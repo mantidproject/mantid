@@ -51,12 +51,12 @@ namespace Algorithms
   static double gsl_costFunction(const gsl_vector *v, void *params)
   {
     double x, y, z, rotx, roty, rotz;
-    std::string detname, inname, outname, instname, rb_param;
+    std::string detname, inname, outname, peakOpt, rb_param;
     std::string *p = (std::string *)params;
     detname = p[0];
     inname = p[1];
     outname = p[2];
-    instname = p[3];
+    peakOpt = p[3];
     rb_param = p[4];
     x = gsl_vector_get(v, 0);
     y = gsl_vector_get(v, 1);
@@ -65,8 +65,7 @@ namespace Algorithms
     roty = gsl_vector_get(v, 4);
     rotz = gsl_vector_get(v, 5);
     Mantid::Algorithms::DiffractionEventCalibrateDetectors u;
-    // To maximize intensity, minimize -intensity
-    return -u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, instname, rb_param);
+    return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, peakOpt, rb_param);
   }
 
 /**
@@ -166,10 +165,10 @@ namespace Algorithms
  * @param detname :: The detector name
  * @param inname :: The workspace name
  * @param outname :: The workspace name
- * @param instname :: The instrument name
+ * @param peakOpt :: Location of optimized peak
  */
 
-  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string instname, std::string rb_param)
+  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param)
   {
 
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
@@ -188,7 +187,7 @@ namespace Algorithms
     }
     catch (std::runtime_error&)
     {
-      g_log.information()<<"Unable to successfully run CreateCalFileByNames sub-algorithm for "<<instname<< "\n";
+      g_log.information("Unable to successfully run CreateCalFileByNames sub-algorithm.");
       throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
     }
 
@@ -244,11 +243,12 @@ namespace Algorithms
     const MantidVec & yValues = outputW->readY(0);
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
     const double peakHeight = *it;
-    //const double peakLoc = outputW->readX(0)[it - yValues.begin()];
+    if(peakHeight == 0)return -0.000;
+    const double peakLoc = outputW->readX(0)[it - yValues.begin()];
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
-    return peakHeight;
+    return 1.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
 }
   /** Initialisation method
   */
@@ -268,6 +268,10 @@ namespace Algorithms
     declareProperty("MaxIterations", 10, mustBePositive,
       "Stop after this number of iterations if a good fit is not found" );
 
+    BoundedValidator<double>* dblmustBePositive = new BoundedValidator<double>();
+    declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
+      "Optimize this location of peak by moving detectors" );
+
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -283,6 +287,7 @@ namespace Algorithms
   {
     // Try to retrieve optional properties
     const int maxIterations = getProperty("MaxIterations");
+    const double peakOpt = getProperty("LocationOfPeakToOptimize");
 
     // Get the input workspace
     MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");
@@ -328,7 +333,6 @@ namespace Algorithms
 
     std::string inname = getProperty("InputWorkspace");
     std::string outname = inname+"2"; //getProperty("OutputWorkspace");
-    std::string instname = inst->getName();
 
     IAlgorithm_sptr algS = createSubAlgorithm("Sort");
     algS->setPropertyValue("InputWorkspace",inname);
@@ -351,7 +355,9 @@ namespace Algorithms
       par[0]=detList[det]->getName();
       par[1]=inname;
       par[2]=outname;
-      par[3]=instname;
+      std::ostringstream strpeakOpt;
+      strpeakOpt<<peakOpt;
+      par[3]=strpeakOpt.str();
       par[4]=rb_params;
       const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
@@ -415,12 +421,13 @@ namespace Algorithms
       }
 
       std::string reportOfDiffractionEventCalibrateDetectors = gsl_strerror(status);
+      if (s->fval == -0.000) reportOfDiffractionEventCalibrateDetectors = "No events";
 
       g_log.information() << "Detector = " << det << "\n" <<
         "Method used = " << "Simplex" << "\n" <<
         "Iteration = " << iter << "\n" <<
         "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n" <<
-        "Minimize -PeakHeight = " << s->fval << "\n";
+        "Minimize PeakLoc-" << peakOpt << " = " << s->fval << "\n";
       g_log.information() << "Move (X)   = " << gsl_vector_get (s->x, 0) << "  \n";
       g_log.information() << "Move (Y)   = " << gsl_vector_get (s->x, 1) << "  \n";
       g_log.information() << "Move (Z)   = " << gsl_vector_get (s->x, 2) << "  \n";
