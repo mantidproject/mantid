@@ -372,6 +372,7 @@ public:
      filename << filename_root << static_cast<int>(type) << ".nxs";
      testFile= filename.str();
      alg.setPropertyValue("Filename", testFile);
+     std::string outputFile = alg.getPropertyValue("Filename");
      alg.setPropertyValue("OutputWorkspace", output_ws);
 
      TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -419,6 +420,10 @@ public:
        TS_ASSERT ( false );
      }
      //TS_ASSERT( equals(origWS, ws, 1e-4) );
+
+     //Clear old file
+     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+
    }
 
    void test_LoadEventNexus_TOF()

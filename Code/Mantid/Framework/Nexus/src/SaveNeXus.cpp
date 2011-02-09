@@ -130,7 +130,7 @@ void SaveNexus::setOtherProperties(IAlgorithm* alg,const std::string& propertyNa
  }
 void SaveNexus::runSaveNexusProcessed()
 {
-  IAlgorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed");
+  IAlgorithm_sptr saveNexusPro = createSubAlgorithm("SaveNexusProcessed", 0.0, 1.0, true);
   // Pass through the same output filename
   saveNexusPro->setPropertyValue("Filename", m_filename);
   // Set the workspace property

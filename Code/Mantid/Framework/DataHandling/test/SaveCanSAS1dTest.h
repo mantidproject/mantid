@@ -7,6 +7,7 @@
 #include "MantidDataHandling/LoadCanSAS1D.h"
 #include "MantidKernel/UnitFactory.h"
 #include <Poco/Path.h>
+#include <Poco/File.h>
 
 #include <fstream>
 #include <sstream>
@@ -138,10 +139,9 @@ public:
 
     testFile.close();
 
-
-
     //no more tests on the file are possible after this
-    remove(m_filename.c_str());
+    if( Poco::File(m_filename).exists() ) Poco::File(m_filename).remove();
+
   }
 
   void testGroup()

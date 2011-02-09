@@ -428,7 +428,7 @@ namespace Mantid
       IAlgorithm_wptr weakPtr(alg);
       PARALLEL_CRITICAL(Algorithm_StoreWeakPtr)
       {
-	m_ChildAlgorithms.push_back(weakPtr);
+        m_ChildAlgorithms.push_back(weakPtr);
       }
 
       return alg;

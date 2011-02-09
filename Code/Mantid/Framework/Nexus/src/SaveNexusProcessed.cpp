@@ -287,7 +287,10 @@ namespace NeXus
    * */
   void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile)
   {
-    prog = new Progress(this, 0.3, 1.0,m_eventWorkspace->getNumberEvents());
+    prog = new Progress(this, 0.3, 1.0, m_eventWorkspace->getNumberEvents()*2);
+
+    // Start by writing out the axes and crap
+    nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
 
     // Make a super long list of tofs, weights, etc.
     std::vector<size_t> indices;
@@ -378,9 +381,6 @@ namespace NeXus
     }
     PARALLEL_CHECK_INTERUPT_REGION
 
-
-    // Start by writing out the axes and crap
-    nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
 
     // Write out to the NXS file
     nexusFile->writeNexusProcessedDataEventCompressed(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes);
