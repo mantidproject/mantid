@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>581</width>
-    <height>504</height>
+    <height>524</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -412,7 +412,7 @@
             </sizepolicy>
            </property>
            <property name="currentIndex" >
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="furyfit_page_inputFile" >
             <layout class="QHBoxLayout" name="horizontalLayout_19" >
@@ -1363,26 +1363,83 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_14" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="findRunFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Sample file:</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions" >
-          <stringlist>
-           <string>_red.nxs</string>
-          </stringlist>
+        <layout class="QHBoxLayout" name="horizontalLayout_23" >
+         <item>
+          <widget class="QLabel" name="label" >
+           <property name="text" >
+            <string>Input type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="absp_cbInputType" >
+           <item>
+            <property name="text" >
+             <string>File</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="absp_swInput" >
+           <property name="currentIndex" >
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page" >
+            <layout class="QVBoxLayout" name="verticalLayout_16" >
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>41</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="findRunFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="label" stdset="0" >
+                <string>Sample file:</string>
+               </property>
+               <property name="multipleFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="fileExtensions" >
+                <stringlist>
+                 <string>_red.nxs</string>
+                </stringlist>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_2" >
+            <layout class="QHBoxLayout" name="horizontalLayout_24" >
+             <item>
+              <widget class="QComboBox" name="absp_cbWorkspace" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="absp_pbRefresh" >
+               <property name="text" >
+                <string>Refresh Workspace List</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QCheckBox" name="absp_ckUseCan" >
+         <property name="text" >
+          <string>Use Can</string>
          </property>
         </widget>
        </item>
@@ -1519,13 +1576,6 @@
                 </property>
                </widget>
               </item>
-              <item row="1" column="4" >
-               <widget class="QLineEdit" name="absp_ler4" >
-                <property name="text" >
-                 <string/>
-                </property>
-               </widget>
-              </item>
               <item row="0" column="1" >
                <widget class="QLineEdit" name="absp_ler1" >
                 <property name="text" >
@@ -1535,6 +1585,9 @@
               </item>
               <item row="1" column="1" >
                <widget class="QLineEdit" name="absp_ler3" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
                 <property name="text" >
                  <string/>
                 </property>
@@ -1543,28 +1596,24 @@
               <item row="0" column="3" >
                <widget class="QLabel" name="absp_lbR2" >
                 <property name="text" >
-                 <string>Outer Radius (R2)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="3" >
-               <widget class="QLabel" name="absp_lbR4" >
-                <property name="text" >
-                 <string>r4</string>
+                 <string>Radius 2</string>
                 </property>
                </widget>
               </item>
               <item row="0" column="0" >
                <widget class="QLabel" name="absp_lbR1" >
                 <property name="text" >
-                 <string>Inner Radius</string>
+                 <string>Radius 1</string>
                 </property>
                </widget>
               </item>
               <item row="1" column="0" >
                <widget class="QLabel" name="absp_lbR3" >
+                <property name="enabled" >
+                 <bool>false</bool>
+                </property>
                 <property name="text" >
-                 <string>Outer Radius (R3)</string>
+                 <string>Radius 3</string>
                 </property>
                </widget>
               </item>
@@ -1590,16 +1639,9 @@
               </item>
               <item row="1" column="2" >
                <widget class="QLabel" name="absp_valR3" >
-                <property name="styleSheet" >
-                 <string notr="true" >color: rgb(255, 0, 0);</string>
+                <property name="enabled" >
+                 <bool>false</bool>
                 </property>
-                <property name="text" >
-                 <string>*</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="5" >
-               <widget class="QLabel" name="absp_valR4" >
                 <property name="styleSheet" >
                  <string notr="true" >color: rgb(255, 0, 0);</string>
                 </property>
@@ -1750,13 +1792,6 @@
            </widget>
           </item>
          </layout>
-        </widget>
-       </item>
-       <item>
-        <widget class="QCheckBox" name="absp_ckUseCan" >
-         <property name="text" >
-          <string>Use Can</string>
-         </property>
         </widget>
        </item>
        <item>

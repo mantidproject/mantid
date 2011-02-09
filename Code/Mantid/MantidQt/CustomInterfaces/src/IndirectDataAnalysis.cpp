@@ -446,9 +446,11 @@ void IndirectDataAnalysis::setupConFit()
 void IndirectDataAnalysis::setupAbsorptionF2Py()
 {
   // set signals and slot connections for F2Py Absorption routine
+  connect(m_uiForm.absp_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.absp_swInput, SLOT(setCurrentIndex(int)));
   connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(absf2pShape(int)));
   connect(m_uiForm.absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(absf2pUseCanChecked(bool)));
-
+  connect(m_uiForm.absp_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.absp_letc1, SIGNAL(editingFinished()), this, SLOT(absf2pTCSync()));
   // apply QValidators to items.
   m_uiForm.absp_lewidth->setValidator(m_valDbl);
   m_uiForm.absp_leavar->setValidator(m_valDbl);
@@ -468,7 +470,6 @@ void IndirectDataAnalysis::setupAbsorptionF2Py()
   m_uiForm.absp_ler1->setValidator(m_valDbl);
   m_uiForm.absp_ler2->setValidator(m_valDbl);
   m_uiForm.absp_ler3->setValidator(m_valDbl);
-  m_uiForm.absp_ler4->setValidator(m_valDbl);
 }
 
 void IndirectDataAnalysis::setupAbsCor()
@@ -665,8 +666,15 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
 {
   bool valid = true;
 
-  // Sample input file (handled in MWRunFiles class
-  if ( ! m_uiForm.absp_inputFile->isValid() ) { valid = false; }
+  // Input (file or workspace)
+  if ( m_uiForm.absp_cbInputType->currentText() == "File" )
+  {
+    if ( ! m_uiForm.absp_inputFile->isValid() ) { valid = false; }
+  }
+  else
+  {
+    if ( m_uiForm.absp_cbWorkspace->currentText() == "" ) { valid = false; }
+  }
 
   if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
   {
@@ -725,7 +733,7 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
       valid = false;
     }
     
-    // R3 and R4 only relevant when using can
+    // R3  only relevant when using can
     if ( m_uiForm.absp_ckUseCan->isChecked() )
     {
       if ( m_uiForm.absp_ler3->text() != "" )
@@ -735,16 +743,6 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
       else
       {
         m_uiForm.absp_valR3->setText("*");
-        valid = false;
-      }
-
-      if ( m_uiForm.absp_ler4->text() != "" )
-      {
-        m_uiForm.absp_valR4->setText(" ");
-      }
-      else
-      {
-        m_uiForm.absp_valR4->setText("*");
         valid = false;
       }
     }
@@ -1093,6 +1091,7 @@ void IndirectDataAnalysis::refreshWSlist()
   m_uiForm.fury_cbWorkspace->clear();
   m_uiForm.furyfit_cbWorkspace->clear();
   m_uiForm.confit_cbWorkspace->clear();
+  m_uiForm.absp_cbWorkspace->clear();
   
   if ( ! workspaceList.empty() )
   {
@@ -1103,10 +1102,11 @@ void IndirectDataAnalysis::refreshWSlist()
       
       if ( workspace->id() != "TableWorkspace" )
       {
-      QString ws = QString::fromStdString(*it);
-      m_uiForm.fury_cbWorkspace->addItem(ws);
-      m_uiForm.furyfit_cbWorkspace->addItem(ws);
-      m_uiForm.confit_cbWorkspace->addItem(ws);
+        QString ws = QString::fromStdString(*it);
+        m_uiForm.fury_cbWorkspace->addItem(ws);
+        m_uiForm.furyfit_cbWorkspace->addItem(ws);
+        m_uiForm.confit_cbWorkspace->addItem(ws);
+        m_uiForm.absp_cbWorkspace->addItem(ws);
       }
     }
   }
@@ -2330,6 +2330,7 @@ void IndirectDataAnalysis::absf2pRun()
 {
   if ( ! validateAbsorptionF2Py() )
   {
+    showInformationBox("Invalid input.");
     return;
   }
 
@@ -2348,29 +2349,46 @@ void IndirectDataAnalysis::absf2pRun()
   else if ( m_uiForm.absp_cbShape->currentText() == "Cylinder" )
   {
     geom = "cyl";
-    size = "[" + m_uiForm.absp_ler1->text() + ", " +
-      m_uiForm.absp_ler2->text() + ", " +
-      m_uiForm.absp_ler3->text() + ", " +
-      m_uiForm.absp_ler4->text() + "]";
+
+    // R3 only populated when using can. R4 is fixed to 0.0
+    if ( m_uiForm.absp_ckUseCan->isChecked() ) 
+    {
+      size = "[" + m_uiForm.absp_ler1->text() + ", " +
+        m_uiForm.absp_ler2->text() + ", " +
+        m_uiForm.absp_ler3->text() + ", 0.0 ]";
+    }
+    else
+    {
+      size = "[" + m_uiForm.absp_ler1->text() + ", " +
+        m_uiForm.absp_ler2->text() + ", 0.0, 0.0 ]";
+    }
+    
   }
 
   QString width = m_uiForm.absp_lewidth->text();
-
-  // need to load the nexus file
-  QString input = m_uiForm.absp_inputFile->getFirstFilename();
-  if ( input == "" ) { return; }
 
   QString ncan = "ncan = ";
   if ( m_uiForm.absp_ckUseCan->isChecked() ) { ncan += "2\n"; }
   else { ncan += "1\n"; }
 
-  pyInput +=
+  if ( m_uiForm.absp_cbInputType->currentText() == "File" )
+  {
+    QString input = m_uiForm.absp_inputFile->getFirstFilename();
+    if ( input == "" ) { return; }
+    pyInput +=
     "import os.path as op\n"
     "file = r'" + input + "'\n"
     "( dir, filename ) = op.split(file)\n"
     "( name, ext ) = op.splitext(filename)\n"
     "LoadNexusProcessed(file, name)\n"
-    "inputws = name\n"
+    "inputws = name\n";
+  }
+  else
+  {
+    pyInput += "inputws = '" + m_uiForm.absp_cbWorkspace->currentText() + "'\n";
+  }
+
+  pyInput +=
     "geom = '" + geom + "'\n"
     "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
     "ncan = " + ncan + "\n"
@@ -2401,10 +2419,15 @@ void IndirectDataAnalysis::absf2pUseCanChecked(bool value)
   m_uiForm.absp_lbR3->setEnabled(value);
   m_uiForm.absp_ler3->setEnabled(value);
   m_uiForm.absp_valR3->setEnabled(value);
+}
 
-  m_uiForm.absp_lbR4->setEnabled(value);
-  m_uiForm.absp_ler4->setEnabled(value);
-  m_uiForm.absp_valR4->setEnabled(value);
+void IndirectDataAnalysis::absf2pTCSync()
+{
+  if ( m_uiForm.absp_letc2->text() == "" )
+  {
+    QString val = m_uiForm.absp_letc1->text();
+    m_uiForm.absp_letc2->setText(val);
+  }
 }
 
 void IndirectDataAnalysis::abscorRun()

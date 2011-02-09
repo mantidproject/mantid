@@ -161,6 +161,7 @@ namespace MantidQt
       void absf2pRun();
       void absf2pShape(int index);
       void absf2pUseCanChecked(bool value);
+      void absf2pTCSync();
 
       // abscor (PolynomialCorrection based)
       void abscorRun();

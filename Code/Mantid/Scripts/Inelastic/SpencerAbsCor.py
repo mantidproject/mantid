@@ -153,7 +153,7 @@ def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar,
     if ( plotOpt == 'Wavelength' or plotOpt == 'Both' ):
         graph = plotSpectrum(workspaces, 0)
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
-        graph = plotTimeBin(workspaces[0], 0)
+        graph = plotTimeBin(workspaces, 0)
         graph.activeLayer().setAxisTitle(Layer.Bottom, 'Angle')
 
 def CubicFit(inputWS, spec):
@@ -163,13 +163,15 @@ def CubicFit(inputWS, spec):
     fit = Fit(inputWS, spec, Function=function)
     return fit.getPropertyValue('Parameters')
 
-def applyCorrections(inputWS, cannisterWS, corrections):
+def applyCorrections(inputWS, cannisterWS, corrections, efixed):
     '''Through the PolynomialCorrection algorithm, makes corrections to the
     input workspace based on the supplied correction values.'''
     # Corrections are applied in Lambda (Wavelength)
-    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect')
+    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect',
+        EFixed=efixed)
     if cannisterWS != '':
-        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect')
+        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect',
+            EFixed=efixed)
     nHist = mtd[inputWS].getNumberHistograms()
     # Check that number of histograms in each corrections workspace matches
     # that of the input (sample) workspace
@@ -207,7 +209,11 @@ def applyCorrections(inputWS, cannisterWS, corrections):
                 CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
             else:
                 ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
-    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect')
+    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace+"en", 'DeltaE', 'Indirect',
+        EFixed=efixed)
+    if cannisterWS != '':
+        ConvertUnits(CorrectedCanWorkspace, CorrectedCanWorkspace, 'DeltaE',
+            'Indirect', EFixed=efixed)
                 
 def correctionsFeeder(sampleFile, cannisterFile, geom):
     '''Load up the necessary files and then passes them into the main
@@ -227,10 +233,17 @@ def correctionsFeeder(sampleFile, cannisterFile, geom):
         corrections.append(loadNexus(name+'acc.nxs'))
     else: # No can
         cannister = ''
-
+    # Get efixed
+    det = ws.getDetector(0)
+    try:
+        efixed = det.getNumberParameter('Efixed')[0]
+    except AttributeError:
+        ids = det.getDetectorIDs()
+        det = ws.getInstrument().getDetector(ids[0])
+        efixed = det.getNumberParameter('Efixed')[0]
     # Fire off main routine
     try:
-        applyCorrections(sample, cannister, corrections)
+        applyCorrections(sample, cannister, corrections, efixed)
     except ValueError:
         print """Number of histograms in corrections workspaces do not match
             the sample workspace."""
