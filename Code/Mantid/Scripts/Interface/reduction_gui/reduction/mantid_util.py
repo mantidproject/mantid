@@ -38,7 +38,7 @@ class DataFileProxy(object):
                 x = mtd["raw_data_file"].dataX(0)
                 self.wavelength = (x[0]+x[1])/2.0
                 self.wavelength_spread = x[1]-x[0]
-                self.sample_detector_distance = reducer.instrument.sample_detector_distance
+                self.sample_detector_distance = mtd["raw_data_file"].getRun().getProperty("sample_detector_distance").value
                 
                 if HAS_NUMPY:
                     raw_data = numpy.zeros(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels)

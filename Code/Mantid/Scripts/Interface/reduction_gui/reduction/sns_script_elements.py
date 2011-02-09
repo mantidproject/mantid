@@ -217,7 +217,7 @@ class InstrumentDescription(BaseScriptElement):
                 trans = ReductionSingleton()._transmission_calculator.get_transmission()
                 self.transmission = trans[0]
                 self.transmission_error = trans[1]
-            self.sample_distance = ReductionSingleton().instrument.sample_detector_distance
+            self.sample_distance = mtd[ReductionSingleton()._data_files.keys()[0]].getRun().getProperty("sample_detector_distance").value
         
         
 class DataFileProxy(object):
@@ -234,7 +234,7 @@ class DataFileProxy(object):
                 reducer.set_instrument(EQSANS())
                 loader = LoadRun(str(data_file))
                 loader.execute(reducer, "raw_data_file")
-                self.sample_detector_distance = reducer.instrument.sample_detector_distance
+                self.sample_detector_distance = mtd["raw_data_file"].getRun().getProperty("sample_detector_distance").value
                 
                 if HAS_NUMPY:
                     raw_data = numpy.zeros(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels)

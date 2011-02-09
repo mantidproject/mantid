@@ -151,7 +151,7 @@ class SNSInstrumentWidget(BaseWidget):
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         
         # Sample-detector distance
-        self._summary.sample_dist_edit.setText(QtCore.QString("%-5.0g" % state.sample_distance))
+        self._summary.sample_dist_edit.setText(QtCore.QString("%-5.5g" % state.sample_distance))
         
         # Data file
         self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
