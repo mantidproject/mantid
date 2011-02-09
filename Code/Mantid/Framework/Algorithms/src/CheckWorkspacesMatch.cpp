@@ -84,7 +84,7 @@ void CheckWorkspacesMatch::doComparison()
     }
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
-    PARALLEL_FOR2(ews1, ews2)
+    //PARALLEL_FOR2(ews1, ews2)
     for (int i=0; i<ews1->getNumberHistograms(); i++)
     {
       prog->reportIncrement(1, "EventLists");
@@ -159,14 +159,14 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   }
   
   const double tolerance = getProperty("Tolerance");
-  bool result = true;
+  bool resultBool = true;
   
   // Now check the data itself
-  PARALLEL_FOR2(ws1, ws2)
+  //PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < numHists; ++i )
   {
     prog->reportIncrement(1, "Histograms");
-    if (result) // Avoid checking unnecessarily
+    if (resultBool) // Avoid checking unnecessarily
     {
 
       // Get references to the current spectrum
@@ -183,7 +183,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         {
           g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
           result = "Data mismatch";
-          result = false;
+          resultBool = false;
         }
       }
 
@@ -191,13 +191,13 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       if ( histogram && std::abs(X1.back()-X2.back()) > tolerance )
       {
         result = "Data mismatch";
-        result = false;
+        resultBool = false;
       }
     }
   }
   
   // If all is well, return true
-  return result;
+  return resultBool;
 }
 
 /// Checks that the axes matches
