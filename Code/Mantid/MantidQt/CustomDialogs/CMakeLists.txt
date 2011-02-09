@@ -54,4 +54,4 @@ set_target_properties ( CustomDialogs PROPERTIES OUTPUT_NAME MantidQtCustomDialo
 # Add to the 'MantidQt' group in VS
 set_property ( TARGET CustomDialogs PROPERTY FOLDER "MantidQt" )
 
-target_link_libraries ( CustomDialogs MantidQtAPI )
+target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
