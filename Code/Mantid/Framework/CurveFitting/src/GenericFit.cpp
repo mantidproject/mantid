@@ -304,7 +304,7 @@ namespace CurveFitting
           for(int j=0; j<nParam; j++)
           {
             if (j == i)
-              row << 1.0;
+              row << 100.0;
             else
             {
               row << 100.0*gsl_matrix_get(covar,i,j)/sqrt(gsl_matrix_get(covar,i,i)*gsl_matrix_get(covar,j,j));
