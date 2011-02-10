@@ -43,6 +43,30 @@ public:
     Poco::File(filename).remove();
   }
 
+  void test_Spacing_Around_Separators()
+  {
+    const std::string filename("LoadAsciiTest_test_Spaced_Separators");
+    std::ofstream file(filename.c_str());
+    file << "X , Y0 , E0\n";
+    file << "0.0105 , 0.374914 , 0.00584427\n"
+      "0.0115 , 0.393394 , 0.00464693\n"
+      "0.0125 , 0.414756 , 0.00453993\n"
+      "0.0135 , 0.443152 , 0.00492027\n"
+      "0.0145 , 0.460175 , 0.00478891\n"
+      "0.0155 , 0.456802 , 0.00481\n"
+      "0.0165 , 0.477264 , 0.00504672\n"
+      "0.0175 , 0.478456 , 0.00524423\n"
+      "0.0185 , 0.488523 , 0.00515007\n";
+    file.close();
+    using Mantid::API::MatrixWorkspace_sptr;
+    MatrixWorkspace_sptr outputWS = runTest(filename, "CSV",true,false);
+    TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS(outputWS->blocksize(), 9);
+    
+    Mantid::API::AnalysisDataService::Instance().remove(outputWS->getName());
+    Poco::File(filename).remove();
+  }
+
 private:
   
   // Write the test file
@@ -160,7 +184,9 @@ private:
   }
 
 
-  void runTest(const std::string & filename, const std::string & sep, const bool threeColumn)
+  Mantid::API::MatrixWorkspace_sptr 
+  runTest(const std::string & filename, const std::string & sep, const bool threeColumn,
+	  const bool dataCheck = true)
   {
     using Mantid::DataHandling::LoadAscii;
     using namespace Mantid::API;
@@ -184,18 +210,21 @@ private:
     MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(output);
     if(outputWS)
     {
-      checkData(outputWS, threeColumn);
-      //Test output
-      TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Energy");
-      TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "meV");
-    
-      dataStore.remove(outputName);
+      if( dataCheck )
+      {
+	checkData(outputWS, threeColumn);
+	//Test output
+	TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->caption(), "Energy");
+	TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->label(), "meV");
+	dataStore.remove(outputName);
+	outputWS = MatrixWorkspace_sptr();
+      }
     }
     else
     {
       TS_FAIL("Cannot retrieve output workspace");
     }
-
+    return outputWS;
   }
 
   void checkData(const Mantid::API::MatrixWorkspace_sptr outputWS, const bool threeColumn)
