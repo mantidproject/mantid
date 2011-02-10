@@ -29,6 +29,8 @@ include ( CommonSetup )
 
 add_subdirectory ( Framework )
 
+
+
 # Check for Qt
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 include ( ${QT_USE_FILE} )

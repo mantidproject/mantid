@@ -8645,6 +8645,9 @@ void ApplicationWindow::fileMenuAboutToShow()
   fileMenu->addAction(actionLoad);
   fileMenu->insertSeparator();
   fileMenu->addAction(actionclearAllMemory);
+#ifdef USE_TCMALLOC
+  fileMenu->addAction(actionreleaseFreeMemory);
+#endif
 
   fileMenu->insertSeparator();
   fileMenu->addAction(actionCloseAllWindows);
@@ -12702,6 +12705,11 @@ void ApplicationWindow::createActions()
   actionclearAllMemory = new QAction("&Clear All Memory",this);
   actionclearAllMemory->setShortcut(QKeySequence::fromString("Ctrl+Shift+L"));
   connect(actionclearAllMemory,SIGNAL(triggered()), mantidUI, SLOT(clearAllMemory() ));
+
+#ifdef USE_TCMALLOC
+  actionreleaseFreeMemory = new QAction("&Release Free Memory",this);
+  connect(actionreleaseFreeMemory,SIGNAL(triggered()), mantidUI, SLOT(releaseFreeMemory() ));
+#endif
 
   actionMagnify = new QAction(QIcon(getQPixmap("magnifier_xpm")), tr("Zoom &In/Out and Drag Canvas"), this);
   connect(actionMagnify, SIGNAL(activated()), this, SLOT(magnify()));

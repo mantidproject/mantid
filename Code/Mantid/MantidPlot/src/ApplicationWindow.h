@@ -121,25 +121,25 @@ class ScriptManagerWidget;
  */
 class ApplicationWindow: public QMainWindow, public Scripted
 {
-    Q_OBJECT
+  Q_OBJECT
 public:
-    ApplicationWindow(bool factorySettings = false);
-	ApplicationWindow(const QStringList& l);
-	~ApplicationWindow();
+  ApplicationWindow(bool factorySettings = false);
+  ApplicationWindow(const QStringList& l);
+  ~ApplicationWindow();
 
-	enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
-	enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
-	enum MatrixToTableConversion{Direct, XYZ, YXZ};
-	enum EndLineChar{LF, CRLF, CR};
-	enum Analysis{NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal};
+  enum ShowWindowsPolicy{HideAll, ActiveFolder, SubFolders};
+  enum WindowType{NoWindow, TableWindow, MatrixWindow, MultiLayerWindow, NoteWindow, Plot3DWindow};
+  enum MatrixToTableConversion{Direct, XYZ, YXZ};
+  enum EndLineChar{LF, CRLF, CR};
+  enum Analysis{NoAnalysis, Integrate, Diff, FitLinear, FitGauss, FitLorentz, FitSigmoidal};
 
-	FolderListView *lv, *folders;
-	QDockWidget *logWindow;
+  FolderListView *lv, *folders;
+  QDockWidget *logWindow;
 
-	/** Generates a new unique name starting with string /param name.
+  /** Generates a new unique name starting with string /param name.
 	You can force the output to be a name different from /param name,
 	even if 'name' is not used in the project, by setting /param increment = true (the default)
-	*/
+   */
 	QString generateUniqueName(const QString& name, bool increment = true);
 	void saveFitFunctions(const QStringList& lst);
 
@@ -255,15 +255,15 @@ public slots:
 	void deleteLayer();
 
 	//! Creates a new spectrogram graph
-  	MultiLayer* plotSpectrogram(Matrix *m, Graph::CurveType type);
-  	MultiLayer* plotGrayScale(Matrix *m = 0);
-  	MultiLayer* plotContour(Matrix *m = 0);
-  	MultiLayer* plotColorMap(Matrix *m = 0);
-  	MultiLayer* plotImage(Matrix *m = 0);
-  	MultiLayer* plotNoContourColorMap(Matrix *m = 0);
+	MultiLayer* plotSpectrogram(Matrix *m, Graph::CurveType type);
+	MultiLayer* plotGrayScale(Matrix *m = 0);
+	MultiLayer* plotContour(Matrix *m = 0);
+	MultiLayer* plotColorMap(Matrix *m = 0);
+	MultiLayer* plotImage(Matrix *m = 0);
+	MultiLayer* plotNoContourColorMap(Matrix *m = 0);
 
 	//! Rearrange the layersin order to fit to the size of the plot window
-  	void autoArrangeLayers();
+	void autoArrangeLayers();
 	void initMultilayerPlot(MultiLayer* g, const QString& name);
 	void polishGraph(Graph *g, int style);
 	void plot2VerticalLayers();
@@ -1244,11 +1244,11 @@ public:
 
 private:
 	MdiSubWindow *d_active_window;
-    TextEditor *d_text_editor;
-    QLocale d_locale;
+	TextEditor *d_text_editor;
+	QLocale d_locale;
 	// Flag telling if table values should be automatically recalculated when values in a column are modified.
 	bool d_auto_update_table_values;
-    int d_matrix_undo_stack_size;
+	int d_matrix_undo_stack_size;
 
 	//! Workaround for the new colors introduced in rev 447
 	int convertOldToNewColorIndex(int cindex);
@@ -1259,21 +1259,19 @@ private:
 	Graph *lastCopiedLayer;
 	QSplitter *explorerSplitter;
 
-//	QAssistantClient *assistant;
+	//	QAssistantClient *assistant;
 	ScriptingWindow *scriptingWindow; //Mantid
-        Script *m_iface_script;
+	Script *m_iface_script;
 	QTranslator *appTranslator, *qtTranslator;
 	QDockWidget *explorerWindow, *undoStackWindow;
 	QTextEdit *results;
-	//#ifdef SCRIPTING_CONSOLE
 	QDockWidget *consoleWindow;
 	QTextEdit *console;
-        QDockWidget *m_interpreterDock;
-        ScriptManagerWidget *m_scriptInterpreter;
-	//#endif
+	QDockWidget *m_interpreterDock;
+	ScriptManagerWidget *m_scriptInterpreter;
 	QMdiArea *d_workspace;
 
-  QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;
+	QToolBar *fileTools, *plotTools, *tableTools, *columnTools, *plot3DTools, *displayBar, *editTools, *plotMatrixBar;
 	QToolBar *formatToolBar;
 	QToolButton *btnResults;
 	QWidgetList *hiddenWindows;
@@ -1286,46 +1284,44 @@ private:
 
 	QAction *actionEditCurveRange, *actionCurveFullRange, *actionShowAllCurves, *actionHideCurve, *actionHideOtherCurves;
 	QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
-    QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
-    QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
-    QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj,*actionOpenRaw,*actionOpenNexus;
-      QAction *actionLoad, *actionUndo, *actionRedo;
-    QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
-    QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
-    QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory;
+	QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
+	QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
+	QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj,*actionOpenRaw,*actionOpenNexus;
+	QAction *actionLoad, *actionUndo, *actionRedo;
+	QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
+	QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;
+	QAction *actionShowExplorer, *actionShowLog, *actionAddLayer, *actionShowLayerDialog, *actionAutomaticLayout,*actionclearAllMemory, *actionreleaseFreeMemory;
 	QAction *actionICatLogin,*actionICatSearch,*actionMydataSearch,*actionICatLogout,*actionAdvancedSearch;
-	//#ifdef SCRIPTING_CONSOLE
-    QAction *actionShowConsole;
-    //#endif
-    QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
-    QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
-    QAction *actionExportPDF, *actionReadOnlyCol;
-  QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
-    QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
-    QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
-    QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
+	QAction *actionShowConsole;
+	QAction *actionSwapColumns, *actionMoveColRight, *actionMoveColLeft, *actionMoveColFirst, *actionMoveColLast;
+	QAction *actionExportGraph, *actionExportAllGraphs, *actionPrint, *actionPrintAllPlots, *actionShowExportASCIIDialog;
+	QAction *actionExportPDF, *actionReadOnlyCol;
+	QAction *actionCloseAllWindows, *actionClearLogInfo, *actionClearConsole, *actionShowPlotWizard, *actionShowConfigureDialog;
+	QAction *actionShowCurvesDialog, *actionAddErrorBars, *actionRemoveErrorBars, *actionAddFunctionCurve, *actionUnzoom, *actionNewLegend, *actionAddImage, *actionAddText;
+	QAction *actionPlotL, *actionPlotP, *actionPlotLP, *actionPlotVerticalDropLines, *actionPlotSpline;
+	QAction *actionPlotVertSteps, *actionPlotHorSteps, *actionPlotVerticalBars;
 	QAction *actionPlotHorizontalBars, *actionPlotArea, *actionPlotPie, *actionPlotVectXYAM, *actionPlotVectXYXY;
-    QAction *actionPlotHistogram, *actionPlotStackedHistograms, *actionPlot2VerticalLayers, *actionPlot2HorizontalLayers, *actionPlot4Layers, *actionPlotStackedLayers;
-    QAction *actionPlot3DRibbon, *actionPlot3DBars, *actionPlot3DScatter, *actionPlot3DTrajectory;
-    QAction *actionShowColStatistics, *actionShowRowStatistics, *actionShowIntDialog, *actionIntegrate;
-    QAction *actionDifferentiate, *actionFitLinear, *actionShowFitPolynomDialog;
-    QAction *actionShowExpDecayDialog, *actionShowTwoExpDecayDialog, *actionShowExpDecay3Dialog;
-    QAction *actionFitExpGrowth, *actionFitSigmoidal, *actionFitGauss, *actionFitLorentz, *actionShowFitDialog;
-    QAction *actionShowAxisDialog, *actionShowTitleDialog;
-    QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
-    QAction *actionTableRecalculate;
-    QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
-    QAction *actionRename, *actionCloseWindow, *actionConvertTable;
-    QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
-    QAction *actionResizeActiveWindow, *actionHideActiveWindow;
-    QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;
-    QAction *actionShowLineDialog, *actionShowImageDialog, *actionShowTextDialog;
-    QAction *actionActivateWindow, *actionMinimizeWindow, *actionMaximizeWindow, *actionHideWindow, *actionResizeWindow;
-    QAction *actionEditSurfacePlot, *actionAdd3DData;
+	QAction *actionPlotHistogram, *actionPlotStackedHistograms, *actionPlot2VerticalLayers, *actionPlot2HorizontalLayers, *actionPlot4Layers, *actionPlotStackedLayers;
+	QAction *actionPlot3DRibbon, *actionPlot3DBars, *actionPlot3DScatter, *actionPlot3DTrajectory;
+	QAction *actionShowColStatistics, *actionShowRowStatistics, *actionShowIntDialog, *actionIntegrate;
+	QAction *actionDifferentiate, *actionFitLinear, *actionShowFitPolynomDialog;
+	QAction *actionShowExpDecayDialog, *actionShowTwoExpDecayDialog, *actionShowExpDecay3Dialog;
+	QAction *actionFitExpGrowth, *actionFitSigmoidal, *actionFitGauss, *actionFitLorentz, *actionShowFitDialog;
+	QAction *actionShowAxisDialog, *actionShowTitleDialog;
+	QAction *actionShowColumnOptionsDialog, *actionShowColumnValuesDialog, *actionShowColsDialog, *actionShowRowsDialog;
+	QAction *actionTableRecalculate;
+	QAction *actionAbout, *actionShowHelp, *actionChooseHelpFolder,*actionMantidConcepts,*actionMantidAlgorithms,*actionmantidplotHelp;
+	QAction *actionRename, *actionCloseWindow, *actionConvertTable;
+	QAction *actionAddColToTable, *actionDeleteLayer, *actionInterpolate;
+	QAction *actionResizeActiveWindow, *actionHideActiveWindow;
+	QAction *actionShowMoreWindows, *actionPixelLineProfile, *actionIntensityTable;
+	QAction *actionShowLineDialog, *actionShowImageDialog, *actionShowTextDialog;
+	QAction *actionActivateWindow, *actionMinimizeWindow, *actionMaximizeWindow, *actionHideWindow, *actionResizeWindow;
+	QAction *actionEditSurfacePlot, *actionAdd3DData;
 	QAction *actionMatrixDeterminant, *actionSetMatrixProperties, *actionConvertMatrixXYZ, *actionConvertMatrixYXZ;
 	QAction *actionSetMatrixDimensions, *actionConvertMatrixDirect, *actionSetMatrixValues, *actionTransposeMatrix, *actionInvertMatrix;
 	QAction *actionPlot3DWireFrame, *actionPlot3DHiddenLine, *actionPlot3DPolygons, *actionPlot3DWireSurface;
-  QAction *actionColorMap, *actionContourMap, *actionGrayMap, *actionNoContourColorMap;
+	QAction *actionColorMap, *actionContourMap, *actionGrayMap, *actionNoContourColorMap;
 	QAction *actionDeleteFitTables, *actionShowGridDialog, *actionTimeStamp;
 	QAction *actionSmoothSavGol, *actionSmoothFFT, *actionSmoothAverage, *actionFFT;
 	QAction *actionLowPassFilter, *actionHighPassFilter, *actionBandPassFilter, *actionBandBlockFilter;
@@ -1340,40 +1336,40 @@ private:
 	QAction *actionNextWindow, *actionPrevWindow;
 	QAction *actionScriptingLang,*actionClearTable, *actionGoToRow, *actionGoToColumn;
 	QAction *actionNoteExecute, *actionNoteExecuteAll, *actionNoteEvaluate, *actionSaveNote;
-  QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
+	QAction *actionShowScriptWindow, *actionShowScriptInterpreter;
 	QAction *actionAnimate, *actionPerspective, *actionFitFrame, *actionResetRotation;
-    QAction *actionDeleteRows, *actionDrawPoints;
+	QAction *actionDeleteRows, *actionDrawPoints;
 	QAction *btnCursor, *btnSelect, *btnPicker, *btnRemovePoints, *btnMovePoints, /* *btnPeakPick,*/ *btnMultiPeakPick;
 	QAction *btnZoomIn, *btnZoomOut, *btnPointer, *btnLine, *btnArrow;
 	QAction *actionFlipMatrixVertically, *actionFlipMatrixHorizontally, *actionRotateMatrix;
 	QAction *actionViewMatrixImage, *actionViewMatrix, *actionExportMatrix;
-    QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
-    QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
-    QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
+	QAction *actionMatrixGrayScale, *actionMatrixRainbowScale, *actionMatrixCustomScale, *actionRotateMatrixMinus;
+	QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
+	QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
 	QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
 	QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs;
 	QAction *actionGreekMajSymbol, *actionMathSymbol;
 	QAction *Box, *Frame, *None;
-    QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
-    QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
-    QAction *actionShowUndoStack;
-    QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
+	QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;
+	QAction *wireframe, *hiddenline, *polygon, *filledmesh, *pointstyle, *barstyle, *conestyle, *crossHairStyle;
+	QAction *actionShowUndoStack;
+	QActionGroup *coord, *floorstyle, *grids, *plotstyle, *dataTools;
 	QAction *actionMagnify;
 
-    QList<QAction *> d_user_actions;
-    QList<QMenu* > d_user_menus; //Mantid
+	QList<QAction *> d_user_actions;
+	QList<QMenu* > d_user_menus; //Mantid
 
-    QUndoView *d_undo_view;
-    /// list of mantidmatrix windows opened from project file.
-    QList<MantidMatrix*> m_mantidmatrixWindows;
+	QUndoView *d_undo_view;
+	/// list of mantidmatrix windows opened from project file.
+	QList<MantidMatrix*> m_mantidmatrixWindows;
 
-    friend class MantidUI;
-    QString m_nexusInputWSName;
+	friend class MantidUI;
+	QString m_nexusInputWSName;
 
-    // Store initialized script environments
-    QHash<QString, ScriptingEnv*> m_script_envs;
-  /// Store a list of environments that cannot be used
-  QSet<QString> m_bad_script_envs;
+	// Store initialized script environments
+	QHash<QString, ScriptingEnv*> m_script_envs;
+	/// Store a list of environments that cannot be used
+	QSet<QString> m_bad_script_envs;
 
 public:
     MantidUI *mantidUI;
