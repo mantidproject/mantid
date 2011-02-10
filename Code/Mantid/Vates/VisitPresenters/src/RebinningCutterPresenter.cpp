@@ -23,6 +23,7 @@
 #include "MantidVisitPresenters/MetadataToFieldData.h"
 #include "MantidVisitPresenters/FieldDataToMetadata.h"
 
+#include "MantidMDAlgorithms/DimensionFactory.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/DynamicRebinFromXML.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
@@ -53,14 +54,19 @@ namespace Mantid
 namespace VATES
 {
 
-struct findID : public std::unary_function <Mantid::Geometry::IMDDimension, bool>
+using namespace Mantid::MDAlgorithms;
+using namespace Mantid::MDDataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::API;
+
+struct findID : public std::unary_function <IMDDimension, bool>
 {
   const std::string m_id;
   findID(const std::string id) :
     m_id(id)
   {
   }
-  bool operator ()(const boost::shared_ptr<Mantid::Geometry::IMDDimension> obj) const
+  bool operator ()(const boost::shared_ptr<IMDDimension> obj) const
   {
     return m_id == obj->getDimensionId();
   }
@@ -82,7 +88,7 @@ void RebinningCutterPresenter::constructReductionKnowledge(
     Dimension_sptr dimensionY,
     Dimension_sptr dimensionZ,
     Dimension_sptr dimensiont,
-    Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction,
+    CompositeImplicitFunction* compFunction,
     vtkDataSet* inputDataSet)
 {
   using namespace Mantid::MDAlgorithms;
@@ -91,10 +97,10 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId.c_str());
   if (existingFunctions != NULL)
   {
-    compFunction->addFunction(boost::shared_ptr<Mantid::API::ImplicitFunction>(existingFunctions));
+    compFunction->addFunction(boost::shared_ptr<ImplicitFunction>(existingFunctions));
   }
 
-  m_function = boost::shared_ptr<Mantid::API::ImplicitFunction>(compFunction);
+  m_function = boost::shared_ptr<ImplicitFunction>(compFunction);
   //Apply the implicit function.
   m_serializer.setImplicitFunction(m_function);
   //Apply the geometry.
@@ -109,9 +115,6 @@ void RebinningCutterPresenter::constructReductionKnowledge(
 
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(RebinningIterationAction action) const
 {
-     using namespace Mantid::MDDataObjects;
-     using namespace Mantid::API;
-
      //Verify that constuction has occured properly first/
      VerifyInitalization();
 
@@ -168,8 +171,6 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFu
 
 Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  using namespace Mantid::Geometry;
-
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
@@ -189,8 +190,6 @@ Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkData
 
 Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  using namespace Mantid::Geometry;
-
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
@@ -210,7 +209,6 @@ Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkData
 
 Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  using namespace Mantid::Geometry;
 
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
@@ -231,8 +229,6 @@ Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkData
 
 Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  using namespace Mantid::Geometry;
-
   Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
@@ -267,86 +263,19 @@ void RebinningCutterPresenter::VerifyInitalization() const
 
 Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString)
 {
-  Poco::XML::DOMParser pParser;
-  Poco::XML::Document* pDoc = pParser.parseString(dimensionXMLString);
-  Poco::XML::Element* pDimensionElement = pDoc->documentElement();
-  return Mantid::VATES::Dimension_sptr(createDimension(pDimensionElement));
+  DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+  return Mantid::VATES::Dimension_sptr(factory.create());
 }
 
 Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins)
 {
-  Poco::XML::DOMParser pParser;
-  Poco::XML::Document* pDoc = pParser.parseString(dimensionXMLString);
-  Poco::XML::Element* pDimensionElement = pDoc->documentElement();
-  Mantid::Geometry::MDDimension* dimension = createDimension(pDimensionElement);
+  DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+  MDDimension* dimension = factory.createAsMDDimension();
   double currentMin = dimension->getMinimum();
   double currentMax = dimension->getMaximum();
   //Set the number of bins to use for a given dimension.
   dimension->setRange(currentMin, currentMax, nBins);
   return Mantid::VATES::Dimension_sptr(dimension);
-}
-
-Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML)
-{
-  using namespace Mantid::Geometry;
-  Poco::XML::NamedNodeMap* attributes = dimensionXML->attributes();
-
-  //First and only attribute is the dimension id.
-  Poco::XML::Node* dimensionId = attributes->item(0);
-  std::string id = dimensionId->innerText();
-
-  Poco::XML::Element* reciprocalMapping = dimensionXML->getChildElement("ReciprocalDimensionMapping");
-  MDDimension* mdDimension;
-
-  if (NULL != reciprocalMapping)
-  {
-    rec_dim recipPrimitiveDirection;
-
-    //Reciprocal dimensions are either q1, q2, or  q3.
-    static const boost::regex q1Match("(q1)|(qx)");
-    static const boost::regex q2Match("(q2)|(qy)");
-
-    if (regex_match(reciprocalMapping->innerText(), q1Match))
-    {
-      recipPrimitiveDirection = q1; //rec_dim::q1
-    }
-    else if (regex_match(reciprocalMapping->innerText(), q2Match))
-    {
-      recipPrimitiveDirection = q2; //rec_dim::q2
-    }
-    else
-    {
-      recipPrimitiveDirection = q3; //rec_dim::q3
-    }
-    //Create the dimension as a reciprocal dimension
-    mdDimension = new MDDimensionRes(id, recipPrimitiveDirection);
-  }
-  else
-  {
-    //Create the dimension as an orthogonal dimension.
-    mdDimension = new MDDimension(id);
-  }
-
-  std::string name = dimensionXML->getChildElement("Name")->innerText();
-  mdDimension->setName(name);
-
-  double upperBounds = atof(dimensionXML->getChildElement("UpperBounds")->innerText().c_str());
-  double lowerBounds = atof(dimensionXML->getChildElement("LowerBounds")->innerText().c_str());
-  unsigned int nBins = atoi(dimensionXML->getChildElement("NumberOfBins")->innerText().c_str());
-  Poco::XML::Element* integrationXML = dimensionXML->getChildElement("Integrated");
-
-  if (NULL != integrationXML)
-  {
-    double upperLimit = atof(integrationXML->getChildElement("UpperLimit")->innerText().c_str());
-    double lowerLimit = atof(integrationXML->getChildElement("LowerLimit")->innerText().c_str());
-
-    //As it is not currently possible to set integration ranges on a MDDimension or MDGeometryDescription, boundaries become integration ranges.
-    upperBounds = upperLimit;
-    lowerBounds = lowerLimit;
-  }
-
-  mdDimension->setRange(lowerBounds, upperBounds, nBins);
-  return mdDimension;
 }
 
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
@@ -361,7 +290,8 @@ std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
   for (int i = 0; i < nDimensions; i++)
   {
     Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*> (dimensionsXML->item(i));
-    IMDDimension* dimension = createDimension(dimensionXML);
+    DimensionFactory factory(dimensionXML);
+    IMDDimension* dimension = factory.create();
     if (!nonIntegratedOnly || (dimension->getNBins() > 1))
     {
       dimensionVec.push_back(boost::shared_ptr<IMDDimension>(dimension));

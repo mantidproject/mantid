@@ -83,7 +83,6 @@ private:
   /// Serializer to create and pass on rebinning metadata.
   RebinningXMLGenerator m_serializer;
 
-
 public:
 
 	/// Constructor

@@ -14,6 +14,7 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
 #include "MantidMDAlgorithms/BoxInterpreter.h"
 #include "MantidMDAlgorithms/PlaneInterpreter.h"
+#include "MantidMDAlgorithms/DimensionFactory.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
@@ -81,65 +82,8 @@ namespace Mantid
 
     Mantid::Geometry::IMDDimension* DynamicRebinFromXML::createDimension(Poco::XML::Element* dimensionXML) const
     {
-      using namespace Mantid::Geometry;
-      Poco::XML::NamedNodeMap* attributes = dimensionXML->attributes();
-
-      //First and only attribute is the dimension id.
-      Poco::XML::Node* dimensionId = attributes->item(0);
-      std::string id = dimensionId->innerText();
-
-      Poco::XML::Element* reciprocalMapping = dimensionXML->getChildElement("ReciprocalDimensionMapping");
-      MDDimension* mdDimension;
-
-      if(NULL != reciprocalMapping)
-      {
-        rec_dim recipPrimitiveDirection;
-
-        //Reciprocal dimensions are either q1, q2, or  q3.
-        static const boost::regex q1Match("(q1)|(qx)");
-        static const boost::regex q2Match("(q2)|(qy)");
-
-        if(regex_match(reciprocalMapping->innerText(), q1Match))
-        {
-          recipPrimitiveDirection = q1; //rec_dim::q1
-        }
-        else if(regex_match(reciprocalMapping->innerText(), q2Match))
-        {
-          recipPrimitiveDirection = q2; //rec_dim::q2
-        }
-        else
-        {
-          recipPrimitiveDirection = q3; //rec_dim::q3
-        }
-        //Create the dimension as a reciprocal dimension
-        mdDimension = new MDDimensionRes(id, recipPrimitiveDirection); 
-      }
-      else
-      {
-        //Create the dimension as an orthogonal dimension.
-        mdDimension = new MDDimension(id); 
-      }
-
-      std::string name = dimensionXML->getChildElement("Name")->innerText();
-      mdDimension->setName(name);
-
-      double upperBounds = atof(dimensionXML->getChildElement("UpperBounds")->innerText().c_str());
-      double lowerBounds = atof(dimensionXML->getChildElement("LowerBounds")->innerText().c_str());
-      unsigned int nBins = atoi(dimensionXML->getChildElement("NumberOfBins")->innerText().c_str());
-      Poco::XML::Element* integrationXML = dimensionXML->getChildElement("Integrated");
-
-      if(NULL != integrationXML)
-      {
-        double upperLimit = atof(integrationXML->getChildElement("UpperLimit")->innerText().c_str());
-        double lowerLimit = atof(integrationXML->getChildElement("LowerLimit")->innerText().c_str());
-
-        //As it is not currently possible to set integration ranges on a MDDimension or MDGeometryDescription, boundaries become integration ranges.
-        upperBounds = upperLimit;
-        lowerBounds = lowerLimit;
-      }
-
-      mdDimension->setRange(lowerBounds, upperBounds, nBins); //HACK- this method should be protected and used by geometry only, not a valid dimension 
-      return mdDimension;
+      DimensionFactory dimensionFactory(dimensionXML);
+      return dimensionFactory.create();
     }
 
     Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const

@@ -13,6 +13,7 @@ src/IDynamicRebinning.cpp
 src/DepthParameter.cpp
 src/DynamicCPRRebinning.cpp
 src/DynamicRebinFromXML.cpp
+src/DimensionFactory.cpp
 src/HeightParameter.cpp
 src/IDynamicRebinning.cpp
 src/InvalidParameter.cpp
@@ -46,6 +47,7 @@ inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
 inc/MantidMDAlgorithms/DepthParameter.h
+inc/MantidMDAlgorithms/DimensionFactory.h
 inc/MantidMDAlgorithms/DynamicCPRRebinning.h
 inc/MantidMDAlgorithms/IDynamicRebinning.h
 inc/MantidMDAlgorithms/DynamicRebinFromXML.h
@@ -77,6 +79,7 @@ set (TEST_FILES
 test/CPR_preselectCellsTest.h 
 test/CPRebinKeepPixTest.h
 test/DepthParameterTest.h
+test/DimensionFactoryTest.h
 test/DynamicRebinFromXMLAlgorithmTest.h
 test/HeightParameterTest.h
 test/InvalidParameterParserTest.h
