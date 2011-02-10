@@ -363,16 +363,13 @@ public:
      std::string filename_root = "LoadNexusProcessed_ExecEvent_";
 
      // Call a function that writes out the file
-     EventWorkspace_sptr origWS = SaveNexusProcessedTest::do_testExec_EventWorkspaces(filename_root, type, false, false);
+     std::string outputFile;
+     EventWorkspace_sptr origWS = SaveNexusProcessedTest::do_testExec_EventWorkspaces(filename_root, type, outputFile, false, false);
 
      LoadNexusProcessed alg;
      TS_ASSERT_THROWS_NOTHING(alg.initialize());
      TS_ASSERT( alg.isInitialized() );
-     std::ostringstream filename;
-     filename << filename_root << static_cast<int>(type) << ".nxs";
-     testFile= filename.str();
-     alg.setPropertyValue("Filename", testFile);
-     std::string outputFile = alg.getPropertyValue("Filename");
+     alg.setPropertyValue("Filename", outputFile);
      alg.setPropertyValue("OutputWorkspace", output_ws);
 
      TS_ASSERT_THROWS_NOTHING(alg.execute());
@@ -422,7 +419,7 @@ public:
      //TS_ASSERT( equals(origWS, ws, 1e-4) );
 
      //Clear old file
-     //if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
+     if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();
 
    }
 

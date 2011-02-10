@@ -307,7 +307,7 @@ public:
 
 
   static EventWorkspace_sptr do_testExec_EventWorkspaces(std::string filename_root, EventType type,
-      bool makeDifferentTypes=false, bool clearfiles=false)
+      std::string & outputFile,  bool makeDifferentTypes, bool clearfiles)
   {
     std::vector< std::vector<int> > groups(5);
     groups[0].push_back(10);
@@ -345,7 +345,7 @@ public:
     // specify name of file to save workspace to
     std::ostringstream mess;
     mess << filename_root << static_cast<int>(type) << ".nxs";
-    std::string outputFile = mess.str();
+    outputFile = mess.str();
     std::string dataName = "spectra";
     std::string title = "A simple workspace saved in Processed Nexus format";
 
@@ -368,22 +368,26 @@ public:
 
   void testExec_EventWorkspace_TofEvent()
   {
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, false, clearfiles);
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", TOF, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_WeightedEvent()
   {
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, false, clearfiles);
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_WeightedEventNoTime()
   {
-    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME, false, clearfiles);
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_", WEIGHTED_NOTIME, outputFile, false, clearfiles);
   }
 
   void testExec_EventWorkspace_DifferentTypes()
   {
-    do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, true, clearfiles);
+    std::string outputFile;
+    do_testExec_EventWorkspaces("SaveNexusProcessed_DifferentTypes_", WEIGHTED_NOTIME, outputFile, true, clearfiles);
   }
 
 
