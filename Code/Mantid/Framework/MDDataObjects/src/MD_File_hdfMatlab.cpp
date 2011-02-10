@@ -3,7 +3,6 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 
-
 namespace Mantid{
     namespace MDDataObjects{
       using namespace Mantid::Kernel;
@@ -395,7 +394,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 	try{
 		size_t max_npix_in_buf(0);
 		if(n_pix_inDataset>~max_npix_in_buf){
-			throw(std::bad_alloc("too many pixels to place in memory for given architecture "));
+			throw(std::runtime_error("too many pixels to place in memory for given architecture "));
 		}else{
 			max_npix_in_buf= (size_t)n_pix_inDataset;
 		}
