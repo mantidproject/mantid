@@ -134,6 +134,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/SupportTempCode.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/TestChannel.h
+	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/TimeSeriesProperty.h

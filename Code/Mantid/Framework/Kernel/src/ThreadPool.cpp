@@ -15,10 +15,12 @@ namespace Kernel
 //--------------------------------------------------------------------------------
   /** Constructor
    *
+   * @param scheduler :: an instance of a ThreadScheduler to schedule tasks.
    * @param numThreads :: number of cores to use; default = 0, meaning auto-detect all
    *        available physical cores.
    */
-  ThreadPool::ThreadPool(size_t numThreads)
+  ThreadPool::ThreadPool( ThreadScheduler * scheduler, size_t numThreads)
+    : m_scheduler(scheduler)
   {
     if (numThreads == 0)
     {
@@ -38,7 +40,7 @@ namespace Kernel
   void ThreadPool::schedule(Task * task)
   {
     if (task)
-      m_tasks.push_back(task);
+      m_scheduler->push(task);
   }
 
 
@@ -64,12 +66,15 @@ namespace Kernel
    */
   void ThreadPool::joinAll()
   {
-    std::vector<Task *>::iterator it;
-    for (it = m_tasks.begin(); it != m_tasks.end(); it++)
+    while (m_scheduler->size() > 0)
     {
-      Task * task = *it;
+      Task * task = m_scheduler->pop();
+
       // Run it!
-      task->run();
+      if (task)
+      {
+        task->run();
+      }
     }
 
   }

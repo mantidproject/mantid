@@ -7,6 +7,7 @@
 #include <MantidKernel/FunctionTask.h>
 #include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
+#include "MantidKernel/ThreadScheduler.h"
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -96,7 +97,7 @@ public:
 
   void test_Constructor()
   {
-    ThreadPool p(5);
+    ThreadPool p;
   }
 
   void test_schedule()
@@ -108,27 +109,63 @@ public:
     TS_ASSERT_THROWS_NOTHING( p.joinAll() );
     TS_ASSERT_EQUALS( threadpooltest_check, 12);
   }
-//
-//  void test_run_with_sort()
-//  {
-//    // Only use one core, it'll make things simpler
-//    ThreadPool p(1);
-//
-//    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
-//    for (int i=0; i< 10; i++)
-//    {
-//      double cost = i;
-//      p.schedule( new FunctionTask( boost::bind(threadpooltest_adding_stuff, i), cost ) );
-//    }
-//
-//    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
-//    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
-//    // And the largest cost one was run first.
-//    TS_ASSERT_EQUALS( threadpooltest_vec[0], 9);
-//    TS_ASSERT_EQUALS( threadpooltest_vec[1], 8);
-//    TS_ASSERT_EQUALS( threadpooltest_vec[2], 7);
-//  }
 
+  void test_Scheduler_FIFO()
+  {
+    // Only use one core, it'll make things simpler
+    ThreadPool p(new ThreadSchedulerFIFO(), 1);
+
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( boost::bind(threadpooltest_adding_stuff, i), cost ) );
+    }
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
+    // The first ones added are the first ones run.
+    TS_ASSERT_EQUALS( threadpooltest_vec[0], 0);
+    TS_ASSERT_EQUALS( threadpooltest_vec[1], 1);
+    TS_ASSERT_EQUALS( threadpooltest_vec[2], 2);
+  }
+
+
+  void test_Scheduler_LIFO()
+  {
+    ThreadPool p(new ThreadSchedulerLIFO(), 1);
+    threadpooltest_vec.clear();
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( boost::bind(threadpooltest_adding_stuff, i), cost ) );
+    }
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
+    // The last ones added are the first ones run.
+    TS_ASSERT_EQUALS( threadpooltest_vec[0], 9);
+    TS_ASSERT_EQUALS( threadpooltest_vec[1], 8);
+    TS_ASSERT_EQUALS( threadpooltest_vec[2], 7);
+  }
+
+  void test_Scheduler_LargestCostFirst()
+  {
+    // Only use one core, it'll make things simpler
+    ThreadPool p(new ThreadSchedulerLargestCost(), 1);
+    threadpooltest_vec.clear();
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( boost::bind(threadpooltest_adding_stuff, i), cost ) );
+    }
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
+    // The first ones added are the first ones run.
+    TS_ASSERT_EQUALS( threadpooltest_vec[0], 9);
+    TS_ASSERT_EQUALS( threadpooltest_vec[1], 8);
+    TS_ASSERT_EQUALS( threadpooltest_vec[2], 7);
+  }
 
 
 

@@ -4,6 +4,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/ThreadScheduler.h"
 #include <vector>
 
 namespace Mantid
@@ -46,7 +47,7 @@ namespace Kernel
   class DLLExport ThreadPool
   {
   public:
-    ThreadPool(size_t numCores = 0);
+    ThreadPool(ThreadScheduler * scheduler = new ThreadSchedulerFIFO(), size_t numCores = 0);
 
     void schedule(Task * task);
 
@@ -57,8 +58,8 @@ namespace Kernel
     /// Number of cores used
     size_t m_numThreads;
 
-    /// List of scheduled tasks
-    std::vector<Task *> m_tasks;
+    /// The ThreadScheduler instance taking care of task scheduling
+    ThreadScheduler * m_scheduler;
   };
 
 
