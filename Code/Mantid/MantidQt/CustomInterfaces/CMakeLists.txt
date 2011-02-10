@@ -64,7 +64,5 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 add_library ( CustomInterfaces ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 # Set the name of the generated library
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
-# Add to the 'MantidQt' group in VS
-set_property ( TARGET CustomInterfaces PROPERTY FOLDER "MantidQt" )
 
 target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser )

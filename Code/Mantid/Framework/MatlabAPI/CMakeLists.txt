@@ -11,7 +11,7 @@ add_library ( MatlabAPI ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( MatlabAPI PROPERTIES OUTPUT_NAME MantidMatlabAPI )
 # Add to the 'Framework' group in VS
-set_property ( TARGET MatlabAPI PROPERTY FOLDER "Framework" )
+set_property ( TARGET MatlabAPI PROPERTY FOLDER "MantidFramework" )
 # Target dependencies
 target_link_libraries ( MatlabAPI ${MANTIDLIBS} ${MATLAB_LIBRARIES} )
 

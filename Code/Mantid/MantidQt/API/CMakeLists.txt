@@ -45,7 +45,5 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 add_definitions ( -DIN_MANTIDQT_API )
 
 add_library ( MantidQtAPI ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
-# Add to the 'MantidQt' group in VS
-set_property ( TARGET MantidQtAPI PROPERTY FOLDER "MantidQt" )
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} )

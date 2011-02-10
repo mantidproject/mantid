@@ -191,7 +191,7 @@ add_library ( API ${SRC_FILES} ${INC_FILES})
 set_target_properties ( API PROPERTIES OUTPUT_NAME MantidAPI 
                                        COMPILE_DEFINITIONS IN_MANTID_API )
 # Add to the 'Framework' group in VS
-set_property ( TARGET API PROPERTY FOLDER "Framework" )
+set_property ( TARGET API PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( API ${MANTIDLIBS} ${WINSOCK} )
 
@@ -206,5 +206,5 @@ if ( CXXTEST_FOUND )
   endif()
   add_dependencies ( FrameworkTests APITest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET APITest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET APITest PROPERTY FOLDER "UnitTests" )
 endif ()

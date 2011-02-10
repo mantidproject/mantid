@@ -58,7 +58,7 @@ add_library ( ICat ${SRC_FILES} ${INC_FILES})
 set_target_properties ( ICat PROPERTIES OUTPUT_NAME MantidICat 
                                         COMPILE_DEFINITIONS IN_MANTID_ICAT )
 # Add to the 'Framework' group in VS
-set_property ( TARGET ICat PROPERTY FOLDER "Framework" )
+set_property ( TARGET ICat PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
@@ -69,5 +69,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries( ICatTest ICat )
   add_dependencies ( FrameworkTests ICatTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET ICatTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET ICatTest PROPERTY FOLDER "UnitTests" )
 endif ()

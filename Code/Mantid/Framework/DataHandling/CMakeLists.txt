@@ -178,7 +178,7 @@ add_library ( DataHandling ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
-set_property ( TARGET DataHandling PROPERTY FOLDER "Framework" )
+set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
@@ -190,5 +190,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries( DataHandlingTest DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests DataHandlingTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET DataHandlingTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET DataHandlingTest PROPERTY FOLDER "UnitTests" )
 endif ()

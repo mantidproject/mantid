@@ -224,7 +224,7 @@ add_library ( Geometry ${SRC_FILES} ${INC_FILES})
 set_target_properties ( Geometry PROPERTIES OUTPUT_NAME MantidGeometry 
                                             COMPILE_DEFINITIONS IN_MANTID_GEOMETRY )
 # Add to the 'Framework' group in VS
-set_property ( TARGET Geometry PROPERTY FOLDER "Framework" )
+set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
 
@@ -234,5 +234,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries( GeometryTest Geometry TestHelpers )
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET GeometryTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET GeometryTest PROPERTY FOLDER "UnitTests" )
 endif ()

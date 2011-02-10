@@ -199,7 +199,7 @@ add_library ( Kernel ${SRC_FILES} ${INC_FILES})
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
                                           COMPILE_DEFINITIONS IN_MANTID_KERNEL )
 # Add to the 'Framework' group in VS
-set_property ( TARGET Kernel PROPERTY FOLDER "Framework" )
+set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
 set_property ( TARGET Kernel PROPERTY PRIVATE_HEADER inc/MantidKernel/TestChannel.h )
 
 target_link_libraries ( Kernel ${MANTIDLIBS} )
@@ -210,7 +210,7 @@ if ( CXXTEST_FOUND )
   target_link_libraries( KernelTest Kernel)
   add_dependencies ( FrameworkTests KernelTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET KernelTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET KernelTest PROPERTY FOLDER "UnitTests" )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 

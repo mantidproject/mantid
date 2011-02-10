@@ -104,7 +104,7 @@ add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( CurveFitting PROPERTIES OUTPUT_NAME MantidCurveFitting )
 # Add to the 'Framework' group in VS
-set_property ( TARGET CurveFitting PROPERTY FOLDER "Framework" )
+set_property ( TARGET CurveFitting PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
@@ -116,5 +116,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries( CurveFittingTest CurveFitting DataHandling Nexus )
   add_dependencies ( FrameworkTests CurveFittingTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET CurveFittingTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )
 endif ()

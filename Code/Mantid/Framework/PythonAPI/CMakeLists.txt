@@ -76,7 +76,7 @@ add_library ( PythonAPI ${SRC_FILES} ${INC_FILES} ${PYTHON_INSTALL_FILES})
 # Set the name of the generated library
 set_target_properties ( PythonAPI PROPERTIES OUTPUT_NAME MantidPythonAPI )
 # Add to the 'Framework' group in VS
-set_property ( TARGET PythonAPI PROPERTY FOLDER "Framework" )
+set_property ( TARGET PythonAPI PROPERTY FOLDER "MantidFramework" )
 # Debug python library expects imported module names to end in _d
 if ( PYTHON_DEBUG_LIBRARY )
   set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
@@ -126,8 +126,8 @@ if ( CXXTEST_FOUND )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )
-  # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET PythonAPITest PROPERTY FOLDER "FrameworkTests" )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET PythonAPITest PROPERTY FOLDER "UnitTests" )
 endif ()
 
 # python unit tests
@@ -135,14 +135,19 @@ if (PYUNITTEST_FOUND)
   pyunittest_add_test ( VanillaPythonTest.py ${TEST_PY_FILES} )
   add_dependencies ( VanillaPythonTest.py PythonAPI Algorithms )
   add_dependencies ( FrameworkTests VanillaPythonTest.py )
+  # Add to the 'UnitTests' group in VS
+  set_property ( TARGET VanillaPythonTest.py PROPERTY FOLDER "UnitTests" )
 endif ()
 
 ###########################################################################
 # things to put together a main program
 ###########################################################################
+
+set ( NAME_IS_PETE OFF CACHE BOOL "Ha ha" )
+
 find_program( GEN_TEST_MAIN generatetestmain.py
               ${PROJECT_SOURCE_DIR}/TestingTools/ ${PROJECT_SOURCE_DIR}/../TestingTools/)
-if (GEN_TEST_MAIN)
+if (NAME_IS_PETE AND GEN_TEST_MAIN)
   # generate a default "main.cpp" file
   add_custom_command ( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp
                        COMMAND ${GEN_TEST_MAIN} ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp )

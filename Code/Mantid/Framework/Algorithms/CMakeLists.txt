@@ -395,7 +395,7 @@ add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( Algorithms PROPERTIES OUTPUT_NAME MantidAlgorithms )
 # Add to the 'Framework' group in VS
-set_property ( TARGET Algorithms PROPERTY FOLDER "Framework" )
+set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
@@ -407,5 +407,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests AlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET AlgorithmsTest PROPERTY FOLDER "UnitTests" )
 endif ()

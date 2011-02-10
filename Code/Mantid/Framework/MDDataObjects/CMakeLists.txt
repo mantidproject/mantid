@@ -57,7 +57,7 @@ add_library ( MDDataObjects ${SRC_FILES} ${INC_FILES})
 set_target_properties ( MDDataObjects PROPERTIES OUTPUT_NAME MantidMDDataObjects 
                                                  COMPILE_DEFINITIONS IN_MANTID_MDDATAOBJECTS )
 # Add to the 'Framework' group in VS
-set_property ( TARGET MDDataObjects PROPERTY FOLDER "Framework" )
+set_property ( TARGET MDDataObjects PROPERTY FOLDER "MantidFramework" )
 # Find hdf5 libraries
 if( WIN32 )
 #Exact libraries will need to be refined for windows 64/32 bit as they are different in third_party.
@@ -97,6 +97,6 @@ if ( CXXTEST_FOUND )
   
   add_dependencies ( FrameworkTests MDDataObjectsTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET MDDataObjectsTest PROPERTY FOLDER "UnitTests" )
 endif ()
 

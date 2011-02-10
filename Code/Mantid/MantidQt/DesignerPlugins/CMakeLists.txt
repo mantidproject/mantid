@@ -58,8 +58,6 @@ set_target_properties ( DesignerPlugins PROPERTIES OUTPUT_NAME ${LIB_NAME} )
 
 # Remove from the 'all' target as most people don't care about them
 set_target_properties( DesignerPlugins PROPERTIES EXCLUDE_FROM_ALL TRUE )
-# Add to the 'MantidQt' group in VS
-set_property ( TARGET DesignerPlugins PROPERTY FOLDER "MantidQt" )
 # Set the library dependencies
 target_link_libraries ( DesignerPlugins MantidWidgets ${QT_LIBRARIES} )
 

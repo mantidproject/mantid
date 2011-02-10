@@ -73,7 +73,7 @@ add_library ( Nexus ${SRC_FILES} ${INC_FILES})
 set_target_properties ( Nexus PROPERTIES OUTPUT_NAME MantidNexus 
                                          COMPILE_DEFINITIONS IN_MANTID_NEXUS )
 # Add to the 'Framework' group in VS
-set_property ( TARGET Nexus PROPERTY FOLDER "Framework" )
+set_property ( TARGET Nexus PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
@@ -85,5 +85,5 @@ if ( CXXTEST_FOUND )
   target_link_libraries( NexusTest Nexus DataHandling TestHelpers)
   add_dependencies ( FrameworkTests NexusTest )
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET NexusTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
 endif ()

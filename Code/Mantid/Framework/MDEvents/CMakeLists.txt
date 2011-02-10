@@ -31,7 +31,7 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
                                                  COMPILE_DEFINITIONS IN_MANTID_MDEVENT )
                                                  
 # Add to the 'Framework' group in VS
-set_property ( TARGET MDEvents PROPERTY FOLDER "Framework" )
+set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
 # Find hdf5 libraries
 if( WIN32 )
@@ -73,7 +73,7 @@ if ( CXXTEST_FOUND )
   add_dependencies ( FrameworkTests MDEventsTest )
   
   # Add to the 'FrameworkTests' group in VS
-  set_property ( TARGET MDEventsTest PROPERTY FOLDER "FrameworkTests" )
+  set_property ( TARGET MDEventsTest PROPERTY FOLDER "UnitTests" )
   
 endif ()
 

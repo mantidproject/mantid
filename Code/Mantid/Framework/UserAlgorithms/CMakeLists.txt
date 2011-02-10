@@ -16,6 +16,6 @@ set ( INC_FILES HelloWorldAlgorithm.h
 add_library ( UserAlgorithms EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 
 # Add to the 'FrameworkTests' group in VS
-set_property ( TARGET UserAlgorithms PROPERTY FOLDER "FrameworkTests" )
+set_property ( TARGET UserAlgorithms PROPERTY FOLDER "UnitTests" )
 
 target_link_libraries ( UserAlgorithms ${MANTIDLIBS} )
