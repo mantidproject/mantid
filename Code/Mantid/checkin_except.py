@@ -6,6 +6,7 @@ Prompts the user for the checkin message."""
 
 import os, sys
 
+
 def do_checkin(only_this):
     """Parameters:
         only_this: a list of strings. The string must be in the filename
@@ -63,13 +64,21 @@ def do_checkin(only_this):
         print "..."
         print cmd
         os.system(cmd)
-
-
 #end def
 
+
 if __name__=="__main__":
-    if len(sys.argv)>1:
-        only_this = sys.argv[1:]
-    else:
-        only_this = None
-    do_checkin(only_this)
+	if len(sys.argv)>1:
+		only_this = sys.argv[1:]
+	else:
+		only_this = None
+
+	# Also list the new svn files
+	try:
+		import svn_new_files
+		svn_new_files.do_list_new_files(None)
+	except:
+		pass
+	
+	# Now the checkin part	
+	do_checkin(only_this)	

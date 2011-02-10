@@ -52,11 +52,10 @@ def do_list_new_files(only_this):
     print "-------- New files that have not bee 'svn add'ed: -------------"
     print ""
     if len(good_files)==0:
-        print "Nothing new! \n\n"
+        print "Nothing new! \n"
         return
     
     print "\n".join(good_files)
-    print ""
     print ""
 
 
