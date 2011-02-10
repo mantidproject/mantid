@@ -29,13 +29,18 @@ public:
     instrument->markAsDetector(det2.get());
     det3 = boost::shared_ptr<Detector>(new Detector("det3",11,0));
     instrument->markAsDetector(det3.get());
+
+    pmap.reset(new ParameterMap);
   }
 
-  void testType()
+  void test_Constructor_Throws_With_Invalid_Pointers()
   {
-    Instrument pinstrument(instrument,pmap);
-    TS_ASSERT_EQUALS( pinstrument.type(), "Instrument" );
-  }
+    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),boost::shared_ptr<ParameterMap>()), std::invalid_argument);
+    boost::shared_ptr<Instrument> instr(new Instrument);
+    TS_ASSERT_THROWS(Instrument(instr,boost::shared_ptr<ParameterMap>()),std::invalid_argument);
+    boost::shared_ptr<ParameterMap> paramMap(new ParameterMap);
+    TS_ASSERT_THROWS(Instrument(boost::shared_ptr<Instrument>(),paramMap),std::invalid_argument);
+   }
 
   void testDetector()
   {
@@ -71,7 +76,6 @@ public:
 
 private:
   boost::shared_ptr<Instrument> instrument;
-  //Mantid::Kernel::cow_ptr<Mantid::Geometry::ParameterMap> pmap;
   Mantid::Geometry::ParameterMap_sptr pmap;
   boost::shared_ptr<Detector> det, det2, det3;
 };
