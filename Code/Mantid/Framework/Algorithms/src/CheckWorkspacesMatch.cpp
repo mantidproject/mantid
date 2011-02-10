@@ -85,7 +85,7 @@ void CheckWorkspacesMatch::doComparison()
     }
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
-    PARALLEL_FOR2(ews1, ews2)
+    //PARALLEL_FOR2(ews1, ews2)
     for (int i=0; i<ews1->getNumberHistograms(); i++)
     {
       prog->reportIncrement(1, "EventLists");
@@ -168,7 +168,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
   
   // Now check the data itself
-  PARALLEL_FOR2(ws1, ws2)
+  //PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < numHists; ++i )
   {
     prog->reportIncrement(1, "Histograms");
