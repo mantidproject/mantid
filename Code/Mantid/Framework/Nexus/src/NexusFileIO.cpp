@@ -1299,10 +1299,10 @@ using namespace DataObjects;
     //
     int numberSpec=int(spec.size());
     // allocate space for the Nexus Muon format of spctra-detector mapping
-    int *detector_index=new int[numberSpec+1];  // allow for writing one more than required
-    int *detector_count=new int[numberSpec];
-    int *detector_list=new int[nDetectors];
-    int *spectra=new int[numberSpec];
+    int32_t *detector_index=new int32_t[numberSpec+1];  // allow for writing one more than required
+    int32_t *detector_count=new int32_t[numberSpec];
+    int32_t *detector_list=new int32_t[nDetectors];
+    int32_t *spectra=new int32_t[numberSpec];
     double *detPos = new double[nDetectors*3];
     detector_index[0]=0;
     int id=0;
@@ -1312,17 +1312,17 @@ using namespace DataObjects;
     for(int i=0;i<numberSpec;i++)
     {
       int si = spec[i];
-      spectra[i] = spectraAxis->spectraNo(si);
+      spectra[i] = int32_t(spectraAxis->spectraNo(si));
       const int ndet1=spectraMap.ndet(spectra[i]);
-      detector_index[i+1]=detector_index[i]+ndet1; // points to start of detector list for the next spectrum
-      detector_count[i]=ndet1;
+      detector_index[i+1]= int32_t(detector_index[i]+ndet1); // points to start of detector list for the next spectrum
+      detector_count[i]= int32_t(ndet1);
       ndet += ndet1;
 
       const std::vector<int> detectorgroup = spectraMap.getDetectors(spectra[i]);
       std::vector<int>::const_iterator it;
       for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       {
-        detector_list[id++]=(*it);
+        detector_list[id++]=int32_t(*it);
       }
     }
     // write data as Nexus sections detector{index,count,list}
@@ -1390,7 +1390,7 @@ using namespace DataObjects;
     }
     catch(...)
     {
-      g_log.error("Unknown error cought when saving detector positions.");
+      g_log.error("Unknown error caught when saving detector positions.");
     }
     // tidy up
     delete[] detector_list;
