@@ -50,7 +50,7 @@ namespace Kernel
 
     void schedule(Task * task);
 
-    void run(bool sort = false);
+    void joinAll();
 
 
   protected:

@@ -61,15 +61,9 @@ namespace Kernel
   /** Begin the execution of all scheduled tasks.
    * TODO: Make it parallel! For now, serial execution.
    *
-   * @param sort :: set to True to pre-sort the tasks so as to optimize run time.
    */
-  void ThreadPool::run(bool sort)
+  void ThreadPool::joinAll()
   {
-    if (sort)
-    {
-      std::sort( m_tasks.begin(), m_tasks.end(), compareTasks);
-    }
-
     std::vector<Task *>::iterator it;
     for (it = m_tasks.begin(); it != m_tasks.end(); it++)
     {
