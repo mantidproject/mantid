@@ -416,7 +416,6 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
 void FrameworkManagerProxy::
 deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 {
-  std::cout << "deleteNotificationReceived(" << notice << ")" << std::endl;
   /// This function may be overridden in Python
   workspaceRemoved(notice->object_name());  
 }
@@ -438,7 +437,6 @@ addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
 void FrameworkManagerProxy::
 replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
 {
-  std::cout << "replaceNotificationReceived(" << notice << ")" << std::endl;
   /// This function may be overridden in Python
   workspaceReplaced(notice->object_name());
 }
@@ -449,7 +447,6 @@ replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr n
  */
 void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr)
 {
-  std::cout << "clearNotificationReceived()" << std::endl;
   /// This function may be overridden in Python
   workspaceStoreCleared();
 }
