@@ -173,7 +173,7 @@ public:
   }
 
 
-  void testExecOnMuon()
+  void xtestExecOnMuon()
   {
     SaveNexusProcessed algToBeTested;
 
@@ -238,7 +238,7 @@ public:
 
 
 
-  void testExecOnMuonXml()
+  void xtestExecOnMuonXml()
   {
     SaveNexusProcessed algToBeTested;
 
