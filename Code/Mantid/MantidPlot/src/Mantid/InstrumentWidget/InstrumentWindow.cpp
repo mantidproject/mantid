@@ -47,7 +47,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   QSplitter* controlPanelLayout = new QSplitter(Qt::Horizontal);
 
   //Add Tab control panel and Render window
-  mControlsTab = new QTabWidget(0,0);
+  mControlsTab = new QTabWidget(this,0);
   controlPanelLayout->addWidget(mControlsTab);
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
@@ -112,7 +112,15 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   connect(app->mantidUI->getAlgMinitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
   connect(app->mantidUI->getAlgMinitor(),SIGNAL(allAlgorithmsStopped()),this,SLOT(unblock()));
 
-  resize(600,650);
+  const int windowWidth = 600;
+  const int tabsSize = windowWidth / 3;
+  QList<int> sizes;
+  sizes << tabsSize << windowWidth - tabsSize;
+  controlPanelLayout->setSizes(sizes);
+  controlPanelLayout->setStretchFactor(0,0);
+  controlPanelLayout->setStretchFactor(1,1);
+
+  resize(windowWidth,650);
 }
 
 /**

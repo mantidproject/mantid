@@ -1,13 +1,20 @@
 <RCC>
-  <qresource>
-    <file>MantidSplashScreen.png</file>
-    <file>MantidPlot_Icon_32offset.png</file>
-    <file>SNS_logo_trans_back.gif</file>
-    <file>Tessella_Logo_Transparent.gif</file>
-    <file>Mantid_Logo_Transparent_Cropped.png</file>
-    <file>HFIR_logo_small.png</file>
-    <file>ISIS_Logo_Transparent.gif</file>
-    <file>Mantid_Logo_Transparent.png</file>
-    <file>data_replace.png</file>
-  </qresource>
+    <qresource prefix="/">
+        <file>MantidSplashScreen.png</file>
+        <file>MantidPlot_Icon_32offset.png</file>
+        <file>SNS_logo_trans_back.gif</file>
+        <file>Tessella_Logo_Transparent.gif</file>
+        <file>Mantid_Logo_Transparent_Cropped.png</file>
+        <file>HFIR_logo_small.png</file>
+        <file>ISIS_Logo_Transparent.gif</file>
+        <file>Mantid_Logo_Transparent.png</file>
+        <file>data_replace.png</file>
+    </qresource>
+    <qresource prefix="/PickTools">
+        <file>selection-tube.png</file>
+        <file>selection-box.png</file>
+        <file>selection-circle.png</file>
+        <file>selection-pointer.png</file>
+        <file>selection-text.png</file>
+    </qresource>
 </RCC>

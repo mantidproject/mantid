@@ -22,6 +22,7 @@ class InstrumentWindowPickTab: public QFrame
 {
   Q_OBJECT
 public:
+  enum SelectionType {Single,Box,Tube};
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(const Instrument3DWidget::DetInfo & cursorPos);
 private slots:
@@ -29,16 +30,21 @@ private slots:
   void sumDetectors();
   void integrateTimeBins();
   void setPlotCaption();
+  void setSelectionType();
 private:
   void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
   void updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos);
+  void plotSingle(const Instrument3DWidget::DetInfo & cursorPos);
+  void plotBox(const Instrument3DWidget::DetInfo & cursorPos);
+  void plotTube(const Instrument3DWidget::DetInfo & cursorPos);
 
   InstrumentWindow* m_instrWindow;
   Instrument3DWidget *mInstrumentDisplay;
   /* Pick tab controls */
   OneCurvePlot* m_plot;
   QPushButton *m_one; ///< Button switching on single detector selection mode
-  QPushButton *m_many; ///< Botton switching on detector's parent selection mode
+  QPushButton *m_tube; ///< Button switching on detector's parent selection mode
+  QPushButton *m_box; ///< Button switching on box selection mode
   bool m_plotSum; 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
@@ -48,6 +54,7 @@ private:
   CollapsiblePanel* m_plotPanel;
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
+  SelectionType m_selectionType;
 };
 
 

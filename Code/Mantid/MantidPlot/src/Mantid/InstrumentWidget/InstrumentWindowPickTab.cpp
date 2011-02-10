@@ -49,18 +49,30 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_plotPanel = panelStack->addPanel("Name",m_plot);
 
   // set up the tool bar
-  m_one = new QPushButton("One");
+  m_one = new QPushButton();
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
   m_one->setChecked(true);
-  m_many = new QPushButton("Many");
-  m_many->setCheckable(true);
-  m_many->setAutoExclusive(true);
+
+  m_one->setIcon(QIcon(":/PickTools/selection-pointer.png"));
+  m_box = new QPushButton();
+  m_box->setCheckable(true);
+  m_box->setAutoExclusive(true);
+  m_box->setIcon(QIcon(":/PickTools/selection-box.png"));
+  m_tube = new QPushButton();
+  m_tube->setCheckable(true);
+  m_tube->setAutoExclusive(true);
+  m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
-  toolBox->addWidget(m_many);
-  connect(m_one,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
-  connect(m_many,SIGNAL(clicked()),this,SLOT(setPlotCaption()));
+  toolBox->addWidget(m_box);
+  toolBox->addWidget(m_tube);
+  toolBox->addStretch();
+  toolBox->setSpacing(2);
+  connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_box,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  setSelectionType();
 
   // lay out the widgets
   layout->addLayout(toolBox);
@@ -83,90 +95,11 @@ void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cur
   {
     if (m_one->isChecked())
     {// plot spectrum of a single detector
-      const Mantid::MantidVec& x = ws->readX(wi);
-      const Mantid::MantidVec& y = ws->readY(wi);
-      m_plot->setXScale(x.front(),x.back());
-      Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-      Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-      m_plot->setData(&x[0],&y[0],y.size());
-      m_plot->setYScale(*min_it,*max_it);
+      plotSingle(cursorPos);
     }
     else
     {// plot integrals
-      Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
-      boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
-      Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
-      if (parent && ass)
-      {
-        const int n = ass->nelements();
-        if (m_plotSum) // plot sums over detectors vs time bins
-        {
-          const Mantid::MantidVec& x = ws->readX(wi);
-          m_plot->setXScale(x.front(),x.back());
-          std::vector<double> y(ws->blocksize());
-          //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
-          for(int i = 0; i < n; ++i)
-          {
-            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-            if (idet)
-            {
-              int index = cursorPos.getIndexOf(idet->getID());
-              if (index >= 0)
-              {
-                const Mantid::MantidVec& Y = ws->readY(index);
-                std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
-              }
-            }
-          }
-          Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
-          Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-          m_plot->setData(&x[0],&y[0],y.size());
-          m_plot->setYScale(*min_it,*max_it);
-        }
-        else // plot detector integrals vs detID
-        {
-          std::vector<double> x;
-          x.reserve(n);
-          std::map<double,double> ymap;
-          for(int i = 0; i < n; ++i)
-          {
-            Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
-            if (idet)
-            {
-              const int id = idet->getID();
-              int index = cursorPos.getIndexOf(id);
-              if (index >= 0)
-              {
-                x.push_back(id);
-                const Mantid::MantidVec& Y = ws->readY(index);
-                double sum = std::accumulate(Y.begin(),Y.end(),0);
-                ymap[id] = sum;
-              }
-            }
-          }
-          if (!x.empty())
-          {
-            std::sort(x.begin(),x.end());
-            std::vector<double> y(x.size());
-            double ymin =  DBL_MAX;
-            double ymax = -DBL_MAX;
-            for(int i = 0; i < x.size(); ++i)
-            {
-              const double val = ymap[x[i]];
-              y[i] = val;
-              if (val < ymin) ymin = val;
-              if (val > ymax) ymax = val;
-            }
-            m_plot->setData(&x[0],&y[0],y.size());
-            m_plot->setXScale(x.front(),x.back());
-            m_plot->setYScale(ymin,ymax);
-          }
-        }
-      }
-      else
-      {
-        m_plot->clearCurve();
-      }
+      plotTube(cursorPos);
     }
   }
   else
@@ -227,7 +160,7 @@ void InstrumentWindowPickTab::plotContextMenu()
 void InstrumentWindowPickTab::setPlotCaption()
 {
   QString caption;
-  if (m_one->isChecked())
+  if (m_selectionType == Single)
   {
     caption = "Plotting detector spectra";
   }
@@ -258,4 +191,118 @@ void InstrumentWindowPickTab::updatePick(const Instrument3DWidget::DetInfo & cur
 {
   updatePlot(cursorPos);
   updateSelectionInfo(cursorPos);
+}
+
+void InstrumentWindowPickTab::plotSingle(const Instrument3DWidget::DetInfo & cursorPos)
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
+  int wi = cursorPos.getWorkspaceIndex();
+  const Mantid::MantidVec& x = ws->readX(wi);
+  const Mantid::MantidVec& y = ws->readY(wi);
+  m_plot->setXScale(x.front(),x.back());
+  Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
+  Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+  m_plot->setData(&x[0],&y[0],y.size());
+  m_plot->setYScale(*min_it,*max_it);
+}
+
+void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & cursorPos)
+{
+}
+
+void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & cursorPos)
+{
+  Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
+  int wi = cursorPos.getWorkspaceIndex();
+  Mantid::Geometry::IDetector_sptr det = ws->getInstrument()->getDetector(cursorPos.getDetID());
+  boost::shared_ptr<const Mantid::Geometry::IComponent> parent = det->getParent();
+  Mantid::Geometry::ICompAssembly_const_sptr ass = boost::dynamic_pointer_cast<const Mantid::Geometry::ICompAssembly>(parent);
+  if (parent && ass)
+  {
+    const int n = ass->nelements();
+    if (m_plotSum) // plot sums over detectors vs time bins
+    {
+      const Mantid::MantidVec& x = ws->readX(wi);
+      m_plot->setXScale(x.front(),x.back());
+      std::vector<double> y(ws->blocksize());
+      //std::cerr<<"plotting sum of " << ass->nelements() << " detectors\n";
+      for(int i = 0; i < n; ++i)
+      {
+        Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+        if (idet)
+        {
+          int index = cursorPos.getIndexOf(idet->getID());
+          if (index >= 0)
+          {
+            const Mantid::MantidVec& Y = ws->readY(index);
+            std::transform(y.begin(),y.end(),Y.begin(),y.begin(),std::plus<double>());
+          }
+        }
+      }
+      Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
+      Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
+      m_plot->setData(&x[0],&y[0],y.size());
+      m_plot->setYScale(*min_it,*max_it);
+    }
+    else // plot detector integrals vs detID
+    {
+      std::vector<double> x;
+      x.reserve(n);
+      std::map<double,double> ymap;
+      for(int i = 0; i < n; ++i)
+      {
+        Mantid::Geometry::IDetector_sptr idet = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*ass)[i]);
+        if (idet)
+        {
+          const int id = idet->getID();
+          int index = cursorPos.getIndexOf(id);
+          if (index >= 0)
+          {
+            x.push_back(id);
+            const Mantid::MantidVec& Y = ws->readY(index);
+            double sum = std::accumulate(Y.begin(),Y.end(),0);
+            ymap[id] = sum;
+          }
+        }
+      }
+      if (!x.empty())
+      {
+        std::sort(x.begin(),x.end());
+        std::vector<double> y(x.size());
+        double ymin =  DBL_MAX;
+        double ymax = -DBL_MAX;
+        for(int i = 0; i < x.size(); ++i)
+        {
+          const double val = ymap[x[i]];
+          y[i] = val;
+          if (val < ymin) ymin = val;
+          if (val > ymax) ymax = val;
+        }
+        m_plot->setData(&x[0],&y[0],y.size());
+        m_plot->setXScale(x.front(),x.back());
+        m_plot->setYScale(ymin,ymax);
+      }
+    }
+  }
+  else
+  {
+    m_plot->clearCurve();
+  }
+}
+
+void InstrumentWindowPickTab::setSelectionType()
+{
+  if (m_one->isChecked())
+  {
+    m_selectionType = Single;
+  }
+  else if (m_box->isChecked())
+  {
+    m_selectionType = Box;
+  }
+  else if (m_tube->isChecked())
+  {
+    m_selectionType = Tube;
+  }
+  setPlotCaption();
 }
