@@ -49,9 +49,8 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-  
-  std::vector<std::string> searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
-  searchPaths.insert(searchPaths.begin(), Poco::Path().toString());
+
+  const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
   std::vector<std::string>::const_iterator it = searchPaths.begin();
   for (; it != searchPaths.end(); ++it)
   {
@@ -106,8 +105,6 @@ std::pair<std::string, std::string> FileFinderImpl::toInstrumentAndNumber(const 
     }
     std::string::size_type nChars = std::distance(it, hint.rend());
     instrPart = hint.substr(0, nChars);
-    // Upper case the instrument name as this is more likely to be upper case in a file name
-    std::transform(instrPart.begin(), instrPart.end(), instrPart.begin(), toupper);
     runPart = hint.substr(nChars);
   }
 
@@ -169,22 +166,11 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
  */
 std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
 {
-  std::string fName(hint);
-  size_t dot_pos = hint.rfind(".");
-  if( dot_pos != std::string::npos )
+  if (hint.find(".") != std::string::npos)
   {
-    fName = getFullPath(hint);
-    if( fName.empty() )
-    {
-      fName = hint.substr(0, dot_pos);
-    }
-    else if(Poco::File(fName).exists())
-    {
-      return fName;
-    }
+    return getFullPath(hint);
   }
-  // Try and transform it to a run file
-  fName = makeFileName(fName);
+  std::string fName = makeFileName(hint);
   const std::vector<std::string> facility_extensions =
       Kernel::ConfigService::Instance().Facility().extensions();
   // select allowed extensions

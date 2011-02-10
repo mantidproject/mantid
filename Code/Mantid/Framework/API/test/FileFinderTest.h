@@ -109,8 +109,7 @@ public:
     TS_ASSERT_EQUALS(fName, "HRP00000");
 
     TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("EFG2H123"));
-    // Test that lower case name ends up with upper case name
-    TS_ASSERT_EQUALS("EFG2H00000123", FileFinder::Instance().makeFileName("efg2h123"));
+
   }
 
   void testMakeFileNameForSNS()
@@ -157,18 +156,15 @@ public:
     TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     Poco::File file(path);
     TS_ASSERT(file.exists());
-    // With extension
-    path = FileFinder::Instance().findRun("CSP78173.raw");
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
-    TS_ASSERT(Poco::File(path).exists());
-
     path = FileFinder::Instance().findRun("HRP37129");
     TS_ASSERT(path.size() > 3);
     TS_ASSERT_EQUALS(path.substr(path.size() - 3), "s02");
 
-    // Test case lower->upper case of filename
-    path = FileFinder::Instance().findRun("csp78173.raw");
-    TS_ASSERT(Poco::File(path).exists());
+    //ConfigService::Instance().setString("datasearch.searcharchive","On");
+    //path = FileFinder::Instance().findRun("CSP77374");
+    //std::cerr<<"Path: "<<path<<'\n';
+    //path = FileFinder::Instance().findRun("CSP78174");
+    //std::cerr<<"Path: "<<path<<'\n';
   }
 
   void testFindFiles()

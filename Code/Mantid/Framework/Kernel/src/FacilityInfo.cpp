@@ -160,6 +160,8 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
   {
     iname = iName;
   }
+  // All of our instrument names are upper case
+  std::transform(iname.begin(), iname.end(), iname.begin(), toupper);
   std::vector<InstrumentInfo>::const_iterator it = m_instruments.begin();
   for(;it != m_instruments.end(); ++it)
   {
@@ -177,7 +179,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
       return *it;
     }
   }
-  g_log.debug("Instrument "+iname+" not found in facility "+name());
+  g_log.debug("Instrument "+iName+" not found in facility "+name());
   throw Exception::NotFoundError("FacilityInfo",iname);
 }
 
