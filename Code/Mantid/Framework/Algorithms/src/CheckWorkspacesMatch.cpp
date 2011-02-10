@@ -58,9 +58,6 @@ void CheckWorkspacesMatch::doComparison()
   MatrixWorkspace_const_sptr ws1 = getProperty("Workspace1");
   MatrixWorkspace_const_sptr ws2 = getProperty("Workspace2");
 
-  int numhist = ws1->getNumberHistograms();
-  prog = new Progress(this, 0.0, 1.0, numhist*5);
-
   // Check that both workspaces are the same type
   EventWorkspace_const_sptr ews1 = boost::dynamic_pointer_cast<const EventWorkspace>(ws1);
   EventWorkspace_const_sptr ews2 = boost::dynamic_pointer_cast<const EventWorkspace>(ws2);
@@ -70,9 +67,13 @@ void CheckWorkspacesMatch::doComparison()
     return;
   }
 
+  int numhist = ws1->getNumberHistograms();
+
   // Check some event-based stuff
   if (ews1 && ews2)
   {
+    prog = new Progress(this, 0.0, 1.0, numhist*5);
+
     // Both will end up sorted anyway
     ews1->sortAll(TOF_SORT, prog);
     ews2->sortAll(TOF_SORT, prog);
@@ -84,7 +85,7 @@ void CheckWorkspacesMatch::doComparison()
     }
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
-    //PARALLEL_FOR2(ews1, ews2)
+    PARALLEL_FOR2(ews1, ews2)
     for (int i=0; i<ews1->getNumberHistograms(); i++)
     {
       prog->reportIncrement(1, "EventLists");
@@ -107,6 +108,11 @@ void CheckWorkspacesMatch::doComparison()
       result = mess.str();
       return;
     }
+  }
+  else
+  {
+    // Fewer steps if not events
+    prog = new Progress(this, 0.0, 1.0, numhist*2);
   }
 
 
@@ -162,7 +168,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   bool resultBool = true;
   
   // Now check the data itself
-  //PARALLEL_FOR2(ws1, ws2)
+  PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < numHists; ++i )
   {
     prog->reportIncrement(1, "Histograms");
