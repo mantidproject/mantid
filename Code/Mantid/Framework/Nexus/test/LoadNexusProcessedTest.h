@@ -426,8 +426,6 @@ public:
 
    }
 
-#ifndef __APPLE__
-   // Something looks to be wrong in the nexus mac library - not sure
    void test_LoadEventNexus_TOF()
    {
      dotest_LoadAnEventFile(TOF);
@@ -442,7 +440,6 @@ public:
    {
      dotest_LoadAnEventFile(WEIGHTED_NOTIME);
    }
-#endif
 
 private:
   LoadNexusProcessed algToBeTested;
