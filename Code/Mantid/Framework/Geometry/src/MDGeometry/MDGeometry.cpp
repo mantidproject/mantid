@@ -471,8 +471,6 @@ MDGeometry::init_empty_dimensions()
 
 MDGeometry::~MDGeometry(void)
 {
-    this->theDimension.clear();
-    this->dimensions_map.clear();
 }
 
 std::vector<std::string> 

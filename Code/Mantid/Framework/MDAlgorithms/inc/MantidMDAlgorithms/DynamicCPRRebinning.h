@@ -71,7 +71,7 @@ public:
      * and (in some implementations) the locations of the points in the final MDDatapoints array 
      *
      *   Returns the number of points (events, pixels) contributed into the image;    */
-    virtual unsigned long finalize_rebinning();
+    uint64_t finalize_rebinning();
  
     /** the constructor takes source workspace and the rebinning request and initiate proper target workspace, obtained from the dataservice
        It also retains shared pointers to source and target workspaces to work with; Childs will mainly work with parts of these workspaces
@@ -109,6 +109,8 @@ protected:
     MDDataObjects::MDDataPoints        *const pSourceDataPoints;
     /// pointer to the target geometry
     Geometry::MDGeometry                *      pTargetGeom;  
+	/// target image
+	boost::shared_ptr<MDDataObjects::MDImage>  spTargetImage;
    /// number of the cells in the target image 
     size_t    n_target_cells;
     /// pointer to the MD array of target image points

@@ -79,19 +79,18 @@ std::string workspaceFileName;
 	MDPointDescription pd = pFileReader->read_pointDescriptions();
 
     // workspace now takes control for the file reader; initial pointer becomes invalid
+	// this function will read MDImage and initiate MDDataPoints accordingly
     inputWS->init(pFileReader,pBasis,geomDescr,pd);
 
-    // retrieve file reader back as it does not here any more
-    IMD_FileFormat *pFReader = inputWS->get_pFileReader();
 
-    pFReader->read_MDImg_data(*inputWS->get_spMDImage());
-   // init the structure, which specifies the location of data points in relation to cells
-    inputWS->get_spMDDPoints()->init_pix_locations();
+	bool loadPix =  this->getProperty("LoadPixels");
+	if(loadPix){
+		ldmdws_log.warning()<<" loading pixels in the memory is not implemented at the moment\n";
+    	//TODO: if enough memory and we want to try placing pixels in memory -- read MDDatapoints
+       // should also allocate memory for points somewhere here. 
+      //  pReader->read_pix(*(inputWS->get_spMDDPoints()));
+	}
 
-
-    //TODO: if enough memory and we want to place pixels in memory -- read MDDatapoints
-    // should also allocate memory for points somewhere here. 
-   //  pReader->read_pix(*(inputWS->get_spMDDPoints()));
 
 }
 } // end namespaces

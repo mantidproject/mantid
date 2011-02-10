@@ -59,6 +59,8 @@ class MDTestWorkspace
         Geometry::MDGeometryDescription geomDescr(pBasis->getNumDims(),pBasis->getNumReciprocalDims());
         pReader->read_MDGeomDescription(geomDescr);
 
+//		pReader->read_MDImg_data(
+
         // read test point description 
         //TODO: The test point description is correlated with rebinning algorithm. Decorrelate
         MDPointDescription pd = pReader->read_pointDescriptions();
@@ -69,10 +71,6 @@ class MDTestWorkspace
 
          pMDImg                    = spMDWs->get_spMDImage().get();
          pMDDPoints                = spMDWs->get_spMDDPoints().get();
-        // read MDImage data (the key to the datapoints location) 
-         pReader->read_MDImg_data(*pMDImg);
-        // and initiate the positions of the datapoinst
-         pMDDPoints->init_pix_locations();
 
          // tries to read all MDPoints in memory; It is impossible here, so it sets the workspace location to not in memory;
          pReader->read_pix(*pMDDPoints);

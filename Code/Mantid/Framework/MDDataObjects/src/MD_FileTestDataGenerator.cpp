@@ -89,6 +89,7 @@ MD_FileTestDataGenerator::read_MDImg_data(MDImage & mdd)
         sanity_check+=i+1;
     }
     this->nDataPoints = ((uint64_t)(nCells))*(nCells+1)/2;
+	mdd.setNpix(this->nDataPoints);
 
 }
    

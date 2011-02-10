@@ -43,15 +43,6 @@ namespace MDDataObjects
 {
 //********************************************************************************************************************************************************************
 //********************************************************************************************************************************************************************
-struct MDPointsLocations
-{
-    size_t   n_data_pages;
-    uint64_t points_location;
-    MDPointsLocations():n_data_pages(0),points_location(0){};
-};
-
-
-//********************************************************************************************************************************************************************
 /** the class to work with the pixels buffer itself. Class works the MDpoints having equal index fields*/
  template<class T=float, class I=uint16_t,class S=double>
  class MDDataPointEqual: public MDPointDescription

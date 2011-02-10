@@ -260,6 +260,8 @@ MD_FileHoraceReader::read_MDImg_data(MDImage & mdd)
         pImg_data[i].npix       = (size_t)*((uint64_t*)(&buff[i*8]));
         hor_points_locations[i] = hor_points_locations[i-1]+pImg_data[i-1].npix;
     }
+	//
+	mdd.setNpix(hor_points_locations[nCells-1]+pImg_data[nCells-1].npix);
 
 
 }
@@ -285,6 +287,9 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
 {
     size_t i,buffer_availible,cell_index;
     size_t iCellRead(starting_cell);
+	size_t max_npix_inCell(0);
+	max_npix_inCell=~max_npix_inCell;
+	uint64_t nPix;
     // timing
     time_t start,end;
     time(&start);  //***********************************************>>>
@@ -298,7 +303,12 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     for(i=starting_cell;i<selected_cells.size();i++){
 
         cell_index      = selected_cells[i];
-        n_pix_in_buffer+=pImgData[cell_index].npix;
+		nPix            =pImgData[cell_index].npix;
+		if(nPix>max_npix_inCell){
+			 f_log.error()<<"The reader can not read this dataset as number of pixels contributed into cell"<<i<<" larger then current architecture allows\n";
+			 throw(std::invalid_argument("Data size exceed the possibilities of this computer"));
+		}
+        n_pix_in_buffer+=(size_t)nPix;
 
         // end the loop earlier
         if(n_pix_in_buffer>buffer_availible){ 
@@ -307,7 +317,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
                 iCellRead=i;
             }else{
                 iCellRead=i-1;
-                n_pix_in_buffer-=pImgData[cell_index].npix;
+                n_pix_in_buffer-=(size_t)pImgData[cell_index].npix;
             }
             break;
         }
@@ -326,6 +336,7 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     size_t ic      = starting_cell;
     size_t ic_next = ic+1;
     if(ic_next>iCellRead)ic_next = iCellRead;
+	uint64_t nBytes;
     time(&start);  //***********************************************>>>
 
 
@@ -335,15 +346,28 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
         cell_index      = selected_cells[ic];
         pixels_start  =   this->positions.pix_start+hbs*hor_points_locations[cell_index];
 
-        // optimisaion possible when cells are adjacent
-        block_size    = hbs*pImgData[cell_index].npix;
+         // optimisaion possible when cells are adjacent
+        nBytes    = hbs*pImgData[cell_index].npix;
+		if(nBytes> max_npix_inCell){
+			 f_log.error()<<"The reader can not read this dataset as number of pixels contributed into cell"<<cell_index<<" larger then current architecture allows\n";
+			 throw(std::invalid_argument("Data size exceed the possibilities of this computer"));
+		}else{
+			block_size = (size_t)nBytes;
+		}
 
         // if the next cell follows the current on HDD, we should read them together aggregating adjacent cells;
         uint64_t next_block = hor_points_locations[cell_index]+pImgData[cell_index].npix;
         size_t next_index = selected_cells[ic_next];
         while(hor_points_locations[next_index]==next_block){
             // block size grows and all other is auxiliary
-                block_size    += hbs*pImgData[next_index].npix;
+			    nBytes = hbs*pImgData[next_index].npix;
+				if(nBytes> max_npix_inCell){
+					 f_log.error()<<"The reader can not read this dataset as number of pixels contributed into cell"<<next_index<<" larger then current architecture allows\n";
+					throw(std::invalid_argument("Data size exceed the possibilities of this computer"));
+				}
+
+            // block size grows and all other is auxiliary
+                block_size    += (size_t)nBytes;
                 ic = ic_next;
                 ic_next++;
                 if(ic_next > iCellRead)break;

@@ -87,7 +87,7 @@ public:
 	void testGetNpixCorrect(){
 		TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",1523850,pReader->getNPix());
 	}
-
+	
 	void testReadBasis(){
 		// this is currently hardcoded so no problem shouls be here but it will read crystall in a futute. 
 		TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",pReader->read_basis(basis));
@@ -109,7 +109,11 @@ public:
 		TSM_ASSERT_THROWS_NOTHING("MD image reader should not normaly throw",
 			this->pReader->read_MDImg_data(*pImg));
 
-        // check what has been read;
+	// check what has been read;	
+		TSM_ASSERT_THROWS_NOTHING("Image control sums should be coorrect",pImg->validateNPix());
+		//
+        TSM_ASSERT_EQUALS("Image has to be consistent witn MD data points",pReader->getNPix(),pImg->getNMDDPoints());  
+
 	}
 	void testReadAllPixels(){
 		MDPointDescription defaultDescr;

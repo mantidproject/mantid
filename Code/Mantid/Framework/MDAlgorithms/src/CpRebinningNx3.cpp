@@ -28,15 +28,18 @@ pTargetDataPoints(targetWS->get_spMDDPoints().get())
 
      this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
  
-     pix_buf = this->pSourceDataPoints->getBuffer();
+	 pix_buf = this->pSourceDataPoints->get_pBuffer();
 
      if(keep_pixels){
          // not necessary; will clear things out
          //out_pix = this->pTargetDataPoints->getBuffer();
          // get number of pixels which fit the buffer
-         size_t n_pix = pix_buf.size()/this->pSourceDataPoints->sizeofMDDataPoint();
+         size_t n_pix = (*pix_buf).size()/this->pSourceDataPoints->sizeofMDDataPoint();
          retained_cell_indexes.resize(n_pix);
          pixel_valid.resize(n_pix,false);
+		 // initialize target points to treat current target image as keys to pixels locations
+		 this->pTargetWS->get_spMDDPoints()->initialize(this->spTargetImage);
+
      }
 
 }
@@ -45,7 +48,7 @@ CpRebinningNx3::rebin_data_chunk()
 {
    time_t start,end;
    time(&start);  //*******
-   n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+   n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,*pix_buf,n_pix_in_buffer);
    n_pixels_read   += n_pix_in_buffer;
 
    time(&end);   
@@ -70,18 +73,21 @@ CpRebinningNx3::rebin_data_chunk_keep_pixels()
     time_t start,end;
     time(&start);  //*******
  
-    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,pix_buf,n_pix_in_buffer);
+    n_starting_cell  = this->pSourceDataPoints->get_pix_subset(preselected_cells,n_starting_cell,*pix_buf,n_pix_in_buffer);
     n_pixels_read   += n_pix_in_buffer;
     time(&end);   
     bin_log.debug()<<" data obtained in: "<<difftime (end,start)<<" sec\n";;
     time(&start);  //*******
 
 
-    n_pixels_retained_now  =  rebin_Nx3dataset();
+    n_pixels_retained_now  =  this->rebin_Nx3dataset();
     n_pixels_selected     += n_pixels_retained_now;
-    this->pTargetDataPoints->store_pixels(pix_buf,pixel_valid,retained_cell_indexes,n_pixels_retained_now);
     time(&end);   
-    bin_log.debug()<<" pixels and cells rebinned in: "<<difftime (end,start)<<" sec\n";;
+    bin_log.debug()<<" pixels and cells rebinned in: "<<difftime (end,start)<<" sec\n";
+    time(&start);  //*******
+    this->pTargetDataPoints->store_pixels(*pix_buf,pixel_valid,retained_cell_indexes,n_pixels_retained_now);
+    time(&end);   
+    bin_log.debug()<<" pixels and cells stored in: "<<difftime (end,start)<<" sec\n";;
 
 
     if(n_starting_cell==preselected_cells.size()){
@@ -189,7 +195,7 @@ CpRebinningNx3::rebin_Nx3dataset()
   double s,err;
   size_t nDimX(strides[this->rec_dim_indexes[0]]),nDimY(strides[this->rec_dim_indexes[1]]),nDimZ(strides[this->rec_dim_indexes[2]]);
   // this one should coinside with the description, obtained from the MDDataPoints and readers;
-  float *MDDataPoint =(float *)(&pix_buf[0]);
+  float *MDDataPoint =(float *)(&(pix_buf->operator[](0)));
   unsigned int signal_shift = nDimensions;
   unsigned int data_stride  = this->pSourceDataPoints->sizeofMDDataPoint()/sizeof(float);
   // min-max value initialization
@@ -349,7 +355,9 @@ CpRebinningNx3::rebin_Nx3dataset()
     pTargetDataPoints->rPixMin(ii) = (pTargetDataPoints->rPixMin(ii)<boxMin[ii])?pTargetDataPoints->rPixMin(ii):boxMin[ii];
     pTargetDataPoints->rPixMax(ii) = (pTargetDataPoints->rPixMax(ii)>boxMax[ii])?pTargetDataPoints->rPixMax(ii):boxMax[ii];
   }
-
+  // keep image array properly defined 
+  this->pTargetWS->get_spMDImage()->get_pMDImgData()->npixSum+=nPixel_retained;
+  //
   return nPixel_retained;
 }
 

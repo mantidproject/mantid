@@ -41,7 +41,7 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
    
       cpr.setPropertyValue("Input", InputWorkspaceName);      
       cpr.setPropertyValue("Result","CPRebinKeepPixTestOut");
-      cpr.setProperty("KeepPixels",false);
+      cpr.setProperty("KeepPixels",true);
       // set slicing property for the target workspace to the size and shape of the current workspace
       cpr.setTargetGeomDescrEqSource();
 

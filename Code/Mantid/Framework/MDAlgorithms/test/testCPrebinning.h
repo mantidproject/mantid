@@ -20,7 +20,7 @@ bool load_existing_workspace(const std::string &workspace_name){
 // helper function to load a workpsace -- something a user should do before rebinning
 
 	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
-//    std::string dataFileName("../../../../../Test/VATES/fe_demo.sqw");
+//    std::string dataFileName("fe_demo.sqw");
 //    std::string dataFileName("../../../../../Test/VATES/fe_demo_bin.sqw");
     std::string dataFileName("test_horace_reader.sqw");
 //        std::string dataFileName("fe_E800_8K.sqw");
@@ -106,7 +106,7 @@ class testCPrebinning :    public CxxTest::TestSuite
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
    // now modify it as we need/want;
-        double r0=-1;
+        double r0=0;
         pSlicing->pDimDescription("qx")->cut_min = r0;
 		pSlicing->pDimDescription("qx")->cut_max = r0+1;
 		pSlicing->pDimDescription("qy")->cut_min = r0;

@@ -29,6 +29,8 @@
 
 namespace Mantid{
     namespace MDDataObjects{
+/// the size of the data page (in bytes), providing optimal speed of data exchange with HDD -- should be calculated;
+#define PAGE_SIZE  4096
 //*****************************************************************************
 class DLLExport MD_File_hdfV1 :    public IMD_FileFormat
 {

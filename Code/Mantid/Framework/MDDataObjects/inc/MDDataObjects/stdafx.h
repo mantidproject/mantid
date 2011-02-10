@@ -7,7 +7,6 @@
 #define H_STDAFX_VADDS
 
 
-#include <stdio.h>
 #include <iostream>
 #include <vector>
 #include <list>

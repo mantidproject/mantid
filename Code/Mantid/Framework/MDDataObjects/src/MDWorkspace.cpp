@@ -55,11 +55,15 @@ MDWorkspace::init(std::auto_ptr<IMD_FileFormat> pFile,
 
     // create new empty image form of its description and the basis
     this->m_spMDImage  = boost::shared_ptr<MDImage>(new MDImage(geomDescr,*m_spMDBasis));
-    
+
+   // read MDImage data (the keys to the datapoints location) 
+	this->m_spFile->read_MDImg_data(*m_spMDImage);
+  
    	// constructor MD points-
 	this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(pd));
   
     this->m_spDataPoints->initialize(m_spMDImage,m_spFile);
+ 
  
 }
 
@@ -89,6 +93,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
    // called and new file name is known. Temporary file manager has to be created if and when datapoint writing is necessary;
    MDDataPointsDescription pixDescr = SourceWorkspace->get_const_MDDPoints().getMDPointDescription();
    this->m_spDataPoints = boost::shared_ptr<MDDataPoints>(new MDDataPoints(pixDescr));
+  
    //this->DDataPoints
 }
 

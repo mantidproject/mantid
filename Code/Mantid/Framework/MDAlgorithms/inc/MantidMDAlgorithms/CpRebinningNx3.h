@@ -76,8 +76,8 @@ protected:
 
     bool keep_pixels;
 
-    /// working buffer to keep input data pixels;
-    std::vector<char  > pix_buf;
+    /// working buffer to keep input data pixels, initialized by the pointer to buffer from the input workspace;
+    std::vector<char  > *pix_buf;
 
  // these variables are initated if keep pixels option has been selected;
     /// the buffer to keep the indexes of the outpit pixels within the target lattice

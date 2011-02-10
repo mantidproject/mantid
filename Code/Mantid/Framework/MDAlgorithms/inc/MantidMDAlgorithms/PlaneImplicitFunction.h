@@ -98,7 +98,7 @@ namespace Mantid
         };
 
         //Non-member helper.
-        Mantid::Geometry::Matrix<double> extractRotationMatrix(const PlaneImplicitFunction& plane);
+        DLLExport Mantid::Geometry::Matrix<double> extractRotationMatrix(const PlaneImplicitFunction& plane);
     }
 }
 

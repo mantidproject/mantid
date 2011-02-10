@@ -59,7 +59,7 @@ MD_FileFormatFactory::getFileReader(user_request rec,const char *fileName)
 
     std::string unique_tmp_name = get_unique_tmp_fileName();
 
-    return getFileReader(fileName,rec);
+    return getFileReader(unique_tmp_name.c_str(),rec);
 }
 // 
 std::string get_unique_tmp_fileName(void){

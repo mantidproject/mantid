@@ -131,7 +131,9 @@ namespace Mantid
       //Mantid::Geometry::MDGeometry const *        get_spMDGeometry(){return m_spMDImage->getGeometry();}
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
-      IMD_FileFormat *                                  get_pFileReader(){return m_spFile.get();}                             
+      IMD_FileFormat *                                  get_pFileReader(){return m_spFile.get();}
+
+	
       
         /// Gets the number of points(MDDataPoints, events) contributed to the workspace.
       ///TODO: resolve -- do we need number of points contributed to workspace or availible in it -- > different things if we 

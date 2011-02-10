@@ -73,7 +73,7 @@ public:
 
        Returns the number of points (events, pixels) contributed into the image;
      */
-    virtual unsigned long finalize_rebinning()=0;
+    virtual uint64_t finalize_rebinning()=0;
     /// destructor
     virtual ~IDynamicRebinning(){};
 protected:

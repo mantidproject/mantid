@@ -124,7 +124,9 @@ protected:
     std::vector<std::string> mdd_attrib_names;
 
 ///  number of fields in HORACE sqw dataset;
-    static const int  DATA_PIX_WIDTH=9;
+    //static const int  DATA_PIX_WIDTH=9;
+	// in fact this is MDDataPoint<>, but as it does not have virtual functions it need to be statically cast to the MDDataPoint;
+	mutable MDPointDescription *pReader; 
 
 // not used at the moment
 //   static std::stringstream ErrBuf;

@@ -183,6 +183,7 @@ MDImage::set_imgArray_shape()
 		g_log.error()<<" size of MD image array = " << MD_IMG_array.data_size<<" and differs from the size, described by MDGeometry = "<<pMDGeometry->getGeometryExtend()<<std::endl;
 		throw(std::logic_error(" MD geometry and MD_image_Data are not synchroneous any more. BUGGG!!! "));
 	}
+	this->MD_IMG_array.npixSum = 0;
 
     this->nd2 =MD_IMG_array.dimStride[1];
     this->nd3 =MD_IMG_array.dimStride[2];
@@ -231,11 +232,28 @@ MDImage::initialize(const MDGeometryDescription &transf,const MDGeometryBasis *c
 			pData[j].err =0;
 			pData[j].npix=0;
 		}
+		MD_IMG_array.npixSum=0;
    }
  
 
 }
+// 
+void 
+MDImage::validateNPix(void)
+{
+	uint64_t pix_sum(0);
+    MD_image_point *pData = MD_IMG_array.data;
+	for(size_t j=0;j<MD_IMG_array.data_size;j++){
+			pix_sum+=pData[j].npix;
+	}
+	if(pix_sum!=MD_IMG_array.npixSum){
+		uint64_t old_number = MD_IMG_array.npixSum;
+		MD_IMG_array.npixSum = pix_sum;
+		g_log.warning()<<" the control number of pixels specified in the pixel array = "<<old_number<<" is not equal to the actual number of pixels referred by the cells: "<<pix_sum<<std::endl;
+		throw(std::invalid_argument("sum of pixels numbers is not consistent with the control sum; fixed for now but suggests an error in algorithm produced this image"));
+	}
 
+}
 //
 MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry): 
 pMDGeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry)),
@@ -265,7 +283,8 @@ MDImage::alloc_image_data()
 	size_t ImgSize     = this->pMDGeometry->getGeometryExtend();
 	MD_IMG_array.data = new MD_image_point[ImgSize];
 	if (!MD_IMG_array.data){
-			throw(std::runtime_error("Can not allocate memory for Multidimensional dataset"));
+		g_log.error()<<" can not allocate memory for multidimensional image\n";
+		throw(std::runtime_error("Can not allocate memory for Multidimensional image "));
 	}
     MD_image_point *pData        = MD_IMG_array.data;
 	MD_IMG_array.data_array_size = ImgSize;
@@ -297,6 +316,7 @@ MDImage::clear_class(void)
 	}
 	MD_IMG_array.data_array_size=0;
 	MD_IMG_array.data_size     = 0;
+	MD_IMG_array.npixSum       = 0;
 
 }
 

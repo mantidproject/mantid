@@ -37,12 +37,13 @@ public:
   
         // read data;
         TSM_ASSERT_THROWS_NOTHING("Read MD image should not throw",pReader->read_MDImg_data(*pMDImg));
-        TSM_ASSERT_THROWS_NOTHING("Init pix loactions should not throw",pMDDPoints->init_pix_locations());
+ //       TSM_ASSERT_THROWS_NOTHING("Init pix loactions should not throw",pMDDPoints->init_pix_locations());
     }
     void testWSSizes(){
         size_t nCells = pMDImg->getDataSize();
+		uint64_t nTpoints = ((uint64_t)nCells)*(nCells+1)/2;
         uint64_t nPoints = pMDDPoints->getNumPixels();
-        TSM_ASSERT_EQUALS("Test number of pixels shoule be equal to geometric progression of nCells",nCells*(nCells+1)/2,nPoints);
+        TSM_ASSERT_EQUALS("Test number of pixels shoule be equal to sum of arithmetic progression up to nCells",nTpoints,nPoints);
     }
     void testReadCell(){
         std::vector<size_t> SelectedCells(1);

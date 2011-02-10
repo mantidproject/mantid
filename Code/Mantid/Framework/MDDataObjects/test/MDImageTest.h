@@ -67,6 +67,16 @@ private:
     UnitCell cell;
     return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
   } 
+//
+  void setFakeImageValuesIncompletely(){
+	  MD_image_point *pData = pImage->get_pData();
+	  size_t nCells =         pImage->getDataSize();
+      for(size_t  j=0;j<nCells;j++){
+		  	pData[j].s=(double)j;
+			pData[j].npix=j;
+	   }
+
+  }
 
   std::vector<point3D> img;
   std::vector<unsigned int> selection;
@@ -152,27 +162,20 @@ public:
     pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
+  void testSetValues(){
+	  this->setFakeImageValuesIncompletely();
+	  TSM_ASSERT_THROWS("This validation should throw as the npix control sum has not been set properly",pImage->validateNPix(),std::invalid_argument);
+  }
+  void testValidationSetCorrect(){
+	  TSM_ASSERT_THROWS_NOTHING("This should not throw as the previous check set correct number of pixels contributed",pImage->validateNPix());
+  }
+  void testNpixCorrect(){
+	  size_t nCells = pImage->getDataSize();
+	  uint64_t nPix = ((uint64_t)nCells)*(nCells-1)/2;
+	  TSM_ASSERT_EQUALS("setFakeImage function set number of contributing pixels which is not consistent with the number expected or getNMDDPoints returned wrong number",nPix,pImage->getNMDDPoints());
+  }
 
 private:
-  std::string findTestFileLocation(void){
 
-    std::string path = Mantid::Kernel::getDirectoryOfExecutable();
-
-    char pps[2];
-    pps[0]=Poco::Path::separator();
-    pps[1]=0; 
-    std::string sps(pps);
-
-    std::string root_path;
-    size_t   nPos = path.find("Mantid"+sps+"Code");
-    if(nPos==std::string::npos){
-      std::cout <<" can not identify application location\n";
-      root_path="../../../../Test/VATES/fe_demo.sqw";
-    }else{
-      root_path=path.substr(0,nPos)+"Mantid/Test/VATES/fe_demo.sqw";
-    }
-    std::cout << "\n\n test file location: "<< root_path<< std::endl;
-    return root_path;
-  }
 };
 #endif

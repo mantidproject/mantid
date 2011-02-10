@@ -44,16 +44,16 @@ namespace MDAlgorithms
 //TODO: consider replacing with something more Mantid generic.
 
 
-double dotProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
+DLLExport double dotProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
 
-double dotProduct(double a1, double a2, double a3, double b1, double b2, double b3);
+DLLExport double dotProduct(double a1, double a2, double a3, double b1, double b2, double b3);
 
-Mantid::Geometry::V3D crossProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
+DLLExport Mantid::Geometry::V3D crossProduct(Mantid::Geometry::V3D a, Mantid::Geometry::V3D b);
 
-Mantid::Geometry::V3D crossProduct(double a1, double a2, double a3, double b1, double b2,
+DLLExport Mantid::Geometry::V3D crossProduct(double a1, double a2, double a3, double b1, double b2,
     double b3);
 
-double absolute(double a1, double a2, double a3);
+DLLExport double absolute(double a1, double a2, double a3);
 
 }
 }

@@ -48,6 +48,7 @@ n_preselected_pix(0)
     // initialisze the target workspace to have proper size and shape
     pTargetWS->init(pSourceWS,pTargetDescr);
 
+	spTargetImage  = pTargetWS->get_spMDImage();
     pTargetGeom    = pTargetWS->get_spMDImage()->getGeometry();
     //
     n_target_cells = pTargetWS->get_spMDImage()->getDataSize();
@@ -293,7 +294,7 @@ DynamicCPRRebinning::preselect_cells()
 }
 
 //
-unsigned long 
+uint64_t 
 DynamicCPRRebinning::finalize_rebinning()
 {
   size_t i;
@@ -305,7 +306,7 @@ DynamicCPRRebinning::finalize_rebinning()
 
 
   // counter for the number of retatined pixels;
-  unsigned long nPix = pTargetImgData[0].npix;
+  uint64_t nPix = pTargetImgData[0].npix;
   for(i=1;i<n_target_cells;i++){
     if(pTargetImgData[i].npix>0){
       nPix        +=pTargetImgData[i].npix;

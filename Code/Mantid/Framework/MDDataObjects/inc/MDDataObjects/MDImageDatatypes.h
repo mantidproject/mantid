@@ -1,6 +1,8 @@
 #ifndef MD_IMAGE_DATATYPES_H
 #define MD_IMAGE_DATATYPES_H
 #include <vector>
+// to get uint64_t datatype
+#include <MantidKernel/System.h>
 /** The header contains the description of the datatypes, used by MDImage
  * There are currently three structures:
  <ul>
@@ -45,9 +47,9 @@ namespace Mantid{
   */
 struct MD_image_point
 {
-        double s;            // signal 
-        double err;          // error
-        unsigned long npix;  // numer of data points (pixels) contributed into this point;
+        double      s;    // signal 
+        double     err;   // error
+        uint64_t   npix;  // numer of data points (pixels) contributed into this point;
 		MD_image_point():s(0),err(0),npix(0){}
 };
 
@@ -56,13 +58,14 @@ struct MD_img_data{
     size_t data_size;              ///< size of the data points array expressed as 1D array (number of data cells);
 	size_t data_array_size;        ///< size of allocated part of MD_Image_point *data block (may be bigger then data_size)
     MD_image_point *data;           ///< multidimensional array of image cells, represented as a single dimensional array;
+	uint64_t npixSum;              ///< sum of all npix fields in the data array; Used to check if the image is consistent with MDDPoints;
     // descriptors for dimensions;
     std::vector<size_t>dimStride;
     std::vector<size_t>dimSize;     ///< number of bin in this dimension
 	// Min-max values for real data should sit with MDData points
     std::vector<double> min_value;  /**< min value of cut upplied in the selected dimension   -- should be the range set in geometry*/ 
     std::vector<double> max_value;  /**< max value of data extend in the selected dimension  */
-    MD_img_data():data_size(0),data_array_size(0),data(NULL){}
+    MD_img_data():data_size(0),data_array_size(0),data(NULL),npixSum(0){}
 
 };
 

@@ -49,7 +49,7 @@ class MDDimension;
 namespace MDAlgorithms
 {
 
-class DimensionFactory
+class DLLExport DimensionFactory
 {
 
 public:
