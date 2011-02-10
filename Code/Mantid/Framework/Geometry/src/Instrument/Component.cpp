@@ -15,6 +15,10 @@ namespace Geometry
   Component::Component(const IComponent* base,  const ParameterMap * map)
   : m_base(dynamic_cast<const Component*>(base)), m_map(map), m_isParametrized(true)
   {
+    if (m_isParametrized && !m_map)
+    {
+      throw std::invalid_argument("Zero pointer to parameter map in parametrized component");
+    }
     if( !m_base )
     {
       throw std::invalid_argument("Component::Component() - Cannot construct a "

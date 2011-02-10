@@ -92,6 +92,7 @@ public:
   /// for saving the instrument window  to mantid project
   QString saveToString(const QString& geometry, bool saveAsTemplate= false);
   Instrument3DWidget* getInstrumentDisplay(){return mInstrumentDisplay;}
+  bool blocked()const{return m_blocked;}
 
 protected:
   /// Called just before a show event
@@ -116,7 +117,11 @@ public slots:
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
-  void execMantidAlgorithm(const QString&,const QString&);								  
+  void execMantidAlgorithm(const QString&,const QString&);
+
+private slots:
+  void block();
+  void unblock();
 
 private:
 
@@ -150,6 +155,8 @@ private:
   InstrumentWindowPickTab * m_pickTab;
 
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
+
+  bool m_blocked;     ///< Set to true to block access to instrument during algorithm executions
 
 
 private:

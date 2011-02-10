@@ -164,6 +164,8 @@ public:
 	/// This method is to execute download data files algorithm from ICat
 	void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
 
+  AlgorithmMonitor* getAlgMinitor(){return m_algMonitor;}
+
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false);

@@ -2,6 +2,7 @@
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
 #include "../MantidUI.h"
+#include "../AlgMonitor.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "Poco/Path.h"
@@ -35,7 +36,7 @@ using namespace Mantid::Geometry;
  * Constructor.
  */
 InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app , const QString& name , Qt::WFlags f ): 
-  MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false)
+  MdiSubWindow(label, app, name, f), WorkspaceObserver(), mViewChanged(false),m_blocked(false)
 {
   m_savedialog_dir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
 
@@ -51,7 +52,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->setSizePolicy(QSizePolicy::Expanding,QSizePolicy::Expanding);
 
   // Create the display widget
-  mInstrumentDisplay = new Instrument3DWidget();
+  mInstrumentDisplay = new Instrument3DWidget(this);
   controlPanelLayout->addWidget(mInstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
 
@@ -107,6 +108,9 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   observeDelete();
   observeAfterReplace();
   observeADSClear();
+
+  connect(app->mantidUI->getAlgMinitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
+  connect(app->mantidUI->getAlgMinitor(),SIGNAL(allAlgorithmsStopped()),this,SLOT(unblock()));
 
   resize(600,650);
 }
@@ -667,3 +671,12 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
   return instrumentTree;
 }
 
+  void InstrumentWindow::block()
+  {
+    m_blocked = true;
+  }
+
+  void InstrumentWindow::unblock()
+  {
+    m_blocked = false;
+  }

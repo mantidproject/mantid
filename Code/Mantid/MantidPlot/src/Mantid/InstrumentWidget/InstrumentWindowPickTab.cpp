@@ -71,6 +71,11 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
 
 void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
 {
+  if (m_instrWindow->blocked())
+  {
+    m_plot->clearCurve();
+    return;
+  }
   if (m_plotPanel->isCollapsed()) return;
   Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();
   int wi = cursorPos.getWorkspaceIndex();
@@ -174,6 +179,11 @@ void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cur
 
 void InstrumentWindowPickTab::updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos)
 {
+  if (m_instrWindow->blocked()) 
+  {
+    m_selectionInfoDisplay->clear();
+    return;
+  }
   if (cursorPos.getDetID() >= 0)
   {
     Mantid::API::MatrixWorkspace_const_sptr ws = cursorPos.getWorkspace();

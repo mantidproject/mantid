@@ -63,6 +63,7 @@ void AlgorithmMonitor::remove(const IAlgorithm* alg)
     }
     emit algorithmFinished(alg->getAlgorithmID());
     emit countChanged();
+    if (m_algorithms.empty()) emit allAlgorithmsStopped();
     unlock();
 }
 

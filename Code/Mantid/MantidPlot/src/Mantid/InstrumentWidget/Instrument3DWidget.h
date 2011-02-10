@@ -47,6 +47,7 @@ namespace Mantid
 }
 
 class InstrumentActor;
+class InstrumentWindow;
 
 class Instrument3DWidget : public GL3DWidget
 { 
@@ -93,7 +94,7 @@ public:
     bool is_good(const int testVal) const { return testVal > NO_INDEX; }
   };
 
-  Instrument3DWidget(QWidget* parent=0); ///< Constructor
+  Instrument3DWidget(InstrumentWindow* parent); ///< Constructor
   virtual ~Instrument3DWidget();         ///< Destructor
   void setWorkspace(const QString& name);
   QString getWorkspaceName() const;
@@ -166,6 +167,8 @@ private:
   /// Convert the list of detector ids to a list of workspace indices and store them
   void createWorkspaceIndexList(const std::vector<int> & idlist, bool forceNew);
   boost::shared_ptr<Mantid::API::MatrixWorkspace> getMatrixWorkspace(QString ) const;
+
+  InstrumentWindow* m_instrumentWindow;
 
   bool mFastRendering;
   int iTimeBin;

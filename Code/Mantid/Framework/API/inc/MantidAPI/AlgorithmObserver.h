@@ -17,9 +17,6 @@ namespace Mantid
 {
 namespace API
 {
-#ifndef IGNORE_ALGORITHM_OBSERVER_ARGUMENT
-#define IGNORE_ALGORITHM_OBSERVER_ARGUMENT(x)
-#endif
 /** @class AlgorithmObserver AlgorithmObserver.h API/AlgorithmObserver.h
 
  Observes Algorithm notifications: start,progress,finish,error.
@@ -140,10 +137,11 @@ public:
         @param p :: Progress reported by the algorithm, 0 <= p <= 1
         @param msg :: Optional message string sent by the algorithm
     */
-    virtual void progressHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg),
-                                double p,const std::string& IGNORE_ALGORITHM_OBSERVER_ARGUMENT(msg))
+    virtual void progressHandle(const IAlgorithm* alg,double p,const std::string& msg)
     {
-        std::cerr<<"Progress "<<p<<'\n';
+      (void*)alg;
+      (void)msg;
+      std::cerr<<"Progress "<<p<<'\n';
     }
 
     /** Handler of the start notifications. Must be overriden in inherited classes.
@@ -153,9 +151,10 @@ public:
         an observer can be connected to an AlgorithmProxy instance and receive notifications from
         the corresponding Algorithm type object.
     */
-    virtual void startHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg))
+    virtual void startHandle(const IAlgorithm* alg)
     {
-        std::cerr<<"Started "<<'\n';
+      (void*)alg;
+      std::cerr<<"Started "<<'\n';
     }
    /** Handler of the finish notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
@@ -164,9 +163,10 @@ public:
         an observer can be connected to an AlgorithmProxy instance and receive notifications from
         the corresponding Algorithm type object.
     */
-    virtual void finishHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg))
+    virtual void finishHandle(const IAlgorithm* alg)
     {
-        std::cerr<<"Finished "<<'\n';
+      (void*)alg;
+      std::cerr<<"Finished "<<'\n';
     }
     /** Handler of the error notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
@@ -176,9 +176,10 @@ public:
         the corresponding Algorithm type object.
         @param what :: The error message
     */
-    virtual void errorHandle(const IAlgorithm* IGNORE_ALGORITHM_OBSERVER_ARGUMENT(alg),const std::string& what)
+    virtual void errorHandle(const IAlgorithm* alg,const std::string& what)
     {
-        std::cerr<<"Error "<<what<<'\n';
+      (void*)alg;
+      std::cerr<<"Error "<<what<<'\n';
     }
 /// @endcond
 private:

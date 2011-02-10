@@ -41,6 +41,7 @@ signals:
   void algorithmFinished(void* alg);
   void needUpdateProgress(void* alg,int p, const QString& msg);
   void countChanged();
+  void allAlgorithmsStopped();
 protected:
 
   /// Algorithm notification handlers

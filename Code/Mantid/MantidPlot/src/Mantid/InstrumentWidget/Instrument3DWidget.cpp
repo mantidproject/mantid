@@ -1,5 +1,6 @@
 #include "Instrument3DWidget.h"
 #include "InstrumentActor.h"
+#include "InstrumentWindow.h"
 #include "MantidObject.h"
 #include "OpenGLError.h"
 #include "UnwrappedSurface.h"
@@ -146,8 +147,8 @@ private:
   bool m_delete;      ///< if true delete the file on destruction
 };
 
-Instrument3DWidget::Instrument3DWidget(QWidget* parent):
-  GL3DWidget(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
+Instrument3DWidget::Instrument3DWidget(InstrumentWindow* parent):
+  GL3DWidget(parent),m_instrumentWindow(parent),mFastRendering(true), iTimeBin(0), mDataMapping(INTEGRAL),
   mColorMap(), mInstrumentActor(NULL), mAxisDirection(Mantid::Geometry::V3D(0.0,0.0,1.0)),
   mAxisUpVector(Mantid::Geometry::V3D(0.0,1.0,0.0)), mDataMinValue(DBL_MAX), mDataMaxValue(-DBL_MAX),
   mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX),
@@ -196,6 +197,10 @@ void Instrument3DWidget::setAxis(const Mantid::Geometry::V3D& direction)
  */
 void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
 {
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
   std::vector<int> detectorIds;
   detectorIds.reserve(pickedColors.size());
   for(std::set<QRgb>::const_iterator it = pickedColors.begin(); it!= pickedColors.end(); it++)
@@ -221,6 +226,10 @@ void Instrument3DWidget::fireDetectorsPicked(const std::set<QRgb>& pickedColors)
  */
 void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
 {
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
   //get the data for the detector currently under the cursor
   const int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
 
@@ -236,6 +245,10 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
  */
 void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
 {
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
   //get the data for the detector currently under the cursor
   const int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
 
@@ -247,6 +260,10 @@ void Instrument3DWidget::detectorsHighligted(QRgb pickedColor)
 
 void Instrument3DWidget::fireDetectorHighligted(int detID)
 {
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
   m_detInfo.setDet(detID);
   emit actionDetectorHighlighted(m_detInfo);
 }
