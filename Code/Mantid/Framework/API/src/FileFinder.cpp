@@ -50,11 +50,8 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
   if (Poco::Path(fName).isAbsolute())
     return fName;
   
-  // Check the current directory first
-  Poco::Path currentPath(Poco::Path().resolve(fName));
-  if( Poco::File(currentPath).exists() ) return currentPath.toString();
-
-  const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+  std::vector<std::string> searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
+  searchPaths.insert(searchPaths.begin(), Poco::Path().toString());
   std::vector<std::string>::const_iterator it = searchPaths.begin();
   for (; it != searchPaths.end(); ++it)
   {

@@ -168,7 +168,6 @@ public:
 
     // Test case lower->upper case of filename
     path = FileFinder::Instance().findRun("csp78173.raw");
-    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
     TS_ASSERT(Poco::File(path).exists());
   }
 
