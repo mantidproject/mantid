@@ -293,7 +293,7 @@ namespace NeXus
     nexusFile->writeNexusProcessedData2D(m_eventWorkspace, uniformSpectra, spec, "event_workspace", false);
 
     // Make a super long list of tofs, weights, etc.
-    std::vector<size_t> indices;
+    std::vector<int64_t> indices;
     indices.reserve( m_eventWorkspace->getNumberHistograms()+1 );
     // First we need to index the events in each spectrum
     size_t index = 0;
@@ -306,7 +306,7 @@ namespace NeXus
     indices.push_back(index);
 
     // Initialize all the arrays
-    size_t num = index;
+    int64_t num = index;
     double * tofs = NULL;
     float * weights = NULL;
     float * errorSquareds = NULL;

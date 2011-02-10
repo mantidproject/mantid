@@ -170,9 +170,9 @@ void LoadNexusProcessed::exec()
 API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, NXDouble & xbins,
     const double& progressStart, const double& progressRange)
 {
-  NXDataSetTyped<long> indices_data = wksp_cls.openNXDataSet<long>("indices");
+  NXDataSetTyped<int64_t> indices_data = wksp_cls.openNXDataSet<int64_t>("indices");
   indices_data.load();
-  boost::shared_array<long> indices = indices_data.sharedBuffer();
+  boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   int numspec = indices_data.dim0()-1;
 
   int num_xbins = xbins.dim1();
@@ -239,8 +239,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int wi=0; wi < numspec; wi++)
   {
-    long index_start = indices[wi];
-    long index_end = indices[wi+1];
+    int64_t index_start = indices[wi];
+    int64_t index_end = indices[wi+1];
     //std::cout << wi << ":" << index_start << " to " << index_end << std::endl;
 
     if (index_end >= index_start)

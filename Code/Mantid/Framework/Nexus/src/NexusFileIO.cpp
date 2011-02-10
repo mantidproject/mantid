@@ -711,7 +711,7 @@ using namespace DataObjects;
    * @param ws :: an EventWorkspace
    *  */
   int NexusFileIO::writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
-      std::vector<size_t> & indices,
+      std::vector<int64_t> & indices,
       double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const
   {
     NXstatus status;
