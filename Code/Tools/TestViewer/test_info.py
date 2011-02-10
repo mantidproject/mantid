@@ -954,19 +954,30 @@ class MultipleProjects(object):
         num_threads = multiprocessing.cpu_count()-1
         if num_threads < 1: num_threads = 1
         
+        testnames = set()
+        
         dirList=os.listdir(path)
         for fname in dirList:
             # Look for executables ending in Test
-            if fname.endswith("Test") :#and (fname.startswith("DataHandling") ): #!TODO
-                make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
-                pj = TestProject(fname, os.path.join(path, fname), make_command)
-                print "... Populating project %s ..." % fname
+            if fname.endswith("Test") and os.path.isfile(fname):
+                testnames.add(fname)
+                
+        # Now add the known tests, in case they were deleted
+        for x in ["AlgorithmsTest", "DataObjectsTest", "MDAlgorithmsTest", "PythonAPITest", "APITest", 
+                       "GeometryTest", "MDDataObjectsTest", "CurveFittingTest", "ICatTest", "MDEventsTest", 
+                       "DataHandlingTest", "KernelTest", "NexusTest"]:
+            testnames.add(x)
+        
+        for fname in testnames:
+            make_command = "cd %s ; make %s -j%d " % (os.path.join(path, ".."), fname, num_threads)
+            pj = TestProject(fname, os.path.join(path, fname), make_command)
+            print "... Populating project %s ..." % fname
 
-                project_name = fname.replace("Test", "")
-                project_source_path = os.path.join(source_path, project_name)
+            project_name = fname.replace("Test", "")
+            project_source_path = os.path.join(source_path, project_name)
 
-                pj.populate(project_source_path)
-                self.projects.append(pj)
+            pj.populate(project_source_path)
+            self.projects.append(pj)
         
     #--------------------------------------------------------------------------        
     def make_fake_results(self):
@@ -1211,8 +1222,6 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
         status :: status code
         output :: accumulated stdoutput
     """
-    print "run_command_with_callback called for " + full_command
-    print callback_func
     output = ""
     
     if not run_shell:
