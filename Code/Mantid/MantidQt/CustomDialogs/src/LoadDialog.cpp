@@ -9,6 +9,7 @@
 #include <QComboBox>
 #include <QUrl>
 #include <QDesktopServices>
+#include <QFileInfo>
 // Mantid
 #include "MantidKernel/Property.h"
 #include "MantidKernel/MaskedProperty.h"
@@ -30,7 +31,7 @@ namespace MantidQt
     LoadDialog:: LoadDialog(QWidget *parent) 
       : API::AlgorithmDialog(parent), m_fileWidget(NULL), m_wkspaceWidget(NULL), 
 	m_wkspaceLayout(NULL), m_dialogLayout(NULL), m_loaderLayout(NULL), 
-	m_currentFile()					       
+	m_currentFile()				       
     {
       QSizePolicy sizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
       setSizePolicy(sizePolicy);
@@ -58,6 +59,34 @@ namespace MantidQt
       QDesktopServices::openUrl(QUrl(QString("http://www.mantidproject.org/") + helpPage));
     }
 
+    /**
+     * Suggest a workspace name from the file
+     */
+    void LoadDialog::suggestWSName()
+    {
+      QString suggestion;
+      if( m_fileWidget->isValid() )
+      {
+	suggestion = QFileInfo(m_fileWidget->getFirstFilename()).baseName();	
+      }
+      m_wkspaceWidget->setText(suggestion);
+    }
+
+    /**
+     * Connect/Disconnect the signal that updates the workspace name with a suggested value
+     * @param on :: If true then a workspace name will be suggested
+     */
+    void LoadDialog::enableNameSuggestion(const bool on)
+    {
+      if( on )
+      {
+	connect(m_fileWidget, SIGNAL(fileEditingFinished()), this, SLOT(suggestWSName()));
+      }
+      else
+      {
+	disconnect(m_fileWidget, SIGNAL(fileEditingFinished()), this, SLOT(suggestWSName()));
+      }
+    }
 
     //--------------------------------------------------------------------------
     // Private methods (non-slot)
@@ -127,6 +156,10 @@ namespace MantidQt
       m_wkspaceWidget = new QLineEdit(this);
       m_wkspaceLayout->addWidget(m_wkspaceWidget);
       staticLayout->addLayout(m_wkspaceLayout);
+
+      // Guess at an output workspace name but only if the user hasn't changed anything
+      enableNameSuggestion(true);
+      connect(m_wkspaceWidget, SIGNAL(textEdited(const QString&)), this, SLOT(enableNameSuggestion()));
     
       // Add to the static layout
       widgetLayout->addLayout(staticLayout);

@@ -77,6 +77,10 @@ namespace MantidQt
       void createDynamicWidgets();
       /// Override the help button clicked method
       void helpClicked();
+      /// Suggest a workspace name from the file
+      void suggestWSName();
+      /// Connect/Disconnect the signal that updates the workspace name with a suggested value
+      void enableNameSuggestion(const bool on = false);
 
     private:
       /// Initialize the layout
