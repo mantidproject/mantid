@@ -10,7 +10,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
-using Mantid::API::AnalysisDataService;
+using Mantid::API::MatrixWorkspace;
 using Mantid::API::MatrixWorkspace_sptr;
 using Mantid::DataObjects::EventWorkspace_sptr;
 
@@ -68,14 +68,10 @@ public:
 
     EventWorkspace_sptr ews1 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30);
     EventWorkspace_sptr ews2 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30);
-    AnalysisDataService::Instance().addOrReplace("ews1", ews1);
-    AnalysisDataService::Instance().addOrReplace("ews2", ews2);
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
-    AnalysisDataService::Instance().remove( "ews1" );
-    AnalysisDataService::Instance().remove( "ews2" );
 
     // Same, using the equals() function
     TS_ASSERT( equals(ews1, ews2) );
@@ -86,12 +82,10 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
 
     EventWorkspace_sptr ews2 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30);
-    AnalysisDataService::Instance().addOrReplace("ews2", ews2);
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",ws1) );
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    AnalysisDataService::Instance().remove( "ews2" );
 
     // Same, using the equals() function
     TS_ASSERT( !equals(ws1, ews2) );
@@ -104,14 +98,10 @@ public:
 
     EventWorkspace_sptr ews1 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30);
     EventWorkspace_sptr ews2 = WorkspaceCreationHelper::CreateEventWorkspace(15,20,30);
-    AnalysisDataService::Instance().addOrReplace("ews1", ews1);
-    AnalysisDataService::Instance().addOrReplace("ews2", ews2);
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    AnalysisDataService::Instance().remove( "ews1" );
-    AnalysisDataService::Instance().remove( "ews2" );
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ews1, ews2)) );
   }
@@ -121,14 +111,10 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
     EventWorkspace_sptr ews1 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30);
     EventWorkspace_sptr ews2 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30, 0.0, 1.0, 2);
-    AnalysisDataService::Instance().addOrReplace("ews1", ews1);
-    AnalysisDataService::Instance().addOrReplace("ews2", ews2);
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    AnalysisDataService::Instance().remove( "ews1" );
-    AnalysisDataService::Instance().remove( "ews2" );
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ews1, ews2)) );
   }
@@ -138,14 +124,10 @@ public:
     if ( !checker.isInitialized() ) checker.initialize();
     EventWorkspace_sptr ews1 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30, 15.0, 10.0);
     EventWorkspace_sptr ews2 = WorkspaceCreationHelper::CreateEventWorkspace(10,20,30, 5.0, 10.0);
-    AnalysisDataService::Instance().addOrReplace("ews1", ews1);
-    AnalysisDataService::Instance().addOrReplace("ews2", ews2);
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1","ews1") );
-    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2","ews2") );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace1",boost::dynamic_pointer_cast<MatrixWorkspace>(ews1)) );
+    TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    AnalysisDataService::Instance().remove( "ews1" );
-    AnalysisDataService::Instance().remove( "ews2" );
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ews1, ews2)) );
   }
@@ -162,8 +144,6 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Size mismatch" );
     
-    Mantid::API::AnalysisDataService::Instance().remove( "ws2" );
-
     // Same, using the !equals() function
     TS_ASSERT( (!equals(ws1, ws2)) );
   }
