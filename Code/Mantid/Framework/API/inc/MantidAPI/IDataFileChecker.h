@@ -6,7 +6,7 @@
 
 // Most file header checking requires use of the ntohl c-library function defined here
 #ifdef _WIN32
-  #include <winsock.h>
+  #include <winsock2.h>
 #else
   #include <netinet/in.h>
 #endif
