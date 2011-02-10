@@ -14,14 +14,6 @@ namespace Mantid
 namespace Kernel
 {
 
-using std::cout;
-using std::endl;
-using std::ifstream;
-using std::runtime_error;
-using std::stringstream;
-using std::string;
-using std::vector;
-
 /// Default number of items to read in from any of the files.
 static const size_t DEFAULT_BLOCK_SIZE = 100000; // 100,000
 
@@ -76,12 +68,12 @@ public:
     this->handle = NULL;
     if (!Poco::File(filename).exists())
     {
-      stringstream msg;
+      std::stringstream msg;
       msg << "BinaryFile::open: File " << filename << " was not found.";
       throw std::invalid_argument("File does not exist.");
     }
     //Open the file
-    this->handle = new ifstream(filename.c_str(), std::ios::binary);
+    this->handle = new std::ifstream(filename.c_str(), std::ios::binary);
     //Count the # of elements.
     this->num_elements = this->getFileSize();
     //Make sure we are starting at 0
@@ -94,11 +86,8 @@ public:
    * */
   void close()
   {
-    if (handle)
-    {
-      delete handle;
-      handle = NULL;
-    }
+    delete handle;
+    handle = NULL;
   }
 
 
@@ -113,7 +102,7 @@ public:
     this->obj_size = sizeof(T);
 
     if (!handle) {
-      throw runtime_error("BinaryFile::getFileSize: Cannot find the size of a file from a null handle");
+      throw std::runtime_error("BinaryFile::getFileSize: Cannot find the size of a file from a null handle");
     }
 
     // get the size of the file in bytes and reset the handle back to the beginning
@@ -123,11 +112,11 @@ public:
 
     // check the file is a compatible size
     if (filesize % obj_size != 0) {
-      stringstream msg;
+      std::stringstream msg;
       msg << "BinaryFile::getFileSize: File size is not compatible with data size ";
       msg << filesize << "%" << obj_size << "=";
       msg << filesize % obj_size;
-      throw runtime_error(msg.str());
+      throw std::runtime_error(msg.str());
     }
 
     return filesize / sizeof(T);
@@ -169,7 +158,7 @@ public:
   std::vector<T> * loadAll()
   {
     if (!handle) {
-      throw runtime_error("BinaryFile: file is not open.");
+      throw std::runtime_error("BinaryFile: file is not open.");
     }
 
     //Initialize the pointer
@@ -210,7 +199,7 @@ public:
   void loadAllInto(std::vector<T> &data)
   {
     if (!handle) {
-      throw runtime_error("BinaryFile: file is not open.");
+      throw std::runtime_error("BinaryFile: file is not open.");
     }
 
     //Clear the vector
@@ -253,7 +242,7 @@ public:
   size_t loadBlock(T * buffer, size_t block_size)
   {
     if (!handle) {
-      throw runtime_error("BinaryFile: file is not open.");
+      throw std::runtime_error("BinaryFile: file is not open.");
     }
 
     size_t loaded_size;

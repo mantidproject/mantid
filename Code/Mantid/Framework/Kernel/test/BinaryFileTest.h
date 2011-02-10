@@ -46,7 +46,7 @@ static void MakeDummyFile(std::string filename, size_t num_bytes)
 
   std::ofstream myFile (filename.c_str(), std::ios::out | std::ios::binary);
   myFile.write (buffer, num_bytes);
-  delete buffer;
+  delete [] buffer;
   myFile.close();
 }
 
@@ -159,6 +159,7 @@ public:
    //Check the last event
    TS_ASSERT_EQUALS( data[ 9].tof, 38);
    TS_ASSERT_EQUALS( data[ 9].pid, 39);
+   delete [] data;
    file.close();
    Poco::File(dummy_file).remove();
  }
