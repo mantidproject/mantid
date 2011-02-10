@@ -426,17 +426,17 @@ public:
 
    }
 
-   void xtest_LoadEventNexus_TOF()
+   void test_LoadEventNexus_TOF()
    {
      dotest_LoadAnEventFile(TOF);
    }
 
-   void xtest_LoadEventNexus_WEIGHTED()
+   void test_LoadEventNexus_WEIGHTED()
    {
      dotest_LoadAnEventFile(WEIGHTED);
    }
 
-   void xtest_LoadEventNexus_WEIGHTED_NOTIME()
+   void test_LoadEventNexus_WEIGHTED_NOTIME()
    {
      dotest_LoadAnEventFile(WEIGHTED_NOTIME);
    }

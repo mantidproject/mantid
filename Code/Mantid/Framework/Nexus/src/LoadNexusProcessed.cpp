@@ -188,10 +188,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
 
   //Handle optional fields.
   // TODO: Handle inconsistent sizes
-  boost::shared_array<long> pulsetimes;
+  boost::shared_array<int64_t> pulsetimes;
   if (wksp_cls.isValid("pulsetime"))
   {
-    NXDataSetTyped<long> pulsetime = wksp_cls.openNXDataSet<long>("pulsetime");
+    NXDataSetTyped<int64_t> pulsetime = wksp_cls.openNXDataSet<int64_t>("pulsetime");
     pulsetime.load();
     pulsetimes = pulsetime.sharedBuffer();
   }
