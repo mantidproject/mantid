@@ -234,8 +234,6 @@ class ISISInstrument(instrument.Instrument):
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
             'default-incident-monitor-spectrum')[0])
-        #this is used by suggest_incident_mntr() below 
-        self._incid_monitor_lckd = False
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
         firstDetect.disable_y_and_rot_corrs()
@@ -273,15 +271,6 @@ class ISISInstrument(instrument.Instrument):
         #this variable isn't used again and stops the instrument from being deep copied!
         self.definition = None
 
-    def suggest_incident_mntr(self, spectrum_number):
-        """
-            Only sets the monitor spectrum number if it isn't locked, used
-            so MON/SPECTRUM in ISIS user files don't change MON/LENGTH settings
-            @param spectrum_number: monitor's sectrum number
-        """
-        if not self._incid_monitor_lckd :
-            self._incid_monitor = int(spectrum_number)
-        
     def get_incident_mon(self):
         """
             @return: the spectrum number of the incident scattering monitor
@@ -295,7 +284,6 @@ class ISISInstrument(instrument.Instrument):
             @param spectrum_number: monitor's sectrum number
         """
         self._incid_monitor = int(spectrum_number)
-        self._incid_monitor_lckd = True
         
     def set_component_positions(self, ws, xbeam, ybeam): raise NotImplementedError
         
@@ -310,14 +298,10 @@ class ISISInstrument(instrument.Instrument):
      
     def set_interpolating_norm(self, on=True):
         """
-            This method sets that the monitor spectrum should be interpolated,
-            there is currently no unset method but its off by default    
+            This method sets that the monitor spectrum should be interpolated before
+            normalisation
         """
         self._use_interpol_norm = on
-     
-    def suggest_interpolating_norm(self):
-        if not self._incid_monitor_lckd:
-            self._use_interpol_norm = True
      
     def cur_detector(self):
         if self.lowAngDetSet : return self.DETECTORS['low-angle']

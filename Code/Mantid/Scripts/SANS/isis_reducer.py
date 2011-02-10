@@ -180,18 +180,12 @@ class ISISReducer(SANSReducer):
         
         if not self._monitor_set or override:
             self.instrument.set_incident_mon(specNum)
-        #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        if override:
             self.instrument.set_interpolating_norm(interp)
-        elif interp :
-            self.instrument.set_interpolating_norm()
                         
     def suggest_monitor_spectrum(self, specNum, interp=False):
         if not self._monitor_set:
             self.instrument.suggest_incident_mntr(specNum)
-        #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        if interp :
-            self.instrument.suggest_interpolating_norm()
+            self.instrument.suggest_interpolating_norm(interp)
                     
     def set_trans_spectrum(self, specNum, interp=False):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
