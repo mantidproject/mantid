@@ -57,6 +57,7 @@ namespace PythonAPI
       .def("sendLogMessage", &FrameworkManagerProxy::sendLogMessage)
       .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
+      .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
       .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)

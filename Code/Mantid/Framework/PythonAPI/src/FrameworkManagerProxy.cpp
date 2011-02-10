@@ -14,6 +14,7 @@
 
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/ITableWorkspace.h"
 
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
@@ -415,6 +416,7 @@ boost::shared_ptr<Mantid::API::Workspace> FrameworkManagerProxy::retrieveWorkspa
 void FrameworkManagerProxy::
 deleteNotificationReceived(Mantid::API::WorkspaceDeleteNotification_ptr notice)
 {
+  std::cout << "deleteNotificationReceived(" << notice << ")" << std::endl;
   /// This function may be overridden in Python
   workspaceRemoved(notice->object_name());  
 }
@@ -435,7 +437,8 @@ addNotificationReceived(Mantid::API::WorkspaceAddNotification_ptr notice)
  */
 void FrameworkManagerProxy::
 replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr notice)
-{  
+{
+  std::cout << "replaceNotificationReceived(" << notice << ")" << std::endl;
   /// This function may be overridden in Python
   workspaceReplaced(notice->object_name());
 }
@@ -446,6 +449,7 @@ replaceNotificationReceived(Mantid::API::WorkspaceAfterReplaceNotification_ptr n
  */
 void FrameworkManagerProxy::clearNotificationReceived(Mantid::API::ClearADSNotification_ptr)
 {
+  std::cout << "clearNotificationReceived()" << std::endl;
   /// This function may be overridden in Python
   workspaceStoreCleared();
 }
@@ -461,6 +465,11 @@ handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr
   createPythonSimpleAPI(g_last_api_flag);
   //Call up to python via a virtual function
   algorithmFactoryUpdated();
+}
+
+void FrameworkManagerProxy::releaseFreeMemory()
+{
+  Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 }
 
 }

@@ -159,6 +159,8 @@ public:
   /// A function that can be overridden in Python to handle updates of the AlgorithmFactory
   virtual void algorithmFactoryUpdated() {};
 
+  void releaseFreeMemory();
+
  protected:
   /** A flag indicating whether code has been executed from within Python. This is a bit of a hack
    * so that the notification signals don't cause deadlocks if they happen to get called from
