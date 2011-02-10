@@ -18,6 +18,15 @@
     </reference-frame>
   </defaults>
   
+  <!-- Muon default grouping files -->
+
+  <parameter name="Default grouping file - Transverse" type="string">
+    <value val="Grouping/MUSR_Detector_Grouping_TF_64.xml"/>
+  </parameter> 
+  <parameter name="Default grouping file - Longitudinal" type="string">
+    <value val="Grouping/MUSR_Detector_Grouping_LF_64.xml"/>
+  </parameter>   
+  
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
   

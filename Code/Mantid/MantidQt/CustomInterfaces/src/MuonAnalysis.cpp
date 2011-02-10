@@ -471,6 +471,9 @@ void MuonAnalysis::runLoadGroupButton()
 void MuonAnalysis::runClearGroupingButton()
 {
   clearTablesAndCombo();
+
+  // also disable plotting buttons and cal alpha button
+  noDataAvailable();
 }
 
 /**
@@ -2059,7 +2062,20 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
 {
   IInstrument_sptr inst = matrix_workspace->getInstrument();
 
-  std::vector<std::string> groupFile = inst->getStringParameter("Default grouping file");
+  QString instname = m_uiForm.instrSelector->currentText().toUpper();
+
+  QString groupParameter = "Default grouping file";
+  // for now hard coded in the special case of MUSR
+  if (instname == "MUSR")
+  {
+    if ( mainFieldDirection == "Transverse" )
+      groupParameter += " - Transverse";
+    else
+      groupParameter += " - Longitudinal";
+  }
+
+
+  std::vector<std::string> groupFile = inst->getStringParameter(groupParameter.toStdString());  
 
   // get search directory for XML instrument definition files (IDFs)
   std::string directoryName = ConfigService::Instance().getInstrumentDirectory();
