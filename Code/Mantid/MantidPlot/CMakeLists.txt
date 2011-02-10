@@ -660,7 +660,6 @@ else ()
   set ( RELDATE_WC_REVISION 0 )
 endif ()
 # Create the header with the revision number in
-#set ( HEADER_DIR src/Mantid )
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/Mantid/MantidPlotReleaseDate.h.in
                  ${CMAKE_CURRENT_BINARY_DIR}/MantidPlotReleaseDate.h 
 )

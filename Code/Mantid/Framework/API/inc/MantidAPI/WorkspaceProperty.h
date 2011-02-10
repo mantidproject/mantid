@@ -84,13 +84,12 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
-				 bool optional) :
-	Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), 
-							     new Kernel::NullValidator<boost::shared_ptr<TYPE> >, direction),
+                                 bool optional) :
+        Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ),
+              new Kernel::NullValidator<boost::shared_ptr<TYPE> >, direction),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional)
       {
       }
-
 
       /// Copy constructor, the default name stored in the new object is the same as the default name from the original object
       WorkspaceProperty( const WorkspaceProperty& right ) :
@@ -192,7 +191,7 @@ namespace Mantid
           }
           else
           {
-	    if( m_optional ) return error; 
+            if( m_optional ) return "";
             //Return a user level error
             error = "Enter a name for the Output workspace";
             //the debug message has more detail to put it in context
@@ -202,7 +201,7 @@ namespace Mantid
         }
 
         // If an input (or inout) workspace, must point to something, although it doesn't have to have a name
-	// unless it's optional
+        // unless it's optional
         if ( this->direction() == Kernel::Direction::Input || this->direction() == Kernel::Direction::InOut )
         {
           // Workspace groups will not have a value since they are not of type TYPE
@@ -217,21 +216,21 @@ namespace Mantid
             {
               if( m_workspaceName.empty() ) 
               {
-		if( m_optional )
-		{
-		  error = "";
-		}
-		else
-		{
-		  error = "Enter a name for the Input/InOut workspace";
-		}
+                if( m_optional )
+                {
+                  error = "";
+                }
+                else
+                {
+                  error = "Enter a name for the Input/InOut workspace";
+                }
               }
               else
               {
                 error = "Workspace \"" + this->value() + "\" was not found in the Analysis Data Service";
               }
-	      if( !error.empty() )
-		g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
+              if( !error.empty() )
+                g_log.debug() << "Problem validating workspace: " << error << "." << std::endl;
               return error;
             }
 
@@ -270,7 +269,16 @@ namespace Mantid
         if ( this->direction() == 0 || this->direction() == 2 )
         {
           // If an input workspace, get the list of workspaces currently in the ADS
-          return AnalysisDataService::Instance().getObjectNames();
+          if (m_optional)
+          {
+            std::set<std::string> vals = AnalysisDataService::Instance().getObjectNames();
+            vals.insert("");
+            return vals;
+          }
+          else
+          {
+            return AnalysisDataService::Instance().getObjectNames();
+          }
         }
         else
         {
@@ -293,7 +301,7 @@ namespace Mantid
       virtual bool store()
       {
         bool result = false;
-	if ( ! this->operator()() && m_optional ) return result; 
+        if ( ! this->operator()() && m_optional ) return result;
         if ( this->direction() ) // Output or InOut
         {
           // Check that workspace exists

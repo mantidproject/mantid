@@ -8,6 +8,7 @@
 #include <vector>
 #include <functional>
 #include <cmath>
+#include <stdexcept>
 
 namespace Mantid
 {
@@ -19,7 +20,7 @@ namespace Kernel
     @author Laurent C Chapon, Rutherford Appleton Laboratory
     @date 16/12/2008
 
-    Copyright &copy; 2007-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -49,7 +50,7 @@ namespace VectorHelper
 
   // New method to rebin Histogram data, should be faster than previous one
   void DLLExport rebinHistogram(const std::vector<double>& xold, const std::vector<double>& yold, const std::vector<double>& eold,
-				const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
+                                const std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew,bool addition);
 
   /// Convert an array of bin boundaries to bin centre values.
   void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
@@ -65,46 +66,46 @@ namespace VectorHelper
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {
-  	SumGaussError(){}
-  	/// Sums the arguments in quadrature
-  	inline T operator()(const T& l, const T& r) const
-  	{
-  	  return sqrt(l*l+r*r);
-  	}
+    SumGaussError(){}
+    /// Sums the arguments in quadrature
+    inline T operator()(const T& l, const T& r) const
+    {
+      return sqrt(l*l+r*r);
+    }
   };
 
   /// Functor to deal with the increase in the error when adding (or substracting) a number of counts. More generally add errors in quadrature using the square of one of the errors (variance = error^2)
   template <class T> struct AddVariance: public std::binary_function<T,T,T>
   {
-	  AddVariance(){}
-	  /// adds the square of the left-hand argument to the right hand argument and takes the square root
-	  T operator()(const T& r, const T& x) const
-	  {
-		  return sqrt(r*r+x);
-	  }
+    AddVariance(){}
+    /// adds the square of the left-hand argument to the right hand argument and takes the square root
+    T operator()(const T& r, const T& x) const
+    {
+      return sqrt(r*r+x);
+    }
   };
 
   /// Functor to accumulate a sum of squares
   template <class T> struct SumSquares: public std::binary_function<T,T,T>
   {
-	  SumSquares(){}
-	  /// Adds the square of the right-hand argument to the left hand one
-	  T operator()(const T& r, const T& x) const
-	  {
-		  return (r+x*x);
-	  }
+    SumSquares(){}
+    /// Adds the square of the right-hand argument to the left hand one
+    T operator()(const T& r, const T& x) const
+    {
+      return (r+x*x);
+    }
   };
 
   /// Functor giving the product of the squares of the arguments
   template <class T> struct TimesSquares: public std::binary_function<T,T,T>
-	{
-		TimesSquares(){}
-		/// Multiplies the squares of the arguments
-		T operator()(const T& l, const T& r) const
-		{
-			return (r*r*l*l);
-		}
-	};
+  {
+    TimesSquares(){}
+    /// Multiplies the squares of the arguments
+    T operator()(const T& l, const T& r) const
+    {
+      return (r*r*l*l);
+    }
+  };
 
   /// Square functor
   template <class T> struct Squares: public std::unary_function<T,T>
@@ -113,21 +114,33 @@ namespace VectorHelper
     /// Returns the square of the argument
     T operator()(const T& x) const
     {
-  	  return (x*x);
+      return (x*x);
+    }
+  };
+
+  /// Square functor
+  template <class T> struct Log: public std::unary_function<T,T>
+  {
+    Log(){}
+    /// Returns the square of the argument
+    T operator()(const T& x) const
+    {
+      if (x <= 0 ) throw std::range_error("Attempt to take logarithm of zero or negative number.");
+      return std::log(x);
     }
   };
 
   /// Divide functor with result reset to 0 if the denominator is null
   template <class T> struct DividesNonNull: public std::binary_function<T,T,T>
-	{
-		DividesNonNull(){}
-		/// Returns l/r if r is non-zero, otherwise returns l.
-		T operator()(const T& l, const T& r) const
-		{
-			if (std::fabs(r)<1e-12) return l;
-			return l/r;
-		}
-	};
+  {
+    DividesNonNull(){}
+    /// Returns l/r if r is non-zero, otherwise returns l.
+    T operator()(const T& l, const T& r) const
+    {
+      if (std::fabs(r)<1e-12) return l;
+      return l/r;
+    }
+  };
 
   /// A binary functor to compute the simple average of 2 numbers
   template <class T> struct SimpleAverage: public std::binary_function<T,T,T>

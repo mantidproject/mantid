@@ -74,6 +74,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/InputWSDetectorInfo.cpp
 		src/Integration.cpp
 		src/InterpolatingRebin.cpp
+                src/IQTransform.cpp
 		src/Logarithm.cpp
 		src/MaskBins.cpp
 		src/MaskDetectorsIf.cpp
@@ -208,6 +209,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/InputWSDetectorInfo.h
 		inc/MantidAlgorithms/Integration.h
 		inc/MantidAlgorithms/InterpolatingRebin.h
+                inc/MantidAlgorithms/IQTransform.h
 		inc/MantidAlgorithms/Logarithm.h
 		inc/MantidAlgorithms/MaskBins.h
 		inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -331,6 +333,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/IdentifyNoisyDetectorsTest.h
 		 test/IntegrationTest.h
 		 test/InterpolatingRebinTest.h
+                 test/IQTransformTest.h
 		 test/LogarithmTest.h
 		 test/MaskBinsTest.h
 		 test/MedianDetectorTestTest.h

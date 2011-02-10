@@ -112,7 +112,7 @@ void rebin(const std::vector<double>& xold, const std::vector<double>& yold, con
     enew.assign(size_ynew, 0.0);
   }
 
-  int iold = 0, inew = 0;
+  size_t iold = 0, inew = 0;
   double xo_low, xo_high, xn_low, xn_high, delta(0.0), width;
 
   while ((inew < size_ynew) && (iold < size_yold))
