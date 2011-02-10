@@ -1,24 +1,14 @@
 #ifndef SAVESNSNEXUSTEST_H_
 #define SAVESNSNEXUSTEST_H_
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
-
-#include "MantidDataObjects/WorkspaceSingleValue.h" 
-#include "MantidDataHandling/LoadInstrument.h" 
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace1D.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidNexus/SaveSNSNexus.h"
-#include "MantidNexus/LoadMuonNexus.h"
-#include "MantidNexus/LoadNeXus.h"
-#include <Poco/Path.h>
+#include "MantidAPI/AlgorithmFactory.h"
+#include "MantidAPI/IAlgorithm.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
-using namespace Mantid::DataObjects;
 
 class SaveSNSNexusTest : public CxxTest::TestSuite
 {
