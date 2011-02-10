@@ -173,7 +173,7 @@ public:
   }
 
 
-  void xtestExecOnMuon()
+  void testExecOnMuon()
   {
     SaveNexusProcessed algToBeTested;
 
@@ -238,7 +238,7 @@ public:
 
 
 
-  void xtestExecOnMuonXml()
+  void testExecOnMuonXml()
   {
     SaveNexusProcessed algToBeTested;
 
@@ -268,6 +268,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();
+    algToBeTested.setRethrows(true);
 
     algToBeTested.setPropertyValue("InputWorkspace", outputSpace);
     // specify name of file to save workspace to

@@ -313,7 +313,6 @@ namespace NeXus
     int64_t * pulsetimes = NULL;
 
     // overall event type.
-    std::string eventType;
     EventType type = m_eventWorkspace->getEventType();
     bool writeTOF = true;
     bool writePulsetime = false;
@@ -323,17 +322,14 @@ namespace NeXus
     switch (type)
     {
     case TOF:
-      eventType = "TOF";
       writePulsetime = true;
       break;
     case WEIGHTED:
-      eventType = "WEIGHTED";
       writePulsetime = true;
       writeWeight = true;
       writeError = true;
       break;
     case WEIGHTED_NOTIME:
-      eventType = "WEIGHTED_NOTIME";
       writeWeight = true;
       writeError = true;
       break;
@@ -359,6 +355,7 @@ namespace NeXus
       // This is where it will land in the output array.
       // It is okay to write in parallel since none should step on each other.
       size_t offset = indices[wi];
+      std::string eventType;
 
       switch (el.getEventType())
       {
