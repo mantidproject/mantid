@@ -121,12 +121,18 @@ int LoadEventPreNeXus::fileCheck(const std::string& filePath)
   try
   {
     // If this looks like a binary file where the exact file length is a multiple
-    // of the DasEvent struct then we're probably okay
-    BinaryFile<DasEvent> event_file = BinaryFile<DasEvent>(filePath);
+    // of the DasEvent struct then we're probably okay.
+    // NOTE: Putting this on the stack gives a segfault on Windows when for some reason
+    // the BinaryFile destructor is called twice! I'm sure there is something I don't understand there
+    // but heap allocation seems to work so go for that.
+    BinaryFile<DasEvent> *event_file = new BinaryFile<DasEvent>(filePath);
     confidence = 80;
+    delete event_file;
   }
   catch(std::runtime_error &)
   {
+    // This BinaryFile constructor throws if the file does not contain an
+    // exact multiple of the sizeof(DasEvent) objects.
   }
   return confidence;
 }
