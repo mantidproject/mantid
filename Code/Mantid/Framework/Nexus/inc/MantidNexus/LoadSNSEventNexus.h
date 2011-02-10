@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -53,7 +53,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LoadSNSEventNexus : public API::Algorithm
+    class DLLExport LoadSNSEventNexus : public API::IDataFileChecker
     {
     public:
       /// Default constructor
@@ -72,6 +72,11 @@ namespace Mantid
 
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "Nexus";}
+
+      /// do a quick check that this file can be loaded 
+      bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
+      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
+      int fileCheck(const std::string& filePath);
 
       /** Sets whether the pixel counts will be pre-counted.
        * @param value :: true if you want to precount. */

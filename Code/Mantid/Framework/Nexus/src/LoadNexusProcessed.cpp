@@ -22,12 +22,6 @@
 #include <Poco/Path.h>
 #include <Poco/StringTokenizer.h>
 
-#ifdef _WIN32
-#	include <winsock.h>
-#else
-#	include <netinet/in.h>
-#endif
-
 namespace Mantid
 {
 namespace NeXus
@@ -1436,7 +1430,7 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
       /*
       * HDF files have magic cookie in the first 4 bytes
       */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes)) == g_hdf5_cookie)||bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes)) == g_hdf_cookie)||bnexs )
       {
         //hdf
         return true;

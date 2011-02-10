@@ -21,12 +21,6 @@
 #include <cmath>
 #include <numeric>
 
-#ifdef _WIN32
-#	include <winsock.h>
-#else
-#	include <netinet/in.h>
-#endif
-
 namespace Mantid
 {
   namespace NeXus
@@ -338,7 +332,7 @@ namespace Mantid
       /*
       * HDF files have magic cookie in the first 4 bytes
       */
-      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf5_cookie)) || bnexs )
+      if ( ((nread >= sizeof(unsigned)) && (ntohl(header.four_bytes) == g_hdf_cookie)) || bnexs )
       {
         //hdf
         return true;

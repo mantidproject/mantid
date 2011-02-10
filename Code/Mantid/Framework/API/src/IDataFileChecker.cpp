@@ -8,10 +8,10 @@ namespace Mantid
   namespace API
   {
 
+    /// Magic HDF cookie that is stored in the first 4 bytes of the file.
+    const uint32_t IDataFileChecker::g_hdf_cookie = 0x0e031301;
     // Magic HDF5 signature
     const unsigned char IDataFileChecker::g_hdf5_signature[8] = { '\211', 'H', 'D', 'F', '\r', '\n', '\032', '\n' };
-    /// Magic HDF5 cookie that is stored in the first 4 bytes of the file.
-    const uint32_t IDataFileChecker::g_hdf5_cookie = 0x0e031301;
 
     /// constructor
     IDataFileChecker::IDataFileChecker():API::Algorithm()

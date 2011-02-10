@@ -32,6 +32,16 @@ class LoadSNSEventNexusTest : public CxxTest::TestSuite
 {
 public:
 
+  void test_fileCheck()
+  {
+    LoadSNSEventNexus ld;
+    ld.initialize();
+    ld.setPropertyValue("Filename","CNCS_7860_event.nxs"); // Only doing this to resolve the path to the file
+    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 80);
+    //Try an ISIS nexus file
+    ld.setPropertyValue("Filename","LOQ49886.nxs");
+    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
+  }
 
   void test_Normal_vs_Precount()
   {

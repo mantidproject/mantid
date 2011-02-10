@@ -4,6 +4,14 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidAPI/Algorithm.h"
 
+// Most file header checking requires use of the ntohl c-library function defined here
+#ifdef _WIN32
+  #include <winsock.h>
+#else
+  #include <netinet/in.h>
+#endif
+
+
 namespace Mantid
 {
   namespace API
@@ -48,10 +56,10 @@ namespace Mantid
       /// Returns the name of the property to be considered as the Filename for Load
       virtual const char * filePropertyName() const { return "Filename"; }
 
+      /// Magic HDF cookie that is stored in the first 4 bytes of the file.
+      static const uint32_t g_hdf_cookie;
       /// Magic signature identifying a HDF5 file.
       static const unsigned char g_hdf5_signature[8];
-      /// Magic HDF5 cookie that is stored in the first 4 bytes of the file.
-      static const uint32_t g_hdf5_cookie;
 
       /// The default number of bytes of the header to check
       enum { g_hdr_bytes = 100 };

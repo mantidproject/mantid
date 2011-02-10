@@ -10,6 +10,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Timer.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidAPI/LoadAlgorithmFactory.h" // For the DECLARE_LOADALGORITHM macro
 
 #include <fstream>
 #include <sstream>
@@ -31,14 +32,55 @@ namespace NeXus
 {
 
 DECLARE_ALGORITHM(LoadSNSEventNexus)
+DECLARE_LOADALGORITHM(LoadSNSEventNexus)
 
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
 
 /// Empty default constructor
-LoadSNSEventNexus::LoadSNSEventNexus()
+LoadSNSEventNexus::LoadSNSEventNexus() : IDataFileChecker()
 {}
+
+/**
+ * Do a quick file type check by looking at the first 100 bytes of the file 
+ *  @param filePath :: path of the file including name.
+ *  @param nread :: no.of bytes read
+ *  @param header :: The first 100 bytes of the file as a union
+ *  @return true if the given file is of type which can be loaded by this algorithm
+ */
+bool LoadSNSEventNexus::quickFileCheck(const std::string& filePath,size_t nread, const file_header& header)
+{
+  std::string ext = this->extension(filePath);
+  // If the extension is nxs then give it a go
+  if( ext.compare("nxs") == 0 ) return true;
+
+  // If not then let's see if it is a HDF file by checking for the magic cookie
+  if ( nread >= sizeof(int32_t) && (ntohl(header.four_bytes) == g_hdf_cookie) ) return true;
+  return false;
+}
+
+/**
+ * Checks the file by opening it and reading few lines 
+ *  @param filePath :: name of the file inluding its path
+ *  @return an integer value how much this algorithm can load the file 
+ */
+int LoadSNSEventNexus::fileCheck(const std::string& filePath)
+{
+  int confidence(0);
+  try
+  {
+    ::NeXus::File file = ::NeXus::File(filePath);
+    // Open the base group called 'entry'
+    file.openGroup("entry", "NXentry");
+    // If all this succeeded then we'll assume this is an SNS Event NeXus file
+    confidence = 80;
+  }
+  catch(::NeXus::Exception&)
+  {
+  }
+  return confidence;
+}
 
 /// Initialisation method.
 void LoadSNSEventNexus::init()

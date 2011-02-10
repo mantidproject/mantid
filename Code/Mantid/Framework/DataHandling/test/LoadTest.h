@@ -251,14 +251,23 @@ public:
     AnalysisDataService::Instance().remove("LoadTest_Output");
   }
 
-  void testEventFileWithNoExecute()
+  void test_EventPreNeXus_WithNoExecute()
   {
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventPreNeXus");
   }
 
+  void test_SNSEventNeXus_WithNoExecute()
+  {
+    Load loader;
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860.nxs"));
+    TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadSNSEventNexus");
+  }
 };
 
 #endif /*LOADTEST_H_*/
