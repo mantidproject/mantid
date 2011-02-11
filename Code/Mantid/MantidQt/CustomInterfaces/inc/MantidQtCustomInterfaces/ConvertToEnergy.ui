@@ -208,7 +208,7 @@
               <item>
                <widget class="MantidQt::MantidWidgets::MWRunFiles" name="whiteBeamFile" >
                 <property name="label" stdset="0" >
-                 <string>White beam</string>
+                 <string>Detector Vanadium</string>
                 </property>
                 <property name="multipleFiles" stdset="0" >
                  <bool>false</bool>
@@ -2290,7 +2290,7 @@ p, li { white-space: pre-wrap; }
      </widget>
      <widget class="QWidget" name="tabAbsoluteUnits" >
       <attribute name="title" >
-       <string>Normalisation</string>
+       <string>Absolute Units</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_11" >
        <item>
@@ -2299,7 +2299,7 @@ p, li { white-space: pre-wrap; }
           <bool>true</bool>
          </property>
          <property name="text" >
-          <string>Perform Normalisation</string>
+          <string>Perform Absolute Normalisation</string>
          </property>
          <property name="checked" >
           <bool>false</bool>
@@ -2318,7 +2318,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absRunFiles" >
             <property name="label" stdset="0" >
-             <string>Mono Van</string>
+             <string>Abs Units Vanadium</string>
             </property>
            </widget>
           </item>
@@ -2344,7 +2344,7 @@ p, li { white-space: pre-wrap; }
           <item>
            <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absWhiteFile" >
             <property name="label" stdset="0" >
-             <string>White Beam (Abs Units)</string>
+             <string>Detector Vanadium (Abs Units)</string>
             </property>
             <property name="multipleFiles" stdset="0" >
              <bool>false</bool>
