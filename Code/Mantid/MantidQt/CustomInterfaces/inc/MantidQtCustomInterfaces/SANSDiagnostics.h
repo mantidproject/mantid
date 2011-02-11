@@ -168,9 +168,11 @@ private:
   ///returns true if the spec min and max are in the valid range
   bool isValidSpectra(const QString& specMin,const QString& specMax);
   //disable total periods boxes and labels
-  void disblePeriodsControls();
+  void changePeriodsControls(bool bEnable);
   /// applys the time channel or pixel mask
   void maskDetector(const QString& wsName,bool bMask,bool time_pixel);
+  //getvalues of HVMin and HvMax values for sumrowcolumn algorithm
+  void HVMinHVMaxStringValues(const int minVal,const int maxVal,QString& hvMin,QString& hvMax);
 
 private:
   QString m_dataDir; ///< default data search directory

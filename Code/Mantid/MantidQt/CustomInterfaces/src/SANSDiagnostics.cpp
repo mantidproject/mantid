@@ -36,8 +36,14 @@ namespace MantidQt
       //disable the rectanglar detctors initially
       disableDetectorGroupBoxes(true);
       //daisable periods controls
-      disblePeriodsControls();
+      changePeriodsControls(true);
     
+      //disable time region contorls
+      m_SANSForm->region_det1->setDisabled(true);
+      m_SANSForm->region_det2->setDisabled(true);
+      m_SANSForm->tirange_edit1->setDisabled(true);
+      m_SANSForm->tirange_edit2->setDisabled(true);
+
       //disable the check boxes for Time channel and Pixel masks
       m_SANSForm->tcmask1->setDisabled(true);
       m_SANSForm->tcmask2->setDisabled(true);
@@ -109,16 +115,19 @@ namespace MantidQt
       }
       //total periods
       m_totalPeriods=getTotalNumberofPeriods();
-      if(m_totalPeriods==1)
+      if(m_totalPeriods<=1)
       {
-        disblePeriodsControls();
+       // disble Periods Controls;
+        changePeriodsControls(true);
+      }
+      if(m_totalPeriods==1)
+      {        
         displayRectangularDetectors(m_outws_load);
       }
-      else
+      else if(m_totalPeriods>1)
       {
-        m_SANSForm->period_edit->setDisabled(false);
-        m_SANSForm->total_perioids->setDisabled(false);
-        m_SANSForm->label_period->setDisabled(false);
+        // enable Periods Controls;
+        changePeriodsControls(false);
         displayTotalPeriods();
       }
 
@@ -152,12 +161,12 @@ namespace MantidQt
 
     }
     /// This method disables the total periods controls
-    void SANSDiagnostics::disblePeriodsControls()
+    void SANSDiagnostics::changePeriodsControls(bool bEnable)
     {
        //daisable periods controls
-      m_SANSForm->period_edit->setDisabled(true);
-      m_SANSForm->total_perioids->setDisabled(true);
-      m_SANSForm->label_period->setDisabled(true);
+      m_SANSForm->period_edit->setDisabled(bEnable);
+      m_SANSForm->total_perioids->setDisabled(bEnable);
+      m_SANSForm->label_period->setDisabled(bEnable);
     }
 
     /// get the period number entered in the Periods box
@@ -610,10 +619,7 @@ namespace MantidQt
       const QString opws(detName);
       ///horizontal integral range string
       QString hiRange=m_SANSForm->hirange_edit1->text();
-      if(hiRange.isEmpty())
-      {      
-        return;
-      }
+     
       IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask1->isChecked(),true);
          
     }
@@ -637,10 +643,7 @@ namespace MantidQt
       QString opws(detName);
       ///horizontal integral range string
       QString viRange=m_SANSForm->virange_edit1->text();
-      if(viRange.isEmpty())
-      {      
-        return;
-      }
+      
       IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask2->isChecked(),true);
 
     }
@@ -677,7 +680,8 @@ namespace MantidQt
         return;
       }
      
-      plotSpectrum(opws,0);
+      QString plotws = "\"" + opws +"\"";
+      plotSpectrum(plotws,0);
     }
 
 
@@ -689,6 +693,8 @@ namespace MantidQt
     * @param specMin- minimum spectrum index
     * @param specMax - maximum spectrum index
     * @param opws - output workspace.
+    * @param bMask boolean used for masking
+    * @param time_pixel true if time masking,false if pixel mask
     */
     void SANSDiagnostics::IntegralClicked(const QString& range,const QString& orientation,
       const QString& specMin,const QString& specMax,const QString& opws,bool bMask,bool time_pixel)
@@ -699,24 +705,27 @@ namespace MantidQt
         return;
       } 
       //get the workspace name
-      QString loadedws=getWorkspaceToProcess(); 
-      
-      //QString ipwsName;
-      //if(isMultiPeriod())
-      //{
-      //  //this is the user selected member workspace
-      //  ipwsName=m_memberwsName; 
-      //}
-      //else
-      //{
-      //  ipwsName=m_outws_load;
-      //}
+      QString loadedws = getWorkspaceToProcess(); 
+            
       //aplly mask
       if(bMask)
       {
         maskDetector(loadedws,bMask,time_pixel);
       }
 
+      if(range.isEmpty())
+      {        
+        QString HVMin,HVMax;
+        HVMinHVMaxStringValues(Mantid::EMPTY_INT(),Mantid::EMPTY_INT(),HVMin,HVMax);
+        if(!runsumRowColumn(loadedws,opws,orientation,HVMin,HVMax))
+        {
+          return ;
+        }
+        QString plotws = "\"" + opws +"\"";
+        plotSpectrum(plotws,0);
+        return;
+      }
+      //parse the range string
       int count=0;
       UserStringParser parser;
       std::vector<std::vector<unsigned int> > parsedVals;
@@ -734,21 +743,50 @@ namespace MantidQt
         g_log.error(e.what());
         return;
       }
-     
-      QString wsPlotString="[";
+           
+      QString wsPlotString;
       //loop through each element of the parsed value vector
       std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
       for(parsedValcitr=parsedVals.begin();parsedValcitr!=parsedVals.end();++parsedValcitr)
       {
+        if((*parsedValcitr).empty())
+        {
+          return;
+        }
+        //check the vector contains sequential vales.
+        if(!isSequentialValues((*parsedValcitr)))
+        {
+          g_log.error("Values between H/V_Min and H/V_Max in the Range string  are not sequential ");
+          return ;
+        }
+        //first value in the vector  is the HVmin
+        int min=(*parsedValcitr).at(0);
+        int max;
+        ///last value is HVMax
+        if((*parsedValcitr).size()>1)
+        {
+          max=(*parsedValcitr).at((*parsedValcitr).size()-1);
+        }
+        else
+        {
+          //if the vector contains only one value HVMax=HVMin
+          max=min;
+        }
+
+        QString HVMin,HVMax;
+        HVMinHVMaxStringValues(min,max,HVMin,HVMax);
+        
         ++count;
         std::stringstream num;
         num<<count;
         QString outputwsname=opws+QString::fromStdString(num.str());
-        if(!executeSumRowColumn(*parsedValcitr,loadedws,outputwsname,orientation))
+
+        //now execute sumrowcolumn with hvmin and havmax from the first and last vales from the vector
+        if(!runsumRowColumn(loadedws,outputwsname,orientation,HVMin,HVMax))
         {
-          return;
+          return ;
         }
-       
+               
         wsPlotString+="\"";
         wsPlotString+=outputwsname;
         wsPlotString+="\"";
@@ -758,20 +796,36 @@ namespace MantidQt
       //remove the last comma
       int index=wsPlotString.lastIndexOf(",");
       wsPlotString.remove(index,1);
-      wsPlotString+="]";
-
+  
       //plot the zeroth spectrum for all the workspaces created.
       int specNum=0;
-      QString plotspec="plotSpectrum(";
-      plotspec+=wsPlotString;
-      plotspec+=",";
-      plotspec+=QString::number(specNum);
-      plotspec+=")";
-      runPythonCode(plotspec);
-
+      plotSpectrum(wsPlotString,specNum);
+    
     }
 
-   /**  This method applys time channel masks to the detector bank selected.
+    /** Get values of HVMin and HvMax values for sumrowcolumn algorithm
+      * @param minVal spectrum min value
+      * @param maxVal spectrum maximum value
+      * @param hvMin  spectrum min string
+      * @param hvMax  spectrum max string
+    */
+    void SANSDiagnostics::HVMinHVMaxStringValues(const int minVal,const int maxVal,QString& hvMin,QString& hvMax)
+    {
+      try
+      {
+        //first value in the vector 
+        hvMin=QString::fromStdString(boost::lexical_cast<std::string>(minVal));
+        ///last value is HVMax
+        hvMax=QString::fromStdString(boost::lexical_cast<std::string>(maxVal));
+      }
+      catch(boost::bad_lexical_cast& )
+      {
+        g_log.error("Error when getting the H/V_Min and H/V_Max value from the Range string ");
+      }
+      
+    }
+
+   /** This method applys time channel masks to the detector bank selected.
       * @param wsName - name of the workspace.
       * @param bMask - boolean flag to indicate the mask check box selected
       */
@@ -790,9 +844,9 @@ namespace MantidQt
     */ 
     void SANSDiagnostics::plotSpectrum(const QString& wsName,int specNum)
     {      
-      QString plotspec="plotSpectrum(\"";
+      QString plotspec="plotSpectrum([";
       plotspec+=wsName;
-      plotspec+="\",";
+      plotspec+="],";
       plotspec+=QString::number(specNum);
       plotspec+=")";
       runPythonCode(plotspec);
@@ -882,7 +936,9 @@ namespace MantidQt
      {
        return;
      }
-     plotSpectrum(opws,0);
+
+     QString plotws = "\"" + opws +"\"";
+     plotSpectrum(plotws,0);
     }
 
     /// This method loads values from registry
@@ -1011,6 +1067,16 @@ namespace MantidQt
          g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
          return false;
       }
+      if(hvMin.isEmpty())
+      {
+         g_log.error()<<"Error when executing SumRowColumn algorithm :Empty H/V_Min String value "<<std::endl;
+         return false;
+      }
+      if(hvMax.isEmpty())
+      {
+         g_log.error()<<"Error when executing SumRowColumn algorithm :Empty H/V_Max String value "<<std::endl;
+         return false;
+      }
 
       QString code=
         "try:\n"
@@ -1029,7 +1095,7 @@ namespace MantidQt
       code+=")\n";
       code+="except:\n";
       code+="  print 'Failure'";
-      
+
       QString ret= runPythonCode(code.trimmed());
       if(!ret.isEmpty())
       {

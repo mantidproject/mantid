@@ -61,7 +61,7 @@
       <string notr="true" />
      </property>
      <property name="currentIndex" >
-      <number>0</number>
+      <number>6</number>
      </property>
      <property name="elideMode" >
       <enum>Qt::ElideNone</enum>
@@ -3941,7 +3941,7 @@ p, li { white-space: pre-wrap; }
        <item row="1" column="0" >
         <widget class="QLabel" name="label_7" >
          <property name="text" >
-          <string>The Range string format for example is 60-65 or 60-66:2 or 60:66 or 60:66:2 or 60+61 or 60-65,66,67,68:72:2,73+74</string>
+          <string>The format of Range string for example is 60-65 or 60-66:2 or 60:66 or 60:66:2 or 60+61 or 60-65,66,67,68:72:2,73+74</string>
          </property>
         </widget>
        </item>
