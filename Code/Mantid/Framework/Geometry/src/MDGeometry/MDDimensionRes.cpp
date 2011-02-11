@@ -9,6 +9,7 @@
 #include <Poco/DOM/DOMWriter.h>
 #include <Poco/XML/XMLWriter.h>
 #include <sstream>
+#include <float.h>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
