@@ -148,6 +148,7 @@ class Transmission(BaseScriptElement):
     transmission_spread = 0.0
     calculate_transmission = False
     calculation_method = DirectBeam()
+    theta_dependent = True
             
     def to_script(self):
         """
@@ -160,6 +161,7 @@ class Transmission(BaseScriptElement):
         else:
             script += str(self.calculation_method)
             
+        script += "ThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
         return script
 
     def update(self):
@@ -180,6 +182,7 @@ class Transmission(BaseScriptElement):
         xml += "  <trans>%g</trans>\n" % self.transmission
         xml += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
         xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+        xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
         if self.calculate_transmission:
             xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
@@ -200,6 +203,8 @@ class Transmission(BaseScriptElement):
                                                                   default=Transmission.transmission_spread)  
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = Transmission.calculate_transmission)
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+                                                                           default = Transmission.theta_dependent)
             
             if self.calculate_transmission:
                 for m in [Transmission.DirectBeam, Transmission.BeamSpreader]:
@@ -217,6 +222,7 @@ class Transmission(BaseScriptElement):
         self.transmission_spread = Transmission.transmission_spread  
         self.calculate_transmission = Transmission.calculate_transmission
         self.calculation_method = Transmission.calculation_method
+        self.theta_dependent = Transmission.theta_dependent
     
 class Background(BaseScriptElement):
     
@@ -276,6 +282,7 @@ class Background(BaseScriptElement):
     bck_transmission = 1.0
     bck_transmission_spread = 0.0
     calculate_transmission = False 
+    theta_dependent = True 
     trans_calculation_method = DirectBeam()
         
     def to_script(self):
@@ -302,6 +309,8 @@ class Background(BaseScriptElement):
                     script += "SetBckTransmission(%g, %g)\n" % (self.bck_transmission, self.bck_transmission_spread)
                 else:
                     script += str(self.trans_calculation_method)
+
+        script += "BckThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
             
         return script           
     
@@ -331,6 +340,7 @@ class Background(BaseScriptElement):
             xml += "  <bck_trans>%g</bck_trans>\n" % self.bck_transmission
             xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
             xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
+            xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
             if self.calculate_transmission:
                 xml += self.trans_calculation_method.to_xml()
         xml += "</Background>\n"
@@ -363,7 +373,9 @@ class Background(BaseScriptElement):
                                                                   default=Background.bck_transmission_spread)  
             self.calculate_transmission = BaseScriptElement.getBoolElement(instrument_dom, "calculate_trans",
                                                                            default = Background.calculate_transmission)
-            
+            self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
+                                                                           default = Background.theta_dependent)
+
             if self.calculate_transmission:
                 for m in [Background.DirectBeam, Background.BeamSpreader]:
                     method = m()
@@ -384,6 +396,7 @@ class Background(BaseScriptElement):
         self.bck_transmission = Background.bck_transmission      
         self.bck_transmission_spread = Background.bck_transmission_spread  
         self.calculate_transmission = Background.calculate_transmission
+        self.theta_dependent = Background.theta_dependent
         self.trans_calculation_method = Background.trans_calculation_method
     
 class DataSets(BaseScriptElement):

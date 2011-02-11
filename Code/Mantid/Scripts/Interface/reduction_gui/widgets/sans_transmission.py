@@ -213,6 +213,7 @@ class TransmissionWidget(BaseWidget):
             self._beam_spreader(state=state.calculation_method)
 
         self._content.calculate_chk.setChecked(state.calculate_transmission)
+        self._content.theta_dep_chk.setChecked(state.theta_dependent)
         self._calculate_clicked(state.calculate_transmission)
 
     def get_state(self):
@@ -225,6 +226,7 @@ class TransmissionWidget(BaseWidget):
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
         
         m.calculate_transmission = self._content.calculate_chk.isChecked()
+        m.theta_dependent = self._content.theta_dep_chk.isChecked()
         
         m.calculation_method=self._method_box.get_state()           
 

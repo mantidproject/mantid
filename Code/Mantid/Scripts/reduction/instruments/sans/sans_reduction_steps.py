@@ -164,19 +164,33 @@ class BaseTransmission(ReductionStep):
         as well as the algorithm for calculating it.
         TODO: ISIS doesn't use ApplyTransmissionCorrection, perhaps it's in Q1D, can we remove it from here?
     """
-    def __init__(self, trans=0.0, error=0.0):
+    def __init__(self, trans=0.0, error=0.0, theta_dependent=True):
         super(BaseTransmission, self).__init__()
         self._trans = float(trans)
         self._error = float(error)
+        self._theta_dependent = theta_dependent
+        
+    def set_theta_dependence(self, theta_dependence=True):
+        """
+            Set the flag for whether or not we want the full theta-dependence
+            included in the correction. Setting this flag to false will result
+            in simply dividing by the zero-angle transmission.
+            @param theta_dependence: theta-dependence included if True
+        """
+        self._theta_dependent = theta_dependence
         
     def get_transmission(self):
         return [self._trans, self._error]
     
     def execute(self, reducer, workspace):
-        ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                    TransmissionValue=self._trans,
-                                    TransmissionError=self._error, 
-                                    OutputWorkspace=workspace) 
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionValue=self._trans,
+                                        TransmissionError=self._error, 
+                                        OutputWorkspace=workspace) 
+        else:
+            CreateSingleValuedWorkspace("transmission", self._trans, self._error)
+            Divide(workspace, "transmission", workspace)
         
         return "Transmission correction applied for T = %g +- %g" % (self._trans, self._error)
   
@@ -186,8 +200,9 @@ class BeamSpreaderTransmission(BaseTransmission):
     """
     def __init__(self, sample_spreader, direct_spreader,
                        sample_scattering, direct_scattering,
-                       spreader_transmission=1.0, spreader_transmission_err=0.0): 
-        super(BeamSpreaderTransmission, self).__init__()
+                       spreader_transmission=1.0, spreader_transmission_err=0.0,
+                       theta_dependent=True): 
+        super(BeamSpreaderTransmission, self).__init__(theta_dependent=theta_dependent)
         self._sample_spreader = sample_spreader
         self._direct_spreader = direct_spreader
         self._sample_scattering = sample_scattering
@@ -247,9 +262,12 @@ class BeamSpreaderTransmission(BaseTransmission):
 
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                    TransmissionWorkspace=self._transmission_ws, 
-                                    OutputWorkspace=workspace)                
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionWorkspace=self._transmission_ws, 
+                                        OutputWorkspace=workspace)          
+        else:
+            Divide(workspace, self._transmission_ws, workspace)  
         
         trans_ws = mtd[self._transmission_ws]
         self._trans = trans_ws.dataY(0)[0]
@@ -262,8 +280,8 @@ class DirectBeamTransmission(BaseTransmission):
     """
         Calculate transmission using the direct beam method
     """
-    def __init__(self, sample_file, empty_file, beam_radius=3.0):
-        super(DirectBeamTransmission, self).__init__()
+    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
+        super(DirectBeamTransmission, self).__init__(theta_dependent=theta_dependent)
         ## Location of the data files used to calculate transmission
         self._sample_file = sample_file
         self._empty_file = empty_file
@@ -328,9 +346,12 @@ class DirectBeamTransmission(BaseTransmission):
             
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
-        ApplyTransmissionCorrection(InputWorkspace=workspace, 
-                                    TransmissionWorkspace=self._transmission_ws, 
-                                    OutputWorkspace=workspace)            
+        if self._theta_dependent:
+            ApplyTransmissionCorrection(InputWorkspace=workspace, 
+                                        TransmissionWorkspace=self._transmission_ws, 
+                                        OutputWorkspace=workspace)          
+        else:
+            Divide(workspace, self._transmission_ws, workspace)  
 
         trans_ws = mtd[self._transmission_ws]
         self._trans = trans_ws.dataY(0)[0]
@@ -961,6 +982,12 @@ class SubtractBackground(ReductionStep):
         else:
             return None
         
+    def set_trans_theta_dependence(self, theta_dependence):
+        if self._transmission is not None:
+            self._transmission.set_theta_dependence(theta_dependence)
+        else:
+            raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
+            
     def execute(self, reducer, workspace):
         log_text = ''
         if self._background_ws is None:

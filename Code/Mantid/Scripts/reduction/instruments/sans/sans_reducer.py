@@ -119,6 +119,9 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_transmission expects an object of class ReductionStep"
         
+    def get_transmission(self):
+        return self._transmission_calculator
+    
     def set_mask(self, mask):
         """
             Set the reduction step that will apply the mask
@@ -228,6 +231,9 @@ class SANSReducer(Reducer):
             self._full_file_path(data_file)
             self._background_subtracter = sans_reduction_steps.SubtractBackground(data_file)
     
+    def get_background(self):
+        return self._background_subtracter
+
     def set_bck_transmission(self, trans):
         """
              Set the reduction step that will apply the transmission correction

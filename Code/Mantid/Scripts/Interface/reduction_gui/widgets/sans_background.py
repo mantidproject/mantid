@@ -102,6 +102,7 @@ class BackgroundWidget(BaseWidget):
             self._content.transmission_edit.hide()
             self._content.dtransmission_edit.hide()
             self._content.calculate_trans_chk.hide()
+            self._content.theta_dep_chk.hide()
             self._content.trans_direct_chk.hide()
             self._content.trans_spreader_chk.hide()
 
@@ -130,6 +131,7 @@ class BackgroundWidget(BaseWidget):
                 self._beam_spreader(state=state.trans_calculation_method)
     
             self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
+            self._content.theta_dep_chk.setChecked(state.theta_dependent)
             self._calculate_clicked(state.calculate_transmission)
         
         
@@ -150,6 +152,7 @@ class BackgroundWidget(BaseWidget):
             m.bck_transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
             m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
             m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
+            m.theta_dependent = self._content.theta_dep_chk.isChecked()
         
             if self._method_box is not None:
                 m.trans_calculation_method=self._method_box.get_state()   
@@ -193,6 +196,7 @@ class BackgroundWidget(BaseWidget):
         self._content.background_edit.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.calculate_trans_chk.setEnabled(is_checked)
+        self._content.theta_dep_chk.setEnabled(is_checked)
         self._content.bck_trans_label.setEnabled(is_checked)
         self._content.bck_trans_err_label.setEnabled(is_checked)
         

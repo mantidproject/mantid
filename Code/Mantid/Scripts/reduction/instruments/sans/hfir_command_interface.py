@@ -56,23 +56,31 @@ def AzimuthalAverage(binning=None, suffix="_Iq", error_weighting=False, n_bins=1
 def NoTransmission():
     ReductionSingleton().set_transmission(None)
     
-def SetTransmission(trans, error):
-    ReductionSingleton().set_transmission(sans_reduction_steps.BaseTransmission(trans, error))
+def SetTransmission(trans, error, theta_dependent=True):
+    ReductionSingleton().set_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
 
-def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0):
+def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
     ReductionSingleton().set_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                     empty_file=empty_file,
-                                                                                    beam_radius=beam_radius))
+                                                                                    beam_radius=beam_radius,
+                                                                                    theta_dependent=theta_dependent))
+
+def ThetaDependentTransmission(theta_dependence=True):
+    if ReductionSingleton().get_transmission() is None:
+        raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
+    ReductionSingleton().get_transmission().set_theta_dependence(theta_dependence)
 
 def BeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
-                             spreader_transmission=1.0, spreader_transmission_err=0.0 ):
+                             spreader_transmission=1.0, spreader_transmission_err=0.0,
+                             theta_dependent=True ):
     ReductionSingleton().set_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
                                                                                       direct_spreader=direct_spreader,
                                                                                       sample_scattering=sample_scattering, 
                                                                                       direct_scattering=direct_scattering,
                                                                                       spreader_transmission=spreader_transmission, 
-                                                                                      spreader_transmission_err=spreader_transmission_err))
+                                                                                      spreader_transmission_err=spreader_transmission_err,
+                                                                                      theta_dependent=theta_dependent))
   
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
@@ -130,23 +138,31 @@ def HFIRSANS():
     SolidAngle()
     AzimuthalAverage()
     
-def SetBckTransmission(trans, error):
-    ReductionSingleton().set_bck_transmission(sans_reduction_steps.BaseTransmission(trans, error))
+def SetBckTransmission(trans, error, theta_dependent=True):
+    ReductionSingleton().set_bck_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))
 
-def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0):
+def BckDirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
     ReductionSingleton().set_bck_transmission(sans_reduction_steps.DirectBeamTransmission(sample_file=sample_file,
                                                                                         empty_file=empty_file,
-                                                                                        beam_radius=beam_radius))
+                                                                                        beam_radius=beam_radius,
+                                                                                        theta_dependent=theta_dependent))
 
 def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                              sample_scattering, direct_scattering,
-                             spreader_transmission=1.0, spreader_transmission_err=0.0 ):
+                             spreader_transmission=1.0, spreader_transmission_err=0.0,
+                             theta_dependent=True ):
     ReductionSingleton().set_bck_transmission(sans_reduction_steps.BeamSpreaderTransmission(sample_spreader=sample_spreader, 
                                                                                           direct_spreader=direct_spreader,
                                                                                           sample_scattering=sample_scattering, 
                                                                                           direct_scattering=direct_scattering,
                                                                                           spreader_transmission=spreader_transmission, 
-                                                                                          spreader_transmission_err=spreader_transmission_err))
+                                                                                          spreader_transmission_err=spreader_transmission_err,
+                                                                                          theta_dependent=theta_dependent))
+
+def BckThetaDependentTransmission(theta_dependence=True):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_trans_theta_dependence(theta_dependence)
     
 def SetSampleDetectorOffset(distance):
     if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
