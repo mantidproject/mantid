@@ -192,7 +192,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -260,7 +260,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -445,7 +445,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),3);
+    TS_ASSERT_EQUALS(outParams->rowCount(),4);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -502,7 +502,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),3);
+    TS_ASSERT_EQUALS(outParams->rowCount(),4);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -551,7 +551,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -622,7 +622,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
@@ -693,7 +693,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),2);
 
     TableRow row = outParams->getFirstRow();
@@ -764,7 +764,7 @@ public:
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
-    TS_ASSERT_EQUALS(outParams->rowCount(),8);
+    TS_ASSERT_EQUALS(outParams->rowCount(),9);
     TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
     TableRow row = outParams->getFirstRow();
