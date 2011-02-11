@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Fri Feb 11 08:42:27 2011
+# Created: Fri Feb 11 12:21:48 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -140,6 +140,9 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.n_sub_pix_edit.setObjectName("n_sub_pix_edit")
         self.horizontalLayout_2.addWidget(self.n_sub_pix_edit)
+        self.log_binning_radio = QtGui.QRadioButton(self.reduction_options_groupbox)
+        self.log_binning_radio.setObjectName("log_binning_radio")
+        self.horizontalLayout_2.addWidget(self.log_binning_radio)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem1)
         self.gridLayout.addLayout(self.horizontalLayout_2, 1, 1, 1, 1)
@@ -308,6 +311,7 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"
 "radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3\n"
 "in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
+        self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setText(QtGui.QApplication.translate("Frame", "Perform solid angle correction", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a detector sensitivity correction.", None, QtGui.QApplication.UnicodeUTF8))

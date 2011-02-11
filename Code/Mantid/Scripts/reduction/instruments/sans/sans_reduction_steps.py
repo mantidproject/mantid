@@ -538,13 +538,14 @@ class WeightedAzimuthalAverage(ReductionStep):
         ReductionStep class that performs azimuthal averaging
         and transforms the 2D reduced data set into I(Q).
     """
-    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1):
+    def __init__(self, binning=None, suffix="_Iq", error_weighting=False, n_bins=100, n_subpix=1, log_binning=False):
         super(WeightedAzimuthalAverage, self).__init__()
         self._binning = binning
         self._suffix = suffix
         self._error_weighting = error_weighting
         self._nbins = n_bins
         self._nsubpix = n_subpix
+        self._log_binning = log_binning
         
     def execute(self, reducer, workspace):
         # Q range                        
@@ -568,14 +569,22 @@ class WeightedAzimuthalAverage(ReductionStep):
             dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
             maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
             qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
-            qstep = (qmax-qmin)/self._nbins
             
-            f_step = (qmax-qmin)/qstep
-            n_step = math.floor(f_step)
-            if f_step-n_step>10e-10:
-                qmax = qmin+qstep*n_step
-                
-            self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
+            if not self._log_binning:
+                qstep = (qmax-qmin)/self._nbins
+                f_step = (qmax-qmin)/qstep
+                n_step = math.floor(f_step)
+                if f_step-n_step>10e-10:
+                    qmax = qmin+qstep*n_step
+                self._binning = "%g, %g, %g" % (qmin, qstep, qmax)
+            else:
+                # Note: the log binning in Mantid is x_i+1 = x_i * ( 1 + dx )
+                qstep = (math.log10(qmax)-math.log10(qmin))/self._nbins
+                f_step = (math.log10(qmax)-math.log10(qmin))/qstep
+                n_step = math.floor(f_step)
+                if f_step-n_step>10e-10:
+                    qmax = math.pow(10.0, math.log10(qmin)+qstep*n_step)
+                self._binning = "%g, %g, %g" % (qmin, -(math.pow(10.0,qstep)-1.0), qmax)
         else:
             toks = self._binning.split(',')
             if len(toks)<3:

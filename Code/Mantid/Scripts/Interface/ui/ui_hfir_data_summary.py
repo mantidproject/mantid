@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Fri Feb 11 09:50:13 2011
+# Created: Fri Feb 11 12:34:37 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(796, 697)
+        Frame.resize(1026, 875)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -70,7 +70,7 @@ class Ui_Frame(object):
         self.reduction_options_groupbox.setMaximumSize(QtCore.QSize(16777215, 250))
         self.reduction_options_groupbox.setObjectName("reduction_options_groupbox")
         self.formLayoutWidget_2 = QtGui.QWidget(self.reduction_options_groupbox)
-        self.formLayoutWidget_2.setGeometry(QtCore.QRect(10, 20, 725, 187))
+        self.formLayoutWidget_2.setGeometry(QtCore.QRect(10, 20, 881, 187))
         self.formLayoutWidget_2.setObjectName("formLayoutWidget_2")
         self.gridLayout_2 = QtGui.QGridLayout(self.formLayoutWidget_2)
         self.gridLayout_2.setSizeConstraint(QtGui.QLayout.SetFixedSize)
@@ -149,6 +149,17 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.n_sub_pix_edit.setObjectName("n_sub_pix_edit")
         self.horizontalLayout_2.addWidget(self.n_sub_pix_edit)
+        self.log_binning_radio = QtGui.QRadioButton(self.formLayoutWidget_2)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.log_binning_radio.sizePolicy().hasHeightForWidth())
+        self.log_binning_radio.setSizePolicy(sizePolicy)
+        self.log_binning_radio.setMinimumSize(QtCore.QSize(120, 0))
+        self.log_binning_radio.setMaximumSize(QtCore.QSize(120, 16777215))
+        self.log_binning_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.log_binning_radio.setObjectName("log_binning_radio")
+        self.horizontalLayout_2.addWidget(self.log_binning_radio)
         self.gridLayout_2.addLayout(self.horizontalLayout_2, 1, 1, 1, 1)
         self.solid_angle_chk = QtGui.QCheckBox(self.formLayoutWidget_2)
         self.solid_angle_chk.setObjectName("solid_angle_chk")
@@ -340,6 +351,8 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"
 "radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3\n"
 "in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
+        self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to use logarithmic binning for I(Q)", None, QtGui.QApplication.UnicodeUTF8))
+        self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setText(QtGui.QApplication.translate("Frame", "Perform solid angle correction", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a detector sensitivity correction.", None, QtGui.QApplication.UnicodeUTF8))

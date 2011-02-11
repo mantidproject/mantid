@@ -149,6 +149,7 @@ class SNSInstrumentWidget(BaseWidget):
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString(str(state.n_q_bins)))
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
+        self._summary.log_binning_radio.setChecked(state.log_binning)
         
         # Sample-detector distance
         self._summary.sample_dist_edit.setText(QtCore.QString("%-5.5g" % state.sample_distance))
@@ -197,6 +198,7 @@ class SNSInstrumentWidget(BaseWidget):
         # Q range
         m.n_q_bins = util._check_and_get_int_line_edit(self._summary.n_q_bins_edit)
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
+        m.log_binning = self._summary.log_binning_radio.isChecked()
         
         return m
     

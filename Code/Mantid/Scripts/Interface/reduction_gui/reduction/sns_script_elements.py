@@ -55,6 +55,7 @@ class InstrumentDescription(BaseScriptElement):
     # Q range
     n_q_bins = 100
     n_sub_pix = 1
+    log_binning = False
     
     NORMALIZATION_NONE = 0
     NORMALIZATION_TIME = 1
@@ -89,7 +90,7 @@ class InstrumentDescription(BaseScriptElement):
             script += "SetTransmission(trans=%g, error=%g)\n" % (self.transmission, self.transmission_error)
             
         # Q binning
-        script += "AzimuthalAverage(n_bins=%g, n_subpix=%g)\n" % (self.n_q_bins, self.n_sub_pix)        
+        script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
         
         # Data file
         if len(str(self.data_file).strip())>0:
@@ -133,6 +134,7 @@ class InstrumentDescription(BaseScriptElement):
 
         xml += "  <n_q_bins>%g</n_q_bins>\n" % self.n_q_bins
         xml += "  <n_sub_pix>%g</n_sub_pix>\n" % self.n_sub_pix
+        xml += "  <log_binning>%s</log_binning>\n" % str(self.log_binning)
 
         xml += "  <normalization>%d</normalization>\n" % self.normalization
         
@@ -173,6 +175,8 @@ class InstrumentDescription(BaseScriptElement):
                                                        default=InstrumentDescription.n_q_bins)
         self.n_sub_pix = BaseScriptElement.getIntElement(instrument_dom, "n_sub_pix",
                                                        default=InstrumentDescription.n_sub_pix)
+        self.log_binning = BaseScriptElement.getBoolElement(instrument_dom, "log_binning",
+                                                              default = InstrumentDescription.log_binning)
         
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=InstrumentDescription.normalization)
@@ -201,6 +205,7 @@ class InstrumentDescription(BaseScriptElement):
         
         self.n_q_bins = InstrumentDescription.n_q_bins
         self.n_sub_pix = InstrumentDescription.n_sub_pix
+        self.log_binning = InstrumentDescription.log_binning
         
         self.normalization = InstrumentDescription.normalization
         

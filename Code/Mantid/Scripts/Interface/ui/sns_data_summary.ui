@@ -336,6 +336,13 @@ in each direction and will create 9 sub-pixels.</string>
            </widget>
           </item>
           <item>
+           <widget class="QRadioButton" name="log_binning_radio">
+            <property name="text">
+             <string>Log binning</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <spacer name="horizontalSpacer_4">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>

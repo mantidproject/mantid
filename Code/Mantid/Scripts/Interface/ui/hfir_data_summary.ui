@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>796</width>
-    <height>697</height>
+    <width>1026</width>
+    <height>875</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -174,7 +174,7 @@
        <rect>
         <x>10</x>
         <y>20</y>
-        <width>725</width>
+        <width>881</width>
         <height>187</height>
        </rect>
       </property>
@@ -382,6 +382,37 @@
             <string>Enter the number of sub-pixels in each direction of a detector pixel to use for the
 radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3
 in each direction and will create 9 sub-pixels.</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QRadioButton" name="log_binning_radio">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>120</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>120</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>Select to use logarithmic binning for I(Q)</string>
+           </property>
+           <property name="layoutDirection">
+            <enum>Qt::LeftToRight</enum>
+           </property>
+           <property name="text">
+            <string>Log binning</string>
            </property>
           </widget>
          </item>
@@ -798,8 +829,6 @@ in each direction and will create 9 sub-pixels.</string>
          </layout>
         </item>
        </layout>
-       <zorder>horizontalLayoutWidget</zorder>
-       <zorder>geometry_options_groupbox</zorder>
       </widget>
      </item>
      <item>
