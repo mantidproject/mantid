@@ -117,6 +117,7 @@ public:
   void _declareListProperty(const std::string & prop_name, boost::python::list values, 
     Kernel::IValidator<TYPE> & validator,const std::string &doc, const unsigned int direction)
   {
+    // FIXME validator is not passed in - but I'm not sure this would ever reasonably be called.
     (void)validator;
     //Extract the values from the python list into a std vector
     this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
@@ -136,7 +137,7 @@ public:
   {
     (void)validator;
     //Extract the values from the python list into a std vector
-    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), validator.clone(), doc, direction);
   }
 
   /**
