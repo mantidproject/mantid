@@ -25,7 +25,7 @@ namespace
   const int NUMTESTS = 4;
   /// the list of tests that we display results for
   const QString TESTS[NUMTESTS] =
-  { "First white beam test", "Second white beam test", "Background test", "PSD Bleed test"};
+  { "First detector vanadium test", "Second detector vanadium test", "Background test", "PSD Bleed test"};
 }
 
 //----------------------

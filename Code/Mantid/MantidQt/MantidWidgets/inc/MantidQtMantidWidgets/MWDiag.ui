@@ -241,7 +241,7 @@
       <item>
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file" >
         <property name="label" stdset="0" >
-         <string>White Beam Van 1</string>
+         <string>Detector Van 1</string>
         </property>
         <property name="multipleFiles" stdset="0" >
          <bool>false</bool>
@@ -311,7 +311,7 @@
       <item>
        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="white_file_2" >
         <property name="label" stdset="0" >
-         <string>White Beam Van 2</string>
+         <string>Detector Van 2</string>
         </property>
         <property name="multipleFiles" stdset="0" >
          <bool>false</bool>
