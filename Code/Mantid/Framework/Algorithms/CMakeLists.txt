@@ -112,6 +112,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/RenameWorkspace.cpp
 		src/ReplaceSpecialValues.cpp
 		src/Scale.cpp
+                src/SCD_TOFINT.cpp
 		src/SetUncertaintiesToZero.cpp
 		src/SmoothData.cpp
 		src/SofQW.cpp
@@ -247,6 +248,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/RenameWorkspace.h
 		inc/MantidAlgorithms/ReplaceSpecialValues.h
 		inc/MantidAlgorithms/Scale.h
+                inc/MantidAlgorithms/SCD_TOFINT.h
 		inc/MantidAlgorithms/SetUncertaintiesToZero.h
 		inc/MantidAlgorithms/SmoothData.h
 		inc/MantidAlgorithms/SofQW.h

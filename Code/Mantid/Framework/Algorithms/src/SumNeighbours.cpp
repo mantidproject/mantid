@@ -52,7 +52,9 @@ void SumNeighbours::init()
   declareProperty("SumY", 4, mustBePositive->clone(),
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
-  //declareProperty("DetectorNames", "", "Comma-separated list of the names of the detectors in the Mantid geometry file." );
+  declareProperty("DetectorName", "", "Name of the detector when calculating for one detector." );
+  declareProperty("Xpixel", -1, "X of pixel when choosing only one pixel for sum." );
+  declareProperty("Ypixel", -1, "Y of pixel when choosing only one pixel for sum." );
 
 
 }
@@ -95,7 +97,7 @@ void SumNeighbours::exec()
 
 //  //Split the detector names string.
 //  std::vector<std::string> det_names;
-//  std::string det_name_list = getPropertyValue("DetectorNames");
+    std::string det_name = getProperty("DetectorName");
 //  boost::split(det_names, det_name_list, boost::is_any_of(", "));
 
   //To get the workspace index from the detector ID
@@ -113,8 +115,11 @@ void SumNeighbours::exec()
     boost::shared_ptr<ICompAssembly> assem;
 
     det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-    if (det)
-      detList.push_back(det);
+    if (det) 
+    {
+      if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
+        detList.push_back(det);
+    }
     else
     {
       //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
@@ -125,7 +130,8 @@ void SumNeighbours::exec()
         for (int j=0; j < assem->nelements(); j++)
         {
           det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-          if (det) detList.push_back(det);
+          if (det) if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
+            detList.push_back(det);
         }
       }
 
@@ -143,13 +149,27 @@ void SumNeighbours::exec()
     det = detList[i];
     if (det)
     {
+    int x0 = getProperty("Xpixel");
+    int xend = x0 + SumX;
+    if (x0 < 0)
+    {
+      x0 = 0;
+      xend = det->xpixels();
+    }
+    int y0 = getProperty("Ypixel");
+    int yend = y0 + SumY;
+    if (y0 < 0)
+    {
+      y0 = 0;
+      yend = det->ypixels();
+    }
       int x, y;
       det_name = det->getName();
       //TODO: Check validity of the parameters
 
       //det->getAtXY()
-      for (x=0; x<det->xpixels(); x += SumX)
-        for (y=0; y<det->ypixels(); y += SumY)
+      for (x=x0; x<xend; x += SumX)
+        for (y=y0; y<yend; y += SumY)
         {
           //Initialize the output event list
           EventList outEL;
