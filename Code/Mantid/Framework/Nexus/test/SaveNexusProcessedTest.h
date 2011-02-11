@@ -391,7 +391,7 @@ public:
   }
 
 
-  void testExec_LoadedEventWorkspace()
+  void xtestExec_LoadedEventWorkspace()
   {
 
     //----- Now we re-load with precounting and compare memory use ----
