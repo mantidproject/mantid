@@ -71,7 +71,7 @@ void Q1DWeighted::exec()
   const bool errorWeighting = getProperty("ErrorWeighting");
 
   // Now create the output workspace
-  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create("Workspace2D",1,sizeOut,sizeOut-1);
+  MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,1,sizeOut,sizeOut-1);
   outputWS->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
   outputWS->setYUnitLabel("1/cm");
   setProperty("OutputWorkspace",outputWS);
