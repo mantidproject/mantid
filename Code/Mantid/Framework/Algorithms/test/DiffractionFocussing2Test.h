@@ -82,7 +82,17 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
-  void testEventWorkspaceSameOutputWS()
+  void test_EventWorkspace_SameOutputWS()
+  {
+    dotestEventWorkspace(true);
+  }
+
+  void test_EventWorkspace_DifferentOutputWS()
+  {
+    dotestEventWorkspace(false);
+  }
+
+  void dotestEventWorkspace(bool inplace)
   {
     //----- Load some event data --------
     LoadEventPreNeXus * eventLoader;
@@ -99,6 +109,7 @@ public:
             (AnalysisDataService::Instance().retrieve("refl"));
     int numpixels_with_events = 4753;
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), numpixels_with_events);
+    int old_numevents = inputW->getNumberEvents();
 
     //Fake a d-spacing unit in the data.
     inputW->getAxis(0)->unit() =UnitFactory::Instance().create("dSpacing");
@@ -118,7 +129,8 @@ public:
     }
 
     focus.setPropertyValue("InputWorkspace", "refl");
-    std::string outputws( "refl2" );
+    std::string outputws = "refl2";
+    if (inplace) outputws = "refl";
     focus.setPropertyValue("OutputWorkspace", outputws);
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
@@ -143,7 +155,7 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups-1);
 
     //Because no pixels are rejected or anything, the total # of events should stay the same.
-    TS_ASSERT_EQUALS( inputW->getNumberEvents(), output->getNumberEvents());
+    TS_ASSERT_EQUALS(old_numevents, output->getNumberEvents());
 
     //List of the expected total # of events in each group
     int * expected_total_events = new int[numgroups+1];
@@ -163,17 +175,24 @@ public:
       //This is to find the workspace index for a given original spectrum #
       Mantid::API::IndexToIndexMap * mymap = inputW->getDetectorIDToWorkspaceIndexMap(true);
 
-      for (int i=0; i<mylist.size(); i++)
+      if (inplace)
       {
-        //The formula for assigning fake group #
-        TS_ASSERT_EQUALS( (mylist[i] % numgroups)+1, group );
-        //The workspace index in the input workspace for this detector #
-        int workspaceIndex_in_input = (*mymap)[ mylist[i] ];
-        //Add up the events
-        numevents += inputW->getEventList(workspaceIndex_in_input).getNumberEvents();
+        TS_ASSERT_LESS_THAN(0, output->getEventList(workspaceindex_in_output).getNumberEvents());
       }
-      //Look up how many events in the output, summed up spectrum (workspace index = group-1)
-      TS_ASSERT_EQUALS(numevents, output->getEventList(workspaceindex_in_output).getNumberEvents());
+      else
+      {
+        for (int i=0; i<mylist.size(); i++)
+        {
+          //The formula for assigning fake group #
+          TS_ASSERT_EQUALS( (mylist[i] % numgroups)+1, group );
+          //The workspace index in the input workspace for this detector #
+          int workspaceIndex_in_input = (*mymap)[ mylist[i] ];
+          //Add up the events
+          numevents += inputW->getEventList(workspaceIndex_in_input).getNumberEvents();
+        }
+        //Look up how many events in the output, summed up spectrum (workspace index = group-1)
+        TS_ASSERT_EQUALS(numevents, output->getEventList(workspaceindex_in_output).getNumberEvents());
+      }
 
       //The first X bin of each group corresponds to the lowest workspace index - since the limits in X are used.
       const MantidVec & X = (*output->refX(workspaceindex_in_output));
@@ -209,8 +228,8 @@ public:
       int events_after_binning = 0;
       for (int i=0; i<15; i++)
         events_after_binning += output->dataY(workspace_index)[i];
-//      std::cout << workspace_index << " workspace_index \n";
-      TS_ASSERT_EQUALS( events_after_binning, expected_total_events[workspace_index]);
+      if (!inplace)
+        TS_ASSERT_EQUALS( events_after_binning, expected_total_events[workspace_index]);
     }
 
 

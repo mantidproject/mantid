@@ -93,6 +93,7 @@ void DiffractionFocussing2::exec()
   // retrieve the properties
   std::string groupingFileName=getProperty("GroupingFileName");
 
+  progress(0.01, "Reading grouping file");
   readGroupingFile(groupingFileName);
 
   // Get the input workspace
@@ -284,64 +285,49 @@ void DiffractionFocussing2::execEvent()
   nGroups = maxgroup_in_file+1;
   //g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
 
-  //Flag to determine whether the X for a group has been set
-  std::vector<bool> flags(nGroups,true);
+  Progress * prog;
+  prog = new Progress(this,0.0,0.15,nHist);
 
   // ------------- Pre-allocate Event Lists ----------------------------
+  std::vector< std::vector<int> > ws_indices(nGroups);
   std::vector<size_t> size_required(nGroups,0);
-  for (int i=0;i<nHist;i++)
+  for (int wi=0;wi<nHist;wi++)
   {
     //i is the workspace index (of the input)
-    //Check whether this spectra is in a valid group
-    const int group = groupAtWorkspaceIndex[i];
+    const int group = groupAtWorkspaceIndex[wi];
     if (group < 1) // Not in a group
       continue;
-    size_required[group] += eventW->getEventList(i).getNumberEvents();
+    size_required[group] += eventW->getEventList(wi).getNumberEvents();
+    // Also record a list of workspace indices
+    ws_indices[group].push_back(wi);
+    prog->reportIncrement(1, "Pre-counting");
   }
+
+  delete prog; prog = new Progress(this,0.15,0.3,nGroups);
+  // This creates and reserves the space required
   for (int group=1; group<nGroups; group++)
-    out->getOrAddEventList(group-1).reserve(size_required[group]);
-
-
-  API::Progress progress(this,0.0,1.0,nHist+nGroups);
-  for (int i=0;i<nHist;i++)
   {
-    progress.report();
-    //i is the workspace index (of the input)
-
-    //Check whether this spectra is in a valid group
-    const int group = groupAtWorkspaceIndex[i];
-    if (group < 1) // Not in a group
-      continue;
-
-    // Assign the new X axis only once (i.e when this group is encountered the first time)
-    if (flags[group])
-    {
-      //Copy the X axis for later
-      //original_X_to_use[group].assign( eventW->refX(i)->begin(), eventW->refX(i)->end())  ;
-      //Flag not to copy it again.
-      flags[group]=false;
-    }
-
-    //In workspace index group-1, put what was in the OLD workspace index i
-    out->getOrAddEventList(group-1) += eventW->getEventList(i);
-
-    // When focussing in place, you can clear out old memory from the input one!
-    if (inPlace)
-      eventW->getEventList(i).clear();
+    out->getOrAddEventList(group-1).reserve(size_required[group]);
+    prog->reportIncrement(1, "Allocating");
   }
 
-  //Now, we want to make sure that all groups are listed in the output workspace,
-  //  even those with no events at all
-  for (int group=1; group < this->nGroups; group++)
+  // ----------- Focus ---------------
+  delete prog; prog = new Progress(this,0.3,0.9,nHist);
+  PARALLEL_FOR1(eventW)
+  for (int group=1; group<nGroups; group++)
   {
-    //Flags still true = this group was not touched yet
-    if (flags[group])
+    std::vector<int> indices = ws_indices[group];
+    for (size_t i=0; i<indices.size(); i++)
     {
-      //Simply getting the event list will create it, if not already there.
-      EventList& emptyEventList = out->getOrAddEventList(group-1);
-      emptyEventList.clear();
-      //If the X axis hasn't been set, just use the one from workspace index 0.
-      //original_X_to_use[group].assign( eventW->refX(0)->begin(), eventW->refX(0)->end())  ;
+      int wi = indices[i];
+
+      //In workspace index group-1, put what was in the OLD workspace index wi
+      out->getOrAddEventList(group-1) += eventW->getEventList(wi);
+      prog->reportIncrement(1, "Appending Lists");
+
+      // When focussing in place, you can clear out old memory from the input one!
+      if (inPlace)
+        eventW->getEventList(wi).clear();
     }
   }
 
@@ -349,11 +335,12 @@ void DiffractionFocussing2::execEvent()
   out->doneAddingEventLists();
 
   //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
-
+  delete prog; prog = new Progress(this,0.9,1.0,nGroups);
   for (int g=1; g < nGroups; g++)
   {
     //Now this is the workspace index of that group; simply 1 offset
     int workspaceIndex = g-1;
+    prog->reportIncrement(1, "Setting X");
 
     if (workspaceIndex >= out->getNumberHistograms())
     {
