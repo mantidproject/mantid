@@ -233,6 +233,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
   PARALLEL_FOR_NO_WSP_CHECK()
   for (int wi=0; wi < numspec; wi++)
   {
+    PARALLEL_START_INTERUPT_REGION
     int64_t index_start = indices[wi];
     int64_t index_end = indices[wi+1];
     //std::cout << wi << ":" << index_start << " to " << index_end << std::endl;
@@ -273,7 +274,9 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
     }
 
     progress(progressStart + progressRange*(1.0/numspec));
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Clean up some stuff
   ws->doneAddingEventLists();

@@ -316,6 +316,7 @@ void DiffractionFocussing2::execEvent()
   PARALLEL_FOR1(eventW)
   for (int group=1; group<nGroups; group++)
   {
+    PARALLEL_START_INTERUPT_REGION
     std::vector<int> indices = ws_indices[group];
     for (size_t i=0; i<indices.size(); i++)
     {
@@ -329,7 +330,9 @@ void DiffractionFocussing2::execEvent()
       if (inPlace)
         eventW->getEventList(wi).clear();
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   //Finalize the maps
   out->doneAddingEventLists();

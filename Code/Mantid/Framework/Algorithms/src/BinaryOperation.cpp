@@ -1024,7 +1024,6 @@ namespace Mantid
 //          mess << "BinaryOperation: cannot find a RHS spectrum that contains the detectors in LHS workspace index " << lhsWI << "\n";
 //          throw std::runtime_error(mess.str());
         }
-
       }
       //std::cout << timer1.elapsed() << " sec to do the rest\n";
 

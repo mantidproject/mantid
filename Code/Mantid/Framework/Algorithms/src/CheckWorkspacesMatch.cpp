@@ -88,6 +88,7 @@ void CheckWorkspacesMatch::doComparison()
     //PARALLEL_FOR2(ews1, ews2)
     for (int i=0; i<ews1->getNumberHistograms(); i++)
     {
+      PARALLEL_START_INTERUPT_REGION
       prog->reportIncrement(1, "EventLists");
       if (!mismatchedEvent) // This guard will avoid checking unnecessarily
       {
@@ -99,7 +100,9 @@ void CheckWorkspacesMatch::doComparison()
           mismatchedEventWI = i;
         }
       }
+      PARALLEL_END_INTERUPT_REGION
     }
+    PARALLEL_CHECK_INTERUPT_REGION
 
     if ( mismatchedEvent)
     {
@@ -171,6 +174,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   //PARALLEL_FOR2(ws1, ws2)
   for ( int i = 0; i < numHists; ++i )
   {
+    PARALLEL_START_INTERUPT_REGION
     prog->reportIncrement(1, "Histograms");
     if (resultBool) // Avoid checking unnecessarily
     {
@@ -200,7 +204,9 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         resultBool = false;
       }
     }
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
   
   // If all is well, return true
   return resultBool;

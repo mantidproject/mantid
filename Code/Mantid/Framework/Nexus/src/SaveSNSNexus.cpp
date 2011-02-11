@@ -295,6 +295,7 @@ namespace NeXus
       PARALLEL_FOR1(inputWorkspace)
       for (int y = 0; y < ypixels; y++)
       {
+        PARALLEL_START_INTERUPT_REGION
         //Get the workspace index for the detector ID at this spot
         int wi = 0;
         try
@@ -330,8 +331,9 @@ namespace NeXus
             std::copy(Y.begin(), Y.end(), data+index);
           }
         }
-
+        PARALLEL_END_INTERUPT_REGION
       }
+      PARALLEL_CHECK_INTERUPT_REGION
 
       fillTime += tim1.elapsed();
 
