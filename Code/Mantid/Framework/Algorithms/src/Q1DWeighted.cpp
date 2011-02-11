@@ -152,7 +152,7 @@ void Q1DWeighted::exec()
         {
           iq = (int)floor( (q-binParams[0])/ binParams[1] );
         } else {
-          iq = (int)floor(log(q/binParams[0])/log(-binParams[1]));
+          iq = (int)floor(log(q/binParams[0])/log(1.0-binParams[1]));
         }
 
         if (iq>=0 && iq < sizeOut-1)
