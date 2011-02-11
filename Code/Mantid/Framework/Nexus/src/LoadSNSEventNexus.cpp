@@ -382,9 +382,12 @@ void LoadSNSEventNexus::exec()
   PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
+    PARALLEL_START_INTERUPT_REGION
     prog2.report("Loading " + bankNames[i]);
     this->loadBankEventData(bankNames[i], pixelID_to_wi_map);
+    PARALLEL_END_INTERUPT_REGION
   }
+  PARALLEL_CHECK_INTERUPT_REGION
 
   //Don't need the map anymore.
   delete pixelID_to_wi_map;
