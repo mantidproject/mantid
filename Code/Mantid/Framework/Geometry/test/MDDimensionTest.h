@@ -28,6 +28,7 @@ public:
     void setExpanded(unsigned int nBins){
         MDDimension::setExpanded(nBins);
     }
+	
 
 };
 // test class for dimensionRes
@@ -47,6 +48,9 @@ public:
     void setExpanded(unsigned int nBins){
         MDDimensionRes::setExpanded(nBins);
     }
+	void setDirection(const V3D &newDir){
+		MDDimensionRes::setDirection(newDir);
+	}
 
 };
 
@@ -70,6 +74,33 @@ public:
        // and one orthogonal dimension
        TS_ASSERT_THROWS_NOTHING(pOrtDim = new tDimension("en"));
     }
+	void testDirections(void){
+		V3D dirOrt = pOrtDim->getDirection();
+		V3D dirRec = pResDim->getDirection();
+		
+		TSM_ASSERT_DELTA("The norm for the orthogonal dimension direction should be close to 0",0,dirOrt.norm2(),FLT_EPSILON);
+		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1,dirRec.norm2(),FLT_EPSILON);
+		V3D desDir(1,0,0);
+		TSM_ASSERT_EQUALS("First reciprocal dimension direction should be {1,0,0}",desDir,dirRec);
+	}
+	void testZeroDirectionThrows(){
+		V3D zeroDir;
+		TSM_ASSERT_THROWS("A direction in a reciprocal dimension can not be 0",pResDim->setDirection(zeroDir),std::invalid_argument);
+	}
+	void testSetDirection(void){
+		V3D desDir(1,-2,0);
+		TSM_ASSERT_THROWS_NOTHING("Setting an direction should not throw",pResDim->setDirection(desDir));
+
+		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1,pResDim->getDirection().norm2(),FLT_EPSILON);
+
+		TSM_ASSERT_EQUALS("The actual reciprocal dimension should be as set ",desDir,pResDim->getDirectionCryst());
+
+		desDir.normalize();
+	    TSM_ASSERT_EQUALS("The actual reciprocal dimension should be as set but normalized to 1 ",desDir,pResDim->getDirection());
+
+	}
+ 
+
     void testSetRanges(){
         if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
 
@@ -131,36 +162,26 @@ public:
       // axiss
           std::vector<double> ax;
           TS_ASSERT_THROWS_NOTHING(ax=pResDim->getAxis());
-          TS_ASSERT_THROWS_NOTHING(ax=pResDim->getCoord());
-
-// are these correct vectors?
-          TS_ASSERT_EQUALS(ax.size(),3); 
-          TS_ASSERT_DELTA(ax[0],1,FLT_EPSILON);
-
-          TS_ASSERT_THROWS_NOTHING(ax=pOrtDim->getAxis());
-          TS_ASSERT_THROWS_NOTHING(ax=pOrtDim->getCoord());
-
-// are these correct vectors?
-          TS_ASSERT_EQUALS(ax.size(),1); 
-          TS_ASSERT_DELTA(ax[0],1,FLT_EPSILON);
 
     }
+	  void testRecDimDirection(){
+        if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
+      // axiss
+          V3D dir;
+          TS_ASSERT_THROWS_NOTHING(dir=pResDim->getDirectionCryst());
+          TS_ASSERT_DELTA(dir[0],1,FLT_EPSILON);
+	  }
 
     void testDimensionRes(void){
 
 
         tDimensionRes dimY("yy",q2);
-        std::vector<double> e0;
-        TS_ASSERT_THROWS_NOTHING(e0=dimY.getCoord());
+        V3D e0;
+		TS_ASSERT_THROWS_NOTHING(e0=dimY.getDirection());
 
-
-          // are these correct vectors?
-          TS_ASSERT_EQUALS(e0.size(),3);
-
-
-          TS_ASSERT_DELTA(e0[0],0,FLT_EPSILON);
-          TS_ASSERT_DELTA(e0[1],1,FLT_EPSILON);
-          TS_ASSERT_DELTA(e0[2],0,FLT_EPSILON);
+        TS_ASSERT_DELTA(e0[0],0,FLT_EPSILON);
+        TS_ASSERT_DELTA(e0[1],1,FLT_EPSILON);
+        TS_ASSERT_DELTA(e0[2],0,FLT_EPSILON);
 
     }
 

@@ -129,34 +129,14 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
   this->data[i].nBins = dimension->getNBins();
   this->data[i].AxisName  = dimension->getName();
   this->data[i].isReciprocal = dimension->isReciprocal();
-  this->data[i].data_scale = dimension->getScale();
+//  this->data[i].data_scale = dimension->getScale();
   this->data[i].Tag = dimension->getDimensionId();
 
   //Handle reciprocal dimensions.
   if(dimension->isReciprocal())
   {
-    this->coordinates[i].assign(3,0);
-    MDDimensionRes* reciprocalDimension = dynamic_cast<MDDimensionRes*>(dimension.get());
-    rec_dim qn = reciprocalDimension->getReciprocalVectorType();
-
-    //The following is only accurate for othogonal primitive reciprocal vectors. This has had to be done
-    //because of the way that geometry currently works.
-    int index;
-    if(qn == q1)
-    {
-      index = 0;
-    }
-    else if(qn == q2)
-    {
-      index = 1;
-    }
-    else if(qn == q3)
-    {
-      index = 2;
-    }
-    this->coordinates[index].assign(3,0);
-    this->coordinates[index].at(index)= 1;
-
+	  this->data[i].direction = dimension->getDirection();
+        
   }
 }
 
@@ -176,11 +156,6 @@ MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
     this->data.assign(nDimensions,any);    
 
     for(i=0;i<this->nDimensions;i++){
-		if(Dims[i]->isReciprocal()){
-			//TODO: THIS IS WRONG; redesighn
-				this->coordinates[nr].assign(3,0);
-				this->coordinates[nr] = Dims[i]->getCoord();
-		}
 		this->createDimensionDescription(Dims[i],i);
     }
     
@@ -338,8 +313,8 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
     this->data.assign(nDimensions,defaults);
     
     for(i=0;i<nReciprocalDimensions;i++){ //
-        this->coordinates[i].assign(3,0);
-        this->coordinates[i].at(i)= 1;
+		this->data[i].isReciprocal = true;
+		this->data[i].direction[i] = 1;
     }
   
   
@@ -350,18 +325,14 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
 
 }
 void 
-MDGeometryDescription::setCoord(unsigned int i,const std::vector<double> &coord)
+MDGeometryDescription::setDirection(unsigned int i,const V3D &coord)
 {
-    this->check_index(i,"setCoord");
+    this->check_index(i,"setDirection");
     if(i<3){
-        if(coord.size()!=3){
-            throw(std::invalid_argument("SlicingProperty::setCoord wrong parameter, index<3 and attempting to set a non-3 point coordinate"));
-        }
-        this->coordinates[i]=coord;
+		this->data[i].direction =coord;
     }else{
-        if(coord.size()!=1){
-            throw(std::invalid_argument("SlicingProperty::setCoord wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
-        }
+         throw(std::invalid_argument("SlicingProperty::setDirection wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
+ 
     }
 }
 

@@ -83,13 +83,20 @@ namespace Geometry
     virtual double       getRange(void)const{return (rMax-rMin);}
     /// scale of the data along this axis
     /// TO DO: what is this scale and what constraint we want to apply on it? 
-    virtual double getScale(void)const{return latticeParam;}
+    //virtual double getScale(void)const{return latticeParam;}
     /** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
      *   coinsiding with min and max values rMin and rMax; */
     virtual bool        getIntegrated(void)const{return isIntegrated;}
-    /// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
-    virtual std::vector<double>const & getCoord(void)const{return coord;}
-    /// get Axis data; 
+    /** function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
+       *  Orthogonal dimensions always have direction 1 (e.g. V3D={1,0,0})according to their direction in the coordinate 
+	   * system. Norm of the vector, returned by this function has to be 1    */
+	virtual V3D getDirection(void)const{return direction;}
+	  /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
+	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
+	   have integer values; */
+	virtual V3D getDirectionCryst(void)const{return direction;}
+
+	/// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
     /// the function returns the center points of the axis bins; There are nBins of such points 
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
@@ -122,14 +129,14 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
 
     //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
     // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
-    virtual void setCoord(const std::vector<double> &){};
+	virtual void setDirection(const V3D &){};
     // function sets the dimension as a linear dimension with specific ranges and number of bins
     
     void  setName(const char *name) {this->AxisName.assign(name);}
     
     /** Set the scale of a particular dimension
      * @param Value :: -- the value to set;    */
-    void   setScale(double Value){latticeParam=Value;}
+    //void   setScale(double Value){latticeParam=Value;}
     /// functions clears axis, makes nBins=1 and sets "integrated" sign to the dimension. Meaningless and dangerous without real integration procedure
     void   setIntegrated(void);
     /// as setIntegrated(void) but integration within the range specified
@@ -145,21 +152,21 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     void  setShift(double newShift){data_shift= newShift;}
     /// should not be public to everybody as chanded by  MDGeometry while reshaping or rebinning;
     void  setStride(size_t newStride){nStride=newStride; }
-    /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 1 here and triplet for reciprocals) -- need further exploration -> which coordinate systen it is.
-    std::vector<double> coord;
+ 
 
     /// logger -> to provide logging, for MD workspaces in this dimension
     static Kernel::Logger& g_log;
 
     /// Helper method actually implementing the bulk of toXMLString. Allows subtypes to use the same serialisation code, with the ability to append to the same root element.
     void ApplySerialization(Poco::XML::Document* pDoc, Poco::XML::Element* pDimensionElement) const;
-
+	// direction of a vector in the basis system of coordinates;
+   /// the coordinate of a dimension in an WorkspaceGeometry system of coordinates (always 0 here and |1| triplet for reciprocals) 
+	V3D   direction;
   private:
     /// name of the axis;
     std::string AxisName;
     /// the name of the dimension in the dimensions basis;
     std::string dimTag;
-
 
     /// The parameter, which specify if the axis is integraged. If it is, nBins =1;
     bool isIntegrated;
@@ -167,13 +174,11 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     unsigned int nBins;
     /// dimension stride in a multidimensional array
     size_t   nStride;
-    /// vector of leftmost bin ranges plus rightmost value;  
+    /// vector of leftmost bin ranges for bins plus rightmost value;  
     std::vector<double> Axis;
     /// min and maximum values along this dimension;
     double rMin,rMax;
-    /// lattice sacale in this direction
-    double latticeParam;
-
+ 
     /// data shift in correspondent direction
     double data_shift; 
     // *************  should be prohibited?:

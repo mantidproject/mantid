@@ -1063,7 +1063,7 @@ namespace Mantid
       ///  Get coordinate for index;
       virtual double getX(unsigned int ind)const {return m_axis(ind);}
       // Mess; TODO: clear
-      virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not implemented");}
+      virtual Geometry::V3D getDirection(void)const {throw std::runtime_error("Not implemented");}
 
       /// the function returns the center points of the axis bins; There are nBins of such points 
       /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)

@@ -46,8 +46,7 @@ public:
 
   /// it is reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return true;}
- /// 
-    virtual std::vector<double> const & getCoord(void)const{return this->coord;}
+
 
     /// indicates which reciprocal primitive vector this reciprocal dimension is associated with, either q1, q2 or q3
     rec_dim getReciprocalVectorType() const 
@@ -57,12 +56,14 @@ public:
 
     /// Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
     virtual std::string toXMLString() const;
+    
+	virtual V3D getDirectionCryst(void)const;
 
     MDDimensionRes(const std::string &ID,const rec_dim nDim);
-private:
+protected:
     // function sets the coordinates of the dimension;
-    virtual void setCoord(const std::vector<double> &theCoord);
-
+    virtual void setDirection(const V3D &theDirection);
+private:
     /// helper method for converting between qtypes as enums to strings.
     std::string getQTypeAsString() const;
 
@@ -97,8 +98,7 @@ public:
 /** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
  *   coinsiding with min and max values rMin and rMax; */
     bool        getIntegrated(void)const{return true;}
-/// coordinate along this direction; It is rather interface as the coordinate of usual dimension along orthogonal axis is always 1
-    virtual std::vector<double>const & getCoord(void)const{return coord;}
+
     /// the function returns the center points of the axis bins; There are nBins of such points 
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
     virtual void getAxisPoints(std::vector<double>  &p)const{std::vector<double> tmp(1,0.5);p=tmp;}

@@ -385,10 +385,15 @@ MDDPoints_MemManager::store_pixels(const std::vector<char> &all_new_pixels,const
 						  this->init_pix_locations_in_memory();
 					  }
 				  }catch(std::bad_alloc &){
-					  memBased = false;
+					  try{
+						  // try this as this is slower but trying accomodate pixels in-place which may be possible
+						  this->add_pixels_in_memory(target_data_buffer,all_new_pixels,pixels_selected,cell_indexes,n_selected_pixels);
+					  }catch(std::bad_alloc &){
+     						memBased = false;
+					  }
 				  }
 
-		}else{  // existing buffer is sufficient to place all pixels;
+		}else{  // existing buffer is sufficient or almost sufficient to place all pixels, so no point in allocating new buffer;
 			this->add_pixels_in_memory(target_data_buffer,all_new_pixels,pixels_selected,cell_indexes,n_selected_pixels);
 		}
 	           

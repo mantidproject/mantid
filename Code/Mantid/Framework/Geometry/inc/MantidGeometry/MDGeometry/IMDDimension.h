@@ -30,6 +30,7 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 #include "MantidKernel/System.h"
+#include "MantidGeometry/V3D.h"
 
 namespace Mantid
 {
@@ -59,15 +60,22 @@ namespace Mantid
 	  virtual size_t      getStride()const = 0;
 	  /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
       virtual bool isReciprocal() const = 0;
-	  /// defines the dimension scale in physical units. 
-	  virtual double getScale()const = 0; 
+	  /// defines the dimension scale in physical units. ->TODO: it is unclear if we need this here
+	 // virtual double getScale()const = 0; 
 	  ///  Get coordinate for index;
 	  virtual double getX(unsigned int ind)const = 0;
-	  // Mess; TODO: clear
-      virtual std::vector<double>const & getCoord(void)const = 0;
+	  /** function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
+       *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;
+	   *  while reciprocal dimension can be directed anywhere withing the reciprocal space; 
+	     Norm of the vector, returned by this function has to be 1    */
+	  virtual V3D getDirection(void)const = 0;
+	  /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
+	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
+	   have integer values; */
+	  virtual V3D getDirectionCryst(void)const = 0;
 
-    /// the function returns the center points of the axis bins; There are nBins of such points 
-    /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
+    /** the function returns the center points of the axis bins; There are nBins of such points 
+     (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
     virtual void getAxisPoints(std::vector<double>  &)const=0;
 
 

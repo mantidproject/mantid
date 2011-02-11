@@ -90,7 +90,7 @@ MDGeometry::initialize(const MDGeometryDescription &trf)
     this->initialize(dimID);
     this->setRanges(trf);
     this->arrangeDimensionsProperly(dimID);
-
+//TODO:
   /*
   // all reciprocal dimensions may have new coordinates in the WorkspaceGeometry coordinate system, so these coordinates have to 
   // be set properly;

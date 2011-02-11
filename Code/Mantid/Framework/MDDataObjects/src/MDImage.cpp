@@ -281,10 +281,11 @@ void
 MDImage::alloc_image_data()
 {
 	size_t ImgSize     = this->pMDGeometry->getGeometryExtend();
-	MD_IMG_array.data = new MD_image_point[ImgSize];
-	if (!MD_IMG_array.data){
-		g_log.error()<<" can not allocate memory for multidimensional image\n";
-		throw(std::runtime_error("Can not allocate memory for Multidimensional image "));
+	try{
+     	MD_IMG_array.data = new MD_image_point[ImgSize];
+	}catch(std::bad_alloc &err){
+		g_log.error()<<" can not allocate memory for multidimensional image of "<<ImgSize<<" points\n";
+		throw(std::bad_alloc("Can not allocate memory for Multidimensional image "));
 	}
     MD_image_point *pData        = MD_IMG_array.data;
 	MD_IMG_array.data_array_size = ImgSize;

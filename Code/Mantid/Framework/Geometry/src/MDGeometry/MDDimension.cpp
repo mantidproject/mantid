@@ -43,12 +43,10 @@ void MDDimension::getAxisPoints(std::vector<double>  &rez)const
 
 // default dimension is always integrated (it has one point and limits) 
 MDDimension::MDDimension(const std::string &ID):
-    coord(1,1),
     dimTag(ID),
     isIntegrated(true),
     nBins(1),
     nStride(0),
-    latticeParam(1),
     data_shift(0)
 {
   // default name coinside with the tag but can be overwritten later
@@ -66,7 +64,8 @@ MDDimension::initialize(const DimensionDescription &descr)
     this->setRange(descr.cut_min,descr.cut_max,descr.nBins);
     // stride now reset which makes this dimension invalid in group of dimensions
     this->nStride = 0;
-    this->latticeParam= descr.data_scale;
+	// the meaning of the lattice parameter for dimension is unclear
+//    this->latticeParam= descr.data_scale;
     this->data_shift  = descr.data_shift;
 
 	if(!descr.AxisName.empty()){

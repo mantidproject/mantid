@@ -17,23 +17,45 @@ namespace Mantid{
     namespace Geometry{
 
 
+
+
+
+
 MDDimensionRes::MDDimensionRes(const std::string &ID,const rec_dim nRecDim0):
 MDDimension(ID),
 nRecDim(nRecDim0)
 {
-    this->coord.assign(3,0);
-    this->coord[nRecDim]=1;
+    this->direction[nRecDim] = 1;
 }
 void 
-MDDimensionRes::setCoord(const std::vector<double> &theCoord)
+MDDimensionRes::setDirection(const V3D &theDirection)
 {
-    if(theCoord.size()!=3){
-        g_log.error()<<"MDDimensionRes::setCoord: Attempt to set the dimension which is not a 3-vector";
-        throw(std::invalid_argument("MDDimensionRes::setCoord: Attempt to set the dimension which is not a 3-vector"));
+	
+    if(theDirection.norm2()<FLT_EPSILON){
+        g_log.error()<<"MDDimensionRes::setDirection: Attempt to set reciprocal dimension in 0 direction";
+        throw(std::invalid_argument("MDDimensionRes::setDirection: Attempt to set reciprocal dimension in 0 direction"));
     }
-    coord=theCoord;
-}
+    direction=theDirection;
+	direction.normalize();
 
+}
+//
+V3D 
+MDDimensionRes::getDirectionCryst(void)const
+{
+	unsigned int i;
+	V3D dirCryst(this->direction);
+	double minDir(FLT_MAX);
+	double val;
+	for(i=0;i<3;i++){
+		val =std::abs(dirCryst[i]); 
+		if(val>FLT_EPSILON){
+			if(val<minDir)minDir=val;
+		}
+	}
+	return dirCryst/minDir;
+}
+//
 std::string MDDimensionRes::getQTypeAsString() const
 {
   std::string qType;

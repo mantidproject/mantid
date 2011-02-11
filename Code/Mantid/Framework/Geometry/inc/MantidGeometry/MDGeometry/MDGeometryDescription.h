@@ -3,6 +3,7 @@
 
 #include <deque>
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
 
 /** class describes slicing and rebinning matrix and the geometry of the MD workspace. 
@@ -56,6 +57,7 @@ public:
   bool isReciprocal; //< specifies if this dimension is reciprocal or not.
   std::string AxisName; //< new names for axis;
    
+  V3D  direction;   //< direction in reciprocal space for reciprocal dimension, 0 for orthogonal
 
   DimensionDescription() :
     Tag(""), data_shift(0), cut_min(-1), cut_max(1), data_scale(1), nBins(1), isReciprocal(false), AxisName("")
@@ -105,7 +107,7 @@ public:
    }
    std::vector<double> getRotations(void)const{return rotations;}
 
-   std::vector<double> getCoord(unsigned int i)const;
+   Geometry::V3D getDirection(unsigned int i)const;
    bool isAxisNamePresent(unsigned int i)const;
  
    /** finds the location of the dimension, defined by the tag in the list of all dimensions;
@@ -136,10 +138,10 @@ public:
 
 
 ////*** SET -> t
-   void setCoord(const std::string &Tag,const std::vector<double> &coord){
-       int index = getTagNum(Tag,true);       this->setCoord(index,coord);
+   void setDirection(const std::string &Tag,const V3D &coord){
+       int index = getTagNum(Tag,true);       this->setDirection(index,coord);
    }
-   void setCoord(unsigned int i,const std::vector<double> &coord);
+   void setDirection(unsigned int i,const V3D &coord);
 
 /**  function sets the Tag requested into the position, defined by the index i;
  *
@@ -152,7 +154,7 @@ private:
                                                 If source dataset has more dimensions than specified here, all other dimensions will be collapsed */
     unsigned int nReciprocalDimensions;    // number of reciprocal dimensions from the nDimensions
 
-    std::vector<double> coordinates[3];     //< The coordinates of the target dataset in the WorkspaceGeometry system of coordinates (define the rotation matrix for qx,qy,qz coordinates;) 
+  
     std::vector<double>     rotations;
  
     /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/
