@@ -86,9 +86,10 @@ namespace Algorithms
     IAlgorithm_sptr alg1 = createSubAlgorithm("MoveInstrumentComponent");
     alg1->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     alg1->setPropertyValue("ComponentName", detname);
-    alg1->setProperty("X", x);
-    alg1->setProperty("Y", y);
-    alg1->setProperty("Z", z);
+    //Move in cm for small shifts
+    alg1->setProperty("X", x*0.01);
+    alg1->setProperty("Y", y*0.01);
+    alg1->setProperty("Z", z*0.01);
     alg1->setPropertyValue("RelativePosition", "1");
     try
     {
@@ -248,7 +249,7 @@ namespace Algorithms
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
-    return 1.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
+    return 200.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
 }
   /** Initialisation method
   */
@@ -428,9 +429,10 @@ namespace Algorithms
         "Iteration = " << iter << "\n" <<
         "Status = " << reportOfDiffractionEventCalibrateDetectors << "\n" <<
         "Minimize PeakLoc-" << peakOpt << " = " << s->fval << "\n";
-      g_log.information() << "Move (X)   = " << gsl_vector_get (s->x, 0) << "  \n";
-      g_log.information() << "Move (Y)   = " << gsl_vector_get (s->x, 1) << "  \n";
-      g_log.information() << "Move (Z)   = " << gsl_vector_get (s->x, 2) << "  \n";
+      //Move in cm for small shifts
+      g_log.information() << "Move (X)   = " << gsl_vector_get (s->x, 0)*0.01 << "  \n";
+      g_log.information() << "Move (Y)   = " << gsl_vector_get (s->x, 1)*0.01 << "  \n";
+      g_log.information() << "Move (Z)   = " << gsl_vector_get (s->x, 2)*0.01 << "  \n";
       g_log.information() << "Rotate (X) = " << gsl_vector_get (s->x, 3) << "  \n";
       g_log.information() << "Rotate (Y) = " << gsl_vector_get (s->x, 4) << "  \n";
       g_log.information() << "Rotate (Z) = " << gsl_vector_get (s->x, 5) << "  \n";
