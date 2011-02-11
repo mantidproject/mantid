@@ -9,6 +9,7 @@ import isis_reduction_steps
 import isis_reducer
 import MantidFramework
 import copy
+from SANSadd2 import *
 
 #remove the following
 DEL__FINDING_CENTRE_ = False

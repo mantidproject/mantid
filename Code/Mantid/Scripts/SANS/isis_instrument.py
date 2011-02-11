@@ -271,6 +271,9 @@ class ISISInstrument(instrument.Instrument):
         #this variable isn't used again and stops the instrument from being deep copied!
         self.definition = None
 
+        #remove this function
+        self._del_incidient_set = False
+
     def get_incident_mon(self):
         """
             @return: the spectrum number of the incident scattering monitor
@@ -284,6 +287,14 @@ class ISISInstrument(instrument.Instrument):
             @param spectrum_number: monitor's sectrum number
         """
         self._incid_monitor = int(spectrum_number)
+        self._del_incidient_set = True
+
+    def suggest_incident_mntr(self, spectrum_number):
+        """
+            remove this function and the data memember it uses
+        """
+        if not self._del_incidient_set:
+            self.set_incident_mon(spectrum_number)
         
     def set_component_positions(self, ws, xbeam, ybeam): raise NotImplementedError
         

@@ -729,6 +729,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             else:
                 detectorCentreY = ycentre
                 beamCentreY = ycentre
+
             if ( not self.min_radius is None) and (self.min_radius > 0.0):
                 self.add_cylinder(self.min_radius, beamCentreX, beamCentreY,
                                                              'beam_stop')
