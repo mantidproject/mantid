@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>841</width>
+    <width>866</width>
     <height>608</height>
    </rect>
   </property>
@@ -336,7 +336,7 @@ in each direction and will create 9 sub-pixels.</string>
            </widget>
           </item>
           <item>
-           <widget class="QRadioButton" name="log_binning_radio">
+           <widget class="QCheckBox" name="log_binning_radio">
             <property name="text">
              <string>Log binning</string>
             </property>

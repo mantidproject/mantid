@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Fri Feb 11 12:21:48 2011
+# Created: Fri Feb 11 13:18:02 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(841, 608)
+        Frame.resize(866, 608)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -140,7 +140,7 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.n_sub_pix_edit.setObjectName("n_sub_pix_edit")
         self.horizontalLayout_2.addWidget(self.n_sub_pix_edit)
-        self.log_binning_radio = QtGui.QRadioButton(self.reduction_options_groupbox)
+        self.log_binning_radio = QtGui.QCheckBox(self.reduction_options_groupbox)
         self.log_binning_radio.setObjectName("log_binning_radio")
         self.horizontalLayout_2.addWidget(self.log_binning_radio)
         spacerItem1 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

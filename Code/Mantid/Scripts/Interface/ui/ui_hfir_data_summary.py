@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Fri Feb 11 12:34:37 2011
+# Created: Fri Feb 11 13:17:59 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -149,7 +149,7 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.n_sub_pix_edit.setObjectName("n_sub_pix_edit")
         self.horizontalLayout_2.addWidget(self.n_sub_pix_edit)
-        self.log_binning_radio = QtGui.QRadioButton(self.formLayoutWidget_2)
+        self.log_binning_radio = QtGui.QCheckBox(self.formLayoutWidget_2)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
