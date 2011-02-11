@@ -118,11 +118,11 @@
 		</parameter>
 
 		<parameter name="wb-integr-min">
-			<value val="0" />
+			<value val="100" />
 		</parameter>
 
 		<parameter name="wb-integr-max">
-			<value val="100" />
+			<value val="500" />
 		</parameter>
 
 		<parameter name="norm-mon1-spec">

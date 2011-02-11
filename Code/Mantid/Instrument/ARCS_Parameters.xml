@@ -36,11 +36,11 @@
 		</parameter>
 
 		<parameter name="wb-integr-min">
-			<value val="0" />
+			<value val="182" />
 		</parameter>
 
 		<parameter name="wb-integr-max">
-			<value val="100" />
+			<value val="598" />
 		</parameter>
 
 		<!-- Overall Scale Factor -->
