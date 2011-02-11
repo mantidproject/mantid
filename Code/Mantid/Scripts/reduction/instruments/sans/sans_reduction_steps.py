@@ -597,6 +597,7 @@ class WeightedAzimuthalAverage(ReductionStep):
                     NPixelDivision=self._nsubpix,
                     PixelSizeX=reducer.instrument.pixel_size_x,
                     PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=self._error_weighting)  
+        ReplaceSpecialValues(output_ws, output_ws, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0)
         return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         
     def get_output_workspace(self, workspace):
