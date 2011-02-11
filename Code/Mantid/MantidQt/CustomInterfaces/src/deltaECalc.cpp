@@ -62,9 +62,12 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QString pyAbsRunFiles = createPyListAsString(absRunFiles);
   QString absEiGuess = m_sets.leVanEi->text();
   QString pyAbsWhiteBeam = (absWhiteBeam.isEmpty()) ? "None" : QString("r'" + absWhiteBeam + "'");
-  // Tzero value
-  QString Tzero = m_sets.TzeroEdit->text();
-  QString pyTzero = (Tzero.isEmpty()) ? "None" : Tzero;
+  // SE Offset value
+  QString seOffset = m_sets.seOffsetEdit->text();
+  QString pySeOffset = (seOffset.isEmpty()) ? "None" : seOffset;
+  // SE Motor Name
+  QString motorName = m_sets.motorNameEdit->text();
+  QString pyMotorName = (motorName.isEmpty()) ? "None" : motorName;
 
   if( m_sets.ckSumSpecs->isChecked() || runFiles.size() == 1)
   {
@@ -77,8 +80,8 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
       pySaveName = "r'" + saveName + "'";
     }
-    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, Tzero=%8)");
-    pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName, pyTzero);
+    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, motor='%8', offset=%9)");
+    pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
   }
   else
   {
@@ -96,16 +99,16 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
       pyCode +=
         "for run in rfiles:\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,Tzero=%4)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyTzero);
+        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,motor=%4, offset=%5)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyMotorName, pySeOffset);
     }
     else
     {
       pyCode += "abs_rfiles = " + pyAbsRunFiles + "\n";
       pyCode +=
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5,Tzero=%6)\n";
-      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pySaveName, pyTzero);
+        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5,motor=%6, offset=%7)\n";
+      pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
     }
   }
   m_pyScript = pyCode;

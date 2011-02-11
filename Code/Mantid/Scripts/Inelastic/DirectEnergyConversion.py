@@ -325,7 +325,8 @@ class DirectEnergyConversion(object):
 #-------------------------------------------------------------------------------
 
     def convert_to_energy(self, mono_run, ei, white_run=None, mono_van=None,\
-                          abs_ei=None, abs_white_run=None, save_path=None, Tzero=None):
+                          abs_ei=None, abs_white_run=None, save_path=None, Tzero=None, \
+                          motor=None, offset=None):
         """
         One-shot function to convert the given runs to energy
         """
@@ -666,6 +667,10 @@ class DirectEnergyConversion(object):
         self.monitor_workspace = None
         
         self.time_bins = None
+                
+        # Motor names
+        self.motor = None
+        self.motor_offset = None
                 
         # Detector diagnosis
         self.spectra_masks = None
