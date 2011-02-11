@@ -341,22 +341,7 @@ class DirectEnergyConversion(object):
             # TODO: Need a better check than this...
             if (abs_white_run is None):
                 self.log("Performing Normalisation to Mono Vanadium.")
-                if (self.average_mono):
-                    norm_factor = self.calc_average(monovan_wkspace)
-                else:
-                    e_low = self.monovan_integr_range[0]
-                    e_upp = self.monovan_integr_range[1]
-                    if e_low > e_upp:
-                        raise ValueError("Inconsistent mono-vanadium integration range defined!")
-                    integration_alg = Integration(monovan_wkspace, "monovan_wkspace_integrated", RangeLower=e_low, RangeUpper=e_upp)
-                    # Find if we have any zeros
-                    norm_factor = integration_alg.workspace()
-                    #min_value = self.tiny * self.tiny
-                    #max_value = self.large * self.large
-                    zerovalue_tests_ws = '_tmp_abs_median_tests'
-                    fdol_alg = FindDetectorsOutsideLimits(norm_factor, zerovalue_tests_ws, HighThreshold=self.large, LowThreshold=self.tiny)
-                    MaskDetectors(norm_factor, MaskedWorkspace=fdol_alg.workspace())
-                    mtd.deleteWorkspace(zerovalue_tests_ws)
+                norm_factor = self.calc_average(monovan_wkspace)
             else:
                 self.log("Performing Absolute Units Normalisation.")
                 # Perform Abs Units...
@@ -375,6 +360,11 @@ class DirectEnergyConversion(object):
                                           self.spectra_masks, result_name, Tzero)
         if not norm_factor is None:
             sample_wkspace /= norm_factor
+
+        # Check if motor name exists
+        # if not self.motor = None
+        # self.motor_offset = 
+        # self.psi = 
 
         # Save then finish
         self.save_results(sample_wkspace, save_path)
@@ -671,6 +661,7 @@ class DirectEnergyConversion(object):
         # Motor names
         self.motor = None
         self.motor_offset = None
+        self.psi = None
                 
         # Detector diagnosis
         self.spectra_masks = None
@@ -680,9 +671,6 @@ class DirectEnergyConversion(object):
         self.abs_spectra_masks = None
         self.sample_mass = 1.0
         self.sample_rmm = 1.0
-        
-        # Divide by the mono norm average
-        self.average_mono = True
         
         # Detector Efficiency Correction
         self.apply_detector_eff = True
