@@ -55,7 +55,9 @@ public:
     ld.execute();
     TS_ASSERT( ld.isExecuted() );
 
-    DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    DataObjects::EventWorkspace_sptr WS;
+    TS_ASSERT_THROWS_NOTHING(
+        WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     //Pixels have to be padded
@@ -226,7 +228,8 @@ public:
   }
 
 
-  void test_SingleBank()
+
+  void doTestSingleBank(bool SingleBankPixelsOnly, bool Precount, std::string BankName = "bank36", bool willFail=false)
   {
     Mantid::API::FrameworkManager::Instance();
     LoadSNSEventNexus ld;
@@ -234,23 +237,53 @@ public:
     ld.initialize();
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace",outws_name);
-    ld.setPropertyValue("BankName", "bank36");
-
+    ld.setPropertyValue("BankName", BankName);
+    ld.setProperty<bool>("SingleBankPixelsOnly", SingleBankPixelsOnly);
+    ld.setProperty<bool>("Precount", Precount);
     ld.execute();
+    if (willFail)
+    {
+      TS_ASSERT( !ld.isExecuted() );
+      return;
+    }
     TS_ASSERT( ld.isExecuted() );
-
-    DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    DataObjects::EventWorkspace_sptr WS;
+    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
+    if (!WS) return;
     //Pixels have to be padded
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
+    TS_ASSERT_EQUALS( WS->getNumberHistograms(), SingleBankPixelsOnly ? 1024 : 51200);
     //Events - there are fewer now.
     TS_ASSERT_EQUALS( WS->getNumberEvents(), 7274);
+  }
 
+  void test_SingleBank_AllPixels()
+  {
+    doTestSingleBank(false, false);
+  }
+
+  void test_SingleBank_PixelsOnlyInThatBank()
+  {
+    doTestSingleBank(true, false);
+  }
+
+  void test_SingleBank_AllPixels_Precount()
+  {
+    doTestSingleBank(false, true);
+  }
+
+  void test_SingleBank_PixelsOnlyInThatBank_Precount()
+  {
+    doTestSingleBank(true, true);
   }
 
 
-
+  void test_SingleBank_ThatDoesntExist()
+  {
+    doTestSingleBank(false, false, "bankDoesNotExist", true);
+    //doTestSingleBank(true, false, "bankDoesNotExist", true);
+  }
 
   void xtest_LargeFile()
   {

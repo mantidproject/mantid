@@ -2,8 +2,8 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidNexus/LoadSNSEventNexus.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-
+#include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/FileProperty.h"
@@ -24,6 +24,7 @@ using std::string;
 using std::vector;
 
 using namespace ::NeXus;
+using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
 
 namespace Mantid
@@ -120,6 +121,11 @@ void LoadSNSEventNexus::init()
   declareProperty(
       new PropertyWithValue<string>("BankName", "", Direction::Input),
     "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
+
+  declareProperty(
+      new PropertyWithValue<bool>("SingleBankPixelsOnly", true, Direction::Input),
+    "Optional: Only applies if you specified a single bank to load with BankName.\n"
+    "Only pixels in the specified bank will be created if true; all of the instrument's pixels will be created otherwise.");
 
   declareProperty(
       new PropertyWithValue<bool>("LoadMonitors", false, Direction::Input),
@@ -274,6 +280,16 @@ void LoadSNSEventNexus::exec()
   file.closeGroup();
   file.close();
 
+  // --------- Loading only one bank ----------------------------------
+  std::string onebank = getProperty("BankName");
+  bool doOneBank = (onebank != "");
+  bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
+  if (doOneBank)
+  {
+    bankNames.clear();
+    bankNames.push_back( onebank + "_events" );
+  }
+
 
   prog.report("Initializing all pixels");
 
@@ -286,7 +302,37 @@ void LoadSNSEventNexus::exec()
   {
     Timer tim1;
     //Pad pixels; parallel flag is off because it is actually slower :(
-    WS->padPixels( false );
+    if (doOneBank && SingleBankPixelsOnly)
+    {
+      // ---- Pad a pixel for each detector inside the bank -------
+      int wi = 0;
+      IInstrument_sptr inst = WS->getInstrument();
+      boost::shared_ptr<IComponent> comp = inst->getComponentByName(onebank);
+      boost::shared_ptr<ICompAssembly> bank = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+      if (bank)
+      {
+        // Get a vector of children (recursively)
+        std::vector<boost::shared_ptr<IComponent> > children;
+        bank->getChildren(children, true);
+        std::vector<boost::shared_ptr<IComponent> >::iterator it;
+        for (it = children.begin(); it != children.end(); it++)
+        {
+          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(*it);
+          if (det)
+          {
+            WS->getOrAddEventList(wi).addDetectorID( det->getID() );
+            wi++;
+          }
+        }
+        WS->doneAddingEventLists();
+      }
+      else
+        throw std::runtime_error("Could not find the bank named " + onebank + " as a component assembly in the instrument tree.");
+    }
+    else
+    {
+      WS->padPixels( false );
+    }
     //std::cout << tim1.elapsed() << "seconds to pad pixels.\n";
   }
 
@@ -330,14 +376,6 @@ void LoadSNSEventNexus::exec()
 
   //This map will be used to find the workspace index
   IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
-
-  std::string onebank = getProperty("BankName");
-  onebank += "_events";
-  if(onebank != "_events")
-  {
-    bankNames.clear();
-    bankNames.push_back( onebank );
-  }
 
   // Now go through each bank.
   // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.

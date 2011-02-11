@@ -219,6 +219,33 @@ boost::shared_ptr<IComponent> ObjCompAssembly::operator[](int i) const
   }
 }
 
+
+//------------------------------------------------------------------------------------------------
+/** Return a vector of all contained children components
+ *
+ * @param outVector :: vector of IComponent sptr.
+ * @param recursive :: if a child is a CompAssembly, returns its children recursively
+ */
+void ObjCompAssembly::getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const
+{
+  for (int i=0; i < this->nelements(); i++)
+  {
+    boost::shared_ptr<IComponent> comp = this->getChild(i);
+    if (comp)
+    {
+      outVector.push_back( comp );
+      // Look deeper, on option.
+      if (recursive)
+      {
+        boost::shared_ptr<ICompAssembly> assemb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+        if (assemb)
+          assemb->getChildren(outVector, recursive);
+      }
+    }
+  }
+}
+
+
 /** Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 

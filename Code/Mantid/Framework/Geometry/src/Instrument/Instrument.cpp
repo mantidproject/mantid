@@ -166,8 +166,8 @@ namespace Mantid
     {
       if (m_isParametrized)
       {
-	IDetector_sptr baseDet = m_instr->getDetector(detector_id);
-	return ParComponentFactory::createParDetector(baseDet, m_map);
+        IDetector_sptr baseDet = m_instr->getDetector(detector_id);
+        return ParComponentFactory::createParDetector(baseDet, m_map);
       }
       else
       {

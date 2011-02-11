@@ -75,6 +75,8 @@ public:
   int addCopy(IComponent*, const std::string&);
   //! Get a pointer to the ith component within the assembly. Easier to use than [] when you have a pointer
   boost::shared_ptr<IComponent> getChild(const int i) const;
+  //! Returns a vector of all children contained.
+  void getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const;
   //! Get a pointer to the ith component in the assembly
   boost::shared_ptr<IComponent> operator[](int i) const;
 

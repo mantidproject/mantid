@@ -416,7 +416,6 @@ public:
      {
        TS_ASSERT ( false );
      }
-     //TS_ASSERT( equals(origWS, ws, 1e-4) );
 
      //Clear old file
      if( Poco::File(outputFile).exists() ) Poco::File(outputFile).remove();

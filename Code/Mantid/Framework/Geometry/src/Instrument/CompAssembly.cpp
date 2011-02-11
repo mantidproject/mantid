@@ -215,6 +215,35 @@ boost::shared_ptr<IComponent> CompAssembly::operator[](int i) const
   return this->getChild(i);
 }
 
+
+//------------------------------------------------------------------------------------------------
+/** Return a vector of all contained children components
+ *
+ * @param outVector :: vector of IComponent sptr.
+ * @param recursive :: if a child is a CompAssembly, returns its children recursively
+ */
+void CompAssembly::getChildren(std::vector<boost::shared_ptr<IComponent> > & outVector, bool recursive) const
+{
+  for (int i=0; i < this->nelements(); i++)
+  {
+    boost::shared_ptr<IComponent> comp = this->getChild(i);
+    if (comp)
+    {
+      outVector.push_back( comp );
+      // Look deeper, on option.
+      if (recursive)
+      {
+        boost::shared_ptr<ICompAssembly> assemb = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+        if (assemb)
+          assemb->getChildren(outVector, recursive);
+      }
+    }
+  }
+}
+
+
+
+//------------------------------------------------------------------------------------------------
 /**
  * Get the bounding box for this assembly. It is simply the sum of the bounding boxes of its children
  * @param assemblyBox :: [Out] The resulting bounding box is stored here.
