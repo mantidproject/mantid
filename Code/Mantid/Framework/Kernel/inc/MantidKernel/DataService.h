@@ -171,8 +171,8 @@ public:
     else
     {
     	std::string information=" add Data Object '"+name+"' successful";
-    	g_log.information(information);
-        notificationCenter.postNotification(new AddNotification(name,Tobject));
+    	g_log.debug(information);
+      notificationCenter.postNotification(new AddNotification(name,Tobject));
     }
     return;
   }
@@ -184,7 +184,7 @@ public:
     svc_it it = datamap.find(name);
     if (it!=datamap.end())
     {
-      g_log.information("Data Object '"+ name +"' replaced in data service.");
+      g_log.debug("Data Object '"+ name +"' replaced in data service.");
       notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
       datamap[name] = Tobject;
       notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));

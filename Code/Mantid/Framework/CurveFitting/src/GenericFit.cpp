@@ -226,12 +226,14 @@ namespace CurveFitting
     std::string reportOfGenericFit = gsl_strerror(status);
 
     g_log.information() << "Method used = " << methodUsed << "\n" <<
-      "Iteration = " << iter << "\n" <<
-      "Status = " << reportOfGenericFit << "\n" <<
-      "Chi^2/DoF = " << finalCostFuncVal << "\n";
+      "Iteration = " << iter << "\n";
+    if ( reportOfGenericFit == "success" )
+      g_log.information() << reportOfGenericFit << "  Chi^2/DoF = " << finalCostFuncVal << "\n";
+    else
+      g_log.warning() << reportOfGenericFit << "  Chi^2/DoF = " << finalCostFuncVal << "\n";
     for (int i = 0; i < m_function->nParams(); i++)
     {
-      g_log.information() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
+      g_log.debug() << m_function->parameterName(i) << " = " << m_function->getParameter(i) << "  \n";
     }
 
 
@@ -339,8 +341,10 @@ namespace CurveFitting
           row << standardDeviations[i];
         }
       }
+      // Add chi-squared value at the end of parameter table
+      Mantid::API::TableRow row = m_result->appendRow();
+      row << "Cost function value" << finalCostFuncVal;      
       setProperty("OutputParameters",m_result);
-
 
 
       if ( methodUsed.compare("Simplex") != 0 ) 
