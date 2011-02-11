@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'reduction_main.ui'
+# Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Tue Nov 30 14:20:32 2010
+# Created: Fri Feb 11 08:23:54 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_SANSReduction(object):
     def setupUi(self, SANSReduction):
         SANSReduction.setObjectName("SANSReduction")
-        SANSReduction.resize(872, 819)
+        SANSReduction.resize(963, 861)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -26,8 +26,9 @@ class Ui_SANSReduction(object):
         self.centralwidget.setSizePolicy(sizePolicy)
         self.centralwidget.setAutoFillBackground(True)
         self.centralwidget.setObjectName("centralwidget")
+        self.verticalLayout = QtGui.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setObjectName("verticalLayout")
         self.tabWidget = QtGui.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(20, 10, 831, 701))
         self.tabWidget.setObjectName("tabWidget")
         self.tab = QtGui.QWidget()
         self.tab.setObjectName("tab")
@@ -35,15 +36,21 @@ class Ui_SANSReduction(object):
         self.tab_2 = QtGui.QWidget()
         self.tab_2.setObjectName("tab_2")
         self.tabWidget.addTab(self.tab_2, "")
+        self.verticalLayout.addWidget(self.tabWidget)
+        self.horizontalLayout = QtGui.QHBoxLayout()
+        self.horizontalLayout.setObjectName("horizontalLayout")
+        spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout.addItem(spacerItem)
         self.reduce_button = QtGui.QPushButton(self.centralwidget)
-        self.reduce_button.setGeometry(QtCore.QRect(650, 730, 93, 27))
         self.reduce_button.setObjectName("reduce_button")
+        self.horizontalLayout.addWidget(self.reduce_button)
         self.export_button = QtGui.QPushButton(self.centralwidget)
-        self.export_button.setGeometry(QtCore.QRect(750, 730, 93, 27))
         self.export_button.setObjectName("export_button")
+        self.horizontalLayout.addWidget(self.export_button)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         SANSReduction.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(SANSReduction)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 872, 23))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 963, 25))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtGui.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")

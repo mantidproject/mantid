@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>872</width>
-    <height>819</height>
+    <width>963</width>
+    <height>861</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -29,69 +29,70 @@
    <property name="autoFillBackground">
     <bool>true</bool>
    </property>
-   <widget class="QTabWidget" name="tabWidget">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>831</width>
-      <height>701</height>
-     </rect>
-    </property>
-    <property name="currentIndex">
-     <number>0</number>
-    </property>
-    <widget class="QWidget" name="tab">
-     <attribute name="title">
-      <string>Tab 1</string>
-     </attribute>
-    </widget>
-    <widget class="QWidget" name="tab_2">
-     <attribute name="title">
-      <string>Tab 2</string>
-     </attribute>
-    </widget>
-   </widget>
-   <widget class="QPushButton" name="reduce_button">
-    <property name="geometry">
-     <rect>
-      <x>650</x>
-      <y>730</y>
-      <width>93</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Click to execute reduction.</string>
-    </property>
-    <property name="text">
-     <string>Reduce</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="export_button">
-    <property name="geometry">
-     <rect>
-      <x>750</x>
-      <y>730</y>
-      <width>93</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string>Click to export the reduction parameters to a python script that can be run in MantidPlot.</string>
-    </property>
-    <property name="text">
-     <string>Export</string>
-    </property>
-   </widget>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tab">
+       <attribute name="title">
+        <string>Tab 1</string>
+       </attribute>
+      </widget>
+      <widget class="QWidget" name="tab_2">
+       <attribute name="title">
+        <string>Tab 2</string>
+       </attribute>
+      </widget>
+     </widget>
+    </item>
+    <item>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="reduce_button">
+        <property name="toolTip">
+         <string>Click to execute reduction.</string>
+        </property>
+        <property name="text">
+         <string>Reduce</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="export_button">
+        <property name="toolTip">
+         <string>Click to export the reduction parameters to a python script that can be run in MantidPlot.</string>
+        </property>
+        <property name="text">
+         <string>Export</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </item>
+   </layout>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>872</width>
-     <height>23</height>
+     <width>963</width>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_output.ui'
 #
-# Created: Tue Nov 30 15:00:36 2010
+# Created: Fri Feb 11 08:45:32 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,27 +15,31 @@ class Ui_Frame(object):
         Frame.resize(806, 795)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
+        self.verticalLayout = QtGui.QVBoxLayout(Frame)
+        self.verticalLayout.setObjectName("verticalLayout")
         self.label = QtGui.QLabel(Frame)
-        self.label.setGeometry(QtCore.QRect(30, 30, 161, 17))
         self.label.setObjectName("label")
+        self.verticalLayout.addWidget(self.label)
         self.scrollArea = QtGui.QScrollArea(Frame)
-        self.scrollArea.setGeometry(QtCore.QRect(30, 50, 744, 273))
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 742, 271))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 784, 348))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.output_text_edit = QtGui.QTextEdit(self.scrollAreaWidgetContents)
-        self.output_text_edit.setGeometry(QtCore.QRect(0, 0, 742, 271))
         self.output_text_edit.setObjectName("output_text_edit")
+        self.verticalLayout_2.addWidget(self.output_text_edit)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
-        self.horizontalLayoutWidget = QtGui.QWidget(Frame)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(50, 339, 691, 256))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
-        self.plot_area_layout = QtGui.QHBoxLayout(self.horizontalLayoutWidget)
+        self.verticalLayout.addWidget(self.scrollArea)
+        self.plot_area_layout = QtGui.QHBoxLayout()
         self.plot_area_layout.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.plot_area_layout.setContentsMargins(0, 20, -1, 20)
         self.plot_area_layout.setObjectName("plot_area_layout")
+        self.verticalLayout.addLayout(self.plot_area_layout)
+        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout.addItem(spacerItem)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
