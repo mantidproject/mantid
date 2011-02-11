@@ -5,7 +5,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>517</width>
+    <width>495</width>
     <height>619</height>
    </rect>
   </property>
@@ -30,7 +30,7 @@
         <rect>
          <x>10</x>
          <y>10</y>
-         <width>461</width>
+         <width>441</width>
          <height>121</height>
         </rect>
        </property>
@@ -139,7 +139,7 @@
         <rect>
          <x>10</x>
          <y>140</y>
-         <width>491</width>
+         <width>461</width>
          <height>111</height>
         </rect>
        </property>
@@ -213,7 +213,7 @@
         <rect>
          <x>10</x>
          <y>260</y>
-         <width>491</width>
+         <width>461</width>
          <height>121</height>
         </rect>
        </property>
@@ -285,7 +285,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>350</x>
+          <x>340</x>
           <y>80</y>
           <width>41</width>
           <height>22</height>
@@ -308,7 +308,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>410</x>
+          <x>390</x>
           <y>80</y>
           <width>51</width>
           <height>22</height>
@@ -331,7 +331,7 @@
         <rect>
          <x>10</x>
          <y>390</y>
-         <width>491</width>
+         <width>461</width>
          <height>81</height>
         </rect>
        </property>
@@ -389,7 +389,7 @@
         <rect>
          <x>10</x>
          <y>480</y>
-         <width>491</width>
+         <width>461</width>
          <height>101</height>
         </rect>
        </property>
@@ -401,7 +401,7 @@
          <rect>
           <x>10</x>
           <y>20</y>
-          <width>471</width>
+          <width>441</width>
           <height>71</height>
          </rect>
         </property>
@@ -410,7 +410,7 @@
       <widget class="QPushButton" name="muonAnalysisHelp" >
        <property name="geometry" >
         <rect>
-         <x>480</x>
+         <x>457</x>
          <y>20</y>
          <width>20</width>
          <height>24</height>
@@ -513,7 +513,7 @@
       <widget class="QLabel" name="label_5" >
        <property name="geometry" >
         <rect>
-         <x>220</x>
+         <x>210</x>
          <y>350</y>
          <width>46</width>
          <height>14</height>
@@ -526,7 +526,7 @@
       <widget class="QLabel" name="label_6" >
        <property name="geometry" >
         <rect>
-         <x>170</x>
+         <x>160</x>
          <y>550</y>
          <width>101</width>
          <height>16</height>
@@ -542,7 +542,7 @@
        </property>
        <property name="geometry" >
         <rect>
-         <x>400</x>
+         <x>390</x>
          <y>350</y>
          <width>75</width>
          <height>24</height>
@@ -558,7 +558,7 @@
        </property>
        <property name="geometry" >
         <rect>
-         <x>400</x>
+         <x>390</x>
          <y>550</y>
          <width>75</width>
          <height>24</height>
@@ -587,7 +587,7 @@
       <widget class="QComboBox" name="groupTablePlotChoice" >
        <property name="geometry" >
         <rect>
-         <x>270</x>
+         <x>260</x>
          <y>350</y>
          <width>111</width>
          <height>22</height>
@@ -612,7 +612,7 @@
       <widget class="QComboBox" name="pairTablePlotChoice" >
        <property name="geometry" >
         <rect>
-         <x>270</x>
+         <x>260</x>
          <y>550</y>
          <width>111</width>
          <height>22</height>
@@ -669,7 +669,7 @@
       <widget class="QLabel" name="label_7" >
        <property name="geometry" >
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>70</y>
          <width>71</width>
          <height>16</height>
@@ -688,7 +688,7 @@
       <widget class="QLabel" name="label_8" >
        <property name="geometry" >
         <rect>
-         <x>20</x>
+         <x>10</x>
          <y>380</y>
          <width>81</width>
          <height>16</height>
@@ -730,7 +730,7 @@
       <widget class="QPushButton" name="muonAnalysisHelpGrouping" >
        <property name="geometry" >
         <rect>
-         <x>460</x>
+         <x>457</x>
          <y>20</y>
          <width>20</width>
          <height>24</height>
@@ -750,7 +750,7 @@
         <rect>
          <x>10</x>
          <y>20</y>
-         <width>481</width>
+         <width>461</width>
          <height>111</height>
         </rect>
        </property>
@@ -760,7 +760,7 @@
        <widget class="QLabel" name="label_10" >
         <property name="geometry" >
          <rect>
-          <x>20</x>
+          <x>10</x>
           <y>20</y>
           <width>51</width>
           <height>16</height>
@@ -776,7 +776,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>230</x>
+          <x>220</x>
           <y>20</y>
           <width>71</width>
           <height>16</height>
@@ -789,7 +789,7 @@
        <widget class="QLabel" name="timeAxisFinishAtLabel" >
         <property name="geometry" >
          <rect>
-          <x>350</x>
+          <x>340</x>
           <y>20</y>
           <width>71</width>
           <height>16</height>
@@ -805,7 +805,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>300</x>
+          <x>290</x>
           <y>20</y>
           <width>41</width>
           <height>20</height>
@@ -818,7 +818,7 @@
        <widget class="QLineEdit" name="timeAxisFinishAtInput" >
         <property name="geometry" >
          <rect>
-          <x>420</x>
+          <x>410</x>
           <y>20</y>
           <width>41</width>
           <height>20</height>
@@ -828,7 +828,7 @@
        <widget class="QLabel" name="label_11" >
         <property name="geometry" >
          <rect>
-          <x>20</x>
+          <x>10</x>
           <y>50</y>
           <width>46</width>
           <height>21</height>
@@ -841,7 +841,7 @@
        <widget class="QCheckBox" name="yAxisAutoscale" >
         <property name="geometry" >
          <rect>
-          <x>80</x>
+          <x>70</x>
           <y>50</y>
           <width>72</width>
           <height>21</height>
@@ -860,7 +860,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>175</x>
+          <x>170</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -876,7 +876,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>230</x>
+          <x>220</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -889,7 +889,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>295</x>
+          <x>290</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -905,7 +905,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>350</x>
+          <x>340</x>
           <y>50</y>
           <width>51</width>
           <height>20</height>
@@ -918,7 +918,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>20</x>
+          <x>10</x>
           <y>80</y>
           <width>101</width>
           <height>18</height>
@@ -934,7 +934,7 @@
         </property>
         <property name="geometry" >
          <rect>
-          <x>150</x>
+          <x>140</x>
           <y>80</y>
           <width>101</width>
           <height>18</height>
@@ -950,7 +950,7 @@
        <widget class="QComboBox" name="timeComboBox" >
         <property name="geometry" >
          <rect>
-          <x>80</x>
+          <x>70</x>
           <y>20</y>
           <width>141</width>
           <height>22</height>
