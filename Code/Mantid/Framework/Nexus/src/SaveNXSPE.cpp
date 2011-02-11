@@ -240,7 +240,7 @@ namespace Mantid
             {
               Geometry::IDetector_sptr det = inputWS->getDetector(i);
               polar.push_back(inputWS->detectorTwoTheta(det) * rad2deg);
-              azimuthal.push_back(inputWS->getDetector(i)->getPhi() * rad2deg);
+              azimuthal.push_back(det->getPhi() * rad2deg);
 
               // Get Sample->Detector distance
               distance = det->getDistance(*sample);
@@ -303,7 +303,7 @@ namespace Mantid
                   nxFile.closeData();
                 }
             }
-          // make regular progress reports and check for cancelling the algorithm
+          // make regular progress reports and check for canceling the algorithm
           if ( i % progStep == 0 )
           {
             progress.report();
