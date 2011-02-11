@@ -37,7 +37,13 @@
 	<value val="27000" />
 </parameter>
 
+<parameter name="analyser" type="string">
+  <value val="graphite" />
+</parameter>
 
+<parameter name="reflection" type="string">
+  <value val="004" />
+</parameter>
 
 </component-link>
 

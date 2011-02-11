@@ -325,9 +325,9 @@ void IndirectDataAnalysis::setupFuryFit()
   connect(m_ffRangeManager, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyfitRangePropChanged(QtProperty*, double)));
 
   m_ffProp["LinearBackground"] = m_groupManager->addProperty("LinearBackground");
-  QtProperty* bgA0 = m_ffRangeManager->addProperty("A0");
-  m_ffProp["LinearBackground"]->addSubProperty(bgA0);
-  m_ffProp["BackgroundA0"] = bgA0;
+  m_ffProp["BackgroundA0"] = m_ffRangeManager->addProperty("A0");
+  m_ffRangeManager->setDecimals(m_ffProp["BackgroundA0"], m_nDec);
+  m_ffProp["LinearBackground"]->addSubProperty(m_ffProp["BackgroundA0"]);
 
   m_ffProp["Exponential1"] = createExponential();
   m_ffProp["Exponential2"] = createExponential();
@@ -2169,6 +2169,20 @@ void IndirectDataAnalysis::confitSequential()
     return;
   }
 
+  QString bg = m_uiForm.confit_cbBackground->currentText();
+  if ( bg == "Fixed Flat" )
+  {
+    bg = "FixF";
+  }
+  else if ( bg == "Fit Flat" )
+  {
+    bg = "FitF";
+  }
+  else if ( bg == "Fit Linear" )
+  {
+    bg = "FitL";
+  }
+
   Mantid::API::CompositeFunction* func = confitCreateFunction();
   std::string function = std::string(*func);
   QString stX = m_cfProp["StartX"]->valueText();
@@ -2185,8 +2199,9 @@ void IndirectDataAnalysis::confitSequential()
   
   pyInput += m_uiForm.confit_ckSaveSeq->isChecked() ? "True\n" : "False\n";
   
-  pyInput +=
-    "confitSeq(input, func, startx, endx, save, plot)\n";
+  pyInput +=    
+    "bg = '" + bg + "'\n"
+    "confitSeq(input, func, startx, endx, save, plot, bg)\n";
 
   QString pyOutput = runPythonCode(pyInput);
 }

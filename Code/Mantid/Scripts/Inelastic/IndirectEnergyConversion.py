@@ -26,7 +26,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
     except IndexError, message:
         print message
         sys.exit(message)
-    isTosca = adjustTOF('__empty_'+instrument)    
+    isTosca = adjustTOF('__empty_'+instrument)
     # Get short name of instrument from the config service
     isn = ConfigService().facility().instrument(instrument).shortName().lower()
     if ( calib != '' ): # Only load Calibration file once
@@ -36,6 +36,14 @@ def convert_to_energy(rawfiles, grouping, first, last,
     runNos = []
     mon_wsl = loadData(rawfiles, Sum=SumFiles, SpecMin=fmon+1, SpecMax=fmon+1,
         Suffix='_mon')
+    if isTosca: # Check if we need to use ChopData etc
+        ws = mtd[mon_wsl[0]]
+        if ( ws.readX(0)[ws.getNumberBins()] > 40000 ):
+            DeleteWorkspace(mon_wsl[0])
+            workspaces = toscaChop(rawfiles)
+            if ( saveFormats != [] ): # Save data in selected formats
+                saveItems(workspaces, saveFormats)
+            return workspaces
     ws_names = loadData(rawfiles, Sum=SumFiles, SpecMin=first, SpecMax=last)    
     if ( len(mon_wsl) != len(ws_names) ):
         print "Indirect CTE: Error loading data files."
@@ -86,7 +94,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         saveItems(output_workspace_names, saveFormats)
     if ( calib != '' ): # Remove calibration workspace
         DeleteWorkspace('__calibration')
-    return output_workspace_names, runNos
+    return output_workspace_names
         
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         Suffix=''):
@@ -113,6 +121,76 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         return [outWS+Suffix]
     else:
         return workspaces
+
+def toscaChop(files):
+    '''Reduction routine for TOSCA instrument when input workspace must be 
+    "split" into parts and folded together after it has been corrected to the 
+    monitor.'''
+    wslist = []
+    workspace_list = loadData(files)
+    for raw in workspace_list:
+        invalid = getBadDetectorList(raw)
+        chopdata = ChopData(raw,raw+'_data')
+        wsgroup = mtd[raw+'_data'].getNames()
+        for ws in wsgroup:
+            TofCorrection(ws, ws)
+            for i in range(1,141):
+                detector = "Detector #" + str(i)
+                MoveInstrumentComponent(ws, detector, X=0, Y=0, Z=0, 
+                    RelativePosition=False)
+            ExtractSingleSpectrum(ws, ws+'mon', 140)
+            ConvertUnits(ws+'mon', ws+'mon', 'Wavelength')
+            monitorEfficiency(ws+'mon', 5.391011e-5, 0.013)
+            CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
+            normToMon(Factor=1e9, monitor=ws+'mon', detectors=ws)
+            DeleteWorkspace(ws+'mon')
+        workspaces = ','.join(wsgroup)
+        ws = raw+'_c'
+        MergeRuns(workspaces, ws)
+        scaling = createScalingWorkspace(wsgroup, ws)
+        Divide(ws, scaling, ws)
+        DeleteWorkspace(scaling)
+        for grpws in wsgroup:
+            DeleteWorkspace(grpws)
+        conToEnergy(detectors=ws)
+        Rebin(ws, ws, '-2.5,0.015,3,-0.005,1000')
+        wstitle = ''
+        ws = groupTosca(ws+'_en', invalid, detectors=ws)
+        wslist.append(ws)
+    return wslist
+
+def createScalingWorkspace(wsgroup, merged, wsname='__scaling'):
+    '''Based on the widths of the workspaces in the group once they've been
+    converted into Wavelength and normalised by the monitor, this function
+    uses the CreateWorksapce algorithm to decide how to scale the merged
+    workspace.'''
+    largest = 0
+    nlargest = 0
+    nlrgws = ''
+    for ws in wsgroup:
+        nbin = mtd[ws].getNumberBins()
+        if ( nbin > largest ):
+            nlargest = largest
+            largest = nbin
+        elif ( nbin > nlargest ):
+            nlargest = nbin
+            nlrgws = ws
+    nlargestX = mtd[nlrgws].dataX(0)[nlargest]	
+    largestValInNLrg = nlargestX
+    binIndex = mtd[merged].binIndexOf(largestValInNLrg)	
+    dataX = list(mtd[merged].readX(0))
+    dataY = []
+    dataE = []
+    totalBins = mtd[merged].getNumberBins()
+    nWS = len(wsgroup)
+    for i in range(0, binIndex):
+        dataE.append(0.0)
+        dataY.append(nWS)    
+    for i in range(binIndex, totalBins):
+        dataE.append(0.0)
+        dataY.append(1.0)	
+    CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='Wavelength')
+    return wsname
 
 def getFirstMonFirstDet(inWS):
     workspace = mtd[inWS]
@@ -179,7 +257,8 @@ def fortranUnwrap(monitor):
     DataX.append(2*DataX[ntc-1]-DataX[ntc-2])
     DataY = LibA2L(ntc,yout)
     DataE = LibA2L(ntc,eout)
-    CreateWorkspace(monitor,DataX,DataY,DataE,1,'Wavelength')
+    CreateWorkspace(monitor,DataX,DataY,DataE,1,'Wavelength', 
+        Distribution=True)
     return True
     
 def monitorEfficiency(inWS, area, thickness):
@@ -289,15 +368,13 @@ def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
         if workspace.endswith('_'+analyser+reflection+r'_red_intermediate'):
             ws_list.append(workspace)
     if ( len(ws_list) == 0 ):
-        message = "No intermediate workspaces were found. Run with \
-                'Keep Intermediate Workspaces' checked."
+        message = "No intermediate workspaces were found. Run with "
+        message += "'Keep Intermediate Workspaces' checked."
         print message
         sys.exit(message)
     output = []
-    runNos = []
     for ws in ws_list:
         runNo = mtd[ws].getRun().getLogData("run_number").value
-        runNos.append(runNo)
         inst = mtd[ws].getInstrument().getName()
         inst = ConfigService().facility().instrument(inst).shortName().lower()
         name = inst + runNo + '_' + analyser + reflection + '_red'
@@ -312,7 +389,7 @@ def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
         output.append(name)
     if ( saveFormats != [] ):
         saveItems(output, saveFormats)
-    return output, runNos
+    return output
 
 def createMappingFile(groupFile, ngroup, nspec, first):
     if ( ngroup == 1 ): return 'All'
@@ -377,17 +454,21 @@ def createCalibFile(rawfiles, suffix, peakMin, peakMax, backMin, backMax,
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
         plotOpt=False, Res=True):
-    workspace_list, runNos = convert_to_energy(files, 'All', 
+    workspace_list = convert_to_energy(files, 'All', 
         iconOpt['first'], iconOpt['last'], SumFiles=True, 
         instrument=instrument, analyser=analyser, reflection=reflection)
     iconWS = workspace_list[0]
     if Res:
         run = mtd[iconWS].getRun().getLogData("run_number").value
         name = iconWS[:3].lower() + run + '_' + analyser + reflection + '_res'
+        FlatBackground(iconWS, '__background', bground[0], bground[1], 
+            Mode='Mean', OutputMode='Return Background')
         Rebin(iconWS, iconWS, rebinParam)
         FFTSmooth(iconWS,iconWS,0)
-        FlatBackground(iconWS, name, bground[0], bground[1], Mode='Mean')
+        RebinToWorkspace('__background', iconWS, '__background')
+        Minus(iconWS, '__background', name)
         DeleteWorkspace(iconWS)
+        DeleteWorkspace('__background')
         SaveNexusProcessed(name, name+'.nxs')
         if plotOpt:
             graph = plotSpectrum(name, 0)

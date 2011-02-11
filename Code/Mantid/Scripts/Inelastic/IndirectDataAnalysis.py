@@ -61,9 +61,8 @@ def concatWSs(workspaces, unit, name):
     CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
         UnitX=unit)
 
-def confitParsToWS(Table, Data):
+def confitParsToWS(Table, Data, BackG='FixF'):
     dataX = []
-    outNm = Table + '_matrix'
     ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
     Transpose('inq', 'inq')
     readX = mtd['inq'].readX(0)
@@ -91,6 +90,8 @@ def confitParsToWS(Table, Data):
                 dataE.append(ws.getDouble(eAxis,row))
         else:
             nSpec -= 1
+    suffix = str(nSpec) + 'L' + BackG
+    outNm = Table + suffix
     CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
@@ -112,14 +113,13 @@ def confitPlotSeq(inputWS, plot):
             plotSpecs.append(i)
     plotSpectrum(inputWS, plotSpecs)
 
-def confitSeq(inputWS, func, startX, endX, save, plot):
+def confitSeq(inputWS, func, startX, endX, save, plot, bg):
     input = inputWS+',i0'
-    nHist = mtd[inputWS].getNumberHistograms()
-    for i in range(1, nHist):
+    for i in range(1, mtd[inputWS].getNumberHistograms()):
         input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_convfit_seq_Parameters'
+    outNm = getWSprefix(inputWS) + '_conv_'
     PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
-    wsname = confitParsToWS(outNm, inputWS)
+    wsname = confitParsToWS(outNm, inputWS, bg)
     if save:
             SaveNexusProcessed(wsname, wsname+'.nxs')
     if plot != 'None':
@@ -137,7 +137,6 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         wsInst = mtd['__empty_' + instrument]
     # short name of instrument for saving etc
     isn = ConfigService().facility().instrument(instrument).shortName().lower()
-
     # parameters to do with monitor
     if Monitor:
         fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
@@ -150,10 +149,8 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
             sys.exit(message)
         ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
             SpecMin=fmon+1, SpecMax=fmon+1)
-
-    ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, 
-        SpecMin=first, SpecMax=last)
-
+    ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, SpecMin=first, 
+        SpecMax=last)
     workspaces = []
     for i in range(0, len(ws_det_l)):
         det_ws = ws_det_l[i]
@@ -168,7 +165,6 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
             IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
             # Remove monitor workspace
             DeleteWorkspace(mon_ws)
-
         if ( cal != '' ): # AlignDetectors and Group by .cal file
             if Monitor:
                 ConvertUnits(det_ws, det_ws, 'TOF')
@@ -177,18 +173,14 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
             AlignDetectors(det_ws, det_ws, cal)
             DiffractionFocussing(det_ws, savefile, cal)
             DeleteWorkspace(det_ws)
-            
             if ( Vanadium != '' ):
                 print "NotImplemented: divide by vanadium."
-
         else: ## Do it the old fashioned way
             # Convert to dSpacing - need to AlignBins so we can group later
             ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
             IEC.groupData(grouping, savefile, detectors=det_ws)
-
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
-
         workspaces.append(savefile)
     if ( Plot != 'None' ):
         for demon in workspaces:
@@ -301,7 +293,6 @@ def furyfitCreateXAxis(inputWS):
     return result
 
 def furyfitParsToWS(Table, Data):
-    wsname = Table + '_matrix'
     dataX = furyfitCreateXAxis(Data)
     dataY = []
     dataE = []
@@ -313,6 +304,7 @@ def furyfitParsToWS(Table, Data):
     cName =  ws.getColumnNames()
     nSpec = ( cCount - 1 ) / 2
     xAxis = cName[0]
+    stretched = 0
     for spec in range(0,nSpec):
         yAxis = cName[(spec*2)+1]
         if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis)
@@ -325,8 +317,17 @@ def furyfitParsToWS(Table, Data):
             for row in range(0, rCount):
                 dataY.append(ws.getDouble(yAxis,row))
                 dataE.append(ws.getDouble(eAxis,row))
+            if ( re.search('Beta$', yAxis) ): # need to know how many of curves
+                stretched += 1                # are stretched exponentials
         else:
             nSpec -= 1
+    suffix = ''
+    nE = ( nSpec / 2 ) - stretched
+    if ( nE > 0 ):
+        suffix += str(nE) + 'E'
+    if ( stretched > 0 ):
+        suffix += str(stretched) + 'S'
+    wsname = Table + suffix
     CreateWorkspace(wsname, xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', VerticalAxisUnit='Text',
         VerticalAxisValues=names)
@@ -355,7 +356,7 @@ def furyfitSeq(inputWS, func, startx, endx, save, plot):
     nHist = mtd[inputWS].getNumberHistograms()
     for i in range(1,nHist):
         input += ';'+inputWS+',i'+str(i)
-    outNm = inputWS + '_furyfit_seq_Parameters'
+    outNm = getWSprefix(inputWS) + 'fury_'
     PlotPeakByLogValue(input, outNm, func, StartX=startx, EndX=endx)
     wsname = furyfitParsToWS(outNm, inputWS)
     if save:
@@ -363,6 +364,18 @@ def furyfitSeq(inputWS, func, startx, endx, save, plot):
     if ( plot != 'None' ):
         furyfitPlotSeq(wsname, plot)
 
+def getWSprefix(workspace):
+    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
+    all of our other naming conventions are built.'''
+    ws = mtd[workspace]
+    ins = ws.getInstrument().getName()
+    ins = ConfigService().facility().instrument(ins).shortName().lower()
+    run = ws.getRun().getLogData('run_number').value
+    analyser = ws.getInstrument().getStringParameter('analyser')[0]
+    reflection = ws.getInstrument().getStringParameter('reflection')[0]
+    prefix = ins + run + '_' + analyser + reflection + '_'
+    return prefix
+    
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     output = []
     for file in inputs:
@@ -382,26 +395,6 @@ def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
         if Save:
             SaveNexusProcessed(outWS_n, outWS_n+'.nxs', Title=title)
     return output
-
-def mut(inWS_n, deltaW, filename, efixed):
-    file_handle = open(filename, 'w') # Open File
-    sigs = 5.0 # sigs ?
-    siga = 1.0 # siga ?
-    we = math.sqrt(81.787/efixed) # 81.787 ?
-    tempWS = '__tmp_indirect_mut_file'
-    ConvertUnits(inWS_n, tempWS, 'Wavelength', 'Indirect', efixed)
-    xValues = mtd[tempWS].readX(0)
-    nbins = len(xValues)
-    xMin = xValues[0]
-    xMax = xValues[nbins-1]
-    nw = int(xMax/deltaW) - int(xMin/deltaW) + 1
-    file_handle.write(str(nw)+' '+str(we)+' '+str(siga)+' '+str(sigs)+'\n')
-    for i in range(0, nw):
-        wavelength = (int(xMin/deltaW) + i) * deltaW
-        sigt = sigs + siga*wavelength/1.8
-        file_handle.write(str(wavelength) + ' ' + str(sigt) + '\n')
-    file_handle.close()
-    mantid.deleteWorkspace(tempWS)
 
 def plotFury(inWS_n, spec):
     inWS = mtd[inWS_n[0]]

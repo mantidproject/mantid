@@ -293,14 +293,14 @@ void Indirect::runConvertToEnergy(bool tryToSave)
 
   if ( isDirty() )
   {
-    pyInput += "ws_list, rns = ind.convert_to_energy(rawfiles, mapfile, first, last,"
+    pyInput += "ws_list = ind.convert_to_energy(rawfiles, mapfile, first, last,"
       "instrument, analyser, reflection,"
       "SumFiles=Sum, bgremove=bgRemove, tempK=tempK, calib=calib, rebinParam=rebinParam,"
       "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose, FortranUnwrap=FU)\n";
   }
   else if ( isDirtyRebin() )
   {
-    pyInput += "ws_list, rns = ind.cte_rebin(mapfile, tempK, rebinParam, analyser, reflection,"
+    pyInput += "ws_list = ind.cte_rebin(mapfile, tempK, rebinParam, analyser, reflection,"
       "fileFormats, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
@@ -709,15 +709,6 @@ bool Indirect::validateCalib()
     if ( m_calDblMng->value(m_calResProp["ELow"]) > m_calDblMng->value(m_calResProp["EHigh"]) )
     {
       valid = false;
-    }
-
-    if ( m_calDblMng->value(m_calResProp["Start"]) < m_calDblMng->value(m_calResProp["ELow"]) )
-    {
-      m_calDblMng->setValue(m_calResProp["Start"], m_calDblMng->value(m_calResProp["ELow"]) );
-    }
-    if ( m_calDblMng->value(m_calResProp["End"]) > m_calDblMng->value(m_calResProp["EHigh"]) )
-    {
-      m_calDblMng->setValue(m_calResProp["End"], m_calDblMng->value(m_calResProp["EHigh"]) );
     }
 
   }

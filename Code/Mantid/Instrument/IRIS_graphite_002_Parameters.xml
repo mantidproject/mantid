@@ -3,8 +3,6 @@
 
 <component-link name = "IRIS">
 
-<!-- [[62500 ,  65000] , [59000 ,  61500]] -->
-
 <parameter name="analysis-type" type="string">
   <value val="spectroscopy" />
 </parameter>
@@ -37,7 +35,13 @@
 	<value val="61500" />
 </parameter>
 
+<parameter name="analyser" type="string">
+  <value val="graphite" />
+</parameter>
 
+<parameter name="reflection" type="string">
+  <value val="002" />
+</parameter>
 
 </component-link>
 
