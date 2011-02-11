@@ -101,6 +101,8 @@ public:
   /// Destructor
   virtual ~SANSDiagnostics();
 
+signals:
+  void applyMask(const QString& wsName,bool time_pixel);
 private:
   
  /// Initilaise the current tab
@@ -120,7 +122,7 @@ private:
   ///returns true if the user string contains sequential data
   bool isSequentialValues(const std::vector<unsigned int>& values);
   /// returns the workspace name
-  QString getWorkspaceName(const QString& fileName);
+  QString getWorkspaceNameFileName(const QString& fileName);
   /// returns the filename
   QString getFileName();
   /// run loadraw algorithm
@@ -138,8 +140,8 @@ private:
   void displayRectangularDetectors(const QString & wsName);
 
   // This method executes loadraw and sumrow column algorithm
-  void IntegralClicked(const QString& range,const QString& orientation,
-                                          const QString& specMin,const QString& specMax,const QString& opws);
+  void IntegralClicked(const QString& range,const QString& orientation,const QString& specMin,
+                                          const QString& specMax,const QString& opws,bool bMask,bool time_pixel);
   /// plot spectrum
   void plotSpectrum(const QString& wsName,int specNum);
 
@@ -167,6 +169,8 @@ private:
   bool isValidSpectra(const QString& specMin,const QString& specMax);
   //disable total periods boxes and labels
   void disblePeriodsControls();
+  /// applys the time channel or pixel mask
+  void maskDetector(const QString& wsName,bool bMask,bool time_pixel);
 
 private:
   QString m_dataDir; ///< default data search directory
@@ -208,6 +212,8 @@ private slots:
   
   /// load the first spectrum using the user given file.
   void loadFirstSpectrum();
+  /// enable the mask controls in the diagnostics UI
+  void enableMaskFileControls();
   
 };
 

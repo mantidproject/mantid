@@ -3939,6 +3939,13 @@ p, li { white-space: pre-wrap; }
         </layout>
        </item>
        <item row="1" column="0" >
+        <widget class="QLabel" name="label_7" >
+         <property name="text" >
+          <string>The Range string format for example is 60-65 or 60-66:2 or 60:66 or 60:66:2 or 60+61 or 60-65,66,67,68:72:2,73+74</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0" >
         <widget class="QGroupBox" name="groupBox_Detector1" >
          <property name="title" >
           <string> Detector1</string>
@@ -4019,7 +4026,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="2" column="0" >
+       <item row="3" column="0" >
         <widget class="QGroupBox" name="groupBox_Detector2" >
          <property name="title" >
           <string>Detector2</string>
@@ -4100,7 +4107,7 @@ p, li { white-space: pre-wrap; }
          </layout>
         </widget>
        </item>
-       <item row="3" column="0" >
+       <item row="4" column="0" >
         <spacer name="verticalSpacer_11" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>

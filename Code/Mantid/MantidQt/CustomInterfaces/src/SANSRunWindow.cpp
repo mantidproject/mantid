@@ -157,7 +157,13 @@ void SANSRunWindow::initLayout()
   if( ! m_addFilesTab )
   {//sets up the AddFiles tab which must be deleted in the destructor
     m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
+  } 
+  //diagnostics tab
+  if(!m_diagnosticsTab)
+  {
+    m_diagnosticsTab = new SANSDiagnostics(this,&m_uiForm);
   }
+  connect(this,SIGNAL(userfileLoaded()),m_diagnosticsTab,SLOT(enableMaskFileControls()));
   //Listen for Workspace delete signals
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
@@ -186,10 +192,7 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.transFit_lb->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
 
   
-  if(!m_diagnosticsTab)
-  {
-    m_diagnosticsTab = new SANSDiagnostics(this,&m_uiForm);
-  }
+ 
   //Listen for Workspace delete signals
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
@@ -1242,12 +1245,15 @@ bool SANSRunWindow::isUserFileLoaded() const
 /**
  * Create the mask strings for spectra and times
  */
-void SANSRunWindow::addUserMaskStrings(QString & exec_script)
-{
+void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& importCommand, enum MaskType mType)
+{  
   //Clear current
-  exec_script += "i.Mask('MASK/CLEAR')\n";
-  exec_script += "i.Mask('MASK/CLEAR/TIME')\n";
-
+ 
+  QString temp = importCommand+"('MASK/CLEAR')\n"; 
+  exec_script += temp;
+  temp = importCommand + "('MASK/CLEAR/TIME')\n";
+  exec_script += temp;
+  
   //Pull in the table details first, skipping the first two rows
   int nrows = m_uiForm.mask_table->rowCount();
   for(int row = 0; row <  nrows; ++row)
@@ -1256,8 +1262,24 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
     {
       continue;
     }
+    if(mType == PixelMask)
+    {
+      if( m_uiForm.mask_table->item(row, 0)->text() == "time")
+      {
+        continue;
+      }
+    }
+    else if (mType == TimeMask)
+    {
+       if( m_uiForm.mask_table->item(row, 0)->text() != "time")
+      {
+        continue;
+      }
+
+    }
     //Details are in the third column
-    exec_script += "i.Mask('MASK";
+    temp = importCommand + "('MASK";
+    exec_script += temp;
     if( m_uiForm.mask_table->item(row, 0)->text() == "time")
     {
       exec_script += "/TIME";
@@ -1279,6 +1301,7 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
     exec_script += "')\n";
   }
 
+  
   //Spectra mask first
   QStringList mask_params = m_uiForm.user_spec_mask->text().split(",", QString::SkipEmptyParts);
   QStringListIterator sitr(mask_params);
@@ -1288,12 +1311,14 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
     QString item = sitr.next().trimmed();
     if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
     {
-      exec_script += "i.Mask('MASK/" + item + "')\n";
+      temp = importCommand+"('MASK/" + item + "')\n";
+      exec_script += temp;
     }
     else if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) ||
         item.startsWith('V', Qt::CaseInsensitive) )
     {
-      exec_script += "i.Mask('MASK " + item + "')\n";
+      temp = importCommand +" ('MASK " + item + "')\n";
+      
     }
     else
     {
@@ -1318,7 +1343,9 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
       int ndetails = item.split(" ").count();
       if( ndetails == 3 || ndetails == 2 )
       {
-        exec_script += "i.Mask('/TIME" + item + "')\n";
+        temp = importCommand + "('/TIME" + item + "')\n";
+        exec_script += temp;
+
       }
       else
       {
@@ -1326,11 +1353,39 @@ void SANSRunWindow::addUserMaskStrings(QString & exec_script)
       }
     }
   }
+
   if( !bad_masks.isEmpty() )
   {
     m_uiForm.tabWidget->setCurrentIndex(3);
     showInformationBox(QString("Warning: Could not parse the following time masks: ") + bad_masks + ". Values skipped.");
   }
+ 
+}
+
+/** This method applys mask to a given workspace
+  * @param wsName name of the workspace
+  * @param time_pixel  true if time mask needs to be applied
+*/
+void SANSRunWindow::applyMask(const QString& wsName,bool time_pixel)
+{
+  QString script = "mask= isis_reduction_steps.Mask_ISIS()\n";
+  QString str;
+  if(time_pixel)
+  {
+    addUserMaskStrings(str,"mask.parse_instruction",TimeMask);
+  }
+  else
+  {
+    addUserMaskStrings(str,"mask.parse_instruction",PixelMask);
+  }
+  
+  script += str;
+  script += "mask.execute(i.ReductionSingleton(),\"";
+  script += wsName;
+  script += "\"";
+  script += ",xcentre=0,ycentre=0)";
+  runPythonCode(script.trimmed());
+ 
 }
 void SANSRunWindow::oldUserMaskStrings(QString & exec_script)
 {
@@ -1689,6 +1744,7 @@ void SANSRunWindow::selectUserFile()
   checkLogFlags();
 
   m_cfg_loaded = true;
+  emit userfileLoaded();
   m_uiForm.tabWidget->setTabEnabled(1, true);
   m_uiForm.tabWidget->setTabEnabled(2, true);
   m_uiForm.tabWidget->setTabEnabled(3, true);
@@ -2181,7 +2237,7 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
   exec_reduce += ")\n";
   //mask strings that the user has entered manually on to the GUI
-  addUserMaskStrings(exec_reduce);
+  addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
 
   //Set geometry info
   exec_reduce += 
@@ -2664,7 +2720,7 @@ void SANSRunWindow::handleStepComboChange(int new_index)
 void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
-  addUserMaskStrings(analysis_script);
+  addUserMaskStrings(analysis_script,"i.Mask",DefaultMask);
   analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);

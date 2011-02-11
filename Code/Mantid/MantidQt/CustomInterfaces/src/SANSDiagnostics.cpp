@@ -19,6 +19,8 @@ namespace MantidQt
       g_log(Mantid::Kernel::Logger::get("SANSDiagnostics"))
     {
       initLayout();
+      //connect to SANSRunWindow to apply mask
+      connect(this,SIGNAL(applyMask(const QString&,bool)),parent,SLOT(applyMask(const QString&,bool)));
     }
     ///Destructor
     SANSDiagnostics::~SANSDiagnostics()
@@ -58,7 +60,8 @@ namespace MantidQt
       connect(m_SANSForm->ti_Btn2,SIGNAL(clicked()),this,SLOT(secondDetectorVerticalIntegralClicked()));
       /// if period is entered display rectangual detector banks for that period
       connect(m_SANSForm->period_edit,SIGNAL(editingFinished()),this,SLOT(displayDetectorBanksofMemberWorkspace()));
-
+      
+      
     }
     /// set tool tips
     void SANSDiagnostics::setToolTips()
@@ -241,8 +244,7 @@ namespace MantidQt
         g_log.error("Error:Period number entered is is wrong.Enter a value between 1 and total number of periods "+ sPeriods );
         return;
       }
-      //this check is doing bcoz the editfinished signal seems to be emitted twice on my machine.
-      //May be the qt version I use has this problem.
+      //this check is doing bcoz the editfinished signal seems to be emitted more than once .
       if(periodNum==m_Period)
       {
       return;
@@ -517,11 +519,11 @@ namespace MantidQt
       return filename;
     }
 
-  /**This method returns workspace name from the load file name 
+  /**This method returns workspace name from the  file name 
     * @param fileName name of the file
     * @returns workspace name
     */
-    QString SANSDiagnostics::getWorkspaceName(const QString& fileName)
+    QString SANSDiagnostics::getWorkspaceNameFileName(const QString& fileName)
     {
       //construct workspace name from the file name.
       int index1=fileName.lastIndexOf(".");
@@ -603,18 +605,17 @@ namespace MantidQt
       } 
       
       QString detName= getDetectorName(0);
-           
       //give the detectorname_H for workspace
       detName+="_H";
-      QString opws(detName);
+      const QString opws(detName);
       ///horizontal integral range string
       QString hiRange=m_SANSForm->hirange_edit1->text();
       if(hiRange.isEmpty())
       {      
         return;
       }
-      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws);
-
+      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask1->isChecked(),true);
+         
     }
 
     /// Handler for first detector vertical integral button
@@ -640,7 +641,7 @@ namespace MantidQt
       {      
         return;
       }
-      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws);
+      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask2->isChecked(),true);
 
     }
 
@@ -662,8 +663,10 @@ namespace MantidQt
       {
         return;
       }
-
-     // QString wsName= getWorkspaceToProcess();
+      QString loadedws=getWorkspaceToProcess(); 
+      //apply mask
+      maskDetector(loadedws,m_SANSForm->pmask1->isChecked(),false);
+      
       QString detName= getDetectorName(0);
       //give the detectorname_V for workspace
       detName+="_T";
@@ -673,7 +676,7 @@ namespace MantidQt
       {
         return;
       }
-        
+     
       plotSpectrum(opws,0);
     }
 
@@ -688,13 +691,32 @@ namespace MantidQt
     * @param opws - output workspace.
     */
     void SANSDiagnostics::IntegralClicked(const QString& range,const QString& orientation,
-      const QString& specMin,const QString& specMax,const QString& opws)
+      const QString& specMin,const QString& specMax,const QString& opws,bool bMask,bool time_pixel)
     {
       /// now run the load algorithm with the spec_min and spec_max
       if(!runLoadAlgorithm(m_fileName,specMin,specMax))
       {
         return;
+      } 
+      //get the workspace name
+      QString loadedws=getWorkspaceToProcess(); 
+      
+      //QString ipwsName;
+      //if(isMultiPeriod())
+      //{
+      //  //this is the user selected member workspace
+      //  ipwsName=m_memberwsName; 
+      //}
+      //else
+      //{
+      //  ipwsName=m_outws_load;
+      //}
+      //aplly mask
+      if(bMask)
+      {
+        maskDetector(loadedws,bMask,time_pixel);
       }
+
       int count=0;
       UserStringParser parser;
       std::vector<std::vector<unsigned int> > parsedVals;
@@ -712,17 +734,7 @@ namespace MantidQt
         g_log.error(e.what());
         return;
       }
-      //now execute sumrowcolumn algorithm
-      QString ipwsName;
-      if(isMultiPeriod())
-      {
-        ipwsName=m_memberwsName; 
-      }
-      else
-      {
-        ipwsName=m_outws_load;
-      }
-
+     
       QString wsPlotString="[";
       //loop through each element of the parsed value vector
       std::vector<std::vector<unsigned int> >::const_iterator parsedValcitr;
@@ -732,11 +744,11 @@ namespace MantidQt
         std::stringstream num;
         num<<count;
         QString outputwsname=opws+QString::fromStdString(num.str());
-        if(!executeSumRowColumn(*parsedValcitr,ipwsName,outputwsname,orientation))
+        if(!executeSumRowColumn(*parsedValcitr,loadedws,outputwsname,orientation))
         {
           return;
         }
-
+       
         wsPlotString+="\"";
         wsPlotString+=outputwsname;
         wsPlotString+="\"";
@@ -759,6 +771,18 @@ namespace MantidQt
 
     }
 
+   /**  This method applys time channel masks to the detector bank selected.
+      * @param wsName - name of the workspace.
+      * @param bMask - boolean flag to indicate the mask check box selected
+      */
+    void SANSDiagnostics::maskDetector(const QString& wsName,bool bMask,bool time_pixel)
+    {
+      //if  mask control selected
+      if(bMask)
+      {
+        emit applyMask(wsName,time_pixel);
+      }
+    }
 
   /**This method plots spectrum for the given workspace
     * @param wsName - name of the workspace
@@ -797,7 +821,8 @@ namespace MantidQt
       {      
         return;
       }
-      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws);
+     
+      IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask3->isChecked(),true);
 
     }
     /// Handler for second detector horizontal integral button
@@ -824,7 +849,7 @@ namespace MantidQt
       {      
         return;
       }
-      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws);
+      IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask4->isChecked(),true);
     }
     /// Handler for second detector horizontal integral button
     void SANSDiagnostics::secondDetectorTimeIntegralClicked()
@@ -844,7 +869,9 @@ namespace MantidQt
       {
         return;
       }
-   
+      QString loadedws=getWorkspaceToProcess();
+    
+      maskDetector(loadedws,m_SANSForm->pmask2->isChecked(),false);
 
       QString detName= getDetectorName(1);
       //give the detectorname_V for workspace
@@ -855,8 +882,7 @@ namespace MantidQt
      {
        return;
      }
-      
-      plotSpectrum(opws,0);
+     plotSpectrum(opws,0);
     }
 
     /// This method loads values from registry
@@ -1068,8 +1094,8 @@ namespace MantidQt
     {
 
       if(fileName.isEmpty()) return false;
-      //output workspace for load algorithm 
-      m_outws_load=getWorkspaceName(fileName);
+      //get the output workspace for load algorithm from file name
+      m_outws_load=getWorkspaceNameFileName(fileName);
       if(m_outws_load.isEmpty())
       {
          g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
@@ -1127,6 +1153,19 @@ namespace MantidQt
         return false;
       }
       return true;
+    }
+    
+  /** This method enables the mask controls in teh diagnostics UI
+    */
+    void  SANSDiagnostics::enableMaskFileControls()
+    {
+      //enable time and pixel check masks
+      m_SANSForm->tcmask1->setEnabled(true);
+      m_SANSForm->tcmask2->setEnabled(true);
+      m_SANSForm->pmask1->setEnabled(true);
+      m_SANSForm->tcmask3->setEnabled(true);
+      m_SANSForm->tcmask4->setEnabled(true);
+      m_SANSForm->pmask2->setEnabled(true);
     }
 
   }
