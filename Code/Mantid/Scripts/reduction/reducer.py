@@ -229,12 +229,21 @@ class Reducer(object):
                 default will be the name of the file 
             TODO: this needs to be an ordered list
         """
-        # Check that the file exists
-        self._full_file_path(data_file)
-        
-        if workspace is None:
-            workspace = extract_workspace_name(data_file)
+        if type(data_file)==list:
+            for item in data_file:
+                # Check that the file exists
+                self._full_file_path(item)
             
+            if workspace is None:
+                # Use the first file to deternine the workspace name
+                workspace = extract_workspace_name(data_file[0])
+        else:
+            # Check that the file exists
+            self._full_file_path(data_file)
+            
+            if workspace is None:
+                workspace = extract_workspace_name(data_file)
+                
         self._data_files[workspace] = data_file 
     
     def pre_process(self):

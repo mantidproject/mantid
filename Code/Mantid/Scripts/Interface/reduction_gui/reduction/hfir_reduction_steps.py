@@ -310,7 +310,7 @@ class Background(BaseScriptElement):
                 else:
                     script += str(self.trans_calculation_method)
 
-        script += "BckThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
+                script += "BckThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
             
         return script           
     
@@ -410,7 +410,7 @@ class InstrumentDescription(BaseScriptElement):
     pixel_size = 5.1
     
     # Data file
-    data_file = ''
+    data_files = []
     
     # Mask
     mask_top = 0
@@ -488,11 +488,11 @@ class InstrumentDescription(BaseScriptElement):
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
         
-        # Data file
-        if len(str(self.data_file).strip())>0:
-            parts = os.path.split(str(self.data_file))
+        # Data files
+        if len(self.data_files)>0:
+            parts = os.path.split(str(self.data_files[0]).strip())
             script += "DataPath(\"%s\")\n" % parts[0]
-            script += "AppendDataFile(\"%s\")\n" % self.data_file
+            script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
         else:
             raise RuntimeError, "Trying to generate reduction script without a data file."
         
@@ -508,7 +508,8 @@ class InstrumentDescription(BaseScriptElement):
         xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
         xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
 
-        xml += "  <data_file>%s</data_file>\n" % self.data_file
+        for item in self.data_files:
+            xml += "  <data_file>%s</data_file>\n" % item
         xml += "  <mask_top>%g</mask_top>\n" % self.mask_top
         xml += "  <mask_bottom>%g</mask_bottom>\n" % self.mask_bottom
         xml += "  <mask_left>%g</mask_left>\n" % self.mask_left
@@ -550,7 +551,7 @@ class InstrumentDescription(BaseScriptElement):
         self.pixel_size = BaseScriptElement.getFloatElement(instrument_dom, "pixel_size",
                                                             default=InstrumentDescription.pixel_size)
         
-        self.data_file = BaseScriptElement.getStringElement(instrument_dom, "data_file")
+        self.data_files = BaseScriptElement.getStringList(instrument_dom, "data_file")
         self.mask_top = BaseScriptElement.getIntElement(instrument_dom, "mask_top",
                                                         default=InstrumentDescription.mask_top)
         self.mask_bottom = BaseScriptElement.getIntElement(instrument_dom, "mask_bottom",
@@ -598,7 +599,7 @@ class InstrumentDescription(BaseScriptElement):
         self.name = ''
         self.pixel_size = InstrumentDescription.pixel_size
         
-        self.data_file = ''
+        self.data_files = []
         self.mask_top = InstrumentDescription.mask_top
         self.mask_bottom = InstrumentDescription.mask_bottom
         self.mask_right = InstrumentDescription.mask_right

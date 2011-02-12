@@ -479,14 +479,29 @@ class LoadRun(ReductionStep):
         else:
             data_file = self._data_file
         
-        # Load data
-        filepath = reducer._full_file_path(data_file)
-        if reducer.instrument.wavelength is None:
-            LoadSpice2D(filepath, workspace)
+        def _load_data_file(file_name, wks_name):
+            filepath = reducer._full_file_path(file_name)
+            if reducer.instrument.wavelength is None:
+                LoadSpice2D(filepath, wks_name)
+            else:
+                LoadSpice2D(filepath, wks_name, 
+                            Wavelength=reducer.instrument.wavelength,
+                            WavelengthSpread=reducer.instrument.wavelength_spread)
+
+        # Check whether we have a list of files that need merging
+        if type(data_file)==list:
+            for i in range(len(data_file)):
+                if i==0:
+                    _load_data_file(data_file[i], workspace)
+                else:
+                    _load_data_file(data_file[i], 'tmp_wksp')
+                    Plus(LHSWorkspace=workspace,
+                         RHSWorkspace='tmp_wksp',
+                         OutputWorkspace=workspace)
+            if mtd.workspaceExists('tmp_wksp'):
+                mtd.deleteWorkspace('tmp_wksp')
         else:
-            LoadSpice2D(filepath, workspace, 
-                        Wavelength=reducer.instrument.wavelength,
-                        WavelengthSpread=reducer.instrument.wavelength_spread)
+            _load_data_file(data_file, workspace)
         
         sdd = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]
         

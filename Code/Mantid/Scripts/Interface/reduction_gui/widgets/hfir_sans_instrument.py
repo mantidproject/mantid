@@ -109,13 +109,13 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.sensitivity_file_edit.setText(fname)      
 
     def _data_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._summary.data_file_edit.setText(fname)   
+        fname = self.data_browse_dialog(multi=True)
+        if len(fname)>0:
+            self._summary.data_file_edit.setText('; '.join(fname))   
             self.get_data_info()
             
             # Set the mask background
-            self._find_background_image(fname)       
+            self._find_background_image(fname[0])       
             
     def _find_background_image(self, filename):
         """
@@ -201,13 +201,14 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.log_binning_radio.setChecked(state.log_binning)
         
         # Data file
-        self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
-        self._find_background_image(state.data_file)
-        # Store the location of the loaded file
-        if len(state.data_file)>0:
-            (folder, file_name) = os.path.split(state.data_file)
-            self._settings.data_path = folder
-            self.get_data_info()
+        self._summary.data_file_edit.setText(QtCore.QString('; '.join(state.data_files)))
+        if len(state.data_files)>0:
+            self._find_background_image(state.data_files[0])
+            # Store the location of the loaded file
+            if len(state.data_files[0])>0:
+                (folder, file_name) = os.path.split(state.data_files[0])
+                self._settings.data_path = folder
+                self.get_data_info()
 
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
@@ -225,7 +226,10 @@ class SANSInstrumentWidget(BaseWidget):
         m = InstrumentDescription()
         
         # Data file
-        m.data_file = unicode(self._summary.data_file_edit.text())
+        flist_str = unicode(self._summary.data_file_edit.text())
+        flist_str = flist_str.replace(',', ';')
+        flist_str = flist_str.replace(' ', '')
+        m.data_files = flist_str.split(';')
 
         # Mask
         m.mask_top = int(self._mask_widget.topSpinBox.value())
@@ -275,9 +279,15 @@ class SANSInstrumentWidget(BaseWidget):
             Retrieve information from the data file and update the display
         """
         if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
-            fname = self._summary.data_file_edit.text()
+            flist_str = unicode(self._summary.data_file_edit.text())
+            flist_str = flist_str.replace(',', ';')
+            flist_str = flist_str.replace(' ', '')
+            data_files = flist_str.split(';')
+            if len(data_files)<1:
+                return
+            fname = data_files[0]
             if len(str(fname).strip())>0:
-                dataproxy = DataFileProxy(str(self._summary.data_file_edit.text()))
+                dataproxy = DataFileProxy(fname)
                 if dataproxy.sample_detector_distance is not None and not self._summary.sample_dist_chk.isChecked():
                     self._summary.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
                 if not self._summary.wavelength_chk.isChecked():

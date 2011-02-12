@@ -52,19 +52,35 @@ class BaseWidget(QtGui.QWidget):
         """
         return NotImplemented
     
-    def data_browse_dialog(self, data_type=None):
+    def data_browse_dialog(self, data_type=None, multi=False):
         """
             Pop up a file dialog box.
             @param data_type: string used to filter the files
+            @param multi: multiselection is enabled if True
         """
         if data_type is None:
             data_type = self._data_type
-        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
-                                                          self._settings.data_path, 
-                                                          data_type))
-        if fname:
-            # Store the location of the loaded file
-            (folder, file_name) = os.path.split(fname)
-            self._settings.data_path = folder
-        return fname     
+        if multi:
+            qflist = QtGui.QFileDialog.getOpenFileNames(self, "Data file - Choose a data file",
+                                                              self._settings.data_path, 
+                                                              data_type)
+            if qflist.count()>0:
+                flist = []
+                for i in range(qflist.count()):
+                    flist.append(unicode(qflist[i]))
+                # Store the location of the loaded file
+                (folder, file_name) = os.path.split(flist[0])
+                self._settings.data_path = folder
+                return flist
+            else:
+                return None
+        else:       
+            fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+                                                              self._settings.data_path, 
+                                                              data_type))
+            if fname:
+                # Store the location of the loaded file
+                (folder, file_name) = os.path.split(fname)
+                self._settings.data_path = folder
+            return fname     
     

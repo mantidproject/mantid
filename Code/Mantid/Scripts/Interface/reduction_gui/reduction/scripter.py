@@ -104,6 +104,15 @@ class BaseScriptElement(object):
             return value
         else:
             return default
+        
+    @classmethod
+    def getStringList(cls, dom, tag, default=[]):
+        elem_list = []
+        element_list = dom.getElementsByTagName(tag)
+        if len(element_list)>0:
+            for l in element_list:
+                elem_list.append(BaseScriptElement.getText(l.childNodes))
+        return elem_list    
 
     @classmethod
     def getBoolElement(cls, dom, tag, true_tag='true', default=False):
