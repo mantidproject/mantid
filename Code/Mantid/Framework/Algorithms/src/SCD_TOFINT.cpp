@@ -59,8 +59,9 @@ namespace Mantid
     {
       retrieveProperties();
       std::string Peakbank="bank14";
-      int XPeak = 53;
-      int YPeak = 168;
+      int XPeak = 53-1;
+      int YPeak = 168-1;
+      // Between 549 and 550 TOF bins
       double TOFPeak = 3590.45;
       TOFmin += TOFPeak;
       TOFmax += TOFPeak;
@@ -122,7 +123,7 @@ namespace Mantid
     {
       // Find point of peak centre
       const MantidVec & yValues = outputW->readY(s);
-      MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
+      MantidVec::const_iterator it = std::max_element(yValues.begin(),yValues.begin()+600);
       const double peakHeight = *it; 
       const double peakLoc = outputW->readX(s)[it - yValues.begin()];
       // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
@@ -150,7 +151,8 @@ namespace Mantid
       std::ostringstream fun_str;
       /*fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=0.432702,Alpha1=-0.0802024,Beta0=36.4172,Kappa=40.3074,SigmaSquared=42.3954,";
       fun_str << "X0="<<peakLoc<<",Gamma=12.8576";*/
-      fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=1.6,Alpha1=1.5,Beta0=31.9,Kappa=46,SigmaSquared=1,Gamma=1,X0="<<peakLoc<<";name=Lorentzian,Height="<<peakHeight<<",PeakCentre="<<peakLoc<<",HWHM=0)";
+      /*fun_str << "name=LinearBackground,A0=0.0,A1=0.0;(composite=Convolution;name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=1.6,Alpha1=1.5,Beta0=31.9,Kappa=46,SigmaSquared=1,Gamma=1,X0="<<peakLoc<<";name=Lorentzian,Height="<<peakHeight<<",PeakCentre="<<peakLoc<<",HWHM=0)";*/
+      fun_str << "name=LinearBackground,A0=0.0,A1=0.0;name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=1.6,Alpha1=1.5,Beta0=31.9,Kappa=46,SigmaSquared=1,Gamma=1,X0="<<peakLoc;
 
       fit_alg->setProperty("Function",fun_str.str());
       fit_alg->setProperty("Ties","f0.A1=0.0");
@@ -179,12 +181,20 @@ namespace Mantid
       std::cout <<"\n";
 
       IFitFunction *out = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
+      std::cout <<"After IFit\n";
       IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
-      int n=1000;
-      double* x = new double[n];
-      double* y = new double[n];
-      for (int i=0; i < n; i++) x[i]=TOFmin+i*(TOFmax-TOFmin)/double(n);
+      std::cout <<"After IPeak\n";
+      const int n=100;
+      double *x = new double[n];
+      double *y = new double[n];
+      std::cout <<"After alloc\n";
+      double dx=(TOFmax-TOFmin)/double(n-1);
+      for (int i=0; i < n; i++) {
+        x[i]=TOFmin+i*dx;
+        std::cout <<x[i]<<"\n";
+      }
       pk->function(y,x,n);
+      std::cout <<"After funct\n";
       for (int i=0; i < n; i++) std::cout <<y[i]<<" ";
       std::cout <<"\n";
 

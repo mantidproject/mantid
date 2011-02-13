@@ -12,6 +12,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidAPI/FileProperty.h"
 #include <Poco/File.h>
 #include <sstream>
 #include <numeric>
@@ -273,6 +274,8 @@ namespace Algorithms
     declareProperty("LocationOfPeakToOptimize", 2.0308, dblmustBePositive,
       "Optimize this location of peak by moving detectors" );
 
+    declareProperty(new API::FileProperty("DetCalFilename", "", API::FileProperty::Save, ".DetCal"), "The output filename of the ISAW DetCal file");
+
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -444,6 +447,68 @@ namespace Algorithms
       gsl_multimin_fminimizer_free (s);
       prog.report();
     }
+    //Write DetCal File
+    double baseX,baseY,baseZ,upX,upY,upZ;
+
+    std::string filename=getProperty("DetCalFilename");
+    std::fstream outfile;
+    outfile.open(filename.c_str(), std::ios::out);
+
+    outfile << "#\n";
+    outfile << "#  Mantid Optimized .DetCal file for SNAP with TWO detector panels\n";
+    outfile << "#  Old Panel, nominal size and distance at -90 degrees.\n";
+    outfile << "#  New Panel, nominal size and distance at +90 degrees.\n";
+    outfile << "#\n";
+    outfile << "# Lengths are in centimeters.\n";
+    outfile << "# Base and up give directions of unit vectors for a local\n";
+    outfile << "# x,y coordinate system on the face of the detector.\n";
+    outfile << "#\n";
+    outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
+    outfile << "#\n";
+    outfile << "6         L1     T0_SHIFT\n";
+    outfile << "7  1500.0000            0\n";
+    outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
+    for (int det=0; det < static_cast<int>(detList.size()); det++)
+    {
+      Geometry::V3D Center=detList[det]->getPos();
+      int pixmax = detList[det]->xpixels()-1;
+      int pixmid = (detList[det]->ypixels()-1)/2;
+      BoundingBox box;
+      detList[det]->getAtXY(pixmax, pixmid)->getBoundingBox(box);
+      baseX = box.xMax();
+      baseY = box.yMax();
+      baseZ = box.zMax();
+      Geometry::V3D Base=V3D(baseX,baseY,baseZ);
+      pixmid = (detList[det]->xpixels()-1)/2;
+      pixmax = detList[det]->ypixels()-1;
+      detList[det]->getAtXY(pixmid, pixmax)->getBoundingBox(box);
+      upX = box.xMax();
+      upY = box.yMax();
+      upZ = box.zMax();
+      Geometry::V3D Up=V3D(upX,upY,upZ);
+      Base-=Center;
+      Up-=Center;
+      Base.normalize();
+      Up.normalize();
+      Center*=100.0;
+      outfile << "5  " 
+       << det+1  << "  " 
+       << detList[det]->xpixels() << "  " 
+       << detList[det]->ypixels() << "  " 
+       << 100.0*detList[det]->xsize() << "  " 
+       << 100.0*detList[det]->ysize() << "  " 
+       << "0.2000" << "  " 
+       << "55.330" << "  " ;
+      Center.write(outfile);
+      outfile << "  ";
+      Base.write(outfile);
+      outfile << "  ";
+      Up.write(outfile);
+      outfile << "\n";
+    }
+
+    // Closing
+    outfile.close();
 
     return;
   }
