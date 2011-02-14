@@ -863,7 +863,6 @@ void testCheckIfVariousInstrumentsLoad()
 
     AnalysisDataService::Instance().remove(wsName);
 
-    LoadEmptyInstrument loaderEMU2;
     loaderEMU2.initialize();
     loaderEMU2.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/EMU_for_UNIT_TESTING.XML");
     wsName = "LoadEmptyInstrumentParamEMU2Test";
