@@ -482,7 +482,7 @@ void LoadSNSEventNexus::loadBankEventData(const std::string entry_name, IndexToI
 
   bool loadError = false ;
 
-  PARALLEL_CRITICAL(event_nexus_file_access)
+  PARALLEL_CRITICAL(LoadSNSEventNexus_loadBankEventData_nexus_file_access)
   {
     // Open the file
     ::NeXus::File file(m_filename);
