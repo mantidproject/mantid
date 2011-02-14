@@ -301,7 +301,7 @@ void InstrumentWindowPickTab::setSelectionType()
   }
   else if (m_box->isChecked())
   {
-    m_selectionType = DetSelectionType::Box;
+    m_selectionType = BoxType;
   }
   else if (m_tube->isChecked())
   {

@@ -30,7 +30,7 @@
 
 class QPainter;
 
-enum DetSelectionType {Single,Box,Tube};
+enum DetSelectionType {Single,BoxType,Tube};
 
 class DetSelector
 {
