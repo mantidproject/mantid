@@ -128,7 +128,9 @@ namespace Mantid
       //@}
 
     private:
+      /// The number of properties that are summed when two workspaces are summed
       static const int ADDABLES;
+      /// The names of the properties to summ when two workspaces are summed
       static const std::string ADDABLE[];
 
       /// A pointer to a property manager
