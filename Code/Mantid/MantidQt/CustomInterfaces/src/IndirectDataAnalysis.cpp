@@ -898,7 +898,20 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
 {
   Mantid::API::CompositeFunctionMW* conv = dynamic_cast<Mantid::API::CompositeFunctionMW*>(Mantid::API::FunctionFactory::Instance().createFunction("Convolution"));
   Mantid::API::CompositeFunctionMW* result = new Mantid::API::CompositeFunctionMW();
-  Mantid::API::CompositeFunctionMW* comp = new Mantid::API::CompositeFunctionMW();
+  Mantid::API::CompositeFunctionMW* comp;
+
+  bool singleFunction = false;
+
+  if ( m_uiForm.confit_cbFitType->currentText() == "Two Lorentzians" )
+  {
+    comp = new Mantid::API::CompositeFunctionMW();
+  }
+  else
+  {
+    comp = conv;
+    singleFunction = true;
+  }
+
   int index = 0;
 
   // 0 = Fixed Flat, 1 = Fit Flat, 2 = Fit all
@@ -980,10 +993,11 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
     break;
   }
 
-  conv->addFunction(comp);
+  if ( ! singleFunction )
+    conv->addFunction(comp);
   result->addFunction(conv);
 
-  if ( tie ) { result->applyTies(); }
+  if ( tie || m_uiForm.confit_ckFixCentres->isChecked() ) { result->applyTies(); }
 
   return result;
 }
@@ -1048,7 +1062,20 @@ void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Man
       QString propName = pref + props[i]->propertyName();
       comp->tie(propName.toStdString(), props[i]->valueText().toStdString() );
     }
-    else { func->setParameter(props[i]->propertyName().toStdString(), props[i]->valueText().toDouble()); }
+    else
+    {
+      std::string propName = props[i]->propertyName().toStdString();
+      double propValue = props[i]->valueText().toDouble();
+      if ( propName == "PeakCentre" && m_uiForm.confit_ckFixCentres->isChecked() )
+      {
+        std::string propertyName = pref.toStdString() + propName;
+        comp->tie(propertyName, props[i]->valueText().toStdString());
+      }
+      else
+      {
+        func->setParameter(propName, propValue);
+      }      
+    }
   }
 
 }

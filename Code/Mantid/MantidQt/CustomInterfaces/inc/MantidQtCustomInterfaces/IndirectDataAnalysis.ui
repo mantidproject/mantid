@@ -723,7 +723,7 @@
             </sizepolicy>
            </property>
            <property name="currentIndex" >
-            <number>1</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="confit_page_inputFile" >
             <layout class="QHBoxLayout" name="horizontalLayout_28" >
@@ -845,6 +845,13 @@
                 </widget>
                </item>
               </layout>
+             </item>
+             <item>
+              <widget class="QCheckBox" name="confit_ckFixCentres" >
+               <property name="text" >
+                <string>Fix Peak Centres</string>
+               </property>
+              </widget>
              </item>
              <item>
               <layout class="QHBoxLayout" name="confit_layoutBackground" >

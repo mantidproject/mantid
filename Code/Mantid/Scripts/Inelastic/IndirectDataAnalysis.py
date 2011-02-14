@@ -90,7 +90,7 @@ def confitParsToWS(Table, Data, BackG='FixF'):
                 dataE.append(ws.getDouble(eAxis,row))
         else:
             nSpec -= 1
-    suffix = str(nSpec) + 'L' + BackG
+    suffix = str(nSpec / 2) + 'L' + BackG
     outNm = Table + suffix
     CreateWorkspace(outNm, xAxisVals, dataY, dataE, nSpec,
         UnitX='MomentumTransfer', VerticalAxisUnit='Text',
@@ -245,9 +245,8 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         ExtractFFTSpectrum('sam_data', 'sam_fft', 2)
         Integration('sam_data', 'sam_int')
         Divide('sam_fft', 'sam_int', 'sam')
-        # Create save file name.
-        runNo = mtd['sam_data'].getRun().getLogData("run_number").value
-        savefile = root[:3] + runNo + root[8:-3] + 'iqt'
+        # Create save file name
+        savefile = getWSprefix('sam_data') + 'iqt'
         outWSlist.append(savefile)
         Divide('sam', 'res', savefile)
         #Cleanup Sample Files
@@ -367,6 +366,8 @@ def furyfitSeq(inputWS, func, startx, endx, save, plot):
 def getWSprefix(workspace):
     '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
     all of our other naming conventions are built.'''
+    if workspace == '':
+        return ''
     ws = mtd[workspace]
     ins = ws.getInstrument().getName()
     ins = ConfigService().facility().instrument(ins).shortName().lower()
