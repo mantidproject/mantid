@@ -366,7 +366,7 @@ std::string IFitFunction::Attribute::asUnquotedString()const
       "as string");
   }
   std::string unquoted(attr);
-  if( *(attr.begin()) == '\"' ) unquoted = std::string(attr.begin() + 1, attr.end());
+  if( *(attr.begin()) == '\"' ) unquoted = std::string(attr.begin() + 1, attr.end() - 1);
   if( *(unquoted.end() - 1) == '\"' ) unquoted = std::string(unquoted.begin(), unquoted.end() - 1);
   
   return unquoted;
