@@ -51,7 +51,9 @@ else:
 
 
 #-------------------------------------------------------------------------------
-def makeString(value):
+def _makeString(value):
+    """Make a string out of a value such that the Mantid properties can understand it
+    """
     if isinstance(value, list):
         return str(value).lstrip('[').rstrip(']')
     elif isinstance(value, bool):

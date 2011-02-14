@@ -22,7 +22,7 @@ namespace Mantid
 
   namespace PythonAPI
   {
-
+    
     /// The module filename
     std::string SimplePythonAPI::g_module_name = "mantidsimple.py";
 
@@ -49,7 +49,7 @@ namespace Mantid
     {
       std::ofstream module(getModuleFilename().c_str());
 
-      module << "from MantidFramework import *\n";
+      module << "from MantidFramework import mtd, _makeString\n";
       //If in gui mode also need sys and qti module
       if( gui )
       {
@@ -69,14 +69,14 @@ namespace Mantid
       {
         module << "# A utility function for the dialog routines that decides if the parameter\n"
           << "# should be added to the final list of parameters that have their widgets enabled\n"
-          << "def convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
+          << "def _convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
           << "  if param_value == None:\n"
           << "    if not param_name in disabled_list:\n"
           << "      return ('', param_name)\n"
           << "    else:\n"
           << "      return ('', '')\n"
           << "  else:\n"
-          << "    strval = makeString(param_value)\n"
+          << "    strval = _makeString(param_value)\n"
           << "    if param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):\n"
           << "      return (param_name + '=' + strval.lstrip('?'), param_name)\n"
           << "    else:\n"
@@ -206,6 +206,11 @@ namespace Mantid
     void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
       const PropertyVector & properties, bool async)
     {
+      if( algm == "Load" )
+      {
+	writeLoadFunction(os, async);
+	return;
+      }
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
       os << "def " << algm;
@@ -230,7 +235,7 @@ namespace Mantid
       if( properties.size()>0 ) os << ", ";
       os << "execute=True):\n";
 
-      os << "  algm = mantid.createAlgorithm(\"" << algm << "\")\n";
+      os << "  algm = mtd.createAlgorithm(\"" << algm << "\")\n";
 
       // Redo loop for setting values
       pIter = properties.begin();
@@ -242,12 +247,12 @@ namespace Mantid
         {
           os << "  if execute:\n";
           os << "    algm.setPropertyValue(\"" << (*pIter)->name()
-            << "\", makeString(" << pvalue << ").lstrip('? '))\n";
+            << "\", _makeString(" << pvalue << ").lstrip('? '))\n";
         }
         else
         {
           os << "  if " << pvalue << " != None:\n"
-            << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", makeString(" 
+            << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", _makeString(" 
             << pvalue << ").lstrip('? '))\n";
         }
       }
@@ -274,6 +279,102 @@ namespace Mantid
     }
 
     /**
+     * Write a spcial function definition for the smarter Load algorithm
+     * @param[in,out] module :: The file stream
+     * @param async :: If true then the algorithm will run asynchrnously
+     */
+    void SimplePythonAPI::writeLoadFunction(std::ostream & os, bool async)
+    {
+      os <<
+	"def Load(*args, **kwargs):\n"
+	"    \"\"\"\n"
+	"    Load is a more flexible algorithm than other Mantid algorithms.\n"
+	"    It's aim is to discover the correct loading algorithm for a\n"
+	"    given file. This flexibility comes at the expense of knowing the\n"
+	"    properties out right before the file is specified.\n"
+	"    \n"
+	"    The argument list for the Load function has to be more flexible to\n"
+	"    allow this searching to occur. Two arguments must be specified:\n"
+	"    \n"
+	"      - Filename :: The name of the file,\n"
+	"      - OutputWorkspace :: The name of the workspace,\n"
+	"    \n"
+	"    either as the first two arguments in the list or as keywords. Any other\n"
+	"    properties that the Load algorithm has can be specified by keyword only.\n"
+	"    \n"
+	"    Some common keywords are:\n"
+	"     - SpectrumMin,\n"
+	"     - SpectrumMax,\n"
+	"     - SpectrumList,\n"
+	"     - EntryNumber\n"
+	"    \n"
+	"    Example:\n"
+	"      # Simple usage, ISIS NeXus file\n"
+	"      Load('INSTR00001000.nxs', 'run_ws')\n"
+	"      \n"
+	"      # ISIS NeXus with SpectrumMin and SpectrumMax = 1\n"
+	"      Load('INSTR00001000.nxs', 'run_ws', SpectrumMin=1,SpectrumMax=1)\n"
+	"      \n"
+	"      # SNS Event NeXus with precount on\n"
+	"      Load('INSTR_1000_event.nxs', 'event_ws', Precount=True)\n"
+	"      \n"
+	"      # A mix of keyword and non-keyword is also possible\n"
+	"      Load('event_ws', Filename='INSTR_1000_event.nxs',Precount=True)\n"
+	"    \"\"\"\n"
+	"    # Small inner function to grab the mandatory arguments and translate possible\n"
+	"    # exceptions\n"
+	"    def get_argument_value(key, kwargs):\n"
+	"        try:\n"
+	"            return kwargs[key]\n"
+	"        except KeyError:\n"
+	"            raise RuntimeError('%s argument not supplied to Load function' % str(key))\n"
+	"    \n"
+	"    if len(args) == 2:\n"
+	"        filename = args[0]\n"
+	"        wkspace = args[1]\n"
+	"    elif len(args) == 1:\n"
+	"        if 'Filename' in kwargs:\n"
+	"            filename = kwargs['Filename']\n"
+	"            wkspace = args[0]\n"
+	"        elif 'OutputWorkspace' in kwargs:\n"
+	"            wkspace = kwargs['OutputWorkspace']\n"
+	"            filename = args[0]\n"
+	"        else:\n"
+	"            raise RuntimeError('Cannot find \"Filename\" or \"OutputWorkspace\" in key word list. '\n"
+	"                               'Cannot use single positional argument.')\n"
+	"    elif len(args) == 0:\n"
+	"        filename = get_argument_value('Filename', kwargs)\n"
+	"        wkspace = get_argument_value('OutputWorkspace', kwargs)\n"
+	"    else:\n"
+	"        raise RuntimeError('Load() takes at most 2 positional arguments, %d found.' % len(args))\n"
+	"    \n"
+	"    # Create and execute\n"
+	"    algm = mtd.createAlgorithm('Load')\n"
+	"    if kwargs.get('execute', True) == True:\n"
+	"        algm.setPropertyValue('Filename', filename)\n"
+	"        algm.setPropertyValue('OutputWorkspace', wkspace)\n"
+	"        for key, value in kwargs.iteritems():\n"
+	"            try:\n"
+	"                algm.setPropertyValue(key, _makeString(value).lstrip('? '))\n"
+	"            except RuntimeError:\n"
+	"                raise RuntimeError('Invalid argument \"%s\" to Load algorithm.' % str(key))\n"
+	"            \n";
+      // Execution
+      if( async )
+      {
+	writeAsyncFunctionCall(os, "Load", "        ");
+        os << "        if result == False:\n"
+	   << "            sys.exit('An error occurred while running Load. See results log for details.')\n";
+      }
+      else
+      {
+	os << "        algm.setRethrows(True)\n";
+	os << "        algm.execute()\n";
+      }
+      os << "    return mtd._createAlgProxy(algm)\n\n";
+    }
+
+    /**
     * Write the GUI version of the Python function that raises a Qt dialog
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
@@ -282,6 +383,11 @@ namespace Mantid
     void SimplePythonAPI::writeGUIFunctionDef(std::ostream & os, const std::string & algm,
       const PropertyVector & properties)
     {
+      if( algm == "Load" )
+      {
+	return;
+      }
+
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
       os << "def " << algm << "Dialog(";
@@ -298,7 +404,7 @@ namespace Mantid
       }
       //end of algorithm function parameters but add other arguments
       os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
-        << "  algm = mantid.createAlgorithm(\"" << algm << "\")\n"
+        << "  algm = mtd.createAlgorithm(\"" << algm << "\")\n"
         << "  enabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
         << "  disabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
         << "  values = '|'\n"
@@ -307,7 +413,7 @@ namespace Mantid
       pIter = properties.begin();
       for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
       {
-        os << "  valpair = convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
+        os << "  valpair = _convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
         << ", enabled_list, disabled_list)\n"
           << "  values += valpair[0] + '|'\n"
           << "  final_enabled += valpair[1] + ','\n\n";
@@ -316,9 +422,7 @@ namespace Mantid
       os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
         << "\" , values, Message, final_enabled)\n"
         << "  if dialog == True:\n";
-
       writeAsyncFunctionCall(os, algm, "    ");
-
       os << "  else:\n"
         << "    sys.exit('Information: Script execution cancelled')\n"
         << "  if result == False:\n"

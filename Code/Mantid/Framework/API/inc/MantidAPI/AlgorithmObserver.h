@@ -139,9 +139,9 @@ public:
     */
     virtual void progressHandle(const IAlgorithm* alg,double p,const std::string& msg)
     {
-      (void*)alg;
+      (void)alg;
+      (void)p;
       (void)msg;
-      std::cerr<<"Progress "<<p<<'\n';
     }
 
     /** Handler of the start notifications. Must be overriden in inherited classes.
@@ -153,8 +153,7 @@ public:
     */
     virtual void startHandle(const IAlgorithm* alg)
     {
-      (void*)alg;
-      std::cerr<<"Started "<<'\n';
+      (void)alg;
     }
    /** Handler of the finish notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
@@ -165,8 +164,7 @@ public:
     */
     virtual void finishHandle(const IAlgorithm* alg)
     {
-      (void*)alg;
-      std::cerr<<"Finished "<<'\n';
+      (void)alg;
     }
     /** Handler of the error notifications. Must be overriden in inherited classes.
         The default handler is provided (doing nothing).
@@ -178,8 +176,8 @@ public:
     */
     virtual void errorHandle(const IAlgorithm* alg,const std::string& what)
     {
-      (void*)alg;
-      std::cerr<<"Error "<<what<<'\n';
+      (void)alg;
+      (void)what;
     }
 /// @endcond
 private:

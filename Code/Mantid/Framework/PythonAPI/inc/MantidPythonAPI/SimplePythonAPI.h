@@ -62,7 +62,8 @@ class DLLExport SimplePythonAPI
   /// Create and return the full-qualified path name for the module
   static std::string getModuleFilename(); 
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
-  static std::string removeCharacters(const std::string & value, const std::string & cs = "", bool eol_to_space = false);
+  static std::string removeCharacters(const std::string & value, const std::string & cs = "", 
+				      bool eol_to_space = false);
   
   ///Functor for use with std::sort to put the properties that do not
   ///have valid values first
@@ -88,9 +89,12 @@ class DLLExport SimplePythonAPI
   static std::string extractAlgName(const std::string & algKey);
   /// Writes the Python function definition for the given algorithm
   static void writeFunctionDef(std::ostream & module, const std::string & algName, 
-    const PropertyVector & properties, bool async);
+			       const PropertyVector & properties, bool async);
+  /// Write a special definition for the 'Load' algorithm
+  static void writeLoadFunction(std::ostream & module, bool async);
   /// Writes the GUI version of the Python function definition for the given algorithm
-  static void writeGUIFunctionDef(std::ostream & module, const std::string & algName, const PropertyVector & properties);
+  static void writeGUIFunctionDef(std::ostream & module, const std::string & algName, 
+				  const PropertyVector & properties);
   /// Writes the global help command
   static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
   /// Write the mantidHelp command

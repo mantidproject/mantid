@@ -34,11 +34,11 @@ namespace Mantid
      */
     void Load::setPropertyValue(const std::string &name, const std::string &value)
     {
-      IDataFileChecker::setPropertyValue(name, value);
-      
       IDataFileChecker_sptr loader;
       if( name == "Filename" )
       {
+	// This call makes resolving the filename easier
+	IDataFileChecker::setPropertyValue(name, value);
 	loader = getFileLoader(getPropertyValue(name));
       }
       else
@@ -52,6 +52,9 @@ namespace Mantid
 	}
       }
       if( loader ) declareLoaderProperties(loader);
+
+      // Set the property after some may have been redeclared
+      if( name != "Filename") IDataFileChecker::setPropertyValue(name, value);
     }
     
     //--------------------------------------------------------------------------
@@ -207,16 +210,10 @@ namespace Mantid
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",Direction::Output), 
         "The name of the workspace that will be created, filled with the\n"
         "read-in data and stored in the Analysis Data Service.");
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
-      mustBePositive->setLower(1);
-      declareProperty("SpectrumMin", 1, mustBePositive);
-      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("EntryNumber", 0, 
-        "Load a particular entry, if supported by the file format (default: Load all entries)");
-      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
-        Direction::Output);
 
+      declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
+		      Direction::Output);
+      // Save for later what the base Load properties are
       const std::vector<Property*> & props = this->getProperties();
       for( size_t i = 0; i < this->propertyCount(); ++i )
       {

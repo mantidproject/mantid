@@ -14,6 +14,9 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+
 #include <cmath>
 #include <iostream>
 #include <sstream>
@@ -341,19 +344,17 @@ double LoadSNSNexus::dblSqrt(double in)
     */
     int LoadSNSNexus::fileCheck(const std::string& filePath)
     {
-      NXRoot root(filePath);
-      NXEntry entry = root.openEntry(root.groups().front().nxname);
-      int bret=0;
+      int confidence(0);
       try
       {
-        NXChar nxc = entry.openNXChar("instrument/SNSdetector_calibration_id");
-        bret= 80;
+	::NeXus::File file(filePath);
+	file.openPath("instrument/SNSdetector_calibration_id");
+	confidence = 80;
       }
-      catch(...)
+      catch(::NeXus::Exception&)
       {
-       bret=0;
       }
-      return bret;
+      return confidence;
     }
 
 
