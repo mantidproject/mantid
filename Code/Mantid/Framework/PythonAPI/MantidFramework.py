@@ -1286,7 +1286,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             if isinstance(args[i], WorkspaceProxy):
                 algm._setWorkspaceProperty(_args[i], args[i]._getHeldObject())                
             else:
-                algm.setPropertyValue(_args[i], makeString(args[i]).lstrip('? '))
+                algm.setPropertyValue(_args[i], _makeString(args[i]).lstrip('? '))
         # Go through keyword arguments
         for key in kwargs:
             if key not in proxy.keys():
@@ -1294,7 +1294,7 @@ class PythonAlgorithm(PyAlgorithmBase):
             if isinstance(kwargs[key], WorkspaceProxy):
                 algm._setWorkspaceProperty(key, kwargs[key]._getHeldObject())
             else:             
-                algm.setPropertyValue(key, makeString(kwargs[key]).lstrip('? '))
+                algm.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
         
         # Execute synchronously        
         algm.setRethrows(True)

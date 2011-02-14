@@ -2,6 +2,7 @@ import unittest
 
 from MantidFramework import mtd
 from MantidFramework import PythonAlgorithm
+from MantidFramework import Direction
 mtd.initialise()
 from mantidsimple import *
 
