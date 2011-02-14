@@ -55,7 +55,7 @@ def _makeString(value):
     """Make a string out of a value such that the Mantid properties can understand it
     """
     if isinstance(value, list) or isinstance(value, cpp_list_dbl)  \
-            or isintance(value, cpp_list_int) or isinstance(value, cpp_list_long):
+            or isinstance(value, cpp_list_int) or isinstance(value, cpp_list_long):
         return str(value).lstrip('[').rstrip(']')
     elif isinstance(value, tuple):
         return str(value).lstrip('(').rstrip(')')
