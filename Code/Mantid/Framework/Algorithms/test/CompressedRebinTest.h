@@ -20,7 +20,7 @@ public:
 
   void testworkspace2D_dist()
   {
-    Workspace2D_sptr test_in2D = Create2DWorkspace(50,20);
+    Workspace2D_sptr test_in2D = Create2DWorkspaceForCompressedRebin(50,20);
     test_in2D->isDistribution(true);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
@@ -56,7 +56,7 @@ public:
 
   void testworkspace2D_nondist()
   {
-    Workspace2D_sptr test_in2D = Create2DWorkspace(50,20);
+    Workspace2D_sptr test_in2D = Create2DWorkspaceForCompressedRebin(50,20);
     AnalysisDataService::Instance().add("test_in2D", test_in2D);
 
     // Mask a couple of bins for a test
@@ -102,7 +102,7 @@ public:
 
 private:
 
-  Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
+  Workspace2D_sptr Create2DWorkspaceForCompressedRebin(int xlen, int ylen)
   {
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
     boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(xlen-1,3.0));

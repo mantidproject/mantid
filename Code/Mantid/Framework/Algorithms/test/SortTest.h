@@ -36,7 +36,7 @@ public:
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
-    Workspace2D_sptr test_in_ws2d = Create2DWorkspace(NUMBINS, NUMPIXELS);
+    Workspace2D_sptr test_in_ws2d = Create2DWorkspaceToSort(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
 
     Sort sort;
@@ -122,7 +122,7 @@ private:
   }
 
 
-  Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
+  Workspace2D_sptr Create2DWorkspaceToSort(int xlen, int ylen)
   {
     boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
     boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(xlen-1,3.0));

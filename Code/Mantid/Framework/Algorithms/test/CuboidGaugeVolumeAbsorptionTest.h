@@ -31,7 +31,7 @@ public:
   void testFailsIfNoInstrument()
   {
     // Create a simple test workspace that has no instrument
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(10,5);
     // Needs to have units of wavelength
     testWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
 

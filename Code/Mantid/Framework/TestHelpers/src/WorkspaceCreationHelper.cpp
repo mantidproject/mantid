@@ -62,21 +62,21 @@ namespace WorkspaceCreationHelper
     retVal->setData(y1,e1);
     return retVal;
   }
-  Workspace2D_sptr Create2DWorkspace(int xlen, int ylen)
+  Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries)
   {
-    return Create2DWorkspaceBinned(ylen, xlen);
+    return Create2DWorkspaceBinned(nhist, numBoundaries);
   }
 
-  Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist, 
+  Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins,bool isHist,
 					const std::set<int> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
-    x1.access().resize(isHist?xlen+1:xlen,1);
-    y1.access().resize(xlen,2);
-    e1.access().resize(xlen,3);
+    x1.access().resize(isHist?nBins+1:nBins,1);
+    y1.access().resize(nBins,2);
+    e1.access().resize(nBins,3);
     Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
-    for (int i=0; i< ylen; i++)
+    retVal->initialize(nHist,isHist?nBins+1:nBins,nBins);
+    for (int i=0; i< nHist; i++)
     {
       retVal->setX(i,x1);
       retVal->setData(i,y1,e1);
@@ -87,16 +87,16 @@ namespace WorkspaceCreationHelper
     return retVal;
   }
 
-  Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist, 
+  Workspace2D_sptr Create2DWorkspace154(int nHist, int nBins,bool isHist,
 					const std::set<int> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
-    x1.access().resize(isHist?xlen+1:xlen,1);
-    y1.access().resize(xlen,5);
-    e1.access().resize(xlen,4);
+    x1.access().resize(isHist?nBins+1:nBins,1);
+    y1.access().resize(nBins,5);
+    e1.access().resize(nBins,4);
     Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(ylen,isHist?xlen+1:xlen,xlen);
-    for (int i=0; i< ylen; i++)
+    retVal->initialize(nHist,isHist?nBins+1:nBins,nBins);
+    for (int i=0; i< nHist; i++)
     {
       retVal->setX(i,x1);
       retVal->setData(i,y1,e1);

@@ -123,8 +123,8 @@ private:
   virtual int getHistogramNumberHelper() const;
 
   /// A vector that holds the 1D histograms
-  std::vector<Histogram1D> data;
 
+  std::vector<Histogram1D> data;
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };

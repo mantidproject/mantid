@@ -353,7 +353,7 @@ public:
   {
     using namespace Mantid::API;
     using namespace Mantid::DataObjects;
-    Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspace154(3, 1, false);
+    Workspace2D_sptr workspace = WorkspaceCreationHelper::Create2DWorkspace154(1, 3, false);
     workspace->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("TOF");
 
     TS_ASSERT_DIFFERS(workspace, boost::shared_ptr<Workspace2D>());

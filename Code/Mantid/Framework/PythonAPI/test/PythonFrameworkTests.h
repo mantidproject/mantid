@@ -59,7 +59,7 @@ public:
 
   void testGetDeleteWorkspace()
   {
-    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
+    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace1",WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
     Mantid::API::MatrixWorkspace_sptr ws = mgr->retrieveMatrixWorkspace("TestWorkspace1");
 
     TS_ASSERT_EQUALS(ws->getNumberHistograms(), 22);
@@ -71,7 +71,7 @@ public:
     std::set<std::string> temp = mgr->getWorkspaceNames();
     TS_ASSERT(temp.empty());
     const std::string name = "outer";
-    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
+    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
 
     temp = mgr->getWorkspaceNames();
     TS_ASSERT(!temp.empty());
@@ -95,7 +95,7 @@ public:
     const std::string name = "outer";
     TS_ASSERT_EQUALS(mgr->workspaceExists(name), false);
     //Add the workspace
-    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
+    Mantid::API::AnalysisDataService::Instance().add(name,WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
 
     TS_ASSERT_EQUALS(mgr->workspaceExists(name), true);
     //Remove it to clean up properly

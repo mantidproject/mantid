@@ -42,10 +42,10 @@ public:
 
   void testExec1D1D()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -70,10 +70,10 @@ public:
 
   void testExec1D1DRand()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -99,10 +99,10 @@ public:
 
   void testExec2D2D()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
 
     PoissonErrors alg;
 
@@ -127,10 +127,10 @@ public:
 
   void testExec1D2D()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
 
     PoissonErrors alg;
 
@@ -152,10 +152,10 @@ public:
 
   void testExec1DRand2DVertical()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizey);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     PoissonErrors alg;
 
@@ -176,10 +176,10 @@ public:
 
     void testExec1DSingleValue()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
 
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
@@ -201,9 +201,9 @@ public:
   
   void testExec2DSingleValue()
   {
-    int sizex = 5,sizey=300;
+    int nHist = 5,nBins=300;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
 
     PoissonErrors alg;

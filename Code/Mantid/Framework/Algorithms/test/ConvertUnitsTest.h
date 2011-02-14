@@ -164,7 +164,7 @@ public:
 
   void testConvertQuicklyCommonBins()
   {
-    Workspace2D_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    Workspace2D_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     input->getAxis(0)->unit() = UnitFactory::Instance().create("MomentumTransfer");
     AnalysisDataService::Instance().add("quickIn", input);
     ConvertUnits quickly;

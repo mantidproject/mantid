@@ -141,7 +141,7 @@ public:
 
   void testExecZero()
   {
-    AnalysisDataService::Instance().add("normIn",WorkspaceCreationHelper::Create2DWorkspace123(10,3,1));
+    AnalysisDataService::Instance().add("normIn",WorkspaceCreationHelper::Create2DWorkspace123(3,10,1));
 
     NormaliseByCurrent norm1;
     norm1.initialize();

@@ -87,16 +87,6 @@ namespace Mantid
       // Make a check of what will be needed to setup the workspaces, based on the input types.
       this->checkRequirements();
 
-      // Check that the input workspace are compatible
-      if (!checkCompatibility(m_lhs,m_rhs))
-      {
-        std::ostringstream ostr;
-        ostr << "The two workspaces are not compatible for algorithm " << this->name();
-        g_log.error() << ostr.str() << std::endl;
-        throw std::invalid_argument( ostr.str() );
-      }
-
-
       if (m_flipSides)
       {
         //Flip the workspaces left and right
@@ -107,6 +97,16 @@ namespace Mantid
         m_elhs = m_erhs;
         m_erhs = etemp;
       }
+
+      // Check that the input workspace are compatible
+      if (!checkCompatibility(m_lhs,m_rhs))
+      {
+        std::ostringstream ostr;
+        ostr << "The two workspaces are not compatible for algorithm " << this->name();
+        g_log.error() << ostr.str() << std::endl;
+        throw std::invalid_argument( ostr.str() );
+      }
+
 
       //Is the output going to be an EventWorkspace?
       if (m_keepEventWorkspace)

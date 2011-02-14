@@ -60,9 +60,8 @@ public:
 
   void testcheckSizeCompatibility1D1D()
   {
-    int sizex = 10;
     // Register the workspace in the data service
-    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    Workspace1D_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     Workspace1D_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
     Workspace1D_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     Workspace1D_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
@@ -103,11 +102,11 @@ public:
 
     // Register the workspace in the data service
     Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(10,20);
     Workspace2D_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     Workspace2D_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
     Workspace2D_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
-    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
+    Workspace2D_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(100,1);
     MatrixWorkspace_sptr work_inEvent1 = WorkspaceCreationHelper::CreateEventWorkspace(5,5);
     MatrixWorkspace_sptr work_inEvent2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);
     BinaryOpHelper helper;
@@ -122,14 +121,14 @@ public:
 
   void testMaskedSpectraPropagation()
   {
-    const int sizex = 10,sizey=20;
+    const int nHist = 10,nBins=20;
     std::set<int> masking;
     masking.insert(0);
     masking.insert(2);
     masking.insert(4);
 
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey, 0, masking);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins, 0, masking);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     BinaryOpHelper helper;
     helper.initialize();
@@ -146,7 +145,7 @@ public:
     MatrixWorkspace_sptr output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace));
     TS_ASSERT(output);
 
-    for( int i = 0; i < sizey; ++i )
+    for( int i = 0; i < nHist; ++i )
     {
       IDetector_sptr det;
       try

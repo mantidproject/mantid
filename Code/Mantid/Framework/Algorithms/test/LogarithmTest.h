@@ -32,68 +32,62 @@ public:
 
   void testExec1D(void)
   {
-      int sizex = 10;
+    int sizex = 10;
 
-        // Register the workspace in the data service
-      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-      AnalysisDataService::Instance().add("test_inLn", work_in1);
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    AnalysisDataService::Instance().add("test_inLn", work_in1);
 
+    Logarithm alg;
 
-      Logarithm alg;
+    alg.initialize();
 
-      alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
+        alg.setPropertyValue("InputWorkspace","test_inLn");
+    alg.setPropertyValue("OutputWorkspace","test_inLn");
+    alg.setPropertyValue("Filler","10");
+    alg.setPropertyValue("Natural","0");
+    );
 
-      TS_ASSERT_THROWS_NOTHING(
-          alg.setPropertyValue("InputWorkspace","test_inLn");
-          alg.setPropertyValue("OutputWorkspace","test_inLn");
-          alg.setPropertyValue("Filler","10");
-          alg.setPropertyValue("Natural","0");
-       );
+    alg.execute();
 
-      alg.execute();
+    MatrixWorkspace_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_inLn")));
 
-     MatrixWorkspace_sptr work_out1;
-     TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_inLn")));
-
-     TS_ASSERT_THROWS_NOTHING(
-      AnalysisDataService::Instance().remove("test_outLn");
-      AnalysisDataService::Instance().remove("test_inLn");
-      );
+    TS_ASSERT_THROWS_NOTHING(
+        AnalysisDataService::Instance().remove("test_outLn");
+    AnalysisDataService::Instance().remove("test_inLn");
+    );
 
   }
 
   void testExec2D(void)
   {
+    int nHist = 10,nBins=20;
+    // Register the workspace in the data service
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+    Workspace2D_sptr     work_ou2 = WorkspaceCreationHelper::Create2DWorkspace(nHist, nBins);
 
-      int sizex = 10,sizey=20;
-        // Register the workspace in the data service
-        MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-        Workspace2D_sptr     work_ou2 = WorkspaceCreationHelper::Create2DWorkspace(sizex, sizey);
-
-
-        Logarithm alg;
-
-        AnalysisDataService::Instance().add("test_inLn2", work_in2);
-        AnalysisDataService::Instance().add("test_outLn2", work_ou2);
-
-        alg.initialize();
-       TS_ASSERT_THROWS_NOTHING(
+    Logarithm alg;
+    AnalysisDataService::Instance().add("test_inLn2", work_in2);
+    AnalysisDataService::Instance().add("test_outLn2", work_ou2);
+    alg.initialize();
+    TS_ASSERT_THROWS_NOTHING(
         alg.setPropertyValue("InputWorkspace","test_inLn2");
-        alg.setPropertyValue("OutputWorkspace","test_outLn2");
-        alg.setPropertyValue("Natural","1");
+    alg.setPropertyValue("OutputWorkspace","test_outLn2");
+    alg.setPropertyValue("Natural","1");
 
-        );
+    );
 
-        TS_ASSERT_THROWS_NOTHING(alg.execute());
-        TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING(alg.execute());
+    TS_ASSERT( alg.isExecuted() );
 
-         MatrixWorkspace_sptr work_out2;
-         TS_ASSERT_THROWS_NOTHING(work_out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_outLn2")));
+    MatrixWorkspace_sptr work_out2;
+    TS_ASSERT_THROWS_NOTHING(work_out2 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_outLn2")));
 
-   //    checkData(work_in1, work_in2, work_out1);
-
-        AnalysisDataService::Instance().remove("test_inLn2");
-        AnalysisDataService::Instance().remove("test_outLn2");
+    //    checkData(work_in1, work_in2, work_out1);
+    AnalysisDataService::Instance().remove("test_inLn2");
+    AnalysisDataService::Instance().remove("test_outLn2");
 
   }
 

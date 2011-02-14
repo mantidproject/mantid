@@ -11,6 +11,7 @@
 #include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidAPI/LocatedDataRef.h"
 #include "MantidAPI/WorkspaceIterator.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using Mantid::MantidVec;
 using namespace Mantid::DataObjects;
@@ -42,50 +43,50 @@ private:
 
 public:
 
-  parray CreateRandomArray(int size)
-  {
-    parray x(new MantidVec);
-    x->resize(size);
-    std::generate(x->begin(),x->end(),rand);
-    return x;
-  }
-
-  W1D Create1DWorkspace(int size)
-  {
-    W1D retVal(new Workspace1D);
-    retVal->setX(CreateRandomArray(size));
-    retVal->setData(CreateRandomArray(size),CreateRandomArray(size));
-    return retVal;
-  }
-
-  W2D Create2DWorkspace(int histogramCount,int size)
-  {
-    W2D retVal(new Workspace2D);
-    retVal->initialize(histogramCount,size,size);
-    for (int i = 0; i < histogramCount; i++)
-    {
-      retVal->setX(i,CreateRandomArray(size));
-      retVal->setData(i,CreateRandomArray(size),CreateRandomArray(size));
-    }
-    return retVal;
-  }
-
-  W1D Create1DWorkspaceFib(int size)
-  {
-    Mantid::MantidVecPtr x1,y1,e1;
-    y1.access().resize(size);
-    std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
-    e1.access().resize(size);
-    W1D retVal = W1D(new Workspace1D);
-    retVal->setX(CreateRandomArray(size));
-    retVal->setData(y1,e1);
-    return retVal;
-  }
+//  parray CreateRandomArray(int size)
+//  {
+//    parray x(new MantidVec);
+//    x->resize(size);
+//    std::generate(x->begin(),x->end(),rand);
+//    return x;
+//  }
+//
+//  W1D Create1DWorkspace(int size)
+//  {
+//    W1D retVal(new Workspace1D);
+//    retVal->setX(CreateRandomArray(size));
+//    retVal->setData(CreateRandomArray(size),CreateRandomArray(size));
+//    return retVal;
+//  }
+//
+//  W2D Create2DWorkspace(int histogramCount,int size)
+//  {
+//    W2D retVal(new Workspace2D);
+//    retVal->initialize(histogramCount,size,size);
+//    for (int i = 0; i < histogramCount; i++)
+//    {
+//      retVal->setX(i,CreateRandomArray(size));
+//      retVal->setData(i,CreateRandomArray(size),CreateRandomArray(size));
+//    }
+//    return retVal;
+//  }
+//
+//  W1D Create1DWorkspaceFib(int size)
+//  {
+//    Mantid::MantidVecPtr x1,y1,e1;
+//    y1.access().resize(size);
+//    std::generate(y1.access().begin(),y1.access().end(),FibSeries<double>());
+//    e1.access().resize(size);
+//    W1D retVal = W1D(new Workspace1D);
+//    retVal->setX(CreateRandomArray(size));
+//    retVal->setData(y1,e1);
+//    return retVal;
+//  }
 
   void testIteratorWorkspace1DLength()
   {
     int size = 100;
-    W1D workspace = Create1DWorkspace(size);
+    W1D workspace = WorkspaceCreationHelper::Create1DWorkspaceRand(size);
 
     int count = 0;
     for(Workspace1D::const_iterator ti(*workspace); ti != ti.end(); ++ti)
@@ -105,7 +106,7 @@ public:
   void testIteratorWorkspace1DOrder()
   {
     int size = 200;
-    W1D workspace = Create1DWorkspace(size);
+    W1D workspace = WorkspaceCreationHelper::Create1DWorkspaceRand(size);
 
     const MantidVec& x1 = workspace->dataX();
     const MantidVec& y1 = workspace->dataY();
@@ -128,7 +129,7 @@ public:
   void testIteratorWorkspace1DAsBase()
   {
     int size = 57;
-    Wbase workspace = Create1DWorkspace(size);
+    Wbase workspace = WorkspaceCreationHelper::Create1DWorkspaceRand(size);
 
     int count = 0;
     for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
@@ -151,7 +152,7 @@ public:
   {
     int size = 57;
     int histogramCount = 100;
-    Wbase workspace = Create2DWorkspace(histogramCount,size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount,size);
     //workspace->dataX(0) // this is the first spectrum in the workspace with real data
     int count = 0;
     for(MatrixWorkspace::const_iterator ti(*workspace); ti != ti.end(); ++ti)
@@ -182,7 +183,7 @@ public:
     loopCountArray[4] = 11;
     loopCountArray[5] = 0;
 
-    Wbase workspace = Create1DWorkspace(size);
+    Wbase workspace = WorkspaceCreationHelper::Create1DWorkspaceRand(size);
 
     for (int i = 0; i < loopCountArrayLength; i++)
     {
@@ -207,7 +208,7 @@ public:
   {
     int size = 57;
     int histogramCount = 100;
-    Wbase workspace = Create2DWorkspace(histogramCount,size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount,size);
 
     const int loopCountArrayLength = 4;
     int loopCountArray[loopCountArrayLength];
@@ -250,7 +251,7 @@ public:
     loopCountArray[4] = 11;
     loopCountArray[5] = 0;
 
-    Wbase workspace = Create1DWorkspace(size);
+    Wbase workspace = WorkspaceCreationHelper::Create1DWorkspaceRand(size);
 
     for (int i = 0; i < loopCountArrayLength; i++)
     {
@@ -276,7 +277,7 @@ public:
   {
     int size = 50;
     int histogramCount = 100;
-    Wbase workspace = Create2DWorkspace(histogramCount,size);
+    Wbase workspace = WorkspaceCreationHelper::Create2DWorkspace(histogramCount,size);
 
     const int loopCountArrayLength = 4;
     int loopCountArray[loopCountArrayLength];

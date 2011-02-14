@@ -27,30 +27,29 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceRand(int size);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceConstant(int size, double value, double error);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int xlen, int ylen);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int xlen, int ylen,bool isHist=0, const std::set<int> & 
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins, bool isHist=false, const std::set<int> &
 					       maskedWorkspaceIndices = std::set<int>());
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int xlen, int ylen,bool isHist=0, 
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int nHist, int nBins, bool isHist=false,
 					       const std::set<int> & maskedWorkspaceIndices = std::set<int>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr maskSpectra(Mantid::DataObjects::Workspace2D_sptr workspace, 
 								    const std::set<int> & maskedWorkspaceIndices);
   /** Create a 2D workspace with this many histograms and bins.
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(int nhist, int nbins, double x0=0.0, double deltax = 1.0);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(int nHist, int nBins, double x0=0.0, double deltax = 1.0);
 
   /** Create a 2D workspace with this many histograms and bins. The bins are assumed to be non-uniform and given by the input array
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(int nhist, const int numBoundaries, 
-							   const double xBoundaries[]);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceBinned(int nHist, const int nBins, const double xBoundaries[]);
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the
    * pervious. 
    * Data filled with: Y: 2.0, E: sqrt(2.0), X: nbins of width 1 starting at 0 
    */
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nhist, int nbins, 
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr create2DWorkspaceWithFullInstrument(int nHist, int nBins,
 							      bool includeMonitors = false);
   DLL_TESTHELPERS Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value);
   DLL_TESTHELPERS Mantid::DataObjects::WorkspaceSingleValue_sptr CreateWorkspaceSingleValueWithError(double value, double error);

@@ -84,12 +84,12 @@ public:
   void testExecwithOneGroupandOne2DWorkspace()
   {
    
-    int sizex = 10, sizey = 20;
+    int nHist = 20, nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex, sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex, sizey);
-    MatrixWorkspace_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex, sizey);
-    MatrixWorkspace_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace154(sizex, sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
+    MatrixWorkspace_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspace123(nHist, nBins);
+    MatrixWorkspace_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins);
 
     WorkspaceGroup_sptr wsSptr = WorkspaceGroup_sptr(new WorkspaceGroup);
     if (wsSptr)
@@ -164,15 +164,15 @@ public:
 
   void testExecOnlyOneGroupInput()
   {
-    int sizex = 10, sizey = 20;
+    int nHist = 20, nBins = 10;
     // Register the workspace in the data service
-    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex, sizey, 1);
-    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex, sizey, 1);
+    Workspace2D_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins, 1);
+    Workspace2D_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist, nBins, 1);
     int forSpecDetMap[20] =
     { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19 };
     //set some dead detectors
-    boost::shared_ptr<Mantid::MantidVec> yDead(new Mantid::MantidVec(sizex, 0));
-    for (int i = 0; i < sizey; i++)
+    boost::shared_ptr<Mantid::MantidVec> yDead(new Mantid::MantidVec(nHist, 0));
+    for (int i = 0; i < nBins; i++)
     {
       if (i % 2 == 0)
       {
@@ -187,7 +187,7 @@ public:
     }
     work_in1->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, 20);
 
-    for (int i = 0; i < sizey; i++)
+    for (int i = 0; i < nBins; i++)
     {
       if (i % 2 == 0)
       {
@@ -245,7 +245,7 @@ public:
     std::vector<int> deadDets;
     TS_ASSERT_THROWS_NOTHING( deadDets = alg.getProperty("FoundDead") )
     TS_ASSERT_EQUALS( deadDets.size(),0 )
-    for (int i=0; i < sizey; i++)
+    for (int i=0; i < nBins; i++)
     {
       const double val = work_out1->readY(i)[0];
       double valExpected = 1;
@@ -291,17 +291,17 @@ public:
       
     void testTwoGroupWorkspaces()
     {
-      int sizex = 10,sizey=20;
+      int nHist = 10,nBins=20;
       // Register the workspace in the data service
-      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
-      MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+      MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
       WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
       if(wsSptr)
@@ -400,16 +400,16 @@ public:
 
     void testLHS2DWorkspaceandRHSGroupWorkspace()
     {
-      int sizex = 10,sizey=20;
+      int nHist = 10,nBins=20;
 
-      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
       if(worklhs_in1)
       AnalysisDataService::Instance().add("testlhs_in1", worklhs_in1);
 
-      MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+      MatrixWorkspace_sptr workrhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr workrhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
       WorkspaceGroup_sptr wsSptr1= WorkspaceGroup_sptr(new WorkspaceGroup);
       if(wsSptr1)
@@ -480,12 +480,12 @@ public:
     void testLHSandRHSSameGroupWorkspaces()
     {
       //this is the test for self addition
-      int sizex = 10,sizey=20;
+      int nHist = 10,nBins=20;
       // Register the workspace in the data service
-      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-      MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+      MatrixWorkspace_sptr worklhs_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in3 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+      MatrixWorkspace_sptr worklhs_in4= WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
       WorkspaceGroup_sptr wsSptr= WorkspaceGroup_sptr(new WorkspaceGroup);
       if(wsSptr)

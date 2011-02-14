@@ -45,9 +45,8 @@ public:
 
   void testcheckSizeCompatibility1D1D()
   {
-    int sizex = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(20);
     MatrixWorkspace_sptr work_in3 = WorkspaceCreationHelper::Create1DWorkspaceFib(10);
     MatrixWorkspace_sptr work_in4 = WorkspaceCreationHelper::Create1DWorkspaceFib(5);
@@ -88,11 +87,11 @@ public:
   {
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(20,10);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(10,20);
     MatrixWorkspace_sptr work_in3 = WorkspaceCreationHelper::Create2DWorkspace(10,10);
     MatrixWorkspace_sptr work_in4 = WorkspaceCreationHelper::Create2DWorkspace(5,5);
     MatrixWorkspace_sptr work_in5 = WorkspaceCreationHelper::Create2DWorkspace(3,3);
-    MatrixWorkspace_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(1,100);
+    MatrixWorkspace_sptr work_in6 = WorkspaceCreationHelper::Create2DWorkspace(100,1);
     MatrixWorkspace_sptr work_in7 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
     MatrixWorkspace_sptr work_event1 = WorkspaceCreationHelper::CreateEventWorkspace(10,1);
     MatrixWorkspace_sptr work_event2 = WorkspaceCreationHelper::CreateEventWorkspace(10,10);

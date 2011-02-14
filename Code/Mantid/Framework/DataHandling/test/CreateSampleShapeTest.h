@@ -60,9 +60,8 @@ public:
   void runTest(std::string xmlShape, double x, double y , double z, bool inside)
   {
     //Need a test workspace
-    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace", WorkspaceCreationHelper::Create2DWorkspace123(10,22,1));
+    Mantid::API::AnalysisDataService::Instance().add("TestWorkspace", WorkspaceCreationHelper::Create2DWorkspace123(22,10,1));
     
-
     CreateSampleShape alg;
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT( alg.isInitialized() );

@@ -179,9 +179,15 @@ namespace Mantid
       // A SingleValueWorkspace on the left only matches if rhs was single value too. Why are you using mantid to do simple math?!?
       if (lhs->size()==1) return false;
 
-      // RHS only has one value (1D vertical), so the number of histograms needs to match.
+      // If RHS only has one value (1D vertical), the number of histograms needs to match.
       // Each lhs spectrum will be divided by that scalar
       if ( rhs->blocksize() == 1 && lhs->getNumberHistograms() == rhs->getNumberHistograms() ) return true;
+
+      if (m_matchXSize)
+      {
+        // Past this point, for a 2D WS operation, we require the X arrays to match. Note this only checks the first spectrum
+        if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
+      }
 
       // We don't need to check for matching bins for events. Yay events!
       const int rhsSpec = rhs->getNumberHistograms();

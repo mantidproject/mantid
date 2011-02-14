@@ -24,7 +24,7 @@ public:
 
   NormaliseToMonitorTest()
   {
-    MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    MatrixWorkspace_sptr input = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
     // Change the data in the monitor spectrum
     input->dataY(0).assign(10,10.0);
     // Need to change bins

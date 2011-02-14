@@ -27,7 +27,7 @@ public:
   void test_That_Output_Is_The_Same_As_Input_If_Input_Contains_Point_Data()
   {
     // False indicates a non histogram workspace
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(10,5,false);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace123(5,10,false);
 
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
     TS_ASSERT(outputWS);

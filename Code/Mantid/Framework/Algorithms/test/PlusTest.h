@@ -44,11 +44,11 @@ public:
   
   void testExec1D1D()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
 
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -75,10 +75,10 @@ public:
 
   void testExec1D1DRand()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
 
@@ -103,10 +103,10 @@ public:
 
   void testExec2D2D()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -132,10 +132,10 @@ public:
   
   void testExec2D2DHist()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey,true);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey,true);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins,true);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins,true);
 
     Plus alg;
 
@@ -166,10 +166,10 @@ public:
   
   void testExec1D2D()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -197,10 +197,10 @@ public:
 
   void testExec1DRand2D()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -228,10 +228,10 @@ public:
 
   void testExec1DRand2DVertical()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 20,nBins=10;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(sizex);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -258,10 +258,10 @@ public:
 
   void testExec2D1D()
   {
-    int sizex = 5,sizey=300;
+    int nHist = 5,nBins=300;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -289,10 +289,10 @@ public:
 
   void testExec2D1DVertical()
   {
-    int sizex = 10,sizey=20;
+    int nHist = 10,nBins=20;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,sizey);
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     Plus alg;
 
@@ -319,9 +319,9 @@ public:
   
   void testExec2D2DbyOperatorOverload()
   {
-    int sizex = 10,sizey=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    int nHist = 10,nBins=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     MatrixWorkspace_sptr work_out1 = work_in2 + work_in1;
 
@@ -331,10 +331,10 @@ public:
 
   void testExec2D2D_byOperatorOverload_MoreComplexCase()
   {
-    int sizex = 10,sizey=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(sizex,sizey);
+    int nHist = 10,nBins=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(nHist,nBins);
     work_in1->dataY(3)[3] = 100;
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(sizex,sizey);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
 
     MatrixWorkspace_sptr work_out1 = work_in2 + work_in1;
 
@@ -343,10 +343,10 @@ public:
 
   void testExec1DSingleValue()
   {
-    int sizex = 10;
+    int nBins = 10;
     // Register the workspace in the data service
 
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
     AnalysisDataService::Instance().add("test_in11", work_in1);
     AnalysisDataService::Instance().add("test_in12", work_in2);
@@ -372,9 +372,9 @@ public:
   
   void testExec2DSingleValue()
   {
-    int sizex = 5,sizey=300;
+    int nHist = 5,nBins=300;
     // Register the workspace in the data service
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(sizex);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
 
     Plus alg;

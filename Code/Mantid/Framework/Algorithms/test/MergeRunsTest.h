@@ -482,7 +482,7 @@ public:
 	  TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("OutputWorkspace","null") );
 	  TS_ASSERT_THROWS( merge2.execute(), std::runtime_error );
     TS_ASSERT( ! merge2.isExecuted() );
-    MatrixWorkspace_sptr badIn = WorkspaceCreationHelper::Create2DWorkspace123(10,3,1);
+    MatrixWorkspace_sptr badIn = WorkspaceCreationHelper::Create2DWorkspace123(3,10,1);
 	  badIn->dataX(0) = std::vector<double>(11,2.0);
     AnalysisDataService::Instance().add("badIn",badIn);
     TS_ASSERT_THROWS_NOTHING( merge.setPropertyValue("InputWorkspaces","ws1,badIn") );

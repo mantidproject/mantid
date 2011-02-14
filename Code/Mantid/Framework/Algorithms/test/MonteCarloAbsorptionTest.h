@@ -27,7 +27,7 @@ public:
   {
     IAlgorithm_sptr mcAbsorb = createAlgorithm();
     // Create a simple test workspace that has no instrument
-    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(5, 10);
+    Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspace(10, 5);
     
     TS_ASSERT_THROWS(mcAbsorb->setProperty<MatrixWorkspace_sptr>("InputWorkspace", testWS), 
 		     std::invalid_argument);
