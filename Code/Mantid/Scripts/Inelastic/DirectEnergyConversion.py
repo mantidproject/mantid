@@ -361,11 +361,22 @@ class DirectEnergyConversion(object):
         if not norm_factor is None:
             sample_wkspace /= norm_factor
 
-        # Check if motor name exists
-        # if not self.motor = None
-        # self.motor_offset = 
-        # self.psi = 
-
+        
+        #calculate psi from sample environment motor and offset 
+        if (offset is None):
+            self.motor_offset = 0
+        else:
+            self.motor_offset = float(offset)
+        
+        self.motor=0
+        if not (motor is None):
+        # Check if motor name exists    
+            if sample_wkspace.getRun().hasProperty(motor):
+                self.motor=sample_wkspace.getRun()[motor].value[0]
+                self.log("Motor value is"+self.motor)
+            else:
+                self.log("Could not find such sample environment log. Will use psi=offset")
+        self.psi = self.motor+self.motor_offset
         # Save then finish
         self.save_results(sample_wkspace, save_path)
         return sample_wkspace
@@ -563,7 +574,7 @@ class DirectEnergyConversion(object):
             elif ext == '.nxs':
                 SaveNexus(workspace, filename)
             elif ext == '.nxspe':
-                SaveNXSPE(workspace, filename, kioverkfscaling=self.apply_kikf_correction)
+                SaveNXSPE(workspace, filename, kioverkfscaling=self.apply_kikf_correction,psi=self.psi)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
     

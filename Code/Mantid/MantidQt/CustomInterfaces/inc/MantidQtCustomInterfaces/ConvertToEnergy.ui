@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>602</width>
-    <height>762</height>
+    <width>615</width>
+    <height>856</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -827,33 +827,6 @@
                 </property>
                </spacer>
               </item>
-              <item>
-               <widget class="QLabel" name="label_5">
-                <property name="text">
-                 <string>SE Motor</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="motorNameEdit">
-                <property name="maximumSize">
-                 <size>
-                  <width>70</width>
-                  <height>16777215</height>
-                 </size>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLabel" name="label_6">
-                <property name="text">
-                 <string>offset</string>
-                </property>
-               </widget>
-              </item>
-              <item>
-               <widget class="QLineEdit" name="seOffsetEdit"/>
-              </item>
              </layout>
             </widget>
             <widget class="QWidget" name="page_8">
@@ -1368,6 +1341,80 @@ p, li { white-space: pre-wrap; }
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QStackedWidget" name="SampleEnvSW">
+         <widget class="QWidget" name="page_17">
+          <widget class="QLabel" name="label_5">
+           <property name="geometry">
+            <rect>
+             <x>10</x>
+             <y>20</y>
+             <width>63</width>
+             <height>49</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>SE Motor</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="motorNameEdit">
+           <property name="geometry">
+            <rect>
+             <x>90</x>
+             <y>30</y>
+             <width>150</width>
+             <height>27</height>
+            </rect>
+           </property>
+          </widget>
+          <widget class="QLabel" name="label_6">
+           <property name="geometry">
+            <rect>
+             <x>290</x>
+             <y>20</y>
+             <width>42</width>
+             <height>49</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>offset</string>
+           </property>
+          </widget>
+          <widget class="QLineEdit" name="seOffsetEdit">
+           <property name="geometry">
+            <rect>
+             <x>340</x>
+             <y>30</y>
+             <width>146</width>
+             <height>27</height>
+            </rect>
+           </property>
+           <property name="toolTip">
+            <string> Psi = Motor Value + Offset</string>
+           </property>
+          </widget>
+          <widget class="QGroupBox" name="groupBox">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>551</width>
+             <height>80</height>
+            </rect>
+           </property>
+           <property name="title">
+            <string>Sample Environment</string>
+           </property>
+          </widget>
+          <zorder>groupBox</zorder>
+          <zorder>label_5</zorder>
+          <zorder>motorNameEdit</zorder>
+          <zorder>label_6</zorder>
+          <zorder>seOffsetEdit</zorder>
+         </widget>
+         <widget class="QWidget" name="page_18"/>
         </widget>
        </item>
        <item>

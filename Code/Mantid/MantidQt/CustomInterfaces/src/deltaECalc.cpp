@@ -99,7 +99,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
       pyCode +=
         "for run in rfiles:\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,motor=%4, offset=%5)\n";
+        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,motor='%4', offset=%5)\n";
       pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyMotorName, pySeOffset);
     }
     else
