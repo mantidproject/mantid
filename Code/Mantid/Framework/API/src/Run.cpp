@@ -14,6 +14,9 @@ namespace API
 
 using namespace Kernel;
 
+const int Run::ADDABLES = 4;
+const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur"};
+
   //----------------------------------------------------------------------
   // Public member functions
   //----------------------------------------------------------------------
@@ -57,17 +60,82 @@ using namespace Kernel;
 
   //-----------------------------------------------------------------------------------------------
   /**
-   * Addition operator
-   * @param rhs :: The object that is being added to this.
+   * Adds just the properties that are safe to add. All time series are
+   * merged together and the list of addable properties are added
+   * @param rhs The object that is being added to this.
    * @returns A reference to the summed object
    */
   Run& Run::operator+=(const Run& rhs)
   {
-    //The propery manager operator will have to handle it
-    m_manager += rhs.m_manager;
+    //merge and copy properties where there is no risk of corrupting data
+    mergeMergables(m_manager, rhs.m_manager);
+
+    // Other properties are added to gether if they are on the approved list
+    for(int i = 0; i < ADDABLES; ++i )
+    {
+      // get a pointer to the property on the right-handside worksapce
+      Property * right;
+      try
+      {
+        right = rhs.m_manager.getProperty(ADDABLE[i]);
+      }
+      catch (Exception::NotFoundError err)
+      {
+        //if it's not there then ignore it and move on
+        continue;
+      }
+      // now deal with the left-handside
+      Property * left;
+      try
+      {
+        left = m_manager.getProperty(ADDABLE[i]);
+      }
+      catch (Exception::NotFoundError err)
+      {
+        //no property on the left-handside, create one and copy the right-handside across verbatum
+        m_manager.declareProperty(right->clone(), "");
+        continue;
+      }
+      
+      left->operator+=(right);
+
+    }
     return *this;
   }
 
+  /** Adds all the time series in the second property manager to those in the first
+  * @param sum the properties to add to
+  * @param toAdd the properties to add
+  */
+  void Run::mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd)
+  {
+    // get pointers to all the properties on the right-handside and prepare to loop through them
+    const std::vector<Property*> inc = toAdd.getProperties();
+    std::vector<Property*>::const_iterator end = inc.end();
+    for (std::vector<Property*>::const_iterator it=inc.begin(); it != end;++it)
+    {
+      const std::string rhs_name = (*it)->name();
+      try
+      {
+        //now get pointers to the same properties on the left-handside
+        Property * lhs_prop(sum.getProperty(rhs_name));
+        lhs_prop->merge(*it);
+        
+/*        TimeSeriesProperty * timeS = dynamic_cast< TimeSeriesProperty * >(lhs_prop);
+        if (timeS)
+        {
+          (*lhs_prop) += (*it);
+        }*/
+      }
+      catch (Exception::NotFoundError err)
+      {
+        //copy any properties that aren't already on the left hand side
+        Property * copy = (*it)->clone();
+        //And we add a copy of that property to *this
+        sum.declareProperty(copy, "");
+      }
+    }
+  }
 
   //-----------------------------------------------------------------------------------------------
   /**

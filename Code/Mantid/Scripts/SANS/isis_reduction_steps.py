@@ -98,15 +98,6 @@ class LoadRun(ReductionStep):
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
 
             SANS2D_log_file = mtd[workspace]
-
-            #get rid of these two lines when files store their logs properly
-            log_file = alg.getPropertyValue("Filename")
-            base_name = os.path.splitext(log_file)[0]
-            if base_name.endswith('-add'):
-                #remove the add files specifier, if it's there
-                base_name = base_name.rpartition('-add')[0]
-            SANS2D_log_file = base_name+'.log'
-
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files

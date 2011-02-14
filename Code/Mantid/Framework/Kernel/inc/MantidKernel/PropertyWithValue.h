@@ -320,9 +320,9 @@ public:
 
   //--------------------------------------------------------------------------------------
   ///Add the value of another property
-  virtual PropertyWithValue& operator+=( Property * right )
+  virtual PropertyWithValue& operator+=( Property const * right )
   {
-    PropertyWithValue * rhs = dynamic_cast< PropertyWithValue * >(right);
+    PropertyWithValue const * rhs = dynamic_cast< PropertyWithValue const * >(right);
 
     if (rhs)
     {

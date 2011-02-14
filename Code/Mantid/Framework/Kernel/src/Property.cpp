@@ -165,14 +165,13 @@ void Property::setUnits(std::string unit)
  * @return the augmented property
  * @throw NotImplementedError always, since this should have been overridden
  */
-Property& Property::operator+=( Property * rhs )
+Property& Property::operator+=( Property const * rhs )
 {
   (void) rhs; //Avoid compiler warning
   std::stringstream msg;
   msg << "Property object '" << m_name << "' of type '" << type() << "' has not implemented a operator+=() method.";
   throw Exception::NotImplementedError(msg.str());
 }
-
 
 //-------------------------------------------------------------------------------------------------
 /** Filter out a property by time. Will be overridden by TimeSeriesProperty (only)

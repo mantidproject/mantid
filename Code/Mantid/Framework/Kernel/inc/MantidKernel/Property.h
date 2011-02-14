@@ -122,7 +122,7 @@ public:
   }
 
   /// Add to this
-  virtual Property& operator+=( Property * rhs );
+  virtual Property& operator+=( Property const * rhs );
   virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
   virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
 
@@ -134,6 +134,12 @@ public:
 
   virtual size_t getMemorySize() const
   { return sizeof(Property); }
+
+  /** Just returns the property (*this) unless overridden
+  *  @return a property with the value
+  */
+  virtual  Property& merge( Property * )
+  { return *this; }
 
 protected:
   /// Constructor

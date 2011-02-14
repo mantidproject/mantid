@@ -112,11 +112,20 @@ public:
     return m_propertySeries.size() * (sizeof(TYPE) + sizeof(DateAndTime));
   }
 
+  /** Just returns the property (*this) unless overridden
+  *  @param rhs a property that is merged in some descendent classes
+  *  @return a property with the value
+  */
+  virtual TimeSeriesProperty& merge(Property * rhs)
+  {
+    return operator+=(rhs);
+  }
+
   //--------------------------------------------------------------------------------------
   ///Add the value of another property
-  virtual TimeSeriesProperty& operator+=( Property * right )
+  virtual TimeSeriesProperty& operator+=( Property const * right )
   {
-    TimeSeriesProperty * rhs = dynamic_cast< TimeSeriesProperty * >(right);
+    TimeSeriesProperty const * rhs = dynamic_cast< TimeSeriesProperty const * >(right);
 
     if (rhs)
     {
@@ -131,7 +140,7 @@ public:
       }
 
       //Count the REAL size.
-      m_size = m_propertySeries.size();
+      m_size = static_cast<int>(m_propertySeries.size());
 
     }
     else
@@ -165,7 +174,7 @@ public:
       }
     }
     //Cache the size for later. Any filtered TSP's will have to fend for themselves.
-    m_size = m_propertySeries.size();
+    m_size = static_cast<int>(m_propertySeries.size());
   }
 
 
@@ -493,7 +502,7 @@ public:
    */
   int realSize() const
   {
-    return m_propertySeries.size();
+    return static_cast<int>(m_propertySeries.size());
   }
 
 
@@ -631,7 +640,7 @@ public:
 //    // Insert the whole list in one go.
 //    m_propertySeries.insert(list.begin(), list.end());
 
-    m_size = m_propertySeries.size();
+    m_size = static_cast<int>(m_propertySeries.size());
   }
 
   //-----------------------------------------------------------------------------------------------

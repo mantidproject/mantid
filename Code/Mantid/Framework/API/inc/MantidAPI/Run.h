@@ -128,10 +128,16 @@ namespace Mantid
       //@}
 
     private:
+      static const int ADDABLES;
+      static const std::string ADDABLE[];
+
       /// A pointer to a property manager
       Kernel::PropertyManager m_manager;
       /// The name of the proton charge property
       std::string m_protonChargeName;
+      
+      /// Adds all the time series in from one property manager into another
+      void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
     };
 
     /**
