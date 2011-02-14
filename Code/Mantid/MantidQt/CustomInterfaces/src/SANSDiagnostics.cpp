@@ -25,6 +25,7 @@ namespace MantidQt
     ///Destructor
     SANSDiagnostics::~SANSDiagnostics()
     {
+      saveSettings();
     }
 
     ///initialise the diagonstics tab
@@ -72,12 +73,12 @@ namespace MantidQt
     /// set tool tips
     void SANSDiagnostics::setToolTips()
     {
-      m_SANSForm->label_period->setToolTip("Enter the desired period number if the loaded file contains multi period data");
+      m_SANSForm->label_period->setToolTip("Period number of the member workspace to process  if the loaded file contains multi period data");
       m_SANSForm->hrange_det1->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
       m_SANSForm->vrange_det1->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
 
-      m_SANSForm->hrange_det2->setToolTip("Enter H/V_Min and H/V_Max values for SumRowColumn algorithm");
-      m_SANSForm->vrange_det2->setToolTip("Enter H/V_Min and H/V_Max values for SumRowColumn algorithm");
+      m_SANSForm->hrange_det2->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
+      m_SANSForm->vrange_det2->setToolTip("H/V_Min and H/V_Max values for SumRowColumn algorithm");
 
       m_SANSForm->hi_Btn1->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the H Plot for the first detectro bank ");
       m_SANSForm->vi_Btn1->setToolTip("Executes SANS specific SumRowColumn algorithm and displays the V Plot for the first detectro bank");
@@ -941,18 +942,7 @@ namespace MantidQt
      plotSpectrum(plotws,0);
     }
 
-    /// This method loads values from registry
-    void SANSDiagnostics::loadSettings()
-    {
-      m_settingsGroup = "CustomInterfaces/SANSDiagnostics";
-      QSettings settings;
-      // Load settings for MWRunFile widgets
-      settings.beginGroup(m_settingsGroup + "DataFiles");
-      settings.value("last_directory", m_dataDir);
-      m_SANSForm->file_run_edit->readSettings(settings.group());
-      settings.endGroup();
-    }
-
+    
     /// get the total number of periods in the loaded raw/nexus file
     int SANSDiagnostics::getTotalNumberofPeriods()
     {
@@ -973,19 +963,31 @@ namespace MantidQt
       }
       return 1;
     }
+    /// This method loads last saved settings values from registry
+    void SANSDiagnostics::loadSettings()
+    {
+     
+      QSettings settings;
+      m_settingsGroup = "CustomInterfaces/SANSRunWindow/SANSDiagnostics";
+      settings.beginGroup(m_settingsGroup);
+      m_SANSForm->file_run_edit->readSettings(settings.group());
+      m_SANSForm->file_run_edit->setFileText(settings.value("File").toString());
+      settings.endGroup();
+    }
+
     ///save settings
     void SANSDiagnostics::saveSettings()
     {
       m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
       m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
       QSettings settings;
-      // Load settings for MWRunFile widgets
-      settings.beginGroup(m_settingsGroup + "DataFiles");
-      settings.setValue("last_directory",m_dataDir);
-
-      m_SANSForm->file_run_edit->saveSettings(settings.group());
+      m_settingsGroup="CustomInterfaces/SANSRunWindow/SANSDiagnostics";
+      settings.beginGroup(m_settingsGroup);
+      settings.setValue("last_directory", m_dataDir);
+      settings.setValue("File",getFileName());
       settings.endGroup();
-
+      m_SANSForm->file_run_edit->saveSettings(settings.group());
+      
     }
 
     /**Execute sumrowcolumn algorithm 
