@@ -87,9 +87,8 @@ int MuonNexusReader::readFromFile(const std::string& filename)
   if(stat==NX_ERROR) return(1);
   // allocate temp space for grouping data
   numDetectors = dims[0];
-  detectorGroupings = new int[dims[0]]; // This doesn't seem to be used?
+  detectorGroupings = new int[dims[0]];
   stat=NXgetdata(fileID,detectorGroupings);
-  delete[] detectorGroupings;
   if(stat==NX_ERROR) return(1);
   //
   stat=NXclosedata(fileID);
