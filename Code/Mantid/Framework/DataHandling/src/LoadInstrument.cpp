@@ -31,6 +31,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <Poco/Exception.h>
 #include <sstream>
 
 using Poco::XML::DOMParser;
@@ -131,9 +132,12 @@ namespace Mantid
       {
         pDoc = pParser.parse(m_filename);
       }
+      catch(Poco::Exception& exc)
+      {
+        throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", m_filename);
+      }
       catch(...)
       {
-        g_log.error("Unable to parse file " + m_filename);
         throw Kernel::Exception::FileError("Unable to parse File:" , m_filename);
       }
       // Get pointer to root element

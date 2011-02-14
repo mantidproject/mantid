@@ -342,11 +342,15 @@ void GroupDetectors2::processXMLFile(std::string fname,
   {
     pDoc = pParser.parse(fname);
   }
+  catch(Poco::Exception& exc)
+  {
+    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", fname);
+  }
   catch(...)
   {
-    g_log.error("Unable to parse file " + fname);
     throw Kernel::Exception::FileError("Unable to parse File:" , fname);
   }
+
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )

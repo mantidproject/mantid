@@ -81,11 +81,15 @@ void LoadParameterFile::exec()
   {
     pDoc = pParser.parse(filename);
   }
+  catch(Poco::Exception& exc)
+  {
+    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", filename);
+  }
   catch(...)
   {
-    g_log.error("Unable to parse file " + filename);
     throw Kernel::Exception::FileError("Unable to parse File:" , filename);
   }
+
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
   if ( !pRootElem->hasChildNodes() )
