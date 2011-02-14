@@ -53,6 +53,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_one->setCheckable(true);
   m_one->setAutoExclusive(true);
   m_one->setChecked(true);
+  m_one->setToolTip("Select single pixel");
 
   m_one->setIcon(QIcon(":/PickTools/selection-pointer.png"));
   m_box = new QPushButton();
@@ -63,9 +64,11 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_tube->setCheckable(true);
   m_tube->setAutoExclusive(true);
   m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
+  m_tube->setToolTip("Select whole tube");
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
-  toolBox->addWidget(m_box);
+  toolBox->addWidget(m_box); 
+  m_box->setVisible(false); //Hidden by Owen Arnold 14/02/2011 because box picking doesn't exhibit correct behaviour and is not necessary for current release 
   toolBox->addWidget(m_tube);
   toolBox->addStretch();
   toolBox->setSpacing(2);
@@ -298,11 +301,12 @@ void InstrumentWindowPickTab::setSelectionType()
   }
   else if (m_box->isChecked())
   {
-    m_selectionType = Box;
+    m_selectionType = DetSelectionType::Box;
   }
   else if (m_tube->isChecked())
   {
     m_selectionType = Tube;
   }
   setPlotCaption();
+  mInstrumentDisplay->setSelectionType(m_selectionType);
 }

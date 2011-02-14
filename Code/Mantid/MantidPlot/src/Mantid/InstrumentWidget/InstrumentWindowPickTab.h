@@ -2,6 +2,7 @@
 #define INSTRUMENTWINDOWPICKTAB_H_
 
 #include "Instrument3DWidget.h"
+#include "DetSelector.h"
 
 #include <QFrame>
 
@@ -22,7 +23,7 @@ class InstrumentWindowPickTab: public QFrame
 {
   Q_OBJECT
 public:
-  enum SelectionType {Single,Box,Tube};
+  
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(const Instrument3DWidget::DetInfo & cursorPos);
 private slots:
@@ -54,7 +55,7 @@ private:
   CollapsiblePanel* m_plotPanel;
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
-  SelectionType m_selectionType;
+  DetSelectionType m_selectionType;
 };
 
 

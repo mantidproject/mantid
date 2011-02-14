@@ -8,6 +8,7 @@
 #include "UnwrappedCylinder.h"
 #include "UnwrappedSphere.h"
 #include "OpenGLError.h"
+#include "DetSelector.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Objects/Object.h"
 
@@ -1017,3 +1018,7 @@ void GL3DWidget::componentSelected(Mantid::Geometry::ComponentID id)
   }
 }
 
+void GL3DWidget::setSelectionType(int type)
+{
+  m_detSelector.reset(DetSelector::create((DetSelectionType)type));
+}

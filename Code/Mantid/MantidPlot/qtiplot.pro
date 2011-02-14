@@ -519,6 +519,7 @@ HEADERS  += src/ApplicationWindow.h \
                 src/Mantid/InstrumentWidget/UnwrappedSphere.h \
                 src/Mantid/InstrumentWidget/OneCurvePlot.h \
                 src/Mantid/InstrumentWidget/CollapsiblePanel.h \
+                src/Mantid/InstrumentWidget/DetSelector.h \
                 src/Mantid/ManageCustomMenus.h
 
 ###################### FORMS ##############################################
@@ -712,6 +713,7 @@ SOURCES  += src/ApplicationWindow.cpp \
                 src/Mantid/InstrumentWidget/UnwrappedSphere.cpp \
                 src/Mantid/InstrumentWidget/OneCurvePlot.cpp \
                 src/Mantid/InstrumentWidget/CollapsiblePanel.cpp \
+                src/Mantid/InstrumentWidget/DetSelector.cpp \
                 src/Mantid/ManageCustomMenus.cpp \
 		src/pixmaps.cpp
 

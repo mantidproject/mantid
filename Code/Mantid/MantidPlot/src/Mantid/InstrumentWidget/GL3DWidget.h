@@ -9,7 +9,10 @@
 #include "GLTrackball.h"
 #include "GLActorCollection.h"
 #include "GLGroupPickBox.h"
+#include "DetSelector.h"
+
 #include "boost/shared_ptr.hpp"
+#include "boost/scoped_ptr.hpp"
 
 class UnwrappedSurface;
 
@@ -77,6 +80,7 @@ public slots:
   void resetUnwrappedViews();
   void componentSelected(Mantid::Geometry::ComponentID);
   void hidePickBox(){mPickBox->hide();}
+  void setSelectionType(int);
 
 protected:
   void initializeGL();
@@ -136,6 +140,7 @@ protected:
   UnwrappedSurface* m_unwrappedSurface;
   bool m_unwrappedSurfaceChanged;
   bool m_unwrappedViewChanged;   ///< set when the unwrapped image must be redrawn, but the surface is the same
+  boost::scoped_ptr<DetSelector> m_detSelector;    ///< draws the selection region
 
 };
 
