@@ -338,6 +338,11 @@ namespace Mantid
       catch(std::runtime_error &)
       {
       }
+      catch(std::domain_error &)
+      {
+        // try statement will throw a domain_error when the axis is not a spectra axis.
+        return continueOp;
+      }
       if( (det_lhs && det_lhs->isMasked()) || ( det_rhs && det_rhs->isMasked()) )
       {
         continueOp = false;
