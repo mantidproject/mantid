@@ -478,7 +478,7 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
 
   bool loadError = false ;
 
-  PARALLEL_CRITICAL(event_nexus_file_access)
+  PARALLEL_CRITICAL(LoadEventNexus_loadBankEventData_nexus_file_access)
   {
     // Open the file
     ::NeXus::File file(m_filename);

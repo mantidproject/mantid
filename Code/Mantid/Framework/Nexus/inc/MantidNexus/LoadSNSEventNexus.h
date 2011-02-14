@@ -6,14 +6,11 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidNexus/NexusClasses.h"
+#include "MantidNexus/LoadEventNexus.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
-
-//Copy of the NexusCpp API was placed in MantidNexus
-#include "MantidNexus/NeXusFile.hpp"
-#include "MantidNexus/NeXusException.hpp"
 
 
 namespace Mantid
@@ -53,16 +50,16 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LoadSNSEventNexus : public API::IDataFileChecker
+    class DLLExport LoadSNSEventNexus : public LoadEventNexus
     {
     public:
       /// Default constructor
-      LoadSNSEventNexus();
+      LoadSNSEventNexus()
+      { }
 
       /// Destructor
       virtual ~LoadSNSEventNexus()
-      {
-      }
+      { }
 
       /// Algorithm's name for identification overriding a virtual method
       virtual const std::string name() const { return "LoadSNSEventNexus";};
@@ -70,65 +67,11 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
 
-      /// Algorithm's category for identification overriding a virtual method
-      virtual const std::string category() const { return "Nexus";}
-
-      /// do a quick check that this file can be loaded 
-      bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
-      /// check the structure of the file and  return a value between 0 and 100 of how much this file can be loaded
       int fileCheck(const std::string& filePath);
-
-      /** Sets whether the pixel counts will be pre-counted.
-       * @param value :: true if you want to precount. */
-      void setPrecount(bool value)
-      {
-        precount = value;
-      }
 
     private:
 
-      void init();
-
       void exec();
-
-      /// The name and path of the input file
-      std::string m_filename;
-
-      /// The workspace being filled out
-      DataObjects::EventWorkspace_sptr WS;
-
-      /// Filter by a minimum time-of-flight
-      double filter_tof_min;
-      /// Filter by a maximum time-of-flight
-      double filter_tof_max;
-
-      /// Filter by start time
-      Kernel::DateAndTime filter_time_start;
-      /// Filter by stop time
-      Kernel::DateAndTime filter_time_stop;
-
-      /// Was the instrument loaded?
-      bool instrument_loaded_correctly;
-
-      /// Limits found to tof
-      double longest_tof;
-      /// Limits found to tof
-      double shortest_tof;
-
-      /// List of the absolute time of each pulse
-      std::vector<Kernel::DateAndTime> pulseTimes;
-
-      /// Do we pre-count the # of events in each pixel ID?
-      bool precount;
-
-      /// Do we load the sample logs?
-      bool loadlogs;
-
-      void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map);
-      void loadEntryMetadata(const std::string &entry_name);
-      void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
-      void runLoadMonitors();
-
     };
 
   } // namespace NeXus
