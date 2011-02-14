@@ -533,7 +533,10 @@ class LoadRun(ReductionStep):
         else:
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
         
-        return "Data file loaded: %s" % (workspace)
+        n_files = 1
+        if type(data_file)==list:
+            n_files = len(data_file)
+        return "Data set loaded: %s [%g file(s)]" % (workspace, n_files)
     
 class Normalize(ReductionStep):
     """
