@@ -2,59 +2,69 @@ from MantidFramework import *
 from mantidsimple import *
 import os
 
-class PDInfo:
-    def __init__(self, data, has_dspace=False):
-        self.freq = data[0]
-        self.wl = data[1]
-        self.bank = int(data[2])
-        self.van = int(data[3])
-        self.can = int(data[4])
-        self.has_dspace = has_dspace
-        if has_dspace:
-            self.dmin = data[5]
-            self.dmax = data[6]
-        else:
-            self.tmin = data[5] * 1000. # convert to microseconds
-            self.tmax = data[6] * 1000.
-
-class PDConfigFile(object):
-    def __init__(self, filename):
-        self.filename = filename
-        handle = file(filename, 'r')
-        self._data = {}
-        self.use_dspace = False
-        for line in handle.readlines():
-            self._addData(line)
-    def _addData(self, line):
-        if line.startswith('#') or len(line.strip()) <= 0:
-            if "d_min" in line and "d_max" in line:
-                self.use_dspace = True
-            return
-        data = line.strip().split()
-        data = [float(i) for i in data]
-        if data[0] not in self._data.keys():
-            self._data[data[0]]={}
-        info = PDInfo(data, self.use_dspace)
-        self._data[info.freq][info.wl]=info
-    def __getFrequency(self, request):
-        for freq in self._data.keys():
-            if 100. * abs(float(freq)-request)/request < 5.:
-                return freq
-        raise RuntimeError("Failed to find frequency: %fHz" % request)
-
-    def __getWavelength(self, frequency, request):
-        for wavelength in self._data[frequency].keys():
-            if 100. * abs(wavelength-request)/request < 5.:
-                return wavelength
-        raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
-
-    def getInfo(self, frequency, wavelength):
-        frequency = self.__getFrequency(float(frequency))
-        wavelength = self.__getWavelength(frequency, float(wavelength))
-
-        return self._data[frequency][wavelength]
-
 class SNSPowderReduction(PythonAlgorithm):
+    class PDConfigFile(object):
+        class PDInfo:
+            """Inner class for holding configuration information for a reduction."""
+            def __init__(self, data, has_dspace=False):
+                if data is None:
+                    data = [None, None, 0, 0, 0, 0., 0.]
+                self.freq = data[0]
+                self.wl = data[1]
+                self.bank = int(data[2])
+                self.van = int(data[3])
+                self.can = int(data[4])
+                self.has_dspace = has_dspace
+                if has_dspace:
+                    self.dmin = data[5]
+                    self.dmax = data[6]
+                else:
+                    self.tmin = data[5] * 1000. # convert to microseconds
+                    self.tmax = data[6] * 1000.
+    
+        def __init__(self, filename):
+            if len(filename.strip()) <= 0:
+                filename = None
+            self.filename = filename
+            self._data = {}
+            self.use_dspace = False
+            if self.filename is None:
+                return
+            handle = file(filename, 'r')
+            for line in handle.readlines():
+                self._addData(line)
+        def _addData(self, line):
+            if line.startswith('#') or len(line.strip()) <= 0:
+                if "d_min" in line and "d_max" in line:
+                    self.use_dspace = True
+                return
+            data = line.strip().split()
+            data = [float(i) for i in data]
+            if data[0] not in self._data.keys():
+                self._data[data[0]]={}
+            info = self.PDInfo(data, self.use_dspace)
+            self._data[info.freq][info.wl]=info
+        def __getFrequency(self, request):
+            for freq in self._data.keys():
+                if 100. * abs(float(freq)-request)/request < 5.:
+                    return freq
+            raise RuntimeError("Failed to find frequency: %fHz" % request)
+    
+        def __getWavelength(self, frequency, request):
+            for wavelength in self._data[frequency].keys():
+                if 100. * abs(wavelength-request)/request < 5.:
+                    return wavelength
+            raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
+    
+        def getInfo(self, frequency, wavelength):
+            if self.filename is not None:
+                frequency = self.__getFrequency(float(frequency))
+                wavelength = self.__getWavelength(frequency, float(wavelength))
+        
+                return self._data[frequency][wavelength]
+            else:
+                return self.PDInfo(None)
+
     def category(self):
         return "Diffraction"
 
@@ -62,23 +72,27 @@ class SNSPowderReduction(PythonAlgorithm):
         return "SNSPowderReduction"
 
     def PyInit(self):
-        instruments = ["PG3"] #, "VULCAN", "SNAP", "NOMAD"]
+        instruments = ["PG3", "VULCAN", "SNAP", "NOMAD"]
         self.declareProperty("Instrument", "PG3",
                              Validator=ListValidator(instruments))
         #types = ["Event preNeXus", "Event NeXus"]
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
-        self.declareListProperty("RunNumber", [0], Validator=BoundedValidator(Lower=0))
+        self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
+                             Description="If specified overrides value in CharacterizationRunsFile")
+        self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
+                             Description="If specified overrides value in CharacterizationRunsFile")
         self.declareFileProperty("CalibrationFile", "", FileAction.Load,
                                  [".cal"])
-        self.declareFileProperty("CharacterizationRunsFile", "", FileAction.Load,
+        self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
                                  ['.txt'],
                                  Description="File with characterization runs denoted")
 #        self.declareProperty("FilterByTimeMin", 0.,
 #                             Description="Relative time to start filtering by")
 #        self.declareProperty("FilterByTimeMax", 0.,
 #                             Description="Relative time to stop filtering by")
-        self.declareProperty("BinWidth", 0.,
+        self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothParams", "20,2")
@@ -93,8 +107,10 @@ class SNSPowderReduction(PythonAlgorithm):
     def _findData(self, runnumber, extension):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
-        result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
-                              Extension=extension)
+        result = FindSNSNeXus(Instrument=self._instrument,
+                              RunNumber=runnumber, Extension=extension)
+#        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
+#                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
     def _loadPreNeXusData(self, runnumber, extension):
@@ -120,7 +136,10 @@ class SNSPowderReduction(PythonAlgorithm):
 
     def _loadNeXusData(self, runnumber, extension):
         # find the file to load
-        filename = self._findData(runnumber, extension)
+        try:
+            filename = self._findData(runnumber, extension)
+        except:
+            filename = "%s_%d%s" % (self._instrument, runnumber, extension)
 
         # generate the workspace name
         (path, name) = os.path.split(filename)
@@ -157,16 +176,25 @@ class SNSPowderReduction(PythonAlgorithm):
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
                                    % (filterLogs[0], str(wksp)))
+        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
         
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         if info.has_dspace:
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.dmin, self._delta, info.dmax])
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.dmin, self._binning[0], info.dmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         if not info.has_dspace:
-            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[info.tmin, self._delta, info.tmax])
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.tmin, self._binning[0], info.tmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
@@ -197,13 +225,18 @@ class SNSPowderReduction(PythonAlgorithm):
     def PyExec(self):
         # temporary hack for getting python algorithms working
         import mantidsimple
-        reload(mantidsimple)
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
         SUFFIX = "_event.nxs"
-        self._config = PDConfigFile(self.getProperty("CharacterizationRunsFile"))
-        self._delta = self.getProperty("BinWidth")
+        self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
+        self._binning = self.getProperty("Binning")
+        print "BINNING:", self._binning
+        if len(self._binning) != 1 and len(self._binning) != 3:
+            raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
+        if len(self._binning) == 3:
+            if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
+                raise RuntimeError("Failed to specify the binning")
         self._instrument = self.getProperty("Instrument")
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
@@ -220,6 +253,7 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outDir = self.getProperty("OutputDirectory")
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
+        self.log().information("***************RUNS:%s" % str(samRuns))
 
         for samRun in samRuns:
             # first round of processing the sample 
@@ -228,19 +262,27 @@ class SNSPowderReduction(PythonAlgorithm):
             samRun = self._focus(samRun, calib, info, filterLogs)
 
             # process the container
-            if info.can > 0:
-                canRun = mtd["%s_%d" % (self._instrument, info.can)]
-                if canRun is None:
-                    canRun = self._loadData(info.can, SUFFIX)
+            canRun = self.getProperty("BackgroundNumber")
+            if canRun <= 0:
+                canRun = info.can
+            if canRun > 0:
+                temp = mtd["%s_%d" % (self._instrument, canRun)]
+                if temp is None:
+                    canRun = self._loadData(canRun, SUFFIX)
                     canRun = self._focus(canRun, calib, info)
+                else:
+                    canRun = temp
             else:
-                canRun = None 
+                canRun = None
 
             # process the vanadium run
-            if info.van > 0:
-                vanRun = mtd["%s_%d" % (self._instrument, info.van)]
-                if vanRun is None:
-                    vanRun = self._loadData(info.van, SUFFIX)
+            vanRun = self.getProperty("VanadiumNumber")
+            if vanRun <= 0:
+                vanRun = info.van
+            if vanRun > 0:
+                temp = mtd["%s_%d" % (self._instrument, vanRun)]
+                if temp is None:
+                    vanRun = self._loadData(vanRun, SUFFIX)
                     vanRun = self._focus(vanRun, calib, info)
                     ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
@@ -251,21 +293,27 @@ class SNSPowderReduction(PythonAlgorithm):
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
                     SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                else:
+                    vanRun = temp
             else:
                 vanRun = None
 
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
+                canRun = str(canRun)
             if vanRun is not None:
                 samRun /= vanRun
                 normalized = True
                 samRun.getRun()['van_number'] = vanRun.getRun()['run_number'].value
+                vanRun = str(vanRun)
             else:
                 normalized = False
 
             # write out the files
-            ConvertToMatrixWorkspace(InputWorkspace=samRun, OutputWorkspace=samRun)
+            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.005) # 50ns
             self._save(samRun, info, normalized)
+            samRun = str(samRun)
+            mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSPowderReduction())
