@@ -103,6 +103,9 @@ void LoadGSS::exec()
           gsasDataX.push_back(X);
           gsasDataY.push_back(Y);
           gsasDataE.push_back(E);
+          X = new MantidVec();
+          Y = new MantidVec();
+          E = new MantidVec();
 
           if ( prog != NULL )
             prog->report();
@@ -113,9 +116,6 @@ void LoadGSS::exec()
         *  BC2 = X[1] * 32 - BC1
         *  BC4 = ( X[1] - X[0] ) / X[0]
         */
-        X = new MantidVec();
-        Y = new MantidVec();
-        E = new MantidVec();
 
         std::istringstream inputLine(currentLine, std::ios::in);
         inputLine.ignore(256, 'F');
@@ -178,12 +178,13 @@ void LoadGSS::exec()
     outputWorkspace->dataX(i) = *gsasDataX[i];
     outputWorkspace->dataY(i) = *gsasDataY[i];
     outputWorkspace->dataE(i) = *gsasDataE[i];
+    // Clean up after copy
+    delete gsasDataX[i];
+    delete gsasDataY[i];
+    delete gsasDataE[i];
   }
 
   // Clean up
-  delete X;
-  delete Y;
-  delete E;
   delete prog;
 
   setProperty("OutputWorkspace", outputWorkspace);
