@@ -349,7 +349,7 @@ double LoadSNSNexus::dblSqrt(double in)
       {
 	::NeXus::File file(filePath);
 	file.openPath("instrument/SNSdetector_calibration_id");
-	confidence = 80;
+	confidence = 50;
       }
       catch(::NeXus::Exception&)
       {

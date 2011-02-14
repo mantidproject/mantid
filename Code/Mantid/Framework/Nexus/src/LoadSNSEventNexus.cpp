@@ -75,7 +75,9 @@ int LoadSNSEventNexus::fileCheck(const std::string& filePath)
     // Open the base group called 'entry'
     file.openGroup("entry", "NXentry");
     // If all this succeeded then we'll assume this is an SNS Event NeXus file
-    confidence = 80;
+
+    // Setting this low as this is a deprecated algorithm that we don't want to autorun.
+    confidence = 10;
   }
   catch(::NeXus::Exception&)
   {
