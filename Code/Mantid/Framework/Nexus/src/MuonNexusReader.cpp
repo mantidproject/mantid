@@ -2,7 +2,7 @@
 #include <sstream>
 #include <napi.h>
 #include "MantidNexus/MuonNexusReader.h"
-
+#include <boost/scoped_array.hpp>
 
 
 /// Default constructor
@@ -36,28 +36,29 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    NXaccess mode= NXACC_READ;
    NXstatus stat=NXopen(filename.c_str(), mode, &fileID);
    if(stat==NX_ERROR) return(1);
-   char *nxname,*nxclass;
    int nxdatatype;
-   nxname= new char[NX_MAXNAMELEN];
-   nxclass = new char[NX_MAXNAMELEN];
-   stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype);
+   boost::scoped_array<char> nxname(new char[NX_MAXNAMELEN]);
+   boost::scoped_array<char> nxclass(new char[NX_MAXNAMELEN]);
+   stat=NXgetnextentry(fileID,nxname.get(),nxclass.get(),&nxdatatype);
    if(stat==NX_ERROR) return(1);
-   stat=NXopengroup(fileID,nxname,nxclass);
+   stat=NXopengroup(fileID,nxname.get(),nxclass.get());
    if(stat==NX_ERROR) return(1);
    //
    std::vector<std::string> nxnamelist,nxclasslist;
-   nxnamelist.push_back(nxname);
-   nxclasslist.push_back(nxclass);
+   nxnamelist.push_back(nxname.get());
+   nxclasslist.push_back(nxclass.get());
    std::vector<std::string> nxdataname;
    //
    // read nexus fields at this level
-   while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   while( (stat=NXgetnextentry(fileID,nxname.get(),nxclass.get(),&nxdatatype)) == NX_OK )
    {
-      nxnamelist.push_back(nxname);
-      nxclasslist.push_back(nxclass);
-      // record NXdata section name(s)
-      if(nxclasslist.back()=="NXdata")
-      nxdataname.push_back(nxnamelist.back());
+     nxnamelist.push_back(nxname.get());
+     nxclasslist.push_back(nxclass.get());
+     // record NXdata section name(s)
+     if(nxclasslist.back()=="NXdata")
+     {
+       nxdataname.push_back(nxnamelist.back());
+     }
    }
    //
    if(stat==NX_ERROR) return(1);
@@ -143,8 +144,6 @@ int MuonNexusReader::readFromFile(const std::string& filename)
    if(stat==NX_ERROR) return(1);
    stat=NXclose (&fileID);
 
-   delete[] nxname;
-   delete[] nxclass;
    return(0);
 }
 
@@ -186,14 +185,13 @@ int MuonNexusReader::readLogData(const std::string& filename)
    NXstatus stat=NXopen(filename.c_str(), mode, &fileID);
    if(stat==NX_ERROR) return(1);
    // find name and class of first entry
-   char *nxname,*nxclass;
    int nxdatatype;
-   nxname= new char[NX_MAXNAMELEN];
-   nxclass = new char[NX_MAXNAMELEN];
-   stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype);
+   boost::scoped_array<char> nxname(new char[NX_MAXNAMELEN]);
+   boost::scoped_array<char> nxclass(new char[NX_MAXNAMELEN]);
+   stat=NXgetnextentry(fileID,nxname.get(),nxclass.get(),&nxdatatype);
    if(stat==NX_ERROR) return(1);
    // assume this is the requied NXentry
-   stat=NXopengroup(fileID,nxname,nxclass);
+   stat=NXopengroup(fileID,nxname.get(),nxclass.get());
    if(stat==NX_ERROR) return(1);
    //
    // read nexus fields at this level looking for NXlog and loading these into
@@ -205,13 +203,13 @@ int MuonNexusReader::readLogData(const std::string& filename)
    char start_time[]="start_time";
    nexusLogCount=0;
    int nexusSampleCount=0; //debug
-   while( (stat=NXgetnextentry(fileID,nxname,nxclass,&nxdatatype)) == NX_OK )
+   while( (stat=NXgetnextentry(fileID,nxname.get(),nxclass.get(),&nxdatatype)) == NX_OK )
    {
-      nxnamelist.push_back(nxname);
-      nxclasslist.push_back(nxclass);
-      if(nxclasslist[count]=="NXlog")
+     nxnamelist.push_back(nxname.get());
+     nxclasslist.push_back(nxclass.get());
+     if(nxclasslist[count]=="NXlog")
       {
-         stat=NXopengroup(fileID,nxname,nxclass);
+	stat=NXopengroup(fileID,nxname.get(),nxclass.get());
          if(stat==NX_ERROR) return(1);
     	 if(readMuonLogData(fileID)==0)
     	 {
@@ -271,41 +269,42 @@ int MuonNexusReader::readMuonLogData(NXhandle fileID)
     // read name of Log data
     stat=NXopendata(fileID,name); if(stat==NX_ERROR) return(1);
     stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
-    char* dataName=new char[dims[0]+1];
-    stat=NXgetdata(fileID,dataName); if(stat==NX_ERROR) return(1);
+    boost::scoped_array<char> dataName(new char[dims[0]+1]);
+    stat=NXgetdata(fileID,dataName.get()); 
+    if(stat==NX_ERROR) return(1);
     dataName[dims[0]]='\0'; // null terminate
     stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
-    logNames.push_back(dataName);
+    logNames.push_back(dataName.get());
     //
     // read data values
     stat=NXopendata(fileID,values); if(stat==NX_ERROR) return(1);
     stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
-    float* dataVals= new float[dims[0]];
+    boost::scoped_array<float> dataVals(new float[dims[0]]);
     if(type==NX_FLOAT32 && rank==1)
     {
-       stat=NXgetdata(fileID,dataVals);
-       logType.push_back(true);
+      stat=NXgetdata(fileID,dataVals.get());
+      logType.push_back(true);
     }
     else
     {
     	logType.push_back(false);
     	return(1);
     }
-    std::vector<float> tmpf(dataVals,dataVals+dims[0]);
+    std::vector<float> tmpf(dataVals.get(),dataVals.get()+dims[0]);
     logValues.push_back(tmpf);
     stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
     //
     // read time values
     stat=NXopendata(fileID,time); if(stat==NX_ERROR) return(1);
     stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
-    float* timeVals= new float[dims[0]];
+    boost::scoped_array<float> timeVals(new float[dims[0]]);
     if(type==NX_FLOAT32 && rank==1)
     {
-       stat=NXgetdata(fileID,timeVals);
+      stat=NXgetdata(fileID,timeVals.get());
     }
     else
     	return(1);
-    std::vector<float> tmp(timeVals,timeVals+dims[0]);
+    std::vector<float> tmp(timeVals.get(),timeVals.get()+dims[0]);
     logTimes.push_back(tmp);
     stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
     return(0);

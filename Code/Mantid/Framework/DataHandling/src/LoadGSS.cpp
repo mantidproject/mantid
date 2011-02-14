@@ -180,6 +180,12 @@ void LoadGSS::exec()
     outputWorkspace->dataE(i) = *gsasDataE[i];
   }
 
+  // Clean up
+  delete X;
+  delete Y;
+  delete E;
+  delete prog;
+
   setProperty("OutputWorkspace", outputWorkspace);
   return;
 }
