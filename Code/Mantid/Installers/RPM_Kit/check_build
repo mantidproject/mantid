@@ -16,6 +16,11 @@ fi
 trap "rm -f $LOCK_FILE" 0
 
 echo "Running $0"
+if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
+        rhel_version=6
+else
+    	rhel_version=5
+fi
 
 MBUILD=/tmp/mantid_build
 [ -d $MBUILD ] || mkdir $MBUILD
@@ -26,11 +31,11 @@ if [ $n -gt 0 ]; then
     if test "$rev" = "release"; then
 	rev=`svn info http://svn.mantidproject.org/mantid/tags/systemtested  |  grep "Last Changed Rev:"  |  awk '{print $4}'`
 	repo="release"
-	log_file=/var/www/html/buildlog/build_${rev}_release.log
+	log_file=/var/www/html/buildlog/build_${rev}_release_rhel${rhel_version}.log
 	echo "Building $rev for release" > $log_file
     else
 	repo=""
-	log_file=/var/www/html/buildlog/build_$rev.log
+	log_file=/var/www/html/buildlog/build_$rev_${rhel_version}.log
 	echo "Building $rev for testing" > $log_file
     fi
     echo "Building $rev" > $log_file
@@ -50,5 +55,5 @@ if test "$1" = "HEAD" -o "`date +%H%M`" = "0227"; then
     sh nightly_build "$rev" $log_file >> $log_file 2>&1
 fi
 if test -r "$log_file"; then
-    scp $log_file mantidlog@shadow.nd.rl.ac.uk:/isis/www/mantidproject_download/logs/Linux/rpmbuild
+    scp $log_file isisupdate@shadow.nd.rl.ac.uk:/isis/www/mantidproject_download/logs/Linux/rpmbuild
 fi

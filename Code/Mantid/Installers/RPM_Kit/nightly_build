@@ -7,6 +7,11 @@
 #
 trap error_found ERR
 MESS=/tmp/build_mantid.$$
+if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
+	rhel_version=6
+else
+	rhel_version=5
+fi
 
 function error_found() {
     local exit_status=${1:-$?}
@@ -36,6 +41,8 @@ find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
 cd ../../../../
 svn update
 svn update # do twice in case of network issue
+# Back to the build kit directory
+cd Code/Mantid/Installers/RPM_Kit
 current_revision
 log_file="$2"
 if test -z "$1"; then
@@ -43,15 +50,19 @@ if test -z "$1"; then
 else
     rev="$1"
 fi
+
 if test "$3" = "release"; then
     revfile="_$rev"
-    yum_base=/isis/yum/rhel/5   # official build
+    yum_base=/isis/yum/rhel/${rhel_version}   # official build
 else
     revfile=""
-    yum_base=/isis/yum/rhel/testing/5   # test build
+    yum_base=/isis/yum/rhel/testing/${rhel_version}   # test build
 fi
-cd Code/Mantid/Installers/RPM_Kit
-sh make_rpm_rhel5.sh -r $rev
+if [ "${rhel_version}" = "6" ]; then
+    sh make_rpm_rhel5.sh -r $rev
+else
+    sh make_rpm_rhel6.sh -r $rev
+fi	
 scp $build_base/SRPMS/Mantid-*.*-0.svnR$rev.*.src.rpm isisupdate@shadow:$yum_base/SRPMS
 scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64/debug
 # remove to avoid copying debug twice
@@ -59,7 +70,7 @@ rm -f $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm
 scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
 build_src=`ls -t *.tar.gz | head -1`
 scp $build_src isisupdate@shadow:/isis/www/mantidproject_download/CurrentBuild
-echo "Subject: Success: Redhat - RPM build R$rev" > $MESS
+echo "Subject: Success: RHEL${rhel_version} - RPM build R$rev" > $MESS
 echo >> $MESS
 echo "RPM build of svn R$rev SUCCEEDED - see http://download.mantidproject.org/logs/Linux/rpmbuild/`basename $log_file`" >> $MESS
 /usr/sbin/sendmail -fRPMBuildServer1@mantidproject.org mantid-buildserver@mantidproject.org < $MESS

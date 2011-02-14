@@ -37,6 +37,13 @@ do
 done
 shift $(($OPTIND - 1))
 
+# Redhat version
+if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
+        rhel_version=6
+else
+        rhel_version=5
+fi
+
 # Get Mantid version from MantidVersion.txt file
 cd ../../../
 mantid_versionfile=`pwd`/MantidVersion.txt
@@ -79,7 +86,14 @@ echo "Exporting complete - making spec file for version $mantid_version release 
 #
 # Set correct path to python
 py_sitepackages=`python python_sitepackages.py`
-sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" -e "s@PYTHON_SITEPACKAGES@$py_sitepackages@" < mantid.spec.template > Mantid.spec
+if [ "${rhel_version}" = "6" ]; then
+    spec_template=mantid.spec.template_rhel6
+else
+    spec_template=mantid.spec.template
+fi
+spec_file="Mantid.spec.rhel${rhel_version}"
+sed -e "s/MANTID_VERSION/$mantid_version/" -e "s/MANTID_RELEASE/$mantid_release/" -e "s/SVN_VERSION/$svn_version/" -e "s@PYTHON_SITEPACKAGES@$py_sitepackages@" < ${spec_template} > ${spec_file}
+
 echo "Removing old tar files"
 rm -f *.tar.gz
 echo "Building tar file Mantid-$mantid_version.tar.gz"
@@ -95,13 +109,13 @@ if test ! -w "$topdir"; then
 fi
 mytop=`pwd`
 ln -sf $mytop/Mantid-$mantid_version.tar.gz $topdir/SOURCES
-cp -f Mantid.spec $topdir/SPECS
-rm -f Mantid.spec
+cp -f ${spec_file} $topdir/SPECS
+rm -f ${spec_file}
 cd $topdir/SPECS
 echo "Building RPM file in $topdir/RPMS"
 if test -e /etc/debian_version; then
-    rpmbuild --nodeps -ba Mantid.spec
+    rpmbuild --nodeps -ba ${spec_file}
 else
-    rpmbuild -ba Mantid.spec
+    rpmbuild -ba ${spec_file}
 fi
 echo "Building complete - check $topdir/RPMS"
