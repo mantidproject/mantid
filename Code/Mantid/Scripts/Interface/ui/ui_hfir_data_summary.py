@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Fri Feb 11 13:17:59 2011
+# Created: Mon Feb 14 10:32:57 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_Frame(object):
         self.gridLayout.addWidget(self.instr_name_label, 0, 0, 1, 1)
         self.label_9 = QtGui.QLabel(Frame)
         self.label_9.setMinimumSize(QtCore.QSize(200, 30))
-        self.label_9.setMaximumSize(QtCore.QSize(0, 30))
+        self.label_9.setMaximumSize(QtCore.QSize(200, 30))
         self.label_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_9.setWordWrap(False)
         self.label_9.setIndent(0)
