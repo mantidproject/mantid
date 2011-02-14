@@ -113,7 +113,13 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   this->m_initalized = true;
 }
 
-Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(RebinningIterationAction action) const
+void RebinningCutterPresenter::handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
+{
+  }
+
+Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
+    RebinningIterationAction action,
+    ProgressAction& eventHandler) const
 {
      //Verify that constuction has occured properly first/
      VerifyInitalization();
@@ -138,8 +144,14 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinning
        std::string xmlString = m_serializer.createXMLString();
        xmlRebinAlg.setPropertyValue("XMLInputString", xmlString);
 
+       Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+       //Add observer.
+       xmlRebinAlg.addObserver(observer);
        //Run the rebinning algorithm.
        xmlRebinAlg.execute();
+       //Remove observer
+       xmlRebinAlg.removeObserver(observer);
+
       }
 
        //Use the generated workspace to access the underlying image, which may be rendered.

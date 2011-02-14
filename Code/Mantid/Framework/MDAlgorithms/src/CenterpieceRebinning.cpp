@@ -78,6 +78,11 @@ CenterpieceRebinning::init()
    
 }
 
+unsigned int CenterpieceRebinning::reportOccurance(const unsigned int nSteps)
+{
+  return nSteps; //Determine any other report occurance desired.
+}
+
 //
 void 
 CenterpieceRebinning::exec()
@@ -143,10 +148,13 @@ CenterpieceRebinning::exec()
     // find out how many steps is needed to take to make the cut
     unsigned int nSteps = pRebin->getNumDataChunks();
 
+    std::cout << "N Chunks: " << nSteps << std::endl;
+
    /// The progress reporting object
+    int occurance = reportOccurance(nSteps);
     std::auto_ptr<API::Progress> pProgress;
     if(nSteps>1){
-      pProgress = std::auto_ptr<API::Progress>(new Progress(this,0,1,nSteps));
+      pProgress = std::auto_ptr<API::Progress>(new Progress(this,0,1,occurance));
     }
 
     selection_valid = true;

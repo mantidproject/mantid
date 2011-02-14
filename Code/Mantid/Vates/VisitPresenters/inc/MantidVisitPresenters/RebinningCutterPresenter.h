@@ -11,6 +11,13 @@
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include <boost/shared_ptr.hpp>
 #include <MantidVisitPresenters/RebinningXMLGenerator.h>
+#include <MantidVisitPresenters/ProgressAction.h>
+
+#include <Poco/ActiveMethod.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Notification.h>
+#include <Poco/NObserver.h>
+#include <MantidAPI/Algorithm.h>
 
 //Forward declarations
 namespace Poco
@@ -104,7 +111,11 @@ public:
       Mantid::MDAlgorithms::CompositeImplicitFunction* compositeFunction,
       vtkDataSet* inputDataSet);
 
-	Mantid::MDDataObjects::MDWorkspace_sptr applyRebinningAction(Mantid::VATES::RebinningIterationAction action) const;
+	void handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
+
+	Mantid::MDDataObjects::MDWorkspace_sptr applyRebinningAction(
+	    Mantid::VATES::RebinningIterationAction action
+	    ,Mantid::VATES::ProgressAction& eventHandler) const;
 
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(boost::shared_ptr<vtkDataSetFactory> spvtkDataSetFactory);

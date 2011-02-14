@@ -58,6 +58,8 @@
 #include "MantidVisitPresenters/vtkProxyFactory.h"
 #include "boost/functional/hash.hpp"
 #include <sstream>
+#include "VisITProgressAction.h"
+
 using namespace Mantid::VATES;
 
 // ****************************************************************************
@@ -367,8 +369,11 @@ void avtRebinningCutterFilter::Execute()
     //The action determines the level of caching available for optimisations.
   RebinningIterationAction action = decideIterationAction();
 
-  //Acutally perform rebinning or specified action.
-   MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action);
+
+  VisITProgressAction updatehandler(this);
+
+   //Acutally perform rebinning or specified action.
+   MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
 
   /// Create the dataset factory from the user selection.
   vtkDataSet *output_ds;
@@ -431,7 +436,11 @@ void avtRebinningCutterFilter::UpdateDataObjectInfo(void)
   int dim = 3;
   dataAtts.SetTopologicalDimension(dim);
   dataAtts.SetSpatialDimension(dim);
+}
 
+void avtRebinningCutterFilter::UpdateAlgorithmProgress(int progressPercent)
+{
+  this->UpdateProgress(1, progressPercent);
 }
 
 

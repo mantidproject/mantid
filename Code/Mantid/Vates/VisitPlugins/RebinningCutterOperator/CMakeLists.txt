@@ -41,6 +41,7 @@ ${COMMON_SOURCES}
 SET(LIBE_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterEnginePluginInfo.C
 ${CMAKE_CURRENT_SOURCE_DIR}/src/avtRebinningCutterFilter.C
+${CMAKE_CURRENT_SOURCE_DIR}/src/VisITProgressAction.C
 ${COMMON_SOURCES}
 )
 

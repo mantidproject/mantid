@@ -10,6 +10,7 @@ src/Clipper.cpp
 src/FieldDataToMetadata.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
+src/ProgressAction.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningXMLGenerator.cpp
@@ -26,6 +27,7 @@ inc/MantidVisitPresenters/Clipper.h
 inc/MantidVisitPresenters/FieldDataToMetadata.h
 inc/MantidVisitPresenters/MetadataToFieldData.h
 inc/MantidVisitPresenters/MultiDimensionalDbPresenter.h
+inc/MantidVisitPresenters/ProgressAction.h
 inc/MantidVisitPresenters/RebinningCutterPresenter.h
 inc/MantidVisitPresenters/RebinningCutterXMLDefinitions.h 
 inc/MantidVisitPresenters/RebinningXMLGenerator.h

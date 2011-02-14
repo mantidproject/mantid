@@ -232,12 +232,12 @@ namespace Mantid
       //apply cuts to the geometrydescription.
       ApplyImplicitFunctionToMDGeometryDescription(geomDescription, function);
 
-      IAlgorithm_sptr loadWsAlg = this->createSubAlgorithm("LoadMDworkspace", 0.001, 0.5, true, 1);
+      IAlgorithm_sptr loadWsAlg = this->createSubAlgorithm("LoadMDworkspace", 0, 0.02, true, 1);
       loadWsAlg->initialize();
       loadWsAlg->setPropertyValue("inFilename", location);
       loadWsAlg->setPropertyValue("MDWorkspace",name);
 
-      IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.5, 1, true, 1);
+      IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.02, 1, true, 1);
 
       rebinningAlg->initialize();
       rebinningAlg->setPropertyValue("Input", name);

@@ -87,11 +87,13 @@ public:
     virtual void SetAtts(const AttributeGroup*);
     virtual bool Equivalent(const AttributeGroup*);
     virtual void UpdateDataObjectInfo(void);
-
+    void UpdateAlgorithmProgress(int progressPercent);
 protected:
     RebinningCutterAttributes atts;
     virtual void Execute();
     virtual avtContract_p ModifyContract(avtContract_p);
+
+
 private:
 
     /// Timestep value from contract.

@@ -29,6 +29,14 @@ class RebinningCutterTest: public CxxTest::TestSuite
 
 private:
 
+  class MockProgressAction : public ProgressAction
+  {
+    virtual void eventRaised(int progressPercent)
+    {
+      //Do nothing.
+    }
+  };
+
   class PsudoFilter
   {
   private:
@@ -84,7 +92,8 @@ private:
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
         presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
-        MDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll);
+        MockProgressAction action;
+        MDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll, action);
       vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
       vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 

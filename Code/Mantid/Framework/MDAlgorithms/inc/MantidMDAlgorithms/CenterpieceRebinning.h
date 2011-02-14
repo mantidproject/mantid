@@ -66,6 +66,8 @@ public:
       void setTargetGeomDescrEqSource();
     
 private:
+      /// Calculate the reporting occurance.
+      unsigned int reportOccurance(const unsigned int nSteps);
     // Overridden Pivate Algorithm methods
       void init();
       void exec();
