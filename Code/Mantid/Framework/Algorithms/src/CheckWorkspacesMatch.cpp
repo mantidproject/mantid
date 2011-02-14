@@ -192,6 +192,9 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
         if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance )
         {
           g_log.debug() << "Data mismatch at cell (hist#,bin#): (" << i << "," << j << ")\n";
+          g_log.debug() << " Dataset #1 (X,Y,E) = (" << X1[j] << "," << Y1[j] << "," << E1[j] << ")\n";
+          g_log.debug() << " Dataset #2 (X,Y,E) = (" << X2[j] << "," << Y2[j] << "," << E2[j] << ")\n";
+          g_log.debug() << " Difference (X,Y,E) = (" << std::abs(X1[j]-X2[j]) << "," << std::abs(Y1[j]-Y2[j]) << "," << std::abs(E1[j]-E2[j]) << ")\n";
           result = "Data mismatch";
           resultBool = false;
         }
