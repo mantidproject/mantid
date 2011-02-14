@@ -912,6 +912,9 @@ void MuonAnalysis::updatePairTable()
  */
 void MuonAnalysis::inputFileChanged()
 {
+  if ( m_uiForm.mwRunFiles->getText().isEmpty() )
+    return;
+
   if ( !m_uiForm.mwRunFiles->isValid() )
   {
     QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file not recognised");
@@ -958,7 +961,7 @@ void MuonAnalysis::inputFileChanged()
   QString pyString = "from mantidsimple import *\n"
       "import sys\n"
       "try:\n"
-      "  alg = LoadMuonNexus('" + m_previousFilename+"','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
+      "  alg = LoadMuonNexus(r'" + m_previousFilename+"','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
       "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
       "except SystemExit, message:\n"
       "  print ''";
@@ -1899,7 +1902,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   std::string groupedWS = m_workspace_name+"Grouped";
 
   // Load nexus file with grouping
-  QString pyString = "LoadMuonNexus('";
+  QString pyString = "LoadMuonNexus(r'";
   pyString.append(nexusFile);
   pyString.append("','");
   pyString.append( groupedWS.c_str());
