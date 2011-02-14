@@ -14,8 +14,8 @@ namespace API
 
 using namespace Kernel;
 
-const int Run::ADDABLES = 4;
-const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur"};
+const int Run::ADDABLES = 6;
+const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm", "dur", "gd_prtn_chrg", "uA.hour"};
 
   //----------------------------------------------------------------------
   // Public member functions
