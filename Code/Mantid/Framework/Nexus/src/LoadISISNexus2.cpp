@@ -11,7 +11,10 @@
 #include "MantidKernel/LogParser.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidNexus/NexusFileIO.h"
+
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>
 #include <Poco/DateTimeFormatter.h>
@@ -770,7 +773,8 @@ namespace Mantid
         //hdf
         return true;
       }
-      else if ( (nread >= sizeof(g_hdf5_signature)) && (!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
+      else if ( (nread >= sizeof(g_hdf5_signature)) && 
+		(!memcmp(header.full_hdr, g_hdf5_signature, sizeof(g_hdf5_signature))) )
       { 
         //hdf5
         return true;
@@ -783,24 +787,21 @@ namespace Mantid
     */
     int LoadISISNexus2::fileCheck(const std::string& filePath)
     {
-      std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(filePath,entryName,definition);
-      if(count<=-1)
+      using namespace ::NeXus;
+
+      int confidence(0);
+      try
       {
-        g_log.error("Error reading file " + filePath);
-        throw Exception::FileError("Unable to read data in File:" , filePath);
+	::NeXus::File file = ::NeXus::File(filePath);
+	// Open the base group called 'entry'
+	file.openGroup("raw_data_1", "NXentry");
+	// If all this succeeded then we'll assume this is an ISIS NeXus file
+	confidence = 80;
       }
-      else if(count==0)
+      catch(::NeXus::Exception&)
       {
-        g_log.error("Error no entries found in " + filePath);
-        throw Exception::FileError("Error no entries found in " , filePath);
       }
-      int ret=0;
-      if( entryName[0]=="raw_data_1" )
-      {
-        ret=80;
-      }
-      return ret;
+      return confidence;
     }
   } // namespace DataHandling
 } // namespace Mantid

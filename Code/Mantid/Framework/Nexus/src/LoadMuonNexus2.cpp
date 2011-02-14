@@ -12,7 +12,10 @@
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
+
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
+
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include <Poco/Path.h>
 #include <boost/lexical_cast.hpp>
@@ -350,28 +353,29 @@ namespace Mantid
     *  @return an integer value how much this algorithm can load the file 
     */
     int LoadMuonNexus2::fileCheck(const std::string& filePath)
-    {    
-      int ret=0;
-      std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(filePath,entryName,definition);
-      if(count<=-1)
+    {   
+      int confidence(0);
+      try
       {
-       ret =0;
+	::NeXus::File file = ::NeXus::File(filePath);
+	file.openPath("/run/analysis");
+	std::string analysisType = file.getStrData();
+	if( analysisType == "pulsedTD" )
+	{
+	  confidence = 80;
+	}
+	else if( analysisType == "muonTD" )
+	{
+	  confidence = 50;
+	}
+	else confidence = 0;
+	file.close();
       }
-      else if(count==0)
+      catch(::NeXus::Exception&)
       {
-       ret=0;
+	confidence = 0;
       }
-      
-      if( definition[0]=="muonTD")
-      {
-       ret=50;
-      }
-      else if (definition[0]=="pulsedTD")
-      {
-        ret=80;
-      }
-      return ret;
+      return confidence;
     }
 
     /**  Log the run details from the file

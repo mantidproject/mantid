@@ -18,7 +18,8 @@
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
 #include "MantidNexus/NexusClasses.h"
-#include "MantidNexus/NexusFileIO.h"
+#include "MantidNexus/NeXusFile.hpp"
+#include "MantidNexus/NeXusException.hpp"
 
 namespace Mantid
 {
@@ -658,22 +659,25 @@ namespace Mantid
     */
     int LoadMuonNexus::fileCheck(const std::string& filePath)
     {     
-      int ret=0;
-      std::vector<std::string> entryName,definition;
-      int count= getNexusEntryTypes(filePath,entryName,definition);
-      if(count<=-1)
+      using namespace ::NeXus;
+      int confidence(0);
+      try
       {
-       ret =0;
+	::NeXus::File file = ::NeXus::File(filePath);
+	file.openPath("/run/analysis");
+	std::string analysisType = file.getStrData();
+	if( analysisType == "muonTD" )
+	{
+	  // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
+	  confidence = 80;
+	}
+	file.close();
       }
-      else if(count==0)
+      catch(::NeXus::Exception&)
       {
-       ret=0;
       }
-      if( definition[0]=="muonTD")
-      {
-       ret=80;
-      }
-      return ret;
+      return confidence;
+
     }
 
   } // namespace DataHandling

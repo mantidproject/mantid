@@ -106,7 +106,7 @@ void LoadCanSAS1D::exec()
       outputWork = group;
   }
   entryList->release();
-
+  pDoc->release();
   setProperty("OutputWorkspace", outputWork);
 }
 /** Load an individual "<SASentry>" element into a new workspace
@@ -322,20 +322,24 @@ int LoadCanSAS1D::fileCheck(const std::string& filePath)
   try
   {
     pDoc = pParser.parse(filePath);
-  } catch (...)
+  } 
+  catch (...)
   {
+    pDoc->release();
     throw Kernel::Exception::FileError("Unable to parse File:", filePath);
   }
+  int confidence(0);
   // Get pointer to root element
   Element* pRootElem = pDoc->documentElement();
   if(pRootElem)
   {
-    if(!pRootElem->tagName().compare("SASroot"))
+    if(pRootElem->tagName().compare("SASroot") == 0)
     {
-      return 80;
+      confidence = 80;
     }
   }
-  return  0;
+  pDoc->release();
+  return confidence;
 
 }
 

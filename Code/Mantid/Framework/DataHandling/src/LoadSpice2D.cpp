@@ -305,6 +305,8 @@ namespace Mantid
         g_log.error(e.what());
       }
 
+      // Release the XML document memory
+      pDoc->release();
     }
 
     /** Run the sub-algorithm LoadInstrument (as for LoadRaw)
@@ -440,18 +442,19 @@ namespace Mantid
       {
         throw Kernel::Exception::FileError("Unable to parse File:", filePath);
       }
+
+      int confidence(0);
       // Get pointer to root element
       Element* pRootElem = pDoc->documentElement();
       if(pRootElem)
       {
-        if(!pRootElem->tagName().compare("SPICErack"))
-        {
-          return 80;
-        }
+	if(pRootElem->tagName().compare("SPICErack") == 0)
+	{
+	  confidence = 80;
+	}
       }
-      
-      return  0;
-
+      pDoc->release();
+      return confidence;
     }
 }
 }

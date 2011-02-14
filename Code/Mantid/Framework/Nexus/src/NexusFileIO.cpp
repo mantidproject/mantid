@@ -1551,28 +1551,6 @@ using namespace DataObjects;
             break;
           }
       }
-      /*
-           stat=NXopendata(fileH,"definition");
-           if(stat==NX_ERROR)
-               {
-               stat=NXopendata(fileH,"analysis");
-         if(stat==NX_ERROR)
-                   continue;
-               }
-           stat=NXgetinfo(fileH,&rank,dims,&type);
-           if(stat==NX_ERROR || type!=NX_CHAR)
-               continue;
-           char* value=new char[dims[0]+1];
-           stat=NXgetdata(fileH,value);
-           if(stat==NX_ERROR)
-               continue;
-           value[dims[0]]='\0';
-           definition.push_back(value);
-           entryName.push_back(entryList[i]);
-           delete[] value;
-           stat=NXclosegroup(fileH); // close data group, then entry
-           stat=NXclosegroup(fileH);
-       */
     }
     stat=NXclose(&fileH);
     delete[] nxname;
