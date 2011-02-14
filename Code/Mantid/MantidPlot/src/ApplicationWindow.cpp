@@ -715,8 +715,6 @@ void ApplicationWindow::initToolBars()
   fileTools->addSeparator ();
   
   fileTools->addAction(actionOpenProj);
-  fileTools->addAction(actionOpenRaw);
-  fileTools->addAction(actionOpenNexus);
   fileTools->addAction(actionLoadFile);
 
   fileTools->addAction(actionSaveProject);
@@ -5673,58 +5671,6 @@ void ApplicationWindow::savetoNexusFile()
 
   }
 }
-void ApplicationWindow::loadNexus()
-{
-  QString filter = tr("Mantid Files")+" (*.nxs *.nx5  *.s *.xml);;";
-  QString selectedFilter;
-  std::string wsName;
-  QString fileDir=MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  if(fileDir.isEmpty())
-  {fileDir="C\\Mantid\\Test\\Nexus";//default
-  }
-
-  QString fileName= QFileDialog::getOpenFileName(this, tr("Open File"), fileDir, filter, &selectedFilter);
-  if(fileName.isEmpty()) return;
-
-  //look for the last "/ "in the file and . ,extract the string between these charcters to get the workspace name.
-  std::string name(fileName.toStdString());
-  //std::basic_string<char>::size_type index1,index2;
-  int index1,index2;
-  index1=static_cast<int>( name.find_last_of("//") );
-  index2=static_cast<int>( name.find(".") );
-  int count= index2-index1-1;
-  if(index1!=-1 && index2!=-1)
-    wsName= name.substr(index1+1,count);
-  if(mantidUI) mantidUI->loaddataFromNexusFile(wsName,fileName.toStdString());
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
-}
-
-
-void ApplicationWindow::loadRaw()
-{
-  QString filter = tr("Mantid Files")+" (*.raw *.s);;";
-  QString selectedFilter;
-  std::string wsName;
-  QString fileDir=MantidQt::API::AlgorithmInputHistory::Instance().getPreviousDirectory();
-  if(fileDir.isEmpty())
-  {fileDir="C\\Mantid\\Test\\Data";//default
-  }
-  QString fileName = QFileDialog::getOpenFileName (this, tr("Open File"), fileDir, filter, &selectedFilter);
-  if(fileName.isEmpty())return;
-
-  //look for the last / in the file and . ,extract the string between these charcters to get the workspace name.
-  std::string name(fileName.toStdString());
-  //std::basic_string<char>::size_type index1,index2;
-  int index1,index2;
-  index1=static_cast<int>( name.find_last_of("//") );
-  index2=static_cast<int>( name.find(".") );
-  int count=index2-index1-1;
-  if(index1!=-1 && index2!=-1)
-    wsName= name.substr(index1+1,count);
-  if(mantidUI) mantidUI->loadadataFromRawFile(wsName,fileName.toStdString());
-  MantidQt::API::AlgorithmInputHistory::Instance().setPreviousDirectory(QFileInfo(fileName).absoluteDir().path());
-
-}
 
 void ApplicationWindow::loadDataFile()
 {
@@ -8604,8 +8550,6 @@ void ApplicationWindow::fileMenuAboutToShow()
 
   openMenu=fileMenu->addMenu(tr("&Load"));
   openMenu->addAction(actionOpenProj);
-  openMenu->addAction(actionOpenRaw);
-  openMenu->addAction(actionOpenNexus);
   openMenu->addAction(actionLoadFile);
 
   recentMenuID = fileMenu->insertItem(tr("&Recent Projects"), recent);
@@ -11939,19 +11883,11 @@ void ApplicationWindow::createActions()
   actionNewSurfacePlot->setShortcut( tr("Ctrl+ALT+Z") );
   connect(actionNewSurfacePlot, SIGNAL(activated()), this, SLOT(newSurfacePlot()));
 
-  actionOpenNexus=new QAction(QIcon(getQPixmap("fileopen_nexus_xpm")), tr("&Nexus"), this);
-  actionOpenNexus->setShortcut( tr("Ctrl+Shift+N") );
-  connect(actionOpenNexus, SIGNAL(activated()), this, SLOT(loadNexus()));
-
   actionOpenProj=new QAction(QIcon(getQPixmap("folder_open_xpm")), tr("&Project"), this);
   actionOpenProj->setShortcut( tr("Ctrl+Shift+O") );
   connect(actionOpenProj, SIGNAL(activated()), this, SLOT(open()));
 
-  actionOpenRaw=new QAction(QIcon(getQPixmap("fileopen_raw_xpm")), tr("&Raw"), this);
-  actionOpenRaw->setShortcut( tr("Ctrl+Shift+R") );
-  connect(actionOpenRaw, SIGNAL(activated()), this, SLOT(loadRaw()));
-
-  actionLoadFile=new QAction(QIcon(getQPixmap("fileopen_raw_xpm")), tr("File"), this);
+  actionLoadFile=new QAction(QIcon(getQPixmap("fileopen_raw_xpm")), tr("Data File"), this);
   actionLoadFile->setShortcut( tr("Ctrl+Shift+F") );
   connect(actionLoadFile, SIGNAL(activated()), this, SLOT(loadDataFile()));
 
@@ -12790,14 +12726,6 @@ void ApplicationWindow::translateActionsStrings()
   actionOpenProj->setMenuText(tr("&Project"));
   actionOpenProj->setShortcut(tr("Ctrl+Shift+O"));
   actionOpenProj->setToolTip(tr("Load Mantid project"));
-
-  actionOpenRaw->setMenuText(tr("&Raw"));
-  actionOpenRaw->setShortcut(tr("Ctrl+Shift+R"));
-  actionOpenRaw->setToolTip(tr("Load Raw File"));
-
-  actionOpenNexus->setMenuText(tr("&Nexus"));
-  actionOpenNexus->setShortcut(tr("Ctrl+Shift+N"));
-  actionOpenNexus->setToolTip(tr("Load Nexus File"));
 
   actionLoadFile->setMenuText(tr("&File"));
   actionLoadFile->setShortcut(tr("Ctrl+Shift+F"));

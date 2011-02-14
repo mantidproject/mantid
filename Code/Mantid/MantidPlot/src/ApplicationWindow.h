@@ -184,12 +184,8 @@ public slots:
 	ApplicationWindow* open(const QString& fn, bool factorySettings = false, bool newProject = true);
 	ApplicationWindow* openProject(const QString& fn, bool factorySettings = false, bool newProject = true);
 	ApplicationWindow* importOPJ(const QString& fn, bool factorySettings = false, bool newProject = true);
-	///Load nexus file from File->Load Menu
-	void loadNexus();
-	///Load Raw File from File->Load Menu
-	void loadRaw();
-  /// Load mantid data files using generic load algorithm
-  void loadDataFile();
+        /// Load mantid data files using generic load algorithm
+        void loadDataFile();
 	/**
 	 * \brief Create a new project from a data file.
 	 *
@@ -1286,7 +1282,7 @@ private:
 	QAction *actionEditFunction, *actionRemoveCurve, *actionShowCurveWorksheet, *actionShowCurvePlotDialog;
 	QAction *actionNewProject, *actionNewNote, *actionNewTable, *actionNewFunctionPlot,*actionSaveFile;
 	QAction *actionNewSurfacePlot, *actionNewMatrix, *actionNewGraph, *actionNewFolder;
-	QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj,*actionOpenRaw,*actionOpenNexus;
+	QAction *actionOpen, *actionLoadImage, *actionSaveProject, *actionSaveProjectAs, *actionImportImage,*actionLoadFile,*actionOpenProj;
 	QAction *actionLoad, *actionUndo, *actionRedo;
 	QAction *actionCopyWindow, *actionShowAllColumns, *actionHideSelectedColumns;
 	QAction *actionCutSelection, *actionCopySelection, *actionPasteSelection, *actionClearSelection;

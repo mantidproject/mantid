@@ -249,7 +249,7 @@ bool AlgorithmDialog::setPropertyValues()
       error = err_details.what();
       allValid = false;
     }
-    if( validator )
+    if( validator && validator->parent() )
     {
       validator->setToolTip(QString::fromStdString(error));
       if( error.empty() ) validator->hide();
@@ -300,10 +300,11 @@ bool AlgorithmDialog::isWidgetEnabled(const QString & propName) const
   }
 
   if( isInEnabledList(propName) ) return true;
+  
 
   // Otherwise it must be disabled but only if it is valid
   Mantid::Kernel::Property *property = getAlgorithmProperty(propName);
-  if( property->isValid().empty() )
+  if( property->isValid().empty() && m_python_arguments.contains(propName) )
   {
     return false;
   }
