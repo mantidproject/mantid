@@ -45,6 +45,9 @@ public:
     //next line should be os import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import os"));
+    //next line should be sys import
+    getline( is, line );
+    TS_ASSERT_EQUALS(line, std::string("import sys"));
     //next line should be string import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));

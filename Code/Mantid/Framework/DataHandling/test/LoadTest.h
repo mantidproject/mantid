@@ -266,7 +266,7 @@ public:
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860.nxs"));
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
-    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadSNSEventNexus");
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
 };
 
