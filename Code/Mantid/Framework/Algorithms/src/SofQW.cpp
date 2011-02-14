@@ -96,6 +96,7 @@ void SofQW::exec()
   // Loop over input workspace bins, reassigning data to correct bin in output qw workspace
   const int numHists = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
+  Progress prog(this,0.0,1.0,numHists);
   for (int i = 0; i < numHists; ++i)
   {
     try {
@@ -122,11 +123,11 @@ void SofQW::exec()
       std::vector<IDetector_sptr> detectors;
       if( detGroup ) 
       {
-	detectors = detGroup->getDetectors();
+	      detectors = detGroup->getDetectors();
       }
       else
       {
-	detectors.push_back(spectrumDet);
+	      detectors.push_back(spectrumDet);
       }
       const int numDets = detectors.size();
       const MantidVec& Y = inputWorkspace->readY(i);
@@ -136,40 +137,40 @@ void SofQW::exec()
       // Loop over the detectors and for each bin calculate Q
       for( int idet = 0; idet < numDets; ++idet )
       {
-	IDetector_sptr det = detectors[idet];
-	// Calculate kf vector direction and then Q for each energy bin
-	V3D scatterDir = (det->getPos() - sample->getPos());
- 	scatterDir.normalize();
-	for (int j = 0; j < numBins; ++j)
-	{
- 	  const double deltaE = 0.5*(X[j] + X[j+1]);
-	  // Compute ki and kf wave vectors and therefore q = ki - kf
-	  double ei(0.0),ef(0.0);
-	  if( emode == 1 )
-	  {
-	    ei = efixed;
-	    ef = efixed - deltaE;
-	  }
-	  else
-	  {
-	    ei = efixed + deltaE;
-	    ef = efixed;
-	  }
-	  const V3D ki = beamDir*sqrt(energyToK*ei);
-	  const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
-	  const double q = (ki - kf).norm();
+	      IDetector_sptr det = detectors[idet];
+	      // Calculate kf vector direction and then Q for each energy bin
+	      V3D scatterDir = (det->getPos() - sample->getPos());
+ 	      scatterDir.normalize();
+	      for (int j = 0; j < numBins; ++j)
+	      {
+ 	        const double deltaE = 0.5*(X[j] + X[j+1]);
+	        // Compute ki and kf wave vectors and therefore q = ki - kf
+	        double ei(0.0),ef(0.0);
+	        if( emode == 1 )
+	        {
+	          ei = efixed;
+	          ef = efixed - deltaE;
+	        }
+	        else
+	        {
+	          ei = efixed + deltaE;
+	          ef = efixed;
+	        }
+	        const V3D ki = beamDir*sqrt(energyToK*ei);
+	        const V3D kf = scatterDir*(sqrt(energyToK*(ef)));
+	        const double q = (ki - kf).norm();
 
-	  // Test whether it's in range of the Q axis
-	  if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
-	  // Find which q bin this point lies in
-	  const MantidVec::difference_type qIndex =
-	    std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
+	        // Test whether it's in range of the Q axis
+	        if ( q < verticalAxis.front() || q > verticalAxis.back() ) continue;
+	        // Find which q bin this point lies in
+	        const MantidVec::difference_type qIndex =
+	        std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
 	  
-	  // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
-	  outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets;
-	  // Standard error on the average
-	  outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets );
-	}
+	        // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
+	        outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets;
+	        // Standard error on the average
+	        outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets );
+	      }
       }
 
     } catch (Exception::NotFoundError &e) {
@@ -177,7 +178,7 @@ void SofQW::exec()
       // Presumably, if we get to here the spectrum will be all zeroes anyway (from conversion to E)
       continue;
     }
-    
+    prog.report();
   }
 
   // If the input workspace was a distribution, need to divide by q bin width
