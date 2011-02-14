@@ -40,7 +40,7 @@ public:
 
     std::string line;
     getline(is, line);
-    TS_ASSERT_EQUALS(line, std::string("from MantidFramework import *"));
+    TS_ASSERT_EQUALS(line, std::string("from MantidFramework import mtd, _makeString"));
   
     //next line should be os import
     getline( is, line );
