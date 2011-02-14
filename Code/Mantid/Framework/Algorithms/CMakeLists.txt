@@ -378,6 +378,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/SANSSolidAngleCorrectionTest.h
 		 test/SolidAngleTest.h
 		 test/SortTest.h
+		 test/SpatialGroupingTest.h
 		 test/StripPeaksTest.h
 		 test/StripVanadiumPeaksTest.h
 		 test/SumNeighboursTest.h
@@ -388,7 +389,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
-                 test/WeightedMeanTest.h
+         test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 )
 
