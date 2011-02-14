@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="EMU" valid-from   ="2010-01-01 23:59:59"
+                       valid-to     ="2100-01-31 23:59:59"
+		       last-modified="2011-01-07 00:00:00">
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <parameter eq="" type="double" extract-single-value-as="mean" />       
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+  </defaults>
+
+  
+  <!-- BRIEF DESCRIPTION OF EMU INSTRUMENT: 
+  
+      Data provided by Stephen Cottrell for the EMU instrument
+  -->
+  
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- dummy components added for visualisation purposes. 
+       To easy spot what geometry the instrument is in -->
+       
+  <component type="along z">
+    <location />
+  </component> 
+       
+  <type name="along z">
+  <cylinder id="A">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="0.0" y="0" z="1" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type> 
+  
+  <component type="along x">
+    <location />
+  </component> 
+       
+  <type name="along x">
+  <cylinder id="B">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="1.0" y="0" z="0" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type> 
+  
+  <component type="along y">
+    <location />
+  </component> 
+       
+  <type name="along y">
+  <cylinder id="C">
+    <centre-of-bottom-base x="0.0" y="0.0" z="0.0" />
+    <axis x="0.0" y="1" z="0" /> 
+    <radius val="0.002" />
+    <height val="0.10" />
+  </cylinder>
+  </type> 
+  
+  <!-- source and sample-position components -->
+
+  <component type="source">
+    <location z="-10.0" />
+  </component>
+  
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location />
+  </component>
+  
+  <type name="some-sample-holder" is="SamplePos" />
+ 
+  <!-- detector components --> 
+  
+  <component type="all-rings"  idlist="all">
+    <location />
+  </component>  
+  
+  <type name="all-rings">
+     <component type="rings-front" >
+       <location />
+     </component>
+     <component type="rings-back" >
+       <location />     
+     </component>    
+  </type>
+  
+  <type name="rings-front" >
+     <component type="front-inner">
+        <location z="-0.135" name="ring-front-inner" />	<!-- Tube nearest magnet body, scintillator furthest from beam -->
+     </component>
+     <component type="front-middle">     
+        <location z="-0.175" name="ring-front-middle" />
+     </component>
+     <component type="front-outer">     
+        <location z="-0.2855" name="ring-front-outer" />
+     </component>      
+  </type>
+  
+  <type name="rings-back" >
+     <component type="back-inner">
+        <location z="0.135" name="ring-back-inner" />
+     </component>
+     <component type="back-middle">     
+        <location z="0.175" name="ring-back-middle" />
+     </component>
+     <component type="back-outer">     
+        <location z="0.2855" name="ring-back-outer" />
+     </component>      
+  </type>
+  
+  <type name="front-inner">
+    <component type="inner-pixel">
+       <location r="0.0862" t="90" p="90.000000" rot="90.000000" name="det1"/>
+       <location r="0.0862" t="90" p="67.500000" rot="67.500000" name="det4"/>
+       <location r="0.0862" t="90" p="45.000000" rot="45.000000" name="det7"/>
+       <location r="0.0862" t="90" p="22.500000" rot="22.500000" name="det10"/>
+       <location r="0.0862" t="90" p="0.000000" rot="0.000000" name="det13"/>
+       <location r="0.0862" t="90" p="337.500000" rot="337.500000" name="det16"/>
+       <location r="0.0862" t="90" p="315.000000" rot="315.000000" name="det19"/>
+       <location r="0.0862" t="90" p="292.500000" rot="292.500000" name="det22"/>
+       <location r="0.0862" t="90" p="270.000000" rot="270.000000" name="det25"/>
+       <location r="0.0862" t="90" p="247.500000" rot="247.500000" name="det28"/>
+       <location r="0.0862" t="90" p="225.000000" rot="225.000000" name="det31"/>
+       <location r="0.0862" t="90" p="202.500000" rot="202.500000" name="det34"/>
+       <location r="0.0862" t="90" p="180.000000" rot="180.000000" name="det37"/>
+       <location r="0.0862" t="90" p="157.500000" rot="157.500000" name="det40"/>
+       <location r="0.0862" t="90" p="135.000000" rot="135.000000" name="det43"/>
+       <location r="0.0862" t="90" p="112.500000" rot="112.500000" name="det46"/>
+    </component>    
+  </type>  
+  
+  <type name="back-inner">
+    <component type="inner-pixel">
+       <location r="0.0862" t="90" p="90.000000" rot="90.000000" name="det49"/>
+       <location r="0.0862" t="90" p="67.500000" rot="67.500000" name="det52"/>
+       <location r="0.0862" t="90" p="45.000000" rot="45.000000" name="det55"/>
+       <location r="0.0862" t="90" p="22.500000" rot="22.500000" name="det58"/>
+       <location r="0.0862" t="90" p="0.000000" rot="0.000000" name="det61"/>
+       <location r="0.0862" t="90" p="337.500000" rot="337.500000" name="det64"/>
+       <location r="0.0862" t="90" p="315.000000" rot="315.000000" name="det67"/>
+       <location r="0.0862" t="90" p="292.500000" rot="292.500000" name="det70"/>
+       <location r="0.0862" t="90" p="270.000000" rot="270.000000" name="det73"/>
+       <location r="0.0862" t="90" p="247.500000" rot="247.500000" name="det76"/>
+       <location r="0.0862" t="90" p="225.000000" rot="225.000000" name="det79"/>
+       <location r="0.0862" t="90" p="202.500000" rot="202.500000" name="det82"/>
+       <location r="0.0862" t="90" p="180.000000" rot="180.000000" name="det85"/>
+       <location r="0.0862" t="90" p="157.500000" rot="157.500000" name="det88"/>
+       <location r="0.0862" t="90" p="135.000000" rot="135.000000" name="det91"/>
+       <location r="0.0862" t="90" p="112.500000" rot="112.500000" name="det94"/>
+    </component>    
+  </type>  
+  
+  <type name="front-middle">
+    <component type="middle-pixel">
+       <location r="0.0812" t="90" p="90.000000" rot="90.000000" name="det2"/>
+       <location r="0.0812" t="90" p="67.500000" rot="67.500000" name="det5"/>
+       <location r="0.0812" t="90" p="45.000000" rot="45.000000" name="det8"/>
+       <location r="0.0812" t="90" p="22.500000" rot="22.500000" name="det11"/>
+       <location r="0.0812" t="90" p="0.000000" rot="0.000000" name="det14"/>
+       <location r="0.0812" t="90" p="337.500000" rot="337.500000" name="det17"/>
+       <location r="0.0812" t="90" p="315.000000" rot="315.000000" name="det20"/>
+       <location r="0.0812" t="90" p="292.500000" rot="292.500000" name="det23"/>
+       <location r="0.0812" t="90" p="270.000000" rot="270.000000" name="det26"/>
+       <location r="0.0812" t="90" p="247.500000" rot="247.500000" name="det29"/>
+       <location r="0.0812" t="90" p="225.000000" rot="225.000000" name="det32"/>
+       <location r="0.0812" t="90" p="202.500000" rot="202.500000" name="det35"/>
+       <location r="0.0812" t="90" p="180.000000" rot="180.000000" name="det38"/>
+       <location r="0.0812" t="90" p="157.500000" rot="157.500000" name="det41"/>
+       <location r="0.0812" t="90" p="135.000000" rot="135.000000" name="det44"/>
+       <location r="0.0812" t="90" p="112.500000" rot="112.500000" name="det47"/>
+    </component>    
+  </type>  
+  
+  <type name="back-middle">
+    <component type="middle-pixel">
+       <location r="0.0812" t="90" p="90.000000" rot="90.000000" name="det50"/>
+       <location r="0.0812" t="90" p="67.500000" rot="67.500000" name="det53"/>
+       <location r="0.0812" t="90" p="45.000000" rot="45.000000" name="det57"/>
+       <location r="0.0812" t="90" p="22.500000" rot="22.500000" name="det59"/>
+       <location r="0.0812" t="90" p="0.000000" rot="0.000000" name="det62"/>
+       <location r="0.0812" t="90" p="337.500000" rot="337.500000" name="det65"/>
+       <location r="0.0812" t="90" p="315.000000" rot="315.000000" name="det68"/>
+       <location r="0.0812" t="90" p="292.500000" rot="292.500000" name="det71"/>
+       <location r="0.0812" t="90" p="270.000000" rot="270.000000" name="det74"/>
+       <location r="0.0812" t="90" p="247.500000" rot="247.500000" name="det77"/>
+       <location r="0.0812" t="90" p="225.000000" rot="225.000000" name="det80"/>
+       <location r="0.0812" t="90" p="202.500000" rot="202.500000" name="det83"/>
+       <location r="0.0812" t="90" p="180.000000" rot="180.000000" name="det86"/>
+       <location r="0.0812" t="90" p="157.500000" rot="157.500000" name="det89"/>
+       <location r="0.0812" t="90" p="135.000000" rot="135.000000" name="det92"/>
+       <location r="0.0812" t="90" p="112.500000" rot="112.500000" name="det95"/>
+    </component>    
+  </type>  
+  
+  <type name="front-outer">
+    <component type="outer-pixel">
+       <location r="0.0762" t="90" p="90.000000" rot="90.000000" name="det3"/>
+       <location r="0.0762" t="90" p="67.500000" rot="67.500000" name="det6"/>
+       <location r="0.0762" t="90" p="45.000000" rot="45.000000" name="det9"/>
+       <location r="0.0762" t="90" p="22.500000" rot="22.500000" name="det12"/>
+       <location r="0.0762" t="90" p="0.000000" rot="0.000000" name="det15"/>
+       <location r="0.0762" t="90" p="337.500000" rot="337.500000" name="det18"/>
+       <location r="0.0762" t="90" p="315.000000" rot="315.000000" name="det21"/>
+       <location r="0.0762" t="90" p="292.500000" rot="292.500000" name="det24"/>
+       <location r="0.0762" t="90" p="270.000000" rot="270.000000" name="det27"/>
+       <location r="0.0762" t="90" p="247.500000" rot="247.500000" name="det30"/>
+       <location r="0.0762" t="90" p="225.000000" rot="225.000000" name="det33"/>
+       <location r="0.0762" t="90" p="202.500000" rot="202.500000" name="det36"/>
+       <location r="0.0762" t="90" p="180.000000" rot="180.000000" name="det39"/>
+       <location r="0.0762" t="90" p="157.500000" rot="157.500000" name="det42"/>
+       <location r="0.0762" t="90" p="135.000000" rot="135.000000" name="det45"/>
+       <location r="0.0762" t="90" p="112.500000" rot="112.500000" name="det48"/>
+    </component>    
+  </type>  
+  
+  <type name="back-outer">
+    <component type="outer-pixel">
+       <location r="0.0762" t="90" p="90.000000" rot="90.000000" name="det51"/>
+       <location r="0.0762" t="90" p="67.500000" rot="67.500000" name="det54"/>
+       <location r="0.0762" t="90" p="45.000000" rot="45.000000" name="det57"/>
+       <location r="0.0762" t="90" p="22.500000" rot="22.500000" name="det60"/>
+       <location r="0.0762" t="90" p="0.000000" rot="0.000000" name="det63"/>
+       <location r="0.0762" t="90" p="337.500000" rot="337.500000" name="det66"/>
+       <location r="0.0762" t="90" p="315.000000" rot="315.000000" name="det69"/>
+       <location r="0.0762" t="90" p="292.500000" rot="292.500000" name="det72"/>
+       <location r="0.0762" t="90" p="270.000000" rot="270.000000" name="det75"/>
+       <location r="0.0762" t="90" p="247.500000" rot="247.500000" name="det78"/>
+       <location r="0.0762" t="90" p="225.000000" rot="225.000000" name="det81"/>
+       <location r="0.0762" t="90" p="202.500000" rot="202.500000" name="det84"/>
+       <location r="0.0762" t="90" p="180.000000" rot="180.000000" name="det87"/>
+       <location r="0.0762" t="90" p="157.500000" rot="157.500000" name="det90"/>
+       <location r="0.0762" t="90" p="135.000000" rot="135.000000" name="det93"/>
+       <location r="0.0762" t="90" p="112.500000" rot="112.500000" name="det96"/>
+    </component>    
+  </type> 
+    
+  <type name="inner-pixel" is="detector">  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam.
+         This surface is 36mm along y and 30mm along z and the dept along x is 5mm.  -->
+    <cuboid id="inner-shape">
+      <left-front-bottom-point x="0.0" y="-0.018" z="-0.015"  />
+      <left-front-top-point  x="0.0" y="0.018" z="-0.015"  />
+      <left-back-bottom-point  x="0.005" y="-0.018" z="-0.015"  />
+      <right-front-bottom-point  x="0.0" y="-0.018" z="0.015"  />
+    </cuboid>
+    <algebra val="inner-shape" />     
+  </type>
+  
+  <type name="middle-pixel" is="detector">  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam.
+         This surface is 33mm along y and 50mm along z and the dept along x is 5mm.  -->
+    <cuboid id="middle-shape">
+      <left-front-bottom-point x="0.0" y="-0.0165" z="-0.025"  />
+      <left-front-top-point  x="0.0" y="0.0165" z="-0.025"  />
+      <left-back-bottom-point  x="0.005" y="-0.0165" z="-0.025"  />
+      <right-front-bottom-point  x="0.0" y="-0.0165" z="0.025"  />
+    </cuboid>
+    <algebra val="middle-shape" />     
+  </type>
+  
+  <type name="outer-pixel" is="detector">  
+    <!-- It is implicitely assumed here that the front y-z plane (looking down
+         the x-axis) is the surface that see the neutron beam.
+         This surface is 30mm along y and 171mm along z and the dept along x is 5mm.  -->
+    <cuboid id="outer-shape">
+      <left-front-bottom-point x="0.0" y="-0.015" z="-0.0855"  />
+      <left-front-top-point  x="0.0" y="0.015" z="-0.0855"  />
+      <left-back-bottom-point  x="0.005" y="-0.015" z="-0.0855"  />
+      <right-front-bottom-point  x="0.0" y="-0.015" z="0.0855"  />
+    </cuboid>
+    <algebra val="outer-shape" />     
+  </type>        
+    
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="all">
+    <id start="1" step="3" end="46"/>
+    <id start="2" step="3" end="47"/>     
+    <id start="3" step="3" end="48"/>
+    <id start="49" step="3" end="94"/>       
+    <id start="50" step="3" end="95"/>       
+    <id start="51" step="3" end="96"/>            
+  </idlist>
+
+
+  
+</instrument>
