@@ -96,6 +96,9 @@ namespace Mantid
       /// Populate spectra-detector map
       void loadSpectraMap(idc_handle_t dae_handle, DataObjects::Workspace2D_sptr ws);
 
+      /// Populate Run object
+      void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
+
       /// load data from the DAE
       void loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& ispec, idc_handle_t dae_handle, const int& lengthIn,
     		int* spectrum, DataObjects::Workspace2D_sptr localWorkspace, int* allData = 0);

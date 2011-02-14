@@ -522,6 +522,21 @@ namespace Mantid
 
     }
 
+    /**  Log the run details from the file
+    * @param localWorkspace :: The workspace details to use
+    */
+    void LoadDAE::loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace)
+    {
+      API::Run & runDetails = localWorkspace->mutableRun();
+
+      runDetails.addProperty("run_title", localWorkspace->getTitle());
+ 
+      int numSpectra = localWorkspace->getNumberHistograms();
+      runDetails.addProperty("nspectra", numSpectra);
+
+      runDetails.addProperty("run_start", Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+    }
+
     double LoadDAE::dblSqrt(double in)
     {
       return sqrt(in);
