@@ -832,12 +832,23 @@ void testCheckIfVariousInstrumentsLoad()
 
     LoadEmptyInstrument loaderEMU;
     loaderEMU.initialize();
-    loaderEMU.setPropertyValue("Filename", "EMU_Definition.xml");
+    loaderEMU.setPropertyValue("Filename", "EMU_Definition_32detectors.xml");
     wsName = "LoadEmptyInstrumentParamEMUTest";
     loaderEMU.setPropertyValue("OutputWorkspace", wsName);
 
     TS_ASSERT_THROWS_NOTHING(loaderEMU.execute());
     TS_ASSERT( loaderEMU.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
+    LoadEmptyInstrument loaderEMU2;
+    loaderEMU2.initialize();
+    loaderEMU2.setPropertyValue("Filename", "EMU_Definition_96detectors.xml");
+    wsName = "LoadEmptyInstrumentParamEMUTest2";
+    loaderEMU2.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderEMU2.execute());
+    TS_ASSERT( loaderEMU2.isExecuted() );
 
     AnalysisDataService::Instance().remove(wsName);
 
