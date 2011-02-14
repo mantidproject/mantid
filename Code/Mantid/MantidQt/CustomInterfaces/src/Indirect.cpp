@@ -129,14 +129,7 @@ void Indirect::initLayout()
 */
 void Indirect::initLocalPython()
 {
-  // Need to determine whether we are on a platform that supports the Fortran unwrap
-  QString pyInput = "import platform\n"
-    "print platform.system()+platform.architecture()[0]\n";
-  QString pyOutput = runPythonCode(pyInput).trimmed();
-  if ( pyOutput != "Windows32bit" )
-  {
-    m_uiForm.cbUnwrapMethod->removeItem(m_uiForm.cbUnwrapMethod->findText("MaxEnt"));
-  }
+  // Nothing to do here at the moment.
 }
 /**
 * This function opens a web browser window to the Mantid Project wiki page for this
@@ -282,21 +275,12 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput += "clean = True\n";
   }
 
-  if ( m_uiForm.cbUnwrapMethod->currentText() == "MaxEnt" )
-  {
-    pyInput += "FU = True\n";
-  }
-  else
-  {
-    pyInput += "FU = False\n";
-  }
-
   if ( isDirty() )
   {
     pyInput += "ws_list = ind.convert_to_energy(rawfiles, mapfile, first, last,"
       "instrument, analyser, reflection,"
       "SumFiles=Sum, bgremove=bgRemove, tempK=tempK, calib=calib, rebinParam=rebinParam,"
-      "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose, FortranUnwrap=FU)\n";
+      "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( isDirtyRebin() )
   {
@@ -1254,36 +1238,57 @@ void Indirect::plotRaw()
 
     if ( !ok || spectraRange.isEmpty() )
     {
+      return;
+    }
+    QStringList specList = spectraRange.split("-");
+
+    QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
+    if ( (specList.size() > 2) || ( specList.size() < 1) )
+    {
+      showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
+      return;
+    }
+    if ( specList.size() == 1 )
+    {
+      specList.append(specList[0]);
+    }
+
+    QString bgrange;
+
+    if ( m_bgRemoval )
+    {
+      QPair<double, double> range = m_backgroundDialog->getRange();
+      bgrange = "[ " + QString::number(range.first) + "," + QString::number(range.second) + " ]";
     }
     else
     {
-      QStringList specList = spectraRange.split("-");
-
-      QString rawFile = m_uiForm.ind_runFiles->getFirstFilename();
-      if ( (specList.size() > 2) || ( specList.size() < 1) )
-      {
-        showInformationBox("Invalid input. Must be of form <SpecMin>-<SpecMax>");
-        return;
-      }
-      if ( specList.size() == 1 )
-      {
-        specList.append(specList[0]);
-      }
-
-      QString pyInput =
-        "from mantidsimple import *\n"
-        "from mantidplot import *\n"
-        "LoadRaw(r'"+rawFile+"', 'RawTime', SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
-        "GroupDetectors('RawTime', 'RawTime', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
-        "graph = plotSpectrum('RawTime', 0)\n";
-
-      QString pyOutput = runPythonCode(pyInput).trimmed();
-
-      if ( pyOutput != "" )
-      {
-        showInformationBox(pyOutput);
-      }
+      bgrange = "[-1, -1]";
     }
+
+    QString pyInput =
+      "from mantidsimple import *\n"
+      "from mantidplot import *\n"
+      "import os.path as op\n"
+      "file = r'" + rawFile + "'\n"
+      "name = op.splitext( op.split(file)[1] )[0]\n"
+      "bgrange = " + bgrange + "\n"
+      "LoadRaw(file, name, SpectrumMin="+specList[0]+", SpectrumMax="+specList[1]+")\n"
+      "if ( bgrange != [-1, -1] ):\n"
+      "    #Remove background\n"
+      "    FlatBackground(name, name+'_bg', bgrange[0], bgrange[1], Mode='Mean')\n"
+      "    GroupDetectors(name+'_bg', name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "    GroupDetectors(name, name+'_grp_raw', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "else: # Just group detectors as they are\n"
+      "    GroupDetectors(name, name+'_grp', DetectorList=range("+specList[0]+","+specList[1]+"+1))\n"
+      "graph = plotSpectrum(name+'_grp', 0)\n";
+
+    QString pyOutput = runPythonCode(pyInput).trimmed();
+    
+    if ( pyOutput != "" )
+    {
+      showInformationBox(pyOutput);
+    }
+
   }
   else
   {

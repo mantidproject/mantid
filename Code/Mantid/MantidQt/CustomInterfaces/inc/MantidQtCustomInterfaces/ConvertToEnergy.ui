@@ -439,40 +439,6 @@
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_11" >
                 <item>
-                 <widget class="QLabel" name="lbUnwrapMethod" >
-                  <property name="text" >
-                   <string>Unwrap Method: </string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QComboBox" name="cbUnwrapMethod" >
-                  <item>
-                   <property name="text" >
-                    <string>FFT</string>
-                   </property>
-                  </item>
-                  <item>
-                   <property name="text" >
-                    <string>MaxEnt</string>
-                   </property>
-                  </item>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_17" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
                  <widget class="QPushButton" name="pbBack_2" >
                   <property name="toolTip" >
                    <string>Remove a range of background value.</string>
