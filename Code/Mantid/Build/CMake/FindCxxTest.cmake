@@ -94,13 +94,19 @@
 # CXXTEST_ADD_TEST (public macro)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
+    # the directory to write test results
+    set ( _cxxtest_xml_outdir  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/Testing )
+    add_custom_command ( OUTPUT ${_cxxtest_xml_outdir}
+                         COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${_cxxtest_xml_outdir})
     # determine the cpp filename
     set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}_runner.cpp)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
-        DEPENDS ${PATH_FILES}
+        DEPENDS ${PATH_FILES} ${_cxxtest_xml_outdir}
         COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
+        --xunit-printer --world ${_cxxtest_testname}
+        --xunit-file  ${_cxxtest_xml_outdir}/TEST-${_cxxtest_testname}.xml
+        -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
@@ -114,9 +120,12 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
       add_custom_command(
         OUTPUT  ${_cxxtest_cpp}
-        DEPENDS ${_cxxtest_h}
+        DEPENDS ${_cxxtest_h} ${_cxxtest_xml_outdir}
         COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --part
-        --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
+        --world ${_cxxtest_testname} -o ${_cxxtest_cpp}
+        --xunit-printer 
+        --xunit-file ${_cxxtest_xml_outdir}/TEST-${_cxxtest_testname}.xml
+        ${_cxxtest_h}
 	)
 
       set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
@@ -133,7 +142,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
     if (CXXTEST_SINGLE_LOGFILE)
       # add the whole suite as a single test so the output xml doesn't overwrite itself
       add_test ( NAME ${_cxxtest_testname}
-                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin" 
+                 COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
                          $<TARGET_FILE:${_cxxtest_testname}> )
     else (CXXTEST_SINGLE_LOGFILE)
       # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
@@ -142,7 +151,7 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
         get_filename_component(_suitename ${part} NAME_WE )
         set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
         add_test ( NAME ${_cxxtest_separate_name}
-                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin" 
+                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
 		          $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
       endforeach ( part ${ARGN} )
     endif (CXXTEST_SINGLE_LOGFILE)
