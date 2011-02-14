@@ -50,6 +50,7 @@ namespace Mantid
       std::ofstream module(getModuleFilename().c_str());
 
       module << "from MantidFramework import *\n";
+      module << "from MantidFramework import _makeString\n";
       //module << "from MantidFramework import mtd, _makeString\n";
       //If in gui mode also need sys and qti module
       if( gui )
