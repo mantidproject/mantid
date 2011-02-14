@@ -151,6 +151,8 @@ void LoadSNSEventNexus::init()
  */
 void LoadSNSEventNexus::exec()
 {
+	// FIXME:  This should just call LoadEventNexus() algorithm.
+
   // Retrieve the filename from the properties
   m_filename = getPropertyValue("Filename");
 
