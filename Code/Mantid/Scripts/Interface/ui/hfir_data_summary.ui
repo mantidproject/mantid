@@ -278,6 +278,19 @@
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item row="1" column="0">
@@ -292,14 +305,14 @@
          <item>
           <widget class="QLabel" name="label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -339,14 +352,14 @@
          <item>
           <widget class="QLabel" name="label_3">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -415,6 +428,19 @@ in each direction and will create 9 sub-pixels.</string>
             <string>Log binning</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
@@ -494,6 +520,19 @@ in each direction and will create 9 sub-pixels.</string>
            </property>
           </widget>
          </item>
+         <item>
+          <spacer name="horizontalSpacer_6">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
         </layout>
        </item>
        <item row="5" column="0">
@@ -511,14 +550,14 @@ in each direction and will create 9 sub-pixels.</string>
          <item>
           <widget class="QLabel" name="sensitivity_min_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -564,14 +603,14 @@ in each direction and will create 9 sub-pixels.</string>
          <item>
           <widget class="QLabel" name="sensitivity_max_label">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>150</width>
+             <width>0</width>
              <height>0</height>
             </size>
            </property>
@@ -613,6 +652,19 @@ in each direction and will create 9 sub-pixels.</string>
             <string>Enter the maximum allowed relative sensitivity for any given pixel.</string>
            </property>
           </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_3">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
          </item>
         </layout>
        </item>
