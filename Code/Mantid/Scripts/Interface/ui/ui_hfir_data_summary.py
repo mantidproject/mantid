@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Mon Feb 14 11:14:42 2011
+# Created: Mon Feb 14 11:56:10 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,8 +34,13 @@ class Ui_Frame(object):
         self.instr_name_label.setObjectName("instr_name_label")
         self.gridLayout.addWidget(self.instr_name_label, 0, 0, 1, 1)
         self.label_9 = QtGui.QLabel(Frame)
-        self.label_9.setMinimumSize(QtCore.QSize(200, 30))
-        self.label_9.setMaximumSize(QtCore.QSize(200, 30))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.label_9.sizePolicy().hasHeightForWidth())
+        self.label_9.setSizePolicy(sizePolicy)
+        self.label_9.setMinimumSize(QtCore.QSize(200, 27))
+        self.label_9.setMaximumSize(QtCore.QSize(200, 27))
         self.label_9.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
         self.label_9.setWordWrap(False)
         self.label_9.setIndent(0)
@@ -47,8 +52,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_edit.sizePolicy().hasHeightForWidth())
         self.data_file_edit.setSizePolicy(sizePolicy)
-        self.data_file_edit.setMinimumSize(QtCore.QSize(300, 30))
-        self.data_file_edit.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.data_file_edit.setMinimumSize(QtCore.QSize(300, 27))
+        self.data_file_edit.setMaximumSize(QtCore.QSize(16777215, 27))
         self.data_file_edit.setBaseSize(QtCore.QSize(0, 0))
         self.data_file_edit.setObjectName("data_file_edit")
         self.gridLayout.addWidget(self.data_file_edit, 1, 1, 1, 1)
@@ -58,8 +63,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_browse_button.sizePolicy().hasHeightForWidth())
         self.data_file_browse_button.setSizePolicy(sizePolicy)
-        self.data_file_browse_button.setMinimumSize(QtCore.QSize(0, 30))
-        self.data_file_browse_button.setMaximumSize(QtCore.QSize(16777215, 30))
+        self.data_file_browse_button.setMinimumSize(QtCore.QSize(0, 27))
+        self.data_file_browse_button.setMaximumSize(QtCore.QSize(16777215, 27))
         self.data_file_browse_button.setObjectName("data_file_browse_button")
         self.gridLayout.addWidget(self.data_file_browse_button, 1, 2, 1, 1)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
