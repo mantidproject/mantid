@@ -43,6 +43,8 @@ void ConjoinWorkspaces::init()
   declareProperty(new WorkspaceProperty<>("InputWorkspace2",
     "", Direction::Input, new CommonBinsValidator<>),
     "The name of the second input workspace");
+  declareProperty(new PropertyWithValue<bool>("CheckOverlapping", true, Direction::Input),
+                  "Verify that the supplied data do not overlap");
 }
 
 //----------------------------------------------------------------------------------------------
@@ -273,6 +275,9 @@ void ConjoinWorkspaces::validateInputs(API::MatrixWorkspace_const_sptr ws1, API:
  */
 void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2, bool checkSpectra) const
 {
+  // make sure we should bother checking
+  if (!this->getProperty("CheckOverlapping"))
+    return;
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
   const SpectraDetectorMap& specmap1 = ws1->spectraMap();
