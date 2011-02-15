@@ -6,6 +6,7 @@
 #include "MantidAlgorithms/ConjoinWorkspaces.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -15,6 +16,12 @@ using namespace Mantid::DataObjects;
 class ConjoinWorkspacesTest : public CxxTest::TestSuite
 {
 public:
+  ConjoinWorkspacesTest() :
+    ws1Name("ConjoinWorkspacesTest_grp1"), ws2Name("ConjoinWorkspacesTest_grp2")
+  {
+  }
+
+
   void setupWS()
   {
     IAlgorithm* loader;
@@ -208,31 +215,104 @@ public:
     }
 
     // Check it runs with the two separate ones
-     conj = new ConjoinWorkspaces();
-     conj->initialize();
-     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","grp1") );
-     TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","grp2") );
-     conj->execute();
-     TS_ASSERT( conj->isExecuted() );
-     delete conj;
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1","grp1") );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2","grp2") );
+    conj->execute();
+    TS_ASSERT( conj->isExecuted() );
+    delete conj;
 
-     // Get the two input workspaces for later
-     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("grp1_1"));
+    // Get the two input workspaces for later
+    out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("grp1_1"));
 
-     int nHist = out->getNumberHistograms();
-     int nEvents = out->getNumberEvents();
+    int nHist = out->getNumberHistograms();
+    int nEvents = out->getNumberEvents();
 
-     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
-     TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
+    TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
+    TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
 
-     TS_ASSERT( !AnalysisDataService::Instance().doesExist("grp2") );
+    TS_ASSERT( !AnalysisDataService::Instance().doesExist("grp2") );
 
-     // Clean up
-     AnalysisDataService::Instance().remove("grp1");
+    // Clean up
+    AnalysisDataService::Instance().remove("grp1");
   }
+
+
+  void testDoCheckForOverlap()
+  {
+    MatrixWorkspace_sptr ws1, ws2, out;
+    int numPixels = 10;
+    int numBins = 20;
+    ws1 = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins);
+    ws2 = WorkspaceCreationHelper::CreateEventWorkspace(5, numBins);
+
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace1",ws1) );
+    TS_ASSERT_THROWS_NOTHING( conj->setProperty("InputWorkspace2",ws2) );
+    TS_ASSERT_THROWS_NOTHING( conj->setProperty("CheckOverlapping",true) );
+    conj->execute();
+    TS_ASSERT( !conj->isExecuted() );
+    delete conj;
+  }
+
+  void performTestNoOverlap(bool event)
+  {
+    MatrixWorkspace_sptr ws1, ws2, out;
+    int numBins = 20;
+
+    if (event)
+    {
+      ws1 = WorkspaceCreationHelper::CreateEventWorkspace2(10, numBins); //2 events per bin
+      ws2 = WorkspaceCreationHelper::CreateEventWorkspace2(5, numBins);
+    }
+    else
+    {
+      ws1 = WorkspaceCreationHelper::Create2DWorkspace(10, numBins);
+      ws2 = WorkspaceCreationHelper::Create2DWorkspace(5, numBins);
+    }
+    AnalysisDataService::Instance().addOrReplace(ws1Name, ws1);
+    AnalysisDataService::Instance().addOrReplace(ws2Name, ws2);
+
+    conj = new ConjoinWorkspaces();
+    conj->initialize();
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace1",ws1Name) );
+    TS_ASSERT_THROWS_NOTHING( conj->setPropertyValue("InputWorkspace2",ws2Name) );
+    TS_ASSERT_THROWS_NOTHING( conj->setProperty("CheckOverlapping",false) );
+    TS_ASSERT_THROWS_NOTHING( conj->execute(); )
+    TS_ASSERT( conj->isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name) ); )
+    TS_ASSERT(out);
+    if (!out) return;
+
+    TS_ASSERT_EQUALS( out->getNumberHistograms(), 15);
+    TS_ASSERT_EQUALS( out->blocksize(), numBins);
+
+    for(int wi=0; wi<out->getNumberHistograms(); wi++)
+      for(int x=0; x<out->blocksize(); x++)
+        TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
+
+    delete conj;
+  }
+
+  void test_DONTCheckForOverlap_Events()
+  {
+    performTestNoOverlap(true);
+  }
+
+  void test_DONTCheckForOverlap_2D()
+  {
+    performTestNoOverlap(false);
+  }
+
+
 
 private:
   ConjoinWorkspaces * conj;
+  const std::string ws1Name;
+  const std::string ws2Name;
 };
 
 #endif /*CONJOINWORKSPACESTEST_H_*/

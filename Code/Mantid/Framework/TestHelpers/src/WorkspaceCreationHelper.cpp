@@ -300,9 +300,9 @@ namespace WorkspaceCreationHelper
    * 200 events; two in each bin, at time 0.5, 1.5, etc.
    * PulseTime = 1 second, 2 seconds, etc.
    */
-  EventWorkspace_sptr CreateEventWorkspace2()
+  EventWorkspace_sptr CreateEventWorkspace2(int numPixels, int numBins)
   {
-    return CreateEventWorkspace(50, 100, 100, 0.0, 1.0, 2);
+    return CreateEventWorkspace(numPixels, numBins, 100, 0.0, 1.0, 2);
   }
 
   /** Create event workspace

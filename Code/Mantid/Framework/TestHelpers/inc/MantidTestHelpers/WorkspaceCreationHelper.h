@@ -66,7 +66,7 @@ namespace WorkspaceCreationHelper
    * 200 events; two in each bin, at time 0.5, 1.5, etc.
    * PulseTime = 1 second, 2 seconds, etc.
    */
-  DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace2();
+  DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace2(int numPixels=50, int numBins=100);
   /** Create event workspace
    */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr 
