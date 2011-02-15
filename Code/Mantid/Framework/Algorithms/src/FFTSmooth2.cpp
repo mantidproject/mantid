@@ -46,6 +46,8 @@ void FFTSmooth2::init()
           "Ignores the requirement that X bins be linear and of the same size.\n"
           "Set this to true if you are using log binning.\n"
           "The output X axis will be the same as the input either way.");
+      declareProperty("AllSpectra",false,
+          "Smooth all spectra");
 
 }
 
@@ -66,17 +68,28 @@ struct toReal : std::binary_function <double,double,double> {
 void FFTSmooth2::exec()
 {
   m_inWS = getProperty("InputWorkspace");
-  int spec = getProperty("WorkspaceIndex");
   IgnoreXBins = getProperty("IgnoreXBins");
-
-  // Save the starting x value so it can be restored after all transforms.
-  m_x0 = m_inWS->readX(spec)[0];
+  int s0 = getProperty("WorkspaceIndex");
+  int send = s0+1;
+  if (getProperty("AllSpectra"))
+  {
+    s0 = 0;
+    send = m_inWS->getNumberHistograms();
+  }
+  // Create output
+  API::MatrixWorkspace_sptr outWS = 
+    API::WorkspaceFactory::Instance().create(m_inWS,send-s0+1,m_inWS->readX(0).size(),m_inWS->readY(0).size());
 
   // Symmetrize the input spectrum 
   int dn = m_inWS->readY(0).size();
-
   API::MatrixWorkspace_sptr symmWS = 
     API::WorkspaceFactory::Instance().create("Workspace2D",1,m_inWS->readX(0).size()+dn,m_inWS->readY(0).size()+dn);
+
+  for (int spec = s0; spec < send; spec++)
+  {
+  std::cout <<spec<<" "<<"\n";
+  // Save the starting x value so it can be restored after all transforms.
+  m_x0 = m_inWS->readX(spec)[0];
 
   double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) / (m_inWS->readX(spec).size() - 1);
   for(int i=0;i<dn;i++)
@@ -177,10 +190,6 @@ void FFTSmooth2::exec()
   }
   API::MatrixWorkspace_sptr tmpWS = fft->getProperty("OutputWorkspace");
 
-  // Create output
-  API::MatrixWorkspace_sptr outWS = 
-    API::WorkspaceFactory::Instance().create(m_inWS,1,m_inWS->readX(0).size(),m_inWS->readY(0).size());
-
   dn = tmpWS->blocksize()/2;
 
   // x-value correction is needed if the size of the spectrum is changed (e.g. after truncation)
@@ -199,8 +208,9 @@ void FFTSmooth2::exec()
   //std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
   //  std::bind2nd(std::plus<double>(), m_x0) );
 
-  outWS->dataX(0).assign(m_inWS->readX(0).begin(),m_inWS->readX(0).end());
-  outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  outWS->dataX(spec).assign(m_inWS->readX(spec).begin(),m_inWS->readX(spec).end());
+  outWS->dataY(spec).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  }
   
   setProperty("OutputWorkspace",outWS);
 
