@@ -207,8 +207,16 @@ void FFTSmooth2::exec()
   //std::transform( outWS->dataX(0).begin(), outWS->dataX(0).end(), outWS->dataX(0).begin(), 
   //  std::bind2nd(std::plus<double>(), m_x0) );
 
-  outWS->dataX(spec).assign(m_inWS->readX(spec).begin(),m_inWS->readX(spec).end());
-  outWS->dataY(spec).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  if (getProperty("AllSpectra"))
+  {
+    outWS->dataX(spec).assign(m_inWS->readX(spec).begin(),m_inWS->readX(spec).end());
+    outWS->dataY(spec).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  }
+  else
+  {
+    outWS->dataX(0).assign(m_inWS->readX(spec).begin(),m_inWS->readX(spec).end());
+    outWS->dataY(0).assign(tmpWS->readY(0).begin()+dn,tmpWS->readY(0).end());
+  }
   }
   
   setProperty("OutputWorkspace",outWS);
