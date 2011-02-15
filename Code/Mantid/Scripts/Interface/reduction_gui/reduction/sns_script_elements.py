@@ -85,9 +85,9 @@ class InstrumentDescription(BaseScriptElement):
             
         # Transmission correction
         if self.calculate_transmission:
-            script += "\n" #TODO: need a command to enable transmission
+            script += "MeasureTransmission(True)\n" #TODO: need a command to enable transmission
         else:
-            script += "SetTransmission(trans=%g, error=%g)\n" % (self.transmission, self.transmission_error)
+            script += "NoTransmission()\n"
             
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
