@@ -137,11 +137,17 @@ class SNSPowderReduction(PythonAlgorithm):
         return wksp
 
     def _loadNeXusData(self, runnumber, extension):
-        # find the file to load
-        try:
-            filename = self._findData(runnumber, extension)
+        filename = "%s_%d%s" % (self._instrument, runnumber, extension)
+        try: # first just try loading the file
+            # TODO use timemin and timemax to filter what events are being read
+            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name)
+
+            return alg.workspace()
         except:
-            filename = "%s_%d%s" % (self._instrument, runnumber, extension)
+            pass
+
+        # find the file to load
+        filename = self._findData(runnumber, extension)
 
         # generate the workspace name
         (path, name) = os.path.split(filename)
@@ -150,7 +156,7 @@ class SNSPowderReduction(PythonAlgorithm):
             name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
-        alg = LoadSNSEventNexus(Filename=filename, OutputWorkspace=name)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name)
 
         return alg.workspace()
 
