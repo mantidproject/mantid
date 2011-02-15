@@ -87,7 +87,6 @@ void FFTSmooth2::exec()
 
   for (int spec = s0; spec < send; spec++)
   {
-  std::cout <<spec<<" "<<"\n";
   // Save the starting x value so it can be restored after all transforms.
   m_x0 = m_inWS->readX(spec)[0];
 

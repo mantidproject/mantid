@@ -352,6 +352,30 @@ namespace Algorithms
     }
     matrixInWS=algS->getProperty("InputWorkspace");
 
+    //Write DetCal File
+    double baseX,baseY,baseZ,upX,upY,upZ;
+
+    std::string filename=getProperty("DetCalFilename");
+    std::fstream outfile;
+    outfile.open(filename.c_str(), std::ios::out);
+
+    outfile << "#\n";
+    outfile << "#  Mantid Optimized .DetCal file for SNAP with TWO detector panels\n";
+    outfile << "#  Old Panel, nominal size and distance at -90 degrees.\n";
+    outfile << "#  New Panel, nominal size and distance at +90 degrees.\n";
+    outfile << "#\n";
+    outfile << "# Lengths are in centimeters.\n";
+    outfile << "# Base and up give directions of unit vectors for a local\n";
+    outfile << "# x,y coordinate system on the face of the detector.\n";
+    outfile << "#\n";
+    outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
+    outfile << "#\n";
+    outfile << "6         L1     T0_SHIFT\n";
+    IObjComponent_const_sptr source = inst->getSource();
+    IObjComponent_const_sptr sample = inst->getSample();
+    outfile << "7  "<<source->getDistance(*sample)*100<<"            0\n";
+    outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
+
     Progress prog(this,0.0,1.0,detList.size());
     for (int det=0; det < static_cast<int>(detList.size()); det++)
     {
@@ -446,31 +470,10 @@ namespace Algorithms
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
       prog.report();
-    }
-    //Write DetCal File
-    double baseX,baseY,baseZ,upX,upY,upZ;
 
-    std::string filename=getProperty("DetCalFilename");
-    std::fstream outfile;
-    outfile.open(filename.c_str(), std::ios::out);
-
-    outfile << "#\n";
-    outfile << "#  Mantid Optimized .DetCal file for SNAP with TWO detector panels\n";
-    outfile << "#  Old Panel, nominal size and distance at -90 degrees.\n";
-    outfile << "#  New Panel, nominal size and distance at +90 degrees.\n";
-    outfile << "#\n";
-    outfile << "# Lengths are in centimeters.\n";
-    outfile << "# Base and up give directions of unit vectors for a local\n";
-    outfile << "# x,y coordinate system on the face of the detector.\n";
-    outfile << "#\n";
-    outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
-    outfile << "#\n";
-    outfile << "6         L1     T0_SHIFT\n";
-    outfile << "7  1500.0000            0\n";
-    outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
-    for (int det=0; det < static_cast<int>(detList.size()); det++)
-    {
-      Geometry::V3D Center=detList[det]->getPos();
+      Geometry::V3D CalCenter=V3D(gsl_vector_get (s->x, 0)*0.01,
+        gsl_vector_get (s->x, 1)*0.01, gsl_vector_get (s->x, 2)*0.01);
+      Geometry::V3D Center=detList[det]->getPos()+CalCenter;
       int pixmax = detList[det]->xpixels()-1;
       int pixmid = (detList[det]->ypixels()-1)/2;
       BoundingBox box;
@@ -478,16 +481,52 @@ namespace Algorithms
       baseX = box.xMax();
       baseY = box.yMax();
       baseZ = box.zMax();
-      Geometry::V3D Base=V3D(baseX,baseY,baseZ);
+      Geometry::V3D Base=V3D(baseX,baseY,baseZ)+CalCenter;
       pixmid = (detList[det]->xpixels()-1)/2;
       pixmax = detList[det]->ypixels()-1;
       detList[det]->getAtXY(pixmid, pixmax)->getBoundingBox(box);
       upX = box.xMax();
       upY = box.yMax();
       upZ = box.zMax();
-      Geometry::V3D Up=V3D(upX,upY,upZ);
+      Geometry::V3D Up=V3D(upX,upY,upZ)+CalCenter;
       Base-=Center;
       Up-=Center;
+      //Rotate in x
+      baseX = Base[0];
+      baseY = Base[1];
+      baseZ = Base[2];
+      Base=V3D(baseX,baseY*cos(gsl_vector_get (s->x, 3))-baseZ*sin(gsl_vector_get (s->x, 3)),
+        baseY*sin(gsl_vector_get (s->x, 3))+baseZ*cos(gsl_vector_get (s->x, 3)));
+      //Rotate in y
+      baseX = Base[0];
+      baseY = Base[1];
+      baseZ = Base[2];
+      Base=V3D(baseZ*cos(gsl_vector_get (s->x, 4))-baseX*sin(gsl_vector_get (s->x, 4)),
+        baseY,baseZ*sin(gsl_vector_get (s->x, 4))+baseX*cos(gsl_vector_get (s->x, 4)));
+      //Rotate in z
+      baseX = Base[0];
+      baseY = Base[1];
+      baseZ = Base[2];
+      Base=V3D(baseX*cos(gsl_vector_get (s->x, 5))-baseY*sin(gsl_vector_get (s->x, 5)),
+        baseX*sin(gsl_vector_get (s->x, 5))+baseY*cos(gsl_vector_get (s->x, 5)),baseZ);
+      //Rotate in x
+      upX = Up[0];
+      upY = Up[1];
+      upZ = Up[2];
+      Up=V3D(upX,upY*cos(gsl_vector_get (s->x, 3))-upZ*sin(gsl_vector_get (s->x, 3)),
+        upY*sin(gsl_vector_get (s->x, 3))+upZ*cos(gsl_vector_get (s->x, 3)));
+      //Rotate in y
+      upX = Up[0];
+      upY = Up[1];
+      upZ = Up[2];
+      Up=V3D(upZ*cos(gsl_vector_get (s->x, 4))-upX*sin(gsl_vector_get (s->x, 4)),upY,
+        upZ*sin(gsl_vector_get (s->x, 4))+upX*cos(gsl_vector_get (s->x, 4)));
+      //Rotate in z
+      upX = Up[0];
+      upY = Up[1];
+      upZ = Up[2];
+      Up=V3D(upX*cos(gsl_vector_get (s->x, 5))-upY*sin(gsl_vector_get (s->x, 5)),
+        upX*sin(gsl_vector_get (s->x, 5))+upY*cos(gsl_vector_get (s->x, 5)),upZ);
       Base.normalize();
       Up.normalize();
       Center*=100.0;
@@ -498,7 +537,7 @@ namespace Algorithms
        << 100.0*detList[det]->xsize() << "  " 
        << 100.0*detList[det]->ysize() << "  " 
        << "0.2000" << "  " 
-       << "55.330" << "  " ;
+       << Center.norm() << "  " ;
       Center.write(outfile);
       outfile << "  ";
       Base.write(outfile);
