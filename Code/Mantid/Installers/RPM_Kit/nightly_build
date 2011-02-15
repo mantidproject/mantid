@@ -63,9 +63,11 @@ else
     sh make_rpm_rhel5.sh -r $rev
 fi	
 scp $build_base/SRPMS/Mantid-*.*-0.svnR$rev.*.src.rpm isisupdate@shadow:$yum_base/SRPMS
-scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64/debug
-# remove to avoid copying debug twice
-rm -f $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm
+if test -n "`ls $build_base/RPMS/x86_64 | grep debuginfo | grep R${rev}`"; then
+    scp $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64/debug
+    # remove to avoid copying debug twice
+    rm -f $build_base/RPMS/x86_64/Mantid-debuginfo-*.*-0.svnR$rev.*.x86_64.rpm
+fi
 scp $build_base/RPMS/x86_64/Mantid-*.*-0.svnR$rev.*.x86_64.rpm isisupdate@shadow:$yum_base/x86_64
 build_src=`ls -t *.tar.gz | head -1`
 scp $build_src isisupdate@shadow:/isis/www/mantidproject_download/CurrentBuild
