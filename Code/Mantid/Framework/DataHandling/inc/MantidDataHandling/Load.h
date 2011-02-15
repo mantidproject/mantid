@@ -74,7 +74,8 @@ namespace Mantid
       /// Set the output workspace(s)
       void setOutputWorkspace(const API::IDataFileChecker_sptr loader);
       /// Retrieve a pointer to the output workspace from the sub algorithm
-      API::Workspace_sptr getOutputWorkspace(const API::IDataFileChecker_sptr loader) const;
+      API::Workspace_sptr getOutputWorkspace(const std::string & propName, 
+					     const API::IDataFileChecker_sptr loader) const;
       
 
     private:

@@ -4,6 +4,7 @@
 #include "MantidDataHandling/Load.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
@@ -302,39 +303,44 @@ namespace Mantid
 
     /**
      * Set the output workspace(s) if the load's return workspace has type API::Workspace
-     * @param load :: Shared pointer to load algorithm
+     * @param loader :: Shared pointer to load algorithm
      */
-    void Load::setOutputWorkspace(const API::IDataFileChecker_sptr load)
+    void Load::setOutputWorkspace(const API::IDataFileChecker_sptr loader)
     {
-      Workspace_sptr childWS = getOutputWorkspace(load);
-      if( WorkspaceGroup_sptr wsGroup = boost::dynamic_pointer_cast<WorkspaceGroup>(childWS) )
+      // Go through each OutputWorkspace property and check whether we need to make a counterpart here
+      const std::vector<Property*> loaderProps = loader->getProperties();
+      const size_t count = loader->propertyCount();
+      for( size_t i = 0; i < count; ++i )
       {
-	std::vector<std::string> names = wsGroup->getNames();
-	const size_t numMembers(names.size());
-	const std::string baseName("OutputWorkspace_");
-	for( size_t i = 0; i < numMembers; ++i )
+	Property *prop = loaderProps[i];
+	if( dynamic_cast<IWorkspaceProperty*>(prop) && prop->direction() == Direction::Output )
 	{
-	  std::ostringstream propName;
-	  propName << baseName << (i+1);
-	  declareProperty(new WorkspaceProperty<Workspace>(propName.str(), load->getPropertyValue(propName.str()),
-							   Direction::Output));
-	  Workspace_sptr memberWS = load->getProperty(propName.str());
-	  setProperty(propName.str(), memberWS);
+	  const std::string & name = prop->name();
+	  if( !this->existsProperty(name) )
+	  {
+	    declareProperty(new WorkspaceProperty<Workspace>(name, loader->getPropertyValue(name),
+							     Direction::Output));
+	  }
+	  Workspace_sptr wkspace = getOutputWorkspace(name, loader);
+	  setProperty(name, wkspace);
 	}
       }
-      setProperty("OutputWorkspace", childWS);
     }
 
     /**
-     * Return the top-level workspace property
+     * Return an output workspace property dealing with the lack of connection between of 
+     * WorkspaceProperty types
+     * @param propName :: The name of the property
+     * @param loader :: The loader algorithm
      * @returns A pointer to the OutputWorkspace property of the sub algorithm
      */
-    API::Workspace_sptr Load::getOutputWorkspace(const API::IDataFileChecker_sptr loader) const
+    API::Workspace_sptr Load::getOutputWorkspace(const std::string & propName,
+						 const API::IDataFileChecker_sptr loader) const
     {
       // @todo Need to try and find a better way using the getValue methods
       try
       {
-	return loader->getProperty("OutputWorkspace");
+	return loader->getProperty(propName);
       }
       catch(std::runtime_error&)
       {
@@ -342,7 +348,7 @@ namespace Mantid
       // Try a MatrixWorkspace
       try
       {
-	MatrixWorkspace_sptr childWS = loader->getProperty("OutputWorkspace");
+	MatrixWorkspace_sptr childWS = loader->getProperty(propName);
 	return childWS;
       }
       catch(std::runtime_error&)
@@ -351,7 +357,7 @@ namespace Mantid
       // EventWorkspace
       try
       {
-	IEventWorkspace_sptr childWS = loader->getProperty("OutputWorkspace");
+	IEventWorkspace_sptr childWS = loader->getProperty(propName);
 	return childWS;
       }
       catch(std::runtime_error&)

@@ -201,7 +201,7 @@ QLabel* AlgorithmDialog::getValidatorMarker(const QString & propname) const
   QLabel *validLbl(NULL);
   if( !m_validators.contains(propname) )
   {
-    validLbl = new QLabel("*", const_cast<AlgorithmDialog*>(this)); 
+    validLbl = new QLabel("*"); 
     QPalette pal = validLbl->palette();
     pal.setColor(QPalette::WindowText, Qt::darkRed);
     validLbl->setPalette(pal);
@@ -253,7 +253,11 @@ bool AlgorithmDialog::setPropertyValues()
     {
       validator->setToolTip(QString::fromStdString(error));
       if( error.empty() ) validator->hide();
-      else validator->show();
+      else 
+      {
+	validator->show();
+	allValid = false;
+      }
     }
   }
   return allValid;
