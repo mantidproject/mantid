@@ -94,6 +94,8 @@ class SNSPowderReduction(PythonAlgorithm):
 #                             Description="Relative time to stop filtering by")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
+        self.declareProperty("BinInDspace", True,
+                             Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
@@ -182,6 +184,8 @@ class SNSPowderReduction(PythonAlgorithm):
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        if len(self._binning) == 3:
+            info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
             if len(self._binning) == 3:
                 binning = self._binning
@@ -237,6 +241,7 @@ class SNSPowderReduction(PythonAlgorithm):
         if len(self._binning) == 3:
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
+        self._bin_in_dspace = self.getProperty("BinInDspace")
         self._instrument = self.getProperty("Instrument")
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
@@ -311,7 +316,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 normalized = False
 
             # write out the files
-            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.005) # 50ns
+            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.005) # 5ns
             self._save(samRun, info, normalized)
             samRun = str(samRun)
             mtd.releaseFreeMemory()
