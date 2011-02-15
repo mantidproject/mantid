@@ -38,7 +38,7 @@ public:
     TS_ASSERT( fftsmooth2_b.isInitialized() );
 
     const std::vector<Property*> props = fftsmooth2_b.getProperties();
-    TS_ASSERT_EQUALS( props.size(), 6 );
+    TS_ASSERT_EQUALS( props.size(), 7 );
 
     TS_ASSERT_EQUALS( props[0]->name(), "InputWorkspace" );
     TS_ASSERT( props[0]->isDefault() );

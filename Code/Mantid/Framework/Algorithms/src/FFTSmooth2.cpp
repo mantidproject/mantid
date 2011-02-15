@@ -78,7 +78,7 @@ void FFTSmooth2::exec()
   }
   // Create output
   API::MatrixWorkspace_sptr outWS = 
-    API::WorkspaceFactory::Instance().create(m_inWS,send-s0+1,m_inWS->readX(0).size(),m_inWS->readY(0).size());
+    API::WorkspaceFactory::Instance().create(m_inWS,send-s0,m_inWS->readX(0).size(),m_inWS->readY(0).size());
 
   // Symmetrize the input spectrum 
   int dn = m_inWS->readY(0).size();
