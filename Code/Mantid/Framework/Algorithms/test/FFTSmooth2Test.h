@@ -159,6 +159,121 @@ public:
 //  std::cout<< "RUNNING FFTSmooth2 testZeroing() DONE!" << std::endl;
   }
   
+
+  //-------------------------------------------------------------------------------------------------
+  void performTest(bool event, std::string filter, std::string params, bool AllSpectra, int WorkspaceIndex, bool inPlace=false)
+  {
+    MatrixWorkspace_sptr ws1, out;
+    int numPixels = 10;
+    int numBins = 20;
+
+    // Make workspaces where Y value == workspace index
+    if (event)
+      ws1 = WorkspaceCreationHelper::CreateEventWorkspace(10, numBins, numBins, 0, 1.0, 4);
+    else
+      ws1 = WorkspaceCreationHelper::Create2DWorkspaceWhereYIsWorkspaceIndex(numPixels, numBins);
+
+    std::string outName = "SmoothedWS";
+
+    Mantid::Algorithms::FFTSmooth2 alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
+
+    if (inPlace)
+    {
+      AnalysisDataService::Instance().addOrReplace("FFTSmooth2WsInput", ws1);
+      TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue( "InputWorkspace", "FFTSmooth2WsInput" ) );
+      outName = "FFTSmooth2WsInput";
+    }
+    else
+    {
+      TS_ASSERT_THROWS_NOTHING( alg.setProperty( "InputWorkspace", ws1 ) );
+    }
+
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue( "OutputWorkspace", outName) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty( "WorkspaceIndex", WorkspaceIndex ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue( "Filter", filter ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue( "Params", params) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty( "AllSpectra", AllSpectra) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute() );
+    TS_ASSERT( alg.isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( out=boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outName)) );
+    TS_ASSERT( out );
+    if (!out) return;
+
+    TS_ASSERT_EQUALS( out->blocksize(), numBins);
+    if (AllSpectra)
+    {  TS_ASSERT_EQUALS( out->getNumberHistograms(), numPixels); }
+    else
+    {  TS_ASSERT_EQUALS( out->getNumberHistograms(), 1); }
+
+    for (int wi=0; wi < out->getNumberHistograms(); wi++)
+      for (int x=0; x<out->blocksize(); x++)
+      {
+        if (AllSpectra)
+        {
+          TS_ASSERT_DELTA( out->readY(wi)[x], wi*1.0, 0.02); // Because the spectra are flat, the smoothing won't do much
+        }
+        else
+        {
+          TS_ASSERT_DELTA( out->readY(wi)[x], WorkspaceIndex*1.0, 0.02); // Because the spectra are flat, the smoothing won't do much
+        }
+      }
+  }
+
+  //-------------------------------------------------------------------------------------------------
+  // Some specific tests
+  void test_Event_Butterworth_AllSpectra()
+  { performTest(true,  "Butterworth", "100,2",  true, 1);  }
+
+  void test_2D_Butterworth_AllSpectra()
+  { performTest(false, "Butterworth", "100,2",  true, 2);  }
+
+  void test_Event_Zeroing_AllSpectra()
+  { performTest(true,  "Zeroing",     "100",    true, 3);  }
+
+  void test_2D_Zeroing_AllSpectra()
+  { performTest(false, "Zeroing",     "100",    true, 4);  }
+
+  void test_Event_Butterworth_SingleSpectrum()
+  { performTest(true,  "Butterworth", "100,2",  false, 4);  }
+
+  void test_Event_Zeroing_SingleSpectrum()
+  { performTest(true,  "Zeroing",     "100",    false, 6);  }
+
+
+  //-------------------------------------------------------------------------------------------------
+  /** Complete test of all possible inputs!
+   * A total of 88 combinations are tested...
+   * */
+  void test_Everything()
+  {
+    for(int event=0; event<2; event++)
+      for(int filterNum=0; filterNum<2; filterNum++)
+        for(int AllSpectra=0; AllSpectra<2; AllSpectra++)
+          for(int inPlace=0; inPlace<2; inPlace++)
+          {
+            std::string filter = "Zeroing";
+            std::string params = "100";
+            if (filterNum==1)
+            { filter = "Butterworth"; params = "100,2"; }
+
+            if (!AllSpectra)
+            {
+              for (int WorkspaceIndex=0; WorkspaceIndex<10; WorkspaceIndex++)
+              {
+                performTest(event, filter, params, AllSpectra, WorkspaceIndex, inPlace);
+              }
+            }
+            else
+            {
+              performTest(event, filter, params, AllSpectra, 0, inPlace);
+            }
+          }
+  }
+
+
 private:
   Mantid::Algorithms::FFTSmooth2 fftsmooth2;
 

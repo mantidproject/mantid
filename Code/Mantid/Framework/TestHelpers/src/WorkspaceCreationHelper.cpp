@@ -62,10 +62,28 @@ namespace WorkspaceCreationHelper
     retVal->setData(y1,e1);
     return retVal;
   }
+
   Workspace2D_sptr Create2DWorkspace(int nhist, int numBoundaries)
   {
     return Create2DWorkspaceBinned(nhist, numBoundaries);
   }
+
+  /** Create a Workspace2D where the Y value at each bin is
+   * == to the workspace index
+   * @param nhist :: # histograms
+   * @param numBoundaries :: # of bins
+   * @return Workspace2D
+   */
+  Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries)
+  {
+    Workspace2D_sptr out = Create2DWorkspaceBinned(nhist, numBoundaries);
+    for (int wi=0; wi < nhist; wi++)
+      for (int x=0; x<numBoundaries; x++)
+        out->dataY(wi)[x] = wi*1.0;
+    return out;
+  }
+
+
 
   Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins,bool isHist,
 					const std::set<int> & maskedWorkspaceIndices)
@@ -334,6 +352,12 @@ namespace WorkspaceCreationHelper
           else if (eventPattern == 3) // solid 1
           {
             retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+          }
+          else if (eventPattern == 4) // Number of events per bin = pixelId (aka workspace index in most cases)
+          {
+            retVal->getEventListAtPixelID(pix);
+            for (int q=0; q<pix;q++)
+              retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
           }
         }
       }

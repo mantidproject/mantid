@@ -69,10 +69,13 @@ void FFTSmooth2::exec()
 {
   m_inWS = getProperty("InputWorkspace");
   IgnoreXBins = getProperty("IgnoreXBins");
+
+  // First spectrum in input
   int s0 = getProperty("WorkspaceIndex");
+  // By default only do one
   int send = s0+1;
   if (getProperty("AllSpectra"))
-  {
+  { //Except if AllSpectra
     s0 = 0;
     send = m_inWS->getNumberHistograms();
   }

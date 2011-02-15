@@ -28,6 +28,7 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceConstant(int size, double value, double error);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins, bool isHist=false, const std::set<int> &
 					       maskedWorkspaceIndices = std::set<int>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int nHist, int nBins, bool isHist=false,
