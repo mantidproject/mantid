@@ -148,8 +148,6 @@ CenterpieceRebinning::exec()
     // find out how many steps is needed to take to make the cut
     unsigned int nSteps = pRebin->getNumDataChunks();
 
-    std::cout << "N Chunks: " << nSteps << std::endl;
-
    /// The progress reporting object
     int occurance = reportOccurance(nSteps);
     std::auto_ptr<API::Progress> pProgress;
