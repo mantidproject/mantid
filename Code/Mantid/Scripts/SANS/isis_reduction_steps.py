@@ -1272,7 +1272,10 @@ class UserFile(ReductionStep):
             self._readMONValues(line, reducer)
         
         elif upper_line.startswith('MASK'):
-            reducer.mask.parse_instruction(upper_line)
+            if len(upper_line[5:].strip().split()) == 4:
+                _issueInfo('Box mask lines are not supported')
+            else:
+                reducer.mask.parse_instruction(upper_line)
         
         elif upper_line.startswith('SET CENTRE'):
             values = upper_line.split()
