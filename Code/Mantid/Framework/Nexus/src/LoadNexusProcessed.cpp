@@ -680,18 +680,22 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
 
   for(int i = 1; i <= nspectra; ++i)
   { 
-
       int spectrum(-1);
       if( have_spectra ) spectrum = spectra[i-1];
       else spectrum = i+1 ;
 
-      if( m_axis1vals.empty() )
+      if ((i >= m_spec_min && i < m_spec_max )||(m_list && find(m_spec_list.begin(), m_spec_list.end(),
+        i) != m_spec_list.end()))
       {
-        axis1->spectraNo(index) = spectrum;
-      }
-      else
-      {
-        axis1->setValue(index, m_axis1vals[i-1]);
+        if( m_axis1vals.empty() )
+        {
+          axis1->spectraNo(index) = spectrum;
+        }
+        else
+        {
+          axis1->setValue(index, m_axis1vals[i-1]);
+        }
+        ++index;
       }
 
       int offset = det_index[i-1];
@@ -700,10 +704,8 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       {
         spectra_list[offset + j] = spectrum;
       }
-   }
-
-
-
+     
+  }
   local_workspace->mutableSpectraMap().populate(spectra_list, det_list.get(), ndets);
   delete[] spectra_list;
 }
