@@ -679,10 +679,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
   int index=0;
 
   for(int i = 1; i <= nspectra; ++i)
-  {
-    if ((i >= m_spec_min && i < m_spec_max )||(m_list && find(m_spec_list.begin(), m_spec_list.end(),
-        i) != m_spec_list.end()))
-    {
+  { 
 
       int spectrum(-1);
       if( have_spectra ) spectrum = spectra[i-1];
@@ -703,9 +700,7 @@ void LoadNexusProcessed::readInstrumentGroup(NXEntry & mtd_entry, API::MatrixWor
       {
         spectra_list[offset + j] = spectrum;
       }
-      ++index;
-    }
-  }
+   }
 
 
 

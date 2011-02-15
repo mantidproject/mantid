@@ -1177,8 +1177,10 @@ namespace MantidQt
       load+="','";
       load+=m_outws_load;
       load+="',";
+      load+="SpectrumMin=";
       load+=specMin;
       load+=",";
+      load+="SpectrumMax=";
       load+=specMax;
       load+=")\n";
       load+="except:\n";
@@ -1186,7 +1188,7 @@ namespace MantidQt
       QString ret= runPythonCode(load.trimmed());
       if(!ret.isEmpty())
       {
-        g_log.error()<<"Error when executing the Load algorithm "<<ret.toStdString()<<std::endl;
+        g_log.error()<<"Error when executing the Load algorithm "<<std::endl;
         return false;
       }
       return true;
