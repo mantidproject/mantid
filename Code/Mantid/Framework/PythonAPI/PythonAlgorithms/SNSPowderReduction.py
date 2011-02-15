@@ -293,7 +293,8 @@ class SNSPowderReduction(PythonAlgorithm):
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
                     StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
-                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth", Params=self._vanSmoothing,IgnoreXBins=True)
+                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
+                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
                     MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
                                                          AttenuationXSection=2.8, ScatteringXSection=5.1,
                                                          SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
