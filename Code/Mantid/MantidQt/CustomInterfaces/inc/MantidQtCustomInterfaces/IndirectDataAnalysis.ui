@@ -297,6 +297,7 @@
                  <property name="fileExtensions" >
                   <stringlist>
                    <string>_red.nxs</string>
+                   <string>_sqw.nxs</string>
                   </stringlist>
                  </property>
                 </widget>
@@ -741,6 +742,7 @@
                <property name="fileExtensions" >
                 <stringlist>
                  <string>_red.nxs</string>
+                 <string>_sqw.nxs</string>
                 </stringlist>
                </property>
               </widget>

@@ -2365,6 +2365,10 @@ void IndirectDataAnalysis::help()
     url += "ConvFit";
   else if ( tabName == "Absorption" )
     url += "Absorption";
+  else if ( tabName == "Abs (F2PY)" )
+    url += "AbsF2P";
+  else if ( tabName == "Apply Corrections" )
+    url += "AbsCor";
   QDesktopServices::openUrl(QUrl(url));
 }
 

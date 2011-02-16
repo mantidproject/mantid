@@ -63,13 +63,27 @@ def concatWSs(workspaces, unit, name):
 
 def confitParsToWS(Table, Data, BackG='FixF'):
     dataX = []
-    ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
-    Transpose('inq', 'inq')
-    readX = mtd['inq'].readX(0)
-    nBins = len(readX)
-    for i in range(0,nBins):
-        dataX.append(readX[i])
-    mtd.deleteWorkspace('inq')
+    if mtd[Data].getAxis(1).isSpectra():
+        ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
+        Transpose('inq', 'inq')
+        readX = mtd['inq'].readX(0)
+        nBins = len(readX)
+        for i in range(0,nBins):
+            dataX.append(readX[i])
+        mtd.deleteWorkspace('inq')
+    else:
+        axis = mtd[Data].getAxis(1)
+        msg = 'ConvFit: '
+        if not axis.isNumeric():
+            msg += 'Input workspace must have either spectra or numeric axis.'
+            print msg
+            sys.exit(msg)
+        if ( axis.getUnit().name() != 'MomentumTransfer' ):
+            msg += 'Input must have axis values of Q'
+            print msg
+            sys.exit(msg)
+        for i in range(0, mtd[Data].getNumberHistograms()):
+            dataX.append(float(axis.label(i)))
     xAxisVals = []
     dataY = []
     dataE = []
@@ -274,21 +288,35 @@ def furyfitCreateXAxis(inputWS):
     result = []
     ws = mtd[inputWS]
     nHist = ws.getNumberHistograms()
-    inst = ws.getInstrument()
-    samplePos = inst.getSample().getPos()
-    beamPos = samplePos - inst.getSource().getPos()
-    for i in range(0,nHist):
-        detector = ws.getDetector(i)
-        try:
-            efixed = detector.getNumberParameter("Efixed")[0]
-        except AttributeError: # Detector Group
-            ids = detector.getDetectorIDs()
-            det = inst.getDetector(ids[0])
-            efixed = det.getNumberParameter("Efixed")[0]
-        theta = detector.getTwoTheta(samplePos, beamPos) / 2
-        lamda = math.sqrt(81.787/efixed)
-        q = 4 * math.pi * math.sin(theta) / lamda
-        result.append(q)
+    if ws.getAxis(1).isSpectra():
+        inst = ws.getInstrument()
+        samplePos = inst.getSample().getPos()
+        beamPos = samplePos - inst.getSource().getPos()
+        for i in range(0,nHist):
+            detector = ws.getDetector(i)
+            try:
+                efixed = detector.getNumberParameter("Efixed")[0]
+            except AttributeError: # Detector Group
+                ids = detector.getDetectorIDs()
+                det = inst.getDetector(ids[0])
+                efixed = det.getNumberParameter("Efixed")[0]
+            theta = detector.getTwoTheta(samplePos, beamPos) / 2
+            lamda = math.sqrt(81.787/efixed)
+            q = 4 * math.pi * math.sin(theta) / lamda
+            result.append(q)
+    else:
+        axis = ws.getAxis(1)
+        msg = 'FuryFit: '
+        if not axis.isNumeric():
+            msg += 'Input workspace must have either spectra or numeric axis.'
+            print msg
+            sys.exit(msg)
+        if ( axis.getUnit().name() != 'MomentumTransfer' ):
+            msg += 'Input must have axis values of Q'
+            print msg
+            sys.exit(msg)
+        for i in range(0, nHist):
+            result.append(float(axis.label(i)))
     return result
 
 def furyfitParsToWS(Table, Data):
