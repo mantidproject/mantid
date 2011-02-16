@@ -16,7 +16,7 @@ public:
 
 };
 
-class testCPcomponents :    public CxxTest::TestSuite
+class testCPComponents :    public CxxTest::TestSuite
 {
        std::auto_ptr<MockMDWorkspace> pOrigin;
  public:

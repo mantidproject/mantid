@@ -5,7 +5,7 @@
 
 
 #include <cxxtest/TestSuite.h>
-class testSQW: public CxxTest::TestSuite
+class test_sqw: public CxxTest::TestSuite
 {
 public:
       void testTMain(void)

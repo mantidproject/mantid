@@ -33,7 +33,7 @@ public:
 	const std::vector<size_t> & getPreselectedCells()const{return preselected_cells;}
 };
 
-class testCPcomponents :    public CxxTest::TestSuite
+class CPR_preselectCellsTest :    public CxxTest::TestSuite
 {
     boost::shared_ptr<MDDataObjects::MDWorkspace> pOrigin;
     boost::shared_ptr<MDDataObjects::MDWorkspace> pTarget;
