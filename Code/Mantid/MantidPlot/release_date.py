@@ -2,6 +2,9 @@ import sys
 import os
 from datetime import date
 
+HEADER='src/MantidPlotReleaseDate.h'
+HEADERPATH=os.path.join(os.path.dirname(__file__), HEADER)
+
 def getSVNRevision():
   put, get = os.popen4("svnversion .")
   line=get.readline()
@@ -33,6 +36,24 @@ def getFileVersion():
     return "0.0"
 #end def
 
+def getMantidPlotVersion():
+  """Get the MantidPlot Version 
+  """
+  try:
+    version_file = open(HEADERPATH, 'r')
+    version = "0.0.0"
+    for line in version_file:
+        if line.startswith('#define MANTIDPLOT_RELEASE_VERSION'):
+            items = line.split('"')
+            if len(items) == 3:
+                version = items[1]
+                break
+    version_file.close()
+    return version.strip()
+  except:
+    return "0.0.0"
+
+
 def main(argv=None):
   if argv is None:
     argv = sys.argv
@@ -44,7 +65,7 @@ def main(argv=None):
     svn = argv[2]
   else:
     svn = getSVNRevision()
-  f = open('src/MantidPlotReleaseDate.h','w')
+  f = open(HEADERPATH,'w')
   f.write('#ifndef MANTIDPLOT_RELEASE_DATE\n')
   f.write('#define MANTIDPLOT_RELEASE_DATE "')
   f.write(date.today().strftime("%d %b %Y"))

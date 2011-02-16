@@ -76,6 +76,7 @@ DEPENDPATH  += ../Framework/Geometry/inc/
 DEPENDPATH  += ../Framework/API/inc/
 DEPENDPATH  += ../MantidQt/MantidWidgets/inc
 DEPENDPATH  += ../MantidQt/API/inc
+DEPENDPATH  += src
 INCLUDEPATH  += ../Framework/Kernel/inc/
 INCLUDEPATH  += ../Framework/Geometry/inc/
 INCLUDEPATH  += ../Framework/API/inc/

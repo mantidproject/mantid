@@ -7,6 +7,10 @@ import md5
 import uuid
 import string
 import platform
+# Use the release_date module in MantidPlot
+import sys
+sys.path.append('../../MantidPlot')
+import release_date
 
 QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
 QTLIBDIR = QTDIR + '/lib'
@@ -16,24 +20,8 @@ PYQTDIR = SIPDIR + '/PyQt4'
 USERALGORITHMSDIR = '../../Framework/UserAlgorithms'
 MANTIDRELEASE = '../../Framework/release/'
 
-vfile = open('build_number.txt','r')
-vstr = vfile.read()
-vlen = len(vstr)
-vfile.close()
-
-def getFileVersion():
-  try:
-    VERSIONFILE = '../../../MantidVersion.txt'
-    f = open(VERSIONFILE,'r')
-    line = f.readline()
-    f.close()
-    return line.rstrip()
-  except:
-    return "0.0"
-#end def
-
-MantidVersion = getFileVersion() + '.' + vstr[12:vlen-2]
-print('Mantid version '+MantidVersion)
+MantidVersion = release_date.getMantidPlotVersion()
+print('Mantid version '+ MantidVersion)
 
 # Architecture
 if platform.architecture()[0] == '64bit':

@@ -1,5 +1,8 @@
 import os
 
+HEADER='Kernel/inc/MantidKernel/MantidVersion.h'
+HEADERPATH=os.path.join(os.path.dirname(__file__), HEADER)
+
 def getSVNRevision():
   try:
     #To remove deprecation warning in later python version
@@ -40,10 +43,9 @@ def getFileVersion():
 
 def writeMantidVersion(verbose=False):
   version = getFileVersion() + '.' +getSVNRevision()
-  HEADER = 'Kernel/inc/MantidKernel/MantidVersion.h'
-
+  
   if verbose:
-    print "Writing version %s into %s " % (version, HEADER)
+    print "Writing version %s into %s " % (version, HEADERPATH)
 
   f = open(HEADER,'w')
 
@@ -54,6 +56,25 @@ def writeMantidVersion(verbose=False):
   f.write('"\n#endif\n')
 
   f.close()
+  
+def getMantidVersion():
+  """Get the Mantid Version from the chosen file or the default
+  """
+  try:
+    version_file = open(HEADERPATH, 'r')
+    version = "0.0"
+    for line in version_file:
+        if line.startswith('#define MANTID_VERSION'):
+            items = line.split('"')
+            if len(items) == 3:
+                version = items[1]
+                break
+    version_file.close()
+    return version.strip()
+  except:
+    return "0.0"
+#end def
+
 
 if __name__ == "__main__":
   writeMantidVersion()
