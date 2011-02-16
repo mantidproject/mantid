@@ -137,7 +137,8 @@ class SNSPowderReduction(PythonAlgorithm):
         return wksp
 
     def _loadNeXusData(self, runnumber, extension):
-        filename = "%s_%d%s" % (self._instrument, runnumber, extension)
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
         try: # first just try loading the file
             # TODO use timemin and timemax to filter what events are being read
             alg = LoadEventNexus(Filename=filename, OutputWorkspace=name)
