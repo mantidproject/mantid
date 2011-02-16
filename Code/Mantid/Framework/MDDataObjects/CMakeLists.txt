@@ -38,7 +38,7 @@ set (TEST_FILES
 test/HoraceReaderTest.h
 test/MD_FileFactoryTest.h
 test/MDDataPointDescriptionTest.h
-test/MDFIleTestDataGeneratorTest.h
+test/MDFileTestDataGeneratorTest.h
 test/MDDPoints_MemManagerTest.h
 )
 
