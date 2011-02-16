@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Wed Feb 16 13:38:38 2011
+# Created: Wed Feb 16 13:43:14 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -246,7 +246,6 @@ class Ui_Frame(object):
         self.transmission_edit.setSizePolicy(sizePolicy)
         self.transmission_edit.setMinimumSize(QtCore.QSize(80, 0))
         self.transmission_edit.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.transmission_edit.setToolTip("")
         self.transmission_edit.setObjectName("transmission_edit")
         self.horizontalLayout_3.addWidget(self.transmission_edit)
         self.plus_minus_label = QtGui.QLabel(self.reduction_options_groupbox)
@@ -260,7 +259,6 @@ class Ui_Frame(object):
         self.transmission_error_edit.setSizePolicy(sizePolicy)
         self.transmission_error_edit.setMinimumSize(QtCore.QSize(80, 0))
         self.transmission_error_edit.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.transmission_error_edit.setToolTip("")
         self.transmission_error_edit.setObjectName("transmission_error_edit")
         self.horizontalLayout_3.addWidget(self.transmission_error_edit)
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -281,7 +279,6 @@ class Ui_Frame(object):
         self.sample_dist_edit.setSizePolicy(sizePolicy)
         self.sample_dist_edit.setMinimumSize(QtCore.QSize(80, 0))
         self.sample_dist_edit.setMaximumSize(QtCore.QSize(80, 16777215))
-        self.sample_dist_edit.setToolTip("")
         self.sample_dist_edit.setObjectName("sample_dist_edit")
         self.gridLayout.addWidget(self.sample_dist_edit, 8, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
@@ -311,6 +308,7 @@ class Ui_Frame(object):
         self.n_sub_pix_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the number of sub-pixels in each direction of a detector pixel to use for the\n"
 "radial averaging. For instance, entering 3 will sub-divide each detector pixel by 3\n"
 "in each direction and will create 9 sub-pixels.", None, QtGui.QApplication.UnicodeUTF8))
+        self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Check to get log binning of I(q).", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setText(QtGui.QApplication.translate("Frame", "Perform solid angle correction", None, QtGui.QApplication.UnicodeUTF8))
@@ -326,8 +324,11 @@ class Ui_Frame(object):
         self.max_sensitivity_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the maximum allowed relative sensitivity for any given pixel.", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to calculate transmission and apply transmission correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_chk.setText(QtGui.QApplication.translate("Frame", "Calculate transmission", None, QtGui.QApplication.UnicodeUTF8))
+        self.transmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter transmission value.", None, QtGui.QApplication.UnicodeUTF8))
         self.plus_minus_label.setText(QtGui.QApplication.translate("Frame", "+/-", None, QtGui.QApplication.UnicodeUTF8))
-        self.frame_skipping_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a detector sensitivity correction.", None, QtGui.QApplication.UnicodeUTF8))
+        self.transmission_error_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter error on transmission.", None, QtGui.QApplication.UnicodeUTF8))
+        self.frame_skipping_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to assume frame-skipping during reduction.", None, QtGui.QApplication.UnicodeUTF8))
         self.frame_skipping_chk.setText(QtGui.QApplication.translate("Frame", "Frame skipping", None, QtGui.QApplication.UnicodeUTF8))
         self.sampleDetectorDistanceMmLabel.setText(QtGui.QApplication.translate("Frame", "Sample-detector distance [mm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_dist_edit.setToolTip(QtGui.QApplication.translate("Frame", "Sample-detector distance [mm].", None, QtGui.QApplication.UnicodeUTF8))
 
