@@ -125,6 +125,10 @@ QString MWDiag::getSetting(const QString & settingName, IInstrument_sptr instrum
   {
     value = QString();
   }
+  // Convert strings of true/false to 1/0
+  if( value.trimmed().toLower()  == "true" ) value = "1";
+  else if( value.trimmed().toLower() == "false" ) value = "0";
+
   return value;
 }
 

@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawBin0.h"
-#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidAPI/MemoryManager.h"

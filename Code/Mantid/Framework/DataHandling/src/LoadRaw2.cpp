@@ -145,7 +145,8 @@ namespace Mantid
       }
 
       // If there is not enough memory use ManagedRawFileWorkspace2D.
-      if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) &&
+      if ( ConfigService::Instance().getString("ManagedRawFileWorkspace.DoNotUse") != "1" &&
+           m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(total_specs,lengthIn,channelsPerSpectrum) &&
           total_specs == m_numberOfSpectra)
       {
         const std::string cache_option = getPropertyValue("Cache");

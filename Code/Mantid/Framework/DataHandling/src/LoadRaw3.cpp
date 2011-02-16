@@ -112,8 +112,9 @@ void LoadRaw3::exec()
    m_total_specs = calculateWorkspaceSize();
 
   // If there is not enough memory use ManagedRawFileWorkspace2D.
-  if (m_numberOfPeriods == 1 && MemoryManager::Instance().goForManagedWorkspace(m_total_specs,m_lengthIn,
-      m_lengthIn-1) && m_total_specs == m_numberOfSpectra)
+  if ( ConfigService::Instance().getString("ManagedRawFileWorkspace.DoNotUse") != "1" &&
+       m_numberOfPeriods == 1 && m_total_specs == m_numberOfSpectra &&
+       MemoryManager::Instance().goForManagedWorkspace(m_total_specs,m_lengthIn, m_lengthIn-1) )
   {
     fclose(file);
     goManagedRaw(bincludeMonitors, bexcludeMonitors, bseparateMonitors,m_filename);

@@ -2,7 +2,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataHandling/LoadRawHelper.h"
-#include "MantidDataHandling/ManagedRawFileWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"

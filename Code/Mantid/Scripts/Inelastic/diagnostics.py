@@ -70,6 +70,12 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     # Map the test number to the results
     # Each element is the mask workspace name then the number of failures
     test_results = [ [None, None], [None, None], [None, None], [None, None]]
+
+    ##
+    ## Accumulate the masking on this workspace
+    ##
+    diag_total_mask = 'diag_total_mask'
+
     ##
     ## White beam Test
     ##
@@ -85,6 +91,7 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         _white_masks, num_failed = \
                       _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
         test_results[0] = [str(_white_masks), num_failed]
+        diag_total_mask = CloneWorkspace(_white_masks, diag_total_mask).workspace()
     else:
         raise RuntimeError('Invalid input for white run "%s"' % str(white_run))
 
@@ -103,7 +110,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
                                                    tiny, large, median_lo, median_hi,
                                                    signif,variation)
         test_results[1] = [str(_second_white_masks), num_failed]
-
+        # Accumulate
+        diag_total_mask += _second_white_masks
     ##
     ## Background Test
     ##
@@ -114,6 +122,8 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
                                          bkgd_range, bkgd_threshold, remove_zero, signif,
                                          hard_mask_spectra)
         test_results[2] = [str(_bkgd_masks), num_failed]
+        # Accumulate
+        diag_total_mask += _bkgd_masks
 
     ##
     ## PSD Bleed Test
@@ -121,21 +131,12 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     if type(bleed_test) == bool and bleed_test == True:
         _bleed_masks, num_failed = _do_bleed_test(sample_run, bleed_maxrate, bleed_pixels)
         test_results[3] = [str(_bleed_masks), num_failed]
-
-    ##
-    ## Accumulate the masking
-    ##
-    diag_total_mask = _white_masks + _bkgd_masks
-    # If we did the second white beam, add that too
-    if test_results[1][0] is not None:
-        diag_total_mask += _second_white_masks
-    # And the PSD bleed
-    if test_results[3][0] is not None:
         diag_total_mask += _bleed_masks
 
     # Remove temporary workspaces
     mtd.deleteWorkspace(str(white_counts))
-    mtd.deleteWorkspace(str(second_white_counts))
+    if second_white_counts is not None:
+        mtd.deleteWorkspace(str(second_white_counts))
     
     # Revert our default instrument changes if necessary
     if inst_name != def_inst:
