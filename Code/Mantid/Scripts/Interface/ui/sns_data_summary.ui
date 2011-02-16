@@ -584,7 +584,7 @@ in each direction and will create 9 sub-pixels.</string>
         <item row="6" column="0">
          <widget class="QCheckBox" name="transmission_chk">
           <property name="toolTip">
-           <string>Select to perform a detector sensitivity correction.</string>
+           <string>Select to calculate transmission and apply transmission correction.</string>
           </property>
           <property name="text">
            <string>Calculate transmission</string>

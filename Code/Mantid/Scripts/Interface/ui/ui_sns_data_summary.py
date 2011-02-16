@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Fri Feb 11 13:18:02 2011
+# Created: Wed Feb 16 13:38:38 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -324,7 +324,7 @@ class Ui_Frame(object):
         self.min_sensitivity_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the minimum allowed relative sensitivity for any given pixel.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_max_label.setText(QtGui.QApplication.translate("Frame", "Max", None, QtGui.QApplication.UnicodeUTF8))
         self.max_sensitivity_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the maximum allowed relative sensitivity for any given pixel.", None, QtGui.QApplication.UnicodeUTF8))
-        self.transmission_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a detector sensitivity correction.", None, QtGui.QApplication.UnicodeUTF8))
+        self.transmission_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to calculate transmission and apply transmission correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_chk.setText(QtGui.QApplication.translate("Frame", "Calculate transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.plus_minus_label.setText(QtGui.QApplication.translate("Frame", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.frame_skipping_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a detector sensitivity correction.", None, QtGui.QApplication.UnicodeUTF8))
