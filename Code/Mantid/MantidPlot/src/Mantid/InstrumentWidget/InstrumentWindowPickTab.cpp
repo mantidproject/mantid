@@ -13,6 +13,7 @@
 #include <QTextEdit>
 #include <QMenu>
 #include <QAction>
+#include <QLabel>
 
 #include <numeric>
 #include <cfloat>
@@ -48,6 +49,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_infoPanel = panelStack->addPanel("Selection",m_selectionInfoDisplay);
   m_plotPanel = panelStack->addPanel("Name",m_plot);
 
+  m_activeTool = new QLabel(this);
   // set up the tool bar
   m_one = new QPushButton();
   m_one->setCheckable(true);
@@ -78,6 +80,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   setSelectionType();
 
   // lay out the widgets
+  layout->addWidget(m_activeTool);
   layout->addLayout(toolBox);
   layout->addWidget(panelStack);
 
@@ -298,14 +301,17 @@ void InstrumentWindowPickTab::setSelectionType()
   if (m_one->isChecked())
   {
     m_selectionType = Single;
+    m_activeTool->setText("Tool: Pixel selection");
   }
   else if (m_box->isChecked())
   {
     m_selectionType = BoxType;
+    m_activeTool->setText("Tool: Box selection");
   }
   else if (m_tube->isChecked())
   {
     m_selectionType = Tube;
+    m_activeTool->setText("Tool: Tube/bank selection");
   }
   setPlotCaption();
   mInstrumentDisplay->setSelectionType(m_selectionType);

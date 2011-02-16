@@ -15,6 +15,7 @@ class QPushButton;
 class QTextEdit;
 class QComboBox;
 class QCheckBox;
+class QLabel;
 
 /**
   * Implements the Pick tab in InstrumentWindow
@@ -43,6 +44,7 @@ private:
   Instrument3DWidget *mInstrumentDisplay;
   /* Pick tab controls */
   OneCurvePlot* m_plot;
+  QLabel *m_activeTool; ///< Displays a tip on which tool is currently selected
   QPushButton *m_one; ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
   QPushButton *m_box; ///< Button switching on box selection mode
