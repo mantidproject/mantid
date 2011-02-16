@@ -110,7 +110,7 @@ class SANSInstrumentWidget(BaseWidget):
 
     def _data_browse(self):
         fname = self.data_browse_dialog(multi=True)
-        if len(fname)>0:
+        if fname and len(fname)>0:
             self._summary.data_file_edit.setText('; '.join(fname))   
             self.get_data_info()
             
