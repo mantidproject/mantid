@@ -94,10 +94,14 @@ public:
   // Test is taken from LoadRawTest
   void testLoadRaw2()
   {
+    // Make sure we go managed
     ConfigServiceImpl& conf = ConfigService::Instance();
     const std::string managed = "ManagedWorkspace.LowerMemoryLimit";
     const std::string oldValue = conf.getString(managed);
     conf.setString(managed,"0");
+    const std::string managed2 = "ManagedRawFileWorkspace.DoNotUse";
+    const std::string oldValue2 = conf.getString(managed2);
+    conf.setString(managed2,"0");
 
     LoadRaw2 loader;
     if ( !loader.isInitialized() ) loader.initialize();
@@ -199,6 +203,7 @@ public:
     
     AnalysisDataService::Instance().remove(outputSpace);
     conf.setString(managed,oldValue);
+    conf.setString(managed2,oldValue2);
   }
 
 private:
