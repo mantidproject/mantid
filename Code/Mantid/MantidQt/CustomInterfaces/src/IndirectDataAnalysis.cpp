@@ -2413,10 +2413,6 @@ void IndirectDataAnalysis::absf2pRun()
 
   QString width = m_uiForm.absp_lewidth->text();
 
-  QString ncan = "ncan = ";
-  if ( m_uiForm.absp_ckUseCan->isChecked() ) { ncan += "2\n"; }
-  else { ncan += "1\n"; }
-
   if ( m_uiForm.absp_cbInputType->currentText() == "File" )
   {
     QString input = m_uiForm.absp_inputFile->getFirstFilename();
@@ -2433,19 +2429,31 @@ void IndirectDataAnalysis::absf2pRun()
   {
     pyInput += "inputws = '" + m_uiForm.absp_cbWorkspace->currentText() + "'\n";
   }
+  
+  if ( m_uiForm.absp_ckUseCan->isChecked() )
+  {
+    pyInput +=
+      "ncan = 2\n"
+      "density = [" + m_uiForm.absp_lesamden->text() + ", " + m_uiForm.absp_lecanden->text() + ", " + m_uiForm.absp_lecanden->text() + "]\n"
+      "sigs = [" + m_uiForm.absp_lesamsigs->text() + "," + m_uiForm.absp_lecansigs->text() + "," + m_uiForm.absp_lecansigs->text() + "]\n"
+      "siga = [" + m_uiForm.absp_lesamsiga->text() + "," + m_uiForm.absp_lecansiga->text() + "," + m_uiForm.absp_lecansiga->text() + "]\n";
+  }
+  else
+  {
+    pyInput +=
+      "ncan = 1\n"
+      "density = [" + m_uiForm.absp_lesamden->text() + ", 0.0, 0.0 ]\n"
+      "sigs = [" + m_uiForm.absp_lesamsigs->text() + ", 0.0, 0.0]\n"
+      "siga = [" + m_uiForm.absp_lesamsiga->text() + ", 0.0, 0.0]\n";
+  }
 
   pyInput +=
     "geom = '" + geom + "'\n"
     "beam = [3.0, 0.5*" + width + ", -0.5*" + width + ", 2.0, -2.0, 0.0, 3.0, 0.0, 3.0]\n"
-    "ncan = " + ncan + "\n"
     "size = " + size + "\n"
-    "density = [" + m_uiForm.absp_lesamden->text() + ", " + m_uiForm.absp_lecanden->text() + ", " + m_uiForm.absp_lecanden->text() + "]\n"
-    "sigs = [" + m_uiForm.absp_lesamsigs->text() + "," + m_uiForm.absp_lecansigs->text() + "," + m_uiForm.absp_lecansigs->text() + "]\n"
-    "siga = [" + m_uiForm.absp_lesamsiga->text() + "," + m_uiForm.absp_lecansiga->text() + "," + m_uiForm.absp_lecansiga->text() + "]\n"
     "avar = " + m_uiForm.absp_leavar->text() + "\n"
     "plotOpt = '" + m_uiForm.absp_cbPlotOutput->currentText() + "'\n"
     "SpencerAbsCor.AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar, plotOpt=plotOpt)\n";
-
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
