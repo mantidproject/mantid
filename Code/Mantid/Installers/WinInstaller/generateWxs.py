@@ -455,8 +455,8 @@ addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + 'MantidW
 # Add Qt Property Browser
 addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 'QtPropertyBrowser.dll',MantidDlls)
 
-# addDlls('../Mantid/Build/Plugins','PnDll',MantidDlls)
-addDlls('../../../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd421m.dll','hdf5dll.dll','hm421m.dll','libNeXus-0.dll'])
+# NeXus dlls for the main path
+addDlls('../../../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
 
 #------------- Environment settings ---------------------- 
 addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHON25DIR]'})
@@ -522,14 +522,9 @@ addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + '
 addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + 'MantidCurveFitting.dll',Plugins)
 addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + 'MantidICat.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + 'MantidNexus.dll',Plugins)
-addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../../../Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
 
-#Add hdf4 for 32bit systems
-if ARCH == '32':
-    addFileV('hd421mdll','hd421m.dll','hd421m.dll','../../../Third_Party/lib/win32/hd421m.dll',Plugins)
-    addFileV('hm421mdll','hm421m.dll','hm421m.dll','../../../Third_Party/lib/win32/hm421m.dll',Plugins)
-    
-addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../../../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
+# NeXus dlls for the plugins path
+addDlls('../../../Third_Party/lib/win' + ARCH,'NXSPlug',Plugins,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
 
 # Python algorithms
 pyalgsList = addCompList("PyAlgsDir","../../Framework/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
