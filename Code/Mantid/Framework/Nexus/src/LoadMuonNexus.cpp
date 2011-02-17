@@ -663,15 +663,15 @@ namespace Mantid
       int confidence(0);
       try
       {
-	::NeXus::File file = ::NeXus::File(filePath);
-	file.openPath("/run/analysis");
-	std::string analysisType = file.getStrData();
-	if( analysisType == "muonTD" )
-	{
-	  // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
-	  confidence = 80;
-	}
-	file.close();
+        ::NeXus::File file = ::NeXus::File(filePath);
+        file.openPath("/run/analysis");
+        std::string analysisType = file.getStrData();
+        if( analysisType == "muonTD" )
+        {
+          // If all this succeeded then we'll assume this is an ISIS Muon NeXus file
+          confidence = 80;
+        }
+        file.close();
       }
       catch(::NeXus::Exception&)
       {

@@ -355,26 +355,37 @@ namespace Mantid
     int LoadMuonNexus2::fileCheck(const std::string& filePath)
     {   
       int confidence(0);
+      std::string analysisType;
       try
       {
-	::NeXus::File file = ::NeXus::File(filePath);
-	file.openPath("/run/analysis");
-	std::string analysisType = file.getStrData();
-	if( analysisType == "pulsedTD" )
-	{
-	  confidence = 80;
-	}
-	else if( analysisType == "muonTD" )
-	{
-	  confidence = 50;
-	}
-	else confidence = 0;
-	file.close();
+        ::NeXus::File file = ::NeXus::File(filePath);
+        // Will throw if this doesn't exist
+        file.openPath("/run/analysis");
+        analysisType = file.getStrData();
       }
       catch(::NeXus::Exception&)
       {
-	confidence = 0;
+        try
+        {
+          ::NeXus::File file = ::NeXus::File(filePath);
+          file.openPath("/run/definition");
+          analysisType = file.getStrData();
+        }
+        catch(::NeXus::Exception&)
+        {
+          analysisType = "";
+        }
       }
+      if( analysisType == "pulsedTD" )
+      {
+        confidence = 80;
+      }
+      else if( analysisType == "muonTD" )
+      {
+        confidence = 50;
+      }
+      else confidence = 0;
+
       return confidence;
     }
 

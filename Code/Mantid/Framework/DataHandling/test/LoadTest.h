@@ -17,6 +17,7 @@ class LoadTest : public CxxTest::TestSuite
 {
 public:
 
+
   void testViaProxy()
   {
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
@@ -86,8 +87,7 @@ public:
   {
     Load loader;
     loader.initialize();
-//    const char * loadraw_props[5] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
-    const char * loadraw_props[2] = {"Cache", "LoadLogFiles"};
+    const char * loadraw_props[5] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
     const size_t numProps = (size_t)(sizeof(loadraw_props)/sizeof(const char*));
     // Basic load has no additional loader properties
     for( size_t i = 0; i < numProps ; ++i )
@@ -187,6 +187,17 @@ public:
     TS_ASSERT(ws);
     AnalysisDataService::Instance().remove("LoadTest_Output");
     #endif
+  }
+
+  void test_ARGUS_NXS()
+  {
+#ifndef _WIN64
+    Load loader;
+    loader.initialize();
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","argus0026287.nxs"));
+
+    TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadMuonNexus");
+#endif
   }
 
   void xtestHDF4NexusGroup()

@@ -325,7 +325,6 @@ int LoadCanSAS1D::fileCheck(const std::string& filePath)
   } 
   catch (...)
   {
-    pDoc->release();
     throw Kernel::Exception::FileError("Unable to parse File:", filePath);
   }
   int confidence(0);
