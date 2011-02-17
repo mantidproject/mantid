@@ -24,6 +24,7 @@ void EQSANSTofStructure::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
+  wsValidator->add(new EventWorkspaceValidator<>(false));
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the TOF correction to");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
