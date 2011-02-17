@@ -77,6 +77,8 @@ namespace Mantid
 
       getTimeChannels();
       getAxis(0)->unit() = Kernel::UnitFactory::Instance().create("TOF");
+      setYUnit("Counts");
+      setTitle(std::string(isisRaw->r_title, 80));
     }
 
     /// Constructs the time channel (X) vector(s)
@@ -285,7 +287,7 @@ namespace Mantid
 		return false;
 	}
 
-    void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite)
+    void ManagedRawFileWorkspace2D::writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite) const
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
       ManagedWorkspace2D::writeDataBlock(toWrite);

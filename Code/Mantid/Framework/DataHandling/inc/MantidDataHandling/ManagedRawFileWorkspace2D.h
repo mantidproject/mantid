@@ -67,7 +67,7 @@ protected:
   /// Reads in a data block.
   virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const;
   /// Saves the dropped data block to disk.
-  virtual void writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite);
+  virtual void writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite) const;
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -95,7 +95,7 @@ private:
   // For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
   // of false if it must be read from the RAW file.
   // The block's index = startIndex / m_vectorsPerBlock.
-  std::vector<bool> m_changedBlock;  ///< Flags for modified blocks. Modified blocks are accessed through ManagedWorkspace2D interface
+  mutable std::vector<bool> m_changedBlock;  ///< Flags for modified blocks. Modified blocks are accessed through ManagedWorkspace2D interface
   static int g_uniqueID;             ///< Counter used to create unique file names
   std::string m_tempfile;            ///< The temporary file name
 
