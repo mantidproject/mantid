@@ -522,13 +522,14 @@ addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + '
 addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + 'MantidCurveFitting.dll',Plugins)
 addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + 'MantidICat.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + 'MantidNexus.dll',Plugins)
-
 # NeXus dlls for the plugins path
-addDlls('../../../Third_Party/lib/win' + ARCH,'NXSPlug',Plugins,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
+addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../../../Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
+addFileV('hd425mdll','hd425m.dll','hd425m.dll','../../../Third_Party/lib/win' + ARCH + '/hd425m.dll',Plugins)
+addFileV('hm425mdll','hm425m.dll','hm425m.dll','../../../Third_Party/lib/win'+ ARCH +'/hm425m.dll',Plugins)
+addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../../../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
 pyalgsList = addCompList("PyAlgsDir","../../Framework/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
-
 
 ##
 # Qt plugins
