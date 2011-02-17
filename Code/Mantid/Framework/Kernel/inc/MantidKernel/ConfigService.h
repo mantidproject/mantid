@@ -200,7 +200,7 @@ namespace Mantid
       /// Create the storage of the user search directories
       void cacheUserSearchPaths();
       /// Returns true if the path is in the data search list
-      bool isADataSearchDir(const std::string & path) const;
+      bool isInDataSearchList(const std::string & path) const;
 
       // Forward declaration of inner class
       template <class T>

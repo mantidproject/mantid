@@ -185,15 +185,16 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
     names[i] = SimplePythonAPI::removeCharacters(properties[i]->name(), "");
   }
 
-  // write the actual properties
+  buffer << "Property descriptions: " << EOL << EOL;
+  // write the actual propertie descriptions
   Mantid::Kernel::Property *prop;
   for ( size_t i = 0; i < numProps; ++i) {
     prop = properties[i];
-    buffer << "  " << names[i] << "("
+    buffer << names[i] << "("
            << Mantid::Kernel::Direction::asText(prop->direction());
     if (!prop->isValid().empty())
       buffer << ":req";
-    buffer << ") *" << prop->type() << "* "<< "\n";
+    buffer << ") *" << prop->type() << "* "<< EOL;
     std::set<std::string> allowed = prop->allowedValues();
     if (!prop->documentation().empty() || !allowed.empty())
     {
@@ -211,7 +212,8 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
         }
         buffer << "]";
       }
-//      buffer << EOL; // TODO REMOVE
+      buffer << EOL;
+      if( i < numProps - 1 ) buffer << EOL;
     }
   }
 

@@ -24,6 +24,8 @@
 #include <Poco/Notification.h>
 #include <Poco/Environment.h>
 
+#include <boost/algorithm/string/replace.hpp>
+
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -336,7 +338,6 @@ void ConfigServiceImpl::convertRelativeToAbsolute()
 std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::string & key) const
 {
   std::string converted;
-  const std::string propFileDir(getPropertiesDir());
   // If we have a list, chop it up and convert each one
   if (dir.find_first_of(";,") != std::string::npos)
   {
@@ -379,6 +380,7 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   }
   if (is_relative)
   {
+    const std::string propFileDir(getPropertiesDir());
     converted = Poco::Path(propFileDir).resolve(dir).toString();
   }
   else
@@ -400,6 +402,10 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
         << "\" variable does not exist.\n";
     converted = "";
   }
+  // Backward slashes cannot be allowed to go into our properties file
+  // Note this is a temporary fix for ticket #2445. 
+  // Ticket #2460 prompts a review of our path handling in the config service.
+  boost::replace_all(converted,"\\","/");
   return converted;
 }
 
@@ -451,17 +457,11 @@ void ConfigServiceImpl::cacheUserSearchPaths()
  *  @param path :: the absolute path name to search for
  *  @return true if the path was found
  */
-bool ConfigServiceImpl::isADataSearchDir(const std::string & path) const
+bool ConfigServiceImpl::isInDataSearchList(const std::string & path) const
 {
-  std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
-  for( ; it != m_DataSearchDirs.end(); ++it)
-  {
-    if ( path == *it )
-    {
-      return true;
-    }
-  }
-  return false;
+  std::vector<std::string>::const_iterator it = 
+    std::find_if(m_DataSearchDirs.begin(), m_DataSearchDirs.end(), std::bind2nd(std::equal_to<std::string>(),path));
+  return (it != m_DataSearchDirs.end());
 }
 
 /**
@@ -471,7 +471,7 @@ bool ConfigServiceImpl::isADataSearchDir(const std::string & path) const
  */
 void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
 {
-  if ( ! isADataSearchDir(path) )
+  if ( ! isInDataSearchList(path) )
   {
     std::string newSearchString;
     std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
@@ -877,7 +877,7 @@ std::string ConfigServiceImpl::getPropertiesDir() const
  */
 std::string ConfigServiceImpl::getUserPropertiesDir() const
 {
-#ifdef _WIN32 
+#ifdef _WIN32
   return m_strBaseDir;
 #else
   Poco::Path datadir(m_pSysConfig->getString("system.homeDir"));
