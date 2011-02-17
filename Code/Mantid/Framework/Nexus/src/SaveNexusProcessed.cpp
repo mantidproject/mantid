@@ -33,9 +33,7 @@ namespace NeXus
 
 
   /// Empty default constructor
-  SaveNexusProcessed::SaveNexusProcessed() :
-  Algorithm(),
-  m_spec_list(), m_spec_max(Mantid::EMPTY_INT())
+  SaveNexusProcessed::SaveNexusProcessed() : Algorithm()
   {
   }
 
@@ -106,11 +104,12 @@ namespace NeXus
       }
     }
 
-    m_spec_list = getProperty("WorkspaceIndexList");
-    m_spec_max = getProperty("WorkspaceIndexMax");
-    m_list = !m_spec_list.empty();
-    m_interval = (m_spec_max != Mantid::EMPTY_INT());
-    if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
+    std::vector<int> spec_list = getProperty("WorkspaceIndexList");
+    int spec_min = getProperty("WorkspaceIndexMin");
+    int spec_max = getProperty("WorkspaceIndexMax");
+    const bool list = !spec_list.empty();
+    const bool interval = (spec_max != Mantid::EMPTY_INT());
+    if ( spec_max == Mantid::EMPTY_INT() ) spec_max = 0;
 
     const std::string workspaceID = m_inputWorkspace->id();
     if ((workspaceID.find("Workspace2D") == std::string::npos) &&
@@ -170,50 +169,49 @@ namespace NeXus
 
 
     const int numberOfHist = m_inputWorkspace->getNumberHistograms();
+    std::vector<int> spec;
     // check if all X() are in fact the same array
-    uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
-    if( m_interval )
+    const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
+    if( interval )
     {
-      m_spec_min = getProperty("WorkspaceIndexMin");
-      m_spec_max = getProperty("WorkspaceIndexMax");
-      if ( m_spec_max < m_spec_min || m_spec_max > numberOfHist-1 )
+      if ( spec_max < spec_min || spec_max > numberOfHist-1 )
       {
         g_log.error("Invalid WorkspaceIndex min/max properties");
         throw std::invalid_argument("Inconsistent properties defined");
       }
-      spec.reserve(1+m_spec_max-m_spec_min);
-      for(int i=m_spec_min;i<=m_spec_max;i++)
+      spec.reserve(1+spec_max-spec_min);
+      for(int i=spec_min;i<=spec_max;i++)
         spec.push_back(i);
-      if (m_list)
+      if (list)
       {
-        for(size_t i=0;i<m_spec_list.size();i++)
+        for(size_t i=0;i<spec_list.size();i++)
         {
-          int s = m_spec_list[i];
+          int s = spec_list[i];
           if ( s < 0 ) continue;
-          if (s < m_spec_min || s > m_spec_max)
+          if (s < spec_min || s > spec_max)
             spec.push_back(s);
         }
       }
     }
-    else if (m_list)
+    else if (list)
     {
-      m_spec_max=0;
-      m_spec_min=numberOfHist-1;
-      for(size_t i=0;i<m_spec_list.size();i++)
+      spec_max=0;
+      spec_min=numberOfHist-1;
+      for(size_t i=0;i<spec_list.size();i++)
       {
-        int s = m_spec_list[i];
+        int s = spec_list[i];
         if ( s < 0 ) continue;
         spec.push_back(s);
-        if (s > m_spec_max) m_spec_max = s;
-        if (s < m_spec_min) m_spec_min = s;
+        if (s > spec_max) spec_max = s;
+        if (s < spec_min) spec_min = s;
       }
     }
     else
     {
-      m_spec_min=0;
-      m_spec_max=numberOfHist-1;
-      spec.reserve(1+m_spec_max-m_spec_min);
-      for(int i=m_spec_min;i<=m_spec_max;i++)
+      spec_min=0;
+      spec_max=numberOfHist-1;
+      spec.reserve(1+spec_max-spec_min);
+      for(int i=spec_min;i<=spec_max;i++)
         spec.push_back(i);
     }
 
@@ -221,7 +219,7 @@ namespace NeXus
     if (m_eventWorkspace)
     {
       //nexusFile->writeNexusProcessedDataEvent(m_eventWorkspace);
-      this->execEvent(nexusFile);
+      this->execEvent(nexusFile,uniformSpectra,spec);
       //g_log.warning() << "Saving EventWorkspace " << m_eventWorkspace->getName() << " as a histogram.\n";
     }
     else
@@ -285,7 +283,7 @@ namespace NeXus
   /** Execute the saving of event data.
    * This will make one long event list for all events contained.
    * */
-  void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile)
+  void SaveNexusProcessed::execEvent(NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec)
   {
     prog = new Progress(this, 0.3, 1.0, m_eventWorkspace->getNumberEvents()*2);
 

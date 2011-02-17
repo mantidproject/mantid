@@ -28,7 +28,7 @@ namespace Mantid
     <LI> Title - the title to describe the saved processed data
     </UL>
 
-    Copyright &copy; 2007-8 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2007-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -71,7 +71,7 @@ namespace Mantid
       template<class T>
       static void appendEventListData( std::vector<T> events, size_t offset, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes);
 
-      void execEvent(NexusFileIO * nexusFile);
+      void execEvent(NexusFileIO * nexusFile,const bool uniformSpectra,const std::vector<int> spec);
 	    /// sets non workspace properties for the algorithm
       void setOtherProperties(IAlgorithm* alg,const std::string & propertyName,const std::string &propertyValue,int perioidNum);
 
@@ -85,19 +85,6 @@ namespace Mantid
       API::MatrixWorkspace_const_sptr m_inputWorkspace;
       /// Pointer to the local workspace, cast to EventWorkspace
       DataObjects::EventWorkspace_const_sptr m_eventWorkspace;
-      /// Flag set if list of spectra to save is specifed
-      bool m_list;
-      /// Flag set if interval of spectra to write is set
-      bool m_interval;
-      /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
-      /// The value of the spectrum_min property
-      int m_spec_min;
-      /// The value of the spectrum_max property
-      int m_spec_max;
-
-      bool uniformSpectra;
-      std::vector<int> spec;
 
       /// Progress bar
       API::Progress * prog;
