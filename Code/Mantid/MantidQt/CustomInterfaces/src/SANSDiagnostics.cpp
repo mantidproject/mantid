@@ -64,7 +64,7 @@ namespace MantidQt
       //2nd detector
       connect(m_SANSForm->hi_Btn2,SIGNAL(clicked()),this,SLOT(secondDetectorHorizontalIntegralClicked()));
       connect(m_SANSForm->vi_Btn2,SIGNAL(clicked()),this,SLOT(secondDetectorVerticalIntegralClicked()));
-      connect(m_SANSForm->ti_Btn2,SIGNAL(clicked()),this,SLOT(secondDetectorVerticalIntegralClicked()));
+      connect(m_SANSForm->ti_Btn2,SIGNAL(clicked()),this,SLOT(secondDetectorTimeIntegralClicked()));
       /// if period is entered display rectangual detector banks for that period
       connect(m_SANSForm->period_edit,SIGNAL(editingFinished()),this,SLOT(displayDetectorBanksofMemberWorkspace()));
       
@@ -291,7 +291,7 @@ namespace MantidQt
       m_rectDetectors.assign(rectDetectors.begin(),rectDetectors.end());
       if(rectDetectors.empty())
       {
-        g_log.error()<<"No rectangular detectors found in the instrunment associated to the file "+m_fileName.toStdString()<<std::endl;
+        g_log.error()<<"The instrument associated to the file "+m_fileName.toStdString()<<" does not have any RectangularDetectors "<<std::endl;
         disableDetectorGroupBoxes(true);
         return;
       }
@@ -329,7 +329,7 @@ namespace MantidQt
     }
 
   /** This method returns the detector name from list of detctors for a given index
-    * @param index of the rectangualar detector
+    * @param index of the rectangular detector
     * @return detector name
     */
     const QString SANSDiagnostics::getDetectorName(int index)
@@ -408,12 +408,12 @@ namespace MantidQt
       return rectDetectors;
     }
 
-  /** This method returns the minimum and maximum spectrum ids
-    * @param detNum - a number used to identify the detector.
-    * @param minSpec - minimum spectrum number
-    * @param maxSpec - maximum spectrum number
+  /** This method returns spectrum list for the selected detector
+    * @param mws_sptr shared pointer to workspace
+    * @param detNum number used to identify detector
+    * @param specList  -list of spectrum
     */
-    void SANSDiagnostics::minandMaxSpectrumIds(const int detNum,QString& minSpec, QString& maxSpec)
+    void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int detNum,std::vector<int>&specList)
     {
       boost::shared_ptr<RectDetectorDetails> rectDet;
       try
@@ -422,62 +422,37 @@ namespace MantidQt
       }
       catch(std::out_of_range& )
       {
-        if(detNum==1)
+        if(detNum==0)
         {
-            g_log.error()<<"Error : No Rectangualar detector found in the instrument loaded"<<std::endl;
+          g_log.error()<<"Error : The instrument does not have any RectangularDetectors "<<std::endl;
         }
-        else if(detNum==2)
+        else if(detNum==1)
         {
-            g_log.error()<<"Error  when accessing the details of second rectangular detector"<<std::endl;
+          g_log.error()<<"Error : The instrument  have only one  RectangularDetector"<<std::endl;
         }
         return;
       }
       if(!rectDet)
       {
-        g_log.error()<<"Error  when accessing the details of rectangular detector"<<std::endl;
+        g_log.error()<<"Error when accessing the details of rectangular detector"<<std::endl;
         return;
-
       }
       std::vector<int> detIdList;
       detIdList.push_back(rectDet->getMinimumDetcetorId());
       detIdList.push_back(rectDet->getMaximumDetcetorId());
-      QString wsName;
-      //get the spec min and max using the detector ids
-      //if the loaded workpace is multi period use the workspace for user selected period
-      if(isMultiPeriod())
-      {
-        wsName=m_memberwsName;
-      }
-      else
-      {wsName=m_outws_load;
-      }
-
-      Mantid::API::Workspace_sptr ws_sptr;
-      try
-      {
-        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString());
-
-      }
-      catch(Exception::NotFoundError&)
-      {
-        g_log.error()<<"Error when accessing the Workspace "+wsName.toStdString()<<std::endl;
-        return;
-        
-      }
-      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
-      if(!mws_sptr)
-      {
-        return;
-      }
-      //get spectrum list
-      std::vector<int>specList= mws_sptr->spectraMap().getSpectra(detIdList);
-      if(specList.empty())
-      {
-        return;
-      }
+      specList= mws_sptr->spectraMap().getSpectra(detIdList);
+     
+    }
+  /** This method returns the minimum and maximum spectrum ids
+    * @param specList - list of spectra.
+    * @param minSpec - minimum spectrum number
+    * @param maxSpec - maximum spectrum number
+    */
+    void SANSDiagnostics::minandMaxSpectrumIds(const std::vector<int>& specList,QString& minSpec, QString& maxSpec)
+    {      
       int spec_min =*std::min_element(specList.begin(),specList.end());
       int spec_max=*std::max_element(specList.begin(),specList.end());
-
+    
       std::string s_min,s_max;
       try
       {
@@ -501,9 +476,44 @@ namespace MantidQt
 
       minSpec=QString::fromStdString(s_min);
       maxSpec=QString::fromStdString(s_max);
-
-
+      
     }
+
+    /** This method returns workspace Indexes for the given spectrum indexes
+      * @param mws_sptr - shared pointer to workspace
+      * @param specList - list of spectra
+      * @param startWSIndex - start index of workspace
+      * @param endWSIndex  - end index of the workspace
+    */
+
+    void SANSDiagnostics::getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,
+                                              const std::vector<int>& specList,
+                                              QString& startWSIndex,QString& endWSIndex)
+    {      
+            
+      std::vector<int> wsindexList;
+      mws_sptr->getIndicesFromSpectra(specList,wsindexList);
+      std::string wsStart;
+      std::string wsEnd;
+      try
+      {        
+        wsStart= boost::lexical_cast<std::string>(wsindexList.at(0));
+        wsEnd = boost::lexical_cast<std::string>(wsindexList.at(1));
+      }
+      catch(boost::bad_lexical_cast&)
+      {
+        g_log.error()<<"Error: Invalid start / end workspace index"<<std::endl;
+      }
+      catch(std::out_of_range&)
+      {
+        g_log.error()<<"Error: Invalid start / end workspace index"<<std::endl;
+      }
+     
+      startWSIndex = QString::fromStdString(wsStart);
+      endWSIndex =  QString::fromStdString(wsEnd);
+          
+    }
+
     //This method disables the rectangular detectors group boxes
     void SANSDiagnostics::disableDetectorGroupBoxes(bool bStatus)
     {
@@ -568,7 +578,7 @@ namespace MantidQt
     }
 
 
-    /**This method checks the spec min and are in valid range
+  /**This method checks the spec min and are in valid range
     * @param specMin - minimum spectrum number
     * @param specMax - maximum spectrum number
     * @returns true if the spectra is in valid range.
@@ -596,7 +606,7 @@ namespace MantidQt
         g_log.error()<<"Inavlid spectrum maximum "+specMax.toStdString()+ " found in  the selected detector bank  "<<std::endl;
                                                                           
       }
-      return ((spec_min>=1 ||spec_max<=Mantid::EMPTY_INT())?true:false);
+      return ((spec_min>=1 && spec_max<=Mantid::EMPTY_INT())?true:false);
     }
 
 
@@ -607,7 +617,28 @@ namespace MantidQt
       QString minSpec;
       QString maxSpec;
       int detNum=0;//first detector
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+
+      QString ipwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+ipwsName.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+      std::vector<int> specList;
+      getSpectraList(mws_sptr,detNum,specList);
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector1->setDisabled(true);
@@ -632,7 +663,30 @@ namespace MantidQt
       QString minSpec;
       QString maxSpec;
       int detNum=0;//first detector
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+     
+      QString ipwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+ipwsName.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+
+      std::vector<int> specList;
+      getSpectraList(mws_sptr,detNum,specList);
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
+
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector1->setDisabled(true);
@@ -656,7 +710,31 @@ namespace MantidQt
       int detNum=0;//first detector
       QString minSpec;
       QString maxSpec;
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+     
+      QString ipwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+ipwsName.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+
+      std::vector<int> specList;
+      getSpectraList(mws_sptr,detNum,specList);
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
+      QString wsStartIndex, wsEndIndex;
+      
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector1->setDisabled(true);
@@ -667,7 +745,28 @@ namespace MantidQt
       {
         return;
       }
+
       QString loadedws=getWorkspaceToProcess(); 
+      Mantid::API::Workspace_sptr loadedws_sptr;
+      try
+      {
+        loadedws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(loadedws.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+loadedws.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr1=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedws_sptr);
+      if(!mws_sptr1)
+      {
+        return;
+      }
+      //get the workspace index from spectra list
+      getWorkspaceIndexes(mws_sptr1,specList,wsStartIndex,wsEndIndex);
+      
       //apply mask
       maskDetector(loadedws,m_SANSForm->pmask1->isChecked(),false);
       
@@ -675,8 +774,9 @@ namespace MantidQt
       //give the detectorname_V for workspace
       detName+="_T";
       QString opws(detName);
+           
       //execute SumSpectra 
-      if(!runsumSpectra(opws))
+      if(!runsumSpectra(loadedws,opws,wsStartIndex,wsEndIndex))
       {
         return;
       }
@@ -713,7 +813,7 @@ namespace MantidQt
       {
         maskDetector(loadedws,bMask,time_pixel);
       }
-
+    
       if(range.isEmpty())
       {        
         QString HVMin,HVMax;
@@ -860,7 +960,30 @@ namespace MantidQt
       QString minSpec;
       QString maxSpec;
       int detNum=1;//second detector
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+      
+      QString ipwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+ipwsName.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+      
+      std::vector<int> specList;
+      getSpectraList(mws_sptr,detNum,specList);
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
+       
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector2->setDisabled(true);
@@ -872,11 +995,6 @@ namespace MantidQt
       QString opws(detName);
       ///horizontal integral range string
       QString hiRange=m_SANSForm->hirange_edit2->text();
-      if(hiRange.isEmpty())
-      {      
-        return;
-      }
-     
       IntegralClicked(hiRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask3->isChecked(),true);
 
     }
@@ -887,7 +1005,29 @@ namespace MantidQt
       QString minSpec;
       QString maxSpec;
       int detNum=1;//first detector
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+
+      QString ipwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
+
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+ipwsName.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+
+      std::vector<int> specList;
+      getSpectraList(mws_sptr,detNum,specList);
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector2->setDisabled(true);
@@ -900,10 +1040,6 @@ namespace MantidQt
 
       ///horizontal integral range string
       QString viRange=m_SANSForm->virange_edit2->text();
-      if(viRange.isEmpty())
-      {      
-        return;
-      }
       IntegralClicked(viRange,orientation,minSpec,maxSpec,opws,m_SANSForm->tcmask4->isChecked(),true);
     }
     /// Handler for second detector horizontal integral button
@@ -913,7 +1049,32 @@ namespace MantidQt
       int detNum=1;
       QString minSpec;
       QString maxSpec;
-      minandMaxSpectrumIds(detNum,minSpec,maxSpec);
+
+      //Get the workspace created by load algorithm initially with specmin=1 and specmax=1
+      QString initialwsName= getWorkspaceToProcess();
+      Mantid::API::Workspace_sptr ws_sptr;
+      try
+      {
+        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(initialwsName.toStdString());
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+initialwsName.toStdString()<<std::endl;
+        return;
+      }
+      Mantid::API::MatrixWorkspace_sptr mws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws_sptr);
+      if(!mws_sptr)
+      {
+        return;
+      }
+            
+      std::vector<int> specList;
+      //get spectrum list from detector ids
+      getSpectraList(mws_sptr,detNum,specList);
+      // get maximum and minimum spectrum ids
+      minandMaxSpectrumIds(specList,minSpec,maxSpec);
+      QString wsStartIndex, wsEndIndex;
+      //   
       if(!isValidSpectra(minSpec,maxSpec))
       {
         m_SANSForm->groupBox_Detector2->setDisabled(true);
@@ -923,23 +1084,45 @@ namespace MantidQt
       if(!runLoadAlgorithm(m_fileName,minSpec,maxSpec))
       {
         return;
-      }
-      QString loadedws=getWorkspaceToProcess();
-    
+      } 
+      //Get the workspace created by load algorithm  with spec_min and specmax for the detectors
+      QString loadedws= getWorkspaceToProcess();
+      //apply mask
       maskDetector(loadedws,m_SANSForm->pmask2->isChecked(),false);
+    
+      Mantid::API::Workspace_sptr loadedws_sptr;
+      try
+      {
+        loadedws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(loadedws.toStdString());
 
+      }
+      catch(Exception::NotFoundError&)
+      {
+        g_log.error()<<"Error when accessing the Workspace "+loadedws.toStdString()<<std::endl;
+        return;
+
+      }
+      Mantid::API::MatrixWorkspace_sptr mloadedws_sptr=boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(loadedws_sptr);
+      if(!loadedws_sptr)
+      {
+        return;
+      }
+      //get workspace indexes
+      getWorkspaceIndexes(mloadedws_sptr,specList,wsStartIndex,wsEndIndex);
+      
       QString detName= getDetectorName(1);
       //give the detectorname_V for workspace
       detName+="_T";
       QString opws(detName);
       //execute SumSpectra 
-     if(!runsumSpectra(opws))
+     if(!runsumSpectra(loadedws,opws,wsStartIndex,wsEndIndex))
      {
        return;
      }
 
      QString plotws = "\"" + opws +"\"";
      plotSpectrum(plotws,0);
+
     }
 
     
@@ -971,7 +1154,6 @@ namespace MantidQt
       m_settingsGroup = "CustomInterfaces/SANSRunWindow/SANSDiagnostics";
       settings.beginGroup(m_settingsGroup);
       m_SANSForm->file_run_edit->readSettings(settings.group());
-      m_SANSForm->file_run_edit->setFileText(settings.value("File").toString());
       settings.endGroup();
     }
 
@@ -1108,41 +1290,48 @@ namespace MantidQt
     }
 
   /** This method creates script string for sumspectra algorithm
+    * @param ipwsName - name of the input workspace
     * @param opwsName - name of the ooutput workspace
+    * @param wsStartIndex - start workspace index
+    * @param wsEndIndex - end workspace Index
     * @returns - sumspectra script string
     */
-    bool  SANSDiagnostics::runsumSpectra(const QString& opwsName)
+    bool  SANSDiagnostics::runsumSpectra(const QString& ipwsName,const QString& opwsName,const QString& wsStartIndex,const QString& wsEndIndex)
     {
-      QString ipwsName= getWorkspaceToProcess();
-
-      Mantid::API::Workspace_sptr ws_sptr;
-      try
-      {
-        ws_sptr = Mantid::API::AnalysisDataService::Instance().retrieve(ipwsName.toStdString());
-
-      }
-      catch(Exception::NotFoundError&)
-      {
-        g_log.error()<<"Error when  trying to access the workspace "<<ipwsName.toStdString()<<" which is not loaded"<<std::endl;
-        return false;
-      }
+      
       if(opwsName.isEmpty())
       {
          g_log.error()<<"Output workspace name is empty , can't create workspace with empty name"<<std::endl;
          return false;
       }
 
+      if(wsStartIndex.isEmpty())
+      {
+        g_log.error()<<"Error: Invalid StartWorkspaceIndex"<<std::endl;
+        return false;
+      }
+      if(wsEndIndex.isEmpty())
+      {
+        g_log.error()<<"Error Invalid EndWorkspaceIndex"<<std::endl;
+        return false;
+      }
+           
       QString code=
         "try:\n"
         "  SumSpectra(\"";
       code+=ipwsName;
       code+="\",\"";
       code+=opwsName;
-      code+="\")\n";
+      code+="\",";
+      code+="StartWorkspaceIndex=";
+      code+=wsStartIndex;
+      code+=",";
+      code+="EndWorkspaceIndex=";
+      code+=wsEndIndex;
+      code+=")\n";
       code+="except:\n";
       code+="  print 'Failure'"; 
-      //return code;
-
+     
       QString ret= runPythonCode(code.trimmed());
       if(!ret.isEmpty())
       {

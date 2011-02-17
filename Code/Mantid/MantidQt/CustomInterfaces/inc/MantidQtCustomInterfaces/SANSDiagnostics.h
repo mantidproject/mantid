@@ -5,6 +5,7 @@
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace MantidQt
 {
@@ -133,7 +134,7 @@ private:
   //get rectangular detector details
   std::vector<boost::shared_ptr<RectDetectorDetails> >  rectangularDetectorDetails(Mantid::API::Workspace_sptr& ws_sptr);
   /// returns sumspectra script
-  bool  runsumSpectra(const QString& opwsName);
+  bool runsumSpectra(const QString& ipwsName,const QString& opwsName,const QString& wsStartIndex,const QString& wsEndIndex);
   /// display total number of periods box
   void displayTotalPeriods();
   /// display rectangualr detectors
@@ -149,7 +150,13 @@ private:
   void disableDetectorGroupBoxes(bool bStatus);
    
   /// minimum and maximum spectrum ids for detector 
-  void minandMaxSpectrumIds(const int detNum,QString& minSpec, QString& maxSpec);
+  void minandMaxSpectrumIds(const std::vector<int>& specList,QString& minSpec, QString& maxSpec);
+
+  /// get workspaceIndexes from spectrum list
+  void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const std::vector<int>& specList,
+                                              QString& startWSIndex,QString& endWSIndex);
+  ///get spectra list from workspace.
+  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int detNum,std::vector<int>&specList);
 
   /// get detector name
  const  QString getDetectorName(int index);
@@ -173,6 +180,7 @@ private:
   void maskDetector(const QString& wsName,bool bMask,bool time_pixel);
   //getvalues of HVMin and HvMax values for sumrowcolumn algorithm
   void HVMinHVMaxStringValues(const int minVal,const int maxVal,QString& hvMin,QString& hvMax);
+
 
 private:
   QString m_dataDir; ///< default data search directory

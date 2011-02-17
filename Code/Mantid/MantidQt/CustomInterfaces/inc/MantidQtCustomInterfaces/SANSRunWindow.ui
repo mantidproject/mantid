@@ -249,7 +249,7 @@
             </item>
             <item>
              <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="inst_opt" >
-              <property name="techniques" >
+              <property name="techniques" stdset="0" >
                <stringlist>
                 <string>Small Angle Scattering</string>
                </stringlist>
@@ -1943,7 +1943,7 @@ intermediate ranges are there for comparison</string>
            </widget>
           </item>
           <item row="3" column="1" colspan="2" >
-           <widget class="MantidQt::MantidWidgets::MWRunFiles" name="floodFile" >
+           <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="floodFile" >
             <property name="findRunFiles" stdset="0" >
              <bool>false</bool>
             </property>
@@ -3877,7 +3877,7 @@ p, li { white-space: pre-wrap; }
           <number>6</number>
          </property>
          <item row="0" column="0" >
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="file_run_edit" >
+          <widget class="MantidQt::MantidWidgets::MWRunFiles" native="1" name="file_run_edit" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Minimum" hsizetype="MinimumExpanding" >
              <horstretch>0</horstretch>
@@ -3941,7 +3941,7 @@ p, li { white-space: pre-wrap; }
        <item row="1" column="0" >
         <widget class="QLabel" name="label_7" >
          <property name="text" >
-          <string>The format of Range string for example is 60-65 or 60-66:2 or 60:66 or 60:66:2 or 60+61 or 60-65,66,67,68:72:2,73+74</string>
+          <string>Example range string is 60-65 or 60-66:1 or 60:66 or 60:66:2 or 60+61 or 60-65,66,67,68:72:2,73+74</string>
          </property>
         </widget>
        </item>
@@ -3954,7 +3954,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0" >
            <widget class="QPushButton" name="hi_Btn1" >
             <property name="text" >
-             <string>Horizontal Integral</string>
+             <string>Display Horizontal </string>
             </property>
            </widget>
           </item>
@@ -3978,7 +3978,7 @@ p, li { white-space: pre-wrap; }
           <item row="1" column="0" >
            <widget class="QPushButton" name="vi_Btn1" >
             <property name="text" >
-             <string>Vertical Integral</string>
+             <string>Display Vertical </string>
             </property>
            </widget>
           </item>
@@ -4002,7 +4002,7 @@ p, li { white-space: pre-wrap; }
           <item row="2" column="0" >
            <widget class="QPushButton" name="ti_Btn1" >
             <property name="text" >
-             <string>Time Integral</string>
+             <string>Display Time</string>
             </property>
            </widget>
           </item>
@@ -4035,7 +4035,7 @@ p, li { white-space: pre-wrap; }
           <item row="0" column="0" >
            <widget class="QPushButton" name="hi_Btn2" >
             <property name="text" >
-             <string>Horizontal Integral</string>
+             <string>Display Horizontal </string>
             </property>
            </widget>
           </item>
@@ -4059,7 +4059,7 @@ p, li { white-space: pre-wrap; }
           <item row="1" column="0" >
            <widget class="QPushButton" name="vi_Btn2" >
             <property name="text" >
-             <string>Vertical Integral</string>
+             <string>Display Vertical </string>
             </property>
            </widget>
           </item>
@@ -4083,7 +4083,7 @@ p, li { white-space: pre-wrap; }
           <item row="2" column="0" >
            <widget class="QPushButton" name="ti_Btn2" >
             <property name="text" >
-             <string>Time Integral</string>
+             <string>Display Time</string>
             </property>
            </widget>
           </item>
