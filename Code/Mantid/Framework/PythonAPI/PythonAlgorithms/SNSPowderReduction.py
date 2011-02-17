@@ -242,7 +242,6 @@ class SNSPowderReduction(PythonAlgorithm):
         SUFFIX = "_event.nxs"
         self._config = self.PDConfigFile(self.getProperty("CharacterizationRunsFile"))
         self._binning = self.getProperty("Binning")
-        print "BINNING:", self._binning
         if len(self._binning) != 1 and len(self._binning) != 3:
             raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
         if len(self._binning) == 3:
@@ -314,6 +313,7 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
+                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.01) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
                 samRun /= vanRun
