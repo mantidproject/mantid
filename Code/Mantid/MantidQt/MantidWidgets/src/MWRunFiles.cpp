@@ -392,7 +392,10 @@ void MWRunFiles::findFiles()
   {
     setFileProblem("");
   }
-}/**
+  emit filesFound();
+}
+
+/**
 * Read settings from the given group
 * @param group :: The name of the group key to retrieve data from
 */
