@@ -440,13 +440,20 @@ namespace Mantid
     }
 
     /** Returns the 2Theta scattering angle for a detector
-    *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
-    *  @return The scattering angle (0 < theta < pi)
-    */
+     *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
+     *  @return The scattering angle (0 < theta < pi)
+     */
     double MatrixWorkspace::detectorTwoTheta(Geometry::IDetector_const_sptr det) const
     {
-      const Geometry::V3D samplePos = getInstrument()->getSample()->getPos();
-      const Geometry::V3D beamLine = samplePos - getInstrument()->getSource()->getPos();
+      Geometry::IObjComponent_const_sptr source = getInstrument()->getSource();
+      Geometry::IObjComponent_const_sptr sample = getInstrument()->getSample();
+      if ( source == NULL || sample == NULL )
+      {
+        throw Kernel::Exception::InstrumentDefinitionError("Instrument not sufficiently defined: failed to get source and/or sample");
+      }
+
+      const Geometry::V3D samplePos = sample->getPos();
+      const Geometry::V3D beamLine = samplePos - source->getPos();
 
       return det->getTwoTheta(samplePos,beamLine);
     }
