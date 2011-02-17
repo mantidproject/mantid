@@ -71,6 +71,7 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
   int confidence(0);
   try
   {
+	// FIXME: We need a better test
     ::NeXus::File file = ::NeXus::File(filePath);
     // Open the base group called 'entry'
     file.openGroup("entry", "NXentry");
@@ -87,7 +88,7 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
 void LoadEventNexus::init()
 {
   this->setOptionalMessage(
-      "Loads a SNS EventNeXus format file.\n"
+      "Loads an EventNeXus format file.\n"
       "Optionally, you can filter out events falling outside a\n"
       "range of times-of-flight and/or a time interval.");
 
