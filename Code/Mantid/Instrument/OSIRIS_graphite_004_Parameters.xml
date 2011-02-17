@@ -39,6 +39,14 @@
 <parameter name="Efixed"> <value val="7.3812" /> </parameter>
 </component-link>
 
+<parameter name="analyser" type="string">
+  <value val="graphite" />
+</parameter>
+
+<parameter name="reflection" type="string">
+  <value val="004" />
+</parameter>
+
 </component-link>
 
 </parameter-file>
