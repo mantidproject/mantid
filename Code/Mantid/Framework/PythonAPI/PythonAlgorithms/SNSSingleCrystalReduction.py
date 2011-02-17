@@ -284,6 +284,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         # write out the files
         # ReplaceSpecialValues(samRun, samRun, NaNValue="0.0", InfinityValue="0.0")
         self._save(samRun, normalized)
+        mtd.deleteWorkspace(samRun.getName())
         raise Exception("End of script")
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
