@@ -36,6 +36,52 @@ public:
     TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), false);
   }
 
+  void testPropertyValuesViaProxy()
+  {
+    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
+    
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename","IRS38633.raw"));
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin","10"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax","100"));
+
+    // Test that the properties have the correct values
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"),"10");
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"),"100");
+  }
+
+  void testSwitchingLoaderViaProxy()
+  {
+    IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
+    TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("Filename","IRS38633.raw"));
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("LoadLogFiles"), true);
+
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin","10"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax","100"));
+
+    // Test that the properties have the correct values
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"),"10");
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"),"100");
+
+    // Change loader
+    proxy->setPropertyValue("Filename","LOQ49886.nxs");
+    TS_ASSERT_EQUALS(proxy->existsProperty("EntryNumber"), true);
+    TS_ASSERT_EQUALS(proxy->existsProperty("Cache"), false);
+
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMin","11"));
+    TS_ASSERT_THROWS_NOTHING(proxy->setPropertyValue("SpectrumMax","101"));
+
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMin"),"11");
+    TS_ASSERT_EQUALS(proxy->getPropertyValue("SpectrumMax"),"101");
+
+  }
+
   void testFindLoader()
   {
     Load loader;

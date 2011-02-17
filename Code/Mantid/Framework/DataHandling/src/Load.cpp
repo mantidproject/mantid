@@ -29,45 +29,45 @@ namespace Mantid
     }
 
     /**
-     * Override setPropertyValue
-     * @param name The name of the property
-     * @param value The value of the property as a string
-     */
+    * Override setPropertyValue
+    * @param name The name of the property
+    * @param value The value of the property as a string
+    */
     void Load::setPropertyValue(const std::string &name, const std::string &value)
     {
       IDataFileChecker_sptr loader;
       if( name == "Filename" )
       {
-	// This call makes resolving the filename easier
-	IDataFileChecker::setPropertyValue(name, value);
-	loader = getFileLoader(getPropertyValue(name));
+        // This call makes resolving the filename easier
+        IDataFileChecker::setPropertyValue(name, value);
+        loader = getFileLoader(getPropertyValue(name));
       }
       else
       {
-	const std::string loaderName = getProperty("LoaderName");
-	if( !loaderName.empty() )
-	{
-	  loader = boost::static_pointer_cast<IDataFileChecker>(
-	    API::AlgorithmManager::Instance().createUnmanaged(loaderName));
-	  loader->initialize();
-	}
+        const std::string loaderName = getProperty("LoaderName");
+        if( !loaderName.empty() )
+        {
+          loader = boost::static_pointer_cast<IDataFileChecker>(
+            API::AlgorithmManager::Instance().createUnmanaged(loaderName));
+          loader->initialize();
+        }
       }
       if( loader ) declareLoaderProperties(loader);
 
       // Set the property after some may have been redeclared
       if( name != "Filename") IDataFileChecker::setPropertyValue(name, value);
     }
-    
+
     //--------------------------------------------------------------------------
     // Private methods
     //--------------------------------------------------------------------------
 
     /**
-     * Quick file always returns false here
-     * @param filePath File path
-     * @param nread Number of bytes read
-     * @param header_buffer A buffer containing the nread bytes
-     */
+    * Quick file always returns false here
+    * @param filePath File path
+    * @param nread Number of bytes read
+    * @param header_buffer A buffer containing the nread bytes
+    */
     bool Load::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
       (void)filePath; (void)nread; (void)header;
@@ -85,11 +85,11 @@ namespace Mantid
       return -1;
     }
 
-        /** 
-     * Get a shared pointer to the load algorithm with highest preference for loading
-     * @param filePath :: path of the file
-     * @returns A shared pointer to the unmanaged algorithm
-     */
+    /** 
+    * Get a shared pointer to the load algorithm with highest preference for loading
+    * @param filePath :: path of the file
+    * @returns A shared pointer to the unmanaged algorithm
+    */
     API::IDataFileChecker_sptr Load::getFileLoader(const std::string& filePath)
     {
       /* Open the file and read in the first bufferSize bytes - these will
@@ -140,30 +140,33 @@ namespace Mantid
 
       if( !winningLoader )
       {
-	// Clear what may have been here previously
-	setPropertyValue("LoaderName", "");
+        // Clear what may have been here previously
+        setPropertyValue("LoaderName", "");
         throw std::runtime_error("Cannot find a loader for \"" + filePath + "\"");
       }
       setPropertyValue("LoaderName", winningLoader->name());
       winningLoader->initialize();
       return winningLoader;
     }
-    
+
     /**
-     * Declare any additional properties of the concrete loader here
-     * @param loader A pointer to the concrete loader
-     */
+    * Declare any additional properties of the concrete loader here
+    * @param loader A pointer to the concrete loader
+    */
     void Load::declareLoaderProperties(const IDataFileChecker_sptr loader)
     {
+      // If we have switch loaders then the concrete loader will have different properties
+      // so take care of ensuring Load has the correct ones
       const std::vector<Property*> existingProps = this->getProperties();      
       for( size_t i = 0; i < existingProps.size(); ++i )
       {
-	const std::string name = existingProps[i]->name();
-	if( m_baseProps.find(name) != m_baseProps.end() )
-	{
-	  continue;
-	}
-	this->removeProperty(name);
+        const std::string name = existingProps[i]->name();
+        if( m_baseProps.find(name) != m_baseProps.end() ||
+            loader->existsProperty(name) )
+        {
+          continue;
+        }
+        this->removeProperty(name);
       }
 
       const std::vector<Property*> &loaderProps = loader->getProperties();
@@ -171,17 +174,17 @@ namespace Mantid
       size_t numProps(loaderProps.size());
       for (size_t i = 0; i < numProps; ++i)
       {
-	Property* loadProp = loaderProps[i];
-	if( loadProp->name() == filePropName ) continue;
-	try
-	{
-	  declareProperty(loadProp->clone(), loadProp->documentation());
-	}
-	catch(Exception::ExistsError&)
-	{
-	  // Already exists as a static property
-	  continue;
-	}
+        Property* loadProp = loaderProps[i];
+        if( loadProp->name() == filePropName ) continue;
+        try
+        {
+          declareProperty(loadProp->clone(), loadProp->documentation());
+        }
+        catch(Exception::ExistsError&)
+        {
+          // Already exists as a static property
+          continue;
+        }
       }
     }
 
@@ -213,12 +216,12 @@ namespace Mantid
         "read-in data and stored in the Analysis Data Service.");
 
       declareProperty("LoaderName", std::string(""), "A string containing the name of the concrete loader used", 
-		      Direction::Output);
+        Direction::Output);
       // Save for later what the base Load properties are
       const std::vector<Property*> & props = this->getProperties();
       for( size_t i = 0; i < this->propertyCount(); ++i )
       {
-	m_baseProps.insert(props[i]->name());
+        m_baseProps.insert(props[i]->name());
       }
 
     }
@@ -231,7 +234,7 @@ namespace Mantid
       const std::string loaderName = getPropertyValue("LoaderName");
       if( loaderName.empty() )
       {
-	throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
+        throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
       }     
       IDataFileChecker_sptr loader = createLoader(loaderName);
       g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
@@ -242,15 +245,15 @@ namespace Mantid
       std::vector<Kernel::Property*>::const_iterator itr;
       for (itr = loader_props.begin(); itr != loader_props.end(); ++itr)
       {
-	const std::string propName = (*itr)->name();
-	if( this->existsProperty(propName) )
-	{
-	  loader->setPropertyValue(propName, getPropertyValue(propName));
-	}
-	else if( propName == loader->filePropertyName() )
-	{
-	  loader->setPropertyValue(propName, getPropertyValue("Filename"));
-	}
+        const std::string propName = (*itr)->name();
+        if( this->existsProperty(propName) )
+        {
+          loader->setPropertyValue(propName, getPropertyValue(propName));
+        }
+        else if( propName == loader->filePropertyName() )
+        {
+          loader->setPropertyValue(propName, getPropertyValue("Filename"));
+        }
       }
 
       // Execute the concrete loader
@@ -260,23 +263,23 @@ namespace Mantid
     }
 
     /** 
-     * Create the concrete instance use for the actual loading.
-     * @param name :: The name of the loader to instantiate
-     * @param startProgress :: The percentage progress value of the overall 
-     * algorithm where this child algorithm starts
-     * @param endProgress :: The percentage progress value of the overall 
-     * algorithm where this child algorithm ends
-     * @param logging :: Set to false to disable logging from the child algorithm
-      */
+    * Create the concrete instance use for the actual loading.
+    * @param name :: The name of the loader to instantiate
+    * @param startProgress :: The percentage progress value of the overall 
+    * algorithm where this child algorithm starts
+    * @param endProgress :: The percentage progress value of the overall 
+    * algorithm where this child algorithm ends
+    * @param logging :: Set to false to disable logging from the child algorithm
+    */
     API::IDataFileChecker_sptr Load::createLoader(const std::string & name, const double startProgress, 
-						  const double endProgress, const bool logging) const
+      const double endProgress, const bool logging) const
     {
       IDataFileChecker_sptr loader = boost::static_pointer_cast<IDataFileChecker>(
-	API::AlgorithmManager::Instance().createUnmanaged(name));
+        API::AlgorithmManager::Instance().createUnmanaged(name));
       loader->initialize();
       if( !loader )
       {
-	throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
+        throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
       }
 
       //Set as a child so that we are in control of output storage
@@ -286,25 +289,25 @@ namespace Mantid
       const std::vector< Property*> &props = loader->getProperties();
       for (unsigned int i = 0; i < props.size(); ++i)
       {
-	if (props[i]->direction() == Direction::Output && 
-	    dynamic_cast<IWorkspaceProperty*>(props[i]) )
-	{
-	  if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
-	}
+        if (props[i]->direction() == Direction::Output && 
+          dynamic_cast<IWorkspaceProperty*>(props[i]) )
+        {
+          if ( props[i]->value().empty() ) props[i]->setValue("LoadChildWorkspace");
+        }
       }
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
-	loader->addObserver(m_progressObserver);
-	loader->setChildStartProgress(startProgress);
-	loader->setChildEndProgress(endProgress);
+        loader->addObserver(m_progressObserver);
+        loader->setChildStartProgress(startProgress);
+        loader->setChildEndProgress(endProgress);
       }
       return loader;
     }
 
     /**
-     * Set the output workspace(s) if the load's return workspace has type API::Workspace
-     * @param loader :: Shared pointer to load algorithm
-     */
+    * Set the output workspace(s) if the load's return workspace has type API::Workspace
+    * @param loader :: Shared pointer to load algorithm
+    */
     void Load::setOutputWorkspace(const API::IDataFileChecker_sptr loader)
     {
       // Go through each OutputWorkspace property and check whether we need to make a counterpart here
@@ -312,35 +315,35 @@ namespace Mantid
       const size_t count = loader->propertyCount();
       for( size_t i = 0; i < count; ++i )
       {
-	Property *prop = loaderProps[i];
-	if( dynamic_cast<IWorkspaceProperty*>(prop) && prop->direction() == Direction::Output )
-	{
-	  const std::string & name = prop->name();
-	  if( !this->existsProperty(name) )
-	  {
-	    declareProperty(new WorkspaceProperty<Workspace>(name, loader->getPropertyValue(name),
-							     Direction::Output));
-	  }
-	  Workspace_sptr wkspace = getOutputWorkspace(name, loader);
-	  setProperty(name, wkspace);
-	}
+        Property *prop = loaderProps[i];
+        if( dynamic_cast<IWorkspaceProperty*>(prop) && prop->direction() == Direction::Output )
+        {
+          const std::string & name = prop->name();
+          if( !this->existsProperty(name) )
+          {
+            declareProperty(new WorkspaceProperty<Workspace>(name, loader->getPropertyValue(name),
+              Direction::Output));
+          }
+          Workspace_sptr wkspace = getOutputWorkspace(name, loader);
+          setProperty(name, wkspace);
+        }
       }
     }
 
     /**
-     * Return an output workspace property dealing with the lack of connection between of 
-     * WorkspaceProperty types
-     * @param propName :: The name of the property
-     * @param loader :: The loader algorithm
-     * @returns A pointer to the OutputWorkspace property of the sub algorithm
-     */
+    * Return an output workspace property dealing with the lack of connection between of 
+    * WorkspaceProperty types
+    * @param propName :: The name of the property
+    * @param loader :: The loader algorithm
+    * @returns A pointer to the OutputWorkspace property of the sub algorithm
+    */
     API::Workspace_sptr Load::getOutputWorkspace(const std::string & propName,
-						 const API::IDataFileChecker_sptr loader) const
+      const API::IDataFileChecker_sptr loader) const
     {
       // @todo Need to try and find a better way using the getValue methods
       try
       {
-	return loader->getProperty(propName);
+        return loader->getProperty(propName);
       }
       catch(std::runtime_error&)
       {
@@ -348,8 +351,8 @@ namespace Mantid
       // Try a MatrixWorkspace
       try
       {
-	MatrixWorkspace_sptr childWS = loader->getProperty(propName);
-	return childWS;
+        MatrixWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
       }
       catch(std::runtime_error&)
       {
@@ -357,8 +360,8 @@ namespace Mantid
       // EventWorkspace
       try
       {
-	IEventWorkspace_sptr childWS = loader->getProperty(propName);
-	return childWS;
+        IEventWorkspace_sptr childWS = loader->getProperty(propName);
+        return childWS;
       }
       catch(std::runtime_error&)
       {
