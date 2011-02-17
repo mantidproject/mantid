@@ -240,7 +240,7 @@ public:
 
 
 
-  void testExecOnMuonXml()
+  void xtestExecOnMuonXml()
   {
     SaveNexusProcessed algToBeTested;
 
