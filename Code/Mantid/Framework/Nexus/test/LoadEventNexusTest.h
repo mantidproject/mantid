@@ -1,23 +1,24 @@
 #ifndef LOADEVENTNEXUSTEST_H_
 #define LOADEVENTNEXUSTEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidAPI/WorkspaceGroup.h"
-#include <iostream>
-#include "MantidNexus/LoadEventNexus.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/Timer.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/Workspace.h"
-#include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/Property.h"
-#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidNexus/LoadEventNexus.h"
 #include "MantidNexus/LoadLogsFromSNSNexus.h"
+#include <cxxtest/TestSuite.h>
+#include <iostream>
 
 using namespace Mantid;
 using namespace Mantid::Geometry;
@@ -150,43 +151,79 @@ public:
 
   }
 
-  void test_Filtered()
+  void test_FilteredLoad_vs_LoadThenFilter()
   {
     Mantid::API::FrameworkManager::Instance();
-    LoadEventNexus ld;
-    std::string outws_name = "cncs";
-    ld.initialize();
-    ld.setPropertyValue("OutputWorkspace",outws_name);
-    ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
-    ld.setPropertyValue("FilterByTime_Start", "60.0");
-    ld.setPropertyValue("FilterByTime_Stop", "120.0");
-    ld.setPropertyValue("FilterByTof_Min", "-1e10");
-    ld.setPropertyValue("FilterByTof_Max", "1e10");
+    DataObjects::EventWorkspace_sptr WS1, WS2;
+    std::string ws1Name = "cncs_filtered_on_load";
+    std::string ws2Name = "cncs_filtered_after";
 
-    ld.execute();
-    TS_ASSERT( ld.isExecuted() );
+    LoadEventNexus * ld = new LoadEventNexus;
+    ld->initialize();
+    ld->setPropertyValue("OutputWorkspace",ws1Name);
+    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld->setPropertyValue("FilterByTime_Start", "60.0");
+    ld->setPropertyValue("FilterByTime_Stop", "120.0");
+    ld->setPropertyValue("FilterByTof_Min", "-1e10");
+    ld->setPropertyValue("FilterByTof_Max", "1e10");
+    ld->execute();
+    TS_ASSERT( ld->isExecuted() );
 
-    DataObjects::EventWorkspace_sptr WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name));
+    TS_ASSERT_THROWS_NOTHING(
+        WS1 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
     //Valid WS and it is an EventWorkspace
-    TS_ASSERT( WS );
+    TS_ASSERT( WS1 );
     //Pixels have to be padded
-    TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
+    TS_ASSERT_EQUALS( WS1->getNumberHistograms(), 51200);
     //Events
-    TS_ASSERT_EQUALS( WS->getNumberEvents(), 29753);
+    TS_ASSERT_EQUALS( WS1->getNumberEvents(), 29753);
+
+    if (WS1->getNumberEvents() == 0)
+      return;
 
     //Check one event from one pixel - does it have a reasonable pulse time
-    TS_ASSERT( WS->getEventListPtr(7)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
+    TS_ASSERT( WS1->getEventListPtr(7)->getEvents()[0].pulseTime() > DateAndTime(int64_t(1e9*365*10)) );
 
     // Check the run_start property exists and is right.
     Property * p = NULL;
-    TS_ASSERT( WS->mutableRun().hasProperty("run_start") );
-    TS_ASSERT_THROWS_NOTHING( p = WS->mutableRun().getProperty("run_start"); )
+    TS_ASSERT( WS1->mutableRun().hasProperty("run_start") );
+    TS_ASSERT_THROWS_NOTHING( p = WS1->mutableRun().getProperty("run_start"); )
     if (p)
     {
       TS_ASSERT_EQUALS( p->value(), "2010-03-25T16:08:37") ;
     }
 
+    // ----------- Now load the entire thing -----------------
+    delete ld;
+    ld = new LoadEventNexus;
+    ld->initialize();
+    ld->setPropertyValue("OutputWorkspace",ws2Name);
+    ld->setPropertyValue("Filename","CNCS_7860_event.nxs");
+    ld->setPropertyValue("FilterByTime_Start", "-1e10");
+    ld->setPropertyValue("FilterByTime_Stop", "1e10");
+    ld->setPropertyValue("FilterByTof_Min", "-1e10");
+    ld->setPropertyValue("FilterByTof_Max", "1e10");
+    ld->execute();
+    TS_ASSERT( ld->isExecuted() );
+
+    IAlgorithm_sptr alg = AlgorithmManager::Instance().create("FilterByTime");
+    alg->setPropertyValue("InputWorkspace", ws2Name);
+    alg->setPropertyValue("OutputWorkspace", ws2Name);
+    alg->setPropertyValue("StartTime", "60.0");
+    alg->setPropertyValue("StopTime", "120.0");
+    alg->execute();
+    TS_ASSERT( alg->isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING(
+        WS2 = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(ws1Name)); )
+    TS_ASSERT( WS2 );
+    TS_ASSERT_EQUALS( WS2->getNumberHistograms(), 51200);
+    TS_ASSERT_EQUALS( WS2->getNumberEvents(), 29753);
+
+    // The two workspaces are the same
+    TS_ASSERT( equals(WS1, WS2) );
   }
+
 
   void test_Monitors()
   {
@@ -232,6 +269,7 @@ public:
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs";
+    AnalysisDataService::Instance().remove(outws_name);
     ld.initialize();
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace",outws_name);
@@ -239,14 +277,17 @@ public:
     ld.setProperty<bool>("SingleBankPixelsOnly", SingleBankPixelsOnly);
     ld.setProperty<bool>("Precount", Precount);
     ld.execute();
+
+    DataObjects::EventWorkspace_sptr WS;
     if (willFail)
     {
       TS_ASSERT( !ld.isExecuted() );
+      TS_ASSERT_THROWS( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)), std::exception );
       return;
     }
+
     TS_ASSERT( ld.isExecuted() );
-    DataObjects::EventWorkspace_sptr WS;
-    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)) );
+    TS_ASSERT_THROWS_NOTHING( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)));
     //Valid WS and it is an EventWorkspace
     TS_ASSERT( WS );
     if (!WS) return;

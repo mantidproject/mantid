@@ -251,11 +251,6 @@ void LoadEventNexus::exec()
     this->runLoadMonitors();
   }
 
-  // Delete the output workspace name if it existed
-  std::string outName = getPropertyValue("OutputWorkspace");
-  if (AnalysisDataService::Instance().doesExist(outName))
-    AnalysisDataService::Instance().remove( outName );
-
   // top level file information
   ::NeXus::File file(m_filename);
 
@@ -287,10 +282,22 @@ void LoadEventNexus::exec()
   bool SingleBankPixelsOnly = getProperty("SingleBankPixelsOnly");
   if (doOneBank)
   {
+    bool foundIt = false;
+    for (std::vector<string>::iterator it=bankNames.begin(); it!= bankNames.end(); it++)
+      if (*it == ( onebank + "_events") )
+        foundIt = true;
+    if (!foundIt)
+    {
+      throw std::invalid_argument("No entry named '" + onebank + "_events'" + " was found in the .NXS file.\n");
+    }
     bankNames.clear();
     bankNames.push_back( onebank + "_events" );
   }
 
+  // Delete the output workspace name if it existed
+  std::string outName = getPropertyValue("OutputWorkspace");
+  if (AnalysisDataService::Instance().doesExist(outName))
+    AnalysisDataService::Instance().remove( outName );
 
   prog.report("Initializing all pixels");
 
@@ -306,29 +313,18 @@ void LoadEventNexus::exec()
     if (doOneBank && SingleBankPixelsOnly)
     {
       // ---- Pad a pixel for each detector inside the bank -------
-      int wi = 0;
-      IInstrument_sptr inst = WS->getInstrument();
-      boost::shared_ptr<IComponent> comp = inst->getComponentByName(onebank);
-      boost::shared_ptr<ICompAssembly> bank = boost::dynamic_pointer_cast<ICompAssembly>(comp);
-      if (bank)
+      std::vector<IDetector_sptr> dets;
+      // Get the vector of contained detectors
+      WS->getInstrument()->getDetectorsInBank(dets, onebank);
+      if (dets.size() > 0)
       {
-        // Get a vector of children (recursively)
-        std::vector<boost::shared_ptr<IComponent> > children;
-        bank->getChildren(children, true);
-        std::vector<boost::shared_ptr<IComponent> >::iterator it;
-        for (it = children.begin(); it != children.end(); it++)
-        {
-          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(*it);
-          if (det)
-          {
-            WS->getOrAddEventList(wi).addDetectorID( det->getID() );
-            wi++;
-          }
-        }
+        // Make an event list for each.
+        for(size_t wi=0; wi < dets.size(); wi++)
+          WS->getOrAddEventList(wi).addDetectorID( dets[wi]->getID() );
         WS->doneAddingEventLists();
       }
       else
-        throw std::runtime_error("Could not find the bank named " + onebank + " as a component assembly in the instrument tree.");
+        throw std::runtime_error("Could not find the bank named " + onebank + " as a component assembly in the instrument tree; or it did not contain any detectors.");
     }
     else
     {
@@ -474,8 +470,17 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
 
   //The vectors we will be filling
   std::vector<uint64_t> event_index;
-  std::vector<uint32_t> event_id;
-  std::vector<float> event_time_of_flight;
+
+  //std::vector<uint32_t> event_id;
+  //std::vector<float> event_time_of_flight;
+
+  // These give the limits in each file as to which events we actually load (when filtering by time).
+  std::vector<int> load_start(1); //TODO: Should this be size_t?
+  std::vector<int> load_size(1);
+
+  // Data arrays
+  uint32_t * event_id = NULL;
+  float * event_time_of_flight = NULL;
 
   bool loadError = false ;
 
@@ -483,6 +488,8 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
   {
     // Open the file
     ::NeXus::File file(m_filename);
+    try
+    {
     file.openGroup("entry", "NXentry");
 
     //Open the bankN_event group
@@ -511,9 +518,16 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
       }
     }
 
+    if (event_index.size() != pulseTimes.size())
+    {
+      loadError = true;
+      g_log.debug() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
+    }
+
     if (!loadError)
     {
       bool old_nexus_file_names = false;
+
 
       // Get the list of pixel ID's
       try
@@ -527,80 +541,157 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
         old_nexus_file_names = true;
       }
 
-      //Must be uint32
-      if (file.getInfo().type == ::NeXus::UINT32)
-        file.getData(event_id);
-      else
-      {
-        g_log.warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
-        loadError = true;
-      }
-      file.closeData();
+      // By default, use all available indices
+      int start_event = 0;
+      ::NeXus::Info id_info = file.getInfo();
+      int stop_event = id_info.dims[0];
 
-      if (!loadError)
+      //TODO: Handle the time filtering by changing the start/end offsets.
+      for (size_t i=0; i < pulseTimes.size(); i++)
       {
-        // Get the list of event_time_of_flight's
-        if (!old_nexus_file_names)
-          file.openData("event_time_offset");
-        else
-          file.openData("event_time_of_flight");
-
-        //Check that the type is what it is supposed to be
-        if (file.getInfo().type == ::NeXus::FLOAT32)
-          file.getData(event_time_of_flight);
-        else
+        if (pulseTimes[i] >= filter_time_start)
         {
-          g_log.warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
+          start_event = event_index[i];
+          break; // stop looking
+        }
+      }
+
+      for (size_t i=0; i < pulseTimes.size(); i++)
+      {
+        if (pulseTimes[i] > filter_time_stop)
+        {
+          stop_event = event_index[i];
+          break;
+        }
+      }
+
+      // Make sure it is within range
+      if ((stop_event > id_info.dims[0]) || (stop_event < 0))
+        stop_event = id_info.dims[0];
+      if (start_event < 0)
+        start_event = 0;
+
+      g_log.debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << std::endl;
+
+      // These are the arguments to getSlab()
+      load_start[0] = start_event;
+      load_size[0] = stop_event - start_event;
+
+      if ((load_size[0] > 0) && (load_start[0]>=0) )
+      {
+        // Now we allocate the required arrays
+        event_id = new uint32_t[load_size[0]];
+        event_time_of_flight = new float[load_size[0]];
+
+        // Check that the required space is there in the file.
+        if (id_info.dims[0] < load_size[0]+load_start[0])
+        {
+          g_log.warning() << "Entry " << entry_name << "'s event_id field is too small (" << id_info.dims[0]
+                          << ") to load the desired data size (" << load_size[0]+load_start[0] << ").\n";
           loadError = true;
         }
 
+        //Must be uint32
+        if (id_info.type == ::NeXus::UINT32)
+          file.getSlab(event_id, load_start, load_size);
+        else
+        {
+          g_log.warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
+          loadError = true;
+        }
+        file.closeData();
+
         if (!loadError)
         {
-          std::string units;
-          file.getAttr("units", units);
-          if (units != "microsecond")
+          // Get the list of event_time_of_flight's
+          if (!old_nexus_file_names)
+            file.openData("event_time_offset");
+          else
+            file.openData("event_time_of_flight");
+
+          // Check that the required space is there in the file.
+          ::NeXus::Info tof_info = file.getInfo();
+          if (tof_info.dims[0] < load_size[0]+load_start[0])
           {
-            g_log.warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
+            g_log.warning() << "Entry " << entry_name << "'s event_time_offset field is too small to load the desired data.\n";
             loadError = true;
           }
-          file.closeData();
-        } //no error
 
-      } //no error
+          //Check that the type is what it is supposed to be
+          if (tof_info.type == ::NeXus::FLOAT32)
+            file.getSlab(event_time_of_flight, load_start, load_size);
+          else
+          {
+            g_log.warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
+            loadError = true;
+          }
+
+          if (!loadError)
+          {
+            std::string units;
+            file.getAttr("units", units);
+            if (units != "microsecond")
+            {
+              g_log.warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
+              loadError = true;
+            }
+            file.closeData();
+          } //no error
+        } //no error
+      } // Size is at least 1
+      else
+      {
+        // Found a size that was 0 or less; stop processign
+        loadError=true;
+      }
 
     } //no error
 
-    //Close up the file
+    } // try block
+    catch (std::exception e)
+    {
+      g_log.error() << "Error while loading bank " << entry_name << ":" << std::endl;
+      g_log.error() << e.what() << std::endl;
+      loadError = true;
+    }
+    catch (...)
+    {
+      g_log.error() << "Unspecified error while loading bank " << entry_name << std::endl;
+      loadError = true;
+    }
+
+    //Close up the file even if errors occured.
     file.closeGroup();
     file.close();
+
   } // END of critical block.
 
   //Abort if anything failed
   if (loadError)
-    return;
-
-  // Two arrays must be the same size
-  if (event_id.size() != event_time_of_flight.size())
   {
-    g_log.warning() << "Entry " << entry_name << "'s event_time_offset and event_id vectors are not the same size! It will be skipped.\n";
+    delete [] event_id;
+    delete [] event_time_of_flight;
     return;
   }
+
+  // The number of events we actually loaded
+  std::size_t numEvents = load_size[0];
 
   // ---- Pre-counting events per pixel ID ----
   if (precount)
   {
     std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
-    std::vector<uint32_t>::const_iterator it;
-    for (it = event_id.begin(); it != event_id.end(); it++)
+    for (size_t i=0; i < numEvents; i++)
     {
-      std::map<uint32_t, size_t>::iterator map_found = counts.find(*it);
+      uint32_t thisId = event_id[i];
+      std::map<uint32_t, size_t>::iterator map_found = counts.find(thisId);
       if (map_found != counts.end())
       {
         map_found->second++;
       }
       else
       {
-        counts[*it] = 1; // First entry
+        counts[thisId] = 1; // First entry
       }
     }
 
@@ -631,14 +722,13 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
   }
 
   //Go through all events in the list
-  std::size_t numEvents = event_id.size();
   for (std::size_t i = 0; i < numEvents; i++)
   {
-    //Find the pulse time for this event index
+    //------ Find the pulse time for this event index ---------
     if (pulse_i < numPulses-1)
     {
       //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
-      while ( !((i >= event_index[pulse_i]) && (i < event_index[pulse_i+1])))
+      while ( !((i+load_start[0] >= event_index[pulse_i]) && (i+load_start[0] < event_index[pulse_i+1])))
       {
         pulse_i++;
         if (pulse_i >= (numPulses-1))
@@ -648,27 +738,22 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
       pulsetime = pulseTimes[pulse_i];
     }
 
-    //Does this event pass the time filter?
-    if ((pulsetime < filter_time_stop) && (pulsetime >= filter_time_start))
+    //Create the tofevent
+    double tof = static_cast<double>( event_time_of_flight[i] );
+    if ((tof >= filter_tof_min) && (tof <= filter_tof_max))
     {
-      //Create the tofevent
-      double tof = static_cast<double>( event_time_of_flight[i] );
-      if ((tof >= filter_tof_min) && (tof <= filter_tof_max))
-      {
-        //The event TOF passes the filter.
-        TofEvent event(tof, pulsetime);
+      //The event TOF passes the filter.
+      TofEvent event(tof, pulsetime);
 
-        //Find the the workspace index corresponding to that pixel ID
-        int wi((*pixelID_to_wi_map)[event_id[i]]);
-        // Add it to the list at that workspace index
-        WS->getEventList(wi).addEventQuickly( event );
+      //Find the the workspace index corresponding to that pixel ID
+      int wi((*pixelID_to_wi_map)[event_id[i]]);
+      // Add it to the list at that workspace index
+      WS->getEventList(wi).addEventQuickly( event );
 
-        //Local tof limits
-        if (tof < my_shortest_tof) { my_shortest_tof = tof;}
-        if (tof > my_longest_tof) { my_longest_tof = tof;}
-      }
+      //Local tof limits
+      if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+      if (tof > my_longest_tof) { my_longest_tof = tof;}
     }
-
   }
 
   //Join back up the tof limits to the global ones
@@ -679,6 +764,9 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
     if (my_longest_tof > longest_tof ) { longest_tof  = my_longest_tof;}
   }
 
+  // Free Memory
+  delete [] event_id;
+  delete [] event_time_of_flight;
 
 }
 

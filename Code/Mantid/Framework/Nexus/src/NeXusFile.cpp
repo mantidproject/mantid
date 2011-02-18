@@ -626,6 +626,7 @@ void File::getData(void* data) {
   }
 }
 
+//---------------------------------------------------------------------------------------------
 template <typename NumT>
 std::vector<NumT> * File::getData() {
   Info info = this->getInfo();
@@ -647,7 +648,7 @@ std::vector<NumT> * File::getData() {
   // fetch the data
   this->getData(temp);
 
-  // put it in the vector
+  // put it in the vector (copy operation)
   vector<NumT> * result = new vector<NumT>(static_cast<NumT *>(temp),
                                            static_cast<NumT *>(temp)
                                            + static_cast<size_t>(length));
@@ -889,6 +890,7 @@ map<string, string> File::getEntries() {
   return result;
 }
 
+//-------------------------------------------------------------------------------------------------
 void File::getSlab(void* data, const vector<int>& start,
                    vector<int>& size) {
   if (data == NULL) {
@@ -922,6 +924,70 @@ void File::getSlab(void* data, const vector<int>& start,
     throw Exception("NXgetslab failed", status);
   }
 }
+
+
+////---------------------------------------------------------------------------------------------
+///** Allocate and return a C-style array with the loaded data.
+// * @param[out] length :: length of the returned array.
+// * @param start :: start offset in the dimensions
+// * @param size ::
+// * @return :: pointer to the data.
+// */
+///**
+// *
+// * @param length
+// * @return
+// */
+//template <typename NumT>
+//NumT * File::getSlabAllocated(size_t & length, const vector<int>& start, vector<int>& size) {
+//  {
+//    // allocate memory into which to put the data
+//    void * temp;
+//    inner_malloc(temp, size, getType<NumT>());
+//
+//    // fetch the data
+//    this->getSlab(temp, start, size);
+//
+//    // put it in the vector
+//    vector<NumT> * result = new vector<NumT>(static_cast<NumT *>(temp),
+//        static_cast<NumT *>(temp)
+//        + static_cast<size_t>(length));
+//
+//    inner_free(temp);
+//    return result;
+//
+//  }
+
+
+//
+////-------------------------------------------------------------------------------------------------
+///** Get a slab of data and place it into a vector.
+// *
+// * @param data :: reference to vector
+// * @param start
+// * @param size
+// * @return
+// */
+//template <typename NumT>
+//std::vector<NumT> * File::getSlab(vector<NumT> & data, const vector<int>& start, vector<int>& size)
+//{
+//  // allocate memory into which to put the data
+//  void * temp;
+//  inner_malloc(temp, size, getType<NumT>());
+//
+//  // fetch the data
+//  this->getSlab(temp, start, size);
+//
+//  // put it in the vector
+//  vector<NumT> * result = new vector<NumT>(static_cast<NumT *>(temp),
+//                                           static_cast<NumT *>(temp)
+//                                           + static_cast<size_t>(length));
+//
+//  inner_free(temp);
+//  return result;
+//}
+
+
 
 AttrInfo File::getNextAttr() {
   //string & name, int & length, NXnumtype type) {
