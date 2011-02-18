@@ -124,7 +124,7 @@ namespace Mantid
       /// Do we load the sample logs?
       bool loadlogs;
 
-      void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map);
+      void loadBankEventData(const std::string entry_name, API::IndexToIndexMap * pixelID_to_wi_map, Mantid::API::Progress * prog);
       void loadEntryMetadata(const std::string &entry_name);
       void runLoadInstrument(const std::string &nexusfilename, API::MatrixWorkspace_sptr localWorkspace);
       void runLoadMonitors();

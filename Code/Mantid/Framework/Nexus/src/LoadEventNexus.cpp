@@ -189,12 +189,10 @@ void LoadEventNexus::exec()
   WS->setYUnit("Counts");
 
   //Initialize progress reporting.
-  //3 calls for the first part, 4 if monitors are loaded
   int reports = 4;
   if (load_monitors)
-  {
     reports++;
-  }
+
   Progress prog(this,0.0,0.3,  reports);
 
 
@@ -369,7 +367,7 @@ void LoadEventNexus::exec()
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
   longest_tof = 0.;
 
-  Progress prog2(this,0.3,1.0, bankNames.size());
+  Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   //This map will be used to find the workspace index
   IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
@@ -380,11 +378,11 @@ void LoadEventNexus::exec()
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
     PARALLEL_START_INTERUPT_REGION
-    prog2.report("Loading " + bankNames[i]);
-    this->loadBankEventData(bankNames[i], pixelID_to_wi_map);
+    this->loadBankEventData(bankNames[i], pixelID_to_wi_map, prog2);
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+  delete prog2;
 
   //Don't need the map anymore.
   delete pixelID_to_wi_map;
@@ -460,7 +458,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
  * @param entry_name :: The pathname of the bank to load
  * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
  */
-void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map)
+void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map, Progress * prog)
 {
   //Local tof limits
   double my_shortest_tof, my_longest_tof;
@@ -483,6 +481,8 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
   float * event_time_of_flight = NULL;
 
   bool loadError = false ;
+
+  prog->report(entry_name + ": load from disk");
 
   PARALLEL_CRITICAL(LoadEventNexus_loadBankEventData_nexus_file_access)
   {
@@ -591,15 +591,22 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
           loadError = true;
         }
 
-        //Must be uint32
-        if (id_info.type == ::NeXus::UINT32)
-          file.getSlab(event_id, load_start, load_size);
-        else
+        if (this->m_cancel) loadError = true; //To allow cancelling the algorithm
+
+        if (!loadError)
         {
-          g_log.warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
-          loadError = true;
+          //Must be uint32
+          if (id_info.type == ::NeXus::UINT32)
+            file.getSlab(event_id, load_start, load_size);
+          else
+          {
+            g_log.warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
+            loadError = true;
+          }
+          file.closeData();
         }
-        file.closeData();
+
+        if (this->m_cancel) loadError = true; //To allow cancelling the algorithm
 
         if (!loadError)
         {
@@ -669,6 +676,7 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
   //Abort if anything failed
   if (loadError)
   {
+    prog->reportIncrement(2, entry_name + ": skipping");
     delete [] event_id;
     delete [] event_time_of_flight;
     return;
@@ -676,6 +684,8 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
 
   // The number of events we actually loaded
   std::size_t numEvents = load_size[0];
+
+  prog->report(entry_name + ": precount");
 
   // ---- Pre-counting events per pixel ID ----
   if (precount)
@@ -693,6 +703,7 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
       {
         counts[thisId] = 1; // First entry
       }
+      if (m_cancel) break; // User cancellation
     }
 
     // Now we pre-allocate (reserve) the vectors of events in each pixel counted
@@ -703,8 +714,13 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
       int wi((*pixelID_to_wi_map)[ pixID->first ]);
       // Allocate it
       WS->getEventList(wi).reserve( pixID->second );
+      if (m_cancel) break; // User cancellation
     }
   }
+
+  // Check for cancelled algorithm
+  if (this->m_cancel)
+  {  delete [] event_id;  delete [] event_time_of_flight; return;  }
 
   //Default pulse time (if none are found)
   Mantid::Kernel::DateAndTime pulsetime;
@@ -721,21 +737,31 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
     pulse_i = numPulses + 1;
   }
 
+  prog->report(entry_name + ": filling events");
+
   //Go through all events in the list
   for (std::size_t i = 0; i < numEvents; i++)
   {
     //------ Find the pulse time for this event index ---------
     if (pulse_i < numPulses-1)
     {
+      bool breakOut = false;
       //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
       while ( !((i+load_start[0] >= event_index[pulse_i]) && (i+load_start[0] < event_index[pulse_i+1])))
       {
         pulse_i++;
+        // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
+        if (this->m_cancel)
+          breakOut = true;
         if (pulse_i >= (numPulses-1))
           break;
       }
       //Save the pulse time at this index for creating those events
       pulsetime = pulseTimes[pulse_i];
+
+      // Flag to break out of the event loop with using goto ;)
+      if (breakOut)
+        break;
     }
 
     //Create the tofevent
@@ -754,7 +780,7 @@ void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToInde
       if (tof < my_shortest_tof) { my_shortest_tof = tof;}
       if (tof > my_longest_tof) { my_longest_tof = tof;}
     }
-  }
+  } //(for each event)
 
   //Join back up the tof limits to the global ones
   PARALLEL_CRITICAL(tof_limits)
