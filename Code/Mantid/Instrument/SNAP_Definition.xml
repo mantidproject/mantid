@@ -3,9 +3,10 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="SNAP" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2010-11-11 00:00:00">
+		        last-modified="2011-02-17 00:00:00">
   <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
   <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
+  <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
   <!--DEFAULTS-->
   <defaults>
     <length unit="metre"/>
@@ -63,94 +64,94 @@
   </component>
   <type name="East">
   <component type="panel"   idstart="720896" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E1">
+    <location name="bank1">
       <trans x="-0.167548" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="917504" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E2">
+    <location name="bank2">
       <trans x="0.0" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="1114112" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E3">
+    <location name="bank3">
       <trans x="0.167548" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="655360" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E4">
+    <location name="bank4">
       <trans x="-0.167548" y="0.0" />
     </location>
   </component>
   <component type="panel"  idstart="851968" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E5">
+    <location name="bank5">
       <trans x="0.0" y="0.0" />
     </location>
   </component>
   <component type="panel"   idstart="1048576" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E6">
+    <location name="bank6">
       <trans x="0.167548" y="0.0" />
     </location>
   </component>
   <component type="panel"   idstart="589824" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E7">
+    <location name="bank7">
       <trans x="-0.167548" y="-0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="786432" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E8">
+    <location name="bank8">
       <trans x="0.0" y="-0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="983040" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="E9">
+    <location name="bank9">
       <trans x="0.167548" y="-0.167548" />
     </location>
   </component>
   </type>
   <type name="West">
   <component type="panel"   idstart="524288" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W1">
+    <location name="bank10">
       <trans x="0.167548" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="327680" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W2">
+    <location name="bank11">
       <trans x="0.0" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="131072" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W3">
+    <location name="bank12">
       <trans x="-0.167548" y="0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="458752" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W4">
+    <location name="bank13">
       <trans x="0.167548" y="0.0" />
     </location>
   </component>
   <component type="panel"   idstart="262144" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W5">
+    <location name="bank14">
       <trans x="0.0" y="0.0" />
     </location>
   </component>
   <component type="panel"   idstart="65536" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W6">
+    <location name="bank15">
       <trans x="-0.167548" y="0.0" />
     </location>
   </component>
   <component type="panel"   idstart="393216" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W7">
+    <location name="bank16">
       <trans x="0.167548" y="-0.167548" />
     </location>
   </component>
   <component type="panel"   idstart="196608" idfillbyfirst="y" idstepbyrow="256" >
-    <location name="W8">
+    <location name="bank17">
       <trans x="0.0" y="-0.167548" />
     </location>
   </component>
   <component type="panel"  idstart="0" idfillbyfirst="y" idstepbyrow="256" > 
-    <location name="W9">
+    <location name="bank18">
       <trans x="-0.167548" y="-0.167548" />
     </location>
   </component>
