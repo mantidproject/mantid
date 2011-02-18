@@ -228,7 +228,7 @@ AlignDetectors::~AlignDetectors()
 void AlignDetectors::init()
 {
   this->setOptionalMessage(
-      "Converts time-of-flight to d-Spacing, using a calibration file to correct by an offset.\n"
+      "Performs a unit change from Time-Of-Flight to dSpacing, correcting the X values to account for small errors in the detector positions.\n"
       );
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
