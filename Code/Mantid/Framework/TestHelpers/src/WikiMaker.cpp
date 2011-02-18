@@ -65,9 +65,16 @@ std::string makeWikiText(IAlgorithm * alg)
       out << "|" << Kernel::Direction::asText(p->direction()) << "\n";
       // Type
       out << "|" << p->type() << "\n";
-      // Allowed values, comma separated
-      std::set<std::string> allowed = p->allowedValues();
-      out << "|" << p->getDefault() << "\n";
+
+      // Default?
+      if (p->isValid()=="") //Nothing was set, but it's still valid = NOT mandatory
+      {
+        out << "|" << p->getDefault() << "\n";
+      }
+      else
+      {
+        out << "|Mandatory\n";
+      }
       // Documentation
       out << "|" << Strings::replace( p->documentation(), "\n", " ") << "\n";
       // End of table line
