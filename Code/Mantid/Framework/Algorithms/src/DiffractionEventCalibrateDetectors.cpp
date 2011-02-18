@@ -241,6 +241,25 @@ namespace Algorithms
     }
     outputW=alg5->getProperty("OutputWorkspace");
 
+    IAlgorithm_sptr smooth = createSubAlgorithm("SmoothData");
+    smooth->setProperty("InputWorkspace", outputW);
+    // The number of points which contribute to each smoothed point
+    smooth->setProperty("NPoints",20);
+    try {
+      smooth->execute();
+    } catch (std::runtime_error &) {
+      g_log.error("Unable to successfully run SmoothData sub-algorithm");
+      throw;
+    }
+
+    if ( ! smooth->isExecuted() )
+    {
+      g_log.error("Unable to successfully run SmoothData sub-algorithm");
+      throw std::runtime_error("Unable to successfully run SmoothData sub-algorithm");
+    }
+    // Get back the result
+    outputW = smooth->getProperty("OutputWorkspace");
+
   // Find point of peak centre
     const MantidVec & yValues = outputW->readY(0);
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
@@ -465,12 +484,6 @@ namespace Algorithms
       g_log.information() << "Rotate (Z) = " << gsl_vector_get (s->x, 5) << "  \n";
 
 
-      // clean up dynamically allocated gsl stuff
-      gsl_vector_free(x);
-      gsl_vector_free(ss);
-      gsl_multimin_fminimizer_free (s);
-      prog.report();
-
       Geometry::V3D CalCenter=V3D(gsl_vector_get (s->x, 0)*0.01,
         gsl_vector_get (s->x, 1)*0.01, gsl_vector_get (s->x, 2)*0.01);
       Geometry::V3D Center=detList[det]->getPos()+CalCenter;
@@ -491,42 +504,43 @@ namespace Algorithms
       Geometry::V3D Up=V3D(upX,upY,upZ)+CalCenter;
       Base-=Center;
       Up-=Center;
-      //Rotate in x
+      //Rotate around x
       baseX = Base[0];
       baseY = Base[1];
       baseZ = Base[2];
-      Base=V3D(baseX,baseY*cos(gsl_vector_get (s->x, 3))-baseZ*sin(gsl_vector_get (s->x, 3)),
-        baseY*sin(gsl_vector_get (s->x, 3))+baseZ*cos(gsl_vector_get (s->x, 3)));
-      //Rotate in y
+      double deg2rad=M_PI/180.0;
+      double angle = gsl_vector_get (s->x, 3)*deg2rad;
+      Base=V3D(baseX,baseY*cos(angle)-baseZ*sin(angle),
+        baseY*sin(angle)+baseZ*cos(angle));
+      upX = Up[0];
+      upY = Up[1];
+      upZ = Up[2];
+      Up=V3D(upX,upY*cos(angle)-upZ*sin(angle),
+        upY*sin(angle)+upZ*cos(angle));
+      //Rotate around y
       baseX = Base[0];
       baseY = Base[1];
       baseZ = Base[2];
-      Base=V3D(baseZ*cos(gsl_vector_get (s->x, 4))-baseX*sin(gsl_vector_get (s->x, 4)),
-        baseY,baseZ*sin(gsl_vector_get (s->x, 4))+baseX*cos(gsl_vector_get (s->x, 4)));
-      //Rotate in z
+      angle = gsl_vector_get (s->x, 4)*deg2rad;
+      Base=V3D(baseZ*sin(angle)+baseX*cos(angle),
+        baseY,baseZ*cos(angle)-baseX*sin(angle));
+      upX = Up[0];
+      upY = Up[1];
+      upZ = Up[2];
+      Up=V3D(upZ*cos(angle)-upX*sin(angle),upY,
+        upZ*sin(angle)+upX*cos(angle));
+      //Rotate around z
       baseX = Base[0];
       baseY = Base[1];
       baseZ = Base[2];
-      Base=V3D(baseX*cos(gsl_vector_get (s->x, 5))-baseY*sin(gsl_vector_get (s->x, 5)),
-        baseX*sin(gsl_vector_get (s->x, 5))+baseY*cos(gsl_vector_get (s->x, 5)),baseZ);
-      //Rotate in x
+      angle = gsl_vector_get (s->x, 5)*deg2rad;
+      Base=V3D(baseX*cos(angle)-baseY*sin(angle),
+        baseX*sin(angle)+baseY*cos(angle),baseZ);
       upX = Up[0];
       upY = Up[1];
       upZ = Up[2];
-      Up=V3D(upX,upY*cos(gsl_vector_get (s->x, 3))-upZ*sin(gsl_vector_get (s->x, 3)),
-        upY*sin(gsl_vector_get (s->x, 3))+upZ*cos(gsl_vector_get (s->x, 3)));
-      //Rotate in y
-      upX = Up[0];
-      upY = Up[1];
-      upZ = Up[2];
-      Up=V3D(upZ*cos(gsl_vector_get (s->x, 4))-upX*sin(gsl_vector_get (s->x, 4)),upY,
-        upZ*sin(gsl_vector_get (s->x, 4))+upX*cos(gsl_vector_get (s->x, 4)));
-      //Rotate in z
-      upX = Up[0];
-      upY = Up[1];
-      upZ = Up[2];
-      Up=V3D(upX*cos(gsl_vector_get (s->x, 5))-upY*sin(gsl_vector_get (s->x, 5)),
-        upX*sin(gsl_vector_get (s->x, 5))+upY*cos(gsl_vector_get (s->x, 5)),upZ);
+      Up=V3D(upX*cos(angle)-upY*sin(angle),
+        upX*sin(angle)+upY*cos(angle),upZ);
       Base.normalize();
       Up.normalize();
       Center*=100.0;
@@ -544,6 +558,12 @@ namespace Algorithms
       outfile << "  ";
       Up.write(outfile);
       outfile << "\n";
+
+      // clean up dynamically allocated gsl stuff
+      gsl_vector_free(x);
+      gsl_vector_free(ss);
+      gsl_multimin_fminimizer_free (s);
+      prog.report();
     }
 
     // Closing
