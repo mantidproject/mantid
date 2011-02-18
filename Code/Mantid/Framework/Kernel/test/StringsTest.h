@@ -83,9 +83,14 @@ public:
 	}
 
 
-	void test_Join()
+	void test_join()
 	{
 	  std::vector<std::string> v;
+    std::string out;
+
+    out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS( out, "");
+
     v.push_back("Help");
     v.push_back("Me");
     v.push_back("I'm");
@@ -94,9 +99,23 @@ public:
     v.push_back("A");
     v.push_back("Test");
 
-    std::string out = join(v.begin(), v.end(), ",");
+    out = join(v.begin(), v.end(), ",");
     TS_ASSERT_EQUALS( out, "Help,Me,I'm,Stuck,Inside,A,Test");
 	}
+
+
+	void test_replace()
+	{
+	  std::string in = "hello\nI hate\nnewlines.\n";
+	  std::string out = replace(in, "\n", " ");
+    TS_ASSERT_EQUALS(out, "hello I hate newlines. ");
+
+    TS_ASSERT_EQUALS(replace("bla", "bla", ""), "");
+    TS_ASSERT_EQUALS(replace("FirstSecond", "First", ""), "Second");
+    TS_ASSERT_EQUALS(replace("FirstSecond", "Second", ""), "First");
+    TS_ASSERT_EQUALS(replace("Hello You", " ", " I am stupid, "), "Hello I am stupid, You");
+	}
+
 
 };
 

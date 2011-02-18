@@ -17,6 +17,26 @@ namespace Kernel
 namespace Strings
 {
 
+//------------------------------------------------------------------------------------------------
+/** Return a string with all matching occurence-strings
+ *
+ * @param input :: input string
+ * @param find_what :: will search for all occurences of this string
+ * @param replace_with :: ... and replace them with this.
+ * @return the modified string.
+ */
+std::string replace(const std::string input, const std::string find_what, const std::string replace_with)
+{
+  std::string output = input;
+  std::string::size_type pos=0;
+  while((pos=output.find(find_what, pos))!=std::string::npos)
+  {
+    output.erase(pos, find_what.length());
+    output.insert(pos, replace_with);
+    pos+=replace_with.length();
+  }
+  return output;
+}
 
 
 //------------------------------------------------------------------------------------------------

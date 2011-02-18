@@ -8,6 +8,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/Memory.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Strings.h"
 #include <set>
 
 using namespace Mantid;
@@ -18,18 +19,20 @@ using namespace Mantid::DataObjects;
 
 /* Application to make a wiki page text from an algorithm */
 
+//--------------------------------------------------------------------------
 void printHelp()
 {
   std::cout
   << "WikiMaker: Utility to make Mantid wiki pages.\n"
   << "---------------------------------------------\n"
-  << "USAGE: WikiMaker ALGORITHM_NAME\n"
+  << "USAGE: WikiMaker ALGORITHM_NAME [outputfile]\n"
   << "\n"
   << "Please specify an algorithm name!\n"
   ;
 }
 
 
+//--------------------------------------------------------------------------
 /** Make a wiki text from the properties of an algorithm.
   *
  * @param alg :: pointer to the algorithm.
@@ -39,7 +42,7 @@ std::string makeWikiText(IAlgorithm * alg)
   // To pipe out the string
   std::ostringstream out;
   out << "== Summary ==\n\n";
-  out << alg->getOptionalMessage() << "\n\n";
+  out << Strings::replace( alg->getOptionalMessage(), "\n", " ") << "\n\n";
   out << "== Properties ==\n\n";
 
   out << "{| border=\"1\" cellpadding=\"5\" cellspacing=\"0\" \n"
@@ -62,8 +65,11 @@ std::string makeWikiText(IAlgorithm * alg)
       out << "|" << Kernel::Direction::asText(p->direction()) << "\n";
       // Type
       out << "|" << p->type() << "\n";
+      // Allowed values, comma separated
       std::set<std::string> allowed = p->allowedValues();
-      //std::accumulate(allowed.begin()
+      out << "|" << p->getDefault() << "\n";
+      // Documentation
+      out << "|" << Strings::replace( p->documentation(), "\n", " ") << "\n";
       // End of table line
       out << "|-\n";
       propNum++;
@@ -85,9 +91,8 @@ std::string makeWikiText(IAlgorithm * alg)
 }
 
 
-//"""== Properties ==
 
-
+//--------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
   // Must specift the algorigthm
@@ -103,7 +108,12 @@ int main(int argc, char *argv[])
     printHelp();
     exit(2);
   }
+  // Optional output filename
+  std::string filename = "";
+  if (argc >= 2)
+    filename = argv[2];
 
+  // Get the algorithm
   FrameworkManagerImpl& fm = FrameworkManager::Instance();
   IAlgorithm *alg;
   // Create it; will throw if not found
@@ -112,8 +122,18 @@ int main(int argc, char *argv[])
   // Make it!
   std::string res = makeWikiText(alg);
 
-  //TODO: Write out to file
-  std::cout << res;
+  // Output to screen
+  std::cout << "\n\n" << res;
+
+  if (filename != "")
+  {
+    std::ofstream myfile;
+    myfile.open(filename.c_str());
+    myfile << res;
+    myfile.close();
+    std::cout << "\n\n... Written to: " << filename << "\n\n";
+  }
+
 
   exit(0);
 }

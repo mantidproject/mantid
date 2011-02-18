@@ -1,26 +1,22 @@
 //---------------------------------------
 // Includes
 //------------------------------------
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/MemoryManager.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/Strings.h"
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
-
-#include <boost/python/handle.hpp>
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
+#include "MantidPythonAPI/SimplePythonAPI.h"
 #include <boost/python/extract.hpp>
+#include <boost/python/handle.hpp>
 #include <fstream>
 #include <sstream>
 #include <vector>
-
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/AlgorithmManager.h"
-
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/ITableWorkspace.h"
-
-#include "MantidPythonAPI/PyAlgorithmWrapper.h"
-#include "MantidPythonAPI/SimplePythonAPI.h"
-
-#include "MantidKernel/ConfigService.h"
 
 namespace Mantid
 {
@@ -201,15 +197,7 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
       buffer << "      " << prop->documentation();
       if (!allowed.empty())
       {
-        buffer << " [";
-        std::set<std::string>::const_iterator sIter = allowed.begin();
-        std::set<std::string>::const_iterator sEnd = allowed.end();
-        for( ; sIter != sEnd ; )
-        {
-          buffer << (*sIter);
-          if( ++sIter != sEnd )
-            buffer << ", ";
-        }
+        buffer << " [" << Kernel::Strings::join(allowed.begin(), allowed.end(), ", ");
         buffer << "]";
       }
       buffer << EOL;

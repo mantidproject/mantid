@@ -59,7 +59,7 @@ namespace Strings
  * @return
  */
 template<typename ITERATOR_TYPE>
-std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
+DLLExport std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
 {
   std::ostringstream output;
   ITERATOR_TYPE it;
@@ -73,6 +73,8 @@ std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separ
   return output.str();
 }
 
+/// Return a string with all matching occurence-strings
+DLLExport std::string replace(const std::string input, const std::string find_what, const std::string replace_with);
 
 /// determine if a character group exists in a string
 DLLExport int confirmStr(const std::string& S,const std::string& fullPhrase);
