@@ -84,6 +84,48 @@ public:
   }
 
 
+  //-----------------------------------------------------------------------------
+  ICompAssembly_sptr setUpGetChildren()
+  {
+    ICompAssembly_sptr bank( new CompAssembly("BankName") );
+    for (int i=0; i<3; i++)
+    {
+      Component* det1 = new Component("Det1Name");
+      bank->add(det1);
+    }
+    CompAssembly * childbank =  new CompAssembly("ChildBank");
+    for (int i=0; i<5; i++)
+    {
+      Component* det1 = new Component("ChildDet1Name");
+      childbank->add(det1);
+    }
+    bank->add(childbank);
+    return bank;
+  }
+
+  void test_GetChildren_NonRecursive()
+  {
+    ICompAssembly_sptr bank = setUpGetChildren();
+    TS_ASSERT_EQUALS(bank->nelements(), 4);
+    std::vector<IComponent_sptr> kids;
+    bank->getChildren(kids, false);
+    TS_ASSERT_EQUALS(kids.size(), 4);
+    TS_ASSERT_EQUALS(kids[0]->getName(), "Det1Name");
+  }
+
+  void test_GetChildren_Recursive()
+  {
+    ICompAssembly_sptr bank = setUpGetChildren();
+    TS_ASSERT_EQUALS(bank->nelements(), 4);
+    std::vector<IComponent_sptr> kids;
+    bank->getChildren(kids, true);
+    TS_ASSERT_EQUALS(kids.size(), 9);
+    TS_ASSERT_EQUALS(kids[0]->getName(), "Det1Name");
+    TS_ASSERT_EQUALS(kids[8]->getName(), "ChildDet1Name");
+  }
+
+
+  //-----------------------------------------------------------------------------
   void testAddCopy()
   {
     CompAssembly bank("BankName");

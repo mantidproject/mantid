@@ -6,6 +6,7 @@
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/Exception.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
@@ -143,6 +144,27 @@ public:
     TS_ASSERT( i->getComponentByName("det1").get() );
 
     delete i;
+  }
+
+
+
+  void test_getDetectorsInBank()
+  {
+    // 5 banks with 6x6 pixels in them.
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    std::vector<IDetector_sptr> dets;
+    inst->getDetectorsInBank(dets, "bank2");
+    TS_ASSERT_EQUALS(dets.size(), 36);
+    TS_ASSERT_EQUALS(dets[0]->getID(), 36*2);
+  }
+
+  void test_getDetectorsInBank2()
+  {
+    // 5 banks with 9 pixels each
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5, false);
+    std::vector<IDetector_sptr> dets;
+    inst->getDetectorsInBank(dets, "bank2");
+    TS_ASSERT_EQUALS(dets.size(), 9);
   }
 
 private:

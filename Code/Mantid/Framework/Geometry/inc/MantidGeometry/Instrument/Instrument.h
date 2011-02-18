@@ -95,6 +95,8 @@ namespace Mantid
       /// return reference to detector cache 
       std::map<int, Geometry::IDetector_sptr> getDetectors() const;
 
+      void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName);
+
       /// returns a list containing  detector ids of monitors
       const std::vector<int> getMonitors()const ;
       /// Get the bounding box for this component and store it in the given argument

@@ -60,8 +60,12 @@ public:
   virtual Geometry::IObjComponent_sptr getSample() const = 0;
   /// Returns a unit vector pointing in the direction of the beam
   Geometry::V3D getBeamDirection() const;
+
   /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
+
+  /// Fill a vector with all the detectors contained in a named component
+  virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
 
   /// Returns a pointer to the geometrical object representing the monitor with the given ID
   virtual Geometry::IDetector_sptr getMonitor(const int &detector_id) const = 0;

@@ -66,7 +66,8 @@ namespace Mantid
 
 
 
-    /**	return reference to detector cache 
+    //------------------------------------------------------------------------------------------
+    /**	Return a copy of the detector cache
     * @returns a map of the detectors hold by the instrument
     */
     std::map<int, Geometry::IDetector_sptr> Instrument::getDetectors() const
@@ -88,6 +89,40 @@ namespace Mantid
       }
     }
 
+
+    //------------------------------------------------------------------------------------------
+    /** Fill a vector with all the detectors contained (at any depth) in a named component. For example,
+     * you might have a bank10 with 4 tubes with 100 pixels each; this will return the
+     * 400 contained Detector objects.
+     *
+     * @param[out] dets :: vector filled with detector pointers
+     * @param bankName :: name of the parent component assembly that contains detectors.
+     *        The name must be unique, otherwise the first matching component (getComponentByName)
+     *        is used.
+     */
+    void Instrument::getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName)
+    {
+      boost::shared_ptr<IComponent> comp = this->getComponentByName(bankName);
+      boost::shared_ptr<ICompAssembly> bank = boost::dynamic_pointer_cast<ICompAssembly>(comp);
+      if (bank)
+      {
+        // Get a vector of children (recursively)
+        std::vector<boost::shared_ptr<IComponent> > children;
+        bank->getChildren(children, true);
+        std::vector<boost::shared_ptr<IComponent> >::iterator it;
+        for (it = children.begin(); it != children.end(); it++)
+        {
+          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(*it);
+          if (det)
+          {
+            dets.push_back( det );
+          }
+        }
+      }
+    }
+
+
+    //------------------------------------------------------------------------------------------
     /** Gets a pointer to the source
      *   @returns a pointer to the source
      */
@@ -108,6 +143,7 @@ namespace Mantid
       }
     }
 
+    //------------------------------------------------------------------------------------------
     /** Gets a pointer to the Sample Position
      *  @returns a pointer to the Sample Position
      */
@@ -128,6 +164,7 @@ namespace Mantid
       }
     }
 
+    //------------------------------------------------------------------------------------------
     /**  Get a shared pointer to a component by its ID
     *   @param id :: ID
     *   @return A pointer to the component.
@@ -141,6 +178,7 @@ namespace Mantid
         return boost::shared_ptr<Geometry::IComponent>(base, NoDeleting());
     }
 
+    //------------------------------------------------------------------------------------------
     /**  Get a shared pointer to a component by its ID, const version
     *   @param id :: ID
     *   @return A pointer to the component.
