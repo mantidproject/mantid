@@ -30,7 +30,7 @@ using namespace DataObjects;
 void SumNeighbours::init()
 {
   this->setOptionalMessage(
-      "Sums neighboring pixels on rectangular detectors. \n"
+      "Sums neighbouring pixels on rectangular detectors. \n"
       "Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.\n"
       "Only works on EventWorkspaces and for instruments with RectangularDetector's.");
 
@@ -52,9 +52,13 @@ void SumNeighbours::init()
   declareProperty("SumY", 4, mustBePositive->clone(),
     "The number of Y (vertical) pixels to sum together. This must evenly divide the number of Y pixels in a detector" );
 
-  declareProperty("DetectorName", "", "Name of the detector when calculating for one detector." );
-  declareProperty("Xpixel", -1, "X of pixel when choosing only one pixel for sum." );
-  declareProperty("Ypixel", -1, "Y of pixel when choosing only one pixel for sum." );
+  declareProperty(
+      new PropertyWithValue<bool>("SingleNeighbourhood", false, Direction::Input),
+    "Optional: Only applies if you specified a single Xpixel and Ypixel for DetectorName.\n");
+  declareProperty("Xpixel", 0, "Optional: Left-most X of neighbourhood when choosing only single neighbourhood." );
+  declareProperty("Ypixel", 0, "Optional: Lowest Y of neighbourhood when choosing only single neighbourhood." );
+  declareProperty("DetectorName", "", "Optional: Name of the detector when calculating for single neighbourhood." );
+
 
 
 }
@@ -139,7 +143,7 @@ void SumNeighbours::exec()
   }
 
   if (detList.size() == 0)
-    throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbors cannot operate on this instrument at this time.");
+    throw std::runtime_error("This instrument does not have any RectangularDetector's. SumNeighbours cannot operate on this instrument at this time.");
 
   //Loop through the RectangularDetector's we listed before.
   for (int i=0; i < static_cast<int>(detList.size()); i++)
@@ -149,20 +153,22 @@ void SumNeighbours::exec()
     det = detList[i];
     if (det)
     {
-    int x0 = getProperty("Xpixel");
-    int xend = x0 + SumX;
-    if (x0 < 0)
-    {
-      x0 = 0;
-      xend = det->xpixels();
-    }
-    int y0 = getProperty("Ypixel");
-    int yend = y0 + SumY;
-    if (y0 < 0)
-    {
-      y0 = 0;
-      yend = det->ypixels();
-    }
+      int x0 = 0;
+      int xend = det->xpixels();
+      int y0 = 0;
+      int yend = det->ypixels();
+      bool SingleNeighbourhood = getProperty("SingleNeighbourhood");
+      if (SingleNeighbourhood)
+      {
+        x0 = getProperty("Xpixel");
+        xend = x0 + SumX;
+        if(x0 < 0)x0 = 0;
+        if(xend>det->xpixels())xend = det->xpixels();
+        y0 = getProperty("Ypixel");
+        yend = y0 + SumY;
+        if(y0 < 0)y0 = 0;
+        if(yend>det->ypixels())yend = det->ypixels();
+      }
       int x, y;
       det_name = det->getName();
       //TODO: Check validity of the parameters
