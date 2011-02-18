@@ -72,7 +72,7 @@ public:
     if (!ins)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
 
-    boost::shared_ptr<Mantid::Geometry::IComponent> det = ins->getComponentByName("E1");
+    boost::shared_ptr<Mantid::Geometry::IComponent> det = ins->getComponentByName("bank1");
     V3D PosNew = det->getPos();
     Quat rot = det->getRotation();
     TS_ASSERT_EQUALS(PosNew, V3D(0.500000,0.167548,-0.167548));
