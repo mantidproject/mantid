@@ -282,7 +282,6 @@ public:
     if (willFail)
     {
       TS_ASSERT( !ld.isExecuted() );
-      TS_ASSERT_THROWS( WS = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(AnalysisDataService::Instance().retrieve(outws_name)), std::exception );
       return;
     }
 
