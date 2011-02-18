@@ -243,7 +243,6 @@ namespace Algorithms
 
 
   // Find point of peak centre
-    const MantidVec & xValues = outputW->readX(0);
     const MantidVec & yValues = outputW->readY(0);
     MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
     double peakHeight = *it;
@@ -262,8 +261,8 @@ namespace Algorithms
     }
     fit_alg->setProperty("InputWorkspace",outputW);
     fit_alg->setProperty("WorkspaceIndex",0);
-    fit_alg->setProperty("StartX",xValues.begin());
-    fit_alg->setProperty("EndX",xValues.end());
+    fit_alg->setProperty("StartX",outputW->readX(0)[0]);
+    fit_alg->setProperty("EndX",outputW->readX(0)[outputW->blocksize()]);
     fit_alg->setProperty("MaxIterations",200);
     fit_alg->setProperty("Output","fit");
     std::ostringstream fun_str;
