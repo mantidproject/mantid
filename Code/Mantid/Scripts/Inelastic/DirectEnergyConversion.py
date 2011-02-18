@@ -292,13 +292,7 @@ class DirectEnergyConversion(object):
             Rebin(result_ws, result_ws, self.energy_bins)
         
         if self.apply_detector_eff:
-            if (self.facility == "SNS"):
-                # Need to be in lambda for detector efficiency correction
-                ConvertUnits(result_ws, result_ws, Target="Wavelength", EMode="Direct", EFixed=ei_value)
-                He3TubeEfficiency(result_ws, result_ws)
-                ConvertUnits(result_ws, result_ws, Target="DeltaE",EMode='Direct', EFixed=ei_value)
-            else:
-                DetectorEfficiencyCor(result_ws, result_ws)
+            DetectorEfficiencyCor(result_ws, result_ws)
 
         # Ki/Kf Scaling...
         if self.apply_kikf_correction:
