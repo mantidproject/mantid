@@ -78,6 +78,7 @@ void FrameworkManagerImpl::clear()
   clearAlgorithms();
   clearData();
   clearInstruments();
+  MemoryManager::Instance().releaseFreeMemory();
 }
 
 /**
