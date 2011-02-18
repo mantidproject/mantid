@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <iterator>
 
 namespace Mantid
 {
@@ -42,6 +43,37 @@ namespace Kernel
 
 namespace Strings
 {
+
+//------------------------------------------------------------------------------------------------
+/** Join a set or vector of (something that turns into a string) together
+ * into one string, separated by a string.
+ * Returns an empty string if the range is null.
+ * Does not add the separator after the LAST item.
+ *
+ * For example, join a vector of strings with commas with:
+ *  out = join(v.begin(), v.end(), ", ");
+ *
+ * @param begin :: iterator at the start
+ * @param end :: iterator at the end
+ * @param separator :: string to append.
+ * @return
+ */
+template<typename ITERATOR_TYPE>
+std::string join(ITERATOR_TYPE begin, ITERATOR_TYPE end, const std::string separator)
+{
+  std::ostringstream output;
+  ITERATOR_TYPE it;
+  for (it = begin; it != end; )
+  {
+    output << *it;
+    it++;
+    if (it != end)
+      output << separator;
+  }
+  return output.str();
+}
+
+
 /// determine if a character group exists in a string
 DLLExport int confirmStr(const std::string& S,const std::string& fullPhrase);
 /// Get a word from a string

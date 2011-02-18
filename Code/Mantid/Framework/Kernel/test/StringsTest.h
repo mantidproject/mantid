@@ -36,9 +36,6 @@ public:
 	}
 
 	void testConvert()
-	  /**
-		Applies a test to convert
-	  */
 	{
 	  int i;
 	  //valid double convert
@@ -61,9 +58,6 @@ public:
 	}
 
 	void testSection()
-	  /**
-		Applies a test to section
-	  */
 	{
 	  std::string Mline="V 1 tth ";
 	  std::string Y;
@@ -73,9 +67,6 @@ public:
 	}
 
 	void testSectPartNum()
-	  /**
-		Applies a test to sectPartNum
-	  */
 	{
 	  double X;
 	  std::string NTest="   3.4   ";
@@ -89,6 +80,22 @@ public:
 	  NTest="   e3.4   ";
 	  TS_ASSERT_DIFFERS(sectPartNum(NTest,X),1);
 	  TS_ASSERT_EQUALS(X,9.0);
+	}
+
+
+	void test_Join()
+	{
+	  std::vector<std::string> v;
+    v.push_back("Help");
+    v.push_back("Me");
+    v.push_back("I'm");
+    v.push_back("Stuck");
+    v.push_back("Inside");
+    v.push_back("A");
+    v.push_back("Test");
+
+    std::string out = join(v.begin(), v.end(), ",");
+    TS_ASSERT_EQUALS( out, "Help,Me,I'm,Stuck,Inside,A,Test");
 	}
 
 };

@@ -12,18 +12,14 @@ using std::size_t;
 
 namespace Mantid
 {
-
-namespace Geometry
-{
-  class V3D; //Forward declaration
-}
-
-
 namespace Kernel
 {
 namespace Strings
 {
 
+
+
+//------------------------------------------------------------------------------------------------
 /**
   Function to convert a number into hex
   output (and leave the stream un-changed)
@@ -43,6 +39,7 @@ void printHex(std::ostream& OFS,const int n)
   return;
 } 
 
+//------------------------------------------------------------------------------------------------
 /**
   Removes the multiple spaces in the line
   @param Line :: Line to process
@@ -74,6 +71,8 @@ std::string stripMultSpc(const std::string& Line)
   return Out;
 }
 
+//------------------------------------------------------------------------------------------------
+//------------------------------------------------------------------------------------------------
 /**
   Checks that as least cnt letters of 
   works is part of the string. It is currently 
@@ -104,6 +103,7 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
   return 1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Check to see if S is the same as the
   first part of a phrase. (case insensitive)
@@ -123,6 +123,7 @@ int confirmStr(const std::string& S,const std::string& fullPhrase)
   return 1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Gets a line and determine if there is addition component to add
   in the case of a very long line.
@@ -170,6 +171,7 @@ int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int 
   return -1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Removes all spaces from a string 
   except those with in the form '\ '
@@ -191,6 +193,7 @@ std::string removeSpace(const std::string& CLine)
   return Out;
 }
 	
+//------------------------------------------------------------------------------------------------
 /**
   Reads a line from the stream of max length spc.
   Trailing comments are removed. (with # or ! character)
@@ -216,6 +219,7 @@ std::string getLine(std::istream& fh,const int spc)
   return Line;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Determines if a string is only spaces
   @param A :: string to check
@@ -228,6 +232,7 @@ int isEmpty(const std::string& A)
   return (pos!=std::string::npos) ? 0 : 1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   removes the string after the comment type of 
   '$ ' or '!' or '#  '
@@ -247,6 +252,7 @@ void stripComment(std::string& A)
   return;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Returns the string from the first non-space to the 
   last non-space 
@@ -263,6 +269,7 @@ std::string fullBlock(const std::string& A)
 }
 
 
+//------------------------------------------------------------------------------------------------
 /**
   Write out the line in the limited form for MCNPX
   ie initial line from 0->72 after that 8 to 72
@@ -303,6 +310,7 @@ void writeMCNPX(const std::string& Line,std::ostream& OX)
   return;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Splits the sting into parts that are space delminated.
   @param Ln :: line component to strip
@@ -317,6 +325,7 @@ std::vector<std::string> StrParts(std::string Ln)
   return Out;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Converts a vax number into a standard unix number
   @param A :: float number as read from a VAX file
@@ -351,6 +360,7 @@ float getVAXnum(const float A)
 }
 
 
+//------------------------------------------------------------------------------------------------
 /**
   Takes a character string and evaluates
   the first [typename T] object. The string is then
@@ -380,6 +390,7 @@ int sectPartNum(std::string& A,T& out)
   return 1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Takes a character string and evaluates
   the first [typename T] object. The string is then filled with
@@ -469,6 +480,7 @@ int sectionMCNPX(std::string& A,T& out)
   return 0;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Takes a character string and evaluates
   the first [typename T] object. The string is then
@@ -496,6 +508,7 @@ int convPartNum(const std::string& A,T& out)
   return static_cast<int>(xpt);
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Convert a string into a value
   @param A :: string to pass
@@ -520,6 +533,7 @@ int convert(const std::string& A,T& out)
   return 1;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Convert a string into a value
   @param A :: string to pass
@@ -535,6 +549,7 @@ int convert(const char* A,T& out)
   return convert(Cx,out);
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Write out the three vectors into a file of type dc 9
   @param step :: parameter to control x-step (starts from zero)
@@ -553,6 +568,7 @@ int writeFile(const std::string& Fname,const T step, const V<T,A>& Y)
   return writeFile(Fname,X,Y,Ex);
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Write out the three vectors into a file of type dc 9
   @param X :: X column
@@ -567,6 +583,7 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
   return writeFile(Fname,X,Y,Ex);  // don't need to specific ??
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Write out the three container into a file with
   column free-formated data in the form :
@@ -616,6 +633,7 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   return 0;
 }
 
+//------------------------------------------------------------------------------------------------
 /**
   Call to read in various values in position x1,x2,x3 from the
   line. Note to avoid the dependency on crossSort this needs
