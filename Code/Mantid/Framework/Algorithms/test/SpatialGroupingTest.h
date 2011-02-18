@@ -59,7 +59,6 @@ public:
     TS_ASSERT(alg->isExecuted());
 
     std::string file = alg->getProperty("Filename");
-    file += ".xml";
 
     Poco::File fileobj(file);
     const bool fileExists = fileobj.exists();

@@ -127,7 +127,19 @@ void SpatialGrouping::exec()
   std::vector<std::vector<int> >::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
-  fname = fname + ".xml";
+  
+  // Check to see whether we need to append .xml to the name.
+  size_t fnameXMLappend = fname.find(".xml");
+  if ( fnameXMLappend == std::string::npos )
+  {
+    fnameXMLappend = fname.find(".XML"); // check both 'xml' and 'XML'
+    if ( fnameXMLappend == std::string::npos )
+      fname = fname + ".xml";
+  }
+
+  // set the property again so the user can retrieve the stored result.
+  setPropertyValue("Filename", fname);
+
   xml.open(fname.c_str());
 
   xml << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
