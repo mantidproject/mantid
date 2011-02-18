@@ -241,31 +241,54 @@ namespace Algorithms
     }
     outputW=alg5->getProperty("OutputWorkspace");
 
-    IAlgorithm_sptr smooth = createSubAlgorithm("SmoothData");
-    smooth->setProperty("InputWorkspace", outputW);
-    // The number of points which contribute to each smoothed point
-    smooth->setProperty("NPoints",20);
-    try {
-      smooth->execute();
-    } catch (std::runtime_error &) {
-      g_log.error("Unable to successfully run SmoothData sub-algorithm");
+
+  // Find point of peak centre
+    const MantidVec & xValues = outputW->readX(0);
+    const MantidVec & yValues = outputW->readY(0);
+    MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
+    double peakHeight = *it;
+    if(peakHeight == 0)return -0.000;
+    double peakLoc = outputW->readX(0)[it - yValues.begin()];
+
+    IAlgorithm_sptr fit_alg;
+    try
+    {
+      //set the subalgorithm no to log as this will be run once per spectra
+      fit_alg = createSubAlgorithm("Fit",-1,-1,false);
+    } catch (Exception::NotFoundError&)
+    {
+      g_log.error("Can't locate Fit algorithm");
+      throw ;
+    }
+    fit_alg->setProperty("InputWorkspace",outputW);
+    fit_alg->setProperty("WorkspaceIndex",0);
+    fit_alg->setProperty("StartX",xValues.begin());
+    fit_alg->setProperty("EndX",xValues.end());
+    fit_alg->setProperty("MaxIterations",200);
+    fit_alg->setProperty("Output","fit");
+    std::ostringstream fun_str;
+    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=17.5221,PeakCentre="<<peakLoc;
+    fit_alg->setProperty("Function",fun_str.str());
+
+    try
+    {
+      fit_alg->execute();
+    }
+    catch (std::runtime_error&)
+    {
+      g_log.error("Unable to successfully run Fit sub-algorithm");
       throw;
     }
 
-    if ( ! smooth->isExecuted() )
+    if ( ! fit_alg->isExecuted() )
     {
-      g_log.error("Unable to successfully run SmoothData sub-algorithm");
-      throw std::runtime_error("Unable to successfully run SmoothData sub-algorithm");
+      g_log.error("Unable to successfully run Fit sub-algorithm");
+      throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
     }
-    // Get back the result
-    outputW = smooth->getProperty("OutputWorkspace");
 
-  // Find point of peak centre
-    const MantidVec & yValues = outputW->readY(0);
-    MantidVec::const_iterator it = std::max_element(yValues.begin(), yValues.end());
-    const double peakHeight = *it;
-    if(peakHeight == 0)return -0.000;
-    const double peakLoc = outputW->readX(0)[it - yValues.begin()];
+    std::vector<double> params = fit_alg->getProperty("Parameters");
+    peakHeight = params[0];
+    peakLoc = params[1];
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
