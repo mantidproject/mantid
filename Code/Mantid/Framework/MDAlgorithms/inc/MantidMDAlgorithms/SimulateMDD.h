@@ -65,9 +65,9 @@ namespace Mantid
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return (1);}
       // Method to actually evaluate the bg model with the given parameters
-      void SimBackground(std::vector<double>& cellBg, std::string bgmodel,const double bgpara_p1,const double bgpara_p2, const double bgpara_p3,
-          const double bgpara_p4, const double bgpara_p5, const double bgpara_p6,
-          const double bgpara_p7, const double bgpara_p8);
+      void SimBackground(std::vector<double>& cellBg, const std::string & bgmodel, const double bgpara_p1,
+          const double bgpara_p2, const double bgpara_p3, const double bgpara_p4, const double bgpara_p5,
+          const double bgpara_p6, const double bgpara_p7, const double bgpara_p8);
 	  // Simple test method to actually evaluate the fg model with the given parameters
       //void SimForeground(std::string,const double,
       //       const double, const double);

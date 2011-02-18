@@ -80,12 +80,13 @@ namespace Mantid
 
             //boost::shared_ptr<Mantid::API::Workspace> inputWS = getProperty("InputWorkspaceTMP");
             imdwCut = boost::dynamic_pointer_cast<Mantid::API::IMDWorkspace>(AnalysisDataService::Instance().retrieve(inputMDwrkspc));
-            //g_log.warning("No FakeCut data yet available in SimulateMDD");
             std::vector<double> cellBg;
             SimBackground(cellBg, bgmodel,bgparaP1,bgparaP2,bgparaP3,bgparaP4,bgparaP5,bgparaP6,bgparaP7,bgparaP8);
-            TobyFitSimulate* tfSim = new TobyFitSimulate();
-            tfSim->SimForeground(imdwCut,fgmodel,fgparaP1,fgparaP2,fgparaP3);
-
+            // currently this does nothing, but will be called in future
+            if(fgmodel.compare("")!=0) {
+                TobyFitSimulate* tfSim = new TobyFitSimulate();
+                tfSim->SimForeground(imdwCut,fgmodel,fgparaP1,fgparaP2,fgparaP3);
+            }
             double residual=0;
             // TO DO add in foreground component
             double weightSq;
@@ -95,7 +96,7 @@ namespace Mantid
             };
             setProperty("Residual", residual);
         }
-        void SimulateMDD::SimBackground(std::vector<double>& cellBg, std::string bgmodel,const double bgparaP1, const double bgparaP2, const double bgparaP3,
+        void SimulateMDD::SimBackground(std::vector<double>& cellBg, const std::string & bgmodel,const double bgparaP1, const double bgparaP2, const double bgparaP3,
                                         const double bgparaP4, const double bgparaP5, const double bgparaP6,
                                         const double bgparaP7, const double bgparaP8)
         {
@@ -142,7 +143,9 @@ namespace Mantid
                     }
                 }
                 else {
-                    //g_log.error("undefined background model: "+bgmodel);
+                    std::string message="undefined background model: "+bgmodel;
+                    g_log.error(message);
+                    throw std::invalid_argument(message);
                 }
                 // Would pre size cellBg vector, but no getNCell method for IMDWorkspace
                 if(cellBg.size()<i+1)

@@ -68,6 +68,7 @@ namespace Mantid
         // SQW convolution MonteCarlo
         void TobyFitSimulate::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
               double answer, double error) {
+            
         }
 
         // Return next pseudo or quasi random point in the N dimensional space
@@ -613,12 +614,16 @@ namespace Mantid
         A, ANG are unchanged
         ARLU, ANGRLU, BMAT filled if IERR=0; otherwise unchanged
         */
-        void TobyFitSimulate::rlatt(const std::vector<double> & a, const std::vector<double> & ang,
+        int TobyFitSimulate::rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                  std::vector<double> & arlu, std::vector<double> & angrlu,
                  Geometry::Matrix<double> & dMat )
         {
             int i;
+	    double tol=1e-10;
+	    if( a[0]< tol || a[1]<tol || a[2]<tol )
+		    return 1;
 
+	    return 0;
         }
 
     } // namespace Algorithms

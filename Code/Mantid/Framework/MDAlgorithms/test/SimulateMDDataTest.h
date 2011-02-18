@@ -307,6 +307,10 @@ public:
     residual = alg.getProperty("Residual");
 
     TS_ASSERT_DELTA(residual, expected_residual, 1e-03);
+
+    // test incorrect model name - Does not throw as expected
+    //alg.setPropertyValue("BackgroundModel","notAmodel");
+    //TS_ASSERT_THROWS(alg.execute(), std::invalid_argument);
   }
   void testTidyUp()
   {

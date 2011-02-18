@@ -8,6 +8,7 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidKernel/RandomNumberGenerator.h"
+#include "MantidMDAlgorithms/RunParam.h"
 
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/mathSupport.h"
@@ -17,6 +18,7 @@ namespace Mantid
 {
   namespace MDAlgorithms
   {
+   class RunParam;
     /** 
     TobyFitSimulate performs a simulation of the data in the MDData workspace
 
@@ -105,7 +107,7 @@ namespace Mantid
       void mcYVec(const double detWidth, const double detHeight, const double detTimeBin,
             std::vector<double> & yVec, double & eta2, double & eta3 );
       /// get transform matrices, vectors for reciprocal space
-      void rlatt(const std::vector<double> & a, const std::vector<double> & ang,
+      int rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                  std::vector<double> & arlu, std::vector<double> & angrlu,
                  Geometry::Matrix<double> & dMat );
       /// The default seed for MT random numbers
