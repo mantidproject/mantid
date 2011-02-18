@@ -7,7 +7,7 @@
 #include <functional>
 #include <gsl/gsl_poly.h>
 
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/PolyFunction.h"
 
 namespace Mantid
@@ -101,7 +101,7 @@ PolyFunction::getMaxSize(const std::string& CLine,const char V)
       if (pos!=L && CLine[pos+1]=='^') 
         {
 	  int pV;
-	  if (StrFunc::convPartNum(CLine.substr(pos+2),pV) && pV>maxPower)
+	  if (Mantid::Kernel::Strings::convPartNum(CLine.substr(pos+2),pV) && pV>maxPower)
 	    maxPower=pV;
 	}
       else if (!maxPower)      // case of +y+... etc

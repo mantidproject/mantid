@@ -1,13 +1,14 @@
 #ifndef REGEXSUPPORT_H
 #define REGEXSUPPORT_H
 
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include <boost/regex.hpp>
 
 namespace Mantid 
 {
-
-namespace StrFunc
+namespace Kernel
+{
+namespace Strings
 {
 /// Find if a pattern matches a string
 template<typename T> DLLExport int StrComp(const char*,const boost::regex&,T&,const int=0);
@@ -47,8 +48,10 @@ template<typename T> DLLExport int findComp(std::istream&,const boost::regex&,T&
 /// Finds a pattern in a file
 DLLExport int findPattern(std::istream&,const boost::regex&,std::string&);
 
-}
 
+} //NAMESPACE Strings
+
+} //NAMESPACE Kernel
 
 } //NAMESPACE Mantid
 #endif

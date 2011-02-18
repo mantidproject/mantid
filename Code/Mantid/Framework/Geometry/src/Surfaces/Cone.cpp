@@ -13,7 +13,7 @@
 
 #include "MantidKernel/Logger.h"
 
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
@@ -110,7 +110,7 @@ namespace Mantid
 		{
 			std::string Line=Pstr;
 			std::string item;
-			if (!StrFunc::section(Line,item) || 
+			if (!Mantid::Kernel::Strings::section(Line,item) || 
 				tolower(item[0])!='k' || item.length()<2 || 
 				item.length()>3)
 				return -1;
@@ -126,19 +126,19 @@ namespace Mantid
 
 			if (itemPt==1)        // kx type cone
 			{
-				if (!StrFunc::section(Line,cent[ptype]))
+				if (!Mantid::Kernel::Strings::section(Line,cent[ptype]))
 					return -3;
 			}
 			else
 			{
 				int index;
-				for(index=0;index<3 && StrFunc::section(Line,cent[index]);index++);
+				for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);index++);
 				if (index!=3)
 					return -4;
 			}
 			// The user must enter t^2 which is tan^2(angle) for MCNPX
 			double tanAng;
-			if (!StrFunc::section(Line,tanAng))
+			if (!Mantid::Kernel::Strings::section(Line,tanAng))
 				return -5;
 
 			Centre=Geometry::V3D(cent);
@@ -380,7 +380,7 @@ namespace Mantid
 			}
 			const double TA=tan((M_PI*alpha)/180.0);    // tan^2(angle)
 			cx<<TA*TA;
-			StrFunc::writeMCNPX(cx.str(),OX);
+			Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
 			return;
 		}
 

@@ -2,7 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/FacilityInfo.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/ConfigService.h"
 
@@ -34,7 +34,7 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
     throw std::runtime_error("Facility name is not defined");
   }
   std::string paddingStr = elem->getAttribute("zeropadding");
-  if ( paddingStr.empty() || !StrFunc::convert(paddingStr,m_zeroPadding) )
+  if ( paddingStr.empty() || !Mantid::Kernel::Strings::convert(paddingStr,m_zeroPadding) )
   {
     m_zeroPadding = 0;
   }

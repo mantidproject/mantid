@@ -8,7 +8,7 @@
 #include <gsl/gsl_poly.h>
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/PolyVar.h"
 
 #ifndef M_PI 
@@ -883,7 +883,7 @@ namespace Mantid
       */
     {
       const char Variable('x');
-      std::string CLine=StrFunc::removeSpace(Line);
+      std::string CLine=Mantid::Kernel::Strings::removeSpace(Line);
       setDegree(PolyFunction::getMaxSize(CLine,Variable));
 
       std::string::size_type pos=CLine.find(Variable);
@@ -917,10 +917,10 @@ namespace Mantid
         if (!CLine.empty() && CLine[0]=='^')
         {
           CLine.erase(0,1);
-          StrFunc::sectPartNum(CLine,pV);
+          Mantid::Kernel::Strings::sectPartNum(CLine,pV);
         }
 
-        if (pV<0 || (!Comp.empty() && !StrFunc::convert(Comp,cV)))
+        if (pV<0 || (!Comp.empty() && !Mantid::Kernel::Strings::convert(Comp,cV)))
           throw std::invalid_argument("Invalid line in PolVarOne::read : " + Line);
 
         if (Comp.empty())
@@ -931,7 +931,7 @@ namespace Mantid
       }
 
       // Process variable at end:
-      if (!CLine.empty() && StrFunc::section(CLine,cV))
+      if (!CLine.empty() && Mantid::Kernel::Strings::section(CLine,cV))
         PCoeff[0]=cV;
 
       return 0;

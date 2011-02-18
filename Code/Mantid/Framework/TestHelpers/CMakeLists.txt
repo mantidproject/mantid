@@ -33,4 +33,4 @@ set ( TMP_MANTIDLIBS )
 #add_executable(WikiMaker EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
 
 add_executable(WikiMaker ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
-target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling DataObjects )
+target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling DataObjects Geometry )

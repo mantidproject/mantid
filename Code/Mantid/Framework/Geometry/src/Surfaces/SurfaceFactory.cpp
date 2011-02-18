@@ -15,7 +15,7 @@
 
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Surfaces/BaseVisit.h"
 #include "MantidGeometry/Surfaces/Surface.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"
@@ -160,7 +160,7 @@ SurfaceFactory::processLine(const std::string& Line) const
   */    
 {
   std::string key;
-  if (!StrFunc::convert(Line,key))
+  if (!Mantid::Kernel::Strings::convert(Line,key))
       throw Kernel::Exception::NotFoundError("SurfaceFactory::processLine",Line);
   
   Surface *X = createSurfaceID(key);

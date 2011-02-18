@@ -1,25 +1,23 @@
-
 #ifndef MANTID_SUPPORTTEST_H_
 #define MANTID_SUPPORTTEST_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include <string>
 
-using namespace Mantid::StrFunc;
+using namespace Mantid::Kernel::Strings;
 
 /**
-  \class testSupport 
-  \brief test of Support components
-  \version 1.0
+  \class StringsTest
+  \brief test of Strings components
   \date September 2005
   \author S.Ansell
   
-  Checks the basic string operations in
-  support.cxx
+  Checks the basic string operations in Strings
 */
-class SupportTest : public CxxTest::TestSuite
+
+class StringsTest : public CxxTest::TestSuite
 {
 public: 
 

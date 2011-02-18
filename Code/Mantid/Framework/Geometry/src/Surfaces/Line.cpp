@@ -1,6 +1,6 @@
 #include "MantidGeometry/Surfaces/Line.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/mathSupport.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Surfaces/Quadratic.h"

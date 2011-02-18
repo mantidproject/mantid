@@ -1,6 +1,6 @@
 #include "MantidGeometry/Surfaces/Cylinder.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include <cfloat>
@@ -91,7 +91,7 @@ Cylinder::setSurface(const std::string& Pstr)
 
   std::string Line=Pstr;
   std::string item;
-  if (!StrFunc::section(Line,item) || 
+  if (!Mantid::Kernel::Strings::section(Line,item) || 
       tolower(item[0])!='c' || item.length()<2 || 
       item.length()>3)
     return errDesc;
@@ -109,7 +109,7 @@ Cylinder::setSurface(const std::string& Pstr)
     {
       // get the other two coordinates
       int index((!ptype) ? 1 : 0);
-      while(index<3 &&  StrFunc::section(Line,cent[index]))
+      while(index<3 &&  Mantid::Kernel::Strings::section(Line,cent[index]))
 	{
 	  index++;
 	  if (index==ptype)
@@ -120,7 +120,7 @@ Cylinder::setSurface(const std::string& Pstr)
     }
   // Now get radius
   double R;
-  if (!StrFunc::section(Line,R) || R<=0.0)
+  if (!Mantid::Kernel::Strings::section(Line,R) || R<=0.0)
     return errRadius;
 
   Centre=Geometry::V3D(cent);
@@ -350,7 +350,7 @@ Cylinder::write(std::ostream& OX) const
       cx<< Radius;
     }
 
-  StrFunc::writeMCNPX(cx.str(),OX);
+  Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
   return;
 }
 

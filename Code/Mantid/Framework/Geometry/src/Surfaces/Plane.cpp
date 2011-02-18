@@ -1,6 +1,6 @@
 #include "MantidGeometry/Surfaces/Plane.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Tolerance.h"
 #include <cfloat>
 
@@ -81,7 +81,7 @@ Plane::setSurface(const std::string& Pstr)
   std::string Line=Pstr;
   std::string item;
   
-  if (!StrFunc::section(Line,item) || tolower(item[0])!='p')
+  if (!Mantid::Kernel::Strings::section(Line,item) || tolower(item[0])!='p')
     return -1;
   // Only 3 need to be declared
   double surf[9]={0.0,0,0,0,0};
@@ -89,7 +89,7 @@ Plane::setSurface(const std::string& Pstr)
   if (item.size()==1)  // PROCESS BASIC PLANE:
     {
       int cnt;
-      for(cnt=0;cnt<9 && StrFunc::section(Line,surf[cnt]);cnt++);
+      for(cnt=0;cnt<9 && Mantid::Kernel::Strings::section(Line,surf[cnt]);cnt++);
 
       if (cnt!=4 && cnt!=9)
 		return -3;
@@ -119,7 +119,7 @@ Plane::setSurface(const std::string& Pstr)
       if (ptype<0 || ptype>2)         // Not x,y,z
 	return -5;
       surf[ptype]=1.0;
-      if (!StrFunc::convert(Line,Dist))
+      if (!Mantid::Kernel::Strings::convert(Line,Dist))
 	return -6;                      //Too short or no number
       NormV=Geometry::V3D(surf[0],surf[1],surf[2]);
     }
@@ -305,7 +305,7 @@ void Plane::write(std::ostream& OX) const
   else 
     cx<<"p"<<"xyz"[ptype-1]<<" "<<Dist;
 
-  StrFunc::writeMCNPX(cx.str(),OX);
+  Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
   return;
 }
 

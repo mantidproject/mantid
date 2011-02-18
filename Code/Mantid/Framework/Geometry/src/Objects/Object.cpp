@@ -1,6 +1,6 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Objects/Rules.h"
 #include "MantidGeometry/Objects/Track.h"
@@ -15,7 +15,7 @@
 #include "MantidGeometry/Rendering/CacheGeometryHandler.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheReader.h"
 #include "MantidGeometry/Rendering/vtkGeometryCacheWriter.h"
-#include "MantidGeometry/Math/RegexSupport.h"
+#include "MantidKernel/RegexStrings.h"
 #include "MantidGeometry/Tolerance.h"
 #include <deque>
 #include <stack>
@@ -126,7 +126,7 @@ namespace Mantid
       // Split line
       std::string part;
       const boost::regex letters("[a-zA-Z]"); // Does the string now contain junk...
-      if (StrFunc::StrLook(Ln, letters))
+      if (Mantid::Kernel::Strings::StrLook(Ln, letters))
         return 0;
 
       if (procString(Ln)) // this currently does not fail:
@@ -169,7 +169,7 @@ namespace Mantid
         pos++;
         cx << TopStr.substr(0, pos); // Everything including the #
         int cN(0);
-        const int nLen = StrFunc::convPartNum(TopStr.substr(pos), cN);
+        const int nLen = Mantid::Kernel::Strings::convPartNum(TopStr.substr(pos), cN);
         if (nLen > 0)
         {
           cx << "(";
@@ -329,7 +329,7 @@ namespace Mantid
       int type = 0; //intersection
 
       //plus 1 to skip 'R'
-      if (Rstart == Ln.size() || !StrFunc::convert(Ln.c_str() + Rstart + 1, Ra) || Rlist.find(Ra)
+      if (Rstart == Ln.size() || !Mantid::Kernel::Strings::convert(Ln.c_str() + Rstart + 1, Ra) || Rlist.find(Ra)
         == Rlist.end())
         return 0;
 
@@ -338,7 +338,7 @@ namespace Mantid
         if (Ln[Rend] == ':')
           type = 1; //make union
       }
-      if (Rend == Ln.size() || !StrFunc::convert(Ln.c_str() + Rend + 1, Rb) || Rlist.find(Rb) == Rlist.end())
+      if (Rend == Ln.size() || !Mantid::Kernel::Strings::convert(Ln.c_str() + Rend + 1, Rb) || Rlist.find(Rb) == Rlist.end())
         return 0;
 
       // Get end of number (digital)
@@ -678,7 +678,7 @@ namespace Mantid
       std::ostringstream cx;
       cx.precision(10);
       cx << str();
-      StrFunc::writeMCNPX(cx.str(), OX);
+      Mantid::Kernel::Strings::writeMCNPX(cx.str(), OX);
       return;
     }
 
@@ -708,7 +708,7 @@ namespace Mantid
         if (isdigit(Ln[i]) || Ln[i] == '-')
         {
           int SN;
-          int nLen = StrFunc::convPartNum(Ln.substr(i), SN);
+          int nLen = Mantid::Kernel::Strings::convPartNum(Ln.substr(i), SN);
           if (!nLen)
             throw std::invalid_argument("Invalid surface string in Object::ProcString : " + Line);
           // Process #Number

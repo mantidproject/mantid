@@ -34,11 +34,11 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/PropertyManagerOwner.cpp
 	src/PropertyWithValue.cpp
 	src/RebinParamsValidator.cpp
+	src/RegexStrings.cpp
 	src/SignalChannel.cpp
 	src/SingletonHolder.cpp
 	src/Statistics.cpp
-	src/SupportBasic.cpp
-	src/SupportKernel.cpp
+	src/Strings.cpp
 	src/System.cpp
 	src/TestChannel.cpp
 	src/ThreadSafeLogStream.cpp
@@ -127,11 +127,11 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/PropertyWithValue.h
 	inc/MantidKernel/RandomNumberGenerator.h
 	inc/MantidKernel/RebinParamsValidator.h
+	inc/MantidKernel/RegexStrings.h
 	inc/MantidKernel/SignalChannel.h
 	inc/MantidKernel/SingletonHolder.h
 	inc/MantidKernel/Statistics.h
-	inc/MantidKernel/Support.h
-	inc/MantidKernel/SupportTempCode.h
+	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/TestChannel.h
 	inc/MantidKernel/ThreadScheduler.h
@@ -182,9 +182,10 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/RandomNumberGeneratorTest.h
 	test/RebinHistogramTest.h
 	test/RebinParamsValidatorTest.h
+	test/RegexStringsTest.h
 	test/SignalChannelTest.h
 	test/StatisticsTest.h
-	test/SupportTest.h
+	test/StringsTest.h
 	test/ThreadPoolTest.h
 	test/TimerTest.h
 	test/TimeSeriesPropertyTest.h

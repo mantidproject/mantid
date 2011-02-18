@@ -13,7 +13,7 @@
 #include <iterator>
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/MapSupport.h"
 #include "MantidGeometry/Math/Algebra.h"
 
@@ -279,7 +279,7 @@ Algebra::setFunctionObjStr(const std::string& A)
         {
 	  int N;
 	  int neg(0);
-	  int nCount=StrFunc::convPartNum(A.substr(ipt,std::string::npos),N);
+	  int nCount=Mantid::Kernel::Strings::convPartNum(A.substr(ipt,std::string::npos),N);
 	  if (nCount)
 	    {
 	      if (N<0)

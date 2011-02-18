@@ -1,6 +1,6 @@
 #include "MantidGeometry/Surfaces/Sphere.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Tolerance.h"
 
 namespace Mantid
@@ -82,7 +82,7 @@ namespace Mantid
     {
       std::string Line=Pstr;
       std::string item;
-      if (!StrFunc::section(Line,item) || 
+      if (!Mantid::Kernel::Strings::section(Line,item) || 
         tolower(item[0])!='s' || item.length()>2)
         return -1;
 
@@ -95,21 +95,21 @@ namespace Mantid
           const int pType=static_cast<int>(tolower(item[1])-'x');
           if (pType<0 || pType>2)
             return -3;
-          if (!StrFunc::section(Line,cent[pType]))
+          if (!Mantid::Kernel::Strings::section(Line,cent[pType]))
             return -4;
         }
       }
       else if (item.length()==1)
       {
         int index;
-        for(index=0;index<3 && StrFunc::section(Line,cent[index]);
+        for(index=0;index<3 && Mantid::Kernel::Strings::section(Line,cent[index]);
           index++);
           if (index!=3)
             return -5;
       }
       else
         return -6;
-      if (!StrFunc::section(Line,R))
+      if (!Mantid::Kernel::Strings::section(Line,R))
         return -7;
 
       Centre=Geometry::V3D(cent);
@@ -256,7 +256,7 @@ namespace Mantid
       {
         cx<<"s "<<Centre<<" "<<Radius;
       }
-      StrFunc::writeMCNPX(cx.str(),OX);
+      Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
       return;
     }
     /**

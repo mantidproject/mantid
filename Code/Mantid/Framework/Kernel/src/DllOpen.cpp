@@ -17,7 +17,7 @@
 #include <dlfcn.h>
 #endif /* _WIN32 */
 
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/DllOpen.h"
 #include "MantidKernel/Logger.h"
 

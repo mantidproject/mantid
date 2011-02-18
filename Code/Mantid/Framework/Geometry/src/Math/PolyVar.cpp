@@ -9,7 +9,7 @@
 
 
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/MatrixBase.h"
 #include "MantidGeometry/Math/PolyVar.h"
 
@@ -743,7 +743,7 @@ namespace Mantid
     int PolyVar<VCount>::read(const std::string& Line)
     {
       const char Variable("xyzabc"[VCount-1]);
-      std::string CLine=StrFunc::removeSpace(Line);
+      std::string CLine=Mantid::Kernel::Strings::removeSpace(Line);
       setDegree(PolyFunction::getMaxSize(CLine,Variable));
       zeroPoly();
 
@@ -796,7 +796,7 @@ namespace Mantid
         if (!CLine.empty() && CLine[0]=='^')
         {
           CLine.erase(0,1);
-          if (!StrFunc::sectPartNum(CLine,pV) || pV<0)
+          if (!Mantid::Kernel::Strings::sectPartNum(CLine,pV) || pV<0)
             return -1;
         }
         if (Comp.empty())

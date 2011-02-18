@@ -10,21 +10,20 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/System.h"
 
-#include "MantidGeometry/V3D.h"
 #include <boost/regex.hpp>
-#include "MantidGeometry/Math/RegexSupport.h"
+#include "MantidKernel/RegexStrings.h"
 
 
 using namespace Mantid;
-using namespace StrFunc;
+using namespace Mantid::Kernel::Strings;
 
-class RegexSupportTest: public CxxTest::TestSuite
+class RegexStringsTest: public CxxTest::TestSuite
 {
 private:
   std::stringstream testStream;
 
 public:
-  RegexSupportTest()
+  RegexStringsTest()
   {
     testStream << "2007-11-16T13:25:48 END\n"
                << "2007-11-16T13:29:36 CHANGE RUNTABLE\n"

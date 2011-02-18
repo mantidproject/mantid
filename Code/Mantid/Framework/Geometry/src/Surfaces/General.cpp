@@ -1,6 +1,6 @@
 #include "MantidGeometry/Surfaces/General.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
@@ -76,7 +76,7 @@ General::setSurface(const std::string& Pstr)
 {
   std::string Line=Pstr;
   std::string item;
-  if (!StrFunc::section(Line,item) || item.length()!=2 ||
+  if (!Mantid::Kernel::Strings::section(Line,item) || item.length()!=2 ||
       (tolower(item[0])!='g' &&  tolower(item[0]!='s')) ||
       tolower(item[1])!='q')
     return -1;
@@ -84,7 +84,7 @@ General::setSurface(const std::string& Pstr)
   double num[10];
   int index;
   for(index=0;index<10 && 
-	StrFunc::section(Line,num[index]);index++);
+	Mantid::Kernel::Strings::section(Line,num[index]);index++);
   if (index!=10)
     return -2;
 

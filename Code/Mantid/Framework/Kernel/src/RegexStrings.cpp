@@ -8,26 +8,26 @@
 #include <algorithm>
 #include <functional>
 
-#include "MantidGeometry/Math/RegexSupport.h"
+#include "MantidKernel/RegexStrings.h"
 
 namespace Mantid
 {
-
-namespace StrFunc
+namespace Kernel
+{
+namespace Strings
 {
 
+/**
+  Find the match in regular expression and places number in Aout
+  @param Text :: string to search
+  @param Re :: regular expression to use
+  @param Aout :: Place to put Unit found
+  @param compNum :: item to extract [0:N-1]
+  @return 0 on failure and 1 on success
+*/
 template<typename T>
-int
-StrComp(const std::string& Text,const boost::regex& Re,T& Aout,
+int StrComp(const std::string& Text,const boost::regex& Re,T& Aout,
 	const int compNum) 
-  /**
-    Find the match in regular expression and places number in Aout 
-    @param Text :: string to search
-    @param Re :: regular expression to use
-    @param Aout :: Place to put Unit found
-    @param compNum :: item to extract [0:N-1]
-    @return 0 on failure and 1 on success
-  */
 {
 	boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
 	boost::sregex_iterator empty;
@@ -42,31 +42,29 @@ StrComp(const std::string& Text,const boost::regex& Re,T& Aout,
 }
 
 
+/**
+  Find the match in regular expression and places number in Aout
+  @param Text :: string to search
+  @param Re :: regular expression to use
+  @param Aout :: Place to put Unit found
+  @param compNum :: item to extract [0:N-1]
+  @return 0 on failure and 1 on success
+*/
 template<typename T>
-int
-StrComp(const char* Text,const boost::regex& Re,
+int StrComp(const char* Text,const boost::regex& Re,
 	T& Aout,const int compNum) 
-  /**
-    Find the match in regular expression and places number in Aout 
-    @param Text :: string to search
-    @param Re :: regular expression to use
-    @param Aout :: Place to put Unit found
-    @param compNum :: item to extract [0:N-1]
-    @return 0 on failure and 1 on success
-  */
 {
 	return StrComp(std::string(Text),Re,Aout,compNum);
 }
 
 
-int
-StrLook(const char* Sx,const boost::regex& Re)
-  /**
-    Find the match in regular expression and return 1 if good match 
-    @param Sx :: string to match
-    @param Re :: regular expression to use
-    @return 0 on failure and 1 on success
-  */
+/**
+  Find the match in regular expression and return 1 if good match
+  @param Sx :: string to match
+  @param Re :: regular expression to use
+  @return 0 on failure and 1 on success
+*/
+int StrLook(const char* Sx,const boost::regex& Re)
 {
   boost::cmatch ans;
   if (boost::regex_search(Sx,ans,Re,boost::match_default))
@@ -74,14 +72,13 @@ StrLook(const char* Sx,const boost::regex& Re)
   return 0;
 }
 
-int
-StrLook(const std::string& Text,const boost::regex& Re)
-  /**
-    Find the match in regular expression and return 1 if good match 
-    @param Text :: string to match
-    @param Re :: regular expression to use
-    @return 0 on failure and 1 on success
-  */
+/**
+  Find the match in regular expression and return 1 if good match
+  @param Text :: string to match
+  @param Re :: regular expression to use
+  @return 0 on failure and 1 on success
+*/
+int StrLook(const std::string& Text,const boost::regex& Re)
 {
   boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
   boost::sregex_iterator empty;
@@ -91,37 +88,35 @@ StrLook(const std::string& Text,const boost::regex& Re)
   return 1;
 }
 
-std::vector<std::string> 
-StrParts(std::string Sdx,const boost::regex& Re)
-  /** 
-    Find the match, return the disected items.
-    Note it is complementary to support.h StrParts(Sdx)
-    @param Sdx :: Input string (note implicit copy since altered)
-    @param Re :: Regular expression for separator component
-    @return vector of string components
-  */
+/**
+  Find the match, return the disected items.
+  Note it is complementary to support.h StrParts(Sdx)
+  @param Sdx :: Input string (note implicit copy since altered)
+  @param Re :: Regular expression for separator component
+  @return vector of string components
+*/
+std::vector<std::string> StrParts(std::string Sdx,const boost::regex& Re)
 {   
   std::vector<std::string> Aout;
   boost::regex_split(std::back_inserter(Aout), Sdx, Re);   // Destroys string in process
   return Aout;
 }   
 
+/**
+  Find the match, return the disected items:
+  Then remove the whole of the match
+  The regexpression must have  one  ( ) around the area to extract
+  @param Text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: Value to extract
+  @param compNum :: Index of matches [0->N-1] (-1 :: whole match)
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval 1 :: success
+ */
 template<typename T>
-int
-StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
+int StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
        const int compNum)
-  /** 
-    Find the match, return the disected items:
-    Then remove the whole of the match
-    The regexpression must have  one  ( ) around the area to extract
-    @param Text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: Value to extract
-    @param compNum :: Index of matches [0->N-1] (-1 :: whole match)
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval 1 :: success
-   */
 {
   boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
   boost::sregex_iterator empty;
@@ -130,8 +125,8 @@ StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
   
   if (compNum+1>=static_cast<int>(m1->size()))
     return 0;
-  // StrFunc::Convert to required output form
-  if (!StrFunc::convert((*m1)[compNum+1].str(),Aout))
+  // Mantid::Kernel::Strings::Convert to required output form
+  if (!Mantid::Kernel::Strings::convert((*m1)[compNum+1].str(),Aout))
     return 0;
   // Found object 
   unsigned int zero = 0; // Needed for boost 1.40 (can't just put 0 in next line)
@@ -139,20 +134,19 @@ StrFullCut(std::string& Text,const boost::regex& Re,T& Aout,
   return 1;
 }
 
+/**
+  Find the match, return the disected items:
+  Then remove the whole of the match
+  The regexpression must have  one  ( ) around the area to extract
+  @param Text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: Values to extract
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval 1 :: success
+ */
 template<typename T>
-int
-StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
-  /** 
-    Find the match, return the disected items:
-    Then remove the whole of the match
-    The regexpression must have  one  ( ) around the area to extract
-    @param Text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: Values to extract
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval 1 :: success
-   */
+int StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
 {
   boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
   boost::sregex_iterator empty;
@@ -169,7 +163,7 @@ StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
       for(unsigned int index=1;index<m1->size();index++)
         {
 	  T tmp;
-	  if (!StrFunc::convert((*m1)[index].str(),tmp))
+	  if (!Mantid::Kernel::Strings::convert((*m1)[index].str(),tmp))
 	    return 0;
 	  Aout.push_back(tmp);
 	}
@@ -181,23 +175,22 @@ StrFullCut(std::string& Text,const boost::regex& Re,std::vector<T>& Aout)
   return 1;
 }
 
+/**
+  Find the match, return the disected items:
+  Then remove the whole of the match
+  The regexpression must have  one  ( ) around the area to extract
+  This is specialised for string and thus does not need
+  a convert.
+  @param Text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: Values to extract
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval 1 :: success
+ */
 template<>
-int
-StrFullCut(std::string& Text,const boost::regex& Re,
+int StrFullCut(std::string& Text,const boost::regex& Re,
 	   std::vector<std::string>& Aout)
-  /** 
-    Find the match, return the disected items:
-    Then remove the whole of the match
-    The regexpression must have  one  ( ) around the area to extract
-    This is specialised for string and thus does not need 
-    a convert.
-    @param Text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: Values to extract
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval 1 :: success
-   */
 {
   boost::sregex_iterator m1(Text.begin(),Text.end(),Re);
   boost::sregex_iterator empty;
@@ -219,8 +212,6 @@ StrFullCut(std::string& Text,const boost::regex& Re,
   return 1;
 }
 
-int
-StrRemove(std::string& Sdx,std::string& Extract,const boost::regex& Re)
 /** 
   Find the match, return the string - the bit 
   @param Sdx :: string to split, is returned with the string after
@@ -230,6 +221,7 @@ StrRemove(std::string& Sdx,std::string& Extract,const boost::regex& Re)
   @retval 0 :: failed to match the string or there were no parts to match.
   @retval 1 :: succes
 */
+int StrRemove(std::string& Sdx,std::string& Extract,const boost::regex& Re)
 {
   boost::sregex_token_iterator empty;
 
@@ -247,21 +239,20 @@ StrRemove(std::string& Sdx,std::string& Extract,const boost::regex& Re)
   return 0;
 }
 
+/**
+  Find the match, return the disected items
+  The rege xpression must have ( ) around the area to extract.
+  The function appends the results onto Aout.
+  @param text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: vector to add components to.
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval Number :: number of components added to Aout.
+ */
 template<typename T>
-int
-StrFullSplit(const std::string& text,
+int StrFullSplit(const std::string& text,
 	     const boost::regex& Re,std::vector<T>& Aout)
-  /** 
-    Find the match, return the disected items
-    The rege xpression must have ( ) around the area to extract.
-    The function appends the results onto Aout.
-    @param text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: vector to add components to.
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval Number :: number of components added to Aout.
-   */
 {
   boost::sregex_iterator m1(text.begin(),text.end(),Re);
   boost::sregex_iterator empty;
@@ -269,28 +260,27 @@ StrFullSplit(const std::string& text,
     for(unsigned int index=1;index<m1->size();index++)
       {
 	T tmp;
-	if (!StrFunc::convert((*m1)[index].str(),tmp))
+	if (!Mantid::Kernel::Strings::convert((*m1)[index].str(),tmp))
 	  return static_cast<int>(Aout.size());
 	Aout.push_back(tmp);
       }
   return static_cast<int>(Aout.size());
 }
 
+/**
+  Find the match, return the disected items
+  The regexpression must have ( ) around the area to extract.
+  The function appends the results onto Aout.
+  @param text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: vector to add components to.
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval Number :: number of components added to Aout.
+ */
 template<typename T>
-int     
-StrSingleSplit(const std::string& text,
+int StrSingleSplit(const std::string& text,
 	     const boost::regex& Re,std::vector<T>& Aout)
-  /** 
-    Find the match, return the disected items
-    The regexpression must have ( ) around the area to extract.
-    The function appends the results onto Aout.
-    @param text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: vector to add components to.
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval Number :: number of components added to Aout.
-   */
 {
   boost::sregex_iterator m1(text.begin(),text.end(),Re);
   boost::sregex_iterator empty;
@@ -298,7 +288,7 @@ StrSingleSplit(const std::string& text,
     for(unsigned int index=1;index<m1->size();index++)
       {
 	T tmp;
-	if (!StrFunc::convert((*m1)[index].str(),tmp))
+	if (!Mantid::Kernel::Strings::convert((*m1)[index].str(),tmp))
 	  return static_cast<int>(Aout.size());
 	Aout.push_back(tmp);
       }
@@ -306,22 +296,21 @@ StrSingleSplit(const std::string& text,
   return static_cast<int>(Aout.size());
 }
 
+/**
+  Find the match, return the disected items
+  The regexpression must have ( ) around the area to extract.
+  The function appends the results onto Aout.
+  - Specialised to avoid convert for std::string
+  @param text :: string to split, is returned with the string after
+  the find (if successful).
+  @param Re :: regular expression to use.
+  @param Aout :: vector to add components to.
+  @retval 0 :: failed to match the string or there were no parts to match.
+  @retval Number :: number of components added to Aout.
+ */
 template<>
-int
-StrSingleSplit(const std::string& text,
+int StrSingleSplit(const std::string& text,
 	     const boost::regex& Re,std::vector<std::string>& Aout)
-  /** 
-    Find the match, return the disected items
-    The regexpression must have ( ) around the area to extract.
-    The function appends the results onto Aout.
-    - Specialised to avoid convert for std::string
-    @param text :: string to split, is returned with the string after
-    the find (if successful).
-    @param Re :: regular expression to use.
-    @param Aout :: vector to add components to.
-    @retval 0 :: failed to match the string or there were no parts to match.
-    @retval Number :: number of components added to Aout.
-   */
 {
   boost::sregex_iterator m1(text.begin(),text.end(),Re);
   boost::sregex_iterator empty;
@@ -334,15 +323,15 @@ StrSingleSplit(const std::string& text,
   return 0;
 }
 
+/**
+  Finds the start of the tally
+  @param fh :: open file stream
+  @param Re :: regular expression to match
+  @param Out :: string to place match
+  @return count of line that matched (or zero on failure)
+*/
 DLLExport int
 findPattern(std::istream& fh,const boost::regex& Re,std::string& Out)
-  /** 
-    Finds the start of the tally 
-    @param fh :: open file stream
-    @param Re :: regular expression to match
-    @param Out :: string to place match 
-    @return count of line that matched (or zero on failure)
-  */
 {
   char ss[512];   // max of 512 
   boost::cmatch ans;
@@ -360,16 +349,15 @@ findPattern(std::istream& fh,const boost::regex& Re,std::string& Out)
   return cnt;
 }
 
+/**
+  Finds the start of the tally
+  @param fh :: open file stream
+  @param Re :: regular expression to match
+  @param Out :: component in ( ) expression must be first.
+  @return count of line that matched (or zero on failure)
+*/
 template<typename T>
-int 
-findComp(std::istream& fh,const boost::regex& Re,T& Out)
-  /** 
-    Finds the start of the tally 
-    @param fh :: open file stream
-    @param Re :: regular expression to match
-    @param Out :: component in ( ) expression must be first.
-    @return count of line that matched (or zero on failure)
-  */
+int findComp(std::istream& fh,const boost::regex& Re,T& Out)
 {
   char ss[512];   // max of 512 
   boost::cmatch ans;
@@ -384,22 +372,21 @@ findComp(std::istream& fh,const boost::regex& Re,T& Out)
   if (ans[0].matched)
     {
       std::string xout(ans[1].first,ans[1].second);
-      if (StrFunc::convert(xout,Out))
+      if (Mantid::Kernel::Strings::convert(xout,Out))
 	return cnt;
     }
   return 0;
 }
 
+/**
+  Finds the start of the tally
+  @param fh :: open file stream
+  @param Re :: regular expression to match
+  @param Out :: component in ( ) expression must be first.
+  @return count of line that matched (or zero on failure)
+*/
 template<>
-DLLExport int 
-findComp(std::istream& fh,const boost::regex& Re,std::string& Out)
-  /** 
-    Finds the start of the tally 
-    @param fh :: open file stream
-    @param Re :: regular expression to match
-    @param Out :: component in ( ) expression must be first.
-    @return count of line that matched (or zero on failure)
-  */
+DLLExport int findComp(std::istream& fh,const boost::regex& Re,std::string& Out)
 {
   char ss[512];   // max of 512 
   boost::cmatch ans;
@@ -419,6 +406,9 @@ findComp(std::istream& fh,const boost::regex& Re,std::string& Out)
   return 0;
 }
 
+
+
+
 /// \cond TEMPLATE 
 
 template DLLExport int StrFullCut(std::string&,const boost::regex&,
@@ -426,29 +416,31 @@ template DLLExport int StrFullCut(std::string&,const boost::regex&,
 template DLLExport int StrFullCut(std::string&,const boost::regex&,int&,const int);
 template DLLExport int StrFullCut(std::string&,const boost::regex&,double&,const int);
 
-
-// --------------------------------------------------------
 template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<int>&);
 template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<double>&);
 template DLLExport int StrFullSplit(const std::string&,const boost::regex&,
 			  std::vector<std::string>&);
-// --------------------------------------------------------
+
 template DLLExport int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<int>&);
 template DLLExport int StrSingleSplit(const std::string&,const boost::regex&,
 			  std::vector<double>&);
-// --------------------------------------------------------
+
 template DLLExport int StrComp(const char*,const boost::regex&,double&,const int);
 template DLLExport int StrComp(const char*,const boost::regex&,int&,const int);
 template DLLExport int StrComp(const std::string&,const boost::regex&,double&,const int);
 template DLLExport int StrComp(const std::string&,const boost::regex&,int&,const int);
-// ------------------------------------------------------------------
+
 template DLLExport int findComp(std::istream&,const boost::regex&,int&);
 
 /// \endcond TEMPLATE 
-}  // NAMESPACE StrFunc
 
-} // NAMESPACE MAntid
+
+} //NAMESPACE Strings
+
+} //NAMESPACE Kernel
+
+} //NAMESPACE Mantid
 

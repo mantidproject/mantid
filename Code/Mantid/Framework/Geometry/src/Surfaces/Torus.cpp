@@ -11,7 +11,7 @@
 #include <algorithm>
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Tolerance.h"
 #include "MantidGeometry/Math/Matrix.h"
@@ -112,6 +112,35 @@ Torus::operator==(const Torus& A) const
   return 1;
 }
 
+
+/*
+  takes a character string and evaluates
+  the first <T> object. The string is then filled with
+  spaces upto the end of the <T> object
+  @param out :: place for output
+  @param A :: string for input and output.
+  @return 1 on success 0 on failure
+*/
+int sectionV3D(std::string& A,Mantid::Geometry::V3D& out)
+{
+  if (A.empty()) return 0;
+  std::istringstream cx;
+  Mantid::Geometry::V3D retval;
+  cx.str(A);
+  cx.clear();
+  cx>>retval;
+  if (cx.fail())
+    return 0;
+  const std::streamoff xpt = cx.tellg();
+  const char xc=cx.get();
+  if (!cx.fail() && !isspace(xc))
+    return 0;
+  A.erase(0, static_cast<unsigned int>(xpt));
+  out=retval;
+  return 1;
+}
+
+
 int 
 Torus::setSurface(const std::string& Pstr)
   /** 
@@ -129,7 +158,7 @@ Torus::setSurface(const std::string& Pstr)
   std::string Line=Pstr;
 
   std::string item;
-  if (!StrFunc::section(Line,item) || 
+  if (!Mantid::Kernel::Strings::section(Line,item) || 
       tolower(item[0])!='t' || item.length()!=3) 
     return errDesc;
 
@@ -145,9 +174,9 @@ Torus::setSurface(const std::string& Pstr)
 
   // Torus on X/Y/Z axis
   Norm[ptype]=1.0;
-  if (!StrFunc::section(Line,Centre))
+  if (!sectionV3D(Line,Centre))
     return errCent;
-  if (!StrFunc::section(Line,PtVec))
+  if (!sectionV3D(Line,PtVec))
     return errNormal;
 
   Iradius=PtVec[1];
@@ -294,7 +323,7 @@ Torus::write(std::ostream& OX) const
   // Name and transform 
    
   cx<<Centre<<" "<<Displacement<<" "<<Iradius<<" "<<Dradius;
-  StrFunc::writeMCNPX(cx.str(),OX);
+  Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
   return;
 }
 

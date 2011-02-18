@@ -4,7 +4,7 @@
 #include "MantidKernel/InstrumentInfo.h"
 #include "MantidKernel/FacilityInfo.h"
 #include "MantidKernel/Exception.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/NodeList.h>
@@ -28,7 +28,7 @@ namespace Mantid
       :m_facility(f)
     {
       std::string paddingStr = elem->getAttribute("zeropadding");
-      if ( paddingStr.empty() || !StrFunc::convert(paddingStr,m_zeroPadding) )
+      if ( paddingStr.empty() || !Mantid::Kernel::Strings::convert(paddingStr,m_zeroPadding) )
       {
         m_zeroPadding = f->zeroPadding();
       }

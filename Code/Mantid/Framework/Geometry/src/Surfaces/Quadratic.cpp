@@ -24,7 +24,7 @@
 #include "MantidGeometry/Surfaces/Quadratic.h"
 
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 
 namespace Mantid
 {
@@ -387,7 +387,7 @@ Quadratic::write(std::ostream& OX) const
   cx<<" "<<BaseEqn[4]<<" ";
   for(int i=6;i<10;i++)
     cx<<" "<<BaseEqn[i]<<" ";
-  StrFunc::writeMCNPX(cx.str(),OX);
+  Mantid::Kernel::Strings::writeMCNPX(cx.str(),OX);
   return;
 }
 

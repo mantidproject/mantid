@@ -697,7 +697,7 @@ target_link_libraries ( MantidPlot
                         ${QWT_LIBRARIES} ${QWTPLOT3D_LIBRARIES}
                         ${QSCINTILLA_LIBRARIES}
                         ${PYTHON_LIBRARIES}
-                        ${ZLIB_LIBRARIES}
+                        ${ZLIB_LIBRARIES} 
 )
 
 ###########################################################################

@@ -1,5 +1,5 @@
-#ifndef MANTID_STRFUNC_SUPPORT_H_
-#define MANTID_STRFUNC_SUPPORT_H_
+#ifndef MANTID_KERNEL_STRINGS_H
+#define MANTID_KERNEL_STRINGS_H
 
 //----------------------------------------------------------------------
 // Includes
@@ -11,6 +11,9 @@
 
 namespace Mantid
 {
+namespace Kernel
+{
+
 /** Holds support functions for strings.
 
     @author S. Ansell
@@ -35,8 +38,9 @@ namespace Mantid
     
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-v*/
-namespace StrFunc
+*/
+
+namespace Strings
 {
 /// determine if a character group exists in a string
 DLLExport int confirmStr(const std::string& S,const std::string& fullPhrase);
@@ -92,13 +96,14 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y);
 template<template<typename T,typename A> class V,typename T,typename A>
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err);
 
-
 /// Convert a VAX number to x86 little eindien
 float getVAXnum(const float A);
 
-}   // NAMESPACE StrFunc
+}   // NAMESPACE Strings
+
+}   // NAMESPACE Kernel
 
 }   // NAMESPACE Mantid
 
-#endif //MANTID_STRFUNC_SUPPORT_H_
+#endif //MANTID_KERNEL_STRINGS_H
 

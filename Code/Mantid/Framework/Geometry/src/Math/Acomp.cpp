@@ -1,6 +1,6 @@
 #include "MantidGeometry/Math/Acomp.h"
 #include "MantidKernel/Logger.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Math/RotCounter.h"
@@ -478,7 +478,7 @@ namespace Mantid
             if (Ln[iu]=='%')
             {
               iu++;
-              const int Nmove=StrFunc::convPartNum(Ln.substr(iu),numItem);
+              const int Nmove=Mantid::Kernel::Strings::convPartNum(Ln.substr(iu),numItem);
               if (!Nmove)
                 throw std::invalid_argument("Acomp::procIntersection error in line Ln\"" + Ln + "\"");
               numItem+=52;

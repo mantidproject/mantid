@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/MantidVersion.h"
-#include "MantidKernel/Support.h"
+#include "MantidKernel/Strings.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/FilterChannel.h"
 #include "MantidKernel/SignalChannel.h"
@@ -780,7 +780,7 @@ template<typename T>
 int ConfigServiceImpl::getValue(const std::string& keyName, T& out)
 {
   std::string strValue = getString(keyName);
-  int result = StrFunc::convert(strValue, out);
+  int result = Mantid::Kernel::Strings::convert(strValue, out);
   return result;
 }
 

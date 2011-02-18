@@ -28,9 +28,7 @@ set ( SRC_FILES src/IDetector.cpp
                 src/Math/PolyFunction.cpp
                 src/Math/PolyVar.cpp
                 src/Math/PolyVarOne.cpp
-                src/Math/RegexSupport.cpp
                 src/Math/RotCounter.cpp
-                src/Math/SupportGeometry.cpp
                 src/Math/Triple.cpp
                 src/MDGeometry/IMDDimension.cpp
                 src/MDGeometry/MDBasisDimension.cpp
@@ -106,7 +104,6 @@ set ( INC_FILES inc/MantidGeometry/DllExport.h
                 inc/MantidGeometry/Math/PolyBase.h
                 inc/MantidGeometry/Math/PolyFunction.h
                 inc/MantidGeometry/Math/PolyVar.h
-                inc/MantidGeometry/Math/RegexSupport.h
                 inc/MantidGeometry/Math/RotCounter.h
                 inc/MantidGeometry/Math/Triple.h
                 inc/MantidGeometry/MDGeometry/IMDDimension.h
@@ -182,7 +179,6 @@ set ( TEST_FILES test/AcompTest.h
                  test/PolyTest.h
                  test/QuatTest.h
                  test/RectangularDetectorTest.h
-                 test/RegexSupportTest.h
                  test/RotCounterTest.h
                  test/RulesBoolValueTest.h  
                  test/RulesIntersectionTest.h  
