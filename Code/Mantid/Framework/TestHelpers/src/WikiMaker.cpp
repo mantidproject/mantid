@@ -117,8 +117,9 @@ int main(int argc, char *argv[])
   }
   // Optional output filename
   std::string filename = "";
-  if (argc >= 2)
-    filename = argv[2];
+  if (argc >= 3)
+    if (argv[2])
+      filename = std::string(argv[2]);
 
   // Get the algorithm
   FrameworkManagerImpl& fm = FrameworkManager::Instance();
@@ -140,6 +141,8 @@ int main(int argc, char *argv[])
     myfile.close();
     std::cout << "\n\n... Written to: " << filename << "\n\n";
   }
+
+  std::cout << "http://www.mantidproject.org/index.php?title=" << alg->name() << "&action=edit\n\n";
 
 
   exit(0);
