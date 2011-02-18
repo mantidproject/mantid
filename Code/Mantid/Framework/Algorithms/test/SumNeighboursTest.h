@@ -67,7 +67,7 @@ public:
 //    alg.setPropertyValue("OutputWorkspace",outputSpace1) ;
 //    alg.setPropertyValue("SumX","4");
 //    alg.setPropertyValue("SumY","16");
-//    //alg.setPropertyValue("DetectorNames","E1,E2,E3,E4,E5,E6,E7,E8,E9,W1,W2,W3,W4,W5,W6,W7,W8,W9");
+//    //alg.setPropertyValue("DetectorNames","bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11,bank12,bank13,bank14,bank15,bank16,bank17,bank18");
 //    //alg.setPropertyValue("DetectorNames","bank1,bank2,bank3");
 //
 //    alg.execute();
