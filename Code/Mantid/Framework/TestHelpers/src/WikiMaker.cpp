@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
     std::cout << "\n\n... Written to: " << filename << "\n\n";
   }
 
-  std::cout << "http://www.mantidproject.org/index.php?title=" << alg->name() << "&action=edit\n\n";
+  std::cout << "\n\nhttp://www.mantidproject.org/index.php?title=" << alg->name() << "&action=edit\n\n";
 
 
   exit(0);
