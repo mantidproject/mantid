@@ -83,6 +83,11 @@ class avtMDFileReaderFileFormat : public avtMTSDFileFormat
     //
 
     virtual int            GetNTimesteps(void);
+    virtual void GetCycles(std::vector<int> &cycles);
+    virtual void GetTimes(std::vector<double> &times);
+
+    virtual bool      ReturnsValidCycle() const;
+    virtual bool      ReturnsValidTime() const;
 
     virtual const char    *GetType(void)   { return "MDFileReader"; };
     virtual void           FreeUpResources(void); 

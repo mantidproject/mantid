@@ -112,6 +112,31 @@ int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
   return m_MDWorkspace->gettDimension()->getNBins();
 }
 
+std::vector<int> MultiDimensionalDbPresenter::getCycles() const
+{
+  verifyExecution();
+  std::vector<int> cycles(m_MDWorkspace->gettDimension()->getNBins());
+  for(unsigned int i=0; i < cycles.size(); i++)
+    {
+      cycles[i] = i;
+    }
+  return cycles;
+}
+
+std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
+{
+  using namespace Mantid::Geometry;
+  verifyExecution();
+  boost::shared_ptr<const IMDDimension> tDimension = m_MDWorkspace->gettDimension();
+  const double increment = (tDimension->getMaximum() - tDimension->getMinimum())/tDimension->getNBins();
+  std::vector<double> times(tDimension->getNBins());
+  for(unsigned int i=0; i < tDimension->getNBins(); i++)
+  {
+    times[i] = tDimension->getMinimum() + (i*increment);
+  }
+  return times;
+}
+
 vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char* scalarName) const
 {
   using namespace Mantid::MDDataObjects;

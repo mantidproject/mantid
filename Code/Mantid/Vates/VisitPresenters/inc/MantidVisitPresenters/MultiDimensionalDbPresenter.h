@@ -69,6 +69,12 @@ public:
   /// Gets the number of timesteps in the workspace.
   int getNumberOfTimesteps() const;
 
+  /// Get the actual timestep values to use.
+  std::vector<double> getTimesteps() const;
+
+  /// Get the actual cycle values to use.
+  std::vector<int> getCycles() const;
+
   /// Get x axis name so that it may be applied to labels.
   std::string getXAxisName() const;
 

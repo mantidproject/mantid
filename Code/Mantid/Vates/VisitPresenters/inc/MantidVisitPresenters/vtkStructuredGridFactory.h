@@ -106,7 +106,7 @@ vtkStructuredGridFactory<Image> & vtkStructuredGridFactory<Image>::operator=(con
 
 
 template<typename Image>
-vtkStructuredGridFactory<Image>::vtkStructuredGridFactory(boost::shared_ptr<Image> image) : m_scalarName(""), m_timestep(0), m_image(image), m_meshOnly(true)
+vtkStructuredGridFactory<Image>::vtkStructuredGridFactory(boost::shared_ptr<Image> image) : m_image(image), m_scalarName(""), m_timestep(0),  m_meshOnly(true)
 {
 }
 

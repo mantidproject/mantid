@@ -92,6 +92,28 @@ avtMDFileReaderFileFormat::GetNTimesteps(void)
     return m_executor.getNumberOfTimesteps();
 }
 
+void avtMDFileReaderFileFormat::GetCycles(std::vector<int> &cycles)
+{
+   std::vector<int> allCycles = m_executor.getCycles();
+   cycles.swap(allCycles);
+}
+
+void avtMDFileReaderFileFormat::GetTimes(std::vector<double> &times)
+{
+  std::vector<double> allTimes = m_executor.getTimesteps();
+  times.swap(allTimes);
+}
+
+bool avtMDFileReaderFileFormat::ReturnsValidCycle() const
+{
+  return true;
+}
+
+bool avtMDFileReaderFileFormat::ReturnsValidTime() const
+{
+  return true;
+}
+
 
 // ****************************************************************************
 //  Method: avtMDFileReaderFileFormat::FreeUpResources
