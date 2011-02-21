@@ -43,6 +43,8 @@ namespace MDEvents
 
     size_t getNumDims() const;
 
+    void setExtents(size_t dim, CoordType min, CoordType max);
+
     std::vector< MDE > & getEvents();
 
     std::vector< MDE > * getEventsCopy();
@@ -62,7 +64,7 @@ namespace MDEvents
     /** Array of MDDimensionExtents giving the extents and
      * in each dimension.
      */
-    MDDimensionExtents dims[nd];
+    MDDimensionExtents extents[nd];
 
     /// The box splitting controller
     BoxSplitController_sptr m_splitController;

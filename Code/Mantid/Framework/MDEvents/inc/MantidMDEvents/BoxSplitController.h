@@ -10,7 +10,7 @@ namespace MDEvents
 
   /** This class is used by MDBox and MDGridBox to determine when,
    * a MDBox needs to split into a MDGridBox.
-   * It also specified the way the splitting will occur.
+   * It also specifies the way the splitting will occur.
    *
    * @author Janik Zikovsky
    * @date Feb 21, 2011
@@ -42,10 +42,31 @@ namespace MDEvents
       return (original+added) > m_threshold;
     }
 
+    //-----------------------------------------------------------------------------------
+    /** Return into how many to split along a dimension
+     *
+     * @param dim :: index of the dimension to split
+     * @return the dimension will be split into this many even boxes.
+     */
+    size_t splitInto(size_t dim)
+    {
+      return m_splitInto;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Set the way splitting will be done */
+    void setSplitInto(size_t num)
+    {
+      m_splitInto = num;
+    }
+
 
   protected:
     /// Splitting threshold
     size_t m_threshold;
+
+    // Even splitting for all dimensions
+    size_t m_splitInto;
 
   };
 

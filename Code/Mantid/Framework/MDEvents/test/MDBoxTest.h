@@ -25,6 +25,14 @@ public:
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
   }
 
+  void test_setExtents()
+  {
+    MDBox<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 4.0);
+    TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
+  }
+
 
   void test_addEvent()
   {

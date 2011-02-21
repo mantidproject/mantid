@@ -48,6 +48,21 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Set the extents of this box.
+   * @param dim :: index of dimension
+   * @param min :: min edge of the dimension
+   * @param max :: max edge of the dimension
+   */
+  TMDE(
+  void MDBox)::setExtents(size_t dim, CoordType min, CoordType max)
+  {
+    if (dim >= nd)
+      throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
+    this->extents[dim].min = min;
+    this->extents[dim].max = min;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns a reference to the events vector contained within.
    */
   TMDE(
