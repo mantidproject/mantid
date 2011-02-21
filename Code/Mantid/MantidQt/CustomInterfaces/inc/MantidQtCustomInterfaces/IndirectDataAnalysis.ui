@@ -812,13 +812,6 @@
            <item>
             <layout class="QVBoxLayout" name="confit_layoutOptions" >
              <item>
-              <widget class="QCheckBox" name="confit_ckPlotGuess" >
-               <property name="text" >
-                <string>Plot Guess</string>
-               </property>
-              </widget>
-             </item>
-             <item>
               <layout class="QHBoxLayout" name="confit_layoutFitType" >
                <item>
                 <widget class="QLabel" name="confit_lbFitType" >
@@ -847,13 +840,6 @@
                 </widget>
                </item>
               </layout>
-             </item>
-             <item>
-              <widget class="QCheckBox" name="confit_ckFixCentres" >
-               <property name="text" >
-                <string>Fix Peak Centres</string>
-               </property>
-              </widget>
              </item>
              <item>
               <layout class="QHBoxLayout" name="confit_layoutBackground" >
@@ -885,6 +871,24 @@
                </item>
               </layout>
              </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_30" >
+               <item>
+                <widget class="QCheckBox" name="confit_ckFixCentres" >
+                 <property name="text" >
+                  <string>Fix Peak Centres</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <widget class="QCheckBox" name="confit_ckPlotGuess" >
+                 <property name="text" >
+                  <string>Plot Guess</string>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
             </layout>
            </item>
            <item>
@@ -902,7 +906,7 @@
              <item>
               <widget class="QLabel" name="confit_lbSpecNo" >
                <property name="text" >
-                <string>Spectra No:</string>
+                <string>Spectra Range</string>
                </property>
               </widget>
              </item>
@@ -916,6 +920,26 @@
                </property>
                <property name="text" >
                 <string>0</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLabel" name="label_2" >
+               <property name="text" >
+                <string>to</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="confit_leSpecMax" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>-1</string>
                </property>
               </widget>
              </item>

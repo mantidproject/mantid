@@ -61,14 +61,16 @@ def concatWSs(workspaces, unit, name):
     CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
         UnitX=unit)
 
-def confitParsToWS(Table, Data, BackG='FixF'):
+def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
+    if ( specMax == -1 ):
+        specMax = mtd[Data].getNumberHistograms() - 1
     dataX = []
     if mtd[Data].getAxis(1).isSpectra():
         ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
         Transpose('inq', 'inq')
         readX = mtd['inq'].readX(0)
         nBins = len(readX)
-        for i in range(0,nBins):
+        for i in range(specMin, specMax+1):
             dataX.append(readX[i])
         mtd.deleteWorkspace('inq')
     else:
@@ -82,7 +84,7 @@ def confitParsToWS(Table, Data, BackG='FixF'):
             msg += 'Input must have axis values of Q'
             print msg
             sys.exit(msg)
-        for i in range(0, mtd[Data].getNumberHistograms()):
+        for i in range(specMin, specMax+1):
             dataX.append(float(axis.label(i)))
     xAxisVals = []
     dataY = []
@@ -127,13 +129,15 @@ def confitPlotSeq(inputWS, plot):
             plotSpecs.append(i)
     plotSpectrum(inputWS, plotSpecs)
 
-def confitSeq(inputWS, func, startX, endX, save, plot, bg):
-    input = inputWS+',i0'
-    for i in range(1, mtd[inputWS].getNumberHistograms()):
+def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
+    input = inputWS+',i' + str(specMin)
+    if (specMax == -1):
+        specMax = mtd[inputWS].getNumberHistograms() - 1
+    for i in range(specMin + 1, specMax + 1):
         input += ';'+inputWS+',i'+str(i)
     outNm = getWSprefix(inputWS) + '_conv_'
     PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
-    wsname = confitParsToWS(outNm, inputWS, bg)
+    wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
     if save:
             SaveNexusProcessed(wsname, wsname+'.nxs')
     if plot != 'None':

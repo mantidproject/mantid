@@ -441,6 +441,7 @@ void IndirectDataAnalysis::setupConFit()
   connect(m_uiForm.confit_pbSequential, SIGNAL(clicked()), this, SLOT(confitSequential()));
 
   m_uiForm.confit_leSpecNo->setValidator(m_valInt);
+  m_uiForm.confit_leSpecMax->setValidator(m_valInt);
 }
 
 void IndirectDataAnalysis::setupAbsorptionF2Py()
@@ -2115,6 +2116,16 @@ void IndirectDataAnalysis::confitPlotInput()
   m_cfInputWSName = wsname;
 
   int specNo = m_uiForm.confit_leSpecNo->text().toInt();
+  // Set spectra max value
+  int specMax = m_cfInputWS->getNumberHistograms() - 1;
+  if ( specNo < 0 || specNo > specMax )
+  {
+    m_uiForm.confit_leSpecNo->setText("0");
+    specNo = 0;
+  }
+  int smCurrent = m_uiForm.confit_leSpecMax->text().toInt();
+  if ( smCurrent < 0 || smCurrent > specMax )
+    m_uiForm.confit_leSpecMax->setText(QString::number(specMax));
 
   m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, wsname, specNo);
   int npnts = m_cfDataCurve->data().size();
@@ -2221,6 +2232,8 @@ void IndirectDataAnalysis::confitSequential()
     "func = r'" + QString::fromStdString(function) + "'\n"
     "startx = " + stX + "\n"
     "endx = " + enX + "\n"
+    "specMin = " + m_uiForm.confit_leSpecNo->text() + "\n"
+    "specMax = " + m_uiForm.confit_leSpecMax->text() + "\n"
     "plot = '" + m_uiForm.confit_cbPlotOutput->currentText() + "'\n"
     "save = ";
   
@@ -2228,7 +2241,7 @@ void IndirectDataAnalysis::confitSequential()
   
   pyInput +=    
     "bg = '" + bg + "'\n"
-    "confitSeq(input, func, startx, endx, save, plot, bg)\n";
+    "confitSeq(input, func, startx, endx, save, plot, bg, specMin, specMax)\n";
 
   QString pyOutput = runPythonCode(pyInput);
 }
