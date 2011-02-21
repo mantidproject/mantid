@@ -1,7 +1,6 @@
 from MantidFramework import *
 from mantidsimple import *
 import os
-import numpy
 
 class SNSSingleCrystalReduction(PythonAlgorithm):
     def category(self):
