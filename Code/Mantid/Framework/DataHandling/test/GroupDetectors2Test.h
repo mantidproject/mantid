@@ -401,6 +401,62 @@ public:
     AnalysisDataService::Instance().remove("boevs");
   }
 
+  void testReadingFromXMLCheckDublicateIndex2()
+  {
+    LoadMuonNexus2 nxLoad;
+    nxLoad.initialize();
+
+    // Now set required filename and output workspace name
+    std::string inputFile = "MUSR00015190.nxs";
+    nxLoad.setPropertyValue("FileName", inputFile);
+
+    std::string outputSpace="outer2";
+    nxLoad.setPropertyValue("OutputWorkspace", outputSpace);     
+    
+    //
+    // Test execute to read file and populate workspace
+    //
+    TS_ASSERT_THROWS_NOTHING(nxLoad.execute());    
+    TS_ASSERT( nxLoad.isExecuted() );    
+
+    MatrixWorkspace_sptr output;
+    output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace+"_1"));
+    Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
+    TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 64);
+
+    GroupDetectors2 groupAlg;
+    groupAlg.initialize();
+    groupAlg.setPropertyValue("InputWorkspace", outputSpace+"_1");
+    groupAlg.setPropertyValue("OutputWorkspace", "boevs");
+    groupAlg.setPropertyValue("MapFile", "IDFs_for_UNIT_TESTING/MUSR_Detector_Grouping_dublicate2.xml");
+    TS_ASSERT_THROWS_NOTHING(groupAlg.execute());    
+    TS_ASSERT( groupAlg.isExecuted() );
+
+    MatrixWorkspace_sptr output1;
+    TS_ASSERT_THROWS_NOTHING(output1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("boevs")));    
+    Workspace2D_sptr output2D1 = boost::dynamic_pointer_cast<Workspace2D>(output1);
+    TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
+
+    const SpectraDetectorMap &specDetecMap = output2D1->spectraMap();
+    std::vector<int> specDet = specDetecMap.getDetectors(1);
+    TS_ASSERT_EQUALS( specDet[0], 1);
+    specDet = specDetecMap.getDetectors(2);
+    TS_ASSERT_EQUALS( specDet[0], 2);
+    specDet = specDetecMap.getDetectors(3);
+    TS_ASSERT_EQUALS( specDet[1], 4);
+    TS_ASSERT_EQUALS( specDet[2], 5);
+    specDet = specDetecMap.getDetectors(8);
+    TS_ASSERT_EQUALS( specDet[0], 8);
+    TS_ASSERT_EQUALS( specDet[1], 9);
+    TS_ASSERT_EQUALS( specDet[2], 2);
+    TS_ASSERT_EQUALS( specDet[3], 11);
+    TS_ASSERT_EQUALS( specDet[4], 12);
+    TS_ASSERT_EQUALS( specDet[5], 13);
+
+    AnalysisDataService::Instance().remove(outputSpace);
+    AnalysisDataService::Instance().remove("boevs");
+  }
+
   void testAverageBehaviour()
   {
     GroupDetectors2 gd2;
