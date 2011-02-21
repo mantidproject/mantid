@@ -155,7 +155,7 @@ namespace MantidQt
       void confitHwhmUpdateRS(double);
 
       // Absorption (Basic)
-      void absorptionShape(int index);
+      // (nothing for this)
 
       // Absorption (F2PY)
       void absf2pRun();

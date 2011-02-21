@@ -15,9 +15,8 @@ else:                                                                        ##
 ## Other imports
 from mantidsimple import *
 from mantidplot import *
-
+from IndirectDataAnalysis import getEfixed
 import math
-import os.path
 
 def GetWSangles(inWS):
     tmp = mtd[inWS]
@@ -138,13 +137,7 @@ def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar,
     ## sam = run number
     sam = ws.getRun().getLogData("run_number").value
     ## efixed can be taken from the instrument parameter file
-    det = ws.getDetector(0)
-    try:
-        efixed = det.getNumberParameter('Efixed')[0]
-    except AttributeError:
-        ids = det.getDetectorIDs()
-        det = ws.getInstrument().getDetector(ids[0])
-        efixed = det.getNumberParameter('Efixed')[0]
+    efixed = getEfixed(inputws)
     ## Run the routine
     workspaces = AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density,
         sigs, siga, avar, efixed, inputWS=inputws)
@@ -155,104 +148,3 @@ def AbsRunFeeder(inputws, geom, beam, ncan, size, density, sigs, siga, avar,
     if ( plotOpt == 'Angle' or plotOpt == 'Both' ):
         graph = plotTimeBin(workspaces, 0)
         graph.activeLayer().setAxisTitle(Layer.Bottom, 'Angle')
-
-def CubicFit(inputWS, spec):
-    '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
-    parameter. Returns a list containing the fitted parameter values.'''
-    function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
-    fit = Fit(inputWS, spec, Function=function)
-    return fit.getPropertyValue('Parameters')
-
-def applyCorrections(inputWS, cannisterWS, corrections, efixed):
-    '''Through the PolynomialCorrection algorithm, makes corrections to the
-    input workspace based on the supplied correction values.'''
-    # Corrections are applied in Lambda (Wavelength)
-    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect',
-        EFixed=efixed)
-    if cannisterWS != '':
-        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect',
-            EFixed=efixed)
-    nHist = mtd[inputWS].getNumberHistograms()
-    # Check that number of histograms in each corrections workspace matches
-    # that of the input (sample) workspace
-    for ws in corrections:
-        if ( mtd[ws].getNumberHistograms() != nHist ):
-            raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
-    # Workspaces that hold intermediate results
-    CorrectedWorkspace = '__corrected'
-    CorrectedSampleWorkspace = '__csamws'
-    CorrectedCanWorkspace = '__cancorrected'
-    for i in range(0, nHist): # Loop through each spectra in the inputWS
-        ExtractSingleSpectrum(inputWS, CorrectedSampleWorkspace, i)
-        if ( len(corrections) == 1 ):
-            Ass = CubicFit(corrections[0], i)
-            PolynomialCorrection(CorrectedSampleWorkspace, 
-                CorrectedSampleWorkspace, Ass, 'Divide')
-            if ( i == 0 ):
-                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
-            else:
-                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
-        else:
-            ExtractSingleSpectrum(cannisterWS, CorrectedCanWorkspace, i)
-            Acc = CubicFit(corrections[3], i)
-            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
-                Acc, 'Divide')
-            Acsc = CubicFit(corrections[2], i)
-            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
-                Acsc, 'Multiply')
-            Minus(CorrectedSampleWorkspace, CorrectedCanWorkspace,
-                CorrectedSampleWorkspace)
-            Assc = CubicFit(corrections[1], i)
-            PolynomialCorrection(CorrectedSampleWorkspace, 
-                CorrectedSampleWorkspace, Assc, 'Divide')
-            if ( i == 0 ):
-                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
-            else:
-                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
-    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect',
-        EFixed=efixed)
-    if cannisterWS != '':
-        ConvertUnits(CorrectedCanWorkspace, CorrectedCanWorkspace, 'DeltaE',
-            'Indirect', EFixed=efixed)
-                
-def correctionsFeeder(sampleFile, cannisterFile, geom):
-    '''Load up the necessary files and then passes them into the main
-    applyCorrections routine.'''
-    sample = loadNexus(sampleFile)
-    ## Files named: (ins)(runNo)_(geom)_(suffix)
-    ws = mtd[sample]
-    ins = ws.getInstrument().getName()
-    ins = ConfigService().facility().instrument(ins).shortName().lower()
-    run = ws.getRun().getLogData('run_number').value
-    name = ins + run + '_' + geom + '_'
-    corrections = [loadNexus(name+'ass.nxs')]
-    if cannisterFile != '':
-        cannister = loadNexus(cannisterFile)
-        corrections.append(loadNexus(name+'assc.nxs'))
-        corrections.append(loadNexus(name+'acsc.nxs'))
-        corrections.append(loadNexus(name+'acc.nxs'))
-    else: # No can
-        cannister = ''
-    # Get efixed
-    det = ws.getDetector(0)
-    try:
-        efixed = det.getNumberParameter('Efixed')[0]
-    except AttributeError:
-        ids = det.getDetectorIDs()
-        det = ws.getInstrument().getDetector(ids[0])
-        efixed = det.getNumberParameter('Efixed')[0]
-    # Fire off main routine
-    try:
-        applyCorrections(sample, cannister, corrections, efixed)
-    except ValueError:
-        print """Number of histograms in corrections workspaces do not match
-            the sample workspace."""
-        raise
-
-def loadNexus(filename):
-    '''Loads a Nexus file into a workspace with the name based on the
-    filename. Convenience function for not having to play around with paths
-    in every function.'''
-    name = os.path.splitext( os.path.split(filename)[1] )[0]
-    LoadNexus(filename, name)
-    return name

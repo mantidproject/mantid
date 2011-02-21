@@ -91,13 +91,13 @@ void IndirectDataAnalysis::initLayout()
   setupConFit();
   setupAbsorptionF2Py();
   setupAbsCor();
-    
+
   connect(m_uiForm.pbHelp, SIGNAL(clicked()), this, SLOT(help()));
   connect(m_uiForm.pbRun, SIGNAL(clicked()), this, SLOT(run()));
   connect(m_uiForm.pbManageDirs, SIGNAL(clicked()), this, SLOT(openDirectoryDialog()));
 
   // absorption
-  connect(m_uiForm.abs_cbShape, SIGNAL(activated(int)), this, SLOT(absorptionShape(int)));
+  connect(m_uiForm.abs_cbShape, SIGNAL(currentIndexChanged(int)), m_uiForm.abs_swDetails, SLOT(setCurrentIndex(int)));
   // apply validators - absorption
   m_uiForm.abs_leAttenuation->setValidator(m_valDbl);
   m_uiForm.abs_leScatter->setValidator(m_valDbl);
@@ -110,7 +110,6 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.abs_leRadius->setValidator(m_valDbl);
   m_uiForm.abs_leSlices->setValidator(m_valInt);
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
-
 
   refreshWSlist();
 }
@@ -475,7 +474,16 @@ void IndirectDataAnalysis::setupAbsorptionF2Py()
 
 void IndirectDataAnalysis::setupAbsCor()
 {
-  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_can, SLOT(setEnabled(bool)));
+  // Disable Container inputs is "Use Container" is not checked
+  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_lbContainerInputType, SLOT(setEnabled(bool)));
+  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_cbContainerInputType, SLOT(setEnabled(bool)));
+  connect(m_uiForm.abscor_ckUseCan, SIGNAL(toggled(bool)), m_uiForm.abscor_swContainerInput, SLOT(setEnabled(bool)));
+
+  connect(m_uiForm.abscor_cbSampleInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swSampleInput, SLOT(setCurrentIndex(int)));
+  connect(m_uiForm.abscor_cbContainerInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swContainerInput, SLOT(setCurrentIndex(int)));
+
+  connect(m_uiForm.abscor_pbSampleRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.abscor_pbContainerRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
 }
 
 bool IndirectDataAnalysis::validateElwin()
@@ -1115,11 +1123,13 @@ void IndirectDataAnalysis::refreshWSlist()
 {
   // Get object list from ADS
   std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  // Clear Workspace Lists
+  // Clear Current Workspace Lists
   m_uiForm.fury_cbWorkspace->clear();
   m_uiForm.furyfit_cbWorkspace->clear();
   m_uiForm.confit_cbWorkspace->clear();
   m_uiForm.absp_cbWorkspace->clear();
+  m_uiForm.abscor_cbSampleWS->clear();
+  m_uiForm.abscor_cbContainerWS->clear();
   
   if ( ! workspaceList.empty() )
   {
@@ -1135,6 +1145,8 @@ void IndirectDataAnalysis::refreshWSlist()
         m_uiForm.furyfit_cbWorkspace->addItem(ws);
         m_uiForm.confit_cbWorkspace->addItem(ws);
         m_uiForm.absp_cbWorkspace->addItem(ws);
+        m_uiForm.abscor_cbSampleWS->addItem(ws);
+        m_uiForm.abscor_cbContainerWS->addItem(ws);
       }
     }
   }
@@ -2348,11 +2360,6 @@ void IndirectDataAnalysis::absorptionRun()
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 
-void IndirectDataAnalysis::absorptionShape(int index)
-{
-  m_uiForm.abs_swDetails->setCurrentIndex(index);
-}
-
 void IndirectDataAnalysis::openDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
@@ -2363,25 +2370,25 @@ void IndirectDataAnalysis::openDirectoryDialog()
 void IndirectDataAnalysis::help()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
-  QString url = "http://www.mantidproject.org/IDA:";
+  QString url = "http://www.mantidproject.org/IDA";
   if ( tabName == "Initial Settings" )
     url += "";
   else if ( tabName == "Elwin" )
-    url += "Elwin";
+    url += ":Elwin";
   else if ( tabName == "MSD Fit" )
-    url += "MSDFit";
+    url += ":MSDFit";
   else if ( tabName == "Fury" )
-    url += "Fury";
+    url += ":Fury";
   else if ( tabName == "FuryFit" )
-    url += "FuryFit";
+    url += ":FuryFit";
   else if ( tabName == "ConvFit" )
-    url += "ConvFit";
+    url += ":ConvFit";
   else if ( tabName == "Absorption" )
-    url += "Absorption";
+    url += ":Absorption";
   else if ( tabName == "Abs (F2PY)" )
-    url += "AbsF2P";
+    url += ":AbsF2P";
   else if ( tabName == "Apply Corrections" )
-    url += "AbsCor";
+    url += ":AbsCor";
   QDesktopServices::openUrl(QUrl(url));
 }
 
@@ -2509,12 +2516,54 @@ void IndirectDataAnalysis::abscorRun()
     geom = "cyl";
   }
 
-  QString pyInput = "import SpencerAbsCor\n"
-    "sampleFile = r'" + m_uiForm.abscor_sample->getFirstFilename() + "'\n"
-    "cannisterFile = r'" + m_uiForm.abscor_can->getFirstFilename() + "'\n"
-    "geom = '" + geom + "'\n"
-    "SpencerAbsCor.correctionsFeeder(sampleFile, cannisterFile,\n"
-    "    geom)\n";
+  QString pyInput = "from IndirectDataAnalysis import abscorFeeder, loadNexus\n";
+
+  if ( m_uiForm.abscor_cbSampleInputType->currentText() == "File" )
+  {
+    pyInput +=
+      "sample = loadNexus(r'" + m_uiForm.abscor_sample->getFirstFilename() + "')\n";
+  }
+  else
+  {
+    pyInput +=
+      "sample = '" + m_uiForm.abscor_cbSampleWS->currentText() + "'\n";
+  }
+
+  if ( m_uiForm.abscor_ckUseCan->isChecked() )
+  {
+    if ( m_uiForm.abscor_cbContainerInputType->currentText() == "File" )
+    {
+      pyInput +=
+        "container = loadNexus(r'" + m_uiForm.abscor_can->getFirstFilename() + "')\n";
+    }
+    else
+    {
+      pyInput +=
+        "container = '" + m_uiForm.abscor_cbContainerWS->currentText() + "'\n";
+    }
+  }
+  else
+  {
+    pyInput +=
+      "container = ''\n";
+  }
+
+  pyInput +=
+    "geom = '" + geom + "'\n";
+
+
+
+  if ( m_uiForm.abscor_ckUseCorrections->isChecked() )
+  {
+    pyInput += "useCor = True\n";
+  }
+  else
+  {
+    pyInput += "useCor = False\n";
+  }
+
+  pyInput +=
+    "abscorFeeder(sample, container, geom, useCor)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
 }
 

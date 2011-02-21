@@ -1960,25 +1960,87 @@
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_11" >
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" >
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Sample</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions" >
-          <stringlist>
-           <string>_red.nxs</string>
-          </stringlist>
-         </property>
-        </widget>
+        <layout class="QHBoxLayout" name="horizontalLayout_32" >
+         <item>
+          <widget class="QLabel" name="label_3" >
+           <property name="text" >
+            <string>Input Type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="abscor_cbSampleInputType" >
+           <item>
+            <property name="text" >
+             <string>File</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="abscor_swSampleInput" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex" >
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_3" >
+            <layout class="QVBoxLayout" name="verticalLayout_17" >
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>41</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="label" stdset="0" >
+                <string/>
+               </property>
+               <property name="multipleFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="fileExtensions" >
+                <stringlist>
+                 <string>_red.nxs</string>
+                </stringlist>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_4" >
+            <layout class="QHBoxLayout" name="horizontalLayout_31" >
+             <item>
+              <widget class="QComboBox" name="abscor_cbSampleWS" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="abscor_pbSampleRefresh" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_20" >
@@ -2006,38 +2068,136 @@
         </layout>
        </item>
        <item>
-        <widget class="QCheckBox" name="abscor_ckUseCan" >
+        <widget class="QCheckBox" name="abscor_ckUseCorrections" >
          <property name="text" >
-          <string>Use Can</string>
+          <string>Use Corrections</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" >
-         <property name="enabled" >
-          <bool>false</bool>
-         </property>
-         <property name="sizePolicy" >
-          <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
-           <horstretch>0</horstretch>
-           <verstretch>41</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="label" stdset="0" >
-          <string>Can</string>
-         </property>
-         <property name="multipleFiles" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="optional" stdset="0" >
-          <bool>false</bool>
-         </property>
-         <property name="fileExtensions" >
-          <stringlist>
-           <string>_red.nxs</string>
-          </stringlist>
+        <widget class="QCheckBox" name="abscor_ckUseCan" >
+         <property name="text" >
+          <string>Use Container</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="abscor_layoutContainer" >
+         <item>
+          <widget class="QLabel" name="abscor_lbContainerInputType" >
+           <property name="text" >
+            <string>Input Type:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="abscor_cbContainerInputType" >
+           <item>
+            <property name="text" >
+             <string>File</string>
+            </property>
+           </item>
+           <item>
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+         <item>
+          <widget class="QStackedWidget" name="abscor_swContainerInput" >
+           <property name="enabled" >
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="currentIndex" >
+            <number>0</number>
+           </property>
+           <widget class="QWidget" name="page_5" >
+            <layout class="QHBoxLayout" name="horizontalLayout_34" >
+             <item>
+              <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" >
+               <property name="enabled" >
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+                 <horstretch>0</horstretch>
+                 <verstretch>41</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="label" stdset="0" >
+                <string/>
+               </property>
+               <property name="multipleFiles" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="optional" stdset="0" >
+                <bool>false</bool>
+               </property>
+               <property name="fileExtensions" >
+                <stringlist>
+                 <string>_red.nxs</string>
+                </stringlist>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+           <widget class="QWidget" name="page_6" >
+            <layout class="QHBoxLayout" name="horizontalLayout_35" >
+             <item>
+              <widget class="QComboBox" name="abscor_cbContainerWS" />
+             </item>
+             <item>
+              <widget class="QPushButton" name="abscor_pbContainerRefresh" >
+               <property name="sizePolicy" >
+                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="text" >
+                <string>Refresh</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </widget>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_36" >
+         <item>
+          <widget class="QLabel" name="label_5" >
+           <property name="sizePolicy" >
+            <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="text" >
+            <string>Plot Output:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="abscor_cbPlotOutput" >
+           <item>
+            <property name="text" >
+             <string>None</string>
+            </property>
+           </item>
+          </widget>
+         </item>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer" >

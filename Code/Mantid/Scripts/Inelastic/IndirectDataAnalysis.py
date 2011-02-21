@@ -4,6 +4,7 @@ import IndirectEnergyConversion as IEC
 
 import math
 import re
+import os.path
 
 def abscyl(inWS_n, outWS_n, efixed, sample, can):
     ConvertUnits(inWS_n, 'wavelength', 'Wavelength', 'Indirect', efixed)
@@ -21,18 +22,8 @@ def absflat(inWS_n, outWS_n, efixed, sample, can):
 
 def absorption(input, mode, sample, can, Save=False, Verbose=False,
         Plot=False):
-    (direct, filename) = os.path.split(input)
-    (root, ext) = os.path.splitext(filename)
-    LoadNexusProcessed(input, root)
-    ws = mtd[root]
-    det = ws.getDetector(0)
-    efixed = 0.0
-    try:
-        efixed = det.getNumberParameter('Efixed')[0]
-    except AttributeError: # detector group
-        ids = det.getDetectorIDs()
-        det = ws.getInstrument().getDetector(ids[0])
-        efixed = det.getNumberParameter('Efixed')[0]
+    root = loadNexus(input)
+    efixed = getEfixed(root)
     outWS_n = root[:-3] + 'abs'
     if mode == 'Flat Plate':
         absflat(root, outWS_n, efixed, sample, can)
@@ -56,7 +47,6 @@ def concatWSs(workspaces, unit, name):
             dataX.append(readX[i])
         for i in range(0, len(readY)):
             dataY.append(readY[i])
-        for i in range(0, len(readE)):
             dataE.append(readE[i])
     CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
         UnitX=unit)
@@ -297,13 +287,7 @@ def furyfitCreateXAxis(inputWS):
         samplePos = inst.getSample().getPos()
         beamPos = samplePos - inst.getSource().getPos()
         for i in range(0,nHist):
-            detector = ws.getDetector(i)
-            try:
-                efixed = detector.getNumberParameter("Efixed")[0]
-            except AttributeError: # Detector Group
-                ids = detector.getDetectorIDs()
-                det = inst.getDetector(ids[0])
-                efixed = det.getNumberParameter("Efixed")[0]
+            efixed = getEfixed(inputWS, i)
             theta = detector.getTwoTheta(samplePos, beamPos) / 2
             lamda = math.sqrt(81.787/efixed)
             q = 4 * math.pi * math.sin(theta) / lamda
@@ -395,20 +379,6 @@ def furyfitSeq(inputWS, func, startx, endx, save, plot):
     if ( plot != 'None' ):
         furyfitPlotSeq(wsname, plot)
 
-def getWSprefix(workspace):
-    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.'''
-    if workspace == '':
-        return ''
-    ws = mtd[workspace]
-    ins = ws.getInstrument().getName()
-    ins = ConfigService().facility().instrument(ins).shortName().lower()
-    run = ws.getRun().getLogData('run_number').value
-    analyser = ws.getInstrument().getStringParameter('analyser')[0]
-    reflection = ws.getInstrument().getStringParameter('reflection')[0]
-    prefix = ins + run + '_' + analyser + reflection + '_'
-    return prefix
-    
 def msdfit(inputs, startX, endX, Save=False, Verbose=False, Plot=False):
     output = []
     for file in inputs:
@@ -453,3 +423,133 @@ def plotInput(inputfiles,spectra=[]):
     if len(workspaces) > 0:
         graph = plotSpectrum(workspaces,0)
         layer = graph.activeLayer().setTitle(", ".join(workspaces))
+        
+###############################################################################
+## abscor (previously in SpencerAnalysis) #####################################
+###############################################################################
+
+def CubicFit(inputWS, spec):
+    '''Uses the Mantid Fit Algorithm to fit a cubic function to the inputWS
+    parameter. Returns a list containing the fitted parameter values.'''
+    function = 'name=UserFunction, Formula=A0+A1*x+A2*x*x, A0=1, A1=0, A2=0'
+    fit = Fit(inputWS, spec, Function=function)
+    return fit.getPropertyValue('Parameters')
+
+def applyCorrections(inputWS, cannisterWS, corrections, efixed):
+    '''Through the PolynomialCorrection algorithm, makes corrections to the
+    input workspace based on the supplied correction values.'''
+    # Corrections are applied in Lambda (Wavelength)
+    ConvertUnits(inputWS, inputWS, 'Wavelength', 'Indirect',
+        EFixed=efixed)
+    if cannisterWS != '':
+        ConvertUnits(cannisterWS, cannisterWS, 'Wavelength', 'Indirect',
+            EFixed=efixed)
+    nHist = mtd[inputWS].getNumberHistograms()
+    # Check that number of histograms in each corrections workspace matches
+    # that of the input (sample) workspace
+    for ws in corrections:
+        if ( mtd[ws].getNumberHistograms() != nHist ):
+            raise ValueError('Mismatch: num of spectra in '+ws+' and inputWS')
+    # Workspaces that hold intermediate results
+    CorrectedWorkspace = getWSprefix(inputWS) + 'csam'
+    CorrectedSampleWorkspace = '__csamws'
+    CorrectedCanWorkspace = getWSprefix(cannisterWS) + 'ccan'
+    for i in range(0, nHist): # Loop through each spectra in the inputWS
+        ExtractSingleSpectrum(inputWS, CorrectedSampleWorkspace, i)
+        if ( len(corrections) == 1 ):
+            Ass = CubicFit(corrections[0], i)
+            PolynomialCorrection(CorrectedSampleWorkspace, 
+                CorrectedSampleWorkspace, Ass, 'Divide')
+            if ( i == 0 ):
+                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+            else:
+                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
+        else:
+            ExtractSingleSpectrum(cannisterWS, CorrectedCanWorkspace, i)
+            Acc = CubicFit(corrections[3], i)
+            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
+                Acc, 'Divide')
+            Acsc = CubicFit(corrections[2], i)
+            PolynomialCorrection(CorrectedCanWorkspace, CorrectedCanWorkspace,
+                Acsc, 'Multiply')
+            Minus(CorrectedSampleWorkspace, CorrectedCanWorkspace,
+                CorrectedSampleWorkspace)
+            Assc = CubicFit(corrections[1], i)
+            PolynomialCorrection(CorrectedSampleWorkspace, 
+                CorrectedSampleWorkspace, Assc, 'Divide')
+            if ( i == 0 ):
+                CloneWorkspace(CorrectedSampleWorkspace, CorrectedWorkspace)
+            else:
+                ConjoinWorkspaces(CorrectedWorkspace, CorrectedSampleWorkspace)
+    ConvertUnits(CorrectedWorkspace, CorrectedWorkspace, 'DeltaE', 'Indirect',
+        EFixed=efixed)
+    if cannisterWS != '':
+        ConvertUnits(CorrectedCanWorkspace, CorrectedCanWorkspace, 'DeltaE',
+            'Indirect', EFixed=efixed)
+                
+def abscorFeeder(sample, container, geom, useCor):
+    '''Load up the necessary files and then passes them into the main
+    applyCorrections routine.'''
+    if useCor:
+        ## Files named: (ins)(runNo)_(geom)_(suffix)
+        ins = mtd[sample].getInstrument().getName()
+        ins = ConfigService().facility().instrument(ins).shortName().lower()
+        run = mtd[sample].getRun().getLogData('run_number').value
+        name = ins + run + '_' + geom + '_'
+        corrections = [loadNexus(name+'ass.nxs')]
+        if container != '': # if container is given we have 3 more corrections
+            corrections.append(loadNexus(name+'assc.nxs'))
+            corrections.append(loadNexus(name+'acsc.nxs'))
+            corrections.append(loadNexus(name+'acc.nxs'))
+    else:
+        if ( container == '' ):
+            sys.exit("What do you want me to do?")
+        else:
+            result = getWSprefix(sample) + 'bgd'
+            Minus(sample, container, result)
+            return
+    # Get efixed
+    efixed = getEfixed(sample)
+    # Fire off main routine
+    try:
+        applyCorrections(sample, container, corrections, efixed)
+    except ValueError:
+        print """Number of histograms in corrections workspaces do not match
+            the sample workspace."""
+        raise
+
+###############################################################################        
+## utility functions - can probably be moved elsewhere to share better ########
+###############################################################################
+
+def loadNexus(filename):
+    '''Loads a Nexus file into a workspace with the name based on the
+    filename. Convenience function for not having to play around with paths
+    in every function.'''
+    name = os.path.splitext( os.path.split(filename)[1] )[0]
+    LoadNexus(filename, name)
+    return name
+    
+def getWSprefix(workspace):
+    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
+    all of our other naming conventions are built.'''
+    if workspace == '':
+        return ''
+    ws = mtd[workspace]
+    ins = ws.getInstrument().getName()
+    ins = ConfigService().facility().instrument(ins).shortName().lower()
+    run = ws.getRun().getLogData('run_number').value
+    analyser = ws.getInstrument().getStringParameter('analyser')[0]
+    reflection = ws.getInstrument().getStringParameter('reflection')[0]
+    prefix = ins + run + '_' + analyser + reflection + '_'
+    return prefix
+
+def getEfixed(workspace, detIndex=0):
+    det = mtd[workspace].getDetector(detIndex)
+    try:
+        efixed = det.getNumberParameter('Efixed')[0]
+    except AttributeError:
+        ids = det.getDetectorIDs()
+        det = mtd[workspace].getInstrument().getDetector(ids[0])
+        efixed = det.getNumberParameter('Efixed')[0]
+    return efixed
