@@ -6,7 +6,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/BoxController.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
@@ -25,7 +25,7 @@ public:
   MDBox<MDEvent<1>,1> * makeMDBox1()
   {
     // Split at 5 events
-    BoxSplitController_sptr splitter(new BoxSplitController(5));
+    BoxController_sptr splitter(new BoxController(5));
     // Splits into 10 boxes
     splitter->setSplitInto(10);
     // Set the size

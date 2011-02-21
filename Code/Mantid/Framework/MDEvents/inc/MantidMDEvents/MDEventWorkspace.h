@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"

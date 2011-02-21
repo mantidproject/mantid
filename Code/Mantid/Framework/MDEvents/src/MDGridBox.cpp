@@ -15,9 +15,9 @@ namespace MDEvents
   {
     if (!box)
       throw std::runtime_error("MDGridBox::ctor(): box is NULL.");
-    BoxSplitController_sptr sc = box->getSplitController();
+    BoxController_sptr sc = box->getSplitController();
     if (!sc)
-      throw std::runtime_error("MDGridBox::ctor(): No BoxSplitController specified in box.");
+      throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
 
     // Copy the extents
     for (size_t d=0; d<nd; d++)

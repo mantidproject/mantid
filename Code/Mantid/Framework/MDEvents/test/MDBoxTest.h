@@ -5,7 +5,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
-#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/BoxController.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
@@ -123,7 +123,7 @@ public:
 
   void test_splitter()
   {
-    BoxSplitController_sptr sc( new BoxSplitController(10));
+    BoxController_sptr sc( new BoxController(10));
     MDBox<MDEvent<3>,3> b3(sc);
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);

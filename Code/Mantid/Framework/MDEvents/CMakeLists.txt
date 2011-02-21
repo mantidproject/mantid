@@ -14,7 +14,7 @@ set (INC_FILES
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDDimensionExtents.h
-	inc/MantidMDEvents/BoxSplitController.h
+	inc/MantidMDEvents/BoxController.h
 )
 
 # Test files. Other source files required.
@@ -23,7 +23,7 @@ set (TEST_FILES
 	test/MDEventWorkspaceTest.h  
 	test/MDBoxTest.h  
 	test/MDGridBoxTest.h  
-	test/BoxSplitControllerTest.h  
+	test/BoxControllerTest.h  
 )
 
 set ( GMOCK_TEST_FILES

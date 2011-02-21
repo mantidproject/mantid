@@ -15,9 +15,9 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** ctor
-   * @param splitter :: BoxSplitController that controls how boxes split
+   * @param splitter :: BoxController that controls how boxes split
    */
-  TMDE(MDBox)::MDBox(BoxSplitController_sptr splitter)
+  TMDE(MDBox)::MDBox(BoxController_sptr splitter)
   {
     m_splitController = splitter;
   }

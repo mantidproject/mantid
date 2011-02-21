@@ -1,5 +1,5 @@
-#ifndef BOXSPLITCONTROLLER_H_
-#define BOXSPLITCONTROLLER_H_
+#ifndef BOXCONTROLLER_H_
+#define BOXCONTROLLER_H_
 
 #include <boost/shared_ptr.hpp>
 
@@ -8,14 +8,15 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** This class is used by MDBox and MDGridBox to determine when,
-   * a MDBox needs to split into a MDGridBox.
-   * It also specifies the way the splitting will occur.
+  /** This class is used by MDBox and MDGridBox in order to intelligently
+   * determine optimal behavior. It informs:
+   *  - When a MDBox needs to split into a MDGridBox.
+   *  - How the splitting will occur.
    *
    * @author Janik Zikovsky
    * @date Feb 21, 2011
    */
-  class BoxSplitController
+  class BoxController
   {
   public:
 
@@ -25,7 +26,7 @@ namespace MDEvents
      * @param threshold :: # of points at which the MDBox splits
      * @return
      */
-    BoxSplitController(size_t threshold)
+    BoxController(size_t threshold)
     : m_threshold(threshold)
     {
     }
@@ -71,8 +72,8 @@ namespace MDEvents
 
   };
 
-  /// Shared ptr to BoxSplitController
-  typedef boost::shared_ptr<BoxSplitController> BoxSplitController_sptr;
+  /// Shared ptr to BoxController
+  typedef boost::shared_ptr<BoxController> BoxController_sptr;
 
 }//namespace MDEvents
 

@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
@@ -35,7 +35,7 @@ namespace MDEvents
   public:
     MDBox();
 
-    MDBox(BoxSplitController_sptr splitter);
+    MDBox(BoxController_sptr splitter);
 
     void clear();
 
@@ -54,7 +54,7 @@ namespace MDEvents
     bool willSplit(size_t num) const;
 
     /// Return the split controller saved.
-    BoxSplitController_sptr getSplitController() const
+    BoxController_sptr getSplitController() const
     { return m_splitController; }
 
   protected:
@@ -64,7 +64,7 @@ namespace MDEvents
     std::vector< MDE > data;
 
     /// The box splitting controller
-    BoxSplitController_sptr m_splitController;
+    BoxController_sptr m_splitController;
 
 
   public:
