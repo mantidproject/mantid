@@ -11954,11 +11954,11 @@ void ApplicationWindow::createActions()
     //#endif
 
   actionAddLayer = new QAction(QIcon(getQPixmap("newLayer_xpm")), tr("Add La&yer"), this);
-  actionAddLayer->setShortcut( tr("ALT+L") );
+  actionAddLayer->setShortcut( tr("Alt+L") );
   connect(actionAddLayer, SIGNAL(activated()), this, SLOT(addLayer()));
 
   actionShowLayerDialog = new QAction(QIcon(getQPixmap("arrangeLayers_xpm")), tr("Arran&ge Layers"), this);
-  actionShowLayerDialog->setShortcut( tr("Shift+A") );
+  actionShowLayerDialog->setShortcut( tr("Alt+A") );
   connect(actionShowLayerDialog, SIGNAL(activated()), this, SLOT(showLayerDialog()));
 
   actionAutomaticLayout = new QAction(QIcon(getQPixmap("auto_layout_xpm")), tr("Automatic Layout"), this);
@@ -12812,11 +12812,11 @@ void ApplicationWindow::translateActionsStrings()
 
   actionAddLayer->setMenuText(tr("Add La&yer"));
   actionAddLayer->setToolTip(tr("Add Layer"));
-  actionAddLayer->setShortcut(tr("ALT+L"));
+  actionAddLayer->setShortcut(tr("Alt+L"));
 
   actionShowLayerDialog->setMenuText(tr("Arran&ge Layers"));
   actionShowLayerDialog->setToolTip(tr("Arrange Layers"));
-  actionShowLayerDialog->setShortcut(tr("Shift+A"));
+  actionShowLayerDialog->setShortcut(tr("Alt+A"));
 
   actionAutomaticLayout->setMenuText(tr("Automatic Layout"));
   actionAutomaticLayout->setToolTip(tr("Automatic Layout"));
