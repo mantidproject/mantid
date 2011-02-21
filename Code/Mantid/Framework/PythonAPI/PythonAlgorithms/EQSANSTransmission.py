@@ -27,6 +27,7 @@ class EQSANSTransmission(PythonAlgorithm):
     NY_TRANS_PIX = 10
     
     # Number of Y pixels
+    NX_PIX = 192
     NY_PIX = 256
     
     # To define transmission peak
@@ -65,6 +66,18 @@ class EQSANSTransmission(PythonAlgorithm):
         nx_max = xcenter + self.NX_TRANS_PIX
         ny_min = ycenter - self.NY_TRANS_PIX
         ny_max = ycenter + self.NY_TRANS_PIX
+
+        # Check that pixels are on the detector
+        if nx_min<0: nx_min = 0
+        if nx_min>self.NX_PIX: nx_min = self.NX_PIX
+        if nx_max<0: nx_max = 0
+        if nx_max>self.NX_PIX: nx_max = self.NX_PIX
+        
+        if ny_min<0: ny_min = 0
+        if ny_min>self.NY_PIX: ny_min = self.NY_PIX
+        if ny_max<0: ny_max = 0
+        if ny_max>self.NY_PIX: ny_max = self.NY_PIX
+        
 
         # Sum up all TOF bins
         Integration(input_ws, input_ws.getName()+'_int')
