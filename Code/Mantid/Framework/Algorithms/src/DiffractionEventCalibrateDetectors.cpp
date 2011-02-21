@@ -168,6 +168,7 @@ namespace Algorithms
  * @param inname :: The workspace name
  * @param outname :: The workspace name
  * @param peakOpt :: Location of optimized peak
+ * @param rb_param :: Bin boundary string
  */
 
   double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param)
@@ -266,7 +267,7 @@ namespace Algorithms
     fit_alg->setProperty("MaxIterations",200);
     fit_alg->setProperty("Output","fit");
     std::ostringstream fun_str;
-    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=17.5221,PeakCentre="<<peakLoc;
+    fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
     fit_alg->setProperty("Function",fun_str.str());
 
     try
@@ -317,6 +318,9 @@ namespace Algorithms
 
     declareProperty(new API::FileProperty("DetCalFilename", "", API::FileProperty::Save, ".DetCal"), "The output filename of the ISAW DetCal file");
 
+    declareProperty( new PropertyWithValue<std::string>("BankName", "", Direction::Input),
+    "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
+
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
 
@@ -350,14 +354,20 @@ namespace Algorithms
 
     //Build a list of Rectangular Detectors
     std::vector<boost::shared_ptr<RectangularDetector> > detList;
+    // --------- Loading only one bank ----------------------------------
+    std::string onebank = getProperty("BankName");
+    bool doOneBank = (onebank != "");
     for (int i=0; i < inst->nelements(); i++)
     {
       boost::shared_ptr<RectangularDetector> det;
       boost::shared_ptr<ICompAssembly> assem;
 
       det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-     if (det)
-        detList.push_back(det);
+      if (det) 
+      {
+        if (det->getName().compare(onebank) == 0) detList.push_back(det);
+        if (!doOneBank) detList.push_back(det);
+      }
       else
       {
         //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
@@ -368,7 +378,11 @@ namespace Algorithms
           for (int j=0; j < assem->nelements(); j++)
           {
             det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-            if (det) detList.push_back(det);
+            if (det)
+            {
+               if (det->getName().compare(onebank) == 0) detList.push_back(det);
+               if (!doOneBank) detList.push_back(det);
+            }
           }
         }
       }
@@ -400,26 +414,32 @@ namespace Algorithms
     std::fstream outfile;
     outfile.open(filename.c_str(), std::ios::out);
 
-    outfile << "#\n";
-    outfile << "#  Mantid Optimized .DetCal file for SNAP with TWO detector panels\n";
-    outfile << "#  Old Panel, nominal size and distance at -90 degrees.\n";
-    outfile << "#  New Panel, nominal size and distance at +90 degrees.\n";
-    outfile << "#\n";
-    outfile << "# Lengths are in centimeters.\n";
-    outfile << "# Base and up give directions of unit vectors for a local\n";
-    outfile << "# x,y coordinate system on the face of the detector.\n";
-    outfile << "#\n";
-    outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
-    outfile << "#\n";
-    outfile << "6         L1     T0_SHIFT\n";
-    IObjComponent_const_sptr source = inst->getSource();
-    IObjComponent_const_sptr sample = inst->getSample();
-    outfile << "7  "<<source->getDistance(*sample)*100<<"            0\n";
-    outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
+    if(detList.size() > 1) 
+    {
+      outfile << "#\n";
+      outfile << "#  Mantid Optimized .DetCal file for SNAP with TWO detector panels\n";
+      outfile << "#  Old Panel, nominal size and distance at -90 degrees.\n";
+      outfile << "#  New Panel, nominal size and distance at +90 degrees.\n";
+      outfile << "#\n";
+      outfile << "# Lengths are in centimeters.\n";
+      outfile << "# Base and up give directions of unit vectors for a local\n";
+      outfile << "# x,y coordinate system on the face of the detector.\n";
+      outfile << "#\n";
+      outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
+      outfile << "#\n";
+      outfile << "6         L1     T0_SHIFT\n";
+      IObjComponent_const_sptr source = inst->getSource();
+      IObjComponent_const_sptr sample = inst->getSample();
+      outfile << "7  "<<source->getDistance(*sample)*100<<"            0\n";
+      outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
+    }
 
     Progress prog(this,0.0,1.0,detList.size());
+    //omp_set_nested(1);
+    //PARALLEL_FOR1(inputW)
     for (int det=0; det < static_cast<int>(detList.size()); det++)
     {
+      //PARALLEL_START_INTERUPT_REGION
       std::string par[5];
       par[0]=detList[det]->getName();
       par[1]=inname;
@@ -566,8 +586,9 @@ namespace Algorithms
       Base.normalize();
       Up.normalize();
       Center*=100.0;
+      // << det+1  << "  " 
       outfile << "5  " 
-       << det+1  << "  " 
+       << detList[det]->getName().substr(4)  << "  " 
        << detList[det]->xpixels() << "  " 
        << detList[det]->ypixels() << "  " 
        << 100.0*detList[det]->xsize() << "  " 
@@ -586,7 +607,9 @@ namespace Algorithms
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
       prog.report();
+      //PARALLEL_END_INTERUPT_REGION
     }
+    //PARALLEL_CHECK_INTERUPT_REGION
 
     // Closing
     outfile.close();
