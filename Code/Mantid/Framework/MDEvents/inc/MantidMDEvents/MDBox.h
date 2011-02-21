@@ -1,12 +1,12 @@
 #ifndef MDBOX_H_
 #define MDBOX_H_
 
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/IMDBox.h"
-#include "MantidMDEvents/BoxSplitController.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/MDDimensionExtents.h"
+#include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
 {
@@ -35,6 +35,8 @@ namespace MDEvents
   public:
     MDBox();
 
+    MDBox(BoxSplitController_sptr splitter);
+
     void clear();
 
     size_t getNPoints() const;
@@ -62,7 +64,7 @@ namespace MDEvents
      */
     MDDimensionExtents dims[nd];
 
-    /// The box splitting controlelr
+    /// The box splitting controller
     BoxSplitController_sptr m_splitController;
 
 

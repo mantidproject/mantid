@@ -1,11 +1,12 @@
 #ifndef MDEVENTWORKSPACE_H_
 #define MDEVENTWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/IMDEventWorkspace.h"
-#include "MantidMDEvents/IMDBox.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/BoxSplitController.h"
+#include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/IMDEventWorkspace.h"
+#include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
 {

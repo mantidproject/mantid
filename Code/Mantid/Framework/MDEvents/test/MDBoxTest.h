@@ -5,6 +5,7 @@
 
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/BoxSplitController.h"
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
@@ -22,13 +23,8 @@ public:
     MDBox<MDEvent<3>,3> b3;
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
-
-//    std::cout << sizeof(b3) << "\n";
-//    std::cout << sizeof(MDBox<0> ) << "\n";
-//    std::cout << sizeof(MDBox<1> ) << "\n";
-//    std::vector< int > v;
-//    std::cout << sizeof(v) << "\n";
   }
+
 
   void test_addEvent()
   {
@@ -102,6 +98,31 @@ public:
   }
 
 
+  /** If you don't set a splitter, the box never splits */
+  void test_splitter_ifNotSet()
+  {
+    MDBox<MDEvent<3>,3> b3;
+    TS_ASSERT( !b3.willSplit(12) );
+    TS_ASSERT( !b3.willSplit(12345) );
+  }
+
+
+  void test_splitter()
+  {
+    BoxSplitController_sptr sc( new BoxSplitController(10));
+    MDBox<MDEvent<3>,3> b3(sc);
+    TS_ASSERT_EQUALS( b3.getNumDims(), 3);
+    TS_ASSERT_EQUALS( b3.getNPoints(), 0);
+
+    TS_ASSERT( !b3.willSplit(2) );
+    TS_ASSERT( b3.willSplit(12) );
+
+    MDEvent<3> ev(1.2, 3.4);
+    std::vector< MDEvent<3> > vec;
+    for(int i=0; i < 12; i++) vec.push_back(ev);
+    b3.addEvents( vec );
+
+  }
 };
 
 

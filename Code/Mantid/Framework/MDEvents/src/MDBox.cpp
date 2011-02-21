@@ -13,6 +13,14 @@ namespace MDEvents
   {
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** ctor
+   * @param splitter :: BoxSplitController that controls how boxes split
+   */
+  TMDE(MDBox)::MDBox(BoxSplitController_sptr splitter)
+  {
+    m_splitController = splitter;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Clear any points contained. */
@@ -85,12 +93,15 @@ namespace MDEvents
   TMDE(
   bool MDBox)::willSplit(size_t num) const
   {
+    if (!m_splitController)
+      return false;
     return m_splitController->willSplit(this->data.size(), num);
   }
 
 
   //-----------------------------------------------------------------------------------------------
   /** Add several events
+   * @param events :: vector of events to be copied.
    */
   TMDE(
   void MDBox)::addEvents(const std::vector<MDE> & events)
