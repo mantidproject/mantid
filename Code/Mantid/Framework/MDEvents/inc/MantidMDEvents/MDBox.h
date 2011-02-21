@@ -43,8 +43,6 @@ namespace MDEvents
 
     size_t getNumDims() const;
 
-    void setExtents(size_t dim, CoordType min, CoordType max);
-
     std::vector< MDE > & getEvents();
 
     std::vector< MDE > * getEventsCopy();
@@ -55,16 +53,15 @@ namespace MDEvents
 
     bool willSplit(size_t num) const;
 
-  private:
+    /// Return the split controller saved.
+    BoxSplitController_sptr getSplitController() const
+    { return m_splitController; }
+
+  protected:
 
     /** Vector of MDEvent's, in no particular order.
      * */
     std::vector< MDE > data;
-
-    /** Array of MDDimensionExtents giving the extents and
-     * in each dimension.
-     */
-    MDDimensionExtents extents[nd];
 
     /// The box splitting controller
     BoxSplitController_sptr m_splitController;

@@ -29,7 +29,13 @@ public:
   {
     MDBox<MDEvent<2>,2> b;
     b.setExtents(0, -10.0, 10.0);
-    b.setExtents(1, -4.0, 4.0);
+    TS_ASSERT_DELTA(b.getExtents(0).min, -10.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
+
+    b.setExtents(1, -4.0, 6.0);
+    TS_ASSERT_DELTA(b.getExtents(1).min, -4.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(1).max, +6.0, 1e-6);
+
     TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
   }
 
@@ -129,6 +135,8 @@ public:
     std::vector< MDEvent<3> > vec;
     for(int i=0; i < 12; i++) vec.push_back(ev);
     b3.addEvents( vec );
+
+    TS_ASSERT_EQUALS( b3.getSplitController(), sc);
 
   }
 };

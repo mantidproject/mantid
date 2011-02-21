@@ -60,6 +60,27 @@ namespace MDEvents
     /// Add several events
     virtual void addEvents(const std::vector<MDE> & events) = 0;
 
+    //-----------------------------------------------------------------------------------------------
+    /** Set the extents of this box.
+     * @param dim :: index of dimension
+     * @param min :: min edge of the dimension
+     * @param max :: max edge of the dimension
+     */
+    void setExtents(size_t dim, CoordType min, CoordType max)
+    {
+      if (dim >= nd)
+        throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
+      this->extents[dim].min = min;
+      this->extents[dim].max = max;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Get the extents for this box */
+    MDDimensionExtents & getExtents(size_t dim)
+    {
+      return extents[dim];
+    }
+
 
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated signal from all points within.
@@ -83,7 +104,7 @@ namespace MDEvents
     /** Array of MDDimensionStats giving the extents and
      * other stats on the box dimensions.
      */
-    MDDimensionExtents dimExtents[nd];
+    MDDimensionExtents extents[nd];
 
     /** Cached total signal from all points within */
     double m_signal;

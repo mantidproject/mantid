@@ -50,6 +50,7 @@ namespace MDEvents
      */
     size_t splitInto(size_t dim)
     {
+      (void) dim; // Ignore dim for now
       return m_splitInto;
     }
 
