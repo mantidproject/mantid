@@ -43,7 +43,6 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
     delete m_xDimensionWidget;
     delete m_yDimensionWidget;
     delete m_zDimensionWidget;
-    delete m_tDimensionWidget;
   }
 
   //Create widget to display/control the aligned x-dimension
@@ -57,10 +56,6 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
   //Create widget to display/control the aligned z-dimension
   m_zDimensionWidget = new DimensionWidget(this, "z Dimension", 2, nonIntegratedVector);
   layout->addWidget(m_zDimensionWidget, 2, 0);
-
-  //Create widget to display/control the aligned t-dimension
-  m_tDimensionWidget = new DimensionWidget(this, "t Dimension", 3, nonIntegratedVector);
-  layout->addWidget(m_tDimensionWidget, 3, 0);
 
   this->setLayout(layout);
   m_isConstructed = true;
@@ -86,12 +81,6 @@ std::string GeometryWidget::getZDimensionXML() const
 {
   validateSetup();
   return m_zDimensionWidget->getDimension()->toXMLString();
-}
-
-std::string GeometryWidget::gettDimensionXML() const
-{
-  validateSetup();
-  return m_tDimensionWidget->getDimension()->toXMLString();
 }
 
 
@@ -144,15 +133,6 @@ void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDim
     {
       //Update the zDimensionWidget only.
       m_zDimensionWidget->populateWidget(oldDimensionIndex);
-    }
-  }
-
-  //Update the zDimensionWidget only.
-  if (isEqualToChangedDimension(m_tDimensionWidget->getDimension()))
-  {
-    if (pDimensionWidget != m_tDimensionWidget)
-    {
-      m_tDimensionWidget->populateWidget(oldDimensionIndex);
     }
   }
 

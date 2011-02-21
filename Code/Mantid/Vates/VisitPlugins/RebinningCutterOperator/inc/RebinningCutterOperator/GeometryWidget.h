@@ -78,9 +78,6 @@ std::string getYDimensionXML() const;
 /// Gets the z dimension in a serialzed form
 std::string getZDimensionXML() const;
 
-/// Gets the t dimension in a serialized form
-std::string gettDimensionXML() const;
-
 
 bool isSetup() const
 {
@@ -98,7 +95,6 @@ void validateSetup() const;
 DimensionWidget* m_xDimensionWidget;
 DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
-DimensionWidget* m_tDimensionWidget;
 bool m_isConstructed;
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_nonIntegratedVector;
 

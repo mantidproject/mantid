@@ -181,19 +181,12 @@ Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensionZ(vtkDataSet
 
 Mantid::VATES::Dimension_sptr avtRebinningCutterFilter::getDimensiont(vtkDataSet* in_ds) const
 {
-  if (atts.GetIsSetUp())
-  {
-    return Mantid::VATES::createDimension(atts.GetDimensionXML()[3]);
-  }
-  else
-  {
     return m_presenter.getTDimensionFromDS(in_ds);
-  }
 }
 
 std::string avtRebinningCutterFilter::createHash() const
 {
-  size_t seed;
+  size_t seed = 1;
   boost::hash_combine(seed, atts.GetOriginX());
   boost::hash_combine(seed, atts.GetOriginY());
   boost::hash_combine(seed, atts.GetOriginZ());
@@ -303,7 +296,7 @@ RebinningIterationAction avtRebinningCutterFilter::decideIterationAction()
   vtkDataSet* cachedOutput = static_cast<vtkDataSet*> (FetchArbitraryVTKObject(DATA_DEPENDENCE,
     this->createHash().c_str(), 0, 1, "VTK_DATASET"));
 
-  void_ref_ptr ptr = FetchArbitraryRefPtr(DATA_DEPENDENCE,"timestep",0, 1, "DOUBLE" );
+  void_ref_ptr ptr = FetchArbitraryRefPtr(DATA_DEPENDENCE,"timestep",0, 1, "INT" );
 
   RebinningIterationAction action;
   if(cachedOutput == NULL)
@@ -312,7 +305,7 @@ RebinningIterationAction avtRebinningCutterFilter::decideIterationAction()
   }
   else
   {
-    double* oldtime = (double*)(*ptr);
+    int* oldtime = (int*)(*ptr);
     if(*oldtime == m_timestep)
     {
       action = UseCache; // Use cache since there has been no change.
@@ -327,7 +320,7 @@ RebinningIterationAction avtRebinningCutterFilter::decideIterationAction()
 
 void deleteTimeMarker(void* timeMarkerVoid)
 {
-  double* cachedmarker = (double*)timeMarkerVoid;
+  int* cachedmarker = (int*)timeMarkerVoid;
   delete cachedmarker;
 }
 
@@ -389,13 +382,15 @@ void avtRebinningCutterFilter::Execute()
  else
  {
     /// Use the dataset factory to draw an image and to persist metadata.
-    StoreArbitraryRefPtr(DATA_DEPENDENCE, "timestep", 0, 1, "DOUBLE", void_ref_ptr(new double(m_timestep), deleteTimeMarker));
+    StoreArbitraryRefPtr(DATA_DEPENDENCE, "timestep", 0, 1, "INT", void_ref_ptr(new int(m_timestep), deleteTimeMarker));
 
     vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
     output_ds = m_presenter.createVisualDataSet(spvtkDataSetFactory);
+
     StoreArbitraryVTKObject(DATA_DEPENDENCE, this->createHash().c_str(), 0, 1, "VTK_DATASET",
         output_ds);
   }
+
 
   output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName.c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);

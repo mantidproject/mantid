@@ -272,7 +272,6 @@ void QvisRebinningCutterWindow::createGeometryWidget()
     dimensionXMLStrings.push_back(m_geomWidget->getXDimensionXML());
     dimensionXMLStrings.push_back(m_geomWidget->getYDimensionXML());
     dimensionXMLStrings.push_back(m_geomWidget->getZDimensionXML());
-    dimensionXMLStrings.push_back(m_geomWidget->gettDimensionXML());
     atts->SetDimensionXML(dimensionXMLStrings);
 
     //Get the bounding box and use it to configure box boundaries.
@@ -548,7 +547,6 @@ QvisRebinningCutterWindow::GetCurrentValues(int which_widget)
     dimensionXMLStrings.push_back(m_geomWidget->getXDimensionXML());
     dimensionXMLStrings.push_back(m_geomWidget->getYDimensionXML());
     dimensionXMLStrings.push_back(m_geomWidget->getZDimensionXML());
-    dimensionXMLStrings.push_back(m_geomWidget->gettDimensionXML());
     atts->SetDimensionXML(dimensionXMLStrings);
   }
 }
