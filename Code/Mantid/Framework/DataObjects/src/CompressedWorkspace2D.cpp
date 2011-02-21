@@ -58,7 +58,7 @@ void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const 
   //std::cerr<<"Compressed buffer size "<<bufferSize<<'\n';
   //std::cerr<<"m_vectorSize: "<<m_vectorSize<<"\n";
   //std::cerr<<"m_vectorsPerBlock: "<<m_vectorsPerBlock<<"\n";
-  //std::cerr<<"Memeory: "<<getMemorySize()<<"\n";
+  //std::cerr<<"Memory: "<<getMemorySize()<<"\n";
 
   ManagedDataBlock2D *newBlock = new ManagedDataBlock2D(0, m_vectorsPerBlock, m_XLength, m_YLength);
   CompressedPointer tmpBuff = compressBlock(newBlock,0);
@@ -110,7 +110,7 @@ size_t CompressedWorkspace2D::getMemorySize() const
   //std::cerr<<"Memory: "<<sz/1e6<<" + "<<double(getNumberBlocks()) * double(m_blockSize)/1e6
   //  << " + " << double(m_inBuffer.size())*sizeof(double)/1e6<< " + " << double(m_outBuffer.size())/1e6<<'\n';
   sz += double(getNumberBlocks()) * m_blockSize + double(m_inBuffer.size())*sizeof(double) + double(m_outBuffer.size());
-  return (size_t)(sz/1024);
+  return (size_t)(sz);
 }
 
 /**

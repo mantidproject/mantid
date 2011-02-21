@@ -166,6 +166,18 @@ public:
     TS_ASSERT_EQUALS( (*E)[0], sqrt(2.0) );
   }
 
+  void test_getMemorySizeForXAxes()
+  {
+    ws = Create2DWorkspaceBinned(nhist, nbins);
+    // Here they are shared, so only 1 X axis
+    TS_ASSERT_EQUALS( ws->getMemorySizeForXAxes(), 1*(nbins+1)*sizeof(double));
+    for (int i=0; i < nhist; i++)
+    {
+      ws->dataX(i)[0] += 1; // This modifies the X axis in-place, creatign a copy of it.
+    }
+    // Now there is a different one for each
+    TS_ASSERT_EQUALS( ws->getMemorySizeForXAxes(), nhist*(nbins+1)*sizeof(double));
+  }
 
 };
 

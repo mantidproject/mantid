@@ -285,7 +285,7 @@ namespace DataObjects
   }
 
   //-----------------------------------------------------------------------------
-  /// Returns the amount of memory used in KB
+  /// Returns the amount of memory used in bytes
   size_t EventWorkspace::getMemorySize() const
   {
     size_t  total = 0;
@@ -302,8 +302,10 @@ namespace DataObjects
 
     total += m_run->getMemorySize();
 
-    // Return in KB
-    return total / 1024;
+    total += this->getMemorySizeForXAxes();
+
+    // Return in bytes
+    return total;
   }
 
   //-----------------------------------------------------------------------------

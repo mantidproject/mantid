@@ -212,7 +212,7 @@ public:
   void test_getMemorySize()
   {
     // Because of the way vectors allocate, we can only know the minimum amount of memory that can be used.
-    size_t min_memory = (ew->getNumberEvents() * sizeof(TofEvent) + NUMPIXELS * sizeof(EventList))/1024;
+    size_t min_memory = (ew->getNumberEvents() * sizeof(TofEvent) + NUMPIXELS * sizeof(EventList));
     TS_ASSERT_LESS_THAN_EQUALS(min_memory,  ew->getMemorySize());
   }
 

@@ -134,7 +134,7 @@ public:
       virtual const std::string id() const {return "TestIMDDWorkspace";}
       /// return number of dimensions in MD workspace
       virtual unsigned int getNumDims()const{return 4;}
-      /// Get the footprint in memory in KB - return 0 for now
+      /// Get the footprint in memory in bytes - return 0 for now
       virtual size_t getMemorySize() const {return 0;};
       virtual std::string getWSLocation() const
       {

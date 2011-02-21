@@ -61,7 +61,7 @@ public:
     const std::string& getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
-    /// Get the footprint in memory in KB.
+    /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
 
     /** Marks the workspace as safe for multiple threads to edit data simutaneously.

@@ -259,7 +259,7 @@ int ManagedWorkspace2D::getHistogramNumberHelper() const
 /// Return the size used in memory
 size_t ManagedWorkspace2D::getMemorySize() const
 {
-    return (size_t)(double(m_vectorSize)/1024)*m_bufferedData.size()*m_vectorsPerBlock;
+    return size_t(m_vectorSize)*size_t(m_bufferedData.size())*size_t(m_vectorsPerBlock);
 }
 
 /// Return the full path to the file used.

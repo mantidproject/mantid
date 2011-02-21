@@ -756,11 +756,33 @@ namespace Mantid
       return it->second;
     }
 
+    //---------------------------------------------------------------------------------------------
+    /** Return memory used by the workspace, in bytes.
+     * @return bytes used.
+     */
     size_t MatrixWorkspace::getMemorySize() const
     {
       //3 doubles per histogram bin.
-      return ( 3*size()*sizeof(double) + m_run->getMemorySize() )/1024;
+      return 3*size()*sizeof(double) + m_run->getMemorySize();
     }
+
+    /** Returns the memory used (in bytes) by the X axes, handling ragged bins.
+     * @return bytes used
+     */
+    size_t MatrixWorkspace::getMemorySizeForXAxes() const
+    {
+      size_t total = 0;
+      MantidVecPtr lastX = this->refX(0);
+      for (int wi=0; wi < getNumberHistograms(); wi++)
+      {
+        MantidVecPtr X = this->refX(wi);
+        // If the pointers are the same
+        if (!(X == lastX) || wi==0)
+          total += (*X).size() * sizeof(double);
+      }
+      return total;
+    }
+
 
     /** Add parameters to the instrument parameter map that are defined in instrument
     *   definition file and for which logfile data are available. Logs must be loaded 

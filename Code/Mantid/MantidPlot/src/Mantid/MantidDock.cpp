@@ -407,7 +407,7 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize())+" KB"));
+  data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize()/1024)+" KB"));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 

@@ -116,8 +116,9 @@ namespace Mantid
       /// Calculates the drop of a neutron coming from the sample, there isn't current a Mantid convention for which axis is vertical
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
 
-      /// Get the footprint in memory in KB.
+      /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;
+      virtual size_t getMemorySizeForXAxes() const;
 
       /// Returns the set of parameters modifying the base instrument
       Geometry::ParameterMap& instrumentParameters()const;
