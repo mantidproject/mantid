@@ -38,10 +38,10 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns a reference to the points vector contained within.
+  /** Returns a reference to the events vector contained within.
    */
   TMDE(
-  std::vector< MDEvent<nd> > & MDBox)::getPoints()
+  std::vector< MDE > & MDBox)::getEvents()
   {
     return data;
   }
@@ -69,24 +69,34 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDEvent to the box.
-   * @param point :: reference to a MDEvent to add.
+   * @param event :: reference to a MDEvent to add.
    * */
   TMDE(
-  void MDBox)::addEvent( const MDEvent<nd> & point)
+  void MDBox)::addEvent( const MDE & event)
   {
-    this->data.push_back(point);
+    this->data.push_back(event);
 
     // Keep the running total of signal and error
-    signal += point.getSignal();
-    errorSquared += point.getErrorSquared();
+    signal += event.getSignal();
+    errorSquared += event.getErrorSquared();
   }
 
-  // Here we export a bunch of version of MDBox with various dimension sizes.
-  // We need to define one for every possibility.
-  template DLLExport class MDBox<1>;
-  template DLLExport class MDBox<2>;
-  template DLLExport class MDBox<3>;
-  template DLLExport class MDBox<4>;
+
+
+
+
+
+
+
+  template DLLExport class MDBox<MDEvent<1>, 1>;
+  template DLLExport class MDBox<MDEvent<2>, 2>;
+  template DLLExport class MDBox<MDEvent<3>, 3>;
+  template DLLExport class MDBox<MDEvent<4>, 4>;
+  template DLLExport class MDBox<MDEvent<5>, 5>;
+  template DLLExport class MDBox<MDEvent<6>, 6>;
+  template DLLExport class MDBox<MDEvent<7>, 7>;
+  template DLLExport class MDBox<MDEvent<8>, 8>;
+  template DLLExport class MDBox<MDEvent<9>, 9>;
 
 
 }//namespace MDEvents

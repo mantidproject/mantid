@@ -28,12 +28,12 @@ namespace MDEvents
   class DLLExport MDEventWorkspace  : public IMDEventWorkspace
   {
   public:
-    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
-     * This is for convenience; an algorithm can declare
-     *  MyWorkspace::Event someEvent;
-     * without having to look up template parameters...
-     */
-    typedef MDEvent<nd> Event;
+//    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
+//     * This is for convenience; an algorithm can declare
+//     *  MyWorkspace::Event someEvent;
+//     * without having to look up template parameters...
+//     */
+//    //typedef MDEvent<nd> Event;
 
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const;
@@ -45,10 +45,10 @@ namespace MDEvents
      * used by the workspace. */
     virtual size_t getMemoryUsed() const;
 
-    /** Sample function returning the n-th point in the workspace.
+    /** Sample function returning (a copy of) the n-th event in the workspace.
      * This may not be needed.
      *  */
-    //Event getPoint(size_t n);
+    MDE getEvent(size_t n);
 
   protected:
 

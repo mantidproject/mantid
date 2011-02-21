@@ -25,21 +25,20 @@ namespace MDEvents
    * {
    *    // function body here
    * }
+   *
+   * @tparam MDE :: the MDEvent type; at first, this will always be MDEvent<nd>
+   * @tparam nd :: the number of dimensions in the center coords. Passing this
+   *               as a template argument should speed up some code.
    */
-  #define TMDE(decl) template <size_t nd> decl<nd>
+  #define TMDE(decl) template <typename MDE, size_t nd> decl<MDE, nd>
 
   /** Macro to make declaring template classes faster.
    * Use:
    * TMDE_CLASS
    * class ClassName : ...
    */
-  #define TMDE_CLASS template <size_t nd>
+  #define TMDE_CLASS template <typename MDE, size_t nd>
 
-
-  /** Macro MDE to make declaring the MDEvent
-   * data type more maintainable.
-   */
-  #define MDE MDEvent<nd>
 
 
   /** Templated class holding data about a neutron detection event
@@ -59,7 +58,7 @@ namespace MDEvents
    * @date Dec 3, 2010
    *
    * */
-  TMDE_CLASS
+  template<size_t nd>
   class DLLExport MDEvent
   {
   private:
@@ -74,10 +73,10 @@ namespace MDEvents
      */
     float errorSquared;
 
-    /** The N-dimensional coordinates. A simple
-     * fixed-sized array of (floats or doubles).
+    /** The N-dimensional coordinates of the center of the event.
+     * A simple fixed-sized array of (floats or doubles).
      */
-    CoordType coord[nd];
+    CoordType center[nd];
 
   public:
     /* Will be keeping functions inline for (possible?) performance improvements */
@@ -102,17 +101,17 @@ namespace MDEvents
     }
 
     //---------------------------------------------------------------------------------------------
-    /** Constructor with signal and error and an array of coords
+    /** Constructor with signal and error and an array of centers
      *
      * @param signal :: signal
      * @param errorSquared :: errorSquared
-     * @param coords :: pointer to a nd-sized array of values to set for all coordinates.
+     * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
      * */
-    MDEvent(const float signal, const float errorSquared, const CoordType * coords) :
+    MDEvent(const float signal, const float errorSquared, const CoordType * centers) :
       signal(signal), errorSquared(errorSquared)
     {
       for (size_t i=0; i<nd; i++)
-        coord[i] = coords[i];
+        center[i] = centers[i];
     }
 
     //---------------------------------------------------------------------------------------------
@@ -125,7 +124,7 @@ namespace MDEvents
       signal(rhs.signal), errorSquared(rhs.errorSquared)
     {
       for (size_t i=0; i<nd; i++)
-        coord[i] = rhs.coord[i];
+        center[i] = rhs.center[i];
     }
 
 
@@ -133,9 +132,9 @@ namespace MDEvents
     /** Returns the n-th coordinate axis value.
      * @param n :: index (0-based) of the dimension you want.
      * */
-    CoordType getCoord(const size_t n) const
+    CoordType getCenter(const size_t n) const
     {
-      return coord[n];
+      return center[n];
     }
 
     //---------------------------------------------------------------------------------------------
@@ -143,20 +142,20 @@ namespace MDEvents
      * @param n :: index (0-based) of the dimension you want to set
      * @param value :: value to set.
      * */
-    void setCoord(const size_t n, const CoordType value)
+    void setCenter(const size_t n, const CoordType value)
     {
-      coord[n] = value;
+      center[n] = value;
     }
 
     //---------------------------------------------------------------------------------------------
     /** Sets all the coordinates.
      *
-     * @param coords :: pointer to a nd-sized array of the values to set.
+     * @param centers :: pointer to a nd-sized array of the values to set.
      * */
-    void setCoords(const CoordType * coords)
+    void setCoords(const CoordType * centers)
     {
       for (size_t i=0; i<nd; i++)
-        coord[i] = coords[i];
+        center[i] = centers[i];
     }
 
     //---------------------------------------------------------------------------------------------

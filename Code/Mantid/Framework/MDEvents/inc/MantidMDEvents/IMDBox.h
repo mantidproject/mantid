@@ -40,11 +40,11 @@ namespace MDEvents
 
     virtual size_t getNumDims() const = 0;
 
-    virtual std::vector< MDE > * getPointsCopy();
+    virtual std::vector< MDE > * getEventsCopy();
 
-    virtual double getSignal() const;
+    virtual double getSignal() const = 0;
 
-    virtual double getErrorSquared() const;
+    virtual double getErrorSquared() const = 0;
 
   private:
 
@@ -56,7 +56,7 @@ namespace MDEvents
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class
-    typedef boost::shared_ptr< IMDBox<nd> > sptr;
+//    typedef boost::shared_ptr< IMDBox<nd> > sptr;
 
   };
 

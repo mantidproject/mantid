@@ -17,9 +17,9 @@ class MDBoxTest :    public CxxTest::TestSuite
 {
 
 public:
-  void testConstructor()
+  void test_Constructor()
   {
-    MDBox<3> b3;
+    MDBox<MDEvent<3>,3> b3;
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
 
@@ -30,19 +30,19 @@ public:
 //    std::cout << sizeof(v) << "\n";
   }
 
-  void testAddPoint()
+  void test_addEvent()
   {
-    MDBox<2> b;
+    MDBox<MDEvent<2>,2> b;
     MDEvent<2> ev(1.2, 3.4);
-    ev.setCoord(0, 2.0);
-    ev.setCoord(1, 3.0);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
     b.addEvent(ev);
     TS_ASSERT_EQUALS( b.getNPoints(), 1)
   }
 
-  void testClear()
+  void test_clear()
   {
-    MDBox<2> b;
+    MDBox<MDEvent<2>,2> b;
     MDEvent<2> ev(1.2, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
@@ -54,23 +54,25 @@ public:
     TS_ASSERT_DELTA( b.getErrorSquared(), 0.0, 1e-5)
   }
 
-  void test_getPoints()
+  void test_getEvents()
   {
-    MDBox<2> b;
+    MDBox<MDEvent<2>,2> b;
     MDEvent<2> ev(4.0, 3.4);
     b.addEvent(ev);
     b.addEvent(ev);
     b.addEvent(ev);
-    TS_ASSERT_EQUALS( b.getPoints().size(), 3);
-    TS_ASSERT_EQUALS( b.getPoints()[2].getSignal(), 4.0);
+    TS_ASSERT_EQUALS( b.getEvents().size(), 3);
+    TS_ASSERT_EQUALS( b.getEvents()[2].getSignal(), 4.0);
   }
 
   void test_sptr()
   {
-    MDBox<3>::sptr a( new MDBox<3>());
-    //TS_ASSERT_EQUALS( sizeof(a), 16);
-
+    MDBox<MDEvent<3>,3>::sptr a( new MDBox<MDEvent<3>,3>());
+    TS_ASSERT_EQUALS( sizeof(a), 16);
   }
+
 };
 
+
 #endif
+

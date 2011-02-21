@@ -18,7 +18,7 @@ set (INC_FILES
 set (TEST_FILES 
 	test/MDEventTest.h  
 #	test/MDEventWorkspaceTest.h  
-#	test/MDBoxTest.h  
+	test/MDBoxTest.h  
 )
 
 set ( GMOCK_TEST_FILES

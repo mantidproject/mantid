@@ -42,7 +42,7 @@ namespace MDEvents
 
     size_t getNumDims() const;
 
-    std::vector< MDE > & getPoints();
+    std::vector< MDE > & getEvents();
 
     double getSignal() const;
     double getErrorSquared() const;
@@ -67,7 +67,7 @@ namespace MDEvents
 
   public:
     /// Typedef for a shared pointer to a MDBox
-    typedef boost::shared_ptr< MDBox<nd> > sptr;
+    typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;
 
   };
 

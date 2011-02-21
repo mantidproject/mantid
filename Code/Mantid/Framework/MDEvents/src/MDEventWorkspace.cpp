@@ -27,19 +27,8 @@ namespace MDEvents
   TMDE(
   size_t MDEventWorkspace)::getMemoryUsed() const
   {
-    return this->getNPoints() * sizeof(MDEvent<nd>);
+    return this->getNPoints() * sizeof(MDE);
   }
-
-
-
-  //-----------------------------------------------------------------------------------------------
-
-
-  // We export a bunch of version of MDEventWorkspace with various dimension sizes.
-  template DLLExport class MDEventWorkspace<1>;
-  template DLLExport class MDEventWorkspace<2>;
-  template DLLExport class MDEventWorkspace<3>;
-  template DLLExport class MDEventWorkspace<4>;
 
 
 

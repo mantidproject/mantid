@@ -31,7 +31,6 @@ def generate():
     print "Generating MDDeclarations.cpp"
     
     classes = ["MDEvent", "MDBox", "IMDBox", "MDEventWorkspace"]
-    classes = ["MDEvent", "MDBox"]
     
     f = open("MDDeclarations.cpp", 'w');
     f.write(topheader)
@@ -40,11 +39,18 @@ def generate():
         f.write('#include "MantidMDEvents/%s.h"\n' % c)
     
     f.write(header)
-    
+
+    classes = ["MDEvent"]
     for c in classes:
         f.write("\n\n")
         for nd in xrange(1,10):
             f.write("template DLLExport class %s<%d>;\n" % (c, nd) )
+
+    classes = ["MDBox"]
+    for c in classes:
+        f.write("\n\n")
+        for nd in xrange(1,10):
+            f.write("template DLLExport class %s<MDEvent<%d>, %d>;\n" % (c, nd, nd) )
             
     f.write(footer)
     f.close()
