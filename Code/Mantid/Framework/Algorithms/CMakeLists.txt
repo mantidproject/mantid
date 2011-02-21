@@ -49,6 +49,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/ExtractMasking.cpp
 		src/ExtractSingleSpectrum.cpp
 		src/FFT.cpp
+		src/FFTDerivative.cpp
 		src/FFTSmooth2.cpp
 		src/FFTSmooth.cpp
 		src/FilterBadPulses.cpp
@@ -184,6 +185,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/ExtractMasking.h
 		inc/MantidAlgorithms/ExtractSingleSpectrum.h
 		inc/MantidAlgorithms/FFT.h
+		inc/MantidAlgorithms/FFTDerivative.h
 		inc/MantidAlgorithms/FFTSmooth2.h
 		inc/MantidAlgorithms/FFTSmooth.h
 		inc/MantidAlgorithms/FilterBadPulses.h
@@ -317,6 +319,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/ExtractSingleSpectrumTest.h
 		 test/FFTSmooth2Test.h
 		 test/FFTTest.h
+		 test/FFTDerivativeTest.h
 		 test/FilterByLogValueTest.h
 		 test/FilterByTimeTest.h
 		 test/FindCenterOfMassPositionTest.h
@@ -335,7 +338,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/IdentifyNoisyDetectorsTest.h
 		 test/IntegrationTest.h
 		 test/InterpolatingRebinTest.h
-                 test/IQTransformTest.h
+		 test/IQTransformTest.h
 		 test/LogarithmTest.h
 		 test/MaskBinsTest.h
 		 test/MedianDetectorTestTest.h
@@ -389,7 +392,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
-         test/WeightedMeanTest.h
+		 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 )
 
