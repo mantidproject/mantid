@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/IMDEventWorkspace.h"
+#include "MantidMDEvents/IMDBox.h"
 #include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
@@ -28,12 +29,8 @@ namespace MDEvents
   class DLLExport MDEventWorkspace  : public IMDEventWorkspace
   {
   public:
-//    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
-//     * This is for convenience; an algorithm can declare
-//     *  MyWorkspace::Event someEvent;
-//     * without having to look up template parameters...
-//     */
-//    //typedef MDEvent<nd> Event;
+    MDEventWorkspace();
+    ~MDEventWorkspace();
 
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const;
@@ -50,7 +47,22 @@ namespace MDEvents
      *  */
     MDE getEvent(size_t n);
 
+    /// Add a vector of MDEvents to the workspace.
+    void addEvents(const std::vector<MDE> & events);
+
   protected:
+
+    /** MDBox containing all of the events in the workspace. */
+    IMDBox<MDE, nd> * data;
+
+
+    //    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
+    //     * This is for convenience; an algorithm can declare
+    //     *  MyWorkspace::Event someEvent;
+    //     * without having to look up template parameters...
+    //     */
+    //    //typedef MDEvent<nd> Event;
+
 
   };
 

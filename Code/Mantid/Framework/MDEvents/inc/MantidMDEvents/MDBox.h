@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/IMDBox.h"
+#include "MantidMDEvents/BoxSplitController.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -29,12 +30,10 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDBox //: public IMDBox<nd>
+  class DLLExport MDBox : public IMDBox<MDE, nd>
   {
   public:
     MDBox();
-
-    void addEvent( const MDE & point);
 
     void clear();
 
@@ -44,8 +43,13 @@ namespace MDEvents
 
     std::vector< MDE > & getEvents();
 
-    double getSignal() const;
-    double getErrorSquared() const;
+    std::vector< MDE > * getEventsCopy();
+
+    void addEvent(const MDE & point);
+
+    void addEvents(const std::vector<MDE> & events);
+
+    bool willSplit(size_t num) const;
 
   private:
 
@@ -58,16 +62,16 @@ namespace MDEvents
      */
     MDDimensionExtents dims[nd];
 
-    /** Total signal from all points within */
-    double signal;
-
-    /** Total error (squared) from all points within */
-    double errorSquared;
+    /// The box splitting controlelr
+    BoxSplitController_sptr m_splitController;
 
 
   public:
     /// Typedef for a shared pointer to a MDBox
     typedef boost::shared_ptr< MDBox<MDE, nd> > sptr;
+
+    /// Typedef for a vector of the conatined events
+    typedef std::vector< MDE > vec_t;
 
   };
 

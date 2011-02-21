@@ -46,7 +46,7 @@ def generate():
         for nd in xrange(1,10):
             f.write("template DLLExport class %s<%d>;\n" % (c, nd) )
 
-    classes = ["MDBox"]
+    classes = ["MDBox", "IMDBox", "MDEventWorkspace"]
     for c in classes:
         f.write("\n\n")
         for nd in xrange(1,10):

@@ -65,11 +65,42 @@ public:
     TS_ASSERT_EQUALS( b.getEvents()[2].getSignal(), 4.0);
   }
 
+  void test_getEventsCopy()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(4.0, 3.4);
+    b.addEvent(ev);
+    b.addEvent(ev);
+    b.addEvent(ev);
+    std::vector<MDEvent<2> > * events;
+    events = b.getEventsCopy();
+    TS_ASSERT_EQUALS( events->size(), 3);
+    TS_ASSERT_EQUALS( (*events)[2].getSignal(), 4.0);
+  }
+
   void test_sptr()
   {
     MDBox<MDEvent<3>,3>::sptr a( new MDBox<MDEvent<3>,3>());
     TS_ASSERT_EQUALS( sizeof(a), 16);
   }
+
+
+  void test_addEvents()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    std::vector< MDEvent<2> > vec;
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    vec.push_back(ev);
+    vec.push_back(ev);
+    vec.push_back(ev);
+    b.addEvents(vec);
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+
+  }
+
 
 };
 

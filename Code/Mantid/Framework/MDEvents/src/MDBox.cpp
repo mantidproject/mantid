@@ -9,23 +9,25 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Empty constructor */
   TMDE(MDBox)::MDBox() :
-    signal(0.0), errorSquared(0.0)
+    IMDBox<MDE, nd>()
   {
   }
 
 
   //-----------------------------------------------------------------------------------------------
   /** Clear any points contained. */
-  TMDE(void MDBox)::clear()
+  TMDE(
+  void MDBox)::clear()
   {
-    signal = 0.0;
-    errorSquared = 0.0;
+    this->m_signal = 0.0;
+    this->m_errorSquared = 0.0;
     data.clear();
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this box */
-  TMDE(size_t MDBox)::getNumDims() const
+  TMDE(
+  size_t MDBox)::getNumDims() const
   {
     return nd;
   }
@@ -47,21 +49,15 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the integrated signal from all points within.
+  /** Allocate and return a vector with a copy of all events contained
    */
   TMDE(
-  double MDBox)::getSignal() const
+  std::vector< MDE > * MDBox)::getEventsCopy()
   {
-    return signal;
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Returns the integrated error squared from all points within.
-   */
-  TMDE(
-  double MDBox)::getErrorSquared() const
-  {
-    return errorSquared;
+    std::vector< MDE > * out = new std::vector<MDE>();
+    //Make the copy
+    out->insert(out->begin(), data.begin(), data.end());
+    return out;
   }
 
 
@@ -77,8 +73,29 @@ namespace MDEvents
     this->data.push_back(event);
 
     // Keep the running total of signal and error
-    signal += event.getSignal();
-    errorSquared += event.getErrorSquared();
+    this->m_signal += event.getSignal();
+    this->m_errorSquared += event.getErrorSquared();
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Return true if the box would need to split into a MDGridBox to handle the new events
+   * @param num :: number of events that would be added
+   */
+  TMDE(
+  bool MDBox)::willSplit(size_t num) const
+  {
+    return m_splitController->willSplit(this->data.size(), num);
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add several events
+   */
+  TMDE(
+  void MDBox)::addEvents(const std::vector<MDE> & events)
+  {
+    this->data.insert(this->data.end(), events.begin(), events.end());
   }
 
 

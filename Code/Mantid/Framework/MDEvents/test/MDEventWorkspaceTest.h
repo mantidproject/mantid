@@ -1,27 +1,29 @@
-#ifndef MDEVENTWORKSPACETEST_H
-#define MDEVENTWORKSPACETEST_H
+#ifndef BOXPLITCONTROLLER_TEST_H
+#define BOXPLITCONTROLLER_TEST_H
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
+#include "MantidMDEvents/BoxSplitController.h"
 #include <memory>
 #include <map>
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
 
-class MDEventWorkspaceTest :    public CxxTest::TestSuite
+class BoxSplitControllerTest :    public CxxTest::TestSuite
 {
 public:
 
-  void testConstructor()
+  void test_Constructor()
   {
-    MDEventWorkspace<3> ew3;
-    TS_ASSERT_EQUALS( ew3.getNumDims(), 3);
-    TS_ASSERT_EQUALS( ew3.getNPoints(), 0);
+    BoxSplitController sc(10);
+  }
+
+  void test_willSplit()
+  {
+    BoxSplitController sc(10);
+    TS_ASSERT( sc.willSplit(5,10) );
+    TS_ASSERT( !sc.willSplit(2,3) );
   }
 
 

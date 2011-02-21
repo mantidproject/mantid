@@ -12,13 +12,15 @@ set (INC_FILES
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDEventWorkspace.h
 	inc/MantidMDEvents/MDDimensionExtents.h
+	inc/MantidMDEvents/BoxSplitController.h
 )
 
 # Test files. Other source files required.
 set (TEST_FILES 
 	test/MDEventTest.h  
-#	test/MDEventWorkspaceTest.h  
+	test/MDEventWorkspaceTest.h  
 	test/MDBoxTest.h  
+	test/BoxSplitControllerTest.h  
 )
 
 set ( GMOCK_TEST_FILES
