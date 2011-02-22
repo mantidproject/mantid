@@ -138,6 +138,7 @@ private:
 
   void updateDirSearchSettings();
   void updateCurveFitSettings();
+  void initMantidOptionsTab();
 
 	QFont textFont, headerFont, axesFont, numbersFont, legendFont, titleFont, appFont;
 	QFont plot3DTitleFont, plot3DNumbersFont, plot3DAxesFont;
@@ -156,6 +157,7 @@ private:
   //Mantid
   QWidget *instrumentPage;
   QComboBox *facility;
+  QCheckBox *m_invisibleWorkspaces;
   MantidQt::MantidWidgets::InstrumentSelector  *defInstr;
 
   /// Mantid tab for setting directories
@@ -172,6 +174,7 @@ private:
   QSpinBox  *findPeaksFWHM,*findPeaksTolerance;
   QSpinBox  *peakRadius;
   QSpinBox  *decimals;
+  QWidget*  mantidOptionsPage;
   
 	QPushButton* buttonAxesFont, *buttonNumbersFont, *buttonLegendFont, *buttonTitleFont, *fontsBtn;
 	QCheckBox *boxSearchUpdates, *boxOrthogonal, *logBox, *plotLabelBox, *scaleErrorsBox;
@@ -209,6 +212,7 @@ private:
 	QSpinBox *undoStackSizeBox;
 	QComboBox *boxEndLine;
   QCheckBox* cbApplyToMantid;
+
 #ifdef SCRIPTING_PYTHON
 	QLabel *lblPythonConfigDir;
 	QLineEdit *pythonConfigDirLine;

@@ -19,7 +19,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/MemoryManager.h"
-
+#include "MantidKernel/ConfigService.h"
 namespace Mantid
 {
 namespace Kernel
@@ -172,6 +172,18 @@ public:
     {
     	std::string information=" add Data Object '"+name+"' successful";
     	g_log.debug(information);
+
+      //check the workspace invisible option set
+      std::string name_startswith=name.substr(0,2);
+      if(isInvisbleWorkspaceOptionsSet())
+      {
+        //if the name of workspace starts with __
+        if(!name_startswith.compare("__"))
+        {
+          return;
+        }
+      }
+     
       notificationCenter.postNotification(new AddNotification(name,Tobject));
     }
     return;
@@ -187,6 +199,17 @@ public:
       g_log.debug("Data Object '"+ name +"' replaced in data service.");
       notificationCenter.postNotification(new BeforeReplaceNotification(name,it->second,Tobject));
       datamap[name] = Tobject;
+
+      std::string name_startswith=name.substr(0,2);
+      //check the workspace invisible option set
+      if(isInvisbleWorkspaceOptionsSet())
+      {
+        //if the name of workspace starts with __
+        if(!name_startswith.compare("__"))
+        {
+          return;
+        }
+      }
       notificationCenter.postNotification(new AfterReplaceNotification(name,Tobject));
     }
     else
@@ -260,6 +283,13 @@ public:
       names.insert(it->first);
     }
     return names;
+  }
+
+  /// returns true if the InvisibleWorkspaces option set
+  bool isInvisbleWorkspaceOptionsSet()
+  {
+    std::string isvisblews = Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces");
+    return ((!isvisblews.compare("1"))?true:false);
   }
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter

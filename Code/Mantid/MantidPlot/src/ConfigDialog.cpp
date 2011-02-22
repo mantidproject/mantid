@@ -610,6 +610,7 @@ void ConfigDialog::initMantidPage()
   grid->addWidget(new QLabel("Facility"), 0, 0);
   grid->addWidget(facility, 0, 1);
 
+
   defInstr = new MantidQt::MantidWidgets::InstrumentSelector();
   grid->addWidget(new QLabel("Default Instrument"), 2, 0);
   grid->addWidget(defInstr, 2, 1);
@@ -637,11 +638,39 @@ void ConfigDialog::initMantidPage()
 
   initDirSearchTab();
   initCurveFittingTab();
+  initMantidOptionsTab();
 
+}
+
+/**
+ * Configure a Mantid Options page on the config dialog
+ */
+void ConfigDialog::initMantidOptionsTab()
+{
+  mantidOptionsPage = new QWidget();
+  QGroupBox *frame = new QGroupBox(mantidOptionsPage);
+  QGridLayout *grid = new QGridLayout(mantidOptionsPage);
+  //create a checkbox for invisible workspaces options
+  m_invisibleWorkspaces = new QCheckBox("Invisible Workspaces",frame);
+  m_invisibleWorkspaces->setChecked(true);
+  grid->addWidget(frame,0,0);
+  mtdTabWidget->addTab(mantidOptionsPage,"Options");
+
+  QString setting = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("MantidOptions.InvisibleWorkspaces"));
+  if(!setting.compare("1"))
+  {
+    m_invisibleWorkspaces->setChecked(true);
+  }
+  else if(!setting.compare("0"))
+  {
+    m_invisibleWorkspaces->setChecked(false);
+  }
+ // grid->setRowStretch(1,0);
 }
 
 void ConfigDialog::initDirSearchTab()
 {
+  
   directoriesPage = new QWidget();
   QVBoxLayout *dirTabLayout = new QVBoxLayout(directoriesPage);
   QGroupBox *frame = new QGroupBox();
@@ -852,6 +881,7 @@ void ConfigDialog::initCurveFittingTab()
   decimals->setValue(app->mantidUI->fitFunctionBrowser()->getDecimals());
   
 }
+
 
 void ConfigDialog::initOptionsPage()
 {
@@ -1732,6 +1762,18 @@ void ConfigDialog::updateCurveFitSettings()
   mantid_config.setString("curvefitting.peakRadius", setting);
 
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
+
+  //invisible workspaces options
+  QString invisible_ws;
+  if(m_invisibleWorkspaces->isChecked())
+  {
+    invisible_ws="1";
+  }
+  else
+  {
+    invisible_ws="0";
+  }
+  mantid_config.setString("MantidOptions.InvisibleWorkspaces",invisible_ws.toStdString());
 }
 
 

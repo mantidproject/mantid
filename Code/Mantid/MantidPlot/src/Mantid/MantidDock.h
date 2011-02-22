@@ -63,6 +63,7 @@ private:
   void addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
+  bool isInvisibleWorkspaceOptionSet();
   
 protected:
   MantidTreeWidget * m_tree;

@@ -163,7 +163,14 @@ void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Wo
   QString group_name = findParentName(ws_name, workspace);
 
   QList<QTreeWidgetItem *> matches = m_tree->findItems(ws_name, Qt::MatchFixedString, 0);
-  if( matches.empty() ) return;
+  if( matches.empty() )
+  {
+    if(!isInvisibleWorkspaceOptionSet())
+    {
+      addTreeEntry(ws_name,workspace);
+    }
+    return;
+  }
   QTreeWidgetItem * item = matches[0];
 
   if( !group_name.isEmpty() )
@@ -178,6 +185,13 @@ void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Wo
   {
     populateChildData(item);
   }
+}
+
+// returns true if the workspaces option is set
+bool MantidDockWidget::isInvisibleWorkspaceOptionSet()
+{
+  bool invisible_ws = AnalysisDataService::Instance().isInvisbleWorkspaceOptionsSet();
+  return (invisible_ws?true:false);
 }
 
 /**
