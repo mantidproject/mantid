@@ -120,10 +120,19 @@ public:
     TS_ASSERT( !b3.willSplit(12345) );
   }
 
+  void test_bad_splitter()
+  {
+    BoxController_sptr sc( new BoxController(4));
+    sc->setSplitThreshold(10);
+    typedef MDBox<MDEvent<3>,3> MACROS_ARE_DUMB; //...since they get confused by commas
+    TS_ASSERT_THROWS( MACROS_ARE_DUMB b3(sc), std::invalid_argument);
+  }
+
 
   void test_splitter()
   {
-    BoxController_sptr sc( new BoxController(10));
+    BoxController_sptr sc( new BoxController(3));
+    sc->setSplitThreshold(10);
     MDBox<MDEvent<3>,3> b3(sc);
     TS_ASSERT_EQUALS( b3.getNumDims(), 3);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);

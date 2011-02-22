@@ -25,12 +25,31 @@ public:
   MDBox<MDEvent<1>,1> * makeMDBox1()
   {
     // Split at 5 events
-    BoxController_sptr splitter(new BoxController(5));
+    BoxController_sptr splitter(new BoxController(1));
+    splitter->setSplitThreshold(5);
     // Splits into 10 boxes
     splitter->setSplitInto(10);
     // Set the size
     MDBox<MDEvent<1>,1> * out = new MDBox<MDEvent<1>,1>(splitter);
     out->setExtents(0, 0.0, 10.0);
+    return out;
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Generate an empty MDBox with 3 dimensions */
+  MDBox<MDEvent<3>,3> * makeMDBox3()
+  {
+    // Split at 5 events
+    BoxController_sptr splitter(new BoxController(3));
+    splitter->setSplitThreshold(5);
+    // Splits into 10x5x2 boxes
+    splitter->setSplitInto(10);
+    splitter->setSplitInto(1,5);
+    splitter->setSplitInto(2,2);
+    // Set the size to 10.0 in all directions
+    MDBox<MDEvent<3>,3> * out = new MDBox<MDEvent<3>,3>(splitter);
+    for (size_t d=0; d<3; d++)
+      out->setExtents(d, 0.0, 10.0);
     return out;
   }
 

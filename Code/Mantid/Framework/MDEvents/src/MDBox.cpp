@@ -19,6 +19,8 @@ namespace MDEvents
    */
   TMDE(MDBox)::MDBox(BoxController_sptr splitter)
   {
+    if (splitter->getNDims() != nd)
+      throw std::invalid_argument("MDBox::ctor(): splitter passed has the wrong number of dimensions.");
     m_splitController = splitter;
   }
 

@@ -23,12 +23,29 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------
     /** Constructor
      *
-     * @param threshold :: # of points at which the MDBox splits
      * @return
      */
-    BoxController(size_t threshold)
-    : m_threshold(threshold)
+    BoxController(size_t nd)
+    : nd(nd)
     {
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Get # of dimensions
+     * @return # of dimensions
+     */
+    size_t getNDims()
+    {
+      return nd;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Set the splitting threshold
+    * @param threshold :: # of points at which the MDBox splits
+    */
+    void setSplitThreshold(size_t threshold)
+    {
+      m_SplitThreshold = threshold;
     }
 
     //-----------------------------------------------------------------------------------
@@ -40,7 +57,7 @@ namespace MDEvents
      */
     bool willSplit(size_t original, size_t added)
     {
-      return (original+added) > m_threshold;
+      return (original+added) > m_SplitThreshold;
     }
 
     //-----------------------------------------------------------------------------------
@@ -51,24 +68,39 @@ namespace MDEvents
      */
     size_t splitInto(size_t dim)
     {
-      (void) dim; // Ignore dim for now
-      return m_splitInto;
+      return m_splitInto[dim];
     }
 
     //-----------------------------------------------------------------------------------
-    /** Set the way splitting will be done */
+    /** Set the way splitting will be done
+     * @param num :: amount in which to split
+     * */
     void setSplitInto(size_t num)
     {
-      m_splitInto = num;
+      m_splitInto.resize(nd, num);
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Set the way splitting will be done
+     *
+     * @param dim :: dimension to set
+     * @param num :: amount in which to split
+     */
+    void setSplitInto(size_t dim, size_t num)
+    {
+      m_splitInto[dim] = num;
     }
 
 
   protected:
+    // Number of dimensions
+    size_t nd;
+
     /// Splitting threshold
-    size_t m_threshold;
+    size_t m_SplitThreshold;
 
     // Even splitting for all dimensions
-    size_t m_splitInto;
+    std::vector<size_t> m_splitInto;
 
   };
 
