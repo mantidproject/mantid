@@ -94,19 +94,13 @@
 # CXXTEST_ADD_TEST (public macro)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
-    # the directory to write test results
-    set ( _cxxtest_xml_outdir  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/Testing )
-    add_custom_command ( OUTPUT ${_cxxtest_xml_outdir}
-                         COMMAND ${CMAKE_COMMAND} ARGS -E make_directory ${_cxxtest_xml_outdir})
     # determine the cpp filename
     set(_cxxtest_real_outfname ${CMAKE_CURRENT_BINARY_DIR}/${_cxxtest_testname}_runner.cpp)
     add_custom_command(
         OUTPUT  ${_cxxtest_real_outfname}
-        DEPENDS ${PATH_FILES} ${_cxxtest_xml_outdir}
+        DEPENDS ${PATH_FILES}
         COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --root
-        --xunit-printer --world ${_cxxtest_testname}
-        --xunit-file  ${_cxxtest_xml_outdir}/TEST-${_cxxtest_testname}.xml
-        -o ${_cxxtest_real_outfname}
+        --xunit-printer --world ${_cxxtest_testname} -o ${_cxxtest_real_outfname}
     )
     set_source_files_properties(${_cxxtest_real_outfname} PROPERTIES GENERATED true)
 
@@ -120,12 +114,9 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
 
       add_custom_command(
         OUTPUT  ${_cxxtest_cpp}
-        DEPENDS ${_cxxtest_h} ${_cxxtest_xml_outdir}
+        DEPENDS ${_cxxtest_h}
         COMMAND python ${CXXTEST_TESTGEN_EXECUTABLE} --part
-        --world ${_cxxtest_testname} -o ${_cxxtest_cpp}
-        --xunit-printer 
-        --xunit-file ${_cxxtest_xml_outdir}/TEST-${_cxxtest_testname}.xml
-        ${_cxxtest_h}
+        --world ${_cxxtest_testname} -o ${_cxxtest_cpp} ${_cxxtest_h}
 	)
 
       set_source_files_properties(${_cxxtest_cpp} PROPERTIES GENERATED true)
