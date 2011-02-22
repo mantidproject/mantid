@@ -170,6 +170,9 @@ public:
   int getDecimals()const{return m_decimals;}
   void setDecimals(int d);
 
+  /// Returns true if the difference plot should be drawn
+  bool plotDiff()const;
+
 public slots:
   void fit();
   void sequentialFit();
@@ -325,6 +328,7 @@ private:
   QtProperty *m_minimizer;
   QtProperty *m_costFunction;
   QtProperty *m_logValue;
+  QtProperty *m_plotDiff;
 
   /// A list of registered functions
   mutable QStringList m_registeredFunctions;

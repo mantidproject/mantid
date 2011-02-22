@@ -91,6 +91,9 @@ m_autoBgName(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().ge
 m_autoBackground(NULL),
 m_decimals(-1)
 {
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser");
+
   // Make sure plugins are loaded
   std::string libpath = Mantid::Kernel::ConfigService::Instance().getString("plugins.directory");
   if( !libpath.empty() )
@@ -179,6 +182,9 @@ m_decimals(-1)
   m_costFunctions << "Least squares"
                   << "Ignore positive peaks";
   m_enumManager->setEnumNames(m_costFunction,m_costFunctions);
+  m_plotDiff = m_boolManager->addProperty("Plot Difference");
+  bool plotDiff = settings.value("Plot Difference",QVariant(true)).toBool();
+  m_boolManager->setValue(m_plotDiff,plotDiff);
 
   settingsGroup->addSubProperty(m_workspace);
   settingsGroup->addSubProperty(m_workspaceIndex);
@@ -187,6 +193,7 @@ m_decimals(-1)
   settingsGroup->addSubProperty(m_output);
   settingsGroup->addSubProperty(m_minimizer);
   settingsGroup->addSubProperty(m_costFunction);
+  settingsGroup->addSubProperty(m_plotDiff);
 
      /* Create editors and assign them to the managers */
 
@@ -264,6 +271,10 @@ m_decimals(-1)
 /// Destructor
 FitPropertyBrowser::~FitPropertyBrowser()
 {
+  QSettings settings;
+  settings.beginGroup("Mantid/FitBrowser");
+  bool plotDiff = m_boolManager->value(m_plotDiff);
+  settings.setValue("Plot Difference",plotDiff);
   if (m_compositeFunction) delete m_compositeFunction;
 }
 
@@ -2156,3 +2167,9 @@ void FitPropertyBrowser::setDecimals(int d)
   settings.setValue("decimals",d);
   updateDecimals();
 }
+
+bool FitPropertyBrowser::plotDiff()const
+{
+  return m_boolManager->value(m_plotDiff);
+}
+
