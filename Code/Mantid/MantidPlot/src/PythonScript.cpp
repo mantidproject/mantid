@@ -103,7 +103,8 @@ void PythonScript::updatePath(const QString & filename, bool append)
   }
   else
   {
-    pyCode = "sys.path.remove(r'%1')";
+    pyCode = "if r'%1' in sys.path:\n"
+      "    sys.path.remove(r'%1')";
   }
   setCode(pyCode.arg(scriptPath));
   exec();

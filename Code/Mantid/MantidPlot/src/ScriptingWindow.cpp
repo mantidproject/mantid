@@ -338,18 +338,37 @@ void ScriptingWindow::saveSettings()
   QSettings settings;
   settings.beginGroup("/ScriptWindow");
   settings.setValue("/AlwaysOnTop", m_always_on_top->isChecked());
-  QRect window_size(pos(), size());
-  settings.setValue("/x", window_size.x());
-  settings.setValue("/y", window_size.y());
-  settings.setValue("/width", window_size.width());
-  settings.setValue("/height", window_size.height());
   settings.setValue("/ProgressArrow", m_manager->m_toggle_progress->isChecked());
   settings.setValue("/LastDirectoryVisited", m_manager->m_last_dir);
   settings.setValue("/RecentScripts",m_manager->recentScripts());
   settings.endGroup();
-
-  m_manager->closeAllTabs();
 }
+
+/**
+ * Override the closeEvent
+ * @param event :: A pointer to the event object
+ */
+void ScriptingWindow::closeEvent(QCloseEvent *event)
+{
+  emit closeMe();
+  // This will ensure each is saved correctly
+  m_manager->closeAllTabs();
+  event->accept();
+}
+
+/**
+ * Override the showEvent function
+ * @param event :: A pointer to the event object
+ */
+void ScriptingWindow::showEvent(QShowEvent *event)
+{
+  if( m_manager->count() == 0 )
+  {
+    m_manager->newTab();
+  }
+  event->accept();
+}
+
 
 /**
  * Open a script directly. This is here for backwards compatability with the old ScriptWindow
@@ -424,9 +443,6 @@ void ScriptingWindow::fileAboutToShow()
   // Close current tab
   m_file_menu->insertSeparator();
   m_file_menu->addAction(m_manager->m_close_tab);
-
-  // Close scripting window
-  m_file_menu->addAction(m_close_window);
 
 }
 
@@ -504,10 +520,6 @@ void ScriptingWindow::initMenus()
   m_print_output = new QAction(tr("Print &Output"), this);
   connect(m_print_output, SIGNAL(activated()), m_output_dock, SLOT(print()));
 
-  m_close_window = new QAction(tr("Close Script Window"), this);
-  m_close_window->setShortcut(tr("F3"));
-  connect(m_close_window, SIGNAL(activated()), this, SLOT(close()));
-
   //************* Edit menu *************
   m_edit_menu = menuBar()->addMenu(tr("&Edit"));
   connect(m_edit_menu, SIGNAL(aboutToShow()), this, SLOT(editAboutToShow()));
@@ -533,7 +545,9 @@ void ScriptingWindow::initMenus()
   m_window_menu->addAction(m_always_on_top);
   //Hide
   m_hide = new QAction(tr("&Hide"), this);
-  connect(m_hide, SIGNAL(activated()), this, SLOT(hide()));
+  m_hide->setShortcut(tr("F3"));
+  // Note that we channel the hide through the parent so that we can save the geometry state
+  connect(m_hide, SIGNAL(activated()), this, SIGNAL(hideMe()));
   m_window_menu->addAction(m_hide);
 
   m_window_menu->insertSeparator();
@@ -559,5 +573,5 @@ void ScriptingWindow::initMenus()
  */
 QString ScriptingWindow::saveToString()
 {
-	return m_manager->saveToString();
+  return m_manager->saveToString();
 }

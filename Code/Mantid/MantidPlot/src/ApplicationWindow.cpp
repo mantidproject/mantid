@@ -407,6 +407,15 @@ void ApplicationWindow::init(bool factorySettings)
     results->insertPlainText("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
     results->setTextColor(Qt::black);
   }
+
+  // And the script window
+  // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
+  // flag, it is treated as a sub window of its parent
+  scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
+  scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+  connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
+  connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
+  connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
@@ -491,8 +500,6 @@ void ApplicationWindow::initGlobalConstants()
   autoSearchUpdatesRequest = false;
 
   show_windows_policy = ActiveFolder;
-  d_script_win_on_top = false;  //M. Gigg, Mantid
-  d_script_win_rect = QRect(0, 0, 600, 660);
   d_init_window_type = NoWindow;
 
   QString aux = qApp->applicationDirPath();
@@ -564,6 +571,9 @@ void ApplicationWindow::initGlobalConstants()
   autoSaveTime = 15;
   d_backup_files = true;
   defaultScriptingLang = "Python";  //Mantid M. Gigg
+  // Scripting window geometry
+  d_script_win_pos = QPoint(250,200);
+  d_script_win_size = QSize(600,660);
   d_thousands_sep = true;
   d_locale = QLocale::system().name();
   if (!d_thousands_sep)
@@ -4900,10 +4910,8 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // ExportImage
 
   settings.beginGroup("/ScriptWindow");
-  d_script_win_on_top = settings.value("/AlwaysOnTop", false).toBool();  //M. Gigg, Mantid
-  d_script_win_rect = QRect(settings.value("/x", 100).toInt(), settings.value("/y", 50).toInt(),
-      settings.value("/width", 600).toInt(), settings.value("/height", 660).toInt());
-  d_script_win_arrow = settings.value("/ProgressArrow", true).toBool();  // Mantid - restore progress arrow state
+  d_script_win_pos = settings.value("/pos", QPoint(250,200)).toPoint();
+  d_script_win_size = settings.value("/size", QSize(600,660)).toSize();
   settings.endGroup();
 
   settings.beginGroup("/ToolBars");
@@ -5256,20 +5264,18 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/KeepAspect", d_keep_plot_aspect);
   settings.endGroup(); // ExportImage
 
-  if(m_scriptInterpreter)
-  {
-    m_scriptInterpreter->saveSettings();
-    m_interpreterDock->hide();
-  }
 
-  if( scriptingWindow )
+  if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
+  if( scriptingWindow ) 
   {
-    scriptingWindow->raise();//Mantid
-    scriptingWindow->show();//Mantid
-    scriptingWindow->saveSettings(); //Mantid
-    scriptingWindow->hide();
+    settings.beginGroup("/ScriptWindow");
+    // Geometry is applied by the app window
+    settings.setValue("/size", d_script_win_size);
+    settings.setValue("/pos", d_script_win_pos);
+    settings.endGroup();
+    // Other specific settings
+    scriptingWindow->saveSettings();
   }
-
 
   settings.beginGroup("/ToolBars");
   settings.setValue("/FileToolBar", d_file_tool_bar);
@@ -8916,6 +8922,14 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     }
   }
   
+
+  if( scriptingWindow )
+  {
+    this->showScriptWindow(true);
+    scriptingWindow->saveSettings();
+    scriptingWindow->close();
+  }
+
   //Save the settings and exit
   saveSettings();
   mantidUI->shutdown();
@@ -12552,11 +12566,11 @@ void ApplicationWindow::createActions()
   actionNoteEvaluate->setShortcut(tr("Ctrl+Return"));
 
 #ifdef SCRIPTING_PYTHON
-  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("&Script Window"), this);
+  actionShowScriptWindow = new QAction(getQPixmap("python_xpm"), tr("Toggle &Script Window"), this);
   actionShowScriptWindow->setShortcut(tr("F3"));
-  actionShowScriptWindow->setToggleAction( true );
+  actionShowScriptWindow->setToggleAction(true);
   connect(actionShowScriptWindow, SIGNAL(activated()), this, SLOT(showScriptWindow()));
-  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Script &Interpreter"), this);
+  actionShowScriptInterpreter = new QAction(getQPixmap("python_xpm"), tr("Toggle Script &Interpreter"), this);
   actionShowScriptInterpreter->setShortcut(tr("F4"));
   actionShowScriptInterpreter->setToggleAction(true);
   connect(actionShowScriptInterpreter, SIGNAL(activated()), this, SLOT(showScriptInterpreter()));
@@ -15456,33 +15470,26 @@ void ApplicationWindow::goToColumn()
   }
 }
 
-void ApplicationWindow::showScriptWindow()
+void ApplicationWindow::showScriptWindow(bool forceVisible)
 {
-  if (!scriptingWindow)
-  { 
-    // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
-    // flag, it is treated as a sub window of its parent
-    scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
-    connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
-    scriptingWindow->resize(d_script_win_rect.size());
-    scriptingWindow->move(d_script_win_rect.topLeft());
-  }
-
-  if (!scriptingWindow->isVisible())
+  if( forceVisible || scriptingWindow->isMinimized() || !scriptingWindow->isVisible() )
   {
-    Qt::WindowFlags flags = Qt::Window;
-    if (d_script_win_on_top)
-    {
-      flags |= Qt::WindowStaysOnTopHint;
-    }
-    scriptingWindow->setWindowFlags(flags);
+    scriptingWindow->resize(d_script_win_size);
+    scriptingWindow->move(d_script_win_pos);
     scriptingWindow->show();
     scriptingWindow->setFocus();
-  } 
-  else
+  }
+  else 
   {
+    saveScriptWindowGeometry();
     scriptingWindow->hide();
   }
+}
+
+void ApplicationWindow::saveScriptWindowGeometry()
+{
+  d_script_win_size = scriptingWindow->size();
+  d_script_win_pos = scriptingWindow->pos();
 }
 
 void ApplicationWindow::showScriptInterpreter()

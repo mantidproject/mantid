@@ -207,7 +207,6 @@ public slots:
   void displayOutput(const QString& msg, bool error);
   /// Overrride the paste command when in interpreter mode
   void paste();
- 
   
 signals:
   /// Inform observers that undo information is available
@@ -235,7 +234,6 @@ private:
   
   /// if it's start of multi line
   bool isStartOfMultiLine();
-
   /// if it's multiline statement
   bool isMultiLineStatement();
   ///if it's end of multi line
@@ -248,8 +246,9 @@ private:
   /// The file name associated with this editor
   QString m_filename;
 
-  //Each editor needs its own undo/redo etc
+  /// Each editor needs its own undo/redo etc
   QAction *m_undo, *m_redo, *m_cut, *m_copy, *m_paste, *m_print;
+  /// Zoom in/out actions
   QAction *m_zoomIn,*m_zoomOut;
   /// The margin marker 
   int m_marker_handle;

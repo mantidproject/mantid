@@ -17,7 +17,8 @@ class QPoint;
 class QMenu;
 class QAction;
 class QCloseEvent;
-class ApplicationWindow;
+class QShowEvent;
+class QHideEvent;
 
 /** @class ScriptOutputDock
     
@@ -61,7 +62,7 @@ public:
   ScriptOutputDock(const QString & title, ScriptManagerWidget *manager, QWidget *parent = 0, 
 		   Qt::WindowFlags flags = 0);
 
-  //Is there anything here
+  /// Is there anything here
   bool isEmpty() const;
 
 public slots:
@@ -109,6 +110,10 @@ public:
   ScriptingWindow(ScriptingEnv *env,QWidget *parent = 0, Qt::WindowFlags flags = 0);
   ///Destructor
   ~ScriptingWindow();
+  /// Override the closeEvent
+  void closeEvent(QCloseEvent *event);		      
+  /// Override the showEvent
+  void showEvent(QShowEvent *event);		      
   /// Is a script running?
   bool isScriptRunning() const;
   ///Save the current state of the script window for next time
@@ -125,6 +130,10 @@ public:
 signals:
   /// Show the scripting language dialog
   void chooseScriptingLanguage();
+  /// Tell others we are closing
+  void closeMe();
+  /// Tell others we are hiding
+  void hideMe();
   
 private:
   /// Create menu bar and menu actions
@@ -162,8 +171,6 @@ private:
   QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
   /// Change scripting language
   QAction *m_scripting_lang;
-  /// Close the scripting window
-  QAction *m_close_window;
 };
 
 #endif //SCRIPTINGWINDOW_H_

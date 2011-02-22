@@ -158,7 +158,7 @@ ScriptEditor::ScriptEditor(QWidget *parent, bool interpreter_mode, QsciLexer *co
   connect(m_print, SIGNAL(activated()), this, SLOT(print()));
 
   m_zoomIn = new QAction(("Zoom &In"), this);
-  m_zoomIn->setShortcut(tr("Ctrl++"));
+  m_zoomIn->setShortcut(Qt::ControlModifier + Qt::Key_Minus);
   connect(m_zoomIn, SIGNAL(activated()),this,SLOT(zoomIn()));
 
   m_zoomOut = new QAction(("Zoom &Out"), this);

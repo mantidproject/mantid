@@ -693,7 +693,8 @@ public slots:
 	//! Connected to the context menu signal from lv; it's called when there are no items selected in the list
 	void showListViewPopupMenu(const QPoint &p);
 
-	void showScriptWindow();
+	void showScriptWindow(bool forceVisible = false);
+        void saveScriptWindowGeometry();
         void showScriptInterpreter();
 	void showMoreWindows();
 	void showMarkerPopupMenu();
@@ -1118,8 +1119,9 @@ public:
 	bool d_plot_tool_bar, d_plot3D_tool_bar, d_display_tool_bar, d_format_tool_bar;
 	bool d_backup_files;
 	WindowType d_init_window_type;
-	QRect d_script_win_rect, d_app_rect;
-	bool d_script_win_on_top;
+	QRect d_app_rect;
+        QPoint d_script_win_pos;
+        QSize d_script_win_size;
         bool d_script_win_arrow;
 	bool d_inform_rename_table;
 	QString d_export_col_separator;
