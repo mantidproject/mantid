@@ -1,6 +1,5 @@
-set ( SRC_FILES src/AdvancedSearch.cpp
-                src/DownloadDataFile.cpp
-		src/ErrorHandling.cpp
+set ( SRC_FILES src/DownloadDataFile.cpp
+                src/ErrorHandling.cpp
 		src/GetDataFiles.cpp
 		src/GetDataSets.cpp
 		src/GSoapGenerated/soapC.cpp
@@ -16,9 +15,8 @@ set ( SRC_FILES src/AdvancedSearch.cpp
 		src/Search.cpp
 		src/SearchParam.cpp )
 
-set ( INC_FILES inc/MantidICat/AdvancedSearch.h
-                inc/MantidICat/DownloadDataFile.h
-		inc/MantidICat/ErrorHandling.h
+set ( INC_FILES  inc/MantidICat/DownloadDataFile.h
+				 inc/MantidICat/ErrorHandling.h
 		inc/MantidICat/GetDataFiles.h
 		inc/MantidICat/GetDataSets.h
 		inc/MantidICat/GSoapGenerated/soapH.h
@@ -37,9 +35,8 @@ set ( INC_FILES inc/MantidICat/AdvancedSearch.h
 		inc/MantidICat/SearchParam.h
 		inc/MantidICat/Session.h )
 
-set ( TEST_FILES test/AdvancedSearchTest.h
-                 test/DownloadDataFileTest.h
-		 test/GetDataFilesTest.h
+set ( TEST_FILES test/DownloadDataFileTest.h
+				 test/GetDataFilesTest.h
 		 test/GetDataSetsTest.h
 		 test/ListInstrumentsTest.h
 		 test/ListInvestigationTypesTest.h

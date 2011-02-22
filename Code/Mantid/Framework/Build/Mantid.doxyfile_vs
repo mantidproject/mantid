@@ -98,7 +98,9 @@ INPUT                  = ../Kernel/inc/MantidKernel \
                          ../MatlabAPI/inc/MatlabAPI \
                          ../MatlabAPI/src \
                          ../Crystal/inc/MantidCrystal \
-                         ../Crystal/src
+                         ../Crystal/src	\
+						 ../ICat/inc/MantidICat	\
+                         ../ICat/src
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = YES
