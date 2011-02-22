@@ -1,6 +1,24 @@
 #ifndef MANTID_KERNEL_MULTITHREADED_H_
 #define MANTID_KERNEL_MULTITHREADED_H_
 
+#include <Poco/Mutex.h>
+
+namespace Mantid
+{
+namespace Kernel
+{
+
+//==============================================================================================
+// Typedefs for ThreadPool
+
+/// Recursive mutex (typedef'd to Poco::Mutex)
+typedef Poco::Mutex Mutex;
+
+} //namespace
+} //namespace
+
+
+
 // _OPENMP is automatically defined if openMP support is enabled in the compiler.
 #ifdef _OPENMP
 
@@ -104,6 +122,8 @@
 
 #define PARALLEL_NUMBER_OF_THREADS omp_get_num_threads()
 
+#define PARALLEL_GET_MAX_THREADS omp_get_max_threads()
+
 #define PARALLEL_THREAD_NUMBER omp_get_thread_num()
 
 #define PARALLEL \
@@ -139,6 +159,7 @@
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
 #define PARALLEL_NUMBER_OF_THREADS 1
+#define PARALLEL_GET_MAX_THREADS 1
 #define PARALLEL
 #define PARALLEL_SECTIONS
 #define PARALLEL_SECTION

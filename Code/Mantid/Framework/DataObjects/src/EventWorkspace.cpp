@@ -998,13 +998,7 @@ namespace DataObjects
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
     int num_threads;
-    PARALLEL
-    {
-      PARALLEL_CRITICAL(how_many_threads)
-      {
-        num_threads = PARALLEL_NUMBER_OF_THREADS;
-      }
-    }
+    num_threads = PARALLEL_GET_MAX_THREADS;
 
     if ((num_threads > m_noVectors) && sortType==TOF_SORT && (m_noVectors <= 4))
     {

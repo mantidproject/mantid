@@ -40,7 +40,9 @@ namespace Kernel
   void ThreadPool::schedule(Task * task)
   {
     if (task)
+    {
       m_scheduler->push(task);
+    }
   }
 
 

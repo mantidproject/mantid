@@ -187,6 +187,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/StatisticsTest.h
 	test/StringsTest.h
 	test/ThreadPoolTest.h
+	test/TaskTest.h
 	test/TimerTest.h
 	test/TimeSeriesPropertyTest.h
 	test/TimeSplitterTest.h

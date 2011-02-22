@@ -2,6 +2,9 @@
 #define MANTID_KERNEL_TASK_H_
 
 #include "MantidKernel/System.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/MultiThreaded.h"
+
 
 namespace Mantid
 {
@@ -47,6 +50,18 @@ namespace Kernel
     virtual double cost()
     {
       return m_cost;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Use an arbitrary pointer to lock (mutex) the execution of this task.
+     * For example, you might point to a particular EventList in memory to signify that
+     * this task will operate on this object.
+     *
+     * @param object :: any pointer.
+     */
+    void setMutexObject(void * object)
+    {
+      throw Kernel::Exception::NotImplementedError("Not impl.");
     }
 
 
