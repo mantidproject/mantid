@@ -59,9 +59,9 @@ namespace MDEvents
 
       // Increment the indices, rolling back as needed
       indices[0]++;
-      for (size_t d=0; d<nd-1; d++)
+      for (size_t d=0; d<nd-1; d++) //This is not run if nd=1; that's okay, you can ignore the warning
       {
-        if (indices[d] > splitCumul[d])
+        if (indices[d] >= split[d])
         {
           indices[d] = 0;
           indices[d+1]++;
@@ -154,7 +154,10 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::addEvents(const std::vector<MDE> & events)
   {
-    //TODO: Does it make sense to collect vectors to add, in the event that it is a HUGE list?
+    //TODO: Does it make sense to collect vectors to add, in the event that it is a HUGE list,
+    // instead of calling the single "addEvent" method
+
+    //TODO: Use tasks and threadpool.
 
     // --- Go event by event and add them ----
     typename std::vector<MDE>::const_iterator it;
