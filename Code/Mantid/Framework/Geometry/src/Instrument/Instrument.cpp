@@ -78,8 +78,10 @@ namespace Mantid
         std::map<int, IDetector_sptr> res, dets = dynamic_cast<const Instrument*>(m_base)->getDetectors();
         //And turn them into parametrized versions
         for(std::map<int, IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)
+	{
           res.insert(std::pair<int, IDetector_sptr>
-	     (it->first, IDetector_sptr( new Detector( dynamic_cast<Detector*>(it->second.get()), m_map_nonconst.get() ))));
+		     (it->first, ParComponentFactory::createDetector(it->second.get(), m_map)));
+	}
         return res;
       }
       else
@@ -88,7 +90,6 @@ namespace Mantid
         return _detectorCache;
       }
     }
-
 
     //------------------------------------------------------------------------------------------
     /** Fill a vector with all the detectors contained (at any depth) in a named component. For example,
@@ -205,7 +206,7 @@ namespace Mantid
       if (m_isParametrized)
       {
         IDetector_sptr baseDet = m_instr->getDetector(detector_id);
-        return ParComponentFactory::createParDetector(baseDet, m_map);
+        return ParComponentFactory::createDetector(baseDet.get(), m_map);
       }
       else
       {
@@ -449,7 +450,7 @@ namespace Mantid
         for(plottables::size_type i = 0; i < total; ++i)
         {
 	  res[i] = boost::dynamic_pointer_cast<const Detector>(
-	    ParComponentFactory::createParComponent(objs->at(i), m_map));
+	    ParComponentFactory::create(objs->at(i), m_map));
         }
         return objs;
 

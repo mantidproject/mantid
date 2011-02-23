@@ -124,7 +124,7 @@ namespace Geometry
     if (this->m_isParametrized)
     {
       boost::shared_ptr<const IComponent> parent = m_base->getParent();
-      return ParComponentFactory::createParComponent(parent,m_map);
+      return ParComponentFactory::create(parent,m_map);
     }
     else
       return boost::shared_ptr<const IComponent>(m_parent, NoDeleting());

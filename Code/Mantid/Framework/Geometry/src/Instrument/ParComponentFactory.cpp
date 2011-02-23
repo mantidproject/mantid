@@ -18,11 +18,7 @@ namespace Mantid
 
     /// Detector pool static storage
     ComponentPool<Detector> ParComponentFactory::g_detPool = 
-      ComponentPool<Detector>(2*PARALLEL_NUMBER_OF_THREADS);
-    /// Instrument pool static storage
-    ComponentPool<Instrument> ParComponentFactory::g_instPool = 
-      ComponentPool<Instrument>(2*PARALLEL_NUMBER_OF_THREADS);
-
+      ComponentPool<Detector>(2*PARALLEL_GET_MAX_THREADS);
 
     //--------------------------------------------------------------------------
     // ComponentPool
@@ -46,14 +42,9 @@ namespace Mantid
      */
     template<typename ClassType>
     typename ComponentPool<ClassType>::PtrType
-    ComponentPool<ClassType>::create(ConstPtrType base, 
-				     const ParameterMap * map)
+    ComponentPool<ClassType>::create(const ClassType *base, 
+				     const ParameterMap *map)
     {
-
-      // Temporary. Problems in debug with the SolidAngle algorithm, which probably means there
-      // are other issues lurking
-      return PtrType(createUsingNew(base, map));
-
       try
       {
     	const size_t index = getIndexInCache();
@@ -63,7 +54,7 @@ namespace Mantid
     	  // Creating cached object
     	  cached = PtrType(createUsingNew(base, map));
     	}
-    	cached->swap(base.get(), map);
+    	cached->swap(base, map);
     	return cached;
       }
       catch(std::runtime_error&)
@@ -86,7 +77,7 @@ namespace Mantid
       if( cached_first && !cached_first.unique() )
       {
     	// Try the extra storage
-    	index += PARALLEL_NUMBER_OF_THREADS;
+    	index += PARALLEL_GET_MAX_THREADS;
     	const PtrType & cached_second = m_store[index];
     	if( cached_second && !cached_second.unique() )
     	{
@@ -104,27 +95,11 @@ namespace Mantid
      */
     template<typename ClassType>
     ClassType* 
-    ComponentPool<ClassType>::createUsingNew(ConstPtrType base, 
+    ComponentPool<ClassType>::createUsingNew(const ClassType *base, 
 					     const ParameterMap *map)
     {
-      return new ClassType(base.get(),map);
+      return new ClassType(base,map);
     }
-
-    /**
-     * Create an object with the new operator
-     * @param base The base object to wrap
-     * @param map A pointer to the ParamterMap
-     * @returns A parameterized object
-     */
-    template<>
-    Instrument* 
-    ComponentPool<Instrument>::createUsingNew(ConstPtrType base, 
-					     const ParameterMap *map)
-    {
-      return new Instrument(boost::const_pointer_cast<Instrument>(base),
-			    ParameterMap_sptr(const_cast<ParameterMap*>(map), NoDeleting()));
-    }
-
 
     //--------------------------------------------------------------------------
     // ParComponentFactory
@@ -138,39 +113,55 @@ namespace Mantid
      * @returns A pointer to a parameterized component
      */
     boost::shared_ptr<Detector> 
-    ParComponentFactory::createParDetector(boost::shared_ptr<const IComponent> base, 
-					   const ParameterMap * map)
+    ParComponentFactory::createDetector(const IDetector *base, const ParameterMap *map)
     {
-      boost::shared_ptr<const Detector> det_sptr = boost::dynamic_pointer_cast<const Detector>(base);
-      if( det_sptr )
+      // Use a pool for the detectors as the are created very frequently
+      const Detector *baseDet = dynamic_cast<const Detector*>(base);
+      if( baseDet )
       {
-    	return g_detPool.create(det_sptr, map);
+	return g_detPool.create(baseDet,map);
       }
       return boost::shared_ptr<Detector>();
     }
 
     /**
-     * Create a parameterized component from the given base component and ParameterMap
+     * Create a parameterized instrument from the given base detector and ParameterMap. This version
+     * avoids a cast by directly returning the Instrument pointer
      * @param base A pointer to the unparameterized version
      * @param map A pointer to the ParameterMap
      * @returns A pointer to a parameterized component
      */
-    IComponent_sptr ParComponentFactory::createParComponent(IComponent_const_sptr base, 
-							    const ParameterMap * map)
+    boost::shared_ptr<Instrument> 
+    ParComponentFactory::createInstrument(boost::shared_ptr<Instrument> base, 
+					  boost::shared_ptr<ParameterMap> map)
     {
-      // Make an exception of Detectors and instruments and use the pre-allocated pools
-      // as they are by far the most frequently called
-      boost::shared_ptr<const Detector> det_sptr = boost::dynamic_pointer_cast<const Detector>(base);
+      return boost::shared_ptr<Instrument>(new Instrument(base, map));
+    }
+
+    /**
+     * Create a parameterized component from the given base component and ParameterMap
+     * SLOW VERSION as it has to check each possible type
+     * @param base A pointer to the unparameterized version
+     * @param map A pointer to the ParameterMap
+     * @returns A pointer to a parameterized component
+     */
+    IComponent_sptr ParComponentFactory::create(IComponent_const_sptr base, 
+						const ParameterMap * map)
+    {
+      boost::shared_ptr<const IDetector> det_sptr = boost::dynamic_pointer_cast<const IDetector>(base);
       if( det_sptr )
       {
-    	return g_detPool.create(det_sptr, map);
+    	return createDetector(det_sptr.get(), map);
       }
 
       boost::shared_ptr<const Instrument> inst_sptr = 
     	boost::dynamic_pointer_cast<const Instrument>(base);
+      // @todo One of the review tasks is to take a look at the parametertized mess and
+      // short out this problem with different classes carrying different types of pointers around
       if( inst_sptr )
       {
-	return g_instPool.create(inst_sptr, map);
+	return createInstrument(boost::const_pointer_cast<Instrument>(inst_sptr), 
+				boost::shared_ptr<ParameterMap>(const_cast<ParameterMap*>(map), NoDeleting()));
       }
 
       // Everything gets created on the fly. Note that the order matters here
@@ -178,7 +169,6 @@ namespace Mantid
       const RectangularDetector* rd = dynamic_cast<const RectangularDetector*>(base.get());
       if (rd)
 	return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
-
 
       const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
       if (ac)
@@ -196,54 +186,6 @@ namespace Mantid
 	return boost::shared_ptr<IComponent>(new Component(cc,map));
 
       return IComponent_sptr();
-    }
-
-
-
-//---------------------------- to go-----------------------------
-
-    /**
-     * Create a shared pointer to a new parameterized component object
-     * @param base A pointer to the base unparameterized component
-     * @param map A pointer to the ParameterMap storing the parameters
-     */
-    boost::shared_ptr<IComponent> ParComponentFactory::create(boost::shared_ptr<const IComponent> base, 
-							      const ParameterMap * map)
-    {
-      if (base)
-      {
-	const Detector* dc = dynamic_cast<const Detector*>(base.get());
-	if (dc)
-	  return boost::shared_ptr<IComponent>(new Detector(dc,map));
-
-	const RectangularDetector* rd = dynamic_cast<const RectangularDetector*>(base.get());
-	if (rd)
-	  return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
-
-	boost::shared_ptr<const Instrument> iinst = boost::dynamic_pointer_cast<const Instrument>(base);
-	if (iinst)
-	  return boost::shared_ptr<Instrument>(new Instrument(boost::const_pointer_cast<Instrument>(iinst), boost::shared_ptr<ParameterMap>(const_cast<ParameterMap*>(map), NoDeleting())));
-
-	const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
-	if (ac)
-	  return boost::shared_ptr<IComponent>(new CompAssembly(ac,map));
-
-	const ObjCompAssembly* oac = dynamic_cast<const ObjCompAssembly*>(base.get());
-	if (oac)
-	  return boost::shared_ptr<IComponent>(new ObjCompAssembly(oac,map));
-
-	const ObjComponent* oc = dynamic_cast<const ObjComponent*>(base.get());
-	if (oc)
-	  return boost::shared_ptr<IComponent>(new ObjComponent(oc,map));
-
-	//must be a component
-	const IComponent* cc = dynamic_cast<const IComponent*>(base.get());
-	if (cc)
-	  return boost::shared_ptr<IComponent>(new Component(cc,map));
-
-      }
-
-      return boost::shared_ptr<IComponent>();
     }
 
   }

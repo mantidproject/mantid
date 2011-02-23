@@ -9,6 +9,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidKernel/TimeSeriesProperty.h"
@@ -487,7 +488,7 @@ namespace Mantid
     */
     IInstrument_sptr MatrixWorkspace::getInstrument()const
     {
-      return boost::shared_ptr<Instrument>(new Instrument(sptr_instrument,m_parmap));
+      return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
     }
 
     /** Get a shared pointer to the instrument associated with this workspace

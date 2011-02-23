@@ -41,7 +41,7 @@ namespace Mantid
        * @param map A pointer to the ParamterMap
        * @returns A parameterized object
        */
-      PtrType create(ConstPtrType base, const ParameterMap * map);
+      PtrType create(const ClassType *base, const ParameterMap * map);
       
     private:
       /// Default constructor
@@ -49,7 +49,7 @@ namespace Mantid
       /// Retrieve a index for a pre-allocated object, throwing if one cannot be found
       size_t getIndexInCache() const;
       /// Create an object with the new operator
-      ClassType* createUsingNew(ConstPtrType base, const ParameterMap *map);
+      ClassType* createUsingNew(const ClassType *base, const ParameterMap *map);
 
       /// Size of the pool 
       size_t m_storeSize;
@@ -87,27 +87,20 @@ namespace Mantid
     {
     public:
 
+      /// Create a parameterized detector from the given base component and ParameterMap and
+      /// return a shared_ptr<Detector>
+      static boost::shared_ptr<Detector> createDetector(const IDetector *base, const ParameterMap *map);
       /// Create a parameterized component from the given base component and ParameterMap
-      static boost::shared_ptr<IComponent> createParComponent(boost::shared_ptr<const IComponent> base, 
-							      const ParameterMap * map);
+      static boost::shared_ptr<Instrument> createInstrument(boost::shared_ptr<Instrument> base, 
+							    boost::shared_ptr<ParameterMap> map);
       /// Create a parameterized component from the given base component and ParameterMap
-      static boost::shared_ptr<Detector> createParDetector(boost::shared_ptr<const IComponent> base, 
-							   const ParameterMap * map);
-
-
-      // ------------ togo --------------------------------------------------------
-      /// Create a new shared pointer to a parameterized version of the given base component
+      /// This has to check to is slower than the aobve functions
       static boost::shared_ptr<IComponent> create(boost::shared_ptr<const IComponent> base, 
 						  const ParameterMap * map);
-      //------------------
 
     private:
       // A pool of existing detectors
       static ComponentPool<Detector> g_detPool;
-      // A pool of existing detectors
-      static ComponentPool<Instrument> g_instPool;
-
-      
     };
     
 } //Namespace Geometry
