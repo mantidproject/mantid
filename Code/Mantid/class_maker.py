@@ -140,19 +140,37 @@ def generate(subproject, classname, overwrite):
     testfile = os.path.join(basedir, "test/"+classname+"Test.h")
     
     if not overwrite and (os.path.exists(headerfile) or os.path.exists(headerfile) or os.path.exists(headerfile)):
-        raise BaseException("Error! One or more of the class files already exist. Use --force to overwrite.")
+        print "\nError! One or more of the class files already exist. Use --force to overwrite."
+        print
+        return
       
+    print
     write_header(subproject, classname, headerfile)
     write_source(subproject, classname, sourcefile)
     write_test(subproject, classname, testfile)
     
-    print "\n\n   Don't forget to add your class to CMakeLists.txt:"
+    print "\n   Don't forget to add your class to CMakeLists.txt:"
     print 
     print "\tsrc/%s.cpp" % (classname)
     print "\tinc/Mantid%s/%s.cpp" % (subproject, classname)
     print "\ttest/%sTest.h" % (classname)
+    print 
 
 
 #======================================================================
 if __name__ == "__main__":
-    generate("Kernel", "ThreadPoolRunnable", True)
+    parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test.')
+    parser.add_argument('subproject', metavar='SUBPROJECT', type=str, 
+                        help='The subproject under Framework/; e.g. Kernel')
+    parser.add_argument('classname', metavar='CLASSNAME', type=str, 
+                        help='Name of the class to create')
+    parser.add_argument('--force', dest='force', action='store_const',
+                        const=True, default=False,
+                        help='Force overwriting existing files. Use with caution!')
+    
+    args = parser.parse_args()
+    subproject = args.subproject
+    classname = args.classname
+    overwrite = args.force
+    
+    generate(subproject, classname, overwrite)
