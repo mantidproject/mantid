@@ -12,6 +12,7 @@ set ( SRC_FILES src/DiagResults.cpp
                 src/RenameParDialog.cpp
                 src/SaveWorkspaces.cpp
                 src/UserFunctionDialog.cpp
+                src/WorkspaceSelector.cpp
 )
 
 # Include files aren't required, but this makes them appear in Visual Studio
@@ -30,6 +31,7 @@ set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
                 inc/MantidQtMantidWidgets/WidgetDllOption.h
+                inc/MantidQtMantidWidgets/WorkspaceSelector.h
 )
 
 set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
@@ -46,6 +48,7 @@ set ( MOC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/RenameParDialog.h
                 inc/MantidQtMantidWidgets/SaveWorkspaces.h
                 inc/MantidQtMantidWidgets/UserFunctionDialog.h
+                inc/MantidQtMantidWidgets/WorkspaceSelector.h
 )
 
 set ( UI_FILES inc/MantidQtMantidWidgets/ICatAdvancedSearch.ui
