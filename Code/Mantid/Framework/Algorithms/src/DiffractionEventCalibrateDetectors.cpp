@@ -13,7 +13,6 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidKernel/DateAndTime.h"
 #include <Poco/File.h>
 #include <sstream>
 #include <numeric>
@@ -293,8 +292,7 @@ namespace Algorithms
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
-    return 0.20/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));// for 4012 and 4065
-    //return 200.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
+    return 200.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
 }
   /** Initialisation method
   */
@@ -427,9 +425,7 @@ namespace Algorithms
       outfile << "# Base and up give directions of unit vectors for a local\n";
       outfile << "# x,y coordinate system on the face of the detector.\n";
       outfile << "#\n";
-      std::time_t current_t = DateAndTime::get_current_time().to_time_t() ;
-      std::tm * current = gmtime( &current_t );
-      outfile << "# "<<asctime (current) <<"\n";
+      outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
       outfile << "#\n";
       outfile << "6         L1     T0_SHIFT\n";
       IObjComponent_const_sptr source = inst->getSource();
