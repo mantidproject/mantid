@@ -55,7 +55,12 @@ namespace Kernel
     : m_cost(0), m_costExecuted(0)
     {
     }
-  
+
+    /// Destructor
+    virtual ~ThreadScheduler()
+    {
+    }
+
     //-----------------------------------------------------------------------------------
     /** Add a Task to the queue.
      * @param newTask :: Task to add to queue
@@ -127,7 +132,13 @@ namespace Kernel
     ThreadSchedulerFIFO()
       : ThreadScheduler()
     {}
-  
+
+    /// Destructor
+    virtual ~ThreadSchedulerFIFO()
+    { clear();
+    }
+
+
     //-------------------------------------------------------------------------------
     void push(Task * newTask)
     {
@@ -233,6 +244,11 @@ namespace Kernel
     ThreadSchedulerLargestCost()
       : ThreadScheduler()
     {}
+
+    /// Destructor
+    virtual ~ThreadSchedulerLargestCost()
+    { clear();
+    }
 
     //-------------------------------------------------------------------------------
     void push(Task * newTask)

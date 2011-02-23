@@ -5,6 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadPoolRunnable.h"
 #include <vector>
 #include <Poco/Thread.h>
 
@@ -50,6 +51,8 @@ namespace Kernel
   public:
     ThreadPool(ThreadScheduler * scheduler = new ThreadSchedulerFIFO(), size_t numCores = 0);
 
+    ~ThreadPool();
+
     void start();
 
     void schedule(Task * task, bool start = false);
@@ -66,6 +69,9 @@ namespace Kernel
 
     /// Vector with all the threads that are started
     std::vector<Poco::Thread *> m_threads;
+
+    /// Vector of the POCO-required classes to actually run in a thread.
+    std::vector<ThreadPoolRunnable *> m_runnables;
 
     /// Have the threads started?
     bool m_started;

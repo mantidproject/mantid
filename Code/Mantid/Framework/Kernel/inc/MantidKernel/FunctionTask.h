@@ -64,6 +64,7 @@ public:
       m_voidFunc();
     else
       throw std::runtime_error("FunctionTask: NULL method pointer provided.");
+
   }
 
 

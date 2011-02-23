@@ -22,13 +22,14 @@ namespace Kernel
   /** Constructor
    *
    * @param scheduler :: an instance of a ThreadScheduler to schedule tasks.
+   *        NOTE: The ThreadPool destructor will delete this.
    * @param numThreads :: number of cores to use; default = 0, meaning auto-detect all
    *        available physical cores.
    */
   ThreadPool::ThreadPool( ThreadScheduler * scheduler, size_t numThreads)
     : m_scheduler(scheduler), m_started(false)
   {
-    if (!scheduler)
+    if (!m_scheduler)
       throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPool constructor.");
 
     if (numThreads == 0)
@@ -43,6 +44,15 @@ namespace Kernel
 
 
   //--------------------------------------------------------------------------------
+  /** Destructor. Deletes the ThreadScheduler.
+   */
+  ThreadPool::~ThreadPool()
+  {
+    if (m_scheduler)
+      delete m_scheduler;
+  }
+
+  //--------------------------------------------------------------------------------
   /** Start the threads and begin looking for tasks.
    * @throw runtime_error if called when it has already started.
    */
@@ -53,6 +63,7 @@ namespace Kernel
 
     // Now, launch that many threads and let them wait for new tasks.
     m_threads.clear();
+    m_runnables.clear();
     for (size_t i = 0; i < m_numThreads; i++)
     {
       // Make a descriptive name
@@ -64,7 +75,8 @@ namespace Kernel
 
       // Make the runnable object and run it
       ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler);
-      //ThreadPoolRunnable runnable(i, m_scheduler);
+      m_runnables.push_back(runnable);
+
       thread->start(*runnable);
     }
     // Yep, all the threads are running.
@@ -120,7 +132,15 @@ namespace Kernel
     for (size_t i=0; i < m_threads.size(); i++)
     {
       m_threads[i]->join();
+      // Delete the old thread
+      delete m_threads[i];
     }
+
+    // Clear the vectors (the threads are deleted now).
+    m_threads.clear();
+    for (size_t i=0; i < m_runnables.size(); i++)
+      delete m_runnables[i];
+    m_runnables.clear();
 
 //
 //    while (m_scheduler->size() > 0)

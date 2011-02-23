@@ -15,9 +15,10 @@ class ThreadPoolRunnableTest : public CxxTest::TestSuite
 {
 public:
 
-  void testSomething()
+  void test_constructor()
   {
-    TS_ASSERT(1);
+    ThreadPoolRunnable * tpr;
+    TS_ASSERT_THROWS( tpr = new ThreadPoolRunnable(0, NULL), std::invalid_argument);
   }
 
 

@@ -14,6 +14,8 @@ namespace Kernel
   ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler)
   :  m_threadnum(threadnum), m_scheduler(scheduler)
   {
+    if (!m_scheduler)
+      throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPoolRunnable::ctor()");
   }
 
   //-----------------------------------------------------------------------------------
@@ -39,13 +41,16 @@ namespace Kernel
 
       if (task)
       {
-        //TODO: Mutex?
+        //TODO: task-specific mutex if specified?
 
         // Run the task (synchronously within this thread)
         task->run();
 
         // Tell the scheduler that we finished this task
         m_scheduler->finished(task);
+
+        // We now delete the task to free up memory
+        delete task;
       }
       else
       {
