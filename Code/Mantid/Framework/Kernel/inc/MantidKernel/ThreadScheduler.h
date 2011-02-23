@@ -74,7 +74,7 @@ namespace Kernel
      *
      * @param task :: the Task that was completed.
      */
-    virtual Task * finished(Task * task)
+    virtual void finished(Task * task)
     { (void) task; //Ignore argument
     }
   

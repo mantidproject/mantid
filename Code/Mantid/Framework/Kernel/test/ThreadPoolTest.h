@@ -21,6 +21,7 @@ using namespace Mantid::Kernel;
 
 size_t waste_time(double seconds)
 {
+  std::cout << "waste_time for " << seconds << " seconds." << std::endl;
   // Waste time, but use up the CPU!
   std::size_t num = 0;
   Mantid::Kernel::Timer time;
@@ -167,6 +168,27 @@ public:
     TS_ASSERT_EQUALS( threadpooltest_vec[0], 9);
     TS_ASSERT_EQUALS( threadpooltest_vec[1], 8);
     TS_ASSERT_EQUALS( threadpooltest_vec[2], 7);
+  }
+
+
+  /** Make it waste time, 0 to 16 seconds
+   * DISABLED because it is (intentionally) slow. */
+  void xtest_Scheduler_LargestCostFirst_wastetime()
+  {
+    ThreadPool p(new ThreadSchedulerFIFO(), 0);
+    threadpooltest_vec.clear();
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    for (int i=0; i< 16; i++)
+    {
+      double cost = i; // time is exactly i
+      p.schedule( new FunctionTask( boost::bind(waste_time, i), cost ) );
+    }
+
+    Timer overall;
+
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+
+    std::cout << overall.elapsed() << " secs total." << std::endl;
   }
 
 
