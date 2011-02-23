@@ -71,6 +71,7 @@ private:
   int TOFmin;        ///< The start of the TOF range for fitting
   int TOFmax;        ///< The end of the TOF range for fitting
   int TOFPeak;       ///< The peak in the TOF range for fitting
+  int tofISAW;       /// check if bin agrees with peak from ISAW
   int nspec;          ///< The number of spectra in the input workspace
 };
   double Alpha0,Alpha1,Beta0,Kappa,SigmaSquared,Gamma; ///<Ikeda-Carpender function 
