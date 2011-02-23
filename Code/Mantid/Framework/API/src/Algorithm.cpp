@@ -120,7 +120,11 @@ namespace Mantid
           }
         }
         // Try the validation again
-        if ( !validateProperties() ) throw std::runtime_error("Some invalid Properties found");
+        if ( !validateProperties() )
+        {
+           m_notificationCenter.postNotification(new ErrorNotification(this,"Some invalid Properties found"));
+           throw std::runtime_error("Some invalid Properties found");
+        }
 
       }
       // get properties and check one of the input properties is a work space group
