@@ -115,6 +115,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
  public:
   /// Typedef for a Most-Recently-Used list of Data objects.
   typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
+  /// Typedef for a vector of MRUlists.
   typedef std::vector< mru_list * > mru_lists;
 
   /// The name of the workspace type.

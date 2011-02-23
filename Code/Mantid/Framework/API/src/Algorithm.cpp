@@ -87,6 +87,7 @@ namespace Mantid
     *  must be EXPLICITLY invoked by  the parent algorithm.
     *
     *  @throw runtime_error Thrown if algorithm or sub-algorithm cannot be executed
+    *  @return true if executed successfully.
     */
     bool Algorithm::execute()
     {
@@ -638,6 +639,9 @@ namespace Mantid
       m_isChildAlgorithm = isChild;
     }
 
+    /** Set whether the algorithm will rethrow exceptions
+     * @param rethrow :: true if you want to rethrow exception.
+     */
     void Algorithm::setRethrows(const bool rethrow)
     {
       this->m_rethrow = rethrow;
@@ -1046,8 +1050,8 @@ namespace Mantid
 
     }
 
-    /**
-    * Callback when an algorithm is executed asynchronously
+    /**Callback when an algorithm is executed asynchronously
+     * @return true if executed successfully.
     */
     bool Algorithm::executeAsyncImpl(const Poco::Void&)
     {

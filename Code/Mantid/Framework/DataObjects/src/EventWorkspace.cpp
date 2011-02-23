@@ -1021,10 +1021,17 @@ namespace DataObjects
     }
 
   private:
-    int m_wiStart, m_wiStop;
+    /// Start workspace index to process
+    int m_wiStart;
+    /// Stop workspace index to process
+    int m_wiStop;
+    /// How to sort
     EventSortType m_sortType;
+    /// How many cores for each sort
     size_t m_howManyCores;
+    /// EventWorkspace on which to sort
     const EventWorkspace * m_WS;
+    /// Optional Progress dialog.
     Mantid::API::Progress * prog;
   };
 

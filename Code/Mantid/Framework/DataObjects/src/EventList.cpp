@@ -630,6 +630,8 @@ namespace DataObjects
 
   /** Return the given event in the list.
    * Handles the different types of events by converting to WeightedEvent (the most general type).
+   * @param event_number :: the index of the event to retrieve
+   * @return a WeightedEvent
    */
   WeightedEvent EventList::getEvent(size_t event_number)
   {
@@ -1690,6 +1692,7 @@ namespace DataObjects
   //----------------------------------------------------------------------------------
   /** Integrate the events between a range of X values, or all events.
    *
+   * @param events :: reference to a vector of events to change.
    * @param minX :: minimum X bin to use in integrating.
    * @param maxX :: maximum X bin to use in integrating.
    * @param entireRange :: set to true to use the entire range. minX and maxX are then ignored!
@@ -1810,6 +1813,7 @@ namespace DataObjects
    * on either the TofEvent list or the WeightedEvent list.
    * Does NOT reverse the event list if the factor < 0
    *
+   * @param events :: reference to a vector of events to change.
    * @param factor :: multiply by this
    * @param offset :: add this
    */
@@ -1850,9 +1854,9 @@ namespace DataObjects
 
 
   // --------------------------------------------------------------------------
-  /**
-   * Mask out events that have a tof between tofMin and tofMax (inclusively).
+  /** Mask out events that have a tof between tofMin and tofMax (inclusively).
    * Events are removed from the list.
+   * @param events :: reference to a vector of events to change.
    * @param tofMin :: lower bound of TOF to filter out
    * @param tofMax :: upper bound of TOF to filter out
    */

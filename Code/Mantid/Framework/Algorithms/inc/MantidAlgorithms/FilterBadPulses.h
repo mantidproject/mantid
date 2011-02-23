@@ -64,8 +64,6 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-
-  void execEvent();
 };
 
 

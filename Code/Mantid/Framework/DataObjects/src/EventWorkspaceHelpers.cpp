@@ -13,7 +13,7 @@ namespace DataObjects
 {
 
 /** Converts an EventWorkspace to an equivalent Workspace2D
- * @param inputWSName :: input event workspace
+ * @param inputMatrixW :: input event workspace
  * @return a MatrixWorkspace_sptr
  */
 MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_sptr inputMatrixW)

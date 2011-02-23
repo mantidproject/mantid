@@ -19,9 +19,11 @@ namespace Mantid
 {
   namespace Algorithms
   {
-    BinaryOperation::BinaryOperation() : API::PairedGroupAlgorithm(), m_indicesToMask(), m_progress(NULL),
-      m_useHistogramForRhsEventWorkspace(false),
-      m_ClearRHSWorkspace(false)
+    BinaryOperation::BinaryOperation()
+      : API::PairedGroupAlgorithm(),
+      m_indicesToMask(), m_progress(NULL),
+      m_ClearRHSWorkspace(false),
+      m_useHistogramForRhsEventWorkspace(false)
     {}
     
     BinaryOperation::~BinaryOperation()
