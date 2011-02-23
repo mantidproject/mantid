@@ -142,17 +142,17 @@ namespace Kernel
     virtual Task * pop(size_t threadnum)
     {
       (void) threadnum; //Ignore argument
-      if (this->size() > 0)
+      Task * temp = NULL;
+      m_queueLock.lock();
+      // Check the size within the same locking block; otherwise the size may change before you get the next item.
+      if (m_queue.size() > 0)
       {
-        m_queueLock.lock();
         //TODO: Would a try/catch block be smart here?
-        Task * temp = m_queue.front();
+        temp = m_queue.front();
         m_queue.pop_front();
-        m_queueLock.unlock();
-        return temp;
       }
-      else
-        return NULL;
+      m_queueLock.unlock();
+      return temp;
     }
   
     //-------------------------------------------------------------------------------
@@ -197,17 +197,19 @@ namespace Kernel
     Task * pop(size_t threadnum)
     {
       (void) threadnum; //Ignore argument
-      if (this->size() > 0)
+      Task * temp = NULL;
+      m_queueLock.lock();
+      // Check the size within the same locking block; otherwise the size may change before you get the next item.
+      if (m_queue.size() > 0)
       {
-        m_queueLock.lock();
-        Task * temp = m_queue.back();
+        //TODO: Would a try/catch block be smart here?
+        temp = m_queue.back();
         m_queue.pop_back();
-        m_queueLock.unlock();
-        return temp;
       }
-      else
-        return NULL;
+      m_queueLock.unlock();
+      return temp;
     }
+
   };
 
 
@@ -246,20 +248,19 @@ namespace Kernel
     virtual Task * pop(size_t threadnum)
     {
       (void) threadnum; //Ignore argument
-      //TODO: Thread-safety
-      if (this->size() > 0)
+      Task * temp = NULL;
+      m_queueLock.lock();
+      // Check the size within the same locking block; otherwise the size may change before you get the next item.
+      if (m_map.size() > 0)
       {
-        m_queueLock.lock();
         // Since the map is sorted by cost, we want the LAST item.
         std::multimap<double, Task*>::iterator it = m_map.end();
         it--;
-        Task * temp = it->second;
+        temp = it->second;
         m_map.erase(it);
-        m_queueLock.unlock();
-        return temp;
       }
-      else
-        return NULL;
+      m_queueLock.unlock();
+      return temp;
     }
 
     //-------------------------------------------------------------------------------

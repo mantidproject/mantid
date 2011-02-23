@@ -12,16 +12,18 @@
 #include <boost/bind.hpp>
 #include <iostream>
 #include <iomanip>
+#include <Poco/Mutex.h>
 
 using namespace Mantid::Kernel;
 
 //#include <boost/thread.hpp>
 
 
-
-size_t waste_time(double seconds)
+class TimeWaster
 {
-  std::cout << "waste_time for " << seconds << " seconds." << std::endl;
+public:
+static size_t waste_time(double seconds)
+{
   // Waste time, but use up the CPU!
   std::size_t num = 0;
   Mantid::Kernel::Timer time;
@@ -39,6 +41,33 @@ size_t waste_time(double seconds)
   return num;
 }
 
+
+void waste_time_with_lock(double seconds)
+{
+  {
+    Mutex::ScopedLock lock(m_mutex);
+    std::cout << "waste_time for " << seconds << " seconds." << std::endl;
+  }
+  waste_time(seconds);
+}
+
+
+/** Add a number but use a lock to avoid contention */
+void add_to_number(size_t adding)
+{
+  {
+    Mutex::ScopedLock lock(m_mutex);
+    total += adding;
+  }
+}
+
+private:
+  Mutex m_mutex;
+
+public:
+  size_t total;
+
+};
 
 int threadpooltest_check = 0;
 
@@ -73,7 +102,7 @@ public:
       double delay = num-i;
       PARALLEL_CRITICAL(test1)
       std::cout << std::setw(5) << i << ": Thread " << PARALLEL_THREAD_NUMBER << " will delay for " << delay << " seconds." << std::endl;
-      waste_time(delay);
+      TimeWaster::waste_time(delay);
       PARALLEL_CRITICAL(test1)
       std::cout << std::setw(5) << i << ": is done." << std::endl;
     }
@@ -171,6 +200,7 @@ public:
   }
 
 
+
   /** Make it waste time, 0 to 16 seconds
    * DISABLED because it is (intentionally) slow. */
   void xtest_Scheduler_LargestCostFirst_wastetime()
@@ -178,10 +208,13 @@ public:
     ThreadPool p(new ThreadSchedulerFIFO(), 0);
     threadpooltest_vec.clear();
     TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    TimeWaster mywaster;
+
     for (int i=0; i< 16; i++)
     {
       double cost = i; // time is exactly i
-      p.schedule( new FunctionTask( boost::bind(waste_time, i), cost ) );
+      // Bind to a member function of mywaster
+      p.schedule( new FunctionTask( boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost ) );
     }
 
     Timer overall;
@@ -192,6 +225,49 @@ public:
   }
 
 
+
+
+  //--------------------------------------------------------------------
+  /** Perform a stress test on the given scheduler.
+   * This runs a large number of super-short tasks; enough that the
+   * queue locking is tested against simultaneous access. A segfault
+   * results if the queue is improperly accessed.
+   */
+  void do_StressTest_scheduler(ThreadScheduler * sched)
+  {
+    ThreadPool p(sched, 0);
+    TimeWaster mywaster;
+    size_t num = 100000;
+    mywaster.total = 0;
+    for (size_t i=0; i<=num; i++)
+    {
+      p.schedule( new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), i*1.0 ) );
+    }
+
+    Timer overall;
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    //std::cout << overall.elapsed() << " secs total." << std::endl;
+
+    // Expected total
+    size_t expected = (num * num + num) / 2;
+    TS_ASSERT_EQUALS( mywaster.total, expected);
+  }
+
+
+  void test_StressTest_ThreadSchedulerFIFO()
+  {
+    do_StressTest_scheduler(new ThreadSchedulerFIFO());
+  }
+
+  void test_StressTest_ThreadSchedulerLIFO()
+  {
+    do_StressTest_scheduler(new ThreadSchedulerLIFO());
+  }
+
+  void test_StressTest_ThreadSchedulerLargestCost()
+  {
+    do_StressTest_scheduler(new ThreadSchedulerLargestCost());
+  }
 
 
 };
