@@ -13,6 +13,7 @@
 #include <iostream>
 #include <iomanip>
 #include <Poco/Mutex.h>
+#include <cstdlib>
 
 using namespace Mantid::Kernel;
 
@@ -66,8 +67,10 @@ private:
 
 public:
   size_t total;
-
 };
+
+
+//=======================================================================================
 
 int threadpooltest_check = 0;
 
@@ -85,6 +88,52 @@ void threadpooltest_adding_stuff(int val)
 }
 
 
+
+// Counter for the test.
+size_t TaskThatAddsTasks_counter;
+Mutex TaskThatAddsTasks_mutex;
+
+//=======================================================================================
+/** Class that adds tasks to its scheduler */
+class TaskThatAddsTasks : public Task
+{
+public:
+  // ctor
+  TaskThatAddsTasks(ThreadScheduler * scheduler, size_t depth)
+  : m_scheduler(scheduler), depth(depth)
+  {
+    // Use a randomized cost function; this will have an effect on the sorted schedulers.
+    m_cost = rand();
+  }
+
+  // Run the task
+  void run()
+  {
+    if (depth < 4)
+    {
+      // Add ten tasks (one level deeper)
+      for (size_t i=0; i<10; i++)
+      {
+        m_scheduler->push(new TaskThatAddsTasks(m_scheduler, depth+1));
+      }
+    }
+    else
+    {
+      // Lock to ensure you don't step on yourself.
+      Mutex::ScopedLock lock(TaskThatAddsTasks_mutex);
+      // Increment the counter only at the lowest level.
+      TaskThatAddsTasks_counter += 1;
+    }
+  }
+
+private:
+  ThreadScheduler * m_scheduler;
+  size_t depth;
+};
+
+
+
+//=======================================================================================
 class ThreadPoolTest : public CxxTest::TestSuite
 {
 public:
@@ -107,6 +156,45 @@ public:
       std::cout << std::setw(5) << i << ": is done." << std::endl;
     }
     std::cout << overall.elapsed() << " secs total.\n";
+  }
+
+  /** Make it waste time, 0 to 16 seconds
+   * DISABLED because it is (intentionally) slow. */
+  void xtest_Scheduler_LargestCostFirst_wastetime()
+  {
+    ThreadPool p(new ThreadSchedulerFIFO(), 0);
+    threadpooltest_vec.clear();
+    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
+    TimeWaster mywaster;
+
+    for (int i=0; i< 16; i++)
+    {
+      double cost = i; // time is exactly i
+      // Bind to a member function of mywaster
+      p.schedule( new FunctionTask( boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost ) );
+    }
+
+    Timer overall;
+
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+
+    std::cout << overall.elapsed() << " secs total." << std::endl;
+  }
+
+  /** Speed comparison of test
+   * DISABLED: because it is not necessary
+   */
+  void xtest_compare()
+  {
+    size_t total=0;
+    ThreadScheduler * sched = new ThreadSchedulerLargestCost();
+    for (size_t i=0; i<100000; i++)
+    {
+      total += 1;
+      sched->push(new FunctionTask( boost::bind(TimeWaster::waste_time, i*1.0), i*1.0 ));
+    }
+    size_t other = total;
+    //std::cout << total << std::endl;
   }
 
 //
@@ -201,32 +289,6 @@ public:
 
 
 
-  /** Make it waste time, 0 to 16 seconds
-   * DISABLED because it is (intentionally) slow. */
-  void xtest_Scheduler_LargestCostFirst_wastetime()
-  {
-    ThreadPool p(new ThreadSchedulerFIFO(), 0);
-    threadpooltest_vec.clear();
-    TS_ASSERT_EQUALS( threadpooltest_vec.size(), 0);
-    TimeWaster mywaster;
-
-    for (int i=0; i< 16; i++)
-    {
-      double cost = i; // time is exactly i
-      // Bind to a member function of mywaster
-      p.schedule( new FunctionTask( boost::bind(&TimeWaster::waste_time_with_lock, &mywaster, i), cost ) );
-    }
-
-    Timer overall;
-
-    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
-
-    std::cout << overall.elapsed() << " secs total." << std::endl;
-  }
-
-
-
-
   //--------------------------------------------------------------------
   /** Perform a stress test on the given scheduler.
    * This runs a large number of super-short tasks; enough that the
@@ -237,7 +299,7 @@ public:
   {
     ThreadPool p(sched, 0);
     TimeWaster mywaster;
-    size_t num = 100000;
+    size_t num = 30000;
     mywaster.total = 0;
     for (size_t i=0; i<=num; i++)
     {
@@ -268,6 +330,44 @@ public:
   {
     do_StressTest_scheduler(new ThreadSchedulerLargestCost());
   }
+
+
+  //--------------------------------------------------------------------
+  /** Perform a stress test on the given scheduler.
+   * This one creates tasks that create new tasks; e.g. 10 tasks each add
+   * 10 tasks, and so on (up to a certain depth)
+   */
+  void do_StressTest_TasksThatCreateTasks(ThreadScheduler * sched)
+  {
+    ThreadPool * p = new ThreadPool(sched, 0);
+    // Create the first task, depth 0, that will recursively create 100000
+    TaskThatAddsTasks * task = new TaskThatAddsTasks(sched, 0);
+    p->schedule( task );
+
+    //Reset the total
+    TaskThatAddsTasks_counter = 0;
+    TS_ASSERT_THROWS_NOTHING( p->joinAll() );
+
+    // Expected total = the number of lowest level entries
+    TS_ASSERT_EQUALS( TaskThatAddsTasks_counter, 10000);
+    delete p;
+  }
+
+  void test_StressTest_TasksThatCreateTasks_ThreadSchedulerFIFO()
+  {
+    do_StressTest_TasksThatCreateTasks(new ThreadSchedulerFIFO());
+  }
+
+  void test_StressTest_TasksThatCreateTasks_ThreadSchedulerLIFO()
+  {
+    do_StressTest_TasksThatCreateTasks(new ThreadSchedulerLIFO());
+  }
+
+  void test_StressTest_TasksThatCreateTasks_ThreadSchedulerLargestCost()
+  {
+    do_StressTest_TasksThatCreateTasks(new ThreadSchedulerLargestCost());
+  }
+
 
 
 };
