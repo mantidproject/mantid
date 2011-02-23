@@ -96,23 +96,27 @@ class LoadRun(ReductionStep):
                                     RelativePosition="1")
         else:
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
- 
-        Rebin(workspace+'_evt', workspace, "0,10,20000")
-        
-        # Apply the TOF offset for this run
-        mantid.sendLogMessage("Frame-skipping option: %s" % str(reducer.frame_skipping))
-        
+
         # Modify TOF
-        EQSANSTofStructure(InputWorkspace=workspace, OutputWorkspace=workspace, FrameSkipping=reducer.frame_skipping)
+        a = EQSANSTofStructure(InputWorkspace=workspace+'_evt')
+        offset = float(a.getPropertyValue("TofOffset"))
+        wl_min = float(a.getPropertyValue("WavelengthMin"))
+        wl_max = float(a.getPropertyValue("WavelengthMax"))
+        frame_skipping = a.getPropertyValue("FrameSkipping")
+        mantid.sendLogMessage("Frame-skipping option: %s" % str(frame_skipping))
+        
+        x_step = 100
+        x_min = offset-offset%x_step
+        x_max = 2*1e6/60.0+offset
+        x_max -= x_max%x_step
+        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max))
 
         ConvertUnits(workspace, workspace, "Wavelength")
         
         # Rebin so all the wavelength bins are aligned
-        min_lambda = min(mtd[workspace].readX(0))
-        max_lambda = max(mtd[workspace].readX(0))
-        Rebin(workspace, workspace, "%4.1f,%4.1f,%4.1f" % (min_lambda, 0.1, max_lambda))
+        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max))
         
-        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g" %(workspace, sdd))
+        mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
         # Remove the dirty flag if it existed
         reducer.clean(workspace)

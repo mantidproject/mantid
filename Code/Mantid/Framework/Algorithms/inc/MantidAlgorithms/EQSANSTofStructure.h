@@ -6,6 +6,8 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
@@ -49,6 +51,12 @@ private:
   void init();
   /// Execution code
   void exec();
+  //void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, bool frame_skipping);
+  void execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold, double frame_offset,
+      double tof_frame_width, double tmp_frame_width);
+  void execHisto(API::MatrixWorkspace_sptr inputWS, double threshold, double frame_offset,
+      double tmp_frame_width, double frequency);
+
   /// Compute TOF offset
   double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping);
 };

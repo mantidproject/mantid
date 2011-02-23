@@ -4,8 +4,13 @@
 #include "MantidAlgorithms/EQSANSTofStructure.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidDataObjects/Events.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include <vector>
 
 using namespace Mantid::Kernel;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -24,41 +29,56 @@ void EQSANSTofStructure::init()
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);
-  wsValidator->add(new EventWorkspaceValidator<>(false));
+  //wsValidator->add(new EventWorkspaceValidator<>(false));
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the TOF correction to");
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
-      "Workspace to store the corrected data in");
-  declareProperty("FrameSkipping", false, "Frame skipping option" );
+
+  // Output parameters
+  declareProperty("FrameSkipping", false, Kernel::Direction::Output);
+  declareProperty("TofOffset", 0.0, Kernel::Direction::Output);
+  declareProperty("WavelengthMin", 0.0, Kernel::Direction::Output);
+  declareProperty("WavelengthMax", 0.0, Kernel::Direction::Output);
 }
 
 void EQSANSTofStructure::exec()
 {
-  MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const bool frame_skipping = getProperty("FrameSkipping");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
 
-  // Now create the output workspace
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
-  if ( outputWS != inputWS )
-  {
-    outputWS = WorkspaceFactory::Instance().create(inputWS);
-    setProperty("OutputWorkspace",outputWS);
-  }
+  // Calculate the frame width
+  double frequency = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("frequency"))->getStatistics().mean;
+  double tof_frame_width = 1.0e6/frequency;
 
-  const int numHists = inputWS->getNumberHistograms();
-
-  Progress progress(this,0.0,1.0,numHists);
+  // Determine whether we need frame skipping or not by checking the chopper speed
+  bool frame_skipping = false;
+  const double chopper_speed = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("Speed1"))->getStatistics().mean;
+  if (std::fabs(chopper_speed-frequency/2.0)<1.0) frame_skipping = true;
 
   // Get TOF offset
   double frame_tof0 = getTofOffset(inputWS, frame_skipping);
 
   // Calculate the frame width
-  const double frequency = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("frequency"))->getStatistics().mean;
-  double tof_frame_width = 1.0e6/frequency;
   double tmp_frame_width = frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
-
   double frame_offset=0.0;
   if (frame_tof0 >= tmp_frame_width) frame_offset = tmp_frame_width * ( (int)( frame_tof0/tmp_frame_width ) );
+  double threshold = frame_tof0-frame_offset;
+
+  Mantid::DataObjects::EventWorkspace_sptr eventW = boost::dynamic_pointer_cast<EventWorkspace>(inputWS);
+  if (eventW)
+  {
+    this->execEvent(eventW, threshold, frame_offset, tof_frame_width, tmp_frame_width);
+  }
+  else
+  {
+    this->execHisto(inputWS, threshold, frame_offset, tmp_frame_width, frequency);
+  }
+
+}
+
+void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, double threshold, double frame_offset,
+       double tmp_frame_width, double frequency)
+{
+  const int numHists = inputWS->getNumberHistograms();
+  Progress progress(this,0.0,1.0,numHists);
 
   // Find the new binning first
   const MantidVec XIn = inputWS->readX(0); // Copy here to avoid holding on to reference for too long (problem with managed workspaces)
@@ -66,7 +86,6 @@ void EQSANSTofStructure::exec()
 
   // Loop through each bin
   int cutoff = 0;
-  double threshold = frame_tof0-frame_offset;
   for (int i=0; i<nTOF; i++)
   {
       if (XIn[i] < threshold) cutoff = i;
@@ -89,7 +108,7 @@ void EQSANSTofStructure::exec()
   g_log.information() << "Overlap: new = [" << (tof_bin_range-1) << ", " << (nTOF-2) << "]" << std::endl;
 
   // Loop through the spectra and apply correction
-  PARALLEL_FOR2(inputWS,outputWS)
+  PARALLEL_FOR1(inputWS)
   for (int ispec = 0; ispec < numHists; ispec++)
   {
     PARALLEL_START_INTERUPT_REGION
@@ -101,9 +120,9 @@ void EQSANSTofStructure::exec()
     MantidVec ECopy = MantidVec(inputWS->readE(ispec));
     MantidVec& EIn = ECopy;
 
-    MantidVec& XOut = outputWS->dataX(ispec);
-    MantidVec& YOut = outputWS->dataY(ispec);
-    MantidVec& EOut = outputWS->dataE(ispec);
+    MantidVec& XOut = inputWS->dataX(ispec);
+    MantidVec& YOut = inputWS->dataY(ispec);
+    MantidVec& EOut = inputWS->dataE(ispec);
 
     // Move up the low TOFs
     for (int i=0; i<cutoff; i++)
@@ -136,7 +155,37 @@ void EQSANSTofStructure::exec()
     YOut[tof_bin_range-2-cutoff] = 0.0;
     EOut[tof_bin_range-2-cutoff] = 0.0;
 
-    progress.report();
+    progress.report("TOF structure");
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
+}
+
+void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold,
+    double frame_offset, double tof_frame_width, double tmp_frame_width)
+{
+  const int numHists = inputWS->getNumberHistograms();
+  Progress progress(this,0.0,1.0,numHists);
+
+  // Loop through the spectra and apply correction
+  PARALLEL_FOR1(inputWS)
+  for (int ispec = 0; ispec < numHists; ispec++)
+  {
+    PARALLEL_START_INTERUPT_REGION
+
+    //Get the pointer to the output event list
+    EventList* outEL = inputWS->getEventListPtr(ispec);
+    std::vector<TofEvent>& events = outEL->getEvents();
+    std::vector<TofEvent>::iterator it;
+    for (it=events.begin(); it<events.end(); it++)
+    {
+    	if( it->m_tof >= tof_frame_width ) continue;
+    	if( it->m_tof < threshold )
+    		it->m_tof += tmp_frame_width;
+    	it->m_tof += frame_offset;
+    }
+
+    progress.report("TOF structure");
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
@@ -368,6 +417,12 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
   g_log.information() << "Chopper    Actual Phase    Lambda1    Lambda2" << std::endl;
   for ( int i=0; i<4; i++)
       g_log.information() << i << "    " << chopper_actual_phase[i] << "  " << chopper_wl_1[i] << "  " << chopper_wl_2[i] << std::endl;
+
+  setProperty("FrameSkipping", frame_skipping);
+  setProperty("TofOffset", frame_tof0);
+  setProperty("WavelengthMin", frame_wl_1);
+  setProperty("WavelengthMax", frame_wl_2);
+
   return frame_tof0;
 }
 

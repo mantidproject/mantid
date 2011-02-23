@@ -258,6 +258,7 @@ class Reducer(object):
         """
             Go through the list of reduction steps
         """
+        t_0 = time.time()
         # Log text
         self.log_text = "%s reduction - %s\n" % (self.instrument.name(), time.ctime())
         # Check that an instrument was specified
@@ -277,6 +278,7 @@ class Reducer(object):
         #any clean up, possibly removing workspaces 
         self.post_process()
     
+        self.log_text += "Reduction completed in %g sec" % (time.time()-t_0)
         return self.log_text
     
     
