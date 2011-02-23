@@ -154,7 +154,7 @@ def generate(subproject, classname, overwrite):
     print "\tsrc/%s.cpp" % (classname)
     print "\tinc/Mantid%s/%s.cpp" % (subproject, classname)
     print "\ttest/%sTest.h" % (classname)
-    print 
+    print  
 
 
 #======================================================================
@@ -167,7 +167,7 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help='Force overwriting existing files. Use with caution!')
-    
+     
     args = parser.parse_args()
     subproject = args.subproject
     classname = args.classname

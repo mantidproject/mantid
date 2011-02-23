@@ -59,15 +59,17 @@ class ThreadPoolTest : public CxxTest::TestSuite
 {
 public:
 
-  /** Test that shows that OPENMP does not use a thread pool idea to optimally allocate threads */
+  /** Test that shows that OPENMP does not use a thread pool idea to optimally allocate threads
+   * (unless you use schedule(dynamic) )! */
   void xtestOpenMP()
   {
     Timer overall;
     int num = 16;
-    PARALLEL_FOR_NO_WSP_CHECK()
+    //PARALLEL_FOR_NO_WSP_CHECK()
+//#pragma omp parallel for schedule(dynamic)
     for (int i=0; i<num; i++)
     {
-      double delay = i;
+      double delay = num-i;
       PARALLEL_CRITICAL(test1)
       std::cout << std::setw(5) << i << ": Thread " << PARALLEL_THREAD_NUMBER << " will delay for " << delay << " seconds." << std::endl;
       waste_time(delay);

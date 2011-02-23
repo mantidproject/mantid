@@ -1,18 +1,24 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadPoolRunnable.h"
 #include "MantidKernel/Task.h"
 #include <algorithm>
+#include <sstream>
 #include <cmath>
 #include <cfloat>
+#include <Poco/Mutex.h>
+#include <Poco/Runnable.h>
+#include <Poco/Thread.h>
 
 namespace Mantid
 {
 namespace Kernel
 {
 
-//--------------------------------------------------------------------------------
+  //--------------------------------------------------------------------------------
   /** Constructor
    *
    * @param scheduler :: an instance of a ThreadScheduler to schedule tasks.
@@ -20,28 +26,66 @@ namespace Kernel
    *        available physical cores.
    */
   ThreadPool::ThreadPool( ThreadScheduler * scheduler, size_t numThreads)
-    : m_scheduler(scheduler)
+    : m_scheduler(scheduler), m_started(false)
   {
+    if (!scheduler)
+      throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPool constructor.");
+
     if (numThreads == 0)
     {
-      //TODO: auto-detect
-      numThreads = 1;
+      //Uses OpenMP to find how many cores there are.
+      m_numThreads = PARALLEL_GET_MAX_THREADS;
     }
     else
       m_numThreads = numThreads;
+    //std::cout << m_numThreads << " m_numThreads \n";
   }
 
 
   //--------------------------------------------------------------------------------
-  /** Schedule a task for later execution.
+  /** Start the threads and begin looking for tasks.
+   * @throw runtime_error if called when it has already started.
+   */
+  void ThreadPool::start()
+  {
+    if (m_started)
+      throw std::runtime_error("Threads have already started.");
+
+    // Now, launch that many threads and let them wait for new tasks.
+    m_threads.clear();
+    for (size_t i = 0; i < m_numThreads; i++)
+    {
+      // Make a descriptive name
+      std::ostringstream name;
+      name << "Thread" << i;
+      // Create the thread
+      Poco::Thread * thread = new Poco::Thread(name.str());
+      m_threads.push_back(thread);
+
+      // Make the runnable object and run it
+      ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler);
+      //ThreadPoolRunnable runnable(i, m_scheduler);
+      thread->start(*runnable);
+    }
+    // Yep, all the threads are running.
+    m_started = true;
+  }
+
+  //--------------------------------------------------------------------------------
+  /** Schedule a task for later execution. If the threadpool is running,
+   * it will be picked up by the next available thread.
    *
    * @param task :: pointer to a Task object to run.
+   * @param start :: start the thread at the same time; default false
    */
-  void ThreadPool::schedule(Task * task)
+  void ThreadPool::schedule(Task * task, bool start)
   {
     if (task)
     {
       m_scheduler->push(task);
+      // Start all the threads if they were not already.
+      if (start && !m_started)
+        this->start();
     }
   }
 
@@ -68,16 +112,27 @@ namespace Kernel
    */
   void ThreadPool::joinAll()
   {
-    while (m_scheduler->size() > 0)
-    {
-      Task * task = m_scheduler->pop();
+    // Start all the threads if they were not already.
+    if (!m_started)
+      this->start();
 
-      // Run it!
-      if (task)
-      {
-        task->run();
-      }
+    // Sequentially join all the threads.
+    for (size_t i=0; i < m_threads.size(); i++)
+    {
+      m_threads[i]->join();
     }
+
+//
+//    while (m_scheduler->size() > 0)
+//    {
+//      Task * task = m_scheduler->pop(0);
+//
+//      // Run it!
+//      if (task)
+//      {
+//        task->run();
+//      }
+//    }
 
   }
 

@@ -4,6 +4,7 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <vector>
 #include <deque>
 #include <map>
@@ -55,14 +56,30 @@ namespace Kernel
     {
     }
   
+    //-----------------------------------------------------------------------------------
     /** Add a Task to the queue.
      * @param newTask :: Task to add to queue
      */
     virtual void push(Task * newTask) = 0;
+
+    //-----------------------------------------------------------------------------------
+    /** Retrieves the next Task to execute.
+     * @param threadnum :: ID of the calling thread.
+     */
+    virtual Task * pop(size_t threadnum) = 0;
+
+    //-----------------------------------------------------------------------------------
+    /** Signal to the scheduler that a task is complete. The
+     * scheduler may release mutexes, etc.
+     *
+     * @param task :: the Task that was completed.
+     */
+    virtual Task * finished(Task * task)
+    { (void) task; //Ignore argument
+    }
   
-    /// Retrieves the next Task to execute.
-    virtual Task * pop() = 0;
-  
+
+    //-----------------------------------------------------------------------------------
     /// Returns the size of the queue
     virtual size_t size() = 0;
 
@@ -89,6 +106,8 @@ namespace Kernel
     double m_cost;
     /// Accumulated cost of tasks that have been executed (popped)
     double m_costExecuted;
+    /// Mutex to prevent simultaneous access to the queue.
+    Mutex m_queueLock;
 
   };
 
@@ -113,35 +132,46 @@ namespace Kernel
     void push(Task * newTask)
     {
       // Cache the total cost
+      m_queueLock.lock();
       m_cost += newTask->cost();
-      //TODO: Thread-safety
       m_queue.push_back(newTask);
+      m_queueLock.unlock();
     }
 
     //-------------------------------------------------------------------------------
-    virtual Task * pop()
+    virtual Task * pop(size_t threadnum)
     {
-      if (m_queue.size() > 0)
+      (void) threadnum; //Ignore argument
+      if (this->size() > 0)
       {
-        //TODO: Thread-safety
+        m_queueLock.lock();
+        //TODO: Would a try/catch block be smart here?
         Task * temp = m_queue.front();
         m_queue.pop_front();
+        m_queueLock.unlock();
         return temp;
       }
+      else
+        return NULL;
     }
   
     //-------------------------------------------------------------------------------
     size_t size()
     {
-      return m_queue.size();
+      m_queueLock.lock();
+      size_t temp = m_queue.size();
+      m_queueLock.unlock();
+      return temp;
     }
   
     //-------------------------------------------------------------------------------
     void clear()
     {
+      m_queueLock.lock();
       m_queue.clear();
       m_cost = 0;
       m_costExecuted = 0;
+      m_queueLock.unlock();
     }
 
   protected:
@@ -164,15 +194,19 @@ namespace Kernel
   {
 
     //-------------------------------------------------------------------------------
-    Task * pop()
+    Task * pop(size_t threadnum)
     {
-      if (m_queue.size() > 0)
+      (void) threadnum; //Ignore argument
+      if (this->size() > 0)
       {
-        //TODO: Thread-safety
+        m_queueLock.lock();
         Task * temp = m_queue.back();
         m_queue.pop_back();
+        m_queueLock.unlock();
         return temp;
       }
+      else
+        return NULL;
     }
   };
 
@@ -202,22 +236,26 @@ namespace Kernel
     void push(Task * newTask)
     {
       // Cache the total cost
+      m_queueLock.lock();
       m_cost += newTask->cost();
-      //TODO: Thread-safety
       m_map.insert( std::pair<double, Task*>(newTask->cost(), newTask) );
+      m_queueLock.unlock();
     }
 
     //-------------------------------------------------------------------------------
-    virtual Task * pop()
+    virtual Task * pop(size_t threadnum)
     {
+      (void) threadnum; //Ignore argument
       //TODO: Thread-safety
-      if (m_map.size() > 0)
+      if (this->size() > 0)
       {
+        m_queueLock.lock();
         // Since the map is sorted by cost, we want the LAST item.
         std::multimap<double, Task*>::iterator it = m_map.end();
         it--;
         Task * temp = it->second;
         m_map.erase(it);
+        m_queueLock.unlock();
         return temp;
       }
       else
@@ -227,15 +265,20 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     size_t size()
     {
-      return m_map.size();
+      m_queueLock.lock();
+      size_t temp = m_map.size();
+      m_queueLock.unlock();
+      return temp;
     }
 
     //-------------------------------------------------------------------------------
     void clear()
     {
+      m_queueLock.lock();
       m_map.clear();
       m_cost = 0;
       m_costExecuted = 0;
+      m_queueLock.unlock();
     }
 
   protected:

@@ -43,6 +43,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/TestChannel.cpp
 	src/ThreadSafeLogStream.cpp
 	src/ThreadPool.cpp
+	src/ThreadPoolRunnable.cpp
 	src/Timer.cpp
 	src/TimeSeriesProperty.cpp
 	src/TimeSplitter.cpp
@@ -136,6 +137,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/TestChannel.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSafeLogStream.h
+	inc/MantidKernel/ThreadPoolRunnable.h
 	inc/MantidKernel/Timer.h
 	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
@@ -187,6 +189,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/StatisticsTest.h
 	test/StringsTest.h
 	test/ThreadPoolTest.h
+	test/ThreadPoolRunnableTest.h
 	test/TaskTest.h
 	test/TimerTest.h
 	test/TimeSeriesPropertyTest.h
