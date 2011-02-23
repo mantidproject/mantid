@@ -1,6 +1,14 @@
+# The default compiler on the Mac (gcc 4.2) can't cope with this
+# file if optimization is turned on, so make sure it isn't
+set ( SRC_ATOM src/Atom.cpp )
+if ( APPLE )
+  SET_SOURCE_FILES_PROPERTIES( ${SRC_ATOM} PROPERTIES
+                                           COMPILE_FLAGS -O0
+  )
+endif ()
+
 set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/ArrayProperty.cpp
-	src/Atom.cpp
 	src/BinFinder.cpp
 	src/ConfigService.cpp
 	src/DateAndTime.cpp
@@ -199,7 +207,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/UserStringParserTest.h )
 
 # Add the target for this directory
-add_library ( Kernel ${SRC_FILES} ${INC_FILES})
+add_library ( Kernel ${SRC_FILES} ${SRC_ATOM} ${INC_FILES} )
 # Set the name of the generated library
 set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel 
                                           COMPILE_DEFINITIONS IN_MANTID_KERNEL )
