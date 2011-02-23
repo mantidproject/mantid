@@ -307,18 +307,9 @@
              <widget class="QWidget" name="fury_page_inputWorkspace" >
               <layout class="QHBoxLayout" name="horizontalLayout_28" >
                <item>
-                <widget class="QComboBox" name="fury_cbWorkspace" />
-               </item>
-               <item>
-                <widget class="QPushButton" name="fury_pbRefresh" >
-                 <property name="sizePolicy" >
-                  <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-                   <horstretch>0</horstretch>
-                   <verstretch>0</verstretch>
-                  </sizepolicy>
-                 </property>
-                 <property name="text" >
-                  <string>Refresh</string>
+                <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample" >
+                 <property name="Suffix" >
+                  <string>_red</string>
                  </property>
                 </widget>
                </item>
@@ -446,18 +437,9 @@
            <widget class="QWidget" name="furyfit_page_inputWorkspace" >
             <layout class="QHBoxLayout" name="horizontalLayout_12" >
              <item>
-              <widget class="QComboBox" name="furyfit_cbWorkspace" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="furyfit_pbRefreshWSList" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>Refresh</string>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="furyfit_wsIqt" >
+               <property name="Suffix" >
+                <string>_iqt</string>
                </property>
               </widget>
              </item>
@@ -752,18 +734,9 @@
            <widget class="QWidget" name="confit_page_inputWorkspace" >
             <layout class="QHBoxLayout" name="horizontalLayout_29" >
              <item>
-              <widget class="QComboBox" name="confit_cbWorkspace" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="confit_pbRefresh" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>Refresh</string>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="confit_wsSample" >
+               <property name="Suffix" >
+                <string>_red</string>
                </property>
               </widget>
              </item>
@@ -1454,12 +1427,9 @@
            <widget class="QWidget" name="page_2" >
             <layout class="QHBoxLayout" name="horizontalLayout_24" >
              <item>
-              <widget class="QComboBox" name="absp_cbWorkspace" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="absp_pbRefresh" >
-               <property name="text" >
-                <string>Refresh Workspace List</string>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput" >
+               <property name="Suffix" >
+                <string>_red</string>
                </property>
               </widget>
              </item>
@@ -2021,18 +1991,9 @@
            <widget class="QWidget" name="page_4" >
             <layout class="QHBoxLayout" name="horizontalLayout_31" >
              <item>
-              <widget class="QComboBox" name="abscor_cbSampleWS" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="abscor_pbSampleRefresh" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>Refresh</string>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample" >
+               <property name="Suffix" >
+                <string>_red</string>
                </property>
               </widget>
              </item>
@@ -2152,18 +2113,9 @@
            <widget class="QWidget" name="page_6" >
             <layout class="QHBoxLayout" name="horizontalLayout_35" >
              <item>
-              <widget class="QComboBox" name="abscor_cbContainerWS" />
-             </item>
-             <item>
-              <widget class="QPushButton" name="abscor_pbContainerRefresh" >
-               <property name="sizePolicy" >
-                <sizepolicy vsizetype="Fixed" hsizetype="Maximum" >
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="text" >
-                <string>Refresh</string>
+              <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer" >
+               <property name="Suffix" >
+                <string>_red</string>
                </property>
               </widget>
              </item>
@@ -2289,6 +2241,11 @@
    <class>MantidQt::MantidWidgets::MWRunFiles</class>
    <extends>QWidget</extends>
    <header>MantidQtMantidWidgets/MWRunFiles.h</header>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

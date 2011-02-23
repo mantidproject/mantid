@@ -173,10 +173,8 @@ bool WorkspaceSelector::checkEligibility(const QString & name, Mantid::API::Work
   {
     return false;
   }
-  else
-  {
-    return true;
-  }
+
+  return true;
 }
 
 void WorkspaceSelector::refresh()

@@ -104,7 +104,6 @@ namespace MantidQt
       void handleDirectoryChange(Mantid::Kernel::ConfigValChangeNotification_ptr pNf); ///< handle POCO event
 
     private slots:
-      void refreshWSlist();
       void run();
 
       // ElasticWindow
@@ -121,7 +120,6 @@ namespace MantidQt
       void msdUpdateRS(QtProperty* prop, double val);
 
       // Fourier Transform
-      void furyInputType(int index);
       void furyResType(const QString& type);
       void furyPlotInput();
       void furyMinChanged(double val);

@@ -110,8 +110,6 @@ void IndirectDataAnalysis::initLayout()
   m_uiForm.abs_leRadius->setValidator(m_valDbl);
   m_uiForm.abs_leSlices->setValidator(m_valInt);
   m_uiForm.abs_leAnnuli->setValidator(m_valInt);
-
-  refreshWSlist();
 }
 
 void IndirectDataAnalysis::initLocalPython()
@@ -280,8 +278,7 @@ void IndirectDataAnalysis::setupFury()
   connect(m_furRange, SIGNAL(maxValueChanged(double)), this, SLOT(furyMaxChanged(double)));
   connect(m_furDblMng, SIGNAL(valueChanged(QtProperty*, double)), this, SLOT(furyUpdateRS(QtProperty*, double)));
   
-  connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyInputType(int)));
-  connect(m_uiForm.fury_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.fury_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.fury_swInput, SLOT(setCurrentIndex(int)));  
   connect(m_uiForm.fury_cbResType, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(furyResType(const QString&)));
   connect(m_uiForm.fury_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyPlotInput()));
 }
@@ -343,8 +340,7 @@ void IndirectDataAnalysis::setupFuryFit()
   connect(m_uiForm.furyfit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitTypeSelection(int)));
   connect(m_uiForm.furyfit_pbPlotInput, SIGNAL(clicked()), this, SLOT(furyfitPlotInput()));
   connect(m_uiForm.furyfit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(furyfitPlotInput()));
-  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));
-  connect(m_uiForm.furyfit_pbRefreshWSList, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
+  connect(m_uiForm.furyfit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(furyfitInputType(int)));  
   connect(m_uiForm.furyfit_pbSeqFit, SIGNAL(clicked()), this, SLOT(furyfitSequential()));
   // apply validators - furyfit
   m_uiForm.furyfit_leSpecNo->setValidator(m_valInt);
@@ -432,7 +428,6 @@ void IndirectDataAnalysis::setupConFit()
   connect(m_uiForm.confit_leSpecNo, SIGNAL(editingFinished()), this, SLOT(confitPlotInput()));
   connect(m_uiForm.confit_inputFile, SIGNAL(fileEditingFinished()), this, SLOT(confitPlotInput()));
   
-  connect(m_uiForm.confit_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
   connect(m_uiForm.confit_cbInputType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitInputType(int)));
   connect(m_uiForm.confit_cbFitType, SIGNAL(currentIndexChanged(int)), this, SLOT(confitTypeSelection(int)));
   connect(m_uiForm.confit_cbBackground, SIGNAL(currentIndexChanged(int)), this, SLOT(confitBgTypeSelection(int)));
@@ -449,7 +444,6 @@ void IndirectDataAnalysis::setupAbsorptionF2Py()
   connect(m_uiForm.absp_cbInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.absp_swInput, SLOT(setCurrentIndex(int)));
   connect(m_uiForm.absp_cbShape, SIGNAL(currentIndexChanged(int)), this, SLOT(absf2pShape(int)));
   connect(m_uiForm.absp_ckUseCan, SIGNAL(toggled(bool)), this, SLOT(absf2pUseCanChecked(bool)));
-  connect(m_uiForm.absp_pbRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
   connect(m_uiForm.absp_letc1, SIGNAL(editingFinished()), this, SLOT(absf2pTCSync()));
   // apply QValidators to items.
   m_uiForm.absp_lewidth->setValidator(m_valDbl);
@@ -481,9 +475,6 @@ void IndirectDataAnalysis::setupAbsCor()
 
   connect(m_uiForm.abscor_cbSampleInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swSampleInput, SLOT(setCurrentIndex(int)));
   connect(m_uiForm.abscor_cbContainerInputType, SIGNAL(currentIndexChanged(int)), m_uiForm.abscor_swContainerInput, SLOT(setCurrentIndex(int)));
-
-  connect(m_uiForm.abscor_pbSampleRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
-  connect(m_uiForm.abscor_pbContainerRefresh, SIGNAL(clicked()), this, SLOT(refreshWSlist()));
 }
 
 bool IndirectDataAnalysis::validateElwin()
@@ -526,7 +517,7 @@ bool IndirectDataAnalysis::validateFury()
     break;
   case 1:
     {
-      if ( m_uiForm.fury_cbWorkspace->currentText() == "" )
+      if ( m_uiForm.fury_wsSample->currentText() == "" )
       {
         valid = false;
       }
@@ -682,7 +673,7 @@ bool IndirectDataAnalysis::validateAbsorptionF2Py()
   }
   else
   {
-    if ( m_uiForm.absp_cbWorkspace->currentText() == "" ) { valid = false; }
+    if ( m_uiForm.absp_wsInput->currentText() == "" ) { valid = false; }
   }
 
   if ( m_uiForm.absp_cbShape->currentText() == "Flat" )
@@ -1119,39 +1110,6 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
   return curve;
 }
 
-void IndirectDataAnalysis::refreshWSlist()
-{
-  // Get object list from ADS
-  std::set<std::string> workspaceList = Mantid::API::AnalysisDataService::Instance().getObjectNames();
-  // Clear Current Workspace Lists
-  m_uiForm.fury_cbWorkspace->clear();
-  m_uiForm.furyfit_cbWorkspace->clear();
-  m_uiForm.confit_cbWorkspace->clear();
-  m_uiForm.absp_cbWorkspace->clear();
-  m_uiForm.abscor_cbSampleWS->clear();
-  m_uiForm.abscor_cbContainerWS->clear();
-  
-  if ( ! workspaceList.empty() )
-  {
-    std::set<std::string>::const_iterator it;
-    for ( it=workspaceList.begin(); it != workspaceList.end(); ++it )
-    {
-      Mantid::API::Workspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::Workspace>(Mantid::API::AnalysisDataService::Instance().retrieve(*it));
-      
-      if ( workspace->id() != "TableWorkspace" )
-      {
-        QString ws = QString::fromStdString(*it);
-        m_uiForm.fury_cbWorkspace->addItem(ws);
-        m_uiForm.furyfit_cbWorkspace->addItem(ws);
-        m_uiForm.confit_cbWorkspace->addItem(ws);
-        m_uiForm.absp_cbWorkspace->addItem(ws);
-        m_uiForm.abscor_cbSampleWS->addItem(ws);
-        m_uiForm.abscor_cbContainerWS->addItem(ws);
-      }
-    }
-  }
-}
-
 void IndirectDataAnalysis::run()
 {
   QString tabName = m_uiForm.tabWidget->tabText(m_uiForm.tabWidget->currentIndex());
@@ -1370,7 +1328,7 @@ void IndirectDataAnalysis::furyRun()
     filenames = m_uiForm.fury_iconFile->getFilenames().join("', r'");
     break;
   case 1:
-    filenames = m_uiForm.fury_cbWorkspace->currentText();
+    filenames = m_uiForm.fury_wsSample->currentText();
     break;
   }
 
@@ -1378,7 +1336,6 @@ void IndirectDataAnalysis::furyRun()
     "from IndirectDataAnalysis import fury\n"
     "samples = [r'" + filenames + "']\n"
     "resolution = r'" + m_uiForm.fury_resFile->getFirstFilename() + "'\n"
-    // "rebin = '" + m_uiForm.fury_leELow->text()+","+m_uiForm.fury_leEWidth->text()+","+ m_uiForm.fury_leEHigh->text()+"'\n"
     "rebin = '" + m_furProp["ELow"]->valueText() +","+ m_furProp["EWidth"]->valueText() +","+m_furProp["EHigh"]->valueText()+"'\n";
 
   if ( m_uiForm.fury_ckVerbose->isChecked() ) pyInput += "verbose = True\n";
@@ -1393,12 +1350,6 @@ void IndirectDataAnalysis::furyRun()
   pyInput +=
     "fury_ws = fury(samples, resolution, rebin, Save=save, Verbose=verbose, Plot=plot)\n";
   QString pyOutput = runPythonCode(pyInput).trimmed();
-}
-
-void IndirectDataAnalysis::furyInputType(int index)
-{
-  m_uiForm.fury_swInput->setCurrentIndex(index);
-  refreshWSlist();
 }
 
 void IndirectDataAnalysis::furyResType(const QString& type)
@@ -1441,7 +1392,7 @@ void IndirectDataAnalysis::furyPlotInput()
   }
   else if ( m_uiForm.fury_cbInputType->currentIndex() == 1 )
   {
-    workspace = m_uiForm.fury_cbWorkspace->currentText().toStdString();
+    workspace = m_uiForm.fury_wsSample->currentText().toStdString();
     if ( workspace.empty() )
     {
       showInformationBox("No workspace selected.");
@@ -1694,7 +1645,7 @@ void IndirectDataAnalysis::furyfitPlotInput()
     break;
   case 1: // Workspace
     {
-      wsname = m_uiForm.furyfit_cbWorkspace->currentText().toStdString();
+      wsname = m_uiForm.furyfit_wsIqt->currentText().toStdString();
       try
       {
         m_ffInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
@@ -2110,7 +2061,7 @@ void IndirectDataAnalysis::confitPlotInput()
     break;
   case 1: // Workspace
     {
-      wsname = m_uiForm.confit_cbWorkspace->currentText().toStdString();
+      wsname = m_uiForm.confit_wsSample->currentText().toStdString();
       try
       {
         m_cfInputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(wsname));
@@ -2447,7 +2398,7 @@ void IndirectDataAnalysis::absf2pRun()
   }
   else
   {
-    pyInput += "inputws = '" + m_uiForm.absp_cbWorkspace->currentText() + "'\n";
+    pyInput += "inputws = '" + m_uiForm.absp_wsInput->currentText() + "'\n";
   }
   
   if ( m_uiForm.absp_ckUseCan->isChecked() )
@@ -2526,7 +2477,7 @@ void IndirectDataAnalysis::abscorRun()
   else
   {
     pyInput +=
-      "sample = '" + m_uiForm.abscor_cbSampleWS->currentText() + "'\n";
+      "sample = '" + m_uiForm.abscor_wsSample->currentText() + "'\n";
   }
 
   if ( m_uiForm.abscor_ckUseCan->isChecked() )
@@ -2539,7 +2490,7 @@ void IndirectDataAnalysis::abscorRun()
     else
     {
       pyInput +=
-        "container = '" + m_uiForm.abscor_cbContainerWS->currentText() + "'\n";
+        "container = '" + m_uiForm.abscor_wsContainer->currentText() + "'\n";
     }
   }
   else

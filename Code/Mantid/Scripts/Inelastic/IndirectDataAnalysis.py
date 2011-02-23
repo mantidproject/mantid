@@ -288,6 +288,7 @@ def furyfitCreateXAxis(inputWS):
         beamPos = samplePos - inst.getSource().getPos()
         for i in range(0,nHist):
             efixed = getEfixed(inputWS, i)
+            detector = ws.getDetector(i)
             theta = detector.getTwoTheta(samplePos, beamPos) / 2
             lamda = math.sqrt(81.787/efixed)
             q = 4 * math.pi * math.sin(theta) / lamda
