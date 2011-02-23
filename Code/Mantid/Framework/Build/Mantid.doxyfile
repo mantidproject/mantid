@@ -113,7 +113,11 @@ EXCLUDE                = ../Nexus/src/NeXusException.cpp \
 			../Nexus/inc/MantidNexus/NeXusFile.hpp \
 			../Nexus/inc/MantidNexus/NeXusException.hpp \
             ../Kernel/inc/MantidKernel/ANN \
-            ../Kernel/src/ANN
+            ../Kernel/src/ANN \
+		../ICat/inc/MantidICat/GSoapGenerated \
+		../ICat/inc/MantidICat/GSoap \
+		../ICat/src/GSoapGenerated
+
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 
