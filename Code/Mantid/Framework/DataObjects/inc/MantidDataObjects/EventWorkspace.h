@@ -206,7 +206,6 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Make all the mapping stuff
   void makeSpectraMap();
   void makeAxis1();
-  void makeAxis0();
   void doneAddingEventLists();
 
   /// Call this method when loading event data is complete.
@@ -231,6 +230,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   /// Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog) const;
+  void sortAllOld(EventSortType sortType, Mantid::API::Progress * prog) const;
 
   Kernel::DateAndTime getFirstPulseTime() const;
   Kernel::DateAndTime getLastPulseTime() const;

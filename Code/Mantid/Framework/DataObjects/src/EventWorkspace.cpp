@@ -9,6 +9,8 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/ThreadPool.h"
 #include <numeric>
 
 using namespace boost::posix_time;
@@ -594,22 +596,6 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
-  /** Generate the axes[0] (which I think is just the X axis)
-   */
-  void EventWorkspace::makeAxis0()
-  {
-    const MantidVec & X = this->readX(0);
-//    //We create a spectra-type axis that holds the spectrum # at each workspace index.
-//    //  It is a simple 1-1 map (workspace index = spectrum #)
-//    delete m_axes[0];
-//    API::NumericAxis * ax0 = new API::NumericAxis(X.size());
-//    for (size_t i=0; i < X.size(); i++)
-//      ax0->setValue(i, X[i]);
-//    m_axes[0] = ax0;
-  }
-
-
-  //-----------------------------------------------------------------------------
   /** Call this method when you are done manually adding event lists
    * at specific workspace indices.
    * The spectra map and axis#1 are populated:
@@ -983,11 +969,64 @@ namespace DataObjects
     {
       (*i)->setX(x);
     }
-    this->makeAxis0();
 
     //Clear MRU lists now, free up memory
     this->clearMRU();
   }
+
+  //-----------------------------------------------------------------------------
+  /** Task for sorting an event list */
+  class EventSortingTask : public Task
+  {
+  public:
+    /// ctor
+    EventSortingTask(const EventWorkspace * WS, int wiStart, int wiStop, EventSortType sortType, size_t howManyCores, Mantid::API::Progress * prog)
+    : m_wiStart(wiStart), m_wiStop(wiStop),  m_sortType(sortType), m_howManyCores(howManyCores), m_WS(WS), prog(prog)
+    {
+      m_cost = 0;
+      if (m_wiStop > m_WS->getNumberHistograms())
+        m_wiStop = m_WS->getNumberHistograms();
+
+      for (int wi=m_wiStart; wi < m_wiStop; wi++)
+      {
+        double n = m_WS->getEventList(wi).getNumberEvents();
+        // Sorting time is approximately n * ln (n)
+        m_cost += n * log(n);
+      }
+
+      if (! ((m_howManyCores == 1)||(m_howManyCores == 2)||(m_howManyCores == 4)))
+        throw std::invalid_argument("howManyCores should be 1,2 or 4.");
+    }
+
+    // Execute the sort as specified.
+    void run()
+    {
+      if (!m_WS) return;
+      for (int wi=m_wiStart; wi < m_wiStop; wi++)
+      {
+        if (m_sortType != TOF_SORT)
+          m_WS->getEventList(wi).sort(m_sortType);
+        else
+        {
+          if (m_howManyCores == 1)
+            m_WS->getEventList(wi).sort(m_sortType);
+          else if (m_howManyCores == 2)
+            m_WS->getEventList(wi).sortTof2();
+          else if (m_howManyCores == 4)
+            m_WS->getEventList(wi).sortTof4();
+        }
+        // Report progress
+        if (prog) prog->report("Sorting");
+      }
+    }
+
+  private:
+    int m_wiStart, m_wiStop;
+    EventSortType m_sortType;
+    size_t m_howManyCores;
+    const EventWorkspace * m_WS;
+    Mantid::API::Progress * prog;
+  };
 
 
   //-----------------------------------------------------------------------------
@@ -998,14 +1037,58 @@ namespace DataObjects
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
     int num_threads;
-    num_threads = PARALLEL_GET_MAX_THREADS;
+    num_threads = ThreadPool::getNumPhysicalCores();
+    g_log.debug() << num_threads << " cores found. ";
+
+    // Initial chunk size: set so that each core will be called for 20 tasks.
+    // (This is to avoid making too small tasks.)
+    int chunk_size = m_noVectors/(num_threads*20);
+    if (chunk_size < 1) chunk_size = 1;
+
+    // Sort with 1 core per event list by default
+    size_t howManyCores = 1;
+    // And auto-detect how many threads
+    size_t howManyThreads = 0;
+    if (m_noVectors < num_threads*10)
+    {
+      // If you have few vectors, sort with 2 cores.
+      chunk_size = 1;
+      howManyCores = 2;
+      howManyThreads = num_threads / 2 + 1;
+    }
+    else if (m_noVectors < num_threads)
+    {
+      // If you have very few vectors, sort with 4 cores.
+      chunk_size = 1;
+      howManyCores = 4;
+      howManyThreads = num_threads / 4 + 1;
+    }
+    g_log.debug() << "Performing sort with " << howManyCores << " cores per EventList, in " << howManyThreads << " threads, using a chunk size of " << chunk_size << ".\n";
+
+    // Create the thread pool, and optimize by doing the longest sorts first.
+    ThreadPool pool(new ThreadSchedulerLargestCost(), howManyThreads);
+    for (int i=0; i < m_noVectors; i+=chunk_size)
+    {
+      pool.schedule(new EventSortingTask(this, i, i+chunk_size, sortType, howManyCores, prog));
+    }
+
+    // Now run it all
+    pool.joinAll();
+  }
+
+
+
+  /** TODO: Old version using OPENMP; delete this later */
+  void EventWorkspace::sortAllOld(EventSortType sortType, Mantid::API::Progress * prog) const
+  {
+    int num_threads;
+    num_threads = ThreadPool::getNumPhysicalCores();
 
     if ((num_threads > m_noVectors) && sortType==TOF_SORT && (m_noVectors <= 4))
     {
 
       if (m_noVectors == 1)
       {
-        g_log.information() << num_threads << " cores found. ";
         g_log.information() << "Performing sort with as many cores as possible on single event list.\n";
         // Only one event list - throw all the cores you got!
         if (num_threads >= 4)

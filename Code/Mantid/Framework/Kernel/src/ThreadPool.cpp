@@ -35,7 +35,7 @@ namespace Kernel
     if (numThreads == 0)
     {
       //Uses OpenMP to find how many cores there are.
-      m_numThreads = PARALLEL_GET_MAX_THREADS;
+      m_numThreads = getNumPhysicalCores();
     }
     else
       m_numThreads = numThreads;
@@ -51,6 +51,18 @@ namespace Kernel
     if (m_scheduler)
       delete m_scheduler;
   }
+
+  //--------------------------------------------------------------------------------
+  /** Return the number of physical cores available on the system.
+   * NOTE: Uses OpenMP getMaxThreads to find the number.
+   * @return how many cores are present. 1 if no OpenMP is installed.
+   */
+  size_t ThreadPool::getNumPhysicalCores()
+  {
+    return PARALLEL_GET_MAX_THREADS;
+  }
+
+
 
   //--------------------------------------------------------------------------------
   /** Start the threads and begin looking for tasks.

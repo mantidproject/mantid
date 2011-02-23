@@ -649,8 +649,43 @@ public:
 
 
 
+  /** SLOW TEST: disabled. */
+  void xtest_sortAll_comparison()
+  {
+    EventWorkspace_sptr test_in;
+    Progress * prog = NULL;
+    size_t num_extra = 1000000;
+    int numpix = 1000;
+    int numbins = 1000;
 
-  void testSortByTof()
+    test_in = CreateRandomEventWorkspace(numbins, numpix);
+    for (size_t i=0; i<num_extra; i++)
+      test_in->getEventList(0).addEventQuickly( TofEvent(std::rand() , std::rand()) );
+
+    Timer tim1;
+    std::cout << "Starting OpenMP version" << std::endl;
+    test_in->sortAllOld(TOF_SORT, prog);
+    std::cout << tim1.elapsed() << " sec for the OpenMP version" << std::endl;
+
+    test_in = CreateRandomEventWorkspace(numbins, numpix);
+    for (size_t i=0; i<num_extra; i++)
+      test_in->getEventList(0).addEventQuickly( TofEvent(std::rand() , std::rand()) );
+
+    Timer tim2;
+    std::cout << "Starting ThreadPool version" << std::endl;
+    test_in->sortAll(TOF_SORT, prog);
+    std::cout << tim2.elapsed() << " sec for the ThreadPool version" << std::endl;
+
+//    EventWorkspace_sptr outWS = test_in;
+//    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+//    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+//    for (size_t i=0; i<ve.size()-1; i++)
+//      TS_ASSERT_LESS_THAN_EQUALS( ve[i].tof(), ve[i+1].tof());
+  }
+
+
+
+  void test_sortAll_TOF()
   {
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress * prog = NULL;
@@ -658,11 +693,13 @@ public:
     test_in->sortAll(TOF_SORT, prog);
 
     EventWorkspace_sptr outWS = test_in;
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
-    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
-    for (size_t i=0; i<ve.size()-1; i++)
-      TS_ASSERT_LESS_THAN_EQUALS( ve[i].tof(), ve[i+1].tof());
-
+    for (int wi=0; wi<NUMPIXELS; wi++)
+    {
+      std::vector<TofEvent> ve = outWS->getEventList(wi).getEvents();
+      TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+       for (size_t i=0; i<ve.size()-1; i++)
+          TS_ASSERT_LESS_THAN_EQUALS( ve[i].tof(), ve[i+1].tof());
+    }
   }
 
 
@@ -670,7 +707,7 @@ public:
   /** Test sortAll() when there are more cores available than pixels.
    * This test will only work on machines with 2 cores at least.
    */
-  void testSortAll_Parallel()
+  void test_sortAll_SingleEventList()
   {
     int numEvents = 30;
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(numEvents, 1);
@@ -686,8 +723,26 @@ public:
   }
 
 
+  /** Test sortAll() when there are more cores available than pixels.
+   * This test will only work on machines with 2 cores at least.
+   */
+  void test_sortAll_byTime_SingleEventList()
+  {
+    int numEvents = 30;
+    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(numEvents, 1);
+    Progress * prog = NULL;
 
-  void testSortByPulseTime()
+    test_in->sortAll(PULSETIME_SORT, prog);
+
+    EventWorkspace_sptr outWS = test_in;
+    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
+    TS_ASSERT_EQUALS( ve.size(), numEvents);
+    for (size_t i=0; i<ve.size()-1; i++)
+      TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
+  }
+
+
+  void test_sortAll_ByTime()
   {
     EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress * prog = NULL;
@@ -695,11 +750,16 @@ public:
     test_in->sortAll(PULSETIME_SORT, prog);
 
     EventWorkspace_sptr outWS = test_in;
-    std::vector<TofEvent> ve = outWS->getEventList(0).getEvents();
-    TS_ASSERT_EQUALS( ve.size(), NUMBINS);
-     for (size_t i=0; i<ve.size()-1; i++)
-      TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
+    for (int wi=0; wi<NUMPIXELS; wi++)
+    {
+      std::vector<TofEvent> ve = outWS->getEventList(wi).getEvents();
+      TS_ASSERT_EQUALS( ve.size(), NUMBINS);
+       for (size_t i=0; i<ve.size()-1; i++)
+        TS_ASSERT_LESS_THAN_EQUALS( ve[i].pulseTime(), ve[i+1].pulseTime());
+    }
   }
+
+
 
 
   /** Nov 29 2010, ticket #1974

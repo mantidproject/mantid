@@ -59,6 +59,8 @@ namespace Kernel
 
     void joinAll();
 
+    static size_t getNumPhysicalCores();
+
 
   protected:
     /// Number of cores used
