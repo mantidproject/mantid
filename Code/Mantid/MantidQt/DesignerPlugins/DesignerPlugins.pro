@@ -26,12 +26,14 @@ SRCDIR = src
 SOURCES = \
   $$SRCDIR/PluginCollectionInterface.cpp\
   $$SRCDIR/FileFinderPlugin.cpp \
-  $$SRCDIR/InstrumentSelectorPlugin.cpp
+  $$SRCDIR/InstrumentSelectorPlugin.cpp \
+  $$SRCDIR/WorkspaceSelectorPlugin.cpp
  
 HEADERS = \
   $$HEADERDIR/PluginCollectionInterface.h\
   $$HEADERDIR/FileFinderPlugin.h \
-  $$HEADERDIR/InstrumentSelectorPlugin.h
+  $$HEADERDIR/InstrumentSelectorPlugin.h \
+  $$HEADERDIR/WorkspaceSelectorPlugin.h
 
 INCLUDEPATH += inc
   

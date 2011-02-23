@@ -37,7 +37,8 @@ SOURCES = \
   $$SRCDIR/InstrumentSelector.cpp  \
   $$SRCDIR/ICatUtils.cpp  \
   $$SRCDIR/ICatAdvancedSearch.cpp \
-  $$SRCDIR/RangeSelector.cpp
+  $$SRCDIR/RangeSelector.cpp \
+  $$SRCDIR/WorkspaceSelector.cpp
   
  
 HEADERS = \
@@ -55,7 +56,8 @@ HEADERS = \
   $$HEADERDIR/InstrumentSelector.h   \
   $$HEADERDIR/ICatUtils.h  \
   $$HEADERDIR/ICatAdvancedSearch.h \
-  $$HEADERDIR/RangeSelector.h
+  $$HEADERDIR/RangeSelector.h \
+  $$HEADERDIR/WorkspaceSelector.h
   
 UI_DIR = $$HEADERDIR
 
