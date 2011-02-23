@@ -101,10 +101,10 @@ class InstrumentDescription(BaseScriptElement):
             raise RuntimeError, "Trying to generate reduction script without a data file."
         
         # Frame skipping
-        if self.frame_skipping:
-            script += "FrameSkipping(True)\n"
-        else:
-            script += "FrameSkipping(False)\n"
+        #if self.frame_skipping:
+        #    script += "FrameSkipping(True)\n"
+        #else:
+        #    script += "FrameSkipping(False)\n"
         
         # Normalization
         if self.normalization == InstrumentDescription.NORMALIZATION_NONE:

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Wed Feb 16 13:43:14 2011
+# Created: Wed Feb 23 10:58:01 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -264,13 +264,9 @@ class Ui_Frame(object):
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem4)
         self.gridLayout.addLayout(self.horizontalLayout_3, 6, 1, 1, 1)
-        self.frame_skipping_chk = QtGui.QCheckBox(self.reduction_options_groupbox)
-        self.frame_skipping_chk.setChecked(False)
-        self.frame_skipping_chk.setObjectName("frame_skipping_chk")
-        self.gridLayout.addWidget(self.frame_skipping_chk, 7, 0, 1, 1)
         self.sampleDetectorDistanceMmLabel = QtGui.QLabel(self.reduction_options_groupbox)
         self.sampleDetectorDistanceMmLabel.setObjectName("sampleDetectorDistanceMmLabel")
-        self.gridLayout.addWidget(self.sampleDetectorDistanceMmLabel, 8, 0, 1, 1)
+        self.gridLayout.addWidget(self.sampleDetectorDistanceMmLabel, 7, 0, 1, 1)
         self.sample_dist_edit = QtGui.QLineEdit(self.reduction_options_groupbox)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -280,7 +276,7 @@ class Ui_Frame(object):
         self.sample_dist_edit.setMinimumSize(QtCore.QSize(80, 0))
         self.sample_dist_edit.setMaximumSize(QtCore.QSize(80, 16777215))
         self.sample_dist_edit.setObjectName("sample_dist_edit")
-        self.gridLayout.addWidget(self.sample_dist_edit, 8, 1, 1, 1)
+        self.gridLayout.addWidget(self.sample_dist_edit, 7, 1, 1, 1)
         self.verticalLayout_2.addLayout(self.gridLayout)
         self.verticalLayout.addWidget(self.reduction_options_groupbox)
         spacerItem5 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
@@ -327,8 +323,6 @@ class Ui_Frame(object):
         self.transmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter transmission value.", None, QtGui.QApplication.UnicodeUTF8))
         self.plus_minus_label.setText(QtGui.QApplication.translate("Frame", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.transmission_error_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter error on transmission.", None, QtGui.QApplication.UnicodeUTF8))
-        self.frame_skipping_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to assume frame-skipping during reduction.", None, QtGui.QApplication.UnicodeUTF8))
-        self.frame_skipping_chk.setText(QtGui.QApplication.translate("Frame", "Frame skipping", None, QtGui.QApplication.UnicodeUTF8))
         self.sampleDetectorDistanceMmLabel.setText(QtGui.QApplication.translate("Frame", "Sample-detector distance [mm]", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_dist_edit.setToolTip(QtGui.QApplication.translate("Frame", "Sample-detector distance [mm].", None, QtGui.QApplication.UnicodeUTF8))
 

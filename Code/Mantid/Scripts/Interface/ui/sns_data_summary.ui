@@ -672,26 +672,13 @@ in each direction and will create 9 sub-pixels.</string>
          </layout>
         </item>
         <item row="7" column="0">
-         <widget class="QCheckBox" name="frame_skipping_chk">
-          <property name="toolTip">
-           <string>Select to assume frame-skipping during reduction.</string>
-          </property>
-          <property name="text">
-           <string>Frame skipping</string>
-          </property>
-          <property name="checked">
-           <bool>false</bool>
-          </property>
-         </widget>
-        </item>
-        <item row="8" column="0">
          <widget class="QLabel" name="sampleDetectorDistanceMmLabel">
           <property name="text">
            <string>Sample-detector distance [mm]</string>
           </property>
          </widget>
         </item>
-        <item row="8" column="1">
+        <item row="7" column="1">
          <widget class="QLineEdit" name="sample_dist_edit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">

@@ -125,7 +125,7 @@ class SNSInstrumentWidget(BaseWidget):
         self._summary.solid_angle_chk.setChecked(state.solid_angle_corr)
         
         # Frame skipping
-        self._summary.frame_skipping_chk.setChecked(state.frame_skipping)
+        #self._summary.frame_skipping_chk.setChecked(state.frame_skipping)
         
         # Sensitivity correction
         self._summary.sensitivity_file_edit.setText(QtCore.QString(state.sensitivity_data))
@@ -176,7 +176,7 @@ class SNSInstrumentWidget(BaseWidget):
         m.solid_angle_corr = self._summary.solid_angle_chk.isChecked()
         
         # Frame skipping
-        m.frame_skipping = self._summary.frame_skipping_chk.isChecked()
+        #m.frame_skipping = self._summary.frame_skipping_chk.isChecked()
         
         # Sensitivity correction
         m.sensitivity_corr = self._summary.sensitivity_chk.isChecked() 

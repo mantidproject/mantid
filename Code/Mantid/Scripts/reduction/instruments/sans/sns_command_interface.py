@@ -20,7 +20,8 @@ def EQSANS():
     AzimuthalAverage()
     
 def FrameSkipping(value=False):
-    ReductionSingleton().set_frame_skipping(value)
+    raise RuntimeError, "The FrameSkipping command is no longer needed and no longer supported" 
+    #ReductionSingleton().set_frame_skipping(value)
     
 def DarkCurrent(datafile):
     ReductionSingleton().set_dark_current_subtracter(sns_reduction_steps.SubtractDarkCurrent(datafile))
