@@ -124,7 +124,7 @@ namespace Mantid
     /** Loads, checks and passes back the values passed to the algorithm
      * @param whiteBeam1 :: A white beam vanadium spectrum that will be used to check detector efficiency variations
      * @param whiteBeam2 :: The other white beam vanadium spectrum from the same instrument to use for comparison
-     * @param vari :: The maximum fractional variation above the median that is allowed for god detectors
+     * @param variation :: The maximum fractional variation above the median that is allowed for god detectors
      * @param minSpec :: Index number of the first spectrum to use
      * @param maxSpec :: Index number of the last spectrum to use
      * @throw invalid_argument if there is an incapatible property value and so the algorithm can't continue
@@ -194,6 +194,7 @@ namespace Mantid
      * @param variation :: The allowed variation in terms of number of medians, i.e those spectra where
      * the ratio of the counts outside this range will fail the tests and will be masked on counts1
      * @param badIndices :: A set of indexs that mark bad spectra to skip in the tests
+     * @return number of detectors for which tests failed
      */
     int DetectorEfficiencyVariation::doDetectorTests(API::MatrixWorkspace_const_sptr counts1, 
 						     API::MatrixWorkspace_const_sptr counts2,

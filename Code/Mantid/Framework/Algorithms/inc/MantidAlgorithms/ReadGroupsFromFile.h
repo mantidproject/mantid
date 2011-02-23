@@ -94,8 +94,7 @@ private:
   /// Execution code
   void exec();
   /// Read a grouping file and construct the calibration map
-  /// @param groupingFileName :: (filename extension .cal, including path)
-  void readGroupingFile(const std::string& groupingFileName);
+  void readGroupingFile(const std::string& filename);
   /// Read an XML Grouping File
   void readXMLGroupingFile(const std::string& filename);
   /// Sub-algorithm to Load the associated empty instrument

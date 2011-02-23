@@ -121,64 +121,64 @@ namespace Mantid
       PARALLEL_FOR1(input)
       for (int i = 0; i < nhists; ++i)
       {
-	PARALLEL_START_INTERUPT_REGION
-	  
-	IDetector_sptr det;
-	try
-	{
-	  det = input->getDetector(i);
-	}
-	catch (Kernel::Exception::NotFoundError&)
-	{
-	  PARALLEL_CRITICAL(DetectorDiagnostic_median_a)
-	  {
-	    badIndices.insert(i);
-	  }
-	  continue;
-	}
-	// If we're already masked skip it
-	if( det->isMasked() )
-	{
-	  PARALLEL_CRITICAL(DetectorDiagnostic_median_b)
-	  {
-	    badIndices.insert(i);
-	  }
-	  continue;
-	}
+        PARALLEL_START_INTERUPT_REGION
 
-	const double yValue = input->readY(i)[0];
-	// We shouldn't have negative numbers of counts, probably a SolidAngle correction problem
-	if ( yValue  < 0 )
-	{
-	  g_log.debug() << "Negative count rate found for spectrum index " << i << std::endl;
-	  throw std::out_of_range("Negative number of counts found, could be corrupted raw counts or solid angle data");
-	}
-	// There has been a divide by zero, likely to be due to a detector with zero solid angle
-	if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
-	{
-	  PARALLEL_CRITICAL(DetectorDiagnostic_median_c)
-	  {
-	    badIndices.insert(i);
-	  }
-	  continue;
-	}
-	// Now we have a good value
-	PARALLEL_CRITICAL(DetectorDiagnostic_median_d)
-	{
-	  goodValues.push_back(yValue);
-	}
-	
-	PARALLEL_END_INTERUPT_REGION
+        IDetector_sptr det;
+        try
+        {
+          det = input->getDetector(i);
+        }
+        catch (Kernel::Exception::NotFoundError&)
+        {
+          PARALLEL_CRITICAL(DetectorDiagnostic_median_a)
+          {
+            badIndices.insert(i);
+          }
+          continue;
+        }
+        // If we're already masked skip it
+        if( det->isMasked() )
+        {
+          PARALLEL_CRITICAL(DetectorDiagnostic_median_b)
+          {
+            badIndices.insert(i);
+          }
+          continue;
+        }
+
+        const double yValue = input->readY(i)[0];
+        // We shouldn't have negative numbers of counts, probably a SolidAngle correction problem
+        if ( yValue  < 0 )
+        {
+          g_log.debug() << "Negative count rate found for spectrum index " << i << std::endl;
+          throw std::out_of_range("Negative number of counts found, could be corrupted raw counts or solid angle data");
+        }
+        // There has been a divide by zero, likely to be due to a detector with zero solid angle
+        if( boost::math::isinf(yValue) || boost::math::isnan(yValue) )
+        {
+          PARALLEL_CRITICAL(DetectorDiagnostic_median_c)
+          {
+            badIndices.insert(i);
+          }
+          continue;
+        }
+        // Now we have a good value
+        PARALLEL_CRITICAL(DetectorDiagnostic_median_d)
+        {
+          goodValues.push_back(yValue);
+        }
+
+        PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
       // We need a sorted array to calculate the median
       std::sort(goodValues.begin(), goodValues.end());
       double median = gsl_stats_median_from_sorted_data( &goodValues[0], 1, goodValues.size() );
-  
+
       if ( median < 0 || median > DBL_MAX/10.0 )
       {
-	throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
+        throw std::out_of_range("The calculated value for the median was either negative or unreliably large");
       }
       return median;
     }
@@ -186,13 +186,14 @@ namespace Mantid
     /** 
      * Convert to a distribution
      * @param workspace :: The input workspace to convert to a count rate
+     * @return distribution workspace with equiv. data
      */
     API::MatrixWorkspace_sptr DetectorDiagnostic::convertToRate(API::MatrixWorkspace_sptr workspace)
     {
       if( workspace->isDistribution() )
       {
-	g_log.information() << "Workspace already contains a count rate, nothing to do.\n";
-	return workspace;
+        g_log.information() << "Workspace already contains a count rate, nothing to do.\n";
+        return workspace;
       }
 
       g_log.information("Calculating time averaged count rates");

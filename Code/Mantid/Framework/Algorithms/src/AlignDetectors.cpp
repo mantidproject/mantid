@@ -39,6 +39,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants
  * @param samplePos: position of the sample
  * @param det: Geometry object representing the detector (position of the pixel)
  * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
+ * @return conversion factor for pixel
  */
 double AlignDetectors::calcConversion(const double l1,
                       const Geometry::V3D &beamline,
@@ -135,9 +136,9 @@ void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
 /**
  * Make a map of the conversion factors between tof and D-spacing
  * for all pixel IDs in a workspace.
- * @params: inputWS: the workspace containing the instrument geometry
- *    of interest.
- * @params: offsets: map between pixelID and offset (from the calibration file)
+ * @param inputWS the workspace containing the instrument geometry of interest.
+ * @param offsets map between pixelID and offset (from the calibration file)
+ * @return map of conversion factors between TOF and dSpacing
  */
 std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::map<int,double> &offsets)

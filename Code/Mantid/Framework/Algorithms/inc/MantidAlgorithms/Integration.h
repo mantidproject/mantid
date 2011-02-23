@@ -69,7 +69,7 @@ private:
   void init();
   void exec();
   void execEvent();
-
+  /// Input event workspace
   DataObjects::EventWorkspace_const_sptr inputEventWS;
 
   /// The value in X to start the integration from

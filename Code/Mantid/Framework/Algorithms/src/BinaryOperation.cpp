@@ -886,15 +886,6 @@ namespace Mantid
       m_useHistogramForRhsEventWorkspace = false;
     }
 
-
-
-
-
-
-
-
-
-
     //---------------------------------------------------------------------------------------------
     /** Build up an BinaryOperationTable for performing a binary operation
      * e.g. lhs = (lhs + rhs)
@@ -903,12 +894,12 @@ namespace Mantid
      *
      * @param lhs :: matrix workspace in which the operation is being done.
      * @param rhs :: matrix workspace on the right hand side of the operand
-     * @param lhs_det_to_wi :: map from detector ID to workspace index for the RHS workspace.
+     * @return map from detector ID to workspace index for the RHS workspace.
      *        NULL if there is not a 1:1 mapping from detector ID to workspace index (e.g more than one detector per pixel).
      */
     BinaryOperation::BinaryOperationTable * BinaryOperation::buildBinaryOperationTable(MatrixWorkspace_const_sptr lhs, MatrixWorkspace_const_sptr rhs)
     {
-        //An addition table is a list of pairs:
+      //An addition table is a list of pairs:
       //  First int = workspace index in the EW being added
       //  Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
       BinaryOperationTable * table = new BinaryOperationTable();

@@ -134,12 +134,12 @@ void DspacemaptoCal::exec()
 /**
  * Make a map of the conversion factors between tof and D-spacing
  * for all pixel IDs in a workspace.
- * @params: inputWS: the workspace containing the instrument geometry
+ * @param inputWS the workspace containing the instrument geometry
  *    of interest.
- * @params: DFileName: name of dspacemap file
- * @params: calFileName: name of calibration/grouping file
- * @params: offsets: map between pixelID and offset (from the calibration file)
- * @params: groups: map between pixelID and group (from the calibration file)
+ * @param DFileName name of dspacemap file
+ * @param calFileName name of calibration/grouping file
+ * @param offsets map between pixelID and offset (from the calibration file)
+ * @param groups map between pixelID and group (from the calibration file)
  */
 void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   const std::string DFileName, std::string calFileName,
@@ -199,12 +199,12 @@ void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorksp
 /**
  * Make a map of the conversion factors between tof and D-spacing
  * for all pixel IDs in a workspace.
- * @params: inputWS: the workspace containing the instrument geometry
+ * @param inputWS the workspace containing the instrument geometry
  *    of interest.
- * @params: DFileName: name of dspacemap file
- * @params: calFileName: name of calibration/grouping file
- * @params: offsets: map between pixelID and offset (from the calibration file)
- * @params: groups: map between pixelID and group (from the calibration file)
+ * @param DFileName name of dspacemap file
+ * @param calFileName name of calibration/grouping file
+ * @param offsets map between pixelID and offset (from the calibration file)
+ * @param groups map between pixelID and group (from the calibration file)
  */
 void DspacemaptoCal::CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   std::string calFileName, std::map<int, double> & vulcan,
@@ -341,7 +341,9 @@ void DspacemaptoCal::readVulcanAsciiFile(const std::string& fileName, std::map<i
 /** Structure of the vulcan binary file */
 struct VulcanCorrectionFactor
 {
+  /// ID for pixel
   double pixelID;
+  /// Correction factor for pixel
   double factor;
 };
 

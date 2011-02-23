@@ -19,22 +19,24 @@ namespace Mantid
     //------------------------------------------------------------------------------
     
     /**
-     * Returns true if the algorithm needs to be run. 
+     * Returns true if the algorithm needs to be run.
+     * @param inputWS pointer to input workspace
      * @returns True if the input workspace needs to be run through this algorithm
      */
     bool ConvertToPointData::isProcessingRequired(const MatrixWorkspace_sptr inputWS) const
     {
       if( !inputWS->isHistogramData() )
       {
-     	g_log.information() << "Input workspace already contains point data. "
-     			    << "OutputWorkspace set to InputWorkspace value.\n";
-	return false;
+        g_log.information() << "Input workspace already contains point data. "
+          << "OutputWorkspace set to InputWorkspace value.\n";
+        return false;
       }
       return true;
     }
     
     /** 
      * Checks the input workspace's X data structure is logical.
+     * @param inputWS pointer to input workspace
      * @returns True if the X structure of the given input is what we expect, i.e. NX=NY+1
      */
     bool ConvertToPointData::isWorkspaceLogical(const MatrixWorkspace_sptr inputWS) const
@@ -43,15 +45,16 @@ namespace Mantid
       const int numBoundaries = inputWS->readX(0).size();
       if( numBoundaries != (numBins + 1) )
       {
-     	g_log.error() << "The number of bin boundaries must be one greater than the number of bins. "
-     		      << "Found nbins=" << numBins << " and nBoundaries=" << numBoundaries << "\n";
-	return false;
+        g_log.error() << "The number of bin boundaries must be one greater than the number of bins. "
+          << "Found nbins=" << numBins << " and nBoundaries=" << numBoundaries << "\n";
+        return false;
       }
       return true;
     }
 
     /**
      * Returns the size of the new X vector
+     * @param inputWS pointer to input workspace
      * @returns An integer giving the size of the new X vector
      */
     int ConvertToPointData::getNewXSize(const MatrixWorkspace_sptr inputWS) const

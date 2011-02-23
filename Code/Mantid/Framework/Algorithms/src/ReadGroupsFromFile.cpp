@@ -36,7 +36,7 @@ namespace Algorithms
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(ReadGroupsFromFile)
 
-            using namespace Kernel;
+  using namespace Kernel;
   using API::WorkspaceProperty;
   using API::MatrixWorkspace_sptr;
   using API::MatrixWorkspace;

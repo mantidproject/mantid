@@ -20,21 +20,23 @@ namespace Mantid
     
     /**
      * Returns true if the algorithm needs to be run. 
+     * @param inputWS pointer to input workspace
      * @returns True if the input workspace needs to be run through this algorithm
      */
     bool ConvertToHistogram::isProcessingRequired(const MatrixWorkspace_sptr inputWS) const
     {
       if( inputWS->isHistogramData() )
       {
-     	g_log.information() << "Input workspace already contains histogram data. "
-     			    << "OutputWorkspace set to InputWorkspace value.\n";
-	return false;
+        g_log.information() << "Input workspace already contains histogram data. "
+          << "OutputWorkspace set to InputWorkspace value.\n";
+        return false;
       }
       return true;
     }
     
     /** 
      * Checks the input workspace's X data structure is logical.
+     * @param inputWS pointer to input workspace
      * @returns True if the X structure of the given input is what we expect, i.e. NX=NY+1
      */
     bool ConvertToHistogram::isWorkspaceLogical(const MatrixWorkspace_sptr inputWS) const
@@ -44,15 +46,16 @@ namespace Mantid
       const int numXPoints = inputWS->readX(0).size();
       if( numYPoints != numXPoints )
       {
-    	g_log.error() << "The number of Y data points must equal the number of X data points on the InputWorkspace. "
-    		      << "Found NY=" << numYPoints << " and NX=" << numXPoints << "\n";
-	return false;
+        g_log.error() << "The number of Y data points must equal the number of X data points on the InputWorkspace. "
+          << "Found NY=" << numYPoints << " and NX=" << numXPoints << "\n";
+        return false;
       }
       return true;
     }
 
     /**
      * Returns the size of the new X vector
+     * @param inputWS pointer to input workspace
      * @returns An integer giving the size of the new X vector
      */
     int ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const
@@ -75,7 +78,7 @@ namespace Mantid
       // Handle the front and back points outside
       for( size_t i = 0; i < numPoints - 1; ++i )
       {
-	outputX[i+1] = 0.5*(inputX[i+1] + inputX[i]);
+        outputX[i+1] = 0.5*(inputX[i+1] + inputX[i]);
       }
       // Now deal with the end points
       outputX[0] = inputX.front() - (outputX[1] - inputX.front());
