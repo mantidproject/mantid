@@ -63,7 +63,7 @@ namespace Mantid
 			virtual void getDownloadURL(const long long& fileid,std::string & fileLocation);
 			/// keep alive
 			virtual void keepAlive();
-			//keep alive in minutes
+			/// keep alive in minutes
 			virtual int keepAliveinminutes(); 
 		
 		};

@@ -437,10 +437,12 @@ namespace Mantid
 
 			return outputws;
 		}
-		/** This method sets the request parameters for the investigations includes
-		 * @param invstId :: investigation id 
-		 * @param include :: enum parameter to retrieve dat from DB
-		 * @param request :: request object
+
+		/**
+    * This method sets the request parameters for the investigations includes
+		* @param invstId :: investigation id 
+		* @param include :: enum parameter to retrieve dat from DB
+		* @param request :: request object
 		*/
 		void CICatHelper::setReqParamforInvestigationIncludes(long long invstId,ns1__investigationInclude include,ns1__getInvestigationIncludes& request)
 		{
@@ -450,11 +452,12 @@ namespace Mantid
   		    *request.investigationId=invstId;
 
 		}
-	   /**This method calls ICat API getInvestigationIncludes and returns investigation details for a given investigation Id
+	  /**
+    * This method calls ICat API getInvestigationIncludes and returns investigation details for a given investigation Id
 		* @param invstId :: investigation id
 		* @param include :: enum parameter for selecting the response data from the db.
 		* @param responsews_sptr :: table workspace to save the response data
-		* @param returns :: zero if success
+		* @returns zero if success otherwise error code
 		*/
 		int CICatHelper::getDataFiles(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
@@ -510,11 +513,12 @@ namespace Mantid
 			}
 			return ret_advsearch;
 		}
-		/** This method loops through the response return_vector and saves the datafile details to a table workspace
+
+		 /**
+     * This method loops through the response return_vector and saves the datafile details to a table workspace
 		 * @param response :: const reference to response object
-		 * @param bloadonlyData :: boolean to load only data files
 		 * @param outputws :: shared pointer to table workspace which stores the data
-		*/
+		 */
 		void  CICatHelper::saveInvestigationIncludesResponse(const ns1__getInvestigationIncludesResponse& response,
 			API::ITableWorkspace_sptr& outputws)
 		{
@@ -609,7 +613,7 @@ namespace Mantid
 
 		}
 
-	    /**This checks the datafile boolean  selected
+	   /**This checks the datafile boolean  selected
 		 * @param fileName :: pointer to file name
 		 * @return bool - returns true if it's a raw file or nexus file
 		 */
@@ -633,6 +637,7 @@ namespace Mantid
 		 * @param invstId :: investigation id
 		 * @param include :: enum parameter for selecting the response data from iact db.
 		 * @param responsews_sptr :: table workspace to save the response data
+     * @returns an integer zero if success if not an error number.
 		 */
 		int CICatHelper::doDataSetsSearch(long long invstId,ns1__investigationInclude include,
 			               API::ITableWorkspace_sptr& responsews_sptr)
@@ -807,7 +812,7 @@ namespace Mantid
 
 		
 		/**This method calls ICat api listruments and returns the list of instruments a table workspace
-		 *@param investTypes ::  list of investigationtypes
+		  *@param investTypes ::  list of investigationtypes
 		 */
 		void  CICatHelper::listInvestigationTypes(std::vector<std::string>& investTypes)
 		{		
@@ -858,9 +863,10 @@ namespace Mantid
 	    	 investTypes.assign(response.return_.begin(),response.return_.end());
 		}
 
-	 		
-
-		/// This method creates table workspace
+  
+	  /** This method creates table workspace
+		  * @returns the table workspace created
+		 */
 		API::ITableWorkspace_sptr CICatHelper::createTableWorkspace()
 		{
 			//create table workspace
@@ -879,7 +885,12 @@ namespace Mantid
 			}
 			return outputws;
 		}
-        /// This method calls ICat api logoutand disconnects from ICat DB
+    
+
+    /** 
+    *This method calls ICat api logout and disconnects from ICat DB
+    * @returns zero if successful otherwise error code
+    */
 		int CICatHelper::doLogout()
 		{
 			ICATPortBindingProxy icat;
@@ -912,7 +923,8 @@ namespace Mantid
 			return ret;
 		}
 
-		/**This method calls ICat api getmyinvestigations and do returns the investigations of the logged in user
+		 /**
+     * This method calls ICat api getmyinvestigations and do returns the investigations of the logged in user
 		 * @param ws_sptr :: shared pointer to table workspace which stores the investigations search result
 		 */
 		void CICatHelper::doMyDataSearch(API::ITableWorkspace_sptr& ws_sptr)
@@ -945,9 +957,7 @@ namespace Mantid
 
 			int ret=icat.getMyInvestigationsIncludes(&request,&response);
 			if(ret!=0)
-			{
-				//CErrorHandling::throwErrorMessages(icat);
-
+			{				
          if(isvalidSession())
 				 {					
 					 CErrorHandling::throwErrorMessages(icat);

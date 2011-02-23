@@ -13,8 +13,9 @@ namespace Mantid
   * This algorithm does Icat search and returns the investigations record
 
     Required Properties:
-    <UL> OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
-    <LI> 
+    <UL>
+    <LI>  OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
+    <LI>  isValid         - Boolean option used to check the validity of login session
     </UL>
    
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 

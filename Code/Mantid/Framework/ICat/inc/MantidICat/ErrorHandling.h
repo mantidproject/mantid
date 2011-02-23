@@ -54,6 +54,7 @@ namespace Mantid
 		{
 
 		private:
+      /// error string
 			std::string m_error;
 		public:
 			/// constructor

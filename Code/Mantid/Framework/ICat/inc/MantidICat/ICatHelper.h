@@ -133,10 +133,10 @@ namespace Mantid
 			void saveInvestigatorsNameandSample(ns1__investigation* investigation,API::TableRow& t);
              
 
-			/* This is a template method to save data to table workspace
+			/** This is a template method to save data to table workspace
 			 * @param input :: pointer to input value
 			 * @param t :: table row reference
-            */
+       */
 			template<class T>
 			void savetoTableWorkspace(const T* input,Mantid::API::TableRow &t)
 			{

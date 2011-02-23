@@ -12,80 +12,76 @@ namespace Mantid
 			/// Destructor
 			CSearchParam::~CSearchParam(){}
 			/** This method  sets start date
-             *  @param startRun :: start run number
+        *  @param startRun start run number
 			 */
 			void CSearchParam::setRunStart(const double& startRun){m_startRun=startRun;}
 			/** This method  sets end date
-           	 *  @param endRun :: end run number
+        *  @param endRun  end run number
 			 */
 			void CSearchParam::setRunEnd(const double& endRun){m_endRun=endRun;}
 			/** This method  sets isntrument name
-           	 *  @param instrName :: name of the instrument
+           	 *  @param instrName  name of the instrument
 			 */
 			void CSearchParam::setInstrument(const std::string& instrName){m_instrName=instrName;}
 			/** This method  sets the start date
-           	 *  @param startDate :: start date for search
+       *  @param startDate  start date for search
 			 */
 			void CSearchParam::setStartDate(const time_t& startDate){m_startDate=startDate;}
 			/** This method  sets the end date
-           	 *  @param endDate :: end date for search
+        *  @param endDate end date for search
 			 */
 			void CSearchParam::setEndDate(const time_t& endDate){m_endDate=endDate;}
 			/** This method  sets the CaseSensitive
-           	 *  @param setCaseSensitive :: flag to do case sensitive  search
+        *  @param bCase  flag to do case sensitive  search
 			 */
 			void CSearchParam::setCaseSensitive(bool bCase){m_caseSensitive=bCase;}
+			
 			/** This method  sets the InvestigationInclude
-           	 *  @param include :: enum for selecting dat from the icat db
-			 */
-			//void CSearchParam::setInvestigationInclude(const ns1__investigationInclude& include){m_include=include;}
-
-			/** This method  sets the InvestigationInclude
-           	 *  @param include :: enum for selecting data from the icat db
+        *  @param keywords keywords used for search
 			 */
 			void CSearchParam::setKeywords(const std::string& keywords){m_keywords=keywords;}
 
 			/** This method  sets investigationName used for searching
-           	 *  @param investigation :: name
+        *  @param instName  name of the investigation
 			 */
 			void  CSearchParam::setInvestigationName(const std::string& instName){ m_investigationName = instName;}
 
 			/** This method  sets investigationAbstract used for searching
-           	 *  @param investigation :: abstract
+        *  @param invstabstract  abstract of the investigation
 			 */
 			 void CSearchParam::setInvestigationAbstract(const std::string& invstabstract){ m_investigationAbstract=invstabstract;}
 
 			/** This method  sets sample used for searching
-           	 *  @param samplename:: 
+        *  @param sampleName name of the sample
 			 */
 			void CSearchParam::setSampleName(const std::string& sampleName){ m_sampleName = sampleName;}
 
 			/** This method  sets Investigator surname
-           	 *@param surname :: of the investigator
+        *@param investigatorName  surname of the investigator
 			 */
 			void  CSearchParam::setInvestigatorSurName(const std::string& investigatorName){m_investigatorSurname = investigatorName;}
 
 			/** This method  sets Rb Number
-           	 *@param Rb :: number
+        *@param RbNumber rutherford board number
 			 */
 			 void CSearchParam::setRbNumber(const std::string& RbNumber){m_RbNumber = RbNumber;}
 
 			/** This method  sets Investigation Type
-           	 *@param Rb :: number
+        * @param invstType type of investigation
 			 */
 			 void CSearchParam::setInvestigationType(const std::string& invstType){m_investigationType = invstType;}
 
 			/** This method  sets datafileName
-           	 *@param m_datafileName:: 
+        *@param datafileName name of the file
 			 */
 			void CSearchParam::setDatafileName(const std::string& datafileName ){ m_datafileName =datafileName;}
 
 			/** This method  returns the start run number
-           	 *  @returns  run start number
+        *  @returns  run start number
 			 */
 			const double& CSearchParam::getRunStart()const {return m_startRun; }
 			/** This method  returns the end run number
-           	 *  @returns  run end number
+        *  @returns  run end number
 			 */
 			const double& CSearchParam::getRunEnd() const {return m_endRun;}
 			/** This method  returns the instrument name
@@ -93,7 +89,7 @@ namespace Mantid
 			 */
 			const std::string& CSearchParam::getInstrument() const{return m_instrName;}
 			/**This method  returns the start date
-           	 * @returns  start date
+        * @returns  start date
 			 */
            
 			const time_t& CSearchParam::getStartDate()const{return m_startDate;}
@@ -101,17 +97,15 @@ namespace Mantid
            	 *  @returns end date for investigations serch
 			 */
 			const time_t& CSearchParam::getEndDate()const{return m_endDate;}
+
 			/** This method  returns case sensitive flag
-           	 *  @returns  case sensitive flag
+        *  @returns  case sensitive flag
 			 */
 			bool CSearchParam::getCaseSensitive()const{return m_caseSensitive;}
 			/** This method  returns the enum for data search in icat db
-           	 *  @returns  investigation include
+        *  @returns  investigation include
 			 */
-			//const ns1__investigationInclude& CSearchParam::getInvestigationInclude(){return m_include;}
-			/** This method  returns keywords used for searching
-           	 *  @returns keywords
-			 */
+			
 			const std::string& CSearchParam::getKeywords()const{return m_keywords;}
 
 			/** This method  returns investigationName used for searching
@@ -120,32 +114,32 @@ namespace Mantid
 			const std::string& CSearchParam::getInvestigationName()const{return m_investigationName;}
 
 			/** This method  returns investigationAbstract used for searching
-           	 *  @returns investigation abstract
+        *  @returns investigation abstract
 			 */
 			const std::string&  CSearchParam::getInvestigationAbstract()const{return m_investigationAbstract;}
 
 			/** This method  returns sample used for searching
-           	 *  @returns samplename
+        *  @returns samplename
 			 */
 			const std::string& CSearchParam::getSampleName()const{return m_sampleName;}
 
 			/** This method  returns Investigator surname
-           	 *@returns surname of the investigator
+        *@returns surname of the investigator
 			 */
 			const std::string& CSearchParam::getInvestigatorSurName()const{return m_investigatorSurname;}
 
 			/** This method  returns Rb Number
-           	 *@returns Rb number
+        * @returns Rb number
 			 */
 			const std::string& CSearchParam::getRbNumber()const{return m_RbNumber;}
 
 			/** This method  returns Investigation Type
-           	 *@returns Rb number
+        @ returns type of the investigation
 			 */
 			const std::string& CSearchParam::getInvestigationType()const{return m_investigationType;}
 
 			/** This method  returns datafileName
-           	 *@returns m_datafileName
+        * @returns name of the data file
 			 */
 			const std::string& CSearchParam::getDatafileName()const{return m_datafileName;}
 
