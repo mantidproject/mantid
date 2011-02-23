@@ -235,9 +235,9 @@ public:
   void setOptionalMessage(const std::string optionalMessage) { m_OptionalMessage = optionalMessage;}
 
   ///setting the child start progress
-  void setChildStartProgress(const double startProgress){m_startChildProgress=startProgress;}
+  void setChildStartProgress(const double startProgress)const{m_startChildProgress=startProgress;}
   /// setting the child end progress
-  void setChildEndProgress(const double endProgress){m_endChildProgress=endProgress;}
+  void setChildEndProgress(const double endProgress)const{m_endChildProgress=endProgress;}
 
 protected:
 
@@ -340,8 +340,8 @@ private:
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
 
-  double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
-  double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
+  mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
+  mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
 
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
 

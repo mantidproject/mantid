@@ -1345,10 +1345,10 @@ void FitPropertyBrowser::getFitResults()
 
     if (ws)
     {
-      try
+      Mantid::API::TableRow row = ws->getFirstRow();
+      do
       {
-        Mantid::API::TableRow row = ws->getFirstRow();
-        do
+        try
         {
           std::string name;
           double value;
@@ -1360,13 +1360,13 @@ void FitPropertyBrowser::getFitResults()
           }
           compositeFunction()->setParameter(name,value);
         }
-        while(row.next());
-        updateParameters();
+        catch(...)
+        {
+          // do nothing
+        }
       }
-      catch(...)
-      {
-        // do nothing
-      }
+      while(row.next());
+      updateParameters();
     }
   }
 }

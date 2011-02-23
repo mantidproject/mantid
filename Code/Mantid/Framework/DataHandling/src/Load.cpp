@@ -236,7 +236,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
       }     
-      IDataFileChecker_sptr loader = createLoader(loaderName);
+      IDataFileChecker_sptr loader = createLoader(loaderName,0,1);
       g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm
       const std::vector<Kernel::Property*> & loader_props = loader->getProperties();
@@ -298,8 +298,8 @@ namespace Mantid
       if (startProgress >= 0. && endProgress > startProgress && endProgress <= 1.)
       {
         loader->addObserver(m_progressObserver);
-        loader->setChildStartProgress(startProgress);
-        loader->setChildEndProgress(endProgress);
+        setChildStartProgress(startProgress);
+        setChildEndProgress(endProgress);
       }
       return loader;
     }

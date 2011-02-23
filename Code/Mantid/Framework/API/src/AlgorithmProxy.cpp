@@ -214,12 +214,12 @@ bool AlgorithmProxy::executeAsyncImpl(const Poco::Void & dummy)
   return m_isExecuted;
 }
  ///setting the child start progress
- void AlgorithmProxy::setChildStartProgress(const double startProgress)
+ void AlgorithmProxy::setChildStartProgress(const double startProgress)const
  {
    m_alg->setChildStartProgress(startProgress);
  }
  /// setting the child end progress
- void AlgorithmProxy::setChildEndProgress(const double endProgress)
+ void AlgorithmProxy::setChildEndProgress(const double endProgress)const
  {
    m_alg->setChildEndProgress(endProgress);
  }

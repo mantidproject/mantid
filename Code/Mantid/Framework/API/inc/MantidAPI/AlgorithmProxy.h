@@ -107,9 +107,9 @@ namespace Mantid
       bool isLogging() const { return m_isLoggingEnabled; }
 
       ///setting the child start progress
-      void setChildStartProgress(const double startProgress);
+      void setChildStartProgress(const double startProgress)const;
         /// setting the child end progress
-      void setChildEndProgress(const double endProgress);
+      void setChildEndProgress(const double endProgress)const;
       
 
     private:

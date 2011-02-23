@@ -36,7 +36,7 @@ namespace Mantid
     LoadRawHelper::LoadRawHelper() :
     isisRaw(new ISISRAW2),
       m_list(false),m_spec_list(),m_spec_min(0),
-      m_spec_max(EMPTY_INT()),m_specTimeRegimes(),m_bmspeclist(false)
+      m_spec_max(EMPTY_INT()),m_specTimeRegimes(),m_prog(0),m_bmspeclist(false)
     {      
     }
 

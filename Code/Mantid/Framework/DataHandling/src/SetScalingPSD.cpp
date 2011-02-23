@@ -309,7 +309,8 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
   double scale,maxScale=-1e6,minScale=1e6,aveScale=0.0;
   int scaleCount=0;
   //progress 50% here inside the for loop
-  double prog=0.5;
+  //double prog=0.5;
+  Progress prog(this,0.5,1.0,m_vectDet.size());
   // loop over detector (IComps)
   for(size_t id=0;id<m_vectDet.size();id++)
   {
@@ -351,8 +352,9 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
           pmap.addV3D(comp.get(),"sca",V3D(1.0,it->second,1.0));
       }
       //
-      prog+= double(1)/m_vectDet.size();
-      progress(prog);
+      //prog+= double(1)/m_vectDet.size();
+      //progress(prog);
+      prog.report();
   }
   g_log.debug() << "Range of scaling factors is " << minScale << " to " << maxScale << "\n"
                 << "Average abs scaling fraction is " << aveScale/scaleCount << "\n";
