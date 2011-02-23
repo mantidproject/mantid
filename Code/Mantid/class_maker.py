@@ -32,7 +32,7 @@ namespace %s
    * @author:
    * @date: %s
    */
-  class %s
+  class DLLExport %s
   {
   public:
     %s();
