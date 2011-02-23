@@ -21,7 +21,7 @@ namespace Kernel
    * @author Janik Zikovsky, SNS
    * @date Feb 8, 2011
    */
-  class Task
+  class DLLExport Task
   {
   public:
     //---------------------------------------------------------------------------------------------

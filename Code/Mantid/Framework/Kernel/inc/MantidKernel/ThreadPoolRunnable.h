@@ -19,7 +19,7 @@ namespace Kernel
    * @author: Janik Zikovsky
    * @date: 2011-02-23 10:40:46.297133
    */
-  class ThreadPoolRunnable: public Poco::Runnable
+  class DLLExport ThreadPoolRunnable: public Poco::Runnable
   {
   public:
     ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler);

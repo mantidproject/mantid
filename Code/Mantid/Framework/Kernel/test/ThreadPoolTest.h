@@ -368,18 +368,6 @@ public:
     do_StressTest_TasksThatCreateTasks(new ThreadSchedulerLargestCost());
   }
 
-
-  void test_memory_leak()
-  {
-    TimeWaster mywaster;
-    mywaster.total = 0;
-    for (size_t i=0; i <100; i++)
-    {
-    FunctionTask * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, 1234) );
-    task->run();
-    delete task;
-    }
-  }
 };
 
 #endif
