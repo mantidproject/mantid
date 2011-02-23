@@ -34,6 +34,10 @@ class Mask(BaseScriptElement):
     # Shapes
     shapes = []
     
+    def __init__(self):
+        super(Mask, self).__init__()
+        self.reset()
+        
     def to_script(self):
         """
             Generate reduction script
