@@ -233,7 +233,7 @@ void DspacemaptoCal::CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorksp
     if( vulcan_iter != vulcan.end() )
       vulcan_factor = vulcan_iter->second;
     // The actual factor is 10^(-value_in_the_file)
-    vulcan_factor = exp(-vulcan_factor*log(10.0));
+    vulcan_factor = pow(10,-vulcan_factor);
 
     // At this point, tof_corrected = vulcan_factor * tof_input
     // So this is the offset
