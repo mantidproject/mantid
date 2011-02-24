@@ -870,6 +870,7 @@ void GL3DWidget::setBackgroundColor(QColor input)
   glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("GL3DWidget::setBackgroundColor");
+  m_unwrappedSurfaceChanged = true;
   update();
 }
 
