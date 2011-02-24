@@ -280,19 +280,36 @@ int MuonNexusReader::readMuonLogData(NXhandle fileID)
   // read data values
   stat=NXopendata(fileID,values); if(stat==NX_ERROR) return(1);
   stat=NXgetinfo(fileID,&rank,dims,&type); if(stat==NX_ERROR) return(1);
-  boost::scoped_array<float> dataVals(new float[dims[0]]);
   if(type==NX_FLOAT32 && rank==1)
   {
+    boost::scoped_array<float> dataVals(new float[dims[0]]);
     stat=NXgetdata(fileID,dataVals.get());
     logType.push_back(true);
+    std::vector<float> tmpf(dataVals.get(),dataVals.get()+dims[0]);
+    logValues.push_back(tmpf);
+    logStringValues.push_back(std::vector<std::string>(dims[0]));
+  }
+  else if(type==NX_CHAR && rank==2)
+  {
+    logType.push_back(false);
+    boost::scoped_array<char> dataVals(new char[dims[0]*dims[1]+1]);
+    stat=NXgetdata(fileID,dataVals.get());
+    dataVals[dims[0]*dims[1]] = 0;
+    std::vector<std::string> tmps;
+    for(int i=0;i<dims[0];++i)
+    {
+      std::string str(&dataVals[i*dims[1]],&dataVals[(i+1)*dims[1]]);
+      tmps.push_back(str);
+    }
+    logValues.push_back(std::vector<float>(dims[0]));
+    logStringValues.push_back(tmps);
   }
   else
   {
     logType.push_back(false);
-    return(1);
+    logValues.push_back(std::vector<float>(dims[0]));
+    logStringValues.push_back(std::vector<std::string>(dims[0]));
   }
-  std::vector<float> tmpf(dataVals.get(),dataVals.get()+dims[0]);
-  logValues.push_back(tmpf);
   stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
   //
   // read time values
@@ -304,7 +321,9 @@ int MuonNexusReader::readMuonLogData(NXhandle fileID)
     stat=NXgetdata(fileID,timeVals.get());
   }
   else
+  {
     return(1);
+  }
   std::vector<float> tmp(timeVals.get(),timeVals.get()+dims[0]);
   logTimes.push_back(tmp);
   stat=NXclosedata(fileID); if(stat==NX_ERROR) return(1);
@@ -322,6 +341,16 @@ void MuonNexusReader::getLogValues(const int& logNumber, const int& logSequence,
   //DateAndTime="2008-08-12T09:00:01"; //test
   value=logValues[logNumber][logSequence];
 }
+
+void MuonNexusReader::getLogStringValues(const int& logNumber, const int& logSequence,
+    std::time_t& logTime, std::string& value)
+{
+  // for the given log find the logTime and value at given sequence in log
+  double time=logTimes[logNumber][logSequence];
+  logTime=static_cast<std::time_t>(time)+startTime_time_t;
+  value=logStringValues[logNumber][logSequence];
+}
+
 int MuonNexusReader::numberOfLogs() const
 {
   return(nexusLogCount);

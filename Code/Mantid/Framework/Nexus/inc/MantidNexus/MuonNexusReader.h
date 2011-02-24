@@ -53,7 +53,8 @@ class MuonNexusReader
 		std::vector<std::string> logNames;  ///< stores name read from file
 		int readMuonLogData(NXhandle fileID);  ///< method to read the fields of open NXlog section
 		std::vector< std::vector<float> > logValues, ///< array of values for i'th NXlog section
-			                              logTimes;  ///< arrys of times for i'th NXlog section
+			                                logTimes;  ///< arrys of times for i'th NXlog section
+		std::vector< std::vector<std::string> > logStringValues; ///< array of string values for i'th NXlog section
 		std::string startTime; ///< string startTime which must be read from Nexus file to base all NXlog times on
 		std::time_t startTime_time_t; ///< startTime in time_t format
 		std::time_t to_time_t(boost::posix_time::ptime t) ///< convert posix time to time_t
@@ -86,8 +87,10 @@ class MuonNexusReader
 		int numberOfLogs() const;  ///< Number of NXlog sections read from file
 		int getLogLength(const int i) const;  ///< Lenght of i'th log
 		std::string getLogName(const int i) const;  ///< Name of i'th log
-        void getLogValues(const int& logNumber, const int& logSequence,
+    void getLogValues(const int& logNumber, const int& logSequence,
 						  std::time_t& logTime, double& value);  ///< get logSequence pair of logNumber log
+    void getLogStringValues(const int& logNumber, const int& logSequence,
+						  std::time_t& logTime, std::string& value);  ///< get logSequence pair of logNumber string log
 		bool logTypeNumeric(const int i) const;  ///< true if i'th log is of numeric type
 		// following ISISRAW.h
 		int t_nsp1;			///< number of spectra in time regime 1
