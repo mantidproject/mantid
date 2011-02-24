@@ -72,8 +72,12 @@ class LoadRun(ReductionStep):
 
         
         if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
+            # MG - 2011-02-24: Temporary fix to load .sav or .s* files. Lets the file property
+            # work it out
+            file_hint = os.path.splitext(self._data_file)[0]
             #raw files have some different options
-            alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+            alg = LoadRaw(file_hint, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+            self._data_file = alg.getPropertyValue("Filename")
             LoadSampleDetailsFromRaw(workspace, self._data_file)
             #if the user didn't specify a period use the first period
             if self._period != self.UNSET_PERIOD:
@@ -152,7 +156,7 @@ class LoadRun(ReductionStep):
     def _assignHelper(self, reducer):
         if self._data_file == '' or self._data_file.startswith('.'):
             return '', '', -1
-
+        
         try:
             data_file = self._extract_run_details(
                 self._data_file, self._is_trans, prefix=reducer.instrument.name(), 
