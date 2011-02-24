@@ -134,6 +134,7 @@ private:
 
 
 
+int ThreadPoolTest_TaskThatThrows_counter = 0;
 
 //=======================================================================================
 class ThreadPoolTest : public CxxTest::TestSuite
@@ -376,22 +377,26 @@ public:
   {
     void run()
     {
+      ThreadPoolTest_TaskThatThrows_counter++;
       throw Mantid::Kernel::Exception::NotImplementedError("Test exception from TaskThatThrows.");
     }
   };
 
-//  //--------------------------------------------------------------------
-//  void test_TaskThatThrows()
-//  {
-//    ThreadPool p(new ThreadSchedulerFIFO(),1);
-//
-//    for (int i=0; i< 10; i++)
-//    {
-//      double cost = i;
-//      p.schedule( new TaskThatThrows());
-//    }
-//    TS_ASSERT_THROWS( p.joinAll() , std::runtime_error);
-//  }
+  //--------------------------------------------------------------------
+  void test_TaskThatThrows()
+  {
+    ThreadPool p(new ThreadSchedulerFIFO(),1); // one core
+    ThreadPoolTest_TaskThatThrows_counter = 0;
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new TaskThatThrows());
+    }
+    // joinAll rethrows
+    TS_ASSERT_THROWS( p.joinAll() , std::runtime_error);
+    // And only one of the tasks actually ran (since we're on one core)
+    TS_ASSERT_EQUALS(ThreadPoolTest_TaskThatThrows_counter, 1);
+  }
 
 };
 

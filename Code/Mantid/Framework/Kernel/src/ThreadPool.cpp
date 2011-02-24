@@ -154,17 +154,12 @@ namespace Kernel
       delete m_runnables[i];
     m_runnables.clear();
 
-//
-//    while (m_scheduler->size() > 0)
-//    {
-//      Task * task = m_scheduler->pop(0);
-//
-//      // Run it!
-//      if (task)
-//      {
-//        task->run();
-//      }
-//    }
+    // Did one of the threads abort or throw an exception?
+    if (m_scheduler->getAborted())
+    {
+      // Re-raise the error
+      throw m_scheduler->getAbortException();
+    }
 
   }
 
