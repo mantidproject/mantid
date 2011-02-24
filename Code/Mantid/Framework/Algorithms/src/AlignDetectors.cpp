@@ -39,6 +39,7 @@ const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants
  * @param samplePos: position of the sample
  * @param det: Geometry object representing the detector (position of the pixel)
  * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
+ * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return conversion factor for pixel
  */
 double AlignDetectors::calcConversion(const double l1,
@@ -149,6 +150,7 @@ void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
  * for all pixel IDs in a workspace.
  * @param inputWS the workspace containing the instrument geometry of interest.
  * @param offsets map between pixelID and offset (from the calibration file)
+ * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return map of conversion factors between TOF and dSpacing
  */
 std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
