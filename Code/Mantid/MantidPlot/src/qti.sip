@@ -1731,6 +1731,7 @@ sipClass=sipFindClass(sipCpp->className());
 public:  
   MultiLayer* pyPlotSpectraList(const QList<QString>& wsnames, const QList<int>&, bool errs=false);
   MultiLayer* mergePlots(MultiLayer*, MultiLayer*);
+  void setIsRunning(bool);
   MantidMatrix* getMantidMatrix(const QString &);
   MultiLayer* plotBin(const QString&,int,bool = false);  
   MantidMatrix* importMatrixWorkspace(const QString&,int = -1, int = -1, bool = false, bool = false);

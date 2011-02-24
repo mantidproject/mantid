@@ -1638,6 +1638,15 @@ MultiLayer* MantidUI::pyPlotSpectraList(const QList<QString>& ws_names, const QL
 }
 
 /**
+ * Sets the flag that tells the scripting environment that
+ * a script is currently running
+ */
+void MantidUI::setIsRunning(bool running)
+{
+  appWindow()->scriptingEnv()->setIsRunning(running);
+}
+
+/**
  * Merge the curves from the two given MultiLayer objects
  */
 MultiLayer* MantidUI::mergePlots(MultiLayer* mlayer_1, MultiLayer* mlayer_2)
