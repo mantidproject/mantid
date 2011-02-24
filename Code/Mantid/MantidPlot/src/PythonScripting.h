@@ -107,7 +107,8 @@ private:
   PyObject *m_math;
   /// The dictionary of the sys module
   PyObject *m_sys;
-  
+  /// Refresh protection
+  int refresh_allowed;
 };
 
 #endif

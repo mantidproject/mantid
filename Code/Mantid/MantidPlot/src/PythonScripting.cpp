@@ -173,6 +173,9 @@ bool PythonScripting::start()
     setQObject(this, "stdout", m_sys);
     setQObject(this, "stderr", m_sys);
 
+    //Get the refresh protection flag
+    Mantid::Kernel::ConfigService::Instance().getValue("algorithms.refresh.allowed", refresh_allowed);
+
     if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) &&
         loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
     {
@@ -318,7 +321,7 @@ const QStringList PythonScripting::fileExtensions() const
 
 void PythonScripting::refreshAlgorithms(bool force)
 {
-  if( force || !isRunning() )
+  if( (force || !isRunning()) && refresh_allowed==1)
   {
     PyRun_SimpleString("mtd._refreshPyAlgorithms()");
   }
