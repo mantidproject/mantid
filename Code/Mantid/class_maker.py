@@ -131,7 +131,7 @@ public:
     
 
 #======================================================================
-def generate(subproject, classname, overwrite):
+def generate(subproject, classname, overwrite, test_only):
     # Directory at base of subproject
     basedir = os.path.join(os.path.curdir, "Framework/"+subproject)
     
@@ -139,20 +139,27 @@ def generate(subproject, classname, overwrite):
     sourcefile = os.path.join(basedir, "src/"+classname+".cpp")
     testfile = os.path.join(basedir, "test/"+classname+"Test.h")
     
-    if not overwrite and (os.path.exists(headerfile) or os.path.exists(headerfile) or os.path.exists(headerfile)):
-        print "\nError! One or more of the class files already exist. Use --force to overwrite."
-        print
+    if not test_only and not overwrite and os.path.exists(headerfile):
+        print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
+        return
+    if not test_only and not overwrite and os.path.exists(sourcefile):
+        print "\nError! Source file %s already exists. Use --force to overwrite.\n" % sourcefile
+        return
+    if not overwrite and os.path.exists(testfile):
+        print "\nError! Test file %s already exists. Use --force to overwrite.\n" % testfile
         return
       
     print
-    write_header(subproject, classname, headerfile)
-    write_source(subproject, classname, sourcefile)
+    if not test_only:
+        write_header(subproject, classname, headerfile)
+        write_source(subproject, classname, sourcefile)
     write_test(subproject, classname, testfile)
     
     print "\n   Don't forget to add your class to CMakeLists.txt:"
     print 
-    print "\tsrc/%s.cpp" % (classname)
-    print "\tinc/Mantid%s/%s.cpp" % (subproject, classname)
+    if not test_only:
+        print "\tsrc/%s.cpp" % (classname)
+        print "\tinc/Mantid%s/%s.cpp" % (subproject, classname)
     print "\ttest/%sTest.h" % (classname)
     print  
 
@@ -167,10 +174,14 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help='Force overwriting existing files. Use with caution!')
+    parser.add_argument('--test', dest='test', action='store_const',
+                        const=True, default=False,
+                        help='Create only the test file.')
      
     args = parser.parse_args()
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force
+    test_only = args.test
     
-    generate(subproject, classname, overwrite)
+    generate(subproject, classname, overwrite, test_only)
