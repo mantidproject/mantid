@@ -59,7 +59,6 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   //Set the mouse/keyboard operation info
   mInteractionInfo = new QLabel();
   mainLayout->addWidget(mInteractionInfo);
-  updateInteractionInfoText();  
   connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
   connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
@@ -121,6 +120,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   controlPanelLayout->setStretchFactor(1,1);
 
   resize(windowWidth,650);
+
+  tabChanged(0);
 }
 
 /**
@@ -128,14 +129,30 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   */
 void InstrumentWindow::tabChanged(int i)
 {
+  QString text;
   if (i == 1) 
   {
     mInstrumentDisplay->setInteractionModePick();
+    text = "Move cursor over instrument to see detector information.";
   }
   else
   {
     mInstrumentDisplay->setInteractionModeNormal();
+    if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
+    {
+      text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
+      if( m_renderTab->areAxesOn() )
+      {
+        text += "\nAxes: X = Red; Y = Green; Z = Blue";
+      }
+    }
+    else
+    {
+      text = "Left mouse click and drag to zoom in.\n";
+      text += "Right mouse click to zoom out.";
+    }
   }
+  setInfoText(text);
 
 }
 
@@ -559,21 +576,20 @@ void InstrumentWindow::saveImage()
 /**
  * Update the text display that informs the user of the current mode and details about it
  */
-void InstrumentWindow::updateInteractionInfoText()
+void InstrumentWindow::setInfoText(const QString& text)
 {
-  QString text;  
-  if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
-	{
-    text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
-    if( m_renderTab->areAxesOn() )
-    {
-      text += "\nAxes: X = Red; Y = Green; Z = Blue";
-    }
-  }
-  else
-  {
-   text = tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode");
-  }
+ // if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
+	//{
+ //   text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
+ //   if( m_renderTab->areAxesOn() )
+ //   {
+ //     text += "\nAxes: X = Red; Y = Green; Z = Blue";
+ //   }
+ // }
+ // else
+ // {
+ //  text = tr("Use Mouse Left Button to Pick an detector\n Click on 'Normal' button to get into interactive mode");
+ // }
   mInteractionInfo->setText(text);
 }
 
@@ -687,4 +703,16 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
   void InstrumentWindow::unblock()
   {
     m_blocked = false;
+  }
+
+  void InstrumentWindow::set3DAxesState(bool on)
+  {
+    mInstrumentDisplay->set3DAxesState(on);
+    tabChanged(0);
+  }
+
+  void InstrumentWindow::setRenderMode(int mode)
+  {
+    mInstrumentDisplay->setRenderMode(mode);
+    tabChanged(0);
   }

@@ -112,7 +112,9 @@ public slots:
   void componentSelected(const QItemSelection&, const QItemSelection&);
   void pickBackgroundColor();
   void saveImage();
-  void updateInteractionInfoText();
+  void setInfoText(const QString&);
+  void set3DAxesState(bool);
+  void setRenderMode(int);
 
 signals:
   void plotSpectra(const QString&,const std::set<int>&);

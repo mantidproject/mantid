@@ -29,7 +29,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   QStringList modeList;
   modeList << "Full 3D" << "Cylindrical Y" << "Cylindrical Z" << "Cylindrical X" << "Spherical Y" << "Spherical Z" << "Spherical X";
   renderMode->insertItems(0,modeList);
-  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow->getInstrumentDisplay(),SLOT(setRenderMode(int)));
+  connect(renderMode,SIGNAL(currentIndexChanged(int)),m_instrWindow,SLOT(setRenderMode(int)));
   connect(renderMode, SIGNAL(currentIndexChanged(int)), this, SLOT(showResetView(int)));
 
   // X selection control
@@ -56,7 +56,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_displayAxes = new QAction("Display Axes",this);
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
-  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow->getInstrumentDisplay(), SLOT(set3DAxesState(bool)));
+  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(set3DAxesState(bool)));
   connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(updateInteractionInfoText()));
   m_wireframe = new QAction("Wireframe",this);
   m_wireframe->setCheckable(true);

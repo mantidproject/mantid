@@ -854,6 +854,7 @@ void GL3DWidget::defaultProjection()
 void GL3DWidget::set3DAxesState(bool state)
 {
   m3DAxesShown = state;
+
   // Update the display
   update();
 }

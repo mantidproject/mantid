@@ -81,6 +81,8 @@ public slots:
   void componentSelected(Mantid::Geometry::ComponentID);
   void hidePickBox(){mPickBox->hide();}
   void setSelectionType(int);
+  void set3DAxesState(bool);
+  void setRenderMode(int);
 
 protected:
   void initializeGL();
@@ -108,10 +110,6 @@ protected:
   boost::shared_ptr<GLActorCollection> scene;      ///< Collection of actors
   GLTrackball* _trackball;       ///< Trackball for user interaction
   GLViewport* _viewport;         ///< Opengl View port [World -> Window]
-
-protected slots:
-  void set3DAxesState(bool);
-  void setRenderMode(int);
 
 private:
   void setRenderingOptions();
