@@ -33,7 +33,7 @@ public:
       std::string p1 = getProperty("prop1");
       int p2 = getProperty("prop2");
 
-      Poco::Thread::current()->sleep(200);
+      Poco::Thread::current()->sleep(300);
       progress(0.333,"Running");
       interruption_point();
       Algorithm* alg = dynamic_cast<Algorithm*>( this );
@@ -102,7 +102,7 @@ public:
         alg->setProperty("prop1","stuff");
         alg->setProperty("prop2",17);
         Poco::ActiveResult<bool> res = alg->executeAsync();
-        res.tryWait(100);
+        res.tryWait(50);
         TS_ASSERT( alg->isRunning() );
         TS_ASSERT( alg->isRunningAsync() );
         res.wait();
