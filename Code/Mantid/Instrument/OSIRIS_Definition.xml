@@ -98,14 +98,14 @@
 <type name="bank">
 <properties />
 <component type="module">
-  <location  r="0" t="0" p="0" name="mod0" />
-  <location  r="0" t="0" p="0" rot="45" name="mod1"  />
-  <location  r="0" t="0" p="0" rot="90" name="mod3"  />
+  <location  r="0" t="0" p="0" rot="0" name="mod0" />
+  <location  r="0" t="0" p="0" rot="180" name="mod1"  />
+  <location  r="0" t="0" p="0" rot="315" name="mod3"  />
   <location  r="0" t="0" p="0" rot="135" name="mod4" />
-  <location  r="0" t="0" p="0" rot="180" name="mod5" />
-  <location  r="0" t="0" p="0" rot="225" name="mod6" />
-  <location  r="0" t="0" p="0" rot="270" name="mod7" />
-  <location  r="0" t="0" p="0" rot="315" name="mod8" />
+  <location  r="0" t="0" p="0" rot="90" name="mod5" />
+  <location  r="0" t="0" p="0" rot="45" name="mod6" />
+  <location  r="0" t="0" p="0" rot="225" name="mod7" />
+  <location  r="0" t="0" p="0" rot="270" name="mod8" />
 </component>
 </type>
 
