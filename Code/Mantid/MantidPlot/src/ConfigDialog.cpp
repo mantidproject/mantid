@@ -651,8 +651,9 @@ void ConfigDialog::initMantidOptionsTab()
   QGroupBox *frame = new QGroupBox(mantidOptionsPage);
   QGridLayout *grid = new QGridLayout(mantidOptionsPage);
   //create a checkbox for invisible workspaces options
-  m_invisibleWorkspaces = new QCheckBox("Invisible Workspaces",frame);
-  m_invisibleWorkspaces->setChecked(true);
+  m_invisibleWorkspaces = new QCheckBox("Show Invisible Workspaces",frame);
+  m_invisibleWorkspaces->setChecked(false);
+  m_invisibleWorkspaces->setGeometry(QRect(10, 10, 150, 18));
   grid->addWidget(frame,0,0);
   mtdTabWidget->addTab(mantidOptionsPage,"Options");
 
@@ -665,7 +666,6 @@ void ConfigDialog::initMantidOptionsTab()
   {
     m_invisibleWorkspaces->setChecked(false);
   }
- // grid->setRowStretch(1,0);
 }
 
 void ConfigDialog::initDirSearchTab()
@@ -1764,16 +1764,16 @@ void ConfigDialog::updateCurveFitSettings()
   app->mantidUI->fitFunctionBrowser()->setDecimals(decimals->value());
 
   //invisible workspaces options
-  QString invisible_ws;
+  QString showinvisible_ws;
   if(m_invisibleWorkspaces->isChecked())
   {
-    invisible_ws="1";
+    showinvisible_ws="1";
   }
   else
   {
-    invisible_ws="0";
+    showinvisible_ws="0";
   }
-  mantid_config.setString("MantidOptions.InvisibleWorkspaces",invisible_ws.toStdString());
+  mantid_config.setString("MantidOptions.InvisibleWorkspaces",showinvisible_ws.toStdString());
 }
 
 

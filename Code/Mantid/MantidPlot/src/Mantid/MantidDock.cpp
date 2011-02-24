@@ -165,7 +165,7 @@ void MantidDockWidget::replaceTreeEntry(const QString & ws_name, Mantid::API::Wo
   QList<QTreeWidgetItem *> matches = m_tree->findItems(ws_name, Qt::MatchFixedString, 0);
   if( matches.empty() )
   {
-    if(!isInvisibleWorkspaceOptionSet())
+    if(isInvisibleWorkspaceOptionSet())
     {
       addTreeEntry(ws_name,workspace);
     }

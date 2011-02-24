@@ -175,7 +175,7 @@ public:
 
       //check the workspace invisible option set
       std::string name_startswith=name.substr(0,2);
-      if(isInvisbleWorkspaceOptionsSet())
+      if(!isInvisbleWorkspaceOptionsSet())
       {
         //if the name of workspace starts with __
         if(!name_startswith.compare("__"))
@@ -202,7 +202,7 @@ public:
 
       std::string name_startswith=name.substr(0,2);
       //check the workspace invisible option set
-      if(isInvisbleWorkspaceOptionsSet())
+      if(!isInvisbleWorkspaceOptionsSet())
       {
         //if the name of workspace starts with __
         if(!name_startswith.compare("__"))
