@@ -20,7 +20,7 @@ const NeutronAtom getNeutronNoExceptions(const uint16_t z, const uint16_t a)
 {
   try {
     return getNeutronAtom(z, a);
-  } catch (std::runtime_error& e) {
+  } catch (std::runtime_error & ) {
     return NeutronAtom(z, a,
 		       NAN, NAN, NAN, NAN,
 		       NAN, NAN, NAN, NAN); // set to junk value

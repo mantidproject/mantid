@@ -151,7 +151,6 @@ void tearDown()
 
     MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceFactory::Instance().create("Workspace2D",1,nX,nY));
 
-    double spec;
     double x;
     const double x0 = 0.;
     const double dx = DX/nY;

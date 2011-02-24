@@ -480,7 +480,7 @@ void DateAndTime::set_from_ISO8601_string(const std::string str)
 //------------------------------------------------------------------------------------------------
 /** Return the date and time as a simple string,
  * for example, "19-Feb-2010 11:23:34.456000000"
- *
+ * @return date-time formatted as a simple string
  */
 std::string DateAndTime::to_simple_string() const
 {
@@ -491,8 +491,8 @@ std::string DateAndTime::to_simple_string() const
 //------------------------------------------------------------------------------------------------
 /** Return the date and time as a string, using formatting of strftime().
  * Default format gives "1990-Jan-02 03:04:05"
- *
- * @format : format for strftime(). Default "%Y-%b-%d %H:%M:%S"
+ * @param format : format for strftime(). Default "%Y-%b-%d %H:%M:%S"
+ * @return date as string, formatted as requested
  */
 std::string DateAndTime::to_string(const std::string format) const
 {
@@ -776,6 +776,7 @@ DateAndTime& DateAndTime::operator-=(const double sec)
 
 //------------------------------------------------------------------------------------------------
 /** Subtract two times.
+ * @param rhs object on right of operation
  * @return a time_duration
  */
 time_duration DateAndTime::operator-(const DateAndTime& rhs) const
@@ -841,7 +842,7 @@ time_duration DateAndTime::duration_from_seconds(double duration)
 /** time duration in nanoseconds. Duration is limited to
  * MAX_NANOSECONDS and MIN_NANOSECONDS to avoid overflows.
  * @param td :: time_duration instance.
- * @Return an int64 of the number of nanoseconds
+ * @return an int64 of the number of nanoseconds
  */
 int64_t DateAndTime::nanoseconds_from_duration(const time_duration & td)
 {

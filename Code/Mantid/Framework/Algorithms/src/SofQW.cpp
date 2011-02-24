@@ -83,7 +83,7 @@ void SofQW::exec()
     l1 = source->getDistance(*sample);
     g_log.debug() << "Source-sample distance: " << l1 << std::endl;
   }
-  catch (Exception::NotFoundError &e)
+  catch (Exception::NotFoundError &)
   {
     g_log.error("Unable to calculate source-sample distance");
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance", inputWorkspace->getTitle());
@@ -173,7 +173,7 @@ void SofQW::exec()
 	      }
       }
 
-    } catch (Exception::NotFoundError &e) {
+    } catch (Exception::NotFoundError &) {
       // Get to here if exception thrown when calculating distance to detector
       // Presumably, if we get to here the spectrum will be all zeroes anyway (from conversion to E)
       continue;

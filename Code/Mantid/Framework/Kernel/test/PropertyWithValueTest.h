@@ -503,7 +503,7 @@ public:
 
   void testAdditionOperator()
   {
-    int i; double d; bool b;
+    int i; double d;
     Property * p1;
     Property * p2;
 

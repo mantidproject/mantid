@@ -123,7 +123,7 @@ class myContentHandler : public Poco::XML::ContentHandler
 *
 *  @param IDFfilename :: Full path of an IDF
 *  @param[out] outValidFrom :: Used to return valid-from date
-*  @param[out] outValidto :: Used to return valid-to date
+*  @param[out] outValidTo :: Used to return valid-to date
 */
 void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::string& outValidFrom,
   std::string& outValidTo)
@@ -152,7 +152,7 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
 /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the 
 *   method returns current date.
 *
-*  @param instrumentName :: Instrument name e.g. GEM, TOPAS or BIOSANS
+*  @param workspace workspace to get information from
 *  @return workspace start date
 */
 std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace)

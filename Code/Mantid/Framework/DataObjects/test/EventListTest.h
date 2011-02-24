@@ -700,7 +700,6 @@ public:
 
   void test_SortTOF_simple()
   {
-    int i;
     el.sortTof();
     vector<TofEvent> rel = el.getEvents();
     TS_ASSERT_EQUALS(rel.size(), 3);

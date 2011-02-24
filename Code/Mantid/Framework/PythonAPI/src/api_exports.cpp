@@ -266,6 +266,7 @@ namespace PythonAPI
     
     class_< API::WorkspaceGroup, bases<API::Workspace>, 
       boost::noncopyable >("WorkspaceGroup", no_init)
+      .def("__len__", &API::WorkspaceGroup::getNumberOfEntries)
       .def("size", &API::WorkspaceGroup::getNumberOfEntries)
       .def("getNames", &API::WorkspaceGroup::getNames)
       .def("add", &API::WorkspaceGroup::add)

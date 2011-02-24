@@ -263,7 +263,7 @@ std::string NXClass::getString(const std::string& name)const
     {
       return std::string(buff(),buff.dim0());
     }
-    catch(std::runtime_error &e)
+    catch(std::runtime_error &)
     {
         // deals with reading uninitialized data
         return std::string();

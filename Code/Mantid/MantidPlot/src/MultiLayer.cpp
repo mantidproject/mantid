@@ -1262,7 +1262,7 @@ void MultiLayer::dropEvent( QDropEvent * event )
       new MantidCurve(it.key(),g,"spectra",it.value(),false); // Always without errors for now
     } catch (Mantid::Kernel::Exception::NotFoundError) {
       // Get here if workspace name is invalid - shouldn't be possible, but just in case
-    } catch (std::invalid_argument& ex) {
+    } catch (std::invalid_argument&) {
       // Get here if invalid spectrum number given - shouldn't be possible, but just in case
     }
   }

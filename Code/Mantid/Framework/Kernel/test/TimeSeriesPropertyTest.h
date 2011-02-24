@@ -335,7 +335,6 @@ public:
     TimeSeriesProperty<int> * logi  = new TimeSeriesProperty<int>("MyIntLog");
     PropertyWithValue<double> * val  = new PropertyWithValue<double>("MySimpleDouble", 1.23);
 
-    Property * prop;
     log->operator+=(val);
     log->operator+=(logi);
     logi->operator+=(log);

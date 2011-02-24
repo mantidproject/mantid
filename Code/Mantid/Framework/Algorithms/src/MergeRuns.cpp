@@ -144,7 +144,7 @@ void MergeRuns::buildAdditionTables()
   {
     lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
   }
-  catch (std::runtime_error& err)
+  catch (std::runtime_error&)
   {
     //If it fails, then there are some grouped detector IDs, and the map cannot exist
   }

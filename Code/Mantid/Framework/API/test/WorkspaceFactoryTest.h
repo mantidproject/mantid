@@ -98,7 +98,7 @@ public:
     {
       WorkspaceFactory::Instance().subscribe<ManagedWorkspace2DTest>("ManagedWorkspace2DTest");
     }
-    catch (std::runtime_error& e)
+    catch (std::runtime_error&)
     {
       // In theory, we shouldn't have the 'real' ManagedWorkspace2D when running this test, but
       // in reality we do so need catch the error from trying to subscribe again

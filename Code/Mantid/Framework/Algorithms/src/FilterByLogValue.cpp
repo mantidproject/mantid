@@ -109,7 +109,7 @@ void FilterByLogValue::exec()
     run_stop = inputWS->getLastPulseTime() + tolerance;
     handle_edge_values = true;
   }
-  catch (Exception::NotFoundError & e)
+  catch (Exception::NotFoundError & )
   {
   }
 

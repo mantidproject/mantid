@@ -126,7 +126,7 @@ void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
   {
     l1 = instrument->getSource()->getDistance(*sample);
   }
-  catch (Exception::NotFoundError &e)
+  catch (Exception::NotFoundError &)
   {
     throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance ", instrument->getName());
   }
@@ -315,7 +315,7 @@ void AlignDetectors::exec()
       outputWS->dataY(i) = inputWS->dataY(i);
       outputWS->dataE(i) = inputWS->dataE(i);
 
-    } catch (Exception::NotFoundError &e) {
+    } catch (Exception::NotFoundError &) {
       // Zero the data in this case
       outputWS->dataX(i).assign(outputWS->dataX(i).size(),0.0);
       outputWS->dataY(i).assign(outputWS->dataY(i).size(),0.0);
