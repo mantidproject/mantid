@@ -70,6 +70,7 @@ namespace Kernel
     //-----------------------------------------------------------------------------------
     /** Retrieves the next Task to execute.
      * @param threadnum :: ID of the calling thread.
+     * @return a Task pointer to execute.
      */
     virtual Task * pop(size_t threadnum) = 0;
 
@@ -221,6 +222,7 @@ namespace Kernel
     }
 
   protected:
+    /// Queue of tasks
     std::deque<Task*> m_queue;
   };
 

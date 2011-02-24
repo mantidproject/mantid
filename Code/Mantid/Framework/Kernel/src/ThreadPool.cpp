@@ -130,9 +130,12 @@ namespace Kernel
 
 
   //--------------------------------------------------------------------------------
-  /** Begin the execution of all scheduled tasks.
-   * TODO: Make it parallel! For now, serial execution.
+  /** Wait for all threads that have started to finish. If the
+   * threads had not started, start them first.
    *
+   * @throw std::runtime_error rethrown if one of the tasks threw something. E.g.
+   *        CancelException in the case of aborting an algorithm. Any exception
+   *        gets downgraded to runtime_error.
    */
   void ThreadPool::joinAll()
   {
