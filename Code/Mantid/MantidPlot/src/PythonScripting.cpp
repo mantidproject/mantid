@@ -174,7 +174,7 @@ bool PythonScripting::start()
     setQObject(this, "stderr", m_sys);
 
     //Get the refresh protection flag
-    Mantid::Kernel::ConfigService::Instance().getValue("algorithms.refresh.allowed", refresh_allowed);
+    Mantid::Kernel::ConfigService::Instance().getValue("pythonalgorithms.refresh.allowed", refresh_allowed);
 
     if( loadInitFile(mantidbin.absoluteFilePath("qtiplotrc.py")) &&
         loadInitFile(mantidbin.absoluteFilePath("mantidplotrc.py")) )
