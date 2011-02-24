@@ -678,10 +678,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
     }
     catch(std::exception& e)
     {
-      if (attName.toLower() == "filename")
-      {
-        QMessageBox::critical(m_browser->m_appWindow,"Mantid - Error",e.what());
-      }
+      QMessageBox::critical(m_browser->m_appWindow,"Mantid - Error",e.what());
       return false;
     }
     return true;
