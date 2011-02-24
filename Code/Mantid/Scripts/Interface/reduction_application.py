@@ -7,6 +7,14 @@ import reduction_gui.settings.qrc_resources
 import ui.ui_reduction_main
 import ui.ui_instrument_dialog
 
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+    
+
 # Check whether Mantid is available
 try:
     from MantidFramework import *
@@ -271,7 +279,11 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Create an object capable of using the information in the
             interface and turn it into a reduction process.
         """
+        if IS_IN_MANTIDPLOT:
+            qti.app.mantidUI.setIsRunning(True)
         self._interface.reduce()
+        if IS_IN_MANTIDPLOT:
+            qti.app.mantidUI.setIsRunning(False)
         
     def open_file(self, file_path=None):
         """
