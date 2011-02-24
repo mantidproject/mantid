@@ -28,7 +28,7 @@
       <attribute name="title" >
        <string>Elwin</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_3" >
+      <layout class="QVBoxLayout" name="layoutElwin" >
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_16" >
          <item>
@@ -115,7 +115,7 @@
       <attribute name="title" >
        <string>MSD Fit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_5" >
+      <layout class="QVBoxLayout" name="layoutMSDFit" >
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_18" >
          <item>
@@ -195,7 +195,7 @@
       <attribute name="title" >
        <string>Fury</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_2" >
+      <layout class="QVBoxLayout" name="layoutFury" >
        <item>
         <layout class="QGridLayout" name="fury_layoutFiles" >
          <item row="2" column="1" >
@@ -276,7 +276,10 @@
               <number>0</number>
              </property>
              <widget class="QWidget" name="fury_page_inputFile" >
-              <layout class="QVBoxLayout" name="verticalLayout_9" >
+              <layout class="QVBoxLayout" name="fury_page_inputFile_layout" >
+               <property name="margin" >
+                <number>0</number>
+               </property>
                <item>
                 <widget class="MantidQt::MantidWidgets::MWRunFiles" name="fury_iconFile" >
                  <property name="sizePolicy" >
@@ -305,7 +308,10 @@
               </layout>
              </widget>
              <widget class="QWidget" name="fury_page_inputWorkspace" >
-              <layout class="QHBoxLayout" name="horizontalLayout_28" >
+              <layout class="QHBoxLayout" name="fury_layout_page_inputWorkspace" >
+               <property name="margin" >
+                <number>0</number>
+               </property>
                <item>
                 <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="fury_wsSample" >
                  <property name="Suffix" >
@@ -378,7 +384,7 @@
       <attribute name="title" >
        <string>FuryFit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_4" >
+      <layout class="QVBoxLayout" name="layoutFuryFit" >
        <item>
         <layout class="QHBoxLayout" name="furyfit_layoutInput" >
          <item>
@@ -680,7 +686,7 @@
       <attribute name="title" >
        <string>ConvFit</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_9" >
+      <layout class="QVBoxLayout" name="layoutConFit" >
        <item>
         <layout class="QHBoxLayout" name="confit_layoutInput" >
          <item>
@@ -709,7 +715,7 @@
             <number>0</number>
            </property>
            <widget class="QWidget" name="confit_page_inputFile" >
-            <layout class="QHBoxLayout" name="horizontalLayout_28" >
+            <layout class="QHBoxLayout" name="confit_layout_page_inputFile" >
              <item>
               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="confit_inputFile" >
                <property name="findRunFiles" stdset="0" >
@@ -897,7 +903,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QLabel" name="label_2" >
+              <widget class="QLabel" name="confit_lbTo" >
                <property name="text" >
                 <string>to</string>
                </property>
@@ -1030,7 +1036,7 @@
       <attribute name="title" >
        <string>Absorption</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_10" >
+      <layout class="QVBoxLayout" name="layoutAbsorption" >
        <item>
         <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abs_inputFile" >
          <property name="sizePolicy" >
@@ -1363,11 +1369,11 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tabAbsp" >
+     <widget class="QWidget" name="tabAbsF2P" >
       <attribute name="title" >
        <string>Abs (F2PY)</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_14" >
+      <layout class="QVBoxLayout" name="layoutAbsF2P" >
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_23" >
          <item>
@@ -1398,6 +1404,12 @@
            </property>
            <widget class="QWidget" name="page" >
             <layout class="QVBoxLayout" name="verticalLayout_16" >
+             <property name="spacing" >
+              <number>0</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
              <item>
               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="absp_inputFile" >
                <property name="sizePolicy" >
@@ -1426,6 +1438,12 @@
            </widget>
            <widget class="QWidget" name="page_2" >
             <layout class="QHBoxLayout" name="horizontalLayout_24" >
+             <property name="spacing" >
+              <number>0</number>
+             </property>
+             <property name="margin" >
+              <number>0</number>
+             </property>
              <item>
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="absp_wsInput" >
                <property name="Suffix" >
@@ -1496,6 +1514,12 @@
             </property>
             <widget class="QWidget" name="absp_page_Flat" >
              <layout class="QGridLayout" name="gridLayout_2" >
+              <property name="margin" >
+               <number>0</number>
+              </property>
+              <property name="horizontalSpacing" >
+               <number>6</number>
+              </property>
               <item row="0" column="0" >
                <widget class="QLabel" name="absp_lbts" >
                 <property name="text" >
@@ -1572,6 +1596,9 @@
             </widget>
             <widget class="QWidget" name="absp_pageCylinder" >
              <layout class="QGridLayout" name="gridLayout_3" >
+              <property name="margin" >
+               <number>0</number>
+              </property>
               <item row="0" column="4" >
                <widget class="QLineEdit" name="absp_ler2" >
                 <property name="text" >
@@ -1924,15 +1951,15 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab" >
+     <widget class="QWidget" name="tabApplyAbsorptionCorrections" >
       <attribute name="title" >
        <string>Apply Corrections</string>
       </attribute>
-      <layout class="QVBoxLayout" name="verticalLayout_11" >
+      <layout class="QVBoxLayout" name="layoutApplyAbsCor" >
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_32" >
+        <layout class="QHBoxLayout" name="abscor_layoutInput" >
          <item>
-          <widget class="QLabel" name="label_3" >
+          <widget class="QLabel" name="abscor_lbSamInputType" >
            <property name="text" >
             <string>Input Type:</string>
            </property>
@@ -1963,7 +1990,7 @@
            <property name="currentIndex" >
             <number>0</number>
            </property>
-           <widget class="QWidget" name="page_3" >
+           <widget class="QWidget" name="abscor_samFile" >
             <layout class="QVBoxLayout" name="verticalLayout_17" >
              <item>
               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_sample" >
@@ -1988,7 +2015,7 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_4" >
+           <widget class="QWidget" name="abscor_samWS" >
             <layout class="QHBoxLayout" name="horizontalLayout_31" >
              <item>
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsSample" >
@@ -2004,7 +2031,7 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_20" >
+        <layout class="QHBoxLayout" name="abscor_layoutGeometry" >
          <item>
           <widget class="QLabel" name="abscor_lbGeometry" >
            <property name="text" >
@@ -2079,8 +2106,11 @@
            <property name="currentIndex" >
             <number>0</number>
            </property>
-           <widget class="QWidget" name="page_5" >
+           <widget class="QWidget" name="abscor_conFile" >
             <layout class="QHBoxLayout" name="horizontalLayout_34" >
+             <property name="margin" >
+              <number>0</number>
+             </property>
              <item>
               <widget class="MantidQt::MantidWidgets::MWRunFiles" name="abscor_can" >
                <property name="enabled" >
@@ -2110,8 +2140,11 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="page_6" >
+           <widget class="QWidget" name="abscor_conWS" >
             <layout class="QHBoxLayout" name="horizontalLayout_35" >
+             <property name="margin" >
+              <number>0</number>
+             </property>
              <item>
               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="abscor_wsContainer" >
                <property name="Suffix" >
@@ -2126,9 +2159,9 @@
         </layout>
        </item>
        <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_36" >
+        <layout class="QHBoxLayout" name="abscor_layoutPlotOutput" >
          <item>
-          <widget class="QLabel" name="label_5" >
+          <widget class="QLabel" name="abscor_lbPlotOutput" >
            <property name="sizePolicy" >
             <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
              <horstretch>0</horstretch>
@@ -2152,7 +2185,7 @@
         </layout>
        </item>
        <item>
-        <spacer name="verticalSpacer" >
+        <spacer name="abscor_verticalSpacer" >
          <property name="orientation" >
           <enum>Qt::Vertical</enum>
          </property>
@@ -2169,7 +2202,7 @@
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_10" >
+    <layout class="QHBoxLayout" name="layout_bottom" >
      <item>
       <widget class="QPushButton" name="pbHelp" >
        <property name="enabled" >

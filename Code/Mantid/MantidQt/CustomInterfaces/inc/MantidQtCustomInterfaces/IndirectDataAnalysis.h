@@ -91,12 +91,14 @@ namespace MantidQt
       void confitRun();
       void absorptionRun();
 
-      Mantid::API::CompositeFunctionMW* createFunction(QtTreePropertyBrowser* propertyBrowser);
+      Mantid::API::CompositeFunctionMW* furyfitCreateFunction(bool tie=false);
+      Mantid::API::IFitFunction* furyfitCreateUserFunction(const QString & name);
       Mantid::API::CompositeFunctionMW* confitCreateFunction(bool tie=false);
-      QtProperty* createLorentzian(QString);
-      QtProperty* createExponential();
-      QtProperty* createStretchedExp();
-      void populateFunction(Mantid::API::IFitFunction*, Mantid::API::IFitFunction*, QtProperty*, int, bool tie=false);
+      QtProperty* createLorentzian(const QString &);
+      QtProperty* createExponential(const QString &);
+      QtProperty* createStretchedExp(const QString &);
+
+      void populateFunction(Mantid::API::IFitFunction*, Mantid::API::IFitFunction*, QtProperty*, int, const bool tie=false);
       QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index);
       
       virtual void closeEvent(QCloseEvent*);
@@ -133,14 +135,12 @@ namespace MantidQt
       void furyfitXMaxSelected(double val);
       void furyfitBackgroundSelected(double val);
       void furyfitRangePropChanged(QtProperty*, double);
-      void furyfitInputType(int index);
       void furyfitSequential();
       void furyfitPlotGuess(QtProperty*);
 
       // Convolution Fit
       void confitTypeSelection(int index);
       void confitBgTypeSelection(int index);
-      void confitInputType(int index);
       void confitPlotInput();
       void confitPlotGuess(QtProperty*);
       void confitSequential();
@@ -210,7 +210,7 @@ namespace MantidQt
       // Fury Fit Member Variables (prefix 'm_ff')
       QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
       QtGroupPropertyManager* m_groupManager;
-      QtDoublePropertyManager* m_doubleManager;
+      QtDoublePropertyManager* m_ffDblMng;
       QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
       QMap<QString, QtProperty*> m_ffProp;
       QwtPlot* m_ffPlot;
