@@ -292,7 +292,9 @@ namespace Algorithms
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
 
-    return 200.0/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
+    //Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of events
+    EventWorkspace_const_sptr inputE = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
+    return (inputE->getNumberEvents()/1.e6)/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
 }
   /** Initialisation method
   */
@@ -319,7 +321,7 @@ namespace Algorithms
     declareProperty(new API::FileProperty("DetCalFilename", "", API::FileProperty::Save, ".DetCal"), "The output filename of the ISAW DetCal file");
 
     declareProperty( new PropertyWithValue<std::string>("BankName", "", Direction::Input),
-    "Optional: To only include events from one bank. Any bank whose name does not match the given string will have no events.");
+    "Optional: To only calibrate one bank. Any bank whose name does not match the given string will have no events.");
 
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
@@ -425,7 +427,9 @@ namespace Algorithms
       outfile << "# Base and up give directions of unit vectors for a local\n";
       outfile << "# x,y coordinate system on the face of the detector.\n";
       outfile << "#\n";
-      outfile << "# Wed Sep 08 11:07:49 CDT 2010\n";
+      std::time_t current_t = DateAndTime::get_current_time().to_time_t() ;
+      std::tm * current = gmtime( &current_t );
+      outfile << "# "<<asctime (current) <<"\n";
       outfile << "#\n";
       outfile << "6         L1     T0_SHIFT\n";
       IObjComponent_const_sptr source = inst->getSource();
