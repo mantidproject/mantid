@@ -33,6 +33,8 @@ namespace MDEvents
     MDEventWorkspace();
     ~MDEventWorkspace();
 
+    virtual const std::string id() const;
+
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const;
 
@@ -41,7 +43,7 @@ namespace MDEvents
 
     /** Returns the number of bytes of memory
      * used by the workspace. */
-    virtual size_t getMemoryUsed() const;
+    virtual size_t getMemorySize() const;
 
     /** Sample function returning (a copy of) the n-th event in the workspace.
      * This may not be needed.

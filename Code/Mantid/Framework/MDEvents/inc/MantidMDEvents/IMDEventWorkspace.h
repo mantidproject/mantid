@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEvent.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Workspace.h"
 
 namespace Mantid
 {
@@ -19,7 +19,7 @@ namespace MDEvents
    * @date Dec 3, 2010
    *
    * */
-  DLLExport class IMDEventWorkspace // : public API::IMDWorkspace
+  DLLExport class IMDEventWorkspace  : public API::Workspace
   {
   public:
     /** Returns the number of dimensions in this workspace */
@@ -27,10 +27,6 @@ namespace MDEvents
 
     /** Returns the total number of points (events) in this workspace */
     virtual size_t getNPoints() const = 0;
-
-    /** Returns the number of bytes of memory
-     * used by the workspace. */
-    virtual size_t getMemoryUsed() const = 0;
 
   };
 

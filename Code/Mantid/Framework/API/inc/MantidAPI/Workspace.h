@@ -50,7 +50,7 @@ namespace API
 class DLLExport Workspace
 {
 public:
-    /// Return the workspace typeID
+    /// Return the workspace typeID (normally the type name as a string)
     virtual const std::string id() const = 0;
 
     Workspace();

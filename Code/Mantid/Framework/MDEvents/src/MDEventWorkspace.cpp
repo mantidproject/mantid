@@ -26,6 +26,15 @@ namespace MDEvents
     delete data;
   }
 
+  TMDE(
+  const std::string MDEventWorkspace)::id() const
+  {
+    std::ostringstream out;
+    out << "MDEventWorkspace<MDEvent," << getNumDims() << ">";
+    return out.str();
+  }
+
+
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this workspace */
   TMDE(
@@ -47,7 +56,7 @@ namespace MDEvents
   /** Returns the number of bytes of memory
    * used by the workspace. */
   TMDE(
-  size_t MDEventWorkspace)::getMemoryUsed() const
+  size_t MDEventWorkspace)::getMemorySize() const
   {
     return this->getNPoints() * sizeof(MDE);
   }

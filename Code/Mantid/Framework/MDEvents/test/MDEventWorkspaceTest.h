@@ -22,6 +22,7 @@ public:
     MDEventWorkspace<MDEvent<3>, 3> ew3;
     TS_ASSERT_EQUALS( ew3.getNumDims(), 3);
     TS_ASSERT_EQUALS( ew3.getNPoints(), 0);
+    TS_ASSERT_EQUALS( ew3.id(), "MDEventWorkspace<MDEvent,3>");
   }
 
   void test_Constructor_IMDEventWorkspace()
