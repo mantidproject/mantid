@@ -43,11 +43,19 @@ namespace Kernel
       {
         //TODO: task-specific mutex if specified?
 
-        // Run the task (synchronously within this thread)
-        task->run();
-
-        // Tell the scheduler that we finished this task
-        m_scheduler->finished(task);
+        try
+        {
+          // Run the task (synchronously within this thread)
+          task->run();
+          // Tell the scheduler that we finished this task
+          m_scheduler->finished(task);
+        }
+        catch (std::exception &e)
+        {
+          // The task threw an exception!
+          // This will clear out the list of tasks, allowing all threads to finish.
+          m_scheduler->abort(std::runtime_error(e.what()));
+        }
 
         // We now delete the task to free up memory
         delete task;

@@ -39,6 +39,10 @@ namespace Kernel
       m_cost(cost)
     { }
 
+    /// Destructor
+    virtual ~Task()
+    {}
+
     //---------------------------------------------------------------------------------------------
     /** Main method that performs the work for the task. */
     virtual void run() = 0;

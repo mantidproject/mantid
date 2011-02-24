@@ -19,6 +19,7 @@ using namespace Mantid::Kernel;
 
 //#include <boost/thread.hpp>
 
+//=======================================================================================
 
 class TimeWaster
 {
@@ -130,6 +131,7 @@ private:
   ThreadScheduler * m_scheduler;
   size_t depth;
 };
+
 
 
 
@@ -367,6 +369,29 @@ public:
   {
     do_StressTest_TasksThatCreateTasks(new ThreadSchedulerLargestCost());
   }
+
+  //=======================================================================================
+  /** Task that throws an exception */
+  class TaskThatThrows : public Task
+  {
+    void run()
+    {
+      throw Mantid::Kernel::Exception::NotImplementedError("Test exception from TaskThatThrows.");
+    }
+  };
+
+//  //--------------------------------------------------------------------
+//  void test_TaskThatThrows()
+//  {
+//    ThreadPool p(new ThreadSchedulerFIFO(),1);
+//
+//    for (int i=0; i< 10; i++)
+//    {
+//      double cost = i;
+//      p.schedule( new TaskThatThrows());
+//    }
+//    TS_ASSERT_THROWS( p.joinAll() , std::runtime_error);
+//  }
 
 };
 

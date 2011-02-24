@@ -52,7 +52,7 @@ namespace Kernel
     /** Constructor
      */
     ThreadScheduler()
-    : m_cost(0), m_costExecuted(0)
+    : m_cost(0), m_costExecuted(0), m_abortException(""), m_aborted(false)
     {
     }
 
@@ -83,6 +83,21 @@ namespace Kernel
     { (void) task; //Ignore argument
     }
   
+    //-----------------------------------------------------------------------------------
+    /** Signal to the scheduler that a task is complete. The
+     * scheduler may release mutexes, etc.
+     *
+     * @param exception :: the exception that aborted the run.
+     */
+    virtual void abort(std::runtime_error exception)
+    {
+      // Save the exception for re-throwing
+      m_abortException = exception;
+      m_aborted = true;
+      // Clear (and delete) the queue
+      clear();
+    }
+
 
     //-----------------------------------------------------------------------------------
     /// Returns the size of the queue
@@ -106,6 +121,19 @@ namespace Kernel
       return m_costExecuted;
     }
 
+    //-------------------------------------------------------------------------------
+    /// Returns the exception that was caught, if any.
+    std::runtime_error getAbortException()
+    {
+      return m_abortException;
+    }
+    //-------------------------------------------------------------------------------
+    /// Returns true if the execution was aborted.
+    bool getAborted()
+    {
+      return m_aborted;
+    }
+
   protected:
     /// Total cost of all tasks
     double m_cost;
@@ -113,6 +141,10 @@ namespace Kernel
     double m_costExecuted;
     /// Mutex to prevent simultaneous access to the queue.
     Mutex m_queueLock;
+    /// The exception that aborted the run.
+    std::runtime_error m_abortException;
+    /// The run was aborted due to an exception
+    bool m_aborted;
 
   };
 
@@ -179,6 +211,9 @@ namespace Kernel
     void clear()
     {
       m_queueLock.lock();
+      // Empty out the queue and delete the pointers!
+      for (std::deque<Task*>::iterator it=m_queue.begin(); it != m_queue.end(); it++)
+        delete *it;
       m_queue.clear();
       m_cost = 0;
       m_costExecuted = 0;
@@ -292,6 +327,9 @@ namespace Kernel
     void clear()
     {
       m_queueLock.lock();
+      // Empty out the queue and delete the pointers!
+      for (std::multimap<double, Task*>::iterator it=m_map.begin(); it != m_map.end(); it++)
+        delete it->second;
       m_map.clear();
       m_cost = 0;
       m_costExecuted = 0;
