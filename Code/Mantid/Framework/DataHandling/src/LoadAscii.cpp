@@ -304,7 +304,7 @@ namespace Mantid
     /**
     * Return true if the line is to be skipped.
     * @param line :: The line to be checked
-    * @param returns True if the line should be skipped
+    * @return True if the line should be skipped
     */
     bool LoadAscii::skipLine(const std::string & line) const
     {

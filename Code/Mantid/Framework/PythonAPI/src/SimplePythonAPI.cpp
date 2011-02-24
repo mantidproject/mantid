@@ -283,7 +283,7 @@ namespace Mantid
 
     /**
      * Write a spcial function definition for the smarter Load algorithm
-     * @param[in,out] module :: The file stream
+     * @param[in,out] os :: The file stream
      * @param async :: If true then the algorithm will run asynchrnously
      */
     void SimplePythonAPI::writeLoadFunction(std::ostream & os, bool async)

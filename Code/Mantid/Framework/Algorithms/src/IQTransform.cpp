@@ -124,8 +124,8 @@ void IQTransform::exec()
 }
 
 /** Subtracts a constant from the data values in the given workspace
- *  @param ws    The workspace to perform the subtraction on
- *  @param value The value to subtract from each data point
+ *  @param Y :: The vector from which to subtract
+ *  @param value :: The value to subtract from each data point
  */
 void IQTransform::subtractBackgroundValue(MantidVec& Y, const double value)
 {

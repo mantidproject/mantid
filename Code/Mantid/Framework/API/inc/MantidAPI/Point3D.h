@@ -38,8 +38,11 @@ namespace Mantid
         class DLLExport Point3D
         {
         public:
+          /// Return the X value
           virtual double getX() const = 0;
+          /// Return the Y value
           virtual double getY() const = 0;
+          /// Return the Z value
           virtual double getZ() const = 0;
           virtual ~Point3D(){};
         };

@@ -207,9 +207,8 @@ namespace API
     std::fill(m_index.begin(),m_index.end(),0);
   }
 
-  /**
-    * Constructor.
-    * @param ws :: A pointer to a MD funtion.
+  /** Constructor.
+    * @param fun :: A pointer to a MD funtion.
     */
   IFunctionMD::MDIterator::MDIterator(const IFunctionMD* fun):
   m_workspace(fun->m_workspace),
@@ -236,9 +235,9 @@ namespace API
     return m_dataSize;
   }
 
-  /**
-    * Get the value of the i-th coordinate at the current point.
+  /** Get the value of the i-th coordinate at the current point.
     * @param i :: Index of the dimension.
+    * @return the value of the i-th coordinate at the current point.
     */
   double IFunctionMD::MDIterator::getAxisValue(int i)const
   {
@@ -246,9 +245,9 @@ namespace API
     return dim->getX(m_index[i]);
   }
 
-  /**
-    * Return the current value in a data array
-    * @param data :: A pointer to the first element of a data array. 
+  /** Return the current value in a data array
+    * @param data :: A pointer to the first element of a data array.
+    * @return the current value in a data array
     */
   double IFunctionMD::MDIterator::getData(const double* data)const
   {

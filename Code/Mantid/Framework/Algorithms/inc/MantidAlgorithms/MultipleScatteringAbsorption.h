@@ -89,9 +89,7 @@ private:
    *  @param coeff3 ::      The total scattering cross section
    *  @param tof ::         Array of times-of-flight at bin boundaries
    *                     (or bin centers) for the spectrum, in microseconds
-   *  @param n_tofs ::      The number of values the tof array
    *  @param y_val ::       The spectrum values
-   *  @param n_ys ::        The number of spectrum values in the y_val array
    */
   void apply_msa_correction( double total_path,
                              double angle_deg,

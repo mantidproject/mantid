@@ -387,12 +387,10 @@ namespace Mantid
       return Parameter_sptr();
     }
 
-    /** 
-     * FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up 
+    /** FASTER LOOKUP in multithreaded loops. Find a parameter by name, recursively going up
      * the component tree to higher parents.
      * @param comp :: The component to start the search with
      * @param name :: Parameter name
-     * @param type :: An optional type string
      * @returns the first matching parameter.
      */
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp, const char * name) const

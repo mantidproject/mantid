@@ -64,9 +64,9 @@ namespace Mantid
 
     /**
     * Quick file always returns false here
-    * @param filePath File path
-    * @param nread Number of bytes read
-    * @param header_buffer A buffer containing the nread bytes
+    * @param filePath :: File path
+    * @param nread :: Number of bytes read
+    * @param header :: A buffer containing the nread bytes
     */
     bool Load::quickFileCheck(const std::string& filePath,size_t nread,const file_header& header)
     {
@@ -76,7 +76,7 @@ namespace Mantid
 
     /**
     * File check by looking at the structure of the data file
-    * @param filePath The full file path
+    * @param filePath :: The full file path
     * @returns -1
     */
     int Load::fileCheck(const std::string& filePath)

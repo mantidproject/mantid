@@ -702,12 +702,12 @@ std::string CompositeFunction::parameterLocalName(int i)const
   return m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
 }
 
-/** Initialize the function providing it the workspace
- * @param workspace :: The shared pointer to a workspace to which the function will be fitted
- * @param spec :: The number of a spectrum for fitting
- * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
- * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
- */
+// /** Initialize the function providing it the workspace
+// * @param workspace :: The shared pointer to a workspace to which the function will be fitted
+// * @param spec :: The number of a spectrum for fitting
+// * @param xMin :: The minimum bin index of spectrum spec that will be used in fitting
+// * @param xMax :: The maximum bin index of spectrum spec that will be used in fitting
+// */
 //void CompositeFunction::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 //{
 //  IFitFunction::setMatrixWorkspace(workspace,spec,xMin,xMax);

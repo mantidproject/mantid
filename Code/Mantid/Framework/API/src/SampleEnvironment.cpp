@@ -96,8 +96,8 @@ namespace Mantid
     
     /**
      * Update the given track with intersections within the environment 
-     * @param [Input/Output] The track is update with an intersections with the
-     * environment
+     * @param track :: The track is updated with an intersection with the
+     *        environment
      */
     void SampleEnvironment::interceptSurfaces(Track & track) const
     {

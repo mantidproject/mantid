@@ -438,8 +438,6 @@ class DLLExport InstrumentValidator : public Kernel::IValidator<boost::shared_pt
 {
 public:
   /** Constructor
-   *  @param mustBeHistogram :: Flag indicating whether the check is that a workspace should
-   *                         contain histogram data (true, default) or shouldn't (false).
    */
   explicit InstrumentValidator() {}
 

@@ -149,10 +149,9 @@ namespace Mantid
       return p->ParameterType<T>::value();
     }
 
-    /**
-     * Sets the value of the parameter
+    /** Sets the value of the parameter
      * @tparam T The concrete type
-     * @param The :: value of the parameter
+     * @param t :: value of the parameter
      */
     template<class T>
     void Parameter::set(const T& t)
@@ -166,8 +165,7 @@ namespace Mantid
     // Template definitions - ParameterType class
     //--------------------------------------------------------------------------
 
-    /**
-     * Return the value of the parameter as a string
+    /** Return the value of the parameter as a string
      * @tparam T The type of the parameter
      * @returns A string representation of the parameter
      */

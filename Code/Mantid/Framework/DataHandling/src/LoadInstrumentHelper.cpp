@@ -152,8 +152,8 @@ void LoadInstrumentHelper::getValidFromTo(const std::string& IDFfilename, std::s
 /** Return workspace start date as an ISO 8601 string. If this info not stored in workspace the 
 *   method returns current date.
 *
-*  @param workspace workspace to get information from
-*  @return workspace start date
+*  @param workspace :: workspace to get information from
+*  @return workspace start date as a string
 */
 std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<API::MatrixWorkspace>& workspace)
 {

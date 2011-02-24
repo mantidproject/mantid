@@ -138,7 +138,8 @@ namespace CurveFitting
 
   /**
    * Constructor. Creates declared -> active index map
-   * @param f :: Pointer to the Fit algorithm
+   * @param fun :: Pointer to the Fit algorithm
+   * @param cf :: ICostFunction
    */
   GSL_FitData::GSL_FitData(API::IFitFunction* fun,ICostFunction* cf):
   function(fun),costFunc(cf)

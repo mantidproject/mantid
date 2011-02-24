@@ -75,15 +75,14 @@ namespace Mantid
     /**
      * Get a pointer to the sample shape object. It is assumed that this is defined within
      * its own coordinate system with its centre at [0,0,0]
-     * @returns A reference to the object describing the shape
+     * @return A reference to the object describing the shape
      */
     const Object& Sample::getShape() const
     {
       return m_shape;
     }
 
-    /**
-     * Set the object that describes the sample shape. It is assumed that this is defined such
+    /** Set the object that describes the sample shape. It is assumed that this is defined such
      * that its centre is at [0,0,0]
      * @param object :: The object describing the shape
      * @throw An std::invalid_argument error if the object does 
@@ -101,9 +100,8 @@ namespace Mantid
       }
     }
 
-    /**
-     * Return the material.
-     * @returns A reference to the material the sample is composed of
+    /** Return the material.
+     * @return A reference to the material the sample is composed of
      */
     const Material & Sample::getMaterial() const
     {
@@ -121,7 +119,7 @@ namespace Mantid
 
     /**
      * Return a reference to the sample environment that this sample is attached to
-     * @returns A const reference to a SampleEnvironment object
+     * @return A const reference to a SampleEnvironment object
      * @throw std::runtime_error If the environment has not been defined
      */
     const SampleEnvironment & Sample::getEnvironment() const

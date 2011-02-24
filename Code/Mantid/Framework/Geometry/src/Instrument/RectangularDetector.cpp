@@ -56,14 +56,6 @@ RectangularDetector::RectangularDetector(const std::string& n, IComponent* refer
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
-///** Copy constructor
-// *  @param other :: RectangularDetector to copy
-// */
-//RectangularDetector::RectangularDetector(const RectangularDetector& other) :
-//  CompAssembly(other), IObjComponent(other)
-//{
-//  //TODO: Copy other fields here
-//}
 
 /** Destructor
  */
