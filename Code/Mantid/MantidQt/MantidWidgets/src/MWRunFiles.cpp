@@ -509,7 +509,7 @@ QStringList MWRunFiles::getFileExtensionsFromAlgorithm(const QString & algName, 
 *  files
 *  @return the names of the selected files as a comma separated list
 */
-QString MWRunFiles::openFileDia()
+QString MWRunFiles::openFileDialog()
 {
   QStringList filenames;
   QString dir = m_lastDir;
@@ -534,7 +534,6 @@ QString MWRunFiles::openFileDia()
     return "";
   }
   m_lastDir = QFileInfo(filenames.front()).absoluteDir().path();
-  // turns the QStringList into a coma separated list inside a QString
   return filenames.join(", ");
 }
 
@@ -574,7 +573,7 @@ void MWRunFiles::refreshValidator()
 */
 void MWRunFiles::browseClicked()
 {
-  QString uFile = openFileDia();
+  QString uFile = openFileDialog();
   if( uFile.trimmed().isEmpty() ) return;
 
   if( this->allowMultipleFiles() )

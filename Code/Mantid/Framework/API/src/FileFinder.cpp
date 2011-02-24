@@ -168,7 +168,9 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
 {
   if (hint.find(".") != std::string::npos)
   {
-    return getFullPath(hint);
+    std::string path = getFullPath(hint);
+    if( !path.empty() && !Poco::File(path).exists() ) path = "";
+    return path;
   }
   std::string fName = makeFileName(hint);
   const std::vector<std::string> facility_extensions =

@@ -241,23 +241,19 @@ bool AlgorithmDialog::setPropertyValues()
     Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
     try
     {
-      //m_algorithm->setPropertyValue(pName.toStdString(), value.toStdString());
       error = p->setValue(value.toStdString());
     }
     catch(std::exception & err_details)
     {
       error = err_details.what();
-      allValid = false;
     }
+    if( !error.empty() ) allValid = false;
+    // If there's no validator then assume it's handling its own validation notification
     if( validator && validator->parent() )
     {
       validator->setToolTip(QString::fromStdString(error));
       if( error.empty() ) validator->hide();
-      else 
-      {
-	validator->show();
-	allValid = false;
-      }
+      else validator->show();
     }
   }
   return allValid;

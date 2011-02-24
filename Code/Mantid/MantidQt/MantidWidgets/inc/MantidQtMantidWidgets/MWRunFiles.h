@@ -116,7 +116,7 @@ namespace MantidQt
       /// Create an extension list from the name algorithm and property
       QStringList getFileExtensionsFromAlgorithm(const QString & algName, const QString &propName);
       /// Open a file dialog
-      QString openFileDia();
+      QString openFileDialog();
       /// flag a problem with the supplied entry number, an empty string means no error
       void setEntryNumProblem(const QString & message);
       /// displays the validator red star if either m_fileProblem or m_entryNumProblem are not empty
