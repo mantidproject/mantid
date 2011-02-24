@@ -46,12 +46,22 @@ double AlignDetectors::calcConversion(const double l1,
                       const double beamline_norm,
                       const Geometry::V3D &samplePos,
                       const Geometry::IDetector_const_sptr &det,
-                      const double offset)
+                      const double offset, 
+                      bool vulcancorrection)
 {
   // Get the sample-detector distance for this detector (in metres)
 
   // The scattering angle for this detector (in radians).
-  Geometry::V3D detPos = det->getPos();
+  Geometry::V3D detPos;
+  if (vulcancorrection)
+  {
+    detPos = det->getParent()->getPos();
+  }
+  else
+  {
+    detPos = det->getPos();
+  }
+
   // Now detPos will be set with respect to samplePos
   detPos -= samplePos;
   // 0.5*cos(2theta)
@@ -75,7 +85,8 @@ double AlignDetectors::calcConversion(const double l1,
                       const Geometry::V3D &samplePos,
                       const IInstrument_const_sptr &instrument,
                       const std::vector<int> &detectors,
-                      const std::map<int,double> &offsets)
+                      const std::map<int,double> &offsets,
+                      bool vulcancorrection)
 {
   double factor = 0.;
   double offset;
@@ -91,7 +102,7 @@ double AlignDetectors::calcConversion(const double l1,
       offset = 0.;
     }
     factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(*iter), offset);
+                             instrument->getDetector(*iter), offset, vulcancorrection);
   }
   return factor / static_cast<double>(detectors.size());
 }
@@ -141,7 +152,8 @@ void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
  * @return map of conversion factors between TOF and dSpacing
  */
 std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  const std::map<int,double> &offsets)
+                                  const std::map<int,double> &offsets,
+                                  bool vulcancorrection)
 {
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = inputWS->getInstrument();
@@ -173,7 +185,7 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
       offset = 0.;
 
     //Compute the factor
-    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, det, offset);
+    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, vulcancorrection);
 
     //Save in map
     (*myMap)[detectorID] = factor;
@@ -245,6 +257,9 @@ void AlignDetectors::init()
     "The name to use for the output workspace" );
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),
      "The CalFile containing the position correction factors");
+  declareProperty(
+      new PropertyWithValue<bool>("VULCANDspacemapFile", false, Direction::Input),
+    "Optional: Only applies if you ran DspacemaptoCal file for VULCAN corrections.\n");
 }
 
 
@@ -260,6 +275,7 @@ void AlignDetectors::exec()
 
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
+  bool vulcancorrection = getProperty("VULCANDspacemapFile");
   std::map<int,double> offsets;
   std::map<int,int> groups; // will be ignored
   progress(0.0,"Reading calibration file");
@@ -271,7 +287,7 @@ void AlignDetectors::exec()
   const int numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
-  this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsets);
+  this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsets, vulcancorrection);
 
   //Check if its an event workspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);

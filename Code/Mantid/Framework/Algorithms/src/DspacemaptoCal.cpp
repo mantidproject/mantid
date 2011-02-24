@@ -180,7 +180,7 @@ void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorksp
 
     //Compute the factor
     double offset = 0.0;
-    double factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset);
+    double factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, false);
     offset=dspace[detectorID]/factor -1.0 ;
     // Save in the map
     offsets[detectorID] = offset;
@@ -233,7 +233,7 @@ void DspacemaptoCal::CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorksp
     if( vulcan_iter != vulcan.end() )
       vulcan_factor = vulcan_iter->second;
     // The actual factor is 10^(-value_in_the_file)
-    vulcan_factor = exp(-vulcan_factor*log(10.0));
+    vulcan_factor = pow(10.0,-vulcan_factor);
 
     // At this point, tof_corrected = vulcan_factor * tof_input
     // So this is the offset
