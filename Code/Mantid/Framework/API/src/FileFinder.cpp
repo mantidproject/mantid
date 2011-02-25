@@ -49,10 +49,17 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
-  // First try the path relative to the current directory
-  Poco::File fullPath(Poco::Path().resolve(fName));
-  if( fullPath.exists() ) return fullPath.path();
 
+  // First try the path relative to the current directory. Can throw in some circumstances with extensions that have wild cards
+  try
+  {
+	Poco::File fullPath(Poco::Path().resolve(fName));
+	if( fullPath.exists() ) return fullPath.path();
+  }
+  catch(std::exception&)
+  {
+  }
+  
   const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
   std::vector<std::string>::const_iterator it = searchPaths.begin();
   for (; it != searchPaths.end(); ++it)
@@ -183,7 +190,7 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
   {
     filename = makeFileName(hint);
   }
-
+ 
   const std::vector<std::string> facility_extensions =
       Kernel::ConfigService::Instance().Facility().extensions();
   // select allowed extensions
@@ -212,7 +219,7 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
     if (!path.empty())
       return path;
   }
-
+  
   // Search the archive of the default facility
   std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
   std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
@@ -235,8 +242,6 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
             continue;
             std::set<std::string> files;
             Kernel::Glob::glob(pathPattern, files);
-            std::cerr << "Searching for:" << pathPattern.toString() << '\n';
-            std::cerr << "Found:" << files.size() << '\n';
           }
           else
           {
