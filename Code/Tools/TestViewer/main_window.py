@@ -176,6 +176,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self, QtCore.SIGNAL("testMonitorChanged()"), self.run_selected)
         
         self.last_tree_update = time.time()
+        self.last_console_update = time.time()
         # The accumulated stdoutput from commands
         self.stdout = ""
         
@@ -327,7 +328,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         if color != "":
             line = '<font color="%s">%s</font>' % (color, line)
         # Add a new line 
-        print "---" + line
         return line + "<br>\n"
     
     #-----------------------------------------------------------------------------
@@ -371,10 +371,12 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                 else:
                     # Accumulated stdout
                     self.stdout +=  self.markup_console( unicode(obj) )
-                    self.textConsole.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
-                                              self.stdout )
-                    sb = self.textConsole.verticalScrollBar();
-                    sb.setValue(sb.maximum());
+                    if (time.time() - self.last_console_update) > 1.5: # Dont update more often than this: 
+                        self.textConsole.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' +
+                                                  self.stdout )
+                        sb = self.textConsole.verticalScrollBar();
+                        sb.setValue(sb.maximum());
+                        self.last_console_update = time.time()
                 
                 
     #-----------------------------------------------------------------------------

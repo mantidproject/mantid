@@ -947,6 +947,9 @@ class MultipleProjects(object):
     def discover_CXX_projects(self, path, source_path):
         """Look for CXXTest projects in the given paths.
         Populates all the test in it."""
+        
+        path = os.path.abspath(path)
+        
         self.source_path = source_path
         self.projects = []
 
@@ -1205,8 +1208,9 @@ def test_run_print_callback(obj):
         print "Made project %s" % pj.name
         
     else:
-        print "-->" + obj     
-        sys.stdout.flush() 
+        pass
+#        print "-->" + obj     
+#        sys.stdout.flush() 
           
         
 
