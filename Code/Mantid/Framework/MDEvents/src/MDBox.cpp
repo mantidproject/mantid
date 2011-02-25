@@ -113,22 +113,6 @@ namespace MDEvents
 
 
 
-
-
-
-
-
-  template DLLExport class MDBox<MDEvent<1>, 1>;
-  template DLLExport class MDBox<MDEvent<2>, 2>;
-  template DLLExport class MDBox<MDEvent<3>, 3>;
-  template DLLExport class MDBox<MDEvent<4>, 4>;
-  template DLLExport class MDBox<MDEvent<5>, 5>;
-  template DLLExport class MDBox<MDEvent<6>, 6>;
-  template DLLExport class MDBox<MDEvent<7>, 7>;
-  template DLLExport class MDBox<MDEvent<8>, 8>;
-  template DLLExport class MDBox<MDEvent<9>, 9>;
-
-
 }//namespace MDEvents
 
 }//namespace Mantid

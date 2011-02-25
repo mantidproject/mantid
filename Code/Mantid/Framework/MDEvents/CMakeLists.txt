@@ -3,7 +3,8 @@ set (SRC_FILES
 	src/MDEventWorkspace.cpp
 	src/MDBox.cpp               
 	src/MDGridBox.cpp               
-	src/MDDeclarations.cpp               
+	src/MDEventFactory.cpp
+    	src/CreateMDEventWorkspace.cpp
 )
 
 # Header files
@@ -13,8 +14,10 @@ set (INC_FILES
 	inc/MantidMDEvents/MDBox.h
 	inc/MantidMDEvents/MDGridBox.h
 	inc/MantidMDEvents/MDEventWorkspace.h
+	inc/MantidMDEvents/MDEventFactory.h
 	inc/MantidMDEvents/MDDimensionExtents.h
 	inc/MantidMDEvents/BoxController.h
+	inc/MantidMDEvents/CreateMDEventWorkspace.h
 )
 
 # Test files. Other source files required.
@@ -23,7 +26,9 @@ set (TEST_FILES
 	test/MDEventWorkspaceTest.h  
 	test/MDBoxTest.h  
 	test/MDGridBoxTest.h  
-	test/BoxControllerTest.h  
+	test/BoxControllerTest.h
+	test/MDEventFactoryTest.h
+	test/CreateMDEventWorkspaceTest.h
 )
 
 set ( GMOCK_TEST_FILES

@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidAPI/Workspace.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
@@ -30,8 +31,8 @@ namespace MDEvents
 
   };
 
-
-
+  /// Shared pointer to a generic IMDEventWorkspace
+  typedef boost::shared_ptr<IMDEventWorkspace> IMDEventWorkspace_sptr;
 
 
 }//namespace MDEvents

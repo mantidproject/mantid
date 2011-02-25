@@ -67,6 +67,11 @@ namespace MDEvents
     //    //typedef MDEvent<nd> Event;
 
 
+  public:
+    /// Typedef for a shared pointer of this kind of event workspace
+    typedef boost::shared_ptr<MDEventWorkspace<MDE, nd> > sptr;
+
+
   };
 
 

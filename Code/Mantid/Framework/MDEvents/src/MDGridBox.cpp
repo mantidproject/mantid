@@ -187,22 +187,6 @@ namespace MDEvents
 
 
 
-
-
-
-
-
-  template DLLExport class MDGridBox<MDEvent<1>, 1>;
-  template DLLExport class MDGridBox<MDEvent<2>, 2>;
-  template DLLExport class MDGridBox<MDEvent<3>, 3>;
-//  template DLLExport class MDGridBox<MDEvent<4>, 4>;
-//  template DLLExport class MDGridBox<MDEvent<5>, 5>;
-//  template DLLExport class MDGridBox<MDEvent<6>, 6>;
-//  template DLLExport class MDGridBox<MDEvent<7>, 7>;
-//  template DLLExport class MDGridBox<MDEvent<8>, 8>;
-//  template DLLExport class MDGridBox<MDEvent<9>, 9>;
-
-
 }//namespace MDEvents
 
 }//namespace Mantid
