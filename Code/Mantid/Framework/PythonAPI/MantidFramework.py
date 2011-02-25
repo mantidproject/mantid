@@ -20,7 +20,7 @@ else:
 # --- Import the Mantid API ---
 if os.name == 'nt':
     from MantidPythonAPI import *
-    from MantidPythonAPI import _binary_op
+    from MantidPythonAPI import _binary_op, _equals_op
 else:
     # 
     # To enable symbol sharing across extension modules (i.e. loaded dynamic libraries)
@@ -45,7 +45,7 @@ else:
         sys.setdlopenflags(dynload.RTLD_NOW | dynload.RTLD_GLOBAL)
 
     from libMantidPythonAPI import *
-    from libMantidPythonAPI import _binary_op
+    from libMantidPythonAPI import _binary_op, _equals_op
     sys.setdlopenflags(saved_dlopenflags)
 # --- End of library load ---
 
@@ -495,6 +495,17 @@ class WorkspaceProxy(ProxyObject):
         lhs = lhs_info()
         return self.__do_operation('Divide', rhs,inplace=True, reverse=False,
                                    lhs_vars=lhs)
+    
+    def equals(self, rhs, tol):
+        """
+        Checks whether the given workspace matches this one within the allowed
+        tolerance. 
+            rhs - The workspace to compare with
+            tol - A tolerance value, e.g. 1e-08
+            
+        Returns True if the workspaces contain the same data, false otherwise
+        """
+        return _equals_op(self._getHeldObject(), rhs._getHeldObject(), tol)
 
     def isGroup(self):
         """
