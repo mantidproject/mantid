@@ -49,6 +49,9 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
   // If this is already a full path, nothing to do
   if (Poco::Path(fName).isAbsolute())
     return fName;
+  // First try the path relative to the current directory
+  Poco::File fullPath(Poco::Path().resolve(fName));
+  if( fullPath.exists() ) return fullPath.path();
 
   const std::vector<std::string>& searchPaths = Kernel::ConfigService::Instance().getDataSearchDirs();
   std::vector<std::string>::const_iterator it = searchPaths.begin();
@@ -166,13 +169,21 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
  */
 std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
 {
-  if (hint.find(".") != std::string::npos)
+  if( hint.empty() ) return "";
+  Poco::Path hintPath(hint);
+  if( !hintPath.getExtension().empty() )
   {
     std::string path = getFullPath(hint);
     if( !path.empty() && !Poco::File(path).exists() ) path = "";
     return path;
   }
-  std::string fName = makeFileName(hint);
+  // Do we need to try and form a filename from our preset rules
+  std::string filename(hint);
+  if( hintPath.depth() == 0 )  
+  {
+    filename = makeFileName(hint);
+  }
+
   const std::vector<std::string> facility_extensions =
       Kernel::ConfigService::Instance().Facility().extensions();
   // select allowed extensions
@@ -193,10 +204,11 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
   {
     extensions.assign(facility_extensions.begin(), facility_extensions.end());
   }
+
   std::vector<std::string>::const_iterator ext = extensions.begin();
   for (; ext != extensions.end(); ++ext)
   {
-    std::string path = getFullPath(fName + *ext);
+    std::string path = getFullPath(filename + *ext);
     if (!path.empty())
       return path;
   }
@@ -211,7 +223,7 @@ std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std:
         *Kernel::ConfigService::Instance().Facility().archiveSearch().begin());
     if (arch)
     {
-      std::string path = arch->getPath(fName);
+      std::string path = arch->getPath(filename);
       if (!path.empty())
       {
         std::vector<std::string>::const_iterator ext = extensions.begin();
