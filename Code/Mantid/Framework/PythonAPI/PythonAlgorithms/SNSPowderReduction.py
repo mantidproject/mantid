@@ -88,10 +88,10 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
                                  ['.txt'],
                                  Description="File with characterization runs denoted")
-#        self.declareProperty("FilterByTimeMin", 0.,
-#                             Description="Relative time to start filtering by")
-#        self.declareProperty("FilterByTimeMax", 0.,
-#                             Description="Relative time to stop filtering by")
+        self.declareProperty("FilterByTimeMin", 0.,
+                             Description="Relative time to start filtering by in seconds. Applies only to sample.")
+        self.declareProperty("FilterByTimeMax", 0.,
+                             Description="Relative time to stop filtering by in seconds. Applies only to sample.")
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Positive is linear bins, negative is logorithmic")
         self.declareProperty("BinInDspace", True,
@@ -136,12 +136,12 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension):
+    def _loadNeXusData(self, runnumber, extension, **filterWall):
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
         try: # first just try loading the file
             # TODO use timemin and timemax to filter what events are being read
-            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name)
+            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **filterWall)
 
             return alg.workspace()
         except:
@@ -157,16 +157,23 @@ class SNSPowderReduction(PythonAlgorithm):
             name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **filterWall)
 
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension):
+    def _loadData(self, runnumber, extension, filterWall=None):
+        filter = {}
+        if filterWall is not None:
+            if filterWall[0] > 0.:
+                filter["FilterByTimeStart"] = filterWall[0]
+            if filterWall[1] > 0.:
+                filter["FilterByTimeStop"] = filterWall[1]
+
         if  runnumber is None or runnumber <= 0:
             return None
 
         if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension)
+            return self._loadNeXusData(runnumber, extension, **filter)
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
@@ -184,7 +191,7 @@ class SNSPowderReduction(PythonAlgorithm):
                                      MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))
+                                   % (filterLogs[0], str(wksp)))            
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
         
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
@@ -264,11 +271,11 @@ class SNSPowderReduction(PythonAlgorithm):
         self._outDir = self.getProperty("OutputDirectory")
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
-        self.log().information("***************RUNS:%s" % str(samRuns))
+        filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
         for samRun in samRuns:
             # first round of processing the sample 
-            samRun = self._loadData(samRun, SUFFIX)
+            samRun = self._loadData(samRun, SUFFIX, filterWall)
             info = self._getinfo(samRun)
             samRun = self._focus(samRun, calib, info, filterLogs)
 
@@ -279,7 +286,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if canRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
-                    canRun = self._loadData(canRun, SUFFIX)
+                    canRun = self._loadData(canRun, SUFFIX, (0., 0.))
                     canRun = self._focus(canRun, calib, info)
                 else:
                     canRun = temp
@@ -293,7 +300,7 @@ class SNSPowderReduction(PythonAlgorithm):
             if vanRun > 0:
                 temp = mtd["%s_%d" % (self._instrument, vanRun)]
                 if temp is None:
-                    vanRun = self._loadData(vanRun, SUFFIX)
+                    vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
                     vanRun = self._focus(vanRun, calib, info)
                     ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
                     ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
