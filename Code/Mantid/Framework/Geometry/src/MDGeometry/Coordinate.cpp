@@ -78,10 +78,14 @@ namespace Geometry
 
   coordinate & coordinate::operator= (const coordinate & other)
   {
+    if(this != &other)
+    {
     m_x = other.m_x;
     m_y = other.m_y;
     m_z = other.m_z;
     m_t = other.m_t;
+    }
+    return *this;
   }
 
   double coordinate::getX() const
