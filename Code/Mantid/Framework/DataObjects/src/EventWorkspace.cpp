@@ -981,7 +981,7 @@ namespace DataObjects
   public:
     /// ctor
     EventSortingTask(const EventWorkspace * WS, int wiStart, int wiStop, EventSortType sortType, size_t howManyCores, Mantid::API::Progress * prog)
-    : m_wiStart(wiStart), m_wiStop(wiStop),  m_sortType(sortType), m_howManyCores(howManyCores), m_WS(WS), prog(prog)
+    : Task(), m_wiStart(wiStart), m_wiStop(wiStop),  m_sortType(sortType), m_howManyCores(howManyCores), m_WS(WS), prog(prog)
     {
       m_cost = 0;
       if (m_wiStop > m_WS->getNumberHistograms())

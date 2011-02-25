@@ -21,8 +21,8 @@ public:
   class TaskDoNothing : public Task
   {
   public:
-    TaskDoNothing() {}
-    TaskDoNothing(double cost) {m_cost = cost;}
+    TaskDoNothing() : Task() {}
+    TaskDoNothing(double cost) : Task() {m_cost = cost;}
 
     ~TaskDoNothing()
     {

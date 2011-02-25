@@ -101,7 +101,7 @@ class TaskThatAddsTasks : public Task
 public:
   // ctor
   TaskThatAddsTasks(ThreadScheduler * scheduler, size_t depth)
-  : m_scheduler(scheduler), depth(depth)
+  : Task(), m_scheduler(scheduler), depth(depth)
   {
     // Use a randomized cost function; this will have an effect on the sorted schedulers.
     m_cost = rand();
