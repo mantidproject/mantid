@@ -7,7 +7,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidAPI/IPeakFunction.h"
-//#include "MantidAPI/IFunction.h"
+#include "MantidKernel/VectorHelper.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/RebinParamsValidator.h"
 #include <boost/math/special_functions/fpclassify.hpp>
 #include <fstream>
 #include <ostream>
@@ -51,10 +53,10 @@ namespace Mantid
       declareProperty("YMax", 2, "Maximum of Y (row) Range to integrate for peak");
       declareProperty("TOFBinMin", -5, "Minimum of TOF Bin Range to integrate for peak");
       declareProperty("TOFBinMax", 5, "Maximum of TOF Bin Range to integrate for peak");
-      declareProperty("Params", "400.0,-0.004,45000.",
+      declareProperty(
+        new ArrayProperty<double>("Params", new RebinParamsValidator),
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
-        "Use bin boundaries close to peak you wish to maximize.\n"
         "Negative width values indicate logarithmic binning.");
 
     }
@@ -66,6 +68,12 @@ namespace Mantid
     void SingleCrystalTOFIntegration::exec()
     {
       retrieveProperties();
+  
+      // create TOF axis from Params
+      MantidVecPtr XValues;
+      const std::vector<double> rb_params=getProperty("Params");
+      const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues.access());
+
       std::string filename = getProperty("Filename");
       std::ifstream input(filename.c_str(), std::ios_base::in);
       std::string line;
@@ -82,15 +90,17 @@ namespace Mantid
        std::stringstream(line) >> id >> seqn >> h >> k >> l >> col >> row >> chan >> l2
           >> twotheta >> az >> wl >> d >> ipk >> inti >> sigi >> rflg;
        if(ipk < 10) continue;
-       fout << std::setw(2) << detnum << std::setw(6) << seqn << std::setw(5) << h << std::setw(5) << k << std::setw(5) << l << std::setw(8) << std::setprecision(2) << col << std::setw(8) << std::setprecision(2) << row << std::setw(8) << std::setprecision(2) << chan << std::setw(9) << std::setprecision(3) << l2
+       fout << std::fixed << std::setw(2) << detnum << std::setw(6) << seqn << std::setw(5) << h << std::setw(5) << k << std::setw(5) << l << std::setw(8) << std::setprecision(2) << col << std::setw(8) << std::setprecision(2) << row << std::setw(8) << std::setprecision(2) << chan << std::setw(9) << std::setprecision(3) << l2
            << std::setw(9) << std::setprecision(5) << twotheta << std::setw(9) << std::setprecision(5) << az << std::setw(10) << std::setprecision(6) << wl << std::setw(9) << std::setprecision(3) << d << std::setw(6) << ipk << std::setw(11) << std::setprecision(2) << inti << std::setw(11) << std::setprecision(2) << sigi ;
 
       std::ostringstream Peakbank;
       Peakbank <<"bank"<<detnum;
-      int XPeak = col-1;
-      int YPeak = row-1;
-      tofISAW = 7.91*(l2+l1);
-      TOFPeak = chan-1;
+      int XPeak = int(col+0.5)-1;
+      int YPeak = int(row+0.5)-1;
+      tofISAW = wl * (l1+l2) / 3.956058e-1;
+      TOFPeak = VectorHelper::getBinIndex(XValues.access(),tofISAW);
+
+
       TOFmin = TOFPeak+Binmin;
       if (TOFmin<0) TOFmin = 0;
       TOFmax = TOFPeak+Binmax;
@@ -127,7 +137,7 @@ namespace Mantid
       IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
       bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
       bin_alg->setProperty("OutputWorkspace", "tmp2");
-      bin_alg->setPropertyValue("Params", getProperty("Params"));
+      bin_alg->setProperty<std::vector<double> >("Params", rb_params);
       try
       {
         bin_alg->execute();
@@ -179,7 +189,7 @@ namespace Mantid
       MantidVec &X = outputW->dataX(s);
       MantidVec &Y = outputW->dataY(s);
       const double peakLoc = X[TOFPeak];
-      const double peakHeight = Y[TOFPeak];
+      const double peakHeight =  Y[TOFPeak];
       // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
       if ( boost::math::isnan(peakHeight) ) return;
 
@@ -223,6 +233,8 @@ namespace Mantid
       double bkg0 = params[0];*/
       double bkg0 = (Y[TOFmin]+Y[TOFmax])*0.5;
 
+      //for (int j=TOFmin; j <= TOFmax; ++j)std::cout <<X[j]<<"  ";
+      //std::cout <<"\n";
       //for (int j=TOFmin; j <= TOFmax; ++j)std::cout <<Y[j]<<"  ";
       //std::cout <<"\n";
       // Now subtract the background from the data
@@ -230,6 +242,8 @@ namespace Mantid
       {
          Y[j] -= bkg0;
       }
+      //for (int j=TOFmin; j <= TOFmax; ++j)std::cout <<Y[j]<<"  ";
+      //std::cout <<"\n";
 
       IAlgorithm_sptr fit_alg;
       try
@@ -272,9 +286,8 @@ namespace Mantid
       }
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       const MantidVec & DataValues = ws->readY(0);
-      //const MantidVec & FitValues = ws->readY(1);
+      const MantidVec & FitValues = ws->readY(1);
 
-      IFitFunction *out = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
       std::vector<double> params = fit_alg->getProperty("Parameters");
       /*Alpha0 = params[1];
       Alpha1 = params[2];
@@ -284,6 +297,8 @@ namespace Mantid
       Gamma = params[6];*/
       std::string funct = fit_alg->getPropertyValue("Function");
       std::cout <<funct<<"\n";
+
+      /*IFitFunction *out = FunctionFactory::Instance().createInitialized(fit_alg->getPropertyValue("Function"));
       IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
       const int n=1000;
       double *x = new double[n];
@@ -292,11 +307,11 @@ namespace Mantid
       for (int i=0; i < n; i++) {
         x[i] = X[TOFmin+1]+i*dx;
       }
-      pk->function(y,x,n);
+      pk->function(y,x,n);*/
 
       I = 0.0;
-      for (int i=0; i < n; i++) I+=y[i];
-      I*=double(DataValues.size())/double(n);
+      for (int i=0; i < static_cast<int>(DataValues.size()); i++) I+=FitValues[i];
+      //I*=double(DataValues.size())/double(n);
       sigI = sqrt(I+DataValues.size()*bkg0+DataValues.size()*DataValues.size()*bkg0);
       return;
     }
