@@ -1,10 +1,10 @@
 #ifndef IMDEVENTWORKSPACE_H_
 #define IMDEVENTWORKSPACE_H_
 
-#include "MantidKernel/System.h"
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/Dimension.h"
 #include "MantidAPI/Workspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/Dimension.h"
+#include "MantidMDEvents/MDEvent.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
