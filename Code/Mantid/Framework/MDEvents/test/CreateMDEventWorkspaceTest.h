@@ -26,13 +26,16 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_Something()
+  void test_exec()
   {
     std::string wsName = "CreateMDEventWorkspaceTest_out";
     CreateMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setPropertyValue("Dimensions", "3");
+    alg.setPropertyValue("Extents", "-1,1,-2,2,-3,3");
+    alg.setPropertyValue("Names", "x,y,z");
+    alg.setPropertyValue("Units", "m,mm,um");
     alg.setPropertyValue("OutputWorkspace",wsName);
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -47,6 +50,19 @@ public:
     TS_ASSERT_EQUALS( ws->getNumDims(), 3);
     TS_ASSERT_EQUALS( ws->getNPoints(), 0);
 
+    Dimension dim;
+    dim = ws->getDimension(0);
+    TS_ASSERT_DELTA( dim.getMax(), 1.0, 1e-6);
+    TS_ASSERT_EQUALS( dim.getName(), "x");
+    TS_ASSERT_EQUALS( dim.getUnits(), "m");
+    dim = ws->getDimension(1);
+    TS_ASSERT_DELTA( dim.getMax(), 2.0, 1e-6);
+    TS_ASSERT_EQUALS( dim.getName(), "y");
+    TS_ASSERT_EQUALS( dim.getUnits(), "mm");
+    dim = ws->getDimension(2);
+    TS_ASSERT_DELTA( dim.getMax(), 3.0, 1e-6);
+    TS_ASSERT_EQUALS( dim.getName(), "z");
+    TS_ASSERT_EQUALS( dim.getUnits(), "um");
   }
 
 

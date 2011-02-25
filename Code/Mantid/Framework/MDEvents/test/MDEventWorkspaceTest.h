@@ -34,6 +34,27 @@ public:
     delete ew3;
   }
 
+  void test_initialize_throws()
+  {
+    IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
+    TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
+    for (size_t i=0; i<5; i++)
+      ew->addDimension( Dimension(-1,1,"x","m") );
+    TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
+    delete ew;
+  }
+
+  void test_initialize()
+  {
+    IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
+    TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
+    for (size_t i=0; i<3; i++)
+      ew->addDimension( Dimension(-1,1,"x","m") );
+    TS_ASSERT_THROWS_NOTHING( ew->initialize() );
+    delete ew;
+  }
+
+
 
 };
 

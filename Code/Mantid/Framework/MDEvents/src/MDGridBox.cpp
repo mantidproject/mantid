@@ -141,6 +141,7 @@ namespace MDEvents
   TMDE(
   bool MDGridBox)::willSplit(size_t num) const
   {
+    (void) num; //Ignore compiler warning
     return false;
   }
 

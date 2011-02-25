@@ -7,6 +7,7 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDGridBox.h"
 
 namespace Mantid
 {
@@ -33,6 +34,9 @@ namespace MDEvents
     MDEventWorkspace();
     ~MDEventWorkspace();
 
+    /// Perform initialization after dimensions (and others) have been set.
+    virtual void initialize();
+
     virtual const std::string id() const;
 
     /** Returns the number of dimensions in this workspace */
@@ -52,6 +56,12 @@ namespace MDEvents
 
     /// Add a vector of MDEvents to the workspace.
     void addEvents(const std::vector<MDE> & events);
+
+    /// Return true if the underlying box is a MDGridBox.
+    bool isGridBox()
+    {
+      return (dynamic_cast<MDGridBox<MDE,nd> *>(data) != NULL);
+    }
 
   protected:
 

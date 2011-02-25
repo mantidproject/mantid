@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/Dimension.h"
 #include "MantidAPI/Workspace.h"
 #include <boost/shared_ptr.hpp>
 
@@ -23,11 +24,25 @@ namespace MDEvents
   DLLExport class IMDEventWorkspace  : public API::Workspace
   {
   public:
+
+    /// Perform initialization after dimensions (and others) have been set.
+    virtual void initialize() = 0;
+
     /** Returns the number of dimensions in this workspace */
     virtual int getNumDims() const = 0;
 
     /** Returns the total number of points (events) in this workspace */
     virtual size_t getNPoints() const = 0;
+
+    /// Add a new dimension
+    virtual void addDimension(Dimension dimInfo);
+
+    /// Get that dimension
+    virtual Dimension getDimension(size_t dim);
+
+  protected:
+    /// Vector with each dimension (length must match nd)
+    std::vector<Dimension> dimensions;
 
   };
 
