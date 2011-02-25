@@ -56,6 +56,10 @@ private:
   void init();
   /// Execution code
   void exec();
+  /**
+   *
+   */
+  void getAxisLength(const std::string &iline, int &length);
 };
 
 } // namespace DataHandling

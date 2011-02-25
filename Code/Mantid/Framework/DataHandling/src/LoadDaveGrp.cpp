@@ -1,7 +1,10 @@
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
+#include <fstream>
+#include <string>
 #include <vector>
+#include <iostream>
 
 namespace Mantid
 {
@@ -10,7 +13,7 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDaveGrp)
 
-void LoadDaveGrp::init()
+    void LoadDaveGrp::init()
 {
   std::vector<std::string> exts;
   exts.push_back(".grp");
@@ -24,9 +27,36 @@ void LoadDaveGrp::init()
 
 void LoadDaveGrp::exec()
 {
-  const int nGroups = 1;
-  const int xLength = 1;
-  const int yLength = 1;
+  const std::string filename = this->getProperty("Filename");
+
+  int xLength = 0;
+  int yLength = 0;
+  int nGroups = 0;
+
+  std::string line;
+
+  std::ifstream ifile(filename.c_str());
+  if (ifile.is_open())
+  {
+    // Skip first line
+    //ifile.getline(lineBuffer, lineSize);
+    std::getline(ifile, line);
+    // Size of x axis
+    std::getline(ifile, line);
+    this->getAxisLength(line, xLength);
+    // Skip next line
+    std::getline(ifile, line);
+    // Size of y axis
+    std::getline(ifile, line);
+    this->getAxisLength(line, yLength);
+    // This is also the number of groups (spectra)
+    nGroups = yLength;
+    // Skip next line
+    std::getline(ifile, line);
+    // Read in the x axis values
+
+  }
+  ifile.close();
 
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace = \
@@ -35,6 +65,12 @@ void LoadDaveGrp::exec()
           xLength, yLength));
 
   this->setProperty("OutputWorkspace", outputWorkspace);
+}
+
+void LoadDaveGrp::getAxisLength(const std::string &iline, int &length)
+{
+  std::istringstream is(iline);
+  is >> length;
 }
 
 } // namespace DataHandling
