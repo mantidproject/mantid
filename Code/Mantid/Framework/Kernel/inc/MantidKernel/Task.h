@@ -36,7 +36,7 @@ namespace Kernel
      * @param cost :: computational cost
      */
     Task(double cost) :
-      m_cost(cost)
+      m_cost(cost), m_mutex(NULL)
     { }
 
     /// Destructor

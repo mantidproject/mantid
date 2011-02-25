@@ -246,6 +246,7 @@ public:
     }
     TS_ASSERT_THROWS_NOTHING( p.joinAll() );
     TS_ASSERT_EQUALS( threadpooltest_vec.size(), 10);
+    if (threadpooltest_vec.size() < 10) return;
     // The first ones added are the first ones run.
     TS_ASSERT_EQUALS( threadpooltest_vec[0], 0);
     TS_ASSERT_EQUALS( threadpooltest_vec[1], 1);
