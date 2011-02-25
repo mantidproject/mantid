@@ -79,6 +79,8 @@ class SNSPowderReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("Sum", False,
+                             Description="Sum the runs. Does nothing for characterization runs")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
                              Description="If specified overrides value in CharacterizationRunsFile")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
@@ -273,11 +275,33 @@ class SNSPowderReduction(PythonAlgorithm):
         samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
+        if self.getProperty("Sum"):
+            samRun = None
+            info = None
+            for temp in samRuns:
+                temp = self._loadData(temp, SUFFIX, filterWall)
+                tempinfo = self._getinfo(temp)
+                temp = self._focus(temp, calib, tempinfo, filterLogs)
+                if samRun is None:
+                    samRun = temp
+                    info = tempinfo
+                else:
+                    if abs(tempinfo.freq - info.freq)/info.freq > .05:
+                        raise RuntimeError("Cannot add incompatible frequencies (%f!=%f)" \
+                                           % (tempinfo.freq, info.freq))
+                    if abs(tempinfo.wl - info.wl)/info.freq > .05:
+                        raise RuntimeError("Cannot add incompatible wavelengths (%f != %f)" \
+                                           % (tempinfo.wl, info.wl))
+                    Plus(samRun, temp, samRun)
+                    mtd.deleteWorkspace(str(temp))
+            samRuns = [samRun]
+
         for samRun in samRuns:
-            # first round of processing the sample 
-            samRun = self._loadData(samRun, SUFFIX, filterWall)
-            info = self._getinfo(samRun)
-            samRun = self._focus(samRun, calib, info, filterLogs)
+            # first round of processing the sample
+            if not self.getProperty("Sum"):
+                samRun = self._loadData(samRun, SUFFIX, filterWall)
+                info = self._getinfo(samRun)
+                samRun = self._focus(samRun, calib, info, filterLogs)
 
             # process the container
             canRun = self.getProperty("BackgroundNumber")
