@@ -137,6 +137,7 @@ namespace Mantid
 		* This is useful when the we download a file over internet and save to local drive,
 		* to open the file in binary or ascii mode
 		* @param fileName ::  file name
+    * @returns true if the file is a data file
 		*/
 		bool CDownloadDataFile::isDataFile(const std::string & fileName)
 		{			

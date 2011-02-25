@@ -5,6 +5,11 @@
 #include "MantidICat/ICatExport.h"
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
+
+namespace Mantid
+{
+	namespace ICat
+	{
 /**  SessionImpl is a singleton class responsible for saving the session id. 
      This class is used across all Mantid-ICat algorithms to get the session id 
 		
@@ -30,10 +35,7 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
-namespace Mantid
-{
-	namespace ICat
-	{
+
 		class EXPORT_OPT_MANTID_ICAT SessionImpl
 		{
 		public:

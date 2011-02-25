@@ -5,7 +5,13 @@
 #include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
 
 
-/** Logout class is responsible for disconnecting from  ICat DB .This class written as a Mantid algorithm. 
+
+namespace Mantid
+{
+	namespace ICat
+	{
+	
+  /** Logout class is responsible for disconnecting from  ICat DB .This class written as a Mantid algorithm. 
     
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 23/07/2010
@@ -29,11 +35,6 @@
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */	
-namespace Mantid
-{
-	namespace ICat
-	{
-	
 		class DLLExport CLogout: public API::Algorithm
 		{
 		public:

@@ -49,7 +49,9 @@ namespace Mantid
 			
 
 		};
-		// a class for throwing Session exception
+
+		/** a class for Throwing Session exception in Catalog module
+    */
 		class SessionException: public std::runtime_error
 		{
 
