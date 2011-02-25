@@ -21,7 +21,7 @@ namespace MDEvents
    * @date Dec 3, 2010
    *
    * */
-  DLLExport class IMDEventWorkspace  : public API::Workspace
+  class DLLExport IMDEventWorkspace  : public API::Workspace
   {
   public:
 

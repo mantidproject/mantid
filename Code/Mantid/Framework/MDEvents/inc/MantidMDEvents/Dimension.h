@@ -16,7 +16,7 @@ namespace MDEvents
    * @author
    * @date 2011-02-25 13:55:55.698592
    */
-  class Dimension
+  class DLLExport Dimension
   {
   public:
     Dimension();

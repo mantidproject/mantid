@@ -19,7 +19,7 @@ namespace MDEvents
   /** Simple class that holds the extents (min/max)
    * of a given dimension in a MD workspace or MDBox
    */
-  DLLExport class MDDimensionExtents
+  class DLLExport MDDimensionExtents
   {
   public:
 
