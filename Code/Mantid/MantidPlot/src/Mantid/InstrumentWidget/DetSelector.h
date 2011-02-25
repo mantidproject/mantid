@@ -39,7 +39,7 @@ public:
   virtual ~DetSelector(){}  ///< Destructor
   virtual void draw(QPainter& painter);
   virtual void start(int x, int y);
-  virtual void move(int x, int y){}
+  virtual void move(int , int ){}
   virtual void stop();
   static DetSelector* create(DetSelectionType type);
 protected:
