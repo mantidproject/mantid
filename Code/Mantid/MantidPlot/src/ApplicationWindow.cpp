@@ -408,14 +408,6 @@ void ApplicationWindow::init(bool factorySettings)
     results->setTextColor(Qt::black);
   }
 
-  // And the script window
-  // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
-  // flag, it is treated as a sub window of its parent
-  scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
-  scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
-  connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
-  connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
-  connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
 }
 
 void ApplicationWindow::showLogWindowContextMenu(const QPoint & p)
@@ -15489,6 +15481,18 @@ void ApplicationWindow::goToColumn()
 
 void ApplicationWindow::showScriptWindow(bool forceVisible)
 {
+  if( !scriptingWindow )
+  {
+    // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
+    // flag, it is treated as a sub window of its parent
+    scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
+    scriptingWindow->setObjectName("ScriptingWindow");
+    scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
+    connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
+    connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
+    connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
+  }
+
   if( forceVisible || scriptingWindow->isMinimized() || !scriptingWindow->isVisible() )
   {
     scriptingWindow->resize(d_script_win_size);

@@ -135,7 +135,9 @@ void ScriptManagerWidget::askSave(int index)
 {
   ScriptEditor *editor = qobject_cast<ScriptEditor*>(widget(index));
   if( !editor || !editor->isModified() ) return;
-
+  // Check we the editor can be seen
+  this->show();
+  this->raise();
   QMessageBox msg_box(this);
   msg_box.setModal(true);
   msg_box.setWindowTitle("MantidPlot");
