@@ -8,6 +8,7 @@ src/MD_File_hdfMatlab.cpp
 src/MD_File_hdfV1.cpp
 src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
+src/MDIndexCalculator.cpp
 src/MDWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
 src/MDDPoints_MemManager.cpp
@@ -26,6 +27,7 @@ inc/MDDataObjects/MD_File_hdfV1.h
 inc/MDDataObjects/MD_FileHoraceReader.h
 inc/MDDataObjects/MDImage.h
 inc/MDDataObjects/MDImageDatatypes.h
+inc/MDDataObjects/MDIndexCalculator.h
 inc/MDDataObjects/MDWorkspace.h
 inc/MDDataObjects/MD_FileTestDataGenerator.h
 inc/MDDataObjects/MDTestWorkspace.h 
@@ -35,7 +37,7 @@ inc/MDDataObjects/stdafx.h
 
 # Test files. Other source files required.
 set (TEST_FILES 
-test/HoraceReaderTest.h
+#test/HoraceReaderTest.h
 test/MD_FileFactoryTest.h
 test/MDDataPointDescriptionTest.h
 test/MDFileTestDataGeneratorTest.h
@@ -43,6 +45,7 @@ test/MDDPoints_MemManagerTest.h
 )
 
 set ( GMOCK_TEST_FILES
+test/MDIndexCalculatorTest.h
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h

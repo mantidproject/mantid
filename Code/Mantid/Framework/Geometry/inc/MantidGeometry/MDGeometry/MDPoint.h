@@ -35,23 +35,12 @@
 #include <vector>
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/MDGeometry/Coordinate.h"
 
 namespace Mantid
 {
-
-
   namespace Geometry
   {
-    struct EXPORT_OPT_MANTID_GEOMETRY coordinate
-    {
-      // Default constructor to avoid compiler warning about unitialized variables
-      coordinate() : x(0.0), y(0.0), z(0.0), t(0.0) {}
-      double x;
-      double y;
-      double z;
-      double t;
-    };
-
     //TODO: relocate once name is stable.
     class MDPoint;
     class EXPORT_OPT_MANTID_GEOMETRY SignalAggregate

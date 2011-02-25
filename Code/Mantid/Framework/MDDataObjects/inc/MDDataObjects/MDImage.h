@@ -112,7 +112,19 @@ public:
 	/** function has to be used by algorithms which change the values of the particular MDDataFiels to modify the value of the pixels sum*/
 	void setNpix(uint64_t newNPix){MD_IMG_array.npixSum=newNPix;}
 //*****************************************************************************************************************************************************************
-   //Temporary fix to get 3-D image data.
+  //Temporary fix to get 1-D image data
+	MD_image_point getPoint(int index)
+	{
+	  return this->MD_IMG_array.data[index];
+	}
+
+	//Temporary fix to get 3-D image data.
+	MD_image_point getPoint(int i,int j)       const
+	{
+	  return this->MD_IMG_array.data[nCell(i, j)];
+	}
+
+	//Temporary fix to get 3-D image data.
    MD_image_point getPoint(int i,int j,int k)       const
    {
      return this->MD_IMG_array.data[nCell(i, j, k)];

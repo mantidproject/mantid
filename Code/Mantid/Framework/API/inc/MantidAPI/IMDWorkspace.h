@@ -79,19 +79,19 @@ namespace Mantid
       virtual const std::vector<std::string> getDimensionIDs() const = 0;
 
       /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const = 0;

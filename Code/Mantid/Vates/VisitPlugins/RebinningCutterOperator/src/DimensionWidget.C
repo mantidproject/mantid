@@ -21,8 +21,15 @@ DimensionWidget::DimensionWidget(
     const int dimensionIndex,
     std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > vecNonIntegratedDimensions )
 :
+    m_layout(NULL),
+    m_nBinsBox(NULL),
+    m_minBox(NULL),
+    m_maxBox(NULL),
+    m_dimensionCombo(NULL),
+    m_currentDimensionIndex(0),
+    m_name(name),
     m_geometryWidget(geometryWidget),
-    m_vecNonIntegratedDimensions(vecNonIntegratedDimensions), m_name(name)
+    m_vecNonIntegratedDimensions(vecNonIntegratedDimensions)
 {
   constructWidget(dimensionIndex);
   populateWidget(dimensionIndex);
@@ -119,7 +126,7 @@ int DimensionWidget::getNBins() const
 
 int DimensionWidget::getSelectedIndex() const
 {
-  m_dimensionCombo->currentIndex();
+  return m_dimensionCombo->currentIndex();
 }
 
 void DimensionWidget::setMinimum(double minimum)

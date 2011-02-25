@@ -1,7 +1,7 @@
 #include "MDDataObjects/stdafx.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
-
+#include "MDDataObjects/MDIndexCalculator.h"
 
 namespace Mantid{
   namespace MDDataObjects{
@@ -38,6 +38,11 @@ namespace Mantid{
        this->m_spFile = spFile;
        this->m_spMDImage = getImageData(geometry);
        this->m_spDataPoints = getDataPoints(m_spMDImage); //Takes a pointer to the image data in order to be able to extract an up-to-date geometry.
+       if(NULL != m_spFile.get())
+       {
+         this->m_spDataPoints->initialize(m_spMDImage, m_spFile);
+         this->m_spFile->read_MDImg_data(*m_spMDImage);
+       }
      }
 //
 void
@@ -157,15 +162,29 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       }
     }
 
+    void  MDWorkspace::setInstrument(const IInstrument_sptr& instr)
+    {
+      boost::shared_ptr<Instrument> tmp = boost::dynamic_pointer_cast<Instrument>(instr);
+      if (tmp->isParametrized())
+      {
+        sptr_instrument = tmp->baseInstrument();
+        m_parmap = tmp->getParameterMap();
+      }
+      else
+      {
+        sptr_instrument=tmp;
+      }
+    }
+
 
     uint64_t MDWorkspace::getNPoints() const
-    {// TODO: change implementation on request to MDDataPoints
-        return this->m_spFile->getNPix();
+    {
+        return this->m_spDataPoints->getNumPixels();
     }
 
     int MDWorkspace::getNDimensions() const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      return m_spMDImage->getGeometry()->getNumDims();
     }
 
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getXDimension() const
@@ -195,37 +214,158 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
     const std::vector<std::string> MDWorkspace::getDimensionIDs() const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      std::vector<boost::shared_ptr<IMDDimension> > vecDimensions = geometry->getDimensions();
+      std::vector<std::string> vecDimensionIds(vecDimensions.size());
+      for(unsigned int i = 0; i < vecDimensions.size() ; i++)
+      {
+        vecDimensionIds[i] = vecDimensions[i]->getDimensionId();
+      }
+      return vecDimensionIds;
     }
 
-    const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(int index) const
+    const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(unsigned int index) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      if(index >= this->getNPoints())
+      {
+        throw std::range_error("Requested point is out of range.");
+      }
+      std::vector<char>* pix_buf = m_spDataPoints->get_pBuffer();
+      float *MDDataPoint =(float *)(&(pix_buf->operator[](0)));
+      unsigned int signal_shift = this->getNDimensions();
+      unsigned int data_stride  =  m_spDataPoints->getMDPointDescription().sizeofMDDPoint()/sizeof(float);
+      size_t base = index*data_stride;
+      double signal  = *(MDDataPoint+base+signal_shift);
+      double error= *(MDDataPoint+base+signal_shift+1);
+
+      std::vector<coordinate> vertexes;
+
+      IDetector_sptr detector; //TODO determine detector.
+
+      MDPointMap::const_iterator iter = m_mdPointMap.find(index);
+      if(m_mdPointMap.end() ==  iter || (*iter).second.getSignal() != signal || (*iter).second.getError() != error)
+      {
+        m_mdPointMap[index] =  Mantid::Geometry::MDPoint(signal, error, vertexes, detector, this->sptr_instrument);
+      }
+      return m_mdPointMap[index];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment) const
+    inline bool MDWorkspace::newCellRequired(const size_t& singleDimensionIndex, const MD_image_point& mdImagePoint) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      MDCellMap::const_iterator iter = m_mdCellMap.find(singleDimensionIndex);
+      //Current rules for determing whether a cell has changed.
+      return m_mdCellMap.end() !=  iter || (*iter).second.getSignal() != mdImagePoint.s || (*iter).second.getError() != mdImagePoint.err;
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      MD_image_point point = m_spMDImage->getPoint(dim1Increment);
+      MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+
+      MDCellMap::const_iterator iter = m_mdCellMap.find(dim1Increment);
+      if(true == newCellRequired(dim1Increment, point))
+      {
+        VecCoordinate vertexes = createLine(dim1Increment, xDimension);
+        m_mdCellMap[dim1Increment] = MDCell(point.s, point.err, vertexes);
+      }
+      return m_mdCellMap[dim1Increment];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment);
+      MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
+
+      //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
+      MDWorkspaceIndexCalculator<2> calculator;
+      calculator.setDimensionSize(0, xDimension->getNBins());
+      calculator.setDimensionSize(1, yDimension->getNBins());
+      std::vector<size_t> indexes(2);
+      indexes[0] = dim1Increment;
+      indexes[1] = dim2Increment;
+      size_t singleDimensionIndex = calculator.calculateSingleDimensionIndex(indexes);
+
+      if(singleDimensionIndex > calculator.getIndexUpperBounds())
+      {
+        throw std::range_error("Requested cell is out of range.");
+      }
+
+      if(true == newCellRequired(singleDimensionIndex, point))
+      {
+        VecCoordinate vertexes = createPolygon(dim1Increment, dim2Increment, xDimension, yDimension);
+        m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
+      }
+      return m_mdCellMap[singleDimensionIndex];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
+      MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
+      IMDDimension_sptr zDimension = geometry->getZDimension();
+
+      //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
+      MDWorkspaceIndexCalculator<3> calculator;
+      calculator.setDimensionSize(0, xDimension->getNBins());
+      calculator.setDimensionSize(1, yDimension->getNBins());
+      calculator.setDimensionSize(2, zDimension->getNBins());
+      size_t indexes[] = {dim1Increment, dim2Increment, dim3Increment};
+      VecIndexes vecIndexes(3);
+      std::copy(indexes, indexes+3, vecIndexes.begin());
+      size_t singleDimensionIndex = calculator.calculateSingleDimensionIndex(vecIndexes);
+
+      if(singleDimensionIndex > calculator.getIndexUpperBounds())
+      {
+        throw std::range_error("Requested cell is out of range.");
+      }
+      if(true == newCellRequired(singleDimensionIndex, point))
+      {
+        VecCoordinate vertexes = createPolyhedron(dim1Increment, dim2Increment, dim3Increment, xDimension, yDimension, zDimension);
+        m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
+      }
+      return m_mdCellMap[singleDimensionIndex];
+    }
+
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+    {
+      MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
+      MDGeometry const * const geometry = m_spMDImage->getGeometry();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
+      IMDDimension_sptr zDimension = geometry->getZDimension();
+      IMDDimension_sptr tDimension = geometry->getZDimension();
+
+      //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
+      MDWorkspaceIndexCalculator<4> calculator;
+      calculator.setDimensionSize(0, xDimension->getNBins());
+      calculator.setDimensionSize(1, yDimension->getNBins());
+      calculator.setDimensionSize(2, zDimension->getNBins());
+      calculator.setDimensionSize(3, tDimension->getNBins());
+      size_t indexes[] = {dim1Increment, dim2Increment, dim3Increment, dim4Increment};
+      VecIndexes vecIndexes(4);
+      std::copy(indexes, indexes+4, vecIndexes.begin());
+      size_t singleDimensionIndex = calculator.calculateSingleDimensionIndex(vecIndexes);
+
+      if(singleDimensionIndex > calculator.getIndexUpperBounds())
+      {
+        throw std::range_error("Requested cell is out of range.");
+      }
+      if(true == newCellRequired(singleDimensionIndex, point))
+      {
+        VecCoordinate vertexes = create4DPolyhedron(dim1Increment, dim2Increment, dim3Increment, dim4Increment, xDimension, yDimension, zDimension, tDimension);
+        m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
+      }
+      return m_mdCellMap[singleDimensionIndex];
     }
 
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(...) const
     {
-      throw std::runtime_error("Not implemented"); //TODO
+      throw std::runtime_error("Not implemented");
     }
 
     std::string MDWorkspace::getWSLocation() const 
@@ -240,6 +380,93 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return this->m_spMDImage->getGeometry()->toXMLString();
     }
 
+    VecCoordinate create4DPolyhedron(
+        unsigned int dim1Increment,
+        unsigned int dim2Increment,
+        unsigned int dim3Increment,
+        unsigned int dim4Increment,
+        IMDDimension_sptr xDimension,
+        IMDDimension_sptr yDimension,
+        IMDDimension_sptr zDimension,
+        IMDDimension_sptr tDimension)
+{
+  double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
+  double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
+  double delta_z = (zDimension->getMaximum() - zDimension->getMinimum()) / zDimension->getNBins();
+  double delta_t = (tDimension->getMaximum() - tDimension->getMinimum()) / tDimension->getNBins();
+  //Make two Hexahedrons at each time interval.
+  VecCoordinate vertexes(16);
+  vertexes[0] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,dim4Increment);
+  vertexes[1] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[2] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[3] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, dim4Increment);
+  vertexes[4] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[5] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[6] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, dim4Increment);
+  vertexes[7] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, dim4Increment);
+  vertexes[8] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z,delta_t + dim4Increment);
+  vertexes[9] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[10] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[11] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z, delta_t + dim4Increment);
+  vertexes[12] = coordinate::createCoordinate4D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[13] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[14] = coordinate::createCoordinate4D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z, delta_t + dim4Increment);
+  vertexes[15] = coordinate::createCoordinate4D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z, delta_t + dim4Increment);
+  return vertexes;
+}
+
+VecCoordinate createPolyhedron(
+    unsigned int dim1Increment,
+    unsigned int dim2Increment,
+    unsigned int dim3Increment,
+    IMDDimension_sptr xDimension,
+    IMDDimension_sptr yDimension,
+    IMDDimension_sptr zDimension)
+{
+  double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
+  double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
+  double delta_z = (zDimension->getMaximum() - zDimension->getMinimum()) / zDimension->getNBins();
+  //Make a Hexahedron
+  VecCoordinate vertexes(8);
+  vertexes[0] = coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, dim3Increment * delta_z);
+  vertexes[1] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, dim3Increment* delta_z);
+  vertexes[2] = coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
+  vertexes[3] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, dim3Increment* delta_z);
+  vertexes[4] = coordinate::createCoordinate3D(dim1Increment * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[5] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, dim2Increment * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[6] = coordinate::createCoordinate3D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment + 1)* delta_z);
+  vertexes[7] = coordinate::createCoordinate3D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y, (dim3Increment+ 1) * delta_z);
+  return vertexes;
+}
+
+VecCoordinate createPolygon(
+    unsigned int dim1Increment,
+    unsigned int dim2Increment,
+    IMDDimension_sptr xDimension,
+    IMDDimension_sptr yDimension)
+{
+  double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
+  double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
+  //Make a square
+  VecCoordinate vertexes(4);
+  vertexes[0] = coordinate::createCoordinate2D(dim1Increment * delta_x, dim2Increment * delta_y);
+  vertexes[1] = coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, dim2Increment * delta_y);
+  vertexes[2] = coordinate::createCoordinate2D(dim1Increment * delta_x, (dim2Increment + 1) * delta_y);
+  vertexes[3] = coordinate::createCoordinate2D((dim1Increment + 1) * delta_x, (dim2Increment + 1) * delta_y);
+  return vertexes;
+}
+
+VecCoordinate createLine(
+    unsigned int dim1Increment,
+    IMDDimension_sptr xDimension)
+{
+  double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
+  VecCoordinate vertexes(2);
+  //Make a line
+  vertexes[0] = coordinate::createCoordinate1D(dim1Increment * delta_x);
+  vertexes[1] = coordinate::createCoordinate1D((dim1Increment + 1) * delta_x);
+  return vertexes;
+}
 
 } // namespace
 }
@@ -282,3 +509,5 @@ namespace Mantid
 
   } // namespace Kernel
 } // name
+
+

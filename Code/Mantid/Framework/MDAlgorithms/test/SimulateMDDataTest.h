@@ -95,27 +95,27 @@ public:
         throw std::runtime_error("Not implemented");
       }
 
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const       
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-     virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const
+     virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const
       {
           return(m_mdcells.at(dim1Increment));
       };
 
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual const Mantid::Geometry::SignalAggregate&  getCell(int dim1Increment, int dim2Increment, int dim3Increment) const
+      virtual const Mantid::Geometry::SignalAggregate&  getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
 
-      virtual const Mantid::Geometry::SignalAggregate&  getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const
+      virtual const Mantid::Geometry::SignalAggregate&  getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
@@ -176,11 +176,7 @@ private:
   {
     using namespace Mantid::Geometry;
     std::vector<coordinate> vertices;
-    coordinate c;
-    c.x = 4;
-    c.y = 3;
-    c.z = 2;
-    c.t = 1;
+    coordinate c = coordinate::createCoordinate4D(4, 3, 2, 1);
     vertices.push_back(c);
 
     std::vector<boost::shared_ptr<MDPoint> > points;
@@ -216,11 +212,7 @@ private:
   {
     using namespace Mantid::Geometry;
     std::vector<coordinate> vertices;
-    coordinate c;
-    c.x = x;
-    c.y = y;
-    c.z = z;
-    c.t = t;
+    coordinate c = coordinate::createCoordinate4D(x, y, z, t);
     vertices.push_back(c);
     IDetector_sptr detector = IDetector_sptr(new DummyDetector("dummydetector"));
     IInstrument_sptr instrument = IInstrument_sptr(new DummyInstrument("dummyinstrument"));
@@ -262,8 +254,8 @@ public:
     TS_ASSERT_EQUALS(contributingPoints.size(),2);
     TS_ASSERT_THROWS_NOTHING(vertices=contributingPoints.at(0)->getVertexes());
     TS_ASSERT_EQUALS(vertices.size(),1);
-    TS_ASSERT_EQUALS(vertices.at(0).t,1);
-    TS_ASSERT_EQUALS(vertices.at(0).x,1);
+    TS_ASSERT_EQUALS(vertices.at(0).gett(),1);
+    TS_ASSERT_EQUALS(vertices.at(0).getX(),1);
 
   }
 

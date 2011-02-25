@@ -11,7 +11,7 @@ namespace Mantid
 namespace VATES
 {
 
-RebinningXMLGenerator::RebinningXMLGenerator() : m_wsName(""), m_wsLocation(""), m_geomXML(""), m_wsLocationXML(""), m_wsNameXML(""), m_spFunction()
+RebinningXMLGenerator::RebinningXMLGenerator() : m_spFunction(), m_wsLocationXML(""), m_wsNameXML(""), m_wsLocation(""), m_wsName(""), m_geomXML("")
 {
 }
 

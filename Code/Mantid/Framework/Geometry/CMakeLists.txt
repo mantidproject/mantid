@@ -30,6 +30,7 @@ set ( SRC_FILES src/IDetector.cpp
                 src/Math/PolyVarOne.cpp
                 src/Math/RotCounter.cpp
                 src/Math/Triple.cpp
+                src/MDGeometry/Coordinate.cpp
                 src/MDGeometry/IMDDimension.cpp
                 src/MDGeometry/MDBasisDimension.cpp
                 src/MDGeometry/MDCell.cpp
@@ -106,6 +107,7 @@ set ( INC_FILES inc/MantidGeometry/DllExport.h
                 inc/MantidGeometry/Math/PolyVar.h
                 inc/MantidGeometry/Math/RotCounter.h
                 inc/MantidGeometry/Math/Triple.h
+                inc/MantidGeometry/MDGeometry/Coordinate.h
                 inc/MantidGeometry/MDGeometry/IMDDimension.h
                 inc/MantidGeometry/MDGeometry/MDBasisDimension.h
                 inc/MantidGeometry/MDGeometry/MDCell.h

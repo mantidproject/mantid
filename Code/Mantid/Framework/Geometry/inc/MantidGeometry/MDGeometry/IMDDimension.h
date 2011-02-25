@@ -31,6 +31,7 @@
     */
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
+#include "boost/shared_ptr.hpp"
 
 namespace Mantid
 {
@@ -84,6 +85,11 @@ namespace Mantid
 
     virtual ~IMDDimension(){};
   };
+
+  /// Shared Pointer for IMDDimension. Frequently used type in framework.
+  typedef boost::shared_ptr<IMDDimension> IMDDimension_sptr;
+  /// Shared Pointer to const IMDDimension. Not stictly necessary since IMDDimension is pure abstract.
+  typedef boost::shared_ptr<const IMDDimension> IMDDimension_const_sptr;
 
   }
 }

@@ -240,19 +240,19 @@ namespace Mantid
       virtual const std::vector<std::string> getDimensionIDs() const;
 
       /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const;
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const;
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
@@ -275,10 +275,10 @@ namespace Mantid
     private:
 
       /// Implementation of getMDPointImp taking two arguments for histogram and bin.
-      const Mantid::Geometry::SignalAggregate& getPointImp(int histogram, int bin) const;
+      const Mantid::Geometry::SignalAggregate& getPointImp(unsigned int histogram, unsigned int bin) const;
 
       /// Creates a point for a given histogram/bin.
-      Mantid::Geometry::MDPoint createPoint(int histogram, int bin) const;
+      Mantid::Geometry::MDPoint createPoint(unsigned int histogram, unsigned int bin) const;
      
       /// Private copy constructor. NO COPY ALLOWED
       MatrixWorkspace(const MatrixWorkspace&);

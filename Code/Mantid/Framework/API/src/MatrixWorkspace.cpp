@@ -991,7 +991,7 @@ namespace Mantid
       return 2;
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(int index) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(unsigned int index) const
     {
       HistogramIndex histInd = m_indexCalculator.getHistogramIndex(index);
       BinIndex binInd = m_indexCalculator.getBinIndex(index, histInd);
@@ -1004,7 +1004,7 @@ namespace Mantid
       return m_mdPointMap[index];
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(int histogram, int bin) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(unsigned int histogram, unsigned int bin) const
     {
       Index oneDimIndex = m_indexCalculator.getOneDimIndex(histogram, bin);
       MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(oneDimIndex);
@@ -1015,41 +1015,33 @@ namespace Mantid
       return m_mdPointMap[oneDimIndex];
     }
 
-    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(int histogram, int bin) const
+    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(unsigned int histogram, unsigned int bin) const
     {
-      std::vector<Mantid::Geometry::coordinate> verts;
+      VecCoordinate verts(4);
 
       double x = this->dataX(histogram)[bin];
       double signal = this->dataY(histogram)[bin];
       double error = this->dataE(histogram)[bin];
 
-      coordinate vert1, vert2, vert3, vert4;
-
       if(isHistogramData()) //TODO. complete vertex generating cases.
       {
-        vert1.y = histogram;
-        vert2.y = histogram;
-        vert3.y = histogram+1;
-        vert4.y = histogram+1;
-        vert1.x = x;
-        vert2.x = this->dataX(histogram)[bin+1];
-        vert3.x = x;
-        vert4.x = this->dataX(histogram)[bin+1];
+        verts[0] = coordinate::createCoordinate2D(x, histogram);
+        verts[1] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram);
+        verts[3] = coordinate::createCoordinate2D(x, histogram+1);
+        verts[4] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram+1);
       }
-      verts.resize(4);
-      verts[0] = vert1;
-      verts[1] = vert2;
-      verts[2] = vert3;
-      verts[3] = vert4;
 
       IDetector_sptr detector;
-      try
+      if(m_spectramap->nElements() > 0)
       {
-        detector = this->getDetector(histogram);
-      }
-      catch(std::exception&)
-      {
-        //Swallow exception and continue processing.
+        try
+        {
+          detector = this->getDetector(histogram);
+        }
+        catch(std::exception&)
+        {
+          //Swallow exception and continue processing.
+        }
       }
       return Mantid::Geometry::MDPoint(signal, error, verts, detector, this->sptr_instrument);
     }
@@ -1164,9 +1156,9 @@ namespace Mantid
       return keys;
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int dim1Increment) const
     { 
-      if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
+      if (dim1Increment >= static_cast<unsigned int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1174,13 +1166,13 @@ namespace Mantid
       return this->getPoint(dim1Increment);
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int dim1Increment, int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
     { 
-      if (dim1Increment<0 || dim1Increment >= static_cast<int>(this->dataX(0).size()))
+      if (dim1Increment >= static_cast<unsigned int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
-      if (dim2Increment<0 || dim2Increment >= static_cast<int>(this->dataX(0).size()))
+      if (dim2Increment >= static_cast<unsigned int>(this->dataX(0).size()))
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1188,12 +1180,12 @@ namespace Mantid
       return getPointImp(dim1Increment, dim2Increment);
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int, int, int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int, unsigned int, unsigned int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(int, int, int, int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int, unsigned int, unsigned int, unsigned int) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }

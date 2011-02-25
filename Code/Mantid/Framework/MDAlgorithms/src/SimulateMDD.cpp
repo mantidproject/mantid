@@ -112,14 +112,14 @@ namespace Mantid
                     for(size_t j=0; j<myPoints.size(); j++){
                         // TO DO: this is expensive way to get eps, should use pointer
                         std::vector<Mantid::Geometry::coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].t;
+                        eps=vertexes[0].gett();
                         bgsum+=bgparaP1+eps*(bgparaP2+eps*bgparaP3);
                     }
                 }
                 else if( ! bgmodel.compare("ExpEnTrans")) {
                     for(size_t j=0; j<myPoints.size(); j++){
                         std::vector<Mantid::Geometry::coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].t;
+                        eps=vertexes[0].gett();
                         bgsum+=bgparaP1+bgparaP2*exp(-eps/bgparaP3);
                     }
                 }
@@ -127,7 +127,7 @@ namespace Mantid
                     double dphi,deps;
                     for(size_t j=0; j<myPoints.size(); j++){
                         std::vector<Mantid::Geometry::coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].t;
+                        eps=vertexes[0].gett();
                         deps=eps-bgparaP1;
                         phi=0.; // TO DO: get phi of detector
                         dphi=phi-bgparaP2;
@@ -137,7 +137,7 @@ namespace Mantid
                 else if( ! bgmodel.compare("ExpEnTransAndPhi")) {
                     for(size_t j=0; j<myPoints.size(); j++){
                         std::vector<Mantid::Geometry::coordinate> vertexes = myPoints[j]->getVertexes();
-                        eps=vertexes[0].t;
+                        eps=vertexes[0].gett();
                         phi=0.; // TO DO: get phi of detector
                         bgsum+=bgparaP3*exp(-(eps-bgparaP1)/bgparaP4 - (phi-bgparaP2)/bgparaP5 );
                     }

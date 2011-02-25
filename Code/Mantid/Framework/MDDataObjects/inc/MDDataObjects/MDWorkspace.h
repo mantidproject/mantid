@@ -7,6 +7,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MDDataObjects/IMD_FileFormat.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 
 
 /** MD-workspace -> main class which keeps all data objects necessary for work with 
@@ -68,7 +69,8 @@ namespace Mantid
     //Seam method.
     boost::shared_ptr<Mantid::MDDataObjects::MDImage> getImageData(const Mantid::Geometry::MDGeometry* geometry);
 
-    typedef std::map<int, Mantid::Geometry::MDPoint> MDPointMap;
+    typedef std::map<size_t, Mantid::Geometry::MDPoint> MDPointMap;
+    typedef std::map<size_t, Mantid::Geometry::MDCell> MDCellMap;
     class DLLExport MDWorkspace :  public API::IMDWorkspace
     {
     public:
@@ -162,19 +164,19 @@ namespace Mantid
       virtual const std::vector<std::string> getDimensionIDs() const;
 
       /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(int index) const;
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const;
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
@@ -185,9 +187,21 @@ namespace Mantid
       /// Get the geometry xml.
       virtual std::string getGeometryXML() const;
 
+      void setInstrument(const Mantid::Geometry::IInstrument_sptr& instr);
+
     private:
-        // what is that?
-      MDPointMap m_mdPointMap;
+      /// Cache. Gives MDWorkspace ownership of MDPoints (as an IMDWorkspace), while allowing polymorphic behaviour.
+      /// Note this is NOT an optimized implementation yet, but it does support lazy instantiation.
+      mutable MDPointMap m_mdPointMap;
+      /// Cache. Gives MDWorkspace ownership of MDCells (as an IMDWorkspace), while allowing polymorphic behaviour.
+      /// Note this is NOT an optimized implementation yet, but it does support lazy instantiation.
+      mutable MDCellMap m_mdCellMap;
+
+      // Shared pointer to a base instrument.
+      mutable boost::shared_ptr<Mantid::Geometry::Instrument> sptr_instrument;
+
+      /// The instrument parameter map.
+      mutable boost::shared_ptr<Geometry::ParameterMap> m_parmap;
 
       static Kernel::Logger& g_log;
 	  /// pointer to the geometry basis e.g. the unit cell of the bravis latice of the crystal and additional dimensions
@@ -202,13 +216,53 @@ namespace Mantid
       boost::shared_ptr<Mantid::MDDataObjects::IMD_FileFormat> m_spFile;
       /// no copy constructor -- its meaning is unclear; 
       MDWorkspace(const MDWorkspace &){};
-    };
 
+      /// Determine if a new IMDWorkspace MDCell is required.
+      inline bool newCellRequired(const size_t& singleDimensionIndex, const MD_image_point& mdImagePoint) const;
+
+     };
 
     ///shared pointer to the MD workspace base class
     typedef boost::shared_ptr<MDWorkspace> MDWorkspace_sptr;
     ///shared pointer to the MD workspace base class (const version)
     typedef boost::shared_ptr<const MDWorkspace> MDWorkspace_const_sptr;
+
+
+/// Non-member helper. Does not need access to private fields.
+/// Creates coordinates to represent cell in 4D given a set of dimensions
+Mantid::Geometry::VecCoordinate create4DPolyhedron(
+    unsigned int dim1Increment,
+    unsigned int dim2Increment,
+    unsigned int dim3Increment,
+    unsigned int dim4Increment,
+    Mantid::Geometry::IMDDimension_sptr xDimension,
+    Mantid::Geometry::IMDDimension_sptr yDimension,
+    Mantid::Geometry::IMDDimension_sptr zDimension,
+    Mantid::Geometry::IMDDimension_sptr tDimension);
+
+/// Non-member helper. Does not need access to private fields.
+/// Creates coordinates to represent cell in 3D given a set of dimensions
+Mantid::Geometry::VecCoordinate createPolyhedron(
+    unsigned int dim1Increment,
+    unsigned int dim2Increment,
+    unsigned int dim3Increment,
+    Mantid::Geometry::IMDDimension_sptr xDimension,
+    Mantid::Geometry::IMDDimension_sptr yDimension,
+    Mantid::Geometry::IMDDimension_sptr zDimension);
+
+/// Non-member helper. Does not need access to private fields.
+/// Creates coordinates to represent cell in 2D given a set of dimensions
+Mantid::Geometry::VecCoordinate createPolygon(
+    unsigned int dim1Increment,
+    unsigned int dim2Increment,
+    Mantid::Geometry::IMDDimension_sptr xDimension,
+    Mantid::Geometry::IMDDimension_sptr yDimension);
+
+/// Non-member helper. Does not need access to private fields.
+/// Creates coordinates to represent cell in 1D given a set of dimensions
+Mantid::Geometry::VecCoordinate createLine(
+    unsigned int dim1Increment,
+    Mantid::Geometry::IMDDimension_sptr xDimension);
 
 
 }

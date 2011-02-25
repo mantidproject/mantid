@@ -32,7 +32,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include <vector>
 #include <boost/shared_ptr.hpp>
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 namespace Mantid
@@ -48,7 +47,12 @@ namespace Mantid
       std::vector<boost::shared_ptr<MDPoint> > m_contributingPoints;
       inline void calculateCachedValues();
     public:
+      /// Default constructor
+      MDCell(){};
+      /// Construct from exising points.
       MDCell(std::vector<boost::shared_ptr<MDPoint> > pContributingPoints, std::vector<coordinate> vertexes);
+      /// Construct image-only mode. No contributing points maintained.
+      MDCell(const double& signal,const double& error, const std::vector<coordinate>& vertexes);
       std::vector<coordinate> getVertexes() const;
       double getSignal() const;
       double getError() const;

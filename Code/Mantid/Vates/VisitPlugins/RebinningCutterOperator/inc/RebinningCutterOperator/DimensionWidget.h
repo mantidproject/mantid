@@ -70,10 +70,12 @@ private:
 
   GeometryWidget* m_geometryWidget;
 
+  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
+
   /// Creates gui layout and controls.
   void constructWidget(const int dimensionIndex);
 
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
+
 
 private slots:
 

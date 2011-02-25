@@ -37,11 +37,11 @@ private:
 
     MOCK_CONST_METHOD0(id, const std::string());
     MOCK_CONST_METHOD0(getMemorySize, size_t());
-    MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(int index));
-    MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment));
-    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment, int dim2Increment));
-    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment, int dim2Increment, int dim3Increment));
-    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(int dim1Increment, int dim2Increment, int dim3Increment, int dim4Increment));
+    MOCK_CONST_METHOD1(getPoint,const Mantid::Geometry::SignalAggregate&(unsigned int index));
+    MOCK_CONST_METHOD1(getCell,const Mantid::Geometry::SignalAggregate&(unsigned int dim1Increment));
+    MOCK_CONST_METHOD2(getCell,const Mantid::Geometry::SignalAggregate&(unsigned int dim1Increment, unsigned int dim2Increment));
+    MOCK_CONST_METHOD3(getCell,const Mantid::Geometry::SignalAggregate&(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment));
+    MOCK_CONST_METHOD4(getCell,const Mantid::Geometry::SignalAggregate&(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment));
 
     MOCK_CONST_METHOD0(getWSLocation,std::string());
     MOCK_CONST_METHOD0(getGeometryXML,std::string());

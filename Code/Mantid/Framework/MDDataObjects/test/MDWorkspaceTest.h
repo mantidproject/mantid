@@ -21,41 +21,124 @@ class MDWorkspaceTest :    public CxxTest::TestSuite
 {
 private:
 
-  //Helper mock type for file format.
-  class MockFileFormat : public Mantid::MDDataObjects::IMD_FileFormat
+  /// Fake geometry. Simply required so that dimensions can be created with ranges on-the-spot.
+  class FakeMDGeometry : public Mantid::Geometry::MDGeometry
   {
   public:
-	MockFileFormat(const char *file_name):IMD_FileFormat(file_name){}; 
-    MOCK_CONST_METHOD0(getFileName, std::string());
-    MOCK_CONST_METHOD0(is_open, bool());
-    MOCK_METHOD1(read_MDImg_data, void(Mantid::MDDataObjects::MDImage&)); 
-    MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
-    MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
-    uint64_t getNPix()
+    FakeMDGeometry(const Mantid::Geometry::MDGeometryBasis& basis) : MDGeometry(basis)
     {
-      return 0;
     }
-    MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImage&));
-    MOCK_METHOD1(read_MDGeomDescription,void(Mantid::Geometry::MDGeometryDescription &));
-    MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
-    MOCK_CONST_METHOD0(read_pointDescriptions,Mantid::MDDataObjects::MDPointDescription(void));
-
-    virtual ~MockFileFormat(void){};
+    void setNumberOfBins(const int indexOfDimension, const int nBins)
+    {
+      //Range min/max are not important, but the number of bins is!
+      this->getDimension(indexOfDimension)->setRange(0, 10, nBins);
+    }
+    /// Convenience member function for working with cells in a IMDWorkspace.
+    size_t getTotalNumberOfBins()
+    {
+      size_t sum = 0;
+      for(int i = 0; i < this->getDimensions().size(); i++)
+      {
+        sum += this->getDimension(i)->getNBins();
+      }
+      return sum;
+    }
   };
-     ///
+
   //Helper constructional method sets-up a MDGeometry with a valid MDGeometryBasis instance.
   static Mantid::Geometry::MDGeometry* constructMDGeometry()
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("q1", true, 0));
-    basisDimensions.insert(MDBasisDimension("q2", true, 1));
-    basisDimensions.insert(MDBasisDimension("q3", true, 2));
-    basisDimensions.insert(MDBasisDimension("u1", false, 3));
+    basisDimensions.insert(MDBasisDimension("q0", true, 0));
+    basisDimensions.insert(MDBasisDimension("q1", true, 1));
+    basisDimensions.insert(MDBasisDimension("q2", true, 2));
+    basisDimensions.insert(MDBasisDimension("u3", false, 3));
 
     UnitCell cell;
-    return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
+    FakeMDGeometry* geometry = new FakeMDGeometry(MDGeometryBasis(basisDimensions, cell));
+    geometry->setNumberOfBins(0, 4);
+    geometry->setNumberOfBins(1, 4);
+    geometry->setNumberOfBins(2, 4);
+    geometry->setNumberOfBins(3, 4);
+    return geometry;
   }
+
+  //Helper mock type for file format.
+  class MockFileFormat : public Mantid::MDDataObjects::IMD_FileFormat
+  {
+  private:
+    int m_ncells;
+    int m_npoints;
+  public:
+	MockFileFormat(const char *file_name, int ncells, int npoints):IMD_FileFormat(file_name), m_ncells(ncells), m_npoints(npoints){};
+    MOCK_CONST_METHOD0(getFileName, std::string());
+    MOCK_CONST_METHOD0(is_open, bool());
+    MOCK_METHOD5(read_pix_subset, size_t(const Mantid::MDDataObjects::MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer));
+    MOCK_METHOD1(write_mdd,void(const Mantid::MDDataObjects::MDImage&));
+    MOCK_METHOD1(read_MDGeomDescription,void(Mantid::Geometry::MDGeometryDescription &));
+    MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
+    MOCK_CONST_METHOD0(read_pointDescriptions,Mantid::MDDataObjects::MDPointDescription(void));
+
+    //Implementation loosely taken from MD_File_hdfMatlab. Enables verification that MDCells can be read out correctly.
+    void read_MDImg_data(Mantid::MDDataObjects::MDImage& image)
+    {
+      using namespace Mantid::MDDataObjects;
+      MD_image_point *pImageCell = new MD_image_point[m_ncells];
+
+      for(int i=0;i<m_ncells;i++)
+      {
+        pImageCell[i].s   = i+1;//Just some computable value.
+        pImageCell[i].err = i; //Just some computable value.
+      }
+      image.get_pMDImgData()->data = pImageCell;
+    }
+
+    //Implementation loosely taken from MD_File_hdfMatlab. Just want to be able to load pixels into workspace
+    bool read_pix(Mantid::MDDataObjects::MDDataPoints& sqw)
+    {
+      using namespace Mantid::MDDataObjects;
+      const int size = 9;
+      std::vector<std::string> dataTags(size);
+      std::string tagNames[] = {"qx","qy","qz","en","S","err","runID","pixID","enID"};
+      std::copy ( tagNames, tagNames + size, dataTags.begin() );
+
+      MDPointStructure defaultPixel;
+      defaultPixel.DimIDlength =4;
+      defaultPixel.SignalLength=4;
+      defaultPixel.NumPixCompressionBits=0;
+
+      MDPointDescription PixSignature(defaultPixel,dataTags);
+      char *buf(NULL);
+      MDDataPointEqual<float,uint32_t,float> packer(buf,PixSignature);
+
+      std::vector<char> *outData = sqw.get_pBuffer(this->getNPix());
+      packer.setBuffer(&(*outData)[0]);
+
+      float    s_dim_fields[6];
+      uint32_t  ind_fields[3];
+
+      for(int i=0;i<this->getNPix();i++)
+      {
+        s_dim_fields[0] =           i;
+        s_dim_fields[1] =           i; // sqw.pix_array[i].qy
+        s_dim_fields[2] =           i; // sqw.pix_array[i].qz
+        s_dim_fields[3] =           i; // sqw.pix_array[i].En
+        ind_fields[0]   =  (uint32_t)i;    // sqw.pix_array[i].irun
+        ind_fields[1]   =  (uint32_t)i;   // sqw.pix_array[i].idet
+        ind_fields[2]   =  (uint32_t)i; // sqw.pix_array[i].ien
+        s_dim_fields[4] =           i+1; // sqw.pix_array[i].s
+        s_dim_fields[5] =           i;  // sqw.pix_array[i].err
+
+        packer.setData(i,s_dim_fields,ind_fields);
+       }
+    }
+    uint64_t getNPix()
+    {
+      return m_npoints;
+    }
+    virtual ~MockFileFormat(void){};
+  };
 
   //Helper stock constructional method.
   static Mantid::MDDataObjects::MDWorkspace* constructMDWorkspace()
@@ -63,16 +146,8 @@ private:
     using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
-    MDWorkspace* workspace;
-    try
-    {
-    workspace = new MDWorkspace;
-    }
-    catch(std::exception& ex)
-    {
-      std::string what = ex.what();
-    }
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MDWorkspace* workspace = new MDWorkspace;
+    MockFileFormat* mockFile = new MockFileFormat("",256,256);
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
     return workspace;
   }
@@ -83,8 +158,6 @@ private:
     return  constructMDWorkspace();
   }
 
-
-
 public:
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -92,7 +165,7 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_EQUALS("MDWorkspace::getNPoints() is mainly implemented. this implementation should return 0",0, workspace->getNPoints());
+    TSM_ASSERT_EQUALS("MDWorkspace::getNPoints(). Implementation should return 256 ",256, workspace->getNPoints());
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -102,7 +175,7 @@ public:
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
 
-    std::string id = "q1";
+    std::string id = "q0";
     boost::shared_ptr<const IMDDimension> dimension = workspace->getDimension(id);
     TSM_ASSERT_EQUALS("The dimension id does not match", id, dimension->getDimensionId());
   }
@@ -121,16 +194,39 @@ public:
   void testGetPoint()
   {
     using namespace Mantid::API;
-    boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getPoint() is not yet implemented. Should have thrown runtime exception", workspace->getPoint(1), std::runtime_error);
+    using namespace Mantid::MDDataObjects;
+
+    //Get as a MDWorkspace so that the read pixels can be called. This uses a fake method on a mock object to
+    //generate an array of pixels to read.
+    MDWorkspace* mdWorkspace = constructMDWorkspace();
+    mdWorkspace->read_pix();
+
+    //Pass workspace over as IMDWorkspace. Ensures we are testing IMDWorkspace aspects.
+    boost::scoped_ptr<IMDWorkspace> workspace(mdWorkspace);
+
+    //There should be 10 pixels available. This is tested elsewhere.
+    //Test that the first and last pixels give the correct results.
+    TSM_ASSERT_EQUALS("The signal value for the first pixel is incorrect", 1, workspace->getPoint(0).getSignal());
+    TSM_ASSERT_EQUALS("The error value for the first pixel is incorrect", 0, workspace->getPoint(0).getError());
+    TSM_ASSERT_EQUALS("The signal value for the pixel is incorrect", 10, workspace->getPoint(9).getSignal());
+    TSM_ASSERT_EQUALS("The error value for the pixel is incorrect", 9, workspace->getPoint(9).getError());
+    TSM_ASSERT_THROWS("Index should be out of bounds", workspace->getPoint(256), std::range_error);
+    TSM_ASSERT_THROWS("Index should be out of bounds", workspace->getPoint(-1), std::range_error);
   }
+
+
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetCellOneArgument()
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1), std::runtime_error);
+    const SignalAggregate& cell = workspace->getCell(0);
+    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, workspace->getCell(0).getSignal());
+    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, workspace->getCell(0).getError());
+    TSM_ASSERT_EQUALS("The MDCell's signal value is incorrect", 4, workspace->getCell(3).getSignal());
+    TSM_ASSERT_EQUALS("The MDCell's error value is incorrect", 3, workspace->getCell(3).getError());
+    TSM_ASSERT_EQUALS("Wrong number of vertexes generated.", 2, workspace->getCell(3).getVertexes().size());
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -138,8 +234,14 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1), std::runtime_error);
-
+    const SignalAggregate& cell = workspace->getCell(0);
+    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, workspace->getCell(0, 0).getSignal());
+    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, workspace->getCell(0, 0).getError());
+    TSM_ASSERT_EQUALS("The MDCell's signal value is incorrect", 2, workspace->getCell(1, 0).getSignal());
+    TSM_ASSERT_EQUALS("The MDCell's error value is incorrect", 1, workspace->getCell(1, 0).getError());
+    TSM_ASSERT_EQUALS("Wrong number of vertexes generated.", 4, workspace->getCell(1, 0).getVertexes().size());
+    TSM_ASSERT_THROWS("The cell requested should be out of bounds", workspace->getCell(4, 4), std::range_error);
+    TSM_ASSERT_THROWS("The cell requested should be out of bounds", workspace->getCell(0,-1), std::runtime_error);
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -147,7 +249,14 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1), std::runtime_error);
+    const SignalAggregate& cell = workspace->getCell(0);
+    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, workspace->getCell(0, 0, 0).getSignal());
+    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, workspace->getCell(0, 0, 0).getError());
+    TSM_ASSERT_EQUALS("The MDCell's signal value is incorrect", 2, workspace->getCell(1, 0, 0).getSignal());
+    TSM_ASSERT_EQUALS("The MDCell's error value is incorrect", 1, workspace->getCell(1, 0, 0).getError());
+    TSM_ASSERT_EQUALS("Wrong number of vertexes generated.", 8, workspace->getCell(1, 0, 0).getVertexes().size());
+    TSM_ASSERT_THROWS("The cell requested should be out of bounds", workspace->getCell(4, 4, 4), std::range_error);
+    TSM_ASSERT_THROWS("The cell requested should be out of bounds", workspace->getCell(0, 0, -1), std::runtime_error);
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -155,7 +264,13 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    TSM_ASSERT_THROWS("MDWorkspace::getCell() is not yet implemented. Should have thrown runtime exception", workspace->getCell(1, 1, 1, 1), std::runtime_error);
+    const SignalAggregate& cell = workspace->getCell(0);
+    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, workspace->getCell(0, 0, 0, 0).getSignal());
+    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, workspace->getCell(0, 0, 0, 0).getError());
+    TSM_ASSERT_EQUALS("The MDCell's signal value is incorrect", 2, workspace->getCell(1, 0, 0, 0).getSignal());
+    TSM_ASSERT_EQUALS("The MDCell's error value is incorrect", 1, workspace->getCell(1, 0, 0, 0).getError());
+    TSM_ASSERT_EQUALS("Wrong number of vertexes generated.", 16, workspace->getCell(1, 0, 0, 0).getVertexes().size());
+    TSM_ASSERT_THROWS("The cell requested should be out of bounds", workspace->getCell(4, 4, 4, 4), std::range_error);
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -174,7 +289,7 @@ public:
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getXDimension();
-    TSM_ASSERT_EQUALS("The x-dimension returned was not the expected alignment.", "q1", dimension->getDimensionId());
+    TSM_ASSERT_EQUALS("The x-dimension returned was not the expected alignment.", "q0", dimension->getDimensionId());
 
   }
 
@@ -186,7 +301,7 @@ public:
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getYDimension();
-    TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q2", dimension->getDimensionId());
+    TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q1", dimension->getDimensionId());
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -197,7 +312,7 @@ public:
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->getZDimension();
-    TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q3", dimension->getDimensionId());
+    TSM_ASSERT_EQUALS("The y-dimension returned was not the expected alignment.", "q2", dimension->getDimensionId());
   }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
@@ -208,7 +323,7 @@ public:
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
     boost::shared_ptr<const IMDDimension> dimension = workspace->gettDimension();
-    TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u1", dimension->getDimensionId());
+    TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u3", dimension->getDimensionId());
   }
 
   void testGetMemorySize()
@@ -238,7 +353,7 @@ public:
     using namespace Mantid::MDDataObjects;
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MockFileFormat* mockFile = new MockFileFormat("",1,1);
     EXPECT_CALL(*mockFile, read_pix_subset(testing::_, testing::_, testing::_, testing::_, testing::_)).Times(1);
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
@@ -262,21 +377,6 @@ public:
         workspace->read_pix_selection(empty1, size_param, empty2, size_param), std::runtime_error);
   }
 
-
-  void  testReadPix(void)
-  {
-    using namespace Mantid::MDDataObjects;
-    boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
-
-    MockFileFormat* mockFile = new MockFileFormat("");
-    EXPECT_CALL(*mockFile, read_pix(testing::_)).Times(1);
-
-    workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
-
-    workspace->read_pix();
-    TSM_ASSERT("MDWorkspace::read_pix() failed to call appropriate method on nested component.", testing::Mock::VerifyAndClearExpectations(mockFile));
-  }
-
   void  testReadThrows(void)
   {
     using namespace Mantid::MDDataObjects;
@@ -292,7 +392,7 @@ public:
     using namespace Mantid::MDDataObjects;
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
     EXPECT_CALL(*mockFile, write_mdd(testing::_)).Times(1);
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), constructMDGeometry());
@@ -318,7 +418,7 @@ public:
 
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
     MDGeometry* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
@@ -339,7 +439,7 @@ public:
 
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
     EXPECT_CALL(*mockFile, getFileName()).Times(1).WillOnce(testing::Return("somelocalfile.sqw"));
     MDGeometry* geometry = constructMDGeometry();
 
@@ -350,12 +450,12 @@ public:
 
   void testGetWorkspaceGeometry()
   {
-        using namespace Mantid::MDDataObjects;
+    using namespace Mantid::MDDataObjects;
     using namespace Mantid::Geometry;
 
     boost::scoped_ptr<MDWorkspace> workspace(new MDWorkspace());
 
-    MockFileFormat* mockFile = new MockFileFormat("");
+    MockFileFormat* mockFile = new MockFileFormat("", 1, 1);
     MDGeometry* geometry = constructMDGeometry();
 
     workspace->init(boost::shared_ptr<IMD_FileFormat>(mockFile), geometry);
@@ -366,7 +466,7 @@ public:
     TSM_ASSERT("Geometry xml string returned does not look like xml", regex_match(workspace->getGeometryXML(), condition));
     //Test against geometry xml to ensure pass through.
     TSM_ASSERT_EQUALS("Geometry xml does not match xml provided by workspace.", geometry->toXMLString(), workspace->getGeometryXML());
- 
+
   }
 
 

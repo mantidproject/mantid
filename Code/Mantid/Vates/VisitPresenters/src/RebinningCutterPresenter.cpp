@@ -113,10 +113,6 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   this->m_initalized = true;
 }
 
-void RebinningCutterPresenter::handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf)
-{
-  }
-
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
     RebinningIterationAction action,
     ProgressAction& eventHandler) const

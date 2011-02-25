@@ -17,6 +17,16 @@ namespace Mantid
       calculateCachedValues();
     }
 
+    MDCell::MDCell(const double& signal,const double& error, const std::vector<coordinate>& vertexes)
+    : m_cachedSignal(signal),
+      m_cachedError(error),
+      m_vertexes(vertexes)
+    {
+
+    }
+
+
+
     std::vector<coordinate> MDCell::getVertexes() const
     {
       return this->m_vertexes;

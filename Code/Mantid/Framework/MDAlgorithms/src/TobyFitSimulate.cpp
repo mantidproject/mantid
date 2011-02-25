@@ -51,7 +51,7 @@ namespace Mantid
                 // loop over each MDPoint in current MDCell
                 for(size_t j=0; j<cellPoints.size(); j++){
                     std::vector<Mantid::Geometry::coordinate> vertexes = cellPoints[j]->getVertexes();
-                    double eps=vertexes[0].t;
+                    double eps=vertexes[0].gett();
                     sqwConvolution(cellPoints[j],answer,error);
                 }
                 //pnt->setSignal(bgsum);
