@@ -34,6 +34,8 @@ public:
    * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a function that takes
    * an argument into a argument-less function pointer.
    *
+   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a class method of this.
+   *
    * @param func :: pointer to a void function()
    * @param cost :: computational cost
    */
@@ -47,6 +49,8 @@ public:
    *
    * Pro-tip: use boost::bind(f, argument1, argument2) (for example) to turn a function that takes
    * an argument into a argument-less function pointer.
+   *
+   * Use boost::bind(&ClassName::function, &*this, arg1, arg2) to bind to a class method of this.
    *
    * @param func :: boost::function<> returned by boost::bind()
    * @param cost :: computational cost

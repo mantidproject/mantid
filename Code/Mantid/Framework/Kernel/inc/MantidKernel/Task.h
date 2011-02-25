@@ -27,7 +27,7 @@ namespace Kernel
     //---------------------------------------------------------------------------------------------
     /** Default constructor */
     Task() :
-      m_cost(1.0)
+      m_cost(1.0), m_mutex(NULL)
     { }
 
     //---------------------------------------------------------------------------------------------
@@ -65,7 +65,26 @@ namespace Kernel
      */
     void setMutexObject(void * object)
     {
+      (void) object;
       throw Kernel::Exception::NotImplementedError("Not impl.");
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Get the mutex object for this Task
+     * @return Mutex pointer, or NULL
+     */
+    Mutex * getMutex()
+    {
+      return m_mutex;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Set the mutex object for this Task
+     * @param mutex :: Mutex pointer, or NULL
+     */
+    void setMutex(Mutex * mutex)
+    {
+      m_mutex = mutex;
     }
 
 
@@ -73,6 +92,9 @@ namespace Kernel
 
     /// Cached computational cost for the thread.
     double m_cost;
+
+    /// Mutex associated with this task (can be NULL)
+    Mutex * m_mutex;
   };
 
 

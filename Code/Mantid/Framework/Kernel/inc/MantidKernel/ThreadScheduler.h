@@ -75,13 +75,14 @@ namespace Kernel
     virtual Task * pop(size_t threadnum) = 0;
 
     //-----------------------------------------------------------------------------------
-    /** Signal to the scheduler that a task is complete. The
-     * scheduler may release mutexes, etc.
+    /** Signal to the scheduler that a task is complete.
      *
      * @param task :: the Task that was completed.
+     * @param threadnum :: Thread ID that launched the task
      */
-    virtual void finished(Task * task)
+    virtual void finished(Task * task, size_t threadnum)
     { (void) task; //Ignore argument
+      (void) threadnum; //Ignore argument
     }
   
     //-----------------------------------------------------------------------------------

@@ -144,6 +144,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/TestChannel.h
 	inc/MantidKernel/ThreadScheduler.h
+	inc/MantidKernel/ThreadSchedulerMutexes.h
 	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadPoolRunnable.h
 	inc/MantidKernel/Timer.h
@@ -198,6 +199,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/StringsTest.h
 	test/ThreadPoolTest.h
 	test/ThreadSchedulerTest.h
+	test/ThreadSchedulerMutexesTest.h
 	test/ThreadPoolRunnableTest.h
 	test/TaskTest.h
 	test/TimerTest.h
@@ -205,7 +207,8 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/TimeSplitterTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
-	test/UserStringParserTest.h )
+	test/UserStringParserTest.h 
+)
 
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${SRC_ATOM} ${INC_FILES} )

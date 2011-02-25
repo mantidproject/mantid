@@ -41,14 +41,15 @@ namespace Kernel
 
       if (task)
       {
-        //TODO: task-specific mutex if specified?
+        //Task-specific mutex if specified?
+        Mutex * mutex = task->getMutex();
+        if (mutex)
+          mutex->lock();
 
         try
         {
           // Run the task (synchronously within this thread)
           task->run();
-          // Tell the scheduler that we finished this task
-          m_scheduler->finished(task);
         }
         catch (std::exception &e)
         {
@@ -56,6 +57,13 @@ namespace Kernel
           // This will clear out the list of tasks, allowing all threads to finish.
           m_scheduler->abort(std::runtime_error(e.what()));
         }
+
+        // Tell the scheduler that we finished this task
+        m_scheduler->finished(task, m_threadnum);
+
+        // Unlock the mutex, if any.
+        if (mutex)
+          mutex->unlock();
 
         // We now delete the task to free up memory
         delete task;

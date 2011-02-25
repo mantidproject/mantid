@@ -40,6 +40,14 @@ public:
     TS_ASSERT_EQUALS( TaskTestNamespace::my_check_value, 123 );
   }
 
+  void test_mutex()
+  {
+    MyTask t;
+    Mutex * mut = new Mutex();
+    t.setMutex(mut);
+    TS_ASSERT_EQUALS( mut, t.getMutex() );
+  }
+
 
 
 };
