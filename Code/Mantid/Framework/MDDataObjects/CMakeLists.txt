@@ -49,7 +49,7 @@ set ( GMOCK_TEST_FILES
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
-test/MDWorkspaceTest.h
+# test/MDWorkspaceTest.h
 #test/MDPointTest.h  
 #test/MDBoxTest.h  
 )
