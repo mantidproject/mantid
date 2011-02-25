@@ -300,7 +300,23 @@ QAction* ScriptManagerWidget::zoomOutAction() const
   }
   else return NULL;
 }
-
+/// copy method
+void ScriptManagerWidget::copy()
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    editor->copy();
+  }
+}
+  ///paste method
+void ScriptManagerWidget::paste()
+{
+  if( ScriptEditor *editor = currentEditor() )
+  {
+    editor->paste();
+  }
+  
+}
 //-------------------------------------------
 // Public slots
 //-------------------------------------------

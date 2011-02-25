@@ -101,6 +101,10 @@ public:
   void updateRecentScriptList();
   ///set the recent script list
   void setRecentScripts(const QStringList & scriptList);
+  /// copy implementation
+  void copy();
+  /// paste implementation
+  void paste();
 
 signals:
   ///A message is ready to be printed

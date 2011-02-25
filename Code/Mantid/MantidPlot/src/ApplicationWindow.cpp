@@ -1376,6 +1376,7 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
       format->insertSeparator();
       format->addAction(actionShowGridDialog);
       format->addAction(actionShowTitleDialog);
+  
     } else if (w->isA("Graph3D")) {
       disableActions();
 
@@ -1420,8 +1421,8 @@ void ApplicationWindow::customMenu(QMdiSubWindow* w)
       connect(actionNoteExecute, SIGNAL(activated()), w, SLOT(execute()));
       connect(actionNoteExecuteAll, SIGNAL(activated()), w, SLOT(executeAll()));
       connect(actionNoteEvaluate, SIGNAL(activated()), w, SLOT(evaluate()));
-    } else if (!mantidUI->menuAboutToShow(w))
-      disableActions();
+    } 
+   
   } else
     disableActions();
 
@@ -7845,11 +7846,16 @@ void ApplicationWindow::copySelection()
     info->copy();
     return;
   }
+  else if (m_interpreterDock->hasFocus())
+  {
+    m_scriptInterpreter->copy();
+    return;
+  }
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
 
-  if (m->inherits("Table"))
+    if (m->inherits("Table"))
     ((Table*)m)->copySelection();
   else if (m->isA("Matrix"))
     ((Matrix*)m)->copySelection();
@@ -7888,6 +7894,7 @@ void ApplicationWindow::copySelection()
 
 void ApplicationWindow::cutSelection()
 {
+  
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -7948,7 +7955,14 @@ void ApplicationWindow::copyMarker()
 }
 
 void ApplicationWindow::pasteSelection()
-{
+{  
+  if (m_interpreterDock->hasFocus())
+  {
+    
+    m_scriptInterpreter->paste();
+    return;
+  }
+
   MdiSubWindow* m = activeWindow();
   if (!m)
     return;
@@ -15508,6 +15522,7 @@ void ApplicationWindow::showScriptInterpreter()
     m_interpreterDock->setWidget(m_scriptInterpreter);
     m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
     m_interpreterDock->setFocusProxy(m_scriptInterpreter);
+    
   }
   if( m_interpreterDock->isVisible() )
   {
@@ -15516,7 +15531,11 @@ void ApplicationWindow::showScriptInterpreter()
   else
   { 
     m_interpreterDock->show();
+    m_interpreterDock->setFocusPolicy(Qt::StrongFocus);
+    m_interpreterDock->setFocusProxy(m_scriptInterpreter);
     m_scriptInterpreter->setFocus();
+    m_interpreterDock->activateWindow();
+     
   }
 
 }
