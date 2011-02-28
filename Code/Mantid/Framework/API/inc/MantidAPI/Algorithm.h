@@ -227,6 +227,10 @@ public:
   void setLogging(const bool value){g_log.setEnabled(value);}
   ///returns the status of logging, True = enabled
   bool isLogging() const {return g_log.getEnabled();}
+  /// Returns a reference to the logger.
+  Kernel::Logger& getLogger() const { return g_log; }
+  /// Returns the cancellation state
+  bool getCancel() const { return m_cancel; }
 
   /// function returns an optional message that will be displayed in the default GUI, at the top.
   const std::string getOptionalMessage() const { return m_OptionalMessage;}

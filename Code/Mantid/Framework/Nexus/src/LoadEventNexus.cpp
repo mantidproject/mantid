@@ -6,6 +6,8 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/FunctionTask.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Timer.h"
@@ -38,6 +40,449 @@ DECLARE_LOADALGORITHM(LoadEventNexus)
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
+
+
+
+
+
+//===============================================================================================
+//===============================================================================================
+/** This task does the disk IO from loading the NXS file,
+ * and so will be on a disk IO mutex */
+class ProcessBankData : public Task
+{
+public:
+  /**
+   *
+   * @param alg :: LoadEventNexus
+   * @param entry_name :: name of the bank
+   * @param pixelID_to_wi_map :: map pixel ID to Workspace Index
+   * @param prog :: Progress reporter
+   * @param scheduler :: ThreadScheduler running this task
+   * @param event_id :: array with event IDs
+   * @param event_time_of_flight :: array with event TOFS
+   * @param numEvents :: how many events in the arrays
+   * @param startAt :: index of the first event from event_index
+   * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
+   * @return
+   */
+  ProcessBankData(LoadEventNexus * alg, std::string entry_name, IndexToIndexMap * pixelID_to_wi_map,
+      Progress * prog, ThreadScheduler * scheduler,
+      uint32_t * event_id, float * event_time_of_flight,
+      size_t numEvents, size_t startAt, std::vector<uint64_t> * event_index_ptr)
+  : Task(),
+    alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler),
+    event_id(event_id), event_time_of_flight(event_time_of_flight), numEvents(numEvents), startAt(startAt),
+    event_index_ptr(event_index_ptr), event_index(*event_index_ptr)
+  {
+    // Cost is approximately proportional to the number of events to process.
+    m_cost = numEvents;
+  }
+
+  //----------------------------------------------------
+  // Run the data processing
+  void run()
+  {
+    //Local tof limits
+    double my_shortest_tof, my_longest_tof;
+    my_shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
+    my_longest_tof = 0.;
+
+    prog->report(entry_name + ": precount");
+
+    // ---- Pre-counting events per pixel ID ----
+    if (alg->precount)
+    {
+      std::map<uint32_t, size_t> counts; // key = pixel ID, value = count
+      for (size_t i=0; i < numEvents; i++)
+      {
+        uint32_t thisId = event_id[i];
+        std::map<uint32_t, size_t>::iterator map_found = counts.find(thisId);
+        if (map_found != counts.end())
+        {
+          map_found->second++;
+        }
+        else
+        {
+          counts[thisId] = 1; // First entry
+        }
+        if (alg->getCancel()) break; // User cancellation
+      }
+
+      // Now we pre-allocate (reserve) the vectors of events in each pixel counted
+      std::map<uint32_t, size_t>::iterator pixID;
+      for (pixID = counts.begin(); pixID != counts.end(); pixID++)
+      {
+        //Find the the workspace index corresponding to that pixel ID
+        int wi((*pixelID_to_wi_map)[ pixID->first ]);
+        // Allocate it
+        alg->WS->getEventList(wi).reserve( pixID->second );
+        if (alg->getCancel()) break; // User cancellation
+      }
+    }
+
+    // Check for cancelled algorithm
+    if (alg->getCancel())
+    {  delete [] event_id;  delete [] event_time_of_flight; return;  }
+
+    //Default pulse time (if none are found)
+    Mantid::Kernel::DateAndTime pulsetime;
+
+    // Index into the pulse array
+    int pulse_i = 0;
+
+    // And there are this many pulses
+    int numPulses = static_cast<int>(alg->pulseTimes.size());
+    if (numPulses > static_cast<int>(event_index.size()))
+    {
+      alg->getLogger().warning() << "Entry " << entry_name << "'s event_index vector is smaller than the proton_charge DAS log. This is inconsistent, so we cannot find pulse times for this entry.\n";
+      //This'll make the code skip looking for any pulse times.
+      pulse_i = numPulses + 1;
+    }
+
+    prog->report(entry_name + ": filling events");
+
+    //Go through all events in the list
+    for (std::size_t i = 0; i < numEvents; i++)
+    {
+      //------ Find the pulse time for this event index ---------
+      if (pulse_i < numPulses-1)
+      {
+        bool breakOut = false;
+        //Go through event_index until you find where the index increases to encompass the current index. Your pulse = the one before.
+        while ( !((i+startAt >= event_index[pulse_i]) && (i+startAt < event_index[pulse_i+1])))
+        {
+          pulse_i++;
+          // Check once every new pulse if you need to cancel (checking on every event might slow things down more)
+          if (alg->getCancel()) breakOut = true;
+          if (pulse_i >= (numPulses-1))
+            break;
+        }
+        //Save the pulse time at this index for creating those events
+        pulsetime = alg->pulseTimes[pulse_i];
+
+        // Flag to break out of the event loop with using goto ;)
+        if (breakOut)
+          break;
+      }
+
+      //Create the tofevent
+      double tof = static_cast<double>( event_time_of_flight[i] );
+      if ((tof >= alg->filter_tof_min) && (tof <= alg->filter_tof_max))
+      {
+        //The event TOF passes the filter.
+        TofEvent event(tof, pulsetime);
+
+        //Find the the workspace index corresponding to that pixel ID
+        int wi((*pixelID_to_wi_map)[event_id[i]]);
+        // Add it to the list at that workspace index
+        alg->WS->getEventList(wi).addEventQuickly( event );
+
+        //Local tof limits
+        if (tof < my_shortest_tof) { my_shortest_tof = tof;}
+        if (tof > my_longest_tof) { my_longest_tof = tof;}
+      }
+    } //(for each event)
+
+    //Join back up the tof limits to the global ones
+    PARALLEL_CRITICAL(tof_limits)
+    {
+      //This is not thread safe, so only one thread at a time runs this.
+      if (my_shortest_tof < alg->shortest_tof) { alg->shortest_tof = my_shortest_tof;}
+      if (my_longest_tof > alg->longest_tof ) { alg->longest_tof  = my_longest_tof;}
+    }
+
+    // Free Memory
+    delete [] event_id;
+    delete [] event_time_of_flight;
+    delete event_index_ptr;
+  }
+
+
+private:
+  LoadEventNexus * alg;
+  std::string entry_name;
+  IndexToIndexMap * pixelID_to_wi_map;
+  Progress * prog;
+  ThreadScheduler * scheduler;
+  uint32_t * event_id;
+  float * event_time_of_flight;
+  size_t numEvents;
+  size_t startAt;
+  std::vector<uint64_t> * event_index_ptr;
+  std::vector<uint64_t> & event_index;
+};
+
+
+
+
+//===============================================================================================
+//===============================================================================================
+/** This task does the disk IO from loading the NXS file,
+ * and so will be on a disk IO mutex */
+class LoadBankFromDiskTask : public Task
+{
+public:
+  //---------------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param entry_name :: The pathname of the bank to load
+   * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
+   * @param prog :: an optional Progress object
+   * @param ioMutex :: a mutex shared for all Disk I-O tasks
+   * @param scheduler :: the ThreadScheduler that runs this task.
+   */
+  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, IndexToIndexMap * pixelID_to_wi_map,
+      Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
+  : Task(),
+    alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
+  {
+    setMutex(ioMutex);
+  }
+
+
+  //---------------------------------------------------------------------------------------------------
+  void run()
+  {
+
+    //The vectors we will be filling
+    std::vector<uint64_t> * event_index_ptr = new std::vector<uint64_t>();
+    std::vector<uint64_t> & event_index = *event_index_ptr;
+
+    // These give the limits in each file as to which events we actually load (when filtering by time).
+    std::vector<int> load_start(1); //TODO: Should this be size_t?
+    std::vector<int> load_size(1);
+
+    // Data arrays
+    uint32_t * event_id = NULL;
+    float * event_time_of_flight = NULL;
+
+    bool loadError = false ;
+
+    prog->report(entry_name + ": load from disk");
+
+
+    // Open the file
+    ::NeXus::File file(alg->m_filename);
+    try
+    {
+    file.openGroup("entry", "NXentry");
+
+    //Open the bankN_event group
+    file.openGroup(entry_name, "NXevent_data");
+
+    // Get the event_index (a list of size of # of pulses giving the index in the event list for that pulse)
+    file.openData("event_index");
+    //Must be uint64
+    if (file.getInfo().type == ::NeXus::UINT64)
+      file.getData(event_index);
+    else
+    {
+     alg->getLogger().warning() << "Entry " << entry_name << "'s event_index field is not UINT64! It will be skipped.\n";
+     loadError = true;
+    }
+    file.closeData();
+
+    // Look for the sign that the bank is empty
+    if (event_index.size()==1)
+    {
+      if (event_index[0] == 0)
+      {
+        //One entry, only zero. This means NO events in this bank.
+        loadError = true;
+        alg->getLogger().debug() << "Bank " << entry_name << " is empty.\n";
+      }
+    }
+
+    if (event_index.size() != alg->pulseTimes.size())
+    {
+      loadError = true;
+      alg->getLogger().debug() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
+    }
+
+    if (!loadError)
+    {
+      bool old_nexus_file_names = false;
+
+
+      // Get the list of pixel ID's
+      try
+      {
+        file.openData("event_id");
+      }
+      catch (::NeXus::Exception& )
+      {
+        //Older files (before Nov 5, 2010) used this field.
+        file.openData("event_pixel_id");
+        old_nexus_file_names = true;
+      }
+
+      // By default, use all available indices
+      int start_event = 0;
+      ::NeXus::Info id_info = file.getInfo();
+      int stop_event = id_info.dims[0];
+
+      //TODO: Handle the time filtering by changing the start/end offsets.
+      for (size_t i=0; i < alg->pulseTimes.size(); i++)
+      {
+        if (alg->pulseTimes[i] >= alg->filter_time_start)
+        {
+          start_event = event_index[i];
+          break; // stop looking
+        }
+      }
+
+      for (size_t i=0; i < alg->pulseTimes.size(); i++)
+      {
+        if (alg->pulseTimes[i] > alg->filter_time_stop)
+        {
+          stop_event = event_index[i];
+          break;
+        }
+      }
+
+      // Make sure it is within range
+      if ((stop_event > id_info.dims[0]) || (stop_event < 0))
+        stop_event = id_info.dims[0];
+      if (start_event < 0)
+        start_event = 0;
+
+      alg->getLogger().debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << std::endl;
+
+      // These are the arguments to getSlab()
+      load_start[0] = start_event;
+      load_size[0] = stop_event - start_event;
+
+      if ((load_size[0] > 0) && (load_start[0]>=0) )
+      {
+        // Now we allocate the required arrays
+        event_id = new uint32_t[load_size[0]];
+        event_time_of_flight = new float[load_size[0]];
+
+        // Check that the required space is there in the file.
+        if (id_info.dims[0] < load_size[0]+load_start[0])
+        {
+          alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is too small (" << id_info.dims[0]
+                          << ") to load the desired data size (" << load_size[0]+load_start[0] << ").\n";
+          loadError = true;
+        }
+
+        if (alg->getCancel()) loadError = true; //To allow cancelling the algorithm
+
+        if (!loadError)
+        {
+          //Must be uint32
+          if (id_info.type == ::NeXus::UINT32)
+            file.getSlab(event_id, load_start, load_size);
+          else
+          {
+            alg->getLogger().warning() << "Entry " << entry_name << "'s event_id field is not UINT32! It will be skipped.\n";
+            loadError = true;
+          }
+          file.closeData();
+        }
+
+        if (alg->getCancel()) loadError = true; //To allow cancelling the algorithm
+
+        if (!loadError)
+        {
+          // Get the list of event_time_of_flight's
+          if (!old_nexus_file_names)
+            file.openData("event_time_offset");
+          else
+            file.openData("event_time_of_flight");
+
+          // Check that the required space is there in the file.
+          ::NeXus::Info tof_info = file.getInfo();
+          if (tof_info.dims[0] < load_size[0]+load_start[0])
+          {
+            alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is too small to load the desired data.\n";
+            loadError = true;
+          }
+
+          //Check that the type is what it is supposed to be
+          if (tof_info.type == ::NeXus::FLOAT32)
+            file.getSlab(event_time_of_flight, load_start, load_size);
+          else
+          {
+            alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field is not FLOAT32! It will be skipped.\n";
+            loadError = true;
+          }
+
+          if (!loadError)
+          {
+            std::string units;
+            file.getAttr("units", units);
+            if (units != "microsecond")
+            {
+              alg->getLogger().warning() << "Entry " << entry_name << "'s event_time_offset field's units are not microsecond. It will be skipped.\n";
+              loadError = true;
+            }
+            file.closeData();
+          } //no error
+        } //no error
+      } // Size is at least 1
+      else
+      {
+        // Found a size that was 0 or less; stop processign
+        loadError=true;
+      }
+
+    } //no error
+
+    } // try block
+    catch (std::exception e)
+    {
+      alg->getLogger().error() << "Error while loading bank " << entry_name << ":" << std::endl;
+      alg->getLogger().error() << e.what() << std::endl;
+      loadError = true;
+    }
+    catch (...)
+    {
+      alg->getLogger().error() << "Unspecified error while loading bank " << entry_name << std::endl;
+      loadError = true;
+    }
+
+    //Close up the file even if errors occured.
+    file.closeGroup();
+    file.close();
+
+    //Abort if anything failed
+    if (loadError)
+    {
+      prog->reportIncrement(2, entry_name + ": skipping");
+      delete [] event_id;
+      delete [] event_time_of_flight;
+      delete event_index_ptr;
+      return;
+    }
+
+    // No error? Launch a new task to process that data.
+    size_t numEvents = load_size[0];
+    size_t startAt = load_start[0];
+    ProcessBankData * newTask = new ProcessBankData(alg, entry_name,pixelID_to_wi_map,prog,scheduler,
+        event_id,event_time_of_flight, numEvents, startAt, event_index_ptr);
+    scheduler->push(newTask);
+  }
+
+
+
+private:
+  LoadEventNexus * alg;
+  std::string entry_name;
+  IndexToIndexMap * pixelID_to_wi_map;
+  Progress * prog;
+  ThreadScheduler * scheduler;
+};
+
+
+
+
+
+
+
+//===============================================================================================
+//===============================================================================================
 
 /// Empty default constructor
 LoadEventNexus::LoadEventNexus() : IDataFileChecker()
@@ -372,17 +817,45 @@ void LoadEventNexus::exec()
   //This map will be used to find the workspace index
   IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
 
-  // Now go through each bank.
-  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
-  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+//  // Now go through each bank.
+//  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
+//  PARALLEL_FOR_IF( (this->instrument_loaded_correctly) )
+//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
+//  {
+//    PARALLEL_START_INTERUPT_REGION
+//    this->loadBankEventData(bankNames[i], pixelID_to_wi_map, prog2);
+//    PARALLEL_END_INTERUPT_REGION
+//  }
+//  PARALLEL_CHECK_INTERUPT_REGION
+//  delete prog2;
+
+
+
+//  // Create a thread pool with scheduler
+//  ThreadPool pool(new ThreadSchedulerLargestCost());
+//  for (int i=0; i < static_cast<int>(bankNames.size()); i++)
+//  {
+//    double cost = 1.0;
+//    pool.schedule( new FunctionTask(boost::bind(&LoadEventNexus::loadBankEventData, &*this, bankNames[i], pixelID_to_wi_map, prog2), cost ) );
+//  }
+//  // Start and end all threads
+//  pool.joinAll();
+//  delete prog2;
+
+  // Make the thread pool
+  ThreadScheduler * scheduler = new ThreadSchedulerLargestCost();
+  ThreadPool pool(scheduler);
+  Mutex * diskIOMutex = new Mutex();
   for (int i=0; i < static_cast<int>(bankNames.size()); i++)
   {
-    PARALLEL_START_INTERUPT_REGION
-    this->loadBankEventData(bankNames[i], pixelID_to_wi_map, prog2);
-    PARALLEL_END_INTERUPT_REGION
+    // We make tasks for loading
+    pool.schedule( new LoadBankFromDiskTask(this,bankNames[i],pixelID_to_wi_map, prog2, diskIOMutex, scheduler) );
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  // Start and end all threads
+  pool.joinAll();
+  delete diskIOMutex;
   delete prog2;
+
 
   //Don't need the map anymore.
   delete pixelID_to_wi_map;
@@ -421,7 +894,7 @@ void LoadEventNexus::exec()
 }
 
 
-
+/** Load the run number and other meta data from the given bank */
 void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
   // Open the file
   ::NeXus::File file(m_filename);
@@ -457,8 +930,9 @@ void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
  * Load one of the banks' event data from the nexus file
  * @param entry_name :: The pathname of the bank to load
  * @param pixelID_to_wi_map :: a map where key = pixelID and value = the workpsace index to use.
+ * @param prog :: Progress reporter
  */
-void LoadEventNexus::loadBankEventData(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map, Progress * prog)
+void LoadEventNexus::loadBankEventData_OBSOLETE(const std::string entry_name, IndexToIndexMap * pixelID_to_wi_map, Progress * prog)
 {
   //Local tof limits
   double my_shortest_tof, my_longest_tof;
