@@ -2,6 +2,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidAPI/MemoryManager.h"
 #include <functional>
 #include <math.h>
 
@@ -963,7 +964,7 @@ namespace DataObjects
   /** Perform a parallelized sort on a provided vector, using 4 threads.
    * NOTE: Will temporarily use twice the memory used by the incoming vector.
    *
-   * @param vec :: a vector, by refe/rence, that will be sorted-in place.
+   * @param vec :: a vector, by reference, that will be sorted-in place.
    */
   template<typename T>
   void parallel_sort4(std::vector<T> & vec)
@@ -1014,10 +1015,17 @@ namespace DataObjects
     // We can clear the incoming vector to free up memory now,
     //  because it is copied already in temp1, temp2
     vec.clear();
+    MemoryManager::Instance().releaseFreeMemory();
 
     // Final merge
     typename std::vector<T> temp;
     merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), temp);
+
+    // Clear out this temporary storage
+    temp1.clear();
+    temp2.clear();
+    typename std::vector<T>().swap(temp1);
+    typename std::vector<T>().swap(temp2);
 
     // Swap storage with the temp vector
     vec.swap(temp);
@@ -1570,7 +1578,17 @@ namespace DataObjects
   void EventList::generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError) const
   {
     // All types of weights need to be sorted by TOF
-    this->sortTof();
+
+    size_t numEvents = getNumberEvents();
+    if (numEvents > 5e5 && PARALLEL_GET_MAX_THREADS >= 4)
+      // Four-core sort
+      this->sortTof4();
+    else if (numEvents > 5e5 && PARALLEL_GET_MAX_THREADS >= 2)
+      // Two-core sort
+      this->sortTof2();
+    else
+      // One-core sort
+      this->sortTof();
 
     switch (eventType)
     {
