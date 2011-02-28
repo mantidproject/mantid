@@ -8,6 +8,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
 
 #include <boost/bind.hpp>
 #include <iostream>
@@ -305,9 +306,15 @@ public:
     TimeWaster mywaster;
     size_t num = 30000;
     mywaster.total = 0;
+    Mutex * lastMutex = NULL;
     for (size_t i=0; i<=num; i++)
     {
-      p.schedule( new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), i*1.0 ) );
+      Task * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), i*1.0 );
+      // Create a new mutex every 1000 tasks. This is more relevant to the ThreadSchedulerMutexes; others ignore it.
+      if (i % 1000 == 0)
+        lastMutex = new Mutex();
+      task->setMutex(lastMutex);
+      p.schedule( task );
     }
 
     Timer overall;
@@ -335,16 +342,23 @@ public:
     do_StressTest_scheduler(new ThreadSchedulerLargestCost());
   }
 
+  void test_StressTest_ThreadSchedulerMutexes()
+  {
+    do_StressTest_scheduler(new ThreadSchedulerMutexes());
+  }
+
 
   //--------------------------------------------------------------------
   /** Perform a stress test on the given scheduler.
    * This one creates tasks that create new tasks; e.g. 10 tasks each add
-   * 10 tasks, and so on (up to a certain depth)
+   * 10 tasks, and so on (up to a certain depth).
+   * So it tests against possible segfaults of one task
+   * accessing the queue while another thread is popping it.
    */
   void do_StressTest_TasksThatCreateTasks(ThreadScheduler * sched)
   {
     ThreadPool * p = new ThreadPool(sched, 0);
-    // Create the first task, depth 0, that will recursively create 100000
+    // Create the first task, depth 0, that will recursively create 10000
     TaskThatAddsTasks * task = new TaskThatAddsTasks(sched, 0);
     p->schedule( task );
 
@@ -370,6 +384,11 @@ public:
   void test_StressTest_TasksThatCreateTasks_ThreadSchedulerLargestCost()
   {
     do_StressTest_TasksThatCreateTasks(new ThreadSchedulerLargestCost());
+  }
+
+  void test_StressTest_TasksThatCreateTasks_ThreadSchedulerMutexes()
+  {
+    do_StressTest_TasksThatCreateTasks(new ThreadSchedulerMutexes());
   }
 
   //=======================================================================================

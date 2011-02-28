@@ -17,6 +17,11 @@ namespace Kernel
    * This scheduler also sorts by largest cost so as to optimize allocation
    * that way.
    *
+   * NOTE: The performance of "pop"ping a task is much slower if you have a very
+   * large number of different mutexes; this scheduler is better suited if you
+   * only have a few (e.g. one for DiskIO, and NULL for calculations).
+   * Popping a task scales with the N^2 where N is the number of different mutexes.
+   *
    * @author Janik Zikovsky
    * @date 2011-02-25 16:39:43.233991
    */
@@ -49,8 +54,9 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     virtual Task * pop(size_t threadnum)
     {
+      (void) threadnum;
+
       Task * temp = NULL;
-      Mutex * mut = NULL;
       std::set<Mutex *>::iterator mutexes_end = m_mutexes.end();
 
       m_queueLock.lock();
@@ -61,7 +67,9 @@ namespace Kernel
         SuperMap::iterator it_end = m_supermap.end();
         for (; it != it_end; it++)
         {
-          if (m_mutexes.find(mut) == m_mutexes.end())
+          // The key is the mutex associated with the inner map
+          Mutex * mapMutex = it->first;
+          if (m_mutexes.find(mapMutex) == m_mutexes.end())
           {
             // The mutex of this map is free!
             InnerMap & map = it->second;
@@ -73,6 +81,8 @@ namespace Kernel
               it2--;
               // Great, we found something.
               temp = it2->second;
+              // Take it out of the map (popped)
+              map.erase(it2);
               break;
             }
           }
@@ -80,22 +90,33 @@ namespace Kernel
         if (temp == NULL)
         {
           // Nothing was found, meaning all mutexes are in use
-          // Try the first non-emprty map
+          // Try the first non-empty map
           SuperMap::iterator it = m_supermap.begin();
           SuperMap::iterator it_end = m_supermap.end();
           for (; it != it_end; it++)
           {
             if (it->second.size() > 0)
             {
+              InnerMap & map = it->second;
               // Use the first one
-              temp = it->second.begin()->second;
+              temp = map.begin()->second;
+              // And erase that item (pop it)
+              map.erase(map.begin());
               break;
             }
           }
         }
         // If temp is still NULL, then no tasks are left.
-
       }
+
+      // --- Add the mutex (if any) to the list of "busy" ones ---
+      if (temp)
+      {
+        Mutex * mut = temp->getMutex();
+        if (mut)
+          m_mutexes.insert(mut);
+      }
+
       m_queueLock.unlock();
       return temp;
     }
@@ -104,60 +125,6 @@ namespace Kernel
 
 
 
-
-//    // Check the size within the same locking block; otherwise the size may change before you get the next item.
-//    if (m_supermap.size() > 0)
-//    {
-//      SuperMap::iterator it = m_supermap.find(
-//
-//
-//      // Since the map is sorted by cost, we want the LAST item.
-//      //std::multimap<double, Task*>::iterator it = m_map.end();
-//      while (it != m_map.begin())
-//      {
-//        it--;
-//        temp = it->second;
-//
-//        // Look at the mutex
-//        mut = temp->getMutex();
-//        if (mut)
-//        {
-////            if (mut->tryLock())
-////            {
-////              mut->unlock();
-////              break;
-////            }
-//
-//
-//          if (m_mutexes.find(mut) == mutexes_end)
-//          {
-//            // The mutex was not in our used list; therefore it is free
-//            // ... and we will use this task then
-//            break;
-//          }
-//          // else the mutex is in use, and we should keep looking.
-//        }
-//        else
-//        {
-//          // No Mutex? Great, you can use this task
-//          break;
-//        }
-//      }
-//      // Worst case: if all mutexes were used, you end up with the first (lowest-cost) Task here.
-//      // The ThreadPoolRunnable will have to lock for real and wait.
-//
-//      // Add the mutex being used (if any) to the list of in-use mutexes
-//      if (mut)
-//      {
-//        //TODO: threadsafe
-//        m_mutexes.insert(mut);
-//        //std::cout << m_mutexes.size() << " used mutexes\n";
-//      }
-//
-//      // Remove the old task from the queue
-//      m_map.erase(it);
-//    }
-
     //-----------------------------------------------------------------------------------
     /** Signal to the scheduler that a task is complete.
      *
@@ -165,12 +132,14 @@ namespace Kernel
      */
     virtual void finished(Task * task, size_t threadnum)
     {
+      (void) threadnum;
       Mutex * mut = task->getMutex();
       if (mut)
       {
-        //TODO: threadsafe
+        m_queueLock.lock();
         // We take this mutex off the list of used ones.
         m_mutexes.erase(mut);
+        m_queueLock.unlock();
       }
     }
 
@@ -193,11 +162,20 @@ namespace Kernel
     void clear()
     {
       m_queueLock.lock();
+
       // Empty out the queue and delete the pointers!
-      // TODO:
-//      for (std::multimap<double, Task*>::iterator it=m_map.begin(); it != m_map.end(); it++)
-//        delete it->second;
-//      m_map.clear();
+      SuperMap::iterator it = m_supermap.begin();
+      SuperMap::iterator it_end = m_supermap.end();
+      for (; it != it_end; it++)
+      {
+        InnerMap & map = it->second;
+        InnerMap::iterator it2 = map.begin();
+        InnerMap::iterator it2_end = map.end();
+        for (; it2!=it2_end; it2++)
+          delete it2->second;
+        map.clear();
+      }
+      m_supermap.clear();
       m_cost = 0;
       m_costExecuted = 0;
       m_queueLock.unlock();

@@ -11,9 +11,12 @@
 
 using namespace Mantid::Kernel;
 
+int ThreadSchedulerMutexesTest_timesDeleted;
+
 class ThreadSchedulerMutexesTest : public CxxTest::TestSuite
 {
 public:
+
   /** A custom implementation of Task,
    * that sets its mutex */
   class TaskWithMutex : public Task
@@ -24,6 +27,10 @@ public:
       m_mutex = mutex;
       m_cost = cost;
     }
+
+    /// Count # of times destructed in the destructor
+    ~TaskWithMutex()
+    {ThreadSchedulerMutexesTest_timesDeleted++;}
 
     void run()
     {
@@ -46,7 +53,7 @@ public:
     TS_ASSERT_EQUALS( sc.size(), 2);
   }
 
-  void xtest_queue()
+  void test_queue()
   {
     ThreadSchedulerMutexes sc;
     Mutex * mut1 = new Mutex();
@@ -58,58 +65,87 @@ public:
     TaskWithMutex * task4 = new TaskWithMutex(mut2,  7.0);
     TaskWithMutex * task5 = new TaskWithMutex(mut2,  6.0);
     TaskWithMutex * task6 = new TaskWithMutex(mut3,  5.0);
+    TaskWithMutex * task7 = new TaskWithMutex(NULL,  4.0);
     sc.push(task1);
     sc.push(task2);
     sc.push(task3);
-    sc.push(task4);
-    sc.push(task5);
-    sc.push(task6);
+    TS_ASSERT_EQUALS( sc.size(), 3);
 
     Task * task;
-    // Run the first task
+    // Run the first task. mut1 becomes busy
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task1 );
-    //task->getMutex()->lock();
+    TS_ASSERT_EQUALS( sc.size(), 2);
 
-    // Next one will be task4 since mut1 is locked
+    // Add some tasks with mut2
+    sc.push(task4);
+    sc.push(task5);
+    TS_ASSERT_EQUALS( sc.size(), 4);
+
+    // Next one will be task4 since mut1 is locked. mut2 is busy now too.
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task4 );
-    //task->getMutex()->lock();
+    TS_ASSERT_EQUALS( sc.size(), 3);
 
-    // Next one will be task6 since mut1 and mut2 are locked
+    sc.push(task6);
+
+    // Next one will be task6 since mut1 and mut2 are locked. mut3 is busy now too.
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task6 );
+    TS_ASSERT_EQUALS( sc.size(), 3);
+
+    // This task has NO mutex, so it comes next
+    sc.push(task7);
+    task = sc.pop(0);
+    TS_ASSERT_EQUALS( task, task7 );
+    TS_ASSERT_EQUALS( sc.size(), 3);
 
     // Now we release task1, allowing task2 to come next
     sc.finished(task1,0);
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task2 );
+    TS_ASSERT_EQUALS( sc.size(), 2);
     sc.finished(task2,0); // Have to complete task2 before task3 comes
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task3 );
+    TS_ASSERT_EQUALS( sc.size(), 1);
 
     // mut2 is still locked, but since it's the last one, task5 is returned
     task = sc.pop(0);
     TS_ASSERT_EQUALS( task, task5 );
-    // (at this point, the thread pool would have to wait till the mutex is released)
-
     TS_ASSERT_EQUALS( sc.size(), 0 );
+    // (for this task, the thread pool would have to wait till the mutex is released)
+
   }
 
-  void xtest_performance()
+  void test_clear()
+  {
+    ThreadSchedulerMutexes sc;
+    for (size_t i=0; i<10; i++)
+    {
+      TaskWithMutex * task = new TaskWithMutex(new Mutex(), 10.0);
+      sc.push(task);
+    }
+    TS_ASSERT_EQUALS(sc.size(), 10);
+    ThreadSchedulerMutexesTest_timesDeleted = 0;
+    sc.clear();
+    TS_ASSERT_EQUALS(sc.size(), 0);
+    // Was the destructor called enough times?
+    TS_ASSERT_EQUALS(ThreadSchedulerMutexesTest_timesDeleted, 10);
+  }
+
+  void test_performance_same_mutex()
   {
     ThreadSchedulerMutexes sc;
     Timer tim0;
     Mutex * mut1 = new Mutex();
-    size_t num = 5000;
+    size_t num = 500;
     for (size_t i=0; i < num; i++)
     {
       sc.push(new TaskWithMutex(mut1, 10.0));
     }
-    std::cout << tim0.elapsed() << " secs to push." << std::endl;
-
-    // Now lock the only mutex
-    mut1->lock();
+    //std::cout << tim0.elapsed() << " secs to push." << std::endl;
+    TS_ASSERT_EQUALS( sc.size(), num);
 
     Timer tim1;
     for (size_t i=0; i < num; i++)
@@ -117,10 +153,30 @@ public:
       Task * task;
       task = sc.pop(0);
     }
-    std::cout << tim1.elapsed() << " secs to pop." << std::endl;
+    //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
+    TS_ASSERT_EQUALS( sc.size(), 0);
+  }
 
-    // Now lock the only mutex
-    //mut1->unlock();
+  void test_performance_lotsOfMutexes()
+  {
+    ThreadSchedulerMutexes sc;
+    Timer tim0;
+    size_t num = 500;
+    for (size_t i=0; i < num; i++)
+    {
+      sc.push(new TaskWithMutex(new Mutex(), 10.0));
+    }
+    //std::cout << tim0.elapsed() << " secs to push." << std::endl;
+    TS_ASSERT_EQUALS( sc.size(), num);
+
+    Timer tim1;
+    for (size_t i=0; i < num; i++)
+    {
+      Task * task;
+      task = sc.pop(0);
+    }
+    //std::cout << tim1.elapsed() << " secs to pop." << std::endl;
+    TS_ASSERT_EQUALS( sc.size(), 0);
   }
 
 
