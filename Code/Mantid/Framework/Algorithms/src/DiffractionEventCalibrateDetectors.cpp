@@ -294,7 +294,7 @@ namespace Algorithms
 
     //Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of events
     EventWorkspace_const_sptr inputE = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
-    return (inputE->getNumberEvents()/1.e6)/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
+    return (inputE->getNumberEvents()/1.e9)/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
 }
   /** Initialisation method
   */

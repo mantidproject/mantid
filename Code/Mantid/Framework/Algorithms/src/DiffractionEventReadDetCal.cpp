@@ -114,7 +114,7 @@ namespace Algorithms
     std::string filename = getProperty("Filename");
 
     // Output summary to log file
-    int count, id, nrows, ncols;
+    int idnum=0, count, id, nrows, ncols;
     double width, height, depth, detd, x, y, z, base_x, base_y, base_z, up_x, up_y, up_z;
     std::ifstream input(filename.c_str(), std::ios_base::in);
     std::string line;
@@ -159,7 +159,8 @@ namespace Algorithms
       y = y * 0.01;
       z = z * 0.01;
       boost::shared_ptr<RectangularDetector> det;
-      det = detList[id-1];
+      det = detList[idnum];
+      idnum++;
       if (det)
       {
         detname = det->getName();
