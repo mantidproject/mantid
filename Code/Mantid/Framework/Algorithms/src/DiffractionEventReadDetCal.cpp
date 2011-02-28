@@ -159,8 +159,12 @@ namespace Algorithms
       y = y * 0.01;
       z = z * 0.01;
       boost::shared_ptr<RectangularDetector> det;
+      std::ostringstream Detbank;
+      Detbank <<"bank"<<id;
+      // Loop through detectors to match names with number from DetCal file
+      for (int i=0; i < static_cast<int>(detList.size()); i++)
+        if(detList[i]->getName().compare(Detbank.str()) == 0) idnum=i;
       det = detList[idnum];
-      idnum++;
       if (det)
       {
         detname = det->getName();
