@@ -25,6 +25,7 @@
 #include <Poco/Environment.h>
 
 #include <boost/algorithm/string/replace.hpp>
+#include <boost/algorithm/string/join.hpp>
 
 #include <fstream>
 #include <sstream>
@@ -465,27 +466,6 @@ bool ConfigServiceImpl::isInDataSearchList(const std::string & path) const
 }
 
 /**
- *  Adds the passed path to the end of the list of data search paths
- *  the path name must be absolute
- *  @param path :: the absolute path to add
- */
-void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
-{
-  if ( ! isInDataSearchList(path) )
-  {
-    std::string newSearchString;
-    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
-    for( ; it != m_DataSearchDirs.end(); ++it)
-    {
-      newSearchString.append(*it);
-      newSearchString.append(";");
-    }
-    newSearchString.append(path);
-    setString("datasearch.directories", newSearchString);
-  }
-}
-
-/**
  * writes a basic placeholder user.properties file to disk
  * any errors are caught and logged, but not propagated
  */
@@ -896,6 +876,47 @@ const std::vector<std::string>& ConfigServiceImpl::getDataSearchDirs() const
 {
   return m_DataSearchDirs;
 }
+
+/**
+ * Set a list of search paths via a vector
+ * @param searchDirs :: A list of search directories
+ */
+void ConfigServiceImpl::setDataSearchDirs(const std::vector<std::string> &searchDirs)
+{
+  std::string searchPaths = boost::join(searchDirs, ";");
+  setDataSearchDirs(searchPaths);
+}
+
+/**
+ * Set a list of search paths via a string
+ * @param searchDirs :: A string containing a list of search directories separated by a semi colon (;).
+ */
+void ConfigServiceImpl::setDataSearchDirs(const std::string &searchDirs)
+{
+  setString("datasearch.directories", searchDirs);
+}
+
+/**
+ *  Adds the passed path to the end of the list of data search paths
+ *  the path name must be absolute
+ *  @param path :: the absolute path to add
+ */
+void ConfigServiceImpl::appendDataSearchDir(const std::string & path)
+{
+  if ( ! isInDataSearchList(path) )
+  {
+    std::string newSearchString;
+    std::vector<std::string>::const_iterator it = m_DataSearchDirs.begin();
+    for( ; it != m_DataSearchDirs.end(); ++it)
+    {
+      newSearchString.append(*it);
+      newSearchString.append(";");
+    }
+    newSearchString.append(path);
+    setString("datasearch.directories", newSearchString);
+  }
+}
+
 
 /**
  * Return the list of user search paths

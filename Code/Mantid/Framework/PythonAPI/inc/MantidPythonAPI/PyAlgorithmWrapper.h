@@ -120,7 +120,7 @@ public:
     // FIXME validator is not passed in - but I'm not sure this would ever reasonably be called.
     (void)validator;
     //Extract the values from the python list into a std vector
-    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+    this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), doc, direction);
   }
 
   /**
@@ -137,7 +137,7 @@ public:
   {
     (void)validator;
     //Extract the values from the python list into a std vector
-    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), validator.clone(), doc, direction);
+    this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), validator.clone(), doc, direction);
   }
 
   /**
@@ -152,7 +152,7 @@ public:
 			    const unsigned int direction)
   {
     //Extract the values from the python list into a std vector
-    this->IAlgorithm::declareProperty(prop_name, Conversions::convertToStdVector<TYPE>(values), doc, direction);
+    this->IAlgorithm::declareProperty(prop_name, Conversions::toStdVector<TYPE>(values), doc, direction);
   }
 
   /**
@@ -208,7 +208,7 @@ public:
   void _declareFileProperty(const std::string & prop_name, const std::string & default_value, const unsigned int type, 
 			    boost::python::list exts, const std::string & description, const unsigned int direction)
   {
-    this->Algorithm::declareProperty(new API::FileProperty(prop_name, default_value, type, Conversions::convertToStdVector<std::string>(exts), direction), description);
+    this->Algorithm::declareProperty(new API::FileProperty(prop_name, default_value, type, Conversions::toStdVector<std::string>(exts), direction), description);
   }
   
   /**

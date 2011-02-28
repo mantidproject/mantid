@@ -209,11 +209,18 @@ namespace PythonAPI
   {
     class_<ConfigServiceWrapper>("ConfigService")
       // Special methods
-      .def("__getitem__", &ConfigServiceWrapper::getProperty)
-      .def("__setitem__", &ConfigServiceWrapper::setProperty)
+      .def("__getitem__", &ConfigServiceWrapper::getString)
+      .def("__setitem__", &ConfigServiceWrapper::setString)
       // Standard methods
       .def("facility", &ConfigServiceWrapper::facility, ConfigService_facilityOverloads())
       .def("welcomeMessage", &ConfigServiceWrapper::welcomeMessage)
+      .def("getDataSearchDirs",&ConfigServiceWrapper::getDataSearchDirs)
+      .def("setDataSearchDirs", (void (ConfigServiceWrapper::*)(const std::string &))&ConfigServiceWrapper::setDataSearchDirs)
+      .def("setDataSearchDirs", (void (ConfigServiceWrapper::*)(const boost::python::list &))&ConfigServiceWrapper::setDataSearchDirs)
+      .def("appendDataSearchDir", &ConfigServiceWrapper::appendDataSearchDir)
+      .def("getInstrumentDirectory", &ConfigServiceWrapper::getInstrumentDirectory)
+      .def("getUserFilename", &ConfigServiceWrapper::getUserFilename)
+      .def("saveConfig", &ConfigServiceWrapper::saveConfig)
       ;
   }
 

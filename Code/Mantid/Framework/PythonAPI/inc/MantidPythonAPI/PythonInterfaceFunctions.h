@@ -245,9 +245,10 @@ namespace Mantid
       /**
       * Convert a Boost Python list to a std::vector of the requested type
       * @param pylist :: The Python list
+      * @returns A std::vector from the given list
       */
       template<typename TYPE>
-      std::vector<TYPE> convertToStdVector(const boost::python::list & pylist)
+      std::vector<TYPE> toStdVector(const boost::python::list & pylist)
       {
         int length = boost::python::extract<int>(pylist.attr("__len__")());
         std::vector<TYPE> seq_std(length, TYPE());
@@ -266,6 +267,19 @@ namespace Mantid
         }
         return seq_std;
       }
+
+      //@{
+      /**
+      * Convert a std::vector of the given type to boost python list
+      * @param stdvec :: An input vector
+      * @returns A boost::python list converted from the given vector
+      */
+      template<typename TYPE>
+      boost::python::list toPyList(const std::vector<TYPE> & stdvec)
+      {
+	return	boost::python::list(stdvec);
+      }
+
     }
     //@}
     //@endcond

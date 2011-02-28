@@ -97,7 +97,8 @@ namespace Mantid
         *   @param newvalue :: new value of property
         *   @param prevvalue :: previous value of property
         */
-        ValueChanged(const std::string name, const std::string newvalue, const std::string prevvalue) : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
+        ValueChanged(const std::string &name, const std::string &newvalue, const std::string &prevvalue) 
+	  : ConfigServiceNotification(), m_name(name), m_value(newvalue), m_prev(prevvalue) {}
         /// The name of the user property that has changed, as it appears in the user.properties file
         const std::string & key() const { return this->m_name; } ///< @return The name of the changed the property
         /// The new value for the property
@@ -146,12 +147,22 @@ namespace Mantid
       std::string getPropertiesDir() const;
       /// Returns a directory to use to write out Mantid information. Needs to be writable
       std::string getUserPropertiesDir() const;
+
+      /** @name Search paths handling */
+      //@{
       /// Get the list of search paths
       const std::vector<std::string>& getDataSearchDirs() const;
+      /// Set a list of search paths via a vector
+      void setDataSearchDirs(const std::vector<std::string> &searchDirs);
+      /// Set a list of search paths via a string
+      void setDataSearchDirs(const std::string &searchDirs);
+      /// Adds the passed path to the end of the list of data search paths
+      void appendDataSearchDir(const std::string & path);
       /// Get the list of user search paths
       const std::vector<std::string>& getUserSearchDirs() const;
       /// Get instrument search directory
       const std::string getInstrumentDirectory() const;
+      //@}
 
       /// Load facility information from instrumentDir/Facilities.xml file 
       void updateFacilities(const std::string& fName = "");
@@ -188,8 +199,6 @@ namespace Mantid
       std::string defaultConfig() const;
       /// Writes out a fresh user properties file
       void createUserPropertiesFile() const;
-      /// Adds the passed path to the end of the list of data search paths
-      void appendDataSearchDir(const std::string & path);
       /// Convert any relative paths to absolute ones and store them locally so that
       /// if the working directory is altered the paths will not be affected
       void convertRelativeToAbsolute();
