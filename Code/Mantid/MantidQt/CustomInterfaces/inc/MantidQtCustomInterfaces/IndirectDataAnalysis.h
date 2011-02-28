@@ -39,6 +39,7 @@ class QtProperty;
 class QtBoolPropertyManager;
 class QtDoublePropertyManager;
 class QtGroupPropertyManager;
+class QtStringPropertyManager;
 class QtTreePropertyBrowser;
 //----------------------
 //       End Of
@@ -92,7 +93,7 @@ namespace MantidQt
       void absorptionRun();
 
       Mantid::API::CompositeFunctionMW* furyfitCreateFunction(bool tie=false);
-      Mantid::API::IFitFunction* furyfitCreateUserFunction(const QString & name);
+      Mantid::API::IFitFunction* furyfitCreateUserFunction(const QString & name, bool tie=false);
       Mantid::API::CompositeFunctionMW* confitCreateFunction(bool tie=false);
       QtProperty* createLorentzian(const QString &);
       QtProperty* createExponential(const QString &);
@@ -137,6 +138,10 @@ namespace MantidQt
       void furyfitRangePropChanged(QtProperty*, double);
       void furyfitSequential();
       void furyfitPlotGuess(QtProperty*);
+      // context menu on fitting property browser
+      void furyfitContextMenu(const QPoint &);
+      void ffFixItem();
+      void ffUnFixItem();
 
       // Convolution Fit
       void confitTypeSelection(int index);
@@ -151,6 +156,8 @@ namespace MantidQt
       void confitCheckBoxUpdate(QtProperty*, bool);
       void confitHwhmChanged(double);
       void confitHwhmUpdateRS(double);
+
+      void confitContextMenu(const QPoint &);
 
       // Absorption (Basic)
       // (nothing for this)
@@ -211,6 +218,7 @@ namespace MantidQt
       QtTreePropertyBrowser* m_ffTree; ///< FuryFit Property Browser
       QtGroupPropertyManager* m_groupManager;
       QtDoublePropertyManager* m_ffDblMng;
+      QtBoolPropertyManager* m_ffBlnMng;
       QtDoublePropertyManager* m_ffRangeManager; ///< StartX and EndX for FuryFit
       QMap<QString, QtProperty*> m_ffProp;
       QwtPlot* m_ffPlot;
@@ -222,6 +230,9 @@ namespace MantidQt
       boost::shared_ptr<const Mantid::API::MatrixWorkspace> m_ffOutputWS;
       std::string m_ffInputWSName;
       QString m_furyfitTies;
+
+      QtStringPropertyManager* m_stringManager;
+
 
       // Confit (prefix: 'm_cf')
       QtTreePropertyBrowser* m_cfTree;
