@@ -16,6 +16,22 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadSNSEventNexus)
 DECLARE_LOADALGORITHM(LoadSNSEventNexus)
 
+LoadSNSEventNexus::LoadSNSEventNexus()
+{
+  this->useAlgorithm("LoadEventNexus");
+  this->deprecatedDate("2011-02-14");
+}
+
+int LoadSNSEventNexus::version() const
+{
+  return 1;
+}
+
+const std::string LoadSNSEventNexus::name() const
+{
+  return "LoadSNSEventNexus";
+}
+
 /**
  * Checks the file by opening it and reading few lines
  *  @param filePath :: name of the file inluding its path
@@ -23,37 +39,8 @@ DECLARE_LOADALGORITHM(LoadSNSEventNexus)
  */
 int LoadSNSEventNexus::fileCheck(const std::string& filePath)
 {
-  int confidence(0);
-  try
-  {
-    ::NeXus::File file = ::NeXus::File(filePath);
-    // Open the base group called 'entry'
-    file.openGroup("entry", "NXentry");
-    // If all this succeeded then we'll assume this is an SNS Event NeXus file
-
-    // Setting this low as this is a deprecated algorithm that we don't want to autorun.
-    confidence = 10;
-  }
-  catch(::NeXus::Exception&)
-  {
-  }
-  return confidence;
+  return 0;
 }
-
-
-
-//------------------------------------------------------------------------------------------------
-/** Executes the algorithm. Reading in the file and creating and populating
- *  the output workspace
- */
-void LoadSNSEventNexus::exec()
-{
-  g_log.error() << "WARNING! LoadSNSEventNexus is deprecated! Please call LoadEventNexus from now on.\n";
-  LoadEventNexus::exec();
-  return;
-}
-
-
 
 } // namespace NeXus
 } // namespace Mantid

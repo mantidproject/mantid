@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IDataFileChecker.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidNexus/NexusClasses.h"
 #include "MantidNexus/LoadEventNexus.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -50,28 +51,24 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     */
-    class DLLExport LoadSNSEventNexus : public LoadEventNexus
+    class DLLExport LoadSNSEventNexus : public LoadEventNexus, public API::DeprecatedAlgorithm
     {
     public:
       /// Default constructor
-      LoadSNSEventNexus()
-      { }
+      LoadSNSEventNexus();
 
       /// Destructor
       virtual ~LoadSNSEventNexus()
       { }
 
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "LoadSNSEventNexus";};
+      virtual const std::string name() const;
 
       /// Algorithm's version for identification overriding a virtual method
-      virtual int version() const { return 1;};
+      virtual int version() const;
 
       int fileCheck(const std::string& filePath);
 
-    private:
-
-      void exec();
     };
 
   } // namespace NeXus

@@ -13,6 +13,7 @@ set ( SRC_FILES src/Algorithm.cpp
 		src/CompositeFunction.cpp
 		src/CompositeFunctionMW.cpp
 		src/ConstraintFactory.cpp
+		src/DeprecatedAlgorithm.cpp
 		src/Expression.cpp
 		src/FileFinder.cpp
 		src/FileProperty.cpp
@@ -78,6 +79,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 		inc/MantidAPI/CompositeFunctionMW.h
 		inc/MantidAPI/ConstraintFactory.h
 		inc/MantidAPI/DeclareUserAlg.h
+        inc/MantidAPI/DeprecatedAlgorithm.h
 		inc/MantidAPI/DllExport.h
 		inc/MantidAPI/Expression.h
 		inc/MantidAPI/FileFinder.h

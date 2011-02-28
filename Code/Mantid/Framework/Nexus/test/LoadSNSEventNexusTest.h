@@ -23,7 +23,7 @@ public:
     LoadSNSEventNexus ld;
     ld.initialize();
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs"); // Only doing this to resolve the path to the file
-    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 10);
+    TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
 
     //Try an ISIS nexus file
     ld.setPropertyValue("Filename","LOQ49886.nxs");
