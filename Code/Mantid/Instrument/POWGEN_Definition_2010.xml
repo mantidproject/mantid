@@ -2,7 +2,7 @@
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
 <instrument name="POWGEN" valid-from   ="1900-01-31 23:59:59"
-                          valid-to     ="2010-12-31 23:59:59"
+                          valid-to     ="2011-02-24 23:59:59"
 		          last-modified="2011-02-17 00:00:00">
   <!--Data taken from /SNS/PG3/2010_2_11A_CAL/calibrations/PG3_geom_2010_09_08.xml-->
   <!--Created by Stuart Campbell-->
