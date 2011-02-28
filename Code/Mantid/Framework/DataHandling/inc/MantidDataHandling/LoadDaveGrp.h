@@ -2,6 +2,8 @@
 #define MANTID_DATAHANDLING_LOADDAVEGRP_H_
 
 #include "MantidAPI/Algorithm.h"
+#include <fstream>
+#include <string>
 
 namespace Mantid
 {
@@ -41,7 +43,7 @@ class DLLExport LoadDaveGrp: public Mantid::API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  LoadDaveGrp() : API::Algorithm(){}
+  LoadDaveGrp();
   /// Virtual destructor
   virtual ~LoadDaveGrp() {}
   /// Algorithm's name
@@ -59,7 +61,12 @@ private:
   /**
    *
    */
-  void getAxisLength(const std::string &iline, int &length);
+  void getAxisLength(int &length);
+  void getAxisValues(MantidVec *axis, const std::size_t length);
+  void readLine();
+
+  std::ifstream ifile;
+  std::string line;
 };
 
 } // namespace DataHandling

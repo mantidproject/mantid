@@ -33,6 +33,10 @@ public:
     if(outputWS)
     {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
+      TS_ASSERT_EQUALS(outputWS->readX(0).size(), 60);
+      TS_ASSERT_EQUALS(outputWS->readX(0)[0], 655.0);
+      TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 0.625);
+
       dataStore.remove(outputWSName);
     }
   }
