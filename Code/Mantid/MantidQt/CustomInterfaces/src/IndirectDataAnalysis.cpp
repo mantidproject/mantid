@@ -1816,8 +1816,6 @@ void IndirectDataAnalysis::furyfitContextMenu(const QPoint &)
 
 void IndirectDataAnalysis::ffFixItem()
 {
-  m_uiForm.tabWidget->currentPageIndex();
-
   // Determine what the property is.
   QtBrowserItem* item = m_ffTree->currentItem();
   QtProperty* prop = item->property();
