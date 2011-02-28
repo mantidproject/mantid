@@ -7,6 +7,7 @@ set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
                 src/Histogram1D.cpp
                 src/ManagedDataBlock2D.cpp
                 src/ManagedWorkspace2D.cpp
+                src/PeaksWorkspace.cpp
                 src/TableColumn.cpp
                 src/TableWorkspace.cpp
                 src/Workspace1D.cpp
@@ -22,6 +23,7 @@ set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
                 inc/MantidDataObjects/Histogram1D.h
                 inc/MantidDataObjects/ManagedDataBlock2D.h
                 inc/MantidDataObjects/ManagedWorkspace2D.h
+                inc/MantidDataObjects/PeaksWorkspace.h
                 inc/MantidDataObjects/TableColumn.h
                 inc/MantidDataObjects/TablePointerColumn.h
                 inc/MantidDataObjects/TableWorkspace.h
