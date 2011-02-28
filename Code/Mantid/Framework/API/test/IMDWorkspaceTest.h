@@ -176,40 +176,40 @@ public:
   }
 
 
-//  void testGetCellSingleParameterVersion()
-//  {
-//    const Mantid::Geometry::SignalAggregate& cell = workspace.getCell(1);
-//    const Mantid::Geometry::SignalAggregate& point = workspace.getPoint(1);
-//
-//    TSM_ASSERT_EQUALS("Signal values not correct. The cell should be the same as a point for the matrix ws.", point.getSignal(), cell.getSignal());
-//    TSM_ASSERT_EQUALS("Error values not correct. The cell should be the same as a point for the matrix ws.", point.getError(), cell.getError() );
-//  }
+  void testGetCellSingleParameterVersion()
+  {
+    const Mantid::Geometry::SignalAggregate& cell = workspace.getCell(1);
+    const Mantid::Geometry::SignalAggregate& point = workspace.getPoint(1);
 
-//  void testGetPoint()
-//  {
-//    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(5);
-//    TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of signal.", 100, pointA.getSignal());
-//    TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of error.", 10, pointA.getError());
-//  }
-//
-//  void testGetPointVertexes()
-//  {
-//    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(4);
-//    std::vector<coordinate> vertexes = pointA.getVertexes();
-//    TSM_ASSERT_EQUALS("Wrong number of vertexes returned", 4, vertexes.size());
-//
-//    TSM_ASSERT_EQUALS("The v0 x-value is incorrect.", 4, vertexes.at(0).getX());
-//    TSM_ASSERT_EQUALS("The v0 y-value is incorrect.", 1, vertexes.at(0).getY());
-//
-//    TSM_ASSERT_EQUALS("The v1 x-value is incorrect.", 5, vertexes.at(1).getX());
-//    TSM_ASSERT_EQUALS("The v1 y-value is incorrect.", 1, vertexes.at(1).getY());
-//
-//    TSM_ASSERT_EQUALS("The v2 x-value is incorrect.", 4, vertexes.at(2).getX());
-//    TSM_ASSERT_EQUALS("The v2 y-value is incorrect.", 2, vertexes.at(2).getY());
-//
-//    TSM_ASSERT_EQUALS("The v3 x-value is incorrect.", 5, vertexes.at(3).getX());
-//    TSM_ASSERT_EQUALS("The v3 y-value is incorrect.", 2, vertexes.at(3).getY());
-//  }
+    TSM_ASSERT_EQUALS("Signal values not correct. The cell should be the same as a point for the matrix ws.", point.getSignal(), cell.getSignal());
+    TSM_ASSERT_EQUALS("Error values not correct. The cell should be the same as a point for the matrix ws.", point.getError(), cell.getError() );
+  }
+
+  void testGetPoint()
+  {
+    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(5);
+    TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of signal.", 100, pointA.getSignal());
+    TSM_ASSERT_EQUALS("The expected mdpoint has not been returned on the basis of error.", 10, pointA.getError());
+  }
+
+  void testGetPointVertexes()
+  {
+    const Mantid::Geometry::SignalAggregate& pointA = workspace.getPoint(4);
+    std::vector<coordinate> vertexes = pointA.getVertexes();
+    TSM_ASSERT_EQUALS("Wrong number of vertexes returned", 4, vertexes.size());
+
+    TSM_ASSERT_EQUALS("The v0 x-value is incorrect.", 4, vertexes.at(0).getX());
+    TSM_ASSERT_EQUALS("The v0 y-value is incorrect.", 1, vertexes.at(0).getY());
+
+    TSM_ASSERT_EQUALS("The v1 x-value is incorrect.", 5, vertexes.at(1).getX());
+    TSM_ASSERT_EQUALS("The v1 y-value is incorrect.", 1, vertexes.at(1).getY());
+
+    TSM_ASSERT_EQUALS("The v2 x-value is incorrect.", 4, vertexes.at(2).getX());
+    TSM_ASSERT_EQUALS("The v2 y-value is incorrect.", 2, vertexes.at(2).getY());
+
+    TSM_ASSERT_EQUALS("The v3 x-value is incorrect.", 5, vertexes.at(3).getX());
+    TSM_ASSERT_EQUALS("The v3 y-value is incorrect.", 2, vertexes.at(3).getY());
+  }
 
   void testGetWSLocationThrows()
   {

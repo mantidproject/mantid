@@ -1027,8 +1027,8 @@ namespace Mantid
       {
         verts[0] = coordinate::createCoordinate2D(x, histogram);
         verts[1] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram);
-        verts[3] = coordinate::createCoordinate2D(x, histogram+1);
-        verts[4] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram+1);
+        verts[2] = coordinate::createCoordinate2D(x, histogram+1);
+        verts[3] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram+1);
       }
 
       IDetector_sptr detector;

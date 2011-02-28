@@ -63,7 +63,7 @@ namespace Mantid
       std::vector<coordinate> m_vertexes;
     public:
       MDPoint(){};
-      MDPoint(double signal, double error, std::vector<coordinate> vertexes, IDetector_sptr detector, IInstrument_sptr instrument);
+      MDPoint(double signal, double error, const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument);
       std::vector<coordinate> getVertexes() const;
       double getSignal() const;
       double getError() const;
