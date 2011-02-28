@@ -70,7 +70,6 @@ class LoadRun(ReductionStep):
         """
         workspace = self._get_workspace_name()
 
-        print __file__
         if os.path.splitext(self._data_file)[1].lower().startswith('.r'):
             try:
                 alg = LoadRaw(self._data_file, workspace, SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
