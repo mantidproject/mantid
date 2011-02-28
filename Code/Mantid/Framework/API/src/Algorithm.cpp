@@ -4,6 +4,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/AlgorithmProxy.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Timer.h"
@@ -91,6 +92,11 @@ namespace Mantid
     */
     bool Algorithm::execute()
     {
+      {
+        DeprecatedAlgorithm * depo = dynamic_cast<DeprecatedAlgorithm *>(this);
+        if (depo != NULL)
+          g_log.error(depo->deprecationMsg(this));
+      }
       // Start by freeing up any memory available.
       Mantid::API::MemoryManager::Instance().releaseFreeMemory();
 
@@ -116,7 +122,7 @@ namespace Mantid
           IWorkspaceProperty *wsProp = dynamic_cast<IWorkspaceProperty*>(props[i]);
           if (wsProp && !(wsProp->getWorkspace()))
           {
-            // Setting it's name to the same one it alreasy had
+            // Setting it's name to the same one it already had
             props[i]->setValue(props[i]->value());
           }
         }
