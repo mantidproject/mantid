@@ -24,26 +24,32 @@ class SettingsTest(unittest.TestCase):
         """Set data search paths via a string
         """
         updated = self._setup_test_areas()
+        # Set by a string
         mtd.settings.setDataSearchDirs(updated)
-        # Have they been updated - The stored values come back with trailing slashes
-        self.assertEquals(mtd.settings['datasearch.directories'], updated)
-
+        # The test
+        self._do_path_test()
         self._clean_up_test_areas()
 
-    def test_setting_data_search_paths_via_string(self):
-        """Set data search paths via a string
+    def test_setting_data_search_paths_via_list(self):
+        """Set data search paths via a list
         """
         updated = self._setup_test_areas()
         updated_list = updated.split(';')
-
-        self.assertEquals(len(updated_list), 2)
-        self.assertEquals(type(updated_list), list)
+        # Set by a list
         mtd.settings.setDataSearchDirs(updated_list)
-
-        # Have they been updated - The stored values come back with trailing slashes
-        self.assertEquals(mtd.settings['datasearch.directories'], updated)
-
+        # The test
+        self._do_path_test()
         self._clean_up_test_areas()
+        
+    def _do_path_test(self):
+        """Perform the path test
+        """
+        # Have they been updated - The stored values come back with trailing slashes
+        new_value = mtd.settings.getDataSearchDirs()
+        self.assertEquals(len(new_value), 2)
+        self.assert_('tmp' in new_value[0])
+        self.assert_('tmp_2' in new_value[1])
+
 
     def _setup_test_areas(self):
         """Set data search paths via a list
