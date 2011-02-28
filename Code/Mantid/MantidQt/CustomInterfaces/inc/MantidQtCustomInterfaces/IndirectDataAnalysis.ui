@@ -6,7 +6,7 @@
     <x>0</x>
     <y>0</y>
     <width>581</width>
-    <height>524</height>
+    <height>488</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -853,13 +853,6 @@
              <item>
               <layout class="QHBoxLayout" name="horizontalLayout_30" >
                <item>
-                <widget class="QCheckBox" name="confit_ckFixCentres" >
-                 <property name="text" >
-                  <string>Fix Peak Centres</string>
-                 </property>
-                </widget>
-               </item>
-               <item>
                 <widget class="QCheckBox" name="confit_ckPlotGuess" >
                  <property name="text" >
                   <string>Plot Guess</string>
@@ -897,6 +890,12 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="maximumSize" >
+                <size>
+                 <width>65</width>
+                 <height>16777215</height>
+                </size>
+               </property>
                <property name="text" >
                 <string>0</string>
                </property>
@@ -916,6 +915,12 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="maximumSize" >
+                <size>
+                 <width>65</width>
+                 <height>16777215</height>
+                </size>
                </property>
                <property name="text" >
                 <string>-1</string>

@@ -85,6 +85,8 @@ void IndirectDataAnalysis::initLayout()
   m_dblEdFac = new DoubleEditorFactory();
   m_blnEdFac = new QtCheckBoxFactory();
 
+  m_stringManager = new QtStringPropertyManager();
+
   setupElwin();
   setupMsd();
   setupFury();
@@ -310,12 +312,9 @@ void IndirectDataAnalysis::setupFuryFit()
   m_groupManager = new QtGroupPropertyManager();
   m_ffDblMng = new QtDoublePropertyManager();
   m_ffRangeManager = new QtDoublePropertyManager();
-  m_ffBlnMng = new QtBoolPropertyManager();
-  m_stringManager = new QtStringPropertyManager();
-
+  
   m_ffTree->setFactoryForManager(m_ffDblMng, m_dblEdFac);
   m_ffTree->setFactoryForManager(m_ffRangeManager, m_dblEdFac);
-  m_ffTree->setFactoryForManager(m_ffBlnMng, m_blnEdFac);
 
   m_ffProp["StartX"] = m_ffRangeManager->addProperty("StartX");
   m_ffRangeManager->setDecimals(m_ffProp["StartX"], m_nDec);
@@ -351,7 +350,7 @@ void IndirectDataAnalysis::setupFuryFit()
 
   // Set a custom handler for the QTreePropertyBrowser's ContextMenu event
   m_ffTree->setContextMenuPolicy(Qt::CustomContextMenu);
-  connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(furyfitContextMenu(const QPoint &)));
+  connect(m_ffTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
 }
 
 void IndirectDataAnalysis::setupConFit()
@@ -397,7 +396,9 @@ void IndirectDataAnalysis::setupConFit()
 
   m_cfProp["LinearBackground"] = m_cfGrpMng->addProperty("Background");
   m_cfProp["BGA0"] = m_cfDblMng->addProperty("A0");
+  m_cfDblMng->setDecimals(m_cfProp["BGA0"], m_nDec);
   m_cfProp["BGA1"] = m_cfDblMng->addProperty("A1");
+  m_cfDblMng->setDecimals(m_cfProp["BGA1"], m_nDec);
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA0"]);
   m_cfProp["LinearBackground"]->addSubProperty(m_cfProp["BGA1"]);
   m_cfTree->addProperty(m_cfProp["LinearBackground"]);
@@ -444,6 +445,10 @@ void IndirectDataAnalysis::setupConFit()
 
   m_uiForm.confit_leSpecNo->setValidator(m_valInt);
   m_uiForm.confit_leSpecMax->setValidator(m_valInt);
+
+  // Context menu
+  m_cfTree->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(m_cfTree, SIGNAL(customContextMenuRequested(const QPoint &)), this, SLOT(fitContextMenu(const QPoint &)));
 }
 
 void IndirectDataAnalysis::setupAbsorptionF2Py()
@@ -946,7 +951,7 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
   // Background
   func = Mantid::API::FunctionFactory::Instance().createFunction("LinearBackground");
   index = result->addFunction(func);
-  if ( tie  || bgType == 0 )
+  if ( tie  || bgType == 0 || ! m_cfProp["BGA0"]->subProperties().isEmpty() )
   {
     result->tie("f0.A0", m_cfProp["BGA0"]->valueText().toStdString() );
   }
@@ -961,7 +966,10 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
   }
   else
   {
-    if ( tie ) { result->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() ); }
+    if ( tie || ! m_cfProp["BGA1"]->subProperties().isEmpty() )
+    {
+      result->tie("f0.A1", m_cfProp["BGA1"]->valueText().toStdString() );
+    }
     else { func->setParameter("A1", m_cfProp["BGA1"]->valueText().toDouble()); }
   }
 
@@ -977,7 +985,10 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
   {
     func = Mantid::API::FunctionFactory::Instance().createFunction("DeltaFunction");
     index = comp->addFunction(func);
-    if ( tie ) { comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() ); }
+    if ( tie || ! m_cfProp["DeltaHeight"]->subProperties().isEmpty() )
+    {
+      comp->tie("f0.Height", m_cfProp["DeltaHeight"]->valueText().toStdString() );
+    }
     else { func->setParameter("Height", m_cfProp["DeltaHeight"]->valueText().toDouble()); }
   }
 
@@ -1012,7 +1023,7 @@ Mantid::API::CompositeFunctionMW* IndirectDataAnalysis::confitCreateFunction(boo
     conv->addFunction(comp);
   result->addFunction(conv);
 
-  if ( tie || m_uiForm.confit_ckFixCentres->isChecked() ) { result->applyTies(); }
+  result->applyTies();
 
   return result;
 }
@@ -1072,7 +1083,7 @@ void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Man
 
   for ( int i = 0; i < props.size(); i++ )
   {
-    if ( tie )
+    if ( tie || ! props[i]->subProperties().isEmpty() )
     {
       QString propName = pref + props[i]->propertyName();
       comp->tie(propName.toStdString(), props[i]->valueText().toStdString() );
@@ -1081,18 +1092,9 @@ void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Man
     {
       std::string propName = props[i]->propertyName().toStdString();
       double propValue = props[i]->valueText().toDouble();
-      if ( propName == "PeakCentre" && m_uiForm.confit_ckFixCentres->isChecked() )
-      {
-        std::string propertyName = pref.toStdString() + propName;
-        comp->tie(propertyName, props[i]->valueText().toStdString());
-      }
-      else
-      {
-        func->setParameter(propName, propValue);
-      }      
+      func->setParameter(propName, propValue);
     }
   }
-
 }
 
 QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index)
@@ -1138,6 +1140,120 @@ void IndirectDataAnalysis::run()
   else if ( tabName == "Abs (F2PY)" ) { absf2pRun(); }
   else if ( tabName == "Apply Corrections" ) { abscorRun(); }
   else { showInformationBox("This tab does not have a 'Run' action."); }
+}
+
+void IndirectDataAnalysis::fitContextMenu(const QPoint &)
+{
+  QtBrowserItem* item;
+  QtDoublePropertyManager* dblMng;
+  
+  int pageNo = m_uiForm.tabWidget->currentIndex();
+  if ( pageNo == 3 )
+  { // FuryFit
+    item = m_ffTree->currentItem();
+    dblMng = m_ffDblMng;
+  }
+  else if ( pageNo == 4 )
+  { // Convolution Fit
+    item = m_cfTree->currentItem();
+    dblMng = m_cfDblMng;
+  }
+
+  if ( ! item )
+  {
+    return;
+  }
+
+  // is it a fit property ?
+  QtProperty* prop = item->property();
+  if ( prop->propertyManager() != dblMng )
+  {
+    return;
+  }
+
+  if ( pageNo == 4 && ( prop == m_cfProp["StartX"] || prop == m_cfProp["EndX"] ) )
+  {
+    return;
+  }
+
+  // is it already fixed?
+  QList<QtProperty*> subProps = prop->subProperties();
+  bool fixed = ! subProps.isEmpty();
+
+  // Create the menu
+  QMenu* menu = new QMenu("FuryFit", m_ffTree);
+  QAction* action;
+
+  if ( ! fixed )
+  {
+    action = new QAction("Fix", this);
+    connect(action, SIGNAL(triggered()), this, SLOT(fixItem()));
+  }
+  else
+  {
+    action = new QAction("Remove Fix", this);
+    connect(action, SIGNAL(triggered()), this, SLOT(unFixItem()));
+  }
+
+  menu->addAction(action);
+
+  // Show the menu
+  menu->popup(QCursor::pos());
+}
+
+void IndirectDataAnalysis::fixItem()
+{
+  int pageNo = m_uiForm.tabWidget->currentIndex();
+
+  QtBrowserItem* item;
+  if ( pageNo == 3 )
+  { // FuryFit
+    item = m_ffTree->currentItem();
+  }
+  else if ( pageNo == 4 )
+  { // Convolution Fit
+    item = m_cfTree->currentItem();
+  }
+
+  // Determine what the property is.
+  QtProperty* prop = item->property();
+
+  QtProperty* fixedProp = m_stringManager->addProperty("Fixed:");
+  m_stringManager->setValue(fixedProp, prop->valueText());
+  prop->addSubProperty(fixedProp);
+
+  fixedProp->setEnabled(false);
+  prop->setEnabled(false);
+  
+}
+
+void IndirectDataAnalysis::unFixItem()
+{
+  QtBrowserItem* item;
+  QtDoublePropertyManager* dblMng;
+  
+  int pageNo = m_uiForm.tabWidget->currentIndex();
+  if ( pageNo == 3 )
+  { // FuryFit
+    item = m_ffTree->currentItem();
+    dblMng = m_ffDblMng;
+  }
+  else if ( pageNo == 4 )
+  { // Convolution Fit
+    item = m_cfTree->currentItem();
+    dblMng = m_cfDblMng;
+  }
+
+  QtProperty* prop = item->property();
+  prop->subProperties().isEmpty();
+  QList<QtProperty*> subProps = prop->subProperties();
+
+  for ( QList<QtProperty*>::iterator it = subProps.begin(); it != subProps.end(); ++it )
+  {
+    if ( (*it)->propertyManager() != dblMng ) { delete (*it); }
+  }
+
+  prop->setEnabled(true);
 }
 
 void IndirectDataAnalysis::elwinRun()
@@ -1772,78 +1888,6 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   m_ffPlot->replot();
 }
 
-void IndirectDataAnalysis::furyfitContextMenu(const QPoint &)
-{
-  QtBrowserItem* curItem = m_ffTree->currentItem();
-  if ( ! curItem )
-  {
-    return;
-  }
-
-  // is it a fit property ?  
-  QtProperty* prop = curItem->property();
-  bool isProperty = ( prop->propertyManager() == m_ffDblMng );
-
-  if ( ! isProperty )
-  {
-    return;
-  }
-
-  // is it already fixed?
-  QList<QtProperty*> subProps = prop->subProperties();
-  bool fixed = ! subProps.isEmpty();
-
-  // Create the menu
-  QMenu* menu = new QMenu("FuryFit", m_ffTree);
-  QAction* action;
-
-  if ( ! fixed )
-  {
-    action = new QAction("Fix", this);
-    connect(action, SIGNAL(triggered()), this, SLOT(ffFixItem()));
-  }
-  else
-  {
-    action = new QAction("Remove Fix", this);
-    connect(action, SIGNAL(triggered()), this, SLOT(ffUnFixItem()));
-  }
-
-  menu->addAction(action);
-
-  // Show the menu
-  menu->popup(QCursor::pos());
-}
-
-void IndirectDataAnalysis::ffFixItem()
-{
-  // Determine what the property is.
-  QtBrowserItem* item = m_ffTree->currentItem();
-  QtProperty* prop = item->property();
-
-  QtProperty* fixedProp = m_stringManager->addProperty("Fixed:");
-  m_stringManager->setValue(fixedProp, prop->valueText());
-  prop->addSubProperty(fixedProp);
-
-  fixedProp->setEnabled(false);
-  prop->setEnabled(false);
-  
-}
-
-void IndirectDataAnalysis::ffUnFixItem()
-{
-  QtBrowserItem* item = m_ffTree->currentItem();
-  QtProperty* prop = item->property();
-  prop->subProperties().isEmpty();
-  QList<QtProperty*> subProps = prop->subProperties();
-
-  for ( QList<QtProperty*>::iterator it = subProps.begin(); it != subProps.end(); ++it )
-  {
-    if ( (*it)->propertyManager() != m_ffDblMng ) { delete (*it); }
-  }
-
-  prop->setEnabled(true);
-}
-
 void IndirectDataAnalysis::confitRun()
 {
   confitPlotInput();
@@ -1891,7 +1935,6 @@ void IndirectDataAnalysis::confitRun()
   }
 
   // Populate Tree widget with values
-
   // Background should always be f0
   m_cfDblMng->setValue(m_cfProp["BGA0"], parameters["f0.A0"]);
   m_cfDblMng->setValue(m_cfProp["BGA1"], parameters["f0.A1"]);
@@ -2209,11 +2252,6 @@ void IndirectDataAnalysis::confitCheckBoxUpdate(QtProperty* prop, bool checked)
     if ( checked ) { m_cfProp["DeltaFunction"]->addSubProperty(m_cfProp["DeltaHeight"]); }
     else { m_cfProp["DeltaFunction"]->removeSubProperty(m_cfProp["DeltaHeight"]); }
   }
-}
-
-void IndirectDataAnalysis::confitContextMenu(const QPoint &)
-{
-  return;
 }
 
 void IndirectDataAnalysis::absorptionRun()
