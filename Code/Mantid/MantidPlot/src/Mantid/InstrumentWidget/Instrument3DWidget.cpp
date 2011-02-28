@@ -333,9 +333,8 @@ void Instrument3DWidget::calculateBinRange()
   Mantid::API::MatrixWorkspace_sptr workspace = mWorkspace;
   Timer timer;
 
-
   // Value has not been preset?
-  if (( std::fabs(mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08 ) && ( (mBinMaxValue + DBL_MAX)/DBL_MAX < 1e-08 ))
+  if (( std::fabs(mWkspBinMin - DBL_MAX)/DBL_MAX < 1e-08 ) && ( (mWkspBinMax + DBL_MAX)/DBL_MAX < 1e-08 ))
   {
     //Then we need to calculate
     const int nHist = workspace->getNumberHistograms();
@@ -373,20 +372,25 @@ void Instrument3DWidget::calculateBinRange()
         else {}
       }
     }
-    mBinMinValue = mWkspBinMin;
-    mBinMaxValue = mWkspBinMax;
+    if ( (std::fabs(mBinMinValue - DBL_MAX)/DBL_MAX < 1e-08) && 
+	 ( (mBinMaxValue + DBL_MAX)/DBL_MAX < 1e-08) )
+    {
+      mBinMinValue = mWkspBinMin;
+      mBinMaxValue = mWkspBinMax;
+    }
   }
 
   // Check validity
   if( mBinMinValue < mWkspBinMin || mBinMinValue > mWkspBinMax )
   {
-      mBinMinValue = mWkspBinMin;
+    mBinMinValue = mWkspBinMin;
   }
 
   if( mBinMaxValue > mWkspBinMax || mBinMaxValue < mWkspBinMin )
   {
     mBinMaxValue = mWkspBinMax;
   }
+
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateBinRange() took " << timer.elapsed() << " seconds\n";
 

@@ -9,7 +9,7 @@ mtdHelp()
 mtdHelp("LoadRaw")
 
 # Perform some algorithms
-LoadRaw("HET15869.RAW","test")
+LoadRaw("HET15869.raw","test")
 ConvertUnits("test","converted","dSpacing")
 Rebin("converted","rebinned","0.1,0.001,5")
 

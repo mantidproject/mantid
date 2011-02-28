@@ -57,7 +57,6 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_displayAxes->setCheckable(true);
   m_displayAxes->setChecked(true);
   connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(set3DAxesState(bool)));
-  connect(m_displayAxes, SIGNAL(toggled(bool)), m_instrWindow, SLOT(updateInteractionInfoText()));
   m_wireframe = new QAction("Wireframe",this);
   m_wireframe->setCheckable(true);
   m_wireframe->setChecked(false);

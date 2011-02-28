@@ -67,6 +67,7 @@ BinDialog::~BinDialog()
 /** Set the values in the GUI. */
 void BinDialog::setIntegralMinMax(double minBin,double maxBin, bool useEverything)
 {
+
 	QString strBinNum;
 	mIntegralMinValue->setText(strBinNum.setNum(minBin));
 	mIntegralMaxValue->setText(strBinNum.setNum(maxBin));
