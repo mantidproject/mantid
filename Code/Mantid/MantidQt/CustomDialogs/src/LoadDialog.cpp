@@ -135,7 +135,7 @@ namespace MantidQt
         inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
         inputMessage->setBackgroundRole( QPalette::ToolTipBase ); //Make a tooltip color
         inputMessage->setAutoFillBackground(true);
-        inputMessage->setWordWrap(true);
+        inputMessage->setWordWrap(false);
         inputMessage->setText(getOptionalMessage());
         QHBoxLayout *msgArea = new QHBoxLayout;
         msgArea->addWidget(inputMessage);
