@@ -26,8 +26,8 @@ RemoveBins::RemoveBins() : API::Algorithm(), m_rangeUnit()
  */
 void RemoveBins::init()
 {
-  this->setWikiSummary("Used to remove data from a range of bins in a workspace.");
-  this->setOptionalMessage("Used to remove data from a range of bins in a workspace.");
+  //this->setWikiSummary("Used to remove data from a range of bins in a workspace.");
+  //this->setOptionalMessage("Used to remove data from a range of bins in a workspace.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);

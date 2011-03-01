@@ -18,8 +18,8 @@ using namespace DataObjects;
 
 void ConvertToMatrixWorkspace::init()
 {
-  this->setWikiSummary("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
-  this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
+  //this->setWikiSummary("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
+  //this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output Workspace2D.");

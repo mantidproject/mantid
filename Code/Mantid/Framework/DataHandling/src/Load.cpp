@@ -191,8 +191,8 @@ namespace Mantid
     /// Initialisation method.
     void Load::init()
     {
-      this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm.");
-      this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
+      //this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm.");
+      //this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
 
 
       std::vector<std::string> exts;

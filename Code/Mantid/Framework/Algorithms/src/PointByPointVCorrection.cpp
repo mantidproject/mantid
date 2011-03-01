@@ -27,8 +27,8 @@ PointByPointVCorrection::~PointByPointVCorrection() {}
 
 void PointByPointVCorrection::init()
 {
-  this->setWikiSummary("Spectrum by spectrum division for vanadium normalisation correction.");
-  this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
+  //this->setWikiSummary("Spectrum by spectrum division for vanadium normalisation correction.");
+  //this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
 
   declareProperty(new WorkspaceProperty<>("InputW1","",Direction::Input),
                   "Name of the Sample workspace" );

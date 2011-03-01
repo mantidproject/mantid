@@ -17,8 +17,8 @@ using namespace Geometry;
 
 void HRPDSlabCanAbsorption::init()
 {
-  this->setWikiSummary("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
-  this->setOptionalMessage("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
+  //this->setWikiSummary("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
+  //this->setOptionalMessage("Calculates attenuation due to absorption and scattering in an HRPD 'slab' can.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

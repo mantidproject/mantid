@@ -16,8 +16,8 @@ using namespace API;
 
 void ExtractSingleSpectrum::init()
 {
-  this->setWikiSummary("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.");
-  this->setOptionalMessage("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.");
+  //this->setWikiSummary("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.");
+  //this->setOptionalMessage("Extracts the specified spectrum from a workspace and places it in a new single-spectrum workspace.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

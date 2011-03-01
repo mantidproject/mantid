@@ -30,8 +30,8 @@ CompressEvents::~CompressEvents() {}
 
 void CompressEvents::init()
 {
-  this->setWikiSummary("Reduce the number of events in an [[EventWorkspace]] by grouping together events with identical or similar X-values (time-of-flight).");
-  this->setOptionalMessage("Reduce the number of events in an EventWorkspace by grouping together events with identical or similar X-values (time-of-flight).");
+  //this->setWikiSummary("Reduce the number of events in an [[EventWorkspace]] by grouping together events with identical or similar X-values (time-of-flight).");
+  //this->setOptionalMessage("Reduce the number of events in an EventWorkspace by grouping together events with identical or similar X-values (time-of-flight).");
 
   declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::InOut,
     new EventWorkspaceValidator<>),

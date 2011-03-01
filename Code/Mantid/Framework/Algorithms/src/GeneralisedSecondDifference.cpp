@@ -33,8 +33,8 @@ namespace Mantid
     /// Initialisation method.
     void GeneralisedSecondDifference::init()
     {
-      this->setWikiSummary("Computes the generalised second difference of a spectrum or several spectra.");
-      this->setOptionalMessage("Computes the generalised second difference of a spectrum or several spectra.");
+      //this->setWikiSummary("Computes the generalised second difference of a spectrum or several spectra.");
+      //this->setOptionalMessage("Computes the generalised second difference of a spectrum or several spectra.");
 
 
       //Input and output workspaces

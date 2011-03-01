@@ -32,8 +32,8 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-  this->setWikiSummary("Performs complex Fast Fourier Transform");
-  this->setOptionalMessage("Performs complex Fast Fourier Transform");
+  //this->setWikiSummary("Performs complex Fast Fourier Transform");
+  //this->setOptionalMessage("Performs complex Fast Fourier Transform");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace",
                   "",Direction::Input), "The name of the input workspace.");

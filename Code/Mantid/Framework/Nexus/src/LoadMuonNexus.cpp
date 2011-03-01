@@ -41,8 +41,8 @@ namespace Mantid
     /// Initialisation method.
     void LoadMuonNexus::init()
     {
-      this->setWikiSummary("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace.LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a Nexus file of this type.");
-      this->setOptionalMessage("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a Nexus file of this type.");
+      //this->setWikiSummary("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace.LoadMuonNexus may be invoked by [[LoadNexus]] if it is given a Nexus file of this type.");
+      //this->setOptionalMessage("The LoadMuonNexus algorithm will read the given Nexus Muon data file Version 1 and use the results to populate the named workspace. LoadMuonNexus may be invoked by LoadNexus if it is given a Nexus file of this type.");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
         "The name of the Nexus file to load" );      

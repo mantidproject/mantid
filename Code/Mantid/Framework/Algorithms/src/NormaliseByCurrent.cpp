@@ -24,8 +24,8 @@ NormaliseByCurrent::~NormaliseByCurrent() {}
 
 void NormaliseByCurrent::init()
 {
-  this->setWikiSummary("Normalises a workspace by the proton charge.");
-  this->setOptionalMessage("Normalises a workspace by the proton charge.");
+  //this->setWikiSummary("Normalises a workspace by the proton charge.");
+  //this->setOptionalMessage("Normalises a workspace by the proton charge.");
 
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),

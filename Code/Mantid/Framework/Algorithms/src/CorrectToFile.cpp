@@ -19,8 +19,8 @@ const double CorrectToFile::LOAD_TIME = 0.5;
 
 void CorrectToFile::init()
 {
-  this->setWikiSummary("Correct data using a file in the LOQ RKH format");
-  this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
+  //this->setWikiSummary("Correct data using a file in the LOQ RKH format");
+  //this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
 
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input),
     "Name of the input workspace" );

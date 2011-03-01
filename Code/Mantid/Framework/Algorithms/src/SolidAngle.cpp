@@ -33,8 +33,8 @@ namespace Mantid
     /// Initialisation method
     void SolidAngle::init()
     {
-      this->setWikiSummary("The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.");
-      this->setOptionalMessage("The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.");
+      //this->setWikiSummary("The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.");
+      //this->setOptionalMessage("The SolidAngle algorithm calculates the solid angle in steradians for each of the detectors in an instrument and outputs the data in a workspace.  This can then be used to normalize a data workspace using the divide algorithm should you wish.");
 
       declareProperty(
         new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,new InstrumentValidator<>),

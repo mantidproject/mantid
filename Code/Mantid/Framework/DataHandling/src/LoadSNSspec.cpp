@@ -28,8 +28,8 @@ namespace Mantid
     /// Initialisation method.
     void LoadSNSspec::init()
     {
-      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
+      //this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
+      //this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
 
       std::vector<std::string> exts;
 	  exts.push_back(".dat");

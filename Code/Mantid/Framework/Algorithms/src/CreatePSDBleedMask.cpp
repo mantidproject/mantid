@@ -42,8 +42,8 @@ namespace Mantid
     /// Initialize the algorithm properties
     void CreatePSDBleedMask::init()
     {
-      this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
-      this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
+      //this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
+      //this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
 
       using API::WorkspaceProperty;
       using Kernel::Direction;

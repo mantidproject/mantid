@@ -14,8 +14,8 @@ DECLARE_ALGORITHM(CreateSingleValuedWorkspace)
 
 void CreateSingleValuedWorkspace::init()
 {
-  this->setWikiSummary("Creates a 2D workspace with a single value contained in it.");
-  this->setOptionalMessage("Creates a 2D workspace with a single value contained in it.");
+  //this->setWikiSummary("Creates a 2D workspace with a single value contained in it.");
+  //this->setOptionalMessage("Creates a 2D workspace with a single value contained in it.");
 
   using namespace Mantid::Kernel;
   using namespace Mantid::API;

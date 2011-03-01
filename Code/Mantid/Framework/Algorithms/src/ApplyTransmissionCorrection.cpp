@@ -18,8 +18,8 @@ using namespace Geometry;
 
 void ApplyTransmissionCorrection::init()
 {
-  this->setWikiSummary("Apply a transmission correction to 2D SANS data.");
-  this->setOptionalMessage("Apply a transmission correction to 2D SANS data.");
+  //this->setWikiSummary("Apply a transmission correction to 2D SANS data.");
+  //this->setOptionalMessage("Apply a transmission correction to 2D SANS data.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));

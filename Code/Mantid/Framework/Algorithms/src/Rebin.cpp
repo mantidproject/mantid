@@ -28,8 +28,8 @@ namespace Mantid
     */
     void Rebin::init()
     {
-      this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a [[Workspace2D]].");
-      this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a Workspace2D.");
+      //this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a [[Workspace2D]].");
+      //this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a Workspace2D.");
 
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),

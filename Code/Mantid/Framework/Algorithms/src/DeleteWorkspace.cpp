@@ -19,8 +19,8 @@ namespace Mantid
     /// Initialize the algorithm properties
     void DeleteWorkspace::init()
     {
-      this->setWikiSummary("Removes a workspace from memory.");
-      this->setOptionalMessage("Removes a workspace from memory.");
+      //this->setWikiSummary("Removes a workspace from memory.");
+      //this->setOptionalMessage("Removes a workspace from memory.");
 
       declareProperty(new API::WorkspaceProperty<API::Workspace> ("Workspace", "", 
 								  Kernel::Direction::Input), "Name of the workspace to delete.");

@@ -45,8 +45,8 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  this->setWikiSummary("Filter out events from an [[EventWorkspace]] based on a sample log value satisfying filter criteria.");
-  this->setOptionalMessage("Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.");
+  //this->setWikiSummary("Filter out events from an [[EventWorkspace]] based on a sample log value satisfying filter criteria.");
+  //this->setOptionalMessage("Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace

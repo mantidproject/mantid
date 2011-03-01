@@ -34,8 +34,8 @@ SaveCanSAS1D::~SaveCanSAS1D()
 /// Overwrites Algorithm method.
 void SaveCanSAS1D::init()
 {
-  this->setWikiSummary("Save a file in the canSAS 1-D format");
-  this->setOptionalMessage("Save a file in the canSAS 1-D format");
+  //this->setWikiSummary("Save a file in the canSAS 1-D format");
+  //this->setOptionalMessage("Save a file in the canSAS 1-D format");
 
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
       new API::WorkspaceUnitValidator<>("MomentumTransfer")),

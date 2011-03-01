@@ -26,8 +26,8 @@ MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
 /// Initialisation method
 void MergeRuns::init()
 {
-  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
-  this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
+  //this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
+  //this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
 
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(

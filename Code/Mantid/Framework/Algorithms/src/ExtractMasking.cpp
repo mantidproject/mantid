@@ -26,8 +26,8 @@ namespace Mantid
      */
     void ExtractMasking::init()
     {
-      this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace.");
-      this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
+      //this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace.");
+      //this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
 
       declareProperty(
 	new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",

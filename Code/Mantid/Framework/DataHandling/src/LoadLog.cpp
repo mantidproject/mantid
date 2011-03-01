@@ -46,8 +46,8 @@ LoadLog::LoadLog()
 /// Initialisation method.
 void LoadLog::init()
 {
-  this->setWikiSummary("Load ISIS log file(s) into a [[workspace]].");
-  this->setOptionalMessage("Load ISIS log file(s) into a workspace.");
+  //this->setWikiSummary("Load ISIS log file(s) into a [[workspace]].");
+  //this->setOptionalMessage("Load ISIS log file(s) into a workspace.");
 
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(

@@ -23,8 +23,8 @@ namespace Mantid
     /// Initialisation method.
     void CrossCorrelate::init()
     {
-      this->setWikiSummary("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
-      this->setOptionalMessage("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
+      //this->setWikiSummary("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
+      //this->setOptionalMessage("Cross-correlates a range of spectra against one reference spectra in the same workspace.");
 
       API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
       wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));

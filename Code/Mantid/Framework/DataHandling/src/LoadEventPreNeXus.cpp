@@ -142,8 +142,8 @@ int LoadEventPreNeXus::fileCheck(const std::string& filePath)
 /** Initialize the algorithm */
 void LoadEventPreNeXus::init()
 {
-  this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class).");
-  this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
+  //this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class).");
+  //this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
 
   // which files to use
   this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),

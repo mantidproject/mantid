@@ -45,8 +45,8 @@ namespace CurveFitting
   */
   void GenericFit::init()
   {
-    this->setWikiSummary("Fits a function to data in a Workspace");
-    this->setOptionalMessage("Fits a function to data in a Workspace");
+    //this->setWikiSummary("Fits a function to data in a Workspace");
+    //this->setOptionalMessage("Fits a function to data in a Workspace");
 
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
     declareProperty("Input","","Workspace slicing parameters. Must be consistent with the Function type (see FitFunction::setWorkspace).");

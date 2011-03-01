@@ -26,8 +26,6 @@ CreateWorkspace::~CreateWorkspace()
 /// Init function
 void CreateWorkspace::init()
 {
-  this->setOptionalMessage("Creates a new MatrixWorkspace using input values.\n"
-    "Please view the help page for description of syntax.");
 
   std::vector<std::string> unitOptions = Mantid::Kernel::UnitFactory::Instance().getKeys();
   unitOptions.push_back("SpectraNumber");

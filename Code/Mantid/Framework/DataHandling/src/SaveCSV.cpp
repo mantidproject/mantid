@@ -64,8 +64,8 @@ SaveCSV::SaveCSV()
  */
 void SaveCSV::init()
 {
-  this->setWikiSummary("Saves a 1D or 2D [[workspace]] to a CSV file.");
-  this->setOptionalMessage("Saves a 1D or 2D workspace to a CSV file.");
+  //this->setWikiSummary("Saves a 1D or 2D [[workspace]] to a CSV file.");
+  //this->setOptionalMessage("Saves a 1D or 2D workspace to a CSV file.");
 
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),

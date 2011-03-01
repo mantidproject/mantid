@@ -37,8 +37,8 @@ DECLARE_LOADALGORITHM(LoadRKH)
  */
 void LoadRKH::init()
 {
-  this->setWikiSummary("Load a file written in the RKH format");
-  this->setOptionalMessage("Load a file written in the RKH format");
+  //this->setWikiSummary("Load a file written in the RKH format");
+  //this->setOptionalMessage("Load a file written in the RKH format");
   
   std::vector<std::string> exts;
   exts.push_back(".txt");

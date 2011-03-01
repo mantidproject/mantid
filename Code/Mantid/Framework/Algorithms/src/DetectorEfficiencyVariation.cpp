@@ -29,8 +29,8 @@ namespace Mantid
     /// Initialize the algorithm
     void DetectorEfficiencyVariation::init()
     {
-      this->setWikiSummary("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
-      this->setOptionalMessage("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
+      //this->setWikiSummary("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
+      //this->setOptionalMessage("Compares two white beam vanadium workspaces from the same instrument to find detectors whose efficiencies have changed beyond a threshold.");
 
       HistogramValidator<MatrixWorkspace> *val =
 	new HistogramValidator<MatrixWorkspace>;

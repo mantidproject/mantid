@@ -27,8 +27,8 @@ using namespace Mantid::DataHandling;
  */
 void LoadSampleDetailsFromRaw::init()
 {
-  this->setWikiSummary("Loads the simple sample geometry that is defined within an ISIS raw file.");
-  this->setOptionalMessage("Loads the simple sample geometry that is defined within an ISIS raw file.");
+  //this->setWikiSummary("Loads the simple sample geometry that is defined within an ISIS raw file.");
+  //this->setOptionalMessage("Loads the simple sample geometry that is defined within an ISIS raw file.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
 		  "The workspace to which the information should be added");

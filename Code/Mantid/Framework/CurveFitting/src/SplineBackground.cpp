@@ -19,8 +19,8 @@ using namespace API;
 /// Initialisation method
 void SplineBackground::init()
 {
-  this->setWikiSummary("Fit spectra background using b-splines.");
-  this->setOptionalMessage("Fit spectra background using b-splines.");
+  //this->setWikiSummary("Fit spectra background using b-splines.");
+  //this->setOptionalMessage("Fit spectra background using b-splines.");
 
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
     "",Direction::Input), "The name of the input workspace.");

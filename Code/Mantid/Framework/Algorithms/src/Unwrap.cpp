@@ -28,8 +28,8 @@ Unwrap::~Unwrap()
 /// Initialisation method
 void Unwrap::init()
 {
-  this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
-  this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
+  //this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
+  //this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));

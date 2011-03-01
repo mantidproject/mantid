@@ -26,8 +26,8 @@ using API::FileProperty;
  */
 void DiffractionFocussing::init()
 {
-  this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]].");
-  this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
+  //this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]].");
+  //this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
 
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),

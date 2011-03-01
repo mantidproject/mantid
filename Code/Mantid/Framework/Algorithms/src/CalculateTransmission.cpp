@@ -25,8 +25,8 @@ CalculateTransmission::~CalculateTransmission()
 
 void CalculateTransmission::init()
 {
-  this->setWikiSummary("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
-  this->setOptionalMessage("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
+  //this->setWikiSummary("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
+  //this->setOptionalMessage("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));

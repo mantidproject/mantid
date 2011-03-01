@@ -37,8 +37,8 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  this->setWikiSummary("Performs a unit change on the X values of a [[workspace]]");
-  this->setOptionalMessage("Performs a unit change on the X values of a workspace");
+  //this->setWikiSummary("Performs a unit change on the X values of a [[workspace]]");
+  //this->setOptionalMessage("Performs a unit change on the X values of a workspace");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);

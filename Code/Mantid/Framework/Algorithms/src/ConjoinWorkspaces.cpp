@@ -35,8 +35,8 @@ ConjoinWorkspaces::~ConjoinWorkspaces()
 /** Initialize the properties */
 void ConjoinWorkspaces::init()
 {
-  this->setWikiSummary("Joins two partial, non-overlapping workspaces into one.");
-  this->setOptionalMessage("Joins two partial, non-overlapping workspaces into one.");
+  //this->setWikiSummary("Joins two partial, non-overlapping workspaces into one.");
+  //this->setOptionalMessage("Joins two partial, non-overlapping workspaces into one.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace1",
     "", Direction::InOut, new CommonBinsValidator<>),

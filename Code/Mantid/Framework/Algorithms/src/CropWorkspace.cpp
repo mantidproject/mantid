@@ -32,8 +32,8 @@ CropWorkspace::~CropWorkspace() {}
 
 void CropWorkspace::init()
 {
-  this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace.");
-  this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
+  //this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace.");
+  //this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "The input Workspace2D" );

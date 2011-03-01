@@ -17,8 +17,8 @@ StripPeaks::StripPeaks() : API::Algorithm() {}
 
 void StripPeaks::init()
 {
-  this->setWikiSummary("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
-  this->setOptionalMessage("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
+  //this->setWikiSummary("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
+  //this->setOptionalMessage("This algorithm attempts to find all the peaks in all spectra of a workspace and subtract them from the data, leaving just the 'background'.");
 
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input),

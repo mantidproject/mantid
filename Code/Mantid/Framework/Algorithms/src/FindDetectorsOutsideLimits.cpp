@@ -20,8 +20,8 @@ namespace Mantid
     /// Initialisation method.
     void FindDetectorsOutsideLimits::init()
     {
-      this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
-      this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
+      //this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
+      //this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
 
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),

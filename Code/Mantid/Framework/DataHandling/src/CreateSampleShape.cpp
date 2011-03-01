@@ -23,8 +23,8 @@ using namespace Mantid::API;
  */
 void CreateSampleShape::init()
 {
-  this->setWikiSummary("Create a shape object to model the sample.");
-  this->setOptionalMessage("Create a shape object to model the sample.");
+  //this->setWikiSummary("Create a shape object to model the sample.");
+  //this->setOptionalMessage("Create a shape object to model the sample.");
 
   using namespace Mantid::Kernel;
   declareProperty(

@@ -28,8 +28,8 @@ using namespace DataObjects;
 
 void SANSSolidAngleCorrection::init()
 {
-  this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
-  this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
+  //this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
+  //this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));

@@ -26,8 +26,8 @@ namespace Mantid
     */
     void Sort::init()
     {
-      this->setWikiSummary("Sort the events in an [[EventWorkspace]], for faster rebinning.");
-      this->setOptionalMessage("Sort the events in an EventWorkspace, for faster rebinning.");
+      //this->setWikiSummary("Sort the events in an [[EventWorkspace]], for faster rebinning.");
+      //this->setOptionalMessage("Sort the events in an EventWorkspace, for faster rebinning.");
 
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::InOut,new EventWorkspaceValidator<>),

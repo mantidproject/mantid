@@ -23,8 +23,8 @@ using namespace DataObjects;
  */
 void SumSpectra::init()
 {
-  this->setWikiSummary("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an [[EventWorkspace]], the output is also an [[EventWorkspace]]; otherwise it will be a [[Workspace2D]].");
-  this->setOptionalMessage("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.");
+  //this->setWikiSummary("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an [[EventWorkspace]], the output is also an [[EventWorkspace]]; otherwise it will be a [[Workspace2D]].");
+  //this->setOptionalMessage("The SumSpectra algorithm adds the data values in each time bin across a range of spectra; the output workspace has a single spectrum. If the input is an EventWorkspace, the output is also an EventWorkspace; otherwise it will be a Workspace2D.");
 
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new CommonBinsValidator<>),

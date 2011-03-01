@@ -34,8 +34,8 @@ NormaliseToMonitor::~NormaliseToMonitor() {}
 
 void NormaliseToMonitor::init()
 {
-  this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum.");
-  this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
+  //this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum.");
+  //this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
 
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new HistogramValidator<>);

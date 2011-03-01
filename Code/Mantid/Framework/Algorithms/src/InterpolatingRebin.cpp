@@ -23,8 +23,8 @@ namespace Mantid
     */
     void InterpolatingRebin::init()
     {
-      this->setWikiSummary("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.");
-      this->setOptionalMessage("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.");
+      //this->setWikiSummary("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.");
+      //this->setOptionalMessage("Creates a workspace with different x-value bin boundaries where the new y-values are estimated using cubic splines.");
 
       Rebin::init();
     }

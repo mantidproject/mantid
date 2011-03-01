@@ -28,8 +28,8 @@ namespace Mantid
     /// Initialisation method.
     void LoadEmptyInstrument::init()
     {
-      this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]], with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.For more information on IDFs see [[InstrumentDefinitionFile]].");
-      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace, with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.  For more information on IDFs see InstrumentDefinitionFile.");
+      //this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]], with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.For more information on IDFs see [[InstrumentDefinitionFile]].");
+      //this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace, with the purpose of being able to visualise an instrument without requiring to read in a raw datafile first. The name of the algorithm refers to the fact that an instrument is loaded into a workspace but without any real data - hence the reason for referring to it as an 'empty' instrument.  For more information on IDFs see InstrumentDefinitionFile.");
 
       declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
 		      "The filename (including its full or relative path) of an ISIS instrument\n"

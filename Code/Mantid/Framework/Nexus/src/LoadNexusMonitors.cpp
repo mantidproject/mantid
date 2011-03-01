@@ -32,8 +32,8 @@ LoadNexusMonitors::~LoadNexusMonitors()
 /// Initialisation method.
 void LoadNexusMonitors::init()
 {
-  this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
-  this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
+  //this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
+  //this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
 
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
       ".nxs"),

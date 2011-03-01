@@ -29,8 +29,8 @@ MaskDetectors::~MaskDetectors() {}
 
 void MaskDetectors::init()
 {
-  this->setWikiSummary("An algorithm to mask a detector, or set of detectors, as not to be used.The workspace spectra associated with those detectors are zeroed.");
-  this->setOptionalMessage("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
+  //this->setWikiSummary("An algorithm to mask a detector, or set of detectors, as not to be used.The workspace spectra associated with those detectors are zeroed.");
+  //this->setOptionalMessage("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
 
   declareProperty(
     new WorkspaceProperty<>("Workspace","", Direction::InOut),

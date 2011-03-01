@@ -48,10 +48,6 @@ DiffractionFocussing2::~DiffractionFocussing2()
  */
 void DiffractionFocussing2::init()
 {
-  this->setOptionalMessage(
-      "Sums (focusses) spectra together to make one spectrum per group.\n"
-      "The groups are specifed in a grouping file."
-      );
 
   API::CompositeValidator<MatrixWorkspace> *wsValidator = new API::CompositeValidator<MatrixWorkspace>;
   wsValidator->add(new API::WorkspaceUnitValidator<MatrixWorkspace>("dSpacing"));

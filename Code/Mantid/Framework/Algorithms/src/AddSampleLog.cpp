@@ -18,8 +18,8 @@ using namespace API;
 
 void AddSampleLog::init()
 {
-  this->setWikiSummary("Used to insert a single string into the sample in a workspace");
-  this->setOptionalMessage("Used to insert a single string into the sample in a workspace");
+  //this->setWikiSummary("Used to insert a single string into the sample in a workspace");
+  //this->setOptionalMessage("Used to insert a single string into the sample in a workspace");
 
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
     "Workspace to add the log entry to");

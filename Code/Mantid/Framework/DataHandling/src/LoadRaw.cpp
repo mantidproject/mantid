@@ -37,8 +37,8 @@ namespace Mantid
     /// Initialisation method.
     void LoadRaw::init()
     {
-      this->setWikiSummary("Loads a data file in ISIS [[RAW_File | RAW]] format and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      this->setOptionalMessage("Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).");
+      //this->setWikiSummary("Loads a data file in ISIS [[RAW_File | RAW]] format and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
+      //this->setOptionalMessage("Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).");
 
       // Extension checking is not case sensitive
       // MG 20/07/09: I've had to change these extensions so that the native Windows file dialog can recognise

@@ -18,8 +18,8 @@ using namespace DataObjects;
 
 void CloneWorkspace::init()
 {
-  this->setWikiSummary("Copies an existing workspace into a new one.");
-  this->setOptionalMessage("Copies an existing workspace into a new one.");
+  //this->setWikiSummary("Copies an existing workspace into a new one.");
+  //this->setOptionalMessage("Copies an existing workspace into a new one.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

@@ -24,8 +24,8 @@ Linear::~Linear() {if(m_progress) delete m_progress;m_progress=NULL;}
 
 void Linear::init()
 {
-  this->setWikiSummary("Performs linear least-squares regression on a spectrum (or portion of one).");
-  this->setOptionalMessage("Performs linear least-squares regression on a spectrum (or portion of one).");
+  //this->setWikiSummary("Performs linear least-squares regression on a spectrum (or portion of one).");
+  //this->setOptionalMessage("Performs linear least-squares regression on a spectrum (or portion of one).");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Workspace with the spectrum to fit");

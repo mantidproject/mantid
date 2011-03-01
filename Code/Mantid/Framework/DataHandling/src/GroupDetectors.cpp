@@ -26,8 +26,8 @@ GroupDetectors::~GroupDetectors() {}
 
 void GroupDetectors::init()
 {
-  this->setWikiSummary("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
-  this->setOptionalMessage("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
+  //this->setWikiSummary("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
+  //this->setOptionalMessage("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
 
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,
     new CommonBinsValidator<>),

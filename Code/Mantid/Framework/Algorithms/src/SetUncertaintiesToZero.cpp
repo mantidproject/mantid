@@ -37,8 +37,8 @@ const std::string SetUncertaintiesToZero::category() const
 
 void SetUncertaintiesToZero::init()
 {
-  this->setWikiSummary("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.");
-  this->setOptionalMessage("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.");
+  //this->setWikiSummary("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.");
+  //this->setOptionalMessage("This algorithm creates a workspace which is the duplicate of the input, but where the error value for every bin has been set to zero.");
 
   declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",
                                                               Direction::Input));

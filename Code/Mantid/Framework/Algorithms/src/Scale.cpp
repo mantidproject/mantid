@@ -16,8 +16,8 @@ using namespace API;
 
 void Scale::init()
 {
-  this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
-  this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
+  //this->setWikiSummary("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
+  //this->setOptionalMessage("Scales an input workspace by the given factor, which can be either multiplicative or additive.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

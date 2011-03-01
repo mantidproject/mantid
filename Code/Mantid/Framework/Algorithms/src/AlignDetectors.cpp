@@ -242,8 +242,8 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
-  this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
+  //this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
+  //this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace unit must be TOF.

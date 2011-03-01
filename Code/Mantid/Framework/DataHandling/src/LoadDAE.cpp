@@ -74,8 +74,8 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      this->setWikiSummary("Loads data from the ISIS DATA acquisition system and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      this->setOptionalMessage("Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace (Workspace2D class).");
+      //this->setWikiSummary("Loads data from the ISIS DATA acquisition system and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
+      //this->setOptionalMessage("Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace (Workspace2D class).");
 
       declareProperty("DAEname","", new MandatoryValidator<std::string>(),
         "The name of and path to the input DAE host.");

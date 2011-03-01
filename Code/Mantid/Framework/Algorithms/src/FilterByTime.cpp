@@ -42,8 +42,8 @@ FilterByTime::~FilterByTime()
 //-----------------------------------------------------------------------
 void FilterByTime::init()
 {
-  this->setWikiSummary("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
-  this->setOptionalMessage("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
+  //this->setWikiSummary("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
+  //this->setOptionalMessage("This algorithm filters out events from an EventWorkspace that are not between given start and stop times.");
 
   std::string commonHelp("\nYou can only specify the relative or absolute start/stop times, not both.");
 
