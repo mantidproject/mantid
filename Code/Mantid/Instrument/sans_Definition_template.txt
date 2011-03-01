@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="%instrument_name%" valid-from   ="1900-01-31 23:59:59"
+                           valid-to     ="2100-01-31 23:59:59"
+		           last-modified="%last_modified%">
+
+  <!-- TEST DEFINITION: NOT READY FOR SHOW TIME -->
+  
+  <defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+    <default-view axis-view="z-"/>
+  </defaults>
+  
+  <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
+  
+  <!-- source and sample-position components 
+  		Place the beam along the z-axis, the sample holder at (0,0,0) -->
+
+  <component type="source">
+    <location x="0.0" y="0.0" z="-1.0"/>
+  </component>
+  <type name="source" is="Source" />
+  
+  <component type="some-sample-holder">
+    <location x="0.0" y="0.0" z="0.0"/>
+  </component>
+  <type name="some-sample-holder" is="SamplePos" />
+  
+  
+  <!-- detector components (including monitors) -->
+  
+  <component type="monitor1" idlist="monitor1">
+    <location z="-0.5" mark-as="monitor" />
+  </component>
+  <type name="monitor1" is="detector" />
+ 
+  <component type="timer1" idlist="timer1">
+    <location z="-0.5" mark-as="monitor" />
+  </component>
+  <type name="timer1" is="detector" />
+ 
+  <component type="sample_aperture">
+    <location z="0.0"/>
+    <parameter name="Size"> <value val="14.0" /> </parameter>
+  </component>
+  <type name="sample_aperture" />
+ 
+
+  <component type="detector-bank" name="detector1" idlist="det1">
+   <location x="0.0" y="0.0" z="0.0" />
+  </component>   
+
+  <type name="detector-bank">
+    <component type="pixel" >
+		%pixel_positions%
+    </component>
+  </type>
+  
+  <type name="pixel" is="detector">
+    <cuboid id="shape">
+      <left-front-bottom-point x="%pixel_left_front_bottom_x%" y="%pixel_left_front_bottom_y%" z="0.0"  />
+      <left-front-top-point  x="%pixel_left_front_top_x%" y="%pixel_left_front_top_y%" z="0.0"  />
+      <left-back-bottom-point  x="%pixel_left_back_bottom_x%" y="%pixel_left_back_bottom_y%" z="-0.000005"  />
+      <right-front-bottom-point  x="%pixel_right_front_bottom_x%" y="%pixel_right_front_bottom_y%" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" /> 
+  </type>    
+  
+  
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="det1">
+    %pixels_ids%
+  </idlist> 
+  
+  <!-- DETECTOR and MONITOR ID LISTS -->
+
+  <idlist idname="monitor1">
+    <id val="1" />  
+  </idlist>
+  <idlist idname="timer1">
+    <id val="2" />  
+  </idlist>
+  
+</instrument>
