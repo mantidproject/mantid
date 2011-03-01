@@ -458,12 +458,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
    using namespace Mantid::Geometry;
    using namespace Mantid::API;
 
-   Mantid::MDAlgorithms::Load_MDWorkspace wsLoaderAlg;
-   wsLoaderAlg.initialize();
    std::string wsId = "InputMDWs";
-   wsLoaderAlg.setPropertyValue("inFilename", wsLocation);
-   wsLoaderAlg.setPropertyValue("MDWorkspace", wsId);
-   wsLoaderAlg.execute();
    Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
    MDWorkspace_sptr workspace = boost::dynamic_pointer_cast<MDWorkspace>(result);
 

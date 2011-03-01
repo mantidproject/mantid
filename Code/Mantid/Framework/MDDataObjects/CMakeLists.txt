@@ -45,11 +45,11 @@ test/MDDPoints_MemManagerTest.h
 )
 
 set ( GMOCK_TEST_FILES
-# test/MDIndexCalculatorTest.h
+test/MDIndexCalculatorTest.h
 test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
-# test/MDWorkspaceTest.h
+test/MDWorkspaceTest.h
 #test/MDPointTest.h  
 #test/MDBoxTest.h  
 )
