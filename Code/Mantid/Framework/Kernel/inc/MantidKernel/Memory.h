@@ -62,6 +62,7 @@ namespace Mantid
       std::size_t res_usage; ///< Resident memory usage by process in kiB.
       std::size_t total_memory; ///< Total physical memory of system in kiB.
       std::size_t avail_memory; ///< Available memory of system in kiB.
+      static Logger &g_log; ///< Logger
       friend DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
     };
 
