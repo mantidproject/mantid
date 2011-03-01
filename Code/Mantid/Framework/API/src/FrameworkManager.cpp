@@ -15,6 +15,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/LibraryManager.h"
+#include "MantidKernel/Memory.h"
 
 #ifdef _WIN32
 #include <winsock2.h>
@@ -31,6 +32,8 @@ FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("Framew
 {
   // Mantid only understands English...
   setGlobalLocaleToAscii();
+  // Setup memory allocation scheme
+  Kernel::MemoryOptions::initAllocatorOptions();
 
 #ifdef _WIN32
     WSADATA wsaData;

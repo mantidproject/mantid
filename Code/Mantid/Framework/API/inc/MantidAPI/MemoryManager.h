@@ -55,7 +55,7 @@ namespace Mantid
       MemoryInfo getMemoryInfo();
       /// Returns true if there is not sufficient memory for a full Workspace2D.
       bool goForManagedWorkspace(int NVectors,int XLength,int YLength, bool* isCompressedOK = NULL);
-
+      /// Release memory back to the system if we linked againsed tcmalloc
       void releaseFreeMemory();
 
     private:

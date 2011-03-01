@@ -133,41 +133,11 @@ bool read_mem_info(size_t & sys_avail, size_t & sys_total)
 namespace {  // Anonymous namespace
 
   MEMORYSTATUSEX memStatus; ///< A Windows structure holding information about memory usage
-
-  size_t ReservedMem()
-  {
-    MEMORY_BASIC_INFORMATION info; // Windows structure
-
-    char *addr = NULL;
-    size_t unusedReserved = 0; // total reserved space
-    DWORDLONG size = 0;
-    DWORDLONG GB2 = memStatus.ullTotalVirtual; // Maximum memory available to the process
-
-    // Loop over all virtual memory to find out the status of every block.
-    do
-    {
-      VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
-
-      // Count up the total size of reserved but unused blocks
-      if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
-
-      addr += info.RegionSize; // Move up to the starting address for the next call
-      size += info.RegionSize;
-    }
-    while(size < GB2);
-
-    // Convert from bytes to KB
-    unusedReserved /= 1024;
-
-    return unusedReserved;
-  }
-
 }
 #endif
 
 void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
 {
-
   sys_avail = 0;
   sys_total = 0;
 #ifdef __linux__
@@ -223,7 +193,6 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
   sys_avail += unusedReserved;
 #elif _WIN32
   GlobalMemoryStatusEx( &memStatus );
-
   if (memStatus.ullTotalPhys < memStatus.ullTotalVirtual)
   {
     sys_avail = static_cast<size_t>(memStatus.ullAvailPhys/1024);
@@ -237,14 +206,19 @@ void MemoryStats::process_mem_system(size_t & sys_avail, size_t & sys_total)
 #endif
 }
 
-// ------------------ The actual class
-
-MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage(0),
-    total_memory(0), avail_memory(0), g_log(Kernel::Logger::get("Memory"))
+/**
+ * Initialize platform-dependent options for memory management.
+ * On Windows this enables the low-fragmentation heap described here: http://msdn.microsoft.com/en-us/library/aa366750%28v=vs.85%29.aspx
+ * On Linux this enables the mmap option for malloc calls to try and release memory more frequently.
+ * Note that this function can only be called once
+ */
+void MemoryOptions::initAllocatorOptions()
 {
+  static bool initialized(false);
+  if( initialized ) return;
 #ifdef __linux__
-  /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
-   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this
+   /* The line below tells malloc to use a different memory allocation system call (mmap) to the 'usual'
+   * one (sbrk) for requests above the threshold of the second argument (in bytes). The effect of this 
    * is that, for the current threshold value of 8*4096, storage for workspaces having 4096 or greater
    * bins per spectrum will be allocated using mmap.
    * This should have the effect that memory is returned to the kernel as soon as a workspace is deleted,
@@ -255,14 +229,13 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage
    */
   mallopt(M_MMAP_THRESHOLD, 8*4096);
 #elif _WIN32
-  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
-
+  Kernel::Logger &g_log = Kernel::Logger::get("MemoryOptions");
   // Try to enable the Low Fragmentation Heap for all heaps
-  // Bit of a brute force approach, but don't know which heap workspace data end up on
+  // Bit of a brute force approach, but don't know which heap workspace data ends up on
   HANDLE hHeaps[1025];
   // Get the number of heaps
   const DWORD numHeap = GetProcessHeaps(1024, hHeaps);
-  g_log.debug() << "Number of heaps: " << GetProcessHeaps(0, NULL) << "\n";
+  g_log.debug() << "Number of heaps: " << numHeap   << "\n";//GetProcessHeaps(0, NULL) << "\n";
   ULONG ulEnableLFH = 2; // 2 = Low Fragmentation Heap
   for(DWORD i = 0; i < numHeap; i++)
   {
@@ -272,11 +245,34 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage
     }
   }
 #endif
+  initialized = true;
+}
+
+// ------------------ The actual class ----------------------------------------
+
+/// Initialize the logger
+Kernel::Logger &g_log = Kernel::Logger::get("Memory");
+
+/**
+ * Constructor
+ * @param ignore :: Which memory stats should be ignored.
+ */
+MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage(0),
+    total_memory(0), avail_memory(0)
+{
+
+#ifdef _WIN32
+  memStatus.dwLength = sizeof(MEMORYSTATUSEX);
+#endif
 
   this->ignoreFields(ignore);
   this->update();
 }
 
+/**
+ * Update the structure with current information, taking into account what is
+ * to be ignored.
+ */
 void MemoryStats::update()
 {
   // get what is used by the process
@@ -288,45 +284,115 @@ void MemoryStats::update()
   process_mem_system(this->avail_memory, this->total_memory);
 }
 
-void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore) {
+/**
+ * Set the fields to ignore
+ * @param ignore :: An enumeration giving the fields to ignore
+ */
+void MemoryStats::ignoreFields(const MemoryStatsIgnore ignore) 
+{
   this->ignore = ignore;
 }
 
+/**
+ * Returns the virtual memory usage as a string
+ * @returns A string containing the amount of virtual memory usage
+ */
 string MemoryStats::vmUsageStr() const
 {
   return memToString(this->vm_usage);
 }
 
+/**
+ * Returns the resident memory used by the current process
+ * @returns A string containing the amount of memory the process is using
+ */
 string MemoryStats::resUsageStr() const
 {
   return memToString(this->res_usage);
 }
 
+/**
+ * Returns the total memory of the system as a string
+ * @returns A string containing the total amount of memory on the system
+ */
 string MemoryStats::totalMemStr() const
 {
   return memToString(this->total_memory);
 }
 
+/**
+ * Returns the available memory of the system as a string
+ * @returns A string containing the amount of available memory on the system
+ */
 string MemoryStats::availMemStr() const
 {
   return memToString(this->avail_memory);
 }
 
+/**
+ * Returns the total memory of the system 
+ * @returns An unsigned containing the total amount of memory on the system
+ */
 size_t MemoryStats::totalMem() const
 {
   return this->total_memory;
 }
 
 /**
- * Return the available memory in kilobytes.
- * @return int
+ * Returns the available memory of the system in kiB
+ * @returns An unsigned containing the available amount of memory on the system in kiB
  */
 size_t MemoryStats::availMem() const
 {
   return this->avail_memory;
 }
 
-/// The ration of available to total system memory as a number between 0-100.
+/**
+ * Returns the reserved memory that has not been factored into the available memory
+ * calculation.
+ * NOTE: On Windows this can be a lengthy calculation as it involves
+ * adding up the reserved space DWORD length at a time. Call only when necessary
+ * On other systems this will return 0 as it has already been factored in to the available
+ * memory calculation
+ * @returns An extra area of memory that can still be allocated.
+ */
+std::size_t MemoryStats::reservedMem() const
+{
+#ifdef _WIN32
+  MEMORY_BASIC_INFORMATION info; // Windows structure
+  char *addr = NULL;
+  size_t unusedReserved = 0; // total reserved space
+  DWORDLONG size = 0;
+  GlobalMemoryStatusEx( &memStatus );
+  DWORDLONG GB2 = memStatus.ullTotalVirtual; // Maximum memory available to the process
+
+  // Loop over all virtual memory to find out the status of every block.
+  do
+  {
+    VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
+
+    // Count up the total size of reserved but unused blocks
+    if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
+
+    addr += info.RegionSize; // Move up to the starting address for the next call
+    size += info.RegionSize;
+  }
+  while(size < GB2);
+
+  // Convert from bytes to KB
+  unusedReserved /= 1024;
+
+  return unusedReserved;
+#else
+  return 0;
+#endif
+}
+
+
+/**
+ * The ratio of available to total system memory as a number between 0-100.
+ * @returns A percentage
+ */
 double MemoryStats::getFreeRatio() const
 {
   return 100. * static_cast<double>(this->avail_memory) / static_cast<double>(this->total_memory);

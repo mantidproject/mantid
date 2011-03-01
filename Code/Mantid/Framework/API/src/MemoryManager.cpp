@@ -31,6 +31,8 @@ MemoryManagerImpl::~MemoryManagerImpl()
 {
 }
 
+
+
 MemoryInfo MemoryManagerImpl::getMemoryInfo()
 {
   Kernel::MemoryStats mem_stats;
@@ -38,46 +40,8 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
   info.totalMemory = mem_stats.totalMem();
   info.availMemory = mem_stats.availMem();
   info.freeRatio = static_cast<size_t>(mem_stats.getFreeRatio());
-
   return info;
 }
-
-#ifdef _WIN32
-namespace {  // Anonymous namespace
-
-  MEMORYSTATUSEX memStatusWIN; ///< A Windows structure holding information about memory usage
-
-  size_t ReservedMem()
-  {
-    MEMORY_BASIC_INFORMATION info; // Windows structure
-
-    char *addr = NULL;
-    size_t unusedReserved = 0; // total reserved space
-    DWORDLONG size = 0;
-    DWORDLONG GB2 = memStatusWIN.ullTotalVirtual; // Maximum memory available to the process
-
-    // Loop over all virtual memory to find out the status of every block.
-    do
-    {
-      VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
-
-      // Count up the total size of reserved but unused blocks
-      if (info.State == MEM_RESERVE) unusedReserved += info.RegionSize;
-
-      addr += info.RegionSize; // Move up to the starting address for the next call
-      size += info.RegionSize;
-    }
-    while(size < GB2);
-
-    // Convert from bytes to KB
-    unusedReserved /= 1024;
-
-    return unusedReserved;
-  }
-
-}
-#endif
-
 
 /** Decides if a ManagedWorkspace2D sould be created for the current memory conditions
     and workspace parameters NVectors, XLength,and YLength.
@@ -126,19 +90,26 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
   else
       wsSize = NVectors * (YLength * 2 + XLength) / 1024;
 
+  g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
+  g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
+  g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
+
   bool goManaged = (wsSize > triggerSize);
-#ifdef _WIN32
   // If we're on the cusp of going managed, add in the reserved but unused memory
-  // We do this here for windows (rather than always including it in the calculation)
-  // because the function called is, in principle, potentially quite expensive.
-  if (goManaged)
+  if( goManaged )
   {
-    const size_t reserved = ReservedMem();
+    // This is called separately as on some systems it is an expensive calculation.
+    // See Kernel/src/Memory.cpp - reservedMem() for more details
+    Kernel::MemoryStats mem_stats;
+    const size_t reserved = mem_stats.reservedMem();
     g_log.debug() << "Windows - Adding reserved but unused memory of " << reserved << " KB\n";
+    mi.availMemory += reserved;
     triggerSize += reserved / 100 * availPercent / sizeof(double);
     goManaged = (wsSize > triggerSize);
+
+    g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
+    g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
   }
-#endif
 
   if (isCompressedOK)
   {
@@ -167,10 +138,6 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
       *isCompressedOK = false;
     }
   }
-
-  g_log.debug() << "Requested memory: " << wsSize * sizeof(double) << " KB.\n";
-  g_log.debug() << "Available memory: " << mi.availMemory << " KB.\n";
-  g_log.debug() << "MWS trigger memory: " << triggerSize * sizeof(double) << " KB.\n";
 
   return goManaged;
 }
