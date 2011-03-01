@@ -231,7 +231,7 @@ def generate(subproject, classname, overwrite, test_only, algorithm):
         write_source(subproject, classname, sourcefile, algorithm)
     write_test(subproject, classname, testfile, algorithm)
     
-    print "\n   Don't forget to add your class to CMakeLists.txt:"
+    print "\n   Don't forget to add your class to Framework/%s/CMakeLists.txt" % subproject
     print 
     if not test_only:
         print "\tsrc/%s.cpp" % (classname)

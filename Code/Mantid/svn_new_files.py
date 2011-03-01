@@ -57,6 +57,7 @@ def do_list_new_files(only_this):
     
     print "\n".join(good_files)
     print ""
+    print "svn add ", " ".join(good_files)
 
 
 #end def
