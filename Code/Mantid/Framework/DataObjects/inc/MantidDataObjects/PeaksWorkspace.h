@@ -104,9 +104,9 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      void    append( std::string filename);
      void    removeAllPeaks();
 
-     bool   Mantid::API::ITableWorkspace::addColumn  	(  	const std::string &   	 type,
-		                 const std::string &  	name
-	    ) {return false;}
+//     bool   Mantid::API::ITableWorkspace::addColumn  	(  	const std::string &   	 type,
+//		                 const std::string &  	name
+//	    ) {return false;}
 
      static const int IhklCol =0;  //Column number where V3D hkl value is stored
      static const int IpositionCol =1;//Column number where V3D xyz position is stored
