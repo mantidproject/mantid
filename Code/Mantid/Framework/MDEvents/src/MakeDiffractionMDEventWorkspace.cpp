@@ -35,9 +35,8 @@ namespace MDEvents
    */
   void MakeDiffractionMDEventWorkspace::init()
   {
-    setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz)\n"
-        "from an input EventWorkspace."
-        );
+    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
+
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }

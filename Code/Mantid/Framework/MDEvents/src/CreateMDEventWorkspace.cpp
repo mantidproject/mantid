@@ -36,7 +36,8 @@ namespace MDEvents
    */
   void CreateMDEventWorkspace::init()
   {
-    setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
+    this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
+
     declareProperty(new PropertyWithValue<int>("Dimensions",1,Direction::Input), "Number of dimensions that the workspace will have.");
 
     std::vector<std::string> propOptions;

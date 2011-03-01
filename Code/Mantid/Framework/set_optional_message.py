@@ -27,6 +27,21 @@ def get_all_algos():
                     fileList.append( (name, fullpath) )
     return fileList
 
+def de_wikify(input):
+    """ Remove wiki mark-up """
+    line = input
+    # Match for [[BLA|bla bla]]
+    regex = r"\[\[[\w\ ]+\|([\w\s]+)\]\]"
+    # replace just with the plain text one
+    replace = r"\1"
+    line = re.sub(regex, replace, line)
+    line = line.replace("[[", "")
+    line = line.replace('"', "'")
+    line = line.replace("]]", "")
+    line = line.replace("'''", "'")
+    line = line.replace("''", "'")
+    return line
+
 
 def get_wiki_summary(name):
     """ Get the wiki summary from the algorithm name """
@@ -40,19 +55,10 @@ def get_wiki_summary(name):
     for line in wiki.split("\n"):
         line = line.strip()
         if (line != "== Summary ==") and (line != "==Summary=="):
-            # Keep all markup
-            wikified += line
-            # Match for [[BLA|bla bla]]
-            regex = r"\[\[[\w\ ]+\|([\w\s]+)\]\]"
-            # replace just with the plain text one
-            replace = r"\1"
-            line = re.sub(regex, replace, line)
-            line = line.replace("[[", "")
-            line = line.replace('"', "'")
-            line = line.replace("]]", "")
-            line = line.replace("'''", "'")
-            line = line.replace("''", "'")
-            out += line + " "
+            # Keep all markup in here
+            wikified += line + " "
+            # And strip it out for this one
+            out += de_wikify(line) + " "
             
         if line.startswith("{{Binary"):
             # Template in binary ops. Skip the rest
