@@ -251,7 +251,7 @@ void MemoryOptions::initAllocatorOptions()
 // ------------------ The actual class ----------------------------------------
 
 /// Initialize the logger
-Kernel::Logger &g_log = Kernel::Logger::get("Memory");
+Kernel::Logger & MemoryStats::g_log = Kernel::Logger::get("Memory");
 
 /**
  * Constructor
