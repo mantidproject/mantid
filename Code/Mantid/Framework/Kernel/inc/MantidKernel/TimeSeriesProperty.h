@@ -122,7 +122,10 @@ public:
   }
 
   //--------------------------------------------------------------------------------------
-  ///Add the value of another property
+  /** Add the value of another property
+  * @param right the property to add
+  * @return the sum
+  */
   virtual TimeSeriesProperty& operator+=( Property const * right )
   {
     TimeSeriesProperty const * rhs = dynamic_cast< TimeSeriesProperty const * >(right);

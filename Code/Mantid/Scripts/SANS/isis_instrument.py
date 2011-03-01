@@ -215,7 +215,7 @@ class DetectorBank:
 
         return output.rstrip(",")
     
-    # Used to constrain the possible values of orientation 
+    # Used to constrain the possible values of the orientation of the detector bank against the direction that spectrum numbers increase in
     _ORIENTED = {
         'Horizontal' : None,        #most runs have the detectors in this state
         'Vertical' : None,
@@ -223,13 +223,23 @@ class DetectorBank:
         'HorizontalFlipped' : None} # This is for the empty instrument
     
     def set_orien(self, orien):
-        #throw if it's not in the list of allowed
+        """
+            Sets to relationship between the detectors and the spectra numbers. The relationship
+            is given by an orientation string and this function throws if the string is not recognised
+            @param orien: the orienation string must be a string contained in the dictionary _ORIENTED
+        """
         dummy = self._ORIENTED[orien]
         self._orientation = orien
 
 class ISISInstrument(instrument.Instrument):
-    def __init__(self, wrksp_name=None):
-        instrument.Instrument.__init__(self, wrksp_name)
+    def __init__(self, wrksp_name=None, filename=None):
+        """
+            Reads the instrument definition xml file
+            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
+            @param filename: the name of the instrument definition file to read 
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """
+        instrument.Instrument.__init__(self, wrksp_name, instr_filen=filename)
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
@@ -268,7 +278,12 @@ class ISISInstrument(instrument.Instrument):
         self.trans_monitor = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
-        #this variable isn't used again and stops the instrument from being deep copied!
+        
+        isis = mtd.settings.facility('ISIS')
+        # Number of digits in standard file name
+        self.run_number_width = isis.instrument(self._NAME).zeroPadding()
+
+        #this variable isn't used again and stops the instrument from being deep copied if this instance is deep copied
         self.definition = None
 
         #remove this function
@@ -374,13 +389,18 @@ class ISISInstrument(instrument.Instrument):
 class LOQ(ISISInstrument):
     
     _NAME = 'LOQ'
-    # Number of digits in standard file name
-    run_number_width = 5
+    #minimum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MIN = 2.2
+    #maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
     
     def __init__(self, wrksp_name=None):
-        super(LOQ, self).__init__(wrksp_name)
+        """
+            Reads LOQ's instrument definition xml file
+            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
+            @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
+        """
+        super(LOQ, self).__init__(wrksp_name, 'LOQ_Definition_20020226-.xml')
 
 
     def set_component_positions(self, ws, xbeam, ybeam):
@@ -431,8 +451,6 @@ class SANS2D(ISISInstrument):
         be read in from the workspace logs (Run object)
     """ 
     _NAME = 'SANS2D'
-    # Number of digits in standard file name
-    run_number_width = 8
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
@@ -454,7 +472,7 @@ class SANS2D(ISISInstrument):
         second = self.DETECTORS['high-angle']
 
         base_runno = int(base_runno)
-        #first deal with some specifal cases
+        #first deal with some special cases
         if base_runno < 568:
             self.set_incident_mon(73730)
             first.set_first_spec_num(1)
@@ -472,7 +490,6 @@ class SANS2D(ISISInstrument):
 
         #as spectrum numbers of the first detector have changed we'll move those in the second too  
         second.place_after(first)
-
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -508,73 +525,47 @@ class SANS2D(ISISInstrument):
             #does this reflect the detector being immovable?
             return [0.0,0.0], [xshift, yshift]
         
-    def get_detector_log(self, logs, period=-1):
-        """
-            Reads information about the state of the instrument on the current run
-            from the log files
-            @param logs: a workspace pointer for NeXus files or a .log file for raw files
-        """
-        self._marked_dets = []
-
-        try:
-            logvalues = self._get_sample_logs(logs, period)
-        except AttributeError:
-            #this happens if we were passed a filename, as raw files have .log files
-            logvalues = self._get_dot_log_file(logs)
-        
-        return logvalues
-
-    def _get_sample_logs(self, p_wksp, period):
+    def get_detector_log(self, wksp):
         """
             Reads information about the state of the instrument on the information
             stored in the sample
             @param logs: a workspace pointer
             @return the values that were read as a dictionary
         """
-        samp = p_wksp.getSampleDetails()
+        self._marked_dets = []
+        #assume complete log information is stored in the first entry, it isn't stored in the group workspace itself
+        if wksp.isGroup():
+            wksp = wksp[0]
+
+        samp = wksp.getSampleDetails()
 
         logvalues = {}
-        logvalues['Front_Det_Z'] = self._get_log(samp, 'Front_Det_Z', period) 
-        logvalues['Front_Det_X'] = self._get_log(samp, 'Front_Det_X', period)
-        logvalues['Front_Det_Rot'] = self._get_log(samp, 'Front_Det_Rot', period)
-        logvalues['Rear_Det_Z'] = self._get_log(samp, 'Rear_Det_Z', period)
-        logvalues['Rear_Det_X'] = self._get_log(samp, 'Rear_Det_X', period)
+        logvalues['Front_Det_Z'] = self._get_const_num(samp, 'Front_Det_Z') 
+        logvalues['Front_Det_X'] = self._get_const_num(samp, 'Front_Det_X')
+        logvalues['Front_Det_Rot'] = self._get_const_num(samp, 'Front_Det_Rot')
+        logvalues['Rear_Det_Z'] = self._get_const_num(samp, 'Rear_Det_Z')
+        logvalues['Rear_Det_X'] = self._get_const_num(samp, 'Rear_Det_X')
 
         return logvalues
 
-    def _get_log(self, log_data, log_name, period):
-        if period == -1:
-            return float(log_data.getLogData(log_name).value)
-        else:
-            return float(log_data.getLogData(log_name).value[period])
-        
-    def _get_dot_log_file(self, log_file):
-
-        # Build a dictionary of log data 
-        logvalues = {}
-        logvalues['Rear_Det_X'] = '0.0'
-        logvalues['Rear_Det_Z'] = '0.0'
-        logvalues['Front_Det_X'] = '0.0'
-        logvalues['Front_Det_Z'] = '0.0'
-        logvalues['Front_Det_Rot'] = '0.0'
+    def _get_const_num(self, log_data, log_name):
+        """
+            Get a the named entry from the log object. If the entry is a
+            time series it's assumed to contain unchanging data and the first
+            value is used. The answer must be convertible to float otherwise
+            this throws.
+            @param log_data: the sample object from a workspace
+            @param log_name: a string with the name of the individual entry to load
+            @return: the floating point number
+            @raise TypeError: if that log entry can't be converted to a float 
+        """
         try:
-            file_handle = open(log_file, 'r')
-        except IOError:
-            mantid.sendLogMessage("::SANS::load_detector_logs: Log file \"" + log_file + "\" could not be loaded.")
-            return None
+            # return the log value if it stored as a single number
+            return float(log_data.getLogData(log_name).value)
+        except TypeError:
+            # if the value was stored as a time series we have an array here 
+            return float(log_data.getLogData(log_name).value[0])
         
-        for line in file_handle:
-            parts = line.split()
-            if len(parts) != 3:
-                mantid.sendLogMessage('::SANS::load_detector_logs: Incorrect structure detected in logfile "' + log_file + '" for line \n"' + line + '"\nEntry skipped')
-            component = parts[1]
-            if component in logvalues.keys():
-                logvalues[component] = parts[2]
-
-        file_handle.close()
-
-        return logvalues
-    
     def apply_detector_logs(self, logvalues):
         #apply the corrections that came from the logs
         self.FRONT_DET_Z = float(logvalues['Front_Det_Z'])

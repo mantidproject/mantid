@@ -87,9 +87,6 @@ def MaskFile(file_name):
 def SetMonitorSpectrum(specNum, interp=False):
     ReductionSingleton().set_monitor_spectrum(specNum, interp)
 
-def SuggestMonitorSpectrum(specNum, interp=False):  
-    ReductionSingleton().suggest_monitor_spectrum(specNum, interp)
-    
 def SetTransSpectrum(specNum, interp=False):
     ReductionSingleton().set_trans_spectrum(specNum, interp)
       
@@ -554,6 +551,69 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         script += '[COLETTE]  WRITE/LOQ ' + reduced + ' ' + savepath + '\n'
         
     return script
+
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
+    global XVAR_PREV, YVAR_PREV, ITER_NUM, RMIN, RMAX, XBEAM_CENTRE, YBEAM_CENTRE
+    RMIN = float(rlow)/1000.
+    RMAX = float(rupp)/1000.
+
+    if xstart == None or ystart == None:
+        XVAR_PREV = XBEAM_CENTRE
+        YVAR_PREV = YBEAM_CENTRE
+    else:
+        XVAR_PREV = xstart
+        YVAR_PREV = ystart
+
+    mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XVAR_PREV*1000.)+" "+str(YVAR_PREV*1000.)) 
+    _printMessage("Starting centre finding routine ...")
+    # Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
+    _initReduction(XVAR_PREV, YVAR_PREV)
+
+    ITER_NUM = 0
+    # Run reduction, returning the X and Y sum-squared difference values 
+    _printMessage("Running initial reduction: " + str(XVAR_PREV*1000.)+ "  "+ str(YVAR_PREV*1000.))
+    oldX2,oldY2 = RunReduction([XVAR_PREV, YVAR_PREV])
+    XSTEP = 5.0/1000.
+    YSTEP = 5.0/1000.
+    # take first trial step
+    XNEW = XVAR_PREV + XSTEP
+    YNEW = YVAR_PREV + YSTEP
+    for ITER_NUM in range(1, MaxIter+1):
+        _printMessage("Iteration " + str(ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
+        newX2,newY2 = RunReduction([XNEW, YNEW])
+        if newX2 > oldX2:
+            XSTEP = -XSTEP/2.
+        if newY2 > oldY2:
+            YSTEP = -YSTEP/2.
+        if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
+            _printMessage("::SANS:: Converged - check if stuck in local minimum!")
+            break
+        oldX2 = newX2
+        oldY2 = newY2
+        XNEW += XSTEP
+        YNEW += YSTEP
+    
+    if ITER_NUM == MaxIter:
+        _printMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
+        XNEW -= XSTEP
+        YNEW -= YSTEP
+
+    
+    XBEAM_CENTRE = XNEW
+    YBEAM_CENTRE = YNEW
+    _printMessage("Centre coordinates updated: [" + str(XBEAM_CENTRE*1000.)+ ","+ str(YBEAM_CENTRE*1000.) + ']')
+    
+    # Reload the sample and can and reset the radius range
+    global _SAMPLE_SETUP
+    _assignHelper(_SAMPLE_RUN, False, PERIOD_NOS["SCATTER_SAMPLE"])
+    _SAMPLE_SETUP = None
+    if _CAN_RUN != '':
+        _assignHelper(_CAN_RUN, False, PERIOD_NOS["SCATTER_CAN"])
+        global _CAN_SETUP
+        _CAN_SETUP = None
+    
+    RMIN = DEF_RMIN
+    RMAX = DEF_RMAX
 
 #this is like a #define I'd like to get rid of it because it means nothing here
 DefaultTrans = 'True'

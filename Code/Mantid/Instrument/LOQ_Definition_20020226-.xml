@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="LOQ" valid-from   ="1900-01-31 23:59:59"
-                       valid-to     ="2100-01-31 23:59:59"
-		       last-modified="2010-05-05 00:00:00">
+<instrument name="LOQ" valid-from   ="2002-02-26 09:30:00"
+                       valid-to     ="2100-01-31 09:29:59"
+		       last-modified="2011-03-01 00:00:00">
 
   <defaults>
     <length unit="meter"/>
@@ -93,16 +93,16 @@
   </component>
  
   <type name="main-detector-bank" is="rectangular_detector" type="main-detector-pixel" 
-    xpixels="128" xstart="-0.3175" xstep="+0.005"
-    ypixels="128" ystart="-0.3175" ystep="+0.005" >
+    xpixels="128" xstart="-0.3136009" xstep="+0.005038"
+    ypixels="128" ystart="-0.3124091" ystep="+0.005041" > <!-- 28/02/11 this for X or YCORR.021 -->
   </type>
     
   <type name="main-detector-pixel" is="detector">
-    <cuboid id="shape">
-      <left-front-bottom-point x="0.0025" y="-0.0025" z="0.0"  />
-      <left-front-top-point  x="0.0025" y="-0.0025" z="0.000005"  />
-      <left-back-bottom-point  x="-0.0025" y="-0.0025" z="0.0"  />
-      <right-front-bottom-point  x="0.0025" y="0.0025" z="0.0"  />
+    <cuboid id="shape"> <!-- 28/02/11 this for X or YCORR.021 -->
+      <left-front-bottom-point x="0.002519" y="-0.0025205" z="0.0"  />
+      <left-front-top-point  x="0.002519" y="-0.0025205" z="0.000005"  />
+      <left-back-bottom-point  x="-0.002519" y="-0.0025205" z="0.0"  />
+      <right-front-bottom-point  x="0.002519" y="0.0025205" z="0.0"  />
     </cuboid>
     <algebra val="shape" /> 
   </type>    

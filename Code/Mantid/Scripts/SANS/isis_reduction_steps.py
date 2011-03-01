@@ -85,13 +85,14 @@ class LoadRun(ReductionStep):
             if self._period != self.UNSET_PERIOD:
                 workspace = self._leaveSinglePeriod(workspace)
 
-            log_file = alg.getPropertyValue("Filename")
-
-            base_name = os.path.splitext(log_file)[0]
-            if base_name.endswith('-add'):
-                #remove the add files specifier, if it's there
-                base_name = base_name.rpartition('-add')[0]
-            SANS2D_log_file = base_name+'.log'
+#the following code needs to be removed because log information is now stored in raw files
+#            log_file = alg.getPropertyValue("Filename")
+#
+#            base_name = os.path.splitext(log_file)[0]
+#            if base_name.endswith('-add'):
+#                #remove the add files specifier, if it's there
+#                base_name = base_name.rpartition('-add')[0]
+#            SANS2D_log_file = base_name+'.log'
             
         else:
             #a particular entry was selected just load that one
@@ -103,16 +104,7 @@ class LoadRun(ReductionStep):
                 alg = LoadNexus(self._data_file, workspace,
                   SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
 
-            SANS2D_log_file = mtd[workspace]
-
-            #get rid of these two lines when files store their logs properly
-            log_file = alg.getPropertyValue("Filename")
-            base_name = os.path.splitext(log_file)[0]
-            if base_name.endswith('-add'):
-                #remove the add files specifier, if it's there
-                base_name = base_name.rpartition('-add')[0]
-            SANS2D_log_file = base_name+'.log'
-
+        SANS2D_log_file = mtd[workspace]
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
@@ -126,12 +118,9 @@ class LoadRun(ReductionStep):
         if (not inst is None) and inst.name() == 'SANS2D':
             #this instrument has logs to be loaded 
             try:
-                if numPeriods > 1:
-                    log = inst.get_detector_log(SANS2D_log_file, self._period)
-                else:
-                    log = inst.get_detector_log(SANS2D_log_file)
+                log = inst.get_detector_log(SANS2D_log_file)
             except:
-                #transmission files, don't have logs 
+                #transmission workspaces, don't have logs 
                 if not self._is_trans:
                     raise
 
@@ -463,9 +452,9 @@ class CanSubtraction(LoadRun):
         ReplaceSpecialValues(InputWorkspace = tmp_smp,OutputWorkspace = tmp_smp, NaNValue="0", InfinityValue="0")
         ReplaceSpecialValues(InputWorkspace = tmp_can,OutputWorkspace = tmp_can, NaNValue="0", InfinityValue="0")
         if reducer.to_Q.output_type == '1D':
-             rem_zeros = sans_reduction_steps.StripEndZeros()
-             rem_zeros.execute(reducer, tmp_smp)
-             rem_zeros.execute(reducer, tmp_can)
+            rem_zeros = sans_reduction_steps.StripEndZeros()
+            rem_zeros.execute(reducer, tmp_smp)
+            rem_zeros.execute(reducer, tmp_can)
     
 class Mask_ISIS(sans_reduction_steps.Mask):
     """

@@ -319,7 +319,10 @@ public:
 
 
   //--------------------------------------------------------------------------------------
-  ///Add the value of another property
+  /** Add the value of another property
+  * @param right the property to add
+  * @return the sum
+  */
   virtual PropertyWithValue& operator+=( Property const * right )
   {
     PropertyWithValue const * rhs = dynamic_cast< PropertyWithValue const * >(right);

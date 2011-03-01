@@ -12,15 +12,18 @@ def instrument_factory(name):
         raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
 
 class Instrument(object):
-    def __init__(self, wrksp_name=None):
+    def __init__(self, wrksp_name=None, instr_filen=None):
         """
             Reads the instrument definition xml file
             @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
+            @param instr_filen: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
-        """ 
-    
-        self._definition_file = \
-            MantidFramework.mtd.getConfigProperty('instrumentDefinition.directory')+'/'+self._NAME+'_Definition.xml'
+        """
+        if instr_filen is None:
+            instr_filen = self._NAME+'_Definition.xml'
+
+        self._definition_file = MantidFramework.mtd.getConfigProperty(
+            'instrumentDefinition.directory')+'/'+instr_filen
         
         if not wrksp_name is None:
             wrksp = wrksp_name
