@@ -2,6 +2,7 @@
 #define MDEVENT_H_
 
 #include "MantidKernel/System.h"
+#include "MantidAPI/Dimension.h"
 #include <numeric>
 #include <math.h>
 
@@ -9,13 +10,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-
-  /** Typedef for the data type to use for coordinate axes.
-   * This could be a float or a double, depending on requirements.
-   * We can change this in order to compare
-   * performance/memory/accuracy requirements.
-   */
-  typedef double CoordType;
 
 
   /** Macro TMDE to make declaring template functions

@@ -3,13 +3,12 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
-#include "MantidMDEvents/Dimension.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidAPI/Dimension.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
 
   /** Abstract base class for multi-dimension event workspaces (MDEventWorkspace).

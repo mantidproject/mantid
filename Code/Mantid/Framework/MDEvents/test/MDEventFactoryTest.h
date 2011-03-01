@@ -10,6 +10,7 @@
 #include <MantidMDEvents/MDEventFactory.h>
 
 using namespace Mantid::MDEvents;
+using namespace Mantid::API;
 
 class MDEventFactoryTest : public CxxTest::TestSuite
 {

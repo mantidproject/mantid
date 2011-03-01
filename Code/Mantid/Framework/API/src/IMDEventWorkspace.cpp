@@ -1,9 +1,11 @@
-#include "MantidMDEvents/MDEvent.h"
-#include "MantidMDEvents/IMDEventWorkspace.h"
+#include "MantidAPI/Dimension.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+
+using Mantid::MDEvents::CoordType;
 
 namespace Mantid
 {
-namespace MDEvents
+namespace API
 {
 
   //-----------------------------------------------------------------------------------------------

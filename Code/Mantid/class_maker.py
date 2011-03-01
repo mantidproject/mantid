@@ -178,12 +178,12 @@ def write_test(subproject, classname, filename, algorithm):
 #define %s
 
 #include <cxxtest/TestSuite.h>
-#include <MantidKernel/Timer.h>
-#include <MantidKernel/System.h>
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
 
-#include <Mantid%s/%s.h>
+#include "Mantid%s/%s.h"
 
 using namespace Mantid::%s;
 

@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidMDEvents/IMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
 
@@ -28,7 +28,7 @@ namespace MDEvents
    *
    * */
   TMDE_CLASS
-  class DLLExport MDEventWorkspace  : public IMDEventWorkspace
+  class DLLExport MDEventWorkspace  : public API::IMDEventWorkspace
   {
   public:
     MDEventWorkspace();

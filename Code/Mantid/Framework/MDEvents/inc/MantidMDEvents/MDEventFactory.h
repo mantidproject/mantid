@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <MantidMDEvents/MDEventFactory.h>
-#include <MantidMDEvents/IMDEventWorkspace.h>
+#include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidMDEvents/MDEventWorkspace.h>
 
 
@@ -25,7 +25,7 @@ namespace MDEvents
   public:
     MDEventFactory() {}
     ~MDEventFactory() {}
-    static IMDEventWorkspace_sptr CreateMDEventWorkspace(size_t nd, std::string eventType="MDEvent");
+    static API::IMDEventWorkspace_sptr CreateMDEventWorkspace(size_t nd, std::string eventType="MDEvent");
   };
 
 

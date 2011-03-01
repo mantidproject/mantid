@@ -1,5 +1,5 @@
-#ifndef MANTID_MDEVENTS_DIMENSIONTEST_H_
-#define MANTID_MDEVENTS_DIMENSIONTEST_H_
+#ifndef MANTID_API_DIMENSIONTEST_H_
+#define MANTID_API_DIMENSIONTEST_H_
 
 #include <cxxtest/TestSuite.h>
 #include <MantidKernel/Timer.h>
@@ -7,9 +7,9 @@
 #include <iostream>
 #include <iomanip>
 
-#include <MantidMDEvents/Dimension.h>
+#include "MantidAPI/Dimension.h"
 
-using namespace Mantid::MDEvents;
+using namespace Mantid::API;
 
 class DimensionTest : public CxxTest::TestSuite
 {
@@ -28,5 +28,5 @@ public:
 };
 
 
-#endif /* MANTID_MDEVENTS_DIMENSIONTEST_H_ */
+#endif /* MANTID_API_DIMENSIONTEST_H_ */
 

@@ -8,7 +8,7 @@
 #include <iomanip>
 
 #include <MantidMDEvents/CreateMDEventWorkspace.h>
-#include <MantidMDEvents/IMDEventWorkspace.h>
+#include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 
 using namespace Mantid::MDEvents;

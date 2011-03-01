@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/Dimension.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -12,6 +13,7 @@
 #include <map>
 
 using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::MDEvents;
 
 class MDEventWorkspaceTest :    public CxxTest::TestSuite

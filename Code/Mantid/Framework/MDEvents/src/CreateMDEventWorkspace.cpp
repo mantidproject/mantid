@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidMDEvents/MDEventFactory.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 namespace Mantid
 {
