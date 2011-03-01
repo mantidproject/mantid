@@ -28,6 +28,7 @@ using std::vector;
 using namespace ::NeXus;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Kernel;
 
 namespace Mantid
 {
@@ -664,11 +665,22 @@ void LoadEventNexus::exec()
         pulseTimes.push_back( temp[i] );
 
       // Use the first pulse as the run_start time.
+
       if (temp.size() > 0)
       {
-        // add the start of the run as a ISO8601 date/time string. The start = the first pulse.
+        // Find the first pulse after 1991
+        DateAndTime run_start(0.0, 0.0);
+        DateAndTime reference("1991-01-01");
+        size_t i = 0;
+        while ((run_start < reference) && i < temp.size())
+        {
+          run_start = temp[i];
+          i++;
+        }
+
+        // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
         // (this is used in LoadInstrumentHelper to find the right instrument file to use).
-        WS->mutableRun().addProperty("run_start", temp[0].to_ISO8601_string(), true );
+        WS->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
       }
     }
     catch (...)
