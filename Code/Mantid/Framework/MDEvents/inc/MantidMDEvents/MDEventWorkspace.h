@@ -40,7 +40,7 @@ namespace MDEvents
     virtual const std::string id() const;
 
     /** Returns the number of dimensions in this workspace */
-    virtual int getNumDims() const;
+    virtual size_t getNumDims() const;
 
     /** Returns the total number of points (events) in this workspace */
     virtual size_t getNPoints() const;

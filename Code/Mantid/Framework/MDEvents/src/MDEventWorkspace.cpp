@@ -56,7 +56,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of dimensions in this workspace */
   TMDE(
-  int MDEventWorkspace)::getNumDims() const
+  size_t MDEventWorkspace)::getNumDims() const
   {
     return nd;
   }

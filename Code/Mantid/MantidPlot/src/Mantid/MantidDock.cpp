@@ -5,6 +5,8 @@
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 #include <MantidAPI/IEventWorkspace.h>
+#include <MantidAPI/Dimension.h>
+#include <MantidAPI/IMDEventWorkspace.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -22,6 +24,7 @@
 
 #include <map>
 #include <iostream>
+#include <sstream>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -294,6 +297,10 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   {
     populateMatrixWorkspaceData(matrix, item);
   }
+  else if( Mantid::API::IMDEventWorkspace_sptr imdew = boost::dynamic_pointer_cast<IMDEventWorkspace>(workspace) )
+  {
+    populateMDEventWorkspaceData(imdew, item);
+  }
   else if(Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace) )
   {
     populateWorkspaceGroupData(ws_group, item);
@@ -378,6 +385,41 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
 
 }
 
+
+/** Populate the tree with some details about a MDEventWorkspace
+ *
+ * @param workspace :: IMDEventWorkspace
+ * @param ws_item :: tree item
+ */
+void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
+{
+  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
+  //data_item = new QTreeWidgetItem(QStringList("Dimensions: "));
+  //data_item->setFlags(Qt::NoItemFlags);
+  //ws_item->addChild(data_item);
+
+  // Now add each dimension
+  for (size_t i=0; i < workspace->getNumDims(); i++)
+  {
+    std::ostringstream mess;
+    Dimension dim = workspace->getDimension(i);
+    mess << "Dim " << i << ": (" << dim.getName() << ") " << dim.getMin() << " to " << dim.getMax() << " " << dim.getUnits();
+    std::string s = mess.str();
+    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    sub_data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(sub_data_item);
+  }
+
+  data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize()/1024)+" KB"));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
+}
+
+
 /**
 * Populate the children of this item with data relevant to the MatrixWorkspace object
 * @param workspace :: A pointer to the MatrixWorkspace object to inspect
@@ -437,6 +479,9 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
       break;
     case Mantid::API::WEIGHTED_NOTIME:
       extra = " (weighted, no times)";
+      break;
+    case Mantid::API::TOF:
+      extra = "";
       break;
     }
     data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents()) + extra.c_str() ));

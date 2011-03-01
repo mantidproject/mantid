@@ -28,7 +28,7 @@ namespace API
     virtual void initialize() = 0;
 
     /** Returns the number of dimensions in this workspace */
-    virtual int getNumDims() const = 0;
+    virtual size_t getNumDims() const = 0;
 
     /** Returns the total number of points (events) in this workspace */
     virtual size_t getNPoints() const = 0;
