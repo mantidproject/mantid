@@ -132,6 +132,7 @@ private:
 
         packer.setData(i,s_dim_fields,ind_fields);
        }
+      return true;
     }
     uint64_t getNPix()
     {
