@@ -30,6 +30,9 @@ using namespace Mantid::DataHandling;
  */
 void LoadLOQDistancesFromRaw::init()
 {
+  this->setWikiSummary("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
+  this->setOptionalMessage("Loads distance information that is specific to the ISIS TS1 LOQ instrument.");
+
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
 		  "The workspace to which the information should be added");

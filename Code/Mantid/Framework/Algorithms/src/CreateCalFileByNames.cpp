@@ -40,6 +40,9 @@ namespace Mantid
      */
     void CreateCalFileByNames::init()
     {
+      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
+      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
+
       declareProperty(new WorkspaceProperty<> ("InstrumentWorkspace", "", Direction::Input),
         "A workspace that contains a reference to the instrument of interest.\n"
         "You can use LoadEmptyInstrument if you do not have any data files to load.");

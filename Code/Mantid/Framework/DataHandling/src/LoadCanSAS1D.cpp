@@ -52,6 +52,9 @@ LoadCanSAS1D::~LoadCanSAS1D()
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init()
 {
+  this->setWikiSummary("Load a file written in the canSAS 1-D data format");
+  this->setOptionalMessage("Load a file written in the canSAS 1-D data format");
+
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
       "The name of the input  xml file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",

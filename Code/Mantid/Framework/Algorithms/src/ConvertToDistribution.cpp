@@ -16,6 +16,9 @@ using namespace API;
 
 void ConvertToDistribution::init()
 {
+  this->setWikiSummary("Makes a histogram workspace a distribution i.e. divides by the bin width.");
+  this->setOptionalMessage("Makes a histogram workspace a distribution i.e. divides by the bin width.");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);

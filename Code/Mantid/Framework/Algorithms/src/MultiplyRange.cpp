@@ -16,6 +16,9 @@ using namespace API;
 
 void MultiplyRange::init()
 {
+  this->setWikiSummary("An algorithm to multiply a range of bins in a workspace by the factor given.");
+  this->setOptionalMessage("An algorithm to multiply a range of bins in a workspace by the factor given.");
+
   // Declare an input workspace property.
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   // Declare an output workspace property.

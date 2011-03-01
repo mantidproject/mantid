@@ -34,6 +34,9 @@ SaveNexus::SaveNexus() : Algorithm() {}
  */
 void SaveNexus::init()
 {
+  this->setWikiSummary("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file.SaveNexus currently just invokes [[SaveNexusProcessed]].");
+  this->setOptionalMessage("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file. SaveNexus currently just invokes SaveNexusProcessed.");
+
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
   std::vector<std::string> exts;
   exts.push_back(".nxs");

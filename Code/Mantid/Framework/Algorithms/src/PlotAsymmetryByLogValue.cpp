@@ -35,6 +35,9 @@ namespace Mantid
     */
     void PlotAsymmetryByLogValue::init()
     {
+      this->setWikiSummary("Calculates asymmetry for a series of log values");
+      this->setOptionalMessage("Calculates asymmetry for a series of log values");
+
       std::string ext(".nxs");
       declareProperty(new FileProperty("FirstRun","", FileProperty::Load, ext));
       declareProperty(new FileProperty("LastRun","", FileProperty::Load, ext));

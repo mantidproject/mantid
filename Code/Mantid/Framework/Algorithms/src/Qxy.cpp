@@ -22,6 +22,9 @@ using namespace Geometry;
 
 void Qxy::init()
 {
+  this->setWikiSummary("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.");
+  this->setOptionalMessage("Performs the final part of a SANS (LOQ/SANS2D) two dimensional (in Q) data reduction.");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

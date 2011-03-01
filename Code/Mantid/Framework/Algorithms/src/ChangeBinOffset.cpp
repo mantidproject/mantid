@@ -37,6 +37,9 @@ namespace Mantid
     */
     void ChangeBinOffset::init()
     {
+      this->setWikiSummary("Adjusts all the time bin values in a workspace by a specified amount.");
+      this->setOptionalMessage("Adjusts all the time bin values in a workspace by a specified amount.");
+
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "Name of the input workspace");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),

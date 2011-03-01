@@ -24,6 +24,9 @@ RotateInstrumentComponent::RotateInstrumentComponent()
 /// Initialisation method.
 void RotateInstrumentComponent::init()
 {
+  this->setWikiSummary("Rotates an instrument component.");
+  this->setOptionalMessage("Rotates an instrument component.");
+
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("ComponentName","");

@@ -19,6 +19,9 @@ LoadMappingTable::LoadMappingTable() : Algorithm()
 
 void LoadMappingTable::init()
 {
+  this->setWikiSummary("Builds up the mapping between spectrum number and the detector objects in the [[instrument]] [[Geometry]].");
+  this->setOptionalMessage("Builds up the mapping between spectrum number and the detector objects in the instrument Geometry.");
+
   declareProperty(new FileProperty("Filename","", FileProperty::Load),
     "The name of the file from which to obtain the mapping information,\n"
     "including its full or relative path" );

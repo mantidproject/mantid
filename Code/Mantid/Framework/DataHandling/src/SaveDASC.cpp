@@ -23,6 +23,9 @@ using namespace API;
  */
 void SaveDASC::init()
 {
+  this->setWikiSummary("Exports the data in a [[workspace]] into an ASCII file that is readable by the application DAVE");
+  this->setOptionalMessage("Exports the data in a workspace into an ASCII file that is readable by the application DAVE");
+
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   // Data must havec common bins
   wsValidator->add(new API::CommonBinsValidator<>);

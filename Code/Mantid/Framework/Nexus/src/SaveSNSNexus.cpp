@@ -47,7 +47,8 @@ namespace NeXus
    */
   void SaveSNSNexus::init()
   {
-    setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
+    this->setWikiSummary("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
+    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
 
     // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
     std::vector<std::string> exts;

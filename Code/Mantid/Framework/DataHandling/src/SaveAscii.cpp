@@ -26,6 +26,9 @@ namespace Mantid
     /// Initialisation method.
     void SaveAscii::init()
     {
+      this->setWikiSummary("Saves a 2D [[workspace]] to a Ascii file.");
+      this->setOptionalMessage("Saves a 2D workspace to a Ascii file.");
+
       std::vector<std::string> exts;
       exts.push_back(".dat");
       exts.push_back(".txt");

@@ -28,6 +28,9 @@ using namespace DataObjects;
  */
 void Integration::init()
 {
+  this->setWikiSummary("Integration takes a 2D [[workspace]] or an [[EventWorkspace]] as input and sums the data values. Optionally, the range summed can be restricted in either dimension.");
+  this->setOptionalMessage("Integration takes a 2D workspace or an EventWorkspace as input and sums the data values. Optionally, the range summed can be restricted in either dimension.");
+
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
 

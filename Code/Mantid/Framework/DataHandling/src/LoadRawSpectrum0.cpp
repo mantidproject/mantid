@@ -44,6 +44,9 @@ namespace Mantid
 		/// Initialisation method.
 		void LoadRawSpectrum0::init()
 		{
+		  this->setWikiSummary("Loads spectrum zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
+		  this->setOptionalMessage("Loads spectrum zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).");
+
 			LoadRawHelper::init();
 			
 		}

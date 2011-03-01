@@ -35,6 +35,9 @@ MaskDetectorsIf::~MaskDetectorsIf()
  */
 void MaskDetectorsIf::init()
 {
+  this->setWikiSummary("Adjusts the selected field for a [[CalFile]] depending on the values in the input workspace.");
+  this->setOptionalMessage("Adjusts the selected field for a CalFile depending on the values in the input workspace.");
+
 	declareProperty(new API::WorkspaceProperty<>("InputWorkspace","",Direction::Input),
 			 "A 1D Workspace that contains values to select against " );
 	std::vector<std::string> select_mode(2);

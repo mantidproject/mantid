@@ -533,11 +533,8 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
 /// Initialisation method.
 void LoadEventNexus::init()
 {
-  this->setOptionalMessage(
-      "Loads an EventNeXus format file.\n"
-      "Optionally, you can filter out events falling outside a\n"
-      "range of times-of-flight and/or a time interval.");
-
+  this->setWikiSummary("Loads Event NeXus (produced by the SNS) files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
+  this->setOptionalMessage("Loads Event NeXus (produced by the SNS) files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
 
   this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"

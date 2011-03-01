@@ -43,6 +43,9 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
+    this->setWikiSummary("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file.SaveNexusProcessed may be invoked by [[SaveNexus]].");
+    this->setOptionalMessage("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by SaveNexus.");
+
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "Name of the workspace to be saved");
     // Declare required input parameters for algorithm

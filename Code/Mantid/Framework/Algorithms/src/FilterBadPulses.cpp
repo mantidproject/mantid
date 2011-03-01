@@ -62,9 +62,8 @@ const std::string FilterBadPulses::category() const
 //-----------------------------------------------------------------------
 void FilterBadPulses::init()
 {
-  this->setOptionalMessage(
-      "Filters out events associated with pulses that happen when proton charge is outside of the supplied range.\n"
-      );
+  this->setWikiSummary("Filters out events associated with pulses that happen when proton charge is outside of the supplied range.");
+  this->setOptionalMessage("Filters out events associated with pulses that happen when proton charge is outside of the supplied range.");
 
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input, new API::EventWorkspaceValidator<MatrixWorkspace>),

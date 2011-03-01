@@ -32,6 +32,9 @@ const std::string SLOG("SLOG");
  */
 void SaveGSS::init()
 {
+  this->setWikiSummary("Saves a focused data set into a three column GSAS format.");
+  this->setOptionalMessage("Saves a focused data set into a three column GSAS format.");
+
   // Data must be in TOF
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
     new API::WorkspaceUnitValidator<>("TOF")),

@@ -38,6 +38,9 @@ namespace Mantid
     */
     void PlotPeakByLogValue::init()
     {
+      this->setWikiSummary("Fits a number of spectra with the same function.");
+      this->setOptionalMessage("Fits a number of spectra with the same function.");
+
       declareProperty("Input","",new MandatoryValidator<std::string>(),
         "List of input names");
 

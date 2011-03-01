@@ -38,6 +38,9 @@ namespace Mantid
      */
     void GetDetectorOffsets::init()
     {
+      this->setWikiSummary("Creates a [[CalFile|.cal file]] containing offsets for each detector.");
+      this->setOptionalMessage("Creates a CalFile|.cal file containing offsets for each detector.");
+
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
           new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");

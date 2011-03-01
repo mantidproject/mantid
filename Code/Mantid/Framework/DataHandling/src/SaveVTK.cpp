@@ -32,6 +32,9 @@ namespace Mantid
     */
     void SaveVTK::init()
     {
+      this->setWikiSummary("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
+      this->setOptionalMessage("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
+
       //Declare mandatory properties
       declareProperty(new FileProperty("Filename", "", FileProperty::Save),
 		      "The name to use when writing the file");

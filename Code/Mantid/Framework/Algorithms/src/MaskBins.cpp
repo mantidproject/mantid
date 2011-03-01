@@ -26,10 +26,8 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()
 {
-  this->setOptionalMessage(
-      "Mask out bins between two X limits.\n"
-      "For EventWorkspaces, this deletes the events within that range."
-      );
+  this->setWikiSummary("Marks bins in a workspace as being masked. For EventWorkspaces, this deletes the events within that range.");
+  this->setOptionalMessage("Marks bins in a workspace as being masked. For EventWorkspaces, this deletes the events within that range.");
 
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

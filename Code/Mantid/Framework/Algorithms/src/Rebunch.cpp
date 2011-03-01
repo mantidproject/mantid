@@ -26,6 +26,9 @@ namespace Mantid
 		*/
 		void Rebunch::init()
 		{
+		  this->setWikiSummary("Rebins data by adding together ''n_bunch'' successive bins.");
+		  this->setOptionalMessage("Rebins data by adding together 'n_bunch' successive bins.");
+
 			declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "Name of the input workspace" );

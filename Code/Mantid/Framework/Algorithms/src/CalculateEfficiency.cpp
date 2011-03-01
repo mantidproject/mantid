@@ -23,6 +23,9 @@ using namespace Geometry;
  */
 void CalculateEfficiency::init()
 {
+  this->setWikiSummary("Calculates the detector efficiency for a SANS instrument.");
+  this->setOptionalMessage("Calculates the detector efficiency for a SANS instrument.");
+
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new CommonBinsValidator<>),
                             "The workspace containing the flood data" );

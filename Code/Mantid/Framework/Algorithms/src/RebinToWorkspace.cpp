@@ -18,6 +18,9 @@ DECLARE_ALGORITHM(RebinToWorkspace)
  */
 void RebinToWorkspace::init()
 {
+  this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace");
+  this->setOptionalMessage("Rebin a selected workspace to the same binning as a different workspace");
+
   //  using namespace Mantid::DataObjects;
   declareProperty(
     new WorkspaceProperty<>("WorkspaceToRebin","", Kernel::Direction::Input),

@@ -53,6 +53,9 @@ namespace Mantid
      */
     void CreateDummyCalFile::init()
     {
+      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.");
+      this->setOptionalMessage("Create a calibration file (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.");
+
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );

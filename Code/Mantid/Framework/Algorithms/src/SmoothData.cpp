@@ -16,6 +16,9 @@ using namespace API;
 
 void SmoothData::init()
 {
+  this->setWikiSummary("Smooths out statistical fluctuations in a workspace's data.");
+  this->setOptionalMessage("Smooths out statistical fluctuations in a workspace's data.");
+
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the input workspace");

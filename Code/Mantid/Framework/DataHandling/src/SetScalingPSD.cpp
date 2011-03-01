@@ -35,6 +35,9 @@ namespace DataHandling
    */
   void SetScalingPSD::init()
   {
+    this->setWikiSummary("For an instrument with Position Sensitive Detectors (PSDs) the 'engineering' positions of individual detectors may not match the true areas where neutrons are detected. This algorithm reads data on the calibrated location of the detectors and adjusts the parametrized instrument geometry accordingly.");
+    this->setOptionalMessage("For an instrument with Position Sensitive Detectors (PSDs) the 'engineering' positions of individual detectors may not match the true areas where neutrons are detected. This algorithm reads data on the calibrated location of the detectors and adjusts the parametrized instrument geometry accordingly.");
+
     // Declare required input parameters for algorithm
     std::vector<std::string> exts;
     exts.push_back(".sca");

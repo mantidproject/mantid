@@ -25,10 +25,8 @@ StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init()
 {
-  this->setOptionalMessage(
-      "Strips out peaks at known X-positions by performing a linear interpolation\n"
-      "of the background around the known position.");
-
+  this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
+  this->setOptionalMessage("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
 
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input),

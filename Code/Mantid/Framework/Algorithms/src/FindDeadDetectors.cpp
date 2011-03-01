@@ -19,6 +19,9 @@ namespace Mantid
     /// Initialisation method.
     void FindDeadDetectors::init()
     {
+      this->setWikiSummary("Identifies and flags empty spectra caused by 'dead' detectors.");
+      this->setOptionalMessage("Identifies and flags empty spectra caused by 'dead' detectors.");
+
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
         "Name of the input workspace" );

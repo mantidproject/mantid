@@ -35,6 +35,9 @@ SaveRKH::~SaveRKH()
  */
 void SaveRKH::init()
 {
+  this->setWikiSummary("Save a file in the LOQ RKH/'FISH' format");
+  this->setOptionalMessage("Save a file in the LOQ RKH/'FISH' format");
+
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace to save");

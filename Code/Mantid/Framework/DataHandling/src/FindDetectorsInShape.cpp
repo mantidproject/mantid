@@ -33,6 +33,9 @@ namespace Mantid
 
 		void FindDetectorsInShape::init()
 		{
+		  this->setWikiSummary("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
+		  this->setOptionalMessage("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
+
 			declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input),
         "Name of the input workspace" );

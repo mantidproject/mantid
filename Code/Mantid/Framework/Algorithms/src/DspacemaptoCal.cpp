@@ -47,9 +47,8 @@ DspacemaptoCal::~DspacemaptoCal()
 //-----------------------------------------------------------------------
 void DspacemaptoCal::init()
 {
-  this->setOptionalMessage(
-      "Write offset (.cal) file from dspacing file.\n"
-      );
+  this->setWikiSummary("Creates a calibration file with offsets calculated from Dspacemap file.");
+  this->setOptionalMessage("Creates a calibration file with offsets calculated from Dspacemap file.");
 
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),

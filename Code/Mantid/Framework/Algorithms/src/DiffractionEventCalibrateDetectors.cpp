@@ -300,6 +300,9 @@ namespace Algorithms
   */
   void DiffractionEventCalibrateDetectors::init()
   {
+    this->setWikiSummary("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.");
+    this->setOptionalMessage("This algorithm optimizes the position and angles of all of the detector panels. The target instruments for this feature are SNAP and TOPAZ.");
+
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
                             "The workspace containing the geometry to be calibrated." );

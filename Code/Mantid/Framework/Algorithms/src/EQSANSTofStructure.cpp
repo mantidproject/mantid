@@ -26,6 +26,9 @@ using namespace Geometry;
 
 void EQSANSTofStructure::init()
 {
+  this->setWikiSummary("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set.");
+  this->setOptionalMessage("Corrects the Time of Flight binning of raw EQSANS data. This algorithm needs to be run once on every data set.");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);

@@ -59,6 +59,9 @@ namespace Mantid
     */
     void GhostCorrection::init()
     {
+      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
+      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
+
       nGroups = 0;
 
       //Input workspace must be in dSpacing and be an EventWorkspace

@@ -27,6 +27,9 @@ using namespace Geometry;
 
 void FindCenterOfMassPosition::init()
 {
+  this->setWikiSummary("Finds the beam center in a 2D SANS data set.");
+  this->setOptionalMessage("Finds the beam center in a 2D SANS data set.");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

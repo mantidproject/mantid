@@ -30,6 +30,9 @@ DECLARE_LOADALGORITHM(LoadGSS)
 */
 void LoadGSS::init()
 {
+  this->setWikiSummary("Loads a GSS file such as that saved by [[SaveGSS]]. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.'''Please Note''': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.");
+  this->setOptionalMessage("Loads a GSS file such as that saved by SaveGSS. This is not a lossless process, as SaveGSS truncates some data. There is no instrument assosciated with the resulting workspace.  'Please Note': Due to limitations of the GSS file format, the process of going from Mantid to a GSS file and back is not perfect.");
+
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load), "The input filename of the stored data");
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Kernel::Direction::Output));
 }

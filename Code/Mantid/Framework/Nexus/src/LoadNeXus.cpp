@@ -37,6 +37,9 @@ namespace Mantid
      */
     void LoadNexus::init()
     {
+      this->setWikiSummary("The LoadNexus algorithm will try to identify the type of Nexus file given to it and invoke the appropriate algorithm to read thedata and populate the named workspace.");
+      this->setOptionalMessage("The LoadNexus algorithm will try to identify the type of Nexus file given to it and invoke the appropriate algorithm to read the data and populate the named workspace.");
+
       // Declare required input parameters for all sub algorithms
       std::vector<std::string> exts;
       exts.push_back(".nxs");

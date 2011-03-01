@@ -22,6 +22,9 @@ using namespace Mantid::DataHandling;
 
 void RawFileInfo::init()
 {
+  this->setWikiSummary("Extract run parameters from a [[RAW_File | RAW]] file as output properties.");
+  this->setOptionalMessage("Extract run parameters from a  RAW file as output properties.");
+
   std::vector<std::string> exts;
   exts.push_back(".raw");
   exts.push_back(".s*");

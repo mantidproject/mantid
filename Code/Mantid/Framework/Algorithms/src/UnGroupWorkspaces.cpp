@@ -16,6 +16,9 @@ namespace Mantid
     /// Initialisation method
     void UnGroupWorkspace::init()
     {
+      this->setWikiSummary("Takes a group workspace as input and ungroups the workspace.");
+      this->setOptionalMessage("Takes a group workspace as input and ungroups the workspace.");
+
       const AnalysisDataServiceImpl & data_store = AnalysisDataService::Instance();
       // Get the list of workspaces in the ADS
       std::set<std::string> workspaceList = data_store.getObjectNames();

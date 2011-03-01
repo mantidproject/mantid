@@ -24,6 +24,9 @@ CalculateTransmissionBeamSpreader::~CalculateTransmissionBeamSpreader()
 
 void CalculateTransmissionBeamSpreader::init()
 {
+  this->setWikiSummary("Calculates the sample transmission using the beam spreader (aka glass carbon) method.");
+  this->setOptionalMessage("Calculates the sample transmission using the beam spreader (aka glass carbon) method.");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new CommonBinsValidator<>);

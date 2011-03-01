@@ -29,10 +29,8 @@ using namespace DataObjects;
  */
 void SumNeighbours::init()
 {
-  this->setOptionalMessage(
-      "Sums neighbouring pixels on rectangular detectors. \n"
-      "Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels.\n"
-      "Only works on EventWorkspaces and for instruments with RectangularDetector's.");
+  this->setWikiSummary("Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's.");
+  this->setOptionalMessage("Sum event lists from neighboring pixels in rectangular area detectors - e.g. to reduce the signal-to-noise of individual spectra. Each spectrum in the output workspace is a sum of a block of SumX*SumY pixels. Only works on EventWorkspaces and for instruments with RectangularDetector's.");
 
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input, new EventWorkspaceValidator<>),

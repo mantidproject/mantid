@@ -45,9 +45,8 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  this->setOptionalMessage(
-      "Filter out (delete) events based on if they occured at times\n"
-      "where a given log value is outside of a given range (value < min OR value > max).");
+  this->setWikiSummary("Filter out events from an [[EventWorkspace]] based on a sample log value satisfying filter criteria.");
+  this->setOptionalMessage("Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.");
 
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace

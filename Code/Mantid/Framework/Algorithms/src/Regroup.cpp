@@ -31,6 +31,9 @@ using API::MatrixWorkspace;
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {
+  this->setWikiSummary("Regroups data with new bin boundaries.");
+  this->setOptionalMessage("Regroups data with new bin boundaries.");
+
   API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
   wsVal->add(new API::HistogramValidator<>);
   wsVal->add(new API::CommonBinsValidator<>);

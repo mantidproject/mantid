@@ -44,6 +44,9 @@ LoadRawBin0::~LoadRawBin0()
 /// Initialisation method.
 void LoadRawBin0::init()
 {
+  this->setWikiSummary("Loads bin zero  from  ISIS [[RAW_File | raw]] file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
+  this->setOptionalMessage("Loads bin zero  from  ISIS  raw file and stores it in a 2D workspace (Workspace2D class).");
+
   LoadRawHelper::init();
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
   mustBePositive->setLower(1);

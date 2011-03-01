@@ -20,6 +20,9 @@ using namespace API;
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init()
 {
+  this->setWikiSummary("Performs smoothing of a spectrum using various filters.");
+  this->setOptionalMessage("Performs smoothing of a spectrum using various filters.");
+
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",

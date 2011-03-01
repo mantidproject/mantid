@@ -38,9 +38,8 @@ LoadLogsFromSNSNexus::LoadLogsFromSNSNexus()
 /// Initialisation method.
 void LoadLogsFromSNSNexus::init()
 {
-  this->setOptionalMessage(
-      "Loads the logs from a SNS NeXus file,\n"
-      "and adds them to an existing workspace.");
+  this->setWikiSummary("Loads sample logs (temperature, pulse charges, etc.) from a SNS NeXus file and adds it to the run information in a [[workspace]]. This is useful when using [[LoadEventPreNeXus]], to add sample logs after loading.");
+  this->setOptionalMessage("Loads sample logs (temperature, pulse charges, etc.) from a SNS NeXus file and adds it to the run information in a workspace. This is useful when using LoadEventPreNeXus, to add sample logs after loading.");
 
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(

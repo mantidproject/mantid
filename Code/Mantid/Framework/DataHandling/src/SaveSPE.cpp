@@ -41,6 +41,9 @@ namespace Mantid
     */
     void SaveSPE::init()
     {
+      this->setWikiSummary("Writes a workspace into a file the spe format.");
+      this->setOptionalMessage("Writes a workspace into a file the spe format.");
+
       // Data must be in Energy Transfer and common bins
       API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
       wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));

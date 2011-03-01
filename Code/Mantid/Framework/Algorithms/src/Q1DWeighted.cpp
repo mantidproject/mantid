@@ -28,6 +28,9 @@ using namespace DataObjects;
 
 void Q1DWeighted::init()
 {
+  this->setWikiSummary("Performs azimuthal averaging on a 2D SANS data to produce I(Q).");
+  this->setOptionalMessage("Performs azimuthal averaging on a 2D SANS data to produce I(Q).");
+
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

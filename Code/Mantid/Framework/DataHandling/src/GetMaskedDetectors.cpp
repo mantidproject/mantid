@@ -25,6 +25,9 @@ GetMaskedDetectors::~GetMaskedDetectors() {}
 
 void GetMaskedDetectors::init()
 {
+  this->setWikiSummary("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with [[MaskDetectors]] or it's like.");
+  this->setOptionalMessage("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with MaskDetectors or it's like.");
+
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","", Direction::Input),
     "The name of the workspace that will be used as input for the algorithm" );
