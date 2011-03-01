@@ -1,15 +1,18 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidDataHandling/LoadLog.h"
-#include "MantidKernel/LogParser.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidKernel/PropertyWithValue.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/Glob.h"
-#include "MantidAPI/FileProperty.h"
 #include "LoadRaw/isisraw2.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidDataHandling/LoadLog.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Glob.h"
+#include "MantidKernel/LogParser.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 
+#include <boost/algorithm/string.hpp>
 #include <Poco/File.h>
 #include <Poco/Path.h>
 #include <Poco/DirectoryIterator.h>
@@ -54,10 +57,21 @@ void LoadLog::init()
   exts[2] = ".s*";
   exts[3] = ".add";
   declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
-    "The filename (including its full or relative path) of either an ISIS log file\n"
-    "or an ISIS raw file. If a raw file is specified all log files associated with\n"
+    "The filename (including its full or relative path) of either \n"
+    "an ISIS log file, a multi-column SNS-style text file, or an ISIS raw file. \n"
+    "If a raw file is specified all log files associated with\n"
     "that raw file are loaded into the specified workspace. The file extension must\n"
     "either be .raw or .s when specifying a raw file");
+
+  declareProperty(new ArrayProperty<std::string>("Names"),
+    "For SNS-style log files only: the names of each column's log, separated by commas.\n"
+    "This must be one fewer than the number of columns in the file.");
+
+  declareProperty(new ArrayProperty<std::string>("Units"),
+    "For SNS-style log files only: the units of each column's log, separated by commas.\n"
+    "This must be one fewer than the number of columns in the file.\n"
+    "Optional: leave blank for no units in any log.");
+
 }
 
   //@cond NODOC
@@ -79,6 +93,90 @@ void LoadLog::init()
     };
   }
   //@endcond
+
+
+
+/** Check if the file is SNS text; load it if it is, return false otherwise.
+ *
+ * @return true if the file was a SNS style; false otherwise.
+ */
+  bool LoadLog::LoadSNSText()
+{
+
+  // Get the SNS-specific parameter
+  std::vector<std::string> names = getProperty("Names");
+  std::vector<std::string> units = getProperty("Units");
+
+  // Get the input workspace and retrieve run from workspace.
+  // the log file(s) will be loaded into the run object of the workspace
+  const MatrixWorkspace_sptr localWorkspace = getProperty("Workspace");
+
+  // open log file
+  std::ifstream inLogFile(m_filename.c_str());
+
+  // Get the first line
+  std::string aLine;
+  if (!Mantid::Kernel::extractToEOL(inLogFile,aLine))
+    return false;
+
+  std::vector<double> cols;
+  bool ret = SNSTextFormatColumns(aLine, cols);
+  // Any error?
+  if (!ret || cols.size() < 2)
+    return false;
+
+  size_t numCols = static_cast<size_t>(cols.size()-1);
+  if (names.size() != numCols)
+    throw std::invalid_argument("The Names parameter should have one fewer entry as the number of columns in a SNS-style text log file.");
+  if ((units.size() > 0) && (units.size() != numCols))
+    throw std::invalid_argument("The Units parameter should have either 0 entries or one fewer entry as the number of columns in a SNS-style text log file.");
+
+  // Ok, create all the logs
+  std::vector<TimeSeriesProperty<double>*> props;
+  for(size_t i=0; i < numCols; i++)
+  {
+    TimeSeriesProperty<double>* p = new TimeSeriesProperty<double>(names[i]);
+    if (units.size() == numCols)
+      p->setUnits(units[i]);
+    props.push_back(p);
+  }
+  // Go back to start
+  inLogFile.seekg(0);
+  while(Mantid::Kernel::extractToEOL(inLogFile,aLine))
+  {
+    if (aLine.size() == 0)
+      break;
+
+    if (SNSTextFormatColumns(aLine, cols))
+    {
+      if (cols.size() == numCols+1)
+      {
+        DateAndTime time(cols[0], 0.0);
+        for(size_t i=0; i<numCols; i++)
+          props[i]->addValue(time, cols[i+1]);
+      }
+      else
+        throw std::runtime_error("Inconsistent number of columns while reading SNS-style text file.");
+    }
+    else
+      throw std::runtime_error("Error while reading columns in SNS-style text file.");
+  }
+  // Now add all the full logs to the workspace
+  for(size_t i=0; i < numCols; i++)
+  {
+    std::string name = props[i]->name();
+    if (localWorkspace->mutableRun().hasProperty(name))
+    {
+      localWorkspace->mutableRun().removeLogData(name);
+      g_log.information() << "Log data named " << name << " already existed and was overwritten.\n";
+    }
+    localWorkspace->mutableRun().addLogData(props[i]);
+  }
+
+  return true;
+}
+
+
 
 /** Executes the algorithm. Reading in ISIS log file(s)
  * 
@@ -110,9 +208,18 @@ void LoadLog::exec()
   // start the process or populating potential log files into the container: potentialLogFiles
   std::string l_filenamePart = Poco::Path(l_path.path()).getFileName();// get filename part only
   bool rawFile = false;// Will be true if Filename property is a name of a RAW file
+
+  if ( isAscii(m_filename) )
+  {
+    // Is it a SNS style file? If so, we load it and abort.
+    if (LoadSNSText())
+      return;
+    // Otherwise we continue.
+  }
+
   if ( isAscii(m_filename) && l_filenamePart.find("_") != std::string::npos )
   {
-    // then we will assume that m_filename is an ISIS log file
+    // then we will assume that m_filename is an ISIS/SNS log file
     potentialLogFiles.insert(m_filename);
   }
   else
@@ -231,6 +338,7 @@ void LoadLog::exec()
     std::string aLine;
     if( Mantid::Kernel::extractToEOL(inLogFile,aLine) )
     {
+
       if ( !isDateTimeString(aLine) )
       {
         g_log.warning("File" + filename + " is not a standard ISIS log file. Expected to be a two column file.");
@@ -608,9 +716,32 @@ bool LoadLog::isAscii(const std::string& filename)
  */
 bool LoadLog::isDateTimeString(const std::string& str) const
 {
-  Poco::DateTime dt;
-  int tz_diff;
-  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT, str.substr(0,19), dt, tz_diff);
+  return DateAndTime::string_isISO8601(str.substr(0,19));
+}
+
+
+/** Read a line of a SNS-style text file.
+ *
+ * @param str :: The string to test
+ * @param out :: a vector that will be filled with the double values.
+ * @return false if the format is NOT SNS style or a conversion failed.
+ */
+bool LoadLog::SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const
+{
+  std::vector<std::string> strs;
+  out.clear();
+  boost::split(strs, str, boost::is_any_of("\t "));
+  double val;
+  // Every column must evaluate to a double
+  for (size_t i=0; i<strs.size(); i++)
+  {
+    if (!Strings::convert<double>(strs[i],val))
+      return false;
+    else
+      out.push_back(val);
+  }
+  // Nothing failed = it is that format.
+  return true;
 }
 
 } // namespace DataHandling

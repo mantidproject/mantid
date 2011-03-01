@@ -25,3 +25,8 @@ include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( GMOCK DEFAULT_MSG GMOCK_INCLUDE_DIR 
   GMOCK_LIBRARIES
 )
+
+if ( GMOCK_FOUND )
+else ()
+	MESSAGE( On Linux, copy the gmock library from your distro to /TestingTools/lib ! )
+endif ()

@@ -1,5 +1,8 @@
 #include "MantidKernel/DateAndTime.h"
 #include <time.h>
+#include <Poco/DateTime.h>
+#include <Poco/DateTimeFormat.h>
+#include <Poco/DateTimeParser.h>
 
 namespace Mantid
 {
@@ -918,6 +921,19 @@ void DateAndTime::createVector(const DateAndTime start, const std::vector<double
     out[i]._nanoseconds = startnano + static_cast<int64_t>(  (*it) * 1000000000.0 );
     i++;
   }
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Check if a string is iso8601 format.
+ *
+ * @param str :: string to check
+ * @return true if the string conforms to ISO 860I, false otherwise.
+ */
+bool DateAndTime::string_isISO8601(const std::string & str)
+{
+  Poco::DateTime dt;
+  int tz_diff;
+  return Poco::DateTimeParser::tryParse(Poco::DateTimeFormat::ISO8601_FORMAT, str, dt, tz_diff);
 }
 
 

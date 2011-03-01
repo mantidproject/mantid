@@ -87,6 +87,9 @@ namespace Mantid
       /// Overwrites Algorithm method.
       void init();
 
+      /// SNS text
+      bool LoadSNSText();
+
       /// Overwrites Algorithm method
       void exec();
 
@@ -109,6 +112,8 @@ namespace Mantid
       bool isDateTimeString(const std::string& str) const;
       /// Return the name of the three column log file for associated with the specified file. Empty string if one doesn't exist
       std::string getThreeColumnName() const;
+      /// Check for SNS-style text file
+      bool SNSTextFormatColumns(const std::string& str, std::vector<double> & out) const;
 
       /// create timeseries property from .log file and adds taht to sample object
       std::set<std::string> createthreecolumnFileLogProperty(const std::string& logfile, API::Run& run);

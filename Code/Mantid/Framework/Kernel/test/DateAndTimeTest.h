@@ -469,6 +469,20 @@ public:
     TS_ASSERT_EQUALS( times[3], DateAndTime("1990-01-02 03:04:02.000"));
   }
 
+  void test_string_isISO8601()
+  {
+    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02 03:04:02.000") );
+    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02T03:04:02.000") );
+    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02T03:04:02.000+05:30") );
+    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02 03:04") );
+    TS_ASSERT( DateAndTime::string_isISO8601("1990-01-02") );
+    TS_ASSERT( DateAndTime::string_isISO8601("1822-01-02") );
+
+    TS_ASSERT(!DateAndTime::string_isISO8601("January 1, 2345") );
+    TS_ASSERT(!DateAndTime::string_isISO8601("2010-31-56") );
+    TS_ASSERT(!DateAndTime::string_isISO8601("1990-01-02 45:92:22") );
+  }
+
 };
 
 
