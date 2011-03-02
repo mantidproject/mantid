@@ -97,12 +97,12 @@ INPUT                  = \
 						../Kernel/src \
 						../MatlabAPI/inc/MatlabAPI \
 						../MatlabAPI/src \
-						../MDAlgorithm/inc/MDAlgorithms \
-						../MDAlgorithm/src \
+						../MDAlgorithms/inc/MantidMDAlgorithms \
+						../MDAlgorithms/src \
 						../MDDataObjects/inc/MDDataObjects \
 						../MDDataObjects/src \
 						../MDEvents/inc/MantidMDEvents \
-						../MDEvents/src/*.cpp \
+						../MDEvents/src \
 						../Nexus/inc/MantidNexus \
 						../Nexus/src \
 						../PythonAPI/inc/MantidPythonAPI \
@@ -115,6 +115,7 @@ RECURSIVE              = YES
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
 EXCLUDE                = \
+						../MDEvents/src/*.py \
 						../Nexus/src/NeXusException.cpp \
 						../Nexus/src/NeXusFile.cpp \
 						../Nexus/src/NeXusStream.cpp \

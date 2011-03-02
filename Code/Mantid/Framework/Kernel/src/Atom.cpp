@@ -44,7 +44,7 @@ Atom::Atom(const Atom& other):
   {}
 
 // ---------- START DO NOT EDIT AREA----------
-/// @cond
+/// \cond
 static const Atom H("H", 1, 0, 0.000000, 1.007940, 0.0708);
 static const Atom H1("H", 1, 1, 99.988500, 1.007825, 0.070791924393);
 static const Atom H2("H", 1, 2, 0.011500, 2.014102, 0.141475093639);
@@ -2890,7 +2890,7 @@ static const Atom Cm249("Cm", 96, 249, 0.000000, 249.075947, 13.6235467367);
 static const Atom Cm250("Cm", 96, 250, 0.000000, 250.078351, 13.678374583);
 static const Atom Cm251("Cm", 96, 251, 0.000000, 251.082278, 13.7332857319);
 static const Atom Cm252("Cm", 96, 252, 0.000000, 252.084870, 13.7881238611);
-/// @endcond
+/// \endcond
 
 /// All of the atoms in a single array so it can be searched.
 static Atom ATOMS[] = {
