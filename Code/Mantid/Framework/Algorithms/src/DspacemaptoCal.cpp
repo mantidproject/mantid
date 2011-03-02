@@ -63,15 +63,14 @@ void DspacemaptoCal::init()
   exts.push_back(".dat");
   exts.push_back(".bin");
 
-  declareProperty(new FileProperty("DspacemapFile", "", FileProperty::Save, exts),
+  declareProperty(new FileProperty("DspacemapFile", "", FileProperty::Load, exts),
      "The DspacemapFile containing the d-space mapping");
 
   std::vector<std::string> propOptions;
-  propOptions.push_back("POWGEN-dspacetocal");
-  propOptions.push_back("POWGEN-caltodspace");
+  propOptions.push_back("POWGEN");
   propOptions.push_back("VULCAN-ASCII");
   propOptions.push_back("VULCAN-Binary");
-  declareProperty("FileType", "POWGEN-dspacetocal", new ListValidator(propOptions),
+  declareProperty("FileType", "POWGEN", new ListValidator(propOptions),
     "The type of file being read.");
 
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),
@@ -103,15 +102,10 @@ void DspacemaptoCal::exec()
     throw Exception::FileError("Problem reading calibration file", calFileName);
 
   std::string type = this->getPropertyValue("FileType");
-  if (type == "POWGEN-dspacetocal")
+  if (type == "POWGEN")
   {
     // generate map of the tof->d conversion factors
     CalculateOffsetsFromDSpacemapFile(inputWS, DFileName, calFileName, offsets, groups);
-  }
-  else if (type == "POWGEN-caltodspace")
-  {
-    // generate map of the tof->d conversion factors
-    CalculateDspaceFromCal(inputWS, DFileName, offsets);
   }
   else
   {
@@ -198,58 +192,6 @@ void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorksp
 
   // Now write it out
   this->WriteCalibrationFile(calFileName, allDetectors, offsets, selects, groups);
-}
-//-----------------------------------------------------------------------
-/**
- * Make a map of the conversion factors between tof and D-spacing
- * for all pixel IDs in a workspace.
- * @param inputWS the workspace containing the instrument geometry
- *    of interest.
- * @param DFileName name of dspacemap file
- * @param offsets map between pixelID and offset (from the calibration file)
- */
-void DspacemaptoCal::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  std::string DFileName, 
-                                  std::map<int,double> &offsets)
-{
-  const char * filename = DFileName.c_str();
-  std::cout <<filename<<"\n";
-  // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWS->getInstrument();
-  double l1;
-  Geometry::V3D beamline,samplePos;
-  double beamline_norm;
-  AlignDetectors::getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
-
-  //To get all the detector ID's
-  const std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
-
-  double dspace[300000];
-
-  // Selects (empty, will default to true)
-  std::map<int, bool> selects;
-
-  std::map<int, Geometry::IDetector_sptr>::const_iterator it;
-  for (it = allDetectors.begin(); it != allDetectors.end(); it++)
-  {
-    int detectorID = it->first;
-    Geometry::IDetector_sptr det = it->second;
-
-    //Compute the factor
-    double factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsets[detectorID], false);
-    //Factor of 10 between ISAW and Mantid
-    dspace[detectorID] = 0.1 * factor ;
-  }
-
-  // Now write the POWGEN-style Dspace mapping file
-  std::cout <<filename<<"\n";
-  std::ofstream fout(filename, std::ios_base::out|std::ios_base::binary);
-
-  for (int i = 0; i != 300000; i++)
-  {
-    fout.write( reinterpret_cast<char*>( &dspace[i] ), sizeof(double) );
-  }
-  fout.close();
 }
 
 
@@ -362,7 +304,6 @@ void DspacemaptoCal::WriteCalibrationFile(std::string calFileName, const std::ma
 
      number++;
   }
-  fout.close();
 
 }
 
