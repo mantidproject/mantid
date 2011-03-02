@@ -1047,24 +1047,37 @@ namespace Mantid
     }
 
 
-    std::string MatrixWorkspace::getDimensionIdFromAxis(Axis const * const axis) const
+    std::string MatrixWorkspace::getDimensionIdFromAxis(const int& axisIndex) const
     {
-      return axis->title(); //Seam. single point where we configure how an axis maps to a dimension id.
+      std::string id;
+      if(0 == axisIndex)
+      {
+        id = xDimensionId;
+      }
+      else if(1 == axisIndex)
+      {
+        id = yDimensionId;
+      }
+      else
+      {
+        throw std::invalid_argument("Cannot have an index for a MatrixWorkspace axis that is not == 0 or == 1");
+      }
+      return id;
     }
 
     class MWDimension: public Mantid::Geometry::IMDDimension
     {
     public:
 
-      MWDimension(const Axis* axis):
-          m_axis(*axis)
+      MWDimension(const Axis* axis, const std::string& dimensionId):
+          m_axis(*axis), m_dimensionId(dimensionId)
       {
       }
       /// the name of the dimennlsion as can be displayed along the axis
           virtual std::string getName() const {return m_axis.title();}
       /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
       /// various method exist to manipulate set of dimensions by their names. 
-      virtual std::string getDimensionId() const {return m_axis.title();}
+      virtual std::string getDimensionId() const {return m_dimensionId;}
 
       /// if the dimension is integrated (e.g. have single bin)
       virtual bool getIsIntegrated() const {return m_axis.length() == 1;}
@@ -1099,20 +1112,21 @@ namespace Mantid
       virtual ~MWDimension(){};
     private:
       const Axis& m_axis;
+      const std::string m_dimensionId;
     };
 
 
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getXDimension() const
     { 
       Axis* xAxis = this->getAxis(0);
-      MWDimension* dimension = new MWDimension(xAxis);
+      MWDimension* dimension = new MWDimension(xAxis, xDimensionId);
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
     }
 
     boost::shared_ptr< const Mantid::Geometry::IMDDimension> MatrixWorkspace::getYDimension() const
     { 
       Axis* yAxis = this->getAxis(1);
-      MWDimension* dimension = new MWDimension(yAxis);
+      MWDimension* dimension = new MWDimension(yAxis, yDimensionId);
       return boost::shared_ptr<const Mantid::Geometry::IMDDimension>(dimension);
     }
 
@@ -1133,10 +1147,10 @@ namespace Mantid
       for(int i = 0; i < nAxes; i++)
       {
         Axis* xAxis = this->getAxis(i);
-        const std::string& title = getDimensionIdFromAxis(xAxis);
-        if(title == id)
+        const std::string& knownId = getDimensionIdFromAxis(i);
+        if(knownId == id)
         {
-          dim = new MWDimension(xAxis);
+          dim = new MWDimension(xAxis, id);
           break;
         }
       }
@@ -1151,8 +1165,8 @@ namespace Mantid
     const std::vector<std::string> MatrixWorkspace::getDimensionIDs() const
     {
       std::vector<std::string> keys;
-      keys.push_back( getDimensionIdFromAxis(this->getAxis(0)) );
-      keys.push_back( getDimensionIdFromAxis(this->getAxis(1)) );
+      keys.push_back( xDimensionId);
+      keys.push_back( yDimensionId);
       return keys;
     }
 
@@ -1205,6 +1219,9 @@ namespace Mantid
       throw std::runtime_error("Cannot access the workspace location on a MatrixWS");
       //TODO: the matrix workspace as an IMD Workspace does have an effective geometry.
     }
+
+    const std::string MatrixWorkspace::xDimensionId = "xDimension";
+    const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
 
   } // namespace API

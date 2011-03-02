@@ -263,6 +263,12 @@ namespace Mantid
       /// Provide the underlying xml for 
       virtual std::string getGeometryXML() const;
 
+      /// Dimension id for x-dimension.
+      static const std::string xDimensionId;
+
+      /// Dimensin id for y-dimension.
+      static const std::string yDimensionId;
+
     protected:
       MatrixWorkspace();
 
@@ -330,7 +336,8 @@ namespace Mantid
       /// Static reference to the logger class
       static Kernel::Logger& g_log;
 
-      std::string getDimensionIdFromAxis(Axis const * const axis) const;
+      std::string getDimensionIdFromAxis(const int& axisIndex) const;
+
     };
 
     ///shared pointer to the matrix workspace base class

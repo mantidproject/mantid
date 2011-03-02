@@ -100,7 +100,7 @@ public:
     matrixWS.init(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getXDimension();
     std::string id = dimension->getDimensionId();
-    TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.", "1", id);
+    TSM_ASSERT_EQUALS("Dimension-X does not have the expected dimension id.", MatrixWorkspace::xDimensionId, id);
   }
 
 
@@ -110,7 +110,7 @@ public:
     matrixWS.init(1, 1, 1);
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> dimension = matrixWS.getYDimension();
     std::string id = dimension->getDimensionId();
-    TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.", "2", id);
+    TSM_ASSERT_EQUALS("Dimension-Y does not have the expected dimension id.", MatrixWorkspace::yDimensionId, id);
   }
 
   void testGetZDimension()
@@ -136,8 +136,15 @@ public:
   {
     MatrixWorkspaceTester matrixWS;
     matrixWS.init(1,1,1);
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = matrixWS.getDimension("1");
-    TSM_ASSERT_EQUALS("The dimension id found is not the same as that searched for.", "1", dim->getDimensionId());
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = matrixWS.getDimension(MatrixWorkspace::yDimensionId);
+    TSM_ASSERT_EQUALS("The dimension id found is not the same as that searched for.", MatrixWorkspace::yDimensionId, dim->getDimensionId());
+  }
+
+  void testGetDimensionOverflow()
+  {
+    MatrixWorkspaceTester matrixWS;
+    matrixWS.init(1,1,1);
+    TSM_ASSERT_THROWS("The dimension does not exist. Attempting to get it should throw", matrixWS.getDimension("1"), std::overflow_error);
   }
 
   void testGetNPoints()
