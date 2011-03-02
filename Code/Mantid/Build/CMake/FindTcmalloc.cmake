@@ -10,7 +10,7 @@ find_path ( TCMALLOC_INCLUDE_DIR tcmalloc.h
             PATHS /usr/include/google
 )
 
-find_library ( TCMALLOC_LIBRARIES tcmalloc )
+find_library ( TCMALLOC_LIBRARIES NAMES tcmalloc tcmalloc_minimal )
 
 # handle the QUIETLY and REQUIRED arguments and set TCMALLOC_FOUND to TRUE if 
 # all listed variables are TRUE
