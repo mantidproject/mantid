@@ -60,6 +60,9 @@ void RebinningCutterAttributes::Init()
 {
     this->isSetUp = false;
     this->structured = true;
+    this->normalX = 0;
+    this->normalY = 0;
+    this->normalZ = 0;
     RebinningCutterAttributes::SelectAll();
 }
 

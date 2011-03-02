@@ -182,7 +182,7 @@ vtkStructuredGrid* vtkStructuredGridFactory<Image>::createMeshOnly() const
 
   //Attach points to dataset.
   visualDataSet->SetPoints(points);
-  visualDataSet->SetDimensions(nPointsX, nPointsY, nPointsZ);
+  visualDataSet->SetDimensions(nPointsZ, nPointsY, nPointsX);
   points->Delete();
   return visualDataSet;
 }

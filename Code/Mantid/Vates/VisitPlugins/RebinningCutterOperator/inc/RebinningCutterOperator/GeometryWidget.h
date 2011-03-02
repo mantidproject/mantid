@@ -97,6 +97,8 @@ DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
 bool m_isConstructed;
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_nonIntegratedVector;
+/// Directs Reset of all bin values of child dimension widgets.
+void resetAllBinValues();
 
 };
 

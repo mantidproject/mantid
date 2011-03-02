@@ -27,27 +27,39 @@ class DimensionWidget: public QWidget
 Q_OBJECT
 public:
 
+  /// Constructor.
   DimensionWidget(GeometryWidget* geometryWidget, const std::string& name, const int dimensionIndex,
       std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedDimensions );
 
+  /// Destructor
   ~DimensionWidget();
 
+  /// Get minimum
   double getMinimum() const;
 
+  /// Get maximum
   double getMaximum() const;
 
+  /// Set minimum
   void setMinimum(double minimum);
 
+  /// Set maximum
   void setMaximum(double maximum);
 
+  /// Get the number of dimensions.
   boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension() const;
 
+  /// Get the number of bins.
   int getNBins() const;
 
+  /// Get the selected index.
   int getSelectedIndex() const;
 
   /// Populates gui controls. May be called more than once.
   void populateWidget(const int dimensionIndex);
+
+  /// Reset the bin values.
+  void resetBins();
 
 signals:
       void maxSet();

@@ -48,7 +48,7 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   m_dimensionCombo = new QComboBox();
 
   //Loop through non-integrated dimensions and add them to the combobox.
-  for(int i = 0; i < m_vecNonIntegratedDimensions.size(); i++)
+  for(unsigned int i = 0; i < m_vecNonIntegratedDimensions.size(); i++)
   {
     boost::shared_ptr<Mantid::Geometry::IMDDimension> currentDimension = m_vecNonIntegratedDimensions[i];
     m_dimensionCombo->addItem( currentDimension->getName().c_str());
@@ -166,6 +166,13 @@ void DimensionWidget::dimensionSelectedListener()
     populateWidget(dimensionIndex);
     m_geometryWidget->childAppliedNewDimensionSelection(oldDimensionIndex, spNewDimension, this);
   }
+}
+
+void DimensionWidget::resetBins()
+{
+  int nbins = m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getNBins();
+  std::string nBinsString = boost::str(boost::format("%i") % nbins);
+  m_nBinsBox->setText(nBinsString.c_str());
 }
 
 void DimensionWidget::nBinsListener()

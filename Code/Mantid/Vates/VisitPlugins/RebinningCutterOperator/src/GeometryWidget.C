@@ -94,6 +94,14 @@ void GeometryWidget::dimensionWidgetChanged()
   emit valueChanged();
 }
 
+void GeometryWidget::resetAllBinValues()
+{
+  //If dimensions have been swapped, then all bins should be reset to their original values.
+  m_xDimensionWidget->resetBins();
+  m_yDimensionWidget->resetBins();
+  m_zDimensionWidget->resetBins();
+}
+
 void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDimensionIndex,
     boost::shared_ptr<IMDDimension> newDimension, DimensionWidget* pDimensionWidget)
 {
@@ -135,6 +143,7 @@ void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDim
       m_zDimensionWidget->populateWidget(oldDimensionIndex);
     }
   }
+  resetAllBinValues();
 
   //Raise event.
   dimensionWidgetChanged();
