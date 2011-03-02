@@ -416,37 +416,37 @@ public:
 
   }
 
-  void test_SNSTextFile_noNames_fails()
+  void xtest_SNSTextFile_noNames_fails()
   {
     do_test_SNSTextFile("", "", true);
   }
 
-  void test_SNSTextFile_tooFewNames_fails()
+  void xtest_SNSTextFile_tooFewNames_fails()
   {
     do_test_SNSTextFile("Yadda,Yadda", "", true);
   }
 
-  void test_SNSTextFile_tooManyNames_fails()
+  void xtest_SNSTextFile_tooManyNames_fails()
   {
     do_test_SNSTextFile("Yadda,Yadda,Yadda,Yadda,Yadda,Yadda", "", true);
   }
 
-  void test_SNSTextFile()
+  void xtest_SNSTextFile()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false);
   }
 
-  void test_SNSTextFile_noUnits()
+  void xtest_SNSTextFile_noUnits()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "", false);
   }
 
-  void test_SNSTextFile_wrongNumberOfUnits_fails()
+  void xtest_SNSTextFile_wrongNumberOfUnits_fails()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "Dynes,Ergs", true);
   }
 
-  void test_SNSTextFile_twice_overwrites_logs()
+  void xtest_SNSTextFile_twice_overwrites_logs()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false, true, "Furlongs");
     // Dont re-create the workspace the 2nd time around.

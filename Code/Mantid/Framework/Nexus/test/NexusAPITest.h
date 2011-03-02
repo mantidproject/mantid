@@ -15,6 +15,7 @@
 #include "MantidNexus/NeXusFile.hpp"
 #include "MantidNexus/NeXusException.hpp"
 
+#include <Poco/File.h>
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -247,6 +248,9 @@ public:
     TS_ASSERT( !file.isDataInt() );
     TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
+
+    // Remove the file
+    Poco::File(filename).remove();
 
   }
 
