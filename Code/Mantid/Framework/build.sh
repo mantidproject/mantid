@@ -17,7 +17,9 @@
 ## Perform the build and exit if there were errors
 scons $* $MANTID_BUILD_FLAGS
 if [ $? -ne 0 ]; then
-    exit
+    exit 1
+else
+    exit 0
 fi
 
 ## Move the libraries around to the correct place

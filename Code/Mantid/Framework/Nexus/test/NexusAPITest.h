@@ -249,7 +249,8 @@ public:
     TS_ASSERT_THROWS(file.getDataCoerce(ires), ::NeXus::Exception);
     file.closeData();
 
-    // Remove the file
+    // Remove the file. Windows requires it to be closed first
+    file.close();
     Poco::File(filename).remove();
 
   }

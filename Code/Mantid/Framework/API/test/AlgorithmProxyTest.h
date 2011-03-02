@@ -33,7 +33,7 @@ public:
       std::string p1 = getProperty("prop1");
       int p2 = getProperty("prop2");
 
-      Poco::Thread::current()->sleep(300);
+      Poco::Thread::current()->sleep(500);
       progress(0.333,"Running");
       interruption_point();
       Algorithm* alg = dynamic_cast<Algorithm*>( this );
