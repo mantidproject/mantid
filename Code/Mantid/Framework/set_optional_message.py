@@ -67,6 +67,16 @@ def get_wiki_summary(name):
     out = out.strip()
     return (out, wikified)
 
+def get_padding(line):
+    """Return a string with the spaces padding the start of the given line."""
+    out = ""
+    for c in line:
+        if c == " ":
+            out += " "
+        else:
+            break
+    return out
+
 
 def add_optional_message(name, fullpath, summary, wikified_summary):
     f = open(fullpath)
@@ -78,7 +88,49 @@ def add_optional_message(name, fullpath, summary, wikified_summary):
     if not match1 is None:
         print name, "------> Optional message already set for", name
         
-    if 1:
+        
+        
+    # -------- Look for a spot to stick the new function ----------
+    searchfor = "DECLARE_ALGORITHM"
+    if "DECLARE_LOADALGORITHM" in source: searchfor = "DECLARE_LOADALGORITHM" 
+    lines = source.split("\n")
+    count = 0
+    done = False
+    padding = ""
+    for n in xrange(len(lines)):
+        line = lines[n]
+        s = line.strip()
+        if s.startswith(searchfor):
+            # How much padding?
+            padding = get_padding(line)
+            # Look for the first blank line
+            while line.strip() != "":
+                count += len(line) + 1
+                n += 1
+                line = lines[n]
+                done = True
+                break
+            
+        if done: break
+        # Keep a running count of the character
+        count += len(line) + 1
+
+    extra = """
+/// Sets documentation strings for this Algorithm
+%svoid %s::initDocs()
+%s{
+%s  this->setWikiSummary("%s");
+%s  this->setOptionalMessage("%s");
+%s}
+""" % padding
+    
+    source = source[0:count]+extra+source[count:]
+        
+    print
+    print source[count-100:count+200]
+    print
+        
+    if 0:
         # Look for init() and then some padding before { 
         regex = "::init\(\)([\ ]+)?\n([.\s]+)?{"
         m = re.search(regex, source)
@@ -88,7 +140,7 @@ def add_optional_message(name, fullpath, summary, wikified_summary):
             if padding is None: padding = ""
             extraline = '\n%s  this->setWikiSummary("%s");\n%s  this->setOptionalMessage("%s");\n' % (padding, wikified_summary, padding, summary)
             source = source[0:n] + extraline + source[n:]
-            if 1:
+            if 0:
                 f = open(fullpath,'w')
                 f.write(source)
                 f.close()

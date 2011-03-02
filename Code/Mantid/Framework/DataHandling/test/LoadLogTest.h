@@ -354,10 +354,10 @@ public:
     LoadLog alg;
     alg.initialize();
     TS_ASSERT( alg.isInitialized() );
-    alg.setPropertyValue("Filename", "VULCAN_furnace4208.txt");
-    alg.setPropertyValue("Workspace", outputSpace);
-    alg.setPropertyValue("Names", names );
-    alg.setPropertyValue("Units", units );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Filename", "VULCAN_furnace4208.txt") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Workspace", outputSpace) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Names", names ) );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("Units", units ) );
     TS_ASSERT_THROWS_NOTHING(alg.execute() );
     if (willFail)
       { TS_ASSERT(!alg.isExecuted() );
@@ -416,37 +416,37 @@ public:
 
   }
 
-  void xtest_SNSTextFile_noNames_fails()
+  void test_SNSTextFile_noNames_fails()
   {
     do_test_SNSTextFile("", "", true);
   }
 
-  void xtest_SNSTextFile_tooFewNames_fails()
+  void test_SNSTextFile_tooFewNames_fails()
   {
     do_test_SNSTextFile("Yadda,Yadda", "", true);
   }
 
-  void xtest_SNSTextFile_tooManyNames_fails()
+  void test_SNSTextFile_tooManyNames_fails()
   {
     do_test_SNSTextFile("Yadda,Yadda,Yadda,Yadda,Yadda,Yadda", "", true);
   }
 
-  void xtest_SNSTextFile()
+  void test_SNSTextFile()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false);
   }
 
-  void xtest_SNSTextFile_noUnits()
+  void test_SNSTextFile_noUnits()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "", false);
   }
 
-  void xtest_SNSTextFile_wrongNumberOfUnits_fails()
+  void test_SNSTextFile_wrongNumberOfUnits_fails()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "Dynes,Ergs", true);
   }
 
-  void xtest_SNSTextFile_twice_overwrites_logs()
+  void test_SNSTextFile_twice_overwrites_logs()
   {
     do_test_SNSTextFile("Temp1,Temp2,Temp3,Extra", "C,K,F,Furlongs", false, true, "Furlongs");
     // Dont re-create the workspace the 2nd time around.
