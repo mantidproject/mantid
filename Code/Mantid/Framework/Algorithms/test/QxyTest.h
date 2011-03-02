@@ -77,14 +77,15 @@ public:
     TS_ASSERT_EQUALS( result->readX(0).front(), -0.1 )
     TS_ASSERT_DELTA( result->readX(0)[64], 0.028, 0.01 )
     TS_ASSERT_EQUALS( result->readX(0).back(), 0.1 )
-    
+   
     TS_ASSERT_DIFFERS( result->readY(0).front(), result->readY(0).front() )  // NaN
-    TS_ASSERT_DELTA( result->readY(26)[73], 4438798, 1 )
-    TS_ASSERT_DELTA( result->readY(18)[36], 174005, 1 )
+    TS_ASSERT_DELTA( result->readY(28)[71], 229914.7, 1 )
+    TS_ASSERT_DELTA( result->readY(26)[73], 0.0, 1 )
+    TS_ASSERT_DELTA( result->readY(18)[80], 344640.4, 1 )
     
     TS_ASSERT_DELTA( result->readE(20)[67], 0.0, 1e-3 )
-    TS_ASSERT_DELTA( result->readE(27)[70], 233279.0150, 1e-3 )
-    TS_ASSERT_DELTA( result->readE(23)[34], 0.0, 1e-3 )
+    TS_ASSERT_DELTA( result->readE(27)[70], 114778.1004, 1 )
+    TS_ASSERT_DELTA( result->readE(18)[80], 344640, 1 )
     
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
   }
@@ -123,11 +124,12 @@ public:
     TS_ASSERT_EQUALS( (*(result->getAxis(1)))(100), 0.1 )
   
     TS_ASSERT_DIFFERS( result->readY(0).front(), result->readY(0).front() )  // NaN
-    TS_ASSERT_DELTA( result->readY(3)[26], 696467, 1 )
-    TS_ASSERT_DELTA( result->readY(7)[27], 696566, 1 )
+    TS_ASSERT_DELTA( result->readY(3)[26], 0.0000, 1 )
+    TS_ASSERT_DELTA( result->readY(6)[51], 341936, 1 )
+    TS_ASSERT_DELTA( result->readY(7)[27], 685501, 1 )
     
     TS_ASSERT_DELTA( result->readE(20)[67], 0.0, 1e-3 )
-    TS_ASSERT_DELTA( result->readE(7)[27], 696565.8656, 1e-3 )
+    TS_ASSERT_DELTA( result->readE(7)[27], 685500.615, 1e-3 )
     TS_ASSERT_DELTA( result->readE(23)[34], 0.0, 1e-3 )
     
     Mantid::API::AnalysisDataService::Instance().remove(m_inputWS);

@@ -74,12 +74,12 @@ public:
     TS_ASSERT_EQUALS( result->readX(0).front(), 0.1 )
     TS_ASSERT_DELTA( result->readX(0)[6], 0.22, 0.01 )
     TS_ASSERT_EQUALS( result->readX(0).back(), 0.5 )
-    TS_ASSERT_DELTA( result->readY(0).front(), 3196551441.0, 1 )
-    TS_ASSERT_DELTA( result->readY(0)[13], 9272523451.0, 1 )
-    TS_ASSERT_DELTA( result->readY(0).back(), 454931528.0, 1 )
-    TS_ASSERT_DELTA( result->readE(0).front(), 17547891.0, 1 )
-    TS_ASSERT_DELTA( result->readE(0)[10], 55285188.0, 1 )
-    TS_ASSERT_DELTA( result->readE(0).back(), 13831579.0, 1 )
+    TS_ASSERT_DELTA( result->readY(0).front(), 3323038348.6, 1 )
+    TS_ASSERT_DELTA( result->readY(0)[13], 8747222731.8, 1 )
+    TS_ASSERT_DELTA( result->readY(0).back(), 203744814, 1 )
+    TS_ASSERT_DELTA( result->readE(0).front(), 17742755.2, 1 )
+    TS_ASSERT_DELTA( result->readE(0)[10], 54140676.3, 1 )
+    TS_ASSERT_DELTA( result->readE(0).back(), 9187621.9, 1 )
     
     Mantid::API::AnalysisDataService::Instance().remove(inputWS);
     Mantid::API::AnalysisDataService::Instance().remove(outputWS);
