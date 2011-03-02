@@ -2616,7 +2616,16 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
   g->setScaleLayersOnPrint(d_scale_plots_on_print);
   g->printCropmarks(d_print_cropmarks);
 
-  d_workspace->addSubWindow(g);
+  // begin magical code: without it new multilayer subwindow may not be activated
+  MdiSubWindow* old = activeWindow();
+  if (old)
+  {
+	  d_workspace->setActiveSubWindow(NULL);
+	  d_workspace->addSubWindow(g);
+	  activateWindow(old);
+	  activateWindow(g);
+  }
+  // end of magical code
   connectMultilayerPlot(g);
   g->showNormal();
 
@@ -3283,6 +3292,7 @@ MdiSubWindow *ApplicationWindow::activeWindow(WindowType type)
 
 void ApplicationWindow::windowActivated(QMdiSubWindow *w)
 {	
+
   MdiSubWindow *qti_subwin = qobject_cast<MdiSubWindow*>(w);
   if( !qti_subwin ) return;
 
