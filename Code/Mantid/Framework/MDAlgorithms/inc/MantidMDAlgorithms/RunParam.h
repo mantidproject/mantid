@@ -48,6 +48,7 @@ namespace Mantid
        /// Destructor
        ~RunParam();
 
+       /// @cond
        double getEi(const int irun);
        double getPsi(const int irun);
        double getElo(const int irun);
@@ -205,6 +206,7 @@ namespace Mantid
        std::vector<double> m_temp;
        std::vector<double> m_eta;
 
+       /// @endcond
     };
   }
 }

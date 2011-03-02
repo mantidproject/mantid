@@ -115,7 +115,7 @@ RECURSIVE              = YES
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
 EXCLUDE                = \
-						../MDEvents/src/*.py \
+						../MDEvents/src/generate_mdevent_declarations.py \
 						../Nexus/src/NeXusException.cpp \
 						../Nexus/src/NeXusFile.cpp \
 						../Nexus/src/NeXusStream.cpp \
