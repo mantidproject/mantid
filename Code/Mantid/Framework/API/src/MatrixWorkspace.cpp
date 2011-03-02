@@ -29,6 +29,8 @@ namespace Mantid
     using namespace Geometry;
 
     Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
+    const std::string MatrixWorkspace::xDimensionId = "xDimension";
+    const std::string MatrixWorkspace::yDimensionId = "yDimension";
 
     /// Default constructor
     MatrixWorkspace::MatrixWorkspace() : 
@@ -1219,10 +1221,6 @@ namespace Mantid
       throw std::runtime_error("Cannot access the workspace location on a MatrixWS");
       //TODO: the matrix workspace as an IMD Workspace does have an effective geometry.
     }
-
-    const std::string MatrixWorkspace::xDimensionId = "xDimension";
-    const std::string MatrixWorkspace::yDimensionId = "yDimension";
-
 
   } // namespace API
 } // Namespace Mantid
