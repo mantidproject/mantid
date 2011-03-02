@@ -42,6 +42,8 @@ namespace Algorithms
     virtual int version() const { return (1); } ///< @return version number of algorithm
 
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
     void init(); ///< Initialise the algorithm. Declare properties, etc.
     void exec(); ///< Executes the algorithm.
   };

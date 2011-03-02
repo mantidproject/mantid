@@ -34,6 +34,14 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadEventPreNeXus)
 DECLARE_LOADALGORITHM(LoadEventPreNeXus)
 
+/// Sets documentation strings for this algorithm
+void LoadEventPreNeXus::initDocs()
+{
+  this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class). ");
+  this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -142,9 +150,6 @@ int LoadEventPreNeXus::fileCheck(const std::string& filePath)
 /** Initialize the algorithm */
 void LoadEventPreNeXus::init()
 {
-  //this->setWikiSummary("Loads SNS raw neutron event data format and stores it in a [[workspace]] ([[EventWorkspace]] class).");
-  //this->setOptionalMessage("Loads SNS raw neutron event data format and stores it in a workspace (EventWorkspace class).");
-
   // which files to use
   this->declareProperty(new FileProperty(EVENT_PARAM, "", FileProperty::Load, EVENT_EXT),
                         "A preNeXus neutron event file");

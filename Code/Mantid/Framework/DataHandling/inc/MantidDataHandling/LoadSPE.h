@@ -60,6 +60,8 @@ public:
   /// check the structure of the file and if this file can be loaded return a value between 1 and 100
   int fileCheck(const std::string& filePath);
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Initialisation code
   void init();
   // Execution code

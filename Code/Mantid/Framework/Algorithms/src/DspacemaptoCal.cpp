@@ -21,6 +21,14 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(DspacemaptoCal)
 
+/// Sets documentation strings for this algorithm
+void DspacemaptoCal::initDocs()
+{
+  this->setWikiSummary("Creates a calibration file with offsets calculated from Dspacemap file. ");
+  this->setOptionalMessage("Creates a calibration file with offsets calculated from Dspacemap file.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::IInstrument_const_sptr;
@@ -47,9 +55,6 @@ DspacemaptoCal::~DspacemaptoCal()
 //-----------------------------------------------------------------------
 void DspacemaptoCal::init()
 {
-  //this->setWikiSummary("Creates a calibration file with offsets calculated from Dspacemap file.");
-  //this->setOptionalMessage("Creates a calibration file with offsets calculated from Dspacemap file.");
-
   declareProperty(
     new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "A workspace with units of TOF" );

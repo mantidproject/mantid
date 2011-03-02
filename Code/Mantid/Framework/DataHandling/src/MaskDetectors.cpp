@@ -15,6 +15,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MaskDetectors)
 
+/// Sets documentation strings for this algorithm
+void MaskDetectors::initDocs()
+{
+  this->setWikiSummary("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed. ");
+  this->setOptionalMessage("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -29,9 +37,6 @@ MaskDetectors::~MaskDetectors() {}
 
 void MaskDetectors::init()
 {
-  //this->setWikiSummary("An algorithm to mask a detector, or set of detectors, as not to be used.The workspace spectra associated with those detectors are zeroed.");
-  //this->setOptionalMessage("An algorithm to mask a detector, or set of detectors, as not to be used. The workspace spectra associated with those detectors are zeroed.");
-
   declareProperty(
     new WorkspaceProperty<>("Workspace","", Direction::InOut),
     "The name of the workspace that will be used as input and\n"

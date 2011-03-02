@@ -48,6 +48,8 @@ namespace Mantid
       virtual int version() const { return 1; }
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Overridden init
       void init();
       /// Overridden exec

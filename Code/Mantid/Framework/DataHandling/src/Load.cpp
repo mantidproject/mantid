@@ -15,6 +15,14 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(Load);
+    
+    /// Sets documentation strings for this algorithm
+    void Load::initDocs()
+    {
+      this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm. ");
+      this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -191,9 +199,6 @@ namespace Mantid
     /// Initialisation method.
     void Load::init()
     {
-      //this->setWikiSummary("Attempts to load a given file by finding an appropriate Load algorithm.");
-      //this->setOptionalMessage("Attempts to load a given file by finding an appropriate Load algorithm.");
-
 
       std::vector<std::string> exts;
       exts.push_back(".raw");

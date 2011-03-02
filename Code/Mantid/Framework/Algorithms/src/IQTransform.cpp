@@ -15,6 +15,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(IQTransform)
 
+/// Sets documentation strings for this algorithm
+void IQTransform::initDocs()
+{
+  this->setWikiSummary("This algorithm provides various functions that are sometimes used to linearise the output of a '''SANS''' data reduction prior to fitting it. ");
+  this->setOptionalMessage("This algorithm provides various functions that are sometimes used to linearise the output of a 'SANS' data reduction prior to fitting it.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -42,9 +50,6 @@ IQTransform::~IQTransform() {}
 
 void IQTransform::init()
 {
-  //this->setWikiSummary("This algorithm provides various functions that are sometimes used to linearise the output of a '''SANS''' data reduction prior to fitting it.");
-  //this->setOptionalMessage("This algorithm provides various functions that are sometimes used to linearise the output of a 'SANS' data reduction prior to fitting it.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   // Require the input to be in units of Q and to be a distribution
   // (which the result of a SANS reduction in Mantid will be)

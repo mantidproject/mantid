@@ -13,6 +13,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(StripVanadiumPeaks)
 
+/// Sets documentation strings for this algorithm
+void StripVanadiumPeaks::initDocs()
+{
+  this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions. ");
+  this->setOptionalMessage("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
+}
+
+
 using namespace Kernel;
 using namespace DataObjects;
 using namespace API;
@@ -25,9 +33,6 @@ StripVanadiumPeaks::StripVanadiumPeaks() : API::Algorithm() {}
 
 void StripVanadiumPeaks::init()
 {
-  //this->setWikiSummary("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
-  //this->setOptionalMessage("This algorithm removes peaks (at vanadium d-spacing positions by default) out of a background by linearly interpolating over the expected peak positions.");
-
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the input workspace" );

@@ -12,6 +12,14 @@ using namespace Geometry;
 
 DECLARE_ALGORITHM(TofCorrection)
 
+/// Sets documentation strings for this algorithm
+void TofCorrection::initDocs()
+{
+  this->setWikiSummary("This algorithm subtracts a calculated time value from each bin in the workspace. The value is calculated as:  <math> \\Delta T = {L2\\over\\sqrt{EFixed}} * \\sqrt{Mn \\over {2*MeV} } * 1e6 </math>  This is done to correct the values for a time in the secondary flight path, which effectively changes the data to what it would be if all of the detectors were located at the sample.  Where L2 is the distance between the detector and the sample, and l2 and efixed are taken from the [[IDF|Instrument Definition File]].  '''Note:''' this may lead to having negative time values at the start of the dataset, which should be discarded before progressing further. This algorithm is only suited to a small subset of instruments. ");
+  this->setOptionalMessage("This algorithm subtracts a calculated time value from each bin in the workspace. The value is calculated as:  <math> \\Delta T = {L2\\over\\sqrt{EFixed}} * \\sqrt{Mn \\over {2*MeV} } * 1e6 </math>  This is done to correct the values for a time in the secondary flight path, which effectively changes the data to what it would be if all of the detectors were located at the sample.  Where L2 is the distance between the detector and the sample, and l2 and efixed are taken from the Instrument Definition File.  'Note:' this may lead to having negative time values at the start of the dataset, which should be discarded before progressing further. This algorithm is only suited to a small subset of instruments.");
+}
+
+
 void TofCorrection::init()
 {
   CompositeValidator<> *wsVal = new CompositeValidator<>;

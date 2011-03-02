@@ -14,15 +14,20 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CheckWorkspacesMatch)
 
+/// Sets documentation strings for this algorithm
+void CheckWorkspacesMatch::initDocs()
+{
+  this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process. ");
+  this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
 void CheckWorkspacesMatch::init()
 {
-  //this->setWikiSummary("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
-  //this->setOptionalMessage("Compares two workspaces for equality. This algorithm is mainly intended for use by the Mantid development team as part of the testing process.");
-
   declareProperty(new WorkspaceProperty<>("Workspace1","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("Workspace2","",Direction::Input));
 

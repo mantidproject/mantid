@@ -13,6 +13,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Minus)
+    
+    /// Sets documentation strings for this algorithm
+    void Minus::initDocs()
+    {
+      this->setWikiSummary("The Minus algorithm will subtract the data values and calculate the corresponding [[Error Values|error values]] for two compatible workspaces.  {{BinaryOperation|verb=subtracted|prep=from|symbol=<math>-</math>}} ");
+      this->setOptionalMessage("The Minus algorithm will subtract the data values and calculate the corresponding error values for two compatible workspaces.");
+    }
+    
 
     void Minus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)

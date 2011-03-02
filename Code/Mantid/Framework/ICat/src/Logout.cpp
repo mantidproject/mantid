@@ -12,6 +12,14 @@ namespace Mantid
 		using namespace API;
 		DECLARE_ALGORITHM(CLogout)
 
+/// Sets documentation strings for this algorithm
+void CLogout::initDocs()
+{
+  this->setWikiSummary("Disconnects from information catalog . ");
+  this->setOptionalMessage("Disconnects from information catalog .");
+}
+
+
 		/// Init method to declare algorithm properties
 		void CLogout::init()
 		{			

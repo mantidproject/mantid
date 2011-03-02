@@ -24,6 +24,14 @@ namespace CurveFitting
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(GenericFit)
+  
+  /// Sets documentation strings for this algorithm
+  void GenericFit::initDocs()
+  {
+    this->setWikiSummary("Fits a function to data in a Workspace ");
+    this->setOptionalMessage("Fits a function to data in a Workspace");
+  }
+  
 
   using namespace Kernel;
   using API::WorkspaceProperty;
@@ -45,9 +53,6 @@ namespace CurveFitting
   */
   void GenericFit::init()
   {
-    //this->setWikiSummary("Fits a function to data in a Workspace");
-    //this->setOptionalMessage("Fits a function to data in a Workspace");
-
     declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
     declareProperty("Input","","Workspace slicing parameters. Must be consistent with the Function type (see FitFunction::setWorkspace).");
 

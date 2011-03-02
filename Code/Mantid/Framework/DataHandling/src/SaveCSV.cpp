@@ -44,6 +44,14 @@ namespace DataHandling
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(SaveCSV)
 
+/// Sets documentation strings for this algorithm
+void SaveCSV::initDocs()
+{
+  this->setWikiSummary("Saves a 1D or 2D [[workspace]] to a CSV file. ");
+  this->setOptionalMessage("Saves a 1D or 2D workspace to a CSV file.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using API::WorkspaceProperty;
@@ -64,9 +72,6 @@ SaveCSV::SaveCSV()
  */
 void SaveCSV::init()
 {
-  //this->setWikiSummary("Saves a 1D or 2D [[workspace]] to a CSV file.");
-  //this->setOptionalMessage("Saves a 1D or 2D workspace to a CSV file.");
-
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "The filename of the output CSV file" );

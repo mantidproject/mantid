@@ -81,6 +81,8 @@ namespace Mantid
       std::string m_columnSep;
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Declare properties
       void init();
       /// Execute the algorithm

@@ -14,6 +14,14 @@ namespace Mantid
 		using namespace Kernel;
 		using namespace API;
 		DECLARE_ALGORITHM(CGetDataSets)
+
+		/// Sets documentation strings for this algorithm
+		void CGetDataSets::initDocs()
+		{
+		  this->setWikiSummary("Gets the datasets associated to the selected investigation. ");
+		  this->setOptionalMessage("Gets the datasets associated to the selected investigation.");
+		}
+
 		/// Initialisation methods
 		void CGetDataSets::init()
 		{
@@ -23,10 +31,10 @@ namespace Mantid
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the result of datasets search ");
 		}
+
 		/// exec methods
 		void CGetDataSets::exec()
 		{
-						
 			ICatalog_sptr catalog_sptr;
 			try
 			{			

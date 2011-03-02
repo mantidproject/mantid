@@ -62,6 +62,8 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
 #ifndef HAS_UNORDERED_MAP_H
   /// Typedef for detector to value map
 	typedef std::map<int,bool> udet2valuem;

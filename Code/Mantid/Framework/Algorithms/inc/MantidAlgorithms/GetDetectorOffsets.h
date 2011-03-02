@@ -51,6 +51,8 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
   API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
   // Overridden Algorithm methods

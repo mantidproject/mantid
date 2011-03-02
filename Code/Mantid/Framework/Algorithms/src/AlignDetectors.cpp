@@ -19,6 +19,14 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(AlignDetectors)
 
+/// Sets documentation strings for this algorithm
+void AlignDetectors::initDocs()
+{
+  this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions. ");
+  this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::IInstrument_const_sptr;
@@ -242,9 +250,6 @@ AlignDetectors::~AlignDetectors()
 //-----------------------------------------------------------------------
 void AlignDetectors::init()
 {
-  //this->setWikiSummary("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
-  //this->setOptionalMessage("Performs a unit change from TOF to dSpacing, correcting the X values to account for small errors in the detector positions.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace unit must be TOF.
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));

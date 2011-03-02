@@ -10,6 +10,14 @@ using namespace Mantid::Algorithms;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(RebinToWorkspace)
 
+/// Sets documentation strings for this algorithm
+void RebinToWorkspace::initDocs()
+{
+  this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace ");
+  this->setOptionalMessage("Rebin a selected workspace to the same binning as a different workspace");
+}
+
+
 //---------------------------
 // Private Methods
 //---------------------------
@@ -18,9 +26,6 @@ DECLARE_ALGORITHM(RebinToWorkspace)
  */
 void RebinToWorkspace::init()
 {
-  //this->setWikiSummary("Rebin a selected workspace to the same binning as a different workspace");
-  //this->setOptionalMessage("Rebin a selected workspace to the same binning as a different workspace");
-
   //  using namespace Mantid::DataObjects;
   declareProperty(
     new WorkspaceProperty<>("WorkspaceToRebin","", Kernel::Direction::Input),

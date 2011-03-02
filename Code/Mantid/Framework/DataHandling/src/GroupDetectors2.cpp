@@ -44,6 +44,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GroupDetectors2)
 
+/// Sets documentation strings for this algorithm
+void GroupDetectors2::initDocs()
+{
+  this->setWikiSummary("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file. ");
+  this->setOptionalMessage("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

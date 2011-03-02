@@ -30,15 +30,20 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(RealFFT)
 
+/// Sets documentation strings for this algorithm
+void RealFFT::initDocs()
+{
+  this->setWikiSummary("Performs real Fast Fourier Transform ");
+  this->setOptionalMessage("Performs real Fast Fourier Transform");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void RealFFT::init()
 {
-  //this->setWikiSummary("Performs real Fast Fourier Transform");
-  //this->setOptionalMessage("Performs real Fast Fourier Transform");
-
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",

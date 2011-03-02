@@ -22,6 +22,14 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Regroup)
 
+/// Sets documentation strings for this algorithm
+void Regroup::initDocs()
+{
+  this->setWikiSummary("Regroups data with new bin boundaries. ");
+  this->setOptionalMessage("Regroups data with new bin boundaries.");
+}
+
+
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
@@ -31,9 +39,6 @@ using API::MatrixWorkspace;
 /// Initialisation method. Declares properties to be used in algorithm.
 void Regroup::init()
 {
-  //this->setWikiSummary("Regroups data with new bin boundaries.");
-  //this->setOptionalMessage("Regroups data with new bin boundaries.");
-
   API::CompositeValidator<> *wsVal = new API::CompositeValidator<>;
   wsVal->add(new API::HistogramValidator<>);
   wsVal->add(new API::CommonBinsValidator<>);

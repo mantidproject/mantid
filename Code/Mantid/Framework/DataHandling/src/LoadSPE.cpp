@@ -42,6 +42,14 @@ DECLARE_ALGORITHM(LoadSPE)
 //register the algorithm into loadalgorithm factory
 DECLARE_LOADALGORITHM(LoadSPE)
 
+/// Sets documentation strings for this algorithm
+void LoadSPE::initDocs()
+{
+  this->setWikiSummary("Loads a file written in the spe format. ");
+  this->setOptionalMessage("Loads a file written in the spe format.");
+}
+
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -51,9 +59,6 @@ DECLARE_LOADALGORITHM(LoadSPE)
  */
 void LoadSPE::init()
 {
-  //this->setWikiSummary("Loads a file written in the spe format.");
-  //this->setOptionalMessage("Loads a file written in the spe format.");
-
   declareProperty(new FileProperty("Filename","", FileProperty::Load, ".spe"),
                   "Name of the SPE file to load" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace", "", Direction::Output),

@@ -54,6 +54,8 @@ namespace Mantid
       virtual void setPropertyValue(const std::string &name, const std::string &value);
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Quick file always returns false here
       virtual bool quickFileCheck(const std::string& filePath,size_t nread,const file_header& header);
       /// file check by looking at the structure of the data file

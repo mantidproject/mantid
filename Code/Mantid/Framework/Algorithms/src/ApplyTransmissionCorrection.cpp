@@ -12,15 +12,20 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ApplyTransmissionCorrection)
 
+/// Sets documentation strings for this algorithm
+void ApplyTransmissionCorrection::initDocs()
+{
+  this->setWikiSummary("Apply a transmission correction to 2D SANS data. ");
+  this->setOptionalMessage("Apply a transmission correction to 2D SANS data.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
 void ApplyTransmissionCorrection::init()
 {
-  //this->setWikiSummary("Apply a transmission correction to 2D SANS data.");
-  //this->setOptionalMessage("Apply a transmission correction to 2D SANS data.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

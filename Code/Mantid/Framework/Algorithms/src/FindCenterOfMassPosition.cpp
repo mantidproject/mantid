@@ -21,15 +21,20 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindCenterOfMassPosition)
 
+/// Sets documentation strings for this algorithm
+void FindCenterOfMassPosition::initDocs()
+{
+  this->setWikiSummary("Finds the beam center in a 2D SANS data set. ");
+  this->setOptionalMessage("Finds the beam center in a 2D SANS data set.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
 void FindCenterOfMassPosition::init()
 {
-  //this->setWikiSummary("Finds the beam center in a 2D SANS data set.");
-  //this->setOptionalMessage("Finds the beam center in a 2D SANS data set.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

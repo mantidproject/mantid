@@ -13,6 +13,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(MoveInstrumentComponent)
 
+/// Sets documentation strings for this algorithm
+void MoveInstrumentComponent::initDocs()
+{
+  this->setWikiSummary(" Moves an instrument component to a new position. ");
+  this->setOptionalMessage("Moves an instrument component to a new position.");
+}
+
+
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;
@@ -24,9 +32,6 @@ MoveInstrumentComponent::MoveInstrumentComponent()
 /// Initialisation method.
 void MoveInstrumentComponent::init()
 {
-  //this->setWikiSummary("Moves an instrument component to a new position.");
-  //this->setOptionalMessage("Moves an instrument component to a new position.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut));
   declareProperty("ComponentName","");

@@ -81,6 +81,8 @@ namespace Mantid
       virtual const std::string category() const { return "Nexus\\Instrument";}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
 
       /// Overwrites Algorithm method. Does nothing at present
       void init();

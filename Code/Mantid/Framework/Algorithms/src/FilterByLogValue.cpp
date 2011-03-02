@@ -21,6 +21,14 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(FilterByLogValue)
 
+/// Sets documentation strings for this algorithm
+void FilterByLogValue::initDocs()
+{
+  this->setWikiSummary("Filter out events from an [[EventWorkspace]] based on a sample log value satisfying filter criteria. ");
+  this->setOptionalMessage("Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.");
+}
+
+
 using namespace Kernel;
 using namespace DataObjects;
 using namespace API;
@@ -45,9 +53,6 @@ FilterByLogValue::~FilterByLogValue()
 //-----------------------------------------------------------------------
 void FilterByLogValue::init()
 {
-  //this->setWikiSummary("Filter out events from an [[EventWorkspace]] based on a sample log value satisfying filter criteria.");
-  //this->setOptionalMessage("Filter out events from an EventWorkspace based on a sample log value satisfying filter criteria.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   //Workspace must be an Event workspace
   wsValidator->add(new API::EventWorkspaceValidator<MatrixWorkspace>);

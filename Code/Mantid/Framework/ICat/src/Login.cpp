@@ -15,6 +15,14 @@ namespace Mantid
 
 		DECLARE_ALGORITHM(Login)
 
+/// Sets documentation strings for this algorithm
+void Login::initDocs()
+{
+  this->setWikiSummary("Connects to information catalog using user name and password. ");
+  this->setOptionalMessage("Connects to information catalog using user name and password.");
+}
+
+
 		/// Init method to declare algorithm properties
 		void Login::init()
 		{

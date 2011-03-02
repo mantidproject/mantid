@@ -13,6 +13,14 @@ namespace Mantid
 		using namespace API;
 
 		DECLARE_ALGORITHM(CListInvestigationTypes)
+
+		/// Sets documentation strings for this algorithm
+		void CListInvestigationTypes::initDocs()
+		{
+		  this->setWikiSummary("Lists the name of investigationtypes from the Information catalog. ");
+		  this->setOptionalMessage("Lists the name of investigationtypes from the Information catalog.");
+		}
+
 		/// Init method
 		void CListInvestigationTypes::init()
 		{
@@ -20,15 +28,14 @@ namespace Mantid
 				Direction::Output),"List of investigation types obtained from Catalog");
 			declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
 		}
+
 		/// exec method
 		void CListInvestigationTypes::exec()
 		{
 			ICatalog_sptr catalog_sptr;
 			try
 			{
-			
 			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
-			
 			}
 			catch(Kernel::Exception::NotFoundError&)
 			{

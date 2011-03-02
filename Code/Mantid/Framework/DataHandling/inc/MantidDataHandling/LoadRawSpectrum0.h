@@ -71,6 +71,8 @@ namespace Mantid
       virtual const std::string category() const { return "Diagnostics"; }
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

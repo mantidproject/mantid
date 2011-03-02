@@ -26,15 +26,20 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFT)
 
+/// Sets documentation strings for this algorithm
+void FFT::initDocs()
+{
+  this->setWikiSummary("Performs complex Fast Fourier Transform ");
+  this->setOptionalMessage("Performs complex Fast Fourier Transform");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFT::init()
 {
-  //this->setWikiSummary("Performs complex Fast Fourier Transform");
-  //this->setOptionalMessage("Performs complex Fast Fourier Transform");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace",
                   "",Direction::Input), "The name of the input workspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace",

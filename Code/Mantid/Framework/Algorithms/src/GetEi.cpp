@@ -16,6 +16,14 @@ namespace Algorithms
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetEi)
 
+/// Sets documentation strings for this algorithm
+void GetEi::initDocs()
+{
+  this->setWikiSummary("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors. ");
+  this->setOptionalMessage("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -40,9 +48,7 @@ GetEi::GetEi() : Algorithm(),
 
 void GetEi::init()
 {
-  //this->setWikiSummary("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
-  //this->setOptionalMessage("Calculates the kinetic energy of neutrons leaving the source based on the time it takes for them to travel between two monitors.");
-// Declare required input parameters for algorithm and do some validation here
+  // Declare required input parameters for algorithm and do some validation here
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));
   val->add(new HistogramValidator<>);

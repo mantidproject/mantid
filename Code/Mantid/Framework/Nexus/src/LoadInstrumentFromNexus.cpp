@@ -20,6 +20,14 @@ namespace NeXus
 
 DECLARE_ALGORITHM(LoadInstrumentFromNexus)
 
+/// Sets documentation strings for this algorithm
+void LoadInstrumentFromNexus::initDocs()
+{
+  this->setWikiSummary(" Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used. ");
+  this->setOptionalMessage("Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -31,9 +39,6 @@ LoadInstrumentFromNexus::LoadInstrumentFromNexus()
 /// Initialisation method.
 void LoadInstrumentFromNexus::init()
 {
-  //this->setWikiSummary("Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.Later this will be extended to use any further available details about the instrument in the Nexus file.If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
-  //this->setOptionalMessage("Attempts to load information about the instrument from a Nexus file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,phi). Also adds dummy source and samplepos components to instrument.  Later this will be extended to use any further available details about the instrument in the Nexus file.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

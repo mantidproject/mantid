@@ -59,6 +59,8 @@ namespace Mantid
       virtual int fileCheck(const std::string& filePath);
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       void init();
       void exec();
 

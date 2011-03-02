@@ -29,17 +29,19 @@ using namespace Mantid::Kernel;
 DECLARE_ALGORITHM(LoadRKH)
 //register the algorithm into loadalgorithm factory
 DECLARE_LOADALGORITHM(LoadRKH)
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
+
+/// Sets documentation strings for this algorithm
+void LoadRKH::initDocs()
+{
+  this->setWikiSummary("Load a file written in the RKH format ");
+  this->setOptionalMessage("Load a file written in the RKH format");
+}
+
 /**
  * Initialise the algorithm
  */
 void LoadRKH::init()
 {
-  //this->setWikiSummary("Load a file written in the RKH format");
-  //this->setOptionalMessage("Load a file written in the RKH format");
-  
   std::vector<std::string> exts;
   exts.push_back(".txt");
   exts.push_back(".Q");

@@ -13,14 +13,19 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(AddSampleLog)
 
+/// Sets documentation strings for this algorithm
+void AddSampleLog::initDocs()
+{
+  this->setWikiSummary("Used to insert a single string into the sample in a workspace ");
+  this->setOptionalMessage("Used to insert a single string into the sample in a workspace");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
 void AddSampleLog::init()
 {
-  //this->setWikiSummary("Used to insert a single string into the sample in a workspace");
-  //this->setOptionalMessage("Used to insert a single string into the sample in a workspace");
-
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut),
     "Workspace to add the log entry to");
   declareProperty("LogName", "", new MandatoryValidator<std::string>,

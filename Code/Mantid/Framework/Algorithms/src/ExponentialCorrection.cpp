@@ -12,6 +12,14 @@ namespace Algorithms
 {
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(ExponentialCorrection)
+  
+  /// Sets documentation strings for this algorithm
+  void ExponentialCorrection::initDocs()
+  {
+    this->setWikiSummary("Corrects the data in a workspace by the value of an exponential function which is evaluated at the X value of each data point. ");
+    this->setOptionalMessage("Corrects the data in a workspace by the value of an exponential function which is evaluated at the X value of each data point.");
+  }
+  
 
   void ExponentialCorrection::defineProperties()
   {

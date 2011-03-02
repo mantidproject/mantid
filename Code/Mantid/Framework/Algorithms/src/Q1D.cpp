@@ -19,15 +19,20 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(Q1D)
 
+/// Sets documentation strings for this algorithm
+void Q1D::initDocs()
+{
+  this->setWikiSummary("Part of the 1D data reduction chain for SANS instruments. ");
+  this->setOptionalMessage("Part of the 1D data reduction chain for SANS instruments.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
 
 void Q1D::init()
 {
-  //this->setWikiSummary("Part of the 1D data reduction chain for SANS instruments.");
-  //this->setOptionalMessage("Part of the 1D data reduction chain for SANS instruments.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

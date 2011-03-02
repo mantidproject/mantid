@@ -13,6 +13,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Exponential)
+    
+    /// Sets documentation strings for this algorithm
+    void Exponential::initDocs()
+    {
+      this->setWikiSummary("The Exponential algorithm will transform the signal values ''y'' into <math>e^y</math>. The corresponding error values will be updated using <math>E_{new}=E_{old}.e^y</math>, assuming errors are Gaussian and small compared to the signal. ");
+      this->setOptionalMessage("The Exponential algorithm will transform the signal values 'y' into <math>e^y</math>. The corresponding error values will be updated using <math>E_{new}=E_{old}.e^y</math>, assuming errors are Gaussian and small compared to the signal.");
+    }
+    
 
     void Exponential::performUnaryOperation(const double XIn, const double YIn, const double EIn, double& YOut, double& EOut)
     {

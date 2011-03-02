@@ -64,6 +64,8 @@ namespace Algorithms
       virtual const std::string category() const{return "CorrectionFunctions";}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Calculate Ei from the initial guess given
       double calculateEi(const double initial_guess);
       /// Get the distance from the source of the detector at the workspace index given

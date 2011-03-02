@@ -17,11 +17,16 @@ DECLARE_ALGORITHM(CorrectToFile)
 // estimate that this algorithm will spend half it's time loading the file
 const double CorrectToFile::LOAD_TIME = 0.5;
 
+/// Sets documentation strings for this algorithm
+void CorrectToFile::initDocs()
+{
+  this->setWikiSummary("Correct data using a file in the LOQ RKH format ");
+  this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
+}
+
+
 void CorrectToFile::init()
 {
-  //this->setWikiSummary("Correct data using a file in the LOQ RKH format");
-  //this->setOptionalMessage("Correct data using a file in the LOQ RKH format");
-
   declareProperty(new API::WorkspaceProperty<>("WorkspaceToCorrect","",Kernel::Direction::Input),
     "Name of the input workspace" );
   declareProperty(new API::FileProperty("Filename","", API::FileProperty::Load),

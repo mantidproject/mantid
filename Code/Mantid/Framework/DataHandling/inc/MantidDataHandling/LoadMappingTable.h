@@ -65,6 +65,8 @@ namespace Mantid
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "DataHandling\\Instrument";}
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// The name and path of the input file
       std::string m_filename;
 

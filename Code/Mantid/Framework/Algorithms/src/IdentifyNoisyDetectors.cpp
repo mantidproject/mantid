@@ -10,6 +10,14 @@ using namespace API;
 
 DECLARE_ALGORITHM(IdentifyNoisyDetectors)
 
+/// Sets documentation strings for this algorithm
+void IdentifyNoisyDetectors::initDocs()
+{
+  this->setWikiSummary("This algorithm creates a single-column workspace where the Y values are populated withs 1s and 0s, 0 signifying that the detector is to be considered \"bad\" based on the method described below. ");
+  this->setOptionalMessage("This algorithm creates a single-column workspace where the Y values are populated withs 1s and 0s, 0 signifying that the detector is to be considered 'bad' based on the method described below.");
+}
+
+
 void IdentifyNoisyDetectors::init()
 {
   CompositeValidator<> *wsVal = new CompositeValidator<>;

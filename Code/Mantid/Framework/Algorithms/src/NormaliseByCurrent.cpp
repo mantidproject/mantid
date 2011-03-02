@@ -12,6 +12,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseByCurrent)
 
+/// Sets documentation strings for this algorithm
+void NormaliseByCurrent::initDocs()
+{
+  this->setWikiSummary(" Normalises a workspace by the proton charge. ");
+  this->setOptionalMessage("Normalises a workspace by the proton charge.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -24,9 +32,6 @@ NormaliseByCurrent::~NormaliseByCurrent() {}
 
 void NormaliseByCurrent::init()
 {
-  //this->setWikiSummary("Normalises a workspace by the proton charge.");
-  //this->setOptionalMessage("Normalises a workspace by the proton charge.");
-
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "Name of the input workspace" );

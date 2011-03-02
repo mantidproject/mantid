@@ -41,6 +41,14 @@ DECLARE_ALGORITHM(LoadCanSAS1D)
 //register the algorithm into loadalgorithm factory
 DECLARE_LOADALGORITHM(LoadCanSAS1D)
 
+/// Sets documentation strings for this algorithm
+void LoadCanSAS1D::initDocs()
+{
+  this->setWikiSummary("Load a file written in the canSAS 1-D data format ");
+  this->setOptionalMessage("Load a file written in the canSAS 1-D data format");
+}
+
+
 /// constructor
 LoadCanSAS1D::LoadCanSAS1D() : m_groupNumber(0)
 {}
@@ -52,9 +60,6 @@ LoadCanSAS1D::~LoadCanSAS1D()
 /// Overwrites Algorithm Init method.
 void LoadCanSAS1D::init()
 {
-  //this->setWikiSummary("Load a file written in the canSAS 1-D data format");
-  //this->setOptionalMessage("Load a file written in the canSAS 1-D data format");
-
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
       "The name of the input  xml file to load");
   declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace", "",

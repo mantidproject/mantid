@@ -55,6 +55,8 @@ public:
   virtual const std::string category() const { return "DataHandling";}
   
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
  /// Overridden Init method
   void init();
   /// overridden execute method

@@ -53,6 +53,8 @@ namespace Mantid
       virtual const std::string name() const { return "CreatePSDBleedMask";}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();

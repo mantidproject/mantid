@@ -68,6 +68,8 @@ public:
   virtual const std::string category() const { return "Diffraction"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
 	/// Calibration entries map
 	typedef std::map<int,std::pair<int,int> > instrcalmap;
   /// Initialisation code

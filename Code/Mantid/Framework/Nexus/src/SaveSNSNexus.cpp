@@ -33,6 +33,14 @@ namespace NeXus
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveSNSNexus)
+  
+  /// Sets documentation strings for this algorithm
+  void SaveSNSNexus::initDocs()
+  {
+    this->setWikiSummary(" Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. ");
+    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
+  }
+  
 
   using namespace Kernel;
   using namespace API;
@@ -47,9 +55,6 @@ namespace NeXus
    */
   void SaveSNSNexus::init()
   {
-    //this->setWikiSummary("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
-    //this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
-
     // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
     std::vector<std::string> exts;
     exts.push_back(".nxs");

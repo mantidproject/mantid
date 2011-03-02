@@ -12,19 +12,23 @@ namespace Mantid
 {
 namespace DataHandling
 {
-  DECLARE_ALGORITHM(RawFileInfo)
-}
-}
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataHandling;
 
+DECLARE_ALGORITHM(RawFileInfo)
+
+/// Sets documentation strings for this algorithm
+void RawFileInfo::initDocs()
+{
+  this->setWikiSummary("Extract run parameters from a [[RAW_File | RAW]] file as output properties. ");
+  this->setOptionalMessage("Extract run parameters from a  RAW file as output properties.");
+}
+
+/// Initialise
 void RawFileInfo::init()
 {
-  //this->setWikiSummary("Extract run parameters from a [[RAW_File | RAW]] file as output properties.");
-  //this->setOptionalMessage("Extract run parameters from a  RAW file as output properties.");
-
   std::vector<std::string> exts;
   exts.push_back(".raw");
   exts.push_back(".s*");
@@ -124,3 +128,5 @@ void RawFileInfo::exec()
   progress(1.0);
 }
 
+} // namespace
+}

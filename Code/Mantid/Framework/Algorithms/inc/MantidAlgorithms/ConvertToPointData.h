@@ -44,6 +44,8 @@ namespace Mantid
       virtual const std::string name() const { return "ConvertToPointData"; }
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Returns true if the algorithm needs to be run. 
       bool isProcessingRequired(const API::MatrixWorkspace_sptr inputWS) const;
       /// Checks the input workspace is consistent, throwing if not

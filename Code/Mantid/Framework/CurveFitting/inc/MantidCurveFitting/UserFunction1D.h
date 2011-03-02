@@ -91,6 +91,8 @@ namespace Mantid
           static double* AddVariable(const char *varName, void *palg);
 
       private:
+        /// Sets documentation strings for this algorithm
+        virtual void initDocs();
           /// muParser instance
           mu::Parser m_parser;
           /// Used as 'x' variable in m_parser.

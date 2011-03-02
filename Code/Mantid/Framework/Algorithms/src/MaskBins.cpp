@@ -14,6 +14,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(MaskBins)
 
+/// Sets documentation strings for this algorithm
+void MaskBins::initDocs()
+{
+  this->setWikiSummary("Marks bins in a workspace as being masked. ");
+  this->setOptionalMessage("Marks bins in a workspace as being masked.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Mantid;
@@ -26,9 +34,6 @@ MaskBins::MaskBins() : API::Algorithm(), m_startX(0.0), m_endX(0.0) {}
 
 void MaskBins::init()
 {
-  //this->setWikiSummary("Marks bins in a workspace as being masked. For EventWorkspaces, this deletes the events within that range.");
-  //this->setOptionalMessage("Marks bins in a workspace as being masked. For EventWorkspaces, this deletes the events within that range.");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
   

@@ -68,6 +68,8 @@ public:
                                     const std::map<int,double> &offsets, const std::map<int,bool> &selects, std::map<int,int> &groups);
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();
   void exec();

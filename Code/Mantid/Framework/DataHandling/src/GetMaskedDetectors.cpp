@@ -14,6 +14,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(GetMaskedDetectors)
 
+/// Sets documentation strings for this algorithm
+void GetMaskedDetectors::initDocs()
+{
+  this->setWikiSummary("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with [[MaskDetectors]] or it's like. ");
+  this->setOptionalMessage("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with MaskDetectors or it's like.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -25,9 +33,6 @@ GetMaskedDetectors::~GetMaskedDetectors() {}
 
 void GetMaskedDetectors::init()
 {
-  //this->setWikiSummary("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with [[MaskDetectors]] or it's like.");
-  //this->setOptionalMessage("This algorithm returns a std::vector<int> containing the detector ID's of detectors that have been masked with MaskDetectors or it's like.");
-
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","", Direction::Input),
     "The name of the workspace that will be used as input for the algorithm" );

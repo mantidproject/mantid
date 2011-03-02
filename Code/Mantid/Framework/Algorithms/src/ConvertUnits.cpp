@@ -20,6 +20,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(ConvertUnits)
 
+/// Sets documentation strings for this algorithm
+void ConvertUnits::initDocs()
+{
+  this->setWikiSummary("Performs a unit change on the X values of a [[workspace]] ");
+  this->setOptionalMessage("Performs a unit change on the X values of a workspace");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -37,9 +45,6 @@ ConvertUnits::~ConvertUnits()
 /// Initialisation method
 void ConvertUnits::init()
 {
-  //this->setWikiSummary("Performs a unit change on the X values of a [[workspace]]");
-  //this->setOptionalMessage("Performs a unit change on the X values of a workspace");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>);
   wsValidator->add(new HistogramValidator<>);

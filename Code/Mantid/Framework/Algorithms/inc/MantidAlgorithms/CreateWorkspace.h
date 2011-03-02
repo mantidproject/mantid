@@ -54,6 +54,8 @@ public:
   virtual int version() const { return (1); } ///< @return version number of algorithm
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// Initialise the Algorithm (declare properties)
   void init();
   /// Execute the Algorithm

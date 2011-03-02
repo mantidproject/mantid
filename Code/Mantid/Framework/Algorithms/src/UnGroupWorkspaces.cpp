@@ -10,15 +10,20 @@ namespace Mantid
     
     DECLARE_ALGORITHM(UnGroupWorkspace)
     
+    /// Sets documentation strings for this algorithm
+    void UnGroupWorkspace::initDocs()
+    {
+      this->setWikiSummary("Takes a group workspace as input and ungroups the workspace. ");
+      this->setOptionalMessage("Takes a group workspace as input and ungroups the workspace.");
+    }
+    
+    
     using namespace Kernel;
     using namespace API;
     
     /// Initialisation method
     void UnGroupWorkspace::init()
     {
-      //this->setWikiSummary("Takes a group workspace as input and ungroups the workspace.");
-      //this->setOptionalMessage("Takes a group workspace as input and ungroups the workspace.");
-
       const AnalysisDataServiceImpl & data_store = AnalysisDataService::Instance();
       // Get the list of workspaces in the ADS
       std::set<std::string> workspaceList = data_store.getObjectNames();

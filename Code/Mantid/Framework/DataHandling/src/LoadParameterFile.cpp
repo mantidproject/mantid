@@ -37,6 +37,14 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadParameterFile)
 
+/// Sets documentation strings for this algorithm
+void LoadParameterFile::initDocs()
+{
+  this->setWikiSummary(" Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]). ");
+  this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF).");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -48,9 +56,6 @@ LoadParameterFile::LoadParameterFile() : Algorithm()
 /// Initialisation method.
 void LoadParameterFile::init()
 {
-  //this->setWikiSummary("Loads instrument parameters into a [[workspace]]. where these parameters are associated component names as defined in Instrument Definition File ([[InstrumentDefinitionFile|IDF]]).");
-  //this->setOptionalMessage("Loads instrument parameters into a workspace. where these parameters are associated component names as defined in Instrument Definition File (IDF).");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

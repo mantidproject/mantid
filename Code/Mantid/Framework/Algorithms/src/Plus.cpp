@@ -14,6 +14,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Plus)
+    
+    /// Sets documentation strings for this algorithm
+    void Plus::initDocs()
+    {
+      this->setWikiSummary("The Plus algorithm will add the data values and calculate the corresponding [[Error Values|error values]] in two compatible workspaces.  {{BinaryOperation|verb=added|prep=to|symbol=<math>+</math>}} ");
+      this->setOptionalMessage("The Plus algorithm will add the data values and calculate the corresponding error values in two compatible workspaces. ");
+    }
+    
 
     // ===================================== HISTOGRAM BINARY OPERATIONS ==========================================
     //---------------------------------------------------------------------------------------------

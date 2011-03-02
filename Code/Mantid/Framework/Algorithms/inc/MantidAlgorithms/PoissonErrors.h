@@ -59,6 +59,8 @@ public:
   virtual const std::string category() const { return "SANS";}
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                               const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);

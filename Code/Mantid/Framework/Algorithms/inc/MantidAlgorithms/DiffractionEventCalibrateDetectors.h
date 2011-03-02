@@ -58,6 +58,8 @@ public:
   void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, API::MatrixWorkspace_sptr inputW);
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();

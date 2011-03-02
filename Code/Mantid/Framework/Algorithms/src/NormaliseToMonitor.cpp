@@ -18,6 +18,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseToMonitor)
 
+/// Sets documentation strings for this algorithm
+void NormaliseToMonitor::initDocs()
+{
+  this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum. ");
+  this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
+}
+
+
 using namespace Kernel;
 using namespace DataObjects;
 using namespace API;
@@ -34,9 +42,6 @@ NormaliseToMonitor::~NormaliseToMonitor() {}
 
 void NormaliseToMonitor::init()
 {
-  //this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum.");
-  //this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
-
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new HistogramValidator<>);
   val->add(new RawCountValidator<>);

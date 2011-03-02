@@ -12,13 +12,18 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToDistribution)
 
+/// Sets documentation strings for this algorithm
+void ConvertToDistribution::initDocs()
+{
+  this->setWikiSummary("Makes a histogram workspace a distribution i.e. divides by the bin width. ");
+  this->setOptionalMessage("Makes a histogram workspace a distribution i.e. divides by the bin width.");
+}
+
+
 using namespace API;
 
 void ConvertToDistribution::init()
 {
-  //this->setWikiSummary("Makes a histogram workspace a distribution i.e. divides by the bin width.");
-  //this->setOptionalMessage("Makes a histogram workspace a distribution i.e. divides by the bin width.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new HistogramValidator<>);
   wsValidator->add(new RawCountValidator<>);

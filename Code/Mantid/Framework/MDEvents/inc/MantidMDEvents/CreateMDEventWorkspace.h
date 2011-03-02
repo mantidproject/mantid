@@ -31,6 +31,8 @@ namespace MDEvents
     virtual const std::string category() const { return "MDEvents";}
     
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
     void init();
     void exec();
 

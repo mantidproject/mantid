@@ -74,6 +74,8 @@ namespace Mantid
       virtual int fileCheck(const std::string& filePath);
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// If a workspace group is created this is set from empty to the root name of the members, the name of the workspace group members up to and including the _
       std::string m_groupMembersBase;
       /// When a workspace group is being written this is the number of the last member that was written

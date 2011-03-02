@@ -25,6 +25,14 @@ namespace Mantid
   {
     // Register the algorithm into the algorithm factory
     DECLARE_ALGORITHM(LoadDAE)
+    
+    /// Sets documentation strings for this algorithm
+    void LoadDAE::initDocs()
+    {
+      this->setWikiSummary("Loads data from the ISIS DATA acquisition system and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+      this->setOptionalMessage("Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace (Workspace2D class).");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -74,9 +82,6 @@ namespace Mantid
     /// Initialisation method.
     void LoadDAE::init()
     {
-      //this->setWikiSummary("Loads data from the ISIS DATA acquisition system and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      //this->setOptionalMessage("Loads data from the ISIS DATA acquisition system and stores it in a 2D workspace (Workspace2D class).");
-
       declareProperty("DAEname","", new MandatoryValidator<std::string>(),
         "The name of and path to the input DAE host.");
 

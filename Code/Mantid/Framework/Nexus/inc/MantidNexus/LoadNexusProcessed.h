@@ -68,6 +68,8 @@ namespace Mantid
       virtual int fileCheck(const std::string& filePath);
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// specifies the order that algorithm data is listed in workspaces' histories
       enum AlgorithmHist
       {

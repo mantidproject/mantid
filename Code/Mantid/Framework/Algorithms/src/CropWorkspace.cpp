@@ -18,6 +18,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropWorkspace)
 
+/// Sets documentation strings for this algorithm
+void CropWorkspace::initDocs()
+{
+  this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace. ");
+  this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -32,9 +40,6 @@ CropWorkspace::~CropWorkspace() {}
 
 void CropWorkspace::init()
 {
-  //this->setWikiSummary("Extracts a 'block' from a workspace and places it in a new workspace.");
-  //this->setOptionalMessage("Extracts a 'block' from a workspace and places it in a new workspace.");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "The input Workspace2D" );
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),

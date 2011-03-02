@@ -63,6 +63,8 @@ namespace Mantid
       virtual const std::string category() const { return "CurveFitting";}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       // Overridden Fit1D methods
       void declareParameters();
       void function(const double* in, double* out, const double* xValues, const int& nData);

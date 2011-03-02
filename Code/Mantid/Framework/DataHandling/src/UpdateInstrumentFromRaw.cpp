@@ -21,6 +21,14 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(UpdateInstrumentFromRaw)
 
+/// Sets documentation strings for this algorithm
+void UpdateInstrumentFromRaw::initDocs()
+{
+  this->setWikiSummary(" Updating detector positions initially loaded in from Instrument Defintion File ([[InstrumentDefinitionFile|IDF]]) from information in raw files. Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the correct detector positions in the IDF in the first place. It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.  Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for example face the sample perfectly after this algorithm has been applied. ");
+  this->setOptionalMessage("Updating detector positions initially loaded in from Instrument Defintion File (IDF) from information in raw files. Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the correct detector positions in the IDF in the first place. It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.  Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for example face the sample perfectly after this algorithm has been applied.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -32,9 +40,6 @@ UpdateInstrumentFromRaw::UpdateInstrumentFromRaw()
 /// Initialisation method.
 void UpdateInstrumentFromRaw::init()
 {
-  //this->setWikiSummary("Updating detector positions initially loaded in from Instrument Defintion File ([[InstrumentDefinitionFile|IDF]]) from information in raw files. Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the correct detector positions in the IDF in the first place. It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for example face the sample perfectly after this algorithm has been applied.");
-  //this->setOptionalMessage("Updating detector positions initially loaded in from Instrument Defintion File (IDF) from information in raw files. Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the correct detector positions in the IDF in the first place. It is assumed that the positions specified in the raw file are all with respect to the a coordinate system defined with its origin at the sample position.  Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for example face the sample perfectly after this algorithm has been applied.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

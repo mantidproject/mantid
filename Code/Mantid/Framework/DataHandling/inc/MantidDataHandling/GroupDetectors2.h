@@ -110,6 +110,8 @@ public:
   virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// provides a function that expands pairs of integers separated with a hyphen into a list of all the integers between those values
   class RangeHelper
   {

@@ -20,6 +20,14 @@ namespace NeXus
 
 DECLARE_ALGORITHM(LoadNexusMonitors)
 
+/// Sets documentation strings for this algorithm
+void LoadNexusMonitors::initDocs()
+{
+  this->setWikiSummary(" Load all monitors from a NeXus file into a workspace. ");
+  this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
+}
+
+
 LoadNexusMonitors::LoadNexusMonitors() : Algorithm(),
 nMonitors(0)
 {
@@ -32,9 +40,6 @@ LoadNexusMonitors::~LoadNexusMonitors()
 /// Initialisation method.
 void LoadNexusMonitors::init()
 {
-  //this->setWikiSummary("Load all monitors from a NeXus file into a workspace.");
-  //this->setOptionalMessage("Load all monitors from a NeXus file into a workspace.");
-
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load,
       ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"

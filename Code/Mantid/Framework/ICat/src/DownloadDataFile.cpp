@@ -38,6 +38,14 @@ namespace Mantid
 
 		DECLARE_ALGORITHM(CDownloadDataFile)
 
+/// Sets documentation strings for this algorithm
+void CDownloadDataFile::initDocs()
+{
+  this->setWikiSummary("Downloads the given data files from the data server ");
+  this->setOptionalMessage("Downloads the given data files from the data server");
+}
+
+
 		/// declaring algorithm properties 
 		void CDownloadDataFile::init()
 		{			

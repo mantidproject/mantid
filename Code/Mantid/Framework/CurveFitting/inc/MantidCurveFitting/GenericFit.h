@@ -74,6 +74,8 @@ namespace Mantid
       API::IFitFunction* getFunction()const{return m_function;}
 
     protected:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();

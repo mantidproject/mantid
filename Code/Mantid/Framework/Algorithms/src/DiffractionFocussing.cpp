@@ -15,6 +15,14 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing)
 
+/// Sets documentation strings for this algorithm
+void DiffractionFocussing::initDocs()
+{
+  this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]]. ");
+  this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
+}
+
+
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace_sptr;
@@ -26,9 +34,6 @@ using API::FileProperty;
  */
 void DiffractionFocussing::init()
 {
-  //this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]].");
-  //this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
-
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
     "The input workspace" );

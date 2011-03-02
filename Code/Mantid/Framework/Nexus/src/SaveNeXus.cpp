@@ -22,6 +22,14 @@ namespace NeXus
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(SaveNexus)
 
+/// Sets documentation strings for this algorithm
+void SaveNexus::initDocs()
+{
+  this->setWikiSummary("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file. SaveNexus currently just invokes [[SaveNexusProcessed]]. ");
+  this->setOptionalMessage("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file. SaveNexus currently just invokes SaveNexusProcessed.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -34,9 +42,6 @@ SaveNexus::SaveNexus() : Algorithm() {}
  */
 void SaveNexus::init()
 {
-  //this->setWikiSummary("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file.SaveNexus currently just invokes [[SaveNexusProcessed]].");
-  //this->setOptionalMessage("The SaveNexus algorithm will write the given Mantid workspace to a Nexus file. SaveNexus currently just invokes SaveNexusProcessed.");
-
   // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
   std::vector<std::string> exts;
   exts.push_back(".nxs");

@@ -19,11 +19,21 @@ namespace Mantid
 		using namespace API;
 
 		DECLARE_ALGORITHM(CSearch)
+
+		/// Sets documentation strings for this algorithm
+		void CSearch::initDocs()
+		{
+		  this->setWikiSummary("Searches investigations ");
+		  this->setOptionalMessage("Searches investigations");
+		}
+
 		/// Initialisation method.
 		void CSearch::init()
 		{
 			BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
 			mustBePositive->setLower(0.0);
+
+
 			
 			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
 			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");

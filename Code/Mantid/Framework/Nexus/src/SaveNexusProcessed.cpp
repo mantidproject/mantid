@@ -30,6 +30,14 @@ namespace NeXus
 
   // Register the algorithm into the algorithm factory
   DECLARE_ALGORITHM(SaveNexusProcessed)
+  
+  /// Sets documentation strings for this algorithm
+  void SaveNexusProcessed::initDocs()
+  {
+    this->setWikiSummary("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by [[SaveNexus]]. ");
+    this->setOptionalMessage("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by SaveNexus.");
+  }
+  
 
 
   /// Empty default constructor
@@ -43,9 +51,6 @@ namespace NeXus
    */
   void SaveNexusProcessed::init()
   {
-    //this->setWikiSummary("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file.SaveNexusProcessed may be invoked by [[SaveNexus]].");
-    //this->setOptionalMessage("The SaveNexusProcessed algorithm will write the given Mantid workspace to a Nexus file. SaveNexusProcessed may be invoked by SaveNexus.");
-
     declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "Name of the workspace to be saved");
     // Declare required input parameters for algorithm

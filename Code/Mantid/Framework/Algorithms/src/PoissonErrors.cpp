@@ -12,6 +12,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(PoissonErrors)
+    
+    /// Sets documentation strings for this algorithm
+    void PoissonErrors::initDocs()
+    {
+      this->setWikiSummary("Calculates the gaussian approxiamtion of Poisson error based on a matching workspace containing the original counts. ");
+      this->setOptionalMessage("Calculates the gaussian approxiamtion of Poisson error based on a matching workspace containing the original counts.");
+    }
+    
 
     /** Performs a simple check to see if the sizes of two workspaces are identically sized
     * @param lhs :: the first workspace to compare

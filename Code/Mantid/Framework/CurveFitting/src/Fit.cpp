@@ -25,6 +25,14 @@ namespace CurveFitting
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(Fit)
+  
+  /// Sets documentation strings for this algorithm
+  void Fit::initDocs()
+  {
+    this->setWikiSummary("Fits a function to a spectrum in a Workspace2D ");
+    this->setOptionalMessage("Fits a function to a spectrum in a Workspace2D");
+  }
+  
 
   using namespace Kernel;
   using API::WorkspaceProperty;
@@ -44,9 +52,6 @@ namespace CurveFitting
   */
   void Fit::init()
   {
-    //this->setWikiSummary("Fits a function to a spectrum in a Workspace2D");
-    //this->setOptionalMessage("Fits a function to a spectrum in a Workspace2D");
-
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "Name of the input Workspace");
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();

@@ -10,22 +10,24 @@ namespace Mantid
 {
 namespace DataHandling
 {
+using namespace Kernel;
+using namespace API;
 
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveDASC)
-using namespace Kernel;
-using namespace API;
-//---------------------------------------------------
-// Private member functions
-//---------------------------------------------------
+
+/// Sets documentation strings for this algorithm
+void SaveDASC::initDocs()
+{
+  this->setWikiSummary("Exports the data in a [[workspace]] into an ASCII file that is readable by the application DAVE ");
+  this->setOptionalMessage("Exports the data in a workspace into an ASCII file that is readable by the application DAVE");
+}
+
 /**
  * Initialise the algorithm
  */
 void SaveDASC::init()
 {
-  //this->setWikiSummary("Exports the data in a [[workspace]] into an ASCII file that is readable by the application DAVE");
-  //this->setOptionalMessage("Exports the data in a workspace into an ASCII file that is readable by the application DAVE");
-
   API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
   // Data must havec common bins
   wsValidator->add(new API::CommonBinsValidator<>);

@@ -94,6 +94,8 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   virtual const std::string category() const{return "CorrectionFunctions";}
 
  private:
+   /// Sets documentation strings for this algorithm
+   virtual void initDocs();
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency

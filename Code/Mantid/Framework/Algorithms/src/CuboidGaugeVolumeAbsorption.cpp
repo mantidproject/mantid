@@ -11,6 +11,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CuboidGaugeVolumeAbsorption)
 
+/// Sets documentation strings for this algorithm
+void CuboidGaugeVolumeAbsorption::initDocs()
+{
+  this->setWikiSummary("Calculates bin-by-bin correction factors for attenuation due to absorption and (single) scattering within a cuboid shaped 'gauge volume' of a generic sample. The sample shape can be defined by, e.g., the [[CreateSampleShape]] algorithm. ");
+  this->setOptionalMessage("Calculates bin-by-bin correction factors for attenuation due to absorption and (single) scattering within a cuboid shaped 'gauge volume' of a generic sample. The sample shape can be defined by, e.g., the CreateSampleShape algorithm.");
+}
+
+
 using namespace Kernel;
 using namespace Geometry;
 using namespace API;

@@ -21,6 +21,14 @@ namespace Mantid
     
     // Register the class
     DECLARE_ALGORITHM(CreatePSDBleedMask)
+    
+    /// Sets documentation strings for this algorithm
+    void CreatePSDBleedMask::initDocs()
+    {
+      this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra. ");
+      this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
+    }
+    
 
     using API::MatrixWorkspace_sptr;
     using API::MatrixWorkspace_const_sptr;
@@ -42,9 +50,6 @@ namespace Mantid
     /// Initialize the algorithm properties
     void CreatePSDBleedMask::init()
     {
-      //this->setWikiSummary("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
-      //this->setOptionalMessage("Runs a diagnostic test for saturation of PSD tubes and creates a MaskWorkspace marking the failed tube spectra.");
-
       using API::WorkspaceProperty;
       using Kernel::Direction;
       using Kernel::BoundedValidator;

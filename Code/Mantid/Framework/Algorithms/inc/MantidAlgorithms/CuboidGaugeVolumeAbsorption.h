@@ -52,6 +52,8 @@ public:
   virtual int version() const { return (1); }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   std::string sampleXML();
   void initialiseCachedDistances();
 };

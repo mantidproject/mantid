@@ -15,6 +15,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(CorrectKiKf)
 
+/// Sets documentation strings for this algorithm
+void CorrectKiKf::initDocs()
+{
+  this->setWikiSummary("Performs <math>k_i/k_f</math> multiplication, in order to transform differential scattering cross section into dynamic structure factor. Both <math>E_i</math> and <math>E_f</math> must be positive. However, if this requirement is not met, it will give an error only if the data is not 0. This allows applying the algorithms to rebinned data, where one can rebin in Direct EMode to energies higher than EFixed. If no value is defined for EFixed, the algorithm will try to find <math>E_i</math> in the workspace properties for direct geometry spectrometry, or in the instrument definition, for indirect geometry spectrometry ");
+  this->setOptionalMessage("Performs <math>k_i/k_f</math> multiplication, in order to transform differential scattering cross section into dynamic structure factor. Both <math>E_i</math> and <math>E_f</math> must be positive. However, if this requirement is not met, it will give an error only if the data is not 0. This allows applying the algorithms to rebinned data, where one can rebin in Direct EMode to energies higher than EFixed. If no value is defined for EFixed, the algorithm will try to find <math>E_i</math> in the workspace properties for direct geometry spectrometry, or in the instrument definition, for indirect geometry spectrometry");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -33,9 +41,6 @@ CorrectKiKf::~CorrectKiKf()
 /// Initialisation method
 void CorrectKiKf::init()
 {
-  //this->setWikiSummary("Performs <math>k_i/k_f</math> multiplication, in order to transform differential scattering cross section into dynamic structure factor. Both <math>E_i</math> and <math>E_f</math> must be positive. However, if this requirement is not met, it will give an error only if the data is not 0. This allows applying the algorithms to rebinned data, where one can rebin in Direct EMode to energies higher than EFixed. If no value is defined for EFixed, the algorithm will try to find <math>E_i</math> in the workspace properties for direct geometry spectrometry, or in the instrument definition, for indirect geometry spectrometry");
-  //this->setOptionalMessage("Performs <math>k_i/k_f</math> multiplication, in order to transform differential scattering cross section into dynamic structure factor. Both <math>E_i</math> and <math>E_f</math> must be positive. However, if this requirement is not met, it will give an error only if the data is not 0. This allows applying the algorithms to rebinned data, where one can rebin in Direct EMode to energies higher than EFixed. If no value is defined for EFixed, the algorithm will try to find <math>E_i</math> in the workspace properties for direct geometry spectrometry, or in the instrument definition, for indirect geometry spectrometry");
-  
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("DeltaE"));
 

@@ -92,6 +92,8 @@ namespace Mantid
       void setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pElem);
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       void init();
       void exec();
 

@@ -56,6 +56,8 @@ namespace Mantid
     class DLLExport LoadEventNexus : public API::IDataFileChecker
     {
     public:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Default constructor
       LoadEventNexus();
 

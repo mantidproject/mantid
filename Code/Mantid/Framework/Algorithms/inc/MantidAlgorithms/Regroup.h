@@ -62,6 +62,8 @@ public:
                         std::vector<double>& xnew,
                         std::vector<int> &xoldIndex);
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();

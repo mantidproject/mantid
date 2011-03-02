@@ -11,14 +11,19 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SumRowColumn)
 
+/// Sets documentation strings for this algorithm
+void SumRowColumn::initDocs()
+{
+  this->setWikiSummary("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank. ");
+  this->setOptionalMessage("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.");
+}
+
+
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
 void SumRowColumn::init()
 {
-  //this->setWikiSummary("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.");
-  //this->setOptionalMessage("SANS-specific algorithm which gives a single spectrum containing the total counts in either each row or each column of pixels in a square LOQ or SANS2D detector bank.");
-
   // Assume input workspace has correct spectra in it - no more and no less
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input));
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));

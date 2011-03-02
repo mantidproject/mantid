@@ -91,6 +91,14 @@ namespace Mantid
 
     //register the algorithm into loadalgorithm factory
      DECLARE_LOADALGORITHM(LoadSpice2D)
+     
+     /// Sets documentation strings for this algorithm
+     void LoadSpice2D::initDocs()
+     {
+       this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance. ");
+       this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
+     }
+     
 
     /// Constructor
     LoadSpice2D::LoadSpice2D() {}
@@ -101,9 +109,6 @@ namespace Mantid
     /// Overwrites Algorithm Init method.
     void LoadSpice2D::init()
     {
-      //this->setWikiSummary("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-      //this->setOptionalMessage("Loads a SANS data file produce by the HFIR instruments at ORNL. The instrument geometry is also loaded. The center of the detector is placed at (0,0,D), where D is the sample-to-detector distance.");
-
       declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".xml"),
           "The name of the input xml file to load");
       declareProperty(new API::WorkspaceProperty<API::Workspace>("OutputWorkspace", "",

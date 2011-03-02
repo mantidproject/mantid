@@ -15,6 +15,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(PointByPointVCorrection)
 
+/// Sets documentation strings for this algorithm
+void PointByPointVCorrection::initDocs()
+{
+  this->setWikiSummary("Spectrum by spectrum division for vanadium normalisation correction. ");
+  this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -27,9 +35,6 @@ PointByPointVCorrection::~PointByPointVCorrection() {}
 
 void PointByPointVCorrection::init()
 {
-  //this->setWikiSummary("Spectrum by spectrum division for vanadium normalisation correction.");
-  //this->setOptionalMessage("Spectrum by spectrum division for vanadium normalisation correction.");
-
   declareProperty(new WorkspaceProperty<>("InputW1","",Direction::Input),
                   "Name of the Sample workspace" );
   declareProperty(new WorkspaceProperty<>("InputW2","",Direction::Input),

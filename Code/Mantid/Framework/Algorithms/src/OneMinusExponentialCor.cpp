@@ -12,6 +12,14 @@ namespace Algorithms
 {
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(OneMinusExponentialCor)
+  
+  /// Sets documentation strings for this algorithm
+  void OneMinusExponentialCor::initDocs()
+  {
+    this->setWikiSummary("Corrects the data in a workspace by one minus the value of an exponential function. ");
+    this->setOptionalMessage("Corrects the data in a workspace by one minus the value of an exponential function.");
+  }
+  
 
   void OneMinusExponentialCor::defineProperties()
   {

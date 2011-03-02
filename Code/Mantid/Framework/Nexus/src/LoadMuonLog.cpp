@@ -18,6 +18,14 @@ namespace NeXus
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadMuonLog)
 
+/// Sets documentation strings for this algorithm
+void LoadMuonLog::initDocs()
+{
+  this->setWikiSummary("Load log data from within Muon Nexus files into a [[workspace]]. ");
+  this->setOptionalMessage("Load log data from within Muon Nexus files into a workspace.");
+}
+
+
 using namespace Kernel;
 using Geometry::IInstrument;
 using Geometry::IInstrument_sptr;
@@ -36,9 +44,6 @@ LoadMuonLog::LoadMuonLog()
 /// Initialisation method.
 void LoadMuonLog::init()
 {
-  //this->setWikiSummary("Load log data from within Muon Nexus files into a [[workspace]].");
-  //this->setOptionalMessage("Load log data from within Muon Nexus files into a workspace.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

@@ -113,6 +113,8 @@ namespace Mantid
       std::vector<int> m_groupings;
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
       

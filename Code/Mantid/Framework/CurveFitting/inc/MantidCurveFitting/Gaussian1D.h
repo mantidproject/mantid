@@ -66,6 +66,8 @@ namespace Mantid
 
 
     protected:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// overwrite base class methods
       virtual void function(const double* in, double* out, const double* xValues, const int& nData);
       virtual void declareParameters();

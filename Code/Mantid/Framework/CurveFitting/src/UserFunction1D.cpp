@@ -13,6 +13,14 @@ namespace CurveFitting
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(UserFunction1D)
 
+/// Sets documentation strings for this algorithm
+void UserFunction1D::initDocs()
+{
+  this->setWikiSummary("Fits a histogram from a workspace to a user defined function. ");
+  this->setOptionalMessage("Fits a histogram from a workspace to a user defined function.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

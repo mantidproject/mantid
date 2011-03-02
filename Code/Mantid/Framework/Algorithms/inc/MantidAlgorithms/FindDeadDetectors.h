@@ -73,6 +73,8 @@ namespace Mantid
       virtual const std::string category() const { return "Diagnostics";}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       // Overridden Algorithm methods
       void init();
       void exec();

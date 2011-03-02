@@ -21,6 +21,14 @@ namespace Mantid
 		// Register the algorithm into the algorithm factory
 		DECLARE_ALGORITHM(FindDetectorsInShape)
 
+/// Sets documentation strings for this algorithm
+void FindDetectorsInShape::initDocs()
+{
+  this->setWikiSummary("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument. ");
+  this->setOptionalMessage("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
+}
+
+
 		using namespace Kernel;
 		using namespace API;
     using namespace Geometry;
@@ -33,10 +41,7 @@ namespace Mantid
 
 		void FindDetectorsInShape::init()
 		{
-		  //this->setWikiSummary("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
-		  //this->setOptionalMessage("An algorithm for finding which detectors are contained within a user defined 3 dimensional shape within the instrument.");
-
-			declareProperty(
+							declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","",Direction::Input),
         "Name of the input workspace" );
 			declareProperty("ShapeXML", "", new MandatoryValidator<std::string>(),

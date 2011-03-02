@@ -14,6 +14,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Multiply)
+    
+    /// Sets documentation strings for this algorithm
+    void Multiply::initDocs()
+    {
+      this->setWikiSummary("The Multiply algorithm will multiply the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces.  {{BinaryOperation|verb=multiplied|prep=by|symbol=<math>\\times</math>}} ");
+      this->setOptionalMessage("The Multiply algorithm will multiply the data values and calculate the corresponding error values of two compatible workspaces.  ");
+    }
+    
 
     void Multiply::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)

@@ -60,6 +60,8 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// Overwrites Algorithm method.
       void init();
       /// Overwrites Algorithm method

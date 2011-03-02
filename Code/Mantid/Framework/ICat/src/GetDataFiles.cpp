@@ -16,6 +16,14 @@ namespace Mantid
 		using namespace API;
 
 		DECLARE_ALGORITHM(CGetDataFiles)
+
+		/// Sets documentation strings for this algorithm
+		void CGetDataFiles::initDocs()
+		{
+		  this->setWikiSummary("Gets the files associated to the selected investigation . ");
+		  this->setOptionalMessage("Gets the files associated to the selected investigation .");
+		}
+
 		/// Initialising the algorithm
 		void CGetDataFiles::init()
 		{
@@ -28,6 +36,7 @@ namespace Mantid
 			declareProperty("FilterLogFiles",false,"Use this boolean option to filter log files from the list of files associated to the investigation.\n"
 				"The default option is set to false and loads all the files assocaited to the selected investigation.");
 		}
+
 		//execute the algorithm
 		void CGetDataFiles::exec()
 		{

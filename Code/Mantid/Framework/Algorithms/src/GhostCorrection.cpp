@@ -22,6 +22,14 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GhostCorrection)
+    
+    /// Sets documentation strings for this algorithm
+    void GhostCorrection::initDocs()
+    {
+      this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an EventWorkspace. ");
+      this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -59,9 +67,6 @@ namespace Mantid
     */
     void GhostCorrection::init()
     {
-      //this->setWikiSummary("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
-      //this->setOptionalMessage("Perform ghost correction for older POWGEN detectors on an EventWorkspace.");
-
       nGroups = 0;
 
       //Input workspace must be in dSpacing and be an EventWorkspace

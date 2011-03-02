@@ -9,6 +9,14 @@ namespace MDEvents
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
   
+  /// Sets documentation strings for this algorithm
+  void MakeDiffractionMDEventWorkspace::initDocs()
+  {
+    this->setWikiSummary(" Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. ");
+    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
+  }
+  
+  
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 

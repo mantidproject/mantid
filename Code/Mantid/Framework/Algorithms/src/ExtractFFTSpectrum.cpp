@@ -13,6 +13,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ExtractFFTSpectrum)
 
+/// Sets documentation strings for this algorithm
+void ExtractFFTSpectrum::initDocs()
+{
+  this->setWikiSummary("This algorithm performs a [[FFT|Fast Fourier Transform]] on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace. ");
+  this->setOptionalMessage("This algorithm performs a Fast Fourier Transform on each spectrum in a workspace, and from the result takes the indicated spectrum and places it into the OutputWorkspace, so that you end up with one result spectrum for each input spectrum in the same workspace.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

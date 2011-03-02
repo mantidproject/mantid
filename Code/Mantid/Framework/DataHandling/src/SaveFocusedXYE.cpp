@@ -12,6 +12,14 @@ using namespace Mantid::DataHandling;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveFocusedXYE)
 
+/// Sets documentation strings for this algorithm
+void SaveFocusedXYE::initDocs()
+{
+  this->setWikiSummary("Saves a focused data set (usually the output of a diffraction focusing routine but not exclusively) into a three column format containing X_i, Y_i, and E_i. ");
+  this->setOptionalMessage("Saves a focused data set (usually the output of a diffraction focusing routine but not exclusively) into a three column format containing X_i, Y_i, and E_i.");
+}
+
+
 //---------------------------------------------------
 // Private member functions
 //---------------------------------------------------
@@ -20,9 +28,6 @@ DECLARE_ALGORITHM(SaveFocusedXYE)
  */
 void SaveFocusedXYE::init()
 {
-  //this->setWikiSummary("Saves a focused data set (usually the output of a diffraction focusing routine but not exclusively) into a three column format containing X_i, Y_i, and E_i.");
-  //this->setOptionalMessage("Saves a focused data set (usually the output of a diffraction focusing routine but not exclusively) into a three column format containing X_i, Y_i, and E_i.");
-
   declareProperty(
     new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input),
     "The name of the workspace containing the data you wish to save" );

@@ -31,6 +31,14 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadNexusProcessed)
 DECLARE_LOADALGORITHM(LoadNexusProcessed)
 
+/// Sets documentation strings for this algorithm
+void LoadNexusProcessed::initDocs()
+{
+  this->setWikiSummary("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by [[LoadNexus]] if it is given a Nexus file of this type. ");
+  this->setOptionalMessage("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by LoadNexus if it is given a Nexus file of this type.");
+}
+
+
 using namespace DataObjects;
 using namespace Kernel;
 using namespace API;
@@ -54,9 +62,6 @@ LoadNexusProcessed::~LoadNexusProcessed()
  */
 void LoadNexusProcessed::init()
 {
-  //this->setWikiSummary("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace.The data is placed in the named workspace.LoadNexusProcessed may be invoked by [[LoadNexus]] if it is given a Nexus file of this type.");
-  //this->setOptionalMessage("The LoadNexusProcessed algorithm will read the given Nexus Processed data file containing a Mantid Workspace. The data is placed in the named workspace. LoadNexusProcessed may be invoked by LoadNexus if it is given a Nexus file of this type.");
-
   // Declare required input parameters for algorithm
   std::vector<std::string> exts;
   exts.push_back(".nxs");

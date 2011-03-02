@@ -63,6 +63,8 @@ public:
   virtual const std::string category() const { return "DataHandling\\Detectors";}
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();
   void exec();

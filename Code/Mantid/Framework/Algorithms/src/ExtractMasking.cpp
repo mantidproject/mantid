@@ -12,6 +12,14 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(ExtractMasking)
+    
+    /// Sets documentation strings for this algorithm
+    void ExtractMasking::initDocs()
+    {
+      this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace. ");
+      this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
+    }
+    
 
     using Kernel::Direction;
     using Geometry::IDetector_sptr;
@@ -26,9 +34,6 @@ namespace Mantid
      */
     void ExtractMasking::init()
     {
-      //this->setWikiSummary("Extracts the masking from a given workspace and places it in a new workspace.");
-      //this->setOptionalMessage("Extracts the masking from a given workspace and places it in a new workspace.");
-
       declareProperty(
 	new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",
 					       Direction::Input)

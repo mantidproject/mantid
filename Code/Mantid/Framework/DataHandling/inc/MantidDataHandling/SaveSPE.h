@@ -58,6 +58,8 @@ public:
   static const double MASK_FLAG;
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// Initialisation code
   void init();
   ///Execution code

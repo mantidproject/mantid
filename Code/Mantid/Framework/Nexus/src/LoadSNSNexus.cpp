@@ -31,6 +31,14 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadSNSNexus)
 DECLARE_LOADALGORITHM(LoadSNSNexus)
 
+/// Sets documentation strings for this algorithm
+void LoadSNSNexus::initDocs()
+{
+  this->setWikiSummary(" Algorithm for loading a SNS histogram NeXus file. This algorithm ''works'', but use it at your own risk. ");
+  this->setOptionalMessage("Algorithm for loading a SNS histogram NeXus file. This algorithm 'works', but use it at your own risk.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -40,9 +48,6 @@ LoadSNSNexus::LoadSNSNexus():m_L1(0) {}
 /// Initialisation method.
 void LoadSNSNexus::init()
 {
-  //this->setWikiSummary("Algorithm for loading a SNS histogram NeXus file. This algorithm ''works'', but use it at your own risk.");
-  //this->setOptionalMessage("Algorithm for loading a SNS histogram NeXus file. This algorithm 'works', but use it at your own risk.");
-
     declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
 		    "The name of the SNS Nexus file to load" );      
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));

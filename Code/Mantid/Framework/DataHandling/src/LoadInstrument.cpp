@@ -51,6 +51,14 @@ namespace Mantid
   {
 
     DECLARE_ALGORITHM(LoadInstrument)
+    
+    /// Sets documentation strings for this algorithm
+    void LoadInstrument::initDocs()
+    {
+      this->setWikiSummary(" Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. After the IDF has been read this algorithm will attempt to run the sub-algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory [[Properties_File|Mantid property]]). ");
+      this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the sub-algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -66,9 +74,6 @@ namespace Mantid
     /// Initialisation method.
     void LoadInstrument::init()
     {
-      //this->setWikiSummary("Loads an Instrument Definition File ([[InstrumentDefinitionFile|IDF]]) into a [[workspace]]. After the IDF has been read this algorithm will attempt to run the sub-algorithm [[LoadParameterFile]]; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory [[Properties_File|Mantid property]]).");
-      //this->setOptionalMessage("Loads an Instrument Definition File (IDF) into a workspace. After the IDF has been read this algorithm will attempt to run the sub-algorithm LoadParameterFile; where if IDF filename is of the form IDENTIFIER_Definition.xml then the instrument parameters in the file named IDENTIFIER_Parameters.xml would be loaded (in the directory specified by the parameterDefinition.directory Mantid property).");
-
       // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
       declareProperty(
         new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

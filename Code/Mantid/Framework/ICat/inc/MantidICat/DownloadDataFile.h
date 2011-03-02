@@ -68,6 +68,8 @@ namespace Mantid
 			void testDownload(const std::string& URL,const std::string& fileName);
 
 		private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
 			/// Overwrites Algorithm method.
 			void init();
 			/// Overwrites Algorithm method

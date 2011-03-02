@@ -20,6 +20,14 @@ using API::Progress;
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MuonRemoveExpDecay)
 
+/// Sets documentation strings for this algorithm
+void MuonRemoveExpDecay::initDocs()
+{
+  this->setWikiSummary("This algorithm removes the exponential decay from a muon workspace. ");
+  this->setOptionalMessage("This algorithm removes the exponential decay from a muon workspace.");
+}
+
+
 /** Initialisation method. Declares properties to be used in algorithm.
  *
  */

@@ -30,6 +30,14 @@ namespace DataHandling
 DECLARE_ALGORITHM(LoadRaw3)
 DECLARE_LOADALGORITHM(LoadRaw3)
 
+/// Sets documentation strings for this algorithm
+void LoadRaw3::initDocs()
+{
+  this->setWikiSummary("Loads a data file in ISIS [[RAW_File | RAW]] format and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+  this->setOptionalMessage("Loads a data file in ISIS  RAW format and stores it in a 2D workspace (Workspace2D class).");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

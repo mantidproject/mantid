@@ -31,6 +31,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadLog)
 
+/// Sets documentation strings for this algorithm
+void LoadLog::initDocs()
+{
+  this->setWikiSummary("Load ISIS log file(s) into a [[workspace]]. ");
+  this->setOptionalMessage("Load ISIS log file(s) into a workspace.");
+}
+
+
 using namespace Kernel;
 using API::WorkspaceProperty;
 using API::MatrixWorkspace;
@@ -46,9 +54,6 @@ LoadLog::LoadLog()
 /// Initialisation method.
 void LoadLog::init()
 {
-  //this->setWikiSummary("Load ISIS log file(s) into a [[workspace]].");
-  //this->setOptionalMessage("Load ISIS log file(s) into a workspace.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

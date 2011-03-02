@@ -21,6 +21,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SANSSolidAngleCorrection)
 
+/// Sets documentation strings for this algorithm
+void SANSSolidAngleCorrection::initDocs()
+{
+  this->setWikiSummary("Performs solid angle correction on SANS 2D data. ");
+  this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -28,9 +36,6 @@ using namespace DataObjects;
 
 void SANSSolidAngleCorrection::init()
 {
-  //this->setWikiSummary("Performs solid angle correction on SANS 2D data.");
-  //this->setOptionalMessage("Performs solid angle correction on SANS 2D data.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new HistogramValidator<>);

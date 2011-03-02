@@ -60,6 +60,8 @@ public:
   virtual const std::string category() const { return "DataHandling\\Logs"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// Initialisation code
   void init();
   /// Execution code

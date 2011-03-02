@@ -20,6 +20,14 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(GetDetectorOffsets)
+    
+    /// Sets documentation strings for this algorithm
+    void GetDetectorOffsets::initDocs()
+    {
+      this->setWikiSummary("Creates a [[CalFile|.cal file]] containing offsets for each detector. ");
+      this->setOptionalMessage("Creates a CalFile|.cal file containing offsets for each detector.");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -38,9 +46,6 @@ namespace Mantid
      */
     void GetDetectorOffsets::init()
     {
-      //this->setWikiSummary("Creates a [[CalFile|.cal file]] containing offsets for each detector.");
-      //this->setOptionalMessage("Creates a CalFile|.cal file containing offsets for each detector.");
-
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
           new WorkspaceUnitValidator<>("dSpacing")),"A 2D workspace with X values of d-spacing");

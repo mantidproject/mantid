@@ -15,14 +15,19 @@ using namespace Mantid::API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(DefineGaugeVolume)
 
+/// Sets documentation strings for this algorithm
+void DefineGaugeVolume::initDocs()
+{
+  this->setWikiSummary(" Defines a geometrical shape object to be used as the gauge volume in the [[AbsorptionCorrection]] algorithm. ");
+  this->setOptionalMessage("Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.");
+}
+
+
 /**
  * Initialize the algorithm
  */
 void DefineGaugeVolume::init()
 {
-  //this->setWikiSummary("Defines a geometrical shape object to be used as the gauge volume in the [[AbsorptionCorrection]] algorithm.");
-  //this->setOptionalMessage("Defines a geometrical shape object to be used as the gauge volume in the AbsorptionCorrection algorithm.");
-
   declareProperty(new WorkspaceProperty<>("Workspace","",Kernel::Direction::InOut),
     "The workspace with which to associate the defined gauge volume");
   declareProperty("ShapeXML","",new Kernel::MandatoryValidator<std::string>(),

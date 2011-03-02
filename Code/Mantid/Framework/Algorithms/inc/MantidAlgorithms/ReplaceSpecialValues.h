@@ -61,6 +61,8 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden UnaryOperation methods
   void defineProperties();
   void retrieveProperties();

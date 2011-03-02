@@ -232,6 +232,9 @@ public:
   /// Returns the cancellation state
   bool getCancel() const { return m_cancel; }
 
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs() {};
+
   /// function returns an optional message that will be displayed in the default GUI, at the top.
   const std::string getOptionalMessage() const { return m_OptionalMessage;}
 

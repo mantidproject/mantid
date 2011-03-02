@@ -15,6 +15,14 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(ChangeBinOffset)
+    
+    /// Sets documentation strings for this algorithm
+    void ChangeBinOffset::initDocs()
+    {
+      this->setWikiSummary("Adjusts all the time bin values in a workspace by a specified amount. ");
+      this->setOptionalMessage("Adjusts all the time bin values in a workspace by a specified amount.");
+    }
+    
 
     /**
      * Default constructor
@@ -37,9 +45,6 @@ namespace Mantid
     */
     void ChangeBinOffset::init()
     {
-      //this->setWikiSummary("Adjusts all the time bin values in a workspace by a specified amount.");
-      //this->setOptionalMessage("Adjusts all the time bin values in a workspace by a specified amount.");
-
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
         "Name of the input workspace");
       declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),

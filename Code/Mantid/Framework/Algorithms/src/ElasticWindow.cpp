@@ -12,6 +12,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ElasticWindow)
 
+/// Sets documentation strings for this algorithm
+void ElasticWindow::initDocs()
+{
+  this->setWikiSummary("This algorithm performs an integration over an energy range, with the option to subtract a background over a second range, then transposes the result into a single-spectrum workspace with units in Q and Q^2. ");
+  this->setOptionalMessage("This algorithm performs an integration over an energy range, with the option to subtract a background over a second range, then transposes the result into a single-spectrum workspace with units in Q and Q^2.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

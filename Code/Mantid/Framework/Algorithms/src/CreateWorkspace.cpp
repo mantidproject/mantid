@@ -15,6 +15,14 @@ namespace Algorithms
 
 DECLARE_ALGORITHM(CreateWorkspace)
 
+/// Sets documentation strings for this algorithm
+void CreateWorkspace::initDocs()
+{
+  this->setWikiSummary("This algorithm constructs a [[MatrixWorkspace]] when passed a vector for each of the X, Y, and E data values. The unit for the X Axis can optionally be specified as any of the units in the Kernel's UnitFactory.  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be in a single vector for input). ");
+  this->setOptionalMessage("This algorithm constructs a MatrixWorkspace when passed a vector for each of the X, Y, and E data values. The unit for the X Axis can optionally be specified as any of the units in the Kernel's UnitFactory.  Multiple spectra may be created by supplying the NSpec Property (integer, default 1). When this is provided the vectors are split into equal-sized spectra (all X, Y, E values must still be in a single vector for input).");
+}
+
+
 /// Default (empty) constructor
 CreateWorkspace::CreateWorkspace() : API::Algorithm()
 {}

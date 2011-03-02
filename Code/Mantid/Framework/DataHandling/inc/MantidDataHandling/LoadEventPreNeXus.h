@@ -124,6 +124,8 @@ public:
   void setMaxEventsToLoad(std::size_t max_events_to_load);
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   
 
   /// Initialisation code

@@ -74,6 +74,8 @@ namespace Mantid
 			/// Algorithm's category for identification overriding a virtual method
 			virtual const std::string category() const { return "ICat"; }
 		private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
 			/// Overwrites Algorithm init method.
 			void init();
 			/// Overwrites Algorithm exec method

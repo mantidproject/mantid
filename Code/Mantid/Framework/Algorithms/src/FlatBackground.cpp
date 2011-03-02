@@ -16,14 +16,19 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FlatBackground)
 
+/// Sets documentation strings for this algorithm
+void FlatBackground::initDocs()
+{
+  this->setWikiSummary("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum. ");
+  this->setOptionalMessage("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
 void FlatBackground::init()
 {
-  //this->setWikiSummary("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum.");
-  //this->setOptionalMessage("Finds a constant value fit to an appropriate range of each desired spectrum and subtracts that value from the entire spectrum.");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,
     new HistogramValidator<> ),
     "The input workspace must either have constant width bins or is a distribution\n"

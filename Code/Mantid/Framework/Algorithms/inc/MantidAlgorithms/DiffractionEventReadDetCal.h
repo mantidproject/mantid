@@ -56,6 +56,8 @@ public:
   /// Function to optimize
   void center(double x, double y, double z, std::string detname, std::string inname);
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();

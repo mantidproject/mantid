@@ -12,6 +12,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(FindDetectorsOutsideLimits)
+    
+    /// Sets documentation strings for this algorithm
+    void FindDetectorsOutsideLimits::initDocs()
+    {
+      this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum. ");
+      this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
+    }
+    
       
     using namespace Kernel;
     using namespace API;
@@ -20,9 +28,6 @@ namespace Mantid
     /// Initialisation method.
     void FindDetectorsOutsideLimits::init()
     {
-      //this->setWikiSummary("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
-      //this->setOptionalMessage("Identifies histograms and their detectors that have total numbers of counts over a user defined maximum or less than the user define minimum.");
-
       declareProperty(
           new WorkspaceProperty<MatrixWorkspace>("InputWorkspace","",Direction::Input),
           "Name of the input workspace2D" );

@@ -14,6 +14,14 @@ namespace Mantid
   {
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Divide)
+    
+    /// Sets documentation strings for this algorithm
+    void Divide::initDocs()
+    {
+      this->setWikiSummary("The Divide algorithm will divide the data values and calculate the corresponding [[Error Values|error values]] of two compatible workspaces.  {{BinaryOperation|verb=divided|prep=by|symbol=<math>\\div</math>}} ");
+      this->setOptionalMessage("The Divide algorithm will divide the data values and calculate the corresponding error values of two compatible workspaces.");
+    }
+    
 
     void Divide::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                        const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)

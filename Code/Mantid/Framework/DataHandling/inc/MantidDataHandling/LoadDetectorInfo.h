@@ -63,6 +63,8 @@ public:
   virtual const std::string category() const{return "DataHandling\\Detectors";}
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// stores the information that is to be saved in the parameter map for a detector
   struct detectorInfo
   {

@@ -35,6 +35,14 @@ namespace Algorithms
 
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(ReadGroupsFromFile)
+  
+  /// Sets documentation strings for this algorithm
+  void ReadGroupsFromFile::initDocs()
+  {
+    this->setWikiSummary("Read a diffraction [[CalFile|calibration file]] (*.cal) or an [[GroupDetectors|XML grouping file]] (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method. ");
+    this->setOptionalMessage("Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
+  }
+  
 
   using namespace Kernel;
   using API::WorkspaceProperty;
@@ -52,9 +60,6 @@ namespace Algorithms
    */
   void ReadGroupsFromFile::init()
   {
-    //this->setWikiSummary("Read a diffraction [[CalFile|calibration file]] (*.cal) or an [[GroupDetectors|XML grouping file]] (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
-    //this->setOptionalMessage("Read a diffraction calibration file (*.cal) or an XML grouping file (*.xml) and an instrument name, and output a 2D workspace containing on the Y-axis the values of the Group each detector belongs to.  This is used to visualise the grouping scheme for powder diffractometers, where a large number of detectors are grouped together. The output 2D workspace can be visualize using the show instrument method.");
-
 
     // The name of the instrument
     declareProperty(new WorkspaceProperty<MatrixWorkspace> ("InstrumentWorkspace", "", Direction::Input),

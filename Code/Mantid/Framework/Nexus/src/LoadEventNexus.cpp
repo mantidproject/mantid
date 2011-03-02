@@ -38,6 +38,14 @@ namespace NeXus
 DECLARE_ALGORITHM(LoadEventNexus)
 DECLARE_LOADALGORITHM(LoadEventNexus)
 
+/// Sets documentation strings for this algorithm
+void LoadEventNexus::initDocs()
+{
+  this->setWikiSummary("Loads Event NeXus (produced by the SNS) files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval. ");
+  this->setOptionalMessage("Loads Event NeXus (produced by the SNS) files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -533,9 +541,6 @@ int LoadEventNexus::fileCheck(const std::string& filePath)
 /// Initialisation method.
 void LoadEventNexus::init()
 {
-  //this->setWikiSummary("Loads Event NeXus (produced by the SNS) files and stores it in an [[EventWorkspace]]. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
-  //this->setOptionalMessage("Loads Event NeXus (produced by the SNS) files and stores it in an EventWorkspace. Optionally, you can filter out events falling outside a range of times-of-flight and/or a time interval.");
-
   this->declareProperty(new FileProperty("Filename", "", FileProperty::Load, ".nxs"),
       "The name (including its full or relative path) of the Nexus file to\n"
       "attempt to load. The file extension must either be .nxs or .NXS" );

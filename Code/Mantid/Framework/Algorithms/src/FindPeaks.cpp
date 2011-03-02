@@ -15,6 +15,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(FindPeaks)
 
+/// Sets documentation strings for this algorithm
+void FindPeaks::initDocs()
+{
+  this->setWikiSummary("Searches for peaks in a dataset. ");
+  this->setOptionalMessage("Searches for peaks in a dataset.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -28,9 +36,6 @@ FindPeaks::FindPeaks() : API::Algorithm(),m_progress(NULL) {}
  */
 void FindPeaks::init()
 {
-  //this->setWikiSummary("Searches for peaks in a dataset.");
-  //this->setOptionalMessage("Searches for peaks in a dataset.");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input),
     "Name of the workspace to search" );
 

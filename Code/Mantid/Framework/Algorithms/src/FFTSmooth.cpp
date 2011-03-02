@@ -14,15 +14,20 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(FFTSmooth)
 
+/// Sets documentation strings for this algorithm
+void FFTSmooth::initDocs()
+{
+  this->setWikiSummary("Performs smoothing of a spectrum using various filters. ");
+  this->setOptionalMessage("Performs smoothing of a spectrum using various filters.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
 /// Initialisation method. Declares properties to be used in algorithm.
 void FFTSmooth::init()
 {
-  //this->setWikiSummary("Performs smoothing of a spectrum using various filters.");
-  //this->setOptionalMessage("Performs smoothing of a spectrum using various filters.");
-
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace",
         "",Direction::Input), "The name of the input workspace.");
       declareProperty(new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace",

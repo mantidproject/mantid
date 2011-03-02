@@ -83,6 +83,8 @@ namespace Mantid
       const boost::shared_ptr<Kernel::Property> getPeriodsProperty() const {return m_periods;}
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
 
       /// Overwrites Algorithm method.
       void init();

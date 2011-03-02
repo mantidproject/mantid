@@ -12,6 +12,14 @@ namespace MDEvents
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateMDEventWorkspace)
   
+  /// Sets documentation strings for this algorithm
+  void CreateMDEventWorkspace::initDocs()
+  {
+    this->setWikiSummary(" Creates an empty MDEventWorkspace with a given number of dimensions. ");
+    this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
+  }
+  
+  
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 

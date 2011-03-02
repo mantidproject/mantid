@@ -14,6 +14,14 @@ namespace CurveFitting
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(Gaussian1D)
 
+/// Sets documentation strings for this algorithm
+void Gaussian1D::initDocs()
+{
+  this->setWikiSummary("== Deprecation notice == Instead of using this algorithm to fit a Gaussian please use the [[Fit]] algorithm where the Function parameter of this algorithm is used to specified the fitting function, including selecting a [[Gaussian]]. ");
+  this->setOptionalMessage("== Deprecation notice == Instead of using this algorithm to fit a Gaussian please use the Fit algorithm where the Function parameter of this algorithm is used to specified the fitting function, including selecting a Gaussian.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 

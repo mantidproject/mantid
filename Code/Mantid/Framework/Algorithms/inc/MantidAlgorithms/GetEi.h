@@ -58,6 +58,8 @@ public:
   virtual const std::string category() const{return "CorrectionFunctions";}
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   /// name of the tempory workspace that we create and use
   API::MatrixWorkspace_sptr m_tempWS;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 

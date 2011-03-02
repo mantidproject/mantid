@@ -89,6 +89,8 @@ public:
   static bool readCalFile(const std::string& groupingFileName, std::map<int,double>& offsets, std::map<int,int>& group);
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();
   void exec();

@@ -60,6 +60,8 @@ namespace Mantid
     virtual const std::string category() const { return "Nexus"; }
 
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
     /// Intialisation code
     void init();
     /// Execution code

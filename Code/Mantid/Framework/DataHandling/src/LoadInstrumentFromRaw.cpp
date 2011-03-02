@@ -21,6 +21,14 @@ namespace DataHandling
 
 DECLARE_ALGORITHM(LoadInstrumentFromRaw)
 
+/// Sets documentation strings for this algorithm
+void LoadInstrumentFromRaw::initDocs()
+{
+  this->setWikiSummary(" Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.  If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used. ");
+  this->setOptionalMessage("Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::Instrument;
@@ -32,9 +40,6 @@ LoadInstrumentFromRaw::LoadInstrumentFromRaw()
 /// Initialisation method.
 void LoadInstrumentFromRaw::init()
 {
-  //this->setWikiSummary("Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.If the L1 source - sample distance is not available in the file then it may be read from the [[Properties File|mantid properties]] file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
-  //this->setOptionalMessage("Attempts to load information about the instrument from a ISIS raw file. In particular attempt to read L2 and 2-theta detector position values and add detectors which are positioned relative to the sample in spherical coordinates as (r,theta,phi)=(L2,2-theta,0.0). Also adds dummy source and samplepos components to instrument.  If the L1 source - sample distance is not available in the file then it may be read from the mantid properties file using the key instrument.L1, as a final fallback a default distance of 10m will be used.");
-
   // When used as a sub-algorithm the workspace name is not used - hence the "Anonymous" to satisfy the validator
   declareProperty(
     new WorkspaceProperty<MatrixWorkspace>("Workspace","Anonymous",Direction::InOut),

@@ -17,6 +17,14 @@ namespace Mantid
 
     // Register algorithm with AlgorithmFactory
     DECLARE_ALGORITHM(SaveVTK)
+    
+    /// Sets documentation strings for this algorithm
+    void SaveVTK::initDocs()
+    {
+      this->setWikiSummary(" Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview. ");
+      this->setOptionalMessage("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
+    }
+    
 
     using namespace Kernel;
     using namespace DataObjects;
@@ -32,9 +40,6 @@ namespace Mantid
     */
     void SaveVTK::init()
     {
-      //this->setWikiSummary("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
-      //this->setOptionalMessage("Save a workspace out to a VTK file format for use with 3D visualisation tools such as Paraview.");
-
       //Declare mandatory properties
       declareProperty(new FileProperty("Filename", "", FileProperty::Save),
 		      "The name to use when writing the file");

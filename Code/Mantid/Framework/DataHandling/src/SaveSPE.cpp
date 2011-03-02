@@ -14,6 +14,14 @@ namespace Mantid
 
     // Register the algorithm into the AlgorithmFactory
     DECLARE_ALGORITHM(SaveSPE)
+    
+    /// Sets documentation strings for this algorithm
+    void SaveSPE::initDocs()
+    {
+      this->setWikiSummary("Writes a workspace into a file the spe format. ");
+      this->setOptionalMessage("Writes a workspace into a file the spe format.");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -41,9 +49,6 @@ namespace Mantid
     */
     void SaveSPE::init()
     {
-      //this->setWikiSummary("Writes a workspace into a file the spe format.");
-      //this->setOptionalMessage("Writes a workspace into a file the spe format.");
-
       // Data must be in Energy Transfer and common bins
       API::CompositeValidator<> *wsValidator = new API::CompositeValidator<>;
       wsValidator->add(new API::WorkspaceUnitValidator<>("DeltaE"));

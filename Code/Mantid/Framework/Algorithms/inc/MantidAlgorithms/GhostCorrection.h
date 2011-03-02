@@ -129,6 +129,8 @@ public:
   virtual const std::string category() const { return "Diffraction";}
 
 protected:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   virtual void exec();

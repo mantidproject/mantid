@@ -21,6 +21,14 @@ using namespace API;
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(SaveGSS)
 
+/// Sets documentation strings for this algorithm
+void SaveGSS::initDocs()
+{
+  this->setWikiSummary("Saves a focused data set into a three column GSAS format. ");
+  this->setOptionalMessage("Saves a focused data set into a three column GSAS format.");
+}
+
+
 const std::string RALF("RALF");
 const std::string SLOG("SLOG");
 
@@ -32,9 +40,6 @@ const std::string SLOG("SLOG");
  */
 void SaveGSS::init()
 {
-  //this->setWikiSummary("Saves a focused data set into a three column GSAS format.");
-  //this->setOptionalMessage("Saves a focused data set into a three column GSAS format.");
-
   // Data must be in TOF
   declareProperty(new API::WorkspaceProperty<>("InputWorkspace", "", Kernel::Direction::Input,
     new API::WorkspaceUnitValidator<>("TOF")),

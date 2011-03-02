@@ -81,6 +81,8 @@ namespace Mantid
 	static const int LINESIZE = 10;
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       /// when this is set to false reading and writing to the detector map is disabled, 
       /// this is done if there is no map in the workspace
       bool m_usableMaskMap;

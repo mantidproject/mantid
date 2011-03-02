@@ -13,6 +13,14 @@ namespace Algorithms
 
 DECLARE_ALGORITHM(Unwrap)
 
+/// Sets documentation strings for this algorithm
+void Unwrap::initDocs()
+{
+  this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range. ");
+  this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using Geometry::IInstrument_const_sptr;
@@ -28,9 +36,6 @@ Unwrap::~Unwrap()
 /// Initialisation method
 void Unwrap::init()
 {
-  //this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
-  //this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new HistogramValidator<>);

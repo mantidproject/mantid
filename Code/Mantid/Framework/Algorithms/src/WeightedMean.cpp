@@ -8,6 +8,14 @@ namespace Algorithms
 // Algorithm must be declared
 DECLARE_ALGORITHM(WeightedMean)
 
+/// Sets documentation strings for this algorithm
+void WeightedMean::initDocs()
+{
+  this->setWikiSummary("An algorithm to calculate the weighted mean of two workspaces. ");
+  this->setOptionalMessage("An algorithm to calculate the weighted mean of two workspaces.");
+}
+
+
 bool WeightedMean::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
 {
   if ( lhs->YUnit() != rhs->YUnit() )

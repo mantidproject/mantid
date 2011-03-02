@@ -65,6 +65,8 @@ public:
   virtual const std::string category() const { return "General"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
   void init();
   void exec();
 

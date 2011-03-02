@@ -83,6 +83,8 @@ public:
   virtual const std::string category() const { return "Diagnostics"; }
 
 private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
 	/// Map containing the detector entries found in the *.cal file. The key is the udet number, the value of is a pair of <group,selected>.
 	#ifndef HAS_UNORDERED_MAP_H
 	typedef std::map<int,std::pair<int,int> > calmap;

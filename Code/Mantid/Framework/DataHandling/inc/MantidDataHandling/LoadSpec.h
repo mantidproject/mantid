@@ -54,6 +54,8 @@ namespace Mantid
       virtual const std::string category() const { return "DataHandling"; }
 
     private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
       void init();
       void exec();
 

@@ -14,6 +14,14 @@ namespace Algorithms
 {
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(PolynomialCorrection)
+  
+  /// Sets documentation strings for this algorithm
+  void PolynomialCorrection::initDocs()
+  {
+    this->setWikiSummary("Corrects the data in a workspace by the value of a polynomial function which is evaluated at the X value of each data point. ");
+    this->setOptionalMessage("Corrects the data in a workspace by the value of a polynomial function which is evaluated at the X value of each data point.");
+  }
+  
 
   void PolynomialCorrection::defineProperties()
   {

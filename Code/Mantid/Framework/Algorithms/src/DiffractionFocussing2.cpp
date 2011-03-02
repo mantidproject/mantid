@@ -25,6 +25,14 @@ namespace Algorithms
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(DiffractionFocussing2)
 
+/// Sets documentation strings for this algorithm
+void DiffractionFocussing2::initDocs()
+{
+  this->setWikiSummary("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a [[CalFile]]. ");
+  this->setOptionalMessage("Algorithm to focus powder diffraction data into a number of histograms according to a grouping scheme defined in a CalFile.");
+}
+
+
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D;
 using DataObjects::Workspace2D_sptr;

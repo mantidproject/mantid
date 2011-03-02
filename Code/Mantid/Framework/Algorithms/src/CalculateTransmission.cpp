@@ -14,6 +14,14 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CalculateTransmission)
 
+/// Sets documentation strings for this algorithm
+void CalculateTransmission::initDocs()
+{
+  this->setWikiSummary("Calculates the transmission correction, as a function of wavelength, for a SANS instrument. ");
+  this->setOptionalMessage("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 
@@ -25,9 +33,6 @@ CalculateTransmission::~CalculateTransmission()
 
 void CalculateTransmission::init()
 {
-  //this->setWikiSummary("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
-  //this->setOptionalMessage("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
-
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("Wavelength"));
   wsValidator->add(new CommonBinsValidator<>);

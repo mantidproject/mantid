@@ -11,6 +11,14 @@ namespace Mantid
     
     // Register the algorithm
     DECLARE_ALGORITHM(DeleteWorkspace);
+    
+    /// Sets documentation strings for this algorithm
+    void DeleteWorkspace::initDocs()
+    {
+      this->setWikiSummary("Removes a workspace from memory. ");
+      this->setOptionalMessage("Removes a workspace from memory.");
+    }
+    
 
     //--------------------------------------------------------------------------
     // Private member functions
@@ -19,9 +27,6 @@ namespace Mantid
     /// Initialize the algorithm properties
     void DeleteWorkspace::init()
     {
-      //this->setWikiSummary("Removes a workspace from memory.");
-      //this->setOptionalMessage("Removes a workspace from memory.");
-
       declareProperty(new API::WorkspaceProperty<API::Workspace> ("Workspace", "", 
 								  Kernel::Direction::Input), "Name of the workspace to delete.");
     }

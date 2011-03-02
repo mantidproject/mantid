@@ -21,6 +21,14 @@ namespace Mantid
     DECLARE_ALGORITHM(LoadAscii)
     //register the algorithm into loadalgorithm factory
     DECLARE_LOADALGORITHM(LoadAscii)
+    
+    /// Sets documentation strings for this algorithm
+    void LoadAscii::initDocs()
+    {
+      this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+      this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -351,9 +359,6 @@ namespace Mantid
     /// Initialisation method.
     void LoadAscii::init()
     {
-      //this->setWikiSummary("Loads data from a text file and stores it in a 2D [[workspace]] ([[Workspace2D]] class).");
-      //this->setOptionalMessage("Loads data from a text file and stores it in a 2D workspace (Workspace2D class).");
-
       std::vector<std::string> exts;
       exts.push_back(".dat");
       exts.push_back(".txt");

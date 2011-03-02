@@ -17,6 +17,14 @@ namespace DataHandling
 // Register the algorithm into the algorithm factory
 DECLARE_ALGORITHM(LoadDetectorInfo)
 
+/// Sets documentation strings for this algorithm
+void LoadDetectorInfo::initDocs()
+{
+  this->setWikiSummary("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace. ");
+  this->setOptionalMessage("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace Geometry;
@@ -35,9 +43,6 @@ LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
 
 void LoadDetectorInfo::init()
 {
-  //this->setWikiSummary("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace.");
-  //this->setOptionalMessage("Subtracts detector delay times from the time of flight X values in the workspace and modifies its information about detector pressures and wall thicknesses. This information can read from a DAT file or RAW file that corresponds to the same run or series of experimental runs as the workspace.");
-
   // Declare required input parameters for algorithm
   CompositeValidator<> *val = new CompositeValidator<>;
   val->add(new WorkspaceUnitValidator<>("TOF"));

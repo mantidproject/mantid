@@ -67,6 +67,8 @@ namespace DataHandling
     virtual const std::string category() const { return "DataHandling";}
 
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
     
     /// Override virtual init function
     void init();

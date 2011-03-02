@@ -12,6 +12,14 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(MergeRuns)
 
+/// Sets documentation strings for this algorithm
+void MergeRuns::initDocs()
+{
+  this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces. ");
+  this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -26,9 +34,6 @@ MergeRuns::~MergeRuns() {if(m_progress) delete m_progress;m_progress=NULL;}
 /// Initialisation method
 void MergeRuns::init()
 {
-  //this->setWikiSummary("Combines the data contained in an arbitrary number of input workspaces.");
-  //this->setOptionalMessage("Combines the data contained in an arbitrary number of input workspaces.");
-
   // declare arbitrary number of input workspaces as a list of strings at the moment
   declareProperty(
     new ArrayProperty<std::string>("InputWorkspaces", new MandatoryValidator<std::vector<std::string> >),

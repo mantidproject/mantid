@@ -10,6 +10,14 @@ namespace Mantid
   {
 
     DECLARE_ALGORITHM(ConvertToHistogram);
+    
+    /// Sets documentation strings for this algorithm
+    void ConvertToHistogram::initDocs()
+    {
+      this->setWikiSummary("Converts a workspace containing point data into one containing histograms. ");
+      this->setOptionalMessage("Converts a workspace containing point data into one containing histograms.");
+    }
+    
 
     using API::MatrixWorkspace_sptr;
     using Mantid::MantidVec;

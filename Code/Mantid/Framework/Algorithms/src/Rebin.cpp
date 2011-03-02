@@ -15,6 +15,14 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(Rebin)
+    
+    /// Sets documentation strings for this algorithm
+    void Rebin::initDocs()
+    {
+      this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a [[Workspace2D]]. ");
+      this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a Workspace2D.");
+    }
+    
 
     using namespace Kernel;
     using namespace API;
@@ -28,9 +36,6 @@ namespace Mantid
     */
     void Rebin::init()
     {
-      //this->setWikiSummary("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a [[Workspace2D]].");
-      //this->setOptionalMessage("Rebins data with new X bin boundaries. For EventWorkspaces, you can rebin in-place by keeping the same output name, or specify a different output to convert to a Workspace2D.");
-
       declareProperty(
         new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
         "Workspace containing the input data");

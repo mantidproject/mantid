@@ -12,15 +12,20 @@ namespace Algorithms
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(ConvertToMatrixWorkspace)
 
+/// Sets documentation strings for this algorithm
+void ConvertToMatrixWorkspace::initDocs()
+{
+  this->setWikiSummary(" Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values. ");
+  this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
+}
+
+
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 
 void ConvertToMatrixWorkspace::init()
 {
-  //this->setWikiSummary("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
-  //this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
-
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output Workspace2D.");
 }

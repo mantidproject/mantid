@@ -13,6 +13,14 @@ namespace Algorithms
 {
   // Register the class into the algorithm factory
   DECLARE_ALGORITHM(PowerLawCorrection)
+  
+  /// Sets documentation strings for this algorithm
+  void PowerLawCorrection::initDocs()
+  {
+    this->setWikiSummary("Corrects the data and error values on a workspace by the value of an exponential function which is evaluated at the X value of each data point: c0*x^C1. The data and error values are multiplied by the value of this function. ");
+    this->setOptionalMessage("Corrects the data and error values on a workspace by the value of an exponential function which is evaluated at the X value of each data point: c0*x^C1. The data and error values are multiplied by the value of this function.");
+  }
+  
 
   void PowerLawCorrection::defineProperties()
   {

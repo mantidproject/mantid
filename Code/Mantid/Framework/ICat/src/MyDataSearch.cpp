@@ -13,14 +13,22 @@ namespace Mantid
 		using namespace API;
 
 		DECLARE_ALGORITHM(CMyDataSearch)
+
+		/// Sets documentation strings for this algorithm
+		void CMyDataSearch::initDocs()
+		{
+		  this->setWikiSummary("This algorithm  loads the logged in users investigations . ");
+		  this->setOptionalMessage("This algorithm  loads the logged in users investigations .");
+		}
+
 		/// Initialisation method.
 		void CMyDataSearch::init()
 		{
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
                             "The name of the workspace to store the result of MyData search ");
       declareProperty("isValid",true,"Boolean option used to check the validity of login session", Direction::Output);
-			
 		}
+
 		/// Execution method.
 		void CMyDataSearch::exec()
 		{
