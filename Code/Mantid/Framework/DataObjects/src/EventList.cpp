@@ -1018,14 +1018,14 @@ namespace DataObjects
     MemoryManager::Instance().releaseFreeMemory();
 
     // Final merge
-    typename std::vector<T> temp;
+    std::vector<T> temp;
     merge(temp1.begin(), temp1.end(), temp2.begin(), temp2.end(), temp);
 
     // Clear out this temporary storage
     temp1.clear();
     temp2.clear();
-    typename std::vector<T>().swap(temp1);
-    typename std::vector<T>().swap(temp2);
+    std::vector<T>().swap(temp1);
+    std::vector<T>().swap(temp2);
 
     // Swap storage with the temp vector
     vec.swap(temp);
