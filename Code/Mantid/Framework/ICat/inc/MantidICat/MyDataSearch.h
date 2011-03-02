@@ -39,33 +39,34 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
+
+   */
+    class DLLExport CMyDataSearch: public API::Algorithm
+    {
+    public:
+      ///constructor
+      CMyDataSearch():API::Algorithm(){}
+      ///destructor
+      ~CMyDataSearch()
+      {
+      }
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogMyDataSearch"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Overwrites Algorithm init method.
+      void init();
+      /// Overwrites Algorithm exec method
+      void exec();
+
+    };
     
-	*/	
-		class DLLExport CMyDataSearch: public API::Algorithm
-		{
-		public:
-			///constructor
-			CMyDataSearch():API::Algorithm(){}
-			///destructor
-			~CMyDataSearch()
-			{
-			}
-			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogMyDataSearch"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
-		private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-			/// Overwrites Algorithm init method.
-			void init();
-			/// Overwrites Algorithm exec method
-			void exec();
-															
-		};
-	}
+}
 }
 
 #endif

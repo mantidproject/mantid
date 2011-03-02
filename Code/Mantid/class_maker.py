@@ -26,7 +26,11 @@ def write_header(subproject, classname, filename, algorithm):
     virtual const std::string category() const { return "General";}
     
   private:
+    /// Sets documentation strings for this algorithm
+    virtual void initDocs();
+    /// Initialise the properties
     void init();
+    /// Run the algorithm
     void exec();
 
 """ % classname
@@ -93,15 +97,21 @@ def write_source(subproject, classname, filename, algorithm):
 
     algorithm_source = """
   //----------------------------------------------------------------------------------------------
+  /// Sets documentation strings for this algorithm
+  void %s::initDocs()
+  {
+    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
+    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
   void %s::init()
   {
-    setOptionalMessage("TODO: Enter a quick description of your algorithm.");
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
-
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
