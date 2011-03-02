@@ -76,47 +76,56 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 # configuration options related to the input files
 #---------------------------------------------------------------------------
-INPUT                  = ../Kernel/inc/MantidKernel \
-                         ../Kernel/src \
-                         ../API/inc/MantidAPI \
-                         ../API/src \
-                         ../DataObjects/inc/MantidDataObjects \
-                         ../DataObjects/src \
-                         ../DataHandling/inc/MantidDataHandling \
-                         ../DataHandling/src \
-                         ../Nexus/inc/MantidNexus \
-                         ../Nexus/src \
-                         ../Algorithms/inc/MantidAlgorithms \
-                         ../Algorithms/src \
-                         ../Geometry/inc/MantidGeometry \
-                         ../Geometry/src \
-                         ../CurveFitting/inc/MantidCurveFitting \
-                         ../CurveFitting/src \
-                         ../PythonAPI/inc/MantidPythonAPI \
-                         ../PythonAPI/src \
-                         ../MatlabAPI/inc/MatlabAPI \
-                         ../MatlabAPI/src \
-                         ../Crystal/inc/MantidCrystal \
-                         ../Crystal/src	\
-                         ../ICat/inc/MantidICat	\
-						 ../ICat/src
+INPUT                  = \
+						../Algorithms/inc/MantidAlgorithms \
+						../Algorithms/src \
+						../API/inc/MantidAPI \
+						../API/src \
+						../Crystal/inc/MantidCrystal \
+						../Crystal/src \
+						../CurveFitting/inc/MantidCurveFitting \
+						../CurveFitting/src \
+						../DataHandling/inc/MantidDataHandling \
+						../DataHandling/src \
+						../DataObjects/inc/MantidDataObjects \
+						../DataObjects/src \
+						../Geometry/inc/MantidGeometry \
+						../Geometry/src \
+						../ICat/inc/MantidICat \
+						../ICat/src \
+						../Kernel/inc/MantidKernel \
+						../Kernel/src \
+						../MatlabAPI/inc/MatlabAPI \
+						../MatlabAPI/src \
+						../MDAlgorithm/inc/MDAlgorithms \
+						../MDAlgorithm/src \
+						../MDDataObjects/inc/MDDataObjects \
+						../MDDataObjects/src \
+						../MDEvents/inc/MantidMDEvents \
+						../MDEvents/src \
+						../Nexus/inc/MantidNexus \
+						../Nexus/src \
+						../PythonAPI/inc/MantidPythonAPI \
+						../PythonAPI/src \
+
 INPUT_ENCODING         = UTF-8
 FILE_PATTERNS          = 
 RECURSIVE              = YES
 
 #Note: The NeXus API docs are there temporarily and cause lots of (unnecessary) doxygen warnings.
 # Third party library ANN in Kernel is not doxygenised.
-EXCLUDE                = ../Nexus/src/NeXusException.cpp \
-			../Nexus/src/NeXusFile.cpp \
-			../Nexus/src/NeXusStream.cpp \
-			../Nexus/inc/MantidNexus/NeXusStream.hpp \
-			../Nexus/inc/MantidNexus/NeXusFile.hpp \
-			../Nexus/inc/MantidNexus/NeXusException.hpp \
-            ../Kernel/inc/MantidKernel/ANN \
-            ../Kernel/src/ANN \
-		../ICat/inc/MantidICat/GSoapGenerated \
-		../ICat/inc/MantidICat/GSoap \
-		../ICat/src/GSoapGenerated
+EXCLUDE                = \
+						../Nexus/src/NeXusException.cpp \
+						../Nexus/src/NeXusFile.cpp \
+						../Nexus/src/NeXusStream.cpp \
+						../Nexus/inc/MantidNexus/NeXusStream.hpp \
+						../Nexus/inc/MantidNexus/NeXusFile.hpp \
+						../Nexus/inc/MantidNexus/NeXusException.hpp \
+						../Kernel/inc/MantidKernel/ANN \
+						../Kernel/src/ANN \
+						../ICat/inc/MantidICat/GSoapGenerated \
+						../ICat/inc/MantidICat/GSoap \
+						../ICat/src/GSoapGenerated
 
 
 EXCLUDE_SYMLINKS       = NO
