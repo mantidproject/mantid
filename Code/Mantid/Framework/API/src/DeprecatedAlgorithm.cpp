@@ -1,4 +1,5 @@
 #include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidKernel/DateAndTime.h"
 #include <strstream>
 
 namespace Mantid
@@ -31,7 +32,10 @@ namespace API
       // TODO warn people that it wasn't set
       return;
     }
-    // TODO verify it is ISO8601
+    if (!Kernel::DateAndTime::string_isISO8601(date)) {
+      // TODO warn people that it wasn't set
+      return;
+    }
     this->m_deprecatdDate = date;
   }
 
