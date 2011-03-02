@@ -206,16 +206,19 @@ def add_method_to_header(name, cpp_path, method):
     
     # Find the start of the private section
     (n, padding) = find_line_number(lines, "private:")
+    if n is None:
+        (n, padding) = find_line_number(lines, "protected:") 
+    if n is None:
+        (n, padding) = find_line_number(lines, "public:")
+         
     if not n is None:
         # private is back 2 spaces, so add 2 spaces of padding
         padding = padding+"  "
         lines = insert_lines(lines, n+1, method, padding)
-        print "\n".join(lines)
-        #print method
         # Now save to disk
-        #save_lines_to(lines, header_path)
+        save_lines_to(lines, header_path)
     else:
-        "Could not find private: line"
+        print name, "-------> Could not find where to insert method"
 
 
 #======================================================================================
@@ -246,12 +249,11 @@ if __name__=="__main__":
         if real_name is None: real_name = name
           
         # Extract from the wiki
-        if 1:
-#        (summary, wikified_summary) = get_wiki_summary(real_name)
-#        if summary == "":
-#            print name, "------> WIKI SUMMARY NOT FOUND at ", real_name
-#        else:
-            #add_optional_message(name, fullpath, summary, wikified_summary)
+        (summary, wikified_summary) = get_wiki_summary(real_name)
+        if summary == "":
+            print name, "------> WIKI SUMMARY NOT FOUND at ", real_name
+        else:
+            add_optional_message(name, fullpath, summary, wikified_summary)
             add_method_to_header(name, fullpath, "/// Sets documentation strings for this algorithm\nvirtual void initDocs();")
     
     
