@@ -538,6 +538,11 @@ bool NeutronAtomEqualsWithNaN(const double left, const double right)
   return false;
 }
 
+/** Equality between two neutron atoms
+ * @param left :: NeutronAtom to compare
+ * @param right :: NeutronAtom to compare
+ * @return boolean
+ */
 bool operator==(const NeutronAtom& left, const NeutronAtom& right)
 {
   if (&left == &right)
@@ -568,17 +573,32 @@ bool operator==(const NeutronAtom& left, const NeutronAtom& right)
   return true;
 }
 
+/** Inequality between two neutron atoms
+ * @param left :: NeutronAtom to compare
+ * @param right :: NeutronAtom to compare
+ * @return boolean
+ */
 bool operator!=(const NeutronAtom& left, const NeutronAtom& right)
 {
   return !(left == right);
 }
 
+/** Output neutron atom to a stream
+ * @param out :: stream
+ * @param atom :: NeutronAtom
+ * @return stream
+ */
 std::ostream& operator<<(std::ostream& out, const NeutronAtom &atom)
 {
   out << "NeutronAtom(" << atom.z_number << ", " << atom.a_number << ")";
   return out;
 }
 
+/** Comparison between neutron atoms (for sorting)
+ * @param left :: NeutronAtom to compare
+ * @param right :: NeutronAtom to compare
+ * @return boolean
+ */
 bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
 {
   if (left.z_number == right.z_number) {
@@ -589,7 +609,7 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
   }
 }
 
-/**
+/** Retrieve a copy of NeutronAtom
  * @param z_number :: Atomic number of the atom to get
  * @param a_number :: Mass number of the atom to get
  * @return The atom corresponding to the given Z and A
@@ -612,3 +632,4 @@ NeutronAtom getNeutronAtom(const int z_number, const int a_number)
 
 } // namespace PhysicalConstants
 } // namespace Mantid
+
