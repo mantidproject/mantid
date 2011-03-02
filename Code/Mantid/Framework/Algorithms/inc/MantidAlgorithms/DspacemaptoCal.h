@@ -83,6 +83,10 @@ private:
                                     const std::string DFileName, std::string calFileName,
                                     std::map<int,double> &offsets, std::map<int,int> &groups);
 
+  void CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+                                    const std::string DFileName,
+                                    std::map<int,double> &offsets);
+
   void CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                     std::string calFileName, std::map<int, double> & vulcan,
                                     std::map<int,double> &offsets, std::map<int,int> &groups);
