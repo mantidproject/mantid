@@ -183,11 +183,13 @@ namespace Kernel
     }
 
   protected:
+    /// Map to tasks, sorted by cost
     typedef std::multimap<double, Task*> InnerMap;
+    /// Map to maps, sorted by Mutex*
     typedef std::map<Mutex*, InnerMap> SuperMap;
 
-    /// A super map; first key = a Mutex *
-    /// Inside it: second key = the cost.
+    /** A super map; first key = a Mutex *
+     * Inside it: second key = the cost. */
     SuperMap m_supermap;
 
     /// Vector of currently used mutexes.

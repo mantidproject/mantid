@@ -102,7 +102,7 @@ INPUT                  = \
 						../MDDataObjects/inc/MDDataObjects \
 						../MDDataObjects/src \
 						../MDEvents/inc/MantidMDEvents \
-						../MDEvents/src \
+						../MDEvents/src/*.cpp \
 						../Nexus/inc/MantidNexus \
 						../Nexus/src \
 						../PythonAPI/inc/MantidPythonAPI \
