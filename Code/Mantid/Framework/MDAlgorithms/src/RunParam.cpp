@@ -20,6 +20,7 @@ namespace Mantid
        RunParam::~RunParam()
        {}
 
+       /// @cond
        double RunParam::getEi(const int irun) {return m_ei[irun];}
        double RunParam::getPsi(const int irun) {return m_psi[irun];}
        double RunParam::getElo(const int irun) {return m_elo[irun];}
@@ -174,6 +175,8 @@ namespace Mantid
 
        void RunParam::readData(const std::string file){}
        void RunParam::writeData(const std::string file){}
-    
+
+       /// @endcond
+
     }
 }
