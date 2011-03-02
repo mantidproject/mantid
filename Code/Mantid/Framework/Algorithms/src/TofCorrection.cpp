@@ -70,7 +70,21 @@ void TofCorrection::exec()
     double adjustment = ( l2 / sqrt(efixed) ) * 2286.2873574;
 
     std::transform(inputWS->readX(i).begin(), inputWS->readX(i).end(), outputWS->dataX(i).begin(), std::bind2nd(std::minus<double>(), adjustment));
+    
+    // Move the instrument component to (0, 0, 0)
+    boost::shared_ptr<const IComponent> parent = detector->getParent();
+    V3D pos(0.0,0.0,0.0);
+    pos -= parent->getPos();
+    Quat rot = parent->getRelativeRot();
+    rot.inverse();
+    rot.rotate(pos);
 
+    Geometry::ParameterMap & pmap = outputWS->instrumentParameters();
+    PARALLEL_CRITICAL(pmap)
+    {
+      pmap.addV3D(detector.get(), "pos", pos);
+    }
+    
     // end multi-threading
     PARALLEL_END_INTERUPT_REGION
   }

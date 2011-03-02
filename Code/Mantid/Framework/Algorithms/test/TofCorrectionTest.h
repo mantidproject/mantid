@@ -70,13 +70,13 @@ public:
     TS_ASSERT(!tof->isExecuted());
 
     TS_ASSERT_THROWS_NOTHING(tof->setPropertyValue("InputWorkspace", "tofcorrection_tsc_r"));
-    TS_ASSERT_THROWS_NOTHING(tof->setPropertyValue("OutputWorkspace", "output"));
+    TS_ASSERT_THROWS_NOTHING(tof->setPropertyValue("OutputWorkspace", "tofcorrection_test"));
     TS_ASSERT_THROWS_NOTHING(tof->execute());
     TS_ASSERT(tof->isExecuted());
 
     // Get output workspace
     MatrixWorkspace_const_sptr outputWS;
-    TS_ASSERT_THROWS_NOTHING(outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("output")));
+    TS_ASSERT_THROWS_NOTHING(outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("tofcorrection_test")));
 
     const MantidVec inputDataX = inputWS->readX(0);
     const MantidVec outputDataX = outputWS->readX(0);
@@ -93,15 +93,23 @@ public:
     double differenceA = inputDataX[0] - outputDataX[0];
     double differenceB = inputDataX[nBins] - outputDataX[nBins];
     TS_ASSERT_DELTA(differenceA, differenceB, 0.001);
-    // And that they are actually changed
+    // And that they are actually changed:
     TS_ASSERT_DIFFERS(inputDataX[0], outputDataX[0]);
     TS_ASSERT_DIFFERS(inputDataX[nBins], outputDataX[nBins]);
-    // Check that the Y and E values are the same
+    // Check that the Y and E values are the same:
     TS_ASSERT_EQUALS(inputWS->readY(0)[0], outputWS->readY(0)[0]);
     TS_ASSERT_EQUALS(inputWS->readY(0)[nBins-1], outputWS->readY(0)[nBins-1]);
     TS_ASSERT_EQUALS(inputWS->readE(0)[0], outputWS->readE(0)[0]);
     TS_ASSERT_EQUALS(inputWS->readE(0)[nBins-1], outputWS->readE(0)[nBins-1]);
+    // Check that Detector has been moved:
+    Mantid::Geometry::IDetector_sptr detector;
+    TS_ASSERT_THROWS_NOTHING(detector = outputWS->getDetector(0));
+    Mantid::Geometry::V3D pos(0.0, 0.0, 0.0);
+    TS_ASSERT_EQUALS(detector->getPos(), pos);
 
+    // CleanUp (Delete Workspaces)
+    Mantid::API::AnalysisDataService::Instance().remove("tofcorrection_tsc_r");
+    Mantid::API::AnalysisDataService::Instance().remove("tofcorrection_test");
     delete tof;
   }
 private:
