@@ -209,16 +209,27 @@ public:
 
 
 private:
+  /// Algorithm being run
   LoadEventNexus * alg;
+  /// NXS path to bank
   std::string entry_name;
+  /// Map of pixel ID to Workspace Index
   IndexToIndexMap * pixelID_to_wi_map;
+  /// Progress reporting
   Progress * prog;
+  /// ThreadScheduler running this task
   ThreadScheduler * scheduler;
+  /// event pixel ID array
   uint32_t * event_id;
+  /// event TOF array
   float * event_time_of_flight;
+  /// # of events in arrays
   size_t numEvents;
+  /// index of the first event from event_index
   size_t startAt;
+  /// ptr to a vector of event index vs time (length of # of pulses)
   std::vector<uint64_t> * event_index_ptr;
+  /// vector of event index (length of # of pulses)
   std::vector<uint64_t> & event_index;
 };
 
@@ -477,10 +488,15 @@ public:
 
 
 private:
+  /// Algorithm being run
   LoadEventNexus * alg;
+  /// NXS path to bank
   std::string entry_name;
+  /// Map of pixel ID to Workspace Index
   IndexToIndexMap * pixelID_to_wi_map;
+  /// Progress reporting
   Progress * prog;
+  /// ThreadScheduler running this task
   ThreadScheduler * scheduler;
 };
 
