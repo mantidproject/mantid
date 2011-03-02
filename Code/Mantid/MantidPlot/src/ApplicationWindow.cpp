@@ -1578,7 +1578,7 @@ void ApplicationWindow::customToolBars(QMdiSubWindow* w)
       columnTools->setEnabled (true);
       customColumnActions();
     }
-  } else if (w->isA("Matrix") && d_matrix_tool_bar){
+  } else if ((w->isA("Matrix") || w->isA("MantidMatrix")) && d_matrix_tool_bar){
     if(!plotMatrixBar->isVisible())
       plotMatrixBar->show();
     plotMatrixBar->setEnabled (true);
