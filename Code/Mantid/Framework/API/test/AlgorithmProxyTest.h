@@ -102,9 +102,11 @@ public:
         alg->setProperty("prop1","stuff");
         alg->setProperty("prop2",17);
         Poco::ActiveResult<bool> res = alg->executeAsync();
+        res.tryWait(10);
+        TS_ASSERT( alg->isRunningAsync() );
         res.tryWait(50);
         TS_ASSERT( alg->isRunning() );
-        TS_ASSERT( alg->isRunningAsync() );
+
         res.wait();
         TS_ASSERT( res.data() );
         TS_ASSERT( alg->isExecuted() );
