@@ -40,7 +40,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         ws = mtd[mon_wsl[0]]
         if ( ws.readX(0)[ws.getNumberBins()] > 40000 ):
             DeleteWorkspace(mon_wsl[0])
-            workspaces = toscaChop(rawfiles)
+            workspaces = toscaChop(rawfiles, area, thickness)
             if ( saveFormats != [] ): # Save data in selected formats
                 saveItems(workspaces, saveFormats)
             return workspaces
@@ -57,10 +57,6 @@ def convert_to_energy(rawfiles, grouping, first, last,
         if isTosca:
             invalid = getBadDetectorList(ws)
             TofCorrection(ws, ws)
-            for i in range(1,141):
-                detector = "Detector #" + str(i)
-                MoveInstrumentComponent(ws, detector, X=0, Y=0, Z=0,
-                    RelativePosition=False)
             factor = 1e9
         else:
             factor = 1e6
@@ -122,7 +118,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
     else:
         return workspaces
 
-def toscaChop(files):
+def toscaChop(files, area, thickness):
     '''Reduction routine for TOSCA instrument when input workspace must be 
     "split" into parts and folded together after it has been corrected to the 
     monitor.'''
@@ -134,13 +130,9 @@ def toscaChop(files):
         wsgroup = mtd[raw+'_data'].getNames()
         for ws in wsgroup:
             TofCorrection(ws, ws)
-            for i in range(1,141):
-                detector = "Detector #" + str(i)
-                MoveInstrumentComponent(ws, detector, X=0, Y=0, Z=0, 
-                    RelativePosition=False)
             ExtractSingleSpectrum(ws, ws+'mon', 140)
             ConvertUnits(ws+'mon', ws+'mon', 'Wavelength')
-            monitorEfficiency(ws+'mon', 5.391011e-5, 0.013)
+            monitorEfficiency(ws+'mon', area, thickness)
             CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
             normToMon(Factor=1e9, monitor=ws+'mon', detectors=ws)
             DeleteWorkspace(ws+'mon')
@@ -356,7 +348,7 @@ def getBadDetectorList(workspace):
 
 def backgroundRemoval(tofStart, tofEnd, detectors=''):
     ConvertToDistribution(detectors)
-    FlatBackground(detectors, detectors, tofStart, tofEnd, Mode = 'Mean')
+    FlatBackground(detectors, detectors, tofStart, tofEnd, Mode='Mean')
     ConvertFromDistribution(detectors)
     return detectors
 

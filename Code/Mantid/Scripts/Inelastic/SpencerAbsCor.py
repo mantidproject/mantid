@@ -15,7 +15,7 @@ else:                                                                        ##
 ## Other imports
 from mantidsimple import *
 from mantidplot import *
-from IndirectDataAnalysis import getEfixed
+from IndirectDataAnalysis import getEfixed, createQaxis
 import math
 
 def GetWSangles(inWS):
@@ -31,10 +31,10 @@ def GetWSangles(inWS):
         group_angles.append(twoTheta) # add angle
     return group_angles
 
-def WaveRange(inWS,delw):
+def WaveRange(inWS,delw, efixed):
     oWS = '__spencer_WaveRange'
     ExtractSingleSpectrum(inWS,oWS,0)
-    ConvertUnits(oWS,oWS,"Wavelength","Indirect")
+    ConvertUnits(oWS,oWS,'Wavelength','Indirect', efixed)
     tempWS = mtd[oWS]
     Xin = tempWS.readX(0)
     npt = len(Xin)-1			
@@ -59,15 +59,12 @@ def WaveRange(inWS,delw):
     DeleteWorkspace(oWS)
     return wave
 
-## workdir = defaultsave.directory
-## prefix = instrument short name in lower case
-## sam = run number
 def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
         avar, efixed, verbose=False, inputWS='Sam'):
     det = GetWSangles(inputWS)
     ndet = len(det)
     wavelas = math.sqrt(81.787/efixed) # elastic wavelength
-    waves = WaveRange(inputWS,0.0) # get wavelengths
+    waves = WaveRange(inputWS, 0.0, efixed) # get wavelengths
     nw = len(waves)
     DataX = []
     DataE = []
@@ -108,11 +105,16 @@ def AbsRun(workdir, prefix, sam, geom, beam, ncan, size, density, sigs, siga,
     nspec = len(plot_list)
     DataX = DataX * nspec
     DataE = DataE * nspec
-    CreateWorkspace(assWS, DataX, dataY_a1ws, DataE,nspec,'Wavelength')
+    qAxis = createQaxis(inputWS)
+    CreateWorkspace(assWS, DataX, dataY_a1ws, DataE,nspec,'Wavelength',
+            VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
     if ( ncan > 1 ):
-        CreateWorkspace(asscWS, DataX, dataY_a2ws, DataE,nspec,'Wavelength')
-        CreateWorkspace(acscWS, DataX, dataY_a3ws, DataE,nspec,'Wavelength')
-        CreateWorkspace(accWS, DataX, dataY_a4ws, DataE,nspec,'Wavelength')
+        CreateWorkspace(asscWS, DataX, dataY_a2ws, DataE,nspec,'Wavelength',
+            VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        CreateWorkspace(acscWS, DataX, dataY_a3ws, DataE,nspec,'Wavelength',
+            VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
+        CreateWorkspace(accWS, DataX, dataY_a4ws, DataE,nspec,'Wavelength',
+            VerticalAxisUnit='MomentumTransfer', VerticalAxisValues=qAxis)
     ## Tidy up & Save output
     SaveNexusProcessed(assWS, assWS+'.nxs')
     if ncan > 1:

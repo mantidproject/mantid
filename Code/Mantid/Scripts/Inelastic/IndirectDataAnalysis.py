@@ -48,34 +48,13 @@ def concatWSs(workspaces, unit, name):
         for i in range(0, len(readY)):
             dataY.append(readY[i])
             dataE.append(readE[i])
-    CreateWorkspace(name, dataX, dataY, dataE, NSpec = len(workspaces),
+    CreateWorkspace(name, dataX, dataY, dataE, NSpec=len(workspaces),
         UnitX=unit)
 
 def confitParsToWS(Table, Data, BackG='FixF', specMin=0, specMax=-1):
     if ( specMax == -1 ):
         specMax = mtd[Data].getNumberHistograms() - 1
-    dataX = []
-    if mtd[Data].getAxis(1).isSpectra():
-        ConvertSpectrumAxis(Data, 'inq', 'MomentumTransfer', 'Indirect')
-        Transpose('inq', 'inq')
-        readX = mtd['inq'].readX(0)
-        nBins = len(readX)
-        for i in range(specMin, specMax+1):
-            dataX.append(readX[i])
-        mtd.deleteWorkspace('inq')
-    else:
-        axis = mtd[Data].getAxis(1)
-        msg = 'ConvFit: '
-        if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
-            print msg
-            sys.exit(msg)
-        if ( axis.getUnit().name() != 'MomentumTransfer' ):
-            msg += 'Input must have axis values of Q'
-            print msg
-            sys.exit(msg)
-        for i in range(specMin, specMax+1):
-            dataX.append(float(axis.label(i)))
+    dataX = createQaxis(Data)
     xAxisVals = []
     dataY = []
     dataE = []
@@ -125,7 +104,7 @@ def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
         specMax = mtd[inputWS].getNumberHistograms() - 1
     for i in range(specMin + 1, specMax + 1):
         input += ';'+inputWS+',i'+str(i)
-    outNm = getWSprefix(inputWS) + '_conv_'
+    outNm = getWSprefix(inputWS) + 'conv_'
     PlotPeakByLogValue(input, outNm, func, StartX=startX, EndX=endX)
     wsname = confitParsToWS(outNm, inputWS, bg, specMin, specMax)
     if save:
@@ -179,6 +158,7 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
             if ( mtd[det_ws].isDistribution() ):
                 ConvertFromDistribution(det_ws)
             AlignDetectors(det_ws, det_ws, cal)
+            CloneWorkspace(det_ws, 'demon_CorByMon-and-Aligned')
             DiffractionFocussing(det_ws, savefile, cal)
             DeleteWorkspace(det_ws)
             if ( Vanadium != '' ):
@@ -278,38 +258,8 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         plotFury(outWSlist, specrange)
     return outWSlist
 
-def furyfitCreateXAxis(inputWS):
-    result = []
-    ws = mtd[inputWS]
-    nHist = ws.getNumberHistograms()
-    if ws.getAxis(1).isSpectra():
-        inst = ws.getInstrument()
-        samplePos = inst.getSample().getPos()
-        beamPos = samplePos - inst.getSource().getPos()
-        for i in range(0,nHist):
-            efixed = getEfixed(inputWS, i)
-            detector = ws.getDetector(i)
-            theta = detector.getTwoTheta(samplePos, beamPos) / 2
-            lamda = math.sqrt(81.787/efixed)
-            q = 4 * math.pi * math.sin(theta) / lamda
-            result.append(q)
-    else:
-        axis = ws.getAxis(1)
-        msg = 'FuryFit: '
-        if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
-            print msg
-            sys.exit(msg)
-        if ( axis.getUnit().name() != 'MomentumTransfer' ):
-            msg += 'Input must have axis values of Q'
-            print msg
-            sys.exit(msg)
-        for i in range(0, nHist):
-            result.append(float(axis.label(i)))
-    return result
-
 def furyfitParsToWS(Table, Data):
-    dataX = furyfitCreateXAxis(Data)
+    dataX = createQaxis(Data)
     dataY = []
     dataE = []
     names = ""
@@ -554,3 +504,33 @@ def getEfixed(workspace, detIndex=0):
         det = mtd[workspace].getInstrument().getDetector(ids[0])
         efixed = det.getNumberParameter('Efixed')[0]
     return efixed
+
+def createQaxis(inputWS):
+    result = []
+    ws = mtd[inputWS]
+    nHist = ws.getNumberHistograms()
+    if ws.getAxis(1).isSpectra():
+        inst = ws.getInstrument()
+        samplePos = inst.getSample().getPos()
+        beamPos = samplePos - inst.getSource().getPos()
+        for i in range(0,nHist):
+            efixed = getEfixed(inputWS, i)
+            detector = ws.getDetector(i)
+            theta = detector.getTwoTheta(samplePos, beamPos) / 2
+            lamda = math.sqrt(81.787/efixed)
+            q = 4 * math.pi * math.sin(theta) / lamda
+            result.append(q)
+    else:
+        axis = ws.getAxis(1)
+        msg = 'Creating Axis based on Detector Q value: '
+        if not axis.isNumeric():
+            msg += 'Input workspace must have either spectra or numeric axis.'
+            print msg
+            sys.exit(msg)
+        if ( axis.getUnit().name() != 'MomentumTransfer' ):
+            msg += 'Input must have axis values of Q'
+            print msg
+            sys.exit(msg)
+        for i in range(0, nHist):
+            result.append(float(axis.label(i)))
+    return result
