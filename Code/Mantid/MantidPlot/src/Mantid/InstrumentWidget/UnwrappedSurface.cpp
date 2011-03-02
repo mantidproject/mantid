@@ -787,6 +787,7 @@ void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
 int UnwrappedSurface::getDetectorID(int x, int y)
 {
   if (!m_pickImage) return -7;
+  if (!m_pickImage->valid(x,y)) return -1;
   QRgb pixel = m_pickImage->pixel(x,y);
   return getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
 }
