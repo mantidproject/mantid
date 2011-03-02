@@ -5,6 +5,8 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
@@ -15,11 +17,6 @@ namespace MDEvents
     this->setWikiSummary(" Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. ");
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
   }
-  
-  
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -43,8 +40,6 @@ namespace MDEvents
    */
   void MakeDiffractionMDEventWorkspace::init()
   {
-    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
-
     declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }

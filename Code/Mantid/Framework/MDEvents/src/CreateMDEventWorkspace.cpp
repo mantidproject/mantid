@@ -8,6 +8,8 @@ namespace Mantid
 {
 namespace MDEvents
 {
+  using namespace Mantid::Kernel;
+  using namespace Mantid::API;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateMDEventWorkspace)
@@ -18,11 +20,6 @@ namespace MDEvents
     this->setWikiSummary(" Creates an empty MDEventWorkspace with a given number of dimensions. ");
     this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
   }
-  
-  
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
-
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -44,8 +41,6 @@ namespace MDEvents
    */
   void CreateMDEventWorkspace::init()
   {
-    this->setOptionalMessage("Creates an empty MDEventWorkspace with a given number of dimensions.");
-
     declareProperty(new PropertyWithValue<int>("Dimensions",1,Direction::Input), "Number of dimensions that the workspace will have.");
 
     std::vector<std::string> propOptions;
