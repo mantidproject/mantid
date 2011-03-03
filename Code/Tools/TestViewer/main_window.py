@@ -170,6 +170,10 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonSelectSVN, QtCore.SIGNAL("clicked()"), self.select_svn)
         self.connect(self.buttonCopyFilename, QtCore.SIGNAL("clicked()"), self.copy_filename_to_clipboard)
         
+        # -- Text commands ---
+        self.connect(self.textTimeout, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
+        self.connect(self.textMemory, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
+        
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.test_run_callback)
         # Signal called by the monitor thread
@@ -239,6 +243,15 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
             self.treeTests.setColumnWidth( i, s.value("treeTests.columnWidth(%d)"%i, column_default_width[i]).toInt()[0] )
             if self.treeTests.columnWidth(i) < 50:
                 self.treeTests.setColumnWidth( i, 50)
+                
+        # --- Text settings ---
+        memory = s.value("memory_limit_MB", 8000).toInt()[0]
+        test_info.memory_limit_kb = memory*1024;
+        self.textMemory.setPlainText("%d" % memory)
+
+        timeout = s.value("process_timeout_sec", 30).toInt()[0]
+        test_info.process_timeout_sec = timeout;
+        self.textTimeout.setPlainText("%d" % timeout)
         
     #-----------------------------------------------------------------------------
     def saveSettings(self):
@@ -253,6 +266,38 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         s.setValue("TestViewerMainWindow.height", self.height())
         s.setValue("TestViewerMainWindow.x", self.x())
         s.setValue("TestViewerMainWindow.y", self.y())
+        
+    #-----------------------------------------------------------------------------
+    def get_int_from_text(self, plainTextBox):
+        """ Get a value from a text box. Color it red and return None if it is bad."""
+        try:
+            s = plainTextBox.toPlainText()
+            value = int(s)
+            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: white; }");
+            return value
+        except:
+            plainTextBox.setStyleSheet("QPlainTextEdit { background-color: tomato; }");
+            return None
+    
+        
+        
+    #-----------------------------------------------------------------------------
+    def text_settings_changed(self):
+        """ called when one of the text boxes changes """
+        s = self.settings
+        
+        memory = self.get_int_from_text(self.textMemory);
+        if not memory is None:
+            test_info.memory_limit_kb = memory*1024;
+            s.setValue("memory_limit_MB", memory)
+            
+        timeout = self.get_int_from_text(self.textTimeout);
+        if not timeout is None:
+            test_info.process_timeout_sec = timeout;
+            s.setValue("process_timeout_sec", timeout)
+            
+       
+            
         
     #-----------------------------------------------------------------------------
     def closeEvent(self, event):

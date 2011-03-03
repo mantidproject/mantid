@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Thu Jan 13 14:21:18 2011
+# Created: Thu Mar  3 10:07:12 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -34,6 +34,25 @@ class Ui_MainWindow(object):
         self.checkInParallel = QtGui.QCheckBox(self.centralwidget)
         self.checkInParallel.setObjectName("checkInParallel")
         self.hlTop.addWidget(self.checkInParallel)
+        self.label = QtGui.QLabel(self.centralwidget)
+        self.label.setObjectName("label")
+        self.hlTop.addWidget(self.label)
+        self.textTimeout = QtGui.QPlainTextEdit(self.centralwidget)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.textTimeout.sizePolicy().hasHeightForWidth())
+        self.textTimeout.setSizePolicy(sizePolicy)
+        self.textTimeout.setMaximumSize(QtCore.QSize(100, 30))
+        self.textTimeout.setObjectName("textTimeout")
+        self.hlTop.addWidget(self.textTimeout)
+        self.label_7 = QtGui.QLabel(self.centralwidget)
+        self.label_7.setObjectName("label_7")
+        self.hlTop.addWidget(self.label_7)
+        self.textMemory = QtGui.QPlainTextEdit(self.centralwidget)
+        self.textMemory.setMaximumSize(QtCore.QSize(120, 30))
+        self.textMemory.setObjectName("textMemory")
+        self.hlTop.addWidget(self.textMemory)
         spacerItem = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.hlTop.addItem(spacerItem)
         self.verticalLayout.addLayout(self.hlTop)
@@ -550,6 +569,8 @@ class Ui_MainWindow(object):
         self.buttonRunAll.setText(QtGui.QApplication.translate("MainWindow", "Run All Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonRunSelected.setText(QtGui.QApplication.translate("MainWindow", "Run Selected Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.checkInParallel.setText(QtGui.QApplication.translate("MainWindow", "In Parallel", None, QtGui.QApplication.UnicodeUTF8))
+        self.label.setText(QtGui.QApplication.translate("MainWindow", "Timeout (sec):", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_7.setText(QtGui.QApplication.translate("MainWindow", "Memory limit (MB):", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("MainWindow", "Expand to:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonExpandProjects.setText(QtGui.QApplication.translate("MainWindow", "Projects", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonExpandSuites.setText(QtGui.QApplication.translate("MainWindow", "Suites", None, QtGui.QApplication.UnicodeUTF8))
@@ -580,6 +601,8 @@ class Ui_MainWindow(object):
 "<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
 "<tr>\n"
 "<td style=\"border: none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"

@@ -15,6 +15,7 @@ import random
 import subprocess
 import sys
 import shlex
+import threading
 
 #==================================================================================================
 # GLOBAL CONSTANTS
@@ -38,6 +39,16 @@ def html_escape(text):
     return out
     #return "".join(html_escape_table.get(c,c) for c in text)
 
+
+
+#==================================================================================================
+# GLOBAL VARIABLES
+
+# Limit in memory to a process (single test suite)
+memory_limit_kb = 800000
+
+# Limit of time that a suite can run
+process_timeout_sec = 1
 
 #==================================================================================================
 class TestResult:
@@ -442,14 +453,17 @@ class TestSuite(object):
             
         os.chdir(rundir)
         
-        # In order to catch "segmentation fault" message, we call bash and get the output of that! 
-        full_command = "bash -c '%s'" % self.command
-        #full_command = self.command
-        #full_command = "cd /home/8oz/Code/Mantid/Code/Mantid/bin/ ; ./MDEventsTest -v"
+        # In order to catch "segmentation fault" message, we call bash and get the output of that!
+        # Max memory for process in KB is a global
+        full_command = "bash -c 'ulimit -v %d ; %s'" % (memory_limit_kb, self.command)
         
-        # Execute the test command; wait for it to return
-        (status, output) = run_command_with_callback(full_command, stdout_callback_func, run_shell=False)       
-
+        
+        # Execute the test command; wait for it to return, up to a timeout
+        (status, output) = run_command_with_timeout(full_command, process_timeout_sec, run_shell=False)
+        
+        if status == -15:
+            output = output + "\n\nPROCESS TIMED OUT"
+            
         # Get the output XML filename
         xml_path = os.path.join(rundir, self.xml_file)
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
@@ -457,11 +471,8 @@ class TestSuite(object):
             self.parse_xml(xml_path) 
         else:
             # No - you must have segfaulted or some other error!
-            for test in self.tests:
-                test.state.value = self.state.ABORTED
-                test.state.old = False
-                test.stdout = output
-        
+            self.set_aborted(output)
+            
         # Go back to old directory and remove the temp one
         os.chdir(pwd)
         
@@ -473,6 +484,14 @@ class TestSuite(object):
             
         # Finalize
         self.compile_states()  
+        
+    #----------------------------------------------------------------------------------
+    def set_aborted(self, stdout):
+        """ Set that all tests aborted and save the stdout """
+        for test in self.tests:
+            test.state.value = self.state.ABORTED
+            test.state.old = False
+            test.stdout = stdout
         
         
     #----------------------------------------------------------------------------------
@@ -1165,9 +1184,12 @@ class MultipleProjects(object):
             p = Pool( num_threads )
             
             # Call the method that will run each suite
+            results = []
             for suite in suites:
-                p.apply_async( run_tests_in_suite, (self, suite, None), callback=callback_func)
+                result = p.apply_async( run_tests_in_suite, (self, suite, None), callback=callback_func)
+                results.append( (result, suite) )
             p.close()
+            
             # This will block until completed
             p.join()
             
@@ -1230,7 +1252,8 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
     
     if not run_shell:
         full_command = shlex.split(full_command)
-    
+
+
     p = subprocess.Popen(full_command, shell=run_shell, bufsize=10000,
                          cwd=".",
                          stdin=None, stderr=subprocess.STDOUT,
@@ -1263,6 +1286,59 @@ def run_command_with_callback(full_command, callback_func, run_shell=True):
     # The return code or exit status
     p.wait()
     status = p.returncode
+    
+    return (status, output)
+
+
+
+#==================================================================================================
+#==================================================================================================
+def run_command_with_timeout(full_command, timeout, run_shell=True):
+    """Run a shell command with a timeout.
+    
+    Parameters:
+        full_command :: shell command
+        callback_func :: command
+    Returns:
+        status :: status code
+        output :: accumulated stdoutput
+    """
+    
+    # Object to run a command in a process with a timeout.
+    class Command(object):
+        def __init__(self, cmd, run_shell):
+            self.cmd = cmd
+            self.process = None
+            self.run_shell = run_shell
+            self.returncode = 0
+            self.output = ""
+    
+        def run(self, timeout):
+            def target():
+                self.process = subprocess.Popen(self.cmd, shell=self.run_shell, stdin=None, stderr=subprocess.STDOUT,
+                                 stdout=subprocess.PIPE, close_fds=True, universal_newlines=True)
+                (self.output, stdin) = self.process.communicate()
+    
+            thread = threading.Thread(target=target)
+            thread.start()
+    
+            thread.join(timeout)
+            if thread.is_alive():
+                self.process.terminate()
+                thread.join()
+                
+            self.returncode = self.process.returncode
+    
+    
+    if not run_shell:
+        full_command = shlex.split(full_command)
+
+    command = Command(full_command, run_shell)
+    command.run(timeout)
+        
+    output = command.output
+    # Status is -15 when it times out
+    status = command.returncode
     
     return (status, output)
 
@@ -1319,14 +1395,20 @@ test_age()
         
 #==================================================================================================
 if __name__ == '__main__':
+#    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=3)
+#    run_command_with_timeout("echo 'Process started'; sleep 2; echo 'Process finished'", timeout=1)
+    
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.select_svn()
     all_tests.select_all(False)
     suite = all_tests.find_suite("MDEventsTest.MDEventTest")
     suite.set_selected(True)
+    suite = all_tests.find_suite("KernelTest.DateAndTimeTest")
+    suite.set_selected(True)
     all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
-                          parallel=False, callback_func=test_run_print_callback)
-#    
+                          parallel=True, callback_func=test_run_print_callback)
+
+    
 #    for pj in all_tests.projects:
 #        print pj.name, pj.get_state_str()
 #        for suite in pj.suites:
