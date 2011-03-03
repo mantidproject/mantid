@@ -134,9 +134,22 @@ def SampleWidth(width):
 
 def HFIRSANS():
     Clear(SANSReducer)
-    ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS())
+    ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
     SolidAngle()
     AzimuthalAverage()
+    
+def BIOSANS():
+    Clear(SANSReducer)
+    ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
+    SolidAngle()
+    AzimuthalAverage()
+
+def GPSANS():
+    Clear(SANSReducer)
+    ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
+    SolidAngle()
+    AzimuthalAverage()
+    
     
 def SetBckTransmission(trans, error, theta_dependent=True):
     ReductionSingleton().set_bck_transmission(sans_reduction_steps.BaseTransmission(trans, error, theta_dependent=theta_dependent))

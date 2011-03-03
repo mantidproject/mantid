@@ -7,6 +7,7 @@ from hfir_interface import HFIRInterface
 from eqsans_interface import EQSANSInterface
 
 INSTRUMENT_DICT = {"BIOSANS": HFIRInterface, 
+                   "GPSANS": HFIRInterface,
                    "EQSANS": EQSANSInterface}
 
 INSTRUMENT_LIST = INSTRUMENT_DICT.keys()

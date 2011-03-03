@@ -452,7 +452,7 @@ class InstrumentDescription(BaseScriptElement):
             Generate reduction script
             @param execute: if true, the script will be executed
         """
-        script  = "HFIRSANS()\n"
+        script  = "%s()\n" % self.instrument_name
         
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance 
@@ -547,7 +547,7 @@ class InstrumentDescription(BaseScriptElement):
                                                          default=InstrumentDescription.nx_pixels) 
         self.ny_pixels = BaseScriptElement.getIntElement(instrument_dom, "ny_pixels",
                                                          default=InstrumentDescription.ny_pixels) 
-        self.name = BaseScriptElement.getStringElement(instrument_dom, "name")
+        self.instrument_name = BaseScriptElement.getStringElement(instrument_dom, "name")
         self.pixel_size = BaseScriptElement.getFloatElement(instrument_dom, "pixel_size",
                                                             default=InstrumentDescription.pixel_size)
         
@@ -596,7 +596,7 @@ class InstrumentDescription(BaseScriptElement):
         """
         self.nx_pixels = InstrumentDescription.nx_pixels
         self.ny_pixels = InstrumentDescription.ny_pixels
-        self.name = ''
+        #self.instrument_name = ''
         self.pixel_size = InstrumentDescription.pixel_size
         
         self.data_files = []

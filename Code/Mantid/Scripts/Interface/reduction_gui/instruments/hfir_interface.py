@@ -25,7 +25,7 @@ class HFIRInterface(InstrumentInterface):
         self.scripter = HFIRReductionScripter(name=name)        
 
         # Instrument description
-        self.attach(SANSInstrumentWidget(settings = self._settings))
+        self.attach(SANSInstrumentWidget(settings = self._settings, name=name))
         
         # Beam finder
         self.attach(BeamFinderWidget(settings = self._settings))

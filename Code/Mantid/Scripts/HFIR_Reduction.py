@@ -5,6 +5,6 @@
 from Interface.reduction_application import ReductionGUI
 from PyQt4 import QtCore, uic
 
-reducer = ReductionGUI(instrument_list=["BIOSANS", "EQSANS"])
+reducer = ReductionGUI(instrument_list=["BIOSANS", "GPSANS", "EQSANS"])
 reducer.setup_layout()
 reducer.show()

@@ -19,7 +19,7 @@ class SANSInstrumentWidget(BaseWidget):
     ## Widget name
     name = "Instrument"      
     
-    def __init__(self, parent=None, state=None, settings=None):      
+    def __init__(self, parent=None, state=None, settings=None, name="BIOSANS"):      
         super(SANSInstrumentWidget, self).__init__(parent, state, settings) 
 
         class SummaryFrame(QtGui.QFrame, ui.ui_hfir_data_summary.Ui_Frame): 
@@ -34,7 +34,9 @@ class SANSInstrumentWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(InstrumentDescription())
+            instr = InstrumentDescription()
+            instr.instrument_name = name
+            self.set_state(instr)
         
         # General GUI settings
         if settings is None:
@@ -224,6 +226,8 @@ class SANSInstrumentWidget(BaseWidget):
             Returns an object with the state of the interface
         """
         m = InstrumentDescription()
+        
+        m.instrument_name = self._summary.instr_name_label.text()
         
         # Data file
         flist_str = unicode(self._summary.data_file_edit.text())
