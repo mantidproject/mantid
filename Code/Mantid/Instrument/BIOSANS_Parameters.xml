@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<parameter-file instrument = "BIOSANS" date = "2010-07-28T00:00:00">
+<parameter-file instrument = "BIOSANS" date = "2011-03-03 08:35:49">
 
 <component-link name = "BIOSANS">
 
@@ -24,11 +24,11 @@
 </parameter>
 
 <parameter name="x-pixel-size">
-  <value val="5.15"/>
+  <value val="5.1000000"/>
 </parameter>
 
 <parameter name="y-pixel-size">
-  <value val="5.15"/>
+  <value val="5.1000000"/>
 </parameter>
 
 </component-link>

@@ -21,6 +21,8 @@ class Generator(object):
     
     def __init__(self, name="GPSANS", pixel_size_x=5.15, pixel_size_y=5.15):
         self.name = name
+        self.pixel_size_x = float(pixel_size_x)/1000.0
+        self.pixel_size_y = float(pixel_size_y)/1000.0
     
     
     def __call__(self):
@@ -32,7 +34,7 @@ class Generator(object):
         output = open("%s_Definition.xml" % self.name.upper(), 'w')
         input = open(DEFINITION_TEMPLATE, 'r')
         for l in input.readlines():
-            l=l.replace("%instrument_name%", self.name.upper())
+            l=l.replace("%instrument_name%", self.name)
             l=l.replace("%last_modified%", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
             l=l.replace("%pixel_positions%", self._get_positions())
             l=l.replace("%pixels_ids%", self._get_ids())
