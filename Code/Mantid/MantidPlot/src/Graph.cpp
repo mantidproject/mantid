@@ -1873,7 +1873,7 @@ void Graph::setCurveTitle(int index, const QString & title)
 void Graph::removeLegend()
 {
   if (d_legend){
-    delete d_legend;
+    d_legend->deleteLater();
     d_legend = NULL;
   }
 }

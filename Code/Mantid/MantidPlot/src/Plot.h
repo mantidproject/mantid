@@ -40,6 +40,16 @@
 
 class Grid;
 
+/// Helper class to delay deletion of curves
+struct Detacher : public QObject
+{
+  Detacher(QwtPlotItem* plotItem);
+  ~Detacher();
+private:
+  Detacher();
+  QwtPlotItem *m_plotItem;
+};
+
 //! Plot window class
 class Plot: public QwtPlot
 {
@@ -110,5 +120,6 @@ protected:
 	int minTickLength, majTickLength;
 	int marker_key;
 	int curve_key;
+
 };
 #endif

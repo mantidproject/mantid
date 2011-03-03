@@ -47,6 +47,15 @@
 #include <QPainter>
 #include <QMessageBox>
 
+Detacher::Detacher(QwtPlotItem *plotItem) : m_plotItem(plotItem)
+{
+}
+
+Detacher::~Detacher()
+{
+  delete m_plotItem;
+}
+
 Plot::Plot(int width, int height, QWidget *parent, const char *)
 : QwtPlot(parent)
 {
@@ -567,7 +576,12 @@ void Plot::removeCurve(int index)
 	QwtPlotItem* p = d_curves.take (index);
   // RNT: Making curve_key unique prevents clashes elsewhere
 	//--curve_key;
-	delete p;	
+	// MG: This is a rather crude but effective way of delaying the
+	// deletion of the curve objects. This is necessary because in
+	// a tight loop a curve may not have been completely removed 
+	// but the object has been deleted.
+	Detacher *detacher = new Detacher(p);
+	detacher->deleteLater();
 }
 
 QList<int> Plot::getMajorTicksType()

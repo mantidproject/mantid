@@ -114,7 +114,10 @@ private:
   {
     (void) ws; //Avoid compiler warning
     if (wsName == m_wsName.toStdString())
+    {
+      observeDelete(false);
       emit removeMe(this);
+    }
   }
   /// Handles afterReplace notification
   void afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws);
