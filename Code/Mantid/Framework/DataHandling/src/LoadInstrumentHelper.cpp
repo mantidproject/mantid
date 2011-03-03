@@ -192,6 +192,8 @@ std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instr
   // hack to look for long name versions
   if (instrument == "EQSANS")
     instrument = "EQ-SANS";
+  if (instrument == "HIRESSANS")
+    instrument = "GPSANS";
   if (instrument == "NOM")
     instrument = "NOMAD";
   if (instrument == "SEQ")
