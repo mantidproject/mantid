@@ -105,7 +105,7 @@ public:
     boost::shared_ptr<Mantid::Geometry::IInstrument> i = ws2d->getInstrument();
     boost::shared_ptr<Mantid::Geometry::IComponent> source = i->getSource();
 
-    TS_ASSERT_EQUALS( i->getName(), "BIOSANS");
+    TS_ASSERT_EQUALS( i->getName(), "GPSANS");
     TS_ASSERT_EQUALS( source->getName(), "source");
 
     // Check parameters for sample aperture
