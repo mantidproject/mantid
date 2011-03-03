@@ -80,7 +80,8 @@ public:
 
 
   //-----------------------------------------------------------------------------------------------
-  void testExec_Event_CNCS_listed_or_as_workspace_group()
+  // Somewhat slow test; disabled for now
+  void xtestExec_Event_CNCS_listed_or_as_workspace_group()
   {
     std::string eventfile1( "CNCS_7860_neutron_event.dat" );
     std::string eventfile2( "CNCS_7860_neutron_event.dat" );
@@ -328,6 +329,42 @@ public:
     //3 unique pixel ids
     TS_ASSERT_EQUALS( output->getNumberHistograms(), 3);
 
+    EventTeardown();
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  void testExec_Events_MatchingPixelIDs_WithWorkspaceGroup()
+  {
+    EventSetup();
+
+    GroupWorkspaces grpwsalg;
+    grpwsalg.initialize();
+    std::vector<std::string >input;
+    input.push_back("ev1");
+    input.push_back("ev2");
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("InputWorkspaces",input));
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.setProperty("OutputWorkspace","ev1_and_ev2_workspace_group"));
+    TS_ASSERT_THROWS_NOTHING( grpwsalg.execute());
+    TS_ASSERT( grpwsalg.isExecuted() );
+
+    MergeRuns mrg;  mrg.initialize();
+    mrg.setPropertyValue("InputWorkspaces","ev1_and_ev2_workspace_group");
+    mrg.setPropertyValue("OutputWorkspace","outWS");
+    mrg.execute();
+    TS_ASSERT( mrg.isExecuted() );
+
+    //Get the output event workspace
+    EventWorkspace_const_sptr output;
+    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("outWS"));
+    //This checks that it is indeed an EW
+    TS_ASSERT( output  );
+
+    //Should have 300+600
+    TS_ASSERT_EQUALS( output->getNumberEvents(), 900);
+    //3 unique pixel ids
+    TS_ASSERT_EQUALS( output->getNumberHistograms(), 3);
+
+    AnalysisDataService::Instance().remove("ev1_and_ev2_workspace_group");
     EventTeardown();
   }
 
