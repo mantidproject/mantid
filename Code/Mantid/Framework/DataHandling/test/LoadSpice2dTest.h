@@ -110,7 +110,6 @@ public:
 
     // Check parameters for sample aperture
     boost::shared_ptr<Mantid::Geometry::IComponent> sample_aperture = i->getComponentByName("sample_aperture");
-    TS_ASSERT_EQUALS( sample_aperture->getNumberParameter("DistanceToFlange")[0], 146.0);
     TS_ASSERT_EQUALS( sample_aperture->getNumberParameter("Size")[0], 14.0);
 
     // Check parameter map access
