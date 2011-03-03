@@ -2624,8 +2624,11 @@ void ApplicationWindow::initMultilayerPlot(MultiLayer* g, const QString& name)
 	  d_workspace->addSubWindow(g);
 	  activateWindow(old);
 	  activateWindow(g);
+  }// end of magical code
+  else
+  {
+	  d_workspace->addSubWindow(g);
   }
-  // end of magical code
   connectMultilayerPlot(g);
   g->showNormal();
 
