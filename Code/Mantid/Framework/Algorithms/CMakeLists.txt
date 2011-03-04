@@ -7,6 +7,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/CalculateEfficiency.cpp
 		src/CalculateTransmissionBeamSpreader.cpp
 		src/CalculateTransmission.cpp
+		src/CaltoDspacemap.cpp
 		src/ChangeBinOffset.cpp
 		src/CheckWorkspacesMatch.cpp
 		src/ChopData.cpp
@@ -143,6 +144,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/CalculateEfficiency.h
 		inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 		inc/MantidAlgorithms/CalculateTransmission.h
+		inc/MantidAlgorithms/CaltoDspacemap.h
 		inc/MantidAlgorithms/ChangeBinOffset.h
 		inc/MantidAlgorithms/CheckWorkspacesMatch.h
 		inc/MantidAlgorithms/ChopData.h
