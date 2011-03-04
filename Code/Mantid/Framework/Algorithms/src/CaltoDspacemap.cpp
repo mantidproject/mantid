@@ -65,6 +65,8 @@ void CaltoDspacemap::init()
   declareProperty(new FileProperty("DspacemapFile", "", FileProperty::Save, ".dat"),
      "The DspacemapFile on output contains the d-space mapping");
 
+  declareProperty("PadDetID", 300000, "Pad Data to this number of pixels");
+
 }
 
 
@@ -129,6 +131,8 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
     int detectorID = it->first;
     if(detectorID > maxdetID) maxdetID = detectorID;
   }
+  int paddetID = getProperty("PadDetID");
+  if (maxdetID < paddetID)maxdetID = paddetID;
 
   // Now write the POWGEN-style Dspace mapping file
   std::ofstream fout(filename, std::ios_base::out|std::ios_base::binary);
