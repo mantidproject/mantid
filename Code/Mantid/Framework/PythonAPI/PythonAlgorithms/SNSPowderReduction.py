@@ -57,6 +57,7 @@ class SNSPowderReduction(PythonAlgorithm):
             raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
     
         def getInfo(self, frequency, wavelength):
+            #print "getInfo(%f, %f)" % (frequency, wavelength)
             if self.filename is not None:
                 frequency = self.__getFrequency(float(frequency))
                 wavelength = self.__getWavelength(frequency, float(wavelength))
@@ -72,13 +73,15 @@ class SNSPowderReduction(PythonAlgorithm):
         return "SNSPowderReduction"
 
     def PyInit(self):
-        instruments = ["PG3", "VULCAN", "SNAP", "NOMAD"]
+        instruments = ["PG3", "VULCAN", "SNAP", "NOM"]
         self.declareProperty("Instrument", "PG3",
                              Validator=ListValidator(instruments))
         #types = ["Event preNeXus", "Event NeXus"]
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
+        self.declareProperty("CompressOnRead", False,
+                             Description="Compress the event list when reading in the data")
         self.declareProperty("Sum", False,
                              Description="Sum the runs. Does nothing for characterization runs")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
@@ -138,12 +141,16 @@ class SNSPowderReduction(PythonAlgorithm):
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension, **filterWall):
+    def _loadNeXusData(self, runnumber, extension, **kwargs):
+        if self.getProperty("CompressOnRead"):
+            kwargs["CompressTolerance"] = .01
+        else:
+            kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
         filename = name + extension
+
         try: # first just try loading the file
-            # TODO use timemin and timemax to filter what events are being read
-            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **filterWall)
+            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
 
             return alg.workspace()
         except:
@@ -159,7 +166,7 @@ class SNSPowderReduction(PythonAlgorithm):
             name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
-        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **filterWall)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
 
         return alg.workspace()
 
@@ -183,7 +190,7 @@ class SNSPowderReduction(PythonAlgorithm):
         if wksp is None:
             return None
         # take care of filtering events
-        if self._filterBadPulses:
+        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
         if filterLogs is not None:
             try:
