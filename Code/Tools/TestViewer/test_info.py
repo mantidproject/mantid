@@ -257,7 +257,7 @@ class TestSingle(object):
 class TestSuite(object):
     """ A suite of tests """
 
-    def __init__(self, name, parent, classname, command, rundir, xml_file, source_file):
+    def __init__(self, name, parent, classname, command, rundir, xml_file, source_file, log_file):
         """ Constructor"""
         # Its own name, e.g. "UnitTest"
         self.name = name
@@ -269,6 +269,8 @@ class TestSuite(object):
         self.command = command
         # Name of the XML file produced when running (no path)
         self.xml_file = xml_file
+        # Name of the mantid.log file produced for this test
+        self.log_file = log_file
         # Run directory
         self.rundir = rundir
         # Marker for when the contained suites changed (some were added or removed)
@@ -297,6 +299,8 @@ class TestSuite(object):
         self.passed = 0
         self.failed = 0
         self.num_run = 0
+        # Contents of the mantid.log file
+        self.log_contents = ""
 
     #----------------------------------------------------------------------------------
     def get_fullname(self):
@@ -317,6 +321,17 @@ class TestSuite(object):
             for test in self.tests:
                 if details or test.failed:
                     s += test.get_results_text()
+                    
+            # Now the mantid.log, if any
+            if details:
+                if self.log_contents == "":
+                    s += "<br>No log file found.</br>"
+                else:
+                    s += u"<font color=Orange><h3>%s</h3></font>" % (self.name + ": " + "Log File")
+                    s += "<br>"
+                    html_log = html_escape( self.log_contents )
+                    html_log = html_log.replace("\n", "<br>")
+                    s += html_log
         return s
 
     #----------------------------------------------------------------------------------
@@ -338,6 +353,7 @@ class TestSuite(object):
         self.lastrun = other.lastrun
         self.build_succeeded = other.build_succeeded
         self.build_stdout = other.build_stdout
+        self.log_contents = other.log_contents
         # Re-compile the states from the individual tests
         self.compile_states()
         
@@ -472,6 +488,12 @@ class TestSuite(object):
         else:
             # No - you must have segfaulted or some other error!
             self.set_aborted(output)
+            
+        # Now try to load the log_file
+        if os.path.exists(self.log_file):
+            self.log_contents = open(self.log_file).read()
+        else:
+            self.log_contents = ""
             
         # Go back to old directory and remove the temp one
         os.chdir(pwd)
@@ -805,12 +827,14 @@ class TestProject(object):
                         classname = self.name + "." + suite_name
                         source_file = self.find_source_file(suite_name)
                         # The xml file output goes (as of rev 8587, new cxxtestgen see ticket #2204 )
-                        xml_file = "TEST-" + classname + ".xml"        
-
+                        xml_file = "TEST-" + classname + ".xml"     
+                        # The shell command to run   
+                        log_file = classname + ".log"
+                        command = "MANTIDLOGPATH=%s" % log_file + " " + self.executable + " " + suite_name
                         # Create that suite
                         suite = TestSuite(suite_name, self, classname, 
-                                          self.executable + " " + suite_name,
-                                          dir, xml_file, source_file)
+                                          command,
+                                          dir, xml_file, source_file, log_file)
                         last_suite_name = suite_name
                         self.suites.append(suite)
                         
@@ -1403,7 +1427,7 @@ if __name__ == '__main__':
     all_tests.select_all(False)
     suite = all_tests.find_suite("MDEventsTest.MDEventTest")
     suite.set_selected(True)
-    suite = all_tests.find_suite("KernelTest.DateAndTimeTest")
+    suite = all_tests.find_suite("KernelTest.ConfigServiceTest")
     suite.set_selected(True)
     all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
                           parallel=True, callback_func=test_run_print_callback)
