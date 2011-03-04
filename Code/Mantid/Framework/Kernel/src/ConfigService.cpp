@@ -293,6 +293,10 @@ void ConfigServiceImpl::configureLogging()
     //Ensure that the logging directory exists
     m_logFilePath = getString("logging.channels.fileChannel.path");
 
+    // Look in the environment for a variable to override where the log file ends up.
+    if (Poco::Environment::has("MANTIDLOGPATH"))
+      m_logFilePath = Poco::Environment::get("MANTIDLOGPATH");
+
     Poco::Path logpath(m_logFilePath);
 
     // An absolute path makes things simpler

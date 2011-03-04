@@ -13,6 +13,8 @@
 #include <fstream>
 
 #include <Poco/NObserver.h>
+#include <Poco/Environment.h>
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using Mantid::TestChannel;
@@ -281,6 +283,26 @@ public:
     settings.setString("default.facility", "ISIS");
   }
 
+  /** If you set MANTIDLOGPATH environment then you change where the log ends up */
+  void testOverrideLogFile()
+  {
+    // Remove the file
+    if (Poco::File("ConfigServiceTest.log").exists())
+      Poco::File("ConfigServiceTest.log").remove();
+
+    TS_ASSERT(!Poco::File("ConfigServiceTest.log").exists());
+
+    Poco::Environment::set("MANTIDLOGPATH", "ConfigServiceTest.log");
+    const std::string propfile = getDirectoryOfExecutable() + "MantidTest.properties";
+    ConfigService::Instance().updateConfig(propfile);
+    Logger & log1 = Logger::get("logTest1");
+    log1.warning() << "ConfigServiceTest.testOverrideLogFile test output" << std::endl;
+    // The file was written?
+    TS_ASSERT(Poco::File("ConfigServiceTest.log").exists());
+    // Clean up
+    if (Poco::File("ConfigServiceTest.log").exists())
+      Poco::File("ConfigServiceTest.log").remove();
+  }
 
 
 protected:
