@@ -284,7 +284,7 @@ public:
   }
 
   /** If you set MANTIDLOGPATH environment then you change where the log ends up */
-  void testOverrideLogFile()
+  void xtestOverrideLogFile()
   {
     // Remove the file
     if (Poco::File("ConfigServiceTest.log").exists())
