@@ -42,7 +42,7 @@ namespace DataHandling
 class DLLExport LoadDaveGrp: public Mantid::API::Algorithm
 {
 public:
-  /// (Empty) Constructor
+  /// Constructor
   LoadDaveGrp();
   /// Virtual destructor
   virtual ~LoadDaveGrp() {}
@@ -52,7 +52,7 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
-  ///
+
 private:
   /// Initialization code
   void init();
@@ -63,10 +63,13 @@ private:
    */
   void getAxisLength(int &length);
   void getAxisValues(MantidVec *axis, const std::size_t length);
+  void getData(std::vector<MantidVec *> &data, std::vector<MantidVec *> &errs);
   void readLine();
 
   std::ifstream ifile;
   std::string line;
+  std::size_t nGroups;
+  int xLength;
 };
 
 } // namespace DataHandling

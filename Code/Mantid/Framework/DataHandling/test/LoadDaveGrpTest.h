@@ -36,6 +36,9 @@ public:
       TS_ASSERT_EQUALS(outputWS->readX(0).size(), 60);
       TS_ASSERT_EQUALS(outputWS->readX(0)[0], 655.0);
       TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 0.625);
+      TS_ASSERT_EQUALS(outputWS->readY(0)[1], 0.000106102311091);
+      TS_ASSERT_EQUALS(outputWS->readY(11)[59], 0.0116074689604);
+      TS_ASSERT_EQUALS(outputWS->readE(27)[7], 0.0187950781228);
 
       dataStore.remove(outputWSName);
     }

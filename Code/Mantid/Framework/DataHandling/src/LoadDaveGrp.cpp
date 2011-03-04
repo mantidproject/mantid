@@ -12,7 +12,7 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDaveGrp)
 
-LoadDaveGrp::LoadDaveGrp() : ifile(), line()
+LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {
 }
 
@@ -32,45 +32,50 @@ void LoadDaveGrp::exec()
 {
   const std::string filename = this->getProperty("Filename");
 
-  int xLength = 0;
   int yLength = 0;
-  int nGroups = 0;
 
   MantidVec *xAxis = new MantidVec();
   MantidVec *yAxis = new MantidVec();
 
-  //std::vector<MantidVec *> *data = new std::vector<MantidVec *>();
-  //std::vector<MantidVec *> *errors = new std::vector<MantidVec *>();
+  std::vector<MantidVec *> data;
+  std::vector<MantidVec *> errors;
 
   this->ifile.open(filename.c_str());
   if (this->ifile.is_open())
   {
     // Size of x axis
-    this->getAxisLength(xLength);
+    this->getAxisLength(this->xLength);
     // Size of y axis
     this->getAxisLength(yLength);
     // This is also the number of groups (spectra)
-    nGroups = yLength;
+    this->nGroups = static_cast<std::size_t>(yLength);
     // Read in the x axis values
-    this->getAxisValues(xAxis, static_cast<std::size_t>(xLength));
+    this->getAxisValues(xAxis, static_cast<std::size_t>(this->xLength));
     // Read in the y axis values
     this->getAxisValues(yAxis, static_cast<std::size_t>(yLength));
+    // Read in the data
+    this->getData(data, errors);
   }
   this->ifile.close();
 
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace = \
       boost::dynamic_pointer_cast<API::MatrixWorkspace>\
-      (API::WorkspaceFactory::Instance().create("Workspace2D", nGroups,
-          xLength, yLength));
+      (API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
+          this->xLength, yLength));
 
   API::Axis* const verticalAxis = new API::NumericAxis(yLength);
   outputWorkspace->replaceAxis(1, verticalAxis);
 
-  for(std::size_t i = 0; i < static_cast<std::size_t>(nGroups); i++)
+  for(std::size_t i = 0; i < this->nGroups; i++)
   {
     outputWorkspace->dataX(i) = *xAxis;
+    outputWorkspace->dataY(i) = *data[i];
+    outputWorkspace->dataE(i) = *errors[i];
     verticalAxis->setValue(static_cast<const int>(i), yAxis->at(i));
+
+    delete data[i];
+    delete errors[i];
   }
 
   this->setProperty("OutputWorkspace", outputWorkspace);
@@ -103,6 +108,31 @@ void LoadDaveGrp::getAxisValues(MantidVec *axis, const std::size_t length)
     std::istringstream is(this->line);
     is >> value;
     axis->push_back(value);
+  }
+}
+
+void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
+    std::vector<MantidVec *> &errs)
+{
+  double data_val = 0.0;
+  double err_val = 0.0;
+  for(std::size_t j = 0; j < this->nGroups; j++)
+  {
+    // Skip the group comment line
+    this->readLine();
+    // Read the data block
+    MantidVec *d = new MantidVec();
+    MantidVec *e = new MantidVec();
+    for(std::size_t k = 0; k < static_cast<std::size_t>(this->xLength); k++)
+    {
+      this->readLine();
+      std::istringstream is(this->line);
+      is >> data_val >> err_val;
+      d->push_back(data_val);
+      e->push_back(err_val);
+    }
+    data.push_back(d);
+    errs.push_back(e);
   }
 }
 
