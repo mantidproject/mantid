@@ -177,6 +177,9 @@ namespace Mantid
       /// Remove an observer
       void removeObserver(const Poco::AbstractObserver& observer)const;
 
+      // Starts up the logging
+      void configureLogging();
+
     private:
       friend struct Mantid::Kernel::CreateUsingNew<ConfigServiceImpl>;
       /// Handles distribution of Poco signals.
@@ -193,8 +196,6 @@ namespace Mantid
       void loadConfig(const std::string& filename, const bool append=false);
       /// Read a file and place its contents into the given string
       bool readFile(const std::string& filename, std::string & contents) const;
-      // Starts up the logging
-      void configureLogging();
       /// Provies a string of a default configuration
       std::string defaultConfig() const;
       /// Writes out a fresh user properties file
@@ -239,6 +240,8 @@ namespace Mantid
       const std::string m_properties_file_name;
       /// The filename of the Mantid user properties file
       const std::string m_user_properties_file_name;
+      /// The filename where the log ends up
+      std::string m_logFilePath;
       /// Store a list of data search paths
       std::vector<std::string> m_DataSearchDirs;
       /// Store a list of user search paths

@@ -30,7 +30,7 @@ class ThreadSafeLogStream;
 
 /** @class Logger Logger.h Kernel/Logger.h
 
-    The Logger class is in charge of the publishing messages from the framwork through
+    The Logger class is in charge of the publishing messages from the framework through
     various channels. The static methods on the class are responsible for the creation
     of Logger objects on request. This class currently uses the Logging functionality
     provided through the POCO (portable components) library.
@@ -66,7 +66,7 @@ class ThreadSafeLogStream;
   class DLLExport Logger
   {
   public:
-    /// An emuration of the priority levels of a log message.
+    /// An enumeration of the priority levels of a log message.
     enum Priority
     {
       PRIO_FATAL = 1,		  ///< A fatal error. The application will most likely terminate. This is the highest priority.

@@ -174,6 +174,11 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir() << std::endl;
   g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
+  g_log.information() << "Logging to: " << m_logFilePath << std::endl;
+
+  // Make sure the log path is shown somewhere.
+  //std::cout << "Logging to: " << m_logFilePath << std::endl;
+
 }
 
 /** Private Destructor
@@ -278,29 +283,76 @@ bool ConfigServiceImpl::readFile(const std::string& filename, std::string & cont
   return good;
 }
 
-/// Configures the Poco logging and starts it up
+/** Configures the Poco logging and starts it up
+ *
+ */
 void ConfigServiceImpl::configureLogging()
 {
   try
   {
     //Ensure that the logging directory exists
-    Poco::Path logpath(getString("logging.channels.fileChannel.path"));
-    if (logpath.toString().empty() || getUserPropertiesDir() != getPropertiesDir())
+    m_logFilePath = getString("logging.channels.fileChannel.path");
+
+    Poco::Path logpath(m_logFilePath);
+
+    // An absolute path makes things simpler
+    logpath = logpath.absolute();
+
+    // First, try the logpath give
+    if (!m_logFilePath.empty())
     {
-      std::string logfile = getUserPropertiesDir() + "mantid.log";
-      logpath.assign(logfile);
-      m_pConf->setString("logging.channels.fileChannel.path", logfile);
+      try
+      {
+        // Save it for later
+        m_logFilePath = logpath.toString();
+
+        //make this path point to the parent directory and create it if it does not exist
+        Poco::Path parent = logpath;
+        parent.makeParent();
+        Poco::File(parent).createDirectories();
+
+        // Try to create or append to the file. If it fails, use the default
+        FILE *fp = fopen(m_logFilePath.c_str(), "a+");
+        if (fp == NULL)
+        {
+          std::cerr << "Error writing to log file path given in properties file: \"" << m_logFilePath << "\". Will use a default path instead." << std::endl;
+          // Clear the path; this will make it use the default
+          m_logFilePath = "";
+        }
+      }
+      catch (std::exception &)
+      {
+        std::cerr << "Error writing to log file path given in properties file: \"" << m_logFilePath << "\". Will use a default path instead." << std::endl;
+        // ERROR! Maybe the file is not writable!
+        // Clear the path; this will make it use the default
+        m_logFilePath = "";
+      }
     }
+
+    // The path given was invalid somehow? Use a default
+    if (m_logFilePath.empty())
+    {
+      m_logFilePath = getUserPropertiesDir() + "mantid.log";
+      logpath.assign(m_logFilePath);
+      logpath = logpath.absolute();
+      m_logFilePath = logpath.toString();
+    }
+    // Set the line in the configuration properties.
+    //  this'll be picked up by LoggingConfigurator (somehow)
+    m_pConf->setString("logging.channels.fileChannel.path", m_logFilePath);
+
     //make this path point to the parent directory and create it if it does not exist
     logpath.makeParent();
     if (!logpath.toString().empty())
     {
-      Poco::File(logpath).createDirectory();
+      Poco::File(logpath).createDirectories(); // Also creates all necessary directories
     }
-    //configure the logging framework
+
+    // Configure the logging framework
     Poco::Util::LoggingConfigurator configurator;
     configurator.configure(m_pConf);
-  } catch (std::exception& e)
+  }
+  catch (std::exception& e)
   {
     std::cerr << "Trouble configuring the logging framework " << e.what() << std::endl;
   }
@@ -547,10 +599,12 @@ std::string ConfigServiceImpl::defaultConfig() const
 void ConfigServiceImpl::updateConfig(const std::string& filename, const bool append,
     const bool update_caches)
 {
+  //std::cout << "Properties file loaded: " <<  filename << std::endl;
   loadConfig(filename, append);
-  configureLogging();
   if (update_caches)
   {
+    // Only configure logging once
+    configureLogging();
     //Ensure that any relative paths given in the configuration file are relative to the correct directory
     convertRelativeToAbsolute();
     //Configure search paths into a specially saved store as they will be used frequently
@@ -588,9 +642,9 @@ void ConfigServiceImpl::saveConfig(const std::string & filename) const
       char last = *(file_line.end() - 1);
       if (last == '\\')
       {
-	// If we are not in line continuation mode then need
-	// a fresh start line
-	if( !line_continuing ) output = "";
+        // If we are not in line continuation mode then need
+        // a fresh start line
+        if( !line_continuing ) output = "";
         line_continuing = true;
         output += file_line + "\n";
         continue;
