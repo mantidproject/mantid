@@ -24,8 +24,8 @@ DECLARE_ALGORITHM(CaltoDspacemap)
 /// Sets documentation strings for this algorithm
 void CaltoDspacemap::initDocs()
 {
-  this->setWikiSummary("Creates a calibration file with offsets calculated from Dspacemap file. ");
-  this->setOptionalMessage("Creates a calibration file with offsets calculated from Dspacemap file.");
+  this->setWikiSummary("Creates a Dspacemap file from calibration file with offsets calculated. ");
+  this->setOptionalMessage("Creates a Dspacemap file from calibration file with offsets calculated. ");
 }
 
 
@@ -60,10 +60,10 @@ void CaltoDspacemap::init()
     "A workspace with units of TOF" );
 
   declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),
-     "The CalFile on input contains the groups; on output contains the offsets");
+     "The CalFile on input contains the offsets");
 
   declareProperty(new FileProperty("DspacemapFile", "", FileProperty::Save, ".dat"),
-     "The DspacemapFile containing the d-space mapping");
+     "The DspacemapFile on output contains the d-space mapping");
 
 }
 

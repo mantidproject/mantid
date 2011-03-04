@@ -24,12 +24,11 @@ namespace Algorithms
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace whose detectors are to be aligned </LI>
-    <LI> OutputWorkspace - The name of the Workspace in which the result of the algorithm will be stored </LI>
     <LI> CalibrationFile - The file containing the detector offsets </LI>
     </UL>
 
     @author Vickie Lynch ORNL
-    @date 04/01/2011
+    @date 04/03/2011
 
     Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
