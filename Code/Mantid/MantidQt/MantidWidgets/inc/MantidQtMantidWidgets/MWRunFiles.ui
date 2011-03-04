@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>270</width>
-    <height>39</height>
+    <width>308</width>
+    <height>34</height>
    </rect>
   </property>
   <property name="sizePolicy" >
@@ -19,9 +19,6 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout" >
-   <property name="sizeConstraint" >
-    <enum>QLayout::SetDefaultConstraint</enum>
-   </property>
    <property name="margin" >
     <number>0</number>
    </property>
@@ -127,6 +124,17 @@
     </widget>
    </item>
    <item>
+    <widget class="QToolButton" name="browseIco" >
+     <property name="text" >
+      <string/>
+     </property>
+     <property name="icon" >
+      <iconset resource="../../../../Images/images.qrc" >
+       <normaloff>:/Icons/LoadFile.png</normaloff>:/Icons/LoadFile.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QPushButton" name="browseBtn" >
      <property name="text" >
       <string>Browse</string>
@@ -134,7 +142,18 @@
     </widget>
    </item>
   </layout>
+  <action name="actionDialog" >
+   <property name="icon" >
+    <iconset>
+     <normaloff>LoadFile.png</normaloff>LoadFile.png</iconset>
+   </property>
+   <property name="text" >
+    <string>File Dialog</string>
+   </property>
+  </action>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../../../Images/images.qrc" />
+ </resources>
  <connections/>
 </ui>

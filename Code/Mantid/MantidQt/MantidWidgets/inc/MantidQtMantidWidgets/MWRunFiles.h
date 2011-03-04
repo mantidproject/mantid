@@ -44,20 +44,30 @@ namespace MantidQt
     class EXPORT_OPT_MANTIDQT_MANTIDWIDGETS MWRunFiles : public API::MantidWidget
     {
       Q_OBJECT
+      
       Q_PROPERTY(bool findRunFiles READ isForRunFiles WRITE isForRunFiles)
       Q_PROPERTY(QString label READ getLabelText WRITE setLabelText)
       Q_PROPERTY(bool multipleFiles READ allowMultipleFiles WRITE allowMultipleFiles)
       Q_PROPERTY(bool optional READ isOptional WRITE isOptional)
       Q_PROPERTY(bool multiEntry READ doMultiEntry WRITE doMultiEntry)
+      Q_PROPERTY(ButtonOpts buttonOpt READ doButtonOpt WRITE doButtonOpt)
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
+      Q_ENUMS(ButtonOpts)
 
     public:
+      /// options for bringing up the load file dialog
+      enum ButtonOpts
+      {
+        Text,                       ///< use a button (normally labelled "Browse")
+        Icon,                       ///< use an icon
+        None                        ///< disable the load file dialog
+      };
       /// Flags for workspace entries
       enum
       {
-        NO_ENTRY_NUM = -1,                       ///< error in the entry number setting
-        ALL_ENTRIES = -2                         ///< use all entries (i.e. entry number was left blank)
+        NO_ENTRY_NUM = -1,          ///< error in the entry number setting
+        ALL_ENTRIES = -2            ///< use all entries (i.e. entry number was left blank)
       };
 
       ///Default constructor
@@ -71,6 +81,8 @@ namespace MantidQt
       void allowMultipleFiles(const bool);
       bool isOptional() const;
       void isOptional(const bool);
+      ButtonOpts doButtonOpt() const;
+      void doButtonOpt(const ButtonOpts buttonOpt);
       bool doMultiEntry() const;
       void doMultiEntry(const bool);
       QString getAlgorithmProperty() const;
@@ -136,7 +148,9 @@ namespace MantidQt
       /// Whether the widget can be empty
       bool m_isOptional;
       /// Whether to allow the user to state an entry number
-      bool m_doMultiEntry;
+      bool m_multiEntry;
+      /// To use a browse button or icon or nothing at all
+      ButtonOpts m_buttonOpt;
       /// Holds any error with the user entry for the filename, "" means no error
       QString m_fileProblem;
       /// If applicable holds any error with the user in entryNum, "" means no error

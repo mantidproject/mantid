@@ -16,17 +16,16 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-static const int MAX_FILE_NOT_FOUND_DISP = 3;
-
 MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
   m_findRunFiles(true), m_allowMultipleFiles(true), m_isOptional(false),
-  m_doMultiEntry(false), m_fileProblem(""), m_entryNumProblem(""),
-  m_algorithmProperty(""), m_fileFilter("")
+  m_buttonOpt(Text), m_multiEntry(false), m_fileProblem(""),
+  m_entryNumProblem(""), m_algorithmProperty(""), m_fileFilter("")
 {
   m_uiForm.setupUi(this);
 
   connect(m_uiForm.fileEditor, SIGNAL(textChanged(const QString &)), this, SIGNAL(fileTextChanged(const QString&)));
   connect(m_uiForm.browseBtn, SIGNAL(clicked()), this, SLOT(browseClicked()));
+  connect(m_uiForm.browseIco, SIGNAL(clicked()), this, SLOT(browseClicked()));
 
   connect(m_uiForm.fileEditor, SIGNAL(editingFinished()), this, SIGNAL(fileEditingFinished()));
   connect(this, SIGNAL(fileEditingFinished()), this, SLOT(findFiles()));
@@ -35,7 +34,8 @@ MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
 
   m_uiForm.fileEditor->clear();
   
-  m_doMultiEntry ? m_uiForm.entryNum->show() : m_uiForm.entryNum->hide();
+  m_multiEntry ? m_uiForm.entryNum->show() : m_uiForm.entryNum->hide();
+  doButtonOpt(m_buttonOpt);
 
   setFocusPolicy(Qt::StrongFocus);
   setFocusProxy(m_uiForm.fileEditor);
@@ -117,13 +117,46 @@ void MWRunFiles::isOptional(const bool optional)
 }
 
 /**
+* Returns the preference for how the dialog control should be
+* @return the setting
+*/
+MWRunFiles::ButtonOpts MWRunFiles::doButtonOpt() const
+{
+  return m_buttonOpt;
+}
+
+/**
+* Set how the browse should appear
+* @param buttonOpt the preference for the control, if there will be one, to activate the dialog box
+*/
+void MWRunFiles::doButtonOpt(const MWRunFiles::ButtonOpts buttonOpt)
+{
+  m_buttonOpt = buttonOpt;
+  if (buttonOpt == None)
+  {
+    m_uiForm.browseBtn->hide();
+    m_uiForm.browseIco->hide();
+  }
+  else if (buttonOpt == Text)
+  {
+    m_uiForm.browseBtn->show();
+    m_uiForm.browseIco->hide();
+  }
+  else if (buttonOpt == Icon)
+  {
+    m_uiForm.browseBtn->hide();
+    m_uiForm.browseIco->show();
+  }
+}
+
+/**
 * Whether to find the number of entries in the file or assume (the
 * normal situation) of one entry
 * @return true if the widget is to look for multiple entries
 */
 bool MWRunFiles::doMultiEntry() const
 {
-  return m_doMultiEntry;
+  return m_multiEntry;
 }
 
 /**
@@ -132,8 +165,8 @@ bool MWRunFiles::doMultiEntry() const
 */
 void MWRunFiles::doMultiEntry(const bool multiEntry)
 {
-  m_doMultiEntry = multiEntry;
-  if (m_doMultiEntry)
+  m_multiEntry = multiEntry;
+  if (m_multiEntry)
   {
     m_uiForm.entryNum->show();
   }
@@ -239,7 +272,7 @@ QString MWRunFiles::getText() const
 */
 int MWRunFiles::getEntryNum() const
 {
-  if ( m_uiForm.entryNum->text().isEmpty() || (! m_doMultiEntry) )
+  if ( m_uiForm.entryNum->text().isEmpty() || (! m_multiEntry) )
   {
     return ALL_ENTRIES;
   }
@@ -558,7 +591,7 @@ void MWRunFiles::refreshValidator()
     m_uiForm.valid->setToolTip(m_fileProblem);
     m_uiForm.valid->show();
   }
-  else if ( ! m_entryNumProblem.isEmpty() && m_doMultiEntry )
+  else if ( ! m_entryNumProblem.isEmpty() && m_multiEntry )
   {
     m_uiForm.valid->setToolTip(m_entryNumProblem);
     m_uiForm.valid->show();

@@ -10,6 +10,9 @@
         <file>Mantid_Logo_Transparent.png</file>
         <file>data_replace.png</file>
     </qresource>
+    <qresource prefix="/Icons">
+        <file>LoadFile.png</file>
+    </qresource>
     <qresource prefix="/PickTools">
         <file>selection-tube.png</file>
         <file>selection-box.png</file>
