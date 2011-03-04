@@ -55,6 +55,9 @@ pythonscripts.directories = @MANTID_ROOT@/Scripts
 # The locations of Python algorithms that are to be loaded at startup
 pythonalgorithms.directories = @MANTID_ROOT@/Framework/PythonAPI/PythonAlgorithms
 
+# Setting this to 1 will allow python algorithms to be reloaded before execution.
+pythonalgorithms.refresh.allowed = 0
+
 # A semi-colon(;) separated list of directories to use to search for data
 # Use forward slash / for all paths
 datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/../../Test/VATES;@MANTID_ROOT@/Instrument
