@@ -234,8 +234,9 @@ public:
     delete [] event_id;
     delete [] event_time_of_flight;
     delete event_index_ptr;
-    // For Linux with tcmalloc, make sure memory goes back.
-    MemoryManager::Instance().releaseFreeMemory();
+    // For Linux with tcmalloc, make sure memory goes back;
+    // but don't call if more than 15% of memory is still available, since that slows down the loading.
+    MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
   }
 
 
@@ -956,6 +957,9 @@ void LoadEventNexus::exec()
 
   // Clear any large vectors to free up memory.
   this->pulseTimes.clear();
+
+  // Some memory feels like it sticks around (on Linux). Free it.
+  MemoryManager::Instance().releaseFreeMemory();
 
   return;
 }

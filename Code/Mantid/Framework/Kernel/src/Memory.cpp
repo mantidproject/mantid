@@ -331,7 +331,7 @@ string MemoryStats::availMemStr() const
 
 /**
  * Returns the total memory of the system 
- * @returns An unsigned containing the total amount of memory on the system
+ * @returns An unsigned containing the total amount of memory on the system in kiB
  */
 size_t MemoryStats::totalMem() const
 {

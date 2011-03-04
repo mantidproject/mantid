@@ -57,6 +57,8 @@ namespace Mantid
       bool goForManagedWorkspace(int NVectors,int XLength,int YLength, bool* isCompressedOK = NULL);
       /// Release memory back to the system if we linked againsed tcmalloc
       void releaseFreeMemory();
+      /// Release memory back to the system if we linked againsed tcmalloc and are above this much use
+      void releaseFreeMemoryIfAbove(double threshold);
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;

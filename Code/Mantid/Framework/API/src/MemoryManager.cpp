@@ -163,5 +163,31 @@ void MemoryManagerImpl::releaseFreeMemory()
 #endif
 }
 
+/** Release any free memory back to the system,
+ * but only if you are above a certain fraction of use of the
+ * total available PHYSICAL memory.
+ * Calling this could help the system avoid going into swap.
+ *
+ * NOTE: This only works if you linked against tcmalloc.
+ *
+ * @param threshold :: multiplier (0-1.0) of the amount of physical
+ *        memory used that has to be in use before the call to
+ *        release memory is actually called.
+ */
+void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
+{
+
+#ifdef USE_TCMALLOC
+    Kernel::MemoryStats mem;
+    mem.update();
+    double fraction_available = (mem.availMem() * 1.0) / (mem.totalMem() * 1.0);
+    if (fraction_available < (1.0 - threshold))
+    {
+      // Make TCMALLOC release memory to the system
+      MallocExtension::instance()->ReleaseFreeMemory();
+    }
+#endif
+}
+
 } // namespace API
 } // namespace Mantid
