@@ -157,12 +157,18 @@ public:
   /**
    * Filter out a run by time. Takes out any TimeSeriesProperty log entries outside of the given
    *  absolute time range.
+   * EXCEPTION: If there is only one entry in the list, it is considered to mean
+   * "constant" so the value is kept even if the time is outside the range.
    *
    * @param start :: Absolute start time. Any log entries at times >= to this time are kept.
    * @param stop :: Absolute stop time. Any log entries at times < than this time are kept.
    */
   void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
   {
+    // Do nothing for single (constant) value
+    if (m_propertySeries.size() <= 1)
+      return;
+
     typename timeMap::iterator it;
     for (it = m_propertySeries.begin(); it != m_propertySeries.end(); /*increment within loop*/)
     {

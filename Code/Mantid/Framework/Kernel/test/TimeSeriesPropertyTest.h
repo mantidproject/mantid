@@ -27,7 +27,7 @@ public:
     delete sProp;
   }
 
-  void testConstructor()
+  void test_Constructor()
   {
     // Test that all the base class member variables are correctly assigned to
     TS_ASSERT( ! iProp->name().compare("intProp") );
@@ -46,14 +46,14 @@ public:
     //TS_ASSERT( sProp->isDefault() )
   }
 
-  void testSetValue()
+  void test_SetValue()
   {
     TS_ASSERT_THROWS( iProp->setValue("1"), Exception::NotImplementedError );
     TS_ASSERT_THROWS( dProp->setValue("5.5"), Exception::NotImplementedError );
     TS_ASSERT_THROWS( sProp->setValue("aValue"), Exception::NotImplementedError );
   }
 
-  void testAddValue()
+  void test_AddValue()
   {
     const std::string tester("2007-11-30T16:17:00");
     TS_ASSERT( iProp->addValue(tester,1) );
@@ -78,7 +78,7 @@ public:
     TS_ASSERT_EQUALS( sString.substr(0,27), "2007-Nov-30 16:17:00  test\n" );
   }
 
-  void testCasting()
+  void test_Casting()
   {
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(iProp), static_cast<Property*>(0) );
     TS_ASSERT_DIFFERS( dynamic_cast<Property*>(dProp), static_cast<Property*>(0) );
@@ -87,7 +87,7 @@ public:
 
 
   //----------------------------------------------------------------------------
-  void testAdditionOperator()
+  void test_AdditionOperator()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
@@ -107,8 +107,8 @@ public:
   }
 
   //----------------------------------------------------------------------------
-  // Ticket 2097: This caused an infinite loop
-  void testAdditionOperatorOnYourself()
+  /// Ticket 2097: This caused an infinite loop
+  void test_AdditionOperatorOnYourself()
   {
     TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
     TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
@@ -140,6 +140,25 @@ public:
     log->filterByTime(start, stop);
     TS_ASSERT_EQUALS( log->realSize(), 3);
     TS_ASSERT_EQUALS( log->getTotalValue(), 9);
+  }
+
+
+  //----------------------------------------------------------------------------
+  /// Ticket #2591
+  void test_filterByTime_ifOnlyOneValue_assumes_constant_instead()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("2007-11-30T16:17:00",1) );
+    TS_ASSERT_EQUALS( log->realSize(), 1);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
+
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
+    log->filterByTime(start, stop);
+
+    // Still there!
+    TS_ASSERT_EQUALS( log->realSize(), 1);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
   }
 
 
@@ -327,7 +346,7 @@ public:
     TS_ASSERT( boost::math::isnan(stats.duration) );
   }
 
-  void testPlusEqualsOperator_Incompatible_Types()
+  void test_PlusEqualsOperator_Incompatible_Types_dontThrow()
   {
     // Adding incompatible types together should not throw, but issue a warning in the log
 
