@@ -121,6 +121,9 @@ namespace Mantid
       /// Do we pre-count the # of events in each pixel ID?
       bool precount;
 
+      /// Tolerance for CompressEvents; use -1 to mean don't compress.
+      double compressTolerance;
+
       /// Do we load the sample logs?
       bool loadlogs;
 

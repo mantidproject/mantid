@@ -151,6 +151,14 @@ public:
 
     prog->report(entry_name + ": filling events");
 
+    // The workspace
+    EventWorkspace_sptr WS = alg->WS;
+
+    // Will we need to compress?
+    bool compress = (alg->compressTolerance >= 0);
+    // Which workspace indices were touched?
+    std::set<int> usedWI;
+
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
     {
@@ -185,13 +193,34 @@ public:
         //Find the the workspace index corresponding to that pixel ID
         int wi((*pixelID_to_wi_map)[event_id[i]]);
         // Add it to the list at that workspace index
-        alg->WS->getEventList(wi).addEventQuickly( event );
+        WS->getEventList(wi).addEventQuickly( event );
 
         //Local tof limits
         if (tof < my_shortest_tof) { my_shortest_tof = tof;}
         if (tof > my_longest_tof) { my_longest_tof = tof;}
+
+        // Track all the touched wi
+        if (compress)
+        {
+          if (usedWI.find(wi) == usedWI.end())
+            usedWI.insert(wi);
+        }
+
       }
     } //(for each event)
+
+
+    //------------ Compress Events ------------------
+    if (compress)
+    {
+      // Do it on all the workspace indices we touched
+      std::set<int>::iterator it;
+      for (it=usedWI.begin(); it!=usedWI.end(); it++)
+      {
+        EventList * el = WS->getEventListPtr(*it);
+        el->compressEvents(alg->compressTolerance, el);
+      }
+    }
 
     //Join back up the tof limits to the global ones
     PARALLEL_CRITICAL(tof_limits)
@@ -205,6 +234,8 @@ public:
     delete [] event_id;
     delete [] event_time_of_flight;
     delete event_index_ptr;
+    // For Linux with tcmalloc, make sure memory goes back.
+    MemoryManager::Instance().releaseFreeMemory();
   }
 
 
@@ -604,6 +635,11 @@ void LoadEventNexus::init()
       new PropertyWithValue<bool>("Precount", false, Direction::Input),
       "Pre-count the number of events in each pixel before allocating memory (optional, default False). \n"
       "This can significantly reduce memory use and memory fragmentation; it may also speed up loading.");
+
+  declareProperty(
+      new PropertyWithValue<double>("CompressTolerance", -1.0, Direction::Input),
+      "Run CompressEvents while loading (optional, leave blank or negative to not do). \n"
+      "This specified the tolerance to use (in microseconds) when compressing.");
 }
 
 
@@ -618,6 +654,7 @@ void LoadEventNexus::exec()
   m_filename = getPropertyValue("Filename");
 
   precount = getProperty("Precount");
+  compressTolerance = getProperty("CompressTolerance");
 
   //loadlogs = getProperty("LoadLogs");
   loadlogs = true;
