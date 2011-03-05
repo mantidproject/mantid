@@ -125,8 +125,6 @@ void SaveGSS::exec()
   double l1, l2, tth;
   for (int i=0;i<nHist;i++)
   {
-    Geometry::IDetector_const_sptr det = inputWS->getDetector(i);
-    if ( det->isMasked() ) break; 
     getFocusedPos(inputWS, i, l1, l2, tth);
     if (!split && i==0) // Assign only one file
     {
