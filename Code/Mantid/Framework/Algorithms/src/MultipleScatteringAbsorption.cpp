@@ -111,7 +111,7 @@ void MultipleScatteringAbsorption::exec()
     MantidVec tof_vec = in_WS->readX(index);
     MantidVec y_vec   = in_WS->readY(index);
 
-    apply_msa_correction( total_path, tth_rad, radius,
+    if ( !det->isMasked() ) apply_msa_correction( total_path, tth_rad, radius,
                           coeff1, coeff2, coeff3,
                           tof_vec, y_vec);
 
