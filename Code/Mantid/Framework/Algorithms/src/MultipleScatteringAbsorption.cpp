@@ -104,6 +104,7 @@ void MultipleScatteringAbsorption::exec()
     Geometry::IDetector_sptr det = in_WS->getDetector(index);
     if (det == NULL)
       throw std::runtime_error("Failed to find detector");
+    if ( det->isMasked() ) continue;
     double l2 = det->getDistance(*sample);
     double tth_rad = in_WS->detectorTwoTheta(det);
     double total_path = l1 + l2;
