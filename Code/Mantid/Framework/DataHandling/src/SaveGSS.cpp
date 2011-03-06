@@ -123,13 +123,18 @@ void SaveGSS::exec()
   ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
   Progress p(this,0.0,1.0,nHist);
   double l1, l2, tth;
+  Geometry::IInstrument_const_sptr instrument = inputWS->getInstrument();
+  Geometry::IObjComponent_const_sptr source;
+  Geometry::IObjComponent_const_sptr sample;
+  if (instrument != NULL) 
+  {
+    source = instrument->getSource();
+    sample = instrument->getSample();
+  }
   for (int i=0;i<nHist;i++)
   {
-    Geometry::IInstrument_const_sptr instrument = inputWS->getInstrument();
     if (instrument != NULL) 
     {
-      Geometry::IObjComponent_const_sptr source = instrument->getSource();
-      Geometry::IObjComponent_const_sptr sample = instrument->getSample();
       if ( source != NULL && sample != NULL ) 
       {
         Geometry::IDetector_const_sptr det = inputWS->getDetector(static_cast<size_t>(i));
