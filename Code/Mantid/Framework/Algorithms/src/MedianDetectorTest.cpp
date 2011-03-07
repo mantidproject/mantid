@@ -83,16 +83,25 @@ namespace Mantid
       MatrixWorkspace_sptr counts = integrateSpectra(m_inputWS, m_minSpec, m_maxSpec, 
 						     m_rangeLower, m_rangeUpper, true);
       counts = convertToRate(counts); 
-      MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
+
+	  // FIXME: The next section that calculates the solid angle is commented out until 
+	  //        the SolidAngle algorithm is corrected to return the correct number.
+	  //        (see http://trac.mantidproject.org/mantid/ticket/2596)
+	  
+      //MatrixWorkspace_sptr angles = getSolidAngles(m_minSpec, m_maxSpec);
 
       //Gets the count rate per solid angle (in steradians), if it exists, for each spectrum
       //this calculation is optional, it depends on angle information existing
-      if ( angles.use_count() == 1 )
-      {
-	//if some numbers in angles are zero we will get the infinity flag value 
-	// in the output work space which needs to be dealt with later
-	counts = counts/angles;     
-      }
+      //if ( angles.use_count() == 1 )
+      //{
+		//if some numbers in angles are zero we will get the infinity flag value 
+		// in the output work space which needs to be dealt with later
+	  //counts = counts/angles;     
+      //}
+      
+      // End of Solid Angle commented out section
+	   
+
       // An average of the data, the median is less influenced by a small number of huge values than the mean
       std::set<int> badIndices;
       double average = calculateMedian(counts, badIndices);
