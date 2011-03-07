@@ -13,9 +13,9 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
-#include "Poco/DirectoryIterator.h"
-#include "Poco/Path.h"
-#include "Poco/File.h"
+#include <Poco/DirectoryIterator.h>
+#include <Poco/Path.h>
+#include <Poco/File.h>
 
 namespace Mantid
 {
