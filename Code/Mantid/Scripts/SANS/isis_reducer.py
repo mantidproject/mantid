@@ -163,7 +163,7 @@ class ISISReducer(SANSReducer):
         
     def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
         if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
-            self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload)
+            self.samp_trans_load = isis_reduction_steps.LoadTransmissions(reload=reload)
         self.samp_trans_load.set_trans(sample, period_t)
         self.samp_trans_load.set_direc(direct, period_d)
         self.transmission_calculator.set_loader(self.samp_trans_load)
