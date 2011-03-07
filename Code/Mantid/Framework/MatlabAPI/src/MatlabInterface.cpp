@@ -1,5 +1,5 @@
 #include <fstream>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IAlgorithm.h"
