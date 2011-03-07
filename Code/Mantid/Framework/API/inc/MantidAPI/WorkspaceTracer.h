@@ -9,9 +9,9 @@
 #include "MantidKernel/SingletonHolder.h"
 #include "MantidAPI/Algorithm.h"
 
-#include "Poco/NObserver.h"
-#include "Poco/ActiveMethod.h"
-#include "Poco/Void.h"
+#include <Poco/NObserver.h>
+#include <Poco/ActiveMethod.h>
+#include <Poco/Void.h>
 
 #include <deque>
 #include <string>

@@ -16,13 +16,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "Poco/DOM/DOMParser.h"
-#include "Poco/DOM/Document.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Text.h"
-#include "Poco/DOM/AutoPtr.h" 
-#include "Poco/DOM/DOMWriter.h"
-#include "Poco/XML/XMLWriter.h"
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h> 
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
 #include <sstream>
 #include <vector>
 #include "MantidKernel/System.h"
