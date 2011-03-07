@@ -671,9 +671,10 @@ class SensitivityCorrection(ReductionStep):
         be re-used on multiple data sets and the sensitivity will not be
         recalculated.
     """
-    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5):
+    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None):
         super(SensitivityCorrection, self).__init__()
         self._flood_data = flood_data
+        self._dark_current_data = dark_current
         self._efficiency_ws = None
         self._min_sensitivity = min_sensitivity
         self._max_sensitivity = max_sensitivity
@@ -690,8 +691,8 @@ class SensitivityCorrection(ReductionStep):
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
 
             # Subtract dark current
-            if reducer._dark_current_subtracter is not None:
-                reducer._dark_current_subtracter.execute(reducer, flood_ws)
+            if self._dark_current_data is not None:
+                SubtractDarkCurrent(self._dark_current_data).execute(reducer, flood_ws)
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
             # Note: Moving according to the beam center is done in LoadRun above

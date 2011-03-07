@@ -26,8 +26,11 @@ def MonitorNormalization():
 def NoNormalization():
     ReductionSingleton().set_normalizer(None)
     
-def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5):
-    ReductionSingleton().set_sensitivity_correcter(sans_reduction_steps.SensitivityCorrection(flood_data, min_sensitivity, max_sensitivity))
+def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None):
+    ReductionSingleton().set_sensitivity_correcter(sans_reduction_steps.SensitivityCorrection(flood_data, 
+                                                                                              min_sensitivity, 
+                                                                                              max_sensitivity,
+                                                                                              dark_current=dark_current))
     
 def NoSensitivityCorrection():
     ReductionSingleton().set_sensitivity_correcter(None)
@@ -39,8 +42,8 @@ def NoDarkCurrent():
     ReductionSingleton().set_dark_current_subtracter(None)
     
 def SolidAngle():
-    ReductionSingleton().set_solid_angle_correcter(sans_reduction_steps.SolidAngle())
-    #ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, None, None)
+    #ReductionSingleton().set_solid_angle_correcter(sans_reduction_steps.SolidAngle())
+    ReductionSingleton().set_solid_angle_correcter(mantidsimple.SANSSolidAngleCorrection, None, None)
     
 def NoSolidAngle():
     ReductionSingleton().set_solid_angle_correcter(None)
