@@ -1002,20 +1002,21 @@ class PyAlgLoader(object):
             files = os.listdir(path)
         except(OSError):
             return False
-        # Temporarily insert into path
-        sys.path.insert(0, path)
         changes = False
-        for modname in files:
+        
+        def _process_file(file_path, modname):
+            # Temporarily insert into path
+            sys.path.insert(0, file_path)
             pyext = '.py'
             if not modname.endswith(pyext):
-                continue
-            original = os.path.join(path, modname)
+                return
+            original = os.path.join(file_path, modname)
             modname = modname[:-len(pyext)]
-            compiled = os.path.join(path, modname + '.pyc')
+            compiled = os.path.join(file_path, modname + '.pyc')
             if modname in sys.modules and \
                os.path.exists(compiled) and \
                os.path.getmtime(compiled) >= os.path.getmtime(original):
-                continue
+                return
             try:               
                 if self._containsPyAlgorithm(original):
                     if modname in sys.modules:
@@ -1025,13 +1026,17 @@ class PyAlgLoader(object):
                     changes = True
             except(StandardError), exp:
                 self.framework.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
-                continue
             except:
                 self.framework.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
-                continue
 
-        # Cleanup system path
-        del sys.path[0]
+            # Cleanup system path
+            del sys.path[0]
+
+        # Find sub-directories     
+        for root, dirs, files in os.walk(path):
+            for f in files:
+                _process_file(root, f)
+            
         return changes
 
     def _containsPyAlgorithm(self, modfilename):
@@ -1060,6 +1065,7 @@ class PythonAlgorithm(PyAlgorithmBase):
     """
     Base class for all Mantid Python algorithms
     """
+    sequencer = None
 
     def __init__(self):
         super(PythonAlgorithm,self).__init__()
