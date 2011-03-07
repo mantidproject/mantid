@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/Objects/Track.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

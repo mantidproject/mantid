@@ -1,13 +1,13 @@
 #ifndef BITMAPGEOMETRYHANDLER_H
 #define BITMAPGEOMETRYHANDLER_H
 
+#include <boost/weak_ptr.hpp>
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IObjComponent.h"
 #include "MantidGeometry/Rendering/GeometryHandler.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "boost/weak_ptr.hpp"
 #include "MantidGeometry/Objects/Object.h"
 namespace Mantid
 {
