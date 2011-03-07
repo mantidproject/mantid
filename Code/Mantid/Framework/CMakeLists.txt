@@ -98,6 +98,7 @@ add_subdirectory (DataHandling)
 add_subdirectory (Nexus)
 add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
+add_subdirectory (Crystal)
 add_subdirectory (ICat)
 
 # Unit test helper packages 

@@ -121,7 +121,7 @@ def write_source(subproject, classname, filename, algorithm):
     // TODO Auto-generated execute stub
   }
 
-"""% (classname, classname)   
+"""% (classname, classname, classname)   
 
     if not algorithm:
         algorithm_top = ""
