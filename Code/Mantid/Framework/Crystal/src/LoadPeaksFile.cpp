@@ -1,5 +1,8 @@
 #include "MantidCrystal/LoadPeaksFile.h"
 #include "MantidKernel/System.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -11,6 +14,7 @@ namespace Crystal
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
+  using namespace Mantid::DataObjects;
 
 
   //----------------------------------------------------------------------------------------------
@@ -18,7 +22,6 @@ namespace Crystal
    */
   LoadPeaksFile::LoadPeaksFile()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -26,7 +29,6 @@ namespace Crystal
    */
   LoadPeaksFile::~LoadPeaksFile()
   {
-    // TODO Auto-generated destructor stub
   }
   
 
@@ -34,8 +36,8 @@ namespace Crystal
   /// Sets documentation strings for this algorithm
   void LoadPeaksFile::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
+    this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -43,8 +45,13 @@ namespace Crystal
    */
   void LoadPeaksFile::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
-    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
+    std::vector<std::string> exts;
+    exts.push_back(".peaks");
+    // exts.push_back(".integrate");
+
+    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+        "Path to an ISAW-style .peaks filename.");
+    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -52,7 +59,15 @@ namespace Crystal
    */
   void LoadPeaksFile::exec()
   {
-    // TODO Auto-generated execute stub
+    // Create the workspace
+    PeaksWorkspace_sptr ws(new PeaksWorkspace());
+    ws->setName(getPropertyValue("OutputWorkspace"));
+
+    // This loads (appends) the peaks
+    ws->append( getPropertyValue("Filename"));
+
+    // Save it in the output
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
   }
 
 

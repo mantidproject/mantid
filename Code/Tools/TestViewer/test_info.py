@@ -1011,7 +1011,7 @@ class MultipleProjects(object):
         # Now add the known tests, in case they were deleted
         for x in ["AlgorithmsTest", "DataObjectsTest", "MDAlgorithmsTest", "PythonAPITest", "APITest", 
                        "GeometryTest", "MDDataObjectsTest", "CurveFittingTest", "ICatTest", "MDEventsTest", 
-                       "DataHandlingTest", "KernelTest", "NexusTest"]:
+                       "DataHandlingTest", "KernelTest", "NexusTest", "CrystalTest"]:
             testnames.add(x)
         
         for fname in testnames:

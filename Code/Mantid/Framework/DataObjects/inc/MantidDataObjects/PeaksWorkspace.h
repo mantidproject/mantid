@@ -120,6 +120,15 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      static const int ItimeCol =15;
      static const int ItimeOffsetChanCol =16;
 
+     /// These values are needed to write out .peaks files (I think)
+     double C_L1;
+     double C_time_offset;     //seconds
+     std::string C_Facility;
+     std::string C_Instrument;
+     std::string C_version;
+
+     std::string readHeader( std::ifstream& in );
+
 
        // >>   and << add later
        // getCell should be disabled or describe column numbers with static strings
@@ -134,6 +143,9 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
 
 };
 
+
+/// Typedef for a shared pointer to a peaks workspace.
+typedef boost::shared_ptr<PeaksWorkspace> PeaksWorkspace_sptr;
 
 }
 }

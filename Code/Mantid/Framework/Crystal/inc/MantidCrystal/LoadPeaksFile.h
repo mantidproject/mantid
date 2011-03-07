@@ -9,9 +9,10 @@ namespace Mantid
 namespace Crystal
 {
 
-  /** LoadPeaksFile : TODO: DESCRIPTION
+  /** LoadPeaksFile : Load an ISAW-style .peaks file
+   * into a PeaksWorkspace
    * 
-   * @author
+   * @author Janik Zikovsky, SNS
    * @date 2011-03-07 15:22:11.897153
    */
   class DLLExport LoadPeaksFile  : public API::Algorithm
@@ -25,7 +26,7 @@ namespace Crystal
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
-    virtual const std::string category() const { return "General";}
+    virtual const std::string category() const { return "Crystal";}
     
   private:
     /// Sets documentation strings for this algorithm

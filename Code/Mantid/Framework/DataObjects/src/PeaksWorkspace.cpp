@@ -1,9 +1,9 @@
-#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidGeometry/Quat.h"
+#include "MantidDataObjects/TableWorkspace.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -27,16 +27,7 @@ namespace DataObjects
   /// Register the workspace as a type
   DECLARE_WORKSPACE(PeaksWorkspace );
 
-  std::string readHeader( std::ifstream& in );
-
   double pi = 3.1415926535;
-
-  double C_L1  ,
-  C_time_offset;     //seconds
-
-  std::string C_Facility  ,
-  C_Instrument  ,
-  C_version;
 
   bool  BanksSetUp;
   std::vector< std::string > DetNames;
@@ -487,8 +478,12 @@ namespace DataObjects
   }
 
 
-  //returns 1st character of line it should not have read
-  std::string readHeader( std::ifstream& in )
+  /** Reads the header of a .peaks file
+   *
+   * @param in :: stream of the input file
+   * @return TODO: I don't know what here
+   */
+  std::string PeaksWorkspace::readHeader( std::ifstream& in )
   {
 
     std::string r = getWord( in ,  false );
@@ -630,8 +625,6 @@ namespace DataObjects
         s = getWord( in ,  true );
         s = getWord( in ,  false );//no blank lines will be allowed so far
       }
-
-
     }
 
 
@@ -752,10 +745,12 @@ namespace DataObjects
   }
   //special formatted file Use clear peaks to no append
 
-  void  PeaksWorkspace::append( std::string filename )
+  /** Append the peaks from a .peaks file into the workspace
+   *
+   * @param filename :: path to the .peaks file
+   */
+  void PeaksWorkspace::append( std::string filename )
   {
-
-
     std::ifstream in( filename.c_str() );
 
     std::string s = readHeader( in );
@@ -780,7 +775,6 @@ namespace DataObjects
 
     while( in.good() )
     {
-
       s = readPeakBlockHeader( s ,  in  , run , detName , chi , phi ,
           omega , monCount );
 
@@ -804,7 +798,7 @@ namespace DataObjects
       time = xx[ 0 ];
 
 
-      PeaksWorkspace::addPeak( Geometry::V3D( x , y , z ) , time ,
+      this->addPeak( Geometry::V3D( x , y , z ) , time ,
           Geometry::V3D( h , k , l ) ,
           Geometry::V3D( phi , chi , omega ) ,
           Reflag , run , monCount , detName , IPK ,
@@ -813,6 +807,12 @@ namespace DataObjects
 
   }
 
+
+  /** Get the d spacing of the given peak
+   *
+   * @param peakNum :: index of the peak
+   * @return double, d_spacing
+   */
   double  PeaksWorkspace::get_dspacing( int peakNum )
   {
     double time = cell< double >(peakNum, ItimeCol);
@@ -834,8 +834,6 @@ namespace DataObjects
 
   double  PeaksWorkspace::get_wavelength( int peakNum )
   {
-
-
     double time = cell< double >(peakNum, ItimeCol);
     double L1   =cell< double >(peakNum, IL1Col );
     double L2   =cell< double >(peakNum, IL2Col );
@@ -849,6 +847,7 @@ namespace DataObjects
     wl.fromTOF( xx , yy , L1 , L2 , polar , 12 , 12.1 , 12.1 );
     return xx[ 0 ];
   }
+
 
   //I believe their |Q| = 2pi/d.  This is what is returned.
   double  PeaksWorkspace::get_Qmagnitude( int peakNum )
