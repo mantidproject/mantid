@@ -34,11 +34,7 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
 
      virtual const std::string id() const {return "PeaksWorkspace";}
 
-     //Constructors
-
-
      PeaksWorkspace();
-
 
      void initialize(double      L0,              //cm
                      double      time_offset,     //seconds
@@ -49,8 +45,6 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
                      std::string InstrumentDescriptorFileName =0);
     
      virtual ~PeaksWorkspace();
-
-
 
      void addPeak( const Geometry::V3D position,  //in cm McStas coordinates
                    const double time,   //in seconds
