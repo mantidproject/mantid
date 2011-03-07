@@ -432,6 +432,7 @@ class InstrumentDescription(BaseScriptElement):
     sensitivity_corr = False
     # Data file to be used to calculate sensitivity
     sensitivity_data = ''
+    sensitivity_dark = ''
     # Minimum allowed relative sensitivity
     min_sensitivity = 0.5
     max_sensitivity = 1.5
@@ -469,9 +470,13 @@ class InstrumentDescription(BaseScriptElement):
         if self.sensitivity_corr:
             if len(str(self.sensitivity_data).strip())==0:
                 raise RuntimeError, "Sensitivity correction was selected but no sensitivity data file was entered."
-                
-            script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g)\n" % \
-                (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity)
+            
+            if len(str(self.sensitivity_dark).strip())>0:
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, dark_current='%s')\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark)
+            else:
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g)\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity)
         else:
             script += "NoSensitivityCorrection()\n"
             
@@ -523,6 +528,7 @@ class InstrumentDescription(BaseScriptElement):
         xml += "  <solid_angle_corr>%s</solid_angle_corr>\n" % str(self.solid_angle_corr)
         xml += "  <sensitivity_corr>%s</sensitivity_corr>\n" % str(self.sensitivity_corr)
         xml += "  <sensitivity_data>%s</sensitivity_data>\n" % self.sensitivity_data
+        xml += "  <sensitivity_dark>%s</sensitivity_dark>\n" % self.sensitivity_dark
         xml += "  <sensitivity_min>%s</sensitivity_min>\n" % self.min_sensitivity
         xml += "  <sensitivity_max>%s</sensitivity_max>\n" % self.max_sensitivity
 
@@ -575,6 +581,7 @@ class InstrumentDescription(BaseScriptElement):
         self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
                                                                  default = InstrumentDescription.sensitivity_corr)
         self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
+        self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
         self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
                                                             default=InstrumentDescription.min_sensitivity)
         self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
@@ -613,6 +620,7 @@ class InstrumentDescription(BaseScriptElement):
         self.solid_angle_corr = InstrumentDescription.solid_angle_corr
         self.sensitivity_corr = InstrumentDescription.sensitivity_corr
         self.sensitivity_data = ''
+        self.sensitivity_dark = ''
         self.min_sensitivity = InstrumentDescription.min_sensitivity
         self.max_sensitivity = InstrumentDescription.max_sensitivity
         

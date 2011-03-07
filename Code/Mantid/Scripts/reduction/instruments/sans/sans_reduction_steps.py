@@ -691,7 +691,7 @@ class SensitivityCorrection(ReductionStep):
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
 
             # Subtract dark current
-            if self._dark_current_data is not None:
+            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
                 SubtractDarkCurrent(self._dark_current_data).execute(reducer, flood_ws)
             
             # Correct flood data for solid angle effects (Note: SA_Corr_2DSAS)
