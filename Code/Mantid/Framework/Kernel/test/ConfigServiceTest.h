@@ -283,6 +283,23 @@ public:
     settings.setString("default.facility", "ISIS");
   }
 
+  /// Make a properties file with a single line
+  std::string makePropertiesFile(std::string logPathStr)
+  {
+    Poco::Path path(Poco::Path::home());
+    path.append(Poco::Path("Mantid.test.properties"));
+    path = path.absolute();
+    std::string pathStr = path.toString();
+
+    FILE *fp = fopen(pathStr.c_str(), "w");
+    if (fp != NULL)
+    {
+      fprintf(fp, "logging.channels.fileChannel.path = %s\n", logPathStr.c_str());
+      fclose(fp);
+    }
+    return pathStr;
+  }
+
   /** If you set MANTIDLOGPATH environment then you change where the log ends up */
   void testOverrideLogFile()
   {
@@ -293,22 +310,26 @@ public:
     std::string logPathStr = logPath.toString();
     // std::cout << logPathStr << std::endl;
 
+    std::string propFile = makePropertiesFile(logPathStr);
+
     // Remove the file
     if (Poco::File(logPathStr).exists())
       Poco::File(logPathStr).remove();
-
     TS_ASSERT(!Poco::File("ConfigServiceTest.log").exists());
 
-    Poco::Environment::set("MANTIDLOGPATH", logPathStr);
-    const std::string propfile = getDirectoryOfExecutable() + "MantidTest.properties";
-    ConfigService::Instance().updateConfig(propfile);
+    //Poco::Environment::set("MANTIDPROPERTIES", propFile);
+    ConfigService::Instance().updateConfig(propFile);
+
     Logger & log1 = Logger::get("logTest1");
     log1.warning() << "ConfigServiceTest.testOverrideLogFile test output" << std::endl;
+
     // The file was written?
     TS_ASSERT(Poco::File(logPath).exists());
     // Clean up
     if (Poco::File(logPath).exists())
       Poco::File(logPath).remove();
+    if (Poco::File(propFile).exists())
+      Poco::File(propFile).remove();
   }
 
 
