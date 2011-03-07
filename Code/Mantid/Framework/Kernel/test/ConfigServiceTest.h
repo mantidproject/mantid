@@ -284,24 +284,31 @@ public:
   }
 
   /** If you set MANTIDLOGPATH environment then you change where the log ends up */
-  void xtestOverrideLogFile()
+  void testOverrideLogFile()
   {
+    /// Get an absolute path in the user's home directory (should be writable)
+    Poco::Path logPath(Poco::Path::home());
+    logPath.append(Poco::Path("ConfigServiceTest.log"));
+    logPath = logPath.absolute();
+    std::string logPathStr = logPath.toString();
+    // std::cout << logPathStr << std::endl;
+
     // Remove the file
-    if (Poco::File("ConfigServiceTest.log").exists())
-      Poco::File("ConfigServiceTest.log").remove();
+    if (Poco::File(logPathStr).exists())
+      Poco::File(logPathStr).remove();
 
     TS_ASSERT(!Poco::File("ConfigServiceTest.log").exists());
 
-    Poco::Environment::set("MANTIDLOGPATH", "ConfigServiceTest.log");
+    Poco::Environment::set("MANTIDLOGPATH", logPathStr);
     const std::string propfile = getDirectoryOfExecutable() + "MantidTest.properties";
     ConfigService::Instance().updateConfig(propfile);
     Logger & log1 = Logger::get("logTest1");
     log1.warning() << "ConfigServiceTest.testOverrideLogFile test output" << std::endl;
     // The file was written?
-    TS_ASSERT(Poco::File("ConfigServiceTest.log").exists());
+    TS_ASSERT(Poco::File(logPath).exists());
     // Clean up
-    if (Poco::File("ConfigServiceTest.log").exists())
-      Poco::File("ConfigServiceTest.log").remove();
+    if (Poco::File(logPath).exists())
+      Poco::File(logPath).remove();
   }
 
 
