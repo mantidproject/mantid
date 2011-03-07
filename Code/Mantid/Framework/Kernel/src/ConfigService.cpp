@@ -323,6 +323,10 @@ void ConfigServiceImpl::configureLogging()
 
     Poco::Path logpath(m_logFilePath);
 
+    // Undocumented way to override the mantid.log path
+    if (Poco::Environment::has("MANTIDLOGPATH"))
+      logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
+
     // An absolute path makes things simpler
     logpath = logpath.absolute();
 
