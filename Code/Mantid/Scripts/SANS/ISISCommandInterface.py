@@ -155,12 +155,11 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().set_run_number(sample_wksp)
     return sample_wksp, logs
 
-def SetCentre(XVAL, YVAL):
-    _printMessage('SetCentre(' + str(XVAL) + ',' + str(YVAL) + ')')
+def SetCentre(xcoord, ycoord):
+    _printMessage('SetCentre(' + str(xcoord) + ',' + str(ycoord) + ')')
 
-    ReductionSingleton().set_beam_finder(
-        sans_reduction_steps.BaseBeamFinder(float(XVAL)/1000.0, float(YVAL)/1000.0))
-
+    ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
+                                float(xcoord)/1000.0, float(ycoord)/1000.0))
 
 def GetMismatchedDetList():
     """
@@ -168,7 +167,7 @@ def GetMismatchedDetList():
     """
     return ReductionSingleton().instrument.get_marked_dets()
 
-def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
+def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
     """
         Run a reduction that has been set up and reset the old
         setup (unless clean = False)
@@ -193,7 +192,13 @@ def WavRangeReduction(wav_start = None, wav_end = None, full_trans_wav = None):
                 GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
                 return
 
-    return Reduce()
+    result = Reduce()
+    if name_suffix:
+        old = result
+        result += name_suffix
+        RenameWorkspace(old, result)
+        
+    return result
 
 def CompWavRanges(wavelens, plot=True):
     """
@@ -211,7 +216,8 @@ def CompWavRanges(wavelens, plot=True):
     for i in in_betweens:
         reductions.append(i) 
 
-    mantidplot.plotSpectrum(reductions, 0)
+    if plot:
+        mantidplot.plotSpectrum(reductions, 0)
     
     #return just the workspace name of the full range
     return reductions[0]
@@ -311,34 +317,32 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
         !!DEPRECIATED by the function above, remove!!
         need to remove from SANSRunWindow.cpp
     '''
-    settings = ReductionSingleton().user_settings
-    if settings is None:
-        raise RuntimeError('MaskFile() first')
-
     if use_mirror :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=True)')
-        settings.readLimitValues('L/PHI ' + str(phimin) + ' ' + str(phimax), ReductionSingleton())
+        ReductionSingleton().mask.set_phi_limit(phimin, phimax, True)
     else :
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
-        settings.readLimitValues('L/PHI/NOMIRROR ' + str(phimin) + ' ' + str(phimax), ReductionSingleton())
+        ReductionSingleton().mask.set_phi_limit(phimin, phimax, False)
 
-def LimitsR(rmin, rmax):
-    _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', ReductionSingleton())
-    settings = ReductionSingleton().user_settings
-    if settings is None:
-        raise RuntimeError('MaskFile() first')
-    
-    settings.readLimitValues('L/R ' + str(rmin) + ' ' + str(rmax) + ' 1', ReductionSingleton())
+def LimitsR(rmin, rmax, quiet=False):
+    if not quiet:
+        _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', ReductionSingleton())
+
+    ReductionSingleton().mask.set_radi(rmin, rmax)
+    ReductionSingleton().CENT_FIND_RMIN = float(rmin)/1000.
+    ReductionSingleton().CENT_FIND_RMAX = float(rmax)/1000.    
 
 def LimitsWav(lmin, lmax, step, bin_type):
+    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + bin_type + ')')
+    
     if ( bin_type.upper().strip() == 'LINEAR'): bin_type = 'LIN'
     if ( bin_type.upper().strip() == 'LOGARITHMIC'): bin_type = 'LOG'
-    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + bin_type + ')')
-    settings = ReductionSingleton().user_settings
-    if settings is None:
-        raise RuntimeError('MaskFile() first')
+    if bin_type == 'LOG':
+        bin_sym = '-'
+    else:
+        bin_sym = ''
     
-    settings.readLimitValues('L/WAV ' + str(lmin) + ' ' + str(lmax) + ' ' + str(step) + '/'  + bin_type, ReductionSingleton())
+    ReductionSingleton().to_wavelen.set_rebin(lmin, bin_sym + str(step), lmax)
 
 def LimitsQ(*args):
     settings = ReductionSingleton().user_settings
@@ -552,42 +556,52 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
-    global XVAR_PREV, YVAR_PREV, ITER_NUM, RMIN, RMAX, XBEAM_CENTRE, YBEAM_CENTRE
-    RMIN = float(rlow)/1000.
-    RMAX = float(rupp)/1000.
-
-    if xstart == None or ystart == None:
-        XVAR_PREV = XBEAM_CENTRE
-        YVAR_PREV = YBEAM_CENTRE
-    else:
-        XVAR_PREV = xstart
-        YVAR_PREV = ystart
-
-    mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XVAR_PREV*1000.)+" "+str(YVAR_PREV*1000.)) 
-    _printMessage("Starting centre finding routine ...")
-    # Initialize the workspace with the starting coordinates. (Note that this moves the detector to -x,-y)
-    _initReduction(XVAR_PREV, YVAR_PREV)
-
-    ITER_NUM = 0
-    # Run reduction, returning the X and Y sum-squared difference values 
-    _printMessage("Running initial reduction: " + str(XVAR_PREV*1000.)+ "  "+ str(YVAR_PREV*1000.))
-    oldX2,oldY2 = RunReduction([XVAR_PREV, YVAR_PREV])
+def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     XSTEP = 5.0/1000.
     YSTEP = 5.0/1000.
+
+    setting = copy.deepcopy(ReductionSingleton().reference())
+    ReductionSingleton().center_finder = True
+
+    LimitsR(str(float(rlow)/1000.), str(float(rupp)/1000.), quiet=True)
+
+    if ( not x_start is None ) or ( not y_start is None):
+        ReductionSingleton().set_beam_finder(
+            sans_reduction_steps.BaseBeamFinder(
+            float(x_start), float(y_start)))
+
+    beamcoords = ReductionSingleton()._beam_finder.get_beam_center()
+    XNEW = beamcoords[0]
+    YNEW = beamcoords[1]
+
+    mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
+    _printMessage("Starting centre finding routine ...")
+    
+    #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
+    oldX2,oldY2 = RunReduction()
     # take first trial step
-    XNEW = XVAR_PREV + XSTEP
-    YNEW = YVAR_PREV + YSTEP
+    XNEW = x_start + XSTEP
+    YNEW = y_start + YSTEP
+
     for ITER_NUM in range(1, MaxIter+1):
         _printMessage("Iteration " + str(ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
-        newX2,newY2 = RunReduction([XNEW, YNEW])
+        
+        ReductionSingleton().set_beam_finder(
+            sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
+        
+        newX2,newY2 = RunReduction()
+        
+        #have we stepped across the y-axis that goes through the beam center?  
         if newX2 > oldX2:
+            # yes with stepped across the middle, reverse direction and half the step size 
             XSTEP = -XSTEP/2.
         if newY2 > oldY2:
             YSTEP = -YSTEP/2.
         if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
+            # this is the success criteria, we've close enough to the center
             _printMessage("::SANS:: Converged - check if stuck in local minimum!")
             break
+        
         oldX2 = newX2
         oldY2 = newY2
         XNEW += XSTEP
@@ -599,23 +613,24 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         YNEW -= YSTEP
 
     
-    XBEAM_CENTRE = XNEW
-    YBEAM_CENTRE = YNEW
-    _printMessage("Centre coordinates updated: [" + str(XBEAM_CENTRE*1000.)+ ","+ str(YBEAM_CENTRE*1000.) + ']')
+    # return the settings to their state before we started looking for the center 
+    ReductionSingleton().replace(setting)
+    ReductionSingleton().set_beam_finder(
+        sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
+    _printMessage("Centre coordinates updated: [" + str(XNEW)+ ","+ str(YNEW) + ']')
+
     
-    # Reload the sample and can and reset the radius range
-    global _SAMPLE_SETUP
+    # Reload the sample and can
+#    try to get rid of this by leaving the original loaded workspaces unchanged
     _assignHelper(_SAMPLE_RUN, False, PERIOD_NOS["SCATTER_SAMPLE"])
-    _SAMPLE_SETUP = None
     if _CAN_RUN != '':
         _assignHelper(_CAN_RUN, False, PERIOD_NOS["SCATTER_CAN"])
         global _CAN_SETUP
         _CAN_SETUP = None
     
-    RMIN = DEF_RMIN
-    RMAX = DEF_RMAX
 
-#this is like a #define I'd like to get rid of it because it means nothing here
+
+#this is like a #define I'd like to get rid of it because it seems meaningless here
 DefaultTrans = 'True'
 NewTrans = 'False'
 

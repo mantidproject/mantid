@@ -903,13 +903,13 @@ class UnitsConvert(ReductionStep):
         """
         if not w_low is None:
             if self.wav_low is None or override:
-                self.wav_low = w_low
+                self.wav_low = float(w_low)
         if not w_step is None:
             if self.wav_step is None or override:
-                self.wav_step = w_step
+                self.wav_step = float(w_step)
         if not w_high is None:
             if self.wav_high is None or override:
-                self.wav_high = w_high
+                self.wav_high = float(w_high)
 
     def get_range(self):
         """
