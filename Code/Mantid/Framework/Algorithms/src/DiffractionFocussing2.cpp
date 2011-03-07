@@ -295,8 +295,25 @@ void DiffractionFocussing2::execEvent()
   // ------------- Pre-allocate Event Lists ----------------------------
   std::vector< std::vector<int> > ws_indices(nGroups);
   std::vector<size_t> size_required(nGroups,0);
+  Geometry::IInstrument_const_sptr instrument = eventW->getInstrument();
+  Geometry::IObjComponent_const_sptr source;
+  Geometry::IObjComponent_const_sptr sample;
+  if (instrument != NULL) 
+  {
+    source = instrument->getSource();
+    sample = instrument->getSample();
+  }
+
   for (int wi=0;wi<nHist;wi++)
   {
+    if (instrument != NULL) 
+    {
+      if ( source != NULL && sample != NULL ) 
+      {
+        Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+        if ( det->isMasked() ) continue;
+      }
+    }
     //i is the workspace index (of the input)
     const int group = groupAtWorkspaceIndex[wi];
     if (group < 1) // Not in a group
