@@ -5,7 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
-#include "Poco/Mutex.h"
+#include <Poco/Mutex.h>
 
 class ISISRAW2;
 

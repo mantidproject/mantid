@@ -7,8 +7,8 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IDataFileChecker.h"
-#include "Poco/DOM/Element.h"
-#include "Poco/DOM/Node.h"
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Node.h>
 //----------------------------------------------------------------------
 
 namespace Poco {
