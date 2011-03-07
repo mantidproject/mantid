@@ -60,6 +60,7 @@ Mantid::Kernel::RegistrationHelper::RegistrationHelper(int)
  */
 std::string Mantid::Kernel::getDirectoryOfExecutable()
 {
+  //std::cout << "getDirectoryOfExecutable is " << Poco::Path(getPathToExecutable()).parent().toString() << std::endl
   return Poco::Path(getPathToExecutable()).parent().toString();
 }
 

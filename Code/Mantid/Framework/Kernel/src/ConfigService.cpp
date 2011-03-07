@@ -323,6 +323,8 @@ void ConfigServiceImpl::configureLogging()
           // Clear the path; this will make it use the default
           m_logFilePath = "";
         }
+        else
+          fclose(fp);
       }
       catch (std::exception &)
       {
