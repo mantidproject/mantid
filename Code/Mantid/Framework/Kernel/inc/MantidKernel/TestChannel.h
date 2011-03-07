@@ -37,8 +37,8 @@
 
 #include "MantidKernel/DllExport.h"
 
-#include "Poco/Channel.h"
-#include "Poco/Message.h"
+#include <Poco/Channel.h>
+#include <Poco/Message.h>
 #include <list>
 
 namespace Mantid

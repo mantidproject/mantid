@@ -5,9 +5,9 @@
 // Includes
 //--------------------------------------------
 #include "MantidKernel/System.h"
-#include "Poco/Logger.h"
-#include "Poco/LogStream.h"
-#include "Poco/UnbufferedStreamBuf.h"
+#include <Poco/Logger.h>
+#include <Poco/LogStream.h>
+#include <Poco/UnbufferedStreamBuf.h>
 #include <istream>
 
 namespace Mantid 

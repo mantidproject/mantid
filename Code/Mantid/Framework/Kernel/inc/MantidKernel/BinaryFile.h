@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 #include "MantidKernel/System.h"
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
 
 namespace Mantid
 {

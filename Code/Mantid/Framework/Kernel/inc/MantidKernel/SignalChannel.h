@@ -30,10 +30,9 @@
 
 #include "MantidKernel/System.h"
 
-#include "Poco/Foundation.h"
-#include "Poco/Channel.h"
-//#include "Poco/Mutex.h"
-#include "boost/signal.hpp"
+#include <Poco/Foundation.h>
+#include <Poco/Channel.h>
+#include <boost/signal.hpp>
 
 #include <vector>
 
