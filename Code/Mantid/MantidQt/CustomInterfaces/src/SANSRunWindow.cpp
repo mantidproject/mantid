@@ -2062,8 +2062,18 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
     m_uiForm.rad_min->text()+" '+'"+m_uiForm.rad_max->text()+" '+'1', i.ReductionSingleton())\n";
 
+  QString logLin = m_uiForm.wav_dw_opt->currentText().toUpper();
+  if (logLin.contains("LOG"))
+  {
+    logLin = "LOG";
+  }
+  if (logLin.contains("LIN"))
+  {
+    logLin = "LIN";
+  }
   exec_reduce += "i.LimitsWav(" + m_uiForm.wav_min->text().trimmed() + "," + m_uiForm.wav_max->text() + "," +
-    m_uiForm.wav_dw->text()+",'"+m_uiForm.wav_dw_opt->currentText()+"')\n";
+    m_uiForm.wav_dw->text()+",'"+logLin+"')\n";
+
   if( m_uiForm.q_dq_opt->currentIndex() == 2 )
   {
     exec_reduce += "i.ReductionSingleton().user_settings.readLimitValues('L/Q "+m_uiForm.q_rebin->text() +

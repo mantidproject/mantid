@@ -170,11 +170,10 @@ def GetMismatchedDetList():
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
     """
         Run a reduction that has been set up and reset the old
-        setup (unless clean = False)
+        setup
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
         @param full_trans_wav if to use a wide wavelength range for the transmission correction, true by default
-        @param no_clean best to leave this at the default (false) as then all old settings are cleared
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
 
@@ -207,29 +206,8 @@ def CompWavRanges(wavelens, plot=True):
         @param wavelens: the list of wavelength ranges
         @param plot: set this to true to plot the result (must be run in Mantid), default is true
     """ 
-    settings = copy.deepcopy(ReductionSingleton().reference())
-    reductions = WavRanges(
-                           (wavelens[0], wavelens[len(wavelens)-1]))
-    ReductionSingleton().replace(settings)
-    
-    in_betweens = WavRanges(wavelens)
-    for i in in_betweens:
-        reductions.append(i) 
 
-    if plot:
-        mantidplot.plotSpectrum(reductions, 0)
-    
-    #return just the workspace name of the full range
-    return reductions[0]
-
-def WavRanges(wavelens):
-    """
-        Perform a reduction over a number of wavelength ranges. Useful as
-        a diagnostic
-        @param wav_lengths: a list (or tuple) of wave lengths, a reduction will take place between the first wave length and the second, the second to third, etc.
-    """
-    
-    _printMessage('WavRanges( %s )'%str(wavelens))
+    _printMessage('CompWavRanges( %s,plot=%s)'%(str(wavelens),plot))
         
     if not ReductionSingleton().full_trans_wav:
         issueWarning('Using full range for the transmission calculation, overrides setting')
@@ -243,19 +221,24 @@ def WavRanges(wavelens):
     
     if type(wavelens) != type([]) or len(wavelens) < 2:
         if type(wavelens) != type((1,)):
-            raise RuntimeError('Error WavRanges() requires a list of wavelengths between which reductions will be performed.')
+            raise RuntimeError('Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.')
     
-    calculated = []
     try:
-        for i in range(0, len(wavelens)-1):
+        calculated = [ReductionSingleton()._reduce()]
+        for i in range(1, len(wavelens)-1):
             settings = copy.deepcopy(ReductionSingleton().reference())
-            calculated.append(
-                WavRangeReduction(wavelens[i], wavelens[i+1], full_trans_wav=True))
+            ReductionSingleton().to_wavelen.set_rebin(
+                            w_low=wavelens[i], w_high=wavelens[i+1])
+            calculated.append(ReductionSingleton().from_moved())
             ReductionSingleton().replace(settings)
     finally:
         ReductionSingleton.clean(isis_reducer.ISISReducer)
 
-    return calculated
+    if plot:
+        mantidplot.plotSpectrum(calculated, 0)
+    
+    #return just the workspace name of the full range
+    return calculated[0]
 
 def Reduce():
     try:

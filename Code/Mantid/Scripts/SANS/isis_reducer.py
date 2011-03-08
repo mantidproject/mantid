@@ -36,9 +36,6 @@ class ISISReducer(SANSReducer):
     PHIMAX=90.0
     PHIMIRROR=True
     
-    SPECMIN = None
-    SPECMAX = None
-
     ## Path for user settings files
     _user_file_path = '.'
     
@@ -49,9 +46,11 @@ class ISISReducer(SANSReducer):
         self.wksp_name = None
         self.full_trans_wav = True
         self._monitor_set = False
-        #executing the reduction chain unsets this
-        self.clean = True
 
+        self._prepare_raw = []
+        self._convert = []
+        self._can = []
+        self._tidy = []
 
     def _to_steps(self):
         """
@@ -59,24 +58,26 @@ class ISISReducer(SANSReducer):
         """
 #        self._reduction_steps.append(self.data_loader)
 #        self._reduction_steps.append(self.user_settings)
-        self._reduction_steps.append(self.place_det_sam)
-        self._reduction_steps.append(self.geometry)
-        self._reduction_steps.append(self.out_name)
+        self._prepare_raw.append(self.place_det_sam)
+        self._prepare_raw.append(self.geometry)
+        self._convert.append(self.out_name)
         #---- the can special reducer uses the steps starting with the next one
-        self._reduction_steps.append(self.flood_file)
-        self._reduction_steps.append(self.crop_detector)
-        self._reduction_steps.append(self.samp_trans_load)
-        self._reduction_steps.append(self.mask)
-        self._reduction_steps.append(self.to_wavelen)
-        self._reduction_steps.append(self.norm_mon)
-        self._reduction_steps.append(self.transmission_calculator)
-        self._reduction_steps.append(self._corr_and_scale)
-        self._reduction_steps.append(self._geo_corr)
-        self._reduction_steps.append(self.to_Q)
+        self._convert.append(self.flood_file)
+        self._convert.append(self.crop_detector)
+        self._convert.append(self.samp_trans_load)
+        self._convert.append(self.mask)
+        self._convert.append(self.to_wavelen)
+        self._convert.append(self.norm_mon)
+        self._convert.append(self.transmission_calculator)
+        self._convert.append(self._corr_and_scale)
+        self._convert.append(self._geo_corr)
+        self._convert.append(self.to_Q)
         #---- the can special reducer ends on the previous step
-        self._reduction_steps.append(self.background_subtracter)
-        self._reduction_steps.append(self._zero_errors)
-        self._reduction_steps.append(self._rem_zeros)
+        self._can.append(self.background_subtracter)
+        self._tidy.append(self._zero_errors)
+        self._tidy.append(self._rem_zeros)
+        
+        self._reduction_steps = self._prepare_raw + self._convert + self._tidy
 
     def _init_steps(self):
         """
@@ -239,6 +240,19 @@ class ISISReducer(SANSReducer):
         
         #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
         self.run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
+
+        #any clean up, possibly removing workspaces 
+        self.post_process()
+        self.clean = False
+        
+        return self.wksp_name
+    
+    def from_moved(self):
+        """
+            Executes all the steps after moving the components
+        """
+        self.run_steps(start_ind=self.step_num(self._convert[0]),
+                       stop_ind=len(self._reduction_steps))
 
         #any clean up, possibly removing workspaces 
         self.post_process()
