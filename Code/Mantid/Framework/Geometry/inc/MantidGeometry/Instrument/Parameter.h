@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h"
-#include <boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <typeinfo>
 #include <vector>
