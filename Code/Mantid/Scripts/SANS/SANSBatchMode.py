@@ -64,7 +64,17 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, verbose = False, centreit = False, reducer=None):
+def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, save='SaveRKH',verbose=False, centreit=False, reducer=None):
+    """
+        @param filename: the CSV file with the list of runs to analyse
+        @param format: type of file to load, nxs for Nexus, etc.
+        @param full_trans_wav: when set to true (default) a wider range of wavelengths are used in the transmission correction  calculation
+        @param plotresults: if true and this function is run from Mantidplot a graph will be created for the results of each reduction
+        @param save: this named algorithm will be passed the name of the results workspace and filename (default = 'SaveRKH'). Pass a tuple of strings to save to multiple file formats
+        @param verbose: set to true to write more information to the log (default=False)
+        @param centreit: do centre finding (default=False)
+        @param reducer: if to use the command line (default) or GUI reducer object
+    """     
     if not format.startswith('.'):
         format = '.' + format
         
@@ -79,7 +89,7 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
     file_handle.close()
 
     if reducer:
-       ReductionSingleton().replace(reducer)
+        ReductionSingleton().replace(reducer)
     #first copy the user settings incase running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
 
@@ -135,11 +145,17 @@ def BatchReduce(filename, format, deftrans = DefaultTrans, plotresults = False, 
             # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
             # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
             # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
-            reduced = WavRangeReduction(full_trans_wav=deftrans)
+            reduced = WavRangeReduction(full_trans_wav=full_trans_wav)
 
+        #save result workspaces
         file_1 = run['output_as'] + '.txt'
+        #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
         if file_1 != '.txt':
-            SaveRKH(reduced,file_1,'0')
+            if type(save) == str:
+                save = (save, )
+            for alg in save:
+                exec(alg+"(reduced,file_1)")
+
         if verbose:
             mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
         # Rename the final workspace

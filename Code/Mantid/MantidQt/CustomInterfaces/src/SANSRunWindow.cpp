@@ -609,13 +609,7 @@ bool SANSRunWindow::oldLoadUserFile()
 
   user_file.close();
 
-  //Clear the def masking info table.
-  int mask_table_count = m_uiForm.mask_table->rowCount();
-  for( int i = mask_table_count - 1; i >= 0; --i )
-  {
-    m_uiForm.mask_table->removeRow(i);
-  }
-
+  
   QString instFunc = m_uiForm.inst_opt->currentText().trimmed();
   instFunc += "()";
   runReduceScriptFunction("SANSReduction."+instFunc);
@@ -625,114 +619,7 @@ bool SANSRunWindow::oldLoadUserFile()
   {
     return false;
   }
-
-  double unit_conv(1000.);
-  // Radius
-  double dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RMIN'),").toDouble();
-  m_uiForm.rad_min->setText(QString::number(dbl_param*unit_conv));
-  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RMAX'),").toDouble();
-  m_uiForm.rad_max->setText(QString::number(dbl_param*unit_conv));
-  //Wavelength
-  m_uiForm.wav_min->setText(runReduceScriptFunction("SANSReduction.printParameter('WAV1'),"));
-  m_uiForm.wav_max->setText(runReduceScriptFunction("SANSReduction.printParameter('WAV2'),"));
-  setLimitStepParameter("wavelength", runReduceScriptFunction("SANSReduction.printParameter('DWAV'),"), m_uiForm.wav_dw, m_uiForm.wav_dw_opt);
-  //Q
-  QString text = runReduceScriptFunction("SANSReduction.printParameter('Q_REBIN'),");
-  QStringList values = text.split(",");
-  if( values.count() == 3 )
-  {
-    m_uiForm.q_min->setText(values[0].trimmed());
-    m_uiForm.q_max->setText(values[2].trimmed());
-    setLimitStepParameter("Q", values[1].trimmed(), m_uiForm.q_dq, m_uiForm.q_dq_opt);
-  }
-  else
-  {
-    m_uiForm.q_rebin->setText(text.trimmed());
-    m_uiForm.q_dq_opt->setCurrentIndex(2);
-  }
-  //Qxy
-  m_uiForm.qy_max->setText(runReduceScriptFunction("SANSReduction.printParameter('QXY2'),"));
-  setLimitStepParameter("Qxy", runReduceScriptFunction("SANSReduction.printParameter('DQXY'),"), m_uiForm.qy_dqy, m_uiForm.qy_dqy_opt);
-
-  // Tranmission options
-  m_uiForm.trans_min->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV1'),"));
-  m_uiForm.trans_max->setText(runReduceScriptFunction("SANSReduction.printParameter('TRANS_WAV2'),"));
-  text = runReduceScriptFunction("SANSReduction.printParameter('TRANS_FIT')");
-  int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
-  if( index >= 0 )
-  {
-    m_uiForm.trans_opt->setCurrentIndex(index);
-  }
-
-  //Monitor spectra
-  m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "SANSReduction.printParameter('INSTRUMENT.get_incident_mon()'),"));
-  m_uiForm.trans_monitor->setText(runReduceScriptFunction(
-    "SANSReduction.printParameter('INSTRUMENT.incid_mon_4_trans_calc'),"));
-  m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "SANSReduction.printParameter('INSTRUMENT.is_interpolating_norm')").trimmed() == "True");
-  m_uiForm.trans_interp->setChecked(
-    runReduceScriptFunction("SANSReduction.printParameter('INSTRUMENT.use_interpol_trans_calc'),").trimmed() == "True");
-
-  //Direct efficiency correction
-  m_uiForm.direct_file->setText(runReduceScriptFunction("SANSReduction.printParameter('SANSReduction.DIRECT_BEAM_FILE_R'),"));
-  m_uiForm.front_direct_file->setText(runReduceScriptFunction("SANSReduction.printParameter('SANSReduction.DIRECT_BEAM_FILE_F'),"));
-
-  QString file = runReduceScriptFunction("SANSReduction.printParameter('NORMALISATION_FILE'),");
-  //Check if the file name is set to Python's None object
-  file = file == "None " ? "" : file;
-  m_uiForm.floodFile->setFileText(file);
-
-  //Scale factor
-  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('RESCALE'),").toDouble();
-  m_uiForm.scale_factor->setText(QString::number(dbl_param/100.));
-
-  //Sample offset if one has been specified
-  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('SAMPLE_Z_CORR'),").toDouble();
-  m_uiForm.smpl_offset->setText(QString::number(dbl_param*unit_conv));
-
-  //Centre coordinates
-  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('XBEAM_CENTRE'),").toDouble();
-  m_uiForm.beam_x->setText(QString::number(dbl_param*1000.0));
-  dbl_param = runReduceScriptFunction("SANSReduction.printParameter('YBEAM_CENTRE'),").toDouble();
-  m_uiForm.beam_y->setText(QString::number(dbl_param*1000.0));
-
-  //Gravity switch
-  QString param = runReduceScriptFunction("SANSReduction.printParameter('GRAVITY')");
-  if( param.trimmed() == "True" )
-  {
-    m_uiForm.gravity_check->setChecked(true);
-  }
-  else
-  {
-    m_uiForm.gravity_check->setChecked(false);
-  }
-
-  ////Detector bank
-  QString detName = runReduceScriptFunction(
-    "SANSReduction.printParameter('INSTRUMENT.cur_detector().name()')");
-  detName = detName.trimmed();
-  index = m_uiForm.detbank_sel->findText(detName);
-  if( index >= 0 && index < 2 )
-  {
-    m_uiForm.detbank_sel->setCurrentIndex(index);
-  }
-
-  //Masking table
-  updateMaskTable();
-
-  if ( runReduceScriptFunction("SANSReduction.printParameter('PHIMIRROR')").trimmed() == "True" )
-  {
-    m_uiForm.mirror_phi->setChecked(true);
-  }
-  else
-  {
-    m_uiForm.mirror_phi->setChecked(false);
-  }
-
-  m_cfg_loaded = true;
-  m_uiForm.userfileBtn->setText("Reload");
-  m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
+  
   return true;
 }
 /** Issues a Python command to load the user file and returns any output if
