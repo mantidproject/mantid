@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <string>
-#include "MantidKernel\System.h"
+#include "MantidKernel/System.h"
 class vtkFieldData;
 namespace Mantid
 {

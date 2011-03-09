@@ -1,6 +1,6 @@
 #ifndef ABSTRACT_CLIPPER_H
 #define ABSTRACT_CLIPPER_H
-#include "MantidKernel\System.h"
+#include "MantidKernel/System.h"
 
 //Forward declarations
 class vtkDataSet;

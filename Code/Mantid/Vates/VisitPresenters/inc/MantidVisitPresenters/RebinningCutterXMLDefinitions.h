@@ -2,7 +2,7 @@
 #define REBINNINGCUTTERXMLDEFINITIONS_H_
 
 #include <string>
-#include "MantidKernel\System.h"
+#include "MantidKernel/System.h"
 namespace Mantid
 {
 namespace VATES
