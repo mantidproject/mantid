@@ -137,7 +137,7 @@ std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
   return times;
 }
 
-vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char* scalarName) const
+vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTimeBin(int timeBin, const char* scalarName) const
 {
   using namespace Mantid::MDDataObjects;
 
@@ -150,6 +150,30 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarData(int timeBin, const char
   vtkStructuredGridFactory<MDImage> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), timeBin);
   return scalarFactory.createScalarArray();
 }
+
+vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(double time, const char* scalarName) const
+{
+  using namespace Mantid::MDDataObjects;
+
+  verifyExecution();
+  //Find the timebin corresponding to the time value provided.
+  std::vector<double> timeBins = this->getTimesteps();
+  double timeBin = timeBins.size() - 1; //Assume it is last.
+  for(int i = 0; i < timeBins.size()-1; i++)
+  {
+    double currentTime = timeBins[i];
+    double nextTime = timeBins[i+1];
+    if(time >= currentTime && time < nextTime)
+    {
+      timeBin = i;
+      break;
+    }
+  }
+
+  return getScalarDataFromTimeBin(timeBin, scalarName);
+}
+
+
 
 MultiDimensionalDbPresenter::~MultiDimensionalDbPresenter()
 {

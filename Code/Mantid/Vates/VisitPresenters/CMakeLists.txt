@@ -1,7 +1,10 @@
 # This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required ( VERSION 2.6 )
-include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
-include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
+
+if(NOT USE_PARAVIEW)
+  include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
+  include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
+endif(NOT USE_PARAVIEW)
 
 project ( VisitPresenters )
 
@@ -42,9 +45,9 @@ inc/MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h
 set (TEST_FILES
 test/vtkClipperDataSetFactoryTest.h
 test/vtkProxyFactoryTest.h
-test/vtkRectilinearGridFactoryTest.h
-test/vtkStructuredGridFactoryTest.h
-test/vtkThresholdingUnstructuredGridFactoryTest.h
+#test/vtkRectilinearGridFactoryTest.h
+#test/vtkStructuredGridFactoryTest.h
+#test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MetadataToFieldDataTest.h
@@ -52,10 +55,19 @@ test/RebinningCutterTest.h
 test/RebinningXMLGeneratorTest.h
 )
 
-include_directories (${VTK_INCLUDE_DIRS})
+if( USE_PARAVIEW )
+  #ParaView specific
+  include_directories (${VTK_SOURCE_DIR}/Filtering)
+  include_directories (${VTK_SOURCE_DIR}/Common)
+  include_directories (${ParaView_DIR}/VTK)
+  link_directories ( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release
+else( USE_PARAVIEW )
+  #VisIT specific
+  include_directories (${VTK_INCLUDE_DIRS})
+  include_directories (inc)
+  link_directories ( ${VTK_LIBRARY_DIRS} )
+endif( USE_PARAVIEW )
 include_directories (inc)
-
-link_directories ( ${VTK_LIBRARY_DIRS} )
 
 # For Windows:
 add_definitions ( -DIN_MANTID_VISITPRESENTERS )

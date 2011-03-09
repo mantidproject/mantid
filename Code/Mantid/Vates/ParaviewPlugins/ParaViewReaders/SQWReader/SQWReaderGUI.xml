@@ -1,0 +1,6 @@
+<ParaViewReaders>
+  <Reader name="SQWReader"
+    extensions="sqw"
+    file_description="MD *.sqw files">
+  </Reader>
+</ParaViewReaders>

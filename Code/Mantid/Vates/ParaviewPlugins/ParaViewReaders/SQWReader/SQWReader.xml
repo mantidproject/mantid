@@ -1,0 +1,28 @@
+<ServerManagerConfiguration>
+  <!-- Begin SQWReader -->
+  <ProxyGroup name="sources">
+    <SourceProxy name="SQWReader" class="vtkSQWReader" label="SQW Reader">
+	<Documentation
+       short_help="Read a Multidimensional SQW file."
+       long_help="Read a Multidimensional SQW file.">
+       Read a Multidimensional SQW file
+     </Documentation>
+      <StringVectorProperty
+        name="FileName"
+		animateable="0"
+        command="SetFileName"
+        number_of_elements="1">
+        <FileListDomain name="files"/>
+      </StringVectorProperty>
+      	<DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+       </DoubleVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End SQWReader -->
+</ServerManagerConfiguration>
