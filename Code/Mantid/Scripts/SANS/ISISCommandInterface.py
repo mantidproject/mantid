@@ -225,7 +225,7 @@ def CompWavRanges(wavelens, plot=True):
     
     try:
         calculated = [ReductionSingleton()._reduce()]
-        for i in range(1, len(wavelens)-1):
+        for i in range(0, len(wavelens)-1):
             settings = copy.deepcopy(ReductionSingleton().reference())
             ReductionSingleton().to_wavelen.set_rebin(
                             w_low=wavelens[i], w_high=wavelens[i+1])
