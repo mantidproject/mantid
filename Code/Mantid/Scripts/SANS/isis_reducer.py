@@ -48,7 +48,8 @@ class ISISReducer(SANSReducer):
         self._monitor_set = False
 
         self._prepare_raw = []
-        self._convert = []
+        self._fork_ws = []
+        self._conv_Q = []
         self._can = []
         self._tidy = []
 
@@ -60,24 +61,26 @@ class ISISReducer(SANSReducer):
 #        self._reduction_steps.append(self.user_settings)
         self._prepare_raw.append(self.place_det_sam)
         self._prepare_raw.append(self.geometry)
-        self._convert.append(self.out_name)
+        #---- creates a new workspace leaving the raw data behind 
+        self._fork_ws.append(self.out_name)
         #---- the can special reducer uses the steps starting with the next one
-        self._convert.append(self.flood_file)
-        self._convert.append(self.crop_detector)
-        self._convert.append(self.samp_trans_load)
-        self._convert.append(self.mask)
-        self._convert.append(self.to_wavelen)
-        self._convert.append(self.norm_mon)
-        self._convert.append(self.transmission_calculator)
-        self._convert.append(self._corr_and_scale)
-        self._convert.append(self._geo_corr)
-        self._convert.append(self.to_Q)
+        self._conv_Q.append(self.flood_file)
+        self._conv_Q.append(self.crop_detector)
+        self._conv_Q.append(self.samp_trans_load)
+        self._conv_Q.append(self.mask)
+        self._conv_Q.append(self.to_wavelen)
+        self._conv_Q.append(self.norm_mon)
+        self._conv_Q.append(self.transmission_calculator)
+        self._conv_Q.append(self._corr_and_scale)
+        self._conv_Q.append(self._geo_corr)
+        self._conv_Q.append(self.to_Q)
         #---- the can special reducer ends on the previous step
         self._can.append(self.background_subtracter)
+        
         self._tidy.append(self._zero_errors)
         self._tidy.append(self._rem_zeros)
         
-        self._reduction_steps = self._prepare_raw + self._convert + self._tidy
+        self._reduction_steps = self._prepare_raw + self._fork_ws + self._conv_Q + self._can+ self._tidy
 
     def _init_steps(self):
         """
@@ -251,7 +254,8 @@ class ISISReducer(SANSReducer):
         """
             Executes all the steps after moving the components
         """
-        self.run_steps(start_ind=self.step_num(self._convert[0]),
+        self.run_steps(
+                       start_ind=self.step_num(self._fork),
                        stop_ind=len(self._reduction_steps))
 
         #any clean up, possibly removing workspaces 
