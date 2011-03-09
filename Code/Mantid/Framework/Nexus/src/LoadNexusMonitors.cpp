@@ -91,6 +91,8 @@ void LoadNexusMonitors::exec()
   }
   this->nMonitors = monitorNames.size();
 
+  // TODO: Sort the monitor names so we can read them in order
+
   // Create the output workspace
   this->WS = API::WorkspaceFactory::Instance().create("Workspace2D",
       this->nMonitors, 1, 1);
@@ -108,8 +110,12 @@ void LoadNexusMonitors::exec()
     Poco::Path monPath(monitorNames[i]);
     std::string monitorName = monPath.getBaseName();
     std::string::size_type loc = monitorName.rfind('r');
+
     int monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
-    int spectraIndex = monIndex - 1;
+    int spectraIndex = i;
+
+    g_log.debug() << "monIndex = " << monIndex << std::endl;
+    g_log.debug() << "spectraIndex = " << spectraIndex << std::endl;
 
     spectra_numbers[spectraIndex] = monIndex;
     detector_numbers[spectraIndex] = -monIndex;
