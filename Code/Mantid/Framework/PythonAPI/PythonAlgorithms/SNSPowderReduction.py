@@ -2,6 +2,8 @@ from MantidFramework import *
 from mantidsimple import *
 import os
 
+COMPRESS_TOL_TOF = .01
+
 class SNSPowderReduction(PythonAlgorithm):
     class PDConfigFile(object):
         class PDInfo:
@@ -143,7 +145,7 @@ class SNSPowderReduction(PythonAlgorithm):
 
     def _loadNeXusData(self, runnumber, extension, **kwargs):
         if self.getProperty("CompressOnRead"):
-            kwargs["CompressTolerance"] = .01
+            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
         else:
             kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
@@ -201,8 +203,8 @@ class SNSPowderReduction(PythonAlgorithm):
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
                                    % (filterLogs[0], str(wksp)))            
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
-        
+        if not self.getProperty("CompressOnRead"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
@@ -216,6 +218,7 @@ class SNSPowderReduction(PythonAlgorithm):
                 binning = [info.dmin, self._binning[0], info.dmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         if not info.has_dspace:
             if len(self._binning) == 3:
                 binning = self._binning
@@ -351,7 +354,8 @@ class SNSPowderReduction(PythonAlgorithm):
             # the final bit of math
             if canRun is not None:
                 samRun -= canRun
-                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.01) # 10ns
+                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                               Tolerance=COMPRESS_TOL_TOF) # 10ns
                 canRun = str(canRun)
             if vanRun is not None:
                 samRun /= vanRun
@@ -362,7 +366,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 normalized = False
 
             # write out the files
-            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun, Tolerance=.005) # 5ns
+            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                           Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, info, normalized)
             samRun = str(samRun)
             mtd.releaseFreeMemory()
