@@ -36,7 +36,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class vtkProxyFactory : public vtkDataSetFactory
+class DLLExport vtkProxyFactory : public vtkDataSetFactory
 {
 
 public:

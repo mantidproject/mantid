@@ -1,5 +1,6 @@
 #ifndef ABSTRACT_CLIPPER_H
 #define ABSTRACT_CLIPPER_H
+#include "MantidKernel\System.h"
 
 //Forward declarations
 class vtkDataSet;
@@ -37,7 +38,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class Clipper
+class DLLExport Clipper
 {
 public:
 

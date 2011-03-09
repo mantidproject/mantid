@@ -23,23 +23,23 @@ void RebinningXMLGenerator::setImplicitFunction(boost::shared_ptr<const Mantid::
 /// Set the workspace name to apply.
 void RebinningXMLGenerator::setWorkspace(boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace)
 {
-  this->m_wsNameXML =  XMLDefinitions::workspaceNameXMLTagStart + workspace->getName() + XMLDefinitions::workspaceNameXMLTagEnd;
+  this->m_wsNameXML =  XMLDefinitions::workspaceNameXMLTagStart() + workspace->getName() + XMLDefinitions::workspaceNameXMLTagEnd();
   this->m_wsLocation = workspace->getWSLocation();
-  this->m_wsLocationXML =   XMLDefinitions::workspaceLocationXMLTagStart + this->m_wsLocation + XMLDefinitions::workspaceLocationXMLTagEnd;
+  this->m_wsLocationXML =   XMLDefinitions::workspaceLocationXMLTagStart() + this->m_wsLocation + XMLDefinitions::workspaceLocationXMLTagEnd();
   this->m_geomXML = workspace->getGeometryXML();
 }
 
 void RebinningXMLGenerator::setWorkspaceName(std::string wsName)
 {
   this->m_wsName = wsName;
-  this->m_wsNameXML =   std::string(XMLDefinitions::workspaceNameXMLTagStart  + wsName + XMLDefinitions::workspaceNameXMLTagEnd);
+  this->m_wsNameXML =   std::string(XMLDefinitions::workspaceNameXMLTagStart()  + wsName + XMLDefinitions::workspaceNameXMLTagEnd());
 }
 
 void RebinningXMLGenerator::setWorkspaceLocation(std::string wsLocation)
 {
 
   this->m_wsLocation = wsLocation;
-  this->m_wsLocationXML =   std::string(XMLDefinitions::workspaceLocationXMLTagStart  + wsLocation + XMLDefinitions::workspaceLocationXMLTagEnd );
+  this->m_wsLocationXML =   std::string(XMLDefinitions::workspaceLocationXMLTagStart()  + wsLocation + XMLDefinitions::workspaceLocationXMLTagEnd() );
 }
 
 void RebinningXMLGenerator::setGeometryXML(std::string geomXML)
@@ -55,11 +55,11 @@ std::string RebinningXMLGenerator::createXMLString() const
   {
     throw std::runtime_error("No geometry provided on workspace.");
   }
-  if(this->m_wsLocationXML == (XMLDefinitions::workspaceLocationXMLTagStart + XMLDefinitions::workspaceLocationXMLTagEnd))
+  if(this->m_wsLocationXML == (XMLDefinitions::workspaceLocationXMLTagStart() + XMLDefinitions::workspaceLocationXMLTagEnd()))
   {
     throw std::runtime_error("No workspace location provided on workspace.");
   }
-  if(this->m_wsNameXML == (XMLDefinitions::workspaceNameXMLTagStart + XMLDefinitions::workspaceNameXMLTagEnd))
+  if(this->m_wsNameXML == (XMLDefinitions::workspaceNameXMLTagStart() + XMLDefinitions::workspaceNameXMLTagEnd()))
   {
     throw std::runtime_error("No workspace name provided on workspace.");
   }
@@ -67,12 +67,12 @@ std::string RebinningXMLGenerator::createXMLString() const
   //Check to see if a function has been provided.
   if(NULL != m_spFunction.get())
   {
-    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + XMLDefinitions::workspaceInstructionXMLTagEnd);
+    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + m_spFunction->toXMLString() + XMLDefinitions::workspaceInstructionXMLTagEnd());
   }
   else
   {
     //Functions are optional, so don't provide them as part of the completed xml if not present.
-    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart  + m_wsNameXML + m_wsLocationXML + m_geomXML + XMLDefinitions::workspaceInstructionXMLTagEnd);
+    return std::string(XMLDefinitions::workspaceInstructionXMLTagStart()  + m_wsNameXML + m_wsLocationXML + m_geomXML + XMLDefinitions::workspaceInstructionXMLTagEnd());
   }
 }
 

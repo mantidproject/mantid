@@ -251,7 +251,7 @@ vtkDataSet* constructInputDataSet()
 {
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id = XMLDefinitions::metaDataId;
+  std::string id = XMLDefinitions::metaDataId();
   vtkFieldData* fieldData =createFieldDataWithCharArray(getComplexXMLInstructions(), id);
   dataset->SetFieldData(fieldData);
   fieldData->Delete();
@@ -294,14 +294,14 @@ void testExecutionInChainedSchenario()
 void testgetMetaDataID()
 {
 
-  TSM_ASSERT_EQUALS("The expected id for the slicing metadata was not found", "1", XMLDefinitions::metaDataId);
+  TSM_ASSERT_EQUALS("The expected id for the slicing metadata was not found", "VATES_Metadata", XMLDefinitions::metaDataId());
 }
 
 void testFindExistingRebinningDefinitions()
 {
   using namespace Mantid::API;
   using namespace Mantid::MDAlgorithms;
-  std::string id = XMLDefinitions::metaDataId;
+  std::string id = XMLDefinitions::metaDataId();
   vtkDataSet* dataset = constructInputDataSet();
 
   ImplicitFunction* func = findExistingRebinningDefinitions(dataset, id.c_str());
@@ -319,7 +319,7 @@ void testNoExistingRebinningDefinitions()
   using namespace Mantid::API;
 
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  TSM_ASSERT_THROWS("There were no previous definitions carried through. Should have thrown.", findExistingRebinningDefinitions(dataset, XMLDefinitions::metaDataId.c_str()), std::runtime_error);
+  TSM_ASSERT_THROWS("There were no previous definitions carried through. Should have thrown.", findExistingRebinningDefinitions(dataset, XMLDefinitions::metaDataId().c_str()), std::runtime_error);
   dataset->Delete();
 }
 
@@ -336,7 +336,7 @@ void testNoExistingRebinningDefinitions()
 
 void testFindWorkspaceName()
 {
-  std::string id = XMLDefinitions::metaDataId;
+  std::string id = XMLDefinitions::metaDataId();
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string name = findExistingWorkspaceName(dataset, id.c_str());
@@ -347,7 +347,7 @@ void testFindWorkspaceName()
 
 void testFindWorkspaceLocation()
 {
-  std::string id = XMLDefinitions::metaDataId;
+  std::string id = XMLDefinitions::metaDataId();
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string location = findExistingWorkspaceLocation(dataset, id.c_str());
@@ -360,7 +360,7 @@ void testFindWorkspaceLocation()
 void testFindWorkspaceNameThrows()
 {
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  XMLDefinitions::metaDataId;
+  std::string id =  XMLDefinitions::metaDataId();
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a name element, so should throw.", findExistingWorkspaceName(dataset, id.c_str()), std::runtime_error);
@@ -370,7 +370,7 @@ void testFindWorkspaceNameThrows()
 void testFindWorkspaceLocationThrows()
 {
   vtkDataSet* dataset = vtkUnstructuredGrid::New();
-  std::string id =  XMLDefinitions::metaDataId;
+  std::string id =  XMLDefinitions::metaDataId();
   dataset->SetFieldData(createFieldDataWithCharArray("<IncorrectXML></IncorrectXML>", id.c_str()));
 
   TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocation(dataset, id.c_str()), std::runtime_error);

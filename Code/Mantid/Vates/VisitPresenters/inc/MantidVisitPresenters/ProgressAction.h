@@ -38,7 +38,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class ProgressAction
+class DLLExport ProgressAction
 {
 
 public:

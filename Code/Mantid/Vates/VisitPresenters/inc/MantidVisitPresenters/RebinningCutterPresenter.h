@@ -146,44 +146,44 @@ public:
       const RebinningXMLGenerator& xmlGenerator, const char* id);
 
   /// Look for and extract exisiting reduction knowledge in input visualisation dataset.
-  Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
+  DLLExport Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  std::string findExistingWorkspaceName(vtkDataSet *in_ds, const char* id);
+  DLLExport std::string findExistingWorkspaceName(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace location from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  std::string findExistingWorkspaceLocation(vtkDataSet *in_ds, const char* id);
+  DLLExport std::string findExistingWorkspaceLocation(vtkDataSet *in_ds, const char* id);
 
   //Get the workspace geometry from the xmlstring. xmlstring is present of vtkFieldData on vtkDataSet.
-  Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id);
+  DLLExport Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id);
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
   Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
 
   /// Create a geometry from dimensions and then serialise it.
-  std::string constructGeometryXML(DimensionVec dimensions,
+  DLLExport std::string constructGeometryXML(DimensionVec dimensions,
       Dimension_sptr dimensionX,
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont);
 
   /// Helper method to get dimensions from a geometry xml element.
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);
+  DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);
 
   /// Helper method to get dimensions from a geometry xml string.
-  std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
+  DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
 
   /// helper method to get a dimension from a dimension xml element.
-  Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML);
+  DLLExport Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML);
 
   /// helper method to get a dimension from a dimension xml element string.
-  Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString);
+  DLLExport Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString);
 
   /// helper method to get a dimension from a dimension xml element string and set the number of bins for that dimension to a specified value.
-  Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins);
+  DLLExport Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins);
 
   /// helper method to extract the bounding box.
-  std::vector<double> getBoundingBox(const std::string& functionXMLString);
+  DLLExport std::vector<double> getBoundingBox(const std::string& functionXMLString);
 
 }
 }

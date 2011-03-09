@@ -14,7 +14,7 @@ namespace VATES
 {
 
 template<typename Image>
-class vtkRectilinearGridFactory : public vtkDataSetFactory
+class DLLExport vtkRectilinearGridFactory : public vtkDataSetFactory
 {
 public:
 

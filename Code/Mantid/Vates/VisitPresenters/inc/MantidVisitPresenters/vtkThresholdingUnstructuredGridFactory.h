@@ -48,7 +48,7 @@ struct UnstructuredPoint
 };
 
 template<typename Image>
-class vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
+class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 {
 public:
 

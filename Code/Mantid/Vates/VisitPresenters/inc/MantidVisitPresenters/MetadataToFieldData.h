@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include "MantidKernel\System.h"
 class vtkFieldData;
 namespace Mantid
 {
@@ -36,7 +37,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class MetadataToFieldData
+class DLLExport MetadataToFieldData
 {
 public:
   /// Act as Functor.

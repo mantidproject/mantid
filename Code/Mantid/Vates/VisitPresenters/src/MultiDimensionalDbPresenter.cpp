@@ -99,7 +99,7 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   //Add metadata to dataset.
 
   MetadataToFieldData convert;
-  convert(outputFD, xmlString, XMLDefinitions::metaDataId.c_str());
+  convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
   visualDataSet->SetFieldData(outputFD);
   outputFD->Delete();
   return visualDataSet;

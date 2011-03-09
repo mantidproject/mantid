@@ -2,7 +2,7 @@
 #define REBINNINGCUTTERXMLDEFINITIONS_H_
 
 #include <string>
-
+#include "MantidKernel\System.h"
 namespace Mantid
 {
 namespace VATES
@@ -38,33 +38,79 @@ namespace VATES
 
 //TODO: these definitions may be more appropriate in API/Geometry where they can also be used as part of the parsing.
 
-class XMLDefinitions
+class DLLExport XMLDefinitions
 {
 public:
   //XML schema tag definitions for generating xml.
-  static const std::string workspaceNameXMLTagStart;
-  static const std::string workspaceNameXMLTagEnd;
-  static const std::string workspaceLocationXMLTagStart;
-  static const std::string workspaceLocationXMLTagEnd;
-  static const std::string workspaceInstructionXMLTagStart;
-  static const std::string workspaceInstructionXMLTagEnd;
-
-  //XML schema tag definitions for finding xml.
-  static const std::string workspaceNameElementName;
-  static const std::string functionElementName;
-  static const std::string workspaceLocationElementName;
-  static const std::string workspaceGeometryElementName;
-
-  //An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
-  static const std::string metaDataId;
-  static const std::string signalName;
-  static const std::string geometryNodeName;
-  static const std::string functionNodeName;
-  static const std::string geometryOperatorInfo;
-  static const std::string functionOperatorInfo;
+   static const std::string workspaceNameXMLTagStart()
+   {
+     return "<MDWorkspaceName>";
+   }
+   static const std::string workspaceNameXMLTagEnd()
+   {
+     return "</MDWorkspaceName>";
+   }
+   static const std::string workspaceLocationXMLTagStart()
+   {
+     return "<MDWorkspaceLocation>";
+   }
+   static const std::string workspaceLocationXMLTagEnd()
+   {
+     return "</MDWorkspaceLocation>";
+   }
+   static const std::string workspaceInstructionXMLTagStart()
+   {
+     return "<MDInstruction>";
+   }
+   static const std::string workspaceInstructionXMLTagEnd()
+   {
+     return "</MDInstruction>";
+   }
+   ///XML schema tag definitions for finding xml.
+   static const std::string workspaceNameElementName()
+   {
+     return "MDWorkspaceName";
+   }
+   static const std::string functionElementName()
+   {
+     return "Function";
+   }
+   static const std::string workspaceLocationElementName()
+   {
+     return "MDWorkspaceLocation";
+   }
+   static const std::string workspaceGeometryElementName()
+   {
+     return "DimensionSet";
+   }
+   ///An id for recognising specific vtkFieldData objects on inbound and outbound datasets.
+   static const std::string metaDataId()
+   {
+     return "VATES_Metadata";
+   }
+   static const std::string signalName()
+   {
+     return "signal";
+   }
+   static const std::string geometryNodeName()
+   {
+     return "geometryNodeName";
+   }
+   static const std::string functionNodeName()
+   {
+     return "functionNodeName";
+   }
+   static const std::string geometryOperatorInfo()
+   {
+     return "geometryOperatorInfo";
+   }
+   static const std::string functionOperatorInfo()
+   {
+     return "functionOperatorInfo";
+   }
 
 };
 
 }
 }
-#endif /* REBINNINGCUTTERXMLDEFINITIONS_H_ */
+#endif 

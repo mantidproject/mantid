@@ -38,7 +38,7 @@ namespace VATES
  */
 
 
-class MultiDimensionalDbPresenter
+class DLLExport MultiDimensionalDbPresenter
 {
 
 private:

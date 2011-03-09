@@ -94,7 +94,7 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   using namespace Mantid::MDAlgorithms;
 
   //Add existing functions.
-  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId.c_str());
+  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId().c_str());
   if (existingFunctions != NULL)
   {
     compFunction->addFunction(boost::shared_ptr<ImplicitFunction>(existingFunctions));
@@ -106,9 +106,9 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   //Apply the geometry.
   m_serializer.setGeometryXML(constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont));
   //Apply the workspace name after extraction from the input xml.
-  m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId.c_str()));
+  m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId().c_str()));
   //Apply the workspace location after extraction from the input xml.
-  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId.c_str()));
+  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId().c_str()));
 
   this->m_initalized = true;
 }
@@ -167,7 +167,7 @@ vtkDataSet* RebinningCutterPresenter::createVisualDataSet(vtkDataSetFactory_sptr
   vtkDataSet* visualImageData = spvtkDataSetFactory->create();
 
   //save the work performed as part of this filter instance into the pipeline.
-  persistReductionKnowledge(visualImageData, this->m_serializer, XMLDefinitions::metaDataId.c_str());
+  persistReductionKnowledge(visualImageData, this->m_serializer, XMLDefinitions::metaDataId().c_str());
   return visualImageData;
 }
 
@@ -179,7 +179,7 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFu
 
 Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
@@ -198,7 +198,7 @@ Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkData
 
 Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
@@ -218,7 +218,7 @@ Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkData
 Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
 
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
@@ -237,7 +237,7 @@ Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkData
 
 Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const
 {
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId.c_str() );
+  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
 
   std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
 
@@ -389,7 +389,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
     Poco::XML::DOMParser pParser;
     Poco::XML::Document* pDoc = pParser.parseString(xmlString);
     Poco::XML::Element* pRootElem = pDoc->documentElement();
-    Poco::XML::Element* functionElem = pRootElem->getChildElement(XMLDefinitions::functionElementName);
+    Poco::XML::Element* functionElem = pRootElem->getChildElement(XMLDefinitions::functionElementName());
     if(NULL != functionElem)
     {
       function = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(functionElem);
@@ -407,7 +407,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc = pParser.parseString(xmlString);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
-  Poco::XML::Element* wsNameElem = pRootElem->getChildElement(XMLDefinitions::workspaceNameElementName);
+  Poco::XML::Element* wsNameElem = pRootElem->getChildElement(XMLDefinitions::workspaceNameElementName());
   if(wsNameElem == NULL)
   {
     throw std::runtime_error("The element containing the workspace name must be present.");
@@ -425,7 +425,7 @@ Mantid::API::ImplicitFunction* findExistingRebinningDefinitions(
    Poco::XML::DOMParser pParser;
    Poco::XML::Document* pDoc = pParser.parseString(xmlString);
    Poco::XML::Element* pRootElem = pDoc->documentElement();
-   Poco::XML::Element* wsLocationElem = pRootElem->getChildElement(XMLDefinitions::workspaceLocationElementName);
+   Poco::XML::Element* wsLocationElem = pRootElem->getChildElement(XMLDefinitions::workspaceLocationElementName());
    if(wsLocationElem == NULL)
    {
      throw std::runtime_error("The element containing the workspace location must be present.");
@@ -441,7 +441,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
   Poco::XML::DOMParser pParser;
   Poco::XML::Document* pDoc = pParser.parseString(xmlString);
   Poco::XML::Element* pRootElem = pDoc->documentElement();
-  Poco::XML::Element* geometryElem = pRootElem->getChildElement(XMLDefinitions::workspaceGeometryElementName);
+  Poco::XML::Element* geometryElem = pRootElem->getChildElement(XMLDefinitions::workspaceGeometryElementName());
   if (geometryElem == NULL)
   {
     throw std::runtime_error("The element containing the workspace geometry must be present.");
@@ -458,7 +458,12 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
    using namespace Mantid::Geometry;
    using namespace Mantid::API;
 
+   Mantid::MDAlgorithms::Load_MDWorkspace wsLoaderAlg;
+   wsLoaderAlg.initialize();
    std::string wsId = "InputMDWs";
+   wsLoaderAlg.setPropertyValue("inFilename", wsLocation);
+   wsLoaderAlg.setPropertyValue("MDWorkspace", wsId);
+   wsLoaderAlg.execute();
    Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
    MDWorkspace_sptr workspace = boost::dynamic_pointer_cast<MDWorkspace>(result);
 

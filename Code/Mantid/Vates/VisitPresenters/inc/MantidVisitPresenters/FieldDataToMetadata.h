@@ -3,6 +3,7 @@
 
 #include <functional>
 #include <string>
+#include "MantidKernel\System.h"
 
 class vtkFieldData;
 namespace Mantid
@@ -37,7 +38,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-class FieldDataToMetadata : public std::binary_function<vtkFieldData*, std::string, std::string>
+class DLLExport FieldDataToMetadata : public std::binary_function<vtkFieldData*, std::string, std::string>
 {
 public:
   /// Act as Functor.

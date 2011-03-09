@@ -3,6 +3,7 @@
 #ifndef MANTID_VATES_VTKDATASETFACTORY_H_
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
+#include "MantidKernel\System.h"
 #include "boost/shared_ptr.hpp"
 #include "vtkDataSet.h"
 
@@ -39,7 +40,7 @@ namespace VATES
 
 
 
-class vtkDataSetFactory
+class DLLExport vtkDataSetFactory
 {
 
 public:

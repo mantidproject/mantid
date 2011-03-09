@@ -39,7 +39,7 @@ namespace VATES
  */
 
 
-class vtkClipperDataSetFactory : public vtkDataSetFactory
+class DLLExport vtkClipperDataSetFactory : public vtkDataSetFactory
 {
 public:
   /// Constructor
