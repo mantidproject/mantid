@@ -255,7 +255,7 @@ class ISISReducer(SANSReducer):
             Executes all the steps after moving the components
         """
         self.run_steps(
-                       start_ind=self.step_num(self._fork_ws),
+                       start_ind=self.step_num(self._fork_ws[0]),
                        stop_ind=len(self._reduction_steps))
 
         #any clean up, possibly removing workspaces 
