@@ -20,7 +20,6 @@ void AddSampleLog::initDocs()
   this->setOptionalMessage("Used to insert a single string into the sample in a workspace");
 }
 
-
 using namespace Kernel;
 using namespace API;
 
