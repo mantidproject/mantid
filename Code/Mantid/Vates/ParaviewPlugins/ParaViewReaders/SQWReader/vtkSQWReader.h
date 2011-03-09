@@ -1,7 +1,7 @@
 #ifndef _vtkSQWReader_h
 #define _vtkSQWReader_h
 
-#include "MantidVisitPresenters/MultiDimensionalDbPresenter.h"
+#include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "vtkStructuredGridAlgorithm.h"
 class VTK_EXPORT vtkSQWReader : public vtkStructuredGridAlgorithm
 {

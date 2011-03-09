@@ -1,0 +1,92 @@
+# This is mainly here so you don't get a complaint when running cmake
+cmake_minimum_required ( VERSION 2.6 )
+
+if(NOT USE_PARAVIEW)
+  include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
+  include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
+endif(NOT USE_PARAVIEW)
+
+project ( VatesAPI )
+
+set ( SRC_FILES 
+src/Clipper.cpp
+src/FieldDataToMetadata.cpp
+src/MetadataToFieldData.cpp
+src/MultiDimensionalDbPresenter.cpp
+src/ProgressAction.cpp
+src/RebinningCutterPresenter.cpp
+src/RebinningCutterXMLDefinitions.cpp
+src/RebinningXMLGenerator.cpp
+src/vtkDataSetFactory.cpp
+src/vtkClipperDataSetFactory.cpp
+src/vtkProxyFactory.cpp
+src/vtkRectilinearGridFactory.cpp
+src/vtkStructuredGridFactory.cpp
+src/vtkThresholdingUnstructuredGridFactory.cpp
+)
+
+set ( INC_FILES 
+inc/MantidVatesAPI/Clipper.h
+inc/MantidVatesAPI/FieldDataToMetadata.h
+inc/MantidVatesAPI/MetadataToFieldData.h
+inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
+inc/MantidVatesAPI/ProgressAction.h
+inc/MantidVatesAPI/RebinningCutterPresenter.h
+inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
+inc/MantidVatesAPI/RebinningXMLGenerator.h
+inc/MantidVatesAPI/vtkDataSetFactory.h
+inc/MantidVatesAPI/vtkClipperDataSetFactory.h
+inc/MantidVatesAPI/vtkProxyFactory.h
+inc/MantidVatesAPI/vtkRectilinearGridFactory.h
+inc/MantidVatesAPI/vtkStructuredGridFactory.h
+inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
+)
+
+set (TEST_FILES
+test/vtkClipperDataSetFactoryTest.h
+test/vtkProxyFactoryTest.h
+#test/vtkRectilinearGridFactoryTest.h
+#test/vtkStructuredGridFactoryTest.h
+#test/vtkThresholdingUnstructuredGridFactoryTest.h
+test/FieldDataToMetadataTest.h
+test/MultiDimensionalDbPresenterTest.h
+test/MetadataToFieldDataTest.h
+test/RebinningCutterTest.h
+test/RebinningXMLGeneratorTest.h
+)
+
+if( USE_PARAVIEW )
+  #ParaView specific
+  include_directories (${VTK_SOURCE_DIR}/Filtering)
+  include_directories (${VTK_SOURCE_DIR}/Common)
+  include_directories (${ParaView_DIR}/VTK)
+  link_directories ( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release
+else( USE_PARAVIEW )
+  #VisIT specific
+  include_directories (${VTK_INCLUDE_DIRS})
+  include_directories (inc)
+  link_directories ( ${VTK_LIBRARY_DIRS} )
+endif( USE_PARAVIEW )
+include_directories (inc)
+
+# For Windows:
+add_definitions ( -DIN_MANTID_VATESAPI )
+# Add the target for this directory
+add_library ( VatesAPI ${SRC_FILES} ${INC_FILES})
+# Set the name of the generated library
+set_target_properties ( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
+# Add to the 'Framework' group in VS
+set_property ( TARGET VatesAPI PROPERTY FOLDER "Framework" )
+
+target_link_libraries (VatesAPI
+${MANTID_SUBPROJECT_LIBS} 
+vtkCommon 
+vtkFiltering
+)
+
+# Create test file projects
+if ( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
+  cxxtest_add_test ( VatesAPITest ${TEST_FILES} )
+  target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} )
+  add_dependencies ( FrameworkTests VatesAPITest )
+endif ()

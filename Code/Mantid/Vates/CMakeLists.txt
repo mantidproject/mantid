@@ -7,7 +7,7 @@ project ( Vates )
 find_package ( VisIt )
 
 include ( CommonVatesSetup )
-add_subdirectory ( VisitPresenters )
+add_subdirectory ( VatesAPI )
 
 #Select either building Paraview plugins or VisIT plugins.
 set(USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. If OFF, creates VisIT plugins.")

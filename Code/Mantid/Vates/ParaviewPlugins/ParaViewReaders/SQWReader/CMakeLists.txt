@@ -3,7 +3,7 @@ PROJECT(SQWReader)
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 
-set_mantid_subprojects(Vates/VisitPresenters)
+set_mantid_subprojects(Vates/VatesAPI)
 
 ADD_PARAVIEW_PLUGIN(SQWReaderSMPlugin "1.0"
 	SERVER_MANAGER_XML SQWReader.xml

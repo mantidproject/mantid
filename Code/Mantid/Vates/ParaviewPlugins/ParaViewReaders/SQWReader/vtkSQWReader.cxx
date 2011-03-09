@@ -10,7 +10,7 @@
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
-#include "MantidVisitPresenters/MultiDimensionalDbPresenter.h"
+#include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 
 vtkCxxRevisionMacro(vtkSQWReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWReader);

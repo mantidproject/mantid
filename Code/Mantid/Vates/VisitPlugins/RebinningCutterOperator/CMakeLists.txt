@@ -5,7 +5,7 @@ INCLUDE(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
 
 PROJECT(RebinningCutter)
 
-set_mantid_subprojects(Vates/VisitPresenters)
+set_mantid_subprojects(Vates/VatesAPI)
 
 SET(COMMON_SOURCES
 ${CMAKE_CURRENT_SOURCE_DIR}/src/RebinningCutterPluginInfo.C
