@@ -23,23 +23,24 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareProperty("CompressOnRead", False,
                              Description="Compress the event list when reading in the data")
         self.declareProperty("XPixelSum", 1,
-                             Description="Sum detector pixels in X direction.  Must be a factor of X total pixels.")
+                             Description="Sum detector pixels in X direction.  Must be a factor of X total pixels.  Default is 1.")
         self.declareProperty("YPixelSum", 1,
-                             Description="Sum detector pixels in Y direction.  Must be a factor of Y total pixels.")
-        self.declareProperty("Peak1", 0.7282933,
-                             Description="D-space postion of reference peak.")
-        self.declareProperty("Peak2", 1.261441,
-                             Description="Optional: D-space postion of second reference peak.")
-        self.declareProperty("DetectorsPeak1", 17,
-                             Description="Number of detector banks for Peak1.")
-        self.declareProperty("DetectorsPeak2", 6,
-                             Description="Number of detector banks for Peak2.")
+                             Description="Sum detector pixels in Y direction.  Must be a factor of Y total pixels.  Default is 1.")
+        self.declareProperty("Peak1", 0.0,
+                             Description="d-space position of reference peak.")
+        self.declareProperty("Peak2", 0.0,
+                             Description="Optional: d-space position of second reference peak.")
+        self.declareProperty("DetectorsPeak1", 0,
+                             Description="Number of detector banks for Peak1.  Default is all.")
+        self.declareProperty("DetectorsPeak2", 0,
+                             Description="Optional: Number of detector banks for Peak2.")
         self.declareProperty("PeakHalfWidth", 0.05,
-                             Description="Half width of d-space around peaks.")
+                             Description="Half width of d-space around peaks. Default is 0.05")
         self.declareProperty("CrossCorrelationPoints", 100,
-                             Description="Number of points to find peak from cross correlation")
+                             Description="Number of points to find peak from cross correlation.  Default is 100")
         self.declareListProperty("Binning", [0.,0.,0.],
-                             Description="Positive is linear bins, negative is logorithmic")
+                             Description="Min, Step, and Max of d-space bins.  Linear binning is better for finding offsets.")
+        self.declareProperty("DiffractionFocus", False, Description="Diffraction focus by detectors.  Default is False")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("FilterByTimeMin", 0.,
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
@@ -130,6 +131,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _calibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
+        groups = ""
+        numrange = 200
+        if str(self._instrument) == "SNAP":
+            numrange = 19
+        for num in xrange(1,numrange):
+            comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
+            if not comp == None:
+               groups+=("bank%d," % (num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -144,69 +153,76 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
         
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing")
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        alg = ConvertUnits(InputWorkspace=wksp, OutputWorkspace="temp", Target="dSpacing")
+        temp = alg['OutputWorkspace']
+        Sort(InputWorkspace=temp, SortBy="Time of Flight")
         # Sum pixelbin X pixelbin blocks of pixels
         if self._xpixelbin*self._ypixelbin>1:
-                SumNeighbours(InputWorkspace=wksp, OutputWorkspace=wksp, SumX=self._xpixelbin, SumY=self._ypixelbin)
+                SumNeighbours(InputWorkspace=temp, OutputWorkspace=temp, SumX=self._xpixelbin, SumY=self._ypixelbin)
         # Bin events in d-Spacing
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin)+","+str(self._binning[1])+","+str(self._peakmax))
+        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin)+","+str(self._binning[1])+","+str(self._peakmax))
         #Find good peak for reference
         ymax = 0
-        for s in range(0,wksp.getNumberHistograms()):
-            y_s = wksp.readY(s)
-            midBin = wksp.blocksize()/2
+        for s in range(0,temp.getNumberHistograms()):
+            y_s = temp.readY(s)
+            midBin = temp.blocksize()/2
             if y_s[midBin] > ymax:
                     refpixel = s
                     ymax = y_s[midBin]
         print "Reference spectra=",refpixel
         # Remove old calibration files
-        cmd = "rm "+self._outDir+str(wksp)+".cal*"
+        cmd = "rm "+self._outDir+str(temp)+".cal*"
         os.system(cmd)
         # Cross correlate groups using interval around peak at peakpos (d-Spacing)
-        self._lastpixel = wksp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
-        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
+        if self._lastpixel == 0:
+            self._lastpixel = temp.getNumberHistograms()-1
+        else:
+            self._lastpixel = temp.getNumberHistograms()*self._lastpixel/self._lastpixel2-1
+        CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc", ReferenceSpectra=refpixel,
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=self._binning[1],
             DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal1")
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp,Params=str(self._peakmin2)+","+str(self._binning[1])+","+str(self._peakmax2))
-         #Find good peak for reference
-        ymax = 0
-        for s in range(0,wksp.getNumberHistograms()):
-            y_s = wksp.readY(s)
-            midBin = wksp.blocksize()/2
-            if y_s[midBin] > ymax:
-                    refpixel = s
-                    ymax = y_s[midBin]
-        print "Reference spectra=",refpixel
-        CrossCorrelate(InputWorkspace=wksp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
-            WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=wksp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
-        # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
-        GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=self._binning[1],
-            DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
-        cmd = "sed 1d "+self._outDir+str(wksp)+".cal >"+self._outDir+str(wksp)+".cal2"
-        os.system(cmd)
-        cmd = "cat "+self._outDir+str(wksp)+".cal1 "+self._outDir+str(wksp)+".cal2 > "+self._outDir+str(wksp)+".cal"
-        os.system(cmd)
-        cmd = "rm "+self._outDir+str(wksp)+".cal2"
-        os.system(cmd)
-        CreateCalFileByNames(InstrumentWorkspace=wksp, GroupingFileName=self._outDir+str(wksp)+".cal",
-            GroupNames="bank22,bank23,bank24,bank42,bank43,bank44,bank62,bank63,bank64,bank82,bank83,bank84,bank102,bank103,bank104,bank105,bank106,bank123,bank124,bank143,bank144,bank164,bank184")
+        Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(self._binning[1])+","+str(self._peakmax2))
+        if self._peakpos2 > 0.0:
+            #Find good peak for reference
+            ymax = 0
+            for s in range(0,temp.getNumberHistograms()):
+                y_s = temp.readY(s)
+                midBin = temp.blocksize()/2
+                if y_s[midBin] > ymax:
+                        refpixel = s
+                        ymax = y_s[midBin]
+            print "Reference spectra=",refpixel
+            CrossCorrelate(InputWorkspace=temp, OutputWorkspace=str(wksp)+"cc2", ReferenceSpectra=refpixel,
+                WorkspaceIndexMin=self._lastpixel+1, WorkspaceIndexMax=temp.getNumberHistograms()-1, XMin=self._peakmin2, XMax=self._peakmax2)
+            # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
+            GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=self._binning[1],
+                DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
+            cmd = "sed 1d "+self._outDir+str(wksp)+".cal >"+self._outDir+str(wksp)+".cal2"
+            os.system(cmd)
+            cmd = "cat "+self._outDir+str(wksp)+".cal1 "+self._outDir+str(wksp)+".cal2 > "+self._outDir+str(wksp)+".cal"
+            os.system(cmd)
+            cmd = "rm "+self._outDir+str(wksp)+".cal2"
+            os.system(cmd)
+        CreateCalFileByNames(InstrumentWorkspace=temp, GroupingFileName=self._outDir+str(wksp)+".cal",
+            GroupNames=groups)
         #Move new calibration file to replace old calibration file without detector groups
         cmd = "mv "+self._outDir+str(wksp)+".cal2 "+self._outDir+str(wksp)+".cal"
         os.system(cmd)
-        # Convert back to TOF
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        lcinst = str(self._instrument)
+        if lcinst == "PG3":
+            lcinst == "powgen"
         
         filename = os.path.join(self._outDir, str(wksp))
         if "dspacemap" in self._outTypes:
             #write Dspacemap file
-            CaltoDspacemap(InputWorkspace=wksp, CalibrationFile=self._outDir+str(wksp)+".cal", 
-                DspacemapFile=self._outDir+"powgen_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
+            CaltoDspacemap(InputWorkspace=temp, CalibrationFile=self._outDir+str(wksp)+".cal", 
+                DspacemapFile=self._outDir+lcinst+"_dspacemap_d"+str(wksp).strip(self._instrument+"_")+strftime("_%Y_%m_%d.dat"))
         if "calibration" in self._outTypes:
             cmd = "cp "+self._outDir+str(wksp)+".cal "+calib
             os.system(cmd) 
+        mtd.deleteWorkspace(str(temp))
         return wksp
 
     def _focus(self, wksp, calib, filterLogs=None):
@@ -227,8 +243,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
         
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
-                             GroupingFileName=calib)
+        # Diffraction focusing using new calibration file with offsets
+        if self._diffractionfocus:
+            DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
+                GroupingFileName=calib)
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
@@ -260,8 +278,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._peakmax = self._peakpos+peakhalfwidth
         self._peakmin2 = self._peakpos2-peakhalfwidth
         self._peakmax2 = self._peakpos2+peakhalfwidth
-#        self._timeMin = self.getProperty("FilterByTimeMin")
-#        self._timeMax = self.getProperty("FilterByTimeMax")
+        self._diffractionfocus = self.getProperty("DiffractionFocus")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
         if len(filterLogs.strip()) <= 0:
@@ -272,7 +289,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self._outDir = self.getProperty("OutputDirectory")+"/"
         self._outTypes = self.getProperty("SaveAs")
         samRuns = self.getProperty("RunNumber")
-        calib = self._outDir+"powgen_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
+        lcinst = str(self._instrument)
+        if lcinst == "PG3":
+            lcinst == "powgen"
+        calib = self._outDir+lcinst+"_calibrate_d"+str(samRuns[0])+strftime("_%Y_%m_%d.cal")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
         for samRun in samRuns:
@@ -280,6 +300,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             samRun = self._loadData(samRun, SUFFIX, filterWall)
             samRun = self._calibrate(samRun, calib, filterLogs)
             samRun = self._focus(samRun, calib, filterLogs)
+            RenameWorkspace(InputWorkspace=samRun,OutputWorkspace=str(samRun)+"_calibrated")
+
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(CalibrateRectangularDetectors())
