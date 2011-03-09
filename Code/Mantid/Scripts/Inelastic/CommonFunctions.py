@@ -99,7 +99,7 @@ def load_run(run_number, file_type='mono-sample',force=False):
 
     ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
-        LoadSNSEventNexus(Filename=filename, OutputWorkspace=output_name) 
+        LoadEventNexus(Filename=filename, OutputWorkspace=output_name) 
     elif ext.startswith(".n"):
         LoadNexus(filename, output_name)
     elif filename.endswith("_event.dat"):
