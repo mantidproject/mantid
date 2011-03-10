@@ -1,8 +1,11 @@
 #include "ColorMapWidget.h"
 
-#include "qwt_scale_widget.h"
-#include "qwt_scale_engine.h"
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QComboBox>
+#include <QLineEdit>
+#include <qwt_scale_widget.h>
+#include <qwt_scale_engine.h>
 
 /**
   * Constructor.

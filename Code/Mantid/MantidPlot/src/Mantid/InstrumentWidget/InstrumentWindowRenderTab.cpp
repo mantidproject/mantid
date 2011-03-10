@@ -1,11 +1,6 @@
-#include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
-#include "BinDialog.h"
-#include "ColorMapWidget.h"
-#include "MantidKernel/ConfigService.h"
 
-#include "qwt_scale_widget.h"
-#include "qwt_scale_engine.h"
+#include <QMenu>
 #include <QVBoxLayout>
 #include <QPushButton>
 #include <QLineEdit>
@@ -16,6 +11,14 @@
 #include <QFileInfo>
 #include <QSettings>
 #include <QAction>
+#include <qwt_scale_widget.h>
+#include <qwt_scale_engine.h>
+
+#include "MantidKernel/ConfigService.h"
+#include "InstrumentWindow.h"
+#include "BinDialog.h"
+#include "ColorMapWidget.h"
+
 
 InstrumentWindowRenderTab::InstrumentWindowRenderTab(InstrumentWindow* instrWindow):
 QFrame(instrWindow),m_instrWindow(instrWindow)

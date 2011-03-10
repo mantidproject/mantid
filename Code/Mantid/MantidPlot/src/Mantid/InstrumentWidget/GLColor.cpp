@@ -2,7 +2,7 @@
 // Includes
 //--------------------------------
 #include "GLColor.h"
-#include <QtOpenGL>
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
 /**
  * Default Constructor

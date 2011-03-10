@@ -1,7 +1,7 @@
 #include "OpenGLError.h"
 #include <iostream>
 #include <sstream>
-#include <QtOpenGL>
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
 Mantid::Kernel::Logger& OpenGLError::s_log(Mantid::Kernel::Logger::get("OpenGL"));
 

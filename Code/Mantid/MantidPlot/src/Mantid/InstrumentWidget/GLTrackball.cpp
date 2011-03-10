@@ -1,6 +1,6 @@
 #include "GLTrackball.h"
 #include <cmath>
-#include <QtOpenGL>
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "GLViewport.h"
 #include "OpenGLError.h"
 

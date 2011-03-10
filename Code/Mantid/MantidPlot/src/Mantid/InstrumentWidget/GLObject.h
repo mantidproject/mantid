@@ -2,7 +2,7 @@
 #define MANTIDPLOT_GLOBJECT_H_
 
 #include <string>
-#include <QtOpenGL>
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 
 /**
   \class  GLObject

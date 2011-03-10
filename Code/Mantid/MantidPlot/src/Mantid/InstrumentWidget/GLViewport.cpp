@@ -1,7 +1,7 @@
 #include "GLViewport.h"
 #include <math.h>
 #include <iostream>
-#include <QtOpenGL>
+#include "MantidGeometry/Rendering/OpenGL_Headers.h"
 #include "MantidGeometry/V3D.h"
 #include "OpenGLError.h"
 
