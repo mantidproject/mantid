@@ -1,6 +1,6 @@
 #include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidKernel/DateAndTime.h"
-#include <strstream>
+#include <sstream>
 
 namespace Mantid
 {

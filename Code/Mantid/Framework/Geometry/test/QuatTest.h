@@ -4,6 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 #include <ostream>
+#include <float.h>
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Quat.h" 
 
