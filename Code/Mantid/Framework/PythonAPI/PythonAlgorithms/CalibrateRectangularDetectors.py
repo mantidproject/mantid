@@ -54,13 +54,14 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
     def _findData(self, runnumber, extension):
-        # The default filename. Search in the data directories
-        result = str(self._instrument) + "_" + str(runnumber) + extension
-        if os.path.isfile(result)is not None:
-            return result
-        result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
-                              Extension=extension)
+        #self.log().information(str(dir()))
+        #self.log().information(str(dir(mantidsimple)))
+        result = FindSNSNeXus(Instrument=self._instrument,
+                              RunNumber=runnumber, Extension=extension)
+#        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
+#                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
+
 
     def _loadPreNeXusData(self, runnumber, extension):
         # find the file to load
