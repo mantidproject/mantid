@@ -118,7 +118,6 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/SmoothData.cpp
 		src/SofQW.cpp
 		src/SANSSolidAngleCorrection.cpp
-		src/SingleCrystalTOFIntegration.cpp
 		src/SolidAngle.cpp
 		src/Sort.cpp
 		src/SpatialGrouping.cpp
@@ -256,7 +255,6 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SmoothData.h
 		inc/MantidAlgorithms/SofQW.h
 		inc/MantidAlgorithms/SANSSolidAngleCorrection.h
-		inc/MantidAlgorithms/SingleCrystalTOFIntegration.h
 		inc/MantidAlgorithms/SolidAngle.h
 		inc/MantidAlgorithms/Sort.h
 		inc/MantidAlgorithms/SpatialGrouping.h
