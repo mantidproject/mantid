@@ -14,6 +14,7 @@
 #include <iterator>
 #include <numeric>
 
+
 namespace Mantid
 {
 using namespace Kernel;
