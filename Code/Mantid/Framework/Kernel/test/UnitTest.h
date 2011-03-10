@@ -262,7 +262,7 @@ public:
     std::vector<double> x(1,input);
     d.toTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
     q.fromTOF(x,x,99.0,99.0,1.0,0,99.0,99.0);
-    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+    TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
 
     // To QSquared
     TS_ASSERT( d.quickConversion(q2,factor,power) )
@@ -336,7 +336,7 @@ public:
     x[0] = input;
     q.toTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
     d.fromTOF(x,x,99.0,99.0,1.0,99,99.0,99.0);
-    TS_ASSERT_DELTA( x[0], result, 1.0e-15 )
+    TS_ASSERT_DELTA( x[0], result, 1.0e-12 )
   }
 
   //----------------------------------------------------------------------

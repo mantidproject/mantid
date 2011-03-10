@@ -1,6 +1,8 @@
 #ifndef MANTID_KERNEL_SYSTEM_H_
 #define MANTID_KERNEL_SYSTEM_H_
 
+#include <typeinfo>
+
 /*  A system-wide file to contain, e.g., useful system-dependent macros
 
     @author Russell Taylor, Tessella Support Services plc
