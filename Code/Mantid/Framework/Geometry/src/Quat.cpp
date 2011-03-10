@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <cstdlib>
+#include <float.h>
 
 
 namespace Mantid
@@ -20,7 +21,9 @@ Quat::Quat():w(1),a(0),b(0),c(0)
 
 
 /**
- * Construct a Quat between two vectors.
+ * Construct a Quat between two vectors; 
+ * The angle between them is defined differently from usual if vectors are not unit or the same length vectors, so quat would be not consistent
+ *
  * v=(src+des)/�src+des�
  * w=v.des
  * (a,b,c)=(v x des)
@@ -29,9 +32,12 @@ Quat::Quat():w(1),a(0),b(0),c(0)
  */
 Quat::Quat(const V3D& src,const V3D& des)
 {
+ 
   V3D v = (src+des);
   v.normalize();
-  V3D cross=v.cross_prod(des);
+  
+  V3D cross  =v.cross_prod(des);
+ 
   if (cross.nullVector())
   {
     w = 1.;
@@ -40,9 +46,19 @@ Quat::Quat(const V3D& src,const V3D& des)
   else
   {
     w = v.scalar_prod(des);
+	
     a = cross[0];
     b = cross[1];
     c = cross[2];
+
+	double norm = a*a+b*b+c*c+w*w;
+	if(abs(norm-1)>FLT_EPSILON){
+		norm = sqrt(norm);
+		w/=norm;
+		a/=norm;
+		b/=norm;
+		c/=norm;
+	}
   }
 }
 
@@ -500,6 +516,40 @@ void Quat::GLMatrix(double* mat) const
 	}
 	*mat=1.0;
 	return;
+}
+//
+std::vector<double> 
+Quat::getRotation(bool check_normalisation)const
+{
+	double aa      = a * a;
+	double ab      = a * b;
+	double ac      = a * c;
+	double aw      = a * w;
+	double bb      = b * b;
+	double bc      = b * c;
+	double bw      = b * w;
+	double cc      = c * c;
+	double cw      = c * w;
+	if(check_normalisation){
+		double normSq=aa+bb+cc+w*w;
+		if(abs(normSq-1)>FLT_EPSILON){
+			throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
+		}
+	}
+	std::vector<double> out(9);
+
+	out[0]= (1.0 - 2.0 * ( bb + cc ));
+	out[1]= 2.0 * ( ab + cw );
+    out[2]= 2.0 * ( ac - bw );
+	
+	out[3]= 2.0 * ( ab - cw );
+	out[4]= (1.0 - 2.0 * ( aa + cc ));
+	out[5]= 2.0 * ( bc + aw );
+	
+	out[6]=2.0 * ( ac + bw );
+	out[7]=2.0 * ( bc - aw );
+	out[8]=(1.0 - 2.0 * ( aa + bb ));
+	return out;
 }
 
 /**

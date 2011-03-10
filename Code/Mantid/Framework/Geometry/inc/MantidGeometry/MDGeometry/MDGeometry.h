@@ -76,10 +76,6 @@ namespace Mantid{
 	  size_t getGeometryExtend()const{return nGeometrySize;}
 
  
-      /// function returns an axis vector of the dimension, specified by ID; it is 1 for orthogonal dimensions and triplet for the reciprocal 
-      /// (but in a form of <1,0,0> if reciprocals are orthogonal to each other;
-      std::vector<double> getOrt(const std::string &tag)const;
-
       /// return the numbers of dimensions in current geometry; 
       unsigned int getNumDims(void)const{return m_basis.getNumDims();}
       /// returns the number of reciprocal dimensions

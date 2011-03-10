@@ -2,6 +2,7 @@
 #define MANTID_QUAT_H_
 
 #include <iostream>
+#include <vector>
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -95,10 +96,14 @@ namespace Mantid
       //! stored as an linear array of 16 double
       //! The function glRotated must be called
       void GLMatrix(double* glmat) const;
+	  //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
+	  //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
+	  std::vector<double> getRotation(bool check_normalisation=false)const; 
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
       //! Rotate a vector
       void rotate(V3D&) const;
+
       //! Taking two points defining a cuboid bounding box (xmin,ymin,zmin) and (xmax,ymax,zmax)
       // which means implicitly that the cube edges are parallel to the axes,
       // find the smallest bounding box with the edges also parallel to the axes after rotation of the object.

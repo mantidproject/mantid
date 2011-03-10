@@ -74,7 +74,7 @@ namespace Mantid
      
       ~MDGeometryBasis(void);
       /// return the numbers of dimensions in current geometry; 
-      unsigned int getNumDims(void)const{return this->m_mdBasisDimensions.size();}
+      unsigned int getNumDims(void)const{return (unsigned int)this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
       unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
 	  

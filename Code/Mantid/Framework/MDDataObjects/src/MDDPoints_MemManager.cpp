@@ -386,7 +386,7 @@ MDDPoints_MemManager::store_pixels(const std::vector<char> &all_new_pixels,const
 					  }
 				  }catch(std::bad_alloc &){
 					  try{
-						  // try this as this is slower but trying accomodate pixels in-place which may be possible
+						  // try this as this is slower but trying accomodate pixels in-place which still may be possible
 						  this->add_pixels_in_memory(target_data_buffer,all_new_pixels,pixels_selected,cell_indexes,n_selected_pixels);
 					  }catch(std::bad_alloc &){
      						memBased = false;
