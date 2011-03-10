@@ -160,6 +160,7 @@ private:
   void setNumberPeriods(const int key, const int num);
   void unSetPeriods(const int key);
   QString getWorkspaceName(int key);
+  QStringList getSaveAlgs();
   /// Handle a delete notification from Mantid
   void handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf);
   // Format a double in a string with a specfied colour, format and precision

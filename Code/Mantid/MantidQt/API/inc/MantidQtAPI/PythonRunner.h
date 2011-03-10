@@ -3,7 +3,7 @@
 
 #include "DllOption.h"
 #include <QObject>
-#include <QString>
+#include <QStringList>
 
 /** The ase class from which mantid custom widgets are derived it contains
 *  some useful functions
@@ -49,7 +49,8 @@ namespace MantidQt
 
       /// Run python code
       QString runPythonCode(const QString & code, bool no_output = false);
-
+      /// Converts a list of strings into a string recognised by Python as a tuple
+      static const QString stringList2Tuple(const QStringList & list);
     signals:
       void runAsPythonScript(const QString& code);
     };

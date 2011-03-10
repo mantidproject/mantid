@@ -6,7 +6,7 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/FileDialogHandler.h"
-
+#include "MantidQtAPI/PythonRunner.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -2310,6 +2310,9 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     {
       py_code += ", plotresults=True";
     }
+
+    py_code += ", save="+PythonRunner::stringList2Tuple(getSaveAlgs());
+
     if( m_uiForm.log_colette->isChecked() )
     {
       py_code += ", verbose=True";
@@ -2528,16 +2531,13 @@ void SANSRunWindow::handleDefSaveClick()
     QMessageBox::warning(this, "Filename required", "A filename must be entred into the text box above to save this file");
   }
 
+  const QStringList algs(getSaveAlgs());
   QString saveCommand;
-  for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
-  {//the key is the check box
-    if (i.key()->isChecked())
-    {// and value() is the name of the algorithm associated with that chackbox
-      QString algName = i.value();
-      QString ext = SaveWorkspaces::getSaveAlgExt(algName);
-      QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
-      saveCommand += algName+"('"+m_outputWS+"','"+fname+"')\n";
-    }
+  for(QStringList::const_iterator alg = algs.begin(); alg != algs.end(); ++alg)
+  {
+    QString ext = SaveWorkspaces::getSaveAlgExt(*alg);
+    QString fname = fileBase.endsWith(ext) ? fileBase : fileBase+ext;
+    saveCommand += (*alg)+"('"+m_outputWS+"','"+fname+"')\n";
   }
 
   saveCommand += "print 'success'\n";
@@ -3294,7 +3294,21 @@ QString SANSRunWindow::getWorkspaceName(int key)
 {
   return m_workspace_names.value(key);
 }
-
+/** Find which save formats have been selected by the user 
+*  @return save algorithm names
+*/
+QStringList SANSRunWindow::getSaveAlgs()
+{
+  QStringList checked;
+  for(SavFormatsConstIt i = m_savFormats.begin(); i != m_savFormats.end(); ++i)
+  {//the key is the check box
+    if (i.key()->isChecked())
+    {// and value() is the name of the algorithm associated with that checkbox
+      checked.append(i.value());
+    }
+  }
+  return checked;
+}
 /**
  * Handle a delete notification from Mantid
  * @param p_dnf :: A Mantid delete notification

@@ -44,3 +44,19 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
    }
    return tmpstring;
 }
+/** This Python helper function converts a list of strings into one
+* string that Python will recognise as a Python tuple
+* @param list string entries
+* @return the strings as a comma separated list in brakets
+*/
+const QString stringList2Tuple(const QStringList & list)
+{
+  QString tuple("(");
+  QStringList::const_iterator end = list.end();
+  for(QStringList::const_iterator it = list.begin(); it != end; ++it)
+  {
+    tuple += *it+",";
+  }
+  tuple += ")";
+  return tuple;
+}
