@@ -2,6 +2,8 @@ from MantidFramework import *
 from mantidsimple import *
 import os
 
+COMPRESS_TOL_TOF = .01
+
 class SNSSingleCrystalReduction(PythonAlgorithm):
     def category(self):
         return "Diffraction"
@@ -17,18 +19,19 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
         self.declareProperty("RunNumber", 0, Validator=BoundedValidator(Lower=0))
+        self.declareProperty("CompressOnRead", False,
+                             Description="Compress the event list when reading in the data")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("EmptyInstrumentNumber", 0, Validator=BoundedValidator(Lower=0))
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0))
-        self.declareProperty("TOFMin", 1000.0,
-                             Description="Relative time to start filtering by")
-        self.declareProperty("TOFMax", 16666.0,
-                             Description="Relative time to stop filtering by")
-        self.declareProperty("TOFBinWidth", -0.004,
-                             Description="Positive is linear bins, negative is logorithmic")
-
-        self.declareProperty("VanadiumBinParams", "0.2,-0.004,10.00",
-                             Description="Binning parameters to use when calculating the vanadium spectra.")
+        self.declareProperty("FilterByTimeMin", 0.,
+                             Description="Relative time to start filtering by in seconds. Applies only to sample.")
+        self.declareProperty("FilterByTimeMax", 0.,
+                             Description="Relative time to stop filtering by in seconds. Applies only to sample.")
+        self.declareProperty("TOFBinParams", "1000.0,-0.004,16666.0",
+                             Description="Binning parameters to use in TOF.")
+        self.declareProperty("dspaceBinParams", "0.2,-0.004,10.00",
+                             Description="Binning parameters to use in d-space when calculating the vanadium spectra.")
         
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
         self.declareProperty("VanadiumSmoothNumPoints", 11)
@@ -43,12 +46,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
     def _findData(self, runnumber, extension):
         #self.log().information(str(dir()))
         #self.log().information(str(dir(mantidsimple)))
-        # The default filename. Search in the data directories
-        result = str(self._instrument) + "_" + str(runnumber) + extension
-        if os.path.isfile(result)is not None:
-            return result
-        result = FindSNSNeXus(Instrument=self._instrument, RunNumber=runnumber,
-                              Extension=extension)
+        result = FindSNSNeXus(Instrument=self._instrument,
+                              RunNumber=runnumber, Extension=extension)
+#        result = self.executeSubAlg("FindSNSNeXus", Instrument=self._instrument,
+#                                    RunNumber=runnumber, Extension=extension)
         return result["ResultPath"].value
 
     def _loadPreNeXusData(self, runnumber, extension):
@@ -62,7 +63,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         num = num.replace('_event', '') # TODO should do something with this
 
         # load the prenexus file
-        alg = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=name,PadEmptyPixels="1")
+        alg = LoadEventPreNeXus(EventFilename=filename, OutputWorkspace=name)
         wksp = alg['OutputWorkspace']
 
         # add the logs to it
@@ -72,7 +73,21 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         return wksp
 
-    def _loadNeXusData(self, runnumber, extension):
+    def _loadNeXusData(self, runnumber, extension, **kwargs):
+        if self.getProperty("CompressOnRead"):
+            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
+        else:
+            kwargs["Precount"] = True
+        name = "%s_%d" % (self._instrument, runnumber)
+        filename = name + extension
+
+        try: # first just try loading the file
+            alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
+
+            return alg.workspace()
+        except:
+            pass
+
         # find the file to load
         filename = self._findData(runnumber, extension)
 
@@ -83,29 +98,34 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             name = name[0:-1*len("_event")]
 
         # TODO use timemin and timemax to filter what events are being read
-        alg = LoadSNSEventNexus(filename, name, self._TOFMin, self._TOFMax, Precount="1")
-        #alg = LoadSNSEventNexus(Filename=filename, OutputWorkspace=name, FilterByTof_Min=self._TOFMin, FilterByTof_Max=self._TOFMin)
+        alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
 
         return alg.workspace()
 
-    def _loadData(self, runnumber, extension):
+    def _loadData(self, runnumber, extension, filterWall=None):
+        filter = {}
+        if filterWall is not None:
+            if filterWall[0] > 0.:
+                filter["FilterByTimeStart"] = filterWall[0]
+            if filterWall[1] > 0.:
+                filter["FilterByTimeStop"] = filterWall[1]
+
         if  runnumber is None or runnumber <= 0:
             return None
 
         if extension.endswith(".nxs"):
-            return self._loadNeXusData(runnumber, extension)
+            return self._loadNeXusData(runnumber, extension, **filter)
         else:
             return self._loadPreNeXusData(runnumber, extension)
+
+
 
     def _comp(self, wksp, filterLogs=None):
         if wksp is None:
             return None
         # take care of filtering events
-        if self._filterBadPulses:
-            pcharge = wksp.getRun()['proton_charge']
-            pcharge = pcharge.getStatistics().mean
-            FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName="proton_charge",
-                             MinimumValue=.95*pcharge, MaximumValue=2.*pcharge)
+        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
+            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -119,14 +139,15 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
 
         # Compress the events to free up memory
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance="0.05")
+        if not self.getProperty("CompressOnRead"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
 
         return wksp
 
         
     def _bin(self, wksp, filterLogs=None):
         # Rebin in place as weighted events
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._TOFBinParams)
 
         return wksp
 
@@ -173,7 +194,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         
         # This will rebin into a workspace 2D
         oldName = wksp.getName()
-        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=self._VanadiumBinParams)
+        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=self._dspaceBinParams)
         # Delete the old event workspace, free up memory hopefully
         DeleteWorkspace(wksp)
         # Go back to the original name, but as a workspace 2D from now on
@@ -183,7 +204,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         StripVanadiumPeaks(InputWorkspace=wksp, OutputWorkspace=wksp, PeakWidthPercent=self._vanPeakWidthPercent)
         ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
         
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=[self._TOFMin, self._delta, self._TOFMax])
+        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._TOFBinParams)
         SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._vanSmoothPoints)
         # Normalize to one pixel of detector (256 X 256)
         wksp /= 65536.0
@@ -211,12 +232,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
         # get generic information
         SUFFIX = "_event.nxs"
-        self._delta = self.getProperty("TOFBinWidth")
         self._instrument = self.getProperty("Instrument")
         self._bank = 0 #self.getProperty("BankNumber")
-        self._TOFMin = self.getProperty("TOFMin")
-        self._TOFMax = self.getProperty("TOFMax")
-        self._VanadiumBinParams = self.getProperty("VanadiumBinParams")
+        self._TOFBinParams = self.getProperty("TOFBinParams")
+        self._dspaceBinParams = self.getProperty("dspaceBinParams")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
         if len(filterLogs.strip()) <= 0:
@@ -232,10 +251,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         bkg = self.getProperty("BackgroundNumber")
         van = self.getProperty("VanadiumNumber")
         empty = self.getProperty("EmptyInstrumentNumber")
-        
+        filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
         # first round of processing the sample 
-        samRun = self._loadData(sam, SUFFIX)
+        samRun = self._loadData(sam, SUFFIX, filterWall)
         samRun = RenameWorkspace(samRun, samRun.getName() + "_sample").workspace()
         samRun = self._comp(samRun, filterLogs)
         
@@ -246,6 +265,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             bkgRun = RenameWorkspace(bkgRun, bkgRun.getName() + "_background").workspace()
             bkgRun = self._comp(bkgRun)
             Minus(LHSWorkspace=samRun, RHSWorkspace=bkgRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
+            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                           Tolerance=COMPRESS_TOL_TOF) # 10ns
             mtd.deleteWorkspace(bkgRun.getName())
         else:
             bkgRun = None 
@@ -256,7 +277,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             emptyRun = self._loadData(empty, SUFFIX)
             emptyRun = RenameWorkspace(emptyRun, emptyRun.getName() + "_empty").workspace()
             emptyRun = self._comp(emptyRun)
-            Minus(LHSWorkspacer=samRun, RHSWorkspace=emptyRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
+            Minus(LHSWorkspace=samRun, RHSWorkspace=emptyRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
+            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                           Tolerance=COMPRESS_TOL_TOF) # 10ns
             mtd.deleteWorkspace(emptyRun.getName())
         else:
             emptyRun = None 
@@ -281,9 +304,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             normalized = False
 
         # write out the files
-        # ReplaceSpecialValues(samRun, samRun, NaNValue="0.0", InfinityValue="0.0")
+        CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                       Tolerance=COMPRESS_TOL_TOF) # 5ns
         self._save(samRun, normalized)
         mtd.deleteWorkspace(samRun.getName())
-        raise Exception("End of script")
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
