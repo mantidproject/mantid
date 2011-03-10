@@ -49,7 +49,7 @@ QString PythonRunner::runPythonCode(const QString & code, bool no_output)
 * @param list string entries
 * @return the strings as a comma separated list in brakets
 */
-const QString stringList2Tuple(const QStringList & list)
+const QString PythonRunner::stringList2Tuple(const QStringList & list)
 {
   QString tuple("(");
   QStringList::const_iterator end = list.end();
