@@ -149,6 +149,7 @@ class Transmission(BaseScriptElement):
     calculate_transmission = False
     calculation_method = DirectBeam()
     theta_dependent = True
+    dark_current = ''
             
     def to_script(self):
         """
@@ -162,6 +163,8 @@ class Transmission(BaseScriptElement):
             script += str(self.calculation_method)
             
         script += "ThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
+        if self.dark_current is not None and len(str(self.dark_current))>0:
+            script += "TransmissionDarkCurrent(\"%s\")\n" % str(self.dark_current)
         return script
 
     def update(self):
@@ -183,6 +186,7 @@ class Transmission(BaseScriptElement):
         xml += "  <trans_spread>%g</trans_spread>\n" % self.transmission_spread
         xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
         xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+        xml += "  <dark_current>%s</dark_current>\n" % str(self.dark_current)
         if self.calculate_transmission:
             xml += self.calculation_method.to_xml()
         xml += "</Transmission>\n"
@@ -205,6 +209,7 @@ class Transmission(BaseScriptElement):
                                                                            default = Transmission.calculate_transmission)
             self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
                                                                            default = Transmission.theta_dependent)
+            self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
             
             if self.calculate_transmission:
                 for m in [Transmission.DirectBeam, Transmission.BeamSpreader]:
@@ -223,6 +228,7 @@ class Transmission(BaseScriptElement):
         self.calculate_transmission = Transmission.calculate_transmission
         self.calculation_method = Transmission.calculation_method
         self.theta_dependent = Transmission.theta_dependent
+        self.dark_current = Transmission.dark_current
     
 class Background(BaseScriptElement):
     
@@ -283,6 +289,7 @@ class Background(BaseScriptElement):
     bck_transmission_spread = 0.0
     calculate_transmission = False 
     theta_dependent = True 
+    trans_dark_current = ''
     trans_calculation_method = DirectBeam()
         
     def to_script(self):
@@ -311,6 +318,8 @@ class Background(BaseScriptElement):
                     script += str(self.trans_calculation_method)
 
                 script += "BckThetaDependentTransmission(%s)\n" % str(self.theta_dependent)
+                if self.trans_dark_current is not None and len(str(self.trans_dark_current))>0:
+                    script += "BckTransmissionDarkCurrent(\"%s\")\n" % str(self.trans_dark_current)
             
         return script           
     
@@ -341,6 +350,7 @@ class Background(BaseScriptElement):
             xml += "  <bck_trans_spread>%g</bck_trans_spread>\n" % self.bck_transmission_spread
             xml += "  <calculate_trans>%s</calculate_trans>\n" % str(self.calculate_transmission)
             xml += "  <theta_dependent>%s</theta_dependent>\n" % str(self.theta_dependent)
+            xml += "  <trans_dark_current>%s</trans_dark_current>\n" % str(self.trans_dark_current)
             if self.calculate_transmission:
                 xml += self.trans_calculation_method.to_xml()
         xml += "</Background>\n"
@@ -375,6 +385,7 @@ class Background(BaseScriptElement):
                                                                            default = Background.calculate_transmission)
             self.theta_dependent = BaseScriptElement.getBoolElement(instrument_dom, "theta_dependent",
                                                                            default = Background.theta_dependent)
+            self.trans_dark_current = BaseScriptElement.getStringElement(instrument_dom, "trans_dark_current")
 
             if self.calculate_transmission:
                 for m in [Background.DirectBeam, Background.BeamSpreader]:
@@ -397,6 +408,7 @@ class Background(BaseScriptElement):
         self.bck_transmission_spread = Background.bck_transmission_spread  
         self.calculate_transmission = Background.calculate_transmission
         self.theta_dependent = Background.theta_dependent
+        self.trans_dark_current = Background.trans_dark_current
         self.trans_calculation_method = Background.trans_calculation_method
     
 class DataSets(BaseScriptElement):

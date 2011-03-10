@@ -169,6 +169,7 @@ class BaseTransmission(ReductionStep):
         self._trans = float(trans)
         self._error = float(error)
         self._theta_dependent = theta_dependent
+        self._dark_current_data = None
         
     def set_theta_dependence(self, theta_dependence=True):
         """
@@ -179,6 +180,13 @@ class BaseTransmission(ReductionStep):
         """
         self._theta_dependent = theta_dependence
         
+    def set_dark_current(self, dark_current=None):
+        """
+            Set the dark current data file to be subtracted from each tranmission data file
+            @param dark_current: path to dark current data file
+        """
+        self._dark_current_data = dark_current
+                
     def get_transmission(self):
         return [self._trans, self._error]
     
@@ -201,7 +209,7 @@ class BeamSpreaderTransmission(BaseTransmission):
     def __init__(self, sample_spreader, direct_spreader,
                        sample_scattering, direct_scattering,
                        spreader_transmission=1.0, spreader_transmission_err=0.0,
-                       theta_dependent=True): 
+                       theta_dependent=True, dark_current=None): 
         super(BeamSpreaderTransmission, self).__init__(theta_dependent=theta_dependent)
         self._sample_spreader = sample_spreader
         self._direct_spreader = direct_spreader
@@ -209,6 +217,7 @@ class BeamSpreaderTransmission(BaseTransmission):
         self._direct_scattering = direct_scattering
         self._spreader_transmission = spreader_transmission
         self._spreader_transmission_err = spreader_transmission_err
+        self._dark_current_data = dark_current
         ## Transmission workspace (output of transmission calculation)
         self._transmission_ws = None
         
@@ -239,12 +248,13 @@ class BeamSpreaderTransmission(BaseTransmission):
             Load(filepath, direct_scatt_ws)
             
             # Subtract dark current
-            if reducer._dark_current_subtracter is not None:
-                reducer._dark_current_subtracter.execute(reducer, sample_spreader_ws)
-                reducer._dark_current_subtracter.execute(reducer, direct_spreader_ws)
-                reducer._dark_current_subtracter.execute(reducer, sample_scatt_ws)
-                reducer._dark_current_subtracter.execute(reducer, direct_scatt_ws)
-            
+            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+                dc = SubtractDarkCurrent(self._dark_current_data)
+                dc.execute(reducer, sample_spreader_ws)
+                dc.execute(reducer, direct_spreader_ws)
+                dc.execute(reducer, sample_scatt_ws)
+                dc.execute(reducer, direct_scatt_ws)
+                        
             # Get normalization for transmission calculation
             norm_spectrum = reducer.NORMALIZATION_TIME
             if reducer._normalizer is not None:
@@ -280,11 +290,13 @@ class DirectBeamTransmission(BaseTransmission):
     """
         Calculate transmission using the direct beam method
     """
-    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True):
+    def __init__(self, sample_file, empty_file, beam_radius=3.0, theta_dependent=True, dark_current=None):
         super(DirectBeamTransmission, self).__init__(theta_dependent=theta_dependent)
         ## Location of the data files used to calculate transmission
         self._sample_file = sample_file
         self._empty_file = empty_file
+        ## Dark current data file
+        self._dark_current_data = dark_current
         ## Radius of the beam
         self._beam_radius = beam_radius
         ## Transmission workspace (output of transmission calculation)
@@ -309,9 +321,10 @@ class DirectBeamTransmission(BaseTransmission):
             Load(filepath, empty_ws)
             
             # Subtract dark current
-            if reducer._dark_current_subtracter is not None:
-                reducer._dark_current_subtracter.execute(reducer, sample_ws)
-                reducer._dark_current_subtracter.execute(reducer, empty_ws)
+            if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0:
+                dc = SubtractDarkCurrent(self._dark_current_data)
+                dc.execute(reducer, sample_ws)
+                dc.execute(reducer, empty_ws)        
             
             # Find which pixels to sum up as our "monitor". At this point we have moved the detector
             # so that the beam is at (0,0), so all we need is to sum the area around that point.
@@ -392,7 +405,7 @@ class SubtractDarkCurrent(ReductionStep):
         # Load dark current, which will be used repeatedly
         if self._dark_current_ws is None:
             filepath = reducer._full_file_path(self._dark_current_file)
-            self._dark_current_ws = "dark_"+extract_workspace_name(filepath)
+            self._dark_current_ws = "_dark_"+extract_workspace_name(filepath)
             Load(filepath, self._dark_current_ws)
             
             # Normalize the dark current data to counting time
@@ -406,13 +419,13 @@ class SubtractDarkCurrent(ReductionStep):
         # If no timer workspace was provided, get the counting time from the data
         timer_ws = self._timer_ws
         if timer_ws is None:
-            timer_ws = "tmp_timer"     
+            timer_ws = "_tmp_timer"     
             CropWorkspace(workspace, timer_ws,
                           StartWorkspaceIndex = str(reducer.NORMALIZATION_TIME), 
                           EndWorkspaceIndex   = str(reducer.NORMALIZATION_TIME))  
             
         # Scale the stored dark current by the counting time
-        scaled_dark_ws = "scaled_dark_current"
+        scaled_dark_ws = "_scaled_dark_current"
         Multiply(self._dark_current_ws, timer_ws, scaled_dark_ws)
         
         # Set time and monitor channels to zero, so that we subtract only detectors
@@ -423,6 +436,8 @@ class SubtractDarkCurrent(ReductionStep):
         
         # Perform subtraction
         Minus(workspace, scaled_dark_ws, workspace)  
+        if mtd.workspaceExists(scaled_dark_ws):
+            mtd.deleteWorkspace(scaled_dark_ws)
         
         return "Dark current subtracted [%s]" % (scaled_dark_ws)
           
@@ -1007,6 +1022,12 @@ class SubtractBackground(ReductionStep):
         else:
             raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
             
+    def set_trans_dark_current(self, dark_current):
+        if self._transmission is not None:
+            self._transmission.set_dark_current(dark_current)
+        else:
+            raise RuntimeError, "A transmission algorithm must be selected before setting its dark current correction."
+                    
     def execute(self, reducer, workspace):
         log_text = ''
         if self._background_ws is None:

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_background.ui'
 #
-# Created: Fri Feb 11 15:48:04 2011
+# Created: Thu Mar 10 09:07:58 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -113,13 +113,50 @@ class Ui_Frame(object):
         self.horizontalLayout_2.addWidget(self.trans_spreader_chk)
         spacerItem4 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_2.addItem(spacerItem4)
-        self.gridLayout_2.addLayout(self.horizontalLayout_2, 4, 0, 1, 1)
+        self.gridLayout_2.addLayout(self.horizontalLayout_2, 5, 0, 1, 1)
         self.widget_placeholder = QtGui.QVBoxLayout()
         self.widget_placeholder.setObjectName("widget_placeholder")
-        self.gridLayout_2.addLayout(self.widget_placeholder, 5, 0, 1, 1)
+        self.gridLayout_2.addLayout(self.widget_placeholder, 6, 0, 1, 1)
         self.theta_dep_chk = QtGui.QCheckBox(Frame)
         self.theta_dep_chk.setObjectName("theta_dep_chk")
         self.gridLayout_2.addWidget(self.theta_dep_chk, 2, 0, 1, 1)
+        self.horizontalLayout_3 = QtGui.QHBoxLayout()
+        self.horizontalLayout_3.setObjectName("horizontalLayout_3")
+        spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem5)
+        self.trans_dark_current_label = QtGui.QLabel(Frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.trans_dark_current_label.sizePolicy().hasHeightForWidth())
+        self.trans_dark_current_label.setSizePolicy(sizePolicy)
+        self.trans_dark_current_label.setMinimumSize(QtCore.QSize(0, 27))
+        self.trans_dark_current_label.setMaximumSize(QtCore.QSize(16777215, 27))
+        self.trans_dark_current_label.setObjectName("trans_dark_current_label")
+        self.horizontalLayout_3.addWidget(self.trans_dark_current_label)
+        self.trans_dark_current_edit = QtGui.QLineEdit(Frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.trans_dark_current_edit.sizePolicy().hasHeightForWidth())
+        self.trans_dark_current_edit.setSizePolicy(sizePolicy)
+        self.trans_dark_current_edit.setMinimumSize(QtCore.QSize(300, 0))
+        self.trans_dark_current_edit.setMaximumSize(QtCore.QSize(300, 16777215))
+        self.trans_dark_current_edit.setObjectName("trans_dark_current_edit")
+        self.horizontalLayout_3.addWidget(self.trans_dark_current_edit)
+        self.trans_dark_current_button = QtGui.QPushButton(Frame)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.trans_dark_current_button.sizePolicy().hasHeightForWidth())
+        self.trans_dark_current_button.setSizePolicy(sizePolicy)
+        self.trans_dark_current_button.setMinimumSize(QtCore.QSize(85, 0))
+        self.trans_dark_current_button.setMaximumSize(QtCore.QSize(85, 16777215))
+        self.trans_dark_current_button.setObjectName("trans_dark_current_button")
+        self.horizontalLayout_3.addWidget(self.trans_dark_current_button)
+        spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
+        self.horizontalLayout_3.addItem(spacerItem6)
+        self.gridLayout_2.addLayout(self.horizontalLayout_3, 4, 0, 1, 1)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -145,4 +182,6 @@ class Ui_Frame(object):
         self.trans_spreader_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to use the beam spreader (glassy carbon) method for transmission calculation.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_spreader_chk.setText(QtGui.QApplication.translate("Frame", "Beam spreader", None, QtGui.QApplication.UnicodeUTF8))
         self.theta_dep_chk.setText(QtGui.QApplication.translate("Frame", "Theta-dependent correction", None, QtGui.QApplication.UnicodeUTF8))
+        self.trans_dark_current_label.setText(QtGui.QApplication.translate("Frame", "Dark current for transmission", None, QtGui.QApplication.UnicodeUTF8))
+        self.trans_dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
 

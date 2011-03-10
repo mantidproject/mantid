@@ -68,6 +68,9 @@ def DirectBeamTransmission(sample_file, empty_file, beam_radius=3.0, theta_depen
                                                                                     beam_radius=beam_radius,
                                                                                     theta_dependent=theta_dependent))
 
+def TransmissionDarkCurrent(dark_current=None):
+    ReductionSingleton().get_transmission().set_dark_current(dark_current)
+
 def ThetaDependentTransmission(theta_dependence=True):
     if ReductionSingleton().get_transmission() is None:
         raise RuntimeError, "A transmission algorithm must be selected before setting the theta-dependence of the correction."
@@ -174,6 +177,11 @@ def BckBeamSpreaderTransmission(sample_spreader, direct_spreader,
                                                                                           spreader_transmission=spreader_transmission, 
                                                                                           spreader_transmission_err=spreader_transmission_err,
                                                                                           theta_dependent=theta_dependent))
+
+def BckTransmissionDarkCurrent(dark_current=None):
+    if ReductionSingleton().get_background() is None:
+        raise RuntimeError, "A background hasn't been defined."
+    ReductionSingleton().get_background().set_trans_dark_current(dark_current)
 
 def BckThetaDependentTransmission(theta_dependence=True):
     if ReductionSingleton().get_background() is None:

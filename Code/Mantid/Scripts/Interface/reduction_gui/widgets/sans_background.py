@@ -93,6 +93,7 @@ class BackgroundWidget(BaseWidget):
         self.connect(self._content.dark_current_browse, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
+        self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
         
         # Process transmission option
         if not self.show_transmission:
@@ -105,6 +106,10 @@ class BackgroundWidget(BaseWidget):
             self._content.theta_dep_chk.hide()
             self._content.trans_direct_chk.hide()
             self._content.trans_spreader_chk.hide()
+            self._content.trans_dark_current_label.hide()
+            self._content.trans_dark_current_edit.hide()
+            self._content.trans_dark_current_button.hide()
+
 
     def set_state(self, state):
         """
@@ -120,8 +125,8 @@ class BackgroundWidget(BaseWidget):
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
-            self._content.transmission_edit.setText(QtCore.QString(str(state.bck_transmission)))
-            self._content.dtransmission_edit.setText(QtCore.QString(str(state.bck_transmission_spread)))
+            self._content.transmission_edit.setText(QtCore.QString("%6.6f" % state.bck_transmission))
+            self._content.dtransmission_edit.setText(QtCore.QString("%6.6f" % state.bck_transmission_spread))
                     
             if isinstance(state.trans_calculation_method, state.DirectBeam):
                 self._content.trans_direct_chk.setChecked(True)
@@ -132,6 +137,7 @@ class BackgroundWidget(BaseWidget):
     
             self._content.calculate_trans_chk.setChecked(state.calculate_transmission)
             self._content.theta_dep_chk.setChecked(state.theta_dependent)
+            self._content.trans_dark_current_edit.setText(QtCore.QString(str(state.trans_dark_current)))
             self._calculate_clicked(state.calculate_transmission)
         
         
@@ -153,10 +159,16 @@ class BackgroundWidget(BaseWidget):
             m.bck_transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
             m.calculate_transmission = self._content.calculate_trans_chk.isChecked()
             m.theta_dependent = self._content.theta_dep_chk.isChecked()
+            m.trans_dark_current = self._content.trans_dark_current_edit.text()
         
             if self._method_box is not None:
                 m.trans_calculation_method=self._method_box.get_state()   
         return m
+
+    def _trans_dark_current_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.trans_dark_current_edit.setText(fname)      
         
     def _direct_beam(self, state=None):
         if state is None:
@@ -216,5 +228,8 @@ class BackgroundWidget(BaseWidget):
         self._content.transmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         self._content.dtransmission_edit.setEnabled(not is_checked and self._content.background_chk.isChecked())
         
+        self._content.trans_dark_current_label.setEnabled(is_checked)
+        self._content.trans_dark_current_edit.setEnabled(is_checked)
+        self._content.trans_dark_current_button.setEnabled(is_checked)
         
         

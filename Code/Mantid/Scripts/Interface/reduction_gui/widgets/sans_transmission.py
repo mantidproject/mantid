@@ -196,14 +196,15 @@ class TransmissionWidget(BaseWidget):
         self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         self.connect(self._content.direct_beam_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
         self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
+        self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.transmission_edit.setText(QtCore.QString(str(state.transmission)))
-        self._content.dtransmission_edit.setText(QtCore.QString(str(state.transmission_spread)))
+        self._content.transmission_edit.setText(QtCore.QString("%6.6f" % state.transmission))
+        self._content.dtransmission_edit.setText(QtCore.QString("%6.6f" % state.transmission_spread))
         
         if isinstance(state.calculation_method, state.DirectBeam):
             self._content.direct_beam_chk.setChecked(True)
@@ -214,6 +215,7 @@ class TransmissionWidget(BaseWidget):
 
         self._content.calculate_chk.setChecked(state.calculate_transmission)
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
+        self._content.dark_current_edit.setText(QtCore.QString(str(state.dark_current)))
         self._calculate_clicked(state.calculate_transmission)
 
     def get_state(self):
@@ -227,10 +229,16 @@ class TransmissionWidget(BaseWidget):
         
         m.calculate_transmission = self._content.calculate_chk.isChecked()
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
+        m.dark_current = self._content.dark_current_edit.text()
         
         m.calculation_method=self._method_box.get_state()           
 
         return m
+
+    def _dark_current_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.dark_current_edit.setText(fname)      
             
     def _direct_beam(self, state=None):
         if state is None:
@@ -264,3 +272,6 @@ class TransmissionWidget(BaseWidget):
         self._content.transmission_edit.setEnabled(not is_checked)
         self._content.dtransmission_edit.setEnabled(not is_checked)
         
+        self._content.dark_current_label.setEnabled(is_checked)
+        self._content.dark_current_edit.setEnabled(is_checked)
+        self._content.dark_current_button.setEnabled(is_checked)
