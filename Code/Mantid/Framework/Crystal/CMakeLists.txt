@@ -1,9 +1,11 @@
 set ( SRC_FILES 
 	src/LoadPeaksFile.cpp
+	src/PeakIntegration.cpp
 )
 
 set ( INC_FILES 
 	inc/MantidCrystal/LoadPeaksFile.h
+	inc/MantidCrystal/PeakIntegration.h
 )
 
 set ( TEST_FILES 
