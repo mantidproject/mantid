@@ -36,6 +36,7 @@
 #include "ApplicationWindow.h"
 #include "MantidPlotReleaseDate.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 
 #include "Mantid/MantidApplication.h"
 
@@ -139,6 +140,17 @@ public:
 
 int main( int argc, char ** argv )
 {
+  /* First, check for the --version flag to give the mantid version without launching everything. */
+  for (int i=1; i<argc; i++)
+  {
+    std::string str(argv[i]);
+    if (str == "-v" || str == "--version")
+    {
+      std::cout << MANTID_VERSION << std::endl;
+      exit(0);
+    }
+  }
+
   MantidApplication app( argc, argv );
   WaitThread t;
   try
