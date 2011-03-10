@@ -30,6 +30,7 @@ class SANSReducer(Reducer):
     
     ## Dark current data file
     _dark_current_subtracter = None
+    _dark_current_subtracter_class = None
     
     ## Sensitivity correction ReductionStep object
     _sensitivity_correcter = None
@@ -74,6 +75,9 @@ class SANSReducer(Reducer):
         
         # Default mask object
         self._mask = sans_reduction_steps.Mask()
+        
+        # Default dark current subtracter class
+        self._dark_current_subtracter_class = sans_reduction_steps.SubtractDarkCurrent
     
     def set_instrument(self, configuration):
         """
@@ -162,6 +166,7 @@ class SANSReducer(Reducer):
         
     def get_data_loader(self): return self._data_loader
         
+    @validate_step
     def set_sensitivity_correcter(self, correcter):
         """
             Set the ReductionStep object that applies the sensitivity correction.

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_transmission.ui'
 #
-# Created: Thu Mar 10 13:51:08 2011
+# Created: Thu Mar 10 14:17:27 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -154,5 +154,6 @@ class Ui_Frame(object):
         self.label_2.setText(QtGui.QApplication.translate("Frame", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.dtransmission_edit.setToolTip(QtGui.QApplication.translate("Frame", "Uncertainty on the sample transmission.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_label.setText(QtGui.QApplication.translate("Frame", "Dark current for transmission", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_current_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
 

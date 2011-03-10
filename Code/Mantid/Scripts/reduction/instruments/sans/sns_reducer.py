@@ -42,6 +42,9 @@ class EqSansReducer(SANSReducer):
         self._transmission_calculator = sns_reduction_steps.Transmission(True)
         
         self._solid_angle_correcter = sans_reduction_steps.SolidAngle()
+        
+        # Default dark current subtracter class
+        self._dark_current_subtracter_class = sns_reduction_steps.SubtractDarkCurrent
 
     def set_instrument(self, configuration):
         super(SANSReducer, self).set_instrument(configuration)

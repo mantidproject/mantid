@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Mon Mar  7 11:46:27 2011
+# Created: Thu Mar 10 15:51:39 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -273,18 +273,18 @@ class Ui_Frame(object):
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem5)
         self.gridLayout_2.addLayout(self.horizontalLayout_6, 6, 1, 1, 1)
-        self.sensivity_file_label = QtGui.QLabel(self.formLayoutWidget_2)
-        self.sensivity_file_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-        self.sensivity_file_label.setWordWrap(False)
-        self.sensivity_file_label.setIndent(50)
-        self.sensivity_file_label.setObjectName("sensivity_file_label")
-        self.gridLayout_2.addWidget(self.sensivity_file_label, 5, 0, 1, 1)
-        self.sensivity_dark_file_label = QtGui.QLabel(self.formLayoutWidget_2)
-        self.sensivity_dark_file_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-        self.sensivity_dark_file_label.setWordWrap(False)
-        self.sensivity_dark_file_label.setIndent(50)
-        self.sensivity_dark_file_label.setObjectName("sensivity_dark_file_label")
-        self.gridLayout_2.addWidget(self.sensivity_dark_file_label, 6, 0, 1, 1)
+        self.sensitivity_file_label = QtGui.QLabel(self.formLayoutWidget_2)
+        self.sensitivity_file_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.sensitivity_file_label.setWordWrap(False)
+        self.sensitivity_file_label.setIndent(50)
+        self.sensitivity_file_label.setObjectName("sensitivity_file_label")
+        self.gridLayout_2.addWidget(self.sensitivity_file_label, 5, 0, 1, 1)
+        self.sensitivity_dark_file_label = QtGui.QLabel(self.formLayoutWidget_2)
+        self.sensitivity_dark_file_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.sensitivity_dark_file_label.setWordWrap(False)
+        self.sensitivity_dark_file_label.setIndent(50)
+        self.sensitivity_dark_file_label.setObjectName("sensitivity_dark_file_label")
+        self.gridLayout_2.addWidget(self.sensitivity_dark_file_label, 6, 0, 1, 1)
         self.verticalLayout.addWidget(self.reduction_options_groupbox)
         self.horizontalLayout_3 = QtGui.QHBoxLayout()
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
@@ -408,8 +408,8 @@ class Ui_Frame(object):
         self.max_sensitivity_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the maximum allowed relative sensitivity for any given pixel.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensivity_file_label.setText(QtGui.QApplication.translate("Frame", "Sensitivity data file", None, QtGui.QApplication.UnicodeUTF8))
-        self.sensivity_dark_file_label.setText(QtGui.QApplication.translate("Frame", "Dark current data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_file_label.setText(QtGui.QApplication.translate("Frame", "Sensitivity data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_dark_file_label.setText(QtGui.QApplication.translate("Frame", "Dark current data file", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Options", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to set the detector distance offset.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setText(QtGui.QApplication.translate("Frame", "Detector distance offset [mm]", None, QtGui.QApplication.UnicodeUTF8))

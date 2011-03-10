@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_background.ui'
 #
-# Created: Thu Mar 10 09:07:58 2011
+# Created: Thu Mar 10 15:49:40 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -183,5 +183,6 @@ class Ui_Frame(object):
         self.trans_spreader_chk.setText(QtGui.QApplication.translate("Frame", "Beam spreader", None, QtGui.QApplication.UnicodeUTF8))
         self.theta_dep_chk.setText(QtGui.QApplication.translate("Frame", "Theta-dependent correction", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_label.setText(QtGui.QApplication.translate("Frame", "Dark current for transmission", None, QtGui.QApplication.UnicodeUTF8))
+        self.trans_dark_current_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.trans_dark_current_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
 

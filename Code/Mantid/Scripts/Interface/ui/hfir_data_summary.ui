@@ -714,7 +714,7 @@ in each direction and will create 9 sub-pixels.</string>
         </layout>
        </item>
        <item row="5" column="0">
-        <widget class="QLabel" name="sensivity_file_label">
+        <widget class="QLabel" name="sensitivity_file_label">
          <property name="text">
           <string>Sensitivity data file</string>
          </property>
@@ -730,7 +730,7 @@ in each direction and will create 9 sub-pixels.</string>
         </widget>
        </item>
        <item row="6" column="0">
-        <widget class="QLabel" name="sensivity_dark_file_label">
+        <widget class="QLabel" name="sensitivity_dark_file_label">
          <property name="text">
           <string>Dark current data file</string>
          </property>

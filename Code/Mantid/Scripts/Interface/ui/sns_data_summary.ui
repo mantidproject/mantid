@@ -381,7 +381,7 @@ in each direction and will create 9 sub-pixels.</string>
          </widget>
         </item>
         <item row="4" column="0">
-         <widget class="QLabel" name="sensivity_file_label">
+         <widget class="QLabel" name="sensitivity_file_label">
           <property name="text">
            <string>Sensitivity data file</string>
           </property>
@@ -451,7 +451,7 @@ in each direction and will create 9 sub-pixels.</string>
           </item>
          </layout>
         </item>
-        <item row="5" column="0">
+        <item row="6" column="0">
          <widget class="QLabel" name="sensitivity_range_label">
           <property name="text">
            <string>Allowed sensitivity range</string>
@@ -461,7 +461,7 @@ in each direction and will create 9 sub-pixels.</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="1">
+        <item row="6" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_5">
           <item>
            <widget class="QLabel" name="sensitivity_min_label">
@@ -584,7 +584,7 @@ in each direction and will create 9 sub-pixels.</string>
           </item>
          </layout>
         </item>
-        <item row="6" column="0">
+        <item row="7" column="0">
          <widget class="QCheckBox" name="transmission_chk">
           <property name="toolTip">
            <string>Select to calculate transmission and apply transmission correction.</string>
@@ -597,7 +597,7 @@ in each direction and will create 9 sub-pixels.</string>
           </property>
          </widget>
         </item>
-        <item row="6" column="1">
+        <item row="7" column="1">
          <layout class="QHBoxLayout" name="horizontalLayout_3">
           <item>
            <widget class="QLineEdit" name="transmission_edit">
@@ -671,14 +671,14 @@ in each direction and will create 9 sub-pixels.</string>
           </item>
          </layout>
         </item>
-        <item row="7" column="0">
+        <item row="8" column="0">
          <widget class="QLabel" name="sampleDetectorDistanceMmLabel">
           <property name="text">
            <string>Sample-detector distance [mm]</string>
           </property>
          </widget>
         </item>
-        <item row="7" column="1">
+        <item row="8" column="1">
          <widget class="QLineEdit" name="sample_dist_edit">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
@@ -700,6 +700,71 @@ in each direction and will create 9 sub-pixels.</string>
           </property>
           <property name="toolTip">
            <string>Sample-detector distance [mm].</string>
+          </property>
+         </widget>
+        </item>
+        <item row="5" column="1">
+         <layout class="QHBoxLayout" name="horizontalLayout_6">
+          <item>
+           <widget class="QLineEdit" name="sensitivity_dark_file_edit">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>300</width>
+              <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>300</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Enter a valid file path to be used for the dark current data.</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="sensitivity_dark_browse_button">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Browse...</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_6">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item row="5" column="0">
+         <widget class="QLabel" name="sensitivity_dark_file_label">
+          <property name="text">
+           <string>Dark current data file</string>
+          </property>
+          <property name="indent">
+           <number>50</number>
           </property>
          </widget>
         </item>

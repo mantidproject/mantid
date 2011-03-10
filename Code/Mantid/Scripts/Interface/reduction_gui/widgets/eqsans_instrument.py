@@ -53,6 +53,7 @@ class SNSInstrumentWidget(BaseWidget):
         self.connect(self._summary.sensitivity_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_browse)
 
         self.connect(self._summary.transmission_chk, QtCore.SIGNAL("clicked(bool)"), self._transmission_clicked)
+        self.connect(self._summary.sensitivity_dark_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_dark_browse)
 
         # Data file
         self.connect(self._summary.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_browse)
@@ -66,9 +67,12 @@ class SNSInstrumentWidget(BaseWidget):
     def _sensitivity_clicked(self, is_checked):
         self._summary.sensitivity_file_edit.setEnabled(is_checked)
         self._summary.sensitivity_browse_button.setEnabled(is_checked)
+        self._summary.sensitivity_dark_file_edit.setEnabled(is_checked)
+        self._summary.sensitivity_dark_browse_button.setEnabled(is_checked)
+        self._summary.sensitivity_dark_file_label.setEnabled(is_checked)
         self._summary.min_sensitivity_edit.setEnabled(is_checked)
         self._summary.max_sensitivity_edit.setEnabled(is_checked)
-        self._summary.sensivity_file_label.setEnabled(is_checked)
+        self._summary.sensitivity_file_label.setEnabled(is_checked)
         self._summary.sensitivity_range_label.setEnabled(is_checked)
         self._summary.sensitivity_min_label.setEnabled(is_checked)
         self._summary.sensitivity_max_label.setEnabled(is_checked)
@@ -82,6 +86,11 @@ class SNSInstrumentWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._summary.sensitivity_file_edit.setText(fname)      
+
+    def _sensitivity_dark_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.sensitivity_dark_file_edit.setText(fname)      
 
     def _data_browse(self):
         fname = self.data_browse_dialog()
@@ -129,6 +138,7 @@ class SNSInstrumentWidget(BaseWidget):
         
         # Sensitivity correction
         self._summary.sensitivity_file_edit.setText(QtCore.QString(state.sensitivity_data))
+        self._summary.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
         self._summary.sensitivity_chk.setChecked(state.sensitivity_corr)
         self._sensitivity_clicked(state.sensitivity_corr)
         self._summary.min_sensitivity_edit.setText(QtCore.QString(str(state.min_sensitivity)))
@@ -181,6 +191,7 @@ class SNSInstrumentWidget(BaseWidget):
         # Sensitivity correction
         m.sensitivity_corr = self._summary.sensitivity_chk.isChecked() 
         m.sensitivity_data = unicode(self._summary.sensitivity_file_edit.text())
+        m.sensitivity_dark = unicode(self._summary.sensitivity_dark_file_edit.text())
         m.min_sensitivity = util._check_and_get_float_line_edit(self._summary.min_sensitivity_edit)
         m.max_sensitivity = util._check_and_get_float_line_edit(self._summary.max_sensitivity_edit)
         

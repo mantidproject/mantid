@@ -214,7 +214,7 @@ class SubtractDarkCurrent(ReductionStep):
             filepath = reducer._full_file_path(self._dark_current_file)
             self._dark_current_ws = extract_workspace_name(filepath)
             reducer._data_loader.__class__(datafile=filepath).execute(reducer, self._dark_current_ws)
-            
+            RebinToWorkspace(WorkspaceToRebin=self._dark_current_ws, WorkspaceToMatch=workspace, OutputWorkspace=self._dark_current_ws)
         # Normalize the dark current data to counting time
         dark_duration = mtd[self._dark_current_ws].getRun()["proton_charge"].getStatistics().duration
         duration = mtd[workspace].getRun()["proton_charge"].getStatistics().duration

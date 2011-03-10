@@ -283,6 +283,9 @@
            <height>27</height>
           </size>
          </property>
+         <property name="toolTip">
+          <string>Enter a valid file path to be used for the dark current data.</string>
+         </property>
         </widget>
        </item>
        <item>
