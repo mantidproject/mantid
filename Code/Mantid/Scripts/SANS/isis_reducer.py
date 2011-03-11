@@ -19,10 +19,7 @@ class ISISReducer(SANSReducer):
         ISIS Reducer
         TODO: need documentation for all the data member
         TODO: need to see whether all those data members really belong here
-    """
-    CENT_FIND_RMIN = None
-    CENT_FIND_RMAX = None
-    
+    """    
     #the rebin parameters used by Q1D
     Q_REBIN = None
     QXY2 = None
@@ -333,3 +330,6 @@ class ISISReducer(SANSReducer):
 
     def reference(self):
         return self
+
+    CENT_FIND_RMIN = None
+    CENT_FIND_RMAX = None

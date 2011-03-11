@@ -686,7 +686,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             self._mask_phi(
                 'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
-    def execute(self, reducer, workspace, instrument=None, xcentre=None, ycentre=None):
+    def execute(self, reducer, workspace, instrument=None):
         if instrument is None:
             instrument = reducer.instrument
         #set up the spectra lists and shape xml to mask
@@ -711,26 +711,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
             if ( not self.max_radius is None) and (self.max_radius > 0.0):
                 self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-        else:
-            if xcentre is None:
-                detectorCentreX = reducer.place_det_sam.maskpt_rmax[0]
-                beamCentreX = reducer.place_det_sam.maskpt_rmin[0]
-            else:
-                detectorCentreX = xcentre
-                beamCentreX = xcentre
-            if ycentre is None:
-                detectorCentreY = reducer.place_det_sam.maskpt_rmax[1]
-                beamCentreY = reducer.place_det_sam.maskpt_rmin[1]
-            else:
-                detectorCentreY = ycentre
-                beamCentreY = ycentre
 
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder(self.min_radius, beamCentreX, beamCentreY,
-                                                             'beam_stop')
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder(self.max_radius, detectorCentreX,
-                                            detectorCentreY, 'beam_area')
+        if ( not self.min_radius is None ) and ( self.min_radius > 0.0 ):
+            self.add_cylinder(self.min_radius, 0, 0, 'beam_stop')
+        if ( not self.max_radius is None ) and ( self.max_radius > 0.0 ):
+            self.add_outside_cylinder(self.max_radius, 0, 0, 'beam_area')
         #now do the masking
         sans_reduction_steps.Mask.execute(self, reducer, workspace, instrument)
 
