@@ -338,9 +338,11 @@ namespace Mantid
           else if (k < 0)
           {
             if (i >= dim0() || j >= dim1()) rangeError();
-            n = dim2() * blocksize;
+            int m = blocksize;
+            if (j + m > dim1()) m = dim1() - j;
+            n = dim2() * m;
             start[0] = i; m_size[0] = 1;
-            start[1] = j; m_size[1] = blocksize;
+            start[1] = j; m_size[1] = m;
             start[2] = 0; m_size[2] = dim2();
           }
           else
@@ -364,8 +366,10 @@ namespace Mantid
           else if (j < 0)
           {
             if (i >= dim0()) rangeError();
-            n = dim1() * blocksize;
-            start[0] = i; m_size[0] = blocksize;
+            int m = blocksize;
+            if (i + m > dim0()) m = dim0() - i;
+            n = dim1() * m;
+            start[0] = i; m_size[0] = m;
             start[1] = 0; m_size[1] = dim1();
           }
           else
