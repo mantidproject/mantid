@@ -15,10 +15,7 @@ namespace Mantid
   namespace NeXus
   {
     /**
-    Loads a file in NeXus format and stores it in a 2D workspace 
-    (Workspace2D class). LoadNeXus is an algorithm and as such inherits
-    from the Algorithm class, via DataHandlingCommand, and overrides
-    the init() & exec() methods.
+    Reads a raw file and saves it in a ISIS NeXus file.
 
     Required Properties:
     <UL>
@@ -103,6 +100,7 @@ namespace Mantid
       void saveFloatOpen(const char* name,void* data, int size);
       int saveStringVectorOpen(const char* name,const std::vector<std::string>& str_vec,int max_str_size = -1);
       void saveString(const char* name,const std::string& str);
+      void saveStringOpen(const char* name,const std::string& str);
       inline void close(){NXclosedata(handle);} ///< close an open dataset.
       inline void closegroup(){NXclosegroup(handle);} ///< close an open group.
       void putAttr(const char* name,const std::string& value);

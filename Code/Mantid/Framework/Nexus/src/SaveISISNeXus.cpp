@@ -138,12 +138,12 @@ void SaveISISNexus::exec()
     putAttr("units","second");
     close();
     
-    saveCharOpen("definition","TOFRAW",6);
+    saveStringOpen("definition","TOFRAW");
     putAttr("version","1.0");
     putAttr("url","http://definition.nexusformat.org/instruments/TOFRAW/?version=1.0");
     close();
 
-    saveCharOpen("definition_local","ISISTOFRAW",10);
+    saveStringOpen("definition_local","ISISTOFRAW");
     putAttr("version","1.0");
     putAttr("url","http://svn.isis.rl.ac.uk/instruments/ISISTOFRAW/?version=1.0");
     close();
@@ -318,7 +318,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
 {
   if (str_vec.empty())
   {
-    saveCharOpen(name," ",1);
+    saveStringOpen(name," ");
     return 0;
   }
   int buff_size = max_str_size;
@@ -358,6 +358,18 @@ void SaveISISNexus::saveString(const char* name,const std::string& str)
   if (str.empty()) return;
   std::string buff(str);
   saveChar(name,&buff[0],buff.size());
+}
+
+/**
+  * Save a string in a dataset.
+  * @param name :: Name of the data set
+  * @param str_vec :: The vector to save
+  */
+void SaveISISNexus::saveStringOpen(const char* name,const std::string& str)
+{
+  if (str.empty()) return;
+  std::string buff(str);
+  saveCharOpen(name,&buff[0],buff.size());
 }
 
 void SaveISISNexus::putAttr(const char* name,const std::string& value)
@@ -631,9 +643,9 @@ void SaveISISNexus::dae()
   NXmakegroup(handle,"dae","IXdae");
   NXopengroup(handle,"dae","IXdae");
   
-  saveChar("detector_table_file"," ",1);
-  saveChar("spectra_table_file"," ",1);
-  saveChar("wiring_table_file"," ",1);
+  saveString("detector_table_file"," ");
+  saveString("spectra_table_file"," ");
+  saveString("wiring_table_file"," ");
 
   saveIntOpen("period_index",m_isisRaw->t_pmap,nper);
   NXgetdataID(handle,&period_index_link);
@@ -964,9 +976,9 @@ void SaveISISNexus::selog()
     NXopengroup(handle,&logName[0],"IXseblock");
 
     {
-    saveChar("vi_name"," ",1);
-    saveChar("set_control"," ",1);
-    saveChar("read_control"," ",1);
+    saveString("vi_name"," ");
+    saveString("set_control"," ");
+    saveString("read_control"," ");
     float tmp = 0.0;
     saveFloatOpen("setpoint",&tmp,1);
     putAttr("units","mV");
@@ -992,7 +1004,7 @@ void SaveISISNexus::selog()
     putAttr("units"," ");
     close();
 
-    saveChar("name"," ",1);
+    saveString("name"," ");
 
     NXclosegroup(handle); // value_log
 

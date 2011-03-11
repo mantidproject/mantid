@@ -22,7 +22,13 @@ set ( SRC_FILES src/LoadEventNexus.cpp
 		src/SaveISISNeXus.cpp
 		src/SaveNexusProcessed.cpp
 		src/SaveNXSPE.cpp
-		src/SaveSNSNexus.cpp )
+		src/SaveSNSNexus.cpp 
+		src/LoadRaw/byte_rel_comp.cpp
+		src/LoadRaw/isisraw2.cpp
+		src/LoadRaw/isisraw.cpp
+		src/LoadRaw/item_struct.cpp
+		src/LoadRaw/vms_convert.cpp
+		)
 
 set ( INC_FILES inc/MantidNexus/LoadEventNexus.h
         inc/MantidNexus/LoadInstrumentFromNexus.h
@@ -68,7 +74,7 @@ set ( TEST_FILES test/LoadEventNexusTest.h
 
 # Add the dependency on the nexus library
 find_package ( Nexus REQUIRED )
-include_directories ( ${NEXUS_INCLUDE_DIR} )
+include_directories ( ${NEXUS_INCLUDE_DIR} src)
 
 add_definitions ( -DIN_NEXUS_CPP_LIBRARY )
 
