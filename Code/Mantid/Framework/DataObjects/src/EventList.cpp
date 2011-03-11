@@ -1799,6 +1799,15 @@ namespace DataObjects
    */
   void EventList::convertTof(const double factor, const double offset)
   {
+    // fix the histogram parameter
+    MantidVec & x = this->refX.access();
+    for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
+      *iter = (*iter) * factor + offset;
+    //this->refX.access() = x;
+
+    if (factor < 0.)
+      this->reverse();
+
     if (this->getNumberEvents() <= 0)  return;
 
     //Convert the list
@@ -1815,14 +1824,6 @@ namespace DataObjects
       break;
     }
 
-    // fix the histogram parameter
-    MantidVec & x = this->refX.access();
-    for (MantidVec::iterator iter = x.begin(); iter != x.end(); ++iter)
-      *iter = (*iter) * factor + offset;
-    //this->refX.access() = x;
-
-    if (factor < 0.)
-      this->reverse();
   }
 
 
