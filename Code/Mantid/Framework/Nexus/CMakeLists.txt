@@ -19,6 +19,7 @@ set ( SRC_FILES src/LoadEventNexus.cpp
 		src/NexusFileIO.cpp
 		src/NeXusStream.cpp
 		src/SaveNeXus.cpp
+		src/SaveISISNeXus.cpp
 		src/SaveNexusProcessed.cpp
 		src/SaveNXSPE.cpp
 		src/SaveSNSNexus.cpp )
@@ -41,6 +42,7 @@ set ( INC_FILES inc/MantidNexus/LoadEventNexus.h
 		inc/MantidNexus/NexusClasses.h
 		inc/MantidNexus/NexusFileIO.h
 		inc/MantidNexus/SaveNeXus.h
+		inc/MantidNexus/SaveISISNeXus.h
 		inc/MantidNexus/SaveNexusProcessed.h
 		inc/MantidNexus/SaveNXSPE.h
 		inc/MantidNexus/SaveSNSNexus.h )

@@ -295,6 +295,8 @@ namespace API
   }
 
   /** User functions call this method in their constructors to set up the order of the dimensions.
+    * The dimensions will be sorted in the order of calls to useDimension. Ordering is needed to
+    * access dimensions by ineteger index rather than by name (string)
     * @param id :: The id of a dimension in the workspace
     */
   void IFunctionMD::useDimension(const std::string& id)
@@ -307,6 +309,11 @@ namespace API
     m_dimensionIndexMap[id] = n;
   }
 
+  /**
+    * This method is called if a function does not call to useDimension at all. 
+    * It adds all the dimensions in the workspace in the order they are in in that workspace
+    * then calls init(). 
+    */
   void IFunctionMD::useAllDimensions()
   {
     if (!m_workspace)
@@ -318,7 +325,7 @@ namespace API
     {
       useDimension(ids[i]);
     }
-    this->init();
+    this->initDimensions();
   }
 
 
@@ -333,10 +340,17 @@ namespace Mantid
   namespace API
   {
 
+    /**
+      * An example MD function. Gaussian in N dimensions
+      */
     class GaussianMD: public IFunctionMD, public ParamFunction
     {
     public:
-      void init()
+      /**
+        * Defining gaussian's parameters here, ie after the workspace is set and 
+        * the dimensions are known.
+        */
+      void initDimensions()
       {
         if (!getWorkspace()) return;
         std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
@@ -350,6 +364,11 @@ namespace Mantid
       }
       std::string name() const {return "GaussianMD";}
     protected:
+
+      /** 
+        * Calculate the function value at a point r in the MD workspace
+        * @param r :: MD workspace iterator with a reference to the current point
+        */
       double function(MDIterator& r) const
       {
         double arg = 0.0;
@@ -365,6 +384,7 @@ namespace Mantid
       }
     };
 
+    // Subscribe the function into the factory.
     DECLARE_FUNCTION(GaussianMD);
 
   }

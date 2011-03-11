@@ -141,7 +141,7 @@ protected:
     * Increments are done by calling next() which returns false if the end of the workspace is reached.
     * getValue(i) returns the value on the i-th dimension at the current point.
     */
-  class MDIterator
+  class DLLExport MDIterator
   {
   public:
     MDIterator(boost::shared_ptr<const IMDWorkspace> ws);
@@ -162,7 +162,8 @@ protected:
   };
 
   virtual void useDimension(const std::string& id);
-  virtual void useAllDimensions();
+  /// Do finction initialization after useAllDimensions() was called
+  virtual void initDimensions(){}
   /// Does the function evaluation. Must be implemented in derived classes.
   virtual double function(MDIterator& r) const = 0;
 
@@ -192,6 +193,10 @@ protected:
 
   /// Static reference to the logger class
   static Kernel::Logger& g_log;
+
+private:
+  /// Use all the dimensions in the workspace
+  virtual void useAllDimensions();
 
 };
 
