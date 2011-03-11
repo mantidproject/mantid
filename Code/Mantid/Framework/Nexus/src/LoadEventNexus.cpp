@@ -348,7 +348,7 @@ public:
 
     if (event_index.size() != alg->pulseTimes.size())
     {
-      alg->getLogger().information() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
+      alg->getLogger().debug() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
     }
 
     if (!loadError)
@@ -736,6 +736,8 @@ void LoadEventNexus::exec()
         // (this is used in LoadInstrumentHelper to find the right instrument file to use).
         WS->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
       }
+      else
+        g_log.warning() << "Empty proton_charge sample log. You will not be able to filter by time.\n";
     }
     catch (...)
     {
