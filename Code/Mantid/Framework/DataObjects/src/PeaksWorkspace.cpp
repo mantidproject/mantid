@@ -1010,6 +1010,11 @@ namespace DataObjects
     cell< double >( peakNum ,IPeakIntegrateCol) = count;
   }
 
+  void    PeaksWorkspace::setPeakIntegrateError( double count ,  int peakNum )
+  {
+    cell< double >( peakNum ,IPeakIntegrateErrorCol) = count;
+  }
+
   void    PeaksWorkspace::setPeakPos( Geometry::V3D position, int peakNum )
   {
     cell< Geometry::V3D >( peakNum , IpositionCol ) = Geometry::V3D( position );

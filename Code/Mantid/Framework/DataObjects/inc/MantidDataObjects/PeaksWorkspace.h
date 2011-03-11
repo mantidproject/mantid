@@ -94,6 +94,7 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      void    sethkl( const Geometry::V3D hkl,int peakNum);
      void    setPeakCount( double count, int peakNum);
      void    setPeakIntegrateCount( double count, int peakNum);
+     void    setPeakIntegrateError( double count, int peakNum);
      void    setPeakPos( Geometry::V3D position, int peakNum);
      void    setReflag( int newValue, int peakNum);
 
