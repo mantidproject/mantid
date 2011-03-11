@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidCrystal/PeakIntegration.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/FileProperty.h"
@@ -26,6 +27,8 @@ namespace Mantid
 
     using namespace Kernel;
     using namespace API;
+    using namespace DataObjects;
+
 
     /// Constructor
     PeakIntegration::PeakIntegration() :
@@ -43,9 +46,9 @@ namespace Mantid
     {
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input)
-          ,"A 2D workspace with X values of d-spacing");
+          ,"A 2D workspace with X values of time of flight");
       declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),"Workspace containing the integrated boxes");
-      declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".integrate"), "The input filename of the ISAW Integrate file");
+      declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace","",Direction::Input), "Name of the peaks workspace.");
 
       declareProperty("XMin", -2, "Minimum of X (col) Range to integrate for peak");
       declareProperty("XMax", 2, "Maximum of X (col) Range to integrate for peak");
@@ -74,26 +77,34 @@ namespace Mantid
       MantidVecPtr XValues;
       const std::vector<double> rb_params=getProperty("Params");
       const int numbins = VectorHelper::createAxisFromRebinParams(rb_params, XValues.access());
+      PeaksWorkspace_sptr peaksW;
+      peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
+
 
       int largepeak = getProperty("LargePeak");
-      std::string filename = getProperty("Filename");
-      std::ifstream input(filename.c_str(), std::ios_base::in);
-      std::string line;
-      int id,seqn,h,k,l,ipk,rflg,nrun,detnum;
-      double col,row,chan,l1,l2,twotheta,az,wl,d,inti,sigi,chi,phi,omega,moncnt,t0_shift;
+      int h,k,l,ipk,detnum;
+      double col,row,chan,l1,l2,wl,d;
 
       std::ofstream fout("Mantid.integrate");
       fout<<"2   SEQN    H    K    L     COL     ROW    CHAN       L2  2_THETA       AZ        WL        D   IPK       INTI       SIGI INTIMantid SIGIMantid\n";
-      while(std::getline(input, line))
+      for (int i=0; i<peaksW->getNumberPeaks(); i++)
       {
-       if(line[0] == '7') std::stringstream(line) >> id >> l1 >> t0_shift;
-       if(line[0] == '1') std::stringstream(line) >> id >> nrun >> detnum >> chi >> phi >> omega >> moncnt;
-       if(line[0] != '3') continue;
-       std::stringstream(line) >> id >> seqn >> h >> k >> l >> col >> row >> chan >> l2
-          >> twotheta >> az >> wl >> d >> ipk >> inti >> sigi >> rflg;
+       l1=peaksW->get_L1(i);
+       detnum=peaksW->get_Bank(i);
+       Geometry::V3D hkl=peaksW->get_hkl(i);
+       h=hkl[0];
+       k=hkl[1];
+       l=hkl[2];
+       col=peaksW->get_column(i);
+       row=peaksW->get_row(i);
+       chan=peaksW->get_time_channel(i);
+       l2=peaksW->get_L2(i);
+       wl=peaksW->get_wavelength(i);
+       d=peaksW->get_dspacing(i);
+       ipk=peaksW->get_ipk(i);
        if(ipk < largepeak) continue;
-       fout << std::fixed << std::setw(2) << detnum << std::setw(6) << seqn << std::setw(5) << h << std::setw(5) << k << std::setw(5) << l << std::setw(8) << std::setprecision(2) << col << std::setw(8) << std::setprecision(2) << row << std::setw(8) << std::setprecision(2) << chan << std::setw(9) << std::setprecision(3) << l2
-           << std::setw(9) << std::setprecision(5) << twotheta << std::setw(9) << std::setprecision(5) << az << std::setw(10) << std::setprecision(6) << wl << std::setw(9) << std::setprecision(3) << d << std::setw(6) << ipk << std::setw(11) << std::setprecision(2) << inti << std::setw(11) << std::setprecision(2) << sigi ;
+       fout << std::fixed << std::setw(2) << detnum << std::setw(6) << i << std::setw(5) << h << std::setw(5) << k << std::setw(5) << l << std::setw(8) << std::setprecision(2) << col << std::setw(8) << std::setprecision(2) << row << std::setw(8) << std::setprecision(2) << chan << std::setw(9) << std::setprecision(3) << l2
+           << std::setw(10) << std::setprecision(6) << wl << std::setw(9) << std::setprecision(3) << d << std::setw(6) << ipk ;
 
       std::ostringstream Peakbank;
       Peakbank <<"bank"<<detnum;

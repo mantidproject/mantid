@@ -919,6 +919,12 @@ namespace DataObjects
     return cell< double >( peakNum , IPeakRowCol );
   }
 
+  double     PeaksWorkspace::get_ipk( int peakNum )
+  {
+
+    return cell< double >( peakNum , IPeakIntensityCol );
+  }
+
   double     PeaksWorkspace::get_column( int peakNum )
   {
 
@@ -937,10 +943,16 @@ namespace DataObjects
     return cell< double >( peakNum ,ItimeOffsetChanCol) ;;
   }
 
-  double  PeaksWorkspace::get_L0(int peakNum )
+  double  PeaksWorkspace::get_L1(int peakNum )
   {
 
     return cell< double >( peakNum , IL1Col );
+  }
+
+  double  PeaksWorkspace::get_L2(int peakNum )
+  {
+
+    return cell< double >( peakNum , IL2Col );
   }
 
   int    PeaksWorkspace::get_Bank( int peakNum )

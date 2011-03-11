@@ -80,7 +80,9 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      double     get_column( int peakNum);//?
      double     get_time_channel( int peakNum);//?
      double  get_time_offset( int peakNum);
-     double  get_L0(int peakNum);
+     double  get_ipk(int peakNum);
+     double  get_L1(int peakNum);
+     double  get_L2(int peakNum);
      int    get_Bank(int peakNum);
      Geometry::V3D     getPosition( int peakNum);
      double  getPeakCellCount( int peakNum);
