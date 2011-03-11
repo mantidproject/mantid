@@ -1,7 +1,7 @@
 import unittest
 from MantidFramework import mtd
 mtd.initialise()
-from mantidsimple import *
+from mantidsimple import LoadAscii, ConvertToHistogram
 from reduction import Reducer, ReductionStep, validate_step
 
 class TestReductionStep(ReductionStep):
