@@ -2,16 +2,13 @@
 #define MANTID_ICAT_LOGOUT_H_
 
 #include "MantidAPI/Algorithm.h"
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-
-
 
 namespace Mantid
 {
-	namespace ICat
-	{
-	
-  /** Logout class is responsible for disconnecting from  ICat DB .This class written as a Mantid algorithm. 
+  namespace ICat
+  {
+
+  /** This class is responsible for disconnecting from the ICat DB .This class written as a Mantid algorithm.
     
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 23/07/2010
@@ -34,36 +31,31 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */	
-		class DLLExport CLogout: public API::Algorithm
-		{
-		public:
-			/// constructor
-			CLogout():API::Algorithm(),m_prog(0){}
-			/// Destructor
-			~CLogout(){}
-			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogLogout"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
+    */
+    class DLLExport CLogout: public API::Algorithm
+    {
+    public:
+      /// Constructor
+      CLogout() : API::Algorithm() {}
+      /// Destructor
+      ~CLogout(){}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogLogout"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
 
-		private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-			/// Overwrites Algorithm method.
-			void init();
-			/// Overwrites Algorithm method
-			void exec();
-			/// login method
-			void doLogout();
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      void init();
+      void exec();
+      /// logout method
+      void doLogout();
+    };
 
-			/// attributes
-			double m_prog;
-			
-
-		};
-	}
+  }
 }
+
 #endif

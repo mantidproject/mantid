@@ -1,26 +1,31 @@
-#ifndef DOWNLAODDATAFILE_H_
-#define DOWNLAODDATAFILE_H_
+#ifndef MANTID_ICAT_DOWNLOADDATAFILE_H_
+#define MANTID_ICAT_DOWNLOADDATAFILE_H_
 
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidICat/GSoapGenerated/soapICATPortBindingProxy.h"
-#include "MantidAPI/ICatalog.h"
 
+//----------------------------------------------------------------------
+// Forward Declaration
+//----------------------------------------------------------------------
+class ICATPortBindingProxy;
 
 namespace Mantid
 {
-	namespace ICat
-	{
+namespace ICat
+{
 /** CDownloadDataFile class is responsible for GetDataFile algorithms.
-    * This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
-    * If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
-    * Then uses POCO http methods to download over internet.
-     
-	  Required Properties:
+    This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
+    If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
+    Then uses POCO http methods to download over internet.
+
+    Required Properties:
     <UL>
     <LI> Filenames - List of files to download </LI>
     <LI> InputWorkspace - The name of the workspace whioch stored the last investigation search results </LI>
-	  <LI> FileLocations - List of files with location which is downloaded </LI>
-	  </UL>
+    <LI> FileLocations - List of files with location which is downloaded </LI>
+    </UL>
 
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
@@ -43,63 +48,62 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    
-*/
-		class DLLExport CDownloadDataFile: public API::Algorithm
-		{
-		public:
-			/// Constructor
-			CDownloadDataFile():API::Algorithm(),m_prog(0.0){}
-			/// Destructor
-			~CDownloadDataFile(){}
-			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
-			
-		   /** This method is used for unit testing purpose.
-			 * as the Poco::Net library httpget throws an exception when the nd server n/w is slow 
-			 * I'm testing the download from mantid server.
-			 * as the downlaod method I've written is private I can't access that in unit testing.
-			 * so adding this public method to call the private downlaod method and testing.
-			*/
-			void testDownload(const std::string& URL,const std::string& fileName);
+ */
+class DLLExport CDownloadDataFile : public API::Algorithm
+{
+public:
+  /// Constructor
+  CDownloadDataFile():API::Algorithm(),m_prog(0.0){}
+  /// Destructor
+  ~CDownloadDataFile(){}
+  /// Algorithm's name for identification overriding a virtual method
+  virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return 1; }
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "ICat"; }
 
-		private:
+  /** This method is used for unit testing purpose.
+   * as the Poco::Net library httpget throws an exception when the nd server n/w is slow
+   * I'm testing the download from mantid server.
+   * as the download method I've written is private I can't access that in unit testing.
+   * so adding this public method to call the private download method and testing.
+   */
+  void testDownload(const std::string& URL,const std::string& fileName);
+
+private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
-			/// Overwrites Algorithm method.
-			void init();
-			/// Overwrites Algorithm method
-			void exec();
-			/// get location of data file  or download method
-			int doDownload( ICATPortBindingProxy & icat);
-						
-			/// This method is used when the download is done over internet
-			void downloadFileOverInternet(const std::string& url,const std::string& fileName);
+  /// Overwrites Algorithm method.
+  void init();
+  /// Overwrites Algorithm method
+  void exec();
+  /// get location of data file  or download method
+  int doDownload( ICATPortBindingProxy & icat);
 
-			/// If the extn of the file .raw it returns true
-			bool isDataFile(const std::string& fileName);
+  /// This method is used when the download is done over internet
+  void downloadFileOverInternet(const std::string& url,const std::string& fileName);
 
-			/// This method saves the downloaded file to disc
-			void saveFiletoDisk(std::istream& rs,const std::string &fileName);
+  /// If the extn of the file .raw it returns true
+  bool isDataFile(const std::string& fileName);
 
-			/// This method saves downloaded file to local disk
-			void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
+  /// This method saves the downloaded file to disc
+  void saveFiletoDisk(std::istream& rs,const std::string &fileName);
 
-			/// This method replaces backwardslash with forward slashes - for linux
-			void replaceBackwardSlash(std::string& inputString);
+  /// This method saves downloaded file to local disk
+  void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
 
-		private:
-			/// progree indicator
-			double m_prog;
+  /// This method replaces backwardslash with forward slashes - for linux
+  void replaceBackwardSlash(std::string& inputString);
 
-		   
+private:
+  /// progress indicator
+  double m_prog;
 
-		};
 
-	}
+
+};
+
+}
 }
 #endif
