@@ -348,14 +348,12 @@ public:
 
     if (event_index.size() != alg->pulseTimes.size())
     {
-      loadError = true;
-      alg->getLogger().debug() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
+      alg->getLogger().information() << "Bank " << entry_name << " has a mismatch between the number of event_index entries and the number of pulse times.\n";
     }
 
     if (!loadError)
     {
       bool old_nexus_file_names = false;
-
 
       // Get the list of pixel ID's
       try
