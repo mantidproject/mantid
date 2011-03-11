@@ -47,7 +47,6 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input)
           , "A 2D workspace with X values of time of flight");
-      declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "", Direction::Output), "Workspace containing the integrated boxes");
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
 
       declareProperty("XMin", -2, "Minimum of X (col) Range to integrate for peak");
@@ -85,8 +84,17 @@ namespace Mantid
       int h, k, l, ipk, detnum;
       double col, row, chan, l1, l2, wl;
 
+     std::vector <std::pair<int, int> > v1;
+
       for (int i = 0; i<peaksW->getNumberPeaks(); i++)
+      v1.push_back(std::pair<int, int>(peaksW->get_ipk(i),i));
+      // To sort in descending order
+      stable_sort(v1.rbegin(), v1.rend() );
+ 
+      std::vector <std::pair<int, int> >::iterator Iter1;
+      for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
       {
+       int i = (*Iter1).second;
        l1 = peaksW->get_L1(i);
        detnum = peaksW->get_Bank(i);
        Geometry::V3D hkl = peaksW->get_hkl(i);
@@ -167,7 +175,6 @@ namespace Mantid
       peaksW->setPeakIntegrateCount(I, i);
       peaksW->setPeakIntegrateError(sigI, i);
 
-      setProperty("OutputWorkspace", outputW);
     }
     }
 
