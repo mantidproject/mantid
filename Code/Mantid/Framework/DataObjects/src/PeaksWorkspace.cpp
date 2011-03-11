@@ -125,6 +125,7 @@ namespace DataObjects
       const double row ,
       const double col ,
       const double chan ,
+      const double L2 ,
       const double PeakIntegrateCount ,
       const double PeakIntegrateError
   )
@@ -156,6 +157,7 @@ namespace DataObjects
       getRef< int >( std::string( "run" ) ,  i ) = runNum;
 
       getRef< double >( std::string( "chan" ) ,  i ) = chan;
+      getRef< double >( std::string( "L2" ) ,  i ) = L2;
       getRef< int >( std::string( "bank" ) ,  i ) =
           ( bankName );
 
@@ -802,7 +804,7 @@ namespace DataObjects
           Geometry::V3D( h , k , l ) ,
           Geometry::V3D( phi , chi , omega ) ,
           Reflag , run , monCount , detName , IPK ,
-          row , col , chan , Inti , SigI );
+          row , col , chan , L2, Inti , SigI );
     }
 
   }

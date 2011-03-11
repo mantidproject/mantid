@@ -58,6 +58,7 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
                    const double row=0,
                    const double col=0,
                    const double chan=0,
+                   const double L2=0,
                    const double PeakIntegrateCount=0,
                    const double PeakIntegrateError=0);
 

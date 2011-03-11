@@ -110,7 +110,7 @@ namespace Mantid
       Peakbank <<"bank"<<detnum;
       int XPeak = int(col+0.5)-1;
       int YPeak = int(row+0.5)-1;
-      tofISAW = wl * (l1+l2) / 3.956058e-1;
+      tofISAW = wl * (l1+l2) / 3.956058e-3;
       TOFPeak = VectorHelper::getBinIndex(XValues.access(),tofISAW);
 
 
