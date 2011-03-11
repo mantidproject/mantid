@@ -18,7 +18,7 @@ class ReducerTest(unittest.TestCase):
         """
         r = Reducer()
         # An algorithm with a mandatory property that is NOT InputWorkspace or OutputWorkspace
-        r.append_step(Load, "AsciiExample.txt", None)
+        r.append_step(LoadAscii, "AsciiExample.txt", None)
         # Algorithm with InputWorkspace and OutputWorkspace
         r.append_step(ConvertToHistogram, None, None)
         for item in r._reduction_steps:
@@ -34,7 +34,7 @@ class ReducerTest(unittest.TestCase):
         """
         r = Reducer()
         # An algorithm with a mandatory property that is NOT InputWorkspace or OutputWorkspace
-        r.append_step(Load, Filename="AsciiExample.txt", OutputWorkspace=None)
+        r.append_step(LoadAscii, Filename="AsciiExample.txt", OutputWorkspace=None)
         # Algorithm with InputWorkspace and OutputWorkspace
         r.append_step(ConvertToHistogram, None, None)
         for item in r._reduction_steps:
@@ -50,7 +50,7 @@ class ReducerTest(unittest.TestCase):
         """
         r = Reducer()
         # An algorithm with a mandatory property that is NOT InputWorkspace or OutputWorkspace
-        r.append_step(Load, "AsciiExample.txt", None)
+        r.append_step(LoadAscii, "AsciiExample.txt", None)
         # Algorithm with InputWorkspace and OutputWorkspace
         r.append_step(ConvertToHistogram, None, None)
         
@@ -69,7 +69,7 @@ class ReducerTest(unittest.TestCase):
             Similar to previous test, but the algo function is passed as a string
         """
         r = Reducer()
-        r.append_step("Load", "AsciiExample.txt", None)
+        r.append_step("LoadAscii", "AsciiExample.txt", None)
         for item in r._reduction_steps:
             result = item.execute(r, "test2")
             
@@ -96,4 +96,4 @@ class ReducerTest(unittest.TestCase):
         def some_func(reducer, algorithm):
             self.assertTrue(issubclass(type(algorithm), ReductionStep))
             
-        some_func(Reducer(), Load, "AsciiExample.txt", None)
+        some_func(Reducer(), LoadAscii, "AsciiExample.txt", None)

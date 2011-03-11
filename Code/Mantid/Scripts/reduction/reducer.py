@@ -99,6 +99,9 @@ def validate_step(f):
                         argspec = inspect.getargspec(self.algm).args     
                     
                     # Go through provided arguments
+                    if len(args)>len(argspec):
+                        raise RuntimeError, "Could not get call signature for %s" % _algm.name()
+                    
                     for i in range(len(args)):
                         if argspec[i] == "InputWorkspace":
                             _algm.setPropertyValue("InputWorkspace", inputworkspace)
@@ -118,6 +121,8 @@ def validate_step(f):
                         else:
                             _algm.setPropertyValue(key, kwargs[key])
                     mantidsimple.execute_algorithm(proxy)
+                    
+                    return "%s\n\t%s" % (self.algm.__name__, self.algm.__doc__)
                     
             return f(reducer, _AlgorithmStep())
         else:
