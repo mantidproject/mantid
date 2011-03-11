@@ -23,7 +23,8 @@ namespace Mantid
       : API::PairedGroupAlgorithm(),
       m_indicesToMask(), m_progress(NULL),
       m_ClearRHSWorkspace(false),
-      m_useHistogramForRhsEventWorkspace(false)
+      m_useHistogramForRhsEventWorkspace(false),
+      m_do2D_even_for_SingleColumn_on_rhs(false)
     {}
     
     BinaryOperation::~BinaryOperation()
@@ -174,7 +175,9 @@ namespace Mantid
       // xxx   , xxx xxx , xxx     , xxx x
       // xxx   , xxx xxx   xxx       xxx x
       // So work out which one we have and call the appropriate function
-      if ( (m_rhs->size() == 1) && (!m_erhs) ) // Single value workspace; and not an EventWorkspace with 1 spectrum, 1 bin
+
+      // Single value workspace on the right : if it is an EventWorkspace with 1 spectrum, 1 bin, it is treated as a scalar
+      if ( (m_rhs->size() == 1) )
       {
         doSingleValue(); //m_lhs,m_rhs,m_out
       }
@@ -182,12 +185,13 @@ namespace Mantid
       {
         doSingleSpectrum();
       }
-      else if ( (m_rhs->blocksize() == 1)  && (!m_erhs) ) // Single column on rhs; and not an EventWorkspace with 1 bin
+      // Single column on rhs; if the RHS is an event workspace with one bin, it is treated as a scalar.
+      else if ( (m_rhs->blocksize() == 1) && !m_do2D_even_for_SingleColumn_on_rhs  )
       {
         m_indicesToMask.reserve(m_out->getNumberHistograms());
         doSingleColumn();
       }
-      else // The two are both 2D and should be the same size
+      else // The two are both 2D and should be the same size (except if LHS is an event workspace)
       {
         m_indicesToMask.reserve(m_out->getNumberHistograms());
 
@@ -621,7 +625,7 @@ namespace Mantid
 
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+//          PARALLEL_FOR3(m_lhs,m_rhs,m_out) // FIXME: UNCOMMENT
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -639,6 +643,7 @@ namespace Mantid
               if(!propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
                 continue;
             }
+
             //Reach here? Do the division
             performEventBinaryOperation(m_eout->getEventList(i),  m_rhs->readX(rhs_wi), m_rhs->readY(rhs_wi), m_rhs->readE(rhs_wi));
 
@@ -660,7 +665,7 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
-//        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out) // FIXME: UNCOMMENT
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION

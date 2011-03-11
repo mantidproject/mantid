@@ -40,6 +40,7 @@ public:
     DO_DIVIDE = true;
   }
 
+
   void testInit()
   {
     IAlgorithm * alg = NULL;
@@ -59,7 +60,6 @@ public:
     TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
     TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
   }
-
 
   void testDivideWithMaskedSpectraProducesZeroes()
   {
@@ -83,7 +83,6 @@ public:
     TS_ASSERT_EQUALS(a->readY(0)[0],0.3);
     TS_ASSERT_EQUALS(a,b);
   }
-
 
   //========================================= 2D and 1D Workspaces ==================================
 
@@ -210,6 +209,28 @@ public:
     performTest(work_in1,work_in2, false);
   }
 
+  void test_1DVertical_EventWithOneBin_willCommute()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,1.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false /*output is not Event */, 1.0, 1.0, false, false, false /* not in place */);
+    else
+      performTest(work_in1,work_in2, true /*output is Event */, 4.0, 3.4641, false, true /*will commute*/, false /* not in place */);
+  }
+
+  void test_1DVertical_EventWithOneBin_willCommute_inplace()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,1.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false /*output is not Event */, 1.0, 1.0, false, false, true /*in place*/);
+    else
+      performTest(work_in1,work_in2, true /*output is Event */, 4.0, 3.4641, false, false /*will commute*/, true /*in place*/);
+  }
+
   void test_2D_Event_inPlace()
   {
     int nBins = 10,nHist=20;
@@ -219,6 +240,63 @@ public:
       performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, true);
     else
       performTest(work_in1,work_in2, false /*output is not Event */, 4.0, 4.0, false, false, true);
+  }
+
+  void test_2D_Event_RHSEventWorkspaceHasOnebin()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,100.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, false);
+    else
+      performTest(work_in1,work_in2, false /*output is not Event */, 4.0, 4.0, false, false /*no commute*/, false);
+  }
+
+  void test_2D_Event_inPlace_RHSEventWorkspaceHasOnebin()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,100.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false /*output is not Event */, 1.0, sqrt(1.0), false, false, true);
+    else
+      performTest(work_in1,work_in2, false /*output is not Event */, 4.0, 4.0, false, false /*no commute*/, true);
+  }
+
+  void test_2D_Event_inPlace_RHSEventWorkspaceHasOnebinAndOneSpectrum()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(1, 1,100,0.0,100.0,2);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, false /*output is not Event*/, 1.0, sqrt(1.0), false, false, true);
+    else
+      performTest(work_in1,work_in2, false /*output is not Event*/, 4.0, 4.0, false, false /*no commute*/, true);
+  }
+
+  void test_Event_2D_inplace_LHSEventWorkspaceHasOnebin()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    if (DO_DIVIDE)
+      performTest(work_in1,work_in2, true /*output is Event */, 1.0, 0.8660, false, false, true);
+    else
+      // MULTIPLY: This commutes because the RHS workspace is bigger; the LHS workspace is treated as single number
+      performTest(work_in1,work_in2, false /*output is not Event */, 4.0, 4.0, false, true /* commute */, true);
+  }
+
+  void test_Event_2D_inplace_LHSEventWorkspaceHasOnebinAndOneSpectrum()
+  {
+    int nBins = 10,nHist=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(1, 1, 2, 0.0, 1.0, 2); // Events are at 0.5
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    if (DO_DIVIDE)
+      performTest_fails(work_in1,work_in2); // Incompatible sizes
+    else
+      // MULTIPLY: This commutes because the RHS workspace is bigger; the LHS workspace is treated as single number
+      performTest(work_in1,work_in2, false /*output is not Event */, 4.0, 4.0, false, true /* will commute */, true);
   }
 
   void test_Event_2D()
@@ -242,7 +320,6 @@ public:
     else
       performTest(work_in1,work_in2, true, 4.0, sqrt(12.0), false, false, true);
   }
-
 
   void test_Event_2DSingleSpectrum()
   {
@@ -497,9 +574,18 @@ public:
   }
 
 
-
-
-private:
+  std::string describe_workspace(const MatrixWorkspace_sptr ws)
+  {
+    std::ostringstream mess;
+    EventWorkspace_const_sptr ews = boost::dynamic_pointer_cast<const EventWorkspace>(ws);
+    if (ews)
+      mess << "Event";
+    else
+      mess << "2D";
+    mess << "(" << ws->getNumberHistograms() << " spectra," << ws->blocksize() << " bins,";
+    mess << "Y[0][0] = " << ws->readY(0)[0] << ")";
+    return mess.str();
+  }
 
   /** Divide/Multiply work_in1 by work_in2.
    * If outputIsEvent is true, check that the ouput is a EventWorkspace.
@@ -514,6 +600,23 @@ private:
       bool allowMismatchedSpectra = false, bool algorithmWillCommute = false,
       bool doInPlace = false)
   {
+    bool automessage = false;
+    if (message == "")
+    {
+      automessage = true;
+      // Build up the descriptive message
+      std::ostringstream mess;
+      mess << "WITH: ";
+      mess << describe_workspace(work_in1);
+      if (DO_DIVIDE)
+        mess << " divided by ";
+      else
+        mess << " multiplied by ";
+      mess << describe_workspace(work_in2);
+      if (doInPlace)
+        mess << " done in place";
+      message = mess.str();
+    }
 
     IAlgorithm * alg;
     if (DO_DIVIDE)
@@ -544,13 +647,18 @@ private:
     TSM_ASSERT( message, alg->isExecuted() );
     MatrixWorkspace_sptr work_out1;
     TSM_ASSERT_THROWS_NOTHING(message, work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
-
+    TSM_ASSERT( message, work_out1 );
     if (work_out1)
     {
       //Check that the output is an event workspace?
       if (outputIsEvent)
       {
         TSM_ASSERT( message, boost::dynamic_pointer_cast<EventWorkspace>(work_out1) );
+      }
+      else
+      {
+        // Check that it is NOT event
+        TSM_ASSERT( message, !(boost::dynamic_pointer_cast<EventWorkspace>(work_out1)) );
       }
 
       if (algorithmWillCommute)
@@ -565,6 +673,10 @@ private:
     AnalysisDataService::Instance().remove(wsName1);
     AnalysisDataService::Instance().remove(wsName2);
     delete alg;
+
+    // Return to the empty message for next time
+    if (automessage) message = "";
+
     return work_out1;
   }
 
@@ -704,6 +816,9 @@ private:
     // Return false if the error is wrong
     return (diff < 0.0001);
   }
+
+
+
 
   void doDivideWithMaskedTest(bool replaceInput)
   {

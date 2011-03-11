@@ -115,6 +115,9 @@ namespace Mantid
         //If adding in place to the right-hand-side: flip it so you add in-place to the lhs.
         m_flipSides = (m_eout == m_erhs);
         m_useHistogramForRhsEventWorkspace = false;
+        // Special case for plus/minus: if there is only one bin on the RHS, use the 2D method (appending event lists)
+        // so that the single bin is not treated as a scalar
+        m_do2D_even_for_SingleColumn_on_rhs = true;
       }
       else
       {
@@ -167,6 +170,24 @@ namespace Mantid
       return CommutativeBinaryOperation::checkCompatibility(lhs,rhs);
     }
 
+    //--------------------------------------------------------------------------------------------
+    /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
+     *  In order to be size compatible then the larger workspace
+     *  must divide be the size of the smaller workspace leaving no remainder
+     *  @param lhs :: the first workspace to compare
+     *  @param rhs :: the second workspace to compare
+     *  @retval true The two workspaces are size compatible
+     *  @retval false The two workspaces are NOT size compatible
+     */
+    bool Plus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if (m_erhs && m_elhs)
+      {
+        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+      }
+      else
+        return CommutativeBinaryOperation::checkSizeCompatibility(lhs, rhs);
+    }
 
     //---------------------------------------------------------------------------------------------
     /** Adds the integrated proton currents, proton charges, of the two input

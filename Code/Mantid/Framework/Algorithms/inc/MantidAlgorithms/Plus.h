@@ -71,6 +71,7 @@ namespace Mantid
       void performEventBinaryOperation(DataObjects::EventList & lhs, const double& rhsY, const double& rhsE);
 
       void checkRequirements();
+      bool checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       bool checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const;
       void operateOnRun(const API::Run& lhs, const API::Run& rhs, API::Run & ans) const;
 

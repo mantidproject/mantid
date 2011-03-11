@@ -127,6 +127,14 @@ namespace Mantid
     {
       // Can commute workspaces?
       m_flipSides = (m_rhs->size() > m_lhs->size());
+
+      // Both are vertical columns with one bin?
+      if ((m_rhs->blocksize() == 1) && (m_lhs->blocksize() == 1))
+      {
+        // Flip it if the RHS is event and you could keep events
+        if (m_erhs && !m_elhs) m_flipSides = true;
+      }
+
       // The RHS operand will be histogrammed first.
       m_useHistogramForRhsEventWorkspace = true;
 
