@@ -2311,7 +2311,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       py_code += ", plotresults=True";
     }
 
-    py_code += ", save="+PythonRunner::stringList2Tuple(getSaveAlgs());
+    py_code += ", saveAlgs="+PythonRunner::stringList2Tuple(getSaveAlgs());
 
     if( m_uiForm.log_colette->isChecked() )
     {

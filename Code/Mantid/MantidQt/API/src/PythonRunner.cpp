@@ -55,7 +55,7 @@ const QString PythonRunner::stringList2Tuple(const QStringList & list)
   QStringList::const_iterator end = list.end();
   for(QStringList::const_iterator it = list.begin(); it != end; ++it)
   {
-    tuple += *it+",";
+    tuple += "'"+*it+"',";
   }
   tuple += ")";
   return tuple;
