@@ -16452,14 +16452,13 @@
   
   <type name="pixel" is="detector">
     <cuboid id="shape">
-      <left-front-bottom-point x="0.00508" y="-0.00508" z="0.0"  />
-      <left-front-top-point  x="0.00508" y="-0.00508" z="0.000005"  />
-      <left-back-bottom-point  x="-0.00508" y="-0.00508" z="0.0"  />
-      <right-front-bottom-point  x="0.00508" y="0.00508" z="0.0"  />
+      <left-front-bottom-point x="-0.00254" y="-0.00254" z="0.0"  />
+      <left-front-top-point  x="-0.00254" y="0.00254" z="0.0"  />
+      <left-back-bottom-point  x="-0.00254" y="-0.00254" z="-0.000005"  />
+      <right-front-bottom-point  x="0.00254" y="-0.00254" z="0.0"  />
     </cuboid>
     <algebra val="shape" /> 
   </type>    
-
 
   
 <!--DETECTOR IDs-->
