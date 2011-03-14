@@ -158,9 +158,13 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         if wksp is None:
             return None
         
-        # bankNames = "bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11,bank12,bank13,bank14,bank15"
-        bankNames = ",".join(["bank%d" % x for x in xrange(1,16)])
-        print bankNames
+        groups = ""
+        numrange = 200
+        for num in xrange(1,numrange):
+            comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
+            if not comp == None:
+               groups+=("bank%d," % (num) )
+        print groups
         
         # take care of filtering events
         if self._filterBadPulses:
@@ -185,7 +189,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         # Remove old calibration files
         cmd = "rm temp.cal*"
         os.system(cmd)
-        CreateCalFileByNames(wksp, "temp.cal", bankNames)
+        CreateCalFileByNames(wksp, "temp.cal", groups)
         # Align detectors using new calibration file with offsets
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp,CalibrationFile="temp.cal")
         
@@ -213,7 +217,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def _save(self, wksp, normalized):
         filename = os.path.join(self._outDir, str(wksp))
-        nxsfile = self._findData(self.getProperty("RunNumber"), ".nxs")
+        name = "%s_%d" % (self._instrument, self.getProperty("RunNumber"))
+        nxsfile = name + ".nxs"
+
+        if not os.path.isfile(nxsfile):
+            nxsfile = self._findData(self.getProperty("RunNumber"), ".nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
             SaveSNSNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
@@ -308,5 +316,6 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                        Tolerance=COMPRESS_TOL_TOF) # 5ns
         self._save(samRun, normalized)
         mtd.deleteWorkspace(samRun.getName())
+        raise Exception("End of script") 
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
