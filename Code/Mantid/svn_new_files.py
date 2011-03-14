@@ -34,7 +34,13 @@ def do_list_new_files(only_this):
                 
             if filename.endswith(".py"):
                 good = not filename.endswith("checkin_except.py")
-                
+
+            if filename.endswith(".cmake"):
+                good = ("Build/CMake/" in filename)
+
+            if filename.endswith("CMakeLists.txt"):
+                good = True
+
             if good:
                 # Are we filtering any more?
                 if only_this is None:
