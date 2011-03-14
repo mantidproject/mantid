@@ -1945,6 +1945,7 @@ namespace DataObjects
   {
     typename std::vector<T>::const_iterator itev;
     typename std::vector<T>::const_iterator itev_end = events.end(); //cache for speed
+    tofs.clear();
     for (itev = events.begin(); itev != itev_end; itev++)
       tofs.push_back(itev->m_tof);
   }
@@ -1988,7 +1989,7 @@ namespace DataObjects
 
     size_t x_size = tofs.size();
     if (events.size() != x_size)
-      return;
+      return; // should this throw an exception?
 
     for (size_t i = 0; i < x_size; ++i)
       events[i].m_tof = tofs[i];
@@ -2002,6 +2003,8 @@ namespace DataObjects
    */
   void EventList::setTofs(const MantidVec & tofs)
   {
+    this->order = UNSORTED;
+
     //Convert the list
     switch (eventType)
     {
