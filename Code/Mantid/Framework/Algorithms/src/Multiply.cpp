@@ -31,8 +31,8 @@ namespace Mantid
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
-        const double& leftY = lhsY[j];
-        const double& rightY = rhsY[j];
+        const double leftY = lhsY[j];
+        const double rightY = rhsY[j];
 
          // error multiplying two uncorrelated numbers, re-arrange so that you don't get infinity if leftY or rightY == 0
         // (Sa/a)2 + (Sb/b)2 = (Sc/c)2
