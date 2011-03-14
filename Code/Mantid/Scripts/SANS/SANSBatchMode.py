@@ -153,7 +153,11 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if type(saveAlgs) == str:
                 saveAlgs = (saveAlgs, )
             for algor in saveAlgs:
-                exec(algor+"(reduced,file)")
+                if not algor == 'SaveRKH':
+                    exec(algor+"(reduced,file)")
+                else:
+                    RKH = file+'.txt'
+                    exec(algor+"(reduced,RKH)")
 
         if verbose:
             mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
