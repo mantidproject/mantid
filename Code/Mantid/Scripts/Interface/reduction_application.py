@@ -301,7 +301,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             self._instrument = found_instrument
             self.setup_layout()
             
+        self.reduce_button.setEnabled(False)   
+        self.export_button.setEnabled(False)
         self._interface.load_file(file_path)
+        self.reduce_button.setEnabled(True)
+        self.export_button.setEnabled(True)
+
         self._recent_files.append(file_path)
         self._filename = file_path
         self._update_file_menu()
