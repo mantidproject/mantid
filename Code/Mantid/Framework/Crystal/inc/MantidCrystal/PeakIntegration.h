@@ -73,8 +73,9 @@ private:
   int TOFPeak;       ///< The peak in the TOF range for fitting
   int tofISAW;       /// check if bin agrees with peak from ISAW
   int nspec;          ///< The number of spectra in the input workspace
+  double IKI, Alpha0, Alpha1, Beta0, Kappa, SigmaSquared, Gamma, X0; ///<Ikeda-Carpender function 
+
 };
-  double Alpha0,Alpha1,Beta0,Kappa,SigmaSquared,Gamma; ///<Ikeda-Carpender function 
 
 } // namespace Algorithm
 } // namespace Mantid

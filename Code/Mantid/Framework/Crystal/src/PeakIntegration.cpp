@@ -60,7 +60,6 @@ namespace Mantid
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
-      declareProperty("LargePeak", 10, "Intensity of center of peak defined as large");
 
     }
 
@@ -71,22 +70,27 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
+      Alpha0 = 1.2408; //4.69919;
+      Alpha1 = 4.84289; //1.95139;
+      Beta0 = -261.873; //189.391;
+      Kappa = 78.1604; //167.997;
+      SigmaSquared = 2.54745; //0.192605;
+      Gamma = 1.70148; //4.4265;
   
       // create TOF axis from Params
-      MantidVecPtr XValues;
       const std::vector<double> rb_params = getProperty("Params");
+      MantidVecPtr XValues;
       const int numbins = VectorHelper::createAxisFromRebinParams(rb_params, XValues.access());
       PeaksWorkspace_sptr peaksW;
       peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
 
 
-      int largepeak = getProperty("LargePeak");
-      int h, k, l, ipk, detnum;
-      double col, row, chan, l1, l2, wl;
+      int i, XPeak, YPeak, h, k, l, ipk, detnum;
+      double col, row, chan, l1, l2, wl, I, sigI;
 
-     std::vector <std::pair<int, int> > v1;
+      std::vector <std::pair<int, int> > v1;
 
-      for (int i = 0; i<peaksW->getNumberPeaks(); i++)
+      for (i = 0; i<peaksW->getNumberPeaks(); i++)
       v1.push_back(std::pair<int, int>(peaksW->get_ipk(i),i));
       // To sort in descending order
       stable_sort(v1.rbegin(), v1.rend() );
@@ -94,7 +98,7 @@ namespace Mantid
       std::vector <std::pair<int, int> >::iterator Iter1;
       for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
       {
-       int i = (*Iter1).second;
+       i = (*Iter1).second;
        l1 = peaksW->get_L1(i);
        detnum = peaksW->get_Bank(i);
        Geometry::V3D hkl = peaksW->get_hkl(i);
@@ -107,12 +111,11 @@ namespace Mantid
        l2 = peaksW->get_L2(i);
        wl = peaksW->get_wavelength(i);
        ipk = peaksW->get_ipk(i);
-       if(ipk < largepeak) continue;
 
       std::ostringstream Peakbank;
       Peakbank <<"bank"<<detnum;
-      int XPeak = int(col+0.5)-1;
-      int YPeak = int(row+0.5)-1;
+      XPeak = int(col+0.5)-1;
+      YPeak = int(row+0.5)-1;
       tofISAW = wl * (l1+l2) / 3.956058e-3;
       TOFPeak = VectorHelper::getBinIndex(XValues.access(), tofISAW);
 
@@ -168,7 +171,6 @@ namespace Mantid
       if (TOFmin > numbins) TOFmin = numbins;
       if (TOFmax > numbins) TOFmax = numbins;
 
-      double I, sigI;
       fitSpectra(0, I, sigI);
       std::cout << peaksW->getPeakIntegrationCount(i)<<"  " << I << "  "<<peaksW->getPeakIntegrationError(i)<< "  "<< sigI << "\n";
 
@@ -203,12 +205,8 @@ namespace Mantid
     {
       // Find point of peak centre
       // Get references to the current spectrum
-      MantidVec &X = outputW->dataX(s);
-      MantidVec &Y = outputW->dataY(s);
-      const double peakLoc = X[TOFPeak];
-      const double peakHeight =  Y[TOFPeak];
-      // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
-      if ( boost::math::isnan(peakHeight) ) return;
+      MantidVec & X = outputW->dataX(s);
+      MantidVec & Y = outputW->dataY(s);
 
       /*IAlgorithm_sptr bkg_alg;
       try
@@ -261,6 +259,10 @@ namespace Mantid
       }
       for (int j = TOFmin; j <=  TOFmax; ++j)std::cout <<Y[j]<<"  ";
       std::cout <<"\n";
+      const double peakLoc = X[TOFPeak];
+      const double peakHeight =  Y[TOFPeak]*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
+      // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
+      if ( boost::math::isnan(peakHeight) ) return;
 
       IAlgorithm_sptr fit_alg;
       try
@@ -275,15 +277,16 @@ namespace Mantid
       fit_alg->setProperty("WorkspaceIndex", s);
       fit_alg->setProperty("StartX", X[TOFmin]);
       fit_alg->setProperty("EndX", X[TOFmax]);
-      fit_alg->setProperty("MaxIterations", 1000);
+      fit_alg->setProperty("MaxIterations", 5000);
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
-      fun_str << "name = IkedaCarpenterPV, I = "<<peakHeight<<", Alpha0 = -12.7481, Alpha1 = 14.5239, Beta0 = 3.73893, Kappa = 57.4813, SigmaSquared = 0.00424469, Gamma = 26.8937, " << "X0 = "<<peakLoc;
-      //fun_str << "name = Gaussian, Height = "<<peakHeight<<", Sigma = 17.5221, PeakCentre = "<<peakLoc;
+      fun_str << "name = IkedaCarpenterPV, I = "<<peakHeight<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
+              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<peakLoc;
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
-      tie_str << "Alpha1 = 14.5239";
-      //tie_str << "Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "<<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma;
+
+      if (Alpha0== 1.2408)tie_str << "Alpha0 = "<<Alpha0;
+      else tie_str << "Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "<<Beta0<<", Kappa = "<<Kappa;
       fit_alg->setProperty("Ties", tie_str.str());
 
       try
@@ -302,17 +305,74 @@ namespace Mantid
         throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
       }
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
-      const MantidVec & DataValues = ws->readY(0);
+      const MantidVec &  DataValues = ws->readY(0);
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
-      /*Alpha0 = params[1];
+      IKI = params[0];
+      Alpha0 = params[1];
       Alpha1 = params[2];
       Beta0 = params[3];
       Kappa = params[4];
       SigmaSquared = params[5];
-      Gamma = params[6];*/
+      Gamma = params[6];
+      X0 = params[7];
       std::string funct = fit_alg->getPropertyValue("Function");
       std::cout <<funct<<"\n";
+
+      if(Alpha0== 1.2408)
+      {
+      IAlgorithm_sptr fit2_alg;
+      try
+      {
+        fit2_alg = createSubAlgorithm("Fit", -1, -1, false);
+      } catch (Exception::NotFoundError&)
+      {
+        g_log.error("Can't locate Fit algorithm");
+        throw ;
+      }
+      fit2_alg->setProperty("InputWorkspace", outputW);
+      fit2_alg->setProperty("WorkspaceIndex", s);
+      fit2_alg->setProperty("StartX", X[TOFmin]);
+      fit2_alg->setProperty("EndX", X[TOFmax]);
+      fit2_alg->setProperty("MaxIterations", 5000);
+      fit2_alg->setProperty("Output", "fit");
+      std::ostringstream fun_str;
+      fun_str << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
+              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
+      fit2_alg->setProperty("Function", fun_str.str());
+      std::ostringstream tie_str;
+
+      tie_str << "Alpha1 = "<<Alpha1;
+      fit2_alg->setProperty("Ties", tie_str.str());
+
+      try
+      {
+        fit2_alg->execute();
+      }
+      catch (std::runtime_error&)
+      {
+        g_log.error("Unable to successfully run Fit sub-algorithm");
+        throw;
+      }
+
+      if ( ! fit2_alg->isExecuted() )
+      {
+        g_log.error("Unable to successfully run Fit sub-algorithm");
+        throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
+      }
+
+      params = fit2_alg->getProperty("Parameters");
+      IKI = params[0];
+      Alpha0 = params[1];
+      Alpha1 = params[2];
+      Beta0 = params[3];
+      Kappa = params[4];
+      SigmaSquared = params[5];
+      Gamma = params[6];
+      X0 = params[7];
+      funct = fit2_alg->getPropertyValue("Function");
+      std::cout <<funct<<"\n";
+      }
 
       //Fill output workspace with interval; use Fit to calculate values of Fit in interval
       const int n = outputW->blocksize();
@@ -356,7 +416,7 @@ namespace Mantid
       }
 
       MatrixWorkspace_sptr wsn = fit2_alg->getProperty("OutputWorkspace");
-      const MantidVec & FitValues = wsn->readY(1);
+      const MantidVec &  FitValues = wsn->readY(1);
       for (int i = 0; i < n; i++) {
         Y[i] = FitValues[i];
       }
