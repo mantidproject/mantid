@@ -107,6 +107,7 @@ if ( CXXTEST_FOUND )
   add_subdirectory (UserAlgorithms)
 endif ()
 
+
 if ( MAKE_VATES )
   # set hdf5 include directories as a global variable to define it later
   set ( HDF5_INCLUDE_DIRS "")
@@ -118,7 +119,9 @@ if ( MAKE_VATES )
   add_subdirectory (MDAlgorithms)
   set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
   include_directories(MDAlgorithms/inc) 
+endif ()
 
+if ( MAKE_MDEVENTS )
   add_subdirectory (MDEvents)
   set(MANTIDLIBS ${MANTIDLIBS} MDEvents) 
   include_directories(MDEvents/inc) 

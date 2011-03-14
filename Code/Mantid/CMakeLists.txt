@@ -56,6 +56,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
 add_subdirectory ( MantidPlot )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+set ( MAKE_MDEVENTS OFF CACHE BOOL "Switch for compiling the MDEvents project")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 
 if ( MAKE_VATES )
