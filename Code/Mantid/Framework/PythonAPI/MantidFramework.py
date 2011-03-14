@@ -835,7 +835,7 @@ class MantidPyFramework(FrameworkManager):
         print '\n' + self.settings.welcomeMessage() + '\n'
         # Run through init steps
         self.createPythonSimpleAPI(GUI)
-        self._pyalg_loader.load_modules(refresh=False)
+        self._pyalg_loader.load_modules(refresh=True)
         self.createPythonSimpleAPI(GUI)
         self._importSimpleAPIToMain()     
 
