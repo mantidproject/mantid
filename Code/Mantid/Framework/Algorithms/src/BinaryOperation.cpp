@@ -21,10 +21,10 @@ namespace Mantid
   {
     BinaryOperation::BinaryOperation()
       : API::PairedGroupAlgorithm(),
-      m_indicesToMask(),
       m_ClearRHSWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
       m_do2D_even_for_SingleColumn_on_rhs(false),
+      m_indicesToMask(),
       m_progress(NULL)
     {}
     
@@ -178,7 +178,7 @@ namespace Mantid
       // So work out which one we have and call the appropriate function
 
       // Single value workspace on the right : if it is an EventWorkspace with 1 spectrum, 1 bin, it is treated as a scalar
-      if ( (m_rhs->size() == 1) )
+      if ( (m_rhs->size() == 1) && !m_do2D_even_for_SingleColumn_on_rhs  )
       {
         doSingleValue(); //m_lhs,m_rhs,m_out
       }

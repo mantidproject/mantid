@@ -132,6 +132,9 @@ namespace Mantid
         m_matchXSize = false;
         //Can't flip - this is non-commutative
         m_flipSides = false;
+        // Special case for plus/minus: if there is only one bin on the RHS, use the 2D method (appending event lists)
+        // so that the single bin is not treated as a scalar
+        m_do2D_even_for_SingleColumn_on_rhs = true;
       }
       else
       {
