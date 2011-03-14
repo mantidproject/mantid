@@ -835,9 +835,8 @@ class MantidPyFramework(FrameworkManager):
         print '\n' + self.settings.welcomeMessage() + '\n'
         # Run through init steps
         self.createPythonSimpleAPI(GUI)
-        self._pyalg_loader.load_modules(refresh=True)
+        self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI)
-        self._pyalg_loader.load_modules(refresh=True)
         self._importSimpleAPIToMain()     
 
         self.__is_initialized = True
@@ -993,8 +992,7 @@ class PyAlgLoader(object):
 
         # Now connect the relevant signals to monitor for algorithm factory updates
         self.framework.sendLogMessage('PyAlgLoader.load_modules: refresh=%s, changes=%s' % (str(refresh), str(changes)))
-        #self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
-        self.framework._observeAlgFactoryUpdates(True, True)
+        self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
 
 #
 # ------- Private methods --------------
@@ -1017,11 +1015,10 @@ class PyAlgLoader(object):
             original = os.path.join(file_path, modname)
             modname = modname[:-len(pyext)]
             compiled = os.path.join(file_path, modname + '.pyc')
-            # The following, if true, doesn't mean that the module has been loaded!
-            #if modname in sys.modules and \
-            #   os.path.exists(compiled) and \
-            #   os.path.getmtime(compiled) >= os.path.getmtime(original):
-            #    return
+            if modname in sys.modules and \
+               os.path.exists(compiled) and \
+               os.path.getmtime(compiled) >= os.path.getmtime(original):
+                return
             try:               
                 if self._containsPyAlgorithm(original):
                     if modname in sys.modules:
