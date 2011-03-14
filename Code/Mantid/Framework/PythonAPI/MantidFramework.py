@@ -1015,10 +1015,11 @@ class PyAlgLoader(object):
             original = os.path.join(file_path, modname)
             modname = modname[:-len(pyext)]
             compiled = os.path.join(file_path, modname + '.pyc')
-            if modname in sys.modules and \
-               os.path.exists(compiled) and \
-               os.path.getmtime(compiled) >= os.path.getmtime(original):
-                return
+            # The following, if true, doesn't mean that the module has been loaded!
+            #if modname in sys.modules and \
+            #   os.path.exists(compiled) and \
+            #   os.path.getmtime(compiled) >= os.path.getmtime(original):
+            #    return
             try:               
                 if self._containsPyAlgorithm(original):
                     if modname in sys.modules:
