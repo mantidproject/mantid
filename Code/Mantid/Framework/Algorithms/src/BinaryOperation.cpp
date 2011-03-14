@@ -21,10 +21,11 @@ namespace Mantid
   {
     BinaryOperation::BinaryOperation()
       : API::PairedGroupAlgorithm(),
-      m_indicesToMask(), m_progress(NULL),
+      m_indicesToMask(),
       m_ClearRHSWorkspace(false),
       m_useHistogramForRhsEventWorkspace(false),
-      m_do2D_even_for_SingleColumn_on_rhs(false)
+      m_do2D_even_for_SingleColumn_on_rhs(false),
+      m_progress(NULL)
     {}
     
     BinaryOperation::~BinaryOperation()
@@ -625,7 +626,7 @@ namespace Mantid
 
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-//          PARALLEL_FOR3(m_lhs,m_rhs,m_out) // FIXME: UNCOMMENT
+          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -665,7 +666,7 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
-        //PARALLEL_FOR3(m_lhs,m_rhs,m_out) // FIXME: UNCOMMENT
+        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION

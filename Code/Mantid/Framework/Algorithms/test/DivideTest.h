@@ -178,7 +178,7 @@ public:
 
   void test_2D_SingleValue()
   {
-    int nHist = 5,nBins=300;
+    int nHist = 5, nBins=300;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
     performTest(work_in1,work_in2);
@@ -227,7 +227,7 @@ public:
 
   void test_1DVertical_EventWithOneBin_willCommute()
   {
-    int nBins = 10,nHist=20;
+    int nHist=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,1.0,2);
     if (DO_DIVIDE)
@@ -238,7 +238,7 @@ public:
 
   void test_1DVertical_EventWithOneBin_willCommute_inplace()
   {
-    int nBins = 10,nHist=20;
+    int nHist=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,1);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, 1,100,0.0,1.0,2);
     if (DO_DIVIDE)
