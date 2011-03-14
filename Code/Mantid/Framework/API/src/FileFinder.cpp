@@ -22,6 +22,8 @@ namespace Mantid
 {
 namespace API
 {
+// this allowed string could be made into an array of allowed, currently used only by the ISIS SANS group
+const std::string FileFinderImpl::ALLOWED_SUFFIX = "-add";
 //----------------------------------------------------------------------
 // Public member functions
 //----------------------------------------------------------------------
@@ -88,6 +90,31 @@ std::string FileFinderImpl::getFullPath(const std::string& fName) const
   return "";
 }
 
+/** Run numbers can be followed by an allowed string. Check if there is
+*  one, remove it from the name and return the string, else return empty
+*  @param userString run number that may have a suffix
+*  @return the suffix, if there was one
+*/
+std::string FileFinderImpl::extractAllowedSuffix(std::string & userString) const
+{
+  if ( userString.find(ALLOWED_SUFFIX) == std::string::npos )
+  {
+    //short cut processing as normally there is no suffix
+    return "";
+  }
+
+  // ignore any file extension in checking if a suffix is present
+  Poco::Path entry(userString);
+  std::string noExt(entry.getBaseName());
+  const int repNumChars = ALLOWED_SUFFIX.size();
+  if ( noExt.find(ALLOWED_SUFFIX) == noExt.size() - repNumChars)
+  {
+    userString.replace(userString.size()-repNumChars, repNumChars, "");
+    return ALLOWED_SUFFIX;
+  }
+  return "";
+}
+
 /**
  * Extracts the instrument name and run number from a hint
  * @param hint :: The name hint
@@ -150,20 +177,27 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
   if (hint.empty())
     return "";
 
-  std::pair<std::string, std::string> p = toInstrumentAndNumber(hint);
+  std::string filename(hint);
+  const std::string suffix = extractAllowedSuffix(filename);
+
+  std::pair<std::string, std::string> p = toInstrumentAndNumber(filename);
 
   Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(p.first);
   std::string delimiter = instr.delimiter();
 
-  if (delimiter.empty())
+  filename = p.first;
+  if ( ! delimiter.empty() )
   {
-    return p.first + p.second;
+    filename += delimiter;
   }
-  else
+  filename += p.second;
+  
+  if ( ! suffix.empty() )
   {
-    return p.first + delimiter + p.second;
+    filename += suffix;
   }
 
+  return filename;
 }
 
 /**
@@ -177,6 +211,7 @@ std::string FileFinderImpl::makeFileName(const std::string& hint) const
 std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
 {
   if( hint.empty() ) return "";
+
   Poco::Path hintPath(hint);
   if( !hintPath.getExtension().empty() )
   {

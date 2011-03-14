@@ -326,8 +326,8 @@ std::string FileProperty::convertExtension(const std::string & filepath) const
   Poco::Path fullpath(filepath);
   std::string ext = fullpath.getExtension();
   if( ext.empty() ) return filepath;
-  int nchars = ext.size();
-  for( int i = 0; i < nchars; ++i )
+  const size_t nchars = ext.size();
+  for( size_t i = 0; i < nchars; ++i )
   {
     int c = static_cast<int>(ext[i]);
     if( std::islower(c) )

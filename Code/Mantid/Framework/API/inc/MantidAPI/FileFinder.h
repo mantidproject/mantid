@@ -51,13 +51,16 @@ namespace Mantid
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<FileFinderImpl>;
+
+      /// a string that is allowed at the end of any run number
+      static const std::string ALLOWED_SUFFIX;
       /// Default constructor
       FileFinderImpl();
       /// Copy constructor
       FileFinderImpl(const FileFinderImpl&);
       /// Assignment operator
       FileFinderImpl& operator=(const FileFinderImpl&);
-
+      std::string extractAllowedSuffix(std::string & userString) const;
       std::pair<std::string,std::string> toInstrumentAndNumber(const std::string& hint)const;
 
     };

@@ -147,14 +147,13 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
             reduced = WavRangeReduction(full_trans_wav=full_trans_wav)
 
-        #save result workspaces
-        file_1 = run['output_as'] + '.txt'
+        file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
-        if file_1 != '.txt':
+        if file != '':
             if type(saveAlgs) == str:
                 saveAlgs = (saveAlgs, )
             for algor in saveAlgs:
-                exec(algor+"(reduced,file_1)")
+                exec(algor+"(reduced,file)")
 
         if verbose:
             mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))
