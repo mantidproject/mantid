@@ -176,6 +176,14 @@ public:
     performTest(work_in1,work_in2);
   }
 
+  void test_2D_SingleValue_inPlace()
+  {
+    int nHist = 20,nBins=300;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(10.0);
+    performTest(work_in1,work_in2, false /*not event out*/, 0.2, 0.1549, false, false, true /* do it in place */ );
+  }
+
   void test_SingleValue_2D_failsIfDivide()
   {
     int nHist = 5,nBins=300;
