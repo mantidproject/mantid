@@ -837,6 +837,7 @@ class MantidPyFramework(FrameworkManager):
         self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=True)
         self.createPythonSimpleAPI(GUI)
+        self._pyalg_loader.load_modules(refresh=True)
         self._importSimpleAPIToMain()     
 
         self.__is_initialized = True
