@@ -1,55 +1,132 @@
 #ifndef PLUSTEST_H_
 #define PLUSTEST_H_
-
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/Minus.h"
 #include "MantidAlgorithms/Plus.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/WorkspaceOpOverloads.h"
-#include "MantidAPI/WorkspaceProperty.h"
-#include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/DateAndTime.h"
-#include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidDataObjects/Workspace1D.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
 using namespace Mantid::DataObjects;
-using Mantid::MantidVec;
-using Mantid::MantidVecPtr;
+
+
+/*****************************************************************************************/
+/********** PLEASE NOTE! THIS TEST IS SHARED (copy/pasted) WITH MinusTest.h **************/
+/*****************************************************************************************/
+
 
 class PlusTest : public CxxTest::TestSuite
 {
-
 public:
+
   bool DO_PLUS;
   std::string message;
 
-  //Constructor
   PlusTest()
   {
+    numBins = 10;
+    numPixels = 6;
+    wsNameOut = "MinusTest_outputWorkspace";
     DO_PLUS = true;
-    message = "";
   }
 
 
   void testInit()
   {
-    Plus alg;
-    TS_ASSERT_THROWS_NOTHING(alg.initialize());
-    TS_ASSERT(alg.isInitialized());
+    IAlgorithm * alg = NULL;
+    if (DO_PLUS)
+    {
+      alg = new Plus;
+    }
+    else
+    {
+      alg = new Minus;
+    }
+    TS_ASSERT( alg );
+    TS_ASSERT_THROWS_NOTHING(alg->initialize());
+    TS_ASSERT(alg->isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg.setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
-    TS_ASSERT_THROWS( alg.setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace","test_out2") );
+    TS_ASSERT_THROWS( alg->setPropertyValue("LHSWorkspace","test_in21"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg->setPropertyValue("RHSWorkspace","test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue("OutputWorkspace","test_out2") );
   }
-  
 
+
+
+
+  //====================================================================================
+  //====================================================================================
+  //====================================================================================
+
+
+  void test_CompoundAssignment()
+  {
+    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+    const Workspace_const_sptr b = a;
+    MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+    if (DO_PLUS)
+    {
+      a += 5;
+      TS_ASSERT_EQUALS(a->readY(0)[0],8);
+      TS_ASSERT_EQUALS(a,b);
+      a += c;
+      TS_ASSERT_EQUALS(a->readY(0)[0],10);
+      TS_ASSERT_EQUALS(a,b);
+    }
+    else
+    {
+      a -= 5;
+      TS_ASSERT_EQUALS(a->readY(0)[0],-2);
+      TS_ASSERT_EQUALS(a,b);
+      a -= c;
+      TS_ASSERT_EQUALS(a->readY(0)[0],-4);
+      TS_ASSERT_EQUALS(a,b);
+    }
+  }
+
+
+  /// The Plus algorithm sums values in the Run object. Minus does not.
+  void test_RunAddition()
+  {
+    if (DO_PLUS)
+    {
+      MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
+      a->mutableRun().setProtonCharge(10.);
+      MatrixWorkspace_sptr b = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
+      b->mutableRun().setProtonCharge(5.);
+
+      AnalysisDataService::Instance().add("a", a);
+      AnalysisDataService::Instance().add("b", b);
+
+      Plus alg;
+      alg.initialize();
+      TS_ASSERT_THROWS_NOTHING(
+          alg.setPropertyValue("LHSWorkspace","a");
+      alg.setPropertyValue("RHSWorkspace","b");
+      alg.setPropertyValue("OutputWorkspace","c");
+      )
+      alg.execute();
+
+      MatrixWorkspace_sptr work_out1;
+      TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("c")));
+
+      TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), 15.0, 1e-8);
+
+      AnalysisDataService::Instance().remove("a");
+      AnalysisDataService::Instance().remove("b");
+      AnalysisDataService::Instance().remove("c");
+    }
+  }
 
 
 
@@ -119,7 +196,10 @@ public:
     int nHist = 10,nBins=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace123(1,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace154(nHist,nBins);
-    performTest(work_in1,work_in2);
+    if (DO_PLUS)
+      performTest(work_in1,work_in2);
+    else
+      performTest_fails(work_in1,work_in2);
   }
 
   void test_2D_2DSingleSpectrumBiggerSize_fails()
@@ -158,7 +238,10 @@ public:
     int nBins = 10;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.2);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
-    performTest(work_in1,work_in2); // will commute L and R
+    if (DO_PLUS)
+      performTest(work_in1,work_in2);
+    else
+      performTest_fails(work_in1,work_in2);
   }
 
   void test_2D_SingleValue()
@@ -169,12 +252,24 @@ public:
     performTest(work_in1,work_in2);
   }
 
+  void test_2D_SingleValue_InPlace()
+  {
+    int nHist =10,nBins=300;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
+    performTest(work_in1,work_in2, true /*in place*/, false /*not event*/,
+        DO_PLUS ? 6.455 : -2.455,   2.5406);
+  }
+
   void test_SingleValue_2D()
   {
     int nHist = 5,nBins=300;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
-    performTest(work_in1,work_in2);
+    if (DO_PLUS)
+      performTest(work_in1,work_in2);
+    else
+      performTest_fails(work_in1,work_in2);
   }
 
   void test_2D_SingleValueNoError()
@@ -209,10 +304,14 @@ public:
   void test_SingleValue_Event()
   {
     int nHist = 10,nBins=20;
-    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2.0);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     // Become a WS2D
-    performTest(work_in1, work_in2, false, false /*output is NOT event*/ );
+    if (DO_PLUS)
+      performTest(work_in1, work_in2, false, false /*output is NOT event*/ );
+    else
+      performTest_fails(work_in1,work_in2);
+
   }
 
   void test_SingleValue_Event_inPlace_fails()
@@ -240,7 +339,8 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist, nBins,100,0.0,1.0,2);
     // You have to specify the expected output value because in1 gets changed.
-    performTest(work_in1,work_in2, true, false /*not event out*/, 4.0, 2.0);
+    performTest(work_in1,work_in2, true, false /*not event out*/,
+        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
   }
 
   void test_Event_2D()
@@ -284,7 +384,10 @@ public:
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(1, nBins);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      performTest_fails(work_in1,work_in2, inplace);
+      if (DO_PLUS)
+        performTest(work_in1,work_in2, inplace, false /*not event*/, 4.0, 2.0); // Commutes if doing it with event workspace
+      else
+        performTest_fails(work_in1,work_in2, inplace);
     }
   }
 
@@ -304,7 +407,8 @@ public:
     int nHist = 10,nBins=20;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-    MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, true, true /*outputIsEvent*/, 4.0, 2.0);
+    MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, true, true /*outputIsEvent*/,
+        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
   }
 
   void test_Event_EventSingleSpectrum_fails()
@@ -331,7 +435,8 @@ public:
       int nHist = 10,nBins=1;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/, 4.0, 2.0);
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
+          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
 
@@ -342,7 +447,8 @@ public:
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,1,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/, 4.0, 2.0);
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
+          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
 
@@ -353,259 +459,96 @@ public:
       int nHist = 10,nBins=20;
       MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,1,100,0.0,1.0,2);
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
-      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/, 4.0, 2.0);
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
+          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
   }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  void testCompoundAssignment()
+  void test_EventWithASingleBinAndSingleSpectrum_EventWithASingleBinAndSingleSpectrum()
   {
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
-    const Workspace_const_sptr b = a;
-    MatrixWorkspace_sptr c = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-    a += 5;
-    TS_ASSERT_EQUALS(a->readY(0)[0],8);
-    TS_ASSERT_EQUALS(a,b);
-    a += c;
-    TS_ASSERT_EQUALS(a->readY(0)[0],10);
-    TS_ASSERT_EQUALS(a,b);
-  }
-
-  void testRunAddition()
-  {
-    MatrixWorkspace_sptr a = WorkspaceCreationHelper::CreateWorkspaceSingleValue(3);
-    a->mutableRun().setProtonCharge(10.);
-    MatrixWorkspace_sptr b = WorkspaceCreationHelper::CreateWorkspaceSingleValue(2);
-    b->mutableRun().setProtonCharge(5.);
-
-    AnalysisDataService::Instance().add("a", a);
-    AnalysisDataService::Instance().add("b", b);
-
-    Plus alg;
-    alg.initialize();
-    TS_ASSERT_THROWS_NOTHING(
-      alg.setPropertyValue("LHSWorkspace","a");
-      alg.setPropertyValue("RHSWorkspace","b");    
-      alg.setPropertyValue("OutputWorkspace","c");
-    )
-    alg.execute();
-
-    MatrixWorkspace_sptr work_out1;
-    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("c")));
-
-    TS_ASSERT_DELTA(work_out1->run().getProtonCharge(), 15.0, 1e-8);
-   
-    AnalysisDataService::Instance().remove("a");
-    AnalysisDataService::Instance().remove("b");
-    AnalysisDataService::Instance().remove("c");
-  }
-  
-
-
-  void EventSetup()
-  {
-    AnalysisDataService::Instance().addOrReplace("ev1", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3))); // 100 ev
-    AnalysisDataService::Instance().addOrReplace("ev2", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2))); //200 ev
-    AnalysisDataService::Instance().addOrReplace("ev3", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
-    //Make one with weird units
-    MatrixWorkspace_sptr ev4 = boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100));
-    ev4->setYUnit("Microfurlongs per Megafortnights");
-    AnalysisDataService::Instance().addOrReplace("ev4_weird_units",ev4);
-    //Different # of spectra
-    AnalysisDataService::Instance().addOrReplace("ev5", boost::dynamic_pointer_cast<MatrixWorkspace>(WorkspaceCreationHelper::CreateEventWorkspace(5,10,100, 0.0, 1.0, 2, 100))); //200 events per spectrum, but the spectra are at different pixel ids
-    //a 2d workspace with the value 2 in each bin
-    AnalysisDataService::Instance().addOrReplace("in2D", WorkspaceCreationHelper::Create2DWorkspaceBinned(3, 10, 0.0, 1.0));
-
-  }
-
-  void EventTeardown()
-  {
-    AnalysisDataService::Instance().remove("ev1");
-    AnalysisDataService::Instance().remove("ev2");
-    AnalysisDataService::Instance().remove("ev3");
-    AnalysisDataService::Instance().remove("ev4_weird_units");
-    AnalysisDataService::Instance().remove("ev5");
-    AnalysisDataService::Instance().remove("in2D");
-    AnalysisDataService::Instance().remove("evOUT");
-    AnalysisDataService::Instance().remove("out2D");
-  }
-
-  //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_IncompatibleUnits_Fail()
-  {
-    EventSetup();
-    Plus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","ev4_weird_units");
-    alg.setPropertyValue("OutputWorkspace", "evOUT");
-    alg.execute();
-    TS_ASSERT( !alg.isExecuted() );
-    EventTeardown();
-  }
-
-
-  //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_addingInPlace_AllSameWorkspaces()
-  {
-    EventSetup();
-
-    std::string in1_name("ev1");
-    std::string in2_name("ev1");
-    std::string out_name("ev1");
-
-    EventWorkspace_sptr in1, in2, out;
-    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
-    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
-    int numEvents1 = in1->getNumberEvents();
-    int numEvents2 = in2->getNumberEvents();
-    TimeSeriesProperty<double> * p = new TimeSeriesProperty<double>("some_log");
-    p->addValue( DateAndTime::get_current_time(), 123.5 );
-    in1->mutableRun().addLogData( p );
-
-    //Tests that the workspace is okay at first
-    TS_ASSERT_EQUALS( in1->blocksize(), 10);
-    for (int wi=0; wi < 3; wi++)
-      for (int i=0; i<in1->blocksize(); i++)
-        TS_ASSERT_EQUALS( in1->readY(wi)[i], 1);
-
-    Plus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",in1_name);
-    alg.setPropertyValue("RHSWorkspace",in2_name);
-    alg.setPropertyValue("OutputWorkspace",out_name);
-    alg.execute();
-
-    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name)); )
-    int numEventsOut = out->getNumberEvents();
-
-    //Correct in output
-    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
-    //10 bins copied
-    TS_ASSERT_EQUALS( out->blocksize(), 10);
-    for (int wi=0; wi < 3; wi++)
-      for (int i=0; i<out->blocksize(); i++)
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 2);
-
-    //But they were added in #1
-    TS_ASSERT_EQUALS( in1->getNumberEvents(), numEvents1+numEvents2);
-    TS_ASSERT_EQUALS( in1, out);
-    TS_ASSERT_EQUALS( in2, out);
-
-    EventTeardown();
-  }
-
-  //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_differentOutputAndDifferentPixelIDs()
-  {
-    EventSetup();
-
-    std::string in1_name("ev1");
-    std::string in2_name("ev3");
-    std::string out_name("evOUT");
-
-    EventWorkspace_sptr in1, in2, out;
-    TS_ASSERT_THROWS_NOTHING(in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in1_name)));
-    TS_ASSERT_THROWS_NOTHING(in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(in2_name)));
-    int numEvents1 = in1->getNumberEvents();
-    int numEvents2 = in2->getNumberEvents();
-
-    IndexToIndexMap *rhs_map = in2->getWorkspaceIndexToDetectorIDMap();
-    //First pixel id of rhs is 100
-    TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
-
-    Plus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace",in1_name);
-    alg.setPropertyValue("RHSWorkspace",in2_name);
-    alg.setPropertyValue("OutputWorkspace",out_name);
-    alg.execute();
-
-    TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(out_name)); )
-    //Ya, its an event workspace
-    TS_ASSERT(out);
-    if (!out) return;
-    int numEventsOut = out->getNumberEvents();
-
-    //Correct in output
-    TS_ASSERT_EQUALS( out->getNumberEvents(), numEvents1+numEvents2);
-    //Still the same # of histograms
-    TS_ASSERT_EQUALS( out->getNumberHistograms(), 3);
-    //10 bins copied
-    TS_ASSERT_EQUALS( out->blocksize(), 10);
-
-    //1 event per pixel for the first 3 histograms (pixels 0-2)
-    for (int wi=0; wi < 3; wi++)
-      for (int i=0; i < out->blocksize(); i++)
-        TS_ASSERT_EQUALS( out->readY(wi)[i], 3);
-
-    //But two detector IDs in each one
-    for (int i=0; i<3; i++)
+    for(int inplace=0; inplace<2;inplace++)
     {
-      std::vector<int> detList = out->spectraMap().getDetectors(i);
-      TS_ASSERT_EQUALS( detList[0], 0+i );
-      TS_ASSERT_EQUALS( detList[1], 100+i );
+      int nHist=1,nBins=1;
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
+          DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
     }
-
-    //But they were added in #1
-    TS_ASSERT_DIFFERS( in1, out);
-    TS_ASSERT_DIFFERS( in2, out);
-
-    EventTeardown();
   }
+
+
+  /** EW1 = EW1 + EW1
+   * This would cause an infinite loop.
+   */
+  void test_Event_InPlace_AllSameWorkspaces()
+  {
+    int nHist = 10,nBins=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, false, true /*outputIsEvent*/,
+        DO_PLUS ? 4.0 : 0.0,   DO_PLUS ? 2.0 : 2.0);
+  }
+
+
+
+
+
+
+  //====================================================================================
+  //====================================================================================
+  //====================================================================================
+
 
   //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_addingInPlace_But_DifferentPixelIDs()
+  void test_Event_IncompatibleUnits_fails()
   {
-    EventSetup();
-    Plus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","ev3");
-    alg.setPropertyValue("OutputWorkspace","ev1");
-    alg.execute();
-    //Succeeds despite detector id mismatch
-    TS_ASSERT( alg.isExecuted() );
-
-    EventTeardown();
+    int nHist = 10,nBins=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(nHist,nBins,100,0.0,1.0,2);
+    work_in2->setYUnit("Microfurlongs per Megafortnights");
+    performTest_fails(work_in1,work_in2, false /*not inplace*/);
   }
 
 
   //------------------------------------------------------------------------------------------------
-  void testEventWorkspaces_Event_DifferentSizesFail()
+  void test_Event_differentOutputAndDifferentPixelIDs()
   {
-    EventSetup();
-    Plus alg;
-    alg.initialize();
-    alg.setPropertyValue("LHSWorkspace","ev1");
-    alg.setPropertyValue("RHSWorkspace","ev5");
-    alg.setPropertyValue("OutputWorkspace","evOUT");
-    alg.execute();
-    TS_ASSERT( ! alg.isExecuted() );
-    EventTeardown();
+    for (int inplace =0; inplace < 2; inplace++)
+    {
+      MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 3); // 100 ev
+      MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100); //200 events per spectrum, but the spectra are at different pixel ids
+
+      //First pixel id of rhs is 100
+      IndexToIndexMap *rhs_map = work_in2->getWorkspaceIndexToDetectorIDMap();
+      TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
+
+      MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
+          DO_PLUS ? 3.0 : -1.0,   DO_PLUS ? 1.7320 : 1.7320);
+
+      //Ya, its an event workspace
+      TS_ASSERT(work_out);
+      if (!work_out) return;
+
+      //But two detector IDs in each one
+      for (int i=0; i<3; i++)
+      {
+        std::vector<int> detList = work_out->spectraMap().getDetectors(i);
+        TS_ASSERT_EQUALS( detList[0], 0+i );
+        if (DO_PLUS)
+        {
+          TS_ASSERT_EQUALS( detList[1], 100+i );
+        }
+      }
+    }
   }
 
 
-private:
+
+
+
+
+
+  //============================================================================
 
 
   std::string describe_workspace(const MatrixWorkspace_sptr ws)
@@ -647,13 +590,19 @@ private:
    * If outputIsEvent is true, check that the ouput is a EventWorkspace.
    * If expectedValue and expectedError are specified, look for all data items to be those values.
    *
-   * @param algorithmWillCommute :: the algorithm will swap LHS and RHS when calculating.
-   *        Take that into accound when calculating the expected result.
-   *
+   * @param work_in1
+   * @param work_in2
+   * @param doInPlace :: do A = A + B
+   * @param outputIsEvent :: output workspace will be EventWorkspace
+   * @param expectedValue
+   * @param expectedError
+   * @param allWorkspacesSameName :: do A = A + A
+   * @return
    */
   MatrixWorkspace_sptr performTest(const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2, bool doInPlace = false,
       bool outputIsEvent = false, double expectedValue=-1.0, double expectedError=-1.0,
-      bool algorithmWillCommute = false, bool allowMismatchedSpectra = false
+      bool allWorkspacesSameName = false, bool algorithmWillCommute = false,
+      bool allowMismatchedSpectra = false
   )
   {
     bool automessage = set_message(work_in1, work_in2, doInPlace);
@@ -684,8 +633,19 @@ private:
       if (algorithmWillCommute) wsNameOut = wsName2;
     }
 
-    AnalysisDataService::Instance().add(wsName1, work_in1);
-    AnalysisDataService::Instance().add(wsName2, work_in2);
+    if (allWorkspacesSameName)
+    {
+      wsName1 = base + "_inplace3";
+      wsName2 = base + "_inplace3";
+      wsNameOut = base + "_inplace3";
+      AnalysisDataService::Instance().add(wsName1, work_in1);
+    }
+    else
+    {
+      AnalysisDataService::Instance().add(wsName1, work_in1);
+      AnalysisDataService::Instance().add(wsName2, work_in2);
+    }
+
     alg->initialize();
     alg->setPropertyValue("LHSWorkspace",wsName1);
     alg->setPropertyValue("RHSWorkspace",wsName2);
@@ -877,6 +837,228 @@ private:
     return (diff < 0.0001);
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  int numBins;
+  int numPixels;
+  std::string wsName_EW, wsName_2D, wsNameOut;
+  EventWorkspace_sptr work_in1;
+  Workspace2D_sptr work_in2;
+
+
+  // Perform the test for given types
+  void performTest_withClearRHS(MatrixWorkspace_sptr lhs, MatrixWorkspace_sptr rhs,
+      bool clearRHS, bool expectEventOutput,
+      size_t expectedOutputNumberEventsInOutput,
+      bool rhsShouldBeCleared,
+      int outputWorkspaceWillBe = 0
+      )
+  {
+    lhs->setName("MinusTest_lhs");
+    rhs->setName("MinusTest_rhs");
+    switch (outputWorkspaceWillBe)
+    {
+    case 0:
+      wsNameOut = "MinusTest_output";
+      if (AnalysisDataService::Instance().doesExist(wsNameOut))
+        AnalysisDataService::Instance().remove(wsNameOut);
+      break;
+    case 1: wsNameOut = "MinusTest_lhs"; break;
+    case 2: wsNameOut = "MinusTest_rhs"; break;
+    }
+
+    TS_ASSERT_DELTA(  rhs->readY(0)[0], 2.00, 1e-5);
+    TS_ASSERT_DELTA(  rhs->readE(0)[0], sqrt(2.00), 1e-5);
+
+    //Do the minus
+    IAlgorithm * alg;
+    if (DO_PLUS)
+      alg = new Plus();
+    else
+      alg = new Minus();
+
+    alg->initialize();
+    alg->setProperty("LHSWorkspace",lhs);
+    alg->setProperty("RHSWorkspace",rhs);
+    alg->setPropertyValue("OutputWorkspace",wsNameOut);
+    alg->setProperty("ClearRHSWorkspace", clearRHS);
+    TS_ASSERT_THROWS_NOTHING(alg->execute());
+    TS_ASSERT( alg->isExecuted() );
+
+    //The output!
+    MatrixWorkspace_const_sptr work_out1;
+    TS_ASSERT_THROWS_NOTHING(work_out1 = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)));
+    TS_ASSERT(work_out1);
+    if (!work_out1)
+      return;
+
+    // The output is an EventWorkspace ?
+    EventWorkspace_const_sptr eventOut = boost::dynamic_pointer_cast<const EventWorkspace>(work_out1);
+    if (expectEventOutput)
+    {
+      TS_ASSERT(eventOut);
+      if (!eventOut) return;
+      TS_ASSERT_EQUALS( eventOut->getNumberEvents(), expectedOutputNumberEventsInOutput);
+    }
+    else
+    {
+      TS_ASSERT(!eventOut);
+    }
+
+    //Compare
+    for (int pix=0; pix < numPixels; pix+=1)
+      for (int i=0; i < numBins; i++)
+      {
+        if (DO_PLUS)
+        {
+          TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 4.00, 1e-5);
+          TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
+        }
+        else
+        {
+          TS_ASSERT_DELTA(  work_out1->dataY(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  work_out1->dataE(pix)[i], sqrt(4.00), 1e-5);
+        }
+
+        //Incoming event workspace should still have 2.0 for values
+        TS_ASSERT_DELTA(  lhs->readY(pix)[i], 2.00, 1e-5);
+        TS_ASSERT_DELTA(  lhs->readE(pix)[i], sqrt(2.0), 1e-5);
+
+        if (!rhsShouldBeCleared)
+        {
+          //Incoming event workspace should still have 2.0 for values
+          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 2.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->readE(pix)[i], sqrt(2.0), 1e-5);
+        }
+        else
+        {
+          // If you cleared it, should be 0
+          TS_ASSERT_DELTA(  rhs->readY(pix)[i], 0.00, 1e-5);
+          TS_ASSERT_DELTA(  rhs->readE(pix)[i], 0.00, 1e-5);
+        }
+      }
+
+  }
+
+
+  void test_EventWorkspace_minus_EventWorkspace()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, true, true, lhs->getNumberEvents() + rhs->getNumberEvents(), true);
+  }
+
+  void test_Workspace2D_minus_EventWorkspace()
+  {
+    MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, false, false, 0, false);
+  }
+
+  void test_Workspace2D_minus_EventWorkspace_clearRHS()
+  {
+    MatrixWorkspace_sptr lhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, true, false, 0, true);
+  }
+
+  void test_EventWorkspace_minus_Workspace2D()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
+    performTest_withClearRHS(lhs,rhs, false, false, 0, false);
+  }
+
+  void test_EventWorkspace_minus_Workspace2D_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    MatrixWorkspace_sptr rhs = WorkspaceCreationHelper::Create2DWorkspace(numPixels, numBins);
+    performTest_withClearRHS(lhs,rhs, true, false, 0, false);
+  }
+
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_lhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_AND_lhs_is_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 1);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_lhs_is_rhs_with_clearRHS_set_doesnt_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = lhs;
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false);
+  }
+
+  void test_EventWorkspace_minus_EventWorkspace_inPlace_of_rhs_with_clearRHS_set_doesnt_clearRHS()
+  {
+    EventWorkspace_sptr lhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    EventWorkspace_sptr rhs = WorkspaceCreationHelper::CreateEventWorkspace(numPixels, numBins, numBins, 0.0, 1.0, 2);
+    performTest_withClearRHS(lhs,rhs, false, true, lhs->getNumberEvents() + rhs->getNumberEvents(), false, 2);
+  }
+
+
+
+
+
 };
 
-#endif /*PLUSTEST_H_*/
+
+#endif
+

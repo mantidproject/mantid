@@ -57,7 +57,7 @@ namespace Mantid
       for (int j=0; j<bins; ++j)
       {
         // Get reference to input Y
-        const double& leftY = lhsY[j];
+        const double leftY = lhsY[j];
 
         // see comment in the function above for the error formula
         EOut[j] = sqrt( pow(lhsE[j], 2)+pow( leftY, 2)*rhsFactor )/rhsY;

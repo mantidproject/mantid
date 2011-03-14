@@ -186,7 +186,23 @@ namespace Mantid
         return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
       }
       else
-        return CommutativeBinaryOperation::checkSizeCompatibility(lhs, rhs);
+      {
+        //get the largest workspace
+        API::MatrixWorkspace_const_sptr wsLarger;
+        API::MatrixWorkspace_const_sptr wsSmaller;
+        if (rhs->size() > lhs->size())
+        {
+          wsLarger = rhs;
+          wsSmaller = lhs;
+        }
+        else
+        {
+          wsLarger = lhs;
+          wsSmaller = rhs;
+        }
+        //call the base routine
+        return BinaryOperation::checkSizeCompatibility(wsLarger,wsSmaller);
+      }
     }
 
     //---------------------------------------------------------------------------------------------

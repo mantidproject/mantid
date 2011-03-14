@@ -42,27 +42,6 @@ namespace Mantid
         EOut = lhsE;
     }
     
-    bool Minus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
-    {
-      if ( lhs->size() > 1 && rhs->size() > 1 )
-      {
-        if ( lhs->YUnit() != rhs->YUnit() )
-        {
-          g_log.error("The two workspace are not compatible because they have different units for the data (Y).");
-          return false;
-        }
-        if ( lhs->isDistribution() != rhs->isDistribution() )
-        {
-          g_log.error("The two workspace are not compatible because one is flagged as a distribution.");
-          return false;
-        }
-      }
-      
-      return BinaryOperation::checkCompatibility(lhs,rhs);
-    }
-
-
-
 
 
     // ===================================== EVENT LIST BINARY OPERATIONS ==========================================
@@ -143,6 +122,70 @@ namespace Mantid
         BinaryOperation::checkRequirements();
       }
     }
+
+
+    //---------------------------------------------------------------------------------------------
+    /**
+     *  Return true if the units and distribution-type of the workspaces make them compatible
+     *  @param lhs :: first workspace to check for compatibility
+     *  @param rhs :: second workspace to check for compatibility
+     *  @return workspace unit compatibility flag
+     */
+    bool Minus::checkUnitCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if ( lhs->size() > 1 && rhs->size() > 1 )
+      {
+        if ( lhs->YUnit() != rhs->YUnit() )
+        {
+          g_log.error("The two workspaces are not compatible because they have different units for the data (Y).");
+          return false;
+        }
+        if ( lhs->isDistribution() != rhs->isDistribution() )
+        {
+          g_log.error("The two workspaces are not compatible because one is flagged as a distribution.");
+          return false;
+        }
+      }
+      return true;
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /**
+     *  Check the given workspaces for unit, distribution and binary operation
+     *  compatibility. Return is true is the workspaces are compatible.
+     *  @param lhs :: first workspace to check for compatibility
+     *  @param rhs :: second workspace to check for compatibility
+     *  @return workspace compatibility flag
+     */
+    bool Minus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if (!checkUnitCompatibility(lhs, rhs))
+        return false;
+
+      //Keep checking more generally.
+      return BinaryOperation::checkCompatibility(lhs,rhs);
+    }
+
+
+    //--------------------------------------------------------------------------------------------
+    /** Performs a simple check to see if the sizes of two workspaces are compatible for a binary operation
+     *  In order to be size compatible then the larger workspace
+     *  must divide be the size of the smaller workspace leaving no remainder
+     *  @param lhs :: the first workspace to compare
+     *  @param rhs :: the second workspace to compare
+     *  @retval true The two workspaces are size compatible
+     *  @retval false The two workspaces are NOT size compatible
+     */
+    bool Minus::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
+    {
+      if (m_erhs && m_elhs)
+      {
+        return ( lhs->getNumberHistograms() == rhs->getNumberHistograms() );
+      }
+      else
+        return BinaryOperation::checkSizeCompatibility(lhs, rhs);
+    }
+
 
 
   }

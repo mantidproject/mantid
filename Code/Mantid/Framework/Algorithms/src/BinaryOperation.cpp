@@ -301,7 +301,7 @@ namespace Mantid
     {
       const int lhsSize = lhs->size();
       const int rhsSize = rhs->size();
-      // A SingleValueWorkspace matches anything
+      // A SingleValueWorkspace on the right matches anything
       if ( rhsSize == 1 ) return true;
       // The rhs must not be smaller than the lhs
       if ( lhsSize < rhsSize ) return false;
