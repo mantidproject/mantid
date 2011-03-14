@@ -992,7 +992,8 @@ class PyAlgLoader(object):
 
         # Now connect the relevant signals to monitor for algorithm factory updates
         self.framework.sendLogMessage('PyAlgLoader.load_modules: refresh=%s, changes=%s' % (str(refresh), str(changes)))
-        self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
+        #self.framework._observeAlgFactoryUpdates(True, (refresh and changes))
+        self.framework._observeAlgFactoryUpdates(True, True)
 
 #
 # ------- Private methods --------------
