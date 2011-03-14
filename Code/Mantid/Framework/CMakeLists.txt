@@ -136,4 +136,6 @@ if ( MAKE_VATES )
   set ( FRAMEWORK_LIBS ${FRAMEWORK_LIBS} MDDataObjects MDAlgorithms MDEvents)
 endif ()
 
-add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS} )
+add_custom_target ( Framework DEPENDS ${FRAMEWORK_LIBS})
+
+

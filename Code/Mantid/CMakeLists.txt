@@ -70,21 +70,7 @@ endif ()
 
 # For the build servers, use patchelf to remove the rpaths (linux only)
 find_package ( Patchelf )
-set ( RUN_PATCHELF OFF CACHE BOOL "Switch for running patchelf to strip rpaths from executables (Linux; this allows copying the binaries)")
-if ( RUN_PATCHELF )
-  MESSAGE ("RUN_PATCHELF is ON. Setting up patchelf command." )
-  add_custom_command( 
-	OUTPUT patch_all
-	POST_BUILD
-	COMMAND bash ${CMAKE_SOURCE_DIR}/TestingTools/patchelf_all.sh
-	WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-	COMMENT "Strips RPATH from all executables generated."
-	)
-  add_custom_target( run_patchelf DEPENDS patch_all)
-endif ()
-
-#	COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/TestingTools/patchelf_all.sh ${CMAKE_CURRENT_BINARY_DIR}
-#	COMMAND bash ${CMAKE_SOURCE_DIR}/TestingTools/patchelf_all.sh
+# set ( RUN_PATCHELF OFF CACHE BOOL "Switch for running patchelf to strip rpaths from executables (Linux; this allows copying the binaries)")
 
 
 

@@ -262,3 +262,13 @@ add_custom_command ( TARGET Kernel POST_BUILD
                        ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
                        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
+
+# Copy a shell script for patchelf if it is found 
+if ( PATCHELF_FOUND )
+	add_custom_command ( TARGET Kernel POST_BUILD
+		             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
+		              	${CMAKE_SOURCE_DIR}/TestingTools/patchelf_all.sh
+		               	${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+	)
+endif ()
+
