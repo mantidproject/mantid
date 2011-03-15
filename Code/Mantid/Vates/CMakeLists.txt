@@ -24,21 +24,9 @@ endif ( VISIT_FOUND AND (NOT USE_PARAVIEW) )
 
 # Paraview dependencies built if Paraview is found
 find_package( ParaView QUIET ) #TODO switch from QUIET to REQUIRED
-if(ParaView_FOUND AND USE_PARAVIEW )
-
-  set ( VTK_SOURCE_DIR CACHE PATH "VTK Source Directory")
-    if(EXISTS ${VTK_SOURCE_DIR} )
-      
-      #Build Paraview Plugins
-      add_subdirectory( ParaviewPlugins )
-
-    else(EXISTS ${VTK_SOURCE_DIR})
-      MESSAGE("The VTK Source Directory must be provided. This should be a subdirectory of the Paraview Source Directory")
-    endif(EXISTS ${VTK_SOURCE_DIR})
-
-else( ParaView_FOUND AND USE_PARAVIEW)
+if(NOT ParaView_FOUND OR NOT USE_PARAVIEW )
   message( STATUS "Vates-Paraview plugins and widgets will not be built.") #TODO Nice message should be escalated
-endif( ParaView_FOUND AND USE_PARAVIEW )
+endif( NOT ParaView_FOUND OR NOT USE_PARAVIEW )
 
 
 
