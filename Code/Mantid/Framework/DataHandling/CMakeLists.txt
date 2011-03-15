@@ -64,6 +64,7 @@ set ( SRC_FILES
 		src/SaveGSS.cpp
 		src/SavePHX.cpp
 		src/SaveRKH.cpp
+		src/SaveNISTDAT.cpp
 		src/SaveSPE.cpp
 		src/SaveVTK.cpp
 		src/SetScalingPSD.cpp
@@ -121,6 +122,7 @@ set ( INC_FILES
 		inc/MantidDataHandling/SaveGSS.h
 		inc/MantidDataHandling/SavePHX.h
 		inc/MantidDataHandling/SaveRKH.h
+		inc/MantidDataHandling/SaveNISTDAT.h
 		inc/MantidDataHandling/SaveSPE.h
 		inc/MantidDataHandling/SaveVTK.h
 		inc/MantidDataHandling/SetScalingPSD.h
