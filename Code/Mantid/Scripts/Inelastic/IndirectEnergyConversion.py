@@ -56,7 +56,6 @@ def convert_to_energy(rawfiles, grouping, first, last,
             applyParameterFile(ws, analyser, reflection)
         if isTosca:
             invalid = getBadDetectorList(ws)
-            TofCorrection(ws, ws)
             factor = 1e9
         else:
             factor = 1e6
@@ -129,9 +128,8 @@ def toscaChop(files, area, thickness):
         chopdata = ChopData(raw,raw+'_data')
         wsgroup = mtd[raw+'_data'].getNames()
         for ws in wsgroup:
-            TofCorrection(ws, ws)
             ExtractSingleSpectrum(ws, ws+'mon', 140)
-            ConvertUnits(ws+'mon', ws+'mon', 'Wavelength')
+            ConvertUnits(ws+'mon', ws+'mon', 'Wavelength', 'Indirect')
             monitorEfficiency(ws+'mon', area, thickness)
             CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
             normToMon(Factor=1e9, monitor=ws+'mon', detectors=ws)
@@ -206,7 +204,7 @@ def getFirstMonFirstDet(inWS):
 def timeRegime(Smooth=True, monitor='', detectors='', FortranUnwrap=False):
     SpecMon = mtd[monitor].readX(0)[0]
     SpecDet = mtd[detectors].readX(0)[0]
-    if ( SpecMon == SpecDet ):
+    if ( SpecMon == SpecDet ) and not adjustTOF(monitor):
         if FortranUnwrap:
             fuworked = fortranUnwrap(monitor)
             if fuworked:
@@ -221,7 +219,7 @@ def timeRegime(Smooth=True, monitor='', detectors='', FortranUnwrap=False):
         if Smooth:
             FFTSmooth(monitor, monitor, 0)
     else:
-        ConvertUnits(monitor, monitor, 'Wavelength')
+        ConvertUnits(monitor, monitor, 'Wavelength', 'Indirect')
     return monitor
 
 def fortranUnwrap(monitor):
@@ -233,7 +231,7 @@ def fortranUnwrap(monitor):
             return False
     except ImportError:
         return False
-    ConvertUnits(monitor,monitor,"Wavelength")
+    ConvertUnits(monitor,monitor,'Wavelength', 'Indirect')
     ws = mtd[monitor]
     Xin = ws.readX(0)
     ntc = len(Xin)-1 # get no. points from length of x array
@@ -284,7 +282,7 @@ def useCalib(detectors=''):
     return detectors
 
 def normToMon(Factor=1e6, monitor='', detectors=''):
-    ConvertUnits(detectors,detectors, 'Wavelength', EMode='Indirect')
+    ConvertUnits(detectors, detectors, 'Wavelength', 'Indirect')
     RebinToWorkspace(detectors,monitor,detectors)
     Divide(detectors,monitor,detectors)
     Scale(detectors, detectors, Factor)

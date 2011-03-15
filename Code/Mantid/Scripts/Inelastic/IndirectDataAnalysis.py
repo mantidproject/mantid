@@ -490,8 +490,12 @@ def getWSprefix(workspace):
     ins = ws.getInstrument().getName()
     ins = ConfigService().facility().instrument(ins).shortName().lower()
     run = ws.getRun().getLogData('run_number').value
-    analyser = ws.getInstrument().getStringParameter('analyser')[0]
-    reflection = ws.getInstrument().getStringParameter('reflection')[0]
+    try:
+        analyser = ws.getInstrument().getStringParameter('analyser')[0]
+        reflection = ws.getInstrument().getStringParameter('reflection')[0]
+    except IndexError:
+        analyser = ''
+        reflection = ''
     prefix = ins + run + '_' + analyser + reflection + '_'
     return prefix
 
