@@ -108,7 +108,8 @@ namespace Mantid
        col = peaksW->get_column(i);
        row = peaksW->get_row(i);
        chan = peaksW->get_time_channel(i);
-       l2 = peaksW->get_L2(i);
+       Geometry::V3D pos = peaksW->getPosition(i);
+       l2 = pos.norm();
        wl = peaksW->get_wavelength(i);
        ipk = peaksW->get_ipk(i);
 
