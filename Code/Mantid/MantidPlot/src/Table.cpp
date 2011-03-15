@@ -1589,32 +1589,35 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
 
     for(int i=0;i<cols;i++){// Since we have the permutation index, sort all the columns
       int col=colIndex(s[i]);
-      if (d_table->isColumnReadOnly(col))
-        continue;
+      if (col >= 0)
+      {
+        if (d_table->isColumnReadOnly(col))
+          continue;
 
-      if (columnType(col) == Text){
-        for (int j=0; j<non_empty_cells; j++)
-          data_string[j] = text(valid_cell[j], col);
-        if(!order)
+        if (columnType(col) == Text){
           for (int j=0; j<non_empty_cells; j++)
-            d_table->setText(valid_cell[j], col, data_string[p[j]]);
-        else
-          for (int j=0; j<non_empty_cells; j++)
-            d_table->setText(valid_cell[j], col, data_string[p[non_empty_cells-j-1]]);
-      }else{
-        for (int j = 0; j<non_empty_cells; j++)
-          data_double[j] = cell(valid_cell[j], col);
-        int prec;
-        char f;
-        columnNumericFormat(col, &f, &prec);
-        if(!order)
-          for (int j=0; j<non_empty_cells; j++)
-            d_table->setText(valid_cell[j], col, locale().toString(data_double[p[j]], f, prec));
-        else
-          for (int j=0; j<non_empty_cells; j++)
-            d_table->setText(valid_cell[j], col, locale().toString(data_double[p[non_empty_cells-j-1]], f, prec));
+            data_string[j] = text(valid_cell[j], col);
+          if(!order)
+            for (int j=0; j<non_empty_cells; j++)
+              d_table->setText(valid_cell[j], col, data_string[p[j]]);
+          else
+            for (int j=0; j<non_empty_cells; j++)
+              d_table->setText(valid_cell[j], col, data_string[p[non_empty_cells-j-1]]);
+        }else{
+          for (int j = 0; j<non_empty_cells; j++)
+            data_double[j] = cell(valid_cell[j], col);
+          int prec;
+          char f;
+          columnNumericFormat(col, &f, &prec);
+          if(!order)
+            for (int j=0; j<non_empty_cells; j++)
+              d_table->setText(valid_cell[j], col, locale().toString(data_double[p[j]], f, prec));
+          else
+            for (int j=0; j<non_empty_cells; j++)
+              d_table->setText(valid_cell[j], col, locale().toString(data_double[p[non_empty_cells-j-1]], f, prec));
+        }
+        emit modifiedData(this, colName(col));
       }
-      emit modifiedData(this, colName(col));
     }
     delete[] p;
   }
@@ -2184,9 +2187,11 @@ void Table::setHeader(QStringList header)
 
 int Table::colIndex(const QString& name)
 {
+//  std::cout << "Col " << name.toStdString() << std::endl;
   int pos = name.find("_",false);
   QString label = name.right(name.length()-pos-1);
   return col_label.findIndex(label);
+//  return col_label.findIndex(name);
 }
 
 void Table::setHeaderColType()
