@@ -56,18 +56,10 @@ void LoadRawDialog::initLayout()
 {
   QVBoxLayout *main_layout = new QVBoxLayout(this);  
 
+  // Add the helpful summary message
   if( isMessageAvailable() )
-  {
-    QLabel *inputMessage = new QLabel(this);
-    inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-    inputMessage->setBackgroundRole( QPalette::ToolTipBase ); //Make a tooltip color
-    inputMessage->setAutoFillBackground(true);
-    inputMessage->setWordWrap(true);
-    inputMessage->setText(getOptionalMessage());
-    QHBoxLayout *msgArea = new QHBoxLayout;
-    msgArea->addWidget(inputMessage);
-    main_layout->addLayout(msgArea);
-  }
+    this->addOptionalMessage(main_layout);
+
   
   //------------- Filename property ---------------------
   QHBoxLayout *prop_line = new QHBoxLayout;

@@ -268,6 +268,26 @@ const QString & AlgorithmDialog::getOptionalMessage() const
   return m_strMessage;
 }
 
+/** Add the optional message in a light yellow box to the layout
+ *
+ * @param mainLay :: layout
+ */
+void AlgorithmDialog::addOptionalMessage(QVBoxLayout *mainLay)
+{
+  QLabel *inputMessage = new QLabel(this);
+  inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
+  QPalette pal = inputMessage->palette();
+  pal.setColor(inputMessage->backgroundRole(), QColor(255,255,224)); // Light yellow
+  pal.setColor(inputMessage->foregroundRole(), Qt::black);
+  inputMessage->setPalette(pal);
+  inputMessage->setAutoFillBackground(true);
+  inputMessage->setWordWrap(true);
+  inputMessage->setText(getOptionalMessage());
+  QHBoxLayout *msgArea = new QHBoxLayout;
+  msgArea->addWidget(inputMessage);
+  mainLay->addLayout(msgArea);
+}
+
 /**
  * Was this dialog raised from a script? This is important when deciding what to
  * do with properties that have old input

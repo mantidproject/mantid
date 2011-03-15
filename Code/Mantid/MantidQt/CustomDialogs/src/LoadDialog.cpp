@@ -129,18 +129,10 @@ namespace MantidQt
     void LoadDialog::createStaticWidgets(QBoxLayout *widgetLayout)
     {
       QVBoxLayout *staticLayout = new QVBoxLayout();
+
+      // Add the helpful summary message
       if( isMessageAvailable() )
-      {
-        QLabel *inputMessage = new QLabel(this);
-        inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-        inputMessage->setBackgroundRole( QPalette::ToolTipBase ); //Make a tooltip color
-        inputMessage->setAutoFillBackground(true);
-        inputMessage->setWordWrap(false);
-        inputMessage->setText(getOptionalMessage());
-        QHBoxLayout *msgArea = new QHBoxLayout;
-        msgArea->addWidget(inputMessage);
-        staticLayout->addLayout(msgArea);
-      }
+        this->addOptionalMessage(staticLayout);
 
       // Filename widget
       m_fileWidget = new MantidWidgets::MWRunFiles(this);

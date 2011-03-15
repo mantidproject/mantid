@@ -27,6 +27,7 @@
 #include <QDialog>
 #include <QString>
 #include <QHash>
+#include <QVBoxLayout>
 
 //----------------------------------
 // Qt Forward declarations
@@ -154,6 +155,9 @@ protected:
   //@{
   /// Get the message string
   const QString & getOptionalMessage() const;
+
+  /// Add the optional message to the given layout.
+  void addOptionalMessage(QVBoxLayout *mainLay);
 
   /// Get the usage boolean value
   bool isForScript() const;

@@ -196,18 +196,9 @@ void GenericDialog::initLayout()
     //Wire up the signal mapping object
     connect(m_signalMapper, SIGNAL(mapped(QWidget*)), this, SLOT(browseClicked(QWidget*)));
 
+    // Add the helpful summary message
     if( isMessageAvailable() )
-    {
-      QLabel *inputMessage = new QLabel(this);
-      inputMessage->setFrameStyle(QFrame::Panel | QFrame::Sunken);
-      inputMessage->setBackgroundRole( QPalette::ToolTipBase ); //Make a tooltip color
-      inputMessage->setAutoFillBackground(true);
-      inputMessage->setWordWrap(true);
-      inputMessage->setText(getOptionalMessage());
-      QHBoxLayout *msgArea = new QHBoxLayout;
-      msgArea->addWidget(inputMessage);
-      mainLay->addLayout(msgArea);
-    }
+      this->addOptionalMessage(mainLay);
 
     //The property boxes
     mainLay->addLayout(m_inputGrid);
