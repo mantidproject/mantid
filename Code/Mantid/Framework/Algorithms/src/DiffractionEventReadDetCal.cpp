@@ -95,7 +95,9 @@ namespace Algorithms
     new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The name of the workspace to be created as the output of the algorithm." );*/
 
-    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"), "The input filename of the ISAW DetCal file");
+    declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Load, ".DetCal"), "The input filename of the ISAW DetCal file (East banks for SNAP) ");
+
+    declareProperty(new API::FileProperty("Filename2", "", API::FileProperty::OptionalLoad, ".DetCal"), "The input filename of the second ISAW DetCal file (West banks for SNAP) ");
 
     return;
   }
@@ -115,11 +117,13 @@ namespace Algorithms
     IInstrument_sptr inst = inputW->getInstrument();
     if (!inst)
       throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
+    std::string instname = inst->getName();
 
     // set-up minimizer
 
     std::string inname = getProperty("InputWorkspace");
     std::string filename = getProperty("Filename");
+    std::string filename2 = getProperty("Filename2");
 
     // Output summary to log file
     int idnum=0, count, id, nrows, ncols;
@@ -162,6 +166,19 @@ namespace Algorithms
 
       std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd
                               >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >> up_y >> up_z;
+      if( id == 10 && instname == "SNAP" && filename2 != "")
+      {
+        input.close();
+        input.open(filename2.c_str());
+        while(std::getline(input, line))
+        {
+          if(line[0] != '5') continue;
+
+          std::stringstream(line) >> count >> id >> nrows >> ncols >> width >> height >> depth >> detd
+                                  >> x >> y >> z >> base_x >> base_y >> base_z >> up_x >> up_y >> up_z;
+          if (id==10)break;
+        }
+      }
       // Convert from cm to m
       x = x * 0.01;
       y = y * 0.01;
