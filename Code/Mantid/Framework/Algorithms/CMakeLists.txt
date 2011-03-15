@@ -127,7 +127,6 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/SumNeighbours.cpp
 		src/SumRowColumn.cpp
 		src/SumSpectra.cpp
-		src/TofCorrection.cpp
 		src/Transpose.cpp
 		src/UnaryOperation.cpp
 		src/UnGroupWorkspaces.cpp
@@ -265,7 +264,6 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/SumNeighbours.h
 		inc/MantidAlgorithms/SumRowColumn.h
 		inc/MantidAlgorithms/SumSpectra.h
-		inc/MantidAlgorithms/TofCorrection.h
 		inc/MantidAlgorithms/Transpose.h
 		inc/MantidAlgorithms/UnaryOperation.h
 		inc/MantidAlgorithms/UnGroupWorkspaces.h
@@ -389,7 +387,6 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/SumNeighboursTest.h
 		 test/SumRowColumnTest.h
 		 test/SumSpectraTest.h
-		 test/TofCorrectionTest.h
 		 test/TransposeTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
