@@ -37,6 +37,7 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+typedef std::vector<int> VecExtents;
 
 class DLLExport MultiDimensionalDbPresenter
 {
@@ -90,7 +91,8 @@ public:
   /// Destructor
   ~MultiDimensionalDbPresenter();
 
-
+  /// Get extents
+  VecExtents getExtents() const;
 };
 }
 }

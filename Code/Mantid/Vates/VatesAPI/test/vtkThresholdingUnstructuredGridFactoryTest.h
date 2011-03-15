@@ -6,6 +6,7 @@
 #include <cxxtest/TestSuite.h>
 #include "vtkDataSetFactoryTest.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
 
 
 class vtkThresholdingUnstructuredGridFactoryTest: public CxxTest::TestSuite, public vtkDataSetFactoryTest
@@ -19,11 +20,29 @@ class vtkThresholdingUnstructuredGridFactoryTest: public CxxTest::TestSuite, pub
       std::string scalarName = "signal";
       const int timestep = 0;
 
-      vtkThresholdingUnstructuredGridFactory<ImagePolicy> factory(spImage, scalarName, timestep);
+      TimeStepToTimeStep proxy;
+      vtkThresholdingUnstructuredGridFactory<ImagePolicy, TimeStepToTimeStep> factory(spImage, scalarName, timestep, proxy);
       return factory.create();
     }
 
     public:
+
+    void testThresholds()
+    {
+      using namespace Mantid::VATES;
+      //Easy to construct image policy for testing.
+      TimeStepToTimeStep proxy;
+      int nbins = 10;
+       boost::shared_ptr<ImagePolicy> spImage(new ImagePolicy(nbins, nbins, nbins, nbins));
+       std::string scalarName = "signal";
+       const int timestep = 0;
+
+       //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
+       vtkThresholdingUnstructuredGridFactory<ImagePolicy, TimeStepToTimeStep> factory(spImage, scalarName, timestep, proxy, 0, 2);
+       vtkUnstructuredGrid* product = factory.create();
+
+       TSM_ASSERT_EQUALS("Wrong number of cells returned with thresholds applied.", 1 ,product->GetNumberOfCells());
+    }
 
     void testNumberOfPointsGenerated()
     {
@@ -73,7 +92,8 @@ class vtkThresholdingUnstructuredGridFactoryTest: public CxxTest::TestSuite, pub
     void testIsVtkDataSetFactory()
     {
       using namespace Mantid::VATES;
-       const vtkDataSetFactory& factory = vtkThresholdingUnstructuredGridFactory<ImagePolicy>(boost::shared_ptr<ImagePolicy>(new ImagePolicy(1, 1, 1, 1)), "", 0);
+      TimeStepToTimeStep proxy;
+       const vtkDataSetFactory& factory = vtkThresholdingUnstructuredGridFactory<ImagePolicy, TimeStepToTimeStep>(boost::shared_ptr<ImagePolicy>(new ImagePolicy(1, 1, 1, 1)), "", 0, proxy);
        vtkDataSet* product = factory.create();
        TSM_ASSERT("There is no point data in the polymorhic product.", product->GetNumberOfPoints() > 0);
        product->Delete();

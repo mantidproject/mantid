@@ -3,6 +3,8 @@
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
@@ -84,7 +86,8 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   verifyExecution();
 
   //Create the mesh
-  vtkStructuredGridFactory<MDImage> factory =  vtkStructuredGridFactory<MDImage>::constructAsMeshOnly(m_MDWorkspace->get_spMDImage());
+  TimeStepToTimeStep timeStepMapper;
+  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep> factory =  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep>::constructAsMeshOnly(m_MDWorkspace->get_spMDImage(), timeStepMapper);
   vtkDataSet* visualDataSet = factory.createMeshOnly();
 
   vtkFieldData* outputFD = vtkFieldData::New();
@@ -105,6 +108,17 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   return visualDataSet;
 }
 
+VecExtents MultiDimensionalDbPresenter::getExtents() const
+{
+  VecExtents extents;
+  extents.push_back(0);
+  extents.push_back(m_MDWorkspace->getXDimension()->getNBins());
+  extents.push_back(0);
+  extents.push_back(m_MDWorkspace->getYDimension()->getNBins());
+  extents.push_back(0);
+  extents.push_back(m_MDWorkspace->getZDimension()->getNBins());
+  return extents;
+}
 
 int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
 {
@@ -147,7 +161,8 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTimeBin(int timeBin,
     throw std::range_error("A timestep larger than the range of available timesteps has been requested.");
   }
 
-  vtkStructuredGridFactory<MDImage> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), timeBin);
+  TimeStepToTimeStep timeStepMapper;
+  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), timeBin, timeStepMapper);
   return scalarFactory.createScalarArray();
 }
 
@@ -156,21 +171,14 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(double time, co
   using namespace Mantid::MDDataObjects;
 
   verifyExecution();
-  //Find the timebin corresponding to the time value provided.
-  std::vector<double> timeBins = this->getTimesteps();
-  double timeBin = timeBins.size() - 1; //Assume it is last.
-  for(int i = 0; i < timeBins.size()-1; i++)
-  {
-    double currentTime = timeBins[i];
-    double nextTime = timeBins[i+1];
-    if(time >= currentTime && time < nextTime)
-    {
-      timeBin = i;
-      break;
-    }
-  }
 
-  return getScalarDataFromTimeBin(timeBin, scalarName);
+  double tMax = m_MDWorkspace->gettDimension()->getMaximum();
+  double tMin = m_MDWorkspace->gettDimension()->getMinimum();
+  int nbins = m_MDWorkspace->gettDimension()->getNBins();
+
+  TimeToTimeStep timeStepMapper(tMin, tMax, nbins);
+  vtkStructuredGridFactory<MDImage, TimeToTimeStep> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), time, timeStepMapper);
+  return scalarFactory.createScalarArray();
 }
 
 

@@ -17,6 +17,8 @@ src/ProgressAction.cpp
 src/RebinningCutterPresenter.cpp
 src/RebinningCutterXMLDefinitions.cpp
 src/RebinningXMLGenerator.cpp
+src/TimeStepToTimeStep.cpp
+src/TimeToTimeStep.cpp
 src/vtkDataSetFactory.cpp
 src/vtkClipperDataSetFactory.cpp
 src/vtkProxyFactory.cpp
@@ -34,6 +36,8 @@ inc/MantidVatesAPI/ProgressAction.h
 inc/MantidVatesAPI/RebinningCutterPresenter.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningXMLGenerator.h
+inc/MantidVatesAPI/TimeStepToTimeStep.h
+inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
@@ -53,6 +57,8 @@ test/MultiDimensionalDbPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningCutterTest.h
 test/RebinningXMLGeneratorTest.h
+test/TimeStepToTimeStepTest.h
+test/TimeToTimeStepTest.h
 )
 
 if( USE_PARAVIEW )

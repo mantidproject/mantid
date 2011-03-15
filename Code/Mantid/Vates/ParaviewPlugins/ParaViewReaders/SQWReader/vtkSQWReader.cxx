@@ -36,7 +36,6 @@ int vtkSQWReader::RequestData(vtkInformation *request, vtkInformationVector **in
   vtkStructuredGrid *output = vtkStructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-
   int time;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
@@ -65,14 +64,15 @@ int vtkSQWReader::RequestInformation(
 
   m_presenter.execute(FileName);
   vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh());
-  int* extent = structuredMesh->GetExtent();
   int wholeExtent[6];
-  wholeExtent[0] = extent[0];
-  wholeExtent[1] = extent[1];
-  wholeExtent[2] = extent[2];
-  wholeExtent[3] = extent[3];
-  wholeExtent[4] = extent[4];
-  wholeExtent[5] = extent[5];
+
+  Mantid::VATES::VecExtents extents = m_presenter.getExtents();
+  wholeExtent[0] = extents[0];
+  wholeExtent[1] = extents[1];
+  wholeExtent[2] = extents[2];
+  wholeExtent[3] = extents[3];
+  wholeExtent[4] = extents[4];
+  wholeExtent[5] = extents[5];
 
   outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(),
                wholeExtent, 6);

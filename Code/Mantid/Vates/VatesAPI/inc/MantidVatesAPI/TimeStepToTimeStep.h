@@ -1,12 +1,13 @@
+#ifndef MANTID_PARAVIEW_TIMESTEP_TO_TIMESTEP
+#define MANTID_PARAVIEW_TIMESTEP_TO_TIMESTEP
 
-#ifndef CLIPPERADAPTER_H_
-#define CLIPPERADAPTER_H_
+#include "MantidKernel/System.h"
+#include <functional>
 
- /** Concrete implementation of abstract clipper. Adapter wraps visit clipper.
-  * All calls to this type forwarded to adaptee.
+/** Maps from a timestep to a timestep. Provides the static compile time polymorphism required by vtkDataSetFactory type classes.
 
  @author Owen Arnold, Tessella plc
- @date 08/02/2011
+ @date 14/03/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -29,34 +30,22 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
-#include "MantidVatesAPI/Clipper.h"
-#include <vtkVisItClipper.h>
-
-class ClipperAdapter : public Mantid::VATES::Clipper
+namespace Mantid
+{
+namespace VATES
+{
+class DLLExport TimeStepToTimeStep: std::unary_function<int, int>
 {
 private:
-  vtkVisItClipper* m_clipper;
+  double m_timeRange;
+  int m_nIntervalSteps;
 public:
 
-  ClipperAdapter(vtkVisItClipper* pClipper);
-
-  void SetInput(::vtkDataSet* in_ds);
-
-  void SetClipFunction(vtkImplicitFunction* func);
-
-  void SetInsideOut(bool insideout);
-
-  void SetRemoveWholeCells(bool removeWholeCells);
-
-  void SetOutput(vtkUnstructuredGrid* out_ds);
-
-  void Update();
-
-  void Delete();
-
-  ~ClipperAdapter();
+  TimeStepToTimeStep();
+  int operator()(int timeStep) const;
 
 };
+}
+}
 
 #endif

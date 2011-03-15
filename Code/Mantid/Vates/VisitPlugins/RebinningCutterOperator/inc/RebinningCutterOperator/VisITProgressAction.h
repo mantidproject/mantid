@@ -1,4 +1,4 @@
-#include "MantidVisitPresenters/ProgressAction.h"
+#include "MantidVatesAPI/ProgressAction.h"
 
 #ifndef UPDATEHANDLER_H_
 #define UPDATEHANDLER_H_

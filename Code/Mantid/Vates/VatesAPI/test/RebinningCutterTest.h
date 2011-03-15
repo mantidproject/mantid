@@ -18,6 +18,7 @@
 #include "MantidVatesAPI/RebinningCutterPresenter.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include <boost/algorithm/string.hpp>
 #include <boost/scoped_ptr.hpp>
 #include <boost/regex.hpp>
@@ -94,7 +95,8 @@ private:
         presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
         MockProgressAction action;
         MDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll, action);
-      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage>(spRebinnedWs->get_spMDImage(), "", 1));
+      TimeStepToTimeStep proxy;
+      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage, TimeStepToTimeStep>(spRebinnedWs->get_spMDImage(), "", 1, proxy));
       vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
       in_ds->Delete();

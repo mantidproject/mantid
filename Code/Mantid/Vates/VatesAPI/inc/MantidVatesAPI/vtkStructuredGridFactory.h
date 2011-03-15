@@ -39,25 +39,25 @@ namespace Mantid
 namespace VATES
 {
 
-template<typename Image>
+template<typename Image, typename TimeMapper>
 class DLLExport vtkStructuredGridFactory : public vtkDataSetFactory
 {
 public:
 
   /// Constructor
-  vtkStructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarName, const int timestep);
+  vtkStructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarName, const double timeValue, const TimeMapper& timeMapper);
 
   /// Assignment operator
-  vtkStructuredGridFactory& operator=(const vtkStructuredGridFactory<Image>& other);
+  vtkStructuredGridFactory& operator=(const vtkStructuredGridFactory<Image, TimeMapper>& other);
 
   /// Copy constructor.
-  vtkStructuredGridFactory(const vtkStructuredGridFactory<Image>& other);
+  vtkStructuredGridFactory(const vtkStructuredGridFactory<Image, TimeMapper>& other);
 
   /// Destructor
   ~vtkStructuredGridFactory();
 
   /// Constructional method. Have to explicitly ask for a mesh only version.
-  static vtkStructuredGridFactory constructAsMeshOnly(boost::shared_ptr<Image> image);
+  static vtkStructuredGridFactory constructAsMeshOnly(boost::shared_ptr<Image> image, const TimeMapper& timeMapper);
 
   /// Factory method
   vtkStructuredGrid* create() const;
@@ -71,58 +71,59 @@ public:
 private:
 
   /// Private constructor for use by constructional static member
-  vtkStructuredGridFactory(boost::shared_ptr<Image> image);
+  vtkStructuredGridFactory(boost::shared_ptr<Image> image, const TimeMapper& timeMapper);
 
   boost::shared_ptr<Image> m_image;
   std::string m_scalarName;
-  int m_timestep;
+  double m_timeValue;
+  TimeMapper m_timeMapper;
   bool m_meshOnly;
 };
 
-template<typename Image>
-vtkStructuredGridFactory<Image>::vtkStructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarName, const int timestep) :
-    m_image(image), m_scalarName(scalarName), m_timestep(timestep), m_meshOnly(false)
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarName, const double timeValue, const TimeMapper& timeMapper) :
+    m_image(image), m_scalarName(scalarName), m_timeValue(timeValue), m_meshOnly(false), m_timeMapper(timeMapper)
 {
 }
 
-template<typename Image>
-vtkStructuredGridFactory<Image>::vtkStructuredGridFactory(const vtkStructuredGridFactory<Image>& other):
-    m_image(other.m_image), m_scalarName(other.m_scalarName), m_timestep(other.m_timestep), m_meshOnly(other.m_meshOnly)
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(const vtkStructuredGridFactory<Image, TimeMapper>& other):
+    m_image(other.m_image), m_scalarName(other.m_scalarName), m_timeValue(other.m_timeValue), m_timeMapper(other.m_timeMapper), m_meshOnly(other.m_meshOnly)
 {
 }
 
-template<typename Image>
-vtkStructuredGridFactory<Image> & vtkStructuredGridFactory<Image>::operator=(const vtkStructuredGridFactory<Image>& other)
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper> & vtkStructuredGridFactory<Image, TimeMapper>::operator=(const vtkStructuredGridFactory<Image, TimeMapper>& other)
 {
     if (this != &other)
     {
         m_meshOnly = other.m_meshOnly;
         m_scalarName = other.m_scalarName;
-        m_timestep = other.m_timestep;
+        m_timeValue = other.m_timeValue;
         m_image = other.m_image;
     }
     return *this;
 }
 
 
-template<typename Image>
-vtkStructuredGridFactory<Image>::vtkStructuredGridFactory(boost::shared_ptr<Image> image) : m_image(image), m_scalarName(""), m_timestep(0),  m_meshOnly(true)
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(boost::shared_ptr<Image> image, const TimeMapper& timeMapper) : m_image(image), m_scalarName(""), m_timeValue(0), m_timeMapper(timeMapper),  m_meshOnly(true)
 {
 }
 
-template<typename Image>
-vtkStructuredGridFactory<Image> vtkStructuredGridFactory<Image>::constructAsMeshOnly(boost::shared_ptr<Image> image)
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper> vtkStructuredGridFactory<Image, TimeMapper>::constructAsMeshOnly(boost::shared_ptr<Image> image, const TimeMapper& timeMapper)
 {
-   return vtkStructuredGridFactory<Image>(image);
+   return vtkStructuredGridFactory<Image, TimeMapper>(image, timeMapper);
 }
 
-template<typename Image>
-vtkStructuredGridFactory<Image>::~vtkStructuredGridFactory()
+template<typename Image, typename TimeMapper>
+vtkStructuredGridFactory<Image, TimeMapper>::~vtkStructuredGridFactory()
 {
 }
 
-template<typename Image>
-vtkStructuredGrid* vtkStructuredGridFactory<Image>::create() const
+template<typename Image, typename TimeMapper>
+vtkStructuredGrid* vtkStructuredGridFactory<Image, TimeMapper>::create() const
 {
   vtkStructuredGrid* visualDataSet = this->createMeshOnly();
   vtkFloatArray* scalarData = this->createScalarArray();
@@ -131,8 +132,8 @@ vtkStructuredGrid* vtkStructuredGridFactory<Image>::create() const
   return visualDataSet;
 }
 
-template<typename Image>
-vtkStructuredGrid* vtkStructuredGridFactory<Image>::createMeshOnly() const
+template<typename Image, typename TimeMapper>
+vtkStructuredGrid* vtkStructuredGridFactory<Image, TimeMapper>::createMeshOnly() const
 {
   typename Image::GeometryType const * const pGeometry = m_image->getGeometry();
 
@@ -187,8 +188,8 @@ vtkStructuredGrid* vtkStructuredGridFactory<Image>::createMeshOnly() const
   return visualDataSet;
 }
 
-template<typename Image>
-vtkFloatArray* vtkStructuredGridFactory<Image>::createScalarArray() const
+template<typename Image, typename TimeMapper>
+vtkFloatArray* vtkStructuredGridFactory<Image, TimeMapper>::createScalarArray() const
 {
   if(true == m_meshOnly)
   {
@@ -207,7 +208,6 @@ vtkFloatArray* vtkStructuredGridFactory<Image>::createScalarArray() const
   const int sizeZ = pGeometry->getZDimension()->getNBins();
   scalars->Allocate(sizeX * sizeY * sizeZ);
   scalars->SetName(m_scalarName.c_str());
-
   MD_image_point point;
   for (int i = 0; i < sizeX; i++)
   {
@@ -216,7 +216,8 @@ vtkFloatArray* vtkStructuredGridFactory<Image>::createScalarArray() const
       for (int k = 0; k < sizeZ; k++)
       {
         // Create an image from the point data.
-        point = m_image->getPoint(i, j, k, m_timestep);
+
+        point = m_image->getPoint(i, j, k, m_timeMapper(m_timeValue));
         // Insert scalar data.
         scalars->InsertNextValue(point.s);
       }

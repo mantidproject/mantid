@@ -1,0 +1,61 @@
+<ServerManagerConfiguration>
+  <!-- Begin RebinningCutter -->
+  <ProxyGroup name="filters">
+    <SourceProxy name="RebinningCutter" class="vtkRebinningCutter">
+      <InputProperty
+        name="Input"
+        command="SetInputConnection">
+        <ProxyGroupDomain name="groups">
+          <Group name="sources"/>
+          <Group name="filters"/>
+        </ProxyGroupDomain>
+      </InputProperty>
+      <DataTypeDomain name="input_type">
+          <DataType value="vtkDataSet"/>
+      </DataTypeDomain>
+        <ProxyProperty name="ClipFunction" command="SetClipFunction" label="Rebinning Cut Type">
+           <ProxyGroupDomain name="groups">
+               <Group name="implicit_functions"/>
+           </ProxyGroupDomain>
+           <ProxyListDomain name="proxy_list">
+              <Proxy group="implicit_functions" name="Plane" />
+              <Proxy group="implicit_functions" name="Box" />
+           </ProxyListDomain>
+           <Documentation>
+             This property specifies the parameters of the clip function (an implicit plane) used to clip/rebin the dataset.
+           </Documentation>
+        </ProxyProperty>
+        <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+       </DoubleVectorProperty>
+       <DoubleVectorProperty 
+        name="TimestepValues"
+        information_only="1">
+        <TimeStepsInformationHelper/>
+        <Documentation>
+          Available timestep values.
+        </Documentation>
+       </DoubleVectorProperty>
+        <DoubleVectorProperty
+       name="Min Signal"
+       command="SetMinThreshold"
+       number_of_elements="1"
+	   default_values="-10000"
+	   >
+	   </DoubleVectorProperty>
+	    <DoubleVectorProperty
+       name="Max Signal"
+       command="SetMaxThreshold"
+       number_of_elements="1"
+	   default_values="10000"
+	   >
+	   </DoubleVectorProperty>
+    </SourceProxy>
+  </ProxyGroup>
+  <!-- End RebinningCutter -->
+</ServerManagerConfiguration>

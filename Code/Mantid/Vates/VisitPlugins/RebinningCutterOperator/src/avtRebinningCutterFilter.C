@@ -52,10 +52,11 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
-#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
-#include "MantidVisitPresenters/vtkStructuredGridFactory.h"
-#include "MantidVisitPresenters/vtkThresholdingUnstructuredGridFactory.h"
-#include "MantidVisitPresenters/vtkProxyFactory.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/vtkStructuredGridFactory.h"
+#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkProxyFactory.h"
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "boost/functional/hash.hpp"
 #include <sstream>
 #include "VisITProgressAction.h"
@@ -272,15 +273,16 @@ vtkDataSetFactory_sptr avtRebinningCutterFilter::createDataSetFactory(
   //Interogate attributes to determine user selection.
   using Mantid::MDDataObjects::MDImage;
   vtkDataSetFactory* pvtkDataSetFactory;
+  TimeStepToTimeStep timeMapper;
   if (atts.GetStructured())
   {
-    pvtkDataSetFactory = new vtkStructuredGridFactory<MDImage> (spRebinnedWs->get_spMDImage(),
-        XMLDefinitions::signalName, m_timestep);
+    pvtkDataSetFactory = new vtkStructuredGridFactory<MDImage, TimeStepToTimeStep> (spRebinnedWs->get_spMDImage(),
+        XMLDefinitions::signalName(), m_timestep, timeMapper);
   }
   else
   {
-    pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage> (
-        spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName, m_timestep);
+    pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage, TimeStepToTimeStep> (
+        spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName(), m_timestep, timeMapper);
   }
   return vtkDataSetFactory_sptr(pvtkDataSetFactory);
 }
@@ -392,27 +394,27 @@ void avtRebinningCutterFilter::Execute()
   }
 
 
-  output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName.c_str());
+  output_ds->GetCellData()->SetActiveScalars(XMLDefinitions::signalName().c_str());
   avtDataTree* newTree = new avtDataTree(output_ds, 0);
   SetOutputDataTree(newTree);
   double newrange[2] =
   { FLT_MAX, -FLT_MAX };
   double oldrange[2] =
   { FLT_MAX, -FLT_MAX };
-  GetDataRange(output_ds, newrange, XMLDefinitions::signalName.c_str(), false);
-  GetDataRange(in_ds, oldrange, XMLDefinitions::signalName.c_str(), false);
+  GetDataRange(output_ds, newrange, XMLDefinitions::signalName().c_str(), false);
+  GetDataRange(in_ds, oldrange, XMLDefinitions::signalName().c_str(), false);
   avtDataAttributes &dataAtts = GetOutput()->GetInfo().GetAttributes();
-  dataAtts.GetThisProcsOriginalDataExtents(XMLDefinitions::signalName.c_str())->Set(oldrange);
-  dataAtts.GetThisProcsActualDataExtents(XMLDefinitions::signalName.c_str())->Set(newrange);
+  dataAtts.GetThisProcsOriginalDataExtents(XMLDefinitions::signalName().c_str())->Set(oldrange);
+  dataAtts.GetThisProcsActualDataExtents(XMLDefinitions::signalName().c_str())->Set(newrange);
 
   //Persist the execution output geometry so that it can be dermined later in VisIT gui.
   MapNode geometryXMLNode;
-  geometryXMLNode[XMLDefinitions::geometryNodeName] = m_presenter.getWorkspaceGeometry();
+  geometryXMLNode[XMLDefinitions::geometryNodeName()] = m_presenter.getWorkspaceGeometry();
   MapNode functionXMLNode;
-  functionXMLNode[XMLDefinitions::functionNodeName] = m_presenter.getFunction()->toXMLString();
+  functionXMLNode[XMLDefinitions::functionNodeName()] = m_presenter.getFunction()->toXMLString();
 
-  dataAtts.AddPlotInformation(XMLDefinitions::geometryOperatorInfo, geometryXMLNode);
-  dataAtts.AddPlotInformation(XMLDefinitions::functionOperatorInfo, functionXMLNode);
+  dataAtts.AddPlotInformation(XMLDefinitions::geometryOperatorInfo(), geometryXMLNode);
+  dataAtts.AddPlotInformation(XMLDefinitions::functionOperatorInfo(), functionXMLNode);
 
   dataAtts.SetXLabel(spDimX->getDimensionId());
   dataAtts.SetYLabel(spDimY->getDimensionId());

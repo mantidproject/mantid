@@ -44,7 +44,7 @@
 #define AVT_MDFileReader_FILE_FORMAT_H
 
 #include <avtMTSDFileFormat.h>
-#include <MantidVisitPresenters/MultiDimensionalDbPresenter.h>
+#include <MantidVatesAPI/MultiDimensionalDbPresenter.h>
 #include <vector>
 
 

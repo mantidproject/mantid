@@ -74,13 +74,6 @@ private:
     product->Delete();
   }
 
-//  void testIsVtkDataSetFactory()
-//  {
-//     const vtkDataSetFactory& factory = vtkRectilinearGridFactory<ImagePolicy>(boost::shared_ptr<ImagePolicy>(new ImagePolicy(1, 1, 1, 1)), "", 0);
-//     vtkDataSet* product = factory.create();
-//     TSM_ASSERT("There is no point data in the polymorhic product.", product->GetNumberOfPoints() > 0);
-//     product->Delete();
-//  }
 
 };
 

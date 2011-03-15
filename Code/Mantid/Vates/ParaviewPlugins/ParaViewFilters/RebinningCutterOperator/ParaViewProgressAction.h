@@ -1,12 +1,13 @@
+#ifndef PARAVIEWPROGRESSACTION_H_
+#define PARAVIEWPROGRESSACTION_H_
 
-#ifndef CLIPPERADAPTER_H_
-#define CLIPPERADAPTER_H_
+#include "MantidVatesAPI/ProgressAction.h"
+#include "vtkRebinningCutter.h"
 
- /** Concrete implementation of abstract clipper. Adapter wraps visit clipper.
-  * All calls to this type forwarded to adaptee.
+/** Adapter for action specific to ParaView RebinningCutter filter. Handles progress actions raised by underlying Mantid Algorithms.
 
  @author Owen Arnold, Tessella plc
- @date 08/02/2011
+ @date 14/03/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -30,33 +31,31 @@
  */
 
 
-#include "MantidVatesAPI/Clipper.h"
-#include <vtkVisItClipper.h>
-
-class ClipperAdapter : public Mantid::VATES::Clipper
+namespace Mantid
 {
-private:
-  vtkVisItClipper* m_clipper;
+namespace VATES
+{
+
+class ParaViewProgressAction : public ProgressAction
+{
+
 public:
 
-  ClipperAdapter(vtkVisItClipper* pClipper);
+  ParaViewProgressAction(vtkRebinningCutter* filter) : m_filter(filter)
+  {
+  }
 
-  void SetInput(::vtkDataSet* in_ds);
+  virtual void eventRaised(int progressPercent)
+  {
+    m_filter->UpdateAlgorithmProgress(progressPercent);
+  }
 
-  void SetClipFunction(vtkImplicitFunction* func);
+private:
 
-  void SetInsideOut(bool insideout);
-
-  void SetRemoveWholeCells(bool removeWholeCells);
-
-  void SetOutput(vtkUnstructuredGrid* out_ds);
-
-  void Update();
-
-  void Delete();
-
-  ~ClipperAdapter();
-
+  vtkRebinningCutter* m_filter;
 };
 
-#endif
+}
+}
+
+#endif /* PARAVIEWPROGRESSACTION_H_ */

@@ -220,7 +220,7 @@ avtMDFileReaderFileFormat::GetMesh(int timestate, const char *meshname)
 vtkDataArray *
 avtMDFileReaderFileFormat::GetVar(int timestate, const char *varname)
 {
-    return m_executor.getScalarDataTimeBin(timestate, varname);
+    return m_executor.getScalarDataFromTimeBin(timestate, varname);
 }
 
 

@@ -46,7 +46,7 @@
 
 #include <avtPluginDataTreeIterator.h>
 #include <CutterOperatorAttributes.h>
-#include <MantidVisitPresenters/RebinningCutterPresenter.h>
+#include <MantidVatesAPI/RebinningCutterPresenter.h>
 
 class vtkDataSet;
 

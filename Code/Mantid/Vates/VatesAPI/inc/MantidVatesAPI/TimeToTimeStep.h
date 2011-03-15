@@ -1,12 +1,14 @@
+#ifndef MANTID_PARAVIEW_TIME_TO_TIMESTEP
+#define MANTID_PARAVIEW_TIME_TO_TIMESTEP
 
-#ifndef CLIPPERADAPTER_H_
-#define CLIPPERADAPTER_H_
+#include "MantidKernel/System.h"
+#include <functional>
 
- /** Concrete implementation of abstract clipper. Adapter wraps visit clipper.
-  * All calls to this type forwarded to adaptee.
+/** Unary operation applying visualisation platforms specific conversion from a time to a timestep understood by underlying mantid code, where time is treated as an index
+ * in a single dimensional array. See MDWorkspace/MDImage.
 
  @author Owen Arnold, Tessella plc
- @date 08/02/2011
+ @date 14/03/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -29,34 +31,22 @@
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
-#include "MantidVatesAPI/Clipper.h"
-#include <vtkVisItClipper.h>
-
-class ClipperAdapter : public Mantid::VATES::Clipper
+namespace Mantid
+{
+namespace VATES
+{
+class DLLExport TimeToTimeStep: std::unary_function<double, int>
 {
 private:
-  vtkVisItClipper* m_clipper;
+  double m_timeRange;
+  int m_nIntervalSteps;
 public:
 
-  ClipperAdapter(vtkVisItClipper* pClipper);
-
-  void SetInput(::vtkDataSet* in_ds);
-
-  void SetClipFunction(vtkImplicitFunction* func);
-
-  void SetInsideOut(bool insideout);
-
-  void SetRemoveWholeCells(bool removeWholeCells);
-
-  void SetOutput(vtkUnstructuredGrid* out_ds);
-
-  void Update();
-
-  void Delete();
-
-  ~ClipperAdapter();
+  TimeToTimeStep(double timeMin, double timeMax, unsigned int nIntervalSteps);
+  int operator()(double time) const;
 
 };
+}
+}
 
 #endif

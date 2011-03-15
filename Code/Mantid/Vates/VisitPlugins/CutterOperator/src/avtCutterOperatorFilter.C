@@ -46,7 +46,7 @@
 #include <ClipperAdapter.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
 #include <MantidMDAlgorithms/BoxImplicitFunction.h>
-#include <MantidVisitPresenters/vtkClipperDataSetFactory.h>
+#include <MantidVatesAPI/vtkClipperDataSetFactory.h>
 #include <vtkVisItClipper.h>
 
 

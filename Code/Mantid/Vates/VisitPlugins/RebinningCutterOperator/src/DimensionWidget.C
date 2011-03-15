@@ -13,7 +13,7 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "boost/algorithm/string.hpp"
 #include "boost/format.hpp"
-#include "MantidVisitPresenters/RebinningCutterPresenter.h"
+#include "MantidVatesAPI/RebinningCutterPresenter.h"
 
 DimensionWidget::DimensionWidget(
     GeometryWidget* geometryWidget,

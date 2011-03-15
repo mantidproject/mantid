@@ -68,8 +68,8 @@
 #include "PlotList.h"
 #include "Plot.h"
 #include "PlotInfoAttributes.h"
-#include "MantidVisitPresenters/RebinningCutterXMLDefinitions.h"
-#include "MantidVisitPresenters/RebinningCutterPresenter.h"
+#include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
+#include "MantidVatesAPI/RebinningCutterPresenter.h"
 
 using std::string;
 
@@ -210,7 +210,7 @@ PlotInfoAttributes* QvisRebinningCutterWindow::findRebinningInfo() const
     int type = plot.GetPlotType();
     PlotInfoAttributes* tempInfo = GetViewerState()->GetPlotInformation(type);
 
-    if (tempInfo->GetData().HasEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo))
+    if (tempInfo->GetData().HasEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo()))
     {
       //Found plot information so break.
       info = tempInfo;
@@ -252,16 +252,16 @@ void QvisRebinningCutterWindow::createGeometryWidget()
 
   if(info!= NULL && !atts->GetIsSetUp())
   {
-    MapNode *geomNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo);
-    MapNode *funcNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::functionOperatorInfo);
+    MapNode *geomNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::geometryOperatorInfo());
+    MapNode *funcNode = info->GetData().GetEntry(Mantid::VATES::XMLDefinitions::functionOperatorInfo());
 
     MapNode &geometryXMLNode = *geomNode;
     const std::string& geometryXMLString =
-        geometryXMLNode[Mantid::VATES::XMLDefinitions::geometryNodeName].AsString();
+        geometryXMLNode[Mantid::VATES::XMLDefinitions::geometryNodeName()].AsString();
 
     MapNode &functionXMLNode = *funcNode;
     const std::string& functionXMLString =
-        functionXMLNode[Mantid::VATES::XMLDefinitions::functionNodeName].AsString();
+        functionXMLNode[Mantid::VATES::XMLDefinitions::functionNodeName()].AsString();
 
     //Only provide non-integrated dimensions. TODO: handle integrated dimensions.
     dimensions = Mantid::VATES::getDimensions(geometryXMLString, false);

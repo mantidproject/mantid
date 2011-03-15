@@ -47,14 +47,14 @@ struct UnstructuredPoint
   vtkIdType pointId;
 };
 
-template<typename Image>
+template<typename Image, typename TimeMapper>
 class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 {
 public:
 
   /// Constructor
   vtkThresholdingUnstructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarname,
-      const int timestep, double threshold = 0);
+      const double timestep, const TimeMapper& timeMapper, double minThreshold = -10000, double maxThreshold = 10000);
 
   /// Destructor
   ~vtkThresholdingUnstructuredGridFactory();
@@ -74,28 +74,37 @@ private:
   boost::shared_ptr<Image> m_image;
 
   /// timestep obtained from framework.
-  const int m_timestep;
-
-  /// Name of the scalar to provide on mesh.
-  const std::string m_scalarName;
-
-  /// Threshold for signal value, below which we do not provide unstructured topologies for.
-  const double m_threshold;
+  const double m_timestep;
 
   /// Create a hexahedron.
   inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
 
+  /// Name of the scalar to provide on mesh.
+  const std::string m_scalarName;
+
+  /// Time mapper.
+  TimeMapper m_timeMapper;
+
+  /// Threshold for signal value, above which, we do not provide unstructured topologies for.
+  const double m_maxThreshold;
+
+  /// Threshold for signal value. below which, we do not provide unstructured topologies for.
+  const double m_minThreshold;
+
+
+
 };
 
-template<typename Image>
-vtkThresholdingUnstructuredGridFactory<Image>::vtkThresholdingUnstructuredGridFactory(boost::shared_ptr<
-    Image> image, const std::string& scalarName, const int timestep, double threshold) :
-  m_image(image), m_timestep(timestep), m_scalarName(scalarName), m_threshold(threshold)
+template<typename Image, typename TimeMapper>
+vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::vtkThresholdingUnstructuredGridFactory(boost::shared_ptr<
+    Image> image, const std::string& scalarName, const double timestep, const TimeMapper& timeMapper, double minThreshold, double maxThreshold) :
+  m_image(image), m_timestep(timestep), m_scalarName(scalarName), m_timeMapper(timeMapper), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
 {
 }
 
-template<typename Image>
-vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image>::create() const
+
+template<typename Image, typename TimeMapper>
+vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::create() const
 {
   using namespace Mantid::MDDataObjects;
   typename Image::GeometryType const * const pGeometry = m_image->getGeometry();
@@ -149,9 +158,9 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image>::create() con
         posX = minX + currentXIncrement; //Calculate increment in x;
         posY = minY + currentYIncrement; //Calculate increment in y;
         posZ = minZ + k * incrementZ; //Calculate increment in z;
-        signalScalar = m_image->getPoint(i, j, k, m_timestep).s;
+        signalScalar = m_image->getPoint(i, j, k, m_timeMapper(m_timestep)).s;
 
-        if (signalScalar <= m_threshold)
+        if ((signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
         {
           //Flagged so that topological and scalar data is not applied.
           unstructPoint.isSparse = true;
@@ -204,8 +213,8 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image>::create() con
   return visualDataSet;
 }
 
-template<typename Image>
-inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<Image>::createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const
+template<typename Image, typename TimeMapper>
+inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const
 {
   vtkIdType id_xyz = pointMap[i][j][k].pointId;
   vtkIdType id_dxyz = pointMap[i + 1][j][k].pointId;
@@ -231,8 +240,8 @@ inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<Image>::createHexah
 }
 
 
-template <typename Image>
-vtkThresholdingUnstructuredGridFactory<Image>::~vtkThresholdingUnstructuredGridFactory()
+template <typename Image, typename TimeMapper>
+vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
 {
 }
 

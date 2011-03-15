@@ -50,7 +50,7 @@
 #include <RebinningCutterAttributes.h>
 #include <vtkVisItClipper.h>
 
-#include <MantidVisitPresenters/RebinningCutterPresenter.h>
+#include <MantidVatesAPI/RebinningCutterPresenter.h>
 #include <string.h>
 
 // ****************************************************************************
