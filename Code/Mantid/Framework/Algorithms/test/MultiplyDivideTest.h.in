@@ -1,5 +1,5 @@
-#ifndef DivideTest_H
-#define DivideTest_H_
+#ifndef @MULTIPLYDIVIDETEST_CLASS@_H
+#define @MULTIPLYDIVIDETEST_CLASS@_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
@@ -25,15 +25,15 @@ using Mantid::Geometry::IDetector_sptr;
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = MultiplyDivideTest.h.in *********************************************/
 /*****************************************************************************************/
-class DivideTest : public CxxTest::TestSuite
+class @MULTIPLYDIVIDETEST_CLASS@ : public CxxTest::TestSuite
 {
 public:
   bool DO_DIVIDE;
   std::string message;
 
-  DivideTest()
+  @MULTIPLYDIVIDETEST_CLASS@()
   {
-    DO_DIVIDE = true;
+    DO_DIVIDE = @MULTIPLYDIVIDETEST_DO_DIVIDE@;
   }
 
 

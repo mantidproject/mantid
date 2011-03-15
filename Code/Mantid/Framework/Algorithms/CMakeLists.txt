@@ -407,6 +407,15 @@ include_directories ( inc )
 target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
+  # Generate the MultiplyTest.h and DivideTest.h
+  set ( MULTIPLYDIVIDETEST_CLASS MultiplyTest )
+  set ( MULTIPLYDIVIDETEST_DO_DIVIDE false )
+  configure_file ( test/MultiplyDivideTest.h.in      test/MultiplyTest.h)
+  set ( MULTIPLYDIVIDETEST_CLASS DivideTest )
+  set ( MULTIPLYDIVIDETEST_DO_DIVIDE true )
+  configure_file ( test/MultiplyDivideTest.h.in      test/DivideTest.h)
+
+  # Make the rest of the tests
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
   target_link_libraries ( AlgorithmsTest Algorithms CurveFitting DataHandling Nexus TestHelpers )

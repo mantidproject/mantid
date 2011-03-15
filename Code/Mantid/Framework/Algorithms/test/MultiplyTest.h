@@ -1,5 +1,5 @@
-#ifndef MULTIPLYTEST_H_
-#define MULTIPLYTEST_H_
+#ifndef MultiplyTest_H
+#define MultiplyTest_H_
 
 #include <cxxtest/TestSuite.h>
 #include <cmath>
@@ -22,7 +22,8 @@ using namespace Mantid::DataObjects;
 using Mantid::Geometry::IDetector_sptr;
 
 /*****************************************************************************************/
-/********** PLEASE NOTE! THIS TEST IS SHARED (copy/pasted) WITH DivideTest.h *************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = MultiplyDivideTest.h.in *********************************************/
 /*****************************************************************************************/
 class MultiplyTest : public CxxTest::TestSuite
 {
@@ -34,9 +35,6 @@ public:
   {
     DO_DIVIDE = false;
   }
-
-
-
 
 
   void testInit()
@@ -103,6 +101,16 @@ public:
   void test_2D_2D_inPlace()
   {
     int nHist = 10,nBins=20;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
+    performTest(work_in1,work_in2, false /*not event*/,
+        DO_DIVIDE ? 1.0 : 4.0, DO_DIVIDE ? 1.0 : 4.0, false, false, true /*in place*/);
+  }
+
+  /// This test is more likely to cause the odd bug found
+  void test_2D_2D_inPlace_bigger()
+  {
+    int nHist = 500,nBins=500;
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspace(nHist,nBins);
     performTest(work_in1,work_in2, false /*not event*/,
