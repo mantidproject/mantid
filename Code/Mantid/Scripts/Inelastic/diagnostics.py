@@ -88,10 +88,10 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         white_counts = Integration(data_ws, "__counts_white-beam").workspace()
         MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run first white beam tests
-        _white_masks, num_failed = \
+        __white_masks, num_failed = \
                       _do_white_test(white_counts, tiny, large, median_lo, median_hi, signif)
-        test_results[0] = [str(_white_masks), num_failed]
-        diag_total_mask = CloneWorkspace(_white_masks, diag_total_mask).workspace()
+        test_results[0] = [str(__white_masks), num_failed]
+        diag_total_mask = CloneWorkspace(__white_masks, diag_total_mask).workspace()
     else:
         raise RuntimeError('Invalid input for white run "%s"' % str(white_run))
 
@@ -105,33 +105,33 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()
         MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run tests
-        _second_white_masks, num_failed = \
+        __second_white_masks, num_failed = \
                              _do_second_white_test(white_counts, second_white_counts,
                                                    tiny, large, median_lo, median_hi,
                                                    signif,variation)
-        test_results[1] = [str(_second_white_masks), num_failed]
+        test_results[1] = [str(__second_white_masks), num_failed]
         # Accumulate
-        diag_total_mask += _second_white_masks
+        diag_total_mask += __second_white_masks
     ##
     ## Background Test
     ##
     if sample_run is not None and sample_run != '':
         # Run the tests
-        _bkgd_masks, num_failed = \
+        __bkgd_masks, num_failed = \
                      _do_background_test(sample_run, white_counts, second_white_counts,
                                          bkgd_range, bkgd_threshold, remove_zero, signif,
                                          hard_mask_spectra)
-        test_results[2] = [str(_bkgd_masks), num_failed]
+        test_results[2] = [str(__bkgd_masks), num_failed]
         # Accumulate
-        diag_total_mask += _bkgd_masks
+        diag_total_mask += __bkgd_masks
 
     ##
     ## PSD Bleed Test
     ##
     if type(bleed_test) == bool and bleed_test == True:
-        _bleed_masks, num_failed = _do_bleed_test(sample_run, bleed_maxrate, bleed_pixels)
-        test_results[3] = [str(_bleed_masks), num_failed]
-        diag_total_mask += _bleed_masks
+        __bleed_masks, num_failed = _do_bleed_test(sample_run, bleed_maxrate, bleed_pixels)
+        test_results[3] = [str(__bleed_masks), num_failed]
+        diag_total_mask += __bleed_masks
 
     # Remove temporary workspaces
     mtd.deleteWorkspace(str(white_counts))
@@ -264,10 +264,9 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
                             test is applied. It is expected as a MaskWorkspace
     """
     mtd.sendLogMessage('Running background count test')
-
     # Load and integrate the sample using the defined background range. If none is given use the
     # instrument defaults
-    data_ws = common.load_run(sample_run, 'mono-sample')
+    data_ws = common.load_runs(sample_run, 'mono-sample',sum=True)
     instrument = data_ws.getInstrument()
     if bkgd_range is None:
         min_value = float(instrument.getNumberParameter('bkgd-range-min')[0])

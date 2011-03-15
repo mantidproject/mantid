@@ -30,7 +30,7 @@ using Mantid::Geometry::IInstrument_sptr;
 MWDiag::MWDiag(QWidget *parent, QString prevSettingsGr, const QComboBox * const instru):
   MantidWidget(parent),
   m_dispDialog(NULL), m_instru(instru), 
-  m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1)
+  m_TOFChanged(false), m_sTOFAutoVal(-1), m_eTOFAutoVal(-1), m_sumMono(false)
 {
   // allows saving and loading the values the user entered on to the form
   m_prevSets.beginGroup(prevSettingsGr);
@@ -77,6 +77,12 @@ void MWDiag::loadSettings()
   checked = static_cast<bool>(value.toUInt());
   m_designWidg.bleed_group->setChecked(checked);
 }
+
+void MWDiag::setSumState(bool checked)
+{
+  m_sumMono = checked;
+}
+
 
 /**
  * Get an instrument pointer for the name instrument
@@ -341,7 +347,24 @@ QString MWDiag::createDiagnosticScript() const
 {
   // Be nice and explicit so that this is as easy as possible to read later
   // Pull out the for data first
-  QString sampleRun = m_designWidg.ckDoBack->isChecked() ? ("r'" + m_monoFiles[0] + "'") : "";
+  QString sampleRun;
+  if( m_designWidg.ckDoBack )
+  {
+    if( m_sumMono )
+    {
+      sampleRun = "[r'";
+      sampleRun += m_monoFiles.join("',r'");
+      sampleRun += "']";
+    }
+    else
+    {
+      throw std::runtime_error("Diagnostic interface does not support multiple mono files without summing. ");
+    }
+  }
+  else
+  {
+    sampleRun = "None";
+  }
   QString whiteBeam = "r'" + m_designWidg.white_file->getFirstFilename() + "'";
   QString whiteBeam2 = "r'" + m_designWidg.white_file_2->getFirstFilename() + "'";
   if( whiteBeam2 == "r''" ) whiteBeam2 = "None";

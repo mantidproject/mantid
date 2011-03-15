@@ -109,7 +109,7 @@ class DirectEnergyConversion(object):
         """
         Normalise to a specified white-beam run
         """
-        whitews_name = common.create_resultname(white_run, prefix = self.instr_name, suffix='-white')
+        whitews_name = common.create_resultname(white_run, suffix='-white')
         if mtd.workspaceExists(whitews_name):
             return mtd[whitews_name]
 
@@ -146,7 +146,7 @@ class DirectEnergyConversion(object):
         sample_data = self.load_data(mono_van, 'mono-van')
         # Create the result name if necessary
         if result_name is None:
-            result_name = common.create_resultname(mono_van, prefix=self.instr_name)
+            result_name = common.create_resultname(mono_van)
 
         return self._do_mono(sample_data, sample_data, result_name, ei_guess, 
                                    white_run, map_file, spectra_masks, Tzero)
@@ -188,7 +188,7 @@ class DirectEnergyConversion(object):
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            mono_run = common.loaded_file('mono-sample')
+            mono_run = common.last_mono_file()
                            
             if mono_run.endswith("_event.nxs"):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
@@ -259,7 +259,7 @@ class DirectEnergyConversion(object):
             # TODO: This algorithm needs to be separated so that it doesn't actually
             # do the correction as well so that it can be moved next to LoadRaw where
             # it belongs
-            LoadDetectorInfo(result_ws, common.loaded_file('mono'))
+            LoadDetectorInfo(result_ws, common.last_mono_file())
 
 
         if self.background == True:
@@ -379,6 +379,9 @@ class DirectEnergyConversion(object):
         self.psi = self.motor+self.motor_offset
         # Save then finish
         self.save_results(sample_wkspace, save_path)
+        # Clear loaded raw data to free up memory
+        common.clear_loaded_data()
+        
         return sample_wkspace
 
 #----------------------------------------------------------------------------------
@@ -585,18 +588,7 @@ class DirectEnergyConversion(object):
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        if type(runs) == list:
-            result_ws = common.load_run(runs[0], file_type)
-            if len(runs) > 1:
-                del runs[0]
-                common.sum_files(result_ws.getName(), runs)
-                alg = RenameWorkspace(result_ws, 'summed-' + file_type)
-                result_ws = alg.workspace()
-        elif type(str):
-            result_ws = common.load_run(runs, file_type)
-        else:
-            raise TypeError("Run number must be a list or a string")
-
+        result_ws = common.load_runs(runs, file_type, sum=True)
         self.setup_mtd_instrument(result_ws)
         return result_ws
 

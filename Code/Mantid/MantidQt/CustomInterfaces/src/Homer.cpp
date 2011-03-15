@@ -177,6 +177,7 @@ void Homer::setUpPage2()
   diagLayout->addWidget(m_diagPage);
 
   connect(m_uiForm.ckRunDiag, SIGNAL(toggled(bool)), m_diagPage, SLOT(setEnabled(bool)));
+  connect(m_uiForm.ckSumSpecs, SIGNAL(toggled(bool)), m_diagPage, SLOT(setSumState(bool)));
   connect(m_diagPage, SIGNAL(runAsPythonScript(const QString&)), this, SIGNAL(runAsPythonScript(const QString&)));
   m_uiForm.ckRunDiag->setChecked(true);
 }

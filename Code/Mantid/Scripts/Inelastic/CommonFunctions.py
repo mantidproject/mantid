@@ -1,5 +1,6 @@
 from mantidsimple import *
 import os
+import string
 
 def find_file(run_number):
     """Use Mantid to search for the given run.
@@ -23,61 +24,105 @@ def create_resultname(run_number, prefix='', suffix=''):
         name = prefix + str(run_number) + '.spe' + suffix
     else:
         name = os.path.basename(run_number)
+        # Hack any instrument name off the front so the output is the same as if you give it a run number
+        name = name.lstrip(string.ascii_letters)
         if (suffix is None):
             name = os.path.splitext(name)[0] + '.spe'
         else:
             name = os.path.splitext(name)[0] + '.spe' + suffix
     return name
-
-# Keeps track of loaded files for each piece of the diagnosis/reduction
-# so that the raw data files don't stack up and can be deleted when necessary
-_loaded_files = \
-    {
-    'mono-sample': '',
-    'white-beam': '',
-    'white-beam2': '',
-    'mono-van': '',
-    }
-# This is temporary so that the correct file can be picked up for LoadDetectorInfo
-# When the algorithm is updated it can be moved to where LoadRaw takes place
-_last_mono = None
-
-def loaded_file(file_type):
-    """Returns the full file path of the loaded
-    file. If the file has not been loaded or the file_type
-    is unrecognized then it returns an empty string.
+    
+def create_dataname(input):
+    """This assumes some kind of filename input and creates a workspace
+    from the basename of the full file path
     """
-    global _last_mono, _loaded_files
-    try:
-        if file_type.startswith('mono'):
-            if _last_mono is None:
-                raise ValueError("A mono run cannot be retrieved, none has been loaded yet")
-            file_type = _last_mono
-        prev_file = _loaded_files[file_type]
-    except KeyError:
-        mtd.sendLogMessage('Unknown file_type "%s" passed to load_run' % (file_type))
-        prev_file = ''
-    return prev_file
+    return os.path.basename(input)
+
+# Keeps track of loaded data files so that they can be clean up easily
+_loaded_data = []
+
+#--- Temporary ----
+# This is temporary so that the correct file can be picked up for LoadDetectorInfo & LoadEventNexusMonitors
+# When the scripts do the splitting of montors correctlyt this can go
+_last_mono_file = None
+
+def last_mono_file():
+    return _last_mono_file
+#----------------------
+
+def clear_loaded_data():
+    """Clears any previously loaded data workspaces
+    """
+    global _last_mono_file, _loaded_data
+    _last_mono_file = None
+    for data_ws in _loaded_data:
+        mtd.deleteWorkspace(data_ws)
+    _loaded_data = []
+   
+def is_loaded(filename):
+    """Returns True if the file is already loaded, false otherwise
+    """
+    global _loaded_files
+    data_name =  create_dataname(filename)
+    if data_name in _loaded_files:
+        return True
+    else:
+        return False
+    
+def mark_as_loaded(filename, is_mono_file=False):
+    """Mark a file as loaded.
+    """
+    global _last_mono_file, _loaded_data
+    data_name =  create_dataname(filename)
+    if data_name not in _loaded_data:
+        mtd.sendLogMessage("Marking %s as loaded." % filename)
+        _loaded_data.append(data_name)
+    if is_mono_file:
+        _last_mono_file = filename
+        mtd.sendLogMessage("Marking %s as last mono file used." % filename)
+
+def load_runs(runs, file_type, sum=True):
+    """
+    Loads a list of files, summing if the required.
+    
+    file_type is used to see if we need to keep track of a loaded mono run
+    This is a hack for the moment while the LoadDetectorInfo algorithm and 
+    splitting monitors is sorted out.
+    """
+    if type(runs) == list:
+        if sum == True:
+            result_ws = load_run(runs[0], file_type)
+            summed = 'summed-run-files'
+            if len(file_type) > 0: 
+                summed += '-' + file_type
+            CloneWorkspace(result_ws, summed)
+            if len(runs) > 1:
+                sum_files(summed, runs[1:], file_type)
+                result_ws = mtd[summed]
+            mark_as_loaded(summed, False)
+            return result_ws
+        else:
+            loaded = []
+            for r in runs:
+                loaded.append(load_run(r, file_type))
+            return loaded
+    else:
+        # Try a single run
+        return load_run(runs, file_type)
 
 def load_run(run_number, file_type='mono-sample',force=False):
-    """Loads run/runs into the given workspace. The file_type is
-    used to keep track the loaded data for various parts of the reduction.
-    This ensures that multiple requests to load the same file into the same
-    type will result in only a single load.
-
+    """Loads run into the given workspace. 
+    
+    The file_type is used to track whether this is a mono run.
+    This is a hack for the moment while the LoadDetectorInfo algorithm and 
+    splitting monitors is sorted out.
     If force is true then the file is loaded regardless of whether
     its workspace exists already.
     """
-    global _last_mono, _loaded_files
-    try:
-        prev_file = _loaded_files[file_type]
-    except KeyError:
-        mtd.sendLogMessage("Unknown file type, forcing load of file")
-        force = True
-        prev_file = ''
-    
     if type(run_number) == int: 
         filename = find_file(run_number)
+    elif type(run_number) == list:
+        raise TypeError('load_run() cannot handle run lists')
     else:
         # Check if it exists, else tell Mantid to try and 
         # find it
@@ -85,17 +130,12 @@ def load_run(run_number, file_type='mono-sample',force=False):
             filename = run_number
         else:
             filename = find_file(run_number)
-
+       
     # The output name 
     output_name = os.path.basename(filename)
-    if force == False and filename == prev_file and \
-       mtd.workspaceExists(output_name):
+    if force == False and mtd.workspaceExists(output_name):
         mtd.sendLogMessage("%s already loaded" % filename)
         return mtd[output_name]
-
-    # Don't have the file already so load it but first the delete the old one
-    #if mtd.workspaceExists(os.path.basename(prev_file)):
-    #    mtd.deleteWorkspace(os.path.basename(prev_file))
 
     ext = os.path.splitext(filename)[1]
     if filename.endswith("_event.nxs"):
@@ -110,23 +150,19 @@ def load_run(run_number, file_type='mono-sample',force=False):
         #LoadDetectorInfo(output_name, filename)
 
     mtd.sendLogMessage("Loaded %s" % filename)
-    _loaded_files[file_type] = filename
-    if file_type.startswith('mono'): 
-        _last_mono = file_type
-
+    is_mono_file = file_type.startswith('mono')
+    mark_as_loaded(filename, is_mono_file)
     return mtd[output_name]
 
-def sum_files(accumulator, files):
+def sum_files(accumulator, files, file_type):
     """
-    Sum a current workspace and a list of files, acculating the results in the
+    Sum a current workspace and a list of files, accumulating the results in the
     given workspace
     """
     if type(files) == list:
-        tmp_suffix = '_plus_tmp'
         for filename in files:
-            temp = load_run(filename, force=True)
+            temp = load_run(filename, file_type)
             Plus(accumulator, temp, accumulator)
-            mantid.deleteWorkspace(temp.getName())
     else:
         pass
 
@@ -176,36 +212,3 @@ def load_mask(hard_mask):
         return ''
     # Return everything after the very first comma we added in the line above
     return spectra_list.rstrip(',')
-
-
-# -- TODO: Remove this stuff in favour of the mask workspace concept --
-# # returns a string with is comma separated list of the elements in the tuple, array or comma separated string!
-# def listToString(list):
-#   stringIt = str(list).strip()
-  
-#   if stringIt == '' : return ''
-#   if stringIt[0] == '[' or stringIt[0] == '(' :
-#     stringIt = stringIt[1:]
-#     lastInd = len(stringIt) - 1
-#     if stringIt[lastInd] == ']' or stringIt[lastInd] == ')':
-#       stringIt = stringIt[0:lastInd]
-#   return stringIt
-
-# def stringToList(commaSeparated):
-#   if commaSeparated == '' : return []
-#   #remove any leading or trailing ','
-#   if commaSeparated[0] == ',':
-#     commaSeparated = commaSeparated[1:]
-#   if commaSeparated[len(commaSeparated) - 1] == ',':
-#     commaSeparated = commaSeparated[0:len(commaSeparated) - 1]
-
-#   theList = []
-#   numbers = commaSeparated.split(',')
-#   for quoted in numbers :
-#     try :
-#       num = int(quoted)
-#       theList.append(num)
-#     except : #we're not demanding that the entries are all integers
-#       theList.append(quoted)                       
-#   return theList
-    

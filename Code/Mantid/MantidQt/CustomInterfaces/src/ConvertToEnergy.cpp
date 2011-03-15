@@ -276,15 +276,13 @@ ConvertToEnergy::DeltaEMode ConvertToEnergy::instrumentDeltaEMode(const QString&
     "from mantidsimple import *\n"
     "import sys\n"
     "ws_name = '__empty_%2'\n"
-    "if mtd.workspaceExists(ws_name):\n"
-    "  instrument = mtd[ws_name]\n"
-    "else:\n"
+    "if not mtd.workspaceExists(ws_name):\n"
     "  LoadEmptyInstrument(r'%1', ws_name)\n"
-    "  instrument = mtd[ws_name].getInstrument()\n"
+    "instrument = mtd[ws_name].getInstrument()\n"
     "try:\n"
     "    print instrument.getStringParameter('deltaE-mode')[0]\n"
     "except IndexError, message:\n" // the above line will raise an IndexError in Python
-    "    print ''\n";				// if the instrument doesn't have this parameter.
+    "    print ''\n"; // if the instrument doesn't have this parameter.
 
   pyInput = pyInput.arg(defFile,m_uiForm.cbInst->currentText());
 
