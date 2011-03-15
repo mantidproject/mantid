@@ -1,5 +1,5 @@
-#ifndef PLUSTEST_H_
-#define PLUSTEST_H_
+#ifndef PlusTest_H_
+#define PlusTest_H_
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
@@ -21,9 +21,9 @@ using namespace Mantid::DataObjects;
 
 
 /*****************************************************************************************/
-/********** PLEASE NOTE! THIS TEST IS SHARED (copy/pasted) WITH MinusTest.h **************/
+/********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
+/********** Source = PlusMinusTest.h.in **************************************************/
 /*****************************************************************************************/
-
 
 class PlusTest : public CxxTest::TestSuite
 {
@@ -149,6 +149,24 @@ public:
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create1DWorkspaceRand(nBins);
     performTest(work_in1,work_in2);
+  }
+
+  void test_2D_2D()
+  {
+    int nHist = 50,nBins=50;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    performTest(work_in1,work_in2, false /*not inplace*/, false /*not event*/,
+        DO_PLUS ? 4.0 : 0.0,   2.0);
+  }
+
+  void test_2D_2D_inplace()
+  {
+    int nHist = 50,nBins=50;
+    MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::Create2DWorkspaceBinned(nHist,nBins);
+    performTest(work_in1,work_in2, true /*inplace*/, false /*not event*/,
+        DO_PLUS ? 4.0 : 0.0,   2.0);
   }
 
   void test_2D_2D_NotHistograms()

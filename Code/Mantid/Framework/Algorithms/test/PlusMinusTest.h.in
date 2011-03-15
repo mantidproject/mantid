@@ -1,5 +1,5 @@
-#ifndef MinusTest_H_
-#define MinusTest_H_
+#ifndef @PLUSMINUSTEST_CLASS@_H_
+#define @PLUSMINUSTEST_CLASS@_H_
 #include <cxxtest/TestSuite.h>
 #include <cmath>
 
@@ -25,19 +25,19 @@ using namespace Mantid::DataObjects;
 /********** Source = PlusMinusTest.h.in **************************************************/
 /*****************************************************************************************/
 
-class MinusTest : public CxxTest::TestSuite
+class @PLUSMINUSTEST_CLASS@ : public CxxTest::TestSuite
 {
 public:
 
   bool DO_PLUS;
   std::string message;
 
-  MinusTest()
+  @PLUSMINUSTEST_CLASS@()
   {
     numBins = 10;
     numPixels = 6;
     wsNameOut = "MinusTest_outputWorkspace";
-    DO_PLUS = false;
+    DO_PLUS = @PLUSMINUSTEST_DO_PLUS@;
   }
 
 

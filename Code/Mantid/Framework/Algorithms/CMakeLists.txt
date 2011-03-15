@@ -415,6 +415,14 @@ if ( CXXTEST_FOUND )
   set ( MULTIPLYDIVIDETEST_DO_DIVIDE true )
   configure_file ( test/MultiplyDivideTest.h.in      test/DivideTest.h)
 
+  # Generate the PlusTest.h and MinusTest.h
+  set ( PLUSMINUSTEST_CLASS PlusTest )
+  set ( PLUSMINUSTEST_DO_PLUS true )
+  configure_file ( test/PlusMinusTest.h.in      test/PlusTest.h)
+  set ( PLUSMINUSTEST_CLASS MinusTest )
+  set ( PLUSMINUSTEST_DO_PLUS false )
+  configure_file ( test/PlusMinusTest.h.in      test/MinusTest.h)
+  
   # Make the rest of the tests
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc )
   cxxtest_add_test ( AlgorithmsTest ${TEST_FILES} )
