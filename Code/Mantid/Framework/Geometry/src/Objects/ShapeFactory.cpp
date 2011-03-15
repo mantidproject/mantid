@@ -716,6 +716,10 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add front face
   Plane* pPlaneFrontCutoff = new Plane();
   normal = (rfb-lfb).cross_prod(lft-lfb);
+  
+ // V3D jjj = (normal*(rfb-rbb));
+  if ( normal.scalar_prod(rfb-rbb) < 0 )
+    normal *= -1.0;
   pPlaneFrontCutoff->setPlane(lfb, normal); 
   prim[l_id] = pPlaneFrontCutoff;
   std::stringstream retAlgebraMatch;
@@ -725,6 +729,8 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add back face
   Plane* pPlaneBackCutoff = new Plane();
   normal = (rbb-lbb).cross_prod(lbt-lbb);
+  if ( normal.scalar_prod(rfb-rbb) < 0 )
+    normal *= -1.0;  
   pPlaneBackCutoff->setPlane(lbb, normal); 
   prim[l_id] = pPlaneBackCutoff;
   retAlgebraMatch << "" << l_id << " ";
@@ -733,6 +739,8 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add left face
   Plane* pPlaneLeftCutoff = new Plane();
   normal = (lbb-lfb).cross_prod(lft-lfb);
+  if ( normal.scalar_prod(rfb-lfb) < 0 )
+    normal *= -1.0; 
   pPlaneLeftCutoff->setPlane(lfb, normal); 
   prim[l_id] = pPlaneLeftCutoff;
   retAlgebraMatch << "" << l_id << " ";
@@ -741,6 +749,8 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add right face
   Plane* pPlaneRightCutoff = new Plane();
   normal = (rbb-rfb).cross_prod(rft-rfb);
+  if ( normal.scalar_prod(rfb-lfb) < 0 )
+    normal *= -1.0; 
   pPlaneRightCutoff->setPlane(rfb, normal); 
   prim[l_id] = pPlaneRightCutoff;
   retAlgebraMatch << "-" << l_id << " ";
@@ -749,6 +759,8 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add top face
   Plane* pPlaneTopCutoff = new Plane();
   normal = (rft-lft).cross_prod(lbt-lft);
+  if ( normal.scalar_prod(rft-rfb) < 0 )
+    normal *= -1.0; 
   pPlaneTopCutoff->setPlane(lft, normal); 
   prim[l_id] = pPlaneTopCutoff;
   retAlgebraMatch << "-" << l_id << " ";
@@ -757,6 +769,8 @@ std::string ShapeFactory::parseHexahedron(Poco::XML::Element* pElem, std::map<in
   // add bottom face
   Plane* pPlaneBottomCutoff = new Plane();
   normal = (rfb-lfb).cross_prod(lbb-lfb);
+  if ( normal.scalar_prod(rft-rfb) < 0 )
+    normal *= -1.0; 
   pPlaneBottomCutoff->setPlane(lfb, normal); 
   prim[l_id] = pPlaneBottomCutoff;
   retAlgebraMatch << "" << l_id << ")";

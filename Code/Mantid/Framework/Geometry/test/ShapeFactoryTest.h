@@ -42,7 +42,54 @@ public:
     TS_ASSERT( !shape_sptr->isValid(V3D(-0.006,0.0,0.00001)) );
     TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.09, 0.00001)) );
 	}
+
+
+	void testHexahedron()
+	{
+		std::string xmlShape = "<hexahedron id=\"shape\"> ";
+    xmlShape +=	"<left-back-bottom-point  x=\"0.0\" y=\"0.0\" z=\"0.0\"  /> " ;
+    xmlShape +=	"<left-front-bottom-point x=\"1.0\" y=\"0.0\" z=\"0.0\"  /> " ;
+    xmlShape +=	"<right-front-bottom-point x=\"1.0\" y=\"1.0\" z=\"0.0\"  /> " ;
+    xmlShape +=	"<right-back-bottom-point  x=\"0.0\" y=\"1.0\" z=\"0.0\"  /> " ;
+    xmlShape +=	"<left-back-top-point  x=\"0.0\" y=\"0.0\" z=\"2.0\"  /> " ;
+    xmlShape +=	"<left-front-top-point  x=\"0.5\" y=\"0.0\" z=\"2.0\"  /> " ;
+    xmlShape +=	"<right-front-top-point  x=\"0.5\" y=\"0.5\" z=\"2.0\"  /> " ;
+    xmlShape +=	"<right-back-top-point  x=\"0.0\" y=\"0.5\" z=\"2.0\"  /> " ;
+  	xmlShape +=	"</hexahedron> ";
+		xmlShape +=	"<algebra val=\"shape\" /> ";  
+		
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.0,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(1.1,0.0,0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.9,0.9,0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.49,0.49,1.99)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.49,0.81, 1.99)) );
+	}
 	
+	void testHexahedron2()
+	{
+		std::string xmlShape = "<hexahedron id=\"shape\"> ";
+    xmlShape +=	"<left-front-bottom-point x=\"0.0\" y=\"-0.0031\" z=\"-0.037\"  /> " ;
+    xmlShape +=	"<right-front-bottom-point x=\"0.0\" y=\"0.0031\" z=\"-0.037\"  /> " ;
+    xmlShape +=	"<left-front-top-point x=\"0.0\" y=\"-0.0104\" z=\"0.037\"  /> " ;
+    xmlShape +=	"<right-front-top-point x=\"0.0\" y=\"0.0104\" z=\"0.037\"  /> " ;
+    xmlShape +=	"<left-back-bottom-point x=\"0.005\" y=\"-0.0031\" z=\"-0.037\"  /> " ;
+    xmlShape +=	"<right-back-bottom-point x=\"0.005\" y=\"0.0031\" z=\"-0.037\"  /> " ;
+    xmlShape +=	"<left-back-top-point x=\"0.005\" y=\"-0.0104\" z=\"0.037\"  /> " ;
+    xmlShape +=	"<right-back-top-point x=\"0.005\" y=\"0.0104\" z=\"0.037\"  /> " ;
+  	xmlShape +=	"</hexahedron> ";
+		xmlShape +=	"<algebra val=\"shape\" /> ";  
+		
+		boost::shared_ptr<Object> shape_sptr = getObject(xmlShape);
+
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0001,0.0,0.0)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0055,0.0,0.0)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.004,0.003,0.003)) );
+    TS_ASSERT( shape_sptr->isValid(V3D(0.0,0.-0.003,-0.036)) );
+    TS_ASSERT( !shape_sptr->isValid(V3D(0.0,-0.003, -0.038)) );
+	}
+
 	void testSphere()
 	{
 		//algebra line is essential
