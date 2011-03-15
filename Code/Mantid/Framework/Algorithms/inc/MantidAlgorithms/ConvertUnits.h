@@ -38,7 +38,7 @@ namespace Algorithms
     @author Russell Taylor, Tessella Support Services plc
     @date 06/03/2008
 
-    Copyright &copy; 2008-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -80,13 +80,16 @@ private:
   void exec();
   void execEvent();
 
+  API::MatrixWorkspace_sptr setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
+  void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS, const API::MatrixWorkspace_sptr outputWS);
+
   /// Convert the workspace units according to a simple output = a * (input^b) relationship
-  void convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power);
+  void convertQuickly(API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power);
   /// Convert the workspace units using TOF as an intermediate step in the conversion
-  void convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
+  void convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
 
   /// Convert the EventWorkspace units using TOF as an intermediate step in the conversion
-  void convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS);
+  void convertViaEventsTOF(Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS);
 
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr alignBins(const API::MatrixWorkspace_sptr workspace);
@@ -98,6 +101,11 @@ private:
   /// For conversions to energy transfer, removes bins corresponding to inaccessible values
   API::MatrixWorkspace_sptr removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
+  size_t m_numberOfSpectra;
+  bool m_distribution; ///< Whether input is a distribution. Only applies to histogram workspaces.
+  bool m_inputEvents; ///< Flag indicating whether input workspace is an EventWorkspace
+  Kernel::Unit_const_sptr m_inputUnit;
+  Kernel::Unit_sptr m_outputUnit;
 };
 
 } // namespace Algorithm

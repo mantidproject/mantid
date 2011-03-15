@@ -33,7 +33,7 @@ using namespace API;
 using namespace DataObjects;
 
 /// Default constructor
-ConvertUnits::ConvertUnits() : Algorithm()
+ConvertUnits::ConvertUnits() : Algorithm(), m_numberOfSpectra(0), m_inputEvents(false)
 {
 }
 
@@ -84,22 +84,19 @@ void ConvertUnits::exec()
   // Get the workspaces
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
+  m_numberOfSpectra = inputWS->getNumberHistograms();
+  // In the context of this algorithm, we treat things as a distribution if the flag is set
+  // AND the data are not dimensionless
+  m_distribution = inputWS->isDistribution() && !inputWS->YUnit().empty();
   //Check if its an event workspace
-  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
-  if (eventW != NULL)
-  {
-    //g_log.information() << "Executing ConvertUnits for Eventworkspace" << std::endl;
-    this->execEvent();
-    return;
-  }
-
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  m_inputEvents = ( boost::dynamic_pointer_cast<const EventWorkspace>(inputWS) != NULL );
 
   // Check that the input workspace doesn't already have the desired unit.
-  // If it does, just set the output workspace to point to the input one.
-  Kernel::Unit_sptr inputUnit = inputWS->getAxis(0)->unit();
+  // If it does, just set the output workspace to point to the input one and be done.
+  m_inputUnit = inputWS->getAxis(0)->unit();
   const std::string targetUnit = getPropertyValue("Target");
-  if ( inputUnit->unitID() == targetUnit )
+  m_outputUnit = UnitFactory::Instance().create(targetUnit);
+  if ( m_inputUnit->unitID() == targetUnit )
   {
     g_log.information() << "Input workspace already has target unit (" << targetUnit
                         << "), so just pointing the output workspace property to the input workspace." << std::endl;
@@ -107,71 +104,33 @@ void ConvertUnits::exec()
     return;
   }
 
-  // If input and output workspaces are not the same, create a new workspace for the output
-  if (outputWS != inputWS ) outputWS = WorkspaceFactory::Instance().create(inputWS);
-
-  // Set the final unit that our output workspace will have
-  Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
-
-  const unsigned int size = inputWS->blocksize();
-  // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = inputWS->size() / size;
-
-  int iprogress_step = numberOfSpectra / 100;
-  if (iprogress_step == 0) iprogress_step = 1;
-  //input and output workspaces are checked to ensure they suitable for multithreaded access.
-
-  // Check whether the Y data of the input WS is dimensioned and set output WS flag to be same
-  bool distribution = outputWS->isDistribution(inputWS->isDistribution());
-  // In the context of this algorithm, we treat things as a distribution if the flag is set
-  // AND the data are not dimensionless
-  distribution = distribution && !inputWS->YUnit().empty();
-
-  // Loop over the histograms (detector spectra)
-  Progress prog(this,0.0,0.5,numberOfSpectra);
-  PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i) 
+  /// *********** Remove this section when done!!!!!!!
+  EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+  if (eventW != NULL)
   {
-    PARALLEL_START_INTERUPT_REGION
-    // Take the bin width dependency out of the Y & E data
-    if (distribution)
-    {
-      for (unsigned int j = 0; j < size; ++j)
-      {
-        const double width = std::abs( inputWS->dataX(i)[j+1] - inputWS->dataX(i)[j] );
-        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*width;
-        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*width;
-      }
-    }
-    else
-    {
-      // Just copy over
-      outputWS->dataY(i) = inputWS->dataY(i);
-      outputWS->dataE(i) = inputWS->dataE(i);
-    }
-    // Copy over the X data (no copying will happen if the two workspaces are the same)
-    outputWS->setX( i, inputWS->refX(i) );
-    
-    prog.report();
-    PARALLEL_END_INTERUPT_REGION
+    //g_log.information() << "Executing ConvertUnits for Eventworkspace" << std::endl;
+    this->execEvent();
+    return;
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+  /// *********** Remove this section when done!!!!!!!
+
+  MatrixWorkspace_sptr outputWS = this->setupOutputWorkspace(inputWS);
 
   // Check whether there is a quick conversion available
   double factor, power;
-  if ( inputUnit->quickConversion(*outputUnit,factor,power) )
+  if ( m_inputUnit->quickConversion(*m_outputUnit,factor,power) )
   // If test fails, could also check whether a quick conversion in the opposite direction has been entered
   {
-    convertQuickly(numberOfSpectra,outputWS,factor,power);
+    convertQuickly(outputWS,factor,power);
   }
   else
   {
-    convertViaTOF(numberOfSpectra,inputUnit,outputWS);
+    convertViaTOF(m_inputUnit,outputWS);
   }
 
   // If the units conversion has flipped the ascending direction of X, reverse all the vectors
   if (outputWS->dataX(0).size() && ( outputWS->dataX(0).front() > outputWS->dataX(0).back()
-        || outputWS->dataX(numberOfSpectra/2).front() > outputWS->dataX(numberOfSpectra/2).back() ) )
+        || outputWS->dataX(m_numberOfSpectra/2).front() > outputWS->dataX(m_numberOfSpectra/2).back() ) )
   {
     this->reverse(outputWS);
   }
@@ -188,9 +147,9 @@ void ConvertUnits::exec()
 
   const unsigned int outSize = outputWS->blocksize();
   // If appropriate, put back the bin width division into Y/E.
-  if (distribution)
+  if (m_distribution)
   {
-    for (int i = 0; i < numberOfSpectra; ++i) {
+    for (size_t i = 0; i < m_numberOfSpectra; ++i) {
       // There must be good case for having a 'divideByBinWidth'/'normalise' algorithm...
       for (unsigned int j = 0; j < outSize; ++j)
       {
@@ -201,6 +160,7 @@ void ConvertUnits::exec()
     }
   }
 
+  // Point the output property to the right place
   setProperty("OutputWorkspace",outputWS);
   return;
 }
@@ -244,8 +204,77 @@ void ConvertUnits::execEvent()
   // Set the final unit that our output workspace will have
   Kernel::Unit_const_sptr outputUnit = outputWS->getAxis(0)->unit() = UnitFactory::Instance().create(targetUnit);
 
-  const int numberOfSpectra = inputWS->getNumberHistograms();
-  this->convertViaEventsTOF(numberOfSpectra, inputUnit, outputWS);
+  this->convertViaEventsTOF(inputUnit, outputWS);
+}
+
+/** Create an output workspace of the appropriate (histogram or event) type
+ *
+ */
+API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS)
+{
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+
+  // If input and output workspaces are NOT the same, create a new workspace for the output
+  if (outputWS != inputWS )
+  {
+    if ( m_inputEvents )
+    {
+      // Need to create by name as WorkspaceFactory otherwise spits out Workspace2D when EventWS passed in
+      outputWS = WorkspaceFactory::Instance().create("EventWorkspace", inputWS->getNumberHistograms(), 2, 1);
+      // Copy geometry etc. over
+      WorkspaceFactory::Instance().initializeFromParent(inputWS, outputWS, false);
+      // Need to copy over the data as well
+      EventWorkspace_const_sptr inputEventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
+      boost::dynamic_pointer_cast<EventWorkspace>(outputWS)->copyDataFrom( *inputEventWS );
+    }
+    else
+    {
+      // Create the output workspace
+      outputWS = WorkspaceFactory::Instance().create(inputWS);
+      // Copy the data over
+      this->fillOutputHist(inputWS, outputWS);
+    }
+  }
+
+  // Set the final unit that our output workspace will have
+  outputWS->getAxis(0)->unit() = m_outputUnit;
+
+  return outputWS;
+}
+
+void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS, const API::MatrixWorkspace_sptr outputWS)
+{
+  const size_t size = inputWS->blocksize();
+
+  // Loop over the histograms (detector spectra)
+  Progress prog(this,0.0,0.5,m_numberOfSpectra);
+  PARALLEL_FOR2(inputWS,outputWS)
+  for (size_t i = 0; i < m_numberOfSpectra; ++i)
+  {
+    PARALLEL_START_INTERUPT_REGION
+    // Take the bin width dependency out of the Y & E data
+    if (m_distribution)
+    {
+      for (size_t j = 0; j < size; ++j)
+      {
+        const double width = std::abs( inputWS->dataX(i)[j+1] - inputWS->dataX(i)[j] );
+        outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*width;
+        outputWS->dataE(i)[j] = inputWS->dataE(i)[j]*width;
+      }
+    }
+    else
+    {
+      // Just copy over
+      outputWS->dataY(i) = inputWS->dataY(i);
+      outputWS->dataE(i) = inputWS->dataE(i);
+    }
+    // Copy over the X data
+    outputWS->setX( i, inputWS->refX(i) );
+
+    prog.report();
+    PARALLEL_END_INTERUPT_REGION
+  }
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Convert the workspace units using TOF as an intermediate step in the conversion
@@ -253,11 +282,11 @@ void ConvertUnits::execEvent()
  * @param fromUnit :: The unit of the input workspace
  * @param outputWS :: The output workspace
  */
-void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS)
+void ConvertUnits::convertViaEventsTOF(Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS)
 {
   using namespace Geometry;
   
-  Progress prog(this,0.0,1.0,numberOfSpectra);
+  Progress prog(this,0.0,1.0,m_numberOfSpectra);
 
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -337,7 +366,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i)
+  for (size_t i = 0; i < m_numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
@@ -433,7 +462,7 @@ void ConvertUnits::convertViaEventsTOF(const int& numberOfSpectra, Kernel::Unit_
  * @param factor :: the conversion factor a to apply
  * @param power :: the Power b to apply to the conversion
  */
-void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power)
+void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power)
 {
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
@@ -455,10 +484,10 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
       {
         MantidVecPtr xVals;
         xVals.access() = outputWS->dataX(0);
-        Progress prog(this,0.5,1.0,numberOfSpectra);
+        Progress prog(this,0.5,1.0,m_numberOfSpectra);
 
         PARALLEL_FOR1(outputWS)
-        for (int j = 1; j < numberOfSpectra; ++j)
+        for (size_t j = 1; j < m_numberOfSpectra; ++j)
         {
           PARALLEL_START_INTERUPT_REGION
           WS2D->setX(j,xVals);
@@ -474,7 +503,7 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
   // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int k = 0; k < numberOfSpectra; ++k) {
+  for (size_t k = 0; k < m_numberOfSpectra; ++k) {
     PARALLEL_START_INTERUPT_REGION
     MantidVec::iterator it;
     for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
@@ -492,11 +521,11 @@ void ConvertUnits::convertQuickly(const int& numberOfSpectra, API::MatrixWorkspa
  * @param fromUnit :: The unit of the input workspace
  * @param outputWS :: The output workspace
  */
-void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
+void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS)
 {
   using namespace Geometry;
   
-  Progress prog(this,0.5,1.0,numberOfSpectra);
+  Progress prog(this,0.5,1.0,m_numberOfSpectra);
 
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -576,7 +605,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i) 
+  for (size_t i = 0; i < m_numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;

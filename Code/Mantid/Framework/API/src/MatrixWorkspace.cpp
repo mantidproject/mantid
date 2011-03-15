@@ -663,7 +663,7 @@ namespace Mantid
     {
       if(index < 0 || index >= this->getNumberHistograms() )
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
-					    "MatrixWorkspace::maskWorkspaceIndex,index");
+            "MatrixWorkspace::maskWorkspaceIndex,index");
 
       // Assign the value to the data and error arrays
       MantidVec & yValues = this->dataY(index);
@@ -674,30 +674,30 @@ namespace Mantid
       IDetector_sptr det;
       try
       {
-	det = this->getDetector(index);
+        det = this->getDetector(index);
       }
       catch(Kernel::Exception::NotFoundError &)
       {
-	return;
+        return;
       }
       
       PARALLEL_CRITICAL(MatrixWorkspace_maskWorkspaceIndex)
       {
-	int spectrum_number = getAxis(1)->spectraNo(index);
-	const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
-	for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
-	{
-	  try
-	  {
-	    if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
-	    {
-	      m_parmap->addBool(det,"masked",true);
-	    }
-	  }
-	  catch(Kernel::Exception::NotFoundError &)
-	  {
-	  }
-	}
+        int spectrum_number = getAxis(1)->spectraNo(index);
+        const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
+        for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+        {
+          try
+          {
+            if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
+            {
+              m_parmap->addBool(det,"masked",true);
+            }
+          }
+          catch(Kernel::Exception::NotFoundError &)
+          {
+          }
+        }
       }
     }
 
