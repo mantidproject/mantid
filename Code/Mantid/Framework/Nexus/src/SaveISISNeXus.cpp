@@ -112,7 +112,7 @@ void SaveISISNexus::exec()
   rawFile =  fopen(inputFilename.c_str(), "rb");
   if (rawFile == NULL)
   {
-    throw Exception::FileError("Unable to open File:", inputFilename);
+    throw Exception::FileError("Cannot open file ", inputFilename);
   }
   m_isisRaw->ioRAW(rawFile,true);
 
@@ -128,6 +128,10 @@ void SaveISISNexus::exec()
   float flt;
 
   status = NXopen(outputFilename.c_str(),NXACC_CREATE5,&handle);
+  if (status != NX_OK)
+  {
+    throw std::runtime_error("Cannot open file " + outputFilename + " for writing.");
+  }
   status = NXmakegroup(handle,"raw_data_1","NXentry");
   NXopengroup(handle,"raw_data_1","NXentry");
     write_isis_vms_compat();
@@ -200,7 +204,7 @@ void SaveISISNexus::exec()
 
     saveInt("raw_frames",&m_isisRaw->rpb.r_rawfrm);
 
-    run_cycle(); //TODO: check if it's correct
+    run_cycle();
 
     saveInt("run_number",&m_isisRaw->r_number);
 
@@ -414,7 +418,7 @@ void SaveISISNexus::write_isis_vms_compat()
   write_rpb();
   write_spb();
   write_vpb();
-  saveInt("DAEO",&m_isisRaw->daep,64);
+  saveInt("DAEP",&m_isisRaw->daep,64);
   saveInt("DELT",m_isisRaw->delt,ndet);
   saveInt("FORM",&m_isisRaw->data_format);
   saveChar("HDR",&m_isisRaw->hdr,80);
@@ -423,7 +427,7 @@ void SaveISISNexus::write_isis_vms_compat()
   saveInt("MODN",m_isisRaw->modn,ndet);
   saveInt("MONP",m_isisRaw->monp,nmon);
   saveInt("MPOS",m_isisRaw->mpos,ndet);
-  saveChar("NAME",&m_isisRaw->i_inst,8);
+  saveChar("NAME",m_isisRaw->i_inst,8);
   saveInt("NDET",&ndet);
   saveInt("NFPP",&m_isisRaw->t_nfpp);
   saveInt("NMON",&nmon);
@@ -436,7 +440,7 @@ void SaveISISNexus::write_isis_vms_compat()
   saveInt("PMAP",&m_isisRaw->t_pmap,256);
   saveInt("PRE1",&m_isisRaw->t_pre1);
   saveInt("RUN",&m_isisRaw->r_number);
-  saveInt("SPEC",&m_isisRaw->spec,ndet); 
+  saveInt("SPEC",m_isisRaw->spec,ndet); 
   saveInt("TCM1",&m_isisRaw->t_tcm1);
   saveFloat("TCP1",m_isisRaw->t_tcp1,20);
   saveInt("TIMR",m_isisRaw->timr,ndet);
@@ -483,6 +487,8 @@ void SaveISISNexus::instrument()
     close();
   dae();
   detector_1();
+  moderator();
+  source();
   NXclosegroup(handle);
 }
 
@@ -562,6 +568,36 @@ void SaveISISNexus::detector_1()
   saveFloatOpen("polar_angle",&float_vec[0],ndet-nmon);
   putAttr("units","degree");
   close();
+
+  NXclosegroup(handle);
+}
+
+/**
+  * Write instrument/moderator group
+  */
+void SaveISISNexus::moderator()
+{
+  NXstatus status = NXmakegroup(handle,"moderator","NXmoderator");
+  status = NXopengroup(handle,"moderator","NXmoderator");
+
+  float l1 = - m_isisRaw->ivpb.i_l1;
+  saveFloatOpen("distance",&l1,1);
+  putAttr("units","metre");
+
+  NXclosegroup(handle);
+}
+
+/**
+  * Write instrument/source group
+  */
+void SaveISISNexus::source()
+{
+  NXstatus status = NXmakegroup(handle,"source","NXsource");
+  status = NXopengroup(handle,"source","NXsource");
+
+  saveString("name","ISIS");
+  saveString("probe","neutrons");
+  saveString("type","Pulsed Neutron Source");
 
   NXclosegroup(handle);
 }
@@ -694,6 +730,17 @@ void SaveISISNexus::sample()
   saveFloat("height",&m_isisRaw->spb.e_height,1);
   saveFloat("width",&m_isisRaw->spb.e_width,1);
   saveFloat("thickness",&m_isisRaw->spb.e_thick,1);
+  saveString("id"," ");
+  float tmp(0.0);
+  saveFloat("distance",&tmp,1);
+  std::string shape[] = {"cylinder","flat plate","HRPD slab","unknown"};
+  int i = m_isisRaw->spb.e_geom - 1;
+  if (i < 0 || i > 3) i = 3;
+  saveString("shape",shape[i]);
+  std::string type[] = {"sample+can","empty can","vanadium","absorber","nothing","sample, no can","unknown"};
+  i = m_isisRaw->spb.e_type - 1;
+  if (i < 0 || i > 6) i = 6;
+  saveString("type",type[i]);
   
   NXclosegroup(handle); // sample
 }
@@ -1026,14 +1073,7 @@ void SaveISISNexus::logNotes()
 
 void SaveISISNexus::run_cycle()
 {
-  //std::cerr << "start time: " << start_time_str << std::endl;
-  std::string rcycle = start_time_str.substr(2,5);
-  rcycle[2] = '_';
-  if (rcycle[3] == '0')
-  {
-    rcycle.erase(3,1);
-  }
-  saveString("run_cycle",rcycle);
+  saveString("run_cycle"," ");
 }
 
 void SaveISISNexus::write_rpb()

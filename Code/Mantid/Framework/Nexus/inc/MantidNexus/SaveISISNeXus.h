@@ -122,8 +122,12 @@ namespace Mantid
       void instrument();
       /// Write instrument/detector_1
       void detector_1();
+      /// Write instrument/moderator
+      void moderator();
       /// Write instrument/dae
       void dae();
+      /// Write instrument/source
+      void source();
       /// Create a link to some of detector_1's data
       void make_detector_1_link();
       /// Write user
