@@ -536,7 +536,7 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
 
   // Not doing anything with the Y vector in to/fromTOF yet, so just pass empty vector
   std::vector<double> emptyVec;
-  const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos );
+  const bool needEfixed = ( outputUnit->unitID().find("DeltaE") != std::string::npos || outputUnit->unitID().find("Wave") != std::string::npos );
   double efixedProp = getProperty("Efixed");
   if ( emode == 1 )
   {
@@ -617,11 +617,11 @@ void ConvertUnits::convertViaTOF(const int& numberOfSpectra, Kernel::Unit_const_
         l2 = det->getDistance(*source);
         l2 = l2-l1;
         twoTheta = 0.0;
+        efixed = DBL_MIN;
         // Energy transfer is meaningless for a monitor, so set l2 to 0.
-        if (needEfixed)
+        if (outputUnit->unitID().find("DeltaE") != std::string::npos)
         {
           l2 = 0.0;
-          efixed = DBL_MIN;
         }
       }
 

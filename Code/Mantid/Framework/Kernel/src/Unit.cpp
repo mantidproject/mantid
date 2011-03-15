@@ -150,36 +150,83 @@ Wavelength::Wavelength() : Unit()
 
 
 void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
-    const double&, const int&, const double&, const double&) const
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   // First the crux of the conversion
-  double factor = ( PhysicalConstants::NeutronMass * ( l1 + l2 ) ) / PhysicalConstants::h;
-
-  // Now adjustments for the scale of units used
+  double ltot, sfp;
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
+
+  if ( emode == 1 )
+  {
+    ltot = l2;
+    sfp = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l1 ) / sqrt(efixed);
+  }
+  else if ( emode == 2 )
+  {
+    ltot = l1;
+    sfp = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l2 ) / sqrt(efixed);
+  }
+  else
+  {
+    ltot = l1 + l2;
+  }
+
+  double factor = ( PhysicalConstants::NeutronMass * ( ltot ) ) / PhysicalConstants::h;
+  // Now adjustments for the scale of units used
   factor *= TOFisinMicroseconds / toAngstroms;
 
   // Now apply the factor to the input data vector
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
+
+  if ( emode == 1 || emode == 2 )
+  { // If Direct or Indirect we want to correct TOF values...
+    std::transform(xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::plus<double>(), sfp));
+  }
 }
 
 void Wavelength::fromTOF(std::vector<double>& xdata, std::vector<double>&, const double& l1, const double& l2,
-    const double&, const int&, const double&, const double&) const
+    const double&, const int& emode, const double& efixed, const double&) const
 {
   double ltot = l1 + l2;
   // Protect against divide by zero
   if ( ltot == 0.0 ) ltot = DBL_MIN;
 
+  const double TOFisinMicroseconds = 1e6;
+  const double toAngstroms = 1e10;
+
+  // Now apply the factor to the input data vector
+  if ( efixed != DBL_MIN )
+  {
+    if ( emode == 1 ) // Direct
+    {
+      ltot = l2;
+      double sfp = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l1 ) / sqrt(efixed);
+      std::transform(xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::minus<double>(), sfp));
+    }
+    else if ( emode == 2 ) // Indirect
+    {
+      ltot = l1;
+      double sfp = ( sqrt( PhysicalConstants::NeutronMass / (2.0*PhysicalConstants::meV) ) * TOFisinMicroseconds * l2 ) / sqrt(efixed);
+      std::transform(xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::minus<double>(), sfp));
+    }
+    else
+    {
+      ltot = l1 + l2;
+    }
+  }
+  else
+  {
+    ltot = l1 + l2;
+  }
+
   // First the crux of the conversion
   double factor = PhysicalConstants::h / ( PhysicalConstants::NeutronMass * ( ltot ) );
 
   // Now adjustments for the scale of units used
-  const double TOFisinMicroseconds = 1e6;
-  const double toAngstroms = 1e10;
+
   factor *= toAngstroms / TOFisinMicroseconds;
 
-  // Now apply the factor to the input data vector
   std::transform( xdata.begin(), xdata.end(), xdata.begin(), std::bind2nd(std::multiplies<double>(), factor) );
 }
 

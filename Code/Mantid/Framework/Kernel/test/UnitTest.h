@@ -128,7 +128,7 @@ public:
     std::vector<double> x(1, 1.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( lambda.toTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-    TS_ASSERT_DELTA( x[0], 758.3352, 0.0001 )
+    TS_ASSERT_DELTA( x[0], 2665.4390, 0.0001 ) //  758.3352
     TS_ASSERT( yy == y )
   }
 
@@ -137,7 +137,7 @@ public:
     std::vector<double> x(1, 1000.5), y(1, 1.5);
     std::vector<double> yy = y;
     TS_ASSERT_THROWS_NOTHING( lambda.fromTOF(x,y,1.0,1.0,1.0,1,1.0,1.0) )
-    TS_ASSERT_DELTA( x[0], 1.979006, 0.000001 )
+    TS_ASSERT_DELTA( x[0], -5.0865, 0.0001 ) // 1.979006
     TS_ASSERT( yy == y )
   }
 
