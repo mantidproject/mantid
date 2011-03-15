@@ -198,7 +198,6 @@ public:
     units->setPropertyValue("InputWorkspace", outputSpace);
     units->setPropertyValue("OutputWorkspace", outputSpace);
     units->setPropertyValue("Target", "Wavelength");
-    units->setPropertyValue("EMode", "Direct");
     units->execute();
     TS_ASSERT( units->isExecuted() );
 
