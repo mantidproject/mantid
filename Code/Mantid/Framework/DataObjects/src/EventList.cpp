@@ -1257,6 +1257,13 @@ namespace DataObjects
     this->refX.access()=X;
   }
 
+  /** Returns a reference to the x data.
+   *  @return a reference to the X (bin) vector.
+   */
+  MantidVec& EventList::dataX()
+  {
+    return this->refX.access();
+  }
 
   // ==============================================================================================
   // --- Return Data Vectors --------------------------------------------------

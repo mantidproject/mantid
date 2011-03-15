@@ -78,8 +78,8 @@ private:
   // Overridden Algorithm methods
   void init();
   void exec();
-  void execEvent();
 
+  void setupMemberVariables(const API::MatrixWorkspace_const_sptr inputWS);
   API::MatrixWorkspace_sptr setupOutputWorkspace(const API::MatrixWorkspace_const_sptr inputWS);
   void fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS, const API::MatrixWorkspace_sptr outputWS);
 
@@ -87,9 +87,6 @@ private:
   void convertQuickly(API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power);
   /// Convert the workspace units using TOF as an intermediate step in the conversion
   void convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWorkspace_sptr outputWS);
-
-  /// Convert the EventWorkspace units using TOF as an intermediate step in the conversion
-  void convertViaEventsTOF(Kernel::Unit_const_sptr fromUnit, DataObjects::EventWorkspace_sptr outputWS);
 
   // Calls Rebin as a sub-algorithm to align the bins of the output workspace
   API::MatrixWorkspace_sptr alignBins(const API::MatrixWorkspace_sptr workspace);
@@ -101,11 +98,13 @@ private:
   /// For conversions to energy transfer, removes bins corresponding to inaccessible values
   API::MatrixWorkspace_sptr removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
-  int m_numberOfSpectra;
-  bool m_distribution; ///< Whether input is a distribution. Only applies to histogram workspaces.
-  bool m_inputEvents; ///< Flag indicating whether input workspace is an EventWorkspace
-  Kernel::Unit_const_sptr m_inputUnit;
-  Kernel::Unit_sptr m_outputUnit;
+  void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
+
+  int m_numberOfSpectra;     ///< The number of spectra in the input workspace
+  bool m_distribution;       ///< Whether input is a distribution. Only applies to histogram workspaces.
+  bool m_inputEvents;        ///< Flag indicating whether input workspace is an EventWorkspace
+  Kernel::Unit_const_sptr m_inputUnit;  ///< The unit of the input workspace
+  Kernel::Unit_sptr m_outputUnit;       ///< The unit we're going to
 };
 
 } // namespace Algorithm

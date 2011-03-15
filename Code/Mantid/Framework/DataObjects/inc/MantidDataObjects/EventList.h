@@ -199,6 +199,8 @@ public:
 
   void setX(const MantidVec& X);
 
+  virtual MantidVec& dataX();
+
   virtual const MantidVec& dataX() const;
 
   virtual MantidVec * dataY() const;

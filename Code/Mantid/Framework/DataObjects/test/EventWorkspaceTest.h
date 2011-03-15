@@ -389,8 +389,8 @@ public:
   //------------------------------------------------------------------------------
   void test_data_access()
   {
-    //Non-const access throws errors
-    TS_ASSERT_THROWS( ew->dataX(1), NotImplementedError );
+    //Non-const access throws errors for Y & E - not for X
+    TS_ASSERT_THROWS_NOTHING( ew->dataX(1) );
     TS_ASSERT_THROWS( ew->dataY(2), NotImplementedError );
     TS_ASSERT_THROWS( ew->dataE(3), NotImplementedError );
     //Out of range
@@ -423,10 +423,9 @@ public:
     TS_ASSERT_THROWS( ew->dataX(-123), std::range_error );
     TS_ASSERT_THROWS( ew->dataX(5123), std::range_error );
     //Non-const access throws errors, but not RANGE errors!
-    TS_ASSERT_THROWS( ew->dataX(1), NotImplementedError );
+    TS_ASSERT_THROWS_NOTHING( ew->dataX(1) );
     TS_ASSERT_THROWS( ew->dataY(2), NotImplementedError );
     TS_ASSERT_THROWS( ew->dataE(3), NotImplementedError );
-    TS_ASSERT_THROWS( ew->dataX(3), NotImplementedError );
   }
 
   //------------------------------------------------------------------------------

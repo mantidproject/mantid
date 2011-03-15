@@ -665,14 +665,14 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// Return the data X vector at a given workspace index
-  /// Note: these non-const access methods will throw NotImplementedError
+  /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
   MantidVec& EventWorkspace::dataX(const int index)
   {
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
-    throw NotImplementedError("EventWorkspace::dataX cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
+    return this->data[index]->dataX();
   }
 
   /// Return the data Y vector at a given workspace index
