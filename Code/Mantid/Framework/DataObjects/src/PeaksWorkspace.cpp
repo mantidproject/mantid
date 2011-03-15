@@ -36,6 +36,7 @@ namespace DataObjects
   std::vector< double* > DetInfo;
 
   Kernel::DateAndTime  C_experimentDate;
+  Kernel::Logger& PeaksWorkspace::g_log = Kernel::Logger::get("PeaksWorkspace");
 
 
   /** Constructor. Create a table with all the required columns.
@@ -71,51 +72,62 @@ namespace DataObjects
   PeaksWorkspace::~PeaksWorkspace()
   {}
 
-  /** Initialize the workspace
-   *
-   * @param L1
-   * @param time_offset
-   * @param Facility
-   * @param Instrument
-   * @param experimentDate
-   * @param version
-   * @param DetCalFilename
-   */
   void PeaksWorkspace::initialize( double      L1 ,               //m
-      double      time_offset ,      //microseconds
-      std::string Facility ,
-      std::string Instrument ,
-      Kernel::DateAndTime  experimentDate ,
-      std::string version ,
-      std::string DetCalFilename
-      //Isaw DetCal format for
-      //          rectangular detectors
-  )
-  {
-    C_L1 = L1;
-    C_time_offset = time_offset;
-    C_Facility = Facility;
-    C_Instrument = Instrument;
-    C_version = version;
-    C_experimentDate = experimentDate;
-    if( DetCalFilename.length() > 1 )//Set up Detectors
-    {
-      try
-      {
-        std::ifstream in( DetCalFilename.c_str() );
+                                      double      time_offset ,      //microseconds
+                                      std::string Facility ,
+                                      std::string Instrument ,
+                                      Kernel::DateAndTime  experimentDate ,
+                                      std::string version ,
 
-        std::string s = readHeader( in );
-        in.close();
-      }catch( char * str)
-      {
-        std::cout <<"Exception reading detector info "<<str <<std::endl;
-      }
+                                      std::vector<std::string> &PanelNames,
+                                      std::vector< double*> &PanelInfo
+                                      )
+     {
+       C_L1 = L1;
+       C_time_offset = time_offset;
+       C_Facility = Facility;
+       C_Instrument = Instrument;
+       C_version = version;
+       C_experimentDate = experimentDate;
+       DetInfo.clear();
+       DetNames.clear();
+       for( int i=0; i<PanelNames.size() ; i++)
+         DetNames.push_back( std::string(PanelNames[i]));
 
-    }
-  }
+       for( int i=0; i<PanelInfo.size(); i++)
+       {
+         double* data = PanelInfo[i];
+         double* data1 = new double[15];
+         for( int j=0; j<15;j++)
+         {
+           data1[j] = data[j];
+           if( (j>=2) &&( j <=8))
+             data1[j] *=100;
+         }
+         DetInfo.push_back(data1);
+       }
+     }
 
-  void PeaksWorkspace::addPeak( const Geometry::V3D position ,   //in m McStas coordinates
-      const double time ,    //in seconds
+     void PeaksWorkspace::initialize(  std::string DetCalFileName)
+     {
+       DetInfo.clear();
+       DetNames.clear();
+
+       try
+       {
+         std::ifstream in( DetCalFileName.c_str() );
+
+         std::string s = readHeader( in );
+         in.close();
+       }catch( char * str)
+       {
+         std::cout <<"Exception reading detector info "<<str <<std::endl;
+       }
+
+     }
+
+  void PeaksWorkspace::addPeak( const Geometry::V3D position ,
+      const double time ,
       const Geometry::V3D hkl ,
       const Geometry::V3D sample_orientation ,  //radians ,  phi,chi,omega
       const int  reflag ,
@@ -174,7 +186,7 @@ namespace DataObjects
   }
 
 
-  /** Return the number of peaks
+  /**
    * @return the number of peaks
    */
   int PeaksWorkspace::getNumberPeaks() const
@@ -424,14 +436,17 @@ namespace DataObjects
 
     }catch( char *s )
     {
-      std::cout << "Exception =" << s << std::endl;
+      g_log.error(std::string(s));
+      throw( std::string(s));
     }
    catch( std::exception &e)
    {
-     std::cout << "exception =" << e.what() << std::endl;
+     g_log.error(e.what());
+          throw( e.what());
    }catch(...)
    {
-     std::cout << "Exception =???" << std::endl;
+     g_log.error("Unknown Error");
+     throw( "Unknown Error");
    }
   }
 
@@ -820,15 +835,19 @@ namespace DataObjects
       }
   }catch( std::exception & xe)
   {
-     std::cout<< "exception "<<xe.what()<<std::endl;
+    g_log.error( xe.what());
+    throw (std::logic_error(xe.what()));
   }catch( char* str)
   {
 
-    std::cout<< "err "<<str<<std::endl;
+
+    g_log.error( std::string(str));
+    throw (std::logic_error(std::string(str)));
   }catch(...)
   {
 
-    std::cout<< "???? "<<std::endl;
+    g_log.error( "Unknown Error");
+        throw ("Unknown Error");
   }
 
   }
@@ -891,7 +910,7 @@ namespace DataObjects
 
     Kernel::Units::MomentumTransfer Q;
     Q.fromTOF( xx , yy , L1 , L2 , polar , 12 , 12.1 , 12.1 );
-    return xx[ 0 ];
+    return xx[ 0 ]/2/pi;
   }
 
   Geometry::V3D    PeaksWorkspace::get_Qlab( int peakNum )
@@ -978,7 +997,7 @@ namespace DataObjects
   double  PeaksWorkspace::get_L2(int peakNum )
   {
 
-    return cell< double >( peakNum , IL2Col );
+    return cell< Geometry::V3D>( peakNum ,IpositionCol).norm();
   }
 
   int    PeaksWorkspace::get_Bank( int peakNum )
@@ -1007,8 +1026,8 @@ namespace DataObjects
     return cell< double >( peakNum , IPeakIntegrateErrorCol );
   }
 
-  void    PeaksWorkspace::sethkls( Geometry::Matrix< double >UB ,   bool tolerance ,
-      bool SetOnlyUnset )
+  void    sethkls( Geometry::Matrix<double>UB,  double tolerance,
+                 bool SetOnlyUnset, int reflag)
   {
     //TODO
   }
