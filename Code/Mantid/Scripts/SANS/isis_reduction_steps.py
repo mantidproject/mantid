@@ -687,7 +687,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 'unique phi', [0,0,0], self.phi_min,self.phi_max,self.phi_mirror)
 
     def execute(self, reducer, workspace, instrument=None):
-        if instrument is None:
+        if not instrument:
             instrument = reducer.instrument
         #set up the spectra lists and shape xml to mask
         detector = instrument.cur_detector()
@@ -732,13 +732,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         instrum.load_empty(wksp_name)
 
         #apply masking to the current detector
-        self.execute(None, wksp_name, instrum, 0, 0)
+        self.execute(None, wksp_name, instrum)
         
         #now the other detector
         other = instrum.other_detector().name()
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
-        self.execute(None, wksp_name, instrum, 0, 0)
+        self.execute(None, wksp_name, instrum)
         #reset the instrument to mask the currecnt detector
         instrum.setDetector(original)
 
@@ -747,6 +747,29 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp_name)
+
+    def display(self, wksp, reducer):
+        """
+            Mask detectors in a workspace and display its show instrument
+            @param wksp: this named workspace will be masked and displayed
+        """
+        instrum = reducer.instrument
+        #apply masking to the current detector
+        self.execute(None, wksp, instrum)
+        
+        #now the other detector
+        other = instrum.other_detector().name()
+        original = instrum.cur_detector().name()
+        instrum.setDetector(other)
+        self.execute(None, wksp, instrum)
+        #reset the instrument to mask the currecnt detector
+        instrum.setDetector(original)
+
+        # Mark up "dead" detectors with error value 
+        FindDeadDetectors(wksp, wksp, DeadValue=500)
+
+        #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
+        instrum.view(wksp)
 
     def __str__(self):
         return '    radius', self.min_radius, self.max_radius+'\n'+\
@@ -956,11 +979,14 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             RemoveBins(norm_ws, norm_ws, '19900', '20500',
                 Interpolation="Linear")
         
+        ConvertToDistribution(norm_ws, norm_ws)
         # Remove flat background
         if reducer.BACKMON_START != None and reducer.BACKMON_END != None:
             FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
-                EndX = reducer.BACKMON_END, WorkspaceIndexList = '0')
-    
+                EndX = reducer.BACKMON_END, WorkspaceIndexList = '0',
+                Mode='Mean')
+        ConvertFromDistribution(norm_ws, norm_ws)
+
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         sample_rebin = reducer.to_wavelen.rebin_alg 
         if reducer.instrument.is_interpolating_norm():

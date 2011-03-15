@@ -155,6 +155,20 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().set_run_number(sample_wksp)
     return sample_wksp, logs
 
+def DisplayMask(mask_worksp=None):
+    if not mask_worksp:
+        mask_worksp = 'CurrentMask'
+        samp = ReductionSingleton().get_sample()
+        
+        if samp:
+            CloneWorkspace(samp, mask_worksp)
+            move_samp = copy.deepcopy(ReductionSingleton().place_det_sam) 
+            move_samp.execute(ReductionSingleton(), mask_worksp)
+        else:
+            ReductionSingleton().instrument.load_empty(mask_worksp)
+        
+    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
+
 def SetCentre(xcoord, ycoord):
     _printMessage('SetCentre(' + str(xcoord) + ',' + str(ycoord) + ')')
 
