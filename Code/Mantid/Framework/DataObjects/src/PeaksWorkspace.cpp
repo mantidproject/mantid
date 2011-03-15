@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <string>
 #include <ostream>
+#include <exception>
 #include <iostream>
 #include <fstream>
 #include <stdio.h>
@@ -234,16 +235,17 @@ namespace DataObjects
     try
     {
       std::ofstream out( filename.c_str() );
+      std::string date =C_experimentDate.to_ISO8601_string();
+
       out <<  "Version: " <<  C_version <<  " Facility: " <<  C_Facility  ;
-      out <<  " Instrument: " <<  C_Instrument <<  " Date: " <<
-          out << C_experimentDate <<  std::endl;
+      out <<  " Instrument: " <<  C_Instrument <<  " Date: " ;
+      out<< std::setw(date.length())<<date<< std::endl;
 
       out <<  "6        L1    T0_SHIFT" <<  std::endl;
-      out <<  std::fixed <<  ( C_L1*100 ) << "7 " <<  std::setw( 11 )  ;
+      out << "7 "<< std::setw( 11 )  ;
       out <<   std::setprecision( 4 ) <<  std::fixed <<  ( C_L1*100 ) ;
       out << std::setw( 12 ) <<  std::setprecision( 3 ) <<  std::fixed  ;
       out << ( C_time_offset ) <<  std::endl;
-
 
       out <<  "4 DETNUM  NROWS  NCOLS   WIDTH   HEIGHT     DEPTH   DETD  "
           <<  " CenterX   CenterY   CenterZ   BaseX    BaseY    BaseZ    "
@@ -364,12 +366,12 @@ namespace DataObjects
               <<  "2_THETA       AZ        WL        D   IPK      INTI   "
               << "SIGI RFLG" <<  std::endl;
         }
-        std::cout << "hkl="<<this_h<<","<<this_k <<","<<this_l<<std::endl;
+
         int h = (int)floor( this_h+.5) , //assume when set via UB those
             k = (int)floor( this_k +.5 ) , //not close enuf get 0's
             l = (int)floor( this_l +.5 );
 
-        std::cout << "    hkl2="<<h<<","<<k <<","<<l<<std::endl;
+
         out <<  "3" <<  std::setw( 7 ) <<  seqNum <<  std::setw( 5 ) <<  h
             <<  std::setw( 5 ) <<  k <<  std::setw( 5 ) <<  l;
         out <<  std::setw( 8 ) <<  std::fixed << std::setprecision( 2 )
@@ -424,8 +426,14 @@ namespace DataObjects
     {
       std::cout << "Exception =" << s << std::endl;
     }
+   catch( std::exception &e)
+   {
+     std::cout << "exception =" << e.what() << std::endl;
+   }catch(...)
+   {
+     std::cout << "Exception =???" << std::endl;
+   }
   }
-
 
 
   /** Remove all the peaks from the workspace */
@@ -489,6 +497,7 @@ namespace DataObjects
   {
 
     std::string r = getWord( in ,  false );
+
     if( r.length() < 1 )
       throw std::logic_error( std::string( "No first line of Peaks file" ) );
 
@@ -753,59 +762,74 @@ namespace DataObjects
    */
   void PeaksWorkspace::append( std::string filename )
   {
-    std::ifstream in( filename.c_str() );
-
-    std::string s = readHeader( in );
-
-    if( !in.good() || s.length() < 1 )
-      throw std::runtime_error(
-          std::string( "End of Peaks file before peaks" ) );
-
-    if( s.compare( std::string( "0" ) ) != 0 )
-      throw std::logic_error(
-          std::string( "No header for Peak segments" ) );
-
-    readToEndOfLine( in ,  true );
-    s = getWord( in , false );
-
-    int run , Reflag, detName;
-    double chi , phi , omega , monCount;
-
-    double h , k , l , col , row , chan , L2 , ScatAng , Az , wl , D ,
-    IPK , Inti , SigI;
-    double x , y , z , r , time;
-
-    while( in.good() )
+    try
     {
-      s = readPeakBlockHeader( s ,  in  , run , detName , chi , phi ,
-          omega , monCount );
 
-      s = readPeak( s , in , h , k , l , col , row , chan , L2 ,
-          ScatAng , Az , wl , D , IPK , Inti , SigI , Reflag );
+      std::ifstream in( filename.c_str() );
 
-      chi *= pi/180;
-      phi *= pi/180;
-      omega *= pi/180;
+      std::string s = readHeader( in );
 
-      z = L2*cos( ScatAng );
-      r = sqrt( L2*L2 - z*z );
-      x = r*cos( Az );
-      y = r*sin( Az );
-      //Would use the V3D spherical stuff, but it seemed weird
-      std::vector< double >xx , yy;
-      xx.push_back( wl );
+      if( !in.good() || s.length() < 1 )
+        throw std::runtime_error(
+            std::string( "End of Peaks file before peaks" ) );
 
-      Kernel::Units::Wavelength WL;
-      WL.toTOF( xx , yy , C_L1 , L2 , ScatAng , 12 , 12.1 , 12.1 );
-      time = xx[ 0 ];
+      if( s.compare( std::string( "0" ) ) != 0 )
+        throw std::logic_error(
+            std::string( "No header for Peak segments" ) );
+
+      readToEndOfLine( in ,  true );
+      s = getWord( in , false );
+
+      int run , Reflag, detName;
+      double chi , phi , omega , monCount;
+
+      double h , k , l , col , row , chan , L2 , ScatAng , Az , wl , D ,
+      IPK , Inti , SigI;
+      double x , y , z , r , time;
+
+      while( in.good() )
+      {
+        s = readPeakBlockHeader( s ,  in  , run , detName , chi , phi ,
+            omega , monCount );
+
+        s = readPeak( s , in , h , k , l , col , row , chan , L2 ,
+            ScatAng , Az , wl , D , IPK , Inti , SigI , Reflag );
+
+        chi *= pi/180;
+        phi *= pi/180;
+        omega *= pi/180;
+
+        z = L2*cos( ScatAng );
+        r = sqrt( L2*L2 - z*z );
+        x = r*cos( Az );
+        y = r*sin( Az );
+        //Would use the V3D spherical stuff, but it seemed weird
+        std::vector< double >xx , yy;
+        xx.push_back( wl );
+
+        Kernel::Units::Wavelength WL;
+        WL.toTOF( xx , yy , C_L1 , L2 , ScatAng , 12 , 12.1 , 12.1 );
+        time = xx[ 0 ];
 
 
-      this->addPeak( Geometry::V3D( x , y , z ) , time ,
-          Geometry::V3D( h , k , l ) ,
-          Geometry::V3D( phi , chi , omega ) ,
-          Reflag , run , monCount , detName , IPK ,
-          row , col , chan , L2, Inti , SigI );
-    }
+        this->addPeak( Geometry::V3D( x , y , z ) , time ,
+            Geometry::V3D( h , k , l ) ,
+            Geometry::V3D( phi , chi , omega ) ,
+            Reflag , run , monCount , detName , IPK ,
+            row , col , chan , L2, Inti , SigI );
+      }
+  }catch( std::exception & xe)
+  {
+     std::cout<< "exception "<<xe.what()<<std::endl;
+  }catch( char* str)
+  {
+
+    std::cout<< "err "<<str<<std::endl;
+  }catch(...)
+  {
+
+    std::cout<< "???? "<<std::endl;
+  }
 
   }
 
