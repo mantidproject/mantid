@@ -237,7 +237,9 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
     if loqremovebins == True:
         RemoveBins(tmpWS,tmpWS, 19900, 20500, Interpolation='Linear')
     if backmon_start != None and backmon_end != None:
+        ConvertToDistribution(tmpWS, tmpWS)
         FlatBackground(tmpWS, tmpWS, StartX = backmon_start, EndX = backmon_end, WorkspaceIndexList = spec_list)
+        ConvertFromDistribution(tmpWS, tmpWS)
 
     # Convert and rebin
     ConvertUnits(tmpWS,tmpWS,"Wavelength")
