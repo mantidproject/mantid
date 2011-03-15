@@ -162,6 +162,25 @@ public:
   }
 
 
+  //----------------------------------------------------------------------------
+  /// Ticket #2591
+  void test_filterByTime_ifOnlyOneValue_assumes_constant_instead_2()
+  {
+    TimeSeriesProperty<int> * log  = new TimeSeriesProperty<int>("MyIntLog");
+    TS_ASSERT( log->addValue("1990-01-01",1) );
+    TS_ASSERT_EQUALS( log->realSize(), 1);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
+
+    DateAndTime start = DateAndTime("2007-11-30T16:17:10");
+    DateAndTime stop = DateAndTime("2007-11-30T16:17:40");
+    log->filterByTime(start, stop);
+
+    // Still there!
+    TS_ASSERT_EQUALS( log->realSize(), 1);
+    TS_ASSERT_EQUALS( log->getTotalValue(), 1);
+  }
+
+
 
   //----------------------------------------------------------------------------
   void test_makeFilterByValue()

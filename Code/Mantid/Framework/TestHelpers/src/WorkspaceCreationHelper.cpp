@@ -329,6 +329,8 @@ namespace WorkspaceCreationHelper
 					   int numBins, int numEvents, double x0, double binDelta,
 					   int eventPattern, int start_at_pixelID)
   {
+    DateAndTime run_start("2010-01-01");
+
     //add one to the number of bins as this is histogram
     numBins++;
 
@@ -343,21 +345,21 @@ namespace WorkspaceCreationHelper
         for (int i=0; i<numEvents; i++)
         {
           if (eventPattern == 1) // 0, 1 diagonal pattern
-            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, DateAndTime(i,0));
+            retVal->getEventListAtPixelID(pix) += TofEvent((pix+i+0.5)*binDelta, run_start+double(i));
           else if (eventPattern == 2) // solid 2
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
           else if (eventPattern == 3) // solid 1
           {
-            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+            retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
           else if (eventPattern == 4) // Number of events per bin = pixelId (aka workspace index in most cases)
           {
             retVal->getEventListAtPixelID(pix);
             for (int q=0; q<pix;q++)
-              retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, DateAndTime(i,0));
+              retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
           }
         }
       }

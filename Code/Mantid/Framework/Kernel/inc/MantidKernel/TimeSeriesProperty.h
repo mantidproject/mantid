@@ -707,6 +707,27 @@ public:
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Returns n-th time. NOTE: Complexity is order(n)!
+   *  @param n :: index
+   *  @return DateAndTime
+   */
+  Kernel::DateAndTime nthTime(int n) const
+  {
+    if (m_propertySeries.empty())
+      throw std::runtime_error("TimeSeriesProperty is empty");
+
+    typename timeMap::const_iterator it = m_propertySeries.begin();
+    for (std::size_t j = 0; it != m_propertySeries.end(); it++)
+    {
+      if (j == static_cast<size_t>(n))
+        return it->first;
+      j++;
+    }
+
+    return m_propertySeries.rbegin()->first;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the last value
    *  @return Value 
    */

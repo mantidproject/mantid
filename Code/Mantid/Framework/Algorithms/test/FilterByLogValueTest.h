@@ -119,26 +119,28 @@ public:
     // Default Event Workspace with times from 0-99
     EventWorkspace_sptr ew = WorkspaceCreationHelper::CreateEventWorkspace2();
 
+    DateAndTime run_start("2010-01-01"); //NOTE This run_start is hard-coded in WorkspaceCreationHelper.
+
     TimeSeriesProperty<double> * temp;
     temp = new TimeSeriesProperty<double>("temp");
     //10 C at 10 sec up to 50C at 50 sec
-    for (int i=10; i<=50; i +=10)
-      temp->addValue( DateAndTime(i, 0), i);
+    for (double i=10; i<=50; i +=10)
+      temp->addValue( run_start+i, i);
     ew->mutableRun().addProperty( temp );
 
     // Log that goes before and after the pulse times
     TimeSeriesProperty<double> * press;
     press = new TimeSeriesProperty<double>("press");
-    for (int i=-10; i<=150; i +=10)
-      press->addValue( DateAndTime(i, 0), i);
+    for (double i=-10; i<=150; i +=10)
+      press->addValue( run_start+i, i);
     ew->mutableRun().addProperty( press );
 
 
     if (add_proton_charge)
     {
       TimeSeriesProperty<double> * pc = new TimeSeriesProperty<double>("proton_charge");
-      for (int i=0; i<100; i++)
-        pc->addValue( DateAndTime(i, 0), 1.0);
+      for (double i=0; i<100; i++)
+        pc->addValue( run_start+i, 1.0);
       ew->mutableRun().addProperty( pc );
     }
 
@@ -146,15 +148,15 @@ public:
 
     // Single-entry logs with points at different places
     single = new TimeSeriesProperty<double>("single_middle");
-    single->addValue( DateAndTime(30, 0), 1.0);
+    single->addValue( run_start+30.0, 1.0);
     ew->mutableRun().addProperty( single );
 
     single = new TimeSeriesProperty<double>("single_before");
-    single->addValue( DateAndTime(-15, 0), 1.0);
+    single->addValue( run_start-15.0, 1.0);
     ew->mutableRun().addProperty( single );
 
     single = new TimeSeriesProperty<double>("single_after");
-    single->addValue( DateAndTime(200, 0), 1.0);
+    single->addValue( run_start+200.0, 1.0);
     ew->mutableRun().addProperty( single );
 
     // Finalize the needed stuff
