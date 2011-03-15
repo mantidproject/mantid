@@ -61,6 +61,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/FindDeadDetectors.cpp
 		src/FindDetectorsOutsideLimits.cpp
 		src/FindPeaks.cpp
+		src/FixFrameWrap.cpp
 		src/FlatBackground.cpp
 		src/FlatPlateAbsorption.cpp
 		src/GeneralisedSecondDifference.cpp
@@ -197,6 +198,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/FindDeadDetectors.h
 		inc/MantidAlgorithms/FindDetectorsOutsideLimits.h
 		inc/MantidAlgorithms/FindPeaks.h
+		inc/MantidAlgorithms/FixFrameWrap.h
 		inc/MantidAlgorithms/FlatBackground.h
 		inc/MantidAlgorithms/FlatPlateAbsorption.h
 		inc/MantidAlgorithms/GeneralisedSecondDifference.h
