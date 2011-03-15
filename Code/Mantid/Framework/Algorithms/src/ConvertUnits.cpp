@@ -249,7 +249,7 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
   // Loop over the histograms (detector spectra)
   Progress prog(this,0.0,0.5,m_numberOfSpectra);
   PARALLEL_FOR2(inputWS,outputWS)
-  for (size_t i = 0; i < m_numberOfSpectra; ++i)
+  for (int i = 0; i < m_numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Take the bin width dependency out of the Y & E data
@@ -366,7 +366,7 @@ void ConvertUnits::convertViaEventsTOF(Kernel::Unit_const_sptr fromUnit, DataObj
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (size_t i = 0; i < m_numberOfSpectra; ++i)
+  for (int i = 0; i < m_numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
@@ -487,7 +487,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
         Progress prog(this,0.5,1.0,m_numberOfSpectra);
 
         PARALLEL_FOR1(outputWS)
-        for (size_t j = 1; j < m_numberOfSpectra; ++j)
+        for (int j = 1; j < m_numberOfSpectra; ++j)
         {
           PARALLEL_START_INTERUPT_REGION
           WS2D->setX(j,xVals);
@@ -503,7 +503,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
   // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (size_t k = 0; k < m_numberOfSpectra; ++k) {
+  for (int k = 0; k < m_numberOfSpectra; ++k) {
     PARALLEL_START_INTERUPT_REGION
     MantidVec::iterator it;
     for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
@@ -605,7 +605,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (size_t i = 0; i < m_numberOfSpectra; ++i)
+  for (int i = 0; i < m_numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;

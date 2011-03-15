@@ -101,7 +101,7 @@ private:
   /// For conversions to energy transfer, removes bins corresponding to inaccessible values
   API::MatrixWorkspace_sptr removeUnphysicalBins(const API::MatrixWorkspace_const_sptr workspace);
 
-  size_t m_numberOfSpectra;
+  int m_numberOfSpectra;
   bool m_distribution; ///< Whether input is a distribution. Only applies to histogram workspaces.
   bool m_inputEvents; ///< Flag indicating whether input workspace is an EventWorkspace
   Kernel::Unit_const_sptr m_inputUnit;
