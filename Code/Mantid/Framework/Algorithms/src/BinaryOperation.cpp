@@ -387,7 +387,7 @@ namespace Mantid
       if (m_eout)
       {
         // ---- The output is an EventWorkspace ------
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -401,7 +401,7 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -431,7 +431,7 @@ namespace Mantid
       if (m_eout)
       {
         // ---- The output is an EventWorkspace ------
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -451,7 +451,7 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -499,7 +499,7 @@ namespace Mantid
 
           // Now loop over the spectra of the left hand side calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+          //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -522,7 +522,7 @@ namespace Mantid
 
           // Now loop over the spectra of the left hand side calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+          //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -548,7 +548,7 @@ namespace Mantid
 
         // Now loop over the spectra of the left hand side calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -590,7 +590,7 @@ namespace Mantid
            // ------------ The rhs is ALSO an EventWorkspace ---------------
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+          //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -626,7 +626,7 @@ namespace Mantid
 
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
-          PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+          //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -666,7 +666,7 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
-        PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+        //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -716,7 +716,7 @@ namespace Mantid
 //      propagateBinMasks(m_rhs,m_out);
 //      // Loop over the spectra calling the virtual function for each one
 //      const int numHists = m_lhs->getNumberHistograms();
-//      PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+//      //PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 //      for (int i = 0; i < numHists; ++i)
 //      {
 //        PARALLEL_START_INTERUPT_REGION
@@ -770,7 +770,7 @@ namespace Mantid
     {
       int nindices = static_cast<int>(m_indicesToMask.size());
       ParameterMap &pmap = out->instrumentParameters();
-      PARALLEL_FOR1(out)
+      //PARALLEL_FOR1(out)
       for(int i = 0; i < nindices; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
@@ -932,7 +932,7 @@ namespace Mantid
       rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
       //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
-      //PARALLEL_FOR_NO_WSP_CHECK()
+      ////PARALLEL_FOR_NO_WSP_CHECK()
       for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
       {
         int rhs_spec_no;

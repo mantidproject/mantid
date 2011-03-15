@@ -25,6 +25,7 @@ using Mantid::Geometry::IDetector_sptr;
 /********** PLEASE NOTE! THIS FILE WAS AUTO-GENERATED FROM CMAKE.  ***********************/
 /********** Source = MultiplyDivideTest.h.in *********************************************/
 /*****************************************************************************************/
+
 class @MULTIPLYDIVIDETEST_CLASS@ : public CxxTest::TestSuite
 {
 public:
