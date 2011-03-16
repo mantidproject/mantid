@@ -9,7 +9,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace DataHandling
 {
 
 // Register the algorithm into the AlgorithmFactory

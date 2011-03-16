@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace DataHandling
 {
 /**
     Writer for compatibility with SansView and NIST reduced data file format.
