@@ -88,7 +88,7 @@ void Unwrap2::init()
   validator->setLower(0.01);
   declareProperty("Tmax", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used.");
-  declareProperty("ForceHist", false);
+  declareProperty("ForceHist", false); // TODO remove
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
@@ -151,7 +151,7 @@ void Unwrap2::exec()
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  if ((m_inputEvWS != NULL) && ! this->getProperty("ForceHist"))
+  if ((m_inputEvWS != NULL) && ! this->getProperty("ForceHist")) // TODO remove ForceHist option
   {
     this->execEvent();
     return;
@@ -207,6 +207,8 @@ void Unwrap2::exec()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // TODO copy the mask
 
   m_inputWS.reset();
 }
@@ -266,6 +268,8 @@ void Unwrap2::execEvent()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  // TODO copy the mask
 
   outW->clearMRU();
 }
@@ -342,17 +346,10 @@ size_t Unwrap2::unwrapX(const MantidVec& datain, MantidVec& dataout, const doubl
   } // loop over X values
 
   // now put it back into the vector supplied
-//  std::cout << "tempX_U " << tempX_U.size() << " tempX_L " << tempX_L.size() << std::endl;
   dataout.clear();
   dataout.insert(dataout.begin(), tempX_U.begin(), tempX_U.end());
   dataout.insert(dataout.end(), tempX_L.begin(),tempX_L.end());
   assert(datain.size() == dataout.size());
-
-  // REMOVE
-//  std::cout << " DATAOUT[" << dataout.size() << "] " << *(dataout.begin()) << " -> " << *(dataout.rbegin());
-//  for(size_t i = 0; i < dataout.size(); i++)
-//    std::cout << dataout[i] << " ";
-//  std::cout << std::endl;
 
   return specialBin;
 }
