@@ -171,6 +171,7 @@ set ( TEST_FILES
 		 test/SaveCSVTest.h
 		 test/SaveDASCTest.h
 		 test/SaveFocussedXYETest.h
+		 test/SaveNISTDATTest.h
 		 test/SavePHXTest.h
 		 test/SaveRKHTest.h
 		 test/SaveSPETest.h
