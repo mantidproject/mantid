@@ -402,29 +402,27 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
-# PYTHON25DIR is the path to Python 2.5 
-PyProp = addTo(Product,'Property',{'Id':'PYTHON25DIR'})
-py_lookup = {'Id':'Python25Registry1','Type':'raw','Root':'HKLM','Key':'Software\\Python\\PythonCore\\2.5\\InstallPath'}
+# Python versioning
+py_dir_prop = 'PYTHONINSTALL'
+py_reg_key = 'Software\\Python\\PythonCore\\%d.%d\\InstallPath' % (sys.version_info.major,sys.version_info.minor)
+PyProp = addTo(Product,'Property',{'Id':py_dir_prop})
+py_lookup = {'Id':'PythonRegistry1','Type':'raw','Root':'HKLM','Key':py_reg_key}
 if ARCH == '64':
     py_lookup['Win64'] = 'yes'
 # All user search
 addTo(PyProp,'RegistrySearch',py_lookup)
 # Current user search
-py_lookup['Id'] = 'Python25Registry2'
+py_lookup['Id'] = 'PythonRegistry2'
 py_lookup['Root'] = 'HKCU'
 addTo(PyProp,'RegistrySearch',py_lookup)
 
-# Below lines removed due to false positives it creates
-# Just in case these completely fail but Python.exe exists on the standard location check for that
-#py25dir_search = addTo(PyProp, 'DirectorySearch', {'Id':'CheckPy25Dir', 'Path':'C:\\Python25', 'Depth':'0'})
-#addTo(py25dir_search, 'FileSearch', {'Id':'CheckPy25Exe', 'Name' : 'python.exe'})
-
+# Add a condition element that halts installtion if Python is not installed. Note: If the condition evaluates to false, the dialog pops up.
 Cond = doc.createElement('Condition')
-if ARCH == '64':
-    Cond.setAttribute('Message','Mantid requires Python 2.5 64bit to be installed on your machine. It can be downloaded and installed from http://www.python.org/download/. Please ensure you download the 64bit version.')
-else:
-    Cond.setAttribute('Message','Mantid requires Python 2.5 to be installed on your machine. It can be downloaded and installed from http://www.python.org/download/')
-Cond.appendChild(doc.createTextNode('PYTHON25DIR'))
+error_msg = 'Unable to find {0}-bit version of Python {1}.{2}, cannot continue. Please download and install a {0}-bit '\
+            'version from http://www.python.org/download/releases/{1}.{2}.{3}/'.format(ARCH, sys.version_info.major,sys.version_info.minor,sys.version_info.micro)
+Cond.setAttribute('Message', error_msg)
+# Installed is set to TRUE byt the MSI if the product is *already* installed, i.e. the check only gets run on installation and not removal
+Cond.appendChild(doc.createTextNode('Installed OR PYTHONINSTALL'))
 Product.appendChild(Cond)
 
 TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
@@ -459,7 +457,7 @@ addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 
 addDlls('../../../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
 
 #------------- Environment settings ---------------------- 
-addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHON25DIR]'})
+addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHONINSTALL]'})
 # MantidPATH to point to the bin directory
 mantidbin = '[INSTALLDIR]\\bin'
 addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':mantidbin})
