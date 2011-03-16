@@ -27,7 +27,9 @@ namespace Kernel
 
 namespace DataObjects
 {
-
+/**
+ *  PeaksWorkspace stores information about a set of SCD peaks.
+ */
 class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
 {
   public:
@@ -305,21 +307,31 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      static const int ItimeCol =15;                 /** Column where the time of the peak is stored */
      static const int ItimeOffsetChanCol =16;  /** Column where the time offset of the peak is stored */
 
-     /// These values are needed to write out .peaks files (I think)
-     double C_L1;          /** Last L1 value in m used */
-     double C_time_offset;   /** Last time offset used( in usec) */
-     std::string C_Facility; /** Last Facility set or read */
-     std::string C_Instrument; /** Last Instrument set or read */
-     std::string C_version;   /** Last version set or read */
 
-     std::string readHeader( std::ifstream& in );
 
 
 
 
 
   private:
+
+
+       double C_L1;          /** Last L1 value in m used */
+       double C_time_offset;   /** Last time offset used( in usec) */
+       std::string C_Facility; /** Last Facility set or read */
+       std::string C_Instrument; /** Last Instrument set or read */
+       std::string C_version;   /** Last version set or read */
+
+       std::string readHeader( std::ifstream& in );
+
+       void ClearDeleteCalibrationData();
        static Kernel::Logger& g_log;
+
+       std::vector< std::string > DetNames;/** Names of panels for calibration info*/
+
+        std::vector< double* > DetInfo; /** Calibration info for panels */
+
+        Kernel::DateAndTime  C_experimentDate;/** Date associated with peaks file */
 };
 
 

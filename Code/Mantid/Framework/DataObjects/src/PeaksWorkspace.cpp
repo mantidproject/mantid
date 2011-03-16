@@ -29,13 +29,13 @@ namespace DataObjects
   DECLARE_WORKSPACE(PeaksWorkspace );
 
   double pi = 3.1415926535;
-
-  bool  BanksSetUp;
+/*//moved to header file
   std::vector< std::string > DetNames;
 
   std::vector< double* > DetInfo;
 
   Kernel::DateAndTime  C_experimentDate;
+  */
   Kernel::Logger& PeaksWorkspace::g_log = Kernel::Logger::get("PeaksWorkspace");
 
 
@@ -64,13 +64,28 @@ namespace DataObjects
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "time" ) );
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "t_offset" ) );
 
-    BanksSetUp = false;
   }
 
 
   /** Destructor */
   PeaksWorkspace::~PeaksWorkspace()
-  {}
+  {
+    ClearDeleteCalibrationData();
+  }
+
+  void PeaksWorkspace:: ClearDeleteCalibrationData()
+  {
+    DetNames.clear();// elements std::string so will delete self??
+
+    for( size_t n=DetInfo.size(); n >0;)
+    {
+      double* val = DetInfo[n-1];
+      DetInfo.pop_back();
+      delete val;
+
+      n=DetInfo.size();
+    }
+  }
 
   void PeaksWorkspace::initialize( double      L1 ,               //m
                                       double      time_offset ,      //microseconds
@@ -89,8 +104,7 @@ namespace DataObjects
        C_Instrument = Instrument;
        C_version = version;
        C_experimentDate = experimentDate;
-       DetInfo.clear();
-       DetNames.clear();
+       ClearDeleteCalibrationData();
        for( int i=0; i<PanelNames.size() ; i++)
          DetNames.push_back( std::string(PanelNames[i]));
 
@@ -110,8 +124,7 @@ namespace DataObjects
 
      void PeaksWorkspace::initialize(  std::string DetCalFileName)
      {
-       DetInfo.clear();
-       DetNames.clear();
+       ClearDeleteCalibrationData();
 
        try
        {
