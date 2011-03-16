@@ -237,7 +237,7 @@ class TestCommands(unittest.TestCase):
         data = mtd["BioSANS_test_data_Iq"].dataY(0)
         self.assertAlmostEqual(data[0], 0.1948464330517794, 0.00001)
         self.assertAlmostEqual(data[10], 0.25088976280978281, 0.00001)
-        self.assertEqual(data[20], 0.252098592791137, 0.00001)
+        self.assertAlmostEqual(data[20], 0.252098592791137, 0.00001)
 
     def test_reduction_2(self):
         HFIRSANS()
