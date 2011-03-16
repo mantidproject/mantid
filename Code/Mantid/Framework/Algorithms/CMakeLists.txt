@@ -111,6 +111,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/Rebunch.cpp
 		src/Regroup.cpp
 		src/RemoveBins.cpp
+		src/RemoveLowResTOF.cpp
 		src/RenameWorkspace.cpp
 		src/ReplaceSpecialValues.cpp
 		src/Scale.cpp
@@ -248,6 +249,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/Rebunch.h
 		inc/MantidAlgorithms/Regroup.h
 		inc/MantidAlgorithms/RemoveBins.h
+		inc/MantidAlgorithms/RemoveLowResTOF.h
 		inc/MantidAlgorithms/RenameWorkspace.h
 		inc/MantidAlgorithms/ReplaceSpecialValues.h
 		inc/MantidAlgorithms/Scale.h

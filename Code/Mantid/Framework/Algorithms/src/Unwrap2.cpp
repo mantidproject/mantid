@@ -169,7 +169,7 @@ void Unwrap2::exec()
   }
 
   PARALLEL_FOR2(m_inputWS,outputWS)
-  for (unsigned int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
     // get the total flight path
@@ -242,7 +242,7 @@ void Unwrap2::execEvent()
 
   // do the actual work
   PARALLEL_FOR2(m_inputWS, outW)
-  for (unsigned int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getEventList(workspaceIndex).getNumberEvents();
