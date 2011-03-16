@@ -29,7 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 
-%Module(name=qti, version=0)
+%Module qti
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
