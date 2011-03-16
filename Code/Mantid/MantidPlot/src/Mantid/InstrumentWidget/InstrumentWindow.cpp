@@ -141,7 +141,7 @@ void InstrumentWindow::tabChanged(int i)
     if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
     {
       text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
-      if( m_renderTab->areAxesOn() )
+      if( mInstrumentDisplay->areAxesOn() )
       {
         text += "\nAxes: X = Red; Y = Green; Z = Blue";
       }
@@ -581,7 +581,7 @@ void InstrumentWindow::setInfoText(const QString& text)
  // if(mInstrumentDisplay->getInteractionMode() == Instrument3DWidget::PickMode)
 	//{
  //   text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
- //   if( m_renderTab->areAxesOn() )
+ //   if( mInstrumentDisplay->areAxesOn() )
  //   {
  //     text += "\nAxes: X = Red; Y = Green; Z = Blue";
  //   }

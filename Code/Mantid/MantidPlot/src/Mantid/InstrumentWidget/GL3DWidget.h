@@ -67,6 +67,7 @@ public:
   void saveToFile(const QString & filename);
   void getViewport(int& w,int& h){_viewport->getViewport(&w,&h);}
   RenderMode getRenderMode()const{return m_renderMode;}
+  bool areAxesOn()const{return m3DAxesShown;}
 
 signals:
   void actorsPicked(const std::set<QRgb>& );

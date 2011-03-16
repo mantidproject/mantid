@@ -57,6 +57,7 @@ private:
   QAction *m_displayAxes;
   QAction *m_wireframe;
   QAction *m_lighting;
+
 };
 
 

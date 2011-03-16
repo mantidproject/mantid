@@ -228,7 +228,10 @@ void InstrumentWindowRenderTab::loadSettings(const QString& section)
   QSettings settings;
   settings.beginGroup(section);
   int show3daxes = settings.value("3DAxesShown", 1 ).toInt();
+  m_instrWindow->set3DAxesState(show3daxes != 0);
+  m_displayAxes->blockSignals(true);
   m_displayAxes->setChecked(show3daxes != 0);
+  m_displayAxes->blockSignals(false);
   settings.endGroup();
 }
 
@@ -275,7 +278,7 @@ void InstrumentWindowRenderTab::setAxis(const QString& axisNameArg)
 
 bool InstrumentWindowRenderTab::areAxesOn()const
 {
-  return m_displayAxes->isChecked();
+  return mInstrumentDisplay->areAxesOn();
 }
 
 /**
