@@ -390,7 +390,7 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                     # Matching suite name in the same project name
                     topLeft = self.index(i, 0, project_index)
                     bottomRight = self.index( i, 2, project_index)
-                    self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
+                    #self.emit( QtCore.SIGNAL("dataChanged(const QModelIndex &, const QModelIndex &)"), topLeft, bottomRight)
                     # Only update one place
                     return
 
@@ -490,6 +490,8 @@ class TestTreeModel(QtCore.QAbstractItemModel):
                     # Sets it as checked.
                     self.setData(test_indx, QtCore.Qt.Checked, QtCore.Qt.CheckStateRole);
 
+    def mouseDoubleClickEvent(self):
+        print "mouseDoubleClickEvent"
 
 class TreeFilterProxyModel(QSortFilterProxyModel):
     #----------------------------------------------------------------------------------
@@ -541,6 +543,9 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
             
         return True
         
+        
+def dumby(obj):
+    print "DOUBLE CLICKED", obj
 
 if __name__ == "__main__":    
 
@@ -555,7 +560,6 @@ if __name__ == "__main__":
     layout = QtGui.QVBoxLayout(dialog)
 
     tv = QtGui.QTreeView(dialog)
-
 
     
     tv.setAlternatingRowColors(True)

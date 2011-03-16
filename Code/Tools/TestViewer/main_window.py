@@ -174,6 +174,11 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.textTimeout, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
         self.connect(self.textMemory, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
         
+        # --- Tree commands ----
+        #self.connect(self.treeTests, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.tree_doubleClicked)
+        self.connect(self.treeTests, QtCore.SIGNAL("doubleClicked(QModelIndex)"), self.tree_doubleClicked)
+        self.connect(self.treeTests, QtCore.SIGNAL("customContextMenuRequested(QPoint)"), self.tree_contextMenu)
+        
         # Signal that will be called by the worker thread
         self.connect(self, QtCore.SIGNAL("testRun"), self.test_run_callback)
         # Signal called by the monitor thread
@@ -226,6 +231,48 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def test(self):
         pass
             
+    #-----------------------------------------------------------------------------
+    def tree_doubleClicked(self, index):
+        """ Double-clicked on tree at that QModelIndex """
+        print "CLICK ON MOUSE"
+        try:
+            object = self.treeTests.model().data( index, Qt.UserRole).toPyObject()
+        except:
+            return
+        if isinstance(object, TestSingle):
+            print "Running single test:", object.fullname
+            object.parent.run_tests(self.test_run_callback, object.name)
+            
+    def tree_contextMenu(self, point):
+        """ Open the context menu (if on an appropriate index
+        point :: location clicked on the tree.
+        """
+        try:
+            index = self.treeTests.indexAt(point)
+            object = self.treeTests.model().data( index, Qt.UserRole).toPyObject()
+        except:
+            return
+
+        if isinstance(object, TestSuite):
+            menu = QMenu()
+            runTestsAction = menu.addAction("Run Tests Individually")
+            action = menu.exec_(self.treeTests.mapToGlobal(point))
+            if action == runTestsAction:
+                print "Running every test in %s individually" % object.name
+                for test in object.tests:
+                    print "Running %s" % test.fullname
+                    object.run_tests(self.test_run_callback, test.name)
+                    
+        elif isinstance(object, TestSingle):
+            menu = QMenu()
+            runTestsAction = menu.addAction("Run Single Test")
+            action = menu.exec_(self.treeTests.mapToGlobal(point))
+            if action == runTestsAction:
+                print "Running single test:", object.fullname
+                object.parent.run_tests(self.test_run_callback, object.name)
+        
+
+        
 
     #-----------------------------------------------------------------------------
     def readSettings(self):
@@ -401,6 +448,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
                         self.show_results()
             
             if isinstance(obj, TestSuite):
+                #print "Updating GUI of TestSuite", obj.name
                 self.model.update_suite(obj)
             elif isinstance(obj, TestProject):
                 # Updating the project is now redundant since the test status string is made dynamically

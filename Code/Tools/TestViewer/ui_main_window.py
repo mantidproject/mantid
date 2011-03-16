@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Thu Mar  3 10:07:12 2011
+# Created: Wed Mar 16 10:47:37 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -147,6 +147,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout_4.addWidget(self.buttonSelectSVN)
         self.vlTree.addWidget(self.frameTreeFilter)
         self.treeTests = QtGui.QTreeView(self.verticalLayoutWidget_2)
+        self.treeTests.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.treeTests.setSortingEnabled(True)
         self.treeTests.setObjectName("treeTests")
         self.treeTests.header().setStretchLastSection(False)
@@ -601,6 +602,7 @@ class Ui_MainWindow(object):
 "<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
 "<tr>\n"
 "<td style=\"border: none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"

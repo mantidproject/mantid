@@ -151,7 +151,7 @@ class TestSingle(object):
         # Last date and time the test was run
         self.lastrun = None
         
-        # Time (in seconds) to execute the test
+        # Time (in seconds) to execute the testTestSingle
         self.runtime = 0.0
         
         # Last failure text
@@ -239,6 +239,12 @@ class TestSingle(object):
             self.stdout = systemout[0].firstChild.data
         else:
             self.stdout = ""
+
+    #----------------------------------------------------------------------------------
+    def run_test(self):
+        """Run only this single test and interpret the results. """
+        self.parent.run_tests()
+
             
     #----------------------------------------------------------------------------------
     def get_state_str(self):
@@ -329,9 +335,9 @@ class TestSuite(object):
                 else:
                     s += u"<font color=Orange><h3>%s</h3></font>" % (self.name + ": " + "Log File")
                     s += "<br>"
-                    html_log = html_escape( self.log_contents )
-                    html_log = html_log.replace("\n", "<br>")
-                    s += html_log
+#                    html_log = html_escape( self.log_contents )
+#                    html_log = html_log.replace("\n", "<br>")
+#                    s += html_log
         return s
 
     #----------------------------------------------------------------------------------
@@ -449,7 +455,7 @@ class TestSuite(object):
        
         
     #----------------------------------------------------------------------------------
-    def run_tests(self, stdout_callback_func):
+    def run_tests(self, stdout_callback_func, single_test_name=None):
         """ Runs this test suite, then loads the produced XML file
         and interprets its results.
         This method should be written so that it can be run in parallel. """
@@ -471,8 +477,14 @@ class TestSuite(object):
         
         # In order to catch "segmentation fault" message, we call bash and get the output of that!
         # Max memory for process in KB is a global
-        full_command = "bash -c 'ulimit -v %d ; %s'" % (memory_limit_kb, self.command)
+        full_command = "bash -c 'ulimit -v %d ; %s" % (memory_limit_kb, self.command)
         
+        # Are we doing a single test?
+        single_test = (not single_test_name is None) 
+        if single_test:
+            full_command += " " + single_test_name
+        # Close off the quotes
+        full_command += "'"
         
         # Execute the test command; wait for it to return, up to a timeout
         (status, output) = run_command_with_timeout(full_command, process_timeout_sec, run_shell=False)
@@ -484,10 +496,10 @@ class TestSuite(object):
         xml_path = os.path.join(rundir, self.xml_file)
         if os.path.exists(xml_path) and os.path.getsize(xml_path) > 0:
             # Yes, something was output
-            self.parse_xml(xml_path) 
+            self.parse_xml(xml_path, single_test) 
         else:
             # No - you must have segfaulted or some other error!
-            self.set_aborted(output)
+            self.set_aborted(output, single_test_name)
             
         # Now try to load the log_file
         if os.path.exists(self.log_file):
@@ -508,12 +520,14 @@ class TestSuite(object):
         self.compile_states()  
         
     #----------------------------------------------------------------------------------
-    def set_aborted(self, stdout):
+    def set_aborted(self, stdout, single_test_name = None):
         """ Set that all tests aborted and save the stdout """
         for test in self.tests:
-            test.state.value = self.state.ABORTED
-            test.state.old = False
-            test.stdout = stdout
+            if single_test_name is None or (single_test_name == test.name): 
+                test.state.value = self.state.ABORTED
+                test.state.old = False
+                test.stdout = stdout
+                test.lastrun = datetime.datetime.now()
         
         
     #----------------------------------------------------------------------------------
@@ -526,11 +540,12 @@ class TestSuite(object):
         
 
     #----------------------------------------------------------------------------------
-    def parse_xml(self, xml_path):
+    def parse_xml(self, xml_path, single_test=False):
         """Interpret a jUnit-style XML file produced for this suite.
         
         Parameters
-            xml_path :: full path to the produced XML path"""
+            xml_path :: full path to the produced XML path
+            single_test :: we expect only one test to have really run"""
             
         self.lastrun = datetime.datetime.now()
            
@@ -577,13 +592,14 @@ class TestSuite(object):
                 
                 
         # Now we look for tests that are no longer in the suite, and remove them
-        tests_copy = self.tests[:]
-        for test in tests_copy:
-            if test.lastrun != self.lastrun:
-                #print "Removing test %s" % test.get_fullname()
-                self.tests.remove(test)
-                # Mark that we need to update the tree in the GUI
-                self.contents_changed = True
+        if not single_test:
+            tests_copy = self.tests[:]
+            for test in tests_copy:
+                if test.lastrun != self.lastrun:
+                    #print "Removing test %s" % test.get_fullname()
+                    self.tests.remove(test)
+                    # Mark that we need to update the tree in the GUI
+                    self.contents_changed = True
             
     #----------------------------------------------------------------------------------
     def __repr__(self):
@@ -1425,12 +1441,16 @@ if __name__ == '__main__':
     all_tests.discover_CXX_projects("/home/8oz/Code/Mantid/Code/Mantid/bin/", "/home/8oz/Code/Mantid/Code/Mantid/Framework/")
     all_tests.select_svn()
     all_tests.select_all(False)
+    
     suite = all_tests.find_suite("MDEventsTest.MDEventTest")
-    suite.set_selected(True)
-    suite = all_tests.find_suite("KernelTest.ConfigServiceTest")
-    suite.set_selected(True)
-    all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
-                          parallel=True, callback_func=test_run_print_callback)
+    suite.run_tests(test_run_print_callback, 'test_Constructors')
+    
+#    suite = all_tests.find_suite("MDEventsTest.MDEventTest")
+#    suite.set_selected(True)
+#    suite = all_tests.find_suite("KernelTest.ConfigServiceTest")
+#    suite.set_selected(True)
+#    all_tests.run_tests_in_parallel(selected_only=True, make_tests=True, 
+#                          parallel=True, callback_func=test_run_print_callback)
 
     
 #    for pj in all_tests.projects:
