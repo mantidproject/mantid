@@ -187,8 +187,14 @@ bool PythonScripting::start()
     }
     return d_initialized;
   }
+  catch(std::exception & ex)
+  {
+    std::cerr << "Exception in PythonScripting.cpp: " << ex.what() << std::endl;
+    return false;
+  }
   catch(...)
   {
+    std::cerr << "Exception in PythonScripting.cpp" << std::endl;
     return false;
   }
 }
