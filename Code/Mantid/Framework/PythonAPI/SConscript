@@ -24,10 +24,6 @@ if os.name == 'posix':
    myenv.Append(MYLIBLIST='boost_python' + myenv['BOOST_APPEND'])
 # windows
 else:
-   #python_path = 'C:/Python25/'
-   #myenv.Append(CPPPATH=python_path+'include/')
-   #myenv.Append(MYLIBDIRLIST=python_path+'libs/')
-   #myenv.Append(MYLIBLIST=python25)
    myenv.Replace(SHLIBSUFFIX='.pyd')
 listSharedObjects = MantidBuild.getSharedObjects(listCpps, myenv)
 

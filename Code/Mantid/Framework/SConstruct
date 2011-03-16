@@ -85,7 +85,7 @@ if os.name == 'nt':
 	
 	boost_path = third_party + '/include/'
 	
-	python_path = 'C:/Python25/'
+	python_path = sys.prefix.replace('\\','/') + '/'
 	opencascade_path=third_party + '/include/OpenCascade'
 	if int(debug) == 0:
 		libList.append('PocoUtil')
@@ -107,7 +107,7 @@ if os.name == 'nt':
 		print "* Building for 64bit Windows *"
 		libDirList.append(third_party + '/lib/win64/')
 	
-	libList.append('python25')
+	libList.append('python%d%d' % (sys.version_info[0],sys.version_info[1]))
 
 	libList.append('gsl')
 	libList.append('ws2_32')   # winsock library
