@@ -963,7 +963,7 @@ extern "C" {
 #ifdef __APPLE__
 # ifdef __cplusplus
 #  ifndef isnan
-extern "C" int isnan(double);
+  // RJT (11/3/2010)  extern "C" int isnan(double);
 #  endif
 # endif
 # define HAVE_ISNAN
