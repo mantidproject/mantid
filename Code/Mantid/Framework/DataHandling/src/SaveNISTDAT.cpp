@@ -48,7 +48,7 @@ void SaveNISTDAT::exec()
     g_log.error("Failed to open file:" + filename);
     throw Exception::FileError("Failed to open file:" , filename);
   }
-  out_File << "Qx - Qy - I(Qx,Qy) - dI(Qx,Qy)\r\n";
+  out_File << "Data columns Qx - Qy - I(Qx,Qy) - err(I)\r\n";
   out_File << "ASCII data\r\n";
 
   // Set up the progress reporting object

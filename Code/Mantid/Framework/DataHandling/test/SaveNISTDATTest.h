@@ -37,7 +37,7 @@ public:
 
     std::string fileLine;
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "Qx - Qy - I(Qx,Qy) - dI(Qx,Qy)\r" );
+    TS_ASSERT_EQUALS ( fileLine, "Data columns Qx - Qy - I(Qx,Qy) - err(I)\r" );
     std::getline( testFile, fileLine );
     TS_ASSERT_EQUALS ( fileLine, "ASCII data\r" );
     std::getline( testFile, fileLine );
