@@ -24,9 +24,12 @@ endif ( VISIT_FOUND AND (NOT USE_PARAVIEW) )
 
 # Paraview dependencies built if Paraview is found
 find_package( ParaView QUIET ) #TODO switch from QUIET to REQUIRED
-if(NOT ParaView_FOUND OR NOT USE_PARAVIEW )
+
+if (ParaView_FOUND AND USE_PARAVIEW)
+  add_subdirectory(ParaviewPlugins)
+else (ParaView_FOUND AND USE_PARAVIEW )
   message( STATUS "Vates-Paraview plugins and widgets will not be built.") #TODO Nice message should be escalated
-endif( NOT ParaView_FOUND OR NOT USE_PARAVIEW )
+endif( ParaView_FOUND AND USE_PARAVIEW )
 
 
 
