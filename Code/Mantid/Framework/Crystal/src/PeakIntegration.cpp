@@ -98,87 +98,88 @@ namespace Mantid
       std::vector <std::pair<int, int> >::iterator Iter1;
       for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
       {
-       i = (*Iter1).second;
-       l1 = peaksW->get_L1(i);
-       detnum = peaksW->get_Bank(i);
-       Geometry::V3D hkl = peaksW->get_hkl(i);
-       h = hkl[0];
-       k = hkl[1];
-       l = hkl[2];
-       col = peaksW->get_column(i);
-       row = peaksW->get_row(i);
-       chan = peaksW->get_time_channel(i);
-       Geometry::V3D pos = peaksW->getPosition(i);
-       l2 = pos.norm();
-       wl = peaksW->get_wavelength(i);
-       ipk = peaksW->get_ipk(i);
+        i = (*Iter1).second;
+        l1 = peaksW->get_L1(i);
+        detnum = peaksW->get_Bank(i);
+        Geometry::V3D hkl = peaksW->get_hkl(i);
+        h = hkl[0];
+        k = hkl[1];
+        l = hkl[2];
+        col = peaksW->get_column(i);
+        row = peaksW->get_row(i);
+        chan = peaksW->get_time_channel(i);
+        Geometry::V3D pos = peaksW->getPosition(i);
+        l2 = pos.norm();
+        wl = peaksW->get_wavelength(i);
+        ipk = peaksW->get_ipk(i);
 
-      std::ostringstream Peakbank;
-      Peakbank <<"bank"<<detnum;
-      XPeak = int(col+0.5)-1;
-      YPeak = int(row+0.5)-1;
-      tofISAW = wl * (l1+l2) / 3.956058e-3;
-      TOFPeak = VectorHelper::getBinIndex(XValues.access(), tofISAW);
-
-
-      TOFmin = TOFPeak+Binmin;
-      if (TOFmin<0) TOFmin = 0;
-      TOFmax = TOFPeak+Binmax;
-
-      IAlgorithm_sptr sum_alg;
-      try
-      {
-        sum_alg = createSubAlgorithm("SumNeighbours", -1, -1, false);
-      } catch (Exception::NotFoundError&)
-      {
-        g_log.error("Can't locate SumNeighbours algorithm");
-        throw ;
+        std::ostringstream Peakbank;
+        Peakbank <<"bank"<<detnum;
+        XPeak = int(col+0.5)-1;
+        YPeak = int(row+0.5)-1;
+        tofISAW = wl * (l1+l2) / 3.956058e-3;
+        TOFPeak = VectorHelper::getBinIndex(XValues.access(), tofISAW);
+  
+  
+        TOFmin = TOFPeak+Binmin;
+        if (TOFmin<0) TOFmin = 0;
+        TOFmax = TOFPeak+Binmax;
+  
+        IAlgorithm_sptr sum_alg;
+        try
+        {
+          sum_alg = createSubAlgorithm("SumNeighbours", -1, -1, false);
+        } 
+        catch (Exception::NotFoundError&)
+        {
+          g_log.error("Can't locate SumNeighbours algorithm");
+          throw ;
+        }
+        sum_alg->setProperty("InputWorkspace", inputW);
+        sum_alg->setProperty("OutputWorkspace", "tmp");
+        sum_alg->setProperty("SumX", Xmax-Xmin+1);
+        sum_alg->setProperty("SumY", Ymax-Ymin+1);
+        sum_alg->setProperty("SingleNeighbourhood", true);
+        sum_alg->setProperty("Xpixel", XPeak+Xmin);
+        sum_alg->setProperty("Ypixel", YPeak+Ymin);
+        sum_alg->setProperty("DetectorName", Peakbank.str());
+  
+        try
+        {
+          sum_alg->execute();
+        }
+        catch (std::runtime_error&)
+        {
+          g_log.error("Unable to successfully run Fit sub-algorithm");
+          throw;
+        }
+        outputW = sum_alg->getProperty("OutputWorkspace");
+  
+        IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
+        bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
+        bin_alg->setProperty("OutputWorkspace", "tmp2");
+        bin_alg->setProperty<std::vector<double> >("Params", rb_params);
+        try
+        {
+          bin_alg->execute();
+        }
+        catch (std::runtime_error&)
+        {
+          g_log.information("Unable to successfully run Rebin sub-algorithm");
+          throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
+        }
+  
+        outputW = bin_alg->getProperty("OutputWorkspace");
+        if (TOFmin > numbins) TOFmin = numbins;
+        if (TOFmax > numbins) TOFmax = numbins;
+  
+        fitSpectra(0, I, sigI);
+        std::cout << peaksW->getPeakIntegrationCount(i)<<"  " << I << "  "<<peaksW->getPeakIntegrationError(i)<< "  "<< sigI << "\n";
+  
+        peaksW->setPeakIntegrateCount(I, i);
+        peaksW->setPeakIntegrateError(sigI, i);
+  
       }
-      sum_alg->setProperty("InputWorkspace", inputW);
-      sum_alg->setProperty("OutputWorkspace", "tmp");
-      sum_alg->setProperty("SumX", Xmax-Xmin+1);
-      sum_alg->setProperty("SumY", Ymax-Ymin+1);
-      sum_alg->setProperty("SingleNeighbourhood", true);
-      sum_alg->setProperty("Xpixel", XPeak+Xmin);
-      sum_alg->setProperty("Ypixel", YPeak+Ymin);
-      sum_alg->setProperty("DetectorName", Peakbank.str());
-
-      try
-      {
-        sum_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-      outputW = sum_alg->getProperty("OutputWorkspace");
-
-      IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
-      bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
-      bin_alg->setProperty("OutputWorkspace", "tmp2");
-      bin_alg->setProperty<std::vector<double> >("Params", rb_params);
-      try
-      {
-        bin_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.information("Unable to successfully run Rebin sub-algorithm");
-        throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
-      }
-
-      outputW = bin_alg->getProperty("OutputWorkspace");
-      if (TOFmin > numbins) TOFmin = numbins;
-      if (TOFmax > numbins) TOFmax = numbins;
-
-      fitSpectra(0, I, sigI);
-      std::cout << peaksW->getPeakIntegrationCount(i)<<"  " << I << "  "<<peaksW->getPeakIntegrationError(i)<< "  "<< sigI << "\n";
-
-      peaksW->setPeakIntegrateCount(I, i);
-      peaksW->setPeakIntegrateError(sigI, i);
-
-    }
     }
 
     void PeakIntegration::retrieveProperties()
@@ -322,65 +323,69 @@ namespace Mantid
 
       if(Alpha0== 1.2408)
       {
-      IAlgorithm_sptr fit2_alg;
-      try
-      {
-        fit2_alg = createSubAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError&)
-      {
-        g_log.error("Can't locate Fit algorithm");
-        throw ;
-      }
-      fit2_alg->setProperty("InputWorkspace", outputW);
-      fit2_alg->setProperty("WorkspaceIndex", s);
-      fit2_alg->setProperty("StartX", X[TOFmin]);
-      fit2_alg->setProperty("EndX", X[TOFmax]);
-      fit2_alg->setProperty("MaxIterations", 5000);
-      fit2_alg->setProperty("Output", "fit");
-      std::ostringstream fun_str;
-      fun_str << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
-              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
-      fit2_alg->setProperty("Function", fun_str.str());
-      std::ostringstream tie_str;
-
-      tie_str << "Alpha1 = "<<Alpha1;
-      fit2_alg->setProperty("Ties", tie_str.str());
-
-      try
-      {
-        fit2_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-
-      if ( ! fit2_alg->isExecuted() )
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
-      }
-
-      params = fit2_alg->getProperty("Parameters");
-      IKI = params[0];
-      Alpha0 = params[1];
-      Alpha1 = params[2];
-      Beta0 = params[3];
-      Kappa = params[4];
-      SigmaSquared = params[5];
-      Gamma = params[6];
-      X0 = params[7];
-      funct = fit2_alg->getPropertyValue("Function");
-      std::cout <<funct<<"\n";
+        IAlgorithm_sptr fit2_alg;
+        try
+        {
+          fit2_alg = createSubAlgorithm("Fit", -1, -1, false);
+        } catch (Exception::NotFoundError&)
+        {
+          g_log.error("Can't locate Fit algorithm");
+          throw ;
+        }
+        fit2_alg->setProperty("InputWorkspace", outputW);
+        fit2_alg->setProperty("WorkspaceIndex", s);
+        fit2_alg->setProperty("StartX", X[TOFmin]);
+        fit2_alg->setProperty("EndX", X[TOFmax]);
+        fit2_alg->setProperty("MaxIterations", 5000);
+        fit2_alg->setProperty("Output", "fit");
+        std::ostringstream fun_str;
+        fun_str << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
+                <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
+        fit2_alg->setProperty("Function", fun_str.str());
+        std::ostringstream tie_str;
+  
+        tie_str << "Alpha1 = "<<Alpha1;
+        fit2_alg->setProperty("Ties", tie_str.str());
+  
+        try
+        {
+          fit2_alg->execute();
+        }
+        catch (std::runtime_error&)
+        {
+          g_log.error("Unable to successfully run Fit sub-algorithm");
+          throw;
+        }
+  
+        if ( ! fit2_alg->isExecuted() )
+        {
+          g_log.error("Unable to successfully run Fit sub-algorithm");
+          throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
+        }
+  
+        params = fit2_alg->getProperty("Parameters");
+        IKI = params[0];
+        Alpha0 = params[1];
+        Alpha1 = params[2];
+        Beta0 = params[3];
+        Kappa = params[4];
+        SigmaSquared = params[5];
+        Gamma = params[6];
+        X0 = params[7];
+        funct = fit2_alg->getPropertyValue("Function");
+        std::cout <<funct<<"\n";
       }
 
       //Fill output workspace with interval; use Fit to calculate values of Fit in interval
       const int n = outputW->blocksize();
       double dx = (X[TOFmax]-X[TOFmin])/double(n);
       double x0 = X[TOFmin];
-      for (int i = 0; i <=  n; i++) {
+      for (int i = 0; i <=  n; i++) 
+      {
         X[i] = x0+i*dx;
+      }
+      for (int i = 0; i <  n; i++) 
+      {
         Y[i] = 0.0;
       }
       IAlgorithm_sptr fit2_alg;
@@ -396,7 +401,10 @@ namespace Mantid
       fit2_alg->setProperty("WorkspaceIndex", s);
       fit2_alg->setProperty("StartX", X[0]);
       fit2_alg->setProperty("EndX", X[n]);
-      fit2_alg->setProperty("Function", funct);
+      std::ostringstream fun_str2;
+      fun_str2 << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
+              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
+      fit2_alg->setProperty("Function", fun_str2.str());
       fit2_alg->setProperty("MaxIterations", 0);
       fit2_alg->setProperty("Output", "fit_iter0");
 
