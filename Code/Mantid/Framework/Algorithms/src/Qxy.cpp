@@ -44,6 +44,8 @@ void Qxy::init()
   declareProperty("MaxQxy",-1.0,mustBePositive);
   declareProperty("DeltaQ",-1.0,mustBePositive->clone());
   declareProperty("AccountForGravity",false,Direction::Input);
+  declareProperty("SolidAngleWeighting",true,
+      "If true, pixels will be weighted by their solid angle.", Direction::Input);
 }
 
 void Qxy::exec()
@@ -51,6 +53,7 @@ void Qxy::exec()
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
 
   const bool doGravity = getProperty("AccountForGravity");
+  const bool doSolidAngle = getProperty("SolidAngleWeighting");
 
   // Create the output Qx-Qy grid
   MatrixWorkspace_sptr outputWorkspace = this->setUpOutputWorkspace();
@@ -176,8 +179,11 @@ void Qxy::exec()
         {
           fraction = fractions[j];
         }
-        // add the total weight for this bin in the weights workspace, in an equivelant bin to where the data was stored
-        weights->dataY(yIndex)[xIndex] += fraction*angle;      
+        // add the total weight for this bin in the weights workspace, in an equivalent bin to where the data was stored
+        if (doSolidAngle)
+          weights->dataY(yIndex)[xIndex] += fraction*angle;
+        else
+          weights->dataY(yIndex)[xIndex] += fraction;
 
       }
     } // loop over single spectrum

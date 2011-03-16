@@ -21,6 +21,8 @@ namespace Algorithms
     <LI> OutputWorkspace - The workspace in which to store data as x & y components of Q. </LI>
     <LI> MaxQxy          - The upper limit of the Qx-Qy grid (goes from -MaxQxy to +MaxQxy). </LI>
     <LI> DeltaQ          - The dimension of a Qx-Qy cell. </LI>
+    <LI> AccountForGravity - If true, account for gravity. </LI>
+    <LI> SolidAngleWeighting - If true, pixels will be weighted by their solid angle. </LI>
     </UL>
     
     @author Russell Taylor, Tessella plc
