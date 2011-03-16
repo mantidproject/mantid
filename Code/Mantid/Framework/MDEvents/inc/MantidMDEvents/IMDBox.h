@@ -2,6 +2,7 @@
 #define IMDBOX_H_
 
 #include "MantidKernel/System.h"
+#include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -55,10 +56,14 @@ namespace MDEvents
     virtual bool willSplit(size_t num) const = 0;
 
     /// Add a single event
-    virtual void addEvent(const MDE & point) = 0;
+    virtual size_t addEvent(const MDE & point) = 0;
 
     /// Add several events
-    virtual void addEvents(const std::vector<MDE> & events) = 0;
+    virtual size_t addEvents(const std::vector<MDE> & events) = 0;
+
+    /// Return the box controller saved.
+    BoxController_sptr getBoxController() const
+    { return m_BoxController; }
 
     //-----------------------------------------------------------------------------------------------
     /** Set the extents of this box.
@@ -111,6 +116,9 @@ namespace MDEvents
 
     /** Cached total error (squared) from all points within */
     double m_errorSquared;
+
+    /// The box splitting controller
+    BoxController_sptr m_BoxController;
 
 
   public:

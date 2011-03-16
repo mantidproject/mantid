@@ -2,6 +2,13 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/ThreadSchedulerMutexes.h"
+
+using namespace Mantid;
+using namespace Mantid::Kernel;
+
 namespace Mantid
 {
 namespace MDEvents
@@ -11,13 +18,16 @@ namespace MDEvents
   /** Constructor
    * @param box :: MDBox containing the events to split */
   TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box) :
-    IMDBox<MDE, nd>()
+    IMDBox<MDE, nd>(),
+    nPoints(0)
   {
     if (!box)
       throw std::runtime_error("MDGridBox::ctor(): box is NULL.");
-    BoxController_sptr sc = box->getSplitController();
-    if (!sc)
+    BoxController_sptr bc = box->getBoxController();
+    if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
+    // Save the controller in this object.
+    this->m_BoxController = bc;
 
     // Copy the extents
     for (size_t d=0; d<nd; d++)
@@ -30,7 +40,7 @@ namespace MDEvents
       // Cumulative multiplier, for indexing
       splitCumul[d] = tot;
       // How many is it split?
-      split[d] = sc->splitInto(d);
+      split[d] = bc->splitInto(d);
       tot *= split[d];
       // Length of the side of a box in this dimension
       boxSize[d] = (extents[d].max - extents[d].min) / split[d];
@@ -48,7 +58,7 @@ namespace MDEvents
     for (size_t i=0; i<tot; i++)
     {
       // Create the box
-      MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(sc);
+      MDBox<MDE,nd> * myBox = new MDBox<MDE,nd>(bc);
       // Set the extents of this box.
       for (size_t d=0; d<nd; d++)
       {
@@ -96,11 +106,12 @@ namespace MDEvents
   /** Returns the total number of points (events) in this box */
   TMDE(size_t MDGridBox)::getNPoints() const
   {
-    //TODO: Cache the value!
-    size_t tot = 0;
-    for (size_t i=0; i<boxes.size(); i++)
-      tot += boxes[i]->getNPoints();
-    return tot;
+    //Use the cached value
+    return nPoints;
+//    size_t tot = 0;
+//    for (size_t i=0; i<boxes.size(); i++)
+//      tot += boxes[i]->getNPoints();
+//    return tot;
   }
 
 
@@ -118,22 +129,6 @@ namespace MDEvents
 
 
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a MDEvent to the box.
-   * @param event :: reference to a MDEvent to add.
-   * */
-  TMDE(
-  void MDGridBox)::addEvent( const MDE & event)
-  {
-    //this->data.push_back(event);
-
-    // Keep the running total of signal and error
-    this->m_signal += event.getSignal();
-    this->m_errorSquared += event.getErrorSquared();
-  }
-
-
   //-----------------------------------------------------------------------------------------------
   /** Returns false; this box is already split.
    * @param num :: number of events that would be added
@@ -147,43 +142,113 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
+  /** Split a box that is contained in the GridBox, at the given index,
+   * into a MDGridBox.
+   * @param index :: index into the boxes vector. Warning: No bounds check is made, don't give stupid values!
+   */
+  TMDE(
+  void MDGridBox)::splitContents(size_t index)
+  {
+    // You can only split it if it is a MDBox (not MDGridBox).
+    MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[index]);
+    if (!box) return;
+    // Construct the grid box
+    MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
+    // Delete the old ungridded box
+    delete boxes[index];
+    // And now we have a gridded box instead of a boring old regular box.
+    boxes[index] = gridbox;
+  }
+
+
+  //-----------------------------------------------------------------------------------------------
+  /** Add a single MDEvent to the grid box. If the boxes
+   * contained within are also gridded, this will recursively push the event
+   * down to the deepest level.
+   *
+   * @param event :: reference to a MDEvent to add.
+   * @return the number of events that were rejected (because of being out of bounds)
+   * */
+  TMDE(
+  size_t MDGridBox)::addEvent( const MDE & event)
+  {
+    //TODO: Should bounds checks be removed for speed?
+
+    bool badEvent = false;
+    size_t index = 0;
+    for (size_t d=0; d<nd; d++)
+    {
+      CoordType x = event.getCenter(d);
+      int i = int((x - extents[d].min) / boxSize[d]);
+      if (i < 0 || i >= int(split[d]))
+      {
+        badEvent=true;
+        break;
+      }
+      // Accumulate the index
+      index += (i * splitCumul[d]);
+    }
+    if (!badEvent)
+    {
+      // Keep the running total of signal, error, and # of points
+      this->m_signal += event.getSignal();
+      this->m_errorSquared += event.getErrorSquared();
+      ++this->nPoints;
+
+      // Add it to the contained box, and return how many bads where there
+      return boxes[index]->addEvent( event );
+    }
+    else
+      return 1;
+
+//    std::vector<MDE> events;
+//    events.push_back(event);
+//    return this->addEvents(events);
+  }
+
+
+
+  //-----------------------------------------------------------------------------------------------
   /** Add several events. For the grid box, this one needs to
    * parcel out which box receives which event.
    *
    * @param events :: vector of events to be copied.
+   * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  void MDGridBox)::addEvents(const std::vector<MDE> & events)
+  size_t MDGridBox)::addEvents(const std::vector<MDE> & events)
   {
-    //TODO: Does it make sense to collect vectors to add, in the event that it is a HUGE list,
-    // instead of calling the single "addEvent" method
+    size_t numBad = 0;
 
-    //TODO: Use tasks and threadpool.
-
-    // --- Go event by event and add them ----
-    typename std::vector<MDE>::const_iterator it;
-    typename std::vector<MDE>::const_iterator it_end = events.end();
-    for (it = events.begin(); it != it_end; it++)
+    if (this->m_BoxController->useTasksForAddingEvents(events.size()))
     {
-      bool badEvent = false;
-      size_t index = 0;
-      for (size_t d=0; d<nd; d++)
+      //TODO: Use tasks and threadpool.
+      ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+      //ts->
+
+      // Create the threadpool
+      ThreadPool tp(ts);
+      // Finish all threads.
+      tp.joinAll();
+
+      // Done!
+      delete ts;
+    }
+    else
+    {
+      //TODO: Does it make sense to collect vectors to add, in the event that it is a HUGE list,
+      // instead of calling the single "addEvent" method
+
+      // --- Go event by event and add them ----
+      typename std::vector<MDE>::const_iterator it;
+      typename std::vector<MDE>::const_iterator it_end = events.end();
+      for (it = events.begin(); it != it_end; it++)
       {
-        CoordType x = it->getCenter(d);
-        int i = (x - extents[d].min) / boxSize[d];
-        if (i < 0 || i >= int(split[d]))
-        {
-          badEvent=true;
-          break;
-        }
-        // Accumulate the index
-        index += (i * splitCumul[d]);
-      }
-      if (!badEvent)
-      {
-        boxes[index]->addEvent( *it );
+        numBad += addEvent(*it);
+
       }
     }
+    return numBad;
   }
 
 

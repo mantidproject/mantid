@@ -47,6 +47,7 @@ factory_top = """
 */
 API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, std::string eventType)
 {
+  (void) eventType; // Avoid compiler warning
   switch(nd)
   {
 """

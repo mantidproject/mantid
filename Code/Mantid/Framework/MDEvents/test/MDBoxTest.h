@@ -145,7 +145,7 @@ public:
     for(int i=0; i < 12; i++) vec.push_back(ev);
     b3.addEvents( vec );
 
-    TS_ASSERT_EQUALS( b3.getSplitController(), sc);
+    TS_ASSERT_EQUALS( b3.getBoxController(), sc);
 
   }
 };

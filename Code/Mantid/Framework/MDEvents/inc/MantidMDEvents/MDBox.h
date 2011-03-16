@@ -47,24 +47,17 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-    void addEvent(const MDE & point);
+    size_t addEvent(const MDE & point);
 
-    void addEvents(const std::vector<MDE> & events);
+    size_t addEvents(const std::vector<MDE> & events);
 
     bool willSplit(size_t num) const;
-
-    /// Return the split controller saved.
-    BoxController_sptr getSplitController() const
-    { return m_splitController; }
 
   protected:
 
     /** Vector of MDEvent's, in no particular order.
      * */
     std::vector< MDE > data;
-
-    /// The box splitting controller
-    BoxController_sptr m_splitController;
 
 
   public:

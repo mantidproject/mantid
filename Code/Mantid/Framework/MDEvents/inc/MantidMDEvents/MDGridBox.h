@@ -40,11 +40,13 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-    void addEvent(const MDE & point);
+    size_t addEvent(const MDE & point);
 
-    void addEvents(const std::vector<MDE> & events);
+    size_t addEvents(const std::vector<MDE> & events);
 
     bool willSplit(size_t num) const;
+
+    void splitContents(size_t index);
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get the vector of boxes */
@@ -72,6 +74,9 @@ namespace MDEvents
 
     /// Size of each box size in the i^th dimension
     CoordType boxSize[nd];
+
+    /// Cached number of points contained (including all sub-boxes)
+    size_t nPoints;
 
 
   public:

@@ -2,6 +2,7 @@
 #define BOXCONTROLLER_H_
 
 #include <boost/shared_ptr.hpp>
+#include <vector>
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -13,6 +14,7 @@ namespace MDEvents
    * determine optimal behavior. It informs:
    *  - When a MDBox needs to split into a MDGridBox.
    *  - How the splitting will occur.
+   *  - When a MDGridBox should use Tasks to parallelize adding events
    *
    * @author Janik Zikovsky
    * @date Feb 21, 2011
@@ -24,7 +26,8 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------
     /** Constructor
      *
-     * @return
+     * @param nd :: number of dimensions
+     * @return BoxController instance
      */
     BoxController(size_t nd)
     : nd(nd)
@@ -54,7 +57,7 @@ namespace MDEvents
      *
      * @param original :: current size (# of points) in the box
      * @param added :: # to add
-     * @return bool
+     * @return bool, true if it should split
      */
     bool willSplit(size_t original, size_t added)
     {
@@ -90,6 +93,21 @@ namespace MDEvents
     void setSplitInto(size_t dim, size_t num)
     {
       m_splitInto[dim] = num;
+    }
+
+
+    //-----------------------------------------------------------------------------------
+    /** Return true if it is advantageous to use Tasks to
+     * do addEvents on a grid box.
+     *
+     * @param num :: number of events that will be added.
+     * @return bool, false if you should use a simple one-thread routine,
+     *          true if you should parallelize using tasks.
+     */
+    bool useTasksForAddingEvents(size_t num)
+    {
+      //TODO: Smarter criterion here
+      return (num > 1000);
     }
 
 
