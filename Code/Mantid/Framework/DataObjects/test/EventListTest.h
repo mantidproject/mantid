@@ -827,6 +827,15 @@ public:
   }
 
 
+  void test_dataX()
+  {
+    el = EventList();
+    MantidVec inVec(10,1.0);
+    el.dataX() = inVec;
+    const MantidVec & vec = el.dataX();
+    TS_ASSERT_EQUALS( vec, inVec );
+  }
+
   void test_setX_empty_constructor()
   {
     el = EventList();
