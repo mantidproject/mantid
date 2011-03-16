@@ -106,12 +106,10 @@ void Q1DWeighted::exec()
   // Beam line axis, to compute scattering angle
   V3D beamLine = samplePos - sourcePos;
 
-  // TODO: look into the parallel macros before trying to be clever
-  //PARALLEL_FOR2(inputWS,outputWS)
-
+  PARALLEL_FOR2(inputWS,outputWS)
   for (int i = 0; i < numSpec; i++)
   {
-    //PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
     IDetector_const_sptr det;
     try {
@@ -180,17 +178,19 @@ void Q1DWeighted::exec()
             w = 1.0/(nSubPixels*nSubPixels*err*err);
           }
 
-          YOut[iq] += YIn[j]*w;
-          EOut[iq] += w*w*EIn[j]*EIn[j];
-          XNorm[iq] += w;
+          PARALLEL_CRITICAL(iq)    /* Write to shared memory - must protect */
+          {
+            YOut[iq] += YIn[j]*w;
+            EOut[iq] += w*w*EIn[j]*EIn[j];
+            XNorm[iq] += w;
+          }
         }
       }
-
-      progress.report();
-      //PARALLEL_END_INTERUPT_REGION
+      progress.report("Computing I(Q)");
     }
+    PARALLEL_END_INTERUPT_REGION
   }
-  //PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 
   // Normalize according to the chosen weighting scheme
   for ( int i = 0; i<sizeOut-1; i++ )

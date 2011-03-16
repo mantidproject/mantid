@@ -12,14 +12,12 @@ namespace Algorithms
 {
 /**
     Writer for compatibility with SansView and NIST reduced data file format.
-    Writes a SANS 2D data file in Q space. If multiple TOF or wavelength bins are part of the
-    workspace, they will be summed up in Q.
+    Writes I(Qx,Qy), the output of Qxy, to an ASCII file.
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace    - The (partly) corrected data in units of wavelength. </LI>
+    <LI> InputWorkspace    - The reduced data in units of Q. </LI>
     <LI> Filename          - Output file. </LI>
-    <LI> OutputBinning     - The bin parameters to use for the final result. </LI>
     </UL>
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
