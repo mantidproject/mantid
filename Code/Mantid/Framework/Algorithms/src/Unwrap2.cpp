@@ -169,7 +169,7 @@ void Unwrap2::exec()
   }
 
   PARALLEL_FOR2(m_inputWS,outputWS)
-  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  for (unsigned int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
     // get the total flight path
@@ -188,6 +188,7 @@ void Unwrap2::exec()
       // fix the x-axis
       size_t pivot = this->unwrapX(m_inputWS->readX(workspaceIndex),
                                    outputWS->dataX(workspaceIndex), Ld);
+      pivot++; // one-off difference between x and y
 
       // fix the counts using the pivot point
       const MantidVec& yIn = m_inputWS->readY(workspaceIndex);
@@ -240,8 +241,8 @@ void Unwrap2::execEvent()
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
 
   // do the actual work
-  PARALLEL_FOR2(m_inputWS,outW)
-  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  PARALLEL_FOR2(m_inputWS, outW)
+  for (unsigned int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getEventList(workspaceIndex).getNumberEvents();
