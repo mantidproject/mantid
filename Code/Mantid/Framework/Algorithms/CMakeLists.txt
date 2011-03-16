@@ -131,6 +131,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/UnaryOperation.cpp
 		src/UnGroupWorkspaces.cpp
 		src/Unwrap.cpp
+        src/Unwrap2.cpp
 		src/WeightedMean.cpp
 		src/XDataConverter.cpp )
 
@@ -268,6 +269,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/UnaryOperation.h
 		inc/MantidAlgorithms/UnGroupWorkspaces.h
 		inc/MantidAlgorithms/Unwrap.h
+        inc/MantidAlgorithms/Unwrap2.h
 		inc/MantidAlgorithms/WeightedMean.h
 		inc/MantidAlgorithms/XDataConverter.h )
 
