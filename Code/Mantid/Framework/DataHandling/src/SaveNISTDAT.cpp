@@ -48,7 +48,7 @@ void SaveNISTDAT::exec()
     g_log.error("Failed to open file:" + filename);
     throw Exception::FileError("Failed to open file:" , filename);
   }
-  out_File << "Qx - Qy - I(Qx,Qy)\r\n";
+  out_File << "Qx - Qy - I(Qx,Qy) - dI(Qx,Qy)\r\n";
   out_File << "ASCII data\r\n";
 
   // Set up the progress reporting object
@@ -63,6 +63,7 @@ void SaveNISTDAT::exec()
       const double qy = (axis(i)+axis(i+1))/2.0;
       const MantidVec& XIn = inputWS->readX(i);
       const MantidVec& YIn = inputWS->readY(i);
+      const MantidVec& EIn = inputWS->readE(i);
 
       for ( unsigned int j = 0; j < XIn.size()-1; j++)
       {
@@ -71,7 +72,8 @@ void SaveNISTDAT::exec()
         {
           out_File << (XIn[j]+XIn[j+1])/2.0;
           out_File << "  " << qy;
-          out_File << "  " << YIn[j] << "\r\n";
+          out_File << "  " << YIn[j];
+          out_File << "  " << EIn[j] << "\r\n";
         }
       }
     }

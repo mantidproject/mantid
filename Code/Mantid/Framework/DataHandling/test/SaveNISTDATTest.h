@@ -37,11 +37,11 @@ public:
 
     std::string fileLine;
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "Qx - Qy - I(Qx,Qy)\r" );
+    TS_ASSERT_EQUALS ( fileLine, "Qx - Qy - I(Qx,Qy) - dI(Qx,Qy)\r" );
     std::getline( testFile, fileLine );
     TS_ASSERT_EQUALS ( fileLine, "ASCII data\r" );
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "-0.0105  -0.0735  6.13876e+08\r" );
+    TS_ASSERT_EQUALS ( fileLine, "-0.0105  -0.0735  6.13876e+08  6.1697e+07\r" );
 
     // remove file created by this algorithm
     Poco::File(outputFile).remove();
