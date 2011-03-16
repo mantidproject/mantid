@@ -11,6 +11,8 @@
 #include <tr1/unordered_map>
 #endif
 
+#include <Poco/SAX/ContentHandler.h>
+
 namespace Mantid
 {
 namespace DataHandling
@@ -76,7 +78,7 @@ namespace DataHandling
     @author Steve Williams and Russell Taylor (Tessella Support Services plc)
     @date 27/07/2009
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -126,6 +128,63 @@ private:
     };
   };
 
+  /**
+  * This class implements the Poco SAX ContentHandler class for reading of detector grouping files.
+  * @author Michael Whitty, ISIS
+  * @date 16/03/2011
+  * For an explanation of the ContentHandler class, please see http://www.appinf.com/docs/poco/Poco.XML.ContentHandler.html
+  */
+  class GroupXmlReader : public Poco::XML::ContentHandler
+  {
+  public:
+    #ifndef HAS_UNORDERED_MAP_H
+    typedef std::map<int, std::vector<int> > storage_map; ///< typedef to match that in GroupDetectors
+	  #else
+    typedef std::tr1::unordered_map<int, std::vector<int> > storage_map; ///< typedef to match that in GroupDetectors
+	  #endif
+
+    /// Constructor
+    GroupXmlReader();
+    /// Signals start of XML document
+    void startDocument();  
+    /// Signals start of element
+    void startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&, const Poco::XML::Attributes& attr);
+    /// Signals end of element
+    void endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&);
+    /// Used to return information to the GroupDetectors algorithm
+    void getItems(storage_map & map, std::vector<int> & unused);
+    /// Provides some information that is needed for the process to work
+    void setMaps(std::map<int,int> spec, Mantid::API::IndexToIndexMap* det, std::vector<int> & unused);
+
+    // These functions must be present as they are abstract in the base class. They are not used them here.
+    void setDocumentLocator(const Poco::XML::Locator*) {} ///< Not used
+    void endDocument() {} ///< Not used
+    void characters(const Poco::XML::XMLChar [], int, int) {} ///< Not used
+    void ignorableWhitespace(const Poco::XML::XMLChar [], int, int) {} ///< Not used
+    void processingInstruction(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
+    void startPrefixMapping(const Poco::XML::XMLString&, const Poco::XML::XMLString&) {} ///< Not used
+    void endPrefixMapping(const Poco::XML::XMLString&) {} ///< Not used
+    void skippedEntity(const Poco::XML::XMLString&) {} ///< Not used
+
+  private:
+    /// Populates the group list
+    void getIDNumbers(const Poco::XML::Attributes& attr);
+    /// map of groups
+    storage_map m_groups;
+    /// group currently being read from file
+    std::vector<int> m_currentGroup;
+    /// whether reading spectra numbers or detector ids
+    bool m_specNo;
+    /// whether currently inside a group element
+    bool m_inGroup;
+    /// map of spectra number to workspace index
+    std::map<int,int> m_specnTOwi;
+    /// map of detector id to workspace index
+    Mantid::API::IndexToIndexMap* m_detidTOwi;
+    /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
+    std::vector<int> m_unused;
+  };
+
 	#ifndef HAS_UNORDERED_MAP_H
   /// used to store the lists of spectra numbers that will be grouped, the keys are not used
   typedef std::map<int, std::vector<int> > storage_map;
@@ -158,10 +217,6 @@ private:
   /// used while reading the file reads reads spectra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, std::map<int,int> &specs2index,
                    std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator="#");
-
-  /// used while reading the file reads reads detector ids from the string and returns spectra indexes 
-  void readDetectorIDs(std::string line, std::vector<int> &output, std::vector<int> &unUsedSpec,
-                   Mantid::API::IndexToIndexMap* detIdToWiMap);
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(int numGroupsRead, int numInHists);

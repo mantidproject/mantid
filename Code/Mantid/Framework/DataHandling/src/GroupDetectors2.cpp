@@ -20,22 +20,11 @@
 #include <numeric>
 
 #include <Poco/StringTokenizer.h>
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/NodeList.h>
-#include <Poco/DOM/NodeIterator.h>
-#include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
-
-using Poco::XML::DOMParser;
-using Poco::XML::Document;
-using Poco::XML::Element;
-using Poco::XML::Node;
-using Poco::XML::NodeList;
-using Poco::XML::NodeIterator;
-using Poco::XML::NodeFilter;
+#include <Poco/SAX/ContentHandler.h>
+#include <Poco/SAX/Attributes.h>
+#include <Poco/SAX/SAXParser.h>
 
 namespace Mantid
 {
@@ -50,7 +39,6 @@ void GroupDetectors2::initDocs()
   this->setWikiSummary("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file. ");
   this->setOptionalMessage("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
 }
-
 
 using namespace Kernel;
 using namespace API;
@@ -340,93 +328,32 @@ void GroupDetectors2::processFile(std::string fname,
 void GroupDetectors2::processXMLFile(std::string fname,
   API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec)
 {
-  // tring to open the file the user told us exists, skip down 20 lines to find out what happens if we can read from it
-  g_log.debug() << "Opening input file ... " << fname;
-
-  // Set up the DOM parser and parse xml file
-  DOMParser pParser;
-  Document* pDoc;
-  try
-  {
-    pDoc = pParser.parse(fname);
-  }
-  catch(Poco::Exception& exc)
-  {
-    throw Kernel::Exception::FileError(exc.displayText() + ". Unable to parse File:", fname);
-  }
-  catch(...)
-  {
-    throw Kernel::Exception::FileError("Unable to parse File:" , fname);
-  }
-
-  // Get pointer to root element
-  Element* pRootElem = pDoc->documentElement();
-  if ( !pRootElem->hasChildNodes() )
-  {
-    g_log.error("XML file: " + fname + "contains no root element.");
-    throw Kernel::Exception::FileError("No root element in XML grouping file:" , fname);
-  }
-
-  NodeList* pNL_group = pRootElem->getElementsByTagName("group");
-  if ( pNL_group->length() == 0 )
-  {
-    g_log.error("XML group file: " + fname + "contains no group elements.");
-    throw Kernel::Exception::FileError("XML group file contains no group elements:" , fname);
-  }
-
-  // allow spectra number to spectra index look ups
   std::map<int,int> specs2index;
   const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(workspace->getAxis(1));
   if (axis)
   {
     axis->getSpectraIndexMap(specs2index);
   }
-
-  unsigned int numberGroups = pNL_group->length();
-
-  // DetectorIDtoWorkspaceMap is used to when creating the groups from an XML file listing
-  // DetectorIDs as opposed to Spectra numbers. This method on MatrixWorkspace recreates the
-  // map every time, so we want to call it outside of the loop and just pass the pointer in.
+    
   Mantid::API::IndexToIndexMap* detIdToWiMap = workspace->getDetectorIDToWorkspaceIndexMap(false);
 
-  Element* pElemTest = static_cast<Element*>(pNL_group->item(0));
-  Element* idTypeElement = pElemTest->getChildElement("ids");
-
-  std::string idtype = "";
-  if ( idTypeElement ) { idtype = "ids"; }
-  else
+  GroupXmlReader groupReader;
+  Poco::XML::SAXParser parser;
+  parser.setContentHandler(&groupReader);
+    
+  groupReader.setMaps(specs2index, detIdToWiMap, unUsedSpec);
+    
+  try
   {
-    idTypeElement = pElemTest->getChildElement("detids");
-    if ( idTypeElement ) { idtype = "detids"; }
+    parser.parse(fname);
+  }
+  catch ( Poco::Exception & e )
+  {
+    g_log.error() << "GroupDetectors XML error: " << e.displayText() << std::endl;
+    throw std::runtime_error("Error parsing XML file");
   }
 
-  if ( idtype == "" )
-  {
-    // throw and exit
-    g_log.error("XML group file: " + fname + "contains no <ids> elements.");
-    throw Kernel::Exception::FileError("XML group file contains no <ids> or <detids> elements:" , fname);
-  }
-
-  for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
-  {
-    Element* pGroupElem = static_cast<Element*>(pNL_group->item(iGroup));
-    Element* idlistElement = pGroupElem->getChildElement(idtype);
-    std::string ids = idlistElement->getAttribute("val");
-    if ( idtype == "ids" )
-    {
-      readSpectraIndexes(ids, specs2index, m_GroupSpecInds[iGroup], unUsedSpec, ",");
-    }
-    else
-    {
-      std::vector<int> output;
-      readDetectorIDs(ids, output, unUsedSpec, detIdToWiMap);
-      if ( ! output.empty() )
-      {
-        m_GroupSpecInds[iGroup] = output;
-      }
-    }
-  }
-  pNL_group->release();
+  groupReader.getItems(m_GroupSpecInds, unUsedSpec);
 }
 
 /** The function expects that the string passed to it contains an integer number,
@@ -575,34 +502,6 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
   }
 }
 
-/**
-*  This function reads DetectorID lists contained in XML File and expands any ranges signified by a '-'.
-*  It modifies the unUsedSpec map which is keeping track of which Workspace Indexes are contained in a
-*  group.
-*  @param line :: a line read from the file, we'll interpret this
-*  @param output :: the list of integers, with any ranges expanded
-*  @param unUsedSpec :: the list of spectra indexes that have been included in a group (so far)
-*  @param detIdToWiMap :: map taken from the input workspace linking detector IDs to workspace index
-*/
-void GroupDetectors2::readDetectorIDs(std::string line, std::vector<int> &output, std::vector<int> &unUsedSpec, Mantid::API::IndexToIndexMap* detIdToWiMap)
-{
-  Poco::StringTokenizer dataComment(line, ",", IGNORE_SPACES);
-  for( Poco::StringTokenizer::Iterator itr = dataComment.begin(); itr != dataComment.end(); ++itr )
-  {
-    std::vector<int> detIDs;
-    RangeHelper::getList(*itr, detIDs);
-    for ( unsigned int i = 0; i < detIDs.size(); i++ )
-    {
-      Mantid::API::IndexToIndexMap::iterator wi = detIdToWiMap->find(detIDs[i]);
-      if ( wi != detIdToWiMap->end() && unUsedSpec[wi->second] != USED )
-      {
-        unUsedSpec[wi->second] = USED;
-        output.push_back(wi->second);
-      }
-    }
-  }
-}
-
 /** Called while reading input file to report progress (doesn't update m_FracCompl ) and
 *  check for algorithm cancel messages, doesn't look at file size to estimate progress
 *  @param numGroupsRead :: number of groups read from the file so far (not the number of spectra)
@@ -724,7 +623,6 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
   g_log.debug() << name() << " created " << outIndex << " new grouped spectra\n";
   return outIndex;
 }
-
 /**
 *  Only to be used if the KeepUnGrouped property is true, moves the spectra that were not selected
 *  to be in a group to the end of the output spectrum
@@ -839,6 +737,146 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
   if ( *(line.end()-1) == '-' )
   {
     throw std::invalid_argument("'-' found at the end of a list, can't interpret range specification");
+  }
+}
+
+/**
+* This is the constructor for the GroupXmlReader class. It simply initialises the boolean member variables
+* and calls the parent's constructor.
+*/
+GroupDetectors2::GroupXmlReader::GroupXmlReader() : ContentHandler(), m_specNo(true), m_inGroup(false)
+{}
+
+/**
+* This method is called when the parser starts reading a document. It is used hear to ensure that the m_groups
+* and m_currentGroup members are clean to begin with.
+*/
+void GroupDetectors2::GroupXmlReader::startDocument()
+{
+  m_groups.clear();
+  m_currentGroup.clear();
+}
+/**
+* This function is called at the start of each element. It checks whether the element signals the start of a group,
+* the values in a group, or can be ignored.
+* @param localName the name of the element. for example in <group name="a">, this would be "group"
+* @param attr the attributes of the element, in the above example this would be an object linking "name" and "a".
+*/
+void GroupDetectors2::GroupXmlReader::startElement(const Poco::XML::XMLString &, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&, const Poco::XML::Attributes& attr)
+{
+  if ( localName == "group" )
+  {
+    m_inGroup = true;
+  }
+  else if ( m_inGroup && ( localName == "ids" || localName == "detids" ) )
+  {
+    m_specNo = ( localName == "ids" );
+    getIDNumbers(attr);
+  }
+}
+/**
+* This function is called at the end of each element. It only matters here when signifying the end of a group.
+* @param localName the name of the element ending. For example, in </group> this would be "group".
+*/
+void GroupDetectors2::GroupXmlReader::endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&)
+{
+  if ( m_inGroup && localName == "group" )
+  {
+    m_groups[m_groups.size()] = m_currentGroup;
+    m_currentGroup.clear();
+    m_inGroup = false;
+  }
+}
+/**
+* Provides the results that GroupDetectors requires from the XML file. A set of groups, and the vector detailing which spectra are / are not used.
+* @param map mapping of groups
+* @param unused vector where value represent whether the workspace index corresponding to that position in the vector has been used
+*/
+void GroupDetectors2::GroupXmlReader::getItems(storage_map & map, std::vector<int> & unused)
+{
+  map = m_groups;
+  unused = m_unused;
+}
+/**
+* Used by GroupDetectors to provide the maps that the parser needs to translate spectra number/detector id into workspace index.
+* @param spec map of spectra number to workspace index
+* @param det map of detector id to workspace index
+* @param unused vector where value represent whether the workspace index corresponding to that position in the vector has been used
+*/
+void GroupDetectors2::GroupXmlReader::setMaps(std::map<int,int> spec, Mantid::API::IndexToIndexMap* det, std::vector<int> & unused)
+{
+  m_specnTOwi = spec;
+  m_detidTOwi = det;
+  m_unused = unused;
+}
+/**
+* Parses string "val" values into a list of number, expanding any ranges, then converts those from either detector id/spectra number into
+* the correct workspace index.
+* @param attr attributes from the xml element
+*/
+void GroupDetectors2::GroupXmlReader::getIDNumbers(const Poco::XML::Attributes& attr)
+{
+  for ( int i = 0; i < attr.getLength(); ++i )
+  {
+    if ( attr.getLocalName(i) == "val" )
+    {
+      std::vector<int> idlist;
+      // Read from string list into std::vector<int> using Poco StringTokenizer
+      Poco::StringTokenizer list(attr.getValue(i), ",", Poco::StringTokenizer::TOK_TRIM);
+      for( Poco::StringTokenizer::Iterator itr = list.begin(); itr != list.end(); ++itr )
+      {
+        int id;
+        try
+        {
+          id = boost::lexical_cast<int>(*itr);
+          idlist.push_back(id);
+        }
+        catch ( boost::bad_lexical_cast & )
+        {
+          std::vector<int> temp;
+          RangeHelper::getList(*itr, temp);
+          for ( std::vector<int>::iterator it = temp.begin(); it != temp.end(); ++it )
+          {
+            idlist.push_back(*it);
+          }
+        }
+      }
+      for ( std::vector<int>::iterator itr = idlist.begin(); itr != idlist.end(); ++itr )
+      {
+        int id;
+        if ( m_specNo )
+        {
+          // Spectra No
+          std::map<int, int>::iterator ind = m_specnTOwi.find(*itr);
+          if ( ind == m_specnTOwi.end() )
+          {
+            continue;
+          }
+          else
+          {
+            id = ind->second;
+          }
+        }
+        else
+        {
+          // Detector ID
+          Mantid::API::IndexToIndexMap::iterator ind = m_detidTOwi->find(*itr);
+          if ( ind == m_detidTOwi->end() )
+          {
+            continue;
+          }
+          else
+          {
+            id = ind->second;
+          }
+        }
+        m_currentGroup.push_back(id);
+        if ( m_unused[id] != ( 1000 - INT_MAX ) )
+        {
+          m_unused[id] = ( 1000 - INT_MAX );
+        }
+      }
+    }
   }
 }
 
