@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -11,14 +12,20 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <map>
+#include <vector>
 
 using namespace Mantid;
+using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
 
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
 
-public:
+protected:
+
+  //=====================================================================================
+  //===================================== HELPER METHODS ================================
+  //=====================================================================================
 
   //-------------------------------------------------------------------------------------
   /** Generate an empty MDBox */
@@ -71,6 +78,66 @@ public:
     return new MDGridBox<MDEvent<nd>,nd>(out) ;
   }
 
+  //-------------------------------------------------------------------------------------
+  /** Recursively split an existing MDGridBox
+   *
+   * @param box :: box to split
+   * @param atRecurseLevel :: This is the recursion level at which we are
+   * @param recurseLimit :: this is where to spot
+   */
+  template<size_t nd>
+  void recurseSplit(MDGridBox<MDEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
+  {
+    typedef std::vector<IMDBox<MDEvent<nd>,nd> *> boxVector;
+    if (atRecurseLevel >= recurseLimit) return;
+
+    // Split all the contents
+    boxVector boxes;
+    boxes = box->getBoxes();
+    for (size_t i=0; i< boxes.size(); i++)
+      box->splitContents(i);
+
+    // Retrieve the contained MDGridBoxes
+    boxes = box->getBoxes();
+
+    // Go through them and split them
+    for (size_t i=0; i< boxes.size(); i++)
+    {
+      MDGridBox<MDEvent<nd>,nd> * containedbox = dynamic_cast<MDGridBox<MDEvent<nd>,nd> *>(boxes[i]);
+      if (containedbox)
+        recurseSplit(containedbox, atRecurseLevel+1, recurseLimit);
+    }
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  /** Generate a recursively gridded MDGridBox
+   *
+   * @param splitInto :: boxes split into this many boxes/side
+   * @param levels :: levels of splitting recursion (0=just the top level is split)
+   * @return
+   */
+  template<size_t nd>
+  MDGridBox<MDEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
+  {
+    // Split at 5 events
+    BoxController_sptr splitter(new BoxController(nd));
+    splitter->setSplitThreshold(5);
+    // Splits into splitInto x splitInto x ... boxes
+    splitter->setSplitInto(splitInto);
+    // Set the size to splitInto*1.0 in all directions
+    MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
+    for (size_t d=0; d<nd; d++)
+      box->setExtents(d, 0.0, splitInto*1.0);
+    // Split into the gridbox.
+    MDGridBox<MDEvent<nd>,nd> * gridbox = new MDGridBox<MDEvent<nd>,nd>(box);
+
+    // Now recursively split more
+    recurseSplit(gridbox, 0, levels);
+
+    return gridbox;
+  }
+
 
   //-------------------------------------------------------------------------------------
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
@@ -86,13 +153,20 @@ public:
   }
 
 
+
+  //=====================================================================================
+  //===================================== TEST METHODS ==================================
+  //=====================================================================================
+
+
+public:
+
   //-------------------------------------------------------------------------------------
   void test_MDBoxConstructor()
   {
     MDBox<MDEvent<1>,1> * b = makeMDBox1();
     TS_ASSERT_EQUALS( b->getNumDims(), 1);
     TS_ASSERT_EQUALS( b->getNPoints(), 0);
-    TS_ASSERT( b->willSplit(10) );
     TS_ASSERT_DELTA( b->getExtents(0).min, 0.0,  1e-5);
     TS_ASSERT_DELTA( b->getExtents(0).max, 10.0, 1e-5);
     delete b;
@@ -113,6 +187,8 @@ public:
     // Look overall; it has 10 points
     TS_ASSERT_EQUALS(g->getNumDims(), 1);
     TS_ASSERT_EQUALS(g->getNPoints(), 10);
+    // Its depth level should be 0 (same as parent)
+    TS_ASSERT_EQUALS(g->getDepth(), 0);
 
     // It has a BoxController
     TS_ASSERT( g->getBoxController() );
@@ -129,6 +205,8 @@ public:
       TS_ASSERT_EQUALS(box->getNPoints(), 1);
       MDEvent<1> ev = box->getEvents()[0];
       TS_ASSERT_DELTA(ev.getCenter(0), i*1.0 + 0.5, 1e-5);
+      // Its depth level should be 1 (deeper than parent)
+      TS_ASSERT_EQUALS(box->getDepth(), 1);
     }
 
     // Now we add 10 more events
@@ -142,6 +220,8 @@ public:
     }
   }
 
+
+  //-------------------------------------------------------------------------------------
   /** Helper function compares the extents of the given box */
   template<typename MDBOX>
   void extents_match(MDBOX box, size_t dim, double min, double max)
@@ -244,6 +324,9 @@ public:
       superbox->addEvent( MDEvent<2>(2.0, 2.0, centers) );
     }
 
+    // You must refresh the cache after adding individual events.
+    superbox->refreshCache();
+
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
     // Retrieve the 0th grid box
@@ -271,7 +354,51 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Fill a 10x10 gridbox with events*/
+  /** Gauge how fast addEvent is with several levels of gridding
+   * NOTE: DISABLED because it is slow.
+   * */
+  void xtest_addEvent_with_recursive_gridding_Performance()
+  {
+    // Make a 2D box split into 4, 4 levels deep. = 4^4^2 boxes at the bottom = 256^2 boxes.
+    size_t numSplit = 4;
+    for (size_t recurseLevels = 1; recurseLevels < 5; recurseLevels++)
+    {
+      std::cout << " --- Recursion Level " << recurseLevels << " --- " << std::endl;
+      Timer tim1;
+      double boxes_per_side = pow(numSplit*1.0, recurseLevels*1.0);
+      double spacing = (numSplit*1.0)/boxes_per_side;
+      // How many times to add the same event
+      size_t num_to_repeat = size_t(1e7 / (boxes_per_side*boxes_per_side));
+
+      MDGridBox<MDEvent<2>,2> * box = this->makeRecursiveMDGridBox<2>(numSplit, recurseLevels);
+      std::cout << tim1.elapsed() << " seconds to generate the " << boxes_per_side << "^2 boxes." << std::endl;
+
+      for (double x=0; x < numSplit; x += spacing)
+        for (double y=0; y < numSplit; y += spacing)
+        {
+          for (size_t i=0; i<num_to_repeat; i++)
+          {
+            double centers[2] = {x,y};
+            box->addEvent( MDEvent<2>(2.0, 2.0, centers) );
+          }
+        }
+      // You must refresh the cache after adding individual events.
+      box->refreshCache();
+
+      double sec = tim1.elapsed();
+      std::cout << sec << " seconds to add " << box->getNPoints() << " events. Each box had " << num_to_repeat << " events." << std::endl;
+      std::cout << "equals " << 1e6*sec/box->getNPoints() << " seconds per million events." << std::endl;
+    }
+
+  }
+
+
+
+  //-------------------------------------------------------------------------------------
+  /** Fill a 10x10 gridbox with events
+   *
+   * Tests that bad events are thrown out when using addEvents.
+   * */
   void test_addEvents_2D()
   {
     MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
@@ -287,6 +414,8 @@ public:
 
     size_t numbad;
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
+    // Get the right totals again
+    b->refreshCache();
     TS_ASSERT_EQUALS( numbad, 0);
     TS_ASSERT_EQUALS( b->getNPoints(), 100);
     TS_ASSERT_EQUALS( b->getSignal(), 100*2.0);
@@ -310,6 +439,8 @@ public:
         double centers[2] = {x,y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
+    // Get the right totals again
+    b->refreshCache();
     // All 4 points get rejected
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
     TS_ASSERT_EQUALS( numbad, 4);
@@ -320,61 +451,185 @@ public:
   }
 
 
-
   //-------------------------------------------------------------------------------------
-  /** Fill a 10x10 gridbox with events.
-   * Put enough events that they will need to recursively split
-   * into 10x10 boxes inside the 10x10 boxes (total of 10000 boxes with 1 event each).
+  /** Tests add_events with limits into the vectorthat bad events are thrown out when using addEvents.
    * */
-  void xtest_addEvents_2D_recursive_splitting()
+  void test_addEvents_start_stop()
   {
     MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
-
     std::vector< MDEvent<2> > events;
 
     // Make an event in the middle of each box
-    for (double x=0.05; x < 10; x += 0.1)
-      for (double y=0.05; y < 10; y += 0.1)
+    for (double x=0.5; x < 10; x += 1.0)
+      for (double y=0.5; y < 10; y += 1.0)
       {
         double centers[2] = {x,y};
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
 
     size_t numbad;
-    TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events, 50, 60 ); );
+    // Get the right totals again
+    b->refreshCache();
     TS_ASSERT_EQUALS( numbad, 0);
-    TS_ASSERT_EQUALS( b->getNPoints(), 10000);
-    TS_ASSERT_EQUALS( b->getSignal(), 10000*2.0);
-    TS_ASSERT_EQUALS( b->getErrorSquared(), 10000*2.0);
-
-    // Get all the boxes contained
-    std::vector<IMDBox<MDEvent<2>,2>*> boxes = b->getBoxes();
-    TS_ASSERT_EQUALS( boxes.size(), 100);
-    for (size_t i=0; i < boxes.size(); i++)
-    {
-      TS_ASSERT_EQUALS( boxes[i]->getNPoints(), 100);
-      TS_ASSERT_EQUALS( boxes[i]->getSignal(), 100*2.0);
-      TS_ASSERT_EQUALS( boxes[i]->getErrorSquared(), 100*2.0);
-
-      // --- Now look recursively -----
-      MDGridBox<MDEvent<2>,2> * b2 = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(boxes[i]);
-      TSM_ASSERT("Box has not split into MDGridBox", b2);
-      if (b2)
-      {
-        std::vector<IMDBox<MDEvent<2>,2>*> boxes2 = b2->getBoxes();
-        TS_ASSERT_EQUALS( boxes2.size(), 100);
-        for (size_t i=0; i < boxes2.size(); i++)
-        {
-          TS_ASSERT_EQUALS( boxes[i]->getNPoints(), 1);
-          TS_ASSERT_EQUALS( boxes[i]->getSignal(), 2.0);
-          TS_ASSERT_EQUALS( boxes[i]->getErrorSquared(), 2.0);
-        }
-      }
-      else
-        break;
-    }
+    TS_ASSERT_EQUALS( b->getNPoints(), 10);
+    TS_ASSERT_EQUALS( b->getSignal(), 10*2.0);
+    TS_ASSERT_EQUALS( b->getErrorSquared(), 10*2.0);
   }
 
+  //-------------------------------------------------------------------------------------
+  /** Test that adding events (as vectors) in parallel does not cause
+   * segfaults or incorrect totals.
+   * */
+  void test_addEvents_inParallel()
+  {
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
+    size_t num_repeat = 1000;
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (size_t i=0; i < num_repeat; i++)
+    {
+      std::vector< MDEvent<2> > events;
+      // Make an event in the middle of each box
+      for (double x=0.5; x < 10; x += 1.0)
+        for (double y=0.5; y < 10; y += 1.0)
+        {
+          double centers[2] = {x,y};
+          events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+        }
+      TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+    }
+    // Get the right totals again
+    b->refreshCache();
+    TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
+    TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
+    TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+  }
+
+
+  //-------------------------------------------------------------------------------------
+  /** Test the routine that auto-splits MDBoxes into MDGridBoxes recursively.
+   * It tests the max_depth of splitting too, because there are numerous
+   * repeated events at exactly the same position = impossible to separate further.
+   * */
+  void test_splitAllIfNeeded()
+  {
+    typedef MDGridBox<MDEvent<2>,2> gbox_t;
+    typedef MDBox<MDEvent<2>,2> box_t;
+    typedef IMDBox<MDEvent<2>,2> ibox_t;
+
+    gbox_t * b = makeMDGridBox<2>();
+    b->getBoxController()->m_SplitThreshold = 100;
+    b->getBoxController()->m_maxDepth = 4;
+
+    // Make a 1000 events at exactly the same point
+    size_t num_repeat = 1000;
+    std::vector< MDEvent<2> > events;
+    for (size_t i=0; i < num_repeat; i++)
+    {
+      // Make an event in the middle of each box
+      double centers[2] = {1e-10, 1e-10};
+      events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+    }
+    TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+
+    // Split into sub-grid boxes
+    TS_ASSERT_THROWS_NOTHING( b->splitAllIfNeeded(); )
+
+    // Dig recursively into the gridded box hierarchies
+    std::vector<ibox_t*> boxes;
+    size_t expected_depth = 0;
+    while (b)
+    {
+      expected_depth++;
+      boxes = b->getBoxes();
+
+      // Get the 0th box
+      b = dynamic_cast<gbox_t*>(boxes[0]);
+
+      // The 0-th box is a MDGridBox (it was split)
+      // (though it is normal for b to be a MDBox when you reach the max depth)
+      if (expected_depth < 4)
+      { TS_ASSERT( b ) }
+
+      // The 0-th box has all the points
+      TS_ASSERT_EQUALS( boxes[0]->getNPoints(), num_repeat);
+      // The 0-th box is at the expected_depth
+      TS_ASSERT_EQUALS( boxes[0]->getDepth(), expected_depth);
+
+      // The other boxes have nothing
+      TS_ASSERT_EQUALS( boxes[1]->getNPoints(), 0);
+      // The other box is a MDBox (it was not split)
+      TS_ASSERT( dynamic_cast<box_t*>(boxes[1]) )
+    }
+
+    // We went this many levels (and no further) because recursion depth is limited
+    TS_ASSERT_EQUALS(boxes[0]->getDepth(), 4);
+
+
+//    // Get the right totals again
+//    b->refreshCache();
+//    TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
+//    TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
+//    TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+  }
+
+  //-------------------------------------------------------------------------------------
+  /** Fill a 10x10 gridbox with events
+   *
+   * Tests that bad events are thrown out when using addEvents.
+   * */
+  void test_addManyEvents()
+  {
+    typedef MDGridBox<MDEvent<2>,2> box_t;
+    box_t * b = makeMDGridBox<2>();
+    box_t * subbox;
+
+    // Manually set some of the tasking parameters
+    b->getBoxController()->m_addingEvents_eventsPerTask = 1000;
+    b->getBoxController()->m_addingEvents_numTasksPerBlock = 20;
+    b->getBoxController()->m_SplitThreshold = 100;
+    b->getBoxController()->m_maxDepth = 4;
+
+    std::vector< MDEvent<2> > events;
+    size_t num_repeat = 1000;
+    // Make an event in the middle of each box
+    for (double x=0.0005; x < 10; x += 1.0)
+      for (double y=0.0005; y < 10; y += 1.0)
+      {
+        for (size_t i=0; i < num_repeat; i++)
+        {
+          double centers[2] = {x, y};
+          events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+        }
+      }
+    TS_ASSERT_EQUALS( events.size(), 100*num_repeat);
+
+    size_t numbad = 0;
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events ); );
+    TS_ASSERT_EQUALS( numbad, 0);
+    TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
+    TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
+    TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+
+    std::vector<IMDBox<MDEvent<2>,2>*> boxes = b->getBoxes();
+    TS_ASSERT_EQUALS( boxes[0]->getNPoints(), num_repeat);
+    // The box should have been split itself into a gridbox, because 1000 events > the split threshold.
+    subbox = dynamic_cast<box_t *>(boxes[0]);
+    TS_ASSERT( subbox ); if (!subbox) return;
+    // The sub box is at a depth of 1.
+    TS_ASSERT_EQUALS( subbox->getDepth(), 1);
+
+    // And you can keep recursing into the box.
+    boxes = subbox->getBoxes();
+    subbox = dynamic_cast<box_t *>(boxes[0]);
+    TS_ASSERT( subbox ); if (!subbox) return;
+    TS_ASSERT_EQUALS( subbox->getDepth(), 2);
+
+    // And so on (this type of recursion was checked in test_splitAllIfNeeded()
+
+
+  }
 
 };
 

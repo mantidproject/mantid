@@ -23,9 +23,12 @@ public:
   void test_willSplit()
   {
     BoxController sc(2);
+    sc.m_maxDepth = 4;
     sc.setSplitThreshold(10);
-    TS_ASSERT( sc.willSplit(5,10) );
+    TS_ASSERT( sc.willSplit(100,3) );
+    TS_ASSERT( !sc.willSplit(100,4) );
     TS_ASSERT( !sc.willSplit(2,3) );
+    TS_ASSERT( !sc.willSplit(100,5) );
   }
 
   void test_splitInto()

@@ -35,7 +35,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Default constructor.
      */
-    IMDBox() : m_signal(0.0), m_errorSquared(0.0)
+    IMDBox() : m_signal(0.0), m_errorSquared(0.0), m_depth(0)
     {
     }
 
@@ -52,11 +52,8 @@ namespace MDEvents
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
-    /// Return true if the box should split into a gridded box.
-    virtual bool willSplit(size_t num) const = 0;
-
     /// Add a single event
-    virtual size_t addEvent(const MDE & point) = 0;
+    virtual void addEvent(const MDE & point) = 0;
 
     /// Add several events
     virtual size_t addEvents(const std::vector<MDE> & events) = 0;
@@ -103,6 +100,14 @@ namespace MDEvents
       return m_errorSquared;
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /** For testing, mostly: return the recursion depth of this box.
+     * e.g. 1: means this box is in a MDGridBox, which is the top level.
+     *      2: this box's parent MDGridBox is itself a MDGridBox. */
+    size_t getDepth()
+    {
+      return m_depth;
+    }
 
   protected:
 
@@ -120,6 +125,8 @@ namespace MDEvents
     /// The box splitting controller
     BoxController_sptr m_BoxController;
 
+    /// Recursion depth
+    size_t m_depth;
 
   public:
     /// Convenience typedef for a shared pointer to a this type of class

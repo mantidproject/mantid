@@ -17,11 +17,12 @@ namespace MDEvents
   /** ctor
    * @param controller :: BoxController that controls how boxes split
    */
-  TMDE(MDBox)::MDBox(BoxController_sptr controller)
+  TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
   {
     if (controller->getNDims() != nd)
       throw std::invalid_argument("MDBox::ctor(): controller passed has the wrong number of dimensions.");
     this->m_BoxController = controller;
+    this->m_depth = depth;
   }
 
   //-----------------------------------------------------------------------------------------------
@@ -76,48 +77,44 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Add a MDEvent to the box.
    * @param event :: reference to a MDEvent to add.
-   * @return the number of events that were rejected (because of being out of bounds)
    * */
   TMDE(
-  size_t MDBox)::addEvent( const MDE & event)
+  void MDBox)::addEvent( const MDE & event)
   {
+    dataMutex.lock();
     this->data.push_back(event);
 
     // Keep the running total of signal and error
     this->m_signal += event.getSignal();
     this->m_errorSquared += event.getErrorSquared();
-
-    return 0;
+    dataMutex.unlock();
   }
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add several events
+  /** Add several events.
+   *
    * @param events :: vector of events to be copied.
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
   size_t MDBox)::addEvents(const std::vector<MDE> & events)
   {
+    dataMutex.lock();
+    // Copy all the events
     this->data.insert(this->data.end(), events.begin(), events.end());
-    //TODO: Running total of signal/error
 
+    //Running total of signal/error
+    for(typename std::vector<MDE>::const_iterator it = events.begin(); it != events.end(); it++)
+    {
+      this->m_signal += it->getSignal();
+      this->m_errorSquared += it->getErrorSquared();
+    }
+
+    dataMutex.unlock();
     return 0;
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Return true if the box would need to split into a MDGridBox to handle the new events
-   * @param num :: number of events that would be added
-   * @return true if the box should split
-   */
-  TMDE(
-  bool MDBox)::willSplit(size_t num) const
-  {
-    if (!this->m_BoxController)
-      return false;
-    return this->m_BoxController->willSplit(this->data.size(), num);
-  }
 
 
 

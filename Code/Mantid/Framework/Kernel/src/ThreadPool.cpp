@@ -22,7 +22,7 @@ namespace Kernel
   /** Constructor
    *
    * @param scheduler :: an instance of a ThreadScheduler to schedule tasks.
-   *        NOTE: The ThreadPool destructor will delete this.
+   *        NOTE: The ThreadPool destructor will delete this ThreadScheduler.
    * @param numThreads :: number of cores to use; default = 0, meaning auto-detect all
    *        available physical cores.
    */

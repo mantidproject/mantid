@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
@@ -35,7 +36,7 @@ namespace MDEvents
   public:
     MDBox();
 
-    MDBox(BoxController_sptr splitter);
+    MDBox(BoxController_sptr splitter, const size_t depth = 0);
 
     void clear();
 
@@ -47,17 +48,18 @@ namespace MDEvents
 
     std::vector< MDE > * getEventsCopy();
 
-    size_t addEvent(const MDE & point);
+    void addEvent(const MDE & point);
 
     size_t addEvents(const std::vector<MDE> & events);
-
-    bool willSplit(size_t num) const;
 
   protected:
 
     /** Vector of MDEvent's, in no particular order.
      * */
     std::vector< MDE > data;
+
+    /// Mutex for modifying the event list
+    Mantid::Kernel::Mutex dataMutex;
 
 
   public:
