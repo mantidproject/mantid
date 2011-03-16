@@ -7,8 +7,6 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <memory>
 #include <map>
 

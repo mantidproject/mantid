@@ -7,8 +7,6 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/BoxController.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <memory>
 #include <map>
 

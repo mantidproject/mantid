@@ -8,8 +8,6 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/BoxController.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <memory>
 #include <map>
 #include <vector>

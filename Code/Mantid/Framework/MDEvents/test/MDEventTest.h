@@ -6,8 +6,6 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Timer.h"
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 #include <memory>
 #include <map>
 
