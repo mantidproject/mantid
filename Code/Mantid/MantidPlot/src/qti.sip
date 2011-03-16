@@ -29,7 +29,7 @@
  *                                                                         *
  ***************************************************************************/
 
-%Module qti 0
+%Module(name=qti, version=0)
 %Import QtCore/QtCoremod.sip
 %Import QtGui/QtGuimod.sip
 
@@ -572,7 +572,7 @@ public:
   void removeTitle();
 
   LegendWidget* newLegend(const QString& = QString());
-  void setLegend(const QString&) /NoDerived/;
+  void setLegend(const QString&);
 %MethodCode
   sipCpp->legend()->setText(*a0);
 %End
@@ -875,7 +875,7 @@ public:
   MDIWindowList windowsList() /PyName=windows/;
 
   // folders
-  Folder *activeFolder() /NoDerived/;
+  Folder *activeFolder();
 %MethodCode
   sipRes = sipCpp->current_folder;
 %End

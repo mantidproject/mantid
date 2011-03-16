@@ -185,8 +185,11 @@ CONFIG(debug, debug|release) {
 
 ##################### Windows ###############################################
 win32 {
-  LIBPATH += C:/Python25/libs
- 
+  PYTHONPREFIX=$$system(python -c "\"import sys; print sys.prefix\"")
+  PYTHONLIBPATH=$$join(PYTHONPREFIX,,,\\libs)
+  message(Python lib path $${PYTHONLIBPATH})
+  
+  LIBPATH += $${PYTHONLIBPATH}
   CONFIG(build64)  {
     THIRD_PARTY = ../../Third_Party/lib/win64
     message(SETTING FOR x64)
@@ -815,51 +818,6 @@ contains(SCRIPTING_LANGS, Python) {
   }
 
 ##################### SIP generated files #####################
-
-#  HEADERS += $${SIP_DIR}/sipqtiApplicationWindow.h\
-#             $${SIP_DIR}/sipqtiGraph.h\
-#             $${SIP_DIR}/sipqtiGraph3D.h\
-#             $${SIP_DIR}/sipqtiArrowMarker.h\
-#			 $${SIP_DIR}/sipqtiImageMarker.h\
-#			 $${SIP_DIR}/sipqtiLegendWidget.h\
-#			 $${SIP_DIR}/sipqtiGrid.h\
-#             $${SIP_DIR}/sipqtiMultiLayer.h\
-#             $${SIP_DIR}/sipqtiTable.h\
-#             $${SIP_DIR}/sipqtiMatrix.h\
-#             $${SIP_DIR}/sipqtiMdiSubWindow.h\
-#             $${SIP_DIR}/sipqtiNote.h\
-#             $${SIP_DIR}/sipqtiPythonScript.h\
-#             $${SIP_DIR}/sipqtiPythonScripting.h\
-#             $${SIP_DIR}/sipqtiFolder.h\
-#             $${SIP_DIR}/sipqtiQList.h\
-#             $${SIP_DIR}/sipqtiFit.h \
-#             $${SIP_DIR}/sipqtiExponentialFit.h \
-#             $${SIP_DIR}/sipqtiTwoExpFit.h \
-#             $${SIP_DIR}/sipqtiThreeExpFit.h \
-#             $${SIP_DIR}/sipqtiSigmoidalFit.h \
-#			 $${SIP_DIR}/sipqtiLogisticFit.h \
-#             $${SIP_DIR}/sipqtiGaussAmpFit.h \
-#             $${SIP_DIR}/sipqtiLorentzFit.h \
-#             $${SIP_DIR}/sipqtiNonLinearFit.h \
-#             $${SIP_DIR}/sipqtiPluginFit.h \
-#             $${SIP_DIR}/sipqtiMultiPeakFit.h \
-#             $${SIP_DIR}/sipqtiPolynomialFit.h \
-#             $${SIP_DIR}/sipqtiLinearFit.h \
-#             $${SIP_DIR}/sipqtiGaussFit.h \
-#             $${SIP_DIR}/sipqtiFilter.h \
-#             $${SIP_DIR}/sipqtiDifferentiation.h \
-#             $${SIP_DIR}/sipqtiIntegration.h \
-#			 $${SIP_DIR}/sipqtiInterpolation.h \
-#			 $${SIP_DIR}/sipqtiSmoothFilter.h \
-#			 $${SIP_DIR}/sipqtiFFTFilter.h \
-#			 $${SIP_DIR}/sipqtiFFT.h \
-#			 $${SIP_DIR}/sipqtiCorrelation.h \
-#			 $${SIP_DIR}/sipqtiConvolution.h \
-#			 $${SIP_DIR}/sipqtiDeconvolution.h \
-#             $${SIP_DIR}/sipqtiMantidMatrix.h\
-#             $${SIP_DIR}/sipqtiMantidUI.h\
-#             $${SIP_DIR}/sipqtiInstrumentWindow.h
-
 
   SOURCES += $${SIP_DIR}/sipqticmodule.cpp\
              $${SIP_DIR}/sipqtiApplicationWindow.cpp\
