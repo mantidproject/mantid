@@ -45,11 +45,11 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Unwrap2 : public API::Algorithm
+class DLLExport UnwrapSNS : public API::Algorithm
 {
 public:
-  Unwrap2();
-  virtual ~Unwrap2();
+  UnwrapSNS();
+  virtual ~UnwrapSNS();
   virtual const std::string name() const;
   virtual int version() const;
   virtual const std::string category() const;

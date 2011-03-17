@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/Unwrap2.h"
+#include "MantidAlgorithms/UnwrapSNS.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/UnitFactory.h"
@@ -12,10 +12,10 @@ namespace Mantid
 namespace Algorithms
 {
 
-DECLARE_ALGORITHM(Unwrap2)
+DECLARE_ALGORITHM(UnwrapSNS)
 
 /// Sets documentation strings for this algorithm
-void Unwrap2::initDocs()
+void UnwrapSNS::initDocs()
 {
   this->setWikiSummary("Takes an input [[workspace]] that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range. ");
   this->setOptionalMessage("Takes an input workspace that contains 'raw' data, unwraps the data according to the reference flightpath provided and converts the units to wavelength. The output workspace will have common bins in the maximum theoretical wavelength range.");
@@ -32,11 +32,11 @@ using Kernel::Exception::NotFoundError;
 using std::size_t;
 
 /// Default constructor
-Unwrap2::Unwrap2():m_progress(NULL)
+UnwrapSNS::UnwrapSNS():m_progress(NULL)
 {}
 
 /// Destructor
-Unwrap2::~Unwrap2()
+UnwrapSNS::~UnwrapSNS()
 {
   if(m_progress)
     delete m_progress;
@@ -44,25 +44,25 @@ Unwrap2::~Unwrap2()
 }
 
 /// Algorithm's name for identification overriding a virtual method
-const std::string Unwrap2::name() const
+const std::string UnwrapSNS::name() const
 {
-  return "Unwrap2";
+  return "UnwrapSNS";
 }
 
 /// Algorithm's version for identification overriding a virtual method
-int Unwrap2::version() const
+int UnwrapSNS::version() const
 {
   return 2;
 }
 
 /// Algorithm's category for identification overriding a virtual method
-const std::string Unwrap2::category() const
+const std::string UnwrapSNS::category() const
 {
   return "Units";
 }
 
 /// Initialisation method
-void Unwrap2::init()
+void UnwrapSNS::init()
 {
   CompositeValidator<> *wsValidator = new CompositeValidator<>;
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
@@ -101,7 +101,7 @@ void Unwrap2::init()
  *  @throw Kernel::Exception::InstrumentDefinitionError if detector, source or sample positions cannot be calculated
  *
  */
-void Unwrap2::exec()
+void UnwrapSNS::exec()
 {
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
@@ -214,7 +214,7 @@ void Unwrap2::exec()
   m_inputWS.reset();
 }
 
-void Unwrap2::execEvent()
+void UnwrapSNS::execEvent()
 {
   // set up the output workspace
   MatrixWorkspace_sptr matrixOutW = this->getProperty("OutputWorkspace");
@@ -283,7 +283,7 @@ void Unwrap2::execEvent()
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained
  */
-double Unwrap2::calculateFlightpath(const size_t& spectrum, bool& isMonitor) const
+double UnwrapSNS::calculateFlightpath(const size_t& spectrum, bool& isMonitor) const
 {
   double Ld = -1.0;
   try
@@ -313,7 +313,7 @@ double Unwrap2::calculateFlightpath(const size_t& spectrum, bool& isMonitor) con
   return Ld;
 }
 
-size_t Unwrap2::unwrapX(const MantidVec& datain, MantidVec& dataout, const double& Ld)
+size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const double& Ld)
 {
 //  std::cout << "datain[" << datain.size() << "] ";
 
