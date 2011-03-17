@@ -277,7 +277,7 @@ namespace ComponentCreationHelper
     boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
     const double cylRadius(0.004);
-    const double cylHeight(0.004);
+    const double cylHeight(0.0002);
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
 
