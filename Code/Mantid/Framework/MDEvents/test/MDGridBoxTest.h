@@ -485,7 +485,7 @@ public:
     size_t num_repeat = 1000;
 
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (size_t i=0; i < num_repeat; i++)
+    for (int i=0; i < num_repeat; i++)
     {
       std::vector< MDEvent<2> > events;
       // Make an event in the middle of each box
