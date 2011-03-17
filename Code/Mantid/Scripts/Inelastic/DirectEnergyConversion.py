@@ -96,14 +96,24 @@ class DirectEnergyConversion(object):
           print_results - If True then the results are printed to std out
           inst_name  - The name of the instrument to perform the diagnosis.
                        If it is not provided then the default instrument is used (default = None)
-          """
-        self.spectra_masks = \
-                           diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
-                                                tiny, large, median_lo, median_hi, signif,
-                                                bkgd_threshold, bkgd_range, variation,
-                                                bleed_test, bleed_maxrate, bleed_pixels,                                                
-                                                hard_mask, print_results, self.instr_name)
-        return self.spectra_masks
+        """
+        lhs_names = lhs_info('names')
+        if len(lhs_names) > 0:
+            var_name = lhs_names[0]
+        else:
+            var_name = None
+          
+        __diagnostic_mask = diagnostics.diagnose(white_run, sample_run, other_white, remove_zero,
+                                        tiny, large, median_lo, median_hi, signif,
+                                        bkgd_threshold, bkgd_range, variation,
+                                        bleed_test, bleed_maxrate, bleed_pixels,                                              
+                                        hard_mask, print_results, self.instr_name)
+        if var_name is not None:
+            result = RenameWorkspace(str(__diagnostic_mask), var_name).workspace()
+        else:
+            result = __diagnostic_mask
+        self.spectra_masks = result
+        return result
     
     def do_white(self, white_run, spectra_masks, map_file): 
         """

@@ -74,7 +74,12 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     ##
     ## Accumulate the masking on this workspace
     ##
-    diag_total_mask = 'diag_total_mask'
+    # What shall we call the output
+    lhs_names = lhs_info('names')
+    if len(lhs_names) > 0:
+        diag_total_mask = lhs_names[0]
+    else:
+        diag_total_mask = 'diag_total_mask'
 
     ##
     ## White beam Test
