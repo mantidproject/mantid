@@ -539,8 +539,9 @@ public:
     }
     TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
 
+
     // Split into sub-grid boxes
-    TS_ASSERT_THROWS_NOTHING( b->splitAllIfNeeded(); )
+    TS_ASSERT_THROWS_NOTHING( b->splitAllIfNeeded(NULL); )
 
     // Dig recursively into the gridded box hierarchies
     std::vector<ibox_t*> boxes;
@@ -571,13 +572,60 @@ public:
 
     // We went this many levels (and no further) because recursion depth is limited
     TS_ASSERT_EQUALS(boxes[0]->getDepth(), 4);
+  }
 
 
-//    // Get the right totals again
-//    b->refreshCache();
-//    TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
-//    TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
-//    TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+  /** This test splits a large number of events, and uses a ThreadPool
+   * to use all cores.
+   */
+  void test_splitAllIfNeeded_usingThreadPool()
+  {
+    typedef MDGridBox<MDEvent<2>,2> gbox_t;
+    typedef MDBox<MDEvent<2>,2> box_t;
+    typedef IMDBox<MDEvent<2>,2> ibox_t;
+
+    gbox_t * b = makeMDGridBox<2>();
+    b->getBoxController()->m_SplitThreshold = 100;
+    b->getBoxController()->m_maxDepth = 4;
+
+    // Make a 1000 events in each sub-box
+    size_t num_repeat = 1000;
+    if (DODEBUG) num_repeat = 2000;
+
+    Timer tim;
+    if (DODEBUG) std::cout << "Adding " << num_repeat*100 << " events...\n";
+
+    std::vector< MDEvent<2> > events;
+    for (double x=0.5; x < 10; x += 1.0)
+      for (double y=0.5; y < 10; y += 1.0)
+      {
+        double centers[2] = {x,y};
+        for (size_t i=0; i < num_repeat; i++)
+        {
+          // Make an event in the middle of each box
+          events.push_back( MDEvent<2>(2.0, 2.0, centers) );
+        }
+      }
+    TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
+    if (DODEBUG) std::cout << "Adding events done in " << tim.elapsed() << "!\n";
+
+    // Split those boxes in parallel.
+    ThreadSchedulerFIFO * ts = new ThreadSchedulerFIFO();
+    ThreadPool tp(ts);
+    b->splitAllIfNeeded(ts);
+    tp.joinAll();
+
+    if (DODEBUG) std::cout << "Splitting events done in " << tim.elapsed() << " sec.\n";
+
+    // Now check the results. Each sub-box should be MDGridBox and have that many events
+    std::vector<ibox_t*> boxes = b->getBoxes();
+    TS_ASSERT_EQUALS(boxes.size(), 100);
+    for (size_t i=0; i<boxes.size(); i++)
+    {
+      TS_ASSERT_EQUALS( boxes[i]->getNPoints(), num_repeat );
+      TS_ASSERT( dynamic_cast<gbox_t *>(boxes[i]) );
+    }
+
   }
 
   //-------------------------------------------------------------------------------------
@@ -649,7 +697,7 @@ public:
     if (!DODEBUG) return;
 
     ProgressText * prog = new ProgressText(0.0, 1.0, 10, true);
-    prog->setNotifyStep(0.00001); //Notify always
+    prog->setNotifyStep(0.5); //Notify more often
 
     typedef MDGridBox<MDEvent<2>,2> box_t;
     box_t * b = makeMDGridBox<2>();

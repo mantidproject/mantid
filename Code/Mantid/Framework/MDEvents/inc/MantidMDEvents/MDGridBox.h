@@ -9,6 +9,7 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidKernel/ThreadScheduler.h"
 
 namespace Mantid
 {
@@ -53,9 +54,9 @@ namespace MDEvents
 
     size_t addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog = NULL);
 
-    void splitContents(size_t index);
+    void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
-    void splitAllIfNeeded();
+    void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get 9a copy of) the vector of boxes */

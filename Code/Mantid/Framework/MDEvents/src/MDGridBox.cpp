@@ -1,6 +1,7 @@
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -224,9 +225,11 @@ namespace MDEvents
    *
    * @param index :: index into the boxes vector.
    *        Warning: No bounds check is made, don't give stupid values!
+   * @param ts :: optional ThreadScheduler * that will be used to parallelize
+   *        recursive splitting. Set to NULL for no recursive splitting.
    */
   TMDE(
-  void MDGridBox)::splitContents(size_t index)
+  void MDGridBox)::splitContents(size_t index, ThreadScheduler * ts)
   {
     // You can only split it if it is a MDBox (not MDGridBox).
     MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[index]);
@@ -237,17 +240,23 @@ namespace MDEvents
     delete boxes[index];
     // And now we have a gridded box instead of a boring old regular box.
     boxes[index] = gridbox;
+
+    if (ts)
+    {
+      // Create a task to split the newly create MDGridBox.
+      ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridbox, ts) ) );
+    }
   }
 
   //-----------------------------------------------------------------------------------------------
   /** Goes through all the sub-boxes and splits them if they contain
    * enough events to be worth it.
    *
-   * @param index :: index into the boxes vector.
-   *        Warning: No bounds check is made, don't give stupid values!
+   * @param ts :: optional ThreadScheduler * that will be used to parallelize
+   *        recursive splitting. Set to NULL to do it serially.
    */
   TMDE(
-  void MDGridBox)::splitAllIfNeeded()
+  void MDGridBox)::splitAllIfNeeded(ThreadScheduler * ts)
   {
     for (size_t i=0; i < numBoxes; ++i)
     {
@@ -257,15 +266,25 @@ namespace MDEvents
         // Plain MD-Box. Does it need to split?
         if (this->m_BoxController->willSplit(box->getNPoints(), box->getDepth() ))
         {
-          //std::cout << "Splitting box at depth " << box->getDepth() << "\n";
           // The MDBox needs to split into a grid box.
-          MDGridBox<MDE, nd> * gridBox = new MDGridBox<MDE, nd>(box);
-          // Replace in the array
-          boxes[i] = gridBox;
-          // Delete the old box
-          delete box;
-          // Now recursively check if this NEW grid box's contents should be split too
-          gridBox->splitAllIfNeeded();
+          if (!ts)
+          {
+            // ------ Perform split serially (no ThreadPool) ------
+            MDGridBox<MDE, nd> * gridBox = new MDGridBox<MDE, nd>(box);
+            // Replace in the array
+            boxes[i] = gridBox;
+            // Delete the old box
+            delete box;
+            // Now recursively check if this NEW grid box's contents should be split too
+            gridBox->splitAllIfNeeded(NULL);
+          }
+          else
+          {
+            // ------ Perform split in parallel (using ThreadPool) ------
+            // So we create a task to split this MDBox,
+            // Task is : this->splitContents(i, ts);
+            ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitContents, &*this, i, ts) ) );
+          }
         }
       }
       else
@@ -275,7 +294,7 @@ namespace MDEvents
         if (gridBox)
         {
           // Now recursively check if this old grid box's contents should be split too
-          gridBox->splitAllIfNeeded();
+          gridBox->splitAllIfNeeded(ts);
         }
       }
     }
@@ -411,7 +430,7 @@ namespace MDEvents
       //Since the costs are not known ahead of time, use a simple FIFO buffer.
       ThreadScheduler * ts = new ThreadSchedulerFIFO();
       // Create the threadpool
-      ThreadPool tp(ts, 1);
+      ThreadPool tp(ts);
 
       // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
       for (size_t i = 0; i < numTasksPerBlock; i++)
@@ -440,11 +459,18 @@ namespace MDEvents
       tp.joinAll();
 //      std::cout << "... block took " << tim.elapsed() << " secs.\n";
 
+
+      //Create a threadpool for splitting.
+      ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
+      ThreadPool tp_splitter(ts_splitter);
+
       //Now, shake out all the sub boxes and split those if needed
-//      std::cout << "Starting splitAllIfNeeded().\n";
+      //std::cout << "\nStarting splitAllIfNeeded().\n";
       if (prog) prog->report("Splitting MDBox'es.");
-      this->splitAllIfNeeded();
-//      std::cout << "... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
+
+      this->splitAllIfNeeded(ts_splitter);
+      tp_splitter.joinAll();
+      //std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
     }
 
     // Refresh the counts, now that we are all done.
