@@ -17,23 +17,35 @@ DECLARE_ALGORITHM(Max)
 using namespace Kernel;
 using namespace API;
 
+/// Set the documentation strings
+void Max::initDocs()
+{
+  this->setWikiSummary("Takes a 2D workspace as input and find the maximum in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+  this->setOptionalMessage("Takes a 2D workspace as input and find the maximum in each 1D spectrum. The algorithm creates a new 1D workspace containing all maxima as well as their X boundaries and error. This is used in particular for single crystal as a quick way to find strong peaks.");
+}
 
 /** Initialisation method.
  *
  */
 void Max::init()
 {
-  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>));
-  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output));
+  declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,new HistogramValidator<>),
+      "The name of the Workspace2D to take as input");
+  declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
+      "The name of the workspace in which to store the result");
 
-  declareProperty("RangeLower",EMPTY_DBL());
-  declareProperty("RangeUpper",EMPTY_DBL());
+  declareProperty("RangeLower",EMPTY_DBL(),
+      "The X value to search from (default 0)");
+  declareProperty("RangeUpper",EMPTY_DBL(),
+      "The X value to search to (default max)");
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("StartWorkspaceIndex",0, mustBePositive);
+  declareProperty("StartWorkspaceIndex",0, mustBePositive,
+      "Start spectrum number (default 0)");
   // As the property takes ownership of the validator pointer, have to take care to pass in a unique
   // pointer to each property.
-  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone());
+  declareProperty("EndWorkspaceIndex",EMPTY_INT(), mustBePositive->clone(),
+      "End spectrum number  (default max)");
 }
 
 /** Executes the algorithm

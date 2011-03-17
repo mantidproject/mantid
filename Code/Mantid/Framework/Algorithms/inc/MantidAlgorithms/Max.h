@@ -65,6 +65,7 @@ public:
   virtual const std::string category() const { return "General";}
 
 private:
+  void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();
