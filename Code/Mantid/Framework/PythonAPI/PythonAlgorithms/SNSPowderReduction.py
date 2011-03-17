@@ -206,6 +206,11 @@ class SNSPowderReduction(PythonAlgorithm):
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
+        if self._instrument == "PG3": # super special Jason stuff
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
+            UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=62)
+            RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=15000, K=3.22)
+            ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
