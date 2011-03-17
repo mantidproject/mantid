@@ -83,6 +83,7 @@ void Progress::reportIncrement(int inc, const std::string& msg)
 void Progress::setNumSteps(int nsteps)
 {
   m_numSteps = nsteps;
+  if (m_numSteps <= 0) m_numSteps = 1; // Minimum of 1
   m_step = (m_end-m_start) / (m_numSteps);
   int notifyStep = 1;
   m_notifyStep = (static_cast<int>(double(m_numSteps)*notifyStep/100/(m_end-m_start)));

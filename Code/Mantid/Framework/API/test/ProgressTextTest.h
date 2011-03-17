@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <cstdlib>
 
+#include "MantidAPI/Progress.h"
 #include "MantidAPI/ProgressText.h"
 
 using namespace Mantid::API;
@@ -20,6 +21,16 @@ public:
   {
     ProgressText p(0.5, 1.0, 10);
     TS_ASSERT_THROWS_NOTHING(p.setNumSteps(100));
+  }
+
+  void test_constructors()
+  {
+    // No steps?
+    TS_ASSERT_THROWS_NOTHING(Progress p(NULL, 0.0, 1.0, 0); p.report(); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText p(0.0, 1.0, 0); );
+    // Max is < min
+    TS_ASSERT_THROWS_NOTHING(Progress p(NULL, 1.0, 0.5, 10); p.report(); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText p(NULL, 1.0, 0.5, 10); );
   }
 
 
