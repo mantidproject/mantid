@@ -51,7 +51,7 @@ namespace API
     // Print out
     int pct = (p * 100);
 
-    coutMutex.tryLock(50);
+    coutMutex.lock();
 
     // Return at the start of the line if not doing new lines
     if (!m_newLines)
