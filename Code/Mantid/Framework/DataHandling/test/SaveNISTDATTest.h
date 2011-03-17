@@ -41,7 +41,9 @@ public:
     std::getline( testFile, fileLine );
     TS_ASSERT_EQUALS ( fileLine, "ASCII data\r" );
     std::getline( testFile, fileLine );
-    TS_ASSERT_EQUALS ( fileLine, "-0.0105  -0.0735  6.13876e+08  6.1697e+07\r" );
+    TS_ASSERT (( fileLine == "-0.0105  -0.0735  6.13876e+08  6.1697e+07\r" )
+             || (fileLine == "-0.0105  -0.0735  6.13876e+008  6.1697e+007\r"))
+
 
     // remove file created by this algorithm, closing it first as Windows gets tetchy about this
     testFile.close();
