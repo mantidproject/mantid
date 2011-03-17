@@ -51,13 +51,14 @@ target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES})
 
 # Create test file projects
 if ( CXXTEST_FOUND )
-  include_directories(${HDF5_INCLUDE_DIRS} inc)
+  include_directories(${HDF5_INCLUDE_DIRS} inc ../TestHelpers/inc ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../DataObjects/inc  )
+  
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} ${GMOCK_LIBRARIES} )
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} ${GMOCK_LIBRARIES} g DataHandling Nexus TestHelpers DataObjects )
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} )
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} g DataHandling Nexus TestHelpers DataObjects )
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )

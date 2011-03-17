@@ -223,6 +223,8 @@ namespace MDEvents
   /** Split a box that is contained in the GridBox, at the given index,
    * into a MDGridBox.
    *
+   * Thread-safe as long as 'index' is different for all threads.
+   *
    * @param index :: index into the boxes vector.
    *        Warning: No bounds check is made, don't give stupid values!
    * @param ts :: optional ThreadScheduler * that will be used to parallelize
@@ -294,7 +296,13 @@ namespace MDEvents
         if (gridBox)
         {
           // Now recursively check if this old grid box's contents should be split too
-          gridBox->splitAllIfNeeded(ts);
+          if (!ts || (this->nPoints < this->m_BoxController->m_addingEvents_eventsPerTask))
+            // Go serially if there are only a few points contained (less overhead).
+            gridBox->splitAllIfNeeded(ts);
+          else
+            // Go parallel if this is a big enough gridbox.
+            // Task is : gridBox->splitAllIfNeeded(ts);
+            ts->push(new FunctionTask(boost::bind(&MDGridBox<MDE,nd>::splitAllIfNeeded, &*gridBox, ts) ) );
         }
       }
     }
@@ -327,16 +335,6 @@ namespace MDEvents
       // Accumulate the index
       index += (i * splitCumul[d]);
     }
-
-//    // Keep the running total of signal, error, and # of points
-//    if (trackTotals)
-//    {
-//      statsMutex.lock();
-//      this->m_signal += event.getSignal();
-//      this->m_errorSquared += event.getErrorSquared();
-//      ++this->nPoints;
-//      statsMutex.unlock();
-//    }
 
     // Add it to the contained box, and return how many bads where there
     boxes[index]->addEvent(event);
@@ -459,18 +457,17 @@ namespace MDEvents
       tp.joinAll();
 //      std::cout << "... block took " << tim.elapsed() << " secs.\n";
 
-
       //Create a threadpool for splitting.
       ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
       ThreadPool tp_splitter(ts_splitter);
 
       //Now, shake out all the sub boxes and split those if needed
-      //std::cout << "\nStarting splitAllIfNeeded().\n";
+//      std::cout << "\nStarting splitAllIfNeeded().\n";
       if (prog) prog->report("Splitting MDBox'es.");
 
       this->splitAllIfNeeded(ts_splitter);
       tp_splitter.joinAll();
-      //std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
+//      std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
     }
 
     // Refresh the counts, now that we are all done.

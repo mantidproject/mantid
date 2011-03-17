@@ -1,0 +1,64 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="MINITOPAZ" valid-from   ="1900-01-31 23:59:59"
+                         valid-to     ="2100-12-31 23:59:59"
+		         last-modified="2011-03-17 00:00:00">
+<!--Created by Janik Zikovsky
+This is a mini version similar to TOPAZ but used for unit testing.
+-->
+
+  <!--DEFAULTS-->
+  <defaults>
+    <length unit="metre"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness axis="right"/>
+    </reference-frame>
+  </defaults>
+
+  <!--SOURCE-->
+  <component type="moderator">
+    <location z="-11.0"/>
+  </component>
+  <type name="moderator" is="Source"/>
+
+  <!--SAMPLE-->
+  <component type="sample-position">
+    <location y="0.0" x="0.0" z="0.0"/>
+  </component>
+  <type name="sample-position" is="SamplePos"/>
+
+<!--- Make a single panel:
+	0.5 meters from sample, along the +X axis (0.5,0,0) center coord
+	0.5 meters wide and high.
+	100x100 pixels, each 5 mm in size.
+-->
+
+<component type="panel" idstart="2490368" idfillbyfirst="y" idstepbyrow="256">
+<location r="0.5" t="-90.0" p="180.000000" name="bank1" rot="90.0" axis-x="0" axis-y="1" axis-z="0">
+</location>
+</component> 
+
+<!-- Rectangular Detector Panel -->
+<type name="panel" is="rectangular_detector" type="pixel" 
+    xpixels="100" xstart="-0.25" xstep="+0.005"
+    ypixels="100" ystart="-0.25" ystep="+0.005" >
+  <properties/>
+</type>
+
+  <!-- Pixel for Detectors-->
+  <type is="detector" name="pixel">
+    <cuboid id="pixel-shape">
+      <left-front-bottom-point y="-0.0025" x="-0.0025" z="0.0"/>
+      <left-front-top-point y="0.0025" x="-0.0025" z="0.0"/>
+      <left-back-bottom-point y="-0.0025" x="-0.0025" z="-0.0001"/>
+      <right-front-bottom-point y="-0.0025" x="0.0025" z="0.0"/>
+    </cuboid>
+    <algebra val="pixel-shape"/>
+  </type>
+
+</instrument>
+

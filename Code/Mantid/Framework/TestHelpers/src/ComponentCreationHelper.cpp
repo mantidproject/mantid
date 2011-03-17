@@ -263,17 +263,21 @@ namespace ComponentCreationHelper
 
   //----------------------------------------------------------------------------------------------
   /**
-   * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size, a source and spherical sample shape.
+   * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size,
+   * a source and spherical sample shape.
    *
-   * @param num_banks: number of 9-cylinder banks to create
-   * @param verbose: prints out the instrument after creation.
+   * Banks are centered at position (0,0,5*banknum)
+   * Pixels are 4 mm wide.
+   *
+   * @param num_banks: number of rectangular banks to create
+   * @param pixels :: number of pixels in each direction.
    */
   IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels)
   {
     boost::shared_ptr<Instrument> testInst(new Instrument("basic_rect"));
 
     const double cylRadius(0.004);
-    const double cylHeight(0.0002);
+    const double cylHeight(0.004);
     // One object
     Object_sptr pixelShape = ComponentCreationHelper::createCappedCylinder(cylRadius, cylHeight, V3D(0.0,-cylHeight/2.0,0.0), V3D(0.,1.0,0.), "pixel-shape");
 

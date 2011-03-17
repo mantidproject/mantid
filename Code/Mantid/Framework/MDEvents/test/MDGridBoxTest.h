@@ -12,6 +12,11 @@
 #include <memory>
 #include <map>
 #include <vector>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -490,7 +495,7 @@ public:
   void test_addEvents_inParallel()
   {
     MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
-    size_t num_repeat = 1000;
+    int num_repeat = 1000;
 
     PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < num_repeat; i++)
@@ -694,6 +699,7 @@ public:
    * */
   void test_addManyEvents_Performance()
   {
+    // This test is too slow for unit tests, so it is disabled except in debug mode.
     if (!DODEBUG) return;
 
     ProgressText * prog = new ProgressText(0.0, 1.0, 10, true);
@@ -701,11 +707,10 @@ public:
 
     typedef MDGridBox<MDEvent<2>,2> box_t;
     box_t * b = makeMDGridBox<2>();
-    box_t * subbox;
 
     // Manually set some of the tasking parameters
     b->getBoxController()->m_addingEvents_eventsPerTask = 50000;
-    b->getBoxController()->m_addingEvents_numTasksPerBlock = 100;
+    b->getBoxController()->m_addingEvents_numTasksPerBlock = 50;
     b->getBoxController()->m_SplitThreshold = 1000;
     b->getBoxController()->m_maxDepth = 6;
 
@@ -714,13 +719,29 @@ public:
     double step_size = 1e-3;
     size_t numPoints = (10.0/step_size)*(10.0/step_size);
     std::cout << "Starting to write out " << numPoints << " events\n";
-    // Make an event in the middle of each box
-    for (double x=step_size; x < 10; x += step_size)
-      for (double y=step_size; y < 10; y += step_size)
+    if (true)
+    {
+      // ------ Make an event in the middle of each box ------
+      for (double x=step_size; x < 10; x += step_size)
+        for (double y=step_size; y < 10; y += step_size)
+        {
+          double centers[2] = {x, y};
+          events.push_back( MDEvent<2>(2.0, 3.0, centers) );
+        }
+    }
+    else
+    {
+      // ------- Randomize event distribution ----------
+      boost::mt19937 rng;
+      boost::uniform_real<float> u(0.0, 10.0); // Range
+      boost::variate_generator<boost::mt19937&, boost::uniform_real<float> > gen(rng, u);
+
+      for (size_t i=0; i < numPoints; i++)
       {
-        double centers[2] = {x, y};
+        double centers[2] = {gen(), gen()};
         events.push_back( MDEvent<2>(2.0, 3.0, centers) );
       }
+    }
     TS_ASSERT_EQUALS( events.size(), numPoints);
     std::cout << "..." << numPoints << " events were filled in " << tim.elapsed() << " secs.\n";
 

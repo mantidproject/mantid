@@ -1,5 +1,11 @@
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidKernel/System.h"
+#include "MantidDataObjects/EventWorkspace.h"
+
+using namespace Mantid;
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
@@ -14,7 +20,7 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void MakeDiffractionMDEventWorkspace::initDocs()
   {
-    this->setWikiSummary(" Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. ");
+    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. ");
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
   }
 
@@ -23,7 +29,6 @@ namespace MDEvents
    */
   MakeDiffractionMDEventWorkspace::MakeDiffractionMDEventWorkspace()
   {
-    // TODO Auto-generated constructor stub
   }
     
   //----------------------------------------------------------------------------------------------
@@ -31,7 +36,6 @@ namespace MDEvents
    */
   MakeDiffractionMDEventWorkspace::~MakeDiffractionMDEventWorkspace()
   {
-    // TODO Auto-generated destructor stub
   }
   
 
@@ -40,7 +44,7 @@ namespace MDEvents
    */
   void MakeDiffractionMDEventWorkspace::init()
   {
-    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace.");
+    declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
     declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace.");
   }
 
@@ -50,7 +54,7 @@ namespace MDEvents
    */
   void MakeDiffractionMDEventWorkspace::exec()
   {
-    // TODO Auto-generated execute stub
+    EventWorkspace_sptr ws = getProperty("InputWorkspace");
   }
 
 

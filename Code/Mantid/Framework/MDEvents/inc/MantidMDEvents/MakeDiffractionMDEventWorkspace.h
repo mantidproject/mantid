@@ -9,9 +9,10 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** MakeDiffractionMDEventWorkspace : TODO: DESCRIPTION
+  /** MakeDiffractionMDEventWorkspace :
+   * Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.
    * 
-   * @author
+   * @author Janik Zikovsky, SNS
    * @date 2011-03-01 13:14:48.236513
    */
   class DLLExport MakeDiffractionMDEventWorkspace  : public API::Algorithm
