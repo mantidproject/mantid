@@ -153,6 +153,7 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
       factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsets[i], false);
       //Factor of 10 between ISAW and Mantid
       factor *= 0.1 ;
+      if(factor<0)factor = 0.0;
       fout.write( reinterpret_cast<char*>( &factor ), sizeof(double) );
     }
     else
