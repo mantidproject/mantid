@@ -9,7 +9,7 @@
 #include <QStringList>
 #include <QFileDialog>
 #include <QFileInfo>
-
+#include <QHash>
 #include "Poco/File.h"
 
 using namespace Mantid::Kernel;
@@ -19,7 +19,8 @@ using namespace MantidQt::MantidWidgets;
 MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
   m_findRunFiles(true), m_allowMultipleFiles(true), m_isOptional(false),
   m_buttonOpt(Text), m_multiEntry(false), m_fileProblem(""),
-  m_entryNumProblem(""), m_algorithmProperty(""), m_fileFilter("")
+  m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
+  m_fileFilter("")
 {
   m_uiForm.setupUi(this);
 
@@ -210,6 +211,24 @@ void MWRunFiles::setFileExtensions(const QStringList & extensions)
 {
   m_fileExtensions = extensions;
   m_fileFilter.clear();
+}
+
+/**
+ * Returns whether the file dialog should display the exts as a single list or as multiple items
+ * @return boolean
+ */
+bool MWRunFiles::extsAsSingleOption() const
+{
+  return m_extsAsSingleOption;
+}
+
+/**
+ * Sets whether the file dialog should display the exts as a single list or as multiple items
+ * @@param value :: If true the file dialog wil contain a single entry will all filters
+ */
+void MWRunFiles::extsAsSingleOption(const bool value)
+{
+  m_extsAsSingleOption = value;
 }
 
 /**
@@ -483,19 +502,53 @@ QString MWRunFiles::createFileFilter()
   QString fileFilter;
   if( !fileExts.isEmpty() )
   {
-    QStringListIterator itr(fileExts);
-    fileFilter += "Files (";
-    while( itr.hasNext() )
+    // The list may contain upper and lower cased versions, ensure these are on the same line
+    // I want this ordered
+    QList<QPair<QString, QStringList> > finalIndex;
+    QStringListIterator sitr(fileExts);
+    QString ext = sitr.next();
+    finalIndex.append(qMakePair(ext.toUpper(), QStringList(ext)));
+    while( sitr.hasNext() )
     {
-      QString ext = itr.next();
-      fileFilter += "*" + ext;
-      if( itr.hasNext() )
+      ext = sitr.next();
+      QString key = ext.toUpper();
+      bool found(false);
+      const size_t itemCount = finalIndex.count();
+      for( size_t i = 0 ; i < itemCount; ++i )
       {
-	fileFilter += " ";
+        if( key == finalIndex[i].first )
+        {
+          finalIndex[i].second.append(ext);
+          found = true;
+          break;
+        }
+      }
+      if( !found )
+      {
+        finalIndex.append(qMakePair(key, QStringList(ext)));
       }
     }
-    fileFilter += ")";
-    fileFilter += ";;";
+    
+    if( extsAsSingleOption() )
+    {
+      fileFilter += "Files (";
+      QListIterator<QPair<QString, QStringList> > itr(finalIndex);
+      while( itr.hasNext() )
+      {
+        const QStringList values = itr.next().second;
+        fileFilter += "*" + values.join(" *");
+      }
+      fileFilter += ");;";
+    }
+    else
+    {
+      QListIterator<QPair<QString, QStringList> > itr(finalIndex);
+      while( itr.hasNext() )
+      {
+        const QStringList values = itr.next().second;
+        fileFilter += "Files (*" + values.join(" *") + ");;";
+      }
+    }
   }
   fileFilter += "All Files (*.*)";
   return fileFilter;

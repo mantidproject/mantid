@@ -15,6 +15,7 @@
 #include "MantidKernel/MaskedProperty.h"
 #include "MantidAPI/IWorkspaceProperty.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 namespace MantidQt
 {
@@ -141,7 +142,8 @@ namespace MantidQt
       m_fileWidget->allowMultipleFiles(false);
       m_fileWidget->isOptional(false);
       m_fileWidget->doMultiEntry(false);
-      m_fileWidget->setAlgorithmProperty("Load"); // Slight hack to get only the all-files option in browse
+      m_fileWidget->setAlgorithmProperty("Load|Filename");
+      m_fileWidget->extsAsSingleOption(false);
       m_fileWidget->readSettings("Mantid/Algorithms/Load");
       QHBoxLayout *propLine = new QHBoxLayout;
       propLine->addWidget(m_fileWidget);

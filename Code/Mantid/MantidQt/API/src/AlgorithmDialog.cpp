@@ -421,7 +421,6 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
     {
       // --------- Load a File -------------
       filter = "Files (";
-      
       std::set<std::string>::const_iterator iend = exts.end();
       // Push a wild-card onto the front of each file suffix
       for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
@@ -439,15 +438,24 @@ QString AlgorithmDialog::openFileDialog(const QString & propName)
   else if ( prop->isSaveProperty() )
   {
     // --------- Save a File -------------
-    //Have each filter on a separate line
-    QString filter("");
+    //Have each filter on a separate line with the default as the first
+    std::string defaultExt = prop->getDefaultExt();
+    QString filter; 
+    if( !defaultExt.empty() )
+    {
+      filter = "*" + QString::fromStdString(defaultExt) + ";;";
+    }
     std::set<std::string>::const_iterator iend = exts.end();
     for( std::set<std::string>::const_iterator itr = exts.begin(); itr != iend; ++itr)
     {
-      filter.append("*"+QString::fromStdString(*itr) + ";;");
+      if( (*itr) != defaultExt )
+      {
+        filter.append("*"+QString::fromStdString(*itr) + ";;");
+      }
     }
     //Remove last two semi-colons or else we get an extra empty option in the box
     filter.chop(2);
+    // Prepend the default filter
     QString selectedFilter;
     filename = QFileDialog::getSaveFileName(this, "Save file", AlgorithmInputHistory::Instance().getPreviousDirectory(), filter, &selectedFilter);
     

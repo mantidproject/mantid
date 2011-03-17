@@ -8,6 +8,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/AlgorithmManager.h"
+#include "MantidKernel/FacilityInfo.h"
 
 namespace Mantid
 {
@@ -199,21 +200,14 @@ namespace Mantid
     /// Initialisation method.
     void Load::init()
     {
-
-      std::vector<std::string> exts;
-      exts.push_back(".raw");
-      exts.push_back(".s*");
-      exts.push_back(".add");
-
-      exts.push_back(".nxs");
-      exts.push_back(".nx5");
+      // Take extensions first from Facility object
+      const FacilityInfo & defaultFacility = Mantid::Kernel::ConfigService::Instance().Facility();
+      std::vector<std::string> exts = defaultFacility.extensions();
+      // Add in some other known extensions
       exts.push_back(".xml");
-      exts.push_back(".n*");
-
       exts.push_back(".dat");
       exts.push_back(".txt");
       exts.push_back(".csv");
-
       exts.push_back(".spe");
 
       declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),

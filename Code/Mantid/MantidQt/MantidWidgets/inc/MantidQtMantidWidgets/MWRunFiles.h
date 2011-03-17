@@ -53,6 +53,7 @@ namespace MantidQt
       Q_PROPERTY(ButtonOpts buttonOpt READ doButtonOpt WRITE doButtonOpt)
       Q_PROPERTY(QString algorithmAndProperty READ getAlgorithmProperty WRITE setAlgorithmProperty)
       Q_PROPERTY(QStringList fileExtensions READ getFileExtensions WRITE setFileExtensions)
+      Q_PROPERTY(bool extsAsSingleOption READ extsAsSingleOption WRITE extsAsSingleOption)
       Q_ENUMS(ButtonOpts)
 
     public:
@@ -88,9 +89,11 @@ namespace MantidQt
       QString getAlgorithmProperty() const;
       void setAlgorithmProperty(const QString & name);
       QStringList getFileExtensions() const;
+      void setFileExtensions(const QStringList & extensions);
+      bool extsAsSingleOption() const;
+      void extsAsSingleOption(const bool value);
       bool isEmpty() const;
       QString getText() const;
-      void setFileExtensions(const QStringList & extensions);
 
       // Standard setters/getters
       bool isValid() const;
@@ -159,6 +162,8 @@ namespace MantidQt
       QString m_algorithmProperty;
       /// The file extensions to look for
       QStringList m_fileExtensions;
+      /// If true the exts are displayed as one option in the dialog
+      bool m_extsAsSingleOption;
 
       /// The Ui form
       Ui::MWRunFiles m_uiForm;
