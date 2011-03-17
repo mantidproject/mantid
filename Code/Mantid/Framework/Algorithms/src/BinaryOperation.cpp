@@ -369,6 +369,14 @@ namespace Mantid
     }
 
     //--------------------------------------------------------------------------------------------
+    // Disable optimization under the Visual Studio compiler
+    // Optimizing, in combination with openmp parallelization causes occasional miscalculations
+    // Re-enabled below, after the doSingleValue, doSingleSpectrum, doSingleColumn & do2D methods
+    #ifdef _WIN32
+      #pragma optimize( "", off )
+      #pragma warning(disable:4748)  // This is about /Gs being irrelevant when not optimizing
+    #endif
+
     /**
      * Called when the rhs operand is a single value.
      *  Loops over the lhs workspace calling the abstract binary operation function with a single number as the rhs operand.
@@ -701,40 +709,14 @@ namespace Mantid
         m_erhs->clearMRU();
     }
 
-
-
-
-
-//
-//
-//
-//
-//
-//    void BinaryOperation::do2D()
-//    {
-//      // Propagate any masking first or it could mess up the numbers
-//      propagateBinMasks(m_rhs,m_out);
-//      // Loop over the spectra calling the virtual function for each one
-//      const int numHists = m_lhs->getNumberHistograms();
-//      PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-//      for (int i = 0; i < numHists; ++i)
-//      {
-//        PARALLEL_START_INTERUPT_REGION
-//        m_out->setX(i,m_lhs->refX(i));
-//        if( propagateSpectraMask(m_lhs, m_rhs, i, m_out) )
-//        {
-//          performBinaryOperation(m_lhs->readX(i),m_lhs->readY(i),m_lhs->readE(i),m_rhs->readY(i),m_rhs->readE(i),m_out->dataY(i),m_out->dataE(i));
-//        }
-//        m_progress->report();
-//        PARALLEL_END_INTERUPT_REGION
-//      }
-//      PARALLEL_CHECK_INTERUPT_REGION
-//    }
-//
-
-
+    // End of optimization disabling under Visual Studio
+    #ifdef _WIN32
+      #pragma optimize( "", on )
+      #pragma warning(default:4748)
+    #endif
 
     //---------------------------------------------------------------------------------------------
+
     /** Copies any bin masking from the smaller/rhs input workspace to the output.
      *  Masks on the other input workspace are copied automatically by the workspace factory.
      *  @param rhs :: The workspace which is the right hand operand

@@ -62,7 +62,7 @@ FOREACH(_CURRENT_VERSION 2.7 2.6 2.5 2.4 2.3 2.2 2.1 2.0 1.6 1.5)
       [HKEY_LOCAL_MACHINE\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs 
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs/Debug
       [HKEY_CURRENT_USER\\SOFTWARE\\Python\\PythonCore\\${_CURRENT_VERSION}\\InstallPath]/libs 
-	  "${CMAKE_LIBRARY_PATH}/Python25")
+	  "${CMAKE_LIBRARY_PATH}/Python"${_CURRENT_VERSION_NO_DOTS})
   ENDIF(WIN32)
 
   FIND_LIBRARY(PYTHON_LIBRARY

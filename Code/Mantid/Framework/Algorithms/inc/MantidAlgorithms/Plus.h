@@ -65,7 +65,7 @@ namespace Mantid
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                  const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
+                                  const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut);
       void performEventBinaryOperation(DataObjects::EventList & lhs, const DataObjects::EventList & rhs);
       void performEventBinaryOperation(DataObjects::EventList & lhs, const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE);
       void performEventBinaryOperation(DataObjects::EventList & lhs, const double& rhsY, const double& rhsE);

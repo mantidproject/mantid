@@ -31,7 +31,7 @@ namespace Mantid
     }
 
     void Minus::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                       const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
+                                       const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
       std::transform(lhsY.begin(),lhsY.end(),YOut.begin(),std::bind2nd(std::minus<double>(),rhsY));

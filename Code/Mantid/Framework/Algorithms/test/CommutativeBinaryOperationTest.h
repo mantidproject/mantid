@@ -35,7 +35,7 @@ private:
                               const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
   {}
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                              const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
+                              const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
   {}
 };
 

@@ -48,7 +48,7 @@ namespace Mantid
     }
 
     void Divide::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                       const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
+                                        const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
     {
       (void) lhsX; //Avoid compiler warning
       // Do the right-hand part of the error calculation just once

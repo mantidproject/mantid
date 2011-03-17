@@ -50,7 +50,7 @@ private:
       const Mantid::MantidVec&, const Mantid::MantidVec& , Mantid::MantidVec&, Mantid::MantidVec&)
   {}
   void performBinaryOperation(const Mantid::MantidVec& , const Mantid::MantidVec&, const Mantid::MantidVec&,
-      const double& , const double&, Mantid::MantidVec& , Mantid::MantidVec& )
+      const double , const double, Mantid::MantidVec& , Mantid::MantidVec& )
   {}
 };
 

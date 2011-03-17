@@ -63,7 +63,7 @@ namespace Mantid
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                   const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut);
       void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                  const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut);
+                                  const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut);
       void setOutputUnits(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs,API::MatrixWorkspace_sptr out);
 
 

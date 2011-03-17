@@ -113,7 +113,7 @@ namespace Mantid
       /// Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
       /// and is also masked. The function returns true if further processing is not required on the spectra.
       virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs, 
-					const int index, API::MatrixWorkspace_sptr out);
+                                        const int index, API::MatrixWorkspace_sptr out);
 
       /** Carries out the binary operation on a single spectrum, with another spectrum as the right-hand operand.
        *
@@ -139,7 +139,7 @@ namespace Mantid
        *  @param EOut :: The vector to hold the error values resulting from the operation
        */
       virtual void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                          const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
+                                          const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut) = 0;
 
 
       // ===================================== EVENT LIST BINARY OPERATIONS ==========================================

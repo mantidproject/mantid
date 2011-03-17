@@ -79,7 +79,7 @@ void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec
 }
 
 void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
-                                          const double& rhsY, const double& rhsE, MantidVec& YOut, MantidVec& EOut)
+                                          const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
 {
   assert( lhsX.size() == 1 );
   // If we get here we've got two single column workspaces so it's easy.
