@@ -76,7 +76,7 @@ void Max::exec()
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
 
-  Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
+  Progress progress(this,0,1,(m_MaxSpec-m_MinSpec+1));
   PARALLEL_FOR2(localworkspace,outputWorkspace)
   // Loop over spectra
   for (int i = m_MinSpec; i <= m_MaxSpec; ++i)

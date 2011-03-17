@@ -99,7 +99,7 @@ void Integration::exec()
   MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,m_MaxSpec-m_MinSpec+1,2,1);
 
   bool is_distrib=outputWorkspace->isDistribution();
-  Progress progress(this,0,1,m_MinSpec,m_MaxSpec,1);
+  Progress progress(this,0,1,m_MaxSpec-m_MinSpec+1);
 
   const bool axisIsText = localworkspace->getAxis(1)->isText();
 
@@ -248,7 +248,7 @@ void Integration::execEvent()
     outputWS->copyDataFrom( (*inputEventWS), m_MinSpec, m_MaxSpec );
   }
 
-  Progress * progress = new Progress(this,0,1,m_MaxSpec-m_MinSpec +1 + inputEventWS->getNumberHistograms() ,1);
+  Progress * progress = new Progress(this,0,1,m_MaxSpec-m_MinSpec +1 + inputEventWS->getNumberHistograms());
 
   //Sort the input WS - this will allow parallel processing after
   inputEventWS->sortAll(TOF_SORT, progress);

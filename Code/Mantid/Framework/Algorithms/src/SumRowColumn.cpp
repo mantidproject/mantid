@@ -84,7 +84,7 @@ void SumRowColumn::exec()
   const std::string orientation = getProperty("Orientation");
   const bool horizontal = ( orientation=="D_H" ? 1 : 0 );
 
-  Progress progress(this,0,1,dim,1);
+  Progress progress(this,0,1,dim);
   for (int i = 0; i < dim; ++i)
   {
     // Copy X values

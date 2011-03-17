@@ -116,7 +116,7 @@ void SumSpectra::exec()
     MatrixWorkspace_sptr outputWorkspace = API::WorkspaceFactory::Instance().create(localworkspace,
                                                            1,localworkspace->readX(0).size(),YLength);
 
-    Progress progress(this,0,1, indices.size(), 1);
+    Progress progress(this,0,1, indices.size());
 
     // Copy over the bin boundaries
     outputWorkspace->dataX(0) = localworkspace->readX(0);
@@ -208,7 +208,7 @@ void SumSpectra::execEvent(EventWorkspace_const_sptr localworkspace, std::set<in
   //Copy geometry over.
   API::WorkspaceFactory::Instance().initializeFromParent(localworkspace, outputWorkspace, false);
 
-  Progress progress(this,0,1, indices.size(), 1);
+  Progress progress(this,0,1, indices.size());
 
   //Get the pointer to the output event list
   EventList & outEL = outputWorkspace->getEventList(0);

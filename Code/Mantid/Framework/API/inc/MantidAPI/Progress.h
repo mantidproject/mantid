@@ -41,45 +41,36 @@ class Algorithm;
 class DLLExport Progress
 {
 public:
-  /** Creates a Progress instance
-      @param alg ::   Algorithm reporting its progress
-      @param start :: Starting progress
-      @param end ::   Ending progress
-      @param n ::     Number of times report(...) method will be called. 
-      @param step ::  The frequency in % with which report(...) actually sends the notification.
-  */
-  Progress(Algorithm* alg,double start,double end, int n, int step=1)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(0),m_n(n),m_step(static_cast<int>(double(n)*step/100/(end-start))),
-    m_dp((end-start)/(n-1)),m_i(0),m_last_reported(-m_step)
-  {if (m_step <= 0) m_step = 1;}
-  
-  /** Creates a Progress instance
-      @param alg ::    Algorithm reporting its progress
-      @param start ::  Starting progress
-      @param end ::    Ending progress
-      @param ifirst :: Initial value of the loop counter
-      @param n ::      Upper bound for the loop counter
-      @param step ::   The frequency in % with which report(...) actually sends the notification.
-  */
-  Progress(Algorithm* alg,double start,double end, int ifirst, int n, int step)
-    :m_alg(alg),m_start(start),m_end(end),m_ifirst(ifirst),m_n(n),m_step(static_cast<int>(double(n-ifirst)*step/100/(end-start))),
-    m_dp((end-start)/(n-ifirst-1)),m_i(ifirst),m_last_reported(ifirst-m_step)
-  {if (m_step <= 0) m_step = 1;}
-  
-  void report(const std::string& msg = "");
-  void report(int i,const std::string& msg = "");
-  void reportIncrement(int inc, const std::string& msg = "");
+  Progress();
+
+  Progress(Algorithm* alg,double start,double end, int numSteps);
+
+  virtual void report(const std::string& msg = "");
+  virtual void report(int i,const std::string& msg = "");
+  virtual void reportIncrement(int inc, const std::string& msg = "");
+  virtual void setNumSteps(int nsteps);
   
 private:
-  Algorithm* const m_alg;  ///< Owning algorithm
-  const double m_start;    ///< Starting progress
-  const double m_end;      ///< Ending progress
-  const int m_ifirst;      ///< Loop counter initial value
-  const int m_n;           ///< Loop counter upper bound
-  int m_step;        ///< Frequency of sending the notification (every m_step times)
-  const double m_dp;       ///< Progress increment at each loop
-  int m_i;           ///< Loop counter
-  int m_last_reported;     ///< Last loop counter value the was a peport
+  /// Owning algorithm
+  Algorithm* const m_alg;
+
+protected:
+  /// Starting progress
+  double m_start;
+  /// Ending progress
+  double m_end;
+  /// Loop counter initial value
+  int m_ifirst;
+  /// Loop counter upper bound
+  int m_numSteps;
+  /// Frequency of sending the notification (every m_step times)
+  int m_notifyStep;
+  /// Progress increment at each loop
+  double m_step;
+  /// Loop counter
+  int m_i;
+  /// Last loop counter value the was a peport
+  int m_last_reported;
 };
 
 } // namespace API

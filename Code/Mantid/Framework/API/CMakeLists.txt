@@ -1,4 +1,5 @@
-set ( SRC_FILES src/Algorithm.cpp
+set ( SRC_FILES 
+	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
@@ -48,6 +49,7 @@ set ( SRC_FILES src/Algorithm.cpp
 	src/ParameterTie.cpp
 	src/ParamFunction.cpp
 	src/Progress.cpp
+	src/ProgressText.cpp
 	src/RefAxis.cpp
 	src/Run.cpp
 	src/Sample.cpp
@@ -64,8 +66,9 @@ set ( SRC_FILES src/Algorithm.cpp
 	src/WorkspaceProperty.cpp
 	src/WorkspaceTracer.cpp )
 
-set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
-    inc/MantidAPI/Algorithm.h
+set ( INC_FILES 
+	inc/MantidAPI/AlgorithmFactory.h
+	inc/MantidAPI/Algorithm.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
 	inc/MantidAPI/AlgorithmObserver.h
@@ -131,6 +134,7 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/Point3D.h
+	inc/MantidAPI/ProgressText.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/Run.h
@@ -151,40 +155,42 @@ set ( INC_FILES inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/WorkspaceTracer.h
 	inc/MantidAPI/WorkspaceValidators.h )
 
-set ( TEST_FILES test/AlgorithmHistoryTest.h
-     test/AlgorithmManagerTest.h
-	 test/AlgorithmProxyTest.h
-	 test/AlgorithmTest.h
-	 test/AnalysisDataServiceTest.h
-	 test/AsynchronousTest.h
-	 test/AxisTest.h
-	 test/CompositeFunctionTest.h
-	 test/DimensionTest.h
-	 test/ExpressionTest.h
-	 test/FileFinderTest.h
-	 test/FilePropertyTest.h
-	 test/FrameworkManagerTest.h
-	 test/FunctionTest.h
-	 test/IFunctionMDTest.h
-	 test/IMDWorkspaceTest.h
-	 test/ImplicitFunctionParserFactoryTest.h
-	 test/InstrumentDataServiceTest.h
-	 test/MatrixWorkspaceTest.h
-	 test/MDPropertyGeometryTest.h
-	 test/MemoryManagerTest.h
-	 test/ParameterReferenceTest.h
-	 test/ParameterTieTest.h
-	 test/RunTest.h
-	 test/SampleEnvironmentTest.h
-	 test/SampleTest.h
-	 test/SpectraDetectorMapTest.h
-	 test/TextAxisTest.h
-	 test/WorkspaceFactoryTest.h
-	 test/WorkspacePropertyTest.h )
+set ( TEST_FILES 
+	test/AlgorithmHistoryTest.h
+	test/AlgorithmManagerTest.h
+	test/AlgorithmProxyTest.h
+	test/AlgorithmTest.h
+	test/AnalysisDataServiceTest.h
+	test/AsynchronousTest.h
+	test/AxisTest.h
+	test/CompositeFunctionTest.h
+	test/DimensionTest.h
+	test/ExpressionTest.h
+	test/FileFinderTest.h
+	test/FilePropertyTest.h
+	test/FrameworkManagerTest.h
+	test/FunctionTest.h
+	test/IFunctionMDTest.h
+	test/IMDWorkspaceTest.h
+	test/ImplicitFunctionParserFactoryTest.h
+	test/InstrumentDataServiceTest.h
+	test/MatrixWorkspaceTest.h
+	test/MDPropertyGeometryTest.h
+	test/MemoryManagerTest.h
+	test/ParameterReferenceTest.h
+	test/ParameterTieTest.h
+	test/ProgressTextTest.h
+	test/RunTest.h
+	test/SampleEnvironmentTest.h
+	test/SampleTest.h
+	test/SpectraDetectorMapTest.h
+	test/TextAxisTest.h
+	test/WorkspaceFactoryTest.h
+	test/WorkspacePropertyTest.h )
 
 set ( GMOCK_TEST_FILES
-     test/ImplicitFunctionFactoryTest.h
-     test/ImplicitFunctionParameterParserFactoryTest.h
+	test/ImplicitFunctionFactoryTest.h
+	test/ImplicitFunctionParameterParserFactoryTest.h
 )
 
 # Have to link to winsock library on Windows

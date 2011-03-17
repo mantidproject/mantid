@@ -328,7 +328,7 @@ Progress LoadRKH::read2DHeader(const std::string & initalLine, MatrixWorkspace_s
   const int nAxis0Values = boost::lexical_cast<int>(wsDimensions[0]);
   const int nAxis1Values = boost::lexical_cast<int>(wsDimensions[1]);
 
-  Progress prog(this, 0.05, 1.0, 2*nAxis1Values, nAxis1Values/50);
+  Progress prog(this, 0.05, 1.0, 2*nAxis1Values);
 
   // we now have all the data we need to create the output workspace
   outWrksp = WorkspaceFactory::Instance().create(

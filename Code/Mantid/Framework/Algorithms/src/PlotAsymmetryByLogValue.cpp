@@ -134,7 +134,7 @@ namespace Mantid
       }
       outWS->replaceAxis(1,tAxis);
 
-      Progress progress(this,0,1,is,ie+1,1);
+      Progress progress(this,0,1,ie-is+2);
       for(size_t i=is;i<=ie;i++)
       {
         std::ostringstream fn,fnn;
