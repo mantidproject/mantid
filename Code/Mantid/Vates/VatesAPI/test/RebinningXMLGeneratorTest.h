@@ -225,6 +225,51 @@ void testGetGeometryXML()
   TSM_ASSERT_EQUALS("The geometry xml fetched is not the same as that provided", dimensionXMLString, generator.getWorkspaceGeometry());
 }
 
+void testHasFunction()
+{
+  RebinningXMLGenerator withoutFunction;
+  RebinningXMLGenerator withFunction;
+  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
+  withFunction.setImplicitFunction(impFunction);
+
+  TSM_ASSERT_EQUALS("A function has not been provided. ::hasFunctionInfo() should return false.", false,  withoutFunction.hasFunctionInfo());
+  TSM_ASSERT_EQUALS("A function has been provided. ::hasFunctionInfo() should return true.", true, withFunction.hasFunctionInfo());
+}
+
+void testHasGeometryInfoWithoutGeometry()
+{
+  //Note that functions do not apply to this test set.
+  RebinningXMLGenerator withoutGeometry;
+  withoutGeometry.setWorkspaceLocation("-");
+  withoutGeometry.setWorkspaceName("-");
+  TSM_ASSERT_EQUALS("No Geometry provided. ::hasGeometryInfo() should return false.", false, withoutGeometry.hasGeometryInfo());
+}
+
+void testHasGeometryInfoWithoutWSName()
+{
+  RebinningXMLGenerator withoutWSName;
+  withoutWSName.setGeometryXML("-");
+  withoutWSName.setWorkspaceLocation("-");
+  TSM_ASSERT_EQUALS("No WS name provided. ::hasGeometryInfo() should return false.", false, withoutWSName.hasGeometryInfo());
+}
+
+void testHasGeometryInfoWithoutWSLocation()
+{
+  RebinningXMLGenerator withoutWSLocation;
+  withoutWSLocation.setGeometryXML("-");
+  withoutWSLocation.setWorkspaceName("-");
+  TSM_ASSERT_EQUALS("No WS location provided. ::hasGeometryInfo() should return false.", false, withoutWSLocation.hasGeometryInfo());
+}
+
+void testHasGeometryAndWSInfo()
+{
+  RebinningXMLGenerator withFullGeometryAndWSInfo;
+  withFullGeometryAndWSInfo.setGeometryXML("-");
+  withFullGeometryAndWSInfo.setWorkspaceName("-");
+  withFullGeometryAndWSInfo.setWorkspaceLocation("-");
+  TSM_ASSERT_EQUALS("All geometry and ws information has been provided. ::hasGeometryInfo() should return true.", true, withFullGeometryAndWSInfo.hasGeometryInfo());
+}
+
 
 };
 

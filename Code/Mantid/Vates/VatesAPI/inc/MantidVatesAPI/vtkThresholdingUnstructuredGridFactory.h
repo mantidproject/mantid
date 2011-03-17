@@ -85,11 +85,11 @@ private:
   /// Time mapper.
   TimeMapper m_timeMapper;
 
-  /// Threshold for signal value, above which, we do not provide unstructured topologies for.
-  const double m_maxThreshold;
-
   /// Threshold for signal value. below which, we do not provide unstructured topologies for.
   const double m_minThreshold;
+
+  /// Threshold for signal value, above which, we do not provide unstructured topologies for.
+  const double m_maxThreshold;
 
 
 
@@ -152,7 +152,7 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
     for (int j = 0; j < nPointsY; j++)
     {
       currentYIncrement = j * incrementY;
-      Column col(nPointsX);
+      Column col(nPointsZ);
       for (int k = 0; k < nPointsZ; k++)
       {
         posX = minX + currentXIncrement; //Calculate increment in x;

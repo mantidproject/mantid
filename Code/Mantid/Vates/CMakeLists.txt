@@ -28,7 +28,7 @@ find_package( ParaView QUIET ) #TODO switch from QUIET to REQUIRED
 if (ParaView_FOUND AND USE_PARAVIEW)
   add_subdirectory(ParaviewPlugins)
 else (ParaView_FOUND AND USE_PARAVIEW )
-  message( STATUS "Vates-Paraview plugins and widgets will not be built.") #TODO Nice message should be escalated
+  message( STATUS "Vates-Paraview plugins and widgets will not be built.") 
 endif( ParaView_FOUND AND USE_PARAVIEW )
 
 

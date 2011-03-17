@@ -1,0 +1,2 @@
+add_subdirectory(RebinningCutterObjectPanel)
+add_subdirectory(QtWidgets)

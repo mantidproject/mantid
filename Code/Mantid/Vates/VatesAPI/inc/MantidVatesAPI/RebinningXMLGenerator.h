@@ -88,6 +88,12 @@ public:
 
   /// Get the underlying workspace geometry.
   const std::string& getWorkspaceGeometry() const;
+
+  /// Determine if function information is available/set.
+  bool hasFunctionInfo() const;
+
+  /// Determine if gemetry information is available/set.
+  bool hasGeometryInfo() const;
 };
 
 

@@ -81,6 +81,43 @@ RebinningCutterPresenter::~RebinningCutterPresenter()
 
 }
 
+void RebinningCutterPresenter::constructReductionKnowledge(
+    DimensionVec dimensions,
+    Dimension_sptr dimensionX,
+    Dimension_sptr dimensionY,
+    Dimension_sptr dimensionZ,
+    Dimension_sptr dimensiont,
+    vtkDataSet* inputDataSet)
+{
+  using namespace Mantid::MDAlgorithms;
+
+  //Apply the geometry.
+  m_serializer.setGeometryXML(constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont));
+  //Apply the workspace name after extraction from the input xml.
+  m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId().c_str()));
+  //Apply the workspace location after extraction from the input xml.
+  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId().c_str()));
+
+  if(m_serializer.hasGeometryInfo() )
+  {
+    this->m_initalized = true;
+  }
+}
+
+void RebinningCutterPresenter::addFunctionKnowledge(CompositeImplicitFunction* compFunction, vtkDataSet* inputDataSet)
+{
+  //Add existing functions.
+    Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId().c_str());
+    if (existingFunctions != NULL)
+    {
+      compFunction->addFunction(boost::shared_ptr<ImplicitFunction>(existingFunctions));
+    }
+
+    m_function = boost::shared_ptr<ImplicitFunction>(compFunction);
+    //Apply the implicit function.
+    m_serializer.setImplicitFunction(m_function);
+
+}
 
 void RebinningCutterPresenter::constructReductionKnowledge(
     DimensionVec dimensions,
@@ -92,25 +129,8 @@ void RebinningCutterPresenter::constructReductionKnowledge(
     vtkDataSet* inputDataSet)
 {
   using namespace Mantid::MDAlgorithms;
-
-  //Add existing functions.
-  Mantid::API::ImplicitFunction* existingFunctions = findExistingRebinningDefinitions(inputDataSet, XMLDefinitions::metaDataId().c_str());
-  if (existingFunctions != NULL)
-  {
-    compFunction->addFunction(boost::shared_ptr<ImplicitFunction>(existingFunctions));
-  }
-
-  m_function = boost::shared_ptr<ImplicitFunction>(compFunction);
-  //Apply the implicit function.
-  m_serializer.setImplicitFunction(m_function);
-  //Apply the geometry.
-  m_serializer.setGeometryXML(constructGeometryXML(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont));
-  //Apply the workspace name after extraction from the input xml.
-  m_serializer.setWorkspaceName( findExistingWorkspaceName(inputDataSet, XMLDefinitions::metaDataId().c_str()));
-  //Apply the workspace location after extraction from the input xml.
-  m_serializer.setWorkspaceLocation( findExistingWorkspaceLocation(inputDataSet, XMLDefinitions::metaDataId().c_str()));
-
-  this->m_initalized = true;
+  addFunctionKnowledge(compFunction, inputDataSet);
+  constructReductionKnowledge(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, inputDataSet);
 }
 
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(

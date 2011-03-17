@@ -91,5 +91,16 @@ const std::string& RebinningXMLGenerator::getWorkspaceGeometry() const
   return this->m_geomXML;
 }
 
+ bool RebinningXMLGenerator::hasFunctionInfo() const
+ {
+   return NULL != m_spFunction.get();
+ }
+
+ bool RebinningXMLGenerator::hasGeometryInfo() const
+ {
+   return  !m_geomXML.empty() && !m_wsLocation.empty() && !m_wsName.empty();
+ }
+
+
 }
 }

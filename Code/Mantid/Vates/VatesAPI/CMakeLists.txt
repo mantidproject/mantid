@@ -63,7 +63,7 @@ test/TimeToTimeStepTest.h
 
 if( USE_PARAVIEW )
   #ParaView specific
-  find_package( ParaView QUIET )
+  find_package( ParaView REQUIRED )
   include(${PARAVIEW_USE_FILE})
   include_directories (${ParaView_DIR}/VTK)
   link_directories ( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release

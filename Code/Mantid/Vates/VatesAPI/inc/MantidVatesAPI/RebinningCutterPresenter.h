@@ -101,7 +101,7 @@ public:
 	/// Get the generated function.
 	boost::shared_ptr<Mantid::API::ImplicitFunction> getFunction() const;
 
-  /// Construct reduction knowledge objects
+  /// Construct reduction knowledge objects, specifically for VisIT, where all setup is per-request.
 	void constructReductionKnowledge(
       DimensionVec dimensions,
       Dimension_sptr dimensionX,
@@ -111,7 +111,17 @@ public:
       Mantid::MDAlgorithms::CompositeImplicitFunction* compositeFunction,
       vtkDataSet* inputDataSet);
 
-	void handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
+	/// Construct reduction knowledge objects. This is done per pipeline-execution.
+	void constructReductionKnowledge(
+	    DimensionVec dimensions,
+	    Dimension_sptr dimensionX,
+	    Dimension_sptr dimensionY,
+	    Dimension_sptr dimensionZ,
+	    Dimension_sptr dimensiont,
+	    vtkDataSet* inputDataSet);
+
+	/// Add function knowledge, this is always done per request.
+	void addFunctionKnowledge(Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction, vtkDataSet* inputDataSet);
 
 	Mantid::MDDataObjects::MDWorkspace_sptr applyRebinningAction(
 	    Mantid::VATES::RebinningIterationAction action

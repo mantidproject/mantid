@@ -6,7 +6,6 @@
 #include <map>
 #include <functional>
 #include <algorithm>
-#include <QString>
 
 
 using Mantid::Geometry::IMDDimension;
@@ -60,10 +59,12 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
 
   this->setLayout(layout);
   m_isConstructed = true;
+
+
 }
 
 
-QString GeometryWidget::getXDimensionXML()
+QString GeometryWidget::getXDimensionXML() const
 {
   validateSetup();
   //Get the selected alignment for the xdimension.
@@ -91,7 +92,6 @@ void GeometryWidget::dimensionWidgetChanged()
 {
   validateSetup();
   emit valueChanged();
-
 }
 
 void GeometryWidget::resetAllBinValues()

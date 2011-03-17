@@ -1,7 +1,7 @@
 <ServerManagerConfiguration>
   <!-- Begin RebinningCutter -->
   <ProxyGroup name="filters">
-    <SourceProxy name="RebinningCutter" class="vtkRebinningCutter">
+    <SourceProxy name="RebinningCutter" class="vtkRebinningCutter" label="Mantid Rebinning Cutter">
       <InputProperty
         name="Input"
         command="SetInputConnection">
@@ -13,18 +13,6 @@
       <DataTypeDomain name="input_type">
           <DataType value="vtkDataSet"/>
       </DataTypeDomain>
-        <ProxyProperty name="ClipFunction" command="SetClipFunction" label="Rebinning Cut Type">
-           <ProxyGroupDomain name="groups">
-               <Group name="implicit_functions"/>
-           </ProxyGroupDomain>
-           <ProxyListDomain name="proxy_list">
-              <Proxy group="implicit_functions" name="Plane" />
-              <Proxy group="implicit_functions" name="Box" />
-           </ProxyListDomain>
-           <Documentation>
-             This property specifies the parameters of the clip function (an implicit plane) used to clip/rebin the dataset.
-           </Documentation>
-        </ProxyProperty>
         <DoubleVectorProperty 
         name="TimestepValues"
         information_only="1">
@@ -55,6 +43,31 @@
 	   default_values="10000"
 	   >
 	   </DoubleVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedXDimensionXML"
+         command="SetAppliedXDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedYDimensionXML"
+         command="SetAppliedYDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedZDimensionXML"
+         command="SetAppliedZDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End RebinningCutter -->

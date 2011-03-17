@@ -76,8 +76,8 @@ private:
   boost::shared_ptr<Image> m_image;
   std::string m_scalarName;
   double m_timeValue;
-  TimeMapper m_timeMapper;
   bool m_meshOnly;
+  TimeMapper m_timeMapper;
 };
 
 template<typename Image, typename TimeMapper>
@@ -88,7 +88,7 @@ vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(boost::sha
 
 template<typename Image, typename TimeMapper>
 vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(const vtkStructuredGridFactory<Image, TimeMapper>& other):
-    m_image(other.m_image), m_scalarName(other.m_scalarName), m_timeValue(other.m_timeValue), m_timeMapper(other.m_timeMapper), m_meshOnly(other.m_meshOnly)
+    m_image(other.m_image), m_scalarName(other.m_scalarName), m_timeValue(other.m_timeValue), m_meshOnly(other.m_meshOnly), m_timeMapper(other.m_timeMapper)
 {
 }
 
@@ -107,7 +107,7 @@ vtkStructuredGridFactory<Image, TimeMapper> & vtkStructuredGridFactory<Image, Ti
 
 
 template<typename Image, typename TimeMapper>
-vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(boost::shared_ptr<Image> image, const TimeMapper& timeMapper) : m_image(image), m_scalarName(""), m_timeValue(0), m_timeMapper(timeMapper),  m_meshOnly(true)
+vtkStructuredGridFactory<Image, TimeMapper>::vtkStructuredGridFactory(boost::shared_ptr<Image> image, const TimeMapper& timeMapper) : m_image(image), m_scalarName(""), m_timeValue(0),  m_meshOnly(true), m_timeMapper(timeMapper)
 {
 }
 
