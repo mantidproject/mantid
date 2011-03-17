@@ -46,7 +46,7 @@ Unwrap2::~Unwrap2()
 /// Algorithm's name for identification overriding a virtual method
 const std::string Unwrap2::name() const
 {
-  return "Unwrap";
+  return "Unwrap2";
 }
 
 /// Algorithm's version for identification overriding a virtual method
