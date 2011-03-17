@@ -14,6 +14,7 @@ namespace API
 Progress::Progress()
   :m_alg(NULL), m_start(0), m_end(1.0),
    m_ifirst(0), m_numSteps(1),
+   m_notifyStepPct(1),
    m_notifyStep(1),
    m_step(1), m_i(0),
    m_last_reported(-1)
@@ -85,11 +86,23 @@ void Progress::setNumSteps(int nsteps)
   m_numSteps = nsteps;
   if (m_numSteps <= 0) m_numSteps = 1; // Minimum of 1
   m_step = (m_end-m_start) / (m_numSteps);
-  int notifyStep = 1;
-  m_notifyStep = (static_cast<int>(double(m_numSteps)*notifyStep/100/(m_end-m_start)));
+  m_notifyStep = (static_cast<int>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
   if (m_notifyStep <= 0) m_notifyStep = 1;
 }
 
+
+/** Override the frequency at which notifications are sent out.
+ * The default is every change of 1%.
+ *
+ * @param notifyStepPct :: minimum change, in percentage, to skip between updates.
+ *        Default is 1..
+ */
+void Progress::setNotifyStep(double notifyStepPct)
+{
+  m_notifyStepPct = notifyStepPct;
+  m_notifyStep = (static_cast<int>(double(m_numSteps)*m_notifyStepPct/100/(m_end-m_start)));
+  if (m_notifyStep <= 0) m_notifyStep = 1;
+}
 
 } // namespace API
 } // namespace Mantid

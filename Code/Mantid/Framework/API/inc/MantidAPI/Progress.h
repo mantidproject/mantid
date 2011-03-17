@@ -49,6 +49,7 @@ public:
   virtual void report(int i,const std::string& msg = "");
   virtual void reportIncrement(int inc, const std::string& msg = "");
   virtual void setNumSteps(int nsteps);
+  virtual void setNotifyStep(double notifyStepPct);
   
 private:
   /// Owning algorithm
@@ -65,6 +66,8 @@ protected:
   int m_numSteps;
   /// Frequency of sending the notification (every m_step times)
   int m_notifyStep;
+  /// Frequency of sending the notification (as a min percentage step, e.g. 1 for 1 % (default) )
+  double m_notifyStepPct;
   /// Progress increment at each loop
   double m_step;
   /// Loop counter

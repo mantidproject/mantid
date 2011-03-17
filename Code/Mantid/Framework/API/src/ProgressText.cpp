@@ -51,6 +51,8 @@ namespace API
     // Print out
     int pct = (p * 100);
 
+    coutMutex.tryLock(50);
+
     // Return at the start of the line if not doing new lines
     if (!m_newLines)
       std::cout << "\r";
@@ -75,6 +77,8 @@ namespace API
 
     // Save where we last reported to avoid notifying too often.
     this->m_last_reported = m_i;
+
+    coutMutex.unlock();
   }
 
 

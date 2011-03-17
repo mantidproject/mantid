@@ -2,6 +2,7 @@
 #define MANTID_API_PROGRESSTEXT_H_
     
 #include "MantidKernel/System.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidAPI/Progress.h"
 
 namespace Mantid
@@ -35,6 +36,9 @@ namespace API
 
     /// Length of the last printed message.
     size_t m_lastMsgLength;
+
+    /// Mutex to avoid mangled output
+    Kernel::Mutex coutMutex;
   };
 
 

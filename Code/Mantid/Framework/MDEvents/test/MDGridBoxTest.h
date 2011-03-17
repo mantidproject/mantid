@@ -3,6 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
+#include "MantidAPI/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
@@ -15,9 +16,16 @@
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
+using namespace Mantid::API;
 
 class MDGridBoxTest :    public CxxTest::TestSuite
 {
+public:
+  bool DODEBUG;
+  MDGridBoxTest()
+  {
+    DODEBUG = false;
+  }
 
 protected:
 
@@ -579,6 +587,9 @@ public:
    * */
   void test_addManyEvents()
   {
+    ProgressText * prog = NULL;
+    if (DODEBUG) prog = new ProgressText(0.0, 1.0, 10, false);
+
     typedef MDGridBox<MDEvent<2>,2> box_t;
     box_t * b = makeMDGridBox<2>();
     box_t * subbox;
@@ -604,7 +615,7 @@ public:
     TS_ASSERT_EQUALS( events.size(), 100*num_repeat);
 
     size_t numbad = 0;
-    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events ); );
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events, prog ); );
     TS_ASSERT_EQUALS( numbad, 0);
     TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
     TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
@@ -625,6 +636,7 @@ public:
     TS_ASSERT_EQUALS( subbox->getDepth(), 2);
 
     // And so on (this type of recursion was checked in test_splitAllIfNeeded()
+    if (prog) delete prog;
   }
 
 
@@ -632,8 +644,13 @@ public:
   //-------------------------------------------------------------------------------------
   /** Tests that bad events are thrown out when using addEvents.
    * */
-  void xtest_addManyEvents_Performance()
+  void test_addManyEvents_Performance()
   {
+    if (!DODEBUG) return;
+
+    ProgressText * prog = new ProgressText(0.0, 1.0, 10, true);
+    prog->setNotifyStep(0.00001); //Notify always
+
     typedef MDGridBox<MDEvent<2>,2> box_t;
     box_t * b = makeMDGridBox<2>();
     box_t * subbox;
@@ -660,7 +677,7 @@ public:
     std::cout << "..." << numPoints << " events were filled in " << tim.elapsed() << " secs.\n";
 
     size_t numbad = 0;
-    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events ); );
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events, prog); );
     TS_ASSERT_EQUALS( numbad, 0);
     TS_ASSERT_EQUALS( b->getNPoints(), numPoints);
     TS_ASSERT_EQUALS( b->getSignal(), numPoints*2.0);

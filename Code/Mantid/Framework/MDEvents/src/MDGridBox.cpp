@@ -1,3 +1,4 @@
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/Timer.h"
@@ -7,9 +8,11 @@
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include <ostream>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
+using namespace Mantid::API;
 
 namespace Mantid
 {
@@ -31,6 +34,8 @@ namespace MDEvents
     size_t start_at;
     /// Where to stop in vector
     size_t stop_at;
+    /// Progress report
+    Progress * prog;
 
     /** Ctor
      *
@@ -41,9 +46,9 @@ namespace MDEvents
      * @return
      */
     AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,
-                  const size_t start_at, const size_t stop_at)
+                  const size_t start_at, const size_t stop_at, Progress * prog)
     : Task(),
-      box(box), events(events), start_at(start_at), stop_at(stop_at)
+      box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
     {
     }
 
@@ -51,6 +56,12 @@ namespace MDEvents
     void run()
     {
       box->addEvents(events, start_at, stop_at);
+      if (prog)
+      {
+        std::ostringstream out;
+        out << "Adding events " << start_at;
+        prog->report(out.str());
+      }
     }
   };
 
@@ -386,6 +397,13 @@ namespace MDEvents
     size_t eventsPerTask, numTasksPerBlock;
     this->m_BoxController->getAddingEventsParameters(eventsPerTask, numTasksPerBlock);
 
+    // Set up progress report, if any
+    if (prog)
+    {
+      size_t numTasks = events.size()/eventsPerTask;
+      prog->setNumSteps( numTasks + numTasks/numTasksPerBlock);
+    }
+
     // Where we are in the list of events
     size_t event_index = 0;
     while (event_index < events.size())
@@ -393,7 +411,7 @@ namespace MDEvents
       //Since the costs are not known ahead of time, use a simple FIFO buffer.
       ThreadScheduler * ts = new ThreadSchedulerFIFO();
       // Create the threadpool
-      ThreadPool tp(ts);
+      ThreadPool tp(ts, 1);
 
       // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
       for (size_t i = 0; i < numTasksPerBlock; i++)
@@ -411,7 +429,7 @@ namespace MDEvents
 
         // Create a task and push it into the scheduler
         //std::cout << "Making a AddEventsTask " << start_at << " to " << stop_at << std::endl;
-        ts->push( new AddEventsTask<MDE,nd>(this, events, start_at, stop_at) );
+        ts->push( new AddEventsTask<MDE,nd>(this, events, start_at, stop_at, prog) );
 
         if (breakout) break;
       }
@@ -424,6 +442,7 @@ namespace MDEvents
 
       //Now, shake out all the sub boxes and split those if needed
 //      std::cout << "Starting splitAllIfNeeded().\n";
+      if (prog) prog->report("Splitting MDBox'es.");
       this->splitAllIfNeeded();
 //      std::cout << "... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
     }
