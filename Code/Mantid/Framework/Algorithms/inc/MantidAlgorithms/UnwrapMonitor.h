@@ -1,11 +1,10 @@
-#ifndef MANTID_ALGORITHMS_UNWRAP_H_
-#define MANTID_ALGORITHMS_UNWRAP_H_
+#ifndef MANTID_ALGORITHMS_UNWRAPMONITOR_H_
+#define MANTID_ALGORITHMS_UNWRAPMONITOR_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidAlgorithms/UnwrapMonitor.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -45,21 +44,42 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport Unwrap : public UnwrapMonitor, public API::DeprecatedAlgorithm
+class DLLExport UnwrapMonitor : public API::Algorithm
 {
 public:
-  Unwrap();
-
-  virtual ~Unwrap();
-
+  UnwrapMonitor();
+  virtual ~UnwrapMonitor();
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const;
-
+  virtual const std::string name() const { return "UnwrapMonitor"; }
   /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const;
+  virtual int version() const { return 1; }
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "Units";}
+
+private:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
+  void init();
+  void exec();
+
+  double getPrimaryFlightpath() const;
+  double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
+  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld);
+  std::pair<int,int> handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX);
+  void unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds);
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const int& numBins);
+
+  double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
+  API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
+  double m_LRef; ///< The 'reference' flightpath
+  double m_Tmin; ///< The start of the time-of-flight frame
+  double m_Tmax; ///< The end of the time-of-flight frame
+  unsigned int m_XSize; ///< The size of the X vectors in the input workspace
+  /// Progress reporting
+  API::Progress* m_progress;
 };
 
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_UNWRAP_H_ */
+#endif /* MANTID_ALGORITHMS_UNWRAPMONITOR_H_ */
