@@ -1,5 +1,5 @@
-#ifndef MANTID_ALGORITHMS_UNWRAP_H_
-#define MANTID_ALGORITHMS_UNWRAP_H_
+#ifndef MANTID_ALGORITHMS_UNWRAPSNS_H_
+#define MANTID_ALGORITHMS_UNWRAPSNS_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -80,4 +80,4 @@ private:
 } // namespace Algorithm
 } // namespace Mantid
 
-#endif /* MANTID_ALGORITHMS_UNWRAP_H_ */
+#endif /* MANTID_ALGORITHMS_UNWRAPSNS_H_ */
