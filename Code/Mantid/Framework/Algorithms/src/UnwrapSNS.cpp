@@ -52,7 +52,7 @@ const std::string UnwrapSNS::name() const
 /// Algorithm's version for identification overriding a virtual method
 int UnwrapSNS::version() const
 {
-  return 2;
+  return 1;
 }
 
 /// Algorithm's category for identification overriding a virtual method
