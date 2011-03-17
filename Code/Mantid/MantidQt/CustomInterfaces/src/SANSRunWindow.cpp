@@ -2311,7 +2311,13 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       py_code += ", plotresults=True";
     }
 
-    py_code += ", saveAlgs="+PythonRunner::stringList2Tuple(getSaveAlgs());
+    py_code += ", saveAlgs={";
+    QStringList algs(getSaveAlgs());
+    for ( QStringList::const_iterator it = algs.begin(); it != algs.end(); ++it)
+    {// write a Python dict object in the form { algorithm_name : file extension , ... ,}
+      py_code += "'"+*it+"':'"+SaveWorkspaces::getSaveAlgExt(*it)+"',";
+    }
+    py_code += "}";
 
     if( m_uiForm.log_colette->isChecked() )
     {

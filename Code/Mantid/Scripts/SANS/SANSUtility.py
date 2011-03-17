@@ -228,7 +228,7 @@ def MaskByBinRange(workspace, timemask):
 		limits = r.split()
 		if len(limits) == 2:
 			MaskBins(workspace, workspace, XMin= limits[0] ,XMax=limits[1])
-
+##START REMOVED STEVE (SANSReductionSteps.py)
 # Setup the transmission workspace
 def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, wavbining, interpolate, loqremovebins):
     tmpWS = inputWS + '_tmp'
@@ -250,7 +250,6 @@ def SetupTransmissionWorkspace(inputWS, spec_list, backmon_start, backmon_end, w
         Rebin(tmpWS, tmpWS, wavbining)
 
     return tmpWS
-##START REMOVED STEVE (SANSReductionSteps.py)
  # Correct of for the volume of the sample/can. Dimensions should be in order: width, height, thickness
 def ScaleByVolume(inputWS, scalefactor, geomid, width, height, thickness):
 	# Divide by the area

@@ -64,7 +64,7 @@ def addRunToStore(parts, run_store):
     run_store.append(inputdata)
     return 0
 
-def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAlgs='SaveRKH',verbose=False, centreit=False, reducer=None):
+def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAlgs={'SaveRKH':'txt'},verbose=False, centreit=False, reducer=None):
     """
         @param filename: the CSV file with the list of runs to analyse
         @param format: type of file to load, nxs for Nexus, etc.
@@ -149,15 +149,13 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
-        if file != '':
-            if type(saveAlgs) == str:
-                saveAlgs = (saveAlgs, )
-            for algor in saveAlgs:
-                if not algor == 'SaveRKH':
-                    exec(algor+"(reduced,file)")
-                else:
-                    RKH = file+'.txt'
-                    exec(algor+"(reduced,RKH)")
+        if file:
+            for algor in saveAlgs.keys():
+                #add the file extension, important when saving different types of file so they don't over-write each other
+                ext = saveAlgs[algor]
+                if not ext.startswith('.'):
+                    ext = '.' + ext
+                exec(algor+'(reduced,file+ext)')
 
         if verbose:
             mantid.sendLogMessage('::SANS::' + createColetteScript(run, format, reduced, centreit, plotresults, filename))

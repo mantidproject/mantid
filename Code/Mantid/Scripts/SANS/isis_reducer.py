@@ -146,7 +146,10 @@ class ISISReducer(SANSReducer):
             Returns the name of the raw workspace that was
             loaded to run
         """ 
-        return self._data_files.values()[0]
+        if len(self._data_files) > 0:
+            return self._data_files.values()[0]
+        else:
+            return None
     
     def set_background(self, can_run=None, reload = True, period = -1):
         """

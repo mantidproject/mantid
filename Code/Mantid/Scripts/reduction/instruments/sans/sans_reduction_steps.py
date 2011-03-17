@@ -1132,8 +1132,9 @@ class GetSampleGeom(ReductionStep):
         """
             Simply sets the variable _thickness to the value passed
         """
-        if (not self._shape is None) and (not self._shape == 'cuboid'):
-            mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
+        #as only cuboids use the thickness the warning below may be informative
+        #if (not self._shape is None) and (not self._shape == 'cuboid'):
+        #    mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
         self._thickness = float(thickness)
 
     def get_thickness(self):

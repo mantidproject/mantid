@@ -18,7 +18,6 @@
 #include <QShowEvent>
 #include <QGroupBox>
 #include <QSettings>
-#include <QFileDialog>
 #include <QMessageBox>
 
 using namespace MantidQt::MantidWidgets;
@@ -304,7 +303,10 @@ void SaveWorkspaces::saveFileBrowse()
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
   QString filter = ";;AllFiles (*.*)";
-  QString oFile = API::FileDialogHandler::getSaveFileName(this, title, prevPath, filter);
+  QFileDialog::Option userCon = m_append->isChecked() ?
+    QFileDialog::DontConfirmOverwrite : QFileDialog::Option(0);
+  QString oFile = API::FileDialogHandler::getSaveFileName(
+      this, title, prevPath, filter, NULL, userCon);
 
   if( ! oFile.isEmpty() )
   {
