@@ -625,8 +625,48 @@ public:
     TS_ASSERT_EQUALS( subbox->getDepth(), 2);
 
     // And so on (this type of recursion was checked in test_splitAllIfNeeded()
+  }
 
 
+
+  //-------------------------------------------------------------------------------------
+  /** Tests that bad events are thrown out when using addEvents.
+   * */
+  void xtest_addManyEvents_Performance()
+  {
+    typedef MDGridBox<MDEvent<2>,2> box_t;
+    box_t * b = makeMDGridBox<2>();
+    box_t * subbox;
+
+    // Manually set some of the tasking parameters
+    b->getBoxController()->m_addingEvents_eventsPerTask = 50000;
+    b->getBoxController()->m_addingEvents_numTasksPerBlock = 100;
+    b->getBoxController()->m_SplitThreshold = 1000;
+    b->getBoxController()->m_maxDepth = 6;
+
+    Timer tim;
+    std::vector< MDEvent<2> > events;
+    double step_size = 1e-3;
+    size_t numPoints = (10.0/step_size)*(10.0/step_size);
+    std::cout << "Starting to write out " << numPoints << " events\n";
+    // Make an event in the middle of each box
+    for (double x=step_size; x < 10; x += step_size)
+      for (double y=step_size; y < 10; y += step_size)
+      {
+        double centers[2] = {x, y};
+        events.push_back( MDEvent<2>(2.0, 3.0, centers) );
+      }
+    TS_ASSERT_EQUALS( events.size(), numPoints);
+    std::cout << "..." << numPoints << " events were filled in " << tim.elapsed() << " secs.\n";
+
+    size_t numbad = 0;
+    TS_ASSERT_THROWS_NOTHING( numbad = b->addManyEvents( events ); );
+    TS_ASSERT_EQUALS( numbad, 0);
+    TS_ASSERT_EQUALS( b->getNPoints(), numPoints);
+    TS_ASSERT_EQUALS( b->getSignal(), numPoints*2.0);
+    TS_ASSERT_EQUALS( b->getErrorSquared(), numPoints*3.0);
+
+    std::cout << "addManyEvents() ran in " << tim.elapsed() << " secs.\n";
   }
 
 };

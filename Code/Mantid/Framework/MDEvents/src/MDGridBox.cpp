@@ -1,5 +1,6 @@
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/Timer.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadSchedulerMutexes.h"
@@ -245,6 +246,7 @@ namespace MDEvents
         // Plain MD-Box. Does it need to split?
         if (this->m_BoxController->willSplit(box->getNPoints(), box->getDepth() ))
         {
+          //std::cout << "Splitting box at depth " << box->getDepth() << "\n";
           // The MDBox needs to split into a grid box.
           MDGridBox<MDE, nd> * gridBox = new MDGridBox<MDE, nd>(box);
           // Replace in the array
@@ -415,10 +417,15 @@ namespace MDEvents
       }
 
       // Finish all threads.
+//      std::cout << "Starting block ending at index " << event_index << " of " << events.size() << std::endl;
+      Timer tim;
       tp.joinAll();
+//      std::cout << "... block took " << tim.elapsed() << " secs.\n";
 
       //Now, shake out all the sub boxes and split those if needed
+//      std::cout << "Starting splitAllIfNeeded().\n";
       this->splitAllIfNeeded();
+//      std::cout << "... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
     }
 
     // Refresh the counts, now that we are all done.
