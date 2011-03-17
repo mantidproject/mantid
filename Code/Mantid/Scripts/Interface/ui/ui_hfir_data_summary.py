@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_data_summary.ui'
 #
-# Created: Thu Mar 10 15:51:39 2011
+# Created: Thu Mar 17 11:26:29 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -72,7 +72,7 @@ class Ui_Frame(object):
         self.verticalLayout.addLayout(self.gridLayout)
         self.reduction_options_groupbox = QtGui.QGroupBox(Frame)
         self.reduction_options_groupbox.setMinimumSize(QtCore.QSize(0, 250))
-        self.reduction_options_groupbox.setMaximumSize(QtCore.QSize(16777215, 250))
+        self.reduction_options_groupbox.setMaximumSize(QtCore.QSize(16777215, 500))
         self.reduction_options_groupbox.setObjectName("reduction_options_groupbox")
         self.formLayoutWidget_2 = QtGui.QWidget(self.reduction_options_groupbox)
         self.formLayoutWidget_2.setGeometry(QtCore.QRect(10, 20, 881, 222))
