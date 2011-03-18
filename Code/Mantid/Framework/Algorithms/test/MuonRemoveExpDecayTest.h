@@ -37,7 +37,6 @@ public:
   void testLoadNexusAndSetProperties()
   {
   //This test does not run on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
 
     loader.initialize();
     loader.setPropertyValue("Filename", "emu00006473.nxs");
@@ -48,21 +47,17 @@ public:
     alg.setPropertyValue("InputWorkspace", "EMU6473");
     alg.setPropertyValue("OutputWorkspace", "Result");
     alg.setPropertyValue("Spectra", "0");
-#endif /*_WIN64*/
   }
 
   void testProperties()
   {
     //This test does not run on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     TS_ASSERT_EQUALS( alg.getPropertyValue("Spectra"), "0");
-#endif /*_WIN64*/
   }
 
   void testExecute()
   {
       //This test does not run on Windows64 as is does not support HDF4 files
-#ifndef _WIN64
     try 
     {
       TS_ASSERT_EQUALS(alg.execute(),true);
@@ -73,8 +68,28 @@ public:
     }
 
     Workspace_const_sptr outputWS = AnalysisDataService::Instance().retrieve("Result");
-#endif /*_WIN64*/
   }
+
+  void testWhereOptional3rdArgNotSet()
+  {
+  //This test does not run on Windows64 as is does not support HDF4 files
+
+    MuonRemoveExpDecay alg2;
+    alg2.initialize();
+
+    alg2.setPropertyValue("InputWorkspace", "EMU6473");
+    alg2.setPropertyValue("OutputWorkspace", "MuonRemoveExpDecayResult");
+
+    try 
+    {
+      TS_ASSERT_EQUALS(alg2.execute(),true);
+    }
+    catch(std::runtime_error e)
+    {
+      TS_FAIL(e.what());
+    }
+  }
+
 
 private:
   MuonRemoveExpDecay alg;

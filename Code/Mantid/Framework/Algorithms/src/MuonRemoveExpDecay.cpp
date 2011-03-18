@@ -38,8 +38,7 @@ void MuonRemoveExpDecay::init()
   declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace", "",
       Direction::Output), "The name of the workspace to be created as the output of the algorithm");
   std::vector<int> empty;
-  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty, new MandatoryValidator<std::vector<
-      int> > ), "Spectra to remove the exponential decay from");
+  declareProperty(new Kernel::ArrayProperty<int>("Spectra", empty), "Spectra to remove the exponential decay from");
 }
 
 /** Executes the algorithm
