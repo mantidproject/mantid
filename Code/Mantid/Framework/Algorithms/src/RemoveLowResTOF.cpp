@@ -79,8 +79,6 @@ void RemoveLowResTOF::init()
   validator->setLower(0.01);
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used." );
-
-  declareProperty("ForceHist", false); // TODO remove
 }
 
 void RemoveLowResTOF::exec()
@@ -117,7 +115,7 @@ void RemoveLowResTOF::exec()
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  if ((m_inputEvWS != NULL) && ! this->getProperty("ForceHist")) // TODO remove ForceHist option
+  if (m_inputEvWS != NULL)
   {
     this->execEvent();
     return;
@@ -138,13 +136,19 @@ void RemoveLowResTOF::exec()
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     // copy the data from the input workspace
-    outputWS->dataX(workspaceIndex) = m_inputWS->dataX(workspaceIndex);
-    outputWS->dataY(workspaceIndex) = m_inputWS->dataY(workspaceIndex);
-    outputWS->dataE(workspaceIndex) = m_inputWS->dataE(workspaceIndex);
+    outputWS->dataX(workspaceIndex) = m_inputWS->readX(workspaceIndex);
+    outputWS->dataY(workspaceIndex) = m_inputWS->readY(workspaceIndex);
+    outputWS->dataE(workspaceIndex) = m_inputWS->readE(workspaceIndex);
 
+    // calculate where to zero out to
     double tofMin = this->calcTofMin(workspaceIndex);
-    size_t endBin = 1000; // TODO
-    for (size_t i = 1; i < endBin; i++)
+    const MantidVec& X = m_inputWS->readX(0);
+    MantidVec::const_iterator last = std::lower_bound(X.begin(),X.end(),tofMin);
+    if (last==X.end()) --last;
+    size_t endBin = last - X.begin();
+
+    // flatten out the data
+    for (size_t i = 0; i < endBin; i++)
     {
       outputWS->maskBin(workspaceIndex, i);
     }
