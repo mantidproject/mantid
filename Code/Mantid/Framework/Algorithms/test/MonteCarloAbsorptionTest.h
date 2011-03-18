@@ -66,24 +66,23 @@ public:
     TS_ASSERT(factorWS);
     if( !factorWS ) TS_FAIL("Cannot retrieve output workspace");
 
-    const int nhist(factorWS->getNumberHistograms());
     const int nbins(factorWS->blocksize());
 
     // Pick out some random values
     const double delta(1e-08);
     const int middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.00570690, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000063376 , delta);
-    TS_ASSERT_DELTA(factorWS->readY(0).back(), 0.00011295,delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.00478216, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000134138, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0).back(), 1.18e-7, delta);
         
     // Different spectra
-    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.01137836, delta);
-    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.00026730 , delta);
-    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.00035921,delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).front(), 0.00868813, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4)[middle_index], 0.000177928, delta);
+    TS_ASSERT_DELTA(factorWS->readY(4).back(), 0.000131067, delta);
 
-    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00680700, delta);
-    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 7.93578e-05 , delta);
-    TS_ASSERT_DELTA(factorWS->readY(8).back(), 1.81556e-07, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).front(), 0.00654715, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8)[middle_index], 0.00022438, delta);
+    TS_ASSERT_DELTA(factorWS->readY(8).back(), 1.14231e-5, delta);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);
@@ -110,15 +109,14 @@ public:
     TS_ASSERT(factorWS);
     if( !factorWS ) TS_FAIL("Cannot retrieve output workspace");
 
-    const int nhist(factorWS->getNumberHistograms());
     const int nbins(factorWS->blocksize());
 
     // Pick out some random values
     const double delta(1e-08);
     const int middle_index = (nbins/2) - 1;
-    TS_ASSERT_DELTA(factorWS->readY(0).front(), 1.36024602e-05, delta);
-    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 1.99331514638e-08, 1e-9);
-    TS_ASSERT_DELTA(factorWS->readY(0).back(), 5.50128516016e-10, 1e-12);
+    TS_ASSERT_DELTA(factorWS->readY(0).front(), 1.96018e-05, delta);
+    TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 6.56478e-09, 1e-9);
+    TS_ASSERT_DELTA(factorWS->readY(0).back(), 2.3604e-11, 1e-12);
 
     dataStore.remove(inputName);
     dataStore.remove(outputName);

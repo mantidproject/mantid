@@ -42,8 +42,8 @@ class DLLExport Progress
 {
 public:
   Progress();
-
   Progress(Algorithm* alg,double start,double end, int numSteps);
+  virtual ~Progress();
 
   virtual void report(const std::string& msg = "");
   virtual void report(int i,const std::string& msg = "");

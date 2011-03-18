@@ -190,17 +190,17 @@ namespace Mantid
       error = 0.0;
       while( numDetected < m_numberOfEvents )
       {
-	V3D startPos = sampleBeamProfile();
-	V3D scatterPoint = selectScatterPoint();
-	try
-	{
-	  attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
-	}
-	catch(std::logic_error &)
-	{
-	  continue;
-	}
-    	++numDetected;
+        V3D startPos = sampleBeamProfile();
+        V3D scatterPoint = selectScatterPoint();
+        try
+        {
+          attenFactor += attenuationFactor(startPos, scatterPoint, detectorPos, lambda);
+        }
+        catch(std::logic_error &)
+        {
+          continue;
+        }
+        ++numDetected;
       }
 
       // Attenuation factor is simply the average value
@@ -233,9 +233,10 @@ namespace Mantid
       int nattempts(0);
       while( nattempts < MaxRandPointAttempts )
       {
-        scatterPoint = V3D(m_bbox_halflength*(2.0*m_randGen->next() - 1.0),
-            m_bbox_halfwidth*(2.0*m_randGen->next() - 1.0),
-            m_bbox_halfheight*(2.0*m_randGen->next() - 1.0) );
+        const double x = m_bbox_halflength*(2.0*m_randGen->next() - 1.0);
+        const double y = m_bbox_halfwidth*(2.0*m_randGen->next() - 1.0);
+        const double z = m_bbox_halfheight*(2.0*m_randGen->next() - 1.0);
+        scatterPoint(x,y,z);
         ++nattempts;
         if( m_sampleShape->isValid(scatterPoint) ||
             (m_container && m_container->isValid(scatterPoint)) )
@@ -245,7 +246,7 @@ namespace Mantid
         }
       }
       // If we got here then the shape is too strange for the bounding box to be of any use.
-      g_log.error() << "Attempts to generat a random point with the sample/can "
+      g_log.error() << "Attempts to generate a random point with the sample/can "
           << "have exceeded the allowed number of tries.\n";
       throw std::runtime_error("Attempts to produce random scatter point failed. Check sample shape.");
 
@@ -275,7 +276,7 @@ namespace Mantid
       if( m_sampleShape->interceptSurface(beforeScatter) == 0 || 
           m_sampleShape->interceptSurface(afterScatter) == 0 )
       {
-	throw std::logic_error("Track has no surfaces intersections.");
+        throw std::logic_error("Track has no surfaces intersections.");
       }
 
       double length = beforeScatter.begin()->distInsideObject;
@@ -368,7 +369,7 @@ namespace Mantid
       if( !m_sampleShape->hasValidShape() )
       {
         g_log.debug() << "Invalid shape defined on workspace. TopRule = " << m_sampleShape->topRule()
-		                  << ", No. of surfaces: " << m_sampleShape->getSurfacePtr().size() << "\n";
+                      << ", No. of surfaces: " << m_sampleShape->getSurfacePtr().size() << "\n";
         throw std::invalid_argument("Input workspace has an invalid sample shape.");
       }
       

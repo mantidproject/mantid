@@ -14,8 +14,8 @@ namespace API
 Progress::Progress()
   :m_alg(NULL), m_start(0), m_end(1.0),
    m_ifirst(0), m_numSteps(1),
-   m_notifyStepPct(1),
    m_notifyStep(1),
+   m_notifyStepPct(1),
    m_step(1), m_i(0),
    m_last_reported(-1)
 {
@@ -31,11 +31,16 @@ Progress::Progress(Algorithm* alg,double start,double end, int numSteps)
   :m_alg(alg),
    m_start(start),m_end(end),
    m_ifirst(0),
+   m_notifyStepPct(1),
    m_i(0)
 {
   this->setNumSteps(numSteps);
   m_last_reported = -m_notifyStep;
 }
+
+/// Destructor
+Progress::~Progress()
+{}
 
 /** Increments the loop counter by 1, then
  * sends the progress notification on behalf of its algorithm.
