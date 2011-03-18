@@ -351,6 +351,15 @@ bool Graph::isColorBarEnabled(int axis) const
   }
   return false;
 }
+/** Finds out if the specified axis has a log scale or not
+*  @param axis the aixs to check e.g. yright ...
+*  @return true if there is a log scale on that axis
+*/
+bool Graph::isLog(const QwtPlot::Axis axis) const
+{
+  ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(axis);
+  return ( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 );
+}
 
 ScaleDraw::ScaleType Graph::axisType(int axis)
 {
@@ -1011,13 +1020,9 @@ void Graph::setAutoScale()
   updateScale();
   for (int i = 0; i < QwtPlot::axisCnt; i++)
   {
-    if ( !m_fixed_axes.contains(i) )
+    if ( !m_fixed_axes.contains(i) && isLog(QwtPlot::Axis(i)) )
     {
-      ScaleEngine *sc_engine = (ScaleEngine *)d_plot->axisScaleEngine(i);
-      if( sc_engine && sc_engine->type() == QwtScaleTransformation::Log10 )
-      {
-        niceLogScales(QwtPlot::Axis(i));
-      }
+      niceLogScales(QwtPlot::Axis(i));
     }
   }
   emit modifiedGraph();

@@ -98,7 +98,9 @@ MantidCurve::MantidCurve(const MantidCurve& c)
  */
 void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,Graph* g,int index)
 {
-  MantidQwtData data(workspace,index);
+  //we need to censor the data a bit if there is a log scale because it can't deal with negative values, only the y-axis has been found to be problem so far
+  const bool log = g->isLog(QwtPlot::yLeft);
+  MantidQwtData data(workspace,index, style()!=Steps, log);
   setData(data);
 
   int lineWidth = 1;
@@ -342,7 +344,7 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
 //==========================================
 
 /// Constructor
-MantidQwtData::MantidQwtData(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace,int specIndex)
+MantidQwtData::MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace,int specIndex, const bool binCentres, const bool logScale)
 : QObject(),
 m_workspace(workspace),
 m_spec(specIndex),
@@ -350,8 +352,8 @@ m_X(workspace->readX(specIndex)),
 m_Y(workspace->readY(specIndex)),
 m_E(workspace->readE(specIndex)),
 m_isHistogram(workspace->isHistogramData()),
-m_binCentres(false),
-m_logScale(false),
+m_binCentres(binCentres),
+m_logScale(logScale),
 m_tmp(0)
 {}
 
