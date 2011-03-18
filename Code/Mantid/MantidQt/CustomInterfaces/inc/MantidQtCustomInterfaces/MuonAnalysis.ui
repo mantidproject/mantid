@@ -634,11 +634,21 @@
         </rect>
        </property>
        <property name="rowCount" >
-        <number>10</number>
+        <number>20</number>
        </property>
        <property name="columnCount" >
         <number>3</number>
        </property>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
+       <row/>
        <row/>
        <row/>
        <row/>

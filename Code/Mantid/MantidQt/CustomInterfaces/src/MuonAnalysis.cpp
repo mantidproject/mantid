@@ -1191,7 +1191,7 @@ void MuonAnalysis::updateFront()
       m_uiForm.frontAlphaLabel->setVisible(true);
       m_uiForm.frontAlphaNumber->setVisible(true);
 
-      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(index-numG,3)->text());
+      m_uiForm.frontAlphaNumber->setText(m_uiForm.pairTable->item(m_pairToRow[index-numG],3)->text());
     }
     else
     {
@@ -1479,14 +1479,13 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       runPythonCode( pyStrNormalise ).trimmed();
 
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + cropWS + "\"," + gNum + ")\n" + pyS
+        + cropWS + "\")\n" + pyS
         + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
     }
     else if (plotType.compare("Logorithm") == 0)
     {
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
-        + cropWS + "\","
-        + gNum + ")\n" + pyS
+        + cropWS + "\")\n" + pyS
         + "l.setAxisTitle(Layer.Left, \"Logorithm\")\n";
     }
     else
@@ -1546,9 +1545,9 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QString gNum = QString::number(pairNum);
     QString pyS;
     if ( m_uiForm.showErrorBars->isChecked() )
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ",True)\n";
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ",True)\n";
     else
-      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + gNum + ")\n";
+      pyS = "gs = plotSpectrum(\"" + cropWS + "\"," + "0" + ")\n";
     pyS += "l = gs.activeLayer()\n"
       "l.setCurveTitle(0, \"" + titleLabel + "\")\n"
       "l.setTitle(\"" + m_title.c_str() + "\")\n"
@@ -1610,6 +1609,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     }
 
     // run python script
+    std::string bsdfasdf = pyString.toStdString();
     QString pyOutput = runPythonCode( pyString ).trimmed();
   }
 }
