@@ -155,7 +155,7 @@ class MantidQwtData: public QObject, public QwtData
   Q_OBJECT
 public:
   /// Constructor
-  MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool binCentres, const bool logScale);
+  MantidQwtData(Mantid::API::MatrixWorkspace_const_sptr workspace, int specIndex, const bool logScale);
 
   /// Copy constructor
   MantidQwtData(const MantidQwtData& data);
@@ -182,7 +182,7 @@ public:
   /// Return a new data object of the same type but with a new workspace
   virtual MantidQwtData* copy(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
   {
-    return new MantidQwtData(workspace,m_spec, m_binCentres, m_logScale);
+    return new MantidQwtData(workspace,m_spec, m_logScale);
   }
   /// Returns the error of the i-th data point
   double e(size_t i)const;
