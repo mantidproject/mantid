@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<parameter-file instrument = "MAPS" date = "2010-05-05T00:00:00">
+
+<component-link name = "LET">
+
+<parameter name="deltaE-mode" type="string">
+  <value val="direct"/>
+</parameter>
+
+<parameter name="ei-mon1-spec">
+  <value val="24582"/>
+</parameter>
+
+<parameter name="ei-mon2-spec">
+  <value val="5506"/>
+</parameter>
+
+<parameter name="scale-factor">
+  <value val="1.7016e8"/>
+</parameter>
+
+<parameter name="wb-scale-factor">
+  <value val="1000"/>
+</parameter>
+
+<parameter name="bkgd-range-min">
+  <value val="90000"/>
+</parameter>
+
+<parameter name="bkgd-range-max">
+  <value val="95000"/>
+</parameter>
+
+<parameter name="wb-integr-min">
+  <value val="5"/>
+</parameter>
+
+<parameter name="wb-integr-max">
+  <value val="300"/>
+</parameter>
+
+<parameter name="norm-mon1-spec">
+  <value val="24576"/>
+</parameter>
+
+<parameter name="norm-mon1-min">
+  <value val="10000"/>
+</parameter>
+
+<parameter name="norm-mon1-max">
+  <value val="12000"/>
+</parameter>
+
+<parameter name="monovan-integr-min">
+  <value val="-1"/>
+</parameter>
+
+<parameter name="monovan-integr-max">
+  <value val="1"/>
+</parameter>
+
+<parameter name="vanadium-mass">
+  <value val="30.1"/>
+</parameter>
+
+<parameter name="vanadium-rmm">
+  <value val="50.9415"/>
+</parameter>
+
+<!-- Diagnostic test defaults -->
+
+<parameter name="remove_zero">
+  <value val="1.0"/>
+</parameter>
+
+<parameter name="tiny">
+  <value val="1e-10"/>
+</parameter>
+
+<parameter name="large">
+  <value val="1e10"/>
+</parameter>
+
+<parameter name="median_lo">
+  <value val="0.1"/>
+</parameter>
+
+<parameter name="median_hi">
+  <value val="3.0"/>
+</parameter>
+
+<parameter name="signif">
+  <value val="3.3"/>
+</parameter>
+
+<parameter name="check_background">
+  <value val="1.0"/>
+</parameter>
+
+<parameter name="bkgd_threshold">
+  <value val="5.0"/>
+</parameter>
+
+<parameter name="variation">
+  <value val="1.1"/>
+</parameter>
+
+<!--  -->
+<!-- Absolute units conversion average -->
+
+<parameter name="monovan_lo_bound">
+  <value val="0.01"/>
+</parameter>
+
+<parameter name="monovan_hi_bound">
+  <value val="100"/>
+</parameter>
+
+<parameter name="monovan_lo_frac">
+  <value val="0.8"/>
+</parameter>
+
+<parameter name="monovan_hi_frac">
+  <value val="1.2"/>
+</parameter>
+
+<!--  -->
+<!-- PSD bleed test -->
+<!-- PSD bleed test -->
+
+<parameter name="bleed_test">
+  <value val="1.0"/>
+</parameter>
+
+<parameter name="bleed_max_framerate">
+  <value val="0.01"/>
+</parameter>
+
+<parameter name="bleed_ignored_pixels">
+  <value val="80"/>
+</parameter>
+
+</component-link>
+
+</parameter-file>

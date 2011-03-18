@@ -181,13 +181,9 @@ double GetEi2::getDistanceFromSource(int ws_index) const
   IDetector_sptr det = m_input_ws->getDetector(ws_index);
   if( !det )
   {
-    g_log.error() << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
-    throw std::runtime_error("No detector found.");
-  }
-  if( boost::dynamic_pointer_cast<DetectorGroup>(det) )
-  {
-    g_log.error() << "The detector for workspace " << ws_index << " is a group, grouped monitors are not supported by this algorithm\n";
-    throw std::runtime_error("Detector for monitor is a DetectorGroup.");
+    std::ostringstream msg;
+	msg << "A detector for monitor at workspace index " << ws_index << " cannot be found. ";
+    throw std::runtime_error(msg.str());
   }
   return det->getDistance(*source);
 }
@@ -279,14 +275,14 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   const MantidVec & Es = data_ws->readE(0);
 
   MantidVec::const_iterator peakIt = std::max_element(Ys.begin(), Ys.end());
-  unsigned int iPeak = peakIt - Ys.begin();
+  MantidVec::difference_type iPeak = peakIt - Ys.begin();
   double peakY = Ys[iPeak];
   double peakE = Es[iPeak];
 
   const std::vector<double>::size_type nxvals = Xs.size();
 
   //! Find data range that satisfies prominence criterion: im < ipk < ip will be nearest points that satisfy this
-  int im = iPeak-1;
+  int im = (int)iPeak-1;
   for( ; im >= 0; --im )
   {
     const double ratio = Ys[im]/peakY;
@@ -403,12 +399,12 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   std::copy( Es.begin()+im, Es.begin() + ip + 1, peak_e.begin());
 
   // FWHH:
-  int ipk_int = iPeak - im;  //       ! peak position in internal array
+  int ipk_int = (int)iPeak - im;  //       ! peak position in internal array
   double hby2 = 0.5*peak_y[ipk_int];
   int ip1(0), ip2(0);
   double xp_hh(0);
 
-  const int nyvals = peak_y.size();     
+  int nyvals = (int)peak_y.size();     
   if (peak_y[nyvals-1] < hby2)
   {
     for( int i = ipk_int; i < nyvals;  ++i )
@@ -546,8 +542,8 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
   if( mu < ml )
   {
     //special case of no data points in the integration range
-    unsigned int ilo = std::max<unsigned int>(ml-1,0);
-    unsigned int ihi = std::min<unsigned int>(mu+1,nx);
+    unsigned int ilo = std::max<unsigned int>((unsigned int)ml - 1, 0);
+    unsigned int ihi = std::min<unsigned int>((unsigned int)mu + 1, (unsigned int)nx);
     double fraction = (xmax - xmin)/(x[ihi] - x[ilo]);
     integral_val = 0.5 * fraction * 
       ( s[ihi]*((xmax - x[ilo]) + (xmin - x[ilo])) + s[ilo]*((x[ihi] - xmax)+(x[ihi] - xmin)) );
@@ -605,7 +601,7 @@ void GetEi2::integrate(double & integral_val, double &integral_err, const Mantid
   }
   else
   {
-    for( int i = ml; i < mu; ++i )
+    for( int i = (int)ml; i < mu; ++i )
     {
       integral_val += (s[i+1] + s[i])*(x[i+1] - x[i]);
       if( i < mu - 1 )

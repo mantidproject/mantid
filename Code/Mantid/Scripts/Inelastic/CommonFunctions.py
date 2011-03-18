@@ -90,6 +90,8 @@ def load_runs(runs, file_type, sum=True):
     splitting monitors is sorted out.
     """
     if type(runs) == list:
+        if len(runs) == 1:
+            sum = False
         if sum == True:
             result_ws = load_run(runs[0], file_type)
             summed = 'summed-run-files'
@@ -105,7 +107,10 @@ def load_runs(runs, file_type, sum=True):
             loaded = []
             for r in runs:
                 loaded.append(load_run(r, file_type))
-            return loaded
+            if len(loaded) == 1:
+                return loaded[0]
+            else:
+                return loaded
     else:
         # Try a single run
         return load_run(runs, file_type)

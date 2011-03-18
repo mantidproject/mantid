@@ -100,14 +100,14 @@
    <!-- Detectors types -->
    <type name="monitors">
      <component type="monitor" mark-as="monitor">
-       <location r="10.70" t="180.0" p="0.0" name="monitor1" />
-       <location r="15.70" t="180.0" p="0.0" name="monitor2" />
-       <location r="20.964" t="180.0" p="0.0" name="monitor3" />
-       <location r="22" t="180.0" p="0.0" name="monitor4" />
-       <location r="23" t="180.0" p="0.0" name="monitor5" />
-       <location r="24" t="180.0" p="0.0" name="monitor6" />
-       <location r="24.5" t="180.0" p="0.0" name="monitor7" />
-       <location r="1.00" t="0.0" p="0.0" name="monitor8" />
+       <location r="17.758" t="180.0" p="0.0" name="monitor1" />
+       <location r="17.060" t="180.0" p="0.0" name="monitor2" />
+       <location r="16.558" t="180.0" p="0.0" name="monitor3" />
+       <location r="13.164" t="180.0" p="0.0" name="monitor4" />
+       <location r="9.255" t="180.0" p="0.0" name="monitor5" />
+       <location r="1.333" t="180.0" p="0.0" name="monitor6" />
+       <location r="1.088" t="180.0" p="0.0" name="monitor7" />
+       <location r="1.088" t="180.0" p="0.0" name="monitor8" />
      </component>
    </type>
  
@@ -186,7 +186,7 @@
  
  <type name="LETdoor">
  <properties />
- <component type="LETtube">
+ <component type="LETtube" outline="yes">
 <location  x="   0.393024    " z="  -0.221369E-01" name="tube1" />
 <location  x="   0.367765    " z="  -0.193752E-01" name="tube2" />
 <location  x="   0.342486    " z="  -0.167970E-01" name="tube3" />
@@ -222,7 +222,7 @@
  </component>
  </type>
  
- <type name="LETtube">
+ <type name="LETtube"  outline="yes">
  <component type="pixel">
    <location y="   -2.00304    "/>
    <location y="   -1.99913    "/>
