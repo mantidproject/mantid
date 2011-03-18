@@ -2727,7 +2727,8 @@ namespace DataObjects
    * this is overloaded by event type.
    *
    * @param el :: The EventList to retrieve
-   * @param events :: reference to a pointer to a vector of this type of event
+   * @param[out] events :: reference to a pointer to a vector of this type of event.
+   *             The pointer will be set to point to the vector.
    * @throw runtime_error if you call this on the wrong type of EventList.
    */
   void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events)
@@ -2740,7 +2741,8 @@ namespace DataObjects
    * this is overloaded by event type.
    *
    * @param el :: The EventList to retrieve
-   * @param events :: reference to a pointer to a vector of this type of event
+   * @param[out] events :: reference to a pointer to a vector of this type of event.
+   *             The pointer will be set to point to the vector.
    * @throw runtime_error if you call this on the wrong type of EventList.
    */
   void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events)
@@ -2753,7 +2755,8 @@ namespace DataObjects
    * this is overloaded by event type.
    *
    * @param el :: The EventList to retrieve
-   * @param events :: reference to a pointer to a vector of this type of event
+   * @param[out] events :: reference to a pointer to a vector of this type of event.
+   *             The pointer will be set to point to the vector.
    * @throw runtime_error if you call this on the wrong type of EventList.
    */
   void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events)

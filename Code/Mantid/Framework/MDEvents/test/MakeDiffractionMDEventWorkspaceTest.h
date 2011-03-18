@@ -88,17 +88,55 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void xtest_MINITOPAZ()
+  void do_test_MINITOPAZ(EventType type)
   {
-    EventWorkspace_sptr ws = createDiffractionEventWorkspace(1000);
+    int numEventsPer = 100;
+    EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
+    if (type == WEIGHTED)
+      in_ws *= 2.0;
+    if (type == WEIGHTED_NOTIME)
+    {
+      for (int i =0; i<in_ws->getNumberHistograms(); i++)
+      {
+        EventList & el = in_ws->getEventList(i);
+        el.compressEvents(0.0, &el);
+      }
+    }
 
     MakeDiffractionMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
-    alg.setProperty("InputWorkspace", ws);
+    alg.setProperty("InputWorkspace", in_ws);
     alg.setPropertyValue("OutputWorkspace", "test_md3");
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() )
+
+    MDEventWorkspace3::sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    TS_ASSERT_EQUALS( ws->getNPoints(), numEventsPer*100*100);
+
+    AnalysisDataService::Instance().remove("test_md3");
   }
+
+  void test_MINITOPAZ()
+  {
+    do_test_MINITOPAZ(TOF);
+  }
+
+  void test_MINITOPAZ_weightedEvents()
+  {
+    do_test_MINITOPAZ(WEIGHTED);
+  }
+
+  void test_MINITOPAZ_weightedEvents_noTime()
+  {
+    do_test_MINITOPAZ(WEIGHTED);
+  }
+
+
 
 
 };

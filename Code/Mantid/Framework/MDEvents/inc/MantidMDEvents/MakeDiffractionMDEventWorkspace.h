@@ -45,6 +45,7 @@ namespace MDEvents
     void init();
     void exec();
 
+    template <class T>
     void convertEventList(int workspaceIndex);
 
     /// The input event workspace

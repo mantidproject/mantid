@@ -308,6 +308,7 @@ namespace MDEvents
 
   //-----------------------------------------------------------------------------------------------
   /** Add several events, starting and stopping at particular point in a vector.
+   * Bounds checking IS performed, and events outside the range are rejected.
    *
    * NOTE: You must call refreshCache() after you are done, to calculate the
    *  nPoints, signal and error.

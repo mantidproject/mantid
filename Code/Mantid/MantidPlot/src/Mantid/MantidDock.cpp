@@ -413,6 +413,10 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
     ws_item->addChild(sub_data_item);
   }
 
+  data_item = new QTreeWidgetItem(QStringList("Events: "+QString::number(workspace->getNPoints())));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
   data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize()/1024)+" KB"));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);

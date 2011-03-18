@@ -1,13 +1,14 @@
+#include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/IMDEventWorkspace.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
 #include "MantidAPI/ProgressText.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/FunctionTask.h"
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidAlgorithms/AlignDetectors.h"
-#include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -64,10 +65,12 @@ namespace MDEvents
 
 
   //----------------------------------------------------------------------------------------------
-  /** Convert an event list and add it to the MDEventWorkspace
+  /** Convert an event list to 3D q-space and add it to the MDEventWorkspace
    *
+   * @tparam T :: the type of event in the input EventList (TofEvent, WeightedEvent, etc.)
    * @param workspaceIndex :: index into the workspace
    */
+  template <class T>
   void MakeDiffractionMDEventWorkspace::convertEventList(int workspaceIndex)
   {
     EventList & el = in_ws->getEventList(workspaceIndex);
@@ -101,10 +104,14 @@ namespace MDEvents
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
 
-      // TODO: Generalize to other types of events
-      std::vector<TofEvent> & events = el.getEvents();
-      std::vector<TofEvent>::iterator it = events.begin();
-      std::vector<TofEvent>::iterator it_end = events.end();
+      // This little dance makes the vector of events more general.
+      typename std::vector<T> * events_ptr;
+      getEventsFrom(el, events_ptr);
+      typename std::vector<T> & events = *events_ptr;
+
+      // Iterators to start/end
+      typename std::vector<T>::iterator it = events.begin();
+      typename std::vector<T>::iterator it_end = events.end();
       for (; it != it_end; it++)
       {
         // Time of flight of neutron in seconds
@@ -147,9 +154,10 @@ namespace MDEvents
       throw std::runtime_error("Error creating a 3D MDEventWorkspace!");
 
     // Give all the dimensions     //TODO: Find q limits
+    std::string names[3] = {"Qx", "Qy", "Qz"};
     for (size_t d=0; d<nd; d++)
     {
-      Dimension dim(-100.0, +100.0, "Qx", "Angstroms^-1");
+      Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
       ws->addDimension(dim);
     }
     ws->initialize();
@@ -168,17 +176,41 @@ namespace MDEvents
     //To get all the detector ID's
     allDetectors = in_ws->getInstrument()->getDetectors();
 
-    prog = new ProgressText(0, 1.0, in_ws->getNumberHistograms());
+    prog = new Progress(this, 0, 1.0, in_ws->getNumberHistograms());
 
-    PARALLEL_FOR_NO_WSP_CHECK()
+    // Create the thread pool that will run all of these.
+    ThreadScheduler * ts = new ThreadSchedulerLargestCost();
+    ThreadPool tp(ts);
+
     for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
-      this->convertEventList(wi);
+      // Equivalent of: this->convertEventList(wi);
+      EventList & el = in_ws->getEventList(wi);
+
+      // We want to bind to the right templated function, so we have to know the type of TofEvent contained in the EventList.
+      boost::function<void ()> func;
+      switch (el.getEventType())
+      {
+      case TOF:
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<TofEvent>, &*this, wi);
+        break;
+      case WEIGHTED:
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEvent>, &*this, wi);
+        break;
+      case WEIGHTED_NOTIME:
+        func = boost::bind(&MakeDiffractionMDEventWorkspace::convertEventList<WeightedEventNoTime>, &*this, wi);
+        break;
+      default:
+        throw std::runtime_error("EventList had an unexpected data type!");
+      }
+
+      // Give this task to the scheduler
+      double cost = el.getNumberEvents();
+      ts->push( new FunctionTask( func, cost) );
     }
 
-//    ws->data
-
-    std::cout << ws->getNPoints() << " MD events in the workspace now!\n";
+    // Wait for all tasks to complete.
+    tp.joinAll();
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
