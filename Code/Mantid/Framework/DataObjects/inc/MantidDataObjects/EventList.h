@@ -321,9 +321,10 @@ private:
 
 };
 
-void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events);
-void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events);
-void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events);
+// Methods overloaded to get event vectors.
+DLLExport void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events);
+DLLExport void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events);
+DLLExport void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events);
 
 } // DataObjects
 } // Mantid
