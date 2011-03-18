@@ -12,7 +12,7 @@ import platform # used to determine operating environment
 def convert_to_energy(rawfiles, grouping, first, last,
         instrument, analyser, reflection,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
-        saveFormats=[], CleanUp = True, Verbose = False, FortranUnwrap=False):        
+        saveFormats=[], CleanUp = True, Verbose = False):        
     # Get hold of base empty instrument workspace
     wsInst = mtd['__empty_' + instrument]
     if wsInst is None:
@@ -62,7 +62,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         runNo = mtd[ws].getRun().getLogData("run_number").value
         runNos.append(runNo)
         name = isn + runNo + '_' + analyser + reflection + '_red'
-        timeRegime(monitor=ws_mon, detectors=ws, FortranUnwrap=FortranUnwrap)
+        timeRegime(monitor=ws_mon, detectors=ws)
         monitorEfficiency(ws_mon, area, thickness)
         ## start dealing with detector data here
         if ( bgremove != [0, 0] ):
@@ -201,16 +201,10 @@ def getFirstMonFirstDet(inWS):
             break
     return FirstMon, FirstDet
 
-def timeRegime(Smooth=True, monitor='', detectors='', FortranUnwrap=False):
+def timeRegime(Smooth=True, monitor='', detectors=''):
     SpecMon = mtd[monitor].readX(0)[0]
     SpecDet = mtd[detectors].readX(0)[0]
     if ( SpecMon == SpecDet ) and not adjustTOF(monitor):
-        if FortranUnwrap:
-            fuworked = fortranUnwrap(monitor)
-            if fuworked:
-                return monitor
-            else:
-                print "Unable to use FortanUnwrapping. Trying regular instead."
         LRef = getReferenceLength(detectors, 0)
         alg = Unwrap(monitor, monitor, LRef = LRef)
         join = float(alg.getPropertyValue('JoinWavelength'))
@@ -222,35 +216,6 @@ def timeRegime(Smooth=True, monitor='', detectors='', FortranUnwrap=False):
         ConvertUnits(monitor, monitor, 'Wavelength', 'Indirect')
     return monitor
 
-def fortranUnwrap(monitor):
-    try:
-        openv = platform.system()+platform.architecture()[0]
-        if ( openv == 'Windows32bit' ):
-            import unwrap_win32 as unwrap
-        else:
-            return False
-    except ImportError:
-        return False
-    ConvertUnits(monitor,monitor,'Wavelength', 'Indirect')
-    ws = mtd[monitor]
-    Xin = ws.readX(0)
-    ntc = len(Xin)-1 # get no. points from length of x array
-    Yin = ws.readY(0)
-    Ein = ws.readE(0)
-    Xv = LibPadArray(Xin,4096)
-    Yv = LibPadArray(Yin,4096)
-    Ev = LibPadArray(Ein,4096)
-    ## Actual call to Fortran routine here ####################################
-    xout,yout,eout = unwrap.unwrap(ntc,Xv,Yv,Ev)
-    ###########################################################################
-    DataX = LibA2L(ntc,xout)
-    DataX.append(2*DataX[ntc-1]-DataX[ntc-2])
-    DataY = LibA2L(ntc,yout)
-    DataE = LibA2L(ntc,eout)
-    CreateWorkspace(monitor,DataX,DataY,DataE,1,'Wavelength', 
-        Distribution=True)
-    return True
-    
 def monitorEfficiency(inWS, area, thickness):
     OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
     return inWS
