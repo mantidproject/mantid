@@ -40,7 +40,7 @@
 </parameter>
 
 <parameter name="norm-mon1-spec">
-  <value val="24576"/>
+  <value val="24577"/>
 </parameter>
 
 <parameter name="norm-mon1-min">
