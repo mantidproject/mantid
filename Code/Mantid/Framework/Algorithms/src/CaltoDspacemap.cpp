@@ -161,6 +161,9 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
       factor = 0;
       fout.write( reinterpret_cast<char*>( &factor ), sizeof(double) );
     }
+    //Report progress
+    prog.report();
+
   }
   fout.close();
 }
