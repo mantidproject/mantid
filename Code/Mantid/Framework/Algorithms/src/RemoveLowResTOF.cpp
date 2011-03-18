@@ -151,7 +151,7 @@ void RemoveLowResTOF::exec()
     m_progress->report();
   }
 
-  // TODO copy the mask
+  this->runMaskDetectors();
 }
 
 void RemoveLowResTOF::execEvent()
@@ -186,8 +186,8 @@ void RemoveLowResTOF::execEvent()
     outW->getEventList(workspaceIndex).maskTof(0., this->calcTofMin(workspaceIndex));
   }
 
-  // TODO copy the mask
   outW->clearMRU();
+  this->runMaskDetectors();
 }
 
 double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
@@ -212,6 +212,15 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   double tmin = sqrtdmin * sqrtdmin / dspmap;
 
   return tmin;
+}
+
+void RemoveLowResTOF::runMaskDetectors()
+{
+  IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors");
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
+  alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
+  if (!alg->execute())
+    throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully");
 }
 
 } // namespace Algorithm

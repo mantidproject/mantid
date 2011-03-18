@@ -1,4 +1,6 @@
 #ifndef REMOVELOWRESTOF_H_
+#define REMOVELOWRESTOF_H_
+
 //includes
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -24,6 +26,7 @@ private:
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
   DataObjects::EventWorkspace_const_sptr m_inputEvWS; ///< Pointer to the input event workspace
   double calcTofMin(const std::size_t);
+  void runMaskDetectors();
   double m_DIFCref; ///< The reference value for DIFC to filter with
   double m_K; ///< Mystery variable that I'm not sure what it is for
   Geometry::IInstrument_const_sptr m_instrument; //< The instrument
@@ -35,8 +38,5 @@ private:
 
 } // namespace Algorithms
 } // namespace Mantid
-
-#define REMOVELOWRESTOF_H_
-
 
 #endif /* REMOVELOWRESTOF_H_ */

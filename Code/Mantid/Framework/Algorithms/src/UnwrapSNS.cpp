@@ -209,9 +209,8 @@ void UnwrapSNS::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // TODO copy the mask
-
   m_inputWS.reset();
+  this->runMaskDetectors();
 }
 
 void UnwrapSNS::execEvent()
@@ -270,9 +269,8 @@ void UnwrapSNS::execEvent()
   }
   PARALLEL_CHECK_INTERUPT_REGION
 
-  // TODO copy the mask
-
   outW->clearMRU();
+  this->runMaskDetectors();
 }
 
 /** Calculates the total flightpath for the given detector.
@@ -353,6 +351,15 @@ size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const dou
   assert(datain.size() == dataout.size());
 
   return specialBin;
+}
+
+void UnwrapSNS::runMaskDetectors()
+{
+  IAlgorithm_sptr alg = createSubAlgorithm("MaskDetectors");
+  alg->setProperty<MatrixWorkspace_sptr>("Workspace", this->getProperty("OutputWorkspace"));
+  alg->setProperty<MatrixWorkspace_sptr>("MaskedWorkspace", this->getProperty("InputWorkspace"));
+  if (!alg->execute())
+    throw std::runtime_error("MaskDetectors sub-algorithm has not executed successfully");
 }
 
 } // namespace Algorithm

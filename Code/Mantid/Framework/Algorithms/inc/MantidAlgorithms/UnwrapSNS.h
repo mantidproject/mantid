@@ -60,6 +60,7 @@ private:
   void init();
   void exec();
   void execEvent();
+  void runMaskDetectors();
 
   double calculateFlightpath(const std::size_t& spectrum, bool& isMonitor) const;
   size_t unwrapX(const MantidVec&, MantidVec&, const double& Ld);
