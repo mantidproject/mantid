@@ -31,6 +31,9 @@ namespace PythonAPI
   // Class export functions
   //---------------------------------------------------------------------------
 
+  // Overloads for createAlgorithm function which has 1 optional argument
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FrameworkManager_createAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createAlgorithm, 1, 2)
+
   void export_frameworkmanager()
   {
     /** 
@@ -45,7 +48,7 @@ namespace PythonAPI
       .def("clearData", &FrameworkManagerProxy::clearData)
       .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
-      .def("createAlgorithm", &FrameworkManagerProxy::createAlgorithm, return_value_policy< reference_existing_object >())
+      .def("createAlgorithm", &FrameworkManagerProxy::createAlgorithm, FrameworkManager_createAlgorithmOverloader()[return_value_policy< reference_existing_object >()] )
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
       .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
@@ -100,6 +103,8 @@ namespace PythonAPI
 
     class_< API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
       .def("name", &API::IAlgorithm::name)
+      .def("version", &API::IAlgorithm::version)
+	  .def("category", &API::IAlgorithm::category)
       .def("initialize", &API::IAlgorithm::initialize)
       .def("execute", &API::IAlgorithm::execute)
       .def("executeAsync", &API::IAlgorithm::executeAsync)

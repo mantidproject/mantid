@@ -148,11 +148,12 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 /**
  * Creates a specified algorithm.
  * @param algName :: The name of the algorithm to execute.
-  * @return Pointer to algorithm.
+ * @param version :: The version number (default=-1=highest version).
+ * @return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName)
+API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int version)
 {
-  return API::FrameworkManager::Instance().createAlgorithm(algName);
+  return API::FrameworkManager::Instance().createAlgorithm(algName, version);
 }
 
 std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName)

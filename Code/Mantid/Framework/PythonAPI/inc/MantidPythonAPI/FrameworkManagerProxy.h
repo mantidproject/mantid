@@ -96,7 +96,7 @@ public:
   ///  * Check whether a given name is an algorithm using a case-insensitive search
   std::string isAlgorithmName(std::string name) const;
   /// Creates and instance of an algorithm
-  API::IAlgorithm* createAlgorithm(const std::string& algName);
+  API::IAlgorithm* createAlgorithm(const std::string& algName, const int version = -1);
   /// Create the doc string for the supplied algorithm.
   std::string createAlgorithmDocs(const std::string& algName);
   //@}
