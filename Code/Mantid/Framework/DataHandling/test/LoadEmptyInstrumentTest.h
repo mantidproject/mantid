@@ -884,6 +884,17 @@ void testCheckIfVariousInstrumentsLoad()
 
     AnalysisDataService::Instance().remove(wsName);
 
+    LoadEmptyInstrument loaderHIFI;
+    loaderHIFI.initialize();
+    loaderHIFI.setPropertyValue("Filename", "HIFI_Definition.xml");
+    wsName = "LoadEmptyInstrumentHIFITest";
+    loaderHIFI.setPropertyValue("OutputWorkspace", wsName);
+
+    TS_ASSERT_THROWS_NOTHING(loaderHIFI.execute());
+    TS_ASSERT( loaderHIFI.isExecuted() );
+
+    AnalysisDataService::Instance().remove(wsName);
+
   }
 
 
