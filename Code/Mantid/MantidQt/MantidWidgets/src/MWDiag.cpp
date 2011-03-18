@@ -350,15 +350,22 @@ QString MWDiag::createDiagnosticScript() const
   QString sampleRun;
   if( m_designWidg.ckDoBack )
   {
-    if( m_sumMono )
+    if( m_monoFiles.count() == 1 )
     {
-      sampleRun = "[r'";
-      sampleRun += m_monoFiles.join("',r'");
-      sampleRun += "']";
+      sampleRun = "r'" + m_monoFiles[0] + "'";
     }
     else
     {
-      throw std::runtime_error("Diagnostic interface does not support multiple mono files without summing. ");
+      if( m_sumMono )
+      {
+        sampleRun = "[r'";
+        sampleRun += m_monoFiles.join("',r'");
+        sampleRun += "']";
+      }
+      else
+      {
+       throw std::runtime_error("Diagnostic interface does not support multiple mono files without summing. ");
+      }
     }
   }
   else
