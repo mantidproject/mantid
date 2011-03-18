@@ -57,6 +57,7 @@ public:
       {
         retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
       }
+
     }
     retVal->doneLoadingData();
 
@@ -87,15 +88,16 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_MINITOPAZ()
+  void xtest_MINITOPAZ()
   {
-    EventWorkspace_sptr ws = createDiffractionEventWorkspace(100);
+    EventWorkspace_sptr ws = createDiffractionEventWorkspace(160);
 
     MakeDiffractionMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
     alg.setProperty("InputWorkspace", ws);
-
+    alg.setPropertyValue("OutputWorkspace", "test_md3");
+    alg.execute();
   }
 
 

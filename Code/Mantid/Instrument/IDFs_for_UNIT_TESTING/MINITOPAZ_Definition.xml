@@ -37,7 +37,7 @@ This is a mini version similar to TOPAZ but used for unit testing.
 	100x100 pixels, each 5 mm in size.
 -->
 
-<component type="panel" idstart="2490368" idfillbyfirst="y" idstepbyrow="256">
+<component type="panel" idstart="0" idfillbyfirst="y" idstepbyrow="100">
 <location r="0.5" t="-90.0" p="180.000000" name="bank1" rot="90.0" axis-x="0" axis-y="1" axis-z="0">
 </location>
 </component> 

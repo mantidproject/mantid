@@ -1,5 +1,6 @@
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 
@@ -66,9 +67,21 @@ namespace MDEvents
   TMDE(
   size_t MDEventWorkspace)::getNPoints() const
   {
-    //return data.size();
-    return 0;
+    return data->getNPoints();
   }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Set the box controller that the contained GridBoxes will use
+   *
+   * @param controller :: BoxController_sptr
+   */
+  TMDE(
+  void MDEventWorkspace)::setBoxController(BoxController_sptr controller)
+  {
+    m_BoxController = controller;
+    data->m_BoxController = m_BoxController;
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of bytes of memory
@@ -86,10 +99,19 @@ namespace MDEvents
    * @param events :: const ref. to a vector of events; they will be copied.
    */
   TMDE(
-  void MDEventWorkspace)::addEvents(const std::vector<MDE> & events)
+  void MDEventWorkspace)::addEvents(const std::vector<MDE> & events, API::Progress * prog)
   {
-    (void) events; //Avoid compiler warning
-    // TODO: Something.
+    // Always split the MDBox into a grid box
+    // TODO: Should this be a decision point?
+    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    if (!gridBox)
+    {
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
+      gridBox = new MDGridBox<MDE,nd>(box);
+      data = gridBox;
+    }
+    // Do the add manye events one
+    gridBox->addManyEvents(events, prog);
   }
 
 

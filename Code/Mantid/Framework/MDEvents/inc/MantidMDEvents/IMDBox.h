@@ -122,6 +122,7 @@ namespace MDEvents
     /** Cached total error (squared) from all points within */
     double m_errorSquared;
 
+  public://FIXME
     /// The box splitting controller
     BoxController_sptr m_BoxController;
 

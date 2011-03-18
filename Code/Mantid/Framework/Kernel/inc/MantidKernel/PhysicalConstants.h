@@ -43,6 +43,9 @@ namespace PhysicalConstants
       on 2007-10-31 and confirmed again on 2010-12-28. */
   static const double h = 6.62606896e-34;
 
+  /** Planck constant in J*s, divided by 2 PI. */
+  static const double h_bar = h / (2*M_PI);
+
   /** Standard acceleration due to gravity. Precise value in ms<SUP>-2</SUP>. */
   static const double g = 9.80665;
   

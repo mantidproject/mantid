@@ -100,6 +100,7 @@ namespace MDEvents
     }
 
     // Initialize it using the dimension
+    out->initialize();
 
 
     // Save it on the output.

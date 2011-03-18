@@ -1,13 +1,15 @@
 #ifndef MDEVENTWORKSPACE_H_
 #define MDEVENTWORKSPACE_H_
 
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidMDEvents/BoxController.h"
 
 namespace Mantid
 {
@@ -49,13 +51,15 @@ namespace MDEvents
      * used by the workspace. */
     virtual size_t getMemorySize() const;
 
+    void setBoxController(BoxController_sptr controller);
+
     /** Sample function returning (a copy of) the n-th event in the workspace.
      * This may not be needed.
      *  */
     MDE getEvent(size_t n);
 
     /// Add a vector of MDEvents to the workspace.
-    void addEvents(const std::vector<MDE> & events);
+    void addEvents(const std::vector<MDE> & events, API::Progress * prog);
 
     /// Return true if the underlying box is a MDGridBox.
     bool isGridBox()
@@ -67,6 +71,9 @@ namespace MDEvents
 
     /** MDBox containing all of the events in the workspace. */
     IMDBox<MDE, nd> * data;
+
+    /// Box controller in use
+    BoxController_sptr m_BoxController;
 
 
     //    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.

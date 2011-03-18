@@ -120,10 +120,10 @@ double AlignDetectors::calcConversion(const double l1,
 /** Get several instrument parameters used in tof to D-space conversion
  *
  * @param instrument
- * @param l1
- * @param beamline
- * @param beamline_norm
- * @param samplePos
+ * @param l1 :: primary flight path (source-sample distance)
+ * @param beamline :: vector of the direction and length of the beam (source to samepl)
+ * @param beamline_norm :: 2 * the length of beamline
+ * @param samplePos :: vector of the position of the sample
  */
 void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
     double & l1, Geometry::V3D & beamline,

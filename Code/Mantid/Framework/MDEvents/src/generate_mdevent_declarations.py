@@ -74,19 +74,69 @@ def write_factory(f):
 #============================================================================================================
 
 # for the calling function macro
-macro_top = "#define CALL_MDEVENT_FUNCTION(funcname, workspace) \\ \n{ \\ \n"
+macro_top = """
+/** Macro that makes it possible to call a templated method for
+ * a MDEventWorkspace using a IMDEventWorkspace_sptr as the input.
+ * @param funcname :: name of the function that will be called.
+ * @param workspace :: IMDEventWorkspace_sptr input workspace.
+ */
+ 
+#define CALL_MDEVENT_FUNCTION(funcname, workspace) \\
+{ \\
+"""
 macro = """MDEventWorkspace<%s, %d>::sptr MDEW%d = boost::dynamic_pointer_cast<MDEventWorkspace<%s, %d> >(workspace); \\
-if (MDEW%d) funcname<%s, %d>(MDEW%d); \\ 
+if (MDEW%d) funcname<%s, %d>(MDEW%d); \\
 """
 
-def write_macro(f):
-    f.write( "/* \n");
-    f.write( macro_top );
+def get_macro():
+    """ Return the macro code CALL_MDEVENT_FUNCTION """
+    s = macro_top;
     for nd in dimensions:
         eventType = "MDEvent<%d>" % nd
-        f.write(macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) )
-    f.write( "} \n");
-    f.write( "*/ \n");
+        s += macro % (eventType,nd,nd,eventType,nd,nd,eventType,nd,nd) 
+    s +=  "} \n"
+    return s
+
+
+
+#======================================================================================
+def get_padding(line):
+    """Return a string with the spaces padding the start of the given line."""
+    out = ""
+    for c in line:
+        if c == " ":
+            out += " "
+        else:
+            break
+    return out
+
+#======================================================================================
+def find_line_number(lines, searchfor, startat=0):
+    """Look line-by-line in lines[] for a line that starts with searchfor. Return
+    the line number in source where the line was found, and the padding (in spaces) before it"""
+    count = 0
+    done = False
+    padding = ""
+    for n in xrange(startat, len(lines)):
+        line = lines[n]
+        s = line.strip()
+        if s.startswith(searchfor):
+            # How much padding?
+            padding = get_padding(line)
+            return (n, padding)
+    return (None, None)
+
+
+#======================================================================================
+def insert_lines(lines, insert_lineno, extra, padding):
+    """Insert a text, split by lines, inside a list of 'lines', at index 'insert_lineno'
+    Adds 'padding' to each line."""
+    # split
+    extra_lines = extra.split("\n");
+    #Pad 
+    for n in xrange(len(extra_lines)):
+        extra_lines[n] = padding+extra_lines[n]
+    return lines[0:insert_lineno] + extra_lines + lines[insert_lineno:]
 
 #============================================================================================================
 #============================================================================================================
@@ -100,6 +150,22 @@ def generate():
     # All of the classes to instantiate
     classes = classes_cpp + ["MDEvent",  "IMDBox"]
     
+    # First, open the header and read all the lines
+    f = open("../inc/MantidMDEvents/MDEventFactory.h", 'r')
+    s = f.read();
+    lines = s.split("\n")
+    (n1, padding) = find_line_number(lines, "//### BEGIN AUTO-GENERATED CODE ###", startat=0)
+    (n2, padding_ignored) = find_line_number(lines, "//### END AUTO-GENERATED CODE ###", startat=0)
+    print n1
+    print n2
+    if n1 is None or n2 is None:
+        raise Exception("Could not find the marker in the MDEventFactory.h file.")
+    print n2
+    header_before = lines[:n1+1]
+    header_after = lines[n2:]
+    f.close()
+    
+    # =========== Do the Source File ===========
     f = open("MDEventFactory.cpp", 'w');
     f.write(topheader)
     
@@ -131,19 +197,36 @@ def generate():
             f.write("template DLLExport class %s<MDEvent<%d>, %d>;\n" % (c, nd, nd) )
         f.write("\n\n")
             
-    # Typedefs for MDEventWorkspace
-    for nd in dimensions:
-        f.write("/// Typedef for a MDEventWorkspace shared_ptr with %d dimension%s \n" % (nd, ['','s'][nd>1]) )
-        f.write("typedef MDEventWorkspace<MDEvent<%d>, %d>::sptr MDEventWorkspace%d;\n" % (nd, nd, nd) )
-    f.write("\n\n")
-            
     write_factory(f)
     
-    write_macro(f)
-            
     f.write(footer)
     f.close()
     
+    
+    # ========== Start the header file =============
+    lines = header_before
+
+    # Make the macro then pad it into the list of lines
+    macro = get_macro()
+    lines = insert_lines(lines, len(lines), macro, padding)
+
+    # Typedefs for MDEventWorkspace
+    lines.append("\n");
+    classes = ["MDBox", "IMDBox", "MDGridBox", "MDEventWorkspace"]
+    for c in classes:
+        lines.append("\n%s// ------------- Typedefs for %s ------------------\n" % (padding, c));
+        for nd in dimensions:
+            lines.append(padding + "/// Typedef for a %s with %d dimension%s " % (c, nd, ['','s'][nd>1]) )
+            lines.append(padding + "typedef %s<MDEvent<%d>, %d> %s%d;" % (c, nd, nd, c, nd) )
+        lines.append("\n");
+            
+
+    lines += header_after
+    
+    f = open("../inc/MantidMDEvents/MDEventFactory.h", 'w')
+    for line in lines:
+        f.write(line + "\n")
+    f.close()
 
 
 if __name__=="__main__":
