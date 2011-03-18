@@ -229,20 +229,6 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _focus(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
-        # take care of filtering events
-        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
-            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
-        if filterLogs is not None:
-            try:
-                logparam = wksp.getRun()[filterLogs[0]]
-                if logparam is not None:
-                    FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName=filterLogs[0],
-                                     MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
-            except KeyError, e:
-                raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))            
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
-        
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         # Diffraction focusing using new calibration file with offsets
         if self._diffractionfocus:
