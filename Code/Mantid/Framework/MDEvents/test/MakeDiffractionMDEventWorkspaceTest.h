@@ -90,7 +90,7 @@ public:
   
   void xtest_MINITOPAZ()
   {
-    EventWorkspace_sptr ws = createDiffractionEventWorkspace(160);
+    EventWorkspace_sptr ws = createDiffractionEventWorkspace(1000);
 
     MakeDiffractionMDEventWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )

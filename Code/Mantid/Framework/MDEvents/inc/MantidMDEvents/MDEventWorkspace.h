@@ -53,19 +53,35 @@ namespace MDEvents
 
     void setBoxController(BoxController_sptr controller);
 
+    /// Returns the BoxController used in this workspace
+    BoxController_sptr getBoxController()
+    {
+      return m_BoxController;
+    }
+
     /** Sample function returning (a copy of) the n-th event in the workspace.
      * This may not be needed.
      *  */
     MDE getEvent(size_t n);
 
-    /// Add a vector of MDEvents to the workspace.
-    void addEvents(const std::vector<MDE> & events, API::Progress * prog);
+    void addEvents(const std::vector<MDE> & events);
+
+    void addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog);
 
     /// Return true if the underlying box is a MDGridBox.
     bool isGridBox()
     {
       return (dynamic_cast<MDGridBox<MDE,nd> *>(data) != NULL);
     }
+
+    /** Returns a pointer to the box (MDBox or MDGridBox) contained
+     * within.
+     */
+    IMDBox<MDE,nd> * getBox()
+    {
+      return data;
+    }
+
 
   protected:
 

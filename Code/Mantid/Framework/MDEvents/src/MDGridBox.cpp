@@ -1,5 +1,4 @@
 #include "MantidAPI/Progress.h"
-#include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Timer.h"
@@ -19,53 +18,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-
-//===============================================================================================
-//===============================================================================================
-  /** Task for adding events to a MDGridBox. */
-  TMDE_CLASS
-  class AddEventsTask : public Task
-  {
-  public:
-    /// Pointer to MDGridBox.
-    MDGridBox<MDE, nd> * box;
-    /// Reference to the MD events that will be added
-    const std::vector<MDE> & events;
-    /// Where to start in vector
-    size_t start_at;
-    /// Where to stop in vector
-    size_t stop_at;
-    /// Progress report
-    Progress * prog;
-
-    /** Ctor
-     *
-     * @param box :: Pointer to MDGridBox
-     * @param events :: Reference to the MD events that will be added
-     * @param start_at :: Where to start in vector
-     * @param stop_at :: Where to stop in vector
-     * @return
-     */
-    AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,
-                  const size_t start_at, const size_t stop_at, Progress * prog)
-    : Task(),
-      box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
-    {
-    }
-
-    /// Add the events in the MDGridBox.
-    void run()
-    {
-      box->addEvents(events, start_at, stop_at);
-      if (prog)
-      {
-        std::ostringstream out;
-        out << "Adding events " << start_at;
-        prog->report(out.str());
-      }
-    }
-  };
-
 
 
   //===============================================================================================
@@ -397,85 +349,6 @@ namespace MDEvents
     return numBad;
   }
 
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add a large number of events to this MDGridBox.
-   * This will use a ThreadPool/OpenMP to allocate events in parallel. Therefore, it should
-   * only be called on the highest level MDGridBox in a MDEventWorkspace.
-   *
-   * @param events :: vector of events to be copied.
-   * @param prog :: optional Progress object to report progress back to GUI/algorithms.
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDGridBox)::addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog)
-  {
-    // Get some parameters that should optimize task allocation.
-    size_t eventsPerTask, numTasksPerBlock;
-    this->m_BoxController->getAddingEventsParameters(eventsPerTask, numTasksPerBlock);
-
-    // Set up progress report, if any
-    if (prog)
-    {
-      size_t numTasks = events.size()/eventsPerTask;
-      prog->setNumSteps( numTasks + numTasks/numTasksPerBlock);
-    }
-
-    // Where we are in the list of events
-    size_t event_index = 0;
-    while (event_index < events.size())
-    {
-      //Since the costs are not known ahead of time, use a simple FIFO buffer.
-      ThreadScheduler * ts = new ThreadSchedulerFIFO();
-      // Create the threadpool
-      ThreadPool tp(ts);
-
-      // Do 'numTasksPerBlock' tasks with 'eventsPerTask' events in each one.
-      for (size_t i = 0; i < numTasksPerBlock; i++)
-      {
-        // Calculate where to start and stop in the events vector
-        bool breakout = false;
-        size_t start_at = event_index;
-        event_index += eventsPerTask;
-        size_t stop_at = event_index;
-        if (stop_at >= events.size())
-        {
-          stop_at = events.size();
-          breakout = true;
-        }
-
-        // Create a task and push it into the scheduler
-        //std::cout << "Making a AddEventsTask " << start_at << " to " << stop_at << std::endl;
-        ts->push( new AddEventsTask<MDE,nd>(this, events, start_at, stop_at, prog) );
-
-        if (breakout) break;
-      }
-
-      // Finish all threads.
-//      std::cout << "Starting block ending at index " << event_index << " of " << events.size() << std::endl;
-      Timer tim;
-      tp.joinAll();
-//      std::cout << "... block took " << tim.elapsed() << " secs.\n";
-
-      //Create a threadpool for splitting.
-      ThreadScheduler * ts_splitter = new ThreadSchedulerFIFO();
-      ThreadPool tp_splitter(ts_splitter);
-
-      //Now, shake out all the sub boxes and split those if needed
-//      std::cout << "\nStarting splitAllIfNeeded().\n";
-      if (prog) prog->report("Splitting MDBox'es.");
-
-      this->splitAllIfNeeded(ts_splitter);
-      tp_splitter.joinAll();
-//      std::cout << "\n... splitAllIfNeeded() took " << tim.elapsed() << " secs.\n";
-    }
-
-    // Refresh the counts, now that we are all done.
-    this->refreshCache();
-
-    // Done!
-    return 0;
-  }
 
 
 

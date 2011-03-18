@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/Task.h"
 
 namespace Mantid
 {
@@ -102,6 +103,58 @@ namespace MDEvents
 
     /// Mutex for counting points and total signal
     Mantid::Kernel::Mutex statsMutex;
+
+
+
+
+
+
+  public:
+
+    //===============================================================================================
+    //===============================================================================================
+    /** Task for adding events to a MDGridBox. */
+    class AddEventsTask : public Mantid::Kernel::Task
+    {
+    public:
+      /// Pointer to MDGridBox.
+      MDGridBox<MDE, nd> * box;
+      /// Reference to the MD events that will be added
+      const std::vector<MDE> & events;
+      /// Where to start in vector
+      size_t start_at;
+      /// Where to stop in vector
+      size_t stop_at;
+      /// Progress report
+      Mantid::API::Progress * prog;
+
+      /** Ctor
+       *
+       * @param box :: Pointer to MDGridBox
+       * @param events :: Reference to the MD events that will be added
+       * @param start_at :: Where to start in vector
+       * @param stop_at :: Where to stop in vector
+       * @return
+       */
+      AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,
+                    const size_t start_at, const size_t stop_at, Mantid::API::Progress * prog)
+      : Mantid::Kernel::Task(),
+        box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
+      {
+      }
+
+      /// Add the events in the MDGridBox.
+      void run()
+      {
+        box->addEvents(events, start_at, stop_at);
+        if (prog)
+        {
+          std::ostringstream out;
+          out << "Adding events " << start_at;
+          prog->report(out.str());
+        }
+      }
+    };
 
 
 
