@@ -95,6 +95,10 @@ class SNSPowderReduction(PythonAlgorithm):
         self.declareFileProperty("CharacterizationRunsFile", "", FileAction.OptionalLoad,
                                  ['.txt'],
                                  Description="File with characterization runs denoted")
+        self.declareProperty("UnwrapRef", 0., 
+                             Description="Reference total flight path for frame unwrapping. Zero skips the correction")
+        self.declareProperty("LowResRef", 0., 
+                             Description="Reference DIFC for resolution removal. Zero skips the correction")
         self.declareProperty("FilterByTimeMin", 0.,
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
@@ -206,10 +210,14 @@ class SNSPowderReduction(PythonAlgorithm):
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
-        if self._instrument == "PG3": # super special Jason stuff
+        LRef = self.getProperty("UnwrapRef")
+        DIFCref = self.getProperty("LowResRef")
+        if (LRef > 0) or (DIFCref > 0): # super special Jason stuff
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
-            UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=62)
-            RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=15000, K=3.22)
+            if DIFCref > 0:
+                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref, K=3.22)
+            if LRef > 0:
+                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
