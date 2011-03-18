@@ -495,10 +495,10 @@ namespace DataObjects
     s.push_back( c );
 
     if( in.good() )
-      for(  c = in.get() ; in.good()&&c != ' ' && c != '\n' ; c = in.get() )
+      for(  c = in.get() ; in.good()&&c != ' ' && c != '\n' && c != '\r' ; c = in.get() )
         s.push_back( c );
 
-    if( c == '\n' && !consumeEOL )
+    if( ((c == '\n') || (c == '\r')) && !consumeEOL )
       in.putback( c );
 
     return s;

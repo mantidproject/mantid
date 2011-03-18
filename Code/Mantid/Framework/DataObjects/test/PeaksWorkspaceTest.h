@@ -12,10 +12,12 @@
 #include <cmath>
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidKernel/Strings.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class PeaksWorkspaceTest : public CxxTest::TestSuite
 {
@@ -31,24 +33,39 @@ public:
     std::ifstream in1( file1.c_str() );
     std::ifstream in2( file2.c_str() );
 
-    bool done = false;
-    char c1,c2;
-    while( !done)
+    std::string s1, s2;
+    while (in1.good() && in2.good())
     {
-      if( !in1.good() || !in2.good())
-        done = true;
-      else
-      {
-        c1= in1.get();
-        c2= in2.get();
-        if( c1 != c2)
-          return false;
-      }
+      std::getline(in1,s1);
+      std::getline(in2,s2);
+      s1 = Strings::replace(s1, "\r", "");
+      s2 = Strings::replace(s2, "\r", "");
+      if (s1 != s2)
+        return false;
     }
     if( in1.good() || in2.good())
       return false;
     return true;
-    return true;
+
+
+//    bool done = false;
+//    char c1,c2;
+//    while( !done)
+//    {
+//      if( !in1.good() || !in2.good())
+//        done = true;
+//      else
+//      {
+//        c1= in1.get();
+//        c2= in2.get();
+//        if( c1 != c2)
+//          return false;
+//      }
+//    }
+//    if( in1.good() || in2.good())
+//      return false;
+//    return true;
+//    return true;
   }
   void test_Something()
   {
