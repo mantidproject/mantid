@@ -1,4 +1,4 @@
-#include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidCrystal/SavePeaksFile.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
@@ -9,7 +9,7 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(LoadPeaksFile)
+  DECLARE_ALGORITHM(SavePeaksFile)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -19,54 +19,53 @@ namespace Crystal
   //----------------------------------------------------------------------------------------------
   /** Constructor
    */
-  LoadPeaksFile::LoadPeaksFile()
+  SavePeaksFile::SavePeaksFile()
   {
   }
     
   //----------------------------------------------------------------------------------------------
   /** Destructor
    */
-  LoadPeaksFile::~LoadPeaksFile()
+  SavePeaksFile::~SavePeaksFile()
   {
   }
   
 
   //----------------------------------------------------------------------------------------------
   /// Sets documentation strings for this algorithm
-  void LoadPeaksFile::initDocs()
+  void SavePeaksFile::initDocs()
   {
-    this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
-    this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
+    this->setWikiSummary("Save a PeaksWorkspace to a .peaks text-format file.");
+    this->setOptionalMessage("Save a PeaksWorkspace to a .peaks text-format file.");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
    */
-  void LoadPeaksFile::init()
+  void SavePeaksFile::init()
   {
+    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input PeaksWorkspace.");
     std::vector<std::string> exts;
     exts.push_back(".peaks");
-    // exts.push_back(".integrate");
 
-    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
+    declareProperty(new FileProperty("Filename", "", FileProperty::Save, exts),
         "Path to an ISAW-style .peaks filename.");
-    declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
   }
 
   //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
-  void LoadPeaksFile::exec()
+  void SavePeaksFile::exec()
   {
-    // Create the workspace
-    PeaksWorkspace_sptr ws(new PeaksWorkspace());
-    ws->setName(getPropertyValue("OutputWorkspace"));
+    // Retrieve the workspace
+    Workspace_sptr ws_in = getProperty("InputWorkspace");
+    PeaksWorkspace_sptr ws = boost::dynamic_pointer_cast<PeaksWorkspace>(ws_in);
+    if (!ws)
+      throw std::invalid_argument("Workspace given as input is invalid or not a PeaksWorkspace.");
 
-    // This loads (appends) the peaks
-    ws->append( getPropertyValue("Filename"));
+    std::string filename = getPropertyValue("Filename");
 
-    // Save it in the output
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<PeaksWorkspace>(ws));
+    ws->write(filename);
   }
 
 
