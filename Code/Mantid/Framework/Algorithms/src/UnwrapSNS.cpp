@@ -88,7 +88,7 @@ void UnwrapSNS::init()
   validator->setLower(0.01);
   declareProperty("Tmax", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used.");
-  declareProperty("ForceHist", false); // TODO remove
+//  declareProperty("ForceHist", false); // TODO remove
 
   // Calculate and set the constant factor for the conversion to wavelength
   const double TOFisinMicroseconds = 1e6;
@@ -151,7 +151,7 @@ void UnwrapSNS::exec()
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
-  if ((m_inputEvWS != NULL) && ! this->getProperty("ForceHist")) // TODO remove ForceHist option
+  if ((m_inputEvWS != NULL)) // && ! this->getProperty("ForceHist")) // TODO remove ForceHist option
   {
     this->execEvent();
     return;
