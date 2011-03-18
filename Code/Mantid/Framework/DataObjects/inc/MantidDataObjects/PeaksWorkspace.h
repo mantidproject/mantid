@@ -14,7 +14,8 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Math/Matrix.h"
 
-
+//TODO add basic gets and sets
+//IsamplePosition should be IsampleOrientation
 namespace Mantid
 {
 //----------------------------------------------------------------------
@@ -197,8 +198,27 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      /**
       * @return the position of the given peak in m and in McStas coordinates
       */
-     Geometry::V3D     getPosition( int peakNum);
+     Geometry::V3D   getPosition( int peakNum);
 
+     /**
+      * @return the sample orientation of the given peak in radians
+      */
+     Geometry::V3D  getSampleOrientation( int peakNum);
+
+     /**
+      * @return the run number of the associated peak
+      */
+     int  getRunNumber( int peakNum);
+
+     /**
+      * @return the reflag( status flag) for the given peak
+      */
+     int getReflag( int peakNum );
+
+     /**
+      * @return the monitor count for the run associated with the given peak
+      */
+     double getMonitorCount( int peakNum);
      /**
       * @return the intensity of the "middle" cell of the peak
       */
@@ -214,6 +234,30 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
       */
      double  getPeakIntegrationError( int peakNum);
 
+     /**
+      * @return the time of this peak in microseconds
+      */
+     double getTime( int peakNum)
+     {
+       return cell<double>(peakNum, ItimeCol);
+     }
+
+     /**
+      * Sets the time( hence wavelength and d spacing) for this peak
+      * @param newTime  the new time in microseconds
+      * @param peakNum  the peak number starting at 0;
+      */
+     void setTime( double newTime, int peakNum)
+     {
+       cell<double>(peakNum, ItimeCol) = newTime;
+     }
+
+     void setRowColChan( double row, double col, double chan, int peakNum)
+     {
+       cell<double>(peakNum, IPeakRowCol)= row;
+       cell<double>( peakNum, IPeakColCol )= col;
+       cell<double>( peakNum, IPeakChanCol )= chan;
+     }
 
      /**
       * Sets the h,k, and l values for all peaks using the orientation matrix

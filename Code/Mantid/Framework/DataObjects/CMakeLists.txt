@@ -44,6 +44,7 @@ set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/RefAxisTest.h
                  test/TableWorkspacePropertyTest.h
                  test/TableWorkspaceTest.h
+                 test/PeaksWorkspaceTest.h
                  test/Workspace2DTest.h
                  test/WorkspaceHistoryTest.h
                  test/WorkspaceIteratorTest.h

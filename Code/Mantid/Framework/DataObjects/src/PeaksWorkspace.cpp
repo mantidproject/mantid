@@ -430,6 +430,7 @@ namespace DataObjects
 
         xx[ 0 ] = this_time;
         Kernel::Units::dSpacing dsp;
+
         dsp.fromTOF( xx ,  yy ,  this_L1 ,  this_L2 ,  this_polar ,
             0 ,  1.2 ,  1.2 );
 
@@ -875,12 +876,13 @@ namespace DataObjects
   {
     double time = cell< double >(peakNum, ItimeCol);
     double L1   =cell< double >(peakNum, IL1Col );
-    double L2   =cell< double >(peakNum, IL2Col );
     Geometry::V3D position =
         cell< Geometry::V3D >( peakNum , IpositionCol);
 
     double rho, polar,az;
-    position.getSpherical( rho, az, polar);
+    position.getSpherical( rho, polar, az);
+    polar *= pi/180;
+    double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
 
@@ -894,10 +896,11 @@ namespace DataObjects
   {
     double time = cell< double >(peakNum, ItimeCol);
     double L1   =cell< double >(peakNum, IL1Col );
-    double L2   =cell< double >(peakNum, IL2Col );
     Geometry::V3D position = cell< Geometry::V3D >( peakNum , IpositionCol);
     double rho, polar,az;
-    position.getSpherical( rho, az, polar);
+    position.getSpherical( rho, polar, az);
+    polar *= pi/180;
+    double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
 
@@ -914,10 +917,11 @@ namespace DataObjects
 
     double time = cell< double >(peakNum, ItimeCol);
     double L1   =cell< double >(peakNum, IL1Col );
-    double L2   =cell< double >(peakNum, IL2Col );
     Geometry::V3D position = cell< Geometry::V3D >( peakNum , IpositionCol);
     double rho, polar,az;
-    position.getSpherical( rho, az, polar);
+    position.getSpherical( rho, polar, az);
+    polar *= pi/180;
+    double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
 
@@ -936,10 +940,11 @@ namespace DataObjects
     position =Geometry::V3D(position);
     position /=position.norm();
     position.setZ( position.Z()-1);
-    position *=MagQ;
+    double nrm= position.norm();
+    position *=MagQ/nrm;
     return position;
 
-    return Geometry::V3D( );
+
   }
 
   Geometry::V3D     PeaksWorkspace::get_QXtal( int peakNum )
@@ -947,10 +952,11 @@ namespace DataObjects
 
     Geometry::V3D Qvec= Geometry::V3D( get_Qlab( peakNum) );
 
-    Geometry::V3D sampOrient =
-        cell< Geometry::V3D >( peakNum , IsamplePositionCol );
+    Geometry::V3D sampOrient = getSampleOrientation( peakNum );
+
     //phi, chi, omega
     Geometry::Quat rot;
+    sampOrient *=180/pi;
     rot.setAngleAxis( -sampOrient[2],Geometry::V3D( 0,1,0));
 
     rot.rotate( Qvec );
@@ -1021,9 +1027,28 @@ namespace DataObjects
 
   Geometry::V3D     PeaksWorkspace::getPosition( int peakNum )
   {
-    return cell< Geometry::V3D >( peakNum , IpositionCol );
+    return Geometry::V3D(cell< Geometry::V3D >( peakNum , IpositionCol ));
   }
 
+  Geometry::V3D   PeaksWorkspace::getSampleOrientation( int peakNum)
+  {
+    return Geometry::V3D( cell<Geometry::V3D>( peakNum , IsamplePositionCol));
+  }
+
+  int   PeaksWorkspace::getRunNumber( int peakNum)
+  {
+    return cell<int>( peakNum , IrunNumCol);
+  }
+
+  int  PeaksWorkspace::getReflag( int peakNum )
+  {
+      return cell<int>( peakNum , IreflagCol);
+  }
+
+  double  PeaksWorkspace::getMonitorCount( int peakNum)
+  {
+     return cell<double>( peakNum , IMonitorCountCol );
+  }
   double  PeaksWorkspace::getPeakCellCount( int peakNum )
   {
     return cell< double >( peakNum , IPeakIntensityCol );
