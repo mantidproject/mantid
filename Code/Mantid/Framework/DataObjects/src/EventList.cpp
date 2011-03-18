@@ -653,6 +653,7 @@ namespace DataObjects
   // --- Handling the event list -------------------------------------------------------------------
   // ==============================================================================================
 
+
   /** Return the const list of TofEvents contained.
    * NOTE! This should be used for testing purposes only, as much as possible. The EventList
    * may contain weighted events, requiring use of getWeightedEvents() instead.
@@ -2718,6 +2719,46 @@ namespace DataObjects
       break;
     }
 
+  }
+
+
+  //--------------------------------------------------------------------------
+  /** Get the vector of events contained in an EventList;
+   * this is overloaded by event type.
+   *
+   * @param el :: The EventList to retrieve
+   * @param events :: reference to a pointer to a vector of this type of event
+   * @throw runtime_error if you call this on the wrong type of EventList.
+   */
+  void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events)
+  {
+    events = &el.getEvents();
+  }
+
+  //--------------------------------------------------------------------------
+  /** Get the vector of events contained in an EventList;
+   * this is overloaded by event type.
+   *
+   * @param el :: The EventList to retrieve
+   * @param events :: reference to a pointer to a vector of this type of event
+   * @throw runtime_error if you call this on the wrong type of EventList.
+   */
+  void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events)
+  {
+    events = &el.getWeightedEvents();
+  }
+
+  //--------------------------------------------------------------------------
+  /** Get the vector of events contained in an EventList;
+   * this is overloaded by event type.
+   *
+   * @param el :: The EventList to retrieve
+   * @param events :: reference to a pointer to a vector of this type of event
+   * @throw runtime_error if you call this on the wrong type of EventList.
+   */
+  void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events)
+  {
+    events = &el.getWeightedEventsNoTime();
   }
 
 

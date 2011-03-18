@@ -159,6 +159,9 @@ public:
 
   WeightedEvent getEvent(size_t event_number);
 
+  template<class T>
+  std::vector<T>& getEventsOfType();
+
   std::vector<TofEvent>& getEvents();
   const std::vector<TofEvent>& getEvents() const;
 
@@ -317,6 +320,10 @@ private:
   //std::vector<TofEvent>::iterator findFirstEvent(const double seek_tof) const;
 
 };
+
+void getEventsFrom(EventList & el, std::vector<TofEvent> *&  events);
+void getEventsFrom(EventList & el, std::vector<WeightedEvent> *&  events);
+void getEventsFrom(EventList & el, std::vector<WeightedEventNoTime> *&  events);
 
 } // DataObjects
 } // Mantid

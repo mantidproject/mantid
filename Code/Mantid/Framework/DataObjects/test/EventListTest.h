@@ -1582,6 +1582,28 @@ public:
 
 
 
+
+
+  void test_getEventsFrom()
+  {
+    std::vector<TofEvent> * rel;
+    TS_ASSERT_THROWS_NOTHING( getEventsFrom(el, rel) );
+    TS_ASSERT_EQUALS(rel->size(), 3);
+    el *= 2.0;
+
+    std::vector<WeightedEvent> * rel2;
+    TS_ASSERT_THROWS_NOTHING( getEventsFrom(el, rel2) );
+    TS_ASSERT_EQUALS(rel2->size(), 3);
+
+    el.compressEvents(0, &el);
+
+    std::vector<WeightedEventNoTime> * rel3;
+    TS_ASSERT_THROWS_NOTHING( getEventsFrom(el, rel3) );
+    TS_ASSERT_EQUALS(rel3->size(), 3);
+
+  }
+
+
   //==================================================================================
   // Mocking functions
   //==================================================================================
