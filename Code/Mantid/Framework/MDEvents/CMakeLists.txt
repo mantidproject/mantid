@@ -46,8 +46,8 @@ set_target_properties ( MDEvents PROPERTIES OUTPUT_NAME MantidMDEvents
 # Add to the 'Framework' group in VS
 set_property ( TARGET MDEvents PROPERTY FOLDER "MantidFramework" )
 
-include_directories(${HDF5_INCLUDE_DIRS} inc)
-target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES})
+include_directories(${HDF5_INCLUDE_DIRS} inc ../Algorithms/inc)
+target_link_libraries ( MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} Algorithms)
 
 # Create test file projects
 if ( CXXTEST_FOUND )
@@ -55,10 +55,10 @@ if ( CXXTEST_FOUND )
   
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} ${GMOCK_TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} ${GMOCK_LIBRARIES} g DataHandling Nexus TestHelpers DataObjects )
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} ${GMOCK_LIBRARIES} DataHandling Nexus TestHelpers DataObjects )
   else ()
     cxxtest_add_test ( MDEventsTest ${TEST_FILES} )
-    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} g DataHandling Nexus TestHelpers DataObjects )
+    target_link_libraries( MDEventsTest MDEvents ${MANTIDLIBS} ${HDF5_LIBRARIES} DataHandling Nexus TestHelpers DataObjects )
   endif ()
   
   add_dependencies ( FrameworkTests MDEventsTest )
