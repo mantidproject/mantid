@@ -159,6 +159,12 @@ namespace Mantid
      */
     bool Minus::checkCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
+      // Are we allowing the subtraction of different # of spectra, using detector IDs to match up?
+      if (m_AllowDifferentNumberSpectra)
+      {
+        return true;
+      }
+
       if (!checkUnitCompatibility(lhs, rhs))
         return false;
 
