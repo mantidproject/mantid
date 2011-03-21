@@ -1,6 +1,7 @@
 from mantidsimple import *
 from mantidplot import *
 import IndirectEnergyConversion as IEC
+from IndirectCommon import *
 
 import math
 import re
@@ -127,13 +128,6 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
     # parameters to do with monitor
     if Monitor:
         fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
-        try:
-            inst = wsInst.getInstrument()
-            area = inst.getNumberParameter('mon-area')[0]
-            thickness = inst.getNumberParameter('mon-thickness')[0]
-        except IndexError, message:
-            print message
-            sys.exit(message)
         ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
             SpecMin=fmon+1, SpecMax=fmon+1)
     ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, SpecMin=first, 
@@ -148,7 +142,7 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
             mon_ws = ws_mon_l[i]
             # Get Monitor WS
             IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
-            IEC.monitorEfficiency(mon_ws, area, thickness)
+            IEC.monitorEfficiency(mon_ws)
             IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
             # Remove monitor workspace
             DeleteWorkspace(mon_ws)
@@ -183,11 +177,8 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
     eq1 = [] # output workspaces with units in Q
     eq2 = [] # output workspaces with units in Q^2
     for file in inputFiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        LoadNexus(file, root)
-        run = mtd[root].getRun().getLogData("run_number").value
-        savefile = root[:3] + run + root[8:-3]
+        root = loadNexus(file)
+        savefile = getWSprefix(root)
         if ( len(eRange) == 4 ):
             ElasticWindow(root, savefile+'eq1', savefile+'eq2',eRange[0],
                 eRange[1], eRange[2], eRange[3])
@@ -199,7 +190,7 @@ def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
             SaveNexusProcessed(savefile+'eq2', savefile+'eq2.nxs')
         eq1.append(savefile+'eq1')
         eq2.append(savefile+'eq2')
-        mantid.deleteWorkspace(root)
+        DeleteWorkspace(root)
     if Plot:
         nBins = mtd[eq1[0]].getNumberBins()
         lastXeq1 = mtd[eq1[0]].readX(0)[nBins-1]
@@ -238,21 +229,21 @@ def fury(sam_files, res_file, rebinParam, RES=True, Save=False, Verbose=False,
         outWSlist.append(savefile)
         Divide('sam', 'res', savefile)
         #Cleanup Sample Files
-        mantid.deleteWorkspace('sam_data')
-        mantid.deleteWorkspace('sam_int')
-        mantid.deleteWorkspace('sam_fft')
-        mantid.deleteWorkspace('sam')
+        DeleteWorkspace('sam_data')
+        DeleteWorkspace('sam_int')
+        DeleteWorkspace('sam_fft')
+        DeleteWorkspace('sam')
         # Crop nonsense values off workspace
         bin = int(math.ceil(mtd[savefile].getNumberBins()/ 2.0))
         binV = mtd[savefile].dataX(0)[bin]
         CropWorkspace(savefile, savefile, XMax=binV)
         if Save:
-            SaveNexusProcessed(savefile, savefile + '.nxs')
+            SaveNexusProcessed(savefile, savefile+'.nxs')
     # Clean Up RES files
-    mantid.deleteWorkspace('res_data')
-    mantid.deleteWorkspace('res_int')
-    mantid.deleteWorkspace('res_fft')
-    mantid.deleteWorkspace('res')
+    DeleteWorkspace('res_data')
+    DeleteWorkspace('res_int')
+    DeleteWorkspace('res_fft')
+    DeleteWorkspace('res')
     if Plot:
         specrange = range(0,mtd[outWSlist[0]].getNumberHistograms())
         plotFury(outWSlist, specrange)
@@ -273,8 +264,8 @@ def furyfitParsToWS(Table, Data):
     stretched = 0
     for spec in range(0,nSpec):
         yAxis = cName[(spec*2)+1]
-        if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis)
-            or re.search('Beta$', yAxis) ):
+        if ( re.search('Intensity$', yAxis) or re.search('Tau$', yAxis) or
+            re.search('Beta$', yAxis) ):
             xAxisVals += dataX
             if (len(names) > 0):
                 names += ","
@@ -364,9 +355,7 @@ def plotInput(inputfiles,spectra=[]):
         OneSpectra = True
     workspaces = []
     for file in inputfiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        LoadNexusProcessed(file, root)
+        root = loadNexus(file)
         if not OneSpectra:
             GroupDetectors(root, root,
                 DetectorList=range(spectra[0],spectra[1]+1) )
@@ -468,73 +457,3 @@ def abscorFeeder(sample, container, geom, useCor):
         print """Number of histograms in corrections workspaces do not match
             the sample workspace."""
         raise
-
-###############################################################################        
-## utility functions - can probably be moved elsewhere to share better ########
-###############################################################################
-
-def loadNexus(filename):
-    '''Loads a Nexus file into a workspace with the name based on the
-    filename. Convenience function for not having to play around with paths
-    in every function.'''
-    name = os.path.splitext( os.path.split(filename)[1] )[0]
-    LoadNexus(filename, name)
-    return name
-    
-def getWSprefix(workspace):
-    '''Returns a string of the form '<ins><run>_<analyser><refl>_' on which
-    all of our other naming conventions are built.'''
-    if workspace == '':
-        return ''
-    ws = mtd[workspace]
-    ins = ws.getInstrument().getName()
-    ins = ConfigService().facility().instrument(ins).shortName().lower()
-    run = ws.getRun().getLogData('run_number').value
-    try:
-        analyser = ws.getInstrument().getStringParameter('analyser')[0]
-        reflection = ws.getInstrument().getStringParameter('reflection')[0]
-    except IndexError:
-        analyser = ''
-        reflection = ''
-    prefix = ins + run + '_' + analyser + reflection + '_'
-    return prefix
-
-def getEfixed(workspace, detIndex=0):
-    det = mtd[workspace].getDetector(detIndex)
-    try:
-        efixed = det.getNumberParameter('Efixed')[0]
-    except AttributeError:
-        ids = det.getDetectorIDs()
-        det = mtd[workspace].getInstrument().getDetector(ids[0])
-        efixed = det.getNumberParameter('Efixed')[0]
-    return efixed
-
-def createQaxis(inputWS):
-    result = []
-    ws = mtd[inputWS]
-    nHist = ws.getNumberHistograms()
-    if ws.getAxis(1).isSpectra():
-        inst = ws.getInstrument()
-        samplePos = inst.getSample().getPos()
-        beamPos = samplePos - inst.getSource().getPos()
-        for i in range(0,nHist):
-            efixed = getEfixed(inputWS, i)
-            detector = ws.getDetector(i)
-            theta = detector.getTwoTheta(samplePos, beamPos) / 2
-            lamda = math.sqrt(81.787/efixed)
-            q = 4 * math.pi * math.sin(theta) / lamda
-            result.append(q)
-    else:
-        axis = ws.getAxis(1)
-        msg = 'Creating Axis based on Detector Q value: '
-        if not axis.isNumeric():
-            msg += 'Input workspace must have either spectra or numeric axis.'
-            print msg
-            sys.exit(msg)
-        if ( axis.getUnit().name() != 'MomentumTransfer' ):
-            msg += 'Input must have axis values of Q'
-            print msg
-            sys.exit(msg)
-        for i in range(0, nHist):
-            result.append(float(axis.label(i)))
-    return result

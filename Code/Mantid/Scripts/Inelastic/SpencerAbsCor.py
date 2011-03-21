@@ -15,7 +15,7 @@ else:                                                                        ##
 ## Other imports
 from mantidsimple import *
 from mantidplot import *
-from IndirectDataAnalysis import getEfixed, createQaxis
+from IndirectCommon import getEfixed, createQaxis
 import math
 
 def GetWSangles(inWS):

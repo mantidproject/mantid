@@ -8,6 +8,8 @@ except ImportError:
 
 import re
 
+from IndirectCommon import *
+
 def convert_to_energy(rawfiles, grouping, first, last,
         instrument, analyser, reflection,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
@@ -18,13 +20,6 @@ def convert_to_energy(rawfiles, grouping, first, last,
         loadInst(instrument)
         wsInst = mtd['__empty_' + instrument]
     fmon, fdet = getFirstMonFirstDet('__empty_'+instrument)
-    try: # Get monitor parameters
-        inst = wsInst.getInstrument()
-        area = inst.getNumberParameter('mon-area')[0]
-        thickness = inst.getNumberParameter('mon-thickness')[0]
-    except IndexError, message:
-        print message
-        sys.exit(message)
     isTosca = adjustTOF('__empty_'+instrument)
     # Get short name of instrument from the config service
     isn = ConfigService().facility().instrument(instrument).shortName().lower()
@@ -39,7 +34,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         ws = mtd[mon_wsl[0]]
         if ( ws.readX(0)[ws.getNumberBins()] > 40000 ):
             DeleteWorkspace(mon_wsl[0])
-            workspaces = toscaChop(rawfiles, area, thickness)
+            workspaces = toscaChop(rawfiles)
             if ( saveFormats != [] ): # Save data in selected formats
                 saveItems(workspaces, saveFormats)
             return workspaces
@@ -62,7 +57,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
         runNos.append(runNo)
         name = isn + runNo + '_' + analyser + reflection + '_red'
         timeRegime(monitor=ws_mon, detectors=ws)
-        monitorEfficiency(ws_mon, area, thickness)
+        monitorEfficiency(ws_mon)
         ## start dealing with detector data here
         if ( bgremove != [0, 0] ):
             backgroundRemoval(bgremove[0], bgremove[1], detectors=ws)
@@ -80,6 +75,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
             ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )
         # Final stage, grouping of detectors - apply name
         if isTosca: # TOSCA's grouping is pre-determined and fixed
+            name = getRunTitle(ws)
             groupTosca(name, invalid, detectors=ws)
         else:
             groupData(grouping, name, detectors=ws)
@@ -89,7 +85,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
     if ( calib != '' ): # Remove calibration workspace
         DeleteWorkspace('__calibration')
     return output_workspace_names
-        
+
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         Suffix=''):
     workspaces = []
@@ -116,7 +112,7 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
     else:
         return workspaces
 
-def toscaChop(files, area, thickness):
+def toscaChop(files):
     '''Reduction routine for TOSCA instrument when input workspace must be 
     "split" into parts and folded together after it has been corrected to the 
     monitor.'''
@@ -129,7 +125,7 @@ def toscaChop(files, area, thickness):
         for ws in wsgroup:
             ExtractSingleSpectrum(ws, ws+'mon', 140)
             ConvertUnits(ws+'mon', ws+'mon', 'Wavelength', 'Indirect')
-            monitorEfficiency(ws+'mon', area, thickness)
+            monitorEfficiency(ws+'mon')
             CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
             normToMon(Factor=1e9, monitor=ws+'mon', detectors=ws)
             DeleteWorkspace(ws+'mon')
@@ -143,9 +139,10 @@ def toscaChop(files, area, thickness):
             DeleteWorkspace(grpws)
         conToEnergy(detectors=ws)
         Rebin(ws, ws, '-2.5,0.015,3,-0.005,1000')
-        wstitle = ''
-        ws = groupTosca(ws+'_en', invalid, detectors=ws)
+        wstitle = getRunTitle(ws) # Have Run title as Workspace Name
+        ws = groupTosca(wstitle, invalid, detectors=ws)
         wslist.append(ws)
+        DeleteWorkspace(raw)
     return wslist
 
 def createScalingWorkspace(wsgroup, merged, wsname='__scaling'):
@@ -215,8 +212,14 @@ def timeRegime(Smooth=True, monitor='', detectors=''):
         ConvertUnits(monitor, monitor, 'Wavelength', 'Indirect')
     return monitor
 
-def monitorEfficiency(inWS, area, thickness):
-    OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
+def monitorEfficiency(inWS):
+    inst = mtd[inWS].getInstrument()
+    try:
+        area = inst.getNumberParameter('mon-area')[0]
+        thickness = inst.getNumberParameter('mon-thickness')[0]
+        OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
+    except IndexError:
+        print "Unable to take Monitor Area and Thickness from Paremeter File."
     return inWS
 
 def getReferenceLength(inWS, fdi):
@@ -474,7 +477,7 @@ def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
         if Save:
             SaveNexusProcessed(sfile, sfile+'.nxs')
         outWSlist.append(sfile)
-        mantid.deleteWorkspace(root)
+        DeleteWorkspace(root)
     if Plot:
         graph = plotBin(outWSlist, 0)
 
