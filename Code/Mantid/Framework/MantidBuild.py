@@ -16,9 +16,8 @@ COLOR = {"green":'\x1b[32m',
          "boldred":'\x1b[91m'
          }
 
-
 def color_output(cmdline, workingdir):
-    """Run a command and olor the output"""
+    """Run a command and color the output"""
     #Start the subprocess
     p = subprocess.Popen(cmdline, shell=True, bufsize=10000,
                          cwd=workingdir,
