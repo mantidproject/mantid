@@ -196,8 +196,9 @@ public:
   bool sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const;
 
   /// Inform the data that it is to be plotted on a log y scale
-  void setLogScale(bool on){m_logScale = on;}
+  void setLogScale(bool on);
   bool logScale()const{return m_logScale;}
+  void saveLowestPositiveValue(const double v);
 
 private:
 
@@ -222,8 +223,8 @@ private:
   bool m_binCentres;
   /// Indicates that the data is plotted on a log y scale
   bool m_logScale;
-  /// temporary storage for a y value
-  mutable double m_tmp;
+  /// lowest positive y value
+  mutable double m_minPositive;
 
 };
 

@@ -10,6 +10,7 @@
 #include <stdexcept>
 #include <limits>
 #include <typeinfo>
+#include <algorithm>
 
 using namespace Mantid::API;
 
@@ -334,6 +335,7 @@ void MantidCurve::axisScaleChanged(int axis, bool toLog)
     // force boundingRect calculation at this moment
     invalidateBoundingRect();
     boundingRect();
+    mantidData()->saveLowestPositiveValue(m_boundingRect.y());
   }
 }
 
@@ -354,7 +356,7 @@ m_E(workspace->readE(specIndex)),
 m_isHistogram(workspace->isHistogramData()),
 m_binCentres(false),
 m_logScale(logScale),
-m_tmp(0)
+m_minPositive(0)
 {}
 
 /// Copy constructor
@@ -368,7 +370,7 @@ m_E(data.m_workspace->readE(data.m_spec)),
 m_isHistogram(m_workspace->isHistogramData()),
 m_binCentres(data.m_binCentres),
 m_logScale(data.m_logScale),
-m_tmp(0)
+m_minPositive(0)
 {}
 
 /** Size of the data set
@@ -403,11 +405,7 @@ double MantidQwtData::y(size_t i) const
   double tmp = i < m_Y.size() ? m_Y[i] : m_Y[m_Y.size()-1];
   if (m_logScale && tmp <= 0.)
   {
-    tmp = m_tmp;
-  }
-  else
-  {
-    m_tmp = tmp;
+    tmp = m_minPositive;
   }
 
   return tmp;
@@ -431,5 +429,15 @@ int MantidQwtData::esize() const
 bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
 {
   return workspace.get() == m_workspace.get();
+}
+
+void MantidQwtData::setLogScale(bool on)
+{
+  m_logScale = on;
+}
+
+void MantidQwtData::saveLowestPositiveValue(const double v)
+{
+  if (v > 0) m_minPositive = v;
 }
 
