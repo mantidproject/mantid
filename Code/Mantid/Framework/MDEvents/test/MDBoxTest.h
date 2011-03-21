@@ -103,8 +103,8 @@ public:
 
   void test_sptr()
   {
-    MDBox<MDEvent<3>,3>::sptr a( new MDBox<MDEvent<3>,3>());
-    TS_ASSERT_EQUALS( sizeof(a), 16);
+    typedef MDBox<MDEvent<3>,3> mdbox3;
+    TS_ASSERT_THROWS_NOTHING( mdbox3::sptr a( new mdbox3()); )
   }
 
 
