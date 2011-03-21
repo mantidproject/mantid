@@ -6,6 +6,7 @@
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -23,6 +24,8 @@ namespace MDEvents
 {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
+
+  bool DODEBUG = false;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
@@ -131,7 +134,7 @@ namespace MDEvents
 
       ws->addEvents(out_events);
     }
-    prog->report("Adding Events");
+    prog->reportIncrement(el.getNumberEvents(), "Adding Events");
   }
 
 
@@ -165,6 +168,7 @@ namespace MDEvents
     // Build up the box controller
     BoxController_sptr bc(new BoxController(3));
     bc->setSplitInto(4);
+    bc->setSplitThreshold(200);
     ws->setBoxController(bc);
 
     // We always want the box to be split (it will reject bad ones)
@@ -178,13 +182,20 @@ namespace MDEvents
     //To get all the detector ID's
     allDetectors = in_ws->getInstrument()->getDetectors();
 
-    prog = new Progress(this, 0, 1.0, in_ws->getNumberHistograms());
+    size_t totalCost = in_ws->getNumberEvents();
+    prog = new Progress(this, 0, 1.0, totalCost);
+    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, false);
+    if (DODEBUG) prog->setNotifyStep(1);
 
     // Create the thread pool that will run all of these.
     ThreadScheduler * ts = new ThreadSchedulerLargestCost();
     ThreadPool tp(ts);
 
-    size_t events_added = 0;
+    // To track when to split up boxes
+    size_t eventsAdded = 0;
+    size_t lastNumBoxes = ws->getBox()->getNumMDBoxes();
+
+    Timer tim;
 
     for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
@@ -211,19 +222,36 @@ namespace MDEvents
       // Give this task to the scheduler
       double cost = el.getNumberEvents();
       ts->push( new FunctionTask( func, cost) );
+
+      // Keep a running total of how many events we've added
+      eventsAdded += cost;
+      if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
+      {
+        if (DODEBUG) std::cout << "Splitting after " << eventsAdded << " events. There are " << lastNumBoxes << " boxes\n";
+        // Do all the adding tasks
+        tp.joinAll();
+
+        // Now do all the splitting tasks
+        ws->splitAllIfNeeded(ts);
+        tp.joinAll();
+
+        // Count the new # of boxes.
+        lastNumBoxes = ws->getBox()->getNumMDBoxes();
+        eventsAdded = 0;
+        if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
+      }
     }
 
-    // Wait for all tasks to complete.
+    // Do a final splitting of everything
+    ws->splitAllIfNeeded(ts);
     tp.joinAll();
 
-    ThreadScheduler * ts2 = new ThreadSchedulerLargestCost();
-    ThreadPool tp2(ts2);
-    ws->splitAllIfNeeded(ts2);
-    tp2.joinAll();
+    if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
+
+    // Recount totals at the end.
     ws->refreshCache();
 
-//    std::cout << "Workspace has " << ws->getNPoints() << " events\n";
-
+    if (DODEBUG) std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << tim.elapsed() << " sec.\n\n\n";
 
 
     // Save the output

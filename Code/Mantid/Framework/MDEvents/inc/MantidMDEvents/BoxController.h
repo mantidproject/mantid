@@ -139,6 +139,23 @@ namespace MDEvents
     }
 
 
+    /** Determine when would be a good time to split MDBoxes into MDGridBoxes.
+     * This is to be called while adding events. Splitting boxes too frequently
+     * would be a slow-down, but keeping the boxes split at an earlier stage
+     * should help scalability for later adding, so there is a balance to get.
+     *
+     * @param eventsAdded :: How many events were added since the last split?
+     * @param numMDBoxes :: How many un-split MDBoxes are there (total) in the workspace
+     */
+    bool shouldSplitBoxes(size_t eventsAdded, size_t numMDBoxes)
+    {
+      // Avoid divide by zero
+      if (numMDBoxes == 0) return false;
+      // Return true if the average # of events per box is big enough to split.
+      return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
+    }
+
+
   //NOTE: These are left public for testing purposes.
   public:
 

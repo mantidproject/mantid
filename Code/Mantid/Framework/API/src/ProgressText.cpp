@@ -60,7 +60,7 @@ namespace API
     // Put a line of up to 40 *; spaces otherwise.
     for (int i=0; i < 40; i++)
       std::cout << ((i*2.5 < pct) ? "*" : " ");
-    std::cout << " " << std::setw(3) << pct << " % " << msg;
+    std::cout << " " << std::setw(3) << pct << " % " << msg << "  ";
 
     if (!m_newLines)
     {

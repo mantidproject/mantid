@@ -141,8 +141,7 @@ namespace MDEvents
   {
     MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
     if (!gridBox)
-      throw std::runtime_error("MDEventWorkspace::splitAllIfNeeded called on a "
-          "MDBox (call splitBox() first).");
+      throw std::runtime_error("MDEventWorkspace::splitAllIfNeeded called on a MDBox (call splitBox() first).");
     gridBox->splitAllIfNeeded(ts);
   }
   //-----------------------------------------------------------------------------------------------
