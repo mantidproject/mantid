@@ -603,26 +603,32 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
   menu->addAction(m_showData);
   menu->addAction(m_showInst);
   menu->addAction(m_plotSpec);
-  if( matrixWS->blocksize() > 1 )
-  {
-    m_plotSpec->setEnabled(true);
-  }
-  else
-  {
-    m_plotSpec->setEnabled(false);
-  }
+  // Don't plot a spectrum if only one X value
+  m_plotSpec->setEnabled ( matrixWS->blocksize() > 1 );
   menu->addAction(m_colorFill);
-  if( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1)
-  {
-    m_colorFill->setEnabled(true);
-  }
-  else
-  {
-    m_colorFill->setEnabled(false);
-  }
+  // Show the color fill plot if you have more than one histogram
+  m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );
   menu->addAction(m_showLogs);
   menu->addAction(m_showHist);
   menu->addAction(m_saveNexus);
+}
+
+/**
+ * Add the actions that are appropriate for a MDEventWorkspace
+ * @param menu :: The menu to store the items
+ * @param matrixWS :: The workspace related to the menu
+ */
+void MantidDockWidget::addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const
+{
+  (void) mdeventWS;
+
+  //menu->addAction(m_showData); // Show data
+  //menu->addAction(m_showInst); // Show instrument
+  //menu->addAction(m_plotSpec); // Plot spectra
+  //menu->addAction(m_colorFill);
+  //menu->addAction(m_showLogs); // Sample logs
+  menu->addAction(m_showHist);
+  //menu->addAction(m_saveNexus);
 }
 
 /**
@@ -735,6 +741,10 @@ void MantidDockWidget::popupMenu(const QPoint & pos)
     if( MatrixWorkspace_const_sptr matrixWS = boost::dynamic_pointer_cast<const Mantid::API::MatrixWorkspace>(ws) ) 
     {
       addMatrixWorspaceMenuItems(menu, matrixWS);
+    }
+    else if( IMDEventWorkspace_const_sptr mdeventWS = boost::dynamic_pointer_cast<const IMDEventWorkspace>(ws) )
+    {
+      addMDEventWorspaceMenuItems(menu, mdeventWS);
     }
     else if( boost::dynamic_pointer_cast<const WorkspaceGroup>(ws) ) 
     {

@@ -63,6 +63,7 @@ private:
   void populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item);
   void populateTableWorkspaceData(Mantid::API::ITableWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::MatrixWorkspace_const_sptr matrixWS) const;
+  void addMDEventWorspaceMenuItems(QMenu *menu, Mantid::API::IMDEventWorkspace_const_sptr mdeventWS) const;
   void addWorkspaceGroupMenuItems(QMenu *menu) const;
   void addTableWorkspaceMenuItems(QMenu * menu) const;
   bool isInvisibleWorkspaceOptionSet();

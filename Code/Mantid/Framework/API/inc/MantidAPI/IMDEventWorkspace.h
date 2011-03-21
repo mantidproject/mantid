@@ -48,6 +48,9 @@ namespace API
   /// Shared pointer to a generic IMDEventWorkspace
   typedef boost::shared_ptr<IMDEventWorkspace> IMDEventWorkspace_sptr;
 
+  /// Shared pointer to a generic const IMDEventWorkspace
+  typedef boost::shared_ptr<const IMDEventWorkspace> IMDEventWorkspace_const_sptr;
+
 
 }//namespace MDEvents
 
