@@ -7,7 +7,6 @@ except ImportError:
     pass
 
 import re
-import platform # used to determine operating environment
 
 def convert_to_energy(rawfiles, grouping, first, last,
         instrument, analyser, reflection,
@@ -44,7 +43,7 @@ def convert_to_energy(rawfiles, grouping, first, last,
             if ( saveFormats != [] ): # Save data in selected formats
                 saveItems(workspaces, saveFormats)
             return workspaces
-    ws_names = loadData(rawfiles, Sum=SumFiles, SpecMin=first, SpecMax=last)    
+    ws_names = loadData(rawfiles, Sum=SumFiles, SpecMin=first, SpecMax=last)
     if ( len(mon_wsl) != len(ws_names) ):
         print "Indirect CTE: Error loading data files."
         sys.exit("Indirect CTE: Error loading data files.")
@@ -565,17 +564,3 @@ def applyParameterFile(workspace, analyser, refl):
     idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
     ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
     LoadParameterFile(workspace, ipf)
-    
-def LibA2L(n, Array):
-    List = []
-    for m in range(0,n):
-        List.append(Array[m])
-    return List
-   
-def LibPadArray(inarray,nfixed):
-    npt=len(inarray)
-    padding = nfixed-npt
-    outarray = []
-    outarray.extend(inarray)
-    outarray += [0]*padding
-    return outarray
