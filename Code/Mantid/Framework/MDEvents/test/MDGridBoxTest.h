@@ -200,6 +200,8 @@ public:
     TS_ASSERT_EQUALS(g->getNPoints(), 10);
     // Its depth level should be 0 (same as parent)
     TS_ASSERT_EQUALS(g->getDepth(), 0);
+    // It was split into 10 MDBoxes.
+    TS_ASSERT_EQUALS( g->getNumMDBoxes(), 10);
 
     // It has a BoxController
     TS_ASSERT( g->getBoxController() );
@@ -285,6 +287,9 @@ public:
 
     std::vector<IMDBox<MDEvent<2>,2>*> boxes;
 
+    // Start with 100 boxes
+    TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 100);
+
     // The box is a MDBox at first
     boxes = superbox->getBoxes();
     b = dynamic_cast<MDBox<MDEvent<2>,2> *>(boxes[0]);
@@ -296,6 +301,10 @@ public:
     boxes = superbox->getBoxes();
     gb = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( gb );
+
+    // There are now 199 MDBoxes; the 99 at level 1, and 100 at level 2
+    TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 199);
+
 
     // You can split it again and it does nothing
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));

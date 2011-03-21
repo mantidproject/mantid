@@ -44,6 +44,8 @@ namespace MDEvents
 
     size_t getNumDims() const;
 
+    size_t getNumMDBoxes() const;
+
     std::vector< MDE > & getEvents();
 
     std::vector< MDE > * getEventsCopy();

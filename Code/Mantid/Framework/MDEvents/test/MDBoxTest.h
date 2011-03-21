@@ -33,6 +33,7 @@ public:
     TS_ASSERT_EQUALS( b3.getBoxController(), sc);
     TS_ASSERT_EQUALS( b3.getNPoints(), 0);
     TS_ASSERT_EQUALS( b3.getDepth(), 2);
+    TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
   }
 
   void test_setExtents()

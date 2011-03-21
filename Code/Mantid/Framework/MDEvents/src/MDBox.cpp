@@ -44,6 +44,15 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
+  /** Returns the number of un-split MDBoxes in this box (including all children)
+   * @return :: 1 always since this is just a MD Box*/
+  TMDE(
+  size_t MDBox)::getNumMDBoxes() const
+  {
+    return 1;
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Returns the total number of points (events) in this box */
   TMDE(size_t MDBox)::getNPoints() const
   {

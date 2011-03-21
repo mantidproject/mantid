@@ -126,6 +126,20 @@ namespace MDEvents
     return nPoints;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Returns the number of un-split MDBoxes in this box (including all children)
+   * @return :: the total # of MDBoxes in all children */
+  TMDE(
+  size_t MDGridBox)::getNumMDBoxes() const
+  {
+    size_t total = 0;
+    typename boxVector_t::const_iterator it;
+    for (it = boxes.begin(); it != boxes.end(); it++)
+    {
+      total += (*it)->getNumMDBoxes();
+    }
+    return total;
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Refresh the cache of nPoints, signal and error,

@@ -49,6 +49,9 @@ namespace MDEvents
     /// Get number of dimensions
     virtual size_t getNumDims() const = 0;
 
+    /// Get the total # of unsplit MDBoxes contained.
+    virtual size_t getNumMDBoxes() const = 0;
+
     /// Return a copy of contained events
     virtual std::vector< MDE > * getEventsCopy() = 0;
 
