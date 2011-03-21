@@ -87,11 +87,12 @@ void Qxy::exec()
       det = inputWorkspace->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
-    // If this is a monitor, then skip
-    if ( det->isMonitor() ) continue;
-    if ( det->isMasked() ) continue;
+    // If no detector found or if it's masked or a monitor, skip onto the next spectrum
+    if ( !det || det->isMonitor() || det->isMasked() ) continue;
     
     V3D detPos = det->getPos()-samplePos;
       

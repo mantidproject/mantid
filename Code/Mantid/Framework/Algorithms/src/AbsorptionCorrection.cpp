@@ -140,9 +140,12 @@ void AbsorptionCorrection::exec()
       det = m_inputWS->getDetector(i);
     } catch (Exception::NotFoundError&)
     {
-      // Catch when a spectrum doesn't have an attached detector and go to next one
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
+    // If no detector found, skip onto the next spectrum
+    if ( !det ) continue;
 
     std::vector<double> L2s(m_numVolumeElements);
     calculateDistances(det,L2s);

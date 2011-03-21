@@ -91,7 +91,8 @@ namespace Geometry
 
     /// Method for adding a parameter providing its value as a string
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
-	     const std::string& value);
+             const std::string& value);
+
     /**
      * Method for adding a parameter providing its value of a particular type
      * @tparam T The concrete type
@@ -102,19 +103,20 @@ namespace Geometry
      */
     template<class T>
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
-	     const T& value)
+             const T& value)
     {
       bool created(false);
       boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
       ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
       if (!paramT)
       {
-	reportError("Error in adding parameter: incompatible types");
-	throw std::runtime_error("Error in adding parameter: incompatible types");
+        reportError("Error in adding parameter: incompatible types");
+        throw std::runtime_error("Error in adding parameter: incompatible types");
       }
       paramT->setValue(value);
       if( created )
       {
+        PARALLEL_CRITICAL(parameter_add)
 	m_map.insert(std::make_pair(comp->getComponentID(),param));
       }
     }

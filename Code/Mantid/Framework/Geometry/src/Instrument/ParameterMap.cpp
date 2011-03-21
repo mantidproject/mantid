@@ -37,6 +37,7 @@ namespace Mantid
       param->fromString(value);
       if( created )
       {
+        PARALLEL_CRITICAL(parameter_add)
 	m_map.insert(std::make_pair(comp->getComponentID(),param));
       }
     }

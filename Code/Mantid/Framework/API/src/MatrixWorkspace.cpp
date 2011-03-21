@@ -681,22 +681,19 @@ namespace Mantid
         return;
       }
       
-      PARALLEL_CRITICAL(MatrixWorkspace_maskWorkspaceIndex)
+      int spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
+      for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
-        int spectrum_number = getAxis(1)->spectraNo(index);
-        const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
-        for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+        try
         {
-          try
+          if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
           {
-            if ( Geometry::Detector* det = dynamic_cast<Geometry::Detector*>(sptr_instrument->getDetector(*iter).get()) )
-            {
-              m_parmap->addBool(det,"masked",true);
-            }
+            m_parmap->addBool(det,"masked",true);  // Thread-safe method
           }
-          catch(Kernel::Exception::NotFoundError &)
-          {
-          }
+        }
+        catch(Kernel::Exception::NotFoundError &)
+        {
         }
       }
     }

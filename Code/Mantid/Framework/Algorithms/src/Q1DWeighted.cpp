@@ -116,12 +116,12 @@ void Q1DWeighted::exec()
       det = inputWS->getDetector(i);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << i << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // Catch if no detector. Next line tests whether this happened - test placed
+      // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+      // in an openmp block.
     }
-    // If this detector is masked, skip to the next one
-    if ( det->isMasked() ) continue;
-    // If this detector is a monitor, skip to the next one
-    if ( det->isMonitor() ) continue;
+    // If no detector found or if it's masked or a monitor, skip onto the next spectrum
+    if ( !det || det->isMonitor() || det->isMasked() ) continue;
 
     // Get the current spectrum for both input workspaces
     const MantidVec& XIn = inputWS->readX(i);

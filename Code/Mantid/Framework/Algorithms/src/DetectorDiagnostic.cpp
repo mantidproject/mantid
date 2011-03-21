@@ -134,8 +134,13 @@ namespace Mantid
           {
             badIndices.insert(i);
           }
-          continue;
+          // Catch if no detector. Next line tests whether this happened - test placed
+          // outside here because Mac Intel compiler doesn't like 'continue' in a catch
+          // in an openmp block.
         }
+        // If no detector found, skip onto the next spectrum
+        if ( !det ) continue;
+
         // If we're already masked skip it
         if( det->isMasked() )
         {
