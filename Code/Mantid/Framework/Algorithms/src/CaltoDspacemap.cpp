@@ -119,7 +119,8 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
   AlignDetectors::getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
 
   //To get all the detector ID's
-  const std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
+  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  instrument->getDetectors(allDetectors);
 
   // Selects (empty, will default to true)
   std::map<int, bool> selects;

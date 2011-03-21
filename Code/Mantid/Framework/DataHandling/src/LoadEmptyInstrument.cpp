@@ -71,7 +71,9 @@ namespace Mantid
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
-      const std::map<int, IDetector_sptr> detCache = instrument->getDetectors();
+      std::map<int, IDetector_sptr> detCache;
+      //FIXME: Use GetDetectorID's here since it'll be way faster.
+      instrument->getDetectors(detCache);
       const int number_spectra = static_cast<int>(detCache.size());
       
       // Now create the outputworkspace and copy over the instrument object

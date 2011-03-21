@@ -48,7 +48,8 @@ void GetMaskedDetectors::exec()
   // List masked of detector IDs
   std::vector<int> detectorList;
 
-  std::map<int, Geometry::IDetector_sptr> det_map = WS->getInstrument()->getDetectors();
+  std::map<int, Geometry::IDetector_sptr> det_map;
+  WS->getInstrument()->getDetectors(det_map);
 
   for (std::map<int, Geometry::IDetector_sptr>::const_iterator iter = det_map.begin();
       iter != det_map.end(); ++iter )

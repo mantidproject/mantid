@@ -67,29 +67,52 @@ namespace Mantid
 
 
     //------------------------------------------------------------------------------------------
-    /**	Return a copy of the detector cache
+    /**	Fills a copy of the detector cache
     * @returns a map of the detectors hold by the instrument
     */
-    std::map<int, Geometry::IDetector_sptr> Instrument::getDetectors() const
+    void Instrument::getDetectors(std::map<int, Geometry::IDetector_sptr> & out_map) const
     { 
       if (m_isParametrized)
       {
         //Get the base instrument detectors
-        std::map<int, IDetector_sptr> res, dets = dynamic_cast<const Instrument*>(m_base)->getDetectors();
+        out_map.clear();
+        const std::map<int, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
         //And turn them into parametrized versions
-        for(std::map<int, IDetector_sptr>::const_iterator it=dets.begin();it!=dets.end();it++)
-	{
-          res.insert(std::pair<int, IDetector_sptr>
-		     (it->first, ParComponentFactory::createDetector(it->second.get(), m_map)));
-	}
-        return res;
+        for(std::map<int, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        {
+          out_map.insert(std::pair<int, IDetector_sptr>
+          (it->first, ParComponentFactory::createDetector(it->second.get(), m_map)));
+        }
       }
       else
       {
         //You can just return the detector cache directly.
-        return _detectorCache;
+        out_map = _detectorCache;
       }
     }
+
+
+    /** Return a vector of detector IDs in this instrument */
+    std::vector<int> Instrument::getDetectorIDs(bool skipMonitors) const
+    {
+      std::vector<int> out;
+      if (m_isParametrized)
+      {
+        const std::map<int, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
+        for(std::map<int, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+          if (!skipMonitors || !it->second->isMonitor())
+            out.push_back(it->first);
+      }
+      else
+      {
+        const std::map<int, IDetector_sptr> & in_dets = _detectorCache;
+        for(std::map<int, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+          if (!skipMonitors || !it->second->isMonitor())
+            out.push_back(it->first);
+      }
+      return out;
+    }
+
 
     //------------------------------------------------------------------------------------------
     /** Fill a vector with all the detectors contained (at any depth) in a named component. For example,

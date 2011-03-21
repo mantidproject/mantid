@@ -167,6 +167,25 @@ public:
     TS_ASSERT_EQUALS(dets.size(), 9);
   }
 
+  void test_getDetectors()
+  {
+    // 5 banks with 6x6 pixels in them.
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    std::map<int, Mantid::Geometry::IDetector_sptr> dets;
+    inst->getDetectors(dets);
+    TS_ASSERT_EQUALS(dets.size(), 36*5);
+  }
+
+  void test_getDetectorIDs()
+  {
+    // 5 banks with 6x6 pixels in them.
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
+    std::vector<int> dets;
+    dets = inst->getDetectorIDs();
+    TS_ASSERT_EQUALS(dets.size(), 36*5);
+  }
+
+
 private:
   Instrument instrument;
   boost::shared_ptr<Detector> det, det2, det3;

@@ -67,7 +67,7 @@ void Progress::doReport(const std::string& msg)
 */
 void Progress::report(const std::string& msg)
 {
-  if (m_i++ - m_last_reported < m_notifyStep ) return;
+  if (++m_i - m_last_reported < m_notifyStep ) return;
   this->doReport(msg);
 }
 

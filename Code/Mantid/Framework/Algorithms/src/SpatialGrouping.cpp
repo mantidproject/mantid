@@ -72,7 +72,7 @@ void SpatialGrouping::exec()
   int nNeighbours = ( gridSize * gridSize ) - 1;
   
   Mantid::Geometry::IInstrument_sptr m_instrument = inputWorkspace->getInstrument();
-  m_detectors = m_instrument->getDetectors();
+  m_instrument->getDetectors(m_detectors);
   
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
     

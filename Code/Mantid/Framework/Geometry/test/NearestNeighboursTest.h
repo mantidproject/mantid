@@ -35,7 +35,8 @@ public:
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
     ParameterMap_sptr pmap(new ParameterMap());
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
-    std::map<int, IDetector_sptr> m_detectors = m_instrument->getDetectors();
+    std::map<int, IDetector_sptr> m_detectors;
+    m_instrument->getDetectors(m_detectors);
 
     // Need scaling vector since changes to NN ( 22/12/10 )
     Mantid::Geometry::BoundingBox bbox = Mantid::Geometry::BoundingBox();
@@ -83,7 +84,7 @@ public:
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Correct # of detectors
-    TS_ASSERT_EQUALS( m_instrument->getDetectors().size(), 16*16*2);
+    TS_ASSERT_EQUALS( m_instrument->getDetectorIDs().size(), 16*16*2);
 
     RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);

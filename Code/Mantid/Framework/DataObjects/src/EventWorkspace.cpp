@@ -430,20 +430,8 @@ namespace DataObjects
    */
   void EventWorkspace::padPixels(bool parallel)
   {
-
-    //Build a vector with the pixel IDs in order.
-    std::vector<int> pixelIDs;
-
-    std::map<int, Geometry::IDetector_sptr> detector_map = this->getInstrument()->getDetectors();
-    std::map<int, Geometry::IDetector_sptr>::iterator it;
-    for (it = detector_map.begin(); it != detector_map.end(); it++)
-    {
-      //Go through each pixel in the map, but forget monitors.
-      if (!it->second->isMonitor())
-      {
-        pixelIDs.push_back(it->first); //it->first is detector ID #
-      }
-    }
+    //Build a vector with the pixel IDs in order; skipping the monitors
+    std::vector<int> pixelIDs = this->getInstrument()->getDetectorIDs(true);
     int numpixels = pixelIDs.size();
 
     //Remove all old EventLists and resize the vector to hold everything
@@ -476,88 +464,6 @@ namespace DataObjects
 
     //Marker makes it okay to go on.
     done_loading_data = true;
-
-
-
-//    //First, we build a list of blocks of pixel IDs
-//    std::vector< std::vector<int> * > pixel_blocks;
-//    //How many pixels per block? Use a large enough size to make sense to launch a thread.
-//    int block_size = 1000;
-//
-//    //initialize a block
-//    int i=0;
-//    int numpixels=0;
-//    std::vector<int> * block = new std::vector<int>();
-//
-//    //Go through all the detectors
-//    std::map<int, Geometry::IDetector_sptr> detector_map = this->getInstrument()->getDetectors();
-//    std::map<int, Geometry::IDetector_sptr>::iterator it;
-//    for (it = detector_map.begin(); it != detector_map.end(); it++)
-//    {
-//      //Go through each pixel in the map, but forget monitors.
-//      if (!it->second->isMonitor())
-//      {
-//        block->push_back(it->first); //it->first is detector ID #
-//        i++;
-//        if (i >= block_size)
-//        {
-//          //Filled up a block!
-//          pixel_blocks.push_back(block);
-//          numpixels += block->size();
-//          block = new std::vector<int>();
-//          i = 0;
-//        }
-//      }
-//    }
-//
-//    //Push the last block
-//    if (i > 0)
-//    {
-//      pixel_blocks.push_back(block);
-//      numpixels += block->size();
-//    }
-//
-//    int numblocks = static_cast<int>(pixel_blocks.size());
-//    std::vector< std::vector<EventList *> * > el_blocks(numblocks);
-//    //Do each block in parallel
-//    PARALLEL_FOR_IF(parallel)
-//    for (i = 0; i < numblocks; i++)
-//    {
-//      std::vector<int> * myblock = pixel_blocks[i];
-//      int myblock_size = myblock->size();
-//      std::vector<EventList *> * my_el_block = new std::vector<EventList *>(); //(myblock_size);
-//
-//      for (int j=0; j<myblock_size; j++)
-//      {
-//        //Create an event list for here
-//        EventList * newel = new EventList();
-//        //Set the (single) entry in the detector ID set
-//        newel->addDetectorID( (*myblock)[j] );
-//        //Save it in the local event list block.
-//        //(*my_el_block)[j] = newel;
-//        my_el_block->push_back( newel );
-//      }
-//
-//      //Save the local event list block in the master list.
-//      el_blocks[i] = my_el_block;
-//      delete myblock;
-//    }
-//
-//    //Clear any old event lists.
-//    this->clearData();
-//
-//    //Now we append the blocks but NOT in parallel.
-//    for (i = 0; i < numblocks; i++)
-//    {
-//      //Copy all the EventLists from the block into the main list
-//      this->data.insert(data.end(), el_blocks[i]->begin(), el_blocks[i]->end());
-//      //Done with that.
-//      delete el_blocks[i];
-//    }
-//    m_noVectors = data.size();
-//
-//    //Finalize by building the spectra map, etc.
-//    this->doneAddingEventLists();
   }
 
   //-----------------------------------------------------------------------------

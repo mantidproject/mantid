@@ -157,7 +157,8 @@ void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorksp
   AlignDetectors::getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
 
   //To get all the detector ID's
-  const std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
+  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  instrument->getDetectors(allDetectors);
 
   //Read in the POWGEN-style Dspace mapping file
   const char * filename = DFileName.c_str();
@@ -218,7 +219,8 @@ void DspacemaptoCal::CalculateOffsetsFromVulcanFactors(Mantid::API::MatrixWorksp
   IInstrument_const_sptr instrument = inputWS->getInstrument();
 
   //To get all the detector ID's
-  const std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
+  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  instrument->getDetectors(allDetectors);
 
   // Selects (empty, will default to true)
   std::map<int, bool> selects;

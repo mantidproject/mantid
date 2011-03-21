@@ -84,8 +84,11 @@ public:
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<Geometry::IComponent> > getAllComponentsWithName(const std::string & cname);
 
-  /// return reference to detector cache 
-  virtual std::map<int, Geometry::IDetector_sptr> getDetectors() const = 0;
+  /// return map of detector ID : detector sptr
+  virtual void getDetectors(std::map<int, Geometry::IDetector_sptr>  & out_dets) const = 0;
+
+  /// return a vector with a list of the detector IDs
+  virtual std::vector<int> getDetectorIDs(bool skipMonitors = false) const = 0;
 
   /// The type used to deliver the set of plottable components
   typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;

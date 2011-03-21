@@ -547,7 +547,7 @@ void MuonAnalysis::runLoadCurrent()
 
   std::stringstream str;
   str << "Description: ";
-  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size());
+  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size());
   str << nDet;
   str << " detector spectrometer, main field ";
   str << "unknown"; 
@@ -1010,7 +1010,7 @@ void MuonAnalysis::inputFileChanged()
   // finally if nothing else works set dummy grouping and display
   // message to user
   if ( !isGroupingSet() )
-    setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size()));
+    setDummyGrouping(static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size()));
 
 
   if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
@@ -1023,7 +1023,7 @@ void MuonAnalysis::inputFileChanged()
 
   std::stringstream str;
   str << "Description: ";
-  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectors().size());
+  int nDet = static_cast<int>(matrix_workspace->getInstrument()->getDetectorIDs().size());
   str << nDet;
   str << " detector spectrometer, main field ";
   str << QString(mainFieldDirection.c_str()).toLower().toStdString(); 

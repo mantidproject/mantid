@@ -718,7 +718,9 @@ public:
       TS_ASSERT_EQUALS( bank1->getAtXY(1,1)->getID(), 1301);
 
       //The total number of detectors
-      TS_ASSERT_EQUALS( i->getDetectors().size(), 100*200 * 2);
+      std::map<int, Geometry::IDetector_sptr> dets;
+      i->getDetectors(dets);
+      TS_ASSERT_EQUALS( dets.size(), 100*200 * 2);
 
       AnalysisDataService::Instance().remove(wsName);
   }

@@ -482,7 +482,8 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
     else
     {
-      std::map<int, Geometry::IDetector_sptr> detector_map = workspace->getInstrument()->getDetectors();
+      std::map<int, Geometry::IDetector_sptr> detector_map;
+      workspace->getInstrument()->getDetectors(detector_map);
       std::map<int, Geometry::IDetector_sptr>::iterator it;
       for (it = detector_map.begin(); it != detector_map.end(); it++)
       {

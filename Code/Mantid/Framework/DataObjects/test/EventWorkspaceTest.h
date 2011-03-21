@@ -294,7 +294,8 @@ public:
 
     Timer timer;
 
-    std::map<int, Geometry::IDetector_sptr> detector_map = ew->getInstrument()->getDetectors();
+    std::map<int, Geometry::IDetector_sptr> detector_map;
+    ew->getInstrument()->getDetectors(detector_map);
     std::map<int, Geometry::IDetector_sptr>::iterator it;
     for (it = detector_map.begin(); it != detector_map.end(); it++)
     {

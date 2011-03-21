@@ -177,7 +177,8 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
   std::map<int, double> * myMap = new std::map<int, double>();
 
   //To get all the detector ID's
-  std::map<int, Geometry::IDetector_sptr> allDetectors = instrument->getDetectors();
+  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  instrument->getDetectors(allDetectors);
 
   //Now go through all
   std::map<int, Geometry::IDetector_sptr>::iterator it;
