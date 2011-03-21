@@ -82,10 +82,10 @@ public:
     TS_ASSERT_EQUALS(output1->getNumberHistograms(), nHist);
     TS_ASSERT_EQUALS(output4->getNumberHistograms(), nHist);
 
-    TS_ASSERT_EQUALS(output1->blocksize(), 4997);
-    TS_ASSERT_EQUALS(output4->blocksize(), 9976);
+    TS_ASSERT_EQUALS(output1->blocksize(), 4998);
+    TS_ASSERT_EQUALS(output4->blocksize(), 9975);
 
-    TS_ASSERT(output1->readX(0)[4997] < output4->readX(0)[9976]);
+    TS_ASSERT(output1->readX(0)[4997] < output4->readX(0)[9975]);
 
     delete alg;
 

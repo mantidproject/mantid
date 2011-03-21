@@ -27,7 +27,7 @@ void ChopData::init()
   declareProperty("NChops", 5);
   declareProperty("IntegrationRangeLower",5000.0);
   declareProperty("IntegrationRangeUpper",10000.0);
-  declareProperty("BaseOn", 140); // monitor spectrum
+  declareProperty("BaseOn", 140);
 }
 
 void ChopData::exec()
@@ -82,19 +82,26 @@ void ChopData::exec()
   {
       prelow = nlow->first;   
   }
-
+  
   for ( int i = 0; i < chops; i++ )
   {
-    const double stepDiff = i * step;
+    const double stepDiff = ( i * step );
 
     int indexLow, indexHigh;
     
-    try { indexLow = inputWS->binIndexOf(stepDiff); }
+    try
+    {
+      indexLow = inputWS->binIndexOf(stepDiff);
+      if ( indexLow < ( nBins + 1 ) ) { indexLow++; }
+    }
     catch ( std::out_of_range & ) { indexLow = 0; }
 
     if ( i == prelow ) { i++; }
 
-    try { indexHigh = inputWS->binIndexOf((i+1)*step) - 1; }
+    try
+    {
+      indexHigh = inputWS->binIndexOf((i+1)*step);
+    }
     catch ( std::out_of_range & ) { indexHigh = nBins; }
     
     int nbins = indexHigh - indexLow;
@@ -102,7 +109,7 @@ void ChopData::exec()
     MatrixWorkspace_sptr workspace = 
       Mantid::API::WorkspaceFactory::Instance().create(inputWS, nHist, 
       nbins+1, nbins);
-        
+
     // Copy over X, Y and E data
     PARALLEL_FOR2(inputWS, workspace)
     for ( int j = 0 ; j < nHist ; j++ )
