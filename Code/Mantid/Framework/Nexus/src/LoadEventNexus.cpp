@@ -695,6 +695,8 @@ void LoadEventNexus::exec()
 
   Progress prog(this,0.0,0.3,  reports);
 
+  // The run_start will be loaded from the pulse times.
+  DateAndTime run_start(0,0);
 
   if (loadlogs)
   {
@@ -719,11 +721,9 @@ void LoadEventNexus::exec()
         pulseTimes.push_back( temp[i] );
 
       // Use the first pulse as the run_start time.
-      DateAndTime run_start(0.0, 0.0);
-
       if (temp.size() > 0)
       {
-        DateAndTime run_start = WS->getFirstPulseTime();
+        run_start = WS->getFirstPulseTime();
         // add the start of the run as a ISO8601 date/time string. The start = first non-zero time.
         // (this is used in LoadInstrumentHelper to find the right instrument file to use).
         WS->mutableRun().addProperty("run_start", run_start.to_ISO8601_string(), true );
@@ -837,7 +837,7 @@ void LoadEventNexus::exec()
   }
 
 
-  // -- Time filtering --
+  // --------------------------- Time filtering ------------------------------------
   double filter_time_start_sec, filter_time_stop_sec;
   filter_time_start_sec = getProperty("FilterByTime_Start");
   filter_time_stop_sec = getProperty("FilterByTime_Stop");
@@ -852,13 +852,13 @@ void LoadEventNexus::exec()
     //If not specified, use the limits of doubles. Otherwise, convert from seconds to absolute PulseTime
     if (filter_time_start_sec != EMPTY_DBL())
     {
-      filter_time_start = pulseTimes[0] + filter_time_start_sec;
+      filter_time_start = run_start + filter_time_start_sec;
       is_time_filtered = true;
     }
 
     if (filter_time_stop_sec != EMPTY_DBL())
     {
-      filter_time_stop = pulseTimes[0] + filter_time_stop_sec;
+      filter_time_stop = run_start + filter_time_stop_sec;
       is_time_filtered = true;
     }
 
@@ -866,7 +866,6 @@ void LoadEventNexus::exec()
     if (filter_time_stop < filter_time_start)
       throw std::invalid_argument("Your filter for time's Stop value is smaller than the Start value.");
   }
-
 
   //Count the limits to time of flight
   shortest_tof = static_cast<double>(std::numeric_limits<uint32_t>::max()) * 0.1;
