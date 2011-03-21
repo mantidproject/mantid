@@ -51,7 +51,7 @@ namespace Mantid
 
       module << "from MantidFramework import *\n";
       module << "from MantidFramework import _makeString\n";
-      //module << "from MantidFramework import mtd, _makeString\n";
+
       //If in gui mode also need sys and qti module
       if( gui )
       {
@@ -235,31 +235,42 @@ namespace Mantid
       }
 
       //end of function parameters
-      if( properties.size()>0 ) os << ", ";
-      os << "execute=True):\n";
+      size_t nprops = properties.size();
+      if( nprops > 0 ) os << ", ";
+      os << "execute=True, Version=-1):\n";
 
-      os << "  algm = mtd.createAlgorithm(\"" << algm << "\")\n";
-
-      // Redo loop for setting values
-      pIter = properties.begin();
-      iarg = 0;
-      for( ; pIter != pEnd; ++pIter, ++iarg )
+      os << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n";
+      if( nprops > 0 )
       {
-        std::string pvalue = sanitizedNames[iarg];
-        if( iarg < iMand )
-        {
-          os << "  if execute:\n";
-          os << "    algm.setPropertyValue(\"" << (*pIter)->name()
-            << "\", _makeString(" << pvalue << ").lstrip('? '))\n";
-        }
-        else
-        {
-          os << "  if " << pvalue << " != None:\n"
-            << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", _makeString(" 
-            << pvalue << ").lstrip('? '))\n";
-        }
+	os << "  try:\n";
+	// Redo loop for setting values
+	pIter = properties.begin();
+	iarg = 0;
+	for( ; pIter != pEnd; ++pIter, ++iarg )
+	{
+	  std::string pvalue = sanitizedNames[iarg];
+	  if( iarg < iMand )
+	  {
+	    os << "    " << "  if execute:\n";
+	    os << "    " << "    algm.setPropertyValue(\"" << (*pIter)->name()
+	       << "\", _makeString(" << pvalue << ").lstrip('? '))\n";
+	  }
+	  else
+	  {
+	    os << "    " << "  if " << pvalue << " != None:\n"
+	       << "    " << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", _makeString(" 
+	       << pvalue << ").lstrip('? '))\n";
+	  }
+	}
+	os << "  except RuntimeError, exc:\n"
+	   << "      prefix = 'Unknown property search object'\n"
+	   << "      error_msg = str(exc)\n"
+	   << "      if error_msg.startswith(prefix):\n"
+	   << "          prop_name = error_msg.lstrip(prefix).strip()\n"
+	   << "          raise RuntimeError('Unknown property \"' + prop_name + '\" for " << algm << " version ' + str(algm.version()))\n"
+	   << "      else:\n"
+	   << "          raise\n";
       }
-
       if( async )
       {
         os << "  if execute:\n";
@@ -409,8 +420,8 @@ namespace Mantid
         os << " = None,";
       }
       //end of algorithm function parameters but add other arguments
-      os << "Message = \"\", Enable=\"\", Disable=\"\"):\n"
-        << "  algm = mtd.createAlgorithm(\"" << algm << "\")\n"
+      os << "Message = \"\", Enable=\"\", Disable=\"\", Version=-1):\n"
+        << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n"
         << "  enabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
         << "  disabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
         << "  values = '|'\n"
@@ -419,10 +430,13 @@ namespace Mantid
       pIter = properties.begin();
       for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
       {
+	const std::string & propName = (*pIter)->name();
+	os << "  if not algm.existsProperty('" << propName << "'):\n"
+	   << "    raise RuntimeError('Unknown property \"" <<  propName << "\" for " << algm << " version ' + str(algm.version()))\n";
         os << "  valpair = _convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
-        << ", enabled_list, disabled_list)\n"
-          << "  values += valpair[0] + '|'\n"
-          << "  final_enabled += valpair[1] + ','\n\n";
+	   << ", enabled_list, disabled_list)\n"
+	   << "  values += valpair[0] + '|'\n"
+	   << "  final_enabled += valpair[1] + ','\n\n";
       }
 
       os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 

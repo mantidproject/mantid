@@ -159,13 +159,12 @@ API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algNa
 std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName)
 {
   const std::string EOL="\n";
+  // Highest version
   API::IAlgorithm* algm = createAlgorithm(algName);
-
-  std::string temp;
 
   // Put in the quick overview message
   std::stringstream buffer;
-  temp = algm->getOptionalMessage();
+  std::string temp = algm->getOptionalMessage();
   if (temp.size() > 0)
     buffer << temp << EOL << EOL;
 
@@ -178,7 +177,8 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
   PropertyVector::const_iterator pEnd = properties.end();
   StringVector names(properties.size());
   size_t numProps = properties.size();
-  for ( size_t i = 0; i < numProps; ++i) {
+  for ( size_t i = 0; i < numProps; ++i) 
+  {
     names[i] = SimplePythonAPI::removeCharacters(properties[i]->name(), "");
   }
 

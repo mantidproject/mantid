@@ -84,7 +84,7 @@ namespace PythonAPI
    */
   void _setMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
-	  self.setProperty(prop_name,workspace);
+    self.setProperty(prop_name,workspace);
   }
 
   /**
@@ -92,7 +92,7 @@ namespace PythonAPI
    */
   API::MatrixWorkspace_sptr _getMatrixWorkspaceProperty(API::IAlgorithm& self, const std::string & prop_name)
   {
-	   return self.getProperty(prop_name);
+    return self.getProperty(prop_name);
   }
 
   void export_ialgorithm()
@@ -104,7 +104,7 @@ namespace PythonAPI
     class_< API::IAlgorithm, boost::noncopyable>("IAlgorithm", no_init)
       .def("name", &API::IAlgorithm::name)
       .def("version", &API::IAlgorithm::version)
-	  .def("category", &API::IAlgorithm::category)
+      .def("category", &API::IAlgorithm::category)
       .def("initialize", &API::IAlgorithm::initialize)
       .def("execute", &API::IAlgorithm::execute)
       .def("executeAsync", &API::IAlgorithm::executeAsync)
@@ -112,6 +112,7 @@ namespace PythonAPI
       .def("isInitialized", &API::IAlgorithm::isInitialized)
       .def("isExecuted", &API::IAlgorithm::isExecuted)
       .def("setRethrows", &API::IAlgorithm::setRethrows)
+      .def("existsProperty", &API::IAlgorithm::existsProperty)
       .def("setPropertyValue", &API::IAlgorithm::setPropertyValue)
       .def("getPropertyValue", &API::IAlgorithm::getPropertyValue)
       .def("getProperties", &API::IAlgorithm::getProperties, return_value_policy< copy_const_reference >())
@@ -119,10 +120,8 @@ namespace PythonAPI
       .def("_setWorkspaceProperty", &_setMatrixWorkspaceProperty)
       .def("_getWorkspaceProperty", &_getMatrixWorkspaceProperty)
       ;
-
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
-
     class_< API::CloneableAlgorithm, bases<API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
       ;
     

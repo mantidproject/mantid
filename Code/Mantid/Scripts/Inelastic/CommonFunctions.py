@@ -93,14 +93,14 @@ def load_runs(runs, file_type, sum=True):
         if len(runs) == 1:
             sum = False
         if sum == True:
+            if len(runs) == 0: raise RuntimeError("load_runs was supplied an empty list.")
             result_ws = load_run(runs[0], file_type)
             summed = 'summed-run-files'
             if len(file_type) > 0: 
                 summed += '-' + file_type
             CloneWorkspace(result_ws, summed)
-            if len(runs) > 1:
-                sum_files(summed, runs[1:], file_type)
-                result_ws = mtd[summed]
+            sum_files(summed, runs[1:], file_type)
+            result_ws = mtd[summed]
             mark_as_loaded(summed, False)
             return result_ws
         else:
@@ -137,7 +137,7 @@ def load_run(run_number, file_type='mono-sample',force=False):
             filename = find_file(run_number)
        
     # The output name 
-    output_name = os.path.basename(filename)
+    output_name = create_dataname(filename)
     if force == False and mtd.workspaceExists(output_name):
         mtd.sendLogMessage("%s already loaded" % filename)
         return mtd[output_name]
