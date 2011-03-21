@@ -3,6 +3,7 @@
 
 #include <string>
 #include "MantidKernel/DllExport.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/Logger.h"
 
 namespace Mantid
@@ -10,8 +11,8 @@ namespace Mantid
   namespace Kernel
   {
     /// Enmuerate the ignored memory fields
-    enum DLLExport MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
 
+    enum DLLExport MemoryStatsIgnore{MEMORY_STATS_IGNORE_NONE, MEMORY_STATS_IGNORE_SYSTEM, MEMORY_STATS_IGNORE_PROCESS};
     namespace MemoryOptions
     {
       /// Initialize platform-dependent options for memory management
@@ -64,6 +65,8 @@ namespace Mantid
       std::size_t avail_memory; ///< Available memory of system in kiB.
       static Logger &g_log; ///< Logger
       friend DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);
+      /// Mutex to avoid simultaneous access to memory resources
+      static Mutex mutexMemory;
     };
 
     DLLExport std::ostream& operator<<(std::ostream& out, const MemoryStats &stats);

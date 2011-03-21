@@ -169,6 +169,8 @@ void MemoryManagerImpl::releaseFreeMemory()
  * Calling this could help the system avoid going into swap.
  *
  * NOTE: This only works if you linked against tcmalloc.
+ * NOTE 2: This takes at least 0.1 ms on a Ubuntu 10.10 system, because of
+ *      the call to MemoryStats.update().
  *
  * @param threshold :: multiplier (0-1.0) of the amount of physical
  *        memory used that has to be in use before the call to

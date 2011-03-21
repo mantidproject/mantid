@@ -269,12 +269,14 @@ MemoryStats::MemoryStats(const MemoryStatsIgnore ignore): vm_usage(0), res_usage
   this->update();
 }
 
-/**
- * Update the structure with current information, taking into account what is
+/** Update the structure with current information, taking into account what is
  * to be ignored.
+ * This call is thread-safe (protected by a mutex).
+ * Note: This takes about 0.1 ms on a Ubuntu 10.10 system.
  */
 void MemoryStats::update()
 {
+  MemoryStats::mutexMemory.lock();
   // get what is used by the process
   if (this->ignore != MEMORY_STATS_IGNORE_PROCESS)
     process_mem_usage(this->vm_usage, this->res_usage);
@@ -282,6 +284,7 @@ void MemoryStats::update()
   // get the system information
   if (this->ignore != MEMORY_STATS_IGNORE_SYSTEM)
   process_mem_system(this->avail_memory, this->total_memory);
+  MemoryStats::mutexMemory.unlock();
 }
 
 /**
@@ -415,6 +418,8 @@ std::ostream& operator<<(std::ostream& out, const MemoryStats &stats)
 // -------------------------- concrete instantiations
 template DLLExport string memToString<uint32_t>(const uint32_t);
 template DLLExport string memToString<uint64_t>(const uint64_t);
+// To initialize the static class variable.
+Mutex MemoryStats::mutexMemory;
 
 } // namespace Kernel
 } // namespace Mantid

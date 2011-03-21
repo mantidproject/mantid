@@ -60,6 +60,7 @@ namespace MDEvents
     //TODO: Make sure in units are okay
     declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
+    declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input), "Clear the events from the input workspace during conversion, to save memory.");
   }
 
 
@@ -77,6 +78,7 @@ namespace MDEvents
   void MakeDiffractionMDEventWorkspace::convertEventList(int workspaceIndex)
   {
     EventList & el = in_ws->getEventList(workspaceIndex);
+    size_t numEvents = el.getNumberEvents();
 
     // Get the position of the detector there.
     if (el.getDetectorIDs().size() > 0)
@@ -132,9 +134,19 @@ namespace MDEvents
         out_events.push_back( MDE(it->weight(), it->errorSquared(), center) );
       }
 
+      // Clear out the EventList to save memory
+      if (ClearInputWorkspace)
+      {
+        el.clear();
+        // For Linux with tcmalloc, make sure memory goes back;
+        // but don't call if more than 15% of memory is still available, since that slows down the loading.
+        MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
+      }
+
+      // Add them to the MDEW
       ws->addEvents(out_events);
     }
-    prog->reportIncrement(el.getNumberEvents(), "Adding Events");
+    prog->reportIncrement(numEvents, "Adding Events");
   }
 
 
@@ -147,6 +159,8 @@ namespace MDEvents
     in_ws = getProperty("InputWorkspace");
     if (!in_ws)
       throw std::invalid_argument("No input event workspace was passed to algorithm.");
+
+    ClearInputWorkspace = getProperty("ClearInputWorkspace");
 
     // Create an output workspace with 3 dimensions.
     size_t nd = 3;

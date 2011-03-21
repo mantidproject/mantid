@@ -179,6 +179,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
 	test/LogParserTest.h
+	test/MemoryTest.h
 	test/MagneticIonTest.h
 	test/MandatoryValidatorTest.h
 	test/MaskedPropertyTest.h
