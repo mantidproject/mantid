@@ -42,6 +42,24 @@ Progress::Progress(Algorithm* alg,double start,double end, int numSteps)
 Progress::~Progress()
 {}
 
+
+/** Actually do the reporting, without changing the loop counter.
+ * This is called by report(), and can be called directly in
+ * order to force a report.
+ * It can be overridden
+ *
+ * @param msg
+ */
+void Progress::doReport(const std::string& msg)
+{
+  double p = m_start + m_step*(m_i - m_ifirst);
+  if (p > m_end) p = m_end;
+  if (!m_alg) return;
+  m_alg->progress(p,msg);
+  m_alg->interruption_point();
+  m_last_reported = m_i;
+}
+
 /** Increments the loop counter by 1, then
  * sends the progress notification on behalf of its algorithm.
  *
@@ -50,12 +68,7 @@ Progress::~Progress()
 void Progress::report(const std::string& msg)
 {
   if (m_i++ - m_last_reported < m_notifyStep ) return;
-  double p = m_start + m_step*(m_i - m_ifirst);
-  if (p > m_end) p = m_end;
-  if (!m_alg) return;
-  m_alg->progress(p,msg);
-  m_alg->interruption_point();
-  m_last_reported = m_i;
+  this->doReport(msg);
 }
 
 /** Sends the progress notification on behalf of its algorithm

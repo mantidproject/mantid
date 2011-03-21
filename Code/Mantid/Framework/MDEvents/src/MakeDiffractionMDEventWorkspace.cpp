@@ -184,7 +184,7 @@ namespace MDEvents
 
     size_t totalCost = in_ws->getNumberEvents();
     prog = new Progress(this, 0, 1.0, totalCost);
-    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, false);
+    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
     if (DODEBUG) prog->setNotifyStep(1);
 
     // Create the thread pool that will run all of these.
@@ -232,6 +232,7 @@ namespace MDEvents
         tp.joinAll();
 
         // Now do all the splitting tasks
+        prog->doReport("Splitting Boxes");
         ws->splitAllIfNeeded(ts);
         tp.joinAll();
 

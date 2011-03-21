@@ -38,14 +38,12 @@ namespace API
   }
 
   //----------------------------------------------------------------------------------------------
-  /** Increment loop counter by one then report progress, as text.
+  /** Report progress, as text. This is called by the base class Progress->report() method.
    *
    * @param msg :: optional text message to add
    */
-  void ProgressText::report(const std::string & msg)
+  void ProgressText::doReport(const std::string & msg)
   {
-    // Did we increase enough to notify?
-    if ((++m_i - m_last_reported) < m_notifyStep ) return;
     double p = m_start + m_step*(m_i - m_ifirst);
     if (p > m_end) p = m_end;
     // Print out

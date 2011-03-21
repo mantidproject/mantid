@@ -45,12 +45,14 @@ public:
   Progress(Algorithm* alg,double start,double end, int numSteps);
   virtual ~Progress();
 
-  virtual void report(const std::string& msg = "");
-  virtual void report(int i,const std::string& msg = "");
-  virtual void reportIncrement(int inc, const std::string& msg = "");
-  virtual void setNumSteps(int nsteps);
-  virtual void setNotifyStep(double notifyStepPct);
+  virtual void doReport(const std::string& msg = "");
   
+  void report(const std::string& msg = "");
+  void report(int i,const std::string& msg = "");
+  void reportIncrement(int inc, const std::string& msg = "");
+  void setNumSteps(int nsteps);
+  void setNotifyStep(double notifyStepPct);
+
 private:
   /// Owning algorithm
   Algorithm* const m_alg;

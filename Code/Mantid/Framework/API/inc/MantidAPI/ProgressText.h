@@ -25,7 +25,7 @@ namespace API
 
     ~ProgressText();
     
-    virtual void report(const std::string& msg = "");
+    virtual void doReport(const std::string& msg = "");
 
 //    virtual void report(int i,const std::string& msg = "");
 //    virtual void reportIncrement(int inc, const std::string& msg = "");
