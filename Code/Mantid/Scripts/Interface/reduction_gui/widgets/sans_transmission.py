@@ -203,8 +203,8 @@ class TransmissionWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        self._content.transmission_edit.setText(QtCore.QString("%6.6f" % state.transmission))
-        self._content.dtransmission_edit.setText(QtCore.QString("%6.6f" % state.transmission_spread))
+        self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.transmission))
+        self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.transmission_spread))
         
         if isinstance(state.calculation_method, state.DirectBeam):
             self._content.direct_beam_chk.setChecked(True)

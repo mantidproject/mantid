@@ -125,8 +125,8 @@ class BackgroundWidget(BaseWidget):
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
-            self._content.transmission_edit.setText(QtCore.QString("%6.6f" % state.bck_transmission))
-            self._content.dtransmission_edit.setText(QtCore.QString("%6.6f" % state.bck_transmission_spread))
+            self._content.transmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission))
+            self._content.dtransmission_edit.setText(QtCore.QString("%6.4f" % state.bck_transmission_spread))
                     
             if isinstance(state.trans_calculation_method, state.DirectBeam):
                 self._content.trans_direct_chk.setChecked(True)

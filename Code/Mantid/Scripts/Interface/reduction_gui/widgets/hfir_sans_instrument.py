@@ -242,7 +242,6 @@ class SANSInstrumentWidget(BaseWidget):
         # Data file
         flist_str = unicode(self._summary.data_file_edit.text())
         flist_str = flist_str.replace(',', ';')
-        flist_str = flist_str.replace(' ', '')
         m.data_files = flist_str.split(';')
 
         # Mask
@@ -296,7 +295,6 @@ class SANSInstrumentWidget(BaseWidget):
         if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
             flist_str = unicode(self._summary.data_file_edit.text())
             flist_str = flist_str.replace(',', ';')
-            flist_str = flist_str.replace(' ', '')
             data_files = flist_str.split(';')
             if len(data_files)<1:
                 return
