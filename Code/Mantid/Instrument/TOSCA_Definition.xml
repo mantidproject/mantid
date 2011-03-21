@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- For help on the notation used to specify an Instrument Definition File 
      see http://www.mantidproject.org/IDF -->
-<instrument name="TOSCA" valid-from   ="1900-01-31 23:59:59"
+<instrument name="TOSCA" valid-from   ="2006-08-11 00:00:00"
                          valid-to     ="2100-01-31 23:59:59"
-		                 last-modified="2011-01-19 00:00:00"
+		                 last-modified="2011-03-21 00:00:00"
   >
 
 <defaults>
@@ -25,7 +25,6 @@
   </component>
   
   <type name="moderator" is="Source">
-    <properties>write a story </properties>
   </type>
   
   <component type="sample-position">
@@ -45,7 +44,6 @@
   <!-- MONITORS -->
   <component type="monitor1" mark-as="monitor" idlist="monitor1">
     <location z="-1.206" />
-    <!-- -1.206 or -2 ??-->
   </component>
 
   <type name="monitor1" is="detector">
@@ -59,11 +57,11 @@
 
   <!-- DETECTORS -->
   
-  <component type="backscattering" idlist="backscattering">  
+  <component type="back" idlist="back">  
     <location />
   </component>
 
-  <component type="forwardscattering" idlist="forwardscattering">  
+  <component type="front" idlist="front">  
     <location />
   </component>
   
@@ -71,7 +69,7 @@
     <location />
   </component>
    
-  <type name="backscattering">
+  <type name="back">
     <component type="tube" > 
          <location r="0.56370" t="140.8250595" p="150.0" rot="60.0" name="Detector #1" /> 
          <parameter name="Efixed"> <value val="2.690280" /> </parameter>
@@ -354,7 +352,7 @@
     </component> 
   </type>
   
-  <type name="forwardscattering">
+  <type name="front">
     <component type="tube" > 
          <location r="0.56287" t="39.0711405" p="150.0" rot="60.0" name="Detector #71" /> 
          <parameter name="Efixed"> <value val="2.690050" /> </parameter>
@@ -684,7 +682,7 @@
 
   <!-- DETECTOR ID LISTS -->
   
-  <idlist idname="backscattering">
+  <idlist idname="back">
     <id start="1" end="14" />
 	<id start="17" end="30" />
 	<id start="33" end="46" />
@@ -692,7 +690,7 @@
 	<id start="65" end="78" />
   </idlist>
 
-  <idlist idname="forwardscattering">
+  <idlist idname="front">
 	<id start="81" end="94" />
 	<id start="97" end="110" />
 	<id start="113" end="126" />

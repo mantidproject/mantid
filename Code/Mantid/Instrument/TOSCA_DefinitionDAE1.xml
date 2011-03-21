@@ -1,0 +1,713 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- For help on the notation used to specify an Instrument Definition File 
+     see http://www.mantidproject.org/IDF -->
+<instrument name="TOSCA" valid-from   ="1900-01-31 23:59:59"
+                         valid-to     ="2006-08-10 23:59:59"
+		                 last-modified="2011-03-21 00:00:00"
+  >
+
+<defaults>
+    <length unit="meter"/>
+    <angle unit="degree"/>
+    <reference-frame>
+      <!-- The z-axis is set parallel to and in the direction of the beam. the 
+           y-axis points up and the coordinate system is right handed. -->
+      <along-beam axis="z"/>
+      <pointing-up axis="y"/>
+      <handedness val="right"/>
+    </reference-frame>
+</defaults>
+  
+  <!--  SOURCE AND SAMPLE POSITION -->
+  
+  <component type="moderator">
+    <location z="-17.0" />
+  </component>
+  
+  <type name="moderator" is="Source">
+  </type>
+  
+  <component type="sample-position">
+    <location />
+  </component>
+  
+  <type name="sample-position" is="SamplePos">
+    <cuboid id="shape">
+      <left-front-bottom-point x="0.02" y="-0.02" z="0.0"  />
+      <left-front-top-point  x="0.02" y="-0.02" z="0.02"  />
+      <left-back-bottom-point  x="-0.02" y="-0.02" z="0.0"  />
+      <right-front-bottom-point  x="0.02" y="0.02" z="0.0"  />
+    </cuboid>
+    <algebra val="shape" />
+  </type>
+  
+  <!-- MONITORS -->
+  <component type="monitor1" mark-as="monitor" idlist="monitor1">
+    <location z="-1.206" />
+  </component>
+
+  <type name="monitor1" is="detector">
+   <cuboid id="shape">
+      <left-front-bottom-point x="0.0025" y="-0.1" z="0.0"  />
+      <left-front-top-point  x="0.0025" y="-0.1" z="0.02"  />
+      <left-back-bottom-point  x="-0.0025" y="-0.1" z="0.0"  />
+      <right-front-bottom-point  x="0.0025" y="0.1" z="0.0"  />
+   </cuboid>
+  </type>
+
+  <!-- DETECTORS -->
+  
+  <component type="back" idlist="back">  
+    <location />
+  </component>
+
+  <component type="front" idlist="front">  
+    <location />
+  </component>
+  
+  <component type="diffraction" idlist="diffraction">
+    <location />
+  </component>
+   
+  <type name="back">
+    <component type="tube" > 
+         <location r="0.56370" t="140.8250595" p="150.0" rot="60.0" name="Detector #1" /> 
+         <parameter name="Efixed"> <value val="2.690280" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57275" t="139.7268737" p="150.0" rot="60.0" name="Detector #2" /> 
+         <parameter name="Efixed"> <value val="2.771000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58139" t="138.7320442" p="150.0" rot="60.0" name="Detector #3" /> 
+         <parameter name="Efixed"> <value val="2.855410" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58909" t="137.8857039" p="150.0" rot="60.0" name="Detector #4" /> 
+         <parameter name="Efixed"> <value val="2.943700"/> </parameter> 
+    </component> 
+    <component type="tube" > 
+         <location r="0.59795" t="136.9549250" p="150.0" rot="60.0" name="Detector #5" /> 
+         <parameter name="Efixed"> <value val="3.036910" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60815" t="135.9356820" p="150.0" rot="60.0" name="Detector #6" /> 
+         <parameter name="Efixed"> <value val="3.134920" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61800" t="135.0000000" p="150.0" rot="60.0" name="Detector #7" /> 
+         <parameter name="Efixed"> <value val="3.238630" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62553" t="134.3143712" p="150.0" rot="60.0" name="Detector #8" /> 
+         <parameter name="Efixed"> <value val="3.345900" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63820" t="133.2140449" p="150.0" rot="60.0" name="Detector #9" /> 
+         <parameter name="Efixed"> <value val="3.461600" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64925" t="132.3046077" p="150.0" rot="60.0" name="Detector #10" /> 
+         <parameter name="Efixed"> <value val="3.582930" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66204" t="131.3051250" p="150.0" rot="60.0" name="Detector #11" /> 
+         <parameter name="Efixed"> <value val="3.711220" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67394" t="130.4221151" p="150.0" rot="60.0" name="Detector #12" /> 
+         <parameter name="Efixed"> <value val="3.846910" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68674" t="129.5185603" p="150.0" rot="60.0" name="Detector #13" /> 
+         <parameter name="Efixed"> <value val="3.990450" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="128.6289408" p="150.0" rot="60.0" name="Detector #14" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56697" t="140.4212644" p="210.0" rot="120.0" name="Detector #15" /> 
+         <parameter name="Efixed"> <value val="2.711400" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57273" t="139.7292352" p="210.0" rot="120.0" name="Detector #16" /> 
+         <parameter name="Efixed"> <value val="2.791200" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58159" t="138.7095962" p="210.0" rot="120.0" name="Detector #17" /> 
+         <parameter name="Efixed"> <value val="2.876300" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.59101" t="137.6802142" p="210.0" rot="120.0" name="Detector #18" /> 
+         <parameter name="Efixed"> <value val="2.967800" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60202" t="136.5417863" p="210.0" rot="120.0" name="Detector #19" /> 
+         <parameter name="Efixed"> <value val="3.065600" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61305" t="135.4645161" p="210.0" rot="120.0" name="Detector #20" /> 
+         <parameter name="Efixed"> <value val="3.169800" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62244" t="134.5927407" p="210.0" rot="120.0" name="Detector #21" /> 
+         <parameter name="Efixed"> <value val="3.280600" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63452" t="133.5270497" p="210.0" rot="120.0" name="Detector #22" /> 
+         <parameter name="Efixed"> <value val="3.400100" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64940" t="132.2925646" p="210.0" rot="120.0" name="Detector #23" /> 
+         <parameter name="Efixed"> <value val="3.528800" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66191" t="131.3150135" p="210.0" rot="120.0" name="Detector #24" /> 
+         <parameter name="Efixed"> <value val="3.666600" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67482" t="130.3585065" p="210.0" rot="120.0" name="Detector #25" /> 
+         <parameter name="Efixed"> <value val="3.813200" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68980" t="129.3092171" p="210.0" rot="120.0" name="Detector #26" /> 
+         <parameter name="Efixed"> <value val="3.973100" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70642" t="128.2140307" p="210.0" rot="120.0" name="Detector #27" /> 
+         <parameter name="Efixed"> <value val="4.146300" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="128.6289408" p="210.0" rot="120.0" name="Detector #28" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56940" t="140.1263856" p="270.0" rot="180.0" name="Detector #29" /> 
+         <parameter name="Efixed"> <value val="2.709560" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57486" t="139.4792890" p="270.0" rot="180.0" name="Detector #30" /> 
+         <parameter name="Efixed"> <value val="2.789910" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58484" t="138.3483445" p="270.0" rot="180.0" name="Detector #31" /> 
+         <parameter name="Efixed"> <value val="2.878350" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.59564" t="137.1933654" p="270.0" rot="180.0" name="Detector #32" /> 
+         <parameter name="Efixed"> <value val="2.973660" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60434" t="136.3101592" p="270.0" rot="180.0" name="Detector #33" /> 
+         <parameter name="Efixed"> <value val="3.075680" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61560" t="135.2238131" p="270.0" rot="180.0" name="Detector #34" /> 
+         <parameter name="Efixed"> <value val="3.187090" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62627" t="134.2483089" p="270.0" rot="180.0" name="Detector #35" /> 
+         <parameter name="Efixed"> <value val="3.307450" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64092" t="132.9860183" p="270.0" rot="180.0" name="Detector #36" /> 
+         <parameter name="Efixed"> <value val="3.438560" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65612" t="131.7609698" p="270.0" rot="180.0" name="Detector #37" /> 
+         <parameter name="Efixed"> <value val="3.581780" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67119" t="130.6223597" p="270.0" rot="180.0" name="Detector #38" /> 
+         <parameter name="Efixed"> <value val="3.737090" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68877" t="129.3794046" p="270.0" rot="180.0" name="Detector #39" /> 
+         <parameter name="Efixed"> <value val="3.906990" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70746" t="128.1477470" p="270.0" rot="180.0" name="Detector #40" /> 
+         <parameter name="Efixed"> <value val="4.093350" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.72661" t="126.9710935" p="270.0" rot="180.0" name="Detector #41" /> 
+         <parameter name="Efixed"> <value val="4.297320" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="128.6289408" p="270.0" rot="180.0" name="Detector #42" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56746" t="140.3614522" p="330.0" rot="240.0" name="Detector #43" /> 
+         <parameter name="Efixed"> <value val="2.695290" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57458" t="139.5119672" p="330.0" rot="240.0" name="Detector #44" /> 
+         <parameter name="Efixed"> <value val="2.773110" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58325" t="138.5242550" p="330.0" rot="240.0" name="Detector #45" /> 
+         <parameter name="Efixed"> <value val="2.857010" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58955" t="137.8362758" p="330.0" rot="240.0" name="Detector #46" /> 
+         <parameter name="Efixed"> <value val="2.946360" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60136" t="136.6081885" p="330.0" rot="240.0" name="Detector #47" /> 
+         <parameter name="Efixed"> <value val="3.044560" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61266" t="135.5015972" p="330.0" rot="240.0" name="Detector #48" /> 
+         <parameter name="Efixed"> <value val="3.149860" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62338" t="134.5076258" p="330.0" rot="240.0" name="Detector #49" /> 
+         <parameter name="Efixed"> <value val="3.263620" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63521" t="133.4679613" p="330.0" rot="240.0" name="Detector #50" /> 
+         <parameter name="Efixed"> <value val="3.386460" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65000" t="132.2444707" p="330.0" rot="240.0" name="Detector #51" /> 
+         <parameter name="Efixed"> <value val="3.520580" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66507" t="131.0761606" p="330.0" rot="240.0" name="Detector #52" /> 
+         <parameter name="Efixed"> <value val="3.665070" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67977" t="130.0048698" p="330.0" rot="240.0" name="Detector #53" /> 
+         <parameter name="Efixed"> <value val="3.823790" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.69574" t="128.9098389" p="330.0" rot="240.0" name="Detector #54" /> 
+         <parameter name="Efixed"> <value val="3.995720" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.71370" t="127.7553324" p="330.0" rot="240.0" name="Detector #55" /> 
+         <parameter name="Efixed"> <value val="4.183510" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="128.6289408" p="330.0" rot="240.0" name="Detector #56" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56356" t="140.8425303" p="390.0" rot="300.0" name="Detector #57" /> 
+         <parameter name="Efixed"> <value val="2.691220" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57218" t="139.7942880" p="390.0" rot="300.0" name="Detector #58" /> 
+         <parameter name="Efixed"> <value val="2.770220" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58014" t="138.8729233" p="390.0" rot="300.0" name="Detector #59" /> 
+         <parameter name="Efixed"> <value val="2.853400" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58958" t="137.8330566" p="390.0" rot="300.0" name="Detector #60" /> 
+         <parameter name="Efixed"> <value val="2.942070" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60177" t="136.5669120" p="390.0" rot="300.0" name="Detector #61" /> 
+         <parameter name="Efixed"> <value val="3.036440" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60821" t="135.9298424" p="390.0" rot="300.0" name="Detector #62" /> 
+         <parameter name="Efixed"> <value val="3.135540" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61705" t="135.0882797" p="390.0" rot="300.0" name="Detector #63" /> 
+         <parameter name="Efixed"> <value val="3.240510" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62989" t="133.9284248" p="390.0" rot="300.0" name="Detector #64" /> 
+         <parameter name="Efixed"> <value val="3.354510" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64195" t="132.9003934" p="390.0" rot="300.0" name="Detector #65" /> 
+         <parameter name="Efixed"> <value val="3.474760" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65498" t="131.8500731" p="390.0" rot="300.0" name="Detector #66" /> 
+         <parameter name="Efixed"> <value val="3.603410" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66910" t="130.7760529" p="390.0" rot="300.0" name="Detector #67" /> 
+         <parameter name="Efixed"> <value val="3.740930" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68430" t="129.6872876" p="390.0" rot="300.0" name="Detector #68" /> 
+         <parameter name="Efixed"> <value val="3.888930" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.69355" t="129.0560258" p="390.0" rot="300.0" name="Detector #69" /> 
+         <parameter name="Efixed"> <value val="4.043890" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="128.6289408" p="390.0" rot="300.0" name="Detector #70" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+  </type>
+  
+  <type name="front">
+    <component type="tube" > 
+         <location r="0.56287" t="39.0711405" p="150.0" rot="60.0" name="Detector #71" /> 
+         <parameter name="Efixed"> <value val="2.690050" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57191" t="40.1736992" p="150.0" rot="60.0" name="Detector #72" /> 
+         <parameter name="Efixed"> <value val="2.766250" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57991" t="41.1010455" p="150.0" rot="60.0" name="Detector #73" /> 
+         <parameter name="Efixed"> <value val="2.860390" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58735" t="41.9261975" p="150.0" rot="60.0" name="Detector #74" /> 
+         <parameter name="Efixed"> <value val="2.952490" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60016" t="43.2704960" p="150.0" rot="60.0" name="Detector #75" /> 
+         <parameter name="Efixed"> <value val="3.052270" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60978" t="44.2223360" p="150.0" rot="60.0" name="Detector #76" /> 
+         <parameter name="Efixed"> <value val="3.156690" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62000" t="45.1845283" p="150.0" rot="60.0" name="Detector #77" /> 
+         <parameter name="Efixed"> <value val="3.267580" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63028" t="46.1057165" p="150.0" rot="60.0" name="Detector #78" /> 
+         <parameter name="Efixed"> <value val="3.385450" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64397" t="47.2663943" p="150.0" rot="60.0" name="Detector #79" /> 
+         <parameter name="Efixed"> <value val="3.512280" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65787" t="48.3749721" p="150.0" rot="60.0" name="Detector #80" /> 
+         <parameter name="Efixed"> <value val="3.648180" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67388" t="49.5735398" p="150.0" rot="60.0" name="Detector #81" /> 
+         <parameter name="Efixed"> <value val="3.792910" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68722" t="50.5144429" p="150.0" rot="60.0" name="Detector #82" /> 
+         <parameter name="Efixed"> <value val="3.947030" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70304" t="51.5687694" p="150.0" rot="60.0" name="Detector #83" /> 
+         <parameter name="Efixed"> <value val="4.112830" /> </parameter>
+    </component> <!--
+    <component type="tube" > 
+         <location r="0.70000" t="51.3710592" p="150.0" rot="60.0" name="Detector #84" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> -->
+    <component type="tube" > 
+         <location r="0.56463" t="39.2906118" p="210.0" rot="120.0" name="Detector #85" /> 
+         <parameter name="Efixed"> <value val="2.711270" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57336" t="40.3450198" p="210.0" rot="120.0" name="Detector #86" /> 
+         <parameter name="Efixed"> <value val="2.790290" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58214" t="41.3520046" p="210.0" rot="120.0" name="Detector #87" /> 
+         <parameter name="Efixed"> <value val="2.875850" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.59107" t="42.3261729" p="210.0" rot="120.0" name="Detector #88" /> 
+         <parameter name="Efixed"> <value val="2.968390" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60258" t="43.5143774" p="210.0" rot="120.0" name="Detector #89" /> 
+         <parameter name="Efixed"> <value val="3.069580" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61444" t="44.6670652" p="210.0" rot="120.0" name="Detector #90" /> 
+         <parameter name="Efixed"> <value val="3.179160" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62424" t="45.5699125" p="210.0" rot="120.0" name="Detector #91" /> 
+         <parameter name="Efixed"> <value val="3.297780" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63950" t="46.8952864" p="210.0" rot="120.0" name="Detector #92" /> 
+         <parameter name="Efixed"> <value val="3.428740" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65562" t="48.2000032" p="210.0" rot="120.0" name="Detector #93" /> 
+         <parameter name="Efixed"> <value val="3.571460" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66889" t="49.2084315" p="210.0" rot="120.0" name="Detector #94" /> 
+         <parameter name="Efixed"> <value val="3.725890" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68722" t="50.5144429" p="210.0" rot="120.0" name="Detector #95" /> 
+         <parameter name="Efixed"> <value val="3.897650" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70749" t="51.8541613" p="210.0" rot="120.0" name="Detector #96" /> 
+         <parameter name="Efixed"> <value val="4.086060" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.72794" t="53.1076678" p="210.0" rot="120.0" name="Detector #97" /> 
+         <parameter name="Efixed"> <value val="4.293330" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="51.3710592" p="210.0" rot="120.0" name="Detector #98" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56172" t="38.9264282" p="270.0" rot="180.0" name="Detector #99" /> 
+         <parameter name="Efixed"> <value val="2.710510" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56879" t="39.7999991" p="270.0" rot="180.0" name="Detector #100" /> 
+         <parameter name="Efixed"> <value val="2.788980" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57828" t="40.9155771" p="270.0" rot="180.0" name="Detector #101" /> 
+         <parameter name="Efixed"> <value val="2.874580" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58386" t="41.5434180" p="270.0" rot="180.0" name="Detector #102" /> 
+         <parameter name="Efixed"> <value val="3.068150" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.59803" t="43.0532807" p="270.0" rot="180.0" name="Detector #103" /> 
+         <parameter name="Efixed"> <value val="3.068150" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60932" t="44.1778730" p="270.0" rot="180.0" name="Detector #104" /> 
+         <parameter name="Efixed"> <value val="3.177850" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62343" t="45.4968910" p="270.0" rot="180.0" name="Detector #105" /> 
+         <parameter name="Efixed"> <value val="3.297760" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63560" t="46.5653543" p="270.0" rot="180.0" name="Detector #106" /> 
+         <parameter name="Efixed"> <value val="3.427800" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65215" t="47.9268411" p="270.0" rot="180.0" name="Detector #107" /> 
+         <parameter name="Efixed"> <value val="3.571110" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66709" t="49.0748892" p="270.0" rot="180.0" name="Detector #108" /> 
+         <parameter name="Efixed"> <value val="3.726370" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.68570" t="50.4097202" p="270.0" rot="180.0" name="Detector #109" /> 
+         <parameter name="Efixed"> <value val="3.897560" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70653" t="51.7929921" p="270.0" rot="180.0" name="Detector #110" /> 
+         <parameter name="Efixed"> <value val="4.087070" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.72616" t="53.0021741" p="270.0" rot="180.0" name="Detector #111" /> 
+         <parameter name="Efixed"> <value val="4.294290" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="51.3710592" p="270.0" rot="180.0" name="Detector #112" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56350" t="39.1499775" p="330.0" rot="240.0" name="Detector #113" /> 
+         <parameter name="Efixed"> <value val="2.713690" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57377" t="40.3931962" p="330.0" rot="240.0" name="Detector #114" /> 
+         <parameter name="Efixed"> <value val="2.802390" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58080" t="41.2015857" p="330.0" rot="240.0" name="Detector #115" /> 
+         <parameter name="Efixed"> <value val="2.893380" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.59264" t="42.4925653" p="330.0" rot="240.0" name="Detector #116" /> 
+         <parameter name="Efixed"> <value val="2.989900" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60046" t="43.3008959" p="330.0" rot="240.0" name="Detector #117" /> 
+         <parameter name="Efixed"> <value val="3.088330" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.61251" t="44.4841217" p="330.0" rot="240.0" name="Detector #118" /> 
+         <parameter name="Efixed"> <value val="3.192660" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62265" t="45.4263074" p="330.0" rot="240.0" name="Detector #119" /> 
+         <parameter name="Efixed"> <value val="3.299820" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63144" t="46.2069009" p="330.0" rot="240.0" name="Detector #120" /> 
+         <parameter name="Efixed"> <value val="3.410560" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64536" t="47.3802994" p="330.0" rot="240.0" name="Detector #121" /> 
+         <parameter name="Efixed"> <value val="3.528660" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.65448" t="48.1107094" p="330.0" rot="240.0" name="Detector #122" /> 
+         <parameter name="Efixed"> <value val="3.648260" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66854" t="49.1825423" p="330.0" rot="240.0" name="Detector #123" /> 
+         <parameter name="Efixed"> <value val="3.775230" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67979" t="49.9965449" p="330.0" rot="240.0" name="Detector #124" /> 
+         <parameter name="Efixed"> <value val="3.906190" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.69304" t="50.9097545" p="330.0" rot="240.0" name="Detector #125" /> 
+         <parameter name="Efixed"> <value val="4.042820" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="51.3710592" p="330.0" rot="240.0" name="Detector #126" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.56139" t="38.8847087" p="390.0" rot="300.0" name="Detector #127" /> 
+         <parameter name="Efixed"> <value val="2.688160" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.57304" t="40.3073375" p="390.0" rot="300.0" name="Detector #128" /> 
+         <parameter name="Efixed"> <value val="2.787040" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58139" t="41.2679558" p="390.0" rot="300.0" name="Detector #129" /> 
+         <parameter name="Efixed"> <value val="2.864760" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.58820" t="42.0183094" p="390.0" rot="300.0" name="Detector #130" /> 
+         <parameter name="Efixed"> <value val="2.952710" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60028" t="43.2826617" p="390.0" rot="300.0" name="Detector #131" /> 
+         <parameter name="Efixed"> <value val="3.048190" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.60831" t="44.0798864" p="390.0" rot="300.0" name="Detector #132" /> 
+         <parameter name="Efixed"> <value val="3.157880" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.62104" t="45.2797817" p="390.0" rot="300.0" name="Detector #133" /> 
+         <parameter name="Efixed"> <value val="3.268740" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.63551" t="46.5576713" p="390.0" rot="300.0" name="Detector #134" /> 
+         <parameter name="Efixed"> <value val="3.394370" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.64570" t="47.4080548" p="390.0" rot="300.0" name="Detector #135" /> 
+         <parameter name="Efixed"> <value val="3.524460" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.66097" t="48.6133244" p="390.0" rot="300.0" name="Detector #136" /> 
+         <parameter name="Efixed"> <value val="3.664730" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.67463" t="49.6277789" p="390.0" rot="300.0" name="Detector #137" /> 
+         <parameter name="Efixed"> <value val="3.811590" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.69126" t="50.7897939" p="390.0" rot="300.0" name="Detector #138" /> 
+         <parameter name="Efixed"> <value val="3.968720" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70513" t="51.7033958" p="390.0" rot="300.0" name="Detector #139" /> 
+         <parameter name="Efixed"> <value val="4.134120" /> </parameter>
+    </component> 
+    <component type="tube" > 
+         <location r="0.70000" t="51.3710592" p="390.0" rot="300.0" name="Detector #140" /> 
+         <parameter name="Efixed"> <value val="4.000000" /> </parameter>
+    </component>
+  </type>
+  
+  <type name="diffraction">
+    <!-- Detector ID 170 -->
+    <component type="tube" > 
+         <location r="0.1" t="49.6277789" p="30" rot="300.0" name="Diff #1" /> 
+    </component>
+    <!-- Detector ID 171 -->
+    <component type="tube" > 
+         <location r="0.12" t="50.7897939" p="30" rot="300.0" name="Diff #2" /> 
+    </component> 
+    <!-- Detector ID 172 -->
+    <component type="tube" > 
+         <location r="0.14" t="51.7033958" p="30" rot="300.0" name="Diff #3" /> 
+    </component> 
+    <!-- For some reason Detector ID 15 (FIFTEEN) is next (?) -->
+    <component type="tube" > 
+         <location r="0.16" t="51.3710592" p="30" rot="300.0" name="Diff #4" /> 
+    </component>
+    <!-- ... 177 -->
+    <component type="tube" > 
+         <location r="0.18" t="49.6277789" p="30" rot="300.0" name="Diff #5" /> 
+    </component> 
+    <!-- ... 178 -->
+    <component type="tube" > 
+         <location r="0.20" t="50.7897939" p="30" rot="300.0" name="Diff #6" /> 
+    </component>
+    <!-- ... 179 -->    
+    <component type="tube" > 
+         <location r="0.22" t="51.7033958" p="30" rot="300.0" name="Diff #7" /> 
+    </component>
+    <!-- ... 180 -->
+    <component type="tube" > 
+         <location r="0.24" t="51.3710592" p="30" rot="300.0" name="Diff #8" /> 
+    </component>
+  </type>
+
+  <type name="tube" is="detector">
+    <cylinder id="shape">
+      <centre-of-bottom-base x="-0.03" y="0.0" z="0.0" />
+      <axis x="1.0" y="0.0" z="0" />
+      <radius val="0.005" />
+      <height val="0.06" />
+    </cylinder>
+    <algebra val="shape" />
+  </type>  
+
+  <!-- DETECTOR ID LISTS -->
+  
+  <idlist idname="back">
+    <id start="1" end="14" />
+	<id start="17" end="30" />
+	<id start="33" end="46" />
+	<id start="49" end="62" />
+	<id start="65" end="78" />
+  </idlist>
+
+  <idlist idname="front">
+	<id start="81" end="94" />
+	<id start="129" end="138" />
+	<id start="140" end="142" />
+	<id start="145" end="158" />
+	<id start="161" end="174" />
+	<id start="177" end="190" />
+  </idlist>
+    
+  <idlist idname="monitor1">
+    <id val="193" />
+  </idlist>
+
+  <idlist idname="diffraction">
+	<id start="194" end="197" />
+    <!-- Having this value as 15 causes problems in the ConvertToEnergy scripts
+    <id val="15" /> -->
+    <id start="97" end="100" />
+  </idlist>  
+  
+</instrument>
