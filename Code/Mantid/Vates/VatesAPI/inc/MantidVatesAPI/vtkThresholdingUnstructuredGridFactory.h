@@ -137,7 +137,6 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
   double posX, posY, posZ;
 
   UnstructuredPoint unstructPoint;
-  double currentXIncrement, currentYIncrement;
   double signalScalar;
   const int nPointsX = nBinsX + 1;
   const int nPointsY = nBinsY + 1;
@@ -147,17 +146,17 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
   //Loop through dimensions
   for (int i = 0; i < nPointsX; i++)
   {
-    currentXIncrement = i * incrementX;
+    posX = minX + (i * incrementX); //Calculate increment in x;
     Plane plane(nPointsY);
     for (int j = 0; j < nPointsY; j++)
     {
-      currentYIncrement = j * incrementY;
+
+      posY = minY + (j * incrementY); //Calculate increment in y;
       Column col(nPointsZ);
       for (int k = 0; k < nPointsZ; k++)
       {
-        posX = minX + currentXIncrement; //Calculate increment in x;
-        posY = minY + currentYIncrement; //Calculate increment in y;
-        posZ = minZ + k * incrementZ; //Calculate increment in z;
+
+        posZ = minZ + (k * incrementZ); //Calculate increment in z;
         signalScalar = m_image->getPoint(i, j, k, m_timeMapper(m_timestep)).s;
 
         if ((signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))

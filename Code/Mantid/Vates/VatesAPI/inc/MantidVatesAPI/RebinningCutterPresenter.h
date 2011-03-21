@@ -5,6 +5,7 @@
 #include <vtkBox.h>
 
 #include "MDDataObjects/MDWorkspace.h"
+#include <MantidVatesAPI/Common.h>
 #include <MantidAPI/ImplicitFunctionFactory.h>
 #include <MantidAPI/ImplicitFunction.h>
 #include <MantidMDAlgorithms/CompositeImplicitFunction.h>
@@ -61,15 +62,11 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-/// Vector of IMDDimension shared pointers.
-typedef std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > DimensionVec;
-/// IMDDimension as shared pointer.
-typedef boost::shared_ptr<Mantid::Geometry::IMDDimension> Dimension_sptr;
 /// Flags what should be don on the current iteration.
 enum RebinningIterationAction {
-  RecalculateAll, // Rebin and create 3D visualisation slice from 4D dataset.
+  UseCache, //There is no delta here. Use a cached vtkDataSet.
   RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
-  UseCache //There is no delta here. Use a cached vtkDataSet.
+  RecalculateAll // Rebin and create 3D visualisation slice from 4D dataset.
 };
 
 /// Forward declarations

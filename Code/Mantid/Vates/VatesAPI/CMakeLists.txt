@@ -11,6 +11,8 @@ project ( VatesAPI )
 set ( SRC_FILES 
 src/Clipper.cpp
 src/FieldDataToMetadata.cpp
+src/GeometryProxy.cpp
+src/ImageProxy.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
 src/ProgressAction.cpp
@@ -29,7 +31,10 @@ src/vtkThresholdingUnstructuredGridFactory.cpp
 
 set ( INC_FILES 
 inc/MantidVatesAPI/Clipper.h
+inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
+inc/MantidVatesAPI/GeometryProxy.h
+inc/MantidVatesAPI/ImageProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
@@ -53,6 +58,7 @@ test/vtkProxyFactoryTest.h
 #test/vtkStructuredGridFactoryTest.h
 #test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/FieldDataToMetadataTest.h
+test/GeometryProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MetadataToFieldDataTest.h
 test/RebinningCutterTest.h

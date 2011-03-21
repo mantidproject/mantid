@@ -98,8 +98,11 @@ void DimensionWidget::populateWidget(const int dimensionIndex)
     m_currentDimensionIndex = dimensionIndex;
     m_dimensionCombo->setCurrentIndex(dimensionIndex);
 
-    std::string nBinsString = boost::str(boost::format("%i") % spDimensionToRender->getNBins());
-    m_nBinsBox->setText(nBinsString.c_str());
+    if (m_nBinsBox->text().isEmpty())
+    {
+      std::string nBinsString = boost::str(boost::format("%i") % spDimensionToRender->getNBins());
+      m_nBinsBox->setText(nBinsString.c_str());
+    }
 
     std::string maxValueString = boost::str(boost::format("%i") % spDimensionToRender->getMaximum());
     m_maxBox->setText(maxValueString.c_str());

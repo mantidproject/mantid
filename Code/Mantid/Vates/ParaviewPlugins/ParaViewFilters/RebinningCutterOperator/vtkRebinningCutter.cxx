@@ -11,6 +11,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/ImageProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "boost/functional/hash.hpp"
@@ -58,7 +59,8 @@ vtkRebinningCutter::vtkRebinningCutter() :
   m_isSetup(false),
   m_timestep(0),
   m_thresholdMax(10000),
-  m_thresholdMin(0)
+  m_thresholdMin(0),
+  m_actionRequester()
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -80,25 +82,21 @@ std::string vtkRebinningCutter::createRedrawHash() const
   return sstream.str();
 }
 
-RebinningIterationAction vtkRebinningCutter::decideIterationAction(const int timestep)
+void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep)
 {
-  RebinningIterationAction action;
-  if (NULL == m_cachedVTKDataSet || m_Rebin)
+  //Handles some commong iteration actions that can only be determined at execution time.
+  if (NULL == m_cachedVTKDataSet)
   {
-    action = RecalculateAll;
+    m_actionRequester.ask(RecalculateAll);
   }
-  else
+  if ((timestep != m_timestep))
   {
-    if ((timestep != m_timestep) || m_cachedRedrawArguments != createRedrawHash())
-    {
-      action = RecalculateVisualDataSetOnly;
-    }
-    else
-    {
-      action = UseCache;
-    }
+    m_actionRequester.ask(RecalculateVisualDataSetOnly);
   }
-  return action;
+  if (m_cachedRedrawArguments != createRedrawHash())
+  {
+    m_actionRequester.ask(RecalculateVisualDataSetOnly);
+  }
 }
 
 int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVector **inputVector,
@@ -146,11 +144,11 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
     // usually only one actual step requested
     timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
-  RebinningIterationAction action = decideIterationAction(timestep);
-
-  MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
+  determineAnyCommonExecutionActions(timestep);
 
   vtkUnstructuredGrid* outData;
+  RebinningIterationAction action = m_actionRequester.action();
+  MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
   if (UseCache == action)
   {
     //Use existing vtkDataSet
@@ -162,13 +160,14 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
   {
     //Build a vtkDataSet
     vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
+
     outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
     m_cachedVTKDataSet = outData;
   }
-
+  this->
   m_timestep = timestep; //Not settable directly via a setter.
   m_cachedRedrawArguments = createRedrawHash();
-  m_Rebin = false;// So that we can compare again.
+  m_actionRequester.reset();
 
   output->ShallowCopy(outData);
   return 1;
@@ -267,8 +266,13 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
     if (m_appliedXDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      this->m_appliedXDimension = Mantid::VATES::createDimension(xml);
-      this->m_Rebin = true;
+      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      if(temp->getNBins() != m_appliedXDimension->getNBins())
+      {
+        m_actionRequester.ask(RecalculateAll);
+      }
+      this->m_appliedXDimension = temp;
     }
   }
 }
@@ -280,8 +284,13 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
     if (m_appliedYDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      this->m_appliedYDimension = Mantid::VATES::createDimension(xml);
-      this->m_Rebin = true;
+      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      if (temp->getNBins() != m_appliedYDimension->getNBins())
+      {
+        m_actionRequester.ask(RecalculateAll);
+      }
+      this->m_appliedYDimension = temp;
     }
   }
 }
@@ -293,8 +302,13 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
     if (m_appliedZDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      this->m_appliedZDimension = Mantid::VATES::createDimension(xml);
-      this->m_Rebin = true;
+      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      if (temp->getNBins() != m_appliedZDimension->getNBins())
+      {
+        m_actionRequester.ask(RecalculateAll);
+      }
+      this->m_appliedZDimension = temp;
     }
   }
 }
@@ -318,7 +332,11 @@ unsigned long vtkRebinningCutter::GetMTime()
   if (this->m_clipFunction != NULL)
   {
     time = this->m_clipFunction->GetMTime();
-    mTime = (time > mTime ? time : mTime);
+    if(time > mTime)
+    {
+      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      mTime = time;
+    }
   }
 
   return mTime;
@@ -373,7 +391,49 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBo
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
     Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
 {
+  if(m_actionRequester.action() == RecalculateAll)
+  {
+    return createQuickRenderDataSetFactory(spRebinnedWs);
+  }
+  else
+  {
+    return createQuickChangeDataSetFactory(spRebinnedWs);
+  }
+}
 
+vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
+    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+{
+  using Mantid::MDDataObjects::MDImage;
+
+  //Get the time dimension
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->gettDimension();
+
+  //Create a mapper to transform real time into steps.
+  TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),
+      timeDimension->getNBins());
+
+  GeometryProxy* geomProxy = GeometryProxy::New
+      (spRebinnedWs->get_spMDImage()->getGeometry(),
+          m_appliedXDimension,
+          m_appliedYDimension,
+          m_appliedZDimension,
+          m_appliedTDimension);
+
+ boost::shared_ptr<ImageProxy> spImageProcessor(ImageProxy::New(geomProxy, spRebinnedWs->get_spMDImage()));
+
+  //Create a factory for generating a thresholding unstructured grid.
+  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<ImageProxy,
+      TimeToTimeStep> (spImageProcessor, XMLDefinitions::signalName(), m_timestep,
+      timeMapper, m_thresholdMin, m_thresholdMax);
+
+  //Return the generated factory.
+  return vtkDataSetFactory_sptr(pvtkDataSetFactory);
+}
+
+vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
+    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+{
   using Mantid::MDDataObjects::MDImage;
 
   //Get the time dimension

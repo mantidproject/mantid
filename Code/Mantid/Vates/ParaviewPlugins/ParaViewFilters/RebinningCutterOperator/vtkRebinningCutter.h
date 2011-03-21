@@ -2,6 +2,36 @@
 #define _vtkRebinningCutter_h
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/RebinningCutterPresenter.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "RebinningActionManager.h"
+
+/**
+ *
+ * Paraview Filter implementing rebinning/cutting operations.
+
+    @author Owen Arnold, RAL ISIS
+    @date 18/03/2011
+
+    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
+    Code Documentation is available at: <http://doxygen.mantidproject.org>
+*/
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkRebinningCutter : public vtkUnstructuredGridAlgorithm
@@ -27,19 +57,26 @@ public:
 
 protected:
 
+  ///Constructor
   vtkRebinningCutter();
 
+  ///Destructor
   ~vtkRebinningCutter();
 
+  ///Request information prior to execution.
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
+  ///Execution.
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
+  ///Update extents.
   int RequestUpdateExtent(vtkInformation*,
-                                    vtkInformationVector**,
-                                    vtkInformationVector* );
+                                    vtkInformationVector**, vtkInformationVector* );
+
+  ///Handle time variation.
   unsigned long GetMTime();
 
+  ///Overrriden fill inports so that vtkDataSets may be specified.
   int FillInputPortInformation(int port, vtkInformation* info);
 
 private:
@@ -52,10 +89,13 @@ private:
   Mantid::VATES::RebinningCutterPresenter m_presenter;
   /// Get the x dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensionX(vtkDataSet* in_ds) const;
+
   /// Get the y dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensionY(vtkDataSet* in_ds) const;
+
   /// Get the z dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensionZ(vtkDataSet* in_ds) const;
+
   /// Get the t dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
 
@@ -64,11 +104,17 @@ private:
           Mantid::VATES::Dimension_sptr spDimY,
           Mantid::VATES::Dimension_sptr spDimZ) const;
 
-  /// Helper method. Selects the dataset factory to use.
-  boost::shared_ptr<Mantid::VATES::vtkDataSetFactory> createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+  /// Selects the dataset factory to use.
+  Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+
+  /// DataSet handles remappings, so allows regeneration of a visual dataset in rapid time.
+  Mantid::VATES::vtkDataSetFactory_sptr createQuickChangeDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+
+  /// Dataset does not handle remappings and is therefore may be generated quickly.
+  Mantid::VATES::vtkDataSetFactory_sptr createQuickRenderDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
 
   /// Decides on the necessary iteration action that is to be performed.
-  Mantid::VATES::RebinningIterationAction decideIterationAction(const int timestep);
+  void determineAnyCommonExecutionActions(const int timestep);
 
   /// creates a hash of arguments considered as flags for redrawing the visualisation dataset.
   std::string createRedrawHash() const;
@@ -79,9 +125,7 @@ private:
   vtkDataSet* m_cachedVTKDataSet;
   /// Arguments that cause redrawing are hashed and cached for rapid comparison regarding any changes.
   std::string m_cachedRedrawArguments;
-  /// Flag indicating that rebinning must be performed.
-  bool m_Rebin;
-  /// Flag indicating whether set up has occured or not.
+  /// Flag indicating whether set up has occured or not
   bool m_isSetup;
   /// Flag containing the timestep.
   int m_timestep;
@@ -97,6 +141,8 @@ private:
   Mantid::VATES::Dimension_sptr m_appliedZDimension;
   /// the dimension information applied to the tDimension Mapping.
   Mantid::VATES::Dimension_sptr m_appliedTDimension;
+  /// Manages the precedence of rebinning related actions.
+  Mantid::VATES::RebinningActionManger m_actionRequester;
 
 };
 #endif

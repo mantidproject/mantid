@@ -2,7 +2,7 @@
 #ifndef GENERATESTRUCTUREDGRID_H_
 #define GENERATESTRUCTUREDGRID_H_
 
-/** Creates a vtkStructuredGrid (mesh only) from a MDImage.
+/** Creates a vtkStructuredGrid from a MDImage.
 
  @author Owen Arnold, Tessella plc
  @date 11/01/2010
