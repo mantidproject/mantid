@@ -2,12 +2,14 @@ set ( SRC_FILES
 	src/LoadPeaksFile.cpp
 	src/PeakIntegration.cpp
 	src/SavePeaksFile.cpp
+  src/UnitCell.cpp
 )
 
 set ( INC_FILES 
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/SavePeaksFile.h
+  inc/MantidCrystal/UnitCell.h
 )
 
 set ( TEST_FILES 
