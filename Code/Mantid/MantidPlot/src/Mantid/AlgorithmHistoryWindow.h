@@ -170,7 +170,7 @@ class AlgHistoryProperties: public QObject
   void clearData();
   void setAlgProperties( const std::vector<Mantid::Kernel::PropertyHistory>& histProp);
   const std::vector<Mantid::Kernel::PropertyHistory>& getAlgProperties();
-protected:
+public:
   QTreeWidget *m_histpropTree;
 private:
   //std::vector<Mantid::API::AlgorithmHistory>m_algHist;

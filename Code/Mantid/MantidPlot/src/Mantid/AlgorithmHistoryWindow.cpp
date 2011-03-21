@@ -12,24 +12,17 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w)
   : QGroupBox(title,w), m_execDurationlabel(NULL),m_execDurationEdit(NULL),
     m_Datelabel(NULL),m_execDateTimeEdit(NULL), m_algexecDuration()
 {
+
   m_execDurationEdit=new QLineEdit("",this);
-  if(m_execDurationEdit){
+  if(m_execDurationEdit)
     m_execDurationEdit->setReadOnly(1);
-    int charWidth = m_execDurationEdit->fontMetrics().maxWidth();
-    m_execDurationEdit->setMaximumWidth(charWidth*4);
-    m_execDurationEdit->setMaximumHeight(20);
-  }
   m_execDurationlabel=new QLabel("&Duration:",this,0);
   if(m_execDurationlabel)m_execDurationlabel->setBuddy(m_execDurationEdit);
-		
+
   QDateTime datetime(QDate(0,0,0), QTime(0,0,0),Qt::LocalTime );
   m_execDateTimeEdit=new QLineEdit("",this);
-  if(m_execDateTimeEdit){
+  if(m_execDateTimeEdit)
     m_execDateTimeEdit->setReadOnly(1);
-    int charWidth = m_execDateTimeEdit->fontMetrics().maxWidth();
-    m_execDateTimeEdit->setMaximumWidth(charWidth*6);
-    //m_execDateTimeEdit->setGeometry(5,310,100,100);
-  }
   m_Datelabel=new QLabel("&Date:",this,0);
   if(m_Datelabel)m_Datelabel->setBuddy(m_execDateTimeEdit);
 		
@@ -40,6 +33,7 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w)
     setLayout(formLayout);
   }
   setGeometry (5,210,205,130);
+
 }
 AlgExecSummaryGrpBox::~AlgExecSummaryGrpBox()
 {
@@ -90,14 +84,10 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(titl
 								  m_frmworkVersionLabel(NULL),m_frmwkVersnEdit(NULL)
 {
   //OS Name Label & Edit Box
-  int charWidth=0;
   m_osNameEdit=new QLineEdit("",this);
   if(m_osNameEdit)
   {
     m_osNameEdit->setReadOnly(1);
-    charWidth = m_osNameEdit->fontMetrics().maxWidth();
-    m_osNameEdit->setMaximumWidth(charWidth*4);
-    m_osNameEdit->setMaximumHeight(100);
   }
   m_osNameLabel=new QLabel("&OSName:",this,0);
   if(m_osNameLabel)m_osNameLabel->setBuddy(m_osNameEdit);
@@ -107,9 +97,6 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(titl
   if(m_osVersionEdit)
   {
     m_osVersionEdit->setReadOnly(1);
-    charWidth = m_osVersionEdit->fontMetrics().maxWidth();
-    m_osVersionEdit->setMaximumWidth(charWidth*10);
-    m_osVersionEdit->setMaximumHeight(100);
     m_osVersionLabel=new QLabel("&OSVersion:",this,0);
   }
   if(m_osVersionLabel)
@@ -118,12 +105,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(titl
   //Mantid FRamework Version Label & Edit Box
   m_frmwkVersnEdit=new QLineEdit("",this);
   if(m_frmwkVersnEdit)
-  {
     m_frmwkVersnEdit->setReadOnly(1);
-    charWidth = m_frmwkVersnEdit->fontMetrics().maxWidth();
-    m_frmwkVersnEdit->setMaximumWidth(charWidth*4);
-    m_frmwkVersnEdit->setMaximumHeight(100);
-  }
   m_frmworkVersionLabel=new QLabel("&FrameWorkVersion:",this,0);
   if(m_frmworkVersionLabel)
     m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
@@ -150,7 +132,7 @@ AlgEnvHistoryGrpBox::~AlgEnvHistoryGrpBox()
 }
 AlgHistScriptButton::AlgHistScriptButton(QString title,QWidget* w):QPushButton(title,w)
 {
-  setGeometry (460,350,100,30);
+  setGeometry (400,350,160,30);
   //connect(this,SIGNAL(clicked()),w,SLOT(saveScriptToFile()));
   QMenu* scriptMenu=new QMenu(this);
   if(scriptMenu)
@@ -175,33 +157,51 @@ AlgorithmHistoryWindow::AlgorithmHistoryWindow(ApplicationWindow *w,const std::v
   setMinimumHeight(400);
   setMinimumWidth(570);
   setGeometry(50,150,540,380); 
-	
+
+
   //Create a tree widget to display the algorithm names in the workspacehistory
   m_Historytree = new AlgHistoryTreeWidget(this);
   if(m_Historytree)
-  {	m_Historytree->setHeaderLabel("Algorithms");
+  {
+    m_Historytree->setHeaderLabel("Algorithms");
     m_Historytree->setGeometry (5,5,205,200);   
   }
   //Populate the History Tree widget
   populateAlgHistoryTreeWidget();
+
+  //create a tree widget to dispaly history properties
+  if(!m_histPropWindow)
+    m_histPropWindow=createAlgHistoryPropWindow();
+  connect(m_Historytree,SIGNAL(updateAlgorithmHistoryWindow(QString, int,int)),this,SLOT(updateAll(QString,int,int)));
+
+  // The tree and the history details layout
+  QHBoxLayout *treeLayout = new QHBoxLayout;
+  treeLayout->addWidget(m_Historytree,1); // History stretches 1
+  treeLayout->addWidget(m_histPropWindow->m_histpropTree,2); // Properties gets more space
+
   //Create a GroupBox to display exec date,duration
   if(!m_execSumGrpBox)m_execSumGrpBox=createExecSummaryGrpBox();
   //Create a Groupbox to display environment details
   if(!m_envHistGrpBox)m_envHistGrpBox=createEnvHistGrpBox(envHist);
 
-  //std::string algrithmName=(*m_algHist.rbegin( )).name();
-  //int version=(*m_algHist.rbegin( )).version();
-  //create a tree widget to dispaly history properties
-  if(!m_histPropWindow)
-  {m_histPropWindow=createAlgHistoryPropWindow();
-  }
-  connect(m_Historytree,SIGNAL(updateAlgorithmHistoryWindow(QString, int,int)),this,SLOT(updateAll(QString,int,int)));
+  QHBoxLayout *environmentLayout = new QHBoxLayout;
+  environmentLayout->addWidget(m_execSumGrpBox, 1);
+  environmentLayout->addWidget(m_envHistGrpBox, 2);
+
+  // The button at the bottom
   m_scriptButton = CreateScriptButton();
-  if(m_scriptButton==NULL)
-  {	QMessageBox::critical(this,"Mantid","Generatescript Button Creation failed");
-  }
-	
+  if(m_scriptButton==NULL) QMessageBox::critical(this,"Mantid","Generate script Button Creation failed");
+  QHBoxLayout *buttonLayout = new QHBoxLayout;
+  buttonLayout->addStretch(1); // Align the button to the right
+  buttonLayout->addWidget(m_scriptButton);
+
+  //Main layout
+  QVBoxLayout *mainLayout = new QVBoxLayout(this);
+  mainLayout->addLayout(treeLayout);
+  mainLayout->addLayout(environmentLayout);
+  mainLayout->addLayout(buttonLayout);
 }
+
 AlgorithmHistoryWindow::~AlgorithmHistoryWindow()
 {	
   if(m_Historytree){delete m_Historytree;m_Historytree=NULL;}
