@@ -147,15 +147,19 @@ namespace Kernel
     for (size_t i=0; i < m_threads.size(); i++)
     {
       m_threads[i]->join();
-      // Delete the old thread
       delete m_threads[i];
     }
 
     // Clear the vectors (the threads are deleted now).
     m_threads.clear();
+
+    // Get rid of the runnables too
     for (size_t i=0; i < m_runnables.size(); i++)
       delete m_runnables[i];
     m_runnables.clear();
+
+    // This will make threads restart
+    m_started = false;
 
     // Did one of the threads abort or throw an exception?
     if (m_scheduler->getAborted())

@@ -73,7 +73,7 @@ namespace Kernel
         // No appropriate task for this thread (perhaps a mutex is locked)
         // but there are more tasks.
         // So we wait a bit before checking again.
-        Poco::Thread::sleep(100); // millisec
+        Poco::Thread::sleep(50); // millisec
       }
     }
     // Ran out of tasks that could be run.

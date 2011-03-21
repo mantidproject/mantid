@@ -234,6 +234,25 @@ public:
     TS_ASSERT_EQUALS( threadpooltest_check, 12);
   }
 
+  /** We schedule a task, run the threads, but don't abort them.
+   * Then we re-schedule stuff, and re-join.
+   */
+  void test_schedule_resume_tasks()
+  {
+    ThreadPool p; // Makes a default scheduler
+    threadpooltest_check = 0;
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    // Ok, the task did execute.
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+
+    // Now we reset.
+    threadpooltest_check = 0;
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+  }
+
   void test_Scheduler_FIFO()
   {
     // Only use one core, it'll make things simpler

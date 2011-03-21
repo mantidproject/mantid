@@ -184,6 +184,8 @@ namespace MDEvents
     ThreadScheduler * ts = new ThreadSchedulerLargestCost();
     ThreadPool tp(ts);
 
+    size_t events_added = 0;
+
     for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
       // Equivalent of: this->convertEventList(wi);
