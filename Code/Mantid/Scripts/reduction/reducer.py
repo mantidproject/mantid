@@ -283,7 +283,14 @@ class Reducer(object):
         #any clean up, possibly removing workspaces 
         self.post_process()
     
-        self.log_text += "Reduction completed in %g sec" % (time.time()-t_0)
+        self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
+        log_path = os.path.join(self._data_path,"%s_reduction.log" % self.instrument.name())
+        self.log_text += "Log saved to %s" % log_path
+        
+        # Write the log to file
+        f = open(log_path, 'a')
+        f.write(self.log_text)
+        f.close()
         return self.log_text
     
     

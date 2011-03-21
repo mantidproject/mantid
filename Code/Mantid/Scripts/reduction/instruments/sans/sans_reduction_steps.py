@@ -357,6 +357,11 @@ class DirectBeamTransmission(BaseTransmission):
                                   IncidentBeamMonitor=str(norm_spectrum), 
                                   TransmissionMonitor=str(first_det))
             
+            if mtd.workspaceExists(empty_ws):
+                mtd.deleteWorkspace(empty_ws)
+            if mtd.workspaceExists(sample_ws):
+                mtd.deleteWorkspace(sample_ws)          
+            
         # 2- Apply correction (Note: Apply2DTransCorr)
         #Apply angle-dependent transmission correction using the zero-angle transmission
         if self._theta_dependent:
