@@ -62,6 +62,12 @@ namespace MDEvents
     BoxController_sptr getBoxController() const
     { return m_BoxController; }
 
+    /** Set the box controller used.
+     * @param controller :: BoxController_sptr
+     */
+    void setBoxController(BoxController_sptr controller)
+    { m_BoxController = controller; }
+
     //-----------------------------------------------------------------------------------------------
     /** Set the extents of this box.
      * @param dim :: index of dimension
@@ -122,7 +128,6 @@ namespace MDEvents
     /** Cached total error (squared) from all points within */
     double m_errorSquared;
 
-  public://FIXME
     /// The box splitting controller
     BoxController_sptr m_BoxController;
 

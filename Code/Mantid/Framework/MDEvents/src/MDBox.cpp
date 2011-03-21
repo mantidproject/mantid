@@ -92,7 +92,7 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add several events.
+  /** Add several events. No bounds checking is made!
    *
    * @param events :: vector of events to be copied.
    * @return the number of events that were rejected (because of being out of bounds)

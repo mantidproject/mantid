@@ -104,7 +104,7 @@ namespace MDEvents
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
 
-      // This little dance makes the vector of events more general.
+      // This little dance makes the getting vector of events more general (since you can't overload by return type).
       typename std::vector<T> * events_ptr;
       getEventsFrom(el, events_ptr);
       typename std::vector<T> & events = *events_ptr;
@@ -157,7 +157,7 @@ namespace MDEvents
     std::string names[3] = {"Qx", "Qy", "Qz"};
     for (size_t d=0; d<nd; d++)
     {
-      Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
+      Dimension dim(-1000.0, +1000.0, names[d], "Angstroms^-1");
       ws->addDimension(dim);
     }
     ws->initialize();
@@ -167,6 +167,8 @@ namespace MDEvents
     bc->setSplitInto(4);
     ws->setBoxController(bc);
 
+    // We always want the box to be split (it will reject bad ones)
+    ws->splitBox();
 
     // Extract some parameters global to the instrument
     AlignDetectors::getInstrumentParameters(in_ws->getInstrument(),l1,beamline,beamline_norm, samplePos);
@@ -211,6 +213,16 @@ namespace MDEvents
 
     // Wait for all tasks to complete.
     tp.joinAll();
+
+    ThreadScheduler * ts2 = new ThreadSchedulerLargestCost();
+    ThreadPool tp2(ts2);
+    ws->splitAllIfNeeded(ts2);
+    tp2.joinAll();
+    ws->refreshCache();
+
+//    std::cout << "Workspace has " << ws->getNPoints() << " events\n";
+
+
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));

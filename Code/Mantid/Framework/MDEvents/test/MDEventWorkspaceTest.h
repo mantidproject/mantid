@@ -73,6 +73,19 @@ public:
   }
 
 
+  void test_splitBox()
+  {
+    MDEventWorkspace3 * ew = new MDEventWorkspace3();
+    BoxController_sptr bc(new BoxController(3));
+    bc->setSplitInto(4);
+    ew->setBoxController(bc);
+    TS_ASSERT( !ew->isGridBox() );
+    TS_ASSERT_THROWS_NOTHING( ew->splitBox(); )
+    TS_ASSERT( ew->isGridBox() );
+    delete ew;
+  }
+
+
 
   /** Create a test MDEventWorkspace<nd>
    *

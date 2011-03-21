@@ -59,6 +59,12 @@ namespace MDEvents
       return m_BoxController;
     }
 
+    void splitBox();
+
+    void splitAllIfNeeded(Kernel::ThreadScheduler * ts);
+
+    void refreshCache();
+
     /** Sample function returning (a copy of) the n-th event in the workspace.
      * This may not be needed.
      *  */

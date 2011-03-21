@@ -88,7 +88,7 @@ namespace MDEvents
   void MDEventWorkspace)::setBoxController(BoxController_sptr controller)
   {
     m_BoxController = controller;
-    data->m_BoxController = m_BoxController;
+    data->setBoxController(m_BoxController);
   }
 
 
@@ -114,6 +114,47 @@ namespace MDEvents
     data->addEvents(events);
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Split the contained MDBox into a MDGridBox, if it is not
+   * that already.
+   */
+  TMDE(
+  void MDEventWorkspace)::splitBox()
+  {
+    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    if (!gridBox)
+    {
+      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
+      gridBox = new MDGridBox<MDE,nd>(box);
+      data = gridBox;
+    }
+  }
+
+  //-----------------------------------------------------------------------------------------------
+  /** Goes through all the sub-boxes and splits them if they contain
+   * enough events to be worth it.
+   *
+   * @param ts :: optional ThreadScheduler * that will be used to parallelize
+   *        recursive splitting. Set to NULL to do it serially. */
+  TMDE(
+  void MDEventWorkspace)::splitAllIfNeeded(Kernel::ThreadScheduler * ts)
+  {
+    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    if (!gridBox)
+      throw std::runtime_error("MDEventWorkspace::splitAllIfNeeded called on a "
+          "MDBox (call splitBox() first).");
+    gridBox->splitAllIfNeeded(ts);
+  }
+  //-----------------------------------------------------------------------------------------------
+  /** Refresh the cache of # of points, signal, and error */
+  TMDE(
+  void MDEventWorkspace)::refreshCache()
+  {
+    MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    if (!gridBox)
+      throw std::runtime_error("MDEventWorkspace::refreshCache called on a MDBox (call splitBox() first).");
+    gridBox->refreshCache();
+  }
 
   //-----------------------------------------------------------------------------------------------
   /** Add a large number of events to this MDEventWorkspace.
@@ -127,14 +168,8 @@ namespace MDEvents
   void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog)
   {
     // Always split the MDBox into a grid box
-    // TODO: Should this be a decision point?
+    this->splitBox();
     MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
-    if (!gridBox)
-    {
-      MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
-      gridBox = new MDGridBox<MDE,nd>(box);
-      data = gridBox;
-    }
 
     // Get some parameters that should optimize task allocation.
     size_t eventsPerTask, numTasksPerBlock;
