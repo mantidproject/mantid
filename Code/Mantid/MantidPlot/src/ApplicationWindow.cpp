@@ -15498,7 +15498,7 @@ void ApplicationWindow::showScriptWindow(bool forceVisible)
   {
     // MG 09/02/2010 : Removed parent from scripting window. If it has one then it doesn't respect the always on top 
     // flag, it is treated as a sub window of its parent
-    scriptingWindow = new ScriptingWindow(scriptingEnv(),NULL);
+    scriptingWindow = new ScriptingWindow(scriptingEnv(), NULL, Qt::WindowMinMaxButtonsHint);
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
