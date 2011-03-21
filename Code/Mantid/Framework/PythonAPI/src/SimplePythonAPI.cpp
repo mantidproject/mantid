@@ -119,10 +119,11 @@ namespace Mantid
         PropertyVector orderedProperties(algm->getProperties());
         std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());
         std::string name(vIter->first);
-        writeFunctionDef(module, name , orderedProperties, gui);
+	const int version(vIter->second);
+        writeFunctionDef(module, name, version, orderedProperties, gui);
         if( gui ) 
         {
-          writeGUIFunctionDef(module, name, orderedProperties);
+          writeGUIFunctionDef(module, name, version, orderedProperties);
         }
 
         // Get the category and save it to our map
@@ -203,11 +204,13 @@ namespace Mantid
     * Write a Python function defintion
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
+    * @param version The default version of the algorithm
     * @param properties The list of properties
     * @param async Whether the algorithm should be executed asynchonously or not
     */
     void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
-      const PropertyVector & properties, bool async)
+					   const int version,
+					   const PropertyVector & properties, bool async)
     {
       if( algm == "Load" )
       {
@@ -237,7 +240,7 @@ namespace Mantid
       //end of function parameters
       size_t nprops = properties.size();
       if( nprops > 0 ) os << ", ";
-      os << "execute=True, Version=-1):\n";
+      os << "execute=True, Version=" << version << "):\n";
 
       os << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n";
       if( nprops > 0 )
@@ -394,10 +397,12 @@ namespace Mantid
     * Write the GUI version of the Python function that raises a Qt dialog
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
+    * @param version The default version to create
     * @param properties The list of properties
     */
     void SimplePythonAPI::writeGUIFunctionDef(std::ostream & os, const std::string & algm,
-      const PropertyVector & properties)
+					      const int version,
+					      const PropertyVector & properties)
     {
       if( algm == "Load" )
       {
@@ -420,7 +425,7 @@ namespace Mantid
         os << " = None,";
       }
       //end of algorithm function parameters but add other arguments
-      os << "Message = \"\", Enable=\"\", Disable=\"\", Version=-1):\n"
+      os << "Message = \"\", Enable=\"\", Disable=\"\", Version=" << version << "):\n"
         << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n"
         << "  enabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
         << "  disabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"

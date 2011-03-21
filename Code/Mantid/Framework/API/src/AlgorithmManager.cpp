@@ -87,18 +87,26 @@ namespace Mantid
       return m_managed_algs.back();
     }
 
-    /// deletes all registered algorithms
+    /** 
+     * Clears all managed algorithm objects.
+     */
     void AlgorithmManagerImpl::clear()
     {
       m_managed_algs.clear();
       return;
     }
 
-    /// Returns a shared pointer by algorithm id
+    /**
+     * Returns a shared pointer by algorithm id
+     * @param id :: The ID of the algorithm
+     * @returns A shared pointer tot eh algorithm
+     */
     IAlgorithm_sptr AlgorithmManagerImpl::getAlgorithm(AlgorithmID id) const
     {
       for( std::deque<IAlgorithm_sptr>::const_iterator a = m_managed_algs.begin();a!=m_managed_algs.end();a++)
+      {
         if ((**a).getAlgorithmID() == id) return *a;
+      }
       return IAlgorithm_sptr();
     }
 

@@ -46,13 +46,13 @@ class EXPORT_OPT_MANTID_API AlgorithmManagerImpl
 {
 
 public:
-  // Methods to create algorithm instances
+  /// Creates a managed algorithm with the option of choosing a version
   IAlgorithm_sptr create(const std::string& algName, const int& version = -1);
+  /// Creates an unmanaged algorithm with the option of choosing a version
   boost::shared_ptr<Algorithm> createUnmanaged(const std::string& algName, const int& version = -1) const;
 
   /// deletes all registered algorithms
   void clear();
-
   /** Gives the number of managed algorithms
    *  @return The number of registered algorithms
    */
@@ -60,15 +60,14 @@ public:
   {
     return static_cast<int>(m_managed_algs.size());
   }
-
+  /// Returns the names and categories of all algorithms
   const std::vector<std::pair<std::string, std::string> > getNamesAndCategories() const;
-  
   /// Returns a reference to the container of managed algorithms
   const std::deque<IAlgorithm_sptr>& algorithms() const
   {
     return m_managed_algs;
   }
-  
+  /// Return the pointer to an algorithm with the given ID
   IAlgorithm_sptr getAlgorithm(AlgorithmID id) const;
 
 private:

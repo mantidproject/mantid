@@ -160,7 +160,8 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
 {
   const std::string EOL="\n";
   // Highest version
-  API::IAlgorithm* algm = createAlgorithm(algName);
+  API::IAlgorithm_sptr algm = API::AlgorithmManager::Instance().createUnmanaged(algName);
+  algm->initialize();
 
   // Put in the quick overview message
   std::stringstream buffer;
@@ -183,15 +184,21 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
   }
 
   buffer << "Property descriptions: " << EOL << EOL;
-  // write the actual propertie descriptions
+  // write the actual property descriptions
   Mantid::Kernel::Property *prop;
-  for ( size_t i = 0; i < numProps; ++i) {
+  for ( size_t i = 0; i < numProps; ++i) 
+  {
     prop = properties[i];
     buffer << names[i] << "("
            << Mantid::Kernel::Direction::asText(prop->direction());
     if (!prop->isValid().empty())
       buffer << ":req";
-    buffer << ") *" << prop->type() << "* "<< EOL;
+    buffer << ") *" << prop->type() << "* ";
+    int versionFound = API::AlgorithmFactory::Instance().versionForProperty(algName, prop->name());
+    if( versionFound != 1 )
+    {
+      buffer << "(Only Version >= " << versionFound << ")" << EOL;
+    }
     std::set<std::string> allowed = prop->allowedValues();
     if (!prop->documentation().empty() || !allowed.empty())
     {

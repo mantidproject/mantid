@@ -88,13 +88,14 @@ class DLLExport SimplePythonAPI
   /// Gets the algorithm name from a fully qualified name
   static std::string extractAlgName(const std::string & algKey);
   /// Writes the Python function definition for the given algorithm
-  static void writeFunctionDef(std::ostream & module, const std::string & algName, 
-			       const PropertyVector & properties, bool async);
+  static void writeFunctionDef(std::ostream & module, const std::string & algName,
+			       const int version, const PropertyVector & properties, 
+			       bool async);
   /// Write a special definition for the 'Load' algorithm
   static void writeLoadFunction(std::ostream & module, bool async);
   /// Writes the GUI version of the Python function definition for the given algorithm
-  static void writeGUIFunctionDef(std::ostream & module, const std::string & algName, 
-				  const PropertyVector & properties);
+  static void writeGUIFunctionDef(std::ostream & module, const std::string & algName,
+				  const int version, const PropertyVector & properties);
   /// Write a specialised function for the LoadDialog command
   static void writeLoadDialogDef(std::ostream & module);
   /// Writes the global help command

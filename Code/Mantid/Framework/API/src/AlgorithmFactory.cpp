@@ -51,11 +51,11 @@ namespace Mantid
       {
         if(version == -1)//get latest version since not supplied
         {
-          versionMap::const_iterator it = m_vmap.find(name);
+          VersionMap::const_iterator it = m_vmap.find(name);
           if (!name.empty())
           {
             if(it == m_vmap.end() )
-              throw std::runtime_error("algorithm not registered "+ name );
+              throw std::runtime_error("Algorithm not registered "+ name );
             else
               local_version = it->second;
           }
@@ -69,7 +69,7 @@ namespace Mantid
       }
       catch(Kernel::Exception::NotFoundError&)
       {
-        versionMap::const_iterator it = m_vmap.find(name);
+        VersionMap::const_iterator it = m_vmap.find(name);
         if(it == m_vmap.end() )
           throw std::runtime_error("algorithm not registered "+ name );
         else
@@ -135,6 +135,55 @@ namespace Mantid
 	res.push_back(desc);
       }
       return res;
+    }
+    
+    /**
+     * Returns the highest version number of an algorithm
+     * @param algName :: The nameof the algorithm
+     * @returns An integer giving the highest version registered
+     * @throws NotFoundError if the algorithm cannot be found
+     */
+    int AlgorithmFactoryImpl::highestVersion(const std::string & algName) const
+    {
+      VersionMap::const_iterator itr = m_vmap.find(algName);
+      if( itr == m_vmap.end() )
+      {
+	throw std::runtime_error("Algorithm \"" + algName + "\" not registered.");
+      }
+      return itr->second;
+    }
+
+    /**
+     * Return the version of the algorithm where the given property is first found
+     * @param :: algName The name of the algorithm to check
+     * @param :: propName The name of the proeprty to search for
+     * @returns An integer giving the algorithm version where the property is first found
+     * @throws Kernel::Exception::NotFoundError if the algorithm or property do not exist anywhere
+     */
+    int AlgorithmFactoryImpl::versionForProperty(const std::string & algName, 
+						 const std::string & propName) const
+    {
+      // Quick route out will satisfy most algorithms
+      const int topVersion = highestVersion(algName);
+      if( topVersion == 1 ) return topVersion;
+
+      // If not have to search the property lists
+      int foundVersion(-1);
+      for( int version = 1; version <= topVersion; ++version )
+      {
+	Algorithm_sptr alg = this->create(algName, version);
+	alg->initialize();
+	if( alg->existsProperty(propName) )
+	{
+	  foundVersion = version;
+	  break;
+	}
+      }
+      if( foundVersion < 0 )
+      {
+	throw Kernel::Exception::NotFoundError("Unknown property", propName + " on " + algName);
+      }
+      return foundVersion;
     }
 
     /**

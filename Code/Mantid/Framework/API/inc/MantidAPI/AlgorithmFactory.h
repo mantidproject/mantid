@@ -73,7 +73,7 @@ public:
     const int version = extractAlgVersion(tempAlg);
     const std::string className = extractAlgName(tempAlg);
     delete newI;
-    typename versionMap::const_iterator it = m_vmap.find(className);
+    typename VersionMap::const_iterator it = m_vmap.find(className);
     if (!className.empty())
     {
       if( it == m_vmap.end())
@@ -96,6 +96,10 @@ public:
   const std::vector<std::string> getKeys() const;
   /// Returns algorithm descriptors.
   std::vector<Algorithm_descriptor> getDescriptors() const;
+  /// Returns the highest version number of an algorithm
+  int highestVersion(const std::string & algName) const;
+  /// Return the version of the algorithm where the given property is first found
+  int versionForProperty(const std::string & algName, const std::string & propName) const;
 	  
   /// Store a pointer to an algorithm that has alread been constructed; for instance an algorithm created in Python
   bool storeCloneableAlgorithm(CloneableAlgorithm* algorithm);
@@ -125,9 +129,9 @@ public:
   Kernel::Logger& g_log;
 
   /// A typedef for the map of algorithm versions
-  typedef std::map<std::string, int> versionMap;
+  typedef std::map<std::string, int> VersionMap;
   /// The map holding the registered class names and their highest versions
-  versionMap m_vmap;
+  VersionMap m_vmap;
   /// A hash table storing clean pointers to algorithms
   std::map<std::string, CloneableAlgorithm*> m_cloneable_algs;
 };
