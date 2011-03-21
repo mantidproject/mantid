@@ -59,16 +59,41 @@ private:
   /// Execution code
   void exec();
   /**
+   * Function to retrieve the lengths of the x and y axes. This function uses
+   * the same code for each call, but it is the order which determines the axis
+   * found.
    *
+   * @param length the size of a given axis
    */
   void getAxisLength(int &length);
+  /**
+   * Function to parse and store the actual axis values. Again, read order
+   * determines the axis.
+   *
+   * @param axis the array to store the axis values
+   * @param length the size of the axis
+   */
   void getAxisValues(MantidVec *axis, const std::size_t length);
+  /**
+   * Function to parse and store the signal and errors from the data file.
+   *
+   * @param data the array to store the signal values
+   * @param errs the array to store the error values
+   */
   void getData(std::vector<MantidVec *> &data, std::vector<MantidVec *> &errs);
+  /**
+   * Function to read a line from the data file. Makes handling comment lines
+   * easy.
+   */
   void readLine();
 
+  /// Handle for input data file
   std::ifstream ifile;
+  /// Placeholder for file lines
   std::string line;
+  /// The number of groups present in the data file
   std::size_t nGroups;
+  /// The size of the x-axis in the data file
   int xLength;
 };
 
