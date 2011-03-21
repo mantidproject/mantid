@@ -182,6 +182,7 @@ private:
 	/// function sets the shape of existing MD array according to MDGeometry;
 	void set_imgArray_shape();
 };
+typedef boost::shared_ptr<Mantid::MDDataObjects::MDImage> MDImage_sptr;
 //
 }
 }
