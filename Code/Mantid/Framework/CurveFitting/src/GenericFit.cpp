@@ -46,7 +46,7 @@ namespace CurveFitting
   ///Destructor
   GenericFit::~GenericFit()
   {
-    if (m_function) delete m_function;
+    //if (m_function) delete m_function;
   }
 
   /** Initialisation method
@@ -91,9 +91,9 @@ namespace CurveFitting
     const int maxInterations = getProperty("MaxIterations");
 
     std::string funIni = getProperty("Function");
-    m_function = API::FunctionFactory::Instance().createInitialized(funIni);
+    m_function.reset( API::FunctionFactory::Instance().createInitialized(funIni) );
 
-    if (m_function == NULL)
+    if (m_function.get() == NULL)
     {
       throw std::runtime_error("Function was not set.");
     }
@@ -151,8 +151,7 @@ namespace CurveFitting
 
     std::string costFunction = getProperty("CostFunction");
     IFuncMinimizer* minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-    minimizer->initialize(m_function, costFunction);
-    
+    minimizer->initialize(m_function.get(), costFunction);
 
     // finally do the GenericFitting
 
@@ -162,7 +161,7 @@ namespace CurveFitting
     double dof = nData - nParam;  // dof stands for degrees of freedom
 
     // Standard least-squares used if derivative function defined otherwise simplex
-    Progress prog(this,0.0,1.0,maxInterations);
+    Progress prog(this,0.0,1.0,maxInterations?maxInterations:1);
     if ( methodUsed.compare("Simplex") != 0 )
     {
       status = GSL_CONTINUE;
@@ -184,7 +183,7 @@ namespace CurveFitting
             methodUsed = "Simplex";
             delete minimizer;
             minimizer = FuncMinimizerFactory::Instance().createUnwrapped(methodUsed);
-            minimizer->initialize(m_function, costFunction);
+            minimizer->initialize(m_function.get(), costFunction);
             iter = 0;
           }
           break;
@@ -196,6 +195,7 @@ namespace CurveFitting
 
       finalCostFuncVal = minimizer->costFunctionVal() / dof;
     }
+
 
     if ( methodUsed.compare("Simplex") == 0 )
     {
@@ -213,8 +213,8 @@ namespace CurveFitting
             g_log.information() << "Simplex step size reduced to 0.1\n";
             delete minimizer;
             SimplexMinimizer* sm = new SimplexMinimizer;
-            sm->initialize(m_function, costFunction);
-            sm->resetSize(0.1, m_function, costFunction);
+            sm->initialize(m_function.get(), costFunction);
+            sm->resetSize(0.1, m_function.get(), costFunction);
             minimizer = sm;
             status = GSL_CONTINUE;
             continue;

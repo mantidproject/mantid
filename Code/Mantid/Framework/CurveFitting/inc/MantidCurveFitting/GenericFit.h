@@ -60,7 +60,7 @@ namespace Mantid
     {
     public:
       /// Default constructor
-      GenericFit() : API::Algorithm(),m_function(NULL) {};
+      GenericFit() : API::Algorithm(),m_function() {};
       /// Destructor
       virtual ~GenericFit();
       /// Algorithm's name for identification overriding a virtual method
@@ -71,7 +71,7 @@ namespace Mantid
       virtual const std::string category() const { return "CurveFitting";}
 
       /// Get the function for fitting
-      API::IFitFunction* getFunction()const{return m_function;}
+      boost::shared_ptr<API::IFitFunction> getFunction()const{return m_function;}
 
     protected:
       /// Sets documentation strings for this algorithm
@@ -84,7 +84,7 @@ namespace Mantid
       double transformationDerivative(int i);
 
       /// Pointer to the fitting function
-      API::IFitFunction* m_function;
+      boost::shared_ptr<API::IFitFunction> m_function;
 
       friend struct FitData1;
     };

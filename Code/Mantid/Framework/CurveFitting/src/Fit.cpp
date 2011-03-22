@@ -142,7 +142,7 @@ namespace CurveFitting
       // create output parameter table workspace to store final fit parameters 
       // including error estimates if derivative of fitting function defined
 
-      API::IFunctionMW* funmw = dynamic_cast<API::IFunctionMW*>(fit->getFunction());
+      boost::shared_ptr<API::IFunctionMW> funmw = boost::dynamic_pointer_cast<API::IFunctionMW>(fit->getFunction());
       if (funmw)
       {
         declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),

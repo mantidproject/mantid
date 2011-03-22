@@ -139,7 +139,7 @@ namespace API
         xMin = xMax;
         xMax = tmp;
       }
-      m_dataSize = xMax - xMin;
+      m_dataSize = xMax - xMin + 1;
       m_data = &y[xMin];
       m_xValues.reset(new double[m_dataSize]);
       m_weights.reset(new double[m_dataSize]);
