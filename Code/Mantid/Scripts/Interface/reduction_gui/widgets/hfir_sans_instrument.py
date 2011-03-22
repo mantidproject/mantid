@@ -259,8 +259,9 @@ class SANSInstrumentWidget(BaseWidget):
             m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
             
         # Wavelength value
+        wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
         if self._summary.wavelength_chk.isChecked():
-            m.wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit)
+            m.wavelength = wavelength
             m.wavelength_spread = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
             
         # Solid angle correction
@@ -303,9 +304,11 @@ class SANSInstrumentWidget(BaseWidget):
                 dataproxy = DataFileProxy(fname)
                 if dataproxy.sample_detector_distance is not None and not self._summary.sample_dist_chk.isChecked():
                     self._summary.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                    util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
                 if not self._summary.wavelength_chk.isChecked():
                     if dataproxy.wavelength is not None:
                         self._summary.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                        util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
                     if dataproxy.wavelength_spread is not None:
                         self._summary.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
                     if len(dataproxy.errors)>0:
