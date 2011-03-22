@@ -20,8 +20,8 @@ public:
         "DaveAscii.grp"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace",
         outputWSName));
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("X-Axis", "DeltaE"));
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Y-Axis",
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("X-Axis Units", "DeltaE"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Y-Axis Units",
         "MomentumTransfer"));
     loader.execute();
 

@@ -31,13 +31,13 @@ void LoadDaveGrp::init()
       "The name of the workspace that will be created.");
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the X-Axis property
-  this->declareProperty("X-Axis", "",
+  this->declareProperty("X-Axis Units", "",
       new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
     "The name of the units for the X-Axis (must be one of those registered in\n"
     "the Unit Factory)");
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the Y-Axis property
-  this->declareProperty("Y-Axis", "MomentumTransfer",
+  this->declareProperty("Y-Axis Units", "MomentumTransfer",
       new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
     "The name of the units for the Y-Axis (must be one of those registered in\n"
     "the Unit Factory)");
@@ -82,11 +82,11 @@ void LoadDaveGrp::exec()
   outputWorkspace->isDistribution(true);
 
   // Set the x-axis units
-  outputWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("X-Axis"));
+  outputWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("X-Axis Units"));
 
   API::Axis* const verticalAxis = new API::NumericAxis(yLength);
   // Set the y-axis units
-  verticalAxis->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("Y-Axis"));
+  verticalAxis->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("Y-Axis Units"));
 
   outputWorkspace->replaceAxis(1, verticalAxis);
 

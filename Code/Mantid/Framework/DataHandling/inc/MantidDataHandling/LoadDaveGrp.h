@@ -16,6 +16,8 @@ namespace DataHandling
      <UL>
      <LI> OutputWorkspace - The workspace name to produce. </LI>
      <LI> Filename - The filename for input </LI>
+     <LI> X-Axis Units - The units for the x-axis </LI>
+     <LI> Y-Axis Units - The units for the y-axis </LI>
      </UL>
 
      @author Michael Reuter ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
