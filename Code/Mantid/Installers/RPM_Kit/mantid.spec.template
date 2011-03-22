@@ -135,7 +135,7 @@ install -m755 $BUILDDIR/libQtPropertyBrowser.so $RPM_BUILD_ROOT/%{mantidlibdir}
 # install -m755 Code/Mantid/Build/Plugins/*.so $RPM_BUILD_ROOT/%{mantidpluginsdir}
 for i in $BUILDDIR/*.so; do
     case `basename $i` in
-	libMantidAlgorithms.so | libMantidCurveFitting.so | libMantidDataHandling.so | libMantidDataObjects.so | libMantidNexus.so | libMantidICat.so )
+	libMantidAlgorithms.so | libMantidCrystal.so | libMantidCurveFitting.so | libMantidDataHandling.so | libMantidDataObjects.so | libMantidNexus.so | libMantidICat.so )
 	    install -m755 $i $RPM_BUILD_ROOT/%{mantidpluginsdir}
 	    ;;
 	*)
