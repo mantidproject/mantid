@@ -2,6 +2,9 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidKernel/ListValidator.h"
+#include "MantidKernel/UnitFactory.h"
+
 #include <vector>
 #include <iostream>
 
@@ -26,6 +29,18 @@ void LoadDaveGrp::init()
   this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
       Kernel::Direction::Output),
       "The name of the workspace that will be created.");
+  // Extract the current contents of the UnitFactory to be the allowed values
+  // of the X-Axis property
+  this->declareProperty("X-Axis", "",
+      new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
+    "The name of the units for the X-Axis (must be one of those registered in\n"
+    "the Unit Factory)");
+  // Extract the current contents of the UnitFactory to be the allowed values
+  // of the Y-Axis property
+  this->declareProperty("Y-Axis", "MomentumTransfer",
+      new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
+    "The name of the units for the Y-Axis (must be one of those registered in\n"
+    "the Unit Factory)");
 }
 
 void LoadDaveGrp::exec()
@@ -63,8 +78,16 @@ void LoadDaveGrp::exec()
       boost::dynamic_pointer_cast<API::MatrixWorkspace>\
       (API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
           this->xLength, yLength));
+  // Force the workspace to be a distribution
+  outputWorkspace->isDistribution(true);
+
+  // Set the x-axis units
+  outputWorkspace->getAxis(0)->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("X-Axis"));
 
   API::Axis* const verticalAxis = new API::NumericAxis(yLength);
+  // Set the y-axis units
+  verticalAxis->unit() = Kernel::UnitFactory::Instance().create(this->getProperty("Y-Axis"));
+
   outputWorkspace->replaceAxis(1, verticalAxis);
 
   for(std::size_t i = 0; i < this->nGroups; i++)

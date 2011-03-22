@@ -20,6 +20,9 @@ public:
         "DaveAscii.grp"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace",
         outputWSName));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("X-Axis", "DeltaE"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Y-Axis",
+        "MomentumTransfer"));
     loader.execute();
 
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
@@ -39,6 +42,11 @@ public:
       TS_ASSERT_DELTA(outputWS->readY(0)[1], 0.000106102311091, 1e-6);
       TS_ASSERT_DELTA(outputWS->readY(11)[59], 0.0116074689604, 1e-6);
       TS_ASSERT_DELTA(outputWS->readE(27)[7], 0.0187950781228, 1e-6);
+
+      TS_ASSERT_EQUALS(outputWS->getAxis(0)->unit()->unitID(), "DeltaE");
+      TS_ASSERT_EQUALS(outputWS->getAxis(1)->unit()->unitID(), "MomentumTransfer");
+
+      TS_ASSERT_EQUALS(outputWS->isDistribution(), true);
 
       dataStore.remove(outputWSName);
     }
