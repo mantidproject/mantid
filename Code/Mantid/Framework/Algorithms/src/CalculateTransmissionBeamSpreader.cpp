@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/CalculateTransmissionBeamSpreader.h"
+#include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
@@ -121,20 +122,24 @@ void CalculateTransmissionBeamSpreader::exec()
   MatrixWorkspace_sptr sample_spreader_sum;
   MatrixWorkspace_sptr direct_spreader_sum;
 
-  PARALLEL
+  // Note: Replaced PARALLEL_SECTION with this OMP for loop, due to occasional unexplained segfault.
+  std::vector<MatrixWorkspace_sptr> in_ws, out_ws(4);
+  in_ws.push_back(sample_scatterWS);
+  in_ws.push_back(direct_scatterWS);
+  in_ws.push_back(sample_spreaderWS);
+  in_ws.push_back(direct_spreaderWS);
+
+  PARALLEL_FOR_IF(true)
+  for (int i=0; i<4; i++)
   {
-    PARALLEL_SECTIONS
-    {
-      PARALLEL_SECTION
-        sample_scatter_sum = this->sumSpectra(sample_scatterWS);
-      PARALLEL_SECTION
-        direct_scatter_sum = this->sumSpectra(direct_scatterWS);
-      PARALLEL_SECTION
-        sample_spreader_sum = this->sumSpectra(sample_spreaderWS);
-      PARALLEL_SECTION
-        direct_spreader_sum = this->sumSpectra(direct_spreaderWS);
-    }
+    out_ws[i] = this->sumSpectra(in_ws[i]);
   }
+  sample_scatter_sum = out_ws[0];
+  direct_scatter_sum = out_ws[1];
+  sample_spreader_sum = out_ws[2];
+  direct_spreader_sum = out_ws[3];
+
+
 
   // Beam spreader transmission
   MatrixWorkspace_sptr spreader_trans = WorkspaceFactory::Instance().create("WorkspaceSingleValue", 1, 1, 1);
