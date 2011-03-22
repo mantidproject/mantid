@@ -20,7 +20,7 @@ public:
 
 	  std::string path = arch.getPath("cncs_23412_event.nxs");
     //std::cout << "(cncs23412)= " << path << std::endl;
-    TS_ASSERT_EQUALS(path, "/SNS/CNCS/IPTS-4545/0/23412/NeXus/CNCS_23412_event.nxs");
+    TS_ASSERT_EQUALS(path, "/SNS/CNCS/IPTS-4545/0/23412/NeXus/CNCS_23412_event.nxs ");
 
     // Test a non-existent file
     path = arch.getPath("mybeamline_666.nxs");
