@@ -178,6 +178,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/InterpolationTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
+	test/LoggerTest.h
 	test/LogParserTest.h
 	test/MemoryTest.h
 	test/MagneticIonTest.h

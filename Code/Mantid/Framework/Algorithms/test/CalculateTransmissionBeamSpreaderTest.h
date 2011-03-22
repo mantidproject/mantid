@@ -100,6 +100,12 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove(empty_scatt);
   }
 
+//  void test_above_abunchatimes()
+//  {
+//    for (int i=0; i<100; i++)
+//      testSingleBin();
+//  }
+
 private:
   Mantid::Algorithms::CalculateTransmissionBeamSpreader trans;
 };

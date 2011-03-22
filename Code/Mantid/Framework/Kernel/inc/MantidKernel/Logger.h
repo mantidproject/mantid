@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "System.h"
+#include "MantidKernel/MultiThreaded.h"
 #include <string>
 #include <set>
 #include <exception>
@@ -168,6 +169,8 @@ class ThreadSafeLogStream;
     static LoggerList* m_loggerList;
     /// The null stream that is used when logging is disabled
     static Poco::NullOutputStream* m_nullStream;
+    /// Mutex to make changing the static logger list threadsafe.
+    static Mutex mutexLoggerList;
   };
 
 } // namespace Kernel
