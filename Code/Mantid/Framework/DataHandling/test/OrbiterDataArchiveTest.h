@@ -1,7 +1,6 @@
 #ifndef ORBITERDATAARCHIVETEST_H_
 #define ORBITERDATAARCHIVETEST_H_
 
-#include <fstream>
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/OrbiterDataArchive.h"
