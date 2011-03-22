@@ -610,7 +610,7 @@ class WeightedAzimuthalAverage(ReductionStep):
         # Q range                        
         beam_ctr = reducer._beam_finder.get_beam_center()
         if beam_ctr[0] is None or beam_ctr[1] is None:
-            raise RuntimeError, "WeightedAzimuthalAverage could not proceed: beam center not set"
+            raise RuntimeError, "Azimuthal averaging could not proceed: beam center not set"
         if self._binning is None:
             # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
             x = mtd[workspace].dataX(1)
@@ -619,6 +619,8 @@ class WeightedAzimuthalAverage(ReductionStep):
                 raise RuntimeError, "Azimuthal averaging expects at least one wavelength bin"
             wavelength_max = (x[x_length-2]+x[x_length-1])/2.0
             wavelength_min = (x[0]+x[1])/2.0
+            if wavelength_min==0 or wavelength_max==0:
+                raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
                     
             sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
             # Q min is one pixel from the center
@@ -698,14 +700,16 @@ class IQxQy(ReductionStep):
     def execute(self, reducer, workspace):
         beam_ctr = reducer._beam_finder.get_beam_center()
         if beam_ctr[0] is None or beam_ctr[1] is None:
-            raise RuntimeError, "IQxQy could not proceed: beam center not set"
+            raise RuntimeError, "I(Qx,Qy) computation could not proceed: beam center not set"
         
         # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
         x = mtd[workspace].dataX(1)
         x_length = len(x)
         if x_length < 2:
-            raise RuntimeError, "IQxQy expects at least one wavelength bin"
+            raise RuntimeError, "I(Qx,Qy) computation expects at least one wavelength bin"
         wavelength_min = (x[0]+x[1])/2.0
+        if wavelength_min==0:
+            raise RuntimeError, "I(Qx,Qy) computation needs positive wavelengths"
         sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
         dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
         dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])

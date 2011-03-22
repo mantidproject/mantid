@@ -2,6 +2,7 @@
     Base class for instrument-specific user interface
 """
 from PyQt4 import QtGui
+import sys
 import traceback
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
@@ -91,6 +92,10 @@ class InstrumentInterface(object):
                 msg = "The following error was encountered:\n\n%s" % unicode(e)
             self._warning("Reduction Parameters Incomplete", msg)
             return None
+        except:
+            msg = "The following error was encountered:\n\n%s" % sys.exc_info()[0]
+            msg += "\n\nPlease check your reduction parameters\n"
+            self._warning("Reduction Parameters Incomplete", msg)
         
     def reduce(self):
         """
@@ -108,6 +113,10 @@ class InstrumentInterface(object):
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(e)
+            self._warning("Reduction failed", msg)
+        except:
+            msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[0]
+            msg += "\n\nPlease check your reduction parameters\n"
             self._warning("Reduction failed", msg)
         
     def get_tabs(self):
