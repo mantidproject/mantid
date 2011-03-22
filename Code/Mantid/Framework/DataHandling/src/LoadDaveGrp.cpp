@@ -4,6 +4,7 @@
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ListValidator.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include "MantidKernel/UnitFactory.h"
 
 #include <vector>
@@ -49,6 +50,9 @@ void LoadDaveGrp::init()
       new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
     "The name of the units for the Y-Axis (must be one of those registered in\n"
     "the Unit Factory)");
+  this->declareProperty(new Kernel::PropertyWithValue<bool>("IsMicroEV", false,
+      Kernel::Direction::Input),
+      "Original files is in units of micro-eV for DeltaE");
 }
 
 void LoadDaveGrp::exec()
@@ -80,6 +84,17 @@ void LoadDaveGrp::exec()
     this->getData(data, errors);
   }
   this->ifile.close();
+
+  // Scale the x-axis if it is in micro-eV to get it to meV
+  const bool isUeV = this->getProperty("IsMicroEV");
+  if (isUeV)
+  {
+    MantidVec::iterator iter;
+    for (iter = xAxis->begin(); iter != xAxis->end(); ++iter)
+    {
+      *iter /= 1000.0;
+    }
+  }
 
   // Create workspace
   API::MatrixWorkspace_sptr outputWorkspace = \

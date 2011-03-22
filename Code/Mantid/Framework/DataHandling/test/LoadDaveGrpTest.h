@@ -23,6 +23,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("X-Axis Units", "DeltaE"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Y-Axis Units",
         "MomentumTransfer"));
+    TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("IsMicroEV", true));
     loader.execute();
 
     TS_ASSERT_EQUALS(loader.isExecuted(), true);
@@ -37,7 +38,7 @@ public:
     {
       TS_ASSERT_EQUALS(outputWS->getNumberHistograms(), 28);
       TS_ASSERT_EQUALS(outputWS->readX(0).size(), 60);
-      TS_ASSERT_EQUALS(outputWS->readX(0)[0], 655.0);
+      TS_ASSERT_DELTA(outputWS->readX(0)[0], 0.655, 1e-6);
       TS_ASSERT_EQUALS((*(outputWS->getAxis(1)))(1), 0.625);
       TS_ASSERT_DELTA(outputWS->readY(0)[1], 0.000106102311091, 1e-6);
       TS_ASSERT_DELTA(outputWS->readY(11)[59], 0.0116074689604, 1e-6);
