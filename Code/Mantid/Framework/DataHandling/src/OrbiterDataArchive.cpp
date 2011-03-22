@@ -4,7 +4,7 @@
 #include "MantidDataHandling/OrbiterDataArchive.h"
 #include "MantidAPI/ArchiveSearchFactory.h"
 
-#include <Poco/Net/HTTPSClientSession.h>
+//#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
 #include <Poco/Net/Context.h>
