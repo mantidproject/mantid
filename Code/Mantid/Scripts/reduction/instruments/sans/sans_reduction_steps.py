@@ -1098,11 +1098,14 @@ class SubtractBackground(ReductionStep):
             for item in reducer._2D_steps():
                 output = item.execute(reducer, self._background_ws)
                 if output is not None:
-                    log_text = log_text + '  ' + str(output) +'\n'
+                    log_text = log_text + '   ' + str(output) +'\n'
         
             # The transmission correction is set separately
             if self._transmission is not None:
-                self._transmission.execute(reducer, self._background_ws) 
+                output = self._transmission.execute(reducer, self._background_ws)
+                if output is not None:
+                    log_text = log_text + '   ' + str(output) +'\n'
+                 
         
         Minus(workspace, self._background_ws, workspace)
         
