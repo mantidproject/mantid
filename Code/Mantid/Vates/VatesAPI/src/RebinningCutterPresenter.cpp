@@ -78,7 +78,6 @@ RebinningCutterPresenter::RebinningCutterPresenter() : m_initalized(false), m_se
 
 RebinningCutterPresenter::~RebinningCutterPresenter()
 {
-
 }
 
 void RebinningCutterPresenter::constructReductionKnowledge(
@@ -488,6 +487,12 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
    MDWorkspace_sptr workspace = boost::dynamic_pointer_cast<MDWorkspace>(result);
 
    return workspace;
+ }
+
+ bool canProcessInput(vtkDataSet* inputDataSet)
+ {
+   vtkFieldData* fd = inputDataSet->GetFieldData();
+   return NULL != fd->GetArray(XMLDefinitions::metaDataId().c_str());
  }
 
 }

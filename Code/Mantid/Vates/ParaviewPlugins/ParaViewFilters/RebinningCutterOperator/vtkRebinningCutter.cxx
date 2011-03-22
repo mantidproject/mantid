@@ -100,7 +100,7 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep)
 }
 
 int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector)
+  vtkInformationVector *outputVector)
 {
   using namespace Mantid::Geometry;
   using namespace Mantid::MDDataObjects;
@@ -108,21 +108,24 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
   using Mantid::VATES::Dimension_sptr;
   using Mantid::VATES::DimensionVec;
 
-  vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
-  vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
+  //Setup is not complete until metadata has been correctly provided.
+  if(true == m_isSetup)
+  {
+    vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
+    vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
-  DimensionVec dimensionsVec(4);
-  dimensionsVec[0] = m_appliedXDimension;
-  dimensionsVec[1] = m_appliedYDimension;
-  dimensionsVec[2] = m_appliedZDimension;
-  dimensionsVec[3] = m_appliedTDimension;
+    DimensionVec dimensionsVec(4);
+    dimensionsVec[0] = m_appliedXDimension;
+    dimensionsVec[1] = m_appliedYDimension;
+    dimensionsVec[2] = m_appliedZDimension;
+    dimensionsVec[3] = m_appliedTDimension;
 
-  //Create the composite holder.
-  CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
-  compFunction->addFunction(constructBox(m_appliedXDimension, m_appliedYDimension, m_appliedZDimension));
+    //Create the composite holder.
+    CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
+    compFunction->addFunction(constructBox(m_appliedXDimension, m_appliedYDimension, m_appliedZDimension));
 
-  // Construct reduction knowledge.
-  m_presenter.constructReductionKnowledge(
+    // Construct reduction knowledge.
+    m_presenter.constructReductionKnowledge(
       dimensionsVec,
       m_appliedXDimension,
       m_appliedYDimension,
@@ -131,45 +134,46 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
       compFunction,
       inputDataset);
 
-  ParaViewProgressAction updatehandler(this);
+    ParaViewProgressAction updatehandler(this);
 
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
+    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
       vtkDataObject::DATA_OBJECT()));
 
-  //Acutally perform rebinning or specified action.
-  int timestep = 0;
-  if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
-  {
-    // usually only one actual step requested
-    timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
-  }
-  determineAnyCommonExecutionActions(timestep);
+    //Acutally perform rebinning or specified action.
+    int timestep = 0;
+    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
+    {
+      // usually only one actual step requested
+      timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+    }
+    determineAnyCommonExecutionActions(timestep);
 
-  vtkUnstructuredGrid* outData;
-  RebinningIterationAction action = m_actionRequester.action();
-  MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
-  if (UseCache == action)
-  {
-    //Use existing vtkDataSet
-    vtkDataSetFactory_sptr spvtkDataSetFactory(new vtkProxyFactory(m_cachedVTKDataSet));
-    outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
-    outData->Register(NULL);
-  }
-  else
-  {
-    //Build a vtkDataSet
-    vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
+    vtkUnstructuredGrid* outData;
+    RebinningIterationAction action = m_actionRequester.action();
+    MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
+    if (UseCache == action)
+    {
+      //Use existing vtkDataSet
+      vtkDataSetFactory_sptr spvtkDataSetFactory(new vtkProxyFactory(m_cachedVTKDataSet));
+      outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
+      outData->Register(NULL);
+    }
+    else
+    {
+      //Build a vtkDataSet
+      vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
 
-    outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
-    m_cachedVTKDataSet = outData;
-  }
-  this->
-  m_timestep = timestep; //Not settable directly via a setter.
-  m_cachedRedrawArguments = createRedrawHash();
-  m_actionRequester.reset();
+      outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
+      m_cachedVTKDataSet = outData;
+    }
+    this->
+      m_timestep = timestep; //Not settable directly via a setter.
+    m_cachedRedrawArguments = createRedrawHash();
+    m_actionRequester.reset();
 
-  output->ShallowCopy(outData);
+    output->ShallowCopy(outData);
+  }
   return 1;
 }
 
@@ -180,7 +184,7 @@ void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
 }
 
 int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector,
-    vtkInformationVector *outputVector)
+  vtkInformationVector *outputVector)
 {
   if (!m_isSetup)
   {
@@ -194,24 +198,34 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
     DimensionVec dimensionsVec(4);
-    dimensionsVec[0] = m_presenter.getXDimensionFromDS(inputDataset);
-    dimensionsVec[1] = m_presenter.getYDimensionFromDS(inputDataset);
-    dimensionsVec[2] = m_presenter.getZDimensionFromDS(inputDataset);
-    dimensionsVec[3] = m_presenter.getTDimensionFromDS(inputDataset);
+    bool bGoodInputProvided = canProcessInput(inputDataset);
+    if(true == bGoodInputProvided)
+    {
+      dimensionsVec[0] = m_presenter.getXDimensionFromDS(inputDataset);
+      dimensionsVec[1] = m_presenter.getYDimensionFromDS(inputDataset);
+      dimensionsVec[2] = m_presenter.getZDimensionFromDS(inputDataset);
+      dimensionsVec[3] = m_presenter.getTDimensionFromDS(inputDataset);
 
-    m_appliedXDimension = dimensionsVec[0];
-    m_appliedYDimension = dimensionsVec[1];
-    m_appliedZDimension = dimensionsVec[2];
-    m_appliedTDimension = dimensionsVec[3];
+      m_appliedXDimension = dimensionsVec[0];
+      m_appliedYDimension = dimensionsVec[1];
+      m_appliedZDimension = dimensionsVec[2];
+      m_appliedTDimension = dimensionsVec[3];
 
-    // Construct reduction knowledge.
-    m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
+      // Construct reduction knowledge.
+      m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
         dimensionsVec[2], dimensionsVec[3], inputDataset);
 
-    this->Modified();
-    m_isSetup = true;
+      this->Modified();
+      m_isSetup = true;
+      return 1;
+    }
+    else
+    {
+      vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
+      return 0;
+    }
   }
-  return 1;
+  
 }
 
 int vtkRebinningCutter::RequestUpdateExtent(vtkInformation* info, vtkInformationVector** inputVector,

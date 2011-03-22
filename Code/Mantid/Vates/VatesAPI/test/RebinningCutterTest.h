@@ -429,6 +429,24 @@ void testGetWorkspaceGeometryThrows()
   TSM_ASSERT_THROWS("Not properly initalized. Getting workspace geometry should throw.", presenter.getWorkspaceGeometry(), std::runtime_error);
 }
 
+void testCanProcessInput()
+{
+  std::string id = XMLDefinitions::metaDataId();
+  vtkDataSet* dataset = constructInputDataSet(); //Correct fielddata provided.
+
+  TSM_ASSERT("The dataset should be processable given that the correct metadata is present.", canProcessInput(dataset));
+  dataset->Delete();
+}
+
+void testCannotProcessInput()
+{
+  std::string id = XMLDefinitions::metaDataId();
+  vtkDataSet* dataset = vtkUnstructuredGrid::New(); //No fielddata provided.
+
+  TSM_ASSERT("The dataset should not be processable given that no metadata is present.", !canProcessInput(dataset));
+  dataset->Delete();
+}
+
 
 };
 

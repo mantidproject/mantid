@@ -192,6 +192,9 @@ public:
   /// helper method to extract the bounding box.
   DLLExport std::vector<double> getBoundingBox(const std::string& functionXMLString);
 
+  /// Helper method. is used to determine wheter processing of an input data set is possible.
+  DLLExport bool canProcessInput(vtkDataSet* inputDataSet);
+
 }
 }
 #endif
