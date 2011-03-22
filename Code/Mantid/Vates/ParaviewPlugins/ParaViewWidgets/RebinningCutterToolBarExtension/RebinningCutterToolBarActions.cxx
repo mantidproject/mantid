@@ -64,6 +64,9 @@ void RebinningCutterToolBarActions::createTargetFilter()
     return;
   }
 
+  // Handles case where user may have acciedently failed to update the pipeline prior to adding the new filter.
+  src->updatePipeline();
+
   pqObjectBuilder* builder = pqApplicationCore::instance()->getObjectBuilder();
   builder->createFilter("filters", "RebinningCutter", src);
 }
