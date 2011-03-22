@@ -2,8 +2,8 @@
 if "%1" == "" goto usage
 
 SETLOCAL
-if /i %1 == x86 SET MSI_NAME="Mantid.msi" && SET WIX_LOC="C:\Program Files\Windows Installer XML\bin"
-if /i %1 == amd64 SET MSI_NAME="Mantid64.msi" && SET WIX_LOC="C:\Program Files (x86)\Windows Installer XML\bin"
+if /i %1 == x86 SET MSI_NAME="Mantid-32bit.msi" && SET WIX_LOC="C:\Program Files\Windows Installer XML\bin"
+if /i %1 == amd64 SET MSI_NAME="Mantid-64bit.msi" && SET WIX_LOC="C:\Program Files (x86)\Windows Installer XML\bin"
 
 if /i not %1 == x86 (
     if /i not %1 == amd64 (
@@ -11,8 +11,8 @@ if /i not %1 == x86 (
     )
 )
 
-REM Delete Old MSI and wxs file
-del %MSI_NAME%  tmp.wxs tmp.wixobj
+REM Delete any old MSI files and wxs file
+del *.msi tmp.wxs tmp.wixobj
 svn update > build_number.txt
 python generateWxs.py
 if errorlevel 1 goto wxs_error
