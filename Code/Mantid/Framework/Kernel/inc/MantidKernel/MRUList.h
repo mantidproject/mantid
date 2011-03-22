@@ -159,6 +159,25 @@ namespace Kernel
     }
 
     //---------------------------------------------------------------------------------------------
+    /** Delete the T at the given index.
+     * @param index :: the key (index) for this T that you want to remove from the MRU.
+     */
+    void deleteIndex(const unsigned int index)
+    {
+      using namespace boost::multi_index;
+      typename ordered_item_list::iterator it;
+      bool found_nothing;
+      it = il.get<1>().find(index);
+      found_nothing = (it == il.get<1>().end());
+      if (!found_nothing)
+      {
+        // TODO: ERASE IT HERE
+        il.get<1>().erase(it);
+      }
+
+    }
+
+    //---------------------------------------------------------------------------------------------
     /// Size of the list
     size_t size() const
     {

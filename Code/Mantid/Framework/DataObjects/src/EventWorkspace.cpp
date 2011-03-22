@@ -256,18 +256,25 @@ namespace DataObjects
   /** Clears the MRU lists */
   void EventWorkspace::clearMRU() const
   {
-    //Make sure you free up the memory in the MRUs
-    for (size_t i=0; i < m_bufferedDataY.size(); i++)
-      if (m_bufferedDataY[i])
-      {
-        m_bufferedDataY[i]->clear();
-      };
+    // (Make this call thread safe)
+    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    {
+      //Make sure you free up the memory in the MRUs
+      for (size_t i=0; i < m_bufferedDataY.size(); i++)
+        if (m_bufferedDataY[i])
+        {
+          m_bufferedDataY[i]->clear();
+        };
+    }
 
-    for (size_t i=0; i < m_bufferedDataE.size(); i++)
-      if (m_bufferedDataE[i])
-      {
-        m_bufferedDataE[i]->clear();
-      };
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+    {
+      for (size_t i=0; i < m_bufferedDataE.size(); i++)
+        if (m_bufferedDataE[i])
+        {
+          m_bufferedDataE[i]->clear();
+        };
+    }
   }
 
   //-----------------------------------------------------------------------------
@@ -835,6 +842,8 @@ namespace DataObjects
   // --- Histogramming ----
   //-----------------------------------------------------------------------------
   /*** Set a histogram X vector. Should only be called after doneLoadingData().
+   * Performance note: use setAllX() if you are setting identical X for all pixels.
+   *
    * @param index :: Workspace histogram index to set.
    * @param x :: The X vector of histogram bins to use.
    */
@@ -845,10 +854,32 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::setX, histogram number out of range");
     this->data[index]->setX(x);
+
+    // Assume that any manual changing of X invalidates the MRU list entry for this index
+    // This deletes only the entry at this index.
+    PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
+    {
+      for (size_t i=0; i < m_bufferedDataY.size(); i++)
+        if (m_bufferedDataY[i])
+        {
+          m_bufferedDataY[i]->deleteIndex(index);
+        };
+    }
+    PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
+    {
+      for (size_t i=0; i < m_bufferedDataE.size(); i++)
+        if (m_bufferedDataE[i])
+        {
+          m_bufferedDataE[i]->deleteIndex(index);
+        };
+    }
   }
 
 
-  /*** Set a histogram X vector but create a COW pointer for it. Should only be called after doneLoadingData().
+  /*** Set a histogram X vector but create a COW pointer for it.
+   * Should only be called after doneLoadingData().
+   * Performance note: use setAllX() if you are setting identical X for all pixels.
+   *
    * @param index :: Workspace histogram index to set.
    * @param x :: The X vector of histogram bins to use.
    */

@@ -15,6 +15,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include "MantidKernel/Timer.h"
 
@@ -755,9 +756,49 @@ public:
   }
 
 
+  /** Refs #2649: Add a dirty flag when changing X on an event list */
+  void do_test_dirtyFlag(bool do_parallel)
+  {
+    // 50 pixels, 100 bins, 2 events in each
+    int numpixels = 900;
+    EventWorkspace_sptr ew1 = WorkspaceCreationHelper::CreateEventWorkspace2(numpixels, 100);
+    PARALLEL_FOR_IF(do_parallel)
+    for (int i=0; i < numpixels; i += 3)
+    {
+      const MantidVec & Y = ew1->readY(i);
+      TS_ASSERT_DELTA( Y[0], 2.0, 1e-5);
+      const MantidVec & E = ew1->readE(i);
+      TS_ASSERT_DELTA( E[0], sqrt(2.0), 1e-5);
 
+      // Vector with 10 bins, 10 wide
+      MantidVec X;
+      for (size_t j=0; j<11; j++)
+        X.push_back(j*10.0);
+      ew1->setX(i, X);
 
+      // Now it should be 20 in that spot
+      const MantidVec & Y_now = ew1->readY(i);
+      TS_ASSERT_DELTA( Y_now[0], 20.0, 1e-5);
+      const MantidVec & E_now = ew1->readE(i);
+      TS_ASSERT_DELTA( E_now[0], sqrt(20.0), 1e-5);
 
+      // But the other pixel is still 2.0
+      const MantidVec & Y_other = ew1->readY(i+1);
+      TS_ASSERT_DELTA( Y_other[0], 2.0, 1e-5);
+      const MantidVec & E_other = ew1->readE(i+1);
+      TS_ASSERT_DELTA( E_other[0], sqrt(2.0), 1e-5);
+    }
+  }
+
+  void test_dirtyFlag()
+  {
+    do_test_dirtyFlag(false);
+  }
+
+  void test_dirtyFlag_parallel()
+  {
+    do_test_dirtyFlag(true);
+  }
 };
 
 #endif /* EVENTWORKSPACETEST_H_ */

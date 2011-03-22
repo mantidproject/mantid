@@ -78,6 +78,9 @@ public:
     TS_ASSERT( m.find(50) );
     TS_ASSERT( m.find(60) );
 
+    TS_ASSERT_THROWS_NOTHING( m.deleteIndex(50) );
+    TS_ASSERT_EQUALS( m.size(), 2 );
+
     // Test out the clear method.
     m.clear();
     TS_ASSERT_EQUALS( m.size(), 0 );
