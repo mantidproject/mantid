@@ -54,6 +54,7 @@ set ( SRC_FILES
 		src/MaskDetectors.cpp
 		src/MaskDetectorsInShape.cpp
 		src/MoveInstrumentComponent.cpp
+		src/OrbiterDataArchive.cpp
 		src/RawFileInfo.cpp
 		src/RotateInstrumentComponent.cpp
 		src/SaveAscii.cpp
@@ -112,6 +113,7 @@ set ( INC_FILES
 		inc/MantidDataHandling/MaskDetectors.h
 		inc/MantidDataHandling/MaskDetectorsInShape.h
 		inc/MantidDataHandling/MoveInstrumentComponent.h
+		inc/MantidDataHandling/OrbiterDataArchive.h
 		inc/MantidDataHandling/RawFileInfo.h
 		inc/MantidDataHandling/RotateInstrumentComponent.h
 		inc/MantidDataHandling/SaveAscii.h
@@ -136,7 +138,7 @@ set ( TEST_FILES
 		 test/GetMaskedDetectorsTest.h
 		 test/GroupDetectors2Test.h
 		 test/GroupDetectorsTest.h
-		 #test/ISISDataArchiveTest.h # TODO no tests are defined
+		 test/ISISDataArchiveTest.h
 		 test/LoadAsciiTest.h
 		 test/LoadCanSAS1dTest.h
 		 test/LoadDAETest.h
@@ -166,6 +168,7 @@ set ( TEST_FILES
 		 test/MaskDetectorsInShapeTest.h
 		 test/MaskDetectorsTest.h
 		 test/MoveInstrumentComponentTest.h
+		 test/OrbiterDataArchiveTest.h
 		 test/RawFileInfoTest.h
 		 test/SaveCanSAS1dTest.h
 		 test/SaveCSVTest.h
