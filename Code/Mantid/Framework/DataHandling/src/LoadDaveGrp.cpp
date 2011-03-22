@@ -2,6 +2,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/NumericAxis.h"
+#include "MantidAPI/Progress.h"
 #include "MantidKernel/ListValidator.h"
 #include "MantidKernel/UnitFactory.h"
 
@@ -146,6 +147,7 @@ void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
 {
   double data_val = 0.0;
   double err_val = 0.0;
+  API::Progress progress(this, 0.0, 1.0, static_cast<int>(this->nGroups));
   for(std::size_t j = 0; j < this->nGroups; j++)
   {
     // Skip the group comment line
@@ -163,6 +165,7 @@ void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
     }
     data.push_back(d);
     errs.push_back(e);
+    progress.report();
   }
 }
 
