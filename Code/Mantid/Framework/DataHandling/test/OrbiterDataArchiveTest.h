@@ -14,7 +14,7 @@ class OrbiterDataArchiveTest : public CxxTest::TestSuite
 {
 public: 
 
-  void testSearch()
+  void xtestSearch()
   {
 	OrbiterDataArchive arch;
 
