@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing2.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataObjects/EventWorkspace.h"
@@ -350,7 +351,10 @@ void DiffractionFocussing2::execEvent()
 
       // When focussing in place, you can clear out old memory from the input one!
       if (inPlace)
+      {
         eventW->getEventList(wi).clear();
+        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+      }
     }
     PARALLEL_END_INTERUPT_REGION
   }
