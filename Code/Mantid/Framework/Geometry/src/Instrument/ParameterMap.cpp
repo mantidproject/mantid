@@ -30,15 +30,17 @@ namespace Mantid
      * @param value :: The parameter's value
      */
     void ParameterMap::add(const std::string& type,const IComponent* comp,const std::string& name, 
-			   const std::string& value)
+                           const std::string& value)
     {
-      bool created(false);
-      boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-      param->fromString(value);
-      if( created )
+      PARALLEL_CRITICAL(parameter_add)
       {
-        PARALLEL_CRITICAL(parameter_add)
-	m_map.insert(std::make_pair(comp->getComponentID(),param));
+        bool created(false);
+        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
+        param->fromString(value);
+        if( created )
+        {
+          m_map.insert(std::make_pair(comp->getComponentID(),param));
+        }
       }
     }
 
@@ -50,7 +52,7 @@ namespace Mantid
      * @param value :: value
      */
     void ParameterMap::addPositionCoordinate(const IComponent* comp, const std::string& name, 
-					     const double value)
+                                             const double value)
     {
       Parameter_sptr param = get(comp,"pos");
       V3D position;
@@ -312,7 +314,7 @@ namespace Mantid
      * this must also match
      */
     bool ParameterMap::contains(const IComponent* comp, const std::string & name, 
-				const std::string & type) const
+                                const std::string & type) const
     {
       if( m_map.empty() ) return false;
       const ComponentID id = comp->getComponentID();
@@ -364,7 +366,7 @@ namespace Mantid
      * @returns The named parameter of the given type if it exists or a NULL shared pointer if not
      */
     Parameter_sptr ParameterMap::get(const IComponent* comp, const std::string& name, 
-				     const std::string & type) const
+                                     const std::string & type) const
     {
       if( m_map.empty() ) return Parameter_sptr();
       const ComponentID id = comp->getComponentID();
@@ -419,7 +421,7 @@ namespace Mantid
      * @returns the first matching parameter.
      */
     Parameter_sptr ParameterMap::getRecursive(const IComponent* comp,const std::string& name, 
-					      const std::string & type) const
+                                              const std::string & type) const
     {
       if( m_map.empty() ) return Parameter_sptr();
       boost::shared_ptr<const IComponent> compInFocus(comp,NoDeleting());
@@ -606,7 +608,7 @@ namespace Mantid
         else
         {
           throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours", 
-								parent->getName());
+                                                                  parent->getName());
         }
       }
       m_nearestNeighbours->build();
@@ -638,39 +640,36 @@ namespace Mantid
      * @param name :: The name of the parameter
      */
     Parameter_sptr ParameterMap::retrieveParameter(bool & created, const std::string & type, 
-						   const IComponent* comp, const std::string & name)
+                                                   const IComponent* comp, const std::string & name)
     {
       boost::shared_ptr<Parameter> param;
       if( this->contains(comp, name) )
       {
-	param = this->get(comp, name);
-	if( param->type() != type )
-	{
-	  reportError("ParameterMap::add - Type mismatch on replacement of '" + name + "' parameter");
-	  throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
-	}
-	created = false;
+        param = this->get(comp, name);
+        if( param->type() != type )
+        {
+          reportError("ParameterMap::add - Type mismatch on replacement of '" + name + "' parameter");
+          throw std::runtime_error("ParameterMap::add - Type mismatch on parameter replacement");
+        }
+        created = false;
       }
       else
       {
-	// Create a new one
-	param = ParameterFactory::create(type,name);
-	created = true;
+        // Create a new one
+        param = ParameterFactory::create(type,name);
+        created = true;
       }
       return param;
     }
     
-    /**  Logs an error
-	@param str :: The error message
+    /** Logs an error
+     *  @param str :: The error message
      */
     void ParameterMap::reportError(const std::string& str)
     {
       g_log.error(str);
     }
-    
-
 
   } // Namespace Geometry
-
 } // Namespace Mantid
 

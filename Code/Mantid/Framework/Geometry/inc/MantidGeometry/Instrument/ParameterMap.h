@@ -105,19 +105,21 @@ namespace Geometry
     void add(const std::string& type,const IComponent* comp,const std::string& name, 
              const T& value)
     {
-      bool created(false);
-      boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
-      ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
-      if (!paramT)
+      PARALLEL_CRITICAL(parameter_add)
       {
-        reportError("Error in adding parameter: incompatible types");
-        throw std::runtime_error("Error in adding parameter: incompatible types");
-      }
-      paramT->setValue(value);
-      if( created )
-      {
-        PARALLEL_CRITICAL(parameter_add)
-	m_map.insert(std::make_pair(comp->getComponentID(),param));
+        bool created(false);
+        boost::shared_ptr<Parameter> param = retrieveParameter(created, type, comp, name);
+        ParameterType<T> *paramT = dynamic_cast<ParameterType<T> *>(param.get());
+        if (!paramT)
+        {
+          reportError("Error in adding parameter: incompatible types");
+          throw std::runtime_error("Error in adding parameter: incompatible types");
+        }
+        paramT->setValue(value);
+        if( created )
+        {
+          m_map.insert(std::make_pair(comp->getComponentID(),param));
+        }
       }
     }
     /** @name Helper methods for adding and updating paramter types  */
