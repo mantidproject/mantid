@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/SingletonHolder.h"
 
 namespace Mantid
@@ -59,6 +60,8 @@ namespace Mantid
       void releaseFreeMemory();
       /// Release memory back to the system if we linked againsed tcmalloc and are above this much use
       void releaseFreeMemoryIfAbove(double threshold);
+      /// Release memory back to the system if you accumulated enough
+      void releaseFreeMemoryIfAccumulated(size_t adding, size_t threshold);
 
     private:
       friend struct Mantid::Kernel::CreateUsingNew<MemoryManagerImpl>;
@@ -74,6 +77,13 @@ namespace Mantid
 
       /// Static reference to the logger class
       Kernel::Logger& g_log;
+
+      /** Amount of memory (in bytes) that has been cleared but perhaps not released.
+       * releaseFreeMemoryIfAccumulated() uses this value
+       */
+      size_t memoryCleared;
+      /// Mutex for adding to memoryCleared
+      Kernel::Mutex accumulatorMutex;
     };
 
     ///Forward declaration of a specialisation of SingletonHolder for AlgorithmManagerImpl (needed for dllexport/dllimport) and a typedef for it.

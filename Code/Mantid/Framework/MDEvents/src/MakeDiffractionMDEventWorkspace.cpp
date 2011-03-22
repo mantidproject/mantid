@@ -137,10 +137,13 @@ namespace MDEvents
       // Clear out the EventList to save memory
       if (ClearInputWorkspace)
       {
+
+        // Track how much memory you cleared
+        size_t memoryCleared = el.getMemorySize();
+        // Clear it now
         el.clear();
-        // For Linux with tcmalloc, make sure memory goes back;
-        // but don't call if more than 15% of memory is still available, since that slows down the loading.
-        MemoryManager::Instance().releaseFreeMemoryIfAbove(0.85);
+        // For Linux with tcmalloc, make sure memory goes back, if you've cleared 200 Megs
+        MemoryManager::Instance().releaseFreeMemoryIfAccumulated(memoryCleared, 2e8);
       }
 
       // Add them to the MDEW
@@ -182,7 +185,7 @@ namespace MDEvents
     // Build up the box controller
     BoxController_sptr bc(new BoxController(3));
     bc->setSplitInto(4);
-    bc->setSplitThreshold(200);
+    bc->setSplitThreshold(1000);
     ws->setBoxController(bc);
 
     // We always want the box to be split (it will reject bad ones)
@@ -246,8 +249,9 @@ namespace MDEvents
         tp.joinAll();
 
         // Now do all the splitting tasks
-        prog->doReport("Splitting Boxes");
         ws->splitAllIfNeeded(ts);
+        if (ts->size() > 0)
+          prog->doReport("Splitting Boxes");
         tp.joinAll();
 
         // Count the new # of boxes.

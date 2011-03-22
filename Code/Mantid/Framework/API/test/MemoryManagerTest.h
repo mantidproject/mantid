@@ -51,6 +51,16 @@ public:
     pool.joinAll();
   }
 
+  /// Test for thread safety of this call
+  void test_releaseFreeMemoryIfAccumulated_parallel()
+  {
+    PARALLEL_FOR_IF(true)
+    for(int i=0; i<500; i++)
+    {
+      MemoryManager::Instance().releaseFreeMemoryIfAccumulated(1000, 10000);
+    }
+  }
+
 };
 
 #endif /*MEMORYMANAGERTEST_H_*/

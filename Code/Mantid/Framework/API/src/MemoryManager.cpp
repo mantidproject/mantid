@@ -18,7 +18,8 @@ namespace API
 
 /// Private Constructor for singleton class
 MemoryManagerImpl::MemoryManagerImpl() :
-  g_log(Kernel::Logger::get("MemoryManager"))
+  g_log(Kernel::Logger::get("MemoryManager")),
+  memoryCleared(0)
 {
   g_log.debug() << "Memory Manager created." << std::endl;
 }
@@ -190,6 +191,32 @@ void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
     }
 #endif
 }
+
+
+/** Release memory back to the system if you accumulated enough.
+ * Each call adds to the amount cleared, but it is only
+ * released if past the threshold.
+ * NOTE: This only works if you linked against tcmalloc.
+ *
+ * @param adding :: how many bytes where just cleared
+ * @param threshold :: threshold number of bytes accumulated before clearing memory.
+ */
+void MemoryManagerImpl::releaseFreeMemoryIfAccumulated(size_t adding, size_t threshold)
+{
+#ifdef USE_TCMALLOC
+  accumulatorMutex.lock();
+
+  memoryCleared += adding;
+  if (memoryCleared > threshold)
+  {
+    releaseFreeMemory();
+    memoryCleared = 0;
+  }
+
+  accumulatorMutex.unlock();
+#endif
+}
+
 
 } // namespace API
 } // namespace Mantid
