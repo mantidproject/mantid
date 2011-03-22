@@ -126,6 +126,8 @@ public:
   void executeAll();
   ///saves scripts file names to a string 
   QString saveToString();
+  ///Set whether to accept/reject close events
+  void acceptCloseEvent(const bool value);
 
 signals:
   /// Show the scripting language dialog
@@ -171,6 +173,9 @@ private:
   QAction *m_always_on_top, *m_hide, *m_toggle_output, *m_print_output;
   /// Change scripting language
   QAction *m_scripting_lang;
+  /// Flag to define whether we should accept a close event
+  bool m_acceptClose;
+  
 };
 
 #endif //SCRIPTINGWINDOW_H_

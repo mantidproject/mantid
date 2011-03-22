@@ -44,7 +44,8 @@ class muParserScript: public Script
   Q_OBJECT
 
   public:
-    muParserScript(ScriptingEnv *env, const QString &code, QObject *context=0, const QString &name="<input>", bool checkMultilineCode = true);
+    muParserScript(ScriptingEnv *env, const QString &code, QObject *context=0, 
+		   const QString &name="<input>", bool checkMultilineCode = true);
 
   public slots:
     bool compile(bool asFunction=true);

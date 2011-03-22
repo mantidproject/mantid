@@ -888,7 +888,7 @@ bool MatrixModel::calculate(int startRow, int endRow, int startCol, int endCol)
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
 	ScriptingEnv *scriptEnv = d_matrix->scriptingEnv();
-	  Script *script = scriptEnv->newScript(formula, this, false, QString("<%1>").arg(objectName()));
+	  Script *script = scriptEnv->newScript(formula, this, QString("<%1>").arg(objectName()), false);
 	connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptEnv, SIGNAL(error(const QString&,const QString&,int)));
 	connect(script, SIGNAL(print(const QString&)), scriptEnv, SIGNAL(print(const QString&)));
 	

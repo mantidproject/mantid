@@ -67,17 +67,13 @@ namespace
 /**
  * Constructor
  */
-PythonScript::PythonScript(PythonScripting *env, const QString &code, bool interactive, QObject *context, 
-			   const QString &name)
-  : Script(env, code, interactive, context, name), PyCode(NULL), localDict(NULL), 
-    stdoutSave(NULL), stderrSave(NULL), isFunction(false)
+PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
+			   const QString &name, bool reportProgress)
+  : Script(env, code, context, name, reportProgress), PyCode(NULL), localDict(NULL), 
+    stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;
   CURRENT_SCRIPT_OBJECT = this;
-
-  PyObject *pymodule = PyImport_AddModule("__main__");
-  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
-  setQObject(Context, "self");
 }
 
 /**
@@ -85,29 +81,10 @@ PythonScript::PythonScript(PythonScripting *env, const QString &code, bool inter
  */
 PythonScript::~PythonScript()
 {
+  this->disconnect();
+  updatePath(Name, false);
   Py_DECREF(localDict);
   Py_XDECREF(PyCode);
-}
-
-/**
- * Update the current environment with the script's path
- */
-void PythonScript::updatePath(const QString & filename, bool append)
-{
-  if( filename.isEmpty() ) return;
-  QString scriptPath = QFileInfo(filename).absolutePath();
-  QString pyCode;
-  if( append )
-  {
-    pyCode = "sys.path.append(r'%1')";
-  }
-  else
-  {
-    pyCode = "if r'%1' in sys.path:\n"
-      "    sys.path.remove(r'%1')";
-  }
-  setCode(pyCode.arg(scriptPath));
-  exec();
 }
 
 /**
@@ -299,19 +276,25 @@ QVariant PythonScript::eval()
 
 bool PythonScript::exec()
 {
+  // Cannot have two things executing at the same time
+  if( env()->isRunning() ) return false;
+  // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
+  PyGILState_STATE state = PyGILState_Ensure();
+  // Make sure we are initialized. Only does something the first time
+  initialize();
   env()->setIsRunning(true);
-  
+
   if (isFunction) compiled = notCompiled;
   if (compiled != Script::isCompiled && !compile(false))
   {
     env()->setIsRunning(false);
+    PyGILState_Release(state);
     return false;
   }
-
   // Redirect the output
   beginStdoutRedirect();
 
-  if( isInteractive && env()->reportProgress() )
+  if( reportProgress() )
   {
     // This stores the address of the main file that is being executed so that
     // we can track line numbers from the main code only
@@ -332,15 +315,14 @@ bool PythonScript::exec()
     {
       emit_error(constructErrorMsg(), 0);
       env()->setIsRunning(false);
+      PyGILState_Release(state);
       return false;
     }
   }
   /// Return value is NULL if everything succeeded
   pyret = executeScript(empty_tuple);
-
   // Restore output
   endStdoutRedirect();
-	
   /// Disable trace
   PyEval_SetTrace(NULL, NULL);
 
@@ -348,11 +330,50 @@ bool PythonScript::exec()
   {
     Py_DECREF(pyret);
     env()->setIsRunning(false);
+    PyGILState_Release(state);
     return true;
   }
   emit_error(constructErrorMsg(), 0);
   env()->setIsRunning(false);
+  PyGILState_Release(state);
   return false;
+}
+
+/**
+ * A call-once initialize function to grab hold of a copy of the __main__ dictionary
+ */
+void PythonScript::initialize()
+{
+  if( m_isInitialized ) return;
+
+  PyObject *pymodule = PyImport_AddModule("__main__");
+  localDict = PyDict_Copy(PyModule_GetDict(pymodule));
+  setQObject(Context, "self");
+  updatePath(Name, true);
+
+  m_isInitialized = true;
+}
+
+/**
+ * Update the current environment with the script's path
+ */
+void PythonScript::updatePath(const QString & filename, bool append)
+{
+  if( filename.isEmpty() ) return;
+  QString scriptPath = QFileInfo(filename).absolutePath();
+  QString pyCode;
+  if( append )
+  {
+    pyCode = "if r'%1' not in sys.path:\n"
+      "    sys.path.append(r'%1')";
+  }
+  else
+  {
+    pyCode = "if r'%1' in sys.path:\n"
+      "    sys.path.remove(r'%1')";
+  }
+  pyCode = pyCode.arg(scriptPath);
+  PyRun_SimpleString(pyCode.toAscii());
 }
 
 /**
@@ -420,7 +441,7 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
   {
     Py_DECREF(return_tuple);
   }
-  if( isInteractive && pyret )
+  if( pyret )
   {
     emit keywordsChanged(createAutoCompleteList());
   }
@@ -525,7 +546,7 @@ QString PythonScript::constructErrorMsg()
       + "' at line " + QString::number(msg_lineno);
   }
   
-  if( env()->reportProgress() )
+  if( reportProgress() )
   {
     emit currentLineChanged(marker_lineno, false);
   }

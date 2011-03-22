@@ -53,7 +53,7 @@ ScriptEdit::ScriptEdit(ScriptingEnv *env, QWidget *parent, const char *name)
   : QsciScintilla(parent), Scripted(env), d_error(false), m_iFirstLineNumber(0), 
     m_bIsRunning(false), m_bErrorRaised(false) //Mantid
 {
-  myScript = scriptingEnv()->newScript("", this, true, name);
+  myScript = scriptingEnv()->newScript("", this, name);
 	connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
 	connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 
@@ -105,7 +105,7 @@ void ScriptEdit::customEvent(QEvent *e)
 
       // Create a new script class from the new environment
       delete myScript;
-      myScript = scriptingEnv()->newScript("", this, true, name());
+      myScript = scriptingEnv()->newScript("", this, name());
       connect(myScript, SIGNAL(error(const QString&,const QString&,int)), this, SLOT(insertErrorMsg(const QString&)));
       connect(myScript, SIGNAL(print(const QString&)), this, SLOT(scriptPrint(const QString&)));
 

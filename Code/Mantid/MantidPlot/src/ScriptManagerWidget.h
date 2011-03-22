@@ -114,7 +114,7 @@ signals:
 
 public slots:
   /// Create a new tab for script editing with the text within the file imported
-  ScriptEditor* newTab(int index = -1);
+  ScriptEditor* newTab(int index = -1, const QString & filename = "");
   /// Open a file in the current tab
   void openInCurrentTab(const QString & filename = QString());
   /// Open a file in a new tab

@@ -487,7 +487,7 @@ bool Matrix::canCalculate(bool useMuParser)
         return false;
     }
   } else {
-    Script *script = scriptingEnv()->newScript(formula_str, this, false, QString("<%1>").arg(objectName()));
+    Script *script = scriptingEnv()->newScript(formula_str, this, QString("<%1>").arg(objectName()), false);
     connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
     connect(script, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
     if (!script->compile())

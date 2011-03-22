@@ -325,10 +325,12 @@ void ScriptManagerWidget::paste()
 /**
  * Create a new tab such that it is the specified index within the tab range.
  * @param index :: The index to give the new tab. If this is invalid the tab is simply appended
+ * @param filename :: An optional filename
  */
-ScriptEditor* ScriptManagerWidget::newTab(int index)
+ScriptEditor* ScriptManagerWidget::newTab(int index, const QString & filename)
 {
   ScriptEditor *editor = new ScriptEditor(this, m_interpreter_mode, scriptingEnv()->createCodeLexer());
+  editor->setFileName(filename);
   if( !m_interpreter_mode )
   {
     connect(editor, SIGNAL(textChanged()), this, SLOT(markCurrentAsChanged()));
@@ -336,7 +338,15 @@ ScriptEditor* ScriptManagerWidget::newTab(int index)
   editor->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(editor, SIGNAL(customContextMenuRequested(const QPoint&)), 
 	  this, SLOT(editorContextMenu(const QPoint&)));
-  QString tab_title = "New script";
+  QString tab_title;
+  if( filename.isEmpty() )
+  {
+    tab_title = "New script";
+  }
+  else
+  {
+    tab_title = QFileInfo(filename).fileName();
+  }
   index = insertTab(index, editor, tab_title);
   setCurrentIndex(index);
   // Store a script runner
@@ -549,6 +559,8 @@ void ScriptManagerWidget::executeMultiLine()
  */
 bool ScriptManagerWidget::runScriptCode(const QString & code, const int line_offset)
 {
+  if( isScriptRunning() ) return false;
+
   // Get the correct script runner
   Script * runner = m_script_runners.value(this->currentIndex());
   runner->setLineOffset(line_offset);
@@ -771,15 +783,13 @@ void ScriptManagerWidget::setScriptIsRunning(bool running)
  */
 void ScriptManagerWidget::toggleProgressArrow(bool state)
 {
-  scriptingEnv()->reportProgress(state);
-  if( state == false )
+  int index_end = count() - 1;
+  for( int index = index_end; index >= 0; --index )
   {
-    int index_end = count() - 1;
-    for( int index = index_end; index >= 0; --index )
-    {
-      ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
-      if( editor ) editor->setMarkerState(state);
-    }
+    ScriptEditor *editor = static_cast<ScriptEditor*>(widget(index));
+    if( editor ) editor->setMarkerState(state);
+    Script *script = m_script_runners.value(index);
+    if( script ) script->reportProgress(state);
   }
 }
 
@@ -888,7 +898,14 @@ void ScriptManagerWidget::initActions()
   // Toggle the progress arrow
   m_toggle_progress = new QAction(tr("Show &Progress Marker"), this);
   m_toggle_progress->setCheckable(true);
-  m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
+  if( m_interpreter_mode )
+  {
+    m_toggle_progress->setEnabled(false);
+  }
+  else
+  {
+    m_toggle_progress->setEnabled(scriptingEnv()->supportsProgressReporting());
+  }
   connect(m_toggle_progress, SIGNAL(toggled(bool)), this, SLOT(toggleProgressArrow(bool)));
 
   // Toggle code folding
@@ -985,12 +1002,12 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
       return;
     }
   }
-    /// remove the file name from script list
-    m_recentScriptList.remove(file_to_open); 
-    //add the script file to recent scripts list 
-    m_recentScriptList.push_front(file_to_open); 
-    //update the recent scripts menu 
-    updateRecentScriptList();
+  /// remove the file name from script list
+  m_recentScriptList.remove(file_to_open); 
+  //add the script file to recent scripts list 
+  m_recentScriptList.push_front(file_to_open); 
+  //update the recent scripts menu 
+  updateRecentScriptList();
  
   //Save last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();
@@ -1007,22 +1024,16 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
     index = closeCurrentTab();
   }
   
-  ScriptEditor *editor = newTab(index);
+  ScriptEditor *editor = newTab(index, file_to_open);
   editor->blockSignals(true);
   editor->append(script_txt);
   editor->update();
   editor->blockSignals(false);
-  setTabText(currentIndex(), QFileInfo(file_to_open).fileName());
-  editor->setFileName(file_to_open);
+
   editor->setCursorPosition(0,0);
   
-
   // Set last directory
   m_last_dir = QFileInfo(file_to_open).absolutePath();
-
-  // Ensure the script runner knows about the file path
-  Script *runner = m_script_runners.value(currentIndex());
-  if( runner ) runner->updatePath(file_to_open);
 }
 
 /**
@@ -1031,7 +1042,8 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  */
 Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
-  Script *script = scriptingEnv()->newScript("", this, "");
+  Script *script = scriptingEnv()->newScript("", this, editor->fileName(), 
+					     m_toggle_progress->isChecked());
   // Connect the signals that print output and error messages to the formatting functions
   connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
   connect(script, SIGNAL(error(const QString &, const QString&, int)), this, 
@@ -1041,11 +1053,11 @@ Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
     connect(script, SIGNAL(keywordsChanged(const QStringList&)), editor, 
 	    SLOT(updateCompletionAPI(const QStringList &)));
     /// Initialize the auto complete by evaluating some completely trivial code
-    script->setCode("1");
-    script->exec();
-
-    
-
+    if( !scriptingEnv()->isRunning() )
+    {
+      script->setCode("1");
+      script->exec();
+    }
   }
   return script;
 }
@@ -1060,9 +1072,10 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   if( !editor ) return;
   //Check if we need to save
   askSave(index);
+  editor->disconnect();
   // Remove the path from the script runner
-  Script *runner = m_script_runners.value(currentIndex());
-  if( runner ) runner->updatePath(editor->fileName(), false);
+  Script *runner = m_script_runners.take(index);
+  delete runner;
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
   editor->deleteLater();

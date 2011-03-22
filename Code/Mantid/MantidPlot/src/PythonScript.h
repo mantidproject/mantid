@@ -45,8 +45,8 @@ class PythonScript : public Script
   Q_OBJECT
   public:
   /// Constructor
-  PythonScript(PythonScripting *env, const QString &code, bool interactive, QObject *context = 0, 
-	       const QString &name="<input>");
+  PythonScript(PythonScripting *env, const QString &code, QObject *context = 0, 
+	       const QString &name="<input>", bool reportProgress = false);
   ///Destructor
   ~PythonScript();
   /// A function to connect to the ouput stream of the running Python code
@@ -61,7 +61,6 @@ class PythonScript : public Script
     emit currentLineChanged(getLineOffset() + lineno, true);
   }
 
-  void updatePath(const QString & filename, bool append = true);
  
 public slots:
   /// Compile to bytecode
@@ -82,6 +81,10 @@ public slots:
   void setContext(QObject *context);
 
 private:
+  /// A call-once init function
+  void initialize();
+  // Append or remove a path from the Python sys.path
+  void updatePath(const QString & filename, bool append = true);
   /// Perform a call to the Python eval function with the necessary wrapping
   PyObject* executeScript(PyObject* return_tuple);  
   /// Create a list of keywords for the code completion API
@@ -95,6 +98,7 @@ private:
   PyObject *PyCode, *localDict, *stdoutSave, *stderrSave;
   bool isFunction;
   QString fileName;
+  bool m_isInitialized;
 };
 
 #endif

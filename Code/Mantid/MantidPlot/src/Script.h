@@ -54,8 +54,8 @@ class Script : public QObject
 
   public:
   /// Constructor
-  Script(ScriptingEnv *env, const QString &code, bool interactive = true, QObject *context=0, 
-	 const QString &name="<input>");
+  Script(ScriptingEnv *env, const QString &code, QObject *context=NULL, 
+	 const QString &name="<input>", bool reportProgress = false);
   /// Destructor
   virtual ~Script();
   /// Return the code that will be executed when calling exec() or eval()
@@ -72,15 +72,18 @@ class Script : public QObject
   virtual void setCode(const QString &code);
   /// Set the context in which the code is to be executed.
   virtual void setContext(QObject *context) { Context = context; compiled = notCompiled; }
-  /// Set the filename associated with the script
-  virtual void updatePath(const QString &, bool append = true)
-  {
-    (void) append; //Avoid compiler warnings
-  }
   /// Like QObject::setName, but with unicode support.
   void setName(const QString &name) { Name = name; compiled = notCompiled; }
   /// Set whether errors / exceptions are to be emitted or silently ignored
   void setEmitErrors(bool yes) { EmitErrors = yes; }
+  /// Whether we should be reporting progress  
+  bool reportProgress() const { return m_report_progress; }
+  //!Set whether we should be reporting progress
+  void reportProgress(bool on) 
+  { 
+    if( Env->supportsProgressReporting() ) m_report_progress = on; 
+    else m_report_progress = false;
+  }
   // Set the line offset of the current code
   void setLineOffset(int offset) { m_line_offset = offset; } 
   // The current line offset
@@ -115,7 +118,8 @@ protected:
   ScriptingEnv *Env;
   QString Code, Name;
   QObject *Context;
-  bool isInteractive;
+  /// Is progress reporting on?
+  bool m_report_progress;
   enum compileStatus { notCompiled, isCompiled, compileErr } compiled;
   bool EmitErrors;
 

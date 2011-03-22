@@ -42,8 +42,8 @@
 using namespace mu;
 
 muParserScript::muParserScript(ScriptingEnv *env, const QString &code, QObject *context, 
-							const QString &name, bool checkMultilineCode)
-  : Script(env, code, true, context, name),
+			       const QString &name, bool checkMultilineCode)
+  : Script(env, code, context, name),
   d_warn_multiline_code(checkMultilineCode)
 {
   variables.setAutoDelete(true);

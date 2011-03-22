@@ -63,15 +63,18 @@ class ScriptingEnv : public QObject
   /// Is the environment initialized
   bool isInitialized() const { return d_initialized; }
   /// Query if any code is currently being executed
-  bool isRunning() const { return m_is_running; }
+  virtual bool isRunning() const { return m_is_running; }
   /// Set that a script is being executed
   void setIsRunning(bool running) { m_is_running = running; }
   /// Create a script object that is responsible for executing actual code
-  virtual Script *newScript(const QString&, QObject*, bool interactive = true, 
-			    const QString &name="<input>")
+  virtual Script *newScript(const QString& code = "", QObject* context = NULL, 
+			    const QString &name="<input>",
+			    bool reportProgress = false)
   {
-    (void)(interactive); //Stop compiler warning
-    (void)(name); //Stop compiler warning
+    (void)code; //Stop compiler warning
+    (void)context; //Stop compiler warning
+    (void)name; //Stop compiler warning
+    (void)reportProgress; //Stop compiler warning
     return NULL;
   }
   //! If an exception / error occured, return a nicely formated stack backtrace.
@@ -90,10 +93,6 @@ class ScriptingEnv : public QObject
   virtual bool supportsEvaluation() { return false; }
   ///  Is progress reporting supported
   virtual bool supportsProgressReporting() const { return false; }
-  /// Whether we should be reporting progress  
-  bool reportProgress() const { return m_report_progress; }
-  //!Set whether we should be reporting progress
-  void reportProgress(bool on) { m_report_progress = on; }
   /// Create a code lexer for this environment, can be NULL. Ownership of a created object 
   /// is transferred to the caller.
   virtual QsciLexer * createCodeLexer() const { return NULL; }
@@ -126,6 +125,8 @@ protected:
   bool d_initialized;
   /// the context in which we are running
   ApplicationWindow *d_parent;
+  /// Whether a script is running
+  bool m_is_running;
 
 private:
   /// Private default constructor
@@ -141,10 +142,6 @@ private:
   ///Mantid - Store the language name of the concrete implementation so that
   /// the script window title can be set appropriately
   const char * languageName;
-  /// Is progress reporting on?
-  bool m_report_progress;
-  /// Whether a script is running
-  bool m_is_running;
 };
 
 /**

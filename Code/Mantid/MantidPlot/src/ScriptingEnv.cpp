@@ -49,8 +49,8 @@
 
 
 ScriptingEnv::ScriptingEnv(ApplicationWindow *parent, const char *langName)
-  : QObject(0, langName), d_initialized(false), d_parent(parent), d_refcount(0),
-    languageName(langName), m_report_progress(false), m_is_running(false)
+  : QObject(0, langName), d_initialized(false), d_parent(parent), m_is_running(false), d_refcount(0),
+    languageName(langName) 
 {
 }
 

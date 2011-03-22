@@ -53,11 +53,10 @@ class muParserScripting: public ScriptingEnv
     static ScriptingEnv *constructor(ApplicationWindow *parent) { return new muParserScripting(parent); }
 
   bool isRunning() const { return true; }
-  Script *newScript(const QString &code, QObject *context, bool interactive = true,   
-		    const QString &name="<input>")
+  Script *newScript(const QString &code = "", QObject *context = NULL,    
+		    const QString &name="<input>", bool reportProgress=false)
     {
-      (void)(interactive); //Stop compiler warning
-      (void)(name); //Stop compiler warning
+      (void)reportProgress;
       return new muParserScript(this, code, context, name);
     }
     

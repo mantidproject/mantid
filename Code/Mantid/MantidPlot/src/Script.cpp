@@ -32,9 +32,9 @@
 #include <QMessageBox>
 #include <QRegExp>
 
-Script::Script(ScriptingEnv *env, const QString &code, bool interactive, QObject *context, 
-	       const QString &name)
-  : Env(env), Code(code), Name(name), isInteractive(interactive), compiled(notCompiled), 
+Script::Script(ScriptingEnv *env, const QString &code, QObject *context, 
+	       const QString &name, bool reportProgress)
+  : Env(env), Code(code), Name(name),  m_report_progress(reportProgress), compiled(notCompiled), 
     m_line_offset(-1)
 { 
   Env->incref(); 

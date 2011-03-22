@@ -48,6 +48,8 @@ public:
   static ScriptingEnv *constructor(ApplicationWindow *parent);
   /// Destructor
   ~PythonScripting();
+  // Is a Python already executing a script
+  virtual bool isRunning() const { return m_is_running; }
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
   /// Create a new code lexer for Python
@@ -59,9 +61,10 @@ public:
   //Convert a Python list object to a Qt QStringList
   QStringList toStringList(PyObject *py_seq);
   /// Create a new script object that can execute code within this enviroment
-  Script *newScript(const QString &code, QObject *context, bool interactive = true, const QString &name="<input>")
+  Script *newScript(const QString &code, QObject *context = NULL, const QString &name="<input>",
+    bool reportProgress = false)
   {
-    return new PythonScript(this, code, interactive, context, name);
+    return new PythonScript(this, code, context, name, reportProgress);
   }
   ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;

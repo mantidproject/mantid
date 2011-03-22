@@ -258,7 +258,7 @@ void ScriptOutputDock::resetFont()
  * @param flags :: Window flags passed to the base class
  */
 ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFlags flags) : 
-  QMainWindow(parent, flags)
+  QMainWindow(parent, flags), m_acceptClose(false)
 {
   setObjectName("MantidScriptWindow");
   // Sub-widgets
@@ -350,6 +350,14 @@ void ScriptingWindow::saveSettings()
  */
 void ScriptingWindow::closeEvent(QCloseEvent *event)
 {
+  // We ideally don't want a close button but are force by some window managers.
+  // Therefore if someone clicks close and MantidPlot is not quitting then we will just hide
+  if( !m_acceptClose ) 
+  {
+    this->hide();
+    return;
+  }
+
   emit closeMe();
   // This will ensure each is saved correctly
   m_manager->closeAllTabs();
@@ -574,4 +582,13 @@ void ScriptingWindow::initMenus()
 QString ScriptingWindow::saveToString()
 {
   return m_manager->saveToString();
+}
+
+/**
+ * Saves scripts file names to a string 
+ * @param value If true a future close event will be accepted otherwise it will be ignored
+ */
+void ScriptingWindow::acceptCloseEvent(const bool value)
+{
+  m_acceptClose = value;
 }

@@ -301,7 +301,7 @@ void Table::cellEdited(int row, int col)
     d_table->setText(row, col, locale().toString(res, f, precision));
   else
   {
-    Script *script = scriptingEnv()->newScript(d_table->text(row,col),this,false, QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1));
+    Script *script = scriptingEnv()->newScript(d_table->text(row,col),this,QString("<%1_%2_%3>").arg(objectName()).arg(row+1).arg(col+1), false);
     connect(script, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
 
     script->setInt(row+1, "i");
@@ -610,7 +610,7 @@ bool Table::calculate(int col, int startRow, int endRow, bool forceMuParser, boo
 
   QApplication::setOverrideCursor(Qt::WaitCursor);
 
-  Script *colscript = scriptingEnv()->newScript(cmd, this,  false, QString("<%1>").arg(colName(col)));
+  Script *colscript = scriptingEnv()->newScript(cmd, this, QString("<%1>").arg(colName(col)), false);
   connect(colscript, SIGNAL(error(const QString&,const QString&,int)), scriptingEnv(), SIGNAL(error(const QString&,const QString&,int)));
   connect(colscript, SIGNAL(print(const QString&)), scriptingEnv(), SIGNAL(print(const QString&)));
 

@@ -1006,8 +1006,6 @@ class PyAlgLoader(object):
         changes = False
         
         def _process_file(file_path, modname):
-            # Temporarily insert into path
-            sys.path.insert(0, file_path)
             pyext = '.py'
             if not modname.endswith(pyext):
                 return
@@ -1020,6 +1018,8 @@ class PyAlgLoader(object):
                 return
             try:               
                 if self._containsPyAlgorithm(original):
+                    # Temporarily insert into path
+                    sys.path.insert(0, file_path)
                     if modname in sys.modules:
                         reload(sys.modules[modname])
                     else:
@@ -1029,7 +1029,6 @@ class PyAlgLoader(object):
                 self.framework.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
             except:
                 self.framework.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
-
             # Cleanup system path
             del sys.path[0]
 
