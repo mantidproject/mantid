@@ -709,7 +709,7 @@ class IQxQy(ReductionStep):
         sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
         dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
         dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
-        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
+        maxdist = max(dxmax, dymax)
         qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
         
         output_ws = self.get_output_workspace(workspace)
