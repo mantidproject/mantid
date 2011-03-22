@@ -10,7 +10,7 @@ class SNSPowderReduction(PythonAlgorithm):
             """Inner class for holding configuration information for a reduction."""
             def __init__(self, data, has_dspace=False):
                 if data is None:
-                    data = [None, None, 0, 0, 0, 0., 0.]
+                    data = [None, None, 1, 0, 0, 0., 0.]
                 self.freq = data[0]
                 self.wl = data[1]
                 self.bank = int(data[2])
