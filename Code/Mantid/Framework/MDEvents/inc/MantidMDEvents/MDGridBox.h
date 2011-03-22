@@ -37,6 +37,8 @@ namespace MDEvents
   public:
     MDGridBox(MDBox<MDE, nd> * box);
 
+    virtual ~MDGridBox();
+
     void clear();
 
     size_t getNPoints() const;

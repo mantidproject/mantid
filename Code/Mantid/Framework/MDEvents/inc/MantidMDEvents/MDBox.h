@@ -38,6 +38,8 @@ namespace MDEvents
 
     MDBox(BoxController_sptr splitter, const size_t depth = 0);
 
+    virtual ~MDBox() {}
+
     void clear();
 
     size_t getNPoints() const;

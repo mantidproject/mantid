@@ -34,7 +34,7 @@ namespace MDEvents
   {
   public:
     MDEventWorkspace();
-    ~MDEventWorkspace();
+    virtual ~MDEventWorkspace();
 
     /// Perform initialization after dimensions (and others) have been set.
     virtual void initialize();

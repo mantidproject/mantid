@@ -39,6 +39,8 @@ namespace MDEvents
     {
     }
 
+    /// Destructor
+    virtual ~IMDBox() {}
 
     /// Clear all contained data
     virtual void clear() = 0;

@@ -100,6 +100,17 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /// Destructor
+  TMDE(MDGridBox)::~MDGridBox()
+  {
+    // Delete all contained boxes (this should fire the MDGridBox destructors recursively).
+    typename boxVector_t::iterator it;
+    for (it = boxes.begin(); it != boxes.end(); it++)
+      delete *it;
+    boxes.clear();
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   /** Clear any points contained. */
@@ -108,6 +119,11 @@ namespace MDEvents
   {
     this->m_signal = 0.0;
     this->m_errorSquared = 0.0;
+    typename boxVector_t::iterator it;
+    for (it = boxes.begin(); it != boxes.end(); it++)
+    {
+      (*it)->clear();
+    }
   }
 
   //-----------------------------------------------------------------------------------------------
