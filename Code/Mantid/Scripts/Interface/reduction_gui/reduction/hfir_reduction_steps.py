@@ -504,6 +504,7 @@ class InstrumentDescription(BaseScriptElement):
         
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
+        script += "IQxQy(nbins=%g)\n" % self.n_q_bins
         
         # Data files
         if len(self.data_files)>0:

@@ -212,4 +212,9 @@ def ResetWavelength():
         RuntimeError, "SetWavelength was called with the wrong instrument type: re-initialize your instrument (e.g. HFIRSANS() )"    
     ReductionSingleton().instrument.set_wavelength()
     
+def IQxQy(nbins=100):
+    ReductionSingleton().set_IQxQy(sans_reduction_steps.IQxQy(nbins=nbins))
+    
+def NoIQxQy(nbins=100):
+    ReductionSingleton().set_IQxQy(None)
     

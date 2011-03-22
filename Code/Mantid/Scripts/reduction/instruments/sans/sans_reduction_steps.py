@@ -683,6 +683,42 @@ class SolidAngle(ReductionStep):
         
         return "Solid angle correction applied" 
             
+class IQxQy(ReductionStep):
+    """
+        ReductionStep class that performs I(Qx,Qy) calculation
+    """
+    def __init__(self, nbins=100, suffix="_Iq"):
+        super(IQxQy, self).__init__()
+        self._nbins = nbins
+        self._suffix = suffix
+    
+    def get_output_workspace(self, workspace):
+        return workspace+str(self._suffix)+'xy'
+    
+    def execute(self, reducer, workspace):
+        beam_ctr = reducer._beam_finder.get_beam_center()
+        if beam_ctr[0] is None or beam_ctr[1] is None:
+            raise RuntimeError, "IQxQy could not proceed: beam center not set"
+        
+        # Wavelength. Read in the wavelength bins. Skip the first one which is not set up properly for EQ-SANS
+        x = mtd[workspace].dataX(1)
+        x_length = len(x)
+        if x_length < 2:
+            raise RuntimeError, "IQxQy expects at least one wavelength bin"
+        wavelength_min = (x[0]+x[1])/2.0
+        sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
+        dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
+        dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
+        maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
+        qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
+        
+        output_ws = self.get_output_workspace(workspace)
+        
+        Qxy(InputWorkspace=workspace, OutputWorkspace=output_ws,
+            MaxQxy=qmax, DeltaQ=qmax/self._nbins, SolidAngleWeighting=False)
+        
+        return "Computed I(Qx,Qy)" 
+            
 class SensitivityCorrection(ReductionStep):
     """
         Compute the sensitivity correction and apply it to the input workspace.
@@ -980,16 +1016,31 @@ class CorrectToFileStep(ReductionStep):
             
             
 class SaveIqAscii(ReductionStep):
+    """
+        Save the reduced data to ASCII files
+    """
     def __init__(self):
         super(SaveIqAscii, self).__init__()
         
     def execute(self, reducer, workspace):
+        log_text = ""
         if reducer._azimuthal_averager is not None:
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
             filename = os.path.join(reducer._data_path, output_ws+'.txt')
             SaveAscii(Filename=filename, Workspace=output_ws)
             
-            return "I(q) saved in %s" % (filename)
+            log_text = "I(Q) saved in %s" % (filename)
+        
+        if reducer._two_dim_calculator is not None:
+            output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
+            filename = os.path.join(reducer._data_path, output_ws+'.dat')
+            SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
+            
+            if len(log_text)>0:
+                log_text += '\n'
+            log_text += "I(Qx,Qy) saved in %s" % (filename)
+            
+        return log_text
             
 class SubtractBackground(ReductionStep):
     """

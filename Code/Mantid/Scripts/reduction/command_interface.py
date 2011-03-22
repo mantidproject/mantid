@@ -74,6 +74,9 @@ def DataPath(path):
 def Reduce1D():
     return ReductionSingleton().reduce()
         
+def Reduce():
+    return ReductionSingleton().reduce()
+        
 def AppendDataFile(datafile, workspace=None):
     """
         Append a data file in the list of files to be processed.

@@ -41,6 +41,9 @@ class SANSReducer(Reducer):
     ## Azimuthal averaging
     _azimuthal_averager = None
     
+    ## I(Qx,Qy)
+    _two_dim_calculator = None
+    
     ## Transmission calculator
     _transmission_calculator = None
     
@@ -249,6 +252,14 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_bck_transmission expects an object of class ReductionStep"
     
+    @validate_step
+    def set_IQxQy(self, calculator):
+        """
+            Set the algorithm to compute I(Qx,Qy)
+            @param calculator: ReductionStep object
+        """
+        self._two_dim_calculator = calculator
+        
     def pre_process(self): 
         """
             Reduction steps that are meant to be executed only once per set
@@ -320,6 +331,10 @@ class SANSReducer(Reducer):
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:
             self.append_step(self._azimuthal_averager)
+            
+        # Perform I(Qx,Qy) calculation
+        if self._two_dim_calculator is not None:
+            self.append_step(self._two_dim_calculator)
             
         # Save output to file
         if self._save_iq is not None:
