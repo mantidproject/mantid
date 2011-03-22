@@ -8,7 +8,6 @@
 #include "MantidKernel/UnitFactory.h"
 
 #include <vector>
-#include <iostream>
 
 namespace Mantid
 {
