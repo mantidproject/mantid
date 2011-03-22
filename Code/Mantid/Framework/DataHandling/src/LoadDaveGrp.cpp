@@ -15,6 +15,13 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDaveGrp)
 
+/// Sets documentation strings for this algorithm
+void LoadDaveGrp::initDocs()
+{
+  this->setWikiSummary("Loads data from a DAVE grouped ASCII file and stores it in a 2D [[workspace]] ([[Workspace2D]] class). ");
+  this->setOptionalMessage("Loads data from a DAVE grouped ASCII file and stores it in a 2D workspace (Workspace2D class).");
+}
+
 LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {
 }
@@ -25,7 +32,7 @@ void LoadDaveGrp::init()
   exts.push_back(".grp");
 
   this->declareProperty(new API::FileProperty("Filename", "",
-      API::FileProperty::Load, exts), "A Dave grouped Ascii file");
+      API::FileProperty::Load, exts), "A DAVE grouped ASCII file");
   this->declareProperty(new API::WorkspaceProperty<>("OutputWorkspace", "",
       Kernel::Direction::Output),
       "The name of the workspace that will be created.");
