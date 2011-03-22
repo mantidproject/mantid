@@ -345,14 +345,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 5.3,0.1);
+    TS_ASSERT_DELTA( dummy, 5.16,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
     TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.14 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.2 ,0.1);
+    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.06 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);
@@ -434,14 +434,14 @@ public:
 
     // test the output from fit is what you expect
     double dummy = alg.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 5.3,0.1);
+    TS_ASSERT_DELTA( dummy, 5.16,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(1));
     TS_ASSERT_DELTA( pk->height(), 232.1146 ,1);
     TS_ASSERT_DELTA( pk->centre(), 79430.1 ,10);
     TS_ASSERT_DELTA( pk->getParameter("Sigma"), 26.14 ,0.1);
-    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.2 ,0.1);
+    TS_ASSERT_DELTA( out->getParameter("f0.A0"), 8.06 ,0.1);
     TS_ASSERT_DELTA( out->getParameter("f0.A1"), 0.0 ,0.01); 
 
     AnalysisDataService::Instance().remove(outputSpace);

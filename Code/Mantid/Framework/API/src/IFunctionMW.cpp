@@ -592,12 +592,14 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       tAxis->setLabel(2,"Diff");
       ws->replaceAxis(1,tAxis);
 
+      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
+
       for(int i=0;i<3;i++)
       {
-        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+histN);
+        ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
       }
 
-      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex);
+      ws->dataY(0).assign(inputY.begin()+m_xMinIndex,inputY.begin()+m_xMaxIndex+1);
 
       MantidVec& Ycal = ws->dataY(1);
       MantidVec& E = ws->dataY(2);

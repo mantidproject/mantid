@@ -282,7 +282,7 @@ public:
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
     double s1 = row.Double(1);
-    TS_ASSERT_DELTA(row.Double(1),1.1478,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.1476,0.0001);
 
     row = outParams->getRow(5);
     TS_ASSERT_EQUALS(row.String(0),"f2.c");
@@ -294,7 +294,7 @@ public:
 
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
-    TS_ASSERT_DELTA(row.Double(1),3.4435,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),3.4430,0.0001);
     double s2 = row.Double(1);
 
     TS_ASSERT_DELTA(s1,s2/3,1e-12);
@@ -556,36 +556,36 @@ public:
 
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"f0.a");
-    TS_ASSERT_DELTA(row.Double(1),1.4620,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.9998,0.0001);
 
     row = outParams->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"f0.b");
-    TS_ASSERT_DELTA(row.Double(1),0.1262,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.3001,0.0001);
 
     row = outParams->getRow(2);
     TS_ASSERT_EQUALS(row.String(0),"f1.c");
-    TS_ASSERT_DELTA(row.Double(1),4.0993,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),4.0999,0.0001);
 
     row = outParams->getRow(3);
     TS_ASSERT_EQUALS(row.String(0),"f1.h");
-    TS_ASSERT_DELTA(row.Double(1),1.31,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.9842,0.0001);
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
     double s1 = row.Double(1);
-    TS_ASSERT_DELTA(row.Double(1),1.9117,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.6709,0.0001);
 
     row = outParams->getRow(5);
     TS_ASSERT_EQUALS(row.String(0),"f2.c");
-    TS_ASSERT_DELTA(row.Double(1),6.1130,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),6.0282,0.0001);
 
     row = outParams->getRow(6);
     TS_ASSERT_EQUALS(row.String(0),"f2.h");
-    TS_ASSERT_DELTA(row.Double(1),3.0752,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.9832,0.0001);
 
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
-    TS_ASSERT_DELTA(row.Double(1),2.8177,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),3.2842,0.0001);
     double s2 = row.Double(1);
 
     removeWS("Exp");
@@ -627,36 +627,36 @@ public:
 
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"f0.a");
-    TS_ASSERT_DELTA(row.Double(1),1.4620,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.9998,0.0001);
 
     row = outParams->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"f0.b");
-    TS_ASSERT_DELTA(row.Double(1),0.1262,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.3001,0.0001);
 
     row = outParams->getRow(2);
     TS_ASSERT_EQUALS(row.String(0),"f1.c");
-    TS_ASSERT_DELTA(row.Double(1),4.0993,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),4.0999,0.0001);
 
     row = outParams->getRow(3);
     TS_ASSERT_EQUALS(row.String(0),"f1.h");
-    TS_ASSERT_DELTA(row.Double(1),1.3100,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.9842,0.0001);
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
     double s1 = row.Double(1);
-    TS_ASSERT_DELTA(row.Double(1),1.9117,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.6709,0.0001);
 
     row = outParams->getRow(5);
     TS_ASSERT_EQUALS(row.String(0),"f2.c");
-    TS_ASSERT_DELTA(row.Double(1),6.1130,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),6.0282,0.0001);
 
     row = outParams->getRow(6);
     TS_ASSERT_EQUALS(row.String(0),"f2.h");
-    TS_ASSERT_DELTA(row.Double(1),3.0752,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.9832,0.0001);
 
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
-    TS_ASSERT_DELTA(row.Double(1),2.8177,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),3.2842,0.0001);
     double s2 = row.Double(1);
 
     removeWS("Exp");
@@ -698,36 +698,36 @@ public:
 
     TableRow row = outParams->getFirstRow();
     TS_ASSERT_EQUALS(row.String(0),"f0.a");
-    TS_ASSERT_DELTA(row.Double(1),1.0592,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.0236,0.0001);
 
     row = outParams->getRow(1);
     TS_ASSERT_EQUALS(row.String(0),"f0.b");
-    TS_ASSERT_DELTA(row.Double(1),0.2982,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.3017,0.0001);
 
     row = outParams->getRow(2);
     TS_ASSERT_EQUALS(row.String(0),"f1.c");
-    TS_ASSERT_DELTA(row.Double(1),3.8977,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),3.8995,0.0001);
 
     row = outParams->getRow(3);
     TS_ASSERT_EQUALS(row.String(0),"f1.h");
-    TS_ASSERT_DELTA(row.Double(1),0.9216,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),0.9854,0.0001);
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
     double s1 = row.Double(1);
-    TS_ASSERT_DELTA(row.Double(1),2.3460,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),1.8554,0.0001);
 
     row = outParams->getRow(5);
     TS_ASSERT_EQUALS(row.String(0),"f2.c");
-    TS_ASSERT_DELTA(row.Double(1),5.9743,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),5.9927,0.0001);
 
     row = outParams->getRow(6);
     TS_ASSERT_EQUALS(row.String(0),"f2.h");
-    TS_ASSERT_DELTA(row.Double(1),2.1852,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),2.2629,0.0001);
 
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
-    TS_ASSERT_DELTA(row.Double(1),4.0368,0.0001);
+    TS_ASSERT_DELTA(row.Double(1),4.9348,0.0001);
     double s2 = row.Double(1);
 
     removeWS("Exp");

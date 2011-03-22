@@ -139,11 +139,11 @@ public:
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
     IPeakFunction *pk = dynamic_cast<IPeakFunction *>(dynamic_cast<CompositeFunction*>(out)->getFunction(0));
-    TS_ASSERT_DELTA( pk->height(), 100.6960 ,0.0001);
+    TS_ASSERT_DELTA( pk->height(), 100.6900 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.1994 ,0.0001);
-    TS_ASSERT_DELTA( pk->width(), 2.1975 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A0"), -0.0028 ,0.0001);
-    TS_ASSERT_DELTA( out->getParameter("f1.A1"), 0.0005 ,0.0001);
+    TS_ASSERT_DELTA( pk->width(), 2.1988 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A0"), 0.0000 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("f1.A1"), -0.0007 ,0.0001);
 
     AnalysisDataService::Instance().remove(wsName);
 
