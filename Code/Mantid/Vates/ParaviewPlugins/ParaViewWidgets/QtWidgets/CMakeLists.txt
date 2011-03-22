@@ -3,6 +3,13 @@ find_package( ParaView REQUIRED )
 include(${PARAVIEW_USE_FILE})
 
 #header files
+set(INC_FILES
+ WidgetDllOption.h
+ GeometryWidget.h
+ DimensionWidget.h
+)
+
+#header files that are mocced
 set( HDR_FILES
   GeometryWidget.h
   DimensionWidget.h
@@ -21,6 +28,8 @@ qt4_wrap_cpp ( MOCCED_FILES ${HDR_FILES} )
 set_mantid_subprojects(Vates/VatesAPI)
 
 PROJECT(MantidParaViewQtWidgets)
-ADD_LIBRARY(MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ) 
+ADD_LIBRARY(MantidParaViewQtWidgets ${SRC_FILES} ${MOCCED_FILES} ${INC_FILES} ) 
 TARGET_LINK_LIBRARIES(MantidParaViewQtWidgets ${QT_LIBRARIES} ${MANTID_SUBPROJECT_LIBS} )
+
+add_definitions ( -DIN_MANTIDPARAVIEWQT_MANTIDPARAVIEWWIDGETS )
 

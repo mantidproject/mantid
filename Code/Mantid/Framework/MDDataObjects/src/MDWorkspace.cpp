@@ -254,7 +254,9 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     {
       MDCellMap::const_iterator iter = m_mdCellMap.find(singleDimensionIndex);
       //Current rules for determing whether a cell has changed.
-      return m_mdCellMap.end() !=  iter || (*iter).second.getSignal() != mdImagePoint.s || (*iter).second.getError() != mdImagePoint.err;
+      return m_mdCellMap.end() ==  iter || 
+        (*iter).second.getSignal() != mdImagePoint.s || 
+        (*iter).second.getError() != mdImagePoint.err;
     }
 
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment) const

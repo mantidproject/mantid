@@ -173,10 +173,10 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
   return 1;
 }
 
-void vtkRebinningCutter::UpdateAlgorithmProgress(int progressPercent)
+void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
 {
-  this->UpdateProgress(progressPercent);
   this->SetProgressText("Executing Mantid Rebinning Algorithm...");
+  this->UpdateProgress(progress);
 }
 
 int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector,
@@ -268,8 +268,10 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      //The visualisation dataset will at least need to be recalculated.
       if(temp->getNBins() != m_appliedXDimension->getNBins())
       {
+        //when the number of bins is chanded the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedXDimension = temp;
@@ -285,9 +287,11 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
     {
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      //The visualisation dataset will at least need to be recalculated.
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
       if (temp->getNBins() != m_appliedYDimension->getNBins())
       {
+        //when the number of bins is chanded the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedYDimension = temp;
@@ -303,9 +307,11 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
     {
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
-      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      //The visualisation dataset will at least need to be recalculated.
+      m_actionRequester.ask(RecalculateVisualDataSetOnly); 
       if (temp->getNBins() != m_appliedZDimension->getNBins())
       {
+        //when the number of bins is chanded the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedZDimension = temp;

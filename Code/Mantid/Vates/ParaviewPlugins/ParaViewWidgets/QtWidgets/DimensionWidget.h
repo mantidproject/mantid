@@ -6,6 +6,7 @@
 #include <memory>
 #include "boost/shared_ptr.hpp"
 #include <vector>
+#include "WidgetDllOption.h"
 
 //Foward decs
 class QLabel;
@@ -22,7 +23,7 @@ namespace Mantid
 }
 
 
-class DimensionWidget: public QWidget
+class EXPORT_OPT_MANTIDPARVIEW DimensionWidget: public QWidget
 {
 Q_OBJECT
 public:

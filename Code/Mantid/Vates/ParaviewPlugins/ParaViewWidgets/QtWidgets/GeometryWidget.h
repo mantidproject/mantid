@@ -35,6 +35,7 @@
 #include <qwidget.h>
 #include <memory>
 #include <boost/shared_ptr.hpp>
+#include "WidgetDllOption.h"
 
 //Foward decs
 class QLabel;
@@ -52,13 +53,13 @@ namespace Mantid
 }
 
 
-class GeometryWidget: public QWidget
+class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget
 {
 Q_OBJECT
 public:
-Q_PROPERTY(QString getXDimensionXML READ getXDimensionXML NOTIFY valueChanged USER true)
-Q_PROPERTY(QString getYDimensionXML READ getYDimensionXML NOTIFY valueChanged USER true)
-Q_PROPERTY(QString getZDimensionXML READ getZDimensionXML NOTIFY valueChanged USER true)
+Q_PROPERTY(QString XDimensionXML READ getXDimensionXML WRITE setXDimensionXML NOTIFY valueChanged)
+Q_PROPERTY(QString YDimensionXML READ getYDimensionXML WRITE setYDimensionXML NOTIFY valueChanged)
+Q_PROPERTY(QString ZDimensionXML READ getZDimensionXML WRITE setZDimensionXML NOTIFY valueChanged)
 GeometryWidget();
 void constructWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
 
@@ -80,6 +81,20 @@ QString getYDimensionXML() const;
 /// Gets the z dimension in a serialzed form
 QString getZDimensionXML() const;
 
+void setXDimensionXML(QString value)
+{
+  //Do nothing.
+}
+
+void setYDimensionXML(QString value)
+{
+  //Do nothing.
+}
+
+void setZDimensionXML(QString value)
+{
+  //Do nothing.
+}
 
 bool isSetup() const
 {

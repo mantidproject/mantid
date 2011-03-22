@@ -40,15 +40,6 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
-/// Helper function used to determine if a dimension is qx dimension
-bool isQxDimension(Mantid::Geometry::IMDDimension_sptr dimension);
-
-/// Helper function used to determine if a dimension is qy dimension
-bool isQyDimension(Mantid::Geometry::IMDDimension_sptr dimension);
-
-/// Helper function used to determine if a dimension is qz dimension
-bool isQzDimension(Mantid::Geometry::IMDDimension_sptr dimension);
-
 class DLLExport GeometryProxy
 {
 
@@ -107,6 +98,15 @@ private:
   void operator=(const GeometryProxy&); // Not implemented.
 
 };
+
+/// Helper function used to determine if a dimension is qx dimension
+DLLExport bool isQxDimension(Mantid::Geometry::IMDDimension_sptr dimension);
+
+/// Helper function used to determine if a dimension is qy dimension
+DLLExport bool isQyDimension(Mantid::Geometry::IMDDimension_sptr dimension);
+
+/// Helper function used to determine if a dimension is qz dimension
+DLLExport bool isQzDimension(Mantid::Geometry::IMDDimension_sptr dimension);
 
 }
 }

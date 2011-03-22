@@ -32,7 +32,7 @@ private:
 
   class MockProgressAction : public ProgressAction
   {
-    virtual void eventRaised(int progressPercent)
+    virtual void eventRaised(double progress)
     {
       //Do nothing.
     }

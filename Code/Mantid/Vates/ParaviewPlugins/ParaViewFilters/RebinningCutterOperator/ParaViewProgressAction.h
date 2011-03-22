@@ -45,9 +45,9 @@ public:
   {
   }
 
-  virtual void eventRaised(int progressPercent)
+  virtual void eventRaised(double progress)
   {
-    m_filter->UpdateAlgorithmProgress(progressPercent);
+    m_filter->UpdateAlgorithmProgress(progress);
   }
 
 private:

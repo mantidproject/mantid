@@ -47,7 +47,7 @@ public:
   ProgressAction();
 
   /// Handle event updates.
-  virtual void eventRaised(int progressPercent) = 0;
+  virtual void eventRaised(double progress) = 0;
 
   void handler(const Poco::AutoPtr<Mantid::API::Algorithm::ProgressNotification>& pNf);
 

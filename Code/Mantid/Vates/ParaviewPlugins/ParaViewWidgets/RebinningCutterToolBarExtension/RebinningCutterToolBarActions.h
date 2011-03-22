@@ -1,7 +1,8 @@
 #include <QActionGroup>
 #include <pqPipelineSource.h>
+#include "MantidKernel/System.h"
 
-class RebinningCutterToolBarActions : public QActionGroup
+class DLLExport RebinningCutterToolBarActions : public QActionGroup
 {
   Q_OBJECT
 public:
