@@ -334,14 +334,22 @@ namespace Kernel
   {
     if (m_loggerList)
     {
-      mutexLoggerList.lock();
+      try
+      { mutexLoggerList.lock(); }
+      catch(Poco::SystemException & e)
+      {}
+
       LoggerList::iterator it = m_loggerList->find(&logger);
       if (it != m_loggerList->end())
       {
         delete(*it);
         m_loggerList->erase(it);
       }
-      mutexLoggerList.unlock();
+
+      try
+      { mutexLoggerList.unlock(); }
+      catch(Poco::SystemException & e)
+      {}
     }
   }
 
@@ -389,7 +397,10 @@ namespace Kernel
   Logger& Logger::get(const std::string& name)
   {
     Logger* pLogger = new Logger(name);
-    mutexLoggerList.lock();
+    try
+    { mutexLoggerList.lock(); }
+    catch(Poco::SystemException & e)
+    {}
 
     //assert the nullSteam
     if(!m_nullStream)
@@ -405,7 +416,10 @@ namespace Kernel
     //insert the newly created logger
     m_loggerList->insert(pLogger);
 
-    mutexLoggerList.unlock();
+    try
+    { mutexLoggerList.unlock(); }
+    catch(Poco::SystemException & e)
+    {}
 
     return *pLogger;
   }
