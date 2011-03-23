@@ -12,7 +12,7 @@ namespace Kernel
 {
   // Initialize the static members
   Logger::LoggerList* Logger::m_loggerList = NULL;
-  Mutex Logger::mutexLoggerList;
+  Mutex* Logger::mutexLoggerList = NULL;
   Poco::NullOutputStream* Logger::m_nullStream = NULL;
 
   /** Constructor
@@ -335,8 +335,8 @@ namespace Kernel
     if (m_loggerList)
     {
       try
-      { mutexLoggerList.lock(); }
-      catch(Poco::SystemException & e)
+      { mutexLoggerList->lock(); }
+      catch(Poco::SystemException &)
       {}
 
       LoggerList::iterator it = m_loggerList->find(&logger);
@@ -347,8 +347,8 @@ namespace Kernel
       }
 
       try
-      { mutexLoggerList.unlock(); }
-      catch(Poco::SystemException & e)
+      { mutexLoggerList->unlock(); }
+      catch(Poco::SystemException &)
       {}
     }
   }
@@ -380,6 +380,8 @@ namespace Kernel
         delete(m_nullStream);
         m_nullStream=0;
       }
+      // Finally delete the mutex
+      delete mutexLoggerList;
     }
     catch (std::exception& e)
     {
@@ -397,9 +399,13 @@ namespace Kernel
   Logger& Logger::get(const std::string& name)
   {
     Logger* pLogger = new Logger(name);
+    // MG: This method can be called to initialize static logger which means
+    // it may get called before mutexLoggerList has been initialized, i.e. the
+    // usual static initialization order problem.
+    if( mutexLoggerList == NULL ) mutexLoggerList = new Mutex();
     try
-    { mutexLoggerList.lock(); }
-    catch(Poco::SystemException & e)
+    { mutexLoggerList->lock(); }
+    catch(Poco::SystemException &)
     {}
 
     //assert the nullSteam
@@ -417,8 +423,8 @@ namespace Kernel
     m_loggerList->insert(pLogger);
 
     try
-    { mutexLoggerList.unlock(); }
-    catch(Poco::SystemException & e)
+    { mutexLoggerList->unlock(); }
+    catch(Poco::SystemException &)
     {}
 
     return *pLogger;

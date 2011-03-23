@@ -170,7 +170,7 @@ class ThreadSafeLogStream;
     /// The null stream that is used when logging is disabled
     static Poco::NullOutputStream* m_nullStream;
     /// Mutex to make changing the static logger list threadsafe.
-    static Mutex mutexLoggerList;
+    static Mutex *mutexLoggerList;
   };
 
 } // namespace Kernel
