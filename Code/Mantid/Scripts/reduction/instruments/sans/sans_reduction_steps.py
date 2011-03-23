@@ -882,6 +882,13 @@ class Mask(ReductionStep):
             for iy in range(y_min, y_max+1):
                 self.masked_pixels.append([ix, iy])
 
+    def add_detector_list(self, det_list):
+        """
+            Mask the given detectors
+            @param det_list: list of detector IDs
+        """
+        self.spec_list.extend(det_list) 
+
     def execute(self, reducer, workspace, instrument=None):
         for shape in self._xml:
             MaskDetectorsInShape(workspace, shape)
@@ -895,7 +902,7 @@ class Mask(ReductionStep):
                                                                    self._ny_low,
                                                                    self._ny_high))
 
-        if self.spec_list != '':
+        if len(self.spec_list)>0:
             MaskDetectors(workspace, SpectraList = self.spec_list)
             
         # Mask out internal list of pixels
@@ -1105,7 +1112,6 @@ class SubtractBackground(ReductionStep):
                 output = self._transmission.execute(reducer, self._background_ws)
                 if output is not None:
                     log_text = log_text + '   ' + str(output) +'\n'
-                 
         
         Minus(workspace, self._background_ws, workspace)
         

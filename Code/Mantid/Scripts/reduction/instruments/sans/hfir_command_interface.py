@@ -91,6 +91,12 @@ def BeamSpreaderTransmission(sample_spreader, direct_spreader,
 def Mask(nx_low=0, nx_high=0, ny_low=0, ny_high=0): 
     ReductionSingleton().get_mask().mask_edges(nx_low=nx_low, nx_high=nx_high, ny_low=ny_low, ny_high=ny_high)
 
+def MaskRectangle(x_min, x_max, y_min, y_max):
+    ReductionSingleton().get_mask().add_pixel_rectangle(x_min, x_max, y_min, y_max)
+    
+def MaskDetectors(det_list):
+    ReductionSingleton().get_mask().add_detector_list(det_list)
+
 def Background(datafile):
     ReductionSingleton().set_background(datafile) 
 

@@ -11,6 +11,62 @@ from reduction import extract_workspace_name
 # Mantid imports
 from mantidsimple import *
 
+class QuickLoad(ReductionStep):
+    """
+        Minimal load for when we only need to get the pixel counts
+    """
+    def __init__(self, datafile=None):
+        super(QuickLoad, self).__init__()
+        self._data_file = datafile
+                
+    def execute(self, reducer, workspace):      
+        # If we don't have a data file, look up the workspace handle
+        # Only files that are used for computing data corrections have
+        # a path that is passed directly. Data files that are reduced
+        # are simply found in reducer._data_files 
+        if self._data_file is None:
+            raise RuntimeError, "File not found: " % self._data_file
+        else:
+            data_file = self._data_file
+        
+        # Load data
+        filepath = reducer._full_file_path(data_file)
+
+        # Find all the necessary files
+        event_file = ""
+        pulseid_file = ""
+        nxs_file = ""
+        
+        # Check if we have an event file or a pulseid file.
+        is_event_nxs = False
+        
+        if filepath.find("_neutron_event")>0:
+            event_file = filepath
+            pulseid_file = filepath.replace("_neutron_event", "_pulseid")
+        elif filepath.find("_pulseid")>0:
+            pulseid_file = filepath
+            event_file = filepath.replace("_pulseid", "_neutron_event")
+        else:
+            #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
+            # Doesn't look like event pre-nexus, try event nexus
+            is_event_nxs = True
+        
+        # Mapping file
+        mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
+        directory,_ = os.path.split(event_file)
+        mapping_file = os.path.join(directory, mapping_file)
+        
+        if is_event_nxs:
+            mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
+            LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace)
+        else:
+            mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
+            nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
+            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace, PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+            LoadLogsFromSNSNexus(Workspace=workspace, Filename=nxs_file)
+
+        return "Quick-load of data file: %s" % (workspace)
+    
 class LoadRun(ReductionStep):
     """
         Load a data file, move its detector to the right position according
