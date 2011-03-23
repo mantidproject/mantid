@@ -30,6 +30,11 @@
   <value val="HAB"/>
 </parameter>
 
+<parameter name="centre-finder-step-size">
+<!-- this is the initial step for the beam centre finder in metres -->
+  <value val="0.001"/>
+</parameter>
+
 <!-- the following few lines respond to the hole in LOQs front detector -->
 <parameter name="high-angle-detector-non-rectangle-height">
   <value val="128"/>

@@ -12,10 +12,9 @@ def instrument_factory(name):
         raise RuntimeError, "Instrument %s doesn't exist\n  %s" % (name, sys.exc_value)
 
 class Instrument(object):
-    def __init__(self, wrksp_name=None, instr_filen=None):
+    def __init__(self, instr_filen=None):
         """
             Reads the instrument definition xml file
-            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
             @param instr_filen: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
@@ -24,35 +23,21 @@ class Instrument(object):
 
         self._definition_file = MantidFramework.mtd.getConfigProperty(
             'instrumentDefinition.directory')+'/'+instr_filen
-        
-        if not wrksp_name is None:
-            wrksp = wrksp_name
-        else:
-            wrksp = '_'+self._NAME+'instrument_definition'
-        
-        # Read instrument description
-        wrksp = self.load_empty(wrksp_name)
-        definitionWS = MantidFramework.mtd[wrksp]  
-        self.definition = definitionWS.getInstrument()
+                
+        self.definition = self.load_instrument() 
 
-        if wrksp_name is None:
-            #we haven't been asked to leave the empty instrument workspace so remove it
-            MantidFramework.mtd.deleteWorkspace(wrksp)
-
-    def load_empty(self, wrksp_name=None):
+    def load_instrument(self):
         """
-            Runs LoadEmptyInstrument to create an empty instrument in the named
-            workspace (a default name is created if none is given)
-            @param workspace_name: The empty instrument data will be contained in the named workspace
+            Runs LoadInstrument get the parameters for the instrument
+            @return the instrument parameter data
         """
-        if not wrksp_name is None:
-            wrksp = wrksp_name
-        else:
-            wrksp = '_'+self._NAME+'instrument_definition'
-        #read the information about the instrument that stored in it's xml
-        mantidsimple.LoadEmptyInstrument(self._definition_file, wrksp)
+        wrksp = '__'+self._NAME+'instrument_definition'
+        if not MantidFramework.mtd.workspaceExists(wrksp):
+          mantidsimple.CreateWorkspace(wrksp,"1","1","1")
+          #read the information about the instrument that stored in its xml
+          mantidsimple.LoadInstrument(wrksp, InstrumentName=self._NAME)
 
-        return wrksp
+        return MantidFramework.mtd[wrksp].getInstrument()  
 
     def name(self):
         """
@@ -77,16 +62,29 @@ class Instrument(object):
         """
         if workspace_name is None:
             workspace_name = self._NAME+'_instrument_view'
-            mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
+            self.load_empty(workspace_name)
         elif not MantidFramework.mtd.workspaceExists(workspace_name):
-            mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
-        
+            self.load_empty(workspace_name)
 
         instrument_win = mantidsimple.qti.app.mantidUI.getInstrumentView(workspace_name)
         instrument_win.showWindow()
 
         return workspace_name
-    
+
+    def load_empty(self, workspace_name = None):
+        """
+            Loads the instrument definition file into a workspace with the given name.
+            If no name is given a hidden workspace is used
+            @param workspace_name: the name of the workspace to create and/or display
+            @return the name of the workspace that was created
+        """
+        if workspace_name is None:
+            workspace_name = '__'+self._NAME+'_empty'
+
+        mantidsimple.LoadEmptyInstrument(self._definition_file, workspace_name)
+
+        return workspace_name
+   
     def get_detector_from_pixel(self, pixel_list):
         """
             Returns a list of detector IDs from a list of [x,y] pixels,

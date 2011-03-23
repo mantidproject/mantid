@@ -47,6 +47,11 @@
   <value val="front"/>
 </parameter>
 
+<parameter name="centre-finder-step-size">
+<!-- this is the initial step for the beam centre finder in metres -->
+  <value val="0.005"/>
+</parameter>
+
 </component-link>
 
 </parameter-file>

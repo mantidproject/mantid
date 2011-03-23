@@ -232,18 +232,19 @@ class DetectorBank:
         self._orientation = orien
 
 class ISISInstrument(instrument.Instrument):
-    def __init__(self, wrksp_name=None, filename=None):
+    def __init__(self, filename=None):
         """
             Reads the instrument definition xml file
-            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
             @param filename: the name of the instrument definition file to read 
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        instrument.Instrument.__init__(self, wrksp_name, instr_filen=filename)
+        instrument.Instrument.__init__(self, instr_filen=filename)
 
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
             'default-incident-monitor-spectrum')[0])
+        self.cen_find_step = int(self.definition.getNumberParameter(
+            'centre-finder-step-size')[0])
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
         firstDetect.disable_y_and_rot_corrs()
@@ -394,14 +395,12 @@ class LOQ(ISISInstrument):
     #maximum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MAX = 10.0
     
-    def __init__(self, wrksp_name=None):
+    def __init__(self):
         """
             Reads LOQ's instrument definition xml file
-            @param wrksp_name: Create a workspace with this containing the empty instrument, if it not set the instrument workspace is deleted afterwards
             @raise IndexError: if any parameters (e.g. 'default-incident-monitor-spectrum') aren't in the xml definition
         """
-        super(LOQ, self).__init__(wrksp_name, 'LOQ_Definition_20020226-.xml')
-
+        super(LOQ, self).__init__('LOQ_Definition_20020226-.xml')
 
     def set_component_positions(self, ws, xbeam, ybeam):
         """
@@ -454,8 +453,8 @@ class SANS2D(ISISInstrument):
     WAV_RANGE_MIN = 2.0
     WAV_RANGE_MAX = 14.0
 
-    def __init__(self, wrksp_name=None):
-        super(SANS2D, self).__init__(wrksp_name)
+    def __init__(self):
+        super(SANS2D, self).__init__()
         
         self._marked_dets = []
         # set to true once the detector positions have been moved to the locations given in the sample logs
@@ -666,6 +665,13 @@ class SANS2D(ISISInstrument):
         self.REAR_DET_X = float(logvalues['Rear_Det_X'])
 
         return logvalues
+    
+    def load_transmission_inst(self, workspace):
+        """
+            Not required for SANS2D
+        """
+        pass
+
 
 if __name__ == '__main__':
     pass
