@@ -1,6 +1,7 @@
 add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL )
+add_definitions ( -DPOCO_NO_UNWINDOWS )
 
 set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
 set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
