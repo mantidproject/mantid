@@ -159,6 +159,8 @@ if os.name == 'nt':
     # MG: Even though MSVC defines "_WIN32" gsl checks for "WIN32" and Poco checks for "_WINDOWS" hence the additional defines.
     # We should stick to the standard _WIN32 check though as this is guaranteed to be defined by the MSVC compiler
     env.Append(CPPDEFINES = ['WIN32','_WINDOWS', 'POCO_DLL', 'GSL_DLL'])
+    # Poco undefs some Windows macros that we use unless this is defined
+    env.Append(CPPDEFINES = ['POCO_NO_UNWINDOWS'])
     if int(debug) :
         cflags = [ '/W3', '/Od', '/FD', '/EHsc', '/MDd', '/TP',  ]
         cflags.extend([ '/wd4275', '/wd4996'])

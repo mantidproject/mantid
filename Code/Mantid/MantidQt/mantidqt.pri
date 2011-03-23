@@ -9,7 +9,7 @@
 CONFIG += qt warn_on exceptions debug_and_release
 QT -= script
 
-win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 BOOST_ALL_DYN_LINK POCO_DLL
+win32:DEFINES += QT_DLL QT_THREAD_SUPPORT _WINDOWS WIN32 BOOST_ALL_DYN_LINK POCO_DLL POCO_NO_UNWINDOWS
 DEFINES += BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
 
 # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function

@@ -19,7 +19,7 @@ DEFINES         += SCRIPTING_CONSOLE
 # a dialog for selecting the scripting language on a per-project basis
 DEFINES         += SCRIPTING_DIALOG
 DEFINES         +=  BOOST_DATE_TIME_POSIX_TIME_STD_CONFIG
-win32:DEFINES   += _WIN32_WINNT=0x0400 _WIN32 GSL_DLL POCO_DLL BOOST_ALL_DYN_LINK NOMINMAX
+win32:DEFINES   += _WIN32_WINNT=0x0400 _WIN32 GSL_DLL POCO_DLL BOOST_ALL_DYN_LINK NOMINMAX POCO_NO_UNWINDOWS
 
 # Mantid requires a macro to tell it if stdint.h exists but qmake has no simple function
 # to check system header paths and worse still no way of accessing what they are!
