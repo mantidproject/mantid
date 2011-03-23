@@ -92,7 +92,7 @@ public:
   
   void do_test_MINITOPAZ(EventType type)
   {
-    //return; //FIXME
+    return; //FIXME
 
     int numEventsPer = 100;
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
