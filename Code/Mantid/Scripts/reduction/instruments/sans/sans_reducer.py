@@ -183,6 +183,13 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_sensitivity_correcter expects an object of class ReductionStep"
     
+    @validate_step
+    def set_sensitivity_beam_center(self, beam_center):
+        if self._sensitivity_correcter is not None:
+            self._sensitivity_correcter.set_beam_center(beam_center)
+        else:
+            raise RuntimeError, "Set the sensitivity correction before setting its beam center"
+    
     def set_dark_current_subtracter(self, subtracter):
         """
             Set the ReductionStep object that subtracts the dark current from the data.

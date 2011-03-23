@@ -2,9 +2,11 @@
     Implementation of reduction steps for SANS
 """
 import os
+import sys
 import math
 from reduction import ReductionStep
 from reduction import extract_workspace_name
+from reduction import validate_step
 
 # Mantid imports
 from mantidsimple import *
@@ -62,7 +64,8 @@ class BaseBeamFinder(ReductionStep):
         filepath = reducer._full_file_path(self._datafile)
         
         # Check whether that file was already meant to be processed
-        workspace = "beam_center_"+extract_workspace_name(filepath)
+        workspace_default = "beam_center_"+extract_workspace_name(filepath)
+        workspace = workspace_default
         if filepath in reducer._data_files.values():
             for k in reducer._data_files.iterkeys():
                 if reducer._data_files[k]==filepath:
@@ -108,7 +111,7 @@ class BaseBeamFinder(ReductionStep):
         # Note: the position of the detector in Z is now part of the load
         # Note: if the relative translation is correct, we shouldn't have to keep 
         #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
-        if workspace is not "beam_center":
+        if not workspace == workspace_default:
             old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
                                     X = old_ctr[0]-float(ctr[0]),
@@ -452,11 +455,24 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0):
+    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, beam_center=None):
+        """
+            @param datafile: file path of data to load
+            @param sample_det_dist: sample-detector distance [mm] (will overwrite header info)
+            @param sample_det_offset: sample-detector distance offset [mm]
+            @param beam_center: [center_x, center_y] [pixels]
+        """
         super(LoadRun, self).__init__()
         self._data_file = datafile
         self.set_sample_detector_distance(sample_det_dist)
         self.set_sample_detector_offset(sample_det_offset)
+        self.set_beam_center(beam_center)
+        
+    def clone(self, data_file=None):
+        if data_file is None:
+            data_file = self._data_file
+        return LoadRun(datafile=data_file, sample_det_dist=self._sample_det_dist,
+                       sample_det_offset=self._sample_det_offset, beam_center=self._beam_center)
         
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
@@ -475,6 +491,29 @@ class LoadRun(ReductionStep):
             except:
                 raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
         self._sample_det_offset = offset
+        
+    def set_beam_center(self, beam_center):
+        """
+            Sets the beam center to be used when loading the file
+            @param beam_center: [pixel_x, pixel_y]
+        """
+        if beam_center is None:
+            self._beam_center = None
+        
+        # Check that we have pixel numbers (int)            
+        elif type(beam_center) == list:
+            if len(beam_center) == 2:
+                try:
+                    int(beam_center[0])
+                    int(beam_center[1])
+                    self._beam_center = [beam_center[0], beam_center[1]]
+                except:
+                    raise RuntimeError, "LoadRun.set_beam_center expects a list of two integers\n  %s" % sys.exc_value
+            else:
+                raise RuntimeError, "LoadRun.set_beam_center expects a list of two integers. Found length %d" % len(beam_center)
+            
+        else:
+            raise RuntimeError, "LoadRun.set_beam_center expects a list of two integers. Found %s" % type(beam_center)
         
     def execute(self, reducer, inputworkspace, outputworkspace=None):
         """
@@ -541,7 +580,10 @@ class LoadRun(ReductionStep):
     
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
-        [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
+        if self._beam_center is not None:            
+            [pixel_ctr_x, pixel_ctr_y] = self._beam_center
+        else:
+            [pixel_ctr_x, pixel_ctr_y] = reducer.get_beam_center()
         if pixel_ctr_x is not None and pixel_ctr_y is not None:
             [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
@@ -731,7 +773,7 @@ class SensitivityCorrection(ReductionStep):
         be re-used on multiple data sets and the sensitivity will not be
         recalculated.
     """
-    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None):
+    def __init__(self, flood_data, min_sensitivity=0.5, max_sensitivity=1.5, dark_current=None, beam_center=None):
         super(SensitivityCorrection, self).__init__()
         self._flood_data = flood_data
         self._dark_current_data = dark_current
@@ -739,6 +781,26 @@ class SensitivityCorrection(ReductionStep):
         self._min_sensitivity = min_sensitivity
         self._max_sensitivity = max_sensitivity
         
+        # Beam center for flood data
+        self._beam_center = beam_center
+        
+    @validate_step
+    def set_beam_center(self, beam_center):
+        """
+             Set the reduction step that will find the beam center position
+             @param beam_center: ReductionStep object
+        """
+        self._beam_center = beam_center
+        
+    def get_beam_center(self):
+        """
+            Returns the beam center found by the beam center finder
+        """
+        if self._beam_center is not None:
+            return self._beam_center.get_beam_center()
+        else:
+            return None
+    
     def execute(self, reducer, workspace):
         # If the sensitivity correction workspace exists, just apply it.
         # Otherwise create it.      
@@ -748,7 +810,15 @@ class SensitivityCorrection(ReductionStep):
             filepath = reducer._full_file_path(self._flood_data)
             flood_ws = "flood_"+extract_workspace_name(filepath)
             
-            reducer._data_loader.__class__(datafile=filepath).execute(reducer, flood_ws)
+            beam_center = None
+            # Find the beam center if we need to
+            if self._beam_center is not None:
+                self._beam_center.execute(reducer)
+                beam_center = self._beam_center.get_beam_center()
+                
+            loader = reducer._data_loader.clone(data_file=filepath)
+            loader.set_beam_center(beam_center)
+            loader.execute(reducer, flood_ws)
 
             # Subtract dark current
             if self._dark_current_data is not None and len(str(self._dark_current_data).strip())>0 \

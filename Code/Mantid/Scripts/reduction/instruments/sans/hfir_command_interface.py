@@ -31,6 +31,14 @@ def SensitivityCorrection(flood_data, min_sensitivity=0.5, max_sensitivity=1.5, 
                                                                                               min_sensitivity, 
                                                                                               max_sensitivity,
                                                                                               dark_current=dark_current))
+def SetSensitivityBeamCenter(x,y):
+    corr = ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.BaseBeamFinder(x,y))
+    
+def SensitivityDirectBeamCenter(datafile):
+    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.DirectBeamCenter(datafile).set_masked_edges(1,1,1,1))
+
+def SensitivityScatteringBeamCenter(datafile, beam_radius=3.0):
+    ReductionSingleton().set_sensitivity_beam_center(sans_reduction_steps.ScatteringBeamCenter(datafile, beam_radius=beam_radius).set_masked_edges(1,1,1,1))
     
 def NoSensitivityCorrection():
     ReductionSingleton().set_sensitivity_correcter(None)
