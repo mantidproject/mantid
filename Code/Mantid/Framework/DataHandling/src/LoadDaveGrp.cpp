@@ -1,6 +1,7 @@
 #include "MantidDataHandling/LoadDaveGrp.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/LoadAlgorithmFactory.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/Progress.h"
 #include "MantidKernel/ListValidator.h"
@@ -16,6 +17,9 @@ namespace DataHandling
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(LoadDaveGrp)
 
+// Register the algorithm into the LoadAlgorithmFactory
+DECLARE_LOADALGORITHM(LoadDaveGrp)
+
 /// Sets documentation strings for this algorithm
 void LoadDaveGrp::initDocs()
 {
@@ -27,6 +31,64 @@ LoadDaveGrp::LoadDaveGrp() : ifile(), line(), nGroups(0), xLength(0)
 {
 }
 
+bool LoadDaveGrp::quickFileCheck(const std::string& filePath, std::size_t nread,
+    const file_header& header)
+{
+  std::string extn = this->extension(filePath);
+  bool bdgrp(false);
+  (!extn.compare("grp") || !extn.compare("sqe") || !extn.compare("txt")) ? bdgrp = true : bdgrp = false;
+  bool is_ascii(true);
+  for(std::size_t i = 0; i < nread; i++)
+  {
+    if (!isascii(header.full_hdr[i]))
+      is_ascii = false;
+  }
+  return(is_ascii || bdgrp ? true : false);
+}
+
+int LoadDaveGrp::fileCheck(const std::string& filePath)
+{
+  this->ifile.open(filePath.c_str());
+  if (!this->ifile.is_open())
+  {
+    g_log.error("Unable to open file: " + filePath);
+    throw Kernel::Exception::FileError("Unable to open file: " , filePath);
+  }
+
+  // First line is a comment: #
+  bool bdgrp(false);
+  this->readLine();
+  if (this->line.substr(0,1) == "#")
+  {
+    bdgrp = true;
+  }
+  // Second line is an integer
+  this->readLine();
+  unsigned int value;
+  std::istringstream is(this->line);
+  is >> value;
+  bdgrp = bdgrp && is.good();
+  // Third line is a comment: #
+  this->readLine();
+  if (this->line.substr(0,1) == "#")
+  {
+    bdgrp = bdgrp && true;
+  }
+  // Fourth line is an integer
+  this->readLine();
+  // Clear all stream bits regardless of what happened before
+  is.clear();
+  is.str(this->line);
+  is >> value;
+  bdgrp = bdgrp && is.good();
+  this->ifile.close();
+
+  if (bdgrp)
+  {
+    return 80;
+  }
+  return 0;
+}
 void LoadDaveGrp::init()
 {
   std::vector<std::string> exts;

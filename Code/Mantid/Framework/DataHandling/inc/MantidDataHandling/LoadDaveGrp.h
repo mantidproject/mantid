@@ -2,6 +2,7 @@
 #define MANTID_DATAHANDLING_LOADDAVEGRP_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/IDataFileChecker.h"
 #include <fstream>
 #include <string>
 
@@ -42,7 +43,7 @@ namespace DataHandling
      File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
      Code Documentation is available at: <http://doxygen.mantidproject.org>
   */
-class DLLExport LoadDaveGrp: public Mantid::API::Algorithm
+class DLLExport LoadDaveGrp : public API::IDataFileChecker
 {
 public:
   /// Constructor
@@ -55,6 +56,24 @@ public:
   virtual int version() const { return (1); }
   /// Algorithm's category for identification
   virtual const std::string category() const { return "DataHandling"; }
+  /**
+   * Do a quick check that this file can be loaded
+   *
+   * @param filePath the location of and the file to check
+   * @param nread number of bytes to read
+   * @param header the first 100 bytes of the file as a union
+   * @return true if the file can be loaded, otherwise false
+   */
+  virtual bool quickFileCheck(const std::string& filePath, std::size_t nread,
+      const file_header& header);
+  /**
+   * Check the structure of the file and return a value between 0 and 100 of
+   * how much this file can be loaded
+   *
+   * @param filePath the location of and the file to check
+   * @return a confidence level indicator between 0 and 100
+   */
+  virtual int fileCheck(const std::string& filePath);
 
 private:
   /// Sets documentation strings for this algorithm
