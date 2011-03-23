@@ -113,7 +113,7 @@ namespace Algorithms
 
       double temp, d, s, deltad;
       double error = 0;
-      for (uint i = 1; i < vd.size(); i ++){
+      for (size_t i = 1; i < vd.size(); i ++){
           d = vd[i];
           s = vs[i];
           deltad = vd[i]-vd[i-1];
@@ -139,7 +139,7 @@ namespace Algorithms
 
       double temp, q, s, deltaq;
       double error = 0;
-      for (uint i = 1; i < vq.size(); i ++){
+      for (size_t i = 1; i < vq.size(); i ++){
           q = vq[i];
           s = vs[i];
           deltaq = vq[i]-vq[i-1];
