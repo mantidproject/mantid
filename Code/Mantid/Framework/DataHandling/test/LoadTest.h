@@ -325,6 +325,18 @@ public:
     TS_ASSERT_EQUALS(loader.existsProperty("EventFilename"), false);
     TS_ASSERT_EQUALS(loader.getPropertyValue("LoaderName"), "LoadEventNexus");
   }
+
+  void testDaveGrp()
+  {
+    Load loader;
+    loader.initialize();
+    loader.setPropertyValue("Filename", "DaveAscii.grp");
+    loader.setPropertyValue("OutputWorkspace","LoadTest_Output");
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
+    MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("LoadTest_Output"));
+    TS_ASSERT(ws);
+    AnalysisDataService::Instance().remove("LoadTest_Output");
+  }
 };
 
 #endif /*LOADTEST_H_*/
