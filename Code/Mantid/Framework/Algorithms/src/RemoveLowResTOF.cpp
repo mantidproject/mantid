@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include <limits>
 #include <math.h>
 
 namespace Mantid
@@ -101,16 +102,6 @@ void RemoveLowResTOF::exec()
   m_DIFCref = this->getProperty("ReferenceDIFC");
   m_K = this->getProperty("K");
 
-  // Get the min TOF
-  {
-    double empty = Mantid::EMPTY_DBL();
-
-    m_Tmin = this->getProperty("Tmin");
-    if (m_Tmin == empty)
-      m_Tmin = m_inputWS->dataX(0).front();
-  }
-  g_log.information() << "Tmin = " << m_Tmin << " microseconds\n";
-
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
 
   // go off and do the event version if appropriate
@@ -133,7 +124,9 @@ void RemoveLowResTOF::exec()
     setProperty("OutputWorkspace", outputWS);
   }
 
-  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  this->getTminData(false);
+
+  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     // copy the data from the input workspace
     outputWS->dataX(workspaceIndex) = m_inputWS->readX(workspaceIndex);
@@ -184,8 +177,10 @@ void RemoveLowResTOF::execEvent()
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
 
+  this->getTminData(true);
+
   // do the actual work
-  for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+  for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
     outW->getEventList(workspaceIndex).maskTof(0., this->calcTofMin(workspaceIndex));
   }
@@ -217,6 +212,40 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 
   return tmin;
 }
+
+void RemoveLowResTOF::getTminData(const bool isEvent)
+{
+  // get it from the properties
+  double empty = Mantid::EMPTY_DBL();
+  double temp = this->getProperty("Tmin");
+  if (temp != empty)
+  {
+    m_Tmin = temp;
+    return;
+  }
+
+  m_Tmin = std::numeric_limits<double>::max();
+  if (isEvent)
+  {
+    for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+    {
+      temp = m_inputEvWS->getEventList(workspaceIndex).getTofMin();
+      if (temp < m_Tmin)
+        m_Tmin = temp;
+    }
+  }
+  else
+  {
+    for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+    {
+      temp = m_inputWS->dataX(workspaceIndex).front();
+      if (temp < m_Tmin)
+          m_Tmin = temp;
+    }
+  }
+  g_log.information() << "Tmin = " << m_Tmin << " microseconds\n";
+}
+
 
 void RemoveLowResTOF::runMaskDetectors()
 {

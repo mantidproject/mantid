@@ -27,6 +27,7 @@ private:
   DataObjects::EventWorkspace_const_sptr m_inputEvWS; ///< Pointer to the input event workspace
   double calcTofMin(const std::size_t);
   void runMaskDetectors();
+  void getTminData(const bool);
   double m_DIFCref; ///< The reference value for DIFC to filter with
   double m_K; ///< Mystery variable that I'm not sure what it is for
   Geometry::IInstrument_const_sptr m_instrument; //< The instrument
