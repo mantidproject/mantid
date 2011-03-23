@@ -214,14 +214,13 @@ class SNSPowderReduction(PythonAlgorithm):
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0) or (DIFCref > 0): # super special Jason stuff
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
-            if DIFCref > 0:
-                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref, K=3.22)
             if LRef > 0:
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
+            if DIFCref > 0:
+                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref, K=3.22)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
