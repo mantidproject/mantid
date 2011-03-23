@@ -67,7 +67,7 @@ int LoadDaveGrp::fileCheck(const std::string& filePath)
   unsigned int value;
   std::istringstream is(this->line);
   is >> value;
-  bdgrp = bdgrp && is.good();
+  bdgrp = bdgrp && !is.fail();
   // Third line is a comment: #
   this->readLine();
   if (this->line.substr(0,1) == "#")
@@ -80,7 +80,7 @@ int LoadDaveGrp::fileCheck(const std::string& filePath)
   is.clear();
   is.str(this->line);
   is >> value;
-  bdgrp = bdgrp && is.good();
+  bdgrp = bdgrp && !is.fail();
   this->ifile.close();
 
   if (bdgrp)
