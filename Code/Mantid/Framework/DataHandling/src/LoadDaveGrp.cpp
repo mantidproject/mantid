@@ -103,7 +103,7 @@ void LoadDaveGrp::init()
       "The name of the workspace that will be created.");
   // Extract the current contents of the UnitFactory to be the allowed values
   // of the X-Axis property
-  this->declareProperty("X-Axis Units", "",
+  this->declareProperty("X-Axis Units", "DeltaE",
       new Kernel::ListValidator(Kernel::UnitFactory::Instance().getKeys()),
     "The name of the units for the X-Axis (must be one of those registered in\n"
     "the Unit Factory)");
