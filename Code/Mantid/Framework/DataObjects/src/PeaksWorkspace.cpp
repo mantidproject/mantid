@@ -1,6 +1,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ColumnFactory.h"
 #include "MantidGeometry/Quat.h"
 #include "MantidDataObjects/TableWorkspace.h"
@@ -28,7 +29,7 @@ namespace DataObjects
   /// Register the workspace as a type
   DECLARE_WORKSPACE(PeaksWorkspace );
 
-  double pi = 3.1415926535;
+  //double pi = 3.1415926535;
 /*//moved to header file
   std::vector< std::string > DetNames;
 
@@ -60,7 +61,7 @@ namespace DataObjects
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "col" ) );
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "chan" ) );
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "L1" ) );
-    TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "L2" ) );
+
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "time" ) );
     TableWorkspace::addColumn( std::string( "double" ) ,  std::string( "t_offset" ) );
 
@@ -87,23 +88,23 @@ namespace DataObjects
     }
   }
 
-  void PeaksWorkspace::initialize( double      L1 ,               //m
-                                      double      time_offset ,      //microseconds
-                                      std::string Facility ,
-                                      std::string Instrument ,
-                                      Kernel::DateAndTime  experimentDate ,
-                                      std::string version ,
+  void PeaksWorkspace::initialize(    const double      L1 ,               //m
+                                      const double      time_offset ,      //microseconds
+                                      const std::string Facility ,
+                                      const std::string Instrument ,
+                                      const Kernel::DateAndTime  experimentDate ,
+                                      const std::string version ,
 
-                                      std::vector<std::string> &PanelNames,
-                                      std::vector< double*> &PanelInfo
+                                      const std::vector<std::string> &PanelNames,
+                                      const std::vector< double*> &PanelInfo
                                       )
      {
        C_L1 = L1;
        C_time_offset = time_offset;
-       C_Facility = Facility;
-       C_Instrument = Instrument;
-       C_version = version;
-       C_experimentDate = experimentDate;
+       C_Facility = std::string( Facility);
+       C_Instrument = std::string( Instrument);
+       C_version = std::string( version );
+       C_experimentDate = Kernel::DateAndTime( experimentDate);
        ClearDeleteCalibrationData();
        for( int i=0; i<PanelNames.size() ; i++)
          DetNames.push_back( std::string(PanelNames[i]));
@@ -122,7 +123,7 @@ namespace DataObjects
        }
      }
 
-     void PeaksWorkspace::initialize(  std::string DetCalFileName)
+     void PeaksWorkspace::initialize(  const std::string DetCalFileName)
      {
        ClearDeleteCalibrationData();
 
@@ -140,21 +141,20 @@ namespace DataObjects
      }
 
   void PeaksWorkspace::addPeak( const Geometry::V3D position ,
-      const double time ,
-      const Geometry::V3D hkl ,
-      const Geometry::V3D sample_orientation ,  //radians ,  phi,chi,omega
-      const int  reflag ,
-      const int  runNum ,
-      const double monCount ,
-      const int bankName ,
-      const double PeakCellCount ,
-      const double row ,
-      const double col ,
-      const double chan ,
-      const double L2 ,
-      const double PeakIntegrateCount ,
-      const double PeakIntegrateError
-  )
+                                const double time ,
+                                const Geometry::V3D hkl ,
+                                const Geometry::V3D sample_orientation ,  //radians ,  phi,chi,omega
+                                const int  reflag ,
+                                const int  runNum ,
+                                const double monCount ,
+                                const int bankName ,
+                                const double PeakCellCount ,
+                                const double row ,
+                                const double col ,
+                                const double chan ,
+                                const double PeakIntegrateCount ,
+                                const double PeakIntegrateError
+         )
   {
     int i = rowCount();
     insertRow( i );
@@ -183,7 +183,7 @@ namespace DataObjects
       getRef< int >( std::string( "run" ) ,  i ) = runNum;
 
       getRef< double >( std::string( "chan" ) ,  i ) = chan;
-      getRef< double >( std::string( "L2" ) ,  i ) = L2;
+      //getRef< double >( std::string( "L2" ) ,  i ) = L2;
       getRef< int >( std::string( "bank" ) ,  i ) =
           ( bankName );
 
@@ -211,7 +211,7 @@ namespace DataObjects
    *
    * @param peakNum :: peak index to remove
    */
-  void PeaksWorkspace::removePeak( int peakNum )
+  void PeaksWorkspace::removePeak( const int peakNum )
   {
     removeRow( peakNum );
   }
@@ -824,9 +824,9 @@ namespace DataObjects
         s = readPeak( s , in , h , k , l , col , row , chan , L2 ,
             ScatAng , Az , wl , D , IPK , Inti , SigI , Reflag );
 
-        chi *= pi/180;
-        phi *= pi/180;
-        omega *= pi/180;
+        chi *= M_PI/180;
+        phi *= M_PI/180;
+        omega *= M_PI/180;
 
         z = L2*cos( ScatAng );
         r = sqrt( L2*L2 - z*z );
@@ -845,7 +845,7 @@ namespace DataObjects
             Geometry::V3D( h , k , l ) ,
             Geometry::V3D( phi , chi , omega ) ,
             Reflag , run , monCount , detName , IPK ,
-            row , col , chan , L2, Inti , SigI );
+            row , col , chan ,  Inti , SigI );
       }
   }catch( std::exception & xe)
   {
@@ -872,16 +872,15 @@ namespace DataObjects
    * @param peakNum :: index of the peak
    * @return double, d_spacing
    */
-  double  PeaksWorkspace::get_dspacing( int peakNum )
+  double  PeaksWorkspace::get_dspacing(const int peakNum )
   {
-    double time = cell< double >(peakNum, ItimeCol);
-    double L1   =cell< double >(peakNum, IL1Col );
-    Geometry::V3D position =
-        cell< Geometry::V3D >( peakNum , IpositionCol);
+    double time = getTime(peakNum);
+    double L1   =get_L1(peakNum );
+    Geometry::V3D position = getPosition( peakNum);
 
     double rho, polar,az;
     position.getSpherical( rho, polar, az);
-    polar *= pi/180;
+    polar *= M_PI/180;
     double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
@@ -892,14 +891,14 @@ namespace DataObjects
 
   }
 
-  double  PeaksWorkspace::get_wavelength( int peakNum )
+  double  PeaksWorkspace::get_wavelength( const int peakNum )
   {
     double time = cell< double >(peakNum, ItimeCol);
     double L1   =cell< double >(peakNum, IL1Col );
     Geometry::V3D position = cell< Geometry::V3D >( peakNum , IpositionCol);
     double rho, polar,az;
     position.getSpherical( rho, polar, az);
-    polar *= pi/180;
+    polar *= M_PI/180;
     double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
@@ -911,32 +910,32 @@ namespace DataObjects
 
 
   //I believe their |Q| = 2pi/d.  This is what is returned.
-  double  PeaksWorkspace::get_Qmagnitude( int peakNum )
+  double  PeaksWorkspace::get_Qmagnitude( const int peakNum )
   {
 
 
-    double time = cell< double >(peakNum, ItimeCol);
-    double L1   =cell< double >(peakNum, IL1Col );
-    Geometry::V3D position = cell< Geometry::V3D >( peakNum , IpositionCol);
+    double time =getTime(peakNum);
+    double L1   = get_L1(peakNum );
+    Geometry::V3D position = getPosition( peakNum );
     double rho, polar,az;
     position.getSpherical( rho, polar, az);
-    polar *= pi/180;
+    polar *= M_PI/180;
     double L2=rho;
     std::vector< double >xx , yy;
     xx.push_back( time );
 
     Kernel::Units::MomentumTransfer Q;
     Q.fromTOF( xx , yy , L1 , L2 , polar , 12 , 12.1 , 12.1 );
-    return xx[ 0 ]/2/pi;
+    return xx[ 0 ]/2/M_PI;
   }
 
-  Geometry::V3D    PeaksWorkspace::get_Qlab( int peakNum )
+  Geometry::V3D    PeaksWorkspace::get_Qlab( const int peakNum )
   {
     double MagQ = get_Qmagnitude( peakNum);
 
 
     Geometry::V3D position =
-        cell< Geometry::V3D >( peakNum , IpositionCol);
+        getPosition( peakNum );
     position =Geometry::V3D(position);
     position /=position.norm();
     position.setZ( position.Z()-1);
@@ -947,7 +946,7 @@ namespace DataObjects
 
   }
 
-  Geometry::V3D     PeaksWorkspace::get_QXtal( int peakNum )
+  Geometry::V3D     PeaksWorkspace::get_QXtal(const int peakNum )
   {
 
     Geometry::V3D Qvec= Geometry::V3D( get_Qlab( peakNum) );
@@ -956,7 +955,7 @@ namespace DataObjects
 
     //phi, chi, omega
     Geometry::Quat rot;
-    sampOrient *=180/pi;
+    sampOrient *=180/M_PI;
     rot.setAngleAxis( -sampOrient[2],Geometry::V3D( 0,1,0));
 
     rot.rotate( Qvec );
@@ -972,102 +971,141 @@ namespace DataObjects
     return Qvec;
   }
 
-  Geometry::V3D   PeaksWorkspace::get_hkl( int peakNum )
+  Geometry::V3D   PeaksWorkspace::get_hkl( const int peakNum )
   {
 
     return Geometry::V3D( cell< Geometry::V3D >(peakNum , IhklCol ));
   }
 
-  double     PeaksWorkspace::get_row(int peakNum )
+  double     PeaksWorkspace::get_row(const int peakNum )
   {
     return cell< double >( peakNum , IPeakRowCol );
   }
 
-  double     PeaksWorkspace::get_ipk( int peakNum )
+  double     PeaksWorkspace::get_ipk(const int peakNum )
   {
 
     return cell< double >( peakNum , IPeakIntensityCol );
   }
 
-  double     PeaksWorkspace::get_column( int peakNum )
+  double     PeaksWorkspace::get_column( const int peakNum )
   {
 
     return cell< double >( peakNum , IPeakColCol );
   }
 
-  double     PeaksWorkspace::get_time_channel( int peakNum )
+  double     PeaksWorkspace::get_time_channel( const int peakNum )
   {
 
     return cell< double >( peakNum , IPeakChanCol );
   }
 
-  double  PeaksWorkspace::get_time_offset( int peakNum )
+  double  PeaksWorkspace::get_time_offset( const int peakNum )
   {
 
-    return cell< double >( peakNum ,ItimeOffsetChanCol) ;;
+    return cell< double >( peakNum ,ItimeOffsetChanCol) ;
   }
 
-  double  PeaksWorkspace::get_L1(int peakNum )
+  double  PeaksWorkspace::get_L1(const int peakNum )
   {
 
     return cell< double >( peakNum , IL1Col );
   }
 
-  double  PeaksWorkspace::get_L2(int peakNum )
+  double  PeaksWorkspace::get_L2(const int peakNum )
   {
 
     return cell< Geometry::V3D>( peakNum ,IpositionCol).norm();
   }
 
-  int    PeaksWorkspace::get_Bank( int peakNum )
+  int    PeaksWorkspace::get_Bank(const int peakNum )
   {
 
     return cell< int >( peakNum , IDetBankCol );
   }
 
-  Geometry::V3D     PeaksWorkspace::getPosition( int peakNum )
+  Geometry::V3D     PeaksWorkspace::getPosition( const int peakNum )
   {
     return Geometry::V3D(cell< Geometry::V3D >( peakNum , IpositionCol ));
   }
 
-  Geometry::V3D   PeaksWorkspace::getSampleOrientation( int peakNum)
+  Geometry::V3D   PeaksWorkspace::getSampleOrientation(const int peakNum)
   {
     return Geometry::V3D( cell<Geometry::V3D>( peakNum , IsamplePositionCol));
   }
 
-  int   PeaksWorkspace::getRunNumber( int peakNum)
+  int   PeaksWorkspace::getRunNumber( const int peakNum)
   {
     return cell<int>( peakNum , IrunNumCol);
   }
 
-  int  PeaksWorkspace::getReflag( int peakNum )
+  int  PeaksWorkspace::getReflag( const int peakNum )
   {
       return cell<int>( peakNum , IreflagCol);
   }
 
-  double  PeaksWorkspace::getMonitorCount( int peakNum)
+  double  PeaksWorkspace::getMonitorCount( const int peakNum)
   {
      return cell<double>( peakNum , IMonitorCountCol );
   }
-  double  PeaksWorkspace::getPeakCellCount( int peakNum )
+  double  PeaksWorkspace::getPeakCellCount( const int peakNum )
   {
     return cell< double >( peakNum , IPeakIntensityCol );
   }
 
-  double  PeaksWorkspace::getPeakIntegrationCount( int peakNum )
+  double  PeaksWorkspace::getPeakIntegrationCount( const int peakNum )
   {
     return cell< double >( peakNum , IPeakIntegrateCol );
   }
 
-  double  PeaksWorkspace::getPeakIntegrationError( int peakNum )
+  double  PeaksWorkspace::getPeakIntegrationError( const int peakNum )
   {
     return cell< double >( peakNum , IPeakIntegrateErrorCol );
   }
 
-  void    sethkls( Geometry::Matrix<double>UB,  double tolerance,
-                 bool SetOnlyUnset, int reflag)
+  void  PeaksWorkspace::sethkls( const Geometry::Matrix<double>UB, const double tolerance,
+                 const bool SetOnlyUnset, const int reflag)
   {
-    //TODO
+     std::pair<int,int> size = UB.size();
+
+     if( size.first !=3 || size.second != 3)
+     {
+       g_log.error( ("orientation matrix is the wrong size"));
+       throw std::runtime_error(" Orientation matrix is the wrong size");
+
+     }
+
+     Geometry::Matrix<double> UBI= Geometry::Matrix<double>(UB);
+     if( UBI.Invert() ==0 )
+     {
+       g_log.error(" Orientation matrix is not invertible");
+       throw std::runtime_error(" Orientation matrix is not invertible");
+     }
+
+     for( int i=0; i< getNumberPeaks(); i++)
+       if( !SetOnlyUnset || get_hkl(i)==Geometry::V3D(0,0,0))
+       {
+         int Reflag = getReflag( i );
+         int unitsDig =  Reflag %10;
+         Geometry::V3D hkl= UBI*get_hkl(i);
+         double h_low = hkl.X()-floor(hkl.X());
+         double k_low = hkl.Y()-floor( hkl.Y());
+         double l_low = hkl.Z()-floor( hkl.Z());
+         if( (h_low <tolerance || (1-h_low)<tolerance ) &&
+             (l_low <tolerance || (1-k_low)<tolerance ) &&
+             (l_low <tolerance || (1-l_low)<tolerance ))
+           {
+             sethkl( hkl, i);
+             Reflag = (Reflag /100)+10*reflag + unitsDig;
+           }
+         else
+           {
+             sethkl( Geometry::V3D(0,0,0), i);
+             Reflag = (Reflag /100)+10*0 + unitsDig;
+           }
+         setReflag( Reflag, i);
+
+       }
   }
 
   void    PeaksWorkspace::clearhkls( )
@@ -1076,32 +1114,32 @@ namespace DataObjects
       cell< Geometry::V3D >( i , IhklCol ) = Geometry::V3D(0,0,0);
   }
 
-  void    PeaksWorkspace::sethkl( const Geometry::V3D hkl , int peakNum )
+  void    PeaksWorkspace::sethkl( const Geometry::V3D hkl , const int peakNum )
   {
     cell< Geometry::V3D >( peakNum , IhklCol ) = Geometry::V3D( hkl );
   }
 
-  void    PeaksWorkspace::setPeakCount( double count ,  int peakNum )
+  void    PeaksWorkspace::setPeakCount( const double count , const int peakNum )
   {
     cell< double >( peakNum , IPeakIntensityCol ) = count;
   }
 
-  void    PeaksWorkspace::setPeakIntegrateCount( double count ,  int peakNum )
+  void    PeaksWorkspace::setPeakIntegrateCount( const double count , const int peakNum )
   {
     cell< double >( peakNum ,IPeakIntegrateCol) = count;
   }
 
-  void    PeaksWorkspace::setPeakIntegrateError( double count ,  int peakNum )
+  void    PeaksWorkspace::setPeakIntegrateError( const double count , const int peakNum )
   {
     cell< double >( peakNum ,IPeakIntegrateErrorCol) = count;
   }
 
-  void    PeaksWorkspace::setPeakPos( Geometry::V3D position, int peakNum )
+  void    PeaksWorkspace::setPeakPos( const Geometry::V3D position, const int peakNum )
   {
     cell< Geometry::V3D >( peakNum , IpositionCol ) = Geometry::V3D( position );
   }
 
-  void    PeaksWorkspace::setReflag( int newValue , int peakNum )
+  void    PeaksWorkspace::setReflag( const int newValue , const int peakNum )
   {
     cell< int >( peakNum ,IreflagCol ) = newValue;
   }

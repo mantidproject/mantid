@@ -14,7 +14,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Math/Matrix.h"
 
-//TODO add basic gets and sets
+
 //IsamplePosition should be IsampleOrientation
 namespace Mantid
 {
@@ -28,8 +28,32 @@ namespace Kernel
 
 namespace DataObjects
 {
-/**
- *  PeaksWorkspace stores information about a set of SCD peaks.
+//==========================================================================================
+/** @class Mantid::DataObjects::PeaksWorkspace
+
+   The class PeaksWorkspace stores information about a set of SCD peaks.
+
+    @author Ruth Mikkelson, SNS ORNL
+    @date 3/10/2010
+
+    Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+    This file is part of Mantid.
+
+    Mantid is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 3 of the License, or
+    (at your option) any later version.
+
+    Mantid is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+    File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
 class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
 {
@@ -54,20 +78,20 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
           *                        center x,y,z; base x,y,z; up x,y,z
           *                        where x,y(vert),z(beam) is in m McStas coords
           */
-         void initialize(double      L1,              //cm
-                         double      time_offset,     //seconds
-                         std::string Facility,
-                         std::string Instrument,
-                         Kernel::DateAndTime  experimentDate,
-                         std::string version,
-                         std::vector<std::string> &PanelNames,
-                         std::vector< double*> &PanelInfo);
+         void initialize(const double      L1,              //cm
+                         const double      time_offset,     //seconds
+                         const std::string Facility,
+                         const std::string Instrument,
+                         const Kernel::DateAndTime  experimentDate,
+                         const std::string version,
+                         const std::vector<std::string> &PanelNames,
+                         const std::vector< double*> &PanelInfo);
 
          /**
           * Initializes calinration values for instrument from an Isaw-like DetCal file
           * @param DetCalFileName   The name of the DetCal file.
           */
-         void initialize(  std::string DetCalFileName);
+         void initialize(  const std::string DetCalFileName);
     
      virtual ~PeaksWorkspace();
 
@@ -101,7 +125,6 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
                    const double row=0,
                    const double col=0,
                    const double chan=0,
-                   const double L2=0,
                    const double PeakIntegrateCount=0,
                    const double PeakIntegrateError=0);
 
@@ -114,7 +137,7 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
       * Removes the indicated peak
       * @param peakNum  the peak to remove. peakNum starts at 0
       */
-     void removePeak( int peakNum);
+     void removePeak( const int peakNum);
      
 
      //column names are hkl,position,sample_orientation,reflag,time,L1,t_offset,
@@ -123,121 +146,122 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      /**
       * @return the d-spacing in Angstroms for the indicated peak
       */
-     double  get_dspacing( int peakNum);
+     double  get_dspacing( const int peakNum);
 
      /**
       * @return the wavelength in Angstroms of the indicated peak
       */
-     double  get_wavelength( int peakNum);
+     double  get_wavelength( const int peakNum);
 
      /**
       *   @return The magnitude of Q in inv Angstroms for the indicated peak. This magnitude = 1/d spacing
       */
-     double  get_Qmagnitude( int peakNum);
+     double  get_Qmagnitude( const int peakNum);
 
      /**
       * @return The vector Q in inv Angstroms(magnitude =1/d spacing) of the indicated peak.
       *         This vector is at the given sample orientation
       */
-     Geometry::V3D   get_Qlab( int peakNum);
+     Geometry::V3D   get_Qlab( const int peakNum);
 
      /**
       * @return The vector Q in inv Angstroms(magnitude =1/d spacing) of the indicated peak after
       *         adjusting for the sample orientation.
       *
       */
-     Geometry::V3D   get_QXtal( int peakNum);
+     Geometry::V3D   get_QXtal( const int peakNum);
 
 
      /**
       * @return the h,k, and l value for the given peak
       */
-     Geometry::V3D   get_hkl( int peakNum);
+     Geometry::V3D   get_hkl( const int peakNum);
 
      /**
       * @return the row of the given peak
       */
-     double     get_row(int peakNum);
+     double     get_row(const int peakNum) ;
 
      /**
       * @return the column of the given peak
       */
-     double     get_column( int peakNum);
+     double     get_column( const int peakNum) ;
 
      /**
       * @return the time channel of the given peak
       */
-     double     get_time_channel( int peakNum);
+     double     get_time_channel( const int peakNum) ;
 
      /**
       * @return the time offset of the given peak in microseconds
       */
-     double  get_time_offset( int peakNum);
+     double  get_time_offset( const int peakNum ) ;
 
      /**
+      * Another name for getPeakCellCount
       * @return peak intensity at "center"
       */
-     double  get_ipk(int peakNum);
+     double  get_ipk( const int peakNum);
 
      /**
       * @return the initial path length for the peak in m
       */
-     double  get_L1(int peakNum);
+     double  get_L1(const int peakNum);
 
      /**
       * @return the sample to peak length for the peak in m
       */
-     double  get_L2(int peakNum);
+     double  get_L2(const int peakNum);
 
 
      /**
       * @return the bank number associated with the given peak
       */
-     int    get_Bank(int peakNum);
+     int    get_Bank(const int peakNum);
 
      /**
       * @return the position of the given peak in m and in McStas coordinates
       */
-     Geometry::V3D   getPosition( int peakNum);
+     Geometry::V3D   getPosition(const int peakNum);
 
      /**
       * @return the sample orientation of the given peak in radians
       */
-     Geometry::V3D  getSampleOrientation( int peakNum);
+     Geometry::V3D  getSampleOrientation( const int peakNum);
 
      /**
       * @return the run number of the associated peak
       */
-     int  getRunNumber( int peakNum);
+     int  getRunNumber( const int peakNum);
 
      /**
       * @return the reflag( status flag) for the given peak
       */
-     int getReflag( int peakNum );
+     int getReflag( const int peakNum );
 
      /**
       * @return the monitor count for the run associated with the given peak
       */
-     double getMonitorCount( int peakNum);
+     double getMonitorCount(const int peakNum);
      /**
       * @return the intensity of the "middle" cell of the peak
       */
-     double  getPeakCellCount( int peakNum);
+     double  getPeakCellCount( const int peakNum);
 
      /**
       * @return the total intensity -background for all the cells associated with the peak
       */
-     double  getPeakIntegrationCount( int peakNum);
+     double  getPeakIntegrationCount( const int peakNum);
 
      /**
       *  @return the error in the PeakIntegration count
       */
-     double  getPeakIntegrationError( int peakNum);
+     double  getPeakIntegrationError( const int peakNum);
 
      /**
       * @return the time of this peak in microseconds
       */
-     double getTime( int peakNum)
+     double getTime( const int peakNum)
      {
        return cell<double>(peakNum, ItimeCol);
      }
@@ -247,12 +271,13 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
       * @param newTime  the new time in microseconds
       * @param peakNum  the peak number starting at 0;
       */
-     void setTime( double newTime, int peakNum)
+     void setTime( const double newTime, const int peakNum)
      {
        cell<double>(peakNum, ItimeCol) = newTime;
      }
 
-     void setRowColChan( double row, double col, double chan, int peakNum)
+     void setRowColChan( const double row, const double col,
+                         const double chan, const int peakNum)
      {
        cell<double>(peakNum, IPeakRowCol)= row;
        cell<double>( peakNum, IPeakColCol )= col;
@@ -272,7 +297,7 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
       *
       *@param reflag  If SetOnlyUnset is true, gives the new reflag value for 2nd digit
       */
-     void    sethkls( Geometry::Matrix<double>UB,  double tolerance, bool SetOnlyUnset, int reflag);
+     void    sethkls( const Geometry::Matrix<double>UB, const double tolerance, const bool SetOnlyUnset, const int reflag);
 
      /**
       * Sets all the h,k,l values to 0,0,0
@@ -282,44 +307,44 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      /**
       *  sets the h,k,l value for the given peak
       */
-     void    sethkl( const Geometry::V3D hkl,int peakNum);
+     void    sethkl( const Geometry::V3D hkl, const int peakNum);
 
 
      /**
       * Sets the Peak Intensity count for the indicated peak
       */
-     void    setPeakCount( double count, int peakNum);
+     void    setPeakCount(const double count, const int peakNum);
 
      /**
       *  Sets the total peak intensity-background for the indicated peak
       */
-     void    setPeakIntegrateCount( double count, int peakNum);
+     void    setPeakIntegrateCount( const double count, const int peakNum);
 
      /**
       * Sets the error in the PeakIntegrate Count
       */
-     void    setPeakIntegrateError( double count, int peakNum);
+     void    setPeakIntegrateError( const double count, const int peakNum);
 
      /**
       * Sets the peak position( in m and McStas) for the indicated peak
       */
-     void    setPeakPos( Geometry::V3D position, int peakNum);
+     void    setPeakPos( const Geometry::V3D position, const int peakNum);
 
      /**
       * Sets the status flag for the indicated peak
       */
-     void    setReflag( int newValue, int peakNum);
+     void    setReflag( const int newValue, const int peakNum);
 
      /**
       *  Writes the peak information to a peaks file
       */
-     void    write( std::string filename );
+     void    write( const std::string filename );
 
      /**
       * Reads in new peaks from a Peaks file and appends it to the current peaks.
       * Use clearhkls to restart
       */
-     void    append( std::string filename);
+     void    append( const std::string filename);
 
 
 
@@ -347,9 +372,9 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      static const int IPeakColCol =11;     /** Column where the column of the peak is stored */
      static const int IPeakChanCol =12;      /** Column where the time channel of the peak is stored */
      static const int IL1Col =13;              /** Column where the initial path of the peak is stored */
-     static const int IL2Col =14;               /** Column where the L2 of the peak is stored */
-     static const int ItimeCol =15;                 /** Column where the time of the peak is stored */
-     static const int ItimeOffsetChanCol =16;  /** Column where the time offset of the peak is stored */
+
+     static const int ItimeCol =14;                 /** Column where the time of the peak is stored */
+     static const int ItimeOffsetChanCol =15;  /** Column where the time offset of the peak is stored */
 
 
 
