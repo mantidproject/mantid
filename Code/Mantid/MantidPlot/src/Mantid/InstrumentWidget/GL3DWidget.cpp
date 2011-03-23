@@ -1,4 +1,4 @@
-#ifdef WIN32
+ #ifdef WIN32
 #include <windows.h>
 #endif
 #include "GL3DWidget.h"
@@ -63,6 +63,7 @@ GL3DWidget::GL3DWidget(QWidget* parent):
 
   //Enable right-click in pick mode
   setContextMenuPolicy(Qt::DefaultContextMenu);
+  setRenderingOptions();
 
 }
 
@@ -135,6 +136,7 @@ void GL3DWidget::setRenderingOptions()
   //enablewriting into the depth buffer
   glDepthMask(GL_TRUE);
 
+  OpenGLError::check("setRenderingOptions");
 }
 
 /**
@@ -229,7 +231,9 @@ void GL3DWidget::drawDisplayScene()
   */
 void GL3DWidget::draw3D()
 {
-  glGetError();
+  OpenGLError::check("GL3DWidget::draw3D()[begin]");
+  // Reset the rendering options just in case
+  setRenderingOptions();
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   // Clear the background to the bg color set previously.
@@ -291,7 +295,7 @@ void GL3DWidget::draw3D()
   }
   glPopMatrix();
   OpenGLError::check("GL3DWidget::draw3D()");
-  QPainter painter(this);
+  QPainter painter(this); // Can change OpenGL state settings! (eg GL_DEPTH_TEST)
   painter.end();
 }
 

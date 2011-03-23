@@ -154,7 +154,7 @@ Instrument3DWidget::Instrument3DWidget(InstrumentWindow* parent):
   mBinMinValue(DBL_MAX), mBinMaxValue(-DBL_MAX),
   mBinEntireRange(true),
   mDataMinEdited(false), mDataMaxEdited(false),
-  mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
+  mWkspDataMin(DBL_MAX), mWkspDataMax(-DBL_MAX),mWkspDataPositiveMin(DBL_MAX), mWkspBinMin(DBL_MAX), mWkspBinMax(-DBL_MAX), 
   mWorkspaceName(""), mWorkspace(), mScaledValues(0)
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
@@ -303,7 +303,7 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   defaultProjection(); // Calculate and set projection
 
   // Calculate bin values, data ranges and integrate data
-  calculateColorCounts(output, true);
+  calculateColorCounts(/*output,*/ true);
 
   if (SHOWTIMING) std::cout << "Instrument3DWidget::setWorkspace() took " << timer.elapsed() << " seconds\n";
 }
@@ -396,28 +396,27 @@ void Instrument3DWidget::calculateBinRange()
 
 }
 
-//------------------------------------------------------------------------------------------------
 /**
- * Integrate the workspace. This calculates the total counts
- * in all spectra and makes the color list for each pixel, using
- * the current color map.
- * @param workspace :: new workspace being set.
- * @param firstCalculation :: set to true when changing the workspace; false is simply changing the color scale
- *
- */
-void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation)
+  * Calculate min and max integrated workspace values. 
+  */
+void Instrument3DWidget::calcMinMax()
 {
-  Timer timer;
-  if( !workspace ) return;
+}
+
+void Instrument3DWidget::calculateCounts(bool firstCalculation)
+{
+  if( !mWorkspace )
+  {
+    std::cerr << "Instrument3DWidget: workspace isn't set" << std::endl;
+    return;
+  }
 
   // This looks like a strange way of doing this but the CompAssemblyActor needs the colours in the same
   // order as it fills its detector lists!
   if (detector_list.size() == 0)
   {
-    Timer timerID;
     //Only load the detector ID list once per instance
     mInstrumentActor->getDetectorIDList(detector_list);
-    if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): mInstrumentActor->getDetectorIDList() took " << timerID.elapsed() << " seconds\n";
   }
 
   if( detector_list.empty() ) return;
@@ -428,16 +427,15 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
 
   //TODO: Make this part in parallel if possible!
 
-  Timer timer2;
-
   const int n_spec = m_workspace_indices.size();
-  std::vector<double> integrated_values( n_spec, -1.0 );
+  //std::vector<double> integrated_values( n_spec, -1.0 );
 
   //Use the workspace function to get the integrated spectra
   mWorkspace->getIntegratedSpectra(m_specIntegrs, (this->mBinMinValue), (this->mBinMaxValue), (this->mBinEntireRange));
 
   mWkspDataMin = DBL_MAX;
   mWkspDataMax = -DBL_MAX;
+  mWkspDataPositiveMin = DBL_MAX;
 
   //Now we need to convert to a vector where each entry is the sum for the detector ID at that spot (in integrated_values).
   for (int i=0; i < n_spec; i++)
@@ -446,16 +444,21 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     if( widx != -1 )
     {
       double sum = m_specIntegrs[widx];
-      integrated_values[i] = sum;
+      //integrated_values[i] = sum;
         if( sum < mWkspDataMin )
+        {
           mWkspDataMin = sum;
+          if (sum > 0)
+          {
+            mWkspDataPositiveMin = sum;
+          }
+        }
         else if( sum > mWkspDataMax )
+        {
           mWkspDataMax = sum;
+        }
     }
   }
-
-
-  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts():Integrating workspace took " << timer2.elapsed() << " seconds\n";
 
   // No preset value
   if( mDataMinEdited == false )
@@ -468,28 +471,33 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
     mDataMaxValue = mWkspDataMax;
   }
 
+}
+
+void Instrument3DWidget::calculateColors(bool firstCalculation)
+{
   Timer timerColLists;
 
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
+  const int n_spec = m_workspace_indices.size();
   mScaledValues = std::vector<unsigned char>(n_spec, 0);
   std::vector<boost::shared_ptr<GLColor> > colorlist(n_spec);
-  QwtDoubleInterval wksp_interval(mWkspDataMin, mWkspDataMax);
-  QwtDoubleInterval user_interval(mDataMinValue, mDataMaxValue);
+  double minValue = (mColorMap.getScaleType() == GraphOptions::Log10 && mDataMinValue < mWkspDataPositiveMin)? 
+                     mWkspDataPositiveMin : mDataMinValue;
+  QwtDoubleInterval user_interval(minValue, mDataMaxValue);
 
-  std::vector<double>::iterator val_end = integrated_values.end();
-  int idx(0);
-  for( std::vector<double>::iterator val_itr = integrated_values.begin(); val_itr != val_end;
-      ++val_itr, ++idx )
+  for(int i = 0; i < n_spec; ++i)
   {
+    int widx = m_workspace_indices[i];
     unsigned char c_index(mColorMap.getTopCIndex());
-    if( (*val_itr) < 0.0 )
+    if( widx < 0 )
     {
-      mScaledValues[idx] = mColorMap.getLargestAllowedCIndex();
+      mScaledValues[i] = mColorMap.getLargestAllowedCIndex();
     }
     else
     {
       // Index to store
-      short index = std::floor( mColorMap.normalize(user_interval, *val_itr)*max_ncols );
+      double sum = m_specIntegrs[widx];
+      short index = std::floor( mColorMap.normalize(user_interval, sum)*max_ncols );
       if( index >= max_ncols )
       {
         index = max_ncols;
@@ -499,19 +507,29 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
         index = 0;
       }
       else {}
-      mScaledValues[idx] = static_cast<unsigned char>(index);
-      c_index = mColorMap.colorIndex(user_interval, *val_itr);
+      mScaledValues[i] = static_cast<unsigned char>(index);
+      c_index = mColorMap.colorIndex(user_interval, sum);
 
     }
-    colorlist[idx] = mColorMap.getColor(c_index);
+    colorlist[i] = mColorMap.getColor(c_index);
   }
-  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): making the colorlist took " << timerColLists.elapsed() << " seconds\n";
 
-  Timer timerCols;
   mInstrumentActor->setDetectorColors(colorlist);
-  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts(): mInstrumentActor->setDetectorColors() took " << timerCols.elapsed() << " seconds\n";
+}
 
-  if (SHOWTIMING) std::cout << "Instrument3DWidget::calculateColorCounts() took " << timer.elapsed() << " seconds\n";
+//------------------------------------------------------------------------------------------------
+/**
+ * Integrate the workspace. This calculates the total counts
+ * in all spectra and makes the color list for each pixel, using
+ * the current color map.
+ * @param workspace :: new workspace being set.
+ * @param firstCalculation :: set to true when changing the workspace; false is simply changing the color scale
+ *
+ */
+void Instrument3DWidget::calculateColorCounts(bool firstCalculation)
+{
+  calculateCounts(firstCalculation);
+  calculateColors(firstCalculation);
 }
 //------------------------------------------------------------------------------------------------
 /**
@@ -519,13 +537,18 @@ void Instrument3DWidget::calculateColorCounts(boost::shared_ptr<Mantid::API::Mat
  */
 void Instrument3DWidget::recount()
 {
-  calculateColorCounts(mWorkspace, false);
+  calculateColorCounts(/*mWorkspace,*/ false);
   mInstrumentActor->refresh();
   redrawUnwrapped();
   update();
 }
 
-
+void Instrument3DWidget::refresh()
+{
+  mInstrumentActor->refresh();
+  redrawUnwrapped();
+  update();
+}
 
 //------------------------------------------------------------------------------------------------
 /**
@@ -770,7 +793,7 @@ void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue,
   setDataMappingType(INTEGRAL);
   if( this->isVisible() )
   {
-    calculateColorCounts(mWorkspace, false);
+    calculateColorCounts(/*mWorkspace,*/ false);
     mInstrumentActor->refresh();
     update();
   }

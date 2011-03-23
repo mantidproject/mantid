@@ -104,6 +104,8 @@ public:
   double getDataMaxValue() const;
   double getBinMinValue() const;
   double getBinMaxValue() const;
+  /// Returns the smallest positive value in the workspace. If all values are <=0 returns DBL_MAX.
+  double getWSPositiveMin() const {return mWkspDataPositiveMin;}
   bool getBinEntireRange() const;
   void setDataMappingType(DataMappingType);
   void setView(const Mantid::Geometry::V3D&,double,double,double,double,double,double);
@@ -145,7 +147,9 @@ public slots:
   void sumDetsToWorkspace();
   void createIncludeGroupingFile();
   void createExcludeGroupingFile();
-
+  void calculateColors(bool firstCalculation = false);
+  void calculateCounts(bool firstCalculation = false);
+  void refresh();
 
 signals:
   void detectorsSelected();
@@ -153,10 +157,11 @@ signals:
 
 public:
   void calculateBinRange();
+  void calcMinMax();
 
 private:
   void ParseInstrumentGeometry(boost::shared_ptr<Mantid::Geometry::IInstrument>);
-  void calculateColorCounts(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, bool firstCalculation);
+  void calculateColorCounts(bool firstCalculation);
 
   void drawSceneUsingColorID();
   void setSceneLowResolution();
@@ -193,7 +198,7 @@ private:
   bool mDataMinEdited, mDataMaxEdited;
 
   /// The workspace data and bin range limits
-  double mWkspDataMin, mWkspDataMax;
+  double mWkspDataMin, mWkspDataMax,mWkspDataPositiveMin;
   double mWkspBinMin, mWkspBinMax;
 
   QString mWorkspaceName;

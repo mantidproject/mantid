@@ -19,10 +19,11 @@ class ColorMapWidget: public QFrame
 {
   Q_OBJECT
 public:
-  ColorMapWidget(int type,QWidget* parent);
+  ColorMapWidget(int type,QWidget* parent,const double& minPositiveValue = 0.0001);
   void setupColorBarScaling(const MantidColorMap&);
   void setMinValue(double);
   void setMaxValue(double);
+  void setMinPositiveValue(double);
   int getScaleType()const;
   void setScaleType(int);
 signals:
@@ -37,6 +38,7 @@ private:
   QwtScaleWidget *m_scaleWidget;
   QLineEdit *m_minValueBox, *m_maxValueBox;
   QComboBox *m_scaleOptions;
+  double m_minPositiveValue;
 };
 
 

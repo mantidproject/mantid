@@ -132,8 +132,10 @@ void InstrumentWindowRenderTab::scaleTypeChanged(int index)
   {
     GraphOptions::ScaleType type = (GraphOptions::ScaleType)index;
     mInstrumentDisplay->mutableColorMap().changeScaleType(type);
+    mInstrumentDisplay->calculateCounts();
     setupColorBarScaling();
-    mInstrumentDisplay->recount();
+    mInstrumentDisplay->calculateColors();
+    mInstrumentDisplay->refresh();
   }
 }
 
@@ -142,7 +144,7 @@ void InstrumentWindowRenderTab::scaleTypeChanged(int index)
  */
 void InstrumentWindowRenderTab::setupColorBarScaling()
 {
-
+  m_colorMapWidget->setMinPositiveValue(mInstrumentDisplay->getWSPositiveMin());
   m_colorMapWidget->setupColorBarScaling(mInstrumentDisplay->getColorMap());
 }
 

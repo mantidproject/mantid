@@ -11,9 +11,10 @@
   * Constructor.
   * @param type The scale type, e.g. "Linear" or "Log10"
   * @param parent A parent widget
+  * @param minPositiveValue A minimum positive value for the Log10 scale
   */
-ColorMapWidget::ColorMapWidget(int type,QWidget* parent):
-QFrame(parent)
+ColorMapWidget::ColorMapWidget(int type,QWidget* parent,const double& minPositiveValue):
+QFrame(parent),m_minPositiveValue(minPositiveValue)
 {
   m_scaleWidget = new QwtScaleWidget(QwtScaleDraw::RightScale);
   m_scaleWidget->setColorBarEnabled(true);
@@ -83,12 +84,15 @@ void ColorMapWidget::setupColorBarScaling(const MantidColorMap& colorMap)
  {
     QwtLog10ScaleEngine logScaler;    
     double logmin(minValue);
-    if( logmin < 1.0 )
+    if( logmin <= 0.0 )
     {
-      logmin = 1.0;
+      logmin = m_minPositiveValue;
+      m_minValueBox->blockSignals(true);
+      setMinValue(logmin);
+      m_minValueBox->blockSignals(false);
     }
     m_scaleWidget->setScaleDiv(logScaler.transformation(), logScaler.divideScale(logmin, maxValue, 20, 5));
-    m_scaleWidget->setColorMap(QwtDoubleInterval(minValue, maxValue), colorMap);
+    m_scaleWidget->setColorMap(QwtDoubleInterval(logmin, maxValue), colorMap);
   }
 }
 
@@ -110,6 +114,15 @@ void ColorMapWidget::setMinValue(double value)
 void ColorMapWidget::setMaxValue(double value)
 {
   m_maxValueBox->setText(QString::number(value));
+}
+
+/**
+  * Set the minimum positive value for use with the Log10 scale. Values below this will
+  * not be displayed on a Log10 scale.
+  */
+void ColorMapWidget::setMinPositiveValue(double value)
+{
+  m_minPositiveValue = value;
 }
 
 int ColorMapWidget::getScaleType()const
