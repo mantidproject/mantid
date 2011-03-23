@@ -7,7 +7,7 @@
 //#include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequest.h>
 #include <Poco/Net/HTTPResponse.h>
-#include <Poco/Net/Context.h>
+//#include <Poco/Net/Context.h>
 #include <Poco/URI.h>
 
 #include <iostream>
