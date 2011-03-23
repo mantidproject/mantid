@@ -25,7 +25,7 @@ namespace MDEvents
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 
-  bool DODEBUG = false;
+  bool DODEBUG = true;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
@@ -201,7 +201,7 @@ namespace MDEvents
 
     size_t totalCost = in_ws->getNumberEvents();
     prog = new Progress(this, 0, 1.0, totalCost);
-    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, false);
+    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
     if (DODEBUG) prog->setNotifyStep(1);
 
     // Create the thread pool that will run all of these.
