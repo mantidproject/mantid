@@ -6,6 +6,7 @@
 #include "MantidDataObjects/EventList.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include <limits>
 
 namespace Mantid
 {
@@ -122,32 +123,10 @@ void UnwrapSNS::exec()
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
 
-  // Get the min & max frame values
-  {
-    double temp;
-    double empty = Mantid::EMPTY_DBL();
-
-    temp = this->getProperty("Tmin");
-    if (temp != empty)
-      m_Tmin = temp;
-    else
-      m_Tmin = m_inputWS->dataX(0).front();
-
-    temp = this->getProperty("Tmax");
-    if (temp != empty)
-      m_Tmax = temp;
-    else
-      m_Tmax = m_inputWS->dataX(0).back();
-  }
-  m_frameWidth = m_Tmax - m_Tmin;
-
-  g_log.debug() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << "\n";
-  g_log.information() << "Wavelength cuttoff is : " << (m_conversionConstant * m_Tmin / m_LRef)
-                      << "Angstrom, Frame width is: " << m_frameWidth << "microseconds\n";
-
   m_XSize = m_inputWS->dataX(0).size();
   m_numberOfSpectra = m_inputWS->getNumberHistograms();
   g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra << "\n";
+
 
   // go off and do the event version if appropriate
   m_inputEvWS = boost::dynamic_pointer_cast<const EventWorkspace>(m_inputWS);
@@ -156,6 +135,8 @@ void UnwrapSNS::exec()
     this->execEvent();
     return;
   }
+
+  this->getTofRangeData(false);
 
   // set up the progress bar
   m_progress = new Progress(this, 0.0, 1.0, m_numberOfSpectra);
@@ -239,11 +220,13 @@ void UnwrapSNS::execEvent()
   // algorithm assumes the data is sorted so it can jump out early
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
 
+  this->getTofRangeData(true);
+
   // do the actual work
-  PARALLEL_FOR2(m_inputWS, outW)
+//  PARALLEL_FOR2(m_inputWS, outW)
   for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
-    PARALLEL_START_INTERUPT_REGION
+//    PARALLEL_START_INTERUPT_REGION
     std::size_t numEvents = outW->getEventList(workspaceIndex).getNumberEvents();
     bool isMonitor;
     double Ld = this->calculateFlightpath(workspaceIndex, isMonitor);
@@ -265,9 +248,9 @@ void UnwrapSNS::execEvent()
       outW->getEventList(workspaceIndex).setTofs(times);
     }
     m_progress->report();
-    PARALLEL_END_INTERUPT_REGION
+//    PARALLEL_END_INTERUPT_REGION
   }
-  PARALLEL_CHECK_INTERUPT_REGION
+//  PARALLEL_CHECK_INTERUPT_REGION
 
   outW->clearMRU();
   this->runMaskDetectors();
@@ -313,11 +296,6 @@ double UnwrapSNS::calculateFlightpath(const size_t& spectrum, bool& isMonitor) c
 
 size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const double& Ld)
 {
-//  std::cout << "datain[" << datain.size() << "] ";
-
-  // Calculate cut-off times
-//  std::cout << "Ld/Lref[" << (Ld/m_LRef) << "="<< Ld << "/" << m_LRef << "] ";
-
   MantidVec tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
   tempX_L.clear();
@@ -351,6 +329,81 @@ size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const dou
   assert(datain.size() == dataout.size());
 
   return specialBin;
+}
+
+void UnwrapSNS::getTofRangeData(const bool isEvent)
+{
+
+  // Get the min & max frame values
+  double empty = Mantid::EMPTY_DBL();
+  double temp;
+
+  // check for Tmin property
+  temp = this->getProperty("Tmin");
+  if (temp == empty)
+  {
+    m_Tmin = std::numeric_limits<double>::max();
+    if (isEvent)
+    {
+      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      {
+        temp = m_inputEvWS->getEventList(workspaceIndex).getTofMin();
+        if (temp < m_Tmin)
+          m_Tmin = temp;
+      }
+    }
+    else
+    {
+      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      {
+        temp = m_inputWS->dataX(workspaceIndex).front();
+        if (temp < m_Tmin)
+          m_Tmin = temp;
+      }
+    }
+  }
+  else
+  {
+    m_Tmin = temp;
+  }
+
+  // check for Tmax property
+  temp = this->getProperty("Tmax");
+  if (temp == empty)
+  {
+    m_Tmax = std::numeric_limits<double>::min();
+    if (isEvent)
+    {
+      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      {
+        temp = m_inputEvWS->getEventList(workspaceIndex).getTofMax();
+        if (temp > m_Tmax)
+          m_Tmax = temp;
+      }
+    }
+    else
+    {
+      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      {
+        temp = m_inputWS->dataX(workspaceIndex).back();
+        if (temp > m_Tmax)
+          m_Tmax = temp;
+      }
+    }
+  }
+  else
+  {
+    m_Tmax = temp;
+  }
+
+  m_frameWidth = m_Tmax - m_Tmin;
+
+  g_log.information() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << "\n";
+  if (m_Tmin > m_Tmax)
+    throw std::runtime_error("Have case of Tmin > Tmax");
+
+  g_log.information() << "Wavelength cuttoff is : " << (m_conversionConstant * m_Tmin / m_LRef)
+                      << "Angstrom, Frame width is: " << m_frameWidth << "microseconds\n";
 }
 
 void UnwrapSNS::runMaskDetectors()

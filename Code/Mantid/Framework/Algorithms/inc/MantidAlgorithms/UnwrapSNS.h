@@ -64,6 +64,7 @@ private:
 
   double calculateFlightpath(const std::size_t& spectrum, bool& isMonitor) const;
   size_t unwrapX(const MantidVec&, MantidVec&, const double& Ld);
+  void getTofRangeData(const bool);
   double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
   DataObjects::EventWorkspace_const_sptr m_inputEvWS; ///< Pointer to the input event workspace
