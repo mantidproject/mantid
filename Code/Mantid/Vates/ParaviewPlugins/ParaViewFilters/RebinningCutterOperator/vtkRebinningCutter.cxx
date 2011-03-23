@@ -3,6 +3,7 @@
 #include "vtkInformationVector.h"
 #include "vtkObjectFactory.h"
 #include "vtkAlgorithm.h"
+#include "vtkPVClipDataSet.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkImplicitFunction.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
@@ -17,7 +18,8 @@
 #include "boost/functional/hash.hpp"
 #include <sstream>
 #include "ParaViewProgressAction.h"
-#include <time.h>
+#include "vtkBox.h"
+
 
 /** Plugin for ParaView. Performs simultaneous rebinning and slicing of Mantid data.
 
@@ -122,7 +124,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
 
     //Create the composite holder.
     CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
-    compFunction->addFunction(constructBox(m_appliedXDimension, m_appliedYDimension, m_appliedZDimension));
+    compFunction->addFunction(constructBox(inputDataset));
 
     // Construct reduction knowledge.
     m_presenter.constructReductionKnowledge(
@@ -186,6 +188,8 @@ void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
 int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
+  enum Status{Bad=0, Good=1};
+  Status status=Good;
   if (!m_isSetup)
   {
     using namespace Mantid::Geometry;
@@ -215,16 +219,15 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
       m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
         dimensionsVec[2], dimensionsVec[3], inputDataset);
 
-      this->Modified();
       m_isSetup = true;
-      return 1;
     }
     else
     {
       vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
-      return 0;
+      status = Bad;
     }
   }
+  return status;
   
 }
 
@@ -354,7 +357,7 @@ unsigned long vtkRebinningCutter::GetMTime()
     time = this->m_clipFunction->GetMTime();
     if(time > mTime)
     {
-      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      m_actionRequester.ask(RecalculateAll);
       mTime = time;
     }
   }
@@ -370,7 +373,6 @@ Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionX(vtkDataSet* in_d
 Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionY(vtkDataSet* in_ds) const
 {
   return m_presenter.getYDimensionFromDS(in_ds);
-  //return Mantid::VATES::createDimension(m_presenter.getYDimensionFromDS(in_ds)->toXMLString(), 100);
 }
 
 Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionZ(vtkDataSet* in_ds) const
@@ -383,18 +385,29 @@ Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensiont(vtkDataSet* in_d
   return m_presenter.getTDimensionFromDS(in_ds);
 }
 
-boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBox(Dimension_sptr spDimX,
-    Dimension_sptr spDimY, Dimension_sptr spDimZ) const
+boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const
 {
   using namespace Mantid::MDAlgorithms;
-  //Have to use dimension knowledge to construct box.
-  double originX = (spDimX->getMaximum() + spDimX->getMinimum()) / 2;
-  double originY = (spDimY->getMaximum() + spDimY->getMinimum()) / 2;
-  double originZ = (spDimZ->getMaximum() + spDimZ->getMinimum()) / 2;
-  double width = spDimX->getMaximum() - spDimX->getMinimum();
-  double height = spDimY->getMaximum() - spDimY->getMinimum();
-  double depth = spDimZ->getMaximum() - spDimZ->getMinimum();
+  
+  vtkBox* box = dynamic_cast<vtkBox*>(this->m_clipFunction);
 
+  //To get the box bounds, we actually need to evaluate the box function. There is not this restriction on planes.
+  vtkPVClipDataSet * cutter = vtkPVClipDataSet::New();
+	cutter->SetInput(inputDataset);
+	cutter->SetClipFunction(box);
+  cutter->SetInsideOut(true);
+	cutter->Update();
+  vtkDataSet* cutterOutput = cutter->GetOutput();
+  //Now we can get the bounds.
+  double* bounds = cutterOutput->GetBounds();
+  
+  double originX = (bounds[1] + bounds[0]) / 2;
+  double originY = (bounds[3] + bounds[2]) / 2;
+  double originZ = (bounds[5] + bounds[4]) / 2;
+  double width = bounds[1] - bounds[0];
+  double height = bounds[3] - bounds[2];
+  double depth = bounds[5] - bounds[4];
+  
   //Create domain parameters.
   OriginParameter originParam = OriginParameter(originX, originY, originZ);
   WidthParameter widthParam = WidthParameter(width);

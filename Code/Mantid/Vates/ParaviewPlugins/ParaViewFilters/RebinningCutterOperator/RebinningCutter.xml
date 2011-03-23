@@ -13,6 +13,17 @@
       <DataTypeDomain name="input_type">
           <DataType value="vtkDataSet"/>
       </DataTypeDomain>
+        <ProxyProperty name="ClipFunction" command="SetClipFunction" label="Rebinning Cut Type">
+           <ProxyGroupDomain name="groups">
+               <Group name="implicit_functions"/>
+           </ProxyGroupDomain>
+           <ProxyListDomain name="proxy_list">
+              <Proxy group="implicit_functions" name="Box" />
+           </ProxyListDomain>
+           <Documentation>
+             This property specifies the parameters of the clip function (an implicit plane) used to clip/rebin the dataset.
+           </Documentation>
+        </ProxyProperty>
         <DoubleVectorProperty 
         name="TimestepValues"
         information_only="1">

@@ -99,10 +99,7 @@ private:
   /// Get the t dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
 
-  boost::shared_ptr<Mantid::API::ImplicitFunction> constructBox(
-          Mantid::VATES::Dimension_sptr spDimX,
-          Mantid::VATES::Dimension_sptr spDimY,
-          Mantid::VATES::Dimension_sptr spDimZ) const;
+  boost::shared_ptr<Mantid::API::ImplicitFunction> constructBox(vtkDataSet* ) const;
 
   /// Selects the dataset factory to use.
   Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;

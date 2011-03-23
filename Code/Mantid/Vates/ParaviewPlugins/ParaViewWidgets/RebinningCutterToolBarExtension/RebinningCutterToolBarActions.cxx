@@ -60,7 +60,7 @@ void RebinningCutterToolBarActions::createTargetFilter()
   if (!src)
   {
     QMessageBox::information(NULL, "Create Filter Warning",
-        "Cannot create the target filter without an input source.");
+        "Cannot create the target filter without an input source. The input source/filter must also be selected.");
     return;
   }
 
