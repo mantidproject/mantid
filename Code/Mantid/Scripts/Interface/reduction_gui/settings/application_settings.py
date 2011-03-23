@@ -7,6 +7,8 @@ class GeneralSettings(object):
     """
     data_path = '.'
     debug = False
+    last_data_ws = ''
+    last_file = ''
     
     def __init__(self, settings=None):
         """

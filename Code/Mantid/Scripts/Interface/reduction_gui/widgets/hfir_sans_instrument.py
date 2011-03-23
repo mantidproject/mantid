@@ -123,6 +123,8 @@ class SANSInstrumentWidget(BaseWidget):
         fname = self.data_browse_dialog(multi=True)
         if fname and len(fname)>0:
             self._summary.data_file_edit.setText('; '.join(fname))   
+            self._settings.last_file = fname[0] 
+            self._settings.last_data_ws = ''
             self.get_data_info()
             
             # Set the mask background
@@ -216,6 +218,9 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.data_file_edit.setText(QtCore.QString('; '.join(state.data_files)))
         if len(state.data_files)>0:
             self._find_background_image(state.data_files[0])
+            self._settings.last_file = state.data_files[0]
+            self._settings.last_data_ws = ''
+
             # Store the location of the loaded file
             if len(state.data_files[0])>0:
                 (folder, file_name) = os.path.split(state.data_files[0])
@@ -302,6 +307,11 @@ class SANSInstrumentWidget(BaseWidget):
             fname = data_files[0]
             if len(str(fname).strip())>0:
                 dataproxy = DataFileProxy(fname)
+                if len(dataproxy.errors)>0:
+                    QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                    return
+                
+                self._settings.last_data_ws = dataproxy.data_ws
                 if dataproxy.sample_detector_distance is not None and not self._summary.sample_dist_chk.isChecked():
                     self._summary.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
                     util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)

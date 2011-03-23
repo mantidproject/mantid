@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'mask.ui'
+# Form implementation generated from reading ui file 'ui/mask.ui'
 #
-# Created: Wed Jan 26 13:20:41 2011
+# Created: Tue Mar 22 16:30:17 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -112,6 +112,21 @@ class Ui_Frame(object):
         self.remove_button = QtGui.QPushButton(self.geometry_options_groupbox)
         self.remove_button.setGeometry(QtCore.QRect(237, 280, 151, 27))
         self.remove_button.setObjectName("remove_button")
+        self.instrument_groupbox = QtGui.QGroupBox(Frame)
+        self.instrument_groupbox.setGeometry(QtCore.QRect(40, 440, 701, 201))
+        self.instrument_groupbox.setObjectName("instrument_groupbox")
+        self.label_9 = QtGui.QLabel(self.instrument_groupbox)
+        self.label_9.setGeometry(QtCore.QRect(10, 30, 541, 41))
+        self.label_9.setObjectName("label_9")
+        self.show_instr_button = QtGui.QPushButton(self.instrument_groupbox)
+        self.show_instr_button.setGeometry(QtCore.QRect(30, 80, 151, 27))
+        self.show_instr_button.setObjectName("show_instr_button")
+        self.label_10 = QtGui.QLabel(self.instrument_groupbox)
+        self.label_10.setGeometry(QtCore.QRect(10, 120, 541, 71))
+        self.label_10.setObjectName("label_10")
+        self.apply_instr_button = QtGui.QPushButton(self.instrument_groupbox)
+        self.apply_instr_button.setGeometry(QtCore.QRect(190, 80, 81, 27))
+        self.apply_instr_button.setObjectName("apply_instr_button")
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
@@ -140,4 +155,15 @@ class Ui_Frame(object):
         self.add_rectangle_button.setText(QtGui.QApplication.translate("Frame", "Add", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_button.setToolTip(QtGui.QApplication.translate("Frame", "Remove the selected mask item from the list", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_button.setText(QtGui.QApplication.translate("Frame", "Removed Selected", None, QtGui.QApplication.UnicodeUTF8))
+        self.instrument_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Instrument Window", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_9.setText(QtGui.QApplication.translate("Frame", "Click the Show Instrument button to mask areas of the detector by hand.\n"
+"Click the Apply button to confirm.", None, QtGui.QApplication.UnicodeUTF8))
+        self.show_instr_button.setToolTip(QtGui.QApplication.translate("Frame", "Remove the selected mask item from the list", None, QtGui.QApplication.UnicodeUTF8))
+        self.show_instr_button.setText(QtGui.QApplication.translate("Frame", "Show Instrument", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_10.setText(QtGui.QApplication.translate("Frame", "Do the following to define a masked region:\n"
+"  -Go to the Pick tab of the instrument window\n"
+"  -Select pixels with the mouse\n"
+"  -Right-click and select Mask.", None, QtGui.QApplication.UnicodeUTF8))
+        self.apply_instr_button.setToolTip(QtGui.QApplication.translate("Frame", "Remove the selected mask item from the list", None, QtGui.QApplication.UnicodeUTF8))
+        self.apply_instr_button.setText(QtGui.QApplication.translate("Frame", "Apply", None, QtGui.QApplication.UnicodeUTF8))
 

@@ -96,6 +96,8 @@ class SNSInstrumentWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._summary.data_file_edit.setText(fname)   
+            self._settings.last_file = fname
+            self._settings.last_data_ws = ''
             #self.get_data_info()
             
             # Set the mask background
@@ -166,6 +168,9 @@ class SNSInstrumentWidget(BaseWidget):
         
         # Data file
         self._summary.data_file_edit.setText(QtCore.QString(state.data_file))
+        self._settings.last_file = state.data_file
+        self._settings.last_data_ws = ''
+        
         self._find_background_image(state.data_file)
         # Store the location of the loaded file
         if len(state.data_file)>0:

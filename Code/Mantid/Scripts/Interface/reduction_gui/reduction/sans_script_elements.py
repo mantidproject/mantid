@@ -34,6 +34,9 @@ class Mask(BaseScriptElement):
     # Shapes
     shapes = []
     
+    # Detector IDs
+    detector_ids = ''
+    
     def __init__(self):
         super(Mask, self).__init__()
         self.reset()
@@ -53,6 +56,9 @@ class Mask(BaseScriptElement):
         for item in self.shapes:
             script += "MaskRectangle(x_min=%g, x_max=%g, y_min=%g, y_max=%g)\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
 
+        if len(self.detector_ids)>0:
+            script += "MaskDetectors([%s])\n" % self.detector_ids
+
         return script
     
     def to_xml(self):
@@ -66,11 +72,13 @@ class Mask(BaseScriptElement):
         xml += "  <mask_right>%g</mask_right>\n" % self.right
         
         xml += "  <Shapes>\n"
-        
-    
         for item in self.shapes:
             xml += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
         xml += "  </Shapes>\n"
+        
+        xml += "  <DetectorIDs>\n"
+        xml += "    %s\n" % self.detector_ids
+        xml += "  </DetectorIDs>\n"
         
         xml += "</Mask>\n"
         return xml
@@ -100,6 +108,8 @@ class Mask(BaseScriptElement):
                     y_max =  float(item.getAttribute("y_max"))
                     self.shapes.append(Mask.RectangleMask(x_min, x_max, y_min, y_max))
                             
+            self.detector_ids = ''
+            self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='')
 
     def reset(self):
         """
@@ -111,5 +121,6 @@ class Mask(BaseScriptElement):
         self.right = Mask.right
         
         self.shapes = []
+        self.detector_ids = ''
         
     

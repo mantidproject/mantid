@@ -20,8 +20,16 @@ try:
     HAS_MPL = True
 except:
     HAS_MPL = False
+
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
     
 from reduction_gui.reduction.sans_script_elements import Mask    
+from reduction_gui.reduction.mantid_util import EQSANSDataProxy
 from base_widget import BaseWidget
 import ui.ui_mask
 import util
@@ -239,7 +247,7 @@ class MaskTabWidget(BaseWidget):
     """
 
     ## Widget name
-    name = "Mask"      
+    name = "Mask"     
     
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(MaskTabWidget, self).__init__(parent, state, settings, data_type) 
@@ -252,6 +260,10 @@ class MaskTabWidget(BaseWidget):
         self._content = MaskFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
+        
+        self._ws_proxy = None
+        self._instrument_view = None
+        self._masked_detectors = []
         
         if state is not None:
             self.set_state(state)
@@ -278,6 +290,42 @@ class MaskTabWidget(BaseWidget):
         self.connect(self._content.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
         self.connect(self._content.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
 
+        # Check whether we are within MantidPlot
+        # Turned OFF for now
+        if False and IS_IN_MANTIDPLOT:
+            self.connect(self._content.show_instr_button, QtCore.SIGNAL("clicked()"), self._show_instrument)
+            self.connect(self._content.apply_instr_button, QtCore.SIGNAL("clicked()"), self._apply_instr_mask)
+        else:
+            self._content.instrument_groupbox.hide()
+
+    def _show_instrument(self):
+        
+        # Do nothing if the instrument view is already displayed
+        if self._instrument_view is not None and self._instrument_view.isVisible():
+            return
+        
+        if len(self._settings.last_data_ws)>0:
+            pass
+        elif len(self._settings.last_file)>0:
+            self._ws_proxy = EQSANSDataProxy(self._settings.last_file)
+            self._ws_proxy.load()
+            if len(self._ws_proxy.errors)>0:
+                QtGui.QMessageBox.warning(self, "Error", self._ws_proxy.errors[0])
+            else:
+                self._settings.last_data_ws = self._ws_proxy.data_ws
+        else:
+            QtGui.QMessageBox.warning(self, "Warning", "Select a data file before setting your mask.")
+            return
+            
+        self._instrument_view = qti.app.mantidUI.getInstrumentView(self._settings.last_data_ws)
+        self._instrument_view.show()
+       
+    def _apply_instr_mask(self):
+        if self._instrument_view is not None and self._instrument_view.isVisible():
+            self._instrument_view.close()
+            if len(self._settings.last_data_ws)>0:
+                self._masked_detectors = self._ws_proxy.get_masked()
+    
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.
@@ -291,6 +339,8 @@ class MaskTabWidget(BaseWidget):
         self._content.listWidget.clear()
         for item in state.shapes:
             self._append_rectangle(item)
+            
+        self._masked_detectors = state.detector_ids
 
     def get_state(self):
         """
@@ -307,6 +357,8 @@ class MaskTabWidget(BaseWidget):
         # Rectangles
         for i in range(self._content.listWidget.count()):
             m.shapes.append(self._content.listWidget.item(i).value)
+        
+        m.detector_ids = self._masked_detectors
         
         return m
     

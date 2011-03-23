@@ -335,6 +335,81 @@
     </property>
    </widget>
   </widget>
+  <widget class="QGroupBox" name="instrument_groupbox">
+   <property name="geometry">
+    <rect>
+     <x>40</x>
+     <y>440</y>
+     <width>701</width>
+     <height>201</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Instrument Window</string>
+   </property>
+   <widget class="QLabel" name="label_9">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>30</y>
+      <width>541</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Click the Show Instrument button to mask areas of the detector by hand.
+Click the Apply button to confirm.</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="show_instr_button">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>80</y>
+      <width>151</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Remove the selected mask item from the list</string>
+    </property>
+    <property name="text">
+     <string>Show Instrument</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_10">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>120</y>
+      <width>541</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Do the following to define a masked region:
+  -Go to the Pick tab of the instrument window
+  -Select pixels with the mouse
+  -Right-click and select Mask.</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="apply_instr_button">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>80</y>
+      <width>81</width>
+      <height>27</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Remove the selected mask item from the list</string>
+    </property>
+    <property name="text">
+     <string>Apply</string>
+    </property>
+   </widget>
+  </widget>
  </widget>
  <resources/>
  <connections/>
