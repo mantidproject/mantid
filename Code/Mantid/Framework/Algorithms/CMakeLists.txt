@@ -134,7 +134,9 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/UnwrapMonitor.cpp
 		src/UnwrapSNS.cpp
 		src/WeightedMean.cpp
-		src/XDataConverter.cpp )
+		src/XDataConverter.cpp 
+		src/PDFFT.cpp 
+		)
 
 set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
                 inc/MantidAlgorithms/AddSampleLog.h
@@ -273,7 +275,9 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/UnwrapMonitor.h
 		inc/MantidAlgorithms/UnwrapSNS.h
 		inc/MantidAlgorithms/WeightedMean.h
-		inc/MantidAlgorithms/XDataConverter.h )
+		inc/MantidAlgorithms/XDataConverter.h 
+		inc/MantidAlgorithms/PDFFT.h 
+		)
 
 set ( TEST_FILES test/AddSampleLogTest.h
                  test/AlignDetectorsTest.h
@@ -397,6 +401,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/UnwrapTest.h
 		 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
+		 test/PDFFTTest.h 
 		 )
 
 # Add the target for this directory
