@@ -115,7 +115,7 @@ void LoadDaveGrp::init()
     "the Unit Factory)");
   this->declareProperty(new Kernel::PropertyWithValue<bool>("IsMicroEV", false,
       Kernel::Direction::Input),
-      "Original files is in units of micro-eV for DeltaE");
+      "Original file is in units of micro-eV for DeltaE");
 }
 
 void LoadDaveGrp::exec()
