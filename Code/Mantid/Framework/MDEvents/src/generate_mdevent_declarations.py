@@ -145,8 +145,8 @@ def insert_lines(lines, insert_lineno, extra, padding):
 def generate():
     print "Generating MDEventFactory.cpp"
 
-    # Classes that have a .cpp file    
-    classes_cpp = ["MDBox", "MDEventWorkspace", "MDGridBox"]
+    # Classes that have a .cpp file (and will get an Include line)
+    classes_cpp = ["MDBox", "MDEventWorkspace", "MDGridBox", "MDBin"]
     # All of the classes to instantiate
     classes = classes_cpp + ["MDEvent",  "IMDBox"]
     
@@ -190,7 +190,7 @@ def generate():
         f.write("\n\n")
 
     # Classes with MDEvent<x>,x
-    classes = ["MDBox", "IMDBox", "MDGridBox", "MDEventWorkspace"]
+    classes = ["MDBox", "IMDBox", "MDGridBox", "MDEventWorkspace", "MDBin"]
     for c in classes:
         f.write("// Instantiations for %s\n" % c )
         for nd in dimensions:
@@ -212,7 +212,7 @@ def generate():
 
     # Typedefs for MDEventWorkspace
     lines.append("\n");
-    classes = ["MDBox", "IMDBox", "MDGridBox", "MDEventWorkspace"]
+    classes = ["MDBox", "IMDBox", "MDGridBox", "MDEventWorkspace", "MDBin"]
     for c in classes:
         lines.append("\n%s// ------------- Typedefs for %s ------------------\n" % (padding, c));
         for nd in dimensions:

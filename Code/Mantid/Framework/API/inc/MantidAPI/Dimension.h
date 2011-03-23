@@ -2,6 +2,7 @@
 #define MANTID_API_DIMENSION_H_
     
 #include "MantidKernel/System.h"
+#include <limits>
 
 
 namespace Mantid
@@ -15,6 +16,12 @@ namespace MDEvents
    * performance/memory/accuracy requirements.
    */
   typedef double CoordType;
+
+  /// Minimum value (large negative number) that a coordinate can take
+  const CoordType CoordType_min = -std::numeric_limits<double>::max();
+
+  /// Maximum value (large positive number) that a coordinate can take
+  const CoordType CoordType_max = std::numeric_limits<double>::max();
 }
 }
 

@@ -6,6 +6,7 @@
 #include <MantidMDEvents/MDEventFactory.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidMDEvents/MDEventWorkspace.h>
+#include <MantidMDEvents/MDBin.h>
 
 
 namespace Mantid
@@ -152,11 +153,36 @@ namespace MDEvents
   typedef MDEventWorkspace<MDEvent<9>, 9> MDEventWorkspace9;
 
 
+
+  // ------------- Typedefs for MDBin ------------------
+
+  /// Typedef for a MDBin with 1 dimension 
+  typedef MDBin<MDEvent<1>, 1> MDBin1;
+  /// Typedef for a MDBin with 2 dimensions 
+  typedef MDBin<MDEvent<2>, 2> MDBin2;
+  /// Typedef for a MDBin with 3 dimensions 
+  typedef MDBin<MDEvent<3>, 3> MDBin3;
+  /// Typedef for a MDBin with 4 dimensions 
+  typedef MDBin<MDEvent<4>, 4> MDBin4;
+  /// Typedef for a MDBin with 5 dimensions 
+  typedef MDBin<MDEvent<5>, 5> MDBin5;
+  /// Typedef for a MDBin with 6 dimensions 
+  typedef MDBin<MDEvent<6>, 6> MDBin6;
+  /// Typedef for a MDBin with 7 dimensions 
+  typedef MDBin<MDEvent<7>, 7> MDBin7;
+  /// Typedef for a MDBin with 8 dimensions 
+  typedef MDBin<MDEvent<8>, 8> MDBin8;
+  /// Typedef for a MDBin with 9 dimensions 
+  typedef MDBin<MDEvent<9>, 9> MDBin9;
+
+
   //### END AUTO-GENERATED CODE ##################################################################
 
 } // namespace Mantid
 } // namespace MDEvents
 
 #endif  /* MANTID_MDEVENTS_MDEVENTFACTORY_H_ */
+
+
 
 
