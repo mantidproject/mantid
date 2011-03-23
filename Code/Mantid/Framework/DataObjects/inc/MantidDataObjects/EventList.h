@@ -245,6 +245,8 @@ public:
   template<class T>
   static void getTofsHelper(const std::vector<T> & events, std::vector<double> & tofs);
   void getTofs(std::vector<double>& tofs) const;
+  double getTofMin() const;
+  double getTofMax() const;
 
   template<class T>
   static void setTofsHelper(std::vector<T> & events, const std::vector<double> & tofs);

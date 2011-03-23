@@ -4,6 +4,7 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidAPI/MemoryManager.h"
 #include <functional>
+#include <limits>
 #include <math.h>
 
 using std::ostream;
@@ -1980,6 +1981,102 @@ namespace DataObjects
       this->getTofsHelper(this->weightedEventsNoTime, tofs);
       break;
     }
+  }
+
+  /**
+   * @return The minimum tof value for the list of the events.
+   */
+  double EventList::getTofMin() const
+  {
+    // set up as the maximum available double
+    double tMin = std::numeric_limits<double>::max();
+
+    // no events is a soft error
+    size_t numEvents = this->getNumberEvents();
+    if (numEvents == 0)
+      return tMin;
+
+    // when events are ordered by tof just need the first value
+    if (this->order == TOF_SORT) {
+      switch (eventType)
+      {
+      case TOF:
+        return this->events.begin()->tof();
+      case WEIGHTED:
+        return this->weightedEvents.begin()->tof();
+      case WEIGHTED_NOTIME:
+        return this->weightedEventsNoTime.begin()->tof();
+      }
+    }
+
+    // now we are stuck with a linear search
+    double temp;
+    for (size_t i = 0; i < numEvents; i++)
+    {
+      switch (eventType)
+      {
+      case TOF:
+        temp = this->events[i].tof();
+        break;
+      case WEIGHTED:
+        temp = this->weightedEvents[i].tof();
+        break;
+      case WEIGHTED_NOTIME:
+        temp = this->weightedEventsNoTime[i].tof();
+        break;
+      }
+      if (temp < tMin)
+        tMin = temp;
+    }
+    return tMin;
+  }
+
+  /**
+   * @return The maximum tof value for the list of events.
+   */
+  double EventList::getTofMax() const
+  {
+    // set up as the minimum available double
+    double tMax = std::numeric_limits<double>::min();
+
+    // no events is a soft error
+    size_t numEvents = this->getNumberEvents();
+    if (numEvents == 0)
+      return tMax;
+
+    // when events are ordered by tof just need the first value
+    if (this->order == TOF_SORT) {
+      switch (eventType)
+      {
+      case TOF:
+        return this->events.rbegin()->tof();
+      case WEIGHTED:
+        return this->weightedEvents.rbegin()->tof();
+      case WEIGHTED_NOTIME:
+        return this->weightedEventsNoTime.rbegin()->tof();
+      }
+    }
+
+    // now we are stuck with a linear search
+    double temp;
+    for (size_t i = 0; i < numEvents; i++)
+    {
+      switch (eventType)
+      {
+      case TOF:
+        temp = this->events[i].tof();
+        break;
+      case WEIGHTED:
+        temp = this->weightedEvents[i].tof();
+        break;
+      case WEIGHTED_NOTIME:
+        temp = this->weightedEventsNoTime[i].tof();
+        break;
+      }
+      if (temp > tMax)
+        tMax = temp;
+    }
+    return tMax;
   }
 
 
