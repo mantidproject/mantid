@@ -93,6 +93,8 @@ void LoadDaveGrp::init()
 {
   std::vector<std::string> exts;
   exts.push_back(".grp");
+  exts.push_back(".sqe");
+  exts.push_back(".txt");
 
   this->declareProperty(new API::FileProperty("Filename", "",
       API::FileProperty::Load, exts), "A DAVE grouped ASCII file");
