@@ -190,14 +190,27 @@
    
 </facility> 
 
-<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat">
+<facility name="SNS" delimiter="_" FileExtensions="_event.nxs,.nxs,.dat,_histo.nxs">
 
+  <archive>
+    <archiveSearch plugin="OrbiterDataSearch" />
+  </archive>
+  
    <catalog name="VFSCatalog">
    </catalog>
   
    <instrument name="DAS"> 
       <technique>technique</technique>
    </instrument> 
+   
+   <instrument name="TOF-USANS" beamline="1A"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
+   
+   <instrument name="NOMAD" shortname="NOM" beamline="1B">
+   	<technique>Neutron Diffraction</technique>
+   	<technique>Neutron Amorphous</technique>
+   </instrument>
    
    <instrument name="BASIS" shortname="BSS" beamline="2"> 
     <technique>Neutron Spectroscopy</technique>
@@ -228,14 +241,20 @@
    <instrument name="VULCAN" beamline="7"> 
 	<technique>Neutron Diffraction</technique>
    </instrument> 
-   
-   <instrument name="VENUS"> 
-      <technique>Imaging</technique>
-      <technique>Tomography</technique>
+
+   <instrument name="CORELLI" beamline="9"> 
+	<technique>Neutron Diffraction</technique>
+	<technique>Diffuse Scattering</technique>
    </instrument> 
-   
+      
    <instrument name="POWGEN" shortname="PG3" beamline="11A"> 
 	<technique>Neutron Diffraction</technique>
+   </instrument> 
+   
+   <instrument name="MANDI" beamline="11B"> 
+	<technique>Neutron Diffraction</technique>
+	<technique>Single Crystal Diffraction</technique>
+	<technique>Protein Crystallography</technique>
    </instrument> 
    
    <instrument name="TOPAZ" beamline="12"> 
@@ -259,6 +278,11 @@
    <instrument name="ARCS" beamline="18"> 
     <technique>Neutron Spectroscopy</technique>
     <technique>TOF Direct Geometry Spectroscopy</technique>
+   </instrument> 
+   
+   <instrument name="VENUS"> 
+      <technique>Imaging</technique>
+      <technique>Tomography</technique>
    </instrument> 
    
 </facility>
