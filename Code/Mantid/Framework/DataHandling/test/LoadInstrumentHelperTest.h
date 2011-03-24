@@ -139,6 +139,9 @@ public:
   {
     LoadInstrumentHelper helper;
 
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "HFIR");
+
     std::string boevs = helper.getInstrumentFilename("BIOSANS", "2100-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
   }
@@ -146,6 +149,9 @@ public:
   //
   void testInstrumentHelper_TOPAZ_No_To_Date()
   {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "SNS");
+
     LoadInstrumentHelper helper;
     std::string boevs = helper.getInstrumentFilename("TOPAZ", "2011-01-31 22:59:59");
     TS_ASSERT(!boevs.empty());
