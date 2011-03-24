@@ -20,6 +20,7 @@
 #include "MantidKernel/Interpolation.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/FacilityInfo.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -184,22 +185,8 @@ std::string LoadInstrumentHelper::getWorkspaceStartDate(const boost::shared_ptr<
 */
 std::string LoadInstrumentHelper::getInstrumentFilename(const std::string& instrumentName, const std::string& date)
 {
-  // force instrument ID to upper case
-  std::string instrument;
-  instrument = instrumentName;
-  std::transform(instrument.begin(), instrument.end(), instrument.begin(), toupper);
-
-  // hack to look for long name versions
-  if (instrument == "EQSANS")
-    instrument = "EQ-SANS";
-  if (instrument == "HIRESSANS")
-    instrument = "GPSANS";
-  if (instrument == "NOM")
-    instrument = "NOMAD";
-  if (instrument == "SEQ")
-    instrument = "SEQUOIA";
-  if (instrument == "PG3")
-    instrument = "POWGEN";
+  // Lookup the instrument (long) name
+  std::string instrument(Kernel::ConfigService::Instance().Facility().Instrument(instrumentName).name());
 
   // Get the search directory for XML instrument definition files (IDFs)
   std::string directoryName = Kernel::ConfigService::Instance().getInstrumentDirectory();
