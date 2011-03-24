@@ -820,11 +820,11 @@ QString AlgorithmDialog::getValue(QWidget *widget)
 {
   if( QComboBox *opts = qobject_cast<QComboBox*>(widget) )
   {
-    return opts->currentText();
+    return opts->currentText().trimmed();
   }
   else if( QLineEdit *textfield = qobject_cast<QLineEdit*>(widget) )
   {
-    return textfield->text();
+    return textfield->text().trimmed();
   }
   else if( QCheckBox *checker = qobject_cast<QCheckBox*>(widget) )
   {
@@ -839,7 +839,7 @@ QString AlgorithmDialog::getValue(QWidget *widget)
   }
   else if( MantidWidget *mtd_widget = qobject_cast<MantidWidget*>(widget) )
   {
-    return mtd_widget->getUserInput().toString();
+    return mtd_widget->getUserInput().toString().trimmed();
   }
   else
   {
