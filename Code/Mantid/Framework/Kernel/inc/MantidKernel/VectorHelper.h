@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidKernel/cow_ptr.h"
 #include <vector>
 #include <functional>
 #include <cmath>
@@ -54,8 +55,7 @@ namespace VectorHelper
 
   /// Convert an array of bin boundaries to bin centre values.
   void DLLExport convertToBinCentre(const std::vector<double> & bin_edges, std::vector<double> & bin_centres);
-
-  bool DLLExport isConstantValue(const std::vector<double> &arra, double &val);
+  bool DLLExport isConstantValue(const MantidVec &arra);
 
   DLLExport std::vector<double> splitStringIntoVector(std::string listString);
 
@@ -152,6 +152,8 @@ namespace VectorHelper
       return 0.5 * (x + y);
     }
   };
+
+
 
 } // namespace VectorHelper
 } // namespace Kernel

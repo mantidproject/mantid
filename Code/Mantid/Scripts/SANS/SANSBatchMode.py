@@ -103,7 +103,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
                 continue
             run_file += format
             sample_ws = AssignSample(run_file)[0]
-            if len(sample_ws) == 0:
+            if (not sample_ws) or (len(sample_ws) == 0):
                 issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
                 continue
             

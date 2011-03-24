@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FlatBackground.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/VectorHelper.h"
 #include <algorithm>
@@ -73,14 +74,13 @@ void FlatBackground::exec()
   std::vector<int> specInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
   this->getSpecInds(specInds, numHists);
-
-  const bool useMean = isModeMean(getProperty("mode"));
  
   // Are we removing the background?
-  const bool removeBackground = subtractBackground(getProperty("outputMode"));
+  const bool removeBackground =
+    std::string(getProperty("outputMode")) == "Subtract Background";
 
   // Initialise the progress reporting object
-  m_progress = new Progress(this,0.0,0.3,numHists); 
+  m_progress = new Progress(this,0.0,0.2,numHists); 
 
   MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // If input and output workspaces are not the same, create a new workspace for the output
@@ -99,11 +99,13 @@ void FlatBackground::exec()
     }
 	  PARALLEL_CHECK_INTERUPT_REGION
   }
+
+  convertToDistribution(outputWS);
   
   // these are used to report information to the user, one progress update for each percent and a report on the size of the background found
-  double prg=0.3, toFitsize=specInds.size();
-  const int progStep = static_cast<int>(ceil(toFitsize/70.0));
-  double backgroundTotal = 0;
+  double prg(0.2), backgroundTotal(0);
+  const double toFitsize(static_cast<double>(specInds.size()));
+  const int progStep(static_cast<int>(ceil(toFitsize/80.0)));
 
   // Now loop over the required spectra
   std::vector<int>::const_iterator specIt;
@@ -116,7 +118,7 @@ void FlatBackground::exec()
       double variance = -1;
 
       // Now call the function the user selected to calculate the background
-      const double background = useMean ?
+      const double background = std::string(getProperty("mode")) == "Mean" ?
         this->Mean(outputWS, currentSpec, startX, endX, variance) :
         this->LinearFit(outputWS, currentSpec, startX, endX);
       
@@ -178,13 +180,73 @@ void FlatBackground::exec()
     }
   } // Loop over spectra to be fitted
 
-  g_log.information()<<"Mean of the backgrounds in the specified " << toFitsize
-    << " spectra was " << backgroundTotal/toFitsize << " counts per bin\n";
+  
+  g_log.debug() << toFitsize << " spectra corrected\n";
+  if ( ! m_convertedFromRawCounts )
+  {
+    g_log.information() << "The mean background over the spectra region was " << backgroundTotal/toFitsize << " per bin\n";
+  }
+  else
+  {
+    g_log.information() << "Background corrected in uneven bin sized workspace\n";
+  }
+
+  restoreDistributionState(outputWS);
+
 
   // Assign the output workspace to its property
   setProperty("OutputWorkspace",outputWS);
 }
+/** Converts only if the workspace requires it: workspaces that are distributions or have constant width bins
+*  aren't affected. A flag is set if there was a change allowing the workspace to be converted back
+*  @param workspace the workspace to check and possibly convert
+*/
+void FlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
+{
+  if (workspace->isDistribution())
+  {
+    return;
+  }
+  
+  bool variationFound(false);
+  // the number of spectra we need to check to assess if the bin widths are all the same
+  const int total = WorkspaceHelpers::commonBoundaries(workspace) ?
+                    1 : workspace->getNumberHistograms();
 
+  MantidVec adjacents(workspace->readX(0).size()-1);
+  for ( int i = 0; i < total; ++i)
+  {
+    MantidVec X = workspace->readX(i);
+    // Calculate bin widths
+    std::adjacent_difference(X.begin()+1, X.end(), adjacents.begin());
+    // the first entry from adjacent difference is just a copy of the fisrt entry in the input vector, ignore this. The histogram validator for this algorithm ensures that X.size() > 1
+    MantidVec widths( adjacents.begin()+1, adjacents.end() );
+    if ( ! VectorHelper::isConstantValue(widths) )
+    {
+      variationFound = true;
+      break;
+    }
+  }
+
+  if (variationFound)
+  {
+    // after all the above checks the conclusion is we need the conversion
+    WorkspaceHelpers::makeDistribution(workspace, true);
+    m_convertedFromRawCounts = true;
+  }
+}
+/** Converts the workspace to a raw counts workspace if the flag m_convertedFromRawCounts
+*  is set
+*  @param worksapce the workspace to, possibly, convert
+*/
+void FlatBackground::restoreDistributionState(API::MatrixWorkspace_sptr workspace)
+{
+  if (m_convertedFromRawCounts)
+  {
+    WorkspaceHelpers::makeDistribution(workspace, false);
+    m_convertedFromRawCounts = false;
+  }
+}
 /** Checks that the range parameters have been set correctly
  *  @param startX :: The starting point
  *  @param endX ::   The ending point
@@ -222,45 +284,6 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
     output[i] = i;
   }
 }
-/** Checks the user selected mode value
-*  @param mode :: must be one of LinearFit or Mean
-*  @return true if the user selected Mean background analysis and false if Linear Fit was selected
-*  @throw invalid_argument if the mode is not recognised
-*/
-bool FlatBackground::isModeMean(const std::string &mode)
-{
-  if ( mode == "Mean" )
-  {
-    return true;
-  }
-  if ( mode == "Linear Fit" )
-  {
-    return false;
-  }
-  throw std::invalid_argument("Selected mode: \"" + mode + "\" is not recognised");
-}
-
-/**
- * Checks the user selected output mode value.
- * @param outputMode
-::  * @return true if we are subtracting the background, false if not.  If neither then return true.
- */
-bool FlatBackground::subtractBackground(const std::string &outputMode)
-{
-  if ( outputMode == "Subtract Background")
-    {
-      return true;
-    }
-
-  if ( outputMode == "Return Background" )
-  {
-    return false;
-  }
-
-  // If in doubt, just return the default behaviour.
-  return true;
-}
-
 /** Gets the mean number of counts in each bin the background region and the variance (error^2) of that
 *  number
 *  @param WS :: points to the input workspace
@@ -282,14 +305,16 @@ double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int 
     throw std::out_of_range("Either the property startX or endX is outside the range of X-values present in one of the specified spectra");
   }
   // Get the index of the first bin contains the X-value, which means this is an inclusive sum. The minus one is because lower_bound() returns index past the last index pointing to a lower value. For example if startX has a higher X value than the first bin boundary but lower than the second lower_bound returns 1, which is the index of the second bin boundary
-  int startInd = std::lower_bound(XS.begin(),XS.end(),startX)-XS.begin() - 1;
+  size_t startInd =
+    std::lower_bound(XS.begin(),XS.end(),startX) - XS.begin() - 1;
   if ( startInd == -1 )
   {// happens if startX is the first X-value, e.g. the first X-value is zero and the user selects zero
     startInd = 0;
   }
 
   // the -1 matches definition of startIn, see the comment above that statement
-  int endInd=std::lower_bound(XS.begin()+startInd,XS.end(),endX)-XS.begin()-1;
+  size_t endInd =
+    std::lower_bound(XS.begin()+startInd,XS.end(),endX) -XS.begin() -1;
   if ( endInd == -1 )
   {// 
     throw std::invalid_argument("EndX was set to the start of one of the spectra, it must greater than the first X-value in any of the specified spectra");
@@ -347,6 +372,7 @@ double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, dou
 
   return background;
 }
+
 
 } // namespace Algorithms
 } // namespace Mantid

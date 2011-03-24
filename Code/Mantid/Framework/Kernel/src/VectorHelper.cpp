@@ -330,9 +330,8 @@ void convertToBinCentre(const std::vector<double> & bin_edges, std::vector<doubl
 //-------------------------------------------------------------------------------------------------
 /** Assess if all the values in the vector are equal or if there are some different values
 *  @param[in] arra the vector to examine
-*  @param[out] val if there is only one value this variable takes that value, otherwise its contents are undefined
 */
-bool isConstantValue(const std::vector<double> &arra, double &val)
+bool isConstantValue(const std::vector<double> &arra)
 {
   //make comparisons with the first value
   std::vector<double>::const_iterator i = arra.begin();
@@ -342,8 +341,9 @@ bool isConstantValue(const std::vector<double> &arra, double &val)
     return true;
   }
 
+  double val(*i);
   //this loop can be entered! NAN values make comparisons difficult because nan != nan, deal with these first
-  for ( val = *i; val != val ; )
+  for ( ; val != val ; )
   {
     ++i;
     if ( i == arra.end() )

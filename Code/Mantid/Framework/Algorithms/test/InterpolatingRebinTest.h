@@ -49,6 +49,7 @@ public:
     MatrixWorkspace_sptr rebindata =
       boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_outdist"));
     TS_ASSERT_EQUALS(rebindata->getNumberHistograms(), 1);
+    TS_ASSERT(rebindata)
 
     const Mantid::MantidVec outX=rebindata->dataX(0);
     const Mantid::MantidVec outY=rebindata->dataY(0);
@@ -109,6 +110,7 @@ public:
     //get the output workspace and test it
     MatrixWorkspace_sptr rebindata =
       boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_out_nondist"));
+    TS_ASSERT(rebindata)
     const Mantid::MantidVec outX=rebindata->dataX(0);
     const Mantid::MantidVec outY=rebindata->dataY(0);
     const Mantid::MantidVec outE=rebindata->dataE(0);
@@ -145,6 +147,49 @@ public:
     TS_ASSERT( ! rebindata->isDistribution() );
     AnalysisDataService::Instance().remove("InterpolatingRebinTest_in_nondist");
     AnalysisDataService::Instance().remove("InterpolatingRebinTest_out_nondist");
+  }
+
+  
+  void testWorkspace_close()
+  {
+    Workspace2D_sptr test_in1D = Create1DData();
+    test_in1D->isDistribution(true);
+    AnalysisDataService::Instance().add("InterpolatingRebinTest_inclose", test_in1D);
+
+    InterpolatingRebin rebin;
+    rebin.initialize();
+    rebin.setPropertyValue("InputWorkspace","InterpolatingRebinTest_inclose");
+    rebin.setPropertyValue("OutputWorkspace","InterpolatingRebinTest_outclose");
+
+    
+    // the extreme values are just passed the ends of the data but the algorithm assume they are on the boundary
+    rebin.setPropertyValue("Params", "0.49999999,0.75,38.0000001");
+
+    TS_ASSERT_THROWS_NOTHING(rebin.execute())
+    TS_ASSERT(rebin.isExecuted())
+
+    //get the output workspace and test it
+    MatrixWorkspace_sptr rebindata =
+      boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("InterpolatingRebinTest_outclose"));
+    TS_ASSERT(rebindata)
+
+    const Mantid::MantidVec outX=rebindata->dataX(0);
+    const Mantid::MantidVec outY=rebindata->dataY(0);
+    const Mantid::MantidVec outE=rebindata->dataE(0);
+    // the output workspace should be the same as the input
+    TS_ASSERT_EQUALS(outX.size(), test_in1D->readX(0).size())
+    TS_ASSERT_EQUALS(outY.size(), test_in1D->readY(0).size())
+
+    TS_ASSERT_DELTA(outX[0], 0.49999999,0.00001)
+    TS_ASSERT_DELTA(outY[0], 1,0.00001)
+    TS_ASSERT_DELTA(outE[0], 1.0/8.0, 0.0001);
+
+    TS_ASSERT_DELTA(outX.back(), 38.00000,0.00001);
+    TS_ASSERT_DELTA(outY.back(), 74.5,0.0001);
+
+    TS_ASSERT( rebindata->isDistribution() );
+    AnalysisDataService::Instance().remove("InterpolatingRebinTest_inclose");
+    AnalysisDataService::Instance().remove("InterpolatingRebinTest_outclose");
   }
 
   void testNullDataHandling()

@@ -55,6 +55,11 @@ public:
     
     AnalysisDataService::Instance().add("flatbackgroundtest_ramp",WS2D);
   }
+
+  ~FlatBackgroundTest()
+  {
+    AnalysisDataService::Instance().remove("flatbackgroundtest_ramp");
+  }
   
 	void testStatics()
 	{
@@ -201,6 +206,51 @@ public:
       }
     }
   }
+
+  void testVariedWidths()
+  {
+    const double YVALUE = 100.0;
+    Mantid::DataObjects::Workspace1D_sptr WS(new Mantid::DataObjects::Workspace1D);
+    WS->initialize(1,NUMBINS+1,NUMBINS);
+    
+    for (int i = 0; i < NUMBINS; ++i)
+    {
+      WS->dataX(0)[i] = 2*i;
+      WS->dataY(0)[i] = YVALUE;
+      WS->dataE(0)[i] = YVALUE/3.0;
+    }
+    WS->dataX(0)[NUMBINS] = 2*(NUMBINS-1)+4.0;
+    
+
+    Mantid::Algorithms::FlatBackground back;
+    back.initialize();
+    
+    back.setProperty("InputWorkspace", boost::static_pointer_cast<Mantid::API::MatrixWorkspace>(WS));
+    back.setPropertyValue("OutputWorkspace","flatbackgroundtest_third");
+    back.setPropertyValue("WorkspaceIndexList","");
+    back.setPropertyValue("Mode","Mean");
+    // sample the background from the last (wider) bin only
+    back.setProperty("StartX", 2.0*NUMBINS+1);
+    back.setProperty("EndX", 2.0*(NUMBINS+1));
+
+    back.execute();
+    TS_ASSERT( back.isExecuted() )
+    
+    MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("flatbackgroundtest_third"));
+    // The X vectors should be the same
+    TS_ASSERT_EQUALS( WS->readX(0), outputWS->readX(0) )
+
+    const Mantid::MantidVec &YOut = outputWS->readY(0);
+    const Mantid::MantidVec &EOut = outputWS->readE(0);
+
+    TS_ASSERT_EQUALS( YOut[5], 50.0 )
+    TS_ASSERT_EQUALS( YOut[25], 50.0 )
+    TS_ASSERT_EQUALS( YOut[NUMBINS-1], 0.0 )
+
+    TS_ASSERT_DELTA( EOut[10], 37.2677, 0.001 )
+    TS_ASSERT_DELTA( EOut[20], 37.2677, 0.001 )
+  }
+  
 
 private:
   double bg;

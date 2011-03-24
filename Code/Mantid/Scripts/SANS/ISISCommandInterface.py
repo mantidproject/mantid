@@ -155,20 +155,6 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().set_run_number(sample_wksp)
     return sample_wksp, logs
 
-def DisplayMask(mask_worksp=None):
-    if not mask_worksp:
-        mask_worksp = 'CurrentMask'
-        samp = ReductionSingleton().get_sample()
-        
-        if samp:
-            CloneWorkspace(samp, mask_worksp)
-            move_samp = copy.deepcopy(ReductionSingleton().place_det_sam) 
-            move_samp.execute(ReductionSingleton(), mask_worksp)
-        else:
-            ReductionSingleton().instrument.load_empty(mask_worksp)
-        
-    ReductionSingleton().mask.display(mask_worksp, ReductionSingleton())
-
 def SetCentre(xcoord, ycoord):
     _printMessage('SetCentre(' + str(xcoord) + ',' + str(ycoord) + ')')
 
@@ -499,6 +485,38 @@ def PlotResult(workspace, canvas=None):
 def ViewCurrentMask():
     ReductionSingleton().ViewCurrentMask()
 
+def DisplayMask(mask_worksp=None):
+    """
+        Displays masking by applying it to a workspace and displaying
+        it in instrument view. If no workspace is passed a copy of the
+        sample workspace is used, unless no sample was loaded and then
+        an empty instrument will be shown
+        @param mask_worksp: optional this named workspace will be modified and should be from the currently selected instrument
+        @return the name of the workspace that was displayed
+    """
+    #this will be copied from a sample work space if one exists
+    counts_data = None
+    instrument = ReductionSingleton().instrument
+    
+    if not mask_worksp:
+        mask_worksp = '__CurrentMask'
+        samp = ReductionSingleton().get_sample()
+        
+        if samp:
+            counts_data = '__DisplayMasked_tempory_wksp'
+            Integration(samp, counts_data)
+            CloneWorkspace(samp, mask_worksp)
+            move_samp = copy.deepcopy(ReductionSingleton().place_det_sam) 
+            move_samp.execute(ReductionSingleton(), mask_worksp)
+        else:
+            instrument.load_empty(mask_worksp)
+        
+    ReductionSingleton().mask.display(mask_worksp, instrument, counts_data)
+    if counts_data:
+        mantid.deleteWorkspace(counts_data)
+        
+    return mask_worksp
+
 # Print a test script for Colette if asked
 def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvfile = '', savepath = ''):
     script = ''
@@ -554,8 +572,7 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
-    XSTEP = 5.0/1000.
-    YSTEP = 5.0/1000.
+    XSTEP = YSTEP = ReductionSingleton().cen_find_step
 
     setting = copy.deepcopy(ReductionSingleton().reference())
     ReductionSingleton().center_finder = True

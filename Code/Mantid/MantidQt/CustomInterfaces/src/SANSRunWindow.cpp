@@ -2624,7 +2624,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
   addUserMaskStrings(analysis_script,"i.Mask",DefaultMask);
-  analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
+  analysis_script += "\ni.DisplayMask()";//analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);
   m_uiForm.showMaskBtn->setText("Working...");
@@ -2634,18 +2634,21 @@ void SANSRunWindow::handleShowMaskButtonClick()
   m_uiForm.showMaskBtn->setEnabled(true);
   m_uiForm.showMaskBtn->setText("Display mask");
 }
-
-/**
- * A different instrument has been selected
+/** Update the GUI and the Python objects with the instrument selection
  * @throw runtime_error if the instrument doesn't have exactly two detectors 
  */
 void SANSRunWindow::handleInstrumentChange()
 {
-  QString instClass = getInstrumentClass();
-  //Inform the Python objects of the change
-  runReduceScriptFunction(
-    "i.ReductionSingleton().set_instrument(isis_instrument."+instClass+")");
+  //set up the required Python objects and delete what's out of date (perhaps everything is cleaned here)
+  const QString instClass(getInstrumentClass());
+  QString pyCode("if i.ReductionSingleton().get_instrument() != '");
+  pyCode += m_uiForm.inst_opt->currentText()+"':";
+  pyCode += "\n\ti.ReductionSingleton.clean(isis_reducer.ISISReducer)";
+  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
+  pyCode += instClass+")";
+  runReduceScriptFunction(pyCode);
 
+  //now update the GUI
   fillDetectNames(m_uiForm.detbank_sel);
   QString detect = runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.cur_detector().name()");

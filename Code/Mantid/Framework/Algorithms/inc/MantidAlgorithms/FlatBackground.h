@@ -51,7 +51,7 @@ class DLLExport FlatBackground : public API::Algorithm
 {
 public:
   /// (Empty) Constructor
-  FlatBackground() : API::Algorithm(), m_progress(NULL) {}
+  FlatBackground() : API::Algorithm(), m_convertedFromRawCounts(false), m_progress(NULL) {}
   /// Virtual destructor
   virtual ~FlatBackground() {if(m_progress) delete m_progress;m_progress=NULL;}
   /// Algorithm's name
@@ -69,13 +69,15 @@ private:
   ///Execution code
   void exec();
 
+  void convertToDistribution(API::MatrixWorkspace_sptr workspace);
+  void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double& startX, double& endX);
-  bool isModeMean(const std::string &mode);
-  bool subtractBackground(const std::string &outputMode);
   void getSpecInds(std::vector<int> &output, const int workspaceTotal);
   double Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const;
   double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
 
+  /// variable bin width raw count data must be converted to distributions first and then converted back, keep track of this
+  bool m_convertedFromRawCounts;
   /// Progress reporting
   API::Progress* m_progress;
 

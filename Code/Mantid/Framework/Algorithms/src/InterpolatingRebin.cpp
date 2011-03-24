@@ -51,7 +51,7 @@ namespace Mantid
       // Get the input workspace
       MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
       const int nHists = inputW->getNumberHistograms();
-      // make output Workspace the same type is the input, but with new length of signal array
+      // make output Workspace the same type as the input but with the new axes
       MatrixWorkspace_sptr outputW =
         WorkspaceFactory::Instance().create(inputW, nHists, ntcnew, ntcnew-1);
       // Copy over the 'vertical' axis
@@ -77,7 +77,7 @@ namespace Mantid
 
         if (distCon)
         {
-          //return the input workspace to the state it was found in
+          //we need to return the input workspace to the state we found it in
           WorkspaceHelpers::makeDistribution(inputW, false);
         }
         throw;
@@ -135,13 +135,13 @@ namespace Mantid
 
         //get references to output workspace data (no copying)
         MantidVec& YValues_new=outputW->dataY(hist);
-        MantidVec& YErrors_new=outputW->dataE(hist);
+        MantidVec& Errors_new=outputW->dataE(hist);
 
         try
         {
           // output data arrays are implicitly filled by function
           cubicInterpolation(XValues, YValues, YErrors,
-            *XValues_new, YValues_new, YErrors_new);
+            *XValues_new, YValues_new, Errors_new);
         }
         catch (std::exception& ex)
         {
@@ -261,9 +261,9 @@ namespace Mantid
 
       if ( ! canInterpol )
       {
-        double constantVal = -1;
-        if (VectorHelper::isConstantValue(yOld, constantVal))
+        if (VectorHelper::isConstantValue(yOld))
         {
+          double constantVal(yOld.front());
           //this copies the single y-value into the output array, errors are still calculated from the nearest input data points
           noInterpolation(xOld, constantVal, eOld, xNew, yNew, eNew);
           //this is as much as we need to do in this (trival) case

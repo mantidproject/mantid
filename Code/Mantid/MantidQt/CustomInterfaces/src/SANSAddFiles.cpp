@@ -254,21 +254,27 @@ void SANSAddFiles::runPythonAddFiles()
 
   m_SANSForm->sum_Btn->setEnabled(false);
   m_pythonRunning = true;
+  //call the algorithms by executing the above script as Python
   QString status = runPythonCode(code_torun, false);
+  
+  // reset the controls and display any errors
   m_SANSForm->sum_Btn->setEnabled(true);
   m_pythonRunning = false;
-
-  if( ! status.startsWith("The following file has been created:") )
+  if (status.startsWith("The following file has been created:"))
+  {
+    QMessageBox::information(this, "Files summed", status);
+  }
+  else if (status.startsWith("Error copying log file:"))
+  {
+    QMessageBox::warning(this, "Error adding files", status);
+  }
+  else
   {
     if (status.isEmpty())
     {
       status = "Could not sum files, there may be more\ninformation in the Results Log window";
     }
     QMessageBox::critical(this, "Error adding files", status);
-  }
-  else
-  {
-    QMessageBox::information(this, "Files summed", status);
   }
 }
 /** This slot opens a manage user directories dialog to allowing the default

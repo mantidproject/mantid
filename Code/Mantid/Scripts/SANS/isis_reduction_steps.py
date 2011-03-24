@@ -748,12 +748,13 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp_name)
 
-    def display(self, wksp, reducer):
+    def display(self, wksp, instrum, counts=None):
         """
             Mask detectors in a workspace and display its show instrument
             @param wksp: this named workspace will be masked and displayed
+            @param instrum: the instrument that the workspace is from
+            @param counts: optional workspace containing neutron counts data that the mask will be supperimposed on to   
         """
-        instrum = reducer.instrument
         #apply masking to the current detector
         self.execute(None, wksp, instrum)
         
@@ -762,11 +763,49 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         original = instrum.cur_detector().name()
         instrum.setDetector(other)
         self.execute(None, wksp, instrum)
-        #reset the instrument to mask the currecnt detector
+        #reset the instrument to mask the current detector
         instrum.setDetector(original)
 
         # Mark up "dead" detectors with error value 
-        FindDeadDetectors(wksp, wksp, DeadValue=500)
+        FindDeadDetectors(wksp, wksp, LiveValue = 0, DeadValue=1)
+
+        #check if we have a workspace to superimpose the mask on to
+        if counts:
+            #the code below is a proto-type for the ISIS SANS group, to make it perminent it should be improved 
+            
+            #create a workspace where the masked spectra have a value
+            flags = mtd[wksp]
+            #normalise that value to the data in the workspace
+            vals = mtd[counts]
+            maxval = 0
+            Xs = []
+            Ys = []
+            Es = []
+            for i in range(0, flags.getNumberHistograms()):
+                Xs.append(flags.readX(i)[0])
+                Xs.append(flags.readX(i)[1])
+                Ys.append(flags.readY(i)[0])
+                Es.append(0)
+                
+                if (vals.readY(i)[0] > maxval):
+                    #don't include masked or monitors
+                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 10000):
+                        maxval = vals.readY(i)[0]
+    
+            #now normalise to the max/4
+            maxval /= 4.0
+            for i in range(0, len(Ys)):
+                if Ys[i] != 0:
+                    Ys[i] = maxval*Ys[i] + vals.readY(i)[0]
+
+            CreateWorkspace(wksp, Xs, Ys, Es, len(Ys), UnitX='TOF', VerticalAxisValues=Ys)
+            #change the units on the workspace so it is compatible with the workspace containing counts data
+            Power(counts, 'ones', 0)
+            Multiply('ones', wksp, 'units')
+            #do the super-position and clean up
+            Minus(counts, 'units', wksp)
+#            mantid.deleteWorkspace('ones')
+#            mantid.deleteWorkspace('units')
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp)
@@ -979,13 +1018,11 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             RemoveBins(norm_ws, norm_ws, '19900', '20500',
                 Interpolation="Linear")
         
-        ConvertToDistribution(norm_ws, norm_ws)
         # Remove flat background
         if reducer.BACKMON_START != None and reducer.BACKMON_END != None:
             FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
                 EndX = reducer.BACKMON_END, WorkspaceIndexList = '0',
                 Mode='Mean')
-        ConvertFromDistribution(norm_ws, norm_ws)
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         sample_rebin = reducer.to_wavelen.rebin_alg 
@@ -1087,6 +1124,43 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
     def set_loader(self, loader):
         self.loader = loader
+        
+    def setup_wksp(self, inputWS, inst, backmon_start, backmon_end, wavbining, interpolate):
+        """
+            Creates a new workspace removing any background from the monitor spectra, converting units
+            and re-binning. Optionally removes between the x-values 19900 and 20500 
+            @param inputWS: contains the monitor spectra
+            @param inst: the selected instrument
+            @param backmon_start: the start of the region that we'll assume is just background
+            @param backmon_end: the end of the background region
+            @param wavbinning: the re-bin string to use after convert units
+            @param interpolate: apply cubic interpolation to the output from convert units
+            @return the name of the workspace created
+        """
+        inst.load_transmission_inst(inputWS)
+
+        tmpWS = inputWS + '_tmp'
+        CropWorkspace(inputWS,tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+    
+
+        if inst.name() == 'LOQ':
+            RemoveBins(tmpWS,tmpWS, 19900, 20500, Interpolation='Linear')
+            # Load in the instrument setup used for LOQ transmission runs
+
+        if backmon_start != None and backmon_end != None:
+            #only remove the background from the monitor spectra that are going to be used
+            spec_list = '1,2' 
+            FlatBackground(tmpWS, tmpWS, StartX=backmon_start, EndX=backmon_end, WorkspaceIndexList=spec_list, Mode='Mean')
+    
+        # Convert and rebin
+        ConvertUnits(tmpWS,tmpWS,"Wavelength")
+        
+        if interpolate:
+            InterpolatingRebin(tmpWS, tmpWS, wavbining)
+        else :
+            Rebin(tmpWS, tmpWS, wavbining)
+    
+        return tmpWS
 
     def execute(self, reducer, workspace):
         if (self.loader is None) or (not self.loader.trans_name):
@@ -1134,30 +1208,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             else:
                 fit_type = self.fit_method
 
+            trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
+                reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
+                reducer.instrument.use_interpol_trans_calc)
+                
+            direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
+                reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
+                reducer.instrument.use_interpol_trans_calc)
+
             if reducer.instrument.name() == 'LOQ':
-                # Load in the instrument setup used for LOQ transmission runs
-                instrum.load_transmission_inst(trans_raw)
-                instrum.load_transmission_inst(direct_raw)
-                
-                trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
-                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
-                    reducer.instrument.use_interpol_trans_calc, True)
-                
-                direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
-                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-                    reducer.instrument.use_interpol_trans_calc, True)
-                
                 CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength=translambda_min, MaxWavelength =  translambda_max, \
                                       FitMethod = fit_type, OutputUnfittedData=True)
             else:
-                trans_tmp_out = SANSUtility.SetupTransmissionWorkspace(trans_raw,
-                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-                    reducer.instrument.use_interpol_trans_calc, False)
-
-                direct_tmp_out = SANSUtility.SetupTransmissionWorkspace(direct_raw,
-                    '1,2', reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-                    reducer.instrument.use_interpol_trans_calc, False)
-                
                 CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
                     reducer.instrument.incid_mon_4_trans_calc, reducer.instrument.trans_monitor,
                     MinWavelength = translambda_min, MaxWavelength = translambda_max,
