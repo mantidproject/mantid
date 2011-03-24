@@ -378,7 +378,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
 
     Mantid::DataHandling::LoadInstrumentHelper helper;
-    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Mantid::Kernel::DateAndTime::get_current_time().to_ISO8601_string());
     
     Mantid::DataHandling::LoadInstrument loadInst;
     loadInst.initialize();
