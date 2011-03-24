@@ -380,6 +380,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/RebunchTest.h
 		 test/RegroupTest.h
 		 test/RemoveBinsTest.h
+		 test/RemoveLowResTOFTest.h
 		 test/RenameWorkspaceTest.h
 		 test/ReplaceSpecialValuesTest.h
 		 test/SaveSNSNexusTest.h
@@ -399,6 +400,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/UnaryOperationTest.h
 		 test/UnGroupWorkspacesTest.h
 		 test/UnwrapTest.h
+		 test/UnwrapSNSTest.h
 		 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 test/PDFFTTest.h 

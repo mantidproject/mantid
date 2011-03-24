@@ -182,7 +182,14 @@ void RemoveLowResTOF::execEvent()
   // do the actual work
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
-    outW->getEventList(workspaceIndex).maskTof(0., this->calcTofMin(workspaceIndex));
+    double tmin = this->calcTofMin(workspaceIndex);
+    if (tmin != tmin)
+    {
+      g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
+      outW->getEventList(workspaceIndex).clear();
+    }
+    else
+      outW->getEventList(workspaceIndex).maskTof(0., tmin);
   }
 
   outW->clearMRU();
@@ -210,6 +217,7 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
   double tmin = sqrtdmin * sqrtdmin / dspmap;
 
+  g_log.debug() << "tmin[" << workspaceIndex << "] " << tmin << "\n";
   return tmin;
 }
 
