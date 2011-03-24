@@ -34,66 +34,79 @@ namespace MDEvents
     /// Get the number of points associated with the workspace; For MD workspace it is number of points contributing into the workspace
     uint64_t getNPoints() const
     {
+      return 0;
     }
 
     /// Get the number of dimensions
     int getNDimensions() const
     {
+      return 0;
     }
 
     /// Get the x-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the y-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the z-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the t-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the dimension with the specified id.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the dimension ids in their order
     const std::vector<std::string> getDimensionIDs() const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the point at the specified index.
     const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
     const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
     {
+      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
