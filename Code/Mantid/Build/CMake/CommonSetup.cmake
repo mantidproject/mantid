@@ -65,7 +65,7 @@ endif ()
 # Look for subversion. Used for version headers - faked if not found.
 ###########################################################################
 
-set ( SVN_WORKING_COPY ON CACHE BOOL "Switch off if not building off a Subversion working copy")
+set ( SVN_WORKING_COPY OFF CACHE BOOL "If true, will try to pull out subversion revision number. Must be true for buildservers. Requires building off an svn working copy." )
 if ( SVN_WORKING_COPY )
   include( FindSubversion )
 endif ()
