@@ -354,6 +354,7 @@ void ScriptingWindow::closeEvent(QCloseEvent *event)
   // Therefore if someone clicks close and MantidPlot is not quitting then we will just hide
   if( !m_acceptClose ) 
   {
+    emit hideMe();
     this->hide();
     return;
   }

@@ -5277,6 +5277,7 @@ void ApplicationWindow::saveSettings()
   if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
   if( scriptingWindow ) 
   {
+    this->saveScriptWindowGeometry();
     settings.beginGroup("/ScriptWindow");
     // Geometry is applied by the app window
     settings.setValue("/size", d_script_win_size);
@@ -15503,6 +15504,7 @@ void ApplicationWindow::showScriptWindow(bool forceVisible)
     scriptingWindow->setObjectName("ScriptingWindow");
     scriptingWindow->setAttribute(Qt::WA_DeleteOnClose, false);
     connect(scriptingWindow, SIGNAL(closeMe()), this, SLOT(saveScriptWindowGeometry()));
+    connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(saveScriptWindowGeometry()));
     connect(scriptingWindow, SIGNAL(hideMe()), this, SLOT(showScriptWindow()));
     connect(scriptingWindow, SIGNAL(chooseScriptingLanguage()), this, SLOT(showScriptingLangDialog()));
   }
