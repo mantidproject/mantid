@@ -676,14 +676,6 @@ add_definitions ( -DSCRIPTING_MUPARSER )
 add_definitions ( -DSCRIPTING_PYTHON )
 add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (as is desired)
 
-# ----- USE_TCMALLOC FLAG -----
-set ( USE_TCMALLOC ON CACHE BOOL "Flag for replacing regular malloc with tcmalloc" )
-find_package ( Tcmalloc )
-if ( USE_TCMALLOC AND TCMALLOC_FOUND )
-  # Make a C++ define to use as flags 
-  add_definitions ( -DUSE_TCMALLOC )
-endif ()
-
 include_directories ( src )
 
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
