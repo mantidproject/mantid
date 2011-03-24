@@ -237,7 +237,7 @@ void FlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
 }
 /** Converts the workspace to a raw counts workspace if the flag m_convertedFromRawCounts
 *  is set
-*  @param worksapce the workspace to, possibly, convert
+*  @param workspace the workspace to, possibly, convert
 */
 void FlatBackground::restoreDistributionState(API::MatrixWorkspace_sptr workspace)
 {
