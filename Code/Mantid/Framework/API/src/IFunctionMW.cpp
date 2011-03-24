@@ -433,6 +433,12 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
       // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
       IInstrument_const_sptr instrument = ws->getInstrument();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if (sample == NULL)
+      {
+        g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
+                      << "Ignore convertion."; 
+        return value; 
+      }
       l1 = instrument->getSource()->getDistance(*sample);
       Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
       if ( ! det->isMonitor() )
@@ -489,6 +495,12 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
       // Get l1, l2 and theta  (see also RemoveBins.calculateDetectorPosition())
       IInstrument_const_sptr instrument = ws->getInstrument();
       Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+      if (sample == NULL)
+      {
+        g_log.error() << "No sample defined instrument. Cannot convert units for function\n"
+                      << "Ignore convertion."; 
+        return; 
+      }
       l1 = instrument->getSource()->getDistance(*sample);
       Geometry::IDetector_const_sptr det = ws->getDetector(wsIndex);
       if ( ! det->isMonitor() )

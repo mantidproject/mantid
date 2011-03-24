@@ -12,6 +12,10 @@
 #include <gsl/gsl_multifit_nlin.h>
 #include <limits>
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
 #include <limits>
 
 namespace Mantid
@@ -21,6 +25,7 @@ namespace CurveFitting
 
 using namespace Kernel;
 using namespace SpecialFunctionSupport;
+using namespace Geometry;
 
 DECLARE_FUNCTION(IkedaCarpenterPV)
 
@@ -62,7 +67,26 @@ double IkedaCarpenterPV::height()const
 
 double IkedaCarpenterPV::width()const 
 {
-  return sqrt(8.0*M_LN2*getParameter("SigmaSquared"))+getParameter("Gamma");
+  double sigmaSquared = getParameter("SigmaSquared");
+  double gamma = getParameter("Gamma");
+
+  if ( sigmaSquared < 0 )
+  {
+    g_log.warning() << "SigmaSquared NEGATIVE!.\n"
+                    << "Likely due to a fit not converging properly\n"
+                    << "If this is frequent problem please report to Mantid team.\n"
+                    << "For now to calculate width force SigmaSquared positive.\n";
+    sigmaSquared = - sigmaSquared;
+  }
+  if ( gamma < 0 )
+  {
+    g_log.warning() << "Gamma NEGATIVE!.\n"
+                    << "Likely due to a fit not converging properly\n"
+                    << "If this is frequent problem please report to Mantid team.\n"
+                    << "For now to calculate width force Gamma positive.\n";
+    gamma = - gamma;;
+  }
+  return sqrt(8.0*M_LN2*sigmaSquared)+gamma;
 };
 
 void IkedaCarpenterPV::setWidth(const double w) 
@@ -90,8 +114,8 @@ void IkedaCarpenterPV::init()
 }
 
 
-/** Method for updating m_waveLength, although don't do this if m_waveLengthFixed = true.
- *  Also if size of m_waveLength is equal to number of data (for a new instance of this 
+/** Method for updating m_waveLength.
+ *  If size of m_waveLength is equal to number of data (for a new instance of this 
  *  class this vector is empty initially) then don't recalculate it.
  *
  *  @param xValues :: x values
@@ -99,8 +123,6 @@ void IkedaCarpenterPV::init()
  */
 void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const
 {
-  if (!m_waveLengthFixed)
-  { 
     // if wavelength vector already have the right size no need for resizing it
     // further we make the assumption that no need to recalculate this vector if
     // it already has the right size
@@ -118,9 +140,35 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
       // note if a version of convertValue was added which allows a double* as first argument
       // then could avoid copying above plus only have to resize m_wavelength when 
       // its size smaller than nData
-	    convertValue(m_waveLength, wavelength, m_workspace, m_workspaceIndex);
+      if ( m_workspace != 0 )
+      {
+        IInstrument_const_sptr instrument = m_workspace->getInstrument();
+        Geometry::IObjComponent_const_sptr sample = instrument->getSample();
+        if (sample != NULL)
+        {
+	        convertValue(m_waveLength, wavelength, m_workspace, m_workspaceIndex);
+        }
+        else
+        {
+          g_log.warning() << "No sample set for instrument in workspace.\n"
+                          << "Can't calculate wavelength in IkedaCarpenter.\n"
+                          << "Default all wavelengths to one.\n"
+                          << "Solution is to load appropriate instrument into workspace.\n";
+          for (int i = 0; i < nData; i++)
+            m_waveLength[i] = 1.0; 
+        }
+      }
+      else
+      {
+        g_log.warning() << "Workspace not set.\n"
+                        << "Can't calculate wavelength in IkedaCarpenter.\n"
+                        << "Default all wavelengths to one.\n"
+                        << "Solution call setMatrixWorkspace() for function.\n";
+        for (int i = 0; i < nData; i++)
+          m_waveLength[i] = 1.0; 
+      
+      }
     }
-  }
 }
 
 
@@ -178,7 +226,15 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
     double u,v,s,r;
     double yu, yv, ys, yr;
 
-    const double someConst = 1/sqrt(2.0*sigmaSquared);
+    // Not entirely sure what to do if sigmaSquared ever negative
+    // for now just post a warning
+    double someConst = std::numeric_limits<double>::max() / 100.0;
+    if ( sigmaSquared > 0 )
+      someConst = 1/sqrt(2.0*sigmaSquared);
+    else if (sigmaSquared < 0 )
+    {
+      g_log.warning() << "sigmaSquared negative in functionLocal.\n";
+    }
 
     double R, Nu, Nv, Ns, Nr, N;
 
@@ -192,17 +248,8 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
-        if (m_waveLengthFixed)
-        {
-          // this is to allow unit testing when a workspace is not available
-          R = exp(-81.799/(m_waveLength[0]*m_waveLength[0]*kappa));
-          alpha = 1.0 / (alpha0+m_waveLength[0]*alpha1);
-        }
-        else
-        {
-          R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
-          alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
-        }
+        R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
+        alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
 
         a_minus = alpha*(1-k);
         a_plus = alpha*(1+k);
@@ -255,7 +302,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     double gamma = 1.0; // dummy initialization
     double eta = 0.5;   // dummy initialization
     convertVoigtToPseudo(voigtsigmaSquared, voigtgamma, gamma, eta);
-    double sigmaSquared = gamma*gamma/(8.0*M_LN2); 
+    double sigmaSquared = gamma*gamma/(8.0*M_LN2); // pseudo voigt sigma^2
 
     const double beta = 1/beta0;
 
@@ -266,7 +313,15 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     double u,v,s,r;
     double yu, yv, ys, yr;
 
-    const double someConst = 1/sqrt(2.0*sigmaSquared);
+    // Not entirely sure what to do if sigmaSquared ever negative
+    // for now just post a warning
+    double someConst = std::numeric_limits<double>::max() / 100.0;
+    if ( sigmaSquared > 0 )
+      someConst = 1/sqrt(2.0*sigmaSquared);
+    else if (sigmaSquared < 0 )
+    {
+      g_log.warning() << "sigmaSquared negative in functionLocal.\n";
+    }
 
     double R, Nu, Nv, Ns, Nr, N;
 
@@ -280,17 +335,10 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     for (int i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
-        if (m_waveLengthFixed)
-        {
-          // this is to allow unit testing when a workspace is not available
-          R = exp(-81.799/(m_waveLength[0]*m_waveLength[0]*kappa));
-          alpha = 1.0 / (alpha0+m_waveLength[0]*alpha1);
-        }
-        else
-        {
-          R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
-          alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
-        }
+
+        R = exp(-81.799/(m_waveLength[i]*m_waveLength[i]*kappa));
+        alpha = 1.0 / (alpha0+m_waveLength[i]*alpha1);
+
 
         a_minus = alpha*(1-k);
         a_plus = alpha*(1+k);

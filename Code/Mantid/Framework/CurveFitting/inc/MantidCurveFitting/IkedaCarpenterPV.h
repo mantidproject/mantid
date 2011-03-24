@@ -44,10 +44,7 @@ namespace Mantid
       virtual ~IkedaCarpenterPV() {};
 
       /// contruction used for standard fitting
-      IkedaCarpenterPV() : m_waveLengthFixed(false) {};
-      /// Constructor used for unit testing where a workspace may not be available
-      IkedaCarpenterPV(double wavelength) : m_waveLengthFixed(true)  
-         {m_waveLength.push_back(wavelength);};
+      IkedaCarpenterPV() {};
 
       /// overwrite IPeakFunction base class methods
       virtual double centre()const;
@@ -77,9 +74,6 @@ namespace Mantid
 
       /// container for storing wavelength values for each data point
       mutable std::vector<double> m_waveLength;
-
-      /// used for unit testing where a workspace may not be available
-      bool m_waveLengthFixed;
 
       /// calculate the const function
       void constFunction(double* out, const double* xValues, const int& nData) const;

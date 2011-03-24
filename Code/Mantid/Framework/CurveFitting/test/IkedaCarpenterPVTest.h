@@ -21,6 +21,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/cow_ptr.h"
 #include <limits>
 
 using namespace Mantid::Kernel;
@@ -106,6 +107,7 @@ public:
     e[30] =      1.0112;
   }
 
+  // here tries to fit an IC peak to a Gaussian mock data peak
   void testAgainstMockData()
   {
     Fit alg2;
@@ -129,50 +131,69 @@ public:
 
     // Set general Fit parameters
     alg2.setPropertyValue("InputWorkspace", wsName);
-    alg2.setPropertyValue("WorkspaceIndex","1");
+    alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","150");
 
     // set up fitting function and pass to Fit
-    IkedaCarpenterPV* icpv = new IkedaCarpenterPV(1.0);
+    IkedaCarpenterPV* icpv = new IkedaCarpenterPV();  
     icpv->initialize();
-    icpv->setMatrixWorkspace(ws2D, 1,0,1);
 
-    icpv->setParameter("I",95000);
+    icpv->setParameter("I",1000);
     icpv->tie("Alpha0", "1.597107");
     icpv->tie("Alpha1", "1.496805");
     icpv->tie("Beta0", "31.891718");
     icpv->tie("Kappa", "46.025921");
-    icpv->tie("SigmaSquared", "100.0");
+    //icpv->tie("SigmaSquared", "100.0");
     icpv->setParameter("X0",45.0);
-    icpv->tie("Gamma", "1.0");
+    //icpv->tie("Gamma", "1.0");
 
     alg2.setPropertyValue("Function",*icpv);
 
     // execute fit
     TS_ASSERT_THROWS_NOTHING(
       TS_ASSERT( alg2.execute() )
-    )
+    )    
     TS_ASSERT( alg2.isExecuted() );
-
-    return;
 
     // test the output from fit is what you expect
     double dummy = alg2.getProperty("Output Chi^2/DoF");
-    TS_ASSERT_DELTA( dummy, 0.0,0.0001);
+    TS_ASSERT_DELTA( dummy, 13.13,1);
 
-    //TS_ASSERT_DELTA( gaus->height(), 31 ,0.001);
-    TS_ASSERT_DELTA( icpv->centre(), 50 ,0.0001);
-    //TS_ASSERT_DELTA( gaus->width(), 2.2284 ,0.0001);
+    IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function")); 
+    IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out); 
 
-    TS_ASSERT_DELTA( icpv->getParameter("I"), 3101 ,1);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha0"), 1.597107 ,0.0001);
-    TS_ASSERT_DELTA( icpv->getParameter("Alpha1"), 1.496805 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Beta0"), 31.891718 ,0.0001);
-    TS_ASSERT_DELTA( icpv->getParameter("Kappa"), 46.025921 ,0.0001);
-    TS_ASSERT_DELTA( icpv->getParameter("SigmaSquared"), 100.0 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("Gamma"), 1.0 ,0.001);
-    TS_ASSERT_DELTA( icpv->getParameter("X0"), 50.0 ,0.001);
+    TS_ASSERT_DELTA( pk->height(), 13.99 ,1);
+    TS_ASSERT_DELTA( pk->centre(), 48.229 ,1);
+    TS_ASSERT_DELTA( pk->width(), 0.4816 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("I"), 374.93, 1);
+    TS_ASSERT_DELTA( out->getParameter("Alpha0"), 1.597107 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("Alpha1"), 1.496805 ,0.001);
+    TS_ASSERT_DELTA( out->getParameter("Beta0"), 31.891718 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("Kappa"), 46.025921 ,0.0001);
+    TS_ASSERT_DELTA( out->getParameter("SigmaSquared"), 0.0338 ,0.001);
+    TS_ASSERT_DELTA( out->getParameter("Gamma"), 0.0484 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("X0"), 48.229 ,0.01);
+
+   
+    // could set workspace here but makes no difference since
+    // regardless m_wavelength set to zero in IC code 
+    //pk->setMatrixWorkspace(ws2D, 0,-1,-1);
+
+    const double* x = &ws2D->readX(0)[0];
+    double *yy = new double[timechannels]; 
+    pk->function(yy, x, timechannels);
+
+    // note that fitting a none-totally optimized IC to a Gaussian peak so 
+    // not a perfect fit - but pretty ok result
+    TS_ASSERT_DELTA( yy[9], 1.22099 ,0.1);
+    TS_ASSERT_DELTA( yy[10], 90.7193 ,4);
+    TS_ASSERT_DELTA( yy[11], 93.1314 ,4);
+    TS_ASSERT_DELTA( yy[12], 41.1798, 2);
+    TS_ASSERT_DELTA( yy[13], 15.0869 ,1);
+    TS_ASSERT_DELTA( yy[14], 5.55355 ,1);
+
+    delete yy;
 
     AnalysisDataService::Instance().remove(wsName);
   }
