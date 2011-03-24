@@ -804,8 +804,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             Multiply('ones', wksp, 'units')
             #do the super-position and clean up
             Minus(counts, 'units', wksp)
-#            mantid.deleteWorkspace('ones')
-#            mantid.deleteWorkspace('units')
+            mantid.deleteWorkspace('ones')
+            mantid.deleteWorkspace('units')
 
         #opens an instrument showing the contents of the workspace (i.e. the instrument with masked detectors) 
         instrum.view(wksp)
