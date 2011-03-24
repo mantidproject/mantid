@@ -35,10 +35,8 @@ namespace Mantid
     {
   
 
-        /** A base class for absorption correction algorithms.
-
-        This class represents the abstract implicit function type used for communicating and implementing an operation against 
-        an MDWorkspace.
+        /** This class represents the abstract implicit function type used for
+         * communicating and implementing an operation against an MDWorkspace.
 
         @author Owen Arnold, Tessella plc
         @date 01/10/2010

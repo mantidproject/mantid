@@ -69,9 +69,6 @@ if (PYUNITTEST_FOUND)
 endif ()
 
 
-# For the build servers, use patchelf to remove the rpaths (linux only)
-find_package ( Patchelf )
-# set ( RUN_PATCHELF OFF CACHE BOOL "Switch for running patchelf to strip rpaths from executables (Linux; this allows copying the binaries)")
 
 
 

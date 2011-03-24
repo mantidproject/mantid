@@ -18,8 +18,8 @@ namespace Mantid
     namespace MDAlgorithms
     {
         /**
-
-        This class represents a Null Implicit function. This type prevents the requirement for Null checks and handles where ImplicitFunctions are used.
+        This class represents a Null Implicit function. This type prevents the requirement
+        for Null checks and handles where ImplicitFunctions are used.
 
         @author Owen Arnold, Tessella plc
         @date 28/01/2011

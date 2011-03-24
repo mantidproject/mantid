@@ -25,6 +25,7 @@ namespace Mantid
             return CompositeImplicitFunction::functionName();
         }
 
+        /** Serialize to XML */
         std::string CompositeImplicitFunction::toXMLString() const
         {
             using namespace Poco::XML;
@@ -55,12 +56,23 @@ namespace Mantid
             return formattedXMLString;
         }
 
+
+        /** Return the number of functions in this composite
+         * */
         int CompositeImplicitFunction::getNFunctions() const
         {
             return this->m_Functions.size();
         }
 
 
+        /** Evaluate a composite of several Implicit functions.
+         *
+         * This returns true if all ImplicitFunctions evaluate as true
+         * (basically an AND operation on the evaluate() of each function).
+         *
+         * @param pPoint3D :: point to evaluate
+         * @return bool
+         */
         bool CompositeImplicitFunction::evaluate(const API::Point3D*  pPoint3D) const
         {
             bool evalResult = false;
@@ -76,6 +88,7 @@ namespace Mantid
             return evalResult;
         }
 
+        /** Comparison operator */
         bool CompositeImplicitFunction::operator==(const CompositeImplicitFunction &other) const
         {
 
