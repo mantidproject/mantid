@@ -20,6 +20,8 @@ public:
 
   void testViaProxy()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
@@ -39,6 +41,8 @@ public:
 
   void testPropertyValuesViaProxy()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
@@ -55,7 +59,9 @@ public:
   }
 
   void testSwitchingLoaderViaProxy()
-  {
+  {    
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     IAlgorithm_sptr proxy = AlgorithmManager::Instance().create("Load");
     TS_ASSERT_EQUALS(proxy->existsProperty("Filename"), true);
     TS_ASSERT_EQUALS(proxy->existsProperty("OutputWorkspace"), true);
@@ -85,6 +91,8 @@ public:
 
   void testFindLoader()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     Load loader;
     loader.initialize();
     const char * loadraw_props[5] = {"SpectrumMin", "SpectrumMax", "SpectrumList", "Cache", "LoadLogFiles"};
@@ -108,6 +116,7 @@ public:
 
   void testRaw()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","IRS38633.raw");
@@ -121,6 +130,7 @@ public:
 
   void testRawWithOneSpectrum()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","IRS38633.raw");
@@ -144,6 +154,7 @@ public:
 
   void testRaw1()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","HRP37129.s02");
@@ -156,6 +167,7 @@ public:
 
   void testRawGroup()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","EVS13895.raw");
@@ -178,6 +190,7 @@ public:
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","emu00006473.nxs");
@@ -192,6 +205,7 @@ public:
   void test_ARGUS_NXS()
   {
 #ifndef _WIN64
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename","argus0026287.nxs"));
@@ -204,6 +218,7 @@ public:
   {
     // Note that there are no 64-bit HDF4 libraries for Windows.
 #ifndef _WIN64
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","MUSR00015189.nxs");
@@ -220,6 +235,7 @@ public:
   }
    void testISISNexus()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","LOQ49886.nxs");
@@ -232,6 +248,7 @@ public:
 
   void testUnknownExt()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS(loader.setPropertyValue("Filename","hrpd_new_072_01.cal"), std::runtime_error);
@@ -263,6 +280,7 @@ public:
 
   void testSpice2D()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "HFIR");
     Load loader;
     loader.initialize();
     loader.setPropertyValue("Filename","BioSANS_exp61_scan0004_0001.xml");
@@ -310,6 +328,7 @@ public:
 
   void test_EventPreNeXus_WithNoExecute()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860_neutron_event.dat"));
@@ -319,6 +338,7 @@ public:
 
   void test_SNSEventNeXus_WithNoExecute()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     Load loader;
     loader.initialize();
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Filename", "CNCS_7860.nxs"));

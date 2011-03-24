@@ -24,6 +24,8 @@ public:
 
   ManagedRawFileWorkspace2DTest()
   {
+    // Set the facility
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     file = FileFinder::Instance().getFullPath("HET15869.raw");
     Workspace = new ManagedRawFileWorkspace2D(file,2);
   }

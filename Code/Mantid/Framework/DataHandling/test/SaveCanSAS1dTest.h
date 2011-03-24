@@ -33,6 +33,9 @@ public:
     if ( !loader.isInitialized() ) loader.initialize();
     std::string inputFile; // Path to test input file assumes Test directory checked out from SVN
     
+    // Set the facility
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     //the file's run number needs to be stored in m_runNum for later tests
     inputFile = "HET15869.raw";
     m_runNum = "15869";
