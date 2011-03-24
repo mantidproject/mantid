@@ -102,12 +102,12 @@ namespace Geometry
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
     virtual void getAxisPoints(std::vector<double>  &)const;
     /// function returns number of the bins this dimension has
-    virtual unsigned int getNBins(void)const{return nBins;}
+    virtual size_t getNBins(void)const{return nBins;}
     /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
     virtual size_t       getStride(void)const{return nStride;}
   
     //Get coordinate for index; Throws through vector if ind out of range 
-    virtual double getX(unsigned int ind)const{return Axis.at(ind);}
+    virtual double getX(size_t ind)const{return Axis.at(ind);}
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return false;}
     /// get data shif in this direction (original data were shifted when rebinnded)

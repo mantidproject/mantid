@@ -1087,7 +1087,7 @@ namespace Mantid
 
       virtual double getMinimum() const {return m_axis(0);}
       /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points. 
-      virtual unsigned int getNBins() const {return m_axis.length();}
+      virtual size_t getNBins() const {return m_axis.length();}
       /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one. 
       virtual size_t      getStride()const {return 0;}
       /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
@@ -1095,7 +1095,7 @@ namespace Mantid
       /// defines the dimension scale in physical units. 
       virtual double getScale()const {return 0;}
       ///  Get coordinate for index;
-      virtual double getX(unsigned int ind)const {return m_axis(ind);}
+      virtual double getX(size_t ind)const {return m_axis(ind);}
       // Mess; TODO: clear
       virtual Geometry::V3D getDirection(void)const {throw std::runtime_error("Not implemented");}
       virtual Geometry::V3D getDirectionCryst(void)const {throw std::runtime_error("Not implemented");}

@@ -119,7 +119,7 @@ MDDimensionRes("DUMMY REC_DIM",(rec_dim)nRecDim)
 }
   //Get coordinate for index; Throws  if ind is out of range 
 double 
-MDDimDummy::getX(unsigned int ind)const
+MDDimDummy::getX(size_t ind)const
 {
       switch(ind){
       case(0): return 0;

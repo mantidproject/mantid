@@ -36,7 +36,7 @@ private:
     {
       return m_min;
     }
-    unsigned int getNBins() const
+    size_t getNBins() const
     {
       return m_nbins;
     }

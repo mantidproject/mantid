@@ -103,12 +103,12 @@ public:
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
     virtual void getAxisPoints(std::vector<double>  &p)const{std::vector<double> tmp(1,0.5);p=tmp;}
     /// function returns number of the bins this dimension has
-    virtual unsigned int getNBins(void)const{return 1;}
+    virtual size_t getNBins(void)const{return 1;}
     /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
     virtual size_t       getStride(void)const{return 0;}
   
     //Get coordinate for index; Throws  if ind is out of range 
-    virtual double getX(unsigned int ind)const;
+    virtual double getX(size_t ind)const;
     /// it is not reciprocal dimension -> convenience function
     virtual bool isReciprocal(void)const{return true;}
     // no mutator allowed

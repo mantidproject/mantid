@@ -55,13 +55,13 @@ namespace Mantid
     virtual double getMinimum() const = 0;
 
     /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
-    virtual unsigned int getNBins() const = 0;
+    virtual size_t getNBins() const = 0;
 
     /// Dimensions must be xml serializable.
     virtual std::string toXMLString() const = 0;
 
     ///  Get coordinate for index;
-    virtual double getX(unsigned int ind)const = 0;
+    virtual double getX(size_t ind)const = 0;
 
 
 //    /// if the dimension is integrated (e.g. have single bin)
