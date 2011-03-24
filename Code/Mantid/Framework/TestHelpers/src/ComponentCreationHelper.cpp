@@ -6,14 +6,16 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
-
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadInstrumentHelper.h"
+
 #include <Poco/Path.h>
 #include <boost/shared_array.hpp>
 
@@ -374,8 +376,10 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     std::string instrumentID = inst_name;
     // force ID to upper case
     std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
-    std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
+    Mantid::DataHandling::LoadInstrumentHelper helper;
+    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+    
     Mantid::DataHandling::LoadInstrument loadInst;
     loadInst.initialize();
     // Now execute the sub-algorithm. Catch and log any error, but don't stop.
