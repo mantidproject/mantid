@@ -43,45 +43,55 @@ namespace Mantid
   public:
     /// the name of the dimennlsion as can be displayed along the axis
     virtual std::string getName() const = 0;
+
     /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
     /// various method exist to manipulate set of dimensions by their names. 
     virtual std::string getDimensionId() const = 0;
 
-    /// if the dimension is integrated (e.g. have single bin)
-    virtual bool getIsIntegrated() const = 0;
-    // it is sometimes convinient to shift image data by some number along specific dimension
-    virtual double getDataShift()const = 0;
-
+    /// Returns the maximum extent of this dimension
     virtual double getMaximum() const = 0;
 
+    /// Returns the minimum extent of this dimension
     virtual double getMinimum() const = 0;
+
     /// number of bins dimension have (an integrated has one). A axis directed along dimension would have getNBins+1 axis points.
     virtual unsigned int getNBins() const = 0;
-    /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one.
-    virtual size_t      getStride()const = 0;
-    /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
-    virtual bool isReciprocal() const = 0;
-    /// defines the dimension scale in physical units. ->TODO: it is unclear if we need this here
-    // virtual double getScale()const = 0;
+
+    /// Dimensions must be xml serializable.
+    virtual std::string toXMLString() const = 0;
+
     ///  Get coordinate for index;
     virtual double getX(unsigned int ind)const = 0;
-    /** function returns a direction of the dimension in the system of coordinates described by the MDBasis;
-     *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;
-     *  while reciprocal dimension can be directed anywhere withing the reciprocal space;
-	     Norm of the vector, returned by this function has to be 1    */
-    virtual V3D getDirection(void)const = 0;
-    /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
-	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
-	   have integer values; */
-    virtual V3D getDirectionCryst(void)const = 0;
-
-    /** the function returns the center points of the axis bins; There are nBins of such points 
-     (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
-    virtual void getAxisPoints(std::vector<double>  &)const=0;
 
 
-    //Dimensions must be xml serializable.
-    virtual std::string toXMLString() const = 0;
+//    /// if the dimension is integrated (e.g. have single bin)
+//    virtual bool getIsIntegrated() const = 0;
+//
+//    // it is sometimes convinient to shift image data by some number along specific dimension
+//    virtual double getDataShift()const = 0;
+//
+//    /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one.
+//    virtual size_t      getStride()const = 0;
+//
+//    /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
+//    virtual bool isReciprocal() const = 0;
+//
+//    /// defines the dimension scale in physical units. ->TODO: it is unclear if we need this here
+//    // virtual double getScale()const = 0;
+//    /** function returns a direction of the dimension in the system of coordinates described by the MDBasis;
+//     *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;
+//     *  while reciprocal dimension can be directed anywhere withing the reciprocal space;
+//	     Norm of the vector, returned by this function has to be 1    */
+//    virtual V3D getDirection(void)const = 0;
+//    /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
+//	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would
+//	   have integer values; */
+//    virtual V3D getDirectionCryst(void)const = 0;
+//
+//    /** the function returns the center points of the axis bins; There are nBins of such points
+//     (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
+//    virtual void getAxisPoints(std::vector<double>  &)const=0;
+
 
     virtual ~IMDDimension(){};
   };

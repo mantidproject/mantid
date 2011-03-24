@@ -80,10 +80,10 @@ namespace Mantid
     }
 
 
-    Mantid::Geometry::IMDDimension* DynamicRebinFromXML::createDimension(Poco::XML::Element* dimensionXML) const
+    Mantid::Geometry::MDDimension* DynamicRebinFromXML::createDimension(Poco::XML::Element* dimensionXML) const
     {
       DimensionFactory dimensionFactory(dimensionXML);
-      return dimensionFactory.create();
+      return dimensionFactory.createAsMDDimension();
     }
 
     Mantid::Geometry::MDGeometryDescription* DynamicRebinFromXML::getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const
@@ -92,15 +92,15 @@ namespace Mantid
       Poco::XML::Element* geometryXML = pRootElem->getChildElement("DimensionSet");
 
       Poco::XML::NodeList* dimensionsXML = geometryXML->getElementsByTagName("Dimension");
-      std::vector<boost::shared_ptr<IMDDimension> > dimensionVec;
+      std::vector<boost::shared_ptr<MDDimension> > dimensionVec;
 
       //Extract dimensions
       int nDimensions = dimensionsXML->length();
       for(int i = 0; i < nDimensions; i++)
       {
         Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*>(dimensionsXML->item(i));
-        IMDDimension* dimension = createDimension(dimensionXML);
-        dimensionVec.push_back(boost::shared_ptr<IMDDimension>(dimension));
+        MDDimension* dimension = createDimension(dimensionXML);
+        dimensionVec.push_back(boost::shared_ptr<MDDimension>(dimension));
       }
 
       //Find the requested xDimension alignment from the dimension id provided in the xml.

@@ -76,7 +76,7 @@ protected:
     virtual Mantid::Geometry::MDGeometryDescription* getMDGeometryDescriptionWithoutCuts(Poco::XML::Element* pRootElem, Mantid::API::ImplicitFunction* impFunction) const;
 
     /// Create a dimension from the xml.
-    virtual Mantid::Geometry::IMDDimension* createDimension(Poco::XML::Element* dimensionXML) const;
+    virtual Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML) const;
 
     /// Current implementation of geometry description requires cut information associated with dimensions.
     virtual void ApplyImplicitFunctionToMDGeometryDescription(Mantid::Geometry::MDGeometryDescription* description, Mantid::API::ImplicitFunction* impFunction) const;

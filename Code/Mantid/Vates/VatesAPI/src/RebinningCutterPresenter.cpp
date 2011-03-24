@@ -211,7 +211,7 @@ Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkData
   //Find the requested xDimension alignment from the dimension id provided in the xml.
   Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement("XDimension");
   std::string xDimId = xDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator xDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(xDimId));
+  std::vector<boost::shared_ptr<IMDDimension> >::iterator xDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(xDimId));
 
   if (xDimensionIt == dimensionVec.end())
   {
@@ -230,7 +230,7 @@ Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkData
   //Find the requested xDimension alignment from the dimension id provided in the xml.
   Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement("YDimension");
   std::string yDimId = yDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator yDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(yDimId));
+  std::vector<boost::shared_ptr<IMDDimension> >::iterator yDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(yDimId));
 
   if (yDimensionIt == dimensionVec.end())
   {
@@ -250,7 +250,7 @@ Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkData
   //Find the requested xDimension alignment from the dimension id provided in the xml.
   Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement("ZDimension");
   std::string zDimId = zDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator zDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(zDimId));
+  std::vector<boost::shared_ptr<IMDDimension> >::iterator zDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(zDimId));
 
   if (zDimensionIt == dimensionVec.end())
   {
@@ -269,7 +269,7 @@ Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkData
   //Find the requested xDimension alignment from the dimension id provided in the xml.
   Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement("TDimension");
   std::string tDimId = tDimensionElement->getChildElement("RefDimensionId")->innerText();
-  DimensionVecIterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
+  std::vector<boost::shared_ptr<IMDDimension> >::iterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
 
   if (tDimensionIt == dimensionVec.end())
   {
@@ -364,7 +364,7 @@ std::string constructGeometryXML(
   {
     //read dimension.
     std::string dimensionId = dimensions[i]->getDimensionId();
-    bool isReciprocal = dimensions[i]->isReciprocal();
+    bool isReciprocal = boost::dynamic_pointer_cast<MDDimension>(dimensions[i])->isReciprocal();
     //basis dimension.
     basisDimensions.insert(MDBasisDimension(dimensionId, isReciprocal, i));
 
@@ -381,7 +381,14 @@ std::string constructGeometryXML(
         identityMatrix[0] = 1;
         identityMatrix[4] = 1;
         identityMatrix[8] = 1;
-  MDGeometryDescription description(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, identityMatrix);
+
+  // Convert IMDDimensions to MDDimensions
+  std::vector<MDDimension_sptr> md_dimensions;
+  for (size_t i=0; i<dimensions.size(); i++)
+    md_dimensions.push_back( boost::dynamic_pointer_cast<MDDimension>(dimensions[i]));
+
+  MDGeometryDescription description(md_dimensions, boost::dynamic_pointer_cast<MDDimension>(dimensionX), boost::dynamic_pointer_cast<MDDimension>(dimensionY),
+      boost::dynamic_pointer_cast<MDDimension>(dimensionZ), boost::dynamic_pointer_cast<MDDimension>(dimensiont), identityMatrix);
 
   //Create a geometry.
   MDGeometry geometry(basis, description);

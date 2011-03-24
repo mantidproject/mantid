@@ -440,7 +440,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
   using Mantid::MDDataObjects::MDImage;
 
   //Get the time dimension
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->gettDimension();
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->getTDimension();
 
   //Create a mapper to transform real time into steps.
   TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),
@@ -470,7 +470,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
   using Mantid::MDDataObjects::MDImage;
 
   //Get the time dimension
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->gettDimension();
+  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->getTDimension();
 
   //Create a mapper to transform real time into steps.
   TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),

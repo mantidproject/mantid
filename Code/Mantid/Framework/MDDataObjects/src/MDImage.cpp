@@ -38,7 +38,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
   }
   unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
   size_t   base(0);
-  const IMDDimension *pDim;
+  const MDDimension *pDim;
 
   // calculate shift for all selected dimensions;
   int the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
@@ -169,7 +169,7 @@ MDImage::set_imgArray_shape()
   this->MD_IMG_array.dimSize.assign(nDims,0);
   this->MD_IMG_array.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
-  const IMDDimension *pDim;
+  const MDDimension *pDim;
   this->MD_IMG_array.data_size    = 1;
   size_t  stride(1);
   for(i=0;i<this->pMDGeometry->getNumDims();i++){

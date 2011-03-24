@@ -56,11 +56,11 @@ namespace Mantid{
       ~MDGeometry(void);
 
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
-      boost::shared_ptr<IMDDimension> getXDimension(void)const{return (theDimension[0]);}
-      boost::shared_ptr<IMDDimension> getYDimension(void)const;
-      boost::shared_ptr<IMDDimension> getZDimension(void)const;
-      boost::shared_ptr<IMDDimension> getTDimension(void)const;
-      std::vector<boost::shared_ptr<IMDDimension> > getIntegratedDimensions(void)const;
+      boost::shared_ptr<MDDimension> getXDimension(void)const{return (theDimension[0]);}
+      boost::shared_ptr<MDDimension> getYDimension(void)const;
+      boost::shared_ptr<MDDimension> getZDimension(void)const;
+      boost::shared_ptr<MDDimension> getTDimension(void)const;
+      std::vector<boost::shared_ptr<MDDimension> > getIntegratedDimensions(void)const;
       /** obtains pointers to all dimensions defined in the geometry
        * Initially, the dimensions are arranged in the order defined for a particular kind of experiments and this order is 
        * defined in MDBasis.
@@ -70,7 +70,7 @@ namespace Mantid{
        * if sort_by_basis is true, the dimensions are returned in the order, defined by the order of dimensions in the MD basis
        * or MDDataPoints (these two have to coinside)  
       */
-      std::vector<boost::shared_ptr<IMDDimension> > getDimensions(bool sort_by_basis=false)const;
+      std::vector<boost::shared_ptr<MDDimension> > getDimensions(bool sort_by_basis=false)const;
 
  	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}
@@ -87,10 +87,10 @@ namespace Mantid{
       unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
       /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
-      boost::shared_ptr<const IMDDimension>  get_constDimension(unsigned int i)const;
+      boost::shared_ptr<const MDDimension>  get_constDimension(unsigned int i)const;
       /** functions return the pointer to the dimension requested by the dimension tag(ID). throws if such dimension is not present in the Geometry 
           (or NULL if not throwing parameter is specified); */
-      boost::shared_ptr<const IMDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
+      boost::shared_ptr<const MDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
 
 
       /** function resets MDGeometryBasis and MDGeometry to new state;

@@ -43,12 +43,12 @@ class MDGeometryTest : public CxxTest::TestSuite
     MDGeometryBasis basis(basisDimensions, cell);
 
     //Dimensions generated, but have default values for bins and extents.
-    std::vector<boost::shared_ptr<IMDDimension> > dimensions; 
-    boost::shared_ptr<IMDDimension> dimX = boost::shared_ptr<IMDDimension>(new MDDimension("q1"));
-    boost::shared_ptr<IMDDimension> dimY = boost::shared_ptr<IMDDimension>(new MDDimension("q2"));
-    boost::shared_ptr<IMDDimension> dimZ = boost::shared_ptr<IMDDimension>(new MDDimension("q3"));
-    boost::shared_ptr<IMDDimension> dimt = boost::shared_ptr<IMDDimension>(new MDDimension("p"));
-    boost::shared_ptr<IMDDimension> dimTemp = boost::shared_ptr<IMDDimension>(new MDDimension("T"));
+    std::vector<boost::shared_ptr<MDDimension> > dimensions;
+    boost::shared_ptr<MDDimension> dimX = boost::shared_ptr<MDDimension>(new MDDimension("q1"));
+    boost::shared_ptr<MDDimension> dimY = boost::shared_ptr<MDDimension>(new MDDimension("q2"));
+    boost::shared_ptr<MDDimension> dimZ = boost::shared_ptr<MDDimension>(new MDDimension("q3"));
+    boost::shared_ptr<MDDimension> dimt = boost::shared_ptr<MDDimension>(new MDDimension("p"));
+    boost::shared_ptr<MDDimension> dimTemp = boost::shared_ptr<MDDimension>(new MDDimension("T"));
 
     dimensions.push_back(dimX);
     dimensions.push_back(dimY);
@@ -93,7 +93,7 @@ public:
 
   }
   void testMDGeomIntegrated(void){
-    std::vector<boost::shared_ptr<IMDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
+    std::vector<boost::shared_ptr<MDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
     // default size of the dimensions is equal 4
     TS_ASSERT_EQUALS(Dims.size(),4);
   }
@@ -184,7 +184,7 @@ public:
   }
  void testDimArrangementByBasis(){
      // here we check if the dimension returned in a way, as they are arranged in basis and MDDataPoints
-     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions(true);
+     std::vector<boost::shared_ptr<MDDimension> > psDims = tDND_geometry->getDimensions(true);
      std::vector<std::string> dimID(4);
      dimID[0]="qx";
      dimID[1]="qy";
@@ -196,7 +196,7 @@ public:
   }
  void testDimArrangementByGeometry(){
      // here we check if the dimension returned in a way, as they are arranged in MDGeometry
-     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions();
+     std::vector<boost::shared_ptr<MDDimension> > psDims = tDND_geometry->getDimensions();
      std::vector<std::string> dimID(4);
      dimID[0]="p";
      dimID[1]="qx";

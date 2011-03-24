@@ -235,10 +235,10 @@ Mantid::Geometry::VecCoordinate create4DPolyhedron(
     unsigned int dim2Increment,
     unsigned int dim3Increment,
     unsigned int dim4Increment,
-    Mantid::Geometry::IMDDimension_sptr xDimension,
-    Mantid::Geometry::IMDDimension_sptr yDimension,
-    Mantid::Geometry::IMDDimension_sptr zDimension,
-    Mantid::Geometry::IMDDimension_sptr tDimension);
+    Mantid::Geometry::MDDimension_sptr xDimension,
+    Mantid::Geometry::MDDimension_sptr yDimension,
+    Mantid::Geometry::MDDimension_sptr zDimension,
+    Mantid::Geometry::MDDimension_sptr tDimension);
 
 /// Non-member helper. Does not need access to private fields.
 /// Creates coordinates to represent cell in 3D given a set of dimensions
@@ -246,23 +246,23 @@ Mantid::Geometry::VecCoordinate createPolyhedron(
     unsigned int dim1Increment,
     unsigned int dim2Increment,
     unsigned int dim3Increment,
-    Mantid::Geometry::IMDDimension_sptr xDimension,
-    Mantid::Geometry::IMDDimension_sptr yDimension,
-    Mantid::Geometry::IMDDimension_sptr zDimension);
+    Mantid::Geometry::MDDimension_sptr xDimension,
+    Mantid::Geometry::MDDimension_sptr yDimension,
+    Mantid::Geometry::MDDimension_sptr zDimension);
 
 /// Non-member helper. Does not need access to private fields.
 /// Creates coordinates to represent cell in 2D given a set of dimensions
 Mantid::Geometry::VecCoordinate createPolygon(
     unsigned int dim1Increment,
     unsigned int dim2Increment,
-    Mantid::Geometry::IMDDimension_sptr xDimension,
-    Mantid::Geometry::IMDDimension_sptr yDimension);
+    Mantid::Geometry::MDDimension_sptr xDimension,
+    Mantid::Geometry::MDDimension_sptr yDimension);
 
 /// Non-member helper. Does not need access to private fields.
 /// Creates coordinates to represent cell in 1D given a set of dimensions
 Mantid::Geometry::VecCoordinate createLine(
     unsigned int dim1Increment,
-    Mantid::Geometry::IMDDimension_sptr xDimension);
+    Mantid::Geometry::MDDimension_sptr xDimension);
 
 
 }

@@ -2,6 +2,7 @@
 #define MANTID_VATES_GEOMETRYPROXY_H_
 
 #include "MantidVatesAPI/Common.h"
+#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidKernel/System.h"
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDWorkspace.h"
@@ -15,6 +16,7 @@ namespace VATES
 
 /** Proxy for geometry. Allows the dimension related data to be fetched from an underlying geometry object in a runtime flexible fashion.
  * Ultimately reduces the need for rebinning operations where dimensions are simply remapped.
+ *
 
 @author Owen Arnold, Tessella plc
 @date 21/03/2011
@@ -45,7 +47,8 @@ class DLLExport GeometryProxy
 
 public:
   /// type definitions for member function returning Dimension_sptr
-  typedef Dimension_sptr (Mantid::Geometry::MDGeometry::*MemFuncGetter)() const;
+  //typedef Dimension_sptr (Mantid::Geometry::MDGeometry::*MemFuncGetter)() const;
+  typedef Mantid::Geometry::MDDimension_sptr (Mantid::Geometry::MDGeometry::*MemFuncGetter)() const;
 
   typedef Mantid::Geometry::MDGeometry Geometry;
 

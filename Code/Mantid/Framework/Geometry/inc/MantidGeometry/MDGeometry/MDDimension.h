@@ -193,6 +193,9 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
 
   };
 
+  /// Shared pointer to a MDDimension
+  typedef boost::shared_ptr<MDDimension> MDDimension_sptr;
+
 } // Geometry
 } // Mantid
 
