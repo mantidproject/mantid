@@ -665,8 +665,12 @@ class WeightedAzimuthalAverage(ReductionStep):
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
                     
             sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
-            # Q min is one pixel from the center
-            mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
+            # Q min is one pixel from the center, unless we have the beam trap size
+            beam_trap_list = mtd[workspace].getInstrument().getNumberParameter("beam-trap-radius")
+            if len(beam_trap_list)>0:
+                mindist = beam_trap_list[0]
+            else:
+                mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
             qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
             dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
             dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])

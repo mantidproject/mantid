@@ -191,6 +191,33 @@ namespace Mantid
       from_element<double>(distance, sasEntryElem, "sample_det_dist", fileName);
       distance *= 1000.0;
 
+      // Read in beam trap positions
+      double highest_trap = 0;
+      double trap_pos = 0;
+      from_element<double>(highest_trap, sasEntryElem, "trap_y_101mm", fileName);
+      double beam_trap_radius = 101.6;
+
+      from_element<double>(trap_pos, sasEntryElem, "trap_y_25mm", fileName);
+      if (trap_pos>highest_trap)
+      {
+        highest_trap = trap_pos;
+        beam_trap_radius = 25.4;
+      }
+
+      from_element<double>(trap_pos, sasEntryElem, "trap_y_50mm", fileName);
+      if (trap_pos>highest_trap)
+      {
+        highest_trap = trap_pos;
+        beam_trap_radius = 50.8;
+      }
+
+      from_element<double>(trap_pos, sasEntryElem, "trap_y_76mm", fileName);
+      if (trap_pos>highest_trap)
+      {
+        highest_trap = trap_pos;
+        beam_trap_radius = 76.2;
+      }
+
       // Read in counters
       sasEntryElem = pRootElem->getChildElement("Counters");
       throwException(sasEntryElem, "Counters", fileName);
@@ -288,6 +315,7 @@ namespace Mantid
 
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
       pmap.addDouble(i.get(), "sample-detector-distance", distance);
+      pmap.addDouble(i.get(), "beam-trap-radius", beam_trap_radius);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
