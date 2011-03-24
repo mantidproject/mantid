@@ -354,7 +354,7 @@ public:
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace x-dimension.", 7, output->getXDimension()->getNBins());
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace y-dimension.", 5, output->getYDimension()->getNBins());
     TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace z-dimension.", 6, output->getZDimension()->getNBins());
-    TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->gettDimension()->getNBins());
+    TSM_ASSERT_EQUALS("Wrong number of bins in rebinned workspace t-dimension.", 4, output->getTDimension()->getNBins());
     //840 = 7 * 5* 6 * 4
     TSM_ASSERT_EQUALS("The image size should be the product of the number of bins accross dimensions", 840, output->get_spMDImage()->getDataSize());
 

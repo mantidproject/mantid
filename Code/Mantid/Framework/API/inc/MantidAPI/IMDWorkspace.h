@@ -70,7 +70,7 @@ namespace Mantid
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const = 0;
 
       /// Get the t-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const = 0;
+      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const = 0;
 
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const = 0;

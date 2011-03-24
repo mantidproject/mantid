@@ -202,7 +202,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return m_spMDImage->getGeometry()->getZDimension();
     }
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::gettDimension() const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MDWorkspace::getTDimension() const
     { 
       return m_spMDImage->getGeometry()->getTDimension();
     }

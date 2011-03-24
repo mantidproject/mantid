@@ -323,7 +323,7 @@ public:
     using namespace Mantid::Geometry;
 
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    boost::shared_ptr<const IMDDimension> dimension = workspace->gettDimension();
+    boost::shared_ptr<const IMDDimension> dimension = workspace->getTDimension();
     TSM_ASSERT_EQUALS("The t-dimension returned was not the expected alignment.", "u3", dimension->getDimensionId());
   }
 

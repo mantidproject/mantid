@@ -123,13 +123,13 @@ VecExtents MultiDimensionalDbPresenter::getExtents() const
 int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
 {
   verifyExecution();
-  return m_MDWorkspace->gettDimension()->getNBins();
+  return m_MDWorkspace->getTDimension()->getNBins();
 }
 
 std::vector<int> MultiDimensionalDbPresenter::getCycles() const
 {
   verifyExecution();
-  std::vector<int> cycles(m_MDWorkspace->gettDimension()->getNBins());
+  std::vector<int> cycles(m_MDWorkspace->getTDimension()->getNBins());
   for(unsigned int i=0; i < cycles.size(); i++)
     {
       cycles[i] = i;
@@ -141,7 +141,7 @@ std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
 {
   using namespace Mantid::Geometry;
   verifyExecution();
-  boost::shared_ptr<const IMDDimension> tDimension = m_MDWorkspace->gettDimension();
+  boost::shared_ptr<const IMDDimension> tDimension = m_MDWorkspace->getTDimension();
   const double increment = (tDimension->getMaximum() - tDimension->getMinimum())/tDimension->getNBins();
   std::vector<double> times(tDimension->getNBins());
   for(unsigned int i=0; i < tDimension->getNBins(); i++)
@@ -172,9 +172,9 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(double time, co
 
   verifyExecution();
 
-  double tMax = m_MDWorkspace->gettDimension()->getMaximum();
-  double tMin = m_MDWorkspace->gettDimension()->getMinimum();
-  int nbins = m_MDWorkspace->gettDimension()->getNBins();
+  double tMax = m_MDWorkspace->getTDimension()->getMaximum();
+  double tMin = m_MDWorkspace->getTDimension()->getMinimum();
+  int nbins = m_MDWorkspace->getTDimension()->getNBins();
 
   TimeToTimeStep timeStepMapper(tMin, tMax, nbins);
   vtkStructuredGridFactory<MDImage, TimeToTimeStep> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), time, timeStepMapper);

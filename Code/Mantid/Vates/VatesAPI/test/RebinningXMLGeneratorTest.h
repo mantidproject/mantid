@@ -58,7 +58,7 @@ private:
     {
       throw std::runtime_error("Not Implemented");
     }
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> gettDimension() const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
     {
       throw std::runtime_error("Not Implemented");
     }

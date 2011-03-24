@@ -1134,7 +1134,7 @@ namespace Mantid
       throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
     }
 
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::gettDimension() const
+    boost::shared_ptr<const Mantid::Geometry::IMDDimension> MatrixWorkspace::getTDimension() const
     { 
       throw std::logic_error("MatrixWorkspaces do not have a z-spacial dimension mapping.");
     }

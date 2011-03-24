@@ -122,7 +122,7 @@ public:
   void testGettDimension()
   {
     MatrixWorkspaceTester matrixWS;
-    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.gettDimension(), std::logic_error);
+    TSM_ASSERT_THROWS("Current implementation should throw runtime error.", matrixWS.getTDimension(), std::logic_error);
   }
 
   void testGetDimensionThrows()
