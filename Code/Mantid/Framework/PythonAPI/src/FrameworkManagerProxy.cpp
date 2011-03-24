@@ -30,9 +30,6 @@ typedef std::vector<std::string> StringVector;
 // Initialize the logger
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
-// Initialize GIL flag
-bool FrameworkManagerProxy::g_gil_required = false;
-
 // Save the flag used on the last creation of the simple API
 bool FrameworkManagerProxy::g_last_api_flag = false;
 
@@ -371,12 +368,10 @@ void FrameworkManagerProxy::registerPyAlgorithm(boost::python::object pyobj)
   Mantid::API::CloneableAlgorithm* cppobj = boost::python::extract<Mantid::API::CloneableAlgorithm*>(pyobj);
   if( cppobj )
   {
-    setGILRequired(true);
     if( ! Mantid::API::AlgorithmFactory::Instance().storeCloneableAlgorithm(cppobj) )
     {
       g_log.error("Unable to register Python algorithm \"" + cppobj->name() + "\"");
     }
-    setGILRequired(false);
   }
   else
   {

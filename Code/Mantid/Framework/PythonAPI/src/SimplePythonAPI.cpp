@@ -155,11 +155,9 @@ namespace Mantid
 
       if( gui )
       {
-        module << "  mtd._setGILRequired(True)\n"
-          << "  result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(_algm.name())\n"
-          << "  mtd._setGILRequired(False)\n"
-          << "  if result == False:\n"
-          << "    sys.exit('An error occurred while running %s. See results log for details.' % _algm.name())\n\n";
+        module << "  result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(_algm.name())\n"
+               << "  if result == False:\n"
+               << "    sys.exit('An error occurred while running %s. See results log for details.' % _algm.name())\n\n";
       }
       else
       {
@@ -514,9 +512,7 @@ namespace Mantid
 	"    # Running algorithm\n"
 	"    dialog = qti.app.mantidUI.createPropertyInputDialog('Load' , values, kwargs.get('Message',''), final_enabled)\n"
 	"    if dialog == True:\n"
-	"        mtd._setGILRequired(True)\n"
 	"        result = qti.app.mantidUI.runAlgorithmAsync_PyCallback('Load')\n"
-	"        mtd._setGILRequired(False)\n"
 	"    else:\n"
 	"        sys.exit('Information: Script execution cancelled')\n"
 	"    if result == False:\n"
@@ -599,7 +595,7 @@ namespace Mantid
     }
 
     /**
-    * Write out Python code required to execute an algorithm asynchronously, ensuring the GIL is in the correct state
+    * Write out Python code required to execute an algorithm asynchronously.
     * @param output The stream to contain the code
     * @param alg_name The name of the algorithm
     * @param prefix A prefix to apply to each line
@@ -607,9 +603,7 @@ namespace Mantid
     void SimplePythonAPI::writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, 
       const std::string & prefix)
     {
-      output << prefix << "mtd._setGILRequired(True)\n" 
-        << prefix << "result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(\"" << alg_name << "\")\n"
-        << prefix << "mtd._setGILRequired(False)\n";
+      output << prefix << "result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(\"" << alg_name << "\")\n";
     }
 
     /**

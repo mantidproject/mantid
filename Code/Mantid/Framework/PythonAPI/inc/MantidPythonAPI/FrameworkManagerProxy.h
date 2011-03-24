@@ -141,15 +141,6 @@ public:
   virtual void workspaceStoreCleared() {}
   //@}
 
-  /** Set GIL state
-   * @param lock :: If true, the next call to Python will acquire the GIL before the call. Note that it is unlocked automatically
-   */
-  static void setGILRequired(bool lock) { g_gil_required = lock; }
-  /** Return if we need to aquire the GIL
-   * @returns A flag indicating if the thread lock is necessary
-   */
-  static bool requireGIL() { return g_gil_required; }
-
   ///Send a log message to the Mantid Framework with a specified priority
   void sendLogMessage(const std::string & msg);
   /// Create the simple Python API for Mantid
@@ -160,13 +151,6 @@ public:
   virtual void algorithmFactoryUpdated() {};
 
   void releaseFreeMemory();
-
- protected:
-  /** A flag indicating whether code has been executed from within Python. This is a bit of a hack
-   * so that the notification signals don't cause deadlocks if they happen to get called from
-   * a thread that did not originate from within Python
-   */
-  static bool g_gil_required;
 
  private:
   /// Copy constructor

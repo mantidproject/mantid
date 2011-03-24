@@ -46,43 +46,43 @@ namespace Mantid
     // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information on the GIL
 
     /**
-    * A simple class that implements an RAII interface for the Python GIL. The GIL is a Python global that needs to be acquired by
-    * a thread, other than the interpreter thread, that wishs to execute Python code
-    */
-    class PythonLocker
+      * A simple class that checks whether there is a current thread state, i.e. PyThread_GetDict != NULL, and acquires the GIL if not.
+      * If it has been aquired then the lock is release on destruction
+      */
+    class PythonGIL
     {
     public:
       ///Constructor
-      PythonLocker() : m_tstate(PyGILState_UNLOCKED), m_locked(false)
+      PythonGIL() : m_tstate(NULL), m_gil_state(PyGILState_UNLOCKED), m_locked(false)
       {
+        if( !PyThreadState_GetDict() )
+        {
+           m_gil_state = PyGILState_Ensure();
+           m_tstate = PyThreadState_GET();
+           m_locked = true;
+        }
       }
 
-      void lock()
-      {
-        m_tstate = PyGILState_Ensure();
-        m_locked = true;
-      }
       ///Destructor
-      ~PythonLocker()
+      ~PythonGIL()
       {
         if( m_locked )
         {
-          PyGILState_Release(m_tstate);
+          PyThreadState_Swap(m_tstate);
+          PyGILState_Release(m_gil_state);
         }
       }
     private:
       /// Store the thread state
-      PyGILState_STATE m_tstate;
+      PyThreadState *m_tstate;
+      /// Store the GIL state
+      PyGILState_STATE m_gil_state;
       /// If we've locked the state
       bool m_locked;
     };
 
     /// Handle a Python error state
     void handlePythonError(const bool with_trace=true);
-
-    /// Check on the current python state
-    bool pythonIsReady();
-
     /// A structure t handle default returns for template functions
     template<typename ResultType>
     struct DefaultReturn
@@ -132,17 +132,10 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name)
       {
-        // The order of the GIL lock and ready query are important
-        PythonLocker gil;
-        if( FrameworkManagerProxy::requireGIL() )
-        {
-          gil.lock();
-        }
         DefaultReturn<ResultType> default_value;
-        if( !pythonIsReady() ) return default_value();
-
         try 
         {
+          PythonGIL gil;
           return boost::python::call_method<ResultType>(object, func_name.c_str());
         }
         catch(boost::python::error_already_set&)
@@ -159,20 +152,13 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name)
       {
-        PythonLocker gil;
-        if( FrameworkManagerProxy::requireGIL() )
-        {
-          gil.lock();
-        }
-        if( !pythonIsReady() ) return;
-        PyThreadState *tstate = PyThreadState_GET();
         try
         {
+          PythonGIL gil;
           boost::python::call_method<void>(object, func_name.c_str());
         }
         catch(boost::python::error_already_set&)
         {
-          PyThreadState_Swap(tstate);
           handlePythonError();
         }
       }
@@ -190,17 +176,10 @@ namespace Mantid
 
       static ResultType dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
-        PythonLocker gil;
-        if( FrameworkManagerProxy::requireGIL() )
-        {
-          gil.lock();
-        }
-
         DefaultReturn<ResultType> default_value;
-        if( !pythonIsReady() ) return;
-
         try 
         {
+          PythonGIL gil;
           return boost::python::call_method<ResultType>(object, func_name.c_str(), arg);
         }
         catch(boost::python::error_already_set&)
@@ -218,15 +197,9 @@ namespace Mantid
 
       static void dispatch(PyObject *object, const std::string & func_name, const ArgType & arg)
       {
-        PythonLocker gil;
-        if( FrameworkManagerProxy::requireGIL() )
-        {
-          gil.lock();
-        }
-        if( !pythonIsReady() ) return;
-
         try 
         {
+          PythonGIL gil;
           boost::python::call_method<void>(object, func_name.c_str(), arg);
         }
         catch(boost::python::error_already_set&)
@@ -277,7 +250,7 @@ namespace Mantid
       template<typename TYPE>
       boost::python::list toPyList(const std::vector<TYPE> & stdvec)
       {
-	return	boost::python::list(stdvec);
+	      return	boost::python::list(stdvec);
       }
 
     }

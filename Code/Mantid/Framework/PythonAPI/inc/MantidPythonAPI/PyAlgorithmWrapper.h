@@ -276,11 +276,7 @@ public:
   /// Called when a delete is performed inside a shared pointer
   virtual void kill()
   {
-    PythonLocker gil;
-    if( FrameworkManagerProxy::requireGIL() )
-    {
-      gil.lock();
-    }
+    PythonGIL gil;
     // !-----
     // This order is very important as the decref causes Python to call the destructor on this object
     // and the destructor checks the value of the killed flag

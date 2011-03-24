@@ -53,14 +53,5 @@ void handlePythonError(const bool with_trace)
   throw std::runtime_error(msg.str());
 }
 
-/**
- * Check if the current Python state will allow execution of Python code
- */
-bool pythonIsReady()
-{
-  if( PyThreadState_GET() ) return true;
-  else return false;
-}
-
 }
 }
