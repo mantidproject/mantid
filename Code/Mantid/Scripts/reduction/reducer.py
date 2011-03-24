@@ -259,6 +259,13 @@ class Reducer(object):
         """
         pass
     
+    def post_process(self):
+        """
+            Reduction steps to be executed after all data files have been
+            processed.
+        """ 
+        pass
+        
     def reduce(self):
         """
             Go through the list of reduction steps

@@ -280,8 +280,6 @@ class SANSReducer(Reducer):
         # Create the list of reduction steps
         self._to_steps()            
     
-    def post_process(self): return NotImplemented
-    
     def _2D_steps(self):
         """
             Creates a list of reduction steps to be applied to
