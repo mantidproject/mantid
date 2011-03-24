@@ -271,11 +271,14 @@ class Reducer(object):
             Go through the list of reduction steps
         """
         t_0 = time.time()
-        # Log text
-        self.log_text = "%s reduction - %s\n" % (self.instrument.name(), time.ctime())
+        instrument_name = ''
+        
         # Check that an instrument was specified
-        if self.instrument is None:
-            raise RuntimeError, "Reducer: trying to run a reduction with an instrument specified"
+        if self.instrument is not None:
+            instrument_name = self.instrument.name()
+        
+        # Log text
+        self.log_text = "%s reduction - %s\n" % (instrument_name, time.ctime())
 
         # Go through the list of steps that are common to all data files
         self.pre_process()
@@ -291,7 +294,7 @@ class Reducer(object):
         self.post_process()
     
         self.log_text += "Reduction completed in %g sec\n" % (time.time()-t_0)
-        log_path = os.path.join(self._data_path,"%s_reduction.log" % self.instrument.name())
+        log_path = os.path.join(self._data_path,"%s_reduction.log" % instrument_name)
         self.log_text += "Log saved to %s" % log_path
         
         # Write the log to file

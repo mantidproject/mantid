@@ -273,6 +273,9 @@ class SANSReducer(Reducer):
             of data files. After this is executed, all files will go through
             the list of reduction steps.
         """
+        if self.instrument is None:
+            raise RuntimeError, "SANSReducer: trying to run a reduction with an instrument specified"
+
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
             self.log_text += "%s\n" % str(result)     
