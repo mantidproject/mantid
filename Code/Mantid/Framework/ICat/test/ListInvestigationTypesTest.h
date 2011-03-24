@@ -16,6 +16,7 @@ class ListInvestigationTypesTest: public CxxTest::TestSuite
 public:
 	void testInit()
 	{
+		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		TS_ASSERT_THROWS_NOTHING( invstTypesList.initialize());
 		TS_ASSERT( invstTypesList.isInitialized() );
 	}

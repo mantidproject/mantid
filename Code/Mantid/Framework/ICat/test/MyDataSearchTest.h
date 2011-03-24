@@ -17,6 +17,7 @@ public:
 	
 	void testInit()
 	{
+		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		CMyDataSearch mydata;
 		TS_ASSERT_THROWS_NOTHING( mydata.initialize());
 		TS_ASSERT( mydata.isInitialized() );

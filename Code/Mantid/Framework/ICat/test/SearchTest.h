@@ -15,6 +15,8 @@ public:
 	
 	void testInit()
 	{
+    		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
 		CSearch searchobj;
 		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( searchobj.initialize());

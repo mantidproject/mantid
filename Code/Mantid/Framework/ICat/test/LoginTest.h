@@ -10,7 +10,9 @@ class LoginTest: public CxxTest::TestSuite
 {
 public:
 	void testInit()
-	{
+	{    
+		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
 		Login loginobj;
 		TS_ASSERT_THROWS_NOTHING( loginobj.initialize());
 		TS_ASSERT( loginobj.isInitialized() );

@@ -16,6 +16,8 @@ class GetDataSetsTest: public CxxTest::TestSuite
 public:
 	void testInit()
 	{
+		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
 		TS_ASSERT_THROWS_NOTHING( datasets.initialize());
 		TS_ASSERT( datasets.isInitialized() );
 	}
