@@ -56,6 +56,8 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events);
 
+    void centerpointBin(MDBin<MDE,nd> & bin) const;
+
   protected:
 
     /** Vector of MDEvent's, in no particular order.

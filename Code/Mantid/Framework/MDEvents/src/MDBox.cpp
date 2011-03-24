@@ -124,7 +124,34 @@ namespace MDEvents
     return 0;
   }
 
+  //-----------------------------------------------------------------------------------------------
+  /** Perform centerpoint binning of events.
+   * @param bin :: MDBin object giving the limits of events to accept.
+   */
+  TMDE(
+  void MDBox)::centerpointBin(MDBin<MDE,nd> & bin) const
+  {
+    typename std::vector<MDE>::const_iterator it = data.begin();
+    typename std::vector<MDE>::const_iterator it_end = data.end();
 
+    // For each MDEvent
+    for (; it != it_end; ++it)
+    {
+      // Go through each dimension
+      for (size_t d=0; d<nd; ++d)
+      {
+        // Check that the value is within the bounds given. (Rotation is for later)
+        CoordType x = it->getCenter(d);
+        if (x < bin.m_min[d])
+          break;
+        if (x >= bin.m_max[d])
+          break;
+      }
+      // Accumulate error and signal
+      bin.m_signal += it->getSignal();
+      bin.m_errorSquared += it->getErrorSquared();
+    }
+  }
 
 
 

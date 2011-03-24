@@ -14,10 +14,10 @@ namespace MDEvents
   TMDE(MDBin)::MDBin()
       : m_signal(0), m_errorSquared(0)
   {
-    for (size_t i=0; i<nd; i++)
-      m_min[i] = CoordType_min;
-    for (size_t i=0; i<nd; i++)
-      m_max[i] = CoordType_max;
+    for (size_t d=0; d<nd; ++d)
+      m_min[d] = CoordType_min;
+    for (size_t d=0; d<nd; ++d)
+      m_max[d] = CoordType_max;
   }
     
 

@@ -1,11 +1,12 @@
 #ifndef IMDBOX_H_
 #define IMDBOX_H_
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
-#include "MantidAPI/IMDWorkspace.h"
+#include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
 {
@@ -62,6 +63,11 @@ namespace MDEvents
 
     /// Add several events
     virtual size_t addEvents(const std::vector<MDE> & events) = 0;
+
+    /** Perform centerpoint binning of events
+     * @param bin :: MDBin object giving the limits of events to accept.
+     */
+    virtual void centerpointBin(MDBin<MDE,nd> & bin) const = 0;
 
     /// Return the box controller saved.
     BoxController_sptr getBoxController() const

@@ -178,6 +178,8 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** Returns the error (not squared) of this event.
+     *
+     * Performance note: This calls sqrt(), which is a slow function. Use getErrorSquared() if possible.
      * */
     float getError() const
     {

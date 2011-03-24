@@ -132,6 +132,12 @@ void RebinningCutterPresenter::constructReductionKnowledge(
   constructReductionKnowledge(dimensions, dimensionX, dimensionY, dimensionZ, dimensiont, inputDataSet);
 }
 
+/** Apply the rebinning action by calling the necessary Mantid algorithm.
+ *
+ * @param action :: TODO
+ * @param eventHandler :: handle progress notifications
+ * @return the MDWorkspace containing the generated image.
+ */
 Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
     RebinningIterationAction action,
     ProgressAction& eventHandler) const

@@ -20,10 +20,10 @@ public:
   {
     typedef MDEvent<3> MDE;
     MDBin<MDE,3> bin;
-    for (size_t i=0; i<3; i++)
+    for (size_t d=0; d<3; d++)
     {
-      TS_ASSERT_EQUALS( bin.m_min[i], CoordType_min );
-      TS_ASSERT_EQUALS( bin.m_max[i], CoordType_max );
+      TS_ASSERT_EQUALS( bin.m_min[d], CoordType_min );
+      TS_ASSERT_EQUALS( bin.m_max[d], CoordType_max );
     }
   }
 

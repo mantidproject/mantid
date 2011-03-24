@@ -382,6 +382,16 @@ namespace MDEvents
 
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Perform centerpoint binning of events.
+   * @param bin :: MDBin object giving the limits of events to accept.
+   */
+  TMDE(
+  void MDGridBox)::centerpointBin(MDBin<MDE,nd> & bin) const
+  {
+    //TODO: This
+  }
+
 
 }//namespace MDEvents
 

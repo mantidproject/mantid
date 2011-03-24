@@ -57,6 +57,8 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
+    void centerpointBin(MDBin<MDE,nd> & bin) const;
+
     size_t addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog = NULL);
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
