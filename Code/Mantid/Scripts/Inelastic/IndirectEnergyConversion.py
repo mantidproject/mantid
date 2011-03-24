@@ -15,26 +15,23 @@ def convert_to_energy(rawfiles, grouping, first, last,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
         saveFormats=[], CleanUp = True, Verbose = False):        
     # Get hold of base empty instrument workspace
-    wsInst = mtd['__empty_' + instrument]
-    if wsInst is None:
+    instWS = '__empty_' + instrument
+    if mtd[instWS] is None:
         loadInst(instrument)
-        wsInst = mtd['__empty_' + instrument]
-    fmon, fdet = getFirstMonFirstDet('__empty_'+instrument)
-    isTosca = adjustTOF('__empty_'+instrument)
-    # Get short name of instrument from the config service
-    isn = ConfigService().facility().instrument(instrument).shortName().lower()
+    fmon, fdet = getFirstMonFirstDet(instWS)
+    isTosca = adjustTOF(instWS)
     if ( calib != '' ): # Only load Calibration file once
-        LoadNexusProcessed(calib, '__calibration')    
+        LoadNexusProcessed(calib, '__calibration')
     # Holds output parameters
     output_workspace_names = []
-    runNos = []
     mon_wsl = loadData(rawfiles, Sum=SumFiles, SpecMin=fmon+1, SpecMax=fmon+1,
         Suffix='_mon')
     if isTosca: # Check if we need to use ChopData etc
         ws = mtd[mon_wsl[0]]
         if ( ws.readX(0)[ws.getNumberBins()] > 40000 ):
-            DeleteWorkspace(mon_wsl[0])
-            workspaces = toscaChop(rawfiles)
+            for wrks in mon_wsl:
+               DeleteWorkspace(wrks)
+            workspaces = toscaChop(rawfiles, Sum=SumFiles)
             if ( saveFormats != [] ): # Save data in selected formats
                 saveItems(workspaces, saveFormats)
             return workspaces
@@ -49,24 +46,19 @@ def convert_to_energy(rawfiles, grouping, first, last,
         if ( analyser != "" and reflection != "" ):
             applyParameterFile(ws, analyser, reflection)
         if isTosca:
-            invalid = getBadDetectorList(ws)
-            factor = 1e9
-        else:
-            factor = 1e6
-        runNo = mtd[ws].getRun().getLogData("run_number").value
-        runNos.append(runNo)
-        name = isn + runNo + '_' + analyser + reflection + '_red'
+            invalid = getBadDetectorList(ws)        
         timeRegime(monitor=ws_mon, detectors=ws)
         monitorEfficiency(ws_mon)
         ## start dealing with detector data here
         if ( bgremove != [0, 0] ):
             backgroundRemoval(bgremove[0], bgremove[1], detectors=ws)
         if ( calib != '' ):
-            calibrated = useCalib(detectors=ws)
-        normToMon(Factor=factor, monitor=ws_mon, detectors=ws)
+            useCalib(detectors=ws)
+        normToMon(monitor=ws_mon, detectors=ws)
         # Remove monitor workspace
         DeleteWorkspace(ws_mon)
         conToEnergy(detectors=ws)
+        name = getWSprefix(ws) + 'red'
         if not CleanUp:
             CloneWorkspace(ws, name+'_intermediate')
         if ( rebinParam != ''): # Rebin data
@@ -112,12 +104,12 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
     else:
         return workspaces
 
-def toscaChop(files):
+def toscaChop(files, Sum=False):
     '''Reduction routine for TOSCA instrument when input workspace must be 
     "split" into parts and folded together after it has been corrected to the 
     monitor.'''
     wslist = []
-    workspace_list = loadData(files)
+    workspace_list = loadData(files, Sum=Sum)
     for raw in workspace_list:
         invalid = getBadDetectorList(raw)
         chopdata = ChopData(raw,raw+'_data')
@@ -127,7 +119,7 @@ def toscaChop(files):
             ConvertUnits(ws+'mon', ws+'mon', 'Wavelength', 'Indirect')
             monitorEfficiency(ws+'mon')
             CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
-            normToMon(Factor=1e9, monitor=ws+'mon', detectors=ws)
+            normToMon(monitor=ws+'mon', detectors=ws)
             DeleteWorkspace(ws+'mon')
         workspaces = ','.join(wsgroup)
         ws = raw+'_c'
@@ -215,8 +207,8 @@ def timeRegime(Smooth=True, monitor='', detectors=''):
 def monitorEfficiency(inWS):
     inst = mtd[inWS].getInstrument()
     try:
-        area = inst.getNumberParameter('mon-area')[0]
-        thickness = inst.getNumberParameter('mon-thickness')[0]
+        area = inst.getNumberParameter('Workflow.MonitorArea')[0]
+        thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
         OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
     except IndexError:
         print "Unable to take Monitor Area and Thickness from Paremeter File."
@@ -248,11 +240,16 @@ def useCalib(detectors=''):
         Divide(detectors,'__calibration',detectors)
     return detectors
 
-def normToMon(Factor=1e6, monitor='', detectors=''):
+def normToMon(monitor='', detectors=''):
     ConvertUnits(detectors, detectors, 'Wavelength', 'Indirect')
     RebinToWorkspace(detectors,monitor,detectors)
     Divide(detectors,monitor,detectors)
-    Scale(detectors, detectors, Factor)
+    try:
+        factor = mtd[detectors].getInstrument().getNumberParameter(
+            'Workflow.MonitorScalingFactor')[0]
+        Scale(detectors, detectors, factor)
+    except IndexError:
+        pass
     return detectors
 
 def conToEnergy(detectors=''):
@@ -317,12 +314,12 @@ def backgroundRemoval(tofStart, tofEnd, detectors=''):
     ConvertFromDistribution(detectors)
     return detectors
 
-def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
-        saveFormats, CleanUp=False, Verbose=False):
+def cte_rebin(grouping, tempK, rebinParam, saveFormats, CleanUp=False, 
+        Verbose=False):
     # Generate list
     ws_list = []
     for workspace in list(mantid.getWorkspaceNames()):
-        if workspace.endswith('_'+analyser+reflection+r'_red_intermediate'):
+        if workspace.endswith('_intermediate'):
             ws_list.append(workspace)
     if ( len(ws_list) == 0 ):
         message = "No intermediate workspaces were found. Run with "
@@ -331,10 +328,7 @@ def cte_rebin(grouping, tempK, rebinParam, analyser, reflection,
         sys.exit(message)
     output = []
     for ws in ws_list:
-        runNo = mtd[ws].getRun().getLogData("run_number").value
-        inst = mtd[ws].getInstrument().getName()
-        inst = ConfigService().facility().instrument(inst).shortName().lower()
-        name = inst + runNo + '_' + analyser + reflection + '_red'
+        name = getWSprefix(ws) + 'red'
         if not CleanUp:
             CloneWorkspace(ws, name)
             ws = name
@@ -421,7 +415,6 @@ def resolution(files, iconOpt, rebinParam, bground,
         FlatBackground(iconWS, '__background', bground[0], bground[1], 
             Mode='Mean', OutputMode='Return Background')
         Rebin(iconWS, iconWS, rebinParam)
-        FFTSmooth(iconWS,iconWS,0)
         RebinToWorkspace('__background', iconWS, '__background')
         Minus(iconWS, '__background', name)
         DeleteWorkspace(iconWS)
@@ -537,13 +530,6 @@ def getReflectionDetails(inst, analyser, refl):
     except IndexError:
         pass
     return result
-
-def loadInst(instrument):    
-    ws = '__empty_' + instrument
-    if (mtd[ws] == None):
-        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-        idf = idf_dir + instrument + '_Definition.xml'
-        LoadEmptyInstrument(idf, ws)
 
 def adjustTOF(ws='', inst=''):
     if ( ws != '' ):

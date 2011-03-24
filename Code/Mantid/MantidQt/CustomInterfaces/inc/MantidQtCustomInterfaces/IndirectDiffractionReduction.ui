@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>518</width>
-    <height>324</height>
+    <width>539</width>
+    <height>348</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -253,6 +253,13 @@
        </item>
       </layout>
      </widget>
+    </widget>
+   </item>
+   <item>
+    <widget class="QCheckBox" name="ckNormByCurrent" >
+     <property name="text" >
+      <string>Normalise by Current</string>
+     </property>
     </widget>
    </item>
    <item>

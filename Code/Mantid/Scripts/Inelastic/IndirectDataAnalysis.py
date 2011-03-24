@@ -113,66 +113,6 @@ def confitSeq(inputWS, func, startX, endX, save, plot, bg, specMin, specMax):
     if plot != 'None':
         confitPlotSeq(wsname, plot)
 
-def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
-        grouping='Individual', cal='', CleanUp=True, Verbose=False, 
-        Plot='None', Save=True, Real=False, Vanadium='', Monitor=True):
-    '''DEMON routine for diffraction reduction on indirect instruments (IRIS /
-    OSIRIS).'''
-    # Get instrument workspace for gathering parameters and such
-    wsInst = mtd['__empty_' + instrument]
-    if wsInst is None:
-        IEC.loadInst(instrument)
-        wsInst = mtd['__empty_' + instrument]
-    # short name of instrument for saving etc
-    isn = ConfigService().facility().instrument(instrument).shortName().lower()
-    # parameters to do with monitor
-    if Monitor:
-        fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
-        ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
-            SpecMin=fmon+1, SpecMax=fmon+1)
-    ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, SpecMin=first, 
-        SpecMax=last)
-    workspaces = []
-    for i in range(0, len(ws_det_l)):
-        det_ws = ws_det_l[i]
-        # Get Run No
-        runNo = mtd[det_ws].getRun().getLogData("run_number").value
-        savefile = isn + runNo + '_diff'
-        if Monitor:
-            mon_ws = ws_mon_l[i]
-            # Get Monitor WS
-            IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
-            IEC.monitorEfficiency(mon_ws)
-            IEC.normToMon(Factor=1e6, monitor=mon_ws, detectors=det_ws)
-            # Remove monitor workspace
-            DeleteWorkspace(mon_ws)
-        if ( cal != '' ): # AlignDetectors and Group by .cal file
-            if Monitor:
-                ConvertUnits(det_ws, det_ws, 'TOF')
-            if ( mtd[det_ws].isDistribution() ):
-                ConvertFromDistribution(det_ws)
-            AlignDetectors(det_ws, det_ws, cal)
-            CloneWorkspace(det_ws, 'demon_CorByMon-and-Aligned')
-            DiffractionFocussing(det_ws, savefile, cal)
-            DeleteWorkspace(det_ws)
-            if ( Vanadium != '' ):
-                print "NotImplemented: divide by vanadium."
-        else: ## Do it the old fashioned way
-            # Convert to dSpacing - need to AlignBins so we can group later
-            ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
-            IEC.groupData(grouping, savefile, detectors=det_ws)
-        if Save:
-            SaveNexusProcessed(savefile, savefile+'.nxs')
-        workspaces.append(savefile)
-    if ( Plot != 'None' ):
-        for demon in workspaces:
-            if ( Plot == 'Contour' ):
-                importMatrixWorkspace(demon).plotGraph2D()
-            else:
-                nspec = mtd[demon].getNumberHistograms()
-                plotSpectrum(demon, range(0, nspec))
-    return workspaces
-
 def elwin(inputFiles, eRange, Save=False, Verbose=False, Plot=False):
     eq1 = [] # output workspaces with units in Q
     eq2 = [] # output workspaces with units in Q^2

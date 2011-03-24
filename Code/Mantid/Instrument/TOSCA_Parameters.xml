@@ -21,16 +21,6 @@
   <value val="002" />
 </parameter>
 
-<!-- "mon-area" and "mon-thickness" are used in the ConvertToEnergy interface
-     as parameters to the OneMinusExponentialCor algorithm.
-     Values obtained from Dr Timmy Ramirez-Cuesta. -->
-<parameter name="mon-area" >
-  <value val="5.391011e-5" />
-</parameter>
-<parameter name="mon-thickness" >
-  <value val="0.013" />
-</parameter>
-
 <!-- This parameter will be taken as a default value for the rebinning of
         the data in DeltaE. The existence of the parameter will make rebinning
         the default, as opposed to not rebinning.
@@ -38,6 +28,17 @@
 -->
 <parameter name="rebin-default" type="string">
   <value val="3,-0.005,1000" />
+</parameter>
+
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.MonitorArea" >
+  <value val="5.391011e-5" />
+</parameter>
+<parameter name="Workflow.MonitorThickness" >
+  <value val="0.013" />
+</parameter>
+<parameter name="Workflow.MonitorScalingFactor">
+  <value val="1e9" />
 </parameter>
 
 </component-link>

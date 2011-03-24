@@ -284,7 +284,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   }
   else if ( isDirtyRebin() )
   {
-    pyInput += "ws_list = ind.cte_rebin(mapfile, tempK, rebinParam, analyser, reflection,"
+    pyInput += "ws_list = ind.cte_rebin(mapfile, tempK, rebinParam,"
       "fileFormats, CleanUp=clean, Verbose=verbose)\n";
   }
   else if ( tryToSave ) // where all we want to do is save and/or plot output
@@ -292,7 +292,7 @@ void Indirect::runConvertToEnergy(bool tryToSave)
     pyInput +=
       "import re\n"
       "wslist = mantid.getWorkspaceNames()\n"
-      "save_ws = re.compile(r'_'+ana+ref+'_red')\n"
+      "save_ws = re.compile(r'_'+analyser+reflection+'_red')\n"
       "ws_list = []\n"
       "for workspace in wslist:\n"
       "   if save_ws.search(workspace):\n"

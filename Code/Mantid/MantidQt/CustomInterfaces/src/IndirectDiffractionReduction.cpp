@@ -31,7 +31,7 @@ void IndirectDiffractionReduction::demonRun()
 {
   if ( validateDemon() )
   {
-    QString pyInput = "from IndirectDataAnalysis import demon\n"
+    QString pyInput = "from IndirectDiffractionReduction import demon\n"
       "files = [r'" + m_uiForm.dem_rawFiles->getFilenames().join("',r'") + "']\n"
       "first = " +m_uiForm.set_leSpecMin->text()+"\n"
       "last = " +m_uiForm.set_leSpecMax->text()+"\n"

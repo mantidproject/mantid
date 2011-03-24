@@ -19,11 +19,15 @@
   <value val="diffraction" />
 </parameter>
 
-<parameter name="mon-area" >
+<!-- Reduction workflow parameters under this line -->
+<parameter name="Workflow.MonitorArea" >
   <value val="1.276e-3" />
 </parameter>
-<parameter name="mon-thickness" >
+<parameter name="Workflow.MonitorThickness" >
   <value val="0.025" />
+</parameter>
+<parameter name="Workflow.MonitorScalingFactor">
+  <value val="1e6" />
 </parameter>
 
 </component-link>

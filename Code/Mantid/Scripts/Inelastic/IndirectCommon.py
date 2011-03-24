@@ -78,3 +78,11 @@ def createQaxis(inputWS):
         for i in range(0, nHist):
             result.append(float(axis.label(i)))
     return result
+
+def loadInst(instrument):    
+    ws = '__empty_' + instrument
+    if (mtd[ws] == None):
+        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
+        idf = idf_dir + instrument + '_Definition.xml'
+        LoadEmptyInstrument(idf, ws)
+        
