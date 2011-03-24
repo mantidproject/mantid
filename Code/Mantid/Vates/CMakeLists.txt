@@ -10,17 +10,20 @@ include ( CommonVatesSetup )
 add_subdirectory ( VatesAPI )
 
 #Select either building Paraview plugins or VisIT plugins.
-set(USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. If OFF, creates VisIT plugins.")
+set(USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. ")
 
-if ( VISIT_FOUND AND (NOT USE_PARAVIEW))
+#Select either building Paraview plugins or VisIT plugins.
+set(USE_VISIT OFF CACHE BOOL "Create visit plugins.")
+
+if ( VISIT_FOUND AND USE_VISIT)
 
   # Perform common setup
   add_subdirectory ( VisitPlugins )
   add_subdirectory ( VisitDataBases )
 
-else ( VISIT_FOUND AND (NOT USE_PARAVIEW) )
+else ( VISIT_FOUND AND USE_VISIT )
   message ( STATUS "Vates-VisIt plugins and widgets will not be built." )
-endif ( VISIT_FOUND AND (NOT USE_PARAVIEW) )
+endif ( VISIT_FOUND AND USE_VISIT )
 
 # Paraview dependencies built if Paraview is found
 find_package( ParaView QUIET ) #TODO switch from QUIET to REQUIRED

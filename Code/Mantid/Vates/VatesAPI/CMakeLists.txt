@@ -1,10 +1,10 @@
 # This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required ( VERSION 2.6 )
 
-if(NOT USE_PARAVIEW)
+if(USE_VISIT)
   include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
   include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
-endif(NOT USE_PARAVIEW)
+endif(USE_VISIT)
 
 project ( VatesAPI )
 
