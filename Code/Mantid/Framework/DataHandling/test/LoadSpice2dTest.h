@@ -136,6 +136,14 @@ public:
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
     TS_ASSERT_EQUALS(*dp,  38.1);
 
+    prop = ws2d->run().getProperty("source-aperture-radius");
+    dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    TS_ASSERT_EQUALS(*dp,  40.0);
+
+    prop = ws2d->run().getProperty("sample-aperture-radius");
+    dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    TS_ASSERT_EQUALS(*dp,  14.0);
+
     prop = ws2d->run().getProperty("number-of-guides");
     Mantid::Kernel::PropertyWithValue<int>* np = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(prop);
     TS_ASSERT_EQUALS(*np,  4);

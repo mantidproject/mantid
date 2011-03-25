@@ -169,6 +169,12 @@ namespace Mantid
       int numberYPixels = 0;
       from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
 
+      double source_apert = 0.0;
+      from_element<double>(source_apert, sasEntryElem, "source_aperture_size", fileName);
+
+      double sample_apert = 0.0;
+      from_element<double>(sample_apert, sasEntryElem, "sample_aperture_size", fileName);
+
       double source_distance = 0.0;
       from_element<double>(source_distance, sasEntryElem, "source_distance", fileName);
 
@@ -317,15 +323,13 @@ namespace Mantid
       runLoadInstrument(instrument, ws);
       runLoadMappingTable(ws, numberXPixels, numberYPixels);
 
-      // Set the sample-detector distance
-      boost::shared_ptr<Mantid::Geometry::IInstrument> i = ws->getInstrument();
-      boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
-
-      Geometry::ParameterMap &pmap = ws->instrumentParameters();
+      // Set the run properties
       ws->mutableRun().addProperty("sample-detector-distance", distance, true);
       ws->mutableRun().addProperty("beam-trap-radius", beam_trap_radius, true);
       ws->mutableRun().addProperty("number-of-guides", nguides, true);
       ws->mutableRun().addProperty("source-sample-distance", source_distance, true);
+      ws->mutableRun().addProperty("source-aperture-radius", source_apert, true);
+      ws->mutableRun().addProperty("sample-aperture-radius", sample_apert, true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
