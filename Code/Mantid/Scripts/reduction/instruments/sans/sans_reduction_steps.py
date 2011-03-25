@@ -578,14 +578,7 @@ class LoadRun(ReductionStep):
 
         # Store the sample-detector distance.
         mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
-    
-        # Get the number of guides in the beam
-        try:
-            nguides = mtd[workspace].getInstrument().getNumberParameter("number-of-guides")[0]
-        except:
-            nguides = 0
-            mantid.sendLogMessage("Could not find the number of guides for %s" % workspace)
-        
+            
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
         if self._beam_center is not None:            
