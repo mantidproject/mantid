@@ -22,10 +22,12 @@ public:
   {
     LoadSNSEventNexus ld;
     ld.initialize();
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs"); // Only doing this to resolve the path to the file
     TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
 
     //Try an ISIS nexus file
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     ld.setPropertyValue("Filename","LOQ49886.nxs");
     TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
   }
@@ -33,6 +35,7 @@ public:
 
   void test_Simple()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     Mantid::API::FrameworkManager::Instance();
     LoadEventNexus ld;
     std::string outws_name = "cncs";
