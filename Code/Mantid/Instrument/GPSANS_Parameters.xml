@@ -31,6 +31,11 @@
   <value val="5.1500000"/>
 </parameter>
 
+<!-- Aperture distances for 8 guides to 0 guides -->
+<parameter name="aperture-distances" type="string">
+  <value val="1919.1, 3329.3, 5323.7, 7377.5, 9399.0, 11433.8, 13454.4, 15473.2, 17495.2" />
+</parameter>
+
 </component-link>
 
 </parameter-file>
