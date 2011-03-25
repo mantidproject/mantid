@@ -47,6 +47,8 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<>("InputWorkspace", "", Direction::Input)
           , "A 2D workspace with X values of time of flight");
+      declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "Name of the output workspace.");
+
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
 
       declareProperty("XMin", -2, "Minimum of X (col) Range to integrate for peak");
@@ -70,12 +72,12 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
-      Alpha0 = 1.2408; //4.69919;
-      Alpha1 = 4.84289; //1.95139;
-      Beta0 = -261.873; //189.391;
-      Kappa = 78.1604; //167.997;
-      SigmaSquared = 2.54745; //0.192605;
-      Gamma = 1.70148; //4.4265;
+      Alpha0 = 1.4283; //1.2408; //4.69919;
+      Alpha1 = 2.6817; //4.84289; //1.95139;
+      Beta0 = -245.6; //-261.873; //189.391;
+      Kappa = 55.5458; //78.1604; //167.997;
+      SigmaSquared = 0.286714; //2.54745; //0.192605;
+      Gamma = 25.9127; //1.70148; //4.4265;
   
       // create TOF axis from Params
       const std::vector<double> rb_params = getProperty("Params");
@@ -178,7 +180,7 @@ namespace Mantid
   
         peaksW->setPeakIntegrateCount(I, i);
         peaksW->setPeakIntegrateError(sigI, i);
-  
+        //break;
       }
     }
 
@@ -210,44 +212,6 @@ namespace Mantid
       MantidVec & X = outputW->dataX(s);
       MantidVec & Y = outputW->dataY(s);
 
-      /*IAlgorithm_sptr bkg_alg;
-      try
-      {
-        bkg_alg = createSubAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError&)
-      {
-        g_log.error("Can't locate Fit algorithm");
-        throw ;
-      }
-      bkg_alg->setProperty("InputWorkspace", outputW);
-      bkg_alg->setProperty("WorkspaceIndex", s);
-      double x0 = X[TOFPeak]-1000.0;
-      if (x0 < X[0]) x0 = X[0];
-      double xn = X[TOFPeak]+1000.0;
-      if (xn >  X[numbins]) xn = X[numbins];
-      bkg_alg->setProperty("StartX", x0);
-      bkg_alg->setProperty("EndX", xn);
-      bkg_alg->setProperty("MaxIterations", 1000);
-      bkg_alg->setProperty("Output", "bkg");
-
-      // set up fitting function and pass to Fit
-      std::ostringstream bkg_str;
-      bkg_str <<"name = LinearBackground, A0 = 16.8446;";
-      bkg_alg->setProperty("Function", bkg_str.str());
-      bkg_alg->setProperty("Ties", "A1 = 0.0");
-      try
-      {
-        bkg_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-      std::vector<double> params = bkg_alg->getProperty("Parameters");
-      std::string bkgfunct = bkg_alg->getPropertyValue("Function");
-      //std::cout <<bkgfunct<<"\n";
-      double bkg0 = params[0];*/
       double bkg0 = (Y[TOFmin]+Y[TOFmax])*0.5;
 
       for (int j = TOFmin; j <=  TOFmax; ++j)std::cout <<X[j]<<"  ";
@@ -287,7 +251,7 @@ namespace Mantid
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
 
-      if (Alpha0== 1.2408)tie_str << "Alpha0 = "<<Alpha0;
+      if (Alpha0== 1.4283)tie_str << "Alpha0 = "<<Alpha0;
       else tie_str << "Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "<<Beta0<<", Kappa = "<<Kappa;
       fit_alg->setProperty("Ties", tie_str.str());
 
@@ -321,7 +285,7 @@ namespace Mantid
       std::string funct = fit_alg->getPropertyValue("Function");
       std::cout <<funct<<"\n";
 
-      if(Alpha0== 1.2408)
+      if(Alpha0== 1.4283)
       {
         IAlgorithm_sptr fit2_alg;
         try
@@ -362,6 +326,7 @@ namespace Mantid
           g_log.error("Unable to successfully run Fit sub-algorithm");
           throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
         }
+        ws = fit2_alg->getProperty("OutputWorkspace");
   
         params = fit2_alg->getProperty("Parameters");
         IKI = params[0];
@@ -375,62 +340,23 @@ namespace Mantid
         funct = fit2_alg->getPropertyValue("Function");
         std::cout <<funct<<"\n";
       }
+      setProperty("OutputWorkspace", ws);
 
-      //Fill output workspace with interval; use Fit to calculate values of Fit in interval
-      const int n = outputW->blocksize();
-      double dx = (X[TOFmax]-X[TOFmin])/double(n);
-      double x0 = X[TOFmin];
-      for (int i = 0; i <=  n; i++) 
+      IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
+      IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+      const int n=1000;
+      double *x = new double[n];
+      double *y = new double[n];
+      double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
+      for (int i=0; i < n; i++) 
       {
-        X[i] = x0+i*dx;
+        x[i] = X[TOFmin]+i*dx;
       }
-      for (int i = 0; i <  n; i++) 
-      {
-        Y[i] = 0.0;
-      }
-      IAlgorithm_sptr fit2_alg;
-      try
-      {
-        fit2_alg = createSubAlgorithm("Fit", -1, -1, false);
-      } catch (Exception::NotFoundError&)
-      {
-        g_log.error("Can't locate Fit algorithm");
-        throw ;
-      }
-      fit2_alg->setProperty("InputWorkspace", outputW);
-      fit2_alg->setProperty("WorkspaceIndex", s);
-      fit2_alg->setProperty("StartX", X[0]);
-      fit2_alg->setProperty("EndX", X[n]);
-      std::ostringstream fun_str2;
-      fun_str2 << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
-              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
-      fit2_alg->setProperty("Function", fun_str2.str());
-      fit2_alg->setProperty("MaxIterations", 0);
-      fit2_alg->setProperty("Output", "fit_iter0");
+      pk->setMatrixWorkspace(outputW, 0, -1, -1);
+      pk->function(y,x,n);
 
-      try
-      {
-        fit2_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-
-      if ( ! fit2_alg->isExecuted() )
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
-      }
-
-      MatrixWorkspace_sptr wsn = fit2_alg->getProperty("OutputWorkspace");
-      const MantidVec &  FitValues = wsn->readY(1);
-      for (int i = 0; i < n; i++) {
-        Y[i] = FitValues[i];
-      }
       I = 0.0;
-      for (int i = 0; i < n; i++) I+= FitValues[i];
+      for (int i = 0; i < n; i++) I+= y[i];
       I*= double(DataValues.size())/double(n);
       sigI = sqrt(I+DataValues.size()*bkg0+DataValues.size()*DataValues.size()*bkg0);
       return;
