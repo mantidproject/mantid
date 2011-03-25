@@ -1,4 +1,5 @@
 from reduction import Instrument
+import MantidFramework
 
 class HFIRSANS(Instrument):
     """
@@ -103,3 +104,17 @@ class HFIRSANS(Instrument):
         return [ 1000000 + p[0]*1000 + p[1] for p in pixel_list ]
         
         
+    def get_aperture_distance(self, workspace):
+        """
+            Return the aperture distance
+        """
+        try:
+            nguides = MantidFramework.mtd[workspace].getRun().getProperty("number-of-guides").value
+            apertures_lst = MantidFramework.mtd[workspace].getInstrument().getStringParameter("aperture-distances")[0]
+            apertures = apertures_lst.split(',')
+            # Note that they are in reverse order, the first item is for 8 guides
+            # and the last item is for 0 guide.
+            index = 8-nguides
+            return float(apertures[index])
+        except:
+            raise RuntimeError, "Could not find the for %s\n  %s" % (workspace, sys.exc_value)
