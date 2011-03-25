@@ -99,6 +99,7 @@ public:
 
   void test_LoadPreNeXus_REFL()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     std::string eventfile( "REF_L_32035_neutron_event.dat" );
     std::string pulsefile( "REF_L_32035_pulseid.dat" );
     eventLoader->setPropertyValue("EventFilename", eventfile);

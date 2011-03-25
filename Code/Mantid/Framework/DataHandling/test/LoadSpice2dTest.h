@@ -41,6 +41,8 @@ public:
   {
     if ( !spice2d.isInitialized() ) spice2d.initialize();
 
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "HFIR");
+
     //No parameters have been set yet, so it should throw
     TS_ASSERT_THROWS(spice2d.execute(), std::runtime_error);
 
