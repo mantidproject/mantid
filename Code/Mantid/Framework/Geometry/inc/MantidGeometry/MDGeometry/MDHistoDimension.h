@@ -108,6 +108,12 @@ namespace Geometry
   };
 
 
+  /// Shared pointer to a MDHistoDimension
+  typedef boost::shared_ptr<MDHistoDimension> MDHistoDimension_sptr;
+
+  /// Shared pointer to a const MDHistoDimension
+  typedef boost::shared_ptr<const MDHistoDimension> MDHistoDimension_const_sptr;
+
 } // namespace Mantid
 } // namespace Geometry
 

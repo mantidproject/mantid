@@ -74,7 +74,7 @@ private:
     {
       throw std::runtime_error("Not Implemented");
     }
-    virtual int getNDimensions() const
+    virtual size_t getNDimensions() const
     {
       throw std::runtime_error("Not Implemented");
     }

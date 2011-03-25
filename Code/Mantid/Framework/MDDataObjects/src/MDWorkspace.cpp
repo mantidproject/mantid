@@ -182,7 +182,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
         return this->m_spDataPoints->getNumPixels();
     }
 
-    int MDWorkspace::getNDimensions() const
+    size_t MDWorkspace::getNDimensions() const
     {
       return m_spMDImage->getGeometry()->getNumDims();
     }

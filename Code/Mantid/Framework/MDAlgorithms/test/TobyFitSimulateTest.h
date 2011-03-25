@@ -84,7 +84,7 @@ public:
         return m_points;
       }
 
-      virtual int getNDimensions() const
+      virtual size_t getNDimensions() const
       {
         throw std::runtime_error("Not implemented");
       }

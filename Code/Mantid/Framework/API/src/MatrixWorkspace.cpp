@@ -985,7 +985,7 @@ namespace Mantid
       return (uint64_t)(this->size());
     }
 
-    int MatrixWorkspace::getNDimensions() const
+    size_t MatrixWorkspace::getNDimensions() const
     {
       return 2;
     }

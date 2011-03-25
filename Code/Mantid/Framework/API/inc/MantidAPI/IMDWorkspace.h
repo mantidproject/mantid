@@ -58,7 +58,7 @@ namespace Mantid
       virtual uint64_t getNPoints() const = 0;
 
       /// Get the number of dimensions
-      virtual int getNDimensions() const = 0;
+      virtual size_t getNDimensions() const = 0;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;
@@ -78,8 +78,35 @@ namespace Mantid
       /// Get the dimension ids in their order
       virtual const std::vector<std::string> getDimensionIDs() const = 0;
 
+      /// Get the signal at the specified index.
+      virtual double getSignalAt(size_t index) const
+      {
+        return getPoint(index).getSignal();
+      }
+
+      /// Get the error of the signal at the specified index.
+      virtual double getErrorAt(size_t index) const
+      {
+        return getPoint(index).getError();
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+      {
+        return getCell(index1,index2,index3,index4).getSignal();
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t)
+      virtual double getErrorAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+      {
+        return getCell(index1,index2,index3,index4).getError();
+      }
+
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const = 0;
+
+
+      // TODO: JZ : As far as I can tell, these getCell() calls are relatively unused, and may perhaps be replaced by getSignal() calls
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const = 0;
