@@ -159,15 +159,29 @@ void IFitFunction::addPenalty(double *out)const
   */
 void IFitFunction::addPenaltyDeriv(Jacobian *out)const
 {
-    for(int i=0;i<nParams();++i)
-    {  
-      API::IConstraint* c = getConstraint(i);
-      if (c)
+  int n = dataSize() - 1;
+  for(int i=0;i<nParams();++i)
+  {  
+    API::IConstraint* c = getConstraint(i);
+    if (c)
+    {
+      double penalty = c->checkDeriv();
+      if ( penalty != 0.0 )
       {
-        double penalty = c->checkDeriv();
-        out->addNumberToColumn(penalty, activeIndex(i));
+        int ia = activeIndex(i);
+        double deriv = out->get(0,ia);
+        out->set(0,ia,deriv + penalty);
+        deriv = out->get(n,ia);
+        out->set(n,ia,deriv+penalty);
+
+        for (int j = 9; j < n; j+=10)
+        {
+          deriv = out->get(j,ia);
+          out->set(j,ia,deriv+penalty);
+        }
       }
-    }
+    } // if (c)
+  }
 
 }
 

@@ -36,6 +36,15 @@ public:
   {
       m_J->set(m_iY0 + iY,iP,value);
   }
+  /**
+   * Overridden Jacobian::get(...).
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   */
+  double get(int iY, int iP)
+  {
+      return m_J->get(m_iY0 + iY,iP);
+  }
 };
 
 /// Default value for the peak radius

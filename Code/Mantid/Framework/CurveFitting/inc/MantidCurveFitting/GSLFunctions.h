@@ -84,6 +84,13 @@ namespace Mantid
       int j = m_index[iP];
       if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
+    /// overwrite base method
+    double get(int iY, int iP)
+    {
+      int j = m_index[iP];
+      if (j >= 0) return gsl_matrix_get(m_J,iY,j);
+      return 0.0;
+    }
   };
 
   /// Structure to contain least squares data and used by GSL

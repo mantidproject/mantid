@@ -169,7 +169,7 @@ namespace CurveFitting
       {
         iter++;
         status = minimizer->iterate();
-        if (status != GSL_SUCCESS)  
+        if (status != GSL_SUCCESS && minimizer->hasConverged() != GSL_SUCCESS)
         { 
           // From experience it is found that gsl_multiGenericFit_fdfsolver_iterate occasionally get
           // stock - even after having achieved a sensible GenericFit. This seem in particular to be a
@@ -188,7 +188,7 @@ namespace CurveFitting
           }
           break;
         }
-
+        
         status = minimizer->hasConverged();
         prog.report();
       }

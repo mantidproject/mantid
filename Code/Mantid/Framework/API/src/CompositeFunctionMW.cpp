@@ -130,6 +130,15 @@ public:
   {
       m_J->set(iY,m_iP0 + iP,value);
   }
+  /**
+   * Overridden Jacobian::get(...).
+   * @param iY :: The index of the data point
+   * @param iP :: The parameter index of an individual function.
+   */
+  double get(int iY, int iP)
+  {
+      return m_J->get(iY,m_iP0 + iP);
+  }
  /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add
   *   @param iActiveP :: The index of an active parameter.

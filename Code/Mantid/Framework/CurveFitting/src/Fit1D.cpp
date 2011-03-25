@@ -48,6 +48,17 @@ public:
         int j = m_map[iP];
         if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
+    /** Get a value to a Jacobian matrix element.
+    *   @param iY :: The index of the data point.
+    *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
+    *   @param value :: The derivative value.
+    */
+    double get(int iY, int iP)
+    {
+        int j = m_map[iP];
+        if (j >= 0) return gsl_matrix_get(m_J,iY,j);
+        return 0.0;
+    }
     /// Set the pointer to the GSL's jacobian
     void setJ(gsl_matrix * J){m_J = J;}
 };

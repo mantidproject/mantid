@@ -386,6 +386,12 @@ public:
   */
   virtual void set(int iY, int iP, double value) = 0;
 
+  /**  Get the value to a Jacobian matrix element.
+  *   @param iY :: The index of a data point.
+  *   @param iP :: The index of a declared parameter.
+  */
+  virtual double get(int iY, int iP) = 0;
+
   ///@cond do not document
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
   *   @param value :: Value to add
