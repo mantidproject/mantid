@@ -184,7 +184,7 @@
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
-   <instrument name="BioSANS"> 
+   <instrument name="BIOSANS"> 
       <technique>Small Angle Scattering</technique>
    </instrument> 
    
@@ -291,6 +291,14 @@
    <instrument name="NGSANS"> 
       <technique>Small Angle Scattering</technique>
    </instrument> 
+</facility>
+
+<facility name="TEST" FileExtensions=".nxs,.dat,.xml">
+
+   <instrument name="MINITOPAZ"> 
+      <technique>Test Neutron Diffraction</technique>
+   </instrument>
+
 </facility>
 
 </facilities>
