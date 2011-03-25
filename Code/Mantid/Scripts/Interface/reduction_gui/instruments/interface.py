@@ -91,11 +91,14 @@ class InstrumentInterface(object):
             else:
                 msg = "The following error was encountered:\n\n%s" % unicode(e)
             self._warning("Reduction Parameters Incomplete", msg)
+            self._error_report(traceback.format_exc())
             return None
         except:
             msg = "The following error was encountered:\n\n%s" % sys.exc_info()[0]
             msg += "\n\nPlease check your reduction parameters\n"
             self._warning("Reduction Parameters Incomplete", msg)
+            self._error_report(traceback.format_exc())
+            return None
         
     def reduce(self):
         """
@@ -114,10 +117,28 @@ class InstrumentInterface(object):
             else:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(e)
             self._warning("Reduction failed", msg)
+            self._error_report(traceback.format_exc())
         except:
             msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[0]
             msg += "\n\nPlease check your reduction parameters\n"
             self._warning("Reduction failed", msg)
+            self._error_report(traceback.format_exc())
+        
+    def _error_report(self, trace=''):
+        """
+            Try to dump the state of the UI to a file, with a traceback
+            if available.
+        """
+        filename = 'sans_error_report.xml'
+        f = open(filename, 'w')
+        reduction = self.scripter.to_xml()
+        f.write("<Report>\n")
+        f.write(reduction)
+        f.write("<ErrorReport>")
+        f.write(trace)
+        f.write("</ErrorReport>")
+        f.write("</Report>")
+        f.close()
         
     def get_tabs(self):
         """
