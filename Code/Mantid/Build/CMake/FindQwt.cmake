@@ -25,4 +25,4 @@ if ( QWT_FOUND )
   endif ()
 endif()
 
-mark_as_advanced ( QWT_LIBRARY QWT_LIBRARY_DEBUG )
+mark_as_advanced ( QWT_INCLUDE_DIR QWT_LIBRARY QWT_LIBRARY_DEBUG )

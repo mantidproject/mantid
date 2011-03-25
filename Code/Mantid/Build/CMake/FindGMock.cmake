@@ -30,3 +30,5 @@ if ( GMOCK_FOUND )
 else ()
 	MESSAGE( "------> On Linux, copy the gmock library from your distro to /TestingTools/lib !" )
 endif ()
+
+mark_as_advanced ( GMOCK_INCLUDE_DIR GMOCK_LIB GMOCK_LIB_DEBUG )

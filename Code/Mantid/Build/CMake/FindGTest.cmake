@@ -11,3 +11,5 @@ find_path ( GTEST_INCLUDE_DIR gtest/gtest.h
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( GTest DEFAULT_MSG GTEST_INCLUDE_DIR )
+
+mark_as_advanced ( GTEST_INCLUDE_DIR )

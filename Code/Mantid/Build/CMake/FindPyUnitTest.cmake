@@ -67,3 +67,5 @@ if (PYUNITTEST_GEN_EXEC)
 else ()
   set ( PYUNITTEST_FOUND FALSE )
 endif ()
+
+mark_as_advanced ( PYUNITTEST_GEN_EXEC PYUNITTEST_XMLRUNNER )

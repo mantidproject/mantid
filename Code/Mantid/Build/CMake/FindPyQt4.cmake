@@ -43,4 +43,6 @@ ELSE(EXISTS PYQT4_VERSION)
   include ( FindPackageHandleStandardArgs )
   find_package_handle_standard_args ( PyQt4 DEFAULT_MSG PYQT4_VERSION )
 
+  mark_as_advanced ( _find_pyqt_py )
+
 ENDIF(EXISTS PYQT4_VERSION)

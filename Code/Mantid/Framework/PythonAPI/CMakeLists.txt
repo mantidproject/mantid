@@ -149,6 +149,7 @@ set ( NAME_IS_PETE OFF CACHE BOOL "Ha ha" )
 
 find_program( GEN_TEST_MAIN generatetestmain.py
               ${PROJECT_SOURCE_DIR}/TestingTools/ ${PROJECT_SOURCE_DIR}/../TestingTools/)
+mark_as_advanced ( GEN_TEST_MAIN )
 if (NAME_IS_PETE AND GEN_TEST_MAIN)
   # generate a default "main.cpp" file
   add_custom_command ( OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/src/main.cpp

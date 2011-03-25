@@ -51,3 +51,12 @@ endif()
 # all listed variables are TRUE
 include ( FindPackageHandleStandardArgs )
 find_package_handle_standard_args( Poco DEFAULT_MSG POCO_LIBRARIES POCO_INCLUDE_DIR )
+
+mark_as_advanced ( POCO_INCLUDE_DIR
+                   POCO_LIB_FOUNDATION POCO_LIB_FOUNDATION_DEBUG
+                   POCO_LIB_XML POCO_LIB_XML_DEBUG
+                   POCO_LIB_UTIL POCO_LIB_UTIL_DEBUG
+                   POCO_LIB_NET POCO_LIB_NET_DEBUG
+                   POCO_LIB_CRYPTO POCO_LIB_CRYPTO_DEBUG
+                   POCO_LIB_NETSSL POCO_LIB_NETSSL_DEBUG
+)

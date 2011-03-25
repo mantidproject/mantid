@@ -80,6 +80,10 @@ IF( WIN32 OR APPLE )  # We get things out of Third_Party on the Mac
   #  "GSL_GSLCBLAS_LIBRARY=${GSL_GSLCBLAS_LIBRARY}\n"
   #  "GSL_LIBRARIES=${GSL_LIBRARIES}")
 
+  mark_as_advanced ( GSL_INCLUDE_DIR GSL_GSL_LIBRARY GSL_GSL_LIBRARY_DEBUG
+                     GSL_GSLCBLAS_LIBRARY GSL_GSLCBLAS_LIBRARY_DEBUG
+  )
+
 ELSE()
   
   IF(UNIX) 
@@ -140,11 +144,15 @@ ELSE()
         GSL_LINK_DIRECTORIES
         GSL_DEFINITIONS
       )
-      MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
+      #MESSAGE(STATUS "Using GSL from ${GSL_PREFIX}")
+      include ( FindPackageHandleStandardArgs )
+      find_package_handle_standard_args( GSL DEFAULT_MSG GSL_INCLUDE_DIR )
       
     ELSE(GSL_CONFIG)
       MESSAGE("FindGSL.cmake: gsl-config not found. Please set it manually. GSL_CONFIG=${GSL_CONFIG}")
     ENDIF(GSL_CONFIG)
+
+    mark_as_advanced ( GSL_CONFIG GSL_CONFIG_PREFER_PATH GSL_EXE_LINKER_FLAGS )
 
   ENDIF(UNIX)
 ENDIF()
@@ -155,3 +163,4 @@ IF(GSL_LIBRARIES)
     SET(GSL_FOUND 1)
   ENDIF(GSL_INCLUDE_DIR OR GSL_CXX_FLAGS)
 ENDIF(GSL_LIBRARIES)
+
