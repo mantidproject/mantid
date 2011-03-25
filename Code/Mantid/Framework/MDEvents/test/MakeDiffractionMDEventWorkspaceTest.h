@@ -94,6 +94,8 @@ public:
   {
     // return; //FIXME
 
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
+
     int numEventsPer = 100;
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
