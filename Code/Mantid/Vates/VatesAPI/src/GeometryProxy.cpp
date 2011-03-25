@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/GeometryProxy.h"
+#include "MantidVatesAPI/DimensionComparitor.h"
 
 #include "boost/regex.hpp"
 #include "boost/function.hpp"
@@ -8,24 +9,6 @@ namespace Mantid
 {
 namespace VATES
 {
-
-bool isQxDimension(Mantid::Geometry::IMDDimension_sptr dimension)
-{
-  boost::regex xDimensionMatch("(q1)|(qx)");
-  return boost::regex_match(dimension->getDimensionId(), xDimensionMatch);
-}
-
-bool isQyDimension(Mantid::Geometry::IMDDimension_sptr dimension)
-{
-  boost::regex yDimensionMatch("(q2)|(qy)");
-  return boost::regex_match(dimension->getDimensionId(), yDimensionMatch);
-}
-
-bool isQzDimension(Mantid::Geometry::IMDDimension_sptr dimension)
-{
-  boost::regex zDimensionMatch("(q3)|(qz)");
-  return boost::regex_match(dimension->getDimensionId(), zDimensionMatch);
-}
 
 
 GeometryProxy::MemFuncGetter GeometryProxy::find(std::string key) const
@@ -101,29 +84,104 @@ GeometryProxy::MemFuncGetter GeometryProxy::find(std::string key) const
   {
     //This switch is used to determine how to remap the arguments to the getPoint member function of MDImage.
     using Mantid::MDDataObjects::MDImage;
-    if (isQxDimension(m_xDimension) && isQyDimension(m_yDimension) && isQzDimension(m_zDimension))
+    DimensionComparitor comparitor(image);
+
+    //Handle binding correctly any one of 4! arrangements. TODO There may be a better way of meta-programming these 4! options.
+    if (comparitor.isXDimension(m_xDimension) && comparitor.isYDimension(m_yDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_tDimension)) //xyzt
     {
-      return boost::bind(&MDImage::getPoint, image, _1, _2, _3, _4);
+      return boost::bind(&MDImage::getPoint, image, _1, _2, _3, _4); //Default.
     }
-    else if (isQxDimension(m_xDimension) && isQyDimension(m_zDimension) && isQzDimension(m_yDimension))
+    else if (comparitor.isXDimension(m_xDimension) && comparitor.isYDimension(m_zDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_tDimension)) //xzyt
     {
       return boost::bind(&MDImage::getPoint, image, _1, _3, _2, _4);
     }
-    else if (isQxDimension(m_yDimension) && isQyDimension(m_xDimension) && isQzDimension(m_zDimension))
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isYDimension(m_xDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_tDimension)) //yxzt
     {
       return boost::bind(&MDImage::getPoint, image, _2, _1, _3, _4);
     }
-    else if (isQxDimension(m_yDimension) && isQyDimension(m_zDimension) && isQzDimension(m_xDimension))
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isYDimension(m_zDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_tDimension)) //yzxt
     {
       return boost::bind(&MDImage::getPoint, image, _2, _3, _1, _4);
     }
-    else if (isQxDimension(m_zDimension) && isQyDimension(m_xDimension) && isQzDimension(m_yDimension))
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isYDimension(m_xDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_tDimension)) //zxyt
     {
       return boost::bind(&MDImage::getPoint, image, _3, _1, _2, _4);
     }
-    else if (isQxDimension(m_zDimension) && isQyDimension(m_yDimension) && isQzDimension(m_xDimension))
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isYDimension(m_yDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_tDimension)) //zyxt
     {
       return boost::bind(&MDImage::getPoint, image, _3, _2, _1, _4);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_xDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_zDimension)) //txyz
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _1, _2, _3);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_xDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_yDimension)) //txzy
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _1, _3, _2);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_yDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_zDimension)) //tyxz
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _2, _1, _3);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_yDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_xDimension)) //tyzx
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _2, _3, _1);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_zDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_yDimension)) //tzxy
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _3, _1, _2);
+    }
+    else if (comparitor.isXDimension(m_tDimension) && comparitor.isYDimension(m_zDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_xDimension)) //tzyx
+    {
+      return boost::bind(&MDImage::getPoint, image, _4, _3, _2, _1);
+    }
+    else if (comparitor.isXDimension(m_xDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_zDimension)) //xtyz
+    {
+      return boost::bind(&MDImage::getPoint, image, _1, _4, _2, _3);
+    }
+    else if (comparitor.isXDimension(m_xDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_yDimension)) //xtzy
+    {
+      return boost::bind(&MDImage::getPoint, image, _1, _4, _3, _2);
+    }
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_zDimension)) //ytxz
+    {
+      return boost::bind(&MDImage::getPoint, image, _2, _4, _1, _3);
+    }
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_zDimension) && comparitor.istDimension(m_xDimension)) //ytzx
+    {
+      return boost::bind(&MDImage::getPoint, image, _2, _4, _3, _1);
+    }
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_xDimension) && comparitor.istDimension(m_yDimension)) //ztxy
+    {
+      return boost::bind(&MDImage::getPoint, image, _3, _4, _1, _2);
+    }
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isXDimension(m_tDimension) && comparitor.isZDimension(m_yDimension) && comparitor.istDimension(m_xDimension)) //ztyx
+    {
+      return boost::bind(&MDImage::getPoint, image, _3, _4, _2, _1);
+    }
+    else if (comparitor.isXDimension(m_xDimension) && comparitor.isXDimension(m_yDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_zDimension)) //xytz
+    {
+      return boost::bind(&MDImage::getPoint, image, _1, _2, _4, _3);
+    }
+    else if (comparitor.isXDimension(m_xDimension) && comparitor.isXDimension(m_zDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_yDimension)) //xzty
+    {
+      return boost::bind(&MDImage::getPoint, image, _1, _3, _4, _2);
+    }
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isXDimension(m_xDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_zDimension)) //yxtz
+    {
+      return boost::bind(&MDImage::getPoint, image, _2, _1, _4, _3);
+    }
+    else if (comparitor.isXDimension(m_yDimension) && comparitor.isXDimension(m_zDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_xDimension)) //yztx
+    {
+      return boost::bind(&MDImage::getPoint, image, _2, _3, _4, _1);
+    }
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isXDimension(m_xDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_yDimension)) //zxty
+    {
+      return boost::bind(&MDImage::getPoint, image, _3, _1, _4, _2);
+    }
+    else if (comparitor.isXDimension(m_zDimension) && comparitor.isXDimension(m_yDimension) && comparitor.isZDimension(m_tDimension) && comparitor.istDimension(m_xDimension)) //zytx
+    {
+      return boost::bind(&MDImage::getPoint, image, _3, _2, _4, _1);
     }
     else
     {

@@ -38,17 +38,23 @@ namespace Mantid
     {
     private:
       RebinningIterationAction m_currentAction;
+      bool m_forced;
     public:
-      RebinningActionManger() : m_currentAction(UseCache)
+      RebinningActionManger() : m_currentAction(UseCache), m_forced(false)
       {
       }
       void ask(RebinningIterationAction requestedAction)
       {
         //Very simply, only allow escalation if the requested action is more 'severe' than the current one.
-        if(requestedAction > m_currentAction)
+        if((false == m_forced) && (requestedAction > m_currentAction))
         {
           m_currentAction = requestedAction;
         }
+      }
+      void force(RebinningIterationAction requestedAction)
+      {
+        m_currentAction = requestedAction;
+        m_forced = true;
       }
       RebinningIterationAction action() const
       {
@@ -57,6 +63,7 @@ namespace Mantid
       void reset()
       {
         m_currentAction = UseCache;
+        m_forced = false;
       }
     };
   }

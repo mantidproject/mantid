@@ -33,6 +33,17 @@
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+namespace Mantid
+{
+  namespace MDAlgorithms
+  {
+    //Forward declaration
+    class BoxImplicitFunction;
+  }
+}
+///Typedef shared pointer to a box implicit function.
+typedef boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> BoxFunction_sptr;
+
 class vtkImplicitFunction;
 class VTK_EXPORT vtkRebinningCutter : public vtkUnstructuredGridAlgorithm
 {
@@ -48,7 +59,7 @@ public:
   void SetAppliedXDimensionXML(std::string xml);
   void SetAppliedYDimensionXML(std::string xml);
   void SetAppliedZDimensionXML(std::string xml);
-  void SetAppliedTDimensionXML(std::string xml);
+  void SetAppliedtDimensionXML(std::string xml);
   const char* GetInputGeometryXML();
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
@@ -99,7 +110,7 @@ private:
   /// Get the t dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
 
-  boost::shared_ptr<Mantid::API::ImplicitFunction> constructBox(vtkDataSet* ) const;
+  BoxFunction_sptr constructBox(vtkDataSet* ) const;
 
   /// Selects the dataset factory to use.
   Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
@@ -111,13 +122,16 @@ private:
   Mantid::VATES::vtkDataSetFactory_sptr createQuickRenderDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
 
   /// Decides on the necessary iteration action that is to be performed.
-  void determineAnyCommonExecutionActions(const int timestep);
+  void determineAnyCommonExecutionActions(const int timestep, BoxFunction_sptr box);
 
   /// creates a hash of arguments considered as flags for redrawing the visualisation dataset.
   std::string createRedrawHash() const;
 
+  /// handles overriting of time ranges.
+  void setTimeRange(vtkInformationVector* outputVector);
+
   /// Clip function provided by ClipFunction ProxyProperty
-  vtkImplicitFunction* m_clipFunction;
+  vtkImplicitFunction * m_clipFunction;
   /// Cached vtkDataSet. Enables fast visualisation where possible.
   vtkDataSet* m_cachedVTKDataSet;
   /// Arguments that cause redrawing are hashed and cached for rapid comparison regarding any changes.
@@ -140,6 +154,8 @@ private:
   Mantid::VATES::Dimension_sptr m_appliedTDimension;
   /// Manages the precedence of rebinning related actions.
   Mantid::VATES::RebinningActionManger m_actionRequester;
+  /// Box implicit function, used to determine when the clipping has changed.
+  BoxFunction_sptr m_box;
 
 };
 #endif

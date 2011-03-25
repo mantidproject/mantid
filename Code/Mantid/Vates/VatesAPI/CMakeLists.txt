@@ -10,6 +10,7 @@ project ( VatesAPI )
 
 set ( SRC_FILES 
 src/Clipper.cpp
+src/DimensionComparitor.cpp
 src/FieldDataToMetadata.cpp
 src/GeometryProxy.cpp
 src/ImageProxy.cpp
@@ -32,6 +33,7 @@ src/vtkThresholdingUnstructuredGridFactory.cpp
 set ( INC_FILES 
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
+inc/MantidVatesAPI/DimensionComparitor.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/GeometryProxy.h
 inc/MantidVatesAPI/ImageProxy.h

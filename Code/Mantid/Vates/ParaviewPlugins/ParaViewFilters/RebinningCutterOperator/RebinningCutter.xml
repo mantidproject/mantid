@@ -79,6 +79,12 @@
          number_of_elements="1"
          default_values="--">
        </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedtDimensionXML"
+         command="SetAppliedtDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
     </SourceProxy>
   </ProxyGroup>
   <!-- End RebinningCutter -->

@@ -118,44 +118,5 @@ public:
     TS_ASSERT_EQUALS("q1", proxy->getZDimension()->getDimensionId());
   }
 
-  void testIsXDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(isQxDimension(Dimension_sptr(new FakeDimension("q1", 1, 2, 3))));
-    TS_ASSERT(isQxDimension(Dimension_sptr(new FakeDimension("q1", 1, 2, 3))));
-  }
-
-  void testIsNotXDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(!isQxDimension(Dimension_sptr(new FakeDimension("-", 1, 2, 3))));
-  }
-
-  void testIsYDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(isQyDimension(Dimension_sptr(new FakeDimension("q2", 1, 2, 3))));
-    TS_ASSERT(isQyDimension(Dimension_sptr(new FakeDimension("qy", 1, 2, 3))));
-  }
-
-  void testIsNotYDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(!isQyDimension(Dimension_sptr(new FakeDimension("-", 1, 2, 3))));
-  }
-
-  void testIsZDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(isQzDimension(Dimension_sptr(new FakeDimension("q3", 1, 2, 3))));
-    TS_ASSERT(isQzDimension(Dimension_sptr(new FakeDimension("qz", 1, 2, 3))));
-  }
-
-  void testIsNotZDimension()
-  {
-    using namespace Mantid::VATES;
-    TS_ASSERT(!isQzDimension(Dimension_sptr(new FakeDimension("-", 1, 2, 3))));
-  }
-
 };
 #endif

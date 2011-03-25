@@ -60,6 +60,7 @@ public:
 Q_PROPERTY(QString XDimensionXML READ getXDimensionXML WRITE setXDimensionXML NOTIFY valueChanged)
 Q_PROPERTY(QString YDimensionXML READ getYDimensionXML WRITE setYDimensionXML NOTIFY valueChanged)
 Q_PROPERTY(QString ZDimensionXML READ getZDimensionXML WRITE setZDimensionXML NOTIFY valueChanged)
+Q_PROPERTY(QString tDimensionXML READ gettDimensionXML WRITE settDimensionXML NOTIFY valueChanged)
 GeometryWidget();
 void constructWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
 
@@ -81,6 +82,9 @@ QString getYDimensionXML() const;
 /// Gets the z dimension in a serialzed form
 QString getZDimensionXML() const;
 
+/// Gets the t dimension in a serialzed form
+QString gettDimensionXML() const;
+
 void setXDimensionXML(QString value)
 {
   //Do nothing.
@@ -92,6 +96,11 @@ void setYDimensionXML(QString value)
 }
 
 void setZDimensionXML(QString value)
+{
+  //Do nothing.
+}
+
+void settDimensionXML(QString value)
 {
   //Do nothing.
 }
@@ -110,13 +119,18 @@ private:
 
 /// Check that constructWidget has been called.
 void validateSetup() const;
+
+/// When dimensions are swapped. Ensure that every dimension widget is given the opportunity to update the nbins to 
+/// reflect the value contained in the dimension it now wraps.
+void applyBinsFromDimensions();
+
 DimensionWidget* m_xDimensionWidget;
 DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
+DimensionWidget* m_tDimensionWidget;
 bool m_isConstructed;
+
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_nonIntegratedVector;
-/// Directs Reset of all bin values of child dimension widgets.
-void resetAllBinValues();
 
 };
 

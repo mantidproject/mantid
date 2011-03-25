@@ -43,6 +43,7 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
     delete m_xDimensionWidget;
     delete m_yDimensionWidget;
     delete m_zDimensionWidget;
+    delete m_tDimensionWidget;
   }
 
   //Create widget to display/control the aligned x-dimension
@@ -57,10 +58,12 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
   m_zDimensionWidget = new DimensionWidget(this, "z Dimension", 2, nonIntegratedVector);
   layout->addWidget(m_zDimensionWidget, 2, 0);
 
+  //Create widget to display/control the aligned t-dimension
+  m_tDimensionWidget = new DimensionWidget(this, "t Dimension", 3, nonIntegratedVector);
+  layout->addWidget(m_tDimensionWidget, 3, 0);
+
   this->setLayout(layout);
   m_isConstructed = true;
-
-
 }
 
 
@@ -83,6 +86,12 @@ QString GeometryWidget::getZDimensionXML() const
   return m_zDimensionWidget->getDimension()->toXMLString().c_str();
 }
 
+QString GeometryWidget::gettDimensionXML() const
+{
+  validateSetup();
+  return m_tDimensionWidget->getDimension()->toXMLString().c_str();
+}
+
 
 GeometryWidget::~GeometryWidget()
 {
@@ -94,12 +103,12 @@ void GeometryWidget::dimensionWidgetChanged()
   emit valueChanged();
 }
 
-void GeometryWidget::resetAllBinValues()
+void GeometryWidget::applyBinsFromDimensions()
 {
-  //If dimensions have been swapped, then all bins should be reset to their original values.
-  //m_xDimensionWidget->resetBins();
-  //m_yDimensionWidget->resetBins();
-  //m_zDimensionWidget->resetBins();
+  m_xDimensionWidget->resetBins();
+  m_yDimensionWidget->resetBins();
+  m_zDimensionWidget->resetBins();
+  m_tDimensionWidget->resetBins();
 }
 
 void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDimensionIndex,
@@ -112,7 +121,6 @@ void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDim
   //Comparitor
   DimensionCompare areEqual;
   std::binder1st<DimensionCompare> isEqualToChangedDimension(areEqual, newDimension);
-
 
   //The new Dimension is overwriting the dimension on this widget.
   //Assign the old widget the old dimension from the calling widget.
@@ -143,8 +151,16 @@ void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDim
       m_zDimensionWidget->populateWidget(oldDimensionIndex);
     }
   }
-  resetAllBinValues();
 
+  if (isEqualToChangedDimension(m_tDimensionWidget->getDimension()))
+  {
+    if (pDimensionWidget != m_tDimensionWidget)
+    {
+      //Update the zDimensionWidget only.
+      m_tDimensionWidget->populateWidget(oldDimensionIndex);
+    }
+  }
+  applyBinsFromDimensions();
   //Raise event.
   dimensionWidgetChanged();
 }

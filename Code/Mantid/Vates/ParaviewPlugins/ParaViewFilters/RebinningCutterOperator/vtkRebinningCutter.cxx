@@ -4,8 +4,11 @@
 #include "vtkObjectFactory.h"
 #include "vtkAlgorithm.h"
 #include "vtkPVClipDataSet.h"
+#include "vtkSmartPointer.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkImplicitFunction.h"
+#include "vtkPointData.h"
+
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
@@ -84,7 +87,7 @@ std::string vtkRebinningCutter::createRedrawHash() const
   return sstream.str();
 }
 
-void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep)
+void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, BoxFunction_sptr box)
 {
   //Handles some commong iteration actions that can only be determined at execution time.
   if (NULL == m_cachedVTKDataSet)
@@ -98,6 +101,10 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep)
   if (m_cachedRedrawArguments != createRedrawHash())
   {
     m_actionRequester.ask(RecalculateVisualDataSetOnly);
+  }
+  if(m_box.get() != NULL && *m_box != *box)
+  {
+     m_actionRequester.ask(RecalculateAll); //The clip function must have changed.
   }
 }
 
@@ -124,8 +131,9 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
 
     //Create the composite holder.
     CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
-    compFunction->addFunction(constructBox(inputDataset));
-
+    BoxFunction_sptr box = constructBox(inputDataset); // Save the implicit function so that we may later determine if the extents have changed.
+    compFunction->addFunction(box);
+    
     // Construct reduction knowledge.
     m_presenter.constructReductionKnowledge(
       dimensionsVec,
@@ -149,7 +157,8 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
       // usually only one actual step requested
       timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
-    determineAnyCommonExecutionActions(timestep);
+    //TODO: warn if time falls outside of time range vtkWarnMacro ...
+    determineAnyCommonExecutionActions(timestep, box);
 
     vtkUnstructuredGrid* outData;
     RebinningIterationAction action = m_actionRequester.action();
@@ -169,11 +178,10 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
       outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
       m_cachedVTKDataSet = outData;
     }
-    this->
-      m_timestep = timestep; //Not settable directly via a setter.
+    m_timestep = timestep; //Not settable directly via a setter.
+    m_box = box;
     m_cachedRedrawArguments = createRedrawHash();
     m_actionRequester.reset();
-
     output->ShallowCopy(outData);
   }
   return 1;
@@ -227,6 +235,7 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
       status = Bad;
     }
   }
+  setTimeRange(outputVector);
   return status;
   
 }
@@ -288,7 +297,7 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
       //The visualisation dataset will at least need to be recalculated.
       if(temp->getNBins() != m_appliedXDimension->getNBins())
       {
-        //when the number of bins is chanded the request has to be for full rebinning.
+        //when the number of bins is changed the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedXDimension = temp;
@@ -308,7 +317,7 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
       if (temp->getNBins() != m_appliedYDimension->getNBins())
       {
-        //when the number of bins is chanded the request has to be for full rebinning.
+        //when the number of bins is changed the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedYDimension = temp;
@@ -328,7 +337,7 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
       m_actionRequester.ask(RecalculateVisualDataSetOnly); 
       if (temp->getNBins() != m_appliedZDimension->getNBins())
       {
-        //when the number of bins is chanded the request has to be for full rebinning.
+        //when the number of bins is changed the request has to be for full rebinning.
         m_actionRequester.ask(RecalculateAll);
       }
       this->m_appliedZDimension = temp;
@@ -336,10 +345,24 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
   }
 }
 
-void vtkRebinningCutter::SetAppliedTDimensionXML(std::string xml)
+void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
 {
-  this->Modified();
-  //TODO
+  if (NULL != m_appliedTDimension.get())
+  {
+    if (m_appliedTDimension->toXMLString() != xml && !xml.empty())
+    {
+      this->Modified();
+      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      //The visualisation dataset will at least need to be recalculated.
+      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      if (temp->getNBins() != m_appliedTDimension->getNBins())
+      {
+        //when the number of bins is changed the request has to be for full rebinning.
+        m_actionRequester.ask(RecalculateAll);
+      }
+      this->m_appliedTDimension = temp;
+    }
+  }
 }
 
 const char* vtkRebinningCutter::GetInputGeometryXML()
@@ -354,10 +377,10 @@ unsigned long vtkRebinningCutter::GetMTime()
 
   if (this->m_clipFunction != NULL)
   {
+    
     time = this->m_clipFunction->GetMTime();
     if(time > mTime)
     {
-      m_actionRequester.ask(RecalculateAll);
       mTime = time;
     }
   }
@@ -385,7 +408,8 @@ Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensiont(vtkDataSet* in_d
   return m_presenter.getTDimensionFromDS(in_ds);
 }
 
-boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const
+
+BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const
 {
   using namespace Mantid::MDAlgorithms;
   
@@ -404,9 +428,9 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBo
   double originX = (bounds[1] + bounds[0]) / 2;
   double originY = (bounds[3] + bounds[2]) / 2;
   double originZ = (bounds[5] + bounds[4]) / 2;
-  double width = bounds[1] - bounds[0];
-  double height = bounds[3] - bounds[2];
-  double depth = bounds[5] - bounds[4];
+  double width = sqrt(pow(bounds[1] - bounds[0], 2));
+  double height = sqrt(pow(bounds[3] - bounds[2], 2));
+  double depth = sqrt(pow(bounds[5] - bounds[4], 2));
   
   //Create domain parameters.
   OriginParameter originParam = OriginParameter(originX, originY, originZ);
@@ -418,7 +442,7 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> vtkRebinningCutter::constructBo
   BoxImplicitFunction* boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
       originParam);
 
-  return boost::shared_ptr<Mantid::API::ImplicitFunction>(boxFunction);
+  return BoxFunction_sptr(boxFunction);
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
@@ -469,12 +493,9 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
 {
   using Mantid::MDDataObjects::MDImage;
 
-  //Get the time dimension
-  boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->getTDimension();
-
   //Create a mapper to transform real time into steps.
-  TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),
-      timeDimension->getNBins());
+  TimeToTimeStep timeMapper(m_appliedTDimension->getMinimum(), m_appliedTDimension->getMaximum(),
+      m_appliedTDimension->getNBins());
 
   //Create a factory for generating a thresholding unstructured grid.
   vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage,
@@ -483,5 +504,26 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
 
   //Return the generated factory.
   return vtkDataSetFactory_sptr(pvtkDataSetFactory);
+}
+
+void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
+{
+  double min = m_appliedTDimension->getMinimum();
+  double max = m_appliedTDimension->getMaximum();
+  unsigned int nBins = m_appliedTDimension->getNBins();
+  double increment = (max - min) / nBins;
+  std::vector<double> timeStepValues(nBins);
+  for (unsigned int i = 0; i < nBins; i++)
+  {
+    timeStepValues[i] = min + (i * increment);
+  }
+  vtkInformation *outInfo = outputVector->GetInformationObject(0);
+  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
+      static_cast<int> (timeStepValues.size()));
+  double timeRange[2];
+  timeRange[0] = timeStepValues.front();
+  timeRange[1] = timeStepValues.back();
+
+  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
 }
 
