@@ -157,7 +157,10 @@ def _isType(ext, allTypes):
 def _copyLog(lastPath, logFile, pathout):
   try :
     logFile = lastPath+'/'+logFile
-    copyfile(logFile, pathout+'/'+os.path.basename(logFile))
+    if os.path.exists(logFile):
+        copyfile(logFile, pathout+'/'+os.path.basename(logFile))
+    else:
+        mantid.sendLogMessage("Could not find log file %s" % logFile)
   except Exception, reason:
     error = 'Error copying log file ' + logFile + ' to directory ' + pathout+'\n'
     print error
