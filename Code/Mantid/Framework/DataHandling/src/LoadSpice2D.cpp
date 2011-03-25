@@ -186,6 +186,10 @@ namespace Mantid
       sasEntryElem = pRootElem->getChildElement("Motor_Positions");
       throwException(sasEntryElem, "Motor_Positions", fileName);
 
+      // Read in the number of guides
+      int nguides = 0;
+      from_element<int>(nguides, sasEntryElem, "nguides", fileName);
+
       // Read in sample-detector distance in mm
       double distance = 0;
       from_element<double>(distance, sasEntryElem, "sample_det_dist", fileName);
@@ -317,6 +321,7 @@ namespace Mantid
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
       pmap.addDouble(i.get(), "sample-detector-distance", distance);
       pmap.addDouble(i.get(), "beam-trap-radius", beam_trap_radius);
+      pmap.addInt(i.get(), "number-of-guides", nguides);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");

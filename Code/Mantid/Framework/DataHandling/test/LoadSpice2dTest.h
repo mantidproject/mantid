@@ -130,9 +130,13 @@ public:
     TS_ASSERT_EQUALS( d->type(), "double");
     TS_ASSERT_EQUALS( d->value<double>(), 6000.0);
 
-    boost::shared_ptr<Mantid::Geometry::Parameter> r = m_paraMap->get(i.get(), "beam-trap-radius");
-    TS_ASSERT_EQUALS( r->type(), "double");
-    TS_ASSERT_EQUALS( r->value<double>(), 38.1);
+    d = m_paraMap->get(i.get(), "beam-trap-radius");
+    TS_ASSERT_EQUALS( d->type(), "double");
+    TS_ASSERT_EQUALS( d->value<double>(), 38.1);
+
+    d = m_paraMap->get(i.get(), "number-of-guides");
+    TS_ASSERT_EQUALS( d->type(), "int");
+    TS_ASSERT_EQUALS( d->value<int>(), 4);
 
     // Check detector position
     TS_ASSERT_EQUALS( i->getComponentByName("detector1")->getPos().Z(), 6.0);
