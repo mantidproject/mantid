@@ -3,6 +3,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/AlignDetectors.cpp
 		src/AnyShapeAbsorption.cpp
 		src/ApplyTransmissionCorrection.cpp
+		src/SmoothNeighbours.cpp
 		src/BinaryOperation.cpp
 		src/CalculateEfficiency.cpp
 		src/CalculateTransmissionBeamSpreader.cpp
@@ -143,6 +144,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/AlignDetectors.h
 		inc/MantidAlgorithms/AnyShapeAbsorption.h
 		inc/MantidAlgorithms/ApplyTransmissionCorrection.h
+		inc/MantidAlgorithms/SmoothNeighbours.h
 		inc/MantidAlgorithms/BinaryOperation.h
 		inc/MantidAlgorithms/CalculateEfficiency.h
 		inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
