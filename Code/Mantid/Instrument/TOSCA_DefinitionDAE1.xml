@@ -404,11 +404,11 @@
     <component type="tube" > 
          <location r="0.70304" t="51.5687694" p="150.0" rot="60.0" name="Detector #83" /> 
          <parameter name="Efixed"> <value val="4.112830" /> </parameter>
-    </component> <!--
+    </component>
     <component type="tube" > 
          <location r="0.70000" t="51.3710592" p="150.0" rot="60.0" name="Detector #84" /> 
          <parameter name="Efixed"> <value val="4.000000" /> </parameter>
-    </component> -->
+    </component>
     <component type="tube" > 
          <location r="0.56463" t="39.2906118" p="210.0" rot="120.0" name="Detector #85" /> 
          <parameter name="Efixed"> <value val="2.711270" /> </parameter>
@@ -448,11 +448,11 @@
     <component type="tube" > 
          <location r="0.66889" t="49.2084315" p="210.0" rot="120.0" name="Detector #94" /> 
          <parameter name="Efixed"> <value val="3.725890" /> </parameter>
-    </component> 
+    </component> <!--
     <component type="tube" > 
          <location r="0.68722" t="50.5144429" p="210.0" rot="120.0" name="Detector #95" /> 
          <parameter name="Efixed"> <value val="3.897650" /> </parameter>
-    </component> 
+    </component> -->
     <component type="tube" > 
          <location r="0.70749" t="51.8541613" p="210.0" rot="120.0" name="Detector #96" /> 
          <parameter name="Efixed"> <value val="4.086060" /> </parameter>
