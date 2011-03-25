@@ -376,9 +376,10 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     std::string instrumentID = inst_name;
     // force ID to upper case
     std::transform(instrumentID.begin(), instrumentID.end(), instrumentID.begin(), toupper);
+    std::string fullPathIDF = directoryName + "/" + instrumentID + "_Definition.xml";
 
-    Mantid::DataHandling::LoadInstrumentHelper helper;
-    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Mantid::Kernel::DateAndTime::get_current_time().to_ISO8601_string());
+//    Mantid::DataHandling::LoadInstrumentHelper helper;
+//    std::string fullPathIDF = helper.getInstrumentFilename(instrumentID, Mantid::Kernel::DateAndTime::get_current_time().to_ISO8601_string());
     
     Mantid::DataHandling::LoadInstrument loadInst;
     loadInst.initialize();
