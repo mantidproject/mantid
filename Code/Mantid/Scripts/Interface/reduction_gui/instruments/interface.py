@@ -3,6 +3,7 @@
 """
 from PyQt4 import QtGui
 import sys
+import os
 import traceback
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.scripter import BaseReductionScripter
@@ -12,7 +13,8 @@ class InstrumentInterface(object):
         Defines the instrument-specific widgets
     """
     ## List of widgets with associated observers
-    widgets = []      
+    widgets = []  
+    ERROR_REPORT_NAME = "sans_error_report.xml"    
     
     def __init__(self, name, settings):
         """
@@ -90,12 +92,16 @@ class InstrumentInterface(object):
                 msg = "The following error was encountered:\n\n%s" % unicode(traceback.format_exc())
             else:
                 msg = "The following error was encountered:\n\n%s" % unicode(e)
+                log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
+                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction Parameters Incomplete", msg)
             self._error_report(traceback.format_exc())
             return None
         except:
             msg = "The following error was encountered:\n\n%s" % sys.exc_info()[0]
             msg += "\n\nPlease check your reduction parameters\n"
+            log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
+            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path
             self._warning("Reduction Parameters Incomplete", msg)
             self._error_report(traceback.format_exc())
             return None
@@ -116,11 +122,15 @@ class InstrumentInterface(object):
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(e)
+                log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
+                msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path                
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         except:
             msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[0]
             msg += "\n\nPlease check your reduction parameters\n"
+            log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
+            msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path            
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         
@@ -129,8 +139,8 @@ class InstrumentInterface(object):
             Try to dump the state of the UI to a file, with a traceback
             if available.
         """
-        filename = 'sans_error_report.xml'
-        f = open(filename, 'w')
+        log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
+        f = open(log_path, 'w')
         reduction = self.scripter.to_xml()
         f.write("<Report>\n")
         f.write(reduction)
