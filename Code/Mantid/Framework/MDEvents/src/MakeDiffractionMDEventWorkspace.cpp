@@ -244,11 +244,12 @@ namespace MDEvents
       eventsAdded += cost;
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) std::cout << "Splitting after " << eventsAdded << " events. There are " << lastNumBoxes << " boxes\n";
+        if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. There are " << lastNumBoxes << " boxes. Let's start adding.\n";
         // Do all the adding tasks
         tp.joinAll();
 
         // Now do all the splitting tasks
+        if (DODEBUG) std::cout << "About to start splitAllIfNeeded() tasks. There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
         ws->splitAllIfNeeded(ts);
         if (ts->size() > 0)
           prog->doReport("Splitting Boxes");
@@ -257,11 +258,15 @@ namespace MDEvents
         // Count the new # of boxes.
         lastNumBoxes = ws->getBox()->getNumMDBoxes();
         eventsAdded = 0;
-        if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
+        if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes. Let's keep adding tasks for events.\n";
       }
     }
 
+    if (DODEBUG) std::cout << "We're done adding tasks for all event lists. " << eventsAdded << " events are left to add. Let's finish those actual tasks.\n";
+    tp.joinAll();
+
     // Do a final splitting of everything
+    if (DODEBUG) std::cout << "Do a final splitting of everything, if it is needed."  << "There are currently " << ws->getBox()->getNumMDBoxes() << " boxes\n";;
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
 
