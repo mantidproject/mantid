@@ -147,7 +147,7 @@
   
 </facility>
 
-<facility name="HFIR" FileExtensions=".nxs,.dat">
+<facility name="HFIR" FileExtensions=".nxs,.dat,.xml">
    
    <catalog name="ICat3Catalog">
    </catalog>
@@ -180,12 +180,12 @@
       <technique>Triple Axis Spectroscopy</technique>
    </instrument> 
    
-   <instrument name="HiResSANS" shortname="SANS1"> 
-      <technique>technique</technique>
+   <instrument name="GPSANS" shortname="HiResSANS"> 
+      <technique>Small Angle Scattering</technique>
    </instrument> 
    
-   <instrument name="BioSANS" shortname="SANS2"> 
-      <technique>technique</technique>
+   <instrument name="BioSANS"> 
+      <technique>Small Angle Scattering</technique>
    </instrument> 
    
 </facility> 
@@ -285,6 +285,12 @@
       <technique>Tomography</technique>
    </instrument> 
    
+</facility>
+
+<facility name="NCNR" FileExtensions=".dat,.xml">
+   <instrument name="NGSANS"> 
+      <technique>Small Angle Scattering</technique>
+   </instrument> 
 </facility>
 
 </facilities>

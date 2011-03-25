@@ -17,7 +17,7 @@
       <pointing-up axis="y"/>
       <handedness val="right"/>
     </reference-frame>
-    <default-view axis-view="z-"/>
+    <default-view axis-view="z+"/>
   </defaults>
   
   <!-- LIST OF PHYSICAL COMPONENTS (which the instrument consists of) -->
