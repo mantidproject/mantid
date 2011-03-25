@@ -60,6 +60,7 @@ public:
     AnalysisDataService::Instance().add(inputSpace, space);
 
     // Load the instrument data
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::DataHandling::LoadInstrument loader;
     loader.initialize();
     // Path to test input file assumes Test directory checked out from SVN
@@ -191,6 +192,7 @@ public:
 
   void testDeltaE()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::DataHandling::LoadRaw loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "MAR11060.raw");
@@ -213,7 +215,7 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
-    TS_ASSERT_EQUALS( output->blocksize(), 472 );
+    TS_ASSERT_EQUALS( output->blocksize(), 475 );
 
     AnalysisDataService::Instance().remove(outputSpace);
 
@@ -236,6 +238,7 @@ public:
 
   void setup_Event()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     this->inputSpace = "eventWS";
     Mantid::DataHandling::LoadEventPreNeXus loader;
     loader.initialize();
