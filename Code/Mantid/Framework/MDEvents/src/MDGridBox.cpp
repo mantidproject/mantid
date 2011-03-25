@@ -157,6 +157,22 @@ namespace MDEvents
     return total;
   }
 
+
+  //-----------------------------------------------------------------------------------------------
+  /** Helper function to get the index into the linear array given
+   * an array of indices for each dimension (0 to nd)
+   * @param indices :: array of size[nd]
+   * @return size_t index into boxes[].
+   */
+  TMDE(
+  inline size_t MDGridBox)::getLinearIndex(size_t * indices) const
+  {
+    size_t out_linear_index = 0;
+    for (size_t d=0; d<nd; d++)
+      out_linear_index += (indices[d] * splitCumul[d]);
+    return out_linear_index;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Refresh the cache of nPoints, signal and error,
    * by adding up all boxes (recursively).
@@ -389,7 +405,126 @@ namespace MDEvents
   TMDE(
   void MDGridBox)::centerpointBin(MDBin<MDE,nd> & bin) const
   {
-    //TODO: This
+//    // We have to find boxes that are partially contained, and those fully contained.
+//    for (size_t i=0; i < numBoxes; i++)
+//    {
+//      // Look at this box
+//      IMDBox<MDE,nd> * box = this->boxes[i];
+//
+//      // Count of dimensions where the box's "min" is contained within the bin
+//      size_t dims_min_contained = 0;
+//      // Count of dimensions where the box's "max" is contained
+//      size_t dims_max_contained = 0;
+//
+//      for (size_t d=0; d<nd; d++)
+//      {
+//        CoordType binMin = bin.m_min[d];
+//        CoordType binMax = bin.m_max[d];
+//        MDDimensionExtents & extents = box->getExtents(d);
+//        if ((extents.min >= binMin) && (extents.min <= binMax))
+//          dims_min_contained++;
+//
+//        if ((extents.max >= binMin) && (extents.max <= binMax))
+//          dims_max_contained++;
+//      }
+//
+//      size_t any_contained = (dims_min_contained + dims_max_contained);
+//      if (any_contained == 2*nd)
+//      {
+//        // The box is fully contained (the min and max of each dimension is within the bin limits)!
+//      }
+//      else if (any_contained > 0)
+//      {
+//        // The box is partly contained.
+//      }
+//    }
+
+
+    // The MDBin ranges from index_min to index_max (inclusively) if each dimension. So
+    // we'll need to make nested loops from index_min[0] to index_max[0]; from index_min[1] to index_max[1]; etc.
+    int index_min[nd];
+    int index_max[nd];
+    // For running the nested loop, counters of each dimension. These are bounded by 0..split[d]-1
+    size_t counters_min[nd];
+    size_t counters_max[nd];
+
+    for (size_t d=0; d<nd; d++)
+    {
+      int min,max;
+
+      // The min index in this dimension (we round down - we'll include this edge)
+      if (bin.m_min[d] >= extents[d].min)
+      {
+        min = size_t((bin.m_min[d] - extents[d].min) / boxSize[d]);
+        counters_min[d] = min;
+      }
+      else
+      {
+        min = -1; // Goes past the edge
+        counters_min[d] = 0;
+      }
+
+      // If the minimum is bigger than the number of blocks in that dimension, then the bin is off completely in
+      //  that dimension. There is nothing to integrate.
+      if (min >= static_cast<int>(split[d]))
+        return;
+      index_min[d] = min;
+
+      // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
+      if (bin.m_max[d] < extents[d].max)
+      {
+        max = size_t(ceil((bin.m_max[d] - extents[d].min) / boxSize[d]));
+        counters_max[d] = max; // This is where the counter ends
+      }
+      else
+      {
+        max = split[d]+1; // Goes past THAT edge
+        counters_max[d] = split[d]; // but we don't want to in the counters
+      }
+
+      // If the max value is before the min, that means NOTHING is in the bin, and we can return
+      if ((max <= min) || (max < 0))
+        return;
+      index_max[d] = max;
+
+      //std::cout << d << " from " <<  index_min[d] << " to " << index_max[d] << "exc" << std::endl;
+    }
+
+    // If you reach here, than at least some of bin is overlapping this box
+    size_t counters[nd];
+    for (size_t d=0; d<nd; d++)
+      counters[d] = counters_min[d];
+
+    bool allDone = false;
+    while (!allDone)
+    {
+      size_t index = getLinearIndex(counters);
+      //std::cout << index << ": " << counters[0] << ", " << counters[1] << std::endl;
+
+      //TODO: Find if the box is COMPLETELY held in the bin.
+
+      // Perform the binning
+      boxes[index]->centerpointBin(bin);
+
+      size_t d = 0;
+      while (d<nd)
+      {
+        counters[d]++;
+        if (counters[d] >= counters_max[d])
+        {
+          // Roll this counter back to 0 (or whatever the min is)
+          counters[d] = counters_min[d];
+          // Go up one in a higher dimension
+          d++;
+          // Reached the maximum of the last dimension. Time to exit the entire loop.
+          if (d == nd)
+            allDone = true;
+        }
+        else
+          break;
+      }
+    }
+
   }
 
 

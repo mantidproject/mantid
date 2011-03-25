@@ -138,7 +138,8 @@ namespace MDEvents
     for (; it != it_end; ++it)
     {
       // Go through each dimension
-      for (size_t d=0; d<nd; ++d)
+      size_t d;
+      for (d=0; d<nd; ++d)
       {
         // Check that the value is within the bounds given. (Rotation is for later)
         CoordType x = it->getCenter(d);
@@ -147,9 +148,13 @@ namespace MDEvents
         if (x >= bin.m_max[d])
           break;
       }
-      // Accumulate error and signal
-      bin.m_signal += it->getSignal();
-      bin.m_errorSquared += it->getErrorSquared();
+      // If the loop reached the end, then it was all within bounds.
+      if (d == nd)
+      {
+        // Accumulate error and signal
+        bin.m_signal += it->getSignal();
+        bin.m_errorSquared += it->getErrorSquared();
+      }
     }
   }
 

@@ -47,6 +47,7 @@ namespace MDEvents
 
     size_t getNumMDBoxes() const;
 
+
     void refreshCache();
 
     std::vector< MDE > * getEventsCopy();
@@ -111,6 +112,9 @@ namespace MDEvents
     Mantid::Kernel::Mutex statsMutex;
 
 
+    //=================== PRIVATE METHODS =======================================
+
+    size_t getLinearIndex(size_t * indices) const;
 
 
 

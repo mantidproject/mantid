@@ -25,7 +25,7 @@ namespace MDEvents
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
 
-  bool DODEBUG = true;
+  bool DODEBUG = false;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)

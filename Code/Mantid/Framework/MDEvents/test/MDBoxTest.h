@@ -199,16 +199,16 @@ public:
     TS_ASSERT_DELTA( bin.m_signal, 100.0, 1e-4);
     TS_ASSERT_DELTA( bin.m_errorSquared, 150.0, 1e-4);
 
-//    // Next, a more restrictive bin. a 2.0 x 2.0 square, with 4 events
-//    bin.m_signal = 0;
-//    bin.m_errorSquared = 0;
-//    bin.m_min[0] = 4.0;
-//    bin.m_max[0] = 6.0;
-//    bin.m_min[1] = 1.0;
-//    bin.m_max[1] = 3.0;
-//    box.centerpointBin(bin);
-//    TS_ASSERT_DELTA( bin.m_signal, 4.0, 1e-4);
-//    TS_ASSERT_DELTA( bin.m_errorSquared, 6.0, 1e-4);
+    // Next, a more restrictive bin. a 2.0 x 2.0 square, with 4 events
+    bin.m_signal = 0;
+    bin.m_errorSquared = 0;
+    bin.m_min[0] = 4.0;
+    bin.m_max[0] = 6.0;
+    bin.m_min[1] = 1.0;
+    bin.m_max[1] = 3.0;
+    box.centerpointBin(bin);
+    TS_ASSERT_DELTA( bin.m_signal, 4.0, 1e-4);
+    TS_ASSERT_DELTA( bin.m_errorSquared, 6.0, 1e-4);
   }
 
 };

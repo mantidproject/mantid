@@ -73,9 +73,12 @@ protected:
 
 
   //-------------------------------------------------------------------------------------
-  /** Generate an empty MDBox with nd dimensions, splitting in 10x10 boxes */
+  /** Generate an empty MDBox with nd dimensions, splitting in 10x10 boxes
+   * @param numEventsPerBox :: each sub-box will get this many events (all
+   *        placed in the middle of each sub-box.
+   * */
   template<size_t nd>
-  MDGridBox<MDEvent<nd>,nd> * makeMDGridBox()
+  MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t numEventsPerBox)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
@@ -83,10 +86,23 @@ protected:
     // Splits into 10x10x.. boxes
     splitter->setSplitInto(10);
     // Set the size to 10.0 in all directions
-    MDBox<MDEvent<nd>,nd> * out = new MDBox<MDEvent<nd>,nd>(splitter);
+    MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
-      out->setExtents(d, 0.0, 10.0);
-    return new MDGridBox<MDEvent<nd>,nd>(out) ;
+      box->setExtents(d, 0.0, 10.0);
+
+    // Split
+    MDGridBox<MDEvent<nd>,nd> * out = new MDGridBox<MDEvent<nd>,nd>(box);
+
+    // Make an event in the middle of each box
+    for (size_t i=0; i < numEventsPerBox; i++)
+      for (double x=0.5; x < 10; x += 1.0)
+        for (double y=0.5; y < 10; y += 1.0)
+        {
+          double centers[2] = {x,y};
+          out->addEvent( MDEvent<2>(2.0, 2.0, centers) );
+        }
+    out->refreshCache();
+    return out;
   }
 
   //-------------------------------------------------------------------------------------
@@ -281,7 +297,7 @@ public:
   /** Start with a grid box, split some of its contents into sub-gridded boxes. */
   void test_splitContents()
   {
-    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>();
+    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>(0);
     MDGridBox<MDEvent<2>,2> * gb;
     MDBox<MDEvent<2>,2> * b;
 
@@ -326,7 +342,7 @@ public:
     std::vector<IMDBox<MDEvent<2>,2>*> boxes;
 
     // 10x10 box, extents 0-10.0
-    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>();
+    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>(0);
     // And the 0-th box is further split (
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
 
@@ -421,7 +437,7 @@ public:
    * */
   void test_addEvents_2D()
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
     std::vector< MDEvent<2> > events;
 
     // Make an event in the middle of each box
@@ -476,7 +492,7 @@ public:
    * */
   void test_addEvents_start_stop()
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
     std::vector< MDEvent<2> > events;
 
     // Make an event in the middle of each box
@@ -503,7 +519,7 @@ public:
    * */
   void test_addEvents_inParallel()
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>();
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
     int num_repeat = 1000;
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -538,7 +554,7 @@ public:
     typedef MDBox<MDEvent<2>,2> box_t;
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
-    gbox_t * b = makeMDGridBox<2>();
+    gbox_t * b = makeMDGridBox<2>(0);
     b->getBoxController()->m_SplitThreshold = 100;
     b->getBoxController()->m_maxDepth = 4;
 
@@ -589,6 +605,7 @@ public:
   }
 
 
+  //------------------------------------------------------------------------------------------------
   /** This test splits a large number of events, and uses a ThreadPool
    * to use all cores.
    */
@@ -598,7 +615,7 @@ public:
     typedef MDBox<MDEvent<2>,2> box_t;
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
-    gbox_t * b = makeMDGridBox<2>();
+    gbox_t * b = makeMDGridBox<2>(0);
     b->getBoxController()->m_SplitThreshold = 100;
     b->getBoxController()->m_maxDepth = 4;
 
@@ -642,7 +659,80 @@ public:
 
   }
 
+  /** Helper to make a 2D MDBin */
+  MDBin<MDEvent<2>,2> makeMDBin2(double minX, double maxX, double minY, double maxY)
+  {
+    MDBin<MDEvent<2>,2> bin;
+    //std::cout << "Bins: X " << minX << " to " << maxX << " , Y " << minY << " to " << maxY << std::endl;
+    bin.m_min[0] = minX;
+    bin.m_max[0] = maxX;
+    bin.m_min[1] = minY;
+    bin.m_max[1] = maxY;
+    return bin;
+  }
 
+  /** Helper to test the binning of a 2D bin */
+  void doTestMDBin2(MDGridBox<MDEvent<2>,2> * b,
+      const std::string & message,
+      double minX, double maxX, double minY, double maxY, double expectedSignal)
+  {
+    MDBin<MDEvent<2>,2> bin;
+    bin = makeMDBin2(minX, maxX, minY, maxY);
+    b->centerpointBin(bin);
+    TSM_ASSERT_DELTA( message, bin.m_signal, expectedSignal, 1e-5);
+  }
+
+  //------------------------------------------------------------------------------------------------
+  /** Test binning in orthogonal axes */
+  void test_centerpointBin()
+  {
+    typedef MDGridBox<MDEvent<2>,2> gbox_t;
+    typedef MDBox<MDEvent<2>,2> box_t;
+    typedef IMDBox<MDEvent<2>,2> ibox_t;
+
+    // 10x10 bins, 2 events per bin, each weight of 2.0
+    gbox_t * b = makeMDGridBox<2>(2);
+    TS_ASSERT_DELTA( b->getSignal(), 400.0, 1e-5);
+
+    MDBin<MDEvent<2>,2> bin;
+
+    doTestMDBin2(b, "Bin that is completely off",
+        10.1, 11.2, 1.9, 3.12,   0.0);
+
+    doTestMDBin2(b, "Bin that holds one entire MDBox (bigger than it)",
+        0.8, 2.2, 1.9, 3.12,     4.0);
+
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off one edge)",
+        -0.2, 1.2, 1.9, 3.12,     4.0);
+
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off the other edge)",
+        9.2, 10.2, 1.9, 3.12,     4.0);
+
+    doTestMDBin2(b, "Bin that holds one entire MDBox (going off both edge)",
+        -0.2, 1.2, -0.2, 1.2,     4.0);
+
+    doTestMDBin2(b, "Bin that holds one entire MDBox and a fraction of at least one more with something",
+        0.8, 2.7, 1.9, 3.12,     8.0);
+
+    doTestMDBin2(b, "Bin that fits all within a single MDBox, and contains the center",
+        0.2, 0.8, 0.2, 0.8,     4.0);
+
+    doTestMDBin2(b, "Bin that fits all within a single MDBox, and DOES NOT contain anything",
+        0.2, 0.3, 0.1, 0.2,     0.0);
+
+    doTestMDBin2(b, "Bin that fits partially in two MDBox'es, and DOES NOT contain anything",
+        0.8, 1.2, 0.1, 0.2,     0.0);
+
+    doTestMDBin2(b, "Bin that fits partially in two MDBox'es, and contains the centers",
+        0.2, 1.8, 0.1, 0.9,     8.0);
+
+    doTestMDBin2(b, "Bin that fits partially in one MDBox'es, and goes of the edge",
+        -3.2, 0.8, 0.1, 0.9,     4.0);
+
+  }
+
+private:
+  std::string message;
 };
 
 
