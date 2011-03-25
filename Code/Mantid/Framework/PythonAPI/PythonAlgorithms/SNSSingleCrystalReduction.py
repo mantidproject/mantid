@@ -5,6 +5,69 @@ import os
 COMPRESS_TOL_TOF = .01
 
 class SNSSingleCrystalReduction(PythonAlgorithm):
+    class PDConfigFile(object):
+        class PDInfo:
+            """Inner class for holding configuration information for a reduction."""
+            def __init__(self, data, has_dspace=False):
+                if data is None:
+                    data = [None, None, 0, 0, 0, 0., 0.]
+                self.freq = data[0]
+                self.wl = data[1]
+                self.bank = int(data[2])
+                self.van = int(data[3])
+                self.can = int(data[4])
+                self.has_dspace = has_dspace
+                if has_dspace:
+                    self.dmin = data[5]
+                    self.dmax = data[6]
+                else:
+                    self.tmin = data[5] * 1000. # convert to microseconds
+                    self.tmax = data[6] * 1000.
+    
+        def __init__(self, filename):
+            if len(filename.strip()) <= 0:
+                filename = None
+            self.filename = filename
+            self._data = {}
+            self.use_dspace = False
+            if self.filename is None:
+                return
+            handle = file(filename, 'r')
+            for line in handle.readlines():
+                self._addData(line)
+        def _addData(self, line):
+            if line.startswith('#') or len(line.strip()) <= 0:
+                if "d_min" in line and "d_max" in line:
+                    self.use_dspace = True
+                return
+            data = line.strip().split()
+            data = [float(i) for i in data]
+            if data[0] not in self._data.keys():
+                self._data[data[0]]={}
+            info = self.PDInfo(data, self.use_dspace)
+            self._data[info.freq][info.wl]=info
+        def __getFrequency(self, request):
+            for freq in self._data.keys():
+                if 100. * abs(float(freq)-request)/request < 5.:
+                    return freq
+            raise RuntimeError("Failed to find frequency: %fHz" % request)
+    
+        def __getWavelength(self, frequency, request):
+            for wavelength in self._data[frequency].keys():
+                if 100. * abs(wavelength-request)/request < 5.:
+                    return wavelength
+            raise RuntimeError("Failed to find wavelength: %fAngstrom" % request)
+    
+        def getInfo(self, frequency, wavelength):
+            #print "getInfo(%f, %f)" % (frequency, wavelength)
+            if self.filename is not None:
+                frequency = self.__getFrequency(float(frequency))
+                wavelength = self.__getWavelength(frequency, float(wavelength))
+        
+                return self._data[frequency][wavelength]
+            else:
+                return self.PDInfo(None)
+
     def category(self):
         return "Diffraction"
 
@@ -13,34 +76,36 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
     def PyInit(self):
         instruments = ["TOPAZ"]
-        self.declareProperty("Instrument", "TOPAZ",
+        self.declareProperty("Instrument", "PG3",
                              Validator=ListValidator(instruments))
         #types = ["Event preNeXus", "Event NeXus"]
         #self.declareProperty("FileType", "Event NeXus",
         #                     Validator=ListValidator(types))
-        self.declareProperty("RunNumber", 0, Validator=BoundedValidator(Lower=0))
+        self.declareListProperty("RunNumber", [0], Validator=ArrayBoundedValidator(Lower=0))
         self.declareProperty("CompressOnRead", False,
                              Description="Compress the event list when reading in the data")
-        self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0))
-        self.declareProperty("EmptyInstrumentNumber", 0, Validator=BoundedValidator(Lower=0))
-        self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0))
+        self.declareProperty("Sum", False,
+                             Description="Sum the runs. Does nothing for characterization runs")
+        self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
+                             Description="If specified overrides value in CharacterizationRunsFile")
+        self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
+                             Description="If specified overrides value in CharacterizationRunsFile")
         self.declareProperty("FilterByTimeMin", 0.,
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
         self.declareProperty("FilterByTimeMax", 0.,
                              Description="Relative time to stop filtering by in seconds. Applies only to sample.")
-        self.declareProperty("TOFBinParams", "1000.0,-0.004,16666.0",
-                             Description="Binning parameters to use in TOF.")
-        self.declareProperty("dspaceBinParams", "0.2,-0.004,10.00",
-                             Description="Binning parameters to use in d-space when calculating the vanadium spectra.")
-        
+        self.declareListProperty("Binning", [0.,0.,0.],
+                             Description="Positive is linear bins, negative is logorithmic")
+        self.declareProperty("BinInDspace", True,
+                             Description="If all three bin parameters a specified, whether they are in dspace (true) or time-of-flight (false)")
         self.declareProperty("VanadiumPeakWidthPercentage", 5.)
-        self.declareProperty("VanadiumSmoothNumPoints", 11)
+        self.declareProperty("VanadiumSmoothParams", "20,2")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         outfiletypes = ['nxs'] #, 'gsas', 'fullprof', 'gsas and fullprof']
         self.declareProperty("FilterByLogValue", "", Description="Name of log value to filter by")
         self.declareProperty("FilterMinimumValue", 0.0, Description="Minimum log value for which to keep events.")
         self.declareProperty("FilterMaximumValue", 0.0, Description="Maximum log value for which to keep events.")
-        self.declareProperty("SaveAs", "nxs", ListValidator(outfiletypes))
+        self.declareProperty("SaveAs", "gsas", ListValidator(outfiletypes))
         self.declareFileProperty("OutputDirectory", "", FileAction.Directory)
 
     def _findData(self, runnumber, extension):
@@ -118,9 +183,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             return self._loadPreNeXusData(runnumber, extension)
 
-
-
-    def _comp(self, wksp, filterLogs=None):
+    def _focus(self, wksp, calib, info, filterLogs=None):
         if wksp is None:
             return None
         # take care of filtering events
@@ -134,44 +197,48 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                      MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))
-        
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-
-        # Compress the events to free up memory
+                                   % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if not os.path.isfile(calib):
+            groups = ""
+            numrange = 60
+            for num in xrange(1,numrange):
+                comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
+                if not comp == None:
+                   groups+=("bank%d," % (num) )
+            print groups
+            CreateCalFileByNames(wksp, calib, groups)
+        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
+        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
+                             GroupingFileName=calib)
+        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        if len(self._binning) == 3:
+            info.has_dspace = self._bin_in_dspace
+        if info.has_dspace:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.dmin, self._binning[0], info.dmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
+        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if not info.has_dspace:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.tmin, self._binning[0], info.tmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
-        
-    def _bin(self, wksp, filterLogs=None):
-        # Rebin in place as weighted events
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._TOFBinParams)
-
-        return wksp
-
-
-
-
-    def _vanbin(self, wksp, filterLogs=None):
+    def _bin(self, wksp, info, filterLogs=None):
         if wksp is None:
             return None
-        
-        groups = ""
-        numrange = 200
-        for num in xrange(1,numrange):
-            comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
-            if not comp == None:
-               groups+=("bank%d," % (num) )
-        print groups
-        
         # take care of filtering events
-        if self._filterBadPulses:
-            pcharge = wksp.getRun()['proton_charge']
-            pcharge = pcharge.getStatistics().mean
-            FilterByLogValue(InputWorkspace=wksp, OutputWorkspace=wksp, LogName="proton_charge",
-                             MinimumValue=.95*pcharge, MaximumValue=2.*pcharge)
+        if self._filterBadPulses and not self.getProperty("CompressOnRead"):
+            FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
         if filterLogs is not None:
             try:
                 logparam = wksp.getRun()[filterLogs[0]]
@@ -180,70 +247,79 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                      MinimumValue=filterLogs[1], MaximumValue=filterLogs[2])
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
-                                   % (filterLogs[0], str(wksp)))
-        
-
-        # Sorting at this point will increase speed a lot
+                                   % (filterLogs[0], str(wksp)))            
+        if not self.getProperty("CompressOnRead"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
         Sort(InputWorkspace=wksp, SortBy="Time of Flight")
-        
-        # Remove old calibration files
-        cmd = "rm temp.cal*"
-        os.system(cmd)
-        CreateCalFileByNames(wksp, "temp.cal", groups)
-        # Align detectors using new calibration file with offsets
-        AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp,CalibrationFile="temp.cal")
-        
-        # Diffraction focusing using new calibration file with offsets
-        DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,GroupingFileName="temp.cal")
-        
-        # This will rebin into a workspace 2D
-        oldName = wksp.getName()
-        Rebin(InputWorkspace=wksp, OutputWorkspace="temp", Params=self._dspaceBinParams)
-        # Delete the old event workspace, free up memory hopefully
-        DeleteWorkspace(wksp)
-        # Go back to the original name, but as a workspace 2D from now on
-        wksp = RenameWorkspace(InputWorkspace="temp", OutputWorkspace=oldName).workspace()
-        
-        # This will make a Workspace2D out of the EventWorkspace
-        StripVanadiumPeaks(InputWorkspace=wksp, OutputWorkspace=wksp, PeakWidthPercent=self._vanPeakWidthPercent)
-        ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF")
-        
-        Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._TOFBinParams)
-        SmoothData(InputWorkspace=wksp, OutputWorkspace=wksp, NPoints=self._vanSmoothPoints)
-        # Normalize to one pixel of detector (256 X 256)
-        wksp /= 65536.0
+        if len(self._binning) == 3:
+            info.has_dspace = self._bin_in_dspace
+        if info.has_dspace:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.dmin, self._binning[0], info.dmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        if not info.has_dspace:
+            if len(self._binning) == 3:
+                binning = self._binning
+            else:
+                binning = [info.tmin, self._binning[0], info.tmax]
+            Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
+        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
+    def _getinfo(self, wksp):
+        logs = wksp.getRun()
+        # get the frequency
+        frequency = logs['SpeedRequest1']
+        if frequency.units != "Hz":
+            raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
+        frequency = frequency.getStatistics().mean
+
+        wavelength = logs['LambdaRequest']
+        if wavelength.units != "Angstrom":
+            raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
+        wavelength = wavelength.getStatistics().mean
+
+        self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
+        return self._config.getInfo(frequency, wavelength)        
+
     def _save(self, wksp, normalized):
         filename = os.path.join(self._outDir, str(wksp))
-        name = "%s_%d" % (self._instrument, self.getProperty("RunNumber"))
-        nxsfile = name + ".nxs"
+        nxsfile = str(wksp) + ".nxs"
 
         if not os.path.isfile(nxsfile):
-            nxsfile = self._findData(self.getProperty("RunNumber"), ".nxs")
+            name = str(wksp)
+            name = name.split('_')[1] # remove the instrument name
+            nxsfile = self._findData(int(name), ".nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
             SaveSNSNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
         if "gsas" in self._outTypes:
-            ReplaceSpecialValues(wksp, wksp, NaNValue="0.0", InfinityValue="0.0")
-            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByTOFBinWidth=normalized, Bank=self._bank, Format="SLOG")
+            SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG")
         if "fullprof" in self._outTypes:
-            ReplaceSpecialValues(wksp, wksp, NaNValue="0.0", InfinityValue="0.0")
             SaveFocusedXYE(InputWorkspace=wksp, Filename=filename+".dat")
 
     def PyExec(self):
         # temporary hack for getting python algorithms working
         import mantidsimple
-        reload(mantidsimple)
         globals()["FindSNSNeXus"] = mantidsimple.FindSNSNeXus
 
         # get generic information
         SUFFIX = "_event.nxs"
+        self._config = self.PDConfigFile("")
+        self._binning = self.getProperty("Binning")
+        if len(self._binning) != 1 and len(self._binning) != 3:
+            raise RuntimeError("Can only specify (width) or (start,width,stop) for binning. Found %d values." % len(self._binning))
+        if len(self._binning) == 3:
+            if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
+                raise RuntimeError("Failed to specify the binning")
+        self._bin_in_dspace = self.getProperty("BinInDspace")
         self._instrument = self.getProperty("Instrument")
-        self._bank = 0 #self.getProperty("BankNumber")
-        self._TOFBinParams = self.getProperty("TOFBinParams")
-        self._dspaceBinParams = self.getProperty("dspaceBinParams")
+#        self._timeMin = self.getProperty("FilterByTimeMin")
+#        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
         filterLogs = self.getProperty("FilterByLogValue")
         if len(filterLogs.strip()) <= 0:
@@ -252,70 +328,95 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
         self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
-        self._vanSmoothPoints = self.getProperty("VanadiumSmoothNumPoints")
+        self._vanSmoothing = self.getProperty("VanadiumSmoothParams")
+        calib = "temp.cal"
+        # Remove old calibration files
+        cmd = "rm "+calib
+        os.system(cmd)
         self._outDir = self.getProperty("OutputDirectory")
         self._outTypes = self.getProperty("SaveAs")
-        sam = self.getProperty("RunNumber")
-        bkg = self.getProperty("BackgroundNumber")
-        van = self.getProperty("VanadiumNumber")
-        empty = self.getProperty("EmptyInstrumentNumber")
+        samRuns = self.getProperty("RunNumber")
         filterWall = (self.getProperty("FilterByTimeMin"), self.getProperty("FilterByTimeMax"))
 
-        # first round of processing the sample 
-        samRun = self._loadData(sam, SUFFIX, filterWall)
-        samRun = RenameWorkspace(samRun, samRun.getName() + "_sample").workspace()
-        samRun = self._comp(samRun, filterLogs)
-        
-        # process the background
-        if bkg > 0:
-            bkgRun = mtd["%s_%d" % (self._instrument, bkg)]
-            bkgRun = self._loadData(bkg, SUFFIX)
-            bkgRun = RenameWorkspace(bkgRun, bkgRun.getName() + "_background").workspace()
-            bkgRun = self._comp(bkgRun)
-            Minus(LHSWorkspace=samRun, RHSWorkspace=bkgRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
+        if self.getProperty("Sum"):
+            samRun = None
+            info = None
+            for temp in samRuns:
+                temp = self._loadData(temp, SUFFIX, filterWall)
+                tempinfo = self._getinfo(temp)
+                if samRun is None:
+                    samRun = temp
+                    info = tempinfo
+                else:
+                    Plus(samRun, temp, samRun)
+                    mtd.deleteWorkspace(str(temp))
+            samRuns = [samRun]
+
+        for samRun in samRuns:
+            # first round of processing the sample
+            if not self.getProperty("Sum"):
+                samRun = self._loadData(samRun, SUFFIX, filterWall)
+                info = self._getinfo(samRun)
+
+            # process the container
+            canRun = self.getProperty("BackgroundNumber")
+            if canRun <= 0:
+                canRun = info.can
+            if canRun > 0:
+                temp = mtd["%s_%d" % (self._instrument, canRun)]
+                if temp is None:
+                    canRun = self._loadData(canRun, SUFFIX, (0., 0.))
+                    SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, AdjX=1, AdjY=1)
+                else:
+                    canRun = temp
+            else:
+                canRun = None
+
+            if canRun is not None:
+                samRun -= canRun
+                CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
+                               Tolerance=COMPRESS_TOL_TOF) # 10ns
+                canRun = str(canRun)
+
+            # process the vanadium run
+            vanRun = self.getProperty("VanadiumNumber")
+            if vanRun <= 0:
+                vanRun = info.van
+            if vanRun > 0:
+                temp = mtd["%s_%d" % (self._instrument, vanRun)]
+                if temp is None:
+                    vanRun = self._loadData(vanRun, SUFFIX, (0., 0.))
+                    vanRun = self._focus(vanRun, calib, info)
+                    ConvertToMatrixWorkspace(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="dSpacing")
+                    StripVanadiumPeaks(InputWorkspace=vanRun, OutputWorkspace=vanRun, PeakWidthPercent=self._vanPeakWidthPercent)
+                    ConvertUnits(InputWorkspace=vanRun, OutputWorkspace=vanRun, Target="TOF")
+                    FFTSmooth(InputWorkspace=vanRun, OutputWorkspace=vanRun, Filter="Butterworth",
+                              Params=self._vanSmoothing,IgnoreXBins=True,AllSpectra=True)
+                    MultipleScatteringCylinderAbsorption(InputWorkspace=vanRun, OutputWorkspace=vanRun, # numbers for vanadium
+                                                         AttenuationXSection=2.8, ScatteringXSection=5.1,
+                                                         SampleNumberDensity=0.0721, CylinderSampleRadius=.3175)
+                    SetUncertaintiesToZero(InputWorkspace=vanRun, OutputWorkspace=vanRun)
+                else:
+                    vanRun = temp
+            else:
+                vanRun = None
+
+            # the final bit of math
+            if vanRun is not None:
+                Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
+                normalized = True
+                vanRun = str(vanRun)
+            else:
+                normalized = False
+
+            # write out the files
+            samRun = self._bin(samRun, info)
             CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                           Tolerance=COMPRESS_TOL_TOF) # 10ns
-            mtd.deleteWorkspace(bkgRun.getName())
-        else:
-            bkgRun = None 
-
-        # process the empty instrument
-        if empty > 0:
-            emptyRun = mtd["%s_%d" % (self._instrument, empty)]
-            emptyRun = self._loadData(empty, SUFFIX)
-            emptyRun = RenameWorkspace(emptyRun, emptyRun.getName() + "_empty").workspace()
-            emptyRun = self._comp(emptyRun)
-            Minus(LHSWorkspace=samRun, RHSWorkspace=emptyRun, OutputWorkspace=samRun, ClearRHSWorkspace="1")
-            CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                           Tolerance=COMPRESS_TOL_TOF) # 10ns
-            mtd.deleteWorkspace(emptyRun.getName())
-        else:
-            emptyRun = None 
-
-        # process the vanadium run
-        if van > 0:
-            vanRun = mtd["%s_%d" % (self._instrument, van)]
-            vanRun = self._loadData(van, SUFFIX)
-            vanRun = RenameWorkspace(vanRun, vanRun.getName() + "_vanadium").workspace()
-            vanRun = self._vanbin(vanRun)
-        else:
-            vanRun = None        
-
-
-        # the final bit of math
-        if vanRun is not None:
-            samRun = self._bin(samRun)
-            Divide(samRun, vanRun, samRun, AllowDifferentNumberSpectra=True) 
-            mtd.deleteWorkspace(vanRun.getName())
-            normalized = True
-        else:
-            normalized = False
-
-        # write out the files
-        CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
-                       Tolerance=COMPRESS_TOL_TOF) # 5ns
-        self._save(samRun, normalized)
-        mtd.deleteWorkspace(samRun.getName())
-        raise Exception("End of script") 
+                           Tolerance=COMPRESS_TOL_TOF) # 5ns
+            self._save(samRun, normalized)
+            samRun = str(samRun)
+            mtd.deleteWorkspace(str(samRun))
+            mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
