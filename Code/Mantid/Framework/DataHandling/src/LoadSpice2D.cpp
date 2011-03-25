@@ -169,6 +169,9 @@ namespace Mantid
       int numberYPixels = 0;
       from_element<int>(numberYPixels, sasEntryElem, "Number_of_Y_Pixels", fileName);
 
+      double source_distance = 0.0;
+      from_element<double>(source_distance, sasEntryElem, "source_distance", fileName);
+
       // Read in wavelength and wavelength spread
       double wavelength = 0;
       double dwavelength = 0;
@@ -319,9 +322,10 @@ namespace Mantid
       boost::shared_ptr<Mantid::Geometry::IComponent> sample = i->getSample();
 
       Geometry::ParameterMap &pmap = ws->instrumentParameters();
-      pmap.addDouble(i.get(), "sample-detector-distance", distance);
-      pmap.addDouble(i.get(), "beam-trap-radius", beam_trap_radius);
-      pmap.addInt(i.get(), "number-of-guides", nguides);
+      ws->mutableRun().addProperty("sample-detector-distance", distance, true);
+      ws->mutableRun().addProperty("beam-trap-radius", beam_trap_radius, true);
+      ws->mutableRun().addProperty("number-of-guides", nguides, true);
+      ws->mutableRun().addProperty("source-sample-distance", source_distance, true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");

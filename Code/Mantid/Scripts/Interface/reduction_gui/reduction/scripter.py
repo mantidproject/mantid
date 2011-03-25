@@ -11,6 +11,8 @@ except:
     HAS_MANTID = False  
 
 import xml.dom.minidom
+import sys
+import time
 
 class BaseScriptElement(object):
     """
@@ -239,6 +241,11 @@ class BaseReductionScripter(object):
         """
         xml_str = "<Reduction>\n"
         xml_str += "  <instrument_name>%s</instrument_name>\n" % self.instrument_name
+        xml_str += "  <timestamp>%s</timestamp>\n" % time.ctime()
+        xml_str += "  <python_version>%s</python_version>\n" % sys.version
+        xml_str += "  <platform>%s</platform>\n" % platform.system()
+        xml_str += "  <architecture>%s</architecture>\n" % str(platform.architecture())
+        xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
         
         for item in self._observers:
             if item.state() is not None:

@@ -562,7 +562,8 @@ class LoadRun(ReductionStep):
         else:
             _load_data_file(data_file, workspace)
         
-        sdd = mtd[workspace].getInstrument().getNumberParameter("sample-detector-distance")[0]
+        # Get the original sample-detector distance from the data file
+        sdd = mtd[workspace].getRun().getProperty("sample-detector-distance").value
         
         if self._sample_det_dist is not None:
             MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
@@ -578,6 +579,13 @@ class LoadRun(ReductionStep):
         # Store the sample-detector distance.
         mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
     
+        # Get the number of guides in the beam
+        try:
+            nguides = mtd[workspace].getInstrument().getNumberParameter("number-of-guides")[0]
+        except:
+            nguides = 0
+            mantid.sendLogMessage("Could not find the number of guides for %s" % workspace)
+        
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load
         if self._beam_center is not None:            
@@ -666,10 +674,9 @@ class WeightedAzimuthalAverage(ReductionStep):
                     
             sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
             # Q min is one pixel from the center, unless we have the beam trap size
-            beam_trap_list = mtd[workspace].getInstrument().getNumberParameter("beam-trap-radius")
-            if len(beam_trap_list)>0:
-                mindist = beam_trap_list[0]
-            else:
+            try:
+                mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
+            except:
                 mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
             qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
             dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])

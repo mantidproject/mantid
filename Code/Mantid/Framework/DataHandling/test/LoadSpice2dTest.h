@@ -13,6 +13,7 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Instrument/Parameter.h"
+#include "MantidKernel/PropertyWithValue.h"
 #include <Poco/Path.h>
 #include <vector>
 
@@ -126,17 +127,18 @@ public:
     sample_aperture_size = m_paraMap->get(sample_aperture.get(), "Size");
     TS_ASSERT_EQUALS( sample_aperture_size->value<double>(), 15.0);
 
-    boost::shared_ptr<Mantid::Geometry::Parameter> d = m_paraMap->get(i.get(), "sample-detector-distance");
-    TS_ASSERT_EQUALS( d->type(), "double");
-    TS_ASSERT_EQUALS( d->value<double>(), 6000.0);
+    TS_ASSERT_EQUALS(ws2d->run().getProperty("sample-detector-distance")->type(), "number");
+    Mantid::Kernel::Property* prop = ws2d->run().getProperty("sample-detector-distance");
+    Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    TS_ASSERT_EQUALS(*dp,  6000.0);
 
-    d = m_paraMap->get(i.get(), "beam-trap-radius");
-    TS_ASSERT_EQUALS( d->type(), "double");
-    TS_ASSERT_EQUALS( d->value<double>(), 38.1);
+    prop = ws2d->run().getProperty("beam-trap-radius");
+    dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    TS_ASSERT_EQUALS(*dp,  38.1);
 
-    d = m_paraMap->get(i.get(), "number-of-guides");
-    TS_ASSERT_EQUALS( d->type(), "int");
-    TS_ASSERT_EQUALS( d->value<int>(), 4);
+    prop = ws2d->run().getProperty("number-of-guides");
+    Mantid::Kernel::PropertyWithValue<int>* np = dynamic_cast<Mantid::Kernel::PropertyWithValue<int>* >(prop);
+    TS_ASSERT_EQUALS(*np,  4);
 
     // Check detector position
     TS_ASSERT_EQUALS( i->getComponentByName("detector1")->getPos().Z(), 6.0);
