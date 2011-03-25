@@ -26,6 +26,7 @@ public:
 
   void testExec()
   {
+
     Mantid::API::MatrixWorkspace_sptr inputWS =
       WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(1,50,true);
     inputWS->getAxis(0)->unit() = 

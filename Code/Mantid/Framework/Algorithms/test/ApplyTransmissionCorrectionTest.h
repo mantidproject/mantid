@@ -31,6 +31,7 @@ public:
   void testExec()
   {
     const std::string inputWS("input_data_ws");
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "HFIR");
 
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();

@@ -35,6 +35,7 @@ public:
 
   void testExec()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "HFIR");
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
     loader.setPropertyValue("Filename","BioSANS_exp61_scan0004_0001.xml");
