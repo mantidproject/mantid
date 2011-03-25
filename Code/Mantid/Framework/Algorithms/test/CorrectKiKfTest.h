@@ -148,6 +148,7 @@ public:
 
   void testReadEffromIDF()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","IRS38633.raw");
