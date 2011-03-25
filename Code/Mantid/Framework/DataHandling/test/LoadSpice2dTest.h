@@ -132,7 +132,7 @@ public:
 
     boost::shared_ptr<Mantid::Geometry::Parameter> r = m_paraMap->get(i.get(), "beam-trap-radius");
     TS_ASSERT_EQUALS( r->type(), "double");
-    TS_ASSERT_EQUALS( r->value<double>(), 76.2);
+    TS_ASSERT_EQUALS( r->value<double>(), 38.1);
 
     // Check detector position
     TS_ASSERT_EQUALS( i->getComponentByName("detector1")->getPos().Z(), 6.0);

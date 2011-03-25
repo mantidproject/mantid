@@ -194,28 +194,29 @@ namespace Mantid
       // Read in beam trap positions
       double highest_trap = 0;
       double trap_pos = 0;
-      from_element<double>(highest_trap, sasEntryElem, "trap_y_101mm", fileName);
-      double beam_trap_radius = 101.6;
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_25mm", fileName);
+      double beam_trap_radius = 25.4/2.0;
+
+      from_element<double>(highest_trap, sasEntryElem, "trap_y_101mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 25.4;
+        beam_trap_radius = 101.6/2.0;
       }
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_50mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 50.8;
+        beam_trap_radius = 50.8/2.0;
       }
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_76mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 76.2;
+        beam_trap_radius = 76.2/2.0;
       }
 
       // Read in counters
