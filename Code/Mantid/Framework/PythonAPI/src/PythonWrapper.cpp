@@ -3,7 +3,9 @@
 //------------------------
 // Boost
 #include <boost/python/module.hpp>
+#include <boost/python/def.hpp>
 #include "MantidKernel/DateAndTime.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
 
@@ -21,6 +23,11 @@ namespace PythonAPI
 } 
 }
 
+const char* mantid_version()
+{
+  return MANTID_VERSION;
+}
+
 /**
  * The actual module definition begins here. The names are different for
  * Windows and Linux due to the difference in library names
@@ -33,6 +40,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
 {
   using namespace Mantid::PythonAPI;
 
+  boost::python::def("mantid_build_version", mantid_version);
   MantidVecHelper::initializeDependencies();
   // Export some frequently used stl containers
   vector_proxy<Mantid::Kernel::DateAndTime>::wrap("cpp_list_dateandtime");
