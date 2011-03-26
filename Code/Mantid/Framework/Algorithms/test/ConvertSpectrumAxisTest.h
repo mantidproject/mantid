@@ -48,6 +48,8 @@ public:
     const std::string inputWS("inWS");
     const std::string outputWS("outWS");
 
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
+
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","LOQ48127.raw");
