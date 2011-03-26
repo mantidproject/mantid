@@ -35,6 +35,7 @@ public:
 
   void testExec()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::DataHandling::LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","LOQ48127.raw");
