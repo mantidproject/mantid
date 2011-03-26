@@ -47,6 +47,7 @@ public:
 
 	void testExecUnGroupSingleGroupWorkspace()
 	{
+	  	Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","EVS13895.raw"));
@@ -79,6 +80,7 @@ public:
 	
 	void testExecUnGroupOneNormalWorkspace()
 	{
+	  	Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 	  	LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48098.raw"));
