@@ -37,6 +37,10 @@
 	<value val="27000" />
 </parameter>
 
+<component-link name="graphite">
+<parameter name="Efixed"> <value val="7.3812" /> </parameter>
+</component-link>
+
 <parameter name="analyser" type="string">
   <value val="graphite" />
 </parameter>

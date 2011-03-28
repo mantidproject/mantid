@@ -89,7 +89,6 @@
 
 <component type="graphite" idlist="graphite">
   <properties />
-  <parameter name="Efixed"> <value val="1.845" /> </parameter>
   <location  />
 </component>
 
