@@ -9,12 +9,13 @@ set ( INC_FILES
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/SavePeaksFile.h
-  inc/MantidCrystal/UnitCell.h
+  inc/MantidCrystal/UnitCell.h 
 )
 
 set ( TEST_FILES 
 	test/LoadPeaksFileTest.h
 	test/SavePeaksFileTest.h
+  test/UnitCellTest.h
 )
 
 # Add the target for this directory

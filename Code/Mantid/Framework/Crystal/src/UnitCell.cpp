@@ -1,12 +1,14 @@
 #include "MantidCrystal/UnitCell.h"
 #include "MantidGeometry/V3D.h"
+#include "MantidKernel/System.h"
 #include <exception>
+
 namespace Mantid
 {
 namespace Crystal
 {
 
-  UnitCell::UnitCell(): G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
   {
 	  da[0]=da[1]=da[2]=1.;
 	  da[3]=da[4]=da[5]=deg2rad*90.0;
@@ -17,7 +19,7 @@ namespace Crystal
   {
   }
 
-  UnitCell::UnitCell(double _a, double _b, double _c): G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(double _a, double _b, double _c): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
   {
 	  da[0]=_a;da[1]=_b;da[2]=_c;
 	  // Angles are 90 degrees in radians ->Pi/2
@@ -25,7 +27,7 @@ namespace Crystal
 	  recalculate();
   }
 
-  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit): G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
   {
 	  da[0]=_a;da[1]=_b;da[2]=_c;
 	  // Angle transformed in radians
@@ -113,7 +115,7 @@ namespace Crystal
 
   double UnitCell::d(double h, double k, double l) const
   {
-	  return 1/dstar(h,k,l);
+	  return 1./dstar(h,k,l);
   }
 
   double UnitCell::dstar(double h, double k, double l) const
@@ -150,16 +152,6 @@ namespace Crystal
   }
 
       
-  void UnitCell::recalculateFromGstar(Geometry::Matrix<double>& NewGstar)
-  {
-    // TODO - not finished
-    Gstar=NewGstar;
-    G=Gstar;
-    G.Invert();
-    return;
-  }  
-
-
   void UnitCell::recalculate()
   {
 	  calculateG();
@@ -194,13 +186,49 @@ namespace Crystal
 	   
   void UnitCell::calculateReciprocalLattice()
   {
-    //TODO
+    ra[0]=sqrt(Gstar[0][0]);//a*
+    ra[1]=sqrt(Gstar[1][1]);//b*
+    ra[2]=sqrt(Gstar[2][2]);//c*
+    ra[3]=acos(Gstar[1][2]/ra[1]/ra[2]);//alpha* 
+    ra[4]=acos(Gstar[0][2]/ra[0]/ra[2]);//beta* 
+    ra[5]=acos(Gstar[0][1]/ra[0]/ra[1]);//gamma* 
   }
 	 
   void UnitCell::calculateB()
   {
-    //TODO
+    // B matrix using a right handed coordinate system with b1 along x and y in the (b1,b2) plane.
+	  // This is the convention in Busing and Levy.
+	  // | b1 b2cos(beta3)      b3cos(beta2)        |
+	  // | 0  b2sin(beta3) -b3sin(beta2)cos(alpha1) |
+	  // | 0       0                  1/a3          |
+	  B[0][0]=ra[0];
+	  B[0][1]=ra[1]*cos(ra[5]);
+	  B[0][2]=ra[2]*cos(ra[4]);
+	  B[1][0]=0.;
+	  B[1][1]=ra[1]*sin(ra[5]);
+	  B[1][2]=-ra[2]*sin(ra[4])*cos(da[3]);
+	  B[2][0]=0.;
+    B[2][1]=0.;
+	  B[2][2]=1./da[2];
+	  return;
   }
+
+  void UnitCell::recalculateFromGstar(Geometry::Matrix<double>& NewGstar)
+  {
+    Gstar=NewGstar;
+    calculateReciprocalLattice();
+    G=Gstar;
+    G.Invert();    
+    da[0]=sqrt(G[0][0]);//a
+    da[1]=sqrt(G[1][1]);//b
+    da[2]=sqrt(G[2][2]);//c
+    da[3]=acos(G[1][2]/da[1]/da[2]);//alpha
+    da[4]=acos(G[0][2]/da[0]/da[2]);//beta
+    da[5]=acos(G[0][1]/da[0]/da[1]);//gamma 
+    calculateB();
+    return;
+  }  
+
 
 } // namespace Mantid
 } // namespace Crystal

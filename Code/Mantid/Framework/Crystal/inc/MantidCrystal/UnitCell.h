@@ -1,12 +1,21 @@
 #ifndef MANTID_CRYSTAL_UNITCELL_H_
 #define MANTID_CRYSTAL_UNITCELL_H_
+#include "MantidKernel/System.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include <cmath>
+#include <vector>
 
 namespace Mantid
 {
 namespace Crystal
-{
+{  
+
+  /** UnitCell : Class to implement unit cell of crystals, based on code
+   *     by L. Chapon. It does not contain information about lattice orientation
+   * 
+   * @author Andrei Savici, SNS, ORNL
+   * @date 2011-03-23 
+   */
   const double deg2rad=M_PI/180.;
   const double rad2deg=180./M_PI;
   enum AngleUnits {Degrees,Radians};
