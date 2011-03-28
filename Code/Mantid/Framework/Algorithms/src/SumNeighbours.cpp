@@ -120,6 +120,7 @@ void SumNeighbours::exec()
   {
     boost::shared_ptr<RectangularDetector> det;
     boost::shared_ptr<ICompAssembly> assem;
+    boost::shared_ptr<ICompAssembly> assem2;
 
     det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
     if (det) 
@@ -137,11 +138,32 @@ void SumNeighbours::exec()
         for (int j=0; j < assem->nelements(); j++)
         {
           det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-          if (det) if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
-            detList.push_back(det);
+          if (det)
+          {
+            if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0)) 
+              detList.push_back(det);
+
+          }
+          else
+          {
+            //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+            // We are not doing a full recursive search since that will be very long for lots of pixels.
+            assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+            if (assem2)
+            {
+              for (int k=0; k < assem2->nelements(); k++)
+              {
+                det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+                if (det) 
+                {
+                  if(det_name.empty() || (!det_name.empty() && det->getName().compare(det_name)==0))  
+                    detList.push_back(det);
+                }
+              }
+            }
+          }
         }
       }
-
     }
   }
 

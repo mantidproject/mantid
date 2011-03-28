@@ -4,6 +4,8 @@ import os
 import datetime
 from time import localtime, strftime
 
+COMPRESS_TOL_TOF = .01
+
 class CalibrateRectangularDetectors(PythonAlgorithm):
 
     def category(self):
@@ -41,6 +43,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Min, Step, and Max of d-space bins.  Linear binning is better for finding offsets.")
         self.declareProperty("DiffractionFocus", False, Description="Diffraction focus by detectors.  Default is False")
+        grouping = ["All", "Group", "Column", "bank"]
+        self.declareProperty("GroupDetectorsBy", "All", Validator=ListValidator(grouping),
+                             Description="Detector groups to use for future focussing: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
         self.declareProperty("FilterByTimeMin", 0.,
                              Description="Relative time to start filtering by in seconds. Applies only to sample.")
@@ -86,7 +91,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
     def _loadNeXusData(self, runnumber, extension, **kwargs):
         if self.getProperty("CompressOnRead"):
-            kwargs["CompressTolerance"] = .05
+            kwargs["CompressTolerance"] = COMPRESS_TOL_TOF
         else:
             kwargs["Precount"] = True
         name = "%s_%d" % (self._instrument, runnumber)
@@ -132,14 +137,17 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _calibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
-        groups = ""
-        numrange = 200
-        if str(self._instrument) == "SNAP":
-            numrange = 19
-        for num in xrange(1,numrange):
-            comp = wksp.getInstrument().getComponentByName("bank%d" % (num) )
-            if not comp == None:
-               groups+=("bank%d," % (num) )
+        if self._grouping == "all":
+            groups = str(self._instrument);
+        else:
+            groups = ""
+            numrange = 200
+            if str(self._instrument) == "SNAP":
+                numrange = 19
+            for num in xrange(1,numrange):
+                comp = wksp.getInstrument().getComponentByName("%s%d" % (self._grouping, num) )
+                if not comp == None:
+                    groups+=("%s%d," % (self._grouping, num) )
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -152,8 +160,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             except KeyError, e:
                 raise RuntimeError("Failed to find log '%s' in workspace '%s'" \
                                    % (filterLogs[0], str(wksp)))            
-        CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=.01) # 100ns
-        
+        if not self.getProperty("CompressOnRead"):
+            CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+
         alg = ConvertUnits(InputWorkspace=wksp, OutputWorkspace="temp", Target="dSpacing")
         temp = alg['OutputWorkspace']
         Sort(InputWorkspace=temp, SortBy="Time of Flight")
@@ -174,7 +183,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # Remove old calibration files
         cmd = "rm "+self._outDir+str(temp)+".cal*"
         os.system(cmd)
-        # Cross correlate groups using interval around peak at peakpos (d-Spacing)
+        # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
             self._lastpixel = temp.getNumberHistograms()-1
         else:
@@ -184,6 +193,9 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=self._binning[1],
             DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal1")
+        mtd.deleteWorkspace(str(wksp)+"cc")
+        mtd.deleteWorkspace(str(wksp)+"offset")
+        mtd.releaseFreeMemory()
         Rebin(InputWorkspace=temp, OutputWorkspace=temp,Params=str(self._peakmin2)+","+str(self._binning[1])+","+str(self._peakmax2))
         if self._peakpos2 > 0.0:
             #Find good peak for reference
@@ -252,6 +264,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             if self._binning[0] == 0. and self._binning[1] == 0. and self._binning[2] == 0.:
                 raise RuntimeError("Failed to specify the binning")
         self._instrument = self.getProperty("Instrument")
+        self._grouping = self.getProperty("GroupDetectorsBy")
         self._xpixelbin = self.getProperty("XPixelSum")
         self._ypixelbin = self.getProperty("YPixelSum")
         self._peakpos = self.getProperty("Peak1")
