@@ -244,10 +244,12 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
   CommonBinsValidator<> sameBins;
+  bool commonBoundaries = false;
   if ( sameBins.isValid(outputWS) == "" )
   {
+    commonBoundaries =  WorkspaceHelpers::commonBoundaries(outputWS);
     // Only do the full check if the quick one passes
-    if ( WorkspaceHelpers::commonBoundaries(outputWS) )
+    if (commonBoundaries)
     {
       // Calculate the new (common) X values
       MantidVec::iterator iter;
@@ -268,7 +270,8 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
         PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
-      return;
+      if (!m_inputEvents) // if in event mode the work is done
+        return;
     }
   }
 
@@ -280,10 +283,12 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
   PARALLEL_FOR1(outputWS)
   for (int k = 0; k < m_numberOfSpectra; ++k) {
     PARALLEL_START_INTERUPT_REGION
-    MantidVec::iterator it;
-    for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
-    {
-      *it = factor * std::pow(*it,power);
+    if (!commonBoundaries) {
+      MantidVec::iterator it;
+      for (it = outputWS->dataX(k).begin(); it != outputWS->dataX(k).end(); ++it)
+      {
+        *it = factor * std::pow(*it,power);
+      }
     }
     // Convert the events themselves if necessary. Inefficiently.
     if ( m_inputEvents )
@@ -301,6 +306,9 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  if (m_inputEvents)
+    eventWS->clearMRU();
   return;
 }
 
