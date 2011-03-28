@@ -473,21 +473,21 @@ namespace MDEvents
       // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
       if (bin.m_max[d] < extents[d].max)
       {
-        max = size_t(ceil((bin.m_max[d] - extents[d].min) / boxSize[d]));
+        max = int(ceil((bin.m_max[d] - extents[d].min) / boxSize[d])) - 1;
         counters_max[d] = max; // This is where the counter ends
       }
       else
       {
-        max = split[d]+1; // Goes past THAT edge
-        counters_max[d] = split[d]; // but we don't want to in the counters
+        max = split[d]; // Goes past THAT edge
+        counters_max[d] = split[d]-1; // but we don't want to in the counters
       }
 
       // If the max value is before the min, that means NOTHING is in the bin, and we can return
-      if ((max <= min) || (max < 0))
+      if ((max < min) || (max < 0))
         return;
       index_max[d] = max;
 
-      //std::cout << d << " from " <<  index_min[d] << " to " << index_max[d] << "exc" << std::endl;
+      //std::cout << d << " from " << std::setw(5) << index_min[d] << " to " << std::setw(5)  << index_max[d] << "inc" << std::endl;
     }
 
     // If you reach here, than at least some of bin is overlapping this box
@@ -501,16 +501,37 @@ namespace MDEvents
       size_t index = getLinearIndex(counters);
       //std::cout << index << ": " << counters[0] << ", " << counters[1] << std::endl;
 
-      //TODO: Find if the box is COMPLETELY held in the bin.
+      // Find if the box is COMPLETELY held in the bin.
+      bool completelyWithin = true;
+      for(size_t dim=0; dim<nd; dim++)
+        if ((static_cast<int>(counters[dim]) <= index_min[dim]) ||
+            (static_cast<int>(counters[dim]) >= index_max[dim]))
+        {
+          // The index we are at is at the edge of the integrated area (index_min or index_max-1)
+          // That means that the bin only PARTIALLY covers this MDBox
+          completelyWithin = false;
+          break;
+        }
 
-      // Perform the binning
-      boxes[index]->centerpointBin(bin);
+      if (completelyWithin)
+      {
+        // Box is completely in the bin.
+        //std::cout << "Box at index " << counters[0] << ", " << counters[1] << " is entirely contained.\n";
+        // Use the aggregated signal and error
+        bin.m_signal += boxes[index]->getSignal();
+        bin.m_errorSquared += boxes[index]->getErrorSquared();
+      }
+      else
+      {
+        // Perform the binning
+        boxes[index]->centerpointBin(bin);
+      }
 
       size_t d = 0;
       while (d<nd)
       {
         counters[d]++;
-        if (counters[d] >= counters_max[d])
+        if (counters[d] > counters_max[d])
         {
           // Roll this counter back to 0 (or whatever the min is)
           counters[d] = counters_min[d];

@@ -193,7 +193,7 @@ public:
     TS_ASSERT_EQUALS(box.getNPoints(), 100);
     // First, a bin object that holds everything
     MDBin<MDEvent<2>,2> bin;
-    // Perform the centerpoitn binning
+    // Perform the centerpoint binning
     box.centerpointBin(bin);
     // 100 events = 100 weight.
     TS_ASSERT_DELTA( bin.m_signal, 100.0, 1e-4);

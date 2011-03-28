@@ -10,6 +10,7 @@
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/BoxController.h"
 #include <memory>
+#include <iomanip>
 #include <map>
 #include <vector>
 #include <boost/random/mersenne_twister.hpp>
@@ -659,11 +660,12 @@ public:
 
   }
 
+
+  //------------------------------------------------------------------------------------------------
   /** Helper to make a 2D MDBin */
   MDBin<MDEvent<2>,2> makeMDBin2(double minX, double maxX, double minY, double maxY)
   {
     MDBin<MDEvent<2>,2> bin;
-    //std::cout << "Bins: X " << minX << " to " << maxX << " , Y " << minY << " to " << maxY << std::endl;
     bin.m_min[0] = minX;
     bin.m_max[0] = maxX;
     bin.m_min[1] = minY;
@@ -676,6 +678,8 @@ public:
       const std::string & message,
       double minX, double maxX, double minY, double maxY, double expectedSignal)
   {
+//    std::cout << "Bins: X " << std::setw(5) << minX << " to "<< std::setw(5)  << maxX << ", Y " << std::setw(5) << minY << " to "<< std::setw(5)  << maxY      << ". " << message << std::endl;
+
     MDBin<MDEvent<2>,2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);
     b->centerpointBin(bin);
@@ -699,6 +703,9 @@ public:
     doTestMDBin2(b, "Bin that is completely off",
         10.1, 11.2, 1.9, 3.12,   0.0);
 
+    doTestMDBin2(b, "Bin that is completely off (2)",
+        2, 3, -0.6, -0.1,   0.0);
+
     doTestMDBin2(b, "Bin that holds one entire MDBox (bigger than it)",
         0.8, 2.2, 1.9, 3.12,     4.0);
 
@@ -706,13 +713,19 @@ public:
         -0.2, 1.2, 1.9, 3.12,     4.0);
 
     doTestMDBin2(b, "Bin that holds one entire MDBox (going off the other edge)",
-        9.2, 10.2, 1.9, 3.12,     4.0);
+        8.9, 10.2, 1.9, 3.12,     4.0);
 
     doTestMDBin2(b, "Bin that holds one entire MDBox (going off both edge)",
         -0.2, 1.2, -0.2, 1.2,     4.0);
 
     doTestMDBin2(b, "Bin that holds one entire MDBox and a fraction of at least one more with something",
         0.8, 2.7, 1.9, 3.12,     8.0);
+
+    doTestMDBin2(b, "Bin that holds four entire MDBoxes",
+        0.8, 3.1, 0.9, 3.2,     16.0);
+
+    doTestMDBin2(b, "Bin goes off two edges in one direction",
+        -0.3, 10.2, 1.9, 3.1,   10*4.0);
 
     doTestMDBin2(b, "Bin that fits all within a single MDBox, and contains the center",
         0.2, 0.8, 0.2, 0.8,     4.0);

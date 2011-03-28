@@ -238,7 +238,7 @@ class DLLExport WeightedEventNoTime {
 public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
 
   /// The time of flight of this neutron
-  float m_tof;
+  float m_tof; //TODO:
 
   /// The weight of this neutron.
   float m_weight;
