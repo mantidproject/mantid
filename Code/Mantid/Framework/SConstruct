@@ -333,9 +333,7 @@ coreSubProjs.append('API')
 
 for subproj in coreSubProjs:
 	ret = SConscript([subproj+'/SConscript'])
-    shared_lib = ret['shared']
-	env.Install(dest_dir, shared_lib)
-    env.Install(dest_dir, os.path.splitext(shared_lib)[0] + '.lib')
+	env.Install(dest_dir, ret['shared'])
 	env.Append(MYLIBLIST=ret['libs'])
 	env.Append(CPPPATH='#/'+subproj+'/inc')
 
@@ -351,9 +349,7 @@ if int(matlab) :
        env.Install(dest_dir, ret['shared'])
 # Now DataObjects, and insert into list of dependencies
 ret = SConscript('DataObjects/SConscript')
-shared_lib = ret['shared']
 env.Install(dest_dir, ret['shared'])
-env.Install(dest_dir, os.path.splitext(shared_lib)[0] + '.lib')
 env.Append(MYLIBLIST=ret['libs'])
 env.Append(CPPPATH=['#/DataObjects/inc'])
 
@@ -369,10 +365,7 @@ subProjs.append('ICat')
 for subproj in subProjs:
     ret = SConscript(subproj+'/SConscript')
     if ( len(ret) > 0 ):
-       shared_lib = ret['shared']
-       env.Install(dest_dir, shared_lib)
-       if subproj == 'CurveFiitting':
-          env.Install(dest_dir, os.path.splitext(shared_lib)[0] + '.lib')
+       env.Install(dest_dir, ret['shared'])    
 
 # User Algs
 # Currently has a dependency on CurveFitting (which ought to be removed)
