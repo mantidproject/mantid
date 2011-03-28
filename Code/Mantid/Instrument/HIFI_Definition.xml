@@ -214,7 +214,17 @@
       <left-back-top-point x="0.005" y="0.037" z="-0.0104"  />
       <right-back-top-point x="0.005" y="0.037" z="0.0104"  />
     </hexahedron>
-    <algebra val="shape" />     
+    <algebra val="shape" /> 
+
+    <bounding-box>
+      <x-min val="0.0"/>
+      <x-max val="0.005"/>
+      <y-min val="-0.037"/>
+      <y-max val="0.037"/>
+      <z-min val="-0.0104"/>
+      <z-max val="0.0104"/>
+    </bounding-box>
+    
   </type>  
  
   <!-- DETECTOR ID LISTS -->
