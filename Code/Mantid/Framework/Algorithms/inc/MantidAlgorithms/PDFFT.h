@@ -30,6 +30,7 @@ namespace Algorithms
   private:
     API::MatrixWorkspace_const_sptr Sspace;
     API::MatrixWorkspace_sptr Gspace;
+    bool printout;
 
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -38,9 +39,9 @@ namespace Algorithms
     /// Run the algorithm
     void exec();
     /// Calculate PDF, i.e., G(r), for a certain r value from S(Q)
-    double CalculateGrFromQ(double r, double& egr);
+    double CalculateGrFromQ(double r, double& egr, double qmin, double qmax);
     /// Calculate PDF, i.e., G(r), for a certain r value from S(d)
-    double CalculateGrFromD(double r, double& egr);
+    double CalculateGrFromD(double r, double& egr, double qmin, double qmax);
 
   };
 

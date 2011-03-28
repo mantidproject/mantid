@@ -137,6 +137,7 @@ set ( SRC_FILES src/AbsorptionCorrection.cpp
 		src/WeightedMean.cpp
 		src/XDataConverter.cpp 
 		src/PDFFT.cpp 
+		src/DampSq.cpp
 		)
 
 set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
@@ -279,6 +280,7 @@ set ( INC_FILES inc/MantidAlgorithms/AbsorptionCorrection.h
 		inc/MantidAlgorithms/WeightedMean.h
 		inc/MantidAlgorithms/XDataConverter.h 
 		inc/MantidAlgorithms/PDFFT.h 
+		inc/MantidAlgorithms/DampSq.h
 		)
 
 set ( TEST_FILES test/AddSampleLogTest.h
@@ -406,6 +408,7 @@ set ( TEST_FILES test/AddSampleLogTest.h
 		 test/WeightedMeanTest.h
 		 test/WorkspaceGroupTest.h
 		 test/PDFFTTest.h 
+		 test/DampSqTest.h
 		 )
 
 # Add the target for this directory

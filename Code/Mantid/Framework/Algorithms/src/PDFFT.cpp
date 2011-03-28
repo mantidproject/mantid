@@ -43,11 +43,12 @@ namespace Algorithms
    */
   void PDFFT::init()
   {
-    declareProperty(new WorkspaceProperty<>("SWorkspace","",Direction::Input), "An input workspace S(d).");
-    declareProperty(new WorkspaceProperty<>("GrWorkspace","",Direction::Output), "An output workspace G(r)");
+    declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input), "An input workspace S(d).");
+    declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output), "An output workspace G(r)");
     declareProperty(new Kernel::PropertyWithValue<double>("RMax", 20));
     declareProperty(new Kernel::PropertyWithValue<double>("DeltaR", 0.1));
-    declareProperty(new Kernel::PropertyWithValue<std::string>("Unit", "Q"));
+    declareProperty(new Kernel::PropertyWithValue<double>("Qmin", 0.1));
+    declareProperty(new Kernel::PropertyWithValue<double>("Qmax", 2.6));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -62,7 +63,8 @@ namespace Algorithms
 	  // 1. Generate a Workspace for G
 	  const double rmax = getProperty("RMax");
 	  const double deltar = getProperty("DeltaR");
-	  const std::string unit = getProperty("Unit");
+	  const double qmax = getProperty("Qmax");
+	  const double qmin = getProperty("Qmin");
 
 	  int sizer = rmax/deltar;
 
@@ -75,20 +77,35 @@ namespace Algorithms
 		  vr[i] = deltar*(1+i);
 	  }
 
-	  Sspace = getProperty("SWorkspace");
+	  Sspace = getProperty("InputWorkspace");
+
+	  std::string unit;
+	  Unit_sptr& iunit = Sspace->getAxis(0)->unit();
+	  if (iunit->unitID() == "dSpacing"){
+		  unit = "d";
+	  } else if (iunit->unitID() == "MomentumTransfer"){
+		  unit = "Q";
+	  } else {
+		  g_log.error() << "Unit " << iunit->unitID() << " is not supported" << std::endl;
+	  }
 
 	  if (unit != "Q" && unit != "d"){
 		  g_log.information() << "Unit " << unit << " is not supported (Q or d)" << std::endl;
 	  }
 
 	  // 3. Calculate G(r)
+	  g_log.information() << "Unit = " << unit << "  Size = " << sizer << std::endl;
+
+	  printout = true;
 	  for (int i = 0; i < sizer; i ++){
 		  double error;
 		  if (unit == "Q"){
-			  vg[i] = CalculateGrFromQ(vr[i], error);
+			  vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax);
+			  if (printout)
+				  printout = false;
 			  vge[i] = error;
 		  } else if (unit == "d"){
-			  vg[i] = CalculateGrFromD(vr[i], error);
+			  vg[i] = CalculateGrFromD(vr[i], error, qmin, qmax);
 			  vge[i] = error;
 		  }
 	  }
@@ -97,12 +114,12 @@ namespace Algorithms
 	  // 3. TODO Calculate rho(r)????
 
 	  // 4. Set property
-	  setProperty("GrWorkspace", Gspace);
+	  setProperty("OutputWorkspace", Gspace);
 
 	  return;
   }
 
-  double PDFFT::CalculateGrFromD(double r, double& egr){
+  double PDFFT::CalculateGrFromD(double r, double& egr, double qmin, double qmax){
 
       double gr = 0;
       double PI = 3.1415926545;
@@ -113,13 +130,17 @@ namespace Algorithms
 
       double temp, d, s, deltad;
       double error = 0;
+      double dmin = 2.0*PI/qmax;
+      double dmax = 2.0*PI/qmin;
       for (size_t i = 1; i < vd.size(); i ++){
           d = vd[i];
-          s = vs[i];
-          deltad = vd[i]-vd[i-1];
-          temp = (s-1)*sin(2*PI*r/d)*4*PI*PI/(d*d*d)*deltad;
-          gr += temp;
-          error += ve[i]*ve[i];
+          if (d >= dmin && d <= dmax){
+        	  s = vs[i];
+        	  deltad = vd[i]-vd[i-1];
+        	  temp = (s-1)*sin(2*PI*r/d)*4*PI*PI/(d*d*d)*deltad;
+        	  gr += temp;
+        	  error += ve[i]*ve[i];
+          }
       }
 
       gr = gr*2/PI;
@@ -128,7 +149,7 @@ namespace Algorithms
       return gr;
   }
 
-  double PDFFT::CalculateGrFromQ(double r, double& egr){
+  double PDFFT::CalculateGrFromQ(double r, double& egr, double qmin, double qmax){
 
       double gr = 0;
       double PI = 3.1415926545;
@@ -139,13 +160,23 @@ namespace Algorithms
 
       double temp, q, s, deltaq;
       double error = 0;
+
+      g_log.information()<< "r = " << r << "  size(q) = " << vq.size() << std::endl;
+
       for (size_t i = 1; i < vq.size(); i ++){
           q = vq[i];
-          s = vs[i];
-          deltaq = vq[i]-vq[i-1];
-          temp = q*(s-1)*sin(q*r)*deltaq;
-          gr += temp;
-          error += ve[i]*ve[i];
+          if (q>=qmin && q<= qmax)
+          {
+        	  s = vs[i];
+        	  deltaq = vq[i]-vq[i-1];
+        	  temp = q*(s-1)*sin(q*r)*deltaq;
+        	  gr += temp;
+        	  error += ve[i]*ve[i];
+        	  if (printout){
+        	  g_log.information() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
+        	  g_log.information() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
+        	  }
+          }
       }
 
       gr = gr*2/PI;
