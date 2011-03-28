@@ -12,6 +12,7 @@ class IndirectReducer(Reducer):
     >> import inelastic_indirect_reducer as iir
     >> reducer = iir.IndirectReducer()
     >> reducer.set_instrument_name('IRIS')
+    >> reducer.set_parameter_file('IRIS_graphite_002_Parameters.xml')
     >> reducer.set_detector_range(2,52)
     >> reducer.append_data_file('IRS21360.raw')
     >> reducer.reduce()
@@ -32,6 +33,12 @@ class IndirectReducer(Reducer):
     _rebin_string = None
     _grouping_policy = None
     _sum_files = False
+    _calib_raw_files = []
+    _calibration_workspace = None
+    _parameter_file = None
+    _background_start = None
+    _background_end = None
+    _detailed_balance_temp = None
     
     def __init__(self):
         """Constructor function for IndirectReducer.
@@ -52,6 +59,12 @@ class IndirectReducer(Reducer):
         self._rebin_string = None
         self._grouping_policy = None
         self._sum_files = False
+        self._calib_raw_files = []
+        self._calibration_workspace = None
+        self._parameter_file = None
+        self._background_start = None
+        self._background_end = None
+        self._detailed_balance_temp = None
         
     def pre_process(self):
         """Handles the loading of the data files. This is done once, at the
@@ -65,6 +78,9 @@ class IndirectReducer(Reducer):
         loadData.set_sum(self._sum_files)
         loadData.execute(self, None)
         
+        calib = steps.CreateCalibrationWorkspace()
+        calib.execute(self, None)
+        
         # Setup the steps for the rest of the reduction, based on selected
         # user settings.
         self.setup_steps()
@@ -73,11 +89,21 @@ class IndirectReducer(Reducer):
         """Setup the steps for the reduction.
         """
         self.append_step(steps.HandleMonitor())
+        self.append_step(steps.BackgroundOperations())
+        self.append_step(steps.ApplyCalibration())
         self.append_step(steps.CorrectByMonitor())
         self.append_step(steps.FoldData())
         self.append_step(steps.ConvertToEnergy())
+        self.append_step(steps.DetailedBalance())
         self.append_step(steps.Grouping())
-        
+    
+    def post_process(self):
+        """Deletes the calibration workspace (if we created it).
+        """
+        if ( self._calibration_workspace is not None ) and ( 
+                len(self._calib_raw_files) > 0 ):
+            DeleteWorkspace(self._calibration_workspace)
+            
     def set_instrument_name(self, instrument):
         self._instrument_name = instrument
         self._load_empty_instrument()
@@ -85,6 +111,12 @@ class IndirectReducer(Reducer):
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
+        
+    def set_parameter_file(self, file):
+        if self._instrument_name is None:
+            raise NotImplementedError("Instrument name not set.")
+        self._parameter_file = file
+        LoadParameterFile(self._workspace_instrument, file)
         
     def set_rebin_string(self, rebin):
         self._rebin_string = rebin
@@ -98,6 +130,16 @@ class IndirectReducer(Reducer):
     def set_sum(self, value):
         self._sum_files = value
 
+    def set_calibration_workspace(self, workspace):
+        self._calibration_workspace = workspace
+        
+    def set_background(self, start, end):
+        self._background_start = start
+        self._background_end = end
+        
+    def set_detailed_balance(self, temp):
+        self._detailed_balance_temp = temp
+        
     def _load_empty_instrument(self):
         """Returns an empty workspace for the instrument.
         """
@@ -107,7 +149,6 @@ class IndirectReducer(Reducer):
         if mtd[self._workspace_instrument] is None:
             idf_dir = mtd.getConfigProperty('instrumentDefinition.directory')
             idf = idf_dir + self._instrument_name + '_Definition.xml'
-            print "Loading IDF for ", self._instrument_name
             try:
                 LoadEmptyInstrument(idf, self._workspace_instrument)
             except RuntimeError:
