@@ -7,21 +7,37 @@ import md5
 import uuid
 import string
 import platform
-# Use the release_date module in MantidPlot
 import sys
-sys.path.append('../../MantidPlot')
-import release_date
+import subprocess
 
-QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
+# Where is the Code directory, i.e. trunk/Code
+CODEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..\..\..'))
+QTDIR = 'C:/Builds/qt-everywhere-opensource-src-4.7.2' #'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
 QTLIBDIR = QTDIR + '/lib'
 QTPLUGINDIR = QTDIR + '/plugins'
 PYTHONDIR = sys.prefix.replace('\\','/')
 SIPDIR = PYTHONDIR + '/Lib/site-packages'
 PYQTDIR = SIPDIR + '/PyQt4'
-USERALGORITHMSDIR = '../../Framework/UserAlgorithms'
-MANTIDRELEASE = '../../Framework/release/'
+FRAMEWORKDIR = CODEDIR.replace('\\', '/') + '/Mantid/Framework'
+USERALGORITHMSDIR = FRAMEWORKDIR + '/UserAlgorithms'
 
-MantidVersion = release_date.getMantidPlotVersion()
+if len(sys.argv) == 3:
+    MANTIDRELEASE = sys.argv[1]
+    MANTIDRELEASE = MANTIDRELEASE.replace('\\','/')
+    WXSDIR = sys.argv[2]
+    WXSFILE = WXSDIR.replace('\\','/') + '/msi_input.wxs'
+else:
+    MANTIDRELEASE = FRAMEWORKDIR + '/release'
+    WXSFILE = 'msi_input.wxs'
+
+# MantidPlot -v prints the version number
+subp = subprocess.Popen([MANTIDRELEASE + '/MantidPlot',  '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+subout, suberr = subp.communicate()
+if suberr != '':
+    print 'Could not determine Mantid version from MantidPlot using 0.0.0'
+    MantidVersion = '0.0.0'
+else:
+    MantidVersion = subout.strip()
 print('Mantid version '+ MantidVersion)
 
 # Architecture
@@ -436,26 +452,26 @@ addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Softwa
 addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
 
 # Need to create Mantid.properties file. A template exists but some entries point to the incorrect locations so those need modifying
-createPropertiesFile('../../Framework/Properties/Mantid.properties')
+createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties')
 addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
 
-MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat','../../Framework/PythonAPI/MantidScript.bat',MantidDlls)
+MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat',FRAMEWORKDIR + '/PythonAPI/MantidScript.bat',MantidDlls)
 addTo(MantidScript,'Shortcut',{'Id':'startmenuMantidScript','Directory':'ProgramMenuDir','Name':'Script','LongName':'Mantid Script','WorkingDirectory':'MantidBin'})
-addFileV('MantidStartup','MStart.py','MantidStartup.py','../../Framework/PythonAPI/MantidStartup.py',MantidDlls)
-addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd',MANTIDRELEASE + 'MantidPythonAPI.pyd',MantidDlls)
-addFileV('MantidAPI','MAPI.dll','MantidAPI.dll',MANTIDRELEASE + 'MantidAPI.dll',MantidDlls)
-addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + 'MantidGeometry.dll',MantidDlls)
-addFileV('MantidKernel','MKern.dll','MantidKernel.dll',MANTIDRELEASE + 'MantidKernel.dll',MantidDlls)
+addFileV('MantidStartup','MStart.py','MantidStartup.py',FRAMEWORKDIR + '/PythonAPI/MantidStartup.py',MantidDlls)
+addFileV('MantidPythonAPI_pyd','MPAPI.pyd','MantidPythonAPI.pyd',MANTIDRELEASE + '/MantidPythonAPI.pyd',MantidDlls)
+addFileV('MantidAPI','MAPI.dll','MantidAPI.dll',MANTIDRELEASE + '/MantidAPI.dll',MantidDlls)
+addFileV('MantidGeometry','MGeo.dll','MantidGeometry.dll',MANTIDRELEASE + '/MantidGeometry.dll',MantidDlls)
+addFileV('MantidKernel','MKern.dll','MantidKernel.dll',MANTIDRELEASE + '/MantidKernel.dll',MantidDlls)
 
 # Add qt API  library
-addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + 'MantidQtAPI.dll',MantidDlls)
-addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + 'MantidWidgets.dll',MantidDlls)
+addFileV('MantidQtAPI','MQTAPI.dll','MantidQtAPI.dll',MANTIDRELEASE + '/MantidQtAPI.dll',MantidDlls)
+addFileV('MantidWidgets','MWid.dll','MantidWidgets.dll',MANTIDRELEASE + '/MantidWidgets.dll',MantidDlls)
 
 # Add Qt Property Browser
-addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 'QtPropertyBrowser.dll',MantidDlls)
+addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + '/QtPropertyBrowser.dll',MantidDlls)
 
 # NeXus dlls for the main path
-addDlls('../../../Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
+addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
 
 #------------- Environment settings ---------------------- 
 addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHONINSTALL]'})
@@ -468,8 +484,8 @@ addTo(MantidDlls,'Environment',{'Id':'AddMtdPath','Name':'PATH','Action':'set','
 # ---------------------- Matlab bindings -------------------------
 # Only on 32bit windows for the moment
 if ARCH == '32':
-    addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll',MANTIDRELEASE + 'MantidMatlabAPI.dll',MantidDlls)
-    Matlab=addCompList('MatlabMFiles','../../Framework/MatlabAPI/mfiles','Matlab',binDir)[0]
+    addFileV('MantidMatlabAPI','MMAPI.dll','MantidMatlabAPI.dll',MANTIDRELEASE + '/MantidMatlabAPI.dll',MantidDlls)
+    Matlab=addCompList('MatlabMFiles',FRAMEWORKDIR + '/MatlabAPI/mfiles','Matlab',binDir)[0]
 
     #Add mantid_setup file
     setupfile = open('mantid_setup.m','w')
@@ -485,7 +501,7 @@ else:
 
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
 addDlls(QTLIBDIR,'qt',QTIPlot)
-QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + 'MantidPlot.exe',QTIPlot)
+QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + '/MantidPlot.exe',QTIPlot)
 # TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
 if ARCH== '32':
     MantidLauncher = addFileV('MantidLauncher','SMPlot.exe','StartMantidPlot.exe','MantidLauncher/Release/MantidLauncher.exe',QTIPlot)
@@ -495,10 +511,10 @@ else:
     startmenuQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'startmenuQTIPlot','Directory':'ProgramMenuDir','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe'})
     desktopQTIPlot = addTo(QTIPlotEXE,'Shortcut',{'Id':'desktopQTIPlot','Directory':'DesktopFolder','Name':'MPlot','LongName':'MantidPlot','WorkingDirectory':'MantidBin','Icon':'MantidPlot.exe','IconIndex':'0'})
     
-addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', '../../MantidPlot/qtiplotrc.py', MantidDlls)
-addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', '../../MantidPlot/qtiUtil.py', MantidDlls)
-addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', '../../MantidPlot/mantidplotrc.py', MantidDlls)
-addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', '../../MantidPlot/mantidplot.py', MantidDlls)
+addFileV('qtiplotrc', 'qtirc.py', 'qtiplotrc.py', CODEDIR + '/Mantid/MantidPlot/qtiplotrc.py', MantidDlls)
+addFileV('qtiplotutil', 'qtiUtil.py', 'qtiUtil.py', CODEDIR + '/Mantid/MantidPlot/qtiUtil.py', MantidDlls)
+addFileV('mantidplotrc', 'mtdrc.py', 'mantidplotrc.py', CODEDIR + '/Mantid/MantidPlot/mantidplotrc.py', MantidDlls)
+addFileV('mantidplot', 'mtdplot.py', 'mantidplot.py', CODEDIR + '/Mantid/MantidPlot/mantidplot.py', MantidDlls)
 
 # Remove files that may have been created
 files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.pyc','MantidFramework.pyc','MantidHeader.pyc',\
@@ -507,28 +523,28 @@ for index, name in enumerate(files_to_remove):
     addTo(MantidDlls,'RemoveFile',{'Id':'RemFile_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
 
 if (QTLIBDIR == 'C:/Qt/4_4_0/bin'): 	 
-	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest',MANTIDRELEASE + 'MantidPlot.exe.manifest',QTIPlot)
+	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest',MANTIDRELEASE + '/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
-addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':MANTIDRELEASE + 'MantidPlot.exe'})
+addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':MANTIDRELEASE + '/MantidPlot.exe'})
 
 #plugins
 pluginsDir = addDirectory('PluginsDir','plugins','plugins',InstallDir)
 Plugins = addComponent('Plugins',comp_guid['Plugins'],pluginsDir)
-addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll',MANTIDRELEASE + 'MantidAlgorithms.dll',Plugins)
-addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll',MANTIDRELEASE + 'MantidDataHandling.dll',Plugins)
-addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + 'MantidDataObjects.dll',Plugins)
-addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + 'MantidCurveFitting.dll',Plugins)
-addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + 'MantidICat.dll',Plugins)
-addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + 'MantidNexus.dll',Plugins)
+addFileV('MantidAlgorithms','MAlg.dll','MantidAlgorithms.dll',MANTIDRELEASE + '/MantidAlgorithms.dll',Plugins)
+addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll',MANTIDRELEASE + '/MantidDataHandling.dll',Plugins)
+addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + '/MantidDataObjects.dll',Plugins)
+addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + '/MantidCurveFitting.dll',Plugins)
+addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + '/MantidICat.dll',Plugins)
+addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + '/MantidNexus.dll',Plugins)
 # NeXus dlls for the plugins path
-addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll','../../../Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
-addFileV('hd425mdll','hd425m.dll','hd425m.dll','../../../Third_Party/lib/win' + ARCH + '/hd425m.dll',Plugins)
-addFileV('hm425mdll','hm425m.dll','hm425m.dll','../../../Third_Party/lib/win'+ ARCH +'/hm425m.dll',Plugins)
-addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll','../../../Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
+addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
+addFileV('hd425mdll','hd425m.dll','hd425m.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hd425m.dll',Plugins)
+addFileV('hm425mdll','hm425m.dll','hm425m.dll',CODEDIR + '/Third_Party/lib/win'+ ARCH +'/hm425m.dll',Plugins)
+addFileV('libNeXus0dll','lNeXus-0.dll','libNeXus-0.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/libNeXus-0.dll',Plugins)
 
 # Python algorithms
-pyalgsList = addCompList("PyAlgsDir","../../Framework/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
+pyalgsList = addCompList("PyAlgsDir",FRAMEWORKDIR + "/PythonAPI/PythonAlgorithms","PythonAlgs",pluginsDir,exclude_suffix=['.pyc'])[0]
 
 ##
 # Qt plugins
@@ -553,8 +569,8 @@ addSingleFile('./','qt.conf','qtcfile', MantidDlls)
 # Qt plugins
 mtdqtdllDir = addDirectory('MantidQtPluginsDir','mqtdir','mantid',qtpluginsDir)
 mtdqtdlls = addComponent('MantidQtPlugins', comp_guid['MantidQtPlugins'], mtdqtdllDir)
-addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll',MANTIDRELEASE + 'MantidQtCustomDialogs.dll',mtdqtdlls)
-addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll',MANTIDRELEASE + 'MantidQtCustomInterfaces.dll',mtdqtdlls)
+addFileV('MantidQtCustomDialogs','MQTCD.dll','MantidQtCustomDialogs.dll',MANTIDRELEASE + '/MantidQtCustomDialogs.dll',mtdqtdlls)
+addFileV('MantidQtCustomInterfaces','MQTCInt.dll','MantidQtCustomInterfaces.dll',MANTIDRELEASE + '/MantidQtCustomInterfaces.dll',mtdqtdlls)
 
 documentsDir = addDirectory('DocumentsDir','docs','docs',InstallDir)
 Documents = addComponent('Documents',comp_guid['Documents'],documentsDir)
@@ -568,45 +584,45 @@ addTo(Logs,'CreateFolder',{})
 includeDir = addDirectory('IncludeDir','include','include',InstallDir)
 includeMantidAlgorithmsDir = addDirectory('IncludeMantidAlgorithmsDir','MAlgs','MantidAlgorithms',includeDir)
 IncludeMantidAlgorithms = addComponent('IncludeMantidAlgorithms',comp_guid['IncludeMantidAlgorithms'],includeMantidAlgorithmsDir)
-addAllFiles('../../Framework/includes/MantidAlgorithms','alg',IncludeMantidAlgorithms)
+addAllFiles(FRAMEWORKDIR + '/Algorithms/inc/MantidAlgorithms','alg',IncludeMantidAlgorithms)
 
 includeMantidAPIDir = addDirectory('IncludeMantidAPIDir','MAPI','MantidAPI',includeDir)
 IncludeMantidAPI = addComponent('IncludeMantidAPI',comp_guid['IncludeMantidAPI'],includeMantidAPIDir)
-addAllFiles('../../Framework/includes/MantidAPI','api',IncludeMantidAPI)
+addAllFiles(FRAMEWORKDIR + '/API/inc/MantidAPI','api',IncludeMantidAPI)
 
 includeMantidCurveFittingDir = addDirectory('IncludeMantidCurveFittingDir','MAlgs','MantidCurveFitting',includeDir)
 IncludeMantidCurveFitting = addComponent('IncludeMantidCurveFitting',comp_guid['IncludeMantidCurveFitting'],includeMantidCurveFittingDir)
-addAllFiles('../../Framework/includes/MantidCurveFitting','cur',IncludeMantidCurveFitting)
+addAllFiles(FRAMEWORKDIR + '/CurveFitting/inc/MantidCurveFitting','cur',IncludeMantidCurveFitting)
 
 includeMantidDataHandlingDir = addDirectory('IncludeMantidDataHandlingDir','MDH','MantidDataHandling',includeDir)
 IncludeMantidDataHandling = addComponent('IncludeMantidDataHandling',comp_guid['IncludeMantidDataHandling'],includeMantidDataHandlingDir)
-addAllFiles('../../Framework/includes/MantidDataHandling','dh',IncludeMantidDataHandling)
+addAllFiles(FRAMEWORKDIR + '/DataHandling/inc/MantidDataHandling','dh',IncludeMantidDataHandling)
 
 includeMantidDataObjectsDir = addDirectory('IncludeMantidDataObjectsDir','MDO','MantidDataObjects',includeDir)
 IncludeMantidDataObjects = addComponent('IncludeMantidDataObjects',comp_guid['IncludeMantidDataObjects'],includeMantidDataObjectsDir)
-addAllFiles('../../Framework/includes/MantidDataObjects','do',IncludeMantidDataObjects)
+addAllFiles(FRAMEWORKDIR + '/DataObjects/inc/MantidDataObjects','do',IncludeMantidDataObjects)
 
-includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList','../../Framework/includes/MantidGeometry','MantidGeometry',includeDir)[0]
+includeMantidGeometryDirList = addCompList('IncludeMantidGeometryDirList',FRAMEWORKDIR + '/Geometry/inc/MantidGeometry','MantidGeometry',includeDir)[0]
 
 includeMantidKernelDir = addDirectory('IncludeMantidKernelDir','KER','MantidKernel',includeDir)
 IncludeMantidKernel = addComponent('IncludeMantidKernel',comp_guid['IncludeMantidKernel'],includeMantidKernelDir)
-addAllFiles('../../Framework/includes/MantidKernel','ker',IncludeMantidKernel)
+addAllFiles(FRAMEWORKDIR + '/Kernel/inc/MantidKernel','ker',IncludeMantidKernel)
 
 includeMantidNexusDir = addDirectory('IncludeMantidNexusDir','NEX','MantidNexus',includeDir)
 IncludeMantidNexus = addComponent('IncludeMantidNexus',comp_guid['IncludeMantidNexus'],includeMantidNexusDir)
-addAllFiles('../../Framework/includes/MantidNexus','nex',IncludeMantidNexus)
+addAllFiles(FRAMEWORKDIR + '/Nexus/inc/MantidNexus','nex',IncludeMantidNexus)
 
 includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','MantidPythonAPI',includeDir)
 IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI',comp_guid['IncludeMantidPythonAPI'],includeMantidPythonAPIDir)
-addAllFiles('../../Framework/includes/MantidPythonAPI','papi',IncludeMantidPythonAPI)
+addAllFiles(FRAMEWORKDIR + '/PythonAPI/inc/MantidPythonAPI','papi',IncludeMantidPythonAPI)
 
-boostList = addCompList('boost','../../../Third_Party/include/boost','boost',includeDir)[0]
-pocoList = addCompList('poco','../../../Third_Party/include/Poco','Poco',includeDir)[0]
+boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
+pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
 #-------------------  end of Includes ---------------------------------------
 
-sconsList = addCompList('scons','../../../Third_Party/src/scons-local','scons-local',InstallDir)[0]
+sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
 
-ins_def_dir = '../../Instrument'
+ins_def_dir = CODEDIR + '/Mantid/Instrument'
 ins_suffix = '.xml'
 instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir, include_suffix=[ins_suffix])
 # At r4214 instrument cache files were moved to be written to managed workspace temp directory
@@ -632,35 +648,35 @@ addTo(Data,'CreateFolder',{})
 
 #sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
 #SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC3}',sourceMantidAlgorithmsDir)
-#addAllFilesExt('../../Framework/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
+#addAllFilesExt(FRAMEWORKDIR + '/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
 
 #sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
 #SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
-#addAllFilesExt('../../Framework/API/src','api','cpp',SourceMantidAPI)
+#addAllFilesExt(FRAMEWORKDIR + '/API/src','api','cpp',SourceMantidAPI)
 
 # sourceMantidDataHandlingDir = addDirectory('SourceMantidDataHandlingDir','Mdh','MantidDataHandling',sourceDir)
 # SourceMantidDataHandling = addComponent('SourceMantidDataHandling','{3DE8C8E7-86F1-457f-8933-149AD79EA9D7}',sourceMantidDataHandlingDir)
-# addAllFilesExt('../../Framework/DataHandling/src','dh','cpp',SourceMantidDataHandling)
+# addAllFilesExt(FRAMEWORKDIR + '/DataHandling/src','dh','cpp',SourceMantidDataHandling)
 
 # sourceMantidDataObjectsDir = addDirectory('SourceMantidDataObjectsDir','Mdo','MantidDataObjects',sourceDir)
 # SourceMantidDataObjects = addComponent('SourceMantidDataObjects','{0C071065-8E0C-4e9c-996E-454692803E7F}',sourceMantidDataObjectsDir)
-# addAllFilesExt('../../Framework/DataObjects/src','dh','cpp',SourceMantidDataObjects)
+# addAllFilesExt(FRAMEWORKDIR + '/DataObjects/src','dh','cpp',SourceMantidDataObjects)
 
 # sourceMantidGeometryDir = addDirectory('SourceMantidGeometryDir','MGeo','MantidGeometry',sourceDir)
 # SourceMantidGeometry = addComponent('SourceMantidGeometry','{949C5B12-7D4B-4a8a-B132-718F6AEA9E69}',sourceMantidGeometryDir)
-# addAllFilesExt('../../Framework/Geometry/src','geo','cpp',SourceMantidGeometry)
+# addAllFilesExt(FRAMEWORKDIR + '/Geometry/src','geo','cpp',SourceMantidGeometry)
 
 # sourceMantidKernelDir = addDirectory('SourceMantidKernelDir','MKer','MantidKernel',sourceDir)
 # SourceMantidKernel = addComponent('SourceMantidKernel','{B7126F68-544C-4e50-9438-E0D6F6155D82}',sourceMantidKernelDir)
-# addAllFilesExt('../../Framework/Kernel/src','ker','cpp',SourceMantidKernel)
+# addAllFilesExt(FRAMEWORKDIR + '/Kernel/src','ker','cpp',SourceMantidKernel)
 
 # sourceMantidNexusDir = addDirectory('SourceMantidNexusDir','MNex','MantidNexus',sourceDir)
 # SourceMantidNexus = addComponent('SourceMantidNexus','{35AABB59-CDE3-49bf-9F96-7A1AFB72FD2F}',sourceMantidNexusDir)
-# addAllFilesExt('../../Framework/Nexus/src','nex','cpp',SourceMantidNexus)
+# addAllFilesExt(FRAMEWORKDIR + '/Nexus/src','nex','cpp',SourceMantidNexus)
 
 # sourceMantidPythonAPIDir = addDirectory('SourceMantidPythonAPIDir','MPAPI','MantidPythonAPI',sourceDir)
 # SourceMantidPythonAPI = addComponent('SourceMantidPythonAPI','{CACED707-92D7-47b9-8ABC-378275D99082}',sourceMantidPythonAPIDir)
-# addAllFilesExt('../../Framework/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
+# addAllFilesExt(FRAMEWORKDIR + '/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
 
 #----------------- end of Source ---------------------------------------
 
@@ -673,22 +689,22 @@ addAllFilesExt(USERALGORITHMSDIR,'ualg','h',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'build.bat','UA_build.bat',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'createAlg.py','UA_ca.py',UserAlgorithms)
 addSingleFile(USERALGORITHMSDIR,'SConstruct','UA_Scon',UserAlgorithms)
-addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib','../../Framework/Kernel/lib/MantidKernel.lib',UserAlgorithms)
-addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib','../../Framework/API/lib/MantidAPI.lib',UserAlgorithms)
-addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib','../../Framework/DataObjects/lib/MantidDataObjects.lib',UserAlgorithms)
-addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib','../../Framework/Geometry/lib/MantidGeometry.lib',UserAlgorithms)
-addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib','../../Framework/CurveFitting/lib/MantidCurveFitting.lib',UserAlgorithms)
-addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib','../../../Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
-addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib','../../../Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
+addFileV('MantidKernel_lib','MKernel.lib','MantidKernel.lib',MANTIDRELEASE + '/MantidKernel.lib',UserAlgorithms)
+addFileV('MantidGeometry_lib','MGeo.lib','MantidGeometry.lib',MANTIDRELEASE + '/MantidGeometry.lib',UserAlgorithms)
+addFileV('MantidAPI_lib','MAPI.lib','MantidAPI.lib',MANTIDRELEASE + '/MantidAPI.lib',UserAlgorithms)
+addFileV('MantidDataObjects_lib','MDObject.lib','MantidDataObjects.lib',MANTIDRELEASE + '/MantidDataObjects.lib',UserAlgorithms)
+addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib',MANTIDRELEASE + '/MantidCurveFitting.lib',UserAlgorithms)
+addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
+addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
 
 #--------------- Python ---------------------------------------------------------------------------------
 Sip = addComponent('Sip',comp_guid['Sip'],binDir)
 addSingleFile(SIPDIR,'sip.pyd','sip',Sip)
 PyQtList = addCompList('PyQtDir', PYQTDIR,'PyQt4',binDir, exclude_suffix=['_d.pyd','.pyc'])[0]
-addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', '../../Framework/PythonAPI/MantidFramework.py', MantidDlls)
+addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
-scriptsList = addCompList("ScriptsDir","../../Scripts","scripts",InstallDir)[0]
+scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/Scripts","scripts",InstallDir)[0]
 
 # M. Gigg 2010-11-19: The Excitations directory was renamed. Unfortunately this causes the directory for the new installer to get left around
 # on certain setups that have used the scripts.  I could force a delete of the folder but if a user has added their own scripts then that would remove them too.
@@ -704,7 +720,7 @@ addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
 #-------------------------- Colormaps ------------------------------------
 ColormapsDir = addDirectory('ColormapsDir','colors','colormaps',InstallDir)
 Colormaps = addComponent('Colormaps',comp_guid['Colormaps'],ColormapsDir)
-addAllFiles('../colormaps','col',Colormaps)
+addAllFiles(CODEDIR + '/Mantid/Installers/colormaps','col',Colormaps)
 #-----------------------------------------------------------------------
 
 ProgramMenuFolder = addDirectory('ProgramMenuFolder','PMenu','Programs',TargetDir)
@@ -774,6 +790,6 @@ addTo(Product,'UIRef',{'Id':'WixUI_FeatureTree'})
 addTo(Product,'UIRef',{'Id':'WixUI_ErrorProgressText'})
 
 # Output the file so that the next step in the chain can process it
-f = open('tmp.wxs','w')
+f = open(WXSFILE,'w')
 doc.writexml(f,newl="\r\n")
 f.close()
