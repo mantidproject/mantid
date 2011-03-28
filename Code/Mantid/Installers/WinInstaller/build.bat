@@ -79,8 +79,8 @@ ENDLOCAL
 echo "Successfully created %FINALMSI%"
 echo "MSI build succeeded"
 cd %START_DIR%
-EXIT /B 0
+EXIT 0
 
 :failed
 ENDLOCAL
-EXIT /B 1
+EXIT 1

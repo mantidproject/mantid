@@ -12,7 +12,7 @@ import subprocess
 
 # Where is the Code directory, i.e. trunk/Code
 CODEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..\..\..'))
-QTDIR = 'C:/Builds/qt-everywhere-opensource-src-4.7.2' #'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
+QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
 QTLIBDIR = QTDIR + '/lib'
 QTPLUGINDIR = QTDIR + '/plugins'
 PYTHONDIR = sys.prefix.replace('\\','/')
