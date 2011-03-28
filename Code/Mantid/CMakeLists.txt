@@ -7,7 +7,9 @@ set ( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/Build/CMake")
 # Define the project name.
 project ( Mantid )
 
+###########################################################################
 # Set paths to Third_Party for Windows and Mac builds
+###########################################################################
 if ( NOT THIRD_PARTY )
   set ( THIRD_PARTY "${PROJECT_SOURCE_DIR}/../Third_Party" )
   if ( WIN32 )
@@ -17,31 +19,45 @@ if ( NOT THIRD_PARTY )
   endif ()
 endif ()
 
+###########################################################################
 # Call our setup script
+###########################################################################
 include ( CommonSetup )
 
+###########################################################################
 # Add linux-specific things
+###########################################################################
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   include ( LinuxSetup )
 endif ()
 
+###########################################################################
 # Add compiler options if using gcc
+###########################################################################
 if ( CMAKE_COMPILER_IS_GNUCXX )
   include ( GNUSetup )
 endif ()
 
-# Now add the components
-
-add_subdirectory ( Framework )
-
+###########################################################################
 # Check for Qt
+###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )
 include ( ${QT_USE_FILE} )
 
+###########################################################################
 # Now qwt
+###########################################################################
 find_package ( Qwt REQUIRED )
 
+###########################################################################
+# Add QtPropertyBrowser to build
+###########################################################################
 add_subdirectory ( QtPropertyBrowser )
+
+###########################################################################
+# Now add in all the components
+###########################################################################
+add_subdirectory ( Framework )
 
 include_directories ( Framework/Kernel/inc )
 include_directories ( Framework/Geometry/inc )

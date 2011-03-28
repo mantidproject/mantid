@@ -31,7 +31,7 @@ if ( Subversion_FOUND )
   Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Framework)
 else ()
   # Just use a dummy version number and print a warning
-  message ( "Subversion not found - using 0 for revision number in MantidVersion.h" )
+  message ( STATUS "Subversion not found - using 0 for revision number in MantidVersion.h" )
   set ( Framework_WC_REVISION 0 )
 endif ()
 # Create the header with the revision number in
@@ -41,7 +41,7 @@ configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
 )
 
 ###########################################################################
-# Look for dependencies - bail out if any necessary oned not found
+# Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
 
 # Might just as well link everything to Boost & Poco (found in CommonSetup)
@@ -49,6 +49,14 @@ set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
 
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
+
+###########################################################################
+# Add OpenMP flags here - don't want them on QtPropertyBrowser
+###########################################################################
+if ( OPENMP_FOUND )
+  set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
+endif ()
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
