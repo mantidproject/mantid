@@ -7,6 +7,7 @@ from reduction.command_interface import ReductionSingleton
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
+import SANSReduction
 import MantidFramework
 import copy
 from SANSadd2 import *
@@ -224,6 +225,8 @@ def CompWavRanges(wavelens, plot=True):
             raise RuntimeError('Error CompWavRanges() requires a list of wavelengths between which reductions will be performed.')
     
     try:
+        ReductionSingleton().to_wavelen.set_rebin(w_low=wavelens[0],
+            w_high=wavelens[len(wavelens)-1])
         calculated = [ReductionSingleton()._reduce()]
         for i in range(0, len(wavelens)-1):
             settings = copy.deepcopy(ReductionSingleton().reference())
@@ -572,6 +575,35 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
+        sample_ws = SANSReduction.AssignSample(run_file)[0]
+        if (not sample_ws) or (len(sample_ws) == 0):
+            issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
+            return
+        
+        #Sample trans
+        run_file = run['sample_trans']
+        run_file2 = run['sample_direct_beam']
+        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
+        if len(run_file) > 0 and len(ws1) == 0:
+            issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
+            return
+        if len(run_file2) > 0 and len(ws2) == 0: 
+            issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
+            return
+        
+        # Sans Can 
+        run_file = run['can_sans']
+        can_ws = AssignCan(run_file + format)[0]
+        if run_file != '' and len(can_ws) == 0:
+            issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
+            return
+
+        #Can trans
+        run_file = run['can_trans']
+        run_file2 = run['can_direct_beam']
+        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
+    
+def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     XSTEP = YSTEP = ReductionSingleton().cen_find_step
 
     setting = copy.deepcopy(ReductionSingleton().reference())
