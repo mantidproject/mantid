@@ -31,6 +31,22 @@ namespace API
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Get the index of the dimension that matches the name given
+   *
+   * @param name :: name of the dimensions
+   * @return the index (size_t)
+   * @throw runtime_error if it cannot be found.
+   */
+  size_t IMDEventWorkspace::getDimensionIndexByName(const std::string & name)
+  {
+    for (size_t d=0; d<dimensions.size(); d++)
+      if (dimensions[d].getName() == name)
+        return d;
+    throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDEventWorkspace.");
+  }
+
+
 
 }//namespace MDEvents
 

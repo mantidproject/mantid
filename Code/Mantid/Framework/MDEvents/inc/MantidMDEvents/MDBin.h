@@ -49,6 +49,8 @@ namespace MDEvents
     /// The maximum edge of the bin for each dimension in the workspace
     CoordType m_max[nd];
 
+    /// Index of where this bin lands into the broader histogrammed workspace.
+    size_t m_index;
 
 
   };

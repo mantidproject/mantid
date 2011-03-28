@@ -9,6 +9,10 @@ namespace MDEvents
 
   //----------------------------------------------------------------------------------------------
   /** Constructor given the 4 dimensions
+   * @param dimX :: X dimension binning parameters
+   * @param dimY :: Y dimension binning parameters
+   * @param dimZ :: Z dimension binning parameters
+   * @param dimT :: T (time) dimension binning parameters
    */
   MDHistoWorkspace::MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)

@@ -39,6 +39,9 @@ namespace API
     /// Get that dimension
     virtual Dimension getDimension(size_t dim);
 
+    /// Get the dimension index, searching by name
+    virtual size_t getDimensionIndexByName(const std::string & name);
+
   protected:
     /// Vector with each dimension (length must match nd)
     std::vector<Dimension> dimensions;

@@ -25,6 +25,7 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class MDEventWorkspaceTest :    public CxxTest::TestSuite
 {
@@ -85,18 +86,34 @@ public:
     delete ew;
   }
 
+  /** Adding dimension info and searching for it back */
+  void test_addDimension_getDimension()
+  {
+    MDEventWorkspace2 * ew = new MDEventWorkspace2();
+    Dimension dim(-1, +1, "Qx", "Ang");
+    TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim); )
+    Dimension dim2(-1, +1, "Qy", "Ang");
+    TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim2); )
+    TS_ASSERT_EQUALS( ew->getNumDims(), 2);
+    TS_ASSERT_EQUALS( ew->getDimension(0).getName(), "Qx");
+    TS_ASSERT_EQUALS( ew->getDimension(1).getName(), "Qy");
+    TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qx"), 0);
+    TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qy"), 1);
+    TS_ASSERT_THROWS_ANYTHING( ew->getDimensionIndexByName("IDontExist"));
+  }
 
 
-  /** Create a test MDEventWorkspace<nd>
+
+  /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
    *
-   * @param splitInto
+   * @param splitInto :: each dimension will split into this many subgrids
    * @return
    */
   template<size_t nd>
   boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > makeMDEW(size_t splitInto, double min, double max)
   {
     boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> >  out(new MDEventWorkspace<MDEvent<nd>,nd>());
-    BoxController_sptr bc(new BoxController(2));
+    BoxController_sptr bc(new BoxController(nd));
     bc->setSplitThreshold(5);
     bc->setSplitInto(splitInto);
     out->setBoxController(bc);
@@ -111,6 +128,7 @@ public:
     out->initialize();
     return out;
   }
+
 
 
   //-------------------------------------------------------------------------------------
@@ -234,6 +252,81 @@ public:
 //    std::cout << "addManyEvents() ran in " << tim.elapsed() << " secs.\n";
 //  }
 
+
+
+  /** Test binning into up to 4 dense histogram dimensions. */
+  void do_test_centerpointBinToMDHistoWorkspace( std::string name1, std::string name2, std::string name3, std::string name4,
+      size_t expected_events_per_bin)
+  {
+    size_t len = 10; // Make the box split into 12x12x12
+    double size = len * 1.0;  // Make each grid box 1.0 in size
+    size_t binlen = 5; // And bin more coarsely, 4x4x4
+
+    // 10x10x10 eventWorkspace
+    MDEventWorkspace3::sptr ws = makeMDEW<3>(len, 0.0, size);
+
+    // Put one event per bin
+    for (size_t x=0; x<len; x++)
+      for (size_t y=0; y<len; y++)
+        for (size_t z=0; z<len; z++)
+        {
+          CoordType centers[3] = {x+0.5,y+0.5,z+0.5};
+          ws->addEvent( MDEvent<3>(1.0, 2.0, centers) );
+        }
+
+    // Split the box, serially.
+    ws->splitBox();
+    ws->splitAllIfNeeded(NULL);
+    ws->refreshCache();
+    TS_ASSERT_EQUALS( ws->getNPoints(), len*len*len);
+    TS_ASSERT_DELTA( ws->getBox()->getSignal(), len*len*len, 1e-5);
+
+    // Will bin it into a 5x5x5 workspace
+    std::vector<MDHistoDimension_sptr> dims;
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", 0, size, name1 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name2, "id1", 0, size, name2 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name3, "id2", 0, size, name3 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name4, "id3", 0, size, name4 != "NONE" ? binlen : 1)));
+
+    // Call the method
+    MDHistoWorkspace_sptr out;
+    TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], NULL) );
+    TS_ASSERT(out);
+
+    // How many points should be in the output?
+    size_t numPointsExpected = 1;
+    for (size_t i=0; i<4; i++)
+      numPointsExpected *= dims[i]->getNBins();
+    TS_ASSERT_EQUALS(out->getNPoints(), numPointsExpected);
+
+    for (size_t i=0; i < out->getNPoints(); i++)
+    {
+      TS_ASSERT_DELTA( out->getSignalAt(i), expected_events_per_bin * 1.0, 1e-5 );
+      TS_ASSERT_DELTA( out->getErrorAt(i), expected_events_per_bin * 2.0, 1e-5 );
+    }
+
+  }
+
+
+  void test_centerpointBinToMDHistoWorkspace_3D()
+  {
+    do_test_centerpointBinToMDHistoWorkspace("Axis0", "Axis1", "Axis2", "NONE", 8);
+  }
+
+  void test_centerpointBinToMDHistoWorkspace_3D_scrambled_order()
+  {
+    do_test_centerpointBinToMDHistoWorkspace("Axis1", "Axis0", "NONE", "Axis2", 8); // 2x2x2 blocks
+  }
+
+  void test_centerpointBinToMDHistoWorkspace_2D()
+  {
+    do_test_centerpointBinToMDHistoWorkspace("Axis0", "Axis1", "NONE", "NONE", 40); // 2x2x10 blocks
+  }
+
+  void test_centerpointBinToMDHistoWorkspace_1D()
+  {
+    do_test_centerpointBinToMDHistoWorkspace("NONE", "Axis2", "NONE", "NONE", 200); // 2x10x10 blocks
+  }
 
 
 };

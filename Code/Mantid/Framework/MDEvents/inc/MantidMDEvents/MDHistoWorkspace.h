@@ -213,6 +213,9 @@ namespace MDEvents
 
   };
 
+  /// A shared pointer to a MDHistoWorkspace
+  typedef boost::shared_ptr<MDHistoWorkspace> MDHistoWorkspace_sptr;
+
 
 } // namespace Mantid
 } // namespace MDEvents
