@@ -12,7 +12,7 @@ if "%2" == "" (
 ) ELSE (
   SET TMPDIR=%CD%\%2
 )
-if not exist %TMPDIR% mkdir %TMPDIR%
+if not exist "%TMPDIR%" mkdir "%TMPDIR%"
 
 REM Location of final output
 if "%3" == "" (
@@ -31,7 +31,7 @@ if /i not %1 == x86 (
 )
 
 SET STARTDIR=%CD%
-cd %~dp0
+cd "%~dp0"
 
 REM - File names
 SET TMPWXS=%TMPDIR%\msi_input.wxs
@@ -39,19 +39,22 @@ SET WXSOBJ=%TMPDIR%\wix_obj.wixobj
 SET FINALMSI=%OUTPUTDIR%\%MSI_NAME%
 
 REM Clean previous output
-del %TMPWXS% %WXSOBJ% %FINALMSI%
+echo Cleaning previous output
+del "%TMPWXS%" "%WXSOBJ%" "%FINALMSI%"
 
 REM Generate input wxs file
-python generateWxs.py %OUTPUTDIR% %TMPDIR%
+echo Running generateWxs to generate %TMPWXS%
+python generateWxs.py "%OUTPUTDIR%" "%TMPDIR%"
 if errorlevel 1 goto wxs_error
 
 REM Generate wix object file
-candle -out %WXSOBJ% %TMPWXS%  
+echo Running candle to generate %WXSOBJ%
+candle -out "%WXSOBJ%" "%TMPWXS%"  
 if errorlevel 1 goto candle_error
 
 REM Generate final MSI
-echo %FINALMSI%
-light -out %FINALMSI% %WXSOBJ% %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib  -loc WixUI_en-us.wxl
+echo Running light to generate %FINALMSI%
+light -out "%FINALMSI%" "%WXSOBJ%" %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib  -loc WixUI_en-us.wxl
 if errorlevel 1 goto light_error
 
 ENDLOCAL
@@ -75,12 +78,12 @@ cd %START_DIR%
 goto failed
 
 :end
-ENDLOCAL
 echo "Successfully created %FINALMSI%"
 echo "MSI build succeeded"
 cd %START_DIR%
-EXIT 0
+ENDLOCAL
+EXIT /B 0
 
 :failed
 ENDLOCAL
-EXIT 1
+EXIT /B 1

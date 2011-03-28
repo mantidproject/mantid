@@ -26,7 +26,9 @@ if len(sys.argv) == 3:
     MANTIDRELEASE = MANTIDRELEASE.replace('\\','/')
     WXSDIR = sys.argv[2]
     WXSFILE = WXSDIR.replace('\\','/') + '/msi_input.wxs'
-else:
+
+# Hack while we still have scons around in some places
+if not os.path.exists(MANTIDRELEASE + '/MantidPlot.exe'):
     MANTIDRELEASE = FRAMEWORKDIR + '/release'
     WXSFILE = 'msi_input.wxs'
 
