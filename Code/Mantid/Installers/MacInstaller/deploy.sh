@@ -23,12 +23,13 @@ update_lib_paths() {
     done
 }
 
-BUILDPATH=../../Framework/release
-THIRDPARTY=../../../Third_Party
+# Build directory can now be anywhere - must be supplied as argument
+BUILDPATH=$1
+THIRDPARTY=../../../Third_Party/lib/mac64
 PYTHONAPI=../../Framework/PythonAPI
 
 # First copy in the MantidPlot executable bundle
-cp -R $BUILDPATH/MantidPlot.app/Contents MantidPlot.app/
+cp -R $BUILDPATH/MantidPlot MantidPlot.app/Contents/MacOS/
 
 # Copy in the colormaps. Use rsync to exclude .svn directories.
 rsync -aC ../colormaps MantidPlot.app/Contents/Resources/
@@ -52,28 +53,29 @@ cp $BUILDPATH/libMantidKernel.dylib MantidPlot.app/Contents/MacOS/
 cp $BUILDPATH/libMantidGeometry.dylib MantidPlot.app/Contents/MacOS/
 cp $BUILDPATH/libMantidAPI.dylib MantidPlot.app/Contents/MacOS/
 # Now our Qt stuff
-cp $BUILDPATH/libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/
-install_name_tool -change @executable_path/../Frameworks/libMantidQtAPI.1.dylib @executable_path/./libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/MantidPlot
-cp $BUILDPATH/libMantidWidgets.1.dylib MantidPlot.app/Contents/MacOS/
-install_name_tool -change libMantidQtAPI.1.dylib @executable_path/./libMantidQtAPI.1.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
-install_name_tool -change @executable_path/../Frameworks/libMantidWidgets.1.dylib @executable_path/./libMantidWidgets.1.dylib MantidPlot.app/Contents/MacOS/MantidPlot
-cp $BUILDPATH/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/Frameworks/
-install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.1.dylib
-install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
-install_name_tool -change libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.1.dylib
-install_name_tool -change libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.1.dylib
+cp $BUILDPATH/libMantidQtAPI.dylib MantidPlot.app/Contents/MacOS/
+install_name_tool -change @executable_path/../Frameworks/libMantidQtAPI.dylib @executable_path/./libMantidQtAPI.dylib MantidPlot.app/Contents/MacOS/MantidPlot
+cp $BUILDPATH/libMantidWidgets.dylib MantidPlot.app/Contents/MacOS/
+install_name_tool -change libMantidQtAPI.dylib @executable_path/./libMantidQtAPI.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.dylib
+install_name_tool -change @executable_path/../Frameworks/libMantidWidgets.dylib @executable_path/./libMantidWidgets.dylib MantidPlot.app/Contents/MacOS/MantidPlot
+cp $BUILDPATH/libQtPropertyBrowser.dylib MantidPlot.app/Contents/Frameworks/
+install_name_tool -change libQtPropertyBrowser.dylib @loader_path/../Frameworks/libQtPropertyBrowser.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.dylib
+install_name_tool -change libQtPropertyBrowser.dylib @loader_path/../Frameworks/libQtPropertyBrowser.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.dylib
+install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.dylib
+install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.dylib
 
 # Now lots of dependencies
 # ...third party directory. Specific required versions only.
-cp $THIRDPARTY/lib/mac/lib*.*.dylib MantidPlot.app/Contents/MacOS/
-cp $THIRDPARTY/lib/mac/libboost* MantidPlot.app/Contents/MacOS/
+cp $THIRDPARTY/lib*.*.dylib MantidPlot.app/Contents/MacOS/
+cp $THIRDPARTY/libboost* MantidPlot.app/Contents/MacOS/
 # Remove a couple that we don't want in the MacOS directory
-rm MantidPlot.app/Contents/MacOS/libqwt.5.dylib
+rm MantidPlot.app/Contents/MacOS/libqwt.5.*
+rm MantidPlot.app/Contents/MacOS/libqwtplot3d.0.*.dylib
 rm MantidPlot.app/Contents/MacOS/libNeXus.0.dylib
 # The NeXus library
 cp /usr/local/lib/libNeXus.0.dylib MantidPlot.app/Contents/Frameworks/
 # ...other stuff needed for qtiplot
-cp $THIRDPARTY/lib/mac/libqwt.5.dylib MantidPlot.app/Contents/Frameworks/
+cp $THIRDPARTY/libqwt.5.dylib MantidPlot.app/Contents/Frameworks/
 cp /Library/Frameworks/libqscintilla2.5.dylib MantidPlot.app/Contents/Frameworks/
 
 # Need to make sure all libraries point to local Qt, not system-wide one
@@ -110,8 +112,8 @@ cp ../../MantidPlot/qtiUtil.py MantidPlot.app/Contents/MacOS/
 cp ../../MantidPlot/mantidplotrc.py MantidPlot.app/Contents/MacOS/
 cp ../../MantidPlot/mantidplot.py MantidPlot.app/Contents/MacOS/
 # ...the sip and PyQt stuff
-cp /Library/Python/2.5/site-packages/sip.so MantidPlot.app/Contents/MacOS/
-cp -R /Library/Python/2.5/site-packages/PyQt4 MantidPlot.app/Contents/MacOS/
+cp /Library/Python/2.6/site-packages/sip.so MantidPlot.app/Contents/MacOS/
+cp -R /Library/Python/2.6/site-packages/PyQt4 MantidPlot.app/Contents/MacOS/
 
 # Need to point PyQt libraries to local ones
 cd MantidPlot.app/Contents/MacOS/PyQt4
@@ -137,7 +139,7 @@ install_name_tool -change /usr/local/lib/libNeXus.0.dylib @loader_path/../Conten
 cp $BUILDPATH/libMantidQtCustomDialogs.dylib MantidPlot.app/plugins/qtplugins/mantid
 cp $BUILDPATH/libMantidQtCustomInterfaces.dylib MantidPlot.app/plugins/qtplugins/mantid
 # Example Python algorithm
-cp -R $PYTHONAPI/PythonAlgorithms/* MantidPlot.app/plugins/PythonAlgs/
+rsync -aC $PYTHONAPI/PythonAlgorithms/* MantidPlot.app/plugins/PythonAlgs/
 
 PLUGINLIBS='MantidPlot.app/plugins/*.dylib'
 update_lib_paths "$PLUGINLIBS" "$MACOSLIBS" "$QTLIBS" ".."
@@ -145,5 +147,34 @@ PLUGINSLIBS='MantidPlot.app/plugins/qtplugins/mantid/*.dylib'
 update_lib_paths "$PLUGINSLIBS" "$MACOSLIBS" "$QTLIBS" "../../.."
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
 install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
-install_name_tool -change libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
-install_name_tool -change libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
+install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
+install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
+install_name_tool -change libiomp5.dylib @loader_path/../../../Contents/Frameworks/libiomp5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
+install_name_tool -change libiomp5.dylib @loader_path/../../../Contents/Frameworks/libiomp5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
+
+# Additions to fix up for cmake snow leopard build
+install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/MantidPlot
+cp /opt/intel/lib/libiomp5.dylib MantidPlot.app/Contents/Frameworks/
+
+cd MantidPlot.app/Contents/MacOS
+MANTIDLIBS=$(ls libMantid*.dylib)
+for l in $MANTIDLIBS
+do
+  echo $l
+  for m in $MANTIDLIBS
+  do
+    install_name_tool -change $l @loader_path/./$l $m
+    install_name_tool -change @executable_path/../Frameworks/$l @loader_path/./$l $m
+  done
+  install_name_tool -change @executable_path/../Frameworks/$l @loader_path/./$l MantidPlot
+  install_name_tool -change libiomp5.dylib @loader_path/../Frameworks/libiomp5.dylib $l
+done
+install_name_tool -change libiomp5.dylib @loader_path/../Frameworks/libiomp5.dylib libMantidPythonAPI.so
+
+cd ../../plugins
+MTDPLUGINS=$(ls libMantid*.dylib)
+for n in $MTDPLUGINS
+do
+  install_name_tool -change libMantidDataObjects.dylib @loader_path/./libMantidDataObjects.dylib $n
+  install_name_tool -change libiomp5.dylib @loader_path/../Contents/Frameworks/libiomp5.dylib $n
+done
