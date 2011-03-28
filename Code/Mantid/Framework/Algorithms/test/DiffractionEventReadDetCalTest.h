@@ -75,8 +75,8 @@ public:
     boost::shared_ptr<Mantid::Geometry::IComponent> det = ins->getComponentByName("bank1");
     V3D PosNew = det->getPos();
     Quat rot = det->getRotation();
-    //TS_ASSERT_EQUALS(PosNew, V3D(0.500000,0.167548,-0.167548));
-    //TS_ASSERT_EQUALS(rot, Quat(0.707146,-8.47033e-22,-0.707068,-7.53079e-13));
+    TS_ASSERT_EQUALS(PosNew, V3D(0.500000,0.167548,-0.167548));
+    TS_ASSERT_EQUALS(rot, Quat(0.707146,-8.47033e-22,-0.707068,-7.53079e-13));
 
 
     // remove file created by this algorithm

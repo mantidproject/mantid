@@ -366,17 +366,16 @@ namespace Algorithms
     std::vector<boost::shared_ptr<RectangularDetector> > detList;
     // --------- Loading only one bank ----------------------------------
     std::string onebank = getProperty("BankName");
-    bool doOneBank = (onebank != "");
     for (int i=0; i < inst->nelements(); i++)
     {
       boost::shared_ptr<RectangularDetector> det;
       boost::shared_ptr<ICompAssembly> assem;
-
+      boost::shared_ptr<ICompAssembly> assem2;
+  
       det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-      if (det) 
+      if (det)
       {
-        if (det->getName().compare(onebank) == 0) detList.push_back(det);
-        if (!doOneBank) detList.push_back(det);
+        detList.push_back(det);
       }
       else
       {
@@ -390,13 +389,31 @@ namespace Algorithms
             det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
             if (det)
             {
-               if (det->getName().compare(onebank) == 0) detList.push_back(det);
-               if (!doOneBank) detList.push_back(det);
+              detList.push_back(det);
+  
+            }
+            else
+            {
+              //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+              // We are not doing a full recursive search since that will be very long for lots of pixels.
+              assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+              if (assem2)
+              {
+                for (int k=0; k < assem2->nelements(); k++)
+                {
+                  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+                  if (det)
+                  {
+                    detList.push_back(det);
+                  }
+                }
+              }
             }
           }
         }
       }
     }
+
 
     // set-up minimizer
 

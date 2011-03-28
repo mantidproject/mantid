@@ -137,10 +137,13 @@ namespace Algorithms
     {
       boost::shared_ptr<RectangularDetector> det;
       boost::shared_ptr<ICompAssembly> assem;
-
+      boost::shared_ptr<ICompAssembly> assem2;
+  
       det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
-     if (det)
+      if (det)
+      {
         detList.push_back(det);
+      }
       else
       {
         //Also, look in the first sub-level for RectangularDetectors (e.g. PG3).
@@ -151,11 +154,33 @@ namespace Algorithms
           for (int j=0; j < assem->nelements(); j++)
           {
             det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
-            if (det) detList.push_back(det);
+            if (det)
+            {
+              detList.push_back(det);
+  
+            }
+            else
+            {
+              //Also, look in the second sub-level for RectangularDetectors (e.g. PG3).
+              // We are not doing a full recursive search since that will be very long for lots of pixels.
+              assem2 = boost::dynamic_pointer_cast<ICompAssembly>( (*assem)[j] );
+              if (assem2)
+              {
+                for (int k=0; k < assem2->nelements(); k++)
+                {
+                  det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
+                  if (det)
+                  {
+                    detList.push_back(det);
+                  }
+                }
+              }
+            }
           }
         }
       }
     }
+
 
     if (detList.size() == 0)
       throw std::runtime_error("This instrument does not have any RectangularDetector's. DiffractionEventReadDetCal cannot operate on this instrument at this time.");
