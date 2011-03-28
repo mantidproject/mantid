@@ -137,7 +137,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
     def _calibrate(self, wksp, calib, filterLogs=None):
         if wksp is None:
             return None
-        if self._grouping == "all":
+        if self._grouping == "All":
             groups = str(self._instrument);
         else:
             groups = ""
