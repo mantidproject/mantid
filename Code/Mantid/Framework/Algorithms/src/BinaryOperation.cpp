@@ -372,7 +372,7 @@ namespace Mantid
     // Disable optimization under the Visual Studio compiler
     // Optimizing, in combination with openmp parallelization causes occasional miscalculations
     // Re-enabled below, after the doSingleValue, doSingleSpectrum, doSingleColumn & do2D methods
-    #ifdef _WIN32
+    #ifdef _MSC_VER
       #pragma optimize( "", off )
       #pragma warning(disable:4748)  // This is about /Gs being irrelevant when not optimizing
     #endif
@@ -409,7 +409,9 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -459,7 +461,9 @@ namespace Mantid
       else
       {
         // ---- Histogram Output -----
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -530,7 +534,9 @@ namespace Mantid
 
           // Now loop over the spectra of the left hand side calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -556,7 +562,9 @@ namespace Mantid
 
         // Now loop over the spectra of the left hand side calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -634,7 +642,9 @@ namespace Mantid
 
           // Now loop over the spectra of each one calling the virtual function
           const int numHists = m_lhs->getNumberHistograms();
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
           for (int i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
@@ -674,7 +684,9 @@ namespace Mantid
 
         // Now loop over the spectra of each one calling the virtual function
         const int numHists = m_lhs->getNumberHistograms();
+#ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
+#endif
         for (int i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
@@ -710,7 +722,7 @@ namespace Mantid
     }
 
     // End of optimization disabling under Visual Studio
-    #ifdef _WIN32
+    #ifdef _MSC_VER
       #pragma optimize( "", on )
       #pragma warning(default:4748)
     #endif
