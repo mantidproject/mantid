@@ -175,6 +175,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("InputWorkspace",intermediaryWS) );
     TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("OutputWorkspace",finalWS) );
     TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("EMode","Indirect"));
+    TS_ASSERT_THROWS_NOTHING( alg1.setPropertyValue("EFixed", "1.845"));
     TS_ASSERT_THROWS_NOTHING( alg1.execute() );
     TS_ASSERT( alg1.isExecuted() );
     
