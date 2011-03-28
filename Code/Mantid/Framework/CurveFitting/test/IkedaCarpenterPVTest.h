@@ -173,7 +173,7 @@ public:
     TS_ASSERT_DELTA( out->getParameter("Kappa"), 46.025921 ,0.0001);
     TS_ASSERT_DELTA( out->getParameter("SigmaSquared"), 0.0338 ,0.001);
     TS_ASSERT_DELTA( out->getParameter("Gamma"), 0.0484 ,0.01);
-    // Fails everywhere except win64 TS_ASSERT_DELTA( out->getParameter("X0"), 48.229 ,0.01);
+    TS_ASSERT_DELTA( out->getParameter("X0"), 48.229 ,0.1);
 
    
     // could set workspace here but makes no difference since
