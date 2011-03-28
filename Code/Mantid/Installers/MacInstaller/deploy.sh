@@ -23,6 +23,12 @@ update_lib_paths() {
     done
 }
 
+if [ $# -ne 1 ]
+then
+  echo "Usage: deploy.sh [PATH_TO_BUILD_DIRECTORY]"
+  exit
+fi
+
 # Build directory can now be anywhere - must be supplied as argument
 BUILDPATH=$1
 THIRDPARTY=../../../Third_Party/lib/mac64
