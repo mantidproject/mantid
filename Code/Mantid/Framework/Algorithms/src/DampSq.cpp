@@ -82,7 +82,7 @@ namespace Algorithms
 	  double dqmax = qmax - iQVec[0];
 
 	  double damp;
-	  for (uint i = 0; i < iQVec.size(); i ++){
+	  for (unsigned int i = 0; i < iQVec.size(); i ++){
 		  // a) calculate damp coefficient
 		  switch (mode){
 		  case 1:
