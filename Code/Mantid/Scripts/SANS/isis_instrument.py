@@ -243,7 +243,7 @@ class ISISInstrument(instrument.Instrument):
         #the spectrum with this number is used to normalize the workspace data
         self._incid_monitor = int(self.definition.getNumberParameter(
             'default-incident-monitor-spectrum')[0])
-        self.cen_find_step = int(self.definition.getNumberParameter(
+        self.cen_find_step = float(self.definition.getNumberParameter(
             'centre-finder-step-size')[0])
 
         firstDetect = DetectorBank(self.definition, 'low-angle')
