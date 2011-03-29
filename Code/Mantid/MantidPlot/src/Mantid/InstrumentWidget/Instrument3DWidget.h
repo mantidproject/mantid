@@ -3,7 +3,7 @@
 
 #include "GL3DWidget.h"
 #include "MantidColorMap.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "MantidGeometry/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"

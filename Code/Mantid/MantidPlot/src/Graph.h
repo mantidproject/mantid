@@ -52,7 +52,7 @@
 #include "ScaleDraw.h"
 //#include "MantidKernel/Logger.h"
 #include "GraphOptions.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include<set>
 
 

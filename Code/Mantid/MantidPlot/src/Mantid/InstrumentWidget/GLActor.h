@@ -15,7 +15,7 @@
 #include "MantidGeometry/V3D.h"
 #include "GLObject.h"
 #include "GLColor.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <ostream>
 
 #include <QList>

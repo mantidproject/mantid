@@ -11,8 +11,8 @@
 #include "GLGroupPickBox.h"
 #include "DetSelector.h"
 
-#include "boost/shared_ptr.hpp"
-#include "boost/scoped_ptr.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
 
 class UnwrappedSurface;
 

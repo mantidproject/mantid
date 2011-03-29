@@ -5,7 +5,7 @@
 // Includes
 //---------------------------------------------
 #include "qwt_color_map.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidKernel/Logger.h"
 #include "../../GraphOptions.h"
 

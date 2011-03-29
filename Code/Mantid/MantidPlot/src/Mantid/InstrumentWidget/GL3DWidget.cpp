@@ -12,7 +12,7 @@
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Objects/Object.h"
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 #include <QtOpenGL>
 #include <QSpinBox>

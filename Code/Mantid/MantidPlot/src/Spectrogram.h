@@ -45,7 +45,7 @@
 //#include "MantidKernel/Logger.h"
 #include "Mantid//InstrumentWidget//MantidColorMap.h"
 #include "Mantid//InstrumentWidget//GLColor.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <QPainter>
 
 class MatrixData;

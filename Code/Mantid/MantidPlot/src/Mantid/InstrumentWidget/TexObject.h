@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidObject.h"
 #include "GLColor.h"
 #include <vector>

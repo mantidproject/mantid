@@ -3,7 +3,7 @@
 
 #include "../PlotCurve.h"
 #include "WorkspaceObserver.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidAPI/MatrixWorkspace.h"
 
 
