@@ -4,8 +4,8 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include <stdexcept>
-#include "boost/bind.hpp"
-#include "boost/function.hpp"
+#include <boost/bind.hpp>
+#include <boost/function.hpp>
 
 namespace Mantid
 {

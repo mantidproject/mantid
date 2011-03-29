@@ -9,7 +9,7 @@
 #include "MantidKernel/Exception.h"
 
 // Boost
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 // Poco
 #include <Poco/Notification.h>

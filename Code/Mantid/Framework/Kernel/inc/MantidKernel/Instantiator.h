@@ -1,7 +1,7 @@
 #ifndef MANTID_KERNEL_INSTANTIATOR_H_
 #define MANTID_KERNEL_INSTANTIATOR_H_
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid 
 {
