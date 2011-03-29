@@ -1,8 +1,8 @@
 #include <MantidAPI/ImplicitFunction.h>
 #include <boost/shared_ptr.hpp>
 #include <MantidAPI/IMDWorkspace.h>
-#include "boost/algorithm/string.hpp"
-#include "boost/format.hpp"
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 

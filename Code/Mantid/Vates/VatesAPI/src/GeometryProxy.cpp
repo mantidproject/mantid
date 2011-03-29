@@ -1,9 +1,9 @@
 #include "MantidVatesAPI/GeometryProxy.h"
 #include "MantidVatesAPI/DimensionComparitor.h"
 
-#include "boost/regex.hpp"
-#include "boost/function.hpp"
-#include "boost/bind.hpp"
+#include <boost/regex.hpp>
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace Mantid
 {

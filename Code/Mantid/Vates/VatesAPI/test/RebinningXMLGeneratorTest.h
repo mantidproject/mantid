@@ -9,7 +9,7 @@
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 using namespace Mantid::VATES;
 

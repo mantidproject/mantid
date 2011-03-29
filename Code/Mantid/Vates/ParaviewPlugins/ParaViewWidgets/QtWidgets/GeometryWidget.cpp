@@ -2,7 +2,7 @@
 #include "DimensionWidget.h"
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <map>
 #include <functional>
 #include <algorithm>

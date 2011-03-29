@@ -5,7 +5,7 @@
 #include <vtkCharArray.h>
 #include <vtkFieldData.h>
 #include "MantidVatesAPI/MetadataToFieldData.h"
-#include "boost/algorithm/string.hpp"
+#include <boost/algorithm/string.hpp>
 
 using Mantid::VATES::MetadataToFieldData;
 

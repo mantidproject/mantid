@@ -4,7 +4,7 @@
 #include <qgridlayout.h>
 #include <qwidget.h>
 #include <memory>
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #include "WidgetDllOption.h"
 

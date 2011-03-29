@@ -1,7 +1,7 @@
 #ifndef MANTID_VATES_VTKPROXYFACTORY_H_
 #define MANTID_VATES_VTKPROXYFACTORY_H_
 
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 
 namespace Mantid

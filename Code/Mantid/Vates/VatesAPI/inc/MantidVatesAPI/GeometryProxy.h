@@ -6,7 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDWorkspace.h"
-#include "boost/scoped_ptr.hpp"
+#include <boost/scoped_ptr.hpp>
 #include <map>
 
 namespace Mantid

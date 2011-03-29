@@ -5,7 +5,7 @@
 #include "MDDataObjects/MDImage.h"
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidVatesAPI/GeometryProxy.h"
-#include "boost/scoped_ptr.hpp"
+#include <boost/scoped_ptr.hpp>
 
 namespace Mantid
 {

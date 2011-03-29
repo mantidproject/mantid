@@ -20,7 +20,7 @@
 #include "MantidVatesAPI/ImageProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include "boost/functional/hash.hpp"
+#include <boost/functional/hash.hpp>
 #include <sstream>
 #include "ParaViewProgressAction.h"
 

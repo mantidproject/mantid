@@ -64,7 +64,7 @@
 #include "DimensionWidget.h"
 #include "GeometryWidget.h"
 #include "IntegratedDimensionWidget.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "PlotList.h"
 #include "Plot.h"
 #include "PlotInfoAttributes.h"

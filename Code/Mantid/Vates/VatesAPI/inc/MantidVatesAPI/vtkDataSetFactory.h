@@ -4,7 +4,7 @@
 #define MANTID_VATES_VTKDATASETFACTORY_H_
 
 #include "MantidKernel/System.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include "vtkDataSet.h"
 
 namespace Mantid

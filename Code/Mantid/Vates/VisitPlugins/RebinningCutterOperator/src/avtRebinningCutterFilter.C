@@ -57,7 +57,7 @@
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
-#include "boost/functional/hash.hpp"
+#include <boost/functional/hash.hpp>
 #include <sstream>
 #include "VisITProgressAction.h"
 
