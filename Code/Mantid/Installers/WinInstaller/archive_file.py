@@ -6,7 +6,7 @@ import os
 def usage():
     usage = """Usage: python archive_file.py file dest_dir
     
-    Simple script for archiving a file. The file is archived under a 
+    Simple script for archiving a file. The file is archived (copied) under a 
     directory named after the current date/time under dest_dir.
   
         file - The file the archive
@@ -34,7 +34,7 @@ def main():
             pass
         else:
             raise
-    shutil.move(file_path, dest_dir)
+    shutil.copy(file_path, dest_dir)
 
 if __name__ == '__main__':
     if len(sys.argv) != 3:
