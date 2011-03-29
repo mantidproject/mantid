@@ -210,7 +210,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 for item in instrument_list:
                     self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 
-        dialog = InstrDialog(self._instrument_list)
+        if self.general_settings.debug:
+            dialog = InstrDialog(INSTRUMENT_LIST)
+        else:   
+            dialog = InstrDialog(self._instrument_list)
         dialog.exec_()
         if dialog.result()==1:
             self._instrument = dialog.instr_combo.currentText()

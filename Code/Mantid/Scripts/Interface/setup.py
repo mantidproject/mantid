@@ -6,6 +6,16 @@ from distutils.core import setup
 # Compile resource file
 try:
     os.system("pyrcc4 -o reduction_gui/settings/qrc_resources.py reduction_gui/settings/resources.qrc")
+
+    # HFIR - new
+    os.system("pyuic4 -o ui/sans/ui_hfir_background.py ui/sans/hfir_background.ui")
+    os.system("pyuic4 -o ui/sans/ui_hfir_sample_data.py ui/sans/hfir_sample_data.ui")
+    os.system("pyuic4 -o ui/sans/ui_hfir_instrument.py ui/sans/hfir_instrument.ui")
+    os.system("pyuic4 -o ui/sans/ui_hfir_detector.py ui/sans/hfir_detector.ui")
+    os.system("pyuic4 -o ui/sans/ui_trans_direct_beam.py ui/sans/trans_direct_beam.ui")
+    os.system("pyuic4 -o ui/sans/ui_trans_spreader.py ui/sans/trans_spreader.ui")
+
+    # OLD
     os.system("pyuic4 -o ui/ui_reduction_main.py ui/reduction_main.ui")
     os.system("pyuic4 -o ui/ui_hfir_background.py ui/hfir_background.ui")
     os.system("pyuic4 -o ui/ui_hfir_beam_finder.py ui/hfir_beam_finder.ui")
@@ -21,17 +31,17 @@ try:
 except:
     print "Could not compile resource file"
     
-setup(name='SANSReduction',
-      version='1.0',
-      description='SANS Reduction for Mantid',
-      author='Mathieu Doucet',
-      author_email='doucetm@ornl.gov',
-      url='http://www.mantidproject.org',
-      packages=['reduction_gui', 'reduction_gui.widgets', 'reduction_gui.instruments', 
-                'reduction_gui.reduction', 'reduction_gui.settings'],
-      package_dir={'reduction_gui' : '',
-                   'reduction_gui.widgets' : 'reduction_gui/widgets',
-                   'reduction_gui.instruments' : 'reduction_gui/instruments',
-                   'reduction_gui.settings' : 'reduction_gui/settings',
-                   'reduction_gui.reduction' : 'reduction_gui/reduction'}
-     )
+#setup(name='SANSReduction',
+#      version='1.0',
+#      description='SANS Reduction for Mantid',
+#      author='Mathieu Doucet',
+#      author_email='doucetm@ornl.gov',
+#      url='http://www.mantidproject.org',
+#      packages=['reduction_gui', 'reduction_gui.widgets', 'reduction_gui.instruments', 
+#                'reduction_gui.reduction', 'reduction_gui.settings'],
+#      package_dir={'reduction_gui' : '',
+#                   'reduction_gui.widgets' : 'reduction_gui/widgets',
+#                   'reduction_gui.instruments' : 'reduction_gui/instruments',
+#                   'reduction_gui.settings' : 'reduction_gui/settings',
+#                   'reduction_gui.reduction' : 'reduction_gui/reduction'}
+#     )

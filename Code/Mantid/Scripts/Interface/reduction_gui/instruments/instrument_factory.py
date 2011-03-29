@@ -5,9 +5,12 @@
 """
 from hfir_interface import HFIRInterface
 from eqsans_interface import EQSANSInterface
+from hfir_interface_dev import HFIRInterface as HFIRInterfaceDev
+
 
 INSTRUMENT_DICT = {"BIOSANS": HFIRInterface, 
                    "GPSANS": HFIRInterface,
+                   "HFIRDEV": HFIRInterfaceDev,
                    "EQSANS": EQSANSInterface}
 
 INSTRUMENT_LIST = INSTRUMENT_DICT.keys()
