@@ -181,7 +181,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                     ymax = y_s[midBin]
         print "Reference spectra=",refpixel
         # Remove old calibration files
-        cmd = "rm "+self._outDir+str(temp)+".cal*"
+        cmd = "rm "+self._outDir+str(wksp)+".cal*"
         os.system(cmd)
         # Cross correlate spectra using interval around peak at peakpos (d-Spacing)
         if self._lastpixel == 0:
@@ -192,7 +192,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             WorkspaceIndexMin=0, WorkspaceIndexMax=self._lastpixel, XMin=self._peakmin, XMax=self._peakmax)
         # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
         GetDetectorOffsets(InputWorkspace=str(wksp)+"cc", OutputWorkspace=str(wksp)+"offset", Step=self._binning[1],
-            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal1")
+            DReference=self._peakpos, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
         mtd.deleteWorkspace(str(wksp)+"cc")
         mtd.deleteWorkspace(str(wksp)+"offset")
         mtd.releaseFreeMemory()
@@ -212,11 +212,16 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
             # Get offsets for pixels using interval around cross correlations center and peak at peakpos (d-Spacing)
             GetDetectorOffsets(InputWorkspace=str(wksp)+"cc2", OutputWorkspace=str(wksp)+"offset2", Step=self._binning[1],
                 DReference=self._peakpos2, XMin=-self._ccnumber, XMax=self._ccnumber, GroupingFileName=self._outDir+str(wksp)+".cal")
+            mtd.deleteWorkspace(str(wksp)+"cc2")
+            mtd.deleteWorkspace(str(wksp)+"offset2")
+            mtd.releaseFreeMemory()
+            cmd = "mv "+self._outDir+str(wksp)+".cal "+self._outDir+str(wksp)+".cal1"
+            os.system(cmd)
             cmd = "sed 1d "+self._outDir+str(wksp)+".cal >"+self._outDir+str(wksp)+".cal2"
             os.system(cmd)
             cmd = "cat "+self._outDir+str(wksp)+".cal1 "+self._outDir+str(wksp)+".cal2 > "+self._outDir+str(wksp)+".cal"
             os.system(cmd)
-            cmd = "rm "+self._outDir+str(wksp)+".cal2"
+            cmd = "rm "+self._outDir+str(wksp)+".cal?"
             os.system(cmd)
         CreateCalFileByNames(InstrumentWorkspace=temp, GroupingFileName=self._outDir+str(wksp)+".cal",
             GroupNames=groups)
