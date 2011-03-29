@@ -127,6 +127,9 @@ private:
   /// creates a hash of arguments considered as flags for redrawing the visualisation dataset.
   std::string createRedrawHash() const;
 
+  /// Sets the rebinning action to rebin if the number of bins has changed on a dimension.
+  void formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim);
+
   /// handles overriting of time ranges.
   void setTimeRange(vtkInformationVector* outputVector);
 

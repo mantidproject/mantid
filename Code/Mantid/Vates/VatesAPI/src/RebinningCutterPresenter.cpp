@@ -145,7 +145,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinning
      //Verify that constuction has occured properly first/
      VerifyInitalization();
 
-     const std::string outputWorkspace = "RebinnedWS";
+     const std::string outputWorkspace = XMLDefinitions::RebinnedWSName();
      if(RecalculateAll == action)
      {
        //Get the input workspace location and name.
@@ -200,6 +200,16 @@ boost::shared_ptr<Mantid::API::ImplicitFunction> RebinningCutterPresenter::getFu
 {
   VerifyInitalization();
   return m_function;
+}
+
+Dimension_const_sptr RebinningCutterPresenter::getDimensionFromWorkspace(const std::string& id)
+{
+  //Simply pass through and let workspace handle request. 
+  const std::string outputWorkspace = XMLDefinitions::RebinnedWSName();
+  MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
+             AnalysisDataService::Instance().retrieve(outputWorkspace));
+  //Get the dimension from the workspace.
+  return outputWs->getDimension(id);
 }
 
 Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const

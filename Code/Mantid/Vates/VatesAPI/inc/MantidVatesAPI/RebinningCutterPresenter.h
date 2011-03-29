@@ -127,6 +127,9 @@ public:
   /// Apply reduction knowledge to create a vtk dataset.
   vtkDataSet* createVisualDataSet(boost::shared_ptr<vtkDataSetFactory> spvtkDataSetFactory);
 
+  /// Get the dimension from the image with the id.
+  Dimension_const_sptr getDimensionFromWorkspace(const std::string& id);
+
   /// Get the x dimension from vtkDataSet field data.
   Dimension_sptr getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
 

@@ -108,6 +108,10 @@ public:
    {
      return "functionOperatorInfo";
    }
+   static const std::string RebinnedWSName()
+   {
+     return "RebinnedWS";
+   }
 
 };
 

@@ -325,16 +325,6 @@ void testNoExistingRebinningDefinitions()
   dataset->Delete();
 }
 
-//
-//void testCreateVisualDataSetThrows()
-//{
-//    using namespace Mantid::API;
-//    using namespace Mantid::MDAlgorithms;
-//
-//    Mantid::VATES::RebinningCutterPresenter presenter;
-//
-//    TSM_ASSERT_THROWS("Should have thrown if constructReductionKnowledge not called first.", presenter.createVisualDataSet("", false,1), std::runtime_error);
-//}
 
 void testFindWorkspaceName()
 {
@@ -377,6 +367,26 @@ void testFindWorkspaceLocationThrows()
 
   TSM_ASSERT_THROWS("The xml does not contain a location element, so should throw.", findExistingWorkspaceLocation(dataset, id.c_str()), std::runtime_error);
   dataset->Delete();
+}
+
+
+void testGetDimensionFromWorkspace()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+  std::string idToRequest = "en"; //see test xml.
+  Mantid::VATES::Dimension_const_sptr xDimension = presenter.getDimensionFromWorkspace(idToRequest);
+  TSM_ASSERT_EQUALS("Cannot extract the requested dimension id.", idToRequest, xDimension->getDimensionId());
+  dataSet->Delete();
+}
+
+void testGetDimensionFromWorkspaceThrows()
+{
+  Mantid::VATES::RebinningCutterPresenter presenter;
+  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
+  std::string idToRequest = "----";
+  TSM_ASSERT_THROWS("Should have thrown a std::invalid_argument exception.", presenter.getDimensionFromWorkspace(idToRequest), std::invalid_argument);
+  dataSet->Delete();
 }
 
 void testGetXDimension()

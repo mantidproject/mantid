@@ -8,7 +8,9 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "vtkImplicitFunction.h"
 #include "vtkPointData.h"
+#include "vtkBox.h"
 
+#include "MantidKernel/Exception.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
@@ -21,7 +23,8 @@
 #include "boost/functional/hash.hpp"
 #include <sstream>
 #include "ParaViewProgressAction.h"
-#include "vtkBox.h"
+
+
 
 
 /** Plugin for ParaView. Performs simultaneous rebinning and slicing of Mantid data.
@@ -182,6 +185,10 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
     m_box = box;
     m_cachedRedrawArguments = createRedrawHash();
     m_actionRequester.reset();
+
+  /*  vtkBox* vbox = dynamic_cast<vtkBox*>(this->m_clipFunction);
+  vbox->SetBounds(0, 2, 0, 2, 0, 20);*/
+
     output->ShallowCopy(outData);
   }
   return 1;
@@ -209,10 +216,10 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
 
-    DimensionVec dimensionsVec(4);
     bool bGoodInputProvided = canProcessInput(inputDataset);
     if(true == bGoodInputProvided)
-    {
+    { 
+      DimensionVec dimensionsVec(4);
       dimensionsVec[0] = m_presenter.getXDimensionFromDS(inputDataset);
       dimensionsVec[1] = m_presenter.getYDimensionFromDS(inputDataset);
       dimensionsVec[2] = m_presenter.getZDimensionFromDS(inputDataset);
@@ -232,6 +239,7 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
     else
     {
       vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
+      m_isSetup = false;
       status = Bad;
     }
   }
@@ -285,6 +293,27 @@ void vtkRebinningCutter::SetMinThreshold(double minThreshold)
   }
 }
 
+void vtkRebinningCutter::formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim)
+{
+  using Mantid::VATES::Dimension_const_sptr;
+  try
+  {
+     //Requests that the dimension is found in the workspace.
+     Dimension_const_sptr wsDim = m_presenter.getDimensionFromWorkspace(newDim->getDimensionId());
+     //
+     if(newDim->getNBins() != wsDim->getNBins())
+     {
+       //The number of bins has changed. Rebinning cannot be avoided.
+       m_actionRequester.ask(RecalculateAll);
+     }
+  }
+  catch(Mantid::Kernel::Exception::NotFoundError&)
+  {
+    //This happens if the workspace is not available in the analysis data service. Hence the rebinning algorithm has not yet been run.
+    m_actionRequester.ask(RecalculateAll);
+  }
+}
+
 void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
 {
   if (NULL != m_appliedXDimension.get())
@@ -295,11 +324,7 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
       //The visualisation dataset will at least need to be recalculated.
-      if(temp->getNBins() != m_appliedXDimension->getNBins())
-      {
-        //when the number of bins is changed the request has to be for full rebinning.
-        m_actionRequester.ask(RecalculateAll);
-      }
+      formulateRequestUsingNBins(temp);
       this->m_appliedXDimension = temp;
     }
   }
@@ -315,11 +340,7 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
-      if (temp->getNBins() != m_appliedYDimension->getNBins())
-      {
-        //when the number of bins is changed the request has to be for full rebinning.
-        m_actionRequester.ask(RecalculateAll);
-      }
+      formulateRequestUsingNBins(temp);
       this->m_appliedYDimension = temp;
     }
   }
@@ -335,11 +356,7 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester.ask(RecalculateVisualDataSetOnly); 
-      if (temp->getNBins() != m_appliedZDimension->getNBins())
-      {
-        //when the number of bins is changed the request has to be for full rebinning.
-        m_actionRequester.ask(RecalculateAll);
-      }
+      formulateRequestUsingNBins(temp);
       this->m_appliedZDimension = temp;
     }
   }
@@ -355,11 +372,7 @@ void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester.ask(RecalculateVisualDataSetOnly);
-      if (temp->getNBins() != m_appliedTDimension->getNBins())
-      {
-        //when the number of bins is changed the request has to be for full rebinning.
-        m_actionRequester.ask(RecalculateAll);
-      }
+      formulateRequestUsingNBins(temp);
       this->m_appliedTDimension = temp;
     }
   }
@@ -367,7 +380,14 @@ void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
 
 const char* vtkRebinningCutter::GetInputGeometryXML()
 {
-  return this->m_presenter.getWorkspaceGeometry().c_str();
+  try
+  {
+    return this->m_presenter.getWorkspaceGeometry().c_str();
+  }
+  catch(std::runtime_error& err)
+  {
+    return "";
+  }
 }
 
 unsigned long vtkRebinningCutter::GetMTime()
@@ -508,22 +528,25 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
 
 void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
 {
-  double min = m_appliedTDimension->getMinimum();
-  double max = m_appliedTDimension->getMaximum();
-  unsigned int nBins = m_appliedTDimension->getNBins();
-  double increment = (max - min) / nBins;
-  std::vector<double> timeStepValues(nBins);
-  for (unsigned int i = 0; i < nBins; i++)
+  if(true == m_isSetup)
   {
-    timeStepValues[i] = min + (i * increment);
-  }
-  vtkInformation *outInfo = outputVector->GetInformationObject(0);
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
+    double min = m_appliedTDimension->getMinimum();
+    double max = m_appliedTDimension->getMaximum();
+    unsigned int nBins = m_appliedTDimension->getNBins();
+    double increment = (max - min) / nBins;
+    std::vector<double> timeStepValues(nBins);
+    for (unsigned int i = 0; i < nBins; i++)
+    {
+      timeStepValues[i] = min + (i * increment);
+    }
+    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0],
       static_cast<int> (timeStepValues.size()));
-  double timeRange[2];
-  timeRange[0] = timeStepValues.front();
-  timeRange[1] = timeStepValues.back();
+    double timeRange[2];
+    timeRange[0] = timeStepValues.front();
+    timeRange[1] = timeStepValues.back();
 
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+    outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_RANGE(), timeRange, 2);
+  }
 }
 
