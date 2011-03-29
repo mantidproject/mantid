@@ -6,6 +6,7 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ThreadPoolRunnable.h"
+#include "MantidKernel/ProgressBase.h"
 #include <vector>
 #include <Poco/Thread.h>
 
@@ -49,7 +50,8 @@ namespace Kernel
   class DLLExport ThreadPool
   {
   public:
-    ThreadPool(ThreadScheduler * scheduler = new ThreadSchedulerFIFO(), size_t numCores = 0);
+    ThreadPool(ThreadScheduler * scheduler = new ThreadSchedulerFIFO(), size_t numCores = 0,
+        ProgressBase * prog = NULL);
 
     ~ThreadPool();
 
@@ -77,6 +79,9 @@ namespace Kernel
 
     /// Have the threads started?
     bool m_started;
+
+    /// Progress reporter
+    ProgressBase * m_prog;
   };
 
 

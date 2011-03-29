@@ -9,6 +9,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ProgressBase.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -179,7 +180,7 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog)
+  void MDEventWorkspace)::addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog)
   {
     // Always split the MDBox into a grid box
     this->splitBox();
@@ -311,7 +312,7 @@ namespace MDEvents
    */
   TMDE(
   MDHistoWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::API::Progress * prog)
+      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::Kernel::ProgressBase * prog)
   {
     // Create the dense histogram. This allocates the memory
     MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimX, dimY, dimZ, dimT));

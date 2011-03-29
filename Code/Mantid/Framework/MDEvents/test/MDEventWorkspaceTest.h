@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidAPI/Dimension.h"
-#include "MantidAPI/ProgressText.h"
+#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/MDBox.h"

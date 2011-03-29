@@ -5,6 +5,7 @@
 
 #include <MantidKernel/Timer.h>
 #include <MantidKernel/FunctionTask.h>
+#include <MantidKernel/ProgressText.h>
 #include "MantidKernel/MultiThreaded.h"
 #include <MantidKernel/ThreadPool.h>
 #include "MantidKernel/ThreadScheduler.h"
@@ -233,6 +234,66 @@ public:
     TS_ASSERT_THROWS_NOTHING( p.joinAll() );
     TS_ASSERT_EQUALS( threadpooltest_check, 12);
   }
+
+
+
+  //=======================================================================================
+  //=======================================================================================
+  /** Class for debugging progress reporting */
+  class MyTestProgress : public ProgressBase
+  {
+  public:
+    MyTestProgress(double start,double end, int numSteps, ThreadPoolTest * myParent)
+    : ProgressBase(start,end, numSteps), parent(myParent)
+    {
+    }
+
+    void doReport(const std::string& msg = "")
+    {
+      parent->last_report_message = msg;
+      parent->last_report_counter = m_i;
+      double p = m_start + m_step*(m_i - m_ifirst);
+      parent->last_report_value = p;
+    }
+
+  public:
+    ThreadPoolTest * parent;
+  };
+
+  /// Index that was last set at doReport
+  int last_report_counter;
+  double last_report_value;
+  std::string last_report_message;
+
+  void test_with_progress_reporting()
+  {
+    last_report_counter = 0;
+    ThreadPool p(new ThreadSchedulerFIFO(), 0, new MyTestProgress(0.0, 1.0, 10, this));
+    for (int i=0; i< 10; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( threadpooltest_function, cost ) );
+    }
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+    // The test reporter was called
+    TS_ASSERT_EQUALS( last_report_counter, 10);
+  }
+
+  /// Disabled because it has std output
+  void xtest_with_progress_reporting2()
+  {
+    ThreadPool p(new ThreadSchedulerFIFO(), 0, new ProgressText(0.0, 1.0, 50));
+    for (int i=0; i< 50; i++)
+    {
+      double cost = i;
+      p.schedule( new FunctionTask( threadpooltest_function, cost ) );
+    }
+    TS_ASSERT_THROWS_NOTHING( p.joinAll() );
+  }
+
+
+
+  //=======================================================================================
 
   /** We schedule a task, run the threads, but don't abort them.
    * Then we re-schedule stuff, and re-join.

@@ -1,24 +1,24 @@
-#ifndef MANTID_API_PROGRESSTEXT_H_
-#define MANTID_API_PROGRESSTEXT_H_
+#ifndef MANTID_KERNEL_PROGRESSTEXT_H_
+#define MANTID_KERNEL_PROGRESSTEXT_H_
     
 #include "MantidKernel/System.h"
 #include "MantidKernel/MultiThreaded.h"
-#include "MantidAPI/Progress.h"
+#include "MantidKernel/ProgressBase.h"
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
   /** ProgressText:
    *
-   *  A sub-class of Progress, it allows reporting progress to
+   *  A sub-class of ProgressBase, it allows reporting progress to
    *  the console rather than the GUI. For use in testing
    * 
    * @author Janik Zikovsky
    * @date 2011-03-17 10:32:42.157991
    */
-  class DLLExport ProgressText : public Progress
+  class DLLExport ProgressText : public ProgressBase
   {
   public:
     ProgressText(double start=0.0, double end=1.0, int nsteps=100, bool newLines=true);
@@ -43,6 +43,6 @@ namespace API
 
 
 } // namespace Mantid
-} // namespace API
+} // namespace Kernel
 
-#endif  /* MANTID_API_PROGRESSTEXT_H_ */
+#endif  /* MANTID_KERNEL_PROGRESSTEXT_H_ */

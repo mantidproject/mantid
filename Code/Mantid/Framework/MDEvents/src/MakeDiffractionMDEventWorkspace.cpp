@@ -1,7 +1,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/ProgressText.h"
+#include "MantidKernel/ProgressText.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/PhysicalConstants.h"

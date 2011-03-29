@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_THREADPOOLRUNNABLE_H_
     
 #include "MantidKernel/System.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include <Poco/Mutex.h>
 #include <Poco/Runnable.h>
@@ -22,7 +23,8 @@ namespace Kernel
   class DLLExport ThreadPoolRunnable: public Poco::Runnable
   {
   public:
-    ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler);
+    ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler,
+        ProgressBase * prog = NULL);
     ~ThreadPoolRunnable();
 
     /// Return the thread number of this thread.
@@ -38,6 +40,9 @@ namespace Kernel
 
     /// The ThreadScheduler instance taking care of task scheduling
     ThreadScheduler * m_scheduler;
+
+    /// Progress reporter
+    ProgressBase * m_prog;
   };
 
 

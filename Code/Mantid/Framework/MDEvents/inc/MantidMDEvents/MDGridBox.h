@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
-#include "MantidAPI/Progress.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/Task.h"
+#include "MantidKernel/ProgressBase.h"
 
 namespace Mantid
 {
@@ -59,8 +60,6 @@ namespace MDEvents
     size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     void centerpointBin(MDBin<MDE,nd> & bin) const;
-
-    size_t addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog = NULL);
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
@@ -136,7 +135,7 @@ namespace MDEvents
       /// Where to stop in vector
       size_t stop_at;
       /// Progress report
-      Mantid::API::Progress * prog;
+      Mantid::Kernel::ProgressBase * prog;
 
       /** Ctor
        *
@@ -147,7 +146,7 @@ namespace MDEvents
        * @return
        */
       AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,
-                    const size_t start_at, const size_t stop_at, Mantid::API::Progress * prog)
+                    const size_t start_at, const size_t stop_at, Mantid::Kernel::ProgressBase * prog)
       : Mantid::Kernel::Task(),
         box(box), events(events), start_at(start_at), stop_at(stop_at), prog(prog)
       {

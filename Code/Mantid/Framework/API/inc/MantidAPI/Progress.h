@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
+#include "MantidKernel/ProgressBase.h"
 
 namespace Mantid
 {
@@ -38,44 +39,19 @@ class Algorithm;
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Progress
+class DLLExport Progress : public Mantid::Kernel::ProgressBase
 {
 public:
   Progress();
   Progress(Algorithm* alg,double start,double end, int numSteps);
   virtual ~Progress();
 
-  virtual void doReport(const std::string& msg = "");
-  
-  void report(const std::string& msg = "");
-  void report(int i,const std::string& msg = "");
-  void reportIncrement(int inc, const std::string& msg = "");
-  void setNumSteps(int nsteps);
-  void setNotifyStep(double notifyStepPct);
+  void doReport(const std::string& msg = "");
 
 private:
   /// Owning algorithm
   Algorithm* const m_alg;
 
-protected:
-  /// Starting progress
-  double m_start;
-  /// Ending progress
-  double m_end;
-  /// Loop counter initial value
-  int m_ifirst;
-  /// Loop counter upper bound
-  int m_numSteps;
-  /// Frequency of sending the notification (every m_step times)
-  int m_notifyStep;
-  /// Frequency of sending the notification (as a min percentage step, e.g. 1 for 1 % (default) )
-  double m_notifyStepPct;
-  /// Progress increment at each loop
-  double m_step;
-  /// Loop counter
-  int m_i;
-  /// Last loop counter value the was a peport
-  int m_last_reported;
 };
 
 } // namespace API

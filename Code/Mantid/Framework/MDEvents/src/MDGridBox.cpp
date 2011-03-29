@@ -1,4 +1,3 @@
-#include "MantidAPI/Progress.h"
 #include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Timer.h"
@@ -347,7 +346,7 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  size_t MDGridBox)::addEvents(const std::vector<MDE> & events)
+  inline size_t MDGridBox)::addEvents(const std::vector<MDE> & events)
   {
     return this->addEvents(events, 0, events.size());
   }

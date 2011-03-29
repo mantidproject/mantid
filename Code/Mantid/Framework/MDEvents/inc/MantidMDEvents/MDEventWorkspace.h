@@ -3,7 +3,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Progress.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
@@ -75,11 +75,11 @@ namespace MDEvents
 
     void addEvents(const std::vector<MDE> & events);
 
-    void addManyEvents(const std::vector<MDE> & events, Mantid::API::Progress * prog);
+    void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
     MDHistoWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
         Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
-        Mantid::API::Progress * prog);
+        Mantid::Kernel::ProgressBase * prog);
 
     /// Return true if the underlying box is a MDGridBox.
     bool isGridBox()

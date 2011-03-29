@@ -25,9 +25,13 @@ namespace Kernel
    *        NOTE: The ThreadPool destructor will delete this ThreadScheduler.
    * @param numThreads :: number of cores to use; default = 0, meaning auto-detect all
    *        available physical cores.
+   * @param prog :: optional pointer to a Progress reporter object. If passed, then
+   *        automatic progress reporting will be handled by the thread pool.
+   *        NOTE: The ThreadPool destructor will delete this.
    */
-  ThreadPool::ThreadPool( ThreadScheduler * scheduler, size_t numThreads)
-    : m_scheduler(scheduler), m_started(false)
+  ThreadPool::ThreadPool( ThreadScheduler * scheduler, size_t numThreads,
+      ProgressBase * prog)
+    : m_scheduler(scheduler), m_started(false), m_prog(prog)
   {
     if (!m_scheduler)
       throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPool constructor.");
@@ -50,6 +54,8 @@ namespace Kernel
   {
     if (m_scheduler)
       delete m_scheduler;
+    if (m_prog)
+      delete m_prog;
   }
 
   //--------------------------------------------------------------------------------
@@ -86,7 +92,7 @@ namespace Kernel
       m_threads.push_back(thread);
 
       // Make the runnable object and run it
-      ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler);
+      ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler, m_prog);
       m_runnables.push_back(runnable);
 
       thread->start(*runnable);

@@ -8,7 +8,8 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidAPI/Progress.h"
-#include "MantidAPI/ProgressText.h"
+#include "MantidKernel/ProgressText.h"
+#include "MantidKernel/ProgressBase.h"
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -67,7 +68,7 @@ namespace MDEvents
     /// Sample position
     Geometry::V3D samplePos;
     /// Progress reporter (shared)
-    API::Progress * prog;
+    Kernel::ProgressBase * prog;
 
 
   };

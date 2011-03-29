@@ -1,4 +1,4 @@
-#include "MantidAPI/ProgressText.h"
+#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/System.h"
 #include <iostream>
 #include <fstream>
@@ -6,7 +6,7 @@
 
 namespace Mantid
 {
-namespace API
+namespace Kernel
 {
 
 

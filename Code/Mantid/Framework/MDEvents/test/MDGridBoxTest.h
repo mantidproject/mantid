@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/ProgressText.h"
+#include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"

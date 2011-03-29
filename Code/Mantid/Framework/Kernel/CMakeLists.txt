@@ -28,6 +28,8 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
 	src/NeutronAtom.cpp
+	src/ProgressBase.cpp
+	src/ProgressText.cpp
 	src/Property.cpp
 	src/PropertyHistory.cpp
 	src/PropertyManager.cpp
@@ -121,6 +123,8 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NullValidator.h
 	inc/MantidKernel/PhysicalConstants.h
+	inc/MantidKernel/ProgressBase.h
+	inc/MantidKernel/ProgressText.h
 	inc/MantidKernel/Property.h
 	inc/MantidKernel/PropertyHistory.h
 	inc/MantidKernel/PropertyManager.h
@@ -180,6 +184,8 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/MRUListTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
+	test/ProgressBaseTest.h
+	test/ProgressTextTest.h
 	test/PropertyHistoryTest.h
 	test/PropertyManagerTest.h
 	test/PropertyTest.h

@@ -9,10 +9,15 @@ namespace Kernel
 
   //-----------------------------------------------------------------------------------
   /** Constructor
+   *
+   * @param threadnum :: the thread ID that this runnable is running in.
    * @param scheduler :: ThreadScheduler used by the thread pool
+   * @param prog :: optional pointer to a Progress reporter object. If passed, then
+   *        automatic progress reporting will be handled by the thread pool.
    */
-  ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler)
-  :  m_threadnum(threadnum), m_scheduler(scheduler)
+  ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler,
+      ProgressBase * prog)
+  :  m_threadnum(threadnum), m_scheduler(scheduler), m_prog(prog)
   {
     if (!m_scheduler)
       throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPoolRunnable::ctor()");
@@ -60,6 +65,10 @@ namespace Kernel
 
         // Tell the scheduler that we finished this task
         m_scheduler->finished(task, m_threadnum);
+
+        // Report progress, if specified.
+        if (m_prog)
+          m_prog->report();
 
         // Unlock the mutex, if any.
         if (mutex)

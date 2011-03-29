@@ -49,7 +49,6 @@ set ( SRC_FILES
 	src/ParameterTie.cpp
 	src/ParamFunction.cpp
 	src/Progress.cpp
-	src/ProgressText.cpp
 	src/RefAxis.cpp
 	src/Run.cpp
 	src/Sample.cpp
@@ -134,7 +133,6 @@ set ( INC_FILES
 	inc/MantidAPI/ParameterTie.h
 	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/Point3D.h
-	inc/MantidAPI/ProgressText.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/Run.h
@@ -179,7 +177,6 @@ set ( TEST_FILES
 	test/MemoryManagerTest.h
 	test/ParameterReferenceTest.h
 	test/ParameterTieTest.h
-	test/ProgressTextTest.h
 	test/RunTest.h
 	test/SampleEnvironmentTest.h
 	test/SampleTest.h
