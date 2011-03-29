@@ -198,6 +198,8 @@ void LoadPreNeXusMonitors::exec()
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
 
+    g_log.debug() << "Loading monitor file :" << pMonitorFilename.toString() << std::endl;
+
     Kernel::BinaryFile<uint32_t> monitorFile(pMonitorFilename.toString());
     monitorFile.loadAllInto(buffer);
 
