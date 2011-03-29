@@ -4,6 +4,7 @@
     TODO:   - Allow use of FindNexus when we are on an analysis computer  
 """
 import os
+import sys
 from reduction import ReductionStep
 from sans_reduction_steps import BaseTransmission
 from reduction import extract_workspace_name
@@ -58,7 +59,7 @@ class QuickLoad(ReductionStep):
         
         if is_event_nxs:
             mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
-            LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace)
+            LoadEventNexus(Filename=filepath, OutputWorkspace=workspace)
         else:
             mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
             nxs_file = event_file.replace("_neutron_event.dat", ".nxs")

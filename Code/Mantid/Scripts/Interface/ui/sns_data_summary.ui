@@ -83,7 +83,7 @@
         </size>
        </property>
        <property name="text">
-        <string>Scattering data file:</string>
+        <string>Scattering event data file:</string>
        </property>
        <property name="alignment">
         <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -123,7 +123,7 @@
         </size>
        </property>
        <property name="toolTip">
-        <string>Enter a valid file path to the SANS data file you want to reduce.</string>
+        <string>Enter a valid file path to the EQSANS event data file you want to reduce.</string>
        </property>
       </widget>
      </item>

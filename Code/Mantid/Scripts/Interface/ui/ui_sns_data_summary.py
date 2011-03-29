@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sns_data_summary.ui'
 #
-# Created: Thu Mar 10 15:49:35 2011
+# Created: Tue Mar 29 13:42:14 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -315,8 +315,8 @@ class Ui_Frame(object):
     def retranslateUi(self, Frame):
         Frame.setWindowTitle(QtGui.QApplication.translate("Frame", "Frame", None, QtGui.QApplication.UnicodeUTF8))
         self.instr_name_label.setText(QtGui.QApplication.translate("Frame", "EQSANS", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_9.setText(QtGui.QApplication.translate("Frame", "Scattering data file:", None, QtGui.QApplication.UnicodeUTF8))
-        self.data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to the SANS data file you want to reduce.", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_9.setText(QtGui.QApplication.translate("Frame", "Scattering event data file:", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to the EQSANS event data file you want to reduce.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.reduction_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Reduction Options", None, QtGui.QApplication.UnicodeUTF8))
         self.label_4.setText(QtGui.QApplication.translate("Frame", "Normalization", None, QtGui.QApplication.UnicodeUTF8))
