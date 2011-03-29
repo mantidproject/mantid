@@ -9,9 +9,9 @@
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/shared_array.hpp"
-#include "boost/variant.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
 

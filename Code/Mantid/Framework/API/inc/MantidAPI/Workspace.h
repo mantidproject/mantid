@@ -7,7 +7,7 @@
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 
 namespace Mantid
 {

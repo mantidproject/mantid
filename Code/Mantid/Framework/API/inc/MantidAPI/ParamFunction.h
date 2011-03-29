@@ -7,7 +7,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include "MantidAPI/IFitFunction.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
 #include <boost/shared_array.hpp>

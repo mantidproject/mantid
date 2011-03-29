@@ -10,10 +10,10 @@
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/shared_array.hpp"
-#include "boost/variant.hpp"
-#include "boost/scoped_array.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/shared_array.hpp>
+#include <boost/variant.hpp>
+#include <boost/scoped_array.hpp>
 #include <string>
 #include <vector>
 

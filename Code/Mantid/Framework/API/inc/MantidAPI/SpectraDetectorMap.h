@@ -4,7 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/cow_ptr.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <vector>
 #ifndef HAS_UNORDERED_MAP_H
   #include <map>

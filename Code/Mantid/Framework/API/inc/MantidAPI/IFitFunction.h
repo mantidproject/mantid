@@ -8,8 +8,8 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/FunctionFactory.h"
-#include "boost/shared_ptr.hpp"
-#include "boost/variant.hpp"
+#include <boost/shared_ptr.hpp>
+#include <boost/variant.hpp>
 #include <string>
 #include <vector>
 
