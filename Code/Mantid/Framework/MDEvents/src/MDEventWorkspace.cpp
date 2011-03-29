@@ -352,8 +352,11 @@ namespace MDEvents
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts, 1); //FIXME: restore CPUS
+    ThreadPool tp(ts, 1, prog); //FIXME: restore CPUS
 
+    // For progress reporting, the # of tasks = the number of bins in the output workspace
+    if (prog)
+      prog->setNumSteps( ws->getNPoints() );
 
     // Now we need to do a nested loop in the N dimensions across which we bin
 

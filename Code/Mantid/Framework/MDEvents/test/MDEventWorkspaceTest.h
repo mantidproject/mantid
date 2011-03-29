@@ -290,8 +290,11 @@ public:
 
     // Call the method
     MDHistoWorkspace_sptr out;
-    TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], NULL) );
+    ProgressText * prog = new ProgressText(0, 1.0, 1); // The function will set the # of steps
+    prog = NULL;
+    TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], prog) );
     TS_ASSERT(out);
+
 
     // How many points should be in the output?
     size_t numPointsExpected = 1;
