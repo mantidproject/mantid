@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_spreader.ui'
 #
-# Created: Tue Mar 29 11:35:11 2011
+# Created: Tue Mar 29 16:30:04 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -157,9 +157,29 @@ class Ui_GroupBox(object):
         self.horizontalLayout.addItem(spacerItem)
         self.gridLayout.addLayout(self.horizontalLayout, 4, 2, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(22, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
-        self.gridLayout.addItem(spacerItem1, 0, 4, 1, 1)
+        self.gridLayout.addItem(spacerItem1, 0, 5, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem2, 0, 1, 1, 1)
+        self.pushButton = QtGui.QPushButton(GroupBox)
+        self.pushButton.setMinimumSize(QtCore.QSize(85, 27))
+        self.pushButton.setMaximumSize(QtCore.QSize(85, 27))
+        self.pushButton.setObjectName("pushButton")
+        self.gridLayout.addWidget(self.pushButton, 0, 4, 1, 1)
+        self.pushButton_2 = QtGui.QPushButton(GroupBox)
+        self.pushButton_2.setMinimumSize(QtCore.QSize(85, 27))
+        self.pushButton_2.setMaximumSize(QtCore.QSize(85, 27))
+        self.pushButton_2.setObjectName("pushButton_2")
+        self.gridLayout.addWidget(self.pushButton_2, 1, 4, 1, 1)
+        self.pushButton_3 = QtGui.QPushButton(GroupBox)
+        self.pushButton_3.setMinimumSize(QtCore.QSize(85, 27))
+        self.pushButton_3.setMaximumSize(QtCore.QSize(85, 27))
+        self.pushButton_3.setObjectName("pushButton_3")
+        self.gridLayout.addWidget(self.pushButton_3, 2, 4, 1, 1)
+        self.pushButton_4 = QtGui.QPushButton(GroupBox)
+        self.pushButton_4.setMinimumSize(QtCore.QSize(85, 27))
+        self.pushButton_4.setMaximumSize(QtCore.QSize(85, 27))
+        self.pushButton_4.setObjectName("pushButton_4")
+        self.gridLayout.addWidget(self.pushButton_4, 3, 4, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         spacerItem3 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem3)
@@ -186,4 +206,8 @@ class Ui_GroupBox(object):
         self.spreader_trans_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Transmission of the beam spreader in %.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_7.setText(QtGui.QApplication.translate("GroupBox", "+/-", None, QtGui.QApplication.UnicodeUTF8))
         self.spreader_trans_spread_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Uncertainty on the beam spreader transmission.", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_2.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_3.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.pushButton_4.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
 

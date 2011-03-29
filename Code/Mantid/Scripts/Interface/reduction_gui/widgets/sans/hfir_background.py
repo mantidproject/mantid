@@ -207,10 +207,12 @@ class BackgroundWidget(BaseWidget):
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
+        self._content.background_plot_button.setEnabled(is_checked)
         self._content.calculate_trans_chk.setEnabled(is_checked)
         self._content.theta_dep_chk.setEnabled(is_checked)
         self._content.bck_trans_label.setEnabled(is_checked)
         self._content.bck_trans_err_label.setEnabled(is_checked)
+        self._content.transmission_grpbox.setEnabled(is_checked)
         
         self._calculate_clicked(is_checked and self._content.calculate_trans_chk.isChecked())
         
@@ -231,5 +233,6 @@ class BackgroundWidget(BaseWidget):
         self._content.trans_dark_current_label.setEnabled(is_checked)
         self._content.trans_dark_current_edit.setEnabled(is_checked)
         self._content.trans_dark_current_button.setEnabled(is_checked)
+        self._content.trans_dark_current_plot_button.setEnabled(is_checked)
         
         

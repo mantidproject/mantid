@@ -255,6 +255,25 @@
                </widget>
               </item>
               <item>
+               <widget class="QPushButton" name="data_file_plot_button">
+                <property name="minimumSize">
+                 <size>
+                  <width>85</width>
+                  <height>27</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>85</width>
+                  <height>27</height>
+                 </size>
+                </property>
+                <property name="text">
+                 <string>Plot</string>
+                </property>
+               </widget>
+              </item>
+              <item>
                <spacer name="horizontalSpacer">
                 <property name="orientation">
                  <enum>Qt::Horizontal</enum>
@@ -445,6 +464,25 @@
              </widget>
             </item>
             <item>
+             <widget class="QPushButton" name="sensitivity_plot_button">
+              <property name="minimumSize">
+               <size>
+                <width>85</width>
+                <height>27</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>85</width>
+                <height>27</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <spacer name="horizontalSpacer_8">
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
@@ -527,6 +565,25 @@
               </property>
               <property name="text">
                <string>Browse...</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="sensitivity_dark_plot_button">
+              <property name="minimumSize">
+               <size>
+                <width>85</width>
+                <height>27</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>85</width>
+                <height>27</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Plot</string>
               </property>
              </widget>
             </item>
@@ -955,6 +1012,25 @@
                    </property>
                    <property name="text">
                     <string>Browse...</string>
+                   </property>
+                  </widget>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="data_file_plot_button_2">
+                   <property name="minimumSize">
+                    <size>
+                     <width>85</width>
+                     <height>27</height>
+                    </size>
+                   </property>
+                   <property name="maximumSize">
+                    <size>
+                     <width>85</width>
+                     <height>27</height>
+                    </size>
+                   </property>
+                   <property name="text">
+                    <string>Plot</string>
                    </property>
                   </widget>
                  </item>

@@ -100,6 +100,7 @@ class DetectorWidget(BaseWidget):
         self._content.beam_radius_label_2.setEnabled(is_checked and is_flood_ctr)
         self._content.beam_data_file_edit_2.setEnabled(is_checked and is_flood_ctr)
         self._content.data_file_browse_button_2.setEnabled(is_checked and is_flood_ctr)
+        self._content.data_file_plot_button_2.setEnabled(is_checked and is_flood_ctr)
         self._flood_center_method_changed(is_checked and is_flood_ctr)
         
         
@@ -133,13 +134,17 @@ class DetectorWidget(BaseWidget):
         self._content.beam_radius_label.setEnabled(is_checked)
         self._content.beam_data_file_edit.setEnabled(is_checked)
         self._content.data_file_browse_button.setEnabled(is_checked)
+        self._content.data_file_plot_button.setEnabled(is_checked)
         self._center_method_changed(is_checked)
 
     def _sensitivity_clicked(self, is_checked):
         self._content.sensitivity_file_edit.setEnabled(is_checked)
         self._content.sensitivity_browse_button.setEnabled(is_checked)
+        self._content.sensitivity_plot_button.setEnabled(is_checked)
         self._content.sensitivity_dark_file_edit.setEnabled(is_checked)
         self._content.sensitivity_dark_browse_button.setEnabled(is_checked)
+        
+        self._content.sensitivity_dark_plot_button.setEnabled(is_checked)
         self._content.min_sensitivity_edit.setEnabled(is_checked)
         self._content.max_sensitivity_edit.setEnabled(is_checked)
         self._content.sensitivity_file_label.setEnabled(is_checked)

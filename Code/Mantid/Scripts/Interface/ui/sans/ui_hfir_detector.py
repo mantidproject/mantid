@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Tue Mar 29 11:35:11 2011
+# Created: Tue Mar 29 16:30:04 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -119,6 +119,11 @@ class Ui_Frame(object):
         self.data_file_browse_button.setSizePolicy(sizePolicy)
         self.data_file_browse_button.setObjectName("data_file_browse_button")
         self.horizontalLayout_4.addWidget(self.data_file_browse_button)
+        self.data_file_plot_button = QtGui.QPushButton(self.beam_center_grpbox)
+        self.data_file_plot_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button.setObjectName("data_file_plot_button")
+        self.horizontalLayout_4.addWidget(self.data_file_plot_button)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem2)
         self.verticalLayout_4.addLayout(self.horizontalLayout_4)
@@ -194,6 +199,11 @@ class Ui_Frame(object):
         self.sensitivity_browse_button.setSizePolicy(sizePolicy)
         self.sensitivity_browse_button.setObjectName("sensitivity_browse_button")
         self.horizontalLayout_9.addWidget(self.sensitivity_browse_button)
+        self.sensitivity_plot_button = QtGui.QPushButton(self.groupBox)
+        self.sensitivity_plot_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.sensitivity_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.sensitivity_plot_button.setObjectName("sensitivity_plot_button")
+        self.horizontalLayout_9.addWidget(self.sensitivity_plot_button)
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_9.addItem(spacerItem5)
         self.verticalLayout_8.addLayout(self.horizontalLayout_9)
@@ -229,6 +239,11 @@ class Ui_Frame(object):
         self.sensitivity_dark_browse_button.setSizePolicy(sizePolicy)
         self.sensitivity_dark_browse_button.setObjectName("sensitivity_dark_browse_button")
         self.horizontalLayout_10.addWidget(self.sensitivity_dark_browse_button)
+        self.sensitivity_dark_plot_button = QtGui.QPushButton(self.groupBox)
+        self.sensitivity_dark_plot_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.sensitivity_dark_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.sensitivity_dark_plot_button.setObjectName("sensitivity_dark_plot_button")
+        self.horizontalLayout_10.addWidget(self.sensitivity_dark_plot_button)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_10.addItem(spacerItem6)
         self.verticalLayout_8.addLayout(self.horizontalLayout_10)
@@ -394,6 +409,11 @@ class Ui_Frame(object):
         self.data_file_browse_button_2.setSizePolicy(sizePolicy)
         self.data_file_browse_button_2.setObjectName("data_file_browse_button_2")
         self.horizontalLayout_6.addWidget(self.data_file_browse_button_2)
+        self.data_file_plot_button_2 = QtGui.QPushButton(self.flood_center_grpbox)
+        self.data_file_plot_button_2.setMinimumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button_2.setMaximumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button_2.setObjectName("data_file_plot_button_2")
+        self.horizontalLayout_6.addWidget(self.data_file_plot_button_2)
         spacerItem12 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_6.addItem(spacerItem12)
         self.verticalLayout_7.addLayout(self.horizontalLayout_6)
@@ -448,6 +468,7 @@ class Ui_Frame(object):
         self.data_file_label.setText(QtGui.QApplication.translate("Frame", "Data file:                       ", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_data_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the file path of a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label.setText(QtGui.QApplication.translate("Frame", "Beam radius [pixels]:", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.groupBox.setTitle(QtGui.QApplication.translate("Frame", "Sensitivity", None, QtGui.QApplication.UnicodeUTF8))
@@ -456,9 +477,11 @@ class Ui_Frame(object):
         self.sensitivity_file_label.setText(QtGui.QApplication.translate("Frame", "Sensitivity data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the detector sensitivity data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_file_label.setText(QtGui.QApplication.translate("Frame", "Dark current data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.sensitivity_dark_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_range_label.setText(QtGui.QApplication.translate("Frame", "Allowed sensitivity range:", None, QtGui.QApplication.UnicodeUTF8))
         self.sensitivity_min_label.setText(QtGui.QApplication.translate("Frame", "Min", None, QtGui.QApplication.UnicodeUTF8))
         self.max_sensitivity_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the maximum allowed relative sensitivity for any given pixel.", None, QtGui.QApplication.UnicodeUTF8))
@@ -479,6 +502,7 @@ class Ui_Frame(object):
         self.data_file_label_2.setText(QtGui.QApplication.translate("Frame", "Data file:                       ", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_data_file_edit_2.setToolTip(QtGui.QApplication.translate("Frame", "Enter the file path of a direct beam data file.", None, QtGui.QApplication.UnicodeUTF8))
         self.data_file_browse_button_2.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
+        self.data_file_plot_button_2.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_label_2.setText(QtGui.QApplication.translate("Frame", "Beam radius [pixels]:", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_edit_2.setToolTip(QtGui.QApplication.translate("Frame", "Enter the radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
 

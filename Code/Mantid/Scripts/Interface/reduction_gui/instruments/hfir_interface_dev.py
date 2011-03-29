@@ -26,6 +26,9 @@ class HFIRInterface(InstrumentInterface):
         # Scripter object to interface with Mantid 
         self.scripter = HFIRReductionScripter(name=name)        
 
+        # Sample
+        self.attach(SampleDataWidget(settings = self._settings))
+        
         # Instrument description
         self.attach(SANSInstrumentWidget(settings = self._settings, name=name))
         
@@ -34,9 +37,6 @@ class HFIRInterface(InstrumentInterface):
 
         # Mask
         self.attach(MaskTabWidget(settings = self._settings))
-        
-        # Sample
-        self.attach(SampleDataWidget(settings = self._settings))
         
         # Background
         self.attach(BackgroundWidget(settings = self._settings))

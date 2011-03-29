@@ -275,3 +275,4 @@ class SampleDataWidget(BaseWidget):
         self._content.dark_current_label.setEnabled(is_checked)
         self._content.dark_current_edit.setEnabled(is_checked)
         self._content.dark_current_button.setEnabled(is_checked)
+        self._content.dark_current_plot_button.setEnabled(is_checked)
