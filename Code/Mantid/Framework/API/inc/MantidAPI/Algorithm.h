@@ -249,6 +249,14 @@ public:
   /// setting the child end progress
   void setChildEndProgress(const double endProgress)const{m_endChildProgress=endProgress;}
 
+  /** @name Serialization functions */
+  //@{
+  /// Serialize an object to a string
+  virtual std::string toString() const;
+  /// De-serialize an object from a string
+  static IAlgorithm_sptr fromString(const std::string & input);
+  //@}
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -343,25 +351,18 @@ private:
 
   bool m_isInitialized; ///< Algorithm has been initialized flag
   bool m_isExecuted; ///< Algorithm is executed flag
-
   bool m_isChildAlgorithm; ///< Algorithm is a child algorithm
-
   bool m_runningAsync; ///< Algorithm is running asynchronously
   bool m_running; ///< Algorithm is running
   bool m_rethrow; ///< Algorithm should rethrow exceptions while executing
-
   mutable double m_startChildProgress; ///< Keeps value for algorithm's progress at start of an sub-algorithm
   mutable double m_endChildProgress; ///< Keeps value for algorithm's progress at sub-algorithm's finish
-
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
-
-  static unsigned int g_execCount; ///< Counter to keep track of algorithm execution order
-
   std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
-
   std::string m_WikiSummary; ///< A summary line for the wiki page.
-
   std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
+
+  static size_t g_execCount; ///< Counter to keep track of algorithm execution order
 };
 
 ///Typedef for a shared pointer to an Algorithm

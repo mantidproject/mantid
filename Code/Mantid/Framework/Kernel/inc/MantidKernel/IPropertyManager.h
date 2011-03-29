@@ -111,6 +111,8 @@ public:
         this->setPropertyValue(name, std::string(value));
         return this;
     }
+    /// Return the property manager serialized as a string.
+    virtual std::string toString(bool includeDefaults = false) const = 0;
 
 protected:
 

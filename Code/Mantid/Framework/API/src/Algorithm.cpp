@@ -9,6 +9,11 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/DateAndTime.h"
+
+#include <boost/algorithm/string/trim.hpp>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/regex.hpp>
+
 #include <iomanip>
 
 using namespace Mantid::Kernel;
@@ -18,8 +23,8 @@ namespace Mantid
 {
   namespace API
   {
-
-    unsigned int Algorithm::g_execCount=0;
+    /// Initialize static algorithm counter
+    size_t Algorithm::g_execCount=0;
 
     /// Constructor
     Algorithm::Algorithm() :
@@ -464,7 +469,81 @@ namespace Mantid
       m_notificationCenter.removeObserver(observer);
     }
 
-    void Algorithm::cancel()const
+    /**
+     * Serialize this object to a string. The format is
+     * AlgorithmName.version(prop1=value1,prop2=value2,...)
+     * @returns This object serialized as a string 
+     */
+    std::string Algorithm::toString() const
+    {
+      std::ostringstream writer;
+      writer << name() << "." << this->version() 
+        << "("
+        << Kernel::PropertyManagerOwner::toString() // A comma separated list of prop=value
+        << ")";
+      return writer.str();
+    }
+
+    /**
+    * De-serialize an object from a string
+    * @param input :: An input string in the format. The format is
+    * AlgorithmName.version(prop1=value1,prop2=value2,...). If .version is not found the 
+    * highest found is used.
+    * @returns A pointer to a managed algorithm object
+    */
+    IAlgorithm_sptr Algorithm::fromString(const std::string & input)
+    {
+      static const boost::regex nameExp("(^[[:alnum:]]*)");
+      // Double back slash gets rid of the compiler warning about unrecognized escape sequence
+      static const boost::regex versExp("\\.([[:digit:]]+)\\(*");
+      // Property regex. Simply match the brackets and split
+      static const boost::regex propExp("\\((.*)\\)");
+      // Name=Value regex
+      static const boost::regex nameValExp("(.*)=(.*)");
+
+      boost::match_results<std::string::const_iterator> what;
+      if( boost::regex_search(input, what, nameExp, boost::match_not_null) )
+      {
+        const std::string algName = what[1];
+        int version = -1;  // Highest version
+        if( boost::regex_search(input, what, versExp, boost::match_not_null) )
+        {
+          try
+          {
+            version = boost::lexical_cast<int, std::string>(what.str(1));
+          }
+          catch(boost::bad_lexical_cast&)
+          {
+          }
+        }
+        IAlgorithm_sptr alg = AlgorithmManager::Instance().create(algName, version);
+        if(  boost::regex_search(input, what, propExp, boost::match_not_null) )
+        {
+          std::string propStr = what[1];
+          std::list<std::string> props;
+          boost::algorithm::split(props, propStr, std::bind2nd(std::equal_to<char>(), ','));
+          for( std::list<std::string>::const_iterator itr = props.begin();
+               itr != props.end(); ++itr )
+          {
+            std::string nameValue = *itr;
+            if( boost::regex_search(nameValue, what, nameValExp,  boost::match_not_null) )
+            {
+              alg->setPropertyValue(what.str(1), what.str(2));
+            }
+          }
+        }
+        return alg;
+      }
+      else
+      {
+        throw std::runtime_error("Cannot create algorithm, invalid string format.");
+      }
+    }
+
+    /**
+     * Cancel an algorithm
+     */
+    void Algorithm::cancel() const
     {
       //set myself to be cancelled
       m_cancel = true;

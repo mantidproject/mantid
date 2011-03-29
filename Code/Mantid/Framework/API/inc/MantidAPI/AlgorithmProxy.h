@@ -108,10 +108,15 @@ namespace Mantid
 
       ///setting the child start progress
       void setChildStartProgress(const double startProgress)const;
-        /// setting the child end progress
+      /// setting the child end progress
       void setChildEndProgress(const double endProgress)const;
-      
 
+      /** @name String serialization */
+      //@{
+      /// Serialize an object to a string
+      virtual std::string toString() const;
+      //@}
+      
     private:
       /// Private Copy constructor: NO COPY ALLOWED
       AlgorithmProxy(const AlgorithmProxy&);
@@ -132,7 +137,7 @@ namespace Mantid
       std::string m_OptionalMessage; ///<Message to display in GUI
       const int m_version;          ///< version of the real algorithm
 
-      boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand
+      mutable boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand
       bool m_isExecuted;     ///< Executed flag
       bool m_isLoggingEnabled;///< is the logging of the underlying algorithm enabled
       bool m_rethrow; ///< Whether or not to rethrow exceptions.

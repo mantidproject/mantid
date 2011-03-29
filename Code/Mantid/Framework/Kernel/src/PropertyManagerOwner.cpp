@@ -162,6 +162,17 @@ namespace Mantid
         return m_properties->getProperty( name );
     }
 
+    /**
+    * Return the property manager serialized as a string.
+    * The format is propName=value,propName=value,propName=value
+    * @param includeDefaults :: If true then the value of default parameters will be included
+    * @returns A stringized version of the manager
+    */
+    std::string PropertyManagerOwner::toString(bool includeDefaults) const
+    {
+      return m_properties->toString(includeDefaults);
+    }
+
     /** 
      * Removes the property from properties map.
      * @param name :: Name of the property to be removed.

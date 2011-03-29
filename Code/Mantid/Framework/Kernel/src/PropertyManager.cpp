@@ -343,6 +343,28 @@ namespace Mantid
       return p->value();
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /**
+    * Return the property manager serialized as a string.
+    * The format is propName=value,propName=value,propName=value
+    * @param includeDefaults :: If true then the value of default parameters will be included
+    * @returns A stringized version of the manager
+    */
+    std::string PropertyManager::toString(bool includeDefaults) const
+    {
+      std::ostringstream writer;
+      const size_t count = propertyCount();
+      for( size_t i = 0; i < count; ++i )
+      {
+        Property *p = getPointerToPropertyOrdinal((int)i);
+        if( includeDefaults || !(p->isDefault()) )
+        {
+          writer << p->name() << "=" << p->value();
+          if( i < count - 1 ) writer << ",";
+        }
+      }
+      return writer.str();
+    }
 
     //-----------------------------------------------------------------------------------------------
     /** Get a property by name

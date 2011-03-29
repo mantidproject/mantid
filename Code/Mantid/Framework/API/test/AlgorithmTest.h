@@ -20,7 +20,8 @@ public:
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
   void init()
-  { declareProperty("prop1","value");
+  { 
+    declareProperty("prop1","value");
     declareProperty("prop2",1);   
   }
   void exec() {}
@@ -35,11 +36,44 @@ public:
   }
 };
 
-DECLARE_ALGORITHM(ToyAlgorithm)
+class ToyAlgorithmTwo : public Algorithm
+{
+public:
+  ToyAlgorithmTwo() : Algorithm() {}
+  virtual ~ToyAlgorithmTwo() {}
+
+  const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
+  int version() const  { return 2;} ///< Algorithm's version for identification
+  const std::string category() const { return "Cat";} 
+  void init()
+  { 
+    declareProperty("prop1","value");
+    declareProperty("prop2",1);   
+    declareProperty("prop3",10.5);   
+  }
+  void exec() {}
+};
 
 class AlgorithmTest : public CxxTest::TestSuite
 {
-public: 
+public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AlgorithmTest *createSuite() { return new AlgorithmTest(); }
+  static void destroySuite( AlgorithmTest *suite ) { delete suite; }
+
+  AlgorithmTest()
+  {
+    Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithm>();
+    Mantid::API::AlgorithmFactory::Instance().subscribe<ToyAlgorithmTwo>();
+  }
+
+  ~AlgorithmTest()
+  {
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm|1");
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("ToyAlgorithm|2");
+  }
   
   void testAlgorithm()
   {
@@ -120,10 +154,100 @@ public:
     TS_ASSERT( ! vec.empty() )
     TS_ASSERT( vec.size() == 2 )
     TS_ASSERT( ! vec[0]->name().compare("prop1") )
-  }    
+  }
+
+  void testStringization()
+  {
+    //Set the properties so that we know what they are
+    alg.setPropertyValue("prop1", "value1");
+    alg.setProperty("prop2", 5);
+    const std::string expected = "ToyAlgorithm.1(prop1=value1,prop2=5)";
+
+    TS_ASSERT_EQUALS(alg.toString(), expected);
+  }
+
+  void test_From_String_With_Invalid_Input_Throws()
+  {
+    const std::string input = "()";
+    TS_ASSERT_THROWS(Algorithm::fromString(input), std::runtime_error );
+  }
+
+  void test_Construction_Via_Valid_String_With_No_Properties()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
+  }
+
+  void test_Construction_Via_Valid_String_With_Version()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.1");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 1);
+    
+    // No brackets
+    testAlg = runFromString("ToyAlgorithm.1");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 1);
+  }
+
+  void test_Construction_Via_Valid_String_With_Version_And_Empty_Props()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.1()");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 1);
+    
+    // No brackets
+    testAlg = runFromString("ToyAlgorithm.1");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 1);
+  }
+
+
+  void test_Construction_Via_Valid_String_With_Set_Properties_And_Version()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm.2(prop1=val1,prop2=8,prop3=10.0)");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
+    
+    std::string prop1;
+    TS_ASSERT_THROWS_NOTHING( prop1 = testAlg->getProperty("prop1") );
+    TS_ASSERT_EQUALS(prop1,"val1");
+    int prop2;
+    TS_ASSERT_THROWS_NOTHING( prop2 = testAlg->getProperty("prop2") );
+    TS_ASSERT_EQUALS(prop2, 8);
+    double prop3;
+    TS_ASSERT_THROWS_NOTHING( prop3 = testAlg->getProperty("prop3") );
+    TS_ASSERT_EQUALS(prop3, 10.0);
+  }
+
+  void test_Construction_Via_Valid_String_With_Empty_Properties()
+  {
+    IAlgorithm_sptr testAlg = runFromString("ToyAlgorithm()");
+    TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
+    TS_ASSERT_EQUALS(testAlg->version(), 2);
+    
+    std::string prop1;
+    TS_ASSERT_THROWS_NOTHING( prop1 = testAlg->getProperty("prop1") );
+    TS_ASSERT_EQUALS(prop1,"value");
+    int prop2;
+    TS_ASSERT_THROWS_NOTHING( prop2 = testAlg->getProperty("prop2") );
+    TS_ASSERT_EQUALS(prop2, 1);
+  }
+
 
 private:
-  ToyAlgorithm alg;	
+  IAlgorithm_sptr runFromString(const std::string & input)
+  {
+    IAlgorithm_sptr testAlg;
+    TS_ASSERT_THROWS_NOTHING(testAlg = Algorithm::fromString(input) );
+    TS_ASSERT(testAlg);
+    if(!testAlg) TS_FAIL("Failed to create algorithm, cannot continue test.");
+    return testAlg;
+  }
+
+  ToyAlgorithm alg;
+  ToyAlgorithmTwo algv2;
 };
 
  
