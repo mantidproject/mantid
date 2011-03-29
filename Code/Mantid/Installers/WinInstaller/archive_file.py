@@ -23,7 +23,7 @@ def usage():
 def main():
     file_path = sys.argv[1]
     if not os.path.exists(file_path):
-        raise RuntimeError('Input file "%s" not found' %s file_path)
+        raise RuntimeError('Input file "%s" not found' % file_path)
     dest_dir = sys.argv[2]
     dest_dir = os.path.join(dest_dir, strftime("%Y-%m-%d-%H-%M-%S"))
     try:
