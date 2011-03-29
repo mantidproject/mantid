@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include "MDEventsTestHelper.hh"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -103,34 +104,6 @@ public:
   }
 
 
-
-  /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
-   *
-   * @param splitInto :: each dimension will split into this many subgrids
-   * @return
-   */
-  template<size_t nd>
-  boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> > makeMDEW(size_t splitInto, double min, double max)
-  {
-    boost::shared_ptr<MDEventWorkspace<MDEvent<nd>,nd> >  out(new MDEventWorkspace<MDEvent<nd>,nd>());
-    BoxController_sptr bc(new BoxController(nd));
-    bc->setSplitThreshold(5);
-    bc->setSplitInto(splitInto);
-    out->setBoxController(bc);
-
-    for (size_t d=0; d<nd;d++)
-    {
-      std::ostringstream name;
-      name << "Axis" << d;
-      Dimension dim(min, max, name.str(), "m");
-      out->addDimension(dim);
-    }
-    out->initialize();
-    return out;
-  }
-
-
-
   //-------------------------------------------------------------------------------------
   /** Fill a 10x10 gridbox with events
    *
@@ -142,7 +115,7 @@ public:
     if (DODEBUG) prog = new ProgressText(0.0, 1.0, 10, false);
 
     typedef MDGridBox<MDEvent<2>,2> box_t;
-    MDEventWorkspace2::sptr b = makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2::sptr b = MDEventsHelper::makeMDEW<2>(10, 0.0, 10.0);
     box_t * subbox;
 
     // Manually set some of the tasking parameters
@@ -263,7 +236,7 @@ public:
     size_t binlen = 5; // And bin more coarsely
 
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3::sptr ws = makeMDEW<3>(len, 0.0, size);
+    MDEventWorkspace3::sptr ws = MDEventsHelper::makeMDEW<3>(len, 0.0, size);
 
     // Put one event per bin
     for (size_t x=0; x<len; x++)
@@ -289,7 +262,7 @@ public:
     dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name4, "id3", 0, size, name4 != "NONE" ? binlen : 1)));
 
     // Call the method
-    MDHistoWorkspace_sptr out;
+    IMDWorkspace_sptr out;
     ProgressText * prog = new ProgressText(0, 1.0, 1); // The function will set the # of steps
     prog = NULL;
     TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], prog) );

@@ -7,6 +7,7 @@
 #include "MantidKernel/Task.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/Utils.h"
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ProgressBase.h"
@@ -297,7 +298,6 @@ namespace MDEvents
   };
 
 
-
   //-----------------------------------------------------------------------------------------------
   /** Bin a MDEventWorkspace into a dense histogram in a MDHistoWorkspace, using the MDBox's
    * centerpointBin routine.
@@ -311,8 +311,8 @@ namespace MDEvents
    * @return a shared ptr to MDHistoWorkspace created.
    */
   TMDE(
-  MDHistoWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::Kernel::ProgressBase * prog)
+  IMDWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
+      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::Kernel::ProgressBase * prog) const
   {
     bool DODEBUG = false;
     Timer tim;
@@ -370,8 +370,10 @@ namespace MDEvents
     // Now we need to do a nested loop in the N dimensions across which we bin
 
     // Index of the loop in each binning dimension, starting at 0.
-    size_t * index = new size_t[numBD];
-    for (size_t bd=0; bd<numBD; bd++) index[bd] = 0;
+    size_t * index = Utils::nestedForLoopSetUp(numBD);
+    // This is the limit to loop over in each dimension
+    size_t * index_max = Utils::nestedForLoopSetUp(numBD);
+    for (size_t bd=0; bd<numBD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
 
     // --- Unrolled Nested Loop ----
     bool allDone = false;
@@ -399,23 +401,8 @@ namespace MDEvents
       ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, bin) );
 
       // --- Increment index in each dimension -----
-      size_t bd = 0;
-      while (bd<numBD)
-      {
-        index[bd]++;
-        if (index[bd] >= binDimensions[bd]->getNBins())
-        {
-          // Roll this counter back to 0 (or whatever the min is)
-          index[bd] = 0;
-          // Go up one in a higher dimension
-          bd++;
-          // Reached the maximum of the last dimension. Time to exit the entire loop.
-          if (bd == numBD)
-            allDone = true;
-        }
-        else
-          break;
-      }
+      allDone = Utils::nestedForLoopIncrement(numBD, index, index_max);
+
     } // While !alldone
 
     if (DODEBUG) std::cout << tim.elapsed() << " sec to fill up the ThreadPool with all the tasks\n";
@@ -426,6 +413,8 @@ namespace MDEvents
 
     if (DODEBUG) std::cout << tim.elapsed() << " sec to run all the tasks\n";
 
+    delete index_max;
+    delete index;
     return ws;
   }
 

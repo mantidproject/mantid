@@ -8,6 +8,7 @@ set (SRC_FILES
 	src/MakeDiffractionMDEventWorkspace.cpp
 	src/MDBin.cpp
 	src/MDHistoWorkspace.cpp
+	src/BinToMDHistoWorkspace.cpp
 )
 
 # Header files
@@ -24,6 +25,7 @@ set (INC_FILES
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
+	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 )
 
 # Test files. Other source files required.
@@ -38,6 +40,7 @@ set (TEST_FILES
 	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/MDBinTest.h
 	test/MDHistoWorkspaceTest.h
+	test/BinToMDHistoWorkspaceTest.h
 )
 
 set ( GMOCK_TEST_FILES

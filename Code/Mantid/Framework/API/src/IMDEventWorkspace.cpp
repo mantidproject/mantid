@@ -25,7 +25,7 @@ namespace API
    * @param dim :: index of dimension to set
    * @return Dimension object
    */
-  Dimension IMDEventWorkspace::getDimension(size_t dim)
+  Dimension IMDEventWorkspace::getDimension(size_t dim) const
   {
     return dimensions[dim];
   }
@@ -38,7 +38,7 @@ namespace API
    * @return the index (size_t)
    * @throw runtime_error if it cannot be found.
    */
-  size_t IMDEventWorkspace::getDimensionIndexByName(const std::string & name)
+  size_t IMDEventWorkspace::getDimensionIndexByName(const std::string & name) const
   {
     for (size_t d=0; d<dimensions.size(); d++)
       if (dimensions[d].getName() == name)

@@ -281,6 +281,17 @@ void stripComment(std::string& A)
 */
 std::string fullBlock(const std::string& A)
 {
+  return strip(A);
+}
+
+//------------------------------------------------------------------------------------------------
+/**  Returns the string from the first non-space to the
+     last non-space
+  @param A :: string to process
+  @return shortened string
+*/
+std::string strip(const std::string& A)
+{
   std::string::size_type posA=A.find_first_not_of(" ");
   std::string::size_type posB=A.find_last_not_of(" ");
   if (posA==std::string::npos)

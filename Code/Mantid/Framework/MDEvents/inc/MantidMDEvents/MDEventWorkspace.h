@@ -77,9 +77,9 @@ namespace MDEvents
 
     void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
-    MDHistoWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
+    Mantid::API::IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
         Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
-        Mantid::Kernel::ProgressBase * prog);
+        Mantid::Kernel::ProgressBase * prog) const;
 
     /// Return true if the underlying box is a MDGridBox.
     bool isGridBox()

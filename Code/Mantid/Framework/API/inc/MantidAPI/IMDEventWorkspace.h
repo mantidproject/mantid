@@ -3,7 +3,10 @@
 
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/System.h"
+#include "MantidKernel/ProgressBase.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/Dimension.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Mantid
@@ -37,10 +40,16 @@ namespace API
     virtual void addDimension(Dimension dimInfo);
 
     /// Get that dimension
-    virtual Dimension getDimension(size_t dim);
+    virtual Dimension getDimension(size_t dim) const;
 
     /// Get the dimension index, searching by name
-    virtual size_t getDimensionIndexByName(const std::string & name);
+    virtual size_t getDimensionIndexByName(const std::string & name) const;
+
+    /// For centerpoint binning
+    virtual IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
+        Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
+        Mantid::Kernel::ProgressBase * prog) const = 0;
+
 
   protected:
     /// Vector with each dimension (length must match nd)

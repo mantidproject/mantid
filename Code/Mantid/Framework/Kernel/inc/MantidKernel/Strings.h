@@ -85,6 +85,8 @@ DLLExport int extractWord(std::string& Line,const std::string& Word,const int cn
 DLLExport std::string removeSpace(const std::string& CLine);
 /// strip pre/post spaces
 DLLExport std::string fullBlock(const std::string& A);
+/// strip pre/post spaces
+DLLExport std::string strip(const std::string& A);
 /// strip trailling comments
 DLLExport void stripComment(std::string& A);
 /// Determines if a string is only spaces

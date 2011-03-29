@@ -49,6 +49,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/Timer.cpp
 	src/TimeSeriesProperty.cpp
 	src/TimeSplitter.cpp
+	src/Utils.cpp
 	src/Unit.cpp
 	src/UnitFactory.cpp
 	src/VectorHelper.cpp
@@ -148,6 +149,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/TimeSplitter.h
 	inc/MantidKernel/UnitFactory.h
 	inc/MantidKernel/Unit.h
+	inc/MantidKernel/Utils.h
 	inc/MantidKernel/VectorHelper.h
 	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/ANN/ANN.h
@@ -207,6 +209,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/TimeSplitterTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
+	test/UtilsTest.h
 	test/UserStringParserTest.h 
 )
 
