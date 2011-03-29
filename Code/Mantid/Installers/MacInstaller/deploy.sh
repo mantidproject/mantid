@@ -151,8 +151,8 @@ PLUGINLIBS='MantidPlot.app/plugins/*.dylib'
 update_lib_paths "$PLUGINLIBS" "$MACOSLIBS" "$QTLIBS" ".."
 PLUGINSLIBS='MantidPlot.app/plugins/qtplugins/mantid/*.dylib'
 update_lib_paths "$PLUGINSLIBS" "$MACOSLIBS" "$QTLIBS" "../../.."
-install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
-install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
+install_name_tool -change libQtPropertyBrowser.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
+# install_name_tool -change libQtPropertyBrowser.1.dylib @loader_path/../../../Contents/Frameworks/libQtPropertyBrowser.1.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
 install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
 install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../../../Contents/Frameworks/libqwt.5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomDialogs.dylib
 install_name_tool -change libiomp5.dylib @loader_path/../../../Contents/Frameworks/libiomp5.dylib MantidPlot.app/plugins/qtplugins/mantid/libMantidQtCustomInterfaces.dylib
@@ -163,7 +163,7 @@ install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Framewor
 cp /opt/intel/lib/libiomp5.dylib MantidPlot.app/Contents/Frameworks/
 
 cd MantidPlot.app/Contents/MacOS
-MANTIDLIBS=$(ls libMantid*.dylib)
+MANTIDLIBS=$(ls libMantid*.*)
 for l in $MANTIDLIBS
 do
   echo $l
