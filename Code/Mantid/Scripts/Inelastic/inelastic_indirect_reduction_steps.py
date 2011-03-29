@@ -434,10 +434,11 @@ class FoldData(ReductionStep):
         """Folds data back into a single workspace if it has been "chopped".
         """
         wsgroup = mtd[file_ws].getNames()        
-        workspaces = ','.join(wsgroup)
         ws = file_ws+'_merged'
-        MergeRuns(workspaces, ws)
+        MergeRuns(','.join(wsgroup), ws)
         scaling = self._create_scaling_workspace(wsgroup, ws)
+        for workspace in wsgroup:
+            DeleteWorkspace(workspace)
         Divide(ws, scaling, ws)
         DeleteWorkspace(scaling)
         RenameWorkspace(ws, file_ws)
@@ -513,23 +514,28 @@ class Grouping(ReductionStep):
 
     _grouping_policy = None
     _masking_detectors = []
+    _result_workspaces = []
     
     def __init__(self):
         super(Grouping, self).__init__()
         self._grouping_policy = None
         self._masking_detectors = []
+        self._result_workspaces = []
         
-    def execute(self, reducer, file_ws):
+    def execute(self, reducer, file_ws):        
         if ( mtd[file_ws].getInstrument().getName() == 'TOSCA' ):
-            self._group_tosca(file_ws)
+            self._result_workspaces.append(self._group_tosca(file_ws))
         else:
-            self._group_data(file_ws)
+            self._result_workspaces.append(self._group_data(file_ws))
             
     def set_grouping_policy(self, value):
         self._grouping_policy = value
         
     def set_mask_list(self, value):
         self._masking_detectors = value
+        
+    def get_result_workspaces(self):
+        return self._result_workspaces
             
     def _group_tosca(self, workspace):
         wsname = self._get_run_title(workspace)
@@ -555,7 +561,7 @@ class Grouping(ReductionStep):
 
     def _group_data(self, workspace):
         grouping = self._grouping_policy
-        name = self._get_run_title(workspace)
+        name = self._get_run_label(workspace) + 'red'
         if ( grouping == 'Individual' ) or ( grouping is None ):
             if ( workspace != name ):
                 RenameWorkspace(workspace, name)
@@ -581,3 +587,19 @@ class Grouping(ReductionStep):
         title = ''.join(ch for ch in title if ch in valid)
         title = isn + runNo + '-' + title
         return title
+        
+    def _get_run_label(self, workspace):
+        if workspace == '':
+            return ''
+        ws = mtd[workspace]
+        ins = ws.getInstrument().getName()
+        ins = ConfigService().facility().instrument(ins).shortName().lower()
+        run = ws.getRun().getLogData('run_number').value
+        try:
+            analyser = ws.getInstrument().getStringParameter('analyser')[0]
+            reflection = ws.getInstrument().getStringParameter('reflection')[0]
+        except IndexError:
+            analyser = ''
+            reflection = ''
+        prefix = ins + run + '_' + analyser + reflection + '_'
+        return prefix

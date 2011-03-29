@@ -188,6 +188,10 @@ class IndirectReducer(Reducer):
     def set_detailed_balance(self, temp):
         self._detailed_balance_temp = temp
         
+    def get_result_workspaces(self):
+        step = self._reduction_steps[len(self._reduction_steps)-1]
+        return step.get_result_workspaces()
+        
     def _load_empty_instrument(self):
         """Returns an empty workspace for the instrument.
         """
