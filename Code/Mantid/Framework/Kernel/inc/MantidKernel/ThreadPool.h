@@ -55,7 +55,7 @@ namespace Kernel
 
     ~ThreadPool();
 
-    void start();
+    void start(double waitSec = 0.0);
 
     void schedule(Task * task, bool start = false);
 

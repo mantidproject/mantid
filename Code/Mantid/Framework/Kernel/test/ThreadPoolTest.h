@@ -268,7 +268,7 @@ public:
   void test_with_progress_reporting()
   {
     last_report_counter = 0;
-    ThreadPool p(new ThreadSchedulerFIFO(), 0, new MyTestProgress(0.0, 1.0, 10, this));
+    ThreadPool p(new ThreadSchedulerFIFO(), 1, new MyTestProgress(0.0, 1.0, 10, this));
     for (int i=0; i< 10; i++)
     {
       double cost = i;
@@ -291,6 +291,65 @@ public:
     TS_ASSERT_THROWS_NOTHING( p.joinAll() );
   }
 
+
+
+  //=======================================================================================
+
+  /** Start a threadpool before adding tasks  */
+  void test_start_and_wait()
+  {
+    ThreadPool p; // Makes a default scheduler
+    threadpooltest_check = 0;
+
+    // Start and allow it to wait for 1 second
+    p.start(1.0);
+
+    // Simulate doing some work
+    Poco::Thread::sleep(40);
+
+    // Now you add the task
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+
+    // Simulate doing more work (this allows the task to run)
+    Poco::Thread::sleep(40);
+
+    // The task ran before we called joinAll(). Magic!
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+
+    // Reset and try again. The threads are still waiting, it has been less than 1 second.
+    threadpooltest_check = 0;
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+    Poco::Thread::sleep(40);
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+
+    // You still need to call joinAll() to clean up everything.
+    p.joinAll();
+
+    // Ok, the task did execute.
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+  }
+
+  /** Start a threadpool before adding tasks. But the wait time was too short! */
+  void test_start_and_wait_short_wait_time()
+  {
+    ThreadPool p; // Makes a default scheduler
+    threadpooltest_check = 0;
+
+    // Start and allow it to wait for a very short time
+    p.start(0.03);
+
+    // But it takes too long before the task is actually added
+    Poco::Thread::sleep(80);
+    p.schedule( new FunctionTask( threadpooltest_function ) );
+    Poco::Thread::sleep(30);
+    // So the task has not run, since the threads exited before!
+    TS_ASSERT_EQUALS( threadpooltest_check, 0);
+
+    // But you can still call joinAll() to run the task that is waiting.
+    p.joinAll();
+    // Ok, the task did execute.
+    TS_ASSERT_EQUALS( threadpooltest_check, 12);
+  }
 
 
   //=======================================================================================

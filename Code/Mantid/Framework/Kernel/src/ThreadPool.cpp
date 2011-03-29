@@ -72,12 +72,24 @@ namespace Kernel
 
   //--------------------------------------------------------------------------------
   /** Start the threads and begin looking for tasks.
+   *
+   * @param waitSec :: how many seconds will each thread be allowed to wait (with no tasks scheduled to it)
+   *        before exiting. Default 0.0 (exit right away).
+   *        This allows you to start a ThreadPool before you start adding tasks.
+   *        You still need to call joinAll() after you've finished!
+   *
    * @throw runtime_error if called when it has already started.
    */
-  void ThreadPool::start()
+  void ThreadPool::start(double waitSec)
   {
     if (m_started)
       throw std::runtime_error("Threads have already started.");
+
+    //Delete any old threads (they should NOT be running!)
+    for (size_t i=0; i < m_threads.size(); ++i)
+      delete m_threads[i];
+    for (size_t i=0; i < m_runnables.size(); ++i)
+      delete m_runnables[i];
 
     // Now, launch that many threads and let them wait for new tasks.
     m_threads.clear();
@@ -92,7 +104,7 @@ namespace Kernel
       m_threads.push_back(thread);
 
       // Make the runnable object and run it
-      ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler, m_prog);
+      ThreadPoolRunnable * runnable = new ThreadPoolRunnable(i, m_scheduler, m_prog, waitSec);
       m_runnables.push_back(runnable);
 
       thread->start(*runnable);
@@ -145,9 +157,22 @@ namespace Kernel
    */
   void ThreadPool::joinAll()
   {
+    // Are the threads REALLY started, or did they exit due to lack of tasks?
+    if (m_started)
+    {
+      m_started = false;
+      // If any of the threads are running, then YES, it is really started.
+      for (size_t i=0; i < m_threads.size(); ++i)
+        m_started = m_started || m_threads[i]->isRunning();
+    }
+
     // Start all the threads if they were not already.
     if (!m_started)
       this->start();
+
+    // Clear any wait times so that the threads stop waiting for new tasks.
+    for (size_t i=0; i < m_runnables.size(); i++)
+      m_runnables[i]->clearWait();
 
     // Sequentially join all the threads.
     for (size_t i=0; i < m_threads.size(); i++)

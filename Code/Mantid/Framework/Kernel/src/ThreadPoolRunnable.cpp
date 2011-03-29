@@ -14,10 +14,11 @@ namespace Kernel
    * @param scheduler :: ThreadScheduler used by the thread pool
    * @param prog :: optional pointer to a Progress reporter object. If passed, then
    *        automatic progress reporting will be handled by the thread pool.
+   * @param waitSec :: how many seconds the thread is allowed to wait with no tasks.
    */
   ThreadPoolRunnable::ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler,
-      ProgressBase * prog)
-  :  m_threadnum(threadnum), m_scheduler(scheduler), m_prog(prog)
+      ProgressBase * prog, double waitSec)
+  :  m_threadnum(threadnum), m_scheduler(scheduler), m_prog(prog), m_waitSec(waitSec)
   {
     if (!m_scheduler)
       throw std::invalid_argument("NULL ThreadScheduler passed to ThreadPoolRunnable::ctor()");
@@ -31,12 +32,28 @@ namespace Kernel
 
 
   //-----------------------------------------------------------------------------------
+  /** Clear the wait time of the runnable so that it stops waiting for tasks. */
+  void ThreadPoolRunnable::clearWait()
+  {
+    m_waitSec = 0.0;
+  }
+
+
+
+  //-----------------------------------------------------------------------------------
   /** Thread method. Will wait for new tasks and run them
    * as scheduled to it.
    */
   void ThreadPoolRunnable::run()
   {
     Task * task;
+
+    // If there are no tasks yet, wait up to m_waitSec for them to come up
+    while (m_scheduler->size() == 0 && m_waitSec > 0.0)
+    {
+      Poco::Thread::sleep(10); // millisec
+      m_waitSec -= 0.01; // Subtract ten millisec from the time left to wait.
+    }
 
     while (m_scheduler->size() > 0)
     {
@@ -82,7 +99,7 @@ namespace Kernel
         // No appropriate task for this thread (perhaps a mutex is locked)
         // but there are more tasks.
         // So we wait a bit before checking again.
-        Poco::Thread::sleep(50); // millisec
+        Poco::Thread::sleep(10); // millisec
       }
     }
     // Ran out of tasks that could be run.

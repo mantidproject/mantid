@@ -24,7 +24,7 @@ namespace Kernel
   {
   public:
     ThreadPoolRunnable(size_t threadnum, ThreadScheduler * scheduler,
-        ProgressBase * prog = NULL);
+        ProgressBase * prog = NULL, double waitSec = 0.0);
     ~ThreadPoolRunnable();
 
     /// Return the thread number of this thread.
@@ -33,6 +33,7 @@ namespace Kernel
 
     virtual void run();
 
+    void clearWait();
 
   private:
     /// ID of this thread.
@@ -43,6 +44,9 @@ namespace Kernel
 
     /// Progress reporter
     ProgressBase * m_prog;
+
+    /// How many seconds you are allowed to wait with no tasks before exiting.
+    double m_waitSec;
   };
 
 
