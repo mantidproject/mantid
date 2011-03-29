@@ -35,6 +35,7 @@ public:
 
   void testNoGravity()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     Mantid::DataHandling::LoadRaw2 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","LOQ48098.raw");
