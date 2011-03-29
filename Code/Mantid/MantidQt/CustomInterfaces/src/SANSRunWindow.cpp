@@ -34,8 +34,8 @@
 #include <QTemporaryFile>
 #include <QDateTime>
 
-#include "Poco/StringTokenizer.h"
-#include "boost/lexical_cast.hpp"
+#include <Poco/StringTokenizer.h>
+#include <boost/lexical_cast.hpp>
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt

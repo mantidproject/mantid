@@ -16,10 +16,10 @@
 #include <QTextStream>
 
 // Boost
-#include "boost/bind.hpp"
+#include <boost/bind.hpp>
 
 //Poco
-#include "Poco/LoggingRegistry.h"
+#include <Poco/LoggingRegistry.h>
 
 #include <iostream>
 

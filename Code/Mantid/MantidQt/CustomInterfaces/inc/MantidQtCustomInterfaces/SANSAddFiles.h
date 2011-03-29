@@ -4,7 +4,7 @@
 #include "ui_SANSRunWindow.h"
 #include "MantidQtAPI/UserSubWindow.h"
 #include "MantidKernel/ConfigService.h"
-#include "Poco/NObserver.h"
+#include <Poco/NObserver.h>
 #include <QString>
 
 namespace MantidQt

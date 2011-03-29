@@ -9,14 +9,16 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
 #include "MantidQtCustomInterfaces/SANSDiagnostics.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/ConfigService.h"
 
 #include <QHash>
 #include <QSettings>
 #include <QStringList>
-#include "Poco/NObserver.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/MatrixWorkspace.h"
-#include "MantidKernel/ConfigService.h"
+
+#include <Poco/NObserver.h>
+
 
 namespace Mantid
 {

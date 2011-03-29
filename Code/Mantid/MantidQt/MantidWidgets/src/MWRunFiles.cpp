@@ -10,7 +10,7 @@
 #include <QFileDialog>
 #include <QFileInfo>
 #include <QHash>
-#include "Poco/File.h"
+#include <Poco/File.h>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;

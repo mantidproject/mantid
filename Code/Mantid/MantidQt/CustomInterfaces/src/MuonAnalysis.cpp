@@ -21,11 +21,12 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include <Poco/StringTokenizer.h>
 #include "MantidKernel/cow_ptr.h"
 
-#include "Poco/File.h"
-#include "Poco/Path.h"
+#include <Poco/File.h>
+#include <Poco/Path.h>
+#include <Poco/StringTokenizer.h>
+#include <boost/lexical_cast.hpp>
 
 #include <algorithm>
 
@@ -43,11 +44,9 @@
 #include <QClipboard>
 #include <QTemporaryFile>
 #include <QDateTime>
-
 #include <QDesktopServices>
 #include <QUrl>
 
-#include "boost/lexical_cast.hpp"
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt

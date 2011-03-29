@@ -11,7 +11,7 @@
 #include "MantidKernel/RebinParamsValidator.h"
 #include "MantidAPI/AlgorithmManager.h"
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 
 #include <QFile>
 #include <QStringList>

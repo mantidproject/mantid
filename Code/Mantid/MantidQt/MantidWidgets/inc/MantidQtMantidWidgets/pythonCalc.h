@@ -1,7 +1,7 @@
 #ifndef MANTIDQTMANTIDWIDGETS_PYTHONCALC_H_
 #define MANTIDQTMANTIDWIDGETS_PYTHONCALC_H_
 
-#include "Poco/Path.h"
+#include <Poco/Path.h>
 #include "MantidKernel/PropertyWithValue.h"
 #include "MantidQtAPI/MantidWidget.h"
 #include "WidgetDllOption.h"
