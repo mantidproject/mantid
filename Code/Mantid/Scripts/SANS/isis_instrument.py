@@ -443,6 +443,11 @@ class LOQ(ISISInstrument):
         trans_definition_file += '/'+self._NAME+'_trans_Definition.xml'
         LoadInstrument(workspace, trans_definition_file)
 
+    def check_can_logs(self):
+        """
+            This function does nothing for LOQ
+        """
+        pass
 
 class SANS2D(ISISInstrument): 
     """

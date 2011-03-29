@@ -338,30 +338,29 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
 
 class CanSubtraction(LoadRun):
     """
-        Subtract the can after correcting it.
-        Note that in the original SANSReduction.py, the can run was loaded immediately after
-        the AssignCan() command was called. Since the loading needs information from the instrument, 
-        we load only before doing the subtraction.
+        Apply the same corrections to the can that were applied to the sample and
+        then subtracts this can from the sample.
     """
     def __init__(self, can_run, reload = True, period = -1):
         """
-            @param lambda_min: MinWavelength parameter for CalculateTransmission
-            @param lambda_max: MaxWavelength parameter for CalculateTransmission
-            @param fit_method: FitMethod parameter for CalculateTransmission (Linear or Log)
+            @param can_run: the run number followed by dot and the extension 
+            @param reload: if set to true (default) the workspace is replaced if it already exists
+            @param period: for multiple entry workspaces this is the period number
         """
         super(CanSubtraction, self).__init__(can_run, reload=reload, entry=period)
         self._scatter_can = None
 
-    def assign_can(self, reducer, reload = True):
-        #TODO: get rid of any reference to the instrument object as much as possible
-        # Definitely get rid of the if-statements checking the instrument name.
-        if not issubclass(reducer.instrument.__class__, isis_instrument.ISISInstrument):
-            raise RuntimeError, "CanSubtraction.assign_can expects an argument of class ISISInstrument"
+    def assign_can(self, reducer):
+        """
+            Loads the can workspace into Mantid and reads any log file
+            @param reducer: the reduction chain
+            @return: the name of the new workspace and its logs object  
+        """
+        if not reducer.user_settings.executed:
+            raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
         
         if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
             self._data_file = None
-            return '', '()'
-
             return '', '()'
     
         self._scatter_can, self._CAN_N_PERIODS, logs = self._assignHelper(
@@ -369,74 +368,36 @@ class CanSubtraction(LoadRun):
         if self._scatter_can == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
             return '','()'
-    
-        if reducer.instrument.name() == 'LOQ':
-            return self._scatter_can, ""
-
-        if reducer.instrument.name() == 'SANS2D':
-            if logs is None:
+          
+        if logs:
+            reducer.instrument.check_can_logs(logs)
+        else:
+            logs = ""
+            if reducer.instrument.name() == 'SANS2D':
                 _issueWarning("Can logs could not be loaded, using sample values.")
-                return self._scatter_can, "()"
-            reducer.instrument.check_can_logs(logs)           
+                return self._scatter_can, "()"    
         
+        if self._reload:
+            reducer.place_det_sam.reset(self._scatter_can)
+        reducer.place_det_sam.execute(reducer, self._scatter_can)
+
         return self._scatter_can, logs
 
     def execute(self, reducer, workspace):
         """
-            Apply same corrections as for data then subtract from data
+            Apply same corrections as for sample workspace then subtract from data
         """
         if not self._data_file:
-            return
-
-        beamcoords = reducer._beam_finder.get_beam_center()
-
-        # Put the components in the correct positions
-        reducer.instrument.set_component_positions(
-                self._scatter_can, beamcoords[0], beamcoords[1])
-        mantid.sendLogMessage('::SANS:: Initialized can workspace to [' + str(beamcoords[0]) + ',' + str(beamcoords[1]) + ']' )
-
-        # Create a run details object
-        TRANS_CAN = ''
-        DIRECT_CAN = ''
-        if reducer._transmission_calculator is not None:
-            TRANS_CAN = reducer._transmission_calculator.TRANS_CAN
-        if reducer._transmission_calculator is not None:
-            DIRECT_CAN = reducer._transmission_calculator.DIRECT_CAN
-            
-        finding_centre = False
+            return        
         
-        
+        #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
         tmp_smp = workspace+"_sam_tmp"
         RenameWorkspace(workspace, tmp_smp)
 
         tmp_can = workspace+"_can_tmp"
 
-        # Can correction
-        #replaces Correct(can_setup, wav_start, wav_end, use_def_trans, finding_centre)
-        reduce_can = copy.deepcopy(reducer)
-
-        #the workspace is again branched with a new name
-        reduce_can.flood_file.out_container[0] = tmp_can
-        #the line below is required if the step above is optional
-        reduce_can.crop_detector.out_container[0] = tmp_can
-        if not reducer.transmission_calculator is None:
-            reduce_can.transmission_calculator.set_loader(reduce_can.can_trans_load)
-
-        norm_step_ind = reduce_can.step_num(reduce_can.norm_mon)
-        reduce_can.norm_mon = NormalizeToMonitor(
-                                        raw_ws = self._scatter_can)
-        reduce_can._reduction_steps[norm_step_ind] = reduce_can.norm_mon
-           
-        #set the workspace that we've been setting up as the one to be processed 
-        reduce_can.set_process_single_workspace(self._scatter_can)
-
-        #this will be the first command that is run in the new chain
-        start = reduce_can.step_num(reduce_can.flood_file)
-        #stop before this current step
-        end = reducer.step_num(self)-1
-        #the reducer is completely setup, run it
-        reduce_can.run_steps(start_ind=start, stop_ind=end)
-        
+        #do same corrections as were done to the sample
+        reducer.reduce_another(self._scatter_can, tmp_can)
 
         #we now have the can workspace, use it
         Minus(tmp_smp, tmp_can, workspace)
@@ -455,7 +416,7 @@ class CanSubtraction(LoadRun):
             rem_zeros = sans_reduction_steps.StripEndZeros()
             rem_zeros.execute(reducer, tmp_smp)
             rem_zeros.execute(reducer, tmp_can)
-    
+
 class Mask_ISIS(sans_reduction_steps.Mask):
     """
         Provides ISIS specific mask functionality (e.g. parsing
@@ -789,7 +750,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 
                 if (vals.readY(i)[0] > maxval):
                     #don't include masked or monitors
-                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 10000):
+                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 1000):
                         maxval = vals.readY(i)[0]
     
             #now normalise to the max/4
@@ -836,6 +797,9 @@ class LoadSample(LoadRun):
         self.uncropped = None
     
     def execute(self, reducer, workspace):
+        if not reducer.user_settings.executed:
+            raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
+
         # If we don't have a data file, look up the workspace handle
         if self._data_file is None:
             self._data_file = reducer.get_sample()
@@ -874,8 +838,11 @@ class LoadSample(LoadRun):
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
 
+        if self._reload:
+            reducer.place_det_sam.reset(self._scatter_sample)
+        reducer.place_det_sam.execute(reducer, self._scatter_sample)
+
         reducer.wksp_name = self.uncropped
-        
         return reducer.wksp_name, logs
 
 class MoveComponents(ReductionStep):
@@ -885,22 +852,28 @@ class MoveComponents(ReductionStep):
     """
     def __init__(self):
         super(MoveComponents, self).__init__()
-        #save where we have moved the workspace to so that we don't move it again
-        self.moved_to = None
+        #dictionary contains where given workspaces were moved to to avoid moving them again
+        self._moved_to = {}
 
     def execute(self, reducer, workspace):
 
         # Put the components in the correct positions
         beamcoords = reducer._beam_finder.get_beam_center()
-        if self.moved_to and self.moved_to != beamcoords:
-            #the components had already been moved, return them to their original location first
-            reducer.instrument.set_component_positions(workspace, -self.moved_to[0], -self.moved_to[1])
+        if self._moved_to.has_key(workspace):
+            if self._moved_to[workspace] != beamcoords:
+                #the components had already been moved, return them to their original location first
+                reducer.instrument.set_component_positions(workspace,
+                    -self._moved_to[workspace][0], -self._moved_to[workspace][1])
         
-        if self.moved_to != beamcoords:
+        if ( not self._moved_to.has_key(workspace) ) or \
+                (self._moved_to[workspace] != beamcoords):
             self.maskpt_rmin, self.maskpt_rmax = reducer.instrument.set_component_positions(workspace, beamcoords[0], beamcoords[1])
-            self.moved_to = beamcoords
+            self._moved_to[workspace] = beamcoords
 
         mantid.sendLogMessage('::SANS:: Moved sample workspace to [' + str(self.maskpt_rmin)+','+str(self.maskpt_rmax) + ']' )
+
+    def reset(self, workspace):
+        self._moved_to.pop(workspace, None)
 
 class CropDetBank(ReductionStep):
     """
@@ -922,7 +895,7 @@ class CropDetBank(ReductionStep):
     def execute(self, reducer, workspace):
         if len(self.out_container) > 0:
             reducer.wksp_name = self.out_container[0]
-         # Get the detector bank that is to be used in this analysis leave the complete workspace
+        # Get the detector bank that is to be used in this analysis leave the complete workspace
         CropWorkspace(workspace, reducer.wksp_name,
             StartWorkspaceIndex = reducer.instrument.cur_detector().get_first_spec_num() - 1,
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
@@ -1301,6 +1274,7 @@ class UserFile(ReductionStep):
         super(UserFile, self).__init__()
         self.filename = file
         self._incid_monitor_lckd = False
+        self.executed = False
 
     def execute(self, reducer, workspace=None):
         if self.filename is None:
@@ -1327,7 +1301,8 @@ class UserFile(ReductionStep):
         # Check if one of the efficency files hasn't been set and assume the other is to be used
         reducer.instrument.copy_correction_files()
         
-        return True
+        self.executed = True
+        return self.executed
 
     def read_line(self, line, reducer):
         # This is so that I can be sure all EOL characters have been removed

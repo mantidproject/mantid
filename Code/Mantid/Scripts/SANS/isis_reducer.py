@@ -10,6 +10,7 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 from mantidsimple import *
 import os
+import copy
 
 ## Version number
 __version__ = '0.0'
@@ -56,7 +57,7 @@ class ISISReducer(SANSReducer):
         """
 #        self._reduction_steps.append(self.data_loader)
 #        self._reduction_steps.append(self.user_settings)
-        self._prepare_raw.append(self.place_det_sam)
+#        self._prepare_raw.append(self.place_det_sam)
         self._prepare_raw.append(self.geometry)
         #---- creates a new workspace leaving the raw data behind 
         self._fork_ws.append(self.out_name)
@@ -74,7 +75,7 @@ class ISISReducer(SANSReducer):
         #---- the can special reducer ends on the previous step
         self._can.append(self.background_subtracter)
         
-        self._tidy.append(self._zero_errors)
+        self._tidy.append(self._zero_error_flags)
         self._tidy.append(self._rem_zeros)
         
         self._reduction_steps = self._prepare_raw + self._fork_ws + self._conv_Q + self._can+ self._tidy
@@ -105,7 +106,7 @@ class ISISReducer(SANSReducer):
         self.to_Q =            isis_reduction_steps.ConvertToQ()
         self.background_subtracter = None
         self._geo_corr =       sans_reduction_steps.SampleGeomCor(self.geometry)
-        self._zero_errors =    isis_reduction_steps.ReplaceErrors()
+        self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
         self._rem_zeros =      sans_reduction_steps.StripEndZeros()
 
     def pre_process(self): 
@@ -115,6 +116,135 @@ class ISISReducer(SANSReducer):
             the list of reduction steps.
         """
         self._to_steps()
+
+    def _reduce(self):
+        """
+            Execute the list of all reduction steps
+        """
+        # Check that an instrument was specified
+        if self.instrument is None:
+            raise RuntimeError, "Reducer: trying to run a reduction without an instrument specified"
+
+        # Go through the list of steps that are common to all data files
+        self.pre_process()
+
+        #self._data_files[final_workspace] = self._data_files[file_ws]
+        #del self._data_files[file_ws]
+        #----> can_setup.setReducedWorkspace(tmp_can)
+        
+        #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
+        self.run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
+
+        #any clean up, possibly removing workspaces 
+        self.post_process()
+        self.clean = False
+        
+        return self.wksp_name
+    
+    def reduce_another(self, to_reduce, new_wksp=None):
+        """
+            Apply the sample corrections to another workspace, used by CanSubtraction
+            @param to_reduce: the workspace that will be corrected
+            @param new_wksp: the name of the workspace that will store the result (default the name of the input workspace)
+        """
+        if not new_wksp:
+            new_wksp = to_reduce
+
+        # Can correction
+        new_reducer = copy.deepcopy(self)
+
+        #give the name of the new workspace to the first algorithm that was run
+        new_reducer.flood_file.out_container[0] = new_wksp
+        #the line below is required if the step above is optional
+        new_reducer.crop_detector.out_container[0] = new_wksp
+        
+        if new_reducer.transmission_calculator:
+            new_reducer.transmission_calculator.set_loader(new_reducer.can_trans_load)
+
+        norm_step_ind = new_reducer.step_num(new_reducer.norm_mon)
+        new_reducer._reduction_steps[norm_step_ind] = \
+            isis_reduction_steps.NormalizeToMonitor(raw_ws=to_reduce)
+           
+        #set the workspace that we've been setting up as the one to be processed 
+        new_reducer.set_process_single_workspace(to_reduce)
+        self.run_conv_Q(new_reducer)
+
+    def run_from_raw(self):
+        """
+            Executes all the steps after moving the components
+        """
+        self.run_steps(
+                       start_ind=self.step_num(self._fork_ws[0]),
+                       stop_ind=len(self._reduction_steps))
+
+        #any clean up, possibly removing workspaces 
+        self.post_process()
+        self.clean = False
+        
+        return self.wksp_name
+
+    def run_conv_Q(self, reducer=None):
+        """
+            Executes all the commands required to correct a can workspace
+        """
+        if not reducer:
+            reducer = self
+            
+        steps = reducer._conv_Q
+        #the reducer is completely setup, run it
+        reducer.run_steps(
+                          start_ind=reducer.step_num(steps[0]),
+                          stop_ind=reducer.step_num(steps[len(steps)-1]))
+
+    def run_steps(self, start_ind = None, stop_ind = None):
+        """
+            Run part of the chain, starting at the first specified step
+            and ending at the last. If start or finish are set to None
+            they will default to the first and last steps in the chain
+            respectively. No pre- or post-processing is done. Assumes
+            there are no duplicated steps
+            @param start_ind the index number of the first step to run
+            @param end_ind the index of the last step that will be run
+        """
+        if start_ind is None:
+            start_ind = 0
+
+        if stop_ind is None:
+            stop_ind = len(self._reduction_steps)
+
+        for file_ws in self._data_files:
+            self.wksp_name = self._data_files.values()[0]
+            for item in self._reduction_steps[start_ind:stop_ind+1]:
+                if not item is None:
+                    item.execute(self, self.wksp_name)
+
+
+                #TODO: change the following
+                finding_centre = False
+        
+                    
+                if finding_centre:
+                    self.final_workspace = file_ws.split('_')[0] + '_quadrants'
+                 
+                # Crop Workspace to remove leading and trailing zeroes
+                #TODO: deal with this once we have the final workspace name sorted out
+                if finding_centre:
+                    quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
+                    for key, value in quadrants.iteritems():
+                        old_name = self.final_workspace + '_' + str(key)
+                        RenameWorkspace(old_name, value)
+
+        self.clean = False
+        return self.wksp_name
+
+
+    def post_process(self):
+        # Store the mask file within the final workspace so that it is saved to the CanSAS file
+        if self.user_settings is None:
+            user_file = 'None'
+        else:
+            user_file = self.user_settings.filename
+        AddSampleLog(self.wksp_name, "UserFile", user_file)
 
     def set_user_path(self, path):
         """
@@ -226,95 +356,6 @@ class ISISReducer(SANSReducer):
         """
         return self._reduction_steps.index(step)
 
-    def _reduce(self):
-        """
-            Execute the list of all reduction steps
-        """
-        # Check that an instrument was specified
-        if self.instrument is None:
-            raise RuntimeError, "Reducer: trying to run a reduction without an instrument specified"
-
-        # Go through the list of steps that are common to all data files
-        self.pre_process()
-
-        #self._data_files[final_workspace] = self._data_files[file_ws]
-        #del self._data_files[file_ws]
-        #----> can_setup.setReducedWorkspace(tmp_can)
-        
-        #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
-        self.run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
-
-        #any clean up, possibly removing workspaces 
-        self.post_process()
-        self.clean = False
-        
-        return self.wksp_name
-    
-    def from_moved(self):
-        """
-            Executes all the steps after moving the components
-        """
-        self.run_steps(
-                       start_ind=self.step_num(self._fork_ws[0]),
-                       stop_ind=len(self._reduction_steps))
-
-        #any clean up, possibly removing workspaces 
-        self.post_process()
-        self.clean = False
-        
-        return self.wksp_name
-
-    def run_steps(self, start_ind = None, stop_ind = None):
-        """
-            Run part of the chain, starting at the first specified step
-            and ending at the last. If start or finish are set to None
-            they will default to the first and last steps in the chain
-            respectively. No pre- or post-processing is done. Assumes
-            there are no duplicated steps
-            @param start_ind the index number of the first step to run
-            @param end_ind the index of the last step that will be run
-        """
-        if start_ind is None:
-            start_ind = 0
-
-        if stop_ind is None:
-            stop_ind = len(self._reduction_steps)
-
-        for file_ws in self._data_files:
-            self.wksp_name = self._data_files.values()[0]
-            for item in self._reduction_steps[start_ind:stop_ind+1]:
-                if not item is None:
-                    item.execute(self, self.wksp_name)
-
-
-                #TODO: change the following
-                finding_centre = False
-        
-                    
-                if finding_centre:
-                    self.final_workspace = file_ws.split('_')[0] + '_quadrants'
-                 
-                # Crop Workspace to remove leading and trailing zeroes
-                #TODO: deal with this once we have the final workspace name sorted out
-                if finding_centre:
-                    quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
-                    for key, value in quadrants.iteritems():
-                        old_name = self.final_workspace + '_' + str(key)
-                        RenameWorkspace(old_name, value)
-
-        self.clean = False
-        return self.wksp_name
-
-
-    def post_process(self):
-        # Store the mask file within the final workspace so that it is saved to the CanSAS file
-        if self.user_settings is None:
-            user_file = 'None'
-        else:
-            user_file = self.user_settings.filename
-        AddSampleLog(self.wksp_name, "UserFile", user_file)
-
-    
     def get_instrument(self):
         """
             Convenience function used by the inst property to make

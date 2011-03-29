@@ -566,7 +566,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   }
 
   //Get information from all but data group
-  progress(progressStart+0.05*progressRange,"Reading the instrument details...");
+  progress(progressStart+0.05*progressRange,"Reading the sample details...");
+  readSampleGroup(mtd_entry, local_workspace);
+
+  progress(progressStart+0.1*progressRange,"Reading the instrument details...");
   readInstrumentGroup(mtd_entry, local_workspace);
   if ( ! local_workspace->getAxis(1)->isSpectra() )
   { // If not a spectra axis, load the axis data into the workspace. (MW 25/11/10)
@@ -586,9 +589,6 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
         el.addDetectorID(dets[i]);
     }
   }
-
-  progress(progressStart+0.1*progressRange,"Reading the sample details...");
-  readSampleGroup(mtd_entry, local_workspace);
 
   progress(progressStart+0.15*progressRange,"Reading the workspace history...");
   try

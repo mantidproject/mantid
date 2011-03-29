@@ -153,6 +153,7 @@ def AssignSample(sample_run, reload = True, period = -1):
 
     sample_wksp, logs = ReductionSingleton().data_loader.execute(
                                             ReductionSingleton(), None)
+
     ReductionSingleton().set_run_number(sample_wksp)
     return sample_wksp, logs
 
@@ -232,7 +233,7 @@ def CompWavRanges(wavelens, plot=True):
             settings = copy.deepcopy(ReductionSingleton().reference())
             ReductionSingleton().to_wavelen.set_rebin(
                             w_low=wavelens[i], w_high=wavelens[i+1])
-            calculated.append(ReductionSingleton().from_moved())
+            calculated.append(ReductionSingleton().run_from_raw())
             ReductionSingleton().replace(settings)
     finally:
         ReductionSingleton.clean(isis_reducer.ISISReducer)
