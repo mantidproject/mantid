@@ -215,8 +215,8 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE");
-//    TS_ASSERT_EQUALS( output->blocksize(), 475 );  // Value from IDF
-    TS_ASSERT_EQUALS( output->blocksize(), 472 );  // Value from RAW geometry
+    TS_ASSERT_EQUALS( output->blocksize(), 475 );  // Value from IDF
+//    TS_ASSERT_EQUALS( output->blocksize(), 472 );  // Value from RAW geometry
 
     AnalysisDataService::Instance().remove(outputSpace);
 
