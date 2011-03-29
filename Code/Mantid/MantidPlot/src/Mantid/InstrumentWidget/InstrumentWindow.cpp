@@ -5,7 +5,8 @@
 #include "../AlgMonitor.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "Poco/Path.h"
+
+#include <Poco/Path.h>
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>

@@ -7,7 +7,7 @@
 #endif
 
 #include <QObject>
-#include "Poco/Message.h"
+#include <Poco/Message.h>
 
 /** 
 

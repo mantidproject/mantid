@@ -1,8 +1,9 @@
 #include "AbstractMantidLog.h"
 
 #include "MantidKernel/SignalChannel.h"
-#include "Poco/LoggingRegistry.h"
-#include "boost/bind.hpp"
+
+#include <Poco/LoggingRegistry.h>
+#include <boost/bind.hpp>
 
 #include <QMessageBox>
 
