@@ -469,11 +469,6 @@ void SANSRunWindow::readSettings()
   //Set old file extension
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
 
-  m_uiForm.enableFlood_ck->setChecked(
-                   value_store.value("enable_flood_correct",true).toBool());
-  m_uiForm.floodFile->setEnabled(m_uiForm.enableFlood_ck->isChecked());
-  m_uiForm.floodFile->readSettings("flood_correct");
-
   int i = m_uiForm.wav_dw_opt->findText(
     value_store.value("wave_binning", "Linear").toString());
   i = i > -1 ? i : 0;
@@ -518,9 +513,6 @@ void SANSRunWindow::saveSettings()
 
   value_store.setValue("instrum", m_uiForm.inst_opt->currentText());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
-
-  value_store.setValue("enable_flood_correct", m_uiForm.enableFlood_ck->isChecked());
-  m_uiForm.floodFile->saveSettings("flood_correct");
 
   value_store.setValue("wave_binning", m_uiForm.wav_dw_opt->currentText());
 
@@ -761,11 +753,12 @@ bool SANSRunWindow::loadUserFile(QString & errors)
     "print i.ReductionSingleton().instrument.detector_file('front')"));
 
   QString file = runReduceScriptFunction(
-      "print i.ReductionSingleton().flood_file.get_filename()");
+    "print i.ReductionSingleton().flood_file.get_filename()");
   file = file.trimmed();
-  //Check if the file name is set to Python's None object
-  file = file == "None" ? "" : file;
-  m_uiForm.floodFile->setFileText(file);
+  //Check if the file name is set to Python's None object and then adjust the controls if there is an empty entry
+  m_uiForm.floodFile->setFileText(file == "None" ? "" : file);
+  m_uiForm.enableFlood_ck->setChecked( ! m_uiForm.floodFile->isEmpty() );
+  prepareFlood(m_uiForm.enableFlood_ck->checkState());
 
   //Scale factor
   dbl_param = runReduceScriptFunction(
