@@ -210,15 +210,37 @@ public:
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
     
-    std::string prop1;
-    TS_ASSERT_THROWS_NOTHING( prop1 = testAlg->getProperty("prop1") );
-    TS_ASSERT_EQUALS(prop1,"val1");
-    int prop2;
-    TS_ASSERT_THROWS_NOTHING( prop2 = testAlg->getProperty("prop2") );
-    TS_ASSERT_EQUALS(prop2, 8);
-    double prop3;
-    TS_ASSERT_THROWS_NOTHING( prop3 = testAlg->getProperty("prop3") );
-    TS_ASSERT_EQUALS(prop3, 10.0);
+    // On gcc we get ambiguous function calls doing
+    // std::string s;
+    // s = getProperty(...);
+    // so we have to do this
+    try
+    {
+      std::string prop1 = testAlg->getProperty("prop1");
+      TS_ASSERT_EQUALS(prop1,"val1");
+    }
+    catch(...)
+    {
+      TS_FAIL("Cannot retrieve property 'prop1'");
+    }
+    try
+    {
+      int prop2 = testAlg->getProperty("prop2");
+      TS_ASSERT_EQUALS(prop2, 8);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'prop2'");
+    }
+    try
+    {
+      double prop3 = testAlg->getProperty("prop3");
+      TS_ASSERT_EQUALS(prop3, 10.0);
+    }
+    catch(...)
+    {
+      TS_FAIL("Cannot retrieve property 'prop3'");
+    }
   }
 
   void test_Construction_Via_Valid_String_With_Empty_Properties()
@@ -227,12 +249,25 @@ public:
     TS_ASSERT_EQUALS(testAlg->name(), "ToyAlgorithm");
     TS_ASSERT_EQUALS(testAlg->version(), 2);
     
-    std::string prop1;
-    TS_ASSERT_THROWS_NOTHING( prop1 = testAlg->getProperty("prop1") );
-    TS_ASSERT_EQUALS(prop1,"value");
-    int prop2;
-    TS_ASSERT_THROWS_NOTHING( prop2 = testAlg->getProperty("prop2") );
-    TS_ASSERT_EQUALS(prop2, 1);
+     try
+    {
+      std::string prop1 = testAlg->getProperty("prop1");
+      TS_ASSERT_EQUALS(prop1,"value");
+    }
+    catch(...)
+    {
+      TS_FAIL("Cannot retrieve property 'prop1'");
+    }
+    try
+    {
+      int prop2 = testAlg->getProperty("prop2");
+      TS_ASSERT_EQUALS(prop2, 1);
+    }
+    catch(...)
+    {
+       TS_FAIL("Cannot retrieve property 'prop2'");
+    }
+
   }
 
 
