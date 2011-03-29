@@ -12,8 +12,9 @@
 #include "MantidAPI/IEventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "boost/date_time/posix_time/posix_time.hpp"
 #include "MantidAPI/Progress.h"
+
+#include <boost/date_time/posix_time/posix_time.hpp>
 
 namespace Mantid
 {

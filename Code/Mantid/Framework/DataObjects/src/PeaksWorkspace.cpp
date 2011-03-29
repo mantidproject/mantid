@@ -11,7 +11,7 @@
 #include "MantidGeometry/V3D.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/MatrixWorkspace.h"
-#include "boost/shared_ptr.hpp"
+#include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <string>
 #include <ostream>
