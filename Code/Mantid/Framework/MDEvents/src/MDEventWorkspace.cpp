@@ -21,7 +21,7 @@ namespace Mantid
 namespace MDEvents
 {
 
-//-----------------------------------------------------------------------------------------------
+  //-----------------------------------------------------------------------------------------------
   /** Default constructor
    */
   TMDE(
@@ -314,8 +314,13 @@ namespace MDEvents
   MDHistoWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::Kernel::ProgressBase * prog)
   {
+    bool DODEBUG = false;
+    Timer tim;
+
     // Create the dense histogram. This allocates the memory
     MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimX, dimY, dimZ, dimT));
+
+    if (DODEBUG) std::cout << tim.elapsed() << " sec to create the MDHistoWorkspace.\n";
 
     // Make it into a vector of dimensions to which to bin.
     std::vector<MDHistoDimension_sptr> binDimensionsIn;
@@ -349,10 +354,14 @@ namespace MDEvents
     for (size_t i=1; i < numBD; i++)
       linear_index_maker[i] = linear_index_maker[i-1]*binDimensions[i]->getNBins();
 
+    if (DODEBUG) std::cout << tim.elapsed() << " sec to cache the binning results.\n";
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
-    ThreadPool tp(ts, 1, prog); //FIXME: restore CPUS
+    // Create the threadpool with: all CPUs, a progress reporter
+    ThreadPool tp(ts, 0, prog);
+    // Start the threadpool, and allow the threads to wait up to 1.0 seconds for tasks to come in.
+    //tp.start(1.0);
 
     // For progress reporting, the # of tasks = the number of bins in the output workspace
     if (prog)
@@ -409,9 +418,13 @@ namespace MDEvents
       }
     } // While !alldone
 
+    if (DODEBUG) std::cout << tim.elapsed() << " sec to fill up the ThreadPool with all the tasks\n";
+
     // OK, all that was just to fill the ThreadScheduler
     // So now we actually run these.
     tp.joinAll();
+
+    if (DODEBUG) std::cout << tim.elapsed() << " sec to run all the tasks\n";
 
     return ws;
   }

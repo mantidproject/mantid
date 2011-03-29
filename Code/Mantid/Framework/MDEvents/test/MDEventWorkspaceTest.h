@@ -258,9 +258,9 @@ public:
   void do_test_centerpointBinToMDHistoWorkspace( std::string name1, std::string name2, std::string name3, std::string name4,
       size_t expected_events_per_bin)
   {
-    size_t len = 10; // Make the box split into 12x12x12
+    size_t len = 10; // Make the box split into this many per size
     double size = len * 1.0;  // Make each grid box 1.0 in size
-    size_t binlen = 5; // And bin more coarsely, 4x4x4
+    size_t binlen = 5; // And bin more coarsely
 
     // 10x10x10 eventWorkspace
     MDEventWorkspace3::sptr ws = makeMDEW<3>(len, 0.0, size);
@@ -321,15 +321,15 @@ public:
     do_test_centerpointBinToMDHistoWorkspace("Axis1", "Axis0", "NONE", "Axis2", 8); // 2x2x2 blocks
   }
 
-  void test_centerpointBinToMDHistoWorkspace_2D()
-  {
-    do_test_centerpointBinToMDHistoWorkspace("Axis0", "Axis1", "NONE", "NONE", 40); // 2x2x10 blocks
-  }
-
-  void test_centerpointBinToMDHistoWorkspace_1D()
-  {
-    do_test_centerpointBinToMDHistoWorkspace("NONE", "Axis2", "NONE", "NONE", 200); // 2x10x10 blocks
-  }
+//  void test_centerpointBinToMDHistoWorkspace_2D()
+//  {
+//    do_test_centerpointBinToMDHistoWorkspace("Axis0", "Axis1", "NONE", "NONE", 40); // 2x2x10 blocks
+//  }
+//
+//  void test_centerpointBinToMDHistoWorkspace_1D()
+//  {
+//    do_test_centerpointBinToMDHistoWorkspace("NONE", "Axis2", "NONE", "NONE", 200); // 2x10x10 blocks
+//  }
 
 
 };
