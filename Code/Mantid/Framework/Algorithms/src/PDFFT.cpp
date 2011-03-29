@@ -94,16 +94,20 @@ namespace Algorithms
 	  }
 
 	  // 3. Calculate G(r)
-	  g_log.information() << "Unit = " << unit << "  Size = " << sizer << std::endl;
-
+	  // g_log.information() << "Unit = " << unit << "  Size = " << sizer << std::endl;
+#if 0
 	  printout = true;
+#endif
 	  for (int i = 0; i < sizer; i ++){
 		  double error;
 		  if (unit == "Q"){
 			  vg[i] = CalculateGrFromQ(vr[i], error, qmin, qmax);
+#if 0
 			  if (printout)
 				  printout = false;
+#endif
 			  vge[i] = error;
+
 		  } else if (unit == "d"){
 			  vg[i] = CalculateGrFromD(vr[i], error, qmin, qmax);
 			  vge[i] = error;
@@ -161,7 +165,7 @@ namespace Algorithms
       double temp, q, s, deltaq;
       double error = 0;
 
-      g_log.information()<< "r = " << r << "  size(q) = " << vq.size() << std::endl;
+      // g_log.information()<< "r = " << r << "  size(q) = " << vq.size() << std::endl;
 
       for (size_t i = 1; i < vq.size(); i ++){
           q = vq[i];
@@ -172,10 +176,12 @@ namespace Algorithms
         	  temp = q*(s-1)*sin(q*r)*deltaq;
         	  gr += temp;
         	  error += ve[i]*ve[i];
+#if 0
         	  if (printout){
         	  g_log.information() << "q[" << i << "] = " << q << "  dq = " << deltaq << "  S(q) =" << s;
         	  g_log.information() << "  d(gr) = " << temp << "  gr = " << gr << std::endl;
         	  }
+#endif
           }
       }
 

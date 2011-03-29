@@ -30,7 +30,9 @@ namespace Algorithms
   private:
     API::MatrixWorkspace_const_sptr Sspace;
     API::MatrixWorkspace_sptr Gspace;
+#if 0
     bool printout;
+#endif
 
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
