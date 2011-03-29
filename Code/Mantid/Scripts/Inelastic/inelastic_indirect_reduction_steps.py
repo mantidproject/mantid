@@ -6,88 +6,118 @@ class LoadData(ReductionStep):
     Options to Sum, etc should be included here.
     """
     
+    _multiple_frames = False
     _sum = False
-    
+    _monitor_index = None
+    _detector_range_start = None
+    _detector_range_end = None
+    _masking_detectors = []
+    _parameter_file = None
+    _data_files = {}
+        
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
         parameters for the step.
         """
         super(LoadData, self).__init__()
         self._sum = False
+        self._multiple_frames = False
+        self._monitor_index = None
+        self._detector_range_start = None
+        self._detector_range_end = None
+        self._parameter_file = None
+        self._data_files = {}
 
     def execute(self, reducer, file_ws):
         """Loads the data.
         """
         wsname = ''
-        if reducer._data_files is None:
-            raise ValueError('You must nominate the data files!')
-
-        for file in reducer._data_files:
+        
+        for file in self._data_files:
             LoadRaw(file, file, LoadLogFiles=False)
             
-            if reducer._parameter_file != None:
-                LoadParameterFile(file, reducer._parameter_file)
+            if self._parameter_file != None:
+                LoadParameterFile(file, self._parameter_file)
             
-            if ( reducer._instrument_name == 'TOSCA' ):
-                reducer._masking_detectors = self._identify_bad_detectors(file)
+            if ( mtd[file].getInstrument().getName() == 'TOSCA' ):
+                self._identify_bad_detectors(file)
 
             if ( wsname == '' ):
                 wsname = file
 
-            if self._require_chop_data(reducer, file):
+            if self._require_chop_data(file):
                 ChopData(file, file)
-                reducer.set_multiple_frames(True)
+                self._multiple_frames = True
             else:
-                reducer.set_multiple_frames(False)
+                self._multiple_frames = False
 
-            if ( reducer._monitor_index == -1 ):
-                self._get_monitor_index(reducer)
-
-            if ( reducer._multiple_frames ):
+            if ( self._multiple_frames ):
                 workspaces = mtd[file].getNames()
             else:
                 workspaces = [file]
 
             for ws in workspaces:
                 ## Extract Monitor Spectrum
-                ExtractSingleSpectrum(ws, ws+'_mon', reducer._monitor_index)
+                ExtractSingleSpectrum(ws, ws+'_mon', self._monitor_index)
                 ## Crop the workspace to remove uninteresting detectors
                 CropWorkspace(ws, ws, 
-                    StartWorkspaceIndex=reducer._detector_range_start,
-                    EndWorkspaceIndex=reducer._detector_range_end)
+                    StartWorkspaceIndex=self._detector_range_start,
+                    EndWorkspaceIndex=self._detector_range_end)
 
-        if ( self._sum ) and ( len(reducer._data_files) > 1 ):
+        if ( self._sum ) and ( len(self._data_files) > 1 ):
             ## Sum files
             merges = []
-            if ( reducer._multiple_frames ):
-                self._sum_chopped(reducer, wsname)
+            if ( self._multiple_frames ):
+                self._sum_chopped(wsname)
             else:
-                self._sum_regular(reducer, wsname)
+                self._sum_regular(wsname)
             ## Need to adjust the reducer's list of workspaces
-            reducer._data_files = {}
-            reducer._data_files[wsname] = wsname
+            self._data_files = {}
+            self._data_files[wsname] = wsname
 
     def set_sum(self, value):
         self._sum = value
 
-    def _sum_regular(self, reducer, wsname):
+    def set_parameter_file(self, value):
+        self._parameter_file = value
+        
+    def set_monitor_index(self, index):
+        self._monitor_index = index
+        
+    def set_detector_range(self, start, end):
+        self._detector_range_start = start
+        self._detector_range_end = end
+
+    def get_mask_list(self):
+        return self._masking_detectors
+
+    def set_ws_list(self, value):
+        self._data_files = value
+
+    def get_ws_list(self):
+        return self._data_files
+
+    def _sum_regular(self, wsname):
         merges = [[], []]
-        for ws in reducer._data_files:
+        for ws in self._data_files:
             merges[0].append(ws)
             merges[1].append(ws+'_mon')
         MergeRuns(','.join(merges[0]), wsname)
         MergeRuns(','.join(merges[1]), wsname+'_mon')
-        factor = 1.0 / len(reducer._data_files)
+        for n in range(1, len(merges[0])):
+            DeleteWorkspace(merges[0][n])
+            DeleteWorkspace(merges[1][n])
+        factor = 1.0 / len(self._data_files)
         Scale(wsname, wsname, factor)
         Scale(wsname+'_mon', wsname+'_mon', factor)
 
-    def _sum_chopped(self, reducer, wsname):
+    def _sum_chopped(self, wsname):
         merges = []
         nmerges = len(mtd[wsname].getNames())
         for n in range(0, nmerges):
             merges.append([])
             merges.append([])
-            for file in reducer._data_files:
+            for file in self._data_files:
                 merges[2*n].append(mtd[file].getNames()[n])
                 merges[2*n+1].append(mtd[file].getNames()[n]+'_mon')
         for merge in merges:
@@ -101,55 +131,51 @@ class LoadData(ReductionStep):
         IdentifyNoisyDetectors(workspace, '__temp_tsc_noise')
         ws = mtd['__temp_tsc_noise']
         nhist = ws.getNumberHistograms()
-        invalid = []
+        self._masking_detectors = []
         for i in range(0, nhist):
             if ( ws.readY(i)[0] == 0.0 ):
-                invalid.append(i)
+                self._masking_detectors.append(i)
         DeleteWorkspace('__temp_tsc_noise')
-        return invalid
+        return self._masking_detectors
 
-    def _get_monitor_index(self, reducer):
-        workspace = reducer._load_empty_instrument()
-        for counter in range(0, workspace.getNumberHistograms()):
-            try:
-                detector = workspace.getDetector(counter)
-            except RuntimeError:
-                pass
-            if detector.isMonitor():
-                reducer._monitor_index = counter
-                return
-
-    def _require_chop_data(self, reducer, workspace):
-        if ( reducer._instrument_name != 'TOSCA' ):
+    def _require_chop_data(self, workspace):
+        if ( mtd[workspace].getInstrument().getName() != 'TOSCA' ):
             return False
         if ( mtd[workspace].readX(0)[mtd[workspace].getNumberBins()] > 40000 ):
             return True
         return False
+        
+    def is_multiple_frames(self):
+        return self._multiple_frames
 
 class BackgroundOperations(ReductionStep):
-    def __init__(self):
+    _multiple_frames = False
+    _background_start = None
+    _background_end = None
+    
+    def __init__(self, MultipleFrames=False):
         super(BackgroundOperations, self).__init__()
+        self._multiple_frames = MultipleFrames
+        self._background_start = None
+        self._background_end = None
         
-    def execute(self, reducer, file_ws):    
-        background_start = reducer._background_start
-        background_end = reducer._background_end
+    def execute(self, reducer, file_ws):
     
-        if ( background_start is None and
-                background_end is None ):
-            return
-    
-        if ( reducer._multiple_frames ):
+        if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
         
         for ws in workspaces:
             ConvertToDistribution(ws)
-            FlatBackground(ws, ws, background_start, 
-                background_end, Mode='Mean')
+            FlatBackground(ws, ws, self._background_start, 
+                self._background_end, Mode='Mean')
             ConvertFromDistribution(ws)
 
-
+    def set_range(self, start, end):
+        self._background_start = start
+        self._background_end = end
+    
 class CreateCalibrationWorkspace(ReductionStep):
     """Creates a calibration workspace from a White-Beam Vanadium run.
     """
@@ -158,6 +184,10 @@ class CreateCalibrationWorkspace(ReductionStep):
     _back_max = None
     _peak_min = None
     _peak_max = None
+    _detector_range_start = None
+    _detector_range_end = None
+    _calib_raw_files = []
+    _calib_workspace = None
     
     def __init__(self):
         super(CreateCalibrationWorkspace, self).__init__()
@@ -165,6 +195,10 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._back_max = None
         self._peak_min = None
         self._peak_max = None
+        self._detector_range_start = None
+        self._detector_range_end = None        
+        self._calib_raw_files = []
+        self._calib_workspace = None
 
     def execute(self, reducer, file_ws):
         """The information we use here is not from the main reducer object
@@ -172,14 +206,14 @@ class CreateCalibrationWorkspace(ReductionStep):
         
         The ApplyCalibration step is related to this.
         """
-        rawfiles = reducer._calib_raw_files
+        rawfiles = self._calib_raw_files
         if ( len(rawfiles) == 0 ):
             print "Indirect: No calibration run specified."
             return
         
-        backMin, backMax, peakMin, peakMax = self._get_calib_details(reducer)
-        specMin = reducer._detector_range_start + 1
-        specMax = reducer._detector_range_end + 1
+        backMin, backMax, peakMin, peakMax = self._get_calib_details()
+        specMin = self._detector_range_start + 1
+        specMax = self._detector_range_end + 1
         
         runs = []
         for file in rawfiles:
@@ -212,20 +246,37 @@ class CreateCalibrationWorkspace(ReductionStep):
         Scale(cwsn, cwsn, value, 'Multiply')
 
         RenameWorkspace(cwsn, outWS_n)
-        reducer.set_calibration_workspace(outWS_n)
+        self._calib_workspace = outWS_n # Set result workspace value
 
     def set_parameters(self, back_min, back_max, peak_min, peak_max):
         self._back_min = back_min
         self._back_max = back_max
         self._peak_min = peak_min
         self._peak_max = peak_max
-
-    def _get_calib_details(self, reducer):    
+        
+    def set_detector_range(self, start, end):
+        self._detector_range_start = start
+        self._detector_range_end = end
+        
+    def set_instrument_workspace(self, workspace):
+        self._instrument_workspace = workspace
+        
+    def set_files(self, files):
+        if len(files) > 0:
+            self._calib_raw_files = files
+        else:
+            raise ValueError("Indirect: Can't set calib files if you don't "
+                "specify a calib file.")
+                
+    def result_workspace(self):
+        return self._calib_workspace
+        
+    def _get_calib_details(self):    
         if ( self._back_min is None and
                 self._back_max is None and
                 self._peak_min is None and
                 self._peak_max is None ):
-            instrument = mtd[reducer._workspace_instrument].getInstrument()
+            instrument = mtd[self._instrument_workspace].getInstrument()
             try:
                 backMin = instrument.getNumberParameter('back-start')[0]
                 backMax = instrument.getNumberParameter('back-end')[0]
@@ -244,51 +295,63 @@ class ApplyCalibration(ReductionStep):
     """Applies a calibration workspace to the data.
     """
     
+    _multiple_frames = False
+    _calib_workspace = None
+    
     def __init__(self):
         super(ApplyCalibration, self).__init__()
+        self._multiple_frames = False
+        self._calib_workspace = None
         
     def execute(self, reducer, file_ws):
-        calib = reducer._calibration_workspace
         
-        if calib is None: # No calibration workspace has been set
+        if self._calib_workspace is None: # No calibration workspace set
             return
             
-        if ( reducer._multiple_frames ):
+        if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
         
         for ws in workspaces:
-            Divide(ws, calib, ws)
+            Divide(ws, self._calib_workspace, ws)
+
+    def set_is_multiple_frames(self, value):
+        self._multiple_frames = value
+
+    def set_calib_workspace(self, value):
+        self._calib_workspace = value
 
 class HandleMonitor(ReductionStep):
     """Handles the montior for the reduction of inelastic indirect data.
     """
+    _multiple_frames = False
     
-    def __init__(self):
+    def __init__(self, MultipleFrames=False):
         """Constructor for HandleMonitor routine.
         """
         super(HandleMonitor, self).__init__()
+        self._multiple_frames = MultipleFrames
 
     def execute(self, reducer, file_ws):
         """Does everything we want to with the Monitor.
         """
-        if ( reducer._multiple_frames ):
+        if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
         
         for ws in workspaces:
             monitor = ws+'_mon'
-            if self._need_to_unwrap(reducer, ws):
+            if self._need_to_unwrap(ws):
                 self._unwrap_monitor(ws)
             else:
                 ConvertUnits(monitor, monitor, 'Wavelength')
             self._monitor_efficiency(monitor)
             self._scale_monitor(monitor)
 
-    def _need_to_unwrap(self, reducer, ws):
-        if ( reducer._instrument_name == 'TOSCA' ):
+    def _need_to_unwrap(self, ws):
+        if ( mtd[ws].getInstrument().getName() == 'TOSCA' ):
             return False
         SpecMon = mtd[ws+'_mon'].readX(0)[0]
         SpecDet = mtd[ws].readX(0)[0]
@@ -343,14 +406,15 @@ class HandleMonitor(ReductionStep):
         else:
             Scale(monitor, monitor, ( 1.0 / factor ), 'Multiply')
 
-
 class CorrectByMonitor(ReductionStep):
+    _multiple_frames = False
 
-    def __init__(self):
+    def __init__(self, MultipleFrames=False):
         super(CorrectByMonitor, self).__init__()
+        self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
-        if ( reducer._multiple_frames ):
+        if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
@@ -361,7 +425,6 @@ class CorrectByMonitor(ReductionStep):
             Divide(ws, ws+'_mon', ws)
             DeleteWorkspace(ws+'_mon')
 
-
 class FoldData(ReductionStep):
 
     def __init__(self):
@@ -370,10 +433,6 @@ class FoldData(ReductionStep):
     def execute(self, reducer, file_ws):
         """Folds data back into a single workspace if it has been "chopped".
         """
-        if not reducer._multiple_frames:
-            return
-        
-        print "Folding data back into a single workspace."
         wsgroup = mtd[file_ws].getNames()        
         workspaces = ','.join(wsgroup)
         ws = file_ws+'_merged'
@@ -417,44 +476,65 @@ class ConvertToEnergy(ReductionStep):
     """
     """
     
+    _rebin_string = None
+    
     def __init__(self):
         super(ConvertToEnergy, self).__init__()
+        self._rebin_string = None
         
     def execute(self, reducer, file_ws):
         ConvertUnits(file_ws, file_ws, 'DeltaE', 'Indirect')
         CorrectKiKf(file_ws, file_ws, 'Indirect')
-        if reducer._rebin_string is not None:
+        if self._rebin_string is not None:
             Rebin(file_ws, file_ws, reducer._rebin_string)
+            
+    def set_rebin_string(self, value):
+        if value is not None:
+            self._rebin_string = value
 
 class DetailedBalance(ReductionStep):
+
+    _temp = None
+    
     def __init__(self):
         super(DetailedBalance, self).__init__()
+        self._temp = None
         
     def execute(self, reducer, file_ws):
-        tempK = reducer._detailed_balance_temp
-        
-        if tempK is None:
-            return
-        
-        correction = 11.606 / ( 2 * tempK )
+        if self._temp is None:
+            return        
+        correction = 11.606 / ( 2 * self._temp )
         ExponentialCorrection(file_ws, file_ws, 1.0, correction)
+        
+    def set_temperature(self, temp):
+        self._temp = temp
             
 class Grouping(ReductionStep):
 
+    _grouping_policy = None
+    _masking_detectors = []
+    
     def __init__(self):
         super(Grouping, self).__init__()
+        self._grouping_policy = None
+        self._masking_detectors = []
         
     def execute(self, reducer, file_ws):
-        if ( reducer._instrument_name == 'TOSCA' ):
-            self._group_tosca(reducer, file_ws)
+        if ( mtd[file_ws].getInstrument().getName() == 'TOSCA' ):
+            self._group_tosca(file_ws)
         else:
-            self._group_data(reducer, file_ws)
+            self._group_data(file_ws)
             
-    def _group_tosca(self, reducer, workspace):
+    def set_grouping_policy(self, value):
+        self._grouping_policy = value
+        
+    def set_mask_list(self, value):
+        self._masking_detectors = value
+            
+    def _group_tosca(self, workspace):
         wsname = self._get_run_title(workspace)
-        invalid = reducer._masking_detectors
         grp = range(0,70)
-        for i in invalid:
+        for i in self._masking_detectors:
             try:
                 grp.remove(i)
             except ValueError:
@@ -462,7 +542,7 @@ class Grouping(ReductionStep):
         GroupDetectors(workspace, wsname, WorkspaceIndexList=grp,
             Behaviour='Average')
         grp = range(70,140)
-        for i in invalid:
+        for i in self._masking_detectors:
             try:
                 grp.remove(i)
             except ValueError:
@@ -473,10 +553,10 @@ class Grouping(ReductionStep):
         ConjoinWorkspaces(wsname, '__front')
         return wsname
 
-    def _group_data(self, reducer, workspace):
-        grouping = reducer._grouping_policy
+    def _group_data(self, workspace):
+        grouping = self._grouping_policy
         name = self._get_run_title(workspace)
-        if (grouping == 'Individual') or ( grouping is None ):
+        if ( grouping == 'Individual' ) or ( grouping is None ):
             if ( workspace != name ):
                 RenameWorkspace(workspace, name)
             return name

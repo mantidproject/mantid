@@ -24,8 +24,6 @@ class IndirectReducer(Reducer):
     _multiple_frames = False
     _instrument_name = None
     _workspace_instrument = None
-    _workspaces_monitor = []
-    _workspaces_detectors = []
     _masking_detectors = []
     _monitor_index = -1
     _detector_range_start = -1
@@ -46,12 +44,9 @@ class IndirectReducer(Reducer):
         starting values.
         """
         super(IndirectReducer, self).__init__()
-        
         self._multiple_frames = False
         self._instrument_name = None
         self._workspace_instrument = None
-        self._workspaces_monitor = []
-        self._workspaces_detectors = []
         self._monitor_index = -1
         self._detector_range_start = -1
         self._detector_range_end = -1
@@ -75,11 +70,28 @@ class IndirectReducer(Reducer):
         self._reduction_steps = []
         
         loadData = steps.LoadData()
+        loadData.set_ws_list(self._data_files)
         loadData.set_sum(self._sum_files)
+        loadData.set_monitor_index(self._monitor_index)
+        loadData.set_detector_range(self._detector_range_start,
+            self._detector_range_end)
+        loadData.set_parameter_file(self._parameter_file)
         loadData.execute(self, None)
         
-        calib = steps.CreateCalibrationWorkspace()
-        calib.execute(self, None)
+        self._multiple_frames = loadData.is_multiple_frames()
+        self._masking_detectors = loadData.get_mask_list()
+        
+        if ( self._sum_files ):
+            self._data_files = loadData.get_ws_list()
+        
+        if len(self._calib_raw_files) > 0:
+            calib = steps.CreateCalibrationWorkspace()
+            calib.set_files(self._calib_raw_files)
+            calib.set_instrument_workspace(self._workspace_instrument)
+            calib.set_detector_range(self._detector_range_start,
+                self._detector_range_end)
+            calib.execute(self, None)
+            self._calibration_workspace = calib.result_workspace()
         
         # Setup the steps for the rest of the reduction, based on selected
         # user settings.
@@ -88,14 +100,52 @@ class IndirectReducer(Reducer):
     def setup_steps(self):
         """Setup the steps for the reduction.
         """
-        self.append_step(steps.HandleMonitor())
-        self.append_step(steps.BackgroundOperations())
-        self.append_step(steps.ApplyCalibration())
-        self.append_step(steps.CorrectByMonitor())
-        self.append_step(steps.FoldData())
-        self.append_step(steps.ConvertToEnergy())
-        self.append_step(steps.DetailedBalance())
-        self.append_step(steps.Grouping())
+        
+        # "HandleMonitor" converts the monitor to Wavelength, possibly Unwraps
+        step = steps.HandleMonitor(MultipleFrames=self._multiple_frames)
+        self.append_step(step)
+        
+        # "BackgroundOperations" just does a FlatBackground at the moment,
+        # will be extended for SNS stuff
+        if (self._background_start is not None and
+                self._background_end is not None):
+            step = steps.BackgroundOperations(
+                MultipleFrames=self._multiple_frames)
+            step.set_range(self._background_start, self._background_end)
+            self.append_step(step)
+            
+        # "ApplyCalibration" divides the workspace by the calibration workspace
+        if self._calibration_workspace is not None:
+            step = steps.ApplyCalibration()
+            step.set_is_multiple_frames(self._multiple_frames)
+            step.set_calib_workspace(self._calibration_workspace)
+            self.append_step(step)
+            
+        # "CorrectByMonitor" converts the data into Wavelength, then divides by
+        # the monitor workspace.
+        step = steps.CorrectByMonitor(MultipleFrames=self._multiple_frames)
+        self.append_step(step)
+        
+        # "FoldData" puts workspaces that have been chopped back together.
+        if self._multiple_frames:
+            self.append_step(steps.FoldData())
+        
+        # "ConvertToEnergy" runs ConvertUnits to DeltaE, CorrectKiKf, and
+        # Rebin if a rebin string has been specified.
+        step = steps.ConvertToEnergy()
+        step.set_rebin_string(self._rebin_string)
+        self.append_step(step)
+        
+        if self._detailed_balance_temp is not None:
+            step = steps.DetailedBalance()
+            step.set_temperature(self._detailed_balance_temp)
+            self.append_step(step)
+            
+        step = steps.Grouping()
+        step.set_grouping_policy(self._grouping_policy)
+        if ( self._instrument_name == 'TOSCA' ):
+            step.set_mask_list(self._masking_detectors)
+        self.append_step(step)
     
     def post_process(self):
         """Deletes the calibration workspace (if we created it).
@@ -107,6 +157,7 @@ class IndirectReducer(Reducer):
     def set_instrument_name(self, instrument):
         self._instrument_name = instrument
         self._load_empty_instrument()
+        self._get_monitor_index()
         
     def set_detector_range(self, start, end):
         self._detector_range_start = start
@@ -124,9 +175,6 @@ class IndirectReducer(Reducer):
     def set_grouping_policy(self, policy):
         self._grouping_policy = policy
 
-    def set_multiple_frames(self, value):
-        self._multiple_frames = value
-        
     def set_sum(self, value):
         self._sum_files = value
 
@@ -154,3 +202,14 @@ class IndirectReducer(Reducer):
             except RuntimeError:
                 raise ValueError('Invalid IDF')
         return mtd[self._workspace_instrument]
+        
+    def _get_monitor_index(self):
+        workspace = self._load_empty_instrument()
+        for counter in range(0, workspace.getNumberHistograms()):
+            try:
+                detector = workspace.getDetector(counter)
+            except RuntimeError:
+                pass
+            if detector.isMonitor():
+                self._monitor_index = counter
+                return
