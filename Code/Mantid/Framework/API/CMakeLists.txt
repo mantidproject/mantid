@@ -1,8 +1,10 @@
 set ( SRC_FILES 
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
+	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
+    src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
@@ -68,9 +70,11 @@ set ( SRC_FILES
 set ( INC_FILES 
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
 	inc/MantidAPI/AlgorithmObserver.h
+    inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
@@ -154,8 +158,10 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceValidators.h )
 
 set ( TEST_FILES 
+    test/AlgorithmHasPropertyTest.h
 	test/AlgorithmHistoryTest.h
 	test/AlgorithmManagerTest.h
+    test/AlgorithmPropertyTest.h
 	test/AlgorithmProxyTest.h
 	test/AlgorithmTest.h
 	test/AnalysisDataServiceTest.h

@@ -1156,5 +1156,56 @@ namespace Mantid
       progress(p,pNf->message);
     }
 
+
+
   } // namespace API
+
+  //---------------------------------------------------------------------------
+  // Specialized templated PropertyManager getValue definitions for Algorithm types
+  //---------------------------------------------------------------------------
+  namespace Kernel
+  {
+    /**
+     * Get the value of a given property as the declared concrete type
+     * @param name :: The name of the property
+     * @returns A pointer to an algorithm
+     */
+    template<> DLLExport
+      API::IAlgorithm_sptr IPropertyManager::getValue<API::IAlgorithm_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<API::IAlgorithm_sptr>* prop =
+        dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
+      }
+    }
+  
+    /**
+     * Get the value of a given property as the declared concrete type (const version)
+     * @param name :: The name of the property
+     * @returns A pointer to an algorithm
+     */
+    template<> DLLExport
+      API::IAlgorithm_const_sptr IPropertyManager::getValue<API::IAlgorithm_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<API::IAlgorithm_sptr>* prop =
+        dynamic_cast<PropertyWithValue<API::IAlgorithm_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        throw std::runtime_error(message);
+      }
+    }
+  }
+
 } // namespace Mantid
