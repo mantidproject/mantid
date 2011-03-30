@@ -265,12 +265,13 @@ def addText(text,parent):
 
 # Copies files in nested folders from location to parent directory
 # Returns a list of component names to be used in addCRefs
-def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
+def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[], shortNamePrefix=None):
     global globalFileCount
     directory = addDirectory(Id+'_dir','dir',name,parent)
     lst = []
     idir = 0
 #    ifil = 0
+    if shortNamePrefix is None: shortNamePrefix = 'f'
     if ARCH == '32':
         m = md5.new(location)
     else:
@@ -307,7 +308,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
                 fn = fil.replace('-','_')
                 fn = fn.replace('+','_')
                 fileId = 'd'+fn+'_file'+str(ifil)
-                fileName = 'file'+str(ifil)
+                fileName = shortNamePrefix + str(ifil)
                 fileLongName = fil
                 addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
     return lst,comp
@@ -618,8 +619,8 @@ includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','Man
 IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI',comp_guid['IncludeMantidPythonAPI'],includeMantidPythonAPIDir)
 addAllFiles(FRAMEWORKDIR + '/PythonAPI/inc/MantidPythonAPI','papi',IncludeMantidPythonAPI)
 
-boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
-pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
+boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir, 'b')[0]
+pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir, 'p')[0]
 #-------------------  end of Includes ---------------------------------------
 
 sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
