@@ -4,6 +4,7 @@
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/Exception.h"
 #include <boost/tokenizer.hpp>
+#include <boost/algorithm/string/trim.hpp>
 #include <algorithm>
 
 namespace Mantid
@@ -359,11 +360,10 @@ namespace Mantid
         Property *p = getPointerToPropertyOrdinal((int)i);
         if( includeDefaults || !(p->isDefault()) )
         {
-          writer << p->name() << "=" << p->value();
-          if( i < count - 1 ) writer << ",";
+          writer << p->name() << "=" << p->value() << ",";
         }
       }
-      return writer.str();
+      return boost::algorithm::trim_right_copy_if(writer.str(), std::bind2nd(std::equal_to<char>(), ','));
     }
 
     //-----------------------------------------------------------------------------------------------

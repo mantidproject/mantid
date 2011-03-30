@@ -117,6 +117,8 @@ namespace PythonAPI
       .def("getProperty", &API::IAlgorithm::getPointerToProperty, return_value_policy<return_by_value>())
       .def("_setWorkspaceProperty", &_setMatrixWorkspaceProperty)
       .def("_getWorkspaceProperty", &_getMatrixWorkspaceProperty)
+      // Special methods
+      .def("__str__", &IAlgorithm::toString)
       ;
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
