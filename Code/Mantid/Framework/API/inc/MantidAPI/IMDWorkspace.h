@@ -102,6 +102,13 @@ namespace Mantid
         return getCell(index1,index2,index3,index4).getError();
       }
 
+      /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
+      virtual std::vector<double> getSignalDataVector() const
+      {
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const = 0;
 

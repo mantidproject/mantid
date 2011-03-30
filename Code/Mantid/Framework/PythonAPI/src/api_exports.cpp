@@ -262,6 +262,7 @@ namespace PythonAPI
     // EventWorkspace class
     class_< IMDWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDWorkspace", no_init)
         .def("getNPoints", &IMDWorkspace::getNPoints)
+        .def("getSignalDataVector", &IMDWorkspace::getSignalDataVector)
         ;
   }
 

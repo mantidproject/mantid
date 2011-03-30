@@ -68,6 +68,20 @@ namespace MDEvents
     numDimensions = m_dimensions.size();
   }
 
+  //----------------------------------------------------------------------------------------------
+  /// Return a vector containing a copy of the signal data in the workspace.
+  std::vector<double> MDHistoWorkspace::getSignalDataVector() const
+  {
+    // TODO: Make this more efficient if needed.
+    std::vector<double> out;
+    out.resize(m_length, 0.0);
+    for (size_t i=0; i<m_length; ++i)
+        out[i] = m_signals[i];
+    // This copies again! :(
+    return out;
+  }
+
+
 } // namespace Mantid
 } // namespace MDEvents
 

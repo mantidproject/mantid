@@ -47,10 +47,15 @@ public:
     }
 
     // Setting and getting
-    ws.setErrorAt(5,1.234);
     ws.setSignalAt(5,2.3456);
-    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
     TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
+
+    ws.setErrorAt(5,1.234);
+    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+
+    std::vector<double> data = ws.getSignalDataVector();
+    TS_ASSERT_EQUALS(data.size(), 5*5*5*5);
+    TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
 
   }
 

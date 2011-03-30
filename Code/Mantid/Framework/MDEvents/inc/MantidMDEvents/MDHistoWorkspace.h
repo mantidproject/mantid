@@ -134,7 +134,8 @@ namespace MDEvents
       return m_errors[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
     }
 
-
+    /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
+    virtual std::vector<double> getSignalDataVector() const;
 
     //================= METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
 
