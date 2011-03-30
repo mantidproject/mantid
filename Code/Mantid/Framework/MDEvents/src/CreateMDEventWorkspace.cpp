@@ -61,7 +61,49 @@ namespace MDEvents
       new ArrayProperty<std::string>("Units"),
       "A comma separated list of the units of each dimension.");
 
+    declareProperty(
+      new ArrayProperty<int>("SplitInto", "10"),
+      "A comma separated list of into how many sub-grid elements each dimension should split; or just one to split into the same number for all dimensions.");
+
+    declareProperty(
+      new PropertyWithValue<int>("SplitThreshold", 1000),
+      "How many events in a box before it should be split.");
+
+    declareProperty(
+      new PropertyWithValue<int>("MaxRecursionDepth", 5),
+      "How many levels of box splitting recursion are allowed.");
+
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
+  }
+
+
+  /** Finish initialisation
+   *
+   * @param ws :: MDEventWorkspace to finish
+   */
+  template<typename MDE, size_t nd>
+  void CreateMDEventWorkspace::finish(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    // ------------ Set up the box controller ----------------------------------
+    BoxController_sptr bc(new BoxController(nd) );
+    int val;
+    val = this->getProperty("SplitThreshold");
+    bc->setSplitThreshold( val );
+    val = this->getProperty("MaxRecursionDepth");
+    bc->setMaxDepth( val );
+    std::vector<int> splits = getProperty("SplitInto");
+    if (splits.size() == 1)
+    {
+      bc->setSplitInto(splits[0]);
+    }
+    else if (splits.size() == nd)
+    {
+      for (size_t d=0; d<nd; ++d)
+        bc->setSplitInto(d, splits[0]);
+    }
+    else
+      throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
+    ws->setBoxController(bc);
   }
 
 
@@ -102,6 +144,8 @@ namespace MDEvents
     // Initialize it using the dimension
     out->initialize();
 
+    // Call the templated function to finish ints
+    CALL_MDEVENT_FUNCTION(this->finish, out);
 
     // Save it on the output.
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));

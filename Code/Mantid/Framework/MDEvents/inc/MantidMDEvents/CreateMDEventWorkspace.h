@@ -3,6 +3,8 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -35,6 +37,9 @@ namespace MDEvents
     virtual void initDocs();
     void init();
     void exec();
+
+    template<typename MDE, size_t nd>
+    void finish(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };

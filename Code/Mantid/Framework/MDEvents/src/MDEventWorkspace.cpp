@@ -168,7 +168,11 @@ namespace MDEvents
   {
     MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
     if (!gridBox)
-      throw std::runtime_error("MDEventWorkspace::refreshCache called on a MDBox (call splitBox() first).");
+    {
+      // Cache only makes sense on a grid box. Just split it right now.
+      splitBox();
+      gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
+    }
     gridBox->refreshCache();
   }
 

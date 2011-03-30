@@ -8,6 +8,7 @@
 #include <iomanip>
 
 #include <MantidMDEvents/CreateMDEventWorkspace.h>
+#include <MantidMDEvents/MDEventFactory.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/AnalysisDataService.h>
 
@@ -36,6 +37,9 @@ public:
     alg.setPropertyValue("Extents", "-1,1,-2,2,-3,3");
     alg.setPropertyValue("Names", "x,y,z");
     alg.setPropertyValue("Units", "m,mm,um");
+    alg.setPropertyValue("SplitInto", "6");
+    alg.setPropertyValue("SplitThreshold", "500");
+    alg.setPropertyValue("MaxRecursionDepth", "7");
     alg.setPropertyValue("OutputWorkspace",wsName);
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
@@ -63,6 +67,17 @@ public:
     TS_ASSERT_DELTA( dim.getMax(), 3.0, 1e-6);
     TS_ASSERT_EQUALS( dim.getName(), "z");
     TS_ASSERT_EQUALS( dim.getUnits(), "um");
+
+    // What about the box controller
+    MDEventWorkspace3::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);
+    TS_ASSERT( ews );
+    if (!ews) return;
+    BoxController_sptr bc = ews->getBoxController();
+    TS_ASSERT( bc );
+    if (!bc) return;
+    TS_ASSERT_EQUALS(bc->splitInto(0), 6 );
+    TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
+    TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
   }
 
 

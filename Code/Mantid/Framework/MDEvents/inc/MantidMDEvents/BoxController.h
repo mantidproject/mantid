@@ -70,6 +70,13 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------
+    /** Return the splitting threshold, in # of events */
+    size_t getSplitThreshold()
+    {
+      return m_SplitThreshold;
+    }
+
+    //-----------------------------------------------------------------------------------
     /** Return into how many to split along a dimension
      *
      * @param dim :: index of the dimension to split
@@ -133,9 +140,15 @@ namespace MDEvents
     }
 
     /** Return the max recursion depth allowed for grid box splitting. */
-    size_t getMaxDepth()
+    size_t getMaxDepth() const
     {
       return m_maxDepth;
+    }
+
+    /** Sets the max recursion depth allowed for grid box splitting. */
+    void setMaxDepth(size_t value)
+    {
+      m_maxDepth = value;
     }
 
 
