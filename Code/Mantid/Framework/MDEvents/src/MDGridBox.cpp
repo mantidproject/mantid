@@ -1,4 +1,5 @@
 #include "MantidKernel/Task.h"
+#include "MantidKernel/Utils.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/Timer.h"
 #include "MantidKernel/ThreadPool.h"
@@ -443,7 +444,7 @@ namespace MDEvents
     // we'll need to make nested loops from index_min[0] to index_max[0]; from index_min[1] to index_max[1]; etc.
     int index_min[nd];
     int index_max[nd];
-    // For running the nested loop, counters of each dimension. These are bounded by 0..split[d]-1
+    // For running the nested loop, counters of each dimension. These are bounded by 0..split[d]
     size_t counters_min[nd];
     size_t counters_max[nd];
 
@@ -473,12 +474,12 @@ namespace MDEvents
       if (bin.m_max[d] < extents[d].max)
       {
         max = int(ceil((bin.m_max[d] - extents[d].min) / boxSize[d])) - 1;
-        counters_max[d] = max; // This is where the counter ends
+        counters_max[d] = max+1; // (the counter looping will NOT include counters_max[d])
       }
       else
       {
         max = split[d]; // Goes past THAT edge
-        counters_max[d] = split[d]-1; // but we don't want to in the counters
+        counters_max[d] = max; // (the counter looping will NOT include max)
       }
 
       // If the max value is before the min, that means NOTHING is in the bin, and we can return
@@ -526,23 +527,8 @@ namespace MDEvents
         boxes[index]->centerpointBin(bin);
       }
 
-      size_t d = 0;
-      while (d<nd)
-      {
-        counters[d]++;
-        if (counters[d] > counters_max[d])
-        {
-          // Roll this counter back to 0 (or whatever the min is)
-          counters[d] = counters_min[d];
-          // Go up one in a higher dimension
-          d++;
-          // Reached the maximum of the last dimension. Time to exit the entire loop.
-          if (d == nd)
-            allDone = true;
-        }
-        else
-          break;
-      }
+      // Increment the counter(s) in the nested for loops.
+      allDone = Utils::nestedForLoopIncrement(nd, counters, counters_max, counters_min);
     }
 
   }

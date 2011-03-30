@@ -47,7 +47,8 @@ namespace Utils
   /** Utility function for performing arbitrarily nested for loops in a serial way.
    *
    * @param numDims :: the number of dimensions (levels of nesting) to loop over
-   * @param index :: an array[numDims] of the counter index in each dimension.
+   * @param index :: an array[numDims] of the current counter index in each dimension.
+   *        The index at the lowest dimension will be incremented, carrying over to higher dimensions.
    * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension
    * @param index_min :: an array[numDims] of the minimum value of the index in each dimension.
    * @return true if the end of the loop was reached; false otherwise.
