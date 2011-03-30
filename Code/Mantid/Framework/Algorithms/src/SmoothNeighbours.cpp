@@ -49,10 +49,10 @@ void SmoothNeighbours::init()
   BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(1);
 
-  declareProperty("AdjX", 2, mustBePositive,
+  declareProperty("AdjX", 1, mustBePositive,
     "The number of X (horizontal) adjacent pixels to average together. " );
 
-  declareProperty("AdjY", 2, mustBePositive->clone(),
+  declareProperty("AdjY", 1, mustBePositive->clone(),
     "The number of Y (vertical) adjacent pixels to average together. " );
 
 
@@ -66,9 +66,6 @@ void SmoothNeighbours::exec()
   // Try and retrieve the optional properties
   AdjX = getProperty("AdjX");
   AdjY = getProperty("AdjY");
-
-//  if ((XPixels % AdjX != 0) || (YPixels % AdjY != 0))
-//    throw std::invalid_argument("AdjX must evenly divide XPixels and AdjY must evenly divide YPixels for SmoothNeighbours to work.");
 
   // Get the input workspace
   MatrixWorkspace_const_sptr matrixInWS = getProperty("InputWorkspace");
@@ -175,8 +172,8 @@ void SmoothNeighbours::exec()
           int count = 0;
           //Initialize the output event list
           EventList outEL;
-          for (int ix=-AdjX; ix < AdjX; ix++)
-            for (int iy=-AdjY; iy < AdjY; iy++)
+          for (int ix=-AdjX; ix <= AdjX; ix++)
+            for (int iy=-AdjY; iy <= AdjY; iy++)
             {
               //Find the pixel ID at that XY position on the rectangular detector
               if(j+ix >=det->xpixels() || j+ix < 0)continue;
