@@ -8,6 +8,7 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <boost/math/distributions/normal.hpp>
 
 namespace Mantid
 {
@@ -67,6 +68,7 @@ namespace MDEvents
 
     boost::mt19937 rng;
     boost::uniform_real<double> u(-width, width); // Range
+//    boost::math::normal_distribution<double> u(0, width);
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
 
     for (size_t i=0; i<num; ++i)

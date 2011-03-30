@@ -122,7 +122,7 @@ public:
         ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
     TS_ASSERT(ws);
     if (!ws) return;
-    TS_ASSERT_LESS_THAN( 950000, ws->getNPoints());
+    TS_ASSERT_LESS_THAN( 100000, ws->getNPoints()); // Some points are left
 
     AnalysisDataService::Instance().remove("test_md3");
   }

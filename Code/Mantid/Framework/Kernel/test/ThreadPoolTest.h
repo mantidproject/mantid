@@ -329,8 +329,9 @@ public:
     TS_ASSERT_EQUALS( threadpooltest_check, 12);
   }
 
-  /** Start a threadpool before adding tasks. But the wait time was too short! */
-  void test_start_and_wait_short_wait_time()
+  /** Start a threadpool before adding tasks. But the wait time was too short!
+   * DISABLED because the timing issues make it somewhat unreliable under heavy loads. */
+  void xtest_start_and_wait_short_wait_time()
   {
     ThreadPool p; // Makes a default scheduler
     threadpooltest_check = 0;
@@ -339,7 +340,7 @@ public:
     p.start(0.03);
 
     // But it takes too long before the task is actually added
-    Poco::Thread::sleep(80);
+    Poco::Thread::sleep(100);
     p.schedule( new FunctionTask( threadpooltest_function ) );
     Poco::Thread::sleep(30);
     // So the task has not run, since the threads exited before!

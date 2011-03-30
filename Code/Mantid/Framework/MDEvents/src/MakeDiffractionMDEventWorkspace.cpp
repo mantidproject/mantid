@@ -177,15 +177,16 @@ namespace MDEvents
     std::string names[3] = {"Qx", "Qy", "Qz"};
     for (size_t d=0; d<nd; d++)
     {
-      Dimension dim(-1000.0, +1000.0, names[d], "Angstroms^-1");
+      Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
       ws->addDimension(dim);
     }
     ws->initialize();
 
     // Build up the box controller
     BoxController_sptr bc(new BoxController(3));
-    bc->setSplitInto(4);
+    bc->setSplitInto(10);
     bc->setSplitThreshold(1000);
+    bc->setMaxDepth(8);
     ws->setBoxController(bc);
 
     // We always want the box to be split (it will reject bad ones)
