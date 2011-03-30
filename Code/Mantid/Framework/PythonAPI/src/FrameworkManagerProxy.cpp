@@ -232,6 +232,19 @@ boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWor
   }
 }
 
+boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWorkspace(const std::string& wsName)
+{
+  API::IEventWorkspace_sptr event = boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
+  if (event != NULL)
+  {
+    return event;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
+  }
+}
+
 /**
 * Returns a specified TableWorkspace.
 * @param wsName :: The name of the workspace to retrieve.

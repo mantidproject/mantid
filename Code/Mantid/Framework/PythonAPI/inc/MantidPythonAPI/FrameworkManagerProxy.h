@@ -13,6 +13,7 @@
 #include "MantidKernel/Logger.h"
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/AlgorithmFactory.h>
+#include <MantidAPI/IEventWorkspace.h>
 
 #include <Poco/NObserver.h>
 
@@ -105,6 +106,8 @@ public:
   //@{
   /// Returns a pointer to the MatrixWorkspace requested
   boost::shared_ptr<API::MatrixWorkspace> retrieveMatrixWorkspace(const std::string& wsName);
+  /// Returns a pointer to the IEventWorkpace requested
+  boost::shared_ptr<API::IEventWorkspace> retrieveIEventWorkspace(const std::string& wsName);
   /// Returns a pointer to the TableWorkspace requested
   boost::shared_ptr<API::ITableWorkspace> retrieveTableWorkspace(const std::string& wsName);
   /// Returns a list of pointers to the MatrixWorkspace objects with a group
