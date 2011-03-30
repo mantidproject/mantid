@@ -217,6 +217,7 @@ std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algNam
  * Returns a specified MatrixWorkspace.
  * @param wsName :: The name of the workspace to retrieve.
  * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
  **/
 boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWorkspace(const std::string& wsName)
 {
@@ -232,6 +233,11 @@ boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWor
   }
 }
 
+/** Return pointer to IEventWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
 boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWorkspace(const std::string& wsName)
 {
   API::IEventWorkspace_sptr event = boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
@@ -244,6 +250,43 @@ boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWor
     throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
   }
 }
+
+/** Return pointer to IMDWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<API::IMDWorkspace> FrameworkManagerProxy::retrieveIMDWorkspace(const std::string& wsName)
+{
+  API::IMDWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDWorkspace>(retrieveWorkspace(wsName));
+  if (ws != NULL)
+  {
+    return ws;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an MD workspace. ");
+  }
+}
+
+/** Return pointer to IMDEventWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<API::IMDEventWorkspace> FrameworkManagerProxy::retrieveIMDEventWorkspace(const std::string& wsName)
+{
+  API::IMDEventWorkspace_sptr ws = boost::dynamic_pointer_cast<API::IMDEventWorkspace>(retrieveWorkspace(wsName));
+  if (ws != NULL)
+  {
+    return ws;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an MD Event Workspace. ");
+  }
+}
+
 
 /**
 * Returns a specified TableWorkspace.

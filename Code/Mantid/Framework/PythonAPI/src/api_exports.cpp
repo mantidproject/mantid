@@ -8,14 +8,15 @@
 #include <ostream>
 
 // API
-#include <MantidAPI/ITableWorkspace.h>
-#include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/IEventWorkspace.h>
-#include <MantidAPI/Sample.h>
-#include <MantidAPI/WorkspaceProperty.h>
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/WorkspaceValidators.h>
 #include <MantidAPI/FileFinder.h>
+#include <MantidAPI/FileProperty.h>
+#include <MantidAPI/IEventWorkspace.h>
+#include <MantidAPI/IMDEventWorkspace.h>
+#include <MantidAPI/ITableWorkspace.h>
+#include <MantidAPI/Sample.h>
+#include <MantidAPI/WorkspaceGroup.h>
+#include <MantidAPI/WorkspaceProperty.h>
+#include <MantidAPI/WorkspaceValidators.h>
 
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
@@ -62,6 +63,8 @@ namespace PythonAPI
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
+      .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
+      .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
       .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)
@@ -249,6 +252,27 @@ namespace PythonAPI
     // EventWorkspace class
     class_< IEventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("IEventWorkspace", no_init)
         .def("getNumberEvents", &IEventWorkspace::getNumberEvents)
+        ;
+  }
+
+  void export_mdworkspace()
+  {
+    register_ptr_to_python<API::IMDWorkspace_sptr>();
+
+    // EventWorkspace class
+    class_< IMDWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDWorkspace", no_init)
+        .def("getNPoints", &IMDWorkspace::getNPoints)
+        ;
+  }
+
+  void export_mdeventworkspace()
+  {
+    register_ptr_to_python<API::IMDEventWorkspace_sptr>();
+
+    // EventWorkspace class
+    class_< IMDEventWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
+            .def("getNPoints", &IMDEventWorkspace::getNPoints)
+            .def("getNumDims", &IMDEventWorkspace::getNumDims)
         ;
   }
 
@@ -451,6 +475,8 @@ namespace PythonAPI
     export_workspace();
     export_matrixworkspace();
     export_eventworkspace();
+    export_mdworkspace();
+    export_mdeventworkspace();
     export_tableworkspace();
     export_workspacegroup();
     export_axis();

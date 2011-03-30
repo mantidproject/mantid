@@ -891,19 +891,39 @@ class MantidPyFramework(FrameworkManager):
         Use the appropriate function to return the workspace that has that name
         """
         # 99% of the time people are using matrix workspaces but we still need to check
+        
+        # Try each workspace type in order, from more specialised to less specialised.
         try:
             return self._getRawIEventWorkspacePointer(name)
         except RuntimeError:
-            try:
-                return self._getRawMatrixWorkspacePointer(name)
-            except(RuntimeError):
-                try:
-                    return self._getRawWorkspaceGroupPointer(name)
-                except RuntimeError:
-                    try:
-                        return self._getRawTableWorkspacePointer(name)
-                    except RuntimeError:
-                        return None
+            pass
+            
+        try:
+            return self._getRawMatrixWorkspacePointer(name)
+        except(RuntimeError):
+            pass
+
+        # IMD and IMDEventWorkspaces are at the same level (lower than MatrixWorkspace).
+        try:
+            return self._getRawIMDWorkspacePointer(name)
+        except RuntimeError:
+            pass
+        
+        try:
+            return self._getRawIMDEventWorkspacePointer(name)
+        except RuntimeError:
+            pass
+        
+        try:
+            return self._getRawWorkspaceGroupPointer(name)
+        except RuntimeError:
+            pass
+        
+        try:
+            return self._getRawTableWorkspacePointer(name)
+        except RuntimeError:
+            return None
+        
 
     def _workspaceRemoved(self, name):
         """
