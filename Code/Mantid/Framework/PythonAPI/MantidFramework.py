@@ -836,8 +836,8 @@ class MantidPyFramework(FrameworkManager):
         # Run through init steps
         self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
-        self.createPythonSimpleAPI(GUI)
-        self._importSimpleAPIToMain()     
+        self.createPythonSimpleAPI(GUI) # TODO this line should go
+        self._importSimpleAPIToMain()   # TODO this line should go
 
         self.__is_initialized = True
         
@@ -929,7 +929,13 @@ class MantidPyFramework(FrameworkManager):
         # Reload the simple api
         self._importSimpleAPIToMain()
 
-    def _createAlgProxy(self, ialg):
+    def _createAlgProxy(self, ialg, version=-1, rethrows=False):
+        """
+        Will accept either a IAlgorithm or a string specifying the algorithm name.
+        """
+        if isinstance(ialg, str):
+            ialg = self.createAlgorithm(str(ialg), version) 
+        ialg.setRethrows(rethrows) # TODO get rid of this line
         return IAlgorithmProxy(ialg, self)
 
       
