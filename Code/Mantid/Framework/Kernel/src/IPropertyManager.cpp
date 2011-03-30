@@ -27,7 +27,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected int.";
             throw std::runtime_error(message);
         }
     }
@@ -42,7 +42,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type (long long)";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected long long.";
             throw std::runtime_error(message);
         }
     }
@@ -57,7 +57,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected bool.";
             throw std::runtime_error(message);
         }
     }
@@ -72,7 +72,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected double.";
             throw std::runtime_error(message);
         }
     }
@@ -87,7 +87,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<int>.";
             throw std::runtime_error(message);
         }
     }
@@ -102,7 +102,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<double>.";
             throw std::runtime_error(message);
         }
     }
@@ -117,7 +117,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<string>.";
             throw std::runtime_error(message);
         }
     }
@@ -131,7 +131,7 @@ namespace Kernel
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<long long>.";
             throw std::runtime_error(message);
         }
     }

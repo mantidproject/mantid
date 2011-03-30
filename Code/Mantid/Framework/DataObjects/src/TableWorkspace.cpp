@@ -184,7 +184,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected TableWorkspace.";
         throw std::runtime_error(message);
       }
     }

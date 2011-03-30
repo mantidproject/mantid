@@ -1126,7 +1126,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type (EventWorkspace_sptr)";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected EventWorkspace.";
         throw std::runtime_error(message);
       }
     }
@@ -1142,7 +1142,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type (EventWorkspace_sptr)";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const EventWorkspace.";
         throw std::runtime_error(message);
       }
     }

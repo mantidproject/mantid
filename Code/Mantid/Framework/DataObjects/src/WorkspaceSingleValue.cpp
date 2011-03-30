@@ -67,7 +67,7 @@ namespace Kernel
       }
       else
       {
-        throw std::runtime_error("Attempt to assign property of incorrect type");
+        throw std::runtime_error("Attempt to assign property of incorrect type. Expected WorkspaceSingleValue.");
       }
     }
 

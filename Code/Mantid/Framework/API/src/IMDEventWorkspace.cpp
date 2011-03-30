@@ -1,5 +1,6 @@
 #include "MantidAPI/Dimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidKernel/IPropertyManager.h"
 
 using Mantid::MDEvents::CoordType;
 
@@ -47,8 +48,53 @@ namespace API
   }
 
 
-
 }//namespace MDEvents
 
 }//namespace Mantid
+
+
+
+
+
+
+namespace Mantid
+{
+namespace Kernel
+{
+  /** In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IMDEventWorkspace> is required */
+  template<> DLLExport
+  Mantid::API::IMDEventWorkspace_sptr IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_sptr>(const std::string &name) const
+  {
+    PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr>* prop =
+                      dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_sptr>*>(getPointerToProperty(name));
+    if (prop)
+    {
+      return *prop;
+    }
+    else
+    {
+      std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected IMDEventWorkspace.";
+      throw std::runtime_error(message);
+    }
+  }
+
+  /** In order to be able to cast PropertyWithValue classes correctly a definition for the PropertyWithValue<IMDEventWorkspace> is required */
+  template<> DLLExport
+  Mantid::API::IMDEventWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::IMDEventWorkspace_const_sptr>(const std::string &name) const
+  {
+    PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr>* prop =
+                      dynamic_cast<PropertyWithValue<Mantid::API::IMDEventWorkspace_const_sptr>*>(getPointerToProperty(name));
+    if (prop)
+    {
+      return prop->operator()();
+    }
+    else
+    {
+      std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const IMDEventWorkspace.";
+      throw std::runtime_error(message);
+    }
+  }
+
+} // namespace Kernel
+} // namespace Mantid
 

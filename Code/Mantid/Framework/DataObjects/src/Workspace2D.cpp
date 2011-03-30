@@ -267,7 +267,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected Workspace2D.";
         throw std::runtime_error(message);
       }
     }
@@ -283,7 +283,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const Workspace2D.";
         throw std::runtime_error(message);
       }
     }

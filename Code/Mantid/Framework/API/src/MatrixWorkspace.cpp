@@ -1243,7 +1243,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected MatrixWorkspace.";
         throw std::runtime_error(message);
       }
     }
@@ -1259,7 +1259,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const MatrixWorkspace.";
         throw std::runtime_error(message);
       }
     }

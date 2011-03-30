@@ -85,7 +85,7 @@ Mantid::API::Workspace_sptr IPropertyManager::getValue<Mantid::API::Workspace_sp
   }
   else
   {
-    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected Workspace.";
     throw std::runtime_error(message);
   }
 }
@@ -101,7 +101,7 @@ Mantid::API::Workspace_const_sptr IPropertyManager::getValue<Mantid::API::Worksp
   }
   else
   {
-    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const Workspace.";
     throw std::runtime_error(message);
   }
 }

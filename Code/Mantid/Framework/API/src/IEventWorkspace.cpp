@@ -30,7 +30,7 @@ Mantid::API::IEventWorkspace_sptr IPropertyManager::getValue<Mantid::API::IEvent
   }
   else
   {
-    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected EventWorkspace.";
     throw std::runtime_error(message);
   }
 }
@@ -46,7 +46,7 @@ Mantid::API::IEventWorkspace_const_sptr IPropertyManager::getValue<Mantid::API::
   }
   else
   {
-    std::string message = "Attempt to assign property "+ name +" to incorrect type";
+    std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const EventWorkspace.";
     throw std::runtime_error(message);
   }
 }
