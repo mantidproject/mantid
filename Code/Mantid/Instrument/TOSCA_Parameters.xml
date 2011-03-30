@@ -4,21 +4,15 @@
 <component-link name = "TOSCA">
 
 <parameter name="deltaE-mode" type="string">
-  <value val="indirect"/>
-</parameter>
-
-<!-- This parameter tells MANTID that the RAW files from this instrument must
-     be put through the TofCorrection algorithm. -->
-<parameter name="adjustTOF">
-  <value val="1" />
+    <value val="indirect"/>
 </parameter>
 
 <!-- These properties are neceessary for use in the Indirect CTE interface. -->
 <parameter name="analysers" type="string">
-  <value val="graphite" />
+    <value val="graphite" />
 </parameter>
 <parameter name="refl-graphite" type="string">
-  <value val="002" />
+    <value val="002" />
 </parameter>
 
 <!-- This parameter will be taken as a default value for the rebinning of
@@ -27,18 +21,33 @@
         This is necessary so that the spectra can be grouped.
 -->
 <parameter name="rebin-default" type="string">
-  <value val="3,-0.005,1000" />
+    <value val="3,-0.005,1000" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->
 <parameter name="Workflow.MonitorArea" >
-  <value val="5.391011e-5" />
+    <value val="5.391011e-5" />
 </parameter>
 <parameter name="Workflow.MonitorThickness" >
-  <value val="0.013" />
+    <value val="0.013" />
 </parameter>
 <parameter name="Workflow.MonitorScalingFactor">
-  <value val="1e9" />
+    <value val="1e9" />
+</parameter>
+<parameter name="Workflow.UnwrapMonitor" type="string">
+    <value val="Never" />
+</parameter>
+<parameter name="Workflow.ChopDataIfGreaterThan">
+    <value val="40000" />
+</parameter>
+<parameter name="Workflow.GroupingMethod" type="string">
+    <value val="Fixed" />
+</parameter>
+<parameter name="Workflow.FixedGrouping" type="string">
+    <value val="0-69,70-139" />
+</parameter>
+<parameter name="Workflow.Masking" type="string">
+    <value val="IdentifyNoisyDetectors" />
 </parameter>
 
 </component-link>

@@ -37,6 +37,9 @@
 <parameter name="Workflow.MonitorScalingFactor">
   <value val="1e6" />
 </parameter>
+<parameter name="Workflow.UnwrapMonitor" type="string">
+    <value val="BaseOnTimeRegime" />
+</parameter>
 
 </component-link>
 

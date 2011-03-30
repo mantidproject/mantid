@@ -143,8 +143,7 @@ class IndirectReducer(Reducer):
             
         step = steps.Grouping()
         step.set_grouping_policy(self._grouping_policy)
-        if ( self._instrument_name == 'TOSCA' ):
-            step.set_mask_list(self._masking_detectors)
+        step.set_mask_list(self._masking_detectors)
         self.append_step(step)
     
     def post_process(self):
@@ -153,7 +152,7 @@ class IndirectReducer(Reducer):
         if ( self._calibration_workspace is not None ) and ( 
                 len(self._calib_raw_files) > 0 ):
             DeleteWorkspace(self._calibration_workspace)
-            
+
     def set_instrument_name(self, instrument):
         self._instrument_name = instrument
         self._load_empty_instrument()

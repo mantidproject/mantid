@@ -2,8 +2,17 @@ from reducer import ReductionStep
 from mantidsimple import *
 
 class LoadData(ReductionStep):
-    """Handles the loading of the data for Indirect instruments.
-    Options to Sum, etc should be included here.
+    """Handles the loading of the data for Indirect instruments. The summing
+    of input workspaces is handled in this routine, as well as the identifying
+    of detectors that require masking.
+    
+    This step will use the following parameters from the Instrument's parameter
+    file:
+    
+    * Workflow.ChopDataIfGreaterThan - if this parameter is specified on the
+        instrument, then the raw data will be split into multiple frames if
+        the largest TOF (X) value in the workspace is greater than the provided
+        value.
     """
     
     _multiple_frames = False
@@ -39,7 +48,12 @@ class LoadData(ReductionStep):
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
             
-            if ( mtd[file].getInstrument().getName() == 'TOSCA' ):
+            try:
+                msk = mtd[file].getInstrument().getStringParameter(
+                    'Workflow.Masking')[0]
+            except IndexError:
+                msk = 'None'
+            if ( msk == 'IdentifyNoisyDetectors' ):
                 self._identify_bad_detectors(file)
 
             if ( wsname == '' ):
@@ -138,12 +152,16 @@ class LoadData(ReductionStep):
         DeleteWorkspace('__temp_tsc_noise')
         return self._masking_detectors
 
-    def _require_chop_data(self, workspace):
-        if ( mtd[workspace].getInstrument().getName() != 'TOSCA' ):
+    def _require_chop_data(self, ws):
+        try:
+            cdigt = mtd[ws].getInstrument().getNumberParameter(
+                'Workflow.ChopDataIfGreaterThan')[0]
+        except IndexError:
             return False
-        if ( mtd[workspace].readX(0)[mtd[workspace].getNumberBins()] > 40000 ):
+        if ( mtd[ws].readX(0)[mtd[ws].getNumberBins()] > cdigt ):
             return True
-        return False
+        else:
+            return False
         
     def is_multiple_frames(self):
         return self._multiple_frames
@@ -175,7 +193,7 @@ class BackgroundOperations(ReductionStep):
     def set_range(self, start, end):
         self._background_start = start
         self._background_end = end
-    
+
 class CreateCalibrationWorkspace(ReductionStep):
     """Creates a calibration workspace from a White-Beam Vanadium run.
     """
@@ -324,6 +342,12 @@ class ApplyCalibration(ReductionStep):
 
 class HandleMonitor(ReductionStep):
     """Handles the montior for the reduction of inelastic indirect data.
+    
+    This uses the following parameters from the instrument:
+    * Workflow.MonitorArea
+    * Workflow.MonitorThickness
+    * Workflow.MonitorScalingFactor
+    * Workflow.UnwrapMonitor
     """
     _multiple_frames = False
     
@@ -351,19 +375,29 @@ class HandleMonitor(ReductionStep):
             self._scale_monitor(monitor)
 
     def _need_to_unwrap(self, ws):
-        if ( mtd[ws].getInstrument().getName() == 'TOSCA' ):
+        try:
+            unwrap = mtd[ws].getInstrument().getStringParameter(
+                'Workflow.UnwrapMonitor')[0]
+        except IndexError:
+            return False # Default it to not unwrap            
+        if ( unwrap == 'Never' ):
             return False
-        SpecMon = mtd[ws+'_mon'].readX(0)[0]
-        SpecDet = mtd[ws].readX(0)[0]
-        if ( SpecMon == SpecDet ):
+        elif ( unwrap == 'Always' ):
             return True
+        elif ( unwrap == 'BaseOnTimeRegime' ):
+            SpecMon = mtd[ws+'_mon'].readX(0)[0]
+            SpecDet = mtd[ws].readX(0)[0]
+            if ( SpecMon == SpecDet ):
+                return True
+            else:
+                return False
         else:
             return False
 
     def _unwrap_monitor(self, ws):
         l_ref = self._get_reference_length(ws, 0)
         monitor = ws+'_mon'
-        alg = Unwrap(monitor, monitor, LRef=l_ref)
+        alg = UnwrapMonitor(monitor, monitor, LRef=l_ref)
         join = float(alg.getPropertyValue('JoinWavelength'))
         RemoveBins(monitor, monitor, join-0.001, join+0.001, 
             Interpolation='Linear')
@@ -522,9 +556,15 @@ class Grouping(ReductionStep):
         self._masking_detectors = []
         self._result_workspaces = []
         
-    def execute(self, reducer, file_ws):        
-        if ( mtd[file_ws].getInstrument().getName() == 'TOSCA' ):
-            self._result_workspaces.append(self._group_tosca(file_ws))
+    def execute(self, reducer, file_ws):
+        try:
+            group = mtd[file_ws].getInstrument().getStringParameter(
+                'Workflow.GroupingMethod')[0]
+        except IndexError:
+            group = 'User'
+
+        if ( group == 'Fixed' ):
+            self._result_workspaces.append(self._group_fixed(file_ws))
         else:
             self._result_workspaces.append(self._group_data(file_ws))
             
@@ -536,27 +576,52 @@ class Grouping(ReductionStep):
         
     def get_result_workspaces(self):
         return self._result_workspaces
-            
-    def _group_tosca(self, workspace):
+
+    def _group_fixed(self, workspace):
         wsname = self._get_run_title(workspace)
-        grp = range(0,70)
+        
+        try:
+            grps = mtd[workspace].getInstrument().getStringParameter(
+                'Workflow.FixedGrouping')[0]
+        except IndexError:
+            raise AttributeError('Could not retrieve fixed grouping setting '
+                'from the instrument parameter file.')
+
+        groups = grps.split(",")
+        group_list = []
+        for group in groups:
+            group_to_from = group.split("-")
+            group_vals = range(int(group_to_from[0]), int(group_to_from[1])+1)
+            group_list.append(group_vals)
+            
         for i in self._masking_detectors:
-            try:
-                grp.remove(i)
-            except ValueError:
-                pass
-        GroupDetectors(workspace, wsname, WorkspaceIndexList=grp,
-            Behaviour='Average')
-        grp = range(70,140)
-        for i in self._masking_detectors:
-            try:
-                grp.remove(i)
-            except ValueError:
-                pass
-        GroupDetectors(workspace, '__front', WorkspaceIndexList=grp,
-            Behaviour='Average')
+            for grp in group_list:
+                try:
+                    grp.remove(i)
+                except ValueError:
+                    pass
+
+        # Write to a temporary XML grouping file to preserve workspace history
+        # a little bit better.
+        xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
+        xml += "<detector-grouping>\n"
+        for grp in group_list:
+            xml += "<group name=\"group\">\n"
+            xml += "    <ids val=\""
+            for i in grp:
+                xml += str(i + 1)
+                if i != ( grp[len(grp)-1] ):
+                    xml += ","
+            xml += "\"/>\n"
+            xml += "</group>\n"
+        xml += "</detector-grouping>\n"
+        
+        xfile = mtd.getConfigProperty('defaultsave.directory') + 'fixedGrp.xml'
+        file = open(xfile, 'w')
+        file.write(xml)
+        file.close()                    
+        GroupDetectors(workspace, wsname, MapFile=xfile, Behaviour='Average')
         DeleteWorkspace(workspace)
-        ConjoinWorkspaces(wsname, '__front')
         return wsname
 
     def _group_data(self, workspace):
@@ -570,7 +635,7 @@ class Grouping(ReductionStep):
             nhist = mtd[workspace].getNumberHistograms()
             GroupDetectors(workspace, name, WorkspaceIndexList=range(0,nhist),
                 Behaviour='Average')
-        else:
+        else:   
             GroupDetectors(workspace, name, MapFile=grouping,
                 Behaviour='Average')
         if ( workspace != name ):
