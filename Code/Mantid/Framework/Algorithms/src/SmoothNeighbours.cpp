@@ -175,9 +175,11 @@ void SmoothNeighbours::exec()
           for (int ix=-AdjX; ix <= AdjX; ix++)
             for (int iy=-AdjY; iy <= AdjY; iy++)
             {
+              //Cut corners
+              if(fabs(ix) == AdjX && fabs(iy) == AdjY)continue;
               //Find the pixel ID at that XY position on the rectangular detector
-              if(j+ix >=det->xpixels() || j+ix < 0)continue;
-              if(k+iy >=det->ypixels() || k+iy < 0)continue;
+              if(j+ix >= det->xpixels() || j+ix < 0)continue;
+              if(k+iy >= det->ypixels() || k+iy < 0)continue;
               int pixelID = det->getAtXY(j+ix,k+iy)->getID();
 
               //Find the corresponding workspace index, if any
