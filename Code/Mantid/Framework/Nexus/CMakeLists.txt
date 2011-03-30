@@ -98,3 +98,9 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET NexusTest PROPERTY FOLDER "UnitTests" )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS Nexus DESTINATION ${PLUGINS_DIR} )

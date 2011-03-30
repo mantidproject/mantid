@@ -87,6 +87,12 @@ if (PYUNITTEST_FOUND)
   add_subdirectory (Scripts)
 endif ()
 
+###########################################################################
+# Installation settings
+###########################################################################
 
-
-
+file ( GLOB INSTRUMENT_FILES Instrument/*.xml )
+install ( FILES ${INSTRUMENT_FILES} DESTINATION instrument )
+install ( DIRECTORY Scripts/ DESTINATION scripts PATTERN ".svn" EXCLUDE 
+                                                 PATTERN "*.pyc" EXCLUDE )
+install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" EXCLUDE )

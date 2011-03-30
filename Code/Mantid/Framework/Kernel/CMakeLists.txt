@@ -220,7 +220,6 @@ set_target_properties ( Kernel PROPERTIES OUTPUT_NAME MantidKernel
                                           COMPILE_DEFINITIONS IN_MANTID_KERNEL )
 # Add to the 'Framework' group in VS
 set_property ( TARGET Kernel PROPERTY FOLDER "MantidFramework" )
-set_property ( TARGET Kernel PROPERTY PRIVATE_HEADER inc/MantidKernel/TestChannel.h )
 
 target_link_libraries ( Kernel ${MANTIDLIBS} )
 
@@ -266,12 +265,8 @@ add_custom_command ( TARGET Kernel POST_BUILD
                        ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
 )
 
-# Copy a shell script for patchelf if it is found 
-if ( PATCHELF_FOUND )
-	add_custom_command ( TARGET Kernel POST_BUILD
-		             COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-		              	${CMAKE_SOURCE_DIR}/TestingTools/patchelf_all.sh
-		               	${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-	)
-endif ()
+###########################################################################
+# Installation settings
+###########################################################################
 
+install ( TARGETS Kernel DESTINATION ${LIB_DIR} )

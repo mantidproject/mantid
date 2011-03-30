@@ -224,3 +224,9 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET APITest PROPERTY FOLDER "UnitTests" )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS API DESTINATION ${LIB_DIR} )

@@ -47,3 +47,9 @@ add_definitions ( -DIN_MANTIDQT_API )
 add_library ( MantidQtAPI ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidQtAPI ${CORE_MANTIDLIBS} ${QT_LIBRARIES} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS MantidQtAPI DESTINATION ${LIB_DIR} )

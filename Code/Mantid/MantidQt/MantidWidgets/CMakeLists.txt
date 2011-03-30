@@ -75,3 +75,9 @@ add_definitions ( -DIN_MANTIDQT_MANTIDWIDGETS )
 add_library ( MantidWidgets ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 
 target_link_libraries ( MantidWidgets MantidQtAPI ${QT_LIBRARIES} ${QWT_LIBRARIES} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS MantidWidgets DESTINATION ${LIB_DIR} )

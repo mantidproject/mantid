@@ -68,3 +68,9 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET ICatTest PROPERTY FOLDER "UnitTests" )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS ICat DESTINATION ${PLUGINS_DIR} )

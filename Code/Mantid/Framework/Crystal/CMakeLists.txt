@@ -38,3 +38,8 @@ if ( CXXTEST_FOUND )
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )
 endif ()
 
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS Crystal DESTINATION ${PLUGINS_DIR} )

@@ -718,3 +718,10 @@ foreach ( PYFILE ${PYTHON_INSTALL_FILES} )
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
   )
 endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS MantidPlot DESTINATION ${BIN_DIR} )
+install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )

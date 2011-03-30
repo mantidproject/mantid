@@ -134,3 +134,9 @@ target_link_libraries ( ${PROJECT_NAME} ${QT_LIBRARIES} )
 if ( WIN32 )
   add_definitions ( -DQT_QTPROPERTYBROWSER_EXPORT )
 endif ( WIN32 )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS ${PROJECT_NAME} DESTINATION ${LIB_DIR} )

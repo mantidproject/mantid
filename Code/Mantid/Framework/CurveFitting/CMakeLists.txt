@@ -118,3 +118,9 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CurveFittingTest PROPERTY FOLDER "UnitTests" )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS CurveFitting DESTINATION ${PLUGINS_DIR} )

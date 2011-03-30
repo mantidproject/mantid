@@ -53,3 +53,9 @@ add_library ( CustomDialogs ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS}
 set_target_properties ( CustomDialogs PROPERTIES OUTPUT_NAME MantidQtCustomDialogs )
 
 target_link_libraries ( CustomDialogs MantidQtAPI MantidWidgets )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS CustomDialogs DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )

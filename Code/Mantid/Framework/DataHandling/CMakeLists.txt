@@ -201,3 +201,9 @@ if ( CXXTEST_FOUND )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET DataHandlingTest PROPERTY FOLDER "UnitTests" )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS DataHandling DESTINATION ${PLUGINS_DIR} )

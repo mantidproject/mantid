@@ -166,3 +166,12 @@ if (NAME_IS_PETE AND GEN_TEST_MAIN)
                       DEPENDS ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell 
                       COMMAND ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/russell )
 endif ()
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS PythonAPI DESTINATION ${LIB_DIR} )
+install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
+install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
+                                      PATTERN ".svn" EXCLUDE PATTERN "*.pyc" EXCLUDE )

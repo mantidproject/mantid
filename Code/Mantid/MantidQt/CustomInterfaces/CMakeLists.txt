@@ -66,3 +66,9 @@ add_library ( CustomInterfaces ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HD
 set_target_properties ( CustomInterfaces PROPERTIES OUTPUT_NAME MantidQtCustomInterfaces )
 
 target_link_libraries ( CustomInterfaces MantidQtAPI MantidWidgets QtPropertyBrowser )
+
+###########################################################################
+# Installation settings
+###########################################################################
+
+install ( TARGETS CustomInterfaces DESTINATION ${PLUGINS_DIR}/qtplugins/mantid )
