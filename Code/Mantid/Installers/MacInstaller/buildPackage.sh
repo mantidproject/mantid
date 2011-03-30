@@ -17,7 +17,7 @@ echo Building package...
 /Developer/usr/bin/packagemaker --doc Mantid.pmdoc --scripts installer_hooks -i org.mantidproject.mantid.mantidplot.pkg
 echo Done.
 echo Creating disk image...
-./dmgpack.sh Mantid mantid.pkg
+./dmgpack.sh Mantid-64bit-snowleopard mantid.pkg
 echo Done.
 
 echo Success!
