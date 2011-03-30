@@ -307,6 +307,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[], sh
                 fn = fil.replace(' ','_')
                 fn = fil.replace('-','_')
                 fn = fn.replace('+','_')
+                fn = fn.replace('.','_')
                 fileId = 'd'+fn+'_file'+str(ifil)
                 fileName = shortNamePrefix + str(ifil)
                 fileLongName = fil
