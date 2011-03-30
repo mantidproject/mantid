@@ -892,15 +892,18 @@ class MantidPyFramework(FrameworkManager):
         """
         # 99% of the time people are using matrix workspaces but we still need to check
         try:
-            return self._getRawMatrixWorkspacePointer(name)
-        except(RuntimeError):
+            return self._getRawIEventWorkspacePointer(name)
+        except RuntimeError:
             try:
-                return self._getRawWorkspaceGroupPointer(name)
-            except RuntimeError:
+                return self._getRawMatrixWorkspacePointer(name)
+            except(RuntimeError):
                 try:
-                    return self._getRawTableWorkspacePointer(name)
+                    return self._getRawWorkspaceGroupPointer(name)
                 except RuntimeError:
-                    return None
+                    try:
+                        return self._getRawTableWorkspacePointer(name)
+                    except RuntimeError:
+                        return None
 
     def _workspaceRemoved(self, name):
         """
@@ -929,13 +932,13 @@ class MantidPyFramework(FrameworkManager):
         # Reload the simple api
         self._importSimpleAPIToMain()
 
-    def _createAlgProxy(self, ialg, version=-1, rethrows=False):
+    def _createAlgProxy(self, ialg, version=-1):
         """
         Will accept either a IAlgorithm or a string specifying the algorithm name.
         """
         if isinstance(ialg, str):
             ialg = self.createAlgorithm(str(ialg), version) 
-        ialg.setRethrows(rethrows) # TODO get rid of this line
+        ialg.setRethrows(True) # TODO get rid of this line
         return IAlgorithmProxy(ialg, self)
 
       
