@@ -171,7 +171,7 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS PythonAPI DESTINATION ${LIB_DIR} )
+install ( TARGETS PythonAPI DESTINATION ${BIN_DIR} )
 install ( FILES ${PY_FILES} DESTINATION ${BIN_DIR} )
 install ( DIRECTORY PythonAlgorithms/ DESTINATION ${PLUGINS_DIR}/PythonAlgs
                                       PATTERN ".svn" EXCLUDE PATTERN "*.pyc" EXCLUDE )

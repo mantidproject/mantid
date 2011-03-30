@@ -18,7 +18,7 @@ endif ()
 ###########################################################################
 
 set ( BIN_DIR bin )
-set ( LIB_DIR ${BIN_DIR} )
+set ( LIB_DIR lib )
 set ( PLUGINS_DIR plugins )
 
 set ( CMAKE_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
