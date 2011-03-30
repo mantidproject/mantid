@@ -36,18 +36,21 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
+
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", in_ws) );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
     //TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "10000"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", "1000"));
 
-//    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
-//    TS_ASSERT( alg.isExecuted() );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() );
 
     // Now there are 1000 more points.
 //    TS_ASSERT_EQUALS( in_ws->getNPoints(), 2000);
+    AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
 
   }
 

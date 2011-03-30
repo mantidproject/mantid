@@ -47,7 +47,7 @@ namespace MDEvents
   void BinToMDHistoWorkspace::init()
   {
     std::string dimHelp = "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'.";
-    declareProperty(new WorkspaceProperty<Workspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::InOut), "An input MDEventWorkspace.");
     declareProperty(new PropertyWithValue<std::string>("DimX","",Direction::Input), "Binning parameters for the X dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimY","",Direction::Input), "Binning parameters for the Y dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimZ","",Direction::Input), "Binning parameters for the Z dimension.\n" + dimHelp);
@@ -100,10 +100,7 @@ namespace MDEvents
     dimZ = makeMDHistoDimensionFromString( getPropertyValue("DimZ"));
     dimT = makeMDHistoDimensionFromString( getPropertyValue("DimT"));
 
-    Workspace_const_sptr in_ws_prop = getProperty("InputWorkspace");
-    IMDEventWorkspace_const_sptr in_ws = boost::dynamic_pointer_cast<const IMDEventWorkspace>(in_ws_prop);
-    if (!in_ws)
-      throw std::invalid_argument("Input workspace is not a MDEventWorkspace!");
+    IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
 
     Progress * prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool!
     IMDWorkspace_sptr out = in_ws->centerpointBinToMDHistoWorkspace(dimX,dimY,dimZ,dimT, prog);

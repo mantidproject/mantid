@@ -68,6 +68,8 @@ namespace MDEvents
         "Add a peak with a normal distribution around a central point.\n"
         "Parameters: x, y, z, ..., width.\n");
 
+//    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::InOut),
+//        "An input workspace, that will get MDEvents added to it");
 
 //    std::vector<std::string> propOptions;
 //    propOptions.push_back("Uniform");
@@ -84,6 +86,7 @@ namespace MDEvents
     IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
 //
 //    CALL_MDEVENT_FUNCTION(this->addFakePeak, in_ws)
+//    setProperty("OutputWorkspace", in_ws);
   }
 
 

@@ -34,24 +34,26 @@ public:
     TS_ASSERT( alg.isInitialized() )
 
     IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", boost::dynamic_pointer_cast<Workspace>(in_ws)) );
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", "NONE,0.0,10.0,1"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 
-    alg.execute();
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
 
     TS_ASSERT( alg.isExecuted() );
 
     IMDWorkspace_sptr out ;
     TS_ASSERT_THROWS_NOTHING( out = boost::dynamic_pointer_cast<IMDWorkspace>(
-        AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest")); )
+        AnalysisDataService::Instance().retrieve("BinToMDHistoWorkspaceTest_ws")); )
     TS_ASSERT(out);
+    if(!out) return;
 
     // Took 6x6x6 bins in the middle of the box
     TS_ASSERT_EQUALS(out->getNPoints(), 6*6*6);
@@ -62,7 +64,7 @@ public:
       TS_ASSERT_DELTA(out->getErrorAt(i), 1.0, 1e-5);
     }
 
-    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest");
+    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
   }
 
 
