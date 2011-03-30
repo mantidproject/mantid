@@ -61,6 +61,7 @@ namespace PythonAPI
       .def("workspaceExists", &FrameworkManagerProxy::workspaceExists)
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
+      .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
       .def("_getRawTableWorkspacePointer", &FrameworkManagerProxy::retrieveTableWorkspace)
       .def("_getRawWorkspaceGroupPointer", &FrameworkManagerProxy::retrieveWorkspaceGroup)
@@ -239,6 +240,16 @@ namespace PythonAPI
     def("_binary_op", (binary_fn2)&PythonAPI::performBinaryOp);
     def("_equals_op", (binary_fn3)&API::equals);
 
+  }
+
+  void export_eventworkspace()
+  {
+    register_ptr_to_python<API::IEventWorkspace_sptr>();
+
+    // EventWorkspace class
+    class_< IEventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("IEventWorkspace", no_init)
+        .def("getNumberEvents", &IEventWorkspace::getNumberEvents)
+        ;
   }
 
   void export_tableworkspace()
@@ -439,6 +450,7 @@ namespace PythonAPI
     export_ialgorithm();
     export_workspace();
     export_matrixworkspace();
+    export_eventworkspace();
     export_tableworkspace();
     export_workspacegroup();
     export_axis();
