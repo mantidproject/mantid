@@ -138,7 +138,10 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if wksp is None:
             return None
         if self._grouping == "All":
-            groups = str(self._instrument);
+            if str(self._instrument) == "PG3":
+                groups = "POWGEN"
+            else:
+                groups = str(self._instrument)
         else:
             groups = ""
             numrange = 200
