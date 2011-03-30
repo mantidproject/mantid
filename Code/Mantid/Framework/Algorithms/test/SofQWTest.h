@@ -5,7 +5,6 @@
 #include "MantidAlgorithms/SofQW.h"
 #include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
-//#include "MantidAPI/WorkspaceOpOverloads.h"
 
 using namespace Mantid::API;
 
@@ -35,6 +34,7 @@ public:
   
   void testExec()
   {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     if (!sqw.isInitialized()) sqw.initialize();
 
     Mantid::NeXus::LoadNexusProcessed loader;
@@ -46,7 +46,7 @@ public:
 
     Mantid::API::MatrixWorkspace_sptr inWS;
     TS_ASSERT_THROWS_NOTHING( inWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-			      (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
     WorkspaceHelpers::makeDistribution(inWS);
 
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("InputWorkspace",inputWS) );
@@ -61,7 +61,7 @@ public:
     
     Mantid::API::MatrixWorkspace_sptr result;
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-			      (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
+                                (Mantid::API::AnalysisDataService::Instance().retrieve(outputWS)) );
 
     TS_ASSERT_EQUALS( result->getAxis(0)->length(), 1904 );
     TS_ASSERT_EQUALS( result->getAxis(0)->unit()->unitID(), "DeltaE" );
