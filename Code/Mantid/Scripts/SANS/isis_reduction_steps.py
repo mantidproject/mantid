@@ -397,7 +397,7 @@ class CanSubtraction(LoadRun):
         tmp_can = workspace+"_can_tmp"
 
         #do same corrections as were done to the sample
-        reducer.reduce_another(self._scatter_can, tmp_can)
+        reducer.reduce_can(self._scatter_can, tmp_can)
 
         #we now have the can workspace, use it
         Minus(tmp_smp, tmp_can, workspace)
@@ -1091,9 +1091,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                     self.fit_method = self.DEFAULT_FIT
                     _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
                 self._method_set = override
-
-    def set_full_wav(self, is_full):
-        self._use_full_range = is_full
 
     def set_loader(self, loader):
         self.loader = loader

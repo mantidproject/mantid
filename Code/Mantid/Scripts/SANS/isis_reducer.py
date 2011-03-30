@@ -64,7 +64,6 @@ class ISISReducer(SANSReducer):
         #---- the can special reducer uses the steps starting with the next one
         self._conv_Q.append(self.flood_file)
         self._conv_Q.append(self.crop_detector)
-        self._conv_Q.append(self.samp_trans_load)
         self._conv_Q.append(self.mask)
         self._conv_Q.append(self.to_wavelen)
         self._conv_Q.append(self.norm_mon)
@@ -141,9 +140,11 @@ class ISISReducer(SANSReducer):
         
         return self.wksp_name
     
-    def reduce_another(self, to_reduce, new_wksp=None):
+    def reduce_can(self, to_reduce, new_wksp=None):
         """
-            Apply the sample corrections to another workspace, used by CanSubtraction
+            Apply the sample corrections to a can workspace. This reducer is deep copied
+            and the output workspace name, transmission and monitor workspaces are changed.
+            Then the reduction is applied to the given workspace 
             @param to_reduce: the workspace that will be corrected
             @param new_wksp: the name of the workspace that will store the result (default the name of the input workspace)
         """
@@ -323,9 +324,7 @@ class ISISReducer(SANSReducer):
                     
     def set_trans_spectrum(self, specNum, interp=False):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
-        #if interpolate is stated once in the file, that is enough it wont be unset (until a file is loaded again)
-        if interp :
-            self.instrument.use_interpol_trans_calc = True                    
+        self.instrument.use_interpol_trans_calc = interp                    
 
     def get_trans_lambdamin(self):
         """
