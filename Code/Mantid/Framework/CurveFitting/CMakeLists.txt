@@ -72,7 +72,7 @@ set ( INC_FILES inc/MantidCurveFitting/BackgroundFunction.h
 		inc/MantidCurveFitting/UserFunction1D.h
 		inc/MantidCurveFitting/UserFunction.h )
 	      
-set ( TEST_FILES #test/BackToBackExponentialTest.h # TODO tests are commented out
+set ( TEST_FILES test/BackToBackExponentialTest.h 
                  test/BoundaryConstraintTest.h
 		 test/ChebyshevTest.h
 		 test/CompositeFunctionTest.h
