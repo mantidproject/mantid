@@ -42,6 +42,8 @@ namespace MDEvents
 
     template<typename MDE, size_t nd>
     void addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws);
+    template<typename MDE, size_t nd>
+    void addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws);
 
 
   };

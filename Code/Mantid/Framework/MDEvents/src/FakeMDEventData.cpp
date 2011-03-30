@@ -3,6 +3,11 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
+#include <boost/random/linear_congruential.hpp>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_int.hpp>
+#include <boost/random/uniform_real.hpp>
+#include <boost/random/variate_generator.hpp>
 
 namespace Mantid
 {
@@ -47,7 +52,92 @@ namespace MDEvents
   template<typename MDE, size_t nd>
   void FakeMDEventData::addFakePeak(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    std::cout << "Workspace " << ws->getName() << " has " << nd << " dims\n";
+    std::vector<double> params = getProperty("PeakParams");
+    if (params.size() == 0)
+      return;
+
+    if (params.size() != nd + 2)
+      throw std::invalid_argument("PeakParams needs to have ndims+2 arguments.");
+    if (params[0] <= 0)
+      throw std::invalid_argument("PeakParams: number_of_events needs to be > 0");
+    size_t num = params[0];
+
+    // Width of the peak
+    double width = params.back();
+
+    boost::mt19937 rng;
+    boost::uniform_real<double> u(-width, width); // Range
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
+
+    for (size_t i=0; i<num; ++i)
+    {
+      CoordType centers[nd];
+      for (size_t d=0; d<nd; d++)
+        centers[d] = params[d+1] + gen(); // Center + random variation
+      // Create and add the event.
+      ws->addEvent( MDE( 1.0, 1.0, centers) );
+    }
+
+    ws->refreshCache();
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Function makes up a fake uniform event data and adds it to the workspace.
+   *
+   * @param ws
+   */
+  template<typename MDE, size_t nd>
+  void FakeMDEventData::addFakeUniformData(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    std::vector<double> params = getProperty("UniformParams");
+    if (params.size() == 0)
+      return;
+
+    if (params[0] <= 0)
+      throw std::invalid_argument("UniformParams: number_of_events needs to be > 0");
+    size_t num = params[0];
+
+    if (params.size() == 1)
+    {
+      for (size_t d=0; d<nd; ++d)
+      {
+        params.push_back( ws->getDimension(d).getMin() );
+        params.push_back( ws->getDimension(d).getMax() );
+      }
+    }
+    if (params.size() != 1 + nd*2)
+      throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments.");
+
+    boost::mt19937 rng;
+
+    // Make a random generator for each dimensions
+    typedef boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >   gen_t;
+    gen_t * gens[nd];
+    for (size_t d=0; d<nd; ++d)
+    {
+      double min = params[d*2+1];
+      double max = params[d*2+2];
+      if (max <= min) throw std::invalid_argument("UniformParams: min must be < max for all dimensions.");
+      boost::uniform_real<double> u(min,max); // Range
+      gen_t * gen = new gen_t(rng, u);
+      gens[d] = gen;
+    }
+
+    // Create all the requested events
+    for (size_t i=0; i<num; ++i)
+    {
+      CoordType centers[nd];
+      for (size_t d=0; d<nd; d++)
+        centers[d] = (*gens[d])(); // use a different generator for each dimension
+      // Create and add the event.
+      ws->addEvent( MDE( 1.0, 1.0, centers) );
+    }
+
+    /// Clean up the generators
+    for (size_t d=0; d<nd; ++d)
+      delete gens[d];
+
+    ws->refreshCache();
   }
 
 
@@ -66,7 +156,7 @@ namespace MDEvents
 
     declareProperty(new ArrayProperty<double>("PeakParams", ""),
         "Add a peak with a normal distribution around a central point.\n"
-        "Parameters: x, y, z, ..., width.\n");
+        "Parameters: number_of_events, x, y, z, ..., width.\n");
 
 //    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::InOut),
 //        "An input workspace, that will get MDEvents added to it");
@@ -84,9 +174,12 @@ namespace MDEvents
   void FakeMDEventData::exec()
   {
     IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
-//
-//    CALL_MDEVENT_FUNCTION(this->addFakePeak, in_ws)
-//    setProperty("OutputWorkspace", in_ws);
+
+    if (getPropertyValue("UniformParams")=="" && getPropertyValue("PeakParams")=="")
+      throw std::invalid_argument("You must specify at least one of PeakParams or UniformParams.");
+
+    CALL_MDEVENT_FUNCTION(this->addFakePeak, in_ws)
+    CALL_MDEVENT_FUNCTION(this->addFakeUniformData, in_ws)
   }
 
 

@@ -42,14 +42,15 @@ public:
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "FakeMDEventDataTest_ws") );
-    //TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "10000"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", "1000"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("PeakParams", "1000, 5.0,5.0,5.0, 1.0"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("UniformParams", "10000"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
     TS_ASSERT( alg.isExecuted() );
 
     // Now there are 1000 more points.
-//    TS_ASSERT_EQUALS( in_ws->getNPoints(), 2000);
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 12000);
+
     AnalysisDataService::Instance().remove("FakeMDEventDataTest_ws");
 
   }
