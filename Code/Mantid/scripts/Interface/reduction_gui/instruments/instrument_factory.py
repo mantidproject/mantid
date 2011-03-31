@@ -8,15 +8,14 @@ from eqsans_interface import EQSANSInterface
 from hfir_interface_dev import HFIRInterface as HFIRInterfaceDev
 
 
-INSTRUMENT_DICT = {"BIOSANS": HFIRInterface, 
-                   "GPSANS": HFIRInterface,
-                   "HFIRDEV": HFIRInterfaceDev,
-                   "EQSANS": EQSANSInterface}
-
-INSTRUMENT_LIST = INSTRUMENT_DICT.keys()
+INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
+                            "GPSANS": HFIRInterface,
+                            "HFIRDEV": HFIRInterfaceDev},
+                   "SNS":  {"EQSANS": EQSANSInterface}}                  
 
 def instrument_factory(instrument_name, settings=None):
-    for instrument in INSTRUMENT_DICT:
-        if str(instrument_name).strip()==instrument:
-            return INSTRUMENT_DICT[instrument](instrument, settings=settings)
+    for facility in INSTRUMENT_DICT:
+        for instrument in INSTRUMENT_DICT[facility]:
+            if str(instrument_name).strip()==instrument:
+                return INSTRUMENT_DICT[facility][instrument](instrument, settings=settings)
         

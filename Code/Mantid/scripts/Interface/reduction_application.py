@@ -1,7 +1,7 @@
 import sys, os
 from PyQt4 import QtGui, QtCore, uic
 
-from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_LIST
+from reduction_gui.instruments.instrument_factory import instrument_factory, INSTRUMENT_DICT
 from reduction_gui.settings.application_settings import GeneralSettings
 import reduction_gui.settings.qrc_resources
 import ui.ui_reduction_main
@@ -38,7 +38,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         
         # List of allowed instrument
         if instrument_list is None:
-            self._instrument_list = INSTRUMENT_LIST
+            self._instrument_list = INSTRUMENT_DICT
         else:
             self._instrument_list = instrument_list
         
@@ -203,15 +203,27 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Invoke an instrument selection dialog
         """ 
         class InstrDialog(QtGui.QDialog, ui.ui_instrument_dialog.Ui_Dialog): 
-            def __init__(self, instrument_list=[]):
+            def __init__(self, instrument_list={}):
                 QtGui.QDialog.__init__(self)
+                self.instrument_list = instrument_list
                 self.setupUi(self)
                 self.instr_combo.clear()
-                for item in instrument_list:
+                self.facility_combo.clear()
+                instruments = instrument_list.keys()
+                instruments.sort()
+                for facility in instruments:
+                    self.facility_combo.addItem(QtGui.QApplication.translate("Dialog", facility, None, QtGui.QApplication.UnicodeUTF8))
+
+                self._facility_changed(instruments[0])
+                self.connect(self.facility_combo, QtCore.SIGNAL("activated(QString)"), self._facility_changed)    
+                
+            def _facility_changed(self, facility):
+                self.instr_combo.clear()
+                for item in self.instrument_list[unicode(facility)]:
                     self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 
         if self.general_settings.debug:
-            dialog = InstrDialog(INSTRUMENT_LIST)
+            dialog = InstrDialog(INSTRUMENT_DICT)
         else:   
             dialog = InstrDialog(self._instrument_list)
         dialog.exec_()
