@@ -121,6 +121,7 @@ set ( SRC_FILES
 	src/SetUncertaintiesToZero.cpp
 	src/SmoothData.cpp
 	src/SofQW.cpp
+	src/SANSDirectBeamScaling.cpp
 	src/SANSSolidAngleCorrection.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
@@ -224,7 +225,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/InputWSDetectorInfo.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
-	inc/MantidAlgorithms/IQTransform.h
+    inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -266,6 +267,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SofQW.h
+	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
