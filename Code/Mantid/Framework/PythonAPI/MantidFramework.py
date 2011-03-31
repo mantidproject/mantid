@@ -664,6 +664,7 @@ class IAlgorithmProxy(ProxyObject):
                                   # 1 - output
         for prop in ialg.getProperties():
             self.__propertynames[prop.name] = prop.direction
+        self.__propertyOrder = None
         
     def workspace(self):
         return self._retrieveWorkspaceByIndex(0)
@@ -712,6 +713,22 @@ class IAlgorithmProxy(ProxyObject):
               isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
                self.__wkspnames.append(p.value)
         self.__havelist = True
+    def setProperties(self, *args, **kwargs):
+        """
+        Set all of the properties of the algorithm.
+        """
+        if self.__propertyOrder is None:
+            self.__propertyOrder = mtd._getPropertyOrder(self._getHeldObject())
+
+        # add the args to the kw list so everything can be set in a single way
+        for (key, arg) in zip(self.__propertyOrder[:len(args)], args):
+            kwargs[key] = arg
+
+        # set the properties of the algorithm
+        ialg = self._getHeldObject()
+        for key in kwargs.keys():
+            ialg.setPropertyValue(key, kwargs[key])
+
 
 #---------------------------------------------------------------------------------------
 
@@ -840,7 +857,7 @@ class MantidPyFramework(FrameworkManager):
         self._importSimpleAPIToMain()   # TODO this line should go
 
         self.__is_initialized = True
-        
+
     #### private methods ###########################################################
     
     @staticmethod
@@ -1328,11 +1345,15 @@ class PythonAlgorithm(PyAlgorithmBase):
         @param **kwargs: keyword arguments to pass to the instantiated algorithm
         @return: algorithm proxy for the executed algorithm
         """
-        if not isinstance(algorithm, types.FunctionType):
-            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
-        
-        algm = self._createSubAlgorithm(algorithm.func_name)
+        if isinstance(algorithm, str):
+            algm = self._createSubAlgorithm(algorithm)
+        else:
+            if isinstance(algorithm, types.FunctionType):
+                algm = self._createSubAlgorithm(algorithm.func_name)
+            else:
+                raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
         proxy = mtd._createAlgProxy(algm)
+
         if not isinstance(proxy, IAlgorithmProxy):
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
         
