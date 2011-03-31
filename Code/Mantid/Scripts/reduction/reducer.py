@@ -165,6 +165,16 @@ class Reducer(object):
         if workspace not in self._dirty:
             self._dirty.append(workspace)
         
+    def clean_up(self):
+        """
+            Removes all workspace flagged as dirty, use when a reduction aborts with errors
+        """
+        for bad_data in self._dirty:
+            if MantidFramework.mtd.workspaceExists(bad_data):
+                mantidsimple.DeleteWorkspace(bad_data)
+            else:
+                MantidFramework.mtd.sendLogMessage('reducer: Could not access tainted workspace '+bad_data)
+            
     def clean(self, workspace):
         """
             Remove the dirty flag on a workspace
