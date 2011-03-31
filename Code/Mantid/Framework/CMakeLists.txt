@@ -82,10 +82,10 @@ set ( MANTIDLIBS ${MANTIDLIBS} API )
 
 add_subdirectory (PythonAPI)
 
-#find_package ( Matlab )
-#if( MATLAB_FOUND )
-#  add_subdirectory (MatlabAPI)
-#endif ()
+find_package ( Matlab )
+if( MATLAB_FOUND )
+  add_subdirectory (MatlabAPI)
+endif ()
 
 include_directories (DataObjects/inc)
 add_subdirectory (DataObjects)
