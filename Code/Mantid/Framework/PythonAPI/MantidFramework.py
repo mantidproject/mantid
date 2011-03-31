@@ -729,6 +729,18 @@ class IAlgorithmProxy(ProxyObject):
         for key in kwargs.keys():
             ialg.setPropertyValue(key, kwargs[key])
 
+    def execute(self):
+        """
+        Execute the (hopefully) configured algorithm.
+        """
+        if mtd.__gui__:
+            name = self._getHeldObject().name()
+            result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(name)
+            if result == False:
+                sys.exit('An error occurred while running %s. See results log for details.' % name)
+        else:
+            self._getHeldObject().execute()
+
 
 #---------------------------------------------------------------------------------------
 
@@ -742,6 +754,7 @@ class MantidPyFramework(FrameworkManager):
     
     __is_initialized = False
     __config_service = None
+    __gui__ = False
     
     def __init__(self):
         # Call base class constructor
@@ -847,7 +860,8 @@ class MantidPyFramework(FrameworkManager):
         """
         if self.__is_initialized == True:
             return
-            
+        self.__gui__ = GUI
+
         # Welcome everyone to the world of MANTID
         print '\n' + self.settings.welcomeMessage() + '\n'
         # Run through init steps
