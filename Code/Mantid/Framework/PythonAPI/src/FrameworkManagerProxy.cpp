@@ -7,6 +7,7 @@
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/MemoryManager.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Strings.h"
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
@@ -241,6 +242,42 @@ boost::shared_ptr<API::MatrixWorkspace> FrameworkManagerProxy::retrieveMatrixWor
 boost::shared_ptr<API::IEventWorkspace> FrameworkManagerProxy::retrieveIEventWorkspace(const std::string& wsName)
 {
   API::IEventWorkspace_sptr event = boost::dynamic_pointer_cast<API::IEventWorkspace>(retrieveWorkspace(wsName));
+  if (event != NULL)
+  {
+    return event;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an event workspace. ");
+  }
+}
+
+/** Return pointer to PeaksWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<DataObjects::PeaksWorkspace> FrameworkManagerProxy::retrievePeaksWorkspace(const std::string& wsName)
+{
+  DataObjects::PeaksWorkspace_sptr event = boost::dynamic_pointer_cast<DataObjects::PeaksWorkspace>(retrieveWorkspace(wsName));
+  if (event != NULL)
+  {
+    return event;
+  }
+  else
+  {
+    throw std::runtime_error("\"" + wsName + "\" is not an peaks workspace. ");
+  }
+}
+
+/** Return pointer to EventWorkspace
+ * @param wsName :: The name of the workspace to retrieve.
+ * @return Shared pointer to workspace.
+ * @throw runtime_error if not of the right type
+ */
+boost::shared_ptr<DataObjects::EventWorkspace> FrameworkManagerProxy::retrieveEventWorkspace(const std::string& wsName)
+{
+  DataObjects::EventWorkspace_sptr event = boost::dynamic_pointer_cast<DataObjects::EventWorkspace>(retrieveWorkspace(wsName));
   if (event != NULL)
   {
     return event;

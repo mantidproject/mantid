@@ -18,6 +18,8 @@
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/WorkspaceValidators.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include <MantidDataObjects/EventWorkspace.h>
+#include <MantidDataObjects/EventList.h>
 
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
@@ -25,6 +27,7 @@ namespace Mantid
 {
 namespace PythonAPI
 {
+using namespace DataObjects;
 using namespace API;
 using namespace Geometry;
 using namespace boost::python;
@@ -65,6 +68,8 @@ using namespace boost::python;
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
+      .def("_getRawEventWorkspacePointer", &FrameworkManagerProxy::retrieveEventWorkspace)
+      .def("_getRawPeaksWorkspacePointer", &FrameworkManagerProxy::retrievePeaksWorkspace)
       .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
       .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
       .def("_getRawMatrixWorkspacePointer", &FrameworkManagerProxy::retrieveMatrixWorkspace)
@@ -254,15 +259,6 @@ using namespace boost::python;
 
   }
 
-  void export_eventworkspace()
-  {
-    register_ptr_to_python<API::IEventWorkspace_sptr>();
-
-    // EventWorkspace class
-    class_< IEventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("IEventWorkspace", no_init)
-        .def("getNumberEvents", &IEventWorkspace::getNumberEvents)
-        ;
-  }
 
   void export_IMDWorkspace()
   {
@@ -289,6 +285,60 @@ using namespace boost::python;
         .def("getNBins", &IMDDimension::getNBins)
         .def("getX", &IMDDimension::getX)
         .def("getDimensionId", &IMDDimension::getDimensionId)
+        ;
+  }
+
+  void export_PeaksWorkspace()
+  {
+    register_ptr_to_python<PeaksWorkspace_sptr>();
+
+    // PeaksWorkspace class
+    class_< PeaksWorkspace, bases<Workspace>, boost::noncopyable >("PeaksWorkspace", no_init)
+        ;
+  }
+
+  void export_eventworkspace()
+  {
+    register_ptr_to_python<EventWorkspace_sptr>();
+
+    // EventWorkspace class
+    class_< EventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("EventWorkspace", no_init)
+        .def("getNumberEvents", &EventWorkspace::getNumberEvents)
+        .def("getEventList", (EventList&(EventWorkspace::*)(const int) ) &EventWorkspace::getEventList, return_internal_reference<>())
+        ;
+  }
+
+  void export_EventList()
+  {
+    register_ptr_to_python<EventList *>();
+
+    class_< EventList, boost::noncopyable >("EventList", no_init)
+        .def("getEventType", &EventList::getEventType)
+        .def("addDetectorID", &EventList::addDetectorID)
+        .def("hasDetectorID", &EventList::hasDetectorID)
+        .def("clear", &EventList::clear)
+        .def("reserve", &EventList::reserve)
+        .def("sort", &EventList::sort)
+        .def("isSortedByTof", &EventList::isSortedByTof)
+        .def("getSortType", &EventList::getSortType)
+        .def("getNumberEvents", &EventList::getNumberEvents)
+        .def("getMemorySize", &EventList::getMemorySize)
+        .def("compressEvents", &EventList::compressEvents)
+        .def("integrate", &EventList::integrate)
+        .def("convertTof", &EventList::convertTof)
+        .def("scaleTof", &EventList::scaleTof)
+        .def("addTof", &EventList::addTof)
+        .def("addPulsetime", &EventList::addPulsetime)
+        .def("maskTof", &EventList::maskTof)
+        .def("getTofs", &EventList::getTofs)
+        .def("getTofMin", &EventList::getTofMin)
+        .def("getTofMax", &EventList::getTofMax)
+        .def("setTofs", &EventList::setTofs)
+        .def("filterByPulseTime", &EventList::filterByPulseTime)
+        .def("multiply", (void(EventList::*)(const double,const double)) &EventList::multiply)
+        .def("divide", (void(EventList::*)(const double,const double)) &EventList::multiply)
+        .def("switchTo", &EventList::switchTo)
+//        .def("add", (EventList&(EventList::*)(const EventList&))&EventList::operator+=)
         ;
   }
 
@@ -515,6 +565,8 @@ using namespace boost::python;
     export_apivalidators();
     export_file_finder();
     export_IMDDimension();
+    export_EventList();
+    export_PeaksWorkspace();
   }
   //@endcond
 

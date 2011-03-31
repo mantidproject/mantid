@@ -893,6 +893,13 @@ class MantidPyFramework(FrameworkManager):
         # 99% of the time people are using matrix workspaces but we still need to check
         
         # Try each workspace type in order, from more specialised to less specialised.
+        
+        # Try each workspace type in order, from more specialised to less specialised.
+        try:
+            return self._getRawEventWorkspacePointer(name)
+        except RuntimeError:
+            pass
+                
         try:
             return self._getRawIEventWorkspacePointer(name)
         except RuntimeError:
@@ -918,6 +925,11 @@ class MantidPyFramework(FrameworkManager):
             return self._getRawWorkspaceGroupPointer(name)
         except RuntimeError:
             pass
+        
+        try:
+            return self._getRawPeaksWorkspacePointer(name)
+        except RuntimeError:
+            return None
         
         try:
             return self._getRawTableWorkspacePointer(name)
