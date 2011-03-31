@@ -158,10 +158,13 @@ class LoadRun(ReductionStep):
         workspace = self._get_workspace_name()
         #this always contains the period number
         period_definitely_inc = self._get_workspace_name(False)
-        if self._reload == False and mantid.workspaceExists(workspace):
-            return workspace, '', -1
-        if self._reload == False and mantid.workspaceExists(period_definitely_inc):
-            return period_definitely_inc, '', -1
+        if not self._reload:
+            raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
+            nPeriods = self._find_workspace_num_periods(workspace)
+            if mantid.workspaceExists(workspace):
+                return workspace, '', nPeriods
+            if mantid.workspaceExists(period_definitely_inc):
+                return period_definitely_inc, '', nPeriods
 
         self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
@@ -1169,34 +1172,31 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         fittedtransws += '_'+str(translambda_min)+'_'+str(translambda_max)
         unfittedtransws = fittedtransws + "_unfitted"
         
-        if (not use_full_range) or \
-        (self.fit_method != 'Off' and mantid.workspaceExists(fittedtransws) == False) or \
-        (self.fit_method == 'Off' and mantid.workspaceExists(unfittedtransws) == False):
-            # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-            if self.fit_method == 'Off':
-                fit_type = 'Linear'
-            else:
-                fit_type = self.fit_method
+        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+        if self.fit_method == 'Off':
+            fit_type = 'Linear'
+        else:
+            fit_type = self.fit_method
 
-            trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
-                reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
-                reducer.instrument.use_interpol_trans_calc)
+        trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
+            reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
+            reducer.instrument.use_interpol_trans_calc)
                 
-            direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
-                reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-                reducer.instrument.use_interpol_trans_calc)
+        direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
+            reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
+            reducer.instrument.use_interpol_trans_calc)
 
-            if reducer.instrument.name() == 'LOQ':
-                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength=translambda_min, MaxWavelength =  translambda_max, \
-                                      FitMethod = fit_type, OutputUnfittedData=True)
-            else:
-                CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-                    reducer.instrument.incid_mon_4_trans_calc, reducer.instrument.trans_monitor,
-                    MinWavelength = translambda_min, MaxWavelength = translambda_max,
-                    FitMethod = fit_type, OutputUnfittedData=True)
-            # Remove temporaries
-            mantid.deleteWorkspace(trans_tmp_out)
-            mantid.deleteWorkspace(direct_tmp_out)
+        if reducer.instrument.name() == 'LOQ':
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength=translambda_min, MaxWavelength =  translambda_max, \
+                                  FitMethod = fit_type, OutputUnfittedData=True)
+        else:
+            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
+                reducer.instrument.incid_mon_4_trans_calc, reducer.instrument.trans_monitor,
+                MinWavelength = translambda_min, MaxWavelength = translambda_max,
+                FitMethod = fit_type, OutputUnfittedData=True)
+        # Remove temporaries
+        mantid.deleteWorkspace(trans_tmp_out)
+        mantid.deleteWorkspace(direct_tmp_out)
             
         if self.fit_method == 'Off':
             result = unfittedtransws

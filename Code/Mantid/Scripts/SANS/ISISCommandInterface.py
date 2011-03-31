@@ -228,6 +228,7 @@ def CompWavRanges(wavelens, plot=True):
     try:
         ReductionSingleton().to_wavelen.set_rebin(w_low=wavelens[0],
             w_high=wavelens[len(wavelens)-1])
+        #run the reduction calculated will be an array with the names of all the workspaces produced
         calculated = [ReductionSingleton()._reduce()]
         for i in range(0, len(wavelens)-1):
             settings = copy.deepcopy(ReductionSingleton().reference())

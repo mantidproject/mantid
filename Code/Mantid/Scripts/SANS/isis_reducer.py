@@ -132,7 +132,7 @@ class ISISReducer(SANSReducer):
         #----> can_setup.setReducedWorkspace(tmp_can)
         
         #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
-        self.run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
+        self._run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
 
         #any clean up, possibly removing workspaces 
         self.post_process()
@@ -174,7 +174,7 @@ class ISISReducer(SANSReducer):
         """
             Executes all the steps after moving the components
         """
-        self.run_steps(
+        self._run_steps(
                        start_ind=self.step_num(self._fork_ws[0]),
                        stop_ind=len(self._reduction_steps))
 
@@ -193,11 +193,11 @@ class ISISReducer(SANSReducer):
             
         steps = reducer._conv_Q
         #the reducer is completely setup, run it
-        reducer.run_steps(
+        reducer._run_steps(
                           start_ind=reducer.step_num(steps[0]),
                           stop_ind=reducer.step_num(steps[len(steps)-1]))
 
-    def run_steps(self, start_ind = None, stop_ind = None):
+    def _run_steps(self, start_ind = None, stop_ind = None):
         """
             Run part of the chain, starting at the first specified step
             and ending at the last. If start or finish are set to None
@@ -324,7 +324,7 @@ class ISISReducer(SANSReducer):
                     
     def set_trans_spectrum(self, specNum, interp=False):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
-        self.instrument.use_interpol_trans_calc = interp                    
+        self.instrument.use_interpol_trans_calc = interp              
 
     def get_trans_lambdamin(self):
         """
