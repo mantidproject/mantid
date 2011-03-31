@@ -88,6 +88,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              Description="Sum the runs. Does nothing for characterization runs")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
                              Description="If specified overrides value in CharacterizationRunsFile")
+        self.declareProperty("XAdjPixels", 0,
+                             Description="Smooth background using neighbors in X. For nearest neighbors use 1.  Default is 0.")
+        self.declareProperty("YAdjPixels", 0,
+                             Description="Smooth background using neighbors in Y. For nearest neighbors use 1.  Default is 0.")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
                              Description="If specified overrides value in CharacterizationRunsFile")
         self.declareProperty("FilterByTimeMin", 0.,
@@ -327,6 +331,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
+        self._xadjpixels = self.getProperty("XAdjPixels")
+        self._yadjpixels = self.getProperty("YAdjPixels")
         self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams")
         calib = "temp.cal"
@@ -366,7 +372,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
                     canRun = self._loadData(canRun, SUFFIX, (0., 0.))
-                    SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, AdjX=1, AdjY=1)
+                    if self._xadjpixels+self._yadjpixels > 0:
+                        SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, 
+                            AdjX=self._xadjpixels, AdjY=self._yadjpixels)
                 else:
                     canRun = temp
             else:

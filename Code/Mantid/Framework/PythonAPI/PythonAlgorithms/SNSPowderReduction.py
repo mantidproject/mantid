@@ -174,6 +174,7 @@ class SNSPowderReduction(PythonAlgorithm):
         # TODO use timemin and timemax to filter what events are being read
         alg = LoadEventNexus(Filename=filename, OutputWorkspace=name, **kwargs)
 
+        MaskDetectors(Workspace=name, DetectorList="20480:21503,34816:35839,51200:52224,60416:61439")
         return alg.workspace()
 
     def _loadData(self, runnumber, extension, filterWall=None):
@@ -244,15 +245,16 @@ class SNSPowderReduction(PythonAlgorithm):
     def _getinfo(self, wksp):
         logs = wksp.getRun()
         # get the frequency
-        frequency = logs['SpeedRequest1']
+        frequency = logs['frequency']
         if frequency.units != "Hz":
             raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
         frequency = frequency.getStatistics().mean
 
-        wavelength = logs['LambdaRequest']
-        if wavelength.units != "Angstrom":
-            raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
-        wavelength = wavelength.getStatistics().mean
+        #wavelength = logs['LambdaRequest']
+        #if wavelength.units != "Angstrom":
+            #raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
+        wavelength = 2
+        #wavelength.getStatistics().mean
 
         self.log().information("frequency: " + str(frequency) + "Hz center wavelength:" + str(wavelength) + "Angstrom")
         return self._config.getInfo(frequency, wavelength)        
