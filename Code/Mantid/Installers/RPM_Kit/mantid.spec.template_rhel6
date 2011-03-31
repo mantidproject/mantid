@@ -159,8 +159,8 @@ cp -R %{pythonsitepackages}/PyQt4 $RPM_BUILD_ROOT/%{mantidbindir}
 chmod -R 755 $RPM_BUILD_ROOT/%{mantidbindir}/PyQt4
 %endif
 
-cp -r Code/Mantid/Instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
-cp -r Code/Mantid/Scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
+cp -r Code/Mantid/instrument/* $RPM_BUILD_ROOT/%{mantidinstrumentdir}
+cp -r Code/Mantid/scripts/* $RPM_BUILD_ROOT/%{mantidscriptsdir}
 cp -r Code/Mantid/Images/* $RPM_BUILD_ROOT/%{mantidimagesdir}
 cp -r Code/Mantid/Framework/includes/* $RPM_BUILD_ROOT/%{mantidincludesdir}
 sed -e "s@MANTIDBINDIR@%{mantidbindir}@" < utils/mantid.sh > $RPM_BUILD_ROOT/etc/profile.d/mantid.sh
@@ -178,7 +178,7 @@ sed -i -e "s@parameterDefinition\.directory.*@parameterDefinition.directory = %{
 sed -i -e "s@ManagedWorkspace\.FilePath.*@ManagedWorkspace.FilePath = /tmp@" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 sed -i -e "s@logging\.channels\.fileChannel\.path.*@logging.channels.fileChannel.path = @" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 # Remaining script paths
-sed -i -e "s@\.\./\.\./Scripts@\.\./scripts@g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
+sed -i -e "s@\.\./\.\./scripts@\.\./scripts@g" $RPM_BUILD_ROOT/%{mantidbindir}/Mantid.properties
 
 %clean
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi

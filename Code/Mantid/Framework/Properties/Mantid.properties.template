@@ -20,7 +20,7 @@ default.instrument =
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space
 mantidqt.python_interfaces = HFIR_Reduction.py
-mantidqt.python_interfaces_directory = @MANTID_ROOT@/Scripts
+mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries
 plugins.directory = .
@@ -29,28 +29,28 @@ plugins.directory = .
 mantidqt.plugins.directory = .
 
 # Where to load instrument definition files from
-instrumentDefinition.directory = @MANTID_ROOT@/Instrument
+instrumentDefinition.directory = @MANTID_ROOT@/instrument
 
 # Where to load parameter definition files from
-parameterDefinition.directory = @MANTID_ROOT@/Instrument
+parameterDefinition.directory = @MANTID_ROOT@/instrument
 
 # Location of Python scripts that are required for certain aspects of Mantid to function
 # correctly, i.e. customized interfaces
 #
 # WARNING: Altering this value will almost certainly break Mantid functionality
 #
-requiredpythonscript.directories = @MANTID_ROOT@/Scripts/Crystallography;@MANTID_ROOT@/Scripts/DisorderedMaterials;@MANTID_ROOT@/Scripts/Engineering;@MANTID_ROOT@/Scripts/Inelastic;@MANTID_ROOT@/Scripts/LargeScaleStructures;\
-@MANTID_ROOT@/Scripts/Muons;@MANTID_ROOT@/Scripts/Neutrinos;@MANTID_ROOT@/Scripts/SANS;@MANTID_ROOT@/Scripts/
+requiredpythonscript.directories = @MANTID_ROOT@/scripts/Crystallography;@MANTID_ROOT@/scripts/DisorderedMaterials;@MANTID_ROOT@/scripts/Engineering;@MANTID_ROOT@/scripts/Inelastic;@MANTID_ROOT@/scripts/LargeScaleStructures;\
+@MANTID_ROOT@/scripts/Muons;@MANTID_ROOT@/scripts/Neutrinos;@MANTID_ROOT@/scripts/SANS;@MANTID_ROOT@/scripts/
 
 # Additional directory for Python scripts. This is added to the Python path by the
 # Python API (DEPRECATED: Use pythonscripts.directories)
 # Note that this is NOT recursive
-pythonscripts.directory = @MANTID_ROOT@/Scripts
+pythonscripts.directory = @MANTID_ROOT@/scripts
 
 # Additional directories for Python scripts. These are added to the Python path by the
 # Python API.
 # Note that they are NOT recursive
-pythonscripts.directories = @MANTID_ROOT@/Scripts
+pythonscripts.directories = @MANTID_ROOT@/scripts
 
 # The locations of Python algorithms that are to be loaded at startup
 pythonalgorithms.directories = @MANTID_ROOT@/Framework/PythonAPI/PythonAlgorithms
@@ -60,7 +60,7 @@ pythonalgorithms.refresh.allowed = 0
 
 # A semi-colon(;) separated list of directories to use to search for data
 # Use forward slash / for all paths
-datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/../../Test/VATES;@MANTID_ROOT@/Instrument
+datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/../../Test/VATES;@MANTID_ROOT@/instrument
 
 # A semi-colon(;) separated list of directories to use to search for files other than data
 # Use forward slash / for all paths

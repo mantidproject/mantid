@@ -1027,7 +1027,7 @@ const std::string ConfigServiceImpl::getInstrumentDirectory() const
   {
     // This is the assumed deployment directory for IDFs, where we need to be relative to the
     // directory of the executable, not the current working directory.
-    directoryName = Poco::Path(getPropertiesDir()).resolve("../Instrument").toString();
+    directoryName = Poco::Path(getPropertiesDir()).resolve("../instrument").toString();
   }
 
   if (!Poco::File(directoryName).isDirectory())

@@ -66,7 +66,7 @@ if $do_local; then
     # we use `pwd` to make absolute links; that way the link will
     # still work when the area is tarred up
     ln -s `pwd`/../../../Images .
-    ln -s `pwd`/../../../Instrument instrument
+    ln -s `pwd`/../../../instrument instrument
     cd Code
     ln -s `pwd`/../../../../../Mantid Mantid
     cd ../..

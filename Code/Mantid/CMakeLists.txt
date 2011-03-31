@@ -84,15 +84,15 @@ endif ( MAKE_VATES )
 
 # python unit tests
 if (PYUNITTEST_FOUND)
-  add_subdirectory (Scripts)
+  add_subdirectory ( scripts )
 endif ()
 
 ###########################################################################
 # Installation settings
 ###########################################################################
 
-file ( GLOB INSTRUMENT_FILES Instrument/*.xml )
+file ( GLOB INSTRUMENT_FILES instrument/*.xml )
 install ( FILES ${INSTRUMENT_FILES} DESTINATION instrument )
-install ( DIRECTORY Scripts/ DESTINATION scripts PATTERN ".svn" EXCLUDE 
+install ( DIRECTORY scripts/ DESTINATION scripts PATTERN ".svn" EXCLUDE 
                                                  PATTERN "*.pyc" EXCLUDE )
 install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" EXCLUDE )

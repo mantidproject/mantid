@@ -41,10 +41,10 @@ cp -R $BUILDPATH/MantidPlot MantidPlot.app/Contents/MacOS/
 rsync -aC ../colormaps MantidPlot.app/Contents/Resources/
 
 # Copy in the instrument definition files
-cp ../../Instrument/*.xml MantidPlot.app/instrument/
+cp ../../instrument/*.xml MantidPlot.app/instrument/
 
 # Copy in the scripts (rsync excludes .svn directories)
-rsync -aC ../../Scripts/* MantidPlot.app/scripts
+rsync -aC ../../scripts/* MantidPlot.app/scripts
 # Remove stuff that really doesn't belong in svn Scripts directory anyway
 rm MantidPlot.app/scripts/CMakeLists.txt
 rm -R MantidPlot.app/scripts/test

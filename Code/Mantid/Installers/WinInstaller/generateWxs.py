@@ -626,7 +626,7 @@ pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',incl
 
 sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
 
-ins_def_dir = CODEDIR + '/Mantid/Instrument'
+ins_def_dir = CODEDIR + '/Mantid/instrument'
 ins_suffix = '.xml'
 instrument_ids, instr_comp = addCompList('instrument',ins_def_dir,'instrument',InstallDir, include_suffix=[ins_suffix])
 # At r4214 instrument cache files were moved to be written to managed workspace temp directory
@@ -708,7 +708,7 @@ PyQtList = addCompList('PyQtDir', PYQTDIR,'PyQt4',binDir, exclude_suffix=['_d.py
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
-scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/Scripts","scripts",InstallDir)[0]
+scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/scripts","scripts",InstallDir)[0]
 
 # M. Gigg 2010-11-19: The Excitations directory was renamed. Unfortunately this causes the directory for the new installer to get left around
 # on certain setups that have used the scripts.  I could force a delete of the folder but if a user has added their own scripts then that would remove them too.
