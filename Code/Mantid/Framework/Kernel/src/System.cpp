@@ -35,6 +35,18 @@ namespace Mantid
     class Workspace;
     class MatrixWorkspace;
     class ITableWorkspace;
+    class IMDEventWorkspace;
+    class IMDWorkspace;
+    class IEventWorkspace;
+  }
+  namespace DataObjects
+  {
+    class EventWorkspace;
+    class PeaksWorkspace;
+  }
+  namespace MDDataObjects
+  {
+    class MDWorkspace;
   }
 }
 
@@ -192,13 +204,19 @@ std::string  Mantid::Kernel::getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(std::make_pair(typeid(bool).name(), std::string("boolean")));
     typestrings.insert(std::make_pair(typeid(std::string).name(), std::string("string")));
     typestrings.insert(std::make_pair(typeid(std::vector<std::string>).name(), std::string("str list")));
-    typestrings.insert(std::make_pair(typeid(std::vector<int>).name(), std::string("num list")));
-    typestrings.insert(std::make_pair(typeid(std::vector<double>).name(), std::string("num list")));
+    typestrings.insert(std::make_pair(typeid(std::vector<int>).name(), std::string("int list")));
+    typestrings.insert(std::make_pair(typeid(std::vector<double>).name(), std::string("dbl list")));
 
     //Workspaces
-    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::Workspace>).name(), std::string("string")));
-    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::MatrixWorkspace>).name(), std::string("string")));
-    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::ITableWorkspace>).name(), std::string("string")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::Workspace>).name(), std::string("Workspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::MatrixWorkspace>).name(), std::string("MatrixWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::ITableWorkspace>).name(), std::string("TableWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IMDWorkspace>).name(), std::string("IMDWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IMDEventWorkspace>).name(), std::string("MDEventWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IEventWorkspace>).name(), std::string("IEventWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::EventWorkspace>).name(), std::string("EventWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>).name(), std::string("PeaksWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::MDDataObjects::MDWorkspace>).name(), std::string("MDWorkspace")));
 
 
   }
