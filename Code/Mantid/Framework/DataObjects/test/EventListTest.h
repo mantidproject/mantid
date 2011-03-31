@@ -1223,6 +1223,33 @@ public:
 
 
 
+  //-----------------------------------------------------------------------------------------------
+  void test_addPulseTime_allTypes()
+  {
+    // Go through each possible EventType as the input
+    for (int this_type=0; this_type<3; this_type++)
+    {
+      this->fake_uniform_time_data();
+      el.switchTo(static_cast<EventType>(this_type));
+      size_t old_num = this->el.getNumberEvents();
+      //Do convert
+      if (static_cast<EventType>(this_type) == WEIGHTED_NOTIME)
+      {
+        TS_ASSERT_THROWS_ANYTHING( this->el.addPulsetime( 123e-9 ); )
+      }
+      else
+      {
+        this->el.addPulsetime( 123e-9  );
+        //Unchanged size
+        TS_ASSERT_EQUALS(old_num, this->el.getNumberEvents());
+        //original times were 0, 1, etc. nansoeconds
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(0).pulseTime().total_nanoseconds(), 123);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(1).pulseTime().total_nanoseconds(), 124);
+        TSM_ASSERT_EQUALS(this_type, this->el.getEvent(2).pulseTime().total_nanoseconds(), 125);
+      }
+    }
+  }
+
 
   //-----------------------------------------------------------------------------------------------
   void test_filterByPulseTime()
@@ -1659,8 +1686,8 @@ public:
     srand(1234); //Fixed random seed
     for (int time=0; time < 1000; time++)
     {
-      //All pulse times from 0 to 999
-      el += TofEvent( rand()%1000, time);
+      //All pulse times from 0 to 999 in seconds
+      el += TofEvent( rand()%1000, time); //Kernel::DateAndTime(time*1.0, 0.0) );
     }
   }
 

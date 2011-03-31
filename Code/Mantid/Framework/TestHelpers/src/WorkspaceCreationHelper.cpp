@@ -316,7 +316,7 @@ namespace WorkspaceCreationHelper
    * 50 pixels
    * 100 histogrammed bins from 0.0 in steps of 1.0
    * 200 events; two in each bin, at time 0.5, 1.5, etc.
-   * PulseTime = 1 second, 2 seconds, etc.
+   * PulseTime = 0 second x2, 1 second x2, 2 seconds x2, etc. after 2010-01-01
    */
   EventWorkspace_sptr CreateEventWorkspace2(int numPixels, int numBins)
   {

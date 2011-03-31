@@ -239,6 +239,10 @@ public:
   void addTof(const double offset);
 
   template<class T>
+  void addPulsetimeHelper(std::vector<T> & events, const double seconds);
+  void addPulsetime(const double seconds);
+
+  template<class T>
   static void maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
   void maskTof(const double tofMin, const double tofMax);
 

@@ -1878,6 +1878,46 @@ namespace DataObjects
   }
 
 
+  // --------------------------------------------------------------------------
+  /** Add an offset to the pulsetime (wall-clock time) of each event in the list.
+   *
+   * @param events :: reference to a vector of events to change.
+   * @param seconds :: The value to shift the pulsetime by, in seconds
+   */
+  template<class T>
+  void EventList::addPulsetimeHelper(std::vector<T> & events, const double seconds)
+  {
+    // iterate through all events
+    typename std::vector<T>::iterator itev;
+    typename std::vector<T>::iterator itev_end = events.end(); //cache for speed
+    for (itev = events.begin(); itev != itev_end; itev++)
+      itev->m_pulsetime += seconds;
+  }
+
+  // --------------------------------------------------------------------------
+  /** Add an offset to the pulsetime (wall-clock time) of each event in the list.
+   *
+   * @param seconds :: The value to shift the pulsetime by, in seconds
+   */
+  void EventList::addPulsetime(const double seconds)
+  {
+    if (this->getNumberEvents() <= 0)  return;
+
+    //Convert the list
+    switch (eventType)
+    {
+    case TOF:
+      this->addPulsetimeHelper(this->events, seconds);
+      break;
+    case WEIGHTED:
+      this->addPulsetimeHelper(this->weightedEvents, seconds);
+      break;
+    case WEIGHTED_NOTIME:
+      throw std::runtime_error("EventList::addPulsetime() called on an event list with no pulse times. You must call this algorithm BEFORE CompressEvents.");
+      break;
+    }
+  }
+
 
 
 
