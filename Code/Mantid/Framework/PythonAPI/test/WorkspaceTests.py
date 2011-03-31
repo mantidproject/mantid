@@ -30,6 +30,12 @@ class MatrixWorkspaceTest(unittest.TestCase):
        DeleteWorkspace(alf_1)
        DeleteWorkspace(alf_2)
 
+    def test_is_dirty(self):
+        CreateWorkspace("test", DataX=1, DataY=1, DataE=1)
+        self.assertFalse(mtd["test"].isDirty())
+        Scale(InputWorkspace="test", OutputWorkspace="test", Factor=2.0)
+        self.assertTrue(mtd["test"].isDirty())
+        
 
 if __name__ == '__main__':
     unittest.main()

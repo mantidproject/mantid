@@ -64,6 +64,21 @@ const std::string& Workspace::getName() const
   return m_name;
 }
 
+/**
+ * Check whether other algorithms have been applied to the
+ * workspace by checking the history length.
+ *
+ * By default a workspace is called dirty if its history is
+ * longer than one. This default can be changed to allow for
+ * workspace creation processes that necessitate more than
+ * a single algorithm.
+ *
+ * @param n: number of algorithms defining a clean workspace
+ */
+bool Workspace::isDirty(const int n) const
+{
+  return m_history.length()>n;
+}
 
 } // namespace API
 } // Namespace Mantid

@@ -172,6 +172,11 @@ namespace PythonAPI
 #undef EXPORT_GETLISTPROPERTY
   }
 
+  bool _isDirty_default(API::Workspace& self)
+  {
+    return self.isDirty();
+  }
+
   void export_workspace()
   {
     /// Shared pointer registration
@@ -183,6 +188,8 @@ namespace PythonAPI
       .def("getComment", &API::MatrixWorkspace::getComment, 
          return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &API::Workspace::getMemorySize)
+      .def("isDirty", &API::Workspace::isDirty)
+      .def("isDirty", &_isDirty_default)
       .def("getName", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("__str__", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       ;

@@ -54,6 +54,14 @@ void WorkspaceHistory::addAlgorithmHistory(const AlgorithmHistory& algHistory)
   m_algorithms.push_back(algHistory);
 }
 
+/*
+ Return the history length
+ */
+size_t WorkspaceHistory::length() const
+{
+  return m_algorithms.size();
+}
+
 /** Prints a text representation of itself
  *  @param os :: The ouput stream to write to
  *  @param indent :: an indentation value to make pretty printing of object and sub-objects

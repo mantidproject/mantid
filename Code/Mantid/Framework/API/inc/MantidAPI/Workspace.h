@@ -61,6 +61,7 @@ public:
     const std::string& getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
+    bool isDirty(const int n=1) const;
     /// Get the footprint in memory in bytes.
     virtual size_t getMemorySize() const = 0;
 

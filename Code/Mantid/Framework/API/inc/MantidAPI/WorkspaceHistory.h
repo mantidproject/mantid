@@ -52,6 +52,7 @@ public:
   ////
   void copyAlgorithmHistory(const WorkspaceHistory& otherHistory);
   void addAlgorithmHistory(const AlgorithmHistory& algHistory);
+  size_t length() const;
 
   void printSelf(std::ostream&, const int indent  = 0) const;
 
