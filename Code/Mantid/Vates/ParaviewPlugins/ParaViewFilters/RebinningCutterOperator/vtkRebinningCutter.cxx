@@ -64,7 +64,8 @@ vtkRebinningCutter::vtkRebinningCutter() :
   m_presenter(),
   m_clipFunction(NULL),
   m_cachedVTKDataSet(NULL),
-  m_clip(Apply),
+  m_clip(ApplyClipping),
+  m_originalExtents(IgnoreOriginal),
   m_setup(Pending),
   m_timestep(0),
   m_thresholdMax(10000),
@@ -102,7 +103,7 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
   {
     m_actionRequester.ask(RecalculateVisualDataSetOnly);
   }
-  if(m_box.get() != NULL && *m_box != *box && Ignore != m_clip) //TODO: clean this up.
+  if(m_box.get() != NULL && *m_box != *box && IgnoreClipping != m_clip) //TODO: clean this up.
   {
      m_actionRequester.ask(RecalculateAll); //The clip function must have changed.
   }
@@ -174,7 +175,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
     m_box = box;
     m_cachedRedrawArguments = createRedrawHash();
     m_actionRequester.reset(); //Restore default
-    if(Ignore == m_clip)
+    if(IgnoreClipping == m_clip)
     {
       m_cachedVTKDataSet =outData; 
     }
@@ -258,12 +259,13 @@ void vtkRebinningCutter::PrintSelf(ostream& os, vtkIndent indent)
 
 void vtkRebinningCutter::SetApplyClip(int applyClip)
 {
-   Clipping temp = applyClip == 1 ? Apply : Ignore;
+   Clipping temp = applyClip == 1 ? ApplyClipping : IgnoreClipping;
    if(temp != m_clip)
    {
      m_clip = temp;
-     if(m_clip == Apply)
+     if(m_clip == ApplyClipping)
      {
+       m_originalExtents = ApplyOriginal;
        m_actionRequester.ask(RecalculateAll);
      }
    }
@@ -437,8 +439,9 @@ Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensiont(vtkDataSet* in_d
 BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const
 {
   using namespace Mantid::MDAlgorithms;
-  BoxImplicitFunction* boxFunction;
-  if(Apply == m_clip)
+
+  double originX, originY, originZ, width, height, depth;
+  if(ApplyClipping == m_clip)
   {
     vtkBox* box = m_clipFunction; //Alias
     //To get the box bounds, we actually need to evaluate the box function. There is not this restriction on planes.
@@ -451,29 +454,33 @@ BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) cons
     //Now we can get the bounds.
     double* bounds = cutterOutput->GetBounds();
 
-    double originX = (bounds[1] + bounds[0]) / 2;
-    double originY = (bounds[3] + bounds[2]) / 2;
-    double originZ = (bounds[5] + bounds[4]) / 2;
-    double width = sqrt(pow(bounds[1] - bounds[0], 2));
-    double height = sqrt(pow(bounds[3] - bounds[2], 2));
-    double depth = sqrt(pow(bounds[5] - bounds[4], 2));
-
-    //Create domain parameters.
-    OriginParameter originParam = OriginParameter(originX, originY, originZ);
-    WidthParameter widthParam = WidthParameter(width);
-    HeightParameter heightParam = HeightParameter(height);
-    DepthParameter depthParam = DepthParameter(depth);
-
-    //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
-    boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
-      originParam);
-
-    return BoxFunction_sptr(boxFunction);
+    originX = (bounds[1] + bounds[0]) / 2;
+    originY = (bounds[3] + bounds[2]) / 2;
+    originZ = (bounds[5] + bounds[4]) / 2;
+    width = sqrt(pow(bounds[1] - bounds[0], 2));
+    height = sqrt(pow(bounds[3] - bounds[2], 2));
+    depth = sqrt(pow(bounds[5] - bounds[4], 2));
   }
   else
   {
-    return m_box;
-  }
+    originX = (m_appliedXDimension->getMaximum() + m_appliedXDimension->getMinimum()) / 2;
+    originY = (m_appliedYDimension->getMaximum() + m_appliedYDimension->getMinimum()) / 2;
+    originZ = (m_appliedZDimension->getMaximum() + m_appliedZDimension->getMinimum()) / 2;
+    width = m_appliedXDimension->getMaximum() - m_appliedXDimension->getMinimum();
+    height = m_appliedYDimension->getMaximum() - m_appliedYDimension->getMinimum();
+    depth = m_appliedZDimension->getMaximum() - m_appliedZDimension->getMinimum();
+  } 
+  //Create domain parameters.
+  OriginParameter originParam = OriginParameter(originX, originY, originZ);
+  WidthParameter widthParam = WidthParameter(width);
+  HeightParameter heightParam = HeightParameter(height);
+  DepthParameter depthParam = DepthParameter(depth);
+
+  //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
+  BoxImplicitFunction* boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
+    originParam);
+
+  return BoxFunction_sptr(boxFunction);
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(

@@ -179,10 +179,10 @@ public:
     ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
     GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
 
-    TS_ASSERT_EQUALS(getXDimId(), proxy->getXDimension()->getDimensionId());
-    TS_ASSERT_EQUALS(getYDimId(), proxy->getYDimension()->getDimensionId());
-    TS_ASSERT_EQUALS(getZDimId(), proxy->getZDimension()->getDimensionId());
-    TS_ASSERT_EQUALS(getTDimId(), proxy->getTDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getTDimId(), proxy->getXDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getZDimId(), proxy->getYDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getYDimId(), proxy->getZDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getXDimId(), proxy->getTDimension()->getDimensionId());
   }
 
   void testRemapPoints_xyzt()

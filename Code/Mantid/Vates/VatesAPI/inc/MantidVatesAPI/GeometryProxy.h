@@ -153,10 +153,10 @@ template<typename Image>
   void GeometryProxy<Image>::initalize()
   {
     //Create a mapping of MDGeometry member functions to dimension ids. Keyed by the id.
-    m_fmap[m_xDimension->getDimensionId()] = &Geometry::getXDimension;
-    m_fmap[m_yDimension->getDimensionId()] = &Geometry::getYDimension;
-    m_fmap[m_zDimension->getDimensionId()] = &Geometry::getZDimension;
-    m_fmap[m_tDimension->getDimensionId()] = &Geometry::getTDimension;
+    m_fmap[m_geometry->getXDimension()->getDimensionId()] = &Geometry::getXDimension;
+    m_fmap[m_geometry->getYDimension()->getDimensionId()] = &Geometry::getYDimension;
+    m_fmap[m_geometry->getZDimension()->getDimensionId()] = &Geometry::getZDimension;
+    m_fmap[m_geometry->getTDimension()->getDimensionId()] = &Geometry::getTDimension;
   }
 
 //-----------------------------------------------------------------------------------------------

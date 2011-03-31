@@ -46,7 +46,9 @@ typedef boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> BoxFunction
 ///Type marks setup status
 enum SetupStatus{ IsSetup, Pending};
 ///Type marks wheter clipping is to be applied or ignored
-enum Clipping{ Apply, Ignore};
+enum Clipping{ ApplyClipping, IgnoreClipping};
+///Type marks wheter original extents should be used over box extents.
+enum OrignalExtents{ ApplyOriginal, IgnoreOriginal};
 
 class vtkBox;
 class VTK_EXPORT vtkRebinningCutter : public vtkUnstructuredGridAlgorithm
@@ -166,6 +168,8 @@ private:
   Mantid::VATES::RebinningActionManger m_actionRequester;
   /// Box implicit function, used to determine when the clipping has changed.
   BoxFunction_sptr m_box;
+  /// Original extents should be used.
+  OrignalExtents m_originalExtents;
 
 };
 #endif
