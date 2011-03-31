@@ -488,7 +488,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected MDWorkspace.";
         throw std::runtime_error(message);
       }
     }
@@ -504,7 +504,7 @@ namespace Mantid
       }
       else
       {
-        std::string message = "Attempt to assign property "+ name +" to incorrect type";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const MDWorkspace.";
         throw std::runtime_error(message);
       }
     }

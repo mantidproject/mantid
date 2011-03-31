@@ -87,8 +87,15 @@ namespace MDEvents
       std::vector<MDE> out_events;
       out_events.reserve( el.getNumberEvents() );
 
-      // TODO: Handle or warn if sum of more than one detector ID
-      int detID = *el.getDetectorIDs().begin();
+      // Warn if the event list is the sum of more than one detector ID
+      std::set<int>& detectors = el.getDetectorIDs();
+      if (detectors.size() != 1)
+      {
+        g_log.warning() << "Event list at workspace index " << workspaceIndex << " has " << detectors.size() << " detectors. Only 1 detector ID per pixel is supported.\n";
+        return;
+      }
+
+      int detID = *(detectors.begin());
       IDetector_sptr det = allDetectors[detID];
 
       // Vector between the sample and the detector
@@ -105,6 +112,9 @@ namespace MDEvents
       double Q_dir_x = Q_dir.X();
       double Q_dir_y = Q_dir.Y();
       double Q_dir_z = Q_dir.Z();
+
+      //TODO: Rotate into sample frame (take out goniometer rotation)
+      //TODO: Convert to HKL, on option.
 
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
