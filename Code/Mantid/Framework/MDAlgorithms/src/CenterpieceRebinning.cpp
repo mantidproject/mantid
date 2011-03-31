@@ -168,7 +168,7 @@ CenterpieceRebinning::exec()
         }
         if(pProgress.get()){
             message_buf<<"Making cut; step "<<ic<<" out of: "<<nSteps<<std::endl;
-            pProgress->report(message_buf.str());
+            pProgress->doReport(message_buf.str());
             message_buf.seekp(std::ios::beg);
         }
         ic++;

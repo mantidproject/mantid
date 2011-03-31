@@ -64,7 +64,8 @@ vtkRebinningCutter::vtkRebinningCutter() :
   m_presenter(),
   m_clipFunction(NULL),
   m_cachedVTKDataSet(NULL),
-  m_isSetup(false),
+  m_clip(Apply),
+  m_setup(Pending),
   m_timestep(0),
   m_thresholdMax(10000),
   m_thresholdMin(0),
@@ -93,10 +94,6 @@ std::string vtkRebinningCutter::createRedrawHash() const
 void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, BoxFunction_sptr box)
 {
   //Handles some commong iteration actions that can only be determined at execution time.
-  if (NULL == m_cachedVTKDataSet)
-  {
-    m_actionRequester.ask(RecalculateAll);
-  }
   if ((timestep != m_timestep))
   {
     m_actionRequester.ask(RecalculateVisualDataSetOnly);
@@ -105,7 +102,7 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
   {
     m_actionRequester.ask(RecalculateVisualDataSetOnly);
   }
-  if(m_box.get() != NULL && *m_box != *box)
+  if(m_box.get() != NULL && *m_box != *box && Ignore != m_clip) //TODO: clean this up.
   {
      m_actionRequester.ask(RecalculateAll); //The clip function must have changed.
   }
@@ -121,7 +118,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
   using Mantid::VATES::DimensionVec;
 
   //Setup is not complete until metadata has been correctly provided.
-  if(true == m_isSetup)
+  if(IsSetup == m_setup)
   {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
@@ -134,7 +131,8 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
 
     //Create the composite holder.
     CompositeImplicitFunction* compFunction = new CompositeImplicitFunction;
-    BoxFunction_sptr box = constructBox(inputDataset); // Save the implicit function so that we may later determine if the extents have changed.
+    vtkDataSet* clipDataSet = m_cachedVTKDataSet == NULL ? inputDataset : m_cachedVTKDataSet;
+    BoxFunction_sptr box = constructBox(clipDataSet); // Save the implicit function so that we may later determine if the extents have changed.
     compFunction->addFunction(box);
     
     // Construct reduction knowledge.
@@ -160,35 +158,27 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
       // usually only one actual step requested
       timestep = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
     }
-    //TODO: warn if time falls outside of time range vtkWarnMacro ...
+    
     determineAnyCommonExecutionActions(timestep, box);
 
     vtkUnstructuredGrid* outData;
     RebinningIterationAction action = m_actionRequester.action();
     MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
-    if (UseCache == action)
-    {
-      //Use existing vtkDataSet
-      vtkDataSetFactory_sptr spvtkDataSetFactory(new vtkProxyFactory(m_cachedVTKDataSet));
-      outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
-      outData->Register(NULL);
-    }
-    else
-    {
-      //Build a vtkDataSet
-      vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
 
-      outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
-      m_cachedVTKDataSet = outData;
-    }
+    //Build a vtkDataSet
+    vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
+    outData = dynamic_cast<vtkUnstructuredGrid*> (m_presenter.createVisualDataSet(spvtkDataSetFactory));
+    
+    
     m_timestep = timestep; //Not settable directly via a setter.
     m_box = box;
     m_cachedRedrawArguments = createRedrawHash();
-    m_actionRequester.reset();
-
-  /*  vtkBox* vbox = dynamic_cast<vtkBox*>(this->m_clipFunction);
-  vbox->SetBounds(0, 2, 0, 2, 0, 20);*/
-
+    m_actionRequester.reset(); //Restore default
+    if(Ignore == m_clip)
+    {
+      m_cachedVTKDataSet =outData; 
+    }
+    
     output->ShallowCopy(outData);
   }
   return 1;
@@ -205,7 +195,7 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
 {
   enum Status{Bad=0, Good=1};
   Status status=Good;
-  if (!m_isSetup)
+  if (Pending == m_setup)
   {
     using namespace Mantid::Geometry;
     using namespace Mantid::MDDataObjects;
@@ -233,13 +223,13 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
       // Construct reduction knowledge.
       m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
         dimensionsVec[2], dimensionsVec[3], inputDataset);
-
-      m_isSetup = true;
+      //First time round, rebinning has to occur.
+      m_actionRequester.ask(RecalculateAll);
+      m_setup = IsSetup;
     }
     else
     {
       vtkErrorMacro("Rebinning operations require Rebinning Metadata. Have you provided a rebinning source?");
-      m_isSetup = false;
       status = Bad;
     }
   }
@@ -266,12 +256,27 @@ void vtkRebinningCutter::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os, indent);
 }
 
+void vtkRebinningCutter::SetApplyClip(int applyClip)
+{
+   Clipping temp = applyClip == 1 ? Apply : Ignore;
+   if(temp != m_clip)
+   {
+     m_clip = temp;
+     if(m_clip == Apply)
+     {
+       m_actionRequester.ask(RecalculateAll);
+     }
+   }
+}
+
 void vtkRebinningCutter::SetClipFunction(vtkImplicitFunction * func)
 {
-  if (func != m_clipFunction)
+  vtkBox* box = dynamic_cast<vtkBox*>(func);
+
+  if (box != m_clipFunction)
   {
     this->Modified();
-    this->m_clipFunction = func;
+    this->m_clipFunction = box;
   }
 }
 
@@ -432,37 +437,43 @@ Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensiont(vtkDataSet* in_d
 BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const
 {
   using namespace Mantid::MDAlgorithms;
-  
-  vtkBox* box = dynamic_cast<vtkBox*>(this->m_clipFunction);
+  BoxImplicitFunction* boxFunction;
+  if(Apply == m_clip)
+  {
+    vtkBox* box = m_clipFunction; //Alias
+    //To get the box bounds, we actually need to evaluate the box function. There is not this restriction on planes.
+    vtkPVClipDataSet * cutter = vtkPVClipDataSet::New();
+    cutter->SetInput(inputDataset);
+    cutter->SetClipFunction(box);
+    cutter->SetInsideOut(true);
+    cutter->Update();
+    vtkDataSet* cutterOutput = cutter->GetOutput();
+    //Now we can get the bounds.
+    double* bounds = cutterOutput->GetBounds();
 
-  //To get the box bounds, we actually need to evaluate the box function. There is not this restriction on planes.
-  vtkPVClipDataSet * cutter = vtkPVClipDataSet::New();
-	cutter->SetInput(inputDataset);
-	cutter->SetClipFunction(box);
-  cutter->SetInsideOut(true);
-	cutter->Update();
-  vtkDataSet* cutterOutput = cutter->GetOutput();
-  //Now we can get the bounds.
-  double* bounds = cutterOutput->GetBounds();
-  
-  double originX = (bounds[1] + bounds[0]) / 2;
-  double originY = (bounds[3] + bounds[2]) / 2;
-  double originZ = (bounds[5] + bounds[4]) / 2;
-  double width = sqrt(pow(bounds[1] - bounds[0], 2));
-  double height = sqrt(pow(bounds[3] - bounds[2], 2));
-  double depth = sqrt(pow(bounds[5] - bounds[4], 2));
-  
-  //Create domain parameters.
-  OriginParameter originParam = OriginParameter(originX, originY, originZ);
-  WidthParameter widthParam = WidthParameter(width);
-  HeightParameter heightParam = HeightParameter(height);
-  DepthParameter depthParam = DepthParameter(depth);
+    double originX = (bounds[1] + bounds[0]) / 2;
+    double originY = (bounds[3] + bounds[2]) / 2;
+    double originZ = (bounds[5] + bounds[4]) / 2;
+    double width = sqrt(pow(bounds[1] - bounds[0], 2));
+    double height = sqrt(pow(bounds[3] - bounds[2], 2));
+    double depth = sqrt(pow(bounds[5] - bounds[4], 2));
 
-  //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
-  BoxImplicitFunction* boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
+    //Create domain parameters.
+    OriginParameter originParam = OriginParameter(originX, originY, originZ);
+    WidthParameter widthParam = WidthParameter(width);
+    HeightParameter heightParam = HeightParameter(height);
+    DepthParameter depthParam = DepthParameter(depth);
+
+    //Create the box. This is specific to this type of presenter and this type of filter. Other rebinning filters may use planes etc.
+    boxFunction = new BoxImplicitFunction(widthParam, heightParam, depthParam,
       originParam);
 
-  return BoxFunction_sptr(boxFunction);
+    return BoxFunction_sptr(boxFunction);
+  }
+  else
+  {
+    return m_box;
+  }
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
@@ -470,10 +481,13 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
 {
   if(m_actionRequester.action() == RecalculateAll)
   {
+    //This route regenerates the underlying image.
     return createQuickRenderDataSetFactory(spRebinnedWs);
   }
   else
   {
+    //This route rebinds the underlying image in such a way that dimension swapping can
+    //be achieved very rapidly.
     return createQuickChangeDataSetFactory(spRebinnedWs);
   }
 }
@@ -490,17 +504,18 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
   TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),
       timeDimension->getNBins());
 
-  GeometryProxy* geomProxy = GeometryProxy::New
-      (spRebinnedWs->get_spMDImage()->getGeometry(),
+
+  GeometryProxy<MDImage>* geomProxy = GeometryProxy<MDImage>::New
+      (spRebinnedWs->get_spMDImage(),
           m_appliedXDimension,
           m_appliedYDimension,
           m_appliedZDimension,
           m_appliedTDimension);
 
- boost::shared_ptr<ImageProxy> spImageProcessor(ImageProxy::New(geomProxy, spRebinnedWs->get_spMDImage()));
+ boost::shared_ptr<ImageProxy<MDImage> > spImageProcessor(ImageProxy<MDImage>::New(geomProxy, spRebinnedWs->get_spMDImage()));
 
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<ImageProxy,
+  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<ImageProxy<MDImage>,
       TimeToTimeStep> (spImageProcessor, XMLDefinitions::signalName(), m_timestep,
       timeMapper, m_thresholdMin, m_thresholdMax);
 
@@ -528,7 +543,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
 
 void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
 {
-  if(true == m_isSetup)
+  if(IsSetup == m_setup)
   {
     double min = m_appliedTDimension->getMinimum();
     double max = m_appliedTDimension->getMaximum();

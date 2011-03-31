@@ -41,6 +41,10 @@ private:
   /// Pointer to custom geometry widget.
   GeometryWidget* m_geometryWidget;
 
+private slots:
+  /// Handler for ignoring bin changes. i.e. 
+  void ignoreBinChangesListner();
+
 public:
 
   /// Constructor
@@ -54,5 +58,7 @@ public:
 
   /// Pop the widget off the layout
   void popWidget();
+
+  
 
 };

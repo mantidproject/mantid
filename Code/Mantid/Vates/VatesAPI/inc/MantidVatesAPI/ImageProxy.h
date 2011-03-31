@@ -38,12 +38,13 @@ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Co
 Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
 
+template<typename Image>
 class DLLExport ImageProxy
 {
 private:
 
   /// Assisting mdgeometry proxy. Constructs and contains all remapping information.
-  boost::scoped_ptr<GeometryProxy> m_geometryProxy;
+  boost::scoped_ptr<GeometryProxy<Image> > m_geometryProxy;
 
   /// underlying MDImage. The subject of this proxy.
   Mantid::MDDataObjects::MDImage_sptr m_image;
@@ -52,7 +53,7 @@ private:
   boost::function<Mantid::MDDataObjects::MD_image_point(int, int, int, int)> m_Function;
 
   /// Constructor.
-  ImageProxy(GeometryProxy* geometryProxy, Mantid::MDDataObjects::MDImage_sptr image);
+  ImageProxy(GeometryProxy<Image>* geometryProxy, boost::shared_ptr<Image> image);
 
   /// Setup method. may throw.
   void initalize();
@@ -63,23 +64,101 @@ private:
 public:
 
   /// Constructional method.
-  static ImageProxy* New(GeometryProxy* geometryProxy, Mantid::MDDataObjects::MDImage_sptr image);
+  static ImageProxy* New(GeometryProxy<Image>* geometryProxy, boost::shared_ptr<Image> image);
 
   /// Destructor
  ~ImageProxy();
 
   /// Embedded type information. Used for static polymorphism.
-  typedef GeometryProxy GeometryType;
+  typedef GeometryProxy<Image> GeometryType;
 
   /// Method from MDImage. Statically overriden here.
-  GeometryProxy * const getGeometry();
+  GeometryProxy<Image> * const getGeometry();
 
   /// Method from MDImage. Statically overriden here.
   Mantid::MDDataObjects::MD_image_point getPoint(int i, int j, int k, int t) const;
 
-
+  /// Get the real image.
+  boost::shared_ptr<Image> getRealImage() const;
 
 };
+
+//-----------------------------------------------------------------------------------------------
+/** Constructional method.
+* @param geometryProxy :: GeometryProxy<Image>* that may wrap a geometry in order to provide rebining capabilities.
+* @param image :: image sharped pointer, points to the image that this proxy wraps.
+*/
+template<typename Image>
+ImageProxy<Image>* ImageProxy<Image>::New(GeometryProxy<Image>* geometryProxy, boost::shared_ptr<Image> image)
+{
+  ImageProxy<Image>* imageProcessor = new ImageProxy<Image>(geometryProxy, image);
+  imageProcessor->initalize(); //This way initalize may throw rather than the constructor.
+  return imageProcessor;
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Constructor
+* @param geometryProxy :: GeometryProxy<Image>* that may wrap a geometry in order to provide rebining capabilities.
+* @param image :: image sharped pointer, points to the image that this proxy wraps.
+*/
+template<typename Image>
+ImageProxy<Image>::ImageProxy(GeometryProxy<Image>* geometryProxy, boost::shared_ptr<Image> image) :
+m_geometryProxy(geometryProxy), m_image(image)
+{
+}
+
+//-----------------------------------------------------------------------------------------------
+/** Destructor.*/
+template<typename Image>
+ImageProxy<Image>::~ImageProxy()
+{
+}
+
+//-----------------------------------------------------------------------------------------------
+/** getGeometry, getter to support compile-time polymorphism. Gets underlying geometry type*/
+template<typename Image>
+GeometryProxy<Image> * const ImageProxy<Image>::getGeometry()
+{
+  return m_geometryProxy.get();
+}
+
+//-----------------------------------------------------------------------------------------------
+/** getPoint
+* @param i : value of increment along 1st dimension in the context of whatever rebinnings have been applied. effective x Dimension.
+* @param j : value of increment along 2st dimension in the context of whatever rebinnings have been applied. effective y Dimension.
+* @param k : value of increment along 3st dimension in the context of whatever rebinnings have been applied. effective z Dimension.
+* @param t : value of increment along 4st dimension in the context of whatever rebinnings have been applied. effective t Dimension.
+*/
+template<typename Image>
+Mantid::MDDataObjects::MD_image_point ImageProxy<Image>::getPoint(int i, int j, int k, int t) const
+{
+
+  //Re-route
+  return m_Function(i, j, k, t);
+}
+
+//-----------------------------------------------------------------------------------------------
+/** initalize()
+* This method critically uses to geometry to determine the rebindings of the getpoint method and then stores the resulting boost::function as a member function.
+*/
+template<typename Image>
+void ImageProxy<Image>::initalize()
+{
+  //Here's the trick. Get a mapped point function from the geometry proxy.
+  m_Function = m_geometryProxy->getMappedPointFunction();
+}
+
+
+//-----------------------------------------------------------------------------------------------
+/** getRealImage()
+* This gets the underlying image.
+*/
+template<typename Image>
+boost::shared_ptr<Image> ImageProxy<Image>::getRealImage() const
+{
+  return m_image;
+}
+
 
 }
 }

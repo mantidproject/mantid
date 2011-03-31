@@ -43,8 +43,12 @@ namespace Mantid
 }
 ///Typedef shared pointer to a box implicit function.
 typedef boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> BoxFunction_sptr;
+///Type marks setup status
+enum SetupStatus{ IsSetup, Pending};
+///Type marks wheter clipping is to be applied or ignored
+enum Clipping{ Apply, Ignore};
 
-class vtkImplicitFunction;
+class vtkBox;
 class VTK_EXPORT vtkRebinningCutter : public vtkUnstructuredGridAlgorithm
 {
 public:
@@ -60,6 +64,7 @@ public:
   void SetAppliedYDimensionXML(std::string xml);
   void SetAppliedZDimensionXML(std::string xml);
   void SetAppliedtDimensionXML(std::string xml);
+  void SetApplyClip(int applyClip);
   const char* GetInputGeometryXML();
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------
 
@@ -134,13 +139,15 @@ private:
   void setTimeRange(vtkInformationVector* outputVector);
 
   /// Clip function provided by ClipFunction ProxyProperty
-  vtkImplicitFunction * m_clipFunction;
+  vtkBox * m_clipFunction;
   /// Cached vtkDataSet. Enables fast visualisation where possible.
   vtkDataSet* m_cachedVTKDataSet;
   /// Arguments that cause redrawing are hashed and cached for rapid comparison regarding any changes.
   std::string m_cachedRedrawArguments;
+  /// Flag indicating that the clip boundaries should be use to construct the rebinning region.
+  Clipping m_clip;
   /// Flag indicating whether set up has occured or not
-  bool m_isSetup;
+  SetupStatus m_setup;
   /// Flag containing the timestep.
   int m_timestep;
   /// Threshold maximum for signal values to be rendered as cells.

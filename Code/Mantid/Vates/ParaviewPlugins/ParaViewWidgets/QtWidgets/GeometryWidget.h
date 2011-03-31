@@ -52,6 +52,7 @@ namespace Mantid
  }
 }
 
+enum BinChangeStatus{ApplyBinChanges, IgnoreBinChanges};
 
 class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget
 {
@@ -69,7 +70,7 @@ void childAppliedNewDimensionSelection(
     boost::shared_ptr<Mantid::Geometry::IMDDimension> newDimension,
     DimensionWidget* pDimensionWidget);
 
-void dimensionWidgetChanged();
+void dimensionWidgetChanged(BinChangeStatus status);
 
 ~GeometryWidget();
 
@@ -113,7 +114,7 @@ bool isSetup() const
 /// Single signal gets raised if anything changes
 Q_SIGNALS:
         void valueChanged();
-        //void textChanged(const QString &);
+        void ignoreBinChanges();
 
 private:
 

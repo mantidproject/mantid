@@ -180,7 +180,7 @@ void DimensionWidget::resetBins()
 
 void DimensionWidget::nBinsListener()
 {
-  m_geometryWidget->dimensionWidgetChanged();
+  m_geometryWidget->dimensionWidgetChanged(ApplyBinChanges);
 }
 
 void DimensionWidget::minBoxListener()

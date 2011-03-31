@@ -50,6 +50,8 @@ namespace Mantid{
     class DLLExport MDGeometry
     {
     public:
+      ///Embedded type information.
+      typedef MDDimension_sptr Dimension_sptr_type;
       MDGeometry(const MDGeometryBasis &basis);
       MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
 

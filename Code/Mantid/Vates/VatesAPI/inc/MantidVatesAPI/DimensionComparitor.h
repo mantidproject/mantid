@@ -35,32 +35,72 @@ namespace Mantid
 {
   namespace VATES
   {
+    template <typename Image>
     class DimensionComparitor
     {
     public:
       
-      /// Constructor.
-      DimensionComparitor(Mantid::MDDataObjects::MDImage_sptr image);
+    DimensionComparitor(boost::shared_ptr<Image> image): m_image(image)
+    {
+    }
 
-      /// Destructor.
-      ~DimensionComparitor();
+    ~DimensionComparitor()
+    {
+    }
 
-      /// Determine if a query dimension is the x dimension of the image.
-      bool isXDimension(Dimension_sptr);
+    bool isXDimension(Dimension_sptr queryDimension)
+    {
+      //Compare dimensions on the basis of their ids.
+      Dimension_sptr actualXDimension = m_image->getGeometry()->getXDimension();
+      return queryDimension->getDimensionId() == actualXDimension->getDimensionId();
+    }
 
-      /// Determine if a query dimension is the y dimension of the image.
-      bool isYDimension(Dimension_sptr);
+    bool isYDimension(Dimension_sptr queryDimension)
+    {
+      Dimension_sptr actualYDimension = m_image->getGeometry()->getYDimension();
+      if(NULL == actualYDimension.get())
+      {
+        return false; //MDImages may have 1 dimension or more.
+      }
+      else
+      {
+        //Compare dimensions on the basis of their ids.
+        return queryDimension->getDimensionId() == actualYDimension->getDimensionId();
+      }
+    }
 
-      /// Determine if a query dimension is the z dimension of the image.
-      bool isZDimension(Dimension_sptr);
+    bool isZDimension(Dimension_sptr queryDimension)
+    {
+      Dimension_sptr actualZDimension = m_image->getGeometry()->getZDimension();
+      if(NULL == actualZDimension.get())
+      {
+        return false; //MDImages may have 1 dimension or more.
+      }
+      else
+      {
+        //Compare dimensions on the basis of their ids.
+        return queryDimension->getDimensionId() == actualZDimension->getDimensionId();
+      }
+    }
 
-      /// Determien if a query dimension is the t dimension of the image.
-      bool istDimension(Dimension_sptr);
+    bool istDimension(Dimension_sptr queryDimension)
+    {
+      Dimension_sptr actualtDimension = m_image->getGeometry()->getTDimension();
+      if(NULL == actualtDimension.get())
+      {
+        return false; //MDImages may have 1 dimension or more.
+      }
+      else
+      {
+        //Compare dimensions on the basis of their ids.
+        return queryDimension->getDimensionId() == actualtDimension->getDimensionId();
+      }
+    }
 
     private:
       
       /// mdimage containing geometry.
-      Mantid::MDDataObjects::MDImage_sptr m_image;
+      boost::shared_ptr<Image> m_image;
      
       DimensionComparitor operator=(DimensionComparitor&);
       

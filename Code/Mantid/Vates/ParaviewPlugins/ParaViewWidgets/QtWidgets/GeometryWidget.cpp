@@ -97,10 +97,14 @@ GeometryWidget::~GeometryWidget()
 {
 }
 
-void GeometryWidget::dimensionWidgetChanged()
+void GeometryWidget::dimensionWidgetChanged(BinChangeStatus status)
 {
   validateSetup();
   emit valueChanged();
+  if(IgnoreBinChanges == status)
+  {
+    emit ignoreBinChanges();
+  }
 }
 
 void GeometryWidget::applyBinsFromDimensions()
@@ -162,5 +166,5 @@ void GeometryWidget::childAppliedNewDimensionSelection(const unsigned int oldDim
   }
   applyBinsFromDimensions();
   //Raise event.
-  dimensionWidgetChanged();
+  dimensionWidgetChanged(IgnoreBinChanges);
 }

@@ -32,14 +32,13 @@
           Available timestep values.
         </Documentation>
        </DoubleVectorProperty>
-       <DoubleVectorProperty 
-        name="TimestepValues"
-        information_only="1">
-        <TimeStepsInformationHelper/>
-        <Documentation>
-          Available timestep values.
-        </Documentation>
-       </DoubleVectorProperty>
+	   <IntVectorProperty
+         name="Apply Clipping"
+         command="SetApplyClip"
+         number_of_elements="1"
+         default_values="1">
+         <BooleanDomain name="bool"/>
+       </IntVectorProperty>
         <DoubleVectorProperty
        name="Min Signal"
        command="SetMinThreshold"

@@ -120,11 +120,11 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
   const double maxZ = pGeometry-> getZDimension()->getMaximum();
   const double minZ = pGeometry-> getZDimension()->getMinimum();
 
-  double incrementX = (maxX - minX) / nBinsX;
-  double incrementY = (maxY - minY) / nBinsY;
-  double incrementZ = (maxZ - minZ) / nBinsZ;
+  double incrementX = (maxX - minX) / (nBinsX-1);
+  double incrementY = (maxY - minY) / (nBinsY-1);
+  double incrementZ = (maxZ - minZ) / (nBinsZ-1);
 
-  const int imageSize = (nBinsX + 1) * (nBinsY + 1) * (nBinsZ + 1);
+  const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
   vtkPoints *points = vtkPoints::New();
   points->Allocate(imageSize);
 
@@ -138,9 +138,9 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
 
   UnstructuredPoint unstructPoint;
   double signalScalar;
-  const int nPointsX = nBinsX + 1;
-  const int nPointsY = nBinsY + 1;
-  const int nPointsZ = nBinsZ + 1;
+  const int nPointsX = nBinsX;
+  const int nPointsY = nBinsY;
+  const int nPointsZ = nBinsZ;
   PointMap pointMap(nPointsX);
 
   //Loop through dimensions
@@ -166,7 +166,7 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
         }
         else
         {
-          if ((i < nBinsX) && (j < nBinsY) && (k < nBinsZ))
+          if ((i < (nBinsX -1)) && (j < (nBinsY - 1)) && (k < (nBinsZ -1)))
           {
             signal->InsertNextValue(signalScalar);
           }
@@ -188,11 +188,11 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
   visualDataSet->SetPoints(points);
   visualDataSet->GetCellData()->SetScalars(signal);
 
-  for (int i = 0; i < nBinsX; i++)
+  for (int i = 0; i < nBinsX - 1; i++)
   {
-    for (int j = 0; j < nBinsY; j++)
+    for (int j = 0; j < nBinsY -1; j++)
     {
-      for (int k = 0; k < nBinsZ; k++)
+      for (int k = 0; k < nBinsZ -1; k++)
       {
         //Only create topologies for those cells which are not sparse.
         if (!pointMap[i][j][k].isSparse)
