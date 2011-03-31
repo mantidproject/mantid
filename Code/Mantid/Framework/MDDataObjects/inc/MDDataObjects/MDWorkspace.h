@@ -82,8 +82,6 @@ namespace Mantid
       //  IMD workspace interface functions
      /// return ID specifying the workspace kind
       virtual const std::string id() const { return "MD-Workspace"; }
-      /// provides number of dimensions the workspace contains
-      virtual unsigned int getNumDims(void) const{return m_spMDImage->getGeometry()->getNumDims();}
 
 	  ///OBSOLETE? or should be modified as does not work properly at the moment  Total share pointers mess;
       void init(boost::shared_ptr<IMD_FileFormat> spFile, Mantid::Geometry::MDGeometry* geometry);
@@ -143,7 +141,7 @@ namespace Mantid
       virtual uint64_t getNPoints() const;
 
       /// Get the number of dimensions
-      virtual size_t getNDimensions() const;
+      virtual size_t getNumDims() const;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;

@@ -219,7 +219,7 @@ namespace Mantid
       virtual uint64_t getNPoints() const;
 
       /// Get the number of dimensions
-      virtual size_t getNDimensions() const;
+      virtual size_t getNumDims() const;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;

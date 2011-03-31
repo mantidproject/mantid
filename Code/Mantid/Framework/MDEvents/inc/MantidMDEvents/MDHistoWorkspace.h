@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
@@ -46,7 +47,7 @@ namespace MDEvents
     }
 
     /// Get the number of dimensions
-    size_t getNDimensions() const
+    size_t getNumDims() const
     {
       return numDimensions;
     }
@@ -73,6 +74,11 @@ namespace MDEvents
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
     {
       return m_dimensions[3];
+    }
+
+    boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
+    {
+      return m_dimensions[index];
     }
 
     /// Get the dimension with the specified id.
@@ -136,6 +142,7 @@ namespace MDEvents
 
     /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
     virtual std::vector<double> getSignalDataVector() const;
+    virtual std::vector<double> getErrorDataVector() const;
 
     //================= METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
 

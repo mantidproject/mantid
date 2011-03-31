@@ -81,6 +81,18 @@ namespace MDEvents
     return out;
   }
 
+  /// Return a vector containing a copy of the error data in the workspace.
+  std::vector<double> MDHistoWorkspace::getErrorDataVector() const
+  {
+    // TODO: Make this more efficient if needed.
+    std::vector<double> out;
+    out.resize(m_length, 0.0);
+    for (size_t i=0; i<m_length; ++i)
+        out[i] = m_errors[i];
+    // This copies again! :(
+    return out;
+  }
+
 
 } // namespace Mantid
 } // namespace MDEvents

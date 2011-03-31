@@ -182,7 +182,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
         return this->m_spDataPoints->getNumPixels();
     }
 
-    size_t MDWorkspace::getNDimensions() const
+    size_t MDWorkspace::getNumDims() const
     {
       return m_spMDImage->getGeometry()->getNumDims();
     }
@@ -232,7 +232,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       }
       std::vector<char>* pix_buf = m_spDataPoints->get_pBuffer();
       float *MDDataPoint =(float *)(&(pix_buf->operator[](0)));
-      unsigned int signal_shift = this->getNDimensions();
+      unsigned int signal_shift = this->getNumDims();
       unsigned int data_stride  =  m_spDataPoints->getMDPointDescription().sizeofMDDPoint()/sizeof(float);
       size_t base = index*data_stride;
       double signal  = *(MDDataPoint+base+signal_shift);

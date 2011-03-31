@@ -17,6 +17,7 @@
 #include <MantidAPI/WorkspaceGroup.h>
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/WorkspaceValidators.h>
+#include <MantidGeometry/MDGeometry/IMDDimension.h>
 
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
 
@@ -24,8 +25,9 @@ namespace Mantid
 {
 namespace PythonAPI
 {
-  using namespace API;
-  using namespace boost::python;
+using namespace API;
+using namespace Geometry;
+using namespace boost::python;
 
   //@cond
   //---------------------------------------------------------------------------
@@ -262,14 +264,31 @@ namespace PythonAPI
         ;
   }
 
-  void export_mdworkspace()
+  void export_IMDWorkspace()
   {
     register_ptr_to_python<API::IMDWorkspace_sptr>();
 
     // EventWorkspace class
     class_< IMDWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDWorkspace", no_init)
         .def("getNPoints", &IMDWorkspace::getNPoints)
+        .def("getNumDims", &IMDWorkspace::getNumDims)
+        .def("getDimensionNum", &IMDWorkspace::getDimensionNum )
         .def("getSignalDataVector", &IMDWorkspace::getSignalDataVector)
+        .def("getErrorDataVector", &IMDWorkspace::getErrorDataVector)
+        ;
+  }
+
+  void export_IMDDimension()
+  {
+    register_ptr_to_python<Geometry::IMDDimension_sptr>();
+
+    class_< IMDDimension, boost::noncopyable >("IMDDimension", no_init)
+        .def("getName", &IMDDimension::getName)
+        .def("getMaximum", &IMDDimension::getMaximum)
+        .def("getMinimum", &IMDDimension::getMinimum)
+        .def("getNBins", &IMDDimension::getNBins)
+        .def("getX", &IMDDimension::getX)
+        .def("getDimensionId", &IMDDimension::getDimensionId)
         ;
   }
 
@@ -277,7 +296,7 @@ namespace PythonAPI
   {
     register_ptr_to_python<API::IMDEventWorkspace_sptr>();
 
-    // EventWorkspace class
+    // MDEventWorkspace class
     class_< IMDEventWorkspace, bases<API::Workspace>, boost::noncopyable >("IMDEventWorkspace", no_init)
             .def("getNPoints", &IMDEventWorkspace::getNPoints)
             .def("getNumDims", &IMDEventWorkspace::getNumDims)
@@ -483,7 +502,7 @@ namespace PythonAPI
     export_workspace();
     export_matrixworkspace();
     export_eventworkspace();
-    export_mdworkspace();
+    export_IMDWorkspace();
     export_mdeventworkspace();
     export_tableworkspace();
     export_workspacegroup();
@@ -495,6 +514,7 @@ namespace PythonAPI
     export_workspacefactory();
     export_apivalidators();
     export_file_finder();
+    export_IMDDimension();
   }
   //@endcond
 

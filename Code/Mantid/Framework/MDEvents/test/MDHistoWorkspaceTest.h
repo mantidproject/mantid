@@ -26,7 +26,7 @@ public:
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 
-    TS_ASSERT_EQUALS( ws.getNDimensions(), 4);
+    TS_ASSERT_EQUALS( ws.getNumDims(), 4);
     TS_ASSERT_EQUALS( ws.getNPoints(), 5*5*5*5);
     TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5*5*5 * sizeof(double)*2);
     TS_ASSERT_EQUALS( ws.getXDimension(), dimX);

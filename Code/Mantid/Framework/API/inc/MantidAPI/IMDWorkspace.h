@@ -58,7 +58,7 @@ namespace Mantid
       virtual uint64_t getNPoints() const = 0;
 
       /// Get the number of dimensions
-      virtual size_t getNDimensions() const = 0;
+      virtual size_t getNumDims() const = 0;
 
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;
@@ -74,6 +74,12 @@ namespace Mantid
 
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const = 0;
+
+      /// Get the dimension
+      virtual boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
+      { (void) index;
+        throw std::runtime_error("Not implemented yet.");
+      }
 
       /// Get the dimension ids in their order
       virtual const std::vector<std::string> getDimensionIDs() const = 0;
@@ -104,6 +110,12 @@ namespace Mantid
 
       /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
       virtual std::vector<double> getSignalDataVector() const
+      {
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
+      virtual std::vector<double> getErrorDataVector() const
       {
         throw std::runtime_error("Not implemented yet.");
       }
