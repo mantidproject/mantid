@@ -59,7 +59,8 @@ namespace MDEvents
   {
     //TODO: Make sure in units are okay
     declareProperty(new WorkspaceProperty<EventWorkspace>("InputWorkspace","",Direction::Input), "An input EventWorkspace.");
-    declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "Name of the output MDEventWorkspace.");
+    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
+        "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input), "Clear the events from the input workspace during conversion, to save memory.");
   }
 
@@ -175,32 +176,42 @@ namespace MDEvents
 
     ClearInputWorkspace = getProperty("ClearInputWorkspace");
 
-    // Create an output workspace with 3 dimensions.
-    size_t nd = 3;
-    IMDEventWorkspace_sptr i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDEvent");
-    ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(i_out);
+    // Try to get the output workspace
+    IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
+    ws = boost::dynamic_pointer_cast<MDEventWorkspace3>( i_out );
+
+    if (!ws)
+    {
+      // Create an output workspace with 3 dimensions.
+      size_t nd = 3;
+      i_out = MDEventFactory::CreateMDEventWorkspace(nd, "MDEvent");
+      ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(i_out);
+
+      // Give all the dimensions
+      std::string names[3] = {"Qx", "Qy", "Qz"};
+      for (size_t d=0; d<nd; d++)
+      {
+        Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
+        ws->addDimension(dim);
+      }
+      ws->initialize();
+
+      // Build up the box controller
+      BoxController_sptr newbc(new BoxController(3));
+      newbc->setSplitInto(10);
+      newbc->setSplitThreshold(1000);
+      newbc->setMaxDepth(8);
+      ws->setBoxController(newbc);
+      // We always want the box to be split (it will reject bad ones)
+      ws->splitBox();
+    }
 
     if (!ws)
       throw std::runtime_error("Error creating a 3D MDEventWorkspace!");
 
-    // Give all the dimensions     //TODO: Find q limits
-    std::string names[3] = {"Qx", "Qy", "Qz"};
-    for (size_t d=0; d<nd; d++)
-    {
-      Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
-      ws->addDimension(dim);
-    }
-    ws->initialize();
-
-    // Build up the box controller
-    BoxController_sptr bc(new BoxController(3));
-    bc->setSplitInto(10);
-    bc->setSplitThreshold(1000);
-    bc->setMaxDepth(8);
-    ws->setBoxController(bc);
-
-    // We always want the box to be split (it will reject bad ones)
-    ws->splitBox();
+    BoxController_sptr bc = ws->getBoxController();
+    if (!bc)
+      throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
 
     // Extract some parameters global to the instrument
     AlignDetectors::getInstrumentParameters(in_ws->getInstrument(),l1,beamline,beamline_norm, samplePos);
@@ -290,7 +301,7 @@ namespace MDEvents
 
 
     // Save the output
-    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(ws));
+    setProperty("OutputWorkspace", boost::dynamic_pointer_cast<IMDEventWorkspace>(ws));
   }
 
 

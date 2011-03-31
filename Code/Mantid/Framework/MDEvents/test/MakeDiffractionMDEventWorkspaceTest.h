@@ -90,10 +90,8 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test_MINITOPAZ(EventType type)
+  void do_test_MINITOPAZ(EventType type, bool addTwice=false)
   {
-    // return; //FIXME
-
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
 
     int numEventsPer = 100;
@@ -122,7 +120,28 @@ public:
         ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
     TS_ASSERT(ws);
     if (!ws) return;
-    TS_ASSERT_LESS_THAN( 100000, ws->getNPoints()); // Some points are left
+    size_t npoints = ws->getNPoints();
+    TS_ASSERT_LESS_THAN( 100000, npoints); // Some points are left
+
+    // Add to an existing MDEW
+    if (addTwice)
+    {
+      TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+      TS_ASSERT( alg.isInitialized() )
+      alg.setProperty("InputWorkspace", in_ws);
+      alg.setPropertyValue("OutputWorkspace", "test_md3");
+      TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+      TS_ASSERT( alg.isExecuted() )
+
+      TS_ASSERT_THROWS_NOTHING(
+          ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("test_md3")) );
+      TS_ASSERT(ws);
+      if (!ws) return;
+
+      TS_ASSERT_EQUALS( npoints*2, ws->getNPoints()); // There are now twice as many points as before
+    }
+
+
 
     AnalysisDataService::Instance().remove("test_md3");
   }
@@ -142,6 +161,10 @@ public:
     do_test_MINITOPAZ(WEIGHTED);
   }
 
+  void test_MINITOPAZ_addToExistingWorkspace()
+  {
+    do_test_MINITOPAZ(TOF, true);
+  }
 
 
 
