@@ -2,35 +2,76 @@ try: paraview.simple
 except: from paraview.simple import *
 paraview.simple._DisableFirstRenderCameraReset()
 
-RenderView1 = GetRenderView()
-AnimationScene1 = GetAnimationScene()
-Cone1 = GetActiveSource()
-RenderView2 = CreateRenderView()
-RenderView2.CameraParallelScale = 1.7320508075688772
-RenderView2.CompressorConfig = 'vtkSquirtCompressor 0 3'
-RenderView2.UseLight = 1
-RenderView2.CameraPosition = [0.0, 0.0, 6.6921304299024635]
-RenderView2.LightSwitch = 0
-RenderView2.RemoteRenderThreshold = 3.0
-RenderView2.CameraClippingRange = [4.6352091256034385, 9.297512386351]
-RenderView2.ViewTime = 0.0
-RenderView2.LODResolution = 50.0
-RenderView2.Background = [0.31999694819562063, 0.3400015259021897, 0.4299992370489052]
-RenderView2.LODThreshold = 5.0
+MantidRebinningCutter1 = GetActiveSource()
+Slice1 = Slice( SliceType="Plane" )
 
-RenderView3 = CreateRenderView()
-RenderView3.CameraParallelScale = 1.7320508075688772
-RenderView3.CompressorConfig = 'vtkSquirtCompressor 0 3'
-RenderView3.UseLight = 1
-RenderView3.CameraPosition = [0.0, 0.0, 6.6921304299024635]
-RenderView3.LightSwitch = 0
-RenderView3.RemoteRenderThreshold = 3.0
-RenderView3.CameraClippingRange = [4.6352091256034385, 9.297512386351]
-RenderView3.ViewTime = 0.0
-RenderView3.LODResolution = 50.0
-RenderView3.Background = [0.31999694819562063, 0.3400015259021897, 0.4299992370489052]
-RenderView3.LODThreshold = 5.0
+Slice1.SliceOffsetValues = [0.0]
+Slice1.SliceType.Origin = [2.1109004616737366, 0.050000429153442383, 4.76837158203125e-07]
+Slice1.SliceType = "Plane"
 
+RenderView3 = GetRenderView()
+SetActiveSource(MantidRebinningCutter1)
+Slice2 = Slice( SliceType="Plane" )
+
+RenderView3.CameraClippingRange = [23.049235935630485, 58.853809426182622]
+
+Slice2.SliceOffsetValues = [0.0]
+Slice2.SliceType.Origin = [2.1109004616737366, 0.050000429153442383, 4.76837158203125e-07]
+Slice2.SliceType = "Plane"
+
+SetActiveSource(MantidRebinningCutter1)
+Slice3 = Slice( SliceType="Plane" )
+
+RenderView3.CameraClippingRange = [23.049235935630485, 58.853809426182622]
+
+Slice3.SliceOffsetValues = [0.0]
+Slice3.SliceType.Origin = [2.1109004616737366, 0.050000429153442383, 4.76837158203125e-07]
+Slice3.SliceType = "Plane"
+
+SQWReader1 = FindSource("SQWReader1")
+my_representation0 = GetDisplayProperties(SQWReader1)
+DataRepresentation2 = GetDisplayProperties(MantidRebinningCutter1)
+a1_signal_PVLookupTable = GetLookupTableForArray( "signal", 1 )
+
+SetActiveSource(Slice1)
+DataRepresentation3 = Show()
+DataRepresentation3.EdgeColor = [0.0, 0.0, 0.50000762951094835]
+DataRepresentation3.ColorAttributeType = 'CELL_DATA'
+DataRepresentation3.ColorArrayName = 'signal'
+DataRepresentation3.LookupTable = a1_signal_PVLookupTable
+DataRepresentation3.CubeAxesVisibility = 1
+
+RenderView3.CameraClippingRange = [19.947473030485547, 62.758283859535496]
+
+SetActiveSource(Slice2)
+DataRepresentation4 = Show()
+DataRepresentation4.EdgeColor = [0.0, 0.0, 0.50000762951094835]
+DataRepresentation4.ColorAttributeType = 'CELL_DATA'
+DataRepresentation4.ColorArrayName = 'signal'
+DataRepresentation4.LookupTable = a1_signal_PVLookupTable
+DataRepresentation4.CubeAxesVisibility = 1
+
+RenderView3.CameraClippingRange = [19.669938932708867, 63.107642091045619]
+
+SetActiveSource(Slice3)
+DataRepresentation5 = Show()
+DataRepresentation5.EdgeColor = [0.0, 0.0, 0.50000762951094835]
+DataRepresentation5.ColorAttributeType = 'CELL_DATA'
+DataRepresentation5.ColorArrayName = 'signal'
+DataRepresentation5.LookupTable = a1_signal_PVLookupTable
+DataRepresentation5.CubeAxesVisibility = 1
+
+RenderView3.CameraClippingRange = [19.87618303888042, 62.848023362167204]
+
+RenderView3.CameraClippingRange = [19.947473030485547, 62.758283859535496]
+
+Slice2.SliceType.Normal = [0.0, 1.0, 0.0]
+
+Slice3.SliceType.Normal = [0.0, 0.0, 1.0]
+
+DataRepresentation2.Visibility = 0
+
+AnimationScene3 = GetAnimationScene()
 RenderView4 = CreateRenderView()
 RenderView4.CameraParallelScale = 1.7320508075688772
 RenderView4.CompressorConfig = 'vtkSquirtCompressor 0 3'
@@ -38,105 +79,83 @@ RenderView4.UseLight = 1
 RenderView4.CameraPosition = [0.0, 0.0, 6.6921304299024635]
 RenderView4.LightSwitch = 0
 RenderView4.RemoteRenderThreshold = 3.0
-RenderView4.CameraClippingRange = [4.6352091256034385, 9.297512386351]
+RenderView4.CameraClippingRange = [0.025760333547106849, 25.76033354710685]
 RenderView4.ViewTime = 0.0
 RenderView4.LODResolution = 50.0
-RenderView4.Background = [0.31999694819562063, 0.3400015259021897, 0.4299992370489052]
+RenderView4.Background = [0.31999694819562063, 0.34000152590218968, 0.42999923704890519]
 RenderView4.LODThreshold = 5.0
+RenderView4.CenterOfRotation = [2.1109006404876709, 0.050000429153442383, 4.76837158203125e-07]
 
-Slice1 = Slice( SliceType="Plane" )
+RenderView5 = CreateRenderView()
+RenderView5.CameraParallelScale = 1.7320508075688772
+RenderView5.CompressorConfig = 'vtkSquirtCompressor 0 3'
+RenderView5.UseLight = 1
+RenderView5.CameraPosition = [0.0, 0.0, 6.6921304299024635]
+RenderView5.LightSwitch = 0
+RenderView5.RemoteRenderThreshold = 3.0
+RenderView5.CameraClippingRange = [4.6352091256034385, 9.2975123863510003]
+RenderView5.ViewTime = 0.0
+RenderView5.LODResolution = 50.0
+RenderView5.Background = [0.31999694819562063, 0.34000152590218968, 0.42999923704890519]
+RenderView5.LODThreshold = 5.0
 
-AnimationScene1.ViewModules = [ RenderView1, RenderView2, RenderView3, RenderView4 ]
-
-Slice1.SliceOffsetValues = [0.0]
-Slice1.SliceType = "Plane"
-
-DataRepresentation1 = GetDisplayProperties(Cone1)
-SetActiveView(RenderView1)
-DataRepresentation2 = Show()
-DataRepresentation2.EdgeColor = [0.0, 0.0, 0.5000076295109483]
-
-RenderView1.CameraClippingRange = [2.12790563200402, 4.565435444007267]
-
-DataRepresentation1.Visibility = 0
-
-SetActiveSource(Cone1)
-Slice2 = Slice( SliceType="Plane" )
-
-RenderView1.CameraClippingRange = [2.740729759529111, 3.7940161277005577]
-
-Slice2.SliceOffsetValues = [0.0]
-Slice2.SliceType = "Plane"
-
-DataRepresentation3 = Show()
-DataRepresentation3.Visibility = 1
-DataRepresentation3.EdgeColor = [0.0, 0.0, 0.5000076295109483]
-
-RenderView1.CameraClippingRange = [2.12790563200402, 4.565435444007267]
-
-Slice2.SliceType.Normal = [0.0, 1.0, 0.0]
-
-SetActiveSource(Cone1)
-Slice3 = Slice( SliceType="Plane" )
-
-RenderView1.CameraClippingRange = [2.309882128879306, 4.336364527086367]
-
-Slice3.SliceOffsetValues = [0.0]
-Slice3.SliceType = "Plane"
-
-DataRepresentation4 = Show()
-DataRepresentation4.Visibility = 1
-DataRepresentation4.EdgeColor = [0.0, 0.0, 0.5000076295109483]
-
-RenderView1.CameraClippingRange = [1.945012432679412, 4.7956603004435205]
-
-Slice3.SliceType.Normal = [0.0, 0.0, 1.0]
+RenderView6 = CreateRenderView()
+RenderView6.CameraParallelScale = 13.400119358296035
+RenderView6.CompressorConfig = 'vtkSquirtCompressor 0 3'
+RenderView6.UseLight = 1
+RenderView6.CameraPosition = [-49.66318505206786, 0.050000429153442383, 4.76837158203125e-07]
+RenderView6.LightSwitch = 0
+RenderView6.RemoteRenderThreshold = 3.0
+RenderView6.CameraClippingRange = [51.256344599595579, 52.55069673594901]
+RenderView6.ViewTime = 0.0
+RenderView6.LODResolution = 50.0
+RenderView6.Background = [0.31999694819562063, 0.34000152590218968, 0.42999923704890519]
+RenderView6.CameraFocalPoint = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
+RenderView6.CameraViewUp = [0.0, 0.0, 1.0]
+RenderView6.LODThreshold = 5.0
+RenderView6.CenterOfRotation = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
 
 SetActiveSource(Slice1)
-SetActiveView(RenderView2)
-DataRepresentation5 = Show()
-DataRepresentation5.EdgeColor = [0.0, 0.0, 0.5000076295109483]
+DataRepresentation6 = Show()
+DataRepresentation6.ColorArrayName = 'signal'
+DataRepresentation6.ColorAttributeType = 'CELL_DATA'
+DataRepresentation6.LookupTable = a1_signal_PVLookupTable
+DataRepresentation6.EdgeColor = [0.0, 0.0, 0.50000762951094835]
 
 SetActiveSource(Slice2)
 SetActiveView(RenderView4)
-DataRepresentation6 = Show()
-DataRepresentation6.EdgeColor = [0.0, 0.0, 0.5000076295109483]
-
-SetActiveSource(Slice3)
-SetActiveView(RenderView3)
 DataRepresentation7 = Show()
-DataRepresentation7.EdgeColor = [0.0, 0.0, 0.5000076295109483]
+DataRepresentation7.ColorArrayName = 'signal'
+DataRepresentation7.ColorAttributeType = 'CELL_DATA'
+DataRepresentation7.LookupTable = a1_signal_PVLookupTable
+DataRepresentation7.EdgeColor = [0.0, 0.0, 0.50000762951094835]
 
-RenderView1.CameraViewUp = [0.10536742395994034, 0.9941991918590245, -0.021579454926129397]
-RenderView1.CameraPosition = [-0.5383178932315406, 0.12554480883624924, 3.1555652373449012]
-RenderView1.CameraClippingRange = [1.7139871590385782, 5.086473521785271]
-
-RenderView2.CameraViewUp = [0.0, 0.0, 1.0]
-RenderView2.CameraPosition = [-1.2777997508187628, 0.0, 0.0]
-RenderView2.CameraClippingRange = [1.2650217533105752, 1.2969667470810444]
-RenderView2.CameraFocalPoint = [0.0, 0.0, 0.0]
-RenderView2.CameraParallelScale = 0.33071891133915116
-RenderView2.CenterOfRotation = [0.0, 0.0, 0.0]
-
-RenderView3.CameraPosition = [0.0, 0.0, -3.919439245554676]
-RenderView3.CameraClippingRange = [3.880244853099129, 3.978230834237996]
-RenderView3.CameraFocalPoint = [0.0, 0.0, 0.0]
-RenderView3.CameraParallelScale = 1.0144255228718055
-RenderView3.CenterOfRotation = [0.0, 0.0, 0.0]
-
-RenderView4.CameraViewUp = [0.0, 0.0, 1.0]
-RenderView4.CameraPosition = [0.0, -3.919439245554676, 0.0]
-RenderView4.CameraClippingRange = [3.880244853099129, 3.978230834237996]
-RenderView4.CameraFocalPoint = [0.0, 0.0, 0.0]
-RenderView4.CameraParallelScale = 1.0144255228718055
-RenderView4.CenterOfRotation = [0.0, 0.0, 0.0]
-
-DataRepresentation1.Visibility = 1
+RenderView3.CameraClippingRange = [23.049238554037068, 58.853800209391451]
 
 DataRepresentation2.Visibility = 1
 
-DataRepresentation3.Visibility = 1
+AnimationScene3.ViewModules = [ RenderView3, RenderView4, RenderView5, RenderView6 ]
 
-DataRepresentation4.Visibility = 1
+SetActiveSource(Slice3)
+SetActiveView(RenderView5)
+DataRepresentation8 = Show()
+DataRepresentation8.ColorArrayName = 'signal'
+DataRepresentation8.ColorAttributeType = 'CELL_DATA'
+DataRepresentation8.LookupTable = a1_signal_PVLookupTable
+DataRepresentation8.EdgeColor = [0.0, 0.0, 0.50000762951094835]
+
+RenderView4.CameraViewUp = [0.0, 0.0, 1.0]
+RenderView4.CameraPosition = [2.1109004020690918, -46.581135779311495, 4.76837158203125e-07]
+RenderView4.CameraClippingRange = [46.164824846380284, 47.330603251591917]
+RenderView4.CameraFocalPoint = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
+RenderView4.CameraParallelScale = 12.069026145520475
+RenderView4.CenterOfRotation = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
+
+RenderView5.CameraPosition = [2.1109004020690918, 0.050000429153442383, -46.63066875713379]
+RenderView5.CameraClippingRange = [30.386606389478224, 67.19107357456258]
+RenderView5.CameraFocalPoint = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
+RenderView5.CameraParallelScale = 12.068905283627853
+RenderView5.CenterOfRotation = [2.1109004020690918, 0.050000429153442383, 4.76837158203125e-07]
 
 Render()
+
