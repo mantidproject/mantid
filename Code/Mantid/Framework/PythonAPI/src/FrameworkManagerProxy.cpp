@@ -14,6 +14,7 @@
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include <boost/python/extract.hpp>
 #include <boost/python/handle.hpp>
+#include <stdexcept>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -151,6 +152,28 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int version)
 {
   return API::FrameworkManager::Instance().createAlgorithm(algName, version);
+}
+
+std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IAlgorithm * algm)
+{
+  if (algm == NULL)
+    throw std::runtime_error("Encountered NULL algorithm pointer in FrameworkManagerProxy::getPropertyOrder");
+
+  // get a sorted copy of the properties
+  PropertyVector properties(algm->getProperties());
+  std::sort(properties.begin(), properties.end(), SimplePythonAPI::PropertyOrdering());
+
+  // generate the sanitized names
+  PropertyVector::const_iterator pIter = properties.begin();
+  PropertyVector::const_iterator pEnd = properties.end();
+  std::vector<std::string>* names = new std::vector<std::string>();
+  names->reserve(properties.size());
+  size_t numProps = properties.size();
+  for ( size_t i = 0; i < numProps; ++i)
+  {
+    names->push_back(SimplePythonAPI::removeCharacters(properties[i]->name(), ""));
+  }
+  return names;
 }
 
 std::string FrameworkManagerProxy::createAlgorithmDocs(const std::string& algName)

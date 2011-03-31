@@ -103,6 +103,8 @@ public:
   std::string isAlgorithmName(std::string name) const;
   /// Creates and instance of an algorithm
   API::IAlgorithm* createAlgorithm(const std::string& algName, const int version = -1);
+  /// Creates an ordered vector for knowing which parameters go where.
+  std::vector<std::string> * getPropertyOrder(const API::IAlgorithm * alg);
   /// Create the doc string for the supplied algorithm.
   std::string createAlgorithmDocs(const std::string& algName);
   //@}
