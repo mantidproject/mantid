@@ -254,6 +254,10 @@ if ( ${CMAKE_PROJECT_NAME} STREQUAL "MantidFramework" )
   set ( MANTID_ROOT ${CMAKE_SOURCE_DIR}/.. )
 endif ()
 
+set ( PLUGINS "." )
+set ( QTPLUGINS "." )
+set ( PYTHONALGS ${MANTID_ROOT}/Framework/PythonAPI/PythonAlgorithms )
+set ( DATADIRS ${MANTID_ROOT}/../../Test/AutoTestData;${MANTID_ROOT}/../../Test/VATES;${MANTID_ROOT}/instrument )
 configure_file ( ../Properties/Mantid.properties.template
                  ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties
 )
@@ -270,3 +274,16 @@ add_custom_command ( TARGET Kernel POST_BUILD
 ###########################################################################
 
 install ( TARGETS Kernel DESTINATION ${LIB_DIR} )
+
+# Create the properties file for the installer
+set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX} )
+set ( PLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
+set ( QTPLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qtplugins/mantid )
+set ( PYTHONALGS ${PLUGINS}/PythonAlgs )
+set ( DATADIRS "" )
+configure_file ( ../Properties/Mantid.properties.template
+                 ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install
+)
+install ( FILES ${CMAKE_CURRENT_BINARY_DIR}/Mantid.properties.install 
+          DESTINATION ${BIN_DIR} RENAME Mantid.properties
+)

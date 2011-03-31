@@ -23,10 +23,10 @@ mantidqt.python_interfaces = HFIR_Reduction.py
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries
-plugins.directory = .
+plugins.directory = @PLUGINS@
 
 # Where to find Mantid Qt plugin libraries
-mantidqt.plugins.directory = .
+mantidqt.plugins.directory = @QTPLUGINS@
 
 # Where to load instrument definition files from
 instrumentDefinition.directory = @MANTID_ROOT@/instrument
@@ -53,14 +53,14 @@ pythonscripts.directory = @MANTID_ROOT@/scripts
 pythonscripts.directories = @MANTID_ROOT@/scripts
 
 # The locations of Python algorithms that are to be loaded at startup
-pythonalgorithms.directories = @MANTID_ROOT@/Framework/PythonAPI/PythonAlgorithms
+pythonalgorithms.directories = @PYTHONALGS@
 
 # Setting this to 1 will allow python algorithms to be reloaded before execution.
 pythonalgorithms.refresh.allowed = 0
 
 # A semi-colon(;) separated list of directories to use to search for data
 # Use forward slash / for all paths
-datasearch.directories = @MANTID_ROOT@/../../Test/AutoTestData;@MANTID_ROOT@/../../Test/VATES;@MANTID_ROOT@/instrument
+datasearch.directories = @DATADIRS@
 
 # A semi-colon(;) separated list of directories to use to search for files other than data
 # Use forward slash / for all paths
@@ -74,7 +74,7 @@ datasearch.searcharchive = Off
 defaultsave.directory = 
 
 # ICat download directory
-icatDownload.directory = @MANTID_ROOT@/../../Test/Data/ICatDownload
+icatDownload.directory = 
 
 # The Number of algorithms properties to retain im memory for refence in scripts.
 algorithms.retained = 50
@@ -91,7 +91,7 @@ ManagedWorkspace.LowerMemoryLimit = 80
 # Setting this to 1 will disable managed workspaces completely - use with care!
 ManagedWorkspace.AlwaysInMemory = 0
 ManagedWorkspace.DataBlockSize = 4000
-ManagedWorkspace.FilePath = .
+ManagedWorkspace.FilePath = 
 # Setting this to 1 will disable managedrawfileworkspaces
 ManagedRawFileWorkspace.DoNotUse = 0
 CompressedWorkspace.DoNotUse = 1
@@ -123,7 +123,7 @@ logging.channels.fileFilterChannel.channel= fileChannel
 logging.channels.fileFilterChannel.level= warning
 # output to a file (For error capturing and debugging)
 logging.channels.fileChannel.class = FileChannel
-logging.channels.fileChannel.path = ../logs/mantid.log
+logging.channels.fileChannel.path =
 logging.channels.fileChannel.formatter.class = PatternFormatter
 logging.channels.fileChannel.formatter.pattern = %Y-%m-%d %H:%M:%S,%i [%I] %p %s - %t
 logging.formatters.f1.class = PatternFormatter

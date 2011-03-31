@@ -323,7 +323,7 @@ def addCRefs(lstId,parent):
 def createPropertiesFile(filename):
     # Field replacements
     replacements = {
-    "plugins.directory":"plugins.directory = ../plugins",
+    "plugins.directory" : "plugins.directory = ../plugins",
     "mantidqt.plugins.directory" : "mantidqt.plugins.directory = ../plugins/qtplugins/mantid",
     "instrumentDefinition.directory":"instrumentDefinition.directory = ../instrument",
     "parameterDefinition.directory":"parameterDefinition.directory = ../instrument",    
@@ -334,7 +334,10 @@ def createPropertiesFile(filename):
     "mantidqt.python_interfaces_directory":"mantidqt.python_interfaces_directory = ../scripts",
     "pythonscripts.directories":"pythonscripts.directories = ../scripts",
     "pythonalgorithms.directories":"pythonalgorithms.directories=../plugins/PythonAlgs",
-    "icatDownload.directory":"icatDownload.directory = ../data"
+    "datasearch.directories" : "datasearch.directories = ../data",
+    "icatDownload.directory":"icatDownload.directory = ../data",
+    "ManagedWorkspace.FilePath" : "ManagedWorkspace.FilePath = ../temp",
+    "logging.channels.fileChannel.path" : "logging.channels.fileChannel.path = ../logs/mantid.logs"
     }
 
     template = open(filename,'r')
@@ -456,7 +459,7 @@ addTo(MantidDlls,'Registry',{'Id':'RegMantidVersion','Root':'HKLM','Key':'Softwa
 addTo(MantidDlls,'Registry',{'Id':'RegMantidGUID','Root':'HKLM','Key':'Software\Mantid','Name':'GUID','Action':'write','Type':'string','Value':product_uuid})
 
 # Need to create Mantid.properties file. A template exists but some entries point to the incorrect locations so those need modifying
-createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties')
+createPropertiesFile(FRAMEWORKDIR + '/Properties/Mantid.properties.template')
 addFileV('MantidProperties','Mantid.pro','Mantid.properties','Mantid.properties',MantidDlls)
 
 MantidScript = addFileV('MantidScript','MScr.bat','MantidScript.bat',FRAMEWORKDIR + '/PythonAPI/MantidScript.bat',MantidDlls)
