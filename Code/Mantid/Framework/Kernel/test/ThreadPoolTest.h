@@ -295,8 +295,9 @@ public:
 
   //=======================================================================================
 
-  /** Start a threadpool before adding tasks  */
-  void test_start_and_wait()
+  /** Start a threadpool before adding tasks
+   * DISABLED because the timing issues make it somewhat unreliable under heavy loads. */
+  void xtest_start_and_wait()
   {
     ThreadPool p; // Makes a default scheduler
     threadpooltest_check = 0;
