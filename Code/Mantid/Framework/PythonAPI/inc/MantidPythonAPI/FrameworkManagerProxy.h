@@ -14,10 +14,11 @@
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/IEventWorkspace.h>
-#include <MantidDataObjects/EventWorkspace.h>
-#include <MantidDataObjects/PeaksWorkspace.h>
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidAPI/IMDEventWorkspace.h>
+
+//#include <MantidDataObjects/EventWorkspace.h>
+//#include <MantidDataObjects/PeaksWorkspace.h>
 
 #include <Poco/NObserver.h>
 
@@ -113,10 +114,10 @@ public:
   /// Returns a pointer to the IEventWorkpace requested
   boost::shared_ptr<API::IEventWorkspace> retrieveIEventWorkspace(const std::string& wsName);
   /// Returns a pointer to the Workpace requested
-  boost::shared_ptr<DataObjects::PeaksWorkspace> retrievePeaksWorkspace(const std::string& wsName);
-  /// Returns a pointer to the IEventWorkpace requested
-  boost::shared_ptr<DataObjects::EventWorkspace> retrieveEventWorkspace(const std::string& wsName);
-  /// Returns a pointer to the IMDWorkspace requested
+//  boost::shared_ptr<DataObjects::PeaksWorkspace> retrievePeaksWorkspace(const std::string& wsName);
+//  /// Returns a pointer to the IEventWorkpace requested
+//  boost::shared_ptr<DataObjects::EventWorkspace> retrieveEventWorkspace(const std::string& wsName);
+//  /// Returns a pointer to the IMDWorkspace requested
   boost::shared_ptr<API::IMDWorkspace> retrieveIMDWorkspace(const std::string& wsName);
   /// Returns a pointer to the IMDEventWorkspace requested
   boost::shared_ptr<API::IMDEventWorkspace> retrieveIMDEventWorkspace(const std::string& wsName);

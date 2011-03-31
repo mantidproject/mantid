@@ -106,9 +106,9 @@ endif ()
 # to ensure that the stdc++ library appears as early in the link list as possible so that it
 # is loaded first, hence the hard coding of it here rather than leaving it to be implicitly defined.
 if ( UNIX ) 
-  set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} DataObjects )
+  set ( PYTHON_DEPS stdc++ ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 else ()
-  set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} DataObjects )
+  set ( PYTHON_DEPS ${MANTIDLIBS} ${Boost_LIBRARIES} ${PYTHON_LIBRARIES}  )
 endif ()
 
 ###########################################################################

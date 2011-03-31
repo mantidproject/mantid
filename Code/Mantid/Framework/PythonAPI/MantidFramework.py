@@ -894,11 +894,10 @@ class MantidPyFramework(FrameworkManager):
         
         # Try each workspace type in order, from more specialised to less specialised.
         
-        # Try each workspace type in order, from more specialised to less specialised.
-        try:
-            return self._getRawEventWorkspacePointer(name)
-        except RuntimeError:
-            pass
+#        try:
+#            return self._getRawEventWorkspacePointer(name)
+#        except RuntimeError:
+#            pass
                 
         try:
             return self._getRawIEventWorkspacePointer(name)
@@ -926,10 +925,10 @@ class MantidPyFramework(FrameworkManager):
         except RuntimeError:
             pass
         
-        try:
-            return self._getRawPeaksWorkspacePointer(name)
-        except RuntimeError:
-            return None
+#        try:
+#            return self._getRawPeaksWorkspacePointer(name)
+#        except RuntimeError:
+#            return None
         
         try:
             return self._getRawTableWorkspacePointer(name)
