@@ -30,7 +30,7 @@ except ImportError:
         return []
 
 _VERBOSE_ = False
-
+LAST_SAMPLE = None
 def SetVerboseMode(state):
 #TODO: this needs to be on the reducer
     _VERBOSE_ = state
@@ -155,6 +155,9 @@ def AssignSample(sample_run, reload = True, period = -1):
                                             ReductionSingleton(), None)
 
     ReductionSingleton().set_run_number(sample_wksp)
+    
+    global LAST_SAMPLE
+    LAST_SAMPLE = sample_wksp 
     return sample_wksp, logs
 
 def SetCentre(xcoord, ycoord):
@@ -506,13 +509,13 @@ def DisplayMask(mask_worksp=None):
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
         samp = ReductionSingleton().get_sample()
+        global LAST_SAMPLE
+        samp = LAST_SAMPLE 
         
         if samp:
             counts_data = '__DisplayMasked_tempory_wksp'
             Integration(samp, counts_data)
             CloneWorkspace(samp, mask_worksp)
-            move_samp = copy.deepcopy(ReductionSingleton().place_det_sam) 
-            move_samp.execute(ReductionSingleton(), mask_worksp)
         else:
             instrument.load_empty(mask_worksp)
         

@@ -753,7 +753,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                 
                 if (vals.readY(i)[0] > maxval):
                     #don't include masked or monitors
-                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 1000):
+                    if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 5000):
                         maxval = vals.readY(i)[0]
     
             #now normalise to the max/4
