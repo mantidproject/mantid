@@ -366,6 +366,7 @@ namespace Algorithms
     std::vector<boost::shared_ptr<RectangularDetector> > detList;
     // --------- Loading only one bank ----------------------------------
     std::string onebank = getProperty("BankName");
+    bool doOneBank = (onebank != ""); 
     for (int i=0; i < inst->nelements(); i++)
     {
       boost::shared_ptr<RectangularDetector> det;
@@ -375,7 +376,8 @@ namespace Algorithms
       det = boost::dynamic_pointer_cast<RectangularDetector>( (*inst)[i] );
       if (det)
       {
-        detList.push_back(det);
+        if (det->getName().compare(onebank) == 0) detList.push_back(det); 
+        if (!doOneBank) detList.push_back(det); 
       }
       else
       {
@@ -389,7 +391,8 @@ namespace Algorithms
             det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem)[j] );
             if (det)
             {
-              detList.push_back(det);
+              if (det->getName().compare(onebank) == 0) detList.push_back(det); 
+              if (!doOneBank) detList.push_back(det); 
   
             }
             else
@@ -404,7 +407,8 @@ namespace Algorithms
                   det = boost::dynamic_pointer_cast<RectangularDetector>( (*assem2)[k] );
                   if (det)
                   {
-                    detList.push_back(det);
+                    if (det->getName().compare(onebank) == 0) detList.push_back(det); 
+                    if (!doOneBank) detList.push_back(det); 
                   }
                 }
               }
