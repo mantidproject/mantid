@@ -1378,8 +1378,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         Will accept either a IAlgorithm or a string specifying the algorithm name.
         """
         if isinstance(ialg, str):
-            #ialg = self._createSubAlgorithm(str(ialg), version)  #FIXME: need to allow for version parameter
-            ialg = self._createSubAlgorithm(str(ialg)) 
+            ialg = self._createSubAlgorithm(str(ialg), version)
         ialg.setRethrows(True) # TODO get rid of this line # We NEED this line for sub-algorithms.
         return IAlgorithmProxy(ialg, self)
         
