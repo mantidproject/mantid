@@ -56,18 +56,58 @@ def validate_step(f):
             is a sub-class of ReductionStep
             @param algorithm: algorithm name, ReductionStep object, or Mantid algorithm function
         """
-            
         if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
             # If we have a ReductionStep object, just use it.
             # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
             return f(reducer, algorithm)
         
-        if isinstance(algorithm, types.StringType):
-            # If we have a string, see if there exists a mantidsimple
-            # function that can be used
-            algorithm = eval(algorithm, mantidsimple.__dict__, mantidsimple.__dict__)
-            
         if isinstance(algorithm, types.FunctionType):
+            # If we get a function, assume its name is an algorithm name
+            algorithm = algorithm.func_name
+
+        if isinstance(algorithm, types.StringType):
+            # If we have a string, assume it's an algorithm name
+            class _AlgorithmStep(ReductionStep):
+                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    """
+                        Create a new instance of the requested algorithm object, 
+                        set the algorithm properties replacing the input and output
+                        workspaces.
+                        The execution will work for any combination of mandatory/optional
+                        properties. 
+                        @param reducer: Reducer object managing the reduction
+                        @param inputworkspace: input workspace name [optional]
+                        @param outputworkspace: output workspace name [optional]
+                    """
+                    if outputworkspace is None:
+                        outputworkspace = inputworkspace 
+                    proxy = MantidFramework.mtd._createAlgProxy(algorithm)
+                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
+                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
+                    
+                    propertyOrder = MantidFramework.mtd._getPropertyOrder(proxy._getHeldObject())
+            
+                    # add the args to the kw list so everything can be set in a single way
+                    for (key, arg) in zip(propertyOrder[:len(args)], args):
+                        kwargs[key] = arg
+
+                    # Override input and output workspaces
+                    if "Workspace" in kwargs:
+                        kwargs["Workspace"] = inputworkspace
+                    if "InputWorkspace" in kwargs:
+                        kwargs["InputWorkspace"] = inputworkspace
+                    if "OutputWorkspace" in kwargs:
+                        kwargs["OutputWorkspace"] = outputworkspace
+
+                    # set the properties of the algorithm                    
+                    ialg = proxy._getHeldObject()
+                    for key in kwargs.keys():
+                        ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
+                        
+                    proxy.execute()
+            return f(reducer, _AlgorithmStep())
+                    
+        if False and isinstance(algorithm, types.FunctionType):
             # If the algorithm is a function, in which case
             # we expect it to produce an algorithm proxy
             class _AlgorithmStep(ReductionStep):

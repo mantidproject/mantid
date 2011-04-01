@@ -97,3 +97,13 @@ class ReducerTest(unittest.TestCase):
             self.assertTrue(issubclass(type(algorithm), ReductionStep))
             
         some_func(Reducer(), LoadAscii, "AsciiExample.txt", None)
+        
+    def test_bad_alg_name(self):
+        r = Reducer()
+        r.append_step("NotAnAlgorithm")
+        self.assertRaises(RuntimeError, r._reduction_steps[0].execute, (r, "test") )
+            
+    
+
+if __name__ == '__main__':
+    unittest.main()
