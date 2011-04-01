@@ -755,6 +755,7 @@ class IAlgorithmProxy(ProxyObject):
         Execute the (hopefully) configured algorithm.
         """
         if mtd.__gui__:
+            import qti
             name = self._getHeldObject().name()
             result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(name)
             if result == False:
