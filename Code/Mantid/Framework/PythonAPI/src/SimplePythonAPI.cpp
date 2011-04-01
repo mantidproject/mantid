@@ -151,18 +151,7 @@ namespace Mantid
 
       // Utility method to run an algorithm
       module << "def execute_algorithm(algm):\n"
-        << "  _algm = algm._getHeldObject()\n";
-
-      if( gui )
-      {
-        module << "  result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(_algm.name())\n"
-               << "  if result == False:\n"
-               << "    sys.exit('An error occurred while running %s. See results log for details.' % _algm.name())\n\n";
-      }
-      else
-      {
-        module << "  _algm.execute()\n\n";
-      }
+             << "  algm.execute()\n";
 
       writeMantidHelp(module);
       module.close();
