@@ -252,6 +252,8 @@ void RemoveLowResTOF::getTminData(const bool isEvent)
     }
   }
   g_log.information() << "Tmin = " << m_Tmin << " microseconds\n";
+  if (m_Tmin < 0.)
+    throw std::runtime_error("Cannot have minimum time less than zero");
 }
 
 

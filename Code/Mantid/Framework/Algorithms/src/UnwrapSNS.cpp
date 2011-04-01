@@ -348,8 +348,10 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
       for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
       {
         temp = m_inputEvWS->getEventList(workspaceIndex).getTofMin();
-        if (temp < m_Tmin)
+        if (temp < m_Tmin) {
+          std::cout << "tmin[" << workspaceIndex << "] = " << temp << std::endl; // REMOVE
           m_Tmin = temp;
+        }
       }
     }
     else
@@ -399,6 +401,8 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
   m_frameWidth = m_Tmax - m_Tmin;
 
   g_log.information() << "Frame range in microseconds is: " << m_Tmin << " - " << m_Tmax << "\n";
+  if (m_Tmin < 0.)
+    throw std::runtime_error("Cannot have Tmin less than zero");
   if (m_Tmin > m_Tmax)
     throw std::runtime_error("Have case of Tmin > Tmax");
 
