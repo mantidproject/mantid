@@ -75,7 +75,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>X position:</string>
+                 <string>X position</string>
                 </property>
                </widget>
               </item>
@@ -107,7 +107,7 @@
                  </sizepolicy>
                 </property>
                 <property name="text">
-                 <string>Y position:</string>
+                 <string>Y position</string>
                 </property>
                </widget>
               </item>
@@ -223,8 +223,14 @@
                   <height>0</height>
                  </size>
                 </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>170</width>
+                  <height>16777215</height>
+                 </size>
+                </property>
                 <property name="text">
-                 <string>Data file:                       </string>
+                 <string>Data file </string>
                 </property>
                </widget>
               </item>
@@ -249,6 +255,9 @@
                   <verstretch>0</verstretch>
                  </sizepolicy>
                 </property>
+                <property name="toolTip">
+                 <string>Click to browse.</string>
+                </property>
                 <property name="text">
                  <string>Browse...</string>
                 </property>
@@ -267,6 +276,9 @@
                   <width>85</width>
                   <height>27</height>
                  </size>
+                </property>
+                <property name="toolTip">
+                 <string>Click to plot data 2D data.</string>
                 </property>
                 <property name="text">
                  <string>Plot</string>
@@ -308,7 +320,7 @@
                  </size>
                 </property>
                 <property name="text">
-                 <string>Beam radius [pixels]:</string>
+                 <string>Beam radius [pixels]</string>
                 </property>
                </widget>
               </item>
@@ -412,7 +424,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Sensitivity data file:</string>
+               <string>Sensitivity data file</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -458,6 +470,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Click to browse.</string>
+              </property>
               <property name="text">
                <string>Browse...</string>
               </property>
@@ -476,6 +491,9 @@
                 <width>85</width>
                 <height>27</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Click to plot data 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -517,7 +535,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Dark current data file:</string>
+               <string>Dark current data file</string>
               </property>
               <property name="alignment">
                <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
@@ -563,6 +581,9 @@
                 <verstretch>0</verstretch>
                </sizepolicy>
               </property>
+              <property name="toolTip">
+               <string>Click to browse.</string>
+              </property>
               <property name="text">
                <string>Browse...</string>
               </property>
@@ -581,6 +602,9 @@
                 <width>85</width>
                 <height>27</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Click to plot data 2D data.</string>
               </property>
               <property name="text">
                <string>Plot</string>
@@ -658,7 +682,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="max_sensitivity_edit">
+             <widget class="QLineEdit" name="min_sensitivity_edit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -678,7 +702,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the maximum allowed relative sensitivity for any given pixel.</string>
+               <string>Enter the minimum allowed relative sensitivity for any given pixel.</string>
               </property>
              </widget>
             </item>
@@ -711,7 +735,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="min_sensitivity_edit">
+             <widget class="QLineEdit" name="max_sensitivity_edit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -731,7 +755,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the minimum allowed relative sensitivity for any given pixel.</string>
+               <string>Enter the maximum allowed relative sensitivity for any given pixel.</string>
               </property>
              </widget>
             </item>
@@ -797,6 +821,9 @@
                    <verstretch>0</verstretch>
                   </sizepolicy>
                  </property>
+                 <property name="toolTip">
+                  <string>Select to use the same beam center for the sensitivity flood data as for the sample data.</string>
+                 </property>
                  <property name="text">
                   <string>Use sample beam center</string>
                  </property>
@@ -813,7 +840,7 @@
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>X position:</string>
+                    <string>X position</string>
                    </property>
                   </widget>
                  </item>
@@ -845,7 +872,7 @@
                     </sizepolicy>
                    </property>
                    <property name="text">
-                    <string>Y position:</string>
+                    <string>Y position</string>
                    </property>
                   </widget>
                  </item>
@@ -985,7 +1012,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Data file:                       </string>
+                    <string>Data file</string>
                    </property>
                   </widget>
                  </item>
@@ -1010,6 +1037,9 @@
                      <verstretch>0</verstretch>
                     </sizepolicy>
                    </property>
+                   <property name="toolTip">
+                    <string>Click to browse.</string>
+                   </property>
                    <property name="text">
                     <string>Browse...</string>
                    </property>
@@ -1028,6 +1058,9 @@
                      <width>85</width>
                      <height>27</height>
                     </size>
+                   </property>
+                   <property name="toolTip">
+                    <string>Click to plot data 2D data.</string>
                    </property>
                    <property name="text">
                     <string>Plot</string>
@@ -1069,7 +1102,7 @@
                     </size>
                    </property>
                    <property name="text">
-                    <string>Beam radius [pixels]:</string>
+                    <string>Beam radius [pixels]</string>
                    </property>
                   </widget>
                  </item>

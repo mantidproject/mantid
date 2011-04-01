@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/hfir_output.ui'
 #
-# Created: Fri Feb 11 08:45:32 2011
+# Created: Fri Apr  1 10:15:45 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -24,7 +24,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 784, 348))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 784, 704))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -38,8 +38,6 @@ class Ui_Frame(object):
         self.plot_area_layout.setContentsMargins(0, 20, -1, 20)
         self.plot_area_layout.setObjectName("plot_area_layout")
         self.verticalLayout.addLayout(self.plot_area_layout)
-        spacerItem = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout.addItem(spacerItem)
 
         self.retranslateUi(Frame)
         QtCore.QMetaObject.connectSlotsByName(Frame)
