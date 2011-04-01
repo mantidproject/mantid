@@ -7,14 +7,14 @@
 #
 trap error_found ERR
 MESS=/tmp/build_mantid.$$
-if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
-	rhel_version=6
-else
-	rhel_version=5
-fi
 
 function error_found() {
     local exit_status=${1:-$?}
+    if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
+	rhel_version=6
+    else
+	rhel_version=5
+    fi
     echo "Subject: FAILED: RHEL${rhel_version} - RPM build R$rev" > $MESS
     echo >> $MESS
     echo "RPM build of svn R$rev FAILED with error code $exit_status - see http://download.mantidproject.org/logs/Linux/rpmbuild/`basename $log_file`" >> $MESS
@@ -34,6 +34,12 @@ function current_revision() {
     current_rev=`svnversion -n`
     current_rev=`expr match $current_rev '\([0-9]*\).*'`
 }
+
+if [ "`cat /etc/redhat-release`" = "Red Hat Enterprise Linux Server release 6.0 (Santiago)" ]; then
+	rhel_version=6
+else
+	rhel_version=5
+fi
 
 build_base=$HOME/mybuilds
 find $build_base -type f -name 'Mantid-*' -exec rm -f {} \;
