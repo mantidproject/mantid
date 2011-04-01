@@ -5,14 +5,12 @@
     process is kept elsewhere (HFIRReduction object)
 """
 from interface import InstrumentInterface
-#from reduction_gui.widgets.sans_beam_finder import BeamFinderWidget
 from reduction_gui.widgets.sans.hfir_instrument import SANSInstrumentWidget
 from reduction_gui.widgets.sans.hfir_detector import DetectorWidget
 from reduction_gui.widgets.sans.hfir_sample_data import SampleDataWidget
 from reduction_gui.widgets.sans.hfir_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.hfir_reduction import HFIRReductionScripter
-from reduction_gui.widgets.mask import MaskTabWidget
 
 
 class HFIRInterface(InstrumentInterface):
@@ -32,9 +30,6 @@ class HFIRInterface(InstrumentInterface):
         # Detector
         self.attach(DetectorWidget(settings = self._settings))
 
-        # Mask
-        self.attach(MaskTabWidget(settings = self._settings))
-        
         # Sample
         self.attach(SampleDataWidget(settings = self._settings))
         
