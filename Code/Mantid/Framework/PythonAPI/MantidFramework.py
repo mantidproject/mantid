@@ -713,6 +713,7 @@ class IAlgorithmProxy(ProxyObject):
               isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
                self.__wkspnames.append(p.value)
         self.__havelist = True
+        
     def setProperties(self, *args, **kwargs):
         """
         Set all of the properties of the algorithm.
@@ -727,7 +728,10 @@ class IAlgorithmProxy(ProxyObject):
         # set the properties of the algorithm
         ialg = self._getHeldObject()
         for key in kwargs.keys():
-            ialg.setPropertyValue(key, kwargs[key])
+            if isinstance(kwargs[key], WorkspaceProxy):
+                ialg._setWorkspaceProperty(key, kwargs[key]._getHeldObject())                
+            else:
+                ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
 
     def execute(self):
         """
@@ -1348,6 +1352,16 @@ class PythonAlgorithm(PyAlgorithmBase):
         else:
             raise TypeError('Unrecognized list type')
         
+    def _createSubAlgProxy(self, ialg, version=-1):
+        """
+        Will accept either a IAlgorithm or a string specifying the algorithm name.
+        """
+        if isinstance(ialg, str):
+            #ialg = self._createSubAlgorithm(str(ialg), version)  #FIXME: need to allow for version parameter
+            ialg = self._createSubAlgorithm(str(ialg)) 
+        ialg.setRethrows(True) # TODO get rid of this line # We NEED this line for sub-algorithms.
+        return IAlgorithmProxy(ialg, self)
+        
     def executeSubAlg(self, algorithm, *args, **kwargs):
         """
         Execute an algorithm as a sub-algorithm.
@@ -1360,41 +1374,19 @@ class PythonAlgorithm(PyAlgorithmBase):
         @return: algorithm proxy for the executed algorithm
         """
         if isinstance(algorithm, str):
-            algm = self._createSubAlgorithm(algorithm)
+            proxy = self._createSubAlgProxy(algorithm)
         else:
+            #TODO: check if we still need this after mantidsimple is gone
             if isinstance(algorithm, types.FunctionType):
-                algm = self._createSubAlgorithm(algorithm.func_name)
+                proxy = self._createSubAlgProxy(algorithm.func_name)
             else:
                 raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
-        proxy = mtd._createAlgProxy(algm)
 
         if not isinstance(proxy, IAlgorithmProxy):
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
         
-        # The inspect module has changed in python 2.6 
-        if sys.version_info[0]==2 and sys.version_info[1]<6:
-            _args = inspect.getargspec(algorithm)[0] 
-        else:
-            _args = inspect.getargspec(algorithm).args     
-        # Go through provided arguments
-        for i in range(len(args)):
-            if isinstance(args[i], WorkspaceProxy):
-                algm._setWorkspaceProperty(_args[i], args[i]._getHeldObject())                
-            else:
-                algm.setPropertyValue(_args[i], _makeString(args[i]).lstrip('? '))
-        # Go through keyword arguments
-        for key in kwargs:
-            if key not in proxy.keys():
-                continue           
-            if isinstance(kwargs[key], WorkspaceProxy):
-                algm._setWorkspaceProperty(key, kwargs[key]._getHeldObject())
-            else:             
-                algm.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
-        
-        # Execute synchronously        
-        algm.setRethrows(True)
-        algm.execute()
-                
+        proxy.setProperties(*args, **kwargs)
+        proxy.execute()
         return proxy
 
 #------------------------------------------------------------------------------------------------
