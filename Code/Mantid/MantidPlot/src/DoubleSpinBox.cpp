@@ -77,12 +77,25 @@ void DoubleSpinBox::setRange(double min, double max)
 
 void DoubleSpinBox::interpretText()
 {
-	bool ok = false;
-	double value = locale().toDouble(text(), &ok);
-	if (ok && setValue(value))
-        emit valueChanged(d_value);
+  bool ok = false;
+  double value = locale().toDouble(text(), &ok);
+  if (ok && setValue(value))
+  {
+    emit valueChanged(d_value);
+  }
+  else
+  {
+    QString val = text().remove(",");
+    value = locale().toDouble(val, &ok);
+    if ( ok && setValue(value) )
+    {
+      emit valueChanged(d_value);
+    }
     else
-        lineEdit()->setText(textFromValue(d_value));
+    {
+      lineEdit()->setText(textFromValue(d_value));
+    }
+  }
 }
 
 void DoubleSpinBox::stepBy ( int steps )
