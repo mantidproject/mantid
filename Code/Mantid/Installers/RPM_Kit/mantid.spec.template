@@ -87,30 +87,29 @@ handle_errors() {
     echo "Passed"
   fi
 }
-echo "Built"
 
-#cd Code/Mantid/Framework
-#sh build.sh rpmbuild=1 skiptest=1 debug=0 -j4
-#handle_errors $? "Framework"
+cd Code/Mantid/Framework
+sh build.sh rpmbuild=1 skiptest=1 debug=0 -j4
+handle_errors $? "Framework"
 
-#cd ../QtPropertyBrowser
-#qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
-#make -j4
-#handle_errors $? "QtPropertyBrowser"
+cd ../QtPropertyBrowser
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+make -j4
+handle_errors $? "QtPropertyBrowser"
 
-#cd ../MantidQt
-#qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
-## Note that the old MantidQt stuff doesn't like being built in parallel
-#make
-#handle_errors $? "MantidQt"
+cd ../MantidQt
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+# Note that the old MantidQt stuff doesn't like being built in parallel
+make
+handle_errors $? "MantidQt"
 
-#cd ../MantidPlot
-#python release_date.py %{version} SVN_VERSION
-#handle_errors $? "release_date"
+cd ../MantidPlot
+python release_date.py %{version} SVN_VERSION
+handle_errors $? "release_date"
 
-#qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
-#make -j4
-#handle_errors $? "MantidPlot"
+qmake-qt4 QMAKE_CC=gcc44 QMAKE_CXX=g++44 QMAKE_LINK=g++44
+make -j4
+handle_errors $? "MantidPlot"
 
 %install
 if test "$RPM_BUILD_ROOT" != "/"; then rm -fr "$RPM_BUILD_ROOT"; fi
