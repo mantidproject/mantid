@@ -51,13 +51,6 @@ namespace Mantid
 
       module << "from MantidFramework import *\n";
       module << "from MantidFramework import _makeString\n";
-
-      //If in gui mode also need sys and qti module
-      if( gui )
-      {
-        module << "import qti\n";
-      }
-      //Need string and os module regardless
       module << "import os\n";
       module << "import sys\n";
       module << "import string\n\n";
@@ -261,22 +254,12 @@ namespace Mantid
 	   << "      else:\n"
 	   << "          raise\n";
       }
-      if( async )
-      {
-        os << "  if execute:\n";
-        writeAsyncFunctionCall(os, algm, "    ");
-        os << "    if result == False:\n"
-          << "      sys.exit('An error occurred while running " << algm << ". See results log for details.')\n";
-      }
-      else
-      {
-        os << "  algm.setRethrows(True)\n";
-        os << "  if execute:\n";
-        os << "    algm.execute()\n";
-      }
+      os << "  algm = mtd._createAlgProxy(algm)\n"
+         << "  if execute:\n"
+         << "    algm.execute()\n";
 
       // Return the IAlgorithm object
-      os << "  return mtd._createAlgProxy(algm)\n";
+      os << "  return algm\n";
 
       // add the help information as a static thing
       os << algm << ".__doc__ = mtd.createAlgorithmDocs(\"" << algm << "\")\n\n";
