@@ -109,6 +109,13 @@ void MoveInstrumentComponent::exec()
       rot.inverse();
       rot.rotate(Pos);
   }
+  boost::shared_ptr<const IComponent>grandparent = parent->getParent();
+  if (grandparent)
+  {
+      Quat rot = grandparent->getRelativeRot();
+      rot.inverse();
+      rot.rotate(Pos);
+  }
 
   Geometry::ParameterMap& pmap = WS->instrumentParameters();
   // Add a parameter for the new position
