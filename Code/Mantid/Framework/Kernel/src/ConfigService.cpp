@@ -483,12 +483,21 @@ std::string ConfigServiceImpl::makeAbsolute(const std::string & dir, const std::
   {
     required = it->second;
   }
-  if (required && !Poco::File(converted).exists())
+  try
+  {
+    if (required && !Poco::File(converted).exists())
+    {
+      g_log.warning() << "Required properties path \"" << converted << "\" in the \"" << key
+          << "\" variable does not exist.\n";
+      converted = "";
+    }
+  } catch ( Poco::FileException & )
   {
     g_log.warning() << "Required properties path \"" << converted << "\" in the \"" << key
         << "\" variable does not exist.\n";
     converted = "";
   }
+  
   // Backward slashes cannot be allowed to go into our properties file
   // Note this is a temporary fix for ticket #2445. 
   // Ticket #2460 prompts a review of our path handling in the config service.
