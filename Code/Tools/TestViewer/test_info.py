@@ -335,9 +335,15 @@ class TestSuite(object):
                 else:
                     s += u"<font color=Orange><h3>%s</h3></font>" % (self.name + ": " + "Log File")
                     s += "<br>"
-#                    html_log = html_escape( self.log_contents )
-#                    html_log = html_log.replace("\n", "<br>")
-#                    s += html_log
+                    if len(self.log_contents) < 10000:
+                        html_log = html_escape( self.log_contents )
+                    else:
+                        # Too long to escape HTML
+                        html_log = html_escape( self.log_contents[:10000] )
+                        html_log += "<br><br> LOG TOO LONG ... <br>" 
+                        
+                    html_log = html_log.replace("\n", "<br>")
+                    s += html_log
         return s
 
     #----------------------------------------------------------------------------------
