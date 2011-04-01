@@ -258,6 +258,15 @@ namespace Algorithms
         if (parent)
         {
             Quat rot0 = parent->getRelativeRot();
+                std::cout <<rot0<<"\n";
+            rot0.inverse();
+            Rot = Rot * rot0;
+        }
+        boost::shared_ptr<const IComponent>grandparent = parent->getParent();
+        if (grandparent)
+        {
+            Quat rot0 = grandparent->getRelativeRot();
+            std::cout <<rot0<<"\n";
             rot0.inverse();
             Rot = Rot * rot0;
         }
@@ -267,6 +276,7 @@ namespace Algorithms
 
         // Set or overwrite "rot" instrument parameter.
 	pmap.addQuat(comp.get(),"rot",Rot);
+                std::cout <<Rot<<"\n";
 
       } 
     } 
