@@ -93,15 +93,15 @@ sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstr
 cd Code/Mantid/Framework
 sh build.sh rpmbuild=1 skiptest=1 debug=0 -j4
 cd ../QtPropertyBrowser
-qmake-qt4 DEFINES+=USE_TCMALLOC
+qmake-qt4
 make -j4
 cd ../MantidQt
-qmake-qt4 DEFINES+=USE_TCMALLOC
+qmake-qt4 DEFINES+=USE_TCMALLOC LIBS+=-ltcmalloc
 # Note that the old MantidQt stuff doesn't like being built in parallel
 make
 cd ../MantidPlot
 python release_date.py %{version} SVN_VERSION
-qmake-qt4
+qmake-qt4 DEFINES+=USE_TCMALLOC LIBS+=-ltcmalloc
 make -j4
 
 %install
