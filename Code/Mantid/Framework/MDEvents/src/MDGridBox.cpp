@@ -50,7 +50,7 @@ namespace MDEvents
       // Cumulative multiplier, for indexing
       splitCumul[d] = tot;
       // How many is it split?
-      split[d] = bc->splitInto(d);
+      split[d] = bc->getSplitInto(d);
       tot *= split[d];
       // Length of the side of a box in this dimension
       boxSize[d] = (extents[d].max - extents[d].min) / split[d];
@@ -234,6 +234,8 @@ namespace MDEvents
     // You can only split it if it is a MDBox (not MDGridBox).
     MDBox<MDE, nd> * box = dynamic_cast<MDBox<MDE, nd> *>(boxes[index]);
     if (!box) return;
+    // Track how many MDBoxes there are in the overall workspace
+    this->m_BoxController->trackNumBoxes(box->getDepth());
     // Construct the grid box
     MDGridBox<MDE, nd> * gridbox = new MDGridBox<MDE, nd>(box);
     // Delete the old ungridded box
@@ -271,6 +273,8 @@ namespace MDEvents
           {
             // ------ Perform split serially (no ThreadPool) ------
             MDGridBox<MDE, nd> * gridBox = new MDGridBox<MDE, nd>(box);
+            // Track how many MDBoxes there are in the overall workspace
+            this->m_BoxController->trackNumBoxes(box->getDepth());
             // Replace in the array
             boxes[i] = gridBox;
             // Delete the old box
@@ -294,7 +298,7 @@ namespace MDEvents
         if (gridBox)
         {
           // Now recursively check if this old grid box's contents should be split too
-          if (!ts || (this->nPoints < this->m_BoxController->m_addingEvents_eventsPerTask))
+          if (!ts || (this->nPoints < this->m_BoxController->getAddingEvents_eventsPerTask()))
             // Go serially if there are only a few points contained (less overhead).
             gridBox->splitAllIfNeeded(ts);
           else

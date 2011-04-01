@@ -23,7 +23,7 @@ public:
   void test_willSplit()
   {
     BoxController sc(2);
-    sc.m_maxDepth = 4;
+    sc.setMaxDepth(4);
     sc.setSplitThreshold(10);
     TS_ASSERT( sc.willSplit(100,3) );
     TS_ASSERT( !sc.willSplit(100,4) );
@@ -31,18 +31,52 @@ public:
     TS_ASSERT( !sc.willSplit(100,5) );
   }
 
-  void test_splitInto()
+  void test_getSplitInto()
   {
     BoxController sc(3);
     sc.setSplitInto(10);
-    TS_ASSERT_EQUALS( sc.splitInto(0), 10);
-    TS_ASSERT_EQUALS( sc.splitInto(1), 10);
-    TS_ASSERT_EQUALS( sc.splitInto(2), 10);
+    TS_ASSERT_EQUALS( sc.getNumSplit(), 1000);
+    TS_ASSERT_EQUALS( sc.getSplitInto(0), 10);
+    TS_ASSERT_EQUALS( sc.getSplitInto(1), 10);
+    TS_ASSERT_EQUALS( sc.getSplitInto(2), 10);
     sc.setSplitInto(1,5);
-    TS_ASSERT_EQUALS( sc.splitInto(0), 10);
-    TS_ASSERT_EQUALS( sc.splitInto(1), 5);
-    TS_ASSERT_EQUALS( sc.splitInto(2), 10);
+    TS_ASSERT_EQUALS( sc.getNumSplit(), 500);
+    TS_ASSERT_EQUALS( sc.getSplitInto(0), 10);
+    TS_ASSERT_EQUALS( sc.getSplitInto(1), 5);
+    TS_ASSERT_EQUALS( sc.getSplitInto(2), 10);
+
   }
+
+  void test_maxDepth()
+  {
+    BoxController sc(3);
+    sc.setMaxDepth(12);
+    TS_ASSERT_EQUALS( sc.getMaxDepth(), 12);
+  }
+
+  void test_trackNumBoxes()
+  {
+    BoxController sc(3);
+    sc.setMaxDepth(4);
+    sc.setSplitInto(10);
+    const std::vector<size_t> & num = sc.getNumMDBoxes();
+    TS_ASSERT_EQUALS( num.size(), 5);
+    TS_ASSERT_EQUALS( num[0], 1);
+    TS_ASSERT_EQUALS( num[1], 0);
+
+    sc.trackNumBoxes(0);
+    TS_ASSERT_EQUALS( num[0], 0);
+    TS_ASSERT_EQUALS( num[1], 1000);
+
+    sc.trackNumBoxes(1);
+    sc.trackNumBoxes(1);
+    TS_ASSERT_EQUALS( num[0], 0);
+    TS_ASSERT_EQUALS( num[1], 998);
+    TS_ASSERT_EQUALS( num[2], 2000);
+
+  }
+
+
 
 
 };

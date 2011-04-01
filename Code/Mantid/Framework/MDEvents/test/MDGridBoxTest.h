@@ -556,8 +556,8 @@ public:
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
     gbox_t * b = makeMDGridBox<2>(0);
-    b->getBoxController()->m_SplitThreshold = 100;
-    b->getBoxController()->m_maxDepth = 4;
+    b->getBoxController()->setSplitThreshold(100);
+    b->getBoxController()->setMaxDepth(4);
 
     // Make a 1000 events at exactly the same point
     size_t num_repeat = 1000;
@@ -617,8 +617,8 @@ public:
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
     gbox_t * b = makeMDGridBox<2>(0);
-    b->getBoxController()->m_SplitThreshold = 100;
-    b->getBoxController()->m_maxDepth = 4;
+    b->getBoxController()->setSplitThreshold(100);
+    b->getBoxController()->setMaxDepth(4);
 
     // Make a 1000 events in each sub-box
     size_t num_repeat = 1000;

@@ -90,11 +90,11 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void do_test_MINITOPAZ(EventType type, bool addTwice=false)
+  void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1)
   {
     Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
 
-    int numEventsPer = 100;
+    int numEventsPer = 1000;
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
       in_ws *= 2.0;
@@ -124,8 +124,9 @@ public:
     TS_ASSERT_LESS_THAN( 100000, npoints); // Some points are left
 
     // Add to an existing MDEW
-    if (addTwice)
+    for (size_t i=1; i < numTimesToAdd; i++)
     {
+      std::cout << "Iteration " << i << std::endl;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )
       TS_ASSERT( alg.isInitialized() )
       alg.setProperty("InputWorkspace", in_ws);
@@ -138,7 +139,7 @@ public:
       TS_ASSERT(ws);
       if (!ws) return;
 
-      TS_ASSERT_EQUALS( npoints*2, ws->getNPoints()); // There are now twice as many points as before
+      TS_ASSERT_EQUALS( npoints*(i+1), ws->getNPoints()); // There are now twice as many points as before
     }
 
 
@@ -150,21 +151,26 @@ public:
   {
     do_test_MINITOPAZ(TOF);
   }
-
-  void test_MINITOPAZ_weightedEvents()
-  {
-    do_test_MINITOPAZ(WEIGHTED);
-  }
-
-  void test_MINITOPAZ_weightedEvents_noTime()
-  {
-    do_test_MINITOPAZ(WEIGHTED);
-  }
-
-  void test_MINITOPAZ_addToExistingWorkspace()
-  {
-    do_test_MINITOPAZ(TOF, true);
-  }
+//
+//  void test_MINITOPAZ_weightedEvents()
+//  {
+//    do_test_MINITOPAZ(WEIGHTED);
+//  }
+//
+//  void test_MINITOPAZ_weightedEvents_noTime()
+//  {
+//    do_test_MINITOPAZ(WEIGHTED);
+//  }
+//
+//  void test_MINITOPAZ_addToExistingWorkspace()
+//  {
+//    do_test_MINITOPAZ(TOF, 2);
+//  }
+//
+//  void test_MINITOPAZ_forProfiling()
+//  {
+//    do_test_MINITOPAZ(TOF, 100);
+//  }
 
 
 

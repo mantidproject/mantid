@@ -169,6 +169,8 @@ namespace MDEvents
    */
   void MakeDiffractionMDEventWorkspace::exec()
   {
+    Timer tim, timtotal;
+
     // Input workspace
     in_ws = getProperty("InputWorkspace");
     if (!in_ws)
@@ -223,8 +225,8 @@ namespace MDEvents
 
     size_t totalCost = in_ws->getNumberEvents();
     prog = new Progress(this, 0, 1.0, totalCost);
-    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
-    if (DODEBUG) prog->setNotifyStep(1);
+//    if (DODEBUG) prog = new ProgressText(0, 1.0, totalCost, true);
+//    if (DODEBUG) prog->setNotifyStep(1);
 
     // Create the thread pool that will run all of these.
     ThreadScheduler * ts = new ThreadSchedulerLargestCost();
@@ -232,9 +234,10 @@ namespace MDEvents
 
     // To track when to split up boxes
     size_t eventsAdded = 0;
-    size_t lastNumBoxes = ws->getBox()->getNumMDBoxes();
+    if (DODEBUG) std::cout << tim.elapsed() << " secs to setup.\n";
+    size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+    if (DODEBUG) std::cout << tim.elapsed() << " secs to count the number of boxes (" << lastNumBoxes << ").\n";
 
-    Timer tim;
 
     for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
@@ -266,38 +269,40 @@ namespace MDEvents
       eventsAdded += cost;
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. There are " << lastNumBoxes << " boxes. Let's start adding.\n";
+        if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. This took " << tim.elapsed() << " secs.\n";
         // Do all the adding tasks
         tp.joinAll();
+        if (DODEBUG) std::cout << "Performing the addition of these events took " << tim.elapsed() << " secs.\n";
 
         // Now do all the splitting tasks
-        if (DODEBUG) std::cout << "About to start splitAllIfNeeded() tasks. There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
         ws->splitAllIfNeeded(ts);
         if (ts->size() > 0)
           prog->doReport("Splitting Boxes");
         tp.joinAll();
+        if (DODEBUG) std::cout << "Performing the splitting took " << tim.elapsed() << " secs.\n";
 
         // Count the new # of boxes.
-        lastNumBoxes = ws->getBox()->getNumMDBoxes();
+        lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
         eventsAdded = 0;
-        if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes. Let's keep adding tasks for events.\n";
+        if (DODEBUG) std::cout << "There are now " << lastNumBoxes << " boxes. Counting them took " << tim.elapsed() << " secs.\n";
       }
     }
 
-    if (DODEBUG) std::cout << "We're done adding tasks for all event lists. " << eventsAdded << " events are left to add. Let's finish those actual tasks.\n";
+    if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. This took " << tim.elapsed() << " secs.\n";
+
     tp.joinAll();
+    if (DODEBUG) std::cout << "Performing the FINAL addition of these events took " << tim.elapsed() << " secs.\n";
 
     // Do a final splitting of everything
-    if (DODEBUG) std::cout << "Do a final splitting of everything, if it is needed."  << "There are currently " << ws->getBox()->getNumMDBoxes() << " boxes\n";;
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
-
-    if (DODEBUG) std::cout << "There are now " << ws->getBox()->getNumMDBoxes() << " boxes\n";
+    if (DODEBUG) std::cout << "Performing the FINAL splitting of boxes took " << tim.elapsed() << " secs.\n";
 
     // Recount totals at the end.
     ws->refreshCache();
+    if (DODEBUG) std::cout << "Performing the refreshCache() call took " << tim.elapsed() << " secs.\n";
 
-    if (DODEBUG) std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << tim.elapsed() << " sec.\n\n\n";
+    if (DODEBUG) std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << timtotal.elapsed() << " sec in total.\n\n";
 
 
     // Save the output

@@ -119,10 +119,10 @@ public:
     box_t * subbox;
 
     // Manually set some of the tasking parameters
-    b->getBoxController()->m_addingEvents_eventsPerTask = 1000;
-    b->getBoxController()->m_addingEvents_numTasksPerBlock = 20;
-    b->getBoxController()->m_SplitThreshold = 100;
-    b->getBoxController()->m_maxDepth = 4;
+    b->getBoxController()->setAddingEvents_eventsPerTask(1000);
+    b->getBoxController()->setAddingEvents_numTasksPerBlock(20);
+    b->getBoxController()->setSplitThreshold(100);
+    b->getBoxController()->setMaxDepth(4);
 
     std::vector< MDEvent<2> > events;
     size_t num_repeat = 1000;

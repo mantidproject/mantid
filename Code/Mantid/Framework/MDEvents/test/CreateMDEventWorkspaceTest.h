@@ -75,7 +75,7 @@ public:
     BoxController_sptr bc = ews->getBoxController();
     TS_ASSERT( bc );
     if (!bc) return;
-    TS_ASSERT_EQUALS(bc->splitInto(0), 6 );
+    TS_ASSERT_EQUALS(bc->getSplitInto(0), 6 );
     TS_ASSERT_EQUALS(bc->getSplitThreshold(), 500 );
     TS_ASSERT_EQUALS(bc->getMaxDepth(), 7 );
   }

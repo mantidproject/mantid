@@ -5,6 +5,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidKernel/ThreadPool.h"
+#include "MantidKernel/MultiThreaded.h"
 
 namespace Mantid
 {
@@ -20,10 +21,9 @@ namespace MDEvents
    * @author Janik Zikovsky
    * @date Feb 21, 2011
    */
-  class DLLExport BoxController
+  class BoxController
   {
   public:
-
     //-----------------------------------------------------------------------------------
     /** Constructor
      *
@@ -31,30 +31,22 @@ namespace MDEvents
      * @return BoxController instance
      */
     BoxController(size_t nd)
-    : nd(nd)
+    :nd(nd)
     {
       // TODO: Smarter ways to determine all of these values
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
+      resetNumBoxes();
     }
 
     //-----------------------------------------------------------------------------------
     /** Get # of dimensions
      * @return # of dimensions
      */
-    size_t getNDims()
+    size_t getNDims() const
     {
       return nd;
-    }
-
-    //-----------------------------------------------------------------------------------
-    /** Set the splitting threshold
-    * @param threshold :: # of points at which the MDBox splits
-    */
-    void setSplitThreshold(size_t threshold)
-    {
-      m_SplitThreshold = threshold;
     }
 
     //-----------------------------------------------------------------------------------
@@ -64,16 +56,24 @@ namespace MDEvents
      * @param depth :: recursion depth of the box
      * @return bool, true if it should split
      */
-    bool willSplit(size_t numPoints, size_t depth)
+    bool willSplit(size_t numPoints, size_t depth) const
     {
       return (numPoints > m_SplitThreshold) && (depth < m_maxDepth);
     }
 
     //-----------------------------------------------------------------------------------
     /** Return the splitting threshold, in # of events */
-    size_t getSplitThreshold()
+    size_t getSplitThreshold() const
     {
       return m_SplitThreshold;
+    }
+
+    /** Set the splitting threshold
+     * @param threshold :: # of points at which the MDBox splits
+     */
+    void setSplitThreshold(size_t threshold)
+    {
+      m_SplitThreshold = threshold;
     }
 
     //-----------------------------------------------------------------------------------
@@ -82,9 +82,15 @@ namespace MDEvents
      * @param dim :: index of the dimension to split
      * @return the dimension will be split into this many even boxes.
      */
-    size_t splitInto(size_t dim)
+    size_t getSplitInto(size_t dim) const
     {
       return m_splitInto[dim];
+    }
+
+    /// Return how many boxes (total) a MDGridBox will contain.
+    size_t getNumSplit() const
+    {
+      return m_numSplit;
     }
 
     //-----------------------------------------------------------------------------------
@@ -94,6 +100,7 @@ namespace MDEvents
     void setSplitInto(size_t num)
     {
       m_splitInto.resize(nd, num);
+      calcNumSplit();
     }
 
     //-----------------------------------------------------------------------------------
@@ -105,24 +112,33 @@ namespace MDEvents
     void setSplitInto(size_t dim, size_t num)
     {
       m_splitInto[dim] = num;
+      calcNumSplit();
+    }
+
+    //-----------------------------------------------------------------------------------
+    /// Getters/setters
+    size_t getAddingEvents_eventsPerTask() const
+    {
+      return m_addingEvents_eventsPerTask;
+    }
+
+    void setAddingEvents_eventsPerTask(size_t m_addingEvents_eventsPerTask)
+    {
+      this->m_addingEvents_eventsPerTask = m_addingEvents_eventsPerTask;
+    }
+
+    void setAddingEvents_numTasksPerBlock(size_t m_addingEvents_numTasksPerBlock)
+    {
+      this->m_addingEvents_numTasksPerBlock = m_addingEvents_numTasksPerBlock;
+    }
+
+    size_t getAddingEvents_numTasksPerBlock() const
+    {
+      return m_addingEvents_numTasksPerBlock;
     }
 
 
-//    //-----------------------------------------------------------------------------------
-//    /** Return true if it is advantageous to use Tasks to
-//     * do addEvents on a grid box.
-//     *
-//     * @param num :: number of events that will be added.
-//     * @return bool, false if you should use a simple one-thread routine,
-//     *          true if you should parallelize using tasks.
-//     */
-//    bool useTasksForAddingEvents(size_t num)
-//    {
-//      //TODO: Smarter criterion here
-//      return (num > 1000);
-//    }
-
-
+    //-----------------------------------------------------------------------------------
     /** Get parameters for adding events to a MDGridBox, trying to optimize parallel CPU use.
      *
      * @param[out] eventsPerTask :: the number of events that should be added by a single task object.
@@ -132,26 +148,31 @@ namespace MDEvents
      *    before the grid boxes should be re-split. Having enough parallel tasks will
      *    help the CPU be used fully.
      */
-    void getAddingEventsParameters(size_t & eventsPerTask, size_t & numTasksPerBlock)
+    void getAddingEventsParameters(size_t & eventsPerTask, size_t & numTasksPerBlock) const
     {
       // TODO: Smarter values here depending on nd, etc.
       eventsPerTask = m_addingEvents_eventsPerTask;
       numTasksPerBlock = m_addingEvents_numTasksPerBlock;
     }
 
+
+    //-----------------------------------------------------------------------------------
     /** Return the max recursion depth allowed for grid box splitting. */
     size_t getMaxDepth() const
     {
       return m_maxDepth;
     }
 
-    /** Sets the max recursion depth allowed for grid box splitting. */
+    /** Sets the max recursion depth allowed for grid box splitting.
+     * NOTE! This resets numMDBoxes stats!
+     *  */
     void setMaxDepth(size_t value)
     {
       m_maxDepth = value;
+      resetNumBoxes();
     }
 
-
+    //-----------------------------------------------------------------------------------
     /** Determine when would be a good time to split MDBoxes into MDGridBoxes.
      * This is to be called while adding events. Splitting boxes too frequently
      * would be a slow-down, but keeping the boxes split at an earlier stage
@@ -160,19 +181,80 @@ namespace MDEvents
      * @param eventsAdded :: How many events were added since the last split?
      * @param numMDBoxes :: How many un-split MDBoxes are there (total) in the workspace
      */
-    bool shouldSplitBoxes(size_t eventsAdded, size_t numMDBoxes)
+    bool shouldSplitBoxes(size_t eventsAdded, size_t numMDBoxes) const
     {
       // Avoid divide by zero
-      if (numMDBoxes == 0) return false;
+      if(numMDBoxes == 0)
+        return false;
+
       // Return true if the average # of events per box is big enough to split.
       return ((eventsAdded / numMDBoxes) > m_SplitThreshold);
     }
 
 
-  //NOTE: These are left public for testing purposes.
-  public:
+    //-----------------------------------------------------------------------------------
+    /** Call to track the number of MDBoxes are contained in the MDEventWorkspace
+     * This should be called when a MDBox gets split into a MDGridBox.
+     * The number of MDBoxes at [depth] is reduced by one
+     * The number of MDBoxes at [depth+1] is increased by however many the splitting gives.
+     *
+     * @param depth :: the depth of the MDBox that is being split into MDGrid boxes.
+     */
+    void trackNumBoxes(size_t depth)
+    {
+      m_mutexNumMDBoxes.lock();
+      if (m_numMDBoxes[depth] > 0)
+        m_numMDBoxes[depth]--;
+      m_numMDBoxes[depth + 1] += m_numSplit;
+      m_mutexNumMDBoxes.unlock();
+    }
 
-    // Number of dimensions
+    /** Return the vector giving the number of MD Boxes as a function of depth */
+    const std::vector<size_t> & getNumMDBoxes() const
+    {
+      return m_numMDBoxes;
+    }
+
+    /** Return the total number of MD Boxes, irrespective of depth */
+    size_t getTotalNumMDBoxes() const
+    {
+      size_t total = 0;
+      for (size_t d=0; d<nd; d++)
+      {
+        total += m_numMDBoxes[d];
+      }
+      return total;
+    }
+
+    /** Reset the number of boxes tracked in m_numMDBoxes */
+    void resetNumBoxes()
+    {
+      m_mutexNumMDBoxes.lock();
+      m_numMDBoxes.clear();
+      m_numMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
+      m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
+      m_numMDBoxes[0] = 1; // Start at 1 at depth 0.
+      // Now calculate the max # of boxes
+      m_maxNumMDBoxes[0] = 1;
+      for (size_t d=1; d<m_maxNumMDBoxes.size(); d++)
+        m_maxNumMDBoxes[d] = m_maxNumMDBoxes[d-1] * m_numSplit;
+      m_mutexNumMDBoxes.unlock();
+    }
+
+
+
+    //-----------------------------------------------------------------------------------
+  private:
+    /// When you split a MDBox, it becomes this many sub-boxes
+    void calcNumSplit()
+    {
+      m_numSplit = 1;
+      for(size_t d = 0;d < nd;d++){
+        m_numSplit *= m_splitInto[d];
+      }
+    }
+
+    /// Number of dimensions
     size_t nd;
 
     /// Splitting threshold
@@ -184,13 +266,26 @@ namespace MDEvents
      */
     size_t m_maxDepth;
 
-    // Even splitting for all dimensions
+    /// Splitting # for all dimensions
     std::vector<size_t> m_splitInto;
+
+    /// When you split a MDBox, it becomes this many sub-boxes
+    size_t m_numSplit;
 
     /// For adding events tasks
     size_t m_addingEvents_eventsPerTask;
+
     /// For adding events tasks
     size_t m_addingEvents_numTasksPerBlock;
+
+    /// For tracking how many MDBoxes (not MDGridBoxes) are at each recursion level
+    std::vector<size_t> m_numMDBoxes;
+
+    /// Mutex for changing the number of MD Boxes.
+    Mantid::Kernel::Mutex m_mutexNumMDBoxes;
+
+    /// This is the maximum number of MD boxes there could be at each recursion level (e.g. (splitInto ^ ndims) ^ depth )
+    std::vector<size_t> m_maxNumMDBoxes;
 
   };
 

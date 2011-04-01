@@ -141,6 +141,9 @@ namespace MDEvents
     MDGridBox<MDE,nd> * gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
     if (!gridBox)
     {
+      // Track how many MDBoxes there are in the overall workspace
+      this->m_BoxController->trackNumBoxes(data->getDepth());
+
       MDBox<MDE,nd> * box = dynamic_cast<MDBox<MDE,nd> *>(data);
       gridBox = new MDGridBox<MDE,nd>(box);
       data = gridBox;
