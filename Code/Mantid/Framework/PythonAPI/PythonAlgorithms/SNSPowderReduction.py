@@ -244,11 +244,17 @@ class SNSPowderReduction(PythonAlgorithm):
     def _getinfo(self, wksp):
         logs = wksp.getRun()
         # get the frequency
+        if not "SpeedRequest1" in logs.keys():
+            self.log().information("SpeedRequest1 is not specified")
+            return self._config.getInfo(None, None)
         frequency = logs['SpeedRequest1']
         if frequency.units != "Hz":
             raise RuntimeError("Only know how to deal with frequency in Hz, not %s" % frequency.units)
         frequency = frequency.getStatistics().mean
 
+        if not "LambdaRequest" in logs.keys():
+            self.log().information("LambdaRequest is not in the datafile")
+            return self._config.getInfo(None, None)
         wavelength = logs['LambdaRequest']
         if wavelength.units != "Angstrom":
             raise RuntimeError("Only know how to deal with LambdaRequest in Angstrom, not $s" % wavelength)
@@ -280,6 +286,8 @@ class SNSPowderReduction(PythonAlgorithm):
                 raise RuntimeError("Failed to specify the binning")
         self._bin_in_dspace = self.getProperty("BinInDspace")
         self._instrument = self.getProperty("Instrument")
+        mtd.settings['default.facility'] = "SNS"
+        mtd.settings['default.instrument'] = self._instrument
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
