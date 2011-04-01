@@ -9,6 +9,10 @@ import inspect
 import opcode
 import __builtin__
 import __main__
+try:
+    import qti
+except:
+    pass # ignore this error as you are probably running without the gui
 
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
@@ -755,7 +759,6 @@ class IAlgorithmProxy(ProxyObject):
         Execute the (hopefully) configured algorithm.
         """
         if mtd.__gui__:
-            import qti
             name = self._getHeldObject().name()
             result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(name)
             if result == False:
