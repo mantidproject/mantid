@@ -714,6 +714,22 @@ class IAlgorithmProxy(ProxyObject):
                self.__wkspnames.append(p.value)
         self.__havelist = True
         
+    def setPropertyValues(self, *args, **kwargs):
+        """
+        Set all of the properties of the algorithm.
+        """
+        if self.__propertyOrder is None:
+            self.__propertyOrder = mtd._getPropertyOrder(self._getHeldObject())
+
+        # add the args to the kw list so everything can be set in a single way
+        for (key, arg) in zip(self.__propertyOrder[:len(args)], args):
+            kwargs[key] = arg
+
+        # set the properties of the algorithm
+        ialg = self._getHeldObject()
+        for key in kwargs.keys():
+            ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+        
     def setProperties(self, *args, **kwargs):
         """
         Set all of the properties of the algorithm.
@@ -732,6 +748,7 @@ class IAlgorithmProxy(ProxyObject):
                 ialg._setWorkspaceProperty(key, kwargs[key]._getHeldObject())                
             else:
                 ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+
 
     def execute(self):
         """
@@ -1385,7 +1402,7 @@ class PythonAlgorithm(PyAlgorithmBase):
         if not isinstance(proxy, IAlgorithmProxy):
             raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
         
-        proxy.setProperties(*args, **kwargs)
+        proxy.setPropertyValues(*args, **kwargs)
         proxy.execute()
         return proxy
 
