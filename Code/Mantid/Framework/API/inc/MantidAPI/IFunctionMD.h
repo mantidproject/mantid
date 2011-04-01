@@ -26,6 +26,7 @@ namespace API
 // Forward declaration
 //----------------------------------------------------------------------
 class IMDWorkspace;
+class IMDIterator;
 class Jacobian;
 class ParameterTie;
 class IConstraint;
@@ -137,35 +138,11 @@ public:
 
 protected:
 
-  /** Implements an iterator over an IMDWorkspace. Doesn't comply with STL iterator definitions.
-    * Increments are done by calling next() which returns false if the end of the workspace is reached.
-    * getValue(i) returns the value on the i-th dimension at the current point.
-    */
-  class DLLExport MDIterator
-  {
-  public:
-    MDIterator(boost::shared_ptr<const IMDWorkspace> ws);
-    MDIterator(const IFunctionMD* fun);
-    int getDataSize()const;
-    double getAxisValue(int i)const;
-    double getData(const double* data)const;
-    void setData(double* data,const double& value)const;
-    bool next();
-    int getPointer()const{return m_data_pointer;} ///< return the current data pointer (index)
-  private:
-    //const IFunctionMD* m_fun;                  ///< The function
-    boost::shared_ptr<const IMDWorkspace> m_workspace; ///< The workspace
-    std::vector< boost::shared_ptr<const Mantid::Geometry::IMDDimension> > m_dimensions;
-    std::vector<int> m_index;                  ///< Multidimensional index defining the current point.
-    int m_data_pointer;                        ///< index to current data and weight values (in arrays m_data and m_weights).
-    mutable int m_dataSize;                            ///< Total data size
-  };
-
   virtual void useDimension(const std::string& id);
   /// Do finction initialization after useAllDimensions() was called
   virtual void initDimensions(){}
   /// Does the function evaluation. Must be implemented in derived classes.
-  virtual double function(MDIterator& r) const = 0;
+  virtual double function(IMDIterator& r) const = 0;
 
 
   //    fields for implementing IFitFunction interface

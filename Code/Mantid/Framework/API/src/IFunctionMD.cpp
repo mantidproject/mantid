@@ -4,16 +4,20 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
+#include <muParser.h>
 #include <boost/lexical_cast.hpp>
+#include <boost/lambda/lambda.hpp>
 
 #include <sstream>
 #include <iostream> 
 #include <algorithm>
 #include <functional>
+#include <iterator>
 #include <float.h>
 
 namespace Mantid
@@ -25,7 +29,7 @@ namespace API
   Kernel::Logger& IFunctionMD::g_log = Kernel::Logger::get("IFunctionMD");
 
   /** Set the workspace
-    * @param ws :: A shared pointer to a workspace. Must be a MatrixWorkspace.
+    * @param ws :: A shared pointer to a workspace.
     * @param slicing :: A string identifying the data to be fitted. 
   */
   void IFunctionMD::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
@@ -68,22 +72,21 @@ namespace API
       m_data.reset(new double[m_dataSize]);
       m_weights.reset(new double[m_dataSize]);
 
-      MDIterator from(m_workspace);
-      MDIterator to(this);
-      if (from.getDataSize() != to.getDataSize())
-      {
-        throw std::runtime_error("Function must be defined on all workspace");
-      }
+      //MDIterator from(m_workspace);
+      //MDIterator to(this);
+      IMDIterator* r = m_workspace->createIterator();
 
       do
       {
-        const Mantid::Geometry::SignalAggregate& point = m_workspace->getPoint(from.getPointer());
+        int i = r->getPointer();
+        const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
         double signal = point.getSignal();
         double error  = point.getError();
         if (error == 0) error = 1.;
-        to.setData(&m_data[0],signal);
-        to.setData(&m_weights[0],1./error);
-      }while(from.next() && to.next());
+        m_data[i] = signal;
+        m_weights[i] = 1./error;
+      }while(r->next());
+      delete r;
     }
     catch(std::exception& e)
     {
@@ -121,11 +124,13 @@ namespace API
   void IFunctionMD::function(double* out)const
   {
     if (m_dataSize == 0) return;
-    MDIterator r(this);
+    IMDIterator* r = m_workspace->createIterator();
     do
     {
-      r.setData(out,function(r));
-    }while(r.next());
+      int i = r->getPointer();
+      out[i] = function(*r);
+    }while(r->next());
+    delete r;
   }
 
   /// Derivatives of function with respect to active parameters
@@ -187,111 +192,6 @@ namespace API
         }
       }
     }
-  }
-
-  /**
-    * Constructor.
-    * @param ws :: A pointer to the iterated workspace.
-    */
-  IFunctionMD::MDIterator::MDIterator(boost::shared_ptr<const IMDWorkspace> ws):
-  m_workspace(ws),
-  m_data_pointer(0),
-  m_dataSize(0)
-  {
-    std::vector<std::string> ids = ws->getDimensionIDs();
-    for(size_t i = 0; i < ids.size(); ++i)
-    {
-      m_dimensions.push_back(ws->getDimension(ids[i]));
-    }
-    m_index.resize(m_dimensions.size());
-    std::fill(m_index.begin(),m_index.end(),0);
-  }
-
-  /** Constructor.
-    * @param fun :: A pointer to a MD funtion.
-    */
-  IFunctionMD::MDIterator::MDIterator(const IFunctionMD* fun):
-  m_workspace(fun->m_workspace),
-  m_dimensions(fun->m_dimensions),
-  m_index(fun->m_dimensions.size()),
-  m_data_pointer(0),
-  m_dataSize(0)
-  {
-  }
-
-  /**
-    * Returns the total size of the data in the workspace
-    */
-  int IFunctionMD::MDIterator::getDataSize()const
-  {
-    if (m_dataSize == 0)
-    {
-      m_dataSize = 1;
-      for(int i = 0; i< static_cast<int>(m_dimensions.size()); ++i)
-      {
-        m_dataSize *= m_dimensions[i]->getNBins();
-      }
-    }
-    return m_dataSize;
-  }
-
-  /** Get the value of the i-th coordinate at the current point.
-    * @param i :: Index of the dimension.
-    * @return the value of the i-th coordinate at the current point.
-    */
-  double IFunctionMD::MDIterator::getAxisValue(int i)const
-  {
-    boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_dimensions[i];
-    return dim->getX(m_index[i]);
-  }
-
-  /** Return the current value in a data array
-    * @param data :: A pointer to the first element of a data array.
-    * @return the current value in a data array
-    */
-  double IFunctionMD::MDIterator::getData(const double* data)const
-  {
-    return data[m_data_pointer];
-  }
-
-  /**
-    * Set a value to an element of data pointed to by this iterator
-    * @param data :: A pointer to the first element of a data array. 
-    * @param value :: A value to set.
-    */
-  void IFunctionMD::MDIterator::setData(double* data,const double& value)const
-  {
-    data[m_data_pointer] = value;
-  }
-
-  /**
-    * Increments the iterator to the next MD point. Stops when the last dimension reaches its last value.
-    */
-  bool IFunctionMD::MDIterator::next()
-  {
-    bool overflow = false;
-    for(size_t i=0;i<m_index.size();++i)
-    {
-      size_t j = m_index[i] + 1;
-      overflow = (j == m_dimensions[i]->getNBins());
-      if (overflow)
-      {
-        m_index[i] = 0;
-      }
-      else
-      {
-        m_index[i] = j;
-        break;
-      }
-    }
-    if (overflow)
-    {
-      m_index.back() = m_dimensions.back()->getNBins() - 1; // to be safe
-      m_data_pointer = m_dataSize - 1;
-      return false;
-    }
-    ++m_data_pointer;
-    return true;
   }
 
   /** User functions call this method in their constructors to set up the order of the dimensions.
@@ -369,7 +269,7 @@ namespace Mantid
         * Calculate the function value at a point r in the MD workspace
         * @param r :: MD workspace iterator with a reference to the current point
         */
-      double function(MDIterator& r) const
+      double function(IMDIterator& r) const
       {
         double arg = 0.0;
         int n = m_dimensions.size();
@@ -377,7 +277,7 @@ namespace Mantid
         {
           double c = getParameter(2*i);
           double a = getParameter(2*i + 1);
-          double t = r.getAxisValue(i) - c;
+          double t = r.getCoordinate(i) - c;
           arg += a*t*t;
         }
         return getParameter("Height") * exp(-arg);
@@ -387,6 +287,139 @@ namespace Mantid
     // Subscribe the function into the factory.
     DECLARE_FUNCTION(GaussianMD);
 
-  }
-}
+    /**
+      * Another example MD function. A function defined as a muParser string.
+      */
+    class UserFunctionMD: public IFunctionMD, public ParamFunction
+    {
+    private:
+      mu::Parser m_parser;
+      mutable std::vector<double> m_vars;
+      std::vector<std::string> m_varNames;
+      std::string m_formula;
+    public:
+      bool hasAttribute(const std::string& attName)const 
+      { 
+        return attName == "Formula";
+      }
+      Attribute getAttribute(const std::string& attName)const
+      {
+        return Attribute(m_formula);
+      }
+      
+      void setAttribute(const std::string& attName,const Attribute& attr)
+      {
+        m_formula = attr.asString();
+        if (!m_vars.empty())
+        {
+          setFormula();
+        }
+      }
+      /**
+        * Defining function's parameters here, ie after the workspace is set and 
+        * the dimensions are known.
+        */
+      void initDimensions()
+      {
+        if (!getWorkspace()) return;
+        m_vars.resize(m_dimensionIndexMap.size());
+        if (m_vars.size() <= 4)
+        {
+          std::string varNames[] = {"x","y","z","t"};
+          m_varNames.assign(varNames,varNames+m_vars.size());
+        }
+        else
+        {
+          for(int i = 0; i < m_vars.size(); ++i)
+          {
+            m_varNames.push_back("x" + boost::lexical_cast<std::string>(i));
+          }
+        }
+        for(int i = 0; i < m_vars.size(); ++i)
+        {
+          m_parser.DefineVar(m_varNames[i],&m_vars[i]);
+        }
+        setFormula();
+      }
+
+      std::string name() const {return "UserFunctionMD";}
+    protected:
+
+      /** 
+        * Calculate the function value at a point r in the MD workspace
+        * @param r :: MD workspace iterator with a reference to the current point
+        */
+      double function(IMDIterator& r) const
+      {
+        int n = m_dimensions.size();
+        for(int i = 0; i < n; ++i)
+        {
+          m_vars[i] = r.getCoordinate(i);
+        }
+        return m_parser.Eval();
+      }
+      /** Static callback function used by MuParser to initialize variables implicitly
+      @param varName :: The name of a new variable
+      @param pufun :: Pointer to the function
+      */
+      static double* AddVariable(const char *varName, void *pufun)
+      {
+        UserFunctionMD& fun = *(UserFunctionMD*)pufun;
+
+        std::vector<std::string>::iterator x = std::find(fun.m_varNames.begin(),fun.m_varNames.end(),varName);
+        if (x != fun.m_varNames.end())
+        {
+          //std::vector<std::string>::difference_type i = std::distance(fun.m_varNames.begin(),x);
+          throw std::runtime_error("UserFunctionMD variables are not defined");
+        }
+        else
+        {
+          try
+          {
+            fun.declareParameter(varName,0.0);
+          }
+          catch(...)
+          {}
+        }
+
+        // The returned pointer will never be used. Just returning a valid double pointer
+        return &fun.m_vars[0];
+      }
+
+      /**
+        * Initializes the mu::Parser.
+        */
+      void setFormula()
+      {
+        // variables must be already defined
+        if (m_vars.empty()) return;
+        if (m_formula.empty())
+        {
+          m_formula = "0";
+        }
+        m_parser.SetVarFactory(AddVariable,this);
+        m_parser.SetExpr(m_formula);
+        // declare function parameters using mu::Parser's implicit variable setting
+        m_parser.Eval();
+        m_parser.ClearVar();
+        // set muParser variables
+        for(size_t i = 0; i < m_vars.size(); ++i)
+        {
+          m_parser.DefineVar(m_varNames[i],&m_vars[i]);
+        }
+        for(int i=0;i<nParams();i++)
+        {
+          m_parser.DefineVar(parameterName(i),getParameterAddress(i));
+        }
+
+        m_parser.SetExpr(m_formula);
+      }
+
+    };
+
+    // Subscribe the function into the factory.
+    DECLARE_FUNCTION(UserFunctionMD);
+
+  } // API
+}   // Mantid
 

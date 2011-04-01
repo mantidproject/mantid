@@ -1,4 +1,5 @@
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidKernel/Exception.h"
 #include "MantidKernel/IPropertyManager.h"
 
 namespace Mantid
@@ -7,6 +8,14 @@ namespace Mantid
   {
       IMDWorkspace::~IMDWorkspace()
       {
+      }
+
+      /**
+        * Default implementation throws NotImplementedError exception.
+        */
+      IMDIterator* IMDWorkspace::createIterator() const
+      {
+        throw Kernel::Exception::NotImplementedError("Iterator is not implemented for this workspace");
       }
   }
 }

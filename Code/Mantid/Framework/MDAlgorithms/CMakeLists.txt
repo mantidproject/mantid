@@ -35,6 +35,7 @@ src/VectorMathematics.cpp
 src/VectorParameterParser.cpp
 src/VectorParameter.cpp
 src/WidthParameter.cpp 
+src/CreateMDFitWorkspace.cpp 
 )
 
 set ( INC_FILES inc/MantidMDAlgorithms/BoxFunctionBuilder.h
@@ -72,6 +73,7 @@ inc/MantidMDAlgorithms/VectorMathematics.h
 inc/MantidMDAlgorithms/VectorParameter.h
 inc/MantidMDAlgorithms/VectorParameterParser.h
 inc/MantidMDAlgorithms/WidthParameter.h 
+inc/MantidMDAlgorithms/CreateMDFitWorkspace.h 
 )
 
 # Test files. Other source files required.

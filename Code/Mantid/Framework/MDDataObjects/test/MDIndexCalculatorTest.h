@@ -11,11 +11,11 @@ public:
 
   void testCalculatorSubdivideIndex()
   {
-    Mantid::MDDataObjects::MDWorkspaceIndexCalculator<3> calculator;
+    Mantid::MDDataObjects::MDWorkspaceIndexCalculator calculator(3);
     calculator.setDimensionSize(0,3);
     calculator.setDimensionSize(1,5);
     calculator.setDimensionSize(2,4);
-    calculator.checkValidSetUp();
+    TS_ASSERT(calculator.isValid());
 
     std::vector<size_t> result = calculator.calculateDimensionIndexes(4);
     TS_ASSERT_EQUALS(1, result[0]);
@@ -30,11 +30,11 @@ public:
     indexes.push_back(4); // In y
     indexes.push_back(3); // In z
 
-    Mantid::MDDataObjects::MDWorkspaceIndexCalculator<3> calculator;
+    Mantid::MDDataObjects::MDWorkspaceIndexCalculator calculator(3);
     calculator.setDimensionSize(0,3);
     calculator.setDimensionSize(1,5);
     calculator.setDimensionSize(2,4);
-    calculator.checkValidSetUp();
+    TS_ASSERT(calculator.isValid());
 
     size_t result = calculator.calculateSingleDimensionIndex(indexes);
     TS_ASSERT_EQUALS(59, result);
@@ -43,11 +43,11 @@ public:
   void testSelfCheck()
   {
     //The two calculation methods are inverse functions of each other.
-    Mantid::MDDataObjects::MDWorkspaceIndexCalculator<3> calculator;
+    Mantid::MDDataObjects::MDWorkspaceIndexCalculator calculator(3);
     calculator.setDimensionSize(0, 3);
     calculator.setDimensionSize(1, 5);
     calculator.setDimensionSize(2, 4);
-    calculator.checkValidSetUp();
+    TS_ASSERT(calculator.isValid());
 
     size_t startingSingleDimensionIndex = 5;
     std::vector<size_t> result = calculator.calculateDimensionIndexes(startingSingleDimensionIndex);

@@ -10,6 +10,7 @@ src/MD_FileHoraceReader.cpp
 src/MDImage.cpp
 src/MDIndexCalculator.cpp
 src/MDWorkspace.cpp
+src/MDFitWorkspace.cpp
 src/MD_FileTestDataGenerator.cpp
 src/MDDPoints_MemManager.cpp
 #src/Events/MDEventWorkspace.cpp # breaks the windows build
@@ -29,9 +30,11 @@ inc/MDDataObjects/MDImage.h
 inc/MDDataObjects/MDImageDatatypes.h
 inc/MDDataObjects/MDIndexCalculator.h
 inc/MDDataObjects/MDWorkspace.h
+inc/MDDataObjects/MDFitWorkspace.h
 inc/MDDataObjects/MD_FileTestDataGenerator.h
 inc/MDDataObjects/MDTestWorkspace.h 
 inc/MDDataObjects/MDDPoints_MemManager.h
+inc/MDDataObjects/DllExport.h
 inc/MDDataObjects/stdafx.h
 )
 
@@ -42,6 +45,7 @@ test/MD_FileFactoryTest.h
 test/MDDataPointDescriptionTest.h
 test/MDFileTestDataGeneratorTest.h
 test/MDDPoints_MemManagerTest.h
+test/MDFitWorkspaceTest.h
 )
 
 set ( GMOCK_TEST_FILES

@@ -282,7 +282,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       MDDimension_sptr yDimension = geometry->getYDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
-      MDWorkspaceIndexCalculator<2> calculator;
+      MDWorkspaceIndexCalculator calculator(2);
       calculator.setDimensionSize(0, xDimension->getNBins());
       calculator.setDimensionSize(1, yDimension->getNBins());
       std::vector<size_t> indexes(2);
@@ -312,7 +312,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       MDDimension_sptr zDimension = geometry->getZDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
-      MDWorkspaceIndexCalculator<3> calculator;
+      MDWorkspaceIndexCalculator calculator(3);
       calculator.setDimensionSize(0, xDimension->getNBins());
       calculator.setDimensionSize(1, yDimension->getNBins());
       calculator.setDimensionSize(2, zDimension->getNBins());
@@ -343,7 +343,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       MDDimension_sptr tDimension = geometry->getZDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
-      MDWorkspaceIndexCalculator<4> calculator;
+      MDWorkspaceIndexCalculator calculator(4);
       calculator.setDimensionSize(0, xDimension->getNBins());
       calculator.setDimensionSize(1, yDimension->getNBins());
       calculator.setDimensionSize(2, zDimension->getNBins());

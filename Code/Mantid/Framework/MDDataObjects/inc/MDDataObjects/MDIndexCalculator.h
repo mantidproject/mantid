@@ -31,7 +31,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-
+#include "MDDataObjects/DllExport.h"
 #include <vector>
 namespace Mantid
 {
@@ -40,156 +40,62 @@ namespace MDDataObjects
 
 typedef std::vector<size_t> VecIndexes;
 
-template<int nDimensions>
-class MDWorkspaceIndexCalculator
+class EXPORT_OPT_MANTID_MDDATAOBJECTS MDWorkspaceIndexCalculator
 {
 private:
+
+  /// Stores the number of dimensions == m_dimSizes.size()
+  const unsigned int m_nDimensions;
 
   /// Stores maximum size in each dimension.
   std::vector<unsigned int> m_dimSizes;
 
+  /// Cached coefficients
+  std::vector<int> m_coeffs;
+
+  bool m_isSetup;
+
   /// Calculate coefficients of form i + aj + ck
   std::vector<int> cacluateCoefficients() const;
+
+  /// Checks that non-zero dimension sizes have been provided for all the required dimensions.
+  bool checkValidSetUp() const;
 
 public:
 
   /// Construct calculator.
-  MDWorkspaceIndexCalculator();
+  MDWorkspaceIndexCalculator(unsigned int nDimensions, int size1 = -1, int size2 = -1, int size3 = -1, int size4 = -1);
 
   /// Set the dimension size limit for a specified index/dimension.
   void setDimensionSize(unsigned int indexOfDimension, int size);
 
   /// Get the dimension size limit for a specified index/dimension.
-  int getDimensionSize(int indexOfDimension) const;
+  int getDimensionSize(unsigned int indexOfDimension) const;
 
   /// Checks that non-zero dimension sizes have been provided for all the required dimensions.
-  void checkValidSetUp() const;
+  bool isValid() const{return m_isSetup;}
 
   /// Check that the indexes requested are not out of bounds.
   void checkValidIndexesProvided(const VecIndexes& indexes) const;
 
   /// Calculate as single dimension index given a set of indexes relating to individual dimensions.
-  size_t calculateSingleDimensionIndex(VecIndexes indexes) const;
+  size_t calculateSingleDimensionIndex(const VecIndexes& indexes) const;
 
   /// calculate a set of indexes relating to individual dimensions given a single dimension index.
   VecIndexes calculateDimensionIndexes(std::size_t singleDimensionIndex) const;
 
+  /// calculate a set of indexes relating to individual dimensions given a single dimension index.
+  void calculateDimensionIndexes(std::size_t singleDimensionIndex,VecIndexes&) const;
+
   /// In a single dimensional form, get the upper limit for a single dimensional index value.
   size_t getIndexUpperBounds() const;
+
+  /// Get number of dimensions
+  size_t getNDimensions()const{return m_nDimensions;}
+
+
 };
 
-template<int nDimensions>
-std::vector<int> MDWorkspaceIndexCalculator<nDimensions>::cacluateCoefficients() const
-{
-  std::vector<int> coeffs(nDimensions);
-  coeffs[0] = 1;
-  for (unsigned int i = 1; i < nDimensions; i++)
-  {
-    coeffs[i] = coeffs[i - 1] * m_dimSizes[i - 1];
-  }
-  return coeffs;
-}
-
-template<int nDimensions>
-MDWorkspaceIndexCalculator<nDimensions>::MDWorkspaceIndexCalculator() :
-  m_dimSizes(nDimensions, 0)
-{
-}
-
-template<int nDimensions>
-void MDWorkspaceIndexCalculator<nDimensions>::setDimensionSize(unsigned int indexOfDimension, int size)
-{
-  if (indexOfDimension >= nDimensions)
-  {
-    throw std::runtime_error("indexOfDimension is out of bounds");
-  }
-  m_dimSizes[indexOfDimension] = size;
-}
-
-template<int nDimensions>
-int MDWorkspaceIndexCalculator<nDimensions>::getDimensionSize(int indexOfDimension) const
-{
-  if (indexOfDimension >= nDimensions)
-  {
-    throw std::runtime_error("indexOfDimension is out of bounds");
-  }
-  return m_dimSizes[indexOfDimension];
-}
-
-template<int nDimensions>
-void MDWorkspaceIndexCalculator<nDimensions>::checkValidSetUp() const
-{
-  for (int i = 0; i < nDimensions; i++)
-  {
-    if (m_dimSizes[i] == 0)
-    {
-      throw std::runtime_error("MDWorkspaceIndexCalculator:: Not all dimensions have sizes set.");
-    }
-  }
-}
-
-template<int nDimensions>
-void MDWorkspaceIndexCalculator<nDimensions>::checkValidIndexesProvided(const VecIndexes& indexes) const
-{
-  checkValidSetUp();
-  if (indexes.size() != nDimensions)
-  {
-    throw std::range_error("Incorrect number of indexes provided");
-  }
-  for (unsigned int i = 0; i < nDimensions; i++)
-  {
-    if (indexes[i] >= m_dimSizes[i])
-    {
-      throw std::range_error("index provided is out of bounds wrt the dimension on which it is to act.");
-    }
-  }
-}
-
-template<int nDimensions>
-size_t MDWorkspaceIndexCalculator<nDimensions>::calculateSingleDimensionIndex(VecIndexes indexes) const
-{
-  checkValidIndexesProvided(indexes);
-  std::vector<int> coeffs = cacluateCoefficients();
-  size_t singleDimensionalIndex = 0;
-  // = i + ni*j + ni*nj*k + ....+
-  for (int i = 0; i < nDimensions; i++)
-  {
-    singleDimensionalIndex += coeffs[i] * indexes[i];
-  }
-  return singleDimensionalIndex;
-}
-
-template<int nDimensions>
-VecIndexes MDWorkspaceIndexCalculator<nDimensions>::calculateDimensionIndexes(
-    std::size_t singleDimensionIndex) const
-{
-  std::vector<size_t> result(nDimensions);
-
-  //Calculate coefficients
-  std::vector<int> coeffs = cacluateCoefficients();
-
-  size_t sum = 0;
-  for (int i = nDimensions - 1; i >= 0; i--)
-  {
-    // single dimension index - all those already accounted for by higher dimensions
-    size_t truncatedDimensionIndex = (singleDimensionIndex - sum);
-    result[i] = truncatedDimensionIndex / coeffs[i]; //Integer division
-    sum += result[i] * coeffs[i];
-  }
-  return result;
-}
-
-template<int nDimensions>
-size_t MDWorkspaceIndexCalculator<nDimensions>::getIndexUpperBounds() const
-{
-  checkValidSetUp();
-  size_t sum = m_dimSizes[0];
-  for (int i = 1; i < nDimensions; i++)
-  {
-    sum *= m_dimSizes[i];
-  }
-  return sum - 1;
-}
 
 }
 }

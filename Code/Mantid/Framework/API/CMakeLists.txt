@@ -22,14 +22,13 @@ set ( SRC_FILES
 	src/FileFinder.cpp
 	src/FileProperty.cpp
 	src/FrameworkManager.cpp
-#	src/Function.cpp
 	src/FunctionFactory.cpp
 	src/IDataFileChecker.cpp
 	src/IEventWorkspace.cpp
 	src/IFitFunction.cpp
-#	src/IFunction.cpp
 	src/IFunctionMW.cpp
 	src/IFunctionMD.cpp
+	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
 	src/IMDEventWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
@@ -95,7 +94,6 @@ set ( INC_FILES
 	inc/MantidAPI/FileProperty.h
 	inc/MantidAPI/FrameworkManager.h
 	inc/MantidAPI/FunctionFactory.h
-	#inc/MantidAPI/Function.h
 	inc/MantidAPI/IAlgorithm.h
 	inc/MantidAPI/IArchiveSearch.h
 	inc/MantidAPI/IBackgroundFunction.h
@@ -105,9 +103,9 @@ set ( INC_FILES
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFitFunction.h
-	#inc/MantidAPI/IFunction.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionMD.h
+	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h

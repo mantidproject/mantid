@@ -18,6 +18,8 @@ namespace Mantid
 
   namespace API
   {
+
+    class IMDIterator;
     
     /** Base MD Workspace Abstract Class.
      *  
@@ -147,6 +149,9 @@ namespace Mantid
 
       /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
       virtual std::string getGeometryXML() const = 0;
+
+      /// Creates a new iterator pointing to the first cell in the workspace
+      virtual IMDIterator* createIterator() const;
 
       virtual ~IMDWorkspace();
 
