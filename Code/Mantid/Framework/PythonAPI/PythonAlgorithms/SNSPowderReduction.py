@@ -20,6 +20,10 @@ class SNSPowderReduction(PythonAlgorithm):
                 if has_dspace:
                     self.dmin = data[5]
                     self.dmax = data[6]
+                    if len(data) > 7:
+                        self.tmin = data[7]
+                        if len(data) > 8:
+                            self.tmax = data[8]
                 else:
                     self.tmin = data[5] * 1000. # convert to microseconds
                     self.tmax = data[6] * 1000.
@@ -195,6 +199,14 @@ class SNSPowderReduction(PythonAlgorithm):
     def _focus(self, wksp, calib, info, filterLogs=None):
         if wksp is None:
             return None
+        try:
+            MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
+        except:
+            pass
+        try:
+            MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
+        except:
+            pass
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -213,11 +225,23 @@ class SNSPowderReduction(PythonAlgorithm):
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
         if (LRef > 0) or (DIFCref > 0): # super special Jason stuff
+            kwargs = {}
+            try:
+                kwargs["Tmin"] = info.tmin
+            except:
+                pass
+            try:
+                kwargs["Tmax"] = info.tmax
+            except:
+                pass
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
             if LRef > 0:
-                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef)
+                UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
             if DIFCref > 0:
-                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref, K=3.22)
+                if kwargs.has_key("Tmax"):
+                    del kwargs["Tmax"]
+                RemoveLowResTOF(InputWorkspace=wksp, OutputWorkspace=wksp, ReferenceDIFC=DIFCref,
+                                K=3.22, **kwargs)
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="dSpacing") # put it back to the original units
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
