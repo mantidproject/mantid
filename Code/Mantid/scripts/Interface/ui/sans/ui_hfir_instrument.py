@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Fri Apr  1 10:15:44 2011
+# Created: Fri Apr  1 10:24:47 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -144,11 +144,11 @@ class Ui_Frame(object):
         self.dark_browse_button.setSizePolicy(sizePolicy)
         self.dark_browse_button.setObjectName("dark_browse_button")
         self.horizontalLayout_7.addWidget(self.dark_browse_button)
-        self.pushButton = QtGui.QPushButton(self.reduction_options_group)
-        self.pushButton.setMinimumSize(QtCore.QSize(85, 27))
-        self.pushButton.setMaximumSize(QtCore.QSize(85, 27))
-        self.pushButton.setObjectName("pushButton")
-        self.horizontalLayout_7.addWidget(self.pushButton)
+        self.dark_plot_button = QtGui.QPushButton(self.reduction_options_group)
+        self.dark_plot_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.dark_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.dark_plot_button.setObjectName("dark_plot_button")
+        self.horizontalLayout_7.addWidget(self.dark_plot_button)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem2)
         self.verticalLayout_6.addLayout(self.horizontalLayout_7)
@@ -442,8 +442,8 @@ class Ui_Frame(object):
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to perform a solid angle correction.", None, QtGui.QApplication.UnicodeUTF8))
         self.solid_angle_chk.setText(QtGui.QApplication.translate("Frame", "Perform solid angle correction", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("Frame", "Radial averaging", None, QtGui.QApplication.UnicodeUTF8))

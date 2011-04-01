@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Tue Mar 29 16:30:04 2011
+# Created: Fri Apr  1 10:24:47 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -83,16 +83,16 @@ class Ui_GroupBox(object):
         self.gridLayout.addItem(spacerItem, 0, 5, 1, 1)
         spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 0, 1, 1, 1)
-        self.pushButton = QtGui.QPushButton(GroupBox)
-        self.pushButton.setMinimumSize(QtCore.QSize(85, 27))
-        self.pushButton.setMaximumSize(QtCore.QSize(85, 27))
-        self.pushButton.setObjectName("pushButton")
-        self.gridLayout.addWidget(self.pushButton, 0, 4, 1, 1)
-        self.pushButton_2 = QtGui.QPushButton(GroupBox)
-        self.pushButton_2.setMinimumSize(QtCore.QSize(85, 27))
-        self.pushButton_2.setMaximumSize(QtCore.QSize(85, 27))
-        self.pushButton_2.setObjectName("pushButton_2")
-        self.gridLayout.addWidget(self.pushButton_2, 1, 4, 1, 1)
+        self.sample_plot = QtGui.QPushButton(GroupBox)
+        self.sample_plot.setMinimumSize(QtCore.QSize(85, 27))
+        self.sample_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.sample_plot.setObjectName("sample_plot")
+        self.gridLayout.addWidget(self.sample_plot, 0, 4, 1, 1)
+        self.direct_plot = QtGui.QPushButton(GroupBox)
+        self.direct_plot.setMinimumSize(QtCore.QSize(85, 27))
+        self.direct_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.direct_plot.setObjectName("direct_plot")
+        self.gridLayout.addWidget(self.direct_plot, 1, 4, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)
         spacerItem2 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
         self.verticalLayout.addItem(spacerItem2)
@@ -105,12 +105,16 @@ class Ui_GroupBox(object):
         GroupBox.setTitle(QtGui.QApplication.translate("GroupBox", "Direct Beam", None, QtGui.QApplication.UnicodeUTF8))
         self.label.setText(QtGui.QApplication.translate("GroupBox", "Sample direct beam data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_browse.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.sample_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("GroupBox", "Empty direct beam data file:", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Enter a valid data file path.", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_browse.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.direct_browse.setText(QtGui.QApplication.translate("GroupBox", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.beam_radius_edit.setToolTip(QtGui.QApplication.translate("GroupBox", "Radius of the beam in pixels.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("GroupBox", "Beam radius (pixels)", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
-        self.pushButton_2.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.sample_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_plot.setToolTip(QtGui.QApplication.translate("GroupBox", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
+        self.direct_plot.setText(QtGui.QApplication.translate("GroupBox", "Plot", None, QtGui.QApplication.UnicodeUTF8))
 

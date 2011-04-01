@@ -343,7 +343,7 @@
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton">
+             <widget class="QPushButton" name="dark_plot_button">
               <property name="minimumSize">
                <size>
                 <width>85</width>
