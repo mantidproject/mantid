@@ -25,6 +25,7 @@ BuildRequires:  gsl-devel
 BuildRequires: 	poco-devel
 BuildRequires:  numpy
 BuildRequires: 	OpenCASCADE-devel
+BuildRequires:  google-perftools-devel
 #required for mantidplot
 BuildRequires:	qt4-devel >= 4.2 
 BuildRequires:	qwt-devel
@@ -54,6 +55,7 @@ Requires:	poco-netssl
 Requires:	poco-foundation
 Requires:	gsl
 Requires:	glibc
+Requires:	google-perftools
 Requires:	qwtplot3d-qt4
 Requires: 	OpenCASCADE-libs-modelling >= 6.3.0
 Requires:	OpenCASCADE-libs-foundation >= 6.3.0
@@ -91,10 +93,10 @@ sed -i -e "s!MANTIDPLUGINS = .*'!MANTIDPLUGINS = '%{mantidpluginsdir}'!" SConstr
 cd Code/Mantid/Framework
 sh build.sh rpmbuild=1 skiptest=1 debug=0 -j4
 cd ../QtPropertyBrowser
-qmake-qt4
+qmake-qt4 DEFINES+=USE_TCMALLOC
 make -j4
 cd ../MantidQt
-qmake-qt4 
+qmake-qt4 DEFINES+=USE_TCMALLOC
 # Note that the old MantidQt stuff doesn't like being built in parallel
 make
 cd ../MantidPlot

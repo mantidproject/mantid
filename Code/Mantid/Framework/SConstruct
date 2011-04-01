@@ -190,6 +190,7 @@ elif platform.system() == 'Linux':
 	else:
 		cppPaths.append(USRLOCALINCLUDE + '/Poco/')
 		cppPaths.append(USRLOCALINCLUDE+'/Poco/Util')
+		env.Append(CPPDEFINES = ['USE_TCMALLOC'])
 		
 	cppPaths.append(boost_path)
 	cppPaths.append(USRINCLUDE)
@@ -288,6 +289,9 @@ if not conf.CheckCXXHeader('ssl.h') and not conf.CheckCXXHeader('openssl/ssl.h')
    Exit(-1)
 if conf.CheckCXXHeader("stdint.h"):
    conf.env.Append(CPPDEFINES = ['HAVE_STDINT_H'])
+if rpmBuild == True and not conf.CheckCXXHeader('google/tcmalloc.h'):
+   print "Failed to find google/tcmalloc.h"
+   Exit(-1)
 env = conf.Finish()
 
 #Collect the includes into a single directory 
