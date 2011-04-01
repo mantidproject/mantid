@@ -91,8 +91,42 @@ endif ()
 # Installation settings
 ###########################################################################
 
+# Create instrument directory and make it writable so vtp files can go there
+install ( DIRECTORY DESTINATION instrument 
+          DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
+                                GROUP_READ GROUP_EXECUTE GROUP_WRITE
+                                WORLD_READ WORLD_EXECUTE WORLD_WRITE
+)
 file ( GLOB INSTRUMENT_FILES instrument/*.xml )
 install ( FILES ${INSTRUMENT_FILES} DESTINATION instrument )
 install ( DIRECTORY scripts/ DESTINATION scripts PATTERN ".svn" EXCLUDE 
                                                  PATTERN "*.pyc" EXCLUDE )
 install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" EXCLUDE )
+
+###########################################################################
+# CPack settings
+###########################################################################
+
+# Keep this in a defaulted-to-off option
+set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
+if ( ENABLE_CPACK )
+  set ( CPACK_GENERATOR RPM )
+  set ( CPACK_SOURCE_GENERATOR TGZ )
+  set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
+  set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
+  set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
+  set ( CPACK_PACKAGE_VERSION 1.1.${Framework_WC_REVISION} )
+  set ( CPACK_PACKAGE_VERSION_MAJOR 1 )
+  set ( CPACK_PACKAGE_VERSION_MINOR 1 )
+  set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_REVISION} )
+  set ( CPACK_PACKAGING_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
+
+  set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
+  set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
+  # This is the rhel5 requirements string
+  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,poco,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+  # and this is the rhel6 one - TODO auto-determination of platform
+  # set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+
+  include ( CPack )
+endif ()
