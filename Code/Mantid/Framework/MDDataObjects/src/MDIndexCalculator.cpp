@@ -1,5 +1,5 @@
 #include "MDDataObjects/MDIndexCalculator.h"
-
+#include <stdexcept>
 
 namespace Mantid
 {

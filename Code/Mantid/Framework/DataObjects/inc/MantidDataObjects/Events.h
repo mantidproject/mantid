@@ -27,6 +27,7 @@ namespace DataObjects
  *  - the time of flight of the neutron (can be converted to other units)
  *  - the absolute time of the pulse at which it was produced
  */
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
 class DLLExport TofEvent {
 
   /// EventList has the right to mess with TofEvent.
@@ -129,7 +130,7 @@ public:
   /// Output a string representation of the event to a stream
   friend std::ostream& operator<<(std::ostream &os, const TofEvent &event);
 };
-
+#pragma pack(pop)
 
 
 
@@ -140,6 +141,7 @@ public:
  *  - the absolute time of the pulse at which it was produced
  *  - weight of the neutron (float, can be
  */
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
 class DLLExport WeightedEvent : public TofEvent {
 
   /// EventList has the right to mess with WeightedEvent.
@@ -211,6 +213,7 @@ public:
 
 
 };
+#pragma pack(pop)
 
 
 
@@ -228,6 +231,7 @@ public:
  *  - the absolute time of the pulse at which it was produced
  *  - weight of the neutron (float, can be
  */
+#pragma pack(push, 4) //Ensure the structure is no larger than it needs to
 class DLLExport WeightedEventNoTime {
 
   /// EventList has the right to mess with this
@@ -238,7 +242,7 @@ class DLLExport WeightedEventNoTime {
 public: //#TODO: switch back to protected when the darwin build is upgraded to GCC v.4.2+
 
   /// The time of flight of this neutron
-  float m_tof; //TODO:
+  double m_tof;
 
   /// The weight of this neutron.
   float m_weight;
@@ -327,6 +331,7 @@ public:
 
 
 };
+#pragma pack(pop)
 
 
 
