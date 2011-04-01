@@ -70,11 +70,11 @@ public:
    * create a sub-algorithm that will not log itself.
    * @param algo_name :: Name of the algorithm to create
    */
-  boost::shared_ptr<API::IAlgorithm>  _createSubAlgorithm(const std::string algo_name)
+  /// Creates and instance of an algorithm
+  boost::shared_ptr<Mantid::API::IAlgorithm> _createSubAlgorithm(const std::string& algo_name, const int version=-1)
   {
-    return this->Algorithm::createSubAlgorithm(algo_name);
+    return this->Algorithm::createSubAlgorithm(algo_name, -1, -1, true, version);
   }
-
   /**
    * Declare a property, templated on the value along with a validator
    * @param prop_name :: The name of the property
