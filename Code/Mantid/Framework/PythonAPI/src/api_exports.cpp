@@ -106,6 +106,9 @@ using namespace boost::python;
     return self.getProperty(prop_name);
   }
 
+  // Overloads for createSubAlgorithm function which has 1 optional argument
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(PyAlgorithmBase_createSubAlgorithmOverloader, PythonAPI::PyAlgorithmBase::_createSubAlgorithm, 1, 2)
+
   void export_ialgorithm()
   {
     
@@ -163,7 +166,7 @@ using namespace boost::python;
       .def("_declareMatrixWorkspace", (void(PyAlgorithmBase::*)(const std::string &, const std::string &,Kernel::IValidator<boost::shared_ptr<API::MatrixWorkspace> >&,const std::string &, const unsigned int))&PyAlgorithmBase::_declareMatrixWorkspace)
       .def("_declareTableWorkspace", &PyAlgorithmBase::_declareTableWorkspace)
       .def("log", &PyAlgorithmBase::getLogger, return_internal_reference<>())
-      .def("_createSubAlgorithm", &PyAlgorithmBase::_createSubAlgorithm, return_value_policy< return_by_value >())
+      .def("_createSubAlgorithm", &PyAlgorithmBase::_createSubAlgorithm, PyAlgorithmBase_createSubAlgorithmOverloader()[return_value_policy< return_by_value >()] )
       EXPORT_DECLAREPROPERTY(int, int)
       EXPORT_DECLAREPROPERTY(double, dbl)
       EXPORT_DECLAREPROPERTY(std::string, str)
@@ -181,10 +184,8 @@ using namespace boost::python;
 #undef EXPORT_GETLISTPROPERTY
   }
 
-  bool _isDirty_default(API::Workspace& self)
-  {
-    return self.isDirty();
-  }
+  // Overloads for createSubAlgorithm function which has 1 optional argument
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(Workspace_isDirtyOverloader, API::Workspace::isDirty, 0, 1)
 
   void export_workspace()
   {
@@ -197,8 +198,7 @@ using namespace boost::python;
       .def("getComment", &API::MatrixWorkspace::getComment, 
          return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &API::Workspace::getMemorySize)
-      .def("isDirty", &API::Workspace::isDirty)
-      .def("isDirty", &_isDirty_default)
+      .def("isDirty", &API::Workspace::isDirty, Workspace_isDirtyOverloader()[return_value_policy< return_by_value >()])
       .def("getName", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("__str__", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       ;
@@ -206,7 +206,7 @@ using namespace boost::python;
 
   // Overloads for binIndexOf function which has 1 optional argument
   BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(MatrixWorkspace_binIndexOfOverloads, API::MatrixWorkspace::binIndexOf, 1, 2)
-    
+
   void export_matrixworkspace()
   {
     /// Shared pointer registration
