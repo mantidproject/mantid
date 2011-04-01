@@ -166,7 +166,7 @@ class LoadRun(ReductionStep):
         x_min = offset-offset%x_step
         x_max = 2*1e6/60.0+offset
         x_max -= x_max%x_step
-        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max))
+        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), False )
 
         ConvertUnits(workspace, workspace, "Wavelength")
         
