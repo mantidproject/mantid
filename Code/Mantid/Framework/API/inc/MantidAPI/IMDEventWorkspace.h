@@ -42,6 +42,9 @@ namespace API
     /// Get that dimension
     virtual Dimension getDimension(size_t dim) const;
 
+    /// Returns some information about the box controller, to be displayed in the GUI, for example
+    virtual std::vector<std::string> getBoxControllerStats() const = 0;
+
     /// Get the dimension index, searching by name
     virtual size_t getDimensionIndexByName(const std::string & name) const;
 

@@ -60,6 +60,8 @@ namespace MDEvents
       return m_BoxController;
     }
 
+    virtual std::vector<std::string> getBoxControllerStats() const;
+
     void splitBox();
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts);

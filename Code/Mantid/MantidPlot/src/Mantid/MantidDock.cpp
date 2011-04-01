@@ -7,6 +7,8 @@
 #include <MantidAPI/IEventWorkspace.h>
 #include <MantidAPI/Dimension.h>
 #include <MantidAPI/IMDEventWorkspace.h>
+#include <MantidAPI/IMDWorkspace.h>
+#include <MantidGeometry/MDGeometry/IMDDimension.h>
 #include "MantidMatrix.h"
 #include <QInputDialog>
 #include <QMessageBox>
@@ -28,6 +30,7 @@
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
+using namespace Mantid::Geometry;
 
 Mantid::Kernel::Logger& MantidDockWidget::logObject=Mantid::Kernel::Logger::get("mantidDockWidget");
 Mantid::Kernel::Logger& MantidTreeWidget::logObject=Mantid::Kernel::Logger::get("MantidTreeWidget");
@@ -301,6 +304,10 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   {
     populateMDEventWorkspaceData(imdew, item);
   }
+  else if( Mantid::API::IMDWorkspace_sptr imdew = boost::dynamic_pointer_cast<IMDWorkspace>(workspace) )
+  {
+    populateMDWorkspaceData(imdew, item);
+  }
   else if(Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace) )
   {
     populateWorkspaceGroupData(ws_group, item);
@@ -386,9 +393,36 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
 }
 
 
+
+/** Populate the tree with some details about a MDWorkspace
+ *
+ * @param workspace :: Workspace
+ * @param ws_item :: tree item
+ */
+void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
+{
+  QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
+  data_item->setFlags(Qt::NoItemFlags);
+  ws_item->addChild(data_item);
+
+  // Now add each dimension
+  for (size_t i=0; i < workspace->getNumDims(); i++)
+  {
+    std::ostringstream mess;
+    IMDDimension_sptr dim = workspace->getDimensionNum(i);
+    mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " in " << dim->getNBins() << " bins";
+    std::string s = mess.str();
+    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    sub_data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(sub_data_item);
+  }
+}
+
+
+
 /** Populate the tree with some details about a MDEventWorkspace
  *
- * @param workspace :: IMDEventWorkspace
+ * @param workspace :: Workspace
  * @param ws_item :: tree item
  */
 void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
@@ -412,6 +446,16 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
     sub_data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(sub_data_item);
   }
+
+  // Now box controller details
+  std::vector<std::string> stats = workspace->getBoxControllerStats();
+  for (size_t i=0; i < stats.size(); i++)
+  {
+    QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString( stats[i] )));
+    sub_data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(sub_data_item);
+  }
+
 
   data_item = new QTreeWidgetItem(QStringList("Events: "+QString::number(workspace->getNPoints())));
   data_item->setFlags(Qt::NoItemFlags);

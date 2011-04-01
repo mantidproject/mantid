@@ -96,6 +96,18 @@ namespace MDEvents
   }
 
 
+  /// Returns some information about the box controller, to be displayed in the GUI, for example
+  TMDE(
+  std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const
+  {
+    std::vector<std::string> out;
+    std::ostringstream mess;
+    mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes";
+    out.push_back(mess.str());
+    mess.clear();
+    return out;
+  }
+
   //-----------------------------------------------------------------------------------------------
   /** Returns the number of bytes of memory
    * used by the workspace. */

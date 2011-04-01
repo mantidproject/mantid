@@ -10,6 +10,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 class MantidUI;
 class ApplicationWindow;
@@ -58,6 +59,7 @@ private:
   QTreeWidgetItem *createEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceEntry(const QString & ws_name, Mantid::API::Workspace_sptr workspace);
   void updateWorkspaceGroupEntry(const QString & ws_name, Mantid::API::WorkspaceGroup_sptr workspace);
+  void populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item);
   void populateWorkspaceGroupData(Mantid::API::WorkspaceGroup_sptr workspace, QTreeWidgetItem* ws_item);
