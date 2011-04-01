@@ -70,7 +70,9 @@ void DiffractionFocussing2::init()
 
   declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
 		  "The name of the CalFile with grouping data" );
-  declareProperty("MatrixWorkspaceOut", false, "Force the output workspace to be a Matrix workspace");
+
+  declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
+      "If false, then the workspace gets converted to a Workspace2D histogram.");
 }
 
 
@@ -112,7 +114,7 @@ void DiffractionFocussing2::exec()
   determineRebinParameters();
 
   eventW = boost::dynamic_pointer_cast<EventWorkspace>( matrixInputW );
-  if ((!getProperty("MatrixWorkspaceOut")) && (eventW != NULL))
+  if ((getProperty("PreserveEvents")) && (eventW != NULL))
   {
     //Input workspace is an event workspace. Use the other exec method
     this->execEvent();

@@ -235,6 +235,21 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
+  /** Switch all event lists to the given event type
+   *
+   * @param type :: EventType to switch to
+   */
+  void EventWorkspace::switchEventType(const Mantid::API::EventType type)
+  {
+    for (EventListVector::const_iterator it = this->data.begin();
+        it != this->data.end(); it++)
+    {
+      (*it)->switchTo(type);
+    }
+  }
+
+
+  //-----------------------------------------------------------------------------
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   /// @returns If the data is a histogram - always true for an eventWorkspace
   bool EventWorkspace::isHistogramData() const

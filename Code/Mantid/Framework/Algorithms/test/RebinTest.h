@@ -9,6 +9,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -198,193 +199,136 @@ public:
     AnalysisDataService::Instance().remove("test_out");
   }
 
-  void do_testEventWorkspace_SameOutputWorkspace(EventType eventType)
+
+
+
+  void do_test_EventWorkspace(EventType eventType, bool inPlace, bool PreserveEvents, bool expectOutputEvent)
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, eventType);
-    AnalysisDataService::Instance().add("test_inEvent", test_in);
+    // Two events per bin
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateEventWorkspace2(50, 100);
+    test_in->switchEventType(eventType);
 
-    const EventList el(test_in->getEventList(1));
-    TS_ASSERT_EQUALS( el.dataX()[0], 0);
-    TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
-    //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( (*el.dataY())[0], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
+    std::string inName("test_inEvent");
+    std::string outName("test_inEvent_output");
+    if (inPlace) outName = inName;
 
+    AnalysisDataService::Instance().addOrReplace(inName, test_in);
     Rebin rebin;
     rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace","test_inEvent");
-    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
+    rebin.setPropertyValue("InputWorkspace",inName);
+    rebin.setPropertyValue("OutputWorkspace",outName);
     rebin.setPropertyValue("Params", "0.0,4.0,100");
+    rebin.setProperty("PreserveEvents", PreserveEvents);
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
-    const EventList el2(test_in->getEventList(2));
-    TS_ASSERT_EQUALS( el2.dataX()[0], 0.0);
-    TS_ASSERT_EQUALS( el2.dataX()[1], 4.0);
+    MatrixWorkspace_sptr outWS;
+    EventWorkspace_sptr eventOutWS;
+    TS_ASSERT_THROWS_NOTHING( outWS = boost::shared_dynamic_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve(outName) ));
+    TS_ASSERT( outWS );
+    if (!outWS) return;
 
-    //Correct # of bins?
-    TS_ASSERT_EQUALS(test_in->blocksize(), 25);
-    TS_ASSERT_EQUALS(el2.dataX().size(), 26);
-    TS_ASSERT_EQUALS(el2.dataY()->size(), 25);
-    TS_ASSERT_EQUALS(el2.dataE()->size(), 25);
+    // Is the output gonna be events?
+    if (expectOutputEvent)
+    {
+      eventOutWS = boost::dynamic_pointer_cast<EventWorkspace>(outWS);
+      TS_ASSERT(eventOutWS);
+      if (!eventOutWS) return;
+      TS_ASSERT_EQUALS( eventOutWS->getNumberEvents(), 50 * 100 * 2);
+      // Check that it is the same workspace
+      if (inPlace)
+        TS_ASSERT( eventOutWS == test_in );
+    }
 
-    //# of events per bin was doubled
-    TS_ASSERT_EQUALS( (*el2.dataY())[0], 2);
-    TS_ASSERT_EQUALS( (*el2.dataY())[1], 2);
-    TS_ASSERT_EQUALS( (*el2.dataY())[NUMBINS/2-2], 2); //The last bin
-    TS_ASSERT_EQUALS( (*el2.dataY())[NUMBINS/2-1], 2); //The last bin
+    const MantidVec & X = outWS->readX(0);
+    const MantidVec & Y = outWS->readY(0);
+    const MantidVec & E = outWS->readE(0);
 
-    //Now do it a second time
-    rebin.setPropertyValue("InputWorkspace","test_inEvent");
-    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
-    rebin.setPropertyValue("Params", "0.0,4.0,100");
-    TS_ASSERT(rebin.execute());
-    const EventList el3(test_in->getEventList(2));
-    TS_ASSERT_EQUALS(el3.dataX().size(), 26);
+    TS_ASSERT_EQUALS( X.size(), 26);
+    TS_ASSERT_DELTA( X[0], 0.0, 1e-5);
+    TS_ASSERT_DELTA( X[1], 4.0, 1e-5);
+    TS_ASSERT_DELTA( X[2], 8.0, 1e-5);
 
+    TS_ASSERT_EQUALS( Y.size(), 25);
+    TS_ASSERT_DELTA( Y[0], 8.0, 1e-5);
+    TS_ASSERT_DELTA( Y[1], 8.0, 1e-5);
+    TS_ASSERT_DELTA( Y[2], 8.0, 1e-5);
 
-    //Now do it a third time
-    rebin.setPropertyValue("InputWorkspace","test_inEvent");
-    rebin.setPropertyValue("OutputWorkspace","test_inEvent");
-    rebin.setPropertyValue("Params", "-100.0,4.0,100");
-    TS_ASSERT(rebin.execute());
-    const EventList el4(test_in->getEventList(2));
-    TS_ASSERT_EQUALS(el4.dataX().size(), 51);
+    TS_ASSERT_EQUALS( E.size(), 25);
+    TS_ASSERT_DELTA( E[0], sqrt(8.0), 1e-5);
+    TS_ASSERT_DELTA( E[1], sqrt(8.0), 1e-5);
 
-    EventWorkspace_const_sptr outWS = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve("test_inEvent"));
-    TS_ASSERT_EQUALS(outWS->dataY(0).size(), 50);
-
-    AnalysisDataService::Instance().remove("test_inEvent");
+    AnalysisDataService::Instance().remove(inName);
+    AnalysisDataService::Instance().remove(outName);
   }
 
 
-  void dotestEventWorkspace_DifferentOutputWorkspace(EventType eventType)
+  void testEventWorkspace_InPlace_PreserveEvents()
   {
-    EventWorkspace_sptr test_in = CreateEventWorkspace(NUMBINS, NUMPIXELS, eventType);
-    AnalysisDataService::Instance().add("test_inEvent2", test_in);
-
-    const EventList el(test_in->getEventList(1));
-    //Correct # of bins?
-    TS_ASSERT_EQUALS(test_in->blocksize(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.dataX().size(), NUMBINS);
-    TS_ASSERT_EQUALS( el.dataY()->size(), NUMBINS-1);
-    TS_ASSERT_EQUALS( el.dataE()->size(), NUMBINS-1);
-    //Good histogram
-    TS_ASSERT_EQUALS( el.dataX()[0], 0);
-    TS_ASSERT_EQUALS( el.dataX()[1], BIN_DELTA);
-    //Because of the way the events were faked, bins 0 to pixel-1 are 0, rest are 1
-    TS_ASSERT_EQUALS( (*el.dataY())[0], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[1], 1);
-    TS_ASSERT_EQUALS( (*el.dataY())[NUMBINS-2], 1); //The last bin
-
-    Rebin rebin;
-    rebin.initialize();
-    rebin.setPropertyValue("InputWorkspace","test_inEvent2");
-    rebin.setPropertyValue("OutputWorkspace","test_out2");
-    rebin.setPropertyValue("Params", "0.0,4.0,100");
-       
-    TS_ASSERT(rebin.execute());
-    TS_ASSERT(rebin.isExecuted());
-
-    MatrixWorkspace_sptr test_out = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("test_out2"));
-    TS_ASSERT_EQUALS(test_out->getNumberHistograms(), NUMPIXELS);
-    TS_ASSERT_EQUALS(test_out->readX(0)[0], 0.0);
-    TS_ASSERT_EQUALS(test_out->readX(0)[1], 4.0);
-    TS_ASSERT_EQUALS(test_out->readX(0)[25], 100.0);
-    //Correct # of bins?
-    TS_ASSERT_EQUALS(test_out->blocksize(), 25);
-    TS_ASSERT_EQUALS(test_out->readX(0).size(), 26);
-    TS_ASSERT_EQUALS(test_out->readY(0).size(), 25);
-    TS_ASSERT_EQUALS(test_out->readE(0).size(), 25);
-    //Number of events was doubled
-    TS_ASSERT_EQUALS(test_out->readY(0)[0], 2);
-    TS_ASSERT_EQUALS(test_out->readY(0)[1], 2);
-    TS_ASSERT_EQUALS(test_out->readY(0)[24], 2);
-    //E is sqrt(2)
-    TS_ASSERT_DELTA(test_out->readE(0)[0],std::sqrt(test_out->readY(0)[0]), 0.0001);
-    //Should say it is histogram data
-    TS_ASSERT(test_out->isHistogramData());
-
-
-    //Axes?
-    TS_ASSERT_EQUALS(test_in->axes(), test_out->axes());
-    //Match the workspace index->spectraNo map.
-    for (int i=0; i<NUMPIXELS; i++)
-      TS_ASSERT_EQUALS(test_in->getAxis(1)->spectraNo(i), test_out->getAxis(1)->spectraNo(i));
-
-    AnalysisDataService::Instance().remove("test_inEvent2");
-
-  }
-    
-  void testEventWorkspace_SameOutputWorkspace()
-  {
-    do_testEventWorkspace_SameOutputWorkspace(TOF);
+    do_test_EventWorkspace(TOF, true, true, true);
   }
 
-  void testEventWorkspace_SameOutputWorkspace_weighted()
+  void testEventWorkspace_InPlace_PreserveEvents_weighted()
   {
-    do_testEventWorkspace_SameOutputWorkspace(WEIGHTED);
+    do_test_EventWorkspace(WEIGHTED, true, true, true);
   }
 
-  void testEventWorkspace_SameOutputWorkspace_weightedNoTime()
+  void testEventWorkspace_InPlace_PreserveEvents_weightedNoTime()
   {
-    do_testEventWorkspace_SameOutputWorkspace(WEIGHTED_NOTIME);
+    do_test_EventWorkspace(WEIGHTED_NOTIME, true, true, true);
   }
 
-  void testEventWorkspace_DifferentOutputWorkspace()
+
+  void testEventWorkspace_InPlace_NoPreserveEvents()
   {
-    dotestEventWorkspace_DifferentOutputWorkspace(TOF);
+    do_test_EventWorkspace(TOF, true, false, false);
   }
 
-  void testEventWorkspace_Weighted_And_DifferentOutputWorkspace()
+  void testEventWorkspace_InPlace_NoPreserveEvents_weighted()
   {
-    dotestEventWorkspace_DifferentOutputWorkspace(WEIGHTED);
+    do_test_EventWorkspace(WEIGHTED, true, false, false);
   }
 
-  void testEventWorkspace_WeightedNoTime_And_DifferentOutputWorkspace()
+  void testEventWorkspace_InPlace_NoPreserveEvents_weightedNoTime()
   {
-    dotestEventWorkspace_DifferentOutputWorkspace(WEIGHTED_NOTIME);
+    do_test_EventWorkspace(WEIGHTED_NOTIME, true, false, false);
+  }
+
+
+  void testEventWorkspace_NotInPlace_NoPreserveEvents()
+  {
+    do_test_EventWorkspace(TOF, false, false, false);
+  }
+
+  void testEventWorkspace_NotInPlace_NoPreserveEvents_weighted()
+  {
+    do_test_EventWorkspace(WEIGHTED, false, false, false);
+  }
+
+  void testEventWorkspace_NotInPlace_NoPreserveEvents_weightedNoTime()
+  {
+    do_test_EventWorkspace(WEIGHTED_NOTIME, false, false, false);
+  }
+
+
+  void testEventWorkspace_NotInPlace_PreserveEvents()
+  {
+    do_test_EventWorkspace(TOF, false, true, true);
+  }
+
+  void testEventWorkspace_NotInPlace_PreserveEvents_weighted()
+  {
+    do_test_EventWorkspace(WEIGHTED, false, true, true);
+  }
+
+  void testEventWorkspace_NotInPlace_PreserveEvents_weightedNoTime()
+  {
+    do_test_EventWorkspace(WEIGHTED_NOTIME, false, true, true);
   }
 
 
 
 private:
-
-  EventWorkspace_sptr CreateEventWorkspace(int numbins, int numpixels, EventType theType)
-  {
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numpixels,numbins,numbins-1);
-
-    //Create the original X axis to histogram on.
-    //Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(numbins);
-    for (int i = 0; i < numbins; ++i)
-      xRef[i] = i*BIN_DELTA;
-
-
-    //Make up some data for each pixels
-    for (int i=0; i< numpixels; i++)
-    {
-      //Create one event for each bin
-      EventList& events = retVal->getEventListAtPixelID(i);
-      for (double ie=0; ie<numbins; ie++)
-      {
-        //Create a list of events in order, one per bin.
-        events += TofEvent((ie*BIN_DELTA)+0.5, 1);
-      }
-      events.switchTo(theType);
-   }
-
-
-    retVal->doneLoadingData();
-    retVal->setAllX(axis);
-
-
-    return retVal;
-  }
 
 
   Workspace1D_sptr Create1DWorkspace(int size)

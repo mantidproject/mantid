@@ -221,6 +221,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Type of the events
   Mantid::API::EventType getEventType() const;
 
+  /// Change the event type
+  void switchEventType(const Mantid::API::EventType type);
+
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   virtual bool isHistogramData() const;
 
