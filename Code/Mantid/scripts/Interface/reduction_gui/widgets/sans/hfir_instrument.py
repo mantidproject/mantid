@@ -27,6 +27,8 @@ class SANSInstrumentWidget(BaseWidget):
         self.initialize_content()
         self._layout.addWidget(self._summary)
         
+        self._masked_detectors = []
+        
         if state is not None:
             self.set_state(state)
         else:
@@ -67,7 +69,23 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_edit.setText(QtCore.QString("1"))
             
         self._summary.instr_name_label.hide()    
-        self._dark_clicked(self._summary.dark_current_check.isChecked())    
+        self._dark_clicked(self._summary.dark_current_check.isChecked())  
+        
+        # Mask Validators
+        self._summary.x_min_edit.setValidator(QtGui.QIntValidator(self._summary.x_min_edit))
+        self._summary.x_max_edit.setValidator(QtGui.QIntValidator(self._summary.x_max_edit))
+        self._summary.y_min_edit.setValidator(QtGui.QIntValidator(self._summary.y_min_edit))
+        self._summary.y_max_edit.setValidator(QtGui.QIntValidator(self._summary.y_max_edit))
+        
+        self._summary.top_edit.setValidator(QtGui.QIntValidator(self._summary.top_edit))
+        self._summary.bottom_edit.setValidator(QtGui.QIntValidator(self._summary.bottom_edit))
+        self._summary.left_edit.setValidator(QtGui.QIntValidator(self._summary.left_edit))
+        self._summary.right_edit.setValidator(QtGui.QIntValidator(self._summary.right_edit))
+        
+        # Mask Connections
+        self.connect(self._summary.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
+        self.connect(self._summary.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
+  
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -96,6 +114,34 @@ class SANSInstrumentWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._summary.dark_file_edit.setText(fname)      
+
+    def _add_rectangle(self):
+        # Read in the parameters
+        x_min = util._check_and_get_int_line_edit(self._summary.x_min_edit)
+        x_max = util._check_and_get_int_line_edit(self._summary.x_max_edit)
+        y_min = util._check_and_get_int_line_edit(self._summary.y_min_edit)
+        y_max = util._check_and_get_int_line_edit(self._summary.y_max_edit)
+        
+        # Check that a rectangle was defined. We don't care whether 
+        # the min/max values were inverted
+        if (self._summary.x_min_edit.hasAcceptableInput() and
+            self._summary.x_max_edit.hasAcceptableInput() and
+            self._summary.y_min_edit.hasAcceptableInput() and
+            self._summary.y_max_edit.hasAcceptableInput()):
+            rect = ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max)
+            self._append_rectangle(rect)
+    
+    def _remove_rectangle(self):
+        selected = self._summary.listWidget.selectedItems()
+        for item in selected:
+            self._summary.listWidget.takeItem( self._summary.listWidget.row(item) )
+    
+    def _append_rectangle(self, rect):
+        class _ItemWrapper(QtGui.QListWidgetItem):
+            def __init__(self, value):
+                QtGui.QListWidgetItem.__init__(self, value)
+                self.value = rect
+        self._summary.listWidget.addItem(_ItemWrapper("Rect: %g < x < %g; %g < y < %g" % (rect.x_min, rect.x_max, rect.y_min, rect.y_max)))    
 
     def set_state(self, state):
         """
@@ -151,6 +197,17 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.n_sub_pix_edit.setText(QtCore.QString(str(state.n_sub_pix)))
         self._summary.log_binning_radio.setChecked(state.log_binning)
         
+        self._summary.top_edit.setText(QtCore.QString(str(state.top)))
+        self._summary.bottom_edit.setText(QtCore.QString(str(state.bottom)))
+        self._summary.left_edit.setText(QtCore.QString(str(state.left)))
+        self._summary.right_edit.setText(QtCore.QString(str(state.right)))
+            
+        self._summary.listWidget.clear()
+        for item in state.shapes:
+            self._append_rectangle(item)
+            
+        self._masked_detectors = state.detector_ids
+
     def _prepare_field(self, is_enabled, stored_value, chk_widget, edit_widget, suppl_value=None, suppl_edit=None):
         #to_display = str(stored_value) if is_enabled else ''
         edit_widget.setEnabled(is_enabled)
@@ -203,6 +260,19 @@ class SANSInstrumentWidget(BaseWidget):
         m.n_sub_pix = util._check_and_get_int_line_edit(self._summary.n_sub_pix_edit)
         m.log_binning = self._summary.log_binning_radio.isChecked()
         
+        # Mask Edges
+        m.top = util._check_and_get_int_line_edit(self._summary.top_edit)
+        m.bottom = util._check_and_get_int_line_edit(self._summary.bottom_edit)
+        m.left = util._check_and_get_int_line_edit(self._summary.left_edit)
+        m.right = util._check_and_get_int_line_edit(self._summary.right_edit)
+        
+        # Mask Rectangles
+        for i in range(self._summary.listWidget.count()):
+            m.shapes.append(self._summary.listWidget.item(i).value)
+        
+        # Mask detector IDs
+        m.detector_ids = self._masked_detectors
+
         return m
     
     def get_data_info(self):

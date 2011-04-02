@@ -34,12 +34,6 @@ class ReductionOptions(BaseScriptElement):
     # Absoulte scale
     scaling_factor = 1.0
     
-    # Mask
-    mask_top = 0
-    mask_bottom = 0
-    mask_left = 0
-    mask_right = 0
-    
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0
     # Detector distance offset [mm]
@@ -59,11 +53,35 @@ class ReductionOptions(BaseScriptElement):
     n_sub_pix = 1
     log_binning = False
     
+    # Masking
+    class RectangleMask(object):
+        def __init__(self, x_min=0, x_max=0, y_min=0, y_max=0):
+            self.x_min = x_min
+            self.x_max = x_max
+            self.y_min = y_min
+            self.y_max = y_max
+        
+    # Masked edges
+    top = 0
+    bottom = 0
+    left = 0
+    right = 0
+    
+    # MAsked shapes
+    shapes = []
+    
+    # Masked detector IDs
+    detector_ids = ''
+
     
     NORMALIZATION_NONE = 0
     NORMALIZATION_TIME = 1
     NORMALIZATION_MONITOR = 2
     normalization = NORMALIZATION_MONITOR
+        
+    def __init__(self):
+        super(ReductionOptions, self).__init__()
+        self.reset()
         
     def to_script(self):
         """
@@ -99,13 +117,21 @@ class ReductionOptions(BaseScriptElement):
         elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
             script += "MonitorNormalization()\n"
         
-        # Mask
-        script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.mask_left, self.mask_right, self.mask_bottom, self.mask_top)
-        
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
         script += "IQxQy(nbins=%g)\n" % self.n_q_bins
         
+        # Mask 
+        #   Edges
+        if (not self.top == self.bottom and not self.left == self.bottom):
+            script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.left, self.right, self.bottom, self.top)
+        #   Rectangles
+        for item in self.shapes:
+            script += "MaskRectangle(x_min=%g, x_max=%g, y_min=%g, y_max=%g)\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
+        #   Detector IDs
+        if len(self.detector_ids)>0:
+            script += "MaskDetectors([%s])\n" % self.detector_ids
+
         # Data files
         if len(self.data_files)>0:
             parts = os.path.split(str(self.data_files[0]).strip())
@@ -125,13 +151,6 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
         xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
         xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
-
-        #for item in self.data_files:
-        #    xml += "  <data_file>%s</data_file>\n" % item
-        #xml += "  <mask_top>%g</mask_top>\n" % self.mask_top
-        #xml += "  <mask_bottom>%g</mask_bottom>\n" % self.mask_bottom
-        #xml += "  <mask_left>%g</mask_left>\n" % self.mask_left
-        #xml += "  <mask_right>%g</mask_right>\n" % self.mask_right
         
         xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
 
@@ -151,6 +170,24 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <normalization>%d</normalization>\n" % self.normalization
         
         xml += "</Instrument>\n"
+        
+        xml += "<Mask>\n"
+        xml += "  <mask_top>%g</mask_top>\n" % self.top
+        xml += "  <mask_bottom>%g</mask_bottom>\n" % self.bottom
+        xml += "  <mask_left>%g</mask_left>\n" % self.left
+        xml += "  <mask_right>%g</mask_right>\n" % self.right
+        
+        xml += "  <Shapes>\n"
+        for item in self.shapes:
+            xml += "    <rect x_min='%g' x_max='%g' y_min='%g' y_max='%g' />\n" % (item.x_min, item.x_max, item.y_min, item.y_max)
+        xml += "  </Shapes>\n"
+        
+        xml += "  <DetectorIDs>\n"
+        xml += "    %s\n" % self.detector_ids
+        xml += "  </DetectorIDs>\n"
+        
+        xml += "</Mask>\n"
+
 
         return xml
         
@@ -168,16 +205,6 @@ class ReductionOptions(BaseScriptElement):
         self.instrument_name = BaseScriptElement.getStringElement(instrument_dom, "name")
         self.pixel_size = BaseScriptElement.getFloatElement(instrument_dom, "pixel_size",
                                                             default=ReductionOptions.pixel_size)
-        
-        #self.data_files = BaseScriptElement.getStringList(instrument_dom, "data_file")
-        #self.mask_top = BaseScriptElement.getIntElement(instrument_dom, "mask_top",
-        #                                                default=ReductionOptions.mask_top)
-        #self.mask_bottom = BaseScriptElement.getIntElement(instrument_dom, "mask_bottom",
-        #                                                   default=ReductionOptions.mask_bottom)
-        #self.mask_right = BaseScriptElement.getIntElement(instrument_dom, "mask_right",
-        #                                                  default=ReductionOptions.mask_right)
-        #self.mask_left = BaseScriptElement.getIntElement(instrument_dom, "mask_left",
-        #                                                 default=ReductionOptions.mask_left)
         
         self.scaling_factor = BaseScriptElement.getFloatElement(instrument_dom, "scaling_factor", 
                                                                           default=ReductionOptions.scaling_factor)
@@ -206,6 +233,28 @@ class ReductionOptions(BaseScriptElement):
         self.normalization = BaseScriptElement.getIntElement(instrument_dom, "normalization",
                                                              default=ReductionOptions.normalization)
 
+        element_list = dom.getElementsByTagName("Mask")
+        if len(element_list)>0: 
+            mask_dom = element_list[0]
+            self.top = BaseScriptElement.getIntElement(mask_dom, "mask_top", default=ReductionOptions.top)
+            self.bottom = BaseScriptElement.getIntElement(mask_dom, "mask_bottom", default=ReductionOptions.bottom)
+            self.right = BaseScriptElement.getIntElement(mask_dom, "mask_right", default=ReductionOptions.right)
+            self.left = BaseScriptElement.getIntElement(mask_dom, "mask_left", default=ReductionOptions.left)
+            
+            self.shapes = []
+            shapes_dom_list = mask_dom.getElementsByTagName("Shapes")
+            if len(shapes_dom_list)>0:
+                shapes_dom = shapes_dom_list[0]
+                for item in shapes_dom.getElementsByTagName("rect"):
+                    x_min =  float(item.getAttribute("x_min"))
+                    x_max =  float(item.getAttribute("x_max"))
+                    y_min =  float(item.getAttribute("y_min"))
+                    y_max =  float(item.getAttribute("y_max"))
+                    self.shapes.append(ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max))
+                            
+            self.detector_ids = ''
+            self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='')
+
     def reset(self):
         """
             Reset state
@@ -231,3 +280,12 @@ class ReductionOptions(BaseScriptElement):
         self.log_binning = ReductionOptions.log_binning
         
         self.normalization = ReductionOptions.normalization
+        
+        self.top = ReductionOptions.top
+        self.bottom = ReductionOptions.bottom
+        self.left = ReductionOptions.left
+        self.right = ReductionOptions.right
+        
+        self.shapes = []
+        self.detector_ids = ''
+
