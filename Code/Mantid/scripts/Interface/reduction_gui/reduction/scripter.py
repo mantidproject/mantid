@@ -13,6 +13,7 @@ except:
 import xml.dom.minidom
 import sys
 import time
+import platform
 
 class BaseScriptElement(object):
     """
@@ -245,7 +246,8 @@ class BaseReductionScripter(object):
         xml_str += "  <python_version>%s</python_version>\n" % sys.version
         xml_str += "  <platform>%s</platform>\n" % platform.system()
         xml_str += "  <architecture>%s</architecture>\n" % str(platform.architecture())
-        xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
+        if HAS_MANTID:
+            xml_str += "  <mantid_version>%s</mantid_version>\n" % mantid_build_version()
         
         for item in self._observers:
             if item.state() is not None:

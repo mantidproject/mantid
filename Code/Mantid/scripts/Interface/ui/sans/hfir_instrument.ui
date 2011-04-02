@@ -274,7 +274,7 @@
           <item>
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QLabel" name="dark_file_label">
+             <widget class="QCheckBox" name="dark_current_check">
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -288,16 +288,7 @@
                </size>
               </property>
               <property name="text">
-               <string>Dark current data file</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-              <property name="wordWrap">
-               <bool>false</bool>
-              </property>
-              <property name="indent">
-               <number>0</number>
+               <string>Dark current file</string>
               </property>
              </widget>
             </item>

@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Fri Apr  1 10:24:47 2011
-#      by: PyQt4 UI code generator 4.7.4
+# Created: Sat Apr  2 10:52:57 2011
+#      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -118,14 +118,11 @@ class Ui_Frame(object):
         self.verticalLayout_6.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_7 = QtGui.QHBoxLayout()
         self.horizontalLayout_7.setObjectName("horizontalLayout_7")
-        self.dark_file_label = QtGui.QLabel(self.reduction_options_group)
-        self.dark_file_label.setMinimumSize(QtCore.QSize(150, 0))
-        self.dark_file_label.setMaximumSize(QtCore.QSize(150, 16777215))
-        self.dark_file_label.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
-        self.dark_file_label.setWordWrap(False)
-        self.dark_file_label.setIndent(0)
-        self.dark_file_label.setObjectName("dark_file_label")
-        self.horizontalLayout_7.addWidget(self.dark_file_label)
+        self.dark_current_check = QtGui.QCheckBox(self.reduction_options_group)
+        self.dark_current_check.setMinimumSize(QtCore.QSize(150, 0))
+        self.dark_current_check.setMaximumSize(QtCore.QSize(150, 16777215))
+        self.dark_current_check.setObjectName("dark_current_check")
+        self.horizontalLayout_7.addWidget(self.dark_current_check)
         self.dark_file_edit = QtGui.QLineEdit(self.reduction_options_group)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
@@ -438,7 +435,7 @@ class Ui_Frame(object):
         self.normalization_monitor_radio.setText(QtGui.QApplication.translate("Frame", "Monitor", None, QtGui.QApplication.UnicodeUTF8))
         self.label_5.setText(QtGui.QApplication.translate("Frame", "Absolute scale factor", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a scaling factor to be multiplied to I(Q).", None, QtGui.QApplication.UnicodeUTF8))
-        self.dark_file_label.setText(QtGui.QApplication.translate("Frame", "Dark current data file", None, QtGui.QApplication.UnicodeUTF8))
+        self.dark_current_check.setText(QtGui.QApplication.translate("Frame", "Dark current file", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_file_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a valid file path to be used for the dark current data.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to browse.", None, QtGui.QApplication.UnicodeUTF8))
         self.dark_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))

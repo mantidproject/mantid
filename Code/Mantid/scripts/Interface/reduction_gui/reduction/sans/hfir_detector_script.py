@@ -107,42 +107,44 @@ class Detector(BaseScriptElement):
             @param xml_str: text to read the data from
         """       
         dom = xml.dom.minidom.parseString(xml_str)
-        instrument_dom = dom.getElementsByTagName("Sensitivity")[0]
-        self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
-                                                                 default = InstrumentDescription.sensitivity_corr)
-        self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
-        self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
-        self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
-                                                            default=InstrumentDescription.min_sensitivity)
-        self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
-                                                            default=InstrumentDescription.max_sensitivity)
-        
+        element_list = dom.getElementsByTagName("Sensitivity")
+        if len(element_list)>0:
+            instrument_dom = element_list[0]
+            self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
+                                                                     default = Detector.sensitivity_corr)
+            self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
+            self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
+            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
+                                                                default=Detector.min_sensitivity)
+            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
+                                                                default=Detector.max_sensitivity)
+            
         element_list = dom.getElementsByTagName("BeamFinder")
         if len(element_list)>0:
             beam_finder_dom = element_list[0]
             self.x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
-                                                                default=BeamFinder.x_position) 
+                                                                default=Detector.x_position) 
             self.y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
-                                                                default=BeamFinder.y_position) 
+                                                                default=Detector.y_position) 
             self.use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
-                                                               default = BeamFinder.use_finder) 
+                                                               default = Detector.use_finder) 
             self.beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
             self.use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
-                                                               default = BeamFinder.use_direct_beam) 
+                                                               default = Detector.use_direct_beam) 
 
     def reset(self):
         """
             Reset state
         """
-        self.sensitivity_corr = InstrumentDescription.sensitivity_corr
+        self.sensitivity_corr = Detector.sensitivity_corr
         self.sensitivity_data = ''
         self.sensitivity_dark = ''
-        self.min_sensitivity = InstrumentDescription.min_sensitivity
-        self.max_sensitivity = InstrumentDescription.max_sensitivity
+        self.min_sensitivity = Detector.min_sensitivity
+        self.max_sensitivity = Detector.max_sensitivity
         
-        self.x_position = BeamFinder.x_position
-        self.y_position = BeamFinder.y_position
-        self.use_finder = BeamFinder.use_finder
+        self.x_position = Detector.x_position
+        self.y_position = Detector.y_position
+        self.use_finder = Detector.use_finder
         self.beam_file = ''
-        self.use_direct_beam = BeamFinder.use_direct_beam
+        self.use_direct_beam = Detector.use_direct_beam
         

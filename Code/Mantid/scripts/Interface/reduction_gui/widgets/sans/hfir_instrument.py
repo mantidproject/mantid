@@ -2,7 +2,7 @@ from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
-from reduction_gui.reduction.hfir_reduction_steps import InstrumentDescription
+from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.reduction.mantid_util import DataFileProxy
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -12,9 +12,6 @@ class SANSInstrumentWidget(BaseWidget):
     """
         Widget that present instrument details to the user
     """
-    # Mask widget    
-    _mask_widget = None   
-    
     ## Widget name
     name = "Reduction Options"      
     
@@ -33,7 +30,7 @@ class SANSInstrumentWidget(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            instr = InstrumentDescription()
+            instr = ReductionOptions()
             instr.instrument_name = name
             self.set_state(instr)
         
@@ -47,17 +44,18 @@ class SANSInstrumentWidget(BaseWidget):
 
     def initialize_content(self):
         # Validators
-        #self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
-        #self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
-        #self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
+        self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
+        self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
+        self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
         self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
         
         # Event connections
-        #self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
-        #self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
-        #self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
+        self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
+        self.connect(self._summary.sample_dist_chk, QtCore.SIGNAL("clicked(bool)"), self._sample_dist_clicked)
+        self.connect(self._summary.wavelength_chk, QtCore.SIGNAL("clicked(bool)"), self._wavelength_clicked)
     
+        self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
 
         # Q range
@@ -67,6 +65,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_edit.setText(QtCore.QString("1"))
             
         self._summary.instr_name_label.hide()    
+        self._dark_clicked(self._summary.dark_current_check.isChecked())    
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -86,10 +85,15 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.wavelength_edit.setEnabled(is_checked)
         self._summary.wavelength_spread_edit.setEnabled(is_checked)
 
+    def _dark_clicked(self, is_checked):
+        self._summary.dark_file_edit.setEnabled(is_checked)
+        self._summary.dark_browse_button.setEnabled(is_checked)
+        self._summary.dark_plot_button.setEnabled(is_checked)
+        
     def _dark_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._summary.sensitivity_dark_file_edit.setText(fname)      
+            self._summary.dark_file_edit.setText(fname)      
 
     def set_state(self, state):
         """
@@ -102,30 +106,31 @@ class SANSInstrumentWidget(BaseWidget):
         #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
         # Detector offset input
-        #self._prepare_field(state.detector_offset != 0, 
-        #                    state.detector_offset, 
-        #                    self._summary.detector_offset_chk, 
-        #                    self._summary.detector_offset_edit)
+        self._prepare_field(state.detector_offset != 0, 
+                            state.detector_offset, 
+                            self._summary.detector_offset_chk, 
+                            self._summary.detector_offset_edit)
 
         # Sample-detector distance
-        #self._prepare_field(state.sample_detector_distance != 0, 
-        #                    state.sample_detector_distance, 
-        #                    self._summary.sample_dist_chk, 
-        #                    self._summary.sample_dist_edit)
+        self._prepare_field(state.sample_detector_distance != 0, 
+                            state.sample_detector_distance, 
+                            self._summary.sample_dist_chk, 
+                            self._summary.sample_dist_edit)
 
         # Wavelength value
-        #self._prepare_field(state.wavelength != 0, 
-        #                    state.wavelength, 
-        #                    self._summary.wavelength_chk, 
-        #                    self._summary.wavelength_edit,
-        #                    state.wavelength_spread,
-        #                    self._summary.wavelength_spread_edit)
+        self._prepare_field(state.wavelength != 0, 
+                            state.wavelength, 
+                            self._summary.wavelength_chk, 
+                            self._summary.wavelength_edit,
+                            state.wavelength_spread,
+                            self._summary.wavelength_spread_edit)
         
         # Solid angle correction flag
         self._summary.solid_angle_chk.setChecked(state.solid_angle_corr)
         
-        # Sensitivity correction
-        self._summary.dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
+        # Dark current
+        self._summary.dark_current_check.setChecked(state.dark_current_corr)
+        self._summary.dark_file_edit.setText(QtCore.QString(state.dark_current_data))
         
         # Normalization
         if state.normalization == state.NORMALIZATION_NONE:
@@ -153,29 +158,30 @@ class SANSInstrumentWidget(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        m = InstrumentDescription()
+        m = ReductionOptions()
         
         m.instrument_name = self._summary.instr_name_label.text()
         
         # Detector offset input
-        #if self._summary.detector_offset_chk.isChecked():
-        #    m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
+        if self._summary.detector_offset_chk.isChecked():
+            m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)
             
         # Sample-detector distance
-        #if self._summary.sample_dist_chk.isChecked():
-        #    m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
+        if self._summary.sample_dist_chk.isChecked():
+            m.sample_detector_distance = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
             
         # Wavelength value
-        #wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-        #if self._summary.wavelength_chk.isChecked():
-        #    m.wavelength = wavelength
-        #    m.wavelength_spread = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
+        wavelength = util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
+        if self._summary.wavelength_chk.isChecked():
+            m.wavelength = wavelength
+            m.wavelength_spread = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
             
         # Solid angle correction
         m.solid_angle_corr = self._summary.solid_angle_chk.isChecked()
         
-        # Sensitivity correction
-        m.sensitivity_dark = unicode(self._summary.dark_file_edit.text())
+        # Dark current
+        m.dark_current_corr = self._summary.dark_current_check.isChecked()
+        m.dark_current_data = unicode(self._summary.dark_file_edit.text())
         
         # Normalization
         if self._summary.normalization_none_radio.isChecked():
@@ -222,7 +228,7 @@ class SANSInstrumentWidget(BaseWidget):
                     if len(dataproxy.errors)>0:
                         print dataproxy.errors
                 if dataproxy.data is not None:
-                    self._mask_widget.set_background_data(dataproxy.data)
+                    #self._mask_widget.set_background_data(dataproxy.data)
                     self._summary.repaint()  
 
             
