@@ -44,9 +44,11 @@ class SANSInstrumentWidget(BaseWidget):
 
     def initialize_content(self):
         # Validators
+        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
         self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
+        self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
         self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
         
@@ -105,6 +107,8 @@ class SANSInstrumentWidget(BaseWidget):
         #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
         #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
 
+        self._summary.scale_edit.setText(QtCore.QString(str(state.scaling_factor)))
+
         # Detector offset input
         self._prepare_field(state.detector_offset != 0, 
                             state.detector_offset, 
@@ -116,6 +120,8 @@ class SANSInstrumentWidget(BaseWidget):
                             state.sample_detector_distance, 
                             self._summary.sample_dist_chk, 
                             self._summary.sample_dist_edit)
+        # Sample-detector distance takes precedence over offset if both are non-zero
+        self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
 
         # Wavelength value
         self._prepare_field(state.wavelength != 0, 
@@ -162,6 +168,7 @@ class SANSInstrumentWidget(BaseWidget):
         
         m.instrument_name = self._summary.instr_name_label.text()
         
+        m.scaling_factor = util._check_and_get_float_line_edit(self._summary.scale_edit)
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():
             m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)

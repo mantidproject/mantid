@@ -31,8 +31,8 @@ class ReductionOptions(BaseScriptElement):
     ny_pixels = 192
     pixel_size = 5.1
     
-    # Data file
-    data_files = []
+    # Absoulte scale
+    scaling_factor = 1.0
     
     # Mask
     mask_top = 0
@@ -71,6 +71,9 @@ class ReductionOptions(BaseScriptElement):
             @param execute: if true, the script will be executed
         """
         script  = "%s()\n" % self.instrument_name
+        
+        if self.scaling_factor != 1:
+            script += "#ScaleFactor(%g)\n" % self.scaling_factor
         
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance 
@@ -129,6 +132,8 @@ class ReductionOptions(BaseScriptElement):
         #xml += "  <mask_bottom>%g</mask_bottom>\n" % self.mask_bottom
         #xml += "  <mask_left>%g</mask_left>\n" % self.mask_left
         #xml += "  <mask_right>%g</mask_right>\n" % self.mask_right
+        
+        xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
 
         xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
         xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
@@ -174,6 +179,9 @@ class ReductionOptions(BaseScriptElement):
         #self.mask_left = BaseScriptElement.getIntElement(instrument_dom, "mask_left",
         #                                                 default=ReductionOptions.mask_left)
         
+        self.scaling_factor = BaseScriptElement.getFloatElement(instrument_dom, "scaling_factor", 
+                                                                          default=ReductionOptions.scaling_factor)
+
         self.sample_detector_distance = BaseScriptElement.getFloatElement(instrument_dom, "sample_det_dist", 
                                                                           default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
@@ -206,6 +214,8 @@ class ReductionOptions(BaseScriptElement):
         self.ny_pixels = ReductionOptions.ny_pixels
         #self.instrument_name = ''
         self.pixel_size = ReductionOptions.pixel_size
+        
+        self.scaling_factor = ReductionOptions.scaling_factor
         
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset
