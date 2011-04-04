@@ -11,6 +11,7 @@
 #include "MantidGeometry/V3D.h"
 
 #include <fstream>
+#include <sstream>
 
 namespace Mantid
 {
@@ -412,6 +413,14 @@ void AlignDetectors::execEvent()
     PARALLEL_END_INTERUPT_REGION
   }
   PARALLEL_CHECK_INTERUPT_REGION
+
+  if (outputWS->getTofMin() < 0.)
+  {
+    std::stringstream msg;
+    msg << "Something wrong with the calibration. Negative minimum d-spacing created. d_min = "
+        <<  outputWS->getTofMin() << " d_max " << outputWS->getTofMax();
+    throw std::runtime_error(msg.str());
+  }
 
 }
 
