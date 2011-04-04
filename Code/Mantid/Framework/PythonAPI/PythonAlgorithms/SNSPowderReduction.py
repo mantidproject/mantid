@@ -199,14 +199,7 @@ class SNSPowderReduction(PythonAlgorithm):
     def _focus(self, wksp, calib, info, filterLogs=None):
         if wksp is None:
             return None
-        try:
-            MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
-        except:
-            pass
-        try:
-            MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
-        except:
-            pass
+
         # take care of filtering events
         if self._filterBadPulses and not self.getProperty("CompressOnRead"):
             FilterBadPulses(InputWorkspace=wksp, OutputWorkspace=wksp)
@@ -221,19 +214,31 @@ class SNSPowderReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
+        Sort(wksp)
+        try:
+            if info.tmin > 0.:
+                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
+        except:
+            pass
+        try:
+            if info.tmax > 0.:
+                MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
+        except:
+            pass
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         LRef = self.getProperty("UnwrapRef")
         DIFCref = self.getProperty("LowResRef")
-        if (LRef > 0) or (DIFCref > 0): # super special Jason stuff
+        if (LRef > 0.) or (DIFCref > 0.): # super special Jason stuff
             kwargs = {}
-            try:
-                kwargs["Tmin"] = info.tmin
-            except:
-                pass
-            try:
-                kwargs["Tmax"] = info.tmax
-            except:
-                pass
+            #try:
+            #    if info.tmin > 0:
+            #        kwargs["Tmin"] = info.tmin
+            #except:
+            #    pass
+            #try:
+            #    kwargs["Tmax"] = info.tmax
+            #except:
+            #    pass
             ConvertUnits(InputWorkspace=wksp, OutputWorkspace=wksp, Target="TOF") # corrections only work in TOF for now
             if LRef > 0:
                 UnwrapSNS(InputWorkspace=wksp, OutputWorkspace=wksp, LRef=LRef, **kwargs)
