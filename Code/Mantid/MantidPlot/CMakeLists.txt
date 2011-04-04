@@ -681,10 +681,22 @@ include_directories ( src )
 set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 
-add_executable ( MantidPlot ${SRC_FILES} ${INC_FILES} 
+###########################################################################
+# Windows console mode
+###########################################################################
+# On Windows we need to distinguish between release and debug modes with respect to the console window, i.e
+# we don't want the console in release modes. This requires the WIN32 argument and the additional linker arguments
+# as we don't use WinMain as an entry point.
+if( WIN32 )
+   set( EXE_FLAG WIN32 )
+endif( WIN32 )
+
+add_executable ( MantidPlot ${EXE_FLAG} ${SRC_FILES} ${INC_FILES} 
                             ${MOCCED_FILES} ${UI_HDRS} ${RES_FILES} 
 )
-
+# Clean up
+set ( EXE_FLAG ) 
+# Library dependencies
 target_link_libraries ( MantidPlot 
                         ${CORE_MANTIDLIBS} MantidQtAPI MantidWidgets
                         QtPropertyBrowser ${QT_LIBRARIES} 
@@ -693,18 +705,17 @@ target_link_libraries ( MantidPlot
                         ${PYTHON_LIBRARIES}
                         ${ZLIB_LIBRARIES} 
 )
-
 ###########################################################################
-# This sets things to generate a console application for a debug build on Windows
+# Ensure the console appears in debug builds
 ###########################################################################
-if(WIN32)
-   set_target_properties(MantidPlot PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE")
-   set_target_properties(MantidPlot PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE")
-   set_target_properties(MantidPlot PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE")
-   set_target_properties(MantidPlot PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE")
-   set_target_properties(MantidPlot PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS")
-   set_target_properties(MantidPlot PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS")
-endif(WIN32)
+if( WIN32 )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+endif( WIN32 )
 
 ###########################################################################
 # Now copy the required python files into the build destination

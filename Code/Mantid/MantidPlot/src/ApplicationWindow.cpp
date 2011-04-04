@@ -155,7 +155,6 @@
 #include <QVarLengthArray>
 #include <QList>
 #include <QUrl>
-//#include <QAssistantClient>
 #include <QFontComboBox>
 #include <QSpinBox>
 #include <QMdiArea>
