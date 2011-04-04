@@ -52,15 +52,6 @@ public:
     //next line should be string import
     getline( is, line );
     TS_ASSERT_EQUALS(line, std::string("import string"));
-    getline(is, line);
-    getline(is, line);
-
-    // Comment line first
-    getline(is, line);
-
-    TS_ASSERT_EQUALS(line, "def setWorkingDirectory(path):");
-    getline(is, line);
-    TS_ASSERT_EQUALS(line, "  os.chdir(path)");
 
     //next non-blank line should be help()
     //eat blank lines

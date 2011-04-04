@@ -55,11 +55,6 @@ namespace Mantid
       module << "import sys\n";
       module << "import string\n\n";
 
-      // A simple function to change the working directory
-      module << "# A wrapper for changing the directory\n"
-        << "def setWorkingDirectory(path):\n"
-        << "  os.chdir(path)\n\n";
-
       // A function to sort out whether the dialog parameters are disabled or not
       if( gui )
       {
@@ -140,10 +135,6 @@ namespace Mantid
           categories.insert(std::make_pair<std::string, std::set<std::string> >(topcategory, cat_algms));
         }
       }
-
-      // Utility method to run an algorithm
-      module << "def execute_algorithm(algm):\n"
-             << "  algm.execute()\n";
 
       module.close();
 
