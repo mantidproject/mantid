@@ -5,6 +5,8 @@
 
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/ThreadScheduler.h"
+#include "MantidKernel/ThreadPool.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
@@ -102,7 +104,7 @@ protected:
           double centers[2] = {x,y};
           out->addEvent( MDEvent<2>(2.0, 2.0, centers) );
         }
-    out->refreshCache();
+    out->refreshCache(NULL);
     return out;
   }
 
@@ -362,7 +364,7 @@ public:
     }
 
     // You must refresh the cache after adding individual events.
-    superbox->refreshCache();
+    superbox->refreshCache(NULL);
 
     TS_ASSERT_EQUALS( superbox->getNPoints(), 3 );
 
@@ -420,7 +422,7 @@ public:
           }
         }
       // You must refresh the cache after adding individual events.
-      box->refreshCache();
+      box->refreshCache(NULL);
 
       double sec = tim1.elapsed();
       std::cout << sec << " seconds to add " << box->getNPoints() << " events. Each box had " << num_to_repeat << " events." << std::endl;
@@ -452,7 +454,7 @@ public:
     size_t numbad;
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
     // Get the right totals again
-    b->refreshCache();
+    b->refreshCache(NULL);
     TS_ASSERT_EQUALS( numbad, 0);
     TS_ASSERT_EQUALS( b->getNPoints(), 100);
     TS_ASSERT_EQUALS( b->getSignal(), 100*2.0);
@@ -477,7 +479,7 @@ public:
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
     // Get the right totals again
-    b->refreshCache();
+    b->refreshCache(NULL);
     // All 4 points get rejected
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
     TS_ASSERT_EQUALS( numbad, 4);
@@ -507,7 +509,7 @@ public:
     size_t numbad;
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events, 50, 60 ); );
     // Get the right totals again
-    b->refreshCache();
+    b->refreshCache(NULL);
     TS_ASSERT_EQUALS( numbad, 0);
     TS_ASSERT_EQUALS( b->getNPoints(), 10);
     TS_ASSERT_EQUALS( b->getSignal(), 10*2.0);
@@ -518,7 +520,7 @@ public:
   /** Test that adding events (as vectors) in parallel does not cause
    * segfaults or incorrect totals.
    * */
-  void test_addEvents_inParallel()
+  void do_test_addEvents_inParallel(ThreadScheduler * ts)
   {
     MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
     int num_repeat = 1000;
@@ -536,11 +538,25 @@ public:
         }
       TS_ASSERT_THROWS_NOTHING( b->addEvents( events ); );
     }
-    // Get the right totals again
-    b->refreshCache();
+    // Get the right totals again by refreshing
+    b->refreshCache(ts);
     TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
     TS_ASSERT_EQUALS( b->getSignal(), 100*num_repeat*2.0);
     TS_ASSERT_EQUALS( b->getErrorSquared(), 100*num_repeat*2.0);
+  }
+
+
+  void test_addEvents_inParallel()
+  {
+    do_test_addEvents_inParallel(NULL);
+  }
+
+  void xtest_addEvents_inParallel_then_refreshCache_inParallel()
+  {
+    ThreadScheduler * ts = new ThreadSchedulerFIFO();
+    do_test_addEvents_inParallel(ts);
+    ThreadPool tp(ts);
+    tp.joinAll();
   }
 
 
@@ -743,6 +759,8 @@ public:
         -3.2, 0.8, 0.1, 0.9,     4.0);
 
   }
+
+
 
 private:
   std::string message;

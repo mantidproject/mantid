@@ -192,7 +192,9 @@ namespace MDEvents
     gridBox->splitAllIfNeeded(ts);
   }
   //-----------------------------------------------------------------------------------------------
-  /** Refresh the cache of # of points, signal, and error */
+  /** Refresh the cache of # of points, signal, and error.
+   * NOTE: This is performed in parallel using a threadpool.
+   *  */
   TMDE(
   void MDEventWorkspace)::refreshCache()
   {
@@ -203,6 +205,8 @@ namespace MDEvents
       splitBox();
       gridBox = dynamic_cast<MDGridBox<MDE,nd> *>(data);
     }
+    // Call the refresh cache method with the first level in parallel.
+    //TODO ThreadPool
     gridBox->refreshCache();
   }
 
@@ -284,8 +288,7 @@ namespace MDEvents
     }
 
     // Refresh the counts, now that we are all done.
-    gridBox->refreshCache();
-
+    this->refreshCache();
   }
 
 

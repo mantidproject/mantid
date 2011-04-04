@@ -293,13 +293,19 @@ namespace MDEvents
     tp.joinAll();
     if (DODEBUG) std::cout << "Performing the FINAL addition of these events took " << tim.elapsed() << " secs.\n";
 
+    clock_t start, end;
+    double cpu_time_used;
+
     // Do a final splitting of everything
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
     if (DODEBUG) std::cout << "Performing the FINAL splitting of boxes took " << tim.elapsed() << " secs.\n";
 
+
     // Recount totals at the end.
+#ifndef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
     ws->refreshCache();
+#endif
     if (DODEBUG) std::cout << "Performing the refreshCache() call took " << tim.elapsed() << " secs.\n";
 
     if (DODEBUG) std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << timtotal.elapsed() << " sec in total.\n\n";

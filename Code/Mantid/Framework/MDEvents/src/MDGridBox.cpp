@@ -14,6 +14,12 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+
+/** If defined, then signal caching is performed as events are added. Otherwise,
+ * refreshCache() has to be called.
+ */
+#undef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
+
 namespace Mantid
 {
 namespace MDEvents
@@ -93,7 +99,7 @@ namespace MDEvents
 
     // Now distribute the events that were in the box before
     this->addEvents(box->getEvents());
-    // Copy the cached numbers from the incoming box. This is most efficient
+    // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
     this->m_signal = box->getSignal();
     this->m_errorSquared = box->getErrorSquared();
@@ -173,13 +179,17 @@ namespace MDEvents
     return out_linear_index;
   }
 
+
   //-----------------------------------------------------------------------------------------------
   /** Refresh the cache of nPoints, signal and error,
    * by adding up all boxes (recursively).
    * MDBoxes' totals are used directly.
+   *
+   * @param ts :: ThreadScheduler pointer to perform the caching
+   *  in parallel. If NULL, it will be performed in series.
    */
   TMDE(
-  void MDGridBox)::refreshCache()
+  void MDGridBox)::refreshCache(ThreadScheduler * ts)
   {
     // Clear your total
     nPoints = 0;
@@ -187,20 +197,32 @@ namespace MDEvents
     this->m_errorSquared = 0;
 
     typename boxVector_t::iterator it;
-    for (it = boxes.begin(); it != boxes.end(); it++)
+    typename boxVector_t::iterator it_end = boxes.end();
+
+    if (!ts)
     {
-      IMDBox<MDE,nd> * ibox = *it;
-      MDGridBox<MDE,nd> * gbox = dynamic_cast<MDGridBox<MDE,nd> *>(ibox);
+      //--------- Serial -----------
+      for (it = boxes.begin(); it != it_end; it++)
+      {
+        IMDBox<MDE,nd> * ibox = *it;
+        MDGridBox<MDE,nd> * gbox = dynamic_cast<MDGridBox<MDE,nd> *>(ibox);
 
-      // Refresh the cache of the contents. Recursive.
-      if (gbox)
-        gbox->refreshCache();
+        // Refresh the cache of the contents. Recursive.
+        if (gbox)
+          gbox->refreshCache(NULL);
 
-      // Add up what's in there
-      nPoints += ibox->getNPoints();
-      this->m_signal += ibox->getSignal();
-      this->m_errorSquared += ibox->getErrorSquared();
+        // Add up what's in there
+        nPoints += ibox->getNPoints();
+        this->m_signal += ibox->getSignal();
+        this->m_errorSquared += ibox->getErrorSquared();
+      }
     }
+    else
+    {
+      //---------- Parallel refresh --------------
+
+    }
+
   }
 
 
@@ -338,8 +360,16 @@ namespace MDEvents
       index += (i * splitCumul[d]);
     }
 
-    // Add it to the contained box, and return how many bads where there
+    // Add it to the contained box
     boxes[index]->addEvent(event);
+
+    // Track the total signal
+#ifdef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
+    statsMutex.lock();
+    this->m_signal += event.getSignal();
+    this->m_errorSquared += event.getErrorSquared();
+    statsMutex.unlock();
+#endif
   }
 
 

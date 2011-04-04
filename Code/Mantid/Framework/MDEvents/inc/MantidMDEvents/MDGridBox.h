@@ -49,7 +49,7 @@ namespace MDEvents
     size_t getNumMDBoxes() const;
 
 
-    void refreshCache();
+    void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
     std::vector< MDE > * getEventsCopy();
 
