@@ -675,7 +675,7 @@ int UnwrappedSurface::getDetectorID(unsigned char r,unsigned char g,unsigned cha
   id += g;
   id *= 256;
   id += r;
-  if (id == 0)
+  if (id == 0 || id > m_unwrappedDetectors.size())
   {
     return -1;
   }
