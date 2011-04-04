@@ -98,10 +98,6 @@ class DLLExport SimplePythonAPI
 				  const int version, const PropertyVector & properties);
   /// Write a specialised function for the LoadDialog command
   static void writeLoadDialogDef(std::ostream & module);
-  /// Writes the global help command
-  static void writeGlobalHelp(std::ostream & output, const VersionMap & versionMap, bool gui);
-  /// Write the mantidHelp command
-  static void writeMantidHelp(std::ostream & output);
   /// Write string to run algorithm asynchronously
   static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
   /// Convert EOL characters to their string representation
