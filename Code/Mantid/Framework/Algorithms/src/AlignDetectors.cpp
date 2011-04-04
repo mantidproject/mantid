@@ -452,6 +452,13 @@ bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,do
       int n,udet,select,group;
       double offset;
       istr >> n >> udet >> offset >> select >> group;
+      if (offset < -1.) // should never happen
+      {
+        std::stringstream msg;
+        msg << "Encountered offset = " << offset << " at index " << n << " for udet = " << udet
+            << ". Offsets must be greater than -1.";
+        throw std::runtime_error(msg.str());
+      }
       offsets.insert(std::make_pair(udet,offset));
       groups.insert(std::make_pair(udet,group));
     }
