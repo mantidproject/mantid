@@ -51,12 +51,12 @@ namespace Mantid
             virtual bool getIsIntegrated() const {return(0);}
             virtual double getMaximum() const {return(1.0);}
             virtual double getMinimum() const {return(0.0);}
-            virtual unsigned int getNBins() const {return(m_cells);}
+            virtual size_t getNBins() const {return(m_cells);}
             virtual bool isReciprocal() const {return false;}
             virtual std::string toXMLString() const { return "";}
             virtual size_t getStride()const {throw std::runtime_error("Not Implemented");}
             virtual double getScale()const {throw std::runtime_error("Not Implemented");} 
-            virtual double getX(unsigned int ind)const {throw std::runtime_error("Not Implemented");}
+            virtual double getX(size_t ind)const {throw std::runtime_error("Not Implemented");}
             virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not Implemented");}
             virtual void getAxisPoints(std::vector<double>  &)const {throw std::runtime_error("Not Implemented");}
             virtual double getDataShift()const{return 0;}
@@ -169,7 +169,7 @@ public:
     /// return ID specifying the workspace kind
     virtual const std::string id() const {return "TestIMDDWorkspace";}
     /// return number of dimensions in MD workspace
-    virtual unsigned int getNumDims()const{return 4;}
+    virtual size_t getNumDims()const{return 4;}
     virtual size_t getMemorySize() const {return 0;};
     virtual std::string getWSLocation() const
     {
@@ -330,7 +330,7 @@ public:
         TS_ASSERT( alg2.isExecuted() );
 
         std::string algStat;
-        algStat = alg2.getProperty("Output Status");
+        algStat = alg2.getPropertyValue("Output Status");
         TS_ASSERT( algStat.compare("success")==0 );
 
         // test the output from fit is as expected - since 3 variables and 3 data points DOF=0
@@ -357,7 +357,7 @@ public:
             TS_ASSERT( alg3.execute() )
             )
         TS_ASSERT( alg3.isExecuted() );
-        algStat = alg3.getProperty("Output Status");
+        algStat = alg3.getPropertyValue("Output Status");
         TS_ASSERT( algStat.compare("success")==0 );
         TWS_type outParams = getTWS("out_Parameters");
         TS_ASSERT(outParams);
