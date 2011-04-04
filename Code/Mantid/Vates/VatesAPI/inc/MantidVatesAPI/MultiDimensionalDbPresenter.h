@@ -53,13 +53,19 @@ private:
   //Verify that execution has occured otherwise should not be able to access scalar data or mesh.
   void verifyExecution() const;
 
+protected:
+
+  /*Interrogates the AnalysisDataService instance to find the workspace with the expected id.
+  Seam method. supports testability given that the AnalysisDataService is a singleton and therefore very hard to fake/mock.*/
+  virtual void extractWorkspaceImplementation(const std::string& wsId);
+
 public:
 
   /// Constructor loads data.
   MultiDimensionalDbPresenter();
 
   // Performs the rebinning.
-  void execute(const std::string& fileName);
+  void execute(API::Algorithm& algorithm, const std::string wsId);
 
   /// Gets the vtk mesh;
   vtkDataSet* getMesh() const;

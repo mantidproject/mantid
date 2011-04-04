@@ -11,6 +11,7 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
+#include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
 vtkCxxRevisionMacro(vtkSQWReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkSQWReader);
@@ -62,7 +63,13 @@ int vtkSQWReader::RequestInformation(
 {
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  m_presenter.execute(FileName);
+
+  Mantid::MDAlgorithms::Load_MDWorkspace wsLoaderAlg;
+  wsLoaderAlg.initialize();
+  std::string wsId = "InputMDWs";
+  wsLoaderAlg.setPropertyValue("inFilename", FileName);
+  wsLoaderAlg.setPropertyValue("MDWorkspace",wsId);
+  m_presenter.execute(wsLoaderAlg, wsId);
   int wholeExtent[6];
 
   Mantid::VATES::VecExtents extents = m_presenter.getExtents();

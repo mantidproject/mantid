@@ -16,12 +16,12 @@ namespace Mantid
 namespace VATES
 {
 
-/** Proxy for geometry. Allows the dimension related data to be fetched from an underlying geometry object in a runtime flexible fashion.
- * Ultimately reduces the need for rebinning operations where dimensions are simply remapped.
+/** 
+ * Acts as a proxy for IMDWorkspaces. Remaps dimensions for the IMDWorkspace instance that it wraps. Acts like a decorator, but does not add any new outward behaviour over IMDWorkspace.
  *
 
  @author Owen Arnold, Tessella plc
- @date 21/03/2011
+ @date 30/03/2011
 
  Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 

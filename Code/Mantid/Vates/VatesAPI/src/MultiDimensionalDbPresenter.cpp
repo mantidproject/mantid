@@ -5,11 +5,11 @@
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/TimeStepToTimeStep.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
-#include <MantidGeometry/MDGeometry/MDGeometry.h>
-#include <MDDataObjects/IMD_FileFormat.h>
-#include <MDDataObjects/MD_FileFormatFactory.h>
+#include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MDDataObjects/IMD_FileFormat.h"
+#include "MDDataObjects/MD_FileFormatFactory.h"
+#include "MantidAPI/Algorithm.h"
 
-#include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include <vtkFloatArray.h>
@@ -19,6 +19,12 @@
 
 namespace Mantid
 {
+namespace API
+{
+  //Forward declaration.
+  class Algorithm;
+}
+
 namespace VATES
 {
 MultiDimensionalDbPresenter::MultiDimensionalDbPresenter() : m_isExecuted(false)
@@ -26,22 +32,28 @@ MultiDimensionalDbPresenter::MultiDimensionalDbPresenter() : m_isExecuted(false)
 
 }
 
-void MultiDimensionalDbPresenter::execute(const std::string& fileName)
-{
-  using namespace Mantid::MDAlgorithms;
+void MultiDimensionalDbPresenter::execute(API::Algorithm& algorithm, const std::string wsId)
+{ 
   using namespace Mantid::API;
 
-  Load_MDWorkspace wsLoaderAlg;
-  wsLoaderAlg.initialize();
-  std::string wsId = "InputMDWs";
-  wsLoaderAlg.setPropertyValue("inFilename", fileName);
-  wsLoaderAlg.setPropertyValue("MDWorkspace",wsId);
-  wsLoaderAlg.execute();
+  if(true == algorithm.isInitialized())
+  {
+    algorithm.execute();
+    extractWorkspaceImplementation(wsId);
+    m_isExecuted = true;
+  }
+  else
+  {
+    throw std::invalid_argument("The algorithm parameter passed to this reader was not initalized");
+  }
+}
+
+void MultiDimensionalDbPresenter::extractWorkspaceImplementation(const std::string& wsId)
+{
+  using namespace Mantid::API;
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
   IMDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<IMDWorkspace>(result);
   this->m_workspace = inputWS;
-
-  m_isExecuted = true;
 }
 
 void MultiDimensionalDbPresenter::verifyExecution() const
@@ -54,7 +66,7 @@ void MultiDimensionalDbPresenter::verifyExecution() const
 
 std::string MultiDimensionalDbPresenter::getXAxisName() const
 {
-  //Sanity check. Must run execution sucessfully first.
+  //Sanity check. Must run execution successfully first.
   verifyExecution();
 
   return m_workspace->getXDimension()->getDimensionId();
