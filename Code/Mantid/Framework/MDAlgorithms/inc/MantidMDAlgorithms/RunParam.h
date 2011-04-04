@@ -45,168 +45,236 @@ namespace Mantid
     public:
        /// Default constructor
        RunParam();
+       RunParam(double ei,double psi,double elo,double ehi,
+          double de, double x0, double xa, double x1,
+          double wa, double ha, double s1, double s2,
+          double s3, double s4, double s5, double thetam,
+          int imod, double pslit, double radius,
+          double rho, double hz, double tjit,
+          double as, double bs, double cs,
+          double aa, double bb, double cc,
+          double uh, double uk, double ul,
+          double vh, double vk, double vl,
+          double omega, double gs, double gl,
+          double dpsi, double xh, double xk,
+          double xl, double yh, double yk,
+          double yl, double sx, double sy,
+          double sz, int isam, double temp,
+          double eta);
+
        /// Destructor
        ~RunParam();
 
        /// @cond
-       double getEi(const int irun);
-       double getPsi(const int irun);
-       double getElo(const int irun);
-       double getEhi(const int irun);
-       double getDe(const int irun);
-       double getX0(const int irun);
-       double getXa(const int irun);
-       double getX1(const int irun);
-       double getWa(const int irun);
-       double getHa(const int irun);
-       double getS1(const int irun);
-       double getS2(const int irun);
-       double getS3(const int irun);
-       double getS4(const int irun);
-       double getS5(const int irun);
-       double getThetam(const int irun);
-       int getImod(const int irun);
-       double getPslit(const int irun);
-       double getRadius(const int irun);
-       double getRho(const int irun);
-       double getHz(const int irun);
-       double getTjit(const int irun);
-       double getAs(const int irun);
-       double getBs(const int irun);
-       double getCs(const int irun);
-       double getAa(const int irun);
-       double getBb(const int irun);
-       double getCc(const int irun);
-       double getUh(const int irun);
-       double getUk(const int irun);
-       double getUl(const int irun);
-       double getVh(const int irun);
-       double getVk(const int irun);
-       double getVl(const int irun);
-       double getOmega(const int irun);
-       double getGs(const int irun);
-       double getGl(const int irun);
-       double getDpsi(const int irun);
-       double getXh(const int irun);
-       double getXk(const int irun);
-       double getXl(const int irun);
-       double getYh(const int irun);
-       double getYk(const int irun);
-       double getYl(const int irun);
-       double getSx(const int irun);
-       double getSy(const int irun);
-       double getSz(const int irun);
-       int getIsam(const int irun);
-       double getTemp(const int irun);
-       double getEta(const int irun);
+       /// return incident energy of run
+       double getEi();
+       /// return psi of run
+       double getPsi();
+       /// return elo of run
+       double getElo();
+       /// return ehi of run
+       double getEhi();
+       /// return de of run
+       double getDe();
+       /// return x0 of run
+       double getX0();
+       /// return xa of run
+       double getXa();
+       /// return x1 of run
+       double getX1();
+       /// return wa of run
+       double getWa();
+       /// return ha of run
+       double getHa();
+       /// return s1 of run
+       double getS1();
+       /// return s2 of run
+       double getS2();
+       /// return s3 of run
+       double getS3();
+       /// return s3 of run
+       double getS4();
+       /// return s5 of run
+       double getS5();
+       /// return thetam of run
+       double getThetam();
+       /// return Imod of run
+       int getImod();
+       /// return pslit of run chopper
+       double getPslit();
+       /// return radius of run chopper
+       double getRadius();
+       /// return rho of run chopper
+       double getRho();
+       /// return hz of run chopper
+       double getHz();
+       /// return tjit of run
+       double getTjit();
+       /// return as of run sample
+       double getAs();
+       /// return bs of run sample
+       double getBs();
+       /// return cs of run sample
+       double getCs();
+       /// return aa of run sample
+       double getAa();
+       /// return bb of run sample
+       double getBb();
+       /// return cc of run sample
+       double getCc();
+       /// return uh of run sample
+       double getUh();
+       /// return uk of run
+       double getUk();
+       /// return ul of run
+       double getUl();
+       /// return vh of run
+       double getVh();
+       /// return vk of run
+       double getVk();
+       /// return vl of run
+       double getVl();
+       /// return omega of run
+       double getOmega();
+       /// return gs of run
+       double getGs();
+       /// return gl of run
+       double getGl();
+       /// return dpsi of run
+       double getDpsi();
+       /// return xh of run
+       double getXh();
+       /// return xk of run
+       double getXk();
+       /// return xl of run
+       double getXl();
+       /// return yh of run
+       double getYh();
+       /// return yk of run
+       double getYk();
+       /// return yl of run
+       double getYl();
+       /// return sample x dimension for run
+       double getSx();
+       /// return sample y dimension for run
+       double getSy();
+       /// return sample z dimension for run
+       double getSz();
+       /// return iSam setting of run
+       int getIsam();
+       /// return temp of run
+       double getTemp();
+       /// return eta of run
+       double getEta();
 
-       void setEi(const int irun, const double val);
-       void setPsi(const int irun, const double val);
-       void setElo(const int irun, const double val);
-       void setEhi(const int irun, const double val);
-       void setDe(const int irun, const double val);
-       void setX0(const int irun, const double val);
-       void setXa(const int irun, const double val);
-       void setX1(const int irun, const double val);
-       void setWa(const int irun, const double val);
-       void setHa(const int irun, const double val);
-       void setS1(const int irun, const double val);
-       void setS2(const int irun, const double val);
-       void setS3(const int irun, const double val);
-       void setS4(const int irun, const double val);
-       void setS5(const int irun, const double val);
-       void setThetam(const int irun, const double val);
-       void setImod(const int irun, const int val);
-       void setPslit(const int irun, const double val);
-       void setRadius(const int irun, const double val);
-       void setRho(const int irun, const double val);
-       void setHz(const int irun, const double val);
-       void setTjit(const int irun, const double val);
-       void setAs(const int irun, const double val);
-       void setBs(const int irun, const double val);
-       void setCs(const int irun, const double val);
-       void setAa(const int irun, const double val);
-       void setBb(const int irun, const double val);
-       void setCc(const int irun, const double val);
-       void setUh(const int irun, const double val);
-       void setUk(const int irun, const double val);
-       void setUl(const int irun, const double val);
-       void setVh(const int irun, const double val);
-       void setVk(const int irun, const double val);
-       void setVl(const int irun, const double val);
-       void setOmega(const int irun, const double val);
-       void setGs(const int irun, const double val);
-       void setGl(const int irun, const double val);
-       void setDpsi(const int irun, const double val);
-       void setXh(const int irun, const double val);
-       void setXk(const int irun, const double val);
-       void setXl(const int irun, const double val);
-       void setYh(const int irun, const double val);
-       void setYk(const int irun, const double val);
-       void setYl(const int irun, const double val);
-       void setSx(const int irun, const double val);
-       void setSy(const int irun, const double val);
-       void setSz(const int irun, const double val);
-       void setIsam(const int irun, const int val);
-       void setTemp(const int irun, const double val);
-       void setEta(const int irun, const double val);
+       void setEi( const double val);
+       void setPsi( const double val);
+       void setElo( const double val);
+       void setEhi( const double val);
+       void setDe( const double val);
+       void setX0( const double val);
+       void setXa( const double val);
+       void setX1( const double val);
+       void setWa( const double val);
+       void setHa( const double val);
+       void setS1( const double val);
+       void setS2( const double val);
+       void setS3( const double val);
+       void setS4( const double val);
+       void setS5( const double val);
+       void setThetam( const double val);
+       void setImod( const int val);
+       void setPslit( const double val);
+       void setRadius( const double val);
+       void setRho( const double val);
+       void setHz( const double val);
+       void setTjit( const double val);
+       void setAs( const double val);
+       void setBs( const double val);
+       void setCs( const double val);
+       void setAa( const double val);
+       void setBb( const double val);
+       void setCc( const double val);
+       void setUh( const double val);
+       void setUk( const double val);
+       void setUl( const double val);
+       void setVh( const double val);
+       void setVk( const double val);
+       void setVl( const double val);
+       void setOmega( const double val);
+       void setGs( const double val);
+       void setGl( const double val);
+       void setDpsi( const double val);
+       void setXh( const double val);
+       void setXk( const double val);
+       void setXl( const double val);
+       void setYh( const double val);
+       void setYk( const double val);
+       void setYl( const double val);
+       void setSx( const double val);
+       void setSy( const double val);
+       void setSz( const double val);
+       void setIsam( const int val);
+       void setTemp( const double val);
+       void setEta( const double val);
 
        void readData(const std::string file);
        void writeData(const std::string file);
 
     private:
-       std::vector<double> m_ei;
-       std::vector<double> m_psi;
-       std::vector<double> m_elo;
-       std::vector<double> m_ehi;
-       std::vector<double> m_de;
-       std::vector<double> m_x0;
-       std::vector<double> m_xa;
-       std::vector<double> m_x1;
-       std::vector<double> m_wa;
-       std::vector<double> m_ha;
-       std::vector<double> m_s1;
-       std::vector<double> m_s2;
-       std::vector<double> m_s3;
-       std::vector<double> m_s4;
-       std::vector<double> m_s5;
-       std::vector<double> m_thetam;
-       std::vector<int> m_imod;
-       std::vector<double> m_pslit;
-       std::vector<double> m_radius;
-       std::vector<double> m_rho;
-       std::vector<double> m_hz;
-       std::vector<double> m_tjit;
-       std::vector<double> m_as;
-       std::vector<double> m_bs;
-       std::vector<double> m_cs;
-       std::vector<double> m_aa;
-       std::vector<double> m_bb;
-       std::vector<double> m_cc;
-       std::vector<double> m_uh;
-       std::vector<double> m_uk;
-       std::vector<double> m_ul;
-       std::vector<double> m_vh;
-       std::vector<double> m_vk;
-       std::vector<double> m_vl;
-       std::vector<double> m_omega;
-       std::vector<double> m_gs;
-       std::vector<double> m_gl;
-       std::vector<double> m_dpsi;
-       std::vector<double> m_xh;
-       std::vector<double> m_xk;
-       std::vector<double> m_xl;
-       std::vector<double> m_yh;
-       std::vector<double> m_yk;
-       std::vector<double> m_yl;
-       std::vector<double> m_sx;
-       std::vector<double> m_sy;
-       std::vector<double> m_sz;
-       std::vector<int> m_isam;
-       std::vector<double> m_temp;
-       std::vector<double> m_eta;
+       double m_ei;
+       double m_psi;
+       double m_elo;
+       double m_ehi;
+       double m_de;
+       double m_x0;
+       double m_xa;
+       double m_x1;
+       double m_wa;
+       double m_ha;
+       double m_s1;
+       double m_s2;
+       double m_s3;
+       double m_s4;
+       double m_s5;
+       double m_thetam;
+       int m_imod;
+       double m_pslit;
+       double m_radius;
+       double m_rho;
+       double m_hz;
+       double m_tjit;
+       double m_as;
+       double m_bs;
+       double m_cs;
+       double m_aa;
+       double m_bb;
+       double m_cc;
+       double m_uh;
+       double m_uk;
+       double m_ul;
+       double m_vh;
+       double m_vk;
+       double m_vl;
+       double m_omega;
+       double m_gs;
+       double m_gl;
+       double m_dpsi;
+       double m_xh;
+       double m_xk;
+       double m_xl;
+       double m_yh;
+       double m_yk;
+       double m_yl;
+       double m_sx;
+       double m_sy;
+       double m_sz;
+       int m_isam;
+       double m_temp;
+       double m_eta;
 
        /// @endcond
+
     };
   }
 }

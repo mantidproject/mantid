@@ -61,14 +61,17 @@ namespace Mantid
       IInstrument_sptr m_instrument;
       IDetector_sptr m_detector;
       std::vector<coordinate> m_vertexes;
+      int m_runId;
     public:
       MDPoint(){};
-      MDPoint(double signal, double error, const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument);
+      MDPoint(double signal, double error, const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
+          const int runId = 0);
       std::vector<coordinate> getVertexes() const;
       double getSignal() const;
       double getError() const;
       IDetector_sptr getDetector() const;
       IInstrument_sptr getInstrument() const;
+      int getRunId() const;
       virtual ~MDPoint();
       std::vector<boost::shared_ptr<MDPoint> > getContributingPoints() const;
       //virtual Mantid::API::Run getRun();

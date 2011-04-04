@@ -113,9 +113,10 @@ if ( MAKE_VATES )
   set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
   include_directories(MDDataObjects/inc)
   
+  set(MANTIDLIBS ${MANTIDLIBS} CurveFitting) 
   add_subdirectory (MDAlgorithms)
   set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
-  include_directories(MDAlgorithms/inc) 
+  include_directories(MDAlgorithms/inc)
 endif ()
 
 if ( MAKE_MDEVENTS )

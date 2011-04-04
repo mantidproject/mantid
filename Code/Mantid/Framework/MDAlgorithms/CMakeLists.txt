@@ -27,6 +27,8 @@ src/PlaneFunctionBuilder.cpp
 src/PlaneImplicitFunction.cpp
 src/PlaneImplicitFunctionParser.cpp
 src/PlaneInterpreter.cpp
+src/QuadEnBackground.cpp
+src/RunParam.cpp
 src/SimulateMDD.cpp
 src/SingleValueParameterParser.cpp
 src/TobyFitSimulate.cpp
@@ -65,6 +67,8 @@ inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
 inc/MantidMDAlgorithms/PlaneImplicitFunction.h
 inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
 inc/MantidMDAlgorithms/PlaneInterpreter.h
+inc/MantidMDAlgorithms/QuadEnBackground.h
+inc/MantidMDAlgorithms/RunParam.h
 inc/MantidMDAlgorithms/SimulateMDD.h
 inc/MantidMDAlgorithms/SingleValueParameterParser.h
 inc/MantidMDAlgorithms/TobyFitSimulate.h
@@ -90,6 +94,8 @@ test/Load_MDWorkspaceTest.h
 test/NormalParameterTest.h
 test/OriginParameterTest.h
 test/PlaneFunctionBuilderTest.h
+test/QuadEnBackgroundTest.h
+test/RunParamTest.h
 test/SimulateMDDataTest.h
 #test/testCPComponents.h TODO: Is this test really necessary?
 test/testCPrebinning.h
@@ -152,16 +158,16 @@ include_directories (${HDF5_INCLUDE_DIRS})
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 
-
 # Create test file projects
 if ( CXXTEST_FOUND )
+  include_directories(../CurveFitting/inc)	
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects 
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting
       ${GMOCK_LIBRARIES} )
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
-    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects )
+    target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting )
   endif ()
   add_dependencies ( FrameworkTests MDAlgorithmsTest )
   # Add to the 'FrameworkTests' group in VS

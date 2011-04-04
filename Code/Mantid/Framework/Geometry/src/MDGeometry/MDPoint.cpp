@@ -4,12 +4,14 @@ namespace Mantid
 {
   namespace Geometry
   {
-    MDPoint::MDPoint(double signal, double error,const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument)
+    MDPoint::MDPoint(double signal, double error,const std::vector<coordinate>& vertexes, IDetector_sptr detector, IInstrument_sptr instrument,
+        const int runId)
       : m_signal(signal),
         m_error(error),
         m_instrument(instrument),
         m_detector(detector),
-        m_vertexes(vertexes)
+        m_vertexes(vertexes),
+        m_runId(runId)
     {
     }
 
@@ -36,6 +38,11 @@ namespace Mantid
       IInstrument_sptr MDPoint::getInstrument() const
       {
         return this->m_instrument;
+      }
+
+      int MDPoint::getRunId() const
+      {
+        return this->m_runId;
       }
 
       std::vector<boost::shared_ptr<MDPoint> > MDPoint::getContributingPoints() const

@@ -4,6 +4,7 @@ include ( SetMantidSubprojects )
 
 set_mantid_subprojects (
 Framework/API
+Framework/CurveFitting
 Framework/Geometry
 Framework/Kernel
 Framework/MDAlgorithms
