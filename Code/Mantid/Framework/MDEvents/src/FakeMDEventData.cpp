@@ -80,6 +80,8 @@ namespace MDEvents
       ws->addEvent( MDE( 1.0, 1.0, centers) );
     }
 
+    ws->splitBox();
+    ws->splitAllIfNeeded(NULL);
     ws->refreshCache();
   }
 
@@ -139,6 +141,8 @@ namespace MDEvents
     for (size_t d=0; d<nd; ++d)
       delete gens[d];
 
+    ws->splitBox();
+    ws->splitAllIfNeeded(NULL);
     ws->refreshCache();
   }
 

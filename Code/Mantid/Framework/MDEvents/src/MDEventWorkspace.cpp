@@ -11,6 +11,7 @@
 #include "MantidKernel/ThreadPool.h"
 #include "MantidKernel/ThreadScheduler.h"
 #include "MantidKernel/ProgressBase.h"
+#include <iomanip>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -96,6 +97,7 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
   /// Returns some information about the box controller, to be displayed in the GUI, for example
   TMDE(
   std::vector<std::string> MDEventWorkspace)::getBoxControllerStats() const
@@ -103,8 +105,21 @@ namespace MDEvents
     std::vector<std::string> out;
     std::ostringstream mess;
     mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes";
-    out.push_back(mess.str());
-    mess.clear();
+    out.push_back(mess.str()); mess.str("");
+    mess << "Avg recursion depth: " << m_BoxController->getAverageDepth();
+    out.push_back(mess.str()); mess.str("");
+
+    mess << "Recursion Coverage %: ";
+    const std::vector<size_t> & num = m_BoxController->getNumMDBoxes();
+    const std::vector<double> & max = m_BoxController->getMaxNumMDBoxes();
+    for (size_t i=0; i<num.size(); i++)
+    {
+      if (i > 0) mess << ", ";
+      double pct = (num[i] / max[i] * 100);
+      if (pct > 0 && pct < 1e-2) mess << std::scientific; else mess << std::fixed;
+      mess << std::setprecision(2) << pct;
+    }
+    out.push_back(mess.str()); mess.str("");
     return out;
   }
 

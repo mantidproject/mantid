@@ -99,6 +99,7 @@ namespace MDEvents
      * */
     void setSplitInto(size_t num)
     {
+      m_splitInto.clear();
       m_splitInto.resize(nd, num);
       calcNumSplit();
     }
@@ -215,15 +216,36 @@ namespace MDEvents
       return m_numMDBoxes;
     }
 
+    /** Return the vector giving the MAXIMUM number of MD Boxes as a function of depth */
+    const std::vector<double> & getMaxNumMDBoxes() const
+    {
+      return m_maxNumMDBoxes;
+    }
+
     /** Return the total number of MD Boxes, irrespective of depth */
     size_t getTotalNumMDBoxes() const
     {
       size_t total = 0;
-      for (size_t d=0; d<nd; d++)
+      for (size_t depth=0; depth<m_numMDBoxes.size(); depth++)
       {
-        total += m_numMDBoxes[d];
+        total += m_numMDBoxes[depth];
       }
       return total;
+    }
+
+    /** Return the average recursion depth of gridding.
+     * */
+    double getAverageDepth() const
+    {
+      double total = 0;
+      double maxNumberOfFinestBoxes = m_maxNumMDBoxes[m_maxNumMDBoxes.size()-1];
+      for (size_t depth=0; depth<m_numMDBoxes.size(); depth++)
+      {
+        // Add up the number of MDBoxes at that depth, weighed by their volume in units of the volume of the finest possible box.
+        // I.e. a box at level 1 is 100 x bigger than a box at level 2, so it counts 100x more.
+        total += double(depth * m_numMDBoxes[depth]) * (maxNumberOfFinestBoxes / m_maxNumMDBoxes[depth]) ;
+      }
+      return total / maxNumberOfFinestBoxes;
     }
 
     /** Reset the number of boxes tracked in m_numMDBoxes */
@@ -232,12 +254,7 @@ namespace MDEvents
       m_mutexNumMDBoxes.lock();
       m_numMDBoxes.clear();
       m_numMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
-      m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
       m_numMDBoxes[0] = 1; // Start at 1 at depth 0.
-      // Now calculate the max # of boxes
-      m_maxNumMDBoxes[0] = 1;
-      for (size_t d=1; d<m_maxNumMDBoxes.size(); d++)
-        m_maxNumMDBoxes[d] = m_maxNumMDBoxes[d-1] * m_numSplit;
       m_mutexNumMDBoxes.unlock();
     }
 
@@ -252,7 +269,20 @@ namespace MDEvents
       for(size_t d = 0;d < nd;d++){
         m_numSplit *= m_splitInto[d];
       }
+      /// And this changes the max # of boxes too
+      resetMaxNumBoxes();
     }
+
+    /// Calculate the vector of the max # of MDBoxes per level.
+    void resetMaxNumBoxes()
+    {
+      // Now calculate the max # of boxes
+      m_maxNumMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
+      m_maxNumMDBoxes[0] = 1;
+      for (size_t d=1; d<m_maxNumMDBoxes.size(); d++)
+        m_maxNumMDBoxes[d] = m_maxNumMDBoxes[d-1] * m_numSplit;
+    }
+
 
     /// Number of dimensions
     size_t nd;
@@ -285,7 +315,7 @@ namespace MDEvents
     Mantid::Kernel::Mutex m_mutexNumMDBoxes;
 
     /// This is the maximum number of MD boxes there could be at each recursion level (e.g. (splitInto ^ ndims) ^ depth )
-    std::vector<size_t> m_maxNumMDBoxes;
+    std::vector<double> m_maxNumMDBoxes;
 
   };
 
