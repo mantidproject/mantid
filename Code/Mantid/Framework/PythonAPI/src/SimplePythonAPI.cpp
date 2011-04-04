@@ -100,7 +100,6 @@ namespace Mantid
       StringVector algKeys = AlgorithmFactory::Instance().getKeys();
       VersionMap vMap;
       createVersionMap(vMap, algKeys);
-      writeGlobalHelp(module, vMap, gui);
       //Function definitions for each algorithm
       //IndexVector helpStrings;
       std::map<std::string, std::set<std::string> > categories;
@@ -146,7 +145,6 @@ namespace Mantid
       module << "def execute_algorithm(algm):\n"
              << "  algm.execute()\n";
 
-      writeMantidHelp(module);
       module.close();
 
     }

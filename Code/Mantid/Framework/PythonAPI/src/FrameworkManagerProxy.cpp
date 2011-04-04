@@ -94,6 +94,11 @@ void FrameworkManagerProxy::clearAlgorithms()
   API::FrameworkManager::Instance().clearAlgorithms();
 }
 
+std::vector<std::string> FrameworkManagerProxy::getRegisteredAlgorithms()
+{
+  return API::AlgorithmFactory::Instance().getKeys();
+}
+
 /**
  * Clear memory associated with the ADS
  */

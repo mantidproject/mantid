@@ -290,7 +290,69 @@ def _process_frame(frame):
     return (max_returns,output_var_names)
 
 #-------------------------------------------------------------------------------
+def mtdGlobalHelp():
+    # first part is algorithm name, second is version
+    orig_algs = [item.split('|') for item in mtd._getRegisteredAlgorithms()]
 
+    # turn this into a dictionary of algorithms with versions
+    algs_dict = {}
+    for alg in orig_algs:
+        (name, version) = alg
+        version = [int(version)]
+        if algs_dict.has_key(name):
+            version.extend(algs_dict[name])
+        version.sort()
+        algs_dict[name] = version
+
+    # do the final formatting
+    algs = []
+    for name in algs_dict.keys():
+        version = algs_dict[name]
+        version = ["v%d" % it for it in algs_dict[name]]
+        version = " ".join(version)
+        if version == "v1":
+            algs.append(name)
+        else:
+            algs.append("%s %s" % (name, version))
+    algs.sort()
+
+    # print out the global help information
+    print "The algorithms available are:\n"
+    for alg in algs:
+        print "  %s" % alg
+    print "For help with a specific command type: help('cmd')"
+    if mtd.__gui__:
+        print "Note: Each command also has a counterpart with the word 'Dialog' appended ",
+        print "to it, which when run will bring up a property input dialog for that algorithm." 
+        
+# This function should generically go away, but for now...
+def mantidHelp(cmd = None):
+  if cmd == None or cmd == '':
+    mtdGlobalHelp()
+    return
+  try:
+    cmd = cmd.func_name
+  except AttributeError:
+    pass
+  try:
+    # Try exact case first as it will be quicker
+    exec('help(%s)' % cmd)
+    return
+  except NameError:
+    alg_name = mtd.isAlgorithmName(cmd)
+  if alg_name == '':
+    print 'mtdHelp(): "%s" not found in help list' % cmd
+  else:
+    exec('help(%s)' % alg_name)
+
+# Some case variations on the mantidHelp function
+mantidhelp = mantidHelp
+mantidHelp = mantidHelp
+MantidHelp = mantidHelp
+mtdhelp = mantidHelp
+mtdHelp = mantidHelp
+Mtdhelp = mantidHelp
+MtdHelp = mantidHelp
 
 #-------------------------------------------------------------------------------
 class ProxyObject(object):
@@ -893,7 +955,7 @@ class MantidPyFramework(FrameworkManager):
         self.createPythonSimpleAPI(GUI)
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI(GUI) # TODO this line should go
-        self._importSimpleAPIToMain()   # TODO this line should go
+        self._importSimpleAPIToMain()
 
         self.__is_initialized = True
 

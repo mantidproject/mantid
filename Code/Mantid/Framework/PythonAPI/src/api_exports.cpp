@@ -60,6 +60,7 @@ using namespace boost::python;
       .def("_getPropertyOrder", &FrameworkManagerProxy::getPropertyOrder, return_value_policy< reference_existing_object >())
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
+      .def("_getRegisteredAlgorithms", &FrameworkManagerProxy::getRegisteredAlgorithms)
       .def("_observeAlgFactoryUpdates", &FrameworkManagerProxy::observeAlgFactoryUpdates)
       .def("deleteWorkspace", &FrameworkManagerProxy::deleteWorkspace)
       .def("getWorkspaceNames", &FrameworkManagerProxy::getWorkspaceNames)
