@@ -11,6 +11,7 @@
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/FunctionTask.h"
 #include "MantidKernel/ThreadPool.h"
+#include <limits>
 #include <numeric>
 
 using namespace boost::posix_time;
@@ -196,6 +197,42 @@ namespace DataObjects
   int EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
+  }
+
+  double EventWorkspace::getTofMin() const
+  {
+    double tmin = std::numeric_limits<double>::max();
+    double temp;
+    size_t numWorkspace = this->data.size();
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList evList = this->getEventList(workspaceIndex);
+      if (evList.getNumberEvents() > 0)
+      {
+        temp = evList.getTofMin();
+        if (temp < tmin)
+          tmin = temp;
+      }
+    }
+    return tmin;
+  }
+
+  double EventWorkspace::getTofMax() const
+  {
+    double tmax = std::numeric_limits<double>::min();
+    double temp;
+    size_t numWorkspace = this->data.size();
+    for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)
+    {
+      const EventList evList = this->getEventList(workspaceIndex);
+      if (evList.getNumberEvents() > 0)
+      {
+        temp = evList.getTofMax();
+        if (temp > tmax)
+          tmax = temp;
+      }
+    }
+    return tmax;
   }
 
   //-----------------------------------------------------------------------------

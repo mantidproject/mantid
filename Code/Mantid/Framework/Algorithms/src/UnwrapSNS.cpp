@@ -345,14 +345,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
     m_Tmin = std::numeric_limits<double>::max();
     if (isEvent)
     {
-      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-      {
-        temp = m_inputEvWS->getEventList(workspaceIndex).getTofMin();
-        if (temp < m_Tmin) {
-          std::cout << "tmin[" << workspaceIndex << "] = " << temp << std::endl; // REMOVE
-          m_Tmin = temp;
-        }
-      }
+      m_Tmin = m_inputEvWS->getTofMin();
     }
     else
     {
@@ -376,12 +369,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
     m_Tmax = std::numeric_limits<double>::min();
     if (isEvent)
     {
-      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-      {
-        temp = m_inputEvWS->getEventList(workspaceIndex).getTofMax();
-        if (temp > m_Tmax)
-          m_Tmax = temp;
-      }
+      m_Tmax = m_inputEvWS->getTofMax();
     }
     else
     {

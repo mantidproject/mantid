@@ -235,12 +235,7 @@ void RemoveLowResTOF::getTminData(const bool isEvent)
   m_Tmin = std::numeric_limits<double>::max();
   if (isEvent)
   {
-    for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
-    {
-      temp = m_inputEvWS->getEventList(workspaceIndex).getTofMin();
-      if (temp < m_Tmin)
-        m_Tmin = temp;
-    }
+    m_Tmin = m_inputEvWS->getTofMin();
   }
   else
   {

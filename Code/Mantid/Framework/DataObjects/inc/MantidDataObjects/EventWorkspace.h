@@ -149,6 +149,10 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void copyDataFrom(const EventWorkspace& source,
       int sourceStartWorkspaceIndex=-1, int sourceEndWorkspaceIndex=-1);
 
+  double getTofMin() const;
+
+  double getTofMax() const;
+
   //------------------------------------------------------------
   void ensureEnoughBuffersY(int thread_num) const;
   void ensureEnoughBuffersE(int thread_num) const;
