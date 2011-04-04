@@ -209,7 +209,7 @@ namespace Mantid
       //end of function parameters
       size_t nprops = properties.size();
       if( nprops > 0 ) os << ", ";
-      os << "execute=True, Version=" << version << "):\n";
+      os << "Version=" << version << "):\n";
 
       os << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n";
       if( nprops > 0 )
@@ -223,8 +223,7 @@ namespace Mantid
 	  std::string pvalue = sanitizedNames[iarg];
 	  if( iarg < iMand )
 	  {
-	    os << "    " << "  if execute:\n";
-	    os << "    " << "    algm.setPropertyValue(\"" << (*pIter)->name()
+	    os << "    " << "  algm.setPropertyValue(\"" << (*pIter)->name()
 	       << "\", _makeString(" << pvalue << ").lstrip('? '))\n";
 	  }
 	  else
@@ -244,8 +243,7 @@ namespace Mantid
 	   << "          raise\n";
       }
       os << "  algm = mtd._createAlgProxy(algm)\n"
-         << "  if execute:\n"
-         << "    algm.execute()\n";
+         << "  algm.execute()\n";
 
       // Return the IAlgorithm object
       os << "  return algm\n";
