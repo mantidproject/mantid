@@ -106,7 +106,6 @@ void SANSRunWindow::initLayout()
   m_uiForm.setupUi(this);
 
   m_reducemapper = new QSignalMapper(this);
-  m_mode_mapper = new QSignalMapper(this);
 
   //Set column stretch on the mask table
   m_uiForm.mask_table->horizontalHeader()->setStretchLastSection(true);
@@ -125,11 +124,8 @@ void SANSRunWindow::initLayout()
   }
 
   //Mode switches
-  connect(m_uiForm.single_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
-  m_mode_mapper->setMapping(m_uiForm.single_mode_btn, SANSRunWindow::SingleMode);
-  connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), m_mode_mapper, SLOT(map()));
-  m_mode_mapper->setMapping(m_uiForm.batch_mode_btn, SANSRunWindow::BatchMode);
-  connect(m_mode_mapper, SIGNAL(mapped(int)), this, SLOT(switchMode(int)));
+  connect(m_uiForm.single_mode_btn, SIGNAL(clicked()),this,SLOT(switchMode()));
+  connect(m_uiForm.batch_mode_btn, SIGNAL(clicked()), this,SLOT(switchMode()));
 
   //Set a custom context menu for the batch table
   m_uiForm.batch_table->setContextMenuPolicy(Qt::ActionsContextMenu);
@@ -2043,7 +2039,7 @@ bool SANSRunWindow::handleLoadButtonClick()
  * current settings
  * @param type :: The reduction type: 1D or 2D
  */
-QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
+QString SANSRunWindow::readUserFileGUIChanges(const QString & type)
 {
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
@@ -2128,13 +2124,23 @@ QString SANSRunWindow::createAnalysisDetailsScript(const QString & type)
   exec_reduce += ")\n";
   //mask strings that the user has entered manually on to the GUI
   addUserMaskStrings(exec_reduce,"i.Mask",DefaultMask);
+  return exec_reduce;
+}
+///Reads the sample geometry, these settings will override what is stored in the run file
+QString SANSRunWindow::readSampleObjectGUIChanges()
+{
+  QString exec_reduce("i.ReductionSingleton().geometry.height = ");
+  exec_reduce += m_uiForm.sample_height->text();
 
-  //Set geometry info
-  exec_reduce += 
-    "i.ReductionSingleton().geometry.height = " + m_uiForm.sample_height->text()+"\n"+
-    "i.ReductionSingleton().geometry.width = " + m_uiForm.sample_width->text()+"\n" +
-    "i.ReductionSingleton().geometry.thickness = " + m_uiForm.sample_thick->text() +"\n"+
-    "i.ReductionSingleton().geometry.shape = " + m_uiForm.sample_geomid->currentText().at(0)+"\n";
+  exec_reduce += "\ni.ReductionSingleton().geometry.width = ";
+  exec_reduce += m_uiForm.sample_width->text();
+
+  exec_reduce += "\ni.ReductionSingleton().geometry.thickness = ";
+  exec_reduce += m_uiForm.sample_thick->text();
+
+  exec_reduce += "\ni.ReductionSingleton().geometry.shape = ";
+  exec_reduce += m_uiForm.sample_geomid->currentText().at(0);
+  exec_reduce += "\n";
  
   return exec_reduce;
 }
@@ -2261,7 +2267,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     }
   }
 
-  QString py_code = createAnalysisDetailsScript(type);
+  QString py_code = readUserFileGUIChanges(type);
   if( py_code.isEmpty() )
   {
     showInformationBox("Error: An error occurred while constructing the reduction code, please check installation.");
@@ -2277,6 +2283,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   //Need to check which mode we're in
   if ( runMode == SingleMode )
   {
+    py_code += readSampleObjectGUIChanges();
     py_code += reduceSingleRun();
     //output the name of the output workspace, this is returned up by the runPythonCode() call below
     py_code += "\nprint '"+PYTHON_SEP+"'+reduced+'"+PYTHON_SEP+"'";
@@ -2296,7 +2303,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
       QString selected_file = QFileDialog::getSaveFileName(this, "Save as CSV", m_last_dir);
       csv_file = saveBatchGrid(selected_file);
     }
-    py_code = "import SANSBatchMode as batch\n" + py_code;
+    py_code.prepend("import SANSBatchMode as batch\n");
     py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',";
     py_code += m_uiForm.def_trans->isChecked() ? "True" : "False";
     if( m_uiForm.plot_check->isChecked() )
@@ -2753,22 +2760,27 @@ void SANSRunWindow::updateLogWindow(const QString & msg)
 }
 
 /**
-* Switch between run modes
-* @param mode_id :: Indicates which toggle has been pressed
+* Enable or disable the controls that corrospond to batch or single run mode
 */
-void SANSRunWindow::switchMode(int mode_id)
+void SANSRunWindow::switchMode()
 {
-  if( mode_id == SANSRunWindow::SingleMode )
+  const RunMode modeId =
+    m_uiForm.single_mode_btn->isChecked() ? SingleMode : BatchMode;
+
+  if( modeId == SingleMode )
   {
     m_uiForm.mode_stack->setCurrentIndex(0);
     m_uiForm.load_dataBtn->setEnabled(true);
+    m_uiForm.sampDetails_gb->setEnabled(true);
+    m_uiForm.sampDetails_gb->setToolTip("The dimensions of the sample");
   }
-  else if( mode_id == SANSRunWindow::BatchMode )
+  else if( modeId == BatchMode )
   {
     m_uiForm.mode_stack->setCurrentIndex(1);
     m_uiForm.load_dataBtn->setEnabled(false);
+    m_uiForm.sampDetails_gb->setEnabled(false);
+    m_uiForm.sampDetails_gb->setToolTip("Batch mode has been selected the sample geometry will be read from the sample workspace");
   }
-  else {}
 }
 
 /**

@@ -2154,7 +2154,7 @@ intermediate ranges are there for comparison</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_14" >
        <item row="0" column="0" >
-        <widget class="QGroupBox" name="groupBox_8" >
+        <widget class="QGroupBox" name="sampDetails_gb" >
          <property name="title" >
           <string>Sample Details</string>
          </property>

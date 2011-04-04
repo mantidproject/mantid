@@ -130,7 +130,8 @@ private:
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
   /// Construct the reduction code from the Python script template
-  QString createAnalysisDetailsScript(const QString & type);
+  QString readUserFileGUIChanges(const QString & type);
+  QString readSampleObjectGUIChanges();
   /// Get the component distances
   void componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
@@ -236,7 +237,7 @@ private slots:
   /// Append log message to log window
   void updateLogWindow(const QString & msg);
   /// Switch mode
-  void switchMode(int mode_id);
+  void switchMode();
   ///Paste to batch table
   void pasteToBatchTable();
   ///Clear the batch table
@@ -299,8 +300,6 @@ private:
   QHash<QString,int> m_allowed_batchtags;
   /// An integer to save the last run reduction type
   int m_lastreducetype;
-  /// A signal mapper for the mode switches
-  QSignalMapper *m_mode_mapper;
   /// Indicate if the reduce module has been loaded?
   bool m_have_reducemodule;
   /// A flag marking if the batch grid has been changed
