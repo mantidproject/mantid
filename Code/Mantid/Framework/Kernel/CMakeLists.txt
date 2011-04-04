@@ -2,6 +2,7 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp
 	src/BinFinder.cpp
+	src/CPUTimer.cpp
 	src/ConfigService.cpp
 	src/DateAndTime.cpp
 	src/DateValidator.cpp
@@ -86,6 +87,7 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/BoundedValidator.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/ConfigService.h
+	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
@@ -163,6 +165,7 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/BinFinderTest.h
 	test/BoundedValidatorTest.h
 	test/CacheTest.h
+	test/CPUTimerTest.h
 	test/ConfigServiceTest.h
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h

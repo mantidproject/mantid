@@ -48,12 +48,12 @@ public:
   Timer();
   virtual ~Timer();
   
-  float elapsed();
+  float elapsed(bool reset = true);
   float elapsed_no_reset() const;
   std::string str() const;
+  void reset();
   
 private:
-  void reset();
   // The type of this variable is different depending on the platform
 #ifdef _WIN32
   clock_t

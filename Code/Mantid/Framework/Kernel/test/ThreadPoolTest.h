@@ -31,7 +31,7 @@ static size_t waste_time(double seconds)
   // Waste time, but use up the CPU!
   std::size_t num = 0;
   Mantid::Kernel::Timer time;
-  while (time.elapsed_no_reset() < seconds)
+  while (time.elapsed(false) < seconds)
   {
     double x = 1.1;
     for (int j=0; j < 100000; j++)

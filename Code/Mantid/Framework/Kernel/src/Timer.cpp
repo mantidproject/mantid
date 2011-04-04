@@ -25,11 +25,33 @@ Timer::Timer()
 Timer::~Timer()
 {}
 
-/// Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
-float Timer::elapsed()
+/** Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
+ *
+ * @param reset :: set to true to reset the clock (default)
+ * @return time in seconds
+ */
+float Timer::elapsed(bool reset)
 {
-  float retval = this->elapsed_no_reset();
-  this->reset();
+  float retval = elapsed_no_reset();
+  if (reset) this->reset();
+  return retval;
+}
+
+/** Returns the wall-clock time elapsed in seconds since the Timer object's creation, or the last call to elapsed
+ *
+ * @param reset :: set to true to reset the clock (default)
+ * @return time in seconds
+ */
+float Timer::elapsed_no_reset() const
+{
+#ifdef _WIN32
+  clock_t now = clock();
+  const float retval = float(now - m_start)/CLOCKS_PER_SEC;
+#else /* linux & mac */
+  timeval now;
+  gettimeofday(&now,0);
+  const float retval = float(now.tv_sec - m_start.tv_sec) + float((now.tv_usec - m_start.tv_usec)/1E6);
+#endif
   return retval;
 }
 
@@ -43,20 +65,6 @@ void Timer::reset()
   gettimeofday(&now,0);
   m_start = now;
 #endif
-}
-
-/// Calculate the elapsed time without reseting the timer.
-float Timer::elapsed_no_reset() const
-{
-#ifdef _WIN32
-  clock_t now = clock();
-  const float retval = float(now - m_start)/CLOCKS_PER_SEC;
-#else /* linux & mac */
-  timeval now;
-  gettimeofday(&now,0);
-  const float retval = float(now.tv_sec - m_start.tv_sec) + float((now.tv_usec - m_start.tv_usec)/1E6);
-#endif
-  return retval;
 }
 
 /// Convert the elapsed time (without reseting) to a string.
