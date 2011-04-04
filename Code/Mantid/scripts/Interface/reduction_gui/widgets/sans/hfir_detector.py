@@ -45,6 +45,7 @@ class DetectorWidget(BaseWidget):
         self._content.min_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._content.min_sensitivity_edit))
         self._content.max_sensitivity_edit.setValidator(QtGui.QDoubleValidator(self._content.max_sensitivity_edit))
 
+        self.connect(self._content.data_file_browse_button_2, QtCore.SIGNAL("clicked()"), self._flood_beam_finder_browse)
 
         self.connect(self._content.sensitivity_chk, QtCore.SIGNAL("clicked(bool)"), self._sensitivity_clicked)
         self.connect(self._content.sensitivity_browse_button, QtCore.SIGNAL("clicked()"), self._sensitivity_browse)
@@ -55,9 +56,11 @@ class DetectorWidget(BaseWidget):
         self.connect(self._content.direct_beam, QtCore.SIGNAL("clicked()"), self._center_method_changed)
 
         self.connect(self._content.use_sample_center_checkbox, QtCore.SIGNAL("clicked(bool)"), self._use_sample_center_changed)
-        self.connect(self._content.scattering_data, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
-        self.connect(self._content.direct_beam, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
+        self.connect(self._content.scattering_data_2, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
+        self.connect(self._content.direct_beam_2, QtCore.SIGNAL("clicked()"), self._flood_center_method_changed)
         self.connect(self._content.use_beam_finder_checkbox_2, QtCore.SIGNAL("clicked(bool)"), self._flood_use_beam_finder_changed)
+
+        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._beam_finder_browse)
 
         self._use_beam_finder_changed(self._content.use_beam_finder_checkbox.isChecked())
         self._content.use_sample_center_checkbox.setChecked(True)
@@ -69,7 +72,37 @@ class DetectorWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
+        # Beam finder
+        self._content.x_pos_edit.setText(QtCore.QString(str(state.x_position)))
+        self._content.y_pos_edit.setText(QtCore.QString(str(state.y_position)))
+        self._content.use_beam_finder_checkbox.setChecked(state.use_finder)
+        self._content.beam_data_file_edit.setText(QtCore.QString(state.beam_file))
+        self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))
+        
+        self._content.direct_beam.setChecked(state.use_direct_beam)
+        self._content.scattering_data.setChecked(not state.use_direct_beam)
+        self._content.beam_radius_edit.setEnabled(not state.use_direct_beam)
 
+        self._use_beam_finder_changed(state.use_finder)
+        
+        # Sensitivity
+        self._content.sensitivity_file_edit.setText(QtCore.QString(state.sensitivity_data))
+        self._content.sensitivity_dark_file_edit.setText(QtCore.QString(state.sensitivity_dark))
+        self._content.sensitivity_chk.setChecked(state.sensitivity_corr)
+        self._sensitivity_clicked(state.sensitivity_corr)
+        self._content.min_sensitivity_edit.setText(QtCore.QString(str(state.min_sensitivity)))
+        self._content.max_sensitivity_edit.setText(QtCore.QString(str(state.max_sensitivity)))
+        
+        self._content.use_sample_center_checkbox.setChecked(state.use_sample_beam_center)
+        self._content.x_pos_edit_2.setText(QtCore.QString(str(state.flood_x_position)))
+        self._content.y_pos_edit_2.setText(QtCore.QString(str(state.flood_y_position)))
+        self._content.use_beam_finder_checkbox_2.setChecked(state.flood_use_finder)
+        self._content.beam_data_file_edit_2.setText(QtCore.QString(state.flood_beam_file))
+        self._content.beam_radius_edit_2.setText(QtCore.QString(str(state.flood_beam_radius)))
+        
+        self._content.direct_beam_2.setChecked(state.flood_use_direct_beam)
+        self._content.scattering_data_2.setChecked(not state.flood_use_direct_beam)
+        self._content.beam_radius_edit_2.setEnabled(not state.flood_use_direct_beam)
         
         
     def get_state(self):
@@ -78,7 +111,28 @@ class DetectorWidget(BaseWidget):
         """
         m = Detector()
         
+        # Mask
+        m.x_position = util._check_and_get_float_line_edit(self._content.x_pos_edit)
+        m.y_position = util._check_and_get_float_line_edit(self._content.y_pos_edit)
+        m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
+        m.use_finder = self._content.use_beam_finder_checkbox.isChecked()
+        m.beam_file = unicode(self._content.beam_data_file_edit.text())
+        m.use_direct_beam = self._content.direct_beam.isChecked()    
 
+        # Sensitivity
+        m.sensitivity_corr = self._content.sensitivity_chk.isChecked() 
+        m.sensitivity_data = unicode(self._content.sensitivity_file_edit.text())
+        m.sensitivity_dark = unicode(self._content.sensitivity_dark_file_edit.text())
+        m.min_sensitivity = util._check_and_get_float_line_edit(self._content.min_sensitivity_edit)
+        m.max_sensitivity = util._check_and_get_float_line_edit(self._content.max_sensitivity_edit)
+        
+        m.use_sample_beam_center = self._content.use_sample_center_checkbox.isChecked() 
+        m.flood_x_position = util._check_and_get_float_line_edit(self._content.x_pos_edit_2)
+        m.flood_y_position = util._check_and_get_float_line_edit(self._content.y_pos_edit_2)
+        m.flood_beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit_2)
+        m.flood_use_finder = self._content.use_beam_finder_checkbox_2.isChecked()
+        m.flood_beam_file = unicode(self._content.beam_data_file_edit_2.text())
+        m.flood_use_direct_beam = self._content.direct_beam_2.isChecked()    
         return m
     
     def _use_sample_center_changed(self, is_checked):
@@ -114,7 +168,14 @@ class DetectorWidget(BaseWidget):
         self._content.beam_radius_edit_2.setEnabled(not is_direct_beam and finder_checked)
     
     def _beam_finder_browse(self):
-        pass
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.beam_data_file_edit.setText(fname)          
+    
+    def _flood_beam_finder_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._content.beam_data_file_edit_2.setText(fname)          
     
     def _use_beam_finder_changed(self, is_checked):
         """

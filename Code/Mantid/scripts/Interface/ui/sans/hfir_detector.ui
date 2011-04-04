@@ -295,7 +295,7 @@
                 </property>
                 <property name="sizeHint" stdset="0">
                  <size>
-                  <width>40</width>
+                  <width>35</width>
                   <height>20</height>
                  </size>
                 </property>
@@ -386,7 +386,7 @@
         </spacer>
        </item>
        <item>
-        <widget class="QGroupBox" name="groupBox">
+        <widget class="QGroupBox" name="sensitivity_grpbox">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
            <horstretch>0</horstretch>
@@ -1077,7 +1077,7 @@
                    </property>
                    <property name="sizeHint" stdset="0">
                     <size>
-                     <width>20</width>
+                     <width>26</width>
                      <height>20</height>
                     </size>
                    </property>

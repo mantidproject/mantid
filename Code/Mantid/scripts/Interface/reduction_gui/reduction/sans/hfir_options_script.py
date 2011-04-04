@@ -132,14 +132,6 @@ class ReductionOptions(BaseScriptElement):
         if len(self.detector_ids)>0:
             script += "MaskDetectors([%s])\n" % self.detector_ids
 
-        # Data files
-        if len(self.data_files)>0:
-            parts = os.path.split(str(self.data_files[0]).strip())
-            script += "DataPath(\"%s\")\n" % parts[0]
-            script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
-        else:
-            raise RuntimeError, "Trying to generate reduction script without a data file."
-        
         return script           
     
     def to_xml(self):
@@ -253,7 +245,7 @@ class ReductionOptions(BaseScriptElement):
                     self.shapes.append(ReductionOptions.RectangleMask(x_min, x_max, y_min, y_max))
                             
             self.detector_ids = ''
-            self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='')
+            self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='').strip()
 
     def reset(self):
         """
