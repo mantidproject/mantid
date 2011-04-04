@@ -89,6 +89,11 @@ private:
     {
       throw std::runtime_error("Not Implemented");
     }
+    double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      uniqueArgumentCombination unique; //Creates a unique return value based on the inputs. Used to determine the arranagement of input arguments after remapping.
+      return unique(index1, index2, index3, index4);
+    }
   };
 
   /// Helper method. Creates a mock x Dimension by assigning a specified id to the getDimensionId return type on the mock object created.
@@ -127,6 +132,7 @@ private:
     return p_tDim;
   }
 
+  /// Helper method. Creates a MDWorkspace with getXDimension, getYDimension ... already pre-setup.
   static Mantid::API::IMDWorkspace* createMockIMDWorkspace()
     {
     using namespace testing;
@@ -195,7 +201,6 @@ public:
 
   void testNormalDimensionMappings()
   {
-    using namespace testing;
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
     using Mantid::VATES::Dimension_const_sptr;
@@ -217,7 +222,6 @@ public:
 
   void testRemappedDimensions()
   {
-    using namespace testing;
     using Mantid::API::IMDWorkspace_sptr;
     using Mantid::VATES::IMDWorkspaceProxy;
     using Mantid::VATES::Dimension_const_sptr;
@@ -233,441 +237,449 @@ public:
 
     TS_ASSERT_EQUALS(getTDimId(), proxy->getXDimension()->getDimensionId());
     TS_ASSERT_EQUALS(getZDimId(), proxy->getYDimension()->getDimensionId());
-    TS_ASSERT_EQUALS(getXDimId(), proxy->getZDimension()->getDimensionId());
-    TS_ASSERT_EQUALS(getYDimId(), proxy->getTDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getYDimId(), proxy->getZDimension()->getDimensionId());
+    TS_ASSERT_EQUALS(getXDimId(), proxy->getTDimension()->getDimensionId());
   }
-//
-//  void testRemapPoints_xyzt()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3)); //Mirrors geometry x dimension mapping
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3)); //Mirrors geometry y dimension mapping
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3)); //Mirrors geometry z dimension mapping
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getTDimId(), 1, 2, 3)); //Mirrors geometry t dimension mapping
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xyzt schenario", unique(1, 2, 3, 4), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_xzyt()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3)); // x -> x
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3)); // y -> y
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3)); // z -> z
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getTDimId(), 1, 2, 3)); // t -> t
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xzyt schenario", unique(1, 3, 2, 4), function(1, 2, 3, 4).s);
-//  }
-//
-//
-//  void testRemapPoints_yxzt()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3)); // x -> y (so x becomes 2nd argument)
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3)); // y -> x (so y becomes 1st argument)
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3)); // z -> z (so z becomes 3rd argument)
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getTDimId(), 1, 2, 3)); // t -> t (so t becomes 4th argument)
-//    //hence yxzt
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yxzt schenario", unique(2, 1, 3, 4), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_yzxt()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getZDimId(), 1, 2, 3)); // x -> z (so becomes 3nd argument)
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3)); // y -> x (so becomes 1st argument)
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3)); // z -> y (so becomes 2nd argument)
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getTDimId(), 1, 2, 3)); // t -> t (so becomes 4th argument)
-//    //hence yzxt
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yzxt schenario", unique(2, 3, 1, 4), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_zxyt()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim); //zxyt
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zxyt schenario", unique(3, 1, 2, 4), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_txyz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3)); // x -> y
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3)); // y -> z
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3)); // z -> t
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3)); // t -> x
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim); //txyz
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for txyz schenario", unique(4, 1, 2, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_txzy()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for txzy schenario", unique(4, 1, 3, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//
-//  void testRemapPoints_tyxz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tyxz schenario", unique(4, 2, 1, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_tyzx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tyzx schenario", unique(4, 2, 3, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//    void testRemapPoints_tzxy()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tzxy schenario", unique(4, 3, 1, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//        void testRemapPoints_tzyx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tzyx schenario", unique(4, 3, 2, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_xtyz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xtyz schenario", unique(1, 4, 2, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_xtzy()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xtzy schenario", unique(1, 4, 3, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_ytxz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ytxz schenario", unique(2, 4, 1, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_ytzx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ytzx schenario", unique(2, 4, 3, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//    void testRemapPoints_ztxy()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ztxy schenario", unique(3, 4, 1, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_ztyx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ztyx  schenario", unique(3, 4, 2, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_xytz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xytz schenario", unique(1, 2, 4, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//    void testRemapPoints_xzty()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xzty schenario", unique(1, 3, 4, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//   void testRemapPoints_yxtz()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yxtz schenario", unique(2, 1, 4, 3), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_yztx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yztx schenario", unique(2, 3, 4, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_zxty()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zxty schenario", unique(3, 1, 4, 2), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_zytx()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension(getTDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    GetPoint_fctn function = proxy->getMappedPointFunction();
-//
-//    uniqueArgumentCombination unique;
-//    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zytx schenario", unique(3, 2, 4, 1), function(1, 2, 3, 4).s);
-//  }
-//
-//  void testRemapPoints_throws()
-//  {
-//    using namespace Mantid::VATES;
-//    //We are going to use new mappings to describe how dimensions are actually to be used.
-//    Mantid::VATES::Dimension_sptr xDim(new FakeDimension("--", 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr yDim(new FakeDimension(getYDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr zDim(new FakeDimension(getXDimId(), 1, 2, 3));
-//    Mantid::VATES::Dimension_sptr tDim(new FakeDimension(getZDimId(), 1, 2, 3));
-//
-//    ImagePolicy_sptr imagePolicy = ImagePolicy_sptr(new ImagePolicy(1, 2, 3, 4));
-//    GeometryProxy_sptr proxy = constructGeometryProxy(imagePolicy, xDim, yDim, zDim, tDim);
-//
-//    TSM_ASSERT_THROWS("Cannot rebind, so should throw, exception.", proxy->getMappedPointFunction(), std::runtime_error);
-//  }
 
+  void testRemapPoints_xyzt()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());// x -> x
+    Dimension_const_sptr yDim(createYDimension());// y -> y
+    Dimension_const_sptr zDim(createZDimension());// z -> z
+    Dimension_const_sptr tDim(createTDimension());// t -> t
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xyzt scenario", unique(1, 2, 3, 4), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testremappoints_xzyt()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());// x -> x
+    Dimension_const_sptr yDim(createZDimension());// y -> z
+    Dimension_const_sptr zDim(createYDimension());// z -> y
+    Dimension_const_sptr tDim(createTDimension());// t -> t
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("rebinding has not been done correctly for xzyt scenario", unique(1, 3, 2, 4),  proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+
+  void testRemapPoints_yxzt()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());// x -> y (so x becomes 2nd argument)
+    Dimension_const_sptr yDim(createXDimension());// y -> x (so y becomes 1st argument)
+    Dimension_const_sptr zDim(createZDimension());// z -> z (so z becomes 3rd argument)
+    Dimension_const_sptr tDim(createTDimension());// t -> t (so t becomes 4th argument)
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yxzt scenario", unique(2, 1, 3, 4), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_yzxt()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createZDimension());// x -> z (so becomes 3nd argument)
+    Dimension_const_sptr yDim(createXDimension());// y -> x (so becomes 1st argument)
+    Dimension_const_sptr zDim(createYDimension());// z -> y (so becomes 2nd argument)
+    Dimension_const_sptr tDim(createTDimension());// t -> t (so becomes 4th argument)
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yzxt scenario", unique(2, 3, 1, 4), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_zxyt()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());
+    Dimension_const_sptr yDim(createZDimension());
+    Dimension_const_sptr zDim(createXDimension());
+    Dimension_const_sptr tDim(createTDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zxyt scenario", unique(3, 1, 2, 4), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_txyz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());
+    Dimension_const_sptr yDim(createZDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for txyz scenario", unique(4, 1, 2, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_txzy()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createZDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for txzy scenario", unique(4, 1, 3, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+
+  void testRemapPoints_tyxz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createZDimension());
+    Dimension_const_sptr yDim(createYDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tyxz scenario", unique(4, 2, 1, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_tyzx()
+  {
+
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createYDimension());
+    Dimension_const_sptr zDim(createZDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tyzx scenario", unique(4, 2, 3, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_tzxy()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createZDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createYDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tzxy scenario", unique(4, 3, 1, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_tzyx()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createZDimension());
+    Dimension_const_sptr zDim(createYDimension());
+    Dimension_const_sptr tDim(createXDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for tzyx scenario", unique(4, 3, 2, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_xtyz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());
+    Dimension_const_sptr yDim(createZDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xtyz scenario", unique(1, 4, 2, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_xtzy()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createZDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xtzy scenario", unique(1, 4, 3, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_ytxz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createZDimension());
+    Dimension_const_sptr yDim(createXDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ytxz scenario", unique(2, 4, 1, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_ytzx()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createXDimension());
+    Dimension_const_sptr zDim(createZDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ytzx scenario", unique(2, 4, 3, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+    void testRemapPoints_ztxy()
+  {
+
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createZDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createXDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ztxy scenario", unique(3, 4, 1, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_ztyx()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createZDimension());
+    Dimension_const_sptr zDim(createXDimension());
+    Dimension_const_sptr tDim(createYDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for ztyx  scenario", unique(3, 4, 2, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_xytz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());
+    Dimension_const_sptr yDim(createYDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xytz scenario", unique(1, 2, 4, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+    void testRemapPoints_xzty()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createXDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createYDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xzty scenario", unique(1, 3, 4, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+   void testRemapPoints_yxtz()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());
+    Dimension_const_sptr yDim(createXDimension());
+    Dimension_const_sptr zDim(createTDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yxtz scenario", unique(2, 1, 4, 3), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_yztx()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createXDimension());
+    Dimension_const_sptr zDim(createYDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for yztx scenario", unique(2, 3, 4, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_zxty()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createYDimension());
+    Dimension_const_sptr yDim(createTDimension());
+    Dimension_const_sptr zDim(createXDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zxty scenario", unique(3, 1, 4, 2), proxy->getSignalAt(1, 2, 3, 4));
+  }
+
+  void testRemapPoints_zytx()
+  {
+    using Mantid::API::IMDWorkspace_sptr;
+    using Mantid::VATES::IMDWorkspaceProxy;
+    using Mantid::VATES::Dimension_const_sptr;
+
+    IMDWorkspace_sptr mock_sptr( createMockIMDWorkspace());
+
+    Dimension_const_sptr xDim(createTDimension());
+    Dimension_const_sptr yDim(createYDimension());
+    Dimension_const_sptr zDim(createXDimension());
+    Dimension_const_sptr tDim(createZDimension());
+
+    IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
+
+    uniqueArgumentCombination unique;
+    TSM_ASSERT_EQUALS("Rebinding has not been done correctly for zytx scenario", unique(3, 2, 4, 1), proxy->getSignalAt(1, 2, 3, 4));
+  }
 
 };
 #endif

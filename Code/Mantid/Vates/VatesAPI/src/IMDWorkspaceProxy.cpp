@@ -189,7 +189,7 @@ double IMDWorkspaceProxy::getSignalAt(size_t index1, size_t index2, size_t index
  */
 boost::function<double(size_t, size_t, size_t, size_t)> IMDWorkspaceProxy::getMappedSignalAt()
 {
-  using Mantid::API::IMDWorkspace;
+  using namespace Mantid::API;
   //This switch is used to determine how to remap the arguments to the getPoint member function of MDImage.
   DimensionComparitor comparitor(m_workspace);
 

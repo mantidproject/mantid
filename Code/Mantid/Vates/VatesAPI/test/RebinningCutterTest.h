@@ -102,7 +102,7 @@ private:
         vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
       in_ds->Delete();
-      return in_ds;
+      return ug;
     }
   };
 
