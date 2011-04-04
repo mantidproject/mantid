@@ -46,6 +46,10 @@ CompositeFunctionMW::~CompositeFunctionMW()
 std::string CompositeFunctionMW::asString()const
 {
   std::ostringstream ostr;
+  if (name() != "CompositeFunctionMW")
+  {
+    ostr << "composite=" <<name() << ";";
+  }
   for(int i=0;i<nFunctions();i++)
   {
     IFitFunction* fun = getFunction(i);

@@ -4,6 +4,7 @@ set ( SRC_FILES src/BackgroundFunction.cpp
 		src/BoundaryConstraint.cpp
 		src/Chebyshev.cpp
 		src/Convolution.cpp
+		src/ProductFunctionMW.cpp
 		src/CostFuncIgnorePosPeaks.cpp
 		src/CostFuncLeastSquares.cpp
 		src/CostFunctionFactory.cpp
@@ -40,6 +41,7 @@ set ( INC_FILES inc/MantidCurveFitting/BackgroundFunction.h
 		inc/MantidCurveFitting/BoundaryConstraint.h
 		inc/MantidCurveFitting/Chebyshev.h
 		inc/MantidCurveFitting/Convolution.h
+		inc/MantidCurveFitting/ProductFunctionMW.h
 		inc/MantidCurveFitting/CostFuncIgnorePosPeaks.h
 		inc/MantidCurveFitting/CostFuncLeastSquares.h
 		inc/MantidCurveFitting/CostFunctionFactory.h
@@ -77,6 +79,7 @@ set ( TEST_FILES test/BackToBackExponentialTest.h
 		 test/ChebyshevTest.h
 		 test/CompositeFunctionTest.h
 		 test/ConvolutionTest.h
+		 test/ProductFunctionMWTest.h
 		 test/CostFunctionFactoryTest.h
 		 test/ExpDecayTest.h
 		 test/FitTest.h
