@@ -1,29 +1,30 @@
 //
 // Wrappers for classes in the API namespace
 //
-#include <MantidPythonAPI/api_exports.h>
-#include <MantidPythonAPI/stl_proxies.h>
-#include <MantidPythonAPI/WorkspaceProxies.h>
+#include "MantidPythonAPI/api_exports.h"
+#include "MantidPythonAPI/stl_proxies.h"
+#include "MantidPythonAPI/WorkspaceProxies.h"
 #include <string>
 #include <ostream>
 
 // API
-#include <MantidAPI/FileFinder.h>
-#include <MantidAPI/FileProperty.h>
-#include <MantidAPI/IEventWorkspace.h>
-#include <MantidAPI/IMDEventWorkspace.h>
-#include <MantidAPI/ITableWorkspace.h>
-#include <MantidAPI/Sample.h>
-#include <MantidAPI/WorkspaceGroup.h>
-#include <MantidAPI/WorkspaceProperty.h>
-#include <MantidAPI/WorkspaceValidators.h>
-#include <MantidGeometry/MDGeometry/IMDDimension.h>
+#include "MantidAPI/AlgorithmProperty.h"
+#include "MantidAPI/FileFinder.h"
+#include "MantidAPI/FileProperty.h"
+#include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/Sample.h"
+#include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/WorkspaceProperty.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-//#include <MantidDataObjects/EventWorkspace.h>
-//#include <MantidDataObjects/EventList.h>
+//#include "MantidDataObjects/EventWorkspace.h"
+//#include "MantidDataObjects/EventList.h"
 //using namespace Mantid::DataObjects;
 
-#include <MantidPythonAPI/PyAlgorithmWrapper.h>
+#include "MantidPythonAPI/PyAlgorithmWrapper.h"
 
 namespace Mantid
 {
@@ -139,6 +140,14 @@ using namespace boost::python;
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
     class_< API::CloneableAlgorithm, bases<API::Algorithm>, boost::noncopyable>("CloneableAlgorithm", no_init)
+      ;
+    
+    /// Algorithm properties
+   	class_<Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>,
+	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_AlgorithmProperty", no_init)
+      .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>::operator(), return_value_policy<copy_const_reference>()))
+      ;
+    class_<API::AlgorithmProperty, bases<Kernel::PropertyWithValue<IAlgorithm_sptr> >, boost::noncopyable>("AlgorithmProperty", no_init)
       ;
     
     //PyAlgorithmBase
