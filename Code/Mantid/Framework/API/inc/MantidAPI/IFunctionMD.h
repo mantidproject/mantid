@@ -8,6 +8,7 @@
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidAPI/FunctionFactory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/shared_ptr.hpp>

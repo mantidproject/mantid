@@ -7,6 +7,8 @@
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
+#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid
 {
@@ -57,7 +59,7 @@ namespace Mantid
             std::string name()const{return "QuadEnBackground";}
         protected:
             /// function to return the calculated signal at cell r, given the energy dependent model applied to points
-            virtual double function(MDIterator& r) const;
+            virtual double function(Mantid::API::IMDIterator& r) const;
         };
 
     } // namespace MDAlgorithms
