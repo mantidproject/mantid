@@ -120,13 +120,13 @@ private:
   BoxFunction_sptr constructBox(vtkDataSet* ) const;
 
   /// Selects the dataset factory to use.
-  Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+  Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::API::IMDWorkspace_sptr spRebinnedWs) const;
 
   /// DataSet handles remappings, so allows regeneration of a visual dataset in rapid time.
-  Mantid::VATES::vtkDataSetFactory_sptr createQuickChangeDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+  Mantid::VATES::vtkDataSetFactory_sptr createQuickChangeDataSetFactory(Mantid::API::IMDWorkspace_sptr spRebinnedWs) const;
 
   /// Dataset does not handle remappings and is therefore may be generated quickly.
-  Mantid::VATES::vtkDataSetFactory_sptr createQuickRenderDataSetFactory(Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const;
+  Mantid::VATES::vtkDataSetFactory_sptr createQuickRenderDataSetFactory(Mantid::API::IMDWorkspace_sptr spRebinnedWs) const;
 
   /// Decides on the necessary iteration action that is to be performed.
   void determineAnyCommonExecutionActions(const int timestep, BoxFunction_sptr box);
@@ -148,6 +148,8 @@ private:
   std::string m_cachedRedrawArguments;
   /// Flag indicating that the clip boundaries should be use to construct the rebinning region.
   Clipping m_clip;
+  /// Original extents should be used.
+  OrignalExtents m_originalExtents;
   /// Flag indicating whether set up has occured or not
   SetupStatus m_setup;
   /// Flag containing the timestep.
@@ -168,8 +170,7 @@ private:
   Mantid::VATES::RebinningActionManger m_actionRequester;
   /// Box implicit function, used to determine when the clipping has changed.
   BoxFunction_sptr m_box;
-  /// Original extents should be used.
-  OrignalExtents m_originalExtents;
+
 
 };
 #endif

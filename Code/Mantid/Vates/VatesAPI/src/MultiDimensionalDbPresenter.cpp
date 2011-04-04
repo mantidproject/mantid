@@ -8,8 +8,7 @@
 #include <MantidGeometry/MDGeometry/MDGeometry.h>
 #include <MDDataObjects/IMD_FileFormat.h>
 #include <MDDataObjects/MD_FileFormatFactory.h>
-#include <MDDataObjects/MDWorkspace.h>
-#include <MantidMDAlgorithms/CenterpieceRebinning.h>
+
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -30,7 +29,6 @@ MultiDimensionalDbPresenter::MultiDimensionalDbPresenter() : m_isExecuted(false)
 void MultiDimensionalDbPresenter::execute(const std::string& fileName)
 {
   using namespace Mantid::MDAlgorithms;
-  using namespace Mantid::MDDataObjects;
   using namespace Mantid::API;
 
   Load_MDWorkspace wsLoaderAlg;
@@ -40,8 +38,8 @@ void MultiDimensionalDbPresenter::execute(const std::string& fileName)
   wsLoaderAlg.setPropertyValue("MDWorkspace",wsId);
   wsLoaderAlg.execute();
   Workspace_sptr result=AnalysisDataService::Instance().retrieve(wsId);
-  MDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
-  this->m_MDWorkspace = inputWS;
+  IMDWorkspace_sptr inputWS = boost::dynamic_pointer_cast<IMDWorkspace>(result);
+  this->m_workspace = inputWS;
 
   m_isExecuted = true;
 }
@@ -59,7 +57,7 @@ std::string MultiDimensionalDbPresenter::getXAxisName() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  return m_MDWorkspace->getGeometry()->getXDimension()->getDimensionId();
+  return m_workspace->getXDimension()->getDimensionId();
 }
 
 std::string MultiDimensionalDbPresenter::getYAxisName() const
@@ -67,7 +65,7 @@ std::string MultiDimensionalDbPresenter::getYAxisName() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  return m_MDWorkspace->getGeometry()->getYDimension()->getDimensionId();
+  return m_workspace->getYDimension()->getDimensionId();
 }
 
 std::string MultiDimensionalDbPresenter::getZAxisName() const
@@ -75,7 +73,7 @@ std::string MultiDimensionalDbPresenter::getZAxisName() const
   //Sanity check. Must run execution sucessfully first.
   verifyExecution();
 
-  return m_MDWorkspace->getGeometry()->getZDimension()->getDimensionId();
+  return m_workspace->getZDimension()->getDimensionId();
 }
 
 vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
@@ -87,20 +85,19 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
 
   //Create the mesh
   TimeStepToTimeStep timeStepMapper;
-  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep> factory =  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep>::constructAsMeshOnly(m_MDWorkspace->get_spMDImage(), timeStepMapper);
+  vtkStructuredGridFactory<TimeStepToTimeStep> factory =  vtkStructuredGridFactory<TimeStepToTimeStep>::constructAsMeshOnly(m_workspace, timeStepMapper);
   vtkDataSet* visualDataSet = factory.createMeshOnly();
 
   vtkFieldData* outputFD = vtkFieldData::New();
 
   //Serialize metadata
   RebinningXMLGenerator serializer;
-  serializer.setWorkspaceName(m_MDWorkspace->getName());
-  serializer.setWorkspaceLocation(m_MDWorkspace->getWSLocation());
-  serializer.setGeometryXML(m_MDWorkspace->get_const_MDGeometry().toXMLString());
+  serializer.setWorkspaceName(m_workspace->getName());
+  serializer.setWorkspaceLocation(m_workspace->getWSLocation());
+  serializer.setGeometryXML(m_workspace->getGeometryXML());
   std::string xmlString = serializer.createXMLString();
 
   //Add metadata to dataset.
-
   MetadataToFieldData convert;
   convert(outputFD, xmlString, XMLDefinitions::metaDataId().c_str());
   visualDataSet->SetFieldData(outputFD);
@@ -112,24 +109,24 @@ VecExtents MultiDimensionalDbPresenter::getExtents() const
 {
   VecExtents extents;
   extents.push_back(0);
-  extents.push_back(m_MDWorkspace->getXDimension()->getNBins());
+  extents.push_back(m_workspace->getXDimension()->getNBins());
   extents.push_back(0);
-  extents.push_back(m_MDWorkspace->getYDimension()->getNBins());
+  extents.push_back(m_workspace->getYDimension()->getNBins());
   extents.push_back(0);
-  extents.push_back(m_MDWorkspace->getZDimension()->getNBins());
+  extents.push_back(m_workspace->getZDimension()->getNBins());
   return extents;
 }
 
 int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
 {
   verifyExecution();
-  return m_MDWorkspace->getTDimension()->getNBins();
+  return m_workspace->getTDimension()->getNBins();
 }
 
 std::vector<int> MultiDimensionalDbPresenter::getCycles() const
 {
   verifyExecution();
-  std::vector<int> cycles(m_MDWorkspace->getTDimension()->getNBins());
+  std::vector<int> cycles(m_workspace->getTDimension()->getNBins());
   for(unsigned int i=0; i < cycles.size(); i++)
     {
       cycles[i] = i;
@@ -141,7 +138,7 @@ std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
 {
   using namespace Mantid::Geometry;
   verifyExecution();
-  boost::shared_ptr<const IMDDimension> tDimension = m_MDWorkspace->getTDimension();
+  boost::shared_ptr<const IMDDimension> tDimension = m_workspace->getTDimension();
   const double increment = (tDimension->getMaximum() - tDimension->getMinimum())/tDimension->getNBins();
   std::vector<double> times(tDimension->getNBins());
   for(unsigned int i=0; i < tDimension->getNBins(); i++)
@@ -162,7 +159,7 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTimeBin(int timeBin,
   }
 
   TimeStepToTimeStep timeStepMapper;
-  vtkStructuredGridFactory<MDImage, TimeStepToTimeStep> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), timeBin, timeStepMapper);
+  vtkStructuredGridFactory<TimeStepToTimeStep> scalarFactory(m_workspace, std::string(scalarName), timeBin, timeStepMapper);
   return scalarFactory.createScalarArray();
 }
 
@@ -172,12 +169,12 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(double time, co
 
   verifyExecution();
 
-  double tMax = m_MDWorkspace->getTDimension()->getMaximum();
-  double tMin = m_MDWorkspace->getTDimension()->getMinimum();
-  int nbins = m_MDWorkspace->getTDimension()->getNBins();
+  double tMax = m_workspace->getTDimension()->getMaximum();
+  double tMin = m_workspace->getTDimension()->getMinimum();
+  int nbins = m_workspace->getTDimension()->getNBins();
 
   TimeToTimeStep timeStepMapper(tMin, tMax, nbins);
-  vtkStructuredGridFactory<MDImage, TimeToTimeStep> scalarFactory(m_MDWorkspace->get_spMDImage(), std::string(scalarName), time, timeStepMapper);
+  vtkStructuredGridFactory<TimeToTimeStep> scalarFactory(m_workspace, std::string(scalarName), time, timeStepMapper);
   return scalarFactory.createScalarArray();
 }
 

@@ -138,7 +138,7 @@ void RebinningCutterPresenter::constructReductionKnowledge(
  * @param eventHandler :: handle progress notifications
  * @return the MDWorkspace containing the generated image.
  */
-Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
+Mantid::API::IMDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
     RebinningIterationAction action,
     ProgressAction& eventHandler) const
 {
@@ -152,7 +152,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinning
        std::string wsLocation = m_serializer.getWorkspaceLocation();
        std::string wsName = m_serializer.getWorkspaceName();
 
-       MDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
+       Mantid::API::IMDWorkspace_sptr baseWs = constructMDWorkspace(wsLocation);
        AnalysisDataService::Instance().addOrReplace(wsName, baseWs);
 
        Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
@@ -176,7 +176,7 @@ Mantid::MDDataObjects::MDWorkspace_sptr RebinningCutterPresenter::applyRebinning
       }
 
        //Use the generated workspace to access the underlying image, which may be rendered.
-       MDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<MDWorkspace>(
+       IMDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<IMDWorkspace>(
            AnalysisDataService::Instance().retrieve(outputWorkspace));
 
        return outputWs;
@@ -494,7 +494,7 @@ Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, co
 
  //NB: At present, the input workspace is required by the dynamicrebinningfromxml algorithm, but not by the
  //sub-algorithm running centerpiece rebinning.
- Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation)
+ Mantid::API::IMDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation)
  {
    using namespace Mantid::MDDataObjects;
    using namespace Mantid::Geometry;

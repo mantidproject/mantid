@@ -29,7 +29,7 @@
  */
 
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MDDataObjects/MDWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <vtkUnstructuredGrid.h>
 #include <vtkFloatArray.h>
 #include <vtkCellData.h>
@@ -47,13 +47,13 @@ struct UnstructuredPoint
   vtkIdType pointId;
 };
 
-template<typename Image, typename TimeMapper>
+template<typename TimeMapper>
 class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 {
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(boost::shared_ptr<Image> image, const std::string& scalarname,
+  vtkThresholdingUnstructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarname,
       const double timestep, const TimeMapper& timeMapper, double minThreshold = -10000, double maxThreshold = 10000);
 
   /// Destructor
@@ -71,7 +71,7 @@ public:
 private:
 
   /// Image from which to draw.
-  boost::shared_ptr<Image> m_image;
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 
   /// timestep obtained from framework.
   const double m_timestep;
@@ -95,30 +95,26 @@ private:
 
 };
 
-template<typename Image, typename TimeMapper>
-vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::vtkThresholdingUnstructuredGridFactory(boost::shared_ptr<
-    Image> image, const std::string& scalarName, const double timestep, const TimeMapper& timeMapper, double minThreshold, double maxThreshold) :
-  m_image(image), m_timestep(timestep), m_scalarName(scalarName), m_timeMapper(timeMapper), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+template<typename TimeMapper>
+vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarName, const double timestep, const TimeMapper& timeMapper, double minThreshold, double maxThreshold) :
+  m_workspace(workspace), m_timestep(timestep), m_scalarName(scalarName), m_timeMapper(timeMapper), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
 {
 }
 
 
-template<typename Image, typename TimeMapper>
-vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::create() const
+template<typename TimeMapper>
+vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<TimeMapper>::create() const
 {
-  using namespace Mantid::MDDataObjects;
-  typename Image::GeometryType const * const pGeometry = m_image->getGeometry();
+  const int nBinsX = m_workspace->getXDimension()->getNBins();
+  const int nBinsY = m_workspace->getYDimension()->getNBins();
+  const int nBinsZ = m_workspace->getZDimension()->getNBins();
 
-  const int nBinsX = pGeometry->getXDimension()->getNBins();
-  const int nBinsY = pGeometry->getYDimension()->getNBins();
-  const int nBinsZ = pGeometry->getZDimension()->getNBins();
-
-  const double maxX = pGeometry-> getXDimension()->getMaximum();
-  const double minX = pGeometry-> getXDimension()->getMinimum();
-  const double maxY = pGeometry-> getYDimension()->getMaximum();
-  const double minY = pGeometry-> getYDimension()->getMinimum();
-  const double maxZ = pGeometry-> getZDimension()->getMaximum();
-  const double minZ = pGeometry-> getZDimension()->getMinimum();
+  const double maxX = m_workspace-> getXDimension()->getMaximum();
+  const double minX = m_workspace-> getXDimension()->getMinimum();
+  const double maxY = m_workspace-> getYDimension()->getMaximum();
+  const double minY = m_workspace-> getYDimension()->getMinimum();
+  const double maxZ = m_workspace-> getZDimension()->getMaximum();
+  const double minZ = m_workspace-> getZDimension()->getMinimum();
 
   double incrementX = (maxX - minX) / (nBinsX-1);
   double incrementY = (maxY - minY) / (nBinsY-1);
@@ -157,7 +153,7 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
       {
 
         posZ = minZ + (k * incrementZ); //Calculate increment in z;
-        signalScalar = m_image->getPoint(i, j, k, m_timeMapper(m_timestep)).s;
+        signalScalar = m_workspace->getSignalAt(i, j, k, m_timeMapper(m_timestep));
 
         if ((signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
         {
@@ -212,8 +208,8 @@ vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::
   return visualDataSet;
 }
 
-template<typename Image, typename TimeMapper>
-inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const
+template<typename TimeMapper>
+inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const
 {
   vtkIdType id_xyz = pointMap[i][j][k].pointId;
   vtkIdType id_dxyz = pointMap[i + 1][j][k].pointId;
@@ -239,8 +235,8 @@ inline vtkHexahedron* vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>:
 }
 
 
-template <typename Image, typename TimeMapper>
-vtkThresholdingUnstructuredGridFactory<Image, TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
+template<typename TimeMapper>
+vtkThresholdingUnstructuredGridFactory<TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
 {
 }
 

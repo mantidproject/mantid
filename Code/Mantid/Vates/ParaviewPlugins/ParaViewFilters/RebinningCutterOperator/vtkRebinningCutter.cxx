@@ -17,7 +17,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
-#include "MantidVatesAPI/ImageProxy.h"
+#include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include <boost/functional/hash.hpp>
@@ -164,7 +164,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
 
     vtkUnstructuredGrid* outData;
     RebinningIterationAction action = m_actionRequester.action();
-    MDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
+    Mantid::API::IMDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
 
     //Build a vtkDataSet
     vtkDataSetFactory_sptr spvtkDataSetFactory = createDataSetFactory(spRebinnedWs);
@@ -484,7 +484,7 @@ BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) cons
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
-    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+    Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
   if(m_actionRequester.action() == RecalculateAll)
   {
@@ -500,7 +500,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
-    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+    Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
   using Mantid::MDDataObjects::MDImage;
 
@@ -512,18 +512,17 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
       timeDimension->getNBins());
 
 
-  GeometryProxy<MDImage>* geomProxy = GeometryProxy<MDImage>::New
-      (spRebinnedWs->get_spMDImage(),
+  Mantid::API::IMDWorkspace_sptr workspaceProxy = IMDWorkspaceProxy::New
+      (spRebinnedWs,
           m_appliedXDimension,
           m_appliedYDimension,
           m_appliedZDimension,
           m_appliedTDimension);
 
- boost::shared_ptr<ImageProxy<MDImage> > spImageProcessor(ImageProxy<MDImage>::New(geomProxy, spRebinnedWs->get_spMDImage()));
 
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<ImageProxy<MDImage>,
-      TimeToTimeStep> (spImageProcessor, XMLDefinitions::signalName(), m_timestep,
+  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>
+  (workspaceProxy, XMLDefinitions::signalName(), m_timestep,
       timeMapper, m_thresholdMin, m_thresholdMax);
 
   //Return the generated factory.
@@ -531,17 +530,16 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
 }
 
 vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
-    Mantid::MDDataObjects::MDWorkspace_sptr spRebinnedWs) const
+    Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-  using Mantid::MDDataObjects::MDImage;
 
   //Create a mapper to transform real time into steps.
   TimeToTimeStep timeMapper(m_appliedTDimension->getMinimum(), m_appliedTDimension->getMaximum(),
       m_appliedTDimension->getNBins());
 
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<MDImage,
-      TimeToTimeStep> (spRebinnedWs->get_spMDImage(), XMLDefinitions::signalName(), m_timestep,
+  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<
+      TimeToTimeStep> (spRebinnedWs, XMLDefinitions::signalName(), m_timestep,
       timeMapper, m_thresholdMin, m_thresholdMax);
 
   //Return the generated factory.

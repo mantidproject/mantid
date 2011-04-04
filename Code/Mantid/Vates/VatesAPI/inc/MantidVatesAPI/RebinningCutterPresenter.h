@@ -4,7 +4,7 @@
 #include <vtkUnstructuredGrid.h>
 #include <vtkBox.h>
 
-#include "MDDataObjects/MDWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <MantidVatesAPI/Common.h>
 #include <MantidAPI/ImplicitFunctionFactory.h>
 #include <MantidAPI/ImplicitFunction.h>
@@ -120,7 +120,7 @@ public:
 	/// Add function knowledge, this is always done per request.
 	void addFunctionKnowledge(Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction, vtkDataSet* inputDataSet);
 
-	Mantid::MDDataObjects::MDWorkspace_sptr applyRebinningAction(
+	Mantid::API::IMDWorkspace_sptr applyRebinningAction(
 	    Mantid::VATES::RebinningIterationAction action
 	    ,Mantid::VATES::ProgressAction& eventHandler) const;
 
@@ -168,7 +168,7 @@ public:
   DLLExport Poco::XML::Element* findExistingGeometryInformation(vtkDataSet* inputDataSet, const char* id);
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
-  Mantid::MDDataObjects::MDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
+  Mantid::API::IMDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
 
   /// Create a geometry from dimensions and then serialise it.
   DLLExport std::string constructGeometryXML(DimensionVec dimensions,
@@ -195,7 +195,7 @@ public:
   /// helper method to extract the bounding box.
   DLLExport std::vector<double> getBoundingBox(const std::string& functionXMLString);
 
-  /// Helper method. is used to determine wheter processing of an input data set is possible.
+  /// Helper method. is used to determine whether processing of an input data set is possible.
   DLLExport bool canProcessInput(vtkDataSet* inputDataSet);
 
 }

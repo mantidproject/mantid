@@ -3,7 +3,7 @@
 
 #include <vtkStructuredGrid.h>
 #include <vtkFieldData.h>
-#include "MDDataObjects/MDWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -48,7 +48,7 @@ private:
   bool m_isExecuted;
 
   // Rebinned dataset in form of MDWorkspace.
-  Mantid::MDDataObjects::MDWorkspace_sptr m_MDWorkspace;
+  Mantid::API::IMDWorkspace_sptr m_workspace;
 
   //Verify that execution has occured otherwise should not be able to access scalar data or mesh.
   void verifyExecution() const;

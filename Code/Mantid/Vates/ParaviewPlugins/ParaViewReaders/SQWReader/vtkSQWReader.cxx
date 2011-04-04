@@ -63,7 +63,6 @@ int vtkSQWReader::RequestInformation(
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
   m_presenter.execute(FileName);
-  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh());
   int wholeExtent[6];
 
   Mantid::VATES::VecExtents extents = m_presenter.getExtents();

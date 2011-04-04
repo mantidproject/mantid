@@ -28,19 +28,18 @@ allow the utilising code to ask wheter some dimension maps to the x, y, or z dim
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
+#include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/Common.h"
-#include "MDDataObjects/MDImage.h"
 
 namespace Mantid
 {
   namespace VATES
   {
-    template <typename Image>
     class DimensionComparitor
     {
     public:
       
-    DimensionComparitor(boost::shared_ptr<Image> image): m_image(image)
+    DimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace): m_workspace(workspace)
     {
     }
 
@@ -48,16 +47,16 @@ namespace Mantid
     {
     }
 
-    bool isXDimension(Dimension_sptr queryDimension)
+    bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
       //Compare dimensions on the basis of their ids.
-      Dimension_sptr actualXDimension = m_image->getGeometry()->getXDimension();
+      Mantid::Geometry::IMDDimension_const_sptr actualXDimension = m_workspace->getXDimension();
       return queryDimension->getDimensionId() == actualXDimension->getDimensionId();
     }
 
-    bool isYDimension(Dimension_sptr queryDimension)
+    bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
-      Dimension_sptr actualYDimension = m_image->getGeometry()->getYDimension();
+      Mantid::Geometry::IMDDimension_const_sptr actualYDimension = m_workspace->getYDimension();
       if(NULL == actualYDimension.get())
       {
         return false; //MDImages may have 1 dimension or more.
@@ -69,9 +68,9 @@ namespace Mantid
       }
     }
 
-    bool isZDimension(Dimension_sptr queryDimension)
+    bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
-      Dimension_sptr actualZDimension = m_image->getGeometry()->getZDimension();
+      Mantid::Geometry::IMDDimension_const_sptr actualZDimension = m_workspace->getZDimension();
       if(NULL == actualZDimension.get())
       {
         return false; //MDImages may have 1 dimension or more.
@@ -83,9 +82,9 @@ namespace Mantid
       }
     }
 
-    bool istDimension(Dimension_sptr queryDimension)
+    bool istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
     {
-      Dimension_sptr actualtDimension = m_image->getGeometry()->getTDimension();
+      Mantid::Geometry::IMDDimension_const_sptr actualtDimension = m_workspace->getTDimension();
       if(NULL == actualtDimension.get())
       {
         return false; //MDImages may have 1 dimension or more.
@@ -100,7 +99,7 @@ namespace Mantid
     private:
       
       /// mdimage containing geometry.
-      boost::shared_ptr<Image> m_image;
+      Mantid::API::IMDWorkspace_sptr m_workspace;
      
       DimensionComparitor operator=(DimensionComparitor&);
       

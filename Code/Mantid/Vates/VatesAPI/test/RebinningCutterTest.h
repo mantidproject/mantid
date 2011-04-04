@@ -92,15 +92,17 @@ private:
       //Create the composite holder.
       Mantid::MDAlgorithms::CompositeImplicitFunction* compFunction = new Mantid::MDAlgorithms::CompositeImplicitFunction;
 
-        presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
-        MockProgressAction action;
-        MDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll, action);
+      presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
+      MockProgressAction action;
+      Mantid::API::IMDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll, action);
+
       TimeStepToTimeStep proxy;
-      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<MDImage, TimeStepToTimeStep>(spRebinnedWs->get_spMDImage(), "", 1, proxy));
-      vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
+      
+      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<TimeStepToTimeStep>(spRebinnedWs, "", 1, proxy)); 
+        vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
       in_ds->Delete();
-      return ug;
+      return in_ds;
     }
   };
 
