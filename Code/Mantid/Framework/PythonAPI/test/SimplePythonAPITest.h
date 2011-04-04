@@ -75,7 +75,6 @@ public:
 
     getline(is, line);
     getline(is, line);
-    TS_ASSERT_EQUALS(line, "def mtdGlobalHelp():");
 
     //skip over help
     while( getline(is, line) && !line.empty() ) 
