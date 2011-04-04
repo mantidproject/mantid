@@ -24,7 +24,6 @@ src/TimeToTimeStep.cpp
 src/vtkDataSetFactory.cpp
 src/vtkClipperDataSetFactory.cpp
 src/vtkProxyFactory.cpp
-src/vtkRectilinearGridFactory.cpp
 src/vtkStructuredGridFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
 )
@@ -46,7 +45,6 @@ inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
-inc/MantidVatesAPI/vtkRectilinearGridFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
 inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 )
@@ -54,7 +52,6 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 set (TEST_FILES
 test/vtkClipperDataSetFactoryTest.h
 test/vtkProxyFactoryTest.h
-#test/vtkRectilinearGridFactoryTest.h
 #test/vtkStructuredGridFactoryTest.h
 #test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/FieldDataToMetadataTest.h
