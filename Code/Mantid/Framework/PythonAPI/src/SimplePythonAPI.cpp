@@ -415,14 +415,13 @@ namespace Mantid
       }
 
       os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
-        << "\" , values, Message, final_enabled)\n"
-        << "  if dialog == True:\n";
-      writeAsyncFunctionCall(os, algm, "    ");
+         << "\" , values, Message, final_enabled)\n"
+         << "  if dialog == True:\n"
+         << "    algm = mtd._createAlgProxy(algm)\n"
+         << "    algm.execute()\n"
+         << "    return algm\n";
       os << "  else:\n"
-        << "    sys.exit('Information: Script execution cancelled')\n"
-        << "  if result == False:\n"
-        << "    sys.exit('An error occurred while running " << algm << ". See results log for details.')\n"
-        << "  return mtd._createAlgProxy(algm)\n\n";
+         << "    sys.exit('Information: Script execution cancelled')\n\n";
     }
 
     /**
