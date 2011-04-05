@@ -159,7 +159,8 @@ namespace Mantid
   
         IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
         bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
-        bin_alg->setProperty("OutputWorkspace", "tmp2");
+        bin_alg->setProperty("OutputWorkspace", outputW);
+        bin_alg->setProperty("PreserveEvents", false);
         bin_alg->setProperty<std::vector<double> >("Params", rb_params);
         try
         {
@@ -180,7 +181,6 @@ namespace Mantid
   
         peaksW->setPeakIntegrateCount(I, i);
         peaksW->setPeakIntegrateError(sigI, i);
-        //break;
       }
     }
 
@@ -212,19 +212,14 @@ namespace Mantid
       MantidVec & X = outputW->dataX(s);
       MantidVec & Y = outputW->dataY(s);
 
-      double bkg0 = (Y[TOFmin]+Y[TOFmax])*0.5;
+      double bkg0 = Y[TOFmin];
+      if (Y[TOFmax] < bkg0) bkg0 = Y[TOFmax];
 
-      for (int j = TOFmin; j <=  TOFmax; ++j)std::cout <<X[j]<<"  ";
-      std::cout <<"\n";
-      for (int j = TOFmin; j <=  TOFmax; ++j)std::cout <<Y[j]<<"  ";
-      std::cout <<"\n";
       // Now subtract the background from the data
       for (int j = 0; j < outputW->blocksize(); ++j)
       {
          Y[j] -=  bkg0;
       }
-      for (int j = TOFmin; j <=  TOFmax; ++j)std::cout <<Y[j]<<"  ";
-      std::cout <<"\n";
       const double peakLoc = X[TOFPeak];
       const double peakHeight =  Y[TOFPeak]*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
       // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
@@ -283,7 +278,6 @@ namespace Mantid
       Gamma = params[6];
       X0 = params[7];
       std::string funct = fit_alg->getPropertyValue("Function");
-      std::cout <<funct<<"\n";
 
       if(Alpha0== 1.4283)
       {
@@ -338,7 +332,6 @@ namespace Mantid
         Gamma = params[6];
         X0 = params[7];
         funct = fit2_alg->getPropertyValue("Function");
-        std::cout <<funct<<"\n";
       }
       setProperty("OutputWorkspace", ws);
 
@@ -359,6 +352,8 @@ namespace Mantid
       for (int i = 0; i < n; i++) I+= y[i];
       I*= double(DataValues.size())/double(n);
       sigI = sqrt(I+DataValues.size()*bkg0+DataValues.size()*DataValues.size()*bkg0);
+      delete [] x;
+      delete [] y;
       return;
     }
 
