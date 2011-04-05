@@ -1927,10 +1927,17 @@ namespace DataObjects
    * @param events :: reference to a vector of events to change.
    * @param tofMin :: lower bound of TOF to filter out
    * @param tofMax :: upper bound of TOF to filter out
+   * @returns The number of events deleted.
    */
   template<class T>
-  void EventList::maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax)
+  std::size_t EventList::maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax)
   {
+    // quick checks to make sure that the masking range is even in the data
+    if (tofMin > events.rbegin()->tof())
+      return 0;
+    if (tofMax < events.begin()->tof())
+      return 0;
+
     typename EventList::tofGreaterOrEqual<T> comparator(tofMin);
     //Find the index of the first tofMin
     typename std::vector<T>::iterator it_first = std::find_if(events.begin(), events.end(), comparator);
@@ -1941,12 +1948,17 @@ namespace DataObjects
       typename EventList::tofGreater<T> comparator2(tofMax);
       typename std::vector<T>::iterator it_last = std::find_if(it_first, events.end(), comparator2);
 
+      if (it_first >= it_last)
+        throw std::runtime_error("Event filter is all messed up"); // TODO
+
       //it_last will either be at the end (if not found) or before it.
       //Erase this range from the vector
       events.erase(it_first, it_last);
 
       //Done! Sorting is still valid, no need to redo.
+      return (it_last - it_first);
     }
+    return 0;
   }
 
 
@@ -1962,23 +1974,34 @@ namespace DataObjects
     if (tofMax <= tofMin)
       throw std::runtime_error("EventList::maskTof: tofMax must be > tofMin");
 
+    // don't do anything with an emply list
+    if (this->getNumberEvents() == 0)
+      return;
+
     //Start by sorting by tof
     this->sortTof();
 
     //Convert the list
+    size_t numOrig = 0;
+    size_t numDel = 0;
     switch (eventType)
     {
     case TOF:
-      this->maskTofHelper(this->events, tofMin, tofMax);
+      numOrig = this->events.size();
+      numDel = this->maskTofHelper(this->events, tofMin, tofMax);
       break;
     case WEIGHTED:
-      this->maskTofHelper(this->weightedEvents, tofMin, tofMax);
+      numOrig = this->weightedEvents.size();
+      numDel = this->maskTofHelper(this->weightedEvents, tofMin, tofMax);
       break;
     case WEIGHTED_NOTIME:
-      this->maskTofHelper(this->weightedEventsNoTime, tofMin, tofMax);
+      numOrig = this->weightedEventsNoTime.size();
+      numDel = this->maskTofHelper(this->weightedEventsNoTime, tofMin, tofMax);
       break;
     }
 
+    if (numDel >= numOrig)
+      this->clear();
   }
 
 
@@ -2050,7 +2073,7 @@ namespace DataObjects
     }
 
     // now we are stuck with a linear search
-    double temp;
+    double temp = std::numeric_limits<double>::max();
     for (size_t i = 0; i < numEvents; i++)
     {
       switch (eventType)
@@ -2098,7 +2121,7 @@ namespace DataObjects
     }
 
     // now we are stuck with a linear search
-    double temp;
+    double temp = std::numeric_limits<double>::min();
     for (size_t i = 0; i < numEvents; i++)
     {
       switch (eventType)

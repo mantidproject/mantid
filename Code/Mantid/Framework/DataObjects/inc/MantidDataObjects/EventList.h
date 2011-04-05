@@ -243,7 +243,7 @@ public:
   void addPulsetime(const double seconds);
 
   template<class T>
-  static void maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
+  static std::size_t maskTofHelper(std::vector<T> & events, const double tofMin, const double tofMax);
   void maskTof(const double tofMin, const double tofMax);
 
   template<class T>
