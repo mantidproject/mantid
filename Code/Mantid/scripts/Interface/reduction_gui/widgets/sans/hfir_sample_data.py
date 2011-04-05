@@ -1,12 +1,13 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
-from reduction_gui.reduction.hfir_reduction_steps import Transmission
+from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
+from reduction_gui.reduction.mantid_util import DataFileProxy
 
 class DirectBeam(BaseWidget):
     """
@@ -28,7 +29,7 @@ class DirectBeam(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(Transmission.DirectBeam())      
+            self.set_state(SampleData.DirectBeam())      
   
     def initialize_content(self):
         """
@@ -55,7 +56,7 @@ class DirectBeam(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        m = Transmission.DirectBeam()
+        m = SampleData.DirectBeam()
         m.beam_radius = util._check_and_get_float_line_edit(self._content.beam_radius_edit)
         m.sample_file = unicode(self._content.sample_edit.text())
         m.direct_beam = unicode(self._content.direct_edit.text())
@@ -91,7 +92,7 @@ class BeamSpreader(BaseWidget):
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(Transmission.BeamSpreader())      
+            self.set_state(SampleData.BeamSpreader())      
   
     def initialize_content(self):
         """
@@ -124,7 +125,7 @@ class BeamSpreader(BaseWidget):
         """
             Returns an object with the state of the interface
         """
-        m = Transmission.BeamSpreader()
+        m = SampleData.BeamSpreader()
         m.spreader_trans = util._check_and_get_float_line_edit(self._content.spreader_trans_edit)
         m.spreader_trans_spread = util._check_and_get_float_line_edit(self._content.spreader_trans_spread_edit)
         m.sample_scatt = unicode(self._content.sample_scatt_edit.text())
@@ -165,19 +166,19 @@ class SampleDataWidget(BaseWidget):
     def __init__(self, parent=None, state=None, settings=None, data_type=None):
         super(SampleDataWidget, self).__init__(parent, state, settings, data_type) 
 
-        class TransFrame(QtGui.QFrame, ui.sans.ui_hfir_sample_data.Ui_Frame): 
+        class DataFrame(QtGui.QFrame, ui.sans.ui_hfir_sample_data.Ui_Frame): 
             def __init__(self, parent=None):
                 QtGui.QFrame.__init__(self, parent)
                 self.setupUi(self)
                 
-        self._content = TransFrame(self)
+        self._content = DataFrame(self)
         self._layout.addWidget(self._content)
         self.initialize_content()
         
         if state is not None:
             self.set_state(state)
         else:
-            self.set_state(Transmission())
+            self.set_state(SampleData())
             
         self._last_direct_state = None
         self._last_spreader_state = None
@@ -193,6 +194,7 @@ class SampleDataWidget(BaseWidget):
         self._content.dtransmission_edit.setValidator(QtGui.QDoubleValidator(self._content.dtransmission_edit))
         
         # Connections
+        self.connect(self._content.data_file_browse_button, QtCore.SIGNAL("clicked()"), self._data_file_browse)
         self.connect(self._content.calculate_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         self.connect(self._content.direct_beam_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
         self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
@@ -217,12 +219,25 @@ class SampleDataWidget(BaseWidget):
         self._content.theta_dep_chk.setChecked(state.theta_dependent)
         self._content.dark_current_edit.setText(QtCore.QString(str(state.dark_current)))
         self._calculate_clicked(state.calculate_transmission)
+        
+        # Data file
+        self._content.data_file_edit.setText(QtCore.QString('; '.join(state.data_files)))
+        if len(state.data_files)>0:
+            self._settings.last_file = state.data_files[0]
+            self._settings.last_data_ws = ''
+
+            # Store the location of the loaded file
+            if len(state.data_files[0])>0:
+                (folder, file_name) = os.path.split(state.data_files[0])
+                self._settings.data_path = folder
+                self.get_data_info()
+
 
     def get_state(self):
         """
             Returns an object with the state of the interface
         """
-        m = Transmission()
+        m = SampleData()
 
         m.transmission = util._check_and_get_float_line_edit(self._content.transmission_edit)
         m.transmission_spread = util._check_and_get_float_line_edit(self._content.dtransmission_edit)
@@ -231,9 +246,23 @@ class SampleDataWidget(BaseWidget):
         m.theta_dependent = self._content.theta_dep_chk.isChecked()
         m.dark_current = self._content.dark_current_edit.text()
         
-        m.calculation_method=self._method_box.get_state()           
+        m.calculation_method=self._method_box.get_state()    
+        
+        # Data file
+        flist_str = unicode(self._content.data_file_edit.text())
+        flist_str = flist_str.replace(',', ';')
+        m.data_files = flist_str.split(';')
+       
 
         return m
+
+    def _data_file_browse(self):
+        fname = self.data_browse_dialog(multi=True)
+        if fname and len(fname)>0:
+            self._content.data_file_edit.setText('; '.join(fname))   
+            self._settings.last_file = fname[0] 
+            self._settings.last_data_ws = ''
+            self.get_data_info()
 
     def _dark_current_browse(self):
         fname = self.data_browse_dialog()
@@ -276,3 +305,30 @@ class SampleDataWidget(BaseWidget):
         self._content.dark_current_edit.setEnabled(is_checked)
         self._content.dark_current_button.setEnabled(is_checked)
         self._content.dark_current_plot_button.setEnabled(is_checked)
+
+    def get_data_info(self):
+        """
+            Retrieve information from the data file and update the display
+        """
+        flist_str = unicode(self._content.data_file_edit.text())
+        flist_str = flist_str.replace(',', ';')
+        data_files = flist_str.split(';')
+        if len(data_files)<1:
+            return
+        fname = data_files[0]
+        if len(str(fname).strip())>0:
+            dataproxy = DataFileProxy(fname)
+            if len(dataproxy.errors)>0:
+                QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                return
+            
+            self._settings.last_data_ws = dataproxy.data_ws
+            if dataproxy.sample_detector_distance is not None:
+                self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+            if dataproxy.wavelength is not None:
+                self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
+            if dataproxy.wavelength_spread is not None:
+                self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                 

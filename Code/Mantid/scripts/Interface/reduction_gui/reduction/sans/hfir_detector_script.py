@@ -138,7 +138,8 @@ class Detector(BaseScriptElement):
         """
             Read in data from XML
             @param xml_str: text to read the data from
-        """       
+        """ 
+        self.reset()      
         dom = xml.dom.minidom.parseString(xml_str)
         element_list = dom.getElementsByTagName("Sensitivity")
         if len(element_list)>0:
