@@ -12,6 +12,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
+#include <QFormLayout>
 #include <QMenu>
 #include <QAction>
 #include <QGroupBox>
@@ -20,6 +21,11 @@
 #include <QMessageBox>
 #include <iostream>
 #include <sstream>
+
+using namespace Mantid;
+using namespace Mantid::API;
+using namespace Mantid::Kernel;
+
 //----------------------------------
 // Public methods
 //----------------------------------
@@ -46,13 +52,13 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   QHBoxLayout *uiLayout = new QHBoxLayout;
   uiLayout->addWidget(m_tree);
 
+  // ----- Filtering options --------------
   QGroupBox *groupBox = new QGroupBox(tr("Filter log values by"));
 
   filterNone = new QRadioButton("None");
   filterStatus = new QRadioButton("Status");
   filterPeriod = new QRadioButton("Period");
   filterStatusPeriod = new QRadioButton("Status + Period");
-
   filterStatusPeriod->setChecked(true);
 
   QVBoxLayout *vbox = new QVBoxLayout;
@@ -62,8 +68,22 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   vbox->addWidget(filterStatusPeriod);
   //vbox->addStretch(1);
   groupBox->setLayout(vbox);
+
+  // -------------- Statistics on logs ------------------------
+  std::string stats[5] = {"Min:", "Max:", "Mean:", "Median:" ,"Std Dev:"};
+  QGroupBox * statsBox = new QGroupBox("Log Statistics");
+  QFormLayout * statsBoxLayout = new QFormLayout;
+  for (size_t i=0; i<5; i++)
+  {
+    statLabels[i] = new QLabel(stats[i].c_str());
+    statValues[i] = new QLineEdit("");
+    statValues[i]->setReadOnly(1);
+    statsBoxLayout->addRow(statLabels[i], statValues[i]);
+  }
+  statsBox->setLayout(statsBoxLayout);
+
+
   QHBoxLayout *bottomButtons = new QHBoxLayout;
-  
   buttonPlot = new QPushButton(tr("&Import selected log"));
   buttonPlot->setAutoDefault(true);
   buttonPlot->setToolTip("Import log file as a table and construct a 1D graph if appropriate");
@@ -76,14 +96,16 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
   QVBoxLayout *hbox = new QVBoxLayout;
   hbox->addLayout(bottomButtons);
   hbox->addWidget(groupBox);
+  hbox->addWidget(statsBox);
   hbox->addStretch(1);
      
 
-  //Main layout
+  //--- Main layout With 2 sides -----
   QHBoxLayout *mainLayout = new QHBoxLayout(this);
-  mainLayout->addLayout(uiLayout);
-  mainLayout->addLayout(hbox);
+  mainLayout->addLayout(uiLayout, 1); // the tree
+  mainLayout->addLayout(hbox, 0);
   //mainLayout->addLayout(bottomButtons);
+  this->setLayout(mainLayout);
 
   init();
 
@@ -97,6 +119,12 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 
   //Double-click imports a log file
   connect(m_tree, SIGNAL(itemDoubleClicked(QTreeWidgetItem *, int)), this, SLOT(importItem(QTreeWidgetItem *)));
+
+  //Selecting shows the stats of it
+  connect(m_tree, SIGNAL(itemClicked(QTreeWidgetItem *, int)), this, SLOT(showLogStatistics()));
+
+  //Selecting shows the stats of it
+  connect(m_tree, SIGNAL(currentItemChanged(QTreeWidgetItem *, QTreeWidgetItem *)), this, SLOT(showLogStatistics()));
 }
 
 //----------------------------------
@@ -115,6 +143,80 @@ void MantidSampleLogDialog::importSelectedFiles()
   }
 }
 
+
+
+/**
+ * Show Log Statistics when a line is selected
+ */
+void MantidSampleLogDialog::showLogStatistics()
+{
+  QList<QTreeWidgetItem *> items = m_tree->selectedItems();
+  QListIterator<QTreeWidgetItem *> pItr(items);
+  if( pItr.hasNext() )
+  {
+    // Show only the first one
+    showLogStatisticsOfItem(pItr.next());
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------
+/**
+* Show the stats of the log for the selected item
+*
+* @param item :: The item to be imported
+* @throw invalid_argument if format identifier for the item is wrong
+*/
+void MantidSampleLogDialog::showLogStatisticsOfItem(QTreeWidgetItem * item)
+{
+  // Assume that you can't show the stats
+  for (size_t i=0; i<5; i++)
+  {
+    statValues[i]->setText( QString(""));
+  }
+
+  //used in numeric time series below, the default filter value
+  switch (item->data(1, Qt::UserRole).toInt())
+  {
+    case numeric :
+    case string :
+    case stringTSeries :
+      return;
+      break;
+
+    case numTSeries :
+      // Calculate the stats
+
+      // Get the workspace
+      if (!AnalysisDataService::Instance().doesExist(m_wsname.toStdString()))  return;
+      Mantid::API::MatrixWorkspace_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
+          AnalysisDataService::Instance().retrieve(m_wsname.toStdString() ));
+      if (!ws) return;
+
+      // Now the log
+      Mantid::Kernel::TimeSeriesPropertyStatistics stats;
+      Mantid::Kernel::Property * logData = ws->run().getLogData(item->text(0).toStdString());
+      // Get the stas if its a series of int or double; fail otherwise
+      Mantid::Kernel::TimeSeriesProperty<double> * tspd = dynamic_cast<TimeSeriesProperty<double> *>(logData);
+      Mantid::Kernel::TimeSeriesProperty<int> * tspi = dynamic_cast<TimeSeriesProperty<int> *>(logData);
+      if (tspd)
+        stats = tspd->getStatistics();
+      else if (tspi)
+        stats = tspi->getStatistics();
+      else
+        return;
+
+      // --- Show the stats ---
+      statValues[0]->setText( QString::number( stats.minimum ));
+      statValues[1]->setText( QString::number( stats.maximum ));
+      statValues[2]->setText( QString::number( stats.mean ));
+      statValues[3]->setText( QString::number( stats.median ));
+      statValues[4]->setText( QString::number( stats.standard_deviation ));
+      return;
+      break;
+  }
+  throw std::invalid_argument("Error importing log entry, wrong data type");
+}
 
 //------------------------------------------------------------------------------------------------
 /**

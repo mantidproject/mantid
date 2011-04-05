@@ -6,6 +6,9 @@
 //----------------------------------
 #include <QDialog>
 #include <QPoint>
+#include <QLabel>
+#include <QTextEdit>
+#include <QLineEdit>
 
 //----------------------------------
 // Forward declarations
@@ -55,6 +58,10 @@ private slots:
   //Plot log files
   void importSelectedFiles();
 
+  // Show the stats of the selected log
+  void showLogStatistics();
+  void showLogStatisticsOfItem(QTreeWidgetItem * item);
+
   //Context menu popup
   void popupMenu(const QPoint & pos);
 
@@ -77,6 +84,13 @@ private:
   // Filter radio buttons
   QRadioButton *filterNone, *filterStatus, *filterPeriod, *filterStatusPeriod;
   
+  // Stats labels
+  QLabel* statLabels[5]; //minLabel, maxLabel, meanLabel, medianLabel, stddevLabel;
+
+  // Testboxes with stats data
+  QLineEdit  * statValues[5];
+
+
   //A pointer to the MantidUI object
   MantidUI* m_mantidUI;
   /// these values are used to specify the format of the log file, all of which are stored as strings
