@@ -295,6 +295,8 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   wsid_item->setFlags(Qt::NoItemFlags);
   item->addChild(wsid_item);
 
+  bool showMemory = true;
+
   if( Mantid::API::MatrixWorkspace_sptr matrix = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace) )
   {
     populateMatrixWorkspaceData(matrix, item);
@@ -309,6 +311,7 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
   }
   else if(Mantid::API::WorkspaceGroup_sptr ws_group = boost::dynamic_pointer_cast<WorkspaceGroup>(workspace) )
   {
+    showMemory = false;
     populateWorkspaceGroupData(ws_group, item);
   }
   else if(Mantid::API::ITableWorkspace_sptr table_ws = boost::dynamic_pointer_cast<ITableWorkspace>(workspace) )
@@ -316,6 +319,29 @@ void MantidDockWidget::populateChildData(QTreeWidgetItem* item)
     populateTableWorkspaceData(table_ws, item);
   }
   else return;
+
+  if (showMemory)
+  {
+    // For all workspaces, show the memory
+    QTreeWidgetItem* data_item;
+    double kb = double(workspace->getMemorySize()/1024);
+    if (kb > 1000000)
+    {
+      // Show in MB if over 1 GB
+      data_item = new QTreeWidgetItem(QStringList("Memory used: "
+                      + QLocale(QLocale::English).toString(kb/1024, 'd', 0)
+                      + " MB"));
+    }
+    else
+    {
+      // Show in MB
+      data_item = new QTreeWidgetItem(QStringList("Memory used: "
+                      + QLocale(QLocale::English).toString(kb, 'd', 0)
+                      + " KB"));
+    }
+    data_item->setFlags(Qt::NoItemFlags);
+    item->addChild(data_item);
+  }
 }
 
 void MantidDockWidget::setItemIcon(QTreeWidgetItem* ws_item,  Mantid::API::Workspace_sptr workspace)
@@ -415,6 +441,7 @@ void MantidDockWidget::populateMDWorkspaceData(Mantid::API::IMDWorkspace_sptr wo
     sub_data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(sub_data_item);
   }
+
 }
 
 
@@ -456,13 +483,10 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
   }
 
 
-  data_item = new QTreeWidgetItem(QStringList("Events: "+QString::number(workspace->getNPoints())));
+  data_item = new QTreeWidgetItem(QStringList("Events: "+ QLocale(QLocale::English).toString(double(workspace->getNPoints()), 'd', 0)));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize()/1024)+" KB"));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
 
 }
 
@@ -478,7 +502,7 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Histograms: "+QString::number(workspace->getNumberHistograms())));
+  data_item = new QTreeWidgetItem(QStringList("Histograms: "+ QLocale(QLocale::English).toString(double(workspace->getNumberHistograms()), 'd', 0)));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
@@ -510,10 +534,6 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Memory used: "+QString::number(workspace->getMemorySize()/1024)+" KB"));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
-
   //Extra stuff for EventWorkspace
   Mantid::API::IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace> ( workspace );
   if (eventWS)
@@ -531,7 +551,9 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
       extra = "";
       break;
     }
-    data_item = new QTreeWidgetItem(QStringList("Number of events: "+QString::number(eventWS->getNumberEvents()) + extra.c_str() ));
+    data_item = new QTreeWidgetItem(QStringList("Number of events: "
+        + QLocale(QLocale::English).toString(double(eventWS->getNumberEvents()), 'd', 0)
+        + extra.c_str() ));
     data_item->setFlags(Qt::NoItemFlags);
     ws_item->addChild(data_item);
   }
@@ -580,8 +602,9 @@ void MantidDockWidget::populateTableWorkspaceData(Mantid::API::ITableWorkspace_s
   data_item = new QTreeWidgetItem(QStringList("Rows: "+QString::number(workspace->rowCount())));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
-
 }
+
+
 
 void MantidDockWidget::removeWorkspaceEntry(const QString & ws_name)
 {
