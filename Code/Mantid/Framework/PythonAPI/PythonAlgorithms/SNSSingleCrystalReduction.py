@@ -88,6 +88,10 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                              Description="Sum the runs. Does nothing for characterization runs")
         self.declareProperty("BackgroundNumber", 0, Validator=BoundedValidator(Lower=0),
                              Description="If specified overrides value in CharacterizationRunsFile")
+        self.declareProperty("XAdjPixels", 0,
+                             Description="Smooth background using neighbors in X. For nearest neighbors use 1.  Default is 0.")
+        self.declareProperty("YAdjPixels", 0,
+                             Description="Smooth background using neighbors in Y. For nearest neighbors use 1.  Default is 0.")
         self.declareProperty("VanadiumNumber", 0, Validator=BoundedValidator(Lower=0),
                              Description="If specified overrides value in CharacterizationRunsFile")
         self.declareProperty("FilterByTimeMin", 0.,
@@ -229,7 +233,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        wksp/=(256*256)
+        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -266,7 +271,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             else:
                 binning = [info.tmin, self._binning[0], info.tmax]
             Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=binning)
-        NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
+        #NormaliseByCurrent(InputWorkspace=wksp, OutputWorkspace=wksp)
 
         return wksp
 
@@ -318,6 +323,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 raise RuntimeError("Failed to specify the binning")
         self._bin_in_dspace = self.getProperty("BinInDspace")
         self._instrument = self.getProperty("Instrument")
+        mtd.settings['default.facility'] = 'SNS'
+        mtd.settings['default.instrument'] = self._instrument
 #        self._timeMin = self.getProperty("FilterByTimeMin")
 #        self._timeMax = self.getProperty("FilterByTimeMax")
         self._filterBadPulses = self.getProperty("FilterBadPulses")
@@ -327,6 +334,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         else:
             filterLogs = [filterLogs, 
                           self.getProperty("FilterMinimumValue"), self.getProperty("FilterMaximumValue")]
+        self._xadjpixels = self.getProperty("XAdjPixels")
+        self._yadjpixels = self.getProperty("YAdjPixels")
         self._vanPeakWidthPercent = self.getProperty("VanadiumPeakWidthPercentage")
         self._vanSmoothing = self.getProperty("VanadiumSmoothParams")
         calib = "temp.cal"
@@ -366,7 +375,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 temp = mtd["%s_%d" % (self._instrument, canRun)]
                 if temp is None:
                     canRun = self._loadData(canRun, SUFFIX, (0., 0.))
-                    SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, AdjX=1, AdjY=1)
+                    if self._xadjpixels+self._yadjpixels > 0:
+                        SmoothNeighbours(InputWorkspace=canRun, OutputWorkspace=canRun, 
+                            AdjX=self._xadjpixels, AdjY=self._yadjpixels)
+                        CompressEvents(InputWorkspace=canRun, OutputWorkspace=canRun,
+                            Tolerance=COMPRESS_TOL_TOF) # 5ns
                 else:
                     canRun = temp
             else:
@@ -374,9 +387,11 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
 
             if canRun is not None:
                 samRun -= canRun
+                canRun = str(canRun)
+                mtd.deleteWorkspace(canRun)
+                mtd.releaseFreeMemory()
                 CompressEvents(InputWorkspace=samRun, OutputWorkspace=samRun,
                                Tolerance=COMPRESS_TOL_TOF) # 10ns
-                canRun = str(canRun)
 
             # process the vanadium run
             vanRun = self.getProperty("VanadiumNumber")
@@ -407,6 +422,8 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                 Divide(LHSWorkspace=samRun, RHSWorkspace=vanRun, OutputWorkspace=samRun, AllowDifferentNumberSpectra=True)
                 normalized = True
                 vanRun = str(vanRun)
+                mtd.deleteWorkspace(vanRun)
+                mtd.releaseFreeMemory()
             else:
                 normalized = False
 
@@ -416,7 +433,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                            Tolerance=COMPRESS_TOL_TOF) # 5ns
             self._save(samRun, normalized)
             samRun = str(samRun)
-            mtd.deleteWorkspace(str(samRun))
+            #mtd.deleteWorkspace(samRun)
             mtd.releaseFreeMemory()
 
 mtd.registerPyAlgorithm(SNSSingleCrystalReduction())
