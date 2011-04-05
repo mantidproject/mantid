@@ -2129,7 +2129,7 @@ QString SANSRunWindow::readUserFileGUIChanges(const QString & type)
 ///Reads the sample geometry, these settings will override what is stored in the run file
 QString SANSRunWindow::readSampleObjectGUIChanges()
 {
-  QString exec_reduce("i.ReductionSingleton().geometry.height = ");
+  QString exec_reduce("\ni.ReductionSingleton().geometry.height = ");
   exec_reduce += m_uiForm.sample_height->text();
 
   exec_reduce += "\ni.ReductionSingleton().geometry.width = ";
