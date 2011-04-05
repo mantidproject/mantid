@@ -3,37 +3,37 @@
 
 <component-link name="bank_bsk" >
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="0.0002081288*sqrt(7.429*centre^4+132.188*centre^2)" unit="dSpacing" result-unit="dSpacing" />
+    <formula eq="sqrt(7.429*centre^4+132.188*centre^2)" unit="dSpacing" result-unit="TOF" />
   </parameter> 
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="(0.086999/centre)/0.0002081288" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>   
   <parameter name="BackToBackExponential:B" type="fitting">
-    <formula eq="(0.026707+0.005560/(centre^4))/0.0002081288" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.026707+0.005560/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>  
 </component-link>
 
 <component-link name="bank_90degnew" >
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="0.0000408705*sqrt(158.011*centre^4+4166.279*centre^2)" unit="dSpacing" result-unit="dSpacing" />
+    <formula eq="sqrt(158.011*centre^4+4166.279*centre^2)" unit="dSpacing" result-unit="TOF" />
   </parameter>   
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="(0.086999/centre)/0.0000408705" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>    
   <parameter name="BackToBackExponential:B" type="fitting">
-    <formula eq="(0.020300+0.019136/(centre^4))/0.0000408705" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.020300+0.019136/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>    
 </component-link>
 
 <component-link name="bank_la" >
   <parameter name="BackToBackExponential:S" type="fitting">
-    <formula eq="0.0000807805*sqrt(188.149*centre^4+6520.945*centre^2)" unit="dSpacing" result-unit="dSpacing" />
+    <formula eq="sqrt(188.149*centre^4+6520.945*centre^2)" unit="dSpacing" result-unit="TOF" />
   </parameter>   
   <parameter name="BackToBackExponential:A" type="fitting">
-    <formula eq="(0.086999/centre)/0.0000807805" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.086999/centre)" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>  
   <parameter name="BackToBackExponential:B" type="fitting">
-    <formula eq="(0.026707+0.005560/(centre^4))/0.0000807805" unit="dSpacing" result-unit="1/dSpacing" /> <fixed />
+    <formula eq="(0.026707+0.005560/(centre^4))" unit="dSpacing" result-unit="1/TOF" /> <fixed />
   </parameter>   
 </component-link>
 
