@@ -37,6 +37,14 @@ void SimplexMinimizer::initialize(double* X, const double* Y, double *sqrtWeight
   // setup minimizer
   m_gslSolver = gsl_multimin_fminimizer_alloc(T, nParam);
   gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, startGuess, m_simplexStepSize);
+
+  // for covariance matrix
+  m_gslLeastSquaresContainer.f = &gsl_f;
+  m_gslLeastSquaresContainer.df = &gsl_df;
+  m_gslLeastSquaresContainer.fdf = &gsl_fdf;
+  m_gslLeastSquaresContainer.n = function->dataSize();
+  m_gslLeastSquaresContainer.p = function->nActive();
+  m_gslLeastSquaresContainer.params = m_data;
 }
 
 void SimplexMinimizer::initialize(API::IFitFunction* function, const std::string& costFunction) 
@@ -116,7 +124,14 @@ double SimplexMinimizer::costFunctionVal()
 ///Calculates covariance matrix - not implemented
 void SimplexMinimizer::calCovarianceMatrix(double epsrel, gsl_matrix * covar)
 {
-  Kernel::Exception::NotImplementedError("Covariance matrix calculation for Simplex not implemented.");
+  gsl_matrix * holdCalculatedJacobian;
+  holdCalculatedJacobian =  gsl_matrix_alloc (m_gslLeastSquaresContainer.n, m_gslLeastSquaresContainer.p);
+
+  int dummy = m_gslLeastSquaresContainer.df(m_gslSolver->x, m_gslLeastSquaresContainer.params, holdCalculatedJacobian);
+  (void) dummy;
+  gsl_multifit_covar (holdCalculatedJacobian, epsrel, covar);
+
+  gsl_matrix_free (holdCalculatedJacobian);
 }
 
 } // namespace CurveFitting

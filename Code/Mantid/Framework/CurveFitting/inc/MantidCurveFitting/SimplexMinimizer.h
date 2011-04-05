@@ -81,6 +81,11 @@ private:
   /// GSL simplex minimizer container
   gsl_multimin_function gslContainer;
 
+  /// passed information about the derivative etc of fitting function
+  /// rather than the derivative etc of cost function
+  /// used for calculating covariance matrix
+  gsl_multifit_function_fdf m_gslLeastSquaresContainer;
+
 	/// Static reference to the logger class
 	static Kernel::Logger& g_log;
 };
