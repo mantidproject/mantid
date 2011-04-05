@@ -598,7 +598,7 @@ public:
     boost::shared_ptr<IDetector> det = i->getDetector(1100);  // should be a detector from bank_bsk
     Parameter_sptr param = paramMap.getRecursive(&(*det), "S", "fitting");
     const FitParameter& fitParam1 = param->value<FitParameter>();
-    TS_ASSERT_DELTA( fitParam1.getValue(1.0), 0.0024, 0.0001);
+    TS_ASSERT_DELTA( fitParam1.getValue(1.0), 11.8159, 0.0001);
     TS_ASSERT( fitParam1.getFunction().compare("BackToBackExponential") == 0 );
 
 
@@ -623,7 +623,7 @@ public:
     det = i->getDetector(1100);  // should be a detector from bank_bsk
     param = paramMap2.getRecursive(&(*det), "S", "fitting");
     const FitParameter& fitParam2 = param->value<FitParameter>();
-    TS_ASSERT_DELTA( fitParam2.getValue(1.0), 0.0024, 0.0001);
+    TS_ASSERT_DELTA( fitParam2.getValue(1.0), 11.8159, 0.0001);
     TS_ASSERT( fitParam2.getFunction().compare("BackToBackExponential") == 0 );
 
     AnalysisDataService::Instance().remove(wsName);
