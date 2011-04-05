@@ -1183,12 +1183,12 @@ class PyAlgLoader(object):
                     else:
                         __import__(modname)
                     changes = True
+                    # Cleanup system path
+                    del sys.path[0]
             except(StandardError), exp:
                 self.framework.sendLogMessage('Error: Importing module "%s" failed". %s' % (modname,str(exp)))
             except:
                 self.framework.sendLogMessage('Error: Unknown error on Python algorithm module import. "%s" skipped' % modname)
-            # Cleanup system path
-            del sys.path[0]
 
         # Find sub-directories     
         for root, dirs, files in os.walk(path):
