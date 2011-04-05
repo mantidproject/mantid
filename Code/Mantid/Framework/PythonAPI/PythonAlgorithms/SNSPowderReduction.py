@@ -218,12 +218,14 @@ class SNSPowderReduction(PythonAlgorithm):
         try:
             if info.tmin > 0.:
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
-        except:
+        except AttributeError:
             pass
         try:
             if info.tmax > 0.:
+                if info.tmin >= info.tmax:
+                    raise RuntimeError("Encountered tmin (%f) >= tmax (%f)" % (info.tmin, info.tmax))
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=info.tmax, XMax=5.*info.tmax)
-        except:
+        except AttributeError:
             pass
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         LRef = self.getProperty("UnwrapRef")
