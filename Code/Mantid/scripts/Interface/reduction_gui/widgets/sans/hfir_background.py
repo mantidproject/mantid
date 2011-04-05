@@ -1,7 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
-from reduction_gui.reduction.hfir_reduction_steps import Background
+from reduction_gui.reduction.sans.hfir_background_script import Background
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
@@ -206,6 +206,7 @@ class BackgroundWidget(BaseWidget):
         
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
+        self._content.geometry_options_groupbox.setEnabled(is_checked)
         self._content.background_browse.setEnabled(is_checked)
         self._content.background_plot_button.setEnabled(is_checked)
         self._content.calculate_trans_chk.setEnabled(is_checked)

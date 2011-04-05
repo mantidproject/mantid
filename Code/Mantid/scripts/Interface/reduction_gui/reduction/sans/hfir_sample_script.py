@@ -241,8 +241,8 @@ class SampleData(BaseScriptElement):
             if self.calculate_transmission:
                 for m in [SampleData.DirectBeam, SampleData.BeamSpreader]:
                     method = m()
-                    if method.find(dom):
-                        method.from_xml(dom)
+                    if method.find(instrument_dom):
+                        method.from_xml(instrument_dom)
                         self.calculation_method = method
                         break
                     
