@@ -128,11 +128,12 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             #Can trans
             run_file = run['can_trans']
             run_file2 = run['can_direct_beam']
-            ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
-            if len(run_file) > 0 and len(ws1) == 0:
+            tran_can_1, tran_can_2 = TransmissionCan(
+                                        run_file + format, run_file2 + format)
+            if len(run_file) > 0 and len(tran_can_1) == 0:
                 issueWarning('Cannot load trans can run "' + run_file + '", skipping reduction')
                 continue
-            if len(run_file2) > 0 and len(ws2) == 0: 
+            if len(run_file2) > 0 and len(tran_can_2) == 0: 
                 issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
                 continue
     
@@ -140,12 +141,17 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if centreit == 1:
                 if verbose == 1:
                     FindBeamCentre(50.,170.,12)
-
-        finally:
-            # WavRangeReduction runs the reduction for the specfied wavelength range where the final argument can either be DefaultTrans or CalcTrans:
-            # Parameter DefaultTrans specifies the transmission should be calculated for the whole range specified by L/WAV and then cropped it to the current wavelength range
-            # Parameter CalcTrans specifies the transmission should be calculated for the specifed wavelength range only
+                    
+            
+            # WavRangeReduction runs the reduction for the specified wavelength range where the final argument can either be DefaultTrans or CalcTrans:
             reduced = WavRangeReduction(full_trans_wav=full_trans_wav)
+
+        except ValueError, reason:
+            issueWarning('Cannot load file :'+str(reason))
+            raise
+        finally:
+            delete_workspaces([sample_ws, can_ws, ws1, ws2, tran_can_1, tran_can_2])
+            
 
         file = run['output_as']
         #saving if optional and doesn't happen if the result workspace is left blank. Is this feature used?
@@ -170,5 +176,11 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
         #the call to WaveRang... killed the reducer so copy back over the settings
         ReductionSingleton().replace(copy.deepcopy(settings))
 
-
-#ReductionSingleton.clean(isis_reducer.ISISReducer)
+def delete_workspaces(workspaces):
+    for wksp in workspaces:
+        if wksp and mtd.workspaceExists(wksp):
+            try:
+                DeleteWorkspace(wksp)
+            except:
+                #if the workspace really won't delete leave it
+                pass

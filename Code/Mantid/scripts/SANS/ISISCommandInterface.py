@@ -174,11 +174,11 @@ def GetMismatchedDetList():
 
 def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_suffix=None):
     """
-        Run a reduction that has been set up and reset the old
-        setup
+        Run a reduction that has been set up, from loading the raw data to calculating Q,  and
+        reset the old setup
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
-        @param full_trans_wav if to use a wide wavelength range for the transmission correction, true by default
+        @param full_trans_wav: if to use a wide wavelength range (whole range specified by L/WAV) for the transmission correction, true by default
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
 
