@@ -232,7 +232,8 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {
-  dlclose(libName);
+  // Commented out for now due to a potential bug in glibc
+  //dlclose(libName);
 }
 
 /* Adds a directory to the dll cearch path
