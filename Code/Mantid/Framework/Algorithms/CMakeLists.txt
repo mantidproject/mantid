@@ -4,7 +4,6 @@ set ( SRC_FILES
 	src/AlignDetectors.cpp
 	src/AnyShapeAbsorption.cpp
 	src/ApplyTransmissionCorrection.cpp
-	src/SmoothNeighbours.cpp
 	src/BinaryOperation.cpp
 	src/CalculateEfficiency.cpp
 	src/CalculateTransmissionBeamSpreader.cpp
@@ -120,6 +119,7 @@ set ( SRC_FILES
 	src/Scale.cpp
 	src/SetUncertaintiesToZero.cpp
 	src/SmoothData.cpp
+	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
 	src/SANSDirectBeamScaling.cpp
 	src/SANSSolidAngleCorrection.cpp
@@ -149,7 +149,6 @@ set ( INC_FILES
 	inc/MantidAlgorithms/AlignDetectors.h
 	inc/MantidAlgorithms/AnyShapeAbsorption.h
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
-	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
 	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
@@ -266,6 +265,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
 	inc/MantidAlgorithms/SmoothData.h
+	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
 	inc/MantidAlgorithms/SANSDirectBeamScaling.h
 	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
@@ -398,6 +398,7 @@ set ( TEST_FILES
 	test/SaveSNSNexusTest.h
 	test/ScaleTest.h
 	test/SmoothDataTest.h
+	test/SmoothNeighboursTest.h
 	test/SofQWTest.h
 	test/SANSSolidAngleCorrectionTest.h
 	test/SolidAngleTest.h
