@@ -12,6 +12,7 @@ set ( SRC_FILES src/kernel_exports.cpp
                 src/PythonWrapper.cpp
                 src/SimplePythonAPI.cpp
                 src/WorkspaceProxies.cpp 
+                src/crystal_exports.cpp
 )
 
 set ( INC_FILES inc/MantidPythonAPI/kernel_exports.h

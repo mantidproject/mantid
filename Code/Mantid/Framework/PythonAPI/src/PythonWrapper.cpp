@@ -20,6 +20,7 @@ namespace PythonAPI
   void export_kernel_namespace();
   void export_geometry_namespace();
   void export_api_namespace();
+  void export_crystal_namespace();
 } 
 }
 
@@ -55,6 +56,7 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   export_kernel_namespace();
   export_geometry_namespace();
   export_api_namespace();
+  export_crystal_namespace();
 }   
 
 
