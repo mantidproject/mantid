@@ -104,8 +104,15 @@ namespace MDEvents
   {
     std::vector<std::string> out;
     std::ostringstream mess;
-    mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes";
+    size_t mem;
+    mem = (this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>)) / 1024;
+    mess << m_BoxController->getTotalNumMDBoxes() << " MDBoxes (" << mem << " kB)";
     out.push_back(mess.str()); mess.str("");
+
+    mem = (this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>)) / 1024;
+    mess << m_BoxController->getTotalNumMDGridBoxes() << " MDGridBoxes (" << mem << " kB)";
+    out.push_back(mess.str()); mess.str("");
+
     mess << "Avg recursion depth: " << m_BoxController->getAverageDepth();
     out.push_back(mess.str()); mess.str("");
 
@@ -129,7 +136,13 @@ namespace MDEvents
   TMDE(
   size_t MDEventWorkspace)::getMemorySize() const
   {
-    return this->getNPoints() * sizeof(MDE);
+//    std::cout << "sizeof(MDE) " << sizeof(MDE) << std::endl;
+//    std::cout << "sizeof(MDBox<MDE,nd>) " << sizeof(MDBox<MDE,nd>) << std::endl;
+//    std::cout << "sizeof(MDGridBox<MDE,nd>) " << sizeof(MDGridBox<MDE,nd>) << std::endl;
+    // Add up the events and the MDBoxes contained.
+    return this->getNPoints() * sizeof(MDE) +
+        this->m_BoxController->getTotalNumMDBoxes() * sizeof(MDBox<MDE,nd>) +
+        this->m_BoxController->getTotalNumMDGridBoxes() * sizeof(MDGridBox<MDE,nd>);
   }
 
 

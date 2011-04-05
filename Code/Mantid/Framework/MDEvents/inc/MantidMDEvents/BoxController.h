@@ -198,6 +198,7 @@ namespace MDEvents
      * This should be called when a MDBox gets split into a MDGridBox.
      * The number of MDBoxes at [depth] is reduced by one
      * The number of MDBoxes at [depth+1] is increased by however many the splitting gives.
+     * Also tracks the number of MDGridBoxes.
      *
      * @param depth :: the depth of the MDBox that is being split into MDGrid boxes.
      */
@@ -205,7 +206,10 @@ namespace MDEvents
     {
       m_mutexNumMDBoxes.lock();
       if (m_numMDBoxes[depth] > 0)
+      {
         m_numMDBoxes[depth]--;
+      }
+      m_numMDGridBoxes[depth]++;
       m_numMDBoxes[depth + 1] += m_numSplit;
       m_mutexNumMDBoxes.unlock();
     }
@@ -233,6 +237,17 @@ namespace MDEvents
       return total;
     }
 
+    /** Return the total number of MDGridBox'es, irrespective of depth */
+    size_t getTotalNumMDGridBoxes() const
+    {
+      size_t total = 0;
+      for (size_t depth=0; depth<m_numMDGridBoxes.size(); depth++)
+      {
+        total += m_numMDGridBoxes[depth];
+      }
+      return total;
+    }
+
     /** Return the average recursion depth of gridding.
      * */
     double getAverageDepth() const
@@ -254,6 +269,7 @@ namespace MDEvents
       m_mutexNumMDBoxes.lock();
       m_numMDBoxes.clear();
       m_numMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
+      m_numMDGridBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
       m_numMDBoxes[0] = 1; // Start at 1 at depth 0.
       m_mutexNumMDBoxes.unlock();
     }
@@ -310,6 +326,9 @@ namespace MDEvents
 
     /// For tracking how many MDBoxes (not MDGridBoxes) are at each recursion level
     std::vector<size_t> m_numMDBoxes;
+
+    /// For tracking how many MDGridBoxes (not MDBoxes) are at each recursion level
+    std::vector<size_t> m_numMDGridBoxes;
 
     /// Mutex for changing the number of MD Boxes.
     Mantid::Kernel::Mutex m_mutexNumMDBoxes;

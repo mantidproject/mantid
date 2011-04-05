@@ -10,9 +10,10 @@ namespace Mantid
 namespace Kernel
 {
 
-  /** CPUTimer : TODO: DESCRIPTION
+  /** CPUTimer : Timer that uses the CPU time, rather than wall-clock time
+   * to measure execution time.
    * 
-   * @author
+   * @author Janik Zikovsky
    * @date 2011-04-04 12:17:48.579100
    */
   class DLLExport CPUTimer 
@@ -24,7 +25,7 @@ namespace Kernel
     float elapsed(bool doReset = true);
     void reset();
     float CPUfraction(bool doReset = true);
-    std::string str() const;
+    std::string str();
 
   private:
     /// The starting time (implementation dependent format)
@@ -34,6 +35,8 @@ namespace Kernel
     Timer m_wallClockTime;
   };
 
+
+  std::ostream& operator<<(std::ostream&, CPUTimer&);
 
 } // namespace Mantid
 } // namespace Kernel

@@ -104,6 +104,7 @@ namespace MDEvents
     else
       throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
     ws->setBoxController(bc);
+    ws->splitBox();
   }
 
 

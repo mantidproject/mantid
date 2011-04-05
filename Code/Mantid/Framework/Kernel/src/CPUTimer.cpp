@@ -2,6 +2,7 @@
 #include "MantidKernel/System.h"
 #include <ctime>
 #include <sstream>
+#include <iomanip>
 
 namespace Mantid
 {
@@ -69,6 +70,22 @@ namespace Kernel
   }
 
 
+
+  /// Convert the elapsed time (without reseting) to a string.
+  std::string CPUTimer::str()
+  {
+    std::stringstream buffer;
+    buffer << std::fixed  << std::setw(7) << std::setprecision(4) << m_wallClockTime.elapsed_no_reset() << " s, CPU " << std::setprecision(2) << this->CPUfraction(false);
+    this->reset();
+    return buffer.str();
+  }
+
+  /// Convenience function to provide for easier debug printing.
+  std::ostream& operator<<(std::ostream& out, CPUTimer& obj)
+  {
+    out << obj.str();
+    return out;
+  }
 
 
 } // namespace Mantid
