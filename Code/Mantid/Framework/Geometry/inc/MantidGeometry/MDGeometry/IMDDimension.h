@@ -6,6 +6,29 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
+#include <limits>
+
+
+namespace Mantid
+{
+namespace MDEvents
+{
+
+  /** Typedef for the data type to use for coordinate axes.
+   * This could be a float or a double, depending on requirements.
+   * We can change this in order to compare
+   * performance/memory/accuracy requirements.
+   */
+  typedef double CoordType;
+
+  /// Minimum value (large negative number) that a coordinate can take
+  const CoordType CoordType_min = -std::numeric_limits<double>::max();
+
+  /// Maximum value (large positive number) that a coordinate can take
+  const CoordType CoordType_max = std::numeric_limits<double>::max();
+}
+
+}
 
 
 
@@ -47,8 +70,11 @@ namespace Mantid
     /// Destructor
     virtual ~IMDDimension(){};
 
-    /// the name of the dimennlsion as can be displayed along the axis
+    /// Return the name of the dimension as can be displayed along the axis
     virtual std::string getName() const = 0;
+
+    /// Return the units of the dimension as a string
+    virtual std::string getUnits() const = 0;
 
     /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
     /// various method exist to manipulate set of dimensions by their names. 
@@ -69,7 +95,7 @@ namespace Mantid
     ///  Get coordinate for index;
     virtual double getX(size_t ind)const = 0;
 
-    /// if the dimension is integrated (e.g. have single bin)
+    /// Return true if the dimension is integrated (e.g. has only one single bin)
     virtual bool getIsIntegrated() const
     {
       return getNBins() == 1;

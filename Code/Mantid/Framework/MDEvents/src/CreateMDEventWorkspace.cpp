@@ -3,6 +3,7 @@
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 namespace Mantid
 {
@@ -10,6 +11,7 @@ namespace MDEvents
 {
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
+  using namespace Mantid::Geometry;
 
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(CreateMDEventWorkspace)
@@ -138,8 +140,8 @@ namespace MDEvents
     // Give all the dimensions
     for (size_t d=0; d<ndims; d++)
     {
-      Dimension dim(extents[d*2], extents[d*2+1], names[d], units[d]);
-      out->addDimension(dim);
+      MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], units[d], extents[d*2], extents[d*2+1], 1);
+      out->addDimension(MDHistoDimension_sptr(dim));
     }
 
     // Initialize it using the dimension

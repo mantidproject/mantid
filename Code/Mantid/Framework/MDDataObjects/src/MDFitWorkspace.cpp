@@ -244,6 +244,7 @@ namespace Mantid{
         m_binBoundaries.assign(x.begin(),x.end());
       }
       virtual std::string getName() const {return m_name;}
+      virtual std::string getUnits() const {return "None";}
       virtual std::string getDimensionId() const {return m_id;}
       virtual bool getIsIntegrated() const {return m_binBoundaries.size() == 2;}
       virtual double getDataShift()const {return 0.0;}

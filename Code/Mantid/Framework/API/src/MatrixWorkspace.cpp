@@ -1073,7 +1073,8 @@ namespace Mantid
       {
       }
       /// the name of the dimennlsion as can be displayed along the axis
-          virtual std::string getName() const {return m_axis.title();}
+      virtual std::string getName() const {return m_axis.title();}
+      virtual std::string getUnits() const {return m_axis.unit()->label();}
       /// short name which identify the dimension among other dimensin. A dimension can be usually find by its ID and various  
       /// various method exist to manipulate set of dimensions by their names. 
       virtual std::string getDimensionId() const {return m_dimensionId;}

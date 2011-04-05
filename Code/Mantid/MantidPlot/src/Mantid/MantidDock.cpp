@@ -5,7 +5,6 @@
 #include <MantidAPI/AlgorithmFactory.h>
 #include <MantidAPI/MemoryManager.h>
 #include <MantidAPI/IEventWorkspace.h>
-#include <MantidAPI/Dimension.h>
 #include <MantidAPI/IMDEventWorkspace.h>
 #include <MantidAPI/IMDWorkspace.h>
 #include <MantidGeometry/MDGeometry/IMDDimension.h>
@@ -439,8 +438,8 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
   for (size_t i=0; i < workspace->getNumDims(); i++)
   {
     std::ostringstream mess;
-    Dimension dim = workspace->getDimension(i);
-    mess << "Dim " << i << ": (" << dim.getName() << ") " << dim.getMin() << " to " << dim.getMax() << " " << dim.getUnits();
+    IMDDimension_sptr dim = workspace->getDimension(i);
+    mess << "Dim " << i << ": (" << dim->getName() << ") " << dim->getMinimum() << " to " << dim->getMaximum() << " " << dim->getUnits();
     std::string s = mess.str();
     QTreeWidgetItem* sub_data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
     sub_data_item->setFlags(Qt::NoItemFlags);

@@ -14,6 +14,7 @@
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
+using namespace Mantid::Geometry;
 
 class CreateMDEventWorkspaceTest : public CxxTest::TestSuite
 {
@@ -54,19 +55,19 @@ public:
     TS_ASSERT_EQUALS( ws->getNumDims(), 3);
     TS_ASSERT_EQUALS( ws->getNPoints(), 0);
 
-    Dimension dim;
+    IMDDimension_sptr dim;
     dim = ws->getDimension(0);
-    TS_ASSERT_DELTA( dim.getMax(), 1.0, 1e-6);
-    TS_ASSERT_EQUALS( dim.getName(), "x");
-    TS_ASSERT_EQUALS( dim.getUnits(), "m");
+    TS_ASSERT_DELTA( dim->getMaximum(), 1.0, 1e-6);
+    TS_ASSERT_EQUALS( dim->getName(), "x");
+    TS_ASSERT_EQUALS( dim->getUnits(), "m");
     dim = ws->getDimension(1);
-    TS_ASSERT_DELTA( dim.getMax(), 2.0, 1e-6);
-    TS_ASSERT_EQUALS( dim.getName(), "y");
-    TS_ASSERT_EQUALS( dim.getUnits(), "mm");
+    TS_ASSERT_DELTA( dim->getMaximum(), 2.0, 1e-6);
+    TS_ASSERT_EQUALS( dim->getName(), "y");
+    TS_ASSERT_EQUALS( dim->getUnits(), "mm");
     dim = ws->getDimension(2);
-    TS_ASSERT_DELTA( dim.getMax(), 3.0, 1e-6);
-    TS_ASSERT_EQUALS( dim.getName(), "z");
-    TS_ASSERT_EQUALS( dim.getUnits(), "um");
+    TS_ASSERT_DELTA( dim->getMaximum(), 3.0, 1e-6);
+    TS_ASSERT_EQUALS( dim->getName(), "z");
+    TS_ASSERT_EQUALS( dim->getUnits(), "um");
 
     // What about the box controller
     MDEventWorkspace3::sptr ews = boost::dynamic_pointer_cast<MDEventWorkspace3>(ws);

@@ -73,6 +73,8 @@ namespace Geometry
     virtual ~MDDimension();
     /// function returns the name of the axis in this direction
     virtual std::string getName()const{return AxisName;}
+    /// Return units string
+    virtual std::string getUnits()const{return "None";}
     /// function return the unique dimension ID, identifying the current dimension among others
     virtual std::string getDimensionTag(void)const{return dimTag;}
     /// get maximal value along the dimension

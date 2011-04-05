@@ -26,6 +26,7 @@ namespace Mantid
     {
     public:
       virtual std::string getName() const { return("TestX"); }
+      virtual std::string getUnits() const { return("TestUnits"); }
       virtual std::string getDimensionId() const { return("TestX"); }
       virtual bool getIsIntegrated() const {return(0);}
       virtual double getMaximum() const {return(1.0);}

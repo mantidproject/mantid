@@ -26,12 +26,14 @@ namespace Geometry
     /** Constructor for simple MDHistoDimension
     * @param name :: full name of the axis
     * @param ID :: identifier string
+    * @param units :: string giving the units of this dimension
     * @param min :: minimum extent
     * @param max :: maximum extent
     * @param numBins :: number of bins (evenly spaced)
     */
-    MDHistoDimension(std::string name, std::string ID, double min, double max, size_t numBins)
-    : m_name(name), m_dimensionId(ID), m_min(min), m_max(max), m_numBins(numBins),
+    MDHistoDimension(std::string name, std::string ID, std::string units, double min, double max, size_t numBins)
+    : m_name(name), m_dimensionId(ID), m_units(units),
+      m_min(min), m_max(max), m_numBins(numBins),
       m_binWidth((max-min)/numBins)
     {
     }
@@ -40,10 +42,16 @@ namespace Geometry
     virtual ~MDHistoDimension()
     {}
 
-    /// the name of the dimennlsion as can be displayed along the axis
+    /// Return the name of the dimension as can be displayed along the axis
     virtual std::string getName() const
     {
       return m_name;
+    }
+
+    /// Return the units of the dimension as a string
+    virtual std::string getUnits() const
+    {
+      return m_units;
     }
 
     /** Short name which identify the dimension among other dimension.
@@ -91,6 +99,9 @@ namespace Geometry
 
     /// ID string
     std::string m_dimensionId;
+
+    /// Dimension units
+    std::string m_units;
 
     /// Extent of dimension
     double m_min;

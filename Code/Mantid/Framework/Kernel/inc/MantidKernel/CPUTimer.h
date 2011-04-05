@@ -36,7 +36,7 @@ namespace Kernel
   };
 
 
-  std::ostream& operator<<(std::ostream&, CPUTimer&);
+  DLLExport std::ostream& operator<<(std::ostream&, CPUTimer&);
 
 } // namespace Mantid
 } // namespace Kernel

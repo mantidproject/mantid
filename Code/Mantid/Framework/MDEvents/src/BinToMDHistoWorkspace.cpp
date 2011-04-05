@@ -84,7 +84,7 @@ namespace MDEvents
     if (numBins < 1)
       throw std::invalid_argument("Number of bins should be >= 1.");
 
-    MDHistoDimension_sptr out(new MDHistoDimension(name, id, min, max, numBins));
+    MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
     return out;
   }
 

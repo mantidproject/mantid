@@ -105,8 +105,8 @@ namespace MDEvents
     {
       for (size_t d=0; d<nd; ++d)
       {
-        params.push_back( ws->getDimension(d).getMin() );
-        params.push_back( ws->getDimension(d).getMax() );
+        params.push_back( ws->getDimension(d)->getMinimum() );
+        params.push_back( ws->getDimension(d)->getMaximum() );
       }
     }
     if (params.size() != 1 + nd*2)

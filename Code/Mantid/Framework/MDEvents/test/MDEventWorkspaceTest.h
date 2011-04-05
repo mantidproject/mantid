@@ -3,9 +3,9 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidAPI/Dimension.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
@@ -59,7 +59,7 @@ public:
     IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     for (size_t i=0; i<5; i++)
-      ew->addDimension( Dimension(-1,1,"x","m") );
+      ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     delete ew;
   }
@@ -69,7 +69,7 @@ public:
     IMDEventWorkspace * ew = new MDEventWorkspace<MDEvent<3>, 3>();
     TS_ASSERT_THROWS( ew->initialize(), std::runtime_error);
     for (size_t i=0; i<3; i++)
-      ew->addDimension( Dimension(-1,1,"x","m") );
+      ew->addDimension( MDHistoDimension_sptr(new MDHistoDimension("x","x","m",-1,1,0)) );
     TS_ASSERT_THROWS_NOTHING( ew->initialize() );
     delete ew;
   }
@@ -91,13 +91,13 @@ public:
   void test_addDimension_getDimension()
   {
     MDEventWorkspace2 * ew = new MDEventWorkspace2();
-    Dimension dim(-1, +1, "Qx", "Ang");
+    MDHistoDimension_sptr dim(new MDHistoDimension("Qx", "Qx", "Ang", -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim); )
-    Dimension dim2(-1, +1, "Qy", "Ang");
+    MDHistoDimension_sptr dim2(new MDHistoDimension("Qy", "Qy", "Ang", -1, +1, 0));
     TS_ASSERT_THROWS_NOTHING( ew->addDimension(dim2); )
     TS_ASSERT_EQUALS( ew->getNumDims(), 2);
-    TS_ASSERT_EQUALS( ew->getDimension(0).getName(), "Qx");
-    TS_ASSERT_EQUALS( ew->getDimension(1).getName(), "Qy");
+    TS_ASSERT_EQUALS( ew->getDimension(0)->getName(), "Qx");
+    TS_ASSERT_EQUALS( ew->getDimension(1)->getName(), "Qy");
     TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qx"), 0);
     TS_ASSERT_EQUALS( ew->getDimensionIndexByName("Qy"), 1);
     TS_ASSERT_THROWS_ANYTHING( ew->getDimensionIndexByName("IDontExist"));
@@ -256,10 +256,10 @@ public:
 
     // Will bin it into a 5x5x5 workspace
     std::vector<MDHistoDimension_sptr> dims;
-    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", 0, size, name1 != "NONE" ? binlen : 1)));
-    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name2, "id1", 0, size, name2 != "NONE" ? binlen : 1)));
-    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name3, "id2", 0, size, name3 != "NONE" ? binlen : 1)));
-    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name4, "id3", 0, size, name4 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", "m", 0, size, name1 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name2, "id1", "m", 0, size, name2 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name3, "id2", "m", 0, size, name3 != "NONE" ? binlen : 1)));
+    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name4, "id3", "m", 0, size, name4 != "NONE" ? binlen : 1)));
 
     // Call the method
     IMDWorkspace_sptr out;

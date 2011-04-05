@@ -6,7 +6,6 @@
 #include "MantidTestHelpers/DLLExport.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/BoxController.h"
-#include "MantidAPI/Dimension.h"
 #include "MantidKernel/Utils.h"
 
 /** Set of helper methods for testing MDEventWorkspace things
@@ -42,7 +41,7 @@ namespace MDEventsHelper
     {
       std::ostringstream name;
       name << "Axis" << d;
-      Mantid::API::Dimension dim(min, max, name.str(), "m");
+      Mantid::Geometry::MDHistoDimension_sptr dim(new Mantid::Geometry::MDHistoDimension( name.str(),name.str(), "m", min, max, 0));
       out->addDimension(dim);
     }
     out->initialize();

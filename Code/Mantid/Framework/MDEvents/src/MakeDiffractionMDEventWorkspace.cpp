@@ -11,6 +11,7 @@
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -23,8 +24,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-  using namespace Mantid::Kernel;
-  using namespace Mantid::API;
 
   bool DODEBUG = false;
 
@@ -83,14 +82,14 @@ namespace MDEvents
     size_t numEvents = el.getNumberEvents();
 
     // Get the position of the detector there.
-    if (el.getDetectorIDs().size() > 0)
+    std::set<int>& detectors = el.getDetectorIDs();
+    if (detectors.size() > 0)
     {
       // The 3D MDEvents that will be added into the MDEventWorkspce
       std::vector<MDE> out_events;
       out_events.reserve( el.getNumberEvents() );
 
       // Warn if the event list is the sum of more than one detector ID
-      std::set<int>& detectors = el.getDetectorIDs();
       if (detectors.size() != 1)
       {
         g_log.warning() << "Event list at workspace index " << workspaceIndex << " has " << detectors.size() << " detectors. Only 1 detector ID per pixel is supported.\n";
@@ -195,8 +194,8 @@ namespace MDEvents
       std::string names[3] = {"Qx", "Qy", "Qz"};
       for (size_t d=0; d<nd; d++)
       {
-        Dimension dim(-100.0, +100.0, names[d], "Angstroms^-1");
-        ws->addDimension(dim);
+        MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], "Angstroms^-1", -100.0, +100.0, 1);
+        ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
 

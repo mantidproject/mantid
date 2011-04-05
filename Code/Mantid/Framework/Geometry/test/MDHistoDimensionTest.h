@@ -17,9 +17,10 @@ public:
 
   void test_constructor()
   {
-    MDHistoDimension d("name", "id", -10, 20.0, 15);
+    MDHistoDimension d("name", "id", "Furlongs", -10, 20.0, 15);
     TS_ASSERT_EQUALS(d.getName(), "name");
     TS_ASSERT_EQUALS(d.getDimensionId(), "id");
+    TS_ASSERT_EQUALS(d.getUnits(), "Furlongs");
     TS_ASSERT_EQUALS(d.getMinimum(), -10);
     TS_ASSERT_EQUALS(d.getMaximum(), +20);
     TS_ASSERT_EQUALS(d.getNBins(), 15);

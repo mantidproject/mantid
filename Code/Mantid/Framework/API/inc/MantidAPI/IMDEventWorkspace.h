@@ -5,7 +5,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
-#include "MantidAPI/Dimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include <boost/shared_ptr.hpp>
 
@@ -37,10 +37,10 @@ namespace API
     virtual size_t getNPoints() const = 0;
 
     /// Add a new dimension
-    virtual void addDimension(Dimension dimInfo);
+    virtual void addDimension(Mantid::Geometry::IMDDimension_sptr dimInfo);
 
     /// Get that dimension
-    virtual Dimension getDimension(size_t dim) const;
+    virtual Mantid::Geometry::IMDDimension_sptr getDimension(size_t dim) const;
 
     /// Returns some information about the box controller, to be displayed in the GUI, for example
     virtual std::vector<std::string> getBoxControllerStats() const = 0;
@@ -56,7 +56,7 @@ namespace API
 
   protected:
     /// Vector with each dimension (length must match nd)
-    std::vector<Dimension> dimensions;
+    std::vector<Mantid::Geometry::IMDDimension_sptr> dimensions;
 
   };
 

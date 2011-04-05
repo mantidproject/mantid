@@ -19,10 +19,10 @@ public:
 
   void test_constructor()
   {
-    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", -10, 10, 5));
-    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", -10, 10, 5));
-    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", -10, 10, 5));
-    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", -10, 10, 5));
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 5));
 
     MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
 

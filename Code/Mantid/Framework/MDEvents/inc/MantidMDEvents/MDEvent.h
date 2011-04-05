@@ -2,7 +2,7 @@
 #define MDEVENT_H_
 
 #include "MantidKernel/System.h"
-#include "MantidAPI/Dimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <numeric>
 #include <math.h>
 

@@ -2,7 +2,7 @@
 #define MANTID_MDEVENTS_MDBIN_H_
     
 #include "MantidKernel/System.h"
-#include "MantidAPI/Dimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidMDEvents/MDEvent.h"
 
 

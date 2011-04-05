@@ -54,7 +54,7 @@ namespace MDEvents
     if (isGridBox())
         throw std::runtime_error("MDEventWorkspace::initialize() called on a MDEventWorkspace containing a MDGridBox. You should call initialize() before adding any events!");
     for (size_t d=0; d<nd; d++)
-      data->setExtents(d, dimensions[d].getMin(), dimensions[d].getMax());
+      data->setExtents(d, dimensions[d]->getMinimum(), dimensions[d]->getMaximum());
   }
 
   //-----------------------------------------------------------------------------------------------

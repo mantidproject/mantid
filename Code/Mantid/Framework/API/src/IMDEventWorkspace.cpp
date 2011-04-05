@@ -1,8 +1,9 @@
-#include "MantidAPI/Dimension.h"
+#include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 
 using Mantid::MDEvents::CoordType;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -12,9 +13,9 @@ namespace API
   //-----------------------------------------------------------------------------------------------
   /** Add a new dimension
    *
-   * @param dimInfo :: Dimension object which will be copied into the workspace
+   * @param dimInfo :: IMDDimension object which will be copied into the workspace
    */
-  void IMDEventWorkspace::addDimension(Dimension dimInfo)
+  void IMDEventWorkspace::addDimension(IMDDimension_sptr dimInfo)
   {
     dimensions.push_back(dimInfo);
   }
@@ -24,9 +25,9 @@ namespace API
   /** Get the given dimension
    *
    * @param dim :: index of dimension to set
-   * @return Dimension object
+   * @return IMDDimension object
    */
-  Dimension IMDEventWorkspace::getDimension(size_t dim) const
+  IMDDimension_sptr IMDEventWorkspace::getDimension(size_t dim) const
   {
     return dimensions[dim];
   }
@@ -42,7 +43,7 @@ namespace API
   size_t IMDEventWorkspace::getDimensionIndexByName(const std::string & name) const
   {
     for (size_t d=0; d<dimensions.size(); d++)
-      if (dimensions[d].getName() == name)
+      if (dimensions[d]->getName() == name)
         return d;
     throw std::runtime_error("Dimension named '" + name + "' was not found in the IMDEventWorkspace.");
   }

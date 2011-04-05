@@ -17,7 +17,6 @@ set ( SRC_FILES
 	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
 	src/DeprecatedAlgorithm.cpp
-	src/Dimension.cpp
 	src/Expression.cpp
 	src/FileFinder.cpp
 	src/FileProperty.cpp
@@ -86,7 +85,6 @@ set ( INC_FILES
 	inc/MantidAPI/CompositeFunctionMW.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
-	inc/MantidAPI/Dimension.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
 	inc/MantidAPI/DllExport.h
 	inc/MantidAPI/Expression.h
@@ -166,7 +164,6 @@ set ( TEST_FILES
 	test/AsynchronousTest.h
 	test/AxisTest.h
 	test/CompositeFunctionTest.h
-	test/DimensionTest.h
 	test/ExpressionTest.h
 	test/FileFinderTest.h
 	test/FilePropertyTest.h
