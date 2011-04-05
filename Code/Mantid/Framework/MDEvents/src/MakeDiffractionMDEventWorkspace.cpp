@@ -7,6 +7,7 @@
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/CPUTimer.h"
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -33,8 +34,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void MakeDiffractionMDEventWorkspace::initDocs()
   {
-    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. ");
-    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace.");
+    this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
+    this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
   }
 
   //----------------------------------------------------------------------------------------------
@@ -170,6 +171,7 @@ namespace MDEvents
   void MakeDiffractionMDEventWorkspace::exec()
   {
     Timer tim, timtotal;
+    CPUTimer cputim, cputimtotal;
 
     // Input workspace
     in_ws = getProperty("InputWorkspace");
@@ -234,10 +236,8 @@ namespace MDEvents
 
     // To track when to split up boxes
     size_t eventsAdded = 0;
-    if (DODEBUG) std::cout << tim.elapsed() << " secs to setup.\n";
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
-    if (DODEBUG) std::cout << tim.elapsed() << " secs to count the number of boxes (" << lastNumBoxes << ").\n";
-
+    if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
     for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
@@ -269,46 +269,50 @@ namespace MDEvents
       eventsAdded += cost;
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
-        if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. This took " << tim.elapsed() << " secs.\n";
+        if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events.\n";
         // Do all the adding tasks
         tp.joinAll();
-        if (DODEBUG) std::cout << "Performing the addition of these events took " << tim.elapsed() << " secs.\n";
+        if (DODEBUG) std::cout << cputim << ": Performing the addition of these events.\n";
 
         // Now do all the splitting tasks
         ws->splitAllIfNeeded(ts);
         if (ts->size() > 0)
           prog->doReport("Splitting Boxes");
         tp.joinAll();
-        if (DODEBUG) std::cout << "Performing the splitting took " << tim.elapsed() << " secs.\n";
 
         // Count the new # of boxes.
         lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
+        if (DODEBUG) std::cout << cputim << ": Performing the splitting. There are now " << lastNumBoxes << " boxes.\n";
         eventsAdded = 0;
-        if (DODEBUG) std::cout << "There are now " << lastNumBoxes << " boxes. Counting them took " << tim.elapsed() << " secs.\n";
       }
     }
 
-    if (DODEBUG) std::cout << "We've added tasks worth " << eventsAdded << " events. This took " << tim.elapsed() << " secs.\n";
+    if (DODEBUG) std::cout << cputim << ": We've added tasks worth " << eventsAdded << " events.\n";
 
     tp.joinAll();
-    if (DODEBUG) std::cout << "Performing the FINAL addition of these events took " << tim.elapsed() << " secs.\n";
-
-    clock_t start, end;
-    double cpu_time_used;
+    if (DODEBUG) std::cout << cputim << ": Performing the FINAL addition of these events.\n";
 
     // Do a final splitting of everything
     ws->splitAllIfNeeded(ts);
     tp.joinAll();
-    if (DODEBUG) std::cout << "Performing the FINAL splitting of boxes took " << tim.elapsed() << " secs.\n";
+    if (DODEBUG) std::cout << cputim << ": Performing the FINAL splitting of boxes. There are now " << ws->getBoxController()->getTotalNumMDBoxes() <<" boxes\n";
 
 
     // Recount totals at the end.
+    cputim.reset();
 #ifndef MDEVENTS_MDGRIDBOX_ONGOING_SIGNAL_CACHE
     ws->refreshCache();
 #endif
-    if (DODEBUG) std::cout << "Performing the refreshCache() call took " << tim.elapsed() << " secs.\n";
+    if (DODEBUG) std::cout << cputim << ": Performing the refreshCache().\n";
 
-    if (DODEBUG) std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << timtotal.elapsed() << " sec in total.\n\n";
+    if (DODEBUG)
+    {
+      std::cout << "Workspace has " << ws->getNPoints() << " events. This took " << cputimtotal << " in total.\n";
+      std::vector<std::string> stats = ws->getBoxControllerStats();
+      for (size_t i=0; i<stats.size(); ++i)
+        std::cout << stats[i] << "\n";
+      std::cout << std::endl;
+    }
 
 
     // Save the output
