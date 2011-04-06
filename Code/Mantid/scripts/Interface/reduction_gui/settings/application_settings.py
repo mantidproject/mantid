@@ -9,6 +9,7 @@ class GeneralSettings(object):
     debug = False
     last_data_ws = ''
     last_file = ''
+    instrument_name = ''
     
     def __init__(self, settings=None):
         """
@@ -35,3 +36,5 @@ class GeneralSettings(object):
         """
         self.data_path = unicode(settings.value("general_data_path", QtCore.QVariant('.')).toString())
         self.debug = settings.value("debug_mode", QtCore.QVariant('false')).toBool()
+        self.instrument_name = unicode(settings.value("instrument_name", QtCore.QVariant('.')).toString())
+        

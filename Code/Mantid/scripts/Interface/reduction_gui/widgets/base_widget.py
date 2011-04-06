@@ -2,6 +2,13 @@ from PyQt4 import QtGui, uic, QtCore
 import os
 from reduction_gui.settings.application_settings import GeneralSettings
 
+IS_IN_MANTIDPLOT = False
+try:
+    import qti
+    IS_IN_MANTIDPLOT = True
+except:
+    pass
+
 class BaseWidget(QtGui.QWidget):    
     """
         Base widget for reduction UI
@@ -31,6 +38,8 @@ class BaseWidget(QtGui.QWidget):
         if ui_class is not None:
             self.setLayout(self._layout)
             self.initialize_content()
+            
+        self._instrument_view = None
         
     def initialize_content(self):
         """
@@ -83,4 +92,13 @@ class BaseWidget(QtGui.QWidget):
                 (folder, file_name) = os.path.split(fname)
                 self._settings.data_path = folder
             return fname     
+    
+    def show_instrument(self, workspace):
+        # Do nothing if the instrument view is already displayed
+        if self._instrument_view is not None and self._instrument_view.isVisible():
+            return
+            
+        self._instrument_view = qti.app.mantidUI.getInstrumentView(workspace)
+        self._instrument_view.show()
+    
     
