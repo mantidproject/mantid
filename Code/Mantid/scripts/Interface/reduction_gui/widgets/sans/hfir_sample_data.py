@@ -42,6 +42,10 @@ class DirectBeam(BaseWidget):
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), self._sample_browse)
         self.connect(self._content.direct_browse, QtCore.SIGNAL("clicked()"), self._direct_browse)
+        
+        if not self._in_mantidplot:
+            self._content.sample_plot.hide()
+            self._content.direct_plot.hide()
 
     def set_state(self, state):
         """
@@ -108,6 +112,12 @@ class BeamSpreader(BaseWidget):
         self.connect(self._content.sample_spread_browse, QtCore.SIGNAL("clicked()"), self._sample_spread_browse)
         self.connect(self._content.direct_scatt_browse, QtCore.SIGNAL("clicked()"), self._direct_scatt_browse)
         self.connect(self._content.direct_spread_browse, QtCore.SIGNAL("clicked()"), self._direct_spread_browse)
+
+        if not self._in_mantidplot:
+            self._content.sample_scatt_plot.hide()
+            self._content.sample_spread_plot.hide()
+            self._content.direct_scatt_plot.hide()
+            self._content.direct_spread_plot.hide()
 
     def set_state(self, state):
         """
@@ -200,6 +210,10 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
         self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         
+        if not self._in_mantidplot:
+            self._content.dark_current_plot_button.hide()
+            self._content.data_file_plot_button.hide()
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.

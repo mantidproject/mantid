@@ -12,6 +12,7 @@ from reduction_gui.widgets.sans.hfir_background import BackgroundWidget
 from reduction_gui.widgets.output import OutputWidget
 from reduction_gui.reduction.hfir_reduction import HFIRReductionScripter
 
+from reduction_gui.reduction.sans.hfir_data_proxy import DataProxy
 
 class HFIRInterface(InstrumentInterface):
     """
@@ -34,7 +35,7 @@ class HFIRInterface(InstrumentInterface):
         self.attach(SampleDataWidget(settings = self._settings))
         
         # Background
-        self.attach(BackgroundWidget(settings = self._settings))
+        self.attach(BackgroundWidget(settings = self._settings, data_proxy=DataProxy))
         
         # Reduction output
         self.attach(OutputWidget(settings = self._settings))

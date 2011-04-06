@@ -16,7 +16,7 @@ class BaseWidget(QtGui.QWidget):
     ## Widget name
     name = ""      
     
-    def __init__(self, parent=None, state=None, settings=None, data_type=None, ui_class=None):
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, ui_class=None, data_proxy=None):
         QtGui.QWidget.__init__(self, parent)
         
         self._layout = QtGui.QHBoxLayout()
@@ -40,6 +40,9 @@ class BaseWidget(QtGui.QWidget):
             self.initialize_content()
             
         self._instrument_view = None
+        
+        self._data_proxy = data_proxy
+        self._in_mantidplot = IS_IN_MANTIDPLOT and self._data_proxy is not None
         
     def initialize_content(self):
         """
@@ -93,12 +96,22 @@ class BaseWidget(QtGui.QWidget):
                 self._settings.data_path = folder
             return fname     
     
-    def show_instrument(self, workspace):
+    def show_instrument(self, file_name):
+        """
+            Show instrument for the given data file.
+            @param file_name: Data file path
+        """
+        if not IS_IN_MANTIDPLOT:
+            return
+        
         # Do nothing if the instrument view is already displayed
         if self._instrument_view is not None and self._instrument_view.isVisible():
             return
+
+        if self._data_proxy is not None:
+            proxy = self._data_proxy(file_name)
             
-        self._instrument_view = qti.app.mantidUI.getInstrumentView(workspace)
+        self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws)
         self._instrument_view.show()
     
     

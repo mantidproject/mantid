@@ -11,16 +11,10 @@ from hfir_interface_dev import HFIRInterface as HFIRInterfaceDev
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface,
                             "HFIRDEV": HFIRInterfaceDev},
-                   "SNS":  {"EQSANS": EQSANSInterface}}     
-
-DATA_PROXY = {"BIOSANS": "class name here"}             
+                   "SNS":  {"EQSANS": EQSANSInterface}}               
 
 def instrument_factory(instrument_name, settings=None):
     for facility in INSTRUMENT_DICT:
         for instrument in INSTRUMENT_DICT[facility]:
             if str(instrument_name).strip()==instrument:
                 return INSTRUMENT_DICT[facility][instrument](instrument, settings=settings)
-        
-def data_proxy_class(instrument_name):
-    if instrument_name in DATA_PROXY:
-        return DATA_PROXY[instrument_name]

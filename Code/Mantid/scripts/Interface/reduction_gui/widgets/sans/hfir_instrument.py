@@ -86,6 +86,8 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
         self.connect(self._summary.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
   
+        if not self._in_mantidplot:
+            self._summary.dark_plot_button.hide()
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)

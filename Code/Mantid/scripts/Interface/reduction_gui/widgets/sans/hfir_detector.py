@@ -67,6 +67,12 @@ class DetectorWidget(BaseWidget):
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
 
+        if not self._in_mantidplot:
+            self._content.sensitivity_plot_button.hide()
+            self._content.sensitivity_dark_plot_button.hide()
+            self._content.data_file_plot_button.hide()
+            self._content.data_file_plot_button_2.hide()
+
     def set_state(self, state):
         """
             Populate the UI elements with the data from the given state.

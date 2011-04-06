@@ -6,6 +6,7 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background
+import functools
 
 class BckDirectBeam(DirectBeam):
     
@@ -51,8 +52,8 @@ class BackgroundWidget(BaseWidget):
     ## Widget name
     name = "Background"      
     
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None):
-        super(BackgroundWidget, self).__init__(parent, state, settings, data_type) 
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, data_proxy=None):
+        super(BackgroundWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
 
         class BckFrame(QtGui.QFrame, ui.sans.ui_hfir_background.Ui_Frame): 
             def __init__(self, parent=None):
@@ -93,6 +94,8 @@ class BackgroundWidget(BaseWidget):
         #self.connect(self._content.dark_current_browse, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
+        self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), 
+                     functools.partial(self.show_instrument, unicode(self._content.background_edit.text())))
         self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
         
         # Process transmission option
@@ -110,6 +113,9 @@ class BackgroundWidget(BaseWidget):
             self._content.trans_dark_current_edit.hide()
             self._content.trans_dark_current_button.hide()
 
+        if not self._in_mantidplot:
+            self._content.background_plot_button.hide()
+            self._content.trans_dark_current_plot_button.hide()
 
     def set_state(self, state):
         """
