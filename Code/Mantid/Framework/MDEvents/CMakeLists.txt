@@ -10,6 +10,7 @@ set (SRC_FILES
 	src/MDHistoWorkspace.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/FakeMDEventData.cpp
+	src/OneStepMDEW.cpp
 )
 
 # Header files
@@ -28,6 +29,7 @@ set (INC_FILES
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
+	inc/MantidMDEvents/OneStepMDEW.h
 )
 
 # Test files. Other source files required.
@@ -44,6 +46,7 @@ set (TEST_FILES
 	test/MDHistoWorkspaceTest.h
 	test/BinToMDHistoWorkspaceTest.h
 	test/FakeMDEventDataTest.h
+	test/OneStepMDEWTest.h
 )
 
 set ( GMOCK_TEST_FILES

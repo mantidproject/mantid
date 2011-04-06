@@ -63,6 +63,25 @@ namespace VectorHelper
   // Linearly interpolate between a set of Y values. Assumes the values are set for the calculated nodes
   DLLExport void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y, const double stepSize);
 
+  //-------------------------------------------------------------------------------------
+  /** Generic method to convert an iterator to an array of type T.
+   * Data type is converted at the same type.
+   * @param begin :: iterator at the beginning of the data
+   * @param end :: iterator at the end of the data
+   * @return :: a pointer to an array of type T.
+   */
+  template< typename T, typename _ForwardIterator >
+  T * iteratorToArray(_ForwardIterator begin, _ForwardIterator end, int * dims_array)
+  {
+    // Create the output array
+    size_t num = std::distance(begin, end);
+    dims_array[0] = num;
+    T * out = new T[num];
+    std::copy(begin, end, out);
+    return out;
+  }
+
+
   //! Functor used for computing the sum of the square values of a vector, using the accumulate algorithm
   template <class T> struct SumGaussError: public std::binary_function<T,T,T>
   {

@@ -78,6 +78,7 @@ namespace Mantid
 
       void initialize();
       bool execute();
+      void executeAsSubAlg() { throw std::runtime_error("Not implemented."); }
       Poco::ActiveResult<bool> executeAsync();
       bool isInitialized() const;
       bool isExecuted() const;
