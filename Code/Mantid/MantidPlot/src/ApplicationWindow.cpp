@@ -796,40 +796,40 @@ void ApplicationWindow::initToolBars()
   btnCursor->setActionGroup(dataTools);
   btnCursor->setCheckable( true );
   btnCursor->setIcon(QIcon(getQPixmap("select_xpm")) );
-  plotTools->addAction(btnCursor);
+  //plotTools->addAction(btnCursor); disabled until fixed (#2783)
 
   btnSelect = new QAction(tr("&Select Data Range"), this);
   btnSelect->setShortcut( tr("ALT+S") );
   btnSelect->setActionGroup(dataTools);
   btnSelect->setCheckable( true );
   btnSelect->setIcon(QIcon(getQPixmap("cursors_xpm")) );
-  plotTools->addAction(btnSelect);
+  //plotTools->addAction(btnSelect); disabled until fixed (#2783)
 
   btnPicker = new QAction(tr("S&creen Reader"), this);
   btnPicker->setActionGroup(dataTools);
   btnPicker->setCheckable( true );
   btnPicker->setIcon(QIcon(getQPixmap("cursor_16_xpm")) );
-  plotTools->addAction(btnPicker);
+  //plotTools->addAction(btnPicker); disabled until fixed (#2783)
 
   actionDrawPoints = new QAction(tr("&Draw Data Points"), this);
   actionDrawPoints->setActionGroup(dataTools);
   actionDrawPoints->setCheckable( true );
   actionDrawPoints->setIcon(QIcon(getQPixmap("draw_points_xpm")) );
-  plotTools->addAction(actionDrawPoints);
+  //plotTools->addAction(actionDrawPoints); disabled until fixed (#2783)
 
   btnMovePoints = new QAction(tr("&Move Data Points..."), this);
   btnMovePoints->setShortcut( tr("Ctrl+ALT+M") );
   btnMovePoints->setActionGroup(dataTools);
   btnMovePoints->setCheckable( true );
   btnMovePoints->setIcon(QIcon(getQPixmap("hand_xpm")) );
-  plotTools->addAction(btnMovePoints);
+  //plotTools->addAction(btnMovePoints); disabled until fixed (#2783)
 
   btnRemovePoints = new QAction(tr("Remove &Bad Data Points..."), this);
   btnRemovePoints->setShortcut( tr("Alt+B") );
   btnRemovePoints->setActionGroup(dataTools);
   btnRemovePoints->setCheckable( true );
   btnRemovePoints->setIcon(QIcon(getQPixmap("gomme_xpm")));
-  plotTools->addAction(btnRemovePoints);
+  //plotTools->addAction(btnRemovePoints); disabled until fixed (#2783)
 
   if (mantidUI->fitFunctionBrowser())
   {

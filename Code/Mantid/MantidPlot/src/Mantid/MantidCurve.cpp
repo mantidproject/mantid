@@ -179,7 +179,7 @@ void MantidCurve::draw(QPainter *p,
     const MantidQwtData* d = dynamic_cast<const MantidQwtData*>(&data());
     if (!d)
       throw std::runtime_error("Only MantidQwtData can be set to a MantidCurve");
-    int xi0;
+    int xi0 = 0;
     p->setPen(pen());
     const int dx = 3;
     const int dx2 = 2*dx;
@@ -188,7 +188,7 @@ void MantidCurve::draw(QPainter *p,
     for (int i = 0; i < d->esize(); i++)
     {
       const int xi = xMap.transform(d->ex(i));
-      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && abs(xi - xi0) > dx2))
+      if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
       {
         const double Y = y(i);
         const double E = d->e(i);

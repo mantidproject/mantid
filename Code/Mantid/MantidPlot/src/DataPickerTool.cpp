@@ -151,6 +151,7 @@ void DataPickerTool::setSelection(QwtPlotCurve *curve, int point_index)
 
 bool DataPickerTool::eventFilter(QObject *obj, QEvent *event)
 {
+  if (!d_selected_curve) return true;
 	switch(event->type()) {
 		case QEvent::MouseButtonDblClick:
 			switch(d_mode) {
