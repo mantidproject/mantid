@@ -65,6 +65,10 @@ def validate_step(f):
             # If we get a function, assume its name is an algorithm name
             algorithm = algorithm.func_name
 
+        if isinstance(algorithm, MantidFramework.IAlgorithmProxy):
+            # If we have an algorithm proxy, get the actual algorithm
+            algorithm = algorithm._getHeldObject()
+            
         if isinstance(algorithm, types.StringType):
             # If we have a string, assume it's an algorithm name
             class _AlgorithmStep(ReductionStep):
@@ -107,7 +111,40 @@ def validate_step(f):
                     proxy.execute()
             return f(reducer, _AlgorithmStep())
                     
-        if False and isinstance(algorithm, types.FunctionType):
+        elif isinstance(algorithm, MantidFramework.IAlgorithm) \
+            or type(algorithm).__name__=="IAlgorithm":
+            class _AlgorithmStep(ReductionStep):
+                def __init__(self):
+                    self.algorithm = algorithm
+                def get_algorithm(self):
+                    return self.algorithm
+                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    """
+                        Create a new instance of the requested algorithm object, 
+                        set the algorithm properties replacing the input and output
+                        workspaces.
+                        The execution will work for any combination of mandatory/optional
+                        properties. 
+                        @param reducer: Reducer object managing the reduction
+                        @param inputworkspace: input workspace name [optional]
+                        @param outputworkspace: output workspace name [optional]
+                    """
+                    if outputworkspace is None:
+                        outputworkspace = inputworkspace 
+                    propertyOrder = MantidFramework.mtd._getPropertyOrder(algorithm)
+            
+                    # Override input and output workspaces
+                    if "Workspace" in propertyOrder:
+                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "InputWorkspace" in propertyOrder:
+                        algorithm.setPropertyValue("InputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "OutputWorkspace" in propertyOrder:
+                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(outputworkspace).lstrip('? '))
+
+                    algorithm.execute()
+            return f(reducer, _AlgorithmStep())
+                    
+        elif False and isinstance(algorithm, types.FunctionType):
             # If the algorithm is a function, in which case
             # we expect it to produce an algorithm proxy
             class _AlgorithmStep(ReductionStep):
