@@ -1377,7 +1377,6 @@ class PythonAlgorithm(PyAlgorithmBase):
 
     # Wrapper around setPropertyValue
     def setProperty(self, Name, Value):
-        print type(Value)
         try:
             prop_type = self._proptypes[Name]
         except KeyError:
