@@ -1334,6 +1334,11 @@ class PythonAlgorithm(PyAlgorithmBase):
             raise TypeError('Invalid type in file extension list for property "' + Name + '"')
         self._mapPropertyToType(Name, str)
 
+    # Specialize version for algorithm property
+    def declareAlgorithmProperty(self, name, description = '', direction = Direction.Input):
+        self._declareAlgorithmProperty(name, description, direction)
+        self._mapPropertyToType(name, AlgorithmProperty)
+        
     # getProperty method  wrapper
     def getProperty(self, Name):
         """
@@ -1352,6 +1357,8 @@ class PythonAlgorithm(PyAlgorithmBase):
             return self.getProperty_bool(Name)
         elif prop_type == str:
             return self.getPropertyValue(Name)
+        elif prop_type == AlgorithmProperty:
+            return self._getAlgorithmProperty(Name)
         elif isinstance(prop_type,list):
             if prop_type[0] == list:
                 ltype = prop_type[1]
@@ -1370,6 +1377,7 @@ class PythonAlgorithm(PyAlgorithmBase):
 
     # Wrapper around setPropertyValue
     def setProperty(self, Name, Value):
+        print type(Value)
         try:
             prop_type = self._proptypes[Name]
         except KeyError:
@@ -1383,6 +1391,13 @@ class PythonAlgorithm(PyAlgorithmBase):
             self.setPropertyValue(Name, Value)
         elif value_type == bool:
             self.setPropertyValue(Name, str(int(Value)))
+        elif value_type == AlgorithmProperty:
+            if isinstance(Value, IAlgorithmProxy):
+                Value = Value._getHeldObject()
+            if type(Value).__name__=="IAlgorithm":
+                self._setAlgorithmProperty(Name, Value)
+            else:
+                raise TypeError('Attempting to set an algorithm property with value that is not an algorithm')
         elif value_type == WorkspaceProperty:
             if isinstance(Value, WorkspaceProxy):
                 Value = Value._getHeldObject()
@@ -1408,6 +1423,8 @@ class PythonAlgorithm(PyAlgorithmBase):
             return bool
         elif isinstance(value,list):
             return list
+        elif isinstance(value, IAlgorithmProxy) or type(value).__name__=="IAlgorithm":
+            return AlgorithmProperty
         elif isinstance(value, WorkspaceProxy) or isinstance(value, MatrixWorkspace) or isinstance(value, ITableWorkspace):
             return WorkspaceProperty
         else:

@@ -19,7 +19,7 @@ class DummyAlg(PythonAlgorithm):
     
     def PyInit(self):
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction = Direction.Output, Description = '')
-        self._declareAlgorithmProperty("Algo", '', Direction.Input)
+        self.declareAlgorithmProperty("Algo")
     
     def PyExec(self):
         output_ws = self.getPropertyValue("OutputWorkspace")
@@ -87,7 +87,7 @@ class PythonAlgorithmTest(unittest.TestCase):
         
     def test_python_alg_property_using_python_alg(self):
         """
-            Declare, set and get a python algorithm from a python algorithm
+            Declare, set and get an algorithm property from a python algorithm
         """
         algm_par = DummyAlg2()
         algm_par.initialize()
@@ -101,5 +101,25 @@ class PythonAlgorithmTest(unittest.TestCase):
         self.assertTrue(mtd.workspaceExists("subalgtest"))
         mtd.deleteWorkspace("subalgtest")
 
+    def test_algp_property_using_public_API(self):
+        """
+            Declare, set and get an algorithm property from a python algorithm
+            using the public API. Only works if the algorithm owning the AlgorithmProperty
+            is a PythonAlgorithm.
+        """
+        algm_par = mtd._createAlgProxy("CreateWorkspace")
+        algm_par.setPropertyValues(OutputWorkspace="test", DataX=1, DataY=1, DataE=1)
+        algm_par.initialize()
+        
+        algm = DummyAlg()
+        algm.initialize()
+        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm.setProperty("Algo", algm_par._getHeldObject())
+        algm.execute()
+        self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
+                         "CreateWorkspace.1(OutputWorkspace=test,DataX=1,DataY=1,DataE=1)")
+        self.assertTrue(mtd.workspaceExists("subalgtest"))
+        mtd.deleteWorkspace("subalgtest")
+        
 if __name__ == '__main__':
     unittest.main()
