@@ -2,8 +2,9 @@
 #include "MantidKernel/System.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidDataObjects/EventWorkspace.h"
-#include "MantidNexus/LoadEventNexus.h"
-#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+//#include "MantidNexus/LoadEventNexus.h"
+//#include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -16,7 +17,6 @@ namespace MDEvents
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
-  using namespace Mantid::NeXus;
 
 
   //----------------------------------------------------------------------------------------------
@@ -62,10 +62,10 @@ namespace MDEvents
   {
     std::string tempWsName = getPropertyValue("OutputWorkspace") + "_nxs";
 
-    IAlgorithm * childAlg;
+    Algorithm_sptr childAlg;
 
     // -------- First we load the event nexus file -------------
-    childAlg = new LoadEventNexus();
+    childAlg = AlgorithmFactory::Instance().create("LoadEventNexus", 1); // new Mantid::NeXus::LoadEventNexus();
     childAlg->initialize();
     childAlg->setPropertyValue("Filename", getPropertyValue("Filename"));
     childAlg->setPropertyValue("OutputWorkspace", tempWsName);
@@ -78,7 +78,7 @@ namespace MDEvents
 
     // --------- Now Convert -------------------------------
     //childAlg = createSubAlgorithm("MakeDiffractionMDEventWorkspace");
-    childAlg = new MakeDiffractionMDEventWorkspace();
+    childAlg = AlgorithmFactory::Instance().create("MakeDiffractionMDEventWorkspace", 1);  // new MakeDiffractionMDEventWorkspace();
     childAlg->initialize();
     childAlg->setPropertyValue("InputWorkspace", tempWsName);
     childAlg->setProperty<bool>("ClearInputWorkspace", false);
