@@ -110,8 +110,23 @@ install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" E
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  set ( CPACK_GENERATOR RPM )
+  # define which binary generators to use
+  set ( CPACK_GENERATOR "" )
+  IF( UNIX )
+    FIND_PROGRAM(DPKG_CMD dpkg)
+    IF ( DPKG_CMD )
+      set ( CPACK_GENERATOR DEB ${CPACK_GENERATOR} )
+    ENDIF( DPKG_CMD )
+    FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
+    IF( RPMBUILD_CMD )
+      set ( CPACK_GENERATOR RPM ${CPACK_GENERATOR} )
+    ENDIF( RPMBUILD_CMD)
+  ENDIF( UNIX )
+
+  # define the source generators
   set ( CPACK_SOURCE_GENERATOR TGZ )
+
+  # generic package level information
   set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
   set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
   set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
@@ -122,6 +137,7 @@ if ( ENABLE_CPACK )
   set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_REVISION} )
   set ( CPACK_PACKAGING_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
 
+  # RPM information
   set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
   set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
   # This is the rhel5 requirements string
@@ -129,5 +145,9 @@ if ( ENABLE_CPACK )
   # and this is the rhel6 one - TODO auto-determination of platform
   # set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
 
+  # DEB information
+  # TODO
+
+  # run cpack configuration
   include ( CPack )
 endif ()
