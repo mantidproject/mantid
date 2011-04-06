@@ -388,8 +388,9 @@ namespace NeXus
     PARALLEL_CHECK_INTERUPT_REGION
 
 
-    // Write out to the NXS file
-    nexusFile->writeNexusProcessedDataEventCompressed(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes);
+    // Write out to the NXS file.
+    nexusFile->writeNexusProcessedDataEventCombined(m_eventWorkspace, indices, tofs, weights, errorSquareds, pulsetimes,
+        false /*DONT compress - much faster*/);
 
     // Free mem.
     delete [] tofs;

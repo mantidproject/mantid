@@ -692,9 +692,10 @@ using namespace DataObjects;
    *
    * @param ws :: an EventWorkspace
    *  */
-  int NexusFileIO::writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
+  int NexusFileIO::writeNexusProcessedDataEventCombined( const DataObjects::EventWorkspace_const_sptr& ws,
       std::vector<int64_t> & indices,
-      double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const
+      double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes,
+      bool compress) const
   {
     NXstatus status;
 
@@ -709,7 +710,10 @@ using namespace DataObjects;
     int64_t * indices_array = VectorHelper::iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
     if (indices.size() > 0)
     {
-      status=NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array, m_nexuscompression, dims_array);
+      if (compress)
+        status=NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array, m_nexuscompression, dims_array);
+      else
+        status=NXmakedata(fileID, "indices", NX_INT64, 1, dims_array);
       status=NXopendata(fileID, "indices");
       status=NXputdata(fileID, (void*)(indices_array) );
       std::string yUnits=ws->YUnit();
@@ -723,13 +727,13 @@ using namespace DataObjects;
     // Write out each field
     dims_array[0] = indices.back(); // This is the # of events
     if (tofs)
-      NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), true);
+      NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
     if (pulsetimes)
-      NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes), true);
+      NXwritedata("pulsetime", NX_INT64, 1, dims_array, (void *)(pulsetimes), compress);
     if (weights)
-      NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights), true);
+      NXwritedata("weight", NX_FLOAT32, 1, dims_array, (void *)(weights), compress);
     if (errorSquareds)
-      NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, (void *)(errorSquareds), true);
+      NXwritedata("error_squared", NX_FLOAT32, 1, dims_array, (void *)(errorSquareds), compress);
 
 
     // Close up the overall group

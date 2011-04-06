@@ -69,8 +69,9 @@ namespace Mantid
 
       int writeNexusProcessedDataEvent( const DataObjects::EventWorkspace_const_sptr& localworkspace);
 
-      int writeNexusProcessedDataEventCompressed( const DataObjects::EventWorkspace_const_sptr& ws,
-          std::vector<int64_t> & indices, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes) const;
+      int writeNexusProcessedDataEventCombined( const DataObjects::EventWorkspace_const_sptr& ws,
+          std::vector<int64_t> & indices, double * tofs, float * weights, float * errorSquareds, int64_t * pulsetimes,
+          bool compress) const;
 
       int writeEventList( const DataObjects::EventList & el, std::string group_name) const;
 
