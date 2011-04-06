@@ -26,6 +26,13 @@ class DummyAlg(PythonAlgorithm):
         a = self.executeSubAlg(CreateWorkspace, output_ws, [0,1,2], [0,1,2], [0,0,0])
         self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
 
+class DummyAlg2(DummyAlg):
+    def name(self):
+        return "DummyAlg2"
+    def PyExec(self):
+        output_ws = self.getPropertyValue("OutputWorkspace")
+        a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
+        self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
 
 class PythonAlgorithmTest(unittest.TestCase):
     """
@@ -52,13 +59,6 @@ class PythonAlgorithmTest(unittest.TestCase):
         """
             Call signature variation for sub-algorithm execution
         """
-        class DummyAlg2(DummyAlg):
-            def name(self):
-                return "DummyAlg2"
-            def PyExec(self):
-                output_ws = self.getPropertyValue("OutputWorkspace")
-                a = self.executeSubAlg(CreateWorkspace, OutputWorkspace=output_ws, DataX=[0,1,2], DataY=[0,1,2], DataE=[0,0,0])
-                self._setWorkspaceProperty("OutputWorkspace", a._getWorkspaceProperty("OutputWorkspace"))
         algm = DummyAlg2()
         algm.initialize()
         algm.setPropertyValue("OutputWorkspace", "subalgtest2")
@@ -89,17 +89,15 @@ class PythonAlgorithmTest(unittest.TestCase):
         """
             Declare, set and get a python algorithm from a python algorithm
         """
-        algm_par = mtd._createAlgProxy("Squares")
-        algm_par.setPropertyValues(MaxRange=2, Preamble=1, OutputFile="test.txt", OutputWorkspace="subalgtest")
+        algm_par = DummyAlg2()
         algm_par.initialize()
         
         algm = DummyAlg()
         algm.initialize()
         algm.setPropertyValue("OutputWorkspace", "subalgtest")
-        algm._setAlgorithmProperty("Algo", algm_par._getHeldObject())
+        algm._setAlgorithmProperty("Algo", algm_par)
         algm.execute()
-        self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
-                         "Squares.1(MaxRange=2,Preamble=1,OutputFile=/home/mantid/workspace/mantid/Code/Mantid/bin/test.txt,OutputWorkspace=subalgtest)")
+        self.assertEqual(str(algm._getAlgorithmProperty("Algo")), "DummyAlg2.1()")
         self.assertTrue(mtd.workspaceExists("subalgtest"))
         mtd.deleteWorkspace("subalgtest")
 
