@@ -19,6 +19,7 @@ class DummyAlg(PythonAlgorithm):
     
     def PyInit(self):
         self.declareWorkspaceProperty("OutputWorkspace", "", Direction = Direction.Output, Description = '')
+        self._declareAlgorithmProperty("Algo", '', Direction.Input)
     
     def PyExec(self):
         output_ws = self.getPropertyValue("OutputWorkspace")
@@ -65,6 +66,42 @@ class PythonAlgorithmTest(unittest.TestCase):
         algm.execute()
         self.assertTrue(mtd.workspaceExists("subalgtest2"))
         mtd.deleteWorkspace("subalgtest2")
+        
+    def test_cpp_alg_property_using_python_alg(self):
+        """
+            Declare, set and get a C++ algorithm from a python algorithm
+        """
+        algm_par = mtd._createAlgProxy("CreateWorkspace")
+        algm_par.setPropertyValues(OutputWorkspace="test", DataX=1, DataY=1, DataE=1)
+        algm_par.initialize()
+        
+        algm = DummyAlg()
+        algm.initialize()
+        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm._setAlgorithmProperty("Algo", algm_par._getHeldObject())
+        algm.execute()
+        self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
+                         "CreateWorkspace.1(OutputWorkspace=test,DataX=1,DataY=1,DataE=1)")
+        self.assertTrue(mtd.workspaceExists("subalgtest"))
+        mtd.deleteWorkspace("subalgtest")
+        
+    def test_python_alg_property_using_python_alg(self):
+        """
+            Declare, set and get a python algorithm from a python algorithm
+        """
+        algm_par = mtd._createAlgProxy("Squares")
+        algm_par.setPropertyValues(MaxRange=2, Preamble=1, OutputFile="test.txt", OutputWorkspace="subalgtest")
+        algm_par.initialize()
+        
+        algm = DummyAlg()
+        algm.initialize()
+        algm.setPropertyValue("OutputWorkspace", "subalgtest")
+        algm._setAlgorithmProperty("Algo", algm_par._getHeldObject())
+        algm.execute()
+        self.assertEqual(str(algm._getAlgorithmProperty("Algo")), 
+                         "Squares.1(MaxRange=2,Preamble=1,OutputFile=/home/mantid/workspace/mantid/Code/Mantid/bin/test.txt,OutputWorkspace=subalgtest)")
+        self.assertTrue(mtd.workspaceExists("subalgtest"))
+        mtd.deleteWorkspace("subalgtest")
 
 if __name__ == '__main__':
     unittest.main()

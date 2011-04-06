@@ -5,6 +5,7 @@
 #include <MantidAPI/WorkspaceProperty.h>
 #include <MantidAPI/MatrixWorkspace.h>
 #include <MantidAPI/ITableWorkspace.h>
+#include "MantidAPI/AlgorithmProperty.h"
 
 #include <MantidAPI/FileProperty.h>
 #include <MantidKernel/NullValidator.h>
@@ -183,6 +184,18 @@ public:
     this->Algorithm::declareProperty(new API::WorkspaceProperty<API::MatrixWorkspace>(prop_name, default_wsname, direction, validator.clone()), description);
   }
 
+	/**
+	 * Declare an Algorithm property
+   * @param prop_name :: The name of the property
+   * @param description :: A string describing the property
+   * @param direction :: The direction
+	 */
+  void _declareAlgorithmProperty(const std::string & prop_name,
+             const std::string & description, const unsigned int direction)
+  {
+    this->Algorithm::declareProperty(new API::AlgorithmProperty(prop_name, new Kernel::NullValidator<boost::shared_ptr<IAlgorithm> >(), direction), description);
+  }
+
   /**
    * Declare a TableWorkspace property
    * @param prop_name :: The name of the property
@@ -243,6 +256,26 @@ public:
   void _setMatrixWorkspaceProperty(const std::string & prop_name, API::MatrixWorkspace_sptr workspace)
   {
     this->IAlgorithm::setProperty(prop_name,workspace);
+  }
+
+  /**
+   * Set an Algorithm property
+   * @param prop_name :: The name of the property
+   * @param algorithm :: A point to the algorithm
+   */
+  void _setAlgorithmProperty(const std::string & prop_name, boost::shared_ptr<IAlgorithm> algorithm)
+  {
+    this->IAlgorithm::setProperty(prop_name,algorithm);
+  }
+
+  /**
+   * Retrieve an Algorithm property
+   * @param prop_name :: The name of the property
+   * @returns A pointer to the algorithm
+   */
+  boost::shared_ptr<IAlgorithm> _getAlgorithmProperty(const std::string & prop_name)
+  {
+    return getProperty(prop_name);
   }
 
   /**
