@@ -29,6 +29,8 @@ public:
   
   void test_exec()
   {
+    ConfigService::Instance().setString("default.facility", "SNS");
+
     OneStepMDEW alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
