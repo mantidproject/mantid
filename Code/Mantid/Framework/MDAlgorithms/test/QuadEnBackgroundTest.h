@@ -22,6 +22,7 @@
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/IMDIterator.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidMDAlgorithms/QuadEnBackground.h"
@@ -37,6 +38,33 @@ using namespace Mantid::MDAlgorithms;
 
 typedef Mantid::DataObjects::TableWorkspace_sptr TWS_type;
 // Implement an IMDWorkspace for testing
+
+// 
+namespace Mantid
+{
+    namespace API
+    {
+        // trivial iterator assumes that just have 3 MDCells by default
+        class DLLExport IMDIterator1 : public IMDIterator
+        {
+        public:
+            virtual size_t getDataSize() const { return 0; }
+            virtual double getCoordinate(int i) const { return 0.0;}
+            virtual bool next() { m_pnt++; return m_pnt<m_pntMax;}
+            virtual size_t getPointer() const {return m_pnt; }
+
+            IMDIterator1() { m_pnt=0; m_pntMax=3;};
+            IMDIterator1(size_t pntMax) { m_pnt=0; m_pntMax=pntMax;};
+            ~IMDIterator1() {};
+
+        private:
+            size_t m_pnt;
+            size_t m_pntMax;
+
+        };
+
+    }
+}
 
 // Add a concrete IMDDimension class
 namespace Mantid
@@ -63,7 +91,7 @@ namespace Mantid
             virtual double getDataShift()const{return 0;}
             virtual V3D getDirection()const{throw std::runtime_error("Not Implemented");}
             virtual V3D getDirectionCryst()const{throw std::runtime_error("Not Implemented");}
-
+            
             TestQIMDDimension() {
             m_cells=0;
             };
@@ -180,6 +208,7 @@ public:
     {
         throw std::runtime_error("Not implemented");
     }
+    virtual IMDIterator* createIterator() const {return new IMDIterator1();}
 
     TestQCut()
     {
