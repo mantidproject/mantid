@@ -194,16 +194,16 @@ namespace MDEvents
       std::string names[3] = {"Qx", "Qy", "Qz"};
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], "Angstroms^-1", -100.0, +100.0, 1);
+        MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], "Angstroms^-1", -50.0, +50.0, 1);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
 
       // Build up the box controller
       BoxController_sptr newbc(new BoxController(3));
-      newbc->setSplitInto(10);
-      newbc->setSplitThreshold(1000);
-      newbc->setMaxDepth(8);
+      newbc->setSplitInto(5);
+      newbc->setSplitThreshold(1500);
+      newbc->setMaxDepth(10);
       ws->setBoxController(newbc);
       // We always want the box to be split (it will reject bad ones)
       ws->splitBox();
