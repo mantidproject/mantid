@@ -75,6 +75,7 @@ if ARCH == '32':
     comp_guid['IncludeMantidKernel'] = '{AF40472B-5822-4ff6-8E05-B4DA5224AA87}'
     comp_guid['IncludeMantidNexus'] = '{BAC18721-6DF1-4870-82FD-2FB37260AE35}'
     comp_guid['IncludeMantidPythonAPI'] = '{052A15D4-97A0-4ce5-A872-E6871485E734}'
+    comp_guid['IncludeMantidCrystal'] = '{fed5c9b1-d70e-4e2f-ae43-fc3e069c652b}'
     comp_guid['Temp'] = '{02D25B60-A114-4f2a-A211-DE88CF648C61}'
     comp_guid['Data'] = '{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}'
     comp_guid['UserAlgorithms'] = '{A82B4540-3CDB-45fa-A7B3-42F392378D3F}'
@@ -96,6 +97,7 @@ else:
     comp_guid['IncludeMantidKernel'] = '{187317c0-cc23-4a21-bf19-0e347866620c}'
     comp_guid['IncludeMantidNexus'] = '{7c60491a-36b2-402e-b989-5b8f13667cee}'
     comp_guid['IncludeMantidPythonAPI'] = '{71c4df47-5564-49ca-8c7c-5ed4d8ceb1e1}'
+    comp_guid['IncludeMantidCrystal'] = '{acb3cd52-bd96-41bf-af7e-8de0e4794b0f}'
     comp_guid['Temp'] = '{212cc3fe-95fb-40d9-a3a7-8421791ac19f}'
     comp_guid['Data'] = '{c9577b5b-75e5-4a4a-b2d5-f4905174627c}'
     comp_guid['UserAlgorithms'] = '{496555f0-f719-4db7-bd8e-5bbcd9fe837d}'
@@ -543,6 +545,7 @@ addFileV('MantidDataHandling','MDH.dll','MantidDataHandling.dll',MANTIDRELEASE +
 addFileV('MantidDataObjects','MDO.dll','MantidDataObjects.dll',MANTIDRELEASE + '/MantidDataObjects.dll',Plugins)
 addFileV('MantidCurveFitting','MCF.dll','MantidCurveFitting.dll',MANTIDRELEASE + '/MantidCurveFitting.dll',Plugins)
 addFileV('MantidICat','MIC.dll','MantidICat.dll',MANTIDRELEASE + '/MantidICat.dll',Plugins)
+addFileV('MantidCrystal','MCR.dll','MantidCrystal.dll',MANTIDRELEASE + '/MantidCrystal.dll',Plugins)
 addFileV('MantidNexus','MNex.dll','MantidNexus.dll',MANTIDRELEASE + '/MantidNexus.dll',Plugins)
 # NeXus dlls for the plugins path
 addFileV('hdf5dlldll','hdf5dll.dll','hdf5dll.dll',CODEDIR + '/Third_Party/lib/win' + ARCH + '/hdf5dll.dll',Plugins)
@@ -623,6 +626,10 @@ includeMantidPythonAPIDir = addDirectory('IncludeMantidPythonAPIDir','PAPI','Man
 IncludeMantidPythonAPI = addComponent('IncludeMantidPythonAPI',comp_guid['IncludeMantidPythonAPI'],includeMantidPythonAPIDir)
 addAllFiles(FRAMEWORKDIR + '/PythonAPI/inc/MantidPythonAPI','papi',IncludeMantidPythonAPI)
 
+includeMantidCrystalDir = addDirectory('IncludeMantidCrystalDir','PCRY','MantidCrystal',includeDir)
+IncludeMantidCrystal = addComponent('IncludeMantidCrystal',comp_guid['IncludeMantidCrystal'],includeMantidCrystalDir)
+addAllFiles(FRAMEWORKDIR + '/Crystal/inc/MantidCrystal','pcry',IncludeMantidCrystal)
+
 boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir, 'b')[0]
 pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir, 'p')[0]
 #-------------------  end of Includes ---------------------------------------
@@ -649,43 +656,6 @@ addTo(Temp,'CreateFolder',{})
 dataDir = addDirectory('DataDir','data','data',InstallDir)
 Data = addComponent('Data',comp_guid['Data'],dataDir)
 addTo(Data,'CreateFolder',{})
-
-#-------------------  Source  ------------------------------------------
-#sourceDir = addDirectory('SourceDir','source','source',InstallDir)
-
-#sourceMantidAlgorithmsDir = addDirectory('SourceMantidAlgorithmsDir','MAlgs','MantidAlgorithms',sourceDir)
-#SourceMantidAlgorithms = addComponent('SourceMantidAlgorithms','{C96FA514-351A-4e60-AC4F-EF07216BBDC3}',sourceMantidAlgorithmsDir)
-#addAllFilesExt(FRAMEWORKDIR + '/Algorithms/src','alg','cpp',SourceMantidAlgorithms)
-
-#sourceMantidAPIDir = addDirectory('SourceMantidAPIDir','MAPI','MantidAPI',sourceDir)
-#SourceMantidAPI = addComponent('SourceMantidAPI','{3186462A-E033-4682-B992-DA80BAF457F2}',sourceMantidAPIDir)
-#addAllFilesExt(FRAMEWORKDIR + '/API/src','api','cpp',SourceMantidAPI)
-
-# sourceMantidDataHandlingDir = addDirectory('SourceMantidDataHandlingDir','Mdh','MantidDataHandling',sourceDir)
-# SourceMantidDataHandling = addComponent('SourceMantidDataHandling','{3DE8C8E7-86F1-457f-8933-149AD79EA9D7}',sourceMantidDataHandlingDir)
-# addAllFilesExt(FRAMEWORKDIR + '/DataHandling/src','dh','cpp',SourceMantidDataHandling)
-
-# sourceMantidDataObjectsDir = addDirectory('SourceMantidDataObjectsDir','Mdo','MantidDataObjects',sourceDir)
-# SourceMantidDataObjects = addComponent('SourceMantidDataObjects','{0C071065-8E0C-4e9c-996E-454692803E7F}',sourceMantidDataObjectsDir)
-# addAllFilesExt(FRAMEWORKDIR + '/DataObjects/src','dh','cpp',SourceMantidDataObjects)
-
-# sourceMantidGeometryDir = addDirectory('SourceMantidGeometryDir','MGeo','MantidGeometry',sourceDir)
-# SourceMantidGeometry = addComponent('SourceMantidGeometry','{949C5B12-7D4B-4a8a-B132-718F6AEA9E69}',sourceMantidGeometryDir)
-# addAllFilesExt(FRAMEWORKDIR + '/Geometry/src','geo','cpp',SourceMantidGeometry)
-
-# sourceMantidKernelDir = addDirectory('SourceMantidKernelDir','MKer','MantidKernel',sourceDir)
-# SourceMantidKernel = addComponent('SourceMantidKernel','{B7126F68-544C-4e50-9438-E0D6F6155D82}',sourceMantidKernelDir)
-# addAllFilesExt(FRAMEWORKDIR + '/Kernel/src','ker','cpp',SourceMantidKernel)
-
-# sourceMantidNexusDir = addDirectory('SourceMantidNexusDir','MNex','MantidNexus',sourceDir)
-# SourceMantidNexus = addComponent('SourceMantidNexus','{35AABB59-CDE3-49bf-9F96-7A1AFB72FD2F}',sourceMantidNexusDir)
-# addAllFilesExt(FRAMEWORKDIR + '/Nexus/src','nex','cpp',SourceMantidNexus)
-
-# sourceMantidPythonAPIDir = addDirectory('SourceMantidPythonAPIDir','MPAPI','MantidPythonAPI',sourceDir)
-# SourceMantidPythonAPI = addComponent('SourceMantidPythonAPI','{CACED707-92D7-47b9-8ABC-378275D99082}',sourceMantidPythonAPIDir)
-# addAllFilesExt(FRAMEWORKDIR + '/PythonAPI/src','papi','cpp',SourceMantidPythonAPI)
-
-#----------------- end of Source ---------------------------------------
 
 #----------------- User Algorithms -------------------------------------
 UserAlgorithmsDir = addDirectory('UserAlgorithmsDir','UAlgs','UserAlgorithms',InstallDir)
@@ -788,6 +758,7 @@ addCRefs(includeMantidGeometryDirList,Includes)
 addCRef('IncludeMantidKernel',Includes)
 addCRef('IncludeMantidNexus',Includes)
 addCRef('IncludeMantidPythonAPI',Includes)
+addCRef('IncludeMantidCrystal',Includes)
 addCRefs(boostList,Includes)
 addCRefs(pocoList,Includes)
 
