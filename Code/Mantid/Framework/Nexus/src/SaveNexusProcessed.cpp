@@ -91,6 +91,9 @@ namespace NeXus
    */
   void SaveNexusProcessed::exec()
   {
+    //TODO: Remove?
+    NXMEnableErrorReporting();
+
     Progress prog_init(this, 0.0, 0.3, 5);
 
     // Retrieve the filename from the properties

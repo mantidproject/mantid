@@ -21,6 +21,7 @@
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/VectorHelper.h"
 
 #include <boost/tokenizer.hpp>
 #include <boost/shared_ptr.hpp>
@@ -38,12 +39,15 @@ using namespace DataObjects;
 
   /// Empty default constructor
   NexusFileIO::NexusFileIO() :
-          m_nexusformat(NXACC_CREATE5), m_nexuscompression(NX_COMP_LZW)
+          m_nexusformat(NXACC_CREATE5),
+          m_nexuscompression(NX_COMP_LZW)
+          //m_nexuscompression(NX_COMP_SZIP) // Experimental SZIP compression (not in the real Nexus)
+
   {
   }
 
   //
-  // Write out the data in a workspace in Nexus "Processed" format.
+  // Write out the data in a worksvn space in Nexus "Processed" format.
   // This *Proposed* standard comprises the fields:
   // <NXentry name="{Name of entry}">
   //   <title>
@@ -683,30 +687,8 @@ using namespace DataObjects;
 
 
 
-
-
-
   //-------------------------------------------------------------------------------------
-  /** Generic method to convert an iterator to an array of type T.
-   * Data type is converted at the same type.
-   * @param begin :: iterator at the beginning of the data
-   * @param end :: iterator at the end of the data
-   * @return :: a pointer to an array of type T.
-   */
-  template< typename T, typename _ForwardIterator >
-  T * iteratorToArray(_ForwardIterator begin, _ForwardIterator end, int * dims_array)
-  {
-    // Create the output array
-    size_t num = std::distance(begin, end);
-    dims_array[0] = num;
-    T * out = new T[num];
-    std::copy(begin, end, out);
-    return out;
-  }
-
-
-  //-------------------------------------------------------------------------------------
-  /** Write out a combined chunk of event data, and compress it.
+  /** Write out a combined chunk of event data
    *
    * @param ws :: an EventWorkspace
    *  */
@@ -724,7 +706,7 @@ using namespace DataObjects;
 
     // The array of indices for each event list #
     int dims_array[1];
-    int64_t * indices_array = iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
+    int64_t * indices_array = VectorHelper::iteratorToArray<int64_t>(indices.begin(), indices.end(), dims_array);
     if (indices.size() > 0)
     {
       status=NXcompmakedata(fileID, "indices", NX_INT64, 1, dims_array, m_nexuscompression, dims_array);
@@ -872,7 +854,7 @@ using namespace DataObjects;
 
     // Copy the detector IDs to an array.
     const std::set<int>& dets = el.getDetectorIDs();
-    int64_t * detectorIDs = iteratorToArray<int64_t>(dets.begin(), dets.end(), dims_array);
+    int64_t * detectorIDs = VectorHelper::iteratorToArray<int64_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
     if (dets.size() > 0)
