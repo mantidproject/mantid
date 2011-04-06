@@ -145,13 +145,15 @@ if ( ENABLE_CPACK )
   # RPM information
   set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
   set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
-  # This is the rhel5 requirements string
-  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,poco,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
-  # and this is the rhel6 one - TODO auto-determination of platform
-  # set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+  # general rhel requirements string
+  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+  # additional rhel5 requirements
+  set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco" )
+  # additional rhel6 requirements - TODO auto-determination of platform
+  #set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
 
-  # DEB information
-  # TODO
+  # DEB information - TODO get this right
+  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
 
   # run cpack configuration
   include ( CPack )
