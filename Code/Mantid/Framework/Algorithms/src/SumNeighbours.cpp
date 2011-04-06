@@ -186,13 +186,17 @@ void SumNeighbours::exec()
       if (SingleNeighbourhood)
       {
         x0 = getProperty("Xpixel");
-        xend = x0 + SumX;
         if(x0 < 0)x0 = 0;
-        if(xend>det->xpixels())xend = det->xpixels();
+        if(x0 >= det->xpixels())x0 = det->xpixels()-1;
+        xend = x0 + SumX;
+        if(xend >= det->xpixels())SumX = det->xpixels()-x0;
+        xend = x0 + SumX;
         y0 = getProperty("Ypixel");
-        yend = y0 + SumY;
         if(y0 < 0)y0 = 0;
-        if(yend>det->ypixels())yend = det->ypixels();
+        if(y0 >= det->ypixels())y0 = det->ypixels()-1;
+        yend = y0 + SumY;
+        if(yend >= det->ypixels())SumY = det->ypixels()-y0;
+        yend = y0 + SumY;
       }
       int x, y;
       det_name = det->getName();
