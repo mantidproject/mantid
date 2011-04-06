@@ -909,7 +909,7 @@ class Mask(ReductionStep):
         return '<infinite-plane id="' + str(id) + '">' + \
             '<point-in-plane x="' + str(plane_pt[0]) + '" y="' + str(plane_pt[1]) + '" z="' + str(plane_pt[2]) + '" />' + \
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
-            '</infinite-plane><algebra val="'+addition+str(id)+'"/>\n'
+            '</infinite-plane>\n'
 
     def _infinite_cylinder(self, centre, radius, axis, complement=False, id='shape'):
         """
@@ -928,8 +928,7 @@ class Mask(ReductionStep):
         return '<infinite-cylinder id="' + str(id) + '">' + \
             '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
             '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
-            '<radius val="' + str(radius) + '" />' + \
-            '</infinite-cylinder><algebra val="'+addition+str(id)+'"/>\n'
+            '<radius val="' + str(radius) + '" /></infinite-cylinder>\n'
 
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of a cylinder on the input workspace.'''
