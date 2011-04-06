@@ -43,6 +43,8 @@ public:
 
 void testExecOnLoadraw()
 {
+  ConfigService::Instance().setString("default.facility", "ISIS");
+
     // use SaveNexusProcessed to build a test file to load
     // for this use LoadRaw
     std::string inputFile = "CSP78173.raw";
@@ -83,6 +85,8 @@ void testExecOnLoadraw()
 
   void testExecRaw()
   {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     // test LoadNexusProcessed reading the data from SNP on Loadraw CSP78173
 
     if ( !algToBeTested.isInitialized() ) algToBeTested.initialize();

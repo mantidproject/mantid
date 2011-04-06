@@ -57,6 +57,8 @@ public:
 
   void testExecWithoutEiThrowsInvalidArgument()
   {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     Workspace2D_sptr dummyWS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(2, 1);
     dummyWS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("DeltaE");
     const std::string inputWS = "testInput";
@@ -77,6 +79,8 @@ public:
 
   void testFromRaw()
   {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     // a smallish raw file that contains the detailed detector information stored by the excitations group 
     std::string inName("fromRaw_DetectorEfficiencyCorTest");
     std::string outName("fromAlg_DetectorEfficiencyCorTest");
@@ -116,6 +120,8 @@ public:
 
   void testDataWithGroupedDetectors()
   {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     const int nspecs(2);
     const int nbins(4);
     MatrixWorkspace_sptr space = WorkspaceFactory::Instance().create("Workspace2D", nspecs, nbins + 1, nbins);

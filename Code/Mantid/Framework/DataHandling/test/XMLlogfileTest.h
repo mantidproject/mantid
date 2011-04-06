@@ -28,6 +28,8 @@ public:
   // checks that this is done ok
   void testParameterMap()
   {
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
     LoadRaw2 loader;
     loader.initialize();
     loader.setPropertyValue("Filename", "CSP79590.raw");
