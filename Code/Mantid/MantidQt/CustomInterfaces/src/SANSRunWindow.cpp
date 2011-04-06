@@ -737,7 +737,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc"));
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.is_interpolating_norm").trimmed() == "True");
+    "print i.ReductionSingleton().instrument.is_interpolating_norm()").trimmed() == "True");
   m_uiForm.trans_interp->setChecked(runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.use_interpol_trans_calc"
     ).trimmed() == "True");
