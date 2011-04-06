@@ -72,12 +72,12 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
-      Alpha0 = 1.4283; //1.2408; //4.69919;
-      Alpha1 = 2.6817; //4.84289; //1.95139;
-      Beta0 = -245.6; //-261.873; //189.391;
-      Kappa = 55.5458; //78.1604; //167.997;
-      SigmaSquared = 0.286714; //2.54745; //0.192605;
-      Gamma = 25.9127; //1.70148; //4.4265;
+      Alpha0 = -7.3462;
+      Alpha1 = 7.38558;
+      Beta0 = 0.139871;
+      Kappa = -149018.;
+      SigmaSquared = 310.759;
+      Gamma = 413.903;
   
       // create TOF axis from Params
       const std::vector<double> rb_params = getProperty("Params");
@@ -152,7 +152,7 @@ namespace Mantid
         }
         catch (std::runtime_error&)
         {
-          g_log.error("Unable to successfully run Fit sub-algorithm");
+          g_log.error("Unable to successfully run SumNeighbours sub-algorithm");
           throw;
         }
         outputW = sum_alg->getProperty("OutputWorkspace");
@@ -212,16 +212,14 @@ namespace Mantid
       MantidVec & X = outputW->dataX(s);
       MantidVec & Y = outputW->dataY(s);
 
-      double bkg0 = Y[TOFmin];
-      if (Y[TOFmax] < bkg0) bkg0 = Y[TOFmax];
+      double bktime = X[TOFmin] + X[TOFmax];
+      double bkg0 = Y[TOFmin] + Y[TOFmax];
+      double pktime = 0.0;
+      for (int i = TOFmin; i < TOFmax; i++) pktime+= X[i];
+      double ratio = pktime/bktime;
 
-      // Now subtract the background from the data
-      for (int j = 0; j < outputW->blocksize(); ++j)
-      {
-         Y[j] -=  bkg0;
-      }
       const double peakLoc = X[TOFPeak];
-      const double peakHeight =  Y[TOFPeak]*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
+      const double peakHeight =  Y[TOFPeak]; //*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
       // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
       if ( boost::math::isnan(peakHeight) ) return;
 
@@ -241,14 +239,10 @@ namespace Mantid
       fit_alg->setProperty("MaxIterations", 5000);
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
-      fun_str << "name = IkedaCarpenterPV, I = "<<peakHeight<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
-              <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<peakLoc;
+      fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = "<<SigmaSquared<<";name=Lorentzian, Height = "
+              <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
-
-      if (Alpha0== 1.4283)tie_str << "Alpha0 = "<<Alpha0;
-      else tie_str << "Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "<<Beta0<<", Kappa = "<<Kappa;
-      fit_alg->setProperty("Ties", tie_str.str());
 
       try
       {
@@ -270,90 +264,46 @@ namespace Mantid
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
       IKI = params[0];
-      Alpha0 = params[1];
-      Alpha1 = params[2];
-      Beta0 = params[3];
-      Kappa = params[4];
-      SigmaSquared = params[5];
-      Gamma = params[6];
-      X0 = params[7];
+      X0 = params[1];
+      if (!boost::math::isnan(params[2])) SigmaSquared = params[2];
+      Alpha0 = params[3];
+      Alpha1 = params[4];
+      Gamma = params[5];
       std::string funct = fit_alg->getPropertyValue("Function");
+      std::cout <<funct<<"\n";
 
-      if(Alpha0== 1.4283)
-      {
-        IAlgorithm_sptr fit2_alg;
-        try
-        {
-          fit2_alg = createSubAlgorithm("Fit", -1, -1, false);
-        } catch (Exception::NotFoundError&)
-        {
-          g_log.error("Can't locate Fit algorithm");
-          throw ;
-        }
-        fit2_alg->setProperty("InputWorkspace", outputW);
-        fit2_alg->setProperty("WorkspaceIndex", s);
-        fit2_alg->setProperty("StartX", X[TOFmin]);
-        fit2_alg->setProperty("EndX", X[TOFmax]);
-        fit2_alg->setProperty("MaxIterations", 5000);
-        fit2_alg->setProperty("Output", "fit");
-        std::ostringstream fun_str;
-        fun_str << "name = IkedaCarpenterPV, I = "<<IKI<<", Alpha0 = "<<Alpha0<<", Alpha1 = "<<Alpha1<<", Beta0 = "
-                <<Beta0<<", Kappa = "<<Kappa<<", SigmaSquared = "<<SigmaSquared<<", Gamma = "<<Gamma<<", X0 = "<<X0;
-        fit2_alg->setProperty("Function", fun_str.str());
-        std::ostringstream tie_str;
-  
-        tie_str << "Alpha1 = "<<Alpha1;
-        fit2_alg->setProperty("Ties", tie_str.str());
-  
-        try
-        {
-          fit2_alg->execute();
-        }
-        catch (std::runtime_error&)
-        {
-          g_log.error("Unable to successfully run Fit sub-algorithm");
-          throw;
-        }
-  
-        if ( ! fit2_alg->isExecuted() )
-        {
-          g_log.error("Unable to successfully run Fit sub-algorithm");
-          throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
-        }
-        ws = fit2_alg->getProperty("OutputWorkspace");
-  
-        params = fit2_alg->getProperty("Parameters");
-        IKI = params[0];
-        Alpha0 = params[1];
-        Alpha1 = params[2];
-        Beta0 = params[3];
-        Kappa = params[4];
-        SigmaSquared = params[5];
-        Gamma = params[6];
-        X0 = params[7];
-        funct = fit2_alg->getPropertyValue("Function");
-      }
       setProperty("OutputWorkspace", ws);
 
-      IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
-      IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
+      std::ostringstream fun_str1;
+      fun_str1 << "name = Gaussian, Height = "<<IKI<<", PeakCentre = "<<X0<<", Sigma = "<<SigmaSquared; 
+      IFitFunction *out1 = FunctionFactory::Instance().createInitialized(fun_str1.str());
+      IPeakFunction *pk1 = dynamic_cast<IPeakFunction *>(out1);
+      std::ostringstream fun_str2;
+      fun_str2 <<"name=Lorentzian, Height = "<<Alpha0<<", PeakCentre = "<<Alpha0<<", HWHM = "<<Gamma;
+      IFitFunction *out2 = FunctionFactory::Instance().createInitialized(fun_str1.str());
+      IPeakFunction *pk2 = dynamic_cast<IPeakFunction *>(out2);
       const int n=1000;
       double *x = new double[n];
-      double *y = new double[n];
+      double *y1 = new double[n];
+      double *y2 = new double[n];
       double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
       for (int i=0; i < n; i++) 
       {
         x[i] = X[TOFmin]+i*dx;
       }
-      pk->setMatrixWorkspace(outputW, 0, -1, -1);
-      pk->function(y,x,n);
+      pk1->setMatrixWorkspace(outputW, 0, -1, -1);
+      pk1->function(y1,x,n);
+      pk2->setMatrixWorkspace(outputW, 0, -1, -1);
+      pk2->function(y2,x,n);
 
       I = 0.0;
-      for (int i = 0; i < n; i++) I+= y[i];
+      for (int i = 0; i < n; i++) I+= y1[i]+y2[i];
       I*= double(DataValues.size())/double(n);
-      sigI = sqrt(I+DataValues.size()*bkg0+DataValues.size()*DataValues.size()*bkg0);
+      sigI = sqrt(I+ratio*ratio*bkg0);
+      I-= ratio*bkg0;
       delete [] x;
-      delete [] y;
+      delete [] y1;
+      delete [] y2;
       return;
     }
 
