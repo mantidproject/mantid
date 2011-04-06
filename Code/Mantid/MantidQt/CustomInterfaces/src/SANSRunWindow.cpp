@@ -2624,7 +2624,7 @@ void SANSRunWindow::handleShowMaskButtonClick()
 {
   QString analysis_script;
   addUserMaskStrings(analysis_script,"i.Mask",DefaultMask);
-  analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";//analysis_script += "\ni.DisplayMask()";
+  analysis_script += "\ni.DisplayMask()";//analysis_script += "\ni.ReductionSingleton().ViewCurrentMask()";
 
   m_uiForm.showMaskBtn->setEnabled(false);
   m_uiForm.showMaskBtn->setText("Working...");

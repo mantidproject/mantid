@@ -258,6 +258,7 @@ class ISISInstrument(instrument.Instrument):
         self._use_interpol_norm = False
         self.use_interpol_trans_calc = False
 
+        # the sample will be moved this distance a long the beam axis
         self.SAMPLE_Z_CORR = 0
         
         # Detector position information for SANS2D

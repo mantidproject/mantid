@@ -95,6 +95,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
 
     # Now loop over run information and process
     for run in runinfo:
+        raw_workspaces = []
         try:
             # Sample run
             run_file = run['sample_sans']
@@ -106,6 +107,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if (not sample_ws) or (len(sample_ws) == 0):
                 issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
                 continue
+            raw_workspaces.append(sample_ws)
             
             #Sample trans
             run_file = run['sample_trans']
@@ -117,6 +119,8 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if len(run_file2) > 0 and len(ws2) == 0: 
                 issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
                 continue
+            raw_workspaces.append(ws1)
+            raw_workspaces.append(ws2)
             
             # Sans Can 
             run_file = run['can_sans']
@@ -124,6 +128,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if run_file != '' and len(can_ws) == 0:
                 issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
                 continue
+            raw_workspaces.append(can_ws)
     
             #Can trans
             run_file = run['can_trans']
@@ -136,7 +141,8 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             if len(run_file2) > 0 and len(tran_can_2) == 0: 
                 issueWarning('Cannot load trans can direct run "' + run_file2 + '", skipping reduction')
                 continue
-    
+            raw_workspaces.append(tran_can_1)
+            raw_workspaces.append(tran_can_2)
     
             if centreit == 1:
                 if verbose == 1:
@@ -150,7 +156,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
             issueWarning('Cannot load file :'+str(reason))
             raise
         finally:
-            delete_workspaces([sample_ws, can_ws, ws1, ws2, tran_can_1, tran_can_2])
+            delete_workspaces(raw_workspaces)
             
 
         file = run['output_as']
@@ -177,10 +183,19 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
         ReductionSingleton().replace(copy.deepcopy(settings))
 
 def delete_workspaces(workspaces):
+    """
+        Delete the list of workspaces if possible but fail siliently if there is
+        a problem
+        @param workspaces: the list to delete
+    """
+    if type(workspaces) != type(list()):
+        if type(workspaces) != type(tuple()):
+            workspaces = [workspaces]
+
     for wksp in workspaces:
         if wksp and mtd.workspaceExists(wksp):
             try:
                 DeleteWorkspace(wksp)
             except:
-                #if the workspace really won't delete leave it
+                #we're only deleting to save memory, if the workspace really won't delete leave it
                 pass
