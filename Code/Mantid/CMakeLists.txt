@@ -110,41 +110,23 @@ install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" E
 # Keep this in a defaulted-to-off option
 set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
-  # define which binary generators to use
-  set ( CPACK_GENERATOR "" )
-  IF( UNIX )
-    FIND_PROGRAM(DPKG_CMD dpkg)
-    IF ( DPKG_CMD )
-      set ( CPACK_GENERATOR "DEB" )
-    ENDIF( DPKG_CMD )
-    FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
-    IF( RPMBUILD_CMD )
-      IF( CPACK_GENERATOR )
-        set ( CPACK_GENERATOR "DEB;RPM" )
-      ELSE( CPACK_GENERATOR )
-        set ( CPACK_GENERATOR "RPM" )
-      ENDIF( CPACK_GENERATOR )
-    ENDIF( RPMBUILD_CMD)
-  ENDIF( UNIX )
-  set ( CPACK_GENERATOR "DEB;RPM" )
-
-  # define the source generators
-  set ( CPACK_SOURCE_GENERATOR TGZ )
-
   # generic package level information
   set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
   set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
   set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
   set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
+  set ( CPACK_PACKAGE_NAME mantid )
   set ( CPACK_PACKAGE_VERSION 1.1.${Framework_WC_REVISION} )
   set ( CPACK_PACKAGE_VERSION_MAJOR 1 )
   set ( CPACK_PACKAGE_VERSION_MINOR 1 )
   set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_REVISION} )
   set ( CPACK_PACKAGING_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
 
-  # RPM information
-  set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
+  # RPM information - only used if generating a rpm
+  #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
   set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
+  set ( CPACK_RPM_PACKAGE_RELEASE 1 )
+  set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
   # general rhel requirements string
   set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
   # additional rhel5 requirements
@@ -152,8 +134,47 @@ if ( ENABLE_CPACK )
   # additional rhel6 requirements - TODO auto-determination of platform
   #set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
 
-  # DEB information - TODO get this right
+  # DEB information - only used if generating a deb
+  # TODO get this right <----------------------
+  set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
   set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
+
+  IF ( UNIX )
+    # define the source generators
+    set ( CPACK_SOURCE_GENERATOR TGZ )
+
+    # define which binary generators to use
+    FIND_PROGRAM(DPKG_CMD dpkg)
+    IF ( DPKG_CMD )
+      set ( CPACK_GENERATOR "DEB" )
+      execute_process( COMMAND ${DPKG_CMD} --print-architecture
+                       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+                       OUTPUT_STRIP_TRAILING_WHITESPACE )
+      # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
+      set( CPACK_PACKAGE_FILE_NAME
+           "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
+    ENDIF( DPKG_CMD ) #-${PROJECT_VERSION_REVISION}
+
+    FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
+    IF ( RPMBUILD_CMD )
+      set ( CPACK_GENERATOR "RPM" )
+      FIND_PROGRAM ( UNAME_CMD uname )
+      IF (UNAME_CMD)
+        execute_process( COMMAND ${UNAME_CMD} -m
+                         OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
+                         OUTPUT_STRIP_TRAILING_WHITESPACE )
+      ELSE (UNAME_CMD)
+        set (CPACK_RPM_PACKAGE_ARCHITECTURE "unknown")
+      ENDIF (UNAME_CMD)
+      # according to rpm.org: name-version-release.architecture.rpm
+      set ( CPACK_PACKAGE_FILE_NAME
+            "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
+       
+    ENDIF ( RPMBUILD_CMD)
+  ENDIF ( UNIX )
+
+  # let people know what is coming out the other end
+  message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
   # run cpack configuration
   include ( CPack )
