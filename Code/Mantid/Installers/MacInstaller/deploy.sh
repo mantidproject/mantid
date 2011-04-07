@@ -31,15 +31,16 @@ fi
 
 # Build directory can now be anywhere - must be supplied as argument
 BUILDPATH=$1
+echo "Build path: $BUILDPATH"
 THIRDPARTY=../../../Third_Party/lib/mac64
 PYTHONAPI=../../Framework/PythonAPI
 
 # First copy in the MantidPlot executable bundle
 cp -R $BUILDPATH/MantidPlot MantidPlot.app/Contents/MacOS/
-
+echo "Copying colormaps"
 # Copy in the colormaps. Use rsync to exclude .svn directories.
 rsync -aC ../colormaps MantidPlot.app/Contents/Resources/
-
+echo "Copying IDF files"
 # Copy in the instrument definition files
 cp ../../instrument/*.xml MantidPlot.app/instrument/
 
@@ -49,12 +50,14 @@ rsync -aC ../../scripts/* MantidPlot.app/scripts
 rm MantidPlot.app/scripts/CMakeLists.txt
 rm -R MantidPlot.app/scripts/test
 
+echo "Deploy qt"
 # Now run the Qt macdeployqt tool to copy the Qt libraries and set the 
 # executable to point to them
 macdeployqt MantidPlot.app 
 
 # Now the Mantid shared libraries
 # First the core Mantid libraries
+echo "Copying core libraries"
 cp $BUILDPATH/libMantidKernel.dylib MantidPlot.app/Contents/MacOS/
 cp $BUILDPATH/libMantidGeometry.dylib MantidPlot.app/Contents/MacOS/
 cp $BUILDPATH/libMantidAPI.dylib MantidPlot.app/Contents/MacOS/
@@ -69,6 +72,7 @@ install_name_tool -change libQtPropertyBrowser.dylib @loader_path/../Frameworks/
 install_name_tool -change libQtPropertyBrowser.dylib @loader_path/../Frameworks/libQtPropertyBrowser.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.dylib
 install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidQtAPI.dylib
 install_name_tool -change @loader_path/./libqwt.5.dylib @loader_path/../Frameworks/libqwt.5.dylib MantidPlot.app/Contents/MacOS/libMantidWidgets.dylib
+echo "Done library path changes"
 
 # Now lots of dependencies
 # ...third party directory. Specific required versions only.
@@ -79,7 +83,7 @@ rm MantidPlot.app/Contents/MacOS/libqwt.5.*
 rm MantidPlot.app/Contents/MacOS/libqwtplot3d.0.*.dylib
 rm MantidPlot.app/Contents/MacOS/libNeXus.0.dylib
 # The NeXus library
-cp /usr/local/lib/libNeXus.0.dylib MantidPlot.app/Contents/Frameworks/
+cp $THIRDPARTY/libNeXus.0.dylib MantidPlot.app/Contents/Frameworks/
 # ...other stuff needed for qtiplot
 cp $THIRDPARTY/libqwt.5.dylib MantidPlot.app/Contents/Frameworks/
 cp /Library/Frameworks/libqscintilla2.5.dylib MantidPlot.app/Contents/Frameworks/

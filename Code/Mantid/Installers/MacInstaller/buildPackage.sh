@@ -18,7 +18,7 @@ echo Modifying properties file...
 python adjustPropertiesFile.py
 echo Done.
 echo Building package...
-/Developer/usr/bin/packagemaker --doc Mantid.pmdoc --scripts installer_hooks -i org.mantidproject.mantid.mantidplot.pkg
+/Developer/usr/bin/packagemaker -v --doc Mantid.pmdoc --scripts installer_hooks -i org.mantidproject.mantid.mantidplot.pkg
 return_code=$?
 if [ $return_code -ne 0 ]; then
     exit $return_code
