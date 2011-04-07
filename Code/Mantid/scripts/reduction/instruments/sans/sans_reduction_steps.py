@@ -911,20 +911,15 @@ class Mask(ReductionStep):
             '<normal-to-plane x="' + str(normal_pt[0]) + '" y="' + str(normal_pt[1]) + '" z="' + str(normal_pt[2]) + '" />'+ \
             '</infinite-plane>\n'
 
-    def _infinite_cylinder(self, centre, radius, axis, complement=False, id='shape'):
+    def _infinite_cylinder(self, centre, radius, axis, id='shape'):
         """
             Generates xml code for an infintely long cylinder
             @param centre: a tupple for a point on the axis
             @param radius: cylinder radius
             @param axis: cylinder orientation
-            @param complement: if True mask all outside the cylinder, default false
             @param id: a string to refer to the shape by
             @return the xml string
         """
-        if complement:
-            addition = '#'
-        else:
-            addition = ''
         return '<infinite-cylinder id="' + str(id) + '">' + \
             '<centre x="' + str(centre[0]) + '" y="' + str(centre[1]) + '" z="' + str(centre[2]) + '" />' + \
             '<axis x="' + str(axis[0]) + '" y="' + str(axis[1]) + '" z="' + str(axis[2]) + '" />' + \
@@ -933,15 +928,13 @@ class Mask(ReductionStep):
     def add_cylinder(self, radius, xcentre, ycentre, ID='shape'):
         '''Mask the inside of a cylinder on the input workspace.'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            complement=False, id=ID))
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="' + str(ID) + '"/>')
             
 
     def add_outside_cylinder(self, radius, xcentre = 0.0, ycentre = 0.0, ID='shape'):
         '''Mask out the outside of a cylinder or specified radius'''
         self.add_xml_shape(
-            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1],
-            complement=True, id=ID))
+            self._infinite_cylinder([xcentre, ycentre, 0.0], radius, [0,0,1], id=ID)+'<algebra val="#' + str(ID) + '"/>')
 
     def add_pixel_rectangle(self, x_min, x_max, y_min, y_max):
         """

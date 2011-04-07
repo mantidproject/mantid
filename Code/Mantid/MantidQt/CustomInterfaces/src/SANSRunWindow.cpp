@@ -711,6 +711,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
     m_uiForm.q_rebin->setText(text.trimmed());
     m_uiForm.q_dq_opt->setCurrentIndex(2);
   }
+
   //Qxy
   m_uiForm.qy_max->setText(runReduceScriptFunction(
       "print i.ReductionSingleton().QXY2"));
