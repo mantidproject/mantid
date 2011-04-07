@@ -6,6 +6,7 @@
 //-----------------------------------
 #include "MantidAPI/MatrixWorkspace.h"  // For MantidVec typedef
 #include <boost/python/object.hpp> // For PyObject
+#include <MantidGeometry/Math/Matrix.h>// For Matrix
 
 namespace Mantid
 {
@@ -13,6 +14,7 @@ namespace Mantid
   {
     /** 
     Wrappings for a MantidVec. 
+    Added wrapping for Matrix.
 
     If numpy is available, the C-array underlying a MantidVec is wrapped in a read-only numpy.ndarray object.
     This provides a read-only view of the data while not having the overhead of copying it to Python. If numpy
@@ -40,6 +42,7 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
+
     struct MantidVecHelper
     {
       /// Intialize external module dependencies
@@ -54,6 +57,10 @@ namespace Mantid
       static bool g_useNumPy;
       /// Flag if the init routine has been called already
       static bool g_isInitialized;
+      /// Choose an appropriate wrapping for a Matrix
+      static PyObject * createPythonWrapper(const Geometry::MantidMat & values, bool readonly);
+      /// Create a numpy array using the already allocated data for Matrix
+      static PyObject * createNumPyArray(const Geometry::MantidMat & values, bool readonly);
     };
   }
 }
