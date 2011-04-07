@@ -46,6 +46,11 @@ namespace MDEvents
     addDimension(dimY);
     addDimension(dimZ);
     addDimension(dimT);
+    // Compute the volume of each cell.
+    double volume = 1.0;
+    for (size_t i=0; i < m_dimensions.size(); ++i)
+      volume *= m_dimensions[i]->getBinWidth();
+    m_inverseVolume = 1.0 / volume;
   }
 
 

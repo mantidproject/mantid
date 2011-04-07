@@ -81,11 +81,6 @@ namespace MDEvents
 
   private:
 
-    /** Array of MDDimensionExtents giving the extents and
-     * in each dimension.
-     */
-    MDDimensionExtents extents[nd];
-
     /// Each dimension is split into this many equally-sized boxes
     size_t split[nd];
 

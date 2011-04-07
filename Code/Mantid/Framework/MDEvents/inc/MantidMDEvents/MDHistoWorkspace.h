@@ -137,11 +137,42 @@ namespace MDEvents
       return m_errors[index1 + indexMultiplier[0]*index2 + indexMultiplier[1]*index3 + indexMultiplier[2]*index4];
     }
 
+
+    /// Get the signal at the specified index, normalized by cell volume
+    virtual double getSignalNormalizedAt(size_t index) const
+    {
+      return m_signals[index] * m_inverseVolume;
+    }
+
+    /// Get the error of the signal at the specified index, normalized by cell volume
+    virtual double getErrorNormalizedAt(size_t index) const
+    {
+      return m_errors[index] * m_inverseVolume;
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      return getSignalAt(index1,index2,index3,index4) * m_inverseVolume;
+    }
+
+    /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+    virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      return getErrorAt(index1,index2,index3,index4) * m_inverseVolume;
+    }
+
+
     /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.
     virtual std::vector<double> getSignalDataVector() const;
     virtual std::vector<double> getErrorDataVector() const;
 
+
+
+
+    //======================================================================================
     //================= METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
+    //======================================================================================
 
     /// Get the point at the specified index.
     const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const
@@ -190,6 +221,9 @@ namespace MDEvents
       return "";
     }
 
+    //======================================================================================
+    //================= END METHODS THAT WON'T GET IMPLEMENTED PROBABLY =====================
+    //======================================================================================
 
 
 
@@ -212,6 +246,9 @@ namespace MDEvents
 
     /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
     size_t indexMultiplier[3];
+
+    /// Inverse of the volume of EACH cell
+    double m_inverseVolume;
 
     // ========================== METHODS ===========================================
     void addDimension(Mantid::Geometry::MDHistoDimension_sptr dim);

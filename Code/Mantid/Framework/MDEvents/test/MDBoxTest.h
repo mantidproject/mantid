@@ -36,6 +36,7 @@ public:
     TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
   }
 
+  /** Setting and getting the extents */
   void test_setExtents()
   {
     MDBox<MDEvent<2>,2> b;
@@ -50,7 +51,26 @@ public:
     TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
   }
 
+  /** Calculating volume and normalizing signal by it. */
+  void test_volume()
+  {
+    MDBox<MDEvent<2>,2> b;
+    b.setExtents(0, -10.0, 10.0);
+    b.setExtents(1, -4.0, 6.0);
+    b.calcVolume();
+    TS_ASSERT_DELTA( b.getVolume(), 200.0, 1e-5);
 
+    MDEvent<2> ev(100.0, 300.0);
+    b.addEvent(ev);
+
+    TS_ASSERT_DELTA( b.getSignal(), 100.0, 1e-5);
+    TS_ASSERT_DELTA( b.getSignalNormalized(), 0.5, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 300.0, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquaredNormalized(), 1.5, 1e-5);
+  }
+
+
+  /** Adding events tracks the total signal */
   void test_addEvent()
   {
     MDBox<MDEvent<2>,2> b;

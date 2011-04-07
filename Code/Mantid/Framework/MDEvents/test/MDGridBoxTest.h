@@ -53,6 +53,7 @@ protected:
     // Set the size
     MDBox<MDEvent<1>,1> * out = new MDBox<MDEvent<1>,1>(splitter);
     out->setExtents(0, 0.0, 10.0);
+    out->calcVolume();
     return out;
   }
 
@@ -199,6 +200,7 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 0);
     TS_ASSERT_DELTA( b->getExtents(0).min, 0.0,  1e-5);
     TS_ASSERT_DELTA( b->getExtents(0).max, 10.0, 1e-5);
+    TS_ASSERT_DELTA( b->getVolume(), 10.0, 1e-5);
     delete b;
   }
 
@@ -210,6 +212,7 @@ public:
     // Give it 10 events
     b->addEvents( makeMDEvents1(10) );
     TS_ASSERT_EQUALS( b->getNPoints(), 10 );
+    TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
 
     // Build the grid box out of it
     MDGridBox<MDEvent<1>,1> * g = new MDGridBox<MDEvent<1>,1>(b);
@@ -221,6 +224,8 @@ public:
     TS_ASSERT_EQUALS(g->getDepth(), 0);
     // It was split into 10 MDBoxes.
     TS_ASSERT_EQUALS( g->getNumMDBoxes(), 10);
+    // The volume was set correctly
+    TS_ASSERT_DELTA(g->getVolume(), 10.0, 1e-5);
 
     // It has a BoxController
     TS_ASSERT( g->getBoxController() );
@@ -239,6 +244,8 @@ public:
       TS_ASSERT_DELTA(ev.getCenter(0), i*1.0 + 0.5, 1e-5);
       // Its depth level should be 1 (deeper than parent)
       TS_ASSERT_EQUALS(box->getDepth(), 1);
+      // The volume was set correctly
+      TS_ASSERT_DELTA(box->getVolume(), 1.0, 1e-5);
     }
 
     // Now we add 10 more events
@@ -313,6 +320,7 @@ public:
     boxes = superbox->getBoxes();
     b = dynamic_cast<MDBox<MDEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( b );
+    TS_ASSERT_DELTA( b->getVolume(), 1.0, 1e-5 );
 
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
 
@@ -320,10 +328,10 @@ public:
     boxes = superbox->getBoxes();
     gb = dynamic_cast<MDGridBox<MDEvent<2>,2> *>(boxes[0]);
     TS_ASSERT( gb );
+    TS_ASSERT_DELTA( gb->getVolume(), 1.0, 1e-5 );
 
     // There are now 199 MDBoxes; the 99 at level 1, and 100 at level 2
     TS_ASSERT_EQUALS( superbox->getNumMDBoxes(), 199);
-
 
     // You can split it again and it does nothing
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
@@ -459,6 +467,8 @@ public:
     TS_ASSERT_EQUALS( b->getNPoints(), 100);
     TS_ASSERT_EQUALS( b->getSignal(), 100*2.0);
     TS_ASSERT_EQUALS( b->getErrorSquared(), 100*2.0);
+    TS_ASSERT_DELTA( b->getSignalNormalized(), 100*2.0 / 100.0, 1e-5);
+    TS_ASSERT_DELTA( b->getErrorSquaredNormalized(), 100*2.0 / 100.0, 1e-5);
 
     // Get all the boxes contained
     std::vector<IMDBox<MDEvent<2>,2>*> boxes = b->getBoxes();
@@ -468,6 +478,8 @@ public:
       TS_ASSERT_EQUALS( boxes[i]->getNPoints(), 1);
       TS_ASSERT_EQUALS( boxes[i]->getSignal(), 2.0);
       TS_ASSERT_EQUALS( boxes[i]->getErrorSquared(), 2.0);
+      TS_ASSERT_EQUALS( boxes[i]->getSignalNormalized(), 2.0);
+      TS_ASSERT_EQUALS( boxes[i]->getErrorSquaredNormalized(), 2.0);
     }
 
     // Now try to add bad events (outside bounds)

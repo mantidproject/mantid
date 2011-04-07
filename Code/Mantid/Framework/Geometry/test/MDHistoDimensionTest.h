@@ -24,6 +24,7 @@ public:
     TS_ASSERT_EQUALS(d.getMinimum(), -10);
     TS_ASSERT_EQUALS(d.getMaximum(), +20);
     TS_ASSERT_EQUALS(d.getNBins(), 15);
+    TS_ASSERT_DELTA(d.getBinWidth(), 2.0, 1e-5);
   }
 
   void test_toXMLStringIntegrated()

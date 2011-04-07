@@ -89,6 +89,12 @@ namespace Geometry
       return index * m_binWidth + m_min;
     }
 
+    /// Return the width of one bin.
+    double getBinWidth() const
+    {
+      return m_binWidth;
+    }
+
   private:
     /// Name
     std::string m_name;

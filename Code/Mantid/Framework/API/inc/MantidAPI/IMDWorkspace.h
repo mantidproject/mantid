@@ -80,7 +80,7 @@ namespace Mantid
       /// Get the dimension
       virtual boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
       { (void) index;
-        throw std::runtime_error("Not implemented yet.");
+      throw std::runtime_error("Not implemented yet.");
       }
 
       /// Get the dimension ids in their order
@@ -108,6 +108,30 @@ namespace Mantid
       virtual double getErrorAt(size_t index1, size_t index2, size_t index3, size_t index4) const
       {
         return getCell(index1,index2,index3,index4).getError();
+      }
+
+      /// Get the signal at the specified index, normalized by cell volume
+      virtual double getSignalNormalizedAt(size_t index) const
+      { (void) index;
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the error of the signal at the specified index, normalized by cell volume
+      virtual double getErrorNormalizedAt(size_t index) const
+      { (void) index;
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+      { (void) index1; (void) index2; (void) index3; (void) index4;
+        throw std::runtime_error("Not implemented yet.");
+      }
+
+      /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+      virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+      { (void) index1; (void) index2; (void) index3; (void) index4;
+        throw std::runtime_error("Not implemented yet.");
       }
 
       /// Return a vector containing a copy of the signal data in the workspace. TODO: Make this more efficient if needed.

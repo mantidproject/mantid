@@ -89,8 +89,8 @@ namespace MDEvents
     {
       if (dim >= nd)
         throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
-      this->extents[dim].min = min;
-      this->extents[dim].max = max;
+      extents[dim].min = min;
+      extents[dim].max = max;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -98,6 +98,21 @@ namespace MDEvents
     MDDimensionExtents & getExtents(size_t dim)
     {
       return extents[dim];
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Compute the volume of the box by simply multiplying each dimension range.
+     * Call this after setExtents() is set for all dimensions.
+     * This is saved for getSignalNormalized() */
+    inline void calcVolume()
+    {
+      double volume = 1;
+      for (size_t d=0; d<nd; d++)
+      {
+        volume *= (extents[d].max - extents[d].min);
+      }
+      /// Floating point multiplication is much faster than division, so cache 1/volume.
+      m_inverseVolume = 1.0 / volume;
     }
 
 
@@ -118,12 +133,50 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------------------
+    /** Returns the integrated signal from all points within, normalized for the cell volume
+     */
+    virtual double getSignalNormalized() const
+    {
+      return m_signal * m_inverseVolume;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Returns the integrated error squared from all points within, normalized for the cell volume
+     */
+    virtual double getErrorSquaredNormalized() const
+    {
+      return m_errorSquared * m_inverseVolume;
+    }
+
+    //-----------------------------------------------------------------------------------------------
     /** For testing, mostly: return the recursion depth of this box.
      * e.g. 1: means this box is in a MDGridBox, which is the top level.
      *      2: this box's parent MDGridBox is itself a MDGridBox. */
     size_t getDepth()
     {
       return m_depth;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Return the volume of the cell */
+    double getVolume()
+    {
+      return 1.0 / m_inverseVolume;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Return the inverse of the volume of the cell */
+    double getInverseVolume()
+    {
+      return m_inverseVolume;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Sets the inverse of the volume of the cell
+     * @param invVolume :: value to set. */
+    void setInverseVolume(double invVolume)
+    {
+      m_inverseVolume = invVolume;
     }
 
   protected:
@@ -138,6 +191,10 @@ namespace MDEvents
 
     /** Cached total error (squared) from all points within */
     double m_errorSquared;
+
+    /// Inverse of the volume of the cell, to be used for normalized signal.
+    double m_inverseVolume;
+
 
     /// The box splitting controller
     BoxController_sptr m_BoxController;

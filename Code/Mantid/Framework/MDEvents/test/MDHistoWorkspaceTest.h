@@ -44,14 +44,18 @@ public:
     {
       TS_ASSERT_EQUALS( ws.getSignalAt(i), 0.0);
       TS_ASSERT_EQUALS( ws.getErrorAt(i), 0.0);
+      TS_ASSERT_EQUALS( ws.getSignalNormalizedAt(i), 0.0);
+      TS_ASSERT_EQUALS( ws.getErrorNormalizedAt(i), 0.0);
     }
 
     // Setting and getting
     ws.setSignalAt(5,2.3456);
     TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
+    TS_ASSERT_DELTA( ws.getSignalNormalizedAt(5), 2.3456 / 256.0, 1e-5); // Cell volume is 256
 
     ws.setErrorAt(5,1.234);
     TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+    TS_ASSERT_DELTA( ws.getErrorNormalizedAt(5), 1.234 / 256.0, 1e-5); // Cell volume is 256
 
     std::vector<double> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5*5*5);

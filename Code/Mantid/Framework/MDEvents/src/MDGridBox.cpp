@@ -45,12 +45,15 @@ namespace MDEvents
 
     // Copy the extents
     for (size_t d=0; d<nd; d++)
-      extents[d] = box->getExtents(d);
+      this->extents[d] = box->getExtents(d);
     // Copy the depth
     this->m_depth = box->getDepth();
+    // Re-calculate the volume of the box
+    this->calcVolume();
 
     // Do some computation based on how many splits per each dim.
     size_t tot = 1;
+    double volume = 1;
     for (size_t d=0; d<nd; d++)
     {
       // Cumulative multiplier, for indexing
@@ -59,8 +62,12 @@ namespace MDEvents
       split[d] = bc->getSplitInto(d);
       tot *= split[d];
       // Length of the side of a box in this dimension
-      boxSize[d] = (extents[d].max - extents[d].min) / split[d];
+      boxSize[d] = (this->extents[d].max - this->extents[d].min) / split[d];
+      volume *= boxSize[d];
     }
+
+    //Cache the inverse volume
+    double inverseVolume = 1.0 / volume;
 
     if (tot == 0)
       throw std::runtime_error("MDGridBox::ctor(): Invalid splitting criterion (one was zero).");
@@ -80,9 +87,10 @@ namespace MDEvents
       // Set the extents of this box.
       for (size_t d=0; d<nd; d++)
       {
-        CoordType min = extents[d].min + boxSize[d] * indices[d];
+        CoordType min = this->extents[d].min + boxSize[d] * indices[d];
         myBox->setExtents(d, min, min + boxSize[d]);
       }
+      myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
       boxes.push_back(myBox);
 
       // Increment the indices, rolling back as needed
@@ -352,7 +360,7 @@ namespace MDEvents
     for (size_t d=0; d<nd; d++)
     {
       CoordType x = event.getCenter(d);
-      int i = int((x - extents[d].min) / boxSize[d]);
+      int i = int((x - this->extents[d].min) / boxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
 
@@ -412,7 +420,7 @@ namespace MDEvents
       for (size_t d=0; d<nd; d++)
       {
         double x = it->getCenter(d);
-        if ((x < extents[d].min) || (x >= extents[d].max))
+        if ((x < this->extents[d].min) || (x >= this->extents[d].max))
         {
           badEvent = true;
           break;
@@ -487,9 +495,9 @@ namespace MDEvents
       int min,max;
 
       // The min index in this dimension (we round down - we'll include this edge)
-      if (bin.m_min[d] >= extents[d].min)
+      if (bin.m_min[d] >= this->extents[d].min)
       {
-        min = size_t((bin.m_min[d] - extents[d].min) / boxSize[d]);
+        min = size_t((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
         counters_min[d] = min;
       }
       else
@@ -505,9 +513,9 @@ namespace MDEvents
       index_min[d] = min;
 
       // The max index in this dimension (we round UP, but when we iterate we'll NOT include this edge)
-      if (bin.m_max[d] < extents[d].max)
+      if (bin.m_max[d] < this->extents[d].max)
       {
-        max = int(ceil((bin.m_max[d] - extents[d].min) / boxSize[d])) - 1;
+        max = int(ceil((bin.m_max[d] - this->extents[d].min) / boxSize[d])) - 1;
         counters_max[d] = max+1; // (the counter looping will NOT include counters_max[d])
       }
       else
