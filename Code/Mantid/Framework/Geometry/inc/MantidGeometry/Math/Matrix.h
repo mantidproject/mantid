@@ -122,6 +122,8 @@ namespace Mantid
     DLLExport std::ostream&
       operator<<(std::ostream&,const Geometry::Matrix<T>&);
 
+    typedef Mantid::Geometry::Matrix<double> MantidMat;
+
   }  // NAMESPACE Geometry
 
 

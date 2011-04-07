@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/IObjComponent.cpp
 	src/Quat.cpp
 	src/V3D.cpp
+  src/Crystal/UnitCell.cpp
 	src/Instrument/CompAssembly.cpp
 	src/Instrument/Component.cpp
 	src/Instrument/Detector.cpp
@@ -84,6 +85,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Quat.h
 	inc/MantidGeometry/Tolerance.h
 	inc/MantidGeometry/V3D.h
+  inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/Instrument/CompAssembly.h
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
@@ -203,6 +205,7 @@ set ( TEST_FILES
 	test/TorusTest.h
 	test/TrackTest.h
 	test/TripleTest.h
+  test/UnitCellTest.h
 	test/V3DTest.h 
 	test/MDHistoDimensionTest.h
 )
