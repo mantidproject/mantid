@@ -684,9 +684,10 @@ set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 ###########################################################################
 # Windows console mode
 ###########################################################################
-# On Windows we need to distinguish between release and debug modes with respect to the console window, i.e
-# we don't want the console in release modes. This requires the WIN32 argument and the additional linker arguments
-# as we don't use WinMain as an entry point.
+# On Windows we need to distinguish between release and debug modes with 
+# respect to the console window, i.e we don't want the console in release 
+# modes. On VS2010 this requires the WIN32 argument and the additional 
+# linker arguments as we don't use WinMain as an entry point.
 if( WIN32 )
    set( EXE_FLAG WIN32 )
 endif( WIN32 )
@@ -706,12 +707,12 @@ target_link_libraries ( MantidPlot
                         ${ZLIB_LIBRARIES} 
 )
 ###########################################################################
-# Ensure the console appears in debug builds
+# Console and entry point flags for Windows
 ###########################################################################
 if( WIN32 )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup" )
    set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE" )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE" )
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup" )
    set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE" )
    set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" )
    set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
