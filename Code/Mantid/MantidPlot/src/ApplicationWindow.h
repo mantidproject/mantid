@@ -1103,6 +1103,8 @@ private:
   ///
   void showalgorithmDescriptions();
 
+  /// Open up the FirstRunSetup dialog
+  void showFirstTimeSetup();
 
   // TODO: a lot of this stuff should be private
 public:
@@ -1345,7 +1347,7 @@ private:
   QAction *actionMatrixXY, *actionMatrixColumnRow, *actionImagePlot, *actionToolBars;
   QAction *actionMatrixFFTDirect, *actionMatrixFFTInverse;
   QAction *actionFontBold, *actionFontItalic, *actionFontBox, *actionFontSize;
-  QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs;
+  QAction *actionSuperscript, *actionSubscript, *actionUnderline, *actionGreekSymbol, *actionCustomActionDialog, *actionManageDirs, *actionFirstTimeSetup;
   QAction *actionGreekMajSymbol, *actionMathSymbol;
   QAction *Box, *Frame, *None;
   QAction *front, *back, *right, *left, *ceil, *floor, *floordata, *flooriso, *floornone;

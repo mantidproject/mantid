@@ -143,6 +143,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/AlgMonitor.cpp
                    src/Mantid/AlgorithmHistoryWindow.cpp
                    src/Mantid/ExecuteAlgorithm.cpp
+				   src/Mantid/FirstTimeSetup.cpp
                    src/Mantid/FitParameterTie.cpp
                    src/Mantid/FitPropertyBrowser.cpp
                    src/Mantid/IFunctionWrapper.cpp
@@ -349,6 +350,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/AlgMonitor.h
                    src/Mantid/AlgorithmHistoryWindow.h
                    src/Mantid/ExecuteAlgorithm.h
+				   src/Mantid/FirstTimeSetup.h
                    src/Mantid/FitParameterTie.h
                    src/Mantid/FitPropertyBrowser.h
                    src/Mantid/IFunctionWrapper.h
@@ -586,6 +588,7 @@ set ( QTIPLOT_MOC_FILES src/ApplicationWindow.h
 set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/AlgorithmHistoryWindow.h
                        src/Mantid/ExecuteAlgorithm.h
+					   src/Mantid/FirstTimeSetup.h
                        src/Mantid/FitPropertyBrowser.h
                        src/Mantid/IFunctionWrapper.h
                        src/Mantid/ImportWorkspaceDlg.h
@@ -621,7 +624,8 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
 )
 
-set ( UI_FILES src/Mantid/UserFitFunctionDialog.ui
+set ( UI_FILES src/Mantid/FirstTimeSetup.ui
+               src/Mantid/UserFitFunctionDialog.ui
                src/Mantid/MantidAbout.ui
                src/Mantid/RemoveErrorsDialog.ui
                src/Mantid/SequentialFitDialog.ui

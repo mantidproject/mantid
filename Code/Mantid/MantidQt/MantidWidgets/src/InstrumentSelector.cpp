@@ -86,7 +86,7 @@ namespace MantidWidgets
 
     if ( newV != oldV )
     {
-      if ( ( prop == "default.facility" ) && ( oldV != QString::fromStdString(m_currentFacility->name()) ) )
+      if ( ( prop == "default.facility" ) && ( newV != QString::fromStdString(m_currentFacility->name()) ) )
       {
         fillWithInstrumentsFromFacility(newV);
       }

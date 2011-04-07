@@ -172,6 +172,7 @@
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
+#include "Mantid/FirstTimeSetup.h"
 
 #include "MantidQtAPI/InterfaceManager.h"
 #include "MantidQtAPI/UserSubWindow.h"
@@ -405,6 +406,15 @@ void ApplicationWindow::init(bool factorySettings)
     results->setTextColor(Qt::blue);
     results->insertPlainText("The scripting language is set to muParser. This is probably not what you want! Change the default in View->Preferences.");
     results->setTextColor(Qt::black);
+  }
+
+  // Need to show first time setup dialog?
+  Mantid::Kernel::ConfigServiceImpl& config = Mantid::Kernel::ConfigService::Instance();
+  std::string facility = config.getString("default.facility");
+  std::string instrument = config.getString("default.instrument");
+  if ( facility.empty() || instrument.empty() )
+  {
+    showFirstTimeSetup();
   }
 
 }
@@ -1168,6 +1178,8 @@ void ApplicationWindow::initMainMenu()
   help->addAction(actionmantidplotHelp);
   help->insertSeparator();
   help->addAction(actionHelpBugReports);
+  help->insertSeparator();
+  help->addAction(actionFirstTimeSetup);
   help->insertSeparator();
   help->addAction(actionAbout);
 
@@ -11881,6 +11893,9 @@ void ApplicationWindow::createActions()
   actionManageDirs = new QAction(QIcon(getQPixmap("managefolders_xpm")), tr("Manage User Directories"), this);
   connect(actionManageDirs, SIGNAL(activated()), this, SLOT(showUserDirectoryDialog()));
 
+  actionFirstTimeSetup = new QAction(tr("First Time Setup"), this);
+  connect(actionFirstTimeSetup, SIGNAL(activated()), this, SLOT(showFirstTimeSetup()));
+
   actionNewProject = new QAction(QIcon(getQPixmap("new_xpm")), tr("New &Project"), this);
   actionNewProject->setShortcut( tr("Ctrl+N") );
   connect(actionNewProject, SIGNAL(activated()), this, SLOT(newProject()));
@@ -13863,6 +13878,15 @@ void ApplicationWindow::showalgorithmDescriptions()
 {
   QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/Category:Algorithms"));
 }
+
+void ApplicationWindow::showFirstTimeSetup()
+{
+  FirstTimeSetup *dialog = new FirstTimeSetup(this);
+  dialog->setAttribute(Qt::WA_DeleteOnClose);
+  dialog->show();
+  dialog->setFocus();
+}
+
 /*
  Show mantidplot help page
  */
@@ -16161,6 +16185,7 @@ void ApplicationWindow::showCustomActionDialog()
 void ApplicationWindow::showUserDirectoryDialog()
 {
   MantidQt::API::ManageUserDirectories *ad = new MantidQt::API::ManageUserDirectories(this);
+  ad->setAttribute(Qt::WA_DeleteOnClose);
   ad->show();
   ad->setFocus();
 }
