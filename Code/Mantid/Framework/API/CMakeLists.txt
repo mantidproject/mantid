@@ -184,7 +184,6 @@ set ( TEST_FILES
 	test/SampleEnvironmentTest.h
 	test/SampleTest.h
 	test/ScriptWriterTest.h
-	test/ScriptWriterFactoryTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
 	test/WorkspaceFactoryTest.h
