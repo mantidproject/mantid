@@ -9,15 +9,27 @@ echo Cleaning...
 echo Done.
 echo Creating application structure...
 ./deploy.sh $1
+return_code=$?
+if [ $return_code -ne 0 ]; then
+    exit $return_code
+fi
 echo Done.
 echo Modifying properties file...
 python adjustPropertiesFile.py
 echo Done.
 echo Building package...
 /Developer/usr/bin/packagemaker --doc Mantid.pmdoc --scripts installer_hooks -i org.mantidproject.mantid.mantidplot.pkg
+return_code=$?
+if [ $return_code -ne 0 ]; then
+    exit $return_code
+fi
 echo Done.
 echo Creating disk image...
 ./dmgpack.sh Mantid-64bit-snowleopard mantid.pkg
-echo Done.
-
+return_code=$?
+if [ $return_code -ne 0 ]; then
+    exit $return_code
+else
+    echo Done.
+fi
 echo Success!

@@ -26,7 +26,7 @@ update_lib_paths() {
 if [ $# -ne 1 ]
 then
   echo "Usage: deploy.sh [PATH_TO_BUILD_DIRECTORY]"
-  exit
+  exit 1
 fi
 
 # Build directory can now be anywhere - must be supplied as argument
