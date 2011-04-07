@@ -66,6 +66,13 @@ void SimplexMinimizer::initialize(API::IFitFunction* function, const std::string
   // setup minimizer
   m_gslSolver = gsl_multimin_fminimizer_alloc(T, function->nActive());
   gsl_multimin_fminimizer_set(m_gslSolver, &gslContainer, m_data->initFuncParams, m_simplexStepSize);
+
+  m_gslLeastSquaresContainer.f = &gsl_f;
+  m_gslLeastSquaresContainer.df = &gsl_df;
+  m_gslLeastSquaresContainer.fdf = &gsl_fdf;
+  m_gslLeastSquaresContainer.n = function->dataSize();
+  m_gslLeastSquaresContainer.p = function->nActive();
+  m_gslLeastSquaresContainer.params = m_data;
 }
 
 ///resets the size
