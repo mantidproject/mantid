@@ -96,7 +96,7 @@ class BaseWidget(QtGui.QWidget):
                 self._settings.data_path = folder
             return fname     
     
-    def show_instrument(self, file_name):
+    def show_instrument(self, file_name=''):
         """
             Show instrument for the given data file.
             @param file_name: Data file path

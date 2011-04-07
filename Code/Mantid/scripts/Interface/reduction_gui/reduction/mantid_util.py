@@ -16,14 +16,6 @@ try:
 except:
     HAS_NUMPY = False
     
-def get_data_proxy(settings, data_file):
-    """
-        Return a data proxy object that standardizes access to workspace information
-        @param settings: GeneralSettings object
-        @param data_file: Data file for which we want a data proxy object
-    """
-    pass
-
 class DataFileProxy(object):
     
     wavelength = None

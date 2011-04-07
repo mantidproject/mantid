@@ -6,7 +6,6 @@ from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
 from hfir_sample_data import BeamSpreader, DirectBeam
 import ui.sans.ui_hfir_background
-import functools
 
 class BckDirectBeam(DirectBeam):
     
@@ -90,13 +89,11 @@ class BackgroundWidget(BaseWidget):
         self.connect(self._content.calculate_trans_chk, QtCore.SIGNAL("clicked(bool)"), self._calculate_clicked)
         self.connect(self._content.trans_direct_chk, QtCore.SIGNAL("clicked()"), self._direct_beam)
         self.connect(self._content.trans_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
-        #self.connect(self._content.dark_current_chk, QtCore.SIGNAL("clicked(bool)"), self._dark_current_clicked)
-        #self.connect(self._content.dark_current_browse, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         self.connect(self._content.background_chk, QtCore.SIGNAL("clicked(bool)"), self._background_clicked)
         self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), self._background_browse)
-        self.connect(self._content.background_browse, QtCore.SIGNAL("clicked()"), 
-                     functools.partial(self.show_instrument, unicode(self._content.background_edit.text())))
+        self.connect(self._content.background_plot_button, QtCore.SIGNAL("clicked()"), self._background_plot)
         self.connect(self._content.trans_dark_current_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_browse)
+        self.connect(self._content.trans_dark_current_plot_button, QtCore.SIGNAL("clicked()"), self._trans_dark_current_plot)
         
         # Process transmission option
         if not self.show_transmission:
@@ -122,10 +119,6 @@ class BackgroundWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
-        #self._content.dark_current_chk.setChecked(state.dark_current_corr)
-        #self._content.dark_current_edit.setText(QtCore.QString(state.dark_current_file))
-        #self._dark_current_clicked(state.dark_current_corr)
-        
         self._content.background_chk.setChecked(state.background_corr)
         self._content.background_edit.setText(QtCore.QString(state.background_file))
         self._background_clicked(state.background_corr)
@@ -201,15 +194,6 @@ class BackgroundWidget(BaseWidget):
         self._method_box = widget
         self._content.widget_placeholder.addWidget(self._method_box)
         
-    def _dark_current_clicked(self, is_checked):
-        self._content.dark_current_edit.setEnabled(is_checked)
-        self._content.dark_current_browse.setEnabled(is_checked)
-        
-    def _dark_current_browse(self):
-        fname = self.data_browse_dialog()
-        if fname:
-            self._content.dark_current_edit.setText(fname)      
-        
     def _background_clicked(self, is_checked):
         self._content.background_edit.setEnabled(is_checked)
         self._content.geometry_options_groupbox.setEnabled(is_checked)
@@ -226,8 +210,14 @@ class BackgroundWidget(BaseWidget):
     def _background_browse(self):
         fname = self.data_browse_dialog()
         if fname:
-            self._content.background_edit.setText(fname)      
-        
+            self._content.background_edit.setText(fname)   
+               
+    def _background_plot(self):
+        self.show_instrument(unicode(self._content.background_edit.text()))
+
+    def _trans_dark_current_plot(self):
+        self.show_instrument(unicode(self._content.trans_dark_current_edit.text()))
+
     def _calculate_clicked(self, is_checked):
         self._content.trans_direct_chk.setEnabled(is_checked)
         self._content.trans_spreader_chk.setEnabled(is_checked)

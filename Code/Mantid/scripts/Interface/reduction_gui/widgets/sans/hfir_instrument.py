@@ -289,7 +289,7 @@ class SANSInstrumentWidget(BaseWidget):
                 return
             fname = data_files[0]
             if len(str(fname).strip())>0:
-                dataproxy = DataFileProxy(fname)
+                dataproxy = self._data_proxy(fname)
                 if len(dataproxy.errors)>0:
                     QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                     return

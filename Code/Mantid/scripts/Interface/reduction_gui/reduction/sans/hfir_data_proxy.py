@@ -1,5 +1,29 @@
-class DataProxy(object):
+import sys
+ 
+# Check whether Mantid is available
+try:
+    from MantidFramework import *
+    mtd.initialise(False)
+    import mantidsimple
+    HAS_MANTID = True
+except:
+    HAS_MANTID = False 
     
+# Check whether we have numpy
+try:
+    import numpy
+    HAS_NUMPY = True
+except:
+    HAS_NUMPY = False
+
+from  reduction.instruments.sans.sans_reduction_steps import LoadRun
+from reduction.instruments.sans.sans_reducer import SANSReducer
+import reduction.instruments.sans.hfir_instrument as hfir_instrument
+
+class DataProxy(object):
+    """
+        Class used to load a data file temporarily to extract header information
+    """
     wavelength = None
     wavelength_spread = None
     sample_detector_distance = None
@@ -12,9 +36,6 @@ class DataProxy(object):
     def __init__(self, data_file):
         if HAS_MANTID:
             try:
-                from reduction.instruments.sans.sans_reduction_steps import LoadRun
-                from reduction.instruments.sans.sans_reducer import SANSReducer
-                import reduction.instruments.sans.hfir_instrument as hfir_instrument
                 self.data_ws = "raw_data_file"
                 reducer = SANSReducer()
                 reducer.set_instrument(hfir_instrument.HFIRSANS())
