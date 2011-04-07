@@ -151,7 +151,8 @@ namespace CxxTest
         }
     
         N digit = 1;
-        while ( digit <= (n / base) )
+        int counter = 0; // Added to avoid infinite loops for N = infinity
+        while ( digit <= (n / base) && (counter++ < 100))
             digit *= base;
         N digitValue;
         for ( ; digit >= 1 && skipDigits; n -= digit * digitValue, digit /= base, -- skipDigits )

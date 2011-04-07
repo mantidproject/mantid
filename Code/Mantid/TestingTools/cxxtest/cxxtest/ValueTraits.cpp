@@ -98,7 +98,10 @@ namespace CxxTest
     {
         unsigned digits = 1;
         for ( t = (t < 0.0) ? -t : t; t > 1.0; t /= BASE )
+        {
             ++ digits;
+            if (digits > 100) break; // Avoid infinite loop if given an infinity as input
+        }
         return digits;
     }
 
