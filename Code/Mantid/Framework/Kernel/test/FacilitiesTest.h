@@ -89,24 +89,6 @@ public:
     );
   }
 
-  void testDefaultFacility()
-  {
-    TS_ASSERT_THROWS_NOTHING(
-      const FacilityInfo& fac = ConfigService::Instance().Facility()
-    );
-    ConfigService::Instance().setString("default.facility","ISIS");
-    const FacilityInfo& fac = ConfigService::Instance().Facility();
-    TS_ASSERT_EQUALS(fac.name(),"ISIS");
-
-    ConfigService::Instance().setString("default.facility","SNS");
-    const FacilityInfo& fac1 = ConfigService::Instance().Facility();
-    TS_ASSERT_EQUALS(fac1.name(),"SNS");
-
-    ConfigService::Instance().setString("default.facility","");
-    const FacilityInfo& fac2 = ConfigService::Instance().Facility();
-    TS_ASSERT_EQUALS(fac2.name(),"ISIS");
-  }
-
   void testDefaultInstrument()
   {
     ConfigService::Instance().setString("default.instrument","HRPD");
