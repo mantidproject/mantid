@@ -214,24 +214,20 @@ namespace Mantid
       if( nprops > 0 )
       {
 	os << "  try:\n";
+	os << "    algm.setPropertyValues(";
 	// Redo loop for setting values
 	pIter = properties.begin();
 	iarg = 0;
 	for( ; pIter != pEnd; ++pIter, ++iarg )
 	{
 	  std::string pvalue = sanitizedNames[iarg];
-	  if( iarg < iMand )
-	  {
-	    os << "    " << "  algm.setPropertyValue(\"" << (*pIter)->name()
-	       << "\", _makeString(" << pvalue << ").lstrip('? '))\n";
-	  }
-	  else
-	  {
-	    os << "    " << "  if " << pvalue << " != None:\n"
-	       << "    " << "    algm.setPropertyValue(\"" << (*pIter)->name() << "\", _makeString(" 
-	       << pvalue << ").lstrip('? '))\n";
-	  }
+    if (iarg > 0)
+      os << ", ";
+    os << pvalue; // name of the parameter, either way
+	  if( iarg >= iMand )
+      os << "=" << pvalue; // if it is a kwarg
 	}
+	os << ")\n";
 	os << "  except RuntimeError, exc:\n"
 	   << "      prefix = 'Unknown property search object'\n"
 	   << "      error_msg = str(exc)\n"

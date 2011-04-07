@@ -292,23 +292,13 @@ def _process_frame(frame):
 #-------------------------------------------------------------------------------
 def mtdGlobalHelp():
     # first part is algorithm name, second is version
-    orig_algs = [item.split('|') for item in mtd._getRegisteredAlgorithms()]
-
-    # turn this into a dictionary of algorithms with versions
-    algs_dict = {}
-    for alg in orig_algs:
-        (name, version) = alg
-        version = [int(version)]
-        if algs_dict.has_key(name):
-            version.extend(algs_dict[name])
-        version.sort()
-        algs_dict[name] = version
+    orig_algs = mtd._getRegisteredAlgorithms()
 
     # do the final formatting
     algs = []
-    for name in algs_dict.keys():
-        version = algs_dict[name]
-        version = ["v%d" % it for it in algs_dict[name]]
+    for alg in orig_algs:
+        (name, version) = alg
+        version = ["v%d" % it for it in version]
         version = " ".join(version)
         if version == "v1":
             algs.append(name)
@@ -782,7 +772,8 @@ class IAlgorithmProxy(ProxyObject):
         
     def setPropertyValues(self, *args, **kwargs):
         """
-        Set all of the properties of the algorithm.
+        Set all of the properties of the algorithm. Everything gets converted into a string.
+        One should generally try to use setProperties instead.
         """
         if self.__propertyOrder is None:
             self.__propertyOrder = mtd._getPropertyOrder(self._getHeldObject())
@@ -794,11 +785,12 @@ class IAlgorithmProxy(ProxyObject):
         # set the properties of the algorithm
         ialg = self._getHeldObject()
         for key in kwargs.keys():
-            ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+            if not kwargs[key] is None:
+                ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
         
     def setProperties(self, *args, **kwargs):
         """
-        Set all of the properties of the algorithm.
+        Set all of the properties of the algorithm. Everything except Workspaces get converted into a string.
         """
         if self.__propertyOrder is None:
             self.__propertyOrder = mtd._getPropertyOrder(self._getHeldObject())
@@ -813,21 +805,22 @@ class IAlgorithmProxy(ProxyObject):
             if isinstance(kwargs[key], WorkspaceProxy):
                 ialg._setWorkspaceProperty(key, kwargs[key]._getHeldObject())                
             else:
-                ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+                if not kwargs[key] is None:
+                    ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
 
-
-    def execute(self):
+    def execute(self, *args, **kwargs):
         """
         Execute the (hopefully) configured algorithm.
         """
+        self.setPropertyValues(*args, **kwargs)
+
         if mtd.__gui__:
             name = self._getHeldObject().name()
             result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(name)
             if result == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % name)
         else:
-            self._getHeldObject().execute()
-
+            self._getHeldObject().execute()     
 
 #---------------------------------------------------------------------------------------
 
@@ -969,6 +962,33 @@ class MantidPyFramework(FrameworkManager):
         object alone
         """
         return self._createAlgProxy(name, version)
+
+    # make what comes out of C++ a little friendlier to use
+    def _getRegisteredAlgorithms(self):
+        # get the full list from C++
+        algs = super(MantidPyFramework, self)._getRegisteredAlgorithms()
+        # split the string into name and version
+        algs = [item.split('|') for item in algs]
+        # convert the version into an integer
+        algs = [(item[0], int(item[1])) for item in algs]
+
+        # convert the list into a dict
+        algs_dict = {}
+        for alg in algs:
+            (name, version) = alg
+            version = [version]
+            if algs_dict.has_key(name):
+                version.extend(algs_dict[name])
+            version.sort()
+            algs_dict[name] = version
+
+        algs = []
+        names = algs_dict.keys()
+        names.sort()
+        for name in names:
+            algs.append((name, tuple(algs_dict[name])))
+
+        return algs
 
     #### private methods ###########################################################
     
