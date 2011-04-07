@@ -6,6 +6,7 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
+#include "MantidKernel/InstrumentInfo.h"
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
@@ -91,6 +92,44 @@ public:
     TS_ASSERT_THROWS_NOTHING(log1.error("This should be from logTestName1"));
     TS_ASSERT_THROWS_NOTHING(log1.error()<<"This should be from logTestName1 via a stream" << std::endl;);
     
+  }
+
+
+  void testInstrumentSearch()
+  {
+    // Set a default facility
+    //ConfigService::Instance().setFacility("SNS");
+
+    // Try and find some instruments from a facility
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BASIS").name(),"BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("REF_L").name(),"REF_L");
+
+    // Now find some from other facilities
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSIRIS").name(),"OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BIOSANS").name(),"BIOSANS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("NGSANS").name(),"NGSANS");
+
+    // Check we throw the correct error for a nonsense beamline.
+    //TS_ASSERT_THROWS(ConfigService::Instance().getInstrument("MyBeamline").name(), NotFoundError);
+
+    // Now find by using short name
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BSS").name(), "BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("MAR").name(), "MARI");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("PG3").name(), "POWGEN");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("OSI").name(), "OSIRIS");
+//    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("HiResSANS").name(), "GPSANS");
+
+    // Now find some with the wrong case
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("baSis").name(),"BASIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("TOPaZ").name(),"TOPAZ");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("Seq").name(),"SEQUOIA");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("eqsans").name(),"EQ-SANS");
+
+    // Set the default instrument
+    ConfigService::Instance().setString("default.instrument", "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("").name(), "OSIRIS");
+    TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument().name(), "OSIRIS");
+
   }
 
   void TestSystemValues()

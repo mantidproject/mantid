@@ -1108,6 +1108,52 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 
 }
 
+/**
+ * Returns instruments with given name
+ * @param  iName Instrument name
+ * @return the instrument information object
+ * @throw NotFoundError if iName was not found
+ */
+const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instrumentName) const
+{
+
+  // TODO: Change this to use getFacility()
+  // Let's first search for the instrument in our default facility
+  std::string defaultFacility = ConfigService::Instance().getString("default.facility");
+
+  if (!defaultFacility.empty())
+  {
+    try
+    {
+      g_log.debug() << "Looking for " << instrumentName << " at " << defaultFacility << "." << std::endl;
+      return Facility(defaultFacility).Instrument(instrumentName);
+    }
+    catch (Exception::NotFoundError e)
+    {
+      // Well the instName doesn't exist for this facility
+      // Move along, there's nothing to see here...
+    }
+  }
+
+  // Now let's look through the other facilities
+  std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
+  for (; it != m_facilities.end(); ++it)
+  {
+    try
+    {
+      g_log.debug() << "Looking for " << instrumentName << " at " << (**it).name() << "." << std::endl;
+      return (**it).Instrument(instrumentName);
+    }
+    catch (Exception::NotFoundError e)
+    {
+      // Well the instName doesn't exist for this facility...
+      // Move along, there's nothing to see here...
+    }
+  }
+  g_log.error("Instrument " + instrumentName + " not found");
+  throw Exception::NotFoundError("Instrument", instrumentName);
+}
+
 /** Get the default `
  * @return the facility information object
  */

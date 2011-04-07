@@ -178,7 +178,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
   {
     if (it->shortName() == iname)
     {
-      g_log.debug() << "Instrument " << iName << " found as " << it->name() << " at " << name() << "." << std::endl;
+      g_log.debug() << "Instrument '" << iName << "' found as " << it->name() << " at " << name() << "." << std::endl;
       return *it;
     }
   }

@@ -41,6 +41,7 @@ namespace Mantid
     //----------------------------------------------------------------------
     class Logger;
     class FacilityInfo;
+    class InstrumentInfo;
 
     /** The ConfigService class provides a simple facade to access the Configuration functionality of the Mantid Framework.
         The class gathers information from config files and the system variables.  
@@ -170,6 +171,9 @@ namespace Mantid
       const FacilityInfo& Facility()const;
       /// Get a facility
       const FacilityInfo& Facility(const std::string& fName)const;
+
+      /// Look for an instrument
+      const InstrumentInfo & getInstrument(const std::string& instrumentName = "") const;
 
       /// Add an observer for a notification
       void addObserver(const Poco::AbstractObserver& observer)const;
