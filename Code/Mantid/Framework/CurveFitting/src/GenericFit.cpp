@@ -260,7 +260,7 @@ namespace CurveFitting
     gsl_matrix *covar(NULL);
 
     // only if derivative is defined for GenericFitting function create covariance matrix output workspace
-    if ( methodUsed.compare("Simplex") != 0 )    
+    if ( isDerivDefined )    
     {
       // calculate covariance matrix
       covar = gsl_matrix_alloc (nParam, nParam);
@@ -287,7 +287,7 @@ namespace CurveFitting
     if (!output.empty())
     {
       // only if derivative is defined for GenericFitting function create covariance matrix output workspace
-      if ( methodUsed.compare("Simplex") != 0 )    
+      if ( isDerivDefined )    
       {
         // Create covariance matrix output workspace
         declareProperty(
@@ -337,14 +337,14 @@ namespace CurveFitting
       Mantid::API::ITableWorkspace_sptr m_result = Mantid::API::WorkspaceFactory::Instance().createTable("TableWorkspace");
       m_result->addColumn("str","Name");
       m_result->addColumn("double","Value");
-      if ( methodUsed.compare("Simplex") != 0 ) 
+      if ( isDerivDefined ) 
         m_result->addColumn("double","Error");
 
       for(int i=0;i<m_function->nParams();i++)
       {
         Mantid::API::TableRow row = m_result->appendRow();
         row << m_function->parameterName(i) << m_function->getParameter(i);
-        if ( methodUsed.compare("Simplex") != 0 && m_function->isActive(i)) 
+        if ( isDerivDefined && m_function->isActive(i)) 
         {
           row << standardDeviations[i];
         }
@@ -355,7 +355,7 @@ namespace CurveFitting
       setProperty("OutputParameters",m_result);
 
 
-      if ( methodUsed.compare("Simplex") != 0 ) 
+      if ( isDerivDefined ) 
         gsl_matrix_free(covar);
     }
 
