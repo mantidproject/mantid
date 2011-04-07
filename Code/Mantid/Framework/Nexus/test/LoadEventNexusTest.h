@@ -225,7 +225,7 @@ public:
     TS_ASSERT_EQUALS( WS2->getNumberEvents(), 29753);
 
     // The two workspaces are the same
-    TS_ASSERT( equals(WS1, WS2) );
+    TS_ASSERT( Mantid::API::equals(WS1, WS2) );
   }
 
 

@@ -58,8 +58,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
-    // Same, using the equals() function
-    TS_ASSERT( equals(ws, ws) );
+    // Same, using the Mantid::API::equals() function
+    TS_ASSERT( Mantid::API::equals(ws, ws) );
   }
   
   void testEvent_matches()
@@ -73,8 +73,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), checker.successString() );
 
-    // Same, using the equals() function
-    TS_ASSERT( equals(ews1, ews2) );
+    // Same, using the Mantid::API::equals() function
+    TS_ASSERT( Mantid::API::equals(ews1, ews2) );
   }
 
   void testEvent_different_type()
@@ -87,8 +87,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
 
-    // Same, using the equals() function
-    TS_ASSERT( !equals(ws1, ews2) );
+    // Same, using the Mantid::API::equals() function
+    TS_ASSERT( !Mantid::API::equals(ws1, ews2) );
 
   }
 
@@ -102,8 +102,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ews1, ews2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ews1, ews2)) );
   }
 
   void testEvent_differentEventLists()
@@ -115,8 +115,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ews1, ews2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ews1, ews2)) );
   }
 
   void testEvent_differentBinBoundaries()
@@ -128,8 +128,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( checker.setProperty("Workspace2",boost::dynamic_pointer_cast<MatrixWorkspace>(ews2)) );
     TS_ASSERT( checker.execute() );
     TS_ASSERT_DIFFERS( checker.getPropertyValue("Result"), checker.successString() );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ews1, ews2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ews1, ews2)) );
   }
 
   void testDifferentSize()
@@ -144,8 +144,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Size mismatch" );
     
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
   
   void testHistNotHist()
@@ -160,8 +160,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Histogram/point-like mismatch" );
 
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDistNonDist()
@@ -177,8 +177,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Distribution flag mismatch" );
 
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentAxisType()
@@ -195,8 +195,8 @@ public:
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 1 type mismatch" );
 
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentAxisTitles()
@@ -212,8 +212,8 @@ public:
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 0 title mismatch" );
 
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentAxisUnit()
@@ -228,8 +228,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 0 unit mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentAxisValues()
@@ -244,8 +244,8 @@ public:
     
     TS_ASSERT( checker.execute() )
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Axis 1 values mismatch" ) ;
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentYUnit()
@@ -260,8 +260,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "YUnit mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentSpectraMap()
@@ -279,8 +279,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "SpectraDetectorMap mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentInstruments()
@@ -295,8 +295,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument name mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentParameterMaps()
@@ -311,8 +311,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Instrument ParameterMap mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
 
   void testDifferentMasking()
@@ -340,8 +340,8 @@ public:
     
     TS_ASSERT( checker.execute() );
     TS_ASSERT_EQUALS( checker.getPropertyValue("Result"), "Masking mismatch" );
-    // Same, using the !equals() function
-    TS_ASSERT( (!equals(ws1, ws2)) );
+    // Same, using the !Mantid::API::equals() function
+    TS_ASSERT( (!Mantid::API::equals(ws1, ws2)) );
   }
   
   void testDifferentSampleName()
