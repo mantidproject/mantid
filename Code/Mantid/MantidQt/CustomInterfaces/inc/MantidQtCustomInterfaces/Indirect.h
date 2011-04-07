@@ -66,7 +66,7 @@ namespace MantidQt
       void helpClicked();
       /// perform whatever operations needed for analysis
       void runClicked();
-      void runConvertToEnergy(bool tryToSave=true);
+      void runConvertToEnergy();
       /// gather necessary information from Instument Definition Files
       virtual void setIDFValues(const QString & prefix);
 
@@ -81,10 +81,6 @@ namespace MantidQt
       bool validateCalib(); ///< validate input of "Calibration" tab
       bool validateSofQw(); ///< validate input of "S(Q, w)" tab
       bool validateSlice(); ///< validate input of "Slice" tab
-      bool isDirty(); ///< state whether interface has had any changes
-      void isDirty(bool state); ///< signify changes to interface
-      bool isDirtyRebin(); ///< state whether post-rebin interface has had any changes
-      void isDirtyRebin(bool state); ///< set value for above
       void loadSettings();
       void saveSettings();
 
@@ -103,11 +99,8 @@ namespace MantidQt
       void rebinCheck(bool state); ///< handle checking/unchecking of "Do Not Rebin"
       void detailedBalanceCheck(bool state); ///< handle checking/unchecking of "Detailed Balance"
       void resCheck(bool state); ///< handles checking/unchecking of "Create RES File" checkbox
-      void rebinData(); ///< rebin transformed data
       void useCalib(bool state); ///< whether to use calib file
       void calibCreate(); ///< create calibration file
-      void setasDirty(); ///< sets m_isDirty(true)
-      void setasDirtyRebin(); ///< sets m_isDirtyRebin(true)
       void calibFileChanged(const QString & calib); ///< sets m_uiForm.ckUseCalib to appropriate value
 
       void calPlotRaw();
@@ -137,8 +130,6 @@ namespace MantidQt
       QString m_saveDir; ///< default data save directory
       QString m_settingsGroup;
       bool m_bgRemoval; ///< whether user has set values for BG removal
-      bool m_isDirty; ///< whether pre-rebin options have changed
-      bool m_isDirtyRebin; ///< whether rebin/post-rebin options have changed
 
       /* Validators */
       QIntValidator *m_valInt; ///< validator for int inputs

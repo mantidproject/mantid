@@ -28,8 +28,8 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL), m_isDirty(true),
-  m_isDirtyRebin(true), m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
+UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
+  m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
   // Null pointers - Calibration Tab
   m_calCalPlot(NULL), m_calResPlot(NULL),
@@ -60,25 +60,10 @@ void Indirect::initLayout()
   connect(m_uiForm.cbMappingOptions, SIGNAL(currentIndexChanged(const QString&)), this, SLOT(mappingOptionSelected(const QString&)));
   connect(m_uiForm.pbBack_2, SIGNAL(clicked()), this, SLOT(backgroundClicked()));
   connect(m_uiForm.pbPlotRaw, SIGNAL(clicked()), this, SLOT(plotRaw()));
-  connect(m_uiForm.rebin_pbRebin, SIGNAL(clicked()), this, SLOT(rebinData()));
   connect(m_uiForm.rebin_ckDNR, SIGNAL(toggled(bool)), this, SLOT(rebinCheck(bool)));
   connect(m_uiForm.ckDetailedBalance, SIGNAL(toggled(bool)), this, SLOT(detailedBalanceCheck(bool)));
-
-  connect(m_uiForm.ind_runFiles, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
-  connect(m_uiForm.ind_calibFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirty()));
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
-  connect(m_uiForm.leSpectraMin, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
-  connect(m_uiForm.leSpectraMax, SIGNAL(editingFinished()), this, SLOT(setasDirty()));
-  connect(m_uiForm.ckSumFiles, SIGNAL(pressed()), this, SLOT(setasDirty()));
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
-  connect(m_uiForm.ckCleanUp, SIGNAL(pressed()), this, SLOT(setasDirtyRebin()));
-
-  connect(m_uiForm.rebin_leELow, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
-  connect(m_uiForm.rebin_leEWidth, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
-  connect(m_uiForm.rebin_leEHigh, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
-  connect(m_uiForm.leDetailedBalance, SIGNAL(editingFinished()), this, SLOT(setasDirtyRebin()));
-  connect(m_uiForm.ind_mapFile, SIGNAL(fileEditingFinished()), this, SLOT(setasDirtyRebin()));
-
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
 
   // "Calibration" tab
@@ -176,131 +161,76 @@ void Indirect::runClicked()
   }
 }
 
-void Indirect::runConvertToEnergy(bool tryToSave)
+void Indirect::runConvertToEnergy()
 {
   if ( ! validateInput() )
   {
     showInformationBox("Please check the input highlighted in red.");
     return;
   }
+
   QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
   if ( grouping == "" )
   {
     return;
   }
 
-  QString pyInput = "from mantidsimple import *\n"
-    "import IndirectEnergyConversion as ind\n";
+  QString pyInput =
+    "import inelastic_indirect_reducer as iir\n"
+    "reducer = iir.IndirectReducer()\n"
+    "reducer.set_instrument_name('" + m_uiForm.cbInst->currentText() + "')\n"
+    "reducer.set_detector_range(" +m_uiForm.leSpectraMin->text()+ "-1, " +m_uiForm.leSpectraMax->text()+ "-1)\n"
+    "reducer.set_parameter_file('" + QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("instrumentDefinition.directory")) + m_uiForm.cbInst->currentText() + "_" + m_uiForm.cbAnalyser->currentText() + "_" + m_uiForm.cbReflection->currentText() + "_Parameters.xml')\n";
 
-  if ( m_uiForm.ckVerbose->isChecked() ) pyInput += "verbose = True\n";
-  else pyInput += "verbose = False\n";
+  QStringList files = m_uiForm.ind_runFiles->getFilenames();
+  for ( QStringList::iterator it = files.begin(); it != files.end(); ++it )
+  {
+    pyInput += "reducer.append_data_file(r'" + *it + "')\n";
+  }
 
-  pyInput += "first = " +m_uiForm.leSpectraMin->text()+ "\n"
-    "last = " +m_uiForm.leSpectraMax->text()+ "\n"
-    "instrument = '" + m_uiForm.cbInst->currentText()+"'\n"
-    "analyser = '"+m_uiForm.cbAnalyser->currentText()+"'\n"
-    "reflection = '"+m_uiForm.cbReflection->currentText()+"'\n";
-  
-  QStringList runFiles_list = m_uiForm.ind_runFiles->getFilenames();
-  QString runFiles = runFiles_list.join("', r'");
-
-  pyInput += "rawfiles = [r'"+runFiles+"']\n"
-    "Sum = ";
   if ( m_uiForm.ckSumFiles->isChecked() )
   {
-    pyInput += "True\n";
-  }
-  else
-  {
-    pyInput += "False\n";
+    pyInput += "reducer.set_sum(True)\n";
   }
 
   if ( m_bgRemoval )
   {
-    QPair<double,double> bgRange = m_backgroundDialog->getRange();
-    QString startTOF, endTOF;
-    startTOF.setNum(bgRange.first, 'e');
-    endTOF.setNum(bgRange.second, 'e');
-    pyInput += "bgRemove = ["+startTOF+", "+endTOF+"]\n";
-  }
-  else
-  {
-    pyInput += "bgRemove = [0, 0]\n";
+    QPair<double,double> background = m_backgroundDialog->getRange();
+    pyInput += "reducer.set_background("+QString::number(background.first)+", "+QString::number(background.second)+")\n";
   }
 
   if ( m_uiForm.ckUseCalib->isChecked() )
   {
-    QString calib = m_uiForm.ind_calibFile->getFirstFilename();
-    pyInput += "calib = r'"+calib+"'\n";
-  }
-  else
-  {
-    pyInput += "calib = ''\n";
+    pyInput +=
+      "from IndirectCommon import loadNexus\n"
+      "reducer.set_calibration_workspace(loadNexus(r'"+m_uiForm.ind_calibFile->getFirstFilename()+"'))\n";
   }
 
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
-  { 
+  {
     QString rebinParam = m_uiForm.rebin_leELow->text() + ","
       + m_uiForm.rebin_leEWidth->text() + ","
       + m_uiForm.rebin_leEHigh->text();
-    pyInput += "rebinParam = '"+rebinParam+"'\n";
-  }
-  else
-  {
-    pyInput += "rebinParam = ''\n";
+    pyInput += "reducer.set_rebin_string('"+rebinParam+"')\n";
   }
 
   if ( m_uiForm.ckDetailedBalance->isChecked() )
-    pyInput += "tempK = "+m_uiForm.leDetailedBalance->text()+"\n";
-  else
-    pyInput += "tempK = -1\n";
-
-  pyInput += "mapfile = r'"+grouping+"'\n";
-
-  if (tryToSave)
   {
-    pyInput += savePyCode();
-  }
-  else
-  {
-    pyInput += "fileFormats = []\n";
+    pyInput += "reducer.set_detailed_balance(" + m_uiForm.leDetailedBalance->text() + ")\n";
   }
 
-  if ( m_uiForm.ckCleanUp->isChecked() )
-  {
-    pyInput += "clean = False\n";
-  }
-  else
-  {
-    pyInput += "clean = True\n";
-  }
+  pyInput += "reducer.set_grouping_policy('" + grouping + "')\n";
 
-  if ( isDirty() )
-  {
-    pyInput += "ws_list = ind.convert_to_energy(rawfiles, mapfile, first, last,"
-      "instrument, analyser, reflection,"
-      "SumFiles=Sum, bgremove=bgRemove, tempK=tempK, calib=calib, rebinParam=rebinParam,"
-      "saveFormats=fileFormats, CleanUp=clean, Verbose=verbose)\n";
-  }
-  else if ( isDirtyRebin() )
-  {
-    pyInput += "ws_list = ind.cte_rebin(mapfile, tempK, rebinParam,"
-      "fileFormats, CleanUp=clean, Verbose=verbose)\n";
-  }
-  else if ( tryToSave ) // where all we want to do is save and/or plot output
-  {
-    pyInput +=
-      "import re\n"
-      "wslist = mantid.getWorkspaceNames()\n"
-      "save_ws = re.compile(r'_'+analyser+reflection+'_red')\n"
-      "ws_list = []\n"
-      "for workspace in wslist:\n"
-      "   if save_ws.search(workspace):\n"
-      "      ws_list.append(workspace)\n"
-      "ind.saveItems(ws_list, fileFormats, Verbose=verbose)\n";
-  }
+  pyInput +=
+    "reducer.reduce()\n"
+    "ws_list = reducer.get_result_workspaces()\n";
 
-  // Plot Output Handling
+  // Saving
+  pyInput += "from IndirectEnergyConversion import saveItems\n"
+    "formats = [" + savePyCode() + "]\n"
+    "saveItems(ws_list, formats)\n";
+
+  // Plot Output options
   switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
   {
   case 0: // "None"
@@ -326,24 +256,6 @@ void Indirect::runConvertToEnergy(bool tryToSave)
   }
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
-
-  if ( pyOutput != "" )
-  {
-    if ( pyOutput == "No intermediate workspaces were found. Run with 'Keep Intermediate Workspaces' checked." )
-    {
-      isDirty(true);
-      runConvertToEnergy(tryToSave=tryToSave);
-    }
-    else
-    {
-      showInformationBox("The following error occurred:\n" + pyOutput + "\n\nAnalysis did not complete.");
-    }
-  }
-  else
-  {
-    isDirty(false);
-    isDirtyRebin(false);
-  }
 
 }
 /**
@@ -435,8 +347,6 @@ void Indirect::clearReflectionInfo()
   m_uiForm.leSpectraMin->clear();
   m_uiForm.leSpectraMax->clear();
   m_uiForm.leEfixed->clear();
-  
-  isDirty(true);
 }
 /**
 * This function creates the mapping/grouping file for the data analysis.
@@ -505,15 +415,11 @@ QString Indirect::savePyCode()
     fileFormats << "nxspe";
 
   if ( fileFormats.size() != 0 )
-    fileFormatList = "[ '" + fileFormats.join("', '") + "']";
+    fileFormatList = "'" + fileFormats.join("', '") + "'";
   else
-    fileFormatList = "[]";
+    fileFormatList = "";
 
-  QString pyInput =
-    "# Save File Parameters\n"
-    "fileFormats = " + fileFormatList + "\n";
-
-  return pyInput;
+  return fileFormatList;
 }
 /**
 * This function is called after calib has run and creates a RES file for use in later analysis (Fury,etc)
@@ -797,40 +703,6 @@ bool Indirect::validateSlice()
   }
 
   return valid;
-}
-/**
-* Used to check whether any changes have been made by the user to the interface.
-* @return boolean m_isDirty
-*/
-bool Indirect::isDirty()
-{
-  return m_isDirty;
-}
-/**
-* Used to set value of m_isDirty, called from each function that signifies a change in the user interface.
-* Will be set to false in functions that use the input.
-* @param state :: whether to set the value to true or false.
-*/
-void Indirect::isDirty(bool state)
-{
-  m_isDirty = state;
-}
-/**
-* Used to check whether any changes have been made by the user to the interface.
-* @return boolean m_isDirtyRebin
-*/
-bool Indirect::isDirtyRebin()
-{
-  return m_isDirtyRebin;
-}
-/**
-* Used to set value of m_isDirtyRebin, called from each function that signifies a change in the user interface.
-* Will be set to false in functions that use the input.
-* @param state :: whether to set the value to true or false.
-*/
-void Indirect::isDirtyRebin(bool state)
-{
-  m_isDirtyRebin = state;
 }
 
 void Indirect::loadSettings()
@@ -1182,8 +1054,6 @@ void Indirect::mappingOptionSelected(const QString& groupType)
   {
     m_uiForm.swMapping->setCurrentIndex(1);
   }
-
-  isDirtyRebin(true);
 }
 
 void Indirect::tabChanged(int index)
@@ -1224,7 +1094,6 @@ void Indirect::backgroundRemoval()
     m_bgRemoval = false;
     m_uiForm.pbBack_2->setText("Background Removal (Off)");
   }
-  isDirty(true);
 }
 /**
 * Plots raw time data from .raw file before any data conversion has been performed.
@@ -1305,7 +1174,6 @@ void Indirect::rebinCheck(bool state)
   QString val;
   if ( state ) val = " ";
   else val = "*";
-  m_uiForm.rebin_pbRebin->setEnabled( !state );
   m_uiForm.rebin_lbLow->setEnabled( !state );
   m_uiForm.rebin_lbWidth->setEnabled( !state );
   m_uiForm.rebin_lbHigh->setEnabled( !state );
@@ -1318,7 +1186,6 @@ void Indirect::rebinCheck(bool state)
   m_uiForm.valEWidth->setText(val);
   m_uiForm.valEHigh->setEnabled(!state);
   m_uiForm.valEHigh->setText(val);
-  isDirtyRebin(true);
 }
 /**
 * Disables/enables the relevant parts of the UI when user checks/unchecks the Detailed Balance
@@ -1329,8 +1196,6 @@ void Indirect::detailedBalanceCheck(bool state)
 {
   m_uiForm.leDetailedBalance->setEnabled(state);
   m_uiForm.lbDBKelvin->setEnabled(state);
-
-  isDirtyRebin(true);
 }
 /**
 * This function enables/disables the display of the options involved in creating the RES file.
@@ -1340,13 +1205,6 @@ void Indirect::resCheck(bool state)
 {
   m_calResR1->setVisible(state);
   m_calResR2->setVisible(state);
-}
-/**
-* This function just calls the runClicked slot, but with tryToSave being 'false'
-*/
-void Indirect::rebinData()
-{
-  runConvertToEnergy(false);
 }
 
 void Indirect::useCalib(bool state)
@@ -1407,20 +1265,6 @@ void Indirect::calibCreate()
       m_uiForm.ckUseCalib->setChecked(true);
     }
   }
-}
-/**
-* Sets interface as "Dirty" - catches all relevant user changes that don't need special action
-*/
-void Indirect::setasDirty()
-{
-  isDirty(true);
-}
-/*
-* Sets interface as "Dirty" - catches all relevant user changes that don't need special action
-*/
-void Indirect::setasDirtyRebin()
-{
-  isDirtyRebin(true);
 }
 /**
 * Controls the ckUseCalib checkbox to automatically check it when a user inputs a file from clicking on 'browse'.

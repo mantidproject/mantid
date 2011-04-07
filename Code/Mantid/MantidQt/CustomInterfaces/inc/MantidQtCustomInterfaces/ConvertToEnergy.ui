@@ -1324,16 +1324,6 @@ p, li { white-space: pre-wrap; }
                  </widget>
                 </item>
                 <item>
-                 <widget class="QCheckBox" name="ckCleanUp" >
-                  <property name="text" >
-                   <string>Keep Intermediate Workspaces</string>
-                  </property>
-                  <property name="checked" >
-                   <bool>false</bool>
-                  </property>
-                 </widget>
-                </item>
-                <item>
                  <spacer name="horizontalSpacer_12" >
                   <property name="orientation" >
                    <enum>Qt::Horizontal</enum>
@@ -1345,16 +1335,6 @@ p, li { white-space: pre-wrap; }
                    </size>
                   </property>
                  </spacer>
-                </item>
-                <item>
-                 <widget class="QPushButton" name="rebin_pbRebin" >
-                  <property name="toolTip" >
-                   <string>Run program up to point where data would be saved, but don't save it.</string>
-                  </property>
-                  <property name="text" >
-                   <string>Rebin</string>
-                  </property>
-                 </widget>
                 </item>
                </layout>
               </item>
@@ -2762,7 +2742,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>rebin_leELow</tabstop>
   <tabstop>rebin_leEWidth</tabstop>
   <tabstop>rebin_leEHigh</tabstop>
-  <tabstop>rebin_pbRebin</tabstop>
   <tabstop>pbBack_2</tabstop>
   <tabstop>pbPlotRaw</tabstop>
   <tabstop>ckSumFiles</tabstop>
@@ -2775,7 +2754,6 @@ p, li { white-space: pre-wrap; }
   <tabstop>leDetailedBalance</tabstop>
   <tabstop>ckDetailedBalance</tabstop>
   <tabstop>cbAnalyser</tabstop>
-  <tabstop>ckCleanUp</tabstop>
   <tabstop>leVanEi</tabstop>
   <tabstop>leVanELow</tabstop>
   <tabstop>leVanEHigh</tabstop>
