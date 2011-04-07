@@ -44,7 +44,7 @@ namespace Mantid
 {
     namespace API
     {
-        // trivial iterator assumes that just have 3 MDCells by default
+        // trivial iterator assumes that just have 4 MDCells by default
         class DLLExport IMDIterator1 : public IMDIterator
         {
         public:
@@ -53,7 +53,7 @@ namespace Mantid
             virtual bool next() { m_pnt++; return m_pnt<m_pntMax;}
             virtual size_t getPointer() const {return m_pnt; }
 
-            IMDIterator1() { m_pnt=0; m_pntMax=3;};
+            IMDIterator1() { m_pnt=0; m_pntMax=4;};
             IMDIterator1(size_t pntMax) { m_pnt=0; m_pntMax=pntMax;};
             ~IMDIterator1() {};
 
@@ -261,6 +261,13 @@ private:
             points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(64,8,1,2,3,5)) );
             c = coordinate::createCoordinate4D(1, 2, 3, 4);
         }
+        else if(npnts==4) {
+            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(81,9,1,2,3,6)) );
+            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(81,9,1,2,3,6.5)) );
+            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(100,10,1,2,3,7)) );
+            points.push_back(boost::shared_ptr<MDPoint>( constructMDPoint(100,10,1,2,3,7.5)) );
+            c = coordinate::createCoordinate4D(1, 2, 3, 6);
+        }
         vertices.push_back(c);
 
         return  MDCell(points, vertices);
@@ -298,7 +305,7 @@ public:
 
     QuadEnBackgroundTest() {};
 
-    // create a test data set of 6 MDPoints contributing to 3 MDCells with 1, 2 and 3 points each.
+    // create a test data set of 6 MDPoints contributing to 4 MDCells with 1, 2 and 3, 4 points each.
     void testInit()
     {
         FakeWSname = "testFakeMDWSSim";
@@ -306,6 +313,7 @@ public:
         pContribCells.push_back(constructMDCell(1));
         pContribCells.push_back(constructMDCell(2));
         pContribCells.push_back(constructMDCell(3));
+        pContribCells.push_back(constructMDCell(4));
 
         myCut = boost::shared_ptr<TestQCut> (new TestQCut(pContribCells) ) ;
         TS_ASSERT_EQUALS(myCut->getNPoints(),0);
@@ -313,7 +321,7 @@ public:
 
         outCut = boost::dynamic_pointer_cast<TestQCut>(AnalysisDataService::Instance().retrieve(FakeWSname));
         TS_ASSERT_EQUALS(outCut->getNPoints(),0);
-        TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),3);
+        TS_ASSERT_EQUALS(myCut->getXDimension()->getNBins(),4);
 
         std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > contributingPoints;
         std::vector<Mantid::Geometry::coordinate> vertices;
@@ -336,6 +344,10 @@ public:
 
     void testWithGenericFit()
     {
+        // test GenericFit - note that fit is to cell data but that MDCell
+        // returns the sum of point contributions, not average.
+        // As the number of points in a cell varies 1 to 4 this must be taken into
+        // account if comparing the fit to the cell data.
         GenericFit alg2;
         TS_ASSERT_THROWS_NOTHING(alg2.initialize());
         TS_ASSERT( alg2.isInitialized() );
@@ -363,14 +375,14 @@ public:
         algStat = alg2.getPropertyValue("Output Status");
         TS_ASSERT( algStat.compare("success")==0 );
 
-        // test the output from fit is as expected - since 3 variables and 3 data points DOF=0
+        // test the output from fit is as expected - since 3 variables and 4 data points DOF= 1
         double dummy = alg2.getProperty("Output Chi^2/DoF");
-        TS_ASSERT( dummy==std::numeric_limits<double>::infinity() );
+        TS_ASSERT_DELTA( dummy, 0.0893, 0.001 );
 
         IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
-        TS_ASSERT_DELTA( out->getParameter("Linear"), 9.777 ,0.02);
-        TS_ASSERT_DELTA( out->getParameter("Constant"), 16.0 ,0.01);
-        TS_ASSERT_DELTA( out->getParameter("Quadratic"), -.0666 ,0.003);
+        TS_ASSERT_DELTA( out->getParameter("Constant"), 16.2809 ,0.001);
+        TS_ASSERT_DELTA( out->getParameter("Linear"), 8.0428 ,0.001);
+        TS_ASSERT_DELTA( out->getParameter("Quadratic"), 0.4192 ,0.001);
 
         // test with output workspace - ties
         GenericFit alg3;
@@ -392,19 +404,19 @@ public:
         TWS_type outParams = getTWS("out_Parameters");
         TS_ASSERT(outParams);
         TS_ASSERT_EQUALS(outParams->rowCount(),4);
-        TS_ASSERT_EQUALS(outParams->columnCount(),2);
+        TS_ASSERT_EQUALS(outParams->columnCount(),3);
 
         TableRow row = outParams->getFirstRow();
         TS_ASSERT_EQUALS(row.String(0),"Constant");
-        TS_ASSERT_DELTA(row.Double(1),16.0,0.01);
+        TS_ASSERT_DELTA(row.Double(1),16.2809,0.001);
 
         row = outParams->getRow(1);
         TS_ASSERT_EQUALS(row.String(0),"Linear");
-        TS_ASSERT_DELTA(row.Double(1),9.777,0.1);
+        TS_ASSERT_DELTA(row.Double(1),8.0428,0.001);
 
         row = outParams->getRow(2);
         TS_ASSERT_EQUALS(row.String(0),"Quadratic");
-        TS_ASSERT_DELTA(row.Double(1),-0.0666,0.03);
+        TS_ASSERT_DELTA(row.Double(1),0.4192,0.001);
 
         AnalysisDataService::Instance().remove(wsName);
         removeWS("out_Parameters");
