@@ -151,6 +151,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
   if (iName.empty())
   {
     iname = ConfigService::Instance().getString("default.instrument");
+    g_log.debug() << "Blank instrument specified, using default instrument of " << iname << "." << std::endl;
     if (iname.empty())
     {
       return m_instruments.front();
@@ -167,6 +168,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
   {
     if (it->name() == iname)
     {
+      g_log.debug() << "Instrument '" << iName << "' found as " << it->name() << " at " << name() << "." << std::endl;
       return *it;
     }
   }
@@ -176,6 +178,7 @@ const InstrumentInfo & FacilityInfo::Instrument(const std::string& iName)const
   {
     if (it->shortName() == iname)
     {
+      g_log.debug() << "Instrument " << iName << " found as " << it->name() << " at " << name() << "." << std::endl;
       return *it;
     }
   }
