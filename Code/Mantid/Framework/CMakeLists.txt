@@ -80,6 +80,8 @@ include_directories (API/inc)
 add_subdirectory (API)
 set ( MANTIDLIBS ${MANTIDLIBS} API )
 
+add_subdirectory (PythonAPI)
+
 find_package ( Matlab )
 if( MATLAB_FOUND )
   add_subdirectory (MatlabAPI)
@@ -93,13 +95,8 @@ add_subdirectory (DataHandling)
 add_subdirectory (Nexus)
 add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
-
-include_directories (Crystal/inc)
 add_subdirectory (Crystal)
-set ( MANTIDLIBS ${MANTIDLIBS} Crystal )
-
 add_subdirectory (ICat)
-add_subdirectory (PythonAPI)
 
 # Unit test helper packages 
 if ( CXXTEST_FOUND )

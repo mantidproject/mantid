@@ -20,7 +20,9 @@ namespace PythonAPI
   void export_kernel_namespace();
   void export_geometry_namespace();
   void export_api_namespace();
-  void export_crystal_namespace();
+
+  // MG: Must be removed as it is a plugin
+  //  void export_crystal_namespace();
 } 
 }
 
