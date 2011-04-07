@@ -528,7 +528,8 @@ HEADERS  += src/ApplicationWindow.h \
                 src/Mantid/InstrumentWidget/OneCurvePlot.h \
                 src/Mantid/InstrumentWidget/CollapsiblePanel.h \
                 src/Mantid/InstrumentWidget/DetSelector.h \
-                src/Mantid/ManageCustomMenus.h
+                src/Mantid/ManageCustomMenus.h \
+                src/Mantid/FirstTimeSetup.h
 
 ###################### FORMS ##############################################
 
@@ -538,6 +539,7 @@ FORMS += src/Mantid/MantidAbout.ui
 FORMS += src/Mantid/RemoveErrorsDialog.ui
 FORMS += src/Mantid/SequentialFitDialog.ui
 FORMS += src/Mantid/ManageCustomMenus.ui
+FORMS += src/Mantid/FirstTimeSetup.ui
 
 ###################### SOURCES ##############################################
 
@@ -723,6 +725,7 @@ SOURCES  += src/ApplicationWindow.cpp \
                 src/Mantid/InstrumentWidget/CollapsiblePanel.cpp \
                 src/Mantid/InstrumentWidget/DetSelector.cpp \
                 src/Mantid/ManageCustomMenus.cpp \
+                src/Mantid/FirstTimeSetup.cpp \
 		src/pixmaps.cpp
 
 
