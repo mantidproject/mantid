@@ -4,7 +4,7 @@ set ( SRC_FILES
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
-    src/AlgorithmProperty.cpp
+        src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
@@ -138,6 +138,8 @@ set ( INC_FILES
 	inc/MantidAPI/Run.h
 	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/Sample.h
+	inc/MantidAPI/ScriptWriter.h
+	inc/MantidAPI/ScriptWriterFactory.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
@@ -154,10 +156,10 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceValidators.h )
 
 set ( TEST_FILES 
-    test/AlgorithmHasPropertyTest.h
+        test/AlgorithmHasPropertyTest.h
 	test/AlgorithmHistoryTest.h
 	test/AlgorithmManagerTest.h
-    test/AlgorithmPropertyTest.h
+        test/AlgorithmPropertyTest.h
 	test/AlgorithmProxyTest.h
 	test/AlgorithmTest.h
 	test/AnalysisDataServiceTest.h
@@ -181,6 +183,8 @@ set ( TEST_FILES
 	test/RunTest.h
 	test/SampleEnvironmentTest.h
 	test/SampleTest.h
+	test/ScriptWriterTest.h
+	test/ScriptWriterFactoryTest.h
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
 	test/WorkspaceFactoryTest.h

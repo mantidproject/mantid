@@ -18,6 +18,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 //#include "MantidDataObjects/EventWorkspace.h"
@@ -214,6 +215,7 @@ using namespace boost::python;
       .def("isDirty", &API::Workspace::isDirty, Workspace_isDirtyOverloader()[return_value_policy< return_by_value >()])
       .def("getName", &API::Workspace::getName, return_value_policy< copy_const_reference >())
       .def("__str__", &API::Workspace::getName, return_value_policy< copy_const_reference >())
+      .def("getHistory", &API::Workspace::getHistory, return_internal_reference<>())
       ;
   }
 
@@ -550,6 +552,13 @@ using namespace boost::python;
 	
   }
 
+  void export_workspace_history()
+  {
+    class_<API::WorkspaceHistory, boost::noncopyable>("WorkspaceHistory", no_init)
+      .def(self_ns::str(self))
+      ;
+  }
+
   void export_file_finder()
   {
     class_<PythonAPI::FileFinderWrapper, boost::noncopyable>("FileFinder", no_init)
@@ -578,6 +587,7 @@ using namespace boost::python;
     export_fileproperty();
     export_workspacefactory();
     export_apivalidators();
+    export_workspace_history();
     export_file_finder();
     export_IMDDimension();
 //    export_EventList();
