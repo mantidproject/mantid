@@ -92,5 +92,35 @@ namespace Mantid
       return (this->name() == rhs.name() && this->shortName() == rhs.shortName());
     }
 
+    /// Returns the default delimiter between instrument name and run number
+    std::string InstrumentInfo::delimiter() const
+    {
+      return m_delimiter;
+    }
+
+    /// Return the name of the instrument
+    const std::string InstrumentInfo::name() const
+    {
+      return m_name;
+    }
+
+    /// Return the short name of the instrument
+    const std::string InstrumentInfo::shortName() const
+    {
+      return m_shortName;
+    }
+
+    /// Returns zero padding for this instrument
+    int InstrumentInfo::zeroPadding() const
+    {
+      return m_zeroPadding;
+    }
+
+    /// Return list of techniques
+    const std::set<std::string>& InstrumentInfo::techniques() const
+    {
+      return m_technique;
+    }
+
   } // namespace Kernel
 } // namespace Mantid

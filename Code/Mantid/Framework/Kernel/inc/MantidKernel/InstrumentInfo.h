@@ -64,15 +64,15 @@ public:
   /// Equality operator
   bool operator==(const InstrumentInfo & rhs) const;
   /// Return the name of the instrument
-  const std::string name()const{return m_name;}
+  const std::string name() const;
   /// Return the short name of the instrument
-  const std::string shortName()const{return m_shortName;}
+  const std::string shortName() const ;
   /// Returns zero padding for this instrument
-  int zeroPadding()const{return m_zeroPadding;}
+  int zeroPadding() const;
   /// Returns the default delimiter between instrument name and run number
-  std::string delimiter() const{return m_delimiter;}
+  std::string delimiter() const;
   /// Return list of techniques
-  const std::set<std::string>& techniques()const{return m_technique;}
+  const std::set<std::string>& techniques() const;
 private:
   const FacilityInfo* m_facility;          ///< facility
   std::string m_name;                      ///< instrument name
