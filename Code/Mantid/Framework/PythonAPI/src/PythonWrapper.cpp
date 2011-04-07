@@ -58,7 +58,9 @@ BOOST_PYTHON_MODULE(libMantidPythonAPI)
   export_kernel_namespace();
   export_geometry_namespace();
   export_api_namespace();
-  export_crystal_namespace();
+
+  // MG: Must be removed as it is a plugin
+  //  export_crystal_namespace();
 }   
 
 
