@@ -93,6 +93,40 @@ namespace Mantid
       }
       return pyValues;
     }
+    /**
+    * Creates an approriate wrapper for the Matrix, i.e. numpy 2D array if it is available or throws an exception if not
+    * @param values :: A reference to the Matrix
+    * @param readonly :: If true the array is flagged as read only (only used for numpy arrays)
+    * @returns A pointer to a PyObject that contains the data
+    */
+    PyObject * MantidVecHelper::createPythonWrapper(const Geometry::MantidMat & values, bool readonly)
+    {
+      if( g_useNumPy )
+      {
+        return MantidVecHelper::createNumPyArray(values, readonly);
+      }
+      else
+      {
+        throw std::runtime_error("Must have numpy installed.");
+      }
+    }
+    /**
+    * Create a NumPy wrapper around the given matrix and marks it as read only
+    * @param values :: A reference to the matrix that will be wrapped by NumPy
+    * @param readonly :: If true the array is flagged as read only
+    * @returns A numpy wrapped array C-array
+    */
+    PyObject * MantidVecHelper::createNumPyArray(const Geometry::MantidMat & values, bool readonly)
+    {
+      npy_intp dims[2] =  {values.size().first,values.size().second} ;
+      PyArrayObject * ndarray = 
+        (PyArrayObject*)PyArray_SimpleNewFromData(2, dims, NPY_DOUBLE,(void*)&(values[0][0]));
+      if( readonly )
+      {
+        ndarray->flags &= ~NPY_WRITEABLE;
+      }
+      return (PyObject*)ndarray;
+    }
 
   }
 }
