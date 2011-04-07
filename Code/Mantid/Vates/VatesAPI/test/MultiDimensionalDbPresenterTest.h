@@ -72,7 +72,8 @@ void testConstruction()
   mdPresenter.execute(wsLoaderAlg, wsId);
 
   vtkDataArray* data = mdPresenter.getScalarDataFromTimeBin(1, "signal");
-  vtkDataSet* visData = mdPresenter.getMesh();
+  RebinningXMLGenerator serializer;
+  vtkDataSet* visData = mdPresenter.getMesh(serializer);
   TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 125000, data->GetSize());
   TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 132651, visData->GetNumberOfPoints());
   TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 30, mdPresenter.getNumberOfTimesteps());
@@ -122,8 +123,8 @@ void testGetMeshThrows()
   MultiDimensionalDbPresenter mdPresenter;
 
   //No execution call. Test that type cannot be used improperly.
-
-  TSM_ASSERT_THROWS("Accessing mesh data without first calling execute should not be possible", mdPresenter.getMesh(), std::runtime_error);
+  RebinningXMLGenerator serializer;
+  TSM_ASSERT_THROWS("Accessing mesh data without first calling execute should not be possible", mdPresenter.getMesh(serializer), std::runtime_error);
 }
 
 void testGetNumberOfTimestepsThrows()

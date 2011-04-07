@@ -1,7 +1,15 @@
 #ifndef MANTID_VATES_DIMENSION_COMPARITOR_H
 #define MANTID_VATES_DIMENSION_COMPARITOR_H
 
-/** Dimension comparitor specifically for use with visualisation layer. Given an arrangement of dimensions in an MDImage, this type
+#include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/Common.h"
+
+namespace Mantid
+{
+  namespace VATES
+  {
+    
+    /** Dimension comparitor specifically for use with visualisation layer. Given an arrangement of dimensions in an MDImage, this type
 allow the utilising code to ask wheter some dimension maps to the x, y, or z dimensions.
 
  @author Owen Arnold, Tessella plc
@@ -27,78 +35,27 @@ allow the utilising code to ask wheter some dimension maps to the x, y, or z dim
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-
-#include "MantidAPI/IMDWorkspace.h"
-#include "MantidVatesAPI/Common.h"
-
-namespace Mantid
-{
-  namespace VATES
-  {
     class DimensionComparitor
     {
     public:
-      
-    DimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace): m_workspace(workspace)
-    {
-    }
+     
+    /// Constructor
+    DimensionComparitor(Mantid::API::IMDWorkspace_sptr workspace);
 
-    ~DimensionComparitor()
-    {
-    }
+    /// Destructor
+    ~DimensionComparitor();
 
-    bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
-    {
-      //Compare dimensions on the basis of their ids.
-      Mantid::Geometry::IMDDimension_const_sptr actualXDimension = m_workspace->getXDimension();
-      return queryDimension->getDimensionId() == actualXDimension->getDimensionId();
-    }
+    bool isXDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
+    
+    bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
 
-    bool isYDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
-    {
-      Mantid::Geometry::IMDDimension_const_sptr actualYDimension = m_workspace->getYDimension();
-      if(NULL == actualYDimension.get())
-      {
-        return false; //MDImages may have 1 dimension or more.
-      }
-      else
-      {
-        //Compare dimensions on the basis of their ids.
-        return queryDimension->getDimensionId() == actualYDimension->getDimensionId();
-      }
-    }
+    bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
 
-    bool isZDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
-    {
-      Mantid::Geometry::IMDDimension_const_sptr actualZDimension = m_workspace->getZDimension();
-      if(NULL == actualZDimension.get())
-      {
-        return false; //MDImages may have 1 dimension or more.
-      }
-      else
-      {
-        //Compare dimensions on the basis of their ids.
-        return queryDimension->getDimensionId() == actualZDimension->getDimensionId();
-      }
-    }
-
-    bool istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension)
-    {
-      Mantid::Geometry::IMDDimension_const_sptr actualtDimension = m_workspace->getTDimension();
-      if(NULL == actualtDimension.get())
-      {
-        return false; //MDImages may have 1 dimension or more.
-      }
-      else
-      {
-        //Compare dimensions on the basis of their ids.
-        return queryDimension->getDimensionId() == actualtDimension->getDimensionId();
-      }
-    }
+    bool istDimension(Mantid::Geometry::IMDDimension_const_sptr  queryDimension);
 
     private:
       
-      /// mdimage containing geometry.
+      /// imd workspace shared ptr.
       Mantid::API::IMDWorkspace_sptr m_workspace;
      
       DimensionComparitor operator=(DimensionComparitor&);

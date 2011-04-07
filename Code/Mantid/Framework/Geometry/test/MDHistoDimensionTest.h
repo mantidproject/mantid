@@ -26,6 +26,40 @@ public:
     TS_ASSERT_EQUALS(d.getNBins(), 15);
   }
 
+  void test_toXMLStringIntegrated()
+  {
+    std::string expectedXML =std::string( 
+      "<Dimension ID=\"id\">") +
+      "<Name>name</Name>" +
+      "<UpperBounds>20.0000</UpperBounds>" +
+      "<LowerBounds>-10.0000</LowerBounds>" +
+      "<NumberOfBins>1</NumberOfBins>" +
+      "<Integrated>" +
+      "<UpperLimit>20.0000</UpperLimit>" +
+      "<LowerLimit>-10.0000</LowerLimit>" +
+      "</Integrated>" +
+      "</Dimension>";
+   
+    MDHistoDimension dimension("name", "id", "Furlongs", -10, 20.0, 1); 
+    std::string actualXML = dimension.toXMLString();
+    TS_ASSERT_EQUALS(expectedXML, actualXML);
+  }
+
+  void test_toXMLStringNotIntegrated()
+  {
+    std::string expectedXML =std::string( 
+      "<Dimension ID=\"id\">") +
+      "<Name>name</Name>" +
+      "<UpperBounds>20.0000</UpperBounds>" +
+      "<LowerBounds>-10.0000</LowerBounds>" +
+      "<NumberOfBins>15</NumberOfBins>" +
+      "</Dimension>";
+
+    MDHistoDimension dimension("name", "id", "Furlongs", -10, 20.0, 15);
+    std::string actualXML = dimension.toXMLString();
+    TS_ASSERT_EQUALS(expectedXML, actualXML);
+  }
+
 
 };
 

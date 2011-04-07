@@ -110,6 +110,7 @@ void testNoImplicitFunctionThrows()
 {
   RebinningXMLGenerator generator;
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
+  pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1);
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1);
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
@@ -121,6 +122,7 @@ void testNoGeometryXMLThrows()
 {
   boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
+  pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return(""));
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return("../somelocation/somefile.sqw"));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
@@ -135,6 +137,7 @@ void testNoLocationThrows()
 {
   boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(new MockImplicitFunction);
   MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
+  pWorkspace->setName("someName");
   EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
   EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return(""));
   boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
@@ -144,6 +147,26 @@ void testNoLocationThrows()
 
   TSM_ASSERT_THROWS("Cannot create the xml without the workspace location", generator.createXMLString(),
       std::runtime_error);
+}
+
+void testNoLocationDoesNotThrow()
+{
+  MockIMDWorkspace* pWorkspace = new MockIMDWorkspace;
+  pWorkspace->setName("someName");
+  EXPECT_CALL(*pWorkspace, getGeometryXML()).Times(1).WillRepeatedly(testing::Return("<DimensionSet/>"));
+  EXPECT_CALL(*pWorkspace, getWSLocation()).Times(1).WillRepeatedly(testing::Return(""));
+  boost::shared_ptr<const Mantid::API::IMDWorkspace> workspace(pWorkspace);
+
+  MockImplicitFunction* pImpFunction = new MockImplicitFunction;
+  EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));
+  boost::shared_ptr<const Mantid::API::ImplicitFunction> impFunction(pImpFunction);
+  
+  RebinningXMLGenerator generator(LocationNotRequired); //Location is not required.
+  generator.setImplicitFunction(impFunction);
+  generator.setWorkspace(workspace);
+  generator.setImplicitFunction(impFunction);
+
+  TSM_ASSERT_THROWS_NOTHING("The location is not mandatory, should not throw", generator.createXMLString());
 }
 
 void testNoNameThrows()
@@ -161,7 +184,7 @@ void testNoNameThrows()
       std::runtime_error);
 }
 
-void testCreateXMLWithWorkspace() //Uses the workspace settter.
+void testCreateXMLWithWorkspace() //Uses the workspace setter.
 {
   MockImplicitFunction* pImpFunction = new MockImplicitFunction;
   EXPECT_CALL(*pImpFunction, toXMLString()).Times(1).WillRepeatedly(testing::Return("<ImplicitFunction/>"));

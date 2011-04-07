@@ -58,6 +58,59 @@ public:
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
 
   }
+  
+  void test_getGeometryXML()
+  {
+    //If POCO xml supported schema validation, we wouldn't need to check xml outputs like this.
+    std::string expectedXML = std::string("<DimensionSet>") +
+      "<Dimension ID=\"x\">" +
+      "<Name>X</Name>" + 
+      "<UpperBounds>10.0000</UpperBounds>" + 
+      "<LowerBounds>-10.0000</LowerBounds>" + 
+      "<NumberOfBins>5</NumberOfBins>" + 
+      "</Dimension>" +
+      "<Dimension ID=\"y\">" +
+      "<Name>Y</Name>" + 
+      "<UpperBounds>10.0000</UpperBounds>" + 
+      "<LowerBounds>-10.0000</LowerBounds>" + 
+      "<NumberOfBins>5</NumberOfBins>" + 
+      "</Dimension>" +
+      "<Dimension ID=\"z\">" +
+      "<Name>Z</Name>" + 
+      "<UpperBounds>10.0000</UpperBounds>" + 
+      "<LowerBounds>-10.0000</LowerBounds>" + 
+      "<NumberOfBins>5</NumberOfBins>" + 
+      "</Dimension>" +
+      "<Dimension ID=\"t\">" +
+      "<Name>T</Name>" + 
+      "<UpperBounds>10.0000</UpperBounds>" + 
+      "<LowerBounds>-10.0000</LowerBounds>" + 
+      "<NumberOfBins>5</NumberOfBins>" + 
+      "</Dimension>" +
+      "<XDimension>" +
+      "<RefDimensionId>x</RefDimensionId>" +
+      "</XDimension>" +
+      "<YDimension>" +
+      "<RefDimensionId>y</RefDimensionId>" + 
+      "</YDimension>" +
+      "<ZDimension>" +
+      "<RefDimensionId>z</RefDimensionId>" + 
+      "</ZDimension>" +
+      "<TDimension>" +
+      "<RefDimensionId>t</RefDimensionId>" + 
+      "</TDimension>" +
+      "</DimensionSet>";
+
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 5));
+
+    MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
+
+    std::string actualXML = ws.getGeometryXML();
+    TS_ASSERT_EQUALS(expectedXML, actualXML);
+  }
 
 
 };

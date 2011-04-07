@@ -5,7 +5,6 @@
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-
 namespace Mantid
 {
 namespace Geometry
@@ -82,10 +81,7 @@ namespace Geometry
     }
 
     /// Dimensions must be xml serializable.
-    virtual std::string toXMLString() const
-    {
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet implemented.");
-    }
+    virtual std::string toXMLString() const;
 
     ///  Get coordinate for index;
     virtual double getX(size_t index) const

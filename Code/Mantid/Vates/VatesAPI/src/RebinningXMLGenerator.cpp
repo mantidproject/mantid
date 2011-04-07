@@ -11,7 +11,14 @@ namespace Mantid
 namespace VATES
 {
 
-RebinningXMLGenerator::RebinningXMLGenerator() : m_spFunction(), m_wsLocationXML(""), m_wsNameXML(""), m_wsLocation(""), m_wsName(""), m_geomXML("")
+RebinningXMLGenerator::RebinningXMLGenerator(LocationPolicy locationPolicy) : 
+  m_spFunction(), 
+  m_wsLocationXML(""), 
+  m_wsNameXML(""), 
+  m_wsLocation(""), 
+  m_wsName(""), 
+  m_geomXML(""),
+  m_locationPolicy(locationPolicy)
 {
 }
 
@@ -55,9 +62,12 @@ std::string RebinningXMLGenerator::createXMLString() const
   {
     throw std::runtime_error("No geometry provided on workspace.");
   }
-  if(this->m_wsLocationXML == (XMLDefinitions::workspaceLocationXMLTagStart() + XMLDefinitions::workspaceLocationXMLTagEnd()))
+  if(LocationMandatory == this->m_locationPolicy) //Only if it is stated that a location must be provided, do we apply the checking.
   {
-    throw std::runtime_error("No workspace location provided on workspace.");
+    if(this->m_wsLocationXML == (XMLDefinitions::workspaceLocationXMLTagStart() + XMLDefinitions::workspaceLocationXMLTagEnd()))
+    {
+      throw std::runtime_error("No workspace location provided on workspace.");
+    }
   }
   if(this->m_wsNameXML == (XMLDefinitions::workspaceNameXMLTagStart() + XMLDefinitions::workspaceNameXMLTagEnd()))
   {

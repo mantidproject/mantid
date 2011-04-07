@@ -129,25 +129,25 @@ public:
 
 
   //Temporary fix to get 1-D image data
-  MD_image_point getPoint(int index)
+  MD_image_point getPoint(size_t index)
   {
     return this->MD_IMG_array.data[index];
   }
 
   //Temporary fix to get 3-D image data.
-  MD_image_point getPoint(int i,int j)       const
+  MD_image_point getPoint(size_t i,size_t j)       const
   {
     return this->MD_IMG_array.data[nCell(i, j)];
   }
 
   //Temporary fix to get 3-D image data.
-  MD_image_point getPoint(int i,int j,int k)       const
+  MD_image_point getPoint(size_t i,size_t j,size_t k)       const
   {
     return this->MD_IMG_array.data[nCell(i, j, k)];
   }
 
   //Temporary fix to get4-D image data.
-  MD_image_point getPoint(int i, int j, int k, int t) const
+  MD_image_point getPoint(size_t i, size_t j, size_t k, size_t t) const
   {
     return this->MD_IMG_array.data[nCell(i, j, k, t)];
   }
@@ -166,10 +166,10 @@ protected:
   //*************************************************
   //
   // location of cell in 1D data array shaped as 4 or less dimensional array;
-  size_t nCell(int i)                    const{ return (i);}
-  size_t nCell(int i,int j)              const{ return (i+j*nd2); }
-  size_t nCell(int i,int j,int k)        const{ return (i+j*nd2+k*nd3); }
-  size_t nCell(int i,int j,int k, int n) const{ return (i+j*nd2+k*nd3+n*nd4);}
+  size_t nCell(size_t i)                    const{ return (i);}
+  size_t nCell(size_t i,size_t j)              const{ return (i+j*nd2); }
+  size_t nCell(size_t i,size_t j,size_t k)        const{ return (i+j*nd2+k*nd3); }
+  size_t nCell(size_t i,size_t j,size_t k, size_t n) const{ return (i+j*nd2+k*nd3+n*nd4);}
 
   /// MD workspace logger
   static Kernel::Logger& g_log;

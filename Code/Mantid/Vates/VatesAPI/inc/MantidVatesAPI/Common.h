@@ -2,6 +2,7 @@
 #define MANTID_VATES_COMMON_H_
 #include <vector>
 #include <boost/shared_ptr.hpp>
+
 namespace Mantid
 {
 namespace Geometry

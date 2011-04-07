@@ -97,10 +97,7 @@ namespace MDEvents
     }
 
     /// All MD type workspaces have an effective geometry. MD type workspaces must provide this geometry in a serialized format.
-    std::string getGeometryXML() const
-    {
-      throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
-    }
+    std::string getGeometryXML() const;
 
 
     /// Sets the signal at the specified index.

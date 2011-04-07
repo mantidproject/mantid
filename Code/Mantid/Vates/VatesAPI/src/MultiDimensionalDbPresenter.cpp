@@ -88,7 +88,7 @@ std::string MultiDimensionalDbPresenter::getZAxisName() const
   return m_workspace->getZDimension()->getDimensionId();
 }
 
-vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
+vtkDataSet* MultiDimensionalDbPresenter::getMesh(RebinningXMLGenerator& serializer) const
 {
   using namespace Mantid::MDDataObjects;
 
@@ -103,7 +103,6 @@ vtkDataSet* MultiDimensionalDbPresenter::getMesh() const
   vtkFieldData* outputFD = vtkFieldData::New();
 
   //Serialize metadata
-  RebinningXMLGenerator serializer;
   serializer.setWorkspaceName(m_workspace->getName());
   serializer.setWorkspaceLocation(m_workspace->getWSLocation());
   serializer.setGeometryXML(m_workspace->getGeometryXML());

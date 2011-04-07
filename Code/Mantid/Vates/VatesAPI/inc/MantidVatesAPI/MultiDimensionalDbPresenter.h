@@ -4,6 +4,7 @@
 #include <vtkStructuredGrid.h>
 #include <vtkFieldData.h>
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidVatesAPI/RebinningXMLGenerator.h"
 
 namespace Mantid
 {
@@ -68,7 +69,7 @@ public:
   void execute(API::Algorithm& algorithm, const std::string wsId);
 
   /// Gets the vtk mesh;
-  vtkDataSet* getMesh() const;
+  vtkDataSet* getMesh(RebinningXMLGenerator& serializer) const;
 
   /// Gets the vtk scalar data for the mesh. Generated scalar data is provided with the specified name.
   vtkDataArray* getScalarDataFromTimeBin(int timeBin, const char *scalarName) const;

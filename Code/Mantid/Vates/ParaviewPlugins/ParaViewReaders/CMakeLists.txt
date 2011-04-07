@@ -1,1 +1,2 @@
 add_subdirectory(SQWReader)
+add_subdirectory(EventNexusReader)

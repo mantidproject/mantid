@@ -1,0 +1,6 @@
+<ParaViewReaders>
+  <Reader name="EventNexusReader"
+    extensions="nxs"
+    file_description="Event Nexus File">
+  </Reader>
+</ParaViewReaders>

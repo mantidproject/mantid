@@ -19,7 +19,7 @@
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
-#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/MetadataToFieldData.h"
 #include "MantidVatesAPI/FieldDataToMetadata.h"
 
@@ -31,7 +31,6 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MD_FileFormatFactory.h"
-#include "MantidAPI/AnalysisDataService.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

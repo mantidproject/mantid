@@ -15,7 +15,6 @@
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
-#include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
@@ -502,8 +501,6 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
 vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
     Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-  using Mantid::MDDataObjects::MDImage;
-
   //Get the time dimension
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->getTDimension();
 
@@ -521,7 +518,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
 
 
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>
+  vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>
   (workspaceProxy, XMLDefinitions::signalName(), m_timestep,
       timeMapper, m_thresholdMin, m_thresholdMax);
 
@@ -538,8 +535,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
       m_appliedTDimension->getNBins());
 
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new vtkThresholdingUnstructuredGridFactory<
-      TimeToTimeStep> (spRebinnedWs, XMLDefinitions::signalName(), m_timestep,
+  vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(spRebinnedWs, XMLDefinitions::signalName(), m_timestep,
       timeMapper, m_thresholdMin, m_thresholdMax);
 
   //Return the generated factory.

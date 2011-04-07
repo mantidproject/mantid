@@ -14,6 +14,10 @@ class IMDWorkspace;
 
 namespace VATES
 {
+
+//The workspace location may or may not be required. This type defines the options.
+enum LocationPolicy{LocationMandatory, LocationNotRequired};
+
 /**
 
  This type assists with the generation of well-formed xml meeting the xsd scehema layed-out for
@@ -56,11 +60,10 @@ private:
   std::string m_wsLocation;
   std::string m_wsName;
   std::string m_geomXML;
-
-
+  LocationPolicy m_locationPolicy;
 public:
 
-  RebinningXMLGenerator();
+  RebinningXMLGenerator(LocationPolicy locationPolicy=LocationMandatory);
 
   /// Set the implicit function to use called.
   void setImplicitFunction(boost::shared_ptr<const Mantid::API::ImplicitFunction> spFunction);

@@ -31,6 +31,7 @@ vtkSQWReader::~vtkSQWReader()
 
 int vtkSQWReader::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
 {
+  using namespace Mantid::VATES;
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -44,7 +45,8 @@ int vtkSQWReader::RequestData(vtkInformation *request, vtkInformationVector **in
      time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   }
 
-  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh());
+  RebinningXMLGenerator serializer;
+  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh(serializer));
   structuredMesh->GetCellData()->AddArray(m_presenter.getScalarDataFromTime(time, "signal"));
 
   int subext[6];

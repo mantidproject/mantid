@@ -1,6 +1,17 @@
 #include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidKernel/System.h"
 
+#include <Poco/DOM/DOMParser.h>
+#include <Poco/DOM/Document.h>
+#include <Poco/DOM/Element.h>
+#include <Poco/DOM/Attr.h>
+#include <Poco/DOM/Text.h>
+#include <Poco/DOM/AutoPtr.h> 
+#include <Poco/DOM/DOMWriter.h>
+#include <Poco/XML/XMLWriter.h>
+#include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
+
 namespace Mantid
 {
 namespace MDEvents
@@ -92,6 +103,70 @@ namespace MDEvents
     // This copies again! :(
     return out;
   }
+
+  std::string MDHistoWorkspace::getGeometryXML() const
+  {
+    using namespace Poco::XML;
+
+    //Create the root element for this fragment.
+    AutoPtr<Document> pDoc = new Document;
+    AutoPtr<Element> dimensionSetElement = pDoc->createElement("DimensionSet");
+    pDoc->appendChild(dimensionSetElement);
+
+    //Loop through dimensions and generate xml for each.
+    std::string dimensionXMLString;
+    for(size_t i = 0; i <m_dimensions.size(); i++)
+    {
+      dimensionXMLString += m_dimensions[i]->toXMLString();
+    }
+
+    //Pass dimensions to dimension set.
+    dimensionSetElement->appendChild(pDoc->createTextNode("%s"));
+
+    //x-dimension mapping.
+    AutoPtr<Element> xDimensionElement = pDoc->createElement("XDimension");
+    AutoPtr<Element> xDimensionIdElement = pDoc->createElement("RefDimensionId");
+    std::string xDimensionId = this->getXDimension()->getDimensionId();
+    AutoPtr<Text> idXText = pDoc->createTextNode(xDimensionId);
+    xDimensionIdElement->appendChild(idXText);
+    xDimensionElement->appendChild(xDimensionIdElement);
+    dimensionSetElement->appendChild(xDimensionElement);
+
+    //y-dimension mapping.
+    AutoPtr<Element> yDimensionElement = pDoc->createElement("YDimension");
+    AutoPtr<Element> yDimensionIdElement = pDoc->createElement("RefDimensionId");
+    std::string yDimensionId = this->getYDimension()->getDimensionId();
+    AutoPtr<Text> idYText = pDoc->createTextNode(yDimensionId);
+    yDimensionIdElement->appendChild(idYText);
+    yDimensionElement->appendChild(yDimensionIdElement);
+    dimensionSetElement->appendChild(yDimensionElement);
+
+    //z-dimension mapping.
+    AutoPtr<Element> zDimensionElement = pDoc->createElement("ZDimension");
+    AutoPtr<Element> zDimensionIdElement = pDoc->createElement("RefDimensionId");
+    std::string zDimensionId = this->getZDimension()->getDimensionId();
+    AutoPtr<Text> idZText = pDoc->createTextNode(zDimensionId);
+    zDimensionIdElement->appendChild(idZText);
+    zDimensionElement->appendChild(zDimensionIdElement);
+    dimensionSetElement->appendChild(zDimensionElement);
+
+    //t-dimension mapping.
+    AutoPtr<Element> tDimensionElement = pDoc->createElement("TDimension");
+    AutoPtr<Element> tDimensionIdElement = pDoc->createElement("RefDimensionId");
+    std::string tDimensionId = this->getTDimension()->getDimensionId();
+    AutoPtr<Text> idTText = pDoc->createTextNode(tDimensionId);
+    tDimensionIdElement->appendChild(idTText);
+    tDimensionElement->appendChild(tDimensionIdElement);
+    dimensionSetElement->appendChild(tDimensionElement);
+
+    std::stringstream xmlstream;
+    DOMWriter writer;
+    writer.writeNode(xmlstream, pDoc);
+
+    std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str()) % dimensionXMLString.c_str());
+    return formattedXMLString;
+  }
+
 
 
 } // namespace Mantid

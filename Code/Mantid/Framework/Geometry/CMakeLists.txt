@@ -40,6 +40,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDGeometryBasis.cpp
 	src/MDGeometry/MDGeometry.cpp
 	src/MDGeometry/MDGeometryDescription.cpp
+	src/MDGeometry/MDHistoDimension.cpp
 	src/MDGeometry/MDPoint.cpp
 	src/Objects/BoundingBox.cpp
 	src/Objects/Material.cpp
