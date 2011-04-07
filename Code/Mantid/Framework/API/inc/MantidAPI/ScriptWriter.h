@@ -50,7 +50,7 @@ namespace Mantid
     {
     public:
       /// Virtual destructor for base class
-      virtual ~ScriptWriter() {}
+      virtual ~ScriptWriter();
       /// Create a script as a string
       virtual std::string write(const WorkspaceHistory& history) const = 0;
     };
