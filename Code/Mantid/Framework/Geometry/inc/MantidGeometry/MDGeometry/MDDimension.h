@@ -15,16 +15,6 @@
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
-#include <Poco/DOM/DOMParser.h>
-#include <Poco/DOM/Document.h>
-#include <Poco/DOM/Element.h>
-#include <Poco/DOM/Attr.h>
-#include <Poco/DOM/Text.h>
-#include <Poco/DOM/AutoPtr.h> 
-#include <Poco/DOM/DOMWriter.h>
-#include <Poco/XML/XMLWriter.h>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 /** The class discribes one dimension of multidimensional dataset representing an ortogonal dimension and linear axis. 
  *
  *   A multidimensional dataset has N such dimensions and usual problem would have maximal number of
