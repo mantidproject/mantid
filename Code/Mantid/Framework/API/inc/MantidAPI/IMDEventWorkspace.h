@@ -48,11 +48,6 @@ namespace API
     /// Get the dimension index, searching by name
     virtual size_t getDimensionIndexByName(const std::string & name) const;
 
-    /// For centerpoint binning
-    virtual IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-        Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
-        Mantid::Kernel::ProgressBase * prog) const = 0;
-
 
   protected:
     /// Vector with each dimension (length must match nd)

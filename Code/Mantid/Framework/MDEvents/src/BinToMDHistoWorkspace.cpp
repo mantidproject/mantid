@@ -1,8 +1,11 @@
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/Strings.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidKernel/System.h"
-#include "MantidKernel/Strings.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidMDEvents/MDEventFactory.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Mantid
@@ -52,6 +55,7 @@ namespace MDEvents
     declareProperty(new PropertyWithValue<std::string>("DimY","",Direction::Input), "Binning parameters for the Y dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimZ","",Direction::Input), "Binning parameters for the Z dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimT","",Direction::Input), "Binning parameters for the T dimension.\n" + dimHelp);
+    declareProperty(new PropertyWithValue<std::string>("ImplicitFunctionXML","",Direction::Input), "XML string describing the implicit function determining which bins to use.");
     declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output), "A name for the output MDHistoWorkspace.");
   }
 
@@ -89,12 +93,22 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Templated method to apply the binning operation to the particular
+   * MDEventWorkspace passed in.
+   * @param ws ::MDEventWorkspace
+   */
+  template<typename MDE, size_t nd>
+  void BinToMDHistoWorkspace::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
+  {
+    out = ws->centerpointBinToMDHistoWorkspace(dimX,dimY,dimZ,dimT, implicitFunc, prog);
+  }
+
+  //----------------------------------------------------------------------------------------------
   /** Execute the algorithm.
    */
   void BinToMDHistoWorkspace::exec()
   {
     // Create the dimensions based on the strings from the user
-    MDHistoDimension_sptr dimX,dimY,dimZ,dimT;
     dimX = makeMDHistoDimensionFromString( getPropertyValue("DimX"));
     dimY = makeMDHistoDimensionFromString( getPropertyValue("DimY"));
     dimZ = makeMDHistoDimensionFromString( getPropertyValue("DimZ"));
@@ -102,8 +116,18 @@ namespace MDEvents
 
     IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
 
-    Progress * prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool!
-    IMDWorkspace_sptr out = in_ws->centerpointBinToMDHistoWorkspace(dimX,dimY,dimZ,dimT, prog);
+    // De serialize the implicit function
+    std::string ImplicitFunctionXML = getPropertyValue("ImplicitFunctionXML");
+    implicitFunc = NULL;
+    if (!ImplicitFunctionXML.empty())
+    {
+      implicitFunc = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(ImplicitFunctionXML);
+    }
+
+    prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool!
+
+    // Wrapper to cast to MDEventWorkspace then call the function
+    CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);
 
     // Save the output
     setProperty("OutputWorkspace", boost::dynamic_pointer_cast<Workspace>(out));

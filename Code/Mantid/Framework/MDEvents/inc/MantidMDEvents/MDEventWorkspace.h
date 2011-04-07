@@ -3,6 +3,7 @@
 
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
+#include "MantidAPI/ImplicitFunction.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
@@ -81,6 +82,7 @@ namespace MDEvents
 
     Mantid::API::IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
         Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
+        Mantid::API::ImplicitFunction *_implicitFunction,
         Mantid::Kernel::ProgressBase * prog) const;
 
     /// Return true if the underlying box is a MDGridBox.

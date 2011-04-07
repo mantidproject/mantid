@@ -357,12 +357,14 @@ namespace MDEvents
    * @param dimY :: Y dimension binning parameters
    * @param dimZ :: Z dimension binning parameters
    * @param dimT :: T (time) dimension binning parameters
-   * @param prog :: Progress reporter.
+   * @param implicitFunction :: a ImplicitFunction defining which bins to calculate. NULL if all bins will be calculated.
+   * @param prog :: Progress reporter, can be NULL.
    * @return a shared ptr to MDHistoWorkspace created.
    */
   TMDE(
   IMDWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT, Mantid::Kernel::ProgressBase * prog) const
+      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
+      Mantid::API::ImplicitFunction * implicitFunction, Mantid::Kernel::ProgressBase * prog) const
   {
     bool DODEBUG = false;
     Timer tim;
@@ -447,8 +449,18 @@ namespace MDEvents
       }
       bin.m_index = linear_index;
 
-      // Create the task and schedule it
-      ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, bin) );
+      // Check if the bin is in the ImplicitFunction (if any)
+      bool binContained = true;
+      if (implicitFunction)
+      {
+        //TODO: implicitFunction call.
+      }
+
+      if (binContained)
+      {
+        // Create the task and schedule it
+        ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, bin) );
+      }
 
       // --- Increment index in each dimension -----
       allDone = Utils::nestedForLoopIncrement(numBD, index, index_max);

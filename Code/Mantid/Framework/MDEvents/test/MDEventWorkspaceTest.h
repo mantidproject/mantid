@@ -265,7 +265,7 @@ public:
     IMDWorkspace_sptr out;
     ProgressText * prog = new ProgressText(0, 1.0, 1); // The function will set the # of steps
     prog = NULL;
-    TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], prog) );
+    TS_ASSERT_THROWS_NOTHING( out = ws->centerpointBinToMDHistoWorkspace(dims[0], dims[1], dims[2], dims[3], NULL, prog) );
     TS_ASSERT(out);
 
 
