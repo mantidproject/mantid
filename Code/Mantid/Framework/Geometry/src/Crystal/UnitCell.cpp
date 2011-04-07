@@ -30,7 +30,7 @@ namespace Geometry
   {
 	  da[0]=_a;da[1]=_b;da[2]=_c;
 	  // Angle transformed in radians
-    if(Unit==Degrees)
+    if(Unit==latDegrees)
       {
 	      da[3]=deg2rad*_alpha;
 	      da[4]=deg2rad*_beta;
@@ -52,7 +52,7 @@ namespace Geometry
   void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit)
   {
     da[0]=_a; da[1]=_b; da[2]=_c;
-    if (Unit==Degrees)
+    if (Unit==latDegrees)
       {
 	      da[3]=deg2rad*_alpha;
 	      da[4]=deg2rad*_beta;
@@ -87,7 +87,7 @@ namespace Geometry
 
   void UnitCell::setalpha(double _alpha,const int Unit)
   {
-    if (Unit==Degrees) 
+    if (Unit==latDegrees) 
       da[3]=deg2rad*_alpha;
     else 
       da[3]=_alpha;
@@ -96,7 +96,7 @@ namespace Geometry
   
   void UnitCell::setbeta(double _beta,const int Unit)
   {
-    if (Unit==Degrees) 
+    if (Unit==latDegrees) 
       da[4]=deg2rad*_beta;
     else 
       da[4]=_beta;
@@ -105,7 +105,7 @@ namespace Geometry
 
   void UnitCell::setgamma(double _gamma,const int Unit)
   {
-    if (Unit==Degrees) 
+    if (Unit==latDegrees) 
       da[5]=deg2rad*_gamma;
     else 
       da[5]=_gamma;
@@ -131,7 +131,7 @@ namespace Geometry
     Q1=Gstar*Q1;
     E=Q1.scalar_prod(Q2);
 	  ang=acos(E/dstar(h1,k1,l1)/dstar(h2,k2,l2));
-    if (Unit==Degrees) 
+    if (Unit==latDegrees) 
       return rad2deg*ang;
     else 
       return ang;    

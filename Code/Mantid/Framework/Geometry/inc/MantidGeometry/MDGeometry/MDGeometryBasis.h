@@ -9,6 +9,7 @@
 #include "MantidGeometry/DllExport.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include <vector>
 #include <string>
 #include <map>
@@ -52,13 +53,13 @@ namespace Mantid
   namespace Geometry
   {
 
-  class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
+ /* class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
  // class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure. 
   {
 	public: 
 		UnitCell(void){};
     };
-
+*/
     //****************************************************************************************************************************************
     class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {

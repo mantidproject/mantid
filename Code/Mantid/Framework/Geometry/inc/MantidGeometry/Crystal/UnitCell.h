@@ -18,7 +18,7 @@ namespace Geometry
    */
   const double deg2rad=M_PI/180.;
   const double rad2deg=180./M_PI;
-  enum AngleUnits {Degrees,Radians};
+  enum AngleUnits {latDegrees,latRadians};
 
   class DLLExport UnitCell
   {
@@ -26,7 +26,7 @@ namespace Geometry
       UnitCell(); //Default constructor
       UnitCell(const UnitCell& other); //Copy constructor
       UnitCell(const double _a,const double _b,const double _c); //Constructor a, b, c, alpha=90degrees, beta=90 degrees, gamma=90 degrees
-      UnitCell(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,const int Unit=Degrees); //Constructor a, b, c, alpha, beta, gamma, AngleUnits (degrees or radians)
+      UnitCell(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,const int Unit=latDegrees); //Constructor a, b, c, alpha, beta, gamma, AngleUnits (degrees or radians)
       ~UnitCell(); //Destructor
 
       // Get and set lattice parameters
@@ -59,13 +59,13 @@ namespace Geometry
 	    double betastar() const {return ra[4]*rad2deg;}
 	    double gammastar() const {return ra[5]*rad2deg;}
       // Set lattice
-      void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit=Degrees);
+      void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit=latDegrees);
       void seta(double _a);
       void setb(double _b);
       void setc(double _c);
-      void setalpha(double _alpha,const int Unit=Degrees);
-      void setbeta(double _beta,const int Unit=Degrees);
-      void setgamma(double _gamma,const int Unit=Degrees);
+      void setalpha(double _alpha,const int Unit=latDegrees);
+      void setbeta(double _beta,const int Unit=latDegrees);
+      void setgamma(double _gamma,const int Unit=latDegrees);
 
       // Access private variables
 	    const Geometry::MantidMat& getG() const {return G;} //Get the metric tensor
@@ -75,7 +75,7 @@ namespace Geometry
       // Calculate things about lattice and vectors
 	    double d(double h, double k, double l) const; //Return d-spacing ($\AA$) for a given h,k,l coordinate
 	    double dstar(double h,double k, double l) const; //Return d*=1/d ($\AA^{-1}$) for a given h,k,l coordinate
-	    double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int Unit=Degrees) const; //Calculate the angle in degrees or radians between two reciprocal vectors (h1,k1,l1) and (h2,k2,l2)
+	    double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int Unit=latDegrees) const; //Calculate the angle in degrees or radians between two reciprocal vectors (h1,k1,l1) and (h2,k2,l2)
 	  	double volume()const; //Volume of the direct unit-cell
 	    double recVolume() const; //Volume of the reciprocal lattice
 

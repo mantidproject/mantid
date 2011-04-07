@@ -61,7 +61,7 @@ public:
     // d spacing for direct lattice at (1,1,1) (will automatically check dstar)
     TS_ASSERT_DELTA(u.d(1.,1.,1.),2.1227107587,1e-10);
     // angle
-    TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,Radians),0.471054990614,1e-10);
+    TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,latRadians),0.471054990614,1e-10);
   }
 };
 
