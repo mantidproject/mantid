@@ -1,21 +1,20 @@
 //-----------------------------------
 //Includes
 //-----------------------------------
-#include <vector>
-#include <set>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iomanip>
 #include "MantidPythonAPI/SimplePythonAPI.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
-#include <Poco/DirectoryIterator.h>
-#include <Poco/Path.h>
-#include <Poco/File.h>
+#include "Poco/Path.h"
+
+#include <vector>
+#include <set>
+#include <string>
+#include <fstream>
+#include <sstream>
+#include <iomanip>
 
 namespace Mantid
 {
@@ -242,9 +241,7 @@ namespace Mantid
 	   << "      else:\n"
 	   << "          raise\n";
       }
-      os << "  algm = mtd._createAlgProxy(algm)\n"
-         << "  algm.execute()\n";
-
+      os  << "  algm.execute()\n";
       // Return the IAlgorithm object
       os << "  return algm\n";
 

@@ -56,7 +56,7 @@ using namespace boost::python;
       .def("clearData", &FrameworkManagerProxy::clearData)
       .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
-      .def("createAlgorithm", &FrameworkManagerProxy::createAlgorithm, FrameworkManager_createAlgorithmOverloader()[return_value_policy< reference_existing_object >()] )
+      .def("createBareAlgorithm", &FrameworkManagerProxy::createAlgorithm, FrameworkManager_createAlgorithmOverloader()[return_value_policy< reference_existing_object >()] )
       .def("_getPropertyOrder", &FrameworkManagerProxy::getPropertyOrder, return_value_policy< reference_existing_object >())
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)

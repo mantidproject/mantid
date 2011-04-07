@@ -890,6 +890,24 @@ class MantidPyFramework(FrameworkManager):
     
     #### methods ###########################################################
 
+    def initialise(self, GUI = False):
+        """
+        Initialise the framework
+        """
+        if self.__is_initialized == True:
+            return
+        self.__gui__ = GUI
+
+        # Welcome everyone to the world of MANTID
+        print '\n' + self.settings.welcomeMessage() + '\n'
+        # Run through init steps
+        self.createPythonSimpleAPI(GUI)
+        self._pyalg_loader.load_modules(refresh=False)
+        self.createPythonSimpleAPI(GUI) # TODO this line should go
+        self._importSimpleAPIToMain()
+
+        self.__is_initialized = True
+
     def list(self):
         """
         Print a list of the workspaces stored in Mantid along with their type
@@ -941,23 +959,16 @@ class MantidPyFramework(FrameworkManager):
         self._pyalg_objs[algorithm.name()] = algorithm
         super(MantidPyFramework, self).registerPyAlgorithm(algorithm)
 
-    def initialise(self, GUI = False):
-        """
-        Initialise the framework
-        """
-        if self.__is_initialized == True:
-            return
-        self.__gui__ = GUI
+    def createAlgorithm(self, name, version=-1):
+        """Creates an algorithm object. The object
+        is then wrapped in an AlgorithmProxy and returned.
+        This allows things such as alg.workspace() to be 
+        used.
 
-        # Welcome everyone to the world of MANTID
-        print '\n' + self.settings.welcomeMessage() + '\n'
-        # Run through init steps
-        self.createPythonSimpleAPI(GUI)
-        self._pyalg_loader.load_modules(refresh=False)
-        self.createPythonSimpleAPI(GUI) # TODO this line should go
-        self._importSimpleAPIToMain()
-
-        self.__is_initialized = True
+        @see createBareAlgorithm for creating an algorithm
+        object alone
+        """
+        return self._createAlgProxy(name, version)
 
     #### private methods ###########################################################
     
@@ -1086,7 +1097,7 @@ class MantidPyFramework(FrameworkManager):
         Will accept either a IAlgorithm or a string specifying the algorithm name.
         """
         if isinstance(ialg, str):
-            ialg = self.createAlgorithm(str(ialg), version) 
+            ialg = self.createBareAlgorithm(str(ialg), version) 
         ialg.setRethrows(True) # TODO get rid of this line
         return IAlgorithmProxy(ialg, self)
 
