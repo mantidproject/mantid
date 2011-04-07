@@ -69,6 +69,15 @@ set ( SVN_WORKING_COPY OFF CACHE BOOL "If true, will try to pull out subversion 
 if ( SVN_WORKING_COPY )
   include( FindSubversion )
 endif ()
+if ( Subversion_FOUND )
+  # extract working copy information for SOURCE_DIR into Framework_XXX variables                                                                 
+  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Framework)
+else ()
+  # Just use a dummy version number and print a warning                                                                                          
+  message ( STATUS "Subversion not found - using 0 for revision number in MantidVersion.h" )
+  set ( Framework_WC_REVISION 0 )
+endif ()
+mark_as_advanced( Framework_WC_REVISION )
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found

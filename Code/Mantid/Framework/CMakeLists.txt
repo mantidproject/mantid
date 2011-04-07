@@ -26,14 +26,6 @@ endif ()
 # This section deals with creating the MantidVersion.h header
 ###########################################################################
 
-if ( Subversion_FOUND )
-  # extract working copy information for SOURCE_DIR into Framework_XXX variables
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Framework)
-else ()
-  # Just use a dummy version number and print a warning
-  message ( STATUS "Subversion not found - using 0 for revision number in MantidVersion.h" )
-  set ( Framework_WC_REVISION 0 )
-endif ()
 # Create the header with the revision number in
 set ( HEADER_DIR Kernel/inc/MantidKernel )
 configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
