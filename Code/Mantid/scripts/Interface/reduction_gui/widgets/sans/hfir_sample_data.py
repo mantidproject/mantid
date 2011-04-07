@@ -3,19 +3,20 @@ import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from reduction_gui.settings.application_settings import GeneralSettings
-from reduction_gui.widgets.base_widget import BaseWidget
+from reduction_gui.widgets.base_widget import BaseWidget, _show_instrument
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
 from reduction_gui.reduction.mantid_util import DataFileProxy
+import functools
 
 class DirectBeam(BaseWidget):
     """
         Widget for the direct beam transmission calculation options.
     """
     
-    def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        super(DirectBeam, self).__init__(parent, state, settings, data_type)
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
+        super(DirectBeam, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy)
         
         class DirectBeamFrame(QtGui.QGroupBox, ui.sans.ui_trans_direct_beam.Ui_GroupBox): 
             def __init__(self, parent=None):
@@ -81,8 +82,8 @@ class BeamSpreader(BaseWidget):
         Widget for the beam spreader transmission calculation options.
     """
     
-    def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        super(BeamSpreader, self).__init__(parent, state, settings, data_type) 
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
+        super(BeamSpreader, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
         
         class SpreaderFrame(QtGui.QGroupBox, ui.sans.ui_trans_spreader.Ui_GroupBox): 
             def __init__(self, parent=None):
@@ -112,6 +113,9 @@ class BeamSpreader(BaseWidget):
         self.connect(self._content.sample_spread_browse, QtCore.SIGNAL("clicked()"), self._sample_spread_browse)
         self.connect(self._content.direct_scatt_browse, QtCore.SIGNAL("clicked()"), self._direct_scatt_browse)
         self.connect(self._content.direct_spread_browse, QtCore.SIGNAL("clicked()"), self._direct_spread_browse)
+
+        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"), 
+                     functools.partial(_show_instrument, self=self, read_function=self._content.sample_scatt_edit.text))
 
         if not self._in_mantidplot:
             self._content.sample_scatt_plot.hide()
@@ -144,6 +148,9 @@ class BeamSpreader(BaseWidget):
         m.direct_spreader = unicode(self._content.direct_spread_edit.text())
         return m    
     
+    def _sample_scatt_plot(self):
+         self.show_instrument(unicode(self._content.sample_scatt_edit.text()))
+       
     def _sample_scatt_browse(self):
         fname = self.data_browse_dialog()
         if fname:
@@ -173,8 +180,8 @@ class SampleDataWidget(BaseWidget):
     ## Widget name
     name = "Sample"      
     
-    def __init__(self, parent=None, state=None, settings=None, data_type=None):
-        super(SampleDataWidget, self).__init__(parent, state, settings, data_type) 
+    def __init__(self, parent=None, state=None, settings=None, data_type=None, data_proxy=None):
+        super(SampleDataWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
 
         class DataFrame(QtGui.QFrame, ui.sans.ui_hfir_sample_data.Ui_Frame): 
             def __init__(self, parent=None):
@@ -288,14 +295,16 @@ class SampleDataWidget(BaseWidget):
             state = self._last_direct_state
         if isinstance(self._method_box, BeamSpreader):
             self._last_spreader_state = self._method_box.get_state()
-        self._replace_method(DirectBeam(self, state=state, settings=self._settings, data_type=self._data_type))
+        self._replace_method(DirectBeam(self, state=state, settings=self._settings, 
+                                        data_type=self._data_type, data_proxy=self._data_proxy))
         
     def _beam_spreader(self, state=None):
         if state is None:
             state = self._last_spreader_state
         if isinstance(self._method_box, DirectBeam):
             self._last_direct_state = self._method_box.get_state()
-        self._replace_method(BeamSpreader(self, state=state, settings=self._settings, data_type=self._data_type))
+        self._replace_method(BeamSpreader(self, state=state, settings=self._settings, 
+                                          data_type=self._data_type, data_proxy=self._data_proxy))
         
     def _replace_method(self, widget):
         if self._method_box is not None:
@@ -324,6 +333,9 @@ class SampleDataWidget(BaseWidget):
         """
             Retrieve information from the data file and update the display
         """
+        if self._data_proxy is None:
+            return
+        
         flist_str = unicode(self._content.data_file_edit.text())
         flist_str = flist_str.replace(',', ';')
         data_files = flist_str.split(';')
@@ -331,7 +343,7 @@ class SampleDataWidget(BaseWidget):
             return
         fname = data_files[0]
         if len(str(fname).strip())>0:
-            dataproxy = DataFileProxy(fname)
+            dataproxy = self._data_proxy(fname)
             if len(dataproxy.errors)>0:
                 QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return

@@ -32,7 +32,7 @@ class HFIRInterface(InstrumentInterface):
         self.attach(DetectorWidget(settings = self._settings))
 
         # Sample
-        self.attach(SampleDataWidget(settings = self._settings))
+        self.attach(SampleDataWidget(settings = self._settings, data_proxy=DataProxy))
         
         # Background
         self.attach(BackgroundWidget(settings = self._settings, data_proxy=DataProxy))

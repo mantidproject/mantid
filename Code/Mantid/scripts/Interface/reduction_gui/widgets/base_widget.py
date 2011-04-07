@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
+import functools
 from reduction_gui.settings.application_settings import GeneralSettings
 
 IS_IN_MANTIDPLOT = False
@@ -103,6 +104,8 @@ class BaseWidget(QtGui.QWidget):
         """
         if not IS_IN_MANTIDPLOT:
             return
+        if not os.path.exists(file_name):
+            return
         
         # Do nothing if the instrument view is already displayed
         if self._instrument_view is not None and self._instrument_view.isVisible():
@@ -113,5 +116,12 @@ class BaseWidget(QtGui.QWidget):
             
         self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws)
         self._instrument_view.show()
+    
+    
+@functools.wraps(BaseWidget.show_instrument)
+def _show_instrument(self, read_function):
+    file_name=unicode(read_function())
+    return self.show_instrument(file_name)
+        
     
     

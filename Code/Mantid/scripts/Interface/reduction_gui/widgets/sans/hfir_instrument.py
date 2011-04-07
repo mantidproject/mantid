@@ -4,7 +4,6 @@ import math
 import os
 from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
-from reduction_gui.reduction.mantid_util import DataFileProxy
 from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_hfir_instrument
 
@@ -281,6 +280,9 @@ class SANSInstrumentWidget(BaseWidget):
         """
             Retrieve information from the data file and update the display
         """
+        if self._data_proxy is None:
+            return
+        
         if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
             flist_str = unicode(self._summary.data_file_edit.text())
             flist_str = flist_str.replace(',', ';')
