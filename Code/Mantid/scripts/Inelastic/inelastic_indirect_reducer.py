@@ -126,24 +126,27 @@ class IndirectReducer(Reducer):
         step = steps.CorrectByMonitor(MultipleFrames=self._multiple_frames)
         self.append_step(step)
         
-        # "FoldData" puts workspaces that have been chopped back together.
-        if self._multiple_frames:
-            self.append_step(steps.FoldData())
-        
         # "ConvertToEnergy" runs ConvertUnits to DeltaE, CorrectKiKf, and
         # Rebin if a rebin string has been specified.
-        step = steps.ConvertToEnergy()
+        step = steps.ConvertToEnergy(MultipleFrames=self._multiple_frames)
         step.set_rebin_string(self._rebin_string)
         self.append_step(step)
         
         if self._detailed_balance_temp is not None:
-            step = steps.DetailedBalance()
+            step = steps.DetailedBalance(MultipleFrames=self._multiple_frames)
             step.set_temperature(self._detailed_balance_temp)
             self.append_step(step)
             
-        step = steps.Grouping()
+        step = steps.Grouping(MultipleFrames=self._multiple_frames)
         step.set_grouping_policy(self._grouping_policy)
         step.set_mask_list(self._masking_detectors)
+        self.append_step(step)
+        
+        # "FoldData" puts workspaces that have been chopped back together.
+        if self._multiple_frames:
+            self.append_step(steps.FoldData())
+            
+        step = steps.Naming()
         self.append_step(step)
     
     def post_process(self):
@@ -205,7 +208,7 @@ class IndirectReducer(Reducer):
             except RuntimeError:
                 raise ValueError('Invalid IDF')
         return mtd[self._workspace_instrument]
-        
+
     def _get_monitor_index(self):
         workspace = self._load_empty_instrument()
         for counter in range(0, workspace.getNumberHistograms()):

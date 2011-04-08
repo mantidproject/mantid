@@ -32,7 +32,9 @@
 <parameter name="Workflow.UnwrapMonitor" type="string">
     <value val="BaseOnTimeRegime" />
 </parameter>
-
+<parameter name="Workflow.NamingConvention" type="string">
+    <value val="AnalyserReflection" />
+</parameter>
 </component-link>
 
 </parameter-file>

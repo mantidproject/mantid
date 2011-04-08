@@ -21,7 +21,7 @@
         This is necessary so that the spectra can be grouped.
 -->
 <parameter name="rebin-default" type="string">
-    <value val="3,-0.005,1000" />
+    <value val="-2.5,0.015,3,-0.005,1000" />
 </parameter>
 
 <!-- Reduction workflow parameters under this line -->

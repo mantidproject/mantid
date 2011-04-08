@@ -9,12 +9,14 @@ class LoadData(ReductionStep):
     This step will use the following parameters from the Instrument's parameter
     file:
     
+    * Workflow.Masking - identifies the method (if any) on which detectors that
+        are to be masked should be identified.
     * Workflow.ChopDataIfGreaterThan - if this parameter is specified on the
         instrument, then the raw data will be split into multiple frames if
         the largest TOF (X) value in the workspace is greater than the provided
         value.
     """
-    
+
     _multiple_frames = False
     _sum = False
     _monitor_index = None
@@ -23,7 +25,7 @@ class LoadData(ReductionStep):
     _masking_detectors = []
     _parameter_file = None
     _data_files = {}
-        
+
     def __init__(self):
         """Initialise the ReductionStep. Constructor should set the initial
         parameters for the step.
@@ -41,13 +43,13 @@ class LoadData(ReductionStep):
         """Loads the data.
         """
         wsname = ''
-        
+
         for file in self._data_files:
             LoadRaw(file, file, LoadLogFiles=False)
-            
+
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
-            
+
             try:
                 msk = mtd[file].getInstrument().getStringParameter(
                     'Workflow.Masking')[0]
@@ -94,10 +96,10 @@ class LoadData(ReductionStep):
 
     def set_parameter_file(self, value):
         self._parameter_file = value
-        
+
     def set_monitor_index(self, index):
         self._monitor_index = index
-        
+
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
@@ -162,28 +164,31 @@ class LoadData(ReductionStep):
             return True
         else:
             return False
-        
+
     def is_multiple_frames(self):
         return self._multiple_frames
 
 class BackgroundOperations(ReductionStep):
+    """Removes, if requested, a background from the detectors data in TOF
+    units. Currently only uses the FlatBackground algorithm, more options
+    to cover SNS use to be added at a later point.
+    """
     _multiple_frames = False
     _background_start = None
     _background_end = None
-    
+
     def __init__(self, MultipleFrames=False):
         super(BackgroundOperations, self).__init__()
         self._multiple_frames = MultipleFrames
         self._background_start = None
         self._background_end = None
-        
+
     def execute(self, reducer, file_ws):
-    
         if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
-        
+
         for ws in workspaces:
             ConvertToDistribution(ws)
             FlatBackground(ws, ws, self._background_start, 
@@ -197,7 +202,7 @@ class BackgroundOperations(ReductionStep):
 class CreateCalibrationWorkspace(ReductionStep):
     """Creates a calibration workspace from a White-Beam Vanadium run.
     """
-    
+
     _back_min = None
     _back_max = None
     _peak_min = None
@@ -206,7 +211,7 @@ class CreateCalibrationWorkspace(ReductionStep):
     _detector_range_end = None
     _calib_raw_files = []
     _calib_workspace = None
-    
+
     def __init__(self):
         super(CreateCalibrationWorkspace, self).__init__()
         self._back_min = None
@@ -214,7 +219,7 @@ class CreateCalibrationWorkspace(ReductionStep):
         self._peak_min = None
         self._peak_max = None
         self._detector_range_start = None
-        self._detector_range_end = None        
+        self._detector_range_end = None
         self._calib_raw_files = []
         self._calib_workspace = None
 
@@ -228,11 +233,11 @@ class CreateCalibrationWorkspace(ReductionStep):
         if ( len(rawfiles) == 0 ):
             print "Indirect: No calibration run specified."
             return
-        
+
         backMin, backMax, peakMin, peakMax = self._get_calib_details()
         specMin = self._detector_range_start + 1
         specMax = self._detector_range_end + 1
-        
+
         runs = []
         for file in rawfiles:
             (direct, filename) = os.path.split(file)
@@ -312,25 +317,23 @@ class CreateCalibrationWorkspace(ReductionStep):
 class ApplyCalibration(ReductionStep):
     """Applies a calibration workspace to the data.
     """
-    
+
     _multiple_frames = False
     _calib_workspace = None
-    
+
     def __init__(self):
         super(ApplyCalibration, self).__init__()
         self._multiple_frames = False
         self._calib_workspace = None
-        
+
     def execute(self, reducer, file_ws):
-        
         if self._calib_workspace is None: # No calibration workspace set
             return
-            
         if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
-        
+
         for ws in workspaces:
             Divide(ws, self._calib_workspace, ws)
 
@@ -350,7 +353,7 @@ class HandleMonitor(ReductionStep):
     * Workflow.UnwrapMonitor
     """
     _multiple_frames = False
-    
+
     def __init__(self, MultipleFrames=False):
         """Constructor for HandleMonitor routine.
         """
@@ -364,7 +367,7 @@ class HandleMonitor(ReductionStep):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
-        
+
         for ws in workspaces:
             monitor = ws+'_mon'
             if self._need_to_unwrap(ws):
@@ -379,7 +382,7 @@ class HandleMonitor(ReductionStep):
             unwrap = mtd[ws].getInstrument().getStringParameter(
                 'Workflow.UnwrapMonitor')[0]
         except IndexError:
-            return False # Default it to not unwrap            
+            return False # Default it to not unwrap
         if ( unwrap == 'Never' ):
             return False
         elif ( unwrap == 'Always' ):
@@ -441,18 +444,21 @@ class HandleMonitor(ReductionStep):
             Scale(monitor, monitor, ( 1.0 / factor ), 'Multiply')
 
 class CorrectByMonitor(ReductionStep):
+    """
+    """
+
     _multiple_frames = False
 
     def __init__(self, MultipleFrames=False):
         super(CorrectByMonitor, self).__init__()
         self._multiple_frames = MultipleFrames
-        
+
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
             workspaces = mtd[file_ws].getNames()
         else:
             workspaces = [file_ws]
-        
+
         for ws in workspaces:
             ConvertUnits(ws, ws, 'Wavelength', 'Indirect')
             RebinToWorkspace(ws, ws+'_mon', ws)
@@ -460,6 +466,8 @@ class CorrectByMonitor(ReductionStep):
             DeleteWorkspace(ws+'_mon')
 
 class FoldData(ReductionStep):
+    """
+    """
 
     def __init__(self):
         super(FoldData, self).__init__()
@@ -504,69 +512,111 @@ class FoldData(ReductionStep):
         for i in range(binIndex, totalBins):
             dataE.append(0.0)
             dataY.append(1.0)	
-        CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='Wavelength')
+        CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='DeltaE')
         return wsname
 
 class ConvertToEnergy(ReductionStep):
     """
-    """
-    
+    """    
     _rebin_string = None
+    _multiple_frames = False
     
-    def __init__(self):
+    def __init__(self, MultipleFrames=False):
         super(ConvertToEnergy, self).__init__()
         self._rebin_string = None
+        self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
-        ConvertUnits(file_ws, file_ws, 'DeltaE', 'Indirect')
-        CorrectKiKf(file_ws, file_ws, 'Indirect')
-        if self._rebin_string is not None:
-            Rebin(file_ws, file_ws, reducer._rebin_string)
+        if ( self._multiple_frames ):
+            workspaces = mtd[file_ws].getNames()
+        else:
+            workspaces = [file_ws]
+            
+        for ws in workspaces:
+            ConvertUnits(ws, ws, 'DeltaE', 'Indirect')
+            CorrectKiKf(ws, ws, 'Indirect')
+            if self._rebin_string is not None:
+                Rebin(ws, ws, self._rebin_string)
             
     def set_rebin_string(self, value):
         if value is not None:
             self._rebin_string = value
 
 class DetailedBalance(ReductionStep):
-
+    """
+    """
     _temp = None
+    _multiple_frames = False
     
-    def __init__(self):
+    def __init__(self, MultipleFrames=False):
         super(DetailedBalance, self).__init__()
         self._temp = None
+        self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
         if self._temp is None:
-            return        
+            return
+
         correction = 11.606 / ( 2 * self._temp )
-        ExponentialCorrection(file_ws, file_ws, 1.0, correction)
+
+        if ( self._multiple_frames ):
+            workspaces = mtd[file_ws].getNames()
+        else:
+            workspaces = [file_ws]
+
+        for ws in workspaces:
+            ExponentialCorrection(ws, ws, 1.0, correction)
         
     def set_temperature(self, temp):
         self._temp = temp
             
 class Grouping(ReductionStep):
-
+    """This ReductionStep handles the grouping and renaming of the final
+    workspace. In most cases, this will require a Rebin on the data. The option
+    to do this is given in the ConvertToEnergy step.
+    
+    The step will use the following parameters on the workspace:
+    * 'Workflow.GroupingMethod' - if this is set to Fixed, it indicates that
+        the grouping is defined at an instrument level and this can not be
+        altered by the user. In this case, the value given in the function
+        set_grouping_policy() is ignored and an XML grouping file is created
+        based on the string in
+    * 'Workflow.FixedGrouping', which is of the form: "0-69,70-139" where the
+        comma seperates a group, and the hyphen indicates a range. The numbers
+        given are taken to be the workspace indices.
+        
+    If a masking list has been set using set_mask_list(), then the workspace
+    indices listed will not be included in the group (if any grouping is in
+    fact performed).
+    """
     _grouping_policy = None
     _masking_detectors = []
     _result_workspaces = []
+    _multiple_frames = False
     
-    def __init__(self):
+    def __init__(self, MultipleFrames=False):
         super(Grouping, self).__init__()
         self._grouping_policy = None
         self._masking_detectors = []
         self._result_workspaces = []
+        self._multiple_frames = MultipleFrames
         
     def execute(self, reducer, file_ws):
-        try:
-            group = mtd[file_ws].getInstrument().getStringParameter(
-                'Workflow.GroupingMethod')[0]
-        except IndexError:
-            group = 'User'
-
-        if ( group == 'Fixed' ):
-            self._result_workspaces.append(self._group_fixed(file_ws))
+        if ( self._multiple_frames ):
+            workspaces = mtd[file_ws].getNames()
         else:
-            self._result_workspaces.append(self._group_data(file_ws))
+            workspaces = [file_ws]
+            
+        for ws in workspaces:
+            try:
+                group = mtd[ws].getInstrument().getStringParameter(
+                    'Workflow.GroupingMethod')[0]
+            except IndexError:
+                group = 'User'
+            if ( group == 'Fixed' ):
+                self._result_workspaces.append(self._group_fixed(ws))
+            else:
+                self._result_workspaces.append(self._group_data(ws))
             
     def set_grouping_policy(self, value):
         self._grouping_policy = value
@@ -578,8 +628,6 @@ class Grouping(ReductionStep):
         return self._result_workspaces
 
     def _group_fixed(self, workspace):
-        wsname = self._get_run_title(workspace)
-        
         try:
             grps = mtd[workspace].getInstrument().getStringParameter(
                 'Workflow.FixedGrouping')[0]
@@ -601,8 +649,6 @@ class Grouping(ReductionStep):
                 except ValueError:
                     pass
 
-        # Write to a temporary XML grouping file to preserve workspace history
-        # a little bit better.
         xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>\n"
         xml += "<detector-grouping>\n"
         for grp in group_list:
@@ -619,30 +665,63 @@ class Grouping(ReductionStep):
         xfile = mtd.getConfigProperty('defaultsave.directory') + 'fixedGrp.xml'
         file = open(xfile, 'w')
         file.write(xml)
-        file.close()                    
-        GroupDetectors(workspace, wsname, MapFile=xfile, Behaviour='Average')
-        DeleteWorkspace(workspace)
-        return wsname
+        file.close()
+        GroupDetectors(workspace, workspace, MapFile=xfile, 
+            Behaviour='Average')
+        return workspace
 
     def _group_data(self, workspace):
         grouping = self._grouping_policy
-        name = self._get_run_label(workspace) + 'red'
         if ( grouping == 'Individual' ) or ( grouping is None ):
-            if ( workspace != name ):
-                RenameWorkspace(workspace, name)
-            return name
+            return workspace
         elif ( grouping == 'All' ):
             nhist = mtd[workspace].getNumberHistograms()
-            GroupDetectors(workspace, name, WorkspaceIndexList=range(0,nhist),
+            GroupDetectors(workspace, workspace, 
+                WorkspaceIndexList=range(0,nhist), Behaviour='Average')
+        else:
+            GroupDetectors(workspace, workspace, MapFile=grouping,
                 Behaviour='Average')
-        else:   
-            GroupDetectors(workspace, name, MapFile=grouping,
-                Behaviour='Average')
-        if ( workspace != name ):
-            DeleteWorkspace(workspace)
-        return name
+        return workspace
 
-    def _get_run_title(self, workspace):
+
+        
+class Naming(ReductionStep):
+    """Takes the responsibility of naming the results away from the Grouping
+    step so that ws names are consistent right up until the last step. This
+    uses the following instrument parameters:
+    * 'Workflow.NamingConvention' - to decide how to name the result workspace.
+        The default (when nothing is selected) is to use the run title.
+    """
+    _result_workspaces = []
+    
+    def __init__(self):
+        super(Naming, self).__init__()
+        self._result_workspaces = []
+        
+    def execute(self, reducer, file_ws):
+        wsname = self._get_ws_name(file_ws)
+        RenameWorkspace(file_ws, wsname)
+        self._result_workspaces.append(wsname)
+
+    def get_result_workspaces(self):
+        return self._result_workspaces
+
+    def _get_ws_name(self, workspace):
+        try:
+            type = mtd[workspace].getInstrument().getStringParameter(
+                'Workflow.NamingConvention')[0]
+        except IndexError:
+            type = 'RunTitle'
+            
+        if ( type == 'AnalyserReflection' ):
+            return self._analyser_reflection(workspace)
+        elif ( type == 'RunTitle' ):
+            return self._run_title(workspace)
+        else:
+            raise NotImplementedError('Unknown \'Workflow.NamingConvention\''
+                ' parameter encountered on workspace: ' + workspace)
+        
+    def _run_title(self, workspace):
         ws = mtd[workspace]
         title = ws.getRun()['run_title'].value.strip()
         runNo = ws.getRun()['run_number'].value
@@ -653,7 +732,7 @@ class Grouping(ReductionStep):
         title = isn + runNo + '-' + title
         return title
         
-    def _get_run_label(self, workspace):
+    def _analyser_reflection(self, workspace):
         if workspace == '':
             return ''
         ws = mtd[workspace]
@@ -666,5 +745,5 @@ class Grouping(ReductionStep):
         except IndexError:
             analyser = ''
             reflection = ''
-        prefix = ins + run + '_' + analyser + reflection + '_'
-        return prefix
+        prefix = ins + run + '_' + analyser + reflection + '_red'
+        return prefix        
