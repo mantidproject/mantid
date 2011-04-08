@@ -35,11 +35,9 @@ public:
   {
     LoadEventNexus ld;
     ld.initialize();
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs"); // Only doing this to resolve the path to the file
     TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 80);
     //Try an ISIS nexus file
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     ld.setPropertyValue("Filename","LOQ49886.nxs");
     TS_ASSERT_EQUALS(ld.fileCheck(ld.getPropertyValue("Filename")), 0);
   }
@@ -50,7 +48,6 @@ public:
     LoadEventNexus ld;
     std::string outws_name = "cncs_noprecount";
     ld.initialize();
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace",outws_name);
     ld.setPropertyValue("Precount", "0");
@@ -97,7 +94,6 @@ public:
     //Longer, more thorough test
     if (false)
     {
-      Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
       IAlgorithm_sptr load =  AlgorithmManager::Instance().create("LoadEventPreNeXus", 1);
       load->setPropertyValue("OutputWorkspace", "cncs_pre");
       load->setPropertyValue("EventFilename","CNCS_7860_neutron_event.dat");

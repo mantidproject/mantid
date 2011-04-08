@@ -37,7 +37,6 @@ public:
 
   void testProcessedFile()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
     LoadNexusProcessed alg;
 

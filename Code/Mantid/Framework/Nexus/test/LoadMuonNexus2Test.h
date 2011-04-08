@@ -35,8 +35,6 @@ public:
     LoadMuonNexus2 nxLoad;
     nxLoad.initialize();
 
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-
     // Now set required filename and output workspace name
     std::string inputFile = "argus0026287.nxs";
     nxLoad.setPropertyValue("FileName", inputFile);

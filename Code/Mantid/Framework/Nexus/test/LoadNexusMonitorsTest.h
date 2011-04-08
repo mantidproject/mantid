@@ -23,7 +23,6 @@ public:
     LoadNexusMonitors ld;
     std::string outws_name = "cncs";
     ld.initialize();
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     ld.setPropertyValue("Filename","CNCS_7860_event.nxs");
     ld.setPropertyValue("OutputWorkspace", outws_name);
 
