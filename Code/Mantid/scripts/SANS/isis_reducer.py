@@ -317,9 +317,11 @@ class ISISReducer(SANSReducer):
             self.instrument.set_incident_mon(specNum)
             self.instrument.set_interpolating_norm(interp)
                         
-    def set_trans_spectrum(self, specNum, interp=False):
+    def set_trans_spectrum(self, specNum, interp=False, override=True):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
-        self.instrument.use_interpol_trans_calc = interp              
+
+        if (interp == None) or override:
+            self.transmission_calculator.interpolate = interp
 
     def get_trans_lambdamin(self):
         """

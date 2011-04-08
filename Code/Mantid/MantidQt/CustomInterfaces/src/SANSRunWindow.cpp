@@ -734,13 +734,13 @@ bool SANSRunWindow::loadUserFile(QString & errors)
 
   //Monitor spectra
   m_uiForm.monitor_spec->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.get_incident_mon()"));
+    "print i.ReductionSingleton().instrument.get_incident_mon()").trimmed());
   m_uiForm.trans_monitor->setText(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc"));
+    "print i.ReductionSingleton().instrument.incid_mon_4_trans_calc").trimmed());
   m_uiForm.monitor_interp->setChecked(runReduceScriptFunction(
     "print i.ReductionSingleton().instrument.is_interpolating_norm()").trimmed() == "True");
   m_uiForm.trans_interp->setChecked(runReduceScriptFunction(
-    "print i.ReductionSingleton().instrument.use_interpol_trans_calc"
+    "print i.ReductionSingleton().transmission_calculator.interpolate"
     ).trimmed() == "True");
 
   //Direct efficiency correction

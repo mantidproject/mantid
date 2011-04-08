@@ -256,7 +256,6 @@ class ISISInstrument(instrument.Instrument):
         self.setDefaultDetector()
         # if this is set InterpolationRebin will be used on the monitor spectrum used to normalize the sample, useful because wavelength resolution in the monitor spectrum can be course in the range of interest 
         self._use_interpol_norm = False
-        self.use_interpol_trans_calc = False
 
         # the sample will be moved this distance a long the beam axis
         self.SAMPLE_Z_CORR = 0

@@ -1056,6 +1056,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.loader = loader
         # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done 
         self._trans_spec = None
+        # use InterpolatingRebin 
+        self.interpolate = None
 
     def get_lambdamin(self, instrum):
         """
@@ -1100,37 +1102,40 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def set_loader(self, loader):
         self.loader = loader
         
-    def setup_wksp(self, inputWS, inst, backmon_start, backmon_end, wavbining, interpolate):
+    def setup_wksp(self, inputWS, inst, backmon_start, backmon_end, wavbining, pre_monitor, post_monitor):
         """
             Creates a new workspace removing any background from the monitor spectra, converting units
-            and re-binning. Optionally removes between the x-values 19900 and 20500 
+            and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500 
             @param inputWS: contains the monitor spectra
             @param inst: the selected instrument
             @param backmon_start: the start of the region that we'll assume is just background
             @param backmon_end: the end of the background region
             @param wavbinning: the re-bin string to use after convert units
-            @param interpolate: apply cubic interpolation to the output from convert units
+            @param pre_monitor: DETECTOR ID of the incident monitor
+            @param post_monitor: DETECTOR ID of the transmission monitor
             @return the name of the workspace created
         """
         inst.load_transmission_inst(inputWS)
 
+        #the workspace is forked, below is its new name
         tmpWS = inputWS + '_tmp'
-        CropWorkspace(inputWS,tmpWS, StartWorkspaceIndex=0, EndWorkspaceIndex=2)
+        
+        #exclude unused spectra because the empty spectra can cause errors, use the index numbers (one less than spectrum number) to crop
+        index1 = min(pre_monitor, post_monitor)-1
+        index2 = max(pre_monitor, post_monitor)-1
+        CropWorkspace(inputWS, tmpWS,
+            StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
     
 
         if inst.name() == 'LOQ':
-            RemoveBins(tmpWS,tmpWS, 19900, 20500, Interpolation='Linear')
-            # Load in the instrument setup used for LOQ transmission runs
+            RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')[0]
 
         if backmon_start != None and backmon_end != None:
-            #only remove the background from the monitor spectra that are going to be used
-            spec_list = '1,2' 
-            FlatBackground(tmpWS, tmpWS, StartX=backmon_start, EndX=backmon_end, WorkspaceIndexList=spec_list, Mode='Mean')
+            FlatBackground(tmpWS, tmpWS, StartX=backmon_start, EndX=backmon_end, Mode='Mean')[0]
     
-        # Convert and rebin
-        ConvertUnits(tmpWS,tmpWS,"Wavelength")
+        ConvertUnits(tmpWS, tmpWS,"Wavelength")
         
-        if interpolate:
+        if self.interpolate:
             InterpolatingRebin(tmpWS, tmpWS, wavbining)
         else :
             Rebin(tmpWS, tmpWS, wavbining)
@@ -1163,9 +1168,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             fit_type = fit_meth
 
         if self._trans_spec:
-            trans = self._trans_spec
+            post_sample = self._trans_spec
         else:
-            trans = reducer.instrument.trans_monitor
+            post_sample = reducer.instrument.trans_monitor
+        pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
         if self._use_full_range is None:
             use_full_range = reducer.full_trans_wav
@@ -1183,21 +1189,19 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             wavbin = str(reducer.to_wavelen.get_rebin())
 
         
-        fittedtransws, unfittedtransws = self.get_wksp_names(
-                            trans_raw, translambda_min, translambda_max)
-        
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
-            reducer.instrument.use_interpol_trans_calc)
+            pre_sample, post_sample)
                 
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-            reducer.instrument.use_interpol_trans_calc)
+            pre_sample, post_sample)
 
+        fittedtransws, unfittedtransws = self.get_wksp_names(
+                            trans_raw, translambda_min, translambda_max)
         CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-            reducer.instrument.incid_mon_4_trans_calc, trans,
-            MinWavelength = translambda_min, MaxWavelength = translambda_max,
-            FitMethod = fit_type, OutputUnfittedData=True)
+            pre_sample, post_sample, MinWavelength=translambda_min,
+            MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
         mantid.deleteWorkspace(trans_tmp_out)
@@ -1453,13 +1457,13 @@ class UserFile(ReductionStep):
             _issueWarning("L/SP lines are ignored")
             return
 
+        rebin_str = None
         if not ',' in limit_line:
             # Split with no arguments defaults to any whitespace character and in particular
             # multiple spaces are include
             elements = limits.split()
             if len(elements) == 4:
                 limit_type, minval, maxval, step = elements[0], elements[1], elements[2], elements[3]
-                rebin_str = None
                 step_details = step.split('/')
                 if len(step_details) == 2:
                     step_size = step_details[0]
@@ -1475,16 +1479,27 @@ class UserFile(ReductionStep):
                 limit_type, minval, maxval = elements[0], elements[1], elements[2]
             else:
                 _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+                return
         else:
-            limit_type = limits[0].lstrip().rstrip()
-            rebin_str = limits[1:].lstrip().rstrip()
+            blocks = limits.split()
+            limit_type = blocks[0].lstrip().rstrip()
+            try:
+                rebin_str = limits.split(limit_type)[1]
+            except:
+                _issueWarning("Incorrectly formatted limit line ignored \"" + limit_line + "\"")
+                return
+
             minval = maxval = step_type = step_size = None
     
         if limit_type.upper() == 'WAV':
-            reducer.to_wavelen.set_rebin(
-                minval, step_type + step_size, maxval, override=False)
+            if rebin_str:
+                _issueWarning("General wave re-bin lines are not implemented, line ignored \"" + limit_line + "\"")
+                return
+            else:
+                reducer.to_wavelen.set_rebin(
+                        minval, step_type + step_size, maxval, override=False)
         elif limit_type.upper() == 'Q':
-            if not rebin_str is None:
+            if rebin_str:
                 reducer.Q_REBIN = rebin_str
             else:
                 reducer.Q_REBIN = minval + "," + step_type + step_size + "," + maxval
@@ -1495,12 +1510,13 @@ class UserFile(ReductionStep):
             reducer.mask.set_radi(minval, maxval)
             reducer.CENT_FIND_RMIN = float(minval)/1000.
             reducer.CENT_FIND_RMAX = float(maxval)/1000.
-        elif limit_type.upper() == 'PHI':
+        elif (limit_type.upper() == 'PHI') or (limit_type.upper() == 'PHI/NOMIRROR'):
+            mirror = limit_type.upper() != 'PHI/NOMIRROR'
+            if maxval.endswith('/NOMIRROR'):
+                maxval = maxval.split('/NOMIRROR')[0]
+                mirror = False
             reducer.mask.set_phi_limit(
-                float(minval), float(maxval), True, override=False) 
-        elif limit_type.upper() == 'PHI/NOMIRROR':
-            reducer.mask.set_phi_limit(
-                float(minval), float(maxval), False, override=False)
+                float(minval), float(maxval), mirror, override=False)
         else:
             _issueWarning('Error in user file after L/, "%s" is not a valid limit line' % limit_type.upper())
 
@@ -1529,7 +1545,7 @@ class UserFile(ReductionStep):
             parts = details.split('=')
             if len(parts) < 2 or parts[0].upper() != 'TRANS/SPECTRUM' :
                 _issueWarning('Unable to parse MON/TRANS line, needs MON/TRANS/SPECTRUM=')
-            reducer.set_trans_spectrum(int(parts[1]), interpolate)        
+            reducer.set_trans_spectrum(int(parts[1]), interpolate, override=False)
     
         elif 'DIRECT' in details.upper() or details.upper().startswith('FLAT'):
             parts = details.split("=")

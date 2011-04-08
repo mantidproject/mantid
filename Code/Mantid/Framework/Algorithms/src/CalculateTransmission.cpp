@@ -92,7 +92,7 @@ void CalculateTransmission::exec()
   {
     if (indices.size() == 1)
     {
-      g_log.error() << "Incident and transmitted spectra can't be set to the same value (they were both set to " << indices.front() << ")\n";
+      g_log.error() << "Incident and transmitted spectra must be set to different spectra that exist in the workspaces. Only found one valid index " << indices.front() << std::endl;
     }
     else
     {
