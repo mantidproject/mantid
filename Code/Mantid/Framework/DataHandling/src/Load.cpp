@@ -201,7 +201,7 @@ namespace Mantid
     void Load::init()
     {
       // Take extensions first from Facility object
-      const FacilityInfo & defaultFacility = Mantid::Kernel::ConfigService::Instance().Facility();
+      const FacilityInfo & defaultFacility = Mantid::Kernel::ConfigService::Instance().getFacility();
       std::vector<std::string> exts = defaultFacility.extensions();
       // Add in some other known extensions
       exts.push_back(".xml");

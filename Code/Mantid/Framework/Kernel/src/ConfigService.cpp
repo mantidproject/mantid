@@ -1117,16 +1117,15 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
 const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instrumentName) const
 {
 
-  // TODO: Change this to use getFacility()
   // Let's first search for the instrument in our default facility
-  std::string defaultFacility = ConfigService::Instance().getString("default.facility");
+  std::string defaultFacility = ConfigService::Instance().getFacility().name();
 
   if (!defaultFacility.empty())
   {
     try
     {
       g_log.debug() << "Looking for " << instrumentName << " at " << defaultFacility << "." << std::endl;
-      return Facility(defaultFacility).Instrument(instrumentName);
+      return getFacility(defaultFacility).Instrument(instrumentName);
     }
     catch (Exception::NotFoundError e)
     {
@@ -1154,17 +1153,65 @@ const InstrumentInfo & ConfigServiceImpl::getInstrument(const std::string& instr
   throw Exception::NotFoundError("Instrument", instrumentName);
 }
 
-/** Get the default `
+/** Get the default facility
  * @return the facility information object
  */
-const FacilityInfo& ConfigServiceImpl::Facility() const
+const FacilityInfo& ConfigServiceImpl::getFacility() const
 {
   std::string defFacility = getString("default.facility");
   if (defFacility.empty())
   {
     defFacility = "ISIS";
   }
-  return Facility(defFacility);
+  return getFacility(defFacility);
+}
+
+/**
+ * Get a facility
+ * @param fName :: Facility name
+ * @return the facility information object
+ * @throw NotFoundException if the facility is not found
+ */
+const FacilityInfo& ConfigServiceImpl::getFacility(const std::string& facilityName) const
+{
+  std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
+  for (; it != m_facilities.end(); ++it)
+  {
+    if ((**it).name() == facilityName)
+    {
+      return **it;
+    }
+  }
+  g_log.error("Facility " + facilityName + " not found");
+  throw Exception::NotFoundError("Facilities", facilityName);
+}
+
+/**
+ * Set the default facility
+ * @param facilityName the facility name
+ * @throw NotFoundException if the facility is not found
+ */
+void ConfigServiceImpl::setFacility(const std::string &facilityName)
+{
+  bool found = false;
+  // Look through the facilities for a matching one.
+  std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
+  for (; it != m_facilities.end(); ++it)
+  {
+    if ((**it).name() == facilityName)
+    {
+      // Found the facility
+      found = true;
+      // So it's safe to set it as our default
+      setString("default.facility", facilityName);
+    }
+  }
+  if (found == false)
+  {
+    g_log.error("Failed to set default facility to be " + facilityName + ". Facility not found");
+    throw Exception::NotFoundError("Facilities", facilityName);
+  }
+
 }
 
 /**  Add an observer to a notification
@@ -1181,26 +1228,6 @@ void ConfigServiceImpl::addObserver(const Poco::AbstractObserver& observer) cons
 void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer) const
 {
   m_notificationCenter.removeObserver(observer);
-}
-
-/**
- * Get a facility
- * @param fName :: Facility name
- * @return the facility information object
- * @throw NotFoundException if the facility is not found
- */
-const FacilityInfo& ConfigServiceImpl::Facility(const std::string& fName) const
-{
-  std::vector<FacilityInfo*>::const_iterator it = m_facilities.begin();
-  for (; it != m_facilities.end(); ++it)
-  {
-    if ((**it).name() == fName)
-    {
-      return **it;
-    }
-  }
-  g_log.error("Facility " + fName + " not found");
-  throw Exception::NotFoundError("Facilities", fName);
 }
 
 /// \cond TEMPLATE

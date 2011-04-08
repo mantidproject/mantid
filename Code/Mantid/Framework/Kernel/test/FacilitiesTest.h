@@ -84,15 +84,13 @@ public:
 
   void testConfigService()
   {
-    TS_ASSERT_THROWS_NOTHING(
-      const FacilityInfo& fac = ConfigService::Instance().Facility("ISIS")
-    );
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility("ISIS"));
   }
 
   void testDefaultInstrument()
   {
     ConfigService::Instance().setString("default.instrument","HRPD");
-    const FacilityInfo& fac = ConfigService::Instance().Facility();
+    const FacilityInfo& fac = ConfigService::Instance().getFacility();
     InstrumentInfo instr = fac.Instrument();
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
   }

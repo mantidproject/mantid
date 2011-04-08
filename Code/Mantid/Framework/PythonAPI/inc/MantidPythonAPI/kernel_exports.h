@@ -38,13 +38,13 @@ namespace Mantid
       {
         if( name.empty() )
         {
-          return Mantid::Kernel::ConfigService::Instance().Facility();
+          return Mantid::Kernel::ConfigService::Instance().getFacility();
         }
         else
         {
           try
           {
-            return Mantid::Kernel::ConfigService::Instance().Facility(name);
+            return Mantid::Kernel::ConfigService::Instance().getFacility(name);
           }
           catch(Kernel::Exception::NotFoundError&)
           {

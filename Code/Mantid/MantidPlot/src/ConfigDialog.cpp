@@ -626,7 +626,7 @@ void ConfigDialog::initMantidPage()
   facility->addItems(prop_list);
 
   // Set default property
-  property = QString::fromStdString(mantid_config.Facility().name());
+  property = QString::fromStdString(mantid_config.getFacility().name());
   int index = facility->findText(property);
   if( index < 0 )
   {

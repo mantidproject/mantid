@@ -7,6 +7,8 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/TestChannel.h"
 #include "MantidKernel/InstrumentInfo.h"
+#include "MantidKernel/FacilityInfo.h"
+
 #include <Poco/Path.h>
 #include <Poco/File.h>
 #include <boost/shared_ptr.hpp>
@@ -94,11 +96,27 @@ public:
     
   }
 
+  void testDefaultFacility()
+  {
+    TS_ASSERT_THROWS_NOTHING(const FacilityInfo& fac = ConfigService::Instance().getFacility() );
+//
+    ConfigService::Instance().setFacility("ISIS");
+    const FacilityInfo& fac = ConfigService::Instance().getFacility();
+    TS_ASSERT_EQUALS(ConfigService::Instance().getFacility().name(),"ISIS");
+
+    ConfigService::Instance().setFacility("SNS");
+    const FacilityInfo& fac1 = ConfigService::Instance().getFacility();
+    TS_ASSERT_EQUALS(fac1.name(),"SNS");
+
+//    // Non existent facility
+//    TS_ASSERT_THROWS(ConfigService::Instance().setFacility(""), Mantid::Kernel::Exception::NotFoundError);
+
+  }
 
   void testInstrumentSearch()
   {
     // Set a default facility
-    //ConfigService::Instance().setFacility("SNS");
+    ConfigService::Instance().setFacility("SNS");
 
     // Try and find some instruments from a facility
     TS_ASSERT_EQUALS(ConfigService::Instance().getInstrument("BASIS").name(),"BASIS");

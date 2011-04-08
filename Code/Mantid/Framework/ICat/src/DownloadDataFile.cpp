@@ -62,7 +62,7 @@ void CDownloadDataFile::exec()
   ICatalog_sptr catalog_sptr;
   try
   {
-    catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().Facility().catalogName());
+    catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
 
   }
   catch(Kernel::Exception::NotFoundError&)

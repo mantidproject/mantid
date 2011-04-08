@@ -129,7 +129,7 @@ namespace Mantid
 
       if (isdigit(hint[0]))
       {
-        instrPart = Kernel::ConfigService::Instance().Facility().Instrument().shortName();
+        instrPart = Kernel::ConfigService::Instance().getFacility().Instrument().shortName();
         runPart = hint;
       }
       else
@@ -147,7 +147,7 @@ namespace Mantid
         runPart = hint.substr(nChars);
       }
 
-      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(instrPart);
+      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getFacility().Instrument(instrPart);
       size_t nZero = instr.zeroPadding();
       // remove any leading zeros in case there are too many of them
       std::string::size_type i = runPart.find_first_not_of('0');
@@ -184,7 +184,7 @@ namespace Mantid
 
       std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
 
-      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().Facility().Instrument(p.first);
+      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getFacility().Instrument(p.first);
       std::string delimiter = instr.delimiter();
 
       filename = p.first;
@@ -231,7 +231,7 @@ namespace Mantid
       }
 
       const std::vector<std::string> facility_extensions =
-          Kernel::ConfigService::Instance().Facility().extensions();
+          Kernel::ConfigService::Instance().getFacility().extensions();
       // select allowed extensions
       std::vector < std::string > extensions;
       if (exts != NULL)
@@ -263,11 +263,11 @@ namespace Mantid
       std::string archiveOpt = Kernel::ConfigService::Instance().getString("datasearch.searcharchive");
       std::transform(archiveOpt.begin(), archiveOpt.end(), archiveOpt.begin(), tolower);
       if (!archiveOpt.empty() && archiveOpt != "off"
-          && !Kernel::ConfigService::Instance().Facility().archiveSearch().empty())
+          && !Kernel::ConfigService::Instance().getFacility().archiveSearch().empty())
       {
         std::cout << "Starting archive search..." << std::endl;
         IArchiveSearch_sptr arch = ArchiveSearchFactory::Instance().create(
-            *Kernel::ConfigService::Instance().Facility().archiveSearch().begin());
+            *Kernel::ConfigService::Instance().getFacility().archiveSearch().begin());
         if (arch)
         {
           std::string path;

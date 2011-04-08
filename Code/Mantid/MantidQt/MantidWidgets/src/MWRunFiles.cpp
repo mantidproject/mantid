@@ -482,7 +482,7 @@ QString MWRunFiles::createFileFilter()
     }
     else if( isForRunFiles() )
     {
-      std::vector<std::string> exts = ConfigService::Instance().Facility().extensions();
+      std::vector<std::string> exts = ConfigService::Instance().getFacility().extensions();
       for( std::vector<std::string>::iterator ex= exts.begin(); ex != exts.end(); ++ex )
       {
         fileExts.append(QString::fromStdString(*ex));

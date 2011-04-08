@@ -14,7 +14,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
-#include "MantidDataHandling/LoadInstrumentHelper.h"
+//#include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>

@@ -166,11 +166,13 @@ namespace Mantid
       //@}
 
       /// Load facility information from instrumentDir/Facilities.xml file 
-      void updateFacilities(const std::string& fName = "");
+      void updateFacilities(const std::string& facilityName = "");
       /// Get the default facility
-      const FacilityInfo& Facility()const;
+      const FacilityInfo& getFacility()const;
       /// Get a facility
-      const FacilityInfo& Facility(const std::string& fName)const;
+      const FacilityInfo& getFacility(const std::string& facilityName)const;
+      /// Set the default facility
+      void setFacility(const std::string& facilityName);
 
       /// Look for an instrument
       const InstrumentInfo & getInstrument(const std::string& instrumentName = "") const;

@@ -117,11 +117,11 @@ namespace MantidWidgets
 
     if( name.isEmpty() )
     {
-      m_currentFacility = &(mantidSettings.Facility());
+      m_currentFacility = &(mantidSettings.getFacility());
     }
     else
     {
-      m_currentFacility = &(mantidSettings.Facility(name.toStdString()));
+      m_currentFacility = &(mantidSettings.getFacility(name.toStdString()));
     }
 
     const std::vector<InstrumentInfo> & instruments = m_currentFacility->Instruments();

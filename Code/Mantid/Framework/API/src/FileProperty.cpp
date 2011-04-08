@@ -183,7 +183,7 @@ void FileProperty::setUp(const std::string & defExt)
  */
 bool FileProperty::extsMatchRunFiles()
 {
-  Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().Facility();
+  Kernel::FacilityInfo facilityInfo = Kernel::ConfigService::Instance().getFacility();
   const std::vector<std::string>  facilityExts = facilityInfo.extensions();
   std::vector<std::string>::const_iterator facilityExtsBegin = facilityExts.begin();
   std::vector<std::string>::const_iterator facilityExtsEnd = facilityExts.end();
