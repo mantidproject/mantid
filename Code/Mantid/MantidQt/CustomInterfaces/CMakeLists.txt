@@ -7,6 +7,7 @@ set ( SRC_FILES src/background.cpp
                 src/IndirectDiffractionReduction.cpp
                 src/IO_MuonGrouping.cpp
                 src/MuonAnalysis.cpp
+                src/MuonAnalysisHelper.cpp
                 src/SANSAddFiles.cpp
                 src/SANSRunWindow.cpp
                 src/SANSUtilityDialogs.cpp
@@ -23,6 +24,7 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.h
                 inc/MantidQtCustomInterfaces/IO_MuonGrouping.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
+                inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
