@@ -224,13 +224,12 @@ namespace CxxTest
           std::ostringstream CPUFraction_stream;
           CPUFraction_stream << CPUFraction;
 
-            o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str() 
-              << "\" name=\"" << testName.c_str() 
-              << "\" line=\"" << line.c_str()
-              << "\" time=\"" << timestream1.str().c_str()
-              << "\" totalTime=\"" <<  timestream2.str().c_str()
-              << "\" CPUFraction=\"" << CPUFraction_stream.str().c_str()
-              << "\"";
+            o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str()  << "\""
+              << " name=\"" << testName.c_str()  << "\""
+              << " line=\"" << line.c_str() << "\""
+              << " time=\"" << timestream1.str().c_str() << "\""
+              << " totalTime=\"" <<  timestream2.str().c_str() << "\""
+              << "";
             bool elts=false;
             element_t curr = elements.begin();
             element_t end  = elements.end();
@@ -243,6 +242,10 @@ namespace CxxTest
               curr->write(o);
               curr++;
               }
+
+            // Add the CPU fraction measurement
+            o << " <measurement><name>CPUFraction</name><value>" << CPUFraction_stream.str().c_str() << "</value></measurement>";
+
             if (elts)
                o << "    </testcase>";
             else
