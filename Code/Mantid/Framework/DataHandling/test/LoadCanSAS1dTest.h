@@ -36,9 +36,6 @@ public:
     //No parameters have been set yet, so it should throw
     TS_ASSERT_THROWS(cansas1d.execute(), std::runtime_error);
 
-    // Set the facility
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-
     //Set the file name
     cansas1d.setPropertyValue("Filename", inputFile);
     
@@ -105,9 +102,6 @@ public:
 
     LoadCanSAS1D alg;
     alg.initialize();
-
-    // Set the facility
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 
     std::string outputSpace = "LoadCanSAS1DTest_out";
     //Set an output workspace

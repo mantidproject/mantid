@@ -29,10 +29,6 @@ public:
   {
     // Path to test input file assumes Test/AutoTestData directory checked out from SVN
     inputFile = "HET15869.raw";
-
-    // Set the facility
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
-
   }
 
   void testInit()
