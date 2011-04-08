@@ -227,10 +227,10 @@ namespace CxxTest
             o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str() 
               << "\" name=\"" << testName.c_str() 
               << "\" line=\"" << line.c_str()
-              << "\" time=\"" << timestream1.str().c_str() << "\""
-              << "\" totalTime=\"" <<  timestream2.str().c_str() << "\""
-              << "\" CPUFraction=\"" << CPUFraction_stream.str().c_str() << "\""
-              ;
+              << "\" time=\"" << timestream1.str().c_str()
+              << "\" totalTime=\"" <<  timestream2.str().c_str()
+              << "\" CPUFraction=\"" << CPUFraction_stream.str().c_str()
+              << "\"";
             bool elts=false;
             element_t curr = elements.begin();
             element_t end  = elements.end();
