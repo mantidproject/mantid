@@ -127,51 +127,88 @@ if ( ENABLE_CPACK )
   set ( CPACK_RPM_PACKAGE_LICENSE GPLv3+ )
   set ( CPACK_RPM_PACKAGE_RELEASE 1 )
   set ( CPACK_RPM_PACKAGE_GROUP Applications/Engineering )
-  # general rhel requirements string
-  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
-  # additional rhel5 requirements
-  set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco" )
-  # additional rhel6 requirements - TODO auto-determination of platform
-  #set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
+
 
   # DEB information - only used if generating a deb
-  # TODO get this right <----------------------
   set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
-  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
 
   IF ( UNIX )
     # define the source generators
     set ( CPACK_SOURCE_GENERATOR TGZ )
 
-    # define which binary generators to use
-    FIND_PROGRAM(DPKG_CMD dpkg)
-    IF ( DPKG_CMD )
-      set ( CPACK_GENERATOR "DEB" )
-      execute_process( COMMAND ${DPKG_CMD} --print-architecture
-                       OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-                       OUTPUT_STRIP_TRAILING_WHITESPACE )
-      # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
-      set( CPACK_PACKAGE_FILE_NAME
-           "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
-    ENDIF( DPKG_CMD ) #-${PROJECT_VERSION_REVISION}
+    FIND_PROGRAM (LSB_CMD lsb_release)
+    IF ( LSB_CMD )
+      # get the distribution
+      execute_process ( COMMAND ${LSB_CMD} -i
+                        OUTPUT_VARIABLE UNIX_DIST
+                        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      string ( REGEX REPLACE "Distributor ID:" "" UNIX_DIST ${UNIX_DIST} )
+      string ( STRIP ${UNIX_DIST} UNIX_DIST )
+      string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+      string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
+      # get the codename
+      execute_process ( COMMAND ${LSB_CMD} -c
+                        OUTPUT_VARIABLE UNIX_CODENAME
+                        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
+      string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
+    ELSE ( LSB_CMD )
+      set ( UNIX_DIST "" )
+      set ( UNIX_CODENAME "" )
+    ENDIF ( LSB_CMD )
+    message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
 
-    FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
-    IF ( RPMBUILD_CMD )
-      set ( CPACK_GENERATOR "RPM" )
-      FIND_PROGRAM ( UNAME_CMD uname )
-      IF (UNAME_CMD)
-        execute_process( COMMAND ${UNAME_CMD} -m
-                         OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
+    # define which binary generators to use
+    IF ( ${UNIX_DIST} MATCHES "Ubuntu" )
+      FIND_PROGRAM(DPKG_CMD dpkg)
+      IF ( DPKG_CMD )
+        set ( CPACK_GENERATOR "DEB" )
+        execute_process( COMMAND ${DPKG_CMD} --print-architecture
+                         OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
                          OUTPUT_STRIP_TRAILING_WHITESPACE )
-      ELSE (UNAME_CMD)
-        set (CPACK_RPM_PACKAGE_ARCHITECTURE "unknown")
-      ENDIF (UNAME_CMD)
-      # according to rpm.org: name-version-release.architecture.rpm
-      set ( CPACK_PACKAGE_FILE_NAME
+        # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
+        set( CPACK_PACKAGE_FILE_NAME
+             "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
+      ENDIF( DPKG_CMD ) 
+    ENDIF ( ${UNIX_DIST} MATCHES "Ubuntu" )
+
+    #RedHatEnterpriseClient RedHatEnterpriseWorkstation
+    IF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+      FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
+      IF ( RPMBUILD_CMD )
+        set ( CPACK_GENERATOR "RPM" )
+        FIND_PROGRAM ( UNAME_CMD uname )
+        IF (UNAME_CMD)
+          execute_process( COMMAND ${UNAME_CMD} -m
+                           OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
+                           OUTPUT_STRIP_TRAILING_WHITESPACE )
+        ELSE (UNAME_CMD)
+          set (CPACK_RPM_PACKAGE_ARCHITECTURE "unknown")
+        ENDIF (UNAME_CMD)
+        # reset the release name to include the RHEL version if known
+        IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
+          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
+        ELSEIF ( ${UNIX_CODENAME} MATCHES "Santiago" )
+          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
+        ENDIF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
+        
+        # according to rpm.org: name-version-release.architecture.rpm
+        set ( CPACK_PACKAGE_FILE_NAME
             "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
        
     ENDIF ( RPMBUILD_CMD)
+    ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
   ENDIF ( UNIX )
+
+  # rhel requirements
+  set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
+  set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
+  IF ( ${CPACK_RPM_ARCHITECTURE} matches "i386" )
+    set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" ) # doesn't exist on 64 bit RHEL
+  ENDIF ( ${CPACK_RPM_ARCHITECTURE} matches "i386" )
+
+  # TODO get this right <----------------------
+  set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
 
   # let people know what is coming out the other end
   message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
