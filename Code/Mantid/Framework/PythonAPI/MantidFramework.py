@@ -769,6 +769,27 @@ class IAlgorithmProxy(ProxyObject):
               isinstance(p, EventWorkspaceProperty) or isinstance(p, WorkspaceProperty):
                self.__wkspnames.append(p.value)
         self.__havelist = True
+
+    def __setProperty(self, name, value, convertToString=False):
+        """
+        Friendly error checking version of setProperty that calls the right version of everything.
+        
+        @param name: Name of the property to set.
+        @param value: The value of the property.
+        @param param: Coerce everyhing into a string if True.   
+        """
+        if value is None:
+            return
+        if convertToString:
+            value = _makeString(value).lstrip('? ')
+
+        ialg = self._getHeldObject()
+        if isinstance(value, WorkspaceProxy):
+            ialg._setWorkspaceProperty(name, value._getHeldObject())
+        elif isinstance(value, str):
+            ialg.setPropertyValue(name, value)
+        else:
+            ialg.setPropertyValue(name, _makeString(value).lstrip('? '))  
         
     def setPropertyValues(self, *args, **kwargs):
         """
@@ -785,8 +806,7 @@ class IAlgorithmProxy(ProxyObject):
         # set the properties of the algorithm
         ialg = self._getHeldObject()
         for key in kwargs.keys():
-            if not kwargs[key] is None:
-                ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+            self.__setProperty(key, kwargs[key], True)
         
     def setProperties(self, *args, **kwargs):
         """
@@ -800,13 +820,8 @@ class IAlgorithmProxy(ProxyObject):
             kwargs[key] = arg
 
         # set the properties of the algorithm
-        ialg = self._getHeldObject()
         for key in kwargs.keys():
-            if isinstance(kwargs[key], WorkspaceProxy):
-                ialg._setWorkspaceProperty(key, kwargs[key]._getHeldObject())                
-            else:
-                if not kwargs[key] is None:
-                    ialg.setPropertyValue(key, _makeString(kwargs[key]).lstrip('? '))
+            self.__setProperty(key, kwargs[key], False)
 
     def execute(self, *args, **kwargs):
         """
