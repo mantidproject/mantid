@@ -8,7 +8,6 @@
 #include "MantidAPI/IFunctionMD.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/IMDIterator.h"
-#include "MantidAPI/IMDIterator.h"
 
 namespace Mantid
 {

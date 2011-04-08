@@ -3,6 +3,7 @@ set ( SRC_FILES src/BoxFunctionBuilder.cpp
 src/BoxImplicitFunction.cpp
 src/BoxImplicitFunctionParser.cpp
 src/BoxInterpreter.cpp
+src/CobaltSpinWaveDSHO.cpp
 src/CompositeFunctionBuilder.cpp
 src/CompositeImplicitFunction.cpp
 src/CompositeImplicitFunctionParser.cpp
@@ -30,6 +31,7 @@ src/PlaneInterpreter.cpp
 src/QuadEnBackground.cpp
 src/RunParam.cpp
 src/SimulateMDD.cpp
+src/SimulateResolution.cpp
 src/SingleValueParameterParser.cpp
 src/TobyFitSimulate.cpp
 src/UpParameter.cpp
@@ -46,6 +48,7 @@ inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
 inc/MantidMDAlgorithms/BoxInterpreter.h
 inc/MantidMDAlgorithms/CenterpieceRebinning.h
 inc/MantidMDAlgorithms/CpRebinningNx3.h
+inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
 inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
 inc/MantidMDAlgorithms/CompositeImplicitFunction.h
 inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
@@ -70,6 +73,7 @@ inc/MantidMDAlgorithms/PlaneInterpreter.h
 inc/MantidMDAlgorithms/QuadEnBackground.h
 inc/MantidMDAlgorithms/RunParam.h
 inc/MantidMDAlgorithms/SimulateMDD.h
+inc/MantidMDAlgorithms/SimulateResolution.h
 inc/MantidMDAlgorithms/SingleValueParameterParser.h
 inc/MantidMDAlgorithms/TobyFitSimulate.h
 inc/MantidMDAlgorithms/UpParameter.h
@@ -82,6 +86,7 @@ inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
 
 # Test files. Other source files required.
 set (TEST_FILES
+test/CobaltSWDTest.h
 test/CPR_preselectCellsTest.h 
 test/CPRebinKeepPixTest.h
 test/DepthParameterTest.h
