@@ -43,6 +43,8 @@ namespace CxxTest
         void enterWorld( const WorldDescription &wd );
         void enterSuite( const SuiteDescription &sd );
         void enterTest( const TestDescription &td );
+        void enterRun( const TestDescription & /*desc*/ );
+        void leaveRun( const TestDescription & /*desc*/ );
         void leaveTest( const TestDescription &td );
         void leaveSuite( const SuiteDescription &sd );
         void leaveWorld( const WorldDescription &wd );

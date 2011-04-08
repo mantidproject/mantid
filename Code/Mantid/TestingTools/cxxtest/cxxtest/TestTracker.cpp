@@ -94,6 +94,15 @@ namespace CxxTest
         _testFailedAsserts = false;
         _l->enterTest(td);
     }
+    void TestTracker::enterRun( const TestDescription &td )
+    {
+        _l->enterRun(td);
+    }
+
+    void TestTracker::leaveRun( const TestDescription &td )
+    {
+        _l->leaveRun( td );
+    }
 
     void TestTracker::leaveTest( const TestDescription &td )
     {

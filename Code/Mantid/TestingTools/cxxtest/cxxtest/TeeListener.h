@@ -50,6 +50,12 @@ namespace CxxTest
             _first->enterTest( d );
             _second->enterTest( d );
         }
+
+        void enterRun( const TestDescription &d )
+        {
+            _first->enterRun( d );
+            _second->enterRun( d );
+        }
         
         void trace( const char *file, unsigned line, const char *expression )
         {
@@ -160,6 +166,12 @@ namespace CxxTest
             _second->failedAssertThrowsNot( file, line, expression );
         }
         
+        void leaveRun( const TestDescription &d )
+        {
+            _first->leaveRun(d);
+            _second->leaveRun(d);
+        }
+
         void leaveTest( const TestDescription &d )
         {
             _first->leaveTest(d);

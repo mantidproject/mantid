@@ -181,13 +181,16 @@ namespace CxxTest
     {
     public:
 
-        TestCaseInfo() : fail(false), error(false), runtime(0.0) {}
+        TestCaseInfo() : fail(false), error(false), runtime(0.0), totalRuntime(0.0) {}
         std::string className;
         std::string testName;
         std::string line;
         bool fail;
         bool error;
+        /// Runtime of just the test
         double runtime;
+        /// Runtime including setup/teardown.
+        double totalRuntime;
         std::list<ElementInfo> elements;
         typedef std::list<ElementInfo>::iterator element_t;
         std::string world;
@@ -211,13 +214,17 @@ namespace CxxTest
             }
 
         void write( OutputStream &o )
-            {
-        	std::ostringstream timeStream;
-        	timeStream << runtime;
+          {
+          std::ostringstream timestream1;
+          timestream1 << runtime;
+          std::ostringstream timestream2;
+          timestream2 << totalRuntime;
+
             o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str() 
               << "\" name=\"" << testName.c_str() 
               << "\" line=\"" << line.c_str()
-              << "\" time=\"" << timeStream.str().c_str() << "\"";
+              << "\" time=\"" << timestream1.str().c_str() << "\""
+              << "\" totalTime=\"" <<  timestream2.str().c_str() << "\"";
             bool elts=false;
             element_t curr = elements.begin();
             element_t end  = elements.end();
@@ -235,7 +242,7 @@ namespace CxxTest
             else
                o << " />";
             o.endl(o);
-            }
+          }
 
     };
 
@@ -260,7 +267,7 @@ namespace CxxTest
       #else
         timeval
       #endif
-        testStartTime, testStopTime;
+        testStartTime, testStopTime, testRunStartTime, testRunStopTime;
 
         int run()
         {
@@ -311,7 +318,7 @@ namespace CxxTest
                 while (curr != end) {
                     if (curr->fail) nfail++;
                     if (curr->error) nerror++;
-                    totaltime += curr->runtime;
+                    totaltime += curr->totalRuntime;
                     ntests++;
                     curr++;
                 }
@@ -346,6 +353,36 @@ namespace CxxTest
               new TeeOutputStreams(CXXTEST_STD(cout), CXXTEST_STD(cerr));
         }
 
+        /** Call this method before the run() call for a single test
+         * Used for timing, mostly
+         * */
+        void enterRun( const TestDescription & /*desc*/ )
+        {
+          //TODO: Also CPU time.
+
+          // Record the time now.
+          #ifdef _WIN32
+            testRunStartTime = clock();
+          #else
+            gettimeofday(&testRunStartTime, 0);
+          #endif
+        }
+
+        /** Call this method after the run() call, but before tearDown()
+         * Used for timing, mostly
+         * */
+        void leaveRun( const TestDescription & /*desc*/ )
+        {
+          //TODO: Also CPU time.
+
+          // Record the time now.
+          #ifdef _WIN32
+            testRunStopTime = clock();
+          #else
+            gettimeofday(&testRunStopTime, 0);
+          #endif
+        }
+
         void leaveTest( const TestDescription & )
         {
            if ( stream_redirect != NULL )
@@ -364,33 +401,40 @@ namespace CxxTest
                 stream_redirect = NULL;
            }
 
+
         #ifdef _WIN32
            const double testTime = float(clock() - testStartTime)/CLOCKS_PER_SEC;
+           const double testRunTime = float(testRunStopTime - testRunStartTime)/CLOCKS_PER_SEC;
         #else
            gettimeofday(&testStopTime, 0);
            double sec = testStopTime.tv_sec - testStartTime.tv_sec;
            double usec = testStopTime.tv_usec - testStartTime.tv_usec;
-
-    //       std::cout << testcase->testName << " took " << sec << "secs and " << usec << ""
-
            double testTime = sec + (usec / 1000000.0);
-        #endif
 
+           sec = testRunStopTime.tv_sec - testRunStartTime.tv_sec;
+           usec = testRunStopTime.tv_usec - testRunStartTime.tv_usec;
+           double testRunTime = sec + (usec / 1000000.0);
+        #endif
+            std::cout << testcase->testName << " took " << sec << "secs and " << usec << "";
+
+            // Changed: we show the run() time, EXCLUDING the setup time.
             // Set the run time for this test
-            testcase->runtime = testTime;
+            testcase->runtime = testRunTime;
+            // We still record both times for possible future use
+            testcase->totalRuntime = testTime;
         }
 
         void leaveWorld( const WorldDescription& desc )
         {
-                std::ostringstream os;
-                os << totaltime;
+          std::ostringstream timeStream;
+          timeStream << totaltime;
                 (*_o) << "<?xml version=\"1.0\" encoding=\"UTF-8\" ?>" << endl;
                 (*_o) << "<testsuite name=\"" << desc.worldName() << "\" ";
                 (*_o) << " tests=\"" << ntests 
                       << "\" errors=\"" << nerror 
                       << "\" failures=\"" << nfail 
                       << "\" package=\"" << desc.worldName()
-                      << "\" time=\"" << os.str().c_str() << "\" >";
+                      << "\" time=\"" << timeStream.str().c_str() << "\" >";
                 _o->endl(*_o);
                 (*_o) << _os->str().c_str();
                 _os->clear();

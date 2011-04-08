@@ -70,9 +70,12 @@ namespace CxxTest
             StateGuard sg;
             
             tracker().enterTest( td );
-            if ( td.setUp() ) {
-                td.run();
-                td.tearDown();
+            if ( td.setUp() )
+            {
+              tracker().enterRun( td );
+              td.run();
+              tracker().leaveRun( td );
+              td.tearDown();
             }
             tracker().leaveTest( td );
         }
