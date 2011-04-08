@@ -44,12 +44,12 @@ set (TEST_FILES
 	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/MDBinTest.h
 	test/MDHistoWorkspaceTest.h
-	test/BinToMDHistoWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/OneStepMDEWTest.h
 )
 
 set ( GMOCK_TEST_FILES
+	test/BinToMDHistoWorkspaceTest.h
 )
 
 # Add the target for this directory
