@@ -231,6 +231,12 @@ namespace CxxTest
               << " totalTime=\"" <<  timestream2.str().c_str() << "\""
               << "";
             bool elts=false;
+
+
+            // Add the CPU fraction measurement
+            o << "> <measurement><name>CPUFraction</name><value>" << CPUFraction_stream.str().c_str() << "</value></measurement>";
+            elts = true; // force there to alway be elements, since I just wrote one
+
             element_t curr = elements.begin();
             element_t end  = elements.end();
             while (curr != end) {
@@ -242,9 +248,6 @@ namespace CxxTest
               curr->write(o);
               curr++;
               }
-
-            // Add the CPU fraction measurement
-            o << " <measurement><name>CPUFraction</name><value>" << CPUFraction_stream.str().c_str() << "</value></measurement>";
 
             if (elts)
                o << "    </testcase>";
@@ -429,7 +432,6 @@ namespace CxxTest
            usec = testRunStopTime.tv_usec - testRunStartTime.tv_usec;
            double testRunTime = sec + (usec / 1000000.0);
         #endif
-            //std::cout << testcase->testName << " took " << sec << "secs and " << usec << "";
 
            // The CPU runtime, which on linux will be from all processors. Don't know about windows, think it's wall-clock time.
            double cpuTime = double(cpuStopTime - cpuStartTime)/CLOCKS_PER_SEC;

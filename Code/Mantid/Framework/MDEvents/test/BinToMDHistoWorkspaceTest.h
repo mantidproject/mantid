@@ -184,7 +184,7 @@ public:
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
     in_ws->splitAllIfNeeded(NULL);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
-    std::cout << tim << " to setUp.\n";
+//    std::cout << tim << " to setUp.\n";
   }
 
   void tearDown()
@@ -210,7 +210,7 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg.execute(); )
       TS_ASSERT( alg.isExecuted() );
     }
-    std::cout << tim << " to run.\n";
+//    std::cout << tim << " to run.\n";
   }
 
 };
