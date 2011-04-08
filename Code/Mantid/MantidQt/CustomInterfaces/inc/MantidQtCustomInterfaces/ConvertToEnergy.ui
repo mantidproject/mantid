@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>507</width>
-    <height>622</height>
+    <width>508</width>
+    <height>625</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -1128,7 +1128,7 @@
             </widget>
            </item>
            <item>
-            <widget class="QGroupBox" name="groupBox" >
+            <widget class="QGroupBox" name="gbSampleEnv" >
              <property name="title" >
               <string>Sample Environment</string>
              </property>
@@ -1174,142 +1174,219 @@
             <number>0</number>
            </property>
            <item row="0" column="1" >
-            <widget class="QGroupBox" name="groupBox_2" >
+            <widget class="QGroupBox" name="gbIndRebin" >
              <property name="title" >
               <string>Energy Transfer Range (meV)</string>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_14" >
+              <property name="spacing" >
+               <number>6</number>
+              </property>
+              <property name="margin" >
+               <number>6</number>
+              </property>
               <item>
-               <layout class="QHBoxLayout" name="horizontalLayout_13" >
+               <layout class="QHBoxLayout" name="horizontalLayout_29" >
                 <item>
-                 <widget class="QLabel" name="rebin_lbLow" >
+                 <widget class="QLabel" name="label_7" >
                   <property name="text" >
-                   <string>Low</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>rebin_leELow</cstring>
+                   <string>Rebin Steps:</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QLineEdit" name="rebin_leELow" >
-                  <property name="sizePolicy" >
-                   <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
+                 <widget class="QComboBox" name="cbIndRebType" >
+                  <item>
+                   <property name="text" >
+                    <string>Single</string>
+                   </property>
+                  </item>
+                  <item>
+                   <property name="text" >
+                    <string>Multiple</string>
+                   </property>
+                  </item>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QStackedWidget" name="swIndRebin" >
+                  <property name="currentIndex" >
+                   <number>0</number>
                   </property>
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+                  <widget class="QWidget" name="page_17" >
+                   <layout class="QVBoxLayout" name="verticalLayout_16" >
+                    <property name="spacing" >
+                     <number>0</number>
+                    </property>
+                    <property name="margin" >
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_13" >
+                      <property name="spacing" >
+                       <number>6</number>
+                      </property>
+                      <property name="margin" >
+                       <number>6</number>
+                      </property>
+                      <item>
+                       <widget class="QLabel" name="rebin_lbLow" >
+                        <property name="text" >
+                         <string>Low</string>
+                        </property>
+                        <property name="buddy" >
+                         <cstring>rebin_leELow</cstring>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="rebin_leELow" >
+                        <property name="sizePolicy" >
+                         <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+                          <horstretch>0</horstretch>
+                          <verstretch>0</verstretch>
+                         </sizepolicy>
+                        </property>
+                        <property name="toolTip" >
+                         <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-size:8pt;">x&lt;span style=" vertical-align:sub;">1 &lt;/span>value for rebinning (start point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valELow" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_13" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="rebin_lbWidth" >
-                  <property name="text" >
-                   <string>Width</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>rebin_leEWidth</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="rebin_leEWidth" >
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="valELow" >
+                        <property name="styleSheet" >
+                         <string notr="true" >color: rgb(255, 0, 4)</string>
+                        </property>
+                        <property name="text" >
+                         <string>*</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_13" >
+                        <property name="orientation" >
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0" >
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="rebin_lbWidth" >
+                        <property name="text" >
+                         <string>Width</string>
+                        </property>
+                        <property name="buddy" >
+                         <cstring>rebin_leEWidth</cstring>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="rebin_leEWidth" >
+                        <property name="toolTip" >
+                         <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Δx&lt;span style=" vertical-align:sub;">1&lt;/span> for rebinning (width of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valEWidth" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <spacer name="horizontalSpacer_14" >
-                  <property name="orientation" >
-                   <enum>Qt::Horizontal</enum>
-                  </property>
-                  <property name="sizeHint" stdset="0" >
-                   <size>
-                    <width>40</width>
-                    <height>20</height>
-                   </size>
-                  </property>
-                 </spacer>
-                </item>
-                <item>
-                 <widget class="QLabel" name="rebin_lbHigh" >
-                  <property name="text" >
-                   <string>High</string>
-                  </property>
-                  <property name="buddy" >
-                   <cstring>rebin_leEHigh</cstring>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLineEdit" name="rebin_leEHigh" >
-                  <property name="toolTip" >
-                   <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="valEWidth" >
+                        <property name="styleSheet" >
+                         <string notr="true" >color: rgb(255, 0, 4)</string>
+                        </property>
+                        <property name="text" >
+                         <string>*</string>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <spacer name="horizontalSpacer_14" >
+                        <property name="orientation" >
+                         <enum>Qt::Horizontal</enum>
+                        </property>
+                        <property name="sizeHint" stdset="0" >
+                         <size>
+                          <width>40</width>
+                          <height>20</height>
+                         </size>
+                        </property>
+                       </spacer>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="rebin_lbHigh" >
+                        <property name="text" >
+                         <string>High</string>
+                        </property>
+                        <property name="buddy" >
+                         <cstring>rebin_leEHigh</cstring>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLineEdit" name="rebin_leEHigh" >
+                        <property name="toolTip" >
+                         <string>&lt;!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
 &lt;html>&lt;head>&lt;meta name="qrichtext" content="1" />&lt;style type="text/css">
 p, li { white-space: pre-wrap; }
 &lt;/style>&lt;/head>&lt;body style=" font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;">
 &lt;p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">x&lt;span style=" vertical-align:sub;">2&lt;/span> value for rebinning (end point for range of bins)&lt;/p>&lt;/body>&lt;/html></string>
-                  </property>
-                 </widget>
-                </item>
-                <item>
-                 <widget class="QLabel" name="valEHigh" >
-                  <property name="styleSheet" >
-                   <string notr="true" >color: rgb(255, 0, 4)</string>
-                  </property>
-                  <property name="text" >
-                   <string>*</string>
-                  </property>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="valEHigh" >
+                        <property name="styleSheet" >
+                         <string notr="true" >color: rgb(255, 0, 4)</string>
+                        </property>
+                        <property name="text" >
+                         <string>*</string>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
+                    </item>
+                   </layout>
+                  </widget>
+                  <widget class="QWidget" name="page_18" >
+                   <layout class="QHBoxLayout" name="horizontalLayout_28" >
+                    <property name="spacing" >
+                     <number>0</number>
+                    </property>
+                    <property name="margin" >
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="lbRebinString" >
+                      <property name="text" >
+                       <string>Rebin String</string>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QLineEdit" name="leRebinString" />
+                    </item>
+                   </layout>
+                  </widget>
                  </widget>
                 </item>
                </layout>
               </item>
               <item>
                <layout class="QHBoxLayout" name="horizontalLayout_12" >
+                <property name="spacing" >
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QCheckBox" name="rebin_ckDNR" >
                   <property name="toolTip" >

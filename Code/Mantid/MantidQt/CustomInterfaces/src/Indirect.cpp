@@ -65,7 +65,7 @@ void Indirect::initLayout()
   connect(m_uiForm.ind_calibFile, SIGNAL(fileTextChanged(const QString &)), this, SLOT(calibFileChanged(const QString &)));
   connect(m_uiForm.ckUseCalib, SIGNAL(toggled(bool)), this, SLOT(useCalib(bool)));
   connect(m_uiForm.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int)));
-
+  connect(m_uiForm.cbIndRebType, SIGNAL(currentIndexChanged(int)), m_uiForm.swIndRebin, SLOT(setCurrentIndex(int)));
   // "Calibration" tab
   connect(m_uiForm.cal_pbPlot, SIGNAL(clicked()), this, SLOT(calPlotRaw()));
   connect(m_uiForm.cal_pbPlotEnergy, SIGNAL(clicked()), this, SLOT(calPlotEnergy()));
@@ -116,6 +116,7 @@ void Indirect::initLocalPython()
 {
   // Nothing to do here at the moment.
 }
+
 /**
 * This function opens a web browser window to the Mantid Project wiki page for this
 * interface ("Inelastic" subsection of ConvertToEnergy).
@@ -208,10 +209,16 @@ void Indirect::runConvertToEnergy()
 
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
   {
-    QString rebinParam = m_uiForm.rebin_leELow->text() + ","
-      + m_uiForm.rebin_leEWidth->text() + ","
-      + m_uiForm.rebin_leEHigh->text();
-    pyInput += "reducer.set_rebin_string('"+rebinParam+"')\n";
+    QString rebin;
+    if ( m_uiForm.cbIndRebType->currentIndex() == 0 )
+    {
+      rebin = m_uiForm.rebin_leELow->text() + "," + m_uiForm.rebin_leEWidth->text() + "," + m_uiForm.rebin_leEHigh->text();
+    }
+    else
+    {
+      rebin = m_uiForm.leRebinString->text();
+    }
+    pyInput += "reducer.set_rebin_string('"+rebin+"')\n";
   }
 
   if ( m_uiForm.ckDetailedBalance->isChecked() )
@@ -296,7 +303,6 @@ void Indirect::setIDFValues(const QString & prefix)
 
       if ( text != "diffraction" ) // do not put diffraction into the analyser list
       {
-
         QVariant data; // holds Data field of combo box (list of reflections)
 
         QStringList analyser = analysers[i].split("-", QString::SkipEmptyParts);
@@ -323,7 +329,6 @@ void Indirect::setIDFValues(const QString & prefix)
 void Indirect::closeEvent(QCloseEvent* close)
 {
   (void) close;
-  //saveSettings();
   Mantid::Kernel::ConfigService::Instance().removeObserver(m_changeObserver);
 }
 
@@ -472,7 +477,6 @@ bool Indirect::validateInput()
   }
 
   // calib file input
-
   if ( m_uiForm.ckUseCalib->isChecked() && !m_uiForm.ind_calibFile->isValid() )
   {
     valid = false;
@@ -527,7 +531,8 @@ bool Indirect::validateInput()
 
   if ( ! m_uiForm.rebin_ckDNR->isChecked() )
   {
-    //
+    if ( m_uiForm.cbIndRebType->currentIndex() == 0 )
+    {
     if ( m_uiForm.rebin_leELow->text() == "" )
     {
       valid = false;
@@ -564,7 +569,14 @@ bool Indirect::validateInput()
       m_uiForm.valELow->setText("*");
       m_uiForm.valEHigh->setText("*");
     }
-
+    }
+    else
+    {
+      if ( m_uiForm.leRebinString->text() == "" )
+      {
+        valid = false;
+      }
+    }
   }
   else
   {
@@ -583,7 +595,6 @@ bool Indirect::validateCalib()
 {
   bool valid = true;
 
-  // run number
   if ( ! m_uiForm.cal_leRunNo->isValid() )
   {
     valid = false;
@@ -706,14 +717,12 @@ bool Indirect::validateSlice()
 }
 
 void Indirect::loadSettings()
-{
-  
+{  
   // set values of m_dataDir and m_saveDir
   m_dataDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories"));
   m_dataDir = m_dataDir.split(";", QString::SkipEmptyParts)[0];
   m_saveDir = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("defaultsave.directory"));
-
-
+  
   QSettings settings;
   // Load settings for MWRunFile widgets
   settings.beginGroup(m_settingsGroup + "DataFiles");
@@ -730,8 +739,6 @@ void Indirect::loadSettings()
   m_uiForm.slice_calibFile->readSettings(settings.group());
   m_uiForm.sqw_inputFile->readSettings(settings.group());
   settings.endGroup();
-
-  // And for instrument/analyser/reflection
 }
 
 void Indirect::saveSettings()
@@ -1012,11 +1019,20 @@ void Indirect::reflectionSelected(int index)
     // Default rebinning parameters can be set in instrument parameter file
     if ( values.count() == 9 )
     {
-      QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
+      m_uiForm.leRebinString->setText(values[8]);
       m_uiForm.rebin_ckDNR->setChecked(false);
-      m_uiForm.rebin_leELow->setText(rbp[0]);
-      m_uiForm.rebin_leEWidth->setText(rbp[1]);
-      m_uiForm.rebin_leEHigh->setText(rbp[2]);
+      QStringList rbp = values[8].split(",", QString::SkipEmptyParts);
+      if ( rbp.size() == 3 )
+      {
+        m_uiForm.rebin_leELow->setText(rbp[0]);
+        m_uiForm.rebin_leEWidth->setText(rbp[1]);
+        m_uiForm.rebin_leEHigh->setText(rbp[2]);
+        m_uiForm.cbIndRebType->setCurrentIndex(0);
+      }
+      else
+      {
+        m_uiForm.cbIndRebType->setCurrentIndex(1);
+      }
     }
     else
     {
@@ -1024,6 +1040,7 @@ void Indirect::reflectionSelected(int index)
       m_uiForm.rebin_leELow->setText("");
       m_uiForm.rebin_leEWidth->setText("");
       m_uiForm.rebin_leEHigh->setText("");
+      m_uiForm.leRebinString->setText("");
     }
   }
 
@@ -1157,7 +1174,6 @@ void Indirect::plotRaw()
     {
       showInformationBox(pyOutput);
     }
-
   }
   else
   {
