@@ -358,6 +358,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
 
   int nFunctions = m_cf->nFunctions()+1;
   m_cf->addFunction(f);
+  m_browser->compositeFunction()->checkFunction();
 
   if (m_cf->nFunctions() != nFunctions)
   {// this may happen
