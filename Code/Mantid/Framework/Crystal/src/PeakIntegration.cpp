@@ -72,12 +72,12 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
-      Alpha0 = -7.3462;
-      Alpha1 = 7.38558;
-      Beta0 = 0.139871;
-      Kappa = -149018.;
-      SigmaSquared = 310.759;
-      Gamma = 413.903;
+      Alpha0 = 1.89157;
+      Alpha1 = 1.69777;
+      Beta0 = 9.38995;
+      Kappa = 4.3558;
+      SigmaSquared = 396.9;
+      Gamma = 0.57103;
   
       // create TOF axis from Params
       const std::vector<double> rb_params = getProperty("Params");
@@ -181,6 +181,7 @@ namespace Mantid
   
         peaksW->setPeakIntegrateCount(I, i);
         peaksW->setPeakIntegrateError(sigI, i);
+        break;
       }
     }
 
@@ -219,9 +220,7 @@ namespace Mantid
       double ratio = pktime/bktime;
 
       const double peakLoc = X[TOFPeak];
-      const double peakHeight =  Y[TOFPeak]; //*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
-      // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
-      if ( boost::math::isnan(peakHeight) ) return;
+      const double peakHeight =  Y[TOFPeak]*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
 
       IAlgorithm_sptr fit_alg;
       try
@@ -239,8 +238,9 @@ namespace Mantid
       fit_alg->setProperty("MaxIterations", 5000);
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
-      fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = "<<SigmaSquared<<";name=Lorentzian, Height = "
-              <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;
+      fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=1.89157,Alpha1=1.69777,Beta0=9.38995,Kappa=4.3558,SigmaSquared=396.9,Gamma=0.57103,X0="<<peakLoc;
+      /*fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = "<<SigmaSquared<<";name=Lorentzian, Height = "
+              <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;*/
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
 
@@ -264,46 +264,38 @@ namespace Mantid
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
       IKI = params[0];
-      X0 = params[1];
-      if (!boost::math::isnan(params[2])) SigmaSquared = params[2];
-      Alpha0 = params[3];
-      Alpha1 = params[4];
-      Gamma = params[5];
+      Alpha0 = params[1];
+      Alpha1 = params[2];
+      Beta0 = params[3];
+      Kappa = params[4];
+      SigmaSquared = params[5];
+      Gamma = params[6];
+      X0 = params[7];
       std::string funct = fit_alg->getPropertyValue("Function");
       std::cout <<funct<<"\n";
 
       setProperty("OutputWorkspace", ws);
 
-      std::ostringstream fun_str1;
-      fun_str1 << "name = Gaussian, Height = "<<IKI<<", PeakCentre = "<<X0<<", Sigma = "<<SigmaSquared; 
-      IFitFunction *out1 = FunctionFactory::Instance().createInitialized(fun_str1.str());
-      IPeakFunction *pk1 = dynamic_cast<IPeakFunction *>(out1);
-      std::ostringstream fun_str2;
-      fun_str2 <<"name=Lorentzian, Height = "<<Alpha0<<", PeakCentre = "<<Alpha0<<", HWHM = "<<Gamma;
-      IFitFunction *out2 = FunctionFactory::Instance().createInitialized(fun_str1.str());
-      IPeakFunction *pk2 = dynamic_cast<IPeakFunction *>(out2);
+      IFitFunction *out = FunctionFactory::Instance().createInitialized(funct);
+      IPeakFunction *pk = dynamic_cast<IPeakFunction *>(out);
       const int n=1000;
       double *x = new double[n];
-      double *y1 = new double[n];
-      double *y2 = new double[n];
+      double *y = new double[n];
       double dx=(X[TOFmax]-X[TOFmin])/double(n-1);
       for (int i=0; i < n; i++) 
       {
         x[i] = X[TOFmin]+i*dx;
       }
-      pk1->setMatrixWorkspace(outputW, 0, -1, -1);
-      pk1->function(y1,x,n);
-      pk2->setMatrixWorkspace(outputW, 0, -1, -1);
-      pk2->function(y2,x,n);
+      pk->setMatrixWorkspace(outputW, 0, -1, -1);
+      pk->function(y,x,n);
 
       I = 0.0;
-      for (int i = 0; i < n; i++) I+= y1[i]+y2[i];
+      for (int i = 0; i < n; i++) I+= y[i];
       I*= double(DataValues.size())/double(n);
       sigI = sqrt(I+ratio*ratio*bkg0);
       I-= ratio*bkg0;
       delete [] x;
-      delete [] y1;
-      delete [] y2;
+      delete [] y;
       return;
     }
 
