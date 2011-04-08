@@ -24,6 +24,38 @@ namespace MDEvents
 {
 
   //-----------------------------------------------------------------------------------------------
+  /** Performs template argument deduction and uses local call to fabricate an adapter instance of Point3D. Templated function may have a more suitable location.
+   */
+  template <typename AdapteeType>
+  Mantid::API::Point3D* makePoint3D(const AdapteeType& adaptee)
+  {
+
+    //Local adapter.
+    class PointAdapter : public Mantid::API::Point3D
+    {
+    private:
+      AdapteeType m_adaptee;
+    public:
+      PointAdapter(const AdapteeType& adaptee) : m_adaptee(adaptee)
+      {
+      }
+      virtual double getX() const
+      {
+        return (m_adaptee.m_max[0] - m_adaptee.m_min[0]) /2 ;
+      }
+      virtual double getY() const
+      {
+        return (m_adaptee.m_max[1] - m_adaptee.m_min[1]) /2;
+      }
+      virtual double getZ() const
+      {
+        return (m_adaptee.m_max[2] - m_adaptee.m_min[2]) /2;
+      }
+    };
+    return new PointAdapter(adaptee);
+  }
+
+  //-----------------------------------------------------------------------------------------------
   /** Default constructor
    */
   TMDE(
@@ -339,7 +371,7 @@ namespace MDEvents
     }
 
   private:
-    /// pointer to the MDBox containing MDEvents
+    /// pointer to the MDBox containing MDEvents 
     IMDBox<MDE,nd> * inBox;
     /// pointer to the MDHistoWorkspace containing the result
     MDHistoWorkspace_sptr outWS;
@@ -451,11 +483,10 @@ namespace MDEvents
 
       // Check if the bin is in the ImplicitFunction (if any)
       bool binContained = true;
-      if (implicitFunction)
+      if (implicitFunction) 
       {
-        //TODO: implicitFunction call.
+        binContained = implicitFunction->evaluate(makePoint3D(bin));
       }
-
       if (binContained)
       {
         // Create the task and schedule it
