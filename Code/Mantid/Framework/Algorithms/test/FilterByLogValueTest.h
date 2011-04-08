@@ -36,7 +36,6 @@ public:
   /** Setup for loading raw data */
   void setUp_Event()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     IAlgorithm_sptr loader = AlgorithmManager::Instance().create("LoadEventNexus");
     loader->initialize();
     loader->setPropertyValue("Filename", "CNCS_7860_event.nxs");

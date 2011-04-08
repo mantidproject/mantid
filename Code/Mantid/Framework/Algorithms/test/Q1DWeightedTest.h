@@ -39,7 +39,6 @@ public:
   {
     Mantid::DataHandling::LoadSpice2D loader;
     loader.initialize();
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "HFIR");
     loader.setPropertyValue("Filename","BioSANS_exp61_scan0004_0001.xml");
     const std::string inputWS("wav");
     loader.setPropertyValue("OutputWorkspace",inputWS);

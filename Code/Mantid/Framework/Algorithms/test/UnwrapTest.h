@@ -52,8 +52,6 @@ public:
 
   void testExec()
   {
-    ConfigService::Instance().setString("default.facility", "ISIS");
-
     IAlgorithm* loader = new Mantid::DataHandling::LoadRaw2;
     loader->initialize();
     loader->setPropertyValue("Filename", "OSI11886.raw");

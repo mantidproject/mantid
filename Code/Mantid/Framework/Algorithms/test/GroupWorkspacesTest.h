@@ -56,7 +56,6 @@ public:
 
 	void testExecGroupOneNormalWorkspace()
 	{
-	    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48097.raw"));
@@ -76,7 +75,6 @@ public:
 	}
 	void testExecGroupTwoNormalWorkspaces()
 	{
-		Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");	
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48097.raw"));
@@ -114,7 +112,6 @@ public:
 	}
 	void testExecGroupThreeNormalWorkspaces()
 	{
-	    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48094.raw"));
@@ -162,7 +159,6 @@ public:
 	}
 	void testExecGroupNormalWorkspaceandGroupWorkspace()
 	{
-	    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","EVS13895.raw"));
@@ -216,7 +212,6 @@ public:
 	}
 	void testExecGroupTwoIncompatibleWorkspaces()
 	{
-	    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
 		LoadRaw3 alg;
 		alg.initialize();
 		TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("FileName","LOQ48094.raw"));

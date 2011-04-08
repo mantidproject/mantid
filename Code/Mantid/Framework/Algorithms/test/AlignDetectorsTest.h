@@ -25,7 +25,6 @@ public:
   /** Setup for loading raw data */
   void setUp_Raw()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     LoadRaw3 loader;
     loader.initialize();
     loader.setPropertyValue("Filename","HRP38692.raw");
@@ -90,7 +89,6 @@ public:
   /** Setup for loading raw data */
   void setUp_Event()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     inputWS = "eventWS";
     LoadEventPreNeXus loader;
     loader.initialize();

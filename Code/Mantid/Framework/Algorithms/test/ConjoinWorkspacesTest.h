@@ -24,7 +24,6 @@ public:
 
   void setupWS()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     IAlgorithm* loader;
     loader = new Mantid::DataHandling::LoadRaw;
     loader->initialize();
@@ -47,7 +46,6 @@ public:
     delete loader;
 
     //Now some event workspaces
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "SNS");
     loader = new Mantid::DataHandling::LoadEventPreNeXus;
     loader->initialize();
     loader->setPropertyValue("EventFilename", "VULCAN_2916_neutron0_event.dat");

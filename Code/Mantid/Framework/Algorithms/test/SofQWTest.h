@@ -34,7 +34,6 @@ public:
   
   void testExec()
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "ISIS");
     if (!sqw.isInitialized()) sqw.initialize();
 
     Mantid::NeXus::LoadNexusProcessed loader;
