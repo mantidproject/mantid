@@ -167,6 +167,46 @@ public:
     //TS_ASSERT_EQUALS(out->getNPoints(), 0); //TODO. Janik. This needs to be fixed. The implicit function should have ensured that no bins were present.
   }
 
+};
+
+
+class BinToMDHistoWorkspaceTestPerformance : public CxxTest::TestSuite
+{
+public:
+  MDEventWorkspace3::sptr in_ws;
+
+  void setUp()
+  {
+    in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1000);
+    // 1000 boxes with 1000 event each
+    TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
+    in_ws->splitAllIfNeeded(NULL);
+    AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
+  }
+
+  void tearDown()
+  {
+    AnalysisDataService::Instance().remove("BinToMDHistoWorkspaceTest_ws");
+  }
+
+  /** A slow test that is useful for profiling and optimizing */
+  void test_for_profiling()
+  {
+    for (size_t i=0; i<1; i++)
+    {
+      BinToMDHistoWorkspace alg;
+      TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+      TS_ASSERT( alg.isInitialized() )
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("InputWorkspace", "BinToMDHistoWorkspaceTest_ws") );
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 60"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 60"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 60"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", "NONE,0.0,10.0,1"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws_histo"));
+      TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+      TS_ASSERT( alg.isExecuted() );
+    }
+  }
 
 };
 

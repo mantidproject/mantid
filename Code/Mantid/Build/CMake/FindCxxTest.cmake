@@ -90,8 +90,9 @@
 #     Eliminated superfluous CXXTEST_FOUND assignment
 #     Cleaned up and added more documentation
 
+
 #=============================================================
-# CXXTEST_ADD_TEST (public macro)
+# CXXTEST_ADD_TEST (public macro to add unit tests)
 #=============================================================
 macro(CXXTEST_ADD_TEST _cxxtest_testname)
     # determine the cpp filename
@@ -135,18 +136,41 @@ macro(CXXTEST_ADD_TEST _cxxtest_testname)
       add_test ( NAME ${_cxxtest_testname}
                  COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
                          $<TARGET_FILE:${_cxxtest_testname}> )
+
     else (CXXTEST_SINGLE_LOGFILE)
       # THE FOLLOWING DESTROYS THE OUTPUT XML FILE
       # add each separate test to ctest
       foreach ( part ${ARGN} )
+		# The filename without extension = The suite name.
         get_filename_component(_suitename ${part} NAME_WE )
         set( _cxxtest_separate_name "${_cxxtest_testname}_${_suitename}")
         add_test ( NAME ${_cxxtest_separate_name}
                   COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
 		          $<TARGET_FILE:${_cxxtest_testname}> ${_suitename} )
+
+		if (CXXTEST_ADD_PERFORMANCE)
+			# ------ Performance test version -------
+			# Name of the possibly-existing Performance test suite
+			set( _performance_suite_name "${_suitename}Performance" )
+			# Read the contents of the header file
+		    FILE( READ ${part} _file_contents )
+			# Is that suite defined in there at all?
+			STRING(REGEX MATCH ${_performance_suite_name} _search_res ${_file_contents} )
+			if (NOT "${_search_res}" STREQUAL "")
+				#MESSAGE( "${_performance_suite_name} Found:                 ${_search_res}" ) 
+				set( _cxxtest_separate_name "${_cxxtest_testname}_${_performance_suite_name}")
+				add_test ( NAME ${_cxxtest_separate_name}
+				          COMMAND ${CMAKE_COMMAND} -E chdir "${CMAKE_BINARY_DIR}/bin/Testing" 
+						  $<TARGET_FILE:${_cxxtest_testname}> ${_performance_suite_name} )
+			endif ()
+		endif ()
       endforeach ( part ${ARGN} )
     endif (CXXTEST_SINGLE_LOGFILE)
 endmacro(CXXTEST_ADD_TEST)
+
+
+
+
 
 #=============================================================
 # main()
