@@ -2,6 +2,7 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -82,6 +83,7 @@ void MuonAnalysis::initLayout()
 
   // Further set initial look
   startUpLook();
+  createMicroSecondsLabels(m_uiForm);
 
 
   // connect exit button
@@ -224,7 +226,7 @@ void MuonAnalysis::runTimeAxisStartAtInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ns)' input box. Reset to zero.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Reset to zero.");
     m_uiForm.timeAxisStartAtInput->setText("0");
   }
 }
@@ -247,8 +249,8 @@ void MuonAnalysis::runFirstGoodBinFront()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ns)' input box. Reset to 300.");
-    m_uiForm.firstGoodBinFront->setText("300");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ms)' input box. Reset to 0.3.");
+    m_uiForm.firstGoodBinFront->setText("0.3");
   }
 }
 
@@ -267,7 +269,7 @@ void MuonAnalysis::runTimeAxisFinishAtInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ns)' input box.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box.");
     m_uiForm.timeAxisFinishAtInput->setText("");
   }
 }
@@ -916,7 +918,7 @@ void MuonAnalysis::inputFileChanged()
 
   if ( !m_uiForm.mwRunFiles->isValid() )
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon file not recognised");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon files text string invalid");
     return;
   }
 
@@ -980,8 +982,6 @@ void MuonAnalysis::inputFileChanged()
   double timeZero;
   double firstGoodData;
   strParam >> mainFieldDirection >> timeZero >> firstGoodData;
-  timeZero *= 1000.0;      // convert to ns
-  firstGoodData *= 1000.0;
 
   // Get hold of a pointer to a matrix workspace and apply grouping if applicatable
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(m_workspace_name);
@@ -1029,8 +1029,10 @@ void MuonAnalysis::inputFileChanged()
   str << " to muon polarisation";
   m_uiForm.instrumentDescription->setText(str.str().c_str());
 
-  m_uiForm.timeZeroFront->setText((boost::lexical_cast<std::string>(static_cast<int>(timeZero))).c_str());
-  m_uiForm.firstGoodBinFront->setText((boost::lexical_cast<std::string>(static_cast<int>(firstGoodData-timeZero))).c_str());
+  m_uiForm.timeZeroFront->setText(QString::number(timeZero, 'g',2));
+  m_uiForm.firstGoodBinFront->setText(QString::number(firstGoodData-timeZero,'g',2));
+  // since content of first-good-bin changed run this slot
+  runFirstGoodBinFront();
 
 
   // Populate run information text field
@@ -2104,12 +2106,7 @@ void MuonAnalysis::setGroupingFromIDF(const std::string& mainFieldDirection, Mat
  */
 QString MuonAnalysis::timeZero()
 {
-  std::stringstream str(m_uiForm.timeZeroFront->text().toStdString()); 
-  double tz;
-  str >> tz;
-  tz /= 1000.0;  // convert from ns to ms
-
-  return QString((boost::lexical_cast<std::string>(tz)).c_str());
+  return m_uiForm.timeZeroFront->text();
 }
 
  /**
@@ -2118,12 +2115,7 @@ QString MuonAnalysis::timeZero()
  */
 QString MuonAnalysis::firstGoodBin()
 {
-  std::stringstream str(m_uiForm.firstGoodBinFront->text().toStdString()); 
-  double fgb;
-  str >> fgb;
-  fgb /= 1000.0;  // convert from ns to ms
-
-  return QString((boost::lexical_cast<std::string>(fgb)).c_str());
+  return m_uiForm.firstGoodBinFront->text();
 }
 
  /**
@@ -2136,12 +2128,11 @@ double MuonAnalysis::plotFromTime()
   try 
   {
     retVal = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
-    retVal /= 1000.0;  // convert from ns to ms
   }
   catch (...)
   {
     retVal = 0.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ns)' input box. Plot from time zero.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Plot from time zero.");
   }
 
   return retVal;
@@ -2158,12 +2149,11 @@ double MuonAnalysis::plotToTime()
   try 
   {
     retVal = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
-    retVal /= 1000.0;  // convert from ns to ms
   }
   catch (...)
   {
     retVal = 1.0;
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ns)' input box. Plot to time=1.0.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box. Plot to time=1.0.");
   }
 
   return retVal;

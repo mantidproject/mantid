@@ -37,7 +37,7 @@
        <property name="title" >
         <string>Instrument</string>
        </property>
-       <widget class="QLabel" name="label_3" >
+       <widget class="QLabel" name="Time_Zero_label" >
         <property name="geometry" >
          <rect>
           <x>110</x>
@@ -47,7 +47,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>Time Zero (ns):</string>
+         <string>Time Zero</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeZeroFront" >
@@ -63,10 +63,10 @@
          </rect>
         </property>
         <property name="text" >
-         <string>200</string>
+         <string>0.2</string>
         </property>
        </widget>
-       <widget class="QLabel" name="label_4" >
+       <widget class="QLabel" name="First_Good_Data_label" >
         <property name="geometry" >
          <rect>
           <x>110</x>
@@ -76,7 +76,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>First Good Data (ns):</string>
+         <string>First Good Data</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="firstGoodBinFront" >
@@ -89,7 +89,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>300</string>
+         <string>0.3</string>
         </property>
        </widget>
        <widget class="QLabel" name="instrumentDescription" >
@@ -793,7 +793,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>Start at (ns):</string>
+         <string>Start at</string>
         </property>
        </widget>
        <widget class="QLabel" name="timeAxisFinishAtLabel" >
@@ -806,7 +806,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>Finish at (ns):</string>
+         <string>Finish at</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeAxisStartAtInput" >
@@ -822,7 +822,7 @@
          </rect>
         </property>
         <property name="text" >
-         <string>300</string>
+         <string>0.3</string>
         </property>
        </widget>
        <widget class="QLineEdit" name="timeAxisFinishAtInput" >
@@ -833,6 +833,9 @@
           <width>41</width>
           <height>20</height>
          </rect>
+        </property>
+        <property name="text" >
+         <string>16.0</string>
         </property>
        </widget>
        <widget class="QLabel" name="label_11" >
