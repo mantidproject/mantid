@@ -595,12 +595,12 @@
        </property>
        <item>
         <property name="text" >
-         <string>Counts</string>
+         <string>Asymmetry</string>
         </property>
        </item>
        <item>
         <property name="text" >
-         <string>Asymmetry</string>
+         <string>Counts</string>
         </property>
        </item>
        <item>

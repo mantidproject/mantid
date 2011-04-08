@@ -1085,6 +1085,11 @@ void MuonAnalysis::inputFileChanged()
     m_uiForm.homePeriodBox2->setEnabled(false);
     m_uiForm.homePeriodBoxMath->setEnabled(false);
   }
+
+  // finally the preferred default by users are to by default
+  // straight away plot the data
+  if (m_uiForm.frontPlotButton->isEnabled() )
+    runFrontPlotButton();
 }
 
 /**
