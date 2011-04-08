@@ -181,7 +181,6 @@ namespace Mantid
   
         peaksW->setPeakIntegrateCount(I, i);
         peaksW->setPeakIntegrateError(sigI, i);
-        break;
       }
     }
 
@@ -238,7 +237,7 @@ namespace Mantid
       fit_alg->setProperty("MaxIterations", 5000);
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
-      fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0=1.89157,Alpha1=1.69777,Beta0=9.38995,Kappa=4.3558,SigmaSquared=396.9,Gamma=0.57103,X0="<<peakLoc;
+      fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa<<",SigmaSquared="<<SigmaSquared<<",Gamma="<<Gamma<<",X0="<<peakLoc;
       /*fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = "<<SigmaSquared<<";name=Lorentzian, Height = "
               <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;*/
       fit_alg->setProperty("Function", fun_str.str());
@@ -262,15 +261,19 @@ namespace Mantid
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       const MantidVec &  DataValues = ws->readY(0);
 
-      std::vector<double> params = fit_alg->getProperty("Parameters");
-      IKI = params[0];
-      Alpha0 = params[1];
-      Alpha1 = params[2];
-      Beta0 = params[3];
-      Kappa = params[4];
-      SigmaSquared = params[5];
-      Gamma = params[6];
-      X0 = params[7];
+      double chisq = fit_alg->getProperty("Output Chi^2/DoF");
+      if(chisq < 0.0) // Find some chisq for a good fit to initialize parameters for next peak
+      {
+        std::vector<double> params = fit_alg->getProperty("Parameters");
+        IKI = params[0];
+        Alpha0 = params[1];
+        Alpha1 = params[2];
+        Beta0 = params[3];
+        Kappa = params[4];
+        SigmaSquared = params[5];
+        Gamma = params[6];
+        X0 = params[7];
+      }
       std::string funct = fit_alg->getPropertyValue("Function");
       std::cout <<funct<<"\n";
 
