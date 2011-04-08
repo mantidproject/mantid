@@ -1052,7 +1052,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self.fit_method = None
         self._method_set = False
         self._use_full_range = None
+        # A LoadTransmissions object that contains the names of the transmission and direct workspaces
         self.loader = loader
+        # this contains the spectrum number of the monitor that comes after the sample from which the transmission calculation is done 
+        self._trans_spec = None
 
     def get_lambdamin(self, instrum):
         """
@@ -1084,12 +1087,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                 self._lambda_max = max
                 self._max_set = override
 
-        if not fit_method is None:
+        if fit_method:
             if (not self._method_set) or override:
                 fit_method = fit_method.upper()
                 if fit_method in self.TRANS_FIT_OPTIONS.keys():
                     self.fit_method = self.TRANS_FIT_OPTIONS[fit_method]
-                    override 
                 else:
                     self.fit_method = self.DEFAULT_FIT
                     _issueWarning('ISISReductionStep.Transmission: Invalid fit mode passed to TransFit, using default method (%s)' % self.DEFAULT_FIT)
@@ -1137,8 +1139,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
     def execute(self, reducer, workspace):
         if (self.loader is None) or (not self.loader.trans_name):
+            #not having transmission files is not an error, we just do nothing
             return
 
+        #get the settings required to do the calculation
         trans_raw = self.loader.trans_name
         direct_raw = self.loader.direct_name
         
@@ -1147,37 +1151,41 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
 
-        instrum = reducer.instrument
 
-        if self.fit_method is None:
-            self.fit_method = self.DEFAULT_FIT
-            
+        if self.fit_method:
+            fit_meth = self.fit_method
+        else:
+            fit_meth = self.DEFAULT_FIT
+        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+        if fit_meth == 'Off':
+            fit_type = 'Linear'
+        else:
+            fit_type = fit_meth
+
+        if self._trans_spec:
+            trans = self._trans_spec
+        else:
+            trans = reducer.instrument.trans_monitor
+
         if self._use_full_range is None:
             use_full_range = reducer.full_trans_wav
         else:
             use_full_range = self._use_full_range
         if use_full_range:
-            wavbin = str(instrum.WAV_RANGE_MIN) 
+            wavbin = str(reducer.instrument.WAV_RANGE_MIN) 
             wavbin +=','+str(reducer.to_wavelen.wav_step)
-            wavbin +=','+str(instrum.WAV_RANGE_MAX)
-            translambda_min = instrum.WAV_RANGE_MIN
-            translambda_max = instrum.WAV_RANGE_MAX
+            wavbin +=','+str(reducer.instrument.WAV_RANGE_MAX)
+            translambda_min = reducer.instrument.WAV_RANGE_MIN
+            translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
             translambda_min = reducer.get_trans_lambdamin()
             translambda_max = reducer.get_trans_lambdamax()
             wavbin = str(reducer.to_wavelen.get_rebin())
-    
-        fittedtransws = trans_raw.split('_')[0] + '_trans_'
-        fittedtransws += self.CAN_SAMPLE_SUFFIXES[self.loader.can]
-        fittedtransws += '_'+str(translambda_min)+'_'+str(translambda_max)
-        unfittedtransws = fittedtransws + "_unfitted"
-        
-        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-        if self.fit_method == 'Off':
-            fit_type = 'Linear'
-        else:
-            fit_type = self.fit_method
 
+        
+        fittedtransws, unfittedtransws = self.get_wksp_names(
+                            trans_raw, translambda_min, translambda_max)
+        
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
             reducer.instrument.use_interpol_trans_calc)
@@ -1186,19 +1194,16 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
             reducer.instrument.use_interpol_trans_calc)
 
-        if reducer.instrument.name() == 'LOQ':
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws, MinWavelength=translambda_min, MaxWavelength =  translambda_max, \
-                                  FitMethod = fit_type, OutputUnfittedData=True)
-        else:
-            CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-                reducer.instrument.incid_mon_4_trans_calc, reducer.instrument.trans_monitor,
-                MinWavelength = translambda_min, MaxWavelength = translambda_max,
-                FitMethod = fit_type, OutputUnfittedData=True)
+        CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
+            reducer.instrument.incid_mon_4_trans_calc, trans,
+            MinWavelength = translambda_min, MaxWavelength = translambda_max,
+            FitMethod = fit_type, OutputUnfittedData=True)
+
         # Remove temporaries
         mantid.deleteWorkspace(trans_tmp_out)
         mantid.deleteWorkspace(direct_tmp_out)
             
-        if self.fit_method == 'Off':
+        if fit_meth == 'Off':
             result = unfittedtransws
             mantid.deleteWorkspace(fittedtransws)
         else:
@@ -1214,11 +1219,29 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                 trans_ws = result
         except:
             raise RuntimeError("Failed to Rebin the workspaces %s and %s to be the same."%(workspace, trans_ws))
-    
+
         try:
             Divide(workspace, trans_ws, workspace)
         except:
             raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
+    
+    def get_trans_spec(self):
+        return self._trans_spec
+    
+    def set_trans_spec(self, value):
+        self._trans_spec = int(value)
+        
+    trans_spec = property(get_trans_spec, set_trans_spec, None, None)
+
+    def get_wksp_names(self, raw_name, lambda_min, lambda_max):
+        fitted_name = raw_name.split('_')[0] + '_trans_'
+        fitted_name += self.CAN_SAMPLE_SUFFIXES[self.loader.can]
+        fitted_name += '_'+str(lambda_min)+'_'+str(lambda_max)
+        
+        unfitted = fitted_name + "_unfitted"
+        
+        return fitted_name, unfitted
+
 
 class ISISCorrections(sans_reduction_steps.CorrectToFileStep):
     DEFAULT_SCALING = 100.0
@@ -1272,6 +1295,7 @@ class UserFile(ReductionStep):
         self.filename = file
         self._incid_monitor_lckd = False
         self.executed = False
+        self.key_functions = {'TRANS/': self._read_trans_line}
 
     def execute(self, reducer, workspace=None):
         if self.filename is None:
@@ -1305,6 +1329,20 @@ class UserFile(ReductionStep):
         # This is so that I can be sure all EOL characters have been removed
         line = line.lstrip().rstrip()
         upper_line = line.upper()
+        
+        #check for a recognised command
+        for keyword in self.key_functions.keys():            
+            if upper_line.startswith(keyword):
+                #remove the keyword as it has already been parsed
+                params = upper_line[len(keyword):]
+                #call the handling function for that keyword
+                error = self.key_functions[keyword](params, reducer)
+                
+                if error:
+                    _issueWarning(error+line)
+                
+                return
+
         if upper_line.startswith('L/'):
             self.readLimitValues(line, reducer)
         
@@ -1313,7 +1351,7 @@ class UserFile(ReductionStep):
         
         elif upper_line.startswith('MASK'):
             if len(upper_line[5:].strip().split()) == 4:
-                _issueInfo('Box mask lines are not supported')
+                _issueInfo('Box masks can only be defined using the V and H syntax, not "mask x1 y1 x2 y2"')
             else:
                 reducer.mask.parse_instruction(upper_line)
         
@@ -1556,6 +1594,17 @@ class UserFile(ReductionStep):
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
+    def _read_trans_line(self, arguments, reducer):
+        if arguments.startswith('TRANSPEC'):
+            arguments = arguments.split('TRANSPEC')[1]
+            arguments = arguments.split('=')
+            if len(arguments) < 2:
+                raise RuntimeError('An "=" is required after TRANSPEC')
+            reducer.transmission_calculator.trans_spec = arguments[1]
+            return ''
+        else:
+            return 'Unrecognised line: '
+        
     def _check_instrument(self, inst_name, reducer):
         if reducer.instrument is None:
             raise RuntimeError('Use SANS2D() or LOQ() to set the instrument before Maskfile()')

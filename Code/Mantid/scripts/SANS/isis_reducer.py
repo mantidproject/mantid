@@ -317,11 +317,6 @@ class ISISReducer(SANSReducer):
             self.instrument.set_incident_mon(specNum)
             self.instrument.set_interpolating_norm(interp)
                         
-    def suggest_monitor_spectrum(self, specNum, interp=False):
-        if not self._monitor_set:
-            self.instrument.suggest_incident_mntr(specNum)
-            self.instrument.suggest_interpolating_norm(interp)
-                    
     def set_trans_spectrum(self, specNum, interp=False):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
         self.instrument.use_interpol_trans_calc = interp              
