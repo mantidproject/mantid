@@ -354,8 +354,8 @@ class DLLExport PeaksWorkspace: public DataObjects::TableWorkspace
      void    removeAllPeaks();
 
 
-     bool   addColumn   (   const std::string &      type,
-                     const std::string &    name
+     bool   addColumn   (   const std::string &      /*type*/,
+                     const std::string &   /* name*/
       ) {return false;}
 
      static const int IhklCol =0;  /** Column number where V3D hkl value is stored*/

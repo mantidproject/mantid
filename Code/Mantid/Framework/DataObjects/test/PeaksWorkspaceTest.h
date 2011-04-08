@@ -13,6 +13,7 @@
 #include "MantidDataObjects/PeaksWorkspace.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Strings.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 using namespace Mantid::DataObjects;
 using namespace Mantid::API;
@@ -99,10 +100,10 @@ public:
     TS_ASSERT_LESS_THAN(hkl.norm(),.00001);
     TS_ASSERT( save==pw.get_hkl(6));
 
-    double pi = 3.1415926535897932384626433832795;
+
     V3D position =pw.getPosition(6);
     V3D ptest;
-    ptest.spherical(.45647,1.3748*180/pi,2.52165*180/pi);
+    ptest.spherical(.45647,1.3748*180/M_PI,2.52165*180/M_PI);
     V3D psave(position);
 
     position -=ptest;
@@ -128,7 +129,7 @@ public:
     V3D sampOrient = pw.getSampleOrientation(6);
     V3D soSave(sampOrient);
     V3D soTest(164.96,45,0);
-    soTest *=pi/180;
+    soTest *=M_PI/180;
     sampOrient -=soTest;
     TS_ASSERT_LESS_THAN( sampOrient.norm(), .001);
     TS_ASSERT( soSave ==pw.getSampleOrientation(6) );
@@ -139,8 +140,6 @@ public:
 
     TS_ASSERT_LESS_THAN( abs(1/.5203-pw.get_Qmagnitude(6)),.004);
 
-    //unrot Q (ISAW)= 1.1155452(beam) , 0.55290407(back) , 1.4642019(up)
-    //getQ  not adjusted for samp orient -1.220807(beam) , -1.2082262(back) , 0.8624681(up)
 
     V3D Qlab= pw.get_Qlab(6);
  //  McStas==back,up,beam
@@ -150,10 +149,51 @@ public:
 
     V3D QlabR= pw.get_QXtal(6);
      //  McStas==back,up,beam
+    V3D QlabRSave = V3D(QlabR);
     V3D QlabRTest(.55290407,1.4642019,1.1155452);
      QlabR -=QlabRTest;
      TS_ASSERT_LESS_THAN( QlabR.norm(), .001);
 
+     Matrix<double> mat(3,3);
+       int beam =2;
+       int up =1;
+       int back =0;
+       int base1=0;
+       int base2 = 1;
+       int base3 =2;
+       mat[beam][base1]=-0.36622801;
+       mat[back][base1]=-0.17730089;
+       mat[up][base1]=-0.29209167;
+       mat[beam][base2]=-0.52597409;
+       mat[back][base2]=0.20688301;
+       mat[up][base2]=0.00279823;
+       mat[beam][base3]=-0.15912011;
+       mat[back][base3]=0.36190018;
+       mat[up][base3]=-0.28579932;
+
+      pw.sethkls( mat, .1, false, 1);
+      Matrix<double>matSave = Matrix<double>(mat);
+      mat.Invert();
+      QlabRSave = pw.get_QXtal(6);
+
+      V3D hklD =  (mat*QlabRSave)-pw.get_hkl(6);
+      TS_ASSERT_LESS_THAN( hklD.norm() ,.001);
+      TS_ASSERT_EQUALS( pw.getReflag(6),10);
+
+      pw.sethkls( matSave, .1, true, 2);
+      hklD =  (mat*QlabRSave)-pw.get_hkl(6);
+      TS_ASSERT_LESS_THAN( hklD.norm() ,.001);
+      TS_ASSERT_EQUALS( pw.getReflag(6),10);
+
+
+      pw.sethkls( matSave, .01, false, 1);
+      TS_ASSERT_EQUALS( pw.get_hkl(6).norm(),0);
+      TS_ASSERT_EQUALS( pw.getReflag(6),0);
+
+      pw.sethkls( matSave, .1, true, 2);
+      hklD =  (mat*QlabRSave)-pw.get_hkl(6);
+      TS_ASSERT_LESS_THAN( hklD.norm() ,.001);
+      TS_ASSERT_EQUALS( pw.getReflag(6),20);
 
      //Now test out the various sets. Not all sets are possible.
      V3D testV(3,5,-6);
@@ -186,6 +226,7 @@ public:
      TS_ASSERT_EQUALS( pw.get_row(6) , 5);
      TS_ASSERT_EQUALS( pw.get_column(6) , 8);
      TS_ASSERT_EQUALS( pw.get_time_channel(6) , 200);
+
 
 
   }

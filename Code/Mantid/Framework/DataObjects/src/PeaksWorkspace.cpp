@@ -106,10 +106,10 @@ namespace DataObjects
        C_version = std::string( version );
        C_experimentDate = Kernel::DateAndTime( experimentDate);
        ClearDeleteCalibrationData();
-       for( int i=0; i<PanelNames.size() ; i++)
+       for( size_t i=0; i<PanelNames.size() ; i++)
          DetNames.push_back( std::string(PanelNames[i]));
 
-       for( int i=0; i<PanelInfo.size(); i++)
+       for( size_t i=0; i<PanelInfo.size(); i++)
        {
          double* data = PanelInfo[i];
          double* data1 = new double[15];
@@ -158,7 +158,7 @@ namespace DataObjects
   {
     int i = rowCount();
     insertRow( i );
-    double T = time;
+    //double T = time;
 
     try
     {
@@ -1087,7 +1087,8 @@ namespace DataObjects
        {
          int Reflag = getReflag( i );
          int unitsDig =  Reflag %10;
-         Geometry::V3D hkl= UBI*get_hkl(i);
+         Geometry::V3D hkl= UBI*get_QXtal(i);
+
          double h_low = hkl.X()-floor(hkl.X());
          double k_low = hkl.Y()-floor( hkl.Y());
          double l_low = hkl.Z()-floor( hkl.Z());
@@ -1096,6 +1097,7 @@ namespace DataObjects
              (l_low <tolerance || (1-l_low)<tolerance ))
            {
              sethkl( hkl, i);
+
              Reflag = (Reflag /100)+10*reflag + unitsDig;
            }
          else
