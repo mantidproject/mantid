@@ -191,6 +191,8 @@ namespace CxxTest
         double runtime;
         /// Runtime including setup/teardown.
         double totalRuntime;
+        /// CPU fraction = what fraction of the CPU(s) was used.
+        double CPUFraction;
         std::list<ElementInfo> elements;
         typedef std::list<ElementInfo>::iterator element_t;
         std::string world;
@@ -219,12 +221,16 @@ namespace CxxTest
           timestream1 << runtime;
           std::ostringstream timestream2;
           timestream2 << totalRuntime;
+          std::ostringstream CPUFraction_stream;
+          CPUFraction_stream << CPUFraction;
 
             o << "    <testcase classname=\"" << tracker().world().worldName() << "." << className.c_str() 
               << "\" name=\"" << testName.c_str() 
               << "\" line=\"" << line.c_str()
               << "\" time=\"" << timestream1.str().c_str() << "\""
-              << "\" totalTime=\"" <<  timestream2.str().c_str() << "\"";
+              << "\" totalTime=\"" <<  timestream2.str().c_str() << "\""
+              << "\" CPUFraction=\"" << CPUFraction_stream.str().c_str() << "\""
+              ;
             bool elts=false;
             element_t curr = elements.begin();
             element_t end  = elements.end();
@@ -250,7 +256,7 @@ namespace CxxTest
     {
         public:
         XmlFormatter( OutputStream *o, OutputStream *ostr, std::ostringstream *os) 
-           : _o(o), _ostr(ostr), _os(os), stream_redirect(NULL) 
+           : _o(o), _ostr(ostr), _os(os), stream_redirect(NULL), cpuStartTime(0), cpuStopTime(0)
         {}
 
         std::list<TestCaseInfo> info;
@@ -268,6 +274,9 @@ namespace CxxTest
         timeval
       #endif
         testStartTime, testStopTime, testRunStartTime, testRunStopTime;
+
+        /// CPU time (for all processors)
+        clock_t cpuStartTime, cpuStopTime;
 
         int run()
         {
@@ -358,7 +367,8 @@ namespace CxxTest
          * */
         void enterRun( const TestDescription & /*desc*/ )
         {
-          //TODO: Also CPU time.
+          //Also CPU time.
+          cpuStartTime = clock();
 
           // Record the time now.
           #ifdef _WIN32
@@ -373,7 +383,8 @@ namespace CxxTest
          * */
         void leaveRun( const TestDescription & /*desc*/ )
         {
-          //TODO: Also CPU time.
+          //Also CPU time.
+          cpuStopTime = clock();
 
           // Record the time now.
           #ifdef _WIN32
@@ -403,8 +414,8 @@ namespace CxxTest
 
 
         #ifdef _WIN32
-           const double testTime = float(clock() - testStartTime)/CLOCKS_PER_SEC;
-           const double testRunTime = float(testRunStopTime - testRunStartTime)/CLOCKS_PER_SEC;
+           const double testTime = double(clock() - testStartTime)/CLOCKS_PER_SEC;
+           const double testRunTime = double(testRunStopTime - testRunStartTime)/CLOCKS_PER_SEC;
         #else
            gettimeofday(&testStopTime, 0);
            double sec = testStopTime.tv_sec - testStartTime.tv_sec;
@@ -415,13 +426,20 @@ namespace CxxTest
            usec = testRunStopTime.tv_usec - testRunStartTime.tv_usec;
            double testRunTime = sec + (usec / 1000000.0);
         #endif
-            std::cout << testcase->testName << " took " << sec << "secs and " << usec << "";
+            //std::cout << testcase->testName << " took " << sec << "secs and " << usec << "";
 
-            // Changed: we show the run() time, EXCLUDING the setup time.
-            // Set the run time for this test
-            testcase->runtime = testRunTime;
-            // We still record both times for possible future use
-            testcase->totalRuntime = testTime;
+           // The CPU runtime, which on linux will be from all processors. Don't know about windows, think it's wall-clock time.
+           double cpuTime = double(cpuStopTime - cpuStartTime)/CLOCKS_PER_SEC;
+           // CPU fraction = what fraction of the CPU(s) was used.
+           double CPUFraction = cpuTime / testRunTime;
+
+           // Changed: we show the run() time, EXCLUDING the setup time.
+           // Set the run time for this test
+           testcase->runtime = testRunTime;
+           // We still record both times for possible future use
+           testcase->totalRuntime = testTime;
+           // We still record both times for possible future use
+           testcase->CPUFraction = CPUFraction;
         }
 
         void leaveWorld( const WorldDescription& desc )
