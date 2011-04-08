@@ -1341,6 +1341,7 @@ void LoadEventNexus::loadEntryMetadata(const std::string &entry_name) {
  */
 void LoadEventNexus::runLoadInstrument(const std::string &nexusfilename, MatrixWorkspace_sptr localWorkspace)
 {
+  this->instrument_loaded_correctly = false;
   string instrument;
 
   // Get the instrument name
