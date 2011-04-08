@@ -203,9 +203,9 @@ if ( ENABLE_CPACK )
   # rhel requirements
   set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
   set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},poco-crypto,poco-data,poco-doc,poco-mysql,poco-sqlite,poco-odbc,poco-util,poco-xml,poco-zip,poco-net,poco-netssl,poco-foundation" )
-  IF ( ${CPACK_RPM_ARCHITECTURE} matches "i386" )
+  IF ( ${CPACK_RPM_ARCHITECTURE} MATCHES "i386" )
     set ( CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES},google-perftools" ) # doesn't exist on 64 bit RHEL
-  ENDIF ( ${CPACK_RPM_ARCHITECTURE} matches "i386" )
+  ENDIF ( ${CPACK_RPM_ARCHITECTURE} MATCHES "i386" )
 
   # TODO get this right <----------------------
   set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
