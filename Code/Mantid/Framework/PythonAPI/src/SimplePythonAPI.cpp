@@ -397,7 +397,6 @@ namespace Mantid
       os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
          << "\" , values, Message, final_enabled)\n"
          << "  if dialog == True:\n"
-         << "    algm = mtd._createAlgProxy(algm)\n"
          << "    algm.execute()\n"
          << "    return algm\n";
       os << "  else:\n"

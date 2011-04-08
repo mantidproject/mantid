@@ -820,7 +820,7 @@ class IAlgorithmProxy(ProxyObject):
             if result == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % name)
         else:
-            self._getHeldObject().execute()     
+            self._getHeldObject().execute()
 
 #---------------------------------------------------------------------------------------
 
@@ -961,7 +961,10 @@ class MantidPyFramework(FrameworkManager):
         @see createBareAlgorithm for creating an algorithm
         object alone
         """
-        return self._createAlgProxy(name, version)
+        if isinstance(name, IAlgorithmProxy): # it already is the right thing
+            return name
+        else:
+            return self._createAlgProxy(name, version)
 
     # make what comes out of C++ a little friendlier to use
     def _getRegisteredAlgorithms(self):
@@ -1116,9 +1119,11 @@ class MantidPyFramework(FrameworkManager):
         """
         Will accept either a IAlgorithm or a string specifying the algorithm name.
         """
+        if isinstance(ialg, IAlgorithmProxy):
+            return ialg
         if isinstance(ialg, str):
             ialg = self.createBareAlgorithm(str(ialg), version) 
-        ialg.setRethrows(True) # TODO get rid of this line
+        ialg.setRethrows(not mtd.__gui__) # TODO get rid of this line
         return IAlgorithmProxy(ialg, self)
 
       
