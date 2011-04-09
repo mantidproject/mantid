@@ -29,7 +29,7 @@ class HFIRInterface(InstrumentInterface):
         self.attach(SANSInstrumentWidget(settings = self._settings, name=name))
         
         # Detector
-        self.attach(DetectorWidget(settings = self._settings))
+        self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy))
 
         # Sample
         self.attach(SampleDataWidget(settings = self._settings, data_proxy=DataProxy))

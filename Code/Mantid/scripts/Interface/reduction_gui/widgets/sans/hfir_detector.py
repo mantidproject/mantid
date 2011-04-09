@@ -1,6 +1,7 @@
 from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import os
+import functools
 from reduction_gui.reduction.sans.hfir_detector_script import Detector
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -15,8 +16,8 @@ class DetectorWidget(BaseWidget):
     ## Widget name
     name = "Detector"      
     
-    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None):
-        super(DetectorWidget, self).__init__(parent, state, settings, data_type) 
+    def __init__(self, parent=None, state=None, settings=None, show_transmission=True, data_type=None, data_proxy=None):
+        super(DetectorWidget, self).__init__(parent, state, settings, data_type, data_proxy=data_proxy) 
 
         class DetFrame(QtGui.QFrame, ui.sans.ui_hfir_detector.Ui_Frame): 
             def __init__(self, parent=None):
@@ -66,6 +67,16 @@ class DetectorWidget(BaseWidget):
         self._content.use_sample_center_checkbox.setChecked(True)
         self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
+
+
+        self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.sensitivity_file_edit.text))
+        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.beam_data_file_edit.text))
+        self.connect(self._content.sensitivity_dark_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.sensitivity_dark_file_edit.text))
+        self.connect(self._content.data_file_plot_button_2, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.beam_data_file_edit_2.text))
 
         if not self._in_mantidplot:
             self._content.sensitivity_plot_button.hide()
