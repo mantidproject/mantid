@@ -91,7 +91,7 @@ class ReductionOptions(BaseScriptElement):
         script  = "%s()\n" % self.instrument_name
         
         if self.scaling_factor != 1:
-            script += "#ScaleFactor(%g)\n" % self.scaling_factor
+            script += "ScaleFactor(%g)\n" % self.scaling_factor
         
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance 
@@ -123,7 +123,7 @@ class ReductionOptions(BaseScriptElement):
         
         # Mask 
         #   Edges
-        if (not self.top == self.bottom and not self.left == self.bottom):
+        if (self.top != 0 or self.bottom != 0 or self.left != 0 or self.right != 0):
             script += "Mask(nx_low=%d, nx_high=%d, ny_low=%d, ny_high=%d)\n" % (self.left, self.right, self.bottom, self.top)
         #   Rectangles
         for item in self.shapes:

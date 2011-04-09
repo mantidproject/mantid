@@ -65,8 +65,8 @@ class DetectorWidget(BaseWidget):
 
         self._use_beam_finder_changed(self._content.use_beam_finder_checkbox.isChecked())
         self._content.use_sample_center_checkbox.setChecked(True)
-        self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
         self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
+        self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
 
 
         self.connect(self._content.sensitivity_plot_button, QtCore.SIGNAL("clicked()"),
@@ -90,8 +90,8 @@ class DetectorWidget(BaseWidget):
             @param state: Transmission object
         """
         # Beam finder
-        self._content.x_pos_edit.setText(QtCore.QString(str(state.x_position)))
-        self._content.y_pos_edit.setText(QtCore.QString(str(state.y_position)))
+        self._content.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
+        self._content.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
         self._content.use_beam_finder_checkbox.setChecked(state.use_finder)
         self._content.beam_data_file_edit.setText(QtCore.QString(state.beam_file))
         self._content.beam_radius_edit.setText(QtCore.QString(str(state.beam_radius)))
@@ -111,8 +111,8 @@ class DetectorWidget(BaseWidget):
         self._content.max_sensitivity_edit.setText(QtCore.QString(str(state.max_sensitivity)))
         
         self._content.use_sample_center_checkbox.setChecked(state.use_sample_beam_center)
-        self._content.x_pos_edit_2.setText(QtCore.QString(str(state.flood_x_position)))
-        self._content.y_pos_edit_2.setText(QtCore.QString(str(state.flood_y_position)))
+        self._content.x_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_x_position))
+        self._content.y_pos_edit_2.setText(QtCore.QString("%6.4f" % state.flood_y_position))
         self._content.use_beam_finder_checkbox_2.setChecked(state.flood_use_finder)
         self._content.beam_data_file_edit_2.setText(QtCore.QString(state.flood_beam_file))
         self._content.beam_radius_edit_2.setText(QtCore.QString(str(state.flood_beam_radius)))
@@ -121,6 +121,8 @@ class DetectorWidget(BaseWidget):
         self._content.scattering_data_2.setChecked(not state.flood_use_direct_beam)
         self._content.beam_radius_edit_2.setEnabled(not state.flood_use_direct_beam)
         
+        self._sensitivity_clicked(self._content.sensitivity_chk.isChecked())
+        self._use_sample_center_changed(self._content.use_sample_center_checkbox.isChecked())
         
     def get_state(self):
         """

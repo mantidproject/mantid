@@ -2,6 +2,7 @@ from PyQt4 import QtGui, uic, QtCore
 import reduction_gui.widgets.util as util
 import math
 import os
+import functools
 from reduction_gui.reduction.sans.hfir_options_script import ReductionOptions
 from reduction_gui.settings.application_settings import GeneralSettings
 from reduction_gui.widgets.base_widget import BaseWidget
@@ -14,8 +15,8 @@ class SANSInstrumentWidget(BaseWidget):
     ## Widget name
     name = "Reduction Options"      
     
-    def __init__(self, parent=None, state=None, settings=None, name="BIOSANS"):      
-        super(SANSInstrumentWidget, self).__init__(parent, state, settings) 
+    def __init__(self, parent=None, state=None, settings=None, name="BIOSANS", data_proxy=None):      
+        super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
 
         class SummaryFrame(QtGui.QFrame, ui.sans.ui_hfir_instrument.Ui_Frame): 
             def __init__(self, parent=None):
@@ -60,6 +61,8 @@ class SANSInstrumentWidget(BaseWidget):
     
         self.connect(self._summary.dark_current_check, QtCore.SIGNAL("clicked(bool)"), self._dark_clicked)
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
+        self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._summary.dark_file_edit.text))
 
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString("100"))

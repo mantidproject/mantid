@@ -73,6 +73,13 @@ class Detector(BaseScriptElement):
             if len(str(self.sensitivity_data).strip())==0:
                 raise RuntimeError, "Sensitivity correction was selected but no sensitivity data file was entered."
             
+            if len(str(self.sensitivity_dark).strip())>0:
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, dark_current='%s')\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark)
+            else:
+                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g)\n" % \
+                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity)
+
             # Beam center
             if not self.use_sample_beam_center:
                 if not self.flood_use_finder:
@@ -86,12 +93,6 @@ class Detector(BaseScriptElement):
                     else:
                         script += "SensitivityScatteringBeamCenter(\"%s\", %g)\n" % (self.flood_beam_file, self.flood_beam_radius)
                     
-            if len(str(self.sensitivity_dark).strip())>0:
-                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g, dark_current='%s')\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity, self.sensitivity_dark)
-            else:
-                script += "SensitivityCorrection('%s', min_sensitivity=%g, max_sensitivity=%g)\n" % \
-                    (self.sensitivity_data, self.min_sensitivity, self.max_sensitivity)
         else:
             script += "NoSensitivityCorrection()\n"
                     
@@ -211,3 +212,19 @@ class Detector(BaseScriptElement):
         self.beam_radius = Detector.beam_radius
         self.use_direct_beam = Detector.use_direct_beam
         
+    def update(self):
+        """
+            Update data members according to reduction results
+        """
+        if HAS_MANTID and ReductionSingleton()._beam_finder is not None:
+            pos = ReductionSingleton()._beam_finder.get_beam_center()
+            self.x_position = pos[0]
+            self.y_position = pos[1]
+            
+            if self.use_sample_beam_center:
+                self.flood_x_position = pos[0]
+                self.flood_y_position = pos[1]
+            elif self.sensitivity_corr:
+                pos_flood = ReductionSingleton()._sensitivity_correcter.get_beam_center()
+                self.flood_x_position = pos_flood[0]
+                self.flood_y_position = pos_flood[1]

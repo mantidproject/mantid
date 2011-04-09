@@ -26,7 +26,7 @@ class HFIRInterface(InstrumentInterface):
         self.scripter = HFIRReductionScripter(name=name)        
 
         # Instrument description
-        self.attach(SANSInstrumentWidget(settings = self._settings, name=name))
+        self.attach(SANSInstrumentWidget(settings = self._settings, name=name, data_proxy=DataProxy))
         
         # Detector
         self.attach(DetectorWidget(settings = self._settings, data_proxy=DataProxy))

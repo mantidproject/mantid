@@ -358,7 +358,7 @@ class SampleDataWidget(BaseWidget):
         if self._data_proxy is None:
             return
         
-        flist_str = unicode(self._content.data_file_edit.text())
+        flist_str = str(self._content.data_file_edit.text())
         flist_str = flist_str.replace(',', ';')
         data_files = flist_str.split(';')
         if len(data_files)<1:

@@ -5,6 +5,10 @@ try:
     from MantidFramework import *
     mtd.initialise(False)
     import mantidsimple
+    from  reduction.instruments.sans.sans_reduction_steps import LoadRun
+    from reduction.instruments.sans.sans_reducer import SANSReducer
+    import reduction.instruments.sans.hfir_instrument as hfir_instrument
+
     HAS_MANTID = True
 except:
     HAS_MANTID = False 
@@ -15,10 +19,6 @@ try:
     HAS_NUMPY = True
 except:
     HAS_NUMPY = False
-
-from  reduction.instruments.sans.sans_reduction_steps import LoadRun
-from reduction.instruments.sans.sans_reducer import SANSReducer
-import reduction.instruments.sans.hfir_instrument as hfir_instrument
 
 class DataProxy(object):
     """
