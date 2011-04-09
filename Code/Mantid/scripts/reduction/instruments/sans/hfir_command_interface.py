@@ -164,6 +164,12 @@ def BIOSANS():
     SolidAngle()
     AzimuthalAverage()
 
+def HFIRDEV():
+    Clear(SANSReducer)
+    ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("BIOSANS"))
+    SolidAngle()
+    AzimuthalAverage()
+
 def GPSANS():
     Clear(SANSReducer)
     ReductionSingleton().set_instrument(hfir_instrument.HFIRSANS("GPSANS"))
@@ -231,4 +237,9 @@ def IQxQy(nbins=100):
     
 def NoIQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(None)
+    
+def ScaleFactor(factor):
+    if ReductionSingleton().get_normalizer() is None:
+        raise RuntimeError, "A normalization option hasn't been defined."
+    ReductionSingleton().get_normalizer().set_scale_factor(factor)
     

@@ -106,6 +106,9 @@ class SANSReducer(Reducer):
         else:
             self._normalizer = sans_reduction_steps.Normalize(option)
         
+    def get_normalizer(self):
+        return self._normalizer
+    
     def set_geometry_correcter(self, correcter):    
         """
             Set the ReductionStep object that takes care of the geometry correction
