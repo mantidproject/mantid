@@ -3,7 +3,7 @@ import reduction_gui.widgets.util as util
 import os
 from reduction_gui.reduction.sans.hfir_sample_script import SampleData
 from reduction_gui.settings.application_settings import GeneralSettings
-from reduction_gui.widgets.base_widget import BaseWidget, _show_instrument
+from reduction_gui.widgets.base_widget import BaseWidget
 import ui.sans.ui_trans_direct_beam
 import ui.sans.ui_trans_spreader
 import ui.sans.ui_hfir_sample_data
@@ -43,6 +43,11 @@ class DirectBeam(BaseWidget):
         # Connections
         self.connect(self._content.sample_browse, QtCore.SIGNAL("clicked()"), self._sample_browse)
         self.connect(self._content.direct_browse, QtCore.SIGNAL("clicked()"), self._direct_browse)
+        
+        self.connect(self._content.sample_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.sample_edit.text))
+        self.connect(self._content.direct_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.direct_edit.text))
         
         if not self._in_mantidplot:
             self._content.sample_plot.hide()
@@ -114,8 +119,14 @@ class BeamSpreader(BaseWidget):
         self.connect(self._content.direct_scatt_browse, QtCore.SIGNAL("clicked()"), self._direct_scatt_browse)
         self.connect(self._content.direct_spread_browse, QtCore.SIGNAL("clicked()"), self._direct_spread_browse)
 
-        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"), 
-                     functools.partial(_show_instrument, self=self, read_function=self._content.sample_scatt_edit.text))
+        self.connect(self._content.sample_scatt_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.sample_scatt_edit.text))
+        self.connect(self._content.sample_spread_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.sample_spread_edit.text))
+        self.connect(self._content.direct_scatt_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.direct_scatt_edit.text))
+        self.connect(self._content.direct_spread_plot, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.direct_spread_edit.text))
 
         if not self._in_mantidplot:
             self._content.sample_scatt_plot.hide()
@@ -217,6 +228,10 @@ class SampleDataWidget(BaseWidget):
         self.connect(self._content.beam_spreader_chk, QtCore.SIGNAL("clicked()"), self._beam_spreader)
         self.connect(self._content.dark_current_button, QtCore.SIGNAL("clicked()"), self._dark_current_browse)
         
+        self.connect(self._content.data_file_plot_button, QtCore.SIGNAL("clicked()"), self._data_file_plot)
+        self.connect(self._content.dark_current_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._content.dark_current_edit.text))
+
         if not self._in_mantidplot:
             self._content.dark_current_plot_button.hide()
             self._content.data_file_plot_button.hide()
@@ -284,6 +299,13 @@ class SampleDataWidget(BaseWidget):
             self._settings.last_file = fname[0] 
             self._settings.last_data_ws = ''
             self.get_data_info()
+
+    def _data_file_plot(self):
+        flist_str = str(self._content.data_file_edit.text())
+        flist_str = flist_str.replace(',', ';')
+        fname = flist_str.split(';')
+        if len(fname)>0:
+            self.show_instrument(fname[0])
 
     def _dark_current_browse(self):
         fname = self.data_browse_dialog()

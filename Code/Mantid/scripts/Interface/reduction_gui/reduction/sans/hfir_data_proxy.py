@@ -33,10 +33,13 @@ class DataProxy(object):
     ## Error log
     errors = []
     
-    def __init__(self, data_file):
+    def __init__(self, data_file, workspace_name=None):
         if HAS_MANTID:
             try:
-                self.data_ws = "raw_data_file"
+                if workspace_name is None:
+                    self.data_ws = "raw_data_file"
+                else:
+                    self.data_ws = workspace_name
                 reducer = SANSReducer()
                 reducer.set_instrument(hfir_instrument.HFIRSANS())
                 loader = LoadRun(str(data_file))

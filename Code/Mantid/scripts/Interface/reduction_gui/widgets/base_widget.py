@@ -1,5 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
+import types
 import functools
 from reduction_gui.settings.application_settings import GeneralSettings
 
@@ -10,6 +11,18 @@ try:
 except:
     pass
 
+def process_file_parameter(f):
+    """
+        Decorator that allows a function parameter to either be
+        a string or a function returning a string
+    """
+    def processed_function(self, file_name): 
+        if isinstance(file_name, types.StringType):
+            return f(self, file_name)
+        else:
+            return f(self, str(file_name()))
+    return processed_function
+    
 class BaseWidget(QtGui.QWidget):    
     """
         Base widget for reduction UI
@@ -41,6 +54,7 @@ class BaseWidget(QtGui.QWidget):
             self.initialize_content()
             
         self._instrument_view = None
+        self._data_set_viewed = ''
         
         self._data_proxy = data_proxy
         self._in_mantidplot = IS_IN_MANTIDPLOT and self._data_proxy is not None
@@ -97,31 +111,28 @@ class BaseWidget(QtGui.QWidget):
                 self._settings.data_path = folder
             return fname     
     
+    @process_file_parameter
     def show_instrument(self, file_name=''):
         """
             Show instrument for the given data file.
             @param file_name: Data file path
         """
+        file_name = unicode(file_name)
         if not IS_IN_MANTIDPLOT:
             return
         if not os.path.exists(file_name):
             return
         
         # Do nothing if the instrument view is already displayed
-        if self._instrument_view is not None and self._instrument_view.isVisible():
+        if self._instrument_view is not None and self._data_set_viewed == file_name \
+            and self._instrument_view.isVisible():
             return
 
         if self._data_proxy is not None:
-            proxy = self._data_proxy(file_name)
+            ws_name = '_'+os.path.split(file_name)[1]
+            proxy = self._data_proxy(file_name, ws_name)
             
         self._instrument_view = qti.app.mantidUI.getInstrumentView(proxy.data_ws)
         self._instrument_view.show()
-    
-    
-@functools.wraps(BaseWidget.show_instrument)
-def _show_instrument(self, read_function):
-    file_name=unicode(read_function())
-    return self.show_instrument(file_name)
-        
-    
-    
+        self._data_set_viewed = file_name
+
