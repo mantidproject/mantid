@@ -335,9 +335,6 @@ public:
     TS_ASSERT_EQUALS(m_key, "default.facility");
     TS_ASSERT_DIFFERS(m_preValue, m_curValue);
     TS_ASSERT_EQUALS(m_curValue, "SNS");
-
-    // Need to set back to ISIS for later tests
-    settings.setString("default.facility", "ISIS");
   }
 
 
