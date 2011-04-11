@@ -98,11 +98,11 @@ public:
 
   void testDefaultFacility()
   {
-    TS_ASSERT_THROWS_NOTHING(const FacilityInfo& fac = ConfigService::Instance().getFacility() );
+    TS_ASSERT_THROWS_NOTHING(ConfigService::Instance().getFacility() );
 //
     ConfigService::Instance().setFacility("ISIS");
     const FacilityInfo& fac = ConfigService::Instance().getFacility();
-    TS_ASSERT_EQUALS(ConfigService::Instance().getFacility().name(),"ISIS");
+    TS_ASSERT_EQUALS(fac.name(),"ISIS");
 
     ConfigService::Instance().setFacility("SNS");
     const FacilityInfo& fac1 = ConfigService::Instance().getFacility();
@@ -261,8 +261,6 @@ public:
     Poco::File prop_file(filename);
     if( prop_file.exists() ) prop_file.remove();
 
-    ConfigServiceImpl& settings = ConfigService::Instance();
-    
     std::ofstream writer(filename.c_str(),std::ios_base::trunc);
     writer << "mantid.legs = 6";
     writer.close();
