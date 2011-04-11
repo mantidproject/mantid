@@ -70,6 +70,7 @@ public:
     fil.close();
 
     ConfigService::Instance().updateFacilities(m_facFile.path());
+
   }
 
   ~FileFinderTest()
@@ -87,6 +88,7 @@ public:
   {
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "HRPD");
+    ConfigService::Instance().setString("default.facility","ISIS");
 
     std::string fName = FileFinder::Instance().makeFileName("123");
     TS_ASSERT_EQUALS(fName, "HRP00123");
@@ -162,6 +164,7 @@ public:
 
   void testFindFiles()
   {
+    ConfigService::Instance().setString("default.facility","ISIS");
     std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-15199");
     TS_ASSERT_EQUALS(files.size(), 11);
     std::vector<std::string>::iterator it = files.begin();

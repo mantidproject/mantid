@@ -89,6 +89,7 @@ public:
 
   void testDefaultInstrument()
   {
+    ConfigService::Instance().setString("default.facility","ISIS");
     ConfigService::Instance().setString("default.instrument","HRPD");
     const FacilityInfo& fac = ConfigService::Instance().getFacility();
     InstrumentInfo instr = fac.Instrument();
