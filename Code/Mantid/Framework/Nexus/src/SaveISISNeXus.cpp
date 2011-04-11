@@ -327,7 +327,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
   }
   int buff_size = max_str_size;
   if (buff_size <= 0)
-  for(int i = 0; i < str_vec.size(); ++i)
+  for(std::size_t i = 0; i < str_vec.size(); ++i)
   {
     buff_size = std::max(buff_size,int(str_vec[i].size()));
   }
@@ -338,7 +338,7 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
   dim[1] = buff_size;
   NXmakedata(handle,name,NX_CHAR,2,dim);
   NXopendata(handle,name);
-  for(int i = 0; i < str_vec.size(); ++i)
+  for(std::size_t i = 0; i < str_vec.size(); ++i)
   {
     int start[] = {i,0};
     int sizes[] = {1,buff_size};
@@ -653,7 +653,7 @@ void SaveISISNexus::monitor_i(int i)
   NXmakegroup(handle,ostr.str().c_str(),"NXmonitor");
   NXopengroup(handle,ostr.str().c_str(),"NXmonitor");
   
-  int imon = m_isisRaw->mdet[i]; // spectrum index 
+//  int imon = m_isisRaw->mdet[i]; // spectrum index
   NXmakedata(handle,"data",NX_INT32,3,dim);
   NXopendata(handle,"data");
   for(int p = 0; p < nper; ++p)
@@ -966,7 +966,7 @@ void SaveISISNexus::selog()
 
   // create a log for each of the found log files
   int nBase = base_name.size() + 1;
-  for(int i = 0; i < potentialLogFiles.size(); ++i)
+  for(std::size_t i = 0; i < potentialLogFiles.size(); ++i)
   {
     std::string logName = Poco::Path(potentialLogFiles[i]).getFileName();
     logName.erase(0,nBase);
