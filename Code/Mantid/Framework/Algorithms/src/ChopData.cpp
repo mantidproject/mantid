@@ -25,9 +25,9 @@ void ChopData::init()
 
   declareProperty("Step", 20000.0);
   declareProperty("NChops", 5);
-  declareProperty("IntegrationRangeLower", DBL_MIN);
-  declareProperty("IntegrationRangeUpper", DBL_MIN);
-  declareProperty("MonitorWorkspaceIndex", INT_MIN);
+  declareProperty("IntegrationRangeLower", EMPTY_DBL());
+  declareProperty("IntegrationRangeUpper", EMPTY_DBL());
+  declareProperty("MonitorWorkspaceIndex", EMPTY_INT());
 }
 
 void ChopData::exec()
@@ -51,7 +51,7 @@ void ChopData::exec()
     throw std::invalid_argument("Step value provided larger than size of workspace.");
   }
 
-  if ( rLower != DBL_MIN && rUpper != DBL_MIN && monitorWi != INT_MIN )
+  if ( rLower != EMPTY_DBL() && rUpper != EMPTY_DBL() && monitorWi != EMPTY_INT() )
   {
 	  // Select the spectrum that is to be used to compare the sections of the workspace
 	  // This will generally be the monitor spectrum.
