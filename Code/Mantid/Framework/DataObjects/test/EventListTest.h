@@ -455,7 +455,7 @@ public:
     // one tenth of the # of bins
     double step = BIN_DELTA*10;
     X = this->makeX(step, NUMBINS/10+1);
-    for (int i=0; i < X.size()-1; i++)
+    for (std::size_t i=0; i < X.size()-1; i++)
     {
       Y.push_back( 1.0 * (i+1));
       E.push_back( sqrt(double(1.0 * (i+1))) );
@@ -475,7 +475,7 @@ public:
       TS_ASSERT_EQUALS( el.getNumberEvents(), 2000);
       TS_ASSERT_EQUALS( el.getEventType(), static_cast<EventType>(this_type));
 
-      for (size_t i=0; i < el.getNumberEvents(); i++)
+      for (std::size_t i=0; i < el.getNumberEvents(); i++)
       {
         double tof = el.getEvent(i).tof();
         if (tof>=step && tof<BIN_DELTA*NUMBINS)
@@ -550,7 +550,7 @@ public:
     {
       X.push_back(tof);
     }
-    for (int i=0; i < X.size()-1; i++)
+    for (std::size_t i=0; i < X.size()-1; i++)
     {
       //Have one zero bin in there
       if (i == 6)
@@ -575,7 +575,7 @@ public:
       TS_ASSERT_EQUALS( el.getNumberEvents(), 2000);
       TS_ASSERT_EQUALS( el.getEventType(), static_cast<EventType>(this_type));
 
-      for (int i=0; i < el.getNumberEvents(); i++)
+      for (std::size_t i=0; i < el.getNumberEvents(); i++)
       {
         double tof = el.getEvent(i).tof();
         if (tof>=step && tof<BIN_DELTA*NUMBINS)
@@ -614,7 +614,7 @@ public:
       MantidVec X = this->makeX(BIN_DELTA, 10);
       el.generateHistogram(X, Y, E);
 
-      for (int i=0; i < Y.size(); i++)
+      for (std::size_t i=0; i < Y.size(); i++)
       {
         TSM_ASSERT_DELTA( this_type, Y[i], 1.0, 1e-5);
         TS_ASSERT_DELTA( E[i], sqrt(2.0)/2.0, 1e-5);
@@ -638,7 +638,7 @@ public:
       MantidVec X = this->makeX(BIN_DELTA, 10);
       el.generateHistogram(X, Y, E);
 
-      for (int i=0; i < Y.size(); i++)
+      for (std::size_t i=0; i < Y.size(); i++)
       {
         TS_ASSERT_DELTA( Y[i], 1.0, 1e-5);
         TS_ASSERT_DELTA( E[i], sqrt(0.75), 1e-5);
@@ -662,7 +662,7 @@ public:
       MantidVec X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
 
-      for (int i=0; i < Y.size(); i++)
+      for (std::size_t i=0; i < Y.size(); i++)
       {
         TS_ASSERT_DELTA( Y[i], 4.0, 1e-5);
         TS_ASSERT_DELTA( E[i], 4.0/sqrt(2.0), 1e-5);
@@ -684,7 +684,7 @@ public:
       MantidVec X = this->makeX(BIN_DELTA);
       el.generateHistogram(X, Y, E);
 
-      for (int i=0; i < Y.size(); i++)
+      for (std::size_t i=0; i < Y.size(); i++)
       {
         TSM_ASSERT_DELTA( this_type, Y[i], 4.0, 1e-5);
         TS_ASSERT_DELTA( E[i], sqrt(12.0), 1e-5);
@@ -869,7 +869,7 @@ public:
     X = el3.dataX();
     Y = *el3.dataY();
     //Histogram is 0, since I cleared all the events
-    for (int i=0; i<X.size()-1; i++)
+    for (std::size_t i=0; i<X.size()-1; i++)
     {
       TS_ASSERT_EQUALS(Y[i], 0);
     }
@@ -884,10 +884,6 @@ public:
     const EventList el4(el);
     TS_ASSERT_EQUALS(el4.dataY()->size(), 0);
   }
-
-
-
-
 
   void test_histogram_all_types()
   {
@@ -906,7 +902,7 @@ public:
       TS_ASSERT_EQUALS(Y.size(), X.size()-1);
       //The data was created so that there should be exactly 2 events per bin
       // The last bin entry will be 0 since we use it as the top boundary of i-1.
-      for (int i=0; i<Y.size(); i++)
+      for (std::size_t i=0; i<Y.size(); i++)
       {
         TS_ASSERT_EQUALS(Y[i], 2.0);
         TS_ASSERT_DELTA(E[i], sqrt(2.0), 1e-5);
@@ -931,7 +927,7 @@ public:
     Y = *el3.dataY();
     E = *el3.dataE();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
-    for (int i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y.size(); i++)
     {
       // 5 events, each with a weight of 3.2
       TS_ASSERT_DELTA(Y[i], 5 * 3.2, 1e-6);
@@ -954,7 +950,7 @@ public:
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
     //The data was created so that there should be exactly 2 events per bin
     // The last bin entry will be 0 since we use it as the top boundary of i-1.
-    for (int i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 4.0);
       //Two errors of (2.5) adds up to sqrt(2 * 2.5*2.5)
@@ -983,7 +979,7 @@ public:
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
 
     //The data was created so that there should be exactly 2 events per bin. The first 10 bins (20 events) are empty.
-    for (int i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 2.0);
     }
@@ -1003,7 +999,7 @@ public:
     X = el3.dataX();
     Y = *el3.dataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
-    for (int i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y.size(); i++)
     {
       TS_ASSERT_EQUALS(Y[i], 4.0);
     }
@@ -1018,7 +1014,7 @@ public:
     X = el3.dataX();
     Y = *el3.dataY();
     TS_ASSERT_EQUALS(Y.size(), X.size()-1);
-    for (int i=0; i<X.size()-1; i++)
+    for (std::size_t i=0; i<X.size()-1; i++)
     {
       //No data was generated above 10 ms.
       if (X[i] > 10e6)
@@ -1046,7 +1042,7 @@ public:
     TS_ASSERT_EQUALS(Y.size(), some_other_x.size()-1);
     TS_ASSERT_EQUALS(E.size(), some_other_x.size()-1);
     //Now there are 4 events per bin
-    for (int i=0; i<Y.size(); i++)
+    for (std::size_t i=0; i<Y.size(); i++)
       TS_ASSERT_EQUALS(Y[i], 4.0);
 
     //With all this jazz, the original element is unchanged
@@ -1126,7 +1122,7 @@ public:
       double min = MAX_TOF * 0.25;
       double max = MAX_TOF * 0.5;
       el.maskTof( min, max);
-      for (int i=0; i<el.getNumberEvents(); i++)
+      for (std::size_t i=0; i<el.getNumberEvents(); i++)
       {
         //No tofs in that range
         TS_ASSERT((el.getEvent(i).tof() < min) || (el.getEvent(i).tof() > max));
@@ -1273,7 +1269,7 @@ public:
         TS_ASSERT_THROWS_NOTHING( el.filterByPulseTime(100, 200, out); );
 
         int numGood = 0;
-        for (int i=0; i < el.getNumberEvents(); i++)
+        for (std::size_t i=0; i < el.getNumberEvents(); i++)
           if ((el.getEvent(i).pulseTime() >= 100) && (el.getEvent(i).pulseTime() < 200))
             numGood++;
 
@@ -1281,7 +1277,7 @@ public:
         TS_ASSERT_EQUALS( numGood, out.getNumberEvents());
         TS_ASSERT_EQUALS( curType, out.getEventType());
 
-        for (int i=0; i < out.getNumberEvents(); i++)
+        for (std::size_t i=0; i < out.getNumberEvents(); i++)
         {
           //Check that the times are within the given limits.
           TSM_ASSERT_LESS_THAN_EQUALS(this_type, DateAndTime(100), out.getEvent(i).pulseTime());
@@ -1564,7 +1560,7 @@ public:
 
         el.switchTo(static_cast<EventType>(this_type));
 
-        int num_old = el.getNumberEvents();
+//        int num_old = el.getNumberEvents();
         double mult = 1.0;
         if (this_type > 0)
         {
@@ -1720,7 +1716,7 @@ public:
   {
     TSM_ASSERT_EQUALS(context, el.getNumberEvents(), NUMEVENTS);
     bool ret = true;
-    for (int i=1; i<el.getNumberEvents(); i++)
+    for (std::size_t i=1; i<el.getNumberEvents(); i++)
     {
       if (el.getEvent(i-1).tof() > el.getEvent(i).tof()) ret = false;
       if (!ret) return ret;
