@@ -1020,20 +1020,31 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
 
         mantid.deleteWorkspace(norm_ws)
 
-# Setup the transmission workspace
-##
 class TransmissionCalc(sans_reduction_steps.BaseTransmission):
-    # Map input values to Mantid options
+    """
+        Calculatates the proportion of neutrons that are transmitted through the sample
+        as a function of wavelenth. The resulsts are stored aas a workspace
+    """
+    
+    # The different ways of doing a fit, convert the possible ways of specifying this into the stand way it's shown on the GUI 
     TRANS_FIT_OPTIONS = {
-        'YLOG' : 'Log',
+        'YLOG' : 'Logarithmic',
         'STRAIGHT' : 'Linear',
         'CLEAR' : 'Off',
         # Add Mantid ones as well
-        'LOGARITHMIC' : 'Log',
-        'LOG' : 'Log',
+        'LOGARITHMIC' : 'Logarithmic',
+        'LOG' : 'Logarithmic',
         'LINEAR' : 'Linear',
         'LIN' : 'Linear',
         'OFF' : 'Off'}
+    
+    
+    # Relate the different ways of doing a fit to teh arguments that can be sent to CalculateTransmission 
+    CALC_TRANS_FIT_PARAMS = {
+        'Logarithmic' : 'Log',
+        'Linear' : 'Linear',
+        'Off' : 'Linear'
+    }
 
     #map to restrict the possible values of _trans_type
     CAN_SAMPLE_SUFFIXES = {
@@ -1179,11 +1190,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             fit_meth = self.fit_method
         else:
             fit_meth = self.DEFAULT_FIT
-        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-        if fit_meth == 'Off':
-            fit_type = 'Linear'
-        else:
-            fit_type = fit_meth
 
         if self._trans_spec:
             post_sample = self._trans_spec
@@ -1207,17 +1213,18 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             translambda_max = reducer.get_trans_lambdamax()
             wavbin = str(reducer.to_wavelen.get_rebin())
 
-        
+        #set up the input workspaces
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
             pre_sample, post_sample)
-                
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
             reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
             pre_sample, post_sample)
-
         fittedtransws, unfittedtransws = self.get_wksp_names(
                             trans_raw, translambda_min, translambda_max)
+        
+        # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
+        fit_type = CALC_TRANS_FIT_PARAMS[self.fit_meth]
         CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
             pre_sample, post_sample, MinWavelength=translambda_min,
             MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
