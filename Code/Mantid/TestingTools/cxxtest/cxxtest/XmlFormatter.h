@@ -229,6 +229,7 @@ namespace CxxTest
               << " line=\"" << line.c_str() << "\""
               << " time=\"" << timestream1.str().c_str() << "\""
               << " totalTime=\"" <<  timestream2.str().c_str() << "\""
+              << " CPUFraction=\"" << CPUFraction_stream.str().c_str() << "\""
               << "";
             bool elts=false;
 
