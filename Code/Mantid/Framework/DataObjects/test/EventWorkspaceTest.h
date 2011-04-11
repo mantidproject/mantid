@@ -537,7 +537,7 @@ public:
     MantidVec data2 = ew2->dataY(1);
     TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
     //All elements are the same
-    for (int i=0; i<data1.size();i++)
+    for (std::size_t i=0; i<data1.size();i++)
       TS_ASSERT_EQUALS( data1[i], data2[i]);
 
     //Now test the caching. The first 100 will load in memory
@@ -610,7 +610,7 @@ public:
     MantidVec data2 = ew2->dataE(1);
     TS_ASSERT_EQUALS( data2.size(), NUMBINS-1);
     //All elements are the same
-    for (int i=0; i<data1.size();i++)
+    for (std::size_t i=0; i<data1.size();i++)
       TS_ASSERT_EQUALS( data1[i], data2[i]);
 
     //Now test the caching. The first 100 will load in memory
