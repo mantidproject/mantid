@@ -90,9 +90,6 @@ class ReductionOptions(BaseScriptElement):
         """
         script  = "%s()\n" % self.instrument_name
         
-        if self.scaling_factor != 1:
-            script += "ScaleFactor(%g)\n" % self.scaling_factor
-        
         if self.sample_detector_distance != 0:
             script += "SetSampleDetectorDistance(%g)\n" % self.sample_detector_distance 
         if self.detector_offset != 0:
@@ -116,7 +113,9 @@ class ReductionOptions(BaseScriptElement):
             script += "TimeNormalization()\n"
         elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
             script += "MonitorNormalization()\n"
-        
+        if self.scaling_factor != 1:
+            script += "ScaleFactor(%g)\n" % self.scaling_factor
+                
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
         script += "IQxQy(nbins=%g)\n" % self.n_q_bins
