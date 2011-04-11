@@ -210,6 +210,8 @@ public:
       TS_ASSERT_THROWS_NOTHING( alg.execute(); )
       TS_ASSERT( alg.isExecuted() );
     }
+    std::cout << "<measurement><name>CPUFraction</name><value>" << tim.CPUfraction() << "</value></measurement>";
+
 //    std::cout << tim << " to run.\n";
   }
 
