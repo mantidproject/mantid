@@ -37,9 +37,18 @@ namespace MDEvents
     // Allocate the linear arrays
     m_signals = new double[m_length];
     m_errors = new double[m_length];
-    // Initialize them to zero (quickly)
-    memset(m_signals, 0, sizeof(double)*m_length);
-    memset(m_errors, 0, sizeof(double)*m_length);
+
+    //memset(m_signals, 0, sizeof(double)*m_length);
+    //memset(m_errors, 0, sizeof(double)*m_length);
+
+    // Initialize them to NAN (quickly)
+    double nan = std::numeric_limits<double>::quiet_NaN();
+    for (size_t i=0; i < m_length; i++)
+    {
+      m_signals[i] = nan;
+      m_errors[i] = nan;
+    }
+
     // Add all the dimensions
     m_dimensions.clear();
     addDimension(dimX);

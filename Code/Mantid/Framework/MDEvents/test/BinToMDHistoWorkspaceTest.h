@@ -2,14 +2,16 @@
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include <boost/math/special_functions/fpclassify.hpp>
 
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
@@ -138,9 +140,9 @@ public:
 
     BinToMDHistoWorkspace alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-      TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT( alg.isInitialized() )
 
-      IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
@@ -165,7 +167,11 @@ public:
     if(!out) return;
 
     // Took 6x6x6 bins in the middle of the box
-    //TS_ASSERT_EQUALS(out->getNPoints(), 0); //TODO. Janik. This needs to be fixed. The implicit function should have ensured that no bins were present.
+    for (size_t i=0; i < out->getNPoints(); i++)
+    {
+      double signal = out->getSignalAt(i);
+      TS_ASSERT( boost::math::isnan(signal) ); //The implicit function should have ensured that no bins were present.
+    }
   }
 
 };
