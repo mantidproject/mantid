@@ -57,6 +57,9 @@ def DataPath(path):
     ReductionSingleton().set_data_path(path)
 
 def SANS2D():
+    """
+        Initialises the instrument settings for SANS2D()
+    """
     _printMessage('SANS2D()')
     instrument = isis_instrument.SANS2D()
         

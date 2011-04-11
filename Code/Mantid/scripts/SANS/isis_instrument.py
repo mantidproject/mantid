@@ -275,8 +275,8 @@ class ISISInstrument(instrument.Instrument):
         # Rear_Det_X  Will Be Needed To Calc Relative X Translation Of Front Detector 
         self.REAR_DET_X = 0
 
-        #used in transmission calculations
-        self.trans_monitor = int(self.definition.getNumberParameter(
+        #spectrum number of the monitor used to as the incidient in the transmission calculations
+        self.default_trans_spec = int(self.definition.getNumberParameter(
             'default-transmission-monitor-spectrum')[0])
         self.incid_mon_4_trans_calc = self._incid_monitor
         
@@ -289,6 +289,10 @@ class ISISInstrument(instrument.Instrument):
 
         #remove this function
         self._del_incidient_set = False
+        
+        #the TOF regions of the monitors assumed to be background
+        self.monitor_4_back = {'start' : None, 'end' : None}
+
 
     def get_incident_mon(self):
         """

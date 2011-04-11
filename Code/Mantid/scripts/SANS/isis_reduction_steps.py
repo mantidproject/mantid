@@ -1105,7 +1105,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def setup_wksp(self, inputWS, inst, backmon_start, backmon_end, wavbining, pre_monitor, post_monitor):
         """
             Creates a new workspace removing any background from the monitor spectra, converting units
-            and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500 
+            and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500
+            This method doesn't affect self. 
             @param inputWS: contains the monitor spectra
             @param inst: the selected instrument
             @param backmon_start: the start of the region that we'll assume is just background
@@ -1120,19 +1121,31 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         #the workspace is forked, below is its new name
         tmpWS = inputWS + '_tmp'
         
-        #exclude unused spectra because the empty spectra can cause errors, use the index numbers (one less than spectrum number) to crop
-        index1 = min(pre_monitor, post_monitor)-1
+        #exclude unused spectra because the empty spectra can cause errors
+        spectrum1 = min(pre_monitor, post_monitor)
+        #index numbers are one less than spectrum number for raw data files
+        index1 = spectrum1-1
         index2 = max(pre_monitor, post_monitor)-1
         CropWorkspace(inputWS, tmpWS,
             StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
     
 
         if inst.name() == 'LOQ':
-            RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')[0]
+            RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')
 
-        if backmon_start != None and backmon_end != None:
-            FlatBackground(tmpWS, tmpWS, StartX=backmon_start, EndX=backmon_end, Mode='Mean')[0]
-    
+        for spectra_number in [pre_monitor, post_monitor]:
+            back_start = backmon_start
+            back_end = backmon_end
+            if spectra_number == 4:
+                if inst.monitor_4_back['start']:
+                    back_start = inst.monitor_4_back['start']
+                if inst.monitor_4_back['end']:
+                    back_end = inst.monitor_4_back['end']
+            if back_start and backmon_end:
+                index = spectra_number - spectrum1
+                FlatBackground(tmpWS, tmpWS, StartX=back_start, EndX=back_end, WorkspaceIndexList=index, Mode='Mean')
+        
+        
         ConvertUnits(tmpWS, tmpWS,"Wavelength")
         
         if self.interpolate:
@@ -1143,6 +1156,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         return tmpWS
 
     def execute(self, reducer, workspace):
+        """
+            Reads in the different settings, without affecting self. Calculates
+            or estimates the proportion of neutrons that are transmitted
+            through the sample
+        """
         if (self.loader is None) or (not self.loader.trans_name):
             #not having transmission files is not an error, we just do nothing
             return
@@ -1170,7 +1188,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         if self._trans_spec:
             post_sample = self._trans_spec
         else:
-            post_sample = reducer.instrument.trans_monitor
+            post_sample = reducer.instrument.default_trans_spec
+
         pre_sample = reducer.instrument.incid_mon_4_trans_calc
 
         if self._use_full_range is None:
@@ -1233,6 +1252,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         return self._trans_spec
     
     def set_trans_spec(self, value):
+        """
+            Allows setting the which transmission monitor that is passed the sample
+            if the new value is an integer
+        """ 
         self._trans_spec = int(value)
         
     trans_spec = property(get_trans_spec, set_trans_spec, None, None)
@@ -1299,7 +1322,9 @@ class UserFile(ReductionStep):
         self.filename = file
         self._incid_monitor_lckd = False
         self.executed = False
-        self.key_functions = {'TRANS/': self._read_trans_line}
+        self.key_functions = {
+            'BACK/M4/TIME' : self._read_backs,
+            'TRANS/': self._read_trans_line}
 
     def execute(self, reducer, workspace=None):
         if self.filename is None:
@@ -1400,7 +1425,7 @@ class UserFile(ReductionStep):
                 reducer.BACKMON_START = None
                 reducer.BACKMON_END = None
         
-        elif upper_line.startswith("FIT/TRANS/"):
+        elif upper_line.startswith('FIT/TRANS/'):
             params = upper_line[10:].split()
             nparams = len(params)
             if nparams == 3 or nparams == 1:
@@ -1610,6 +1635,11 @@ class UserFile(ReductionStep):
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
+    def _read_backs(self, arguments, reducer):
+        times = arguments.split()
+        reducer.instrument.monitor_4_back['start'] = int(times[0])
+        reducer.instrument.monitor_4_back['end'] = int(times[1])
+        
     def _read_trans_line(self, arguments, reducer):
         if arguments.startswith('TRANSPEC'):
             arguments = arguments.split('TRANSPEC')[1]
