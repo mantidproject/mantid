@@ -42,6 +42,11 @@ MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
   setFocusProxy(m_uiForm.fileEditor);
 
   findFiles();
+
+  // When first used try to starting directory better than the directory MantidPlot
+  // is installed in
+  QStringList datadirs = QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getString("datasearch.directories")).split(";", QString::SkipEmptyParts);
+  if ( ! datadirs.isEmpty() ) m_lastDir = datadirs[0];
 }
 
 /**
