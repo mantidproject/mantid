@@ -326,7 +326,7 @@ namespace Mantid
         "            try:\n"
         "                algm.setPropertyValue(key, _makeString(value).lstrip('? '))\n"
         "            except RuntimeError:\n"
-        "                raise RuntimeError('Invalid argument \"%s\" to Load algorithm.' % str(key))\n"
+        "                print 'Ignoring Argument \"%s\": not known to this Loading algorithm.' % str(key)\n"
         "            \n";
       // Execution
       if( async )

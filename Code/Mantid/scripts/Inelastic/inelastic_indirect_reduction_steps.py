@@ -45,7 +45,7 @@ class LoadData(ReductionStep):
         wsname = ''
 
         for file in self._data_files:
-            LoadRaw(file, file, LoadLogFiles=False)
+            Load(file, file, LoadLogFiles=False)
 
             if self._parameter_file != None:
                 LoadParameterFile(file, self._parameter_file)
@@ -245,7 +245,7 @@ class CreateCalibrationWorkspace(ReductionStep):
             (direct, filename) = os.path.split(file)
             (root, ext) = os.path.splitext(filename)
             try:
-                LoadRaw(file, root, SpectrumMin=specMin, SpectrumMax=specMax,
+                Load(file, root, SpectrumMin=specMin, SpectrumMax=specMax,
                     LoadLogFiles=False)
                 runs.append(root)
             except:
