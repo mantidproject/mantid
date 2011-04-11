@@ -213,29 +213,20 @@ namespace Mantid
       os << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n";
       if( nprops > 0 )
       {
-	os << "  try:\n";
-	os << "    algm.setPropertyValues(";
-	// Redo loop for setting values
-	pIter = properties.begin();
-	iarg = 0;
-	for( ; pIter != pEnd; ++pIter, ++iarg )
-	{
-	  std::string pvalue = sanitizedNames[iarg];
-    if (iarg > 0)
-      os << ", ";
-    os << pvalue; // name of the parameter, either way
-	  if( iarg >= iMand )
-      os << "=" << pvalue; // if it is a kwarg
-	}
-	os << ")\n";
-	os << "  except RuntimeError, exc:\n"
-	   << "      prefix = 'Unknown property search object'\n"
-	   << "      error_msg = str(exc)\n"
-	   << "      if error_msg.startswith(prefix):\n"
-	   << "          prop_name = error_msg.lstrip(prefix).strip()\n"
-	   << "          raise RuntimeError('Unknown property \"' + prop_name + '\" for " << algm << " version ' + str(algm.version()))\n"
-	   << "      else:\n"
-	   << "          raise\n";
+        os << "  algm.setPropertyValues(";
+        // Redo loop for setting values
+        pIter = properties.begin();
+        iarg = 0;
+        for( ; pIter != pEnd; ++pIter, ++iarg )
+        {
+          std::string pvalue = sanitizedNames[iarg];
+          if (iarg > 0)
+            os << ", ";
+          os << pvalue; // name of the parameter, either way
+          if( iarg >= iMand )
+            os << "=" << pvalue; // if it is a kwarg
+        }
+        os << ")\n";
       }
       os  << "  algm.execute()\n";
       // Return the IAlgorithm object

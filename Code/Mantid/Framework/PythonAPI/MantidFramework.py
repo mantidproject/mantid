@@ -784,12 +784,19 @@ class IAlgorithmProxy(ProxyObject):
             value = _makeString(value).lstrip('? ')
 
         ialg = self._getHeldObject()
-        if isinstance(value, WorkspaceProxy):
-            ialg._setWorkspaceProperty(name, value._getHeldObject())
-        elif isinstance(value, str):
-            ialg.setPropertyValue(name, value)
-        else:
-            ialg.setPropertyValue(name, _makeString(value).lstrip('? '))  
+        try:
+            if isinstance(value, WorkspaceProxy):
+                ialg._setWorkspaceProperty(name, value._getHeldObject())
+            elif isinstance(value, str):
+                ialg.setPropertyValue(name, value)
+            else:
+                ialg.setPropertyValue(name, _makeString(value).lstrip('? '))
+        except RuntimeError, exc: # Confirms what kind of error just happened and rethrows
+            if str(exc).startswith('Unknown property search object'):
+                msg = 'Unknown property "%s" for %s version %d' % (name, ialg.name(), ialg.version())
+                raise AttributeError(msg)
+            else:
+                raise  # rethrow the error
         
     def setPropertyValues(self, *args, **kwargs):
         """
