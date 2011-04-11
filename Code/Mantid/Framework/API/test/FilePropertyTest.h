@@ -41,7 +41,6 @@ public:
 
     ConfigService::Instance().updateFacilities(facilityFilePath);
     ConfigService::Instance().setString("default.instrument","LOQ");
-    ConfigService::Instance().setString("default.facility","ISIS");
     
     Poco::File(facilityFilePath).remove();
   }

@@ -79,17 +79,12 @@ public:
 
   void testGetFullPath()
   {
-    // Set the facility
-    ConfigService::Instance().setString("default.facility", "ISIS");
-
     std::string path = FileFinder::Instance().getFullPath("CSP78173.raw");
     TS_ASSERT(!path.empty());
   }
 
   void testMakeFileNameForISIS()
   {
-    // Set the facility
-    ConfigService::Instance().setString("default.facility", "ISIS");
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "HRPD");
 
@@ -134,8 +129,6 @@ public:
 
   void testFindRunForSNS()
   {
-    // Set the facility
-    ConfigService::Instance().setString("default.facility", "SNS");
     // Turn off the archive searching
     ConfigService::Instance().setString("datasearch.searcharchive", "Off");
 
@@ -169,9 +162,6 @@ public:
 
   void testFindFiles()
   {
-    // Set the facility
-    ConfigService::Instance().setString("default.facility", "ISIS");
-
     std::vector<std::string> files = FileFinder::Instance().findRuns("MUSR15189-15199");
     TS_ASSERT_EQUALS(files.size(), 11);
     std::vector<std::string>::iterator it = files.begin();
