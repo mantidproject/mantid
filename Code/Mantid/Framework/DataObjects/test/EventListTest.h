@@ -1732,7 +1732,41 @@ public:
 };
 
 
+//==========================================================================================
+/** Performance tests for event lists */
+class EventListTestPerformance : public CxxTest::TestSuite
+{
+public:
+  EventList el1, el2, el3, el4, el5;
 
+  void setUp()
+  {
+    for (size_t i=0; i < 1e6; i++)
+    {
+      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
+      el1 += TofEvent( (rand()%10000)*1.0, rand()%1000);
+    }
+  }
+
+  void tearDown()
+  {
+  }
+
+  void test_sort_tof()
+  {
+    el1.sortTof();
+  }
+
+  void test_sort_tof2()
+  {
+    el1.sortTof2();
+  }
+
+  void test_sort_tof4()
+  {
+    el1.sortTof4();
+  }
+};
 
 #endif /// EVENTLISTTEST_H_
 
