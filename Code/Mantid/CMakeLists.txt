@@ -75,6 +75,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/MantidQt/MantidWidgets )
 add_subdirectory ( MantidPlot )
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
+set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")
 set ( MAKE_MDEVENTS OFF CACHE BOOL "Switch for compiling the MDEvents project")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
@@ -84,7 +85,7 @@ if ( MAKE_VATES )
 endif ( MAKE_VATES )
 
 # python unit tests
-if (PYUNITTEST_FOUND)
+if (PYUNITTEST_FOUND AND REDUCER_TEST)
   add_subdirectory ( scripts )
 endif ()
 
