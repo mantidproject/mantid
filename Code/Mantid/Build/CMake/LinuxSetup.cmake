@@ -23,3 +23,17 @@ set ( PLUGINS_DIR plugins )
 
 set ( CMAKE_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
 set ( CMAKE_INSTALL_RPATH ${CMAKE_INSTALL_PREFIX}/${LIB_DIR};${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
+
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
+                                                    "MANTIDPATH=${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\n"
+                                                    "PATH=$PATH:$MANTIDPATH\n"
+                                                    "export MANTIDPATH PATH"
+)
+file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
+                                                    "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
+                                                    "setenv PATH \"$PATH:$MANTIDPATH\"\n"
+)
+
+install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+          DESTINATION /etc/profile.d 
+)
