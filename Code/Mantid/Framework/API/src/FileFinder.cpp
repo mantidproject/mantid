@@ -184,7 +184,7 @@ namespace Mantid
 
       std::pair < std::string, std::string > p = toInstrumentAndNumber(filename);
 
-      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getFacility().Instrument(p.first);
+      Kernel::InstrumentInfo instr = Kernel::ConfigService::Instance().getInstrument(p.first);
       std::string delimiter = instr.delimiter();
 
       filename = p.first;
