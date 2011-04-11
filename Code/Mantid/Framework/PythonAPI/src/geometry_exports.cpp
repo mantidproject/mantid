@@ -17,13 +17,15 @@
 //Geometry
 #include <MantidGeometry/V3D.h>
 #include <MantidGeometry/Quat.h>
-
+#include <MantidGeometry/Crystal/UnitCell.h>
 #include <MantidGeometry/Instrument/ObjComponent.h>
 #include <MantidGeometry/Instrument/Component.h>
 #include <MantidGeometry/Instrument/CompAssembly.h>
 #include <MantidGeometry/Instrument/Detector.h>
 #include <MantidGeometry/Instrument/Instrument.h>
 #include <MantidGeometry/Instrument/DetectorGroup.h>
+#include "MantidPythonAPI/geometryhelper.h" //exports for matrices to numpy arrays
+
 
 namespace Mantid
 {
@@ -210,12 +212,68 @@ namespace Mantid
     
   }
 
+  void export_unit_cell()
+  {
+    //UnitCell class
+    enum_< Geometry::AngleUnits>("AngleUnits")
+       .value("Degrees", Geometry::latDegrees)
+       .value("Radians", Geometry::latRadians)
+       .export_values();     
+
+    class_< Geometry::UnitCell >( "UnitCell", init< >() )    
+      .def( init< Geometry::UnitCell const & >(( arg("other") )) )    
+      .def( init< double, double, double >(( arg("_a"), arg("_b"), arg("_c") )) )    
+      .def( init< double, double, double, double, double, double, optional< int > >(( arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"), arg("_gamma"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) )) )    
+      .def( "a", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::a ) )    
+      .def( "a1", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::a1 ) )    
+      .def( "a2", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::a2 ) )    
+      .def( "a3", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::a3 ) )    
+      .def( "alpha", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::alpha ) )    
+      .def( "alpha1", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::alpha1 ) )    
+      .def( "alpha2", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::alpha2 ) )    
+      .def( "alpha3", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::alpha3 ) )    
+      .def( "alphastar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::alphastar ) )    
+      .def( "astar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::astar ) )    
+      .def( "b", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::b ) )    
+      .def( "b1", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::b1 ) )    
+      .def( "b2", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::b2 ) )    
+      .def( "b3", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::b3 ) )    
+      .def( "beta", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::beta ) )    
+      .def( "beta1", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::beta1 ) )    
+      .def( "beta2", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::beta2 ) )    
+      .def( "beta3", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::beta3 ) )    
+      .def( "betastar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::betastar ) )    
+      .def( "bstar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::bstar ) )    
+      .def( "c", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::c ) )    
+      .def( "cstar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::cstar ) )    
+      .def( "d", (double ( Geometry::UnitCell::* )( double,double,double ) const)( &Geometry::UnitCell::d ), (arg("h"), arg("k"), arg("l") ) )    
+      .def( "dstar", (double ( Geometry::UnitCell::* )( double,double,double ) const)( &Geometry::UnitCell::dstar ), (arg("h"), arg("k"), arg("l") ) )    
+      .def( "gamma", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::gamma ) )    
+      .def( "gammastar", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::gammastar ) )    
+      .def( "recAngle", (double ( Geometry::UnitCell::* )( double,double,double,double,double,double,int const ) const)( &Geometry::UnitCell::recAngle ), ( arg("h1"), arg("k1"), arg("l1"), arg("h2"), arg("k2"), arg("l2"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) ) )    
+      .def( "recVolume", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::recVolume ) )    
+      .def( "set", (void ( Geometry::UnitCell::* )( double,double,double,double,double,double,int const ) )( &Geometry::UnitCell::set ), ( arg("_a"), arg("_b"), arg("_c"), arg("_alpha"), arg("_beta"), arg("_gamma"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) ) )    
+      .def( "seta", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::seta ), ( arg("_a") ) )    
+      .def( "setalpha", (void ( Geometry::UnitCell::* )( double,int const ) )( &Geometry::UnitCell::setalpha ), ( arg("_alpha"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) ) )    
+      .def( "setb", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::setb ), ( arg("_b") ) )    
+      .def( "setbeta", (void ( Geometry::UnitCell::* )( double,int const ) )( &Geometry::UnitCell::setbeta ), ( arg("_beta"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) ) )    
+      .def( "setc", (void ( Geometry::UnitCell::* )( double ) )( &Geometry::UnitCell::setc ), ( arg("_c") ) )    
+      .def( "setgamma", (void ( Geometry::UnitCell::* )( double,int const ) )( &Geometry::UnitCell::setgamma ), ( arg("_gamma"), arg("Unit")=(int const)((int const)(Geometry::latDegrees)) ) )    
+      .def( "volume", (double ( Geometry::UnitCell::* )(  ) const)( &Geometry::UnitCell::volume ) )
+      .def( "getG",( &UnitCellWrapper::getG ) )
+      .def( "getGstar",( &UnitCellWrapper::getGstar ) )
+      .def( "getB",( &UnitCellWrapper::getB ) );
+
+      scope().attr("deg2rad") = Geometry::deg2rad;
+      scope().attr("rad2deg") = Geometry::rad2deg;
+    }
 
     void export_geometry_namespace()
     {
       export_utils();
       export_components();
       export_instrument();
+      export_unit_cell();
     }
 
   }

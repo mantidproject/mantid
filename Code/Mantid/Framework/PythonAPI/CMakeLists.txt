@@ -4,12 +4,13 @@
 
 set ( SRC_FILES src/kernel_exports.cpp
                 src/geometry_exports.cpp
+                src/geometryhelper.cpp
                 src/api_exports.cpp 
                 src/FrameworkManagerProxy.cpp
                 src/MantidVecHelper.cpp
                 src/PyAlgorithmWrapper.cpp
                 src/PythonInterfaceFunctions.cpp
-		src/PythonScriptWriter.cpp
+                src/PythonScriptWriter.cpp
                 src/PythonWrapper.cpp
                 src/SimplePythonAPI.cpp
                 src/WorkspaceProxies.cpp
@@ -18,10 +19,11 @@ set ( SRC_FILES src/kernel_exports.cpp
 set ( INC_FILES inc/MantidPythonAPI/kernel_exports.h
                 inc/MantidPythonAPI/api_exports.h
                 inc/MantidPythonAPI/FrameworkManagerProxy.h
+                inc/MantidPythonAPI/geometryhelper.h
                 inc/MantidPythonAPI/MantidVecHelper.h
                 inc/MantidPythonAPI/PyAlgorithmWrapper.h
                 inc/MantidPythonAPI/PythonInterfaceFunctions.h
-		inc/MantidPythonAPI/PythonScriptWriter.h
+                inc/MantidPythonAPI/PythonScriptWriter.h
                 inc/MantidPythonAPI/SimplePythonAPI.h
                 inc/MantidPythonAPI/std_operator_definitions.h
                 inc/MantidPythonAPI/stl_proxies.h
