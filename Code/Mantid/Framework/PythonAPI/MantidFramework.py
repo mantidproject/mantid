@@ -1015,6 +1015,23 @@ class MantidPyFramework(FrameworkManager):
 
         return algs
 
+    def _convertToPair(self, param_name, param_value, enabled_list, disabled_list):
+        """
+        A utility function for the dialog routines that decides if the parameter
+        should be added to the final list of parameters that have their widgets enabled
+        """
+        if param_value == None:
+          if not param_name in disabled_list:
+            return ('', param_name)
+          else:
+            return ('', '')
+        else:
+          strval = _makeString(param_value)
+          if param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):
+            return (param_name + '=' + strval.lstrip('?'), param_name)
+          else:
+            return (param_name + '=' + strval, '')
+
     #### private methods ###########################################################
     
     @staticmethod

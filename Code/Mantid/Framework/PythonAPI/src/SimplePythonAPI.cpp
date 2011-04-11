@@ -54,25 +54,6 @@ namespace Mantid
       module << "import sys\n";
       module << "import string\n\n";
 
-      // A function to sort out whether the dialog parameters are disabled or not
-      if( gui )
-      {
-        module << "# A utility function for the dialog routines that decides if the parameter\n"
-          << "# should be added to the final list of parameters that have their widgets enabled\n"
-          << "def _convertToPair(param_name, param_value, enabled_list, disabled_list):\n"
-          << "  if param_value == None:\n"
-          << "    if not param_name in disabled_list:\n"
-          << "      return ('', param_name)\n"
-          << "    else:\n"
-          << "      return ('', '')\n"
-          << "  else:\n"
-          << "    strval = _makeString(param_value)\n"
-          << "    if param_name in enabled_list or (len(strval) > 0 and strval[0] == '?'):\n"
-          << "      return (param_name + '=' + strval.lstrip('?'), param_name)\n"
-          << "    else:\n"
-          << "      return (param_name + '=' + strval, '')\n\n";
-      }
-
       // A couple of functions to aid in the formatting of help commands
       module << "def numberRows(descr, fw):\n"
         << "  des_len = len(descr)\n"
@@ -379,7 +360,7 @@ namespace Mantid
 	const std::string & propName = (*pIter)->name();
 	os << "  if not algm.existsProperty('" << propName << "'):\n"
 	   << "    raise RuntimeError('Unknown property \"" <<  propName << "\" for " << algm << " version ' + str(algm.version()))\n";
-        os << "  valpair = _convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
+        os << "  valpair = mtd._convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
 	   << ", enabled_list, disabled_list)\n"
 	   << "  values += valpair[0] + '|'\n"
 	   << "  final_enabled += valpair[1] + ','\n\n";
@@ -446,7 +427,7 @@ namespace Mantid
 	"            arguments[p_name] = kwargs.get(p_name, None)\n"
 	"    # Everything else\n"
 	"    for key, value in arguments.iteritems():\n"
-	"        valpair = _convertToPair(key, value,enabled_list, disabled_list)\n"
+	"        valpair = mtd._convertToPair(key, value,enabled_list, disabled_list)\n"
 	"        values += valpair[0] + '|'\n"
 	"        final_enabled += valpair[1] + ','\n"
 	"    final_enabled.rstrip(',')\n"
