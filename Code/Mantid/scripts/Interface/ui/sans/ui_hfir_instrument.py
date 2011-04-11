@@ -2,8 +2,8 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Sun Apr 10 18:49:54 2011
-#      by: PyQt4 UI code generator 4.7.2
+# Created: Mon Apr 11 11:51:13 2011
+#      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -499,7 +499,7 @@ class Ui_Frame(object):
         self.y_min_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the minimum pixel number in Y that defines your rectangular mask.", None, QtGui.QApplication.UnicodeUTF8))
         self.label_14.setText(QtGui.QApplication.translate("Frame", "Y max", None, QtGui.QApplication.UnicodeUTF8))
         self.y_max_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the maximum pixel number in Y that defines your rectangular mask.", None, QtGui.QApplication.UnicodeUTF8))
-        self.add_rectangle_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to adda rectangular mask.", None, QtGui.QApplication.UnicodeUTF8))
+        self.add_rectangle_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to add a rectangular mask.", None, QtGui.QApplication.UnicodeUTF8))
         self.add_rectangle_button.setText(QtGui.QApplication.translate("Frame", "Add", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_button.setToolTip(QtGui.QApplication.translate("Frame", "Remove the selected mask item from the list.", None, QtGui.QApplication.UnicodeUTF8))
         self.remove_button.setText(QtGui.QApplication.translate("Frame", "Removed Selected", None, QtGui.QApplication.UnicodeUTF8))

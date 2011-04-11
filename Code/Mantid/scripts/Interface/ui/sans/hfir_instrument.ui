@@ -1102,7 +1102,7 @@ Values can be selected by hand by checking the boxes below.</string>
                <item>
                 <widget class="QPushButton" name="add_rectangle_button">
                  <property name="toolTip">
-                  <string>Click to adda rectangular mask.</string>
+                  <string>Click to add a rectangular mask.</string>
                  </property>
                  <property name="text">
                   <string>Add</string>
