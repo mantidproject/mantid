@@ -8,19 +8,19 @@
 #include <gtest/gtest.h>
 #include <boost/math/special_functions/fpclassify.hpp>
 
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/CPUTimer.h"
-#include "MantidKernel/System.h"
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidAPI/ImplicitFunction.h"
+#include "MantidAPI/ImplicitFunctionFactory.h"
+#include "MantidAPI/ImplicitFunctionParameter.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
-#include "MantidAPI/ImplicitFunctionFactory.h"
 #include "MantidKernel/ConfigService.h"
-#include "MantidAPI/ImplicitFunction.h"
-#include "MantidAPI/ImplicitFunctionParameter.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
 #include "MDEventsTestHelper.hh"
 
 using namespace Mantid::MDEvents;

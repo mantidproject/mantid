@@ -2,13 +2,14 @@
 #define MANTID_MDEVENTS_MDHISTOWORKSPACETEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include <iostream>
 #include <iomanip>
+#include <boost/math/special_functions/fpclassify.hpp>
 
-#include "MantidMDEvents/MDHistoWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include "MantidMDEvents/MDHistoWorkspace.h"
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::Geometry;
@@ -42,10 +43,10 @@ public:
     // The values are cleared at the start
     for (size_t i=0; i <  ws.getNPoints(); i++)
     {
-      TS_ASSERT_EQUALS( ws.getSignalAt(i), 0.0);
-      TS_ASSERT_EQUALS( ws.getErrorAt(i), 0.0);
-      TS_ASSERT_EQUALS( ws.getSignalNormalizedAt(i), 0.0);
-      TS_ASSERT_EQUALS( ws.getErrorNormalizedAt(i), 0.0);
+      TS_ASSERT( boost::math::isnan( ws.getSignalAt(i) ));
+      TS_ASSERT( boost::math::isnan( ws.getErrorAt(i) ));
+      TS_ASSERT( boost::math::isnan( ws.getSignalNormalizedAt(i) ));
+      TS_ASSERT( boost::math::isnan( ws.getErrorNormalizedAt(i) ));
     }
 
     // Setting and getting
