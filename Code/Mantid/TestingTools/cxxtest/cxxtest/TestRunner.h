@@ -11,6 +11,7 @@
 #include <cxxtest/RealDescriptions.h>
 #include <cxxtest/TestSuite.h>
 #include <cxxtest/TestTracker.h>
+#include <string>
 
 namespace CxxTest 
 {
@@ -43,7 +44,24 @@ namespace CxxTest
             if ( wd.setUp() ) {
                 for ( SuiteDescription *sd = wd.firstSuite(); sd; sd = sd->next() )
                     if ( sd->active() )
+                    {
+                      bool keepSuite = true;
+                      if (!TestTracker::include_performance)
+                      {
+                        // Exclude for TestPerformance
+                        std::string suiteName(sd->suiteName());
+                        //std::cout << suiteName << std::endl;
+                        if (suiteName.length() > 11)
+                        {
+                          std::string partName = suiteName.substr(suiteName.length()-11, 11);
+                          if (partName=="Performance")
+                            keepSuite = false;
+                        }
+                      }
+
+                      if (keepSuite)
                         runSuite( *sd );
+                    }
             
                 wd.tearDown();
             }

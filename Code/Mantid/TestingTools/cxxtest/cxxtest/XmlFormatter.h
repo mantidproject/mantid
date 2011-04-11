@@ -263,7 +263,7 @@ namespace CxxTest
     {
         public:
         XmlFormatter( OutputStream *o, OutputStream *ostr, std::ostringstream *os) 
-           : _o(o), _ostr(ostr), _os(os), stream_redirect(NULL), cpuStartTime(0), cpuStopTime(0)
+           : cpuStartTime(0), cpuStopTime(0), _o(o), _ostr(ostr), _os(os), stream_redirect(NULL)
         {}
 
         std::list<TestCaseInfo> info;

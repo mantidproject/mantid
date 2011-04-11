@@ -21,6 +21,7 @@ namespace CxxTest
         
         static TestTracker &tracker();
         static bool print_tracing;
+        static bool include_performance;
 
         const TestDescription *fixTest( const TestDescription *d ) const;
         const SuiteDescription *fixSuite( const SuiteDescription *d ) const;

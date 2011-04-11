@@ -26,6 +26,7 @@ inline void print_help(const char* name)
    CXXTEST_STD(cerr) << name << " <suitename>" << CXXTEST_STD(endl);
    CXXTEST_STD(cerr) << name << " <suitename> <testname>" << CXXTEST_STD(endl);
    CXXTEST_STD(cerr) << name << " -h" << CXXTEST_STD(endl);
+   CXXTEST_STD(cerr) << name << "  --include-performance     Include test suites with Performance in the name."  << CXXTEST_STD(endl);
    CXXTEST_STD(cerr) << name << " --help" << CXXTEST_STD(endl);
    CXXTEST_STD(cerr) << name << " --help-tests" << CXXTEST_STD(endl);
    CXXTEST_STD(cerr) << name << " -v             Enable tracing output." << CXXTEST_STD(endl);
@@ -64,9 +65,12 @@ for (int i=1; i<argc; i++) {
 //
 while ((argc > 1) && (argv[1][0] == '-')) {
   if (CXXTEST_STD(strcmp)(argv[1],"-v") == 0) {
-     TestTracker::print_tracing = true;
-     }
-  else {
+       TestTracker::print_tracing = true;
+       }
+  else if (CXXTEST_STD(strcmp)(argv[1],"--include-performance") == 0) {
+      TestTracker::include_performance = true;
+      }
+   else {
      CXXTEST_STD(cerr) << "ERROR: unknown option '" << argv[1] << "'" << CXXTEST_STD(endl);
      return -1;
      }

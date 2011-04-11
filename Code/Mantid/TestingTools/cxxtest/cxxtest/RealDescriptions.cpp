@@ -242,7 +242,9 @@ namespace CxxTest
     {
         suites().activateAll();
         for ( SuiteDescription *sd = firstSuite(); sd != 0; sd = sd->next() )
+        {
             sd->activateAllTests();
+        }
     }
 
     bool RealWorldDescription::leaveOnly( const char *suiteName, const char *testName )
