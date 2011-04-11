@@ -66,6 +66,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self.connect(self.export_button, QtCore.SIGNAL("clicked()"), self._export)
         self.connect(self.reduce_button, QtCore.SIGNAL("clicked()"), self.reduce_clicked)  
         
+        # Of the widgets that are part of the application, one is the ApplicationWindow.
+        # The ApplicationWindow will send a shutting_down() signal when quitting,
+        # after which we should close this window.
+        # Note: there is no way to identify which Widget is the ApplicationWindow.
+        for w in QtCore.QCoreApplication.instance().topLevelWidgets():
+            self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
+
     def _set_window_title(self):
         """
             Sets the window title using the instrument name and the 

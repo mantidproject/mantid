@@ -1003,6 +1003,7 @@ public slots:
 signals:
   void modified();
   void resultsContextMenu();
+  void shutting_down();
 
 private:
   virtual QMenu * createPopupMenu(){return NULL;};

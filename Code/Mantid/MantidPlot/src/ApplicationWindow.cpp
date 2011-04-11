@@ -8964,6 +8964,11 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
     scriptingWindow->acceptCloseEvent(true);
     scriptingWindow->close();
   }
+  
+	// Emit a shutting_down() signal that can be caught by
+	// independent QMainWindow objects to know when MantidPlot
+	// is shutting down.
+  emit shutting_down();
 
   //Save the settings and exit
   saveSettings();
