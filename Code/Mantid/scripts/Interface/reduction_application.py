@@ -37,10 +37,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._instrument = instrument
         
         # List of allowed instrument
-        if instrument_list is None:
-            self._instrument_list = INSTRUMENT_DICT
-        else:
-            self._instrument_list = instrument_list
+        self._instrument_list = instrument_list
         
         # Reduction interface
         self._interface = None
@@ -203,13 +200,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Invoke an instrument selection dialog
         """ 
         class InstrDialog(QtGui.QDialog, ui.ui_instrument_dialog.Ui_Dialog): 
-            def __init__(self, instrument_list={}):
+            def __init__(self, instrument_list=None):
                 QtGui.QDialog.__init__(self)
                 self.instrument_list = instrument_list
                 self.setupUi(self)
                 self.instr_combo.clear()
                 self.facility_combo.clear()
-                instruments = instrument_list.keys()
+                instruments = INSTRUMENT_DICT.keys()
                 instruments.sort()
                 for facility in instruments:
                     self.facility_combo.addItem(QtGui.QApplication.translate("Dialog", facility, None, QtGui.QApplication.UnicodeUTF8))
@@ -219,11 +216,12 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 
             def _facility_changed(self, facility):
                 self.instr_combo.clear()
-                for item in self.instrument_list[unicode(facility)]:
-                    self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
+                for item in INSTRUMENT_DICT[unicode(facility)]:
+                    if self.instrument_list is None or item in self.instrument_list:
+                        self.instr_combo.addItem(QtGui.QApplication.translate("Dialog", item, None, QtGui.QApplication.UnicodeUTF8))
                 
         if self.general_settings.debug:
-            dialog = InstrDialog(INSTRUMENT_DICT)
+            dialog = InstrDialog()
         else:   
             dialog = InstrDialog(self._instrument_list)
         dialog.exec_()

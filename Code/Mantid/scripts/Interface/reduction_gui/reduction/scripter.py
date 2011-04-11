@@ -20,6 +20,9 @@ class BaseScriptElement(object):
         Base class for each script element (panel on the UI).
         Contains only data and is UI implementation agnostic.
     """
+    
+    UPDATE_1_CHANGESET_CUTOFF = 10735
+    
     def __str__(self):
         """
             Script representation of the object.
@@ -124,6 +127,23 @@ class BaseScriptElement(object):
             return value.lower()==true_tag.lower()
         else:
             return default
+        
+    @classmethod
+    def getMantidBuildVersion(cls, dom):
+        """
+            Get the mantid commit number. The format of the build version
+            is <release>.<sub-version>.<commit number>
+        """
+        element_list = dom.getElementsByTagName("mantid_version")
+        if len(element_list)>0:
+            version_str = BaseScriptElement.getText(element_list[0].childNodes)
+            version_list = version_str.split('.')
+            if len(version_list)==3:
+                return int(version_list[2])
+            else:
+                return 0
+        else:
+            return 0
 
 
 class BaseReductionScripter(object):

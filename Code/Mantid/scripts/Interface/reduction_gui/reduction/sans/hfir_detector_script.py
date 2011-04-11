@@ -142,35 +142,54 @@ class Detector(BaseScriptElement):
         """ 
         self.reset()      
         dom = xml.dom.minidom.parseString(xml_str)
-        element_list = dom.getElementsByTagName("Sensitivity")
-        if len(element_list)>0:
-            instrument_dom = element_list[0]
-            self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
-                                                                     default = Detector.sensitivity_corr)
-            self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
-            self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
-            self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
-                                                                default=Detector.min_sensitivity)
-            self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
-                                                                default=Detector.max_sensitivity)
-            self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_beam_center",
-                                                                     default = Detector.use_sample_beam_center)
-            
-            beam_center_list = instrument_dom.getElementsByTagName("FloodBeamFinder")
-            if len(beam_center_list)>0:
-                beam_finder_dom = beam_center_list[0]
-                self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
-                                                                    default=Detector.flood_x_position) 
-                self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
-                                                                    default=Detector.flood_y_position) 
-                self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
-                                                                   default = Detector.flood_use_finder) 
-                self.flood_beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
-                self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
-                                                                    default=Detector.flood_beam_radius) 
-                self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
-                                                                   default = Detector.flood_use_direct_beam) 
-            
+        
+        # Get Mantid version
+        mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
+
+        # Sensitivity correction - take care of backward compatibility
+        if mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+            element_list = dom.getElementsByTagName("Instrument")
+            if len(element_list)>0:
+                instrument_dom = element_list[0]
+                self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
+                                                                         default = Detector.sensitivity_corr)
+                self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
+                self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
+                self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
+                                                                    default=Detector.min_sensitivity)
+                self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
+                                                                    default=Detector.max_sensitivity)
+                self.use_sample_beam_center = True
+        else:
+            element_list = dom.getElementsByTagName("Sensitivity")
+            if len(element_list)>0:
+                instrument_dom = element_list[0]
+                self.sensitivity_corr = BaseScriptElement.getBoolElement(instrument_dom, "sensitivity_corr",
+                                                                         default = Detector.sensitivity_corr)
+                self.sensitivity_data = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_data")
+                self.sensitivity_dark = BaseScriptElement.getStringElement(instrument_dom, "sensitivity_dark")
+                self.min_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_min",
+                                                                    default=Detector.min_sensitivity)
+                self.max_sensitivity = BaseScriptElement.getFloatElement(instrument_dom, "sensitivity_max",
+                                                                    default=Detector.max_sensitivity)
+                self.use_sample_beam_center = BaseScriptElement.getBoolElement(instrument_dom, "use_sample_beam_center",
+                                                                         default = Detector.use_sample_beam_center)
+                
+                beam_center_list = instrument_dom.getElementsByTagName("FloodBeamFinder")
+                if len(beam_center_list)>0:
+                    beam_finder_dom = beam_center_list[0]
+                    self.flood_x_position = BaseScriptElement.getFloatElement(beam_finder_dom, "x",
+                                                                        default=Detector.flood_x_position) 
+                    self.flood_y_position = BaseScriptElement.getFloatElement(beam_finder_dom, "y",
+                                                                        default=Detector.flood_y_position) 
+                    self.flood_use_finder = BaseScriptElement.getBoolElement(beam_finder_dom, "use_finder",
+                                                                       default = Detector.flood_use_finder) 
+                    self.flood_beam_file = BaseScriptElement.getStringElement(beam_finder_dom, "beam_file")
+                    self.flood_beam_radius = BaseScriptElement.getFloatElement(beam_finder_dom, "beam_radius",
+                                                                        default=Detector.flood_beam_radius) 
+                    self.flood_use_direct_beam = BaseScriptElement.getBoolElement(beam_finder_dom, "use_direct_beam",
+                                                                       default = Detector.flood_use_direct_beam) 
+                
         element_list = dom.getElementsByTagName("BeamFinder")
         if len(element_list)>0:
             beam_finder_dom = element_list[0]

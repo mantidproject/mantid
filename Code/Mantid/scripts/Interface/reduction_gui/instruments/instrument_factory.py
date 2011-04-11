@@ -3,14 +3,14 @@
     This module is responsible for the association between an instrument name
     and its corresponding interface class. 
 """
-from hfir_interface import HFIRInterface
+#from hfir_interface import HFIRInterface as HFIRInterfaceOld
 from eqsans_interface import EQSANSInterface
-from hfir_interface_dev import HFIRInterface as HFIRInterfaceDev
+from hfir_interface_dev import HFIRInterface
 
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface,
-                            "HFIRDEV": HFIRInterfaceDev},
+                            "HFIRDEV": HFIRInterface},
                    "SNS":  {"EQSANS": EQSANSInterface}}               
 
 def instrument_factory(instrument_name, settings=None):

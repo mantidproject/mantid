@@ -125,6 +125,7 @@ class BackgroundWidget(BaseWidget):
         """
         self._content.background_chk.setChecked(state.background_corr)
         self._content.background_edit.setText(QtCore.QString(state.background_file))
+        self.get_data_info()
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
@@ -217,6 +218,7 @@ class BackgroundWidget(BaseWidget):
         fname = self.data_browse_dialog()
         if fname:
             self._content.background_edit.setText(fname)   
+            self.get_data_info()
                
     def _calculate_clicked(self, is_checked):
         self._content.trans_direct_chk.setEnabled(is_checked)
@@ -232,4 +234,27 @@ class BackgroundWidget(BaseWidget):
         self._content.trans_dark_current_button.setEnabled(is_checked)
         self._content.trans_dark_current_plot_button.setEnabled(is_checked)
         
+    def get_data_info(self):
+        """
+            Retrieve information from the data file and update the display
+        """
+        if self._data_proxy is None:
+            return
         
+        fname = str(self._content.background_edit.text())
+        if len(str(fname).strip())>0:
+            dataproxy = self._data_proxy(fname, "_background_raw")
+            if len(dataproxy.errors)>0:
+                QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                return
+            
+            self._settings.last_data_ws = dataproxy.data_ws
+            if dataproxy.sample_detector_distance is not None:
+                self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
+                util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+            if dataproxy.wavelength is not None:
+                self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
+                util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
+            if dataproxy.wavelength_spread is not None:
+                self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                 
