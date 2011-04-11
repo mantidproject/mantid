@@ -114,6 +114,18 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>85</width>
+             <height>27</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>85</width>
+             <height>27</height>
+            </size>
+           </property>
            <property name="toolTip">
             <string>Click to browse.</string>
            </property>
@@ -124,16 +136,22 @@
          </item>
          <item>
           <widget class="QPushButton" name="background_plot_button">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="minimumSize">
             <size>
              <width>85</width>
-             <height>0</height>
+             <height>27</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
              <width>85</width>
-             <height>16777215</height>
+             <height>27</height>
             </size>
            </property>
            <property name="toolTip">
@@ -480,7 +498,7 @@
             <item>
              <widget class="QLabel" name="trans_dark_current_label">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -538,13 +556,13 @@
               <property name="minimumSize">
                <size>
                 <width>85</width>
-                <height>0</height>
+                <height>27</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>85</width>
-                <height>16777215</height>
+                <height>27</height>
                </size>
               </property>
               <property name="toolTip">
@@ -557,6 +575,12 @@
             </item>
             <item>
              <widget class="QPushButton" name="trans_dark_current_plot_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>85</width>
@@ -566,7 +590,7 @@
               <property name="maximumSize">
                <size>
                 <width>85</width>
-                <height>16777215</height>
+                <height>27</height>
                </size>
               </property>
               <property name="toolTip">

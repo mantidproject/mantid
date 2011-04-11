@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Mon Apr  4 14:29:41 2011
+# Created: Mon Apr 11 13:47:50 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -121,6 +121,11 @@ class Ui_Frame(object):
         self.data_file_browse_button.setObjectName("data_file_browse_button")
         self.horizontalLayout_4.addWidget(self.data_file_browse_button)
         self.data_file_plot_button = QtGui.QPushButton(self.beam_center_grpbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.data_file_plot_button.sizePolicy().hasHeightForWidth())
+        self.data_file_plot_button.setSizePolicy(sizePolicy)
         self.data_file_plot_button.setMinimumSize(QtCore.QSize(85, 27))
         self.data_file_plot_button.setMaximumSize(QtCore.QSize(85, 27))
         self.data_file_plot_button.setObjectName("data_file_plot_button")
@@ -201,6 +206,11 @@ class Ui_Frame(object):
         self.sensitivity_browse_button.setObjectName("sensitivity_browse_button")
         self.horizontalLayout_9.addWidget(self.sensitivity_browse_button)
         self.sensitivity_plot_button = QtGui.QPushButton(self.sensitivity_grpbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sensitivity_plot_button.sizePolicy().hasHeightForWidth())
+        self.sensitivity_plot_button.setSizePolicy(sizePolicy)
         self.sensitivity_plot_button.setMinimumSize(QtCore.QSize(85, 27))
         self.sensitivity_plot_button.setMaximumSize(QtCore.QSize(85, 27))
         self.sensitivity_plot_button.setObjectName("sensitivity_plot_button")
@@ -241,6 +251,11 @@ class Ui_Frame(object):
         self.sensitivity_dark_browse_button.setObjectName("sensitivity_dark_browse_button")
         self.horizontalLayout_10.addWidget(self.sensitivity_dark_browse_button)
         self.sensitivity_dark_plot_button = QtGui.QPushButton(self.sensitivity_grpbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.sensitivity_dark_plot_button.sizePolicy().hasHeightForWidth())
+        self.sensitivity_dark_plot_button.setSizePolicy(sizePolicy)
         self.sensitivity_dark_plot_button.setMinimumSize(QtCore.QSize(85, 27))
         self.sensitivity_dark_plot_button.setMaximumSize(QtCore.QSize(85, 27))
         self.sensitivity_dark_plot_button.setObjectName("sensitivity_dark_plot_button")
@@ -411,6 +426,11 @@ class Ui_Frame(object):
         self.data_file_browse_button_2.setObjectName("data_file_browse_button_2")
         self.horizontalLayout_6.addWidget(self.data_file_browse_button_2)
         self.data_file_plot_button_2 = QtGui.QPushButton(self.flood_center_grpbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.data_file_plot_button_2.sizePolicy().hasHeightForWidth())
+        self.data_file_plot_button_2.setSizePolicy(sizePolicy)
         self.data_file_plot_button_2.setMinimumSize(QtCore.QSize(85, 27))
         self.data_file_plot_button_2.setMaximumSize(QtCore.QSize(85, 27))
         self.data_file_plot_button_2.setObjectName("data_file_plot_button_2")

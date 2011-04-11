@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Fri Apr  1 10:15:44 2011
+# Created: Mon Apr 11 13:47:50 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -56,11 +56,18 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.background_browse.sizePolicy().hasHeightForWidth())
         self.background_browse.setSizePolicy(sizePolicy)
+        self.background_browse.setMinimumSize(QtCore.QSize(85, 27))
+        self.background_browse.setMaximumSize(QtCore.QSize(85, 27))
         self.background_browse.setObjectName("background_browse")
         self.horizontalLayout_4.addWidget(self.background_browse)
         self.background_plot_button = QtGui.QPushButton(self.scrollAreaWidgetContents)
-        self.background_plot_button.setMinimumSize(QtCore.QSize(85, 0))
-        self.background_plot_button.setMaximumSize(QtCore.QSize(85, 16777215))
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.background_plot_button.sizePolicy().hasHeightForWidth())
+        self.background_plot_button.setSizePolicy(sizePolicy)
+        self.background_plot_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.background_plot_button.setMaximumSize(QtCore.QSize(85, 27))
         self.background_plot_button.setObjectName("background_plot_button")
         self.horizontalLayout_4.addWidget(self.background_plot_button)
         spacerItem1 = QtGui.QSpacerItem(49, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
@@ -167,7 +174,7 @@ class Ui_Frame(object):
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_3.addItem(spacerItem6)
         self.trans_dark_current_label = QtGui.QLabel(self.transmission_grpbox)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Fixed)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.trans_dark_current_label.sizePolicy().hasHeightForWidth())
@@ -192,13 +199,18 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.trans_dark_current_button.sizePolicy().hasHeightForWidth())
         self.trans_dark_current_button.setSizePolicy(sizePolicy)
-        self.trans_dark_current_button.setMinimumSize(QtCore.QSize(85, 0))
-        self.trans_dark_current_button.setMaximumSize(QtCore.QSize(85, 16777215))
+        self.trans_dark_current_button.setMinimumSize(QtCore.QSize(85, 27))
+        self.trans_dark_current_button.setMaximumSize(QtCore.QSize(85, 27))
         self.trans_dark_current_button.setObjectName("trans_dark_current_button")
         self.horizontalLayout_3.addWidget(self.trans_dark_current_button)
         self.trans_dark_current_plot_button = QtGui.QPushButton(self.transmission_grpbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.trans_dark_current_plot_button.sizePolicy().hasHeightForWidth())
+        self.trans_dark_current_plot_button.setSizePolicy(sizePolicy)
         self.trans_dark_current_plot_button.setMinimumSize(QtCore.QSize(85, 27))
-        self.trans_dark_current_plot_button.setMaximumSize(QtCore.QSize(85, 16777215))
+        self.trans_dark_current_plot_button.setMaximumSize(QtCore.QSize(85, 27))
         self.trans_dark_current_plot_button.setObjectName("trans_dark_current_plot_button")
         self.horizontalLayout_3.addWidget(self.trans_dark_current_plot_button)
         spacerItem7 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)

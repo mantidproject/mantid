@@ -817,6 +817,12 @@ Values can be selected by hand by checking the boxes below.</string>
                </item>
                <item>
                 <widget class="QLabel" name="label_7">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>55</width>
@@ -954,6 +960,18 @@ Values can be selected by hand by checking the boxes below.</string>
               <layout class="QHBoxLayout" name="horizontalLayout_3">
                <item>
                 <widget class="QLabel" name="label_11">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
+                 <property name="minimumSize">
+                  <size>
+                   <width>38</width>
+                   <height>0</height>
+                  </size>
+                 </property>
                  <property name="text">
                   <string>X min</string>
                  </property>
@@ -983,6 +1001,12 @@ Values can be selected by hand by checking the boxes below.</string>
                </item>
                <item>
                 <widget class="QLabel" name="label_12">
+                 <property name="sizePolicy">
+                  <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+                   <horstretch>0</horstretch>
+                   <verstretch>0</verstretch>
+                  </sizepolicy>
+                 </property>
                  <property name="minimumSize">
                   <size>
                    <width>55</width>
