@@ -186,7 +186,7 @@ public:
     el2 += el1;
     TS_ASSERT_EQUALS( el2.getDetectorIDs().size(), 4);
     //Find the right stuff
-    for (int i=7; i< 35; i+=7)
+    for (size_t i=7; i< 35; i+=7)
       TS_ASSERT( el2.hasDetectorID(i) );
     TS_ASSERT( !el2.hasDetectorID(0) );
   }
@@ -314,7 +314,7 @@ public:
   void test_MinusOperator_all_9_possibilites()
   {
     EventList lhs, rhs;
-    for (int i=0; i<3; i++)
+    for (size_t i=0; i<3; i++)
     {
       for (int j=0; j<3; j++)
       {
@@ -347,7 +347,7 @@ public:
   void test_MinusOperator_inPlace_3cases()
   {
     EventList lhs, rhs;
-    for (int i=0; i<3; i++)
+    for (size_t i=0; i<3; i++)
     {
       this->fake_uniform_data();
       // Copy and switch
@@ -717,7 +717,7 @@ public:
       this->fake_data();
       el.switchTo(static_cast<EventType>(this_type));
       el.sort(TOF_SORT);
-      for (int i=1; i<100; i++)
+      for (size_t i=1; i<100; i++)
       {
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i-1).tof(), el.getEvent(i).tof());
       }
@@ -743,7 +743,7 @@ public:
       this->fake_data();
       el.switchTo(static_cast<EventType>(this_type));
       el.sort(PULSETIME_SORT);
-      for (int i=1; i<100; i++)
+      for (size_t i=1; i<100; i++)
       {
         TSM_ASSERT_LESS_THAN_EQUALS(this_type, el.getEvent(i-1).pulseTime(),  el.getEvent(i).pulseTime());
       }
@@ -756,7 +756,7 @@ public:
     el.switchTo(WEIGHTED);
     el.sort(PULSETIME_SORT);
     vector<WeightedEvent> rwel = el.getWeightedEvents();
-    for (int i=1; i<100; i++)
+    for (size_t i=1; i<100; i++)
     {
       TS_ASSERT_LESS_THAN_EQUALS(rwel[i-1].pulseTime(), rwel[i].pulseTime());
     }
@@ -1294,12 +1294,12 @@ public:
     this->fake_uniform_time_data();
 
     std::vector< EventList * > outputs;
-    for (int i=0; i<10; i++)
+    for (size_t i=0; i<10; i++)
       outputs.push_back( new EventList() );
 
     TimeSplitterType split;
     //Start only at 100
-    for (int i=1; i<10; i++)
+    for (size_t i=1; i<10; i++)
     {
       //Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i%2) == 0)
@@ -1314,7 +1314,7 @@ public:
     //No events in the first ouput 0-99
     TS_ASSERT_EQUALS( outputs[0]->getNumberEvents(), 0);
 
-    for (int i=1; i<10; i++)
+    for (size_t i=1; i<10; i++)
     {
       EventList * myOut = outputs[i];
       //std::cout << i << " " << myOut->getNumberEvents() << "\n";
@@ -1344,12 +1344,12 @@ public:
       el.switchTo(curType);
 
       std::vector< EventList * > outputs;
-      for (int i=0; i<10; i++)
+      for (size_t i=0; i<10; i++)
         outputs.push_back( new EventList() );
 
       TimeSplitterType split;
       //Slices of 100
-      for (int i=0; i<10; i++)
+      for (size_t i=0; i<10; i++)
         split.push_back( SplittingInterval(i*100, (i+1)*100, i) );
 
       if (curType == WEIGHTED_NOTIME)
@@ -1385,7 +1385,7 @@ public:
     this->fake_uniform_time_data();
 
     std::vector< EventList * > outputs;
-    for (int i=0; i<1; i++)
+    for (size_t i=0; i<1; i++)
       outputs.push_back( new EventList() );
 
     TimeSplitterType split;
@@ -1548,7 +1548,7 @@ public:
   {
     for (int this_type=0; this_type<3; this_type++)
     {
-      for (int inplace=0; inplace < 2; inplace++)
+      for (size_t inplace=0; inplace < 2; inplace++)
       {
         el = EventList();
         el.addEventQuickly( TofEvent(1.0, 22) );
@@ -1737,7 +1737,7 @@ public:
 
   void setUp()
   {
-    for (size_t i=0; i < 1e6; i++)
+    for (size_t i=0; i < 20e6; i++)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       el1 += TofEvent( (rand()%10000)*1.0, rand()%1000);
@@ -1761,6 +1761,17 @@ public:
   void test_sort_tof4()
   {
     el1.sortTof4();
+  }
+
+  void test_compressEvents()
+  {
+    EventList out_el;
+    el1.compressEvents(10.0, &out_el);
+  }
+
+  void test_multiply()
+  {
+    el1 *= 2.345;
   }
 };
 
