@@ -54,6 +54,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg->initialize());
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("InputWorkspace", "chopdatatest_input"));
     TS_ASSERT_THROWS_NOTHING(alg->setPropertyValue("OutputWorkspace", "chopdatatest_output"));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<int>("MonitorWorkspaceIndex", 140));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<double>("IntegrationRangeLower", 5000.0));
+    TS_ASSERT_THROWS_NOTHING(alg->setProperty<double>("IntegrationRangeUpper", 10000.0));
     TS_ASSERT_THROWS_NOTHING(alg->execute());
     TS_ASSERT(alg->isExecuted());
 

@@ -62,7 +62,9 @@ class LoadData(ReductionStep):
                 wsname = file
 
             if self._require_chop_data(file):
-                ChopData(file, file)
+                ChopData(file, file, 20000.0, 5, IntegrationRangeLower=5000.0,
+                    IntegrationRangeUpper=10000.0, 
+                    MonitorWorkspaceIndex=self._monitor_index)
                 self._multiple_frames = True
             else:
                 self._multiple_frames = False

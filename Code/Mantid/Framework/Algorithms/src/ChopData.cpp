@@ -25,9 +25,9 @@ void ChopData::init()
 
   declareProperty("Step", 20000.0);
   declareProperty("NChops", 5);
-  declareProperty("IntegrationRangeLower",5000.0);
-  declareProperty("IntegrationRangeUpper",10000.0);
-  declareProperty("BaseOn", 140);
+  declareProperty("IntegrationRangeLower", DBL_MIN);
+  declareProperty("IntegrationRangeUpper", DBL_MIN);
+  declareProperty("MonitorWorkspaceIndex", INT_MIN);
 }
 
 void ChopData::exec()
@@ -39,48 +39,50 @@ void ChopData::exec()
   const int chops = getProperty("NChops");
   const double rLower = getProperty("IntegrationRangeLower");
   const double rUpper = getProperty("IntegrationRangeUpper");
-  const int baseOn = getProperty("BaseOn");  
+  const int monitorWi = getProperty("MonitorWorkspaceIndex");
   const int nHist = inputWS->getNumberHistograms();
   const int nBins = inputWS->blocksize();
   const double maxX = inputWS->readX(0)[nBins];
   std::map<int, double> intMap;
-
+  int prelow = -1;
+  std::vector<std::string> workspaces;
   if ( maxX < step )
   {
     throw std::invalid_argument("Step value provided larger than size of workspace.");
   }
 
-  // Select the spectrum that is to be used to compare the sections of the workspace
-  // This will generally be the monitor spectrum.
-  MatrixWorkspace_sptr monitorWS;
-  monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
-  monitorWS->dataX(0) = inputWS->dataX(baseOn);
-  monitorWS->dataY(0) = inputWS->dataY(baseOn);
-  monitorWS->dataE(0) = inputWS->dataE(baseOn);
-
-  int lowest = 0;
-
-  // Get ranges
-  for ( int i = 0; i < chops; i++ )
+  if ( rLower != DBL_MIN && rUpper != DBL_MIN && monitorWi != INT_MIN )
   {
-    Mantid::API::IAlgorithm_sptr integ = Mantid::API::Algorithm::createSubAlgorithm("Integration");
-    integ->initialize();
-    integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitorWS);
-    integ->setProperty<double>("RangeLower", i*step+rLower);
-    integ->setProperty<double>("RangeUpper", i*step+rUpper);
-    integ->execute();
-    MatrixWorkspace_sptr integR = integ->getProperty("OutputWorkspace");
-    intMap[i] = integR->dataY(0)[0];
+	  // Select the spectrum that is to be used to compare the sections of the workspace
+	  // This will generally be the monitor spectrum.
+	  MatrixWorkspace_sptr monitorWS;
+	  monitorWS = WorkspaceFactory::Instance().create(inputWS, 1);
+	  monitorWS->dataX(0) = inputWS->dataX(monitorWi);
+	  monitorWS->dataY(0) = inputWS->dataY(monitorWi);
+	  monitorWS->dataE(0) = inputWS->dataE(monitorWi);
 
-    if ( intMap[i] < intMap[lowest] ) { lowest = i; }
-  }
+	  int lowest = 0;
 
-  std::vector<std::string> workspaces;
-  std::map<int,double>::iterator nlow = intMap.find(lowest-1);
-  int prelow = -1;
-  if ( nlow != intMap.end() && intMap[lowest] < ( 0.1 * nlow->second ) )
-  {
-      prelow = nlow->first;   
+	  // Get ranges
+	  for ( int i = 0; i < chops; i++ )
+	  {
+		  Mantid::API::IAlgorithm_sptr integ = Mantid::API::Algorithm::createSubAlgorithm("Integration");
+		  integ->initialize();
+		  integ->setProperty<MatrixWorkspace_sptr>("InputWorkspace", monitorWS);
+		  integ->setProperty<double>("RangeLower", i*step+rLower);
+		  integ->setProperty<double>("RangeUpper", i*step+rUpper);
+		  integ->execute();
+		  MatrixWorkspace_sptr integR = integ->getProperty("OutputWorkspace");
+		  intMap[i] = integR->dataY(0)[0];
+
+		  if ( intMap[i] < intMap[lowest] ) { lowest = i; }
+	  }
+
+	  std::map<int,double>::iterator nlow = intMap.find(lowest-1);
+	  if ( nlow != intMap.end() && intMap[lowest] < ( 0.1 * nlow->second ) )
+	  {
+		  prelow = nlow->first;
+	  }
   }
   
   for ( int i = 0; i < chops; i++ )
@@ -140,18 +142,16 @@ void ChopData::exec()
     declareProperty(new WorkspaceProperty<>(wsname, wsname, Direction::Output));
     setProperty(wsname, workspace);
 
-    workspaces.push_back(wsname);    
+    workspaces.push_back(wsname);
   }
 
   // Create workspace group that holds output workspaces
   WorkspaceGroup_sptr wsgroup = WorkspaceGroup_sptr(new WorkspaceGroup());
+
   for ( std::vector<std::string>::iterator it = workspaces.begin(); it != workspaces.end(); ++it )
   {
     wsgroup->add(*it);
   }
-  // Send poco notification - must do this for UI to behave properly
-  Mantid::API::AnalysisDataService::Instance().notificationCenter.postNotification(
-      new WorkspacesGroupedNotification(workspaces));
   // set the output property
   setProperty("OutputWorkspace", wsgroup);
 
