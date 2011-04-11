@@ -83,14 +83,18 @@ while ((argc > 1) && (argv[1][0] == '-')) {
 // Run experiments
 //
 bool status=false;
-if ((argc==2) && (argv[1][0] != '-')) {
+if ((argc==2) && (argv[1][0] != '-'))
+{
+  TestTracker::include_performance = true; // Don't exclude performance tests since you might ask for it directly
     status=leaveOnly(argv[1]);
     if (!status) {
        CXXTEST_STD(cerr) << "ERROR: unknown suite '" << argv[1] << "'" << CXXTEST_STD(endl);
        return -1;
        }
     }
-if ((argc==3) && (argv[1][0] != '-')) {
+if ((argc==3) && (argv[1][0] != '-'))
+{
+  TestTracker::include_performance = true; // Don't exclude performance tests since you might ask for it directly
     status=leaveOnly(argv[1],argv[2]);
     if (!status) {
        CXXTEST_STD(cerr) << "ERROR: unknown test '" << argv[1] << "::" << argv[2] << "'" << CXXTEST_STD(endl);
