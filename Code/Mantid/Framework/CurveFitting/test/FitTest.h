@@ -181,12 +181,11 @@ public:
     const Mantid::MantidVec& Y00 = ws->readY(0);
     const Mantid::MantidVec& Y0 = outWS->readY(0);
     const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
+
     for(int i=0;i<Y.size();i++)
     {
       TS_ASSERT_EQUALS(Y00[i],Y0[i]);
       TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
-      //TS_ASSERT_DIFFERS(R[i],0);
     }
 
     TWS_type outParams = getTWS("out_Parameters");
@@ -326,11 +325,6 @@ public:
 
     WS_type outWS = getWS("out_Workspace");
 
-    const Mantid::MantidVec& Y00 = ws->readY(0);
-    const Mantid::MantidVec& Y0 = outWS->readY(0);
-    const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
@@ -384,11 +378,6 @@ public:
 
     WS_type outWS = getWS("out_Workspace");
 
-    const Mantid::MantidVec& Y00 = ws->readY(0);
-    const Mantid::MantidVec& Y0 = outWS->readY(0);
-    const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
 
@@ -430,17 +419,6 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     WS_type outWS = getWS("out_Workspace");
-
-    const Mantid::MantidVec& Y00 = ws->readY(0);
-    const Mantid::MantidVec& Y0 = outWS->readY(0);
-    const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-    //for(int i=0;i<Y.size();i++)
-    //{
-    //  TS_ASSERT_EQUALS(Y00[i],Y0[i]);
-    //  TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
-    //  TS_ASSERT_DIFFERS(R[i],0);
-    //}
 
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
@@ -487,17 +465,6 @@ public:
     TS_ASSERT(alg.isExecuted());
 
     WS_type outWS = getWS("out_Workspace");
-
-    const Mantid::MantidVec& Y00 = ws->readY(0);
-    const Mantid::MantidVec& Y0 = outWS->readY(0);
-    const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-    //for(int i=0;i<Y.size();i++)
-    //{
-    //  TS_ASSERT_EQUALS(Y00[i],Y0[i]);
-    //  TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
-    //  TS_ASSERT_DIFFERS(R[i],0);
-    //}
 
     TWS_type outParams = getTWS("out_Parameters");
     TS_ASSERT(outParams);
@@ -572,7 +539,6 @@ public:
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
-    double s1 = row.Double(1);
     TS_ASSERT_DELTA(row.Double(1),1.6719,0.0001);
 
     row = outParams->getRow(5);
@@ -586,7 +552,6 @@ public:
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
     TS_ASSERT_DELTA(row.Double(1),3.2825,0.0001);
-    double s2 = row.Double(1);
 
     removeWS("Exp");
     removeWS("out_Workspace");
@@ -643,7 +608,6 @@ public:
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
-    double s1 = row.Double(1);
     TS_ASSERT_DELTA(row.Double(1),1.6719,0.0001);
 
     row = outParams->getRow(5);
@@ -657,7 +621,6 @@ public:
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
     TS_ASSERT_DELTA(row.Double(1),3.2825,0.0001);
-    double s2 = row.Double(1);
 
     removeWS("Exp");
     removeWS("out_Workspace");
@@ -714,7 +677,6 @@ public:
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
-    double s1 = row.Double(1);
     TS_ASSERT_DELTA(row.Double(1),2.2353,0.0001);
 
     row = outParams->getRow(5);
@@ -728,7 +690,6 @@ public:
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
     TS_ASSERT_DELTA(row.Double(1),2.7290,0.0001);
-    double s2 = row.Double(1);
 
     removeWS("Exp");
     removeWS("out_Workspace");
@@ -785,7 +746,6 @@ public:
 
     row = outParams->getRow(4);
     TS_ASSERT_EQUALS(row.String(0),"f1.s");
-    double s1 = row.Double(1);
     TS_ASSERT_DELTA(row.Double(1),0.2247,0.0001);
 
     row = outParams->getRow(5);
@@ -799,7 +759,6 @@ public:
     row = outParams->getRow(7);
     TS_ASSERT_EQUALS(row.String(0),"f2.s");
     TS_ASSERT_DELTA(row.Double(1),0.1806,0.0001);
-    double s2 = row.Double(1);
 
     removeWS("Exp");
     removeWS("out_Workspace");
