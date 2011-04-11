@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>440</width>
-    <height>329</height>
+    <width>481</width>
+    <height>371</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -14,94 +14,216 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" >
    <item>
-    <widget class="QGroupBox" name="gbDataSearch" >
-     <property name="title" >
-      <string>Data Search Directories</string>
+    <widget class="QTabWidget" name="tabWidget" >
+     <property name="currentIndex" >
+      <number>0</number>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3" >
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_2" >
-        <item>
-         <widget class="QLineEdit" name="leDirectoryPath" />
-        </item>
-        <item>
-         <widget class="QPushButton" name="pbAddDirectory" >
-          <property name="text" >
-           <string>Add Directory</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <layout class="QHBoxLayout" name="horizontalLayout_3" >
-        <item>
-         <widget class="QListWidget" name="lwDataSearchDirs" />
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2" >
+     <widget class="QWidget" name="tabDataSearch" >
+      <attribute name="title" >
+       <string>Data Search Directories</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_4" >
+       <property name="leftMargin" >
+        <number>0</number>
+       </property>
+       <property name="topMargin" >
+        <number>4</number>
+       </property>
+       <property name="rightMargin" >
+        <number>0</number>
+       </property>
+       <property name="bottomMargin" >
+        <number>4</number>
+       </property>
+       <item>
+        <widget class="QGroupBox" name="gbDataSearch" >
+         <property name="title" >
+          <string>Data Search Directories</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3" >
           <item>
-           <widget class="QPushButton" name="pbBrowseToDir" >
-            <property name="text" >
-             <string>Browse To Directory</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_2" >
+            <item>
+             <widget class="QLineEdit" name="leDirectoryPath" />
+            </item>
+            <item>
+             <widget class="QPushButton" name="pbAddDirectory" >
+              <property name="text" >
+               <string>Add Directory</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pbRemDir" >
-            <property name="text" >
-             <string>Remove Directory</string>
-            </property>
-           </widget>
+           <layout class="QHBoxLayout" name="horizontalLayout_3" >
+            <item>
+             <widget class="QListWidget" name="lwDataSearchDirs" />
+            </item>
+            <item>
+             <layout class="QVBoxLayout" name="verticalLayout_2" >
+              <item>
+               <widget class="QPushButton" name="pbBrowseToDir" >
+                <property name="text" >
+                 <string>Browse To Directory</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbRemDir" >
+                <property name="text" >
+                 <string>Remove Directory</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbMoveUp" >
+                <property name="text" >
+                 <string>Move Up</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <widget class="QPushButton" name="pbMoveDown" >
+                <property name="text" >
+                 <string>Move Down</string>
+                </property>
+               </widget>
+              </item>
+              <item>
+               <spacer name="verticalSpacer_3" >
+                <property name="orientation" >
+                 <enum>Qt::Vertical</enum>
+                </property>
+                <property name="sizeHint" stdset="0" >
+                 <size>
+                  <width>20</width>
+                  <height>40</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+             </layout>
+            </item>
+           </layout>
           </item>
           <item>
-           <widget class="QPushButton" name="pbMoveUp" >
+           <widget class="QCheckBox" name="ckSearchArchive" >
             <property name="text" >
-             <string>Move Up</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="pbMoveDown" >
-            <property name="text" >
-             <string>Move Down</string>
+             <string>Search Data Archive</string>
             </property>
            </widget>
           </item>
          </layout>
-        </item>
-       </layout>
-      </item>
-      <item>
-       <widget class="QCheckBox" name="ckSearchArchive" >
-        <property name="text" >
-         <string>Search Data Archive</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-     <zorder>ckSearchArchive</zorder>
-     <zorder>horizontalLayoutWidget</zorder>
-     <zorder>leDirectoryPath</zorder>
-    </widget>
-   </item>
-   <item>
-    <widget class="QGroupBox" name="gbDefaultSave" >
-     <property name="title" >
-      <string>Default Save Directory</string>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout" >
-      <item>
-       <widget class="QLineEdit" name="leDefaultSave" />
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbSaveBrowse" >
-        <property name="text" >
-         <string>Browse to Directory</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="gbDefaultSave" >
+         <property name="title" >
+          <string>Default Save Directory</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout" >
+          <item>
+           <widget class="QLineEdit" name="leDefaultSave" />
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbSaveBrowse" >
+            <property name="text" >
+             <string>Browse to Directory</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tabPythonDirectories" >
+      <attribute name="title" >
+       <string>Python Script Directories</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5" >
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_5" >
+         <item>
+          <widget class="QLineEdit" name="leDirectoryPathPython" />
+         </item>
+         <item>
+          <widget class="QPushButton" name="pbAddDirectoryPython" >
+           <property name="text" >
+            <string>Add Directory</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_4" >
+         <item>
+          <widget class="QListWidget" name="lwUserSearchDirs" />
+         </item>
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_6" >
+           <item>
+            <widget class="QPushButton" name="pbBrowseToDirPython" >
+             <property name="text" >
+              <string>Browse To Directory</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbRemDirPython" >
+             <property name="text" >
+              <string>Remove Directory</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbMoveUpPython" >
+             <property name="text" >
+              <string>Move Up</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="pbMoveDownPython" >
+             <property name="text" >
+              <string>Move Down</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="verticalSpacer_2" >
+             <property name="orientation" >
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0" >
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer" >
+         <property name="orientation" >
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0" >
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
