@@ -426,7 +426,7 @@ void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y
   int step(stepSize), index2(0);
   double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
 
-  for (size_t i = 0; i < specSize - 1; ++i) // Last point has been calculated
+  for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
   {
     if(step == stepSize) //Point numerically integrated, does not need interpolation
     {
