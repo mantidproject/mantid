@@ -85,7 +85,7 @@ if ( MAKE_VATES )
 endif ( MAKE_VATES )
 
 # python unit tests
-if (PYUNITTEST_FOUND AND REDUCER_TEST)
+if (PYUNITTEST_FOUND)
   add_subdirectory ( scripts )
 endif ()
 
