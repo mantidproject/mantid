@@ -37,7 +37,7 @@ namespace Mantid
     void Rebin::init()
     {
       declareProperty(
-        new WorkspaceProperty<>("InputWorkspace", "",Direction::Input,new HistogramValidator<>),
+        new WorkspaceProperty<>("InputWorkspace", "", Direction::Input),
         "Workspace containing the input data");
       declareProperty(
         new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
@@ -74,6 +74,8 @@ namespace Mantid
       const std::vector<double> rb_params=getProperty("Params");
 
       const bool dist = inputWS->isDistribution();
+
+      const bool hist = inputWS->isHistogramData();
 
       // workspace independent determination of length
       const int histnumber = inputWS->getNumberHistograms();
@@ -178,6 +180,17 @@ namespace Mantid
       else
 
       { //------- Workspace2D or other MatrixWorkspace ---------------------------
+
+        if ( ! hist )
+        {
+          g_log.information() << "Rebin: Converting Data to Histogram." << std::endl;
+          Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToHistogram");
+          subAlg->initialize();
+          subAlg->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+          subAlg->execute();
+          inputWS = subAlg->getProperty("OutputWorkspace");
+        }
+
         // This will be the output workspace (exact type may vary)
         API::MatrixWorkspace_sptr outputWS;
 
@@ -234,6 +247,16 @@ namespace Mantid
         for (int i=0; i < outputWS->axes(); ++i)
         {
           outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
+        }
+
+        if ( ! hist )
+        {
+          g_log.information() << "Rebin: Converting Data back to Data Points." << std::endl;
+          Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToPointData");
+          subAlg->initialize();
+          subAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputWS);
+          subAlg->execute();
+          outputWS = subAlg->getProperty("OutputWorkspace");
         }
 
         // Assign it to the output workspace property
