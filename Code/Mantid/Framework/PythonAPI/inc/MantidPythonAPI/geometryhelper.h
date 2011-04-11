@@ -1,7 +1,7 @@
 #ifndef GEOMETRYHELPER_H_
 #define GEOMETRYHELPER_H_
 
-/*
+/**
  * Based on classes written by Laurent Chapon. Will help
  * export matrices from UnitCell, Goniometer, OrientedSample, ...
  * 
@@ -23,11 +23,11 @@ class UnitCellWrapper: public UnitCell
 		UnitCellWrapper(PyObject *self);
 		/// Destructor
 		~UnitCellWrapper();
-		/// Return the metric tensor
+		/// Return the UnitCell metric tensor
 		static PyObject * getG(UnitCell& self);
-		/// Return the reciprocal metric tensor
+		/// Return the UnitCell reciprocal metric tensor
 		static PyObject * getGstar(UnitCell& self);
-		/// Return the B matrix
+		/// Return the UnitCell B matrix
 		static PyObject * getB(UnitCell& self);
 
 	private:

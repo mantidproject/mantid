@@ -214,7 +214,7 @@ namespace Mantid
 
   void export_unit_cell()
   {
-    //UnitCell class
+    /// UnitCell class Python bindings. If a function returns a matrix, the UnitCellWrapper class is used instead
     enum_< Geometry::AngleUnits>("AngleUnits")
        .value("Degrees", Geometry::latDegrees)
        .value("Radians", Geometry::latRadians)
