@@ -244,8 +244,6 @@ private slots:
   void clearBatchTable();
   ///Clear logger
   void clearLogger();
-  ///Default trans changed state
-  void updateTransInfo(int state);
   void checkList();
   
 private:

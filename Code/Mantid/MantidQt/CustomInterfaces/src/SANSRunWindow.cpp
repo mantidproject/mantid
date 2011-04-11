@@ -331,9 +331,6 @@ void SANSRunWindow::connectChangeSignals()
   connect(m_uiForm.inst_opt, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(handleInstrumentChange()));
 
-  // Default transmission switch
-  connect(m_uiForm.def_trans, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
-
   connect(m_uiForm.enableFlood_ck, SIGNAL(stateChanged(int)), this, SLOT(prepareFlood(int)));
 }
 /**
@@ -721,9 +718,9 @@ bool SANSRunWindow::loadUserFile(QString & errors)
 
   // Tranmission options
   m_uiForm.trans_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamin()"));
+      "print i.ReductionSingleton().get_trans_lambdamin()").trimmed());
   m_uiForm.trans_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamax()"));
+      "print i.ReductionSingleton().get_trans_lambdamax()").trimmed());
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fit_method").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
@@ -2842,29 +2839,6 @@ void SANSRunWindow::clearLogger()
 {
   m_uiForm.logging_field->clear();
   m_uiForm.tabWidget->setTabText(4, "Logging");
-}
-/**Respond to the "Use default transmission" check box being clicked. If
- * the box is checked the transmission fit wavelength maximum and minimum
- * boxs with be set to the defaults for the instrument and disabled.
- * Otherwise they are enabled
- * @param state :: equal to Qt::Checked or not
- */
-void SANSRunWindow::updateTransInfo(int state)
-{
-  if( state == Qt::Checked )
-  {//"Use default transmission" means use the full range for the instrument
-    m_uiForm.trans_min->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
-    m_uiForm.trans_max->setText(runReduceScriptFunction(
-        "print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
-    m_uiForm.trans_min->setEnabled(false);
-    m_uiForm.trans_max->setEnabled(false);
-  }
-  else
-  {//use the user selected wavelengh range for the transmission calculation
-    m_uiForm.trans_min->setEnabled(true);
-    m_uiForm.trans_max->setEnabled(true);
-  }
 }
 /** A slot to validate entries for Python lists and tupples
 */

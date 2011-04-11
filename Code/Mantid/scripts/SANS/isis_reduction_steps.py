@@ -577,7 +577,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
             else:
                 raise SyntaxError('Problem reading a mask entry: "%s"' % x)
         
-        return speclist.rpartition(',')[0]
+        #remove any trailing comma
+        if speclist.endswith(','):
+            speclist = speclist[0:len(speclist)-1]
+        
+        return speclist
 
     def _mask_phi(self, id, centre, phimin, phimax, use_mirror=True):
         '''
@@ -1224,7 +1228,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                             trans_raw, translambda_min, translambda_max)
         
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
-        fit_type = CALC_TRANS_FIT_PARAMS[self.fit_meth]
+        fit_type = self.CALC_TRANS_FIT_PARAMS[fit_meth]
         CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
             pre_sample, post_sample, MinWavelength=translambda_min,
             MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
