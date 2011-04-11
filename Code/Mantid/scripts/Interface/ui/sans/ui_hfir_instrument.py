@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Sat Apr  2 10:52:57 2011
+# Created: Sun Apr 10 18:49:54 2011
 #      by: PyQt4 UI code generator 4.7.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -225,6 +225,20 @@ class Ui_Frame(object):
         self.geometry_options_groupbox.setObjectName("geometry_options_groupbox")
         self.verticalLayout_5 = QtGui.QVBoxLayout(self.geometry_options_groupbox)
         self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.mask_template_horiz_layout = QtGui.QHBoxLayout()
+        self.mask_template_horiz_layout.setSpacing(0)
+        self.mask_template_horiz_layout.setObjectName("mask_template_horiz_layout")
+        self.experiment_parameter_help = QtGui.QLabel(self.geometry_options_groupbox)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Expanding)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.experiment_parameter_help.sizePolicy().hasHeightForWidth())
+        self.experiment_parameter_help.setSizePolicy(sizePolicy)
+        self.experiment_parameter_help.setMinimumSize(QtCore.QSize(150, 0))
+        self.experiment_parameter_help.setStyleSheet("font: italic 10pt \"Bitstream Charter\";")
+        self.experiment_parameter_help.setObjectName("experiment_parameter_help")
+        self.mask_template_horiz_layout.addWidget(self.experiment_parameter_help)
+        self.verticalLayout_5.addLayout(self.mask_template_horiz_layout)
         self.formLayout_3 = QtGui.QFormLayout()
         self.formLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.formLayout_3.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
@@ -453,6 +467,8 @@ class Ui_Frame(object):
         self.log_binning_radio.setToolTip(QtGui.QApplication.translate("Frame", "Select to use logarithmic binning for I(Q).", None, QtGui.QApplication.UnicodeUTF8))
         self.log_binning_radio.setText(QtGui.QApplication.translate("Frame", "Log binning", None, QtGui.QApplication.UnicodeUTF8))
         self.geometry_options_groupbox.setTitle(QtGui.QApplication.translate("Frame", "Experiment Parameters", None, QtGui.QApplication.UnicodeUTF8))
+        self.experiment_parameter_help.setText(QtGui.QApplication.translate("Frame", "The sample-detector distance and wavelength are updated automatically when a sample data file is selected.\n"
+"Values can be selected by hand by checking the boxes below.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to set the detector distance offset.", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_chk.setText(QtGui.QApplication.translate("Frame", "Detector distance offset [mm]", None, QtGui.QApplication.UnicodeUTF8))
         self.detector_offset_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the detector distance offset in mm.", None, QtGui.QApplication.UnicodeUTF8))

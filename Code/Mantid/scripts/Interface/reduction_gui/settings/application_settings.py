@@ -1,6 +1,6 @@
 from PyQt4 import QtGui, QtCore
 
-class GeneralSettings(object):
+class GeneralSettings(QtCore.QObject):
     """
         Settings class that will be passed from the main application
         to the control widgets.
@@ -11,14 +11,23 @@ class GeneralSettings(object):
     last_file = ''
     instrument_name = ''
     
+    data_updated = QtCore.pyqtSignal('PyQt_PyObject','PyQt_PyObject')
+    
     def __init__(self, settings=None):
         """
             Initialization.
             @param settings: QSettings object passed by the main application
         """
+        super(GeneralSettings, self).__init__() 
         if settings is not None:
             self.from_settings(settings)
             
+    def emit_key_value(self, key, value):
+        """
+            Emit a signal to alert listeners of key/value update
+        """
+        self.data_updated.emit(key, value)
+        
     def to_settings(self, settings):
         """
             Write the current settings to a QSettings object

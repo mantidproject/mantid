@@ -374,9 +374,12 @@ class SampleDataWidget(BaseWidget):
             if dataproxy.sample_detector_distance is not None:
                 self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
                 util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+                self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
             if dataproxy.wavelength is not None:
                 self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
+                self._settings.emit_key_value("wavelength", QtCore.QString(str(dataproxy.wavelength)))
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
+                self._settings.emit_key_value("wavelength_spread", QtCore.QString(str(dataproxy.wavelength_spread)))
                  

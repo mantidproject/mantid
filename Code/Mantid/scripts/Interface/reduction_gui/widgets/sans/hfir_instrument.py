@@ -40,6 +40,23 @@ class SANSInstrumentWidget(BaseWidget):
         if settings is None:
             settings = GeneralSettings()
         self._settings = settings
+        # Connect do UI data update
+        self._settings.data_updated.connect(self._data_updated)
+        
+    def _data_updated(self, key, value):
+        """
+            Respond to application-level key/value pair updates.
+            @param key: key string
+            @param value: value string
+        """
+        if key == "sample_detector_distance":
+            self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
+            util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
+        elif key == "wavelength":
+            self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
+            util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
+        elif key == "wavelength_spread":
+            self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
 
     def content(self):
         return self._summary
