@@ -153,7 +153,8 @@ void Wavelength::toTOF(std::vector<double>& xdata, std::vector<double>&, const d
     const double&, const int& emode, const double& efixed, const double&) const
 {
   // First the crux of the conversion
-  double ltot, sfp;
+  double ltot = 0.0;
+  double sfp = 0.0;
   const double TOFisinMicroseconds = 1e6;
   const double toAngstroms = 1e10;
 
