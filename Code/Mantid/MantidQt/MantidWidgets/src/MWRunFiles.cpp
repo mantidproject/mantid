@@ -536,6 +536,10 @@ QString MWRunFiles::createFileFilter()
       while( itr.hasNext() )
       {
         const QStringList values = itr.next().second;
+        if ( *(fileFilter.end()-1) != '(' )
+        {
+          fileFilter += " ";
+        }
         fileFilter += "*" + values.join(" *");
       }
       fileFilter += ");;";
