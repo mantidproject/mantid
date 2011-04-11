@@ -92,6 +92,8 @@ public:
     return NULL;
   }
 
+  void detectorCallback(DetectorCallback* callback)const;
+
 private:
   /// Texture ID that holds the texture.
   unsigned int mTextureID;

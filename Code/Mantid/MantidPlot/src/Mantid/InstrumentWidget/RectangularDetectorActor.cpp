@@ -365,3 +365,41 @@ void RectangularDetectorActor::AppendBoundingBox(const Mantid::Geometry::V3D& mi
   if(maxBoundBox[2]<maxBound[2]) maxBoundBox[2]=maxBound[2];
 }
 
+/**
+  * Call the DetectorCallback::callback method for each detector
+  */
+void RectangularDetectorActor::detectorCallback(DetectorCallback* callback)const
+{
+  //The texture size must be 2^n power.
+  int text_x_size, text_y_size;
+  mDet->getTextureSize(text_x_size, text_y_size);
+  //Pointer to where we are in it.
+  char * image_data_ptr = image_data;
+  for (int y=0; y < mDet->ypixels(); y++)
+  {
+    for (int x=0; x < mDet->xpixels() ; x++)
+    {
+      char r, g, b;
+      //Read the color data from the buffer
+      r = *image_data_ptr;
+      image_data_ptr++;
+      g = *image_data_ptr;
+      image_data_ptr++;
+      b = *image_data_ptr;
+      image_data_ptr++;
+      if (r == 0 && g == 0 && b == 0)
+      {
+        std::cerr << "black\n";
+      }
+      boost::shared_ptr<const Mantid::Geometry::IDetector> det =
+        boost::dynamic_pointer_cast<const Mantid::Geometry::IDetector> (mDet->getAtXY(x,y));
+      if (det)
+      {
+        callback->callback(det,DetectorCallbackData(GLColor(float(r)/255,float(g)/255,float(b)/255,1.0)));
+      }
+    }
+    //Skip any padding in x. 3 bytes per pixel
+    image_data_ptr += 3*(text_x_size-mDet->xpixels());
+  }
+  
+}
