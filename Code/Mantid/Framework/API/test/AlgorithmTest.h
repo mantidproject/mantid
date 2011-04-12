@@ -18,6 +18,7 @@ public:
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 1;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
+  const std::string alias() const { return "Dog";}
 
   void init()
   { 
@@ -45,6 +46,7 @@ public:
   const std::string name() const { return "ToyAlgorithm";} ///< Algorithm's name for identification
   int version() const  { return 2;} ///< Algorithm's version for identification
   const std::string category() const { return "Cat";} 
+  const std::string alias() const { return "Dog";}
   void init()
   { 
     declareProperty("prop1","value");
@@ -100,6 +102,11 @@ public:
   void testCategory()
   {
     TS_ASSERT_EQUALS( alg.category(),"Cat" );
+  }
+
+  void testAlias()
+  {
+    TS_ASSERT_EQUALS( alg.alias(), "Dog");
   }
 
   void testIsChild()

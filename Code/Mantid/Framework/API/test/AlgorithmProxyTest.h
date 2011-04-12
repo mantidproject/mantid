@@ -20,7 +20,8 @@ public:
   virtual ~ToyAlgorithmProxy() {}
   const std::string name() const { return "ToyAlgorithmProxy";} ///< Algorithm's name for identification
   int version() const  { return 1;}                        ///< Algorithm's version for identification
-  const std::string category() const { return "Cat";}           ///< Algorithm's category for identification
+  const std::string category() const { return "ProxyCat";}           ///< Algorithm's category for identification
+  const std::string alias() const { return "Dog";}            ///< Algorithm's alias
 
   void init()
   { 
@@ -80,7 +81,8 @@ public:
         TS_ASSERT( dynamic_cast<AlgorithmProxy*>(alg.get()) );
         TS_ASSERT_EQUALS( alg->name() , "ToyAlgorithmProxy" );
         TS_ASSERT_EQUALS( alg->version() , 1 );
-        TS_ASSERT_EQUALS( alg->category() , "Cat" );
+        TS_ASSERT_EQUALS( alg->category() , "ProxyCat" );
+        TS_ASSERT_EQUALS( alg->alias(), "Dog");
         TS_ASSERT( alg->isInitialized() );
         alg->setChild(true);
         TS_ASSERT( !alg->isChild() );
