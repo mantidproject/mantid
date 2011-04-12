@@ -2,7 +2,6 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/System.h"
 #include <cstdarg>
-#include <cxxtest/TestSuite.h>
 
 namespace AlgorithmHelper
 {
@@ -18,14 +17,14 @@ namespace AlgorithmHelper
   {
     // Create the algorithm
     Mantid::API::Algorithm_sptr alg;
-    TS_ASSERT_THROWS_NOTHING( alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName, -1) );
-    TS_ASSERT_THROWS_NOTHING( alg->initialize() )
-    TS_ASSERT( alg->isInitialized() )
+    alg = Mantid::API::AlgorithmManager::Instance().createUnmanaged(algorithmName, -1);
+    alg->initialize();
+    if (!alg->isInitialized())
+      throw std::runtime_error(algorithmName + " was not initialized.");
 
     if (count % 2 == 1)
     {
-      TSM_ASSERT("Must have an even number of parameter/value string arguments", false);
-      return alg;
+      throw std::runtime_error("Must have an even number of parameter/value string arguments");
     }
 
     va_list Params;
@@ -34,11 +33,11 @@ namespace AlgorithmHelper
     {
       std::string paramName = va_arg(Params, const char *);
       std::string paramValue = va_arg(Params, const char *);
-      TS_ASSERT_THROWS_NOTHING( alg->setPropertyValue(paramName, paramValue) );
+      alg->setPropertyValue(paramName, paramValue);
     }
     va_end(Params);
 
-    TS_ASSERT_THROWS_NOTHING( alg->execute() );
+    alg->execute();
     return alg;
   }
 
