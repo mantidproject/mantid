@@ -26,7 +26,7 @@ class FindSNSNeXus(PythonAlgorithm):
                       "_cvinfo.xml", "_runinfo.xml"]
         self.declareProperty("Extension", "",
                              Validator=ListValidator(extensions))
-        self.declareProperty("Use WebService", True)
+        self.declareProperty("UseWebService", True)
         self.declareProperty("ResultPath", "", Direction=Direction.Output)
 
     def findNeXus(self, runnumber):
