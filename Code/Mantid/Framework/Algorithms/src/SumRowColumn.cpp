@@ -41,8 +41,8 @@ void SumRowColumn::init()
   // For selecting a column range - the whole lot by default
   BoundedValidator<int>* mustBePositive = new BoundedValidator<int>();
   mustBePositive->setLower(0);
-  declareProperty("H/V_Min",EMPTY_INT(),mustBePositive);
-  declareProperty("H/V_Max",EMPTY_INT(),mustBePositive->clone());
+  declareProperty("HoverV_Min",EMPTY_INT(),mustBePositive);
+  declareProperty("HoverV_Max",EMPTY_INT(),mustBePositive->clone());
 }
 
 void SumRowColumn::exec()
@@ -62,8 +62,8 @@ void SumRowColumn::exec()
   const int dim = static_cast<int>( std::sqrt(static_cast<double>(numSpec)) );
 
   // Check the column range properties
-  int start = getProperty("H/V_Min");
-  int end = getProperty("H/V_Max");
+  int start = getProperty("HoverV_Min");
+  int end = getProperty("HoverV_Max");
   if ( isEmpty(start) ) start = 0;
   if ( isEmpty(end) || end > dim-1 ) end = dim-1;
   if ( start > end )

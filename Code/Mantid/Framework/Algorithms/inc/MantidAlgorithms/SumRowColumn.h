@@ -13,7 +13,7 @@ namespace Algorithms
 /** This algorithm is the equivalent of the COLETTE "DISPLAY H/V" command.
     It firsts integrates the input workspace, which must contain all the spectra from
     the detector of interest - no more and no less (so 128x128 or 192x192), 
-    between the X values given. Then each row or column is summed between the H/V_Min/Max
+    between the X values given. Then each row or column is summed between the HoverV_Min/Max
     values, if given, and the result is a single spectrum of row or column number against
     total counts.
 
@@ -28,8 +28,8 @@ namespace Algorithms
     <UL>
     <LI> XMin - The starting X value for each spectrum to include in the summation (default min). </LI>
     <LI> XMax - The ending X value for each spectrum to include in the summation (default max). </LI>
-    <LI> H/V_Min - The first row to include when summing by columns, or vice versa (default all). </LI>
-    <LI> H/V_max - The last row to include when summing by columns, or vice versa (default all). </LI>
+    <LI> HoverV_Min - The first row to include when summing by columns, or vice versa (default all). </LI>
+    <LI> HoverV_max - The last row to include when summing by columns, or vice versa (default all). </LI>
     </UL>
 
     @author Russell Taylor, Tessella plc

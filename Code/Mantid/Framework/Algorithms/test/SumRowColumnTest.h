@@ -92,8 +92,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("Orientation","D_V") )
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMin","4") )
     TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("XMax","10") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Min","5") )
-    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("H/V_Max","9") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("HoverV_Min","5") )
+    TS_ASSERT_THROWS_NOTHING( summer2.setPropertyValue("HoverV_Max","9") )
     
     TS_ASSERT_THROWS_NOTHING( summer2.execute() )
     TS_ASSERT( summer2.isExecuted() )
