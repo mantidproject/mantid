@@ -55,11 +55,11 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
   
 
 }
-std::vector<boost::shared_ptr<MDDimension> >
+std::vector<boost::shared_ptr<IMDDimension> > 
 MDGeometry::getDimensions(bool sort_by_bais)const
 {
     unsigned int i;
-	std::vector<boost::shared_ptr<MDDimension> > dims(this->getNumDims());
+	std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
 
     if(sort_by_bais){ // sort by basis;
        std::vector<std::string> dimID = this->getBasisTags();
@@ -245,7 +245,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 
 }
 //
-    boost::shared_ptr<MDDimension>
+    boost::shared_ptr<IMDDimension>
       MDGeometry::getYDimension(void)const
     {
       if(m_basis.getNumDims()<2){
@@ -254,7 +254,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
       return theDimension[1];
     }
     //
-    boost::shared_ptr<MDDimension>
+    boost::shared_ptr<IMDDimension> 
       MDGeometry::getZDimension(void)const
     {
       if(m_basis.getNumDims()<3){
@@ -263,7 +263,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
       return theDimension[2];
     }
     //
-    boost::shared_ptr<MDDimension>
+    boost::shared_ptr<IMDDimension>
       MDGeometry::getTDimension(void)const
     {
       if(m_basis.getNumDims()<4){
@@ -272,10 +272,10 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
       return theDimension[3];
     }
     //
-    std::vector<boost::shared_ptr<MDDimension> >
+    std::vector<boost::shared_ptr<IMDDimension> >
     MDGeometry::getIntegratedDimensions(void)const
     {
-      std::vector<boost::shared_ptr<MDDimension> > tmp;
+      std::vector<boost::shared_ptr<IMDDimension> > tmp;
 
       if(this->n_expanded_dim<m_basis.getNumDims()){
         unsigned int size = m_basis.getNumDims()-this->n_expanded_dim;
@@ -301,7 +301,7 @@ MDGeometry::getDimension(unsigned int i)
       return theDimension[i];
 }
 //
-boost::shared_ptr<const MDDimension>
+boost::shared_ptr<const IMDDimension>
 MDGeometry::get_constDimension(unsigned int i)const
     {
 	  
@@ -332,10 +332,10 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
   return pDim;
 }
 
-boost::shared_ptr<const MDDimension>
+boost::shared_ptr<const IMDDimension>
 MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
 {
-      boost::shared_ptr<MDDimension> pDim;
+      boost::shared_ptr<IMDDimension> pDim;
       std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
       it = dimensions_map.find(tag);
       if(it == dimensions_map.end()){

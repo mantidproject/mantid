@@ -13,22 +13,23 @@ namespace Mantid
 
     Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
 //
-MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions, unsigned int nReciprocalDimensions) :
-  n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions(), m_cell()
+MDGeometryBasis::MDGeometryBasis(boost::shared_ptr<UnitCell> theSample,unsigned int nDimensions, unsigned int nReciprocalDimensions) :
+n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions(),
+spSample(theSample)
 {
+ // this constructor has to be modified to include relation between the direction of the reciprocal space and the 
   this->check_nDims(n_total_dim, n_reciprocal_dimensions);
   m_mdBasisDimensions.insert(MDBasisDimension("q0", true, 0));
 }
 //
 void
-MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell)
+MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions)
 {
-	m_cell = cell;
-	m_mdBasisDimensions.clear();
-	m_mdBasisDimensions = mdBasisDimensions;
+    m_mdBasisDimensions.clear();
+    m_mdBasisDimensions = mdBasisDimensions;
     this->n_total_dim   = mdBasisDimensions.size();
 
-	this->n_reciprocal_dimensions = 0;
+    this->n_reciprocal_dimensions = 0;
     std::set<MDBasisDimension>::const_iterator it = mdBasisDimensions.begin();
     for( ;it != mdBasisDimensions.end(); ++it){  
         checkInputBasisDimensions(*(it)); // Check that duplicate column numbers have not been used.
@@ -40,14 +41,15 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, const
       if((*it).getIsReciprocal()){
           n_reciprocal_dimensions++;
         }
-	}
+    }
     this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 }
 
-MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell)
-  : n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions), m_cell(cell)
+MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample)
+  : n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions),
+  spSample(theSample)
 {
-   this->init(mdBasisDimensions,cell);
+   this->init(mdBasisDimensions);
 }
 
     void MDGeometryBasis::checkInputBasisDimensions(const MDBasisDimension&  dimension)
@@ -80,19 +82,23 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
       }
     }
     //
-    bool 
-      MDGeometryBasis::checkIdCompartibility(const std::vector<std::string> &newTags)const
-    {
-      for(unsigned int i=0;i<newTags.size();i++){
+bool 
+MDGeometryBasis::checkIdCompartibility(const std::vector<std::string> &newTags)const
+{
+     std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
+     std::set<std::string> existingTags;
+     for(it;it!=m_mdBasisDimensions.end();it++){
+            existingTags.insert(it->getId());
+     }
 
-        MDBasisDimension tDim(newTags[i],true,-1);
-        std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.find(tDim);
-        if(it==m_mdBasisDimensions.end()){
-          return false;
-        }
-      }
-      return true;
-    }
+     for(unsigned int i=0;i<newTags.size();i++){
+         std::set<std::string>::const_iterator its = existingTags.find(newTags[i]);
+          if(its==existingTags.end()){
+                return false;
+          }
+     }
+     return true;
+}
 
     std::set<MDBasisDimension> MDGeometryBasis::getReciprocalDimensions() const
     {

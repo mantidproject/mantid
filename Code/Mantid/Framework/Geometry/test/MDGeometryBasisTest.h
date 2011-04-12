@@ -1,5 +1,5 @@
-#ifndef H_TEST_WORKSPACE_GEOMETRY
-#define H_TEST_WORKSPACE_GEOMETRY
+#ifndef H_TEST_MDGEOMETRY_BASIS
+#define H_TEST_MDGEOMETRY_BASIS
 
 #include <cxxtest/TestSuite.h>
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
@@ -21,13 +21,18 @@ private:
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
-    basisDimensions.insert(MDBasisDimension("qx", true, 0));
-    basisDimensions.insert(MDBasisDimension("qy", true, 1));
-    basisDimensions.insert(MDBasisDimension("qz", true, 2));
+	V3D dir(1,0,0);
+    basisDimensions.insert(MDBasisDimension("qx", true, 0,dir));
+	dir[0]=0;
+	dir[1]=1;
+    basisDimensions.insert(MDBasisDimension("qy", true, 1,dir));
+    dir[1]=0;
+	dir[2]=1;
+	basisDimensions.insert(MDBasisDimension("qz", true, 2,dir));
     basisDimensions.insert(MDBasisDimension("p", false, 3));
 
-    UnitCell cell;
-    return new MDGeometryBasis(basisDimensions, cell);
+	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+    return new MDGeometryBasis(basisDimensions,spCell);
   }
 
 public:
@@ -39,18 +44,17 @@ public:
     basisDimensions.insert(MDBasisDimension("qx", true, 1));
     basisDimensions.insert(MDBasisDimension("qy", true, 1));
 
-    UnitCell cell;
-    TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions, cell), std::logic_error);
+ 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87)); 
+    TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::logic_error);
   }
-  void testConstructWithWrongColumnNumbersThrows(){
+   void testConstructWithWrongColumnNumbersThrows(){
 
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
     basisDimensions.insert(MDBasisDimension("qx", true, 1));
     basisDimensions.insert(MDBasisDimension("qy", true, 2));
-
-    UnitCell cell;
-    TSM_ASSERT_THROWS("Number of any dimension has to be smaller then total number of dimensions. Should have thrown.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
+ 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));  
+    TSM_ASSERT_THROWS("Number of any dimension has to be smaller then total number of dimensions. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
 
   }
 
@@ -99,24 +103,29 @@ public:
       basisDimensions.insert(MDBasisDimension(stream.str(), false, i));
     }
    
-    UnitCell cell;
-    TSM_ASSERT_THROWS("Cannot have this many basis dimensions.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
+	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));  
+    TSM_ASSERT_THROWS("Cannot have this many basis dimensions.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
   }
 
-  void testTooManyReciprocalDimensionsThrows()
+ /* This test currently disabled as you can not generage more then 3 reciprocal dimensions
+ void t__tTooManyReciprocalDimensionsThrows()
   {
     std::set<MDBasisDimension> basisDimensions;
-
+	bool is_reciprocal;
     std::stringstream stream;
     for(int i = 0; i < 4; i++)
     { 
       stream << i;
-      basisDimensions.insert(MDBasisDimension(stream.str(), true, i));
+	  if(i<3){
+		  is_reciprocal=true;
+	  }else{
+		  is_reciprocal=false;
+	  }
+      basisDimensions.insert(MDBasisDimension(stream.str(), is_reciprocal, i));
     }
-   
-    UnitCell cell;
-    TSM_ASSERT_THROWS("Cannot have this many reciprocal basis dimensions.", MDGeometryBasis(basisDimensions, cell), std::invalid_argument);
-  }
+  	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));   
+    TSM_ASSERT_THROWS("Cannot have this many reciprocal basis dimensions.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
+  }*/
 
   void testIDCompartibility(){
 

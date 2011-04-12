@@ -109,15 +109,15 @@ namespace Mantid
 
     // it is sometimes convinient to shift image data by some number along specific dimension
     virtual double getDataShift()
-    { return 0; }
+    {throw std::runtime_error("Not Implemented."); return 0; }
 
     /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one.
     virtual size_t getStride()const
-    { return 0; }
+    {throw std::runtime_error("Not Implemented."); return 0; }
 
     /// defines if the dimension is reciprocal or not. The reciprocal dimensions are treated differently from an orthogonal one
     virtual bool isReciprocal() const
-    { return false; }
+    {throw std::runtime_error("Not Implemented."); return false; }
 
     /** function returns a direction of the dimension in the system of coordinates described by the MDBasis;
      *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;

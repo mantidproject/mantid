@@ -9,7 +9,7 @@
 #include "MantidGeometry/DllExport.h"
 #include "MantidGeometry/MDGeometry/MDWorkspaceConstants.h"
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
-#include "MantidGeometry/Crystal/UnitCell.h"
+#include "MantidGeometry/Crystal/UnitCell.h" // has to be replaced by oriented cell later
 #include <vector>
 #include <string>
 #include <map>
@@ -22,7 +22,10 @@
 *
 *   Class provides the reference framework for visualisation and analysis operations alowing to compare different workspaces and to modify 
 *   the visualisation geometry as requested by user
+* Obsolete: may be temporary
 *   It also keeps the crystall information necessary to transform a Mantid workspace into MD workspace
+*Current meaning:
+*   It is the collections of the basis vectors of extended reciprocal lattice so, up to 3 vectors in k-space and 
 
 @author Alex Buts, RAL ISIS
 @date 27/09/2010
@@ -52,22 +55,16 @@ namespace Mantid
 {
   namespace Geometry
   {
-
- /* class EXPORT_OPT_MANTID_GEOMETRY UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure.
- // class DLLExport UnitCell //HACK: UnitCell type will be introduced by L. Chapon in near future. This Type is a temporary measure. 
-  {
-	public: 
-		UnitCell(void){};
-    };
-*/
+	/// temporary measure; need to include real class 
+    class OrientedCrystal;
     //****************************************************************************************************************************************
     class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {
     public:
 
-      MDGeometryBasis(unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
+      MDGeometryBasis(boost::shared_ptr<UnitCell> spSample,unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
 
-      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell);
+      MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 
       std::set<MDBasisDimension> getNonReciprocalDimensions() const;
       std::set<MDBasisDimension> getReciprocalDimensions() const;
@@ -80,21 +77,24 @@ namespace Mantid
       unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
 	  
 
-      /// function checks if the ids supplied  coinside with the tags for current basis e.g all existing tags have to be here (the order of tags may be different)
+      /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
+	   *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-	  void init(const std::set<MDBasisDimension>& mdBasisDimensions, const UnitCell &cell);
+	  void init(const std::set<MDBasisDimension>& mdBasisDimensions);
 	  // copy constructor is used and can be default
     private:
+	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;
+	  boost::shared_ptr<UnitCell> spSample;
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
       /// number of total dimensions in dataset;
       unsigned int n_total_dim;
       /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
       unsigned int n_reciprocal_dimensions;
-
+      /// the directions in reciprocal lattice plus all addtional orthogonal dimensions
       std::set<MDBasisDimension> m_mdBasisDimensions;
-      UnitCell m_cell;
+ 
 
       /// checks if nDimensions consistent with n_reciprocal_dimensions; throws if not
       void check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
