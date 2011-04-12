@@ -114,6 +114,7 @@ void SANSRunWindow::initLayout()
   
   connectButtonSignals();
 
+  m_uiForm.tabWidget->setCurrentWidget(m_uiForm.runNumbers);
   // Disable most things so that load is the only thing that can be done
   m_uiForm.oneDBtn->setEnabled(false);
   m_uiForm.twoDBtn->setEnabled(false);
@@ -163,6 +164,10 @@ void SANSRunWindow::initLayout()
   //Listen for Workspace delete signals
   AnalysisDataService::Instance().notificationCenter.addObserver(m_delete_observer);
 
+  // Default transmission switch
+  connect(m_uiForm.transFit_ck, SIGNAL(stateChanged(int)), this, SLOT(updateTransInfo(int)));
+  updateTransInfo(m_uiForm.transFit_ck->state());
+
   readSettings();
 }
 
@@ -185,7 +190,7 @@ void SANSRunWindow::initAnalysDetTab()
   m_uiForm.wavlength_lb->setText(QString("Wavelength (%1)").arg(ANGSROM_SYM));
   m_uiForm.qx_lb->setText(QString("Qx (%1^-1)").arg(ANGSROM_SYM));
   m_uiForm.qxy_lb->setText(QString("Qxy (%1^-1)").arg(ANGSROM_SYM));
-  m_uiForm.transFit_lb->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
+  m_uiForm.transFit_ck->setText(QString("Trans Fit (%1)").arg(ANGSROM_SYM));
 
   
  
@@ -647,10 +652,15 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   {
     m_uiForm.mask_table->removeRow(i);
   }
+  
+  QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
+  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
+  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni.ReductionSingleton().user_settings =";
+  pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
 
   // Use python function to read the file and then extract the fields
-  runReduceScriptFunction(
-    "i.ReductionSingleton().user_settings = isis_reduction_steps.UserFile(r'"+filetext+"')");
+  runReduceScriptFunction(pyCode);
 
   errors = runReduceScriptFunction(
     "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
@@ -2090,13 +2100,17 @@ QString SANSRunWindow::readUserFileGUIChanges(const QString & type)
     m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
   exec_reduce += "i.SetDetectorFloodFile('"+floodFile+"')\n";
 
-  //Transmission behaviour
-  exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
-    m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
+  //Set the wavelength ranges, equal to those for the sample unless this box is checked
+  if (m_uiForm.transFit_ck->isChecked())
+  {
+    exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "','" +
+      m_uiForm.trans_min->text().trimmed()+"','"+m_uiForm.trans_max->text().trimmed()+"')\n";
+  }
+  else
+  {
+    exec_reduce += "i.TransFit('" + m_uiForm.trans_opt->currentText() + "')\n";
+  }
 
-  //Centre values
-  exec_reduce += "i.SetCentre('" + m_uiForm.beam_x->text()+
-                 "','"+m_uiForm.beam_y->text()+"')\n";
   //Gravity correction
   exec_reduce += "i.Gravity(";
   if( m_uiForm.gravity_check->isChecked() )
@@ -2199,8 +2213,16 @@ QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
   {
     fitType = "LOG";
   }
-  exec_reduce += "SANSReduction.TransFit('" + fitType + "'," +
-    m_uiForm.trans_min->text() + "," + m_uiForm.trans_max->text() + ")\n";
+  //Set the wavelength ranges, equal to those for the sample unless this box is checked
+  if (m_uiForm.transFit_ck->isChecked())
+  {
+    exec_reduce += "SANSReduction.TransFit('" + fitType + "'," +
+      m_uiForm.trans_min->text() + "," + m_uiForm.trans_max->text() + ")\n";
+  }
+  else
+  {
+    exec_reduce += "SANSReduction.TransFit('" + fitType + "')\n";
+  }
 
   //Centre values
   exec_reduce += "SANSReduction.SetCentre(" + m_uiForm.beam_x->text() + "," + m_uiForm.beam_y->text() + ")\n";
@@ -2303,7 +2325,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     }
     py_code.prepend("import SANSBatchMode as batch\n");
     py_code += "\nbatch.BatchReduce('" + csv_file + "','" + m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString() + "',";
-    py_code += m_uiForm.def_trans->isChecked() ? "True" : "False";
+    py_code += m_uiForm.transFit_ck->isChecked() ? "True" : "False";
     if( m_uiForm.plot_check->isChecked() )
     {
       py_code += ", plotresults=True";
@@ -2401,7 +2423,7 @@ QString SANSRunWindow::reduceSingleRun() const
   else
   {
     reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=";
-    QString fullTransRang = m_uiForm.def_trans->isChecked() ? "True" : "False";
+    QString fullTransRang = m_uiForm.transFit_ck->isChecked() ? "True" : "False";
     reducer_code += fullTransRang + ")";
     if( m_uiForm.plot_check->isChecked() )
     {
@@ -2840,6 +2862,25 @@ void SANSRunWindow::clearLogger()
   m_uiForm.logging_field->clear();
   m_uiForm.tabWidget->setTabText(4, "Logging");
 }
+/**Respond to the "Use default transmission" check box being clicked. If
+ * the box is checked the transmission fit wavelength maximum and minimum
+ * boxs with be set to the defaults for the instrument and disabled.
+ * Otherwise they are enabled
+ * @param state :: equal to Qt::Checked or not
+ */
+void SANSRunWindow::updateTransInfo(int state)
+{
+  if( state == Qt::Checked )
+  {
+    m_uiForm.trans_min->setEnabled(true);
+    m_uiForm.trans_max->setEnabled(true);
+  }
+  else
+  {
+    m_uiForm.trans_min->setEnabled(false);
+    m_uiForm.trans_max->setEnabled(false);
+  }
+}
 /** A slot to validate entries for Python lists and tupples
 */
 void SANSRunWindow::checkList()
@@ -2998,7 +3039,9 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += "('" + run_number + "', reload = True";
     assign_fn += ", period = " + QString::number(getPeriod(key))+")";
     //assign the workspace name to a Python variable and read back some details
-    QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
+    QString run_info = "i.SetCentre('" + m_uiForm.beam_x->text();
+    run_info += "','"+m_uiForm.beam_y->text()+"')\n";
+    run_info += "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
     run_info = runReduceScriptFunction(run_info);
     if (run_info.startsWith("error", Qt::CaseInsensitive))
     {
