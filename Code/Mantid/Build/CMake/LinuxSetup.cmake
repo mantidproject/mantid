@@ -34,6 +34,6 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv PATH \"$PATH:$MANTIDPATH\"\n"
 )
 
-#install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
-#          DESTINATION /etc/profile.d 
-#)
+install ( PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh
+          DESTINATION /etc/profile.d 
+)
