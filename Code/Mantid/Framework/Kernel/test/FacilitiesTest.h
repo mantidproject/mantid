@@ -89,10 +89,8 @@ public:
 
   void testDefaultInstrument()
   {
-    ConfigService::Instance().setString("default.facility","ISIS");
     ConfigService::Instance().setString("default.instrument","HRPD");
-    const FacilityInfo& fac = ConfigService::Instance().getFacility();
-    InstrumentInfo instr = fac.Instrument();
+    InstrumentInfo instr = ConfigService::Instance().getInstrument();
     TS_ASSERT_EQUALS(instr.name(),"HRPD");
   }
 
@@ -110,7 +108,7 @@ public:
       "    </instrument>"
       "  </facility>"
       "</facilities>";
-
+    
     FacilityInfo* fac = getFacility(xmlStr);
 
     TS_ASSERT(fac);
