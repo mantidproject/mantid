@@ -1737,7 +1737,7 @@ public:
 
   void setUp()
   {
-    for (size_t i=0; i < 20e6; i++)
+    for (size_t i=0; i < 5e6; i++)
     {
       //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
       el1 += TofEvent( (rand()%10000)*1.0, rand()%1000);
