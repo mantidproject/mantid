@@ -171,7 +171,8 @@ public:
     {
       double signal = out->getSignalAt(i);
       //TODO: Fix on windows:
-      TS_ASSERT( boost::math::isnan(signal) ); //The implicit function should have ensured that no bins were present.
+      bool result = boost::math::isnan(signal);
+      TS_ASSERT( result ); //The implicit function should have ensured that no bins were present.
     }
   }
 
