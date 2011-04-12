@@ -60,7 +60,7 @@ void SaveCanSAS1D::init()
   radiation_source.push_back("x-ray");
   radiation_source.push_back("muon");
   radiation_source.push_back("electron");
-  declareProperty("Radiation Source", "Spallation Neutron Source", new Kernel::ListValidator(
+  declareProperty("RadiationSource", "Spallation Neutron Source", new Kernel::ListValidator(
       radiation_source));
   declareProperty("Append", false, "If true the output file is not overwritten but appended to"); 
 }
@@ -497,7 +497,7 @@ void SaveCanSAS1D::createSASSourceElement(std::string& sasSource )
   sasSource="\n\t\t\t<SASsource>";
   //outFile<<sasSource;
 
-  std::string radiation_source = getPropertyValue("Radiation Source");
+  std::string radiation_source = getPropertyValue("RadiationSource");
   std::string sasrad="\n\t\t\t\t<radiation>";
   sasrad+=radiation_source;
   sasrad+="</radiation>";
