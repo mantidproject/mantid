@@ -50,6 +50,8 @@ namespace Mantid
       virtual int version() const { return 1; }
       /// Category
       virtual const std::string category() const { return "DataHandling"; }
+      /// Aliases
+      virtual const std::string alias() const { return "load"; }
       /// Override setPropertyValue
       virtual void setPropertyValue(const std::string &name, const std::string &value);
 
