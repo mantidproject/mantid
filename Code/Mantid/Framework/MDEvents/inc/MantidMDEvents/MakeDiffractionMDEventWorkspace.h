@@ -69,6 +69,8 @@ namespace MDEvents
     Geometry::V3D samplePos;
     /// Progress reporter (shared)
     Kernel::ProgressBase * prog;
+    /// Matrix. Multiply this by the lab frame Qx, Qy, Qz to get the desired Q or HKL.
+    Geometry::Matrix<double> mat;
 
 
   };

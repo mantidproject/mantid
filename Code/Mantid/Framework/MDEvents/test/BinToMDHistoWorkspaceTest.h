@@ -203,7 +203,7 @@ public:
   void test_for_profiling()
   {
     Mantid::Kernel::CPUTimer tim;
-    for (size_t i=0; i<1; i++)
+    for (size_t i=0; i<10; i++)
     {
       BinToMDHistoWorkspace alg;
       TS_ASSERT_THROWS_NOTHING( alg.initialize() )

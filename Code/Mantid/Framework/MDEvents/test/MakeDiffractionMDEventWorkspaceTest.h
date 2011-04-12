@@ -12,13 +12,13 @@
 #include "MantidMDEvents/MakeDiffractionMDEventWorkspace.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
-
 using namespace Mantid::MDEvents;
 
 class MakeDiffractionMDEventWorkspaceTest : public CxxTest::TestSuite
@@ -82,6 +82,10 @@ public:
     return retVal;
   }
 
+  void setUp()
+  {
+    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
+  }
     
   void test_Init()
   {
@@ -90,11 +94,52 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
+
+
+  void test_OutputDimensions_Parameter()
+  {
+    EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(10);
+    AnalysisDataService::Instance().addOrReplace("testInEW", in_ws);
+    Algorithm_sptr alg;
+
+    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+        "InputWorkspace", "testInEW",
+        "OutputWorkspace", "testOutMD",
+        "OutputDimensions", "Q (lab frame)");
+    TS_ASSERT( alg->isExecuted() );
+
+    MDEventWorkspace3::sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("testOutMD")) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "Qx");
+
+    // But you can't add to an existing one of the wrong dimensions type
+    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+        "InputWorkspace", "testInEW",
+        "OutputWorkspace", "testOutMD",
+        "OutputDimensions", "HKL");
+    TS_ASSERT( !alg->isExecuted() );
+
+    // Let's try again - it will work.
+    AnalysisDataService::Instance().remove("testOutMD");
+    alg = AlgorithmHelper::runAlgorithm("MakeDiffractionMDEventWorkspace", 6,
+        "InputWorkspace", "testInEW",
+        "OutputWorkspace", "testOutMD",
+        "OutputDimensions", "HKL");
+    TS_ASSERT( alg->isExecuted() );
+
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(AnalysisDataService::Instance().retrieve("testOutMD")) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "H");
+  }
+
+
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1)
   {
-    Mantid::Kernel::ConfigService::Instance().setString("default.facility", "TEST");
 
-    int numEventsPer = 1000;
+    int numEventsPer = 100;
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(numEventsPer);
     if (type == WEIGHTED)
       in_ws *= 2.0;

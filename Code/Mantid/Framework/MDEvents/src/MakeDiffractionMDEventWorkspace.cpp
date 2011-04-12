@@ -27,6 +27,7 @@ namespace MDEvents
 
   bool DODEBUG = false;
 
+
   // Register the algorithm into the AlgorithmFactory
   DECLARE_ALGORITHM(MakeDiffractionMDEventWorkspace)
   
@@ -62,6 +63,18 @@ namespace MDEvents
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::Output),
         "Name of the output MDEventWorkspace. If the workspace already exists, then the events will be added to it.");
     declareProperty(new PropertyWithValue<bool>("ClearInputWorkspace", false, Direction::Input), "Clear the events from the input workspace during conversion, to save memory.");
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back("Q (lab frame)");
+    propOptions.push_back("Q (sample frame)");
+    propOptions.push_back("HKL");
+    declareProperty("OutputDimensions", "Q (lab frame)",new ListValidator(propOptions),
+      "What will be the dimensions of the output workspace?\n"
+      "  Q (lab frame): Wave-vector change of the neutron in the lab frame.\n"
+      "  Q (sample frame): Wave-vector change of the neutron in the frame of the sample (taking out goniometer rotation).\n"
+      "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices."
+       );
+
   }
 
 
@@ -109,14 +122,22 @@ namespace MDEvents
       V3D detDir = detPos / detPos.norm();
 
       // The direction of momentum transfer = the output beam direction - input beam direction (normalized)
-      V3D Q_dir = detDir - beamDir;
+      V3D Q_dir_lab_frame = detDir - beamDir;
+
+      // Multiply by the rotation matrix to convert to Q in the sample frame (take out goniometer rotation)
+      // (or to HKL, if that's what the matrix is)
+      V3D Q_dir = mat * Q_dir_lab_frame;
+
+      // For speed we extract the components.
       double Q_dir_x = Q_dir.X();
       double Q_dir_y = Q_dir.Y();
       double Q_dir_z = Q_dir.Z();
 
-      //TODO: Rotate into sample frame (take out goniometer rotation)
-      //TODO: Convert to HKL, on option.
 
+      /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
+       * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
+      const double wavenumber_in_angstrom_times_tof_in_microsec =
+          (PhysicalConstants::NeutronMass * distance * 1e-10) / (1e-6 * PhysicalConstants::h_bar);
 
       //std::cout << wi << " : " << el.getNumberEvents() << " events. Pos is " << detPos << std::endl;
 
@@ -130,16 +151,11 @@ namespace MDEvents
       typename std::vector<T>::iterator it_end = events.end();
       for (; it != it_end; it++)
       {
-        // Time of flight of neutron in seconds
-        double tof = it->tof() * 1e-6;
-        // Wavenumber = momentum/h_bar = mass*distance/time / h_bar
-        double wavenumber = (PhysicalConstants::NeutronMass * distance) / (tof * PhysicalConstants::h_bar);
-        // Convert to units of Angstroms^-1
-        wavenumber *= 1e-10;
+        // Get the wavenumber in ang^-1 using the previously calculated constant.
+        double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
 
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
         CoordType center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
-        //std::cout << center[0] << "," << center[1] << "," << center[2] << "\n";
 
         // Build a MDEvent
         out_events.push_back( MDE(it->weight(), it->errorSquared(), center) );
@@ -172,17 +188,50 @@ namespace MDEvents
     Timer tim, timtotal;
     CPUTimer cputim, cputimtotal;
 
+    // ---------------------- Extract properties --------------------------------------
+    ClearInputWorkspace = getProperty("ClearInputWorkspace");
+    std::string OutputDimensions = getPropertyValue("OutputDimensions");
+
     // Input workspace
     in_ws = getProperty("InputWorkspace");
     if (!in_ws)
       throw std::invalid_argument("No input event workspace was passed to algorithm.");
 
-    ClearInputWorkspace = getProperty("ClearInputWorkspace");
-
     // Try to get the output workspace
     IMDEventWorkspace_sptr i_out = getProperty("OutputWorkspace");
     ws = boost::dynamic_pointer_cast<MDEventWorkspace3>( i_out );
 
+    // Initalize the matrix to 3x3 identity
+    mat = Geometry::Matrix<double>(3,3);
+    mat.identityMatrix();
+
+    // ----------------- Handle the type of output -------------------------------------
+
+    std::string dimensionNames[3] = {"Qx", "Qy", "Qz"};
+    std::string dimensionUnits = "Angstroms^-1";
+    if (OutputDimensions == "Q (sample frame)")
+    {
+      // TODO: Set the matrix based on goniometer angles
+    }
+    else if (OutputDimensions == "HKL")
+    {
+      // TODO: Set the matrix based on UB etc.
+      dimensionNames[0] = "H";
+      dimensionNames[1] = "K";
+      dimensionNames[2] = "L";
+      dimensionUnits = "lattice";
+    }
+
+    if (ws)
+    {
+      // Check that existing workspace dimensions make sense with the desired one (using the name)
+      if (ws->getDimension(0)->getName() != dimensionNames[0])
+        throw std::runtime_error("The existing MDEventWorkspace " + ws->getName() + " has different dimensions than were requested! Either give a different name for the output, or change the OutputDimensions parameter.");
+    }
+
+
+
+    // ------------------- Create the output workspace if needed ------------------------
     if (!ws)
     {
       // Create an output workspace with 3 dimensions.
@@ -191,10 +240,9 @@ namespace MDEvents
       ws = boost::dynamic_pointer_cast<MDEventWorkspace3>(i_out);
 
       // Give all the dimensions
-      std::string names[3] = {"Qx", "Qy", "Qz"};
       for (size_t d=0; d<nd; d++)
       {
-        MDHistoDimension * dim = new MDHistoDimension(names[d], names[d], "Angstroms^-1", -50.0, +50.0, 1);
+        MDHistoDimension * dim = new MDHistoDimension(dimensionNames[d], dimensionNames[d], dimensionUnits, -50.0, +50.0, 1);
         ws->addDimension(MDHistoDimension_sptr(dim));
       }
       ws->initialize();
@@ -216,6 +264,8 @@ namespace MDEvents
     if (!bc)
       throw std::runtime_error("Output MDEventWorkspace does not have a BoxController!");
 
+
+    // ------------------- Cache values that are common for all ---------------------------
     // Extract some parameters global to the instrument
     AlignDetectors::getInstrumentParameters(in_ws->getInstrument(),l1,beamline,beamline_norm, samplePos);
     beamline_norm = beamline.norm();
@@ -223,6 +273,8 @@ namespace MDEvents
 
     //To get all the detector ID's
     in_ws->getInstrument()->getDetectors(allDetectors);
+
+
 
     size_t totalCost = in_ws->getNumberEvents();
     prog = new Progress(this, 0, 1.0, totalCost);
