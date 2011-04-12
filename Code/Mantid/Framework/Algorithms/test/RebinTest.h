@@ -326,7 +326,38 @@ public:
     do_test_EventWorkspace(WEIGHTED_NOTIME, false, true, true);
   }
 
+  void testRebinPointData()
+  {
+    Workspace1D_sptr input = Create1DWorkspace(51);
+    AnalysisDataService::Instance().add("test_RebinPointDataInput", input);
 
+    Mantid::API::Algorithm_sptr ctpd = Mantid::API::AlgorithmFactory::Instance().create("ConvertToPointData", 1);
+    ctpd->initialize();
+    ctpd->setPropertyValue("InputWorkspace", "test_RebinPointDataInput");
+    ctpd->setPropertyValue("OutputWorkspace", "test_RebinPointDataInput");
+    ctpd->execute();
+
+    Mantid::API::Algorithm_sptr reb = Mantid::API::AlgorithmFactory::Instance().create("Rebin", 1);
+    reb->initialize();
+    TS_ASSERT_THROWS_NOTHING( reb->setPropertyValue("InputWorkspace", "test_RebinPointDataInput") );
+    reb->setPropertyValue("OutputWorkspace", "test_RebinPointDataOutput");
+    reb->setPropertyValue("Params", "7,0.75,23");
+    TS_ASSERT_THROWS_NOTHING( reb->execute() );
+
+    TS_ASSERT( reb->isExecuted() );
+
+    MatrixWorkspace_sptr outWS = boost::shared_dynamic_cast<MatrixWorkspace>( AnalysisDataService::Instance().retrieve("test_RebinPointDataOutput") );
+
+    TS_ASSERT(! outWS->isHistogramData() );
+    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1 );
+
+    TS_ASSERT_EQUALS(outWS->readX(0)[0], 7.3750);
+    TS_ASSERT_EQUALS(outWS->readX(0)[10], 14.8750);
+    TS_ASSERT_EQUALS(outWS->readX(0)[20], 22.3750);
+
+    AnalysisDataService::Instance().remove("test_RebinPointDataInput");
+    AnalysisDataService::Instance().remove("test_RebinPointDataOutput");
+  }
 
 private:
 
