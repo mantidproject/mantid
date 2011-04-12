@@ -382,7 +382,7 @@ public:
         TS_ASSERT( alg2.isExecuted() );
 
         std::string algStat;
-        algStat = alg2.getPropertyValue("Output Status");
+        algStat = alg2.getPropertyValue("OutputStatus");
         TS_ASSERT( algStat.compare("success")==0 );
 
         // test the output from fit is as expected - since 3 variables and 4 data points DOF= 1
@@ -411,7 +411,7 @@ public:
             TS_ASSERT( alg3.execute() )
             )
         TS_ASSERT( alg3.isExecuted() );
-        algStat = alg3.getPropertyValue("Output Status");
+        algStat = alg3.getPropertyValue("OutputStatus");
         TS_ASSERT( algStat.compare("success")==0 );
         TWS_type outParams = getTWS("out_Parameters");
         TS_ASSERT(outParams);

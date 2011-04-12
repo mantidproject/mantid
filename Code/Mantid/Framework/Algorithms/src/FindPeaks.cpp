@@ -543,7 +543,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
       throw std::runtime_error("Unable to successfully run Gaussian Fit sub-algorithm");
     }
  
-    std::string fitStatus = fit->getProperty("Output Status");
+    std::string fitStatus = fit->getProperty("OutputStatus");
     const double height = fit->getProperty("height");
     if ( height <= 0 ) fitStatus.clear();              // Height must be strictly positive
     if ( ! fitStatus.compare("success") ) 

@@ -172,7 +172,7 @@ namespace Mantid
         g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
         throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
       }
-      std::string fitStatus = fit_alg->getProperty("Output Status");
+      std::string fitStatus = fit_alg->getProperty("OutputStatus");
       if ( fitStatus.compare("success") ) return (0.);
 
       std::vector<double> params = fit_alg->getProperty("Parameters");

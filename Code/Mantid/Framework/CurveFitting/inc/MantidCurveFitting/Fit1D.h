@@ -31,7 +31,7 @@ namespace Mantid
     <LI> Properties defined in derived class goes here
 
     <LI> MaxIterations - The spectrum to fit (default 500)</LI>
-    <LI> Output Status - whether the fit was successful. Direction::Output</LI>
+    <LI> OutputStatus - whether the fit was successful. Direction::Output</LI>
     <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 

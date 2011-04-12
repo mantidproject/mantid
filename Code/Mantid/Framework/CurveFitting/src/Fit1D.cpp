@@ -267,7 +267,7 @@ void Fit1D::init()
   declareProperty("Fix","","A list of comma separated parameter names which should be fixed in the fit");
   declareProperty("MaxIterations", 500, mustBePositive->clone(),
     "Stop after this number of iterations if a good fit is not found" );
-  declareProperty("Output Status","", Direction::Output);
+  declareProperty("OutputStatus","", Direction::Output);
   declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
@@ -563,7 +563,7 @@ void Fit1D::exec()
 
   // also output summary to properties
 
-  setProperty("Output Status", reportOfFit);
+  setProperty("OutputStatus", reportOfFit);
   setProperty("Output Chi^2/DoF", finalCostFuncVal);
   for (size_t i = 0; i < m_fittedParameter.size(); i++)
     setProperty(m_parameterNames[i], m_fittedParameter[i]);
