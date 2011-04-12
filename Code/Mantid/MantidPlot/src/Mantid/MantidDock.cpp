@@ -390,14 +390,11 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
 {
   QList<QTreeWidgetItem*> matches = m_tree->findItems(group_name, Qt::MatchFixedString);
   if( matches.empty() ) return;
-
   m_tree->removeItemWidget(matches[0],0);
   if(Mantid::API::WorkspaceGroup_sptr group_ptr = boost::dynamic_pointer_cast<WorkspaceGroup>(ws_group) )
   {
     const std::vector<std::string> group_names = group_ptr->getNames();
-    std::vector<std::string>::const_iterator sitr = group_names.begin();
-    std::vector<std::string>::const_iterator send = group_names.end();
-    for( ; sitr != send; ++sitr )
+    for( std::vector<std::string>::const_iterator sitr = group_names.begin(); sitr != group_names.end(); ++sitr )
     {
       std::string name = *sitr;
       Workspace_sptr member_ws;
@@ -409,15 +406,18 @@ void MantidDockWidget::unrollWorkspaceGroup(const QString &group_name, Mantid::A
       {
         continue;
       }
-      QTreeWidgetItem *item = createEntry(QString::fromStdString(name), member_ws);
-      setItemIcon(item, member_ws);
-      m_tree->addTopLevelItem(item);
+
+      QString wsname = QString::fromStdString(name);
+      QList<QTreeWidgetItem*> exists = m_tree->findItems(wsname, Qt::MatchFixedString);
+      if ( exists.empty() )
+      {
+        QTreeWidgetItem *item = createEntry(wsname, member_ws);
+        setItemIcon(item, member_ws);
+        m_tree->addTopLevelItem(item);
+      }
     }
   }
-
 }
-
-
 
 /** Populate the tree with some details about a MDWorkspace
  *
