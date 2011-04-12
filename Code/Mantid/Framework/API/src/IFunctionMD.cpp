@@ -32,12 +32,12 @@ namespace API
     * @param ws :: A shared pointer to a workspace.
     * @param slicing :: A string identifying the data to be fitted. 
   */
-  void IFunctionMD::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+  void IFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData)
   {
     (void)slicing; //Avoid compiler warning
     try
     {
-      m_workspace = boost::dynamic_pointer_cast<IMDWorkspace>(ws);
+      m_workspace = boost::dynamic_pointer_cast<const IMDWorkspace>(ws);
       if (!m_workspace)
       {
         throw std::invalid_argument("Workspace has a wrong type (not a IMDWorkspace)");
@@ -68,25 +68,27 @@ namespace API
         throw std::runtime_error("Fitting data is empty");
       }
 
-      // fill in m_data and m_weights
-      m_data.reset(new double[m_dataSize]);
-      m_weights.reset(new double[m_dataSize]);
-
-      //MDIterator from(m_workspace);
-      //MDIterator to(this);
-      IMDIterator* r = m_workspace->createIterator();
-
-      do
+      if (copyData)
       {
-        int i = r->getPointer();
-        const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
-        double signal = point.getSignal();
-        double error  = point.getError();
-        if (error == 0) error = 1.;
-        m_data[i] = signal;
-        m_weights[i] = 1./error;
-      }while(r->next());
-      delete r;
+
+        // fill in m_data and m_weights
+        m_data.reset(new double[m_dataSize]);
+        m_weights.reset(new double[m_dataSize]);
+
+        IMDIterator* r = m_workspace->createIterator();
+
+        do
+        {
+          int i = r->getPointer();
+          const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
+          double signal = point.getSignal();
+          double error  = point.getError();
+          if (error == 0) error = 1.;
+          m_data[i] = signal;
+          m_weights[i] = 1./error;
+        }while(r->next());
+        delete r;
+      }
     }
     catch(std::exception& e)
     {
@@ -160,13 +162,9 @@ namespace API
       if ( isActive(iP) )
       {
         const double& val = getParameter(iP);
-        if (val == 0.0)
+        if (fabs(val) < stepPercentage)
         {
           step = stepPercentage;
-        }
-        else if (val < cutoff)
-        {
-          step = cutoff;
         }
         else
         {
@@ -187,8 +185,8 @@ namespace API
         for (int i = 0; i < nData; i++) {
          // out->set(i,iP, 
          //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
-          out->set(i,iP, 
-            (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step);
+          double value = (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step;
+          out->set(i,iP,value);
         }
       }
     }
@@ -298,6 +296,16 @@ namespace Mantid
       std::vector<std::string> m_varNames;
       std::string m_formula;
     public:
+      UserFunctionMD()
+      {
+        m_vars.resize(4);
+        std::string varNames[] = {"x","y","z","t"};
+        m_varNames.assign(varNames,varNames+m_vars.size());
+        for(int i = 0; i < m_vars.size(); ++i)
+        {
+          m_parser.DefineVar(m_varNames[i],&m_vars[i]);
+        }
+      }
       bool hasAttribute(const std::string& attName)const 
       { 
         return attName == "Formula";
@@ -322,22 +330,15 @@ namespace Mantid
       void initDimensions()
       {
         if (!getWorkspace()) return;
-        m_vars.resize(m_dimensionIndexMap.size());
-        if (m_vars.size() <= 4)
+        if (m_vars.size() > 4)
         {
-          std::string varNames[] = {"x","y","z","t"};
-          m_varNames.assign(varNames,varNames+m_vars.size());
-        }
-        else
-        {
+          m_vars.resize(m_dimensionIndexMap.size());
+          m_varNames.resize(m_dimensionIndexMap.size());
           for(int i = 0; i < m_vars.size(); ++i)
           {
-            m_varNames.push_back("x" + boost::lexical_cast<std::string>(i));
+            m_varNames[i] = "x" + boost::lexical_cast<std::string>(i);
+            m_parser.DefineVar(m_varNames[i],&m_vars[i]);
           }
-        }
-        for(int i = 0; i < m_vars.size(); ++i)
-        {
-          m_parser.DefineVar(m_varNames[i],&m_vars[i]);
         }
         setFormula();
       }

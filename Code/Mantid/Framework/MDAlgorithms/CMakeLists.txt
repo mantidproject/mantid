@@ -93,6 +93,7 @@ set (TEST_FILES
 test/CobaltSWDTest.h
 test/CPR_preselectCellsTest.h 
 test/CPRebinKeepPixTest.h
+test/CreateMDFitWorkspaceTest.h
 test/DepthParameterTest.h
 test/DimensionFactoryTest.h
 test/DynamicRebinFromXMLAlgorithmTest.h

@@ -109,50 +109,6 @@ void CompositeFunctionMW::function(double* out, const double* xValues, const int
   }
 }
 
-/** A Jacobian for individual functions
- */
-class PartialJacobian: public Jacobian
-{
-  Jacobian* m_J;  ///< pointer to the overall Jacobian
-  int m_iP0;      ///< offset in the overall Jacobian for a particular function
-  int m_iaP0;      ///< offset in the active Jacobian for a particular function
-public:
-  /** Constructor
-   * @param J :: A pointer to the overall Jacobian
-   * @param iP0 :: The parameter index (declared) offset for a particular function
-   * @param iap0 :: The active parameter index (declared) offset for a particular function
-   */
-  PartialJacobian(Jacobian* J,int iP0, int iap0):m_J(J),m_iP0(iP0),m_iaP0(iap0)
-  {}
-  /**
-   * Overridden Jacobian::set(...).
-   * @param iY :: The index of the data point
-   * @param iP :: The parameter index of an individual function.
-   * @param value :: The derivative value
-   */
-  void set(int iY, int iP, double value)
-  {
-      m_J->set(iY,m_iP0 + iP,value);
-  }
-  /**
-   * Overridden Jacobian::get(...).
-   * @param iY :: The index of the data point
-   * @param iP :: The parameter index of an individual function.
-   */
-  double get(int iY, int iP)
-  {
-      return m_J->get(iY,m_iP0 + iP);
-  }
- /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
-  *   @param value :: Value to add
-  *   @param iActiveP :: The index of an active parameter.
-  */
-  virtual void addNumberToColumn(const double& value, const int& iActiveP) 
-  {
-    m_J->addNumberToColumn(value,m_iaP0+iActiveP);
-  }
-};
-
 /// Derivatives of function with respect to active parameters
 void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
@@ -192,7 +148,7 @@ void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::Matrix
   }
 }
 
-void CompositeFunctionMW::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool)
 {
   IFunctionMW::setWorkspace(ws,slicing);
   for(int iFun=0;iFun<nFunctions();iFun++)

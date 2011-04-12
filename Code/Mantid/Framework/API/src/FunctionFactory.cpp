@@ -4,6 +4,8 @@
 #include "MantidAPI/Expression.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/LibraryManager.h"
 #include <Poco/StringTokenizer.h>
@@ -107,7 +109,7 @@ namespace Mantid
       std::string fnName = term->terms()[1].name();
 
       IFitFunction* fun = createFunction(fnName);
-
+      std::string wsName,wsParam;
       for(++term;term!=terms.end();++term)
       {// loop over function's parameters/attributes
         if (term->name() != "=") inputError(expr.str());
@@ -131,11 +133,25 @@ namespace Mantid
         {
           addTies(fun,(*term)[1]);
         }
+        else if (parName == "Workspace")
+        {
+          wsName = parValue;
+        }
+        else if (parName == "WSParam")
+        {
+          wsParam = parValue;
+        }
         else
         {// set initial parameter value
           fun->setParameter(parName,atof(parValue.c_str()));
         }
       }// for term
+
+      if (!wsName.empty())
+      {
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+        fun->setWorkspace(ws,wsParam);
+      }
 
       return fun;
     }
@@ -159,7 +175,7 @@ namespace Mantid
       const Expression& term = it->bracketsRemoved();
 
       CompositeFunction* cfun = 0;
-
+      std::string wsName,wsParam;
       if (term.name() == "=")
       {
         if (term.terms()[0].name() == "composite")
@@ -221,6 +237,8 @@ namespace Mantid
         }
         else
         {
+          std::string parName = term[0].name();
+          std::string parValue = term[1].str();
           if (term[0].name().size() >= 10 && term[0].name().substr(0,10) == "constraint")
           {
             addConstraints(cfun,term[1]);
@@ -231,12 +249,26 @@ namespace Mantid
             addTies(cfun,term[1]);
             continue;
           }
+          else if (parName == "Workspace")
+          {
+            wsName = parValue;
+          }
+          else if (parName == "WSParam")
+          {
+            wsParam = parValue;
+          }
           else
           {
             fun = createSimple(term);
           }
         }
         cfun->addFunction(fun);
+      }
+
+      if (!wsName.empty())
+      {
+        Workspace_sptr ws = AnalysisDataService::Instance().retrieve(wsName);
+        cfun->setWorkspace(ws,wsParam);
       }
 
       return cfun;

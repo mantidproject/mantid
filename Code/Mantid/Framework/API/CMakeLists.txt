@@ -15,6 +15,7 @@ set ( SRC_FILES
 	src/ColumnFactory.cpp
 	src/CompositeFunction.cpp
 	src/CompositeFunctionMW.cpp
+	src/CompositeFunctionMD.cpp
 	src/ConstraintFactory.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/Expression.cpp
@@ -94,6 +95,7 @@ set ( INC_FILES
 	inc/MantidAPI/Column.h
 	inc/MantidAPI/CompositeFunction.h
 	inc/MantidAPI/CompositeFunctionMW.h
+	inc/MantidAPI/CompositeFunctionMD.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h

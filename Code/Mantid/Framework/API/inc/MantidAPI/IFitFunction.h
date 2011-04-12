@@ -227,17 +227,18 @@ public:
   virtual std::string asString()const;
   /// The string operator
   virtual operator std::string()const{return asString();}
-  /// Set the workspace
+  /// Set the workspace.
   /// @param ws :: Shared pointer to a workspace
   /// @param slicing :: A string identifying the data in the worspace to be fitted, e.g. spectrum index, starting and ending x values, etc
   ///     Concrete form is defined by the derived functions.
-  virtual void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing) = 0;
+  /// @param copyData :: 
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true) = 0;
   /// Get the workspace
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const = 0;
   /// Iinialize the function
   virtual void initialize(){this->init();}
 
-  /// Returns the size of the fitted data (number of double values returned by the function)
+  /// Returns the size of the fitted data (number of double values returned by the function getData())
   virtual int dataSize()const = 0;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const = 0;

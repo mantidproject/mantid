@@ -54,7 +54,7 @@ public:
 
               /* Overriden methods */
 
-  void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
+  void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool copyData = true);
   /// Set the workspace
   void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax);
   /// Returns the function's name

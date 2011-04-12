@@ -294,7 +294,7 @@ namespace Mantid{
       /// Get the size of the data
       virtual size_t getDataSize()const
       {
-        return m_indexCalculator->getIndexUpperBounds();
+        return m_indexCalculator->getIndexUpperBounds() + 1;
       }
       /// Get the i-th coordinate of the current cell
       virtual double getCoordinate(int i)const

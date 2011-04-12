@@ -122,7 +122,7 @@ public:
 
   /* Overidden methods */
 
-  virtual void setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing);
+  virtual void setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing, bool copyData = true);
   virtual boost::shared_ptr<const Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)

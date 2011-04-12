@@ -39,11 +39,11 @@ namespace API
     * @param slicing :: A string identifying the data to be fitted. Format for IFunctionMW:
     *  "WorkspaceIndex=int,StartX=double,EndX=double". StartX and EndX are optional.
   */
-  void IFunctionMW::setWorkspace(boost::shared_ptr<Workspace> ws,const std::string& slicing)
+  void IFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool)
   {
     try
     {
-      MatrixWorkspace_sptr mws = boost::dynamic_pointer_cast<MatrixWorkspace>(ws);
+      MatrixWorkspace_const_sptr mws = boost::dynamic_pointer_cast<const MatrixWorkspace>(ws);
       if (!mws)
       {
         throw std::invalid_argument("Workspace has a wrong type (not a MatrixWorkspace)");
