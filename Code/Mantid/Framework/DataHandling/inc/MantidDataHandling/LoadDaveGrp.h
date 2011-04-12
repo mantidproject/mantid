@@ -17,8 +17,8 @@ namespace DataHandling
      <UL>
      <LI> OutputWorkspace - The workspace name to produce. </LI>
      <LI> Filename - The filename for input </LI>
-     <LI> X-Axis Units - The units for the x-axis </LI>
-     <LI> Y-Axis Units - The units for the y-axis </LI>
+     <LI> XAxisUnits - The units for the x-axis </LI>
+     <LI> YAxisUnits - The units for the y-axis </LI>
      <LI> IsMicroEV - The original file is in micro-electron-volts </LI>
      </UL>
 

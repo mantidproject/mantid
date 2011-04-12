@@ -20,8 +20,8 @@ public:
         "DaveAscii.grp"));
     TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("OutputWorkspace",
         outputWSName));
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("X-Axis Units", "DeltaE"));
-    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("Y-Axis Units",
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("XAxisUnits", "DeltaE"));
+    TS_ASSERT_THROWS_NOTHING(loader.setPropertyValue("YAxisUnits",
         "MomentumTransfer"));
     TS_ASSERT_THROWS_NOTHING(loader.setProperty<bool>("IsMicroEV", true));
     loader.execute();
