@@ -804,7 +804,7 @@ class IAlgorithmProxy(ProxyObject):
             else:
                 ialg.setPropertyValue(name, _makeString(value).lstrip('? '))
         except RuntimeError, exc: # Confirms what kind of error just happened and rethrows
-            if str(exc).startswith('Unknown property search object'):
+            if str(exc).startswith('Unknown property search object'): # shouldn't happen
                 msg = 'Unknown property "%s" for %s version %d' % (name, ialg.name(), ialg.version())
                 raise AttributeError(msg)
             else:
@@ -848,6 +848,9 @@ class IAlgorithmProxy(ProxyObject):
         dialog box call. If the dialog is canceled do a sys.exit, otherwise 
         return the algorithm ready to execute.
         """
+        if not mtd.__gui__:
+            raise RuntimeError("Can only display properties dialog in gui mode")
+
         # generic setup
         enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
         del kwargs["Enable"] # no longer needed
