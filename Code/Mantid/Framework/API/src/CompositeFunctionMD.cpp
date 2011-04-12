@@ -15,6 +15,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <float.h>
 
 using namespace boost::lambda;
 
