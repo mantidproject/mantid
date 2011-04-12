@@ -1,15 +1,13 @@
 #ifndef MANTID_API_IEVENTWORKSPACE_H_
 #define MANTID_API_IEVENTWORKSPACE_H_
 
-#include "MatrixWorkspace.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/IEventList.h"
 
 namespace Mantid
 {
 namespace API
 {
-
-  /// What kind of event list is being stored
-  enum EventType {TOF, WEIGHTED, WEIGHTED_NOTIME};
 
 
   /** This class provides an interface to an EventWorkspace.
@@ -44,6 +42,8 @@ namespace API
     virtual const std::string id() const { return "IEventWorkspace"; }
     virtual std::size_t getNumberEvents() const = 0;
     virtual EventType getEventType() const = 0;
+    virtual IEventList * getEventListPtr(const int workspace_index) = 0;
+    virtual void clearMRU() const = 0;
   };
 
   ///shared pointer to the matrix workspace base class

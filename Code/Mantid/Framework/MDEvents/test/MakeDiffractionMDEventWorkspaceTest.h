@@ -96,6 +96,7 @@ public:
   
 
 
+  /** Test various combinations of OutputDimensions parameter */
   void test_OutputDimensions_Parameter()
   {
     EventWorkspace_sptr in_ws = createDiffractionEventWorkspace(10);
@@ -134,6 +135,8 @@ public:
     if (!ws) return;
     TS_ASSERT_EQUALS( ws->getDimension(0)->getName(), "H");
   }
+
+
 
 
   void do_test_MINITOPAZ(EventType type, size_t numTimesToAdd = 1)

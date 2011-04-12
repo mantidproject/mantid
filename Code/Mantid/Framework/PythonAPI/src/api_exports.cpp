@@ -12,6 +12,7 @@
 #include "MantidAPI/FileFinder.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/IEventWorkspace.h"
+#include "MantidAPI/IEventList.h"
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
 #include "MantidAPI/Sample.h"
@@ -20,10 +21,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
-
-//#include "MantidDataObjects/EventWorkspace.h"
-//#include "MantidDataObjects/EventList.h"
-//using namespace Mantid::DataObjects;
 
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
 
@@ -73,7 +70,6 @@ using namespace boost::python;
       .def("getConfigProperty", &FrameworkManagerProxy::getConfigProperty)
       .def("releaseFreeMemory", &FrameworkManagerProxy::releaseFreeMemory)
       .def("_getRawIEventWorkspacePointer", &FrameworkManagerProxy::retrieveIEventWorkspace)
-//      .def("_getRawEventWorkspacePointer", &FrameworkManagerProxy::retrieveEventWorkspace)
 //      .def("_getRawPeaksWorkspacePointer", &FrameworkManagerProxy::retrievePeaksWorkspace)
       .def("_getRawIMDWorkspacePointer", &FrameworkManagerProxy::retrieveIMDWorkspace)
       .def("_getRawIMDEventWorkspacePointer", &FrameworkManagerProxy::retrieveIMDEventWorkspace)
@@ -321,43 +317,42 @@ using namespace boost::python;
     // EventWorkspace class
     class_< IEventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("EventWorkspace", no_init)
         .def("getNumberEvents", &IEventWorkspace::getNumberEvents)
-//        .def("getEventList", (EventList&(EventWorkspace::*)(const int) ) &EventWorkspace::getEventList, return_internal_reference<>())
-        ;
+        .def("getEventList", (IEventList*(IEventWorkspace::*)(const int) ) &IEventWorkspace::getEventListPtr, return_internal_reference<>())
+        .def("clearMRU", &IEventWorkspace::clearMRU)
+           ;
   }
 
-//  void export_EventList()
-//  {
-//    register_ptr_to_python<EventList *>();
-//
-//    class_< EventList, boost::noncopyable >("EventList", no_init)
-//        .def("getEventType", &EventList::getEventType)
-//        .def("addDetectorID", &EventList::addDetectorID)
-//        .def("hasDetectorID", &EventList::hasDetectorID)
-//        .def("clear", &EventList::clear)
-//        .def("reserve", &EventList::reserve)
-//        .def("sort", &EventList::sort)
-//        .def("isSortedByTof", &EventList::isSortedByTof)
-//        .def("getSortType", &EventList::getSortType)
-//        .def("getNumberEvents", &EventList::getNumberEvents)
-//        .def("getMemorySize", &EventList::getMemorySize)
-//        .def("compressEvents", &EventList::compressEvents)
-//        .def("integrate", &EventList::integrate)
-//        .def("convertTof", &EventList::convertTof)
-//        .def("scaleTof", &EventList::scaleTof)
-//        .def("addTof", &EventList::addTof)
-//        .def("addPulsetime", &EventList::addPulsetime)
-//        .def("maskTof", &EventList::maskTof)
-//        .def("getTofs", &EventList::getTofs)
-//        .def("getTofMin", &EventList::getTofMin)
-//        .def("getTofMax", &EventList::getTofMax)
-//        .def("setTofs", &EventList::setTofs)
-//        .def("filterByPulseTime", &EventList::filterByPulseTime)
-//        .def("multiply", (void(EventList::*)(const double,const double)) &EventList::multiply)
-//        .def("divide", (void(EventList::*)(const double,const double)) &EventList::multiply)
-//        .def("switchTo", &EventList::switchTo)
-////        .def("add", (EventList&(EventList::*)(const EventList&))&EventList::operator+=)
-//        ;
-//  }
+  void export_EventList()
+  {
+    register_ptr_to_python<IEventList *>();
+
+    class_< IEventList, boost::noncopyable >("IEventList", no_init)
+        .def("getEventType", &IEventList::getEventType)
+        .def("switchTo", &IEventList::switchTo)
+        .def("addDetectorID", &IEventList::addDetectorID)
+        .def("hasDetectorID", &IEventList::hasDetectorID)
+        .def("clear", &IEventList::clear)
+//        .def("reserve", &IEventList::reserve)
+//        .def("sort", &IEventList::sort)
+//        .def("filterByPulseTime", &IEventList::filterByPulseTime)
+//        .def("getSortType", &IEventList::getSortType)
+        .def("isSortedByTof", &IEventList::isSortedByTof)
+        .def("getNumberEvents", &IEventList::getNumberEvents)
+        .def("getMemorySize", &IEventList::getMemorySize)
+        .def("integrate", &IEventList::integrate)
+        .def("convertTof", &IEventList::convertTof)
+        .def("scaleTof", &IEventList::scaleTof)
+        .def("addTof", &IEventList::addTof)
+        .def("addPulsetime", &IEventList::addPulsetime)
+        .def("maskTof", &IEventList::maskTof)
+        .def("getTofs", &IEventList::getTofs)
+        .def("getTofMin", &IEventList::getTofMin)
+        .def("getTofMax", &IEventList::getTofMax)
+        .def("setTofs", &IEventList::setTofs)
+        .def("multiply", (void(IEventList::*)(const double,const double)) &IEventList::multiply)
+        .def("divide", (void(IEventList::*)(const double,const double)) &IEventList::multiply)
+        ;
+  }
 
   void export_mdeventworkspace()
   {
@@ -590,7 +585,7 @@ using namespace boost::python;
     export_workspace_history();
     export_file_finder();
     export_IMDDimension();
-//    export_EventList();
+    export_EventList();
 //    export_PeaksWorkspace();
   }
   //@endcond

@@ -65,7 +65,9 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-	src/WorkspaceTracer.cpp )
+	src/WorkspaceTracer.cpp 
+	src/IEventList.cpp
+)
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/CompositeFunctionMW.cpp
@@ -113,6 +115,7 @@ set ( INC_FILES
 	inc/MantidAPI/IDataFileChecker.h
 	inc/MantidAPI/IDataItem.h
 	inc/MantidAPI/IEventWorkspace.h
+	inc/MantidAPI/IEventList.h
 	inc/MantidAPI/IFitFunction.h
 	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionMD.h
@@ -169,10 +172,10 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceValidators.h )
 
 set ( TEST_FILES 
-        test/AlgorithmHasPropertyTest.h
+    test/AlgorithmHasPropertyTest.h
 	test/AlgorithmHistoryTest.h
 	test/AlgorithmManagerTest.h
-        test/AlgorithmPropertyTest.h
+    test/AlgorithmPropertyTest.h
 	test/AlgorithmProxyTest.h
 	test/AlgorithmTest.h
 	test/AnalysisDataServiceTest.h
@@ -185,6 +188,7 @@ set ( TEST_FILES
 	test/FrameworkManagerTest.h
 	test/FunctionTest.h
 	test/IFunctionMDTest.h
+	test/IEventListTest.h
 	test/IMDWorkspaceTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h

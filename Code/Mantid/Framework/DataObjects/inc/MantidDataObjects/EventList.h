@@ -9,6 +9,7 @@
 #include <vector>
 #include "MantidAPI/MatrixWorkspace.h" // get MantidVec declaration
 #include "MantidAPI/IEventWorkspace.h" // get EventType declaration
+#include "MantidAPI/IEventList.h"
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/DateAndTime.h"
@@ -62,7 +63,7 @@ enum EventSortType {UNSORTED, TOF_SORT, PULSETIME_SORT};
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 */
 
-class DLLExport EventList
+class DLLExport EventList : public Mantid::API::IEventList
 {
 private:
 
@@ -221,7 +222,7 @@ public:
   template<class T>
   static void compressEventsHelper(const std::vector<T> & events, std::vector<WeightedEventNoTime> & out, double tolerance);
   void compressEvents(double tolerance, EventList * destination);
-
+  // get EventType declaration
   template<class T>
   static void histogramForWeightsHelper(const std::vector<T> & events, const MantidVec & X, MantidVec & Y, MantidVec & E);
   void generateHistogram(const MantidVec& X, MantidVec& Y, MantidVec& E, bool skipError = false) const;
