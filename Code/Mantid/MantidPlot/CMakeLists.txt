@@ -639,7 +639,7 @@ qt4_wrap_cpp ( MOCCED_FILES ${QTIPLOT_MOC_FILES} ${MANTID_MOC_FILES} )
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} )
 # The generated ui headers will go here:
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
-
+# Internal icon links
 qt4_add_resources ( RES_FILES ${PROJECT_SOURCE_DIR}/Images/images.qrc )
 
 ###########################################################################
@@ -695,7 +695,9 @@ set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 # modes. On VS2010 this requires the WIN32 argument and the additional 
 # linker arguments as we don't use WinMain as an entry point.
 if( WIN32 )
-   set( EXE_FLAG WIN32 )
+   set ( EXE_FLAG WIN32 )
+   # Also include the icon's rc file so that it is embedded in the exe
+   set ( MANTID_SRCS "${MANTID_SRCS} icons/MantidPlotDesktop.rc" )
 endif( WIN32 )
 
 add_executable ( MantidPlot ${EXE_FLAG} ${SRC_FILES} ${INC_FILES} 

@@ -309,7 +309,7 @@ CONFIG(debug, debug|release) {
 
 ###################### ICONS ################################################
 
-win32:RC_FILE = icons/qtiplot.rc
+win32:RC_FILE = icons/MantidPlotDesktop.rc
 mac:RC_FILE   = icons/qtiplot.icns
 
 ###################### TRANSLATIONS #########################################
