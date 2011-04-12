@@ -462,6 +462,8 @@ set ( SIP_HDRS src/MdiSubWindow.h
                src/Mantid/InstrumentWidget/InstrumentWindow.h
 )
 
+set( SRC_UNITY_IGNORE_FILES )
+
 add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}

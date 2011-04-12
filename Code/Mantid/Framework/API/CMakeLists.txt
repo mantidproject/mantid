@@ -66,6 +66,16 @@ set ( SRC_FILES
 	src/WorkspaceProperty.cpp
 	src/WorkspaceTracer.cpp )
 
+set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
+        src/CompositeFunctionMW.cpp
+        src/IDataFileChecker.cpp
+        src/WorkspaceTracer.cpp
+        src/MatrixWorkspace.cpp
+        src/IEventWorkspace.cpp
+        src/IFunctionMD.cpp
+        src/IPeakFunction.cpp
+        )
+
 set ( INC_FILES 
 	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/Algorithm.h
@@ -194,6 +204,11 @@ set ( GMOCK_TEST_FILES
 	test/ImplicitFunctionFactoryTest.h
 	test/ImplicitFunctionParameterParserFactoryTest.h
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(API SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Have to link to winsock library on Windows
 if ( WIN32 )

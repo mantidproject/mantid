@@ -71,6 +71,9 @@ set ( SRC_FILES
 		src/SetScalingPSD.cpp
 		src/UpdateInstrumentFromRaw.cpp )
 
+set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
+        src/LoadDAE/isisds_command.cpp)
+
 set ( INC_FILES 
 		inc/MantidDataHandling/CompressEvents.h
 		inc/MantidDataHandling/CreateSampleShape.h
@@ -181,6 +184,11 @@ set ( TEST_FILES
 		 test/SetScalingPSDTest.h
 		 test/UpdateInstrumentFromRawTest.h
 		 test/XMLlogfileTest.h )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( DataHandling ${SRC_FILES} ${INC_FILES})

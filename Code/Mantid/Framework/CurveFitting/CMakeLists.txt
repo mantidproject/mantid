@@ -34,6 +34,8 @@ set ( SRC_FILES src/BackgroundFunction.cpp
 		src/SplineBackground.cpp
 		src/UserFunction1D.cpp
 		src/UserFunction.cpp )
+		
+set ( SRC_UNITY_IGNORE_FILES src/Fit1D.cpp src/GSLFunctions.cpp )
 
 set ( INC_FILES inc/MantidCurveFitting/BackgroundFunction.h
                 inc/MantidCurveFitting/BackToBackExponential.h
@@ -101,6 +103,11 @@ set ( TEST_FILES test/BackToBackExponentialTest.h
 		 test/UserFunction1DTest.h
 		 test/UserFunctionTest.h
  )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(CurveFitting SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( CurveFitting ${SRC_FILES} ${INC_FILES})

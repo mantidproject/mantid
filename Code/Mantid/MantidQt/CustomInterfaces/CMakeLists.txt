@@ -31,6 +31,8 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
 				inc/MantidQtCustomInterfaces/SANSDiagnostics.h
 )
 
+set ( SRC_UNITY_IGNORE_FILES )
+
 set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/ConvertToEnergy.h
                 inc/MantidQtCustomInterfaces/Homer.h
@@ -62,6 +64,11 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(CustomInterfaces SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 add_library ( CustomInterfaces ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 # Set the name of the generated library

@@ -9,6 +9,8 @@ set ( SRC_FILES src/CreateSampleShapeDialog.cpp
                 src/SampleShapeHelpers.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES )
+
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtCustomDialogs/CreateSampleShapeDialog.h
                 inc/MantidQtCustomDialogs/LoadDialog.h
@@ -47,6 +49,12 @@ qt4_wrap_cpp ( MOCCED_FILES ${MOC_FILES} )
 
 qt4_wrap_ui ( UI_HDRS ${UI_FILES} ) 
 include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(CustomDialogs SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
+
 
 add_library ( CustomDialogs ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )
 # Set the name of the generated library

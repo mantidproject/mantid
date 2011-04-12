@@ -75,6 +75,10 @@ set ( SRC_FILES
 	src/Surfaces/Torus.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
+        src/Instrument/ObjCompAssembly.cpp 
+        )
+        
 set ( INC_FILES 
 	inc/MantidGeometry/DllExport.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -205,10 +209,15 @@ set ( TEST_FILES
 	test/TorusTest.h
 	test/TrackTest.h
 	test/TripleTest.h
-  test/UnitCellTest.h
+        test/UnitCellTest.h
 	test/V3DTest.h 
 	test/MDHistoDimensionTest.h
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Find 'local' dependencies
 find_package ( OpenGL REQUIRED )

@@ -78,6 +78,12 @@ else( USE_PARAVIEW )
 endif( USE_PARAVIEW )
 include_directories (inc)
 
+set ( SRC_UNITY_IGNORE_FILES )
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
+
 # For Windows:
 add_definitions ( -DIN_MANTID_VATESAPI )
 # Add the target for this directory

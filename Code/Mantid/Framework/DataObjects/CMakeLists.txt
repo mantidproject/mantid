@@ -14,6 +14,12 @@ set ( SRC_FILES src/AbsManagedWorkspace2D.cpp
                 src/Workspace2D.cpp
                 src/WorkspaceSingleValue.cpp )
 
+set ( SRC_UNITY_IGNORE_FILES src/Workspace1D.cpp
+                src/Workspace2D.cpp
+                src/WorkspaceSingleValue.cpp
+                src/EventWorkspace.cpp
+)
+
 set ( INC_FILES inc/MantidDataObjects/AbsManagedWorkspace2D.h
                 inc/MantidDataObjects/CompressedWorkspace2D.h
                 inc/MantidDataObjects/Events.h
@@ -50,6 +56,11 @@ set ( TEST_FILES test/CompressedWorkspace2DTest.h
                  test/WorkspaceIteratorTest.h
                  test/WorkspaceSingleValueTest.h
                  test/WorkspaceValidatorsTest.h )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( DataObjects ${SRC_FILES} ${INC_FILES})

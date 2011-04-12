@@ -42,6 +42,10 @@ src/WidthParameter.cpp
 src/CreateMDFitWorkspace.cpp 
 )
 
+set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
+src/DynamicCPRRebinning.cpp
+)
+
 set ( INC_FILES inc/MantidMDAlgorithms/BoxFunctionBuilder.h
 inc/MantidMDAlgorithms/BoxImplicitFunction.h
 inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
@@ -131,6 +135,11 @@ test/WidthParameterParserTest.h
 test/UpParameterParserTest.h
 test/UpParameterTest.h
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(MDAlgorithms SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( MDAlgorithms ${SRC_FILES} ${INC_FILES})

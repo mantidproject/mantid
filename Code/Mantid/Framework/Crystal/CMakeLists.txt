@@ -4,6 +4,7 @@ set ( SRC_FILES
 	src/SavePeaksFile.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES 
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/PeakIntegration.h
@@ -14,6 +15,11 @@ set ( TEST_FILES
 	test/LoadPeaksFileTest.h
 	test/SavePeaksFileTest.h
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Crystal SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( Crystal ${SRC_FILES} ${INC_FILES})

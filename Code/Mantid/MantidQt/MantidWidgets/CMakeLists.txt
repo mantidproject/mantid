@@ -15,6 +15,10 @@ set ( SRC_FILES src/DiagResults.cpp
                 src/WorkspaceSelector.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES src/ICatAdvancedSearch.cpp
+      src/ICatSearch.cpp
+)
+
 # Include files aren't required, but this makes them appear in Visual Studio
 set ( INC_FILES inc/MantidQtMantidWidgets/DiagResults.h
                 inc/MantidQtMantidWidgets/ICatAdvancedSearch.h

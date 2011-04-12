@@ -15,6 +15,8 @@ set ( SRC_FILES src/DownloadDataFile.cpp
 		src/Search.cpp
 		src/SearchParam.cpp )
 
+set ( SRC_UNITY_IGNORE_FILES )
+
 set ( INC_FILES  inc/MantidICat/DownloadDataFile.h
 				 inc/MantidICat/ErrorHandling.h
 		inc/MantidICat/GetDataFiles.h
@@ -43,6 +45,11 @@ set ( TEST_FILES test/DownloadDataFileTest.h
 		 test/LoginTest.h
 		 test/MyDataSearchTest.h
 		 test/SearchTest.h )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(ICat SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add ssl dependency
 find_package ( OpenSSL REQUIRED )

@@ -27,6 +27,12 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR}/../MantidWidgets )
 set( LIB_NAME MantidWidgetPlugins )
 add_definitions( -DLIBRARY_NAME=${LIB_NAME} )
 
+set ( SRC_UNITY_IGNORE_FILES )
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(DesignerPlugins SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
+
 add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )
 
 # Change the destination of the target as Qt expects this in a directory called "designer"

@@ -16,6 +16,8 @@ set ( SRC_FILES src/kernel_exports.cpp
                 src/WorkspaceProxies.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES )
+
 set ( INC_FILES inc/MantidPythonAPI/kernel_exports.h
                 inc/MantidPythonAPI/api_exports.h
                 inc/MantidPythonAPI/FrameworkManagerProxy.h
@@ -46,6 +48,11 @@ set ( TEST_PY_FILES test/ImportTest.py
 		    test/WorkspaceTests.py
 		    test/SettingsTest.py
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(PythonAPI SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 ###########################################################################
 # Add local dependencies

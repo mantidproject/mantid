@@ -30,6 +30,9 @@ set ( SRC_FILES src/LoadEventNexus.cpp
 		src/LoadRaw/vms_convert.cpp
 		)
 
+
+set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
+
 set ( INC_FILES inc/MantidNexus/LoadEventNexus.h
         inc/MantidNexus/LoadInstrumentFromNexus.h
 		inc/MantidNexus/LoadISISNexus2.h
@@ -71,6 +74,11 @@ set ( TEST_FILES test/LoadEventNexusTest.h
 		 test/SaveNeXusTest.h
 		 test/SaveNXSPETest.h
 		 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Nexus SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the dependency on the nexus library
 find_package ( Nexus REQUIRED )

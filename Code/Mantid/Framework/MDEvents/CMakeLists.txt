@@ -13,6 +13,12 @@ set (SRC_FILES
 	src/OneStepMDEW.cpp
 )
 
+set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
+    src/MDBox.cpp
+    src/MDEventWorkspace.cpp
+    src/MDGridBox.cpp
+)
+
 # Header files
 set (INC_FILES
 	inc/MantidMDEvents/MDEvent.h
@@ -51,6 +57,11 @@ set (TEST_FILES
 set ( GMOCK_TEST_FILES
 	test/BinToMDHistoWorkspaceTest.h
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(MDEvents SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( MDEvents ${SRC_FILES} ${INC_FILES})

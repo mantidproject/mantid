@@ -17,6 +17,8 @@ src/MDDPoints_MemManager.cpp
 #src/Events/MDBox.cpp               
 )
 
+set ( SRC_UNITY_IGNORE_FILES )
+
 # Header files
 set (INC_FILES inc/MDDataObjects/IMD_FileFormat.h
 inc/MDDataObjects/MDDataPoint.h
@@ -57,6 +59,13 @@ test/MDWorkspaceTest.h
 #test/MDPointTest.h  
 #test/MDBoxTest.h  
 )
+
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(MDDataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
+
 
 # Add the target for this directory
 add_library ( MDDataObjects ${SRC_FILES} ${INC_FILES})

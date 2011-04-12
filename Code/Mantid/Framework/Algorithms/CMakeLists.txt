@@ -420,6 +420,18 @@ set ( TEST_FILES
 	test/DampSqTest.h
 	)
 
+set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
+    src/FFTSmooth.cpp 
+    src/FFTSmooth2.cpp
+    src/FilterBadPulses.cpp
+    src/SetUncertaintiesToZero.cpp
+    )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
+
 # Add the target for this directory
 add_library ( Algorithms ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library

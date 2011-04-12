@@ -79,6 +79,12 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/ANN/pr_queue.h
 	src/ANN/pr_queue_k.h )
 
+set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
+        src/NeutronAtom.cpp
+        src/FileValidator.cpp
+        src/DirectoryValidator.cpp 
+        )
+
 set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
@@ -215,6 +221,11 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/UtilsTest.h
 	test/UserStringParserTest.h 
 )
+
+if(UNITY_BUILD)
+  include(UnityBuild)
+  enable_unity_build(Kernel SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+endif(UNITY_BUILD)
 
 # Add the target for this directory
 add_library ( Kernel ${SRC_FILES} ${INC_FILES} )
