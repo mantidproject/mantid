@@ -1,9 +1,10 @@
 #include "MantidGeometry/MDGeometry/MDBasisDimension.h"
+#include <cfloat>
 
 namespace Mantid
 {
-  namespace Geometry
-  {
+namespace Geometry
+{
 
 MDBasisDimension::MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const V3D &inDirection,const std::string &UnitID) :
 m_id(id), m_isReciprocal(isReciprocal), m_columnNumber(columnNumber),
