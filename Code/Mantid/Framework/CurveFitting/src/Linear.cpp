@@ -56,7 +56,7 @@ void Linear::init()
   declareProperty("FitSlope",0.0,
     "The slope of the fitted line. c1 in the equation below",
     Direction::Output);
-  declareProperty("Chi^2",0.0,
+  declareProperty("Chi2",0.0,
     "The goodness of the fit", Direction::Output);
 
   // Disable default gsl error handler (which is to call abort!)
@@ -175,7 +175,7 @@ void Linear::exec()
   setProperty("FitStatus",fitStatus);
   setProperty("FitIntercept",*c0);
   setProperty("FitSlope",*c1);
-  setProperty("Chi^2",*chisq);
+  setProperty("Chi2",*chisq);
   
   // Create and fill a workspace2D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin
   const int YSize = Y.size();

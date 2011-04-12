@@ -73,7 +73,7 @@ public:
     TS_ASSERT_DELTA( intercept, c0, 0.1*c0 )
     const double slope = lin.getProperty("FitSlope");
     TS_ASSERT_DELTA( slope, c1, 0.1*c1 )
-    const double chisq = lin.getProperty("Chi^2");
+    const double chisq = lin.getProperty("Chi2");
     TS_ASSERT( chisq )
     
     MatrixWorkspace_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("Line"));
