@@ -697,11 +697,12 @@ set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 if( WIN32 )
    set ( EXE_FLAG WIN32 )
    # Also include the icon's rc file so that it is embedded in the exe
-   set ( MANTID_SRCS "${MANTID_SRCS} icons/MantidPlotDesktop.rc" )
+   set ( MANTID_RC_FILE icons/MantidPlotDesktop.rc )
 endif( WIN32 )
 
 add_executable ( MantidPlot ${EXE_FLAG} ${SRC_FILES} ${INC_FILES} 
                             ${MOCCED_FILES} ${UI_HDRS} ${RES_FILES} 
+							${MANTID_RC_FILE}
 )
 # Clean up
 set ( EXE_FLAG ) 

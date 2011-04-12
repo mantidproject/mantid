@@ -171,8 +171,20 @@ int main( int argc, char ** argv )
       QSplashScreen splash(pixmap);
       splash.show();
       app.processEvents();
-      splash.showMessage("Release: " + QString(MANTIDPLOT_RELEASE_DATE),Qt::AlignLeft | Qt::AlignBottom);
+      QString releaseInfo = QString(MANTIDPLOT_RELEASE_DATE).trimmed();
+      QString releaseDateTime, svnInfo;
+      if( releaseInfo.startsWith('(') )
+      {
+        releaseDateTime = "Unknown";
+        svnInfo = "";
+      }
+      else
+      {
+        releaseDateTime = releaseInfo.section(' ', 0, 1).trimmed();
+        svnInfo = releaseInfo.section(' ', 7).trimmed(); 
+      }
 
+      splash.showMessage("Release: " + releaseDateTime + " " + svnInfo, Qt::AlignLeft | Qt::AlignBottom);
       bool factorySettings = false;
       if (args.contains("-d") || args.contains("--default-settings"))
         factorySettings = true;
