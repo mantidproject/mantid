@@ -86,9 +86,11 @@ public:
 
   void testMakeFileNameForISIS()
   {
+    // Set the facility
+    ConfigService::Instance().setFacility("ISIS");
+
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "HRPD");
-    ConfigService::Instance().setString("default.facility","ISIS");
 
     std::string fName = FileFinder::Instance().makeFileName("123");
     TS_ASSERT_EQUALS(fName, "HRP00123");
@@ -112,7 +114,7 @@ public:
   void testMakeFileNameForSNS()
   {
     // Set the facility
-    ConfigService::Instance().setString("default.facility", "SNS");
+    ConfigService::Instance().setFacility("SNS");
 
     // Set the default instrument
     ConfigService::Instance().setString("default.instrument", "CNCS");
