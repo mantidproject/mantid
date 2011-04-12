@@ -6,7 +6,7 @@ namespace Mantid
 {
 namespace Geometry
 {
-
+  // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
   UnitCell::UnitCell(): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
   {
 	  da[0]=da[1]=da[2]=1.;
@@ -26,11 +26,11 @@ namespace Geometry
 	  recalculate();
   }
 
-  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
+  UnitCell::UnitCell(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)
   {
 	  da[0]=_a;da[1]=_b;da[2]=_c;
 	  // Angle transformed in radians
-    if(Unit==latDegrees)
+    if(angleunit==latDegrees)
       {
 	      da[3]=deg2rad*_alpha;
 	      da[4]=deg2rad*_beta;
@@ -49,10 +49,132 @@ namespace Geometry
   {
   }
 
-  void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int Unit)
+
+  double UnitCell::a1() const
+  {
+    return da[0];
+  }
+
+  double UnitCell::a2() const
+  {
+    return da[1];
+  }
+
+  double UnitCell::a3() const
+  {
+    return da[2];
+  }
+
+  double UnitCell::alpha1() const
+  {
+    return da[3];
+  }
+
+  double UnitCell::alpha2() const
+  {
+    return da[4];
+  }
+
+  double UnitCell::alpha3() const
+  {
+    return da[5];
+  }
+
+  double UnitCell::a() const
+  {
+    return da[0];
+  }
+
+  double UnitCell::b() const
+  {
+    return da[1];
+  }
+
+  double UnitCell::c() const
+  {
+    return da[2];
+  }
+
+  double UnitCell::alpha() const
+  {
+    return da[3]*rad2deg;
+  }
+
+  double UnitCell::beta() const
+  {
+    return da[4]*rad2deg;
+  }
+
+  double UnitCell::gamma() const
+  {
+    return da[5]*rad2deg;
+  }
+
+  double UnitCell::b1() const
+  {
+    return ra[0];
+  }
+
+  double UnitCell::b2() const
+  {
+    return ra[1];
+  }
+
+  double UnitCell::b3() const
+  {
+    return ra[2];
+  }
+
+  double UnitCell::beta1() const
+  {
+    return ra[3];
+  }
+
+  double UnitCell::beta2() const
+  {
+    return ra[4];
+  }
+
+  double UnitCell::beta3() const
+  {
+    return ra[5];
+  }
+
+  double UnitCell::astar() const
+  {
+    return ra[0];
+  }
+
+  double UnitCell::bstar() const
+  {
+    return ra[1];
+  }
+
+  double UnitCell::cstar() const
+  {
+    return ra[2];
+  }
+
+  double UnitCell::alphastar() const
+  {
+    return ra[3]*rad2deg;
+  }
+
+  double UnitCell::betastar() const
+  {
+    return ra[4]*rad2deg;
+  }
+
+  double UnitCell::gammastar() const
+  {
+    return ra[5]*rad2deg;
+  }
+
+
+  void UnitCell::set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit)
   {
     da[0]=_a; da[1]=_b; da[2]=_c;
-    if (Unit==latDegrees)
+    if (angleunit==latDegrees)
       {
 	      da[3]=deg2rad*_alpha;
 	      da[4]=deg2rad*_beta;
@@ -85,27 +207,27 @@ namespace Geometry
     recalculate();
   }
 
-  void UnitCell::setalpha(double _alpha,const int Unit)
+  void UnitCell::setalpha(double _alpha,const int angleunit)
   {
-    if (Unit==latDegrees) 
+    if (angleunit==latDegrees)
       da[3]=deg2rad*_alpha;
     else 
       da[3]=_alpha;
     recalculate();
   }
   
-  void UnitCell::setbeta(double _beta,const int Unit)
+  void UnitCell::setbeta(double _beta,const int angleunit)
   {
-    if (Unit==latDegrees) 
+    if (angleunit==latDegrees)
       da[4]=deg2rad*_beta;
     else 
       da[4]=_beta;
     recalculate();
   }
 
-  void UnitCell::setgamma(double _gamma,const int Unit)
+  void UnitCell::setgamma(double _gamma,const int angleunit)
   {
-    if (Unit==latDegrees) 
+    if (angleunit==latDegrees)
       da[5]=deg2rad*_gamma;
     else 
       da[5]=_gamma;
@@ -124,14 +246,14 @@ namespace Geometry
 	  return Q.norm();
   }
 
-	double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int Unit) const
+	double UnitCell::recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit) const
   {
 	  V3D Q1(h1,k1,l1),Q2(h2,k2,l2);
 	  double E,ang;
     Q1=Gstar*Q1;
     E=Q1.scalar_prod(Q2);
 	  ang=acos(E/dstar(h1,k1,l1)/dstar(h2,k2,l2));
-    if (Unit==latDegrees) 
+    if (angleunit==latDegrees)
       return rad2deg*ang;
     else 
       return ang;    
@@ -150,7 +272,21 @@ namespace Geometry
   	return sqrt(recvolume);
   }
 
-      
+  const Geometry::MantidMat& UnitCell::getG() const
+  {
+    return G;
+  }
+
+  const Geometry::MantidMat& UnitCell::getGstar() const
+  {
+    return Gstar;
+  }
+
+  const Geometry::MantidMat& UnitCell::getB() const
+  {
+    return B;
+  }
+
   void UnitCell::recalculate()
   {
 	  calculateG();
