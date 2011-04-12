@@ -64,55 +64,55 @@ namespace Geometry
   class DLLExport MDDimension : public IMDDimension
   {
   public:
-   /// function return the unique dimension ID, identifying the current dimension among others
-    virtual std::string getDimensionId() const;
-
-    virtual bool getIsIntegrated() const;
+   ///virtual function return the unique dimension ID, identifying the current dimension among others
+     std::string getDimensionId() const;
+	///virtual 
+     bool getIsIntegrated() const;
 
     virtual ~MDDimension();
-    /// function returns the name of the axis in this direction
-    virtual std::string getName()const{return AxisName;}
-    /// Return units string
-    virtual std::string getUnits()const{return "None";}
-    /// function return the unique dimension ID, identifying the current dimension among others
-    virtual std::string getDimensionTag(void)const{return dimTag;}
-    /// get maximal value along the dimension
-    virtual double       getMaximum(void)const{return rMax;}
-    /// get minimal value along the dimension
-    virtual double       getMinimum(void)const{return rMin;}
-    /// range of data along this axis
-    virtual double       getRange(void)const{return (rMax-rMin);}
+    ///virtual  function returns the name of the axis in this direction
+    std::string getName()const{return AxisName;}
+    ///virtual  Return units string
+    std::string getUnits()const{return "None";}
+    ///virtual  function return the unique dimension ID, identifying the current dimension among others
+    std::string getDimensionTag(void)const{return dimTag;}
+    ///virtual  get maximal value along the dimension
+    double       getMaximum(void)const{return rMax;}
+    ///virtual  get minimal value along the dimension
+    double       getMinimum(void)const{return rMin;}
+    ///virtual  range of data along this axis
+    double       getRange(void)const{return (rMax-rMin);}
     /// scale of the data along this axis
     /// TO DO: what is this scale and what constraint we want to apply on it? 
     //virtual double getScale(void)const{return latticeParam;}
-    /** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
+    /**virtual  return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points,
      *   coinsiding with min and max values rMin and rMax; */
-    virtual bool        getIntegrated(void)const{return isIntegrated;}
-    /** function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
+    bool        getIntegrated(void)const{return isIntegrated;}
+    /** virtual: function returns a direction of the dimension in the system of coordinates described by the MDBasis; 
        *  Orthogonal dimensions always have direction 1 (e.g. V3D={1,0,0})according to their direction in the coordinate 
 	   * system. Norm of the vector, returned by this function has to be 1    */
-	virtual V3D getDirection(void)const{return direction;}
-	  /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
+	V3D getDirection(void)const{return direction;}
+	  /** virtual: Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
 	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would 
 	   have integer values; */
-	virtual V3D getDirectionCryst(void)const{return direction;}
+	 V3D getDirectionCryst(void)const{return direction;}
 
 	/// get Axis data; 
     std::vector<double> const &  getAxis(void)const{return Axis;}
-    /// the function returns the center points of the axis bins; There are nBins of such points 
+    ///virtual the function returns the center points of the axis bins; There are nBins of such points 
     /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
-    virtual void getAxisPoints(std::vector<double>  &)const;
-    /// function returns number of the bins this dimension has
-    virtual size_t getNBins(void)const{return nBins;}
-    /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
-    virtual size_t       getStride(void)const{return nStride;}
+     void getAxisPoints(std::vector<double>  &)const;
+    ///virtual function returns number of the bins this dimension has
+     size_t getNBins(void)const{return nBins;}
+    ///virtual function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
+     size_t       getStride(void)const{return nStride;}
   
-    //Get coordinate for index; Throws through vector if ind out of range 
-    virtual double getX(size_t ind)const{return Axis.at(ind);}
-    /// it is not reciprocal dimension -> convenience function
-    virtual bool isReciprocal(void)const{return false;}
-    /// get data shif in this direction (original data were shifted when rebinnded)
-    virtual double getDataShift()const{return data_shift;}
+    ///virtual Get coordinate for index; Throws through vector if ind out of range 
+    double getX(size_t ind)const{return Axis.at(ind);}
+    ///virtual it is not reciprocal dimension -> convenience function
+     bool isReciprocal(void)const{return false;}
+    ///virtual  get data shif in this direction (original data were shifted when rebinnded)
+    double getDataShift()const{return data_shift;}
 
     MDDimension(const std::string &ID);
 

@@ -44,8 +44,8 @@ class DLLExport MDDimensionRes :   public MDDimension
 public:
     virtual ~MDDimensionRes(void);
 
-  /// it is reciprocal dimension -> convenience function
-    virtual bool isReciprocal(void)const{return true;}
+  ///virtual  it is reciprocal dimension -> convenience function
+    bool isReciprocal(void)const{return true;}
 
 
     /// indicates which reciprocal primitive vector this reciprocal dimension is associated with, either q1, q2 or q3
@@ -54,10 +54,10 @@ public:
       return this->nRecDim;
     }
 
-    /// Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
-    virtual std::string toXMLString() const;
-    
-	virtual V3D getDirectionCryst(void)const;
+    ///virtual Implementation of toXMLString providing additional fields over parent MDDimension relating to reciprocal nature.
+     std::string toXMLString() const;
+    /// virtual 
+	V3D getDirectionCryst(void)const;
 
     MDDimensionRes(const std::string &ID,const rec_dim nDim);
 protected:
@@ -86,31 +86,31 @@ public:
 // get Axis data; 
 //    std::vector<double> const &  getAxis(void)const{std::vector<double> tmp(2,0); tmp[1]=1; return tmp;}
 
-/// get maximal value along the dimension
-    virtual double       getMaximum(void)const{return 1;}
-/// get minimal value along the dimension
-    virtual double       getMinimum(void)const{return 0;}
-/// range of data along this axis
-    virtual double       getRange(void)const{return (1);}
-/// scale of the data along this axis 
+/// virtual get maximal value along the dimension
+    double       getMaximum(void)const{return 1;}
+/// virtual get minimal value along the dimension
+     double       getMinimum(void)const{return 0;}
+/// virtual range of data along this axis
+    double       getRange(void)const{return (1);}
+/// virtual  scale of the data along this axis 
     /// TO DO: what is this scale and what constraint we want to apply on it? 
-    virtual double getScale(void)const{return 1;}
+    double getScale(void)const{return 1;}
 /** return the state of this dimension i.e if it is integrated. If it is, it has one bin only, the axis consis of two points, 
  *   coinsiding with min and max values rMin and rMax; */
     bool        getIntegrated(void)const{return true;}
 
-    /// the function returns the center points of the axis bins; There are nBins of such points 
-    /// (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax)
-    virtual void getAxisPoints(std::vector<double>  &p)const{std::vector<double> tmp(1,0.5);p=tmp;}
-    /// function returns number of the bins this dimension has
-    virtual size_t getNBins(void)const{return 1;}
-    /// function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
-    virtual size_t       getStride(void)const{return 0;}
+    /** virtual  the function returns the center points of the axis bins; There are nBins of such points 
+     *(when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
+    void getAxisPoints(std::vector<double>  &p)const{std::vector<double> tmp(1,0.5);p=tmp;}
+    ///virtual  function returns number of the bins this dimension has
+    size_t getNBins(void)const{return 1;}
+    ///virtual  function returns the dimension stride, e.g. the step of change for 1D index of a dimension in multidimensional array, if an index of this dimension changes by one
+    size_t       getStride(void)const{return 0;}
   
-    //Get coordinate for index; Throws  if ind is out of range 
-    virtual double getX(size_t ind)const;
-    /// it is not reciprocal dimension -> convenience function
-    virtual bool isReciprocal(void)const{return true;}
+    //virtual Get coordinate for index; Throws  if ind is out of range 
+    double getX(size_t ind)const;
+    ///virtual  it is not reciprocal dimension -> convenience function
+    bool isReciprocal(void)const{return true;}
     // no mutator allowed
 private:
 
