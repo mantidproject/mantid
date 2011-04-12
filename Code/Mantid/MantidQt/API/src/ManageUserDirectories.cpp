@@ -107,11 +107,11 @@ void ManageUserDirectories::saveProperties()
 
 QListWidget* ManageUserDirectories::listWidget()
 {
-  if ( m_uiForm.tabWidget->currentPage() == m_uiForm.tabDataSearch )
+  if ( m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch )
   {
     return m_uiForm.lwDataSearchDirs;
   }
-  else if ( m_uiForm.tabWidget->currentPage() == m_uiForm.tabPythonDirectories )
+  else if ( m_uiForm.tabWidget->currentWidget() == m_uiForm.tabPythonDirectories )
   {
     return m_uiForm.lwUserSearchDirs;
   }
@@ -140,11 +140,11 @@ void ManageUserDirectories::addDirectory()
 {
   QLineEdit* input;
   
-  if ( m_uiForm.tabWidget->currentPage() == m_uiForm.tabDataSearch )
+  if ( m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch )
   {
     input = m_uiForm.leDirectoryPath;
   }
-  else if ( m_uiForm.tabWidget->currentPage() == m_uiForm.tabPythonDirectories )
+  else if ( m_uiForm.tabWidget->currentWidget() == m_uiForm.tabPythonDirectories )
   {
     input = m_uiForm.leDirectoryPathPython;
   }
