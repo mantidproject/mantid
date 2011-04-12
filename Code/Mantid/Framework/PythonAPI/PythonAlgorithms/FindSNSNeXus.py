@@ -69,7 +69,7 @@ class FindSNSNeXus(PythonAlgorithm):
         instrument = self.getProperty("Instrument").upper()
         runnumber = self.getProperty("RunNumber")
         extension = self.getProperty("Extension")
-        usews = self.getProperty("Use WebService")
+        usews = self.getProperty("UseWebService")
 
         self.nxsfile = instrument + "_" + str(runnumber) + ".nxs"
         self.realfile = instrument + "_" + str(runnumber) + extension
