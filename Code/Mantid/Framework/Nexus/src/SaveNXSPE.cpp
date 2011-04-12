@@ -202,6 +202,8 @@ namespace Mantid
       std::vector<double> polar;
       std::vector<double> azimuthal_width;
       std::vector<double> polar_width;
+      std::vector<double> secondary_flightpath;
+
       double delta_polar = 0.0;
       double delta_azimuthal = 0.0;
       double distance = 0.0;
@@ -244,6 +246,8 @@ namespace Mantid
 
               // Get Sample->Detector distance
               distance = det->getDistance(*sample);
+              // ... and store it
+              secondary_flightpath.push_back(distance);
 
               // Now let's work out the detector widths
               // TODO: This is the historically wrong method...update it!
@@ -319,6 +323,9 @@ namespace Mantid
       // Now the widths...
       nxFile.writeData("polar_width", polar_width);
       nxFile.writeData("azimuthal_width", azimuthal_width);
+
+      // Secondary flight path
+      nxFile.writeData("distance", secondary_flightpath);
 
       nxFile.closeGroup(); // NXdata
 
