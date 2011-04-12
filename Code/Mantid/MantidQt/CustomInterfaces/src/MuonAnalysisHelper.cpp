@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidKernel/ConfigService.h"
 
 #include "MantidQtAPI/UserSubWindow.h"
 
@@ -18,6 +19,7 @@ namespace CustomInterfaces
 namespace Muon
 {
   using namespace MantidQt::API;
+  using namespace Mantid::Kernel;
 
 
 /**
@@ -35,6 +37,35 @@ void createMicroSecondsLabels(Ui::MuonAnalysis& m_uiForm)
 }
 
 
+/**
+ * Auto save various GUI selected items
+ */
+void autoSave(Ui::MuonAnalysis& m_uiForm)
+{
+
+  QSettings prevValues;
+  prevValues.beginGroup("CustomInterfaces/MuonAnalysis/SaveOutput");
+
+  // Get value for "dir". If the setting doesn't exist then use
+  // the the path in "defaultsave.directory"
+  QString prevPath = prevValues.value("dir", QString::fromStdString(
+    ConfigService::Instance().getString("defaultsave.directory"))).toString();
+
+  /*QString filter;
+  filter.append("Files (*.XML *.xml)");
+  filter += ";;AllFiles (*.*)";
+  QString groupingFile = API::FileDialogHandler::getSaveFileName(this,
+                                   "Save Grouping file as", prevPath, filter);
+
+  if( ! groupingFile.isEmpty() )
+  {
+    saveGroupingTabletoXML(m_uiForm, groupingFile.toStdString());
+    
+    QString directory = QFileInfo(groupingFile).path();
+    prevValues.setValue("dir", directory);
+  }
+*/
+}
 
 }
 }

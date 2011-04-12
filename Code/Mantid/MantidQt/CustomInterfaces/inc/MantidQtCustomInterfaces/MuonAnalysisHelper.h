@@ -27,6 +27,9 @@ namespace Muon
   /// Add Greek letter to label from code 
   void createMicroSecondsLabels(Ui::MuonAnalysis& m_uiForm);
 
+  // auto save various gui values
+  void autoSave(Ui::MuonAnalysis& m_uiForm);
+
 }
 }
 }

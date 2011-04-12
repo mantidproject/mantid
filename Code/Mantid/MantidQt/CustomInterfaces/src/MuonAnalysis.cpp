@@ -72,7 +72,7 @@ Logger& MuonAnalysis::g_log = Logger::get("MuonAnalysis");
 ///Constructor
 MuonAnalysis::MuonAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_last_dir(), m_workspace_name("MuonAnalysis"), m_groupTableRowInFocus(0), m_pairTableRowInFocus(0),
-  m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml")
+  m_groupNames(), m_groupingTempFilename("tempMuonAnalysisGrouping.xml"), m_settingsGroup("CustomInterfaces/MuonAnalysis/")
 {
 }
 
@@ -84,7 +84,8 @@ void MuonAnalysis::initLayout()
   // Further set initial look
   startUpLook();
   createMicroSecondsLabels(m_uiForm);
-
+  m_uiForm.mwRunFiles->readSettings(m_settingsGroup + "mwRunFilesBrowse");
+  loadAutoSavedValues(m_settingsGroup);
 
   // connect exit button
   //connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
@@ -165,6 +166,7 @@ void MuonAnalysis::initLayout()
     SLOT(runyAxisMinimumInput()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
     SLOT(runyAxisMaximumInput()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runShowErrorBars(bool)));
 }
 
 
@@ -213,6 +215,11 @@ void MuonAnalysis::runTimeComboBox(int index)
     m_uiForm.timeAxisStartAtInput->setEnabled(true);
     m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
   }
+
+  // save this new choice
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("timeComboBoxIndex", index); 
 }
 
 /**
@@ -223,6 +230,10 @@ void MuonAnalysis::runTimeAxisStartAtInput()
   try 
   {
     double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
+
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "plotStyleOptions");
+    group.setValue("timeAxisStart", boevs); 
   }
   catch (...)
   {
@@ -266,6 +277,10 @@ void MuonAnalysis::runTimeAxisFinishAtInput()
   try 
   {
     double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
+
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "plotStyleOptions");
+    group.setValue("timeAxisFinish", boevs); 
   }
   catch (...)
   {
@@ -322,8 +337,22 @@ void MuonAnalysis::runyAxisAutoscale(bool state)
 {
   m_uiForm.yAxisMinimumInput->setEnabled(!state);
   m_uiForm.yAxisMaximumInput->setEnabled(!state);
+
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("axisAutoScaleOnOff", state);   
 }
 
+
+/**
+* When clicking autoscale (slot)
+*/
+void MuonAnalysis::runShowErrorBars(bool state)
+{
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "plotStyleOptions");
+  group.setValue("showErrorBars", state);   
+}
 
 
 /**
@@ -361,6 +390,11 @@ void MuonAnalysis::userSelectInstrument(const QString& prefix)
 	{
 		runClearGroupingButton();
     m_curInterfaceSetup = prefix;
+
+    // save this new choice
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "instrument");
+    group.setValue("name", prefix); 
 	}
 }
 
@@ -377,9 +411,10 @@ void MuonAnalysis::runSaveGroupButton()
   }
 
   QSettings prevValues;
-  prevValues.beginGroup("CustomInterfaces/MuonAnalysis/SaveOutput");
+  prevValues.beginGroup(m_settingsGroup + "SaveOutput");
 
-  //use their previous directory first and go to their default if that fails
+  // Get value for "dir". If the setting doesn't exist then use
+  // the the path in "defaultsave.directory"
   QString prevPath = prevValues.value("dir", QString::fromStdString(
     ConfigService::Instance().getString("defaultsave.directory"))).toString();
 
@@ -407,11 +442,10 @@ void MuonAnalysis::runLoadGroupButton()
   // Get grouping file
 
   QSettings prevValues;
-  prevValues.beginGroup("CustomInterfaces/MuonAnalysis/LoadGroupFile");
+  prevValues.beginGroup(m_settingsGroup + "LoadGroupFile");
 
-
-  //use their previous directory first and go to their default if that fails
-
+  // Get value for "dir". If the setting doesn't exist then use
+  // the the path in "defaultsave.directory"
   QString prevPath = prevValues.value("dir", QString::fromStdString(
     ConfigService::Instance().getString("defaultload.directory"))).toString();
 
@@ -934,6 +968,10 @@ void MuonAnalysis::inputFileChanged()
     QMessageBox::warning(this,"Mantid - MuonAnalysis", "Specified data file does not exist.");
     return;
   }
+
+  // save selected browse file directory to be reused next time interface is started up
+  m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
+
   // and check if file is from a recognised instrument and update instrument combo box
   QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
   filenamePart = filenamePart.toLower();
@@ -2270,6 +2308,37 @@ void MuonAnalysis::checkIf_ID_dublicatesInTable(const int row)
 
     }
   }
+}
+
+
+/**
+ * Load auto saved values
+ */
+void MuonAnalysis::loadAutoSavedValues(const QString& group)
+{
+  QSettings prevInstrumentValues;
+  prevInstrumentValues.beginGroup(group + "instrument");
+  QString instrumentName = prevInstrumentValues.value("name", "MUSR").toString();
+  m_uiForm.instrSelector->setCurrentIndex(m_uiForm.instrSelector->findText(instrumentName));
+
+  QSettings prevPlotStyle;
+  prevPlotStyle.beginGroup(group + "plotStyleOptions"); 
+  int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
+  m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
+  runTimeComboBox(timeComboBoxIndex);
+
+  double timeAxisStart = prevPlotStyle.value("timeAxisStart", 0.3).toDouble();
+  double timeAxisFinish = prevPlotStyle.value("timeAxisFinish", 16.0).toDouble();
+
+  m_uiForm.timeAxisStartAtInput->setText(QString::number(timeAxisStart));
+  m_uiForm.timeAxisFinishAtInput->setText(QString::number(timeAxisFinish));
+
+  bool axisAutoScaleOnOff = prevPlotStyle.value("axisAutoScaleOnOff", 1).toBool();
+  m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);
+  runyAxisAutoscale(axisAutoScaleOnOff);
+
+  bool showErrorBars = prevPlotStyle.value("showErrorBars", 1).toBool();
+  m_uiForm.showErrorBars->setChecked(showErrorBars);
 
 }
 

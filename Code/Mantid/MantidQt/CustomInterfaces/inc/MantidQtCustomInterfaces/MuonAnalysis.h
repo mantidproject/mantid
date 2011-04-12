@@ -106,6 +106,8 @@ private slots:
   void runyAxisMinimumInput();
   ///
   void runyAxisMaximumInput();
+  ///
+  void runShowErrorBars(bool state);
 
 private:
   /// Initialize the layout
@@ -251,6 +253,12 @@ private:
 
   /// title of run
   std::string m_title;
+
+  /// group defaults are saved to
+  QString m_settingsGroup;
+
+  /// Load auto saved values
+  void loadAutoSavedValues(const QString& group);
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
