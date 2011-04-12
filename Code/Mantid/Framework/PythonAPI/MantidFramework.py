@@ -14,6 +14,11 @@ try:
 except:
     pass # ignore this error as you are probably running without the gui
 
+try:
+    import numpy
+except ImportError:
+    pass
+
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
     sys.path.append(os.getenv("MANTIDPATH"))
@@ -58,6 +63,8 @@ else:
 def _makeString(value):
     """Make a string out of a value such that the Mantid properties can understand it
     """
+    if isinstance(value, numpy.ndarray):
+        value = list(value) # Temp until more complete solution available (#2340)
     if isinstance(value, list) or isinstance(value, cpp_list_dbl)  \
             or isinstance(value, cpp_list_int) or isinstance(value, cpp_list_long):
         return str(value).lstrip('[').rstrip(']')
