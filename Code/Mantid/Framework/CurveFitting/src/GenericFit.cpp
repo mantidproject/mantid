@@ -63,7 +63,7 @@ namespace CurveFitting
     declareProperty("MaxIterations", 500, mustBePositive,
       "Stop after this number of iterations if a good GenericFit is not found" );
     declareProperty("OutputStatus","", Direction::Output);
-    declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+    declareProperty("OutputChi2overDoF",0.0, Direction::Output);
 
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
@@ -248,7 +248,7 @@ namespace CurveFitting
     // also output summary to properties
 
     setProperty("OutputStatus", reportOfGenericFit);
-    setProperty("Output Chi^2/DoF", finalCostFuncVal);
+    setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", methodUsed);
     setPropertyValue("Function",*m_function);
     

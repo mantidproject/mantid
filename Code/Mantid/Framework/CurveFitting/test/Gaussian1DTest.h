@@ -74,7 +74,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 100.98,0.1);
     dummy = alg.getProperty("BG0");
     TS_ASSERT_DELTA( dummy, -2511.4 ,0.2);
@@ -169,7 +169,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
     dummy = alg2.getProperty("BG0");
     TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
@@ -220,7 +220,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.076185,0.0001);
     dummy = alg2.getProperty("BG0");
     TS_ASSERT_DELTA( dummy, 2.8765 ,0.0001);
@@ -273,7 +273,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0732,0.0001);
     dummy = alg2.getProperty("BG0");
     TS_ASSERT_DELTA( dummy, 3.0 ,0.0001);

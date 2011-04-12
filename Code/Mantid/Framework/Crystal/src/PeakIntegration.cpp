@@ -261,7 +261,7 @@ namespace Mantid
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       const MantidVec &  DataValues = ws->readY(0);
 
-      double chisq = fit_alg->getProperty("Output Chi^2/DoF");
+      double chisq = fit_alg->getProperty("OutputChi2overDoF");
       if(chisq < 0.0) // Find some chisq for a good fit to initialize parameters for next peak
       {
         std::vector<double> params = fit_alg->getProperty("Parameters");

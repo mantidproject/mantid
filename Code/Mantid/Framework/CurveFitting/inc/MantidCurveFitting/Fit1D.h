@@ -32,7 +32,7 @@ namespace Mantid
 
     <LI> MaxIterations - The spectrum to fit (default 500)</LI>
     <LI> OutputStatus - whether the fit was successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
+    <LI> OutputChi2overDoF - returns how good the fit was (default 0.0). Direction::Output</LI>
     </UL>
 
     @author Anders Markvardsen, ISIS, RAL

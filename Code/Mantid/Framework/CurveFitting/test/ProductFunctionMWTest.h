@@ -306,7 +306,7 @@ public:
 
     // test the output from fit is what you expect
 
-    double dummy = fit.getProperty("Output Chi^2/DoF");
+    double dummy = fit.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.01);
 
     IFitFunction *outF = FunctionFactory::Instance().createInitialized(fit.getPropertyValue("Function")); 

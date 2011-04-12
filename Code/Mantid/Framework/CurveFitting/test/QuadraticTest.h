@@ -77,7 +77,7 @@ public:
     TS_ASSERT( alg2.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));

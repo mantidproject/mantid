@@ -28,7 +28,7 @@ namespace Mantid
     <LI> EndX - last X value to include in fitting range (default end of the spectrum)</LI>
     <LI> MaxIterations - Max iterations (default 500)</LI>
     <LI> OutputStatus - whether the fit was successful. Direction::Output</LI>
-    <LI> Output Chi^2/DoF - returns how good the fit was (default 0.0). Direction::Output</LI>
+    <LI> OutputChi2overDoF - returns how good the fit was (default 0.0). Direction::Output</LI>
 
     <LI> Function - The user defined function. It must have x as its argument.</LI>
     <LI> InitialParameters - A list of initial values for the parameters in the function. It is a comma separated

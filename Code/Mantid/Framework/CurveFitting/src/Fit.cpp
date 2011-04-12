@@ -73,7 +73,7 @@ namespace CurveFitting
     declareProperty("MaxIterations", 500, mustBePositive->clone(),
       "Stop after this number of iterations if a good fit is not found" );
     declareProperty("OutputStatus","", Direction::Output);
-    declareProperty("Output Chi^2/DoF",0.0, Direction::Output);
+    declareProperty("OutputChi2overDoF",0.0, Direction::Output);
 
     // Disable default gsl error handler (which is to call abort!)
     gsl_set_error_handler_off();
@@ -131,8 +131,8 @@ namespace CurveFitting
 
     // also output summary to properties
     setProperty("OutputStatus", fit->getPropertyValue("OutputStatus"));
-    double finalCostFuncVal = fit->getProperty("Output Chi^2/DoF");
-    setProperty("Output Chi^2/DoF", finalCostFuncVal);
+    double finalCostFuncVal = fit->getProperty("OutputChi2overDoF");
+    setProperty("OutputChi2overDoF", finalCostFuncVal);
     setProperty("Minimizer", fit->getPropertyValue("Minimizer"));
 
     std::string output = getProperty("Output");

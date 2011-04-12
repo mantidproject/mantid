@@ -164,7 +164,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 1.4,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
@@ -256,7 +256,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 1.5,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
@@ -344,7 +344,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 5.16,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
@@ -433,7 +433,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 5.16,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
@@ -513,7 +513,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0,0.1);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));
@@ -573,7 +573,7 @@ public:
     TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
@@ -630,7 +630,7 @@ public:
     TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
 
@@ -689,7 +689,7 @@ public:
     TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
@@ -747,7 +747,7 @@ public:
     TS_ASSERT( minimizer.compare("Conjugate gradient (Fletcher-Reeves imp.)") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
@@ -806,7 +806,7 @@ public:
     std::cerr<<"\n"<<minimizer<<'\n';
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.0717,0.0001);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
@@ -864,7 +864,7 @@ public:
     TS_ASSERT( minimizer.compare("BFGS") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 0.07,0.01);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function"));
@@ -957,7 +957,7 @@ public:
     TS_ASSERT( minimizer.compare("Simplex") == 0 );
 
     // test the output from fit is what you expect
-    double dummy = alg.getProperty("Output Chi^2/DoF");
+    double dummy = alg.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 5.1604,1);
 
     IFitFunction* fun = FunctionFactory::Instance().createInitialized(alg.getPropertyValue("Function"));

@@ -386,7 +386,7 @@ public:
         TS_ASSERT( algStat.compare("success")==0 );
 
         // test the output from fit is as expected - since 3 variables and 4 data points DOF= 1
-        double dummy = alg2.getProperty("Output Chi^2/DoF");
+        double dummy = alg2.getProperty("OutputChi2overDoF");
         // This is INF at present and causes infinite loop
         //TS_ASSERT_DELTA( dummy, 0.0893, 0.001 );
 

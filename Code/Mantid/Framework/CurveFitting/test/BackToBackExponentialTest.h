@@ -234,7 +234,7 @@ public:
     std::string minimizer = alg2.getProperty("Minimizer");
     TS_ASSERT( minimizer.compare("Levenberg-Marquardt") == 0 );
 
-    double dummy = alg2.getProperty("Output Chi^2/DoF");
+    double dummy = alg2.getProperty("OutputChi2overDoF");
     TS_ASSERT_DELTA( dummy, 1.713,0.01);
 
     IFitFunction *out = FunctionFactory::Instance().createInitialized(alg2.getPropertyValue("Function")); 
