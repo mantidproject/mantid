@@ -19,14 +19,14 @@ public:
     #else
       usleep(200000);
     #endif
-    TS_ASSERT_DELTA( timer.elapsed(), 0.2, 0.02 );
+    TS_ASSERT_LESS_THAN( 0.2, timer.elapsed() );
     #ifdef _WIN32
       Sleep(100);
     #else
       usleep(100000);
     #endif
     // Calling elapsed above should reset the timer
-    TS_ASSERT_DELTA( timer.elapsed(), 0.1, 0.02 );
+    TS_ASSERT_LESS_THAN( 0.1, timer.elapsed() );
   }
 };
 
