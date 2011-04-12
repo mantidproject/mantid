@@ -1257,7 +1257,7 @@ def CalculateTransmissionCorrection(run_setup, lambdamin, lambdamax, use_def_tra
                 INSTRUMENT.use_interpol_trans_calc, False)
             
             CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-                INSTRUMENT.incid_mon_4_trans_calc, INSTRUMENT.trans_monitor,
+                INSTRUMENT.incid_mon_4_trans_calc, INSTRUMENT.default_trans_spec,
                 MinWavelength = translambda_min, MaxWavelength = translambda_max,
                 FitMethod = fit_type, OutputUnfittedData=True)
         # Remove temporaries
@@ -1350,7 +1350,7 @@ def Correct(run_setup, wav_start, wav_end, use_def_trans, finding_centre = False
     
     # Remove flat background
     if BACKMON_START != None and BACKMON_END != None:
-        FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0')
+        FlatBackground(monitorWS, monitorWS, StartX = BACKMON_START, EndX = BACKMON_END, WorkspaceIndexList = '0', Mode='Mean')
     
     final_result = run_setup.getReducedWorkspace()
     to_crop = sample_name

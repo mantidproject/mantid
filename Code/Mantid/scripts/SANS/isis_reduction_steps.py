@@ -91,7 +91,7 @@ class LoadRun(ReductionStep):
 #            base_name = os.path.splitext(log_file)[0]
 #            if base_name.endswith('-add'):
 #                #remove the add files specifier, if it's there
-#                base_name = base_name.rpartition('-add')[0]
+#                base_name = base_name.???????????????????rpartition('-add')[0]
 #            SANS2D_log_file = base_name+'.log'
             
         else:
@@ -249,15 +249,18 @@ class LoadRun(ReductionStep):
             #assume we have a complete filename
             filename = run_string
             #remove the path name
-            run_name = run_string.rpartition('/')[2]
+            names = run_string.split('/')
+            run_name = names[len(names)-1]
             #remove the extension
-            file_parts = run_name.rpartition('.')
+            file_parts = run_name.split('.')
             run_name = file_parts[0]
-            self.ext = file_parts[2]
+            ext = file_parts[len(file_parts)-1]
             if run_name.endswith('-add'):
                 #remove the add files specifier, if it's there
-                run_name = run_name.rpartition('-add')[0]
-            self.shortrun_no = str(run_name.partition(prefix)[2])
+                run_name = run_name.rpartition('-add')[0]        
+            names = run_name.split(prefix)
+            shortrun_no = names[len(names)-1]
+
         else:
             #this is a run number dot extension
             run_no = pieces[0]
@@ -760,8 +763,8 @@ class Mask_ISIS(sans_reduction_steps.Mask):
                     if (flags.readY(i)[0] == 0) and (vals.readY(i)[0] < 5000):
                         maxval = vals.readY(i)[0]
     
-            #now normalise to the max/4
-            maxval /= 4.0
+            #now normalise to the max/5
+            maxval /= 5.0
             for i in range(0, len(Ys)):
                 if Ys[i] != 0:
                     Ys[i] = maxval*Ys[i] + vals.readY(i)[0]
