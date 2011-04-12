@@ -7,8 +7,9 @@
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidKernel/ConfigService.h"
-#include "Poco/Path.h"
 
+#include <Poco/Path.h>
+#include <boost/algorithm/string.hpp>
 #include <vector>
 #include <set>
 #include <string>
@@ -86,11 +87,23 @@ namespace Mantid
         PropertyVector orderedProperties(algm->getProperties());
         std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());
         std::string name(vIter->first);
-	const int version(vIter->second);
+        const int version(vIter->second);
         writeFunctionDef(module, name, version, orderedProperties, gui);
         if( gui ) 
         {
           writeGUIFunctionDef(module, name, version, orderedProperties);
+        }
+
+        // Get any aliases
+        std::vector<std::string> aliases;
+        boost::split(aliases, algm->alias(), boost::is_any_of(","));
+        for (std::size_t i=0; i<aliases.size(); i++)
+        {
+          std::string alias = aliases[i];
+          if (!alias.empty())
+          {
+            module << alias << "=" << name << "\n";
+          }
         }
 
         // Get the category and save it to our map

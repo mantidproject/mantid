@@ -69,6 +69,9 @@ public:
   /// function to return a category of the algorithm.
   virtual const std::string category() const = 0;
 
+  /// function to return any aliases of the algorithm.
+  virtual const std::string alias() const = 0;
+
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   virtual AlgorithmID getAlgorithmID()const = 0;
 

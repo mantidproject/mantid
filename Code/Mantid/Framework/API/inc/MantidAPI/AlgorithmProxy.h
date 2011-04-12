@@ -70,6 +70,8 @@ namespace Mantid
       int version() const  {return m_version;}
       /// The category of the algorithm
       const std::string category() const {return m_category;}
+      /// Aliases to the algorithm
+      const std::string alias() const {return m_alias;}
 
       /// The algorithmID
       AlgorithmID getAlgorithmID() const {return AlgorithmID(this);}
@@ -135,6 +137,7 @@ namespace Mantid
 
       const std::string m_name;     ///< name of the real algorithm
       const std::string m_category; ///< category of the real algorithm
+      const std::string m_alias;    ///< alias to the algorithm
       std::string m_OptionalMessage; ///<Message to display in GUI
       const int m_version;          ///< version of the real algorithm
 

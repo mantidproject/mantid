@@ -185,6 +185,8 @@ public:
   virtual int version() const = 0;
   /// function to return a category of the algorithm. A default implementation is provided
   virtual const std::string category() const {return "Misc";}
+  /// function to return any aliases to the algorithm;  A default implementation is provided
+  virtual const std::string alias() const {return "";}
 
   /// Algorithm ID. Unmanaged algorithms return 0 (or NULL?) values. Managed ones have non-zero.
   AlgorithmID getAlgorithmID()const{return m_algorithmID;}
