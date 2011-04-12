@@ -46,7 +46,7 @@ public:
   /// Default constructor
   CompositeFunctionMD():CompositeFunction(),IFunctionMD(){}
   /// Copy contructor
-  CompositeFunctionMD(const CompositeFunctionMD&);
+  //CompositeFunctionMD(const CompositeFunctionMD&);
   ///Assignment operator
   //CompositeFunctionMD& operator=(const CompositeFunctionMD&);
   ///Destructor

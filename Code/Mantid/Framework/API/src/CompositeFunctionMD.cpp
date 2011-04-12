@@ -26,10 +26,10 @@ namespace API
 DECLARE_FUNCTION(CompositeFunctionMD)
 
 /// Copy contructor
-CompositeFunctionMD::CompositeFunctionMD(const CompositeFunctionMD& f)
-:CompositeFunction(f),IFunctionMD(f)
-{
-}
+//CompositeFunctionMD::CompositeFunctionMD(const CompositeFunctionMD& f)
+//:CompositeFunction(f),IFunctionMD(f)
+//{
+//}
 
 ///Destructor
 CompositeFunctionMD::~CompositeFunctionMD()
