@@ -785,12 +785,17 @@ class IAlgorithmProxy(ProxyObject):
         @param value: The value of the property.
         @param param: Coerce everyhing into a string if True.   
         """
+        ialg = self._getHeldObject()
+        # proactively look for the property to exist
+        if not ialg.existsProperty(name):
+            msg = 'Unknown property "%s" for %s version %d' % (name, ialg.name(), ialg.version())
+            raise AttributeError(msg)
+
         if value is None:
             return
         if convertToString:
             value = _makeString(value).lstrip('? ')
 
-        ialg = self._getHeldObject()
         try:
             if isinstance(value, WorkspaceProxy):
                 ialg._setWorkspaceProperty(name, value._getHeldObject())
@@ -836,6 +841,36 @@ class IAlgorithmProxy(ProxyObject):
         # set the properties of the algorithm
         for key in kwargs.keys():
             self.__setProperty(key, kwargs[key], False)
+
+    def setPropertiesDialog(self, *args, **kwargs):
+        """
+        Set the properites all in one go assuming that you are preparing for a
+        dialog box call. If the dialog is canceled do a sys.exit, otherwise 
+        return the algorithm ready to execute.
+        """
+        # generic setup
+        enabled_list = [s.lstrip(' ') for s in kwargs.get("Enable", "").split(',')]
+        del kwargs["Enable"] # no longer needed
+        disabled_list = [s.lstrip(' ') for s in kwargs.get("Disable", "").split(',')]
+        del kwargs["Disable"] # no longer needed
+        Message = kwargs.get("Message", "")
+        del kwargs["Message"]
+        values = '|'
+        final_enabled = ''
+
+        # configure everything for the dialog
+        for name in kwargs.keys():
+            if not self.existsProperty(name):
+                msg = 'Unknown property "%s" for %s version %d' % (name, self.name(), self.version())
+                raise AttributeError(msg)
+            valpair = mtd._convertToPair(name, kwargs[name], enabled_list, disabled_list)
+            values += valpair[0] + '|'
+            final_enabled += valpair[1] + ','
+
+        # finally run the configured dialog
+        dialog = qti.app.mantidUI.createPropertyInputDialog(self.name(), values, Message, final_enabled)
+        if dialog == False:
+            sys.exit('Information: Script execution cancelled')
 
     def execute(self, *args, **kwargs):
         """

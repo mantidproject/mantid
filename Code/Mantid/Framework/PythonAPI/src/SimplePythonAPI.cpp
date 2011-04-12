@@ -173,12 +173,17 @@ namespace Mantid
       //Iterate through properties
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
-      StringVector sanitizedNames(properties.size());
       unsigned int iMand(0), iarg(0);
       for( ; pIter != pEnd; ++iarg)
       {
-        sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
-        os << sanitizedNames[iarg];
+        os << (*pIter)->name();
+        if ((*pIter)->name().compare(removeCharacters((*pIter)->name(), "")) != 0)
+        {
+          std::stringstream msg;
+          msg << "Illegal property name \"" << (*pIter)->name() << "\" in algorithm \""
+              << algm << "\" version " << version;
+          throw std::runtime_error(msg.str());
+        }
 
         //properties are optional unless their current value results in an error (isValid != "")
         if( (*pIter)->isValid() != "" ) ++iMand;
@@ -200,7 +205,7 @@ namespace Mantid
         iarg = 0;
         for( ; pIter != pEnd; ++pIter, ++iarg )
         {
-          std::string pvalue = sanitizedNames[iarg];
+          std::string pvalue = (*pIter)->name();
           if (iarg > 0)
             os << ", ";
           os << pvalue; // name of the parameter, either way
@@ -338,41 +343,32 @@ namespace Mantid
       //Iterate through properties
       PropertyVector::const_iterator pIter = properties.begin();
       PropertyVector::const_iterator pEnd = properties.end();
-      StringVector sanitizedNames(properties.size());
+      std::size_t numProps = properties.size();
       for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
       {
-        sanitizedNames[iarg] = removeCharacters((*pIter)->name(), "");
-        os << sanitizedNames[iarg];
-
-        os << " = None,";
+        os << (*pIter)->name() << "=None, ";
       }
       //end of algorithm function parameters but add other arguments
       os << "Message = \"\", Enable=\"\", Disable=\"\", Version=" << version << "):\n"
-        << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n"
-        << "  enabled_list = [s.lstrip(' ') for s in Enable.split(',')]\n"
-        << "  disabled_list = [s.lstrip(' ') for s in Disable.split(',')]\n"
-        << "  values = '|'\n"
-        << "  final_enabled = ''\n\n";
+         << "  algm = mtd.createAlgorithm(\"" << algm << "\", Version)\n";
 
+      // create the properties dialog call - forward all parameters
+      os << "  algm.setPropertiesDialog(";
       pIter = properties.begin();
       for( int iarg = 0; pIter != pEnd; ++pIter, ++iarg)
       {
-	const std::string & propName = (*pIter)->name();
-	os << "  if not algm.existsProperty('" << propName << "'):\n"
-	   << "    raise RuntimeError('Unknown property \"" <<  propName << "\" for " << algm << " version ' + str(algm.version()))\n";
-        os << "  valpair = mtd._convertToPair('" << (*pIter)->name() << "', " << sanitizedNames[iarg]
-	   << ", enabled_list, disabled_list)\n"
-	   << "  values += valpair[0] + '|'\n"
-	   << "  final_enabled += valpair[1] + ','\n\n";
+        const std::string & propName = (*pIter)->name();
+        if (iarg > 0)
+          os << ", ";
+        os << propName << "=" << propName;
       }
+      if (numProps > 0)
+        os << ", ";
+      os << "Message=Message, Enable=Enable, Disable=Disable)\n";
 
-      os << "  dialog = qti.app.mantidUI.createPropertyInputDialog(\"" << algm 
-         << "\" , values, Message, final_enabled)\n"
-         << "  if dialog == True:\n"
-         << "    algm.execute()\n"
-         << "    return algm\n";
-      os << "  else:\n"
-         << "    sys.exit('Information: Script execution cancelled')\n\n";
+      // finish up
+      os << "  algm.execute()\n"
+         << "  return algm\n\n";
     }
 
     /**
@@ -491,7 +487,7 @@ namespace Mantid
         for (; sIter != sEnd; ++sIter)
         {
           int letter = static_cast<int> (*sIter);
-          if ((letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) || (letter >= 65 && letter <= 90))
+          if ((letter >= 48 && letter <= 57) || (letter >= 97 && letter <= 122) || (letter >= 65 && letter <= 90) || (letter == 95))
           {
             retstring.push_back(*sIter);
           }
