@@ -41,7 +41,10 @@ public:
 
     ConfigService::Instance().updateFacilities(facilityFilePath);
     ConfigService::Instance().setString("default.instrument","LOQ");
-    ConfigService::Instance().setString("default.facility","ISIS");
+
+    // We need to specify the default facility to make sure that there isn't a default
+    // facility set in the Mantid.properties that is not in the Facility XML above.
+    ConfigService::Instance().setFacility("ISIS");
 
     Poco::File(facilityFilePath).remove();
   }
