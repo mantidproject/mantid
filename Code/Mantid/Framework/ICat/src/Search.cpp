@@ -41,14 +41,14 @@ namespace Mantid
 			declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("Keywords","","An option to search investigations data");
-			declareProperty("Case Sensitive", false, "Boolean option to do case sensitive ICat investigations search.");
+			declareProperty("CaseSensitive", false, "Boolean option to do case sensitive ICat investigations search.");
 
-			declareProperty("Investigation Name", "", "The name of the investigation to search.");
-			declareProperty("Investigation Type", "", "The type  of the investigation to search.");
-			declareProperty("Investigation Abstract", "", "The abstract of the investigation to search.");
-			declareProperty("Sample Name", "", "The name of the sample used in the investigation to search.");
-			declareProperty("Investigator SurName", "", "The sur name of the investigator associated to the investigation.");
-			declareProperty("DataFile Name","", "The name of the data file to search.");
+			declareProperty("InvestigationName", "", "The name of the investigation to search.");
+			declareProperty("InvestigationType", "", "The type  of the investigation to search.");
+			declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
+			declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
+			declareProperty("InvestigatorSurName", "", "The sur name of the investigator associated to the investigation.");
+			declareProperty("DataFileName","", "The name of the data file to search.");
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
 				"The name of the workspace that will be created to store the ICat investigations search result.");
@@ -140,25 +140,25 @@ namespace Mantid
 			std::string keyWords=getPropertyValue("Keywords");
 			params.setKeywords(keyWords);
 
-			bool bCase=getProperty("Case Sensitive");
+			bool bCase=getProperty("CaseSensitive");
 			params.setCaseSensitive(bCase);
 
-			std::string invstName=getPropertyValue("Investigation Name");
+			std::string invstName=getPropertyValue("InvestigationName");
 			params.setInvestigationName(invstName);
 
-			std::string invstType=getPropertyValue("Investigation Type");
+			std::string invstType=getPropertyValue("InvestigationType");
 			params.setInvestigationType(invstType);
 
-			std::string invstAbstarct=getPropertyValue("Investigation Abstract");
+			std::string invstAbstarct=getPropertyValue("InvestigationAbstract");
 			params.setInvestigationAbstract(invstAbstarct);
 
-			std::string sampleName=getPropertyValue("Sample Name");
+			std::string sampleName=getPropertyValue("SampleName");
 			params.setSampleName(sampleName);
 
-			std::string invstSurname=getPropertyValue("Investigator SurName");
+			std::string invstSurname=getPropertyValue("InvestigatorSurName");
 			params.setInvestigatorSurName(invstSurname);
 
-			std::string dataFileName=getPropertyValue("DataFile Name");
+			std::string dataFileName=getPropertyValue("DataFileName");
 			params.setDatafileName(dataFileName);
 
 
