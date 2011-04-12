@@ -73,12 +73,18 @@ int vtkEventNexusReader::RequestInformation(
  
   const std::string mdEventWsId = "mdEventWsId";
   const std::string histogrammedWsId = "histogrammedWsId";
+
+  // Make sure the existing workspace is erased, otherwise events get added to it.
+  AnalysisDataService::Instance().remove("mdEventWsId");
+
   Mantid::MDEvents::OneStepMDEW alg;
   alg.initialize();
   alg.setPropertyValue("Filename", this->FileName);
   alg.setPropertyValue("OutputWorkspace", mdEventWsId);
   alg.execute();
-  IMDEventWorkspace_sptr eventMDWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(mdEventWsId));
+
+  //Note: this throws for me (JZ) for some reason, even though the workspace should be in the analysis data service
+//  IMDEventWorkspace_sptr eventMDWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(mdEventWsId));
 
   BinToMDHistoWorkspace hist_alg;
   hist_alg.initialize();
