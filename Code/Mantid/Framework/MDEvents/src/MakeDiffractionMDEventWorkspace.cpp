@@ -75,6 +75,8 @@ namespace MDEvents
       "  HKL: Use the sample's UB matrix to convert to crystal's HKL indices."
        );
 
+    declareProperty(new PropertyWithValue<bool>("LorentzCorrection", false, Direction::Input),
+        "Correct the weights of events with by multiplying by the Lorentz formula: sin(theta)^2 / lambda^4");
   }
 
 
@@ -133,6 +135,15 @@ namespace MDEvents
       double Q_dir_y = Q_dir.Y();
       double Q_dir_z = Q_dir.Z();
 
+      // For lorentz correction, calculate  sin(theta))^2
+      double sin_theta_squared = 0;
+      if (LorentzCorrection)
+      {
+        // Scattering angle = angle between neutron beam direction and the detector (scattering) direction
+        double theta = detDir.angle(beamDir);
+        sin_theta_squared = sin(theta);
+        sin_theta_squared = sin_theta_squared * sin_theta_squared; // square it
+      }
 
       /** Constant that you divide by tof (in usec) to get wavenumber in ang^-1 :
        * Wavenumber (in ang^-1) =  (PhysicalConstants::NeutronMass * distance) / ((tof (in usec) * 1e-6) * PhysicalConstants::h_bar) * 1e-10; */
@@ -157,8 +168,19 @@ namespace MDEvents
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
         CoordType center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
 
-        // Build a MDEvent
-        out_events.push_back( MDE(it->weight(), it->errorSquared(), center) );
+        if (LorentzCorrection)
+        {
+          //double lambda = 1.0/wavenumber;
+          // (sin(theta))^2 / wavelength^4
+          double correct = sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared;
+          // Push the MDEvent but correct the weight.
+          out_events.push_back( MDE(it->weight()*correct, it->errorSquared()*correct*correct, center) );
+        }
+        else
+        {
+          // Push the MDEvent with the same weight
+          out_events.push_back( MDE(it->weight(), it->errorSquared(), center) );
+        }
       }
 
       // Clear out the EventList to save memory
@@ -191,6 +213,7 @@ namespace MDEvents
     // ---------------------- Extract properties --------------------------------------
     ClearInputWorkspace = getProperty("ClearInputWorkspace");
     std::string OutputDimensions = getPropertyValue("OutputDimensions");
+    LorentzCorrection = getProperty("LorentzCorrection");
 
     // Input workspace
     in_ws = getProperty("InputWorkspace");

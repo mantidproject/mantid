@@ -55,6 +55,8 @@ namespace MDEvents
     MDEvents::MDEventWorkspace3::sptr ws;
     /// Do we clear events on the input during loading?
     bool ClearInputWorkspace;
+    /// Perform LorentzCorrection on the fly.
+    bool LorentzCorrection;
     /// Map of all the detectors in the instrument
     std::map<int, Geometry::IDetector_sptr> allDetectors;
     /// Primary flight path (source to sample)

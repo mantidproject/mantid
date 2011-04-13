@@ -37,8 +37,8 @@ namespace NeXus
   /// Sets documentation strings for this algorithm
   void SaveSNSNexus::initDocs()
   {
-    this->setWikiSummary(" Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. ");
-    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point.");
+    this->setWikiSummary(" Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors. ");
+    this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors.");
   }
   
 
