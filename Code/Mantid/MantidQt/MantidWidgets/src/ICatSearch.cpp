@@ -31,8 +31,8 @@ namespace MantidQt
     //----------------------
     ///Constructor
     ICatSearch::ICatSearch(QWidget *par) :
-        QWidget(par),m_sender(NULL),m_invstWidget(NULL),
-        m_utils_sptr(new ICatUtils),m_applicationWindow(NULL)
+        QWidget(par),m_invstWidget(NULL),m_applicationWindow(NULL),
+        m_sender(NULL),m_utils_sptr(new ICatUtils)
     {
 
       // getting the application window pointer and setting it as the parent
@@ -300,7 +300,7 @@ namespace MantidQt
         updatesearchResults(ws_sptr);
         return false;
       }
-      if(!setProperty("Case Sensitive",bCase)){
+      if(!setProperty("CaseSensitive",bCase)){
         updatesearchResults(ws_sptr);
         return false;
       }

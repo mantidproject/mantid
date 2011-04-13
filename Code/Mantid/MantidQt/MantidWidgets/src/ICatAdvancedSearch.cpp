@@ -17,8 +17,8 @@ namespace MantidQt
   namespace MantidWidgets
   {
 
-    ICatAdvancedSearch::ICatAdvancedSearch(QWidget* par):
-    QWidget(par),m_utils_sptr(new ICatUtils),m_applicationWindow(NULL)
+    ICatAdvancedSearch::ICatAdvancedSearch(QWidget* par) :
+        QWidget(par),m_applicationWindow(NULL),m_utils_sptr(new ICatUtils)
     {
 
       //	 getting the application window pointer and setting it
@@ -287,7 +287,7 @@ namespace MantidQt
         return ;
       }
 
-      if(!setProperty("Case Sensitive",bCase))
+      if(!setProperty("CaseSensitive",bCase))
       {
         updatesearchResults(m_ws_sptr);
         return ;
@@ -298,32 +298,32 @@ namespace MantidQt
         return ;
       }
 
-      if(!setProperty("Investigation Name",invstName.toStdString()))
+      if(!setProperty("InvestigationName",invstName.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;
       }
-      if(!setProperty("Investigation Abstract",invstAbstract.toStdString()))
+      if(!setProperty("InvestigationAbstract",invstAbstract.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;
       }
-      if(!setProperty("Investigation Type",invstType.toStdString()))
+      if(!setProperty("InvestigationType",invstType.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;
       }
-      if(!setProperty("Sample Name",sampleName.toStdString()))
+      if(!setProperty("SampleName",sampleName.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;
       }
-      if(!setProperty("Investigator SurName",invstSurName.toStdString()))
+      if(!setProperty("InvestigatorSurname",invstSurName.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;
       }
-      if(!setProperty("DataFile Name",dataFileName.toStdString()))
+      if(!setProperty("DataFileName",dataFileName.toStdString()))
       {
         updatesearchResults(m_ws_sptr);
         return ;

@@ -19,7 +19,7 @@ namespace MantidQt
   namespace MantidWidgets
   {
 
-    ICatUtils::ICatUtils():m_calendarWidget(NULL),m_applicationWindow(NULL)
+    ICatUtils::ICatUtils() : m_applicationWindow(NULL),m_calendarWidget(NULL)
     {
     }
 

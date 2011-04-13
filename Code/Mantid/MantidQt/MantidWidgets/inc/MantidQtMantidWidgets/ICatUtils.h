@@ -27,7 +27,7 @@ namespace MantidQt
       Q_OBJECT
 
     public:
-      ///constrctor
+      ///constructor
       ICatUtils();
       //destructor
       ~ICatUtils(){}
@@ -43,7 +43,7 @@ namespace MantidQt
       //for clearing teh table widget
       void resetSearchResultsWidget(QTableWidget* tablewidget );
 
-      /// for displaying the investigatiosn count
+      /// for displaying the investigation count
       void updateSearchLabel(const Mantid::API::ITableWorkspace_sptr& ws_sptr,QLabel* label);
 
       void populateInstrumentBox(QComboBox* instrumentBox);
@@ -64,7 +64,7 @@ namespace MantidQt
       void clearSearch( QTableWidget*,const std::string & wsName);
 
       bool login();
-      ///Thsi methos return true if it's valid session
+      ///This method return true if it's valid session
       bool isSessionValid(const Mantid::API::IAlgorithm_sptr& alg);
       /// set label widget's text
       void setLabelText(QLabel* plabel,const QString& text);
