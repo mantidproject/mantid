@@ -37,7 +37,7 @@ namespace Mantid
 			
 			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
 			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
-			declareProperty("Instrument","","The name of the insurument used for investigation search.");
+			declareProperty("Instrument","","The name of the instrument used for investigation search.");
 			declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
 			declareProperty("Keywords","","An option to search investigations data");
@@ -47,7 +47,7 @@ namespace Mantid
 			declareProperty("InvestigationType", "", "The type  of the investigation to search.");
 			declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
 			declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
-			declareProperty("InvestigatorSurName", "", "The sur name of the investigator associated to the investigation.");
+			declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
 			declareProperty("DataFileName","", "The name of the data file to search.");
 
 			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
@@ -155,7 +155,7 @@ namespace Mantid
 			std::string sampleName=getPropertyValue("SampleName");
 			params.setSampleName(sampleName);
 
-			std::string invstSurname=getPropertyValue("InvestigatorSurName");
+			std::string invstSurname=getPropertyValue("InvestigatorSurname");
 			params.setInvestigatorSurName(invstSurname);
 
 			std::string dataFileName=getPropertyValue("DataFileName");
