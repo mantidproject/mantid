@@ -726,11 +726,20 @@ bool SANSRunWindow::loadUserFile(QString & errors)
       "print i.ReductionSingleton().DQXY"), m_uiForm.qy_dqy,
       m_uiForm.qy_dqy_opt);
 
-  // Tranmission options
-  m_uiForm.trans_min->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamin()").trimmed());
-  m_uiForm.trans_max->setText(runReduceScriptFunction(
-      "print i.ReductionSingleton().get_trans_lambdamax()").trimmed());
+  // The tramission line of the Limits section 
+  QString transMin = runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.lambda_min").trimmed();
+  if (transMin == "None")
+  {
+    m_uiForm.transFit_ck->setChecked(false);
+  }
+  else
+  {
+    m_uiForm.transFit_ck->setChecked(true);
+    m_uiForm.trans_min->setText(transMin);
+    m_uiForm.trans_max->setText(runReduceScriptFunction(
+      "print i.ReductionSingleton().transmission_calculator.lambda_max").trimmed());
+  }
   text = runReduceScriptFunction(
       "print i.ReductionSingleton().transmission_calculator.fit_method").trimmed();
   int index = m_uiForm.trans_opt->findText(text, Qt::MatchCaseSensitive);
@@ -2422,9 +2431,7 @@ QString SANSRunWindow::reduceSingleRun() const
   }
   else
   {
-    reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=";
-    QString fullTransRang = m_uiForm.transFit_ck->isChecked() ? "True" : "False";
-    reducer_code += fullTransRang + ")";
+    reducer_code += "\nreduced = i.WavRangeReduction(full_trans_wav=False)";
     if( m_uiForm.plot_check->isChecked() )
     {
       reducer_code += "\ni.PlotResult(reduced)";
@@ -2873,12 +2880,21 @@ void SANSRunWindow::updateTransInfo(int state)
   if( state == Qt::Checked )
   {
     m_uiForm.trans_min->setEnabled(true);
+    m_uiForm.trans_min->setText(
+      runReduceScriptFunction("print i.ReductionSingleton().instrument.WAV_RANGE_MIN").trimmed());
+
     m_uiForm.trans_max->setEnabled(true);
+    m_uiForm.trans_max->setText(
+       runReduceScriptFunction("print i.ReductionSingleton().instrument.WAV_RANGE_MAX").trimmed());
+
   }
   else
   {
     m_uiForm.trans_min->setEnabled(false);
+    m_uiForm.trans_min->setText("");
+
     m_uiForm.trans_max->setEnabled(false);
+    m_uiForm.trans_max->setText("");
   }
 }
 /** A slot to validate entries for Python lists and tupples
@@ -2991,7 +3007,7 @@ bool SANSRunWindow::runAssign(int key, QString & logs)
     assign_fn += ", period_d = " + direct_per+")";
     //assign the workspace name to a Python variable and read back some details
     QString pythonC="t1, t2 = " + assign_fn + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
-    QString ws_names = runReduceScriptFunction(pythonC);
+    QString ws_names = runReduceScriptFunction(pythonC).trimmed();
     if (ws_names.startsWith("error", Qt::CaseInsensitive))
     {
       throw std::runtime_error("Couldn't load a transmission file");

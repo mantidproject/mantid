@@ -60,13 +60,15 @@ class LoadRun(ReductionStep):
         self._spec_max = None
         self.ext = ''
         self.shortrun_no = -1
+        #the name of the loaded workspace in Mantid
+        self.wksp_name = ''
         
     def _load(self, inst = None, is_can=False):
         """
             Load a workspace and read the logs into the passed instrument reference
             @param inst: a reference to the current instrument
             @param iscan: set this to True for can runs 
-            @return: name of the workspace, log values, number of periods in the workspace
+            @return: log values, number of periods in the workspace
         """
         workspace = self._get_workspace_name()
 
@@ -124,7 +126,8 @@ class LoadRun(ReductionStep):
                 if not self._is_trans:
                     raise
 
-        return workspace, numPeriods, log        
+        self.wksp_name = workspace 
+        return numPeriods, log        
 
     def _get_workspace_name(self, optional_entry_no=True):
         """
@@ -146,7 +149,7 @@ class LoadRun(ReductionStep):
     # Helper function
     def _assignHelper(self, reducer):
         if self._data_file == '' or self._data_file.startswith('.'):
-            return '', '', -1
+            return '', -1
         
         try:
             data_file = self._extract_run_details(
@@ -156,15 +159,17 @@ class LoadRun(ReductionStep):
             raise AttributeError('No instrument has been assign, run SANS2D or LOQ first')
 
         workspace = self._get_workspace_name()
-        #this always contains the period number
-        period_definitely_inc = self._get_workspace_name(False)
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
             nPeriods = self._find_workspace_num_periods(workspace)
             if mantid.workspaceExists(workspace):
-                return workspace, '', nPeriods
+                self.wksp_name = workspace
+                return '', nPeriods
+            #this always contains the period number
+            period_definitely_inc = self._get_workspace_name(False)
             if mantid.workspaceExists(period_definitely_inc):
-                return period_definitely_inc, '', nPeriods
+                self.wksp_name = period_definitely_inc
+                return '', nPeriods
 
         self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
@@ -180,18 +185,19 @@ class LoadRun(ReductionStep):
                 else:
                     self._spec_min = None
                     self._spec_max = 8
-                wkspname, nPeriods, logs = self._load(reducer.instrument)
+                nPeriods, logs = self._load(reducer.instrument)
             except RuntimeError, err:
                 mantid.sendLogMessage("::SANS::Warning: "+str(err))
-                return '', '', -1
+                return '', -1
         else:
             try:
-                wkspname, nPeriods, logs = self._load(reducer.instrument)
+                nPeriods, logs = self._load(reducer.instrument)
             except RuntimeError, details:
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
-                return '', '', -1
+                self.wksp_name = ''
+                return '', -1
         
-        return wkspname, nPeriods, logs
+        return nPeriods, logs
 
     def _leaveSinglePeriod(self, workspace):
         groupW = mantid[workspace]
@@ -311,7 +317,7 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
             can and if the workspaces should be reloaded if they already
             exist
             @param is_can: if this is to correct the can (default false i.e. it's for the sample)
-            @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
+            @param reload: se8tting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
         super(LoadTransmissions, self).__init__()
         self.trans_name = None
@@ -332,14 +338,15 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
     def execute(self, reducer, workspace):
         if self._trans_name not in [None, '']:
             load = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
-            self.trans_name, self.TRANS_SAMPLE_N_PERIODS, dummy = \
+            self.TRANS_SAMPLE_N_PERIODS, dummy = \
                                         load._assignHelper(reducer)
-        
+            self.trans_name = load.wksp_name
         if self._direct_name not in [None, '']:
             load = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
-            self.direct_name, self.DIRECT_SAMPLE_N_PERIODS, dummy = \
+            self.DIRECT_SAMPLE_N_PERIODS, dummy = \
                                         load._assignHelper(reducer)
-
+            self.direct_name = load.wksp_name
+ 
         return self.trans_name, self.direct_name
 
 class CanSubtraction(LoadRun):
@@ -354,26 +361,30 @@ class CanSubtraction(LoadRun):
             @param period: for multiple entry workspaces this is the period number
         """
         super(CanSubtraction, self).__init__(can_run, reload=reload, entry=period)
-        self._scatter_can = None
+        #contains the workspace with the background (can) data
+        self.workspace = LoadRun()
+
 
     def assign_can(self, reducer):
         """
             Loads the can workspace into Mantid and reads any log file
             @param reducer: the reduction chain
-            @return: the name of the new workspace and its logs object  
+            @return: the logs object  
         """
         if not reducer.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the can can be loaded, run UserFile() first')
         
         if( self._data_file.startswith('.') or self._data_file == '' or self._data_file == None):
-            self._data_file = None
-            return '', '()'
+            self.workspace.wksp_name = ''
+            return '()'
     
-        self._scatter_can, self._CAN_N_PERIODS, logs = self._assignHelper(
-                                                                 reducer)
-        if self._scatter_can == '':
+        self._CAN_N_PERIODS, logs = self._assignHelper(reducer)
+        #refactor this so that CanSubtraction doesn't inherit from LoadRun
+        self.workspace.wksp_name = self.wksp_name
+
+        if self.workspace.wksp_name == '':
             mantid.sendLogMessage('::SANS::Warning: Unable to load SANS can run, cannot continue.')
-            return '','()'
+            return '()'
           
         if logs:
             reducer.instrument.check_can_logs(logs)
@@ -381,19 +392,20 @@ class CanSubtraction(LoadRun):
             logs = ""
             if reducer.instrument.name() == 'SANS2D':
                 _issueWarning("Can logs could not be loaded, using sample values.")
-                return self._scatter_can, "()"    
+                return "()"    
         
         if self._reload:
-            reducer.place_det_sam.reset(self._scatter_can)
-        reducer.place_det_sam.execute(reducer, self._scatter_can)
+            reducer.place_det_sam.reset(self.workspace.wksp_name)
+        reducer.place_det_sam.execute(reducer, self.workspace.wksp_name)
 
-        return self._scatter_can, logs
+        return logs
 
     def execute(self, reducer, workspace):
         """
             Apply same corrections as for sample workspace then subtract from data
         """
-        if not self._data_file:
+        if not self.workspace.wksp_name:
+            # no can data was loaded skip the correction
             return        
         
         #remain the sample workspace, its name will be restored to the original once the subtraction has been done 
@@ -403,7 +415,7 @@ class CanSubtraction(LoadRun):
         tmp_can = workspace+"_can_tmp"
 
         #do same corrections as were done to the sample
-        reducer.reduce_can(self._scatter_can, tmp_can)
+        reducer.reduce_can(self.workspace.wksp_name, tmp_can)
 
         #we now have the can workspace, use it
         Minus(tmp_smp, tmp_can, workspace)
@@ -810,9 +822,6 @@ class LoadSample(LoadRun):
         if not reducer.user_settings.executed:
             raise RuntimeError('User settings must be loaded before the sample can be assigned, run UserFile() first')
 
-        # If we don't have a data file, look up the workspace handle
-        if self._data_file is None:
-            self._data_file = reducer.get_sample()
         # Code from AssignSample
         self._clearPrevious(self._scatter_sample)
         self._SAMPLE_N_PERIODS = -1
@@ -822,13 +831,13 @@ class LoadSample(LoadRun):
             self._scatter_sample = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
-        self._scatter_sample, self._SAMPLE_N_PERIODS, logs =\
+        self._SAMPLE_N_PERIODS, logs =\
             self._assignHelper(reducer)
 
-        if self._scatter_sample == '':
+        if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
 
-        self.uncropped  = self._scatter_sample
+        self.uncropped  = self.wksp_name
         p_run_ws = mantid[self.uncropped]
         
         if p_run_ws.isGroup():
@@ -844,16 +853,16 @@ class LoadSample(LoadRun):
 
         if reducer.instrument.name() == 'SANS2D':
             if logs == None:
-                mantid.deleteWorkspace(self._scatter_sample)
+                mantid.deleteWorkspace(self.wksp_name)
                 raise RuntimeError('Sample logs cannot be loaded, cannot continue')
             reducer.instrument.apply_detector_logs(logs)           
 
         if self._reload:
-            reducer.place_det_sam.reset(self._scatter_sample)
-        reducer.place_det_sam.execute(reducer, self._scatter_sample)
+            reducer.place_det_sam.reset(self.wksp_name)
+        reducer.place_det_sam.execute(reducer, self.wksp_name)
 
-        reducer.wksp_name = self.uncropped
-        return reducer.wksp_name, logs
+        reducer.sample_wksp = self.wksp_name
+        return logs
 
 class MoveComponents(ReductionStep):
     """
@@ -904,9 +913,9 @@ class CropDetBank(ReductionStep):
 
     def execute(self, reducer, workspace):
         if len(self.out_container) > 0:
-            reducer.wksp_name = self.out_container[0]
+            reducer.output_wksp = self.out_container[0]
         # Get the detector bank that is to be used in this analysis leave the complete workspace
-        CropWorkspace(workspace, reducer.wksp_name,
+        CropWorkspace(workspace, reducer.output_wksp,
             StartWorkspaceIndex = reducer.instrument.cur_detector().get_first_spec_num() - 1,
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
@@ -1063,9 +1072,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()
         #set these variables to None, which means they haven't been set and defaults will be set further down
-        self._lambda_min = None
+        self.lambda_min = None
         self._min_set = False
-        self._lambda_max = None
+        self.lambda_max = None
         self._max_set = False
         self.fit_method = None
         self._method_set = False
@@ -1076,35 +1085,20 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         self._trans_spec = None
         # use InterpolatingRebin 
         self.interpolate = None
-
-    def get_lambdamin(self, instrum):
-        """
-            Gets lambdamin or the default if no value has been set
-        """
-        if self._lambda_min is None:
-            return instrum.WAV_RANGE_MIN
-        else:
-            return self._lambda_min
-
-    def get_lambdamax(self, instrum):
-        """
-            Gets lambdamax or the default if no value has been set
-        """
-        if self._lambda_max is None:
-            return instrum.WAV_RANGE_MAX
-        else:
-            return self._lambda_max
+        # a custom transmission workspace, if we have this there is much less to do 
+        self.calculated_samp = None
+        self.calculated_can = None
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
         if min: min = float(min)
         if max: max = float(max)
         if not min is None:
             if (not self._min_set) or override:
-                self._lambda_min = min
+                self.lambda_min = min
                 self._min_set = override
         if not max is None:
             if (not self._max_set) or override:
-                self._lambda_max = max
+                self.lambda_max = max
                 self._max_set = override
 
         if fit_method:
@@ -1179,10 +1173,30 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
-        if (self.loader is None) or (not self.loader.trans_name):
-            #not having transmission files is not an error, we just do nothing
-            return
+        if self.calculated_samp:
+            if self.trans_runs():
+                raise RuntimeError('Canot use TransWorkspace() and TransmissionSample() together')
+            trans_ws = self.calculated_samp
+        else:
+            if self.trans_runs():
+                trans_ws = self.calculate(reducer)
+            else:
+                #not having transmission files is not an error, we just do nothing
+                return None
+                   
+        try:
+            Divide(workspace, trans_ws, workspace)
+        except:
+            raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
 
+
+    def trans_runs(self):
+        if (self.loader is None) or (not self.loader.trans_name):
+            return False
+        else:
+            return True
+
+    def calculate(self, reducer):       
         #get the settings required to do the calculation
         trans_raw = self.loader.trans_name
         direct_raw = self.loader.direct_name
@@ -1191,7 +1205,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[self.loader.can])
         if not direct_raw:
             raise RuntimeError('Attempting transmission correction with no direct file')
-
 
         if self.fit_method:
             fit_meth = self.fit_method
@@ -1216,8 +1229,14 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
-            translambda_min = reducer.get_trans_lambdamin()
-            translambda_max = reducer.get_trans_lambdamax()
+            if self.lambda_min:
+                translambda_min = self.lambda_min
+            else:
+                translambda_min = reducer.to_wavelen.wav_low
+            if self.lambda_max:
+                translambda_max = self.lambda_max
+            else:
+                translambda_max = reducer.to_wavelen.wav_high
             wavbin = str(reducer.to_wavelen.get_rebin())
 
         #set up the input workspaces
@@ -1255,12 +1274,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             else: 
                 trans_ws = result
         except:
-            raise RuntimeError("Failed to Rebin the workspaces %s and %s to be the same."%(workspace, trans_ws))
+            raise RuntimeError("Failed to Rebin the the transmission workspace %s to match the sample" %(workspace))
 
-        try:
-            Divide(workspace, trans_ws, workspace)
-        except:
-            raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
+        return trans_ws
     
     def get_trans_spec(self):
         return self._trans_spec
@@ -1323,8 +1339,8 @@ class CorrectToFileISIS(sans_reduction_steps.CorrectToFileStep):
     def execute(self, reducer, workspace):
         if self._filename:
             if len(self.out_container) > 0:
-                reducer.wksp_name = self.out_container[0]
-                CorrectToFile(workspace, self._filename, reducer.wksp_name,
+                reducer.output_wksp = self.out_container[0]
+                CorrectToFile(workspace, self._filename, reducer.output_wksp,
                               self._corr_type, self._operation)
 
 class UserFile(ReductionStep):
@@ -1698,8 +1714,7 @@ class GetOutputName(ReductionStep):
             @param reducer the reducer object that called this step
             @param workspace un-used
         """
-        run = reducer._data_files.values()[0]
-        name = run.split('_')[0]
+        name = reducer.sample_wksp.split('_')[0]
         
         name += reducer.instrument.cur_detector().name('short')
         name += '_' + reducer.to_Q.output_type

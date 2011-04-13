@@ -36,33 +36,20 @@ class ISISReducer(SANSReducer):
     
     ## Path for user settings files
     _user_file_path = '.'
-    
-    def __init__(self):
-        SANSReducer.__init__(self)
-
-        self._init_steps()
-        self.wksp_name = None
-        self.full_trans_wav = True
-        self._monitor_set = False
-
-        self._prepare_raw = []
-        self._fork_ws = []
-        self._conv_Q = []
-        self._can = []
-        self._tidy = []
 
     def _to_steps(self):
         """
             Defines the steps that are run and their order
         """
+        self._prepare_raw = []
 #        self._reduction_steps.append(self.data_loader)
 #        self._reduction_steps.append(self.user_settings)
 #        self._prepare_raw.append(self.place_det_sam)
         self._prepare_raw.append(self.geometry)
         #---- creates a new workspace leaving the raw data behind 
-        self._fork_ws.append(self.out_name)
+        self._fork_ws = [self.out_name]
         #---- the can special reducer uses the steps starting with the next one
-        self._conv_Q.append(self.flood_file)
+        self._conv_Q = [self.flood_file]
         self._conv_Q.append(self.crop_detector)
         self._conv_Q.append(self.mask)
         self._conv_Q.append(self.to_wavelen)
@@ -72,18 +59,19 @@ class ISISReducer(SANSReducer):
         self._conv_Q.append(self._geo_corr)
         self._conv_Q.append(self.to_Q)
         #---- the can special reducer ends on the previous step
-        self._can.append(self.background_subtracter)
+        self._can = [self.background_subtracter]
         
-        self._tidy.append(self._zero_error_flags)
+        self._tidy = [self._zero_error_flags]
         self._tidy.append(self._rem_zeros)
         
         self._reduction_steps = self._prepare_raw + self._fork_ws + self._conv_Q + self._can+ self._tidy
+        #list of all the steps to go from a loaded workspace to a just before the convert to Q algorithm
+        self._no_Q = self._conv_Q[0:len(self._conv_Q)-1]
 
     def _init_steps(self):
         """
             Initialises the steps that are not initialised by (ISIS)CommandInterface.
         """
-        #_to_steps() defines the order the steps are run in, any steps not in that list wont be run  
         
         self.data_loader =     None
         self.user_settings =   None
@@ -108,37 +96,47 @@ class ISISReducer(SANSReducer):
         self._zero_error_flags=isis_reduction_steps.ReplaceErrors()
         self._rem_zeros =      sans_reduction_steps.StripEndZeros()
 
-    def pre_process(self): 
-        """
-            Reduction steps that are meant to be executed only once per set
-            of data files. After this is executed, all files will go through
-            the list of reduction steps.
-        """
-        self._to_steps()
+    def __init__(self):
+        SANSReducer.__init__(self)
+
+        self._init_steps()
+        self.output_wksp = None
+        self.sample_wksp = None
+        self.full_trans_wav = True
+        self._monitor_set = False
 
     def _reduce(self):
         """
             Execute the list of all reduction steps
         """
+        # defines the order the steps are run in, any steps not in that list wont be run  
+        self._to_steps()
+
         # Check that an instrument was specified
         if self.instrument is None:
             raise RuntimeError, "Reducer: trying to run a reduction without an instrument specified"
 
-        # Go through the list of steps that are common to all data files
-        self.pre_process()
-
-        #self._data_files[final_workspace] = self._data_files[file_ws]
-        #del self._data_files[file_ws]
-        #----> can_setup.setReducedWorkspace(tmp_can)
-        
+        self.output_wksp = self.sample_wksp
         #Correct(sample_setup, wav_start, wav_end, use_def_trans, finding_centre)
-        self._run_steps(start_ind=0, stop_ind=len(self._reduction_steps))
+        self._run(self._reduction_steps)
 
         #any clean up, possibly removing workspaces 
         self.post_process()
         self.clean = False
         
-        return self.wksp_name
+        return self.output_wksp
+    
+    def run_no_Q(self):
+        self._to_steps()
+
+        self._run(self._no_Q)
+        self.clean = False
+        
+    def _run(self, steps):
+        for item in steps:
+            if item:
+                item.execute(self, self.output_wksp)
+
     
     def reduce_can(self, to_reduce, new_wksp=None):
         """
@@ -154,6 +152,10 @@ class ISISReducer(SANSReducer):
         # Can correction
         new_reducer = copy.deepcopy(self)
 
+        #set the workspace that we've been setting up as the one to be processed 
+        new_reducer.sample_wksp = to_reduce
+        new_reducer.output_wksp = new_wksp
+
         #give the name of the new workspace to the first algorithm that was run
         new_reducer.flood_file.out_container[0] = new_wksp
         #the line below is required if the step above is optional
@@ -161,17 +163,18 @@ class ISISReducer(SANSReducer):
         
         if new_reducer.transmission_calculator:
             new_reducer.transmission_calculator.set_loader(new_reducer.can_trans_load)
+            new_reducer.transmission_calculator.calculated_samp = \
+                new_reducer.transmission_calculator.calculated_can
 
         norm_step_ind = new_reducer.step_num(new_reducer.norm_mon)
         new_reducer._reduction_steps[norm_step_ind] = \
             isis_reduction_steps.NormalizeToMonitor(raw_ws=to_reduce)
            
-        #set the workspace that we've been setting up as the one to be processed 
-        new_reducer.set_process_single_workspace(to_reduce)
         self.run_conv_Q(new_reducer)
 
     def run_from_raw(self):
         """
+            Assumes the reducer is copied from a running one
             Executes all the steps after moving the components
         """
         self._run_steps(
@@ -182,10 +185,11 @@ class ISISReducer(SANSReducer):
         self.post_process()
         self.clean = False
         
-        return self.wksp_name
+        return self.output_wksp
 
     def run_conv_Q(self, reducer=None):
         """
+            Assumes the reducer is copied from a running one
             Executes all the commands required to correct a can workspace
         """
         if not reducer:
@@ -196,9 +200,10 @@ class ISISReducer(SANSReducer):
         reducer._run_steps(
                           start_ind=reducer.step_num(steps[0]),
                           stop_ind=reducer.step_num(steps[len(steps)-1]))
-
+    
     def _run_steps(self, start_ind = None, stop_ind = None):
         """
+            Assumes the reducer is copied from a running one
             Run part of the chain, starting at the first specified step
             and ending at the last. If start or finish are set to None
             they will default to the first and last steps in the chain
@@ -207,36 +212,20 @@ class ISISReducer(SANSReducer):
             @param start_ind the index number of the first step to run
             @param end_ind the index of the last step that will be run
         """
+
         if start_ind is None:
             start_ind = 0
 
         if stop_ind is None:
             stop_ind = len(self._reduction_steps)
 
-        for file_ws in self._data_files:
-            self.wksp_name = self._data_files.values()[0]
-            for item in self._reduction_steps[start_ind:stop_ind+1]:
-                if not item is None:
-                    item.execute(self, self.wksp_name)
-
-
-                #TODO: change the following
-                finding_centre = False
-        
-                    
-                if finding_centre:
-                    self.final_workspace = file_ws.split('_')[0] + '_quadrants'
-                 
-                # Crop Workspace to remove leading and trailing zeroes
-                #TODO: deal with this once we have the final workspace name sorted out
-                if finding_centre:
-                    quadrants = {1:'Left', 2:'Right', 3:'Up',4:'Down'}
-                    for key, value in quadrants.iteritems():
-                        old_name = self.final_workspace + '_' + str(key)
-                        RenameWorkspace(old_name, value)
+        self.output_wksp = self.sample_wksp
+        for item in self._reduction_steps[start_ind:stop_ind+1]:
+            if not item is None:
+                item.execute(self, self.output_wksp)
 
         self.clean = False
-        return self.wksp_name
+        return self.output_wksp
 
 
     def post_process(self):
@@ -245,7 +234,7 @@ class ISISReducer(SANSReducer):
             user_file = 'None'
         else:
             user_file = self.user_settings.filename
-        AddSampleLog(self.wksp_name, "UserFile", user_file)
+        AddSampleLog(self.output_wksp, "UserFile", user_file)
 
     def set_user_path(self, path):
         """
@@ -262,26 +251,6 @@ class ISISReducer(SANSReducer):
     
     user_file_path = property(get_user_path, set_user_path, None, None)
 
-    def set_run_number(self, workspace):
-        """
-            The run number is a number followed by a . and then
-            the extension of the run file to load
-            @param workspace: optional name of the workspace for this data,
-                default will be the name of the file 
-        """
-        self._data_files.clear()
-        self._data_files[workspace] = workspace
-
-    def get_sample(self):
-        """
-            Returns the name of the raw workspace that was
-            loaded to run
-        """ 
-        if len(self._data_files) > 0:
-            return self._data_files.values()[0]
-        else:
-            return None
-    
     def set_background(self, can_run=None, reload = True, period = -1):
         """
             Sets the can data to be subtracted from sample data files
@@ -294,7 +263,6 @@ class ISISReducer(SANSReducer):
 
     def set_trans_fit(self, lambda_min=None, lambda_max=None, fit_method="Log"):
         self.transmission_calculator.set_trans_fit(lambda_min, lambda_max, fit_method, override=True)
-        self.transmission_calculator.enabled = True
         
     def set_trans_sample(self, sample, direct, reload=True, period_t = -1, period_d = -1):
         if not issubclass(self.samp_trans_load.__class__, sans_reduction_steps.BaseTransmission):
@@ -322,27 +290,6 @@ class ISISReducer(SANSReducer):
 
         if (interp == None) or override:
             self.transmission_calculator.interpolate = interp
-
-    def get_trans_lambdamin(self):
-        """
-            Gets the value of the lowest wavelength that is to
-            be used in the transmission calculation
-        """
-        return self.transmission_calculator.get_lambdamin(self.instrument)
-
-    def get_trans_lambdamax(self):
-        """
-            Gets the value of the highest wavelength that is to
-            be used in the transmission calculation
-        """
-        return self.transmission_calculator.get_lambdamax(self.instrument)
-
-    def set_process_single_workspace(self, wk_name):
-        """
-            Clears the list of data files and inserts one entry
-            to the workspace whose name is given
-        """
-        self._data_files = {'dummy' : wk_name}
 
     def step_num(self, step):
         """

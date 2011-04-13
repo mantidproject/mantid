@@ -7,6 +7,7 @@ from reduction.command_interface import ReductionSingleton
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
+import centre_finder as centre
 import SANSReduction
 import MantidFramework
 import copy
@@ -112,13 +113,23 @@ def TransFit(mode,lambdamin=None,lambdamax=None):
     _printMessage("TransFit(\"" + message + "\")")
 
     ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
+    
+def TransWorkspace(sample, can = None):
+    """
+        Use a given workpspace that contains pre-calculated transmissions
+        @param sample the workspace to use for the sample
+        @param can calculated transmission for the can 
+    """
+    ReductionSingleton().transmission_calculator.calculated_samp = sample 
+    ReductionSingleton().transmission_calculator.calculated_can = can 
 
 def AssignCan(can_run, reload = True, period = -1):
     _printMessage('AssignCan("' + can_run + '")')
     ReductionSingleton().set_background(can_run, reload = reload, period = period)
 
-    return ReductionSingleton().background_subtracter.assign_can(
-                                                    ReductionSingleton())
+    logs = ReductionSingleton().background_subtracter.assign_can(
+          ReductionSingleton())
+    return ReductionSingleton().background_subtracter.workspace.wksp_name, logs
 
 def TransmissionSample(sample, direct, reload = True, period_t = -1, period_d = -1):
     """
@@ -154,14 +165,12 @@ def AssignSample(sample_run, reload = True, period = -1):
     ReductionSingleton().data_loader = isis_reduction_steps.LoadSample(
                                     sample_run, reload, period)
 
-    sample_wksp, logs = ReductionSingleton().data_loader.execute(
+    logs = ReductionSingleton().data_loader.execute(
                                             ReductionSingleton(), None)
-
-    ReductionSingleton().set_run_number(sample_wksp)
     
     global LAST_SAMPLE
-    LAST_SAMPLE = sample_wksp 
-    return sample_wksp, logs
+    LAST_SAMPLE = ReductionSingleton().sample_wksp 
+    return ReductionSingleton().sample_wksp, logs
 
 def SetCentre(xcoord, ycoord):
     _printMessage('SetCentre(' + str(xcoord) + ',' + str(ycoord) + ')')
@@ -191,14 +200,6 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
     ReductionSingleton().to_wavelen.set_range(wav_start, wav_end)
     _printMessage('Running reduction for ' + str(ReductionSingleton().to_wavelen))
 
-
-
-    if DEL__FINDING_CENTRE_ == True:
-        final_workspace = wsname_cache.split('_')[0] + '_quadrants'
-        if reduction_chain.to_Q.output_type == '1D':
-                GroupIntoQuadrants(tmpWS, final_result, maskpt_rmin[0], maskpt_rmin[1], Q_REBIN)
-                return
-
     result = Reduce()
     if name_suffix:
         old = result
@@ -216,10 +217,6 @@ def CompWavRanges(wavelens, plot=True):
     """ 
 
     _printMessage('CompWavRanges( %s,plot=%s)'%(str(wavelens),plot))
-        
-    if not ReductionSingleton().full_trans_wav:
-        issueWarning('Using full range for the transmission calculation, overrides setting')
-        ReductionSingleton().full_trans_wav = True 
 
     #this only makes sense for 1D reductions
     if ReductionSingleton().to_Q.output_type == '2D':
@@ -511,7 +508,7 @@ def DisplayMask(mask_worksp=None):
     
     if not mask_worksp:
         mask_worksp = '__CurrentMask'
-        samp = ReductionSingleton().get_sample()
+        samp = ReductionSingleton().sample_wksp
         global LAST_SAMPLE
         samp = LAST_SAMPLE 
         
@@ -583,39 +580,41 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
-        sample_ws = SANSReduction.AssignSample(run_file)[0]
-        if (not sample_ws) or (len(sample_ws) == 0):
-            issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
-            return
-        
-        #Sample trans
-        run_file = run['sample_trans']
-        run_file2 = run['sample_direct_beam']
-        ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
-        if len(run_file) > 0 and len(ws1) == 0:
-            issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
-            return
-        if len(run_file2) > 0 and len(ws2) == 0: 
-            issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
-            return
-        
-        # Sans Can 
-        run_file = run['can_sans']
-        can_ws = AssignCan(run_file + format)[0]
-        if run_file != '' and len(can_ws) == 0:
-            issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
-            return
+    """
+        Assumes that the run is setup, sample assigned etc
+    """
+    sample_ws = SANSReduction.AssignSample(run_file)[0]
+    if (not sample_ws) or (len(sample_ws) == 0):
+        issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
+        return
+    
+    #Sample trans
+    run_file = run['sample_trans']
+    run_file2 = run['sample_direct_beam']
+    ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
+    if len(run_file) > 0 and len(ws1) == 0:
+        issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
+        return
+    if len(run_file2) > 0 and len(ws2) == 0: 
+        issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
+        return
+    
+    # Sans Can 
+    run_file = run['can_sans']
+    can_ws = AssignCan(run_file + format)[0]
+    if run_file != '' and len(can_ws) == 0:
+        issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
+        return
 
-        #Can trans
-        run_file = run['can_trans']
-        run_file2 = run['can_direct_beam']
-        ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
+    #Can trans
+    run_file = run['can_trans']
+    run_file2 = run['can_direct_beam']
+    ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
     
 def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     XSTEP = YSTEP = ReductionSingleton().cen_find_step
 
     setting = copy.deepcopy(ReductionSingleton().reference())
-    ReductionSingleton().center_finder = True
 
     LimitsR(str(float(rlow)/1000.), str(float(rupp)/1000.), quiet=True)
 
@@ -630,20 +629,30 @@ def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
 
     mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
     _printMessage("Starting centre finding routine ...")
-    
+
+    #make copies of the workspaces and the reduction chain object
+    samp = ReductionSingleton().sample_wksp + '_cen'
+    CloneWorkspace(ReductionSingleton().sample_wksp, workspace)
+    if ReductionSingleton().background_subtracter:
+        can = reducer.background_subtracter.workspace.wksp_name+'cen'
+        CloneWorkspace(reducer.background_subtracter.workspace.wksp_name, can)
+    centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+    centre_reduction.sample_wksp = samp
+    centre_reduction.background_subtracter.workspace.wksp_name = can
+
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
-    oldX2,oldY2 = RunReduction()
+    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction)
     # take first trial step
     XNEW = x_start + XSTEP
     YNEW = y_start + YSTEP
 
     for ITER_NUM in range(1, MaxIter+1):
         _printMessage("Iteration " + str(ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
-        
+
         ReductionSingleton().set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
-        
-        newX2,newY2 = RunReduction()
+
+        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, samp, can)
         
         #have we stepped across the y-axis that goes through the beam center?  
         if newX2 > oldX2:
@@ -667,11 +676,10 @@ def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
         YNEW -= YSTEP
 
     
-    # return the settings to their state before we started looking for the center 
-    ReductionSingleton().replace(setting)
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
     _printMessage("Centre coordinates updated: [" + str(XNEW)+ ","+ str(YNEW) + ']')
+    
 
     
     # Reload the sample and can
@@ -681,7 +689,6 @@ def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
         _assignHelper(_CAN_RUN, False, PERIOD_NOS["SCATTER_CAN"])
         global _CAN_SETUP
         _CAN_SETUP = None
-    
 
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
