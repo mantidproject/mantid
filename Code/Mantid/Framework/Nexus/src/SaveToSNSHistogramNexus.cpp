@@ -1,10 +1,10 @@
-// SaveSNSNexus
+// SaveToSNSHistogramNexus
 // @author Freddie Akeroyd, STFC ISIS Faility
-// @author Ronald Fowler, STFC eScience. Modified to fit with SaveSNSNexusProcessed
+// @author Ronald Fowler, STFC eScience. Modified to fit with SaveToSNSHistogramNexusProcessed
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidNexus/SaveSNSNexus.h"
+#include "MantidNexus/SaveToSNSHistogramNexus.h"
 #include "MantidDataObjects/Workspace1D.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
@@ -32,10 +32,10 @@ namespace NeXus
 {
 
   // Register the algorithm into the algorithm factory
-  DECLARE_ALGORITHM(SaveSNSNexus)
+  DECLARE_ALGORITHM(SaveToSNSHistogramNexus)
   
   /// Sets documentation strings for this algorithm
-  void SaveSNSNexus::initDocs()
+  void SaveToSNSHistogramNexus::initDocs()
   {
     this->setWikiSummary(" Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors. ");
     this->setOptionalMessage("Saves a workspace into SNS histogrammed NeXus format, using an original file as the starting point. This only works for instruments with Rectangular Detectors.");
@@ -48,12 +48,12 @@ namespace NeXus
   using namespace Geometry;
 
   /// Empty default constructor
-  SaveSNSNexus::SaveSNSNexus() : Algorithm() {}
+  SaveToSNSHistogramNexus::SaveToSNSHistogramNexus() : Algorithm() {}
 
   /** Initialisation method.
    *
    */
-  void SaveSNSNexus::init()
+  void SaveToSNSHistogramNexus::init()
   {
     // Declare required parameters, filename with ext {.nx,.nx5,xml} and input workspac
     std::vector<std::string> exts;
@@ -80,7 +80,7 @@ namespace NeXus
 //   *
 //   *  @throw runtime_error Thrown if algorithm cannot execute
 //   */
-//  void SaveSNSNexus::exec()
+//  void SaveToSNSHistogramNexus::exec()
 //  {
 //    throw std::runtime_error("Temporarily disabled because it does not work on RHEL5.\n");
 //  }
@@ -88,7 +88,7 @@ namespace NeXus
 
   //------------------------------------------------------------------------
   /** Append to current_path */
-  int SaveSNSNexus::add_path(const char* path)
+  int SaveToSNSHistogramNexus::add_path(const char* path)
   {
     int i;
     i = strlen(current_path);
@@ -99,7 +99,7 @@ namespace NeXus
 
   //------------------------------------------------------------------------
   /** Remove the last part of the path */
-  int SaveSNSNexus::remove_path(const char* path)
+  int SaveToSNSHistogramNexus::remove_path(const char* path)
   {
     char *tstr;
     tstr = strrchr(current_path, '/');
@@ -122,7 +122,7 @@ namespace NeXus
   /** Performs the copying from the input to the output file,
    *  while modifying the data and time_of_flight fields.
    */
-  int SaveSNSNexus::copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access)
+  int SaveToSNSHistogramNexus::copy_file(const char* inFile, int nx_read_access, const char* outFile, int nx_write_access)
   {
     int i, nx_is_definition = 0;
     char* tstr;
@@ -215,7 +215,7 @@ namespace NeXus
    * @param bank :: name of the bank being written.
    * @return error code
    */
-  int SaveSNSNexus::WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
+  int SaveToSNSHistogramNexus::WriteOutDataOrErrors(boost::shared_ptr<Mantid::Geometry::RectangularDetector> det,
       int x_pixel_slab,
       const char * field_name, const char * errors_field_name,
       bool doErrors, bool doBoth, int is_definition,
@@ -405,7 +405,7 @@ namespace NeXus
    * @param is_definition
    * @return error code
    */
-  int SaveSNSNexus::WriteDataGroup(std::string bank, int is_definition)
+  int SaveToSNSHistogramNexus::WriteDataGroup(std::string bank, int is_definition)
   {
     int dataType, dataRank, dataDimensions[NX_MAXRANK];
     NXname name;
@@ -481,7 +481,7 @@ namespace NeXus
 
   //------------------------------------------------------------------------
   /** Prints the contents of each group as XML tags and values */
-  int SaveSNSNexus::WriteGroup (int is_definition)
+  int SaveToSNSHistogramNexus::WriteGroup (int is_definition)
   {
     int status, dataType, dataRank, dataDimensions[NX_MAXRANK];
     NXname name, theClass;
@@ -620,7 +620,7 @@ namespace NeXus
 
   //------------------------------------------------------------------------
   /** Copy the attributes from input to output */
-  int SaveSNSNexus::WriteAttributes (int is_definition)
+  int SaveToSNSHistogramNexus::WriteAttributes (int is_definition)
   {
     (void) is_definition;
 
@@ -662,7 +662,7 @@ namespace NeXus
    *
    *  @throw runtime_error Thrown if algorithm cannot execute
    */
-  void SaveSNSNexus::exec()
+  void SaveToSNSHistogramNexus::exec()
   {
     //NXMSetError(NULL, nexus_print_error);
     NXMEnableErrorReporting();

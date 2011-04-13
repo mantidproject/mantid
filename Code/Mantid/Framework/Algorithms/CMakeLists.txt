@@ -395,7 +395,7 @@ set ( TEST_FILES
 	test/RemoveLowResTOFTest.h
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
-	test/SaveSNSNexusTest.h
+	test/SaveToSNSHistogramNexusTest.h
 	test/ScaleTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h

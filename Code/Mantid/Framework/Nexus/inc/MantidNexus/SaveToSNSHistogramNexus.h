@@ -53,16 +53,16 @@ namespace Mantid
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
 
-    class DLLExport SaveSNSNexus : public API::Algorithm
+    class DLLExport SaveToSNSHistogramNexus : public API::Algorithm
     {
     public:
       /// Default constructor
-      SaveSNSNexus();
+      SaveToSNSHistogramNexus();
 
       /// Destructor
-      ~SaveSNSNexus() {}
+      ~SaveToSNSHistogramNexus() {}
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "SaveSNSNexus";};
+      virtual const std::string name() const { return "SaveToSNSHistogramNexus";};
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
       /// Algorithm's category for identification overriding a virtual method

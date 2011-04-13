@@ -22,7 +22,7 @@ set ( SRC_FILES src/LoadEventNexus.cpp
 		src/SaveISISNeXus.cpp
 		src/SaveNexusProcessed.cpp
 		src/SaveNXSPE.cpp
-		src/SaveSNSNexus.cpp 
+		src/SaveToSNSHistogramNexus.cpp 
 		src/LoadRaw/byte_rel_comp.cpp
 		src/LoadRaw/isisraw2.cpp
 		src/LoadRaw/isisraw.cpp
@@ -54,7 +54,7 @@ set ( INC_FILES inc/MantidNexus/LoadEventNexus.h
 		inc/MantidNexus/SaveISISNeXus.h
 		inc/MantidNexus/SaveNexusProcessed.h
 		inc/MantidNexus/SaveNXSPE.h
-		inc/MantidNexus/SaveSNSNexus.h )
+		inc/MantidNexus/SaveToSNSHistogramNexus.h )
 
 set ( TEST_FILES test/LoadEventNexusTest.h
          test/LoadISISNexusTest.h

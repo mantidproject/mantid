@@ -2,7 +2,7 @@
 #define SAVESNSNEXUSTEST_H_
 
 #include <cxxtest/TestSuite.h>
-#include "MantidNexus/SaveSNSNexus.h"
+#include "MantidNexus/SaveToSNSHistogramNexus.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidAPI/IAlgorithm.h"
 
@@ -10,7 +10,7 @@ using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
 
-class SaveSNSNexusTest : public CxxTest::TestSuite
+class SaveToSNSHistogramNexusTest : public CxxTest::TestSuite
 {
 public: 
   
@@ -20,6 +20,7 @@ public:
     TS_ASSERT( algToBeTested.isInitialized() );
   }
   
+  /* Test is disabled because it is slow and requires large files */
   void xtestExec()
   {
     IAlgorithm_sptr alg( AlgorithmFactory::Instance().create("LoadSNSEventNexus", 1) );
@@ -38,7 +39,7 @@ public:
     rebin->execute();
     TS_ASSERT( rebin->isExecuted() );
 
-    IAlgorithm_sptr save( AlgorithmFactory::Instance().create("SaveSNSNexus", 1) );
+    IAlgorithm_sptr save( AlgorithmFactory::Instance().create("SaveToSNSHistogramNexus", 1) );
     save->initialize();
     save->setProperty("InputFilename", "/home/8oz/data/TOPAZ_1786.nxs");
     save->setProperty("InputWorkspace", "savesnsnexus_workspace");
@@ -50,10 +51,10 @@ public:
 
   
 private:
-  SaveSNSNexus algToBeTested;
+  SaveToSNSHistogramNexus algToBeTested;
   std::string outputFile;
   std::string title;
   int entryNumber;
   
 };
-#endif /*SaveSNSNexusTEST_H_*/
+#endif /*SaveToSNSHistogramNexusTEST_H_*/

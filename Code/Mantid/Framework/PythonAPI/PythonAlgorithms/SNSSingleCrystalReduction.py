@@ -301,7 +301,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
             nxsfile = self._findData(int(name), ".nxs")
         self.log().information(nxsfile)
         if "nxs" in self._outTypes:
-            SaveSNSNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
+            SaveToSNSHistogramNexus(InputFilename=nxsfile,InputWorkspace=wksp, OutputFilename=filename+"_mantid.nxs", Compress=True)
         if "gsas" in self._outTypes:
             SaveGSS(InputWorkspace=wksp, Filename=filename+".gsa", SplitFiles="False", Append=False, MultiplyByBinWidth=normalized, Bank=info.bank, Format="SLOG")
         if "fullprof" in self._outTypes:
