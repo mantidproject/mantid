@@ -11,6 +11,7 @@ set (SRC_FILES
 	src/BinToMDHistoWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/OneStepMDEW.cpp
+	src/MDEWPeakIntegration.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
@@ -31,6 +32,7 @@ set (INC_FILES
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
+	inc/MantidMDEvents/MDEWPeakIntegration.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDHistoWorkspace.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
@@ -48,6 +50,7 @@ set (TEST_FILES
 	test/MDEventFactoryTest.h
 	test/CreateMDEventWorkspaceTest.h
 	test/MakeDiffractionMDEventWorkspaceTest.h
+	test/MDEWPeakIntegrationTest.h
 	test/MDBinTest.h
 	test/MDHistoWorkspaceTest.h
 	test/FakeMDEventDataTest.h
