@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_spreader.ui'
 #
-# Created: Fri Apr  1 10:24:47 2011
+# Created: Wed Apr 13 09:27:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -161,23 +161,23 @@ class Ui_GroupBox(object):
         spacerItem2 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem2, 0, 1, 1, 1)
         self.sample_scatt_plot = QtGui.QPushButton(GroupBox)
-        self.sample_scatt_plot.setMinimumSize(QtCore.QSize(85, 27))
-        self.sample_scatt_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.sample_scatt_plot.setMinimumSize(QtCore.QSize(0, 0))
+        self.sample_scatt_plot.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sample_scatt_plot.setObjectName("sample_scatt_plot")
         self.gridLayout.addWidget(self.sample_scatt_plot, 0, 4, 1, 1)
         self.sample_spread_plot = QtGui.QPushButton(GroupBox)
-        self.sample_spread_plot.setMinimumSize(QtCore.QSize(85, 27))
-        self.sample_spread_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.sample_spread_plot.setMinimumSize(QtCore.QSize(0, 0))
+        self.sample_spread_plot.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sample_spread_plot.setObjectName("sample_spread_plot")
         self.gridLayout.addWidget(self.sample_spread_plot, 1, 4, 1, 1)
         self.direct_scatt_plot = QtGui.QPushButton(GroupBox)
-        self.direct_scatt_plot.setMinimumSize(QtCore.QSize(85, 27))
-        self.direct_scatt_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.direct_scatt_plot.setMinimumSize(QtCore.QSize(0, 0))
+        self.direct_scatt_plot.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.direct_scatt_plot.setObjectName("direct_scatt_plot")
         self.gridLayout.addWidget(self.direct_scatt_plot, 2, 4, 1, 1)
         self.direct_spread_plot = QtGui.QPushButton(GroupBox)
-        self.direct_spread_plot.setMinimumSize(QtCore.QSize(85, 27))
-        self.direct_spread_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.direct_spread_plot.setMinimumSize(QtCore.QSize(0, 0))
+        self.direct_spread_plot.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.direct_spread_plot.setObjectName("direct_spread_plot")
         self.gridLayout.addWidget(self.direct_spread_plot, 3, 4, 1, 1)
         self.verticalLayout.addLayout(self.gridLayout)

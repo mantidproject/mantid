@@ -51,6 +51,18 @@
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
+           <property name="minimumSize">
+            <size>
+             <width>175</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>175</width>
+             <height>16777215</height>
+            </size>
+           </property>
            <property name="text">
             <string>Scattering data file:</string>
            </property>
@@ -66,7 +78,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>127</width>
+             <width>85</width>
              <height>20</height>
             </size>
            </property>
@@ -95,14 +107,14 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>85</width>
-             <height>27</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>85</width>
-             <height>27</height>
+             <width>16777215</width>
+             <height>16777215</height>
             </size>
            </property>
            <property name="toolTip">
@@ -123,14 +135,14 @@
            </property>
            <property name="minimumSize">
             <size>
-             <width>85</width>
-             <height>27</height>
+             <width>0</width>
+             <height>0</height>
             </size>
            </property>
            <property name="maximumSize">
             <size>
-             <width>85</width>
-             <height>27</height>
+             <width>16777215</width>
+             <height>16777215</height>
             </size>
            </property>
            <property name="toolTip">
@@ -210,8 +222,29 @@
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
+            <property name="horizontalSpacing">
+             <number>0</number>
+            </property>
             <item row="0" column="0">
              <widget class="QLabel" name="label_4">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>249</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>249</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Sample-dectector distance [mm]</string>
               </property>
@@ -438,6 +471,18 @@
                     <verstretch>0</verstretch>
                    </sizepolicy>
                   </property>
+                  <property name="minimumSize">
+                   <size>
+                    <width>180</width>
+                    <height>0</height>
+                   </size>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>180</width>
+                    <height>16777215</height>
+                   </size>
+                  </property>
                   <property name="text">
                    <string>Transmission:</string>
                   </property>
@@ -453,7 +498,7 @@
                   </property>
                   <property name="sizeHint" stdset="0">
                    <size>
-                    <width>151</width>
+                    <width>63</width>
                     <height>20</height>
                    </size>
                   </property>
@@ -599,7 +644,7 @@
                 <property name="maximumSize">
                  <size>
                   <width>16777215</width>
-                  <height>27</height>
+                  <height>16777215</height>
                  </size>
                 </property>
                 <property name="toolTip">
@@ -617,14 +662,14 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>85</width>
-                  <height>27</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>85</width>
-                  <height>27</height>
+                  <width>16777215</width>
+                  <height>16777215</height>
                  </size>
                 </property>
                 <property name="toolTip">
@@ -645,14 +690,14 @@
                 </property>
                 <property name="minimumSize">
                  <size>
-                  <width>85</width>
-                  <height>27</height>
+                  <width>0</width>
+                  <height>0</height>
                  </size>
                 </property>
                 <property name="maximumSize">
                  <size>
-                  <width>85</width>
-                  <height>27</height>
+                  <width>16777215</width>
+                  <height>16777215</height>
                  </size>
                 </property>
                 <property name="toolTip">

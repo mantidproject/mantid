@@ -226,6 +226,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QLabel" name="label_5">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -242,13 +248,13 @@
               <property name="minimumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
@@ -335,16 +341,22 @@
             </item>
             <item>
              <widget class="QPushButton" name="dark_plot_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
-                <width>85</width>
-                <height>27</height>
+                <width>0</width>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>85</width>
-                <height>27</height>
+                <width>16777215</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
@@ -397,6 +409,12 @@
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
              <widget class="QLabel" name="label_2">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>150</width>
@@ -411,7 +429,7 @@
             <item>
              <widget class="QLabel" name="label">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -441,13 +459,13 @@
               <property name="minimumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">
@@ -458,7 +476,7 @@
             <item>
              <widget class="QLabel" name="label_3">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                 <horstretch>0</horstretch>
                 <verstretch>0</verstretch>
                </sizepolicy>
@@ -488,13 +506,13 @@
               <property name="minimumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>0</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
                 <width>80</width>
-                <height>27</height>
+                <height>16777215</height>
                </size>
               </property>
               <property name="toolTip">

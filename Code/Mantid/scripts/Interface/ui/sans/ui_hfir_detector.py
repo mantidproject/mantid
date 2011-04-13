@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Mon Apr 11 13:47:50 2011
+# Created: Wed Apr 13 09:27:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -126,8 +126,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_plot_button.sizePolicy().hasHeightForWidth())
         self.data_file_plot_button.setSizePolicy(sizePolicy)
-        self.data_file_plot_button.setMinimumSize(QtCore.QSize(85, 27))
-        self.data_file_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button.setMinimumSize(QtCore.QSize(0, 0))
+        self.data_file_plot_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.data_file_plot_button.setObjectName("data_file_plot_button")
         self.horizontalLayout_4.addWidget(self.data_file_plot_button)
         spacerItem2 = QtGui.QSpacerItem(35, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
@@ -211,8 +211,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sensitivity_plot_button.sizePolicy().hasHeightForWidth())
         self.sensitivity_plot_button.setSizePolicy(sizePolicy)
-        self.sensitivity_plot_button.setMinimumSize(QtCore.QSize(85, 27))
-        self.sensitivity_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.sensitivity_plot_button.setMinimumSize(QtCore.QSize(0, 0))
+        self.sensitivity_plot_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sensitivity_plot_button.setObjectName("sensitivity_plot_button")
         self.horizontalLayout_9.addWidget(self.sensitivity_plot_button)
         spacerItem5 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
@@ -256,8 +256,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sensitivity_dark_plot_button.sizePolicy().hasHeightForWidth())
         self.sensitivity_dark_plot_button.setSizePolicy(sizePolicy)
-        self.sensitivity_dark_plot_button.setMinimumSize(QtCore.QSize(85, 27))
-        self.sensitivity_dark_plot_button.setMaximumSize(QtCore.QSize(85, 27))
+        self.sensitivity_dark_plot_button.setMinimumSize(QtCore.QSize(0, 0))
+        self.sensitivity_dark_plot_button.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sensitivity_dark_plot_button.setObjectName("sensitivity_dark_plot_button")
         self.horizontalLayout_10.addWidget(self.sensitivity_dark_plot_button)
         spacerItem6 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
@@ -431,8 +431,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_plot_button_2.sizePolicy().hasHeightForWidth())
         self.data_file_plot_button_2.setSizePolicy(sizePolicy)
-        self.data_file_plot_button_2.setMinimumSize(QtCore.QSize(85, 27))
-        self.data_file_plot_button_2.setMaximumSize(QtCore.QSize(85, 27))
+        self.data_file_plot_button_2.setMinimumSize(QtCore.QSize(0, 0))
+        self.data_file_plot_button_2.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.data_file_plot_button_2.setObjectName("data_file_plot_button_2")
         self.horizontalLayout_6.addWidget(self.data_file_plot_button_2)
         spacerItem12 = QtGui.QSpacerItem(26, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)

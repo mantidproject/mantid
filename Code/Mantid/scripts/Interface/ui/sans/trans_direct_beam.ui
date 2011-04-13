@@ -195,14 +195,14 @@
       <widget class="QPushButton" name="sample_plot">
        <property name="minimumSize">
         <size>
-         <width>85</width>
-         <height>27</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
-         <width>85</width>
-         <height>27</height>
+         <width>16777215</width>
+         <height>16777215</height>
         </size>
        </property>
        <property name="toolTip">
@@ -217,8 +217,8 @@
       <widget class="QPushButton" name="direct_plot">
        <property name="minimumSize">
         <size>
-         <width>85</width>
-         <height>27</height>
+         <width>0</width>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">

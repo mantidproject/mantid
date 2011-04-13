@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Fri Apr  1 10:24:47 2011
+# Created: Wed Apr 13 09:27:46 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -84,12 +84,12 @@ class Ui_GroupBox(object):
         spacerItem1 = QtGui.QSpacerItem(20, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.gridLayout.addItem(spacerItem1, 0, 1, 1, 1)
         self.sample_plot = QtGui.QPushButton(GroupBox)
-        self.sample_plot.setMinimumSize(QtCore.QSize(85, 27))
-        self.sample_plot.setMaximumSize(QtCore.QSize(85, 27))
+        self.sample_plot.setMinimumSize(QtCore.QSize(0, 0))
+        self.sample_plot.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.sample_plot.setObjectName("sample_plot")
         self.gridLayout.addWidget(self.sample_plot, 0, 4, 1, 1)
         self.direct_plot = QtGui.QPushButton(GroupBox)
-        self.direct_plot.setMinimumSize(QtCore.QSize(85, 27))
+        self.direct_plot.setMinimumSize(QtCore.QSize(0, 0))
         self.direct_plot.setMaximumSize(QtCore.QSize(85, 27))
         self.direct_plot.setObjectName("direct_plot")
         self.gridLayout.addWidget(self.direct_plot, 1, 4, 1, 1)
