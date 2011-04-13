@@ -13,158 +13,156 @@
 
 namespace Mantid
 {
-	namespace ICat
-	{
-		using namespace Kernel;
-		using namespace API;
+  namespace ICat
+  {
+    using namespace Kernel;
+    using namespace API;
 
-		DECLARE_ALGORITHM(CSearch)
+    DECLARE_ALGORITHM(CSearch)
 
-		/// Sets documentation strings for this algorithm
-		void CSearch::initDocs()
-		{
-		  this->setWikiSummary("Searches investigations ");
-		  this->setOptionalMessage("Searches investigations");
-		}
+    /// Sets documentation strings for this algorithm
+    void CSearch::initDocs()
+    {
+      this->setWikiSummary("Searches investigations ");
+      this->setOptionalMessage("Searches investigations");
+    }
 
-		/// Initialisation method.
-		void CSearch::init()
-		{
-			BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
-			mustBePositive->setLower(0.0);
+    /// Initialisation method.
+    void CSearch::init()
+    {
+      BoundedValidator<double>* mustBePositive = new BoundedValidator<double>();
+      mustBePositive->setLower(0.0);
 
+      declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
+      declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
+      declareProperty("Instrument","","The name of the instrument used for investigation search.");
+      declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
+      declareProperty("Keywords","","An option to search investigations data");
+      declareProperty("CaseSensitive", false, "Boolean option to do case sensitive ICat investigations search.");
 
-			
-			declareProperty("StartRun",0.0,mustBePositive,"The start run number for the range of investigations to be searched.");
-			declareProperty("EndRun",0.0,mustBePositive->clone(),"The end run number for the range of investigations to be searched.");
-			declareProperty("Instrument","","The name of the instrument used for investigation search.");
-			declareProperty("StartDate","",new DateValidator(),"The start date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-			declareProperty("EndDate","",new DateValidator(),"The end date for the range of investigations to be searched.The format is DD/MM/YYYY.");
-			declareProperty("Keywords","","An option to search investigations data");
-			declareProperty("CaseSensitive", false, "Boolean option to do case sensitive ICat investigations search.");
+      declareProperty("InvestigationName", "", "The name of the investigation to search.");
+      declareProperty("InvestigationType", "", "The type  of the investigation to search.");
+      declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
+      declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
+      declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
+      declareProperty("DataFileName","", "The name of the data file to search.");
 
-			declareProperty("InvestigationName", "", "The name of the investigation to search.");
-			declareProperty("InvestigationType", "", "The type  of the investigation to search.");
-			declareProperty("InvestigationAbstract", "", "The abstract of the investigation to search.");
-			declareProperty("SampleName", "", "The name of the sample used in the investigation to search.");
-			declareProperty("InvestigatorSurname", "", "The surname of the investigator associated to the investigation.");
-			declareProperty("DataFileName","", "The name of the data file to search.");
+      declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
+          "The name of the workspace that will be created to store the ICat investigations search result.");
 
-			declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
-				"The name of the workspace that will be created to store the ICat investigations search result.");
-			
-		}
-		/// Execution method.
-		void CSearch::exec()
-		{				
-			ICatalog_sptr catalog_sptr;
-			try
-			{			
-			 catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
-			
-			}
-			catch(Kernel::Exception::NotFoundError&)
-			{
-				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
-			} 
-			if(!catalog_sptr)
-			{
-				throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
-			}
-			
-			//get the inputs
-			CSearchParam params;
-			getInputProperties(params);
-			//create output workspace
-			ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace"); 
-			// search for investigations
-			catalog_sptr->search(params,ws_sptr);
-			//set output workspace
-			setProperty("OutputWorkspace",ws_sptr);
-			
-		}
-				
-		/**This method gets the input properties for the algorithm.
-		  * @param params :: reference to inputs object
-		 */
-		void CSearch::getInputProperties(CSearchParam& params)
-		{
-			double dstartRun=getProperty("StartRun");
-			if(dstartRun<0)
-			{
-				throw std::runtime_error("Invalid Start Run Number.Enter a valid run number to do investigations search");
-			}
-			double dendRun=getProperty("EndRun");
-			if(dendRun<0)
-			{
-				throw std::runtime_error("Invalid End Run Number.Enter a valid run number to do investigations search");
-			}
-			if(dstartRun>dendRun)
-			{
-				throw std::runtime_error("Run end number cannot be lower than run start number");
-			}
-			params.setRunStart(dstartRun);
-			params.setRunEnd(dendRun);
+    }
+    /// Execution method.
+    void CSearch::exec()
+    {
+      ICatalog_sptr catalog_sptr;
+      try
+      {
+        catalog_sptr=CatalogFactory::Instance().create(ConfigService::Instance().getFacility().catalogName());
 
-			std::string instrument = getPropertyValue("Instrument");
-			// as ICat API is expecting instrument name in uppercase 
-			std::transform(instrument.begin(),instrument.end(),instrument.begin(),toupper);
-			
-			if(!instrument.empty())
-			{
-				params.setInstrument(instrument);
-			}
+      }
+      catch(Kernel::Exception::NotFoundError&)
+      {
+        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file.");
+      }
+      if(!catalog_sptr)
+      {
+        throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
+      }
 
-			std::string date = getPropertyValue("StartDate");
-			time_t startDate = params.getTimevalue(date);
-			if(startDate==-1)
-			{
-				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
-			}
-			date = getPropertyValue("EndDate");
-			time_t endDate = params.getTimevalue(date);
-			if(endDate==-1)
-			{
-				throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
-			}
+      //get the inputs
+      CSearchParam params;
+      getInputProperties(params);
+      //create output workspace
+      ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");
+      // search for investigations
+      catalog_sptr->search(params,ws_sptr);
+      //set output workspace
+      setProperty("OutputWorkspace",ws_sptr);
 
-			if(startDate>endDate)
-			{
-				throw std::runtime_error("End date cannot be lower than Start date");
-			}
-			
-			params.setStartDate(startDate);
+    }
 
-			params.setEndDate(endDate);
+    /**This method gets the input properties for the algorithm.
+     * @param params :: reference to inputs object
+     */
+    void CSearch::getInputProperties(CSearchParam& params)
+    {
+      double dstartRun=getProperty("StartRun");
+      if(dstartRun<0)
+      {
+        throw std::runtime_error("Invalid Start Run Number.Enter a valid run number to do investigations search");
+      }
+      double dendRun=getProperty("EndRun");
+      if(dendRun<0)
+      {
+        throw std::runtime_error("Invalid End Run Number.Enter a valid run number to do investigations search");
+      }
+      if(dstartRun>dendRun)
+      {
+        throw std::runtime_error("Run end number cannot be lower than run start number");
+      }
+      params.setRunStart(dstartRun);
+      params.setRunEnd(dendRun);
 
-			std::string keyWords=getPropertyValue("Keywords");
-			params.setKeywords(keyWords);
+      std::string instrument = getPropertyValue("Instrument");
+      // as ICat API is expecting instrument name in uppercase
+      std::transform(instrument.begin(),instrument.end(),instrument.begin(),toupper);
 
-			bool bCase=getProperty("CaseSensitive");
-			params.setCaseSensitive(bCase);
+      if(!instrument.empty())
+      {
+        params.setInstrument(instrument);
+      }
 
-			std::string invstName=getPropertyValue("InvestigationName");
-			params.setInvestigationName(invstName);
+      std::string date = getPropertyValue("StartDate");
+      time_t startDate = params.getTimevalue(date);
+      if(startDate==-1)
+      {
+        throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
+      }
+      date = getPropertyValue("EndDate");
+      time_t endDate = params.getTimevalue(date);
+      if(endDate==-1)
+      {
+        throw std::runtime_error("Invalid date.Enter a valid date in DD/MM/YYYY format");
+      }
 
-			std::string invstType=getPropertyValue("InvestigationType");
-			params.setInvestigationType(invstType);
+      if(startDate>endDate)
+      {
+        throw std::runtime_error("End date cannot be lower than Start date");
+      }
 
-			std::string invstAbstarct=getPropertyValue("InvestigationAbstract");
-			params.setInvestigationAbstract(invstAbstarct);
+      params.setStartDate(startDate);
 
-			std::string sampleName=getPropertyValue("SampleName");
-			params.setSampleName(sampleName);
+      params.setEndDate(endDate);
 
-			std::string invstSurname=getPropertyValue("InvestigatorSurname");
-			params.setInvestigatorSurName(invstSurname);
+      std::string keyWords=getPropertyValue("Keywords");
+      params.setKeywords(keyWords);
 
-			std::string dataFileName=getPropertyValue("DataFileName");
-			params.setDatafileName(dataFileName);
+      bool bCase=getProperty("CaseSensitive");
+      params.setCaseSensitive(bCase);
+
+      std::string invstName=getPropertyValue("InvestigationName");
+      params.setInvestigationName(invstName);
+
+      std::string invstType=getPropertyValue("InvestigationType");
+      params.setInvestigationType(invstType);
+
+      std::string invstAbstarct=getPropertyValue("InvestigationAbstract");
+      params.setInvestigationAbstract(invstAbstarct);
+
+      std::string sampleName=getPropertyValue("SampleName");
+      params.setSampleName(sampleName);
+
+      std::string invstSurname=getPropertyValue("InvestigatorSurname");
+      params.setInvestigatorSurName(invstSurname);
+
+      std::string dataFileName=getPropertyValue("DataFileName");
+      params.setDatafileName(dataFileName);
 
 
-		}
+    }
 
-	
-	}
+
+  }
 }
 

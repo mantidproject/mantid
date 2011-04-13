@@ -8,9 +8,9 @@
 
 namespace Mantid
 {
-	namespace ICat
-	{
-/** CGetDataSets is a class responsible for GetDataSets algorithm.
+  namespace ICat
+  {
+    /** CGetDataSets is a class responsible for GetDataSets algorithm.
    This algorithm  gives the datsets for a given investigations record
 
     Required Properties:
@@ -19,7 +19,7 @@ namespace Mantid
     <LI> InputWorkspace -  Input workspace which saved last search</LI>
 	  <LI> OutputWorkspace - The putput workspace to store  </LI>
     </UL>
-   
+
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -41,32 +41,32 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    
-*/
-		class DLLExport CGetDataSets:public API::Algorithm
-		{
-		public:
-			/// constructor for CGetDataSets
-			CGetDataSets():API::Algorithm(){}
-			/// destructor for CGetDataSets
-			~CGetDataSets(){}
 
-		    /// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogGetDataSets"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
+     */
+    class DLLExport CGetDataSets:public API::Algorithm
+    {
+    public:
+      /// constructor for CGetDataSets
+      CGetDataSets():API::Algorithm(){}
+      /// destructor for CGetDataSets
+      ~CGetDataSets(){}
 
-		private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-			/// Overwrites Algorithm init method.
-			void init();
-			/// Overwrites Algorithm exec method
-			void exec();
-			
-		};
-	}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogGetDataSets"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
+
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Overwrites Algorithm init method.
+      void init();
+      /// Overwrites Algorithm exec method
+      void exec();
+
+    };
+  }
 }
 #endif

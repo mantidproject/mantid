@@ -7,9 +7,9 @@
 
 namespace Mantid
 {
-	namespace ICat
-	{
- /**CGetDataFiles is a class responsible for GetInvestigation algorithm.
+  namespace ICat
+  {
+    /**CGetDataFiles is a class responsible for GetInvestigation algorithm.
     This algorithm does the basic search and returns the investigations record
     Required Properties:
     <UL>
@@ -17,7 +17,7 @@ namespace Mantid
     <LI> InputWorkspace -  Input workspace which saved last search</LI>
 	  <LI> OutputWorkspace - The putput workspace to store  </LI>
     </UL>
-   
+
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 07/07/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -39,42 +39,41 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    
-	*/	
 
-		class DLLExport CGetDataFiles:public API::Algorithm
-		{
-		public:
+     */
+    class DLLExport CGetDataFiles:public API::Algorithm
+    {
+    public:
 
-			/// Constructor
-			CGetDataFiles():API::Algorithm(){}
-			/// Destructor
-			~CGetDataFiles(){}
+      /// Constructor
+      CGetDataFiles():API::Algorithm(){}
+      /// Destructor
+      ~CGetDataFiles(){}
 
-		    /// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogGetDataFiles"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogGetDataFiles"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
 
-		private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-			/// Overwrites Algorithm method.
-			void init();
-			/// Overwrites Algorithm method
-			void exec();
-			/// do datafile search
-			API::ITableWorkspace_sptr doDataFilesSearch();
-			/// This method returns true if  the given file name is raw file or nexus file otherwise false
-			bool isDataFile(const std::string& fileName);
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Overwrites Algorithm method.
+      void init();
+      /// Overwrites Algorithm method
+      void exec();
+      /// do datafile search
+      API::ITableWorkspace_sptr doDataFilesSearch();
+      /// This method returns true if  the given file name is raw file or nexus file otherwise false
+      bool isDataFile(const std::string& fileName);
 
-			/// This method filters the log files from the workspace
-			void filterLogFiles(API::ITableWorkspace_sptr& ws_sptr);
+      /// This method filters the log files from the workspace
+      void filterLogFiles(API::ITableWorkspace_sptr& ws_sptr);
 
 
-		};
-	}
+    };
+  }
 }
 #endif

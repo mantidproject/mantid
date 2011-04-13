@@ -6,18 +6,18 @@
 
 namespace Mantid
 {
-	namespace ICat
-	{
+  namespace ICat
+  {
 
-/** CMyDataSearch is a class responsible for searching investigations of the logged in user.
-  * This algorithm does Icat search and returns the investigations record
+    /** CMyDataSearch is a class responsible for searching investigations of the logged in user.
+     * This algorithm does Icat search and returns the investigations record
 
     Required Properties:
     <UL>
     <LI>  OutputWorkspace - name of the OutputWorkspace which contains myinvestigations search
     <LI>  isValid         - Boolean option used to check the validity of login session
     </UL>
-   
+
     @author Sofia Antony, ISIS Rutherford Appleton Laboratory 
     @date 04/08/2010
     Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -40,7 +40,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 
-   */
+     */
     class DLLExport CMyDataSearch: public API::Algorithm
     {
     public:
@@ -65,8 +65,8 @@ namespace Mantid
       void exec();
 
     };
-    
-}
+
+  }
 }
 
 #endif

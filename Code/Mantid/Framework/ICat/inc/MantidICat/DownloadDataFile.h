@@ -13,9 +13,9 @@ class ICATPortBindingProxy;
 
 namespace Mantid
 {
-namespace ICat
-{
-/** CDownloadDataFile class is responsible for GetDataFile algorithms.
+  namespace ICat
+  {
+    /** CDownloadDataFile class is responsible for GetDataFile algorithms.
     This algorithm  gets the location string for a given file from ISIS archive file using ICat API.
     If the file is not able to open from isis archive,it will call another ICat api to get the URL for the file.
     Then uses POCO http methods to download over internet.
@@ -48,62 +48,62 @@ namespace ICat
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
- */
-class DLLExport CDownloadDataFile : public API::Algorithm
-{
-public:
-  /// Constructor
-  CDownloadDataFile():API::Algorithm(),m_prog(0.0){}
-  /// Destructor
-  ~CDownloadDataFile(){}
-  /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
-  /// Algorithm's version for identification overriding a virtual method
-  virtual int version() const { return 1; }
-  /// Algorithm's category for identification overriding a virtual method
-  virtual const std::string category() const { return "ICat"; }
+     */
+    class DLLExport CDownloadDataFile : public API::Algorithm
+    {
+    public:
+      /// Constructor
+      CDownloadDataFile():API::Algorithm(),m_prog(0.0){}
+      /// Destructor
+      ~CDownloadDataFile(){}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogDownloadDataFiles"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
 
-  /** This method is used for unit testing purpose.
-   * as the Poco::Net library httpget throws an exception when the nd server n/w is slow
-   * I'm testing the download from mantid server.
-   * as the download method I've written is private I can't access that in unit testing.
-   * so adding this public method to call the private download method and testing.
-   */
-  void testDownload(const std::string& URL,const std::string& fileName);
+      /** This method is used for unit testing purpose.
+       * as the Poco::Net library httpget throws an exception when the nd server n/w is slow
+       * I'm testing the download from mantid server.
+       * as the download method I've written is private I can't access that in unit testing.
+       * so adding this public method to call the private download method and testing.
+       */
+      void testDownload(const std::string& URL,const std::string& fileName);
 
-private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-  /// Overwrites Algorithm method.
-  void init();
-  /// Overwrites Algorithm method
-  void exec();
-  /// get location of data file  or download method
-  int doDownload( ICATPortBindingProxy & icat);
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Overwrites Algorithm method.
+      void init();
+      /// Overwrites Algorithm method
+      void exec();
+      /// get location of data file  or download method
+      int doDownload( ICATPortBindingProxy & icat);
 
-  /// This method is used when the download is done over internet
-  void downloadFileOverInternet(const std::string& url,const std::string& fileName);
+      /// This method is used when the download is done over internet
+      void downloadFileOverInternet(const std::string& url,const std::string& fileName);
 
-  /// If the extn of the file .raw it returns true
-  bool isDataFile(const std::string& fileName);
+      /// If the extn of the file .raw it returns true
+      bool isDataFile(const std::string& fileName);
 
-  /// This method saves the downloaded file to disc
-  void saveFiletoDisk(std::istream& rs,const std::string &fileName);
+      /// This method saves the downloaded file to disc
+      void saveFiletoDisk(std::istream& rs,const std::string &fileName);
 
-  /// This method saves downloaded file to local disk
-  void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
+      /// This method saves downloaded file to local disk
+      void doDownloadandSavetoLocalDrive(const std::string& URL,const std::string& fileName);
 
-  /// This method replaces backwardslash with forward slashes - for linux
-  void replaceBackwardSlash(std::string& inputString);
+      /// This method replaces backwardslash with forward slashes - for linux
+      void replaceBackwardSlash(std::string& inputString);
 
-private:
-  /// progress indicator
-  double m_prog;
+    private:
+      /// progress indicator
+      double m_prog;
 
 
 
-};
+    };
 
-}
+  }
 }
 #endif

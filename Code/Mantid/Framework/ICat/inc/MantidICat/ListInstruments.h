@@ -8,13 +8,13 @@
 
 namespace Mantid
 {
-	namespace ICat
-	{
+  namespace ICat
+  {
 
     /** CListInstruments class is responsible for loading  instruments list from ICat DB .
     This class written as a Mantid algorithm. This algorithm is used to poulate the
     ICat Search Interface instrument box
-      
+
     @author Sofia Antony, STFC Rutherford Appleton Laboratory
     @date 09/07/2010
     Copyright &copy; 2010 STFC Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
@@ -36,30 +36,29 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
-    */	
+    */
+    class DLLExport CListInstruments:public API::Algorithm
+    {
+    public:
+      /// constructor
+      CListInstruments():API::Algorithm(){}
+      /// destructor
+      ~CListInstruments(){}
+      /// Algorithm's name for identification overriding a virtual method
+      virtual const std::string name() const { return "CatalogListInstruments"; }
+      /// Algorithm's version for identification overriding a virtual method
+      virtual int version() const { return 1; }
+      /// Algorithm's category for identification overriding a virtual method
+      virtual const std::string category() const { return "ICat"; }
 
-		class DLLExport CListInstruments:public API::Algorithm
-		{
-		public:
-			/// constructor
-			CListInstruments():API::Algorithm(){}
-			/// destructor
-			~CListInstruments(){}
-			/// Algorithm's name for identification overriding a virtual method
-			virtual const std::string name() const { return "CatalogListInstruments"; }
-			/// Algorithm's version for identification overriding a virtual method
-			virtual int version() const { return 1; }
-			/// Algorithm's category for identification overriding a virtual method
-			virtual const std::string category() const { return "ICat"; }
-
-		private:
-  /// Sets documentation strings for this algorithm
-  virtual void initDocs();
-			/// Overwrites Algorithm init method.
-			void init();
-			/// Overwrites Algorithm exec method
-			void exec();
-		};
-	}
+    private:
+      /// Sets documentation strings for this algorithm
+      virtual void initDocs();
+      /// Overwrites Algorithm init method.
+      void init();
+      /// Overwrites Algorithm exec method
+      void exec();
+    };
+  }
 }
 #endif
