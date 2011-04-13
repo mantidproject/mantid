@@ -102,7 +102,7 @@ class ISISReducer(SANSReducer):
         self._init_steps()
         self.output_wksp = None
         self.sample_wksp = None
-        self.full_trans_wav = True
+        self.full_trans_wav = False
         self._monitor_set = False
 
     def _reduce(self):
