@@ -168,7 +168,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
 
         alg = ConvertUnits(InputWorkspace=wksp, OutputWorkspace="temp", Target="dSpacing")
         temp = alg['OutputWorkspace']
-        Sort(InputWorkspace=temp, SortBy="Time of Flight")
+        SortEvents(InputWorkspace=temp, SortBy="X Value")
         # Sum pixelbin X pixelbin blocks of pixels
         if self._xpixelbin*self._ypixelbin>1:
                 SumNeighbours(InputWorkspace=temp, OutputWorkspace=temp, SumX=self._xpixelbin, SumY=self._ypixelbin)
@@ -254,7 +254,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._diffractionfocus:
             DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                 GroupingFileName=calib)
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         Rebin(InputWorkspace=wksp, OutputWorkspace=wksp, Params=self._binning)
         return wksp
 

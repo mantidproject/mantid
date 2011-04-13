@@ -125,6 +125,7 @@ set ( SRC_FILES
 	src/SANSSolidAngleCorrection.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
+	src/SortEvents.cpp
 	src/SpatialGrouping.cpp
 	src/StripPeaks.cpp
 	src/StripVanadiumPeaks.cpp
@@ -271,6 +272,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
+	inc/MantidAlgorithms/SortEvents.h
 	inc/MantidAlgorithms/SpatialGrouping.h
 	inc/MantidAlgorithms/StripPeaks.h
 	inc/MantidAlgorithms/StripVanadiumPeaks.h
@@ -397,12 +399,12 @@ set ( TEST_FILES
 	test/ReplaceSpecialValuesTest.h
 	test/SaveToSNSHistogramNexusTest.h
 	test/ScaleTest.h
+	test/SortEventsTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQWTest.h
 	test/SANSSolidAngleCorrectionTest.h
 	test/SolidAngleTest.h
-	test/SortTest.h
 	test/SpatialGroupingTest.h
 	test/StripPeaksTest.h
 	test/StripVanadiumPeaksTest.h

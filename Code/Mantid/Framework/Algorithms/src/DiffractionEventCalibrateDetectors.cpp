@@ -426,7 +426,7 @@ namespace Algorithms
 
     IAlgorithm_sptr algS = createSubAlgorithm("Sort");
     algS->setPropertyValue("InputWorkspace",inname);
-    algS->setPropertyValue("SortBy", "Time of Flight");
+    algS->setPropertyValue("SortBy", "X Value");
     try
     {
       algS->execute();

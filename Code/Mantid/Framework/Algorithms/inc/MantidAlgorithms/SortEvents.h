@@ -1,18 +1,22 @@
-#ifndef SORT_H_
-#define SORT_H_
-
+#ifndef MANTID_ALGORITHMS_SORTEVENTS_H_
+#define MANTID_ALGORITHMS_SORTEVENTS_H_
+    
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include "MantidAPI/DeprecatedAlgorithm.h"
-#include "MantidAlgorithms/SortEvents.h"
 
 namespace Mantid
 {
 namespace Algorithms
 {
-/** Obsolete algorithm, renamed SortEvents
+/** Takes an EventWorkspace and sorts by TOF or frame_index.
+
+    Required Properties:
+    <UL>
+    <LI> InputWorkspace  - The name of the workspace to take as input. Must contain event data. </LI>
+    <LI> SortByTof - check to sort by Time of Flight; uncheck to sort by frame index.</LI>
+    </UL>
 
     @author Janik Zikovsky, SNS
     @date Friday, August 13, 2010.
@@ -37,15 +41,26 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport Sort : public SortEvents, public API::DeprecatedAlgorithm
+class DLLExport SortEvents : public API::Algorithm
 {
 public:
   /// Default constructor
-  Sort();
+  SortEvents() : API::Algorithm() {};
   /// Destructor
-  virtual ~Sort() {};
+  virtual ~SortEvents() {};
   /// Algorithm's name for identification overriding a virtual method
-  virtual const std::string name() const { return "Sort";}
+  virtual const std::string name() const { return "SortEvents";}
+  /// Algorithm's version for identification overriding a virtual method
+  virtual int version() const { return 1;}
+  /// Algorithm's category for identification overriding a virtual method
+  virtual const std::string category() const { return "General";}
+
+protected:
+  /// Sets documentation strings for this algorithm
+  virtual void initDocs();
+  // Overridden Algorithm methods
+  void init();
+  virtual void exec();
 
 };
 
@@ -53,4 +68,4 @@ public:
 } // namespace Mantid
 
 
-#endif /* SORT_H_ */
+#endif  /* MANTID_ALGORITHMS_SORTEVENTS_H_ */

@@ -216,7 +216,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         AlignDetectors(InputWorkspace=wksp, OutputWorkspace=wksp, CalibrationFile=calib)
         DiffractionFocussing(InputWorkspace=wksp, OutputWorkspace=wksp,
                              GroupingFileName=calib)
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:
@@ -255,7 +255,7 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        Sort(InputWorkspace=wksp, SortBy="Time of Flight")
+        SortEvents(InputWorkspace=wksp, SortBy="X Value")
         if len(self._binning) == 3:
             info.has_dspace = self._bin_in_dspace
         if info.has_dspace:

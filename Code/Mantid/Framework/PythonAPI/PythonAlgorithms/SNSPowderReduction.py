@@ -214,7 +214,7 @@ class SNSPowderReduction(PythonAlgorithm):
                                    % (filterLogs[0], str(wksp)))            
         if not self.getProperty("CompressOnRead"):
             CompressEvents(InputWorkspace=wksp, OutputWorkspace=wksp, Tolerance=COMPRESS_TOL_TOF) # 100ns
-        Sort(wksp)
+        SortEvents(wksp)
         try:
             if info.tmin > 0.:
                 MaskBins(InputWorkspace=wksp, OutputWorkspace=wksp, XMin=0., XMax=info.tmin)
