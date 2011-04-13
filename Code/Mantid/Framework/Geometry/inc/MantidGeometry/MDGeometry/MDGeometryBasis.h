@@ -61,9 +61,9 @@ namespace Mantid
     class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {
     public:
-
-      MDGeometryBasis(boost::shared_ptr<UnitCell> spSample=boost::shared_ptr<UnitCell>(),unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);
-
+      /// empty constructor used mainly to provide a dummy object for reading data into it
+      MDGeometryBasis(unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
+	  /// fully functional constructor; 
       MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 
       std::set<MDBasisDimension> getNonReciprocalDimensions() const;
@@ -81,7 +81,7 @@ namespace Mantid
 	   *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-	  void init(const std::set<MDBasisDimension>& mdBasisDimensions, boost::shared_ptr<UnitCell> theSample);
+	  void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 	  // copy constructor is used and can be default
     private:
 	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;

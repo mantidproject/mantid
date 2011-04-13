@@ -382,8 +382,8 @@ std::string constructGeometryXML(
     //be considered.
   }
 
-  boost::shared_ptr<UnitCell> cell(new UnitCell());
-  MDGeometryBasis basis(basisDimensions, cell);
+  boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell()); // Unit cell currently does nothing.
+  MDGeometryBasis basis(basisDimensions, spCell);
 
   //TODO: Get Rotation matrix from Plane ImplicitFunction
         RotationMatrix identityMatrix(9, 0);
@@ -392,7 +392,7 @@ std::string constructGeometryXML(
         identityMatrix[8] = 1;
 
   // Convert IMDDimensions to MDDimensions
-  std::vector<MDDimension_sptr> md_dimensions;
+  std::vector<IMDDimension_sptr> md_dimensions;
   for (size_t i=0; i<dimensions.size(); i++)
     md_dimensions.push_back( boost::dynamic_pointer_cast<MDDimension>(dimensions[i]));
 

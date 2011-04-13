@@ -67,8 +67,8 @@ public:
 };
 
 typedef boost::shared_ptr<IMDDimension> Dimension_sptr;
-typedef std::vector<boost::shared_ptr<MDDimension> > DimensionVec;
-typedef std::vector<boost::shared_ptr<MDDimension> >::iterator DimensionVecIterator;
+typedef std::vector<boost::shared_ptr<IMDDimension> > DimensionVec;
+typedef std::vector<boost::shared_ptr<IMDDimension> >::iterator DimensionVecIterator;
 typedef std::vector<double> RotationMatrix;
 
 class DLLExport MDGeometryDescription

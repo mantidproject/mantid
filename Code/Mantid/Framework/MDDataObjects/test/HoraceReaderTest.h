@@ -88,12 +88,13 @@ public:
 
   void testReadBasis(){
     // this is currently hardcoded so no problem shouls be here but it will read crystall in a futute. 
-    TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",pReader->read_basis(basis));
+	  pBasis = std::auto_ptr<Geometry::MDGeometryBasis>(new Geometry::MDGeometryBasis());
+    TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",pReader->read_basis(*pBasis));
 
   }
   void testReadGeometry(){
     // this constructor should be tested elsewhere
-    TSM_ASSERT_THROWS_NOTHING("Geometry description should be able to build from basis ",pGeomDescription = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(basis)));
+    TSM_ASSERT_THROWS_NOTHING("Geometry description should be able to build from basis ",pGeomDescription = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(*pBasis)));
     // and here is the test of reading
     TS_ASSERT_THROWS_NOTHING(pReader->read_MDGeomDescription(*pGeomDescription));
 
@@ -101,7 +102,7 @@ public:
   }
   void testReadMDImgData(){
     TSM_ASSERT_THROWS_NOTHING("MD Image has not been constructred by empty constructor",
-      pImg=std::auto_ptr<MDDataObjects::MDImage>(new MDDataObjects::MDImage(*pGeomDescription,basis)));
+      pImg=std::auto_ptr<MDDataObjects::MDImage>(new MDDataObjects::MDImage(*pGeomDescription,*pBasis)));
 
 
     TSM_ASSERT_THROWS_NOTHING("MD image reader should not normaly throw",
@@ -261,7 +262,7 @@ public:
 private:
   std::auto_ptr<HoraceReaderTester> pReader;
   // the components of the workspace which the reader supplies with data
-  Geometry::MDGeometryBasis basis;
+  std::auto_ptr<Geometry::MDGeometryBasis> pBasis;
   std::auto_ptr<Geometry::MDGeometryDescription> pGeomDescription;
   std::auto_ptr<MDDataObjects::MDImage> pImg;
   //******************************************************************

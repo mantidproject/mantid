@@ -57,6 +57,10 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
 	void build_consistent_pixels(std::vector<char> &pix_buf,std::vector<bool> &pix_sel, std::vector<size_t> &cell_indexes){
 		// this function simulates proper result for rebinning with pixels;
 		uint64_t nPixels(0);
+		size_t   MAX_MEM_DATA_SIZE(0);
+		size_t n_pixLocal;
+		MAX_MEM_DATA_SIZE = ~MAX_MEM_DATA_SIZE;
+
 		if(ImgArray.data_size!=nCells){
 			delete [] ImgArray.data;
 			ImgArray.data            = new MD_image_point[nCells];
@@ -72,10 +76,15 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
 			nPixels += pData[i].npix;
 		}
 		ImgArray.npixSum = nPixels;
+		if(nPixels<MAX_MEM_DATA_SIZE){
+			n_pixLocal = (size_t)nPixels;
+		}else{
+			throw(std::invalid_argument("data type is too big for this memory model"));
+		}
 
-		pix_buf.resize(2*nPixels*pix_size);
-		pix_sel.resize(2*nPixels);
-		cell_indexes.assign(2*nPixels,-1);
+		pix_buf.resize(2*n_pixLocal*pix_size);
+		pix_sel.resize(2*n_pixLocal);
+		cell_indexes.assign(2*n_pixLocal,-1);
 
 	// assign nPixels almost equivalent pixels;
 		float *pPix = (float *)(&pix_buf[0]);
@@ -92,8 +101,8 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
 				pPix[ic*9+4]=(float)i;
 				pPix[ic*9+5]= float(ic_retained);
 			// indexes;
-				pPix[ic*9+6]=j;
-				pPix[ic*9+7]=n_pix;
+				pPix[ic*9+6]=(float)j;
+				pPix[ic*9+7]=(float)n_pix;
 				pPix[ic*9+8]=50;
 				pix_sel[ic]= true;
 				cell_indexes[ic_retained]=i;
@@ -151,8 +160,8 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
 				pPix[ic*9+4]=(float)i;
 				pPix[ic*9+5]=float(ic_retained);
 			// indexes;
-				pPix[ic*9+6]=j;
-				pPix[ic*9+7]=n_pix;
+				pPix[ic*9+6]=(float)j;
+				pPix[ic*9+7]=(float)n_pix;
 				pPix[ic*9+8]=50;
 				pix_sel[ic]= true;
 				cell_indexes[ic_retained]=i;

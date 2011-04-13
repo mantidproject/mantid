@@ -38,7 +38,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
   }
   unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
   size_t   base(0);
-  const MDDimension *pDim;
+  const IMDDimension *pDim;
 
   // calculate shift for all selected dimensions;
   int the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
@@ -169,7 +169,7 @@ MDImage::set_imgArray_shape()
   this->MD_IMG_array.dimSize.assign(nDims,0);
   this->MD_IMG_array.dimStride.assign(MAX_MD_DIMS_POSSIBLE+1,0);
 
-  const MDDimension *pDim;
+  const IMDDimension *pDim;
   this->MD_IMG_array.data_size    = 1;
   size_t  stride(1);
   for(i=0;i<this->pMDGeometry->getNumDims();i++){
@@ -285,7 +285,7 @@ MDImage::alloc_image_data()
   size_t ImgSize     = this->pMDGeometry->getGeometryExtend();
   try{
     MD_IMG_array.data = new MD_image_point[ImgSize];
-  }catch(std::bad_alloc &err){
+  }catch(std::bad_alloc &){
     g_log.error()<<" can not allocate memory for multidimensional image of "<<ImgSize<<" points\n";
     throw(std::runtime_error("Can not allocate memory for Multidimensional image "));
   }

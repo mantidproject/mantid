@@ -20,7 +20,7 @@ pix_locations_calculated(false)
 
 MDDPoints_MemManager::~MDDPoints_MemManager()
 {
-	}
+}
 //
 
 //

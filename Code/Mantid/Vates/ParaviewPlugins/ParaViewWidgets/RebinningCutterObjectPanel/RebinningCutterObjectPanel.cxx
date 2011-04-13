@@ -67,7 +67,7 @@ void RebinningCutterObjectPanel::updateInformationAndDomains()
 
       m_geometryXMLString = geometryXMLString;
     }
-    catch(std::exception& error)
+    catch(std::exception& )
     {
       QMessageBox::information(NULL, "Setup Not possible.",
         "Could not interpret metadata. Are you using a rebinning source? Check field data.");

@@ -8,9 +8,13 @@
 #include <boost/shared_ptr.hpp>
 
 /** Class to support memory managment operations performed over arrays of MDDataPoints, which are represented as an arrays of bytes here
-    The array of MDDataPoints is arranged in memory according to MDImage, namely:
+    The array of MDDataPoints is arranged in memory according to MDImage, 
+
+	Currently:
 	Every image cell has correspondent block of pixels; The pixels for cell N are located after all pixels contributed to cells with i<N and the size of the block
 	equal to the value necessary to place MD_image_point[N].npix pixels which contribute to the cell N;
+
+	This all can change in a future, so access to this structure should be organized through MDDPoints interface;
  
 
     @author Alex Buts, RAL ISIS

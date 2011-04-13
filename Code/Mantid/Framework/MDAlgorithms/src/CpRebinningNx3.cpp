@@ -133,7 +133,7 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
   // reduction dimensions; if stride = 0, the dimension is reduced;
    /// order of dimensions in sparce dimension array is different from the order, obtained in dimensions
   std::vector<std::string> source_dimID = this->pSourceWS->get_const_MDDPoints().getDimensionsID();
-  MDDimension const*  pmDim;
+  IMDDimension const*  pmDim;
   unsigned int rec_dim_count(0);
   for(i=0;i<this->nDimensions;i++){
       pmDim             = (this->pTargetGeom->get_constDimension(source_dimID[i])).get();

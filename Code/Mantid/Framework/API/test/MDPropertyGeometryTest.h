@@ -41,8 +41,8 @@ class MDPropertyGeometryTest : public CxxTest::TestSuite
     basisDimensions.insert(MDBasisDimension("q3", true, 2));
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
-    boost::shared_ptr<UnitCell> cell;
-    return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
+    boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell());
+    return new MDGeometry(MDGeometryBasis(basisDimensions, spCell));
   }
 
 public:

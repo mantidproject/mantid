@@ -28,6 +28,8 @@ private:
     FakeMDGeometry(const Mantid::Geometry::MDGeometryBasis& basis) : MDGeometry(basis)
     {
     }
+	// This function can not be exposed to anywhere withing MD workspace, except testing MDGeometry, 
+	// as changing number of bins invalidates MD image structures and MDDataPoints structures
     void setNumberOfBins(const int indexOfDimension, const int nBins)
     {
       //Range min/max are not important, but the number of bins is!
@@ -55,8 +57,8 @@ private:
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
     basisDimensions.insert(MDBasisDimension("u3", false, 3));
 
-    boost::shared_ptr<UnitCell> cell(new UnitCell());
-    FakeMDGeometry* geometry = new FakeMDGeometry(MDGeometryBasis(basisDimensions, cell));
+	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+    FakeMDGeometry* geometry = new FakeMDGeometry(MDGeometryBasis(basisDimensions,spCell));
     geometry->setNumberOfBins(0, 4);
     geometry->setNumberOfBins(1, 4);
     geometry->setNumberOfBins(2, 4);
@@ -120,15 +122,15 @@ private:
 
       for(int i=0;i<this->getNPix();i++)
       {
-        s_dim_fields[0] =           i;
-        s_dim_fields[1] =           i; // sqw.pix_array[i].qy
-        s_dim_fields[2] =           i; // sqw.pix_array[i].qz
-        s_dim_fields[3] =           i; // sqw.pix_array[i].En
+        s_dim_fields[0] =          (float) i;
+        s_dim_fields[1] =          (float) i; // sqw.pix_array[i].qy
+        s_dim_fields[2] =           (float)i; // sqw.pix_array[i].qz
+        s_dim_fields[3] =           (float)i; // sqw.pix_array[i].En
         ind_fields[0]   =  (uint32_t)i;    // sqw.pix_array[i].irun
         ind_fields[1]   =  (uint32_t)i;   // sqw.pix_array[i].idet
         ind_fields[2]   =  (uint32_t)i; // sqw.pix_array[i].ien
-        s_dim_fields[4] =           i+1; // sqw.pix_array[i].s
-        s_dim_fields[5] =           i;  // sqw.pix_array[i].err
+        s_dim_fields[4] =           (float)i+1; // sqw.pix_array[i].s
+        s_dim_fields[5] =           (float)i;  // sqw.pix_array[i].err
 
         packer.setData(i,s_dim_fields,ind_fields);
        }

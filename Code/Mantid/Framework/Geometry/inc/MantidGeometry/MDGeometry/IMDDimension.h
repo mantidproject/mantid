@@ -107,8 +107,8 @@ namespace Mantid
     //========== Virtual Methods used in MDDimension  ===============================================
     //===============================================================================================
 
-    // it is sometimes convinient to shift image data by some number along specific dimension
-    virtual double getDataShift()
+    /// it is sometimes convinient to shift image data by some number along specific dimension
+    virtual double getDataShift()const
     {throw std::runtime_error("Not Implemented."); return 0; }
 
     /// the change of the location in the multidimensional image array, which occurs if the index of this dimension changes by one.

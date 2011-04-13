@@ -79,8 +79,22 @@ MD_FileHoraceReader::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeometry
     basisDimensions.insert(MDBasisDimension("qz", true, 2));
     basisDimensions.insert(MDBasisDimension("en", false,3));
 
-    boost::shared_ptr<UnitCell> cell(new UnitCell());
-    basisGeometry.init(basisDimensions, cell);
+    std::vector<char> buf(4*(3+3));
+    this->fileStreamHolder.seekg(this->positions.geom_start,std::ios::beg);
+    this->fileStreamHolder.read(&buf[0],buf.size());
+
+	double a = (double)(*((float *)(&buf[0])));
+	double b = (double)(*((float *)(&buf[4])));
+	double c = (double)(*((float *)(&buf[8])));
+	double aa = (double)(*((float *)(&buf[12])));
+	double bb = (double)(*((float *)(&buf[16])));
+	double cc = (double)(*((float *)(&buf[20])));
+
+
+	// here should be the operation to read the cell and goiniometer
+	boost::shared_ptr<UnitCell> spCell= boost::shared_ptr<UnitCell>(new UnitCell(a,b,c,aa,bb,cc));
+
+	basisGeometry.init(basisDimensions,spCell);
     // get_sqw_header should go here and define cell
 }
 //
@@ -457,35 +471,30 @@ void
 MD_FileHoraceReader::parse_sqw_main_header()
 { // we do not need this header  at the moment -> just need to calculated its length;
 
-    std::vector<char> data_buffer(4 * 3);
-  this->fileStreamHolder.read(&data_buffer[0], 4);
-  validateFileStreamHolder(fileStreamHolder);
+  std::vector<char> data_buffer(4 * 3);
+  this->fileStreamHolder.read(&data_buffer[0], 4);                validateFileStreamHolder(fileStreamHolder);
 
   unsigned int file_name_length = *((uint32_t*) (&data_buffer[0]));
   //skip main header file name
-  fileStreamHolder.seekg(file_name_length, std::ios_base::cur);
-  validateFileStreamHolder(fileStreamHolder);
+  fileStreamHolder.seekg(file_name_length, std::ios_base::cur);   validateFileStreamHolder(fileStreamHolder);
 
-  this->fileStreamHolder.read(&data_buffer[0], 4);
+  this->fileStreamHolder.read(&data_buffer[0], 4);                validateFileStreamHolder(fileStreamHolder);
   unsigned int file_path_length = *((uint32_t*) (&data_buffer[0]));
-  validateFileStreamHolder(fileStreamHolder);
+
 
   //skip main header file path
-  fileStreamHolder.seekg(file_path_length, std::ios_base::cur);
-  validateFileStreamHolder(fileStreamHolder);
+  fileStreamHolder.seekg(file_path_length, std::ios_base::cur);    validateFileStreamHolder(fileStreamHolder);
 
   this->fileStreamHolder.read(&data_buffer[0], 4);
-  unsigned int file_title = *((uint32_t*) (&data_buffer[0]));
-  validateFileStreamHolder(fileStreamHolder);
+  unsigned int file_title = *((uint32_t*) (&data_buffer[0]));      validateFileStreamHolder(fileStreamHolder);
 
   //skip main header file path
-  fileStreamHolder.seekg(file_title, std::ios_base::cur);
-  validateFileStreamHolder(fileStreamHolder);
+  fileStreamHolder.seekg(file_title, std::ios_base::cur);          validateFileStreamHolder(fileStreamHolder);
 
   // indentify number of file headers, contributed into the dataset
-  this->fileStreamHolder.read(&data_buffer[0], 4);
+  this->fileStreamHolder.read(&data_buffer[0], 4);                 validateFileStreamHolder(fileStreamHolder);
   unsigned int nFiles = *((uint32_t*) (&data_buffer[0]));
-  validateFileStreamHolder(fileStreamHolder);
+
 
   /// allocate space for the component headers positions;
   positions.component_headers_starts.assign(nFiles, 0);

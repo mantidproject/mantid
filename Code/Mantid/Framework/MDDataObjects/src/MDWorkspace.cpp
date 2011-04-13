@@ -215,7 +215,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     const std::vector<std::string> MDWorkspace::getDimensionIDs() const
     {
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
-      std::vector<boost::shared_ptr<MDDimension> > vecDimensions = geometry->getDimensions();
+      std::vector<boost::shared_ptr<IMDDimension> > vecDimensions = geometry->getDimensions();
       std::vector<std::string> vecDimensionIds(vecDimensions.size());
       for(unsigned int i = 0; i < vecDimensions.size() ; i++)
       {

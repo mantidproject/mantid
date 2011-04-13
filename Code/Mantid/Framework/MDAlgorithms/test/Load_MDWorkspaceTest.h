@@ -24,6 +24,7 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         TSM_ASSERT_THROWS_NOTHING("loader should initialize without throwing",loader.initialize());
         TSM_ASSERT("Loader should be initialized before going any further",loader.isInitialized());
      }
+
      void testLoadMDWSParams(){
          // Should fail because mandatory parameter has not been set
         TSM_ASSERT_THROWS("The loader should throw now as necessary parameters have not been set",loader.execute(),std::runtime_error);

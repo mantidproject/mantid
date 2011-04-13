@@ -64,8 +64,9 @@ private:
     basisDimensions.insert(MDBasisDimension("q3", true, 2));
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
-    boost::shared_ptr<UnitCell> cell(new UnitCell());
-    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, cell)));
+    
+    boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+    return std::auto_ptr<MDGeometry>(new MDGeometry(MDGeometryBasis(basisDimensions, spCell)));
   } 
 //
   void setFakeImageValuesIncompletely(){

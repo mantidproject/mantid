@@ -81,6 +81,8 @@ public:
 
      /// Get the file name associated with this reader.
 	virtual std::string getFileName() const{return File_name;}
+	/// 
+	size_t  MAX_MEM_DATA_SIZE(void)const{size_t zer(0); return ~zer;}
 protected: 
    /// name of a file which keeps mdd dataset;
     std::string File_name;

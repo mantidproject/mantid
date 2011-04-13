@@ -50,6 +50,7 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 		return false;
 	}
  public:
+
      void testINIT_WS(){
          std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
 		 // get usual workspace from the test workspace
@@ -124,6 +125,14 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 		 TSM_ASSERT_EQUALS("The selection should refer to proper number of pixels but it is not",nPix,pRebin->getNumPreselectedPixels());
 
      }
+	 void testClearWorkspaces(){
+		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
+		 // before the real destructor is called
+		 this->pOrigin.reset();
+		 this->pTarget.reset();
+		 this->pTargDescr.reset();
+		 this->pRebin.reset();
+	 }
 };
 
 #endif

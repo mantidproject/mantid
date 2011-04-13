@@ -13,18 +13,20 @@ namespace Mantid
 
     Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
 //
-MDGeometryBasis::MDGeometryBasis(boost::shared_ptr<UnitCell> theSample,unsigned int nDimensions, unsigned int nReciprocalDimensions) :
-n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions(),
-spSample(theSample)
+MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions, unsigned int nReciprocalDimensions) :
+n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions()
+
 {
- // this constructor has to be modified to include relation between the direction of the reciprocal space and the 
+ // this constructor is dummy where all data have to be owerwtirren
   this->check_nDims(n_total_dim, n_reciprocal_dimensions);
   m_mdBasisDimensions.insert(MDBasisDimension("q0", true, 0));
 }
 //
 void
-MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, boost::shared_ptr<UnitCell> theSample)
-{
+MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample)
+{ 
+	spSample = theSample;
+
     m_mdBasisDimensions.clear();
     m_mdBasisDimensions = mdBasisDimensions;
     this->n_total_dim   = mdBasisDimensions.size();
@@ -45,11 +47,10 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, boost
     this->check_nDims(n_total_dim , n_reciprocal_dimensions);
 }
 
-MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample)
-  : n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions),
-  spSample(theSample)
+MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample):
+n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions)
 {
-   this->init(mdBasisDimensions, theSample);
+   this->init(mdBasisDimensions,theSample);
 }
 
     void MDGeometryBasis::checkInputBasisDimensions(const MDBasisDimension&  dimension)

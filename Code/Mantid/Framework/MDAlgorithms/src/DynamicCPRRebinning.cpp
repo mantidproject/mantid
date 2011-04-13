@@ -81,11 +81,11 @@ DynamicCPRRebinning::preselect_cells()
   unsigned int  nReciprocal    = pSourceGeom->getNumReciprocalDims();
   unsigned int  nOrthogonal    = pSourceGeom->getNumDims() - nReciprocal;
 
-  MDDimension *pDim;
+  IMDDimension *pDim;
  
-  std::vector<boost::shared_ptr<MDDimension> > pAllDim  = pSourceGeom->getDimensions();
-  std::vector<boost::shared_ptr<MDDimension> > pOrthogonal(nOrthogonal);
-  std::vector<boost::shared_ptr<MDDimension> > pReciprocal(nReciprocal);
+  std::vector<boost::shared_ptr<IMDDimension> > pAllDim  = pSourceGeom->getDimensions();
+  std::vector<boost::shared_ptr<IMDDimension> > pOrthogonal(nOrthogonal);
+  std::vector<boost::shared_ptr<IMDDimension> > pReciprocal(nReciprocal);
   unsigned int nr(0),no(0);
 
   // get the orthogonal and reciprocal dimensions separately
@@ -163,7 +163,7 @@ DynamicCPRRebinning::preselect_cells()
     }
   }
   enInd.clear();
-  std::vector<boost::shared_ptr<MDDimension> > rec_dim;
+  std::vector<boost::shared_ptr<IMDDimension> > rec_dim;
   rec_dim.resize(3);
   // evaluate the capacity of the real space (3D or less);
   // Define (1<=N<=3)D subspace and transform it into the coordinate system of the new cut;

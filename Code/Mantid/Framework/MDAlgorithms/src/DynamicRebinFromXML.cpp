@@ -92,7 +92,7 @@ namespace Mantid
       Poco::XML::Element* geometryXML = pRootElem->getChildElement("DimensionSet");
 
       Poco::XML::NodeList* dimensionsXML = geometryXML->getElementsByTagName("Dimension");
-      std::vector<boost::shared_ptr<MDDimension> > dimensionVec;
+      std::vector<boost::shared_ptr<IMDDimension> > dimensionVec;
 
       //Extract dimensions
       int nDimensions = dimensionsXML->length();
@@ -100,7 +100,7 @@ namespace Mantid
       {
         Poco::XML::Element* dimensionXML = static_cast<Poco::XML::Element*>(dimensionsXML->item(i));
         MDDimension* dimension = createDimension(dimensionXML);
-        dimensionVec.push_back(boost::shared_ptr<MDDimension>(dimension));
+        dimensionVec.push_back(boost::shared_ptr<IMDDimension>(dimension));
       }
 
       //Find the requested xDimension alignment from the dimension id provided in the xml.

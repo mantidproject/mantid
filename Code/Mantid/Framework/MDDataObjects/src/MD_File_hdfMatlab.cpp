@@ -35,8 +35,8 @@ MD_File_hdfMatlab::read_basis(Geometry::MDGeometryBasis &basisGeometry)
     basisDimensions.insert(MDBasisDimension("qz", true, 2));
     basisDimensions.insert(MDBasisDimension("en", false,3));
 
-    boost::shared_ptr<UnitCell> cell(new UnitCell());
-	basisGeometry.init(basisDimensions,cell);
+	boost::shared_ptr<UnitCell> spCell= boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+	basisGeometry.init(basisDimensions,spCell);
 }
 
 MD_File_hdfMatlab::MD_File_hdfMatlab(const char *file_name):
@@ -382,6 +382,9 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 		f_log.error()<<" attempting to read pixels before the pixel description has been defined\n";
 		throw(std::runtime_error(" incorrect logic, attempt to read the data before the data description"));
 	}
+	if (n_pix_inDataset>MAX_MEM_DATA_SIZE()){
+		return false;
+	}
 	// get the packer, which works with the pixel structure according to the description, read earlier;
     MDDataPointEqual<float,uint32_t,float>  *pPacker = reinterpret_cast<MDDataPointEqual<float,uint32_t,float> *>(pReader);
 	// size of one data point
@@ -440,7 +443,8 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 
  
 	try{
-		std::vector<char> *outData = sqw.get_pBuffer(n_pix_inDataset);
+		// we have already verified the size of n_pix_inDataset (uint_64) and it fits size_t. We can explicitly convert it now. 
+		std::vector<char> *outData = sqw.get_pBuffer(size_t(n_pix_inDataset));
         pPacker->setBuffer(&(*outData)[0]);
 	}catch(std::bad_alloc &){
 
@@ -477,6 +481,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
 {
 // open pixel dataset and dataspace if it has not been opened before;
     n_pix_in_buffer=0;
+	size_t max_data_size=MAX_MEM_DATA_SIZE();
     this->check_or_open_pix_dataset();
     bool pixel_dataspece_opened(false);
 
@@ -504,10 +509,16 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     size_t i,j,n_selected_cells,n_cells_processed(0);
     size_t n_cells_final(selected_cells.size());
     size_t nPix_buf_size = pix_buf.size()/pix_size;
+	uint64_t npix_tt64;
 
     n_selected_cells=n_cells_final-1;     
     for(i=starting_cell;i<n_cells_final;i++){
-        npix_tt             =pData[selected_cells[i]].npix; 
+		npix_tt64           =pData[selected_cells[i]].npix; 
+		if(npix_tt64>max_data_size){
+			throw(std::invalid_argument("The number of data pixels in a cell exceeds the size acceptable in this memory model"));
+		}else{
+			npix_tt             = (size_t)npix_tt64;
+		}
         max_npix_in_buffer +=npix_tt;
 
         if(max_npix_in_buffer<=nPix_buf_size){
@@ -522,7 +533,7 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
                 n_selected_cells=i;
                 n_cells_processed=1;
             }else{
-                n_selected_cells=i-1;
+                n_selected_cells    =i-1;
                 max_npix_in_buffer -=npix_tt;
             }
             break;
@@ -560,7 +571,8 @@ MD_File_hdfMatlab::read_pix_subset(const MDImage &DND,const std::vector<size_t> 
     uint64_t max_npix_indataset = this->getNPix();
     uint64_t pixel_num,block_location;
     for(i=starting_cell;i<=n_selected_cells;i++){
-        npix_tt          =pData[selected_cells[i]].npix; 
+		// previous loop has verified that all npix can fit the memory
+        npix_tt          =(size_t)pData[selected_cells[i]].npix; 
         block_location   =mp_points_locations[selected_cells[i]];
         for(j=0;j<npix_tt;j++){
             pixel_num=block_location+j;

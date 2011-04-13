@@ -21,7 +21,7 @@ bool load_existing_workspace(const std::string &workspace_name){
 
 	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
 //    std::string dataFileName("fe_demo.sqw");
-//    std::string dataFileName("../../../../../Test/VATES/fe_demo_bin.sqw");
+//    std::string dataFileName("c:/Users/wkc26243/Documents/work/MANTID/Test/VATES/fe_demo_bin.sqw");
     std::string dataFileName("test_horace_reader.sqw");
 //        std::string dataFileName("fe_E800_8K.sqw");
     Load_MDWorkspace loader;
@@ -47,6 +47,7 @@ class testCPrebinning :    public CxxTest::TestSuite
    // test centerpiece rebinning 
        CenterpieceRebinning cpr;
  public:
+
     void testRebinInit(void){
 
      InputWorkspaceName = "testCPrebinningIn";
@@ -107,15 +108,20 @@ class testCPrebinning :    public CxxTest::TestSuite
 
    // now modify it as we need/want;
         double r0=0;
-        pSlicing->pDimDescription("qx")->cut_min = r0;
-		pSlicing->pDimDescription("qx")->cut_max = r0+1;
-		pSlicing->pDimDescription("qy")->cut_min = r0;
-		pSlicing->pDimDescription("qy")->cut_max = r0+1;
-		pSlicing->pDimDescription("qz")->cut_min = r0;
-		pSlicing->pDimDescription("qz")->cut_max = r0+1;
-		pSlicing->pDimDescription("en")->cut_max = 50;
-  
-   
+  //      pSlicing->pDimDescription("qx")->cut_min = r0;
+		//pSlicing->pDimDescription("qx")->cut_max = r0+1;
+		//pSlicing->pDimDescription("qy")->cut_min = r0;
+		//pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		//pSlicing->pDimDescription("qz")->cut_min = r0;
+		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
+		//pSlicing->pDimDescription("en")->cut_max = 50;
+  //
+        pSlicing->pDimDescription("qx")->nBins = 200;
+		pSlicing->pDimDescription("qy")->nBins = 200;
+		pSlicing->pDimDescription("qz")->nBins = 200;
+		pSlicing->pDimDescription("en")->nBins  = 0;
+
+
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
 };

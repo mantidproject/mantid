@@ -26,6 +26,8 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
 
        MDWorkspace_sptr spInputWS;
  public:
+
+
     void testRebinInit(void){
 	// build test workspace
       std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
@@ -78,6 +80,13 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
     
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
+	void testClearWorkspaces(){
+		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
+		 // before the real destructor is called
+		AnalysisDataService::Instance().remove(InputWorkspaceName);
+		AnalysisDataService::Instance().remove("CPRebinKeepPixTestOut");
+		
+	 }
 	~CPRebinKeepPixTest(){
 	}
 };

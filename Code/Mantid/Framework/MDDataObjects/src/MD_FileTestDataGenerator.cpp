@@ -34,8 +34,9 @@ MD_FileTestDataGenerator::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeo
     basisDimensions.insert(MDBasisDimension("qzt", true, 2));
     basisDimensions.insert(MDBasisDimension("ent", false,3));
 
-    boost::shared_ptr<UnitCell> cell(new UnitCell());
-    basisGeometry.init(basisDimensions, cell);
+	boost::shared_ptr<UnitCell> spCell= boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
+//    basisGeometry.init(basisDimensions,cell);
+    basisGeometry.init(basisDimensions,spCell);
     // get_sqw_header should go here and define cell
 
   
@@ -137,12 +138,12 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     // data points;
     std::vector<std::vector<float> > dimPoints(this->nDims);
     // get dimensions in the order they are defined in the grid
-    std::vector<boost::shared_ptr<Geometry::MDDimension> > spDims = pCurrentGeom->getDimensions();
+    std::vector<boost::shared_ptr<Geometry::IMDDimension> > spDims = pCurrentGeom->getDimensions();
   
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){
 
-        const Geometry::MDDimension *pDim = spDims[idim].get();
+        const Geometry::IMDDimension *pDim = spDims[idim].get();
         dimPoints[idim].resize(this->nBins[idim]);
         double min  = pDim->getMinimum();
         double step = (pDim->getMaximum()-min)/this->nBins[idim];
@@ -188,7 +189,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
         size_t n_pix  = selected_cells[ic]+1;
   
         for(idim=0;idim<this->nDims;idim++){
-            const Geometry::MDDimension *pDim = spDims[idim].get();
+            const Geometry::IMDDimension *pDim = spDims[idim].get();
             double min  = pDim->getMinimum();
             cell_step[idim] = (float)(pDim->getMaximum()-min)/this->nBins[idim]/n_pix;
          }
