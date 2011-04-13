@@ -205,9 +205,10 @@ namespace Mantid
     /**
      * Find the file given a hint. If the name contains a dot(.) then it is assumed that it is already a file stem
      * otherwise calls makeFileName internally.
-     * @param hint :: The name hint
+     * @param hint :: The name hint, format: [INSTR]1234[.ext]
      * @param exts :: Optional list of allowed extensions. Only those extensions found in both
-     *  facilities extension list and exts will be used in the search
+     *  facilities extension list and exts will be used in the search. If an extension is given in hint 
+     *  this argument is ignored.
      * @return The full path to the file or empty string if not found
      */
     std::string FileFinderImpl::findRun(const std::string& hint, const std::set<std::string> *exts) const
@@ -219,22 +220,34 @@ namespace Mantid
       if (!hintPath.getExtension().empty())
       {
         std::string path = getFullPath(hint);
-        if (!path.empty() && !Poco::File(path).exists())
-          path = "";
-        return path;
+        if (!path.empty() && Poco::File(path).exists())
+        {
+          return path;
+        }
       }
       // Do we need to try and form a filename from our preset rules
       std::string filename(hint);
+      std::string extension;
       if (hintPath.depth() == 0)
       {
-        filename = makeFileName(hint);
+        std::string::difference_type i = filename.find_last_of('.');
+        if (i != std::string::npos)
+        {
+          extension = filename.substr(i);
+          filename.erase(i);
+        }
+        filename = makeFileName(filename);
       }
 
       const std::vector<std::string> facility_extensions =
           Kernel::ConfigService::Instance().getFacility().extensions();
       // select allowed extensions
       std::vector < std::string > extensions;
-      if (exts != NULL)
+      if (!extension.empty())
+      {
+        extensions.push_back(extension);
+      }
+      else if (exts != NULL)
       {
         // find intersection of facility_extensions and exts, preserving the order of facility_extensions
         std::vector<std::string>::const_iterator it = facility_extensions.begin();
@@ -271,26 +284,23 @@ namespace Mantid
         if (arch)
         {
           std::string path;
-          if (!path.empty())
+          std::vector<std::string>::const_iterator ext = extensions.begin();
+          for (; ext != extensions.end(); ++ext)
           {
-            std::vector<std::string>::const_iterator ext = extensions.begin();
-            for (; ext != extensions.end(); ++ext)
+            path = arch->getPath(filename + *ext);
+            Poco::Path pathPattern(path);
+            if (ext->find("*") != std::string::npos)
             {
-              path = arch->getPath(filename + *ext);
-              Poco::Path pathPattern(path);
-              if (ext->find("*") != std::string::npos)
+              continue;
+              std::set < std::string > files;
+              Kernel::Glob::glob(pathPattern, files);
+            }
+            else
+            {
+              Poco::File file(pathPattern);
+              if (file.exists())
               {
-                continue;
-                std::set < std::string > files;
-                Kernel::Glob::glob(pathPattern, files);
-              }
-              else
-              {
-                Poco::File file(pathPattern);
-                if (file.exists())
-                {
-                  return file.path();
-                }
+                return file.path();
               }
             }
           }

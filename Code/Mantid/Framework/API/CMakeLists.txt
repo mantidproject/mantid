@@ -172,10 +172,10 @@ set ( INC_FILES
 	inc/MantidAPI/WorkspaceValidators.h )
 
 set ( TEST_FILES 
-    test/AlgorithmHasPropertyTest.h
+	test/AlgorithmHasPropertyTest.h
 	test/AlgorithmHistoryTest.h
 	test/AlgorithmManagerTest.h
-    test/AlgorithmPropertyTest.h
+	test/AlgorithmPropertyTest.h
 	test/AlgorithmProxyTest.h
 	test/AlgorithmTest.h
 	test/AnalysisDataServiceTest.h
@@ -204,7 +204,8 @@ set ( TEST_FILES
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
 	test/WorkspaceFactoryTest.h
-	test/WorkspacePropertyTest.h )
+	test/WorkspacePropertyTest.h 
+)
 
 set ( GMOCK_TEST_FILES
 	test/ImplicitFunctionFactoryTest.h

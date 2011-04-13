@@ -48,6 +48,9 @@ public:
       "    <instrument name=\"MUSR\" zeropadding=\"8\">"
       "      <technique>Powder Diffraction</technique>"
       "    </instrument>"
+      "    <instrument name=\"OFFSPEC\"  zeropadding=\"8\">"
+      "      <technique>Reflectometer</technique>"
+      "    </instrument>"
       "  </facility>"
       "  <facility name=\"SNS\" delimiter=\"_\" FileExtensions=\"_event.nxs,.nxs,.dat\">"
       "    <archive>"
@@ -178,6 +181,21 @@ public:
       }
 
     }
+  }
+
+  void testFindFileExt()
+  {
+    // Set the facility
+    ConfigService::Instance().setString("default.facility", "ISIS");
+
+    ConfigService::Instance().setString("datasearch.searcharchive", "Off");
+    std::string path = FileFinder::Instance().findRun("CSP78173.raw");
+    TS_ASSERT(path.find("CSP78173.raw") != std::string::npos);
+    Poco::File file(path);
+    TS_ASSERT(file.exists());
+    path = FileFinder::Instance().findRun("OFFSPEC4622.log");
+    TS_ASSERT(path.size() > 3);
+    TS_ASSERT_EQUALS(path.substr(path.size() - 3), "log");
   }
 
 private:
