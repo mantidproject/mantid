@@ -51,187 +51,72 @@ namespace Geometry
   /// Radians to degrees conversion factor
   const double rad2deg=180./M_PI;
   /// Flag for angle units used in UnitCell class
-  enum AngleUnits {latDegrees/** Degrees*/
-    ,latRadians/** Radians*/};
+  enum AngleUnits {angDegrees/** Degrees*/
+    ,angRadians/** Radians*/};
 
   class DLLExport UnitCell
   {
     public:
-      /** Default constructor. 
-       \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
+      // Default constructor. a = b = c = 1, alpha = beta = gamma = 90 degrees
       UnitCell(); 
-      /** Copy constructor
-       @param other :: The UnitCell from which to copy lattice parameters
-      */
+      //Copy constructor
       UnitCell(const UnitCell& other); 
-      /** Constructor
-        @param _a, _b, _c :: lattice parameters \f$ a, b, c \f$ \n
-       with \f$\alpha = \beta = \gamma = 90^\circ \f$*/
+      // a,b,c constructor
       UnitCell(const double _a,const double _b,const double _c); 
-      /** Constructor
-       * @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
-       * @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-       */
-      UnitCell(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,const int angleunit=latDegrees);
-      /// Destructor
+      //a,b,c,alpha,beta,gamma constructor
+      UnitCell(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,const int angleunit=angDegrees);
+      // Destructor
       ~UnitCell(); 
 
       // Get and set lattice parameters
-	    // Direct lattice parameters, angle in radians.
-      /** Get lattice parameter
-       @return a1 :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
-       @see a()*/
+	    // Direct lattice parameters, angle in radians. 
 	    double a1() const;
-      /** Get lattice parameter
-       @return a2 :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
-	     @see b()*/
-	    double a2() const;
-      /** Get lattice parameter
-       @return a3 :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
-       @see c()*/
-	    double a3() const;
-      /** Get lattice parameter
-       @return alpha1 :: lattice parameter \f$ \alpha \f$ (in radians)
-	     @see alpha()*/
-	    double alpha1() const;
-	    /** Get lattice parameter
-       @return alpha2 :: lattice parameter \f$ \beta \f$ (in radians)
-	     @see beta()*/
+      double a2() const;
+      double a3() const;
+      double alpha1() const;
 	    double alpha2() const;
-      /** Get lattice parameter
-       @return alpha3 :: lattice parameter \f$ \gamma \f$ (in radians)
-       @see gamma()*/
 	    double alpha3() const;
 	    // Direct lattice parameters, angle in degrees.
-      /** Get lattice parameter
-       @return a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )
-       @see a1()*/
-	    double a() const;
-	    /** Get lattice parameter
-       @return b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )
-       @see a2()*/
+      double a() const;    
 	    double b() const;
-      /** Get lattice parameter
-       @return c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )
-       @see a3()*/
 	    double c() const;
-      /** Get lattice parameter
-       @return alpha :: lattice parameter \f$ \alpha \f$ (in degrees)
-       @see alpha1()*/
 	    double alpha() const;
-	    /** Get lattice parameter
-       @return beta :: lattice parameter \f$ \beta \f$ (in degrees)
-       @see alpha2()*/
 	    double beta() const;
-	    /** Get lattice parameter
-       @return gamma :: lattice parameter \f$ \gamma \f$ (in degrees)
-       @see alpha3()*/
 	    double gamma() const;
 	    // Reciprocal lattice parameters, angle in radians.
-	    /** Get reciprocal lattice parameter
-      @return b1 :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-      @see astar()*/
 	    double b1() const;
-      /** Get reciprocal lattice parameter
-      @return b2 :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-      @see bstar()*/
 	    double b2() const;
-      /** Get reciprocal lattice parameter
-      @return b3 :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-      @see cstar()*/
 	    double b3() const;
-	    /** Get reciprocal lattice parameter
-	    @return beta1 :: lattice parameter \f$ \alpha^{*} \f$ (in radians)
-	    @see alphastar()*/
 	    double beta1() const;
-	    /** Get reciprocal lattice parameter
-	    @return beta2 :: lattice parameter \f$ \beta^{*} \f$ (in radians)
-	    @see betastar()*/
 	    double beta2() const;
-	    /** Get reciprocal lattice parameter
-	    @return beta3 :: lattice parameter \f$ \gamma^{*} \f$ (in radians)
-	    @see gammastar()*/
 	    double beta3() const;
 	    // Reciprocal lattice parameters, angle in degrees.
-	    /** Get reciprocal lattice parameter
-      @return astar :: lattice parameter \f$ a^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-      @see b1()*/
 	    double astar() const;
-	    /** Get reciprocal lattice parameter
-	    @return bstar :: lattice parameter \f$ b^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-	    @see b2()*/
 	    double bstar() const;
-      /** Get reciprocal lattice parameter
-      @return cstar :: lattice parameter \f$ c^{*} \f$ (in \f$ \mbox{\AA}^{-1} \f$ )
-      @see b3()*/
 	    double cstar() const;
-	    /** Get reciprocal lattice parameter
-      @return alphastar :: lattice parameter \f$ \alpha^{*} \f$ (in degrees)
-      @see beta1()*/
 	    double alphastar() const;
-      /** Get reciprocal lattice parameter
-      @return  betastar:: lattice parameter \f$ \beta^{*} \f$ (in degrees)
-      @see beta2()*/
 	    double betastar() const;
-      /** Get reciprocal lattice parameter
-      @return  gammastar:: lattice parameter \f$ \gamma^{*} \f$ (in degrees)
-      @see beta3()*/
 	    double gammastar() const;
       // Set lattice
-	    /** Set lattice parameters
-	     * @param _a, _b, _c, _alpha, _beta, _gamma :: lattice parameters\n
-       * @param angleunit :: units for angle, of type #AngleUnits . Default is degrees.
-	     */
-      void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit=latDegrees);
-      /** Set lattice parameter
-      @param _a :: lattice parameter \f$ a \f$ (in \f$ \mbox{\AA} \f$ )*/
+	    void set(double _a, double _b, double _c, double _alpha, double _beta, double _gamma,const int angleunit=angDegrees);
       void seta(double _a);
-      /** Set lattice parameter
-      @param _b :: lattice parameter \f$ b \f$ (in \f$ \mbox{\AA} \f$ )*/
       void setb(double _b);
-      /** Set lattice parameter
-      @param _c :: lattice parameter \f$ c \f$ (in \f$ \mbox{\AA} \f$ )*/
       void setc(double _c);
-      /** Set lattice parameter
-      @param _alpha :: lattice parameter \f$ \alpha \f$
-      @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-       */
-      void setalpha(double _alpha,const int angleunit=latDegrees);
-      /** Set lattice parameter
-      @param _beta :: lattice parameter \f$ \beta \f$
-      @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-       */
-      void setbeta(double _beta,const int angleunit=latDegrees);
-      /** Set lattice parameter
-      @param _gamma :: lattice parameter \f$ \gamma \f$
-      @param angleunit :: units for angle, of type #AngleUnits. Default is degrees.
-       */
-      void setgamma(double _gamma,const int angleunit=latDegrees);
+      void setalpha(double _alpha,const int angleunit=angDegrees);
+      void setbeta(double _beta,const int angleunit=angDegrees);
+      void setgamma(double _gamma,const int angleunit=angDegrees);
 
       // Access private variables
-      /// Get the metric tensor
-      /// @return G :: metric tensor
-	    const Geometry::MantidMat& getG() const;
-	    /// Get the reciprocal metric tensor
-	    /// @return Gstar :: metric tensor of the reciprocal lattice
+      const Geometry::MantidMat& getG() const;
       const Geometry::MantidMat& getGstar() const;
-	    /// Get the B-matrix
-      /// @return B :: B matrix in Busing-Levy convention
       const Geometry::MantidMat& getB() const;
 	
-      // Calculate things about lattice and vectors
-      /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
-	    double d(double h, double k, double l) const; 
-	    /// Return d*=1/d (\f$ \mbox{ \AA }^{-1} \f$) for a given h,k,l coordinate
+      // Calculate things about lattice and vectors      
+	    double d(double h, double k, double l) const; 	    
       double dstar(double h,double k, double l) const; 
-	    /// Calculate the angle in degrees or radians between two reciprocal vectors (h1,k1,l1) and (h2,k2,l2)
-      double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=latDegrees) const;
-	  	/// Volume of the direct unit-cell
-      double volume()const; 
-      /// Volume of the reciprocal lattice
-	    double recVolume() const;
-
-      /// Recalculate lattice from reciprocal metric tensor (Gstar=transpose(UB)*UB)
+	    double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
+	  	double volume()const; 
+      double recVolume() const; 
       void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
 
     private:	    
@@ -261,16 +146,11 @@ namespace Geometry
 	  	 */
       MantidMat B;  
 
-      /// Private function, called at initialization or whenever lattice parameters are changed.
-      ///Calls #calculateG() , #calculateGstar(),  #calculateReciprocalLattice(), #calculateB()
+      // Private functions
       void recalculate();
-      /// Private function to calculate #G matrix
 	    void calculateG();
-	    /// Private function to calculate #Gstar matrix
 	    void calculateGstar();
-	    /// Private function to calculate reciprocal lattice parameters
 	    void calculateReciprocalLattice();
-	    /// Private function to calculate #B matrix
 	    void calculateB();   
   };
 } // namespace Mantid
