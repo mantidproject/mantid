@@ -11,126 +11,126 @@
 
 namespace MantidQt
 {
-namespace MantidWidgets
-{
-class  ICatInvestigation : public QWidget
-{
-  Q_OBJECT
+  namespace MantidWidgets
+  {
+    class  ICatInvestigation : public QWidget
+    {
+      Q_OBJECT
 
-public:
-  /// Constructor
-  ICatInvestigation(long long investId,const QString &qRbNumber,const QString &qTitle,
-	   const QString & qInstrument,Mantid::API::ITableWorkspace_sptr& m_ws2_sptr,QWidget *parent = 0);
-signals:
-   ///this signal prints error messge to log window
-   
-   void error(const QString&,int param=0);
-   /// loadraw asynchronous execution.
-   void loadRawAsynch(const QString&,const QString&);
-  
-   /// loadnexus asynchronous execution
-   void loadNexusAsynch(const QString&,const QString&);
+    public:
+      /// Constructor
+      ICatInvestigation(long long investId,const QString &qRbNumber,const QString &qTitle,
+          const QString & qInstrument,Mantid::API::ITableWorkspace_sptr& m_ws2_sptr,QWidget *parent = 0);
+      signals:
+      ///this signal prints error messge to log window
 
-   /// signal for downloading data files
-    void download(const std::vector<std::string>&,const std::vector<long long>&);
+      void error(const QString&,int param=0);
+      /// loadraw asynchronous execution.
+      void loadRawAsynch(const QString&,const QString&);
 
-   //signal for uncontrolled loading of 
-   void executeLoadAlgorithm(const QString&, const QString&, const QString&);
+      /// loadnexus asynchronous execution
+      void loadNexusAsynch(const QString&,const QString&);
 
-private:
-  /// Initialize the layout
-  virtual void initLayout();
-  /// Populate the investigation tree widget
-  void populateInvestigationTreeWidget();
-  /// execute getdatafIles algorithm
-  Mantid::API::ITableWorkspace_sptr executeGetdataFiles();
+      /// signal for downloading data files
+      void download(const std::vector<std::string>&,const std::vector<long long>&);
 
-  /// executes getdatasets algorithm
-   Mantid::API::ITableWorkspace_sptr executeGetdataSets();
- 
-  /// Poulates the data files tree widget 
-  void populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr ws_sptr,const QString& type,bool bEnable);
+      //signal for uncontrolled loading of
+      void executeLoadAlgorithm(const QString&, const QString&, const QString&);
 
-    /// get the selected file name
-	void getSelectedFileNames(std::vector<std::string>& fileNames );
+    private:
+      /// Initialize the layout
+      virtual void initLayout();
+      /// Populate the investigation tree widget
+      void populateInvestigationTreeWidget();
+      /// execute getdatafIles algorithm
+      Mantid::API::ITableWorkspace_sptr executeGetdataFiles();
 
-	/// checks the file is of raw extn
-	bool isRawFile(const QString& fileName);
-	/// checks the file is of  nxs extn
-	bool isNexusFile(const QString& fileName);
+      /// executes getdatasets algorithm
+      Mantid::API::ITableWorkspace_sptr executeGetdataSets();
 
-	/// executes loadRaw algorithm
-	void executeLoadRaw(const QString& fileName,const QString& wsName);
+      /// Poulates the data files tree widget
+      void populateinvestigationWidget(Mantid::API::ITableWorkspace_sptr ws_sptr,const QString& type,bool bEnable);
 
-	/// executes loadRaw algorithm
-	void executeLoadNexus(const QString& fileName,const QString& wsName);
+      /// get the selected file name
+      void getSelectedFileNames(std::vector<std::string>& fileNames );
 
-	//if the loading is controlled
-	bool isLoadingControlled();
+      /// checks the file is of raw extn
+      bool isRawFile(const QString& fileName);
+      /// checks the file is of  nxs extn
+      bool isNexusFile(const QString& fileName);
 
-	/// execute the algorithm
-	bool execute(const QString& algName,const int& version,const QString& filepath,const QString& wsName);
+      /// executes loadRaw algorithm
+      void executeLoadRaw(const QString& fileName,const QString& wsName);
 
-	/// This method loads raw/nexus data
-	void loadData( const QString& filePath);
+      /// executes loadRaw algorithm
+      void executeLoadNexus(const QString& fileName,const QString& wsName);
 
-	/// get fileds 
-	void getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds);
-  
-  ///update the investigation widget label
-  void updateLabel(const QString& labelText);
+      //if the loading is controlled
+      bool isLoadingControlled();
+
+      /// execute the algorithm
+      bool execute(const QString& algName,const int& version,const QString& filepath,const QString& wsName);
+
+      /// This method loads raw/nexus data
+      void loadData( const QString& filePath);
+
+      /// get fileds
+      void getFileIds(const std::vector<std::string> &fileNames, std::vector<long long >&fileIds);
+
+      ///update the investigation widget label
+      void updateLabel(const QString& labelText);
 
 
-  private slots:
-	  /// investigation Clicked
-	void investigationClicked(QTreeWidgetItem *, int);
-	///cancel button clicked
-	void onCancel();
-	/// Download button clicked
-	void onDownload();
-    /// tree widget item named defaults clicked
-	void investigationWidgetItemExpanded(QTreeWidgetItem* item);
-    /// table item selected 
-	void tableItemSelected(QTableWidgetItem* item);
-	/// load button clicked
-	void onLoad();
-	/// select all files button clciked
-	void onSelectAllFiles();
-	/// if data file checkbox selected
-	bool isDataFilesChecked();
-	 /// This method checks the selected data file exis in the downlaoded list
-	bool isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath);
+    private slots:
+      /// investigation Clicked
+      void investigationClicked(QTreeWidgetItem *, int);
+      ///cancel button clicked
+      void onCancel();
+      /// Download button clicked
+      void onDownload();
+      /// tree widget item named defaults clicked
+      void investigationWidgetItemExpanded(QTreeWidgetItem* item);
+      /// table item selected
+      void tableItemSelected(QTableWidgetItem* item);
+      /// load button clicked
+      void onLoad();
+      /// select all files button clciked
+      void onSelectAllFiles();
+      /// if data file checkbox selected
+      bool isDataFilesChecked();
+      /// This method checks the selected data file exis in the downlaoded list
+      bool isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath);
 
-	/// getting the file locations
-	void setfileLocations(const std::vector<std::string>&);
-	//handler for helpbutton
-	void helpButtonClicked();
-	
-private:
-  //The form generated by Qt Designer
-  Ui::ICatInvestigation m_uiForm;
+      /// getting the file locations
+      void setfileLocations(const std::vector<std::string>&);
+      //handler for helpbutton
+      void helpButtonClicked();
 
-   ///investigation id
-  long long m_invstId;
-  /// RbNumber
-  QString m_RbNumber;
-  /// Title
-  QString m_Title;
-  /// Instrument
-  QString m_Instrument;
-  /// data files workspace 
-  Mantid::API::ITableWorkspace_sptr m_datafilesws_sptr;
-   /// filtered data files workspace pointer
-  Mantid::API::ITableWorkspace_sptr m_filteredws_sptr;
-  /// shared pointer to datasets workspace
-  Mantid::API::ITableWorkspace_sptr m_datasetsws_sptr;
-  /// shared pointer to investigation data like abstarct,facility userand samle name 
-  Mantid::API::ITableWorkspace_sptr m_investws_sptr;
-  std::vector<std::string> m_downloadedFileList;
+    private:
+      //The form generated by Qt Designer
+      Ui::ICatInvestigation m_uiForm;
 
-};
+      ///investigation id
+      long long m_invstId;
+      /// RbNumber
+      QString m_RbNumber;
+      /// Title
+      QString m_Title;
+      /// Instrument
+      QString m_Instrument;
+      /// data files workspace
+      Mantid::API::ITableWorkspace_sptr m_datafilesws_sptr;
+      /// filtered data files workspace pointer
+      Mantid::API::ITableWorkspace_sptr m_filteredws_sptr;
+      /// shared pointer to datasets workspace
+      Mantid::API::ITableWorkspace_sptr m_datasetsws_sptr;
+      /// shared pointer to investigation data like abstarct,facility userand samle name
+      Mantid::API::ITableWorkspace_sptr m_investws_sptr;
+      std::vector<std::string> m_downloadedFileList;
 
-}
+    };
+
+  }
 }
 
 #endif //MANTIDQTCUSTOMINTERFACES_ICATINVESTIGATION_H_
