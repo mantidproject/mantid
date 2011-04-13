@@ -1076,10 +1076,36 @@ public:
 
 
 
+}; // end of class PlusTest
 
 
-};
+//============================================================================
+/** Performance test with large workspaces. */
 
+class PlusTestPerformance : public CxxTest::TestSuite
+{
+public:
+  bool DO_PLUS;
+  Workspace2D_sptr ws2D_1, ws2D_2;
+
+  PlusTestPerformance()
+  {
+    DO_PLUS = true;
+  }
+  
+  void setUp()
+  {
+  	ws2D_1 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+   	ws2D_2 = WorkspaceCreationHelper::Create2DWorkspace(10000 /*histograms*/, 1000/*bins*/);
+  }
+  
+  void test_large_2D()
+  {
+  	MatrixWorkspace_sptr out = ws2D_1 * ws2D_2;
+  }
+  
+  
+}; // end of class PlusTestPerformance
 
 #endif
 

@@ -811,6 +811,17 @@ namespace DataObjects
   }
 
   // --------------------------------------------------------------------------
+  /** Manually set the event list sort order value. No actual sorting takes place.
+   * SHOULD ONLY BE USED IN TESTS or if you know what you are doing.
+   * @param order :: sort order to set.
+   */
+  void EventList::setSortOrder(const EventSortType order) const
+  {
+    this->order = order;
+  }
+
+
+  // --------------------------------------------------------------------------
   /** Sort events by TOF */
   void EventList::sortTof() const
   {

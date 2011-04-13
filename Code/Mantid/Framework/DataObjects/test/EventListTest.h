@@ -1729,19 +1729,55 @@ public:
 
 
 //==========================================================================================
-/** Performance tests for event lists */
+/** Performance tests for event lists.
+ * Just runs some of the slowest code with lots of events.
+ * Tries to isolate sorting from other code by feeding
+ * in pre-sorted event lists in some cases.
+ * */
 class EventListTestPerformance : public CxxTest::TestSuite
 {
 public:
-  EventList el1, el2, el3, el4, el5;
-
+  EventList el_random, el_sorted, el_sorted_weighted, el4, el5;
+  MantidVec fineX;
+  MantidVec coarseX;
   void setUp()
   {
-    for (size_t i=0; i < 5e6; i++)
+    std::cout << "setup called";
+    PARALLEL_SECTIONS
     {
-      //tof steps of 5 microseconds, starting at 100 ns, up to 20 msec
-      el1 += TofEvent( (rand()%10000)*1.0, rand()%1000);
+      PARALLEL_SECTION
+      {
+        // Random events up to 1e5 tof
+        el_random.clear();
+        for (size_t i=0; i < 2e6; i++)
+          el_random += TofEvent( (rand()%200000)*0.05, rand()%1000);
+      }
+      PARALLEL_SECTION
+      {
+        // 10 million events, up to 1e5 tof
+        el_sorted.clear();
+        for (size_t i=0; i < 10e6; i++)
+          el_sorted += TofEvent( i/100.0, rand()%1000);
+        el_sorted.setSortOrder(TOF_SORT);
+      }
+      PARALLEL_SECTION
+      {
+        el_sorted_weighted.clear();
+        for (size_t i=0; i < 10e6; i++)
+          el_sorted_weighted += WeightedEvent( i/100.0, rand()%1000, 2.34, 4.56);
+        el_sorted_weighted.setSortOrder(TOF_SORT);
+      }
+      PARALLEL_SECTION
+      {
+        // A vector for histogramming, 100,000 steps of 1.0
+        for (double i=0; i < 100000; i += 1.0)
+          fineX.push_back(i);
+      }
     }
+
+    // Coarse vector, 1000 bins.
+    for (double i=0; i < 100000; i += 100)
+      coarseX.push_back(i);
   }
 
   void tearDown()
@@ -1750,29 +1786,71 @@ public:
 
   void test_sort_tof()
   {
-    el1.sortTof();
+    el_random.sortTof();
   }
 
   void test_sort_tof2()
   {
-    el1.sortTof2();
+    el_random.sortTof2();
   }
 
   void test_sort_tof4()
   {
-    el1.sortTof4();
+    el_random.sortTof4();
   }
 
   void test_compressEvents()
   {
     EventList out_el;
-    el1.compressEvents(10.0, &out_el);
+    el_sorted.compressEvents(10.0, &out_el);
   }
 
   void test_multiply()
   {
-    el1 *= 2.345;
+    el_random *= 2.345;
   }
+
+  void test_convertTof()
+  {
+    el_random.convertTof(2.5, 6.78);
+  }
+
+  void test_getTofs_setTofs()
+  {
+    std::vector<double> tofs;
+    el_random.getTofs(tofs);
+    TS_ASSERT_EQUALS(tofs.size(), el_random.getNumberEvents());
+    el_random.setTofs(tofs);
+  }
+
+  void test_histogram_fine()
+  {
+    MantidVec Y, E;
+    el_sorted.generateHistogram(fineX, Y, E);
+    el_sorted_weighted.generateHistogram(fineX, Y, E);
+  }
+
+  void test_histogram_coarse()
+  {
+    MantidVec Y, E;
+    el_sorted.generateHistogram(coarseX, Y, E);
+    el_sorted_weighted.generateHistogram(coarseX, Y, E);
+  }
+
+  void test_maskTof()
+  {
+    TS_ASSERT_EQUALS(el_sorted.getNumberEvents(), 10000000);
+    el_sorted.maskTof(25e3, 75e3);
+    TS_ASSERT_EQUALS( el_sorted.getNumberEvents(), 5000000-1);
+  }
+
+  void test_integrate()
+  {
+    TS_ASSERT_EQUALS(el_sorted.getNumberEvents(), 10000000);
+    double integ = el_sorted.integrate(25e3, 75e3, false);
+    TS_ASSERT_DELTA( integ, 5e6, 1);
+  }
+
 };
 
 #endif /// EVENTLISTTEST_H_

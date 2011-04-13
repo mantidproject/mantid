@@ -186,6 +186,8 @@ public:
 
   void sort(const EventSortType order) const;
 
+  void setSortOrder(const EventSortType order) const;
+
   void sortTof() const;
   void sortTof2() const;
   void sortTof4() const;
