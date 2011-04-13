@@ -263,7 +263,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
-      MDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
 
       MDCellMap::const_iterator iter = m_mdCellMap.find(dim1Increment);
       if(true == newCellRequired(dim1Increment, point))
@@ -278,8 +278,8 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
-      MDDimension_sptr xDimension = geometry->getXDimension();
-      MDDimension_sptr yDimension = geometry->getYDimension();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(2);
@@ -307,9 +307,9 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
-      MDDimension_sptr xDimension = geometry->getXDimension();
-      MDDimension_sptr yDimension = geometry->getYDimension();
-      MDDimension_sptr zDimension = geometry->getZDimension();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
+      IMDDimension_sptr zDimension = geometry->getZDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(3);
@@ -337,10 +337,10 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
-      MDDimension_sptr xDimension = geometry->getXDimension();
-      MDDimension_sptr yDimension = geometry->getYDimension();
-      MDDimension_sptr zDimension = geometry->getZDimension();
-      MDDimension_sptr tDimension = geometry->getZDimension();
+      IMDDimension_sptr xDimension = geometry->getXDimension();
+      IMDDimension_sptr yDimension = geometry->getYDimension();
+      IMDDimension_sptr zDimension = geometry->getZDimension();
+      IMDDimension_sptr tDimension = geometry->getZDimension();
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(4);
@@ -387,10 +387,10 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
         unsigned int dim2Increment,
         unsigned int dim3Increment,
         unsigned int dim4Increment,
-        MDDimension_sptr xDimension,
-        MDDimension_sptr yDimension,
-        MDDimension_sptr zDimension,
-        MDDimension_sptr tDimension)
+        IMDDimension_sptr xDimension,
+        IMDDimension_sptr yDimension,
+        IMDDimension_sptr zDimension,
+        IMDDimension_sptr tDimension)
 {
   double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
   double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
@@ -421,9 +421,9 @@ VecCoordinate createPolyhedron(
     unsigned int dim1Increment,
     unsigned int dim2Increment,
     unsigned int dim3Increment,
-    MDDimension_sptr xDimension,
-    MDDimension_sptr yDimension,
-    MDDimension_sptr zDimension)
+    IMDDimension_sptr xDimension,
+    IMDDimension_sptr yDimension,
+    IMDDimension_sptr zDimension)
 {
   double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
   double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
@@ -444,8 +444,8 @@ VecCoordinate createPolyhedron(
 VecCoordinate createPolygon(
     unsigned int dim1Increment,
     unsigned int dim2Increment,
-    MDDimension_sptr xDimension,
-    MDDimension_sptr yDimension)
+    IMDDimension_sptr xDimension,
+    IMDDimension_sptr yDimension)
 {
   double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
   double delta_y = (yDimension->getMaximum() - yDimension->getMinimum()) / yDimension->getNBins();
@@ -460,7 +460,7 @@ VecCoordinate createPolygon(
 
 VecCoordinate createLine(
     unsigned int dim1Increment,
-    MDDimension_sptr xDimension)
+    IMDDimension_sptr xDimension)
 {
   double delta_x = (xDimension->getMaximum() - xDimension->getMinimum()) / xDimension->getNBins();
   VecCoordinate vertexes(2);

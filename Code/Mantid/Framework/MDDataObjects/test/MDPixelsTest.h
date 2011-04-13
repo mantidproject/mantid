@@ -76,7 +76,7 @@ private:
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
     basisDimensions.insert(MDBasisDimension("u3", false, 3));
 
-    UnitCell cell;
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
     MDGeometry* pGeometry = new MDGeometry(MDGeometryBasis(basisDimensions, cell));
     return std::auto_ptr<MDImage>(new MDImage(pGeometry));
   }

@@ -34,8 +34,8 @@ MD_FileTestDataGenerator::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeo
     basisDimensions.insert(MDBasisDimension("qzt", true, 2));
     basisDimensions.insert(MDBasisDimension("ent", false,3));
 
-    UnitCell cell;
-    basisGeometry.init(basisDimensions,cell);
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
+    basisGeometry.init(basisDimensions, cell);
     // get_sqw_header should go here and define cell
 
   

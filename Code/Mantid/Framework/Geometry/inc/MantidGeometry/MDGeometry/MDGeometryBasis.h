@@ -62,7 +62,7 @@ namespace Mantid
     {
     public:
 
-      MDGeometryBasis(boost::shared_ptr<UnitCell> spSample,unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
+      MDGeometryBasis(boost::shared_ptr<UnitCell> spSample=boost::shared_ptr<UnitCell>(),unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);
 
       MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 
@@ -81,7 +81,7 @@ namespace Mantid
 	   *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
-	  void init(const std::set<MDBasisDimension>& mdBasisDimensions);
+	  void init(const std::set<MDBasisDimension>& mdBasisDimensions, boost::shared_ptr<UnitCell> theSample);
 	  // copy constructor is used and can be default
     private:
 	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;

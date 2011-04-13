@@ -23,7 +23,7 @@ spSample(theSample)
 }
 //
 void
-MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions)
+MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions, boost::shared_ptr<UnitCell> theSample)
 {
     m_mdBasisDimensions.clear();
     m_mdBasisDimensions = mdBasisDimensions;
@@ -49,7 +49,7 @@ MDGeometryBasis::MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimens
   : n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions),
   spSample(theSample)
 {
-   this->init(mdBasisDimensions);
+   this->init(mdBasisDimensions, theSample);
 }
 
     void MDGeometryBasis::checkInputBasisDimensions(const MDBasisDimension&  dimension)

@@ -55,7 +55,7 @@ private:
     basisDimensions.insert(MDBasisDimension("q2", true, 2));
     basisDimensions.insert(MDBasisDimension("u3", false, 3));
 
-    UnitCell cell;
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
     FakeMDGeometry* geometry = new FakeMDGeometry(MDGeometryBasis(basisDimensions, cell));
     geometry->setNumberOfBins(0, 4);
     geometry->setNumberOfBins(1, 4);

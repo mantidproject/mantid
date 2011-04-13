@@ -55,11 +55,11 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
   
 
 }
-std::vector<boost::shared_ptr<IMDDimension> > 
+std::vector<boost::shared_ptr<MDDimension> >
 MDGeometry::getDimensions(bool sort_by_bais)const
 {
     unsigned int i;
-	std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
+	std::vector<boost::shared_ptr<MDDimension> > dims(this->getNumDims());
 
     if(sort_by_bais){ // sort by basis;
        std::vector<std::string> dimID = this->getBasisTags();
@@ -301,7 +301,7 @@ MDGeometry::getDimension(unsigned int i)
       return theDimension[i];
 }
 //
-boost::shared_ptr<const IMDDimension>
+boost::shared_ptr<const MDDimension>
 MDGeometry::get_constDimension(unsigned int i)const
     {
 	  
@@ -332,10 +332,10 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
   return pDim;
 }
 
-boost::shared_ptr<const IMDDimension>
+boost::shared_ptr<const MDDimension>
 MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
 {
-      boost::shared_ptr<IMDDimension> pDim;
+      boost::shared_ptr<MDDimension> pDim;
       std::map<std::string,boost::shared_ptr<MDDimension> >::const_iterator it;
       it = dimensions_map.find(tag);
       if(it == dimensions_map.end()){

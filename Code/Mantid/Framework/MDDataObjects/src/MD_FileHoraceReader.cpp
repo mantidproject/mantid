@@ -79,8 +79,8 @@ MD_FileHoraceReader::read_basis(Mantid::Geometry::MDGeometryBasis &basisGeometry
     basisDimensions.insert(MDBasisDimension("qz", true, 2));
     basisDimensions.insert(MDBasisDimension("en", false,3));
 
-    UnitCell cell;
-    basisGeometry.init(basisDimensions,cell);
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
+    basisGeometry.init(basisDimensions, cell);
     // get_sqw_header should go here and define cell
 }
 //

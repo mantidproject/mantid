@@ -35,7 +35,7 @@ MD_File_hdfMatlab::read_basis(Geometry::MDGeometryBasis &basisGeometry)
     basisDimensions.insert(MDBasisDimension("qz", true, 2));
     basisDimensions.insert(MDBasisDimension("en", false,3));
 
-    UnitCell cell;
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
 	basisGeometry.init(basisDimensions,cell);
 }
 

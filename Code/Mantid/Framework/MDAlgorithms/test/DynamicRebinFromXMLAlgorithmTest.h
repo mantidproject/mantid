@@ -45,7 +45,7 @@ private:
     basisDimensions.insert(MDBasisDimension("q3", true, 2));
     basisDimensions.insert(MDBasisDimension("u1", false, 3));
 
-    UnitCell cell;
+    boost::shared_ptr<UnitCell> cell(new UnitCell());
     return new MDGeometry(MDGeometryBasis(basisDimensions, cell));
   }
 

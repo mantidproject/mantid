@@ -382,7 +382,7 @@ std::string constructGeometryXML(
     //be considered.
   }
 
-  UnitCell cell; // Unit cell currently does nothing.
+  boost::shared_ptr<UnitCell> cell(new UnitCell());
   MDGeometryBasis basis(basisDimensions, cell);
 
   //TODO: Get Rotation matrix from Plane ImplicitFunction
