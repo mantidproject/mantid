@@ -317,6 +317,8 @@ using namespace boost::python;
     // EventWorkspace class
     class_< IEventWorkspace, bases<API::MatrixWorkspace>, boost::noncopyable >("EventWorkspace", no_init)
         .def("getNumberEvents", &IEventWorkspace::getNumberEvents)
+        .def("getTofMin", &IEventWorkspace::getTofMin)
+        .def("getTofMax", &IEventWorkspace::getTofMax)
         .def("getEventList", (IEventList*(IEventWorkspace::*)(const int) ) &IEventWorkspace::getEventListPtr, return_internal_reference<>())
         .def("clearMRU", &IEventWorkspace::clearMRU)
            ;
