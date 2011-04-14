@@ -611,20 +611,9 @@ class Normalize(ReductionStep):
     def __init__(self, normalization_spectrum=None):
         super(Normalize, self).__init__()
         self._normalization_spectrum = normalization_spectrum
-        self._scale_factor = 1.0
         
     def get_normalization_spectrum(self):
         return self._normalization_spectrum
-    
-    def set_scale_factor(self, factor):
-        """
-            Set the absolute scale factor
-            @param factor: absolute scale factor
-        """
-        try:
-            self._scale_factor = float(factor)
-        except:
-            ValueError, "Normalize.set_scale_factor expects a float"
         
     def execute(self, reducer, workspace):
         if self._normalization_spectrum is None:
@@ -643,9 +632,10 @@ class Normalize(ReductionStep):
         if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
             Scale(workspace, workspace, 1.0e8, 'Multiply')
             
-        if self._scale_factor != 1.0:
-            Scale(workspace, workspace, self._scale_factor, 'Multiply')
-            
+        if reducer._absolute_scale is not None:
+            scale,_ = reducer._absolute_scale.get_scaling_factor()
+            Scale(workspace, workspace, scale, 'Multiply')
+                        
     def clean(self):
         mtd.deleteWorkspace(norm_ws)
             

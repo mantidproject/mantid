@@ -4,6 +4,7 @@
 from reduction.command_interface import *
 from sans_reducer import SANSReducer
 import sans_reduction_steps
+import absolute_scale
 import hfir_instrument
 import mantidsimple
 
@@ -239,7 +240,8 @@ def NoIQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(None)
     
 def ScaleFactor(factor):
-    if ReductionSingleton().get_normalizer() is None:
-        raise RuntimeError, "A normalization option hasn't been defined."
-    ReductionSingleton().get_normalizer().set_scale_factor(factor)
+    ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
     
+def SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0):
+    ReductionSingleton().set_absolute_scale(absolute_scale.AbsoluteScale(direct_beam, beamstop_radius, attenuator_trans))
+   

@@ -7,6 +7,7 @@ from reduction import Reducer
 from reduction import ReductionStep
 from reduction import validate_step
 import sans_reduction_steps
+import absolute_scale
 from mantidsimple import *
 
 ## Version number
@@ -27,6 +28,7 @@ class SANSReducer(Reducer):
     
     ## Normalization option
     _normalizer = None
+    _absolute_scale = None
     
     ## Dark current data file
     _dark_current_subtracter = None
@@ -160,6 +162,14 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_beam_finder expects an object of class ReductionStep"
     
+    def set_absolute_scale(self, scaler):
+        """
+        """
+        if issubclass(scaler.__class__, absolute_scale.BaseAbsoluteScale) or scaler is None:
+            self._absolute_scale = scaler
+        else:
+            raise RuntimeError, "Reducer.set_absolute_scale expects an object of class ReductionStep"
+    
     def set_data_loader(self, loader):
         """
             Set the loader for all data files
@@ -277,11 +287,15 @@ class SANSReducer(Reducer):
             the list of reduction steps.
         """
         if self.instrument is None:
-            raise RuntimeError, "SANSReducer: trying to run a reduction with an instrument specified"
+            raise RuntimeError, "SANSReducer: trying to run a reduction with no instrument specified"
 
         if self._beam_finder is not None:
             result = self._beam_finder.execute(self)
             self.log_text += "%s\n" % str(result)     
+            
+        if self._absolute_scale is not None:
+            result = self._absolute_scale.execute(self)
+            self.log_text += "%s\n" % str(result)
             
         # Create the list of reduction steps
         self._to_steps()            
