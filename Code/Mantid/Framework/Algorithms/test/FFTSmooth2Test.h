@@ -7,7 +7,7 @@
 #include "MantidAlgorithms/FFTSmooth2.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/ArrayProperty.h"
-#include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidDataHandling/LoadNexusProcessed.h"
 
 
 using namespace Mantid::API;
@@ -65,7 +65,7 @@ public:
 
   void testZeroing()
   {                                               // load input and "Gold" result workspaces
-    Mantid::NeXus::LoadNexusProcessed loader;
+    Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","MultispectralTestData.nxs");
     loader.setProperty("OutputWorkspace","TestInputWS");
@@ -113,7 +113,7 @@ public:
 
   void testButterworth()
   {                                               // load input and "Gold" result workspaces
-    Mantid::NeXus::LoadNexusProcessed loader;
+    Mantid::DataHandling::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","MultispectralTestData.nxs");
     loader.setProperty("OutputWorkspace","TestInputWS");

@@ -250,7 +250,7 @@ target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( GeometryTest ${TEST_FILES} )
   include_directories( ../TestHelpers/inc ../DataObjects/inc ../API/inc )
-  target_link_libraries( GeometryTest Geometry TestHelpers )
+  target_link_libraries( GeometryTest Geometry Nexus TestHelpers )
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET GeometryTest PROPERTY FOLDER "UnitTests" )

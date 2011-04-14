@@ -13,7 +13,7 @@
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidNexus/LoadMuonNexus2.h"
+#include "MantidDataHandling/LoadMuonNexus2.h"
 #include <iostream>
 #include <numeric>
 #include <fstream>
@@ -24,7 +24,7 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 
 class GroupDetectors2Test : public CxxTest::TestSuite
 {
