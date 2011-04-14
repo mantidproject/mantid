@@ -83,9 +83,9 @@ DynamicCPRRebinning::preselect_cells()
 
   IMDDimension *pDim;
  
-  std::vector<boost::shared_ptr<MDDimension> > pAllDim  = pSourceGeom->getDimensions();
-  std::vector<boost::shared_ptr<MDDimension> > pOrthogonal(nOrthogonal);
-  std::vector<boost::shared_ptr<MDDimension> > pReciprocal(nReciprocal);
+  std::vector<boost::shared_ptr<IMDDimension> > pAllDim  = pSourceGeom->getDimensions();
+  std::vector<boost::shared_ptr<IMDDimension> > pOrthogonal(nOrthogonal);
+  std::vector<boost::shared_ptr<IMDDimension> > pReciprocal(nReciprocal);
   unsigned int nr(0),no(0);
 
   // get the orthogonal and reciprocal dimensions separately
