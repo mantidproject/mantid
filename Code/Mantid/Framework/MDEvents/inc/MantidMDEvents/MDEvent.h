@@ -43,7 +43,8 @@ namespace MDEvents
    *
    * This class is meant to be as small in memory as possible, since there
    * will be (many) billions of it.
-   * No virtual methods! This adds a vtable which uses lots of memory.
+   * No virtual methods! This adds a pointer to a vtable = 8 bytes of memory
+   * per event (plus the overhead of vtable lookups for calls)
    *
    * @tparam nd :: the number of dimensions that each MDEvent will be tracking.
    *               an int > 0.

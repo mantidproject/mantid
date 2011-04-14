@@ -52,6 +52,24 @@ namespace MDEvents
   {
   }
   
+  //  template<typename MDE, size_t nd>
+//  bool pointContained(double * coords)
+//
+//  template<typename MDE, size_t nd>
+//  void evaluateBox(MDBox<MDE, nd> & box, bool fullyContained)
+//  {
+//    if (fullyContained)
+//    {
+//      // MDBox is fully contained - use the cached value.
+//      //signal += box.getSignal();
+//    }
+//    else
+//    {
+//      // Go through each event
+//    }
+//  }
+
+
 
   //----------------------------------------------------------------------------------------------
   /** Initialize the algorithm's properties.
