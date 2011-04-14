@@ -981,6 +981,88 @@
         </item>
        </widget>
       </widget>
+      <widget class="QGroupBox" name="groupBox_7" >
+       <property name="geometry" >
+        <rect>
+         <x>10</x>
+         <y>140</y>
+         <width>461</width>
+         <height>131</height>
+        </rect>
+       </property>
+       <property name="title" >
+        <string>Data Binning</string>
+       </property>
+       <widget class="QLabel" name="optionLabelBinWidth" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>30</y>
+          <width>281</width>
+          <height>16</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Data collected with histogram bins of</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="label_4" >
+        <property name="geometry" >
+         <rect>
+          <x>10</x>
+          <y>60</y>
+          <width>71</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Rebin data:</string>
+        </property>
+       </widget>
+       <widget class="QComboBox" name="rebinComboBox" >
+        <property name="geometry" >
+         <rect>
+          <x>80</x>
+          <y>60</y>
+          <width>69</width>
+          <height>22</height>
+         </rect>
+        </property>
+        <item>
+         <property name="text" >
+          <string>None</string>
+         </property>
+        </item>
+        <item>
+         <property name="text" >
+          <string>Fixed</string>
+         </property>
+        </item>
+       </widget>
+       <widget class="QLabel" name="optionBinStep" >
+        <property name="geometry" >
+         <rect>
+          <x>170</x>
+          <y>60</y>
+          <width>46</width>
+          <height>21</height>
+         </rect>
+        </property>
+        <property name="text" >
+         <string>Step:</string>
+        </property>
+       </widget>
+       <widget class="QLineEdit" name="optionStepSizeText" >
+        <property name="geometry" >
+         <rect>
+          <x>230</x>
+          <y>60</y>
+          <width>113</width>
+          <height>20</height>
+         </rect>
+        </property>
+       </widget>
+      </widget>
      </widget>
     </widget>
    </item>

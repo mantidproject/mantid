@@ -3,6 +3,7 @@
 //----------------------
 #include "MantidQtCustomInterfaces/MuonAnalysis.h"
 #include "MantidQtCustomInterfaces/MuonAnalysisHelper.h"
+#include "MantidQtCustomInterfaces/MuonAnalysisOptionTab.h"
 #include "MantidQtCustomInterfaces/IO_MuonGrouping.h"
 #include "MantidQtAPI/FileDialogHandler.h"
 
@@ -85,7 +86,9 @@ void MuonAnalysis::initLayout()
   startUpLook();
   createMicroSecondsLabels(m_uiForm);
   m_uiForm.mwRunFiles->readSettings(m_settingsGroup + "mwRunFilesBrowse");
-  loadAutoSavedValues(m_settingsGroup);
+
+  m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
+  m_optionTab->initLayout();
 
   // connect exit button
   //connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
@@ -154,19 +157,8 @@ void MuonAnalysis::initLayout()
   connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this, 
     SLOT(runFirstGoodBinFront()));
 
-  ////////////// Plot Option ///////////////
-  connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(runTimeComboBox(int)));
-  connect(m_uiForm.timeAxisStartAtInput, SIGNAL(lostFocus()), this, 
-    SLOT(runTimeAxisStartAtInput()));
-  connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(lostFocus()), this, 
-    SLOT(runTimeAxisFinishAtInput()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
-  connect(m_uiForm.yAxisMinimumInput, SIGNAL(lostFocus()), this, 
-    SLOT(runyAxisMinimumInput()));
-  connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
-    SLOT(runyAxisMaximumInput()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runShowErrorBars(bool)));
+  // load previous saved values
+  loadAutoSavedValues(m_settingsGroup);
 }
 
 
@@ -200,50 +192,6 @@ void MuonAnalysis::runFrontGroupGroupPairComboBox(int index)
 
 
 /**
-* Plot option time combo box (slot)
-*/
-void MuonAnalysis::runTimeComboBox(int index)
-{
-  if ( index == 1 ) // Start at Time Zero
-  {
-    m_uiForm.timeAxisStartAtInput->setEnabled(false);
-    m_uiForm.timeAxisStartAtInput->setText("0");
-  }
-
-  if ( index == 0 ) // Start at First Good Data
-  {
-    m_uiForm.timeAxisStartAtInput->setEnabled(true);
-    m_uiForm.timeAxisStartAtInput->setText(m_uiForm.firstGoodBinFront->text());
-  }
-
-  // save this new choice
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("timeComboBoxIndex", index); 
-}
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runTimeAxisStartAtInput()
-{
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisStartAtInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("timeAxisStart", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Reset to zero.");
-    m_uiForm.timeAxisStartAtInput->setText("0");
-  }
-}
-
-
-/**
 * Check input is valid in input box (slot)
 */
 void MuonAnalysis::runFirstGoodBinFront()
@@ -263,95 +211,6 @@ void MuonAnalysis::runFirstGoodBinFront()
     QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in First Good Data (ms)' input box. Reset to 0.3.");
     m_uiForm.firstGoodBinFront->setText("0.3");
   }
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runTimeAxisFinishAtInput()
-{
-  if (m_uiForm.timeAxisFinishAtInput->text().isEmpty())
-    return;
-
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.timeAxisFinishAtInput->text().toStdString());
-
-    QSettings group;
-    group.beginGroup(m_settingsGroup + "plotStyleOptions");
-    group.setValue("timeAxisFinish", boevs); 
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box.");
-    m_uiForm.timeAxisFinishAtInput->setText("");
-  }
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runyAxisMinimumInput()
-{
-  if (m_uiForm.yAxisMinimumInput->text().isEmpty())
-    return;
-
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMinimumInput->text().toStdString());
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Minimum:' input box.");
-    m_uiForm.yAxisMinimumInput->setText("");
-  }
-}
-
-
-/**
-* Check input is valid in input box (slot)
-*/
-void MuonAnalysis::runyAxisMaximumInput()
-{
-  if (m_uiForm.yAxisMaximumInput->text().isEmpty())
-    return;
-
-  try 
-  {
-    double boevs = boost::lexical_cast<double>(m_uiForm.yAxisMaximumInput->text().toStdString());
-  }
-  catch (...)
-  {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Maximum:' input box.");
-    m_uiForm.yAxisMaximumInput->setText("");
-  }
-}
-
-
-/**
-* When clicking autoscale (slot)
-*/
-void MuonAnalysis::runyAxisAutoscale(bool state)
-{
-  m_uiForm.yAxisMinimumInput->setEnabled(!state);
-  m_uiForm.yAxisMaximumInput->setEnabled(!state);
-
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("axisAutoScaleOnOff", state);   
-}
-
-
-/**
-* When clicking autoscale (slot)
-*/
-void MuonAnalysis::runShowErrorBars(bool state)
-{
-  QSettings group;
-  group.beginGroup(m_settingsGroup + "plotStyleOptions");
-  group.setValue("showErrorBars", state);   
 }
 
 
@@ -1178,8 +1037,6 @@ void MuonAnalysis::guessAlphaClicked()
         + idsB->text() + "\",\"" 
         + firstGoodBin() + "\")\n"
         + "print alg.getPropertyValue('Alpha')";
-
-    std::cout << pyString.toStdString() << std::endl;
 
     // run python script
     QString pyOutput = runPythonCode( pyString ).trimmed();
@@ -2325,7 +2182,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   prevPlotStyle.beginGroup(group + "plotStyleOptions"); 
   int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
   m_uiForm.timeComboBox->setCurrentIndex(timeComboBoxIndex);
-  runTimeComboBox(timeComboBoxIndex);
+  m_optionTab->runTimeComboBox(timeComboBoxIndex);
 
   double timeAxisStart = prevPlotStyle.value("timeAxisStart", 0.3).toDouble();
   double timeAxisFinish = prevPlotStyle.value("timeAxisFinish", 16.0).toDouble();
@@ -2335,11 +2192,22 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
 
   bool axisAutoScaleOnOff = prevPlotStyle.value("axisAutoScaleOnOff", 1).toBool();
   m_uiForm.yAxisAutoscale->setChecked(axisAutoScaleOnOff);
-  runyAxisAutoscale(axisAutoScaleOnOff);
+  m_optionTab->runyAxisAutoscale(axisAutoScaleOnOff);
 
   bool showErrorBars = prevPlotStyle.value("showErrorBars", 1).toBool();
   m_uiForm.showErrorBars->setChecked(showErrorBars);
 
+  QStringList kusse = prevPlotStyle.childKeys();
+  if ( kusse.contains("yAxisStart") )
+  {
+    double yAxisStart = prevPlotStyle.value("yAxisStart").toDouble();
+    m_uiForm.yAxisMinimumInput->setText(QString::number(yAxisStart));
+  }
+  if ( kusse.contains("yAxisFinish") )
+  {
+    double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
+    m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
+  }
 }
 
 }

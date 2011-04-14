@@ -9,7 +9,6 @@
 
 #include "MantidQtMantidWidgets/pythonCalc.h"
 #include "MantidQtMantidWidgets/MWDiag.h"
-
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include <map>
@@ -18,6 +17,41 @@ namespace MantidQt
 {
 namespace CustomInterfaces
 {
+
+namespace Muon
+{
+  class MuonAnalysisOptionTab;
+}
+
+
+/** 
+This is the main class for the MuonAnalysis interface
+see <http://www.mantidproject.org/MuonAnalysis>.    
+
+@author Anders Markvardsen, ISIS, RAL
+
+Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+This file is part of Mantid.
+
+Mantid is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
+
+Mantid is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+Code Documentation is available at: <http://doxygen.mantidproject.org>    
+*/
+
+
 class MuonAnalysis : public MantidQt::API::UserSubWindow
 {
   Q_OBJECT
@@ -90,24 +124,8 @@ private slots:
 
   ///
   void muonAnalysisHelpGroupingClicked();
-
-  ///////////// Plot options ////////////
-  ///
-  void runTimeComboBox(int index);
-  ///
-  void runTimeAxisStartAtInput();
-  ///
-  void runTimeAxisFinishAtInput();
   ///
   void runFirstGoodBinFront();
-  ///
-  void runyAxisAutoscale(bool state);
-  ///
-  void runyAxisMinimumInput();
-  ///
-  void runyAxisMaximumInput();
-  ///
-  void runShowErrorBars(bool state);
 
 private:
   /// Initialize the layout
@@ -259,6 +277,10 @@ private:
 
   /// Load auto saved values
   void loadAutoSavedValues(const QString& group);
+
+  ///
+ // MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
+    MantidQt::CustomInterfaces::Muon::MuonAnalysisOptionTab* m_optionTab;
 
   //A reference to a logger
   static Mantid::Kernel::Logger & g_log;
