@@ -268,16 +268,16 @@ Matrix<T>::operator*(const T& Value) const
   return X;
 }
 
+/**
+  Matrix multiplication THIS *= A
+  Note that we call operator* to avoid the problem
+  of changing matrix size.
+ @param A :: Matrix to multiply by  (this->row must == A->columns)
+ @return This *= A
+*/
 template<typename T>
 Matrix<T>&
 Matrix<T>::operator*=(const Matrix<T>& A)
-   /** 
-     Matrix multiplication THIS *= A  
-     Note that we call operator* to avoid the problem
-     of changing matrix size.
-    @param A :: Matrix to multiply by  (this->row must == A->columns)
-    @return This *= A 
-   */
 {
   if (ny!=A.nx)
     throw Kernel::Exception::MisMatch<int>(ny,A.nx,"Matrix*=(Matrix<T>)");
@@ -387,14 +387,15 @@ Matrix<T>::deleteMem()
   return;
 }
 
+
+/**
+  Sets the memory held in matrix
+  @param a :: number of rows
+  @param b :: number of columns
+*/
 template<typename T>
 void
 Matrix<T>::setMem(const int a,const int b)
-  /** 
-    Sets the memory held in matrix 
-    @param a :: number of rows
-    @param b :: number of columns
-  */
 {
   if (a==nx && b==ny) 
     return;
@@ -410,19 +411,20 @@ Matrix<T>::setMem(const int a,const int b)
       T* tmpX=new T[nx*ny];
       V=new T*[nx];
       for (int i=0;i<nx;i++)
-	V[i]=tmpX + (i*ny);
+        V[i]=tmpX + (i*ny);
     }
   return;
 }  
 
+
+/**
+  Swap rows I and J
+  @param RowI :: row I to swap
+  @param RowJ :: row J to swap
+*/
 template<typename T> 
 void
 Matrix<T>::swapRows(const int RowI,const int RowJ)
-  /** 
-    Swap rows I and J
-    @param RowI :: row I to swap
-    @param RowJ :: row J to swap
-  */
 {
   if (nx*ny && RowI<nx && RowJ<nx &&
       RowI!=RowJ) 
@@ -437,14 +439,15 @@ Matrix<T>::swapRows(const int RowI,const int RowJ)
   return;
 }
 
+
+/**
+  Swap columns I and J
+  @param colI :: col I to swap
+  @param colJ :: col J to swap
+*/
 template<typename T> 
 void
 Matrix<T>::swapCols(const int colI,const int colJ)
-  /** 
-    Swap columns I and J 
-    @param colI :: col I to swap
-    @param colJ :: col J to swap
-  */
 {
   if (nx*ny && colI<ny && colJ<ny &&
       colI!=colJ) 

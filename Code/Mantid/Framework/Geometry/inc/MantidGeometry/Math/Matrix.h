@@ -90,13 +90,19 @@ namespace Mantid
       std::vector<T> Diagonal() const;                  ///< Returns a vector of the diagonal
       Matrix<T> fDiagonal(const std::vector<T>&) const;    ///< Forward multiply  D*this
       Matrix<T> bDiagonal(const std::vector<T>&) const;    ///< Backward multiply this*D
-      //  std::vector<T> Row(int const) const;
-      //  std::vector<T> Column(int const) const;
 
       void setMem(int const,int const);
+
       /// Access matrix sizes
       std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }
-      /// Access Large matrix component
+
+      /// Return the number of rows in the matrix
+      size_t numRows() const { return static_cast<size_t>(nx); }
+
+      /// Return the number of columns in the matrix
+      size_t numCols() const { return static_cast<size_t>(ny); }
+
+      /// Return the largest matrix size
       int Ssize() const { return (nx>ny) ? ny : nx; }
 
       void swapRows(int const,int const);        ///< Swap rows (first V index)

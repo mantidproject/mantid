@@ -1,6 +1,7 @@
 # Source files
 set ( SRC_FILES
 	src/BinToMDHistoWorkspace.cpp
+	src/CoordTransform.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/MDBin.cpp
@@ -25,6 +26,7 @@ set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
 set ( INC_FILES
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
+	inc/MantidMDEvents/CoordTransform.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/IMDBox.h
@@ -45,6 +47,7 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	test/BoxControllerTest.h
+	test/CoordTransformTest.h
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/MDBinTest.h

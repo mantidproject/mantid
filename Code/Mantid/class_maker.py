@@ -312,13 +312,14 @@ def redo_cmake_section(lines, cmake_tag, add_this_line):
 
 
 #======================================================================
-def add_to_cmake(subproject, classname):
+def add_to_cmake(subproject, classname, test_only=False):
     """ Add the class to the cmake list of the given class """
     cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
     source = open(cmake_path).read()
     lines = source.split("\n");
-    lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
-    lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + classname + ".h")
+    if not test_only:
+        lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
+        lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + classname + ".h")
     lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
     
     f = open(cmake_path, 'w')
@@ -375,13 +376,16 @@ def generate(subproject, classname, overwrite, test_only, algorithm):
         write_source(subproject, classname, sourcefile, algorithm)
     write_test(subproject, classname, testfile, algorithm)
     
-    print "\n   Don't forget to add your class to Framework/%s/CMakeLists.txt" % subproject
+    # Insert into the cmake list
+    add_to_cmake(subproject, classname, test_only)
+    
+    print "\n   Files were added to Framework/%s/CMakeLists.txt !" % subproject
     print 
-    if not test_only:
-        print "\tsrc/%s.cpp" % (classname)
-        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
-    print "\ttest/%sTest.h" % (classname)
-    print  
+#    if not test_only:
+#        print "\tsrc/%s.cpp" % (classname)
+#        print "\tinc/Mantid%s/%s.h" % (subproject, classname)
+#    print "\ttest/%sTest.h" % (classname)
+#    print  
 
 
 
