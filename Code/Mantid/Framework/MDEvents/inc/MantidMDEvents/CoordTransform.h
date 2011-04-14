@@ -28,12 +28,37 @@ namespace MDEvents
   public:
     CoordTransform(const size_t inD, const size_t outD);
     ~CoordTransform();
-    
-    void apply(const CoordType * inputVector, CoordType * outVector);
 
     void addTranslation(const CoordType * translationVector);
-    Mantid::Geometry::Matrix<CoordType> & getMatrix();
+    Mantid::Geometry::Matrix<CoordType> getMatrix() const;
     void setMatrix(const Mantid::Geometry::Matrix<CoordType> newMatrix);
+
+    //----------------------------------------------------------------------------------------------
+    /** Apply the coordinate transformation
+     *
+     * @param inputVector :: fixed-size array of input coordinates, of size inD
+     * @param outVector :: fixed-size array of output coordinates, of size outD
+     */
+    void apply(const CoordType * inputVector, CoordType * outVector)
+    {
+      // For each output dimension
+      for (size_t out = 0; out < outD; out++)
+      {
+        //TODO: some tricks to make the matrix access a bit faster
+        CoordType * rawMatrixRow = rawMatrix[out];
+        CoordType outVal = 0.0;
+        size_t in;
+        for (in = 0; in < inD; in++)
+          outVal += rawMatrixRow[in] * inputVector[in];
+
+        // The last input coordinate is "1" always (made homogenous coordinate out of the input x,y,etc.)
+        outVal += rawMatrixRow[in];
+        // Save in the output
+        outVector[out] = outVal;
+      }
+    }
+
+
 
   protected:
     /// Input number of dimensions
@@ -47,6 +72,11 @@ namespace MDEvents
      * combined by simply multiplying the matrices.
      */
     Mantid::Geometry::Matrix<CoordType> affineMatrix;
+
+    /// Raw pointer to the same underlying matrix as affineMatrix.
+    CoordType ** rawMatrix;
+
+    void copyRawMatrix();
   };
 
 

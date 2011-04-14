@@ -19,11 +19,25 @@ namespace MDEvents
    * @throw std::runtime_error if outD > inD
    */
   CoordTransform::CoordTransform(const size_t inD, const size_t outD)
-  : inD(inD), outD(outD), affineMatrix(outD+1, inD+1)
+  : inD(inD), outD(outD), affineMatrix(outD+1, inD+1), rawMatrix(NULL)
   {
     if (outD > inD)
       throw std::runtime_error("CoordTransform: Cannot have more output dimensions than input dimensions!");
+    if (outD == 0)
+      throw std::runtime_error("CoordTransform: invalid number of output dimensions!");
+    if (inD == 0)
+      throw std::runtime_error("CoordTransform: invalid number of input dimensions!");
     affineMatrix.identityMatrix();
+
+    // Allocate the raw matrix
+    size_t nx = affineMatrix.numRows();
+    size_t ny = affineMatrix.numCols();
+    CoordType * tmpX = new CoordType[nx*ny];
+    rawMatrix = new CoordType*[nx];
+    for (size_t i=0;i<nx;i++)
+      rawMatrix[i] = tmpX + (i*ny);
+    // Copy into the raw matrix (for speed)
+    copyRawMatrix();
   }
     
   //----------------------------------------------------------------------------------------------
@@ -31,30 +45,24 @@ namespace MDEvents
    */
   CoordTransform::~CoordTransform()
   {
+    if (rawMatrix)
+    {
+      delete [] *rawMatrix;
+      delete [] rawMatrix;
+    }
+    rawMatrix=NULL;
   }
 
-  //----------------------------------------------------------------------------------------------
-  /** Apply the coordinate transformation
-   *
-   * @param inputVector :: fixed-size array of input coordinates, of size inD
-   * @param outVector :: fixed-size array of output coordinates, of size outD
-   */
-  void CoordTransform::apply(const CoordType * inputVector, CoordType * outVector)
-  {
-    // For each output dimension
-    for (size_t out = 0; out < outD; out++)
-    {
-      //TODO: some tricks to make the matrix access a bit faster
-      CoordType outVal = 0.0;
-      size_t in;
-      for (in = 0; in < inD; in++)
-        outVal += affineMatrix[out][in] * inputVector[in];
 
-      // The last input coordinate is "1" always (made homogenous coordinate out of the input x,y,etc.)
-      outVal += affineMatrix[out][in];
-      // Save in the output
-      outVector[out] = outVal;
-    }
+  //----------------------------------------------------------------------------------------------
+  /** Copies the affine matrix into a local raw pointer, for speed.
+   * Call this after any change to affineMatrix
+   */
+  void CoordTransform::copyRawMatrix()
+  {
+    for (size_t x=0; x < affineMatrix.numRows(); ++x)
+      for (size_t y=0; y < affineMatrix.numCols(); ++y)
+        rawMatrix[x][y] = affineMatrix[x][y];
   }
 
 
@@ -70,13 +78,16 @@ namespace MDEvents
       throw std::runtime_error("setMatrix(): Number of rows must match!");
     if (newMatrix.numCols() != inD+1)
       throw std::runtime_error("setMatrix(): Number of columns must match!");
+    affineMatrix = newMatrix;
+    // Copy into the raw matrix (for speed)
+    copyRawMatrix();
   }
 
 
   //----------------------------------------------------------------------------------------------
   /** Return the affine matrix in the transform.
    */
-  Mantid::Geometry::Matrix<CoordType> & CoordTransform::getMatrix()
+  Mantid::Geometry::Matrix<CoordType> CoordTransform::getMatrix() const
   {
     return affineMatrix;
   }
@@ -97,6 +108,9 @@ namespace MDEvents
 
     // Multiply the affine matrix by the translation affine matrix to combine them
     affineMatrix *= translationMatrix;
+
+    // Copy into the raw matrix (for speed)
+    copyRawMatrix();
   }
   
 

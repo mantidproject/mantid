@@ -59,5 +59,38 @@ public:
 };
 
 
+class CoordTransformTestPerformance : public CxxTest::TestSuite
+{
+public:
+  void test_apply_3D_performance()
+  {
+    // Do a simple 3-3 transform.
+    CoordTransform ct(3,3);
+    CoordType translation[3] = {2.0, 3.0, 4.0};
+    CoordType in[3] = {1.5, 2.5, 3.5};
+    CoordType out[3];
+    ct.addTranslation(translation);
+
+    for (size_t i=0; i<1000*1000*10; ++i)
+    {
+      ct.apply(in, out);
+    }
+  }
+  void test_apply_4D_performance()
+  {
+    CoordTransform ct(4,4);
+    CoordType translation[4] = {2.0, 3.0, 4.0, 5.0};
+    CoordType in[4] = {1.5, 2.5, 3.5, 4.5};
+    CoordType out[4];
+    ct.addTranslation(translation);
+
+    for (size_t i=0; i<1000*1000*10; ++i)
+    {
+      ct.apply(in, out);
+    }
+  }
+
+};
+
 #endif /* MANTID_MDEVENTS_COORDTRANSFORMTEST_H_ */
 
