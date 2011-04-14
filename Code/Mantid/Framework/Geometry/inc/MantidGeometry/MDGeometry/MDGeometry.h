@@ -73,7 +73,7 @@ namespace Mantid{
        * if sort_by_basis is true, the dimensions are returned in the order, defined by the order of dimensions in the MD basis
        * or MDDataPoints (these two have to coinside)  
       */
-      std::vector<boost::shared_ptr<MDDimension> > getDimensions(bool sort_by_basis=false)const;
+      std::vector<boost::shared_ptr<IMDDimension> > getDimensions(bool sort_by_basis=false)const;
 
  	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}

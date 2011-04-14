@@ -16,7 +16,8 @@ MD_FileHoraceReader::MD_FileHoraceReader(const char *file_name):
 IMD_FileFormat(file_name),
 positions(),
 mdImageSize(0),
-nDataPoints(0)
+nDataPoints(0),
+hbs(9*4)
 {
     if(sizeof(float32)!=4){
         f_log.error()<<"MD_FileHoraceReader is not defined on a computer with non-32-bit float\n";
@@ -285,9 +286,18 @@ MD_FileHoraceReader::read_pointDescriptions(void)const
 {
     const char *HoraceDataTags[]={"qx","qy","qz","en","S","err","iRunID","iDetID","iEn"};
     MDPointStructure  aPointDescr;
+	aPointDescr.NumPixCompressionBits=0;
+	aPointDescr.SignalLength = 4;
+	aPointDescr.DimIDlength  = 4;
     std::vector<std::string> dataID(HoraceDataTags,HoraceDataTags+9);
-    MDPointDescription defaultDescr(aPointDescr,dataID);
-    return defaultDescr;
+    MDPointDescription theDescr(aPointDescr,dataID);
+	this->hbs = theDescr.sizeofMDDPoint();
+
+	if(hbs != 4*9){
+		f_log.error()<<" The length of Horace data pixel ="<<hbs<<" which differs from the expected 36 bytes\n";
+		throw(std::invalid_argument("Invalid Horace data pixel length obtained"));
+	}
+    return theDescr;
 }
  //read whole pixels information in memory; usually impossible, then returns false;
 //bool 

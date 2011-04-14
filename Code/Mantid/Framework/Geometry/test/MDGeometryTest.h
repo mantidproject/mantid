@@ -184,7 +184,7 @@ public:
   }
  void testDimArrangementByBasis(){
      // here we check if the dimension returned in a way, as they are arranged in basis and MDDataPoints
-     std::vector<boost::shared_ptr<MDDimension> > psDims = tDND_geometry->getDimensions(true);
+     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions(true);
      std::vector<std::string> dimID(4);
      dimID[0]="qx";
      dimID[1]="qy";
@@ -196,7 +196,7 @@ public:
   }
  void testDimArrangementByGeometry(){
      // here we check if the dimension returned in a way, as they are arranged in MDGeometry
-     std::vector<boost::shared_ptr<MDDimension> > psDims = tDND_geometry->getDimensions();
+     std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions();
      std::vector<std::string> dimID(4);
      dimID[0]="p";
      dimID[1]="qx";

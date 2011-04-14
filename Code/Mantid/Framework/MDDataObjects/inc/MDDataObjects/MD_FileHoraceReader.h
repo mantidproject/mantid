@@ -126,7 +126,7 @@ private:
 	/// four float, two double and 3 uint16_t;
 	void compact_hor_data(char *buffer,size_t &buf_size);
 	// the size of data block for Horace reader;
-	static const unsigned int hbs=9*4;
+    mutable unsigned int hbs;
     // the array specifying the locations of MD points wrt MD cells;
     std::vector<uint64_t> hor_points_locations;
 

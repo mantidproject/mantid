@@ -22,7 +22,7 @@ bool load_existing_workspace(const std::string &workspace_name){
 	//	 std::auto_ptr<IMD_FileFormat> pFile = MD_FileFormatFactory::getFileReader("../../../../../Test/VATES/fe_demo.sqw",old_4DMatlabReader);
 //    std::string dataFileName("fe_demo.sqw");
 //    std::string dataFileName("c:/Users/wkc26243/Documents/work/MANTID/Test/VATES/fe_demo_bin.sqw");
-    std::string dataFileName("test_horace_reader.sqw");
+   std::string dataFileName("test_horace_reader.sqw");
 //        std::string dataFileName("fe_E800_8K.sqw");
     Load_MDWorkspace loader;
     loader.initialize();
@@ -74,11 +74,13 @@ class testCPrebinning :    public CxxTest::TestSuite
   
     }
     void testCPRExec(){
+       cpr.setProperty("KeepPixels",false);
         // rebin image into the same grid as an initial image, which should provide the same image as before
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
     void testRebinnedWSExists(){
         // now test if we can get the resulting workspace
+
         Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve(OutWorkspaceName);
 
         MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
@@ -97,6 +99,9 @@ class testCPrebinning :    public CxxTest::TestSuite
 
         for(size_t i=0;i<OldIMG.getDataSize();i++){
             TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
+		/*	if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
+				continue;
+			}*/
         }
     }
 
@@ -108,18 +113,18 @@ class testCPrebinning :    public CxxTest::TestSuite
 
    // now modify it as we need/want;
         double r0=0;
-  //      pSlicing->pDimDescription("qx")->cut_min = r0;
-		//pSlicing->pDimDescription("qx")->cut_max = r0+1;
-		//pSlicing->pDimDescription("qy")->cut_min = r0;
-		//pSlicing->pDimDescription("qy")->cut_max = r0+1;
-		//pSlicing->pDimDescription("qz")->cut_min = r0;
-		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
-		//pSlicing->pDimDescription("en")->cut_max = 50;
-  //
-        pSlicing->pDimDescription("qx")->nBins = 200;
+        pSlicing->pDimDescription("qx")->cut_min = r0;
+		pSlicing->pDimDescription("qx")->cut_max = r0+1;
+		pSlicing->pDimDescription("qy")->cut_min = r0;
+		pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		pSlicing->pDimDescription("qz")->cut_min = r0;
+		pSlicing->pDimDescription("qz")->cut_max = r0+1;
+		pSlicing->pDimDescription("en")->cut_max = 50;
+  
+   /*     pSlicing->pDimDescription("qx")->nBins = 200;
 		pSlicing->pDimDescription("qy")->nBins = 200;
 		pSlicing->pDimDescription("qz")->nBins = 200;
-		pSlicing->pDimDescription("en")->nBins  = 0;
+		pSlicing->pDimDescription("en")->nBins  = 0;*/
 
 
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());

@@ -55,11 +55,11 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
   
 
 }
-std::vector<boost::shared_ptr<MDDimension> >
+std::vector<boost::shared_ptr<IMDDimension> >
 MDGeometry::getDimensions(bool sort_by_bais)const
 {
     unsigned int i;
-	std::vector<boost::shared_ptr<MDDimension> > dims(this->getNumDims());
+	std::vector<boost::shared_ptr<IMDDimension> > dims(this->getNumDims());
 
     if(sort_by_bais){ // sort by basis;
        std::vector<std::string> dimID = this->getBasisTags();
@@ -289,7 +289,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
       return tmp;
     }
 
-// now protected;
+//  protected;
 boost::shared_ptr<MDDimension>
 MDGeometry::getDimension(unsigned int i)
     {
@@ -300,19 +300,7 @@ MDGeometry::getDimension(unsigned int i)
       }
       return theDimension[i];
 }
-//
-boost::shared_ptr<const MDDimension>
-MDGeometry::get_constDimension(unsigned int i)const
-    {
-	  
-      if(i>=m_basis.getNumDims()){
-        g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
-        throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
-      }
-      return theDimension[i];
-}
-
-// now protected;
+//  protected;
 boost::shared_ptr<MDDimension>
 MDGeometry::getDimension(const std::string &tag,bool do_throw)
 {
@@ -332,6 +320,16 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
   return pDim;
 }
 
+boost::shared_ptr<const MDDimension>
+MDGeometry::get_constDimension(unsigned int i)const
+{
+	  
+      if(i>=m_basis.getNumDims()){
+        g_log.error()<<"Geometry::getDimension: attemting to get the dimension N"<<i<<" but this is out of the dimensions range";
+        throw(std::out_of_range("Geometry::getDimension: attemting to get the dimension with non-existing number"));
+      }
+      return theDimension[i];
+}
 boost::shared_ptr<const MDDimension>
 MDGeometry::get_constDimension(const std::string &tag,bool do_throw)const
 {
