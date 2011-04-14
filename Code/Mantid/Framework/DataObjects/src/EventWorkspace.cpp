@@ -219,7 +219,7 @@ namespace DataObjects
 
   double EventWorkspace::getTofMax() const
   {
-    double tmax = std::numeric_limits<double>::min();
+    double tmax = -1.*std::numeric_limits<double>::max(); // min is a small number, not negative
     double temp;
     size_t numWorkspace = this->data.size();
     for (size_t workspaceIndex = 0; workspaceIndex < numWorkspace; workspaceIndex++)

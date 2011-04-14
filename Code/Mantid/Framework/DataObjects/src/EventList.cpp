@@ -2111,7 +2111,7 @@ namespace DataObjects
   double EventList::getTofMax() const
   {
     // set up as the minimum available double
-    double tMax = std::numeric_limits<double>::min();
+    double tMax = -1.*std::numeric_limits<double>::max(); // min is a small number, not negative
 
     // no events is a soft error
     size_t numEvents = this->getNumberEvents();
