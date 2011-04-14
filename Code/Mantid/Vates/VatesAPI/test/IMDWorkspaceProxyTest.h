@@ -6,7 +6,7 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
-class GeometryProxyTest: public CxxTest::TestSuite
+class IMDWorkspaceProxyTest: public CxxTest::TestSuite
 {
 private:
 
