@@ -1,50 +1,56 @@
-set ( SRC_FILES src/DownloadDataFile.cpp
-                src/ErrorHandling.cpp
-		src/GetDataFiles.cpp
-		src/GetDataSets.cpp
-		src/GSoapGenerated/soapC.cpp
-		src/GSoapGenerated/soapICATPortBindingProxy.cpp
-		src/GSoap/stdsoap2.cpp
-		src/ICat3Catalog.cpp
-		src/ICatHelper.cpp
-		src/ListInstruments.cpp
-		src/ListInvestigationTypes.cpp
-		src/Login.cpp
-		src/Logout.cpp
-		src/MyDataSearch.cpp
-		src/Search.cpp
-		src/SearchParam.cpp )
+set ( SRC_FILES
+	src/DownloadDataFile.cpp
+	src/ErrorHandling.cpp
+	src/GSoap/stdsoap2.cpp
+	src/GSoapGenerated/soapC.cpp
+	src/GSoapGenerated/soapICATPortBindingProxy.cpp
+	src/GetDataFiles.cpp
+	src/GetDataSets.cpp
+	src/ICat3Catalog.cpp
+	src/ICatHelper.cpp
+	src/ListInstruments.cpp
+	src/ListInvestigationTypes.cpp
+	src/Login.cpp
+	src/Logout.cpp
+	src/MyDataSearch.cpp
+	src/Search.cpp
+	src/SearchParam.cpp
+)
 
 set ( SRC_UNITY_IGNORE_FILES )
 
-set ( INC_FILES  inc/MantidICat/DownloadDataFile.h
-				 inc/MantidICat/ErrorHandling.h
-		inc/MantidICat/GetDataFiles.h
-		inc/MantidICat/GetDataSets.h
-		inc/MantidICat/GSoapGenerated/soapH.h
-		inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
-		inc/MantidICat/GSoapGenerated/soapStub.h
-		inc/MantidICat/GSoap/stdsoap2.h
-		inc/MantidICat/ICat3Catalog.h
-		inc/MantidICat/ICatExport.h
-		inc/MantidICat/ICatHelper.h
-		inc/MantidICat/ListInstruments.h
-		inc/MantidICat/ListInvestigationTypes.h
-		inc/MantidICat/Login.h
-		inc/MantidICat/Logout.h
-		inc/MantidICat/MyDataSearch.h
-		inc/MantidICat/Search.h
-		inc/MantidICat/SearchParam.h
-		inc/MantidICat/Session.h )
+set ( INC_FILES
+	inc/MantidICat/DownloadDataFile.h
+	inc/MantidICat/ErrorHandling.h
+	inc/MantidICat/GSoap/stdsoap2.h
+	inc/MantidICat/GSoapGenerated/soapH.h
+	inc/MantidICat/GSoapGenerated/soapICATPortBindingProxy.h
+	inc/MantidICat/GSoapGenerated/soapStub.h
+	inc/MantidICat/GetDataFiles.h
+	inc/MantidICat/GetDataSets.h
+	inc/MantidICat/ICat3Catalog.h
+	inc/MantidICat/ICatExport.h
+	inc/MantidICat/ICatHelper.h
+	inc/MantidICat/ListInstruments.h
+	inc/MantidICat/ListInvestigationTypes.h
+	inc/MantidICat/Login.h
+	inc/MantidICat/Logout.h
+	inc/MantidICat/MyDataSearch.h
+	inc/MantidICat/Search.h
+	inc/MantidICat/SearchParam.h
+	inc/MantidICat/Session.h
+)
 
-set ( TEST_FILES test/DownloadDataFileTest.h
-				 test/GetDataFilesTest.h
-		 test/GetDataSetsTest.h
-		 test/ListInstrumentsTest.h
-		 test/ListInvestigationTypesTest.h
-		 test/LoginTest.h
-		 test/MyDataSearchTest.h
-		 test/SearchTest.h )
+set ( TEST_FILES
+	test/DownloadDataFileTest.h
+	test/GetDataFilesTest.h
+	test/GetDataSetsTest.h
+	test/ListInstrumentsTest.h
+	test/ListInvestigationTypesTest.h
+	test/LoginTest.h
+	test/MyDataSearchTest.h
+	test/SearchTest.h
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)

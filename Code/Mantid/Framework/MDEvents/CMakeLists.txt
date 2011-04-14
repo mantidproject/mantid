@@ -1,18 +1,18 @@
 # Source files
-set (SRC_FILES 
-	src/MDEventWorkspace.cpp
-	src/MDBox.cpp               
-	src/MDGridBox.cpp               
-	src/MDEventFactory.cpp
-   	src/CreateMDEventWorkspace.cpp
-	src/MakeDiffractionMDEventWorkspace.cpp
-	src/MDBin.cpp
-	src/MDHistoWorkspace.cpp
+set ( SRC_FILES
 	src/BinToMDHistoWorkspace.cpp
+	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
-	src/OneStepMDEW.cpp
-	src/MDEWPeakIntegration.cpp
+	src/MDBin.cpp
+	src/MDBox.cpp
 	src/MDBoxTask.cpp
+	src/MDEWPeakIntegration.cpp
+	src/MDEventFactory.cpp
+	src/MDEventWorkspace.cpp
+	src/MDGridBox.cpp
+	src/MDHistoWorkspace.cpp
+	src/MakeDiffractionMDEventWorkspace.cpp
+	src/OneStepMDEW.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
@@ -22,41 +22,41 @@ set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
 )
 
 # Header files
-set (INC_FILES
-	inc/MantidMDEvents/MDEvent.h
-	inc/MantidMDEvents/IMDBox.h
-	inc/MantidMDEvents/MDBox.h
-	inc/MantidMDEvents/MDGridBox.h
-	inc/MantidMDEvents/MDEventWorkspace.h
-	inc/MantidMDEvents/MDEventFactory.h
-	inc/MantidMDEvents/MDDimensionExtents.h
+set ( INC_FILES
+	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
-	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
-	inc/MantidMDEvents/MDEWPeakIntegration.h
-	inc/MantidMDEvents/MDBin.h
-	inc/MantidMDEvents/MDBoxTask.h
-	inc/MantidMDEvents/MDHistoWorkspace.h
-	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
+	inc/MantidMDEvents/IMDBox.h
+	inc/MantidMDEvents/MDBin.h
+	inc/MantidMDEvents/MDBox.h
+	inc/MantidMDEvents/MDBoxTask.h
+	inc/MantidMDEvents/MDDimensionExtents.h
+	inc/MantidMDEvents/MDEWPeakIntegration.h
+	inc/MantidMDEvents/MDEvent.h
+	inc/MantidMDEvents/MDEventFactory.h
+	inc/MantidMDEvents/MDEventWorkspace.h
+	inc/MantidMDEvents/MDGridBox.h
+	inc/MantidMDEvents/MDHistoWorkspace.h
+	inc/MantidMDEvents/MakeDiffractionMDEventWorkspace.h
 	inc/MantidMDEvents/OneStepMDEW.h
 )
 
 # Test files. Other source files required.
-set (TEST_FILES 
-	test/MDEventTest.h  
-	test/MDEventWorkspaceTest.h  
-	test/MDBoxTest.h  
-	test/MDGridBoxTest.h  
+set ( TEST_FILES
 	test/BoxControllerTest.h
-	test/MDEventFactoryTest.h
 	test/CreateMDEventWorkspaceTest.h
-	test/MakeDiffractionMDEventWorkspaceTest.h
-	test/MDEWPeakIntegrationTest.h
-	test/MDBoxTaskTest.h
-	test/MDBinTest.h
-	test/MDHistoWorkspaceTest.h
 	test/FakeMDEventDataTest.h
+	test/MDBinTest.h
+	test/MDBoxTaskTest.h
+	test/MDBoxTest.h
+	test/MDEWPeakIntegrationTest.h
+	test/MDEventFactoryTest.h
+	test/MDEventTest.h
+	test/MDEventWorkspaceTest.h
+	test/MDGridBoxTest.h
+	test/MDHistoWorkspaceTest.h
+	test/MakeDiffractionMDEventWorkspaceTest.h
 	test/OneStepMDEWTest.h
 )
 

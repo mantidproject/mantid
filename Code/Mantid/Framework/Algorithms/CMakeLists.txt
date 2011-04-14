@@ -1,4 +1,4 @@
-set ( SRC_FILES 
+set ( SRC_FILES
 	src/AbsorptionCorrection.cpp
 	src/AddSampleLog.cpp
 	src/AlignDetectors.cpp
@@ -6,11 +6,11 @@ set ( SRC_FILES
 	src/ApplyTransmissionCorrection.cpp
 	src/BinaryOperation.cpp
 	src/CalculateEfficiency.cpp
-	src/CalculateTransmissionBeamSpreader.cpp
 	src/CalculateTransmission.cpp
+	src/CalculateTransmissionBeamSpreader.cpp
 	src/CaltoDspacemap.cpp
-	src/ChangePulsetime.cpp
 	src/ChangeBinOffset.cpp
+	src/ChangePulsetime.cpp
 	src/CheckWorkspacesMatch.cpp
 	src/ChopData.cpp
 	src/CloneWorkspace.cpp
@@ -34,27 +34,28 @@ set ( SRC_FILES
 	src/CrossCorrelate.cpp
 	src/CuboidGaugeVolumeAbsorption.cpp
 	src/CylinderAbsorption.cpp
+	src/DampSq.cpp
 	src/DeleteWorkspace.cpp
 	src/DetectorDiagnostic.cpp
 	src/DetectorEfficiencyCor.cpp
 	src/DetectorEfficiencyVariation.cpp
 	src/DiffractionEventCalibrateDetectors.cpp
 	src/DiffractionEventReadDetCal.cpp
-	src/DiffractionFocussing2.cpp
 	src/DiffractionFocussing.cpp
+	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
 	src/DspacemaptoCal.cpp
-	src/ElasticWindow.cpp
 	src/EQSANSTofStructure.cpp
-	src/ExponentialCorrection.cpp
+	src/ElasticWindow.cpp
 	src/Exponential.cpp
+	src/ExponentialCorrection.cpp
 	src/ExtractFFTSpectrum.cpp
 	src/ExtractMasking.cpp
 	src/ExtractSingleSpectrum.cpp
 	src/FFT.cpp
 	src/FFTDerivative.cpp
-	src/FFTSmooth2.cpp
 	src/FFTSmooth.cpp
+	src/FFTSmooth2.cpp
 	src/FilterBadPulses.cpp
 	src/FilterByLogValue.cpp
 	src/FilterByTime.cpp
@@ -67,18 +68,18 @@ set ( SRC_FILES
 	src/FlatPlateAbsorption.cpp
 	src/GeneralisedSecondDifference.cpp
 	src/GetDetectorOffsets.cpp
-	src/GetEi2.cpp
 	src/GetEi.cpp
+	src/GetEi2.cpp
 	src/GhostCorrection.cpp
 	src/GravitySANSHelper.cpp
 	src/GroupWorkspaces.cpp
-	src/He3TubeEfficiency.cpp
 	src/HRPDSlabCanAbsorption.cpp
+	src/He3TubeEfficiency.cpp
+	src/IQTransform.cpp
 	src/IdentifyNoisyDetectors.cpp
 	src/InputWSDetectorInfo.cpp
 	src/Integration.cpp
 	src/InterpolatingRebin.cpp
-	src/IQTransform.cpp
 	src/Logarithm.cpp
 	src/MaskBins.cpp
 	src/MaskDetectorsIf.cpp
@@ -96,6 +97,7 @@ set ( SRC_FILES
 	src/NormaliseByCurrent.cpp
 	src/NormaliseToMonitor.cpp
 	src/OneMinusExponentialCor.cpp
+	src/PDFFT.cpp
 	src/PlotAsymmetryByLogValue.cpp
 	src/Plus.cpp
 	src/PointByPointVCorrection.cpp
@@ -116,13 +118,13 @@ set ( SRC_FILES
 	src/RemoveLowResTOF.cpp
 	src/RenameWorkspace.cpp
 	src/ReplaceSpecialValues.cpp
+	src/SANSDirectBeamScaling.cpp
+	src/SANSSolidAngleCorrection.cpp
 	src/Scale.cpp
 	src/SetUncertaintiesToZero.cpp
 	src/SmoothData.cpp
 	src/SmoothNeighbours.cpp
 	src/SofQW.cpp
-	src/SANSDirectBeamScaling.cpp
-	src/SANSSolidAngleCorrection.cpp
 	src/SolidAngle.cpp
 	src/Sort.cpp
 	src/SortEvents.cpp
@@ -133,18 +135,16 @@ set ( SRC_FILES
 	src/SumRowColumn.cpp
 	src/SumSpectra.cpp
 	src/Transpose.cpp
-	src/UnaryOperation.cpp
 	src/UnGroupWorkspaces.cpp
+	src/UnaryOperation.cpp
 	src/Unwrap.cpp
 	src/UnwrapMonitor.cpp
 	src/UnwrapSNS.cpp
 	src/WeightedMean.cpp
-	src/XDataConverter.cpp 
-	src/PDFFT.cpp 
-	src/DampSq.cpp
-	)
+	src/XDataConverter.cpp
+)
 
-set ( INC_FILES 
+set ( INC_FILES
 	inc/MantidAlgorithms/AbsorptionCorrection.h
 	inc/MantidAlgorithms/AddSampleLog.h
 	inc/MantidAlgorithms/AlignDetectors.h
@@ -152,12 +152,12 @@ set ( INC_FILES
 	inc/MantidAlgorithms/ApplyTransmissionCorrection.h
 	inc/MantidAlgorithms/BinaryOperation.h
 	inc/MantidAlgorithms/CalculateEfficiency.h
-	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CalculateTransmission.h
+	inc/MantidAlgorithms/CalculateTransmissionBeamSpreader.h
 	inc/MantidAlgorithms/CaltoDspacemap.h
 	inc/MantidAlgorithms/ChangeBinOffset.h
-	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChangePulsetime.h
+	inc/MantidAlgorithms/CheckWorkspacesMatch.h
 	inc/MantidAlgorithms/ChopData.h
 	inc/MantidAlgorithms/CloneWorkspace.h
 	inc/MantidAlgorithms/CommutativeBinaryOperation.h
@@ -180,27 +180,28 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CrossCorrelate.h
 	inc/MantidAlgorithms/CuboidGaugeVolumeAbsorption.h
 	inc/MantidAlgorithms/CylinderAbsorption.h
+	inc/MantidAlgorithms/DampSq.h
 	inc/MantidAlgorithms/DeleteWorkspace.h
 	inc/MantidAlgorithms/DetectorDiagnostic.h
 	inc/MantidAlgorithms/DetectorEfficiencyCor.h
 	inc/MantidAlgorithms/DetectorEfficiencyVariation.h
 	inc/MantidAlgorithms/DiffractionEventCalibrateDetectors.h
 	inc/MantidAlgorithms/DiffractionEventReadDetCal.h
-	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/DiffractionFocussing.h
+	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
 	inc/MantidAlgorithms/DspacemaptoCal.h
-	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
-	inc/MantidAlgorithms/ExponentialCorrection.h
+	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
+	inc/MantidAlgorithms/ExponentialCorrection.h
 	inc/MantidAlgorithms/ExtractFFTSpectrum.h
 	inc/MantidAlgorithms/ExtractMasking.h
 	inc/MantidAlgorithms/ExtractSingleSpectrum.h
 	inc/MantidAlgorithms/FFT.h
 	inc/MantidAlgorithms/FFTDerivative.h
-	inc/MantidAlgorithms/FFTSmooth2.h
 	inc/MantidAlgorithms/FFTSmooth.h
+	inc/MantidAlgorithms/FFTSmooth2.h
 	inc/MantidAlgorithms/FilterBadPulses.h
 	inc/MantidAlgorithms/FilterByLogValue.h
 	inc/MantidAlgorithms/FilterByTime.h
@@ -211,21 +212,21 @@ set ( INC_FILES
 	inc/MantidAlgorithms/FindPeaks.h
 	inc/MantidAlgorithms/FlatBackground.h
 	inc/MantidAlgorithms/FlatPlateAbsorption.h
+	inc/MantidAlgorithms/GSLFunctions.h
 	inc/MantidAlgorithms/GeneralisedSecondDifference.h
 	inc/MantidAlgorithms/GetDetectorOffsets.h
-	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GetEi.h
+	inc/MantidAlgorithms/GetEi2.h
 	inc/MantidAlgorithms/GhostCorrection.h
 	inc/MantidAlgorithms/GravitySANSHelper.h
 	inc/MantidAlgorithms/GroupWorkspaces.h
-	inc/MantidAlgorithms/GSLFunctions.h
-	inc/MantidAlgorithms/He3TubeEfficiency.h
 	inc/MantidAlgorithms/HRPDSlabCanAbsorption.h
+	inc/MantidAlgorithms/He3TubeEfficiency.h
+	inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/IdentifyNoisyDetectors.h
 	inc/MantidAlgorithms/InputWSDetectorInfo.h
 	inc/MantidAlgorithms/Integration.h
 	inc/MantidAlgorithms/InterpolatingRebin.h
-    inc/MantidAlgorithms/IQTransform.h
 	inc/MantidAlgorithms/Logarithm.h
 	inc/MantidAlgorithms/MaskBins.h
 	inc/MantidAlgorithms/MaskDetectorsIf.h
@@ -243,6 +244,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/NormaliseByCurrent.h
 	inc/MantidAlgorithms/NormaliseToMonitor.h
 	inc/MantidAlgorithms/OneMinusExponentialCor.h
+	inc/MantidAlgorithms/PDFFT.h
 	inc/MantidAlgorithms/PlotAsymmetryByLogValue.h
 	inc/MantidAlgorithms/Plus.h
 	inc/MantidAlgorithms/PointByPointVCorrection.h
@@ -263,13 +265,13 @@ set ( INC_FILES
 	inc/MantidAlgorithms/RemoveLowResTOF.h
 	inc/MantidAlgorithms/RenameWorkspace.h
 	inc/MantidAlgorithms/ReplaceSpecialValues.h
+	inc/MantidAlgorithms/SANSDirectBeamScaling.h
+	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/Scale.h
 	inc/MantidAlgorithms/SetUncertaintiesToZero.h
 	inc/MantidAlgorithms/SmoothData.h
 	inc/MantidAlgorithms/SmoothNeighbours.h
 	inc/MantidAlgorithms/SofQW.h
-	inc/MantidAlgorithms/SANSDirectBeamScaling.h
-	inc/MantidAlgorithms/SANSSolidAngleCorrection.h
 	inc/MantidAlgorithms/SolidAngle.h
 	inc/MantidAlgorithms/Sort.h
 	inc/MantidAlgorithms/SortEvents.h
@@ -280,18 +282,16 @@ set ( INC_FILES
 	inc/MantidAlgorithms/SumRowColumn.h
 	inc/MantidAlgorithms/SumSpectra.h
 	inc/MantidAlgorithms/Transpose.h
-	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/UnGroupWorkspaces.h
+	inc/MantidAlgorithms/UnaryOperation.h
 	inc/MantidAlgorithms/Unwrap.h
 	inc/MantidAlgorithms/UnwrapMonitor.h
 	inc/MantidAlgorithms/UnwrapSNS.h
 	inc/MantidAlgorithms/WeightedMean.h
-	inc/MantidAlgorithms/XDataConverter.h 
-	inc/MantidAlgorithms/PDFFT.h 
-	inc/MantidAlgorithms/DampSq.h
+	inc/MantidAlgorithms/XDataConverter.h
 )
 
-set ( TEST_FILES 
+set ( TEST_FILES
 	test/AddSampleLogTest.h
 	test/AlignDetectorsTest.h
 	test/AnyShapeAbsorptionTest.h
@@ -326,6 +326,7 @@ set ( TEST_FILES
 	test/CropWorkspaceTest.h
 	test/CuboidGaugeVolumeAbsorptionTest.h
 	test/CylinderAbsorptionTest.h
+	test/DampSqTest.h
 	test/DeleteWorkspaceTest.h
 	test/DetectorEfficiencyCorTest.h
 	test/DetectorEfficiencyVariationTest.h
@@ -339,13 +340,13 @@ set ( TEST_FILES
 	test/ExtractFFTSpectrumTest.h
 	test/ExtractMaskingTest.h
 	test/ExtractSingleSpectrumTest.h
+	test/FFTDerivativeTest.h
 	test/FFTSmooth2Test.h
 	test/FFTTest.h
-	test/FFTDerivativeTest.h
 	test/FilterByLogValueTest.h
 	test/FilterByTimeTest.h
-	test/FindCenterOfMassPositionTest.h
 	test/FindCenterOfMassPosition2Test.h
+	test/FindCenterOfMassPositionTest.h
 	test/FindDeadDetectorsTest.h
 	test/FindDetectorsOutsideLimitsTest.h
 	test/FindPeaksTest.h
@@ -355,12 +356,12 @@ set ( TEST_FILES
 	test/GetEiTest.h
 	test/GhostCorrectionTest.h
 	test/GroupWorkspacesTest.h
-	test/He3TubeEfficiencyTest.h
 	test/HRPDSlabCanAbsorptionTest.h
+	test/He3TubeEfficiencyTest.h
+	test/IQTransformTest.h
 	test/IdentifyNoisyDetectorsTest.h
 	test/IntegrationTest.h
 	test/InterpolatingRebinTest.h
-	test/IQTransformTest.h
 	test/LogarithmTest.h
 	test/MaskBinsTest.h
 	test/MedianDetectorTestTest.h
@@ -377,6 +378,7 @@ set ( TEST_FILES
 	test/NormaliseByCurrentTest.h
 	test/NormaliseToMonitorTest.h
 	test/OneMinusExponentialCorTest.h
+	test/PDFFTTest.h
 	test/PlotAsymmetryByLogValueTest.h
 	test/PlusTest.h
 	test/PointByPointVCorrectionTest.h
@@ -387,8 +389,8 @@ set ( TEST_FILES
 	test/Q1DTest.h
 	test/Q1DWeightedTest.h
 	test/QxyTest.h
-	test/RealFFTTest.h
 	test/ReadGroupsFromFileTest.h
+	test/RealFFTTest.h
 	test/RebinTest.h
 	test/RebinToWorkspaceTest.h
 	test/RebunchTest.h
@@ -397,14 +399,14 @@ set ( TEST_FILES
 	test/RemoveLowResTOFTest.h
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
+	test/SANSSolidAngleCorrectionTest.h
 	test/SaveToSNSHistogramNexusTest.h
 	test/ScaleTest.h
-	test/SortEventsTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
 	test/SofQWTest.h
-	test/SANSSolidAngleCorrectionTest.h
 	test/SolidAngleTest.h
+	test/SortEventsTest.h
 	test/SpatialGroupingTest.h
 	test/StripPeaksTest.h
 	test/StripVanadiumPeaksTest.h
@@ -412,15 +414,13 @@ set ( TEST_FILES
 	test/SumRowColumnTest.h
 	test/SumSpectraTest.h
 	test/TransposeTest.h
-	test/UnaryOperationTest.h
 	test/UnGroupWorkspacesTest.h
-	test/UnwrapTest.h
+	test/UnaryOperationTest.h
 	test/UnwrapSNSTest.h
+	test/UnwrapTest.h
 	test/WeightedMeanTest.h
 	test/WorkspaceGroupTest.h
-	test/PDFFTTest.h 
-	test/DampSqTest.h
-	)
+)
 
 set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
     src/FFTSmooth.cpp 

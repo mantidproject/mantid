@@ -1,53 +1,55 @@
 # Source files
-set (SRC_FILES src/IMD_FileFormat.cpp
-src/MDDataPoint.cpp
-src/MDDataPointDescription.cpp
-src/MDDataPoints.cpp
-src/MD_FileFormatFactory.cpp
-src/MD_File_hdfMatlab.cpp
-src/MD_File_hdfV1.cpp
-src/MD_FileHoraceReader.cpp
-src/MDImage.cpp
-src/MDIndexCalculator.cpp
-src/MDWorkspace.cpp
-src/MDFitWorkspace.cpp
-src/MD_FileTestDataGenerator.cpp
-src/MDDPoints_MemManager.cpp
-#src/Events/MDEventWorkspace.cpp # breaks the windows build
-#src/Events/MDBox.cpp               
+set ( SRC_FILES
+	#src/Events/MDBox.cpp
+	#src/Events/MDEventWorkspace.cpp # breaks the windows build
+	src/IMD_FileFormat.cpp
+	src/MDDPoints_MemManager.cpp
+	src/MDDataPoint.cpp
+	src/MDDataPointDescription.cpp
+	src/MDDataPoints.cpp
+	src/MDFitWorkspace.cpp
+	src/MDImage.cpp
+	src/MDIndexCalculator.cpp
+	src/MDWorkspace.cpp
+	src/MD_FileFormatFactory.cpp
+	src/MD_FileHoraceReader.cpp
+	src/MD_FileTestDataGenerator.cpp
+	src/MD_File_hdfMatlab.cpp
+	src/MD_File_hdfV1.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
 
 # Header files
-set (INC_FILES inc/MDDataObjects/IMD_FileFormat.h
-inc/MDDataObjects/MDDataPoint.h
-inc/MDDataObjects/MDDataPointDescription.h
-inc/MDDataObjects/MDDataPoints.h
-inc/MDDataObjects/MD_FileFormatFactory.h
-inc/MDDataObjects/MD_File_hdfMatlab.h
-inc/MDDataObjects/MD_File_hdfV1.h
-inc/MDDataObjects/MD_FileHoraceReader.h
-inc/MDDataObjects/MDImage.h
-inc/MDDataObjects/MDImageDatatypes.h
-inc/MDDataObjects/MDIndexCalculator.h
-inc/MDDataObjects/MDWorkspace.h
-inc/MDDataObjects/MDFitWorkspace.h
-inc/MDDataObjects/MD_FileTestDataGenerator.h
-inc/MDDataObjects/MDTestWorkspace.h 
-inc/MDDataObjects/MDDPoints_MemManager.h
-inc/MDDataObjects/DllExport.h
-inc/MDDataObjects/stdafx.h
+set ( INC_FILES
+	inc/MDDataObjects/DllExport.h
+	inc/MDDataObjects/IMD_FileFormat.h
+	inc/MDDataObjects/MDDPoints_MemManager.h
+	inc/MDDataObjects/MDDataPoint.h
+	inc/MDDataObjects/MDDataPointDescription.h
+	inc/MDDataObjects/MDDataPoints.h
+	inc/MDDataObjects/MDFitWorkspace.h
+	inc/MDDataObjects/MDImage.h
+	inc/MDDataObjects/MDImageDatatypes.h
+	inc/MDDataObjects/MDIndexCalculator.h
+	inc/MDDataObjects/MDTestWorkspace.h
+	inc/MDDataObjects/MDWorkspace.h
+	inc/MDDataObjects/MD_FileFormatFactory.h
+	inc/MDDataObjects/MD_FileHoraceReader.h
+	inc/MDDataObjects/MD_FileTestDataGenerator.h
+	inc/MDDataObjects/MD_File_hdfMatlab.h
+	inc/MDDataObjects/MD_File_hdfV1.h
+	inc/MDDataObjects/stdafx.h
 )
 
 # Test files. Other source files required.
-set (TEST_FILES 
-#test/HoraceReaderTest.h
-test/MD_FileFactoryTest.h
-test/MDDataPointDescriptionTest.h
-test/MDFileTestDataGeneratorTest.h
-test/MDDPoints_MemManagerTest.h
-test/MDFitWorkspaceTest.h
+set ( TEST_FILES
+	#test/HoraceReaderTest.h
+	test/MDDPoints_MemManagerTest.h
+	test/MDDataPointDescriptionTest.h
+	test/MDFileTestDataGeneratorTest.h
+	test/MDFitWorkspaceTest.h
+	test/MD_FileFactoryTest.h
 )
 
 set ( GMOCK_TEST_FILES

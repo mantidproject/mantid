@@ -5,7 +5,7 @@ import sys
 import os
 import argparse
 import datetime
-
+import re
 
 
 #======================================================================
@@ -73,7 +73,7 @@ namespace %s
 } // namespace %s
 
 #endif  /* %s */
-""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now(), classname, alg_class_declare, classname,classname, algorithm_header, subproject, guard)
+""" % (guard, guard, alg_include, subproject, classname, datetime.datetime.now(), classname, alg_class_declare, classname, classname, algorithm_header, subproject, guard)
     f.write(s)
     f.close()
 
@@ -121,7 +121,7 @@ def write_source(subproject, classname, filename, algorithm):
     // TODO Auto-generated execute stub
   }
 
-"""% (classname, classname, classname)   
+""" % (classname, classname, classname)   
 
     if not algorithm:
         algorithm_top = ""
@@ -158,7 +158,7 @@ namespace %s
 } // namespace Mantid
 } // namespace %s
 
-""" % (subproject, classname, subproject, algorithm_top, classname,classname,classname,classname,  algorithm_source, subproject)
+""" % (subproject, classname, subproject, algorithm_top, classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
     f.close()
 
@@ -211,19 +211,153 @@ public:
 
 #endif /* %s */
 
-""" % (guard,guard, subproject, classname,subproject, classname, algorithm_test, guard)
+""" % (guard, guard, subproject, classname, subproject, classname, algorithm_test, guard)
     f.write(s)
     f.close()
     
+    
+#======================================================================================
+def find_line_number(lines, searchfor, startat=0):
+    """Look line-by-line in lines[] for a line that starts with searchfor. Return
+    the line number in source where the line was found, and the padding (in spaces) before it"""
+    count = 0
+    done = False
+    padding = ""
+    for n in xrange(startat, len(lines)):
+        line = lines[n]
+        s = line.strip()
+        if s.startswith(searchfor):
+            # How much padding?
+            padding = get_padding(line)
+            return (n, padding)
 
+    return (None, None)
+
+
+#======================================================================================
+def insert_lines(lines, insert_lineno, extra, padding):
+    """Insert a text, split by lines, inside a list of 'lines', at index 'insert_lineno'
+    Adds 'padding' to each line."""
+    # split
+    extra_lines = extra.split("\n");
+    #Pad 
+    for n in xrange(len(extra_lines)):
+        extra_lines[n] = padding + extra_lines[n]
+    return lines[0:insert_lineno] + extra_lines + lines[insert_lineno:]
+
+
+#======================================================================================
+def save_lines_to(lines, fullpath):
+    """Save a list of strings to one file"""        
+    # Join into one big string
+    source = "\n".join(lines)
+    # Save to disk
+    f = open(fullpath, 'w')
+    f.write(source)
+    f.close()
+
+#======================================================================================
+def redo_cmake_section(lines, cmake_tag, add_this_line):
+    """ Read the LINES of a file. Find "set ( cmake_tag",
+    read all the lines to get all the files,
+    add your new line,
+    sort them,
+    rewrite. Yay!"""
+
+    search_for1 = "set ( %s" % cmake_tag
+    search_for2 = "set (%s" % cmake_tag
+    # List of files in the thingie
+    files = []
+    lines_before = []
+    lines_after = []
+    section_num = 0
+    for line in lines:
+        if line.strip().startswith(search_for1): section_num = 1
+        if line.strip().startswith(search_for2): section_num = 1
+        
+        if section_num == 0:
+            # These are the lines before
+            lines_before.append(line)
+        elif section_num == 1:
+            #this is a line with the name of a file
+            line = line.strip()
+            # Take off the tag
+            if line.startswith(search_for1): line = line[len(search_for1):].strip()
+            if line.startswith(search_for2): line = line[len(search_for2):].strip()
+            # Did we reach the last one?
+            if line.endswith(")"): 
+                section_num = 2
+                line = line[0:len(line) - 1].strip()
+                
+            if len(line) > 0:
+                files.append(line) 
+        else:
+            # These are lines after
+            lines_after.append(line)
+            
+    # Add the new file to the list of files
+    if len(add_this_line) > 0:
+        files.append(add_this_line)
+    # Sort-em alphabetically
+    files.sort()
+        
+    lines = lines_before
+    lines.append("set ( %s" % cmake_tag)
+    for file in files:
+        lines.append("\t" + file)
+    lines.append(")") # close the parentheses
+    lines += lines_after
+     
+    return lines
+
+
+#======================================================================
+def add_to_cmake(subproject, classname):
+    """ Add the class to the cmake list of the given class """
+    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    source = open(cmake_path).read()
+    lines = source.split("\n");
+    lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
+    lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + classname + ".h")
+    lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
+    
+    f = open(cmake_path, 'w')
+    text = "\n".join(lines) 
+    f.write(text)
+    f.close()
+
+#======================================================================
+def fix_cmake_format(subproject):
+    """ Just fix the CMAKE format"""
+    cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
+    source = open(cmake_path).read()
+    lines = source.split("\n");
+    lines = redo_cmake_section(lines, "SRC_FILES", "")
+    lines = redo_cmake_section(lines, "INC_FILES", "")
+    lines = redo_cmake_section(lines, "TEST_FILES", "")
+    
+    f = open(cmake_path, 'w')
+    text = "\n".join(lines) 
+    f.write(text)
+    f.close()
+
+#======================================================================
+def fix_all_cmakes():
+    """ Fix all cmake files """
+    projects = ["Algorithms", "DataObjects", "MDAlgorithms", "PythonAPI", "API", 
+                       "Geometry", "MDDataObjects", "CurveFitting", "ICat", "MDEvents", 
+                       "DataHandling", "Kernel", "Nexus", "Crystal"]
+    for proj in projects:
+        fix_cmake_format(proj)
+    
 #======================================================================
 def generate(subproject, classname, overwrite, test_only, algorithm):
     # Directory at base of subproject
-    basedir = os.path.join(os.path.curdir, "Framework/"+subproject)
+    basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
     
-    headerfile = os.path.join(basedir, "inc/Mantid"+subproject+"/"+classname+".h")
-    sourcefile = os.path.join(basedir, "src/"+classname+".cpp")
-    testfile = os.path.join(basedir, "test/"+classname+"Test.h")
+    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + classname + ".h")
+    sourcefile = os.path.join(basedir, "src/" + classname + ".cpp")
+    testfile = os.path.join(basedir, "test/" + classname + "Test.h")
     
     if not test_only and not overwrite and os.path.exists(headerfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
@@ -250,12 +384,13 @@ def generate(subproject, classname, overwrite, test_only, algorithm):
     print  
 
 
+
 #======================================================================
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Utility to create Mantid class files: header, source and test.')
-    parser.add_argument('subproject', metavar='SUBPROJECT', type=str, 
+    parser.add_argument('subproject', metavar='SUBPROJECT', type=str,
                         help='The subproject under Framework/; e.g. Kernel')
-    parser.add_argument('classname', metavar='CLASSNAME', type=str, 
+    parser.add_argument('classname', metavar='CLASSNAME', type=str,
                         help='Name of the class to create')
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,

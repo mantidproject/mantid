@@ -1,10 +1,10 @@
-set ( SRC_FILES 
+set ( SRC_FILES
 	src/Algorithm.cpp
 	src/AlgorithmFactory.cpp
 	src/AlgorithmHasProperty.cpp
 	src/AlgorithmHistory.cpp
 	src/AlgorithmManager.cpp
-        src/AlgorithmProperty.cpp
+	src/AlgorithmProperty.cpp
 	src/AlgorithmProxy.cpp
 	src/AnalysisDataService.cpp
 	src/ArchiveSearchFactory.cpp
@@ -14,8 +14,8 @@ set ( SRC_FILES
 	src/Column.cpp
 	src/ColumnFactory.cpp
 	src/CompositeFunction.cpp
-	src/CompositeFunctionMW.cpp
 	src/CompositeFunctionMD.cpp
+	src/CompositeFunctionMW.cpp
 	src/ConstraintFactory.cpp
 	src/DeprecatedAlgorithm.cpp
 	src/Expression.cpp
@@ -24,31 +24,32 @@ set ( SRC_FILES
 	src/FrameworkManager.cpp
 	src/FunctionFactory.cpp
 	src/IDataFileChecker.cpp
+	src/IEventList.cpp
 	src/IEventWorkspace.cpp
 	src/IFitFunction.cpp
-	src/IFunctionMW.cpp
 	src/IFunctionMD.cpp
+	src/IFunctionMW.cpp
+	src/IMDEventWorkspace.cpp
 	src/IMDIterator.cpp
 	src/IMDWorkspace.cpp
-	src/IMDEventWorkspace.cpp
+	src/IPeakFunction.cpp
+	src/ITableWorkspace.cpp
 	src/ImplicitFunctionParameterParserFactory.cpp
 	src/ImplicitFunctionParserFactory.cpp
 	src/ImplictFunctionFactory.cpp
 	src/InstrumentDataService.cpp
-	src/IPeakFunction.cpp
-	src/ITableWorkspace.cpp
 	src/LoadAlgorithmFactory.cpp
 	src/LocatedDataRef.cpp
 	src/LocatedDataValue.cpp
-	src/MatrixWorkspace.cpp
-	src/MatrixWSIndexCalculator.cpp
 	src/MDPropertyGeometry.cpp
+	src/MatrixWSIndexCalculator.cpp
+	src/MatrixWorkspace.cpp
 	src/MemoryManager.cpp
 	src/NumericAxis.cpp
 	src/PairedGroupAlgorithm.cpp
+	src/ParamFunction.cpp
 	src/ParameterReference.cpp
 	src/ParameterTie.cpp
-	src/ParamFunction.cpp
 	src/Progress.cpp
 	src/RefAxis.cpp
 	src/Run.cpp
@@ -65,8 +66,7 @@ set ( SRC_FILES
 	src/WorkspaceHistory.cpp
 	src/WorkspaceOpOverloads.cpp
 	src/WorkspaceProperty.cpp
-	src/WorkspaceTracer.cpp 
-	src/IEventList.cpp
+	src/WorkspaceTracer.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
@@ -79,25 +79,25 @@ set ( SRC_UNITY_IGNORE_FILES src/CompositeFunction.cpp
         src/IPeakFunction.cpp
         )
 
-set ( INC_FILES 
-	inc/MantidAPI/AlgorithmFactory.h
+set ( INC_FILES
 	inc/MantidAPI/Algorithm.h
+	inc/MantidAPI/AlgorithmFactory.h
 	inc/MantidAPI/AlgorithmHasProperty.h
 	inc/MantidAPI/AlgorithmHistory.h
 	inc/MantidAPI/AlgorithmManager.h
 	inc/MantidAPI/AlgorithmObserver.h
-    inc/MantidAPI/AlgorithmProperty.h
+	inc/MantidAPI/AlgorithmProperty.h
 	inc/MantidAPI/AlgorithmProxy.h
 	inc/MantidAPI/AnalysisDataService.h
 	inc/MantidAPI/ArchiveSearchFactory.h
 	inc/MantidAPI/Axis.h
 	inc/MantidAPI/CatalogFactory.h
 	inc/MantidAPI/CloneableAlgorithm.h
-	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/Column.h
+	inc/MantidAPI/ColumnFactory.h
 	inc/MantidAPI/CompositeFunction.h
-	inc/MantidAPI/CompositeFunctionMW.h
 	inc/MantidAPI/CompositeFunctionMD.h
+	inc/MantidAPI/CompositeFunctionMW.h
 	inc/MantidAPI/ConstraintFactory.h
 	inc/MantidAPI/DeclareUserAlg.h
 	inc/MantidAPI/DeprecatedAlgorithm.h
@@ -114,64 +114,65 @@ set ( INC_FILES
 	inc/MantidAPI/IConstraint.h
 	inc/MantidAPI/IDataFileChecker.h
 	inc/MantidAPI/IDataItem.h
-	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IEventList.h
+	inc/MantidAPI/IEventWorkspace.h
 	inc/MantidAPI/IFitFunction.h
-	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionMD.h
-	inc/MantidAPI/IMDIterator.h
+	inc/MantidAPI/IFunctionMW.h
 	inc/MantidAPI/IFunctionWithLocation.h
 	inc/MantidAPI/ILocatedData.h
 	inc/MantidAPI/IMDEventWorkspace.h
+	inc/MantidAPI/IMDIterator.h
 	inc/MantidAPI/IMDWorkspace.h
-	inc/MantidAPI/ImplicitFunctionBuilder.h
-	inc/MantidAPI/ImplicitFunctionFactory.h
-	inc/MantidAPI/ImplicitFunction.h
-	inc/MantidAPI/ImplicitFunctionParameter.h
-	inc/MantidAPI/ImplicitFunctionParameterParserFactory.h
-	inc/MantidAPI/ImplicitFunctionParameterParser.h
-	inc/MantidAPI/ImplicitFunctionParserFactory.h
-	inc/MantidAPI/ImplicitFunctionParser.h
-	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/IPeakFunction.h
 	inc/MantidAPI/ITableWorkspace.h
 	inc/MantidAPI/IWorkspaceProperty.h
+	inc/MantidAPI/ImplicitFunction.h
+	inc/MantidAPI/ImplicitFunctionBuilder.h
+	inc/MantidAPI/ImplicitFunctionFactory.h
+	inc/MantidAPI/ImplicitFunctionParameter.h
+	inc/MantidAPI/ImplicitFunctionParameterParser.h
+	inc/MantidAPI/ImplicitFunctionParameterParserFactory.h
+	inc/MantidAPI/ImplicitFunctionParser.h
+	inc/MantidAPI/ImplicitFunctionParserFactory.h
+	inc/MantidAPI/InstrumentDataService.h
 	inc/MantidAPI/LoadAlgorithmFactory.h
 	inc/MantidAPI/LocatedDataRef.h
 	inc/MantidAPI/LocatedDataValue.h
-	inc/MantidAPI/MatrixWorkspace.h
-	inc/MantidAPI/MatrixWSIndexCalculator.h
 	inc/MantidAPI/MDPropertyGeometry.h
+	inc/MantidAPI/MatrixWSIndexCalculator.h
+	inc/MantidAPI/MatrixWorkspace.h
 	inc/MantidAPI/MemoryManager.h
 	inc/MantidAPI/NumericAxis.h
 	inc/MantidAPI/PairedGroupAlgorithm.h
+	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/ParameterReference.h
 	inc/MantidAPI/ParameterTie.h
-	inc/MantidAPI/ParamFunction.h
 	inc/MantidAPI/Point3D.h
 	inc/MantidAPI/Progress.h
 	inc/MantidAPI/RefAxis.h
 	inc/MantidAPI/Run.h
-	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/Sample.h
+	inc/MantidAPI/SampleEnvironment.h
 	inc/MantidAPI/ScriptWriter.h
 	inc/MantidAPI/ScriptWriterFactory.h
 	inc/MantidAPI/SpectraAxis.h
 	inc/MantidAPI/SpectraDetectorMap.h
 	inc/MantidAPI/TableRow.h
 	inc/MantidAPI/TextAxis.h
+	inc/MantidAPI/Workspace.h
 	inc/MantidAPI/WorkspaceFactory.h
 	inc/MantidAPI/WorkspaceGroup.h
-	inc/MantidAPI/Workspace.h
 	inc/MantidAPI/WorkspaceHistory.h
-	inc/MantidAPI/WorkspaceIteratorCode.h
 	inc/MantidAPI/WorkspaceIterator.h
+	inc/MantidAPI/WorkspaceIteratorCode.h
 	inc/MantidAPI/WorkspaceOpOverloads.h
 	inc/MantidAPI/WorkspaceProperty.h
 	inc/MantidAPI/WorkspaceTracer.h
-	inc/MantidAPI/WorkspaceValidators.h )
+	inc/MantidAPI/WorkspaceValidators.h
+)
 
-set ( TEST_FILES 
+set ( TEST_FILES
 	test/AlgorithmHasPropertyTest.h
 	test/AlgorithmHistoryTest.h
 	test/AlgorithmManagerTest.h
@@ -187,13 +188,13 @@ set ( TEST_FILES
 	test/FilePropertyTest.h
 	test/FrameworkManagerTest.h
 	test/FunctionTest.h
-	test/IFunctionMDTest.h
 	test/IEventListTest.h
+	test/IFunctionMDTest.h
 	test/IMDWorkspaceTest.h
 	test/ImplicitFunctionParserFactoryTest.h
 	test/InstrumentDataServiceTest.h
-	test/MatrixWorkspaceTest.h
 	test/MDPropertyGeometryTest.h
+	test/MatrixWorkspaceTest.h
 	test/MemoryManagerTest.h
 	test/ParameterReferenceTest.h
 	test/ParameterTieTest.h
@@ -204,7 +205,7 @@ set ( TEST_FILES
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
 	test/WorkspaceFactoryTest.h
-	test/WorkspacePropertyTest.h 
+	test/WorkspacePropertyTest.h
 )
 
 set ( GMOCK_TEST_FILES

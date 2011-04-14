@@ -1,60 +1,4 @@
-set ( SRC_FILES src/ArrayBoundedValidator.cpp
-	src/ArrayProperty.cpp
-	src/Atom.cpp
-	src/BinFinder.cpp
-	src/CPUTimer.cpp
-	src/ConfigService.cpp
-	src/DateAndTime.cpp
-	src/DateValidator.cpp
-	src/DirectoryValidator.cpp
-	src/DllOpen.cpp
-	src/EnvironmentHistory.cpp
-	src/Exception.cpp
-	src/FacilityInfo.cpp
-	src/FileValidator.cpp
-	src/FilterChannel.cpp
-	src/Glob.cpp
-	src/InstrumentInfo.cpp
-	src/Interpolation.cpp
-	src/IPropertyManager.cpp
-	src/LibraryManager.cpp
-	src/LibraryWrapper.cpp
-	src/ListValidator.cpp
-	src/LogFilter.cpp
-	src/Logger.cpp
-	src/LogParser.cpp
-	src/MagneticIon.cpp
-	src/MandatoryValidator.cpp
-	src/MaskedProperty.cpp
-	src/Memory.cpp
-	src/MersenneTwister.cpp
-	src/NeutronAtom.cpp
-	src/ProgressBase.cpp
-	src/ProgressText.cpp
-	src/Property.cpp
-	src/PropertyHistory.cpp
-	src/PropertyManager.cpp
-	src/PropertyManagerOwner.cpp
-	src/PropertyWithValue.cpp
-	src/RebinParamsValidator.cpp
-	src/RegexStrings.cpp
-	src/SignalChannel.cpp
-	src/SingletonHolder.cpp
-	src/Statistics.cpp
-	src/Strings.cpp
-	src/System.cpp
-	src/TestChannel.cpp
-	src/ThreadSafeLogStream.cpp
-	src/ThreadPool.cpp
-	src/ThreadPoolRunnable.cpp
-	src/Timer.cpp
-	src/TimeSeriesProperty.cpp
-	src/TimeSplitter.cpp
-	src/Utils.cpp
-	src/Unit.cpp
-	src/UnitFactory.cpp
-	src/VectorHelper.cpp
-	src/UserStringParser.cpp
+set ( SRC_FILES
 	src/ANN/ANN.cpp
 	src/ANN/bd_fix_rad_search.cpp
 	src/ANN/bd_pr_search.cpp
@@ -77,7 +21,65 @@ set ( SRC_FILES src/ArrayBoundedValidator.cpp
 	src/ANN/kd_util.h
 	src/ANN/perf.cpp
 	src/ANN/pr_queue.h
-	src/ANN/pr_queue_k.h )
+	src/ANN/pr_queue_k.h
+	src/ArrayBoundedValidator.cpp
+	src/ArrayProperty.cpp
+	src/Atom.cpp
+	src/BinFinder.cpp
+	src/CPUTimer.cpp
+	src/ConfigService.cpp
+	src/DateAndTime.cpp
+	src/DateValidator.cpp
+	src/DirectoryValidator.cpp
+	src/DllOpen.cpp
+	src/EnvironmentHistory.cpp
+	src/Exception.cpp
+	src/FacilityInfo.cpp
+	src/FileValidator.cpp
+	src/FilterChannel.cpp
+	src/Glob.cpp
+	src/IPropertyManager.cpp
+	src/InstrumentInfo.cpp
+	src/Interpolation.cpp
+	src/LibraryManager.cpp
+	src/LibraryWrapper.cpp
+	src/ListValidator.cpp
+	src/LogFilter.cpp
+	src/LogParser.cpp
+	src/Logger.cpp
+	src/MagneticIon.cpp
+	src/MandatoryValidator.cpp
+	src/MaskedProperty.cpp
+	src/Memory.cpp
+	src/MersenneTwister.cpp
+	src/NeutronAtom.cpp
+	src/ProgressBase.cpp
+	src/ProgressText.cpp
+	src/Property.cpp
+	src/PropertyHistory.cpp
+	src/PropertyManager.cpp
+	src/PropertyManagerOwner.cpp
+	src/PropertyWithValue.cpp
+	src/RebinParamsValidator.cpp
+	src/RegexStrings.cpp
+	src/SignalChannel.cpp
+	src/SingletonHolder.cpp
+	src/Statistics.cpp
+	src/Strings.cpp
+	src/System.cpp
+	src/TestChannel.cpp
+	src/ThreadPool.cpp
+	src/ThreadPoolRunnable.cpp
+	src/ThreadSafeLogStream.cpp
+	src/TimeSeriesProperty.cpp
+	src/TimeSplitter.cpp
+	src/Timer.cpp
+	src/Unit.cpp
+	src/UnitFactory.cpp
+	src/UserStringParser.cpp
+	src/Utils.cpp
+	src/VectorHelper.cpp
+)
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/NeutronAtom.cpp
@@ -85,16 +87,19 @@ set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/DirectoryValidator.cpp 
         )
 
-set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
+set ( INC_FILES
+	inc/MantidKernel/ANN/ANN.h
+	inc/MantidKernel/ANN/ANNperf.h
+	inc/MantidKernel/ANN/ANNx.h
+	inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/ArrayProperty.h
 	inc/MantidKernel/Atom.h
-	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BinFinder.h
+	inc/MantidKernel/BinaryFile.h
 	inc/MantidKernel/BoundedValidator.h
+	inc/MantidKernel/CPUTimer.h
 	inc/MantidKernel/Cache.h
 	inc/MantidKernel/ConfigService.h
-	inc/MantidKernel/CPUTimer.h
-	inc/MantidKernel/cow_ptr.h
 	inc/MantidKernel/DataService.h
 	inc/MantidKernel/DateAndTime.h
 	inc/MantidKernel/DateValidator.h
@@ -110,24 +115,24 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/FileValidator.h
 	inc/MantidKernel/FilterChannel.h
 	inc/MantidKernel/Glob.h
+	inc/MantidKernel/IPropertyManager.h
+	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/Instantiator.h
 	inc/MantidKernel/InstrumentInfo.h
 	inc/MantidKernel/Interpolation.h
-	inc/MantidKernel/IPropertyManager.h
-	inc/MantidKernel/IValidator.h
 	inc/MantidKernel/LibraryManager.h
 	inc/MantidKernel/LibraryWrapper.h
 	inc/MantidKernel/ListValidator.h
 	inc/MantidKernel/LogFilter.h
-	inc/MantidKernel/Logger.h
 	inc/MantidKernel/LogParser.h
+	inc/MantidKernel/Logger.h
+	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MagneticIon.h
 	inc/MantidKernel/MandatoryValidator.h
 	inc/MantidKernel/MantidVersion.h
 	inc/MantidKernel/MaskedProperty.h
 	inc/MantidKernel/Memory.h
 	inc/MantidKernel/MersenneTwister.h
-	inc/MantidKernel/MRUList.h
 	inc/MantidKernel/MultiThreaded.h
 	inc/MantidKernel/NeutronAtom.h
 	inc/MantidKernel/NullValidator.h
@@ -148,30 +153,30 @@ set ( INC_FILES inc/MantidKernel/ArrayBoundedValidator.h
 	inc/MantidKernel/Strings.h
 	inc/MantidKernel/System.h
 	inc/MantidKernel/TestChannel.h
+	inc/MantidKernel/ThreadPoolRunnable.h
+	inc/MantidKernel/ThreadSafeLogStream.h
 	inc/MantidKernel/ThreadScheduler.h
 	inc/MantidKernel/ThreadSchedulerMutexes.h
-	inc/MantidKernel/ThreadSafeLogStream.h
-	inc/MantidKernel/ThreadPoolRunnable.h
-	inc/MantidKernel/Timer.h
 	inc/MantidKernel/TimeSeriesProperty.h
 	inc/MantidKernel/TimeSplitter.h
-	inc/MantidKernel/UnitFactory.h
+	inc/MantidKernel/Timer.h
 	inc/MantidKernel/Unit.h
+	inc/MantidKernel/UnitFactory.h
+	inc/MantidKernel/UserStringParser.h
 	inc/MantidKernel/Utils.h
 	inc/MantidKernel/VectorHelper.h
-	inc/MantidKernel/UserStringParser.h
-	inc/MantidKernel/ANN/ANN.h
-	inc/MantidKernel/ANN/ANNperf.h
-	inc/MantidKernel/ANN/ANNx.h )
+	inc/MantidKernel/cow_ptr.h
+)
 
-set ( TEST_FILES test/ArrayBoundedValidatorTest.h
+set ( TEST_FILES
+	test/ArrayBoundedValidatorTest.h
 	test/ArrayPropertyTest.h
 	test/AtomTest.h
-	test/BinaryFileTest.h 
 	test/BinFinderTest.h
+	test/BinaryFileTest.h
 	test/BoundedValidatorTest.h
-	test/CacheTest.h
 	test/CPUTimerTest.h
+	test/CacheTest.h
 	test/ConfigServiceTest.h
 	test/DateAndTimeTest.h
 	test/DateValidatorTest.h
@@ -180,19 +185,19 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/EnvironmentHistoryTest.h
 	test/FacilitiesTest.h
 	test/FileValidatorTest.h
-	test/FunctionTaskTest.h
 	test/FilterChannelTest.h
+	test/FunctionTaskTest.h
 	test/InterpolationTest.h
 	test/ListValidatorTest.h
 	test/LogFilterTest.h
-	test/LoggerTest.h
 	test/LogParserTest.h
-	test/MemoryTest.h
+	test/LoggerTest.h
+	test/MRUListTest.h
 	test/MagneticIonTest.h
 	test/MandatoryValidatorTest.h
 	test/MaskedPropertyTest.h
+	test/MemoryTest.h
 	test/MersenneTwisterTest.h
-	test/MRUListTest.h
 	test/NeutronAtomTest.h
 	test/NullValidatorTest.h
 	test/ProgressBaseTest.h
@@ -208,18 +213,18 @@ set ( TEST_FILES test/ArrayBoundedValidatorTest.h
 	test/SignalChannelTest.h
 	test/StatisticsTest.h
 	test/StringsTest.h
-	test/ThreadPoolTest.h
-	test/ThreadSchedulerTest.h
-	test/ThreadSchedulerMutexesTest.h
-	test/ThreadPoolRunnableTest.h
 	test/TaskTest.h
-	test/TimerTest.h
+	test/ThreadPoolRunnableTest.h
+	test/ThreadPoolTest.h
+	test/ThreadSchedulerMutexesTest.h
+	test/ThreadSchedulerTest.h
 	test/TimeSeriesPropertyTest.h
 	test/TimeSplitterTest.h
+	test/TimerTest.h
 	test/UnitFactoryTest.h
 	test/UnitTest.h
+	test/UserStringParserTest.h
 	test/UtilsTest.h
-	test/UserStringParserTest.h 
 )
 
 if(UNITY_BUILD)

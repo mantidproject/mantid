@@ -1,17 +1,17 @@
-set ( SRC_FILES 
+set ( SRC_FILES
 	src/LoadPeaksFile.cpp
 	src/PeakIntegration.cpp
 	src/SavePeaksFile.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES )
-set ( INC_FILES 
+set ( INC_FILES
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/SavePeaksFile.h
 )
 
-set ( TEST_FILES 
+set ( TEST_FILES
 	test/LoadPeaksFileTest.h
 	test/SavePeaksFileTest.h
 )

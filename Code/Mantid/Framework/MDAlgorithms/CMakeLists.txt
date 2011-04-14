@@ -1,117 +1,119 @@
 # GLOBs should be replaced with explicit listings
-set ( SRC_FILES src/BoxFunctionBuilder.cpp
-src/BoxImplicitFunction.cpp
-src/BoxImplicitFunctionParser.cpp
-src/BoxInterpreter.cpp
-src/CobaltSpinWaveDSHO.cpp
-src/CompositeFunctionBuilder.cpp
-src/CompositeImplicitFunction.cpp
-src/CompositeImplicitFunctionParser.cpp
-src/CenterpieceRebinning.cpp
-src/CpRebinningNx3.cpp
-src/DynamicCPRRebinning.cpp
-src/IDynamicRebinning.cpp
-src/DepthParameter.cpp
-src/DynamicCPRRebinning.cpp
-src/DynamicRebinFromXML.cpp
-src/DimensionFactory.cpp
-src/HeightParameter.cpp
-src/IDynamicRebinning.cpp
-src/InvalidParameter.cpp
-src/InvalidParameterParser.cpp
-src/Load_MDWorkspace.cpp
-src/NormalParameter.cpp
-src/NullImplicitFunction.cpp
-src/OriginParameter.cpp
-src/PerpendicularParameter.cpp
-src/PlaneFunctionBuilder.cpp
-src/PlaneImplicitFunction.cpp
-src/PlaneImplicitFunctionParser.cpp
-src/PlaneInterpreter.cpp
-src/QuadEnBackground.cpp
-src/RunParam.cpp
-src/SimulateMDD.cpp
-src/SimulateResolution.cpp
-src/SingleValueParameterParser.cpp
-src/TobyFitSimulate.cpp
-src/UpParameter.cpp
-src/VectorMathematics.cpp
-src/VectorParameterParser.cpp
-src/VectorParameter.cpp
-src/WidthParameter.cpp 
-src/CreateMDFitWorkspace.cpp 
+set ( SRC_FILES
+	src/BoxFunctionBuilder.cpp
+	src/BoxImplicitFunction.cpp
+	src/BoxImplicitFunctionParser.cpp
+	src/BoxInterpreter.cpp
+	src/CenterpieceRebinning.cpp
+	src/CobaltSpinWaveDSHO.cpp
+	src/CompositeFunctionBuilder.cpp
+	src/CompositeImplicitFunction.cpp
+	src/CompositeImplicitFunctionParser.cpp
+	src/CpRebinningNx3.cpp
+	src/CreateMDFitWorkspace.cpp
+	src/DepthParameter.cpp
+	src/DimensionFactory.cpp
+	src/DynamicCPRRebinning.cpp
+	src/DynamicCPRRebinning.cpp
+	src/DynamicRebinFromXML.cpp
+	src/HeightParameter.cpp
+	src/IDynamicRebinning.cpp
+	src/IDynamicRebinning.cpp
+	src/InvalidParameter.cpp
+	src/InvalidParameterParser.cpp
+	src/Load_MDWorkspace.cpp
+	src/NormalParameter.cpp
+	src/NullImplicitFunction.cpp
+	src/OriginParameter.cpp
+	src/PerpendicularParameter.cpp
+	src/PlaneFunctionBuilder.cpp
+	src/PlaneImplicitFunction.cpp
+	src/PlaneImplicitFunctionParser.cpp
+	src/PlaneInterpreter.cpp
+	src/QuadEnBackground.cpp
+	src/RunParam.cpp
+	src/SimulateMDD.cpp
+	src/SimulateResolution.cpp
+	src/SingleValueParameterParser.cpp
+	src/TobyFitSimulate.cpp
+	src/UpParameter.cpp
+	src/VectorMathematics.cpp
+	src/VectorParameter.cpp
+	src/VectorParameterParser.cpp
+	src/WidthParameter.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
 src/DynamicCPRRebinning.cpp
 )
 
-set ( INC_FILES inc/MantidMDAlgorithms/BoxFunctionBuilder.h
-inc/MantidMDAlgorithms/BoxImplicitFunction.h
-inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
-inc/MantidMDAlgorithms/BoxInterpreter.h
-inc/MantidMDAlgorithms/CenterpieceRebinning.h
-inc/MantidMDAlgorithms/CpRebinningNx3.h
-inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
-inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
-inc/MantidMDAlgorithms/CompositeImplicitFunction.h
-inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
-inc/MantidMDAlgorithms/DepthParameter.h
-inc/MantidMDAlgorithms/DimensionFactory.h
-inc/MantidMDAlgorithms/DynamicCPRRebinning.h
-inc/MantidMDAlgorithms/IDynamicRebinning.h
-inc/MantidMDAlgorithms/DynamicRebinFromXML.h
-inc/MantidMDAlgorithms/HeightParameter.h
-inc/MantidMDAlgorithms/IDynamicRebinning.h
-inc/MantidMDAlgorithms/InvalidParameter.h
-inc/MantidMDAlgorithms/InvalidParameterParser.h
-inc/MantidMDAlgorithms/Load_MDWorkspace.h
-inc/MantidMDAlgorithms/NormalParameter.h
-inc/MantidMDAlgorithms/NullImplicitFunction.h
-inc/MantidMDAlgorithms/OriginParameter.h
-inc/MantidMDAlgorithms/PerpendicularParameter.h
-inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
-inc/MantidMDAlgorithms/PlaneImplicitFunction.h
-inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
-inc/MantidMDAlgorithms/PlaneInterpreter.h
-inc/MantidMDAlgorithms/QuadEnBackground.h
-inc/MantidMDAlgorithms/RunParam.h
-inc/MantidMDAlgorithms/SimulateMDD.h
-inc/MantidMDAlgorithms/SimulateResolution.h
-inc/MantidMDAlgorithms/SingleValueParameterParser.h
-inc/MantidMDAlgorithms/TobyFitSimulate.h
-inc/MantidMDAlgorithms/UpParameter.h
-inc/MantidMDAlgorithms/VectorMathematics.h
-inc/MantidMDAlgorithms/VectorParameter.h
-inc/MantidMDAlgorithms/VectorParameterParser.h
-inc/MantidMDAlgorithms/WidthParameter.h 
-inc/MantidMDAlgorithms/CreateMDFitWorkspace.h 
+set ( INC_FILES
+	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
+	inc/MantidMDAlgorithms/BoxImplicitFunction.h
+	inc/MantidMDAlgorithms/BoxImplicitFunctionParser.h
+	inc/MantidMDAlgorithms/BoxInterpreter.h
+	inc/MantidMDAlgorithms/CenterpieceRebinning.h
+	inc/MantidMDAlgorithms/CobaltSpinWaveDSHO.h
+	inc/MantidMDAlgorithms/CompositeFunctionBuilder.h
+	inc/MantidMDAlgorithms/CompositeImplicitFunction.h
+	inc/MantidMDAlgorithms/CompositeImplicitFunctionParser.h
+	inc/MantidMDAlgorithms/CpRebinningNx3.h
+	inc/MantidMDAlgorithms/CreateMDFitWorkspace.h
+	inc/MantidMDAlgorithms/DepthParameter.h
+	inc/MantidMDAlgorithms/DimensionFactory.h
+	inc/MantidMDAlgorithms/DynamicCPRRebinning.h
+	inc/MantidMDAlgorithms/DynamicRebinFromXML.h
+	inc/MantidMDAlgorithms/HeightParameter.h
+	inc/MantidMDAlgorithms/IDynamicRebinning.h
+	inc/MantidMDAlgorithms/IDynamicRebinning.h
+	inc/MantidMDAlgorithms/InvalidParameter.h
+	inc/MantidMDAlgorithms/InvalidParameterParser.h
+	inc/MantidMDAlgorithms/Load_MDWorkspace.h
+	inc/MantidMDAlgorithms/NormalParameter.h
+	inc/MantidMDAlgorithms/NullImplicitFunction.h
+	inc/MantidMDAlgorithms/OriginParameter.h
+	inc/MantidMDAlgorithms/PerpendicularParameter.h
+	inc/MantidMDAlgorithms/PlaneFunctionBuilder.h
+	inc/MantidMDAlgorithms/PlaneImplicitFunction.h
+	inc/MantidMDAlgorithms/PlaneImplicitFunctionParser.h
+	inc/MantidMDAlgorithms/PlaneInterpreter.h
+	inc/MantidMDAlgorithms/QuadEnBackground.h
+	inc/MantidMDAlgorithms/RunParam.h
+	inc/MantidMDAlgorithms/SimulateMDD.h
+	inc/MantidMDAlgorithms/SimulateResolution.h
+	inc/MantidMDAlgorithms/SingleValueParameterParser.h
+	inc/MantidMDAlgorithms/TobyFitSimulate.h
+	inc/MantidMDAlgorithms/UpParameter.h
+	inc/MantidMDAlgorithms/VectorMathematics.h
+	inc/MantidMDAlgorithms/VectorParameter.h
+	inc/MantidMDAlgorithms/VectorParameterParser.h
+	inc/MantidMDAlgorithms/WidthParameter.h
 )
 
 # Test files. Other source files required.
-set (TEST_FILES
-test/CobaltSWDTest.h
-test/CPR_preselectCellsTest.h 
-test/CPRebinKeepPixTest.h
-test/CreateMDFitWorkspaceTest.h
-test/DepthParameterTest.h
-test/DimensionFactoryTest.h
-test/DynamicRebinFromXMLAlgorithmTest.h
-test/HeightParameterTest.h
-test/InvalidParameterParserTest.h
-test/InvalidParameterTest.h
-test/Load_MDWorkspaceTest.h
-test/NormalParameterTest.h
-test/OriginParameterTest.h
-test/PlaneFunctionBuilderTest.h
-test/QuadEnBackgroundTest.h
-test/RunParamTest.h
-test/SimulateMDDataTest.h
-#test/testCPComponents.h TODO: Is this test really necessary?
-test/testCPrebinning.h
-test/TobyFitSimulateTest.h
-test/VectorMathematicsTest.h
-test/WidthParameterTest.h
+set ( TEST_FILES
+	#test/testCPComponents.h TODO: Is this test really necessary?
+	test/CPR_preselectCellsTest.h
+	test/CPRebinKeepPixTest.h
+	test/CobaltSWDTest.h
+	test/CreateMDFitWorkspaceTest.h
+	test/DepthParameterTest.h
+	test/DimensionFactoryTest.h
+	test/DynamicRebinFromXMLAlgorithmTest.h
+	test/HeightParameterTest.h
+	test/InvalidParameterParserTest.h
+	test/InvalidParameterTest.h
+	test/Load_MDWorkspaceTest.h
+	test/NormalParameterTest.h
+	test/OriginParameterTest.h
+	test/PlaneFunctionBuilderTest.h
+	test/QuadEnBackgroundTest.h
+	test/RunParamTest.h
+	test/SimulateMDDataTest.h
+	test/TobyFitSimulateTest.h
+	test/VectorMathematicsTest.h
+	test/WidthParameterTest.h
+	test/testCPrebinning.h
 )
 
 set ( GMOCK_TEST_FILES
