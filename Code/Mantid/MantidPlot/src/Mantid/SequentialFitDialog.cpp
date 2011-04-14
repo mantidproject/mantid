@@ -349,10 +349,18 @@ void SequentialFitDialog::showPlot()
     QStringList colNames;
     colNames << t->name() + "_" + parName << t->name() + "_" + parName + "_Err";
     MultiLayer* ml = m_fitBrowser->m_appWindow->multilayerPlot(t,colNames,ui.cbCurveType->currentIndex());
+    // set plot titles
     Graph* g = ml->activeGraph();
     if (g)
     {
-      g->setXAxisTitle(ui.cbLogValue->currentText());
+      if (ui.ckbLogPlot->isChecked())
+      {
+        g->setXAxisTitle(ui.cbLogValue->currentText());
+      }
+      else
+      {
+        g->setXAxisTitle("Spectra");
+      }
       g->setYAxisTitle(parName);
       g->setTitle("");
     }

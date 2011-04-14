@@ -179,8 +179,8 @@ namespace Mantid
             // Fit the function
             API::IAlgorithm_sptr fit = createSubAlgorithm("Fit");
             fit->initialize();
-            //fit->setProperty("InputWorkspace",data.ws);
-            fit->setPropertyValue("InputWorkspace",data.ws->getName());
+            fit->setProperty("InputWorkspace",data.ws);
+            //fit->setPropertyValue("InputWorkspace",data.ws->getName());
             fit->setProperty("WorkspaceIndex",j);
             fit->setPropertyValue("Function",fun);
             fit->setPropertyValue("StartX",getPropertyValue("StartX"));
@@ -292,7 +292,7 @@ namespace Mantid
                   std::string propName = "OUTPUTWORKSPACE_" + boost::lexical_cast<std::string>(data.period);
                   if (load->existsProperty(propName))
                   {
-                    DataObjects::Workspace2D_sptr rws1 = load->getProperty(propName);
+                    Workspace_sptr rws1 = load->getProperty(propName);
                     out.ws = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(rws1);
                   }
                 }
