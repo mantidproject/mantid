@@ -10,6 +10,9 @@
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/FacilityInfo.h"
 
+#include <cctype>
+#include <algorithm>
+
 namespace Mantid
 {
   namespace DataHandling
@@ -45,7 +48,9 @@ namespace Mantid
     void Load::setPropertyValue(const std::string &name, const std::string &value)
     {
       IDataFileChecker_sptr loader;
-      if( name == "Filename" )
+      std::string NAME(name);
+      std::transform(name.begin(),name.end(),NAME.begin(),toupper);
+      if( NAME == "FILENAME" )
       {
         // This call makes resolving the filename easier
         IDataFileChecker::setPropertyValue(name, value);
@@ -64,7 +69,7 @@ namespace Mantid
       if( loader ) declareLoaderProperties(loader);
 
       // Set the property after some may have been redeclared
-      if( name != "Filename") IDataFileChecker::setPropertyValue(name, value);
+      if( NAME != "FILENAME") IDataFileChecker::setPropertyValue(name, value);
     }
 
     //--------------------------------------------------------------------------

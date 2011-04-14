@@ -256,22 +256,9 @@ namespace Mantid
         std::string ext = data.name.substr(i);
         try
         {
-          API::IAlgorithm_sptr load;
-          if (ext.size() >= 2 && (ext == ".raw" || ext == ".RAW" || ext == ".add" || ext[1] == 's'))
-          {// raw file
-            load = createSubAlgorithm("LoadRaw");
-          }
-          else
-          {// nexus file
-            load = createSubAlgorithm("LoadNexus");
-          }
+          API::IAlgorithm_sptr load = createSubAlgorithm("Load");
           load->initialize();
           load->setPropertyValue("FileName",data.name);
-          //if (data.spec >= 0)
-          //{
-          //  load->setProperty("SpectrumMin",data.spec);
-          //  load->setProperty("SpectrumMax",data.spec);
-          //}
           load->execute();
           if (load->isExecuted())
           {
