@@ -119,7 +119,7 @@ class ReductionOptions(BaseScriptElement):
             script += "MonitorNormalization()\n"
         
         if self.calculate_scale:
-            script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g):\n" % \
+            script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g)\n" % \
              (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans)
         else:
             if self.scaling_factor != 1:
