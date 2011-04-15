@@ -700,7 +700,12 @@ if( WIN32 )
    set ( MANTID_RC_FILE icons/MantidPlotDesktop.rc )
 endif( WIN32 )
 
-add_executable ( MantidPlot ${EXE_FLAG} ${SRC_FILES} ${INC_FILES} 
+if ( APPLE )
+  set ( MANTID_RC_FILE ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns )
+  set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
+endif ()
+
+add_executable ( MantidPlot MACOSX_BUNDLE ${EXE_FLAG} ${SRC_FILES} ${INC_FILES} 
                             ${MOCCED_FILES} ${UI_HDRS} ${RES_FILES} 
 							${MANTID_RC_FILE}
 )
@@ -744,5 +749,16 @@ endforeach ( PYFILE ${PYTHON_INSTALL_FILES} )
 # Installation settings
 ###########################################################################
 
-install ( TARGETS MantidPlot DESTINATION ${BIN_DIR} )
+install ( TARGETS MantidPlot RUNTIME DESTINATION ${BIN_DIR} 
+                             BUNDLE DESTINATION .
+)
 install ( FILES ${PYTHON_INSTALL_FILES} DESTINATION ${BIN_DIR} )
+
+if ( APPLE )
+  configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/FixBundle.cmake.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake
+                   @ONLY
+  )
+
+  install ( SCRIPT ${CMAKE_CURRENT_BINARY_DIR}/FixBundle.cmake )
+endif ()

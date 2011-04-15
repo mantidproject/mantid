@@ -98,6 +98,11 @@ endif ()
 # Installation settings
 ###########################################################################
 
+# Temp hack for mac
+if ( APPLE )
+  set ( INBUNDLE MantidPlot.app/ )
+endif ()
+
 # Create instrument directory and make it writable so vtp files can go there
 install ( DIRECTORY DESTINATION instrument 
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
@@ -105,10 +110,10 @@ install ( DIRECTORY DESTINATION instrument
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE
 )
 file ( GLOB INSTRUMENT_FILES instrument/*.xml )
-install ( FILES ${INSTRUMENT_FILES} DESTINATION instrument )
-install ( DIRECTORY scripts/ DESTINATION scripts PATTERN ".svn" EXCLUDE 
+install ( FILES ${INSTRUMENT_FILES} DESTINATION ${INBUNDLE}instrument )
+install ( DIRECTORY scripts/ DESTINATION ${INBUNDLE}scripts PATTERN ".svn" EXCLUDE 
                                                  PATTERN "*.pyc" EXCLUDE )
-install ( DIRECTORY Installers/colormaps/ DESTINATION colormaps PATTERN ".svn" EXCLUDE )
+install ( DIRECTORY Installers/colormaps/ DESTINATION ${INBUNDLE}colormaps PATTERN ".svn" EXCLUDE )
 
 ###########################################################################
 # CPack settings
@@ -119,7 +124,7 @@ set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
   # generic package level information
   set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
-  set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
+  #set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
   set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
   set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
   set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
@@ -128,7 +133,7 @@ if ( ENABLE_CPACK )
   set ( CPACK_PACKAGE_VERSION_MAJOR 1 )
   set ( CPACK_PACKAGE_VERSION_MINOR 1 )
   set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_REVISION} )
-  set ( CPACK_PACKAGING_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
+  #set ( CPACK_PACKAGING_INSTALL_PREFIX /opt/${CMAKE_PROJECT_NAME} )
 
   # RPM information - only used if generating a rpm
   #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )

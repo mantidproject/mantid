@@ -122,9 +122,9 @@ endif()
 # (Fake) installation variables to keep windows & mac sweet
 ###########################################################################
 
-set ( BIN_DIR bin )
-set ( LIB_DIR ${BIN_DIR} )
-set ( PLUGINS_DIR plugins )
+#set ( BIN_DIR bin )
+#set ( LIB_DIR ${BIN_DIR} )
+#set ( PLUGINS_DIR plugins )
 
 ###########################################################################
 # Set a flag to indicate that this script has been called

@@ -98,4 +98,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataObjects DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS DataObjects DESTINATION ${LIB_DIR} )

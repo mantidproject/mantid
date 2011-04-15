@@ -295,7 +295,12 @@ add_custom_command ( TARGET Kernel POST_BUILD
 install ( TARGETS Kernel DESTINATION ${LIB_DIR} )
 
 # Create the properties file for the installer
-set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX} )
+if ( APPLE )
+  set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
+else ()
+  set ( MANTID_ROOT ${CMAKE_INSTALL_PREFIX} )
+endif ()
+
 set ( PLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR} )
 set ( QTPLUGINS ${CMAKE_INSTALL_PREFIX}/${PLUGINS_DIR}/qtplugins/mantid )
 set ( PYTHONALGS ${PLUGINS}/PythonAlgs )

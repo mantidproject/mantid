@@ -9,3 +9,23 @@ set ( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m64 )
 set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64 )
 
 set ( CMAKE_INSTALL_NAME_DIR ${CMAKE_LIBRARY_PATH} )
+
+set ( CMAKE_INSTALL_PREFIX /Applications )
+
+set ( BIN_DIR MantidPlot.app/Contents/MacOS )
+set ( LIB_DIR MantidPlot.app/Contents/MacOS )
+set ( PLUGINS_DIR MantidPlot.app/plugins )
+
+install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
+install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4 DESTINATION ${BIN_DIR} )
+
+install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
+                ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
+          DESTINATION MantidPlot.app/Contents/Resources/
+)
+
+set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
+
+set ( CPACK_OSX_PACKAGE_VERSION 10.6 )
+set ( CPACK_POSTFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/postflight )
+
