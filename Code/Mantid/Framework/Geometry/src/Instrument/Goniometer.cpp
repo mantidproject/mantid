@@ -1,5 +1,9 @@
 #include "MantidGeometry/Instrument/Goniometer.h"
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include "MantidGeometry/Quat.h" 
+#include <vector>
 
 namespace Mantid
 {
@@ -16,14 +20,25 @@ Goniometer::Goniometer():R(3,3),initFromR(false)
 }
 
 /// Copy constructor
+/// @param other :: Goniometer from which to copy information
 Goniometer::Goniometer(const Goniometer& other):R(other.R),motors(other.motors),initFromR(other.initFromR)
 {
 }
 
 /// Constructor from a rotation matrix
-Goniometer::Goniometer(MantidMat rot):R(rot),initFromR(true)
+/// @param rot :: #MantidMat matrix that is going to be the internal rotation matrix of the goniometer. Cannot push additional axes
+Goniometer::Goniometer(MantidMat rot)
 {
-  //TODO check if rot is a rotation matrix
+  MantidMat ide(3,3),rtr(3,3);
+  rtr=rot.Tprime()*rot;
+  ide.identityMatrix();
+  if (rtr==ide)
+  {
+    R=rot;
+    initFromR=true;
+  }
+  else
+    throw std::invalid_argument("rot is not a rotation matrix");
 }
 
 /// Default destructor
@@ -43,18 +58,18 @@ const Geometry::MantidMat& Goniometer::getR() const
 /// The angle units shown is degrees
 std::string Goniometer::axesInfo()
 {
-  if initFromR 
+  if (initFromR==true) 
   {
-    return string("Goniometer was initialized from a rotation matrix. No information about axis is available.\n";
+    return std::string("Goniometer was initialized from a rotation matrix. No information about axis is available.\n");
   }
   else
   {
     std::stringstream info;
     std::vector<Axis>::iterator it;
-    std::string CW("CW"),CCW("CCW"),sense;
+    std::string strCW("CW"),strCCW("CCW"),sense;
     double angle;
 
-    if (motors.size == 0) 
+    if (motors.size() == 0) 
     {
       info<<"No axis is found\n";
     }
@@ -63,59 +78,128 @@ std::string Goniometer::axesInfo()
       info<<"Name \t Direction \t Sense \t Angle \n";
       for(it=motors.begin(); it<motors.end(); it++)
       {
-        sense=(*it->sense==1)?CCW:CW;
-        angle=(*it->angleunit==angDegrees)?*it->angle(): *it->angle()*rad2deg; 
-        info<<*it->name<<"\t"<<*it->rotationaxis<<"\t"<<sense<<"\t"<<angle<<std::endl;
+        sense=((*it).sense==CCW)?strCCW:strCW;
+        angle=((*it).angleunit==angDegrees)?((*it).angle): ((*it).angle*rad2deg); 
+        info<<(*it).name<<"\t"<<(*it).rotationaxis<<"\t"<<sense<<"\t"<<angle<<std::endl;
       }  
     }
     return info.str();
+  }
 }
 
-void Goniometer::pushAxis(std::string name, double axisx, double axisy, double axisz, double angle=0., int sense=CCW, int angUnit=angDegrees)
+/**Add an additional axis to the goniometer, closer to the sample
+  @param name :: Axis name
+  @param axisx, axisy axisz :: the x, y, z components of the rotation axis
+  @param angle :: rotation angle, 0 by default
+  @param sense :: rotation sense (CW or CCW), CCW by default
+  @param angUnit :: units for angle of type#AngleUnit, angDegrees by default 
+*/
+void Goniometer::pushAxis(std::string name, double axisx, double axisy, double axisz, double angle, int sense, int angUnit)
 {
-  if initFromR 
+  if (initFromR==true) 
   {
-    //TODO throw some exception
+    throw std::runtime_error("Initialized from a rotation matrix, so no axes can be pushed.");
   }
   else
   {
+    std::vector<Axis>::iterator it;
     // check if such axis is already defined
     for(it=motors.begin(); it<motors.end(); it++)
     {
-      if(compare(*it->name,name)==0){}//TODO throw exception
+      if(name.compare((*it).name)==0) throw std::invalid_argument("Motor name already defined");
     }
     Axis a(name,V3D(axisx,axisy,axisz),angle,sense,angUnit);
     motors.push_back(a);
   }
+  recalculateR();
 }
 
-/// Set rotation angle for an axis using motor name
+/** Set rotation angle for an axis using motor name
+  @param name :: Axis name  
+  @param value :: value in the units that the axis is set
+*/
 void Goniometer::setRotationAngle( std::string name, double value)
 {
   bool changed=false;
+  std::vector<Axis>::iterator it;
   for(it=motors.begin(); it<motors.end(); it++)
   {
-    if(compare(*it->name,name)==0)
+    if(name.compare((*it).name)==0)
     {
-      *it->value=value
+      (*it).angle=value;
+      changed=true;
     }
   }
-  if(!changed)
+  if(changed==false)
   {
-  //TODO throw error 
+    throw std::invalid_argument("Motor name "+name+" not found");
   }
-  recalculateR();
-}
-/// Set rotation angle for an axis using motor number
-void Goniometer::setRotationAngle( size_t axisnumber, double value)
-{
-  (motors.at(axisnumber)).value=value;//it will throw out of range exception if axisnumber is not in range
   recalculateR();
 }
 
+/**Set rotation angle for an axis using motor name
+  @param axisnumber :: Axis number (from 0)  
+  @param value :: value in the units that the axis is set
+*/
+void Goniometer::setRotationAngle( size_t axisnumber, double value)
+{
+  (motors.at(axisnumber)).angle=value;//it will throw out of range exception if axisnumber is not in range
+  recalculateR();
+}
+
+/// Get Axis obfject using motor number
+/// @param axisnumber :: axis number (from 0)
+Axis Goniometer::getAxis( size_t axisnumber)
+{
+  return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
+}
+
+/// Get Axis obfject using motor name
+/// @param axisname :: axis name
+Axis Goniometer::getAxis( std::string axisname)
+{
+  bool found=false;
+  std::vector<Axis>::iterator it;
+  for(it=motors.begin(); it<motors.end(); it++)
+  {
+    if(axisname.compare((*it).name)==0)
+    {
+      return (*it);
+      found=true;
+    }
+  }
+  if(found==false)
+  {
+    throw std::invalid_argument("Motor name "+axisname+" not found");
+  }  
+  return motors.at(0);
+}
+
+/// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR()
 {
-  
+  std::vector<Axis>::iterator it;
+  std::vector<double> elements;
+  Quat QGlobal,QCurrent;
+
+  double ang;
+  for(it=motors.begin(); it<motors.end(); it++)
+  {
+    ang=(*it).angle;
+    if((*it).angleunit==angRadians) ang*=rad2deg;
+    QCurrent=Quat(ang,(*it).rotationaxis);
+    QGlobal*=QCurrent;
+  }  
+  elements=QGlobal.getRotation();
+  R[0][0]=elements[0];
+  R[1][0]=elements[1];
+  R[2][0]=elements[2];
+  R[0][1]=elements[3];
+  R[1][1]=elements[4];
+  R[2][1]=elements[5];
+  R[0][2]=elements[6];
+  R[1][2]=elements[7];
+  R[2][2]=elements[8];
 }
 
 } //Namespace Geometry

@@ -66,7 +66,7 @@ namespace Geometry
       //a,b,c,alpha,beta,gamma constructor
       UnitCell(const double _a,const double _b,const double _c,const double _alpha,const double _beta,const double _gamma,const int angleunit=angDegrees);
       // Destructor
-      ~UnitCell(); 
+      virtual ~UnitCell(); 
 
       // Get and set lattice parameters
 	    // Direct lattice parameters, angle in radians. 

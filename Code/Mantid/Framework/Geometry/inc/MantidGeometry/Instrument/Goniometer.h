@@ -66,7 +66,7 @@ namespace Geometry
       // Constructor from a rotation matrix
       Goniometer(MantidMat rot);
       // Default destructor
-      ~Goniometer();
+      virtual ~Goniometer();
       // Return rotation matrix
       const Geometry::MantidMat& getR() const;
       // Return information about axes  
@@ -77,6 +77,10 @@ namespace Geometry
       void setRotationAngle( std::string name, double value);
       // Set rotation angle for an axis
       void setRotationAngle( size_t axisnumber, double value);
+      // Get axis object
+      Axis getAxis(size_t axisnumber);
+      // Get axis object
+      Axis getAxis(std::string axisname);
     private:
       /// Global rotation matrix of the goniometer
       MantidMat R;
@@ -85,7 +89,7 @@ namespace Geometry
       /// Flag to specify if the goniometer is initialized from a rotation matrix
       bool initFromR;
       /// Private function to recalculate R when setRotationAngle is called
-      void recalculateR;
+      void recalculateR();
   }; 
 } // namespace Geometry
 } // namespace Mantid
