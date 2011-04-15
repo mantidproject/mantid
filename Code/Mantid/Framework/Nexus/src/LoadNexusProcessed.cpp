@@ -1037,7 +1037,7 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
         unsigned int direc(Mantid::Kernel::Direction::asEnum(direction));
         alg_hist.addProperty(prop_name, prop_value, (is_def[0] == 'Y'), direc);
       }
-      local_workspace->history().addAlgorithmHistory(alg_hist);
+      local_workspace->history().addHistory(alg_hist);
       entry.close();
     }
   }
