@@ -74,7 +74,7 @@ namespace MDEvents
     virtual void centerpointBin(MDBin<MDE,nd> & bin) const = 0;
 
     /// Run a generic MDBoxTask onto this, going recursively.
-    virtual void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained) = 0;
+//    virtual void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained) = 0;
 
     /// Return the box controller saved.
     BoxController_sptr getBoxController() const
