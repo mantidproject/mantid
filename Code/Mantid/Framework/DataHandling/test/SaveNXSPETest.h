@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidNexus/SaveNXSPE.h"
+#include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAPI/FrameworkManager.h"
@@ -17,7 +17,7 @@
 
 using namespace Mantid;
 using namespace Mantid::API;
-using namespace Mantid::NeXus;
+using namespace Mantid::DataHandling;
 using Mantid::Kernel::UnitFactory;
 using Mantid::Geometry::Instrument;
 

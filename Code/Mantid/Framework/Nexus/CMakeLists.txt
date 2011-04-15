@@ -25,7 +25,6 @@ set ( SRC_FILES
 	src/NexusClasses.cpp
 	src/NexusFileIO.cpp
 	src/SaveISISNeXus.cpp
-	src/SaveNXSPE.cpp
 	src/SaveNeXus.cpp
 	src/SaveNexusProcessed.cpp
 	src/SaveToSNSHistogramNexus.cpp
@@ -53,7 +52,6 @@ set ( INC_FILES
 	inc/MantidNexus/NexusClasses.h
 	inc/MantidNexus/NexusFileIO.h
 	inc/MantidNexus/SaveISISNeXus.h
-	inc/MantidNexus/SaveNXSPE.h
 	inc/MantidNexus/SaveNeXus.h
 	inc/MantidNexus/SaveNexusProcessed.h
 	inc/MantidNexus/SaveToSNSHistogramNexus.h
@@ -74,7 +72,6 @@ set ( TEST_FILES
 	test/LoadRSaveNLoadNcspTest.h
 	test/LoadSNSEventNexusTest.h
 	test/NexusAPITest.h
-	test/SaveNXSPETest.h
 	test/SaveNeXusTest.h
 	test/SaveNexusProcessedTest.h
 )

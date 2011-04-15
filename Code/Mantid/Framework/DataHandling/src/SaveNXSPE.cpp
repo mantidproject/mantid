@@ -1,4 +1,4 @@
-#include "MantidNexus/SaveNXSPE.h"
+#include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidAPI/WorkspaceValidators.h"
@@ -10,7 +10,7 @@
 
 namespace Mantid
 {
-  namespace NeXus
+  namespace DataHandling
   {
 
     // Register the algorithm into the algorithm factory
@@ -332,5 +332,5 @@ namespace Mantid
       nxFile.closeGroup(); // Top level NXentry
     }
 
-  } // namespace NeXus
+  } // namespace DataHandling
 } // namespace Mantid

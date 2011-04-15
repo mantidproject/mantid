@@ -64,6 +64,7 @@ set ( SRC_FILES
 	src/SaveFocusedXYE.cpp
 	src/SaveGSS.cpp
 	src/SaveNISTDAT.cpp
+	src/SaveNXSPE.cpp
 	src/SavePHX.cpp
 	src/SaveRKH.cpp
 	src/SaveSPE.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveFocusedXYE.h
 	inc/MantidDataHandling/SaveGSS.h
 	inc/MantidDataHandling/SaveNISTDAT.h
+	inc/MantidDataHandling/SaveNXSPE.h
 	inc/MantidDataHandling/SavePHX.h
 	inc/MantidDataHandling/SaveRKH.h
 	inc/MantidDataHandling/SaveSPE.h
@@ -180,6 +182,7 @@ set ( TEST_FILES
 	test/SaveDASCTest.h
 	test/SaveFocussedXYETest.h
 	test/SaveNISTDATTest.h
+	test/SaveNXSPETest.h
 	test/SavePHXTest.h
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
@@ -202,7 +205,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling ${MANTIDLIBS} )
+target_link_libraries ( DataHandling Nexus ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )
