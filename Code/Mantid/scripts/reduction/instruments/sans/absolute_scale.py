@@ -106,7 +106,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         else:
             raise RuntimeError, "AbsoluteScale could not read the pixel size"
         
-        self._scaling_factor = det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd)
+        self._scaling_factor = 1.0/(det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
 
         return "Absolute scale factor:", self._scaling_factor
     
