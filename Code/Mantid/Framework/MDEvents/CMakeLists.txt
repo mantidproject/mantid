@@ -6,7 +6,7 @@ set ( SRC_FILES
 	src/FakeMDEventData.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
-	src/MDBoxTask.cpp
+#	src/MDBoxTask.cpp
 	src/MDEWPeakIntegration.cpp
 	src/MDEventFactory.cpp
 	src/MDEventWorkspace.cpp
@@ -17,7 +17,8 @@ set ( SRC_FILES
 	src/OneStepMDEW.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES src/MDBin.cpp
+set ( SRC_UNITY_IGNORE_FILES 
+	src/MDBin.cpp
     src/MDBox.cpp
     src/MDEventWorkspace.cpp
     src/MDGridBox.cpp
@@ -33,7 +34,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/IMDBox.h
 	inc/MantidMDEvents/MDBin.h
 	inc/MantidMDEvents/MDBox.h
-	inc/MantidMDEvents/MDBoxTask.h
+#	inc/MantidMDEvents/MDBoxTask.h
 	inc/MantidMDEvents/MDDimensionExtents.h
 	inc/MantidMDEvents/MDEWPeakIntegration.h
 	inc/MantidMDEvents/MDEvent.h
@@ -53,7 +54,7 @@ set ( TEST_FILES
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h
 	test/MDBinTest.h
-	test/MDBoxTaskTest.h
+#	test/MDBoxTaskTest.h
 	test/MDBoxTest.h
 	test/MDEWPeakIntegrationTest.h
 	test/MDEventFactoryTest.h
