@@ -7,8 +7,12 @@
   <value val="detector1"/>
 </parameter>
 
-<parameter name="default-incident-monitor-spectrum">
+<parameter name="default-incident-timer-spectrum">
   <value val="1"/>
+</parameter>
+
+<parameter name="default-incident-monitor-spectrum">
+  <value val="0"/>
 </parameter>
 
 <parameter name="number-of-x-pixels">
