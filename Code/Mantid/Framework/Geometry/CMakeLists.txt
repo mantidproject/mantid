@@ -1,4 +1,5 @@
 set ( SRC_FILES
+	src/Crystal/OrientedLattice.cpp
 	src/Crystal/UnitCell.cpp
 	src/IDetector.cpp
 	src/IInstrument.cpp
@@ -81,6 +82,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         )
         
 set ( INC_FILES
+	inc/MantidGeometry/Crystal/OrientedLattice.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllExport.h
 	inc/MantidGeometry/ICompAssembly.h
