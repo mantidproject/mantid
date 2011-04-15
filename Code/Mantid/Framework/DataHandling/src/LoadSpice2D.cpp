@@ -324,12 +324,12 @@ namespace Mantid
       runLoadMappingTable(ws, numberXPixels, numberYPixels);
 
       // Set the run properties
-      ws->mutableRun().addProperty("sample-detector-distance", distance, true);
-      ws->mutableRun().addProperty("beam-trap-radius", beam_trap_radius, true);
+      ws->mutableRun().addProperty("sample-detector-distance", distance, "mm", true);
+      ws->mutableRun().addProperty("beam-trap-radius", beam_trap_radius, "mm", true);
       ws->mutableRun().addProperty("number-of-guides", nguides, true);
-      ws->mutableRun().addProperty("source-sample-distance", source_distance, true);
-      ws->mutableRun().addProperty("source-aperture-radius", source_apert, true);
-      ws->mutableRun().addProperty("sample-aperture-radius", sample_apert, true);
+      ws->mutableRun().addProperty("source-sample-distance", source_distance, "mm", true);
+      ws->mutableRun().addProperty("source-aperture-radius", source_apert, "mm", true);
+      ws->mutableRun().addProperty("sample-aperture-radius", sample_apert, "mm", true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
