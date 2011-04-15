@@ -25,7 +25,7 @@ endif ()
 include ( CommonSetup )
 
 ###########################################################################
-# Add linux-specific things
+# Add linux-specific things (N.B. 'UNIX' variable is true on OSX)
 ###########################################################################
 if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
   include ( LinuxSetup )
@@ -139,74 +139,6 @@ if ( ENABLE_CPACK )
 
   # DEB information - only used if generating a deb
   set ( CPACK_DEBIAN_PACKAGE_RELEASE 1 )
-
-  IF ( UNIX )
-    # define the source generators
-    set ( CPACK_SOURCE_GENERATOR TGZ )
-
-    FIND_PROGRAM (LSB_CMD lsb_release)
-    IF ( LSB_CMD )
-      # get the distribution
-      execute_process ( COMMAND ${LSB_CMD} -i
-                        OUTPUT_VARIABLE UNIX_DIST
-                        OUTPUT_STRIP_TRAILING_WHITESPACE )
-      string ( REGEX REPLACE "Distributor ID:" "" UNIX_DIST ${UNIX_DIST} )
-      string ( STRIP ${UNIX_DIST} UNIX_DIST )
-      string ( REGEX REPLACE "RedHatEnterpriseClient" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-      string ( REGEX REPLACE "RedHatEnterpriseWorkstation" "RedHatEnterprise" UNIX_DIST ${UNIX_DIST} )
-      # get the codename
-      execute_process ( COMMAND ${LSB_CMD} -c
-                        OUTPUT_VARIABLE UNIX_CODENAME
-                        OUTPUT_STRIP_TRAILING_WHITESPACE )
-      string ( REGEX REPLACE "Codename:" "" UNIX_CODENAME ${UNIX_CODENAME} )
-      string ( STRIP ${UNIX_CODENAME} UNIX_CODENAME )
-    ELSE ( LSB_CMD )
-      set ( UNIX_DIST "" )
-      set ( UNIX_CODENAME "" )
-    ENDIF ( LSB_CMD )
-    message ( STATUS " DIST: ${UNIX_DIST} CODENAME: ${UNIX_CODENAME}" )
-
-    # define which binary generators to use
-    IF ( ${UNIX_DIST} MATCHES "Ubuntu" )
-      FIND_PROGRAM(DPKG_CMD dpkg)
-      IF ( DPKG_CMD )
-        set ( CPACK_GENERATOR "DEB" )
-        execute_process( COMMAND ${DPKG_CMD} --print-architecture
-                         OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-                         OUTPUT_STRIP_TRAILING_WHITESPACE )
-        # acording to debian <foo>_<VersionNumber>-<DebianRevisionNumber>_<DebianArchitecture>.deb 
-        set( CPACK_PACKAGE_FILE_NAME
-             "${CPACK_PACKAGE_NAME}_${CPACK_PACKAGE_VERSION}-${CPACK_DEBIAN_PACKAGE_RELEASE}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")   
-      ENDIF( DPKG_CMD ) 
-    ENDIF ( ${UNIX_DIST} MATCHES "Ubuntu" )
-
-    #RedHatEnterpriseClient RedHatEnterpriseWorkstation
-    IF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
-      FIND_PROGRAM ( RPMBUILD_CMD rpmbuild )
-      IF ( RPMBUILD_CMD )
-        set ( CPACK_GENERATOR "RPM" )
-        FIND_PROGRAM ( UNAME_CMD uname )
-        IF (UNAME_CMD)
-          execute_process( COMMAND ${UNAME_CMD} -m
-                           OUTPUT_VARIABLE CPACK_RPM_PACKAGE_ARCHITECTURE
-                           OUTPUT_STRIP_TRAILING_WHITESPACE )
-        ELSE (UNAME_CMD)
-          set (CPACK_RPM_PACKAGE_ARCHITECTURE "unknown")
-        ENDIF (UNAME_CMD)
-        # reset the release name to include the RHEL version if known
-        IF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el5" )
-        ELSEIF ( ${UNIX_CODENAME} MATCHES "Santiago" )
-          set ( CPACK_RPM_PACKAGE_RELEASE "${CPACK_RPM_PACKAGE_RELEASE}.el6" )
-        ENDIF ( ${UNIX_CODENAME} MATCHES "Tikanga" )
-        
-        # according to rpm.org: name-version-release.architecture.rpm
-        set ( CPACK_PACKAGE_FILE_NAME
-            "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_RPM_PACKAGE_RELEASE}.${CPACK_RPM_PACKAGE_ARCHITECTURE}" )
-       
-    ENDIF ( RPMBUILD_CMD)
-    ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
-  ENDIF ( UNIX )
 
   # rhel requirements
   set ( CPACK_RPM_PACKAGE_REQUIRES "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy" )
