@@ -264,12 +264,18 @@ namespace Mantid
         extensions.assign(facility_extensions.begin(), facility_extensions.end());
       }
 
+      std::vector<std::string> filenames(2,filename);
+      std::transform(filename.begin(),filename.end(),filenames[0].begin(),toupper);
+      std::transform(filename.begin(),filename.end(),filenames[1].begin(),tolower);
       std::vector<std::string>::const_iterator ext = extensions.begin();
       for (; ext != extensions.end(); ++ext)
       {
-        std::string path = getFullPath(filename + *ext);
-        if (!path.empty())
-          return path;
+        for(size_t i = 0; i < filenames.size(); ++i)
+        {
+          std::string path = getFullPath(filenames[i] + *ext);
+          if (!path.empty())
+            return path;
+        }
       }
 
       // Search the archive of the default facility
@@ -287,23 +293,26 @@ namespace Mantid
           std::vector<std::string>::const_iterator ext = extensions.begin();
           for (; ext != extensions.end(); ++ext)
           {
-            path = arch->getPath(filename + *ext);
-            Poco::Path pathPattern(path);
-            if (ext->find("*") != std::string::npos)
+            for(size_t i = 0; i < filenames.size(); ++i)
             {
-              continue;
-              std::set < std::string > files;
-              Kernel::Glob::glob(pathPattern, files);
-            }
-            else
-            {
-              Poco::File file(pathPattern);
-              if (file.exists())
+              path = arch->getPath(filenames[i] + *ext);
+              Poco::Path pathPattern(path);
+              if (ext->find("*") != std::string::npos)
               {
-                return file.path();
+                continue;
+                std::set < std::string > files;
+                Kernel::Glob::glob(pathPattern, files);
               }
-            }
-          }
+              else
+              {
+                Poco::File file(pathPattern);
+                if (file.exists())
+                {
+                  return file.path();
+                }
+              }
+            } // i
+          }  // ext
         }
       }
       return "";
