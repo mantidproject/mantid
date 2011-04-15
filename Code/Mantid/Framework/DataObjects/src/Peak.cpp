@@ -17,19 +17,27 @@ namespace DataObjects
    *
    * @param m_inst :: Shared pointer to the instrument for this peak detection
    * @param m_DetectorID :: ID to the detector of the center of the peak
-   * @param m_InitialEnergy :: incident neutron energy, in mEv (UNITS??)
+   * @param m_Wavelength :: incident neutron wavelength, in Angstroms
    * @return
    */
-  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_InitialEnergy)
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength)
     : m_inst(m_inst),
       m_H(0), m_K(0), m_L(0),
-      m_Intensity(0), m_SigIntensity(0),
-      m_InitialEnergy(m_InitialEnergy),
-      m_FinalEnergy(m_InitialEnergy),
-      m_OrientationMatrix(3,3)
+      m_Intensity(0), m_SigmaIntensity(0),
+      m_GoniometerMatrix(3,3),
+      m_RunNumber(0)
   {
     this->setDetectorID(m_DetectorID);
+    this->setWavelength(m_Wavelength);
   }
+
+//  /** Copy constructor
+//   * @param other :: Peak to copy.
+//   */
+//  Peak::Peak(const Peak & other)
+//  : m_inst(other.
+//  {
+//  }
 
   //----------------------------------------------------------------------------------------------
   /** Destructor
@@ -38,98 +46,203 @@ namespace DataObjects
   {
   }
 
-  int Peak::getDetectorID() const
+  //----------------------------------------------------------------------------------------------
+  /** Set the incident wavelength of the neutron. Calculates the energy from this.
+   *
+   * @param wavelength :: wavelength in Angstroms.
+   */
+  void Peak::setWavelength(double wavelength)
   {
-    return m_DetectorID;
+    // Velocity of the neutron (non-relativistic)
+    double velocity = PhysicalConstants::h / (wavelength * 1e-10 * PhysicalConstants::NeutronMass );
+    // Energy in J of the neutron
+    double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2;
+    // Convert to meV
+    m_InitialEnergy = energy / PhysicalConstants::meV;
+    m_FinalEnergy = m_InitialEnergy;
   }
 
-  double Peak::getFinalEnergy() const
-  {
-    return m_FinalEnergy;
-  }
-
-  double Peak::getH() const
-  {
-    return m_H;
-  }
-
-  double Peak::getInitialEnergy() const
-  {
-    return m_InitialEnergy;
-  }
-
-  double Peak::getIntensity() const
-  {
-    return m_Intensity;
-  }
-
-  double Peak::getK() const
-  {
-    return m_K;
-  }
-
-  double Peak::getL() const
-  {
-    return m_L;
-  }
-
-  double Peak::getSigIntensity() const
-  {
-    return m_SigIntensity;
-  }
-
+  //----------------------------------------------------------------------------------------------
+  /** Set the detector ID and look up and cache values related to it.
+   *
+   * @param m_DetectorID :: ID of detector at the center of the peak
+   */
   void Peak::setDetectorID(int m_DetectorID)
   {
     this->m_DetectorID = m_DetectorID;
-    if (m_inst)
-      this->m_det = m_inst->getDetector(this->m_DetectorID);
+    if (!m_inst) throw std::runtime_error("No instrument is set!");
+    this->m_det = m_inst->getDetector(this->m_DetectorID);
+    if (!m_det) throw std::runtime_error("No detector was found!");
+
+
+    // Cache some positions
+    const Geometry::IObjComponent_sptr sourceObj = m_inst->getSource();
+    if (sourceObj == NULL)
+      throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
+    const Geometry::IObjComponent_sptr sampleObj = m_inst->getSample();
+    if (sampleObj == NULL)
+      throw Exception::InstrumentDefinitionError("Failed to get sample component from instrument");
+
+    sourcePos = sourceObj->getPos();
+    samplePos = sampleObj->getPos();
+    detPos = m_det->getPos();
+
+    // We now look for the row/column. -1 if not found.
+    m_Row = -1;
+    m_Col = -1;
+    if (!m_det->getParent()) return;
+    RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(m_det->getParent());
+    if (!retDet) return;
+    std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
+    m_Row = xy.second;
+    m_Col = xy.first;
   }
 
-  void Peak::setFinalEnergy(double m_FinalEnergy)
+
+  // -------------------------------------------------------------------------------------
+  /** Calculate the neutron wavelength (in angstroms) at the peak */
+  double Peak::getWavelength() const
   {
-    this->m_FinalEnergy = m_FinalEnergy;
+    // Energy in J of the neutron
+    double energy =  PhysicalConstants::meV * m_InitialEnergy;
+    // v = sqrt(E / 2*m)
+    double velocity = sqrt(energy/(2*PhysicalConstants::NeutronMass));
+    // wavelength = h / mv
+    double wavelength = PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
+    // Return it in angstroms
+    return wavelength * 1e10;
   }
 
+  // -------------------------------------------------------------------------------------
+  /** Calculate the time of flight (in microseconds) of the neutrons for this peak,
+   * using the geometry of the detector  */
+  double Peak::getTOF() const
+  {
+    // First, calculate the total neutron traveling distance
+    double distance = (detPos - samplePos).norm() + (samplePos - sourcePos).norm();
+    // Energy in J of the neutron
+    double energy =  PhysicalConstants::meV * m_InitialEnergy;
+    // v = sqrt(E / 2*m)
+    double velocity = sqrt(energy/(2*PhysicalConstants::NeutronMass));
+    // Time of flight in seconds = distance / speed
+    double tof = distance / velocity;
+    // Return in microsecond units
+    return tof * 1e6;
+  }
+
+  // -------------------------------------------------------------------------------------
+  /** Calculate the d-spacing of the peak, in 1/Angstroms  */
+  double Peak::getDSpacing() const
+  {
+    // Get the neutron wavelength in angstroms
+    double wavelength = this->getWavelength();
+    // The detector is at 2 theta scattering angle
+    V3D beamDir = samplePos - sourcePos;
+    double two_theta = detPos.angle(beamDir);
+    double sin_theta = sin(two_theta/2.0);
+    // Bragg condition is n*wavelength = 2 * d * sin(theta)
+    return wavelength / (2 * sin_theta);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the Q change (of the lattice, k_i - k_f) for this peak.
+   * The Q is in the Lab frame: the goniometer rotation was NOT taken out.
+   *
+   * Note: There is no 2*pi factor used, so |Q| = 1/wavelength.
+   * */
+  Mantid::Geometry::V3D Peak::getQLabFrame() const
+  {
+    // Normalized beam direction
+    V3D beamDir = samplePos - sourcePos;
+    beamDir /= beamDir.norm();
+    // Normalized detector direction
+    V3D detDir = (detPos - samplePos);
+    detDir /= detDir.norm();
+    // Normalized Q direction
+    V3D Q_dir = beamDir - detDir;
+    // Now calculate the wavevector of the incident neutron
+    double wavevector = 1.0 / this->getWavelength();
+    // And Q in the lab frame = this direction * the wave vector.
+    return Q_dir * wavevector;
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the Q change (of the lattice, k_i - k_f) for this peak.
+   * The Q is in the Sample frame: the goniometer rotation WAS taken out. */
+  Mantid::Geometry::V3D Peak::getQSampleFrame() const
+  {
+    V3D Qlab = this->getQLabFrame();
+    // Multiply by the goniometer matrix to get the sample frame
+    // TODO: should I multiply by the inverse???
+    V3D Qsample = m_GoniometerMatrix * Qlab;
+    return Qsample;
+  }
+
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Return a shared ptr to the detector at center of peak. */
+  Mantid::Geometry::IDetector_sptr Peak::getDetector() const
+  {    return m_det;  }
+
+  /** Return a shared ptr to the instrument for this peak. */
+  Mantid::Geometry::IInstrument_sptr Peak::getInstrument() const
+  {    return m_inst;  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the run number this peak was measured at. */
+  int Peak::getRunNumber() const
+  {    return m_RunNumber;  }
+
+  /** Set the run number that measured this peak
+   * @param m_RunNumber :: the run number   */
+  void Peak::setRunNumber(int m_RunNumber)
+  {    this->m_RunNumber = m_RunNumber;  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the ID of the detector at the center of the peak  */
+  int Peak::getDetectorID() const
+  {    return m_DetectorID;  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the final neutron energy */
+  double Peak::getFinalEnergy() const
+  {    return m_FinalEnergy;  }
+
+  /** Get the initial (incident) neutron energy */
+  double Peak::getInitialEnergy() const
+  {    return m_InitialEnergy; }
+
+  //----------------------------------------------------------------------------------------------
+  /** Get the H index of the peak */
+  double Peak::getH() const
+  {    return m_H;  }
+
+  /** Get the K index of the peak */
+  double Peak::getK() const
+  {    return m_K;  }
+
+  /** Get the L index of the peak */
+  double Peak::getL() const
+  {    return m_L;  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Set the H index of this peak
+   * @param m_H :: index to set   */
   void Peak::setH(double m_H)
-  {
-    this->m_H = m_H;
-  }
+  {    this->m_H = m_H;  }
 
-  void Peak::setInitialEnergy(double m_InitialEnergy)
-  {
-    this->m_InitialEnergy = m_InitialEnergy;
-  }
-
-  void Peak::setIntensity(double m_Intensity)
-  {
-    this->m_Intensity = m_Intensity;
-  }
-
+  /** Set the K index of this peak
+   * @param m_K :: index to set   */
   void Peak::setK(double m_K)
-  {
-    this->m_K = m_K;
-  }
+  {    this->m_K = m_K;  }
 
+  /** Set the L index of this peak
+   * @param m_L :: index to set   */
   void Peak::setL(double m_L)
-  {
-    this->m_L = m_L;
-  }
+  {    this->m_L = m_L;  }
 
-  void Peak::setSigIntensity(double m_SigIntensity)
-  {
-    this->m_SigIntensity = m_SigIntensity;
-  }
-
-  Mantid::Geometry::Matrix<double> Peak::getOrientationMatrix() const
-  {
-    return this->m_OrientationMatrix;
-  }
-
-  void Peak::setOrientationMatrix(Mantid::Geometry::Matrix<double> m_OrientationMatrix)
-  {
-    this->m_OrientationMatrix = m_OrientationMatrix;
-  }
-
+  /** Set all three H,K,L indices of the peak */
   void Peak::setHKL(double H, double K, double L)
   {
     m_H = H;
@@ -137,26 +250,56 @@ namespace DataObjects
     m_L = L;
   }
 
-  // -------------------------------------------------------------------------------------
-  /** Calculate the neutron wavelength at the peak */
-  double Peak::getWavelength()
-  {
-    return 0.0; //TODO:
-  }
+  //----------------------------------------------------------------------------------------------
+  /** Return the integrated peak intensity */
+  double Peak::getIntensity() const
+  {    return m_Intensity;  }
+
+  /** Return the error on the integrated peak intensity */
+  double Peak::getSigmaIntensity() const
+  {    return m_SigmaIntensity;  }
+
+  /** Set the integrated peak intensity
+   * @param m_Intensity :: intensity value   */
+  void Peak::setIntensity(double m_Intensity)
+  {    this->m_Intensity = m_Intensity;  }
+
+  /** Set the error on the integrated peak intensity
+   * @param m_Intensity :: intensity error value   */
+  void Peak::setSigmaIntensity(double m_SigmaIntensity)
+  {    this->m_SigmaIntensity = m_SigmaIntensity;  }
+
+
+  void Peak::setFinalEnergy(double m_FinalEnergy)
+  {    this->m_FinalEnergy = m_FinalEnergy;  }
+
+  void Peak::setInitialEnergy(double m_InitialEnergy)
+  {    this->m_InitialEnergy = m_InitialEnergy;  }
+
 
   // -------------------------------------------------------------------------------------
-  /** Calculate the d-spacing of the peak  */
-  double Peak::getDSpacing()
+  /** Get the goniometer rotation matrix at which this peak was measured. */
+  Mantid::Geometry::Matrix<double> Peak::getGoniometerMatrix() const
   {
-    return 0.0; //TODO:
+    return this->m_GoniometerMatrix;
   }
+
+  /** Set the goniometer rotation matrix at which this peak was measured.
+   * @throw std::invalid_argument if matrix is not 3x3*/
+  void Peak::setGoniometerMatrix(Mantid::Geometry::Matrix<double> goniometerMatrix)
+  {
+    if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
+      throw std::invalid_argument("Goniometer matrix must be 3x3.");
+    this->m_GoniometerMatrix = goniometerMatrix;
+  }
+
 
   // -------------------------------------------------------------------------------------
   /** Find the name of the bank that is the parent of the detector. This works
    * best for RectangularDetector instruments (goes up one level)
    * @return name of the bank.
    */
-  std::string Peak::getBankName()
+  std::string Peak::getBankName() const
   {
     if (!m_det) return "";
     if (!m_det->getParent()) return "";
@@ -164,29 +307,16 @@ namespace DataObjects
   }
 
   // -------------------------------------------------------------------------------------
-  /** For RectangularDetectors only, returns the row (y) of the pixel of the detector. */
-  int Peak::getRow()
-  {
-    if (!m_det) throw std::runtime_error("No detector in Peak!");
-    if (!m_det->getParent()) throw std::runtime_error("No parent to the detector in Peak!");
-    RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(m_det->getParent());
-    if (!retDet) throw std::runtime_error("Parent of the detector in Peak is not RectangularDetector: can't find the row!");
-    std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
-    return xy.second;
-  }
+  /** For RectangularDetectors only, returns the row (y) of the pixel of the detector.
+  * Returns -1 if it could not find it. */
+  int Peak::getRow() const
+  {   return m_Row;  }
 
   // -------------------------------------------------------------------------------------
-  /** For RectangularDetectors only, returns the row of the pixel of the detector. */
-  int Peak::getCol()
-  {
-    if (!m_det) throw std::runtime_error("No detector in Peak!");
-    if (!m_det->getParent()) throw std::runtime_error("No parent to the detector in Peak!");
-    RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(m_det->getParent());
-    if (!retDet) throw std::runtime_error("Parent of the detector in Peak is not RectangularDetector: can't find the col!");
-    std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
-    return xy.first;
-  }
-
+  /** For RectangularDetectors only, returns the column (x) of the pixel of the detector.
+   * Returns -1 if it could not find it. */
+  int Peak::getCol() const
+  {   return m_Col;  }
 
 
 

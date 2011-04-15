@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidKernel/PhysicalConstants.h"
 
 
 namespace Mantid
@@ -20,42 +21,52 @@ namespace DataObjects
   {
   public:
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_InitialEnergy);
-    ~Peak();
+
+    // Copy constructor is compiler-provided.
+    //    Peak(const Peak & other);
+    virtual ~Peak();
 
     int getDetectorID() const;
+    void setDetectorID(int m_DetectorID);
+    Mantid::Geometry::IDetector_sptr getDetector() const;
+    Mantid::Geometry::IInstrument_sptr getInstrument() const;
+
+    int getRunNumber() const;
+    void setRunNumber(int m_RunNumber);
 
     double getH() const;
     double getK() const;
     double getL() const;
-
-    double getInitialEnergy() const;
-    double getFinalEnergy() const;
-
-    double getIntensity() const;
-    double getSigIntensity() const;
-
-    void setDetectorID(int m_DetectorID);
-
     void setH(double m_H);
     void setK(double m_K);
     void setL(double m_L);
     void setHKL(double H, double K, double L);
 
+    Mantid::Geometry::V3D getQLabFrame() const;
+    Mantid::Geometry::V3D getQSampleFrame() const;
+
+    void setWavelength(double wavelength);
+    double getWavelength() const;
+    double getDSpacing() const;
+    double getTOF() const;
+
+    double getInitialEnergy() const;
+    double getFinalEnergy() const;
     void setInitialEnergy(double m_InitialEnergy);
     void setFinalEnergy(double m_FinalEnergy);
 
+    double getIntensity() const;
+    double getSigmaIntensity() const;
+
     void setIntensity(double m_Intensity);
-    void setSigIntensity(double m_SigIntensity);
+    void setSigmaIntensity(double m_SigmaIntensity);
 
-    Mantid::Geometry::Matrix<double> getOrientationMatrix() const;
-    void setOrientationMatrix(Mantid::Geometry::Matrix<double> m_OrientationMatrix);
+    Mantid::Geometry::Matrix<double> getGoniometerMatrix() const;
+    void setGoniometerMatrix(Mantid::Geometry::Matrix<double> m_GoniometerMatrix);
 
-    // ------ Still to implement -------
-    double getWavelength();
-    double getDSpacing();
-    std::string getBankName();
-    int getRow();
-    int getCol();
+    std::string getBankName() const;
+    int getRow() const;
+    int getCol() const;
 
   protected:
     /// Shared pointer to the instrument (for calculating some values )
@@ -80,7 +91,7 @@ namespace DataObjects
     double m_Intensity;
 
     /// Error (sigma) on peak intensity
-    double m_SigIntensity;
+    double m_SigmaIntensity;
 
     /// Initial energy of neutrons at the peak
     double m_InitialEnergy;
@@ -88,8 +99,25 @@ namespace DataObjects
     /// Final energy of the neutrons at peak (normally same as m_InitialEnergy)
     double m_FinalEnergy;
 
-    /// Sample orientation matrix
-    Mantid::Geometry::Matrix<double> m_OrientationMatrix;
+    /// Orientation matrix of the goniometer angles.
+    Mantid::Geometry::Matrix<double> m_GoniometerMatrix;
+
+    /// Originating run number for this peak
+    int m_RunNumber;
+
+    /// Cached row in the detector
+    int m_Row;
+
+    /// Cached column in the detector
+    int m_Col;
+
+    /// Cached source position
+    Mantid::Geometry::V3D sourcePos;
+    /// Cached sample position
+    Mantid::Geometry::V3D samplePos;
+    /// Cached detector position
+    Mantid::Geometry::V3D detPos;
+
   };
 
 
