@@ -9,7 +9,7 @@ namespace Mantid
 {
 namespace Geometry
 {  
-  /** @class UnitCell UnitCell.h Geometry/Crystal/Component.h
+  /** @class UnitCell UnitCell.h Geometry/Crystal/UnitCell.h
     Class to implement unit cell of crystals. 
     It is based on code by Laurent Chapon. It does not contain information about lattice orientation.
     See documentation about UB matrix in the Mantid repository.\n

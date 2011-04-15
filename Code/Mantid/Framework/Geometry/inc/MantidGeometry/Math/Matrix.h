@@ -48,7 +48,7 @@ namespace Mantid
 
     public:
 
-      Matrix(int const =0,int const  =0);
+      Matrix(int const =0,int const  =0, bool const makeIdentity=false);
       Matrix(const std::vector<T>&,const std::vector<T>&);
       Matrix(const Matrix<T>&);
       Matrix<T>& operator=(const Matrix<T>&);

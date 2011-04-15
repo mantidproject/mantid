@@ -52,17 +52,19 @@ Matrix<T>::get_vector()const
 }
 //
 template<typename T>
-Matrix<T>::Matrix(const int nrow,const int ncol)
+Matrix<T>::Matrix(const int nrow,const int ncol, const bool makeIdentity)
   : nx(0),ny(0),V(0)
   /**
     Constructor with pre-set sizes. Matrix is zeroed
     @param nrow :: number of rows
     @param ncol :: number of columns
+    @param makeIdentity :: flag for the constructor to return an identity matrix
   */
 {
   // Note:: nx,ny zeroed so setMem always works
   setMem(nrow,ncol);
   zeroMatrix();
+  if(makeIdentity==true) identityMatrix();
 }
 
 template<typename T>
