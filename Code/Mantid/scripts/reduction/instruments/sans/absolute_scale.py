@@ -38,7 +38,7 @@ class BaseAbsoluteScale(ReductionStep):
         """
             Do nothing since the scaling factor was set by hand
         """
-        return "Absolute scale factor:", self._scaling_factor
+        return "Absolute scale factor: %6.4g" % self._scaling_factor
     
     
 class AbsoluteScale(BaseAbsoluteScale):
@@ -116,7 +116,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         
         self._scaling_factor = 1.0/(det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
 
-        return "Absolute scale factor:", self._scaling_factor
+        return "Absolute scale factor: %6.4g" % self._scaling_factor
     
         
 
