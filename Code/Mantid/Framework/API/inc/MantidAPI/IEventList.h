@@ -25,7 +25,7 @@ namespace API
     virtual void switchTo(Mantid::API::EventType newType) = 0;
     virtual void addDetectorID(const int detID) = 0;
     virtual bool hasDetectorID(const int detID) const = 0;
-    virtual void clear() = 0;
+    virtual void clear(const bool removeDetIDs) = 0;
     virtual void reserve(size_t num) = 0;
     virtual bool isSortedByTof() const = 0;
     virtual std::size_t getNumberEvents() const = 0;

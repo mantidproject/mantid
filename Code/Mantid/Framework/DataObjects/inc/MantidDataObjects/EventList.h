@@ -179,7 +179,7 @@ public:
   std::set<int>& getDetectorIDs();
   const std::set<int>& getDetectorIDs() const;
 
-  void clear();
+  void clear(const bool removeDetIDs=true);
   void clearUnused();
 
   void reserve(size_t num);

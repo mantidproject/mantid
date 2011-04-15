@@ -735,7 +735,7 @@ namespace DataObjects
   /** Clear the list of events and any
    * associated detector ID's.
    * */
-  void EventList::clear()
+  void EventList::clear(const bool removeDetIDs)
   {
     this->events.clear();
     std::vector<TofEvent>().swap(this->events); //STL Trick to release memory
@@ -743,7 +743,8 @@ namespace DataObjects
     std::vector<WeightedEvent>().swap(this->weightedEvents); //STL Trick to release memory
     this->weightedEventsNoTime.clear();
     std::vector<WeightedEventNoTime>().swap(this->weightedEventsNoTime); //STL Trick to release memory
-    this->detectorIDs.clear();
+    if (removeDetIDs)
+      this->detectorIDs.clear();
   }
 
   /** Clear any unused event lists (the ones that do not
@@ -2012,7 +2013,7 @@ namespace DataObjects
     }
 
     if (numDel >= numOrig)
-      this->clear();
+      this->clear(false);
   }
 
 
