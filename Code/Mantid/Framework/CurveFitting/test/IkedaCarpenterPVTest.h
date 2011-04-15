@@ -19,7 +19,7 @@
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidNexus/LoadNeXus.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/cow_ptr.h"
 #include <limits>
@@ -29,6 +29,7 @@ using namespace Mantid::API;
 using namespace Mantid::CurveFitting;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+using namespace Mantid::NeXus;
 
 class IkedaCarpenterPVTest : public CxxTest::TestSuite
 {

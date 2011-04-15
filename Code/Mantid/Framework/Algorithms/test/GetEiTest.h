@@ -7,7 +7,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 
-#include "MantidDataHandling/SaveNeXus.h"
+#include "MantidNexus/SaveNeXus.h"
 
 
 using namespace Mantid::Kernel;

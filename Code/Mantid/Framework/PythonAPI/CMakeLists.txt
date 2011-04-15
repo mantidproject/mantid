@@ -139,7 +139,7 @@ target_link_libraries ( PythonAPI ${PYTHON_DEPS} )
 if ( CXXTEST_FOUND )
   include_directories ( ../DataHandling/inc ../DataObjects/inc ../TestHelpers/inc)
   cxxtest_add_test ( PythonAPITest ${TEST_FILES} )
-  target_link_libraries( PythonAPITest PythonAPI Nexus TestHelpers )
+  target_link_libraries( PythonAPITest PythonAPI TestHelpers )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( PythonAPITest UserAlgorithms )
   add_dependencies ( FrameworkTests PythonAPITest )

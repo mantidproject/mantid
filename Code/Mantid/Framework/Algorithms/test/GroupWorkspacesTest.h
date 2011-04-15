@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/GroupWorkspaces.h"
 #include "MantidDataHandling/LoadRaw3.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidAlgorithms/FindPeaks.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
@@ -219,7 +219,7 @@ public:
 		TS_ASSERT_THROWS_NOTHING( alg.execute());
 		TS_ASSERT( alg.isExecuted() );
 
-		Mantid::DataHandling::LoadNexusProcessed loader;
+		Mantid::NeXus::LoadNexusProcessed loader;
 		loader.initialize();
 		loader.setProperty("Filename","focussed.nxs");
 		loader.setProperty("OutputWorkspace","peaksWS");

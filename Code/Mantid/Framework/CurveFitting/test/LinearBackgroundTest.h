@@ -13,7 +13,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidKernel/Exception.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidNexus/LoadNeXus.h"
 #include "MantidAPI/FunctionFactory.h"
 
 using namespace Mantid::Kernel;
@@ -22,6 +22,7 @@ using Mantid::CurveFitting::LinearBackground;
 using Mantid::CurveFitting::Fit;
 using namespace Mantid::DataObjects;
 using namespace Mantid::DataHandling;
+using namespace Mantid::NeXus;
 
 class LinearBackgroundTest : public CxxTest::TestSuite
 {

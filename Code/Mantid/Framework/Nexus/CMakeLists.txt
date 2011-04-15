@@ -1,25 +1,83 @@
-set ( SRC_FILES 
-		src/NexusClasses.cpp
-		src/NeXusException.cpp
-		src/NeXusFile.cpp
-		src/NexusFileIO.cpp
-		src/NeXusStream.cpp
-		#src/LoadRaw/byte_rel_comp.cpp
-		#src/LoadRaw/isisraw2.cpp
-		#src/LoadRaw/isisraw.cpp
-		#src/LoadRaw/item_struct.cpp
-		#src/LoadRaw/vms_convert.cpp
-		)
+set ( SRC_FILES
+	src/LoadEventNexus.cpp
+	src/LoadISISNexus.cpp
+	src/LoadISISNexus2.cpp
+	src/LoadInstrumentFromNexus.cpp
+	src/LoadLogsFromSNSNexus.cpp
+	src/LoadMuonLog.cpp
+	src/LoadMuonNexus.cpp
+	src/LoadMuonNexus2.cpp
+	src/LoadNeXus.cpp
+	src/LoadNexusMonitors.cpp
+	src/LoadNexusProcessed.cpp
+	src/LoadRaw/byte_rel_comp.cpp
+	src/LoadRaw/isisraw.cpp
+	src/LoadRaw/isisraw2.cpp
+	src/LoadRaw/item_struct.cpp
+	src/LoadRaw/vms_convert.cpp
+	src/LoadSNSEventNexus.cpp
+	src/LoadSNSNexus.cpp
+	src/LoadTOFRawNeXus.cpp
+	src/MuonNexusReader.cpp
+	src/NeXusException.cpp
+	src/NeXusFile.cpp
+	src/NeXusStream.cpp
+	src/NexusClasses.cpp
+	src/NexusFileIO.cpp
+	src/SaveISISNeXus.cpp
+	src/SaveNXSPE.cpp
+	src/SaveNeXus.cpp
+	src/SaveNexusProcessed.cpp
+	src/SaveToSNSHistogramNexus.cpp
+)
 
 
-set ( INC_FILES 
-		inc/MantidNexus/NexusClasses.h
-		inc/MantidNexus/NexusFileIO.h
-		)
+set ( SRC_UNITY_IGNORE_FILES src/NeXusFile.cpp)
 
-set ( TEST_FILES 
-		 test/NexusAPITest.h
-		 )
+set ( INC_FILES
+	inc/MantidNexus/LoadEventNexus.h
+	inc/MantidNexus/LoadISISNexus.h
+	inc/MantidNexus/LoadISISNexus2.h
+	inc/MantidNexus/LoadInstrumentFromNexus.h
+	inc/MantidNexus/LoadLogsFromSNSNexus.h
+	inc/MantidNexus/LoadMuonLog.h
+	inc/MantidNexus/LoadMuonNexus.h
+	inc/MantidNexus/LoadMuonNexus2.h
+	inc/MantidNexus/LoadNeXus.h
+	inc/MantidNexus/LoadNexusMonitors.h
+	inc/MantidNexus/LoadNexusProcessed.h
+	inc/MantidNexus/LoadSNSEventNexus.h
+	inc/MantidNexus/LoadSNSNexus.h
+	inc/MantidNexus/LoadTOFRawNeXus.h
+	inc/MantidNexus/MuonNexusReader.h
+	inc/MantidNexus/NexusClasses.h
+	inc/MantidNexus/NexusFileIO.h
+	inc/MantidNexus/SaveISISNeXus.h
+	inc/MantidNexus/SaveNXSPE.h
+	inc/MantidNexus/SaveNeXus.h
+	inc/MantidNexus/SaveNexusProcessed.h
+	inc/MantidNexus/SaveToSNSHistogramNexus.h
+)
+
+set ( TEST_FILES
+	#test/LoadSNSNexusTest.h # TODO has no active tests in it
+	#test/LoadTOFRawNeXusTest.h # TODO has no active tests in it
+	test/LoadEventNexusTest.h
+	test/LoadISISNexusTest.h
+	test/LoadLogsFromSNSNexusTest.h
+	test/LoadMuonLogTest.h
+	test/LoadMuonNexus2Test.h
+	test/LoadMuonNexusTest.h
+	test/LoadNeXusTest.h
+	test/LoadNexusMonitorsTest.h
+	test/LoadNexusProcessedTest.h
+	test/LoadRSaveNLoadNcspTest.h
+	test/LoadSNSEventNexusTest.h
+	test/NexusAPITest.h
+	test/SaveNXSPETest.h
+	test/SaveNeXusTest.h
+	test/SaveNexusProcessedTest.h
+)
 
 if(UNITY_BUILD)
   include(UnityBuild)

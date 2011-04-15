@@ -5,7 +5,7 @@
 #include "MantidAPI/WorkspaceGroup.h"
 #include <iostream>
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/LoadSNSEventNexus.h"
+#include "MantidNexus/LoadSNSEventNexus.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
@@ -16,7 +16,7 @@
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadLogsFromSNSNexus.h"
+#include "MantidNexus/LoadLogsFromSNSNexus.h"
 
 //#ifndef _WIN32
 //  #include <sys/resource.h>

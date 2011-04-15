@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidNexus/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/GroupDetectors.h"
 #include "MantidAPI/IAlgorithm.h"
@@ -102,7 +102,7 @@ public:
 
 private:
   MuonAsymmetryCalc asymCalc;
-  Mantid::DataHandling::LoadMuonNexus loader;
+  Mantid::NeXus::LoadMuonNexus loader;
   Mantid::DataHandling::GroupDetectors group1;
   Mantid::DataHandling::GroupDetectors group2;
 

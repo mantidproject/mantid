@@ -5,7 +5,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 #include "MantidAlgorithms/FindPeaks.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidCurveFitting/GaussianLinearBG1D.h"
 
@@ -31,7 +31,7 @@ public:
 
   void testExec()
   {
-    Mantid::DataHandling::LoadNexusProcessed loader;
+    Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","focussed.nxs");
     loader.setProperty("OutputWorkspace","FindPeaksTest_peaksWS");
@@ -65,7 +65,7 @@ public:
 
   void LoadPG3_733()
   {
-    Mantid::DataHandling::LoadNexusProcessed loader;
+    Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","PG3_733_focussed.nxs");
     loader.setProperty("OutputWorkspace","FindPeaksTest_vanadium");

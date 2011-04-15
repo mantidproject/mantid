@@ -83,7 +83,7 @@ target_link_libraries ( DataObjects ${MANTIDLIBS} ${ZLIB_LIBRARIES} )
 if ( CXXTEST_FOUND )
   cxxtest_add_test ( DataObjectsTest ${TEST_FILES} )
   include_directories ( ../TestHelpers/inc )
-  target_link_libraries( DataObjectsTest DataObjects Nexus TestHelpers )
+  target_link_libraries( DataObjectsTest DataObjects TestHelpers )
   # Specify implicit dependency, but don't link to it
   add_dependencies ( DataObjectsTest UserAlgorithms )
   add_dependencies ( FrameworkTests DataObjectsTest )

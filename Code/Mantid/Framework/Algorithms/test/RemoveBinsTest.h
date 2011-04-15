@@ -9,7 +9,7 @@
 #include <stdexcept>
 
 #include "MantidAlgorithms/RemoveBins.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidNexus/LoadMuonNexus.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidKernel/UnitFactory.h"
@@ -185,7 +185,7 @@ public:
 	
 	//This test does not compile on Windows64 as is does not support HDF4 files
 #ifndef _WIN64
-		Mantid::DataHandling::LoadMuonNexus loader;
+		Mantid::NeXus::LoadMuonNexus loader;
 		loader.initialize();
 		loader.setPropertyValue("Filename", "emu00006473.nxs");
 		loader.setPropertyValue("OutputWorkspace", "EMU6473");

@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "MantidAlgorithms/SofQW.h"
-#include "MantidDataHandling/LoadNexusProcessed.h"
+#include "MantidNexus/LoadNexusProcessed.h"
 #include "MantidDataHandling/LoadInstrument.h"
 
 using namespace Mantid::API;
@@ -36,7 +36,7 @@ public:
   {
     if (!sqw.isInitialized()) sqw.initialize();
 
-    Mantid::DataHandling::LoadNexusProcessed loader;
+    Mantid::NeXus::LoadNexusProcessed loader;
     loader.initialize();
     loader.setProperty("Filename","IRS26173_ipg.nxs");
     const std::string inputWS = "inputWS";

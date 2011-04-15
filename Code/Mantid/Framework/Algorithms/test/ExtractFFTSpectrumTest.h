@@ -5,13 +5,13 @@
 
 #include "MantidAlgorithms/ExtractFFTSpectrum.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidDataHandling/LoadNeXus.h"
+#include "MantidNexus/LoadNeXus.h"
 #include "MantidAlgorithms/Rebin.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Algorithms;
-using namespace Mantid::DataHandling;
+using namespace Mantid::NeXus;
 using namespace Mantid::DataObjects;
 
 class ExtractFFTSpectrumTest : public CxxTest::TestSuite

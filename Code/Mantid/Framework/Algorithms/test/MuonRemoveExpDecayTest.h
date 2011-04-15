@@ -4,7 +4,7 @@
 #include <cxxtest/TestSuite.h>
 
 #include "MantidDataHandling/LoadInstrument.h"
-#include "MantidDataHandling/LoadMuonNexus.h"
+#include "MantidNexus/LoadMuonNexus.h"
 #include "MantidAlgorithms/MuonRemoveExpDecay.h"
 #include "MantidAPI/Workspace.h"
 #include "MantidDataObjects/Workspace2D.h"
@@ -93,7 +93,7 @@ public:
 
 private:
   MuonRemoveExpDecay alg;
-  Mantid::DataHandling::LoadMuonNexus loader;
+  Mantid::NeXus::LoadMuonNexus loader;
 
 };
 

@@ -35,7 +35,7 @@ target_link_libraries ( Crystal ${MANTIDLIBS} ${GSL_LIBRARIES} DataObjects)
 if ( CXXTEST_FOUND )
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../Kernel/inc ../DataObjects/inc)
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest Kernel API DataHandling Nexus Crystal DataObjects)
+  target_link_libraries ( CrystalTest Kernel API DataHandling Crystal DataObjects)
   add_dependencies ( FrameworkTests CrystalTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )

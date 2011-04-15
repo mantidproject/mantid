@@ -8,7 +8,7 @@
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
-//#include "MantidDataHandling/LoadEventNexus.h"
+#include "MantidNexus/LoadSNSEventNexus.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Geometry;

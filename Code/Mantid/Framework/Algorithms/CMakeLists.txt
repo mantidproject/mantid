@@ -400,6 +400,7 @@ set ( TEST_FILES
 	test/RenameWorkspaceTest.h
 	test/ReplaceSpecialValuesTest.h
 	test/SANSSolidAngleCorrectionTest.h
+	test/SaveToSNSHistogramNexusTest.h
 	test/ScaleTest.h
 	test/SmoothDataTest.h
 	test/SmoothNeighboursTest.h
