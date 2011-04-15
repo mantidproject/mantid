@@ -2,6 +2,7 @@
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include <limits>
+#include <map>
 #include <math.h>
 
 namespace Mantid
@@ -77,7 +78,7 @@ void RemoveLowResTOF::init()
                   "Some arbitrary number whose default is 3.22 for reasons that I don't understand" );
 
   validator = new BoundedValidator<double>;
-  validator->setLower(0.01);
+  validator->setLower(0.0);
   declareProperty("Tmin", Mantid::EMPTY_DBL(), validator,
                   "The minimum time-of-flight of the frame (in microseconds). If not set the data range will be used." );
 }
@@ -170,7 +171,10 @@ void RemoveLowResTOF::execEvent()
     matrixOutW = boost::dynamic_pointer_cast<MatrixWorkspace>(outW);
     this->setProperty("OutputWorkspace", matrixOutW);
   }
+  g_log.debug() << "TOF range was " << m_inputEvWS->getTofMin() << " to "
+                      << m_inputEvWS->getTofMax() << " microseconds\n";
 
+  std::size_t numEventsOrig = outW->getNumberEvents();
   // set up the progress bar
   m_progress = new Progress(this,0.0,1.0,m_numberOfSpectra*2);
 
@@ -178,20 +182,36 @@ void RemoveLowResTOF::execEvent()
   outW->sortAll(Mantid::DataObjects::TOF_SORT, m_progress);
 
   this->getTminData(true);
+  size_t numClearedEventLists = 0;
 
   // do the actual work
   for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
   {
-    double tmin = this->calcTofMin(workspaceIndex);
-    if (tmin != tmin)
+    if (outW->getEventList(workspaceIndex).getNumberEvents() > 0)
     {
-      g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
-      outW->getEventList(workspaceIndex).clear();
+      double tmin = this->calcTofMin(workspaceIndex);
+      if (tmin != tmin)
+      {
+        g_log.warning() << "tmin for workspaceIndex " << workspaceIndex << " is nan. Clearing out data.\n";
+        outW->getEventList(workspaceIndex).clear(false);
+        numClearedEventLists += 1;
+      }
+      else
+      {
+        outW->getEventList(workspaceIndex).maskTof(0., tmin);
+        if (outW->getEventList(workspaceIndex).getNumberEvents() == 0)
+          numClearedEventLists += 1;
+      }
     }
-    else
-      outW->getEventList(workspaceIndex).maskTof(0., tmin);
   }
-
+  g_log.information() << "Went from " << numEventsOrig << " events to "
+                      << outW->getNumberEvents() << " events ("
+                      << ((numEventsOrig - outW->getNumberEvents())*100./numEventsOrig) << "% removed)\n";
+  if (numClearedEventLists > 0)
+    g_log.warning() << numClearedEventLists << " spectra of " << m_numberOfSpectra
+                    << " had all data removed\n";
+  g_log.debug() << "TOF range is now " << outW->getTofMin() << " to "
+                      << outW->getTofMax() << " microseconds\n";
   outW->clearMRU();
   this->runMaskDetectors();
 }
@@ -205,13 +225,9 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 
   const int spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
   std::vector<int> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
-  double dspmap = 0;
-  for (std::vector<int>::const_iterator detNum = detNumbers.begin(); detNum != detNumbers.end(); detNum++)
-  {
-    dspmap += AlignDetectors::calcConversion(m_L1, beamline, beamline_norm, samplePos,
-                                                 m_instrument->getDetector(*detNum), 0., false);
-  }
-  dspmap = dspmap / static_cast<double>(detNumbers.size());
+  std::map<int,double> offsets; // just an empty offsets map
+  double dspmap = AlignDetectors::calcConversion(m_L1, beamline, beamline_norm, samplePos,
+                                     m_instrument, detNumbers, offsets, false);
 
   // this is related to the reference tof
   double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
