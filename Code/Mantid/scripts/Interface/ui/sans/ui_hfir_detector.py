@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Fri Apr 15 13:58:38 2011
+# Created: Fri Apr 15 15:10:01 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -410,7 +410,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.data_file_label_2.sizePolicy().hasHeightForWidth())
         self.data_file_label_2.setSizePolicy(sizePolicy)
-        self.data_file_label_2.setMinimumSize(QtCore.QSize(159, 0))
+        self.data_file_label_2.setMinimumSize(QtCore.QSize(160, 0))
         self.data_file_label_2.setObjectName("data_file_label_2")
         self.horizontalLayout_6.addWidget(self.data_file_label_2)
         self.beam_data_file_edit_2 = QtGui.QLineEdit(self.flood_center_grpbox)
@@ -446,7 +446,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.beam_radius_label_2.sizePolicy().hasHeightForWidth())
         self.beam_radius_label_2.setSizePolicy(sizePolicy)
-        self.beam_radius_label_2.setMinimumSize(QtCore.QSize(159, 0))
+        self.beam_radius_label_2.setMinimumSize(QtCore.QSize(160, 0))
         self.beam_radius_label_2.setObjectName("beam_radius_label_2")
         self.horizontalLayout_8.addWidget(self.beam_radius_label_2)
         self.beam_radius_edit_2 = QtGui.QLineEdit(self.flood_center_grpbox)

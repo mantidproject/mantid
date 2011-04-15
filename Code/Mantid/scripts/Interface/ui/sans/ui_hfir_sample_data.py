@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_sample_data.ui'
 #
-# Created: Fri Apr 15 13:58:37 2011
+# Created: Fri Apr 15 15:10:01 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,7 +39,7 @@ class Ui_Frame(object):
         self.label_3.setMaximumSize(QtCore.QSize(175, 16777215))
         self.label_3.setObjectName("label_3")
         self.horizontalLayout_7.addWidget(self.label_3)
-        spacerItem = QtGui.QSpacerItem(79, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(78, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem)
         self.data_file_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents_2)
         self.data_file_edit.setMinimumSize(QtCore.QSize(300, 0))
