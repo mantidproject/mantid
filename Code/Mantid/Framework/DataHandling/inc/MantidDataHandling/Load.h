@@ -75,6 +75,9 @@ namespace Mantid
       /// Create the concrete instance use for the actual loading.
       API::IDataFileChecker_sptr createLoader(const std::string & name, const double startProgress = -1.0, 
 					      const double endProgress=-1.0, const bool logging = true) const;
+      /// Set the loader option for use as a sub algorithm.
+      void setUpLoader(API::IDataFileChecker_sptr loader, const double startProgress = -1.0, 
+		       const double endProgress=-1.0,  const bool logging = true) const;
       /// Set the output workspace(s)
       void setOutputWorkspace(const API::IDataFileChecker_sptr loader);
       /// Retrieve a pointer to the output workspace from the sub algorithm

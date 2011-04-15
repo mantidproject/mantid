@@ -156,10 +156,12 @@ namespace Mantid
       {
         // Clear what may have been here previously
         setPropertyValue("LoaderName", "");
-        throw std::runtime_error("Cannot find a loader for \"" + filePath + "\"");
+        throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
+	  "Check that the file is a supported type.");
       }
       setPropertyValue("LoaderName", winningLoader->name());
       winningLoader->initialize();
+      setUpLoader(winningLoader);
       return winningLoader;
     }
 
@@ -240,11 +242,15 @@ namespace Mantid
     void Load::exec()
     {
       const std::string loaderName = getPropertyValue("LoaderName");
+      IDataFileChecker_sptr loader;
       if( loaderName.empty() )
       {
-        throw std::invalid_argument("Cannot find loader, LoaderName property has not been set.");
-      }     
-      IDataFileChecker_sptr loader = createLoader(loaderName,0,1);
+	loader = getFileLoader(getPropertyValue("Filename"));
+      }
+      else
+      {
+	loader = createLoader(loaderName,0,1);
+      }
       g_log.information() << "Using " << loaderName << " version " << loader->version() << ".\n";
       ///get the list properties for the concrete loader load algorithm
       const std::vector<Kernel::Property*> & loader_props = loader->getProperties();
@@ -289,7 +295,20 @@ namespace Mantid
       {
         throw std::runtime_error("Cannot create loader for \"" + getPropertyValue("Filename") + "\"");
       }
+      setUpLoader(loader,startProgress,endProgress, logging);
+      return loader;
+    }
 
+    /**
+     * Set the loader option for use as a sub algorithm.
+     * @param loader :: Concrete loader
+     * @param startProgress :: The start progress fraction
+     * @param endProgress :: The end progress fraction
+     * @param logging:: If true, enable logging
+     */
+    void Load::setUpLoader(API::IDataFileChecker_sptr loader, const double startProgress, 
+			   const double endProgress, const bool logging) const
+    {
       //Set as a child so that we are in control of output storage
       loader->setChild(true);
       loader->setLogging(logging);
@@ -309,8 +328,8 @@ namespace Mantid
         setChildStartProgress(startProgress);
         setChildEndProgress(endProgress);
       }
-      return loader;
     }
+
 
     /**
     * Set the output workspace(s) if the load's return workspace has type API::Workspace
