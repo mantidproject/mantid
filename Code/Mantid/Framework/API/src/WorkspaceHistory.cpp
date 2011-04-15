@@ -2,6 +2,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/WorkspaceHistory.h"
+#include "MantidAPI/Algorithm.h"
 
 namespace Mantid
 {
@@ -30,13 +31,13 @@ const std::vector<AlgorithmHistory>& WorkspaceHistory::getAlgorithmHistories() c
   return m_algorithms;
 }
 /// Returns a const reference to the EnvironmentHistory
-  const Kernel::EnvironmentHistory& WorkspaceHistory::getEnvironmentHistory() const
-  {
-	  return m_environment;
-  }
+const Kernel::EnvironmentHistory& WorkspaceHistory::getEnvironmentHistory() const
+{
+  return m_environment;
+}
 
-/// Copy the algorithm history from another WorkspaceHistory into this one
-void WorkspaceHistory::copyAlgorithmHistory(const WorkspaceHistory& otherHistory)
+/// Append the algorithm history from another WorkspaceHistory into this one
+void WorkspaceHistory::addHistory(const WorkspaceHistory& otherHistory)
 {
   // Don't copy one's own history onto oneself
   if (this != &otherHistory)
@@ -49,7 +50,7 @@ void WorkspaceHistory::copyAlgorithmHistory(const WorkspaceHistory& otherHistory
 }
 
 /// Append an AlgorithmHistory to this WorkspaceHistory
-void WorkspaceHistory::addAlgorithmHistory(const AlgorithmHistory& algHistory)
+void WorkspaceHistory::addHistory(const AlgorithmHistory& algHistory)
 {
   m_algorithms.push_back(algHistory);
 }
@@ -57,9 +58,46 @@ void WorkspaceHistory::addAlgorithmHistory(const AlgorithmHistory& algHistory)
 /*
  Return the history length
  */
-size_t WorkspaceHistory::length() const
+size_t WorkspaceHistory::size() const
 {
   return m_algorithms.size();
+}
+
+/**
+ * Retrieve an algorithm history by index
+ * @param index ::  An index within the workspace history
+ * @returns A reference to a const AlgorithmHistory object
+ */
+const AlgorithmHistory & WorkspaceHistory::getAlgorithmHistory(const size_t index) const
+{
+  if( index > this->size() )
+  {
+    throw std::out_of_range("WorkspaceHistory::getAlgorithmHistory() - Index out of range");
+  }
+  return m_algorithms[index];
+}
+
+/**
+ *  Create an algorithm from a history record at a given index
+ * @param index ::  An index within the workspace history
+ * @returns A shared pointer to an algorithm object
+ */
+boost::shared_ptr<IAlgorithm> WorkspaceHistory::getAlgorithm(const size_t index) const
+{
+  return Algorithm::fromHistory(this->getAlgorithmHistory(index));
+}
+
+/**
+ * Convenience function for retrieving the last algorithm
+ * @returns A shared pointer to the algorithm
+ */
+boost::shared_ptr<IAlgorithm> WorkspaceHistory::lastAlgorithm() const
+{
+  if( m_algorithms.empty() )
+  {
+    throw std::out_of_range("WorkspaceHistory::lastAlgorithm() - History contains no algorithms.");
+  }
+  return this->getAlgorithm(this->size() - 1);
 }
 
 /** Prints a text representation of itself

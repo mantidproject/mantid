@@ -540,6 +540,28 @@ namespace Mantid
       }
     }
 
+    /// Construct an object from a history entry
+    IAlgorithm_sptr Algorithm::fromHistory(const AlgorithmHistory & history)
+    {
+      // Hand off to the string creator
+      std::ostringstream stream;
+      stream << history.name() << "." << history.version()
+	     << "(";
+      const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
+      const size_t numProps(props.size());
+      for( size_t i = 0 ; i < numProps; ++i )
+      {
+	const Kernel::PropertyHistory & prop = props[i];
+	if( !prop.isDefault() )
+	{
+	  stream << prop.name() << "=" << prop.value();
+	}
+	if( i < numProps - 1 ) stream << ",";
+      }
+      stream << ")";
+      return Algorithm::fromString(stream.str());
+    }
+
     /**
      * Cancel an algorithm
      */
@@ -639,10 +661,10 @@ namespace Mantid
         // (Protection against copy to self is in WorkspaceHistory::copyAlgorithmHistory)
         for (inWS = inputWorkspaces.begin(); inWS != inputWorkspaces.end(); ++inWS)
         {
-          (*outWS)->history().copyAlgorithmHistory( (*inWS)->getHistory() );
+          (*outWS)->history().addHistory( (*inWS)->getHistory() );
         }
         // Add the history for the current algorithm to all the output workspaces
-        (*outWS)->history().addAlgorithmHistory(algHistory);
+        (*outWS)->history().addHistory(algHistory);
       }
     }
 

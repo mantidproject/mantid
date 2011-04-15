@@ -103,6 +103,15 @@ void AlgorithmHistory::printSelf(std::ostream& os, const int indent)const
 }
 
 /**
+ * Create a concrete algorithm based on a history record
+ * @returns An algorithm object constructed from this history record
+ */
+boost::shared_ptr<IAlgorithm> AlgorithmHistory::createAlgorithm() const
+{
+  return Algorithm::fromHistory(*this);
+}
+
+/**
     Standard Assignment operator
     @param A :: AlgorithmHistory Item to assign to 'this'
  */

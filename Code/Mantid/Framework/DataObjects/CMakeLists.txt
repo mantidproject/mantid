@@ -60,7 +60,6 @@ set ( TEST_FILES
 	test/WeightedEventNoTimeTest.h
 	test/WeightedEventTest.h
 	test/Workspace2DTest.h
-	test/WorkspaceHistoryTest.h
 	test/WorkspaceIteratorTest.h
 	test/WorkspaceSingleValueTest.h
 	test/WorkspaceValidatorsTest.h

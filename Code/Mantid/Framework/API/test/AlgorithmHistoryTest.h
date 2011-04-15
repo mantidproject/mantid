@@ -83,6 +83,25 @@ public:
     delete alg;
   }
 
+  void test_Created_Algorithm_Matches_History()
+  {
+    Mantid::API::AlgorithmFactory::Instance().subscribe<testalg>();
+    Algorithm *testInput = new testalg;
+    testInput->initialize();
+    testInput->setPropertyValue("arg2_param", "5");
+    AlgorithmHistory history(testInput, 10000.,1.5);
+    
+    IAlgorithm_sptr compareAlg = history.createAlgorithm();
+    TS_ASSERT_EQUALS(compareAlg->name(), testInput->name());
+    TS_ASSERT_EQUALS(compareAlg->version(), testInput->version());
+    TS_ASSERT_EQUALS(compareAlg->category(), testInput->category());
+    
+    TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg1_param"), "x");
+    TS_ASSERT_EQUALS(compareAlg->getPropertyValue("arg2_param"), "5");
+    
+    Mantid::API::AlgorithmFactory::Instance().unsubscribe("testalg|1");
+
+  }
 
 };
 

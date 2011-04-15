@@ -552,6 +552,7 @@ using namespace boost::python;
   void export_workspace_history()
   {
     class_<API::WorkspaceHistory, boost::noncopyable>("WorkspaceHistory", no_init)
+      .def("lastAlgorithm", &WorkspaceHistory::lastAlgorithm)
       .def(self_ns::str(self))
       ;
   }

@@ -205,7 +205,8 @@ set ( TEST_FILES
 	test/SpectraDetectorMapTest.h
 	test/TextAxisTest.h
 	test/WorkspaceFactoryTest.h
-	test/WorkspacePropertyTest.h
+	test/WorkspaceHistoryTest.h
+	test/WorkspacePropertyTest.h 
 )
 
 set ( GMOCK_TEST_FILES

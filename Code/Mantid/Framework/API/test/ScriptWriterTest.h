@@ -52,10 +52,10 @@ private:
 
     AlgorithmHistory alg1("FirstAlgorithm", 2);
     alg1.addProperty("FirstAlgProperty", "1",false, Mantid::Kernel::Direction::Input);
-    m_history->addAlgorithmHistory(alg1);
+    m_history->addHistory(alg1);
     AlgorithmHistory alg2("SecondAlgorithm", 1);
     alg2.addProperty("SecondAlgProperty", "5",true, Mantid::Kernel::Direction::Input);
-    m_history->addAlgorithmHistory(alg2);
+    m_history->addHistory(alg2);
     return m_history;
   }
 

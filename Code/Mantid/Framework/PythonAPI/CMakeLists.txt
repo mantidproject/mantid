@@ -48,6 +48,7 @@ set ( TEST_FILES
 set ( TEST_PY_FILES test/ImportTest.py
                     test/PythonAlgorithmTest.py
                     test/NumpyTest.py
+		    test/WorkspaceHistoryTest.py
 		    test/WorkspaceTests.py
 		    test/SettingsTest.py
 )

@@ -77,7 +77,7 @@ const std::string& Workspace::getName() const
  */
 bool Workspace::isDirty(const int n) const
 {
-  return static_cast<int>(m_history.length())>n;
+  return static_cast<int>(m_history.size()) > n;
 }
 
 } // namespace API

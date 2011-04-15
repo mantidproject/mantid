@@ -48,7 +48,7 @@ class DLLExport PropertyHistory
 {
 public:
   PropertyHistory(const std::string& name, const std::string& value, const std::string& type,
-                  const bool& isdefault, const unsigned int& direction = 99 );
+                  const bool isdefault, const unsigned int direction = 99 );
   PropertyHistory(const PropertyHistory&);
   PropertyHistory& operator=(const PropertyHistory&);
   virtual ~PropertyHistory();
@@ -59,9 +59,9 @@ public:
   /// get type of algorithm parameter const
   const std::string& type() const {return m_type;};
   /// get isdefault flag of algorithm parameter const
-  const bool& isDefault() const {return m_isDefault;};
+  bool isDefault() const {return m_isDefault;};
   /// get direction flag of algorithm parameter const
-  const unsigned int& direction() const {return m_direction;};
+  unsigned int direction() const {return m_direction;};
   /// print contents of object
   void printSelf(std::ostream&, const int indent = 0) const;
 

@@ -11,7 +11,8 @@ namespace Kernel
 
 /// Constructor
 PropertyHistory::PropertyHistory(const std::string& name, const std::string& value,
-                 const std::string& type, const bool& isdefault, const unsigned int& direction) :
+				 const std::string& type, const bool isdefault, 
+				 const unsigned int direction) :
   m_name(name),m_value(value),m_type(type),m_isDefault(isdefault),m_direction(direction)
 {}
 

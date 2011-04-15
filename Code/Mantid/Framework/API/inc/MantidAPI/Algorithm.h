@@ -257,6 +257,8 @@ public:
   virtual std::string toString() const;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string & input);
+  /// Construct an object from a history entry
+  static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
 protected:

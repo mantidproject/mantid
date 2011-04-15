@@ -13,7 +13,8 @@ namespace Mantid
 {
 namespace API
 {
-class Algorithm;
+  class IAlgorithm;
+  class Algorithm;
 /** @class AlgorithmHistory AlgorithmHistory.h API/MAntidAPI/AlgorithmHistory.h
 
     This class stores information about the Command History used by algorithms on a workspace.
@@ -46,18 +47,18 @@ class DLLExport AlgorithmHistory
 public:
   /// The date-and-time will be stored as the Mantid::Kernel::DateAndTime type
 
-  explicit AlgorithmHistory(const Algorithm* const alg,const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+  explicit AlgorithmHistory(const Algorithm* const alg,
+			    const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
                             const double& duration = -1,unsigned int uexeccount=0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
-  AlgorithmHistory(const std::string& name, int vers, const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
+  AlgorithmHistory(const std::string& name, int vers, 
+		   const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
                    const double& duration = -1,unsigned int uexeccount=0);
-
   void addExecutionInfo(const Mantid::Kernel::DateAndTime& start, const double& duration);
   void addProperty(const std::string& name,const std::string& value,bool isdefault, 
-           const unsigned int& direction = 99);
-
+		   const unsigned int& direction = 99);
   // get functions
   /// get name of algorithm in history const
   const std::string& name() const {return m_name;}
@@ -73,18 +74,16 @@ public:
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// print contents of object
   void printSelf(std::ostream&,const int indent = 0) const;
-
-  ///this is required for boost.python
-  bool operator==(const AlgorithmHistory &other) const
+  /// Equality operator
+  inline bool operator==(const AlgorithmHistory &other) const
   {
-    if (name() == other.name() && version() == other.version() && getProperties() == other.getProperties())
-    {
-      return true;
-    }
-
-    return false;
+    return (name() == other.name() && 
+	    version() == other.version() && 
+	    getProperties() == other.getProperties());
   }
-
+  /// Create a concrete algorithm based on a history record
+  boost::shared_ptr<IAlgorithm> createAlgorithm() const;
+  
 private:
   /// The name of the Algorithm
   std::string m_name;

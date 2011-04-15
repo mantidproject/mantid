@@ -13,7 +13,8 @@ namespace Mantid
 {
 namespace API
 {
-/** This class stores information about the Workspace History used by algorithms
+  class IAlgorithm;
+  /** This class stores information about the Workspace History used by algorithms
     on a workspace and the environment history.
 
     @author Dickon Champion, ISIS, RAL
@@ -45,15 +46,24 @@ public:
   WorkspaceHistory();
   virtual ~WorkspaceHistory();
   WorkspaceHistory(const WorkspaceHistory&);
-
+  /// Retrieve the algorithm history list
   const std::vector<AlgorithmHistory>& getAlgorithmHistories() const;
-
+  /// Retrieve the environment history
   const Kernel::EnvironmentHistory& getEnvironmentHistory() const;
-  ////
-  void copyAlgorithmHistory(const WorkspaceHistory& otherHistory);
-  void addAlgorithmHistory(const AlgorithmHistory& algHistory);
-  size_t length() const;
+  /// Append an workspace history to this one
+  void addHistory(const WorkspaceHistory& otherHistory);
+  /// Append an algorithm history to this one
+  void addHistory(const AlgorithmHistory& algHistory);
+  /// How many entries are there
+  size_t size() const;
+  /// Retrieve an algorithm history by index
+  const AlgorithmHistory & getAlgorithmHistory(const size_t index) const;
+  /// Create an algorithm from a history record at a given index
+  boost::shared_ptr<IAlgorithm> getAlgorithm(const size_t index) const;
+  /// Convenience function for retrieving the last algorithm
+  boost::shared_ptr<IAlgorithm> lastAlgorithm() const;
 
+  /// Pretty print the entire history
   void printSelf(std::ostream&, const int indent  = 0) const;
 
 private:
