@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/trans_direct_beam.ui'
 #
-# Created: Wed Apr 13 09:27:46 2011
+# Created: Fri Apr 15 13:58:38 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,7 +25,7 @@ class Ui_GroupBox(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.label.sizePolicy().hasHeightForWidth())
         self.label.setSizePolicy(sizePolicy)
-        self.label.setMinimumSize(QtCore.QSize(180, 0))
+        self.label.setMinimumSize(QtCore.QSize(204, 0))
         self.label.setObjectName("label")
         self.gridLayout.addWidget(self.label, 0, 0, 1, 1)
         self.sample_edit = QtGui.QLineEdit(GroupBox)

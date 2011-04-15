@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_sample_data.ui'
 #
-# Created: Fri Apr 15 09:59:39 2011
+# Created: Fri Apr 15 13:58:37 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!

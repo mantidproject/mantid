@@ -411,6 +411,22 @@
              </widget>
             </item>
             <item>
+             <spacer name="horizontalSpacer_13">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>3</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
              <widget class="QLineEdit" name="scale_att_trans_edit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -438,7 +454,7 @@
             <item>
              <widget class="QLabel" name="beamstop_label">
               <property name="text">
-               <string>Beam-stop diameter [mm]</string>
+               <string>Beam diameter [mm]</string>
               </property>
              </widget>
             </item>
@@ -457,7 +473,7 @@
                </size>
               </property>
               <property name="toolTip">
-               <string>Enter the beam-stop diameter in mm.</string>
+               <string>Enter the beam diameter in mm.</string>
               </property>
              </widget>
             </item>
