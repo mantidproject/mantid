@@ -196,6 +196,9 @@ class SANSReducer(Reducer):
         else:
             raise RuntimeError, "Reducer.set_sensitivity_correcter expects an object of class ReductionStep"
     
+    def get_sensitivity_correcter(self):
+        return self._sensitivity_correcter
+    
     @validate_step
     def set_sensitivity_beam_center(self, beam_center):
         if self._sensitivity_correcter is not None:

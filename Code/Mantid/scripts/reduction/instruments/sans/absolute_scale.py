@@ -1,5 +1,8 @@
 """
     Implementation absolute scale calculation for reactor SANS instruments
+    
+    #FIXME: Allow the selection of a box around the beam
+     
 """
 import os
 import sys
@@ -41,7 +44,7 @@ class BaseAbsoluteScale(ReductionStep):
 class AbsoluteScale(BaseAbsoluteScale):
     """
     """
-    def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0):
+    def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0, apply_sensitivity=False):
         """
             @param beamstop_radius: beamstop radius to use. Will otherwise be read from file, if possible [mm]
             @param attenuator_trans: attenuator transmission
@@ -52,6 +55,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         self._data_file = data_file
         self._attenuator_trans = attenuator_trans
         self._beamstop_radius = beamstop_radius
+        self._apply_sensitivity = apply_sensitivity
         
     def execute(self, reducer, workspace=None):
         """
@@ -86,6 +90,10 @@ class AbsoluteScale(BaseAbsoluteScale):
                 self._beamstop_radius = beamstop_property.value
             else:
                 raise RuntimeError, "AbsoluteScale could not read the beam stop radius and none was provided"
+        
+        # Apply sensitivity correction
+        if self._apply_sensitivity and reducer.get_sensitivity_correcter() is not None:
+            reducer.get_sensitivity_correcter().execute(data_file_ws)
         
         det_count = 1
         cylXML = '<infinite-cylinder id="asbsolute_scale">' + \
