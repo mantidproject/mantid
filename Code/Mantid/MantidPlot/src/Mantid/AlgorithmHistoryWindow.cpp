@@ -459,7 +459,6 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory& envHi
 {
   std::string osname=envHistory.osName();
   std::string osversion=envHistory.osVersion();
-  std::string userName=envHistory.userName();
   std::string frwkversn=envHistory.frameworkVersion();
 	
   QLineEdit* osNameEdit=getosNameEdit();
