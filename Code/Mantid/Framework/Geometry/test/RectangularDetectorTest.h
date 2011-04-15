@@ -125,6 +125,20 @@ public:
     TS_ASSERT_EQUALS(det->getAtXY(0,112)->getID() - 1000000, 112);
     TS_ASSERT_EQUALS(det->getAtXY(1,12)->getID() - 1000000, 1012);
 
+    std::pair<int,int> xy; int x; int y;
+
+    TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1000000)); x = xy.first; y = xy.second;
+    TS_ASSERT_EQUALS(x, 0); TS_ASSERT_EQUALS(y, 0);
+
+    TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1000000+12)); x = xy.first; y = xy.second;
+    TS_ASSERT_EQUALS(x, 0); TS_ASSERT_EQUALS(y, 12);
+
+    TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1000000+112)); x = xy.first; y = xy.second;
+    TS_ASSERT_EQUALS(x, 0); TS_ASSERT_EQUALS(y, 112);
+
+    TS_ASSERT_THROWS_NOTHING(xy = det->getXYForDetectorID(1000000+3012)); x = xy.first; y = xy.second;
+    TS_ASSERT_EQUALS(x, 3); TS_ASSERT_EQUALS(y, 12);
+
     //Check some positions
     TS_ASSERT_EQUALS(det->getAtXY(0,0)->getPos(), V3D( 1000-50., 2000-100., 3000.) );
     TS_ASSERT_EQUALS(det->getAtXY(1,0)->getPos(), V3D( 1000-50.+1., 2000-100., 3000.) );

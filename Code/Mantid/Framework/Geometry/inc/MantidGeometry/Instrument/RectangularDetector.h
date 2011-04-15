@@ -73,7 +73,9 @@ public:
   virtual IComponent* clone() const;
 
   /// Get a detector at given XY indices.
-  boost::shared_ptr<Detector> getAtXY(int X, int Y) const;
+  boost::shared_ptr<Detector> getAtXY(const int X, const int Y) const;
+
+  std::pair<int, int> getXYForDetectorID(const int detectorID) const;
 
   int xpixels() const;
   int ypixels() const;
@@ -180,11 +182,21 @@ private:
   /// maximum detector id
   int m_maxDetId;
 
+  /// IDs start here
+  int m_idstart;
+  /// IDs are filled in Y fastest
+  bool m_idfillbyfirst_y;
+  /// Step size in ID in each row
+  int m_idstepbyrow;
+  /// Step size in ID in each col
+  int m_idstep;
+
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const RectangularDetector&);
 
 typedef boost::shared_ptr<RectangularDetector> RectangularDetector_sptr;
+typedef boost::shared_ptr<const RectangularDetector> RectangularDetector_const_sptr;
 
 } //Namespace Geometry
 } //Namespace Mantid

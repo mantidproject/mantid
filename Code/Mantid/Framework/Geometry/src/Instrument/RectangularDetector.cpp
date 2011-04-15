@@ -83,7 +83,7 @@ IComponent* RectangularDetector::clone() const
  * @return a pointer to the component in the assembly at the (X,Y) pixel position
  * @throw runtime_error if the x/y pixel width is not set, or X/Y are out of range
  */
-boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
+boost::shared_ptr<Detector> RectangularDetector::getAtXY(const int X, const int Y) const
 {
   if ((xpixels() <= 0) || (ypixels() <= 0))
     throw std::runtime_error("RectangularDetector::getAtXY: invalid X or Y width set in the object.");
@@ -97,6 +97,30 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(int X, int Y) const
 
   //Use the [] operator to return it (or create the parametrized version if needed)
   return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
+}
+
+//-------------------------------------------------------------------------------------------------
+/** Given a detector ID, return the X,Y coords into the rectangular detector
+ *
+ * @param detectorID :: detectorID
+ * @return pair of (x,y)
+ */
+std::pair<int, int> RectangularDetector::getXYForDetectorID(const int detectorID) const
+{
+  const RectangularDetector * me = this;
+  if (m_isParametrized)
+    me = this->m_rectBase;
+
+  int id = detectorID - me->m_idstart;
+  if ((me->m_idstepbyrow == 0) || (me->m_idstep == 0))
+    return std::pair<int,int>(-1, -1);
+  int row = id / me->m_idstepbyrow;
+  int col = (id % me->m_idstepbyrow) / me->m_idstep;
+
+  if (me->m_idfillbyfirst_y) // x is the fast-changing axis
+    return std::pair<int,int>(row, col);
+  else
+    return std::pair<int,int>(col, row);
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -244,7 +268,16 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   m_xstep = xstep;
   m_ystep = ystep;
   mShape = shape;
- 
+
+  /// IDs start here
+  m_idstart = idstart;
+  /// IDs are filled in Y fastest
+  m_idfillbyfirst_y = idfillbyfirst_y;
+  /// Step size in ID in each row
+  m_idstepbyrow = idstepbyrow;
+  /// Step size in ID in each col
+  m_idstep = idstep;
+
   //TODO: some safety checks
   std::string name = this->getName();
   int minDetId=idstart,maxDetId=idstart;
