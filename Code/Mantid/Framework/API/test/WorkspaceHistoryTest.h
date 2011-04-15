@@ -112,8 +112,8 @@ public:
     TS_ASSERT_EQUALS(first->getPropertyValue("Output1"),"6");
 
     // Last algorithm
-    AlgorithmHistory lastAlg = history.lastAlgorithm;
-    TS_ASSERT_EQUALS(lastAlg.name(), "SimpleSum2");
+    IAlgorithm_sptr lastAlg = history.lastAlgorithm();
+    TS_ASSERT_EQUALS(lastAlg->name(), "SimpleSum2");
         
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum|1");
     Mantid::API::AlgorithmFactory::Instance().unsubscribe("SimpleSum2|1");
@@ -123,7 +123,7 @@ public:
   void test_Empty_History_Throws_When_Retrieving_Attempting_To_Algorithms()
   {
     WorkspaceHistory emptyHistory;
-    TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::runtime_error);
+    TS_ASSERT_THROWS(emptyHistory.lastAlgorithm(), std::out_of_range);
     TS_ASSERT_THROWS(emptyHistory.getAlgorithm(1), std::out_of_range);
   }
   
