@@ -200,12 +200,12 @@ set_target_properties ( DataHandling PROPERTIES OUTPUT_NAME MantidDataHandling )
 # Add to the 'Framework' group in VS
 set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
-include_directories ( inc )
+include_directories ( inc ../Nexus/inc)
 
 target_link_libraries ( DataHandling ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
-  include_directories ( ../Nexus/inc ../TestHelpers/inc )
+  include_directories ( ../TestHelpers/inc )
   cxxtest_add_test ( DataHandlingTest ${TEST_FILES} )
   target_link_libraries( DataHandlingTest DataHandling Nexus TestHelpers )
   add_dependencies ( FrameworkTests DataHandlingTest )
