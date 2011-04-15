@@ -6,12 +6,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>866</width>
-    <height>608</height>
+    <width>874</width>
+    <height>491</height>
    </rect>
   </property>
   <property name="sizePolicy">
-   <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
     <horstretch>0</horstretch>
     <verstretch>0</verstretch>
    </sizepolicy>
@@ -73,13 +73,13 @@
        <property name="minimumSize">
         <size>
          <width>200</width>
-         <height>30</height>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>200</width>
-         <height>30</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="text">
@@ -99,7 +99,7 @@
      <item row="1" column="1">
       <widget class="QLineEdit" name="data_file_edit">
        <property name="sizePolicy">
-        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
@@ -107,13 +107,13 @@
        <property name="minimumSize">
         <size>
          <width>300</width>
-         <height>30</height>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
         <size>
          <width>16777215</width>
-         <height>30</height>
+         <height>16777215</height>
         </size>
        </property>
        <property name="baseSize">
@@ -138,7 +138,7 @@
        <property name="minimumSize">
         <size>
          <width>0</width>
-         <height>30</height>
+         <height>0</height>
         </size>
        </property>
        <property name="maximumSize">
@@ -156,6 +156,9 @@
       <spacer name="horizontalSpacer_5">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Fixed</enum>
        </property>
        <property name="sizeHint" stdset="0">
         <size>
@@ -180,6 +183,12 @@
         </property>
         <item row="0" column="0">
          <widget class="QLabel" name="label_4">
+          <property name="minimumSize">
+           <size>
+            <width>245</width>
+            <height>0</height>
+           </size>
+          </property>
           <property name="text">
            <string>Normalization</string>
           </property>
@@ -401,7 +410,7 @@ in each direction and will create 9 sub-pixels.</string>
           <item>
            <widget class="QLineEdit" name="sensitivity_file_edit">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -440,6 +449,9 @@ in each direction and will create 9 sub-pixels.</string>
            <spacer name="horizontalSpacer_3">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -708,7 +720,7 @@ in each direction and will create 9 sub-pixels.</string>
           <item>
            <widget class="QLineEdit" name="sensitivity_dark_file_edit">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -721,7 +733,7 @@ in each direction and will create 9 sub-pixels.</string>
             </property>
             <property name="maximumSize">
              <size>
-              <width>300</width>
+              <width>16777215</width>
               <height>16777215</height>
              </size>
             </property>
@@ -747,6 +759,9 @@ in each direction and will create 9 sub-pixels.</string>
            <spacer name="horizontalSpacer_6">
             <property name="orientation">
              <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -774,7 +789,7 @@ in each direction and will create 9 sub-pixels.</string>
     </widget>
    </item>
    <item>
-    <spacer name="verticalSpacer">
+    <spacer name="verticalSpacer_2">
      <property name="orientation">
       <enum>Qt::Vertical</enum>
      </property>
