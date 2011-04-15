@@ -19,3 +19,7 @@ else()
   set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/win32" )
   set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/win32" )
 endif()
+
+set ( BIN_DIR bin )
+set ( LIB_DIR ${BIN_DIR} )
+set ( PLUGINS_DIR plugins )
