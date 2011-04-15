@@ -63,7 +63,6 @@ class SANSInstrumentWidget(BaseWidget):
 
     def initialize_content(self):
         # Validators
-        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
         self._summary.detector_offset_edit.setValidator(QtGui.QDoubleValidator(self._summary.detector_offset_edit))
         self._summary.sample_dist_edit.setValidator(QtGui.QDoubleValidator(self._summary.sample_dist_edit))
         self._summary.wavelength_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_edit))
@@ -105,8 +104,37 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.add_rectangle_button, QtCore.SIGNAL("clicked()"), self._add_rectangle)
         self.connect(self._summary.remove_button, QtCore.SIGNAL("clicked()"), self._remove_rectangle)
   
+        # Absolute scale connections and validators
+        self._summary.scale_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_edit))
+        self._summary.scale_beam_radius_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_beam_radius_edit))
+        self._summary.scale_att_trans_edit.setValidator(QtGui.QDoubleValidator(self._summary.scale_att_trans_edit))
+        self.connect(self._summary.scale_data_browse_button, QtCore.SIGNAL("clicked()"), self._scale_data_browse)
+        self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"),
+                     functools.partial(self.show_instrument, file_name=self._summary.scale_data_edit.text))
+        self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
+        self._scale_clicked(self._summary.scale_chk.isChecked())
+        
         if not self._in_mantidplot:
             self._summary.dark_plot_button.hide()
+            self._summary.scale_data_plot_button.hide()
+            
+    def _scale_clicked(self, is_checked):
+        self._summary.direct_beam_label.setEnabled(is_checked)
+        self._summary.att_trans_label.setEnabled(is_checked)
+        self._summary.beamstop_label.setEnabled(is_checked)
+        self._summary.scale_data_edit.setEnabled(is_checked)
+        self._summary.scale_data_plot_button.setEnabled(is_checked)
+        self._summary.scale_data_browse_button.setEnabled(is_checked)
+        self._summary.scale_att_trans_edit.setEnabled(is_checked)
+        self._summary.scale_beam_radius_edit.setEnabled(is_checked)
+        
+        self._summary.att_scale_factor_label.setEnabled(not is_checked)
+        self._summary.scale_edit.setEnabled(not is_checked)
+        
+    def _scale_data_browse(self):
+        fname = self.data_browse_dialog()
+        if fname:
+            self._summary.scale_data_edit.setText(fname)              
             
     def _det_offset_clicked(self, is_checked):
         self._summary.detector_offset_edit.setEnabled(is_checked)
@@ -173,9 +201,15 @@ class SANSInstrumentWidget(BaseWidget):
         #npixels = "%d x %d" % (state.nx_pixels, state.ny_pixels)
         #self._summary.n_pixel_label.setText(QtCore.QString(npixels))
         #self._summary.pixel_size_label.setText(QtCore.QString(str(state.pixel_size)))
-
+       
+        # Absolute scaling
+        self._summary.scale_chk.setChecked(state.calculate_scale)
         self._summary.scale_edit.setText(QtCore.QString(str(state.scaling_factor)))
-
+        self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
+        self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
+        self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(state.scaling_beam_diam)))
+        self._scale_clicked(self._summary.scale_chk.isChecked())
+        
         # Detector offset input
         self._prepare_field(state.detector_offset != 0, 
                             state.detector_offset, 
@@ -246,7 +280,13 @@ class SANSInstrumentWidget(BaseWidget):
         
         m.instrument_name = self._summary.instr_name_label.text()
         
+        # Absolute scaling
         m.scaling_factor = util._check_and_get_float_line_edit(self._summary.scale_edit)
+        m.calculate_scale = self._summary.scale_chk.isChecked()
+        m.scaling_direct_file = unicode(self._summary.scale_data_edit.text())
+        m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
+        m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
+        
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():
             m.detector_offset = util._check_and_get_float_line_edit(self._summary.detector_offset_edit)

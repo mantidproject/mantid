@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Wed Apr 13 09:27:46 2011
+# Created: Fri Apr 15 09:59:39 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,7 +39,7 @@ class Ui_Frame(object):
         self.background_chk.setMaximumSize(QtCore.QSize(175, 16777215))
         self.background_chk.setObjectName("background_chk")
         self.horizontalLayout_4.addWidget(self.background_chk)
-        spacerItem = QtGui.QSpacerItem(85, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(79, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_4.addItem(spacerItem)
         self.background_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Fixed)
@@ -190,8 +190,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.trans_dark_current_label.sizePolicy().hasHeightForWidth())
         self.trans_dark_current_label.setSizePolicy(sizePolicy)
-        self.trans_dark_current_label.setMinimumSize(QtCore.QSize(0, 27))
-        self.trans_dark_current_label.setMaximumSize(QtCore.QSize(16777215, 27))
+        self.trans_dark_current_label.setMinimumSize(QtCore.QSize(203, 27))
+        self.trans_dark_current_label.setMaximumSize(QtCore.QSize(203, 27))
         self.trans_dark_current_label.setObjectName("trans_dark_current_label")
         self.horizontalLayout_3.addWidget(self.trans_dark_current_label)
         self.trans_dark_current_edit = QtGui.QLineEdit(self.transmission_grpbox)

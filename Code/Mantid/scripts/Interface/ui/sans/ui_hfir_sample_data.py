@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_sample_data.ui'
 #
-# Created: Wed Apr 13 09:27:46 2011
+# Created: Fri Apr 15 09:59:39 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,7 +39,7 @@ class Ui_Frame(object):
         self.label_3.setMaximumSize(QtCore.QSize(175, 16777215))
         self.label_3.setObjectName("label_3")
         self.horizontalLayout_7.addWidget(self.label_3)
-        spacerItem = QtGui.QSpacerItem(85, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
+        spacerItem = QtGui.QSpacerItem(79, 20, QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Minimum)
         self.horizontalLayout_7.addItem(spacerItem)
         self.data_file_edit = QtGui.QLineEdit(self.scrollAreaWidgetContents_2)
         self.data_file_edit.setMinimumSize(QtCore.QSize(300, 0))
@@ -229,8 +229,8 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.dark_current_label.sizePolicy().hasHeightForWidth())
         self.dark_current_label.setSizePolicy(sizePolicy)
-        self.dark_current_label.setMinimumSize(QtCore.QSize(0, 27))
-        self.dark_current_label.setMaximumSize(QtCore.QSize(16777215, 27))
+        self.dark_current_label.setMinimumSize(QtCore.QSize(203, 27))
+        self.dark_current_label.setMaximumSize(QtCore.QSize(203, 27))
         self.dark_current_label.setObjectName("dark_current_label")
         self.horizontalLayout_4.addWidget(self.dark_current_label)
         self.dark_current_edit = QtGui.QLineEdit(self.groupBox)
@@ -239,7 +239,7 @@ class Ui_Frame(object):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.dark_current_edit.sizePolicy().hasHeightForWidth())
         self.dark_current_edit.setSizePolicy(sizePolicy)
-        self.dark_current_edit.setMinimumSize(QtCore.QSize(300, 27))
+        self.dark_current_edit.setMinimumSize(QtCore.QSize(300, 0))
         self.dark_current_edit.setMaximumSize(QtCore.QSize(16777215, 16777215))
         self.dark_current_edit.setObjectName("dark_current_edit")
         self.horizontalLayout_4.addWidget(self.dark_current_edit)

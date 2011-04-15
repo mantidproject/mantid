@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_detector.ui'
 #
-# Created: Wed Apr 13 09:27:46 2011
+# Created: Fri Apr 15 09:59:39 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -456,7 +456,7 @@ class Ui_Frame(object):
         sizePolicy.setHeightForWidth(self.beam_radius_edit_2.sizePolicy().hasHeightForWidth())
         self.beam_radius_edit_2.setSizePolicy(sizePolicy)
         self.beam_radius_edit_2.setMinimumSize(QtCore.QSize(80, 0))
-        self.beam_radius_edit_2.setMaximumSize(QtCore.QSize(8, 16777215))
+        self.beam_radius_edit_2.setMaximumSize(QtCore.QSize(80, 16777215))
         self.beam_radius_edit_2.setObjectName("beam_radius_edit_2")
         self.horizontalLayout_8.addWidget(self.beam_radius_edit_2)
         spacerItem13 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)

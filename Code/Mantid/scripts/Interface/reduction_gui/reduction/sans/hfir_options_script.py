@@ -33,6 +33,10 @@ class ReductionOptions(BaseScriptElement):
     
     # Absoulte scale
     scaling_factor = 1.0
+    calculate_scale = False
+    scaling_direct_file = ''
+    scaling_att_trans = 1.0
+    scaling_beam_diam = 25.0 
     
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0
@@ -113,8 +117,13 @@ class ReductionOptions(BaseScriptElement):
             script += "TimeNormalization()\n"
         elif self.normalization==ReductionOptions.NORMALIZATION_MONITOR:
             script += "MonitorNormalization()\n"
-        if self.scaling_factor != 1:
-            script += "ScaleFactor(%g)\n" % self.scaling_factor
+        
+        if self.calculate_scale:
+            script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g):\n" % \
+             (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans)
+        else:
+            if self.scaling_factor != 1:
+                script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
                 
         # Q binning
         script += "AzimuthalAverage(n_bins=%g, n_subpix=%g, log_binning=%s)\n" % (self.n_q_bins, self.n_sub_pix, str(self.log_binning))        
@@ -143,8 +152,6 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
         xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
         
-        xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
-
         xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
         xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
         xml += "  <wavelength>%g</wavelength>\n" % self.wavelength
@@ -178,7 +185,14 @@ class ReductionOptions(BaseScriptElement):
         xml += "  </DetectorIDs>\n"
         
         xml += "</Mask>\n"
-
+        
+        xml += "<AbsScale>\n"
+        xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
+        xml += "  <calculate_scale>%s</calculate_scale>\n" % str(self.calculate_scale)
+        xml += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
+        xml += "  <scaling_att_trans>%g</scaling_att_trans>\n" % self.scaling_att_trans
+        xml += "  <scaling_beam_diam>%g</scaling_beam_diam>\n" % self.scaling_beam_diam
+        xml += "</AbsScale>\n"
 
         return xml
         
@@ -202,9 +216,6 @@ class ReductionOptions(BaseScriptElement):
         self.pixel_size = BaseScriptElement.getFloatElement(instrument_dom, "pixel_size",
                                                             default=ReductionOptions.pixel_size)
         
-        self.scaling_factor = BaseScriptElement.getFloatElement(instrument_dom, "scaling_factor", 
-                                                                          default=ReductionOptions.scaling_factor)
-
         self.sample_detector_distance = BaseScriptElement.getFloatElement(instrument_dom, "sample_det_dist", 
                                                                           default=ReductionOptions.sample_detector_distance)
         self.detector_offset = BaseScriptElement.getFloatElement(instrument_dom, "detector_offset",
@@ -268,6 +279,23 @@ class ReductionOptions(BaseScriptElement):
                 self.detector_ids = ''
                 self.detector_ids = BaseScriptElement.getStringElement(mask_dom, "DetectorIDs", default='').strip()
 
+        # Absolute scaling
+        element_list = dom.getElementsByTagName("AbsScale")
+        if len(element_list)>0: 
+            scale_dom = element_list[0]
+
+            self.scaling_factor = BaseScriptElement.getFloatElement(scale_dom, "scaling_factor", 
+                                                                    default=ReductionOptions.scaling_factor)
+
+
+            self.calculate_scale = BaseScriptElement.getBoolElement(scale_dom, "calculate_scale",
+                                                                   default = ReductionOptions.calculate_scale)
+            self.scaling_direct_file = BaseScriptElement.getStringElement(scale_dom, "scaling_direct_file")
+            self.scaling_att_trans = BaseScriptElement.getFloatElement(scale_dom, "scaling_att_trans",
+                                                                       default=ReductionOptions.scaling_att_trans)
+            self.scaling_beam_diam = BaseScriptElement.getFloatElement(scale_dom, "scaling_beam_diam",
+                                                                       default=ReductionOptions.scaling_beam_diam)
+
     def reset(self):
         """
             Reset state
@@ -278,6 +306,10 @@ class ReductionOptions(BaseScriptElement):
         self.pixel_size = ReductionOptions.pixel_size
         
         self.scaling_factor = ReductionOptions.scaling_factor
+        self.scaling_direct_file = ''
+        self.calculate_scale = ReductionOptions.calculate_scale
+        self.scaling_att_trans = ReductionOptions.scaling_att_trans
+        self.scaling_beam_diam = ReductionOptions.scaling_beam_diam
         
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset

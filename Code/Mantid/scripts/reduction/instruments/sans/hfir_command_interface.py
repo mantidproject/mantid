@@ -239,7 +239,7 @@ def IQxQy(nbins=100):
 def NoIQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(None)
     
-def ScaleFactor(factor):
+def SetAbsoluteScale(factor):
     ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
     
 def SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0):

@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/reduction_main.ui'
 #
-# Created: Fri Feb 11 08:23:54 2011
+# Created: Fri Apr 15 09:59:39 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_SANSReduction(object):
     def setupUi(self, SANSReduction):
         SANSReduction.setObjectName("SANSReduction")
-        SANSReduction.resize(963, 861)
+        SANSReduction.resize(982, 982)
         sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
@@ -50,7 +50,7 @@ class Ui_SANSReduction(object):
         self.verticalLayout.addLayout(self.horizontalLayout)
         SANSReduction.setCentralWidget(self.centralwidget)
         self.menubar = QtGui.QMenuBar(SANSReduction)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 963, 25))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 982, 25))
         self.menubar.setObjectName("menubar")
         self.file_menu = QtGui.QMenu(self.menubar)
         self.file_menu.setObjectName("file_menu")
