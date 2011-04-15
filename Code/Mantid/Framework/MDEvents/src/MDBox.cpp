@@ -159,6 +159,14 @@ namespace MDEvents
   }
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Run a MDBox task inside this box */
+  TMDE(
+  void MDBox)::runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained)
+  {
+    // Fully evaluate this MD Box
+    task->evaluateMDBox(this, fullyContained);
+  }
 
 }//namespace MDEvents
 

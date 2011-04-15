@@ -13,13 +13,16 @@ namespace MDEvents
   /** Template for shortening template coordinate transform classes. */
   #define TCT template<size_t inD, size_t outD>
 
-  /** Generic class to transform from M input dimensionsto N output dimensions
+  /** Generic class to transform from M input dimensionsto N output dimensions.
    *
    * The types of conversions to account for are:
    * * Simple rotation matrix
    * * Affine Transformation = linear transform such as a rotation + a translation
    * * Projection into lower dimensions, for example taking a 2D slice out of 3D data.
    * 
+   * This class could be subclassed in order to handle non-linear transforms (though
+   * making the apply() method virtual would disallow inlining = slowdown).
+   *
    * @author Janik Zikovsky
    * @date 2011-04-14 10:03:55.944809
    */
@@ -42,13 +45,13 @@ namespace MDEvents
     void apply(const CoordType * inputVector, CoordType * outVector)
     {
       // For each output dimension
-      for (size_t out = 0; out < outD; out++)
+      for (size_t out = 0; out < outD; ++out)
       {
-        //TODO: some tricks to make the matrix access a bit faster
+        //Cache the row pointer to make the matrix access a bit faster
         CoordType * rawMatrixRow = rawMatrix[out];
         CoordType outVal = 0.0;
         size_t in;
-        for (in = 0; in < inD; in++)
+        for (in = 0; in < inD; ++in)
           outVal += rawMatrixRow[in] * inputVector[in];
 
         // The last input coordinate is "1" always (made homogenous coordinate out of the input x,y,etc.)

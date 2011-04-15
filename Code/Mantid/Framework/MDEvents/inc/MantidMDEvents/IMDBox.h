@@ -13,6 +13,10 @@ namespace Mantid
 namespace MDEvents
 {
 
+  /// Forward declaration
+  TMDE_CLASS
+  class MDBoxTask;
+
   //===============================================================================================
   /** Abstract Interface for a multi-dimensional event "box".
    * To be subclassed by MDBox and MDGridBox
@@ -68,6 +72,9 @@ namespace MDEvents
      * @param bin :: MDBin object giving the limits of events to accept.
      */
     virtual void centerpointBin(MDBin<MDE,nd> & bin) const = 0;
+
+    /// Run a generic MDBoxTask onto this, going recursively.
+    virtual void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained) = 0;
 
     /// Return the box controller saved.
     BoxController_sptr getBoxController() const

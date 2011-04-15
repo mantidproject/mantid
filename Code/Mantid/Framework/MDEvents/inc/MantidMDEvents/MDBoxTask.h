@@ -4,6 +4,7 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/Task.h"
 #include "MantidMDEvents/MDEvent.h"
+#include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDGridBox.h"
 #include "MantidMDEvents/MDBox.h"
 
@@ -13,7 +14,8 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /** MDBoxTask : TODO: DESCRIPTION
+  /** Abstract class for a task to be run inside the hierarchy of MDGridBoxes.
+   * EXPERIMENTAL...
    * 
    * @author
    * @date 2011-04-13 18:35:18.453468
@@ -22,7 +24,7 @@ namespace MDEvents
   class DLLExport MDBoxTask : public Kernel::Task
   {
   public:
-    MDBoxTask();
+    MDBoxTask(IMDBox<MDE,nd> * inBox);
     ~MDBoxTask();
     
 
@@ -30,7 +32,7 @@ namespace MDEvents
     void run()
     {
       // Start off the run.
-      // The MDGridBox will call evaluateMDBox() and/or pointContained.
+      // The MDGridBox will call evaluateMDBox() and/or boxContained.
       inBox->runMDBoxTask(this);
     }
 
@@ -46,14 +48,17 @@ namespace MDEvents
     }
 
 
-    /** Is the point given contained in the volume of interest
+    /** Is the box given contained in the volume of interest
      * of this task?
      *
      * @param coords :: nd-sized array of the coordinates
+     * @return  0 if not contained;
+     *          1 if partially contained
+     *          2 if fully contained.
      */
-    virtual bool pointContained(CoordType * coords)
+    virtual int boxContained(IMDBox<MDE,nd> * box)
     {
-      return true;
+      return 0;
     }
 
     /** Evaluate the contents of a un-split MDBox.
@@ -63,19 +68,19 @@ namespace MDEvents
      *        within the volume of interest. It can then use the cached
      *        signal, for example.
      */
-    virtual void evaluateMDBox(MDBox<MDE,nd> & box, bool fullyContained) = 0;
+    virtual void evaluateMDBox(MDBox<MDE,nd> * box, bool fullyContained) = 0;
 
     /** Evaluate the contents of a MDGridBox that is fully contained within the
      * volume of interest.
      *
-     * This will only be called if stopOnFullyContained() returns false.
+     * This will only be called if stopOnFullyContained() returns true.
      *
      * @param box :: reference to the MDGridBox
      */
-    virtual void evaluateMDGridBox(MDGridBox<MDE,nd> & box) = 0;
+//    virtual void evaluateMDGridBox(MDGridBox<MDE,nd> * box) = 0;
 
   protected:
-    /// pointer to the IMDBox that is the starting point of the execution
+    /// pointer to the MDBox that is the starting point of the execution
     IMDBox<MDE,nd> * inBox;
 
 

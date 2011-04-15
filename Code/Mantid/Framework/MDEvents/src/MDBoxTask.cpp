@@ -9,11 +9,16 @@ namespace MDEvents
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
+   *
+   * @param inBox :: IMDBox pointer to the starting point of the task.
    */
   TMDE(
-  MDBoxTask)::MDBoxTask()
+  MDBoxTask)::MDBoxTask(IMDBox<MDE,nd> * inBox)
+  : Task(),
+    inBox(inBox)
   {
-    // TODO Auto-generated constructor stub
+    if (!inBox)
+      throw std::runtime_error("MDBoxTask:: NULL IMDBox<> passed to the constructor.");
   }
     
   //----------------------------------------------------------------------------------------------
@@ -22,7 +27,6 @@ namespace MDEvents
   TMDE(
   MDBoxTask)::~MDBoxTask()
   {
-    // TODO Auto-generated destructor stub
   }
   
 

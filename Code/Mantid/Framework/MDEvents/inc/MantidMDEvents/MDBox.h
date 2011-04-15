@@ -58,6 +58,8 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin) const;
 
+    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
+
   protected:
 
     /** Vector of MDEvent's, in no particular order.

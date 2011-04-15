@@ -7,6 +7,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDBox.h"
+#include "MantidMDEvents/MDBoxTask.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidKernel/ThreadScheduler.h"
@@ -64,6 +65,8 @@ namespace MDEvents
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
+
+    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
 
     // ======================= Testing/Debugging Methods =================
     /** For testing: get 9a copy of) the vector of boxes */
