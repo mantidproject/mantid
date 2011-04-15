@@ -1,6 +1,6 @@
 include (BundleUtilities)
 
-set ( bundle @CMAKE_INSTALL_PREFIX@/MantidPlot.app )
+set ( bundle ${CMAKE_INSTALL_PREFIX}/MantidPlot.app )
 
 file ( GLOB pyqt_libs ${bundle}/Contents/MacOS/PyQt4/*.so )
 file ( GLOB_RECURSE qtplugins ${bundle}/plugins/*.dylib )
