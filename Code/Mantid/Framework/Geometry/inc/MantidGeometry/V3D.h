@@ -53,6 +53,9 @@ namespace Mantid
       V3D operator+(const V3D& v) const;
       V3D& operator+=(const V3D& v);
 
+	  // explicit conversion into vector
+	  operator std::vector<double>()const{std::vector<double> tmp(3); tmp[0]=x;tmp[1]=y; tmp[2]=z;return  tmp;}
+
       V3D operator-(const V3D& v) const;
       V3D& operator-=(const V3D& v);
       // Inner product

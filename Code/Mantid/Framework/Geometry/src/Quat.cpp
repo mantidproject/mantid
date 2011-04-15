@@ -587,6 +587,33 @@ void Quat::setQuat(double mat[16])
 		w=q[3];
 	}
 }
+//
+void 
+Quat::setQuat(const Geometry::MantidMat &rMat)
+{
+	double MAT[16];
+	for(int i=0;i<16;i++)MAT[i]=0;
+	
+	MAT[0]= rMat[0][0];
+	MAT[1]= rMat[0][1];
+	MAT[2]= rMat[0][2];
+
+	MAT[4]= rMat[1][0];
+	MAT[5]= rMat[1][1];
+	MAT[6]= rMat[1][2];
+
+	MAT[8] = rMat[2][0];
+	MAT[9] = rMat[2][1];
+	MAT[10]= rMat[2][2];
+
+	MAT[15]= 1;
+	this->setQuat(MAT);
+
+
+
+
+
+}
 /** Bracket operator overload
  * returns the internal representation values based on an index
  * @param Index :: the index of the value required 0=w, 1=a, 2=b, 3=c

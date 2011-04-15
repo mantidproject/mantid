@@ -4,6 +4,7 @@
 #include <iostream>
 #include <vector>
 #include "MantidKernel/System.h"
+#include "MantidGeometry/Math/Matrix.h"
 
 namespace Mantid
 {
@@ -57,7 +58,10 @@ namespace Mantid
 
     public:
       Quat();
+	  // direct quat definition
       Quat(const double, const double, const double, const double);
+    // * Construct a Quat between two vectors; 
+    // * The angle between them is defined differently from usual if vectors are not unit or the same length vectors, so quat would be not consistent
       Quat(const V3D& vec1,const V3D& vec2);
       Quat(const V3D& rX, const V3D& rY, const V3D& rZ);
       Quat(const Quat&);
@@ -101,6 +105,8 @@ namespace Mantid
 	  std::vector<double> getRotation(bool check_normalisation=false)const; 
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
+	  //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not the rotational;
+	  void setQuat(const Geometry::MantidMat &RotMat);
       //! Rotate a vector
       void rotate(V3D&) const;
 

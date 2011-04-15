@@ -323,8 +323,66 @@ public:
 
 
  }
+ void testUnitQuatFromUnitRotMatrix(){
+	 MantidMat Rot(3,3);
+	 Rot[0][0]=1;
+	 Rot[1][1]=1;
+	 Rot[2][2]=1;
 
-  void testSetFromDirectionCosineMatrix_trival()
+	 Quat Test;
+	 Test.setQuat(Rot);
+
+	 std::vector<double> rez = Test.getRotation();
+	 std::vector<double> rot = Rot.get_vector();
+	 TSM_ASSERT_EQUALS("This operation should return rotation matrix",rot,rez);
+
+ }
+
+ void testQuatFromRotMatrix(){
+	 MantidMat Rot(3,3);
+	 int Nx(5),Ny(5),Nz(3);
+	 double Phi=M_PI/2/Nx;
+	 double Tht=M_PI/2/Ny;
+	 double Psi=M_PI/2/Ny;
+	 Quat Test;
+	 std::vector<double> rez;
+	 std::vector<double> rot;
+
+	 for(int i=0;i<=Nx;i++){
+		 double cT=cos(Tht*i);
+		 double sT=sin(Tht*i);
+		 for(int j=0;j<=Ny;j++){
+			 double cF = cos(j*Phi);
+			 double sF = sin(j*Phi);
+			 for (int k=0;k<=Nz;k++){
+				Rot.zeroMatrix();
+				double cP = cos(k*Psi);
+				double sP = sin(k*Psi);
+	
+				Rot[0][0]=cT*cP;   Rot[1][0]=-cF*sP+sF*sT*cP;    Rot[2][0]=sF*sP+cF*sT*cP;
+		        Rot[0][1]=cT*sP;   Rot[1][1]= cF*cP+sF*sT*sP;    Rot[2][1]=-sF*cP+cF*sT*sP;
+		        Rot[0][2]=-sT;     Rot[1][2]= sF*cT;             Rot[2][2]= cT*cF;
+			    V3D e1(1,0,0);
+				V3D e2(0,1,0);
+				V3D e3(0,0,1);
+
+				V3D d1= Rot*e1;
+				V3D d2= Rot*e2;
+				V3D d3= Rot*e3;
+
+			   Test.setQuat(Rot);
+			   rez = Test.getRotation();
+		       rot = Rot.get_vector();
+			   for(int ii=0;ii<9;ii++){
+					TSM_ASSERT_DELTA("This operation should return initial rotation matrix",rot[i],rez[i],1e-4);
+			   }
+			 }
+		 }
+	 }
+
+ }
+
+ void testSetFromDirectionCosineMatrix_trival()
   {
     Mantid::Geometry::V3D rX(1,0,0);
     Mantid::Geometry::V3D rY(0,1,0);

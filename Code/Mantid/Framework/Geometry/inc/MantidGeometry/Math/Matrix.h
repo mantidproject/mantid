@@ -82,6 +82,13 @@ namespace Mantid
       void write(std::ostream&,int const =0) const;
       std::string str() const;
 
+	  // returns this matrix in 1D vector representation
+	  std::vector<T> get_vector()const;
+	  // explicit conversion into the vector
+	  operator std::vector<T>()const{std::vector<T> tmp=this->get_vector(); return tmp;}
+	  //
+	  void setColumn(int nCol,const std::vector<T> &newColumn);
+	  void setRow(int nRow,const std::vector<T> &newRow);
       void zeroMatrix();      ///< Set the matrix to zero
       void identityMatrix();
       void normVert();         ///< Vertical normalisation
@@ -93,6 +100,7 @@ namespace Mantid
 
       void setMem(int const,int const);
 
+	  
       /// Access matrix sizes
       std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }
 

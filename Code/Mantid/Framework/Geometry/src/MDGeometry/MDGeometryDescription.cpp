@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <float.h>
 #include <sstream>
+#include <cfloat>
 
 
 namespace Mantid{
@@ -22,34 +23,81 @@ struct findDimension
      return m_dimension->getDimensionId() == obj->getDimensionId();
    }
 };
-
-        
-/// the function returns the rotation vector which allows to transform vector inumber i into the basis;
-std::vector<double> 
-MDGeometryDescription::setRotations(unsigned int i,const std::vector<double> basis[3])
+void 
+MDGeometryDescription::set_proj_plain(const Geometry::V3D &u, const Geometry::V3D &v, const UnitCell &Lattice)
 {
-// STUB  !!! 
-    this->check_index(i,"rotations");
-    if(i>2){
-        return std::vector<double>(1,1);
-    }
 
-    std::vector<double> tmp;
-    tmp.assign(3,0);
-    tmp[i]=1;
- 
-    rotations.assign(i*3+i,1);
-    return tmp;
+	MantidMat B = Lattice.getB();
+
+	V3D e1 = B*u;
+	V3D V  = B*v;
+	V3D e3  =e1.cross_prod(V);
+	e3.normalize();
+	double norm2 = e3.norm2();
+	if(norm2<FLT_EPSILON){
+		g_log.error()<<"MDGeometryDescription::projection can not be defined by two parallel vectors: "<<u<<" and "<<v<<std::endl;
+		throw(std::invalid_argument(" two parallel vectors do not define the projection lain"));
+	}
+	e1.normalize();
+	V3D e2= e3.cross_prod(e1);
+
+	MantidMat Transf(3,3);
+	Transf.setColumn(0,e1);
+	Transf.setColumn(1,e2);
+	Transf.setColumn(2,e3);
+
+	std::vector<double> view = Transf;
+	Transf.Invert();
+	this->rotations = Transf.get_vector();
+	//bool real_change(false);
+	//if(	proj_plain[0] != u){
+	//	real_change   = true;
+	//	proj_plain[0] = u;
+	//};
+	//if (proj_plain[1] != v){
+	//	real_change   = true;
+	//	proj_plain[1] = v;
+	//}
+	//if(real_change)direction_changed=true;
+	//V3D beamAxis(0,0,1);
+	//this->Rotations = Quat(z,beamAxis);
+}
+//
+std::vector<double> 
+MDGeometryDescription::getRotations()const
+{
+
+	return rotations;
 }
 
+///// the function returns the rotation vector which allows to transform vector inumber i into the basis;
+//std::vector<double> 
+//MDGeometryDescription::setRotations(unsigned int i,const std::vector<double> basis[3])
+//{
+//// STUB  !!! 
+//    this->check_index(i,"rotations");
+//    if(i>2){
+//        return std::vector<double>(1,1);
+//    }
+//
+//    std::vector<double> tmp;
+//    tmp.assign(3,0);
+//    tmp[i]=1;
+// 
+//    rotations.assign(i*3+i,1);
+//    return tmp;
+//}
+
 /// this extracts the size and shape of the current DND object
-MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin)
+MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin):
+direction_changed(false)
 {
     this->build_from_geometry(origin);
 }
 
 
-MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis)
+MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis):
+direction_changed(false)
 {
 	std::set<MDBasisDimension> basisDims = basis.getBasisDimensions();
 	this->nDimensions           = 0 ;
@@ -85,7 +133,8 @@ MDGeometryDescription::MDGeometryDescription(
       Dimension_sptr dimensionZ, 
       Dimension_sptr dimensiont,
       RotationMatrix rotationMatrix
-)
+):
+direction_changed(false)
 {
   this->nDimensions = dimensions.size();
   this->data.resize(dimensions.size());
@@ -144,8 +193,9 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
 void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
+	this->Rotations  = Quat();
 
-
+	this->direction_changed       = false;
     this->nDimensions             = origin.getNumDims();
     this->nReciprocalDimensions   = origin.getNumReciprocalDims();
     std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);

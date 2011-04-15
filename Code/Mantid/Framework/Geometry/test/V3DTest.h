@@ -19,6 +19,7 @@ private:
 public:
 	void testEmptyConstructor()
 	{
+		// very important as a MD geometry rely on it later
 		TS_ASSERT_EQUALS(a.X(),0.0);
 		TS_ASSERT_EQUALS(a.Y(),0.0);
 		TS_ASSERT_EQUALS(a.Z(),0.0);

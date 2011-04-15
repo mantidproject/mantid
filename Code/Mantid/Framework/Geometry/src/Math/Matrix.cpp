@@ -36,6 +36,22 @@ operator<<(std::ostream& of,const Matrix<T>& A)
 }
 
 template<typename T>
+std::vector<T> 
+Matrix<T>::get_vector()const
+{
+	std::vector<T> rez(nx*ny);
+	int ic(0);
+
+	 for(int i=0;i<nx;i++){
+		for(int j=0;j<ny;j++){
+		    rez[ic]=V[i][j];
+			ic++;
+		}
+	 }
+	 return rez;
+}
+//
+template<typename T>
 Matrix<T>::Matrix(const int nrow,const int ncol)
   : nx(0),ny(0),V(0)
   /**
@@ -490,6 +506,34 @@ Matrix<T>::identityMatrix()
 	V[i][j]=(j==i) ? 1 : 0;
   return;
 }
+template<typename T> 
+void 
+Matrix<T>::setColumn(int nCol,const std::vector<T> &newCol)
+{
+	if(nCol>=this->ny){
+		throw(std::invalid_argument("nCol requested> nCol availible"));
+	}
+	int nxM = newCol.size();
+	if(nx<nxM)nxM=nx;
+	for(int i=0;i<nxM;i++){
+		V[i][nCol]=newCol[i];
+	}
+
+}
+template<typename T> 
+void 
+Matrix<T>::setRow(int nRow,const std::vector<T> &newRow)
+{
+	if(nRow>=this->nx){
+		throw(std::invalid_argument("nRow requested> nRow availible"));
+	}
+	int nyM = newRow.size();
+	if(ny<nyM)nyM=ny;
+	for(int j=0;j<nyM;j++){
+		V[nRow][j]=newRow[j];
+	}
+
+}
 
 template<typename T>
 void
@@ -594,6 +638,8 @@ Matrix<T>::Tprime() const
 
   return MT;
 }
+
+
 
 template<typename T>
 Matrix<T>&
@@ -1103,17 +1149,19 @@ Matrix<T>::sortEigen(Matrix<T>& DiagMatrix)
   if (ny!=nx || nx!=DiagMatrix.nx || nx!=DiagMatrix.ny)
     {
       std::cerr<<"Matrix not Eigen Form"<<std::endl;
+	  throw(std::invalid_argument(" Matrix is not in an eigenvalue format"));
     }
   std::vector<int> index;
   std::vector<T> X=DiagMatrix.Diagonal();
   indexSort(X,index);
   Matrix<T> EigenVec(*this);
   for(int Icol=0;Icol<nx;Icol++)
-    {
-      for(int j=0;j<nx;j++)
-	V[j][Icol]=EigenVec[j][index[Icol]];
-      DiagMatrix[Icol][Icol]=X[index[Icol]];
-    }
+  {
+      for(int j=0;j<nx;j++){
+			V[j][Icol]=EigenVec[j][index[Icol]];
+	  }
+	  DiagMatrix[Icol][Icol]=X[index[Icol]];
+  }
 
   return;
 }

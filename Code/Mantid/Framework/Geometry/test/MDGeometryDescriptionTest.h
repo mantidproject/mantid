@@ -98,6 +98,32 @@ public:
     TSM_ASSERT_EQUALS("The image size described by this description differs from expected", 100 * 100
         * 100, pDescr->getImageSize());
   }
+  void testParallelVectorsInProjThrow(){
+	  V3D u(1,0,0);
+	  V3D v(1,0,0);
+	  UnitCell Cell(2.87,2.87,2.87);
+	  TSM_ASSERT_THROWS("Projection plain defined by two parallel vectors should throw",pSlice->set_proj_plain(u,v,Cell),std::invalid_argument);
+  }
+
+ void testUnitRotationWorks(){
+	  V3D u(1,0,0);
+	  V3D v(0,1,0);
+      UnitCell Cell(2.87,2.87,2.87);
+
+	  TSM_ASSERT_THROWS_NOTHING("Projection plain defined by two parallel vectors should throw",pSlice->set_proj_plain(u,v,Cell));
+	  std::vector<double> unit_rot(9,0);
+	  unit_rot[0]=1;
+	  unit_rot[4]=1;
+	  unit_rot[8]=1;
+	  TSM_ASSERT_EQUALS("This slice defines cut along existing xy axis which has to be described by unit matirix",unit_rot,pSlice->getRotations());
+
+	  u=V3D(1,1,0);
+	  v=V3D(1,-1,0);
+	  pSlice->set_proj_plain(u,v,Cell);
+
+	  unit_rot=pSlice->getRotations();
+
+  }
 
   MDGeometryDescriptionTest() :
     pSlice(NULL)
