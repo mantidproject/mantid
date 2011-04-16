@@ -269,8 +269,12 @@ class DirectEnergyConversion(object):
             # TODO: This algorithm needs to be separated so that it doesn't actually
             # do the correction as well so that it can be moved next to LoadRaw where
             # it belongs
-            LoadDetectorInfo(result_ws, common.last_mono_file())
-
+            if self.det_cal_file == None:
+            	LoadDetectorInfo(result_ws, common.last_mono_file())
+            else:
+                self.log('Loading detector info from file ' + self.det_cal_file)
+                self.log('Raw file detector header is superceeded') 
+                LoadDetectorInfo(result_ws, self.det_cal_file)
 
         if self.background == True:
             # Remove the count rate seen in the regions of the histograms defined as the background regions, if the user defined a region
@@ -690,7 +694,9 @@ class DirectEnergyConversion(object):
         
         # Ki/Kf factor correction
         self.apply_kikf_correction = True
-    
+    	
+    	# Detector calibration file
+    	self.det_cal_file = None
      
     def init_idf_params(self):
         """
