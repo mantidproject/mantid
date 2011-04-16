@@ -29,8 +29,9 @@ namespace MantidWidgets
   * @param parent :: A widget to act as this widget's parent (default = NULL)
   * @param init :: If true then the widget will be populated with the instrument list (default = true)
   */
-  InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) : QComboBox(parent), m_techniques(), m_currentFacility(NULL), 
-    m_changeObserver(*this, &InstrumentSelector::handleConfigChange), m_init(init)
+  InstrumentSelector::InstrumentSelector(QWidget *parent, bool init) 
+    : QComboBox(parent), m_changeObserver(*this, &InstrumentSelector::handleConfigChange),
+      m_techniques(), m_currentFacility(NULL), m_init(init)
   {
     setEditable(false);
     if( init )

@@ -61,14 +61,14 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 //----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_addFilesTab(NULL), m_saveWorkspaces(NULL),
-  m_ins_defdir(""), m_last_dir(""),
+  UserSubWindow(parent), m_addFilesTab(NULL), m_diagnosticsTab(NULL),
+  m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
   m_cfg_loaded(true), m_userFname(false), m_sample_no(), m_run_no_boxes(),
   m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
-  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile(""),m_diagnosticsTab(NULL)
+  m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
   ConfigService::Instance().addObserver(m_newInDir);
 }

@@ -28,9 +28,9 @@ using namespace MantidQt::CustomInterfaces;
 * It is used primarily to ensure sane values for member variables.
 */
 Indirect::Indirect(QWidget *parent, Ui::ConvertToEnergy & uiForm) : 
-UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
-  m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
+  UserSubWindow(parent), m_uiForm(uiForm), m_backgroundDialog(NULL),
   m_changeObserver(*this, &Indirect::handleDirectoryChange),
+  m_bgRemoval(false), m_valInt(NULL), m_valDbl(NULL), 
   // Null pointers - Calibration Tab
   m_calCalPlot(NULL), m_calResPlot(NULL),
   m_calCalR1(NULL), m_calCalR2(NULL), m_calResR1(NULL),
@@ -272,6 +272,7 @@ void Indirect::runConvertToEnergy()
 */
 void Indirect::setIDFValues(const QString & prefix)
 {
+  UNUSED_ARG(prefix);
   // empty ComboBoxes, LineEdits,etc of previous values
   m_uiForm.cbAnalyser->clear();
   m_uiForm.cbReflection->clear();
@@ -969,6 +970,7 @@ void Indirect::analyserSelected(int index)
 */
 void Indirect::reflectionSelected(int index)
 {
+  UNUSED_ARG(index);
   // first, clear values in assosciated boxes:
   clearReflectionInfo();
 

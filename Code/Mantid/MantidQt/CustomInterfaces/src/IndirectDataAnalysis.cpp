@@ -44,10 +44,10 @@ DECLARE_SUBWINDOW(IndirectDataAnalysis);
 
 IndirectDataAnalysis::IndirectDataAnalysis(QWidget *parent) :
   UserSubWindow(parent), m_nDec(6), m_valInt(NULL), m_valDbl(NULL), 
-  m_furyResFileType(true), 
   m_elwPlot(NULL), m_elwR1(NULL), m_elwR2(NULL), m_elwDataCurve(NULL),
   m_msdPlot(NULL), m_msdRange(NULL), m_msdDataCurve(NULL), m_msdTree(NULL), m_msdDblMng(NULL),
   m_furPlot(NULL), m_furRange(NULL), m_furCurve(NULL), m_furTree(NULL), m_furDblMng(NULL),
+  m_furyResFileType(true),
   m_ffDataCurve(NULL), m_ffFitCurve(NULL),
   m_cfDataCurve(NULL), m_cfCalcCurve(NULL),
   m_changeObserver(*this, &IndirectDataAnalysis::handleDirectoryChange)
@@ -1144,8 +1144,8 @@ void IndirectDataAnalysis::run()
 
 void IndirectDataAnalysis::fitContextMenu(const QPoint &)
 {
-  QtBrowserItem* item;
-  QtDoublePropertyManager* dblMng;
+  QtBrowserItem* item(NULL);
+  QtDoublePropertyManager* dblMng(NULL);
   
   int pageNo = m_uiForm.tabWidget->currentIndex();
   if ( pageNo == 3 )
@@ -1205,7 +1205,7 @@ void IndirectDataAnalysis::fixItem()
 {
   int pageNo = m_uiForm.tabWidget->currentIndex();
 
-  QtBrowserItem* item;
+  QtBrowserItem* item(NULL);
   if ( pageNo == 3 )
   { // FuryFit
     item = m_ffTree->currentItem();
@@ -1229,8 +1229,8 @@ void IndirectDataAnalysis::fixItem()
 
 void IndirectDataAnalysis::unFixItem()
 {
-  QtBrowserItem* item;
-  QtDoublePropertyManager* dblMng;
+  QtBrowserItem* item(NULL);
+  QtDoublePropertyManager* dblMng(NULL);
   
   int pageNo = m_uiForm.tabWidget->currentIndex();
   if ( pageNo == 3 )

@@ -29,8 +29,6 @@ Background::Background(QWidget *parent) :
 {
   setWindowTitle("Background Removal Settings");
 
-  QGridLayout *grid = new QGridLayout;
-
   m_ckDoRemove->setText("Remove background as found between these points");
   QHBoxLayout *lineOne = new QHBoxLayout;
   lineOne->addWidget(m_ckDoRemove);

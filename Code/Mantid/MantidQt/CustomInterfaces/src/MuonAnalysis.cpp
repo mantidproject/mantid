@@ -198,7 +198,7 @@ void MuonAnalysis::runFirstGoodBinFront()
 {
   try 
   {
-    double boevs = boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
+    boost::lexical_cast<double>(m_uiForm.firstGoodBinFront->text().toStdString());
     
     // if this value updated then also update 'Start at" Plot option if "Start at First Good Data" set
     if (m_uiForm.timeComboBox->currentIndex() == 0 )
@@ -661,7 +661,7 @@ void MuonAnalysis::pairTableChanged(int row, int column)
     {
       try
       {
-         double alpha = boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
+         boost::lexical_cast<double>(itemAlpha->text().toStdString().c_str());
       }  catch (boost::bad_lexical_cast&)
       {
         QMessageBox::warning(this, "MantidPlot - MuonAnalysis", "Alpha must be a number.");
@@ -1569,6 +1569,7 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
       return true;
     }
   }
+  return false;
 }
 
 /**
@@ -1597,6 +1598,7 @@ bool MuonAnalysis::applyGroupingToWS( const std::string& inputWS,  const std::st
     saveGroupingTabletoXML(m_uiForm, m_groupingTempFilename);
     return applyGroupingToWS(inputWS, outputWS, m_groupingTempFilename);
   }
+  return false;
 }
 
 /**

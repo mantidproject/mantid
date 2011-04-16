@@ -15,7 +15,7 @@ namespace MantidQt
 
     ///Constructor
     SANSDiagnostics::SANSDiagnostics(QWidget *parent, Ui::SANSRunWindow *ParWidgets):
-    m_SANSForm(ParWidgets), parForm(parent),m_totalPeriods(0),m_rectDetectors(),m_Period(0),
+    m_SANSForm(ParWidgets), parForm(parent),m_totalPeriods(0),m_Period(0),m_rectDetectors(),
       g_log(Mantid::Kernel::Logger::get("SANSDiagnostics"))
     {
       initLayout();
@@ -1392,7 +1392,7 @@ namespace MantidQt
       {
         unsigned int startVal=values.at(0);
         std::vector<unsigned int>::const_iterator citr;
-        for(int i=1;i<values.size();++i)
+        for(size_t i=1;i<values.size();++i)
         {
           if(values.at(i)==startVal+1)
           {

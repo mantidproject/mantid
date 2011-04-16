@@ -311,7 +311,7 @@ bool MWDiag::isInputValid() const
 //this function will be replaced a function in a widget
 void MWDiag::browseClicked(const QString &buttonDis)
 {
-  QLineEdit *editBox;
+  QLineEdit *editBox(NULL);
   QStringList extensions;
   bool toSave = false;
   if ( buttonDis == "InputFile")

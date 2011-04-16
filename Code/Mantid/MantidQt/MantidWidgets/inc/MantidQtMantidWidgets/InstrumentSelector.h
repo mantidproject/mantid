@@ -90,6 +90,7 @@ namespace MantidQt
       QStringList m_techniques;
       /// The current facility
       const Mantid::Kernel::FacilityInfo *m_currentFacility;
+      /// Should the object be initialized
       bool m_init;
     };
 

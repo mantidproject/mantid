@@ -61,7 +61,7 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
   whichGroupToWhichRow(m_uiForm, groupToRow);
 
   int num = groupToRow.size();
-  for (int i = 0; i < groupToRow.size(); i++)
+  for (size_t i = 0; i < groupToRow.size(); i++)
   {
     Element* gElem = mDoc->createElement("group");
     gElem->setAttribute("name", m_uiForm.groupTable->item(groupToRow[i],0)->text().toStdString());
@@ -343,7 +343,7 @@ void whichGroupToWhichRow(Ui::MuonAnalysis& m_uiForm, std::vector<int>& groupToR
       continue;
     try
     {
-       int ndet = boost::lexical_cast<int>(item2->text().toStdString().c_str());
+       boost::lexical_cast<int>(item2->text().toStdString().c_str());
     }  catch (boost::bad_lexical_cast&)
     {
       continue;

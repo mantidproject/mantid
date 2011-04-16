@@ -197,11 +197,12 @@ private:
   QWidget *parForm;
   
   int m_totalPeriods;///<total periods
+  int m_Period; ///<Current period
   std::vector<std::string> m_wsVec;///< workspace vector
   std::vector<boost::shared_ptr<RectDetectorDetails> > m_rectDetectors;
   Mantid::Kernel::Logger& g_log; ///< reference to logger class.
 
-  int m_Period;
+
 private slots:
 
   /// first detector horizontal integral button clicked.

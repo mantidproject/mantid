@@ -138,7 +138,7 @@ void ManageUserDirectories::confirmClicked()
 
 void ManageUserDirectories::addDirectory()
 {
-  QLineEdit* input;
+  QLineEdit* input(NULL);
   
   if ( m_uiForm.tabWidget->currentWidget() == m_uiForm.tabDataSearch )
   {

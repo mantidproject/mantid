@@ -16,11 +16,11 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace MantidQt::MantidWidgets;
 
-MWRunFiles::MWRunFiles(QWidget *parent) : MantidWidget(parent),
-  m_findRunFiles(true), m_allowMultipleFiles(true), m_isOptional(false),
-  m_buttonOpt(Text), m_multiEntry(false), m_fileProblem(""),
-  m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
-  m_fileFilter("")
+MWRunFiles::MWRunFiles(QWidget *parent) 
+  : MantidWidget(parent), m_findRunFiles(true), m_allowMultipleFiles(true), 
+    m_isOptional(false), m_multiEntry(false), m_buttonOpt(Text), m_fileProblem(""),
+    m_entryNumProblem(""), m_algorithmProperty(""), m_fileExtensions(), m_extsAsSingleOption(true),
+    m_foundFiles(), m_lastDir(), m_fileFilter()
 {
   m_uiForm.setupUi(this);
 
