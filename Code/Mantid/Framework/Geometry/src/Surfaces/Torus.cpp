@@ -244,6 +244,7 @@ Torus::surfaceNormal(const Geometry::V3D& Pt) const
     @return the normal to the surface at that point
   */
 {
+  UNUSED_ARG(Pt);
   return Normal;
 }
 
@@ -282,6 +283,7 @@ Torus::side(const Geometry::V3D& R) const
     @return Side of R
   */
 {
+  UNUSED_ARG(R);
   return -1;
 }
 
@@ -296,7 +298,7 @@ Torus::onSurface(const Geometry::V3D& R) const
      @param R :: Point to check
      @return 1 if on surface and -1 if not no surface
   */
-
+  UNUSED_ARG(R);
   return -1;
 }
 
@@ -337,8 +339,14 @@ Torus::write(std::ostream& OX) const
  */
 void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,double &ymin,double &zmin)
 {
-	///TODO:
-	PLog.warning("Torus::getBoundingBox is not implemented.");
+  UNUSED_ARG(xmax);
+  UNUSED_ARG(ymax);
+  UNUSED_ARG(zmax);
+  UNUSED_ARG(xmin);
+  UNUSED_ARG(ymin);
+  UNUSED_ARG(zmin);
+  ///TODO:
+  PLog.warning("Torus::getBoundingBox is not implemented.");
 }
 
 /** Supposed to set the distance from centre of the torus to the centre of tube (i.e. tube which makes up the torus)
@@ -346,7 +354,7 @@ void Torus::getBoundingBox(double &xmax,double &ymax,double &zmax,double &xmin,d
  */
 void Torus::setDistanceFromCentreToTube(double dist)
 {
-	Iradius = dist;
+  Iradius = dist;
 }
 
 /** Supposed to set the radius of the tube which makes up the torus
@@ -354,7 +362,7 @@ void Torus::setDistanceFromCentreToTube(double dist)
  */
 void Torus::setTubeRadius(double dist)
 {
-	Dradius = dist;
+  Dradius = dist;
 }
 
 }  // NAMESPACE MonteCarlo

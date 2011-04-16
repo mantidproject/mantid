@@ -72,9 +72,9 @@ namespace Mantid
      
       ~MDGeometryBasis(void);
       /// return the numbers of dimensions in current geometry; 
-      unsigned int getNumDims(void)const{return (unsigned int)this->m_mdBasisDimensions.size();}
+      size_t getNumDims() const {return this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
-      unsigned int getNumReciprocalDims(void)const{return this->n_reciprocal_dimensions;};
+      size_t getNumReciprocalDims() const {return this->n_reciprocal_dimensions;};
 	  
 
       /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
@@ -89,9 +89,9 @@ namespace Mantid
       /// logger -> to provide logging, for MD workspaces
       static Kernel::Logger& g_log;
       /// number of total dimensions in dataset;
-      unsigned int n_total_dim;
+      size_t n_total_dim;
       /// number of reciprocal dimensions (which are non-orthogonal to each other n_rsprcl_dim<=n_total_dim)
-      unsigned int n_reciprocal_dimensions;
+      size_t n_reciprocal_dimensions;
       /// the directions in reciprocal lattice plus all addtional orthogonal dimensions
       std::set<MDBasisDimension> m_mdBasisDimensions;
  

@@ -59,7 +59,7 @@ namespace Mantid
 	  *                         it has to be defined when the class of MD workspaces, specific for a particular problem is constructed, as the workspaces
 	  *                         with different id-s can not be mixed in the same binary operation.
 	  * @param isReciprocal  -- a boolean value, sepcifying if the direction is reciprocal or orthogonal
-	  * @param columnNumbner -- the position of the data, describing the coordinate of MD Data point in this direction in the MDDataPoints table (see MDDPoints class)
+	  * @param columnNumber -- the position of the data, describing the coordinate of MD Data point in this direction in the MDDataPoints table (see MDDPoints class)
 	  *                         Has to be consistent with MDDPoint and MDDPoints
 	  * @param inDirection   -- direction of this basis vector. Zero vector for orthogonal dimensions and has to be defined properly for reciprocal
 	  * @param UnitID        -- the units for this direction. A reciprocal dimension always have a "MomentumTransfer" unit, which overrides the value, specified in 

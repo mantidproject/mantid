@@ -125,18 +125,24 @@ General::setBaseEqn()
 
 void General::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin)
 {
-	/**
-	  General bounding box
-	  Intended to improve bounding box for a general quadratic surface
-	  Using the surface calculate improved limits on the bounding box, if possible.
-	  @param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
-	  @param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
-	  @param ymax :: as for xmax
-	  @param ymin :: as for xmin
-	  @param zmax :: as for xmax
-	  @param zmin :: as for xmin
-      //TODO: Implement bounding box for General
-	*/
+  /**
+     General bounding box
+     Intended to improve bounding box for a general quadratic surface
+     Using the surface calculate improved limits on the bounding box, if possible.
+     @param xmax :: On input, existing Xmax bound, on exit possibly improved Xmax bound
+     @param xmin :: On input, existing Xmin bound, on exit possibly improved Xmin bound
+     @param ymax :: as for xmax
+     @param ymin :: as for xmin
+     @param zmax :: as for xmax
+     @param zmin :: as for xmin
+     //TODO: Implement bounding box for General
+     */
+  UNUSED_ARG(xmax);
+  UNUSED_ARG(ymax);
+  UNUSED_ARG(zmax);
+  UNUSED_ARG(xmin);
+  UNUSED_ARG(ymin);
+  UNUSED_ARG(zmin);
 
 }
 

@@ -193,22 +193,20 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
 void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
-	this->Rotations  = Quat();
-
-	this->direction_changed       = false;
-    this->nDimensions             = origin.getNumDims();
-    this->nReciprocalDimensions   = origin.getNumReciprocalDims();
-    std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);
-	
-    unsigned int i,nr(0);
-
-    DimensionDescription any;
-    this->data.assign(nDimensions,any);    
-
-    for(i=0;i<this->nDimensions;i++){
-		this->createDimensionDescription(Dims[i],i);
-    }
-    
+  this->Rotations  = Quat();
+  this->direction_changed       = false;
+  this->nDimensions             = origin.getNumDims();
+  this->nReciprocalDimensions   = origin.getNumReciprocalDims();
+  std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);
+  
+  DimensionDescription any;
+  this->data.assign(nDimensions,any);    
+  
+  for(unsigned int i=0; i < this->nDimensions;i++)
+  {
+    this->createDimensionDescription(Dims[i],i);
+  }
+  
  }
 //
 int 
@@ -243,12 +241,6 @@ MDGeometryDescription::getImageSize()const
 	return data_size;
 }
 //****** SET *******************************************************************************
-//void 
-//MDGeometryDescription::renameTag(unsigned int num,const std::string &newID)
-//{
-//   this->check_index(num,"renameTag");
-//   this->data[num].Tag = newID;
-//}
 void 
 MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag) 
 {
@@ -256,7 +248,7 @@ MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag)
    this->check_index(i,"setPAxis");
 
 // move existing dimension structure, described by the tag into new position, described by the index i;
-   unsigned int ic(0),old_place_index;
+   unsigned int ic(0),old_place_index(0);
    
    it_data it,old_place, new_place;
    old_place = data.end();

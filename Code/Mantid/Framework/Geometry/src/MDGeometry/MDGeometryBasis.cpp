@@ -36,7 +36,7 @@ MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost:
     for( ;it != mdBasisDimensions.end(); ++it){  
         checkInputBasisDimensions(*(it)); // Check that duplicate column numbers have not been used.
         // check if column number is smaller then the number of dimensions
-        if(it->getColumnNumber()>=this->n_total_dim){
+        if(it->getColumnNumber() >= (int)this->n_total_dim){
             g_log.error()<<" the number of the dimension with id: "<<it->getId()<<" is "<<it->getColumnNumber() <<" and it is higher then the number of dimensions\n";
             throw(std::invalid_argument(" the dimension number is higher then total number of dimensions"));
         }
@@ -88,7 +88,7 @@ MDGeometryBasis::checkIdCompartibility(const std::vector<std::string> &newTags)c
 {
      std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
      std::set<std::string> existingTags;
-     for(it;it!=m_mdBasisDimensions.end();it++){
+     for(;it!=m_mdBasisDimensions.end();it++){
             existingTags.insert(it->getId());
      }
 
