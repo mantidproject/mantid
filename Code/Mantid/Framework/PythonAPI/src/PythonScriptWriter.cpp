@@ -2,7 +2,7 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidPythonAPI/PythonScriptWriter.h"
-
+#include "MantidAPI/WorkspaceHistory.h"
 #include "MantidKernel/Exception.h"
 
 namespace Mantid
