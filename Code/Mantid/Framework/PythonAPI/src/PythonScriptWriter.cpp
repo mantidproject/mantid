@@ -21,6 +21,7 @@ namespace Mantid
      */
     std::string PythonScriptWriter::write(const API::WorkspaceHistory & history) const
     {
+      UNUSED_ARG(history);
       throw Kernel::Exception::NotImplementedError(" PythonScriptWriter::write");
     }
     
