@@ -46,7 +46,7 @@ Property::~Property()
 */
 Property& Property::operator=( const Property& right )
 {
-  (void)right; // Get rid of compiler warning but we need the argument for doxygen
+  UNUSED_ARG(right);
   return *this;
 }
 
@@ -167,7 +167,7 @@ void Property::setUnits(std::string unit)
  */
 Property& Property::operator+=( Property const * rhs )
 {
-  (void) rhs; //Avoid compiler warning
+  UNUSED_ARG(rhs);
   std::stringstream msg;
   msg << "Property object '" << m_name << "' of type '" << type() << "' has not implemented a operator+=() method.";
   throw Exception::NotImplementedError(msg.str());
@@ -180,8 +180,8 @@ Property& Property::operator+=( Property const * rhs )
  * */
 void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop)
 {
-  (void) start; //Avoid compiler warning
-  (void) stop; //Avoid compiler warning
+  UNUSED_ARG(start);
+  UNUSED_ARG(stop);
   //Do nothing in general
   return;
 }
@@ -195,8 +195,8 @@ void Property::filterByTime(const Kernel::DateAndTime start, const Kernel::DateA
  */
 void Property::splitByTime(TimeSplitterType& splitter, std::vector< Property * > outputs) const
 {
-  (void) splitter; //Avoid compiler warning
-  (void) outputs; //Avoid compiler warning
+  UNUSED_ARG(splitter);
+  UNUSED_ARG(outputs);
   return;
 }
 

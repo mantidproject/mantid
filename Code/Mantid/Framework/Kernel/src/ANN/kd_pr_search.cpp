@@ -24,6 +24,14 @@
 
 #include "kd_pr_search.h"				// kd priority search declarations
 
+// MG: gcc doesn't like line 117 about a pointer reference 
+// but this is not our code and it seems to function 
+// so disable the warning.
+#if defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#endif
+
+
 //----------------------------------------------------------------------
 //	Approximate nearest neighbor searching by priority search.
 //		The kd-tree is searched for an approximate nearest neighbor.

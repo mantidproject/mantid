@@ -81,8 +81,9 @@ namespace Kernel
      * @param threadnum :: Thread ID that launched the task
      */
     virtual void finished(Task * task, size_t threadnum)
-    { (void) task; //Ignore argument
-      (void) threadnum; //Ignore argument
+    { 
+      UNUSED_ARG(task);
+      UNUSED_ARG(threadnum);
     }
   
     //-----------------------------------------------------------------------------------
@@ -186,7 +187,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     virtual Task * pop(size_t threadnum)
     {
-      (void) threadnum; //Ignore argument
+      UNUSED_ARG(threadnum);
       Task * temp = NULL;
       m_queueLock.lock();
       // Check the size within the same locking block; otherwise the size may change before you get the next item.
@@ -245,7 +246,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     Task * pop(size_t threadnum)
     {
-      (void) threadnum; //Ignore argument
+      UNUSED_ARG(threadnum);
       Task * temp = NULL;
       m_queueLock.lock();
       // Check the size within the same locking block; otherwise the size may change before you get the next item.
@@ -301,7 +302,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     virtual Task * pop(size_t threadnum)
     {
-      (void) threadnum; //Ignore argument
+      UNUSED_ARG(threadnum);
       Task * temp = NULL;
       m_queueLock.lock();
       // Check the size within the same locking block; otherwise the size may change before you get the next item.

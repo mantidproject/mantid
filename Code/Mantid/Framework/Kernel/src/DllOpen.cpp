@@ -232,6 +232,7 @@ void* DllOpen::GetFunctionImpl(void* libName, const std::string& funcName)
  **/
 void DllOpen::CloseDllImpl(void* libName)
 {
+  UNUSED_ARG(libName);
   // Commented out for now due to a potential bug in glibc
   //dlclose(libName);
 }
@@ -240,7 +241,7 @@ void DllOpen::CloseDllImpl(void* libName)
  **/
 void DllOpen::addSearchDirectoryImpl(const std::string& dir)
 {
-  (void) dir; //Avoid compiler warning
+  UNUSED_ARG(dir);
 }
 
 #endif /* _WIN32 */

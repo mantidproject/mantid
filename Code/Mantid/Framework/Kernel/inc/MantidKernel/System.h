@@ -45,7 +45,17 @@
   #define DLLImport
 #endif
 
-// information for holding onto stdint.h
+/**
+ * Function arguments are sometimes unused in certain implentations
+ * but are required for documentation purposes.
+ * These are macros to silence compiler warnings about the subject
+ */
+#define UNUSED_ARG(x) (void)x;
+
+/**
+ * Information for holding onto stdint.h if it is
+ * not available
+ */
 #ifdef HAVE_STDINT_H
 #include <stdint.h>
 #else

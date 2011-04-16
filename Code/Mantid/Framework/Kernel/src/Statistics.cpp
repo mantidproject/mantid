@@ -133,8 +133,8 @@ namespace Mantid
     template<>
     DLLExport Statistics getStatistics<string> (const vector<string>& data, const bool sorted)
     {
-      (void) sorted;
-      (void) data;
+      UNUSED_ARG(sorted);
+      UNUSED_ARG(data);
       return getNanStatistics();
     }
 

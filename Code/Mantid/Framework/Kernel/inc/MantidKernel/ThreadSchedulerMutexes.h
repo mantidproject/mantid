@@ -54,7 +54,7 @@ namespace Kernel
     //-------------------------------------------------------------------------------
     virtual Task * pop(size_t threadnum)
     {
-      (void) threadnum;
+      UNUSED_ARG(threadnum);
 
       Task * temp = NULL;
       std::set<Mutex *>::iterator mutexes_end = m_mutexes.end();
@@ -133,7 +133,7 @@ namespace Kernel
      */
     virtual void finished(Task * task, size_t threadnum)
     {
-      (void) threadnum;
+      UNUSED_ARG(threadnum);
       Mutex * mut = task->getMutex();
       if (mut)
       {

@@ -65,7 +65,7 @@ std::string toString(const T& value)
 template <typename T>
 std::string toString(const boost::shared_ptr<T>& value)
 {
-  (void) value; //avoid compiler warning
+  UNUSED_ARG(value);
   throw boost::bad_lexical_cast();
 }
 
@@ -200,8 +200,8 @@ inline void addingOperator(bool&, const bool&)
 template<typename T>
 inline void addingOperator(boost::shared_ptr<T>& lhs, const boost::shared_ptr<T>& rhs)
 {
-  (void) lhs; //avoid compiler warning
-  (void) rhs; //avoid compiler warning
+  UNUSED_ARG(lhs);
+  UNUSED_ARG(rhs);
   throw Exception::NotImplementedError("PropertyWithValue.h: += operator not implemented for boost::shared_ptr");
 }
 }

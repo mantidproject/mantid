@@ -65,7 +65,7 @@ namespace Kernel
      */
     void setMutexObject(void * object)
     {
-      (void) object;
+      UNUSED_ARG(object);
       throw Kernel::Exception::NotImplementedError("Not impl.");
     }
 
