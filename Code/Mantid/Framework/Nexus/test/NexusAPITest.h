@@ -191,7 +191,7 @@ public:
     // check group attributes
     file.openGroup("entry", "NXentry");
 
-    int num = 4;
+    //int num = 4;
     std::vector<int> ires;
     std::vector<double> dres;
 
@@ -200,7 +200,7 @@ public:
     TS_ASSERT( file.isDataInt() );
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i1_array.size());
-    for (int i=0; i<ires.size();i++)
+    for (std::size_t i=0; i<ires.size();i++)
       TS_ASSERT_EQUALS(ires[i], i1_array[i]);
     file.closeData();
 
@@ -209,7 +209,7 @@ public:
     TS_ASSERT( file.isDataInt() );
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i2_array.size());
-    for (int i=0; i<ires.size();i++)
+    for (std::size_t i=0; i<ires.size();i++)
       TS_ASSERT_EQUALS(ires[i], i2_array[i]);
     file.closeData();
 
@@ -218,7 +218,7 @@ public:
     TS_ASSERT( file.isDataInt() );
     file.getDataCoerce(ires);
     TS_ASSERT_EQUALS(ires.size(), i4_array.size());
-    for (int i=0; i<ires.size();i++)
+    for (std::size_t i=0; i<ires.size();i++)
       TS_ASSERT_EQUALS(ires[i], i4_array[i]);
     file.closeData();
 
@@ -226,7 +226,7 @@ public:
     file.openData("r4_data");
     file.getDataCoerce(dres);
     TS_ASSERT_EQUALS(dres.size(), r4_array.size());
-    for (int i=0; i<dres.size();i++)
+    for (std::size_t i=0; i<dres.size();i++)
       TS_ASSERT_EQUALS(dres[i], r4_array[i]);
     file.closeData();
 
@@ -234,7 +234,7 @@ public:
     file.openData("r8_data");
     file.getDataCoerce(dres);
     TS_ASSERT_EQUALS(dres.size(), r8_array.size());
-    for (int i=0; i<dres.size();i++)
+    for (std::size_t i=0; i<dres.size();i++)
       TS_ASSERT_EQUALS(dres[i], r8_array[i]);
     file.closeData();
 

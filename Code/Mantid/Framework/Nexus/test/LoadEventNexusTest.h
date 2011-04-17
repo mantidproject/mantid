@@ -248,7 +248,7 @@ public:
     TS_ASSERT_EQUALS( WS->getNumberHistograms(), 51200);
     //Events
     TS_ASSERT_EQUALS( WS->getNumberEvents(), 111274); // There are (slightly) fewer events
-    for (size_t wi = 0; wi <  WS->getNumberHistograms(); wi++)
+    for (int wi = 0; wi <  WS->getNumberHistograms(); wi++)
     {
       // Pixels with at least one event will have switched
       if (WS->getEventList(wi).getNumberEvents() > 0)

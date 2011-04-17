@@ -331,7 +331,7 @@ public:
     }
     else
     {
-      for (size_t wi=0; wi < WS->getNumberHistograms(); wi++)
+      for (int wi=0; wi < WS->getNumberHistograms(); wi++)
         WS->getEventList(wi).switchTo(type);
     }
 
