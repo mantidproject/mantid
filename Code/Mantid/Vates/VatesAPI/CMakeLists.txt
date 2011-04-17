@@ -11,6 +11,7 @@ project ( VatesAPI )
 set ( SRC_FILES 
 src/Clipper.cpp
 src/DimensionComparitor.cpp
+src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
 src/IMDWorkspaceProxy.cpp
 src/MetadataToFieldData.cpp
@@ -32,11 +33,13 @@ set ( INC_FILES
 inc/MantidVatesAPI/Clipper.h
 inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionComparitor.h
+inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
 inc/MantidVatesAPI/ProgressAction.h
+inc/MantidVatesAPI/RebinningActionManager.h
 inc/MantidVatesAPI/RebinningCutterPresenter.h
 inc/MantidVatesAPI/RebinningCutterXMLDefinitions.h 
 inc/MantidVatesAPI/RebinningXMLGenerator.h
@@ -50,10 +53,11 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 )
 
 set (TEST_FILES
+test/EscalatingRebinningActionManagerTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkProxyFactoryTest.h
-#test/vtkStructuredGridFactoryTest.h
-#test/vtkThresholdingUnstructuredGridFactoryTest.h
+test/vtkStructuredGridFactoryTest.h
+test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h

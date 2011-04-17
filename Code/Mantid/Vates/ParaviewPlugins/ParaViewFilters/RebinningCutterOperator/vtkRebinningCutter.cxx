@@ -14,6 +14,7 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
@@ -69,7 +70,7 @@ vtkRebinningCutter::vtkRebinningCutter() :
   m_timestep(0),
   m_thresholdMax(10000),
   m_thresholdMin(0),
-  m_actionRequester()
+  m_actionRequester(new Mantid::VATES::EscalatingRebinningActionManager())
 {
   this->SetNumberOfInputPorts(1);
   this->SetNumberOfOutputPorts(1);
@@ -96,15 +97,15 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
   //Handles some commong iteration actions that can only be determined at execution time.
   if ((timestep != m_timestep))
   {
-    m_actionRequester.ask(RecalculateVisualDataSetOnly);
+    m_actionRequester->ask(RecalculateVisualDataSetOnly);
   }
   if (m_cachedRedrawArguments != createRedrawHash())
   {
-    m_actionRequester.ask(RecalculateVisualDataSetOnly);
+    m_actionRequester->ask(RecalculateVisualDataSetOnly);
   }
   if(m_box.get() != NULL && *m_box != *box && IgnoreClipping != m_clip) //TODO: clean this up.
   {
-     m_actionRequester.ask(RecalculateAll); //The clip function must have changed.
+     m_actionRequester->ask(RecalculateAll); //The clip function must have changed.
   }
 }
 
@@ -162,7 +163,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
     determineAnyCommonExecutionActions(timestep, box);
 
     vtkUnstructuredGrid* outData;
-    RebinningIterationAction action = m_actionRequester.action();
+    RebinningIterationAction action = m_actionRequester->action();
     Mantid::API::IMDWorkspace_sptr spRebinnedWs = m_presenter.applyRebinningAction(action, updatehandler);
 
     //Build a vtkDataSet
@@ -173,7 +174,7 @@ int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVecto
     m_timestep = timestep; //Not settable directly via a setter.
     m_box = box;
     m_cachedRedrawArguments = createRedrawHash();
-    m_actionRequester.reset(); //Restore default
+    m_actionRequester->reset(); //Restore default
     if(IgnoreClipping == m_clip)
     {
       m_cachedVTKDataSet =outData; 
@@ -224,7 +225,7 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
       m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
         dimensionsVec[2], dimensionsVec[3], inputDataset);
       //First time round, rebinning has to occur.
-      m_actionRequester.ask(RecalculateAll);
+      m_actionRequester->ask(RecalculateAll);
       m_setup = IsSetup;
     }
     else
@@ -265,7 +266,7 @@ void vtkRebinningCutter::SetApplyClip(int applyClip)
      if(m_clip == ApplyClipping)
      {
        m_originalExtents = ApplyOriginal;
-       m_actionRequester.ask(RecalculateAll);
+       m_actionRequester->ask(RecalculateAll);
      }
    }
 }
@@ -310,13 +311,13 @@ void vtkRebinningCutter::formulateRequestUsingNBins(Mantid::VATES::Dimension_spt
      if(newDim->getNBins() != wsDim->getNBins())
      {
        //The number of bins has changed. Rebinning cannot be avoided.
-       m_actionRequester.ask(RecalculateAll);
+       m_actionRequester->ask(RecalculateAll);
      }
   }
   catch(Mantid::Kernel::Exception::NotFoundError&)
   {
     //This happens if the workspace is not available in the analysis data service. Hence the rebinning algorithm has not yet been run.
-    m_actionRequester.ask(RecalculateAll);
+    m_actionRequester->ask(RecalculateAll);
   }
 }
 
@@ -328,7 +329,7 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
     {
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
-      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      m_actionRequester->ask(RecalculateVisualDataSetOnly);
       //The visualisation dataset will at least need to be recalculated.
       formulateRequestUsingNBins(temp);
       this->m_appliedXDimension = temp;
@@ -345,7 +346,7 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
       this->m_appliedYDimension = temp;
     }
@@ -361,7 +362,7 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester.ask(RecalculateVisualDataSetOnly); 
+      m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
       this->m_appliedZDimension = temp;
     }
@@ -377,7 +378,7 @@ void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
       this->Modified();
       Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester.ask(RecalculateVisualDataSetOnly);
+      m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
       this->m_appliedTDimension = temp;
     }
@@ -485,7 +486,7 @@ BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) cons
 vtkDataSetFactory_sptr vtkRebinningCutter::createDataSetFactory(
     Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-  if(m_actionRequester.action() == RecalculateAll)
+  if(m_actionRequester->action() == RecalculateAll)
   {
     //This route regenerates the underlying image.
     return createQuickRenderDataSetFactory(spRebinnedWs);

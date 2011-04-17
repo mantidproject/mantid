@@ -62,13 +62,6 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-/// Flags what should be don on the current iteration.
-enum RebinningIterationAction {
-  UseCache, //There is no delta here. Use a cached vtkDataSet.
-  RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
-  RecalculateAll // Rebin and create 3D visualisation slice from 4D dataset.
-};
-
 /// Forward declarations
 class vtkDataSetFactory;
 

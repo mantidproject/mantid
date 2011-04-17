@@ -1,9 +1,9 @@
 #ifndef _vtkRebinningCutter_h
 #define _vtkRebinningCutter_h
+#include <boost/scoped_ptr.hpp>
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/RebinningCutterPresenter.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "RebinningActionManager.h"
 
 /**
  *
@@ -40,9 +40,15 @@ namespace Mantid
     //Forward declaration
     class BoxImplicitFunction;
   }
+  namespace VATES
+  {
+    class RebinningActionManager;
+  }
 }
 ///Typedef shared pointer to a box implicit function.
 typedef boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> BoxFunction_sptr;
+///Typedef scoped pointer to a rebinning action manager.
+typedef boost::scoped_ptr<Mantid::VATES::RebinningActionManager> RebinningActionManager_scptr;
 ///Type marks setup status
 enum SetupStatus{ IsSetup, Pending};
 ///Type marks wheter clipping is to be applied or ignored
@@ -167,7 +173,7 @@ private:
   /// the dimension information applied to the tDimension Mapping.
   Mantid::VATES::Dimension_sptr m_appliedTDimension;
   /// Manages the precedence of rebinning related actions.
-  Mantid::VATES::RebinningActionManger m_actionRequester;
+  RebinningActionManager_scptr m_actionRequester;
   /// Box implicit function, used to determine when the clipping has changed.
   BoxFunction_sptr m_box;
 
