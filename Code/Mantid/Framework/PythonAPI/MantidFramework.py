@@ -16,8 +16,9 @@ except:
 
 try:
     import numpy
+    HAVE_NUMPY = True
 except ImportError:
-    pass
+    HAVE_NUMPY = False
 
 # Check whether MANTIDPATH is defined. If so, append it to the PYTHONPATH.
 if os.getenv("MANTIDPATH") is not None:
@@ -63,7 +64,7 @@ else:
 def _makeString(value):
     """Make a string out of a value such that the Mantid properties can understand it
     """
-    if isinstance(value, numpy.ndarray):
+    if HAVE_NUMPY and isinstance(value, numpy.ndarray):
         value = list(value) # Temp until more complete solution available (#2340)
     if isinstance(value, list) or isinstance(value, cpp_list_dbl)  \
             or isinstance(value, cpp_list_int) or isinstance(value, cpp_list_long):
