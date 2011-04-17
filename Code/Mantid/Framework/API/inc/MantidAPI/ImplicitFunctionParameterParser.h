@@ -33,52 +33,74 @@
 #include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "ImplicitFunctionParameter.h"
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+
+/** A base class for absorption correction algorithms.
+
+ XML Parser for parameter types
+
+ @author Owen Arnold, Tessella plc
+ @date 01/10/2010
+
+ Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+
+ This file is part of Mantid.
+
+ Mantid is free software; you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation; either version 3 of the License, or
+ (at your option) any later version.
+
+ Mantid is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+ File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
+ Code Documentation is available at: <http://doxygen.mantidproject.org>
+ */
 
 namespace Mantid
 {
-    namespace API
-    {
-        /** A base class for absorption correction algorithms.
+namespace API
+{
 
-        XML Parser for parameter types
+/*
+ * Deletion policy for unique pointers.
+ */
+template<typename T>
+class DLLExport DeleterPolicy
+{
+public:
+  void operator()(T* pParser)
+  {
+    delete pParser;
+  }
+};
 
-        @author Owen Arnold, Tessella plc
-        @date 01/10/2010
+/*
+ * ImplicitFunctionParameterParser definition. Used to parse implicit function xml.
+ */
+class DLLExport ImplicitFunctionParameterParser
+{
+public:
 
-        Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+  /// Successor type. Unique shared pointer with stack scoped deletion semantics.
+  typedef boost::interprocess::unique_ptr<ImplicitFunctionParameterParser, DeleterPolicy<ImplicitFunctionParameterParser> > SuccessorType;
 
-        This file is part of Mantid.
+  virtual ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
+  virtual void setSuccessorParser(ImplicitFunctionParameterParser* paramParser) = 0;
+  virtual ~ImplicitFunctionParameterParser()
+  {
+  }
+protected:
+  SuccessorType m_successor;
+};
 
-        Mantid is free software; you can redistribute it and/or modify
-        it under the terms of the GNU General Public License as published by
-        the Free Software Foundation; either version 3 of the License, or
-        (at your option) any later version.
-
-        Mantid is distributed in the hope that it will be useful,
-        but WITHOUT ANY WARRANTY; without even the implied warranty of
-        MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-        GNU General Public License for more details.
-
-        You should have received a copy of the GNU General Public License
-        along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-        File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
-        Code Documentation is available at: <http://doxygen.mantidproject.org>
-        */
-
-        class DLLExport ImplicitFunctionParameterParser
-        {
-        public:
-            virtual ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement) = 0;
-            virtual void setSuccessorParser(ImplicitFunctionParameterParser* paramParser) = 0;
-            virtual ~ImplicitFunctionParameterParser()
-            {
-            }
-        protected:
-            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
-
-        };
-    }
+}
 }
 
 #endif

@@ -117,7 +117,8 @@ template<typename VectorValueParameterType>
 void VectorParameterParser<VectorValueParameterType>::setSuccessorParser(
     Mantid::API::ImplicitFunctionParameterParser* paramParser)
 {
-  m_successor = std::auto_ptr<ImplicitFunctionParameterParser>(paramParser);
+  Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
+  m_successor.swap(temp);
 }
 
 template<typename VectorValueParameterType>

@@ -83,8 +83,13 @@ set ( SRC_FILES
 
 set ( SRC_UNITY_IGNORE_FILES src/Atom.cpp
         src/NeutronAtom.cpp
+        src/FacilityInfo.cpp
+        src/FilterChannel.cpp
         src/FileValidator.cpp
-        src/DirectoryValidator.cpp 
+        src/DirectoryValidator.cpp
+        src/PropertyManager.cpp
+        src/Unit.cpp 
+        src/System.cpp
         )
 
 set ( INC_FILES

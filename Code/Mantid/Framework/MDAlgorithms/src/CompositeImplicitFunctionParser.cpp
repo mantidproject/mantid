@@ -1,4 +1,5 @@
-﻿#include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
+﻿#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include "MantidAPI/ImplicitFunctionBuilder.h"
@@ -39,14 +40,15 @@ namespace Mantid
 
         void CompositeImplicitFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
         {
-            this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
+          ImplicitFunctionParser::SuccessorType temp(parser);
+          this->m_successor.swap(temp);
         }
 
         CompositeFunctionBuilder * CompositeImplicitFunctionParser::parseCompositeFunction(Poco::XML::Element* functionElement)
         {
             using namespace Poco::XML;
             ImplicitFunctionParser::checkSuccessorExists();
-            std::auto_ptr<CompositeFunctionBuilder> functionBuilder = std::auto_ptr<CompositeFunctionBuilder>(new CompositeFunctionBuilder);
+            boost::interprocess::unique_ptr<CompositeFunctionBuilder, Mantid::API::DeleterPolicy<CompositeFunctionBuilder> > functionBuilder(new CompositeFunctionBuilder);
             NodeList* childFunctionElementList = functionElement->childNodes();
            
             for(size_t i = 0; i < childFunctionElementList->length(); i++)
@@ -70,7 +72,8 @@ namespace Mantid
 
         void CompositeImplicitFunctionParser::setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
         {
-          this->m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
+          Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(parser);
+          this->m_paramParserRoot.swap(temp);
         }
     }
 }

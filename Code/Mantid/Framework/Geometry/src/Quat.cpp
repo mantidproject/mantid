@@ -157,8 +157,9 @@ void Quat::setAngleAxis(const double _deg, const V3D& _axis)
 
 bool Quat::isNull(const double tolerance) const
 {
-	double pw=std::fabs(w)-1;
-	return (std::fabs(pw)<tolerance);
+  using namespace std;
+	double pw=fabs(w)-1;
+	return (fabs(pw)<tolerance);
 }
 
 ///Extracts the angle of roatation and axis
@@ -378,10 +379,11 @@ Quat& Quat::operator*=(const Quat& _q)
  */
 bool Quat::operator==(const Quat& q) const
 {
-  return (std::fabs(w-q.w)>Tolerance ||
-          std::fabs(a-q.a)>Tolerance ||
-          std::fabs(b-q.b)>Tolerance ||
-          std::fabs(c-q.c)>Tolerance)  ?
+  using namespace std;
+  return (fabs(w-q.w)>Tolerance ||
+          fabs(a-q.a)>Tolerance ||
+          fabs(b-q.b)>Tolerance ||
+          fabs(c-q.c)>Tolerance)  ?
           false : true;
 
 	//return (quat_tol(w,q.w) && quat_tol(a,q.a) && quat_tol(b,q.b) && quat_tol(c,q.c));

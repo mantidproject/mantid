@@ -43,23 +43,21 @@ private:
 
   class MockIMDDimension: public Mantid::Geometry::IMDDimension
   {
+  private:
+    std::string m_id;
   public:
-    MOCK_CONST_METHOD0(getName,
-        std::string());
-    MOCK_CONST_METHOD0(getUnits,
-        std::string());
-    MOCK_CONST_METHOD0(getDimensionId,
-        std::string());
-    MOCK_CONST_METHOD0(getMaximum,
-        double());
-    MOCK_CONST_METHOD0(getMinimum,
-        double());
-    MOCK_CONST_METHOD0(getNBins,
-        size_t());
-    MOCK_CONST_METHOD0(toXMLString,
-        std::string());
-    MOCK_CONST_METHOD1(getX,
-        double(size_t ind));
+    MockIMDDimension(std::string id) : m_id(id) {}
+    std::string getName() const {throw std::runtime_error("Not implemented");}
+    std::string getUnits() const {throw std::runtime_error("Not implemented");}
+    std::string getDimensionId() const {return m_id;}
+    double getMaximum() const {throw std::runtime_error("Not implemented");}
+    double getMinimum() const {throw std::runtime_error("Not implemented");};
+    size_t getNBins() const {throw std::runtime_error("Not implemented");};
+    std::string toXMLString() const {throw std::runtime_error("Not implemented");};
+    double getX(size_t) const {throw std::runtime_error("Not implemented");};
+    virtual ~MockIMDDimension()
+    {
+    }
   };
 
   class MockIMDWorkspace: public Mantid::API::IMDWorkspace
@@ -96,14 +94,16 @@ private:
       uniqueArgumentCombination unique; //Creates a unique return value based on the inputs. Used to determine the arranagement of input arguments after remapping.
       return unique(index1, index2, index3, index4);
     }
+    virtual ~MockIMDWorkspace()
+    {
+    }
   };
 
   /// Helper method. Creates a mock x Dimension by assigning a specified id to the getDimensionId return type on the mock object created.
   static Mantid::Geometry::IMDDimension* createXDimension()
   {
     using namespace testing;
-    MockIMDDimension* p_xDim = new MockIMDDimension;
-    EXPECT_CALL(*p_xDim, getDimensionId()).Times(AtLeast(1)).WillRepeatedly(Return(getXDimId()));
+    MockIMDDimension* p_xDim = new MockIMDDimension(getXDimId());
     return p_xDim;
   }
 
@@ -111,8 +111,7 @@ private:
   static Mantid::Geometry::IMDDimension* createYDimension()
   {
     using namespace testing;
-    MockIMDDimension* p_yDim = new MockIMDDimension;
-    EXPECT_CALL(*p_yDim, getDimensionId()).Times(AtLeast(1)).WillRepeatedly(Return(getYDimId()));
+    MockIMDDimension* p_yDim = new MockIMDDimension(getYDimId());
     return p_yDim;
   }
 
@@ -120,8 +119,7 @@ private:
   static Mantid::Geometry::IMDDimension* createZDimension()
   {
     using namespace testing;
-    MockIMDDimension* p_zDim = new MockIMDDimension;
-    EXPECT_CALL(*p_zDim, getDimensionId()).Times(AtLeast(1)).WillRepeatedly(Return(getZDimId()));
+    MockIMDDimension* p_zDim = new MockIMDDimension(getZDimId());
     return p_zDim;
   }
 
@@ -129,8 +127,7 @@ private:
   static Mantid::Geometry::IMDDimension* createTDimension()
   {
     using namespace testing;
-    MockIMDDimension* p_tDim = new MockIMDDimension;
-    EXPECT_CALL(*p_tDim, getDimensionId()).Times(AtLeast(1)).WillRepeatedly(Return(getTDimId()));
+    MockIMDDimension* p_tDim = new MockIMDDimension(getTDimId());
     return p_tDim;
   }
 

@@ -93,10 +93,10 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	#test/testCPComponents.h TODO: Is this test really necessary?
-	test/CPR_preselectCellsTest.h
-	test/CPRebinKeepPixTest.h
-	test/CobaltSWDTest.h
-	test/CreateMDFitWorkspaceTest.h
+	#test/CPR_preselectCellsTest.h
+	#test/CPRebinKeepPixTest.h
+	#test/CobaltSWDTest.h
+	#test/CreateMDFitWorkspaceTest.h
 	test/DepthParameterTest.h
 	test/DimensionFactoryTest.h
 	test/DynamicRebinFromXMLAlgorithmTest.h

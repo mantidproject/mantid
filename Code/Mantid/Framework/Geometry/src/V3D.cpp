@@ -298,9 +298,10 @@ V3D::operator/=(const double D)
 bool
 V3D::operator==(const V3D& v) const
 {
-  return (std::fabs(x-v.x)>Tolerance ||
-    std::fabs(y-v.y)>Tolerance ||
-    std::fabs(z-v.z)>Tolerance)  ?
+  using namespace std;
+  return (fabs(x-v.x)>Tolerance ||
+    fabs(y-v.y)>Tolerance ||
+    fabs(z-v.z)>Tolerance)  ?
     false : true;
 }
 
@@ -585,11 +586,12 @@ V3D::nullVector(const double Tol) const
     @retval 0 :: Vector bigger than Tol
   */
 {
-  if (std::fabs(x)>Tol)
+  using namespace std;
+  if (fabs(x)>Tol)
     return false;
-  if (std::fabs(y)>Tol)
+  if (fabs(y)>Tol)
     return false;
-  if (std::fabs(z)>Tol)
+  if (fabs(z)>Tol)
     return false;
 
   // Getting to this point means a null vector

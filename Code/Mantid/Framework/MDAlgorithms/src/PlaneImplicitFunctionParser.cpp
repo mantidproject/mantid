@@ -1,4 +1,6 @@
-﻿#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
+﻿#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/scoped_ptr.hpp>
+#include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
@@ -42,20 +44,21 @@ namespace Mantid
 
     void PlaneImplicitFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
     {
-      this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
+      ImplicitFunctionParser::SuccessorType temp(parser);
+      this->m_successor.swap(temp);
     }
 
     PlaneFunctionBuilder * PlaneImplicitFunctionParser::parsePlaneFunction(Poco::XML::Element* functionElement)
     {
       using namespace Poco::XML;
-      std::auto_ptr<PlaneFunctionBuilder> functionBuilder = std::auto_ptr<PlaneFunctionBuilder>(new PlaneFunctionBuilder);
+      boost::interprocess::unique_ptr<PlaneFunctionBuilder, Mantid::API::DeleterPolicy<PlaneFunctionBuilder> > functionBuilder(new PlaneFunctionBuilder);
       NodeList* parameterList = functionElement->getChildElement("ParameterList")->childNodes();
 
       //Loop through all parameters and attemp to identify those that are known to belong to this implicit function type.
       for(unsigned int i = 0; i < parameterList->length(); i++)
       {
         Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
-        std::auto_ptr<API::ImplicitFunctionParameter> parameter = std::auto_ptr<API::ImplicitFunctionParameter>(this->parseParameter(parameterElement));
+        boost::scoped_ptr<API::ImplicitFunctionParameter> parameter(this->parseParameter(parameterElement));
         if(NormalParameter::parameterName() == parameter->getName())
         { 
           NormalParameter* pCurr = dynamic_cast<NormalParameter*>(parameter.get());
@@ -98,7 +101,8 @@ namespace Mantid
 
     void PlaneImplicitFunctionParser::setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      this->m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
+      Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(parser);
+      this->m_paramParserRoot.swap(temp);
     }
   }
 }

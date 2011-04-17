@@ -1,3 +1,4 @@
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/BoxImplicitFunctionParser.h"
 #include "MantidAPI/ImplicitFunctionParserFactory.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"
@@ -41,7 +42,8 @@ namespace Mantid
 
     void BoxImplicitFunctionParser::setSuccessorParser(ImplicitFunctionParser* parser)
     {
-      this->m_successor = std::auto_ptr<ImplicitFunctionParser>(parser);
+      ImplicitFunctionParser::SuccessorType temp(parser);
+      this->m_successor.swap(temp);
     }
 
     BoxFunctionBuilder * BoxImplicitFunctionParser::parseBoxFunction(Poco::XML::Element* functionElement)
@@ -58,7 +60,7 @@ namespace Mantid
 
        std::string namee= parameterElement->localName();
 
-        std::auto_ptr<API::ImplicitFunctionParameter> parameter = std::auto_ptr<API::ImplicitFunctionParameter>(this->parseParameter(parameterElement));
+        boost::scoped_ptr<API::ImplicitFunctionParameter> parameter(this->parseParameter(parameterElement));
         if(WidthParameter::parameterName() == parameter->getName())
         { 
           WidthParameter* pCurr = dynamic_cast<WidthParameter*>(parameter.get());
@@ -101,7 +103,8 @@ namespace Mantid
 
     void BoxImplicitFunctionParser::setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      this->m_paramParserRoot = std::auto_ptr<Mantid::API::ImplicitFunctionParameterParser>(parser);
+      Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(parser);
+      this->m_paramParserRoot.swap(temp);
     }
   }
 }

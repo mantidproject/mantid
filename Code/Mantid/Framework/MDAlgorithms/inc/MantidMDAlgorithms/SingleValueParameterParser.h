@@ -95,7 +95,8 @@ template<class SingleValueParameterType>
 void SingleValueParameterParser<SingleValueParameterType>::setSuccessorParser(
     Mantid::API::ImplicitFunctionParameterParser* paramParser)
 {
-  m_successor = std::auto_ptr<ImplicitFunctionParameterParser>(paramParser);
+  Mantid::API::ImplicitFunctionParameterParser::SuccessorType temp(paramParser);
+  m_successor.swap(temp);
 }
 
 template<class SingleValueParameterType>
