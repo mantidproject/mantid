@@ -153,8 +153,7 @@ public:
 
     //The detector has 304x256 pixels
     TS_ASSERT_LESS_THAN( ew->getAxis(1)->spectraNo(numpixels_with_events-1), 304*256);
-    int max_pixel_id = ew->getAxis(1)->spectraNo(numpixels_with_events-1);
-
+   
     //And the spectramap length matches the # of pixels with events
     TS_ASSERT_EQUALS( ew->spectraMap().nElements(), numpixels_with_events);
 
