@@ -301,7 +301,7 @@ namespace NeXus
       size_t ypixels = det->ypixels();
 
       PARALLEL_FOR1(inputWorkspace)
-      for (int y = 0; y < ypixels; y++)
+      for (size_t y = 0; y < ypixels; y++)
       {
         PARALLEL_START_INTERUPT_REGION
         //Get the workspace index for the detector ID at this spot

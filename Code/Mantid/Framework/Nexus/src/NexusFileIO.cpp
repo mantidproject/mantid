@@ -1216,7 +1216,9 @@ using namespace DataObjects;
     {
       std::string nxName=nxname;
       status=NXopendata(fileID,nxname);
-      if(checkAttributeName("signal"))
+      // FIXME: Is the correct ?
+      //if(checkAttributeName("signal"))
+      if(checkAttributeName(attribute))
       {
         entry=nxname;
         delete[] nxname;

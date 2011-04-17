@@ -277,7 +277,9 @@ void SaveISISNexus::saveIntOpen(const char* name,void* data, int size)
 {
   int dim[1];
   dim[0] = size;
-  NXstatus status = NXmakedata(handle,name,NX_INT32,1,dim);
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_INT32,1,dim); 
   NXopendata(handle,name);
   NXputdata(handle,data);
 }
@@ -292,7 +294,9 @@ void SaveISISNexus::saveCharOpen(const char* name,void* data, int size)
 {
   int dim[1];
   dim[0] = size;
-  NXstatus status = NXmakedata(handle,name,NX_CHAR,1,dim);
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_CHAR,1,dim);
   NXopendata(handle,name);
   NXputdata(handle,data);
 }
@@ -307,7 +311,9 @@ void SaveISISNexus::saveFloatOpen(const char* name,void* data, int size)
 {
   int dim[1];
   dim[0] = size;
-  NXstatus status = NXmakedata(handle,name,NX_FLOAT32,1,dim);
+  // If we aren't going to anything with the status, then don't bother asking
+  // for it!  (NXstatus status = NXblah())
+  NXmakedata(handle,name,NX_FLOAT32,1,dim);
   NXopendata(handle,name);
   NXputdata(handle,data);
 }

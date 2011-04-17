@@ -39,6 +39,7 @@ const std::string LoadSNSEventNexus::name() const
  */
 int LoadSNSEventNexus::fileCheck(const std::string& filePath)
 {
+  UNUSED_ARG(filePath);
   return 0;
 }
 
