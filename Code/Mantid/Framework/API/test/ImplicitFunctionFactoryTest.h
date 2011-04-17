@@ -53,12 +53,12 @@ private:
     }
      void setSuccessorParser(Mantid::API::ImplicitFunctionParser* successor)
     {
-      Mantid::API::ImplicitFunctionParser::ImplicitFunctionParser::SuccessorType successor_uptr(successor);
+      Mantid::API::ImplicitFunctionParser::SuccessorType successor_uptr(successor);
       m_successor.swap(successor_uptr);
     }
     void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      Mantid::API::ImplicitFunctionParameterParser::ImplicitFunctionParameterParser::SuccessorType successor(parser);
+      Mantid::API::ImplicitFunctionParameterParser::SuccessorType successor(parser);
       m_paramParserRoot.swap(successor);
     }
   };
@@ -75,12 +75,12 @@ private:
     }
      void setSuccessorParser(Mantid::API::ImplicitFunctionParser* successor)
     {
-       Mantid::API::ImplicitFunctionParser::ImplicitFunctionParser::SuccessorType successor_uptr(successor);
+       Mantid::API::ImplicitFunctionParser::SuccessorType successor_uptr(successor);
        m_successor.swap(successor_uptr);
     }
     void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser)
     {
-      Mantid::API::ImplicitFunctionParameterParser::ImplicitFunctionParameterParser::SuccessorType successor(parser);
+      Mantid::API::ImplicitFunctionParameterParser::SuccessorType successor(parser);
       m_paramParserRoot.swap(successor);
     }
   };
