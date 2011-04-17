@@ -87,6 +87,9 @@ int IDCclose(idc_handle_t* pfh)
 /** main worker routine for all data reading. Returns 0 on success, -1 on error */
 static int getdat(idc_handle_t fh, int ifsn, int nos, int** value, int dims_array[], int* ndims, int do_alloc)
 {
+        (void) isisds_type_size; // Avoid compiler warning
+        (void) isisds_type_name; // Avoid compiler warning
+
 	int stat, comm_buff_size;
 	ISISDSDataType ret_type;
 	int spec_nos[2] = { ifsn, nos };
@@ -331,7 +334,7 @@ void __stdcall IDCFGETPARC(int fh[], const char* name, unsigned len_name, char v
 void idcfgetparc_(int fh[], const char* name, char* value, int dims_array[], int* ndims,  int* errcode, unsigned len_name, unsigned len_value)
 #endif
 {
-  (void) len_value; // Avoid compiler warning
+  (void) len_value; // Avoid compiler warning  
 
 	int stat;
 	char t_name[256];

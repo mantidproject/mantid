@@ -213,6 +213,10 @@ int isisds_recv_open(SOCKET s, ISISDSAccessMode* access_type)
  */
 int isisds_send_command(SOCKET s, const char* command, const void* data, ISISDSDataType type, const int dims_array[], int ndims)
 {
+
+        (void) isisds_type_code; // Avoid compiler warning
+        (void) isisds_type_name; // Avoid compiler warning
+
 	int i, n, len_data;
 	isisds_command_header_t comm;
 	memset(&comm, 0, sizeof(comm));
