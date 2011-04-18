@@ -34,6 +34,10 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
+#ifdef _WIN32
+  #pragma warning( disable: 4800 )
+#endif
+
 #define  _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <iostream>

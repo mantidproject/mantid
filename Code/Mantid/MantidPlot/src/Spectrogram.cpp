@@ -26,6 +26,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#define _SCL_SECURE_NO_WARNINGS
+
 #include "qwt_compat.h"
 #include "Spectrogram.h"
 #include <math.h>

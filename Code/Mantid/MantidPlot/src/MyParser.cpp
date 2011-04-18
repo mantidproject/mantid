@@ -26,6 +26,10 @@
  *   Boston, MA  02110-1301  USA                                           *
  *                                                                         *
  ***************************************************************************/
+#ifdef _WIN32
+#pragma warning(disable: 4251)
+#endif
+
 #include "MyParser.h"
 
 MyParser::MyParser()

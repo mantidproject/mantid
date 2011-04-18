@@ -15,6 +15,8 @@
 
 /* @(#) $Id$ */
 
+#define  _CRT_SECURE_NO_WARNINGS
+
 #include <stdio.h>
 #include "zlib.h"
 
@@ -213,7 +215,7 @@ void file_compress(file, mode)
     }
     gz_compress(in, out);
 
-    unlink(file);
+    _unlink(file);
 }
 
 
@@ -253,6 +255,6 @@ void file_uncompress(file)
 
     gz_uncompress(in, out);
 
-    unlink(infile);
+    _unlink(infile);
 }
 
