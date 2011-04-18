@@ -54,7 +54,7 @@ class DLLExport TestCut : public IMDWorkspace
 {
 private:
    int m_points;
-   int m_cells;
+   size_t m_cells;
 
    std::vector<Mantid::Geometry::MDCell> m_mdcells;
 
@@ -100,7 +100,7 @@ public:
           return(m_mdcells.at(dim1Increment));
       };
 
-      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment,unsigned  int dim2Increment) const
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
       {
         throw std::runtime_error("Not implemented");
       }
