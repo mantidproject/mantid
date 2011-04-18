@@ -75,8 +75,8 @@ void FindDetectorsInShape::initDocs()
 			std::vector<int> foundDets;
 
 			//progress
-			int objCmptCount = objCmptList->size();
-			int iprogress_step = objCmptCount / 100;
+			IInstrument::plottables::size_type objCmptCount = objCmptList->size();
+			int iprogress_step = static_cast<int>(objCmptCount / 100);
 			if (iprogress_step == 0) iprogress_step = 1;
 
 			//for every plottable item
@@ -100,7 +100,7 @@ void FindDetectorsInShape::initDocs()
 					}
 				}
 
-				int i=objCmptList->end()-it;
+				int i = static_cast<int>(objCmptList->end()-it);
 				if (i % iprogress_step == 0)
 				{
 					progress(double(i)/objCmptCount);

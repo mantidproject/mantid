@@ -117,11 +117,11 @@ void GroupDetectors2::exec()
   // Check what the user asked to be done with ungrouped spectra
   const bool keepAll = getProperty("KeepUngroupedSpectra");
   // ignore the one USED value in set or ignore all the ungrouped if the user doesn't want them
-  const int numUnGrouped = keepAll ? unGroupedSet.size()-1 : 0;
+  const int numUnGrouped = keepAll ? static_cast<int>(unGroupedSet.size())-1 : 0;
 
   MatrixWorkspace_sptr outputWS =
     WorkspaceFactory::Instance().create(inputWS,
-    m_GroupSpecInds.size()+ numUnGrouped, inputWS->readX(0).size(),
+    static_cast<int>(m_GroupSpecInds.size()+ numUnGrouped), static_cast<int>(inputWS->readX(0).size()),
     inputWS->blocksize());
 
   // prepare to move the requested histograms into groups, first estimate how long for progress reporting. +1 in the demonator gets rid of any divide by zero risk
@@ -508,7 +508,7 @@ void GroupDetectors2::readSpectraIndexes(std::string line, std::map<int,int> &sp
 *  @param numInHists :: the total number of histograms in the input workspace
 *  @return estimate of the amount of algorithm progress obtained by reading from the file
 */
-double GroupDetectors2::fileReadProg(int numGroupsRead, int numInHists)
+double GroupDetectors2::fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists)
 {
   // I'm going to guess that there are half as many groups as spectra
   double progEstim = 2*numGroupsRead/static_cast<float>(numInHists);
@@ -544,7 +544,8 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
   if ( behaviour == "Average" ) bhv = 1;
 
   std::vector<int> grpSize;
-  API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create("Workspace2D", m_GroupSpecInds.size(), 1, 1);
+  API::MatrixWorkspace_sptr beh = API::WorkspaceFactory::Instance().create(
+    "Workspace2D", static_cast<int>(m_GroupSpecInds.size()), 1, 1);
 
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
 
@@ -565,7 +566,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     {
       beh->dataX(outIndex)[0] = 0.0;
       beh->dataE(outIndex)[0] = 0.0;
-      beh->dataY(outIndex)[0] = it->second.size();
+      beh->dataY(outIndex)[0] = static_cast<double>(it->second.size());
     }
 
     // Copy over X data from first spectrum, the bin boundaries for all spectra are assumed to be the same here
@@ -782,7 +783,7 @@ void GroupDetectors2::GroupXmlReader::endElement(const Poco::XML::XMLString&, co
 {
   if ( m_inGroup && localName == "group" )
   {
-    m_groups[m_groups.size()] = m_currentGroup;
+    m_groups[static_cast<int>(m_groups.size())] = m_currentGroup;
     m_currentGroup.clear();
     m_inGroup = false;
   }

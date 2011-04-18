@@ -107,8 +107,8 @@ void SaveFocusedXYE::exec()
         out << "# Data for spectra :"<< i << std::endl;
         out << "# " << inputWS->getAxis(0)->unit()->caption() << "              Y                 E" <<std::endl;
       }
-      const int datasize = Y.size();
-      for (int j = 0; j < datasize; j++)
+      const size_t datasize = Y.size();
+      for (size_t j = 0; j < datasize; j++)
       {
         double xvalue(0.0);
         if( isHistogram )

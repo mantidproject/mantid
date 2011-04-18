@@ -115,7 +115,7 @@ namespace Mantid
         throw Kernel::Exception::FileError("Unable to open the file:", filePath);
       }
       file_header header;
-      int nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
+      size_t nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
       // Ensure the character string is null terminated.
       header.full_hdr[g_hdr_bytes] = '\0';
       if (nread == -1)

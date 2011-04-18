@@ -60,7 +60,7 @@ namespace Mantid
 	  std::ifstream file(filename.c_str());
 
 	  file.seekg (0, std::ios::end);
-	  Progress progress(this,0,1,file.tellg());
+	  Progress progress(this,0,1,static_cast<int>(file.tellg()));
 	  file.seekg (0, std::ios::beg);
 
 	  std::string str;
@@ -95,7 +95,7 @@ namespace Mantid
 	  int working_with_spectrum_nbr = -1; //spectrum number
 	  while(getline(file,str))
 	  {
-	    progress.report(file.tellg());
+	    progress.report(static_cast<int>(file.tellg()));
 
 	    //line with data, need to be parsed by white spaces
 	    if (!str.empty() && str[0] != '#')

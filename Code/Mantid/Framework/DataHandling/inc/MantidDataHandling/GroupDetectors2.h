@@ -219,7 +219,7 @@ private:
                    std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator="#");
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
-  double fileReadProg(int numGroupsRead, int numInHists);
+  double fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
   int formGroups(API::MatrixWorkspace_const_sptr inputWS,

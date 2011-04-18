@@ -543,7 +543,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
   if (static_cast<int>(event_indices.size()) < numPulses)
   {
     g_log.warning() << "Event_indices vector is smaller than the pulsetimes array.\n";
-    numPulses = event_indices.size();
+    numPulses = static_cast<int>(event_indices.size());
   }
 
   // process the individual events

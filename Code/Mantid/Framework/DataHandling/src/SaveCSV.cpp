@@ -138,7 +138,7 @@ void SaveCSV::exec()
     const MantidVec& xValue = localworkspace->dataX();
     const MantidVec& yValue = localworkspace->dataY();
     const MantidVec& eValue = localworkspace->dataE();
-    Progress p(this,0,1,xValue.size());
+    Progress p(this, 0, 1, static_cast<int>(xValue.size()));
     // write to file
     
     for (int i = 0; i < (int)xValue.size(); i++)

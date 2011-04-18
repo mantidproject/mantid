@@ -873,7 +873,7 @@ namespace Mantid
           }
           if (m_spec_list.size() == 0)
             m_list = false;
-          total_specs += m_spec_list.size();
+          total_specs += static_cast<int>(m_spec_list.size());
           m_total_specs=total_specs;
 
         }

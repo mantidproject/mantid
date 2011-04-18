@@ -49,6 +49,7 @@ void SaveRKH::init()
   std::vector<std::string> exts;
   exts.push_back(".txt");
   exts.push_back(".Q");
+  exts.push_back(".dat");
   declareProperty(new API::FileProperty("Filename", "", API::FileProperty::Save, exts),
 		"The name to use when saving the file");
   declareProperty("Append",true,"If true and Filename already exists, append, else overwrite");

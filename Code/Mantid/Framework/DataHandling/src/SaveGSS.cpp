@@ -64,7 +64,7 @@ void SaveGSS::init()
  * Determine the focused position for the supplied spectrum. The position
  * (l1, l2, tth) is returned via the references passed in.
  */
-void getFocusedPos(MatrixWorkspace_const_sptr wksp, const size_t spectrum, double &l1, double &l2, double &tth) {
+void getFocusedPos(MatrixWorkspace_const_sptr wksp, const int spectrum, double &l1, double &l2, double &tth) {
   Geometry::IInstrument_const_sptr instrument = wksp->getInstrument();
   if (instrument == NULL)
   {

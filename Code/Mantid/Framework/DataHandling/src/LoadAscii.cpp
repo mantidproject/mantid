@@ -288,7 +288,7 @@ namespace Mantid
         // Asked for dimensionless workspace (obviously not in unit factory)
       }
 
-      for(size_t i = 0; i < (size_t)numSpectra; ++i)
+      for(int i = 0; i < numSpectra; ++i)
       {
         localWorkspace->dataX(i) = spectra[i].dataX();
         localWorkspace->dataY(i) = spectra[i].dataY();
@@ -329,7 +329,7 @@ namespace Mantid
     int LoadAscii::splitIntoColumns(std::list<std::string> & columns, const std::string & str) const
     {
       boost::split(columns, str, boost::is_any_of(m_columnSep), boost::token_compress_on);
-      return columns.size();
+      return static_cast<int>(columns.size());
     }
 
     /**

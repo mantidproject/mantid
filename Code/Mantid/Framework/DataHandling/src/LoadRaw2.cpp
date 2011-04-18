@@ -141,7 +141,7 @@ namespace Mantid
 
             }
             if (m_spec_list.size() == 0) m_list = false;
-            total_specs += m_spec_list.size();
+            total_specs += static_cast<int>(m_spec_list.size());
         }
       }
       else
@@ -158,9 +158,10 @@ namespace Mantid
           total_specs == m_numberOfSpectra)
       {
         const std::string cache_option = getPropertyValue("Cache");
-        int option = find(m_cache_options.begin(),m_cache_options.end(),cache_option) - m_cache_options.begin();
-        DataObjects::Workspace2D_sptr localWorkspace = 
-          DataObjects::Workspace2D_sptr(new ManagedRawFileWorkspace2D(m_filename, option));
+        size_t option = find(m_cache_options.begin(),m_cache_options.end(),cache_option) - m_cache_options.begin();
+        DataObjects::Workspace2D_sptr localWorkspace =
+          DataObjects::Workspace2D_sptr(
+          new ManagedRawFileWorkspace2D(m_filename, static_cast<int>(option)));
         progress(0.,"Reading raw file...");
         helper->loadRunParameters(localWorkspace, isisRaw.get());
         runLoadInstrument(localWorkspace );

@@ -549,11 +549,11 @@ void LoadRaw3::goManagedRaw(bool bincludeMonitors, bool bexcludeMonitors, bool b
 {
   const std::string cache_option = getPropertyValue("Cache");
   bool bLoadlogFiles = getProperty("LoadLogFiles");
-  int option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
+  size_t option = find(m_cache_options.begin(), m_cache_options.end(), cache_option)
     - m_cache_options.begin();
   progress(m_prog, "Reading raw file data...");
   DataObjects::Workspace2D_sptr localWorkspace = DataObjects::Workspace2D_sptr(
-    new ManagedRawFileWorkspace2D(fileName, option));
+    new ManagedRawFileWorkspace2D(fileName, static_cast<int>(option)));
   m_prog = 0.2;
   loadRunParameters(localWorkspace);
   runLoadInstrument(fileName,localWorkspace);

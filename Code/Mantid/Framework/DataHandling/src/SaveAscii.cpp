@@ -85,7 +85,7 @@ namespace Mantid
                 else
                     idx.insert(spec_list[i]);
 
-        if (!idx.empty()) nSpectra = idx.size();
+        if (!idx.empty()) nSpectra = static_cast<int>(idx.size());
 
         if (nBins == 0 || nSpectra == 0) throw std::runtime_error("Trying to save an empty workspace");
 

@@ -52,7 +52,8 @@ void SaveNISTDAT::exec()
   out_File << "ASCII data\r\n";
 
   // Set up the progress reporting object
-  Progress progress(this,0.0,1.0,1.0);
+  Progress progress(this,0.0,1.0,2);
+  progress.report("Save I(Qx,Qy)");
 
   if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
   {

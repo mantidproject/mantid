@@ -21,6 +21,9 @@
 #include "idc.h"
 #include "isisds_command.h"
 
+//suppress warnings that say that vsprintf has been deprecated
+#define _CRT_SECURE_NO_WARNINGS
+
 ///@cond nodoc
 /** used to keep status information about the DAE connection */
 struct idc_info
@@ -145,7 +148,7 @@ static int IDCgetpar(idc_handle_t fh, const char* name, void** value, ISISDSData
 	char* command = NULL;
 	char comm_buffer[256];
 	sprintf(comm_buffer, "GETPAR%s", isisds_type_code[type]);
-	n = strlen(name);
+	n = static_cast<int>(strlen(name));
 	if (isisds_send_command(fh->s, comm_buffer, name, ISISDSChar, &n, 1) <= 0)
 	{
 		IDCreport(0, 0, "error sending command %s (getpar)", name);

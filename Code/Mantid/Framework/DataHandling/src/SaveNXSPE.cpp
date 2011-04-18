@@ -210,7 +210,7 @@ namespace Mantid
 
       std::vector<int> array_dims;
       array_dims.push_back(nHist);
-      array_dims.push_back(nBins);
+      array_dims.push_back(static_cast<int>(nBins));
 
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
@@ -220,7 +220,7 @@ namespace Mantid
 
       // What size slabs are we going to write...
       slab_size.push_back(1);
-      slab_size.push_back(nBins);
+      slab_size.push_back(static_cast<int>(nBins));
 
       // And let's start at the beginning
       slab_start.push_back(0);
@@ -235,7 +235,7 @@ namespace Mantid
       const int progStep = static_cast<int>(ceil(nHist/100.0));
       
       // Loop over spectra
-      for (size_t i = 0; i < static_cast<size_t> (nHist); i++)
+      for (int i = 0; i < nHist; i++)
         {
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())

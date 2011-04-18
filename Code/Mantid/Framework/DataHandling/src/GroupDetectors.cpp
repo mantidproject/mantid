@@ -102,7 +102,7 @@ void GroupDetectors::exec()
   const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
   setProperty("ResultIndex",firstIndex);
   // loop over the spectra to group
-  Progress progress(this,0.0,1.0,indexList.size()-1);
+  Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
   for (unsigned int i = 0; i < indexList.size()-1; ++i)
   {
     const int currentIndex = indexList[i+1];

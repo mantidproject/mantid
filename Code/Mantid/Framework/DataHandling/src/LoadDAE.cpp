@@ -284,7 +284,7 @@ namespace Mantid
       long total_specs;
       if( m_interval || m_list)
       {
-        total_specs = m_spec_list.size();
+        total_specs = static_cast<long>(m_spec_list.size());
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);

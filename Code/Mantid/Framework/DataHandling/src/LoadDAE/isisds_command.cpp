@@ -347,7 +347,7 @@ int isisds_recv_command(SOCKET s, char* command, int* len_command, void* data, I
 		istat = isisds_recv_command_helper(s, &command_temp, &data, type, dims_array, ndims, 0);
 	}
 	strncpy(command, command_temp, *len_command);
-	*len_command = strlen(command_temp);
+	*len_command = static_cast<int>(strlen(command_temp));
 	free(command_temp);
 	return istat;
 }

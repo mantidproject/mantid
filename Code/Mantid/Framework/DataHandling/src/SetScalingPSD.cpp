@@ -194,7 +194,7 @@ namespace DataHandling
           std::vector<Geometry::V3D> truepos;
           getDetPositionsFromRaw(scalingFile,detID,truepos);
           //
-          int detectorCount=detID.size();
+          int detectorCount = static_cast<int>(detID.size());
           if(detectorCount<1)
           {
               g_log.error("Failed to read any detectors from RAW file");
@@ -318,7 +318,7 @@ void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry
   int scaleCount=0;
   //progress 50% here inside the for loop
   //double prog=0.5;
-  Progress prog(this,0.5,1.0,m_vectDet.size());
+  Progress prog(this,0.5,1.0, static_cast<int>(m_vectDet.size()));
   // loop over detector (IComps)
   for(size_t id=0;id<m_vectDet.size();id++)
   {
