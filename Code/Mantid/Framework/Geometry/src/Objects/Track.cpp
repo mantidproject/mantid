@@ -102,7 +102,7 @@ namespace Mantid
       {
         if( (ac->exitPoint).distance(bc->entryPoint) > Tolerance)
         {
-          return (distance(m_links.begin(),bc) + 1);
+          return (static_cast<int>(distance(m_links.begin(),bc)) + 1);
         }
         ac++;
         bc++;
@@ -182,7 +182,7 @@ namespace Mantid
       {
         LType::iterator linkPtr = std::lower_bound(m_links.begin(),m_links.end(),newLink);
         //must extract the distance before you insert otherwise the iterators are incompatible
-        index = std::distance(m_links.begin(), linkPtr);
+        index = static_cast<int>(std::distance(m_links.begin(), linkPtr));
         m_links.insert(linkPtr,newLink);
       }
       return index;

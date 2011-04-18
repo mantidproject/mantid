@@ -749,7 +749,7 @@ namespace Mantid
           Ln.replace(lbrack, 1 + rbrack - lbrack, Lx);
           // Search back and find if # ( exists.
           int hCnt;
-          for (hCnt = lbrack - 1; hCnt >= 0 && isspace(Ln[hCnt]); hCnt--)
+          for (hCnt = static_cast<int>(lbrack) - 1; hCnt >= 0 && isspace(Ln[hCnt]); hCnt--)
             ;
           if (hCnt >= 0 && Ln[hCnt] == '#')
           {

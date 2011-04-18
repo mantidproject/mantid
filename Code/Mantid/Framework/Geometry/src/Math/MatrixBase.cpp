@@ -247,12 +247,12 @@ MatrixBase<T>::operator*(const MatrixBase<T>& A) const
   /**
     MatrixBase multiplication THIS * A
     @param A :: MatrixBase to multiply by  (this->row must == A->columns)
-    @throw MisMatch<int> if there is a size mismatch.
+    @throw MisMatch<size_t> if there is a size mismatch.
     @return MatrixBase(This * A)
  */
 {
   if (ny!=A.nx)
-    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"MatrixBase::operator*(MatrixBase)");
+    throw Kernel::Exception::MisMatch<size_t>(ny,A.nx,"MatrixBase::operator*(MatrixBase)");
   MatrixBase<T> X(nx,A.ny);
   for(int i=0;i<nx;i++)
     for(int j=0;j<A.ny;j++)
@@ -267,13 +267,13 @@ MatrixBase<T>::operator*(const std::vector<T>& Vec) const
   /**
     MatrixBase multiplication THIS * Vec to produce a vec
     @param Vec :: size of vector > this->nrows
-    @throw MisMatch<int> if there is a size mismatch.
+    @throw MisMatch<size_t> if there is a size mismatch.
     @return MatrixBase(This * Vec)
   */
 {
   std::vector<T> Out;
   if (ny>static_cast<int>(Vec.size()))
-    throw Kernel::Exception::MisMatch<int>(ny,Vec.size(),"MatrixBase::operator*(Vec)");
+    throw Kernel::Exception::MisMatch<size_t>(ny,Vec.size(),"MatrixBase::operator*(Vec)");
 
   Out.resize(nx);
   for(int i=0;i<nx;i++)
@@ -313,7 +313,7 @@ MatrixBase<T>::operator*=(const MatrixBase<T>& A)
    */
 {
   if (ny!=A.nx)
-    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"MatrixBase*=(MatrixBase<T>)");
+    throw Kernel::Exception::MisMatch<size_t>(ny,A.nx,"MatrixBase*=(MatrixBase<T>)");
   // This construct to avoid the problem of changing size
   *this = this->operator*(A);
   return *this;

@@ -670,14 +670,14 @@ Rule::getKeyList(std::vector<int>& IList)  const
 	  else
 	    {
 	      std::cerr<<"Error with surface List"<<std::endl;
-	      return IList.size();
+	      return static_cast<int>(IList.size());
 	    }
 	}
     }
   std::sort(IList.begin(),IList.end());
   std::vector<int>::iterator px=std::unique(IList.begin(),IList.end());
   IList.erase(px,IList.end());
-  return IList.size();
+  return static_cast<int>(IList.size());
 }
 
 int
@@ -740,15 +740,9 @@ Rule::Eliminate()
       if (keyChange<0)     // Success !!!!!
 	deadKeys.push_back(targetKey);
     }
-
-  // NOW REMOVE DEAD KEYS
-//  std::vector<int>::const_iterator vc;
-//  for(vc=deadKeys.begin();vc!=deadKeys.end();vc++)
-//    removeItem(*vc);
-
-  return deadKeys.size();
+  return static_cast<int>(deadKeys.size());
 }
 
-}  // NAMESPACE MonteCarlo
+}  // NAMESPACE Geometry
 
 }  // NAMESPACE Mantid

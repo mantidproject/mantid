@@ -90,17 +90,17 @@ namespace Geometry
     pos += V3D( mRectDet->xstep()*(-0.5), mRectDet->ystep()*(-0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (tex_frac_x, 0.0);
+    glTexCoord2f ((GLfloat)tex_frac_x, 0.0);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1,0);
     pos += V3D( mRectDet->xstep()*(+0.5), mRectDet->ystep()*(-0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (tex_frac_x, tex_frac_y);
+    glTexCoord2f ((GLfloat)tex_frac_x, (GLfloat)tex_frac_y);
     pos = mRectDet->getRelativePosAtXY(mRectDet->xpixels()-1, mRectDet->ypixels()-1);
     pos += V3D( mRectDet->xstep()*(+0.5), mRectDet->ystep()*(+0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());
 
-    glTexCoord2f (0.0, tex_frac_y);
+    glTexCoord2f (0.0, (GLfloat)tex_frac_y);
     pos = mRectDet->getRelativePosAtXY(0, mRectDet->ypixels()-1);
     pos += V3D( mRectDet->xstep()*(-0.5), mRectDet->ystep()*(+0.5), 0.0); //Adjust to account for the size of a pixel
     glVertex3f( (GLfloat)pos.X(), (GLfloat)pos.Y(), (GLfloat)pos.Z());

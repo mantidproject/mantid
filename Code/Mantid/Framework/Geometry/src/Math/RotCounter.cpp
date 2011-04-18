@@ -77,12 +77,16 @@ RotaryCounter::operator==(const RotaryCounter& A) const
     @retval 0 :: Something not the same
   */
 {
-  if (A.RC.size()!=A.RC.size())
+  if (RC.size()!=A.RC.size())
     return 0;
 
-  for(int i=0;i<static_cast<int>(RC.size());i++)
+  for(size_t i=0;i<RC.size();i++)
+  {
     if (RC[i]!=A.RC[i])
+    {
       return 0;
+    }
+  }
   return 1;
 }
 
@@ -95,12 +99,20 @@ RotaryCounter::operator>(const RotaryCounter& A) const
     @return This > A
    */
 {
-  const int maxI(A.RC.size()>RC.size() ? RC.size() : A.RC.size());
-  for(int i=0;i<maxI;i++)
+  const size_t ourSize = RC.size();
+  const size_t theirSize = A.RC.size();
+  const size_t maxI = (theirSize > ourSize) ? ourSize :theirSize;
+  for(size_t i=0;i<maxI;i++)
+  {
     if (RC[i]!=A.RC[i])
+    {
       return RC[i]>A.RC[i];
-  if (A.RC.size()!=RC.size())
-    return RC.size()>A.RC.size();
+    }
+  }
+  if (theirSize !=ourSize)
+  {
+    return static_cast<int>(ourSize > theirSize);
+  }
   return 0;
 }
 
@@ -113,12 +125,18 @@ RotaryCounter::operator<(const RotaryCounter& A) const
     @return This < A
    */
 {
-  const int maxI(A.RC.size()>RC.size() ? RC.size() : A.RC.size());
-  for(int i=0;i<maxI;i++)
+  const size_t ourSize = RC.size();
+  const size_t theirSize = A.RC.size();
+  const size_t maxI = (theirSize>ourSize) ? ourSize : theirSize;
+  for(size_t i=0;i<maxI;i++)
+  {
     if (RC[i]!=A.RC[i])
+    {
       return RC[i]<A.RC[i];
-  if (A.RC.size()!=RC.size())
-    return RC.size()<A.RC.size();
+    }
+  }
+  if (theirSize!=ourSize)
+    return ourSize < theirSize;
   return 0;
 }
 
@@ -147,7 +165,7 @@ RotaryCounter::operator++()
 {
   int Npart=Rmax-1;
   int I;
-  for(I=RC.size()-1;I>=0 && RC[I]==Npart;I--,Npart--);
+  for(I=static_cast<int>(RC.size())-1;I>=0 && RC[I]==Npart;I--,Npart--);
   
   if (I<0)
     {
@@ -184,21 +202,25 @@ RotaryCounter::operator--()
     @retval 0 :: no loop occored
   */
 {
-  const int Size(RC.size());
+  const int Size(static_cast<int>(RC.size()));
   int I;
-  for(I=RC.size()-1;I>0 && RC[I]==RC[I-1]+1;I--);
+  for(I=Size-1;I>0 && RC[I]==RC[I-1]+1;I--);
   // Loop case
   if(!I && !RC[0])    
     {
       // In case of loop go to
-      for(int i=0;i<static_cast<int>(RC.size());i++)
-	RC[i]=Rmax+i-Size;
+      for(int i=0;i<Size;i++)
+      {
+      	RC[i]=Rmax+i-Size;
+      }
       return 1;
     }
   
   RC[I]--;
   for(I++;I<Size;I++)
+  {
     RC[I]=Rmax+I-Size;
+  }
   return 0;
 }
 

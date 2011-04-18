@@ -176,16 +176,16 @@ public:
 		TS_ASSERT_EQUALS(A.display(),"(acd)+(afx)+(afy)+(afz)+(bcd)");
 		Acomp B;
 		B.setString("(acd)+(afx)+(afy)+(afz)+(bcd)");
-		TS_ASSERT_EQUALS(A==B,1);
+		TS_ASSERT_EQUALS(A==B,true);
 		Acomp C;
 		C.setString("(a+b)(a+c)(a+d)(c+f)(c+x+y+z)(d+f)");
-		TS_ASSERT_EQUALS(A==C,0);
-		TS_ASSERT_EQUALS(A!=C,1);
-		TS_ASSERT_EQUALS(A!=B,0);
+		TS_ASSERT_EQUALS(A==C,false);
+		TS_ASSERT_EQUALS(A!=C,true);
+		TS_ASSERT_EQUALS(A!=B,false);
 
-		TS_ASSERT_EQUALS(A>C,1);
-		TS_ASSERT_EQUALS(C<B,1);
-		TS_ASSERT_EQUALS(A<B,0);
+		TS_ASSERT_EQUALS(A>C,true);
+		TS_ASSERT_EQUALS(C<B,true);
+		TS_ASSERT_EQUALS(A<B,false);
 	}
 	
 	void testIncrementOperators(){

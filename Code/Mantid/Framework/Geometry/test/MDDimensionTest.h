@@ -128,7 +128,7 @@ public:
       if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(0));
       TS_ASSERT_DELTA(x,pOrtDim->getMinimum(),FLT_EPSILON);
-      unsigned int nBins;
+      size_t nBins;
       TS_ASSERT_THROWS_NOTHING(nBins = pOrtDim->getNBins());
 
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(nBins));
@@ -144,7 +144,7 @@ public:
 
          std::string name("MY new axis name");
          TS_ASSERT_THROWS_NOTHING(pOrtDim->setName(name));   
-         TS_ASSERT_SAME_DATA(pOrtDim->getName().c_str(),"MY new axis name",strlen(pOrtDim->getName().c_str()));
+         TS_ASSERT_SAME_DATA(pOrtDim->getName().c_str(),"MY new axis name",static_cast<unsigned int>(strlen(pOrtDim->getName().c_str())));
 
           // is integrated?, false by default nBins > 1 so it is not integrated
           TS_ASSERT_EQUALS(pOrtDim->getIntegrated(),false);

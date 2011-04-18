@@ -35,11 +35,7 @@ set ( SRC_FILES
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
 	src/Math/Matrix.cpp
-	src/Math/MatrixBase.cpp
-	src/Math/PolyBase.cpp
-	src/Math/PolyFunction.cpp
-	src/Math/PolyVar.cpp
-	src/Math/PolyVarOne.cpp
+    src/Math/PolyBase.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
 	src/Math/mathSupport.cpp
@@ -123,10 +119,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/BnId.h
 	inc/MantidGeometry/Math/MapSupport.h
 	inc/MantidGeometry/Math/Matrix.h
-	inc/MantidGeometry/Math/MatrixBase.h
-	inc/MantidGeometry/Math/PolyBase.h
-	inc/MantidGeometry/Math/PolyFunction.h
-	inc/MantidGeometry/Math/PolyVar.h
+    inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/mathSupport.h
@@ -197,7 +190,6 @@ set ( TEST_FILES
 	test/ParObjComponentTest.h
 	test/ParametrizedComponentTest.h
 	test/PlaneTest.h
-	test/PolyTest.h
 	test/QuatTest.h
 	test/RectangularDetectorTest.h
 	test/RotCounterTest.h
