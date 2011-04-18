@@ -54,6 +54,8 @@
 
 #ifndef WIN32 /* unlink already in stdio.h for WIN32 */
   extern int unlink OF((const char *));
+#else
+#pragma warning(disable: 4996)
 #endif
 
 #ifndef GZ_SUFFIX
@@ -215,7 +217,7 @@ void file_compress(file, mode)
     }
     gz_compress(in, out);
 
-    _unlink(file);
+    unlink(file);
 }
 
 
@@ -255,6 +257,6 @@ void file_uncompress(file)
 
     gz_uncompress(in, out);
 
-    _unlink(infile);
+    unlink(infile);
 }
 
