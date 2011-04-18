@@ -41,9 +41,8 @@ public:
     virtual void read_MDImg_data(MDImage &){};
   
     virtual bool read_pix(MDDataPoints &){return false; }
-    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
+    virtual size_t read_pix_subset(const MDImage &,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
-        UNUSED_ARG(dnd);
         UNUSED_ARG(selected_cells);
         UNUSED_ARG(starting_cell);
         UNUSED_ARG(pix_buf);

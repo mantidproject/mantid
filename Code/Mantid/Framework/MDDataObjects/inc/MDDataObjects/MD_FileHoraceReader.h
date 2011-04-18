@@ -6,7 +6,6 @@
 #include <fstream>
 #include "MDDataObjects/IMD_FileFormat.h"
 
-
 /**  Class supports Horace(MATLAB)-written binary mdd data format and will be used at the initial stage of the development;
 *    to read the data initially provided by MATLAB, Horace
 
@@ -85,9 +84,8 @@ public:
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
 	// TODO: Implement;
-	virtual bool read_pix(MDDataPoints & sqw)
+	virtual bool read_pix(MDDataPoints &)
 	{
-	  UNUSED_ARG(sqw);
 	  throw(Kernel::Exception::NotImplementedError("Read all pixels funtion is not implemented at the moment as target obect for it is in nucleus state"));
 	}
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
@@ -96,9 +94,8 @@ public:
     /// get number of data pixels(points) contributing into the dataset;
     virtual uint64_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDImage & dnd)
+    virtual void write_mdd(const MDImage &)
     {
-      UNUSED_ARG(dnd);
       throw(Kernel::Exception::NotImplementedError("write_mdd-Horace format function is not supported and should not be used"));
     }
     

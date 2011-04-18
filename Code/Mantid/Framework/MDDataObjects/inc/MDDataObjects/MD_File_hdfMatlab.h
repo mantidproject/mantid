@@ -104,9 +104,8 @@ public:
     /// get number of data pixels(points) contributing into the dataset;
     virtual uint64_t getNPix(void);
     /// not implemented and probably will not be as we will develop our own mdd_hdf format
-    virtual void write_mdd(const MDImage & dnd)
+    virtual void write_mdd(const MDImage&)
     {
-      UNUSED_ARG(dnd);
       throw(Kernel::Exception::NotImplementedError("write_mdd-Matlab format function is not supported and should not be used"));
     }
     
