@@ -26,6 +26,7 @@ std::string NullImplicitFunction::toXMLString() const
 
 bool NullImplicitFunction::evaluate(const API::Point3D* pPoint) const
 {
+  UNUSED_ARG(pPoint);
   throw std::logic_error("Cannot evaluate a NullImplicitFunction. No correct behaviour for this.");
 }
 

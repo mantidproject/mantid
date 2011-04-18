@@ -53,7 +53,7 @@ namespace Mantid
       NodeList* parameterList = functionElement->getChildElement("ParameterList")->childNodes();
 
       //Loop through the parameter list looking for known parameter, required, which can then be parsed.
-      for(int i = 0; i < parameterList->length(); i++)
+      for(unsigned int i = 0; i < parameterList->length(); i++)
       {
         
         Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));

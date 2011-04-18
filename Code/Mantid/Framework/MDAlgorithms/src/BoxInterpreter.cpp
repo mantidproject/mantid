@@ -12,7 +12,7 @@ boxVector BoxInterpreter::walkTree(CompositeImplicitFunction* compFunc) const
   using namespace Mantid::API;
   boxVector flattenedboxes;
   functionVector nestedFuncs = compFunc->getFunctions();
-  for (int i = 0; i < nestedFuncs.size(); i++)
+  for (unsigned int i = 0; i < nestedFuncs.size(); i++)
   {
     if (CompositeImplicitFunction::functionName()  == nestedFuncs[i]->getName())
     {
@@ -58,7 +58,7 @@ std::vector<double> BoxInterpreter::Execute(Mantid::API::ImplicitFunction* impli
     double maxX = box->getUpperX();
     double maxY = box->getUpperY();
     double maxZ = box->getUpperZ();
-    for (int i = 0; i < flattenedboxes.size(); i++)
+    for (unsigned int i = 0; i < flattenedboxes.size(); i++)
     {
       box = flattenedboxes[i];
       minX = minX > box->getLowerX() ? minX : box->getLowerX();

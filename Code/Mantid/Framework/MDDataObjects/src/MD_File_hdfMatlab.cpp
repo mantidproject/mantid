@@ -41,10 +41,10 @@ MD_File_hdfMatlab::read_basis(Geometry::MDGeometryBasis &basisGeometry)
 
 MD_File_hdfMatlab::MD_File_hdfMatlab(const char *file_name):
 IMD_FileFormat(file_name),
-file_access_mode(H5P_DEFAULT),
-pixel_dataset_h(-1),
 file_handler(-1),
+pixel_dataset_h(-1),
 pixel_dataspace_h(-1),
+file_access_mode(H5P_DEFAULT),
 pReader(NULL)
 {/// check if the file exists and is an hdf5 file;
     this->File_name.assign(file_name);
@@ -435,7 +435,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     if(err){
         throw(Exception::FileError("Error reading the pixels dataset",this->File_name));
     }
-    size_t  nCellPic(0);
+    //size_t  nCellPic(0);
     size_t   nPixel(0);
 
 	float    s_dim_fields[6];
@@ -852,6 +852,7 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
 % function constructs selarray from array rdata, written to the hdf file
 % instead of variable length array to avoid hdf5-matlab bug;
 */
+    UNUSED_ARG(rank);
     int i,j;
     int nData(dims[0]);
     int length(dims[1]);

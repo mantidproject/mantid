@@ -40,8 +40,8 @@ MDDataPoints::store_pixels(const std::vector<char> &all_new_pixels,const std::ve
  * @param spImage: ???
  * */
 MDDataPoints::MDDataPoints(const MDDataPointsDescription &descr):
-  pixDescription(descr),
   memBased(true),
+  pixDescription(descr),
   n_data_points(0),
   pMemoryMGR(NULL)
 {

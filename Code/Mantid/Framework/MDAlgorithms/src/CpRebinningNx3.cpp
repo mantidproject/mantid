@@ -18,11 +18,11 @@ CpRebinningNx3::CpRebinningNx3(const MDDataObjects::MDWorkspace_const_sptr &sour
                  const MDDataObjects::MDWorkspace_sptr  & targetWS,bool in_keep_pixels):
 DynamicCPRRebinning(sourceWS,pTargetDescr,targetWS),
 nRecDims(3), // can not do anything else here
+keep_pixels(in_keep_pixels),
 n_starting_cell(0),
 n_pixels_read(0),
 n_pixels_selected(0),
 n_pix_in_buffer(0),
-keep_pixels(in_keep_pixels),
 pTargetDataPoints(targetWS->get_spMDDPoints().get())
 {
 
@@ -153,7 +153,7 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
  
   }
   std::vector<double> rot = target.getRotations();
-  std::vector<double> basis[3]; // not used at the momemnt;
+  //std::vector<double> basis[3]; // not used at the momemnt;
 
   for(i=0;i<3;i++){
     ic = i*3;
@@ -204,7 +204,7 @@ CpRebinningNx3::rebin_Nx3dataset()
 
   pix_Xmin=pix_Ymin=pix_Zmin=pix_Emin=  std::numeric_limits<double>::max();
   pix_Xmax=pix_Ymax=pix_Zmax=pix_Emax=- std::numeric_limits<double>::max();
-  size_t nCells  = this->n_target_cells;
+  //size_t nCells  = this->n_target_cells;
   //
   // work at least for MSV 2008
 // The following code does not work cross platform. Hence the undef.

@@ -58,7 +58,7 @@ namespace Mantid
 
       mu::Parser fun;
 
-      for(int i = 0; i < vars.size(); ++i)
+      for(size_t i = 0; i < vars.size(); ++i)
       {
         fun.DefineVar(varNames[i],&vars[i]);
       }

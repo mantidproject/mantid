@@ -41,13 +41,26 @@ public:
     virtual void read_MDImg_data(MDImage &){};
   
     virtual bool read_pix(MDDataPoints &){return false; }
-    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer){
-        return 0;}
+    virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
+    {
+        UNUSED_ARG(dnd);
+        UNUSED_ARG(selected_cells);
+        UNUSED_ARG(starting_cell);
+        UNUSED_ARG(pix_buf);
+        UNUSED_ARG(n_pix_in_buffer);
+        return 0;
+    }
     virtual uint64_t getNPix(void){return 0;}
  
-    virtual void read_basis(Mantid::Geometry::MDGeometryBasis &GeomBasis){}
+    virtual void read_basis(Mantid::Geometry::MDGeometryBasis &GeomBasis)
+    {
+      UNUSED_ARG(GeomBasis);
+    }
 
-	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &desc){}
+	virtual void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &desc)
+	{
+	  UNUSED_ARG(desc);
+	}
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
 
     virtual void write_mdd(const MDImage &){};

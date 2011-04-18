@@ -208,8 +208,14 @@ namespace Mantid
        void RunParam::setEta(const double val)
           {m_eta=val;}
 
-       void RunParam::readData(const std::string file){}
-       void RunParam::writeData(const std::string file){}
+       void RunParam::readData(const std::string file)
+       {
+         UNUSED_ARG(file);
+       }
+       void RunParam::writeData(const std::string file)
+       {
+         UNUSED_ARG(file);
+       }
     
        /// @endcond
     }

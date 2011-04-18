@@ -106,7 +106,7 @@ void RebinningCutterObjectPanel::popWidget()
   }
 }
 
-/// Listner for ingore bin changes.
+/// Listener for ignore bin changes.
 void RebinningCutterObjectPanel::ignoreBinChangesListner()
 {
   QLayoutItem *child;

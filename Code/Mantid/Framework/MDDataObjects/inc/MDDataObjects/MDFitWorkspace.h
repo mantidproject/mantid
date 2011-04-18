@@ -131,7 +131,7 @@ namespace Mantid
       /*---            New methods           ---*/
 
       void setDimension(size_t idim,const std::string& paramString);
-      void setCell(int index,const std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> >& points);
+      void setCell(size_t index,const std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> >& points);
 
     private:
       /// Cells of this workspace

@@ -29,7 +29,7 @@ vtkSQWReader::~vtkSQWReader()
 }
 
 
-int vtkSQWReader::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkSQWReader::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   using namespace Mantid::VATES;
   //get the info objects
@@ -101,7 +101,7 @@ void vtkSQWReader::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkSQWReader::CanReadFile(const char* fname)
+int vtkSQWReader::CanReadFile(const char* vtkNotUsed(fname))
 {
 	return 1; //TODO: Apply checks here.
 }

@@ -72,8 +72,8 @@ struct MDPointsLocations
     MDDataPoints(const MDDataPointsDescription &description);
     virtual ~MDDataPoints();
 /******************************************************************************************************
-    /** initialises MDDataPoints, as file-based structure;
-	  *  allocates all necessary arrays and provides it with  valid data reader; 
+      * initialises MDDataPoints, as file-based structure;
+	    * allocates all necessary arrays and provides it with  valid data reader;
       * if the input dataReader is absent, the function initializes its own dataReader and sets output 
       * temporary scrach file to accept pixels data 
      */

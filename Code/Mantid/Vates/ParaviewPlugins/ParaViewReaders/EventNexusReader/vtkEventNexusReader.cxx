@@ -33,7 +33,7 @@ vtkEventNexusReader::~vtkEventNexusReader()
 }
 
 
-int vtkEventNexusReader::RequestData(vtkInformation *request, vtkInformationVector **inputVector, vtkInformationVector *outputVector)
+int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   using namespace Mantid::VATES;
   //get the info objects
@@ -125,7 +125,7 @@ void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)
   this->Superclass::PrintSelf(os,indent);
 }
 
-int vtkEventNexusReader::CanReadFile(const char* fname)
+int vtkEventNexusReader::CanReadFile(const char* vtkNotUsed(fname))
 {
   return 1; //TODO: Apply checks here.
 }

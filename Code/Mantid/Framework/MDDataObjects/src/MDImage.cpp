@@ -258,8 +258,8 @@ MDImage::validateNPix(void)
 }
 //
 MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry): 
-    pMDGeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry)),
-    nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
+    nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0),
+    pMDGeometry(std::auto_ptr<Mantid::Geometry::MDGeometry>(pGeometry))
 {
   // empty initialisation; currently not supported as will throw later;
   if(!pGeometry)return;

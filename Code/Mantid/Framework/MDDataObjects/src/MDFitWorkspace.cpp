@@ -35,6 +35,7 @@ namespace Mantid{
       */
     MDFitWorkspace::MDFitWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     {
+      UNUSED_ARG(nRecDims);
       m_indexCalculator.reset(new MDWorkspaceIndexCalculator(nDimensions));
       m_dimensions.resize(nDimensions);
     }
@@ -462,7 +463,7 @@ namespace Mantid{
       return new MDFitWorkspaceIterator(m_indexCalculator.get(),m_dimensions);
     }
 
-    void MDFitWorkspace::setCell(int index,const std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> >& points)
+    void MDFitWorkspace::setCell(size_t index,const std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> >& points)
     {
       if (index >= m_cells.size())
       {

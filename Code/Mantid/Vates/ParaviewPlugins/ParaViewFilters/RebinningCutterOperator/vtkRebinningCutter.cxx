@@ -109,7 +109,7 @@ void vtkRebinningCutter::determineAnyCommonExecutionActions(const int timestep, 
   }
 }
 
-int vtkRebinningCutter::RequestData(vtkInformation *request, vtkInformationVector **inputVector,
+int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
   using namespace Mantid::Geometry;
@@ -191,7 +191,7 @@ void vtkRebinningCutter::UpdateAlgorithmProgress(double progress)
   this->UpdateProgress(progress);
 }
 
-int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformationVector **inputVector,
+int vtkRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), vtkInformationVector **inputVector,
   vtkInformationVector *outputVector)
 {
   enum Status{Bad=0, Good=1};
@@ -239,8 +239,8 @@ int vtkRebinningCutter::RequestInformation(vtkInformation *request, vtkInformati
   
 }
 
-int vtkRebinningCutter::RequestUpdateExtent(vtkInformation* info, vtkInformationVector** inputVector,
-    vtkInformationVector* outputVector)
+int vtkRebinningCutter::RequestUpdateExtent(vtkInformation* vtkNotUsed(info), vtkInformationVector** vtkNotUsed(inputVector),
+    vtkInformationVector* vtkNotUsed(outputVector))
 {
   return 1;
 }

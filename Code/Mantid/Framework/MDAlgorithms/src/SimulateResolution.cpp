@@ -23,7 +23,7 @@ namespace Mantid
     namespace MDAlgorithms
     {
         // Constructor
-        SimulateResolution::SimulateResolution() : m_sobol(false), m_randSeed(12345678),m_randGen(NULL)
+        SimulateResolution::SimulateResolution() : m_randGen(NULL), m_randSeed(12345678), m_sobol(false)
         {
         }
 
@@ -40,10 +40,10 @@ namespace Mantid
             std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
             // assume that the first point in the vertexes array is the centre point anf that the gett getter
             // returns a energy value in the appropriate units.
-            for(int i=0; i<points.size();i++){
+            for(size_t i=0; i<points.size();i++){
                 std::vector<Mantid::Geometry::coordinate> vertexes = points[i]->getVertexes();
                 eps=vertexes[0].gett();
-                int run=points[i]->getRunId(); // testing
+                //int run=points[i]->getRunId(); // testing
                 //TODO implement fg calculation for this point: fgSignal+=constant+eps*(linear+eps*quadratic);
             }
             
@@ -85,8 +85,11 @@ namespace Mantid
 
         // SQW convolution MonteCarlo
         void SimulateResolution::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error) {
-            
+              double answer, double error)
+        {
+          UNUSED_ARG(point);
+          UNUSED_ARG(answer);
+          UNUSED_ARG(error);
         }
 
         // Return next pseudo or quasi random point in the N dimensional space
@@ -139,6 +142,7 @@ namespace Mantid
         */
         double SimulateResolution::formTable(const double qsqr) const
         {
+          UNUSED_ARG(qsqr);
             return 0.0; //to do - implement this look up table
         }
         /**
@@ -446,6 +450,10 @@ namespace Mantid
             ! Get vector of random deviates:
             ! ------------------------------
             */
+            UNUSED_ARG(detHeight);
+            UNUSED_ARG(detWidth);
+            UNUSED_ARG(detTimeBin);
+
             const double rt6 = 2.449489742783178098; // sqrt(6)
             int imc(0);
 
@@ -529,7 +537,9 @@ namespace Mantid
             // Sample over crystal mosaic:
 
             if (m_mcOptVec[mcMosaic] ) {
-                gasdev2d(ranvec[imc++], ranvec[imc++], eta2, eta3);
+                double randomA = ranvec[imc++];
+                double randomB = ranvec[imc++];
+                gasdev2d(randomA, randomB, eta2, eta3);
                 eta2 = m_eta_sig * eta2;
                 eta3 = m_eta_sig * eta3;
             }
@@ -598,6 +608,10 @@ namespace Mantid
             std::vector<double> & arlu, std::vector<double> & angrlu,
             Geometry::Matrix<double> & dMat )
         {
+            UNUSED_ARG(ang);
+            UNUSED_ARG(arlu);
+            UNUSED_ARG(angrlu);
+            UNUSED_ARG(dMat);
             double tol=1e-10;
             if( a[0]< tol || a[1]<tol || a[2]<tol )
                 return 1;

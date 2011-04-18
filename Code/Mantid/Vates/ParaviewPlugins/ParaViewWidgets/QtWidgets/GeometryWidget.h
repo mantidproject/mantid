@@ -89,21 +89,25 @@ QString gettDimensionXML() const;
 void setXDimensionXML(QString value)
 {
   //Do nothing.
+  UNUSED_ARG(value);
 }
 
 void setYDimensionXML(QString value)
 {
   //Do nothing.
+  UNUSED_ARG(value);
 }
 
 void setZDimensionXML(QString value)
 {
   //Do nothing.
+  UNUSED_ARG(value);
 }
 
 void settDimensionXML(QString value)
 {
   //Do nothing.
+  UNUSED_ARG(value);
 }
 
 bool isSetup() const

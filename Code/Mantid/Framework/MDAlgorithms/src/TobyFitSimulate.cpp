@@ -23,7 +23,7 @@ namespace Mantid
     namespace MDAlgorithms
     {
         // Constructor
-        TobyFitSimulate::TobyFitSimulate() : m_sobol(false), m_randSeed(12345678),m_randGen(NULL)
+        TobyFitSimulate::TobyFitSimulate() : m_randGen(NULL), m_randSeed(12345678), m_sobol(false)
         {
         }
 
@@ -36,6 +36,11 @@ namespace Mantid
         void TobyFitSimulate::SimForeground(boost::shared_ptr<Mantid::API::IMDWorkspace> imdw,
               std::string fgmodel,const double fgparaP1, const double fgparaP2, const double fgparaP3)
         {
+            UNUSED_ARG(fgmodel);
+            UNUSED_ARG(fgparaP1);
+            UNUSED_ARG(fgparaP2);
+            UNUSED_ARG(fgparaP3);
+
             imdwCut=imdw;
             initRandomNumbers();
             // currently maximum of 13 dimensions required
@@ -51,7 +56,7 @@ namespace Mantid
                 // loop over each MDPoint in current MDCell
                 for(size_t j=0; j<cellPoints.size(); j++){
                     std::vector<Mantid::Geometry::coordinate> vertexes = cellPoints[j]->getVertexes();
-                    double eps=vertexes[0].gett();
+                    //double eps=vertexes[0].gett();
                     sqwConvolution(cellPoints[j],answer,error);
                 }
                 //pnt->setSignal(bgsum);
@@ -67,8 +72,11 @@ namespace Mantid
 
         // SQW convolution MonteCarlo
         void TobyFitSimulate::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error) {
-            
+              double answer, double error)
+        {
+          UNUSED_ARG(point);
+          UNUSED_ARG(answer);
+          UNUSED_ARG(error);
         }
 
         // Return next pseudo or quasi random point in the N dimensional space
@@ -159,6 +167,7 @@ namespace Mantid
         */
         double TobyFitSimulate::formTable(const double qsqr)
         {
+          UNUSED_ARG(qsqr);
             return 0.0; //to do - implement this look up table
         }
         /**
@@ -466,6 +475,10 @@ namespace Mantid
             ! Get vector of random deviates:
             ! ------------------------------
             */
+            UNUSED_ARG(detHeight);
+            UNUSED_ARG(detTimeBin);
+            UNUSED_ARG(detWidth);
+
             const double rt6 = 2.449489742783178098; // sqrt(6)
             int imc(0);
 
@@ -549,7 +562,9 @@ namespace Mantid
             // Sample over crystal mosaic:
 
             if (m_mcOptVec[mcMosaic] ) {
-                gasdev2d(ranvec[imc++], ranvec[imc++], eta2, eta3);
+                double randomA = ranvec[imc++];
+                double randomB = ranvec[imc++];
+                gasdev2d(randomA, randomB, eta2, eta3);
                 eta2 = m_eta_sig * eta2;
                 eta3 = m_eta_sig * eta3;
             }
@@ -618,7 +633,11 @@ namespace Mantid
                  std::vector<double> & arlu, std::vector<double> & angrlu,
                  Geometry::Matrix<double> & dMat )
         {
-            int i;
+          UNUSED_ARG(ang);
+          UNUSED_ARG(arlu);
+          UNUSED_ARG(angrlu);
+          UNUSED_ARG(dMat);
+
 	    double tol=1e-10;
 	    if( a[0]< tol || a[1]<tol || a[2]<tol )
 		    return 1;

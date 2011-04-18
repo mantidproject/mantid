@@ -100,9 +100,9 @@ namespace Mantid
                                         const double bgparaP4, const double bgparaP5, const double bgparaP6,
                                         const double bgparaP7, const double bgparaP8)
         {
-            int ncell= imdwCut->getXDimension()->getNBins();
+            size_t ncell= imdwCut->getXDimension()->getNBins();
             // loop over cells of cut
-            for(int i=0; i<ncell ; i++ ){
+            for(size_t i=0; i<ncell ; i++ ){
                 double bgsum=0.;
                 double eps,phi;
                 const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i);
