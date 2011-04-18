@@ -154,9 +154,11 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
 
         except ValueError, reason:
             issueWarning('Cannot load file :'+str(reason))
-            raise
-        finally:
+#when we are all up to Python 2.5 replace the duplicated code below with one finally:
             delete_workspaces(raw_workspaces)
+            raise
+        
+        delete_workspaces(raw_workspaces)
             
 
         file = run['output_as']

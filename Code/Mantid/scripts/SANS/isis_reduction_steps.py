@@ -317,7 +317,7 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
             can and if the workspaces should be reloaded if they already
             exist
             @param is_can: if this is to correct the can (default false i.e. it's for the sample)
-            @param reload: se8tting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
+            @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
         super(LoadTransmissions, self).__init__()
         self.trans_name = None
@@ -1086,7 +1086,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # use InterpolatingRebin 
         self.interpolate = None
         # a custom transmission workspace, if we have this there is much less to do 
-        self.calculated_samp = None
+        self.calculated_samp = ''
         self.calculated_can = None
 
     def set_trans_fit(self, min=None, max=None, fit_method=None, override=True):
@@ -1173,33 +1173,51 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             or estimates the proportion of neutrons that are transmitted
             through the sample
         """
-        if self.calculated_samp:
-            if self.trans_runs():
-                raise RuntimeError('Canot use TransWorkspace() and TransmissionSample() together')
-            trans_ws = self.calculated_samp
+        #look for run files that contain transmission data
+        test1, test2 = self._get_run_wksps()
+        if test1 or test2:
+            if self.calculated_samp:
+                raise RuntimeError('Cannot use TransWorkspace() and TransmissionSample() together')
+            
+            trans_ws = self.calculate(reducer)
         else:
-            if self.trans_runs():
-                trans_ws = self.calculate(reducer)
+            if self.calculated_samp:
+                temp_ws = self.calculated_samp+'_rebinned'
+                RebinToWorkspace(self.calculated_samp, workspace, temp_ws)
+                trans_ws = temp_ws
             else:
-                #not having transmission files is not an error, we just do nothing
+                #if no transmission files were specified this isn't an error, we just do nothing
                 return None
-                   
+
         try:
             Divide(workspace, trans_ws, workspace)
         except:
+#when we are all up to Python 2.5 replace the duplicated code below with one finally:
+            if self.calculated_samp:
+                if mtd.workspaceExists(temp_ws):
+                    DeleteWorkspace(temp_ws)
+
             raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
 
 
-    def trans_runs(self):
-        if (self.loader is None) or (not self.loader.trans_name):
-            return False
+        if self.calculated_samp:
+            if mtd.workspaceExists(temp_ws):
+                DeleteWorkspace(temp_ws)
+
+    def _get_run_wksps(self):
+        """
+            Retrieves the names runs that contain the user specified for calculation
+            of the transmission
+            @return: post_sample pre_sample workspace names
+        """  
+        if (not self.loader) or (not self.loader.trans_name):
+            return '', ''
         else:
-            return True
+            return self.loader.trans_name, self.loader.direct_name
 
     def calculate(self, reducer):       
         #get the settings required to do the calculation
-        trans_raw = self.loader.trans_name
-        direct_raw = self.loader.direct_name
+        trans_raw, direct_raw = self._get_run_wksps()
         
         if not trans_raw:
             raise RuntimeError('Attempting transmission correction with no specified transmission %s file' % self.CAN_SAMPLE_SUFFIXES[self.loader.can])
