@@ -44,7 +44,7 @@ namespace PhysicalConstants
     /** The number density in units of cm<SUP>-3</SUP> as calculated from the mass density. */
     const double number_density;
 
-    const NeutronAtom& neutron;
+    const NeutronAtom neutron;
   };
 
   DLLExport bool operator==(const Atom& left, const Atom & right);
