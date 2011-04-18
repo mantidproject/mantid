@@ -30,7 +30,7 @@ vtkDataSet* vtkClipperDataSetFactory::create() const
 
   boxVector::const_iterator it = boxFunctions.begin();
 
-  for (it; it != boxFunctions.end(); ++it)
+  for (; it != boxFunctions.end(); ++it)
   {
     boost::shared_ptr<BoxImplicitFunction> boxFunction = *it;
     vtkBox* box = vtkBox::New();
