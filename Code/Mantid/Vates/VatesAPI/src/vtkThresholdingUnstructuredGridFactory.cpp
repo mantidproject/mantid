@@ -17,9 +17,9 @@ namespace VATES
   template<typename TimeMapper>
   vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<TimeMapper>::create() const
   {
-    const int nBinsX = m_workspace->getXDimension()->getNBins();
-    const int nBinsY = m_workspace->getYDimension()->getNBins();
-    const int nBinsZ = m_workspace->getZDimension()->getNBins();
+    const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
+    const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
+    const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
 
     const double maxX = m_workspace-> getXDimension()->getMaximum();
     const double minX = m_workspace-> getXDimension()->getMinimum();
@@ -34,7 +34,7 @@ namespace VATES
 
     const int imageSize = (nBinsX ) * (nBinsY ) * (nBinsZ );
     vtkPoints *points = vtkPoints::New();
-    points->Allocate(imageSize);
+    points->Allocate(static_cast<int>(imageSize));
 
     vtkFloatArray * signal = vtkFloatArray::New();
     signal->Allocate(imageSize);

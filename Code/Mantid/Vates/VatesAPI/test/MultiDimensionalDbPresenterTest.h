@@ -42,7 +42,9 @@ public:
 
 void testExecution()
 {
-  testing::NiceMock<MockDataHandlingAlgorithm> algorithm;
+  MockDataHandlingAlgorithm algorithm;
+  EXPECT_CALL(algorithm, name()).WillRepeatedly(testing::Return("MockDataHandlingAlgorithm"));
+  EXPECT_CALL(algorithm, version()).WillRepeatedly(testing::Return(1));
   EXPECT_CALL(algorithm, isInitialized()).WillRepeatedly(testing::Return(true));
   EXPECT_CALL(algorithm, exec()).Times(1);
   ExposedExecutor presenter;
@@ -52,7 +54,9 @@ void testExecution()
 
 void testNotInitalizedThrowsOnExecution()
 {
-  testing::NiceMock<MockDataHandlingAlgorithm> algorithm;
+  MockDataHandlingAlgorithm algorithm;
+  EXPECT_CALL(algorithm, name()).WillRepeatedly(testing::Return("MockDataHandlingAlgorithm"));
+  EXPECT_CALL(algorithm, version()).WillRepeatedly(testing::Return(1));
   EXPECT_CALL(algorithm, isInitialized()).Times(1).WillOnce(testing::Return(false));
   EXPECT_CALL(algorithm, exec()).Times(0);
   ExposedExecutor presenter;

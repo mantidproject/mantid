@@ -35,9 +35,9 @@ private:
   //Assume arguments are between 0 and 9. Crude, but sufficient for these test scenarios
   struct uniqueArgumentCombination
   {
-    double operator()(int i, int j, int k, int t)
+    double operator()(size_t i, size_t j, size_t k, size_t t)
     {
-      return i * 1000 + j * 100 + k * 10 + t;
+      return static_cast<double>(i * 1000 + j * 100 + k * 10 + t);
     }
   };
 

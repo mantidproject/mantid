@@ -391,7 +391,7 @@ const char* vtkRebinningCutter::GetInputGeometryXML()
   {
     return this->m_presenter.getWorkspaceGeometry().c_str();
   }
-  catch(std::runtime_error& err)
+  catch(std::runtime_error&)
   {
     return "";
   }
@@ -549,7 +549,7 @@ void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
   {
     double min = m_appliedTDimension->getMinimum();
     double max = m_appliedTDimension->getMaximum();
-    unsigned int nBins = m_appliedTDimension->getNBins();
+    unsigned int nBins = static_cast<int>( m_appliedTDimension->getNBins() );
     double increment = (max - min) / nBins;
     std::vector<double> timeStepValues(nBins);
     for (unsigned int i = 0; i < nBins; i++)

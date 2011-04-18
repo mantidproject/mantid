@@ -6,7 +6,7 @@ namespace Mantid
 namespace VATES
 {
 
-TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, unsigned int nIntervalSteps) : m_timeMin(timeMin), m_timeMax(timeMax),
+TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps) : m_timeMin(timeMin), m_timeMax(timeMax),
   m_timeRange(timeMax - timeMin), m_nIntervalSteps(nIntervalSteps)
 {
   if(m_timeRange <= 0)
@@ -15,7 +15,7 @@ TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, unsigned int nInt
   }
 }
 
-int TimeToTimeStep::operator()(double time) const
+size_t TimeToTimeStep::operator()(double time) const
 {
   if(time > m_timeMax)
   {

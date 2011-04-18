@@ -41,11 +41,11 @@ private:
   double m_timeMin;
   double m_timeMax;
   double m_timeRange;
-  int m_nIntervalSteps;
+  size_t m_nIntervalSteps;
 public:
 
-  TimeToTimeStep(double timeMin, double timeMax, unsigned int nIntervalSteps);
-  int operator()(double time) const;
+  TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps);
+  size_t operator()(double time) const;
 
 };
 }

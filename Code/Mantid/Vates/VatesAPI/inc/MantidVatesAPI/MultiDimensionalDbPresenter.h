@@ -78,7 +78,7 @@ public:
   vtkDataArray* getScalarDataFromTime(double time, const char* scalarName) const;
 
   /// Gets the number of timesteps in the workspace.
-  int getNumberOfTimesteps() const;
+  size_t getNumberOfTimesteps() const;
 
   /// Get the actual timestep values to use.
   std::vector<double> getTimesteps() const;

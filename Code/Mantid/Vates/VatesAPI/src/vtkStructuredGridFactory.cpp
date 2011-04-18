@@ -61,9 +61,9 @@ namespace VATES
   template<typename TimeMapper>
   vtkStructuredGrid* vtkStructuredGridFactory<TimeMapper>::createMeshOnly() const
   {
-    const int nBinsX = m_workspace->getXDimension()->getNBins();
-    const int nBinsY = m_workspace->getYDimension()->getNBins();
-    const int nBinsZ = m_workspace->getZDimension()->getNBins();
+    const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
+    const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
+    const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
 
     const double maxX = m_workspace->getXDimension()->getMaximum();
     const double minX = m_workspace->getXDimension()->getMinimum();
@@ -76,10 +76,10 @@ namespace VATES
     double incrementY = (maxY - minY) / nBinsY;
     double incrementZ = (maxZ - minZ) / nBinsZ;
 
-    const int imageSize = (nBinsX + 1) * (nBinsY + 1) * (nBinsZ + 1);
+    const size_t imageSize = (nBinsX + 1) * (nBinsY + 1) * (nBinsZ + 1);
     vtkStructuredGrid* visualDataSet = vtkStructuredGrid::New();
     vtkPoints *points = vtkPoints::New();
-    points->Allocate(imageSize);
+    points->Allocate(static_cast<int>(imageSize));
 
     //The following represent actual calculated positions.
     double posX, posY, posZ;
@@ -125,9 +125,9 @@ namespace VATES
     //Add scalar data to the mesh.
     vtkFloatArray* scalars = vtkFloatArray::New();
 
-    const int sizeX = m_workspace->getXDimension()->getNBins();
-    const int sizeY = m_workspace->getYDimension()->getNBins();
-    const int sizeZ = m_workspace->getZDimension()->getNBins();
+    const int sizeX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
+    const int sizeY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
+    const int sizeZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
     scalars->Allocate(sizeX * sizeY * sizeZ);
     scalars->SetName(m_scalarName.c_str());
     MD_image_point point;

@@ -120,15 +120,15 @@ VecExtents MultiDimensionalDbPresenter::getExtents() const
 {
   VecExtents extents;
   extents.push_back(0);
-  extents.push_back(m_workspace->getXDimension()->getNBins());
+  extents.push_back(static_cast<int>( m_workspace->getXDimension()->getNBins() ));
   extents.push_back(0);
-  extents.push_back(m_workspace->getYDimension()->getNBins());
+  extents.push_back(static_cast<int>( m_workspace->getYDimension()->getNBins() ));
   extents.push_back(0);
-  extents.push_back(m_workspace->getZDimension()->getNBins());
+  extents.push_back(static_cast<int>( m_workspace->getZDimension()->getNBins() ));
   return extents;
 }
 
-int MultiDimensionalDbPresenter::getNumberOfTimesteps() const
+size_t MultiDimensionalDbPresenter::getNumberOfTimesteps() const
 {
   verifyExecution();
   return m_workspace->getTDimension()->getNBins();
@@ -182,7 +182,7 @@ vtkDataArray* MultiDimensionalDbPresenter::getScalarDataFromTime(double time, co
 
   double tMax = m_workspace->getTDimension()->getMaximum();
   double tMin = m_workspace->getTDimension()->getMinimum();
-  int nbins = m_workspace->getTDimension()->getNBins();
+  size_t nbins = m_workspace->getTDimension()->getNBins();
 
   TimeToTimeStep timeStepMapper(tMin, tMax, nbins);
   vtkStructuredGridFactory<TimeToTimeStep> scalarFactory(m_workspace, std::string(scalarName), time, timeStepMapper);

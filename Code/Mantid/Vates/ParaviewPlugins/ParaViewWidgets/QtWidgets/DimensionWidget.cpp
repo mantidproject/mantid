@@ -173,7 +173,7 @@ void DimensionWidget::dimensionSelectedListener()
 
 void DimensionWidget::resetBins()
 {
-  int nbins = m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getNBins();
+  int nbins = static_cast<int>( m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getNBins() );
   std::string nBinsString = boost::str(boost::format("%i") % nbins);
   m_nBinsBox->setText(nBinsString.c_str());
 }
