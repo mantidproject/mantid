@@ -465,8 +465,8 @@ QSize MultiLayer::arrangeLayers(bool userSize)
 	}
 
 	if (!userSize){
-		l_canvas_width = int((rect.width()-(d_cols-1)*colsSpace - right_margin - left_margin)/c_widths);
-		l_canvas_height = int((rect.height()-(d_rows-1)*rowsSpace - top_margin - bottom_margin)/c_heights);
+		l_canvas_width = static_cast<int>((rect.width()-(d_cols-1)*colsSpace - right_margin - left_margin)/c_widths);
+		l_canvas_height = static_cast<int>((rect.height()-(d_rows-1)*rowsSpace - top_margin - bottom_margin)/c_heights);
 	}
 
 	QSize size = QSize(l_canvas_width, l_canvas_height);
@@ -486,18 +486,18 @@ QSize MultiLayer::arrangeLayers(bool userSize)
 		if (hor_align == HCenter)
 			x += int (l_canvas_width*(gsl_vector_get(X, col) + gsl_vector_get(maxYLeftWidth, col) - gsl_vector_get(yLeftR, i)));
 		else if (hor_align == Left)
-			x += int(l_canvas_width*gsl_vector_get(X, col));
+			x += static_cast<int>(l_canvas_width*gsl_vector_get(X, col));
 		else if (hor_align == Right)
-			x += int(l_canvas_width*(gsl_vector_get(X, col) + gsl_vector_get(maxYLeftWidth, col) - gsl_vector_get(yLeftR, i)+
+			x += static_cast<int>(l_canvas_width*(gsl_vector_get(X, col) + gsl_vector_get(maxYLeftWidth, col) - gsl_vector_get(yLeftR, i)+
 						gsl_vector_get(maxYRightWidth, col) - gsl_vector_get(yRightR, i)));
 
 		int y = top_margin + row*rowsSpace;
 		if (vert_align == VCenter)
-			y += int(l_canvas_height*(gsl_vector_get(Y, row) + gsl_vector_get(maxXTopHeight, row) - gsl_vector_get(xTopR, i)));
+			y += static_cast<int>(l_canvas_height*(gsl_vector_get(Y, row) + gsl_vector_get(maxXTopHeight, row) - gsl_vector_get(xTopR, i)));
 		else if (vert_align == Top)
-			y += int(l_canvas_height*gsl_vector_get(Y, row));
+			y += static_cast<int>(l_canvas_height*gsl_vector_get(Y, row));
 		else if (vert_align == Bottom)
-			y += int(l_canvas_height*(gsl_vector_get(Y, row) + gsl_vector_get(maxXTopHeight, row) - gsl_vector_get(xTopR, i)+
+			y += static_cast<int>(l_canvas_height*(gsl_vector_get(Y, row) + gsl_vector_get(maxXTopHeight, row) - gsl_vector_get(xTopR, i)+
 						+ gsl_vector_get(maxXBottomHeight, row) - gsl_vector_get(xBottomR, i)));
 
 		//resizes and moves layers
@@ -849,10 +849,10 @@ void MultiLayer::printAllLayers(QPainter *painter)
 		double scaleFactorY=(double)(paperRect.height()-2*margin)/(double)canvasRect.height();
 	     if (d_print_cropmarks)
         {
-			cr.moveTo(QPoint(margin + int(cr.x()*scaleFactorX),
-							 margin + int(cr.y()*scaleFactorY)));
-			cr.setWidth(int(cr.width()*scaleFactorX));
-			cr.setHeight(int(cr.height()*scaleFactorX));
+			cr.moveTo(QPoint(margin + static_cast<int>(cr.x()*scaleFactorX),
+							 margin + static_cast<int>(cr.y()*scaleFactorY)));
+			cr.setWidth(static_cast<int>(cr.width()*scaleFactorX));
+			cr.setHeight(static_cast<int>(cr.height()*scaleFactorX));
         }
 
 		for (int i=0; i<(int)graphsList.count(); i++)
@@ -860,9 +860,9 @@ void MultiLayer::printAllLayers(QPainter *painter)
 			Graph *gr=(Graph *)graphsList.at(i);
 			Plot *myPlot= gr->plotWidget();
 			QPoint pos=gr->pos();
-			pos=QPoint(margin + int(pos.x()*scaleFactorX), margin + int(pos.y()*scaleFactorY));
-			int width=int(myPlot->frameGeometry().width()*scaleFactorX);
-			int height=int(myPlot->frameGeometry().height()*scaleFactorY);
+			pos=QPoint(margin + static_cast<int>(pos.x()*scaleFactorX), margin + static_cast<int>(pos.y()*scaleFactorY));
+			int width=static_cast<int>(myPlot->frameGeometry().width()*scaleFactorX);
+			int height=static_cast<int>(myPlot->frameGeometry().height()*scaleFactorY);
 			myPlot->print(painter, QRect(pos, QSize(width,height)));
 		}
 	}

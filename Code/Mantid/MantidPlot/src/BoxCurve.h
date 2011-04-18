@@ -105,7 +105,7 @@ public:
 
     virtual size_t size() const{return d_y.size();};
     virtual double x(size_t) const{return d_x;};
-    virtual double y(size_t i) const{return d_y[int(i)];};
+    virtual double y(size_t i) const{return d_y[static_cast<int>(i)];};
 
 private:
     QwtArray<double> d_y;

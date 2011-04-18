@@ -337,7 +337,7 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
 
     //erasing the last "," from the parameter list
     //as concatenation is done in loop last "," is erasing 
-    int nIndex=algParam.find_last_of(",");
+    int nIndex=static_cast<int>(algParam.find_last_of(","));
     if(static_cast<int>(std::string::npos) != nIndex)
       algParam=algParam.erase(nIndex);
     //script string
@@ -473,7 +473,7 @@ void AlgEnvHistoryGrpBox::fillEnvHistoryGroupBox(const EnvironmentHistory& envHi
 }
 void AlgorithmHistoryWindow::updateAll(QString algName,int version,int index)
 {	
-  int nSize=m_algHist.size();
+  int nSize=static_cast<int>(m_algHist.size());
   //indicates the position of the ALgorithmHistory Object in the history vector
   int pos=0;
   //index =-1 for the parent item(root item)

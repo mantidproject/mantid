@@ -620,16 +620,16 @@ void ApplicationWindow::initGlobalConstants()
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
 
-  defaultCurveStyle = int(Graph::LineSymbols);
+  defaultCurveStyle = static_cast<int>(Graph::LineSymbols);
   defaultCurveLineWidth = 1;
   defaultSymbolSize = 7;
 
-  majTicksStyle = int(ScaleDraw::Out);
-  minTicksStyle = int(ScaleDraw::Out);
+  majTicksStyle = static_cast<int>(ScaleDraw::Out);
+  minTicksStyle = static_cast<int>(ScaleDraw::Out);
   minTicksLength = 5;
   majTicksLength = 9;
 
-  legendFrameStyle = int(LegendWidget::Line);
+  legendFrameStyle = static_cast<int>(LegendWidget::Line);
   legendTextColor = Qt::black;
   legendBackground = Qt::white;
   legendBackground.setAlpha(0); // transparent by default;
@@ -666,7 +666,7 @@ void ApplicationWindow::initGlobalConstants()
   d_ASCII_file_filter = "*";
   d_ASCII_import_locale = QLocale::system().name();
   d_import_dec_separators = true;
-  d_ASCII_import_mode = int(ImportASCIIDialog::NewTables);
+  d_ASCII_import_mode = static_cast<int>(ImportASCIIDialog::NewTables);
   d_ASCII_comment_string = "#";
   d_ASCII_import_comments = false;
   d_ASCII_import_read_only = false;
@@ -696,7 +696,7 @@ void ApplicationWindow::initGlobalConstants()
 
   //	d_export_resolution = QPrinter().resolution();
   d_export_color = true;
-  d_export_vector_size = int(QPrinter::Custom);
+  d_export_vector_size = static_cast<int>(QPrinter::Custom);
   d_keep_plot_aspect = true;
 }
 
@@ -5029,7 +5029,7 @@ void ApplicationWindow::saveSettings()
   settings.setValue("/AutoSave", autoSave);
   settings.setValue("/AutoSaveTime", autoSaveTime);
   settings.setValue("/BackupProjects", d_backup_files);
-  settings.setValue("/InitWindow", int(d_init_window_type));
+  settings.setValue("/InitWindow", static_cast<int>(d_init_window_type));
 
   settings.setValue("/ScriptingLang", defaultScriptingLang);
   settings.setValue("/ThousandsSeparator", d_thousands_sep);
@@ -6237,7 +6237,7 @@ void ApplicationWindow::normalizeActiveTable()
   if (!t)
     return;
 
-  if (int(t->selectedColumns().count())>0)
+  if (static_cast<int>(t->selectedColumns().count())>0)
     t->normalize();
   else
     QMessageBox::warning(this, tr("MantidPlot - Column selection error"), tr("Please select a column first!"));//Mantid
@@ -6249,7 +6249,7 @@ void ApplicationWindow::normalizeSelection()
   if (!t)
     return;
 
-  if (int(t->selectedColumns().count())>0)
+  if (static_cast<int>(t->selectedColumns().count())>0)
     t->normalizeSelection();
   else
     QMessageBox::warning(this, tr("MantidPlot - Column selection error"), tr("Please select a column first!"));//Mantid
@@ -6332,7 +6332,7 @@ void ApplicationWindow::showColStatistics()
   if (!t)
     return;
 
-  if (int(t->selectedColumns().count()) > 0)
+  if (static_cast<int>(t->selectedColumns().count()) > 0)
   {
     QList<int> targets;
     for (int i=0; i < t->numCols(); i++)
@@ -8689,7 +8689,7 @@ void ApplicationWindow::windowsMenuAboutToShow()
   windowsMenu->insertSeparator();
 
   QList<MdiSubWindow *> windows = current_folder->windowsList();
-  int n = int(windows.count());
+  int n = static_cast<int>(windows.count());
   if (!n ){
     /*#ifdef SCRIPTING_PYTHON
 			windowsMenu->addAction(actionShowScriptWindow);
@@ -9089,18 +9089,18 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
 
     if (w->inherits("Table")){
       QStringList graphs = dependingPlots(w->objectName());
-      if (int(graphs.count())>0){
+      if (static_cast<int>(graphs.count())>0){
         cm.insertSeparator();
-        for (int i=0;i<int(graphs.count());i++)
+        for (int i=0;i<static_cast<int>(graphs.count());i++)
           plots.insertItem(graphs[i], window(graphs[i]), SLOT(showMaximized()));
 
         cm.insertItem(tr("D&epending Graphs"),&plots);
       }
     } else if (w->isA("Matrix")){
       QStringList graphs = depending3DPlots((Matrix*)w);
-      if (int(graphs.count())>0){
+      if (static_cast<int>(graphs.count())>0){
         cm.insertSeparator();
-        for (int i=0;i<int(graphs.count());i++)
+        for (int i=0;i<static_cast<int>(graphs.count());i++)
           plots.insertItem(graphs[i], window(graphs[i]), SLOT(showMaximized()));
 
         cm.insertItem(tr("D&epending 3D Graphs"),&plots);
@@ -9108,7 +9108,7 @@ void ApplicationWindow::showWindowPopupMenu(Q3ListViewItem *it, const QPoint &p,
     } else if (w->isA("MultiLayer")) {
       tablesDepend->clear();
       QStringList tbls=multilayerDependencies(w);
-      int n = int(tbls.count());
+      int n = static_cast<int>(tbls.count());
       if (n > 0){
         cm.insertSeparator();
         for (int i=0; i<n; i++)
@@ -9194,7 +9194,7 @@ QStringList ApplicationWindow::dependingPlots(const QString& name)
       foreach(Graph *g, layers){
         onPlot = g->curvesList();
         onPlot = onPlot.grep (name,TRUE);
-        if (int(onPlot.count()) && plots.contains(w->objectName())<=0)
+        if (static_cast<int>(onPlot.count()) && plots.contains(w->objectName())<=0)
           plots << w->objectName();
       }
     }else if (w->isA("Graph3D")){
@@ -10839,19 +10839,19 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     else if (s.contains ("EnabledTickLabels")){
       QStringList fList=s.split("\t");
       fList.pop_front();
-      for (int i=0; i<int(fList.count()); i++)
+      for (int i=0; i<static_cast<int>(fList.count()); i++)
         ag->enableAxisLabels(i, fList[i].toInt());
     }
     else if (s.contains ("AxesColors")){
       QStringList fList = s.split("\t");
       fList.pop_front();
-      for (int i=0; i<int(fList.count()); i++)
+      for (int i=0; i<static_cast<int>(fList.count()); i++)
         ag->setAxisColor(i, QColor(fList[i]));
     }
     else if (s.contains ("AxesNumberColors")){
       QStringList fList=QStringList::split ("\t",s,TRUE);
       fList.pop_front();
-      for (int i=0; i<int(fList.count()); i++)
+      for (int i=0; i<static_cast<int>(fList.count()); i++)
         ag->setAxisLabelsColor(i, QColor(fList[i]));
     }
     else if (s.left(5)=="grid\t"){
@@ -11206,7 +11206,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
     else if (s.contains ("AxesTitleColors")){
       QStringList colors = s.split("\t", QString::SkipEmptyParts);
       colors.pop_front();
-      for (int i=0; i<int(colors.count()); i++)
+      for (int i=0; i<static_cast<int>(colors.count()); i++)
         ag->setAxisTitleColor(i, colors[i]);
     }else if (s.contains ("AxesTitleAlignment")){
       QStringList align=s.split("\t", QString::SkipEmptyParts);

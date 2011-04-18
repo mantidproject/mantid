@@ -30,6 +30,7 @@ class OneCurvePlot;
 class CollapsiblePanel;
 class InstrumentWindowRenderTab;
 class InstrumentWindowPickTab;
+class XIntegrationControl;
 
 // Qt forward declarations
 class QPushButton;
@@ -155,6 +156,7 @@ private:
 
   InstrumentWindowRenderTab * m_renderTab;
   InstrumentWindowPickTab * m_pickTab;
+  XIntegrationControl * m_xIntegration;
 
   bool mViewChanged;                ///< stores whether the user changed the view (so don't automatically change it)
 

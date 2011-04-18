@@ -203,7 +203,7 @@ QString Integration::logInfo()
 		gsl_vector *aux = gsl_vector_alloc(d_n);
 		for(int i=0; i < d_n; i++)
 			gsl_vector_set (aux, i, fabs(d_y[i]));
-		int maxID = gsl_vector_max_index (aux);
+		int maxID = static_cast<int>(gsl_vector_max_index (aux));
 		gsl_vector_free(aux);
 
     	logInfo += tr("Peak at") + " x = " + locale.toString(d_x[maxID], 'g', prec)+"\t";

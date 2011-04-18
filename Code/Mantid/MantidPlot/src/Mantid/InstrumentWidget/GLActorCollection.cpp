@@ -69,7 +69,7 @@ void GLActorCollection::removeActor(GLActor*)
  */
 int  GLActorCollection::getNumberOfActors()
 {
-	return mActorsList.size();
+	return static_cast<int>(mActorsList.size());
 }
 
 /**

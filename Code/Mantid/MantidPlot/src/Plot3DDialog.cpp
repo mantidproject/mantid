@@ -493,7 +493,7 @@ void Plot3DDialog::setPlot(Graph3D *g)
 	btnGrid->setColor(g->gridColor());
 
 	boxMeshLineWidth->setValue(g->meshLineWidth());
-	boxTransparency->setValue(int(100*g->transparency()));
+	boxTransparency->setValue(static_cast<int>(100*g->transparency()));
 
 	boxTitle->setText(g->plotTitle());
 	titleFont = g->titleFont();

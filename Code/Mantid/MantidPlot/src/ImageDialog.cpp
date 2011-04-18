@@ -120,7 +120,7 @@ void ImageDialog::adjustHeight(int width)
 if (keepRatioBox->isChecked())
 	{
 	disconnect( boxHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustWidth(int) ) );
-	boxHeight->setValue(int(width/aspect_ratio));
+	boxHeight->setValue(static_cast<int>(width/aspect_ratio));
 	connect( boxHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustWidth(int) ) );
 	}
 else
@@ -132,7 +132,7 @@ void ImageDialog::adjustWidth(int height)
 if (keepRatioBox->isChecked())
 	{
 	disconnect( boxWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustHeight(int) ) );
-	boxWidth->setValue(int(height*aspect_ratio));
+	boxWidth->setValue(static_cast<int>(height*aspect_ratio));
 	connect( boxWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustHeight(int) ) );
 	}
 else

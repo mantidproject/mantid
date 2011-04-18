@@ -132,7 +132,7 @@ QwtText ScaleDraw::label(double value) const
 
 		case Day:
 		{
-			int val = int(transformValue(value))%7;
+			int val = static_cast<int>(transformValue(value))%7;
 			if (val < 0)
 				val = 7 - abs(val);
 			else if (val == 0)
@@ -156,7 +156,7 @@ QwtText ScaleDraw::label(double value) const
 
 		case Month:
 		{
-			int val = int(transformValue(value))%12;
+			int val = static_cast<int>(transformValue(value))%12;
 			if (val < 0)
 				val = 12 - abs(val);
 			else if (val == 0)
@@ -237,7 +237,7 @@ QwtText ScaleDraw::label(double value) const
 				}
 
 				double step = ticks[1] - ticks[0];
-				int index = int(ticks[0] + step*ticks.indexOf(value) - 1);
+				int index = static_cast<int>(ticks[0] + step*ticks.indexOf(value) - 1);
 				int offset = abs((int)floor(break_offset/step));
 				if (offset)
 					offset--;

@@ -1627,13 +1627,13 @@ void Graph::exportVector(const QString& fileName, int, bool color, bool keepAspe
     if (page_aspect > plot_aspect){
       int margin = (int) ((0.1/2.54)*printer.logicalDpiY()); // 1 mm margins
       int height = printer.height() - 2*margin;
-      int width = int(height*plot_aspect);
+      int width = static_cast<int>(height*plot_aspect);
       int x = (printer.width()- width)/2;
       plotRect = QRect(x, margin, width, height);
     } else if (plot_aspect >= page_aspect){
       int margin = (int) ((0.1/2.54)*printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2*margin;
-      int height = int(width/plot_aspect);
+      int height = static_cast<int>(width/plot_aspect);
       int y = (printer.height()- height)/2;
       plotRect = QRect(margin, y, width, height);
     }
@@ -1758,14 +1758,14 @@ void Graph::removeMarker()
     d_plot->replot();
     emit modifiedGraph();
 
-    if (d_lines.contains(selectedMarker)>0)
+    if (d_lines.contains(selectedMarker))
     {
       int index = d_lines.indexOf(selectedMarker);
       int last_line_marker = (int)d_lines.size() - 1;
       for (int i=index; i < last_line_marker; i++)
         d_lines[i]=d_lines[i+1];
       d_lines.resize(last_line_marker);
-    } else if(d_images.contains(selectedMarker)>0){
+    } else if(d_images.contains(selectedMarker)){
       int index=d_images.indexOf(selectedMarker);
       int last_image_marker = d_images.size() - 1;
       for (int i=index; i < last_image_marker; i++)
@@ -1913,7 +1913,7 @@ QString Graph::pieLegendText()
   QList<int> keys= d_plot->curveKeys();
   const QwtPlotCurve *curve = (QwtPlotCurve *)d_plot->curve(keys[0]);
   if (curve){
-    for (int i=0;i<int(curve->dataSize());i++){
+    for (int i=0;i<static_cast<int>(curve->dataSize());i++){
       text+="\\p{";
       text+=QString::number(i+1);
       text+="} ";

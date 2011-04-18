@@ -1027,13 +1027,13 @@ void Matrix::exportVector(const QString& fileName, int res, bool color, bool kee
     if (page_aspect > aspect){
       int margin = (int) ((0.1/2.54)*printer.logicalDpiY()); // 1 mm margins
       int height = printer.height() - 2*margin;
-      int width = int(height*aspect);
+      int width = static_cast<int>(height*aspect);
       int x = (printer.width()- width)/2;
       rect = QRect(x, margin, width, height);
     } else if (aspect >= page_aspect){
       int margin = (int) ((0.1/2.54)*printer.logicalDpiX()); // 1 mm margins
       int width = printer.width() - 2*margin;
-      int height = int(width/aspect);
+      int height = static_cast<int>(width/aspect);
       int y = (printer.height()- height)/2;
       rect = QRect(margin, y, width, height);
     }

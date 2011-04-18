@@ -97,8 +97,8 @@ void QwtBarCurve::draw(QPainter *painter,
 		bar_width = dy*(1-bar_gap*0.01);
 	}
 
-	const int half_width = int((0.5-bar_offset*0.01)*bar_width);
-	int bw1 = int(bar_width) + 1;
+	const int half_width = static_cast<int>((0.5-bar_offset*0.01)*bar_width);
+	int bw1 = static_cast<int>(bar_width) + 1;
 	for (int i=from; i<=to; i++)
 	{
 		const int px = xMap.transform(x(i));
@@ -174,7 +174,7 @@ double QwtBarCurve::dataOffset()
 				if (min <= dx)
 					dx=min;
 			}
-			int x1 = xMap.transform(minXValue()) + int(bar_offset*0.01*bar_width);
+			int x1 = xMap.transform(minXValue()) + static_cast<int>(bar_offset*0.01*bar_width);
 			return xMap.invTransform(x1) - minXValue();
 		}
 		else
@@ -193,7 +193,7 @@ double QwtBarCurve::dataOffset()
 				if (min <= dy)
 					dy=min;
 			}
-			int y1 = yMap.transform(minYValue()) + int(bar_offset*0.01*bar_width);
+			int y1 = yMap.transform(minYValue()) + static_cast<int>(bar_offset*0.01*bar_width);
 			return yMap.invTransform(y1) - minYValue();
 		}
 		else

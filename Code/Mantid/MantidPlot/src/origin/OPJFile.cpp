@@ -34,6 +34,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #endif
 
+#define  _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
@@ -53,7 +54,7 @@ const char* colTypeNames[] = {"X", "Y", "Z", "XErr", "YErr", "Label", "None"};
 
 int strcmp_i(const char *s1, const char *s2) { //compare two strings ignoring case
 #ifdef _WINDOWS
-	return stricmp(s1,s2);
+	return _stricmp(s1,s2);
 #else
 	return strcasecmp(s1,s2);
 #endif
@@ -189,7 +190,7 @@ void OPJFile::convertSpreadToExcel(int spread)
 	for (unsigned int i=0; i<SPREADSHEET[spread].column.size(); ++i)
 	{
 		string name=SPREADSHEET[spread].column[i].name;
-		int pos=name.find_last_of("@");
+		int pos=static_cast<int>(name.find_last_of("@"));
 		string col=name;
 		unsigned int index=0;
 		if(pos!=-1)
@@ -365,14 +366,14 @@ int OPJFile::ParseFormatOld() {
 			fprintf(debug,"NEW SPREADSHEET\n");
 			current_col=1;
 			SPREADSHEET.push_back(spreadSheet(sname));
-			spread=SPREADSHEET.size()-1;
+			spread=static_cast<int>(SPREADSHEET.size())-1;
 			SPREADSHEET.back().maxRows=0;
 		}
 		else {
 
 			spread=compareSpreadnames(sname);
 
-			current_col=SPREADSHEET[spread].column.size();
+			current_col=static_cast<int>(SPREADSHEET[spread].column.size());
 
 			if(!current_col)
 				current_col=1;
@@ -521,19 +522,19 @@ int OPJFile::ParseFormatOld() {
 	fflush(debug);
 	if(i > 0) {
 		if (version == 700 )
-			POS += 0x2530 + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x2530 + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 		else if (version == 610 )
-			POS += 0x25A4 + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x25A4 + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 		else if (version == 604 )
-			POS += 0x25A0 + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x25A0 + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 		else if (version == 601 )
-			POS += 0x2560 + SPREADSHEET[i-1].column.size()*COL_JUMP;	// ?
+			POS += 0x2560 + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;	// ?
 		else if (version == 600 )
-			POS += 0x2560 + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x2560 + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 		else if (version == 500 )
-			POS += 0x92C + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x92C + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 		else if (version == 410 )
-			POS += 0x7FB + SPREADSHEET[i-1].column.size()*COL_JUMP;
+			POS += 0x7FB + static_cast<int>(SPREADSHEET[i-1].column.size())*COL_JUMP;
 	}
 
 	fprintf(debug,"			reading	Header\n");
@@ -646,7 +647,7 @@ int OPJFile::ParseFormatOld() {
 
 		// check column name
 		int max_length=11;	// only first 11 chars are saved here !
-		int name_length = SPREADSHEET[spread].column[j].name.length();
+		int name_length = static_cast<int>(SPREADSHEET[spread].column[j].name.length());
                     int length = (name_length < max_length) ? name_length : max_length;
 
 		if(SPREADSHEET[spread].column[j].name.substr(0,length) == name) {
@@ -982,14 +983,14 @@ int OPJFile::ParseFormatNew() {
 				fprintf(debug,"NEW SPREADSHEET\n");
 				current_col=1;
 				SPREADSHEET.push_back(spreadSheet(sname));
-				spread=SPREADSHEET.size()-1;
+				spread=static_cast<int>(SPREADSHEET.size())-1;
 				SPREADSHEET.back().maxRows=0;
 			}
 			else {
 
 				spread=compareSpreadnames(sname);
 
-				current_col=SPREADSHEET[spread].column.size();
+				current_col=static_cast<int>(SPREADSHEET[spread].column.size());
 
 				if(!current_col)
 					current_col=1;
@@ -999,7 +1000,7 @@ int OPJFile::ParseFormatNew() {
 				sname, cname,current_col,(unsigned int) ftell(f));
 			fflush(debug);
 			SPREADSHEET[spread].column.push_back(spreadColumn(cname, dataIndex));
-			int sheetpos=SPREADSHEET[spread].column.back().name.find_last_of("@");
+			int sheetpos=static_cast<int>(SPREADSHEET[spread].column.back().name.find_last_of("@"));
 			if(!SPREADSHEET[spread].bMultisheet && sheetpos!=-1)
 				if(atoi(string(cname).substr(sheetpos+1).c_str())>1)
 				{
@@ -2334,7 +2335,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 					}
 					else
 					{
-						curve.vector.const_magnitude = curve.symbol_size;
+						curve.vector.const_magnitude = static_cast<int>(curve.symbol_size);
 					}
 
 					fseek(f,LAYER+0x66,SEEK_SET);

@@ -79,7 +79,7 @@ void AlgorithmMonitor::handleAlgorithmFinishedNotification(const Poco::AutoPtr<A
 void AlgorithmMonitor::handleAlgorithmProgressNotification(const Poco::AutoPtr<Algorithm::ProgressNotification>& pNf)
 {
     //if (m_monitorDlg->isVisible()) 
-    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),int(pNf->progress*100),QString::fromStdString(pNf->message));
+    emit needUpdateProgress(pNf->algorithm()->getAlgorithmID(),static_cast<int>(pNf->progress*100),QString::fromStdString(pNf->message));
 }
 
 void AlgorithmMonitor::handleAlgorithmErrorNotification(const Poco::AutoPtr<Algorithm::ErrorNotification>& pNf)

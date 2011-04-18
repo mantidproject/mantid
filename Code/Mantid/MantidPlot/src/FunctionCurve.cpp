@@ -160,7 +160,7 @@ void FunctionCurve::loadData(int points)
       }
 
       QVarLengthArray<double> X;
-      X.reserve(wsX.size());
+      X.reserve(static_cast<int>(wsX.size()));
 
       if (ws->isHistogramData())
       {

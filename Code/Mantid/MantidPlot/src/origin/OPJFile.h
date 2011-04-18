@@ -524,7 +524,7 @@ public:
 
 	const tree<projectNode>* project() const { return &projectTree; }
 	//spreadsheet properties
-	int numSpreads() const { return SPREADSHEET.size(); }			//!< get number of spreadsheets
+	int numSpreads() const { return static_cast<int>(SPREADSHEET.size()); }			//!< get number of spreadsheets
 	const char *spreadName(int s) const { return SPREADSHEET[s].name.c_str(); }	//!< get name of spreadsheet s
 	bool spreadHidden(int s) const { return SPREADSHEET[s].bHidden; }	//!< is spreadsheet s hidden
 	bool spreadLoose(int s) const { return SPREADSHEET[s].bLoose; }	//!< is spreadsheet s loose
@@ -534,8 +534,8 @@ public:
 	double spreadModificationDate(int s) const { return SPREADSHEET[s].modification_date; }	//!< get modification date of spreadsheet s
 	originWindow::State spreadState(int s) const { return SPREADSHEET[s].state; }	//!< get window state of spreadsheet s
 	originWindow::Title spreadTitle(int s) const { return SPREADSHEET[s].title; }	//!< get window state of spreadsheet s
-	int numCols(int s) const { return SPREADSHEET[s].column.size(); }		//!< get number of columns of spreadsheet s
-	int numRows(int s,int c) const { return SPREADSHEET[s].column[c].odata.size(); }	//!< get number of rows of column c of spreadsheet s
+	int numCols(int s) const { return static_cast<int>(SPREADSHEET[s].column.size()); }		//!< get number of columns of spreadsheet s
+	int numRows(int s,int c) const { return static_cast<int>(SPREADSHEET[s].column[c].odata.size()); }	//!< get number of rows of column c of spreadsheet s
 	int maxRows(int s) const { return SPREADSHEET[s].maxRows; }		//!< get maximum number of rows of spreadsheet s
 
 	//spreadsheet's column properties
@@ -559,7 +559,7 @@ public:
 	}	//!< get data of column c/row r of spreadsheet s
 
 	//matrix properties
-	int numMatrices() const { return MATRIX.size(); }			//!< get number of matrices
+	int numMatrices() const { return static_cast<int>(MATRIX.size()); }			//!< get number of matrices
 	const char *matrixName(int m) const { return MATRIX[m].name.c_str(); }	//!< get name of matrix m
 	bool matrixHidden(int m) const { return MATRIX[m].bHidden; }	//!< is matrix m hidden
 	rect matrixWindowRect(int m) const { return MATRIX[m].clientRect; }		//!< get window rectangle of matrix m
@@ -582,7 +582,7 @@ public:
 	std::vector<double> matrixData(int m) const { return MATRIX[m].data; }	//!< get data of matrix m
 
 	//function properties
-	int numFunctions() const { return FUNCTION.size(); }			//!< get number of functions
+	int numFunctions() const { return static_cast<int>(FUNCTION.size()); }			//!< get number of functions
 	int functionIndex(const char* s) const { return compareFunctionnames(s); }	//!< get name of function s
 	const char *functionName(int s) const { return FUNCTION[s].name.c_str(); }	//!< get name of function s
 	int functionType(int s) const { return FUNCTION[s].type; }		//!< get type of function s
@@ -618,7 +618,7 @@ public:
 
 	enum VectorPosition {Tail, Midpoint, Head};
 
-	int numGraphs() const { return GRAPH.size(); }			//!< get number of graphs
+	int numGraphs() const { return static_cast<int>(GRAPH.size()); }			//!< get number of graphs
 	const char *graphName(int s) const { return GRAPH[s].name.c_str(); }	//!< get name of graph s
 	const char *graphLabel(int s) const { return GRAPH[s].label.c_str(); }	//!< get name of graph s
 	double graphCreationDate(int s) const { return GRAPH[s].creation_date; }	//!< get creation date of graph s
@@ -628,7 +628,7 @@ public:
 	bool graphHidden(int s) const { return GRAPH[s].bHidden; }	//!< is graph s hidden
 	rect graphRect(int s) const { return rect(GRAPH[s].width, GRAPH[s].height); }		//!< get rectangle of graph s
 	rect graphWindowRect(int s) const { return GRAPH[s].clientRect; }		//!< get window rectangle of graph s
-	int numLayers(int s) const { return GRAPH[s].layer.size(); }			//!< get number of layers of graph s
+	int numLayers(int s) const { return static_cast<int>(GRAPH[s].layer.size()); }			//!< get number of layers of graph s
 	rect layerRect(int s, int l) const { return GRAPH[s].layer[l].clientRect; }		//!< get rectangle of layer l of graph s
 	text layerXAxisTitle(int s, int l) const { return GRAPH[s].layer[l].xAxis.label; }		//!< get label of X-axis of layer l of graph s
 	text layerYAxisTitle(int s, int l) const { return GRAPH[s].layer[l].yAxis.label; }		//!< get label of Y-axis of layer l of graph s
@@ -689,7 +689,7 @@ public:
 	} //!< get histogram bin of layer l of graph s
 	int layerXScale(int s, int l) const { return GRAPH[s].layer[l].xAxis.scale; }		//!< get scale of X-axis of layer l of graph s
 	int layerYScale(int s, int l) const { return GRAPH[s].layer[l].yAxis.scale; }		//!< get scale of Y-axis of layer l of graph s
-	int numCurves(int s, int l) const { return GRAPH[s].layer[l].curve.size(); }			//!< get number of curves of layer l of graph s
+	int numCurves(int s, int l) const { return static_cast<int>(GRAPH[s].layer[l].curve.size()); }			//!< get number of curves of layer l of graph s
 	const char *curveDataName(int s, int l, int c) const { return GRAPH[s].layer[l].curve[c].dataName.c_str(); }	//!< get data source name of curve c of layer l of graph s
 	const char *curveXColName(int s, int l, int c) const { return GRAPH[s].layer[l].curve[c].xColName.c_str(); }	//!< get X-column name of curve c of layer l of graph s
 	const char *curveYColName(int s, int l, int c) const { return GRAPH[s].layer[l].curve[c].yColName.c_str(); }	//!< get Y-column name of curve c of layer l of graph s
@@ -718,7 +718,7 @@ public:
 	pieProperties curvePieProperties(int s, int l, int c) const { return GRAPH[s].layer[l].curve[c].pie; }	//!< get pie properties of curve c of layer l of graph s
 	vectorProperties curveVectorProperties(int s, int l, int c) const { return GRAPH[s].layer[l].curve[c].vector; }	//!< get vector properties of curve c of layer l of graph s
 
-	int numNotes() const { return NOTE.size(); }			//!< get number of notes
+	int numNotes() const { return static_cast<int>(NOTE.size()); }			//!< get number of notes
 	const char *noteName(int n) const { return NOTE[n].name.c_str(); }	//!< get name of note n
 	const char *noteLabel(int n) const { return NOTE[n].label.c_str(); }	//!< get label of note n
 	const char *noteText(int n) const { return NOTE[n].text.c_str(); }	//!< get text of note n

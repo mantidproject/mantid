@@ -1006,7 +1006,7 @@ void PropertyHandler::calcBase()
     int wi = fMW->getWorkspaceIndex();
     const Mantid::MantidVec& X = ws->readX(wi);
     const Mantid::MantidVec& Y = ws->readY(wi);
-    int n = Y.size() - 1;
+    int n = static_cast<int>(Y.size()) - 1;
     if (m_ci < 0 || m_ci > n || !m_browser->m_autoBackground)
     {
       m_base = 0.;
@@ -1061,7 +1061,7 @@ void PropertyHandler::setCentre(const double& c)
     {
       int wi = m_pf->getWorkspaceIndex();
       const Mantid::MantidVec& X = ws->readX(wi);
-      int n = X.size() - 2;
+      int n = static_cast<int>(X.size()) - 2;
       if (m_ci < 0) m_ci = 0;
       if (m_ci > n) m_ci = n;
       double x = X[m_ci];

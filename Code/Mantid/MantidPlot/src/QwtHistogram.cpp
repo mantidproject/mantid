@@ -77,9 +77,9 @@ void QwtHistogram::draw(QPainter *painter,
 
 	const int ref= yMap.transform(baseline());
 	const int dx=abs(xMap.transform(x(from+1)) - xMap.transform(x(from)));
-	const int bar_width=int(dx*(1-gap()*0.01));
-	const int half_width = int(0.5*(dx-bar_width));
-	const int xOffset = int(0.01*offset()*bar_width);
+	const int bar_width=static_cast<int>(dx*(1-gap()*0.01));
+	const int half_width = static_cast<int>(0.5*(dx-bar_width));
+	const int xOffset = static_cast<int>(0.01*offset()*bar_width);
 
 	for (int i=from; i<=to; i++){
 		const int px1 = xMap.transform(x(i));
@@ -162,7 +162,7 @@ void QwtHistogram::loadData()
 
 		gsl_histogram_set_ranges_uniform (h, floor(min), ceil(max));
 	} else {
-		n = int((d_end - d_begin)/d_bin_size + 1);
+		n = static_cast<int>((d_end - d_begin)/d_bin_size + 1);
 		h = gsl_histogram_alloc (n);
 		if (!h)
 			return;
@@ -222,7 +222,7 @@ void QwtHistogram::loadDataFromMatrix()
 			return;
 		gsl_histogram_set_ranges_uniform (h, floor(min), ceil(max));
 	} else {
-		n = int((d_end - d_begin)/d_bin_size + 1);
+		n = static_cast<int>((d_end - d_begin)/d_bin_size + 1);
 		if (!n)
             return;
 

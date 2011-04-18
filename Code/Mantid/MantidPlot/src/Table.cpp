@@ -1200,7 +1200,7 @@ void Table::deselect()
 void Table::clearSelection()
 {
   QStringList list=selectedColumns();
-  int n = int(list.count());
+  int n = static_cast<int>(list.count());
 
   if (n>0){
     QStringList lstReadOnly;
@@ -1599,10 +1599,10 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
             data_string[j] = text(valid_cell[j], col);
           if(!order)
             for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, data_string[p[j]]);
+              d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[j])]);
           else
             for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, data_string[p[non_empty_cells-j-1]]);
+              d_table->setText(valid_cell[j], col, data_string[static_cast<int>(p[non_empty_cells-j-1])]);
         }else{
           for (int j = 0; j<non_empty_cells; j++)
             data_double[j] = cell(valid_cell[j], col);
@@ -1611,10 +1611,10 @@ void Table::sortColumns(const QStringList&s, int type, int order, const QString&
           columnNumericFormat(col, &f, &prec);
           if(!order)
             for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, locale().toString(data_double[p[j]], f, prec));
+              d_table->setText(valid_cell[j], col, locale().toString(data_double[static_cast<int>(p[j])], f, prec));
           else
             for (int j=0; j<non_empty_cells; j++)
-              d_table->setText(valid_cell[j], col, locale().toString(data_double[p[non_empty_cells-j-1]], f, prec));
+              d_table->setText(valid_cell[j], col, locale().toString(data_double[static_cast<int>(p[non_empty_cells-j-1])], f, prec));
         }
         emit modifiedData(this, colName(col));
       }
@@ -2004,7 +2004,7 @@ bool Table::setTimeFormat(const QString& format, int col, bool updateCells)
 
         if (d_saved_cells){
           if (d_saved_cells[col][i] < 1)// import of Origin files
-            t = ref.addMSecs(int(d_saved_cells[col][i]*86400000));
+            t = ref.addMSecs(static_cast<int>(d_saved_cells[col][i]*86400000));
           else
             t = ref.addMSecs((int)d_saved_cells[col][i]);
 
@@ -2041,7 +2041,7 @@ void Table::setMonthFormat(const QString& format, int col, bool updateCells)
     if (!t.isEmpty()){
       int day;
       if (d_saved_cells)
-        day = int(d_saved_cells[col][i]) % 12;
+        day = static_cast<int>(d_saved_cells[col][i]) % 12;
       else
         day = t.toInt() % 12;
       if (!day)
@@ -2073,7 +2073,7 @@ void Table::setDayFormat(const QString& format, int col, bool updateCells)
     if (!t.isEmpty()){
       int day;
       if (d_saved_cells)
-        day = int(d_saved_cells[col][i]) % 7;
+        day = static_cast<int>(d_saved_cells[col][i]) % 7;
       else
         day = t.toInt() % 7;
       if (!day)

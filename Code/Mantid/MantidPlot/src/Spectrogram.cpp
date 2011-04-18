@@ -752,8 +752,8 @@ void Spectrogram::updateLabels(QPainter *p, const QwtScaleMap &xMap, const QwtSc
     if (!mrk)
       return;
     QSize size = mrk->label().textSize();
-    int dx =int((d_labels_x_offset )*0.01*size.height()); //int((d_labels_x_offset + mrk->xLabelOffset())*0.01*size.height());
-    int dy = -int(((d_labels_y_offset )*0.01 + 0.5)*size.height());
+    int dx =static_cast<int>((d_labels_x_offset )*0.01*size.height()); //static_cast<int>((d_labels_x_offset + mrk->xLabelOffset())*0.01*size.height());
+    int dy = -static_cast<int>(((d_labels_y_offset )*0.01 + 0.5)*size.height());
 
     double x = lines[i].x();
     double y = lines[i].y();
@@ -913,7 +913,7 @@ QImage Spectrogram::renderImage(
       unsigned char *line = image.scanLine(i)+jmin;
       const Mantid::MantidVec& X = mantidFun->getMantidVec(row);
       int col = 0;
-      int nX = X.size()-1;
+      int nX = static_cast<int>(X.size())-1;
       for(int j=jmin;j<imageWidth;++j)
       {
         double x = xMap.invTransform(j+rect.left());

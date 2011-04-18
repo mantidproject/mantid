@@ -28,7 +28,7 @@
  ***************************************************************************/
 #include "fft2D.h"
 #include "../Matrix.h"
-#define _USE_MATH_DEFINES
+//#define _USE_MATH_DEFINES
 #include <math.h>
 #include <QVarLengthArray>
 void fft(double* x_int_re, double* x_int_im, int taille)

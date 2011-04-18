@@ -522,7 +522,7 @@ int Plot::closestCurve(int xpos, int ypos, int &dist, int &point)
 			}
 		}
 	}
-	dist = int(sqrt(dmin));
+	dist = static_cast<int>(sqrt(dmin));
 	return key;
 }
 

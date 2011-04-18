@@ -84,10 +84,10 @@ void LineProfileTool::calculateLineProfile(const QPoint& start, const QPoint& en
 	if (realSize != actualSize){
 		double ratioX = (double)realSize.width()/(double)actualSize.width();
 		double ratioY = (double)realSize.height()/(double)actualSize.height();
-		x1 = int(x1*ratioX);
-		x2 = int(x2*ratioX);
-		y1 = int(y1*ratioY);
-		y2 = int(y2*ratioY);
+		x1 = static_cast<int>(x1*ratioX);
+		x2 = static_cast<int>(x2*ratioX);
+		y1 = static_cast<int>(y1*ratioY);
+		y2 = static_cast<int>(y2*ratioY);
 	}
 
 	QString text = tr("pixel") + "\tx\ty\t" + tr("intensity") + "\n";
@@ -154,7 +154,7 @@ int LineProfileTool::averageImagePixel(const QImage& image, int px, int py, bool
 {
 	QRgb pixel;
 	int sum=0,start,i;
-	int middle=int(0.5*(d_average_pixels-1));
+	int middle=static_cast<int>(0.5*(d_average_pixels-1));
 	if (moreHorizontal){
 		start=py-middle;
 		for(i=0; i<d_average_pixels; i++){

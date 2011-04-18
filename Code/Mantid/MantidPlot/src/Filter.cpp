@@ -437,8 +437,8 @@ bool Filter::setDataFromTable(Table *t, const QString& xColName, const QString& 
     	size_t *p = new size_t[d_n];
    		gsl_sort_index(p, X.data(), 1, d_n);
     	for (int i=0; i<d_n; i++){
-        	d_x[i] = X[p[i]];
-  	    	d_y[i] = Y[p[i]];
+        	d_x[i] = X[static_cast<int>(p[i])];
+  	    	d_y[i] = Y[static_cast<int>(p[i])];
 		}
 		delete[] p;
     }

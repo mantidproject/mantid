@@ -1,6 +1,7 @@
 #include "InstrumentWindow.h"
 #include "InstrumentWindowRenderTab.h"
 #include "InstrumentWindowPickTab.h"
+#include "XIntegrationControl.h"
 #include "../MantidUI.h"
 #include "../AlgMonitor.h"
 #include "MantidKernel/ConfigService.h"
@@ -56,6 +57,10 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mInstrumentDisplay = new Instrument3DWidget(this);
   controlPanelLayout->addWidget(mInstrumentDisplay);
   mainLayout->addWidget(controlPanelLayout);
+
+  m_xIntegration = new XIntegrationControl(this);
+  mainLayout->addWidget(m_xIntegration);
+  connect(m_xIntegration,SIGNAL(changed(double,double,bool)),mInstrumentDisplay,SLOT(setDataMappingIntegral(double,double,bool)));
 
   //Set the mouse/keyboard operation info
   mInteractionInfo = new QLabel();
@@ -225,7 +230,7 @@ void InstrumentWindow::spectraInfoDialog()
   QString info;
   const std::vector<int> & det_ids = mInstrumentDisplay->getSelectedDetectorIDs();
   const std::vector<int> & wksp_indices = mInstrumentDisplay->getSelectedWorkspaceIndices();
-  const int ndets = det_ids.size();
+  const int ndets = static_cast<int>(det_ids.size());
   if( ndets == 1 )
   {
     info = QString("Workspace index: %1\nDetector ID: %2").arg(QString::number(wksp_indices.front()),QString::number(det_ids.front()));
@@ -401,6 +406,9 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
     m_renderTab->setMaxValue(mInstrumentDisplay->getDataMaxValue(),false);
   }
   
+  mInstrumentDisplay->calculateBinRange();
+  m_xIntegration->setTotalRange(mInstrumentDisplay->getBinMinValue(),mInstrumentDisplay->getBinMaxValue());
+
   // Setup the colour map details
   GraphOptions::ScaleType type = m_renderTab->getScaleType();
   mInstrumentDisplay->mutableColorMap().changeScaleType(type);

@@ -137,7 +137,7 @@ gsl_multifit_fdfsolver * Fit::fitGSL(gsl_multifit_function_fdf f, int &iteration
 	} while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);
 
 	gsl_multifit_covar (s->J, 0.0, covar);
-	iterations = iter;
+	iterations = static_cast<int>(iter);
 	return s;
 }
 
@@ -191,7 +191,7 @@ gsl_multimin_fminimizer * Fit::fitSimplex(gsl_multimin_function f, int &iteratio
 	}
 	while (inRange && status == GSL_CONTINUE && (int)iter < d_max_iterations);
 
-	iterations = iter;
+	iterations = static_cast<int>(iter);
 	gsl_vector_free(ss);
 	return s_min;
 }

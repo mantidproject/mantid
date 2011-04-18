@@ -694,7 +694,7 @@ QwtDoubleRect MantidMatrix::boundingRect()
             }
           }
         }
-        m_spectrogramCols = int((x_end - x_start)/ddx);
+        m_spectrogramCols = static_cast<int>((x_end - x_start)/ddx);
         if (m_spectrogramCols < 100) m_spectrogramCols = 100;
       }
       else

@@ -208,7 +208,7 @@ void InstrumentWindowPickTab::plotSingle(const Instrument3DWidget::DetInfo & cur
   m_plot->setXScale(x.front(),x.back());
   Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
   Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-  m_plot->setData(&x[0],&y[0],y.size());
+  m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
   m_plot->setYScale(*min_it,*max_it);
 }
 
@@ -247,7 +247,7 @@ void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & curso
       }
       Mantid::MantidVec::const_iterator min_it = std::min_element(y.begin(),y.end());
       Mantid::MantidVec::const_iterator max_it = std::max_element(y.begin(),y.end());
-      m_plot->setData(&x[0],&y[0],y.size());
+      m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
       m_plot->setYScale(*min_it,*max_it);
     }
     else // plot detector integrals vs detID
@@ -284,7 +284,7 @@ void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & curso
           if (val < ymin) ymin = val;
           if (val > ymax) ymax = val;
         }
-        m_plot->setData(&x[0],&y[0],y.size());
+        m_plot->setData(&x[0],&y[0],static_cast<int>(y.size()));
         m_plot->setXScale(x.front(),x.back());
         m_plot->setYScale(ymin,ymax);
       }

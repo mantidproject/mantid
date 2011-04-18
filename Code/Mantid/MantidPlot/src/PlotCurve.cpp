@@ -541,8 +541,8 @@ void DataCurve::loadLabels()
 		m->setAxis(x_axis, y_axis);
 
 		QSize size = t.textSize();
-        int dx = int(d_labels_x_offset*0.01*size.height());
-        int dy = -int((d_labels_y_offset*0.01 + 0.5)*size.height());
+        int dx = static_cast<int>(d_labels_x_offset*0.01*size.height());
+        int dy = -static_cast<int>((d_labels_y_offset*0.01 + 0.5)*size.height());
         int x2 = d_plot->transform(x_axis, x(index)) + dx;
         int y2 = d_plot->transform(y_axis, y(index)) + dy;
         switch(d_labels_align){
@@ -636,8 +636,8 @@ void DataCurve::updateLabelsPosition()
         QSize size = m->label().textSize();
         int x_axis = xAxis();
         int y_axis = yAxis();
-        int dx = int(d_labels_x_offset*0.01*size.height());
-        int dy = -int((d_labels_y_offset*0.01 + 0.5)*size.height());
+        int dx = static_cast<int>(d_labels_x_offset*0.01*size.height());
+        int dy = -static_cast<int>((d_labels_y_offset*0.01 + 0.5)*size.height());
         int x2 = d_plot->transform(x_axis, x(index)) + dx;
         int y2 = d_plot->transform(y_axis, y(index)) + dy;
         switch(d_labels_align){
@@ -842,8 +842,8 @@ void DataCurve::moveLabels(const QPoint& pos)
 	int d_y = pos.y() - d_plot->transform(yAxis(), d_click_pos_y);
 
 	int height = d_selected_label->label().textSize().height();
-	d_labels_x_offset += int(d_x*100.0/(double)height);
-    d_labels_y_offset -= int(d_y*100.0/(double)height);
+	d_labels_x_offset += static_cast<int>(d_x*100.0/(double)height);
+    d_labels_y_offset -= static_cast<int>(d_y*100.0/(double)height);
 
 	updateLabelsPosition();
 	d_plot->replot();

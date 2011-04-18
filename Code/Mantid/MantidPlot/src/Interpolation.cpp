@@ -172,11 +172,11 @@ int Interpolation::sortedCurveData(QwtPlotCurve *c, double start, double end, do
     double *xtemp = new double[n];
     double *ytemp = new double[n];
 
-	double pr_x;
+	double pr_x = 0;
   	int j=0;
     for (int i = i_start; i <= i_end; i++){
         xtemp[j] = c->x(i);
-        if (xtemp[j] == pr_x){
+        if (i > i_start && xtemp[j] == pr_x){
             delete (*x);
             delete (*y);
             return -1;//this kind of data causes division by zero in GSL interpolation routines

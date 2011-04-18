@@ -1327,7 +1327,7 @@ void FitPropertyBrowser::getFitResults()
       std::vector<std::string>::iterator it = 
         std::find(names.begin(),names.end(),m_groupMember);
       if (it == names.end()) return;
-      int row = int(it - names.begin()) - 1;// take into account the group name
+      int row = static_cast<int>(it - names.begin()) - 1;// take into account the group name
       if (row >= ws->rowCount()) return;
       for(int i=0;i<compositeFunction()->nParams();++i)
       {

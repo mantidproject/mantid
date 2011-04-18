@@ -810,7 +810,7 @@ void Graph3D::setTickLengths(const QStringList& lst)
 {
 	double majorl, minorl;
 	QStringList tick_length = lst;
-	if (int(lst.count()) > 6)
+	if (static_cast<int>(lst.count()) > 6)
 		tick_length.remove(tick_length.first());
 
 	majorl=tick_length[0].toDouble();
@@ -1344,8 +1344,8 @@ void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl,
 	double dx = fabs((xEnd - xStart)/double(d_matrix->numCols()-1));
 	double dy = fabs((yEnd - yStart)/double(d_matrix->numRows()-1));
 
-	int nc = int(fabs(xr - xl)/dx)+1;
-	int nr = int(fabs(yr - yl)/dy)+1;
+	int nc = static_cast<int>(fabs(xr - xl)/dx)+1;
+	int nr = static_cast<int>(fabs(yr - yl)/dy)+1;
 
     double x_begin = qMin(xl, xr);
 	double y_begin = qMin(yl, yr);
@@ -1429,7 +1429,7 @@ void Graph3D::updateScales(double xl, double xr, double yl, double yr,double zl,
 void Graph3D::setTicks(const QStringList& options)
 {
 	int min,maj;
-	if (int(options.count()) == 6)
+	if (static_cast<int>(options.count()) == 6)
 	{
 		maj=options[0].toInt();
 		sp->coordinates()->axes[X1].setMajors(maj);
@@ -2672,7 +2672,7 @@ void Graph3D::rotate()
 if (!sp)
    return;
 
-sp->setRotation(int(sp->xRotation() + 1) % 360, int(sp->yRotation() + 1) % 360, int(sp->zRotation() + 1) % 360);
+sp->setRotation(static_cast<int>(sp->xRotation() + 1) % 360, static_cast<int>(sp->yRotation() + 1) % 360, static_cast<int>(sp->zRotation() + 1) % 360);
 }
 
 void Graph3D::setDataColorMap(const QString& fileName)

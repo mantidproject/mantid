@@ -150,12 +150,12 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
 		const int upperq = yMap.transform(gsl_stats_quantile_from_sorted_data (dat, 1, size, 0.75));
 		QPolygon pa(8);
 		pa[0] = QPoint(px + hbw, b_upperq);
-		pa[1] = QPoint(int(px + 0.4*box_width), upperq);
-		pa[2] = QPoint(int(px + 0.4*box_width), lowerq);
+		pa[1] = QPoint(static_cast<int>(px + 0.4*box_width), upperq);
+		pa[2] = QPoint(static_cast<int>(px + 0.4*box_width), lowerq);
 		pa[3] = QPoint(px + hbw, b_lowerq);
 		pa[4] = QPoint(px - hbw, b_lowerq);
-		pa[5] = QPoint(int(px - 0.4*box_width), lowerq);
-		pa[6] = QPoint(int(px - 0.4*box_width), upperq);
+		pa[5] = QPoint(static_cast<int>(px - 0.4*box_width), lowerq);
+		pa[6] = QPoint(static_cast<int>(px - 0.4*box_width), upperq);
 		pa[7] = QPoint(px - hbw, b_upperq);
 
 		painter->setBrush(QwtPlotCurve::brush());
@@ -171,12 +171,12 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
 		QPolygon pa(10);
 		pa[0] = QPoint(px + hbw, b_upperq);
 		pa[1] = QPoint(px + hbw, upperCI);
-		pa[2] = QPoint(int(px + 0.25*hbw), median);
+		pa[2] = QPoint(static_cast<int>(px + 0.25*hbw), median);
 		pa[3] = QPoint(px + hbw, lowerCI);
 		pa[4] = QPoint(px + hbw, b_lowerq);
 		pa[5] = QPoint(px - hbw, b_lowerq);
 		pa[6] = QPoint(px - hbw, lowerCI);
-		pa[7] = QPoint(int(px - 0.25*hbw), median);
+		pa[7] = QPoint(static_cast<int>(px - 0.25*hbw), median);
 		pa[8] = QPoint(px - hbw, upperCI);
 		pa[9] = QPoint(px - hbw, b_upperq);
 
@@ -186,7 +186,7 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
 
 	if (w_range)
 	{//draw whiskers
-		const int l = int(0.1*box_width);
+		const int l = static_cast<int>(0.1*box_width);
 		int w_upperq, w_lowerq;
 		if(w_range == SD)
 		{
@@ -222,7 +222,7 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
 	if (b_style == Notch || b_style == NoBox)
 		return;
 	if (b_style == WindBox)
-		painter->drawLine(int(px - 0.4*box_width), median, int(px + 0.4*box_width), median);
+		painter->drawLine(static_cast<int>(px - 0.4*box_width), median, static_cast<int>(px + 0.4*box_width), median);
 	else
 		painter->drawLine(px - hbw, median, px + hbw, median);
 }

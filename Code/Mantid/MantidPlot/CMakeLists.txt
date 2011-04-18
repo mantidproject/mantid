@@ -201,6 +201,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
+                   src/Mantid/InstrumentWidget/XIntegrationControl.cpp
 )
 
 ###########################################################################
@@ -408,6 +409,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
                    src/Mantid/InstrumentWidget/DetSelector.h
+                   src/Mantid/InstrumentWidget/XIntegrationControl.h
 )
 
 ###########################################################################
@@ -624,6 +626,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/ColorMapWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
+                       src/Mantid/InstrumentWidget/XIntegrationControl.h
 )
 
 set ( UI_FILES src/Mantid/FirstTimeSetup.ui

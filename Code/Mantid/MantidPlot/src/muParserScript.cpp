@@ -418,7 +418,7 @@ bool muParserScript::compile(bool)
         parser.SetExpr(muCode[0].ascii());
         try {
 			parser.Eval();
-		} catch (EmptySourceError *e) {
+		} catch (EmptySourceError*) {
 		    QApplication::restoreOverrideCursor();
             return false;
         } catch (mu::ParserError &e) {
@@ -437,9 +437,9 @@ QString muParserScript::evalSingleLineToString(const QLocale& locale, char f, in
     double val = 0.0;
     try {
         val = parser.Eval();
-    } catch (EmptySourceError *e) {
+    } catch (EmptySourceError*) {
         return "";
-    } catch (ParserError &e) {
+    } catch (ParserError &) {
 		return "";
 	}
     return locale.toString(val, f, prec);
@@ -450,9 +450,9 @@ double muParserScript::evalSingleLine()
     double val = 0.0;
     try {
         val = parser.Eval();
-    } catch (EmptySourceError *e) {
+    } catch (EmptySourceError *) {
         return GSL_NAN;
-    } catch (ParserError &e) {
+    } catch (ParserError &) {
 		return GSL_NAN;
 	}
     return val;
@@ -471,7 +471,7 @@ QVariant muParserScript::eval()
 			parser.SetExpr(i->ascii());
 			val = parser.Eval();
 		}
-	} catch (EmptySourceError *e) {
+	} catch (EmptySourceError *) {
 		return QVariant("");
 	} catch (ParserError &e) {
 		emit_error(e.GetMsg().c_str(), 0);
@@ -490,7 +490,7 @@ bool muParserScript::exec()
 			parser.SetExpr(i->ascii());
 			parser.Eval();
 		}
-	} catch (EmptySourceError *e) {
+	} catch (EmptySourceError *) {
 		return true;
 	} catch (mu::ParserError &e) {
 		emit_error(e.GetMsg().c_str(), 0);

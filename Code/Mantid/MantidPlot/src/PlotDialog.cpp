@@ -3126,7 +3126,7 @@ void PlotDialog::adjustLayerHeight(int width)
 {
 	if (keepRatioBox->isChecked()){
 		disconnect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
-		boxLayerHeight->setValue(int(width/aspect_ratio));
+		boxLayerHeight->setValue(static_cast<int>(width/aspect_ratio));
 		connect( boxLayerHeight, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerWidth(int) ) );
 	} else
 		aspect_ratio = (double)width/double(boxLayerHeight->value());
@@ -3136,7 +3136,7 @@ void PlotDialog::adjustLayerWidth(int height)
 {
 	if (keepRatioBox->isChecked()){
 		disconnect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
-		boxLayerWidth->setValue(int(height*aspect_ratio));
+		boxLayerWidth->setValue(static_cast<int>(height*aspect_ratio));
 		connect( boxLayerWidth, SIGNAL( valueChanged ( int ) ), this, SLOT( adjustLayerHeight(int) ) );
 	} else
 		aspect_ratio = double(boxLayerWidth->value())/(double)height;

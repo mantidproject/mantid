@@ -621,7 +621,7 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)
 {
-  const int nrows = indices.size();
+  const int nrows = static_cast<int>(indices.size());
   int ncols = 6;
   QStringList col_names;
   col_names << "Index" << "Spectra" << "Detector ID";
@@ -1847,7 +1847,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   //Get a map of time/value. This greatly speeds up display.
   // NOTE: valueAsMap() skips repeated values.
   std::map<DateAndTime, double> time_value_map = flt.data()->valueAsMap();
-  int rowcount = time_value_map.size();
+  int rowcount = static_cast<int>(time_value_map.size());
   int colCount = 2;
   Table* t = new Table(appWindow()->scriptingEnv(), rowcount, colCount, "", appWindow(), 0);
 
@@ -2032,7 +2032,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
     //Set the filter strings
     if (filter && flt.filter() && lastTime < flt.filter()->lastTime())
     {
-      rowcount = time_value_map.size();
+      rowcount = static_cast<int>(time_value_map.size());
       if (rowcount == t->numRows()) t->addRows(1);
       std::string time_string = flt.filter()->lastTime().to_simple_string();
       t->setText(rowcount,0,QString::fromStdString(time_string));
@@ -2636,7 +2636,7 @@ void countVirtual(vector<mem_block>& mem, int& total)
   size_t committed_max = 0;// maximum contiguous block of committed memory
 
   size_t GB2 = memStatus.ullTotalVirtual;// Maximum memeory available to the process
-  total = GB2;
+  total = static_cast<int>(GB2);
 
   // Loop over all virtual memory to find out the status of every block.
   do

@@ -305,6 +305,8 @@ void Instrument3DWidget::setWorkspace(const QString& wsName)
   // Calculate bin values, data ranges and integrate data
   calculateColorCounts(/*output,*/ true);
 
+  calculateBinRange();
+
   if (SHOWTIMING) std::cout << "Instrument3DWidget::setWorkspace() took " << timer.elapsed() << " seconds\n";
 }
 
@@ -332,6 +334,12 @@ void Instrument3DWidget::calculateBinRange()
 {
   Mantid::API::MatrixWorkspace_sptr workspace = mWorkspace;
   Timer timer;
+
+  if (!workspace)
+  {
+    mWkspBinMin = 0;
+    mWkspBinMax = 1;
+  }
 
   // Value has not been preset?
   if (( std::fabs(mWkspBinMin - DBL_MAX)/DBL_MAX < 1e-08 ) && ( (mWkspBinMax + DBL_MAX)/DBL_MAX < 1e-08 ))
@@ -427,7 +435,7 @@ void Instrument3DWidget::calculateCounts(bool firstCalculation)
 
   //TODO: Make this part in parallel if possible!
 
-  const int n_spec = m_workspace_indices.size();
+  const int n_spec = static_cast<int>(m_workspace_indices.size());
   //std::vector<double> integrated_values( n_spec, -1.0 );
 
   //Use the workspace function to get the integrated spectra
@@ -478,7 +486,7 @@ void Instrument3DWidget::calculateColors(bool firstCalculation)
   Timer timerColLists;
 
   const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
-  const int n_spec = m_workspace_indices.size();
+  const int n_spec = static_cast<int>(m_workspace_indices.size());
   mScaledValues = std::vector<unsigned char>(n_spec, 0);
   std::vector<boost::shared_ptr<GLColor> > colorlist(n_spec);
   double minValue = (mColorMap.getScaleType() == GraphOptions::Log10 && mDataMinValue < mWkspDataPositiveMin)? 
@@ -795,6 +803,10 @@ void Instrument3DWidget::setDataMappingIntegral(double minValue,double maxValue,
   {
     calculateColorCounts(/*mWorkspace,*/ false);
     mInstrumentActor->refresh();
+    if (m_unwrappedSurface)
+    {
+      m_unwrappedSurfaceChanged = true;
+    }
     update();
   }
 }

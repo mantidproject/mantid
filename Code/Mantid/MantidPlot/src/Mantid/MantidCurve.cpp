@@ -423,7 +423,7 @@ double MantidQwtData::e(size_t i) const
 
 int MantidQwtData::esize() const
 {
-  return m_E.size();
+  return static_cast<int>(m_E.size());
 }
 
 bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
