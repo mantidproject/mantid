@@ -267,13 +267,12 @@ def addText(text,parent):
 
 # Copies files in nested folders from location to parent directory
 # Returns a list of component names to be used in addCRefs
-def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[], shortNamePrefix=None):
+def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
     global globalFileCount
     directory = addDirectory(Id+'_dir','dir',name,parent)
     lst = []
     idir = 0
 #    ifil = 0
-    if shortNamePrefix is None: shortNamePrefix = 'f'
     if ARCH == '32':
         m = md5.new(location)
     else:
@@ -311,7 +310,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[], sh
                 fn = fn.replace('+','_')
                 fn = fn.replace('.','_')
                 fileId = 'd'+fn+'_file'+str(ifil)
-                fileName = shortNamePrefix + str(ifil)
+                fileName = 'file'+str(ifil)
                 fileLongName = fil
                 addFileV(fileId,fileName,fileLongName,location+'/'+fil,comp)
     return lst,comp
@@ -630,8 +629,8 @@ includeMantidCrystalDir = addDirectory('IncludeMantidCrystalDir','PCRY','MantidC
 IncludeMantidCrystal = addComponent('IncludeMantidCrystal',comp_guid['IncludeMantidCrystal'],includeMantidCrystalDir)
 addAllFiles(FRAMEWORKDIR + '/Crystal/inc/MantidCrystal','pcry',IncludeMantidCrystal)
 
-boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir, 'b')[0]
-pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir, 'p')[0]
+boostList = addCompList('boost',CODEDIR + '/Third_Party/include/boost','boost',includeDir)[0]
+pocoList = addCompList('poco', CODEDIR + '/Third_Party/include/Poco','Poco',includeDir)[0]
 #-------------------  end of Includes ---------------------------------------
 
 sconsList = addCompList('scons',CODEDIR + '/Third_Party/src/scons-local','scons-local',InstallDir)[0]
