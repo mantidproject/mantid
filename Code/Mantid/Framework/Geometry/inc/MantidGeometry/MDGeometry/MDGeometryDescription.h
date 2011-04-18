@@ -57,7 +57,7 @@ public:
   double cut_min; //< min limits to extract data;
   double cut_max; //< max limits to extract data;
   double data_scale; //< Length of projection axes vectors in Ang^-1 or meV 
-  unsigned int nBins; //< number of bins in each direction, bins of size 1 are integrated (collased);
+  size_t nBins; //< number of bins in each direction, bins of size 1 are integrated (collased);
   bool isReciprocal; //< specifies if this dimension is reciprocal or not.
   std::string AxisName; //< new names for axis;
   V3D direction;   //< direction in reciprocal space for reciprocal dimension, 0 for orthogonal
@@ -87,7 +87,7 @@ public:
   );
 
   MDGeometryDescription(const MDGeometryBasis &basis);
-  MDGeometryDescription(unsigned int numDims=4,unsigned int nReciprocalDims=3);
+  MDGeometryDescription(size_t numDims=4, size_t nReciprocalDims=3);
   MDGeometryDescription(const MDGeometry &origin);
   virtual ~MDGeometryDescription(void);
   /** sets the projection plain which vould specify the geometry; 
@@ -101,10 +101,10 @@ public:
   std::vector<double> getRotations()const;
 
   /// obtain number of dimensions in the geometry
-  unsigned int getNumDims(void)const{return nDimensions;}
+  size_t getNumDims(void)const{return nDimensions;}
 
   /// obtain number of reciprocal dimensions in the geometry
-  unsigned int getNumRecDims(void)const{return nReciprocalDimensions;}
+  size_t getNumRecDims(void)const{return nReciprocalDimensions;}
 
   /// returns the size of the image, described by this class
   size_t getImageSize()const;
@@ -121,9 +121,9 @@ public:
     return true;
   }
   
-  Geometry::V3D getDirection(unsigned int i)const;
+  Geometry::V3D getDirection(size_t i)const;
 
-  bool isAxisNamePresent(unsigned int i)const;
+  bool isAxisNamePresent(size_t i)const;
 
   /** finds the location of the dimension, defined by the tag in the list of all dimensions;
    * informatiom about the axis to display is encoded by the tag numbers */
@@ -134,12 +134,12 @@ public:
 
   //   void renameTag(unsigned int num,const std::string &newID);
   // access to all
-  DimensionDescription * pDimDescription(unsigned int i){
+  DimensionDescription * pDimDescription(size_t i){
     check_index(i,"pDimDescription");
     return &data[i];
   }
 
-  DimensionDescription * pDimDescription(unsigned int i)const{
+  DimensionDescription * pDimDescription(size_t i)const{
     check_index(i,"pDimDescription");
     return const_cast<DimensionDescription *>(&data[i]);
   }
@@ -161,22 +161,22 @@ public:
   {
     int index = getTagNum(Tag,true);       this->setDirection(index,coord);
   }
-  void setDirection(unsigned int i,const V3D &coord);
+  void setDirection(size_t i,const V3D &coord);
 
   /**  function sets the Tag requested into the position, defined by the index i;
    *
    * The requested tag is deleted from old location and inserted into the new location, leaving all other data as before.
    * the tag has to be present in the array initially -> throws otherwise */
-  void setPAxis(unsigned int i, const std::string &tag);
+  void setPAxis(size_t i, const std::string &tag);
 
 private:
 
   /**< real number of dimensions in the target dataset.
   If source dataset has more dimensions than specified here, all other dimensions will be collapsed */
-  unsigned int nDimensions;
+  size_t nDimensions;
 
   /// number of reciprocal dimensions from the nDimensions
-  unsigned int nReciprocalDimensions;
+  size_t nReciprocalDimensions;
 
   /// two vectors which define the projection plane on which the target geometry would be build;
   Geometry::V3D   proj_plain[2];
@@ -188,10 +188,10 @@ private:
   bool direction_changed;
 
   /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/
-  void check_index(unsigned int i,const char *ErrinFuncName)const;
+  void check_index(size_t i,const char *ErrinFuncName)const;
 
   /** the function which provides default constructor functionality */
-  void intit_default_slicing(unsigned int nDims,unsigned int nRecDims);
+  void intit_default_slicing(size_t nDims, size_t nRecDims);
 
   /// logger -> to provide logging, for MD workspaces
   static Kernel::Logger& g_log;

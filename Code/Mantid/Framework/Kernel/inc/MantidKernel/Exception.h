@@ -313,12 +313,12 @@ class DLLExport OpenGLError: public std::runtime_error
   {
   private:
 
-    const int Val;     ///< Actual value called
-    const int maxVal;  ///< Maximum value
+    const size_t Val;     ///< Actual value called
+    const size_t maxVal;  ///< Maximum value
 
   public:
-
-    IndexError(const int V,const int B, const std::string& Place);
+    // Unsigned versions
+    IndexError(const size_t V, const size_t B, const std::string& Place);
     IndexError(const IndexError& A);
     ~IndexError() throw() {}
 

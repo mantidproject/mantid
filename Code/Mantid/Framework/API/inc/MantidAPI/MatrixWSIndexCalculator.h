@@ -36,17 +36,17 @@ namespace Mantid
     */
    
     /// Denotes index in 1D array.
-    typedef int Index;
+    typedef size_t Index;
     /// Denotes index of a particular bin in a histogram.
-    typedef int BinIndex;
+    typedef size_t BinIndex;
     /// Denotes index of a particular histogram in the Matrix Workspace.
-    typedef int HistogramIndex;
+    typedef size_t HistogramIndex;
 
     class DLLExport MatrixWSIndexCalculator
     {
     private:
 
-      int m_blockSize;
+      size_t m_blockSize;
 
     public:
 
@@ -54,7 +54,7 @@ namespace Mantid
       MatrixWSIndexCalculator();
    
       /// Constructor requires block size for calculation.
-      MatrixWSIndexCalculator(int blockSize);
+      MatrixWSIndexCalculator(size_t blockSize);
 
       /// Determine which histogram an index in a 1D array relates to given the known blockSize
       HistogramIndex getHistogramIndex(Index index) const;

@@ -990,7 +990,7 @@ namespace Mantid
       return 2;
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(unsigned int index) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPoint(size_t index) const
     {
       HistogramIndex histInd = m_indexCalculator.getHistogramIndex(index);
       BinIndex binInd = m_indexCalculator.getBinIndex(index, histInd);
@@ -1003,7 +1003,7 @@ namespace Mantid
       return m_mdPointMap[index];
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(unsigned int histogram, unsigned int bin) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(size_t histogram, size_t bin) const
     {
       Index oneDimIndex = m_indexCalculator.getOneDimIndex(histogram, bin);
       MatrixMDPointMap::const_iterator iter = m_mdPointMap.find(oneDimIndex);
@@ -1170,9 +1170,9 @@ namespace Mantid
       return keys;
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t dim1Increment) const
     { 
-      if (dim1Increment >= static_cast<unsigned int>(this->dataX(0).size()))
+      if (dim1Increment >= this->dataX(0).size())
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1180,13 +1180,13 @@ namespace Mantid
       return this->getPoint(dim1Increment);
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t dim1Increment, size_t dim2Increment) const
     { 
-      if (dim1Increment >= static_cast<unsigned int>(this->dataX(0).size()))
+      if (dim1Increment >= this->dataX(0).size())
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
-      if (dim2Increment >= static_cast<unsigned int>(this->dataX(0).size()))
+      if (dim2Increment >= this->dataX(0).size())
       {
         throw std::range_error("MatrixWorkspace::getCell, increment out of range");
       }
@@ -1194,12 +1194,12 @@ namespace Mantid
       return getPointImp(dim1Increment, dim2Increment);
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int, unsigned int, unsigned int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t, size_t, size_t) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }
 
-    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(unsigned int, unsigned int, unsigned int, unsigned int) const
+    const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getCell(size_t, size_t, size_t, size_t) const
     { 
       throw std::logic_error("Cannot access higher dimensions");
     }

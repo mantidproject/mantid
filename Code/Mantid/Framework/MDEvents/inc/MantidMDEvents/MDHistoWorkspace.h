@@ -175,35 +175,35 @@ namespace MDEvents
     //======================================================================================
 
     /// Get the point at the specified index.
-    const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const
+    const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
     {
       (void) index; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
     {
       (void) dim1Increment; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
     {
       (void) dim1Increment; (void) dim2Increment; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
+    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
     {
       (void) dim1Increment; (void) dim2Increment; (void) dim3Increment; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");
     }
 
     /// Get the cell at the specified index/increment.
-    const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+    const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
       (void) dim1Increment; (void) dim2Increment; (void) dim3Increment; (void) dim4Increment; // Avoid compiler warning
       throw Mantid::Kernel::Exception::NotImplementedError("Not yet!");

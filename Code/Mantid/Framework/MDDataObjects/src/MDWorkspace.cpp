@@ -227,7 +227,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return vecDimensionIds;
     }
 
-    const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(unsigned int index) const
+    const Mantid::Geometry::SignalAggregate & MDWorkspace::getPoint(size_t index) const
     {
       if(index >= this->getNPoints())
       {
@@ -235,8 +235,8 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       }
       std::vector<char>* pix_buf = m_spDataPoints->get_pBuffer();
       float *MDDataPoint =(float *)(&(pix_buf->operator[](0)));
-      unsigned int signal_shift = this->getNumDims();
-      unsigned int data_stride  =  m_spDataPoints->getMDPointDescription().sizeofMDDPoint()/sizeof(float);
+      size_t signal_shift = this->getNumDims();
+      size_t data_stride  =  m_spDataPoints->getMDPointDescription().sizeofMDDPoint()/sizeof(float);
       size_t base = index*data_stride;
       double signal  = *(MDDataPoint+base+signal_shift);
       double error= *(MDDataPoint+base+signal_shift+1);
@@ -262,7 +262,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
         (*iter).second.getError() != mdImagePoint.err;
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
@@ -277,7 +277,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return m_mdCellMap[dim1Increment];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
@@ -306,7 +306,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return m_mdCellMap[singleDimensionIndex];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();
@@ -336,7 +336,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return m_mdCellMap[singleDimensionIndex];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+    const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
       MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
       MDGeometry const * const geometry = m_spMDImage->getGeometry();

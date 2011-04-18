@@ -4,11 +4,11 @@ namespace Mantid
 {
   namespace API
   {
-    MatrixWSIndexCalculator::MatrixWSIndexCalculator() : m_blockSize(-1)
+    MatrixWSIndexCalculator::MatrixWSIndexCalculator() : m_blockSize(0)
     {
     }
 
-    MatrixWSIndexCalculator::MatrixWSIndexCalculator(int blockSize) : m_blockSize(blockSize)
+    MatrixWSIndexCalculator::MatrixWSIndexCalculator(size_t blockSize) : m_blockSize(blockSize)
     {
     }
 

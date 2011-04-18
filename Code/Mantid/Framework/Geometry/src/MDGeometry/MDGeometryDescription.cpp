@@ -242,7 +242,7 @@ MDGeometryDescription::getImageSize()const
 }
 //****** SET *******************************************************************************
 void 
-MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag) 
+MDGeometryDescription::setPAxis(size_t i, const std::string &Tag) 
 {
 
    this->check_index(i,"setPAxis");
@@ -281,7 +281,7 @@ MDGeometryDescription::setPAxis(unsigned int i, const std::string &Tag)
 
 
 bool
-MDGeometryDescription::isAxisNamePresent(unsigned int i)const
+MDGeometryDescription::isAxisNamePresent(size_t i)const
 {
     this->check_index(i,"isAxisNamePresent");
 
@@ -307,7 +307,7 @@ MDGeometryDescription::getDimensionsTags(void)const
 }
 
 
-MDGeometryDescription::MDGeometryDescription(unsigned int numDims,unsigned int numRecDims):
+MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
 nDimensions(numDims),
 nReciprocalDimensions(numRecDims)
 {
@@ -316,7 +316,7 @@ nReciprocalDimensions(numRecDims)
 }
 
 void
-MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRecDims)
+MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
 {
     if(nDims>MAX_MD_DIMS_POSSIBLE){
         throw(std::invalid_argument("SlicingProperty::intit_default_slicing: attemting to init more dimension that it is actually possible "));
@@ -367,7 +367,7 @@ MDGeometryDescription::intit_default_slicing(unsigned int nDims,unsigned int nRe
 
 }
 void 
-MDGeometryDescription::setDirection(unsigned int i,const V3D &coord)
+MDGeometryDescription::setDirection(size_t i,const V3D &coord)
 {
     this->check_index(i,"setDirection");
     if(i<3){
@@ -393,7 +393,7 @@ MDGeometryDescription::~MDGeometryDescription(void)
 {
 }
 void 
-MDGeometryDescription::check_index(unsigned int i,const char *fName)const
+MDGeometryDescription::check_index(size_t i,const char *fName)const
 {
     if(i>=this->nDimensions){
         g_log.error()<<" index out of range for function: "<<fName<<std::endl;

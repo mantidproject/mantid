@@ -112,25 +112,25 @@ namespace Mantid
 
       /// Get the signal at the specified index, normalized by cell volume
       virtual double getSignalNormalizedAt(size_t index) const
-      { (void) index;
+      { UNUSED_ARG(index);
         throw std::runtime_error("Not implemented yet.");
       }
 
       /// Get the error of the signal at the specified index, normalized by cell volume
       virtual double getErrorNormalizedAt(size_t index) const
-      { (void) index;
+      { UNUSED_ARG(index);
         throw std::runtime_error("Not implemented yet.");
       }
 
       /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
       virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
-      { (void) index1; (void) index2; (void) index3; (void) index4;
+      { UNUSED_ARG(index1); UNUSED_ARG(index2); UNUSED_ARG(index3); UNUSED_ARG(index4);
         throw std::runtime_error("Not implemented yet.");
       }
 
       /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
       virtual double getErrorNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
-      { (void) index1; (void) index2; (void) index3; (void) index4;
+      { UNUSED_ARG(index1); UNUSED_ARG(index2); UNUSED_ARG(index3); UNUSED_ARG(index4);
         throw std::runtime_error("Not implemented yet.");
       }
 
@@ -148,22 +148,22 @@ namespace Mantid
 
 
       /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const = 0;
 
 
       // TODO: JZ : As far as I can tell, these getCell() calls are relatively unused, and may perhaps be replaced by getSignal() calls
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const = 0;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const = 0;
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const = 0;

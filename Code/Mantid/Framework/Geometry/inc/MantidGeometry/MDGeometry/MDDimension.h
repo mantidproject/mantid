@@ -120,7 +120,7 @@ namespace Geometry
     bool operator!=(const MDDimension& other) const;
 
 //HACK -- these methods should be protected or everything goes through IMD 
-virtual void  setRange(double rMin=-1,double rMax=1,unsigned int nBins=1);
+virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
 void  setName(const std::string & name){this->AxisName.assign(name); }
   protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
@@ -146,7 +146,7 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// set the dimension expanded (e.g. real with proper number of bins, non-integrated)
     /// also changes the number of bins if the dimension was not expanded before. 
     /// if nBins == 1 works like setIntegrated;
-    void   setExpanded(unsigned int nBins);
+    void   setExpanded(size_t nBins);
     /// differs from setRange by the fact that the limits has to be within the existing ranges
     void   setExpanded(double rxMin, double rxMax,unsigned int nBins);
     /// set shift in the direction of this dimension
@@ -172,7 +172,7 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// The parameter, which specify if the axis is integraged. If it is, nBins =1;
     bool isIntegrated;
     /// number of bins the axis have
-    unsigned int nBins;
+    size_t nBins;
     /// dimension stride in a multidimensional array
     size_t   nStride;
     /// vector of leftmost bin ranges for bins plus rightmost value;  

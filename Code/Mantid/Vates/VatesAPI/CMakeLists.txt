@@ -95,7 +95,7 @@ add_library ( VatesAPI ${SRC_FILES} ${INC_FILES})
 # Set the name of the generated library
 set_target_properties ( VatesAPI PROPERTIES OUTPUT_NAME MantidVatesAPI )
 # Add to the 'Framework' group in VS
-set_property ( TARGET VatesAPI PROPERTY FOLDER "Framework" )
+set_property ( TARGET VatesAPI PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries (VatesAPI
 ${MANTID_SUBPROJECT_LIBS} 

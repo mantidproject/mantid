@@ -26,32 +26,31 @@ Logger& MDGeometry::g_log=Kernel::Logger::get("MDWorkspaces");
 void
 MDGeometry::setRanges(MDGeometryDescription const &trf)
 {
-      unsigned int i;
-      unsigned int n_new_dims=trf.getNumDims();
-      boost::shared_ptr<MDDimension> pDim;
-      if(n_new_dims>m_basis.getNumDims()){
-        g_log.error()<<" MDGeometry::setRanges transformation sets more ranges then already defined\n";
-        throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
-      }
+  size_t n_new_dims=trf.getNumDims();
+  boost::shared_ptr<MDDimension> pDim;
+  if(n_new_dims>m_basis.getNumDims()){
+    g_log.error()<<" MDGeometry::setRanges transformation sets more ranges then already defined\n";
+    throw(std::invalid_argument("Geometry::setRanges: Attempting to set more dimensions then are currently defined "));
+  }
 
-      std::vector<std::string> tag=trf.getDimensionsTags();
+  std::vector<std::string> tag=trf.getDimensionsTags();
 
-      // let's analyse the dimensions, which were mentioned in transformation matrix and set the ranges of these dimensions 
-      // as requested
-      for(i=0;i<n_new_dims;i++){
+  // let's analyse the dimensions, which were mentioned in transformation matrix and set the ranges of these dimensions 
+  // as requested
+  for(size_t i=0;i<n_new_dims;i++){
 
-        pDim=this->getDimension(tag[i]);
-		DimensionDescription* descr = trf.pDimDescription(i);
-        pDim->initialize(*descr);
+    pDim=this->getDimension(tag[i]);
+    DimensionDescription* descr = trf.pDimDescription(i);
+    pDim->initialize(*descr);
 
-      }
-      this->n_expanded_dim=0;
-      for(i=0;i<m_basis.getNumDims();i++){
-        pDim=this->getDimension(i);
-        if(!pDim->getIntegrated()){
-          this->n_expanded_dim++;
-        }
-      }
+  }
+  this->n_expanded_dim=0;
+  for(size_t i=0;i<m_basis.getNumDims();i++){
+    pDim=this->getDimension(i);
+    if(!pDim->getIntegrated()){
+      this->n_expanded_dim++;
+    }
+  }
   
 
 }
@@ -148,9 +147,7 @@ MDGeometry::initialize(const std::vector<std::string> &DimensionTags)
 void 
 MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 {
-  unsigned int n_new_dims=tags.size();
-  unsigned int i;
-
+  size_t n_new_dims=tags.size();
   if(n_new_dims>m_basis.getNumDims()){
     g_log.error()<<"Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined \n";
     throw(std::invalid_argument("Geometry::arrangeDimensionsProperly: Attempting to arrange more dimensions then are currently defined "));
@@ -164,14 +161,12 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
   // array to keep thd initial dimensions which were not mentioned in transformation
   std::vector<boost::shared_ptr<MDDimension> > pCurrentDims(this->theDimension);  
 
-
-  unsigned int n_expanded_dimensions(0),n_collapsed_dimensions(0);
-
+  size_t n_expanded_dimensions(0),n_collapsed_dimensions(0);
   boost::shared_ptr<MDDimension> pDim;
   std::map<std::string,boost::shared_ptr<MDDimension> >::iterator it;
 
   // let's sort dimensions as requested by the list of tags
-  for(i=0;i<n_new_dims;i++){
+  for( size_t i=0;i<n_new_dims;i++){
 
     // when dimension num we want to use next
     it = dimensions_map.find(tags[i]);
@@ -218,7 +213,7 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
 
   size_t dimension_stride=1;
   // deal with expanded dimensions
-  for(i=0;i<this->n_expanded_dim;i++){
+  for(size_t i=0;i<this->n_expanded_dim;i++){
     pDim  = pExpandedDims[i];
 
     // store the dimension in the vector and the map
@@ -233,8 +228,9 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
   nGeometrySize = dimension_stride;
 
   // now with collapsed dimensions;
-  unsigned int ind(n_expanded_dim);
-  for(i=0;i<n_collapsed_dimensions;i++){
+  size_t ind(n_expanded_dim);
+  for(size_t i=0;i<n_collapsed_dimensions;i++)
+  {
     pDim  = pCollapsedDims[i];
 
     this->theDimension[ind+i]=pDim;
@@ -273,25 +269,26 @@ MDGeometry::arrangeDimensionsProperly(const std::vector<std::string> &tags)
     }
     //
     std::vector<boost::shared_ptr<IMDDimension> >
-    MDGeometry::getIntegratedDimensions(void)const
+      MDGeometry::getIntegratedDimensions(void)const
     {
       std::vector<boost::shared_ptr<IMDDimension> > tmp;
 
-      if(this->n_expanded_dim<m_basis.getNumDims()){
-        unsigned int size = m_basis.getNumDims()-this->n_expanded_dim;
-		tmp.resize(size);
-		unsigned int ic(0);
-		for(unsigned int i = this->n_expanded_dim;i<theDimension.size();i++){
-			tmp[ic] = theDimension[i];
-			ic++;
-		}
+      if(this->n_expanded_dim<m_basis.getNumDims())
+      {
+        size_t size = m_basis.getNumDims()-this->n_expanded_dim;
+        tmp.resize(size);
+        size_t ic(0);
+        for(size_t i = this->n_expanded_dim;i<theDimension.size();i++){
+          tmp[ic] = theDimension[i];
+          ic++;
+        }
       }
       return tmp;
     }
 
 //  protected;
 boost::shared_ptr<MDDimension>
-MDGeometry::getDimension(unsigned int i)
+MDGeometry::getDimension(size_t i)
     {
 	  
       if(i>=m_basis.getNumDims()){

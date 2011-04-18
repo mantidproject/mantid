@@ -275,7 +275,7 @@ template class DLLExport MisMatch<int>;
   @param B :: Maximum value
   @param Place :: Location of Error
 */
-IndexError::IndexError(const int V,const int B, const std::string& Place) :
+IndexError::IndexError(const size_t V,const size_t B, const std::string& Place) :
   std::runtime_error(Place),Val(V),maxVal(B)
 {}
 

@@ -74,7 +74,7 @@ MDDimension::initialize(const DimensionDescription &descr)
 
 }
 /// this function sets Linear range. 
-void  MDDimension::setRange(double rxMin,double rxMax,unsigned int nxBins)
+void  MDDimension::setRange(double rxMin,double rxMax, size_t nxBins)
 {
   if(rxMin>rxMax)
   {
@@ -118,7 +118,7 @@ void MDDimension::check_ranges(double rxMin,double rxMax)
 
 }
 
-void MDDimension::setExpanded(unsigned int nxBins)
+void MDDimension::setExpanded(size_t nxBins)
 {
   if(nxBins<1||nxBins>MAX_REASONABLE_BIN_NUMBER)
   {

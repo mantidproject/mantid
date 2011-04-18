@@ -70,30 +70,30 @@ const std::vector<std::string> IMDWorkspaceProxy::getDimensionIDs() const
   return m_workspace->getDimensionIDs();
 }
 
-const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getPoint(unsigned int index) const
+const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getPoint(size_t index) const
 {
   return m_workspace->getPoint(index);
 }
 
-const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(unsigned int dim1Increment) const
+const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(size_t dim1Increment) const
 {
   return m_workspace->getCell(dim1Increment);
 }
 
-const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(unsigned int dim1Increment,
-    unsigned int dim2Increment) const
+const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(size_t dim1Increment,
+    size_t dim2Increment) const
 {
   return m_workspace->getCell(dim1Increment, dim2Increment);
 }
 
-const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(unsigned int dim1Increment,
-    unsigned int dim2Increment, unsigned int dim3Increment) const
+const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(size_t dim1Increment,
+    size_t dim2Increment, size_t dim3Increment) const
 {
   return m_workspace->getCell(dim1Increment, dim2Increment, dim3Increment);
 }
 
-const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(unsigned int dim1Increment,
-    unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+const Mantid::Geometry::SignalAggregate& IMDWorkspaceProxy::getCell(size_t dim1Increment,
+    size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
 {
   return m_workspace->getCell(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
 }

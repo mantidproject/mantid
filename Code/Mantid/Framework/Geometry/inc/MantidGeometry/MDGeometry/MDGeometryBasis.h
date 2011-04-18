@@ -62,7 +62,7 @@ namespace Mantid
     {
     public:
       /// empty constructor used mainly to provide a dummy object for reading data into it
-      MDGeometryBasis(unsigned int nDimensions=1,unsigned int nReciprocalDimensions=1);  
+      MDGeometryBasis(size_t nDimensions=1,size_t nReciprocalDimensions=1);  
 	  /// fully functional constructor; 
       MDGeometryBasis(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 
@@ -97,7 +97,7 @@ namespace Mantid
  
 
       /// checks if nDimensions consistent with n_reciprocal_dimensions; throws if not
-      void check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions);
+      void check_nDims(size_t nDimensions, size_t nReciprocalDimensions);
 
       void checkInputBasisDimensions(const MDBasisDimension& dimension);
 

@@ -13,7 +13,7 @@ namespace Mantid
 
     Logger& MDGeometryBasis::g_log=Kernel::Logger::get("MDWorkspaces");
 //
-MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions, unsigned int nReciprocalDimensions) :
+MDGeometryBasis::MDGeometryBasis(size_t nDimensions, size_t nReciprocalDimensions) :
 n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBasisDimensions()
 
 {
@@ -67,18 +67,18 @@ n_reciprocal_dimensions(0), m_mdBasisDimensions(mdBasisDimensions)
     }
 
     void 
-    MDGeometryBasis::check_nDims(unsigned int nDimensions,unsigned int nReciprocalDimensions)
+    MDGeometryBasis::check_nDims(size_t nDimensions, size_t nReciprocalDimensions)
     {
       if(nReciprocalDimensions<1||nReciprocalDimensions>3){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted "<<nReciprocalDimensions<<std::endl;
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(size_t nDimensions, size_t nReciprocalDimensions): number of reciprocal dimensions can vary from 1 to 3 but attempted "<<nReciprocalDimensions<<std::endl;
         throw(std::invalid_argument("This constructor can not be used to buid low dimension datasets geometry"));
       }
       if(nDimensions>MAX_MD_DIMS_POSSIBLE||nDimensions<1){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): This constructor attempts to initiate wrong number of dimensions\n";
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(size_t nDimensions, size_t nReciprocalDimensions): This constructor attempts to initiate wrong number of dimensions\n";
         throw(std::invalid_argument("This constructor attempts to initiate more than allowed number of dimensions"));
       }
       if(nDimensions<nReciprocalDimensions){
-        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(unsigned int nDimensions,unsigned int nReciprocalDimensions): Attempting to initiate total dimensions less than reciprocal dimensions\n";
+        g_log.error()<<"MDGeometryBasis::MDGeometryBasis(size_t nDimensions, size_t nReciprocalDimensions): Attempting to initiate total dimensions less than reciprocal dimensions\n";
         throw(std::invalid_argument("Number of reciprocal dimensions is bigger than the total number of dimensions"));
       }
     }

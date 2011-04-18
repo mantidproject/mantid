@@ -129,7 +129,7 @@ namespace Mantid{
       return vecDimensionIds;
     }
 
-    const Mantid::Geometry::SignalAggregate & MDFitWorkspace::getPoint(unsigned int index) const
+    const Mantid::Geometry::SignalAggregate & MDFitWorkspace::getPoint(size_t index) const
     {
       if(index >= m_points.size())
       {
@@ -138,7 +138,7 @@ namespace Mantid{
       return *m_points[index];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment) const
+    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(size_t dim1Increment) const
     {
       if (dim1Increment >= m_cells.size())
       {
@@ -147,7 +147,7 @@ namespace Mantid{
       return m_cells[dim1Increment];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
+    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(size_t dim1Increment, size_t dim2Increment) const
     {
       UNUSED_ARG(dim1Increment);
       UNUSED_ARG(dim2Increment);
@@ -159,7 +159,7 @@ namespace Mantid{
       return m_cells[singleDimensionIndex];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
+    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
     {
       UNUSED_ARG(dim1Increment);
       UNUSED_ARG(dim2Increment);
@@ -194,7 +194,7 @@ namespace Mantid{
       return m_cells[singleDimensionIndex];
     }
 
-    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+    const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
       UNUSED_ARG(dim1Increment);
       UNUSED_ARG(dim2Increment);

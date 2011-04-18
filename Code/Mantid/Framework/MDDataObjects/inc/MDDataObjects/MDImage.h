@@ -88,7 +88,7 @@ public:
   size_t getDataSize(void)const{return MD_IMG_array.data_size;}
 
   /// returns the size occupied by the data part of the MD_IMG_array;
-  virtual long getMemorySize()const{return MD_IMG_array.data_array_size*sizeof(MD_image_point);}
+  virtual long getMemorySize()const{return static_cast<long>(MD_IMG_array.data_array_size*sizeof(MD_image_point));}
 
   ///
   Geometry::MDGeometry * const getGeometry() const { return pMDGeometry.get(); }

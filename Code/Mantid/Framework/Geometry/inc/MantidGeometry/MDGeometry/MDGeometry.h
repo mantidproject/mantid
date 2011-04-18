@@ -80,14 +80,14 @@ namespace Mantid{
 
  
       /// return the numbers of dimensions in current geometry; 
-      unsigned int getNumDims(void)const{return m_basis.getNumDims();}
+      size_t getNumDims()const{return m_basis.getNumDims();}
       /// returns the number of reciprocal dimensions
-      unsigned int getNumReciprocalDims(void)const{return m_basis.getNumReciprocalDims();};
+      size_t getNumReciprocalDims()const{return m_basis.getNumReciprocalDims();};
       /// returns the identifiers of main geometry dimensions
-      std::vector<std::string> getBasisTags(void)const;
+      std::vector<std::string> getBasisTags()const;
 
       /// returns the number of expanded (non-integrated) dimensions;
-      unsigned int getNumExpandedDims(void)const{return n_expanded_dim;}
+      size_t getNumExpandedDims()const{return n_expanded_dim;}
       /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
       boost::shared_ptr<const MDDimension>  get_constDimension(unsigned int i)const;
@@ -109,13 +109,13 @@ namespace Mantid{
     protected: 
      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
-      boost::shared_ptr<MDDimension>  getDimension(unsigned int i);
+      boost::shared_ptr<MDDimension>  getDimension(size_t i);
       /// functions return the pointer to the dimension requested by the dimension tag. throws if such dimension is not present in the Geometry (or NULL if not throwing);
       boost::shared_ptr<MDDimension>  getDimension(const std::string &tag,bool do_throw=true);
    
 
       /// the parameter describes the dimensions, which are not integrated. These dimensions are always at the beginning of the dimensions vector. 
-      unsigned int n_expanded_dim;
+      size_t n_expanded_dim;
       /// the array of Dimensions. Some are collapsed (integrated over)
       std::vector<boost::shared_ptr<MDDimension> >  theDimension;
 

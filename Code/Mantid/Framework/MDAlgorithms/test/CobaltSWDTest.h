@@ -157,7 +157,7 @@ public:
         return ids;
     }
 
-    virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const
+    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
     {
         //throw std::runtime_error("Not implemented");
         // assume that cut is one dimensional and can use idex as dim1Increment
@@ -166,22 +166,22 @@ public:
         return(m_mdcells.at(index));
     }
 
-    virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const
+    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const
     {
         return(m_mdcells.at(dim1Increment));
     };
 
-    virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
+    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
     {
         throw std::runtime_error("Not implemented");
     }
 
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
+    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
     {
         throw std::runtime_error("Not implemented");
     }
 
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
+    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
     {
         throw std::runtime_error("Not implemented");
     }

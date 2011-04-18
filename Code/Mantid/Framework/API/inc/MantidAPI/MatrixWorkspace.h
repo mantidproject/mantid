@@ -240,19 +240,19 @@ namespace Mantid
       virtual const std::vector<std::string> getDimensionIDs() const;
 
       /// Get the point at the specified index.
-      virtual const Mantid::Geometry::SignalAggregate& getPoint(unsigned int index) const;
+      virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const;
 
       /// Get the cell at the specified index/increment.
-      virtual const Mantid::Geometry::SignalAggregate& getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const;
+      virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const;
 
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
@@ -281,7 +281,7 @@ namespace Mantid
     private:
 
       /// Implementation of getMDPointImp taking two arguments for histogram and bin.
-      const Mantid::Geometry::SignalAggregate& getPointImp(unsigned int histogram, unsigned int bin) const;
+      const Mantid::Geometry::SignalAggregate& getPointImp(size_t histogram, size_t bin) const;
 
       /// Creates a point for a given histogram/bin.
       Mantid::Geometry::MDPoint createPoint(unsigned int histogram, unsigned int bin) const;
