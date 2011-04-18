@@ -141,7 +141,7 @@ static void unrollCell(const mxArray *prhs, const mxArray* new_prhs[], int& new_
 	{
 		for(j=0; j < mxGetNumberOfElements(prhs); j++)
 		{
-			unrollCell(mxGetCell(prhs, j), new_prhs, new_nrhs);
+			unrollCell(mxGetCell(prhs, static_cast<int>(j)), new_prhs, new_nrhs);
 		}
 	}
 	else
@@ -200,7 +200,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[])
  * If we find this, flatten any cell arays we find in prhs (varargin arrays)
  * and then call the relevant function (i.e. the name without varargin)
  */
-	i = strlen(funcname);
+	i = static_cast<int>(strlen(funcname));
 	if (!compare_nocase(funcname + (i - 9), "_varargin"))
 	{
 		funcname[i-9] = '\0';	/* remove the trailing "_varargin" from the name */
@@ -520,7 +520,8 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
     //remove iSpec
 	  case 'x':
     {
-      mwSize dims[2] = { wksptr->dataX(0).size(), nHist };
+      mwSize dims[2] = { static_cast<mwSize>(wksptr->dataX(0).size()),
+        static_cast<mwSize>(nHist) };
       mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
       char *start_of_pr = (char *)mxGetData(mptr);
       for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
@@ -534,7 +535,8 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
 
 	  case 'y':
     {
-      mwSize dims[2] = { wksptr->dataY(0).size(), nHist };
+      mwSize dims[2] = { static_cast<mwSize>(wksptr->dataY(0).size()),
+        static_cast<mwSize>(nHist) };
       mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
       char *start_of_pr = (char *)mxGetData(mptr);
       for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
@@ -548,7 +550,8 @@ static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field,
 
 	  case 'e':
     {
-      mwSize dims[2] = { wksptr->dataE(0).size(), nHist };
+      mwSize dims[2] = { static_cast<mwSize>(wksptr->dataE(0).size()),
+        static_cast<mwSize>(nHist) };
       mptr = mxCreateNumericArray(2, dims, mxDOUBLE_CLASS, mxREAL);
       char *start_of_pr = (char *)mxGetData(mptr);
       for ( int i = 0; i < wksptr->getNumberHistograms(); i++ )
