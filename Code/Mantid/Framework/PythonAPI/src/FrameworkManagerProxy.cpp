@@ -12,8 +12,6 @@
 #include "MantidPythonAPI/FrameworkManagerProxy.h"
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
 #include "MantidPythonAPI/SimplePythonAPI.h"
-#include <boost/python/extract.hpp>
-#include <boost/python/handle.hpp>
 #include <stdexcept>
 #include <fstream>
 #include <sstream>

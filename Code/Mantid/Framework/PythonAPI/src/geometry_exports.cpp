@@ -13,7 +13,7 @@
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 
-#include <boost/python.hpp>
+#include "MantidPythonAPI/BoostPython_Silent.h"
 //Geometry
 #include <MantidGeometry/V3D.h>
 #include <MantidGeometry/Quat.h>

@@ -2,12 +2,17 @@
 // Includes
 //------------------------
 // Boost
-#include <boost/python/module.hpp>
-#include <boost/python/def.hpp>
+#include "MantidPythonAPI/BoostPython_Silent.h"
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/MantidVersion.h"
 #include "MantidPythonAPI/stl_proxies.h"
 #include "MantidPythonAPI/MantidVecHelper.h"
+
+// Noisy MSVC compiler that complains about Boost stuff we can do nothing about. For some reason
+// it wouldn't accept it in the BoostPython_Silent.h header
+#ifdef _MSC_VER
+  #pragma warning(disable:4503)
+#endif
 
 namespace Mantid 
 {

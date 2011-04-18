@@ -1,15 +1,12 @@
 #ifndef STL_PROXIES_H_
 #define STL_PROXIES_H_
 
-#include <boost/python/class.hpp>
-#include <boost/python/errors.hpp>
-#include <boost/python/tuple.hpp>
-#include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <vector>
 #include <set>
 #include <sstream>
 
 #include "std_operator_definitions.h"
+#include "MantidPythonAPI/BoostPython_Silent.h"
 
 namespace Mantid
 {

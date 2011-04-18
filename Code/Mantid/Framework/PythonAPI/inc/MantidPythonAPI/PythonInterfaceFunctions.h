@@ -2,9 +2,7 @@
 #define MANTID_PYTHONAPI_PYTHONINTERFACEFUNCTIONS_H_
 
 #include <MantidPythonAPI/FrameworkManagerProxy.h>
-#include <boost/python/call_method.hpp>
-#include <boost/python/list.hpp>
-#include <boost/python/extract.hpp>
+#include "MantidPythonAPI/BoostPython_Silent.h"
 
 namespace Mantid
 {

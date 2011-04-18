@@ -7,6 +7,11 @@
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/FacilityInfo.h"
 
+// Noisy MSVC compiler that complains about Boost stuff we can do nothing about. For some reason
+// it wouldn't accept it in the BoostPython_Silent.h header
+#ifdef _MSC_VER
+  #pragma warning(disable:4503)
+#endif
 
 namespace Mantid
 {

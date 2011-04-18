@@ -1,8 +1,8 @@
 //--------------------------------------------
 // Includes
 //--------------------------------------------
+#include "MantidPythonAPI/BoostPython_Silent.h"
 #include <MantidPythonAPI/PyAlgorithmWrapper.h>
-#include <boost/python.hpp>
 
 using namespace Mantid::PythonAPI;
 

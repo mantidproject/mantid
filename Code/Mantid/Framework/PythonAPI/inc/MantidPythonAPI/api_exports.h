@@ -11,9 +11,9 @@
 #include <MantidAPI/AnalysisDataService.h>
 #include <MantidAPI/IAlgorithm.h>
 #include <MantidAPI/FileFinder.h>
-#include <boost/python.hpp>
 #include <iostream>
 
+#include "MantidPythonAPI/BoostPython_Silent.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/TextAxis.h"

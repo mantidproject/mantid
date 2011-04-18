@@ -6,8 +6,8 @@
 //----------------------------------
 #include <string>
 #include <vector>
-#include <boost/python/object.hpp>
 #include <boost/shared_ptr.hpp>
+#include "MantidPythonAPI/BoostPython_Silent.h"
 
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"

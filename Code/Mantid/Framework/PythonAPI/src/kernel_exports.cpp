@@ -1,7 +1,7 @@
 //
 // Wrappers for classes in the Mantid::Kernel namespace
 //
-#include <boost/python.hpp>
+#include "MantidPythonAPI/BoostPython_Silent.h"
 #include <string>
 #include <vector>
 #include "MantidPythonAPI/kernel_exports.h"

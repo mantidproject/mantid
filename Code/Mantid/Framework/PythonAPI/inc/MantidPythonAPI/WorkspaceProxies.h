@@ -4,11 +4,11 @@
 //-----------------------------------
 // Includes
 //-----------------------------------
-#include <MantidAPI/AnalysisDataService.h>
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/ITableWorkspace.h>
-#include <MantidAPI/WorkspaceFactory.h>
-#include <boost/python/object.hpp>
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidPythonAPI/BoostPython_Silent.h"
 
 namespace Mantid
 {
