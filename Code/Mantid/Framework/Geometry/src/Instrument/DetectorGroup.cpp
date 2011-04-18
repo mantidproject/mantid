@@ -87,7 +87,7 @@ namespace Mantid
       {
         newPos += (*it).second->getPos();
       }
-      return newPos /= m_detectors.size(); // protection against divide by zero in V3D
+      return newPos /= static_cast<double>(m_detectors.size()); // protection against divide by zero in V3D
     }
 
     /// Gives the average distance of a group of detectors from the given component

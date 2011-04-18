@@ -376,7 +376,7 @@ void V3D::setZ(const double zz)
     @return a double value of the requested axis
   */
 const double&
-V3D::operator[](const int Index) const
+V3D::operator[](const size_t Index) const
 {
   switch (Index)
     {
@@ -394,7 +394,7 @@ V3D::operator[](const int Index) const
     @return a double value of the requested axis
   */
 double&
-V3D::operator[](const int Index)
+V3D::operator[](const size_t Index)
 {
   switch (Index)
     {

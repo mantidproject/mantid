@@ -121,7 +121,7 @@ int ObjCompAssembly::add(IComponent* comp)
     comp->setParent(this);
     group.push_back(c);
   }
-  return group.size();
+  return static_cast<int>(group.size());
 }
 
 /** AddCopy method
@@ -148,7 +148,7 @@ int ObjCompAssembly::addCopy(IComponent* comp)
     newcomp->setParent(this);
     group.push_back(c);
   }
-  return group.size();
+  return static_cast<int>(group.size());
 }
 
 /** AddCopy method
@@ -177,7 +177,7 @@ int ObjCompAssembly::addCopy(IComponent* comp, const std::string& n)
     newcomp->setName(n);
     group.push_back(c);
   }
-  return group.size();
+  return static_cast<int>(group.size());
 }
 
 /** Return the number of components in the assembly
@@ -188,7 +188,7 @@ int ObjCompAssembly::nelements() const
   if (m_isParametrized)
     return dynamic_cast<const ObjCompAssembly *>(m_base)->nelements();
   else
-    return group.size();
+    return static_cast<int>(group.size());
 }
 
 /** Get a pointer to the ith component in the assembly. Note standard C/C++

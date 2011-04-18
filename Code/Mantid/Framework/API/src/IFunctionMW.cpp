@@ -19,7 +19,7 @@
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 

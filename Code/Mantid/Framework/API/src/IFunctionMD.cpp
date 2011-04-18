@@ -9,7 +9,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
 
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
 

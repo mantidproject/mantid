@@ -5,7 +5,7 @@
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/LogParser.h"
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 #include <ctime>
 #include <fstream>
 

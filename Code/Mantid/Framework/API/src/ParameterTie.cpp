@@ -1,6 +1,6 @@
-#include <muParser.h>
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidGeometry/muParser_Silent.h"
 
 #include <boost/lexical_cast.hpp>
 #include <boost/regex.hpp>

@@ -139,7 +139,7 @@ int CompAssembly::addCopy(IComponent* comp)
     newcomp->setParent(this);
     m_children.push_back(newcomp);
   }
-  return m_children.size();
+  return static_cast<int>(m_children.size());
 }
 
 /** AddCopy method
@@ -163,7 +163,7 @@ int CompAssembly::addCopy(IComponent* comp, const std::string& n)
     newcomp->setName(n);
     m_children.push_back(newcomp);
   }
-  return m_children.size();
+  return static_cast<int>(m_children.size());
 }
 
 /** Return the number of components in the assembly

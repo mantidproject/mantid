@@ -150,15 +150,14 @@ void NearestNeighbours::populate()
   m_instrument->getDetectors(detectors);
   std::map<int, Mantid::Geometry::IDetector_sptr>::iterator detIt;
 
-  int ndets = detectors.size(); // also number of points in array  
+  size_t ndets = detectors.size(); // also number of points in array  
   int ndet = 0;
-
   for ( detIt = detectors.begin(); detIt != detectors.end(); detIt++ )
   {
     if ( detIt->second->isMonitor() ) { continue; }
     else { ndet++; }
 
-    if ( m_scale == NULL && ndets / ndet == 1 )
+    if ( m_scale == NULL && (ndets / ndet) == 1 )
     {
       // create scaling vector      
       boost::shared_ptr<Mantid::Geometry::Detector> det = boost::dynamic_pointer_cast<Mantid::Geometry::Detector>(detIt->second);

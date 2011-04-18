@@ -87,8 +87,8 @@ namespace Mantid
       const double& Y() const { return y; } ///< Get y
       const double& Z() const { return z; } ///< Get z
 
-      const double& operator[](const int Index) const;
-      double& operator[](const int Index);
+      const double& operator[](const size_t Index) const;
+      double& operator[](const size_t Index);
 
       void getSpherical(double& R, double& theta, double& phi) const;
 

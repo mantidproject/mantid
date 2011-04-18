@@ -5,8 +5,7 @@
 #include "MantidGeometry/Instrument/Parameter.h"
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include <Poco/StringTokenizer.h>
-#include <muParser.h>
-
+#include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid
 {

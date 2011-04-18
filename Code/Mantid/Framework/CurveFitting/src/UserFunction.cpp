@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidCurveFitting/UserFunction.h"
 #include <boost/tokenizer.hpp>
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 
 namespace Mantid
 {

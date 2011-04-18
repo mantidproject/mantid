@@ -5,7 +5,7 @@
 #include "MantidAPI/IMDIterator.h"
 #include "MantidKernel/Property.h"
 
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 #include <Poco/StringTokenizer.h>
 #include <boost/scoped_ptr.hpp>
 #include <boost/lambda/lambda.hpp>

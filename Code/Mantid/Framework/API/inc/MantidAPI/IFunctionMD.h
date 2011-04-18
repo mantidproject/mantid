@@ -4,7 +4,7 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
-#include "MantidKernel/System.h"
+#include "MantidAPI/DllExport.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/Exception.h"
 #include "MantidAPI/IFitFunction.h"
@@ -113,7 +113,7 @@ class FunctionHandler;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport IFunctionMD: public virtual IFitFunction
+class EXPORT_OPT_MANTID_API IFunctionMD: public virtual IFitFunction
 {
 public:
 

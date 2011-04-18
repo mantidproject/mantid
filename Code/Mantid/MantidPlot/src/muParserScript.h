@@ -33,7 +33,7 @@
 #include "ScriptingEnv.h"
 #include "Script.h"
 
-#include <muParser.h>
+#include "MantidGeometry/muParser_Silent.h"
 #include "math.h"
 #include <gsl/gsl_sf.h>
 #include <q3asciidict.h>
