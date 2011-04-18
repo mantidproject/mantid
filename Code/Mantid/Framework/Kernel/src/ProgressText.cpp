@@ -47,7 +47,7 @@ namespace Kernel
     double p = m_start + m_step*(m_i - m_ifirst);
     if (p > m_end) p = m_end;
     // Print out
-    int pct = (p * 100);
+    int pct = static_cast<int>(p * 100.0);
 
     coutMutex.lock();
 

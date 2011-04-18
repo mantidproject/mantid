@@ -66,7 +66,7 @@ namespace Kernel
     double wallTime = m_wallClockTime.elapsed(false);
     double cpuTime = elapsed(false);
     if (doReset) this->reset();
-    return (cpuTime / wallTime);
+    return static_cast<float>((cpuTime / wallTime));
   }
 
 

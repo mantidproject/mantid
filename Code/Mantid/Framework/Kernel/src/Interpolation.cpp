@@ -34,7 +34,7 @@ namespace Kernel
   */
   double Interpolation::value(const double& at) const
   {
-    unsigned int N = m_x.size();
+    size_t N = m_x.size();
 
     if ( N == 0 )
     {
@@ -73,7 +73,7 @@ namespace Kernel
   */
   void Interpolation::addPoint(const double& xx, const double& yy)
   { 
-    unsigned int N = m_x.size();
+    size_t N = m_x.size();
     std::vector<double>::iterator it;
 
     if ( N == 0)

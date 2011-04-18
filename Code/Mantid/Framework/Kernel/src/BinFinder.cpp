@@ -89,7 +89,7 @@ namespace Kernel
       endBinIndex.push_back( numBins + startBinIndex );
     }
     //How many binning regions?
-    numRegions = stepSizes.size();
+    numRegions = static_cast<int>(stepSizes.size());
   }
 
   /// Destructor

@@ -198,11 +198,11 @@ int StrFullCut(std::string& Text,const boost::regex& Re,
     return 0;
 
   unsigned int zero = 0; // Needed for boost 1.40
-  const int M0=m1->position(zero);
+  const int M0=static_cast<int>(m1->position(zero));
   int ML=M0;
   for(;m1!=empty;m1++)
     {
-      ML=m1->position(zero)+(*m1)[0].str().length();
+      ML=static_cast<int>(m1->position(zero)+(*m1)[0].str().length());
       for(unsigned int index=1;index<m1->size();index++)
 	Aout.push_back((*m1)[index].str());
     }

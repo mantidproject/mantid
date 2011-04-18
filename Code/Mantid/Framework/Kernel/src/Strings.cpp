@@ -108,12 +108,12 @@ int extractWord(std::string& Line,const std::string& Word,const int cnt)
   if (Word.empty())
     return 0;
 
-  unsigned int minSize(cnt>static_cast<int>(Word.size()) ?  Word.size() : cnt);
+  size_t minSize(cnt>static_cast<int>(Word.size()) ?  Word.size() : cnt);
   std::string::size_type pos=Line.find(Word.substr(0,minSize));
   if (pos==std::string::npos)
     return 0;
   // Pos == Start of find
-  unsigned int LinePt=minSize+pos;
+  size_t LinePt=minSize+pos;
   for(;minSize<Word.size() && LinePt<Line.size()
 	&& Word[minSize]==Line[LinePt];LinePt++,minSize++)
   {
@@ -161,7 +161,7 @@ int getPartLine(std::istream& fh,std::string& Out,std::string& Excess,const int 
   if (fh.good())
     {
       char* ss=new char[spc+1];
-      const int clen=spc-Out.length();
+      const int clen = static_cast<int>(spc-Out.length());
       fh.getline(ss,clen,'\n');
       ss[clen+1]=0;           // incase line failed to read completely
       Out+=static_cast<std::string>(ss);
@@ -629,8 +629,8 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y)
 template<template<typename T,typename A> class V,typename T,typename A>
 int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T,A>& Err)
 {
-  const int Npts(X.size()>Y.size() ? Y.size() : X.size());
-  const int Epts(Npts>static_cast<int>(Err.size()) ? Err.size() : Npts);
+  const size_t Npts(X.size()>Y.size() ? Y.size() : X.size());
+  const size_t Epts(Npts > Err.size() ? Err.size() : Npts);
 
   std::ofstream FX;
 
@@ -712,7 +712,7 @@ int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<
       if (*sc==cnt)
         {
     if (!section(modLine,value))
-      return -1-distance(static_cast<iVecIter>(sIndex.begin()),sc);
+      return static_cast<int>(-1-distance(static_cast<iVecIter>(sIndex.begin()),sc));
     // this loop handles repeat units
     do
       {
@@ -724,7 +724,7 @@ int setValues(const std::string& Line,const std::vector<int>& Index,std::vector<
       else
         {
     if (!section(modLine,dump))
-      return -1-distance(static_cast<iVecIter>(sIndex.begin()),sc);
+      return static_cast<int>(-1-distance(static_cast<iVecIter>(sIndex.begin()),sc));
   }
       cnt++;         // Add only to cnt [sc/oc in while loop]
     }

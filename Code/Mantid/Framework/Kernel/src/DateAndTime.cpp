@@ -185,7 +185,7 @@ DateAndTime::DateAndTime(const double seconds, const double nanoseconds)
   else if (nano < MIN_NANOSECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = nano;
+    _nanoseconds = static_cast<int64_t>(nano);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -201,7 +201,7 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds)
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = seconds * 1e9 + nanoseconds;;
+    _nanoseconds = static_cast<int64_t>(seconds * 1e9 + nanoseconds);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -217,7 +217,7 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds)
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = seconds * 1e9 + nanoseconds;;
+    _nanoseconds = static_cast<int64_t>(seconds * 1e9 + nanoseconds);
 }
 
 //===========================================================================================

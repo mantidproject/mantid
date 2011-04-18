@@ -325,10 +325,10 @@ namespace Mantid
       size_t dp_size = dp->size();
       for(size_t i=0;i<dp_size;i++)
       {
-        Kernel::TimeInterval t = dp->nthInterval(i);
+        Kernel::TimeInterval t = dp->nthInterval(static_cast<int>(i));
         Kernel::time_duration dt = t.length();
         total += dt;
-        res += dp->nthValue(i) * Kernel::DateAndTime::seconds_from_duration(dt);
+        res += dp->nthValue(static_cast<int>(i)) * Kernel::DateAndTime::seconds_from_duration(dt);
       }
 
       double total_seconds = Kernel::DateAndTime::seconds_from_duration(total);

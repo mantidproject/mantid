@@ -28,7 +28,7 @@ int DLLExport createAxisFromRebinParams(const std::vector<double>& params, std::
 {
   double xs;
   int ibound(2), istep(1), inew(1);
-  int ibounds = params.size(); //highest index in params array containing a bin boundary
+  int ibounds = static_cast<int>(params.size()); //highest index in params array containing a bin boundary
   int isteps = ibounds - 1; // highest index in params array containing a step
   xnew.clear();
 
@@ -401,7 +401,7 @@ int getBinIndex(std::vector<double>& bins, const double X )
   if (X < bins[0])
     return 0;
 
-  int nBins = bins.size();
+  int nBins = static_cast<int>(bins.size());
   for (index = 0; index < nBins-1; index++)
   {
     if ((X >= bins[index]) && (X < bins[index+1]))
@@ -423,7 +423,7 @@ void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y
   int specSize = static_cast<int>(y.size());
   int xSize = static_cast<int>(x.size());
   bool isHistogram(xSize == specSize + 1);
-  int step(stepSize), index2(0);
+  int step(static_cast<int>(stepSize)), index2(0);
   double x1 = 0, x2 = 0, y1 = 0, y2 = 0, xp = 0, overgap = 0;
 
   for (int i = 0; i < specSize - 1; ++i) // Last point has been calculated
@@ -431,7 +431,7 @@ void linearlyInterpolateY(const std::vector<double> & x, std::vector<double> & y
     if(step == stepSize) //Point numerically integrated, does not need interpolation
     {
       x1 = (isHistogram ? (0.5 * (x[i] + x[i + 1])) : x[i]);
-      index2 = ((i + stepSize) >= specSize ? specSize - 1 : (i + stepSize));
+      index2 = static_cast<int>(((i + stepSize) >= specSize ? specSize - 1 : (i + stepSize)));
       x2 = (isHistogram ? (0.5 * (x[index2] + x[index2 + 1])) : x[index2]);
       overgap = 1.0 / (x2 - x1);
       y1 = y[i];
