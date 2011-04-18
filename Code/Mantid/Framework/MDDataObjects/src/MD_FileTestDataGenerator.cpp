@@ -81,7 +81,7 @@ MD_FileTestDataGenerator::read_MDImg_data(MDImage & mdd)
 
     // get access to the MD image array;
     MDDataObjects::MD_image_point *pImg_data =  mdd.get_pData();
-    double step = double(this->nDims)/nCells;
+    //double step = double(this->nDims)/nCells;
     uint64_t  sanity_check(0);
     for(i=0;i<nCells;i++){
         pImg_data[i].s   = i;
@@ -176,7 +176,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 
     // no need in this as will assume number of pixels equal to number of cells
     //const MD_image_point *pData = dnd.get_const_pData();
-    size_t nCells = dnd.get_MDImgData().data_size;
+    //size_t nCells = dnd.get_MDImgData().data_size;
 
 
     std::vector<float> cell_step(this->nDims);

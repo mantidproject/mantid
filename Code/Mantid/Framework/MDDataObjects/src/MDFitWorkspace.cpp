@@ -148,6 +148,8 @@ namespace Mantid{
 
     const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment) const
     {
+      UNUSED_ARG(dim1Increment);
+      UNUSED_ARG(dim2Increment);
       //if (m_dimensions.size() != 2)
       //{
       //  throw std::runtime_error("MDFitWorkspace is not two dimensional");
@@ -158,6 +160,10 @@ namespace Mantid{
 
     const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment) const
     {
+      UNUSED_ARG(dim1Increment);
+      UNUSED_ARG(dim2Increment);
+      UNUSED_ARG(dim3Increment);
+
       //MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment);
       //MDGeometry const * const geometry = m_spMDImage->getGeometry();
       //IMDDimension_sptr xDimension = geometry->getXDimension();
@@ -189,6 +195,11 @@ namespace Mantid{
 
     const Mantid::Geometry::SignalAggregate& MDFitWorkspace::getCell(unsigned int dim1Increment, unsigned int dim2Increment, unsigned int dim3Increment, unsigned int dim4Increment) const
     {
+      UNUSED_ARG(dim1Increment);
+      UNUSED_ARG(dim2Increment);
+      UNUSED_ARG(dim3Increment);
+      UNUSED_ARG(dim4Increment);
+
       //MD_image_point point = m_spMDImage->getPoint(dim1Increment, dim2Increment, dim3Increment, dim4Increment);
       //MDGeometry const * const geometry = m_spMDImage->getGeometry();
       //IMDDimension_sptr xDimension = geometry->getXDimension();
@@ -336,7 +347,7 @@ namespace Mantid{
       * n is the number of bins, dx is the bin width. One of xmin, xmax, n, or dx should be omitted.
       * If all four are give dx is ignored.
       */
-    void MDFitWorkspace::setDimension(int idim,const std::string& paramString)
+    void MDFitWorkspace::setDimension(size_t idim,const std::string& paramString)
     {
       if (idim >= getNumDims())
       {

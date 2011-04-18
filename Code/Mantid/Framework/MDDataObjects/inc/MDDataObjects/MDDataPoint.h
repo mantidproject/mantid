@@ -78,8 +78,7 @@ namespace MDDataObjects
    *   
    */
    MDDataPointEqual(char * buf, const MDPointDescription &pixSignature):
-   pDataBuffer(buf),
-   MDPointDescription(pixSignature)    
+   MDPointDescription(pixSignature), pDataBuffer(buf)
    {
      buildPixel();
    }

@@ -14,7 +14,7 @@ PixDescriptor()
 }
 //
 MDPointDescription::MDPointDescription(const MDPointStructure &pixInfo,const std::vector<std::string> &IndataTags):
-dataIDs(IndataTags),PixDescriptor(pixInfo)
+PixDescriptor(pixInfo), dataIDs(IndataTags)
 {
     if(pixInfo.NumRecDimensions>pixInfo.NumDimensions){
             throw(std::invalid_argument("number of dimensions is lower then the number of reciprocal dimensions"));

@@ -76,7 +76,11 @@ public:
     /// get number of data pixels(points) contributing into the dataset;
     virtual uint64_t getNPix(void);
     /// not implemented 
-    virtual void write_mdd(const MDImage & dnd){throw(Kernel::Exception::NotImplementedError("not implemented at the moment"));}
+    virtual void write_mdd(const MDImage & dnd)
+    {
+      UNUSED_ARG(dnd);
+      throw(Kernel::Exception::NotImplementedError("not implemented at the moment"));
+    }
     
 	virtual ~MD_FileTestDataGenerator(void);
 

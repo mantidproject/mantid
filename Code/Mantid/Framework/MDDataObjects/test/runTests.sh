@@ -27,7 +27,7 @@ python $cxxtestgen --runner=MantidPrinter -o runner.cpp $test_files
 echo
 
 echo "Compiling the test executable..."
-mantid_libpath=../../bin
+mantid_libpath=/home/owen/workspace/MantidDebug/bin
 gmock_libpath=../../../TestingTools/lib/ubuntu-10.10/lib
 g++ -O0 -g3 -DBOOST_DATE_TIME_POSIX_TIME_STD_CONFIG  -o runner.exe runner.cpp -I../../Kernel/inc -I../../Geometry/inc -I ../inc -I../../MDDataObjects/inc -I../../API/inc -I/usr/local/include/gmock -I/usr/local/include/gtest  \
     -I ../../../../Third_Party/src/cxxtest \

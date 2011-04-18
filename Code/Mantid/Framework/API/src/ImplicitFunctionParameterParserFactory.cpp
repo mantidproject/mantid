@@ -22,6 +22,7 @@ namespace Mantid
 
     boost::shared_ptr<ImplicitFunctionParameterParser> ImplicitFunctionParameterParserFactoryImpl::create(const std::string& xmlString) const
     {
+      UNUSED_ARG(xmlString);
       throw std::runtime_error("Use of create in this context is forbidden. Use createUnwrappedInstead.");
     }
 

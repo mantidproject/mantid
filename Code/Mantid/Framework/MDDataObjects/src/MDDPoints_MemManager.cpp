@@ -9,12 +9,14 @@ using namespace Mantid::Kernel;
 Kernel::Logger& MDDPoints_MemManager::g_log =Kernel::Logger::get("MDWorkspaces");
 
 MDDPoints_MemManager::MDDPoints_MemManager(MD_img_data const & inImgArray,size_t nImageCells,unsigned int pix_size):
-n_data_points_in_memory(0),
-ImgArray (inImgArray),
-pixel_size(pix_size),
-n_pix_read_earlier(0),
-pix_locations_calculated(false)
-{}
+    n_data_points_in_memory(0),
+    pixel_size(pix_size),ImgArray (inImgArray),
+    pix_locations_calculated(false),
+    n_pix_read_earlier(0)
+{
+  UNUSED_ARG(nImageCells);
+
+}
 
 
 

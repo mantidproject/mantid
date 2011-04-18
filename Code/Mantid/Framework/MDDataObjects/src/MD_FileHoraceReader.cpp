@@ -661,7 +661,7 @@ MD_FileHoraceReader::parse_data_locations(std::streamoff data_start)
     std::vector<char> data_buffer(12);
     unsigned int i;
 
-    std::streamoff end_location = data_start;
+    //std::streamoff end_location = data_start;
     std::streamoff shift = data_start-this->fileStreamHolder.tellg();
     // move to specified location, which should be usually 0;
     fileStreamHolder.seekg(shift,std::ios_base::cur);

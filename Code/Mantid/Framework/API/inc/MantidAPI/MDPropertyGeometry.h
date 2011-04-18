@@ -85,6 +85,7 @@ namespace Mantid
         Geometry::MDGeometryDescription(Geom),
         Kernel::PropertyWithValue<std::string>(name, "", new Kernel::NullValidator<std::string> , direction)
       {
+        UNUSED_ARG(validator);
           // fill in symbol representation of the property. 
          this->Kernel::PropertyWithValue<std::string>::setValue(this->toXMLstring());
       }

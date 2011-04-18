@@ -57,8 +57,8 @@ struct data_positions{
 		pix_start;
 	data_positions():if_sqw_start(18),n_dims_start(22),sqw_header_start(26),
 		detectors_start(0),data_start(0),geom_start(0),s_start(0), // the following values have to be identified from the file itself
-		min_max_start(0),
-		err_start(0),n_cell_pix_start(0),pix_start(0){}; // the following values have to be identified from the file itself
+		err_start(0),
+		n_cell_pix_start(0),min_max_start(0),pix_start(0){}; // the following values have to be identified from the file itself
 };
 //
 class DLLExport MD_FileHoraceReader :    public IMD_FileFormat
@@ -85,7 +85,11 @@ public:
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
 	// TODO: Implement;
-	virtual bool read_pix(MDDataPoints & sqw){throw(Kernel::Exception::NotImplementedError("Read all pixels funtion is not implemented at the moment as target obect for it is in nucleus state"));}
+	virtual bool read_pix(MDDataPoints & sqw)
+	{
+	  UNUSED_ARG(sqw);
+	  throw(Kernel::Exception::NotImplementedError("Read all pixels funtion is not implemented at the moment as target obect for it is in nucleus state"));
+	}
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);

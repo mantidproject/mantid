@@ -273,8 +273,7 @@ MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry):
 
 }
 MDImage::MDImage(const Geometry::MDGeometryDescription &Description, const Geometry::MDGeometryBasis & Basis):
-    pMDGeometry(NULL),
-    nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0)
+    nd2(0),nd3(0),nd4(0),nd5(0),nd6(0),nd7(0),nd8(0),nd9(0),nd10(0),nd11(0), pMDGeometry(NULL)
 {
   this->initialize(Description,&Basis);
 }
@@ -289,7 +288,7 @@ MDImage::alloc_image_data()
     g_log.error()<<" can not allocate memory for multidimensional image of "<<ImgSize<<" points\n";
     throw(std::runtime_error("Can not allocate memory for Multidimensional image "));
   }
-  MD_image_point *pData        = MD_IMG_array.data;
+  //MD_image_point *pData        = MD_IMG_array.data;
   MD_IMG_array.data_array_size = ImgSize;
   MD_IMG_array.data_size       = ImgSize;
 

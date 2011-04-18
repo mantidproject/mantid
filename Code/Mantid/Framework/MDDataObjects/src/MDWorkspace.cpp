@@ -22,6 +22,7 @@ namespace Mantid{
      //Seam method.
      boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints> getDataPoints(boost::shared_ptr<MDImage> imageData)
      {
+       UNUSED_ARG(imageData);
 	   MDPointDescription descr;
        return  boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>(new MDDataPoints(descr)); //TODO replace with some other factory call.
      }
@@ -105,6 +106,8 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
     /** Default constructor - does nothing */
     MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     {
+      UNUSED_ARG(nDimensions);
+      UNUSED_ARG(nRecDims);
     }
 
     //----------------------------------------------------------------------------------------------
