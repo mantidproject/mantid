@@ -55,7 +55,7 @@ class DLLExport TestCut : public IMDWorkspace
 {
 private:
     int m_points;
-    int m_cells;
+    size_t m_cells;
 
     std::vector<Mantid::Geometry::MDCell> m_mdcells;
 

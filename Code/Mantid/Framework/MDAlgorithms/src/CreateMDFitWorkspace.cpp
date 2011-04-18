@@ -41,7 +41,7 @@ namespace Mantid
     {
       std::string dimensions = getPropertyValue("Dimensions");
       Poco::StringTokenizer tkz(dimensions, ";", Poco::StringTokenizer::TOK_IGNORE_EMPTY | Poco::StringTokenizer::TOK_TRIM);
-      int nDim = tkz.count();
+      size_t nDim = tkz.count();
       if (nDim > 4)
       {
         throw std::invalid_argument("Maximum dimensionality of a workspace created by CreateMDFitWorkspace is 4");
@@ -93,7 +93,7 @@ namespace Mantid
           signal -= s;
         }
         points[0].reset(new MDPoint(signal,error,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
-        int i = it->getPointer();
+        size_t i = it->getPointer();
         ws->setCell(i,points);
       }
       while(it->next());
@@ -106,11 +106,11 @@ namespace Mantid
       {
         std::string fname = "C:/Users/hqs74821/Work/InstrumentBug/" + getPropertyValue("OutputWorkspace") + ".csv";
         std::ofstream fil(fname.c_str());
-        int nx = ws->getXDimension()->getNBins();
+        size_t nx = ws->getXDimension()->getNBins();
         it.reset( ws->createIterator() );
         do
         {
-          int i = it->getPointer();
+          size_t i = it->getPointer();
           if (nDim == 2)
           {
             fil <<  ws->getCell(i).getSignal();

@@ -271,7 +271,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       MDCellMap::const_iterator iter = m_mdCellMap.find(dim1Increment);
       if(true == newCellRequired(dim1Increment, point))
       {
-        VecCoordinate vertexes = createLine(dim1Increment, xDimension);
+        VecCoordinate vertexes = createLine(static_cast<int>( dim1Increment ), xDimension);
         m_mdCellMap[dim1Increment] = MDCell(point.s, point.err, vertexes);
       }
       return m_mdCellMap[dim1Increment];
@@ -286,8 +286,8 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(2);
-      calculator.setDimensionSize(0, xDimension->getNBins());
-      calculator.setDimensionSize(1, yDimension->getNBins());
+      calculator.setDimensionSize(0, static_cast<int>( xDimension->getNBins() ));
+      calculator.setDimensionSize(1, static_cast<int>( yDimension->getNBins() ));
       std::vector<size_t> indexes(2);
       indexes[0] = dim1Increment;
       indexes[1] = dim2Increment;
@@ -300,7 +300,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
       if(true == newCellRequired(singleDimensionIndex, point))
       {
-        VecCoordinate vertexes = createPolygon(dim1Increment, dim2Increment, xDimension, yDimension);
+        VecCoordinate vertexes = createPolygon(static_cast<int>( dim1Increment ), static_cast<int>( dim2Increment ), xDimension, yDimension);
         m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
       }
       return m_mdCellMap[singleDimensionIndex];
@@ -316,9 +316,9 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(3);
-      calculator.setDimensionSize(0, xDimension->getNBins());
-      calculator.setDimensionSize(1, yDimension->getNBins());
-      calculator.setDimensionSize(2, zDimension->getNBins());
+      calculator.setDimensionSize(0, static_cast<int>( xDimension->getNBins() ));
+      calculator.setDimensionSize(1, static_cast<int>( yDimension->getNBins() ));
+      calculator.setDimensionSize(2, static_cast<int>( zDimension->getNBins() ));
       size_t indexes[] = {dim1Increment, dim2Increment, dim3Increment};
       VecIndexes vecIndexes(3);
       std::copy(indexes, indexes+3, vecIndexes.begin());
@@ -330,7 +330,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       }
       if(true == newCellRequired(singleDimensionIndex, point))
       {
-        VecCoordinate vertexes = createPolyhedron(dim1Increment, dim2Increment, dim3Increment, xDimension, yDimension, zDimension);
+        VecCoordinate vertexes = createPolyhedron(static_cast<int>( dim1Increment ), static_cast<int>( dim2Increment ), static_cast<int>( dim3Increment ), xDimension, yDimension, zDimension);
         m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
       }
       return m_mdCellMap[singleDimensionIndex];
@@ -347,10 +347,10 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 
       //The cell map is agnostic of the dimensionality. Request needs to be forulated into a single dimensional form.
       MDWorkspaceIndexCalculator calculator(4);
-      calculator.setDimensionSize(0, xDimension->getNBins());
-      calculator.setDimensionSize(1, yDimension->getNBins());
-      calculator.setDimensionSize(2, zDimension->getNBins());
-      calculator.setDimensionSize(3, tDimension->getNBins());
+      calculator.setDimensionSize(0, static_cast<int>( xDimension->getNBins() ));
+      calculator.setDimensionSize(1, static_cast<int>( yDimension->getNBins() ));
+      calculator.setDimensionSize(2, static_cast<int>( zDimension->getNBins() ));
+      calculator.setDimensionSize(3, static_cast<int>( tDimension->getNBins() ));
       size_t indexes[] = {dim1Increment, dim2Increment, dim3Increment, dim4Increment};
       VecIndexes vecIndexes(4);
       std::copy(indexes, indexes+4, vecIndexes.begin());
@@ -362,7 +362,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       }
       if(true == newCellRequired(singleDimensionIndex, point))
       {
-        VecCoordinate vertexes = create4DPolyhedron(dim1Increment, dim2Increment, dim3Increment, dim4Increment, xDimension, yDimension, zDimension, tDimension);
+        VecCoordinate vertexes = create4DPolyhedron(static_cast<int>(dim1Increment), static_cast<int>(dim2Increment), static_cast<int>(dim3Increment), static_cast<int>(dim4Increment), xDimension, yDimension, zDimension, tDimension);
         m_mdCellMap[singleDimensionIndex] =  Mantid::Geometry::MDCell(point.s, point.err, vertexes);
       }
       return m_mdCellMap[singleDimensionIndex];

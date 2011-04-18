@@ -110,7 +110,7 @@ class DLLExport TestQCut : public IMDWorkspace
 {
 private:
     int m_points;
-    int m_cells;
+    size_t m_cells;
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> m_xDim;
     std::vector<Mantid::Geometry::MDCell> m_mdcells;
 

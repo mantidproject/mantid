@@ -47,7 +47,7 @@ namespace Mantid
             std::vector<double> point;
             for(size_t i=0;i<13;i++)
                 point.push_back(0.0);
-            int ncell= imdwCut->getXDimension()->getNBins();
+            const int ncell= static_cast<int>( imdwCut->getXDimension()->getNBins() );
             // loop over MDCells in this cut
             for(int i=0; i<ncell ; i++ ){
                 const Mantid::Geometry::SignalAggregate& newCell = imdwCut->getCell(i); // get cell data

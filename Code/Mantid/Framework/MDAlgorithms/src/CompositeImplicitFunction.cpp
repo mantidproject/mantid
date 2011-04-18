@@ -61,7 +61,7 @@ namespace Mantid
          * */
         int CompositeImplicitFunction::getNFunctions() const
         {
-            return this->m_Functions.size();
+            return static_cast<int>( this->m_Functions.size() );
         }
 
 

@@ -42,7 +42,7 @@ public:
     it = ws.createIterator();
     do
     {
-      int i = it->getPointer();
+      size_t i = it->getPointer();
       const SignalAggregate& cell = ws.getCell(i);
       //std::cerr << "cell " << i << " " << cell.getSignal() << ' ' << cell.getError() << ' ' << cell.getContributingPoints().size() << std::endl;
     }

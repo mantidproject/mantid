@@ -57,7 +57,7 @@ std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* imp
     //Flatten out box functions
     planeVector flattenedPlanes = walkTree(compFunction);
 
-    int size = flattenedPlanes.size();
+    size_t size = flattenedPlanes.size();
 
     //Only if there are any plane functions at all, get the last plane's rotation matrix.
     if (size > 0)
