@@ -929,14 +929,14 @@ namespace Mantid
       std::vector<Acomp>::iterator dx;
       sort(Comp.begin(),Comp.end());
       dx=std::unique(Comp.begin(),Comp.end());
-      cnt+=std::distance(dx,Comp.end());
+      cnt += static_cast<int>(std::distance(dx,Comp.end()));
       Comp.erase(dx,Comp.end());
 
       // Units are sorted
 
       sort(Units.begin(),Units.end());
       std::vector<int>::iterator ux=unique(Units.begin(),Units.end());
-      cnt+=std::distance(ux,Units.end());
+      cnt += static_cast<int>(std::distance(ux,Units.end()));
       Units.erase(ux,Units.end());
       return cnt;
     }
@@ -1047,13 +1047,14 @@ namespace Mantid
       std::vector<int> PIscore(DNFobj.size());        // Number in each channel
 
       //Populate
-      for(unsigned int pc=0;pc!=PIform.size();pc++)
-        PIactive[pc]=pc;
-
-      for(unsigned int ic=0;ic!=DNFobj.size();ic++)
+      for(int pc=0;pc!=static_cast<int>(PIform.size());pc++)
+      {
+        PIactive[pc] = pc;
+      }
+      for(int ic=0;ic!=static_cast<int>(DNFobj.size());ic++)
       {
         DNFactive[ic]=ic;                            //populate (avoid a loop)
-        for(unsigned int pc=0;pc!=PIform.size();pc++)
+        for(int pc=0;pc!=static_cast<int>(PIform.size());pc++)
         {
           if (PIform[pc].equivalent(DNFobj[ic]))
           {
@@ -1137,8 +1138,8 @@ namespace Mantid
         cm++;
       }
 
-      const int Dsize(DNFactive.size());
-      const int Psize(PIactive.size());
+      const int Dsize(static_cast<int>(DNFactive.size()));
+      const int Psize(static_cast<int>(PIactive.size()));
       //icount == depth of search ie 
       int vecI,di; // variable for later
       for(int Icount=1;Icount<Psize;Icount++)
@@ -1159,9 +1160,11 @@ namespace Mantid
           if (di==Dsize)          // SUCCESS!!!!!
           {
             for(int iout=0;iout<Icount;iout++)
+            {
               EPI.push_back(PIform[Index[iout]]);
+            }
             DNFobj=EPI;
-            return 1;;
+            return 1;
           }
         } while(!(++Index));
       }
@@ -1250,7 +1253,7 @@ namespace Mantid
       {
         if (makePI(DNFobj))
           assignDNF(keyNumbers,DNFobj);
-        return DNFobj.size();
+        return static_cast<int>(DNFobj.size());
       }
       return 0;
     }
@@ -1269,7 +1272,7 @@ namespace Mantid
       {
         if (makePI(CNFobj))
           assignCNF(keyNumbers,CNFobj);
-        return CNFobj.size();
+        return static_cast<int>(CNFobj.size());
       }
       return 0;
     }
@@ -1302,7 +1305,7 @@ namespace Mantid
         }
         for(xc=Comp.begin();xc!=Comp.end();xc++)
           Parts.push_back(*xc);
-        return Parts.size();
+        return static_cast<int>(Parts.size());
       }
 
       std::vector<int> keyNumbers;
@@ -1319,7 +1322,7 @@ namespace Mantid
             Parts.push_back(Aitem);
           }
         }	  
-        return Parts.size();
+        return static_cast<int>(Parts.size());
       }
       return 0;
     }
@@ -1384,7 +1387,7 @@ namespace Mantid
 
       // Deal with case of a single object (then join
       // doesn't matter
-      int retJoin=Units.size()+Comp.size();
+      int retJoin=static_cast<int>(Units.size()+Comp.size());
       if (retJoin!=1)          // single unit is alway ok 
         retJoin=1-Intersect;         
 
@@ -1628,7 +1631,7 @@ namespace Mantid
       {
         int bLevel(1);
         int ePos;
-        for(ePos=sPos+2;bLevel>0 && ePos<static_cast<int>(Ln.size());ePos++)
+        for(ePos=static_cast<int>(sPos)+2;bLevel>0 && ePos<static_cast<int>(Ln.size());ePos++)
         {
           if (Ln[ePos]=='(')
             bLevel++;
@@ -1682,7 +1685,7 @@ namespace Mantid
       @return size of Unit, Comp
       */
     {
-      return std::pair<int,int>(Units.size(),Comp.size());
+      return std::pair<int,int>(static_cast<int>(Units.size()),static_cast<int>(Comp.size()));
     }
 
     int
@@ -1852,7 +1855,7 @@ namespace Mantid
       */
 
     {
-      const std::pair<int,int> RX=Grid.size();
+      const std::pair<size_t,size_t> RX=Grid.size();
       for(unsigned int pc=0;pc!=PIform.size();pc++)
       {
         std::cerr<<PIform[pc]<<":";

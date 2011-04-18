@@ -55,7 +55,7 @@ class DLLExport BnId
 
   static Kernel::Logger& PLog;           ///< The official logger
 
-  int size;                 ///< number of variables
+  size_t size;                 ///< number of variables
   int PI;                   ///< Prime Implicant
   int Tnum;                 ///< True number (1 in Tval)
   int Znum;                 ///< Zero number (0 in Tval)
@@ -67,7 +67,7 @@ class DLLExport BnId
  public:
   
   BnId();
-  BnId(int const,unsigned int);
+  BnId(const size_t,unsigned int);
   BnId(const BnId&);
   BnId& operator=(const BnId&);
   ~BnId();
@@ -99,9 +99,9 @@ class DLLExport BnId
 
 
   /// Total requiring expression
-  int expressCount() const { return size-Znum; } 
+  size_t expressCount() const { return size-Znum; } 
   /// returns number of variables / size          
-  int Size() const { return size; }   
+  size_t Size() const { return size; }   
   /// Access true count
   int TrueCount() const { return Tnum; }
   

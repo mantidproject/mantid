@@ -263,6 +263,7 @@ MisMatch<T>::what() const throw()
 
 /// \cond TEMPLATE
 template class DLLExport MisMatch<int>;
+template class DLLExport MisMatch<size_t>;
 /// \endcond TEMPLATE
 
 //-------------------------

@@ -52,7 +52,7 @@ Matrix<T>::get_vector()const
 }
 //
 template<typename T>
-Matrix<T>::Matrix(const int nrow,const int ncol, const bool makeIdentity)
+Matrix<T>::Matrix(const size_t nrow, const size_t ncol, const bool makeIdentity)
   : nx(0),ny(0),V(0)
   /**
     Constructor with pre-set sizes. Matrix is zeroed
@@ -147,11 +147,15 @@ Matrix<T>::operator+=(const Matrix<T>& A)
      @return Matrix(this + A)
    */
 {
-  const int Xpt((nx>A.nx) ? A.nx : nx);
-  const int Ypt((ny>A.ny) ? A.ny : ny);
-  for(int i=0;i<Xpt;i++)
-    for(int j=0;j<Ypt;j++)
+  const size_t Xpt((nx>A.nx) ? A.nx : nx);
+  const size_t Ypt((ny>A.ny) ? A.ny : ny);
+  for(size_t i=0;i<Xpt;i++)
+  {
+    for(size_t j=0;j<Ypt;j++)
+    {
       V[i][j]+=A.V[i][j];
+    }
+  }
 
   return *this;
 }
@@ -167,11 +171,15 @@ Matrix<T>::operator-=(const Matrix<T>& A)
      @return Ma
    */
 {
-  const int Xpt((nx>A.nx) ? A.nx : nx);
-  const int Ypt((ny>A.ny) ? A.ny : ny);
+  const size_t Xpt((nx>A.nx) ? A.nx : nx);
+  const size_t Ypt((ny>A.ny) ? A.ny : ny);
   for(int i=0;i<Xpt;i++)
+  {
     for(int j=0;j<Ypt;j++)
+    {
       V[i][j]-=A.V[i][j];
+    }
+  }
 
   return *this;
 }
@@ -218,12 +226,18 @@ Matrix<T>::operator*(const Matrix<T>& A) const
  */
 {
   if (ny!=A.nx)
-    throw Kernel::Exception::MisMatch<int>(ny,A.nx,"Matrix::operator*(Matrix)");
+    throw Kernel::Exception::MisMatch<size_t>(ny,A.nx,"Matrix::operator*(Matrix)");
   Matrix<T> X(nx,A.ny);
-  for(int i=0;i<nx;i++)
-    for(int j=0;j<A.ny;j++)
-      for(int kk=0;kk<ny;kk++)
-	X.V[i][j]+=V[i][kk]*A.V[kk][j];
+  for(size_t i=0;i<nx;i++)
+  {
+    for(size_t j=0;j<A.ny;j++)
+    {
+      for(size_t kk=0;kk<ny;kk++)
+      {
+	      X.V[i][j]+=V[i][kk]*A.V[kk][j];
+      }
+    }
+  }
   return X;
 }
 
@@ -262,7 +276,7 @@ Matrix<T>::operator*(const V3D& Vx) const
  */
 {
   if (ny!=3)
-    throw Kernel::Exception::MisMatch<int>(ny,3,"Matrix::operator*(V3D)");
+    throw Kernel::Exception::MisMatch<size_t>(ny,3,"Matrix::operator*(V3D)");
   V3D X;
   for(int i=0;i<nx;i++)
     for(int kk=0;kk<ny;kk++)
@@ -413,7 +427,7 @@ Matrix<T>::deleteMem()
 */
 template<typename T>
 void
-Matrix<T>::setMem(const int a,const int b)
+Matrix<T>::setMem(const size_t a,const size_t b)
 {
   if (a==nx && b==ny) 
     return;
@@ -510,7 +524,7 @@ Matrix<T>::identityMatrix()
 }
 template<typename T> 
 void 
-Matrix<T>::setColumn(int nCol,const std::vector<T> &newCol)
+Matrix<T>::setColumn(const size_t nCol,const std::vector<T> &newCol)
 {
 	if(nCol>=this->ny){
 		throw(std::invalid_argument("nCol requested> nCol availible"));
@@ -524,7 +538,7 @@ Matrix<T>::setColumn(int nCol,const std::vector<T> &newCol)
 }
 template<typename T> 
 void 
-Matrix<T>::setRow(int nRow,const std::vector<T> &newRow)
+Matrix<T>::setRow(const size_t nRow,const std::vector<T> &newRow)
 {
 	if(nRow>=this->nx){
 		throw(std::invalid_argument("nRow requested> nRow availible"));
@@ -1081,7 +1095,7 @@ Matrix<T>::lubksb(const int* rowperm,double* b)
       b[i]=sum;
     }
 
-  for (int i=nx-1;i>=0;i--)
+  for (int i=static_cast<int>(nx)-1;i>=0;i--)
     {
       double sum=static_cast<T>(b[i]);
       for (int j=i+1;j<nx;j++)

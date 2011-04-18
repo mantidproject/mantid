@@ -16,7 +16,7 @@ namespace Mantid
   namespace Geometry
   {
 
-     class V3D;
+    class V3D;
     /**
     \class Matrix
     \brief Numerical Matrix class
@@ -35,8 +35,8 @@ namespace Mantid
     {
     private:
 
-      int nx;      ///< Number of rows    (x coordinate)
-      int ny;      ///< Number of columns (y coordinate)
+      size_t nx;      ///< Number of rows    (x coordinate)
+      size_t ny;      ///< Number of columns (y coordinate)
 
       T** V;                      ///< Raw data
 
@@ -48,16 +48,16 @@ namespace Mantid
 
     public:
 
-      Matrix(int const =0,int const  =0, bool const makeIdentity=false);
+      Matrix(const size_t = 0, const size_t = 0, bool const makeIdentity=false);
       Matrix(const std::vector<T>&,const std::vector<T>&);
       Matrix(const Matrix<T>&);
       Matrix<T>& operator=(const Matrix<T>&);
       ~Matrix();
 
       /// const Array accessor
-      const T* operator[](const int A) const { return V[A]; }
+      const T* operator[](const size_t A) const { return V[A]; }
       /// Array accessor
-      T* operator[](const int A) { return V[A]; }
+      T* operator[](const size_t A) { return V[A]; }
 
       Matrix<T>& operator+=(const Matrix<T>&);       ///< Basic addition operator
       Matrix<T> operator+(const Matrix<T>&);         ///< Basic addition operator
@@ -82,13 +82,13 @@ namespace Mantid
       void write(std::ostream&,int const =0) const;
       std::string str() const;
 
-	  // returns this matrix in 1D vector representation
-	  std::vector<T> get_vector()const;
-	  // explicit conversion into the vector
-	  operator std::vector<T>()const{std::vector<T> tmp=this->get_vector(); return tmp;}
-	  //
-	  void setColumn(int nCol,const std::vector<T> &newColumn);
-	  void setRow(int nRow,const std::vector<T> &newRow);
+      // returns this matrix in 1D vector representation
+      std::vector<T> get_vector()const;
+      // explicit conversion into the vector
+      operator std::vector<T>()const{std::vector<T> tmp=this->get_vector(); return tmp;}
+      //
+      void setColumn(const size_t nCol,const std::vector<T> &newColumn);
+      void setRow(const size_t nRow,const std::vector<T> &newRow);
       void zeroMatrix();      ///< Set the matrix to zero
       void identityMatrix();
       void normVert();         ///< Vertical normalisation
@@ -98,20 +98,19 @@ namespace Mantid
       Matrix<T> fDiagonal(const std::vector<T>&) const;    ///< Forward multiply  D*this
       Matrix<T> bDiagonal(const std::vector<T>&) const;    ///< Backward multiply this*D
 
-      void setMem(int const,int const);
+      void setMem(const size_t, const size_t);
 
-	  
       /// Access matrix sizes
-      std::pair<int,int> size() const { return std::pair<int,int>(nx,ny); }
+      std::pair<size_t,size_t> size() const { return std::pair<size_t,size_t>(nx,ny); }
 
       /// Return the number of rows in the matrix
-      size_t numRows() const { return static_cast<size_t>(nx); }
+      size_t numRows() const { return nx; }
 
       /// Return the number of columns in the matrix
-      size_t numCols() const { return static_cast<size_t>(ny); }
+      size_t numCols() const { return ny; }
 
       /// Return the largest matrix size
-      int Ssize() const { return (nx>ny) ? ny : nx; }
+      size_t Ssize() const { return (nx>ny) ? ny : nx; }
 
       void swapRows(int const,int const);        ///< Swap rows (first V index)
       void swapCols(int const,int const);        ///< Swap cols (second V index)
@@ -143,21 +142,4 @@ namespace Mantid
 
 }  // NAMESPACE Mantid
 
-// template<typename X>
-// std::ostream& operator<<(std::ostream&,const Geometry::Matrix<X>&);
-
 #endif
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -41,7 +41,7 @@ BnId::BnId() :
   */
 {}
 
-BnId::BnId(const int A,const unsigned int X) :
+BnId::BnId(const size_t A,const unsigned int X) :
   size(A),PI(1),Tnum(0),Znum(0),Tval(A)
   /**
     Constructer that creates a true/false mapping
@@ -52,12 +52,12 @@ BnId::BnId(const int A,const unsigned int X) :
 {
   unsigned int cnt=1;
   int sum(0);
-  for(int i=0;i<size;cnt*=2,i++)
+  for(size_t i=0;i<size;cnt*=2,i++)
     {
       Tval[i] = (X & cnt) ? 1 : -1;
       sum+=Tval[i];
     }
-  Tnum=(sum+size)/2;
+  Tnum=(sum + static_cast<int>(size))/2;
 }
 
 BnId::BnId(const BnId& A) :

@@ -45,114 +45,114 @@ public:
   {
     Object_sptr geom_obj = createCappedCylinder();
     //inside
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),0); //origin
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,2.9,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-2.9,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-2.9)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,2.9)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),false); //origin
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,2.9,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-2.9,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-2.9)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,2.9)),false);
     //on the side
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,0)),true);
 
     //on the edges
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.2,0,3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.2,0,3)),true);
     //out side
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3.1,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3.1,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3.1)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3.1)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.3,0,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,3.1,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-3.1,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-3.1)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,3.1)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(1.3,0,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(-3.3,0,0)),false);
   }
 
   void testIsValidCappedCylinder()
   {
     Object_sptr geom_obj = createCappedCylinder();
     //inside
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),1); //origin
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,2.9,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-2.9,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-2.9)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,2.9)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),true); //origin
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,2.9,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-2.9,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-2.9)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,2.9)),true);
     //on the side
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,0)),true);
 
     //on the edges
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,-3,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,-3)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,3)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.2,0,3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,-3,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,-3)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.2,0,3)),true);
     //out side
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3.1,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3.1,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3.1)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3.1)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.3,0,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.3,0,0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,3.1,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-3.1,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-3.1)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,3.1)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(1.3,0,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(-3.3,0,0)),false);
   }
 
   void testIsOnSideSphere()
   {
     Object_sptr geom_obj = createSphere();
     //inside
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),0); //origin
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.0,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.0,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.0)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,0)),false); //origin
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.0,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.0,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.0)),false);
     //on the side
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.1,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.1,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.1)),1);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.1,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.1,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.1)),true);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.1)),true);
 
     //out side
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.2,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.2,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.2)),0);
-    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,4.2,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,-4.2,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,-4.2)),false);
+    TS_ASSERT_EQUALS(geom_obj->isOnSide(V3D(0,0,4.2)),false);
   }
 
   void testIsValidSphere()
   {
     Object_sptr geom_obj = createSphere();
     //inside
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),1); //origin
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.0,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.0,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.0)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,0)),true); //origin
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.0,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.0,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.0)),true);
     //on the side
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.1,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.1,0)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.1)),1);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.1)),1);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.1,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.1,0)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.1)),true);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.1)),true);
 
     //out side
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.2,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.2,0)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.2)),0);
-    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.2)),0);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,4.2,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,-4.2,0)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,-4.2)),false);
+    TS_ASSERT_EQUALS(geom_obj->isValid(V3D(0,0,4.2)),false);
   }
 
   void testCalcValidTypeSphere()

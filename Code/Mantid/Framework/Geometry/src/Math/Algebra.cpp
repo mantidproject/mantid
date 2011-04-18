@@ -195,7 +195,7 @@ Algebra::writeMCNPX() const
   */
 {
   std::string Out=F.display();
-  const int lenOut=Out.length();
+  const int lenOut = static_cast<const int>(Out.length());
   Out+=" ";      // Guard string
   std::ostringstream cx;
   for(int i=0;i<lenOut;i++)
@@ -390,7 +390,7 @@ Algebra::countLiterals() const
 {
   std::map<int,int> Lit;
   F.getLiterals(Lit);
-  return Lit.size();
+  return static_cast<int>(Lit.size());
 }
 
 int

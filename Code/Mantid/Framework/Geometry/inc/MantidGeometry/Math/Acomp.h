@@ -74,7 +74,6 @@ namespace Mantid
 
       void deleteComp();            ///< delete all of the Comp list
       void addComp(const Acomp&);      ///< add a Component intelligently
-      //  void addCompPtr(Acomp*);      ///< add a Component intelligently
       void addUnitItem(int const);      ///< add an Unit intellgently
       void processIntersection(const std::string&);
       void processUnion(const std::string&);
