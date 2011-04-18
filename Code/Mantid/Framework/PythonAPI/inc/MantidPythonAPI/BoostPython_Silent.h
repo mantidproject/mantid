@@ -40,6 +40,8 @@
   #pragma warning(pop)
 #elif defined __GNUC__
   #pragma GCC system_header
+  #include <boost/python.hpp>
+  #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #endif
 
 
