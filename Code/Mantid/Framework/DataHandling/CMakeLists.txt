@@ -205,7 +205,7 @@ set_property ( TARGET DataHandling PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../Nexus/inc)
 
-target_link_libraries ( DataHandling Nexus ${MANTIDLIBS} )
+target_link_libraries ( DataHandling ${MANTIDLIBS} )
 
 if ( CXXTEST_FOUND )
   include_directories ( ../TestHelpers/inc )

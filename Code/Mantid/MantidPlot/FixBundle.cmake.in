@@ -6,6 +6,6 @@ file ( GLOB pyqt_libs ${bundle}/Contents/MacOS/PyQt4/*.so )
 file ( GLOB_RECURSE qtplugins ${bundle}/plugins/*.dylib )
 set ( other_libs ${bundle}/Contents/MacOS/libMantidPythonAPI.so ${pyqt_libs} ${qtplugins} )
 
-set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" "/Library/Frameworks" )
+set ( dirs "@CMAKE_LIBRARY_OUTPUT_DIRECTORY@" "@CMAKE_LIBRARY_PATH@" "/Library/Frameworks" /opt/intel/lib )
 
 fixup_bundle ( "${bundle}" "${other_libs}" "${dirs}" )
