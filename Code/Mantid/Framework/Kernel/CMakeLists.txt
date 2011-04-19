@@ -1,27 +1,5 @@
 set ( SRC_FILES
-	src/ANN/ANN.cpp
-	src/ANN/bd_fix_rad_search.cpp
-	src/ANN/bd_pr_search.cpp
-	src/ANN/bd_search.cpp
-	src/ANN/bd_tree.cpp
-	src/ANN/bd_tree.h
-	src/ANN/brute.cpp
-	src/ANN/kd_dump.cpp
-	src/ANN/kd_fix_rad_search.cpp
-	src/ANN/kd_fix_rad_search.h
-	src/ANN/kd_pr_search.cpp
-	src/ANN/kd_pr_search.h
-	src/ANN/kd_search.cpp
-	src/ANN/kd_search.h
-	src/ANN/kd_split.cpp
-	src/ANN/kd_split.h
-	src/ANN/kd_tree.cpp
-	src/ANN/kd_tree.h
-	src/ANN/kd_util.cpp
-	src/ANN/kd_util.h
-	src/ANN/perf.cpp
-	src/ANN/pr_queue.h
-	src/ANN/pr_queue_k.h
+	src/ANN_complete.cpp
 	src/ArrayBoundedValidator.cpp
 	src/ArrayProperty.cpp
 	src/Atom.cpp

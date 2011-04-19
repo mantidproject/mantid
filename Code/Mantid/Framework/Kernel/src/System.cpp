@@ -87,20 +87,16 @@ std::string Mantid::Kernel::getPathToExecutable()
   std::string execpath("");
   const size_t LEN(1024);
   char pBuf[LEN];
-// The linux function returns an int, the Windows & Mac ones an unsigned type
-#ifndef __linux__
-  unsigned 
-#endif
-  int bytes(0);
   
 #ifdef _WIN32
-  bytes = GetModuleFileName(NULL, pBuf, LEN);
+  unsigned int bytes = GetModuleFileName(NULL, pBuf, LEN);
 #elif defined __linux__
   char szTmp[32];
   sprintf(szTmp, "/proc/%d/exe", getpid());
-  bytes = readlink(szTmp, pBuf, LEN);
+  ssize_t bytes = readlink(szTmp, pBuf, LEN);
 #elif defined __APPLE__
   // Two calls to _NSGetExecutablePath required - first to get size of buffer
+  uint32_t bytes(0);
   _NSGetExecutablePath(pBuf,&bytes);
   const int success = _NSGetExecutablePath(pBuf,&bytes);
   if (success < 0) bytes = 1025;

@@ -50,7 +50,7 @@ float Timer::elapsed_no_reset() const
 #else /* linux & mac */
   timeval now;
   gettimeofday(&now,0);
-  const float retval = float(now.tv_sec - m_start.tv_sec) + float((now.tv_usec - m_start.tv_usec)/1E6);
+  const float retval = float(now.tv_sec - m_start.tv_sec) + float((now.tv_usec - m_start.tv_usec)/1000000);
 #endif
   return retval;
 }

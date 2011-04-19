@@ -359,7 +359,7 @@ namespace Mantid
       {
         if( c == '\r' )
         {
-          c = is.peek();
+          c = static_cast<char>(is.peek());
           if( c == '\n' )
           {
             //Extract this as well

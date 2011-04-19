@@ -3,6 +3,7 @@
 #include <Poco/DateTime.h>
 #include <Poco/DateTimeFormat.h>
 #include <Poco/DateTimeParser.h>
+#include <boost/date_time/posix_time/posix_time_config.hpp>
 
 namespace Mantid
 {
@@ -201,7 +202,7 @@ DateAndTime::DateAndTime(const int64_t seconds, const int64_t nanoseconds)
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1e9 + nanoseconds);
+    _nanoseconds = static_cast<int64_t>(seconds * 1000000000 + nanoseconds);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -217,7 +218,7 @@ DateAndTime::DateAndTime(const int32_t seconds, const int32_t nanoseconds)
   else if (seconds <= MIN_SECONDS)
     _nanoseconds = MIN_NANOSECONDS;
   else
-    _nanoseconds = static_cast<int64_t>(seconds * 1e9 + nanoseconds);
+    _nanoseconds = static_cast<int64_t>(seconds * 1000000000 + nanoseconds);
 }
 
 //===========================================================================================
@@ -578,7 +579,7 @@ int DateAndTime::second() const
  */
 int DateAndTime::nanoseconds() const
 {
-  return (_nanoseconds % 1000000000);
+  return static_cast<int>(_nanoseconds % 1000000000);
 }
 
 //------------------------------------------------------------------------------------------------
@@ -828,14 +829,16 @@ time_duration DateAndTime::duration_from_seconds(double duration)
   else if (duration <= std::numeric_limits<int>::min())
     return boost::posix_time::time_duration( boost::posix_time::min_date_time );
 
+  typedef boost::posix_time::time_res_traits::sec_type sec_type;
+
 #ifdef BOOST_DATE_TIME_HAS_NANOSECONDS
   // Nanosecond resolution
   long fracsecs = long ( 1e9 * fmod(duration, 1.0) );
-  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+  return boost::posix_time::time_duration(0,0,static_cast<sec_type>(secs), fracsecs);
 #else
   // Microsecond resolution
   long fracsecs = long ( 1e6 * fmod(duration, 1.0) );
-  return boost::posix_time::time_duration(0,0,secs, fracsecs);
+  return boost::posix_time::time_duration(0,0,static_cast<sec_type>(secs), fracsecs);
 #endif
 
 }

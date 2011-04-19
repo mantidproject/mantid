@@ -54,9 +54,9 @@ namespace Mantid
       }
 
       Poco::XML::NodeList* pNL_technique = elem->getElementsByTagName("technique");
-      unsigned int n = pNL_technique->length();
+      unsigned long n = pNL_technique->length();
 
-      for (unsigned int i = 0; i < n; ++i)
+      for (unsigned long i = 0; i < n; ++i)
       {
         Poco::XML::NodeList* pNL = pNL_technique->item(i)->childNodes();
         if (pNL->length() > 0)

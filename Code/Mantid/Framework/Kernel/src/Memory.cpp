@@ -77,7 +77,7 @@ void process_mem_usage(size_t & vm_usage, size_t & resident_set)
               >> O >> itrealvalue >> starttime >> vsize >> rss; // don't care about the rest
 
   long page_size_kb = sysconf(_SC_PAGE_SIZE) / 1024; // in case x86-64 is configured to use 2MB pages
-  vm_usage     = static_cast<size_t>(vsize / 1024.0);
+  vm_usage     = static_cast<size_t>(vsize / static_cast<long double>(1024.0));
   resident_set = static_cast<size_t>(rss * page_size_kb);
 #endif
 }

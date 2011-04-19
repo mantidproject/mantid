@@ -98,9 +98,9 @@ FacilityInfo::FacilityInfo(const Poco::XML::Element* elem) :
   pNL_catalogs->release();
 
   Poco::XML::NodeList* pNL_instrument = elem->getElementsByTagName("instrument");
-  unsigned int n = pNL_instrument->length();
+  unsigned long n = pNL_instrument->length();
 
-  for (unsigned int i = 0; i < n; ++i)
+  for (unsigned long i = 0; i < n; ++i)
   {
     Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*>(pNL_instrument->item(i));
     if (elem)

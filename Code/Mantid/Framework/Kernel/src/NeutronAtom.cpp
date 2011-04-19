@@ -616,7 +616,8 @@ bool compareAtoms(const NeutronAtom &left, const NeutronAtom &right)
  */
 NeutronAtom getNeutronAtom(const int z_number, const int a_number)
 {
-  NeutronAtom temp(z_number, a_number, NAN, NAN, NAN, NAN, NAN, NAN);
+  NeutronAtom temp(static_cast<uint16_t>(z_number), static_cast<uint16_t>(a_number), 
+		   NAN, NAN, NAN, NAN, NAN, NAN);
 
   NeutronAtom *result = std::lower_bound(&(ATOMS[0]), &(ATOMS[NUM_ATOMS]), temp, compareAtoms);
   if (result == &(ATOMS[NUM_ATOMS]) || result->z_number != z_number

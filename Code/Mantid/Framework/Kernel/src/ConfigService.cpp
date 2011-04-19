@@ -1081,9 +1081,9 @@ void ConfigServiceImpl::updateFacilities(const std::string& fName)
     }
 
     Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
-    unsigned int n = pNL_facility->length();
+    unsigned long n = pNL_facility->length();
 
-    for (unsigned int i = 0; i < n; ++i)
+    for (unsigned long i = 0; i < n; ++i)
     {
       Poco::XML::Element* elem = dynamic_cast<Poco::XML::Element*> (pNL_facility->item(i));
       if (elem)

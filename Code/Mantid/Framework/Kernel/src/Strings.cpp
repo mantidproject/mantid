@@ -385,8 +385,7 @@ float getVAXnum(const float A)
   expt-=128;
   fmask |=  0x800000;
   frac = (float) fmask  / 0x1000000;
-  onum= frac * sign * 
-         pow(2.0,expt);
+  onum = frac * static_cast<float>(sign) * pow(2.0,expt);
   return (float) onum;
 }
 
@@ -464,7 +463,7 @@ int section(std::string& A,T& out)
   if (cx.fail())
     return 0;
   const std::streamoff xpt = cx.tellg();
-  const char xc=cx.get();
+  const char xc = static_cast<const char>(cx.get());
   if (!cx.fail() && !isspace(xc))
     return 0;
   A.erase(0, static_cast<unsigned int>(xpt));
@@ -499,7 +498,7 @@ int sectionMCNPX(std::string& A,T& out)
       {
         return 0;
       }
-      const char xc=cx.get();
+      const char xc=static_cast<const char>(cx.get());
       if (!cx.fail() && !isspace(xc) && (xc!='-' || xpt<5))
       {
         return 0;
@@ -557,7 +556,7 @@ int convert(const std::string& A,T& out)
   cx>>retval;
   if (cx.fail())
     return 0;
-  const char clast=cx.get();
+  const char clast = static_cast<const char>(cx.get());
   if (!cx.fail() && !isspace(clast))
     return 0;
   out=retval;
@@ -646,7 +645,7 @@ int writeFile(const std::string& Fname,const V<T,A>& X,const V<T,A>& Y,const V<T
   typename V<T,A>::const_iterator ePt=(Epts ? Err.begin() : Y.begin());
 
   // Double loop to include/exclude a short error stack
-  int eCount=0;
+  size_t eCount=0;
   for(;eCount<Epts;eCount++)
     {
       FX<<(*xPt)<<" "<<(*yPt)<<" "<<(*ePt)<<std::endl;
