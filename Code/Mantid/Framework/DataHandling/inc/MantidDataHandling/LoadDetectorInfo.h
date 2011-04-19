@@ -9,6 +9,7 @@
 #include <vector>
 #include <string>
 #include <climits>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -68,9 +69,15 @@ private:
   /// stores the information that is to be saved in the parameter map for a detector
   struct detectorInfo
   {
-    int detID;                                      ///< ID number of the detector
-    double pressure;                                ///< detectors 3He partial pressure
-    double wallThick;                               ///< detector wall thickness
+    int detID;  ///< ID number of the detector
+    double pressure;  ///< detectors 3He partial pressure
+    double wallThick;  ///< detector wall thickness
+    double l2;  ///< l2
+    double theta; ///< theta
+    double phi; ///<phi
+    /// Constructor
+    detectorInfo(): detID(-1), pressure(-1.0), wallThick(DBL_MAX), l2(DBL_MAX),
+		    theta(DBL_MAX), phi(DBL_MAX) {}
   };
   /// will store a pointer to the user selected workspace
   API::MatrixWorkspace_sptr m_workspace;
@@ -88,6 +95,10 @@ private:
   bool m_error;
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;
+  /// If set to true then update the detector positions base on the information in the given file
+  bool m_moveDets;
+  /// Store the sample position as we may need it repeatedly
+  Geometry::V3D m_samplePos;
 
   // Implement abstract Algorithm methods
   void init();

@@ -82,10 +82,6 @@ void UpdateInstrumentFromRaw::exec()
       throw std::runtime_error("Trying to use ParInstrument as an Instrument.");
   }
 
-  // get instrument samplepos 
-
-  Geometry::IObjComponent_sptr samplepos = instrument->getSample();
-
   progress(0.5);
 
   // add detectors

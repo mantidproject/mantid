@@ -34,10 +34,10 @@ const LoadDetectorInfo::detectDatForm LoadDetectorInfo::MARI_TYPE(10, 7, 8);
 const LoadDetectorInfo::detectDatForm
   LoadDetectorInfo::MAPS_MER_TYPE(14, 11, 12);
 /// Empty default constructor
-LoadDetectorInfo::LoadDetectorInfo() : Algorithm(),
-  m_workspace(), m_numHists(-1), m_monitors(),
-  m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
-  m_FracCompl(0.0)
+LoadDetectorInfo::LoadDetectorInfo() 
+  : Algorithm(), m_workspace(), m_numHists(-1), m_monitors(),
+    m_monitorXs(), m_commonXs(false), m_monitOffset(UNSETOFFSET), m_error(false),
+    m_FracCompl(0.0), m_moveDets(false), m_samplePos()
 {
 }
 
@@ -59,6 +59,10 @@ void LoadDetectorInfo::init()
     "workspace. Partial pressures of 3He will be loaded assuming units of\n"
     "atmospheres, offset times in the same units as the workspace X-values and\n"
     "and wall thicknesses in metres.");
+  
+  declareProperty("RelocateDets", false,
+		  "If true then update the detector positions with those from the input file, default=false.",
+		  Direction::Input);
 }
 
 /** Executes the algorithm
@@ -80,6 +84,12 @@ void LoadDetectorInfo::exec()
   m_monitors.clear();
   m_monitOffset = UNSETOFFSET;
   m_error = false;
+  m_moveDets = getProperty("RelocateDets");
+  if( m_moveDets )
+  {
+    Geometry::IObjComponent_sptr sample = m_workspace->getInstrument()->getSample();
+    if( sample ) m_samplePos = sample->getPos();
+  }
 
   // get the user selected filename
   std::string filename = getPropertyValue("DataFilename");
@@ -178,10 +188,10 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
     float dump;
 
     // columns in the file, the detector ID and a code for the type of detector CODE = 3 (psd gas tube)
-    istr >> readin.detID >> delta >> dump >> code;
+    istr >> readin.detID >> delta >> readin.l2 >> code >> readin.theta >> readin.phi;
     detectorList.push_back(readin.detID);
     offsets.push_back(delta);
-
+    
     // check we have a supported code
     switch (code)
     {
@@ -218,8 +228,8 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
       detectorOffset = delta;
     }
 
-    //there are 12 uninteresting columns
-    istr >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump;
+    //there are 10 uninteresting columns
+    istr >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump >> dump;
     // column names det_2   ,   det_3  , (assumes that code=3), the last column is not read
     istr >> readin.pressure >> readin.wallThick;
     try
@@ -350,6 +360,14 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
     readin.pressure = iraw.ut[i+tableForm.pressureTabNum*numDets];
     readin.wallThick = iraw.ut[i+tableForm.wallThickTabNum*numDets];
 
+    // Get the detector info if we require it
+    if( m_moveDets )
+    {
+      readin.l2 = iraw.len2[i];
+      readin.theta = iraw.tthe[i];
+      readin.phi = iraw.ut[i];
+    }
+
     try
     {// iraw.udet contains the detector IDs and the other parameters are stored in order in the user table array (ut)
       setDetectorParams(readin, log);
@@ -391,7 +409,7 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   Geometry::IDetector_sptr det;
   try
   {
-    det = m_workspace->getInstrument()->getDetector(params.detID);
+    det = m_workspace->getBaseInstrument()->getDetector(params.detID);
   }
   catch( std::runtime_error &e)
   {
@@ -404,6 +422,49 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
   pmap.addDouble(comp, "3He(atm)", params.pressure);
   // Set the wall thickness
   pmap.addDouble(comp, "wallT(m)", params.wallThick);
+
+  // If we have a l2, theta and phi. Update the postion if required
+  if( m_moveDets && 
+      params.l2 != DBL_MAX && params.theta != DBL_MAX && params.phi != DBL_MAX )
+  {
+    V3D newPos;
+    newPos.spherical(params.l2, params.theta, params.phi);
+    // The sample position may not be at 0,0,0
+    newPos += m_samplePos;
+
+    IComponent_const_sptr parent = det->getParent();
+    if (parent)
+    {
+      newPos -= parent->getPos();
+      Quat rot = parent->getRotation();
+      rot.inverse();
+      rot.rotate(newPos);
+    }
+    det->setPos(newPos);
+
+
+    // if( params.detID == 3110021 )
+    // {
+    //   std::cout << "-----\n";
+    //   std::cout << det->getPos() << "\n";
+    //   std::cout << det->getPos().distance(m_workspace->getInstrument()->getSample()->getPos()) << "\n";
+    //   Geometry::IDetector_sptr parDet = m_workspace->getInstrument()->getDetector(params.detID);
+    //   std::cout << parDet->getPos().distance(m_workspace->getInstrument()->getSample()->getPos()) << "\n";
+    //   std::cout << pmap.contains(comp, "pos") << "\n";;
+    // }
+
+    // IComponent_const_sptr parent = det->getParent();
+    // if (parent)
+    // {
+    //   newPos -= parent->getPos();
+    //   Quat rot = parent->getRelativeRot();
+    //   rot.inverse();
+    //   rot.rotate(newPos);
+    // }
+    
+    //pmap.addV3D(comp, "pos", newPos);
+  }
+
 
   // this operation has been successful if we are here, the following infomation is usefull for logging
   change = params;
@@ -483,7 +544,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<int> &detIDs, const std::vecto
   if ( spectraList.size() != detIDs.size() )
   {// this shouldn't really happen but would cause a crash if it weren't handled ...
     g_log.debug() << "Couldn't associate some detectors or monitors to spectra, are there some spectra missing?" << std::endl;
-    throw Exception::MisMatch<int>(spectraList.size(), detIDs.size(), "Couldn't associate some detectors or monitors to spectra, are there some spectra missing?");
+    throw Exception::MisMatch<size_t>(spectraList.size(), detIDs.size(), "Couldn't associate some detectors or monitors to spectra, are there some spectra missing?");
   }
   //used for logging
   std::vector<int> missingDetectors;
@@ -605,7 +666,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
   {// first check that our spectranumber to spectra index map is working for us
     if ( specs2index.find(spectraList[j]) == specs2index.end() )
     {// we can't find the spectrum associated the detector prepare to log that
-      missingDetectors.push_back(j);
+      missingDetectors.push_back(static_cast<int>(j));
       // and then move on to the next detector in the loop
       continue;
     }
@@ -636,7 +697,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
     }
     if ( j % INTERVAL == INTERVAL/2 )
     {
-      fracCompl += (2.0*INTERVAL/3.0)/spectraList.size();
+      fracCompl += (2.0*INTERVAL/3.0)/static_cast<double>(spectraList.size());
       progress( fracCompl );
       interruption_point();
     }
@@ -659,7 +720,7 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
   {// first check that our spectranumber to spectra index map is working for us
     if ( specs2index.find(spectraList[j]) == specs2index.end() )
     {// we can't find the spectrum associated the detector prepare to log that
-      missingDetectors.push_back(j);
+      missingDetectors.push_back(static_cast<int>(j));
       // and then move on to the next detector in the loop
       continue;
     }
@@ -687,7 +748,7 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
     }
     if ( j % INTERVAL == INTERVAL/2 )
     {
-      fracCompl += (2.0*INTERVAL/3.0)/spectraList.size();
+      fracCompl += (2.0*INTERVAL/3.0)/static_cast<double>(spectraList.size());
       progress( fracCompl );
       interruption_point();
     }

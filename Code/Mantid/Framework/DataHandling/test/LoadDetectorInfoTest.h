@@ -62,6 +62,9 @@ public:
     makeSmallWS();
     grouper.setPropertyValue("Workspace", m_InoutWS);
     grouper.setPropertyValue("DataFilename", m_DatFile);
+    grouper.setPropertyValue("RelocateDets", "1");
+
+    grouper.setRethrows(true);
 
     TS_ASSERT_THROWS_NOTHING(grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
@@ -91,6 +94,21 @@ public:
         TS_ASSERT_EQUALS(par->asString(), castaround(wallThick[j]).substr(0,par->asString().length()));
       }
       else TS_ASSERT ( ! par );
+
+      const V3D pos = detector->getPos();
+      V3D expected;
+      if( j == 1 ) // Monitors are fixed and unaffected
+      {
+	expected = V3D(0,0,0);
+      }
+      else
+      {
+	expected.spherical(boost::lexical_cast<double>(det_l2[j]), 
+			   boost::lexical_cast<double>(det_theta[j]), 
+			   boost::lexical_cast<double>(det_phi[j]));
+      }
+      TS_ASSERT_EQUALS(expected, pos);
+
     }
 
     // ensure that the loops below are entered into
@@ -192,6 +210,7 @@ public:
     const int firstIndex = 5, lastIndex = 690;
     grouper.setPropertyValue("Workspace", m_MariWS);
     grouper.setPropertyValue("DataFilename", m_rawFile); 
+    grouper.setPropertyValue("RelocateDets", "1");
 
     TS_ASSERT_THROWS_NOTHING( grouper.execute());
     TS_ASSERT( grouper.isExecuted() );
@@ -214,6 +233,10 @@ public:
 
       TS_ASSERT_EQUALS(par->asString(), castaround("0.0008").substr(0,6));
     }
+    
+    // Test that a random detector has been moved
+    IDetector_sptr det = WS->getInstrument()->getDetector(DETECTS[0]);
+    TS_ASSERT_EQUALS(V3D(0,0.2406324,4.014795), det->getPos());
 
     // all non-monitors should share the same array
     /**/    const double *first = &WS->readX(firstIndex)[0];
@@ -308,7 +331,8 @@ private:
   const std::string m_InoutWS, m_DatFile, m_MariWS;
   std::string m_rawFile;
   enum constants { NDETECTS = 6, NBINS = 4, NOTUSED = -123456, DAT_MONTOR_IND = 1};
-  static const std::string delta[NDETECTS], pressure[NDETECTS], wallThick[NDETECTS], code[NDETECTS];
+  static const std::string delta[NDETECTS], pressure[NDETECTS], wallThick[NDETECTS], code[NDETECTS], 
+    det_l2[NDETECTS], det_theta[NDETECTS], det_phi[NDETECTS];
 
   void writeDatFile()
   {
@@ -318,7 +342,7 @@ private:
     file << "det no.  offset    l2     code     theta        phi         w_x         w_y         w_z         f_x         f_y         f_z         a_x         a_y         a_z        det_1       det_2       det_3       det4" << std::endl;
     for( int i = 0; i < NDETECTS; ++i )
     {
-      file << i  << "\t" << delta[i]<< "\t"  << NOTUSED<< "\t"  << code[i]<< "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[i]<< "\t"  << wallThick[i]<< "\t"  << NOTUSED << std::endl;
+      file << i  << "\t" << delta[i]<< "\t"  << det_l2[i] << "\t"  << code[i]<< "\t"  << det_theta[i]<< "\t"   << det_phi[i]<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED<< "\t"   << NOTUSED << "\t"  << NOTUSED<< "\t"   << NOTUSED<< "\t"  << NOTUSED<< "\t"  << pressure[i]<< "\t"  << wallThick[i]<< "\t"  << NOTUSED << std::endl;
     }
     file.close();
   }
@@ -332,5 +356,8 @@ const std::string LoadDetectorInfoTest::delta[] = {"4", "4.500", "4.500", "4.500
 const std::string LoadDetectorInfoTest::pressure[] = {"10.0000", "10.0000", "10.0000", "10.0001", "10.000",  "10.0001"};
 const std::string LoadDetectorInfoTest::wallThick[] = {"0.00080", "0.00080", "0.00080", "-0.00080", "0.00080",  "9.500"};
 const std::string LoadDetectorInfoTest::code[] = {"3", "1", "3", "3", "3",  "3"};
+const std::string LoadDetectorInfoTest::det_l2[] = {"1.5", "1.5", "1.5", "1.5", "1.5", "1.5"};
+const std::string LoadDetectorInfoTest::det_theta[] = {"30", "35", "40", "45", "50", "55"};
+const std::string LoadDetectorInfoTest::det_phi[] = {"-105", "-110", "-115", "-120", "-125", "-130"};
 
 #endif /*LOADDETECTORINFOTEST_H_*/
