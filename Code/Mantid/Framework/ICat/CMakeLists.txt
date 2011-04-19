@@ -1,9 +1,8 @@
 set ( SRC_FILES
 	src/DownloadDataFile.cpp
 	src/ErrorHandling.cpp
-	src/GSoap/stdsoap2.cpp
-	src/GSoapGenerated/soapC.cpp
-	src/GSoapGenerated/soapICATPortBindingProxy.cpp
+	src/GSoap.cpp
+	src/GSoapGenerated.cpp
 	src/GetDataFiles.cpp
 	src/GetDataSets.cpp
 	src/ICat3Catalog.cpp

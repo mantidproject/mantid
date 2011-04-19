@@ -71,9 +71,6 @@ when locally allocated data exceeds 64K.
 
 #ifdef __BORLANDC__
 # pragma warn -8060
-#elif defined(__GNUC__)
-  #pragma GCC diagnostic ignored "-Wcast-qual"
-  #pragma GCC diagnostic ignored "-Wconversion"
 #else
 # ifdef WIN32
 #  ifdef UNDER_CE
