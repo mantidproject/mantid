@@ -1,3 +1,6 @@
+// define placed here to suppress boost library warning
+#define _SCL_SECURE_NO_WARNINGS
+
 #include <stdexcept>
 #include <cmath>
 
@@ -376,7 +379,11 @@ std::vector<double> splitStringIntoVector(std::string listString)
 {
   //Split the string and turn it into a vector.
   std::vector<double> values;
-  std::vector<std::string> strs;
+  //std::vector<std::string> strs;
+
+  typedef std::vector<std::string> split_vector_type;
+  split_vector_type strs;
+
   boost::split(strs, listString, boost::is_any_of(", "));
   for (std::vector<std::string>::iterator it= strs.begin(); it != strs.end(); it++)
   {
