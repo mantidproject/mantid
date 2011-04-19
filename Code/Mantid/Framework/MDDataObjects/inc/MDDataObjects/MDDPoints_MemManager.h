@@ -87,7 +87,7 @@ public:
 	/// constructor, which initiate references to MDImagData, which describes data keys and pixel size 
 	MDDPoints_MemManager(MD_img_data const & ImgArray,size_t nImageCells,unsigned int pix_size);
 	virtual ~MDDPoints_MemManager();
-
+    
 	// internal functions; protected for tests;
 protected:
   // internal functions and variables connected with functions above had wired through them.

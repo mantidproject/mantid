@@ -66,6 +66,15 @@ MDDataPoints::is_initialized(void)const
     }
 }
 //
+//size_t 
+//MDDataPoints::getNumPointsInMemory(void)const
+//{
+//	if(this->pMemoryMGR.get()!=NULL){
+//		return this->pMemoryMGR->getNPixInMemory();
+//	}else{
+//		return 0;
+//	}
+//}
 
 void 
 MDDataPoints::set_file_based()

@@ -76,57 +76,81 @@ public:
   void testConstructor(){
     std::string testFile = API::FileFinder::Instance().getFullPath("test_horace_reader.sqw");
 
-    TSM_ASSERT_THROWS_NOTHING("Can not construct file reader, all tests will fail",pReader = 
-      std::auto_ptr<HoraceReaderTester>(new HoraceReaderTester(testFile.c_str())));
+    TSM_ASSERT_THROWS_NOTHING("Can not construct file reader, all tests will fail",spReader = 
+      boost::shared_ptr<HoraceReaderTester>(new HoraceReaderTester(testFile.c_str())));
   }
   void testValuesReadCorrectly(){
-    TSM_ASSERT_EQUALS("Number of values from the test file have not been read correctly",pReader->check_values_correct(),0);
+    TSM_ASSERT_EQUALS("Number of values from the test file have not been read correctly",spReader->check_values_correct(),0);
   }
   void testGetNpixCorrect(){
-    TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",1523850,pReader->getNPix());
+    TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",1523850,spReader->getNPix());
   }
 
   void testReadBasis(){
     // this is currently hardcoded so no problem shouls be here but it will read crystall in a futute. 
 	  pBasis = std::auto_ptr<Geometry::MDGeometryBasis>(new Geometry::MDGeometryBasis());
-    TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",pReader->read_basis(*pBasis));
+    TSM_ASSERT_THROWS_NOTHING("basis should be read without problem",spReader->read_basis(*pBasis));
 
   }
   void testReadGeometry(){
     // this constructor should be tested elsewhere
     TSM_ASSERT_THROWS_NOTHING("Geometry description should be able to build from basis ",pGeomDescription = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(*pBasis)));
     // and here is the test of reading
-    TS_ASSERT_THROWS_NOTHING(pReader->read_MDGeomDescription(*pGeomDescription));
+    TS_ASSERT_THROWS_NOTHING(spReader->read_MDGeomDescription(*pGeomDescription));
 
     // verify what has been read;
   }
   void testReadMDImgData(){
     TSM_ASSERT_THROWS_NOTHING("MD Image has not been constructred by empty constructor",
-      pImg=std::auto_ptr<MDDataObjects::MDImage>(new MDDataObjects::MDImage(*pGeomDescription,*pBasis)));
+		spImg=boost::shared_ptr<MDDataObjects::MDImage>(new MDDataObjects::MDImage(*pGeomDescription,*pBasis)));
 
 
     TSM_ASSERT_THROWS_NOTHING("MD image reader should not normaly throw",
-      this->pReader->read_MDImg_data(*pImg));
+      this->spReader->read_MDImg_data(*spImg));
 
     // check what has been read;	
-    TSM_ASSERT_THROWS_NOTHING("Image control sums should be coorrect",pImg->validateNPix());
+    TSM_ASSERT_THROWS_NOTHING("Image control sums should be coorrect",spImg->validateNPix());
     //
-    TSM_ASSERT_EQUALS("Image has to be consistent witn MD data points",pReader->getNPix(),pImg->getNMDDPoints());  
+    TSM_ASSERT_EQUALS("Image has to be consistent witn MD data points",spReader->getNPix(),spImg->getNMDDPoints());  
 
   }
   void testReadAllPixels(){
-    MDPointDescription defaultDescr;
-    boost::shared_ptr<MDImage const> emptyImg = boost::shared_ptr<MDImage const>(new MDImage());
-    MDDataPointsDescription pd(defaultDescr);
+    MDPointStructure  horPointInfo;
+	horPointInfo.NumPixCompressionBits=0;
+	horPointInfo.DimIDlength =4;
+	horPointInfo.SignalLength=4;
+	std::vector<std::string> dimID = this->pBasis->getBasisIDs();
+	std::vector<std::string> dataID(9);
+	dataID[0]=dimID[3];
+	dataID[1]=dimID[2];
+	dataID[2]=dimID[1];
+	dataID[3]=dimID[0];
+	dataID[4]="S";
+	dataID[5]="Err";
+	dataID[6]="PixID";
+	dataID[7]="RunID";
+	dataID[8]="enID";
+
+	MDPointDescription horPointDescr(horPointInfo,dataID);
+
+    MDDataPointsDescription pd(horPointDescr);
     MDDataPoints points(pd);
-    TSM_ASSERT_THROWS("You implemented the Horace all_pix reader, write test for it",pReader->read_pix(points),Kernel::Exception::NotImplementedError);
+	points.initialize(spImg,spReader);
+	bool pix_placed_in_memory;
+    TSM_ASSERT_THROWS_NOTHING("Horace all pix reader should not throw",pix_placed_in_memory=spReader->read_pix(points,true));
+	if(pix_placed_in_memory){
+		//TSM_ASSERT_EQUALS(" All data are in memory so these values have to be equal",points.getNumPointsInMemory(),spReader->getNPix());
+
+	}else{
+		TS_FAIL("This test request enough memory to read all MDDPoints (~1.5M*36 bytes)");
+	}
   }
   void testReadPixelsSelectionAll(){
     // read all 
-    int nCells = this->pImg->getGeometry()->getGeometryExtend();
+    int nCells = this->spImg->getGeometry()->getGeometryExtend();
 
     selected_cells.resize(nCells);
-    pix_buf.resize(pReader->getNConributedPixels()*9*8);
+    pix_buf.resize(spReader->getNConributedPixels()*9*8);
 
     size_t starting_cell(0),n_cell_read;
     size_t n_pix_in_buffer(0);
@@ -135,7 +159,7 @@ public:
     }
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1523850,n_pix_in_buffer);
@@ -153,7 +177,7 @@ public:
 
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",77292,n_pix_in_buffer);
@@ -170,7 +194,7 @@ public:
 
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1,n_pix_in_buffer);
@@ -187,7 +211,7 @@ public:
 
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",447,n_pix_in_buffer);
@@ -200,10 +224,10 @@ public:
     size_t n_pix_in_buffer(0);
 
     selected_cells[0]=0;
-    selected_cells[1]=this->pImg->getGeometry()->getGeometryExtend()-1;
+    selected_cells[1]=this->spImg->getGeometry()->getGeometryExtend()-1;
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",21496,n_pix_in_buffer);
@@ -220,7 +244,7 @@ public:
     pix_buf.resize(100);
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-      n_cell_read=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+      n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
     TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",63006,n_pix_in_buffer);
@@ -244,7 +268,7 @@ public:
     unsigned int ic(0);
     while(starting_cell<selected_cells.size()){
       TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
-        starting_cell=this->pReader->read_pix_subset(*pImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
+        starting_cell=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
       ic++;
     }
     // check if the data coinside with what was put there;
@@ -256,15 +280,15 @@ public:
 
 
   void testWriteMDD(){
-    TSM_ASSERT_THROWS("Looks like Horace writer has been implemented, why? ",pReader->write_mdd(*pImg),Kernel::Exception::NotImplementedError);
+    TSM_ASSERT_THROWS("Looks like Horace writer has been implemented, why? ",spReader->write_mdd(*spImg),Kernel::Exception::NotImplementedError);
   }
 
 private:
-  std::auto_ptr<HoraceReaderTester> pReader;
+  boost::shared_ptr<HoraceReaderTester> spReader;
   // the components of the workspace which the reader supplies with data
   std::auto_ptr<Geometry::MDGeometryBasis> pBasis;
   std::auto_ptr<Geometry::MDGeometryDescription> pGeomDescription;
-  std::auto_ptr<MDDataObjects::MDImage> pImg;
+  boost::shared_ptr<MDDataObjects::MDImage> spImg;
   //******************************************************************
   std::vector<size_t> selected_cells;
   std::vector<char> pix_buf;

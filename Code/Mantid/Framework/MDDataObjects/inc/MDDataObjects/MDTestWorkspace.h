@@ -74,7 +74,7 @@ class MDTestWorkspace
          pMDDPoints                = spMDWs->get_spMDDPoints().get();
 
          // tries to read all MDPoints in memory; It is impossible here, so it sets the workspace location to "not in memory";
-         pReader->read_pix(*pMDDPoints);
+         pReader->read_pix(*pMDDPoints,true);
      
     }
 public:

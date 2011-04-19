@@ -66,8 +66,9 @@ public:
 	/// read the description of the data points format and (possibly) service information to calculate the pixel location;
 	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const=0;
-    /// tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
-    virtual bool read_pix(MDDataPoints &)=0; 
+    /** tries to read MDDataPoint (pixels) part of the dataset into memory. Usually impossible for TOF instruments but may be the best method for 3-pl axis
+	 * if nothrow specified, the attempt to load n-datapoints which exceed memory return false, Function throws otherwise;*/
+    virtual bool read_pix(MDDataPoints &, bool nothrow=false)=0; 
     /// read part of the dataset, specified by the vector of MDImage cell numbers. 
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)=0; 
     /// obtain the number of data points (pixels) stored in the dataset;

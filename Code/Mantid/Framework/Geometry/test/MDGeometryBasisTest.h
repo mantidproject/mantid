@@ -141,7 +141,16 @@ public:
     new_ids[0]="k"; //some unknown id value
     TS_ASSERT_EQUALS(basis->checkIdCompartibility(new_ids),false);
   }
+  void testGetID(){
+	 MDGeometryBasis* mdBasis = constructMDGeometryBasis();
+	 std::vector<std::string> dimID;
+	 TSM_ASSERT_THROWS_NOTHING("getBasisIDs is harmless and should not throw ",dimID=mdBasis->getBasisIDs());
 
+	 TSM_ASSERT_EQUALS("4 dimensions should be constructed ",4,dimID.size());
+
+     TSM_ASSERT_EQUALS("Each DIM_id obrained has to belong to dimensions",true,mdBasis->checkIdCompartibility(dimID));
+
+  }
   ~MDGeometryBasisTest()
   {
   }

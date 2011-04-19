@@ -346,7 +346,7 @@ MD_File_hdfMatlab::getNPix(void)
 //***************************************************************************************
 
 bool
-MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
+MD_File_hdfMatlab::read_pix(MDDataPoints & sqw, bool nothrow)
 { 
 
     unsigned long i;
@@ -381,10 +381,8 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 		f_log.error()<<" attempting to read pixels before the pixel description has been defined\n";
 		throw(std::runtime_error(" incorrect logic, attempt to read the data before the data description"));
 	}
-	if (n_pix_inDataset>MAX_MEM_DATA_SIZE()){
-		return false;
-	}
-	// get the packer, which works with the pixel structure according to the description, read earlier;
+
+   // get the packer, which works with the pixel structure according to the description, read earlier;
     MDDataPointEqual<float,uint32_t,float>  *pPacker = reinterpret_cast<MDDataPointEqual<float,uint32_t,float> *>(pReader);
 	// size of one data point
 	unsigned int pix_size = pPacker->sizeofMDDPoint();
@@ -396,16 +394,24 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
 	try{
 		size_t max_npix_in_buf(0);
 		if(n_pix_inDataset>~max_npix_in_buf){
-			throw(std::runtime_error("too many pixels to place in memory for given architecture "));
+			if(nothrow){
+				return false;
+			}else{
+				throw(std::runtime_error("too many pixels to place in memory for given architecture "));
+			}
 		}else{
 			max_npix_in_buf= (size_t)n_pix_inDataset;
 		}
 		std::vector<char> *pa = sqw.get_pBuffer(pix_size*max_npix_in_buf);
 		pix_array             = &(*pa)[0];
-	}catch(std::bad_alloc &){
+	}catch(std::bad_alloc &err){
 		f_log.information()<<" pixel array of "<<n_pix_inDataset<<" pixels can not be placed in memory\n";
 	    sqw.set_file_based();
-	    return false;
+		if(nothrow){
+			return false;
+		}else{
+			throw(err);
+		}
 	}
 	pPacker->setBuffer(pix_array);
 

@@ -35,7 +35,8 @@ private:
 	void read_MDImg_data(MDImage &){
 	}
 
-	bool read_pix(MDDataPoints&){
+	bool read_pix(MDDataPoints&, bool nothrow){
+		UNUSED_ARG(nothrow);
 		return false;
 	}
       

@@ -97,8 +97,10 @@ private:
     }
 
     //Implementation loosely taken from MD_File_hdfMatlab. Just want to be able to load pixels into workspace
-    bool read_pix(Mantid::MDDataObjects::MDDataPoints& sqw)
+    bool read_pix(Mantid::MDDataObjects::MDDataPoints& sqw,bool nothrow)
     {
+	  UNUSED_ARG(nothrow);
+
       using namespace Mantid::MDDataObjects;
       const int size = 9;
       std::vector<std::string> dataTags(size);

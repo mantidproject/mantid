@@ -41,7 +41,7 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
   const IMDDimension *pDim;
 
   // calculate shift for all selected dimensions;
-  size_t the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
+  long the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
   for(int iii=selection_size-1;iii>=0;iii--){
     pDim = this->pMDGeometry->get_constDimension((unsigned int)the_expanded_dim).get();
     if(selection[iii]>=pDim->getNBins()){

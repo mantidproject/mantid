@@ -299,12 +299,6 @@ MD_FileHoraceReader::read_pointDescriptions(void)const
 	}
     return theDescr;
 }
- //read whole pixels information in memory; usually impossible, then returns false;
-//bool 
-//MD_FileHoraceReader::read_pix(MDDataPoints & sqw)
-//{
-//	return false;
-//}
 //
 size_t 
 MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
@@ -424,11 +418,10 @@ MD_FileHoraceReader::read_pix_subset(const MDImage &dnd,const std::vector<size_t
     // returns next cell to read if any or size of the selection
     return ic;
 }
+//
 void 
 MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
 {
- 
-
     size_t i;
     // data size should be in blocks of 9*4
     size_t data_size = buf_size/(hbs);
@@ -468,7 +461,52 @@ MD_FileHoraceReader::compact_hor_data(char *buffer,size_t &buf_size)
     }
 
 }
+//
+ //read whole pixels information in memory; usually impossible, then returns false;
+bool 
+MD_FileHoraceReader::read_pix(MDDataPoints &sqw, bool nothrow)
+{
+	// number of pixels in dataset
+    uint64_t n_pix_inDataset  = this->getNPix();
+  	// size of one data point
+	unsigned int pix_size = hbs;
 
+    // It is often impossible to allocate the array needed to place all pixels in the pixel buffer. In this case this function has to fail as it is 
+    // not possible to read all pixels into memory;
+	char * pix_array;
+	size_t max_npix_in_buf(0);
+	try{
+		if(n_pix_inDataset>~max_npix_in_buf){
+			f_log.information()<<" pixel array of "<<n_pix_inDataset<<" pixels can not be placed in memory on current architectrue\n";
+			if(nothrow){
+				return false;
+			}else{
+				throw(std::bad_alloc("too many pixels to place in memory for given architecture "));
+			}
+		}else{
+			max_npix_in_buf= (size_t)n_pix_inDataset;
+		}
+		std::vector<char> *pa = sqw.get_pBuffer(max_npix_in_buf);
+		pix_array             = &(*pa)[0];
+	}catch(std::bad_alloc &err){
+		f_log.information()<<" can not allocate memory for "<<n_pix_inDataset<<" pixels\n";
+	    sqw.set_file_based();
+		if(nothrow){
+			return false;
+		}else{
+			throw(err);
+		}
+	}
+// sufficient memory is availible
+	size_t data_buffer_size = pix_size*max_npix_in_buf;
+// read data
+    this->fileStreamHolder.seekg(this->positions.pix_start,std::ios::beg);
+    this->fileStreamHolder.read(pix_array,data_buffer_size);
+//
+	compact_hor_data(pix_array,data_buffer_size);
+	
+	return true;
+}
  /// get number of data pixels(points) contributing into the dataset;
 uint64_t
 MD_FileHoraceReader::getNPix(void)

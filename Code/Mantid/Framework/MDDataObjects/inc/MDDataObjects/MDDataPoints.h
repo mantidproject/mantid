@@ -78,18 +78,25 @@ struct MDPointsLocations
       * temporary scrach file to accept pixels data 
      */
 	virtual void initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_ptr<IMD_FileFormat> in_spFile);
-    // initialises MDDataPoints as memory based; it will switch to fileBased later
+    /** initialises MDDataPoints as memory based; it will switch to fileBased later; can be initiated this 
+	 *  way by an empty image only */
 	virtual void initialize(boost::shared_ptr<const MDImage> pMDImage);
    
 	/// return file current file reader (should we let the factory to remember them and return on request?
     virtual boost::shared_ptr<IMD_FileFormat> getFileReader(void)const{return this->spFileReader;}
     /// check if the MDDataPoints class is initialized;
     bool is_initialized(void)const;
+	//***********> convenience 
+	// these functions, despite being slow and not efficient, allow accessing the MDDPoints values when they are placed in memory
+	// the functions are also samples of the generig access to the data
+	/** how many points has been loaded in memory*/
+ // TODO: implement it properly
+	size_t getNumPointsInMemory(void)const{return data_buffer_size;}
 
 	//*********>  MEMORY  <*************************************************************************
     /// check if the pixels are all in memory;
     bool isMemoryBased(void)const{return memBased;}
-	///
+	/// return if exists or try to allocate if not an buffer for the data; the data expressed in n-pixels
 	std::vector<char> * get_pBuffer(size_t buf_size=PIX_BUFFER_PREFERRED_SIZE);
 
     /// function returns numnber of pixels (dataPoints) contributiong into the MD-dataset; The pixels may be on HDD or in memory  
@@ -144,6 +151,7 @@ struct MDPointsLocations
 	 all operations with change of this databuffer or modification of its contents should be done through the MDDPoints_MemManager */
 	std::vector<char> DataBuffer;
 
+	/// the class which manages the behaviour of the dataBuffer above;
     std::auto_ptr<MDDPoints_MemManager> pMemoryMGR;
      /// minimal values of ranges the data pixels are in; size is nDimensions
     std::vector<double> box_min;

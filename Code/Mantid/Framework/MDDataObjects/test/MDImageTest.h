@@ -33,7 +33,7 @@ private:
     {
 		// this function fills data arrays with values obtained from Hdd
     }
-    MOCK_METHOD1(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&)); 
+    MOCK_METHOD2(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&,bool nothrow)); 
     size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
       return 0;

@@ -91,7 +91,8 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
     size_t ic(0);
     size_t ic_retained(0);
     for(size_t i=0;i<nCells;i++){
-      size_t n_pix = pData[i].npix;
+	//HACK -- have not been verified properly
+      size_t n_pix = (size_t)pData[i].npix;
       for(size_t j=0;j<n_pix;j++){
         // rebinned pixel
         pPix[ic*9+0]=1;
@@ -133,7 +134,7 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
     }
     MD_image_point* pData = ImgArray.data;
     for(size_t i=0;i<nCells;i++){
-        pData[i].npix += i;
+      pData[i].npix += i;
       pData[i].s     = i;
       pData[i].err   = 1;
 
@@ -141,8 +142,8 @@ class MDDPoints_MemManagerTest :    public CxxTest::TestSuite
     }
     ImgArray.npixSum = nPixels;
 
-    pix_buf.resize(nPixels*pix_size);
-    pix_sel.resize(nPixels);
+    pix_buf.resize(size_t(nPixels*pix_size));
+    pix_sel.resize(size_t(nPixels));
     cell_indexes.assign(nPixels,-1);
 
   // assign nPixels almost equivalent pixels;

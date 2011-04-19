@@ -40,7 +40,10 @@ public:
     virtual bool is_open(void)const{return false;}
     virtual void read_MDImg_data(MDImage &){};
   
-    virtual bool read_pix(MDDataPoints &){return false; }
+    virtual bool read_pix(MDDataPoints &, bool nothrow=false){
+		UNUSED_ARG(nothrow);
+		return false; 
+	}
     virtual size_t read_pix_subset(const MDImage &,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
         UNUSED_ARG(selected_cells);

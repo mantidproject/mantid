@@ -97,7 +97,7 @@ public:
 	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
     /// read whole pixels information in memory; usually impossible, then returns false;
-    virtual bool read_pix(MDDataPoints & sqw);
+    virtual bool read_pix(MDDataPoints & sqw, bool nothrow=false);
     /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);

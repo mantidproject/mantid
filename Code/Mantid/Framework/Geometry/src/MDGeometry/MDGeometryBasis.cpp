@@ -134,6 +134,18 @@ MDGeometryBasis::checkIdCompartibility(const std::vector<std::string> &newTags)c
       return  std::set<MDBasisDimension>(this->m_mdBasisDimensions);
     }
 
+std::vector<std::string> 
+MDGeometryBasis::getBasisIDs(void)const
+{
+	std::set<MDBasisDimension>::const_iterator it=this->m_mdBasisDimensions.begin();
+	std::vector<std::string> IDs(this->getNumDims());
+	unsigned int ic(0);
+	for(;it!=this->m_mdBasisDimensions.end();it++){
+		IDs[ic]=it->getId();
+		ic++;
+	}
+	return IDs;
+}
     MDGeometryBasis::~MDGeometryBasis(void)
     {
     }

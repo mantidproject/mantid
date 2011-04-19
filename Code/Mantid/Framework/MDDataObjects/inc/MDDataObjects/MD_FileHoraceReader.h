@@ -82,13 +82,10 @@ public:
 	/// read the description of the data points format and (possibly) service information to calculate the pixel location;
 	/// TODO: identify the service information for pixels and if we should read it here; Currently it returns things related to point only
 	virtual Mantid::MDDataObjects::MDPointDescription read_pointDescriptions(void)const;
-    /// read whole pixels information in memory; usually impossible, then returns false;
-	// TODO: Implement;
-	virtual bool read_pix(MDDataPoints &)
-	{
-	  throw(Kernel::Exception::NotImplementedError("Read all pixels funtion is not implemented at the moment as target obect for it is in nucleus state"));
-	}
-    /// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
+
+	/// read whole pixels information in memory; usually impossible,  returns false if nothrow or throws bad_alloc if nothrow=true;
+	virtual bool read_pix(MDDataPoints &, bool nothrow=false);
+	/// read the information from the data pixels, specified by the numbers of selected cells, returns the number of cells actually processed 
     /// by this read operation and number of pixels found in these cells;
     virtual size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer);
     /// get number of data pixels(points) contributing into the dataset;

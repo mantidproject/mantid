@@ -75,7 +75,10 @@ namespace Mantid
       size_t getNumDims() const {return this->m_mdBasisDimensions.size();}
       /// returns the number of reciprocal dimensions
       size_t getNumReciprocalDims() const {return this->n_reciprocal_dimensions;};
-	  
+	  /** function returns symbolioc names(IDs) of the dimensions. 
+	   *  These names have to coinside with  id-s found in MDDataPoints as each 
+	   *  dimID describes one column of MDDPoints table*/
+	  std::vector<std::string> getBasisIDs(void)const;
 
       /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
 	   *  existing tags have to be there (the order of tags may be different) */
