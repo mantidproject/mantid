@@ -39,7 +39,7 @@ class DataProxy(object):
                 if workspace_name is None:
                     self.data_ws = "raw_data_file"
                 else:
-                    self.data_ws = workspace_name
+                    self.data_ws = str(workspace_name)
                 reducer = SANSReducer()
                 reducer.set_instrument(hfir_instrument.HFIRSANS())
                 loader = LoadRun(str(data_file))
