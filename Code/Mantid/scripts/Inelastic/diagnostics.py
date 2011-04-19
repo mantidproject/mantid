@@ -117,26 +117,39 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
         test_results[1] = [str(__second_white_masks), num_failed]
         # Accumulate
         diag_total_mask += __second_white_masks
-    ##
-    ## Background Test
-    ##
-    if sample_run is not None and sample_run != '':
-        # Run the tests
-        __bkgd_masks, num_failed = \
-                     _do_background_test(sample_run, white_counts, second_white_counts,
-                                         bkgd_range, bkgd_threshold, remove_zero, signif,
-                                         hard_mask_spectra)
-        test_results[2] = [str(__bkgd_masks), num_failed]
-        # Accumulate
-        diag_total_mask += __bkgd_masks
 
     ##
-    ## PSD Bleed Test
+    ## Tests on the sample(s)
     ##
-    if type(bleed_test) == bool and bleed_test == True:
-        __bleed_masks, num_failed = _do_bleed_test(sample_run, bleed_maxrate, bleed_pixels)
-        test_results[3] = [str(__bleed_masks), num_failed]
-        diag_total_mask += __bleed_masks
+    if sample_run is not None and sample_run != '':
+        if type(sample_run) != list:
+            sample_run = [sample_run]
+        __bkgd_masks = None
+        __bleed_masks = None
+        bkgd_failures = 0
+        bleed_failures = 0
+        for sample in sample_run:
+            ## Background test
+            __bkgd_masks_i, failures = _do_background_test(sample, white_counts, second_white_counts,
+                                                           bkgd_range, bkgd_threshold, remove_zero, signif,
+                                                           hard_mask_spectra)
+            bkgd_failures += failures
+            __bkgd_masks = _accumulate(__bkgd_masks,__bkgd_masks_i)
+                
+            ## PSD Bleed Test
+            if type(bleed_test) == bool and bleed_test == True:
+                __bleed_masks_i, failures = _do_bleed_test(sample, bleed_maxrate, bleed_pixels)
+                bleed_failures += failures
+                __bleed_masks = _accumulate(__bleed_masks, __bleed_masks_i)
+
+        ## End of sample loop
+        test_results[2] = [str(__bkgd_masks), bkgd_failures]
+        diag_total_mask += __bkgd_masks
+        if __bleed_masks is not None:
+            test_results[3] = [str(__bleed_masks), bleed_failures]
+            diag_total_mask += __bleed_masks
+
+    ## End of background test
 
     # Remove temporary workspaces
     mtd.deleteWorkspace(str(white_counts))
@@ -271,7 +284,7 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     mtd.sendLogMessage('Running background count test')
     # Load and integrate the sample using the defined background range. If none is given use the
     # instrument defaults
-    data_ws = common.load_runs(sample_run, 'mono-sample',sum=True)
+    data_ws = common.load_runs(sample_run, 'mono-sample')
     instrument = data_ws.getInstrument()
     if bkgd_range is None:
         min_value = float(instrument.getNumberParameter('bkgd-range-min')[0])
@@ -331,6 +344,8 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     num_failed = median_test['NumberOfFailures'].value
     return median_test.workspace(), num_failed
 
+#-------------------------------------------------------------------------------
+
 def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
     """Runs the CreatePSDBleedMask algorithm
 
@@ -360,7 +375,25 @@ def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
 
     num_failed = bleed_test['NumberOfFailures'].value
     return bleed_test.workspace(), num_failed
+
+#-------------------------------------------------------------------------------
+
+def _accumulate(lhs, rhs):
+    """Essentially performs lhs += rhs for workspaces
+    but checks if the lhs is None first and just assigns the workspace over
+    """
+    if lhs is None:
+        lhs_names = lhs_info('names')
+        if len(lhs_names) == 0: 
+            raise RuntimeError('diagnostics._accumulate called without assignment of return value')
+        lhs = RenameWorkspace(rhs, lhs_names[0]).workspace()
+    else:
+        lhs += rhs
+        mtd.deleteWorkspace(str(rhs))                
+
+    return lhs
     
+#-------------------------------------------------------------------------------
 
 def print_test_summary(test_results):
     """Print a summary of the failures per test run.
@@ -414,6 +447,7 @@ def print_test_summary(test_results):
     # Append a new line
     print ''
 
+#-------------------------------------------------------------------------------
 
 def get_failed_spectra_list(diag_workspace):
     """Compile a list of spectra numbers that are marked as

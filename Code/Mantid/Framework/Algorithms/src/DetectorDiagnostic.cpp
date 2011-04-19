@@ -140,9 +140,8 @@ namespace Mantid
         }
         // If no detector found, skip onto the next spectrum
         if ( !det ) continue;
-
-        // If we're already masked skip it
-        if( det->isMasked() )
+	
+        if( det->isMonitor() || det->isMasked() )
         {
           PARALLEL_CRITICAL(DetectorDiagnostic_median_b)
           {
