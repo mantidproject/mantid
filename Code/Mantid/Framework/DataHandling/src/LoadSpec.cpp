@@ -67,8 +67,8 @@ namespace Mantid
 	  std::vector<DataObjects::Histogram1D> spectra;
 	  //size_t iLine=0;    // line number
 	  size_t ncols = 3;  // number of columns
-	  size_t nSpectra = 0;
-	  size_t nBins = 0; //number of rows
+	  int nSpectra = 0;
+	  int nBins = 0; //number of rows
 	  std::string first_character;
 	  std::string axes_infos;
 
@@ -158,17 +158,17 @@ namespace Mantid
 	  {
 	    nSpectra = spectra_nbr;
 	    MatrixWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace>
-	    (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
+  	    (WorkspaceFactory::Instance().create("Workspace2D",nSpectra,nBins,nBins));
 
 	    localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
 
-	    for(unsigned int i=0;i<nSpectra;i++)
+	    for(int i=0;i<nSpectra;i++)
 	    {
-		  localWorkspace->dataX(i) = spectra[i].dataX();
-		  localWorkspace->dataY(i) = spectra[i].dataY();
-		  localWorkspace->dataE(i) = spectra[i].dataE();
-		  // Just have spectrum number start at 1 and count up
-		  localWorkspace->getAxis(1)->spectraNo(i) = i+1;
+		    localWorkspace->dataX(i) = spectra[i].dataX();
+		    localWorkspace->dataY(i) = spectra[i].dataY();
+		    localWorkspace->dataE(i) = spectra[i].dataE();
+		    // Just have spectrum number start at 1 and count up
+		    localWorkspace->getAxis(1)->spectraNo(i) = i+1;
 	    }
 
 	    setProperty("OutputWorkspace",localWorkspace);

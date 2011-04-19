@@ -699,7 +699,7 @@ bool LoadLog::isAscii(const std::string& filename)
 {
   FILE* file = fopen(filename.c_str(), "rb");
   char data[256];
-  int n = fread(data, 1, sizeof(data), file);
+  size_t n = fread(data, 1, sizeof(data), file);
   fclose(file);
   char *pend = &data[n];
   /*

@@ -138,7 +138,7 @@ void LoadDaveGrp::exec()
     // Size of y axis
     this->getAxisLength(yLength);
     // This is also the number of groups (spectra)
-    this->nGroups = static_cast<std::size_t>(yLength);
+    this->nGroups = yLength;
     // Read in the x axis values
     this->getAxisValues(xAxis, static_cast<std::size_t>(this->xLength));
     // Read in the y axis values
@@ -163,7 +163,7 @@ void LoadDaveGrp::exec()
   API::MatrixWorkspace_sptr outputWorkspace = \
       boost::dynamic_pointer_cast<API::MatrixWorkspace>\
       (API::WorkspaceFactory::Instance().create("Workspace2D", this->nGroups,
-          this->xLength, yLength));
+      this->xLength, yLength));
   // Force the workspace to be a distribution
   outputWorkspace->isDistribution(true);
 
@@ -176,12 +176,12 @@ void LoadDaveGrp::exec()
 
   outputWorkspace->replaceAxis(1, verticalAxis);
 
-  for(std::size_t i = 0; i < this->nGroups; i++)
+  for(int i = 0; i < this->nGroups; i++)
   {
     outputWorkspace->dataX(i) = *xAxis;
     outputWorkspace->dataY(i) = *data[i];
     outputWorkspace->dataE(i) = *errors[i];
-    verticalAxis->setValue(static_cast<const int>(i), yAxis->at(i));
+    verticalAxis->setValue(i, yAxis->at(i));
 
     delete data[i];
     delete errors[i];
@@ -225,8 +225,8 @@ void LoadDaveGrp::getData(std::vector<MantidVec *> &data,
 {
   double data_val = 0.0;
   double err_val = 0.0;
-  API::Progress progress(this, 0.0, 1.0, static_cast<int>(this->nGroups));
-  for(std::size_t j = 0; j < this->nGroups; j++)
+  API::Progress progress(this, 0.0, 1.0, this->nGroups);
+  for(int j = 0; j < this->nGroups; j++)
   {
     // Skip the group comment line
     this->readLine();

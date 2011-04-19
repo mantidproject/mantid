@@ -69,7 +69,7 @@ private:
   void exec();
 
   /// Number of monitors
-  size_t nMonitors;
+  int nMonitors;
 
   /// Set to true when instrument geometry was loaded.
   bool instrument_loaded_correctly;

@@ -274,8 +274,8 @@ namespace Mantid
       Poco::StringTokenizer::Iterator pixel = pixels.begin();
 
       // Check that we don't keep within the size of the workspace
-      int pixelcount = pixels.count();
-      if( pixelcount != numberXPixels*numberYPixels )
+      size_t pixelcount = pixels.count();
+      if( pixelcount != static_cast<size_t>(numberXPixels*numberYPixels) )
       {
         throw Kernel::Exception::FileError("Inconsistent data set: "
             "There were more data pixels found than declared in the Spice XML meta-data.", fileName);
@@ -396,10 +396,9 @@ namespace Mantid
     void LoadSpice2D::runLoadMappingTable(DataObjects::Workspace2D_sptr localWorkspace, int nxbins, int nybins)
     {
       // Get the number of monitor channels
-      int nMonitors = 0;
       boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
       std::vector<int> monitors = instrument->getMonitors();
-      nMonitors = monitors.size();
+      int nMonitors = static_cast<int>(monitors.size());
 
       // Number of monitors should be consistent with data file format
       if( nMonitors != LoadSpice2D::nMonitors ) {

@@ -174,9 +174,9 @@ namespace DataHandling
       input.close();
     }
 
-    int nHist = gsasDataX.size();
-    int xWidth = X->size();
-    int yWidth = Y->size();
+    int nHist(static_cast<int>(gsasDataX.size()));
+    int xWidth(static_cast<int>(X->size()));
+    int yWidth(static_cast<int>(Y->size()));
 
     // Create workspace
     MatrixWorkspace_sptr outputWorkspace = boost::dynamic_pointer_cast<MatrixWorkspace> (WorkspaceFactory::Instance().create("Workspace2D", nHist, xWidth, yWidth));

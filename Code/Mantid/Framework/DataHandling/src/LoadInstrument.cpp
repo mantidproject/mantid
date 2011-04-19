@@ -127,7 +127,7 @@ namespace Mantid
       m_workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
 
       // Remove the path from the filename for use with the InstrumentDataService
-      const int stripPath = m_filename.find_last_of("\\/");
+      const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
 
       // Get reference to Instrument and set its name
@@ -1759,10 +1759,10 @@ namespace Mantid
       }
 
       // Remove the path from the filename
-      const int stripPath = m_filename.find_last_of("\\/");
+      const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentFile = m_filename.substr(stripPath+1,m_filename.size());
       // the ID is the bit in front of _Definition
-      const int getID = instrumentFile.find("_Definition");
+      const std::string::size_type getID(instrumentFile.find("_Definition"));
       std::string instrumentID = instrumentFile.substr(0,getID);
 
       // force ID to upper case

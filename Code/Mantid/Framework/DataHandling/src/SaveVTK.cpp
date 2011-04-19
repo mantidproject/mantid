@@ -179,12 +179,12 @@ namespace Mantid
     {
       (void) errors; // Avoid compiler warning
 
-      std::vector<double>::size_type nY = yValue.size();
+      int nY = static_cast<int>(yValue.size());
       int nPoints(8*nY); 
       outVTP << "<Piece NumberOfPoints=\"" << nPoints << "\" NumberOfCells=\"" << nY << "\">";
       outVTP << "<CellData Scalars=\"counts\">"
         << "<DataArray type=\"Float32\" Name=\"counts\" NumberOfComponents=\"1\" format=\"ascii\">\n";
-      for( int i = 0; i < (int)nY; ++i )
+      for( int i = 0; i < nY; ++i )
       {
         outVTP << yValue[i] << "\n";
       }
@@ -194,7 +194,7 @@ namespace Mantid
         << "<DataArray type=\"Float32\" NumberOfComponents=\"3\" format=\"ascii\">\n";
 
       double deltaZ(100.);
-      for( int i = 0; i <(int)nY; ++i )
+      for( int i = 0; i < nY; ++i )
       {
         //first face
         double xLow(xValue[i]), xUpp(xValue[i+1]), ypos(yValue[i]), zpos(-index*deltaZ);

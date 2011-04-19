@@ -116,7 +116,7 @@ private:
   /// Placeholder for file lines
   std::string line;
   /// The number of groups present in the data file
-  std::size_t nGroups;
+  int nGroups;
   /// The size of the x-axis in the data file
   int xLength;
 };

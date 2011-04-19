@@ -476,8 +476,7 @@ namespace Mantid
     bool LoadRawHelper::isAscii(FILE* file) const
     {  
       char data[256];
-      int n = fread(data, 1, sizeof(data), file);
-      char *pend = &data[n];
+      char *pend = &data[fread(data, 1, sizeof(data), file)];
       fseek(file,0,SEEK_SET);
       /*
       * Call it a binary file if we find a non-ascii character in the 
@@ -898,8 +897,8 @@ namespace Mantid
     {
       if (!m_interval && !m_bmspeclist)
       {
-        normalwsSpecs = m_total_specs - monitorSpecList.size();
-        monitorwsSpecs = monitorSpecList.size();
+        monitorwsSpecs = static_cast<int>(monitorSpecList.size());
+        normalwsSpecs = m_total_specs - monitorwsSpecs;
         g_log.debug() << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  " << normalwsSpecs
           << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
       }
@@ -1047,7 +1046,7 @@ namespace Mantid
     {
       std::string extn=extension(filePath);
       bool braw = (!extn.compare("raw")||!extn.compare("add")||extn[0]=='s') ? true : false;
-      if( isRawFileHeader(nread, header.full_hdr) || braw )
+      if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
       {
 	return true;
       }
@@ -1072,13 +1071,9 @@ namespace Mantid
 	return bret;
       }
       file_header header;
-      int nread = fread(&header,sizeof(unsigned char), IDataFileChecker::g_hdr_bytes, fp);
+      int nread(static_cast<int>(fread(
+        &header,sizeof(unsigned char), IDataFileChecker::g_hdr_bytes, fp)));
       header.full_hdr[IDataFileChecker::g_hdr_bytes] = '\0';
-      if (nread == -1)
-      {
-	fclose(fp);
-	return bret;
-      }
 
       if (fclose(fp) != 0)
       {

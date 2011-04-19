@@ -615,8 +615,9 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     declareProperty(new WorkspaceProperty<Workspace> ("MonitorWorkspace", monitorWSName,
         Direction::Output));
     //create monitor workspace
+    const int nMons(static_cast<int>(monitorSpecList.size()));
     monitorWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>(
-      WorkspaceFactory::Instance().create(localWorkspace,monitorSpecList.size(),m_lengthIn,m_lengthIn-1));
+      WorkspaceFactory::Instance().create(localWorkspace,nMons,m_lengthIn,m_lengthIn-1));
 
     setProperty("MonitorWorkspace", boost::dynamic_pointer_cast<Workspace>(monitorWorkspace));
    	file =openRawFile(fileName);
@@ -666,7 +667,8 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
   if ((bseparate && monitorwsList.size() > 0) || bexclude)
   {
     localWorkspace->setMonitorList(monitorwsList);
-    localWorkspace->sethistogramNumbers(m_numberOfSpectra - monitorwsList.size());
+    localWorkspace->sethistogramNumbers(
+      m_numberOfSpectra - static_cast<int>(monitorwsList.size()));
     if (bseparate)
     {
       fclose(file);

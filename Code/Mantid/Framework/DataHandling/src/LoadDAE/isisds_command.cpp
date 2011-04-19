@@ -147,7 +147,10 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 		closesocket(s);
 		return INVALID_SOCKET;
 	}
-/* socket connected */
+
+  // diable warning about vsprintf and strncpy
+  #pragma warning(disable:4996)
+  /* socket connected */
 	op.ver_major = ISISDS_MAJOR_VER;
 	op.ver_minor = ISISDS_MINOR_VER;
 	op.pid = 0;

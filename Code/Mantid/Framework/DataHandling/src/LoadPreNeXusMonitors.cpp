@@ -129,7 +129,7 @@ void LoadPreNeXusMonitors::exec()
     {
       // Get a list of the child elements
       Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
-      for (size_t i = 0; i < pDataListChildren->length(); ++i)
+      for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor")
@@ -149,14 +149,14 @@ void LoadPreNeXusMonitors::exec()
     {
       // Get a list of the child elements
       Poco::XML::NodeList* pDataListChildren = pNode->childNodes();
-      for (size_t i = 0; i < pDataListChildren->length(); ++i)
+      for (unsigned long i = 0; i < pDataListChildren->length(); ++i)
       {
         // We only care about monitors
         if (pDataListChildren->item(i)->nodeName() == "monitor")
         {
           std::string dims =
               static_cast<Poco::XML::Element*> (pDataListChildren->item(i))->getAttribute("dims");
-          tchannels = boost::lexical_cast<size_t>(dims);
+          tchannels = boost::lexical_cast<int>(dims);
         }
       }
       // Release the NodeList
@@ -193,7 +193,7 @@ void LoadPreNeXusMonitors::exec()
   // temp buffer for file reading
   std::vector < uint32_t > buffer;
 
-  for (size_t i = 0; i < nMonitors; i++)
+  for (int i = 0; i < nMonitors; i++)
   {
     // Now lets actually read the monitor files..
     Poco::Path pMonitorFilename(dirPath, monitorFilenames[i]);
@@ -230,7 +230,7 @@ void LoadPreNeXusMonitors::exec()
 
   // Populate the Spectra Map
   localWorkspace->mutableSpectraMap().populate(spectra_numbers.get(), detector_numbers.get(),
-      static_cast<int> (nMonitors));
+      nMonitors);
 
   // Set the property
   setProperty("OutputWorkspace", localWorkspace);

@@ -434,7 +434,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   longest_tof = 0.;
 
   //Initialize progress reporting.
-  Progress prog(this,0.0,1.0, this->num_events/loadBlockSize);
+  Progress prog(this,0.0,1.0,static_cast<int>(this->num_events/loadBlockSize));
 
   //Allocate the buffer
   DasEvent * event_buffer = new DasEvent[loadBlockSize];
@@ -697,7 +697,7 @@ void LoadEventPreNeXus::loadPixelMap(const std::string &filename)
   //If we got here, the mapping file was loaded correctly and we'll use it
   this->using_mapping_file = true;
   //Let's assume that the # of pixels in the instrument matches the mapping file length.
-  this->numpixel = pixelmapFile.getNumElements();
+  this->numpixel = static_cast<uint32_t>(pixelmapFile.getNumElements());
 }
 
 

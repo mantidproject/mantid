@@ -68,8 +68,8 @@ namespace Mantid
 	  std::vector<DataObjects::Histogram1D> spectra;
 	  //size_t iLine=0;    // line number
 	  size_t ncols = 3;  // number of columns
-	  size_t nSpectra = 0;
-	  size_t nBins = 0; //number of rows
+	  int nSpectra = 0;
+	  int nBins = 0; //number of rows
 	  std::string first_character;
 	  std::string axes_infos;
 

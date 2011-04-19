@@ -122,7 +122,7 @@ namespace Mantid
       int total_specs;
       if( m_interval || m_list)
       {
-        total_specs = m_spec_list.size();
+        total_specs = static_cast<int>(m_spec_list.size());
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
@@ -248,8 +248,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
     {
       FILE* file = fopen(filename.c_str(), "rb");
       char data[256];
-      int n = fread(data, 1, sizeof(data), file);
-      char *pend = &data[n];
+      char *pend = &data[fread(data, 1, sizeof(data), file)];
       /*
        * Call it a binary file if we find a non-ascii character in the 
        * first 256 bytes of the file.
@@ -335,7 +334,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
     void LoadRaw::runLoadInstrument(DataObjects::Workspace2D_sptr localWorkspace)
     {
       // instrument ID
-      const int stripPath = m_filename.find_last_of("\\/");
+      const std::string::size_type stripPath = m_filename.find_last_of("\\/");
       std::string instrumentID = m_filename.substr(stripPath+1,3);  // get the 1st 3 letters of filename part
 
       IAlgorithm_sptr loadInst = createSubAlgorithm("LoadInstrument");

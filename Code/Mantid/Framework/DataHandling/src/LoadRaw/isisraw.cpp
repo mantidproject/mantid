@@ -109,6 +109,9 @@ ISISRAW::ISISRAW() : m_crpt(0), m_ntc1(0), m_nsp1(0), m_nper(0),dat1(0)
 	{
 		dat1[i] = i;
 	}
+
+  // diable warning about strcpy
+  #pragma warning(disable:4996)
 	logsect.nlines = 1;
 	logsect.lines = new LOG_LINE[logsect.nlines];
 	for(i=0; i<logsect.nlines; i++)
@@ -116,7 +119,7 @@ ISISRAW::ISISRAW() : m_crpt(0), m_ntc1(0), m_nsp1(0), m_nper(0),dat1(0)
 		//logsect.lines[i].data = "test log line"; //Deprecated
 	  logsect.lines[i].data = (char*) malloc (16);
 		strcpy(logsect.lines[i].data, "test log line");
-		logsect.lines[i].len = strlen(logsect.lines[i].data);
+		logsect.lines[i].len = static_cast<int>(strlen(logsect.lines[i].data));
 	}
 	addItems();
 }
@@ -730,7 +733,7 @@ int ISISRAW::ioRAW(FILE* file, bool from_file, bool read_data)
 			if (from_file)
 			{
 				n = fread(s, sizeof(char), len, file);
-        return n - len;
+				return static_cast<int>(n - len);
 			}
 			else
 			{
@@ -1006,7 +1009,7 @@ int ISISRAW::vmstime(char* timbuf, int len, time_t time_value)
 /* 
  * get time in VMS format 01-JAN-1970 00:00:00
  */
-	int i, n;
+	size_t i, n;
 	struct tm *tmstruct = NULL;
 #ifdef MS_VISUAL_STUDIO
   errno_t err = localtime_s( tmstruct, &time_value ); 
