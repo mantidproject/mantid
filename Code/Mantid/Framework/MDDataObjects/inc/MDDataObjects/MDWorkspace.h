@@ -111,7 +111,8 @@ namespace Mantid
       /// read the the pixels corresponding to cells in the vector cell_num
       size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
 
-      Mantid::Geometry::MDGeometry const * const getGeometry() const;
+	  /// returns constant pointer to mutable geometry for algorithms to work. Use get_const_geometry in constant methods
+      Mantid::Geometry::MDGeometry const * getGeometry() ;
       /// read MD image into memory TODO: do we still need this function? Let's try disable and see
       // void read_MDImg();
       /// read the whole pixels dataset in the memory
@@ -122,7 +123,7 @@ namespace Mantid
       //    bool write_mdd(void);
       /// get variois components of the workspace
 	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis.get());}
-      Mantid::Geometry::MDGeometry      &   get_const_MDGeometry()const{return *(m_spMDImage->getGeometry());}
+      Mantid::Geometry::MDGeometry const&   get_const_MDGeometry()const{return (m_spMDImage->get_const_MDGeometry());}
       Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage.get());}
       Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints.get());}
       IMD_FileFormat                      & get_const_FileReader()const{return *(m_spFile);}      

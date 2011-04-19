@@ -133,12 +133,12 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
     std::vector<size_t> dim_strides(this->nDims);
    
 
-    const Geometry::MDGeometry *pCurrentGeom = dnd.getGeometry();
+    const Geometry::MDGeometry &CurrentGeom = dnd.get_const_MDGeometry();
     
     // data points;
     std::vector<std::vector<float> > dimPoints(this->nDims);
     // get dimensions in the order they are defined in the grid
-    std::vector<boost::shared_ptr<Geometry::IMDDimension> > spDims = pCurrentGeom->getDimensions();
+    std::vector<boost::shared_ptr<Geometry::IMDDimension> > spDims = CurrentGeom.getDimensions();
   
     // obtain dimensions and dimensions coordinates;
     for(idim=0;idim<this->nDims;idim++){

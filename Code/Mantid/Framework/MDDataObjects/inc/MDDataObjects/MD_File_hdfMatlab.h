@@ -137,7 +137,7 @@ protected:
    MD_File_hdfMatlab(const MD_File_hdfMatlab& p);
    MD_File_hdfMatlab & operator = (const MD_File_hdfMatlab & other);
 
-   // function checks if pixel dataset is opened and if not opens it. true if it was already opened, false if did nothing
+   // funcn checks if pixel dataset is opened and if not opens it. true if it was already opened, false if did nothing
    bool check_or_open_pix_dataset(void);
   // the array specifying the locations of MD points wrt MD cells;
     std::vector<uint64_t> mp_points_locations;
@@ -148,8 +148,8 @@ private:
 };
 
 // function used to understand Horace written Matlab dataset.
-bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
-void ** transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
+bool read_matlab_field_attr(hid_t group_ID,const std::string &field_name,std::vector<char> &data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name);
+void ** transform_array2cells(std::vector<char>&data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller);
 //********************************************************************************************************************************************************************
 
 

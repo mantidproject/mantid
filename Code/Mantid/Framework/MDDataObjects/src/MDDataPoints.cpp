@@ -83,7 +83,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
     this->spMDImage   = spImage;
     this->spFileReader= in_spFile;
 
-    std::vector<std::string> dim_tags = spMDImage->getGeometry()->getBasisTags();
+	std::vector<std::string> dim_tags = spMDImage->get_const_MDGeometry().getBasisTags();
     std::vector<std::string> data_tags = this->pixDescription.getColumnNames();
     // check if the dimensions id are consistant with the data columns i.e. the MDImage and the MDpoints parts of the dataset are consistent
     for(size_t i=0;i<dim_tags.size();i++){
@@ -110,7 +110,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
 
    this->memBased                = false;
    
-   unsigned int nDims= this->spMDImage->getGeometry()->getNumDims();
+   unsigned int nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);
 
@@ -148,7 +148,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> pImage)
     this->n_data_points           = 0;
 	this->memBased                = true;
 
-   unsigned int nDims= this->spMDImage->getGeometry()->getNumDims();
+	unsigned int nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
 
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);

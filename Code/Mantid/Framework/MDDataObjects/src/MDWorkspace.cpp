@@ -83,7 +83,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 	std::auto_ptr<MDGeometry> pGeometry;
 	// no changes to new workspace is defined and we are initiating the new workspace as a copy of an old workspace;
 	if(!transf){
-		std::auto_ptr<MDGeometryDescription> oldShape = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*SourceWorkspace->getGeometry()));
+		std::auto_ptr<MDGeometryDescription> oldShape = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(SourceWorkspace->get_const_MDGeometry()));
 		// we have basis and description, now can build geometry
 		pGeometry = std::auto_ptr<MDGeometry>(new MDGeometry(*m_spMDBasis,*oldShape));
 	}else{
@@ -145,11 +145,10 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       return this->m_spFile->read_pix_subset(*m_spMDImage,cells_nums,start_cell,pix_buf,n_pix_in_buffer);
     } 
 
-    Mantid::Geometry::MDGeometry const * const
-      MDWorkspace::getGeometry() const
-    {
+Mantid::Geometry::MDGeometry const * 
+MDWorkspace::getGeometry()     {
       return this->m_spMDImage->getGeometry();
-    }
+}
 
     size_t MDWorkspace::getMemorySize(void) const
     {

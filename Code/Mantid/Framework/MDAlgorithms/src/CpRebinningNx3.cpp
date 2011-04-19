@@ -26,7 +26,7 @@ n_pix_in_buffer(0),
 pTargetDataPoints(targetWS->get_spMDDPoints().get())
 {
 
-     this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
+	this->build_scaled_transformation_matrix(sourceWS->get_const_MDGeometry(),*pTargetDescr);
  
 	 pix_buf = this->pSourceDataPoints->get_pBuffer();
 

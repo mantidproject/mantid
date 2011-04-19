@@ -23,9 +23,13 @@ public:
     virtual bool rebin_data_chunk_keep_pixels(){return false;}
 	// this function is similar to the one defined in rebinning but has its own data_chunk (usually rebinning defines it)
     virtual unsigned int getNumDataChunks(void)const{
-        unsigned int rez;
-
-        rez = this->n_preselected_pix/1000;
+        unsigned int rez,max_int(0);
+		max_int =~max_int;
+		uint64_t n_data_chunks_rough = this->n_preselected_pix/1000;
+		if(n_data_chunks_rough >(uint64_t)max_int){
+			throw(std::invalid_argument(" number of data chunks for rebinning exceeds 2^32. Something wrong and you will not be able to rebin such number anyway"));
+		}
+        rez = (unsigned int)(n_data_chunks_rough);
         if(rez*1000!= this->n_preselected_pix)rez++;
         return rez;
     }

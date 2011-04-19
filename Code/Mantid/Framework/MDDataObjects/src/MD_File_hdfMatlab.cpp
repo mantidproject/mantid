@@ -118,7 +118,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
     int    rank;
 	matlab_attrib_kind kind;
     unsigned int nDims,i;
-    void  *data;
+    std::vector<char> data;
     bool ok;
 
 
@@ -136,7 +136,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
   //      unsigned int dim_size=(unsigned int)*((double*)(data)+i);
 		//DND_shape.pDimDescription(i).nBins = dim_size;
   //  }
-    delete [] data;
+	data.clear();
     arr_dims_vector.clear();
 
 
@@ -160,10 +160,10 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
         throw(Exception::FileError(err.str(),this->File_name));
     }
     for(i=0;i<nDims;i++){
-		DND_shape.pDimDescription(i)->cut_min=*((double*)(data)+2*i);
-        DND_shape.pDimDescription(i)->cut_max=*((double*)(data)+2*i+1);
+		DND_shape.pDimDescription(i)->cut_min=*((double*)(&data[0])+2*i);
+        DND_shape.pDimDescription(i)->cut_max=*((double*)(&data[0])+2*i+1);
     }
-    delete [] data;
+    data.clear();
     arr_dims_vector.clear();
 
     // read axis
@@ -178,7 +178,7 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
     }
     // transform 2D array of axis into N-D vector of axis vectors;
     int nData=arr_dims_vector[0]*arr_dims_vector[1];
-    double filler = *((double *)(data)+nData);
+    double filler = *((double *)(&data[0])+nData);
     std::vector<double> **rez    =(std::vector<double> **)transform_array2cells(data,arr_dims_vector,rank,kind,&filler);
     if(MAX_MD_DIMS_POSSIBLE<=arr_dims_vector[0]){
         throw(Exception::FileError("file_hdf_Matlab::read_MDImg_data=>algorithm error: number of the data axis in mdd structure residing in file has to be less then MAX_NDIMS_POSSIBLE",this->File_name));
@@ -192,8 +192,8 @@ MD_File_hdfMatlab::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescriptio
 		  DND_shape.pDimDescription(i)->nBins = dim_lentgh;
     }  
 	// we need to set expanded instead
-    delete [] data;
-    delete [] rez;
+     delete [] rez;
+	 data.clear();
     arr_dims_vector.clear();
 // ***> because of this operator the function accepts full 4D dataset only; if we want accept 1,2 and 3D dataset we need to read pax 
 // iax,iint and variable number of p and process them properly;
@@ -353,7 +353,7 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
     matlab_attrib_kind kind;
     std::vector<int> arr_dims_vector;
 
-    void *data;
+    std::vector<char> data;
     // pixels dims dataset is the 1D dataset of the array datatype
     hsize_t  pix_dims[1],pix_dims_max[1];
 // the variable was_opened identify if we have to close dataset after finishing with it (may be not if partial IO operations expected)
@@ -374,7 +374,6 @@ MD_File_hdfMatlab::read_pix(MDDataPoints & sqw)
         throw(Exception::FileError("MD_File_hdfMatlab::read_pix: Error reading npix sqw attribute",this->File_name));
     }
 
-    delete [] data;
     arr_dims_vector.clear();
 
     uint64_t n_pix_inDataset  = this->getNPix();
@@ -677,7 +676,7 @@ MD_File_hdfMatlab::~MD_File_hdfMatlab(void)
 
  }
 bool
-read_matlab_field_attr(hid_t group_ID,const std::string &field_name,void *&data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name)
+read_matlab_field_attr(hid_t group_ID,const std::string &field_name,std::vector<char> &data, std::vector<int> &dims,int &rank,matlab_attrib_kind &kind,const std::string &file_name)
 {
 /*
   The function is the interface to the attributes written by MATLAB horace hdf
@@ -728,7 +727,7 @@ if(!H5Aexists(group_ID, field_name.c_str())){ // then may be the dataset is empt
      if(H5Aexists(group_ID, new_field_name.c_str())){ // the attribute exists and it is empty
         rank=0;
         dims.clear();
-        data = NULL;
+		data.clear();
         kind = empty;
         return true;
      }else{
@@ -815,14 +814,14 @@ if (attr<=0){
 
 
  if (prim_kind=='C'){
-    data = new char[(size_t)data_size];
-    if(filler_present) *((char *)(data)+data_size-1)=*((char*)(&filler_buf));
+    data.resize((size_t)data_size);
+    if(filler_present)data[size_t(data_size-1)]=*((char*)(&filler_buf));
 
  }else{
-    data = new double[(size_t)data_size];
-    if(filler_present) *((double *)(data)+data_size-1)=filler_buf;
+    data.resize(size_t(sizeof(double)*data_size));
+    if(filler_present) *((double *)(&data[0]+sizeof(double)*(data_size-1)))=filler_buf;
  }
- herr_t err = H5Aread(attr, type,data);
+ herr_t err = H5Aread(attr, type,&data[0]);
  if (err<0){
      std::stringstream err;
      err<<"read_matlab_field_attr: error reading attribute: "<<field_name<<std::endl;
@@ -842,7 +841,7 @@ return true;
 }
 //***************************************************************************************************************
 void ** 
-transform_array2cells(void *data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller)
+transform_array2cells(std::vector<char>&data, std::vector<int> dims,int rank,matlab_attrib_kind kind,void *pFiller)
 {
 /* MATLAB Horace dataset compartibility function 
   it takes the data in the form of an array with filler and returns 
@@ -859,7 +858,7 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
     switch(kind){
         case char_cellarray: {
             std::string ** rez=(new std::string *[nData]);
-            char *arr = (char*)(data);
+            char *arr = &data[0];
             char filler=*((char *)pFiller);
             char data;
 
@@ -879,7 +878,7 @@ function cellarray=transform_array2cells(rdata,filler,type_name)
         }
         case double_cellarray: {
             std::vector<double> **rez= new std::vector<double> *[nData];
-            double *arr = (double*)(data);
+            double *arr = (double*)(&data[0]);
             double filler=*((double *)pFiller);
             double data;
 

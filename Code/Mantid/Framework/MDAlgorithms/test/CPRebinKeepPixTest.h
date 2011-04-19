@@ -66,16 +66,16 @@ class CPRebinKeepPixTest :    public CxxTest::TestSuite
 		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
       // All data go from -1 to 49;
       // take 10%
-//		pSlicing->pDimDescription("ent")->cut_max = 0;
-//        pSlicing->pDimDescription("ent")->nBins   = 5;
-//        // sill too big; cut another 10%
-////        pSlicing->pDimDescription("qzt")->cut_min = r0;
-//		pSlicing->pDimDescription("qzt")->cut_max = 1;
-//        pSlicing->pDimDescription("qzt")->nBins   = 1;
+		pSlicing->pDimDescription("ent")->cut_max = 0;
+        pSlicing->pDimDescription("ent")->nBins   = 5;
+        // sill too big; cut another 10%
+        pSlicing->pDimDescription("qzt")->cut_min = r0;
+		pSlicing->pDimDescription("qzt")->cut_max = 1;
+        pSlicing->pDimDescription("qzt")->nBins   = 1;
 
-//        pSlicing->pDimDescription("qyt")->cut_min = ;
-//		pSlicing->pDimDescription("qyt")->cut_max = 10;
-        //pSlicing->pDimDescription("qyt")->nBins   = 1;
+        pSlicing->pDimDescription("qyt")->cut_min = r0;
+		pSlicing->pDimDescription("qyt")->cut_max = 10;
+        pSlicing->pDimDescription("qyt")->nBins   = 1;
 
     
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());

@@ -114,7 +114,7 @@ private:
       char *buf(NULL);
       MDDataPointEqual<float,uint32_t,float> packer(buf,PixSignature);
 
-      std::vector<char> *outData = sqw.get_pBuffer(this->getNPix());
+      std::vector<char> *outData = sqw.get_pBuffer((size_t)this->getNPix());
       packer.setBuffer(&(*outData)[0]);
 
       float    s_dim_fields[6];
@@ -138,7 +138,7 @@ private:
     }
     uint64_t getNPix()
     {
-      return m_npoints;
+      return (uint64_t)m_npoints;
     }
     virtual ~MockFileFormat(void){};
   };
