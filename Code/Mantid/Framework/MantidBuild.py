@@ -80,7 +80,7 @@ def getCPPFiles(codeFolder, recursive=True) :
       if file.endswith('.cpp'):
         listCpps.append(codeFolder + '/' +  file)
       if recursive and os.path.isdir(os.path.join(codeFolder, file)):
-        listCpps.extend(getCPPFiles(codeFolder + '/' +  file), recursive)
+        listCpps.extend(getCPPFiles(codeFolder + '/' +  file, recursive))
   return listCpps
 
 def getSharedObjects(listCpps, env) :
