@@ -361,8 +361,8 @@ env.Append(CPPPATH=['#/DataObjects/inc'])
 subProjs = []
 subProjs.append('CurveFitting')
 subProjs.append('Algorithms')
-subProjs.append('DataHandling')
 subProjs.append('Nexus')
+subProjs.append('DataHandling')
 subProjs.append('Crystal')
 subProjs.append('ICat')
 
@@ -370,6 +370,9 @@ for subproj in subProjs:
     ret = SConscript(subproj+'/SConscript')
     if ( len(ret) > 0 ):
        env.Install(dest_dir, ret['shared'])    
+       if subproj == 'Nexus':
+         env.Append(MYLIBLIST=ret['libs'])
+         env.Append(CPPPATH=['#/Nexus/inc'])
 
 # User Algs
 # Currently has a dependency on CurveFitting (which ought to be removed)
