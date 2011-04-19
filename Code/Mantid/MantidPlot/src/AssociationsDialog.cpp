@@ -355,10 +355,10 @@ void AssociationsDialog::setGraph(Graph *g)
         if (it->rtti() != QwtPlotItem::Rtti_PlotCurve)
             continue;
 
-        if (((DataCurve *)it)->type() != Graph::Function){
-            QString s = ((DataCurve *)it)->plotAssociation();
-            if (((DataCurve *)it)->table()){
-                QString table = ((DataCurve *)it)->table()->objectName();
+        if (((const DataCurve *)it)->type() != Graph::Function){
+            QString s = ((const DataCurve *)it)->plotAssociation();
+            if (((const DataCurve *)it)->table()){
+                QString table = ((const DataCurve *)it)->table()->objectName();
                 plotAssociationsList << table + ": " + s.remove(table + "_");
             }
         }

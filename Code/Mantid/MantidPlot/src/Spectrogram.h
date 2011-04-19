@@ -79,7 +79,7 @@ public:
   Matrix * matrix(){return d_matrix;};
   UserHelperFunction *funct(){return d_funct;}
 
-  int levels(){return (int)contourLevels().size() + 1;};
+  int levels()const{return (int)contourLevels().size() + 1;};
   void setLevelsNumber(int levels);
 
   bool hasColorScale();
@@ -100,7 +100,7 @@ public:
   //! Used when saving a project file
   QString saveToString();
 
-  ColorMapPolicy colorMapPolicy(){return color_map_policy;};
+  ColorMapPolicy colorMapPolicy()const{return color_map_policy;};
 
   virtual QwtDoubleRect boundingRect() const;
   double getMinPositiveValue()const;
@@ -108,7 +108,7 @@ public:
   QList<QPen> contourPenList(){return d_pen_list;};
   //! Flag telling if we use the color map to calculate the pen (QwtPlotSpectrogram::contourPen()).
   bool d_color_map_pen;
-  bool useColorMapPen(){return d_color_map_pen;};
+  bool useColorMapPen()const{return d_color_map_pen;};
   void setColorMapPen(bool on = true);
   void showContourLineLabels(bool show = true);
   bool hasLabels(){return d_show_labels;};

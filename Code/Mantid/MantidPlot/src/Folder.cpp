@@ -202,7 +202,7 @@ void Folder::removeWindow( MdiSubWindow *w )
 
 QString Folder::sizeToString()
 {
-	int size = 0;
+	size_t size = 0;
 
 	QObjectList folderList = children();
 	if (!folderList.isEmpty()){
@@ -215,7 +215,7 @@ QString Folder::sizeToString()
 	foreach(w, lstWindows)
 		size += sizeof(w);
 
-	return QString::number(8*size/1024.0,'f',1)+" "+tr("kB")+" ("+QString::number(8*size)+" "+tr("bytes")+")";
+	return QString::number(double(8*size)/1024.0,'f',1)+" "+tr("kB")+" ("+QString::number(8*size)+" "+tr("bytes")+")";
 }
 
 Folder* Folder::rootFolder()

@@ -238,8 +238,8 @@ public slots:
   double selectedXStartValue();
   double selectedXEndValue();
 
-  long curveKey(int curve){return c_keys[curve];}
-  int curveIndex(long key){return c_keys.indexOf(key);};
+  int curveKey(int curve){return c_keys[curve];}
+  int curveIndex(int key){return int(c_keys.indexOf(key));};
   //! Map curve pointer to index.
   int curveIndex(QwtPlotCurve *c) const;
   //! map curve title to index
@@ -414,7 +414,7 @@ public slots:
 
   //! \name Line Markers
   //@{
-  ArrowMarker* arrow(long id);
+  ArrowMarker* arrow(int id);
   ArrowMarker* addArrow(ArrowMarker* mrk);
 
   //! Used when opening a project file
@@ -431,7 +431,7 @@ public slots:
 
   //! \name Image Markers
   //@{
-  ImageMarker* imageMarker(long id);
+  ImageMarker* imageMarker(int id);
   QVector<int> imageMarkerKeys(){return d_images;};
   ImageMarker* addImage(ImageMarker* mrk);
   ImageMarker* addImage(const QString& fileName);
@@ -447,14 +447,14 @@ public slots:
   //! Keep the markers on screen each time the scales are modified by adding/removing curves
   void updateMarkersBoundingRect();
 
-  long selectedMarkerKey();
+  int selectedMarkerKey();
   /**\brief Set the selected marker.
    * @param mrk :: key of the marker to be selected.
    * @param add :: whether the marker is to be added to an existing selection.
    * If <i>add</i> is false (the default) or there is no existing selection, a new SelectionMoveResizer is
    * created and stored in #d_markers_selector.
    */
-  void setSelectedMarker(long mrk, bool add=false);
+  void setSelectedMarker(int mrk, bool add=false);
   QwtPlotMarker* selectedMarkerPtr();
   bool markerSelected();
   //! Reset any selection states on markers.
@@ -781,7 +781,7 @@ private:
   QVector<int> d_images;
 
   int n_curves, widthLine;
-  long selectedMarker;
+  int selectedMarker;
   bool drawTextOn, drawLineOn, drawArrowOn, ignoreResize, drawAxesBackbone;
 
   //! The markers selected for move/resize operations or NULL if none are selected.

@@ -269,7 +269,7 @@ ScriptingWindow::ScriptingWindow(ScriptingEnv *env,QWidget *parent, Qt::WindowFl
   //Set the height to 10% of the height of the window
   addDockWidget(Qt::BottomDockWidgetArea, m_output_dock);
   int dock_width = m_output_dock->geometry().width();
-  m_output_dock->resize(dock_width, this->geometry().height() * 0.01);
+  m_output_dock->resize(dock_width, int(this->geometry().height() * 0.01));
   
   connect(m_manager, SIGNAL(MessageToPrint(const QString&,bool,bool)), m_output_dock, 
 	  SLOT(displayOutputMessage(const QString&, bool,bool)));

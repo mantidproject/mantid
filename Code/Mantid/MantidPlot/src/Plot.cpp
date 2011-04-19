@@ -205,7 +205,7 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 		if (!axisEnabled(i))
 			continue;
 
-		ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(i);
+		const ScaleEngine *sc_engine = (const ScaleEngine *)axisScaleEngine(i);
 		/*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(i);
 		const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 		if(sc_engine!=NULL)
@@ -235,7 +235,7 @@ void Plot::drawItems (QPainter *painter, const QRect &rect,
 		if (!axisEnabled(i))
 			continue;
 
-		ScaleDraw *sd = (ScaleDraw *) axisScaleDraw (i);
+		const ScaleDraw *sd = (const ScaleDraw *) axisScaleDraw (i);
 		int majorTicksType = sd->majorTicksStyle();
 		int minorTicksType = sd->minorTicksStyle();
 
@@ -261,7 +261,7 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
 	painter->save();
 	painter->setPen(QPen(color, axesLinewidth(), Qt::SolidLine));
 
-	QwtScaleDiv *scDiv=(QwtScaleDiv *)axisScaleDiv(axis);
+	const QwtScaleDiv *scDiv=(const QwtScaleDiv *)axisScaleDiv(axis);
 	const QwtValueList minTickList = scDiv->ticks(QwtScaleDiv::MinorTick);
 	int minTicks = (int)minTickList.count();
 
@@ -386,7 +386,7 @@ void Plot::drawInwardTicks(QPainter *painter, const QRect &rect,
 
 void Plot::drawBreak(QPainter *painter, const QRect &rect, const QwtScaleMap &map, int axis) const
 {	
-    ScaleEngine *sc_engine = (ScaleEngine *)axisScaleEngine(axis);
+    const ScaleEngine *sc_engine = (const ScaleEngine *)axisScaleEngine(axis);
 	/*const QwtScaleEngine *qwtsc_engine=axisScaleEngine(axis);
 	const ScaleEngine *sc_engine =dynamic_cast<const ScaleEngine*>(qwtsc_engine);
 	if(sc_engine!=NULL)
@@ -660,7 +660,7 @@ int Plot::axisLabelPrecision(int axis)
 void Plot::axisLabelFormat(int axis, char &f, int &prec) const
 {
 	if (axisValid(axis)){
-		ScaleDraw *sd = (ScaleDraw *)axisScaleDraw (axis);
+		const ScaleDraw *sd = (const ScaleDraw *)axisScaleDraw (axis);
 		sd->labelFormat(f, prec);
 	} else {//for a bad call we return the default values
 		f = 'g';

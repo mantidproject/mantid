@@ -190,8 +190,8 @@ using namespace MantidQt::API;
 
 extern "C"
 {
-void file_compress(char  *file, char  *mode);
-void file_uncompress(char  *file);
+void file_compress(const char  *file, const char  *mode);
+void file_uncompress(const char  *file);
 }
 
 
@@ -2605,7 +2605,7 @@ MultiLayer* ApplicationWindow::multilayerPlot(const QStringList& colList)
       c = (PlotCurve *)ag->insertCurve(w, xCol, yColName, defaultCurveStyle);
 
     CurveLayout cl = ag->initCurveLayout(defaultCurveStyle, curves - errorBars);
-    cl.lWidth = defaultCurveLineWidth;
+    cl.lWidth = float(defaultCurveLineWidth);
     cl.sSize = defaultSymbolSize;
     ag->updateCurveLayout(c, &cl);
   }
@@ -4024,7 +4024,7 @@ ApplicationWindow* ApplicationWindow::open(const QString& fn, bool factorySettin
 
   QString fname = fn;
   if (fn.endsWith(".qti.gz", Qt::CaseInsensitive)||fn.endsWith(".mantid.gz",Qt::CaseInsensitive)){//decompress using zlib
-    file_uncompress((char *)fname.ascii());
+    file_uncompress(fname.ascii());
     fname = fname.left(fname.size() - 3);
   }
 
@@ -6946,7 +6946,7 @@ void ApplicationWindow::showCurveWorksheet(Graph *g, int curveIndex)
   if (!g)
     return;
 
-  const QwtPlotItem *it = g->plotItem(curveIndex);
+  QwtPlotItem *it = g->plotItem(curveIndex);
   if (!it)
     return;
 
@@ -10919,7 +10919,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if (d_file_version <= 89)
         cl.lCol = convertOldToNewColorIndex(cl.lCol);
       cl.lStyle=curve[6].toInt();
-      cl.lWidth=curve[7].toDouble();
+      cl.lWidth=curve[7].toFloat();
       cl.sSize=curve[8].toInt();
       if (d_file_version <= 78)
         cl.sType=Graph::obsoleteSymbolStyle(curve[9].toInt());
@@ -10940,9 +10940,9 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       if(curve.count() < 16)
         cl.penWidth = cl.lWidth;
       else if ((d_file_version >= 79) && (curve[3].toInt() == Graph::Box))
-        cl.penWidth = curve[15].toDouble();
+        cl.penWidth = curve[15].toFloat();
       else if ((d_file_version >= 78) && (curve[3].toInt() <= Graph::LineSymbols))
-        cl.penWidth = curve[15].toDouble();
+        cl.penWidth = curve[15].toFloat();
       else
         cl.penWidth = cl.lWidth;
 
@@ -11049,7 +11049,7 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
       cl.connectType=curve[6].toInt();
       cl.lCol=curve[7].toInt();
       cl.lStyle=curve[8].toInt();
-      cl.lWidth=curve[9].toDouble();
+      cl.lWidth=curve[9].toFloat();
       cl.sSize=curve[10].toInt();
       cl.sType=curve[11].toInt();
       cl.symCol=curve[12].toInt();
@@ -11062,12 +11062,12 @@ Graph* ApplicationWindow::openGraph(ApplicationWindow* app, MultiLayer *plot,
         cl.penWidth = cl.lWidth;
       else if ((d_file_version >= 79) && (curve[5].toInt() == Graph::Box))
       {
-        cl.penWidth = curve[17].toDouble();
+        cl.penWidth = curve[17].toFloat();
         current_index++;
       }
       else if ((d_file_version >= 78) && (curve[5].toInt() <= Graph::LineSymbols))
       {
-        cl.penWidth = curve[17].toDouble();
+        cl.penWidth = curve[17].toFloat();
         current_index++;
       }
       else
@@ -14197,7 +14197,7 @@ Folder* ApplicationWindow::appendProject(const QString& fn, Folder* parentFolder
 
   QString fname = fn;
   if (fn.contains(".qti.gz")){//decompress using zlib
-    file_uncompress((char *)fname.ascii());
+    file_uncompress(fname.ascii());
     fname.remove(".gz");
   }
 
@@ -14509,8 +14509,8 @@ void ApplicationWindow::saveFolder(Folder *folder, const QString& fn, bool compr
 
   if (compress)
   {
-    char w9[]="w9";
-    file_compress((char *)fn.ascii(), "w9");
+    //char w9[]="w9";
+    file_compress(fn.ascii(), "w9");
   }
 
   QApplication::restoreOverrideCursor();
@@ -16320,7 +16320,7 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
   if( m_iface_script == NULL )
   {
     setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("",this,false, "");
+    m_iface_script = scriptingEnv()->newScript("",this, "",false);
     m_iface_script->setLineOffset(0);
     connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 

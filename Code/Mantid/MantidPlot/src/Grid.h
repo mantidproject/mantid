@@ -67,7 +67,7 @@ private:
 	QPen d_maj_pen_y;
 	QPen d_min_pen_y;
 
-	long mrkX, mrkY;//x=0 et y=0 line markers keys
+	int mrkX, mrkY;//x=0 et y=0 line markers keys
 };
 
 #endif

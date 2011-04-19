@@ -161,7 +161,7 @@ void FFTDialog::accept()
 	}
 
 	ApplicationWindow *app = (ApplicationWindow *)parent();
-    FFT *fft;
+    FFT *fft = NULL;
 	if (graph)
         fft = new FFT(app, graph, boxName->currentText());
 	else if (d_table){
@@ -291,7 +291,7 @@ void FFTDialog::fftMatrix()
         }
     }
 
-    double **x_fin_re, **x_fin_im;
+    double **x_fin_re = NULL, **x_fin_im = NULL;
     if (inverse){
         x_fin_re = Matrix::allocateMatrixData(height, width); // coeff of the initial image
         x_fin_im = Matrix::allocateMatrixData(height, width); // filled with 0 if everythng OK

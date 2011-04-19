@@ -62,10 +62,10 @@ public:
 	int labelNumericPrecision(){return d_prec;};
 	void setNumericPrecision(int prec){d_prec = prec;};
 
-	int majorTicksStyle(){return d_majTicks;};
+	int majorTicksStyle()const{return d_majTicks;};
 	void setMajorTicksStyle(TicksStyle type){d_majTicks = type;};
 
-	int minorTicksStyle(){return d_minTicks;};
+	int minorTicksStyle()const{return d_minTicks;};
 	void setMinorTicksStyle(TicksStyle type){d_minTicks = type;};
 
 	void setSelected(bool select = true){d_selected = select;};

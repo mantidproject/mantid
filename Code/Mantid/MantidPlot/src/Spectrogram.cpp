@@ -200,7 +200,7 @@ void Spectrogram::showColorScale(int axis, bool on)
   // We must switch main and the color scale axes and their respective scales
   int xAxis = this->xAxis();
   int yAxis = this->yAxis();
-  int oldMainAxis;
+  int oldMainAxis = yAxis;
   if (axis == QwtPlot::xBottom || axis == QwtPlot::xTop)
   {
     oldMainAxis = xAxis;
@@ -623,8 +623,8 @@ double MatrixData::value(double x, double y) const
   x += 0.5*dx;
   y -= 0.5*dy;
 
-  int i = abs((y - y_start)/dy);
-  int j = abs((x - x_start)/dx);
+  int i = abs(int((y - y_start)/dy));
+  int j = abs(int((x - x_start)/dx));
 
   if (d_m && i >= 0 && i < n_rows && j >=0 && j < n_cols)
     return d_m[i][j];

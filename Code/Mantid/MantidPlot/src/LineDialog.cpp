@@ -63,7 +63,7 @@ LineDialog::LineDialog( ArrowMarker *line, QWidget* parent,  Qt::WFlags fl )
 	gl1->addWidget(colorBox, 0, 1);
 
 	gl1->addWidget(new QLabel(tr("Line type")), 1, 0);
-    styleBox = new QComboBox( FALSE);
+    styleBox = new QComboBox();
 	styleBox->insertItem("_____");
 	styleBox->insertItem("- - -");
 	styleBox->insertItem(".....");

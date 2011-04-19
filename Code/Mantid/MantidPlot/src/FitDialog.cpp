@@ -153,7 +153,7 @@ void FitDialog::initFitPage()
     gl1->addWidget(boxAlgorithm, 4, 1);
 
 	gl1->addWidget(new QLabel( tr("Color")), 5, 0);
-	boxColor = new ColorBox( false );
+	boxColor = new ColorBox();
 	boxColor->setColor(QColor(Qt::red));
     gl1->addWidget(boxColor, 5, 1);
 
@@ -638,7 +638,7 @@ void FitDialog::saveUserFunction()
                 QStringList lst = userFunctionNames();
                 lst << name;
                 lst.sort();
-                int index = lst.indexOf(name);
+                int index = int(lst.indexOf(name));
                 d_user_functions.insert (index, d_current_fit);
 
                 if (categoryBox->currentRow() == 0){

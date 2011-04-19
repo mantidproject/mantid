@@ -70,7 +70,7 @@ MatrixValuesDialog::MatrixValuesDialog( ScriptingEnv *env, QWidget* parent, Qt::
 	endCol->setRange(1, 1000000);
 	gl1->addWidget(endCol, 1, 3);
 
-	functions = new QComboBox(false);
+	functions = new QComboBox();
 	btnAddFunction = new QPushButton(tr( "Add &Function" ));
 	btnAddCell = new QPushButton(tr( "Add Ce&ll" ));
 

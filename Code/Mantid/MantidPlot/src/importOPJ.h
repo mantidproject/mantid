@@ -45,7 +45,7 @@ public:
 	int error(){return parse_error;};
 
 private:
-    int arrowAngle(double length, double width){return ceil(45*atan(0.5*width/length)/atan(1.0));};
+    int arrowAngle(double length, double width){return int(ceil(45*atan(0.5*width/length)/atan(1.0)));};
 	int translateOrigin2QtiplotLineStyle(int linestyle);
 	QString parseOriginText(const QString &str);
 	QString parseOriginTags(const QString &str);

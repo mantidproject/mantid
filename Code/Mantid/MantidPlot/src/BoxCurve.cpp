@@ -102,7 +102,7 @@ void BoxCurve::drawBox(QPainter *painter, const QwtScaleMap &xMap,
 	const int hbw = box_width/2;
 	const int median = yMap.transform(gsl_stats_median_from_sorted_data (dat, 1, size));
 	int b_lowerq, b_upperq;
-	double sd, se, mean;
+	double sd = 0, se = 0, mean = 0;
 	if(w_range == SD || w_range == SE || b_range == SD || b_range == SE)
 	{
 		sd = gsl_stats_sd(dat, 1, size);

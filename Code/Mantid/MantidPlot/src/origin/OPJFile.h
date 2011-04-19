@@ -97,14 +97,14 @@ struct originData {
 	double d;
 	std::string s;
 	originData(double _d)
-	:	d(_d)
-	,	type(0)
+	:	type(0)
+	,	d(_d)
 	,	s("")
 	{};
 	originData(char* _s)
-	:	s(_s)
-	,	type(1)
+	:	type(1)
 	,	d(1.0e-307)
+	,	s(_s)
 	{};
 };
 
@@ -125,15 +125,15 @@ struct spreadColumn {
 	std::vector <originData> odata;
 	spreadColumn(std::string _name="", int _index=0)
 	:	name(_name)
-	,	index(_index)
-	,	command("")
-	,	comment("")
 	,	value_type(0)
 	,	value_type_specification(0)
 	,	significant_digits(6)
 	,	decimal_places(6)
-	,	width(8)
 	,	numeric_display_type(0)
+	,	command("")
+	,	comment("")
+	,	width(8)
+	,	index(_index)
 	{};
 };
 
@@ -178,13 +178,13 @@ struct matrix : public originWindow {
 	std::vector <double> data;
 	matrix(std::string _name="", int _index=0)
 	:	originWindow(_name)
-	,	index(_index)
-	,	command("")
 	,	value_type_specification(0)
 	,	significant_digits(6)
 	,	decimal_places(6)
-	,	width(8)
 	,	numeric_display_type(0)
+	,	command("")
+	,	width(8)
+	,	index(_index)
 	,	view(DataView)
 	,	header(ColumnRow)
 	{};
@@ -200,12 +200,12 @@ struct function {
 	int index;
 	function(std::string _name="", int _index=0)
 	:	name(_name)
-	,	index(_index)
 	,	type(0)
 	,	formula("")
 	,	begin(0.0)
 	,	end(0.0)
 	,	points(0)
+	,	index(_index)
 	{};
 };
 
@@ -500,8 +500,8 @@ struct projectNode {
 	double modification_date; // Julian date/time
 
 	projectNode(std::string _name="", int _type=0, double _creation_date=0.0, double _modification_date=0.0)
-	:	name(_name)
-	,	type(_type)
+	:	type(_type)
+	,	name(_name)
 	,	creation_date(_creation_date)
 	,	modification_date(_modification_date)
 	{};

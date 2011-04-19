@@ -232,14 +232,14 @@ QList <LegendWidget *> Graph::textsList()
   return texts;
 }
 
-long Graph::selectedMarkerKey()
+int Graph::selectedMarkerKey()
 {
   return selectedMarker;
 }
 
 QwtPlotMarker* Graph::selectedMarkerPtr()
 {
-  return d_plot->marker(selectedMarker);
+  return d_plot->marker(int(selectedMarker));
 }
 
 void Graph::setSelectedText(LegendWidget *l)
@@ -254,8 +254,9 @@ void Graph::setSelectedText(LegendWidget *l)
   d_selected_text = l;
 }
 
-void Graph::setSelectedMarker(long mrk, bool add)
+void Graph::setSelectedMarker(int _mrk, bool add)
 {
+  int mrk = int(_mrk);
   if (mrk >= 0){
     selectTitle(false);
     scalePicker->deselect();
@@ -1046,7 +1047,7 @@ void Graph::initScaleLimits()
     if (item->rtti() != QwtPlotItem::Rtti_PlotCurve)
       continue;
 
-    const QwtPlotCurve *c = (QwtPlotCurve *)item;
+    const QwtPlotCurve *c = (const QwtPlotCurve *)item;
     const QwtSymbol s = c->symbol();
     if (s.style() != QwtSymbol::NoSymbol && s.size().width() >= maxSymbolSize)
       maxSymbolSize = s.size().width();
@@ -2553,7 +2554,7 @@ LegendWidget* Graph::insertText(const QStringList& list, int fileVersion)
 void Graph::addArrow(QStringList list, int fileVersion)
 {
   ArrowMarker* mrk = new ArrowMarker();
-  long mrkID=d_plot->insertMarker(mrk);
+  int mrkID=d_plot->insertMarker(mrk);
   int linesOnPlot = (int)d_lines.size();
   d_lines.resize(++linesOnPlot);
   d_lines[linesOnPlot-1]=mrkID;
@@ -2597,12 +2598,12 @@ ArrowMarker* Graph::addArrow(ArrowMarker* mrk)
   return aux;
 }
 
-ArrowMarker* Graph::arrow(long id)
+ArrowMarker* Graph::arrow(int id)
 {
   return (ArrowMarker*)d_plot->marker(id);
 }
 
-ImageMarker* Graph::imageMarker(long id)
+ImageMarker* Graph::imageMarker(int id)
 {
   return (ImageMarker*)d_plot->marker(id);
 }
@@ -3105,7 +3106,7 @@ bool Graph::addCurves(Table* w, const QStringList& names, int style, double lWid
       if (c){
         CurveLayout cl = initCurveLayout(style, curves - errCurves);
         cl.sSize = sSize;
-        cl.lWidth = lWidth;
+        cl.lWidth = float(lWidth);
         updateCurveLayout(c, &cl);	
       }
     }
@@ -3624,7 +3625,7 @@ void Graph::contextMenuEvent(QContextMenuEvent *e)
 
   QPoint pos = d_plot->canvas()->mapFrom(d_plot, e->pos());
   int dist, point;
-  const long curve = d_plot->closestCurve(pos.x(), pos.y(), dist, point);
+  const int curve = d_plot->closestCurve(pos.x(), pos.y(), dist, point);
   const QwtPlotCurve *c = (QwtPlotCurve *)d_plot->curve(curve);
 
   if (c && dist < 10)//10 pixels tolerance

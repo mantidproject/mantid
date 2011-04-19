@@ -64,7 +64,7 @@
 #include "plot2D/ScaleEngine.h"
 
 /* XPM */
-static const char* const bottom_scl_xpm[] = {
+static const char*  bottom_scl_xpm[] = {
 "36 38 75 1",
 " 	c None",
 ".	c #FFFFFF",
@@ -181,7 +181,7 @@ static const char* const bottom_scl_xpm[] = {
 "...................................."};
 
 /* XPM */
-static const char* const top_scl_xpm[] = {
+static const char*  top_scl_xpm[] = {
 "36 38 75 1",
 " 	c None",
 ".	c #FFFFFF",
@@ -298,7 +298,7 @@ static const char* const top_scl_xpm[] = {
 "...................................."};
 
 /* XPM */
-static const char* const left_scl_xpm[] = {
+static const char*  left_scl_xpm[] = {
 "36 36 72 1",
 " 	c None",
 ".	c #FFFFFF",
@@ -410,7 +410,7 @@ static const char* const left_scl_xpm[] = {
 ".......67^8.......!......*!!!......."};
 
 /* XPM */
-static const char* const right_scl_xpm[] = {
+static const char*  right_scl_xpm[] = {
 "36 36 72 1",
 " 	c None",
 ".	c #FFFFFF",
@@ -521,7 +521,7 @@ static const char* const right_scl_xpm[] = {
 ".......|12;.......!......345........",
 ".......67^8.......!......*!!!......."};
 
-static const char* const image2_data[] = {
+static const char*  image2_data[] = {
 "74 77 171 2",
 "  	c None",
 ". 	c #FFFFFF",
@@ -772,7 +772,7 @@ static const char* const image2_data[] = {
 ". . @ 6.).} h y.p . . . . . . . . . . . . . . . . . . . . . . @ / / ).# / Y . . . . . . . . . . . . . . . . . . . M.% J.2.2.2.2.N.. . . . . . . . . ",
 ". . . 3 F./ a 4 . . . . . . . . . . . . . . . . . . . . . . . |./ / / / / n . . . . . . . . . . . . . . . . . . . 0./ / / / / / 9.. . . . . . . . . "};
 
-static const char* const image3_data[] = {
+static const char*  image3_data[] = {
 "74 77 168 2",
 "  	c None",
 ". 	c #FFFFFF",
@@ -1020,7 +1020,7 @@ static const char* const image3_data[] = {
 ". . @ 7.&.] d x.l . . . . . . . . . . . . . . . . . . . . . . @ , , &.# , K . . . . . . . . . . . . . . . . . . . J.% G.4.4.4.4.K.. . . . . . . . . ",
 ". . . _ D., 5 : . . . . . . . . . . . . . . . . . . . . . . . 2., , , , , j . . . . . . . . . . . . . . . . . . . 9., , , , , , 8.. . . . . . . . . "};
 
-static const char* const image4_data[] = {
+static const char*  image4_data[] = {
 "35 32 4 1",
 "# c #000000",
 "a c #bfbfbf",
@@ -1059,7 +1059,7 @@ static const char* const image4_data[] = {
 ".........b.....b.....b.....b.......",
 "..................................."};
 
-static const char* const image5_data[] = {
+static const char*  image5_data[] = {
 "33 32 4 1",
 "# c #000000",
 "b c #bfbfbf",
@@ -1098,7 +1098,7 @@ static const char* const image5_data[] = {
 ".........#.....#.....#.....#.....",
 "................................."};
 
-static const char* const image6_data[] = {
+static const char*  image6_data[] = {
 "34 34 4 1",
 "a c #000000",
 "b c #bfbfbf",
@@ -1139,7 +1139,7 @@ static const char* const image6_data[] = {
 "..................................",
 ".................................."};
 
-static const char* const image7_data[] = {
+static const char*  image7_data[] = {
 "32 32 4 1",
 "# c #000000",
 "b c #bfbfbf",

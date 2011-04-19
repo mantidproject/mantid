@@ -1354,14 +1354,14 @@ void Graph3D::updateScalesFromMatrix(double xl, double xr, double yl,
 	for (int i = 0; i < nc; i++){
 		double x = x_begin + i*dx;
         double dli,dlf;
-        dlf = modf(abs((x - xStart)/dx),&dli);
-        int l = dli; if (dlf > 0.5) l++;
+        dlf = modf(fabs((x - xStart)/dx),&dli);
+        int l = int(dli); if (dlf > 0.5) l++;
 		for (int j = 0; j < nr; j++){
 			double y = y_begin + j*dy;
 			if (x >= xStart && x <= xEnd && y >= yStart && y <= yEnd){
                 double dki,dkf;
-                dkf = modf(abs((y - yStart)/dy),&dki);
-                int k = dki; if (dkf > 0.5) k++;
+                dkf = modf(fabs((y - yStart)/dy),&dki);
+                int k = int(dki); if (dkf > 0.5) k++;
 				double val = d_matrix->cell(k, l);
 				if (val > zr)
 					data_matrix[i][j] = zr;

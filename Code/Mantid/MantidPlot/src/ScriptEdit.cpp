@@ -469,7 +469,7 @@ void ScriptEdit::updateEditor()
   emit redoAvailable(isRedoAvailable());
 
   //This adjusts the margin width to accomodate the line number and the arrow
-  setMarginWidth(1, 38 + 5*std::log10( static_cast<double>(lines()) ));
+  setMarginWidth(1, 38 + int(5*std::log10( static_cast<double>(lines()) )));
 }
 
 

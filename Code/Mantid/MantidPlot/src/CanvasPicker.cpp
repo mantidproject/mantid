@@ -200,7 +200,7 @@ bool CanvasPicker::eventFilter(QObject *object, QEvent *e)
 			{
 				int key=((const QKeyEvent *)e)->key();
 
-				long selectedMarker = plot()->selectedMarkerKey();
+				int selectedMarker = plot()->selectedMarkerKey();
 				if (lines.contains(selectedMarker) &&
 						(key==Qt::Key_Enter || key==Qt::Key_Return))
 				{
@@ -278,7 +278,7 @@ void CanvasPicker::drawLineMarker(const QPoint& point, bool endArrow)
 bool CanvasPicker::selectMarker(const QMouseEvent *e)
 {
 	const QPoint point = e->pos();
-	foreach(long i, plot()->imageMarkerKeys()) {
+	foreach(int i, plot()->imageMarkerKeys()) {
 		ImageMarker* m=(ImageMarker*)plotWidget->marker(i);
 		if (!m) return false;
 		if (m->rect().contains(point)) {
@@ -287,7 +287,7 @@ bool CanvasPicker::selectMarker(const QMouseEvent *e)
 			return true;
 		}
 	}
-	foreach(long i, plot()->lineMarkerKeys()) {
+	foreach(int i, plot()->lineMarkerKeys()) {
 		ArrowMarker* mrkL=(ArrowMarker*) plotWidget->marker(i);
 		if (!mrkL)
 			return false;

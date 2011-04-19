@@ -59,7 +59,7 @@ void Bar::configure(double rad)
 void Bar::drawBegin()
 {  
   diag_ = (plot->hull().maxVertex-plot->hull().minVertex).length() * radius_;
-  glLineWidth( plot->meshLineWidth() );
+  glLineWidth( GLfloat(plot->meshLineWidth()) );
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset(1,1);
 }

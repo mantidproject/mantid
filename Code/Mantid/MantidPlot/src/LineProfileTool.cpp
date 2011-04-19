@@ -94,7 +94,7 @@ void LineProfileTool::calculateLineProfile(const QPoint& start, const QPoint& en
 
 	//uses the fast Bresenham's line-drawing algorithm
 #define sgn(x) ((x<0)?-1:((x>0)?1:0))
-	int i,dx,dy,sdx,sdy,dxabs,dyabs,x,y,px,py,n;
+	int i,dx,dy,sdx,sdy,dxabs,dyabs,x,y,px,py,n = 0;
 
 	dx=x2-x1;      //the horizontal distance of the line
 	dy=y2-y1;      //the vertical distance of the line

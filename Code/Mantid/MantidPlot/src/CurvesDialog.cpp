@@ -418,7 +418,7 @@ bool CurvesDialog::addCurve(const QString& name)
     cl.lCol = color;
     cl.symCol = color;
     cl.fillCol = color;
-    cl.lWidth = app->defaultCurveLineWidth;
+    cl.lWidth = float(app->defaultCurveLineWidth);
     cl.sSize = app->defaultSymbolSize;
     cl.sType = symbol;
 

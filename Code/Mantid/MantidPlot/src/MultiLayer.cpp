@@ -884,8 +884,8 @@ void MultiLayer::printAllLayers(QPainter *painter)
 			QPoint pos = gr->pos();
 			pos = QPoint(margin + pos.x(), margin + pos.y());
 			QSize size=	myPlot->size();
-			int width=size.width()*scaleFactorX;
-			int height=size.height()*scaleFactorY;
+			int width=int(size.width()*scaleFactorX);
+			int height=int(size.height()*scaleFactorY);
 			myPlot->print(painter, QRect(pos, QSize(width,height)));
 		
 		}

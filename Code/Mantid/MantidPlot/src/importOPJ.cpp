@@ -72,8 +72,8 @@ QString strreverse(const QString &str) //QString reversing
 QString JulianDateTime2String(double jdt)
 {
 	QTime time(0,0,0,0);
-	time = time.addSecs((jdt-(int)jdt)*86400);
-	QDateTime dt(QDate::fromJulianDay(jdt + 1), time);
+	time = time.addSecs(int(jdt-(int)jdt)*86400);
+	QDateTime dt(QDate::fromJulianDay(int(jdt) + 1), time);
 	return dt.toString("dd.MM.yyyy hh:mm:ss");
 }
 
@@ -238,11 +238,11 @@ bool ImportOPJ::importTables(const OPJFile& opj)
             table->saveToMemory(d_cells);
 
 			QString format;
+  		int f = 0;
 			switch(opj.colValueType(s,j))
 			{
 			case 0: //Numeric
 			case 6: //Text&Numeric
-				int f;
 				if(opj.colNumDisplayType(s,j)==0)
 					f=0;
 				else
@@ -645,7 +645,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					{
 						int flags=opj.curveSymbolType(g,l,c);
 						curve = (PlotCurve *)graph->addErrorBars(tableName + "_" + opj.curveXColName(g,l,c), mw->table(tableName), tableName + "_" + opj.curveYColName(g,l,c),
-							((flags&0x10)==0x10?0:1), ceil(opj.curveLineWidth(g,l,c)), ceil(opj.curveSymbolSize(g,l,c)), QColor(Qt::black),
+							((flags&0x10)==0x10?0:1), int(ceil(opj.curveLineWidth(g,l,c))), int(ceil(opj.curveSymbolSize(g,l,c))), QColor(Qt::black),
 							(flags&0x40)==0x40, (flags&2)==2, (flags&1)==1);
 					}
 					else if(style==Graph::Histogram)
@@ -729,8 +729,8 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				}
 
 				CurveLayout cl = graph->initCurveLayout(style, opj.numCurves(g,l));
-				cl.sSize = ceil(opj.curveSymbolSize(g,l,c));
-				cl.penWidth=opj.curveSymbolThickness(g,l,c);
+				cl.sSize = int(ceil(opj.curveSymbolSize(g,l,c)));
+				cl.penWidth=float(opj.curveSymbolThickness(g,l,c));
 				color=opj.curveSymbolColor(g,l,c);
 				if((style==Graph::Scatter || style==Graph::LineSymbols || style==Graph::Area)&&color==0xF7)//0xF7 -Automatic color
 					color=auto_color++;
@@ -808,7 +808,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					cl.fillCol=-1;
 				}
 
-				cl.lWidth = ceil(opj.curveLineWidth(g,l,c));
+				cl.lWidth = float(ceil(opj.curveLineWidth(g,l,c)));
 				color=opj.curveLineColor(g,l,c);
 				cl.lCol=(color==0xF7?0:color); //0xF7 -Automatic color
 				int linestyle=opj.curveLineStyle(g,l,c);
@@ -859,7 +859,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 						cl.lCol = (color==0xF7?0:color); //0xF7 -Automatic color
 						color=(cl.aStyle==0 ? opj.curveFillAreaColor(g,l,c) : opj.curveFillPatternColor(g,l,c));
 						cl.aCol=(color==0xF7?cl.lCol:color); //0xF7 -Automatic color
-						cl.lWidth = ceil(opj.curveFillPatternBorderWidth(g,l,c));
+						cl.lWidth = float(ceil(opj.curveFillPatternBorderWidth(g,l,c)));
 						linestyle=opj.curveFillPatternBorderStyle(g,l,c);
 					}
 				}
@@ -948,7 +948,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				{
 					vectorProperties vector = opj.curveVectorProperties(g,l,c);
 					graph->updateVectorsLayout(c, ColorBox::color(cl.symCol), ceil(vector.width),
-						floor(vector.arrow_lenght*fVectorArrowScaleFactor + 0.5), vector.arrow_angle, vector.arrow_closed, vector.position);
+						int(floor(vector.arrow_lenght*fVectorArrowScaleFactor + 0.5)), vector.arrow_angle, vector.arrow_closed, vector.position);
 				}
 				switch(opj.curveLineConnect(g,l,c))
 				{
@@ -1042,7 +1042,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				QString tableName=data.right(data.length()-2) + "_" + ticks[i].colName.c_str();
 
 				QString formatInfo;
-				int format;
+				int format = 0;
 				int type;
 				int prec=ticks[i].decimal_places;
 				switch(ticks[i].value_type)
@@ -1127,12 +1127,12 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 					fontsize = opj.layerXAxisTitle(g,l).fontsize;
 					break;
 				}
-				fnt.setPointSize(floor(fontsize*fFontScaleFactor + 0.5));
+				fnt.setPointSize(int(floor(fontsize*fFontScaleFactor + 0.5)));
 				fnt.setBold(false);
 				graph->setAxisTitleFont(i, fnt);
 
 				fnt = graph->axisFont(i);
-				fnt.setPointSize(floor(ticks[i].fontsize*fFontScaleFactor + 0.5));
+				fnt.setPointSize(int(floor(ticks[i].fontsize*fFontScaleFactor + 0.5)));
 				graph->setAxisFont(i, fnt);
 			}
 
@@ -1143,15 +1143,15 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 			int nYDelta = graph->plotWidget()->height() - graph->plotWidget()->canvas()->height();
 			QPoint posCanvas =  graph->plotWidget()->canvas()->pos();
 
-			graph->resize(layerRect.width()*fXScale + nXDelta,
-				layerRect.height()*fYScale + nYDelta);
+			graph->resize(int(layerRect.width()*fXScale) + nXDelta,
+				int(layerRect.height()*fYScale) + nYDelta);
 
-			int newXGraphPos = layerRect.left*fXScale - posCanvas.x() - ml->x();
-			int newYGraphPos = layerRect.top*fYScale - posCanvas.y() - ml->y();
+			int newXGraphPos = int(layerRect.left*fXScale) - posCanvas.x() - ml->x();
+			int newYGraphPos = int(layerRect.top*fYScale) - posCanvas.y() - ml->y();
 			graph->move((newXGraphPos > 0 ? newXGraphPos : 0), (newYGraphPos > 0 ? newYGraphPos : 0));
 
-			graph->plotWidget()->resize(layerRect.width()*fXScale + nXDelta,
-				layerRect.height()*fYScale + nYDelta);
+			graph->plotWidget()->resize(int(layerRect.width()*fXScale) + nXDelta,
+				int(layerRect.height()*fYScale) + nYDelta);
 
 			//add texts
 			vector<text> texts=opj.layerTexts(g, l);
@@ -1174,7 +1174,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 				mrk.setEndPoint(lines[i].end.x, lines[i].end.y);
 				mrk.drawStartArrow(lines[i].begin.shape_type > 0);
 				mrk.drawEndArrow(lines[i].end.shape_type > 0);
-				mrk.setHeadLength(lines[i].end.shape_length);
+				mrk.setHeadLength(int(lines[i].end.shape_length));
                 mrk.setHeadAngle(arrowAngle(lines[i].end.shape_length, lines[i].end.shape_width));
 				mrk.setColor(ColorBox::color(lines[i].color));
 				mrk.setWidth((int)lines[i].width);
@@ -1211,7 +1211,7 @@ bool ImportOPJ::importGraphs(const OPJFile& opj)
 			for(size_t i=0; i<bitmaps.size(); ++i)
 			{
 				QPixmap bmp;
-				bmp.loadFromData(bitmaps[i].data, bitmaps[i].size, "BMP");
+				bmp.loadFromData(bitmaps[i].data, uint(bitmaps[i].size), "BMP");
 				QTemporaryFile file;
 				file.setFileTemplate(QDir::tempPath() + "/XXXXXX.bmp");
 				if (file.open())
@@ -1315,7 +1315,7 @@ void ImportOPJ::addText(const text& _text, Graph* graph, LegendWidget* txt, cons
 		txt=graph->newLegend(parseOriginText(QString::fromLocal8Bit(_text.txt.c_str())));
 
 	QFont font(mw->plotLegendFont);
-	font.setPointSize(floor(_text.fontsize*fFontScaleFactor + 0.5));
+	font.setPointSize(int(floor(_text.fontsize*fFontScaleFactor + 0.5)));
 	txt->setAngle(_text.rotation);
 	txt->setTextColor(ColorBox::color(_text.color));
 	txt->setFont(font);
@@ -1324,7 +1324,7 @@ void ImportOPJ::addText(const text& _text, Graph* graph, LegendWidget* txt, cons
 	rect txtRect=_text.clientRect;
 	int x=(txtRect.left>layerRect.left ? txtRect.left-layerRect.left : 0);
 	int y=(txtRect.top>layerRect.top ? txtRect.top-layerRect.top : 0);
-	txt->move(QPoint(x*fXScale, y*fYScale));
+	txt->move(QPoint(int(x*fXScale), int(y*fYScale)));
 
 	/*QRect qtiRect=graph->plotWidget()->canvas()->geometry();
 	txt->setOrigin(QPoint(x*qtiRect.width()/layerRect.width(),

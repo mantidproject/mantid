@@ -201,7 +201,7 @@ QPrinter::PageSize ImageExportDialog::pageSize() const
 if (!d_standard_page->isChecked())
     return QPrinter::Custom;
 
-QPrinter::PageSize size;
+QPrinter::PageSize size = QPrinter::A4;
 switch (boxPageSize->currentIndex())
 	{
 	case 0:
