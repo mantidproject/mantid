@@ -22,7 +22,7 @@ endif(UNITY_BUILD)
 # Add the target for this directory
 add_library ( UserAlgorithms EXCLUDE_FROM_ALL ${SRC_FILES} ${INC_FILES})
 
-# Add to the 'FrameworkTests' group in VS
-set_property ( TARGET UserAlgorithms PROPERTY FOLDER "UnitTests" )
+# Add to the 'Framework' group in VS
+set_property ( TARGET UserAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 target_link_libraries ( UserAlgorithms ${MANTIDLIBS} )
