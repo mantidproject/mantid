@@ -294,7 +294,7 @@ Algebra::setFunctionObjStr(const std::string& A)
 		    {
 		      SurfMap[N]=nLiteral;
 		      cx<<nLiteral;
-		      nLiteral[0]= (nLiteral[0]=='z') ? 'A' : static_cast<int>(nLiteral[0])+1;
+		      nLiteral[0]= (nLiteral[0]=='z') ? 'A' : static_cast<char>(static_cast<int>(nLiteral[0])+1);
 		      bigFlag=(nLiteral[0]=='Z') ? 1 : 0;
 		    }
 		  else

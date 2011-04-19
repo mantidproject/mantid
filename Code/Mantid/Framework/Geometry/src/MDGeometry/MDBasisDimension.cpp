@@ -32,7 +32,7 @@ direction(inDirection)
 			 throw(std::invalid_argument("The module of basis reciprocal dimension has to be 1"));
 		 }
 	 }else{
-		 if(abs(this->direction.norm()-this->direction[0])>FLT_EPSILON){
+		 if(fabs(this->direction.norm()-this->direction[0])>FLT_EPSILON){
 			 throw(std::invalid_argument("The basis orthogonal dimension have to be directed along 0 in V3D"));
 
 		 }

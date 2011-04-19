@@ -52,7 +52,7 @@ Quat::Quat(const V3D& src,const V3D& des)
     c = cross[2];
 
 	double norm = a*a+b*b+c*c+w*w;
-	if(abs(norm-1)>FLT_EPSILON){
+	if(fabs(norm-1)>FLT_EPSILON){
 		norm = sqrt(norm);
 		w/=norm;
 		a/=norm;
@@ -534,7 +534,7 @@ Quat::getRotation(bool check_normalisation)const
 	double cw      = c * w;
 	if(check_normalisation){
 		double normSq=aa+bb+cc+w*w;
-		if(abs(normSq-1)>FLT_EPSILON){
+		if(fabs(normSq-1)>FLT_EPSILON){
 			throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
 		}
 	}

@@ -134,7 +134,7 @@ void MDDimension::setExpanded(size_t nxBins)
     this->isIntegrated=true;
   }
   this->nBins= nxBins;
-  double Delta=this->getRange()/(nBins);
+  double Delta=this->getRange()/static_cast<double>(nBins);
 
   double r;
   this->Axis.clear();

@@ -33,7 +33,7 @@ namespace Geometry
     MDHistoDimension(std::string name, std::string ID, std::string units, double min, double max, size_t numBins)
     : m_name(name), m_dimensionId(ID), m_units(units),
       m_min(min), m_max(max), m_numBins(numBins),
-      m_binWidth((max-min)/numBins)
+      m_binWidth((max-min)/static_cast<double>(numBins))
     {
     }
     
@@ -86,7 +86,7 @@ namespace Geometry
     ///  Get coordinate for index;
     virtual double getX(size_t index) const
     {
-      return index * m_binWidth + m_min;
+      return static_cast<double>(index) * m_binWidth + m_min;
     }
 
     /// Return the width of one bin.

@@ -139,7 +139,7 @@ SurfaceFactory::createSurfaceID(const std::string& Key) const
 {
   std::map<char,std::string>::const_iterator mc;
   
-  mc=(Key.empty()) ? ID.end() : ID.find(tolower(Key[0]));
+  mc= (Key.empty()) ? ID.end() : ID.find(static_cast<char>(tolower(Key[0])));
   if (mc==ID.end())
     {
       throw Kernel::Exception::NotFoundError("SurfaceFactory::createSurfaceID",Key);

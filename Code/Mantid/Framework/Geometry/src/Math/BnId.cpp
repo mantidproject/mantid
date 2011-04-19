@@ -130,7 +130,7 @@ BnId::equivalent(const BnId& A) const
   if (A.size!=size)
     return 0;
   int retval=1;
-  for(int i=0;i<size;i++)
+  for(size_t i=0;i<size;i++)
     {
       if (Tval[i]*A.Tval[i]<0)          //true * false == -1.
         return 0;
@@ -191,7 +191,7 @@ BnId::operator[](const int A) const
     @return -99 on err, Tval[A] normally
   */
 {
-  if (A<0 && A>=size)
+  if (A<0 && A>=static_cast<int>(size))
     return -99;
   return Tval[A];
 }

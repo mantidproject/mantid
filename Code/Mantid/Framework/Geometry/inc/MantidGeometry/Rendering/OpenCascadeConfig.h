@@ -3,6 +3,7 @@
 
 /** 
   Include this header before any OpenCascade headers to suppress warnings about macro redefinitions
+  and casting away constness
 
   @author Martyn Gigg, Tessella plc
   @date 06/09/2010
@@ -34,5 +35,10 @@
 #endif
 //Open Cascade maths header
 #include <Standard_math.hxx>
+
+#if __GNUC__
+  #pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
+
 
 #endif //OPENCASCADE_CONFIG_H_

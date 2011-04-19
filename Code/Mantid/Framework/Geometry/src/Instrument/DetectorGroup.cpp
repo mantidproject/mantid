@@ -99,7 +99,7 @@ namespace Mantid
       {
         result += (*it).second->getDistance(comp);
       }
-      return result/m_detectors.size();
+      return result/static_cast<double>(m_detectors.size());
     }
 
     /// Gives the average angle of a group of detectors from the observation point, relative to the axis given
@@ -112,7 +112,7 @@ namespace Mantid
         const V3D sampleDetVec = (*it).second->getPos() - observer;
         result += sampleDetVec.angle(axis);
       }
-      return result/m_detectors.size();
+      return result/static_cast<double>(m_detectors.size());
     }
 
     /// Gives the average phi of the constituent detectors
@@ -127,7 +127,7 @@ namespace Mantid
         detPos.getSpherical(dummy,dummy,phi);
         result += phi*M_PI/180.0;;
       }
-      return result/m_detectors.size();  
+      return result/static_cast<double>(m_detectors.size()); 
     }
 
     /** Return IDs for the detectors grouped

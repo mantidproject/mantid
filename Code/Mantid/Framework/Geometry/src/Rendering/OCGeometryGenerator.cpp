@@ -99,7 +99,7 @@ namespace Mantid
 					return;
 				}
 				//Traverse through Rule
-				TopoDS_Shape Result=AnalyzeRule((Rule*)top);
+				TopoDS_Shape Result=AnalyzeRule(const_cast<Rule*>(top));
 				try{					
 					ObjSurface=new TopoDS_Shape(Result);
 					BRepMesh::Mesh(Result,0.001);
@@ -146,7 +146,7 @@ namespace Mantid
 		TopoDS_Shape OCGeometryGenerator::AnalyzeRule(CompObj* rule)
 		{
 			Object* obj=rule->getObj();
-			TopoDS_Shape Result=AnalyzeRule((Rule*)obj->topRule());
+			TopoDS_Shape Result=AnalyzeRule(const_cast<Rule*>(obj->topRule()));
 			Result.Complement();
 			return 	Result;
 		}

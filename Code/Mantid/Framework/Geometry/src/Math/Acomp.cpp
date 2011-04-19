@@ -621,7 +621,7 @@ namespace Mantid
       */
     {
       int flag,S,V;
-      for(int i=0;i<BX.Size();i++)
+      for(int i=0;i<static_cast<int>(BX.Size());i++)
       {
         flag=BX[i];
         if (flag)
@@ -1856,10 +1856,10 @@ namespace Mantid
 
     {
       const std::pair<size_t,size_t> RX=Grid.size();
-      for(unsigned int pc=0;pc!=PIform.size();pc++)
+      for(size_t pc=0;pc!=PIform.size();pc++)
       {
         std::cerr<<PIform[pc]<<":";
-        for(int ic=0;ic!=RX.second;ic++)
+        for(size_t ic=0;ic!=RX.second;ic++)
           std::cerr<<((Grid[pc][ic]) ? " 1" : " 0");
         std::cerr<<std::endl;
       }

@@ -33,16 +33,17 @@ template<typename T>
 std::vector<T> 
 Matrix<T>::get_vector()const
 {
-	std::vector<T> rez(nx*ny);
-	int ic(0);
-
-	 for(int i=0;i<nx;i++){
-		for(int j=0;j<ny;j++){
-		    rez[ic]=V[i][j];
-			ic++;
-		}
-	 }
-	 return rez;
+  std::vector<T> rez(nx*ny);
+  size_t ic(0);
+  for(size_t i=0;i<nx;i++)
+  {
+    for(size_t j=0;j<ny;j++)
+    {
+      rez[ic]=V[i][j];
+      ic++;
+    }
+  }
+  return rez;
 }
 //
 template<typename T>
@@ -74,10 +75,13 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
 {
   // Note:: nx,ny zeroed so setMem always works
   setMem(A.size(),B.size());
-  for(int i=0;i<nx;i++)
-    for(int j=0;j<ny;j++)
+  for(size_t i=0;i<nx;i++)
+  {
+    for(size_t j=0;j<ny;j++)
+    {
       V[i][j]=A[i]*B[j];
-  
+    }
+  }  
 }
 
 template<typename T>
@@ -91,9 +95,9 @@ Matrix<T>::Matrix(const Matrix<T>& A,const size_t nrow,const size_t ncol)
   */
 {
   // Note:: nx,ny zeroed so setMem always works
-  if (nrow>nx || nrow<0)
+  if (nrow>nx)
     throw Kernel::Exception::IndexError(nrow,A.nx, "Matrix::Constructor without col");
-  if (ncol>ny || ncol<0)
+  if (ncol>ny)
     throw Kernel::Exception::IndexError(ncol,A.ny, "Matrix::Constructor without col");
   setMem(nx,ny);
   size_t iR(0);
@@ -127,11 +131,15 @@ Matrix<T>::Matrix(const Matrix<T>& A)
   // Note:: nx,ny zeroed so setMem always works
   setMem(A.nx,A.ny);
   if (nx*ny)
+  {
+    for(size_t i=0;i<nx;i++)
     {
-      for(int i=0;i<nx;i++)
-	for(int j=0;j<ny;j++)
-	  V[i][j]=A.V[i][j];
+      for(size_t j=0;j<ny;j++)
+      {
+	V[i][j]=A.V[i][j];
+      }
     }
+  }
 }
 
 
@@ -148,9 +156,15 @@ Matrix<T>::operator=(const Matrix<T>& A)
     {
       setMem(A.nx,A.ny);
       if (nx*ny)
-	for(int i=0;i<nx;i++)
-	  for(int j=0;j<ny;j++)
+      {
+	for(size_t i=0;i<nx;i++)
+	{
+	  for(size_t j=0;j<ny;j++)
+	  {
 	    V[i][j]=A.V[i][j];
+	  }
+	}
+      }
     }
   return *this;
 }
@@ -203,9 +217,9 @@ Matrix<T>::operator-=(const Matrix<T>& A)
 {
   const size_t Xpt((nx>A.nx) ? A.nx : nx);
   const size_t Ypt((ny>A.ny) ? A.ny : ny);
-  for(int i=0;i<Xpt;i++)
+  for(size_t i=0;i<Xpt;i++)
   {
-    for(int j=0;j<Ypt;j++)
+    for(size_t j=0;j<Ypt;j++)
     {
       V[i][j]-=A.V[i][j];
     }
@@ -282,7 +296,7 @@ Matrix<T>::operator*(const std::vector<T>& Vec) const
   */
 {
   std::vector<T> Out;
-  if (ny>static_cast<int>(Vec.size()))
+  if (ny>Vec.size())
     throw Kernel::Exception::MisMatch<size_t>(ny,Vec.size(),"Matrix::operator*(Vec)");
 
   Out.resize(nx);
@@ -648,16 +662,20 @@ Matrix<T>::fDiagonal(const std::vector<T>& Dvec) const
   */
 {
   // Note:: nx,ny zeroed so setMem always works
-  if (static_cast<int>(Dvec.size())!=nx)
+  if (Dvec.size()!=nx)
     {
       std::ostringstream cx;
       cx<<"Matrix::fDiagonal Size: "<<Dvec.size()<<" "<<nx<<" "<<ny;
       throw std::runtime_error(cx.str());
     }
   Matrix<T> X(Dvec.size(),ny);
-  for(int i=0;i<static_cast<int>(Dvec.size());i++)
-    for(int j=0;j<ny;j++)
+  for(size_t i=0; i < Dvec.size();i++)
+  {
+    for(size_t j=0;j<ny;j++)
+    {
       X.V[i][j]=Dvec[i]*V[i][j];
+    }
+  }
   return X;
 }
 
@@ -674,7 +692,7 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
   */
 {
   // Note:: nx,ny zeroed so setMem always works
-  if (static_cast<int>(Dvec.size())!=ny)
+  if (Dvec.size()!=ny)
     {
       std::ostringstream cx;
       cx<<"Error Matrix::bDiaognal size:: "<<Dvec.size()
@@ -683,9 +701,13 @@ Matrix<T>::bDiagonal(const std::vector<T>& Dvec) const
     }
 
   Matrix<T> X(nx,Dvec.size());
-  for(int i=0;i<nx;i++)
-    for(int j=0;j<static_cast<int>(Dvec.size());j++)
+  for(size_t i=0;i<nx;i++)
+  {
+    for(size_t j=0;j<Dvec.size();j++)
+    {
       X.V[i][j]=Dvec[j]*V[i][j];
+    }
+  }
   return X;
 }
 
@@ -710,8 +732,8 @@ Matrix<T>::Tprime() const
 
   // irregular matrix
   Matrix<T> MT(ny,nx);
-  for(int i=0;i<nx;i++)
-    for(int j=0;j<ny;j++)
+  for(size_t i=0;i<nx;i++)
+    for(size_t j=0;j<ny;j++)
       MT.V[j][i]=V[i][j];
 
   return MT;
@@ -847,26 +869,26 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
     }
     const double pivDiv= 1.0/V[icol][icol];
     V[icol][icol]=1;
-    for(int l=0;l<nx;l++) 
+    for(size_t l=0;l<nx;l++) 
     {
       V[icol][l] *= pivDiv;
     }
-    for(int l=0;l<B.ny;l++)
+    for(size_t l=0;l<B.ny;l++)
     {
       B.V[icol][l] *=pivDiv;
     }
     
-    for(int ll=0;ll<nx;ll++)
+    for(size_t ll=0;ll<nx;ll++)
     {
       if (ll!=icol)
       {
         const double div_num=V[ll][icol];
         V[ll][icol]=0.0;
-        for(int l=0;l<nx;l++) 
+        for(size_t l=0;l<nx;l++) 
         {
           V[ll][l] -= V[icol][l]*div_num;
         }
-        for(int l=0;l<B.ny;l++)
+        for(size_t l=0;l<B.ny;l++)
         {
           B.V[ll][l] -= B.V[icol][l]*div_num;
         }
@@ -875,9 +897,9 @@ Matrix<T>::GaussJordan(Matrix<T>& B)
   }
 
   // Un-roll interchanges
-  if( nx >= 0 )
+  if( nx > 0 )
   {
-    for(size_t l=nx-1;l>=0;l--)
+    for(int l=static_cast<int>(nx)-1;l>=0;l--)
     {
       if (indxrow[l] !=indxcol[l])
       {
@@ -915,11 +937,11 @@ Matrix<T>::Faddeev(Matrix<T>& InvOut)
   Poly.push_back(1);
   Poly.push_back(tVal);
 
-  for(int i=0;i<nx-2;i++)   // skip first (just copy) and last (to keep B-1)
+  for(size_t i=0;i<nx-2;i++)   // skip first (just copy) and last (to keep B-1)
     {
       B=A*B - Ident*tVal;
       tVal=B.Trace();
-      Poly.push_back(tVal/(i+1));
+      Poly.push_back(tVal/static_cast<T>(i+1));
     }
   // Last on need to keep B;
   InvOut=B;
@@ -952,16 +974,16 @@ Matrix<T>::Invert()
   Lcomp.lubcmp(indx,d);
 	
   double det=static_cast<double>(d);
-  for(int j=0;j<nx;j++)
+  for(size_t j=0;j<nx;j++)
     det *= Lcomp.V[j][j];
   
-  for(int j=0;j<nx;j++)
+  for(size_t j=0;j<nx;j++)
     {
-      for(int i=0;i<nx;i++)
+      for(size_t i=0;i<nx;i++)
 	col[i]=0.0;
       col[j]=1.0;
       Lcomp.lubksb(indx,col);
-      for(int i=0;i<nx;i++)
+      for(size_t i=0;i<nx;i++)
 	V[i][j]=static_cast<T>(col[i]);
     } 
   delete [] indx;
@@ -1001,11 +1023,11 @@ Matrix<T>::factor()
 
   double Pmax;
   double deter=1.0;
-  for(int i=0;i<nx-1;i++)       //loop over each row
+  for(int i=0;i<static_cast<int>(nx)-1;i++)       //loop over each row
     {
       int jmax=i;
       Pmax=fabs(V[i][i]);
-      for(int j=i+1;j<nx;j++)     // find max in Row i
+      for(int j=i+1;j<static_cast<int>(nx);j++)     // find max in Row i
         {
 	  if (fabs(V[i][j])>Pmax)
             {
@@ -1027,11 +1049,11 @@ Matrix<T>::factor()
       // zero all rows below diagonal
       Pmax=V[i][i];
       deter*=Pmax;
-      for(int k=i+1;k<nx;k++)  // row index
+      for(int k=i+1;k<static_cast<int>(nx);k++)  // row index
         {
 	  const double scale=V[k][i]/Pmax;
 	  V[k][i]=static_cast<T>(0);
-	  for(int q=i+1;q<nx;q++)   //column index
+	  for(int q=i+1;q<static_cast<int>(nx);q++)   //column index
 	    V[k][q]-=static_cast<T>(scale*V[i][q]);
 	}
     }
@@ -1047,15 +1069,19 @@ Matrix<T>::normVert()
     Assumes that they have already been calculated
   */
 {
-  for(int i=0;i<nx;i++)
+  for(size_t i=0;i<nx;i++)
+  {
+    T sum=0;
+    for(size_t j=0;j<ny;j++)
     {
-      T sum=0;
-      for(int j=0;j<ny;j++)
-	sum+=V[i][j]*V[i][j];
-      sum=static_cast<T>(std::sqrt(static_cast<double>(sum)));
-      for(int j=0;j<ny;j++)
-	V[i][j]/=sum;
+      sum += V[i][j]*V[i][j];
     }
+    sum=static_cast<T>(std::sqrt(static_cast<double>(sum)));
+    for(size_t j=0;j<ny;j++)
+    {
+      V[i][j]/=sum;
+    }
+  }
   return;
 }
 
@@ -1068,9 +1094,13 @@ Matrix<T>::compSum() const
    */
 {
   T sum(0);
-  for(int i=0;i<nx;i++)
-    for(int j=0;j<ny;j++)
+  for(size_t i=0;i<nx;i++)
+  {
+    for(size_t j=0;j<ny;j++)
+    {
       sum+=V[i][j]*V[i][j];
+    }
+  }
   return sum;
 }
 
@@ -1094,10 +1124,10 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
     }
   double *vv=new double[nx];
   interchange=1;
-  for(int i=0;i<nx;i++)
+  for(int i=0;i<static_cast<int>(nx);i++)
     {
       big=0.0;
-      for(j=0;j<nx;j++)
+      for(j=0;j<static_cast<int>(nx);j++)
       if ((temp=fabs(V[i][j])) > big) 
 	  big=temp;
 
@@ -1109,7 +1139,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
       vv[i]=1.0/big;
     }
 
-  for (j=0;j<nx;j++)
+  for (j=0;j<static_cast<int>(nx);j++)
     {
       for(int i=0;i<j;i++)
         {
@@ -1120,7 +1150,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
         }
       big=0.0;
       imax=j;
-      for (int i=j;i<nx;i++)
+      for (int i=j;i<static_cast<int>(nx);i++)
         {
           sum=V[i][j];
           for (k=0;k<j;k++)
@@ -1135,7 +1165,7 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
 
       if (j!=imax)
         {
-          for(k=0;k<nx;k++)
+          for(k=0;k<static_cast<int>(nx);k++)
             {                     //Interchange rows
               dum=V[imax][k];
               V[imax][k]=V[j][k];
@@ -1148,10 +1178,10 @@ Matrix<T>::lubcmp(int* rowperm,int& interchange)
       
       if (V[j][j] == 0.0) 
         V[j][j]=static_cast<T>(1e-14);
-      if (j != nx-1)
+      if (j != static_cast<int>(nx)-1)
         {
           dum=1.0/(V[j][j]);
-          for(int i=j+1;i<nx;i++)
+          for(int i=j+1;i<static_cast<int>(nx);i++)
             V[i][j] *= static_cast<T>(dum);
         }
     }
@@ -1169,7 +1199,7 @@ Matrix<T>::lubksb(const int* rowperm,double* b)
 {
   int ii= -1;
  
-  for(int i=0;i<nx;i++)
+  for(int i=0;i<static_cast<int>(nx);i++)
     {
       int ip=rowperm[i];
       double sum=b[ip];
@@ -1185,7 +1215,7 @@ Matrix<T>::lubksb(const int* rowperm,double* b)
   for (int i=static_cast<int>(nx)-1;i>=0;i--)
     {
       double sum=static_cast<T>(b[i]);
-      for (int j=i+1;j<nx;j++)
+      for (int j=i+1;j<static_cast<int>(nx);j++)
         sum -= V[i][j] * b[j];
       b[i]=sum/V[i][i];
     }
@@ -1263,12 +1293,13 @@ Matrix<T>::sortEigen(Matrix<T>& DiagMatrix)
   std::vector<T> X=DiagMatrix.Diagonal();
   indexSort(X,index);
   Matrix<T> EigenVec(*this);
-  for(int Icol=0;Icol<nx;Icol++)
+  for(size_t Icol=0;Icol<nx;Icol++)
   {
-      for(int j=0;j<nx;j++){
-			V[j][Icol]=EigenVec[j][index[Icol]];
-	  }
-	  DiagMatrix[Icol][Icol]=X[index[Icol]];
+    for(size_t j=0;j<nx;j++)
+    {
+      V[j][Icol]=EigenVec[j][index[Icol]];
+    }
+    DiagMatrix[Icol][Icol]=X[index[Icol]];
   }
 
   return;
@@ -1290,8 +1321,8 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
       std::cerr<<"Matrix not square"<<std::endl;
       return 0;
     }
-  for(int i=0;i<nx;i++)
-    for(int j=i+1;j<nx;j++)
+  for(size_t i=0;i<nx;i++)
+    for(size_t j=i+1;j<nx;j++)
       if (fabs(V[i][j]-V[j][i])>1e-6)
         {
 	  std::cerr<<"Matrix not symmetric"<<std::endl;
@@ -1310,7 +1341,7 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
   std::vector<double> B(nx);
   std::vector<double> ZeroComp(nx);
   //set b and d to the diagonal elements o A
-  for(int i=0;i<nx;i++)
+  for(size_t i=0;i<nx;i++)
     {
       Diag[i]=B[i]= A.V[i][i];
       ZeroComp[i]=0;
@@ -1321,8 +1352,8 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
   for(int i=0;i<100;i++)        //max 50 iterations
     {
       sm=0.0;           // sum of off-diagonal terms
-      for(int ip=0;ip<nx-1;ip++)
-	for(int iq=ip+1;iq<nx;iq++)
+      for(size_t ip=0;ip<nx-1;ip++)
+	for(size_t iq=ip+1;iq<nx;iq++)
 	  sm+=fabs(A.V[ip][iq]);
 
       if (sm==0.0)           // Nothing to do return...
@@ -1330,17 +1361,17 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 	  // Make OUTPUT -- D + A
 	  // sort Output::
 	  std::vector<int> index;
-	  for(int ix=0;ix<nx;ix++)
+	  for(size_t ix=0;ix<nx;ix++)
 	    DiagMatrix.V[ix][ix]=static_cast<T>(Diag[ix]);
 	  return 1;
 	}
 
       // Threshold large for first 5 sweeps
-      tresh= (i<6) ? 0.2*sm/(nx*nx) : 0.0;
+      tresh= (i<6) ? 0.2*sm/static_cast<int>(nx*nx) : 0.0;
 
-      for(int ip=0;ip<nx-1;ip++)
+      for(int ip=0;ip<static_cast<int>(nx)-1;ip++)
 	{
-	  for(int iq=ip+1;iq<nx;iq++)
+	  for(int iq=ip+1;iq<static_cast<int>(nx);iq++)
 	    {
 	      double g=100.0*fabs(A.V[ip][iq]);
 	      // After 4 sweeps skip if off diagonal small
@@ -1375,15 +1406,15 @@ Matrix<T>::Diagonalise(Matrix<T>& EigenVec,Matrix<T>& DiagMatrix) const
 		    A.rotate(tau,sinAngle,j,ip,j,iq);
 		  for(int j=ip+1;j<iq;j++)
 		    A.rotate(tau,sinAngle,ip,j,j,iq);
-		  for(int j=iq+1;j<nx;j++)
+		  for(int j=iq+1;j<static_cast<int>(nx);j++)
 		    A.rotate(tau,sinAngle,ip,j,iq,j);
-		  for(int j=0;j<nx;j++)
+		  for(int j=0;j<static_cast<int>(nx);j++)
 		    EigenVec.rotate(tau,sinAngle,j,ip,j,iq);
 		  iteration++;
 		}
 	    }
 	}   
-      for(int j=0;j<nx;j++)
+      for(size_t j=0;j<nx;j++)
 	{
 	  B[j]+=ZeroComp[j];
 	  Diag[j]=B[j];
@@ -1455,9 +1486,9 @@ Matrix<T>::str() const
   */
 {
   std::ostringstream cx;
-  for(int i=0;i<nx;i++)
+  for(size_t i=0;i<nx;i++)
   {
-    for(int j=0;j<ny;j++)
+    for(size_t j=0;j<ny;j++)
     {
       cx<<std::setprecision(6)<<V[i][j]<<" ";
     }

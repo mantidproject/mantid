@@ -122,7 +122,7 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
   // loop over all the sub-elements of pElem
 
   NodeList* pNL = pElem->childNodes(); // get all child nodes
-  unsigned int pNL_length = pNL->length();
+  unsigned long pNL_length = pNL->length();
   int numPrimitives = 0; // used for counting number of primitives in this 'type' XML element
   std::map<int, Surface*> primitives; // stores the primitives that will be used to build final shape
   int l_id = 1; // used to build up unique id's for each shape added. Must start from int > zero.
