@@ -122,13 +122,13 @@ namespace Mantid
     /** function returns a direction of the dimension in the system of coordinates described by the MDBasis;
      *  Orthogonal dimensions always have direction 1, but we set direction of this to 0  (e.g. direction={0,0,0})? questionable, 1 may be better;
      *  while reciprocal dimension can be directed anywhere withing the reciprocal space;
-	     Norm of the vector, returned by this function has to be 1    */
+       Norm of the vector, returned by this function has to be 1    */
     virtual V3D getDirection(void)const
     { throw std::runtime_error("Not Implemented.");  }
 
     /** Return direction in the crystallogrpahical sence, e.g. output V3D is normalized in such a way that the size of
-	   smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would
-	   have integer values; */
+     smallest (by module) non-0 component of the vector is 1; In this case, all vectors representing valid crystallographical axis would
+     have integer values; */
     virtual V3D getDirectionCryst(void)const
     { throw std::runtime_error("Not Implemented.");  }
 

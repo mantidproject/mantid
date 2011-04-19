@@ -36,14 +36,14 @@ MDImage::getPointData(const std::vector<unsigned int> &selection,std::vector<poi
   if(selection_size >this->pMDGeometry->getNumExpandedDims()){
     throw(std::invalid_argument("MDImageData::getPointData: selection-> attempting to select more dimensions then there are expanded dimensions"));
   }
-  unsigned int i,j,k,iMin,jMin,kMin,iMax,jMax,kMax,isel;
-  size_t   base(0);
+  size_t i,j,k;
+  size_t   base(0),iMin,jMin,kMin,iMax,jMax,kMax,isel;
   const IMDDimension *pDim;
 
   // calculate shift for all selected dimensions;
-  int the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
+  size_t the_expanded_dim= this->pMDGeometry->getNumExpandedDims()-1;
   for(int iii=selection_size-1;iii>=0;iii--){
-    pDim = this->pMDGeometry->get_constDimension(the_expanded_dim).get();
+    pDim = this->pMDGeometry->get_constDimension((unsigned int)the_expanded_dim).get();
     if(selection[iii]>=pDim->getNBins()){
       isel=pDim->getNBins()-1;
     }else{
@@ -163,7 +163,7 @@ MDImage::reshape_geometry(const Geometry::MDGeometryDescription &transf)
 void 
 MDImage::set_imgArray_shape()
 {
-  unsigned int nDims = this->pMDGeometry->getNumDims();
+  size_t nDims = this->pMDGeometry->getNumDims();
   size_t   i;
 
   this->MD_IMG_array.dimSize.assign(nDims,0);
@@ -173,7 +173,7 @@ MDImage::set_imgArray_shape()
   this->MD_IMG_array.data_size    = 1;
   size_t  stride(1);
   for(i=0;i<this->pMDGeometry->getNumDims();i++){
-    pDim                             = (this->pMDGeometry->get_constDimension(i)).get();
+    pDim                             = (this->pMDGeometry->get_constDimension((unsigned int)i)).get();
     stride                           = pDim->getStride();
     this->MD_IMG_array.dimSize[i]    =  pDim->getNBins();
     this->MD_IMG_array.data_size     *= this->MD_IMG_array.dimSize[i];
@@ -264,7 +264,7 @@ MDImage::MDImage(Mantid::Geometry::MDGeometry* pGeometry):
   // empty initialisation; currently not supported as will throw later;
   if(!pGeometry)return;
 
-  int nDims = pMDGeometry->getNumDims();
+  size_t nDims = pMDGeometry->getNumDims();
   if( nDims >MAX_MD_DIMS_POSSIBLE){
     throw(std::invalid_argument("MDData::MDData number of dimensions exceeds the possible value"));
   }

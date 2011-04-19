@@ -546,17 +546,17 @@ namespace Mantid
       // Hand off to the string creator
       std::ostringstream stream;
       stream << history.name() << "." << history.version()
-	     << "(";
+       << "(";
       const std::vector<Kernel::PropertyHistory>& props = history.getProperties();
       const size_t numProps(props.size());
       for( size_t i = 0 ; i < numProps; ++i )
       {
-	const Kernel::PropertyHistory & prop = props[i];
-	if( !prop.isDefault() )
-	{
-	  stream << prop.name() << "=" << prop.value();
-	}
-	if( i < numProps - 1 ) stream << ",";
+  const Kernel::PropertyHistory & prop = props[i];
+  if( !prop.isDefault() )
+  {
+    stream << prop.name() << "=" << prop.value();
+  }
+  if( i < numProps - 1 ) stream << ",";
       }
       stream << ")";
       return Algorithm::fromString(stream.str());

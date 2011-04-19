@@ -104,7 +104,13 @@ unsigned int
 CpRebinningNx3::getNumDataChunks()const
 {
     size_t pix_buffer_size = this->pSourceDataPoints->get_pix_bufSize();
-    size_t n_data_chunks  = (size_t)this->n_preselected_pix/pix_buffer_size;
+    size_t n_data_chunks_large  = (size_t)this->n_preselected_pix/pix_buffer_size;
+    unsigned int n_data_chunks(0);
+    n_data_chunks=~n_data_chunks;
+    if(n_data_chunks_large>=n_data_chunks){
+      throw(std::invalid_argument("Numer of data chunks to rebin is higer then 2^32; no point to do rebinning"));
+    }
+    n_data_chunks=(unsigned int)n_data_chunks_large;
 
     if(n_data_chunks*pix_buffer_size!=n_preselected_pix)n_data_chunks++;
     return n_data_chunks;
@@ -122,7 +128,8 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
   this->n_pixels_read   = 0;
   this->n_pixels_selected=0;
   this->n_pix_in_buffer  = 0;
-  this->nDimensions     = Source.getNumDims();
+  // number of dimensions can not be higher then 2^32 anyway
+  this->nDimensions     = (unsigned int)Source.getNumDims();
   this->shifts.resize(this->nDimensions);
   this->cut_min.resize(this->nDimensions);
   this->cut_max.resize(this->nDimensions);

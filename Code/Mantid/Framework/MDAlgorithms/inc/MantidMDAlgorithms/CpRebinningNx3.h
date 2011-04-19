@@ -61,8 +61,8 @@ public:
   ~CpRebinningNx3();
 protected:
 // the variables used during rebinning operation
-    int nDimensions;                     //< real number of dimensions in a dataset
-    int nRecDims;                        //< number of reciprocal dimensions
+    unsigned int nDimensions;            //< real number of dimensions in a dataset
+    unsigned int nRecDims;               //< number of reciprocal dimensions
     double rotations[9];                 //< rotation matrix for qx,qy,qz coordinates; 
     bool ignore_nan,ignore_inf;
     std::vector<double> shifts;          //< shift in all directions (tans_elo is 4th element of transf_bott_left

@@ -110,7 +110,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> spImage,boost::shared_
 
    this->memBased                = false;
    
-   unsigned int nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
+   size_t nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);
 
@@ -148,7 +148,7 @@ MDDataPoints::initialize(boost::shared_ptr<const MDImage> pImage)
     this->n_data_points           = 0;
 	this->memBased                = true;
 
-	unsigned int nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
+	size_t nDims= this->spMDImage->get_const_MDGeometry().getNumDims();
 
    this->box_min.assign(nDims,FLT_MAX);
    this->box_max.assign(nDims,-FLT_MAX);

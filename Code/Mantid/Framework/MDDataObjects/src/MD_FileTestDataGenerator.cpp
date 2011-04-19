@@ -64,7 +64,7 @@ MD_FileTestDataGenerator::read_MDGeomDescription(Mantid::Geometry::MDGeometryDes
 
         dscrptn.pDimDescription(i)->nBins = this->nBins[i]; // one sets this axis integrated
         dscrptn.pDimDescription(i)->cut_min = -1;
-        dscrptn.pDimDescription(i)->cut_max = this->nBins[i]-1;
+        dscrptn.pDimDescription(i)->cut_max = (double)this->nBins[i]-1;
 
     }
 
@@ -84,7 +84,7 @@ MD_FileTestDataGenerator::read_MDImg_data(MDImage & mdd)
     //double step = double(this->nDims)/nCells;
     uint64_t  sanity_check(0);
     for(i=0;i<nCells;i++){
-        pImg_data[i].s   = i;
+        pImg_data[i].s   = (double)i;
         pImg_data[i].err = 2/double(i+1);
         pImg_data[i].npix= i+1;
         sanity_check+=i+1;
@@ -129,7 +129,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
 // pixels data generated assiuming 50^nDim lattice;
     size_t ic(starting_cell),j;
     unsigned int idim;
-    unsigned long max_data_size;
+    size_t max_data_size;
     std::vector<size_t> dim_strides(this->nDims);
    
 

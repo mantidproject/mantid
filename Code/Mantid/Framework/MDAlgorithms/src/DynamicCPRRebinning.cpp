@@ -68,7 +68,8 @@ DynamicCPRRebinning::preselect_cells()
 
   // transform the grid into new system of coordinate and calculate cell indexes, which contribute into the
   // dataset;
-  unsigned int j,k,l,mp,mm,sizem;
+  unsigned int j,k,l,mp,mm;
+  size_t       sizem;
   double       xt1,yt1,zt1,Etm,Etp;
 
   //TODO: this will be obtained from the taget and source?
@@ -78,8 +79,8 @@ DynamicCPRRebinning::preselect_cells()
 
  
   // evaluate the capacity of the orthogonal dimensions;
-  unsigned int  nReciprocal    = pSourceGeom->getNumReciprocalDims();
-  unsigned int  nOrthogonal    = pSourceGeom->getNumDims() - nReciprocal;
+  unsigned int  nReciprocal    = (unsigned int)pSourceGeom->getNumReciprocalDims();
+  unsigned int  nOrthogonal    = (unsigned int)pSourceGeom->getNumDims() - nReciprocal;
 
   IMDDimension *pDim;
  

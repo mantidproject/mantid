@@ -56,8 +56,8 @@ hbs(9*4)
 
     // go through all component headers and read them (or calculate their length)
     std::streamoff next_position = positions.component_headers_starts[0];
-    unsigned int nFiles        = positions.component_headers_starts.size();
-    for(unsigned int i=0;i<nFiles;i++){
+    size_t nFiles        = positions.component_headers_starts.size();
+    for(size_t i=0;i<nFiles;i++){
         positions.component_headers_starts[i] = next_position;
         next_position = parse_component_header(next_position);
     }

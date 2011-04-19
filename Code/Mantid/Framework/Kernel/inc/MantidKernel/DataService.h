@@ -170,8 +170,8 @@ public:
     }
     else
     {
-    	std::string information=" add Data Object '"+name+"' successful";
-    	g_log.debug(information);
+      std::string information=" add Data Object '"+name+"' successful";
+      g_log.debug(information);
 
       //check the workspace invisible option set
       std::string name_startswith=name.substr(0,2);
@@ -261,10 +261,10 @@ public:
   /// Check to see if a data object exists in the store
   bool doesExist(const std::string& name) const
   {
-	  svc_constit it=datamap.find(name);
-	  if (it!=datamap.end())
-		  	return true;
-	  return false;
+    svc_constit it=datamap.find(name);
+    if (it!=datamap.end())
+        return true;
+    return false;
   }
 
   /// Return the number of objects stored by the data service
@@ -303,10 +303,10 @@ protected:
   virtual ~DataService(){}
 
 private:
-	/// Private, unimplemented copy constructor
-	DataService(const DataService&);
-	/// Private, unimplemented copy assignment operator
-	DataService& operator=(const DataService&);
+  /// Private, unimplemented copy constructor
+  DataService(const DataService&);
+  /// Private, unimplemented copy assignment operator
+  DataService& operator=(const DataService&);
 
   /// DataService name. This is set only at construction. DataService name should be provided when construction of derived classes
   std::string svc_name;
@@ -339,12 +339,12 @@ private:
 
   /// Typedef for the map holding the names of and pointers to the data objects
   typedef std::map<std::string,  boost::shared_ptr<T>, ci_less > svcmap;
-	/// Iterator for the data store map
-	typedef typename svcmap::iterator svc_it;
+  /// Iterator for the data store map
+  typedef typename svcmap::iterator svc_it;
   /// Const iterator for the data store map
-	typedef typename svcmap::const_iterator svc_constit;
-	/// Map of objects in the data service
-	svcmap datamap;
+  typedef typename svcmap::const_iterator svc_constit;
+  /// Map of objects in the data service
+  svcmap datamap;
 
   /// Static reference to the logger for this DataService
   Logger& g_log;
