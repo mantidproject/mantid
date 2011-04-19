@@ -5,7 +5,7 @@ import MantidBuild
 
 #GET LIST OF CPPS
 codeFolder = os.path.abspath('./src')
-listCpps = MantidBuild.getCPPFiles(codeFolder)
+listCpps = MantidBuild.getCPPFiles(codeFolder, recursive=False)
 
 #Import environment
 Import('env')

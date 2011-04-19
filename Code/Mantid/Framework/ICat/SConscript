@@ -6,7 +6,7 @@ import platform
 
 #GET LIST OF CPPS files
 codeFolder = os.path.abspath('./src')
-listCpps = MantidBuild.getCPPFiles(codeFolder) 
+listCpps = MantidBuild.getCPPFiles(codeFolder, recursive=False) 
 
 #Import environment
 Import('env')

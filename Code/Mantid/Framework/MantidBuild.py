@@ -71,17 +71,16 @@ def procHeader(ln,keyname,out):
     out=ln[len(keyname)+1:].strip('\n')
   return out
   
-def getCPPFiles(codeFolder) :
-  ## recursively searches for cpp files and returns the full paths in a list.
+def getCPPFiles(codeFolder, recursive=True) :
+  ## Searches for cpp files and returns the full paths in a list, optionally recursive
   listCpps = []
   if os.path.exists(codeFolder):
     files = os.listdir(codeFolder)
     for file in files:
       if file.endswith('.cpp'):
         listCpps.append(codeFolder + '/' +  file)
-#			print file
-      if os.path.isdir(os.path.join(codeFolder, file)):
-        listCpps.extend(getCPPFiles(codeFolder + '/' +  file))
+      if recursive and os.path.isdir(os.path.join(codeFolder, file)):
+        listCpps.extend(getCPPFiles(codeFolder + '/' +  file), recursive)
   return listCpps
 
 def getSharedObjects(listCpps, env) :
