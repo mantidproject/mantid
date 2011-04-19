@@ -257,6 +257,12 @@ class SampleDataWidget(BaseWidget):
         self._calculate_clicked(state.calculate_transmission)
         
         # Data file
+        #   Check whether we are updating the data file
+        data_files = self._get_data_files()
+        current_file = ''
+        if len(data_files)>0:
+            current_file = data_files[0].strip()
+        
         self._content.data_file_edit.setText(QtCore.QString('; '.join(state.data_files)))
         if len(state.data_files)>0:
             self._settings.last_file = state.data_files[0]
@@ -266,7 +272,10 @@ class SampleDataWidget(BaseWidget):
             if len(state.data_files[0])>0:
                 (folder, file_name) = os.path.split(state.data_files[0])
                 self._settings.data_path = folder
-                self.get_data_info()
+                if current_file != state.data_files[0].strip():
+                    self.get_data_info()
+                else:
+                    self._emit_experiment_parameters()
 
 
     def get_state(self):
@@ -285,27 +294,29 @@ class SampleDataWidget(BaseWidget):
         m.calculation_method=self._method_box.get_state()    
         
         # Data file
-        flist_str = unicode(self._content.data_file_edit.text())
-        flist_str = flist_str.replace(',', ';')
-        m.data_files = flist_str.split(';')
-       
+        m.data_files = self._get_data_files()
 
         return m
 
     def _data_file_browse(self):
+        #   Check whether we are updating the data file
+        data_files = self._get_data_files()
+        current_file = ''
+        if len(data_files)>0:
+            current_file = data_files[0].strip()
+
         fname = self.data_browse_dialog(multi=True)
         if fname and len(fname)>0:
             self._content.data_file_edit.setText('; '.join(fname))   
             self._settings.last_file = fname[0] 
             self._settings.last_data_ws = ''
-            self.get_data_info()
+            if current_file != str(fname[0]).strip():
+                self.get_data_info()
 
     def _data_file_plot(self):
-        flist_str = str(self._content.data_file_edit.text())
-        flist_str = flist_str.replace(',', ';')
-        fname = flist_str.split(';')
-        if len(fname)>0:
-            self.show_instrument(fname[0])
+        data_files = self._get_data_files()
+        if len(data_files)>0:
+            self.show_instrument(data_files[0])
 
     def _dark_current_browse(self):
         fname = self.data_browse_dialog()
@@ -351,6 +362,23 @@ class SampleDataWidget(BaseWidget):
         self._content.dark_current_button.setEnabled(is_checked)
         self._content.dark_current_plot_button.setEnabled(is_checked)
 
+    def _get_data_files(self):
+        """
+            Utility method to return the list of data files in the sample data file edit box.
+        """
+        flist_str = str(self._content.data_file_edit.text())
+        flist_str = flist_str.replace(',', ';')
+        return flist_str.split(';')
+
+    def _emit_experiment_parameters(self):
+        sdd = util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
+        self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(sdd)))
+        wavelength = util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
+        self._settings.emit_key_value("wavelength", QtCore.QString(str(wavelength)))
+        spread = self._content.wavelength_spread_edit.text()
+        self._settings.emit_key_value("wavelength_spread", QtCore.QString(spread))
+        
+        
     def get_data_info(self):
         """
             Retrieve information from the data file and update the display
@@ -358,28 +386,27 @@ class SampleDataWidget(BaseWidget):
         if self._data_proxy is None:
             return
         
-        flist_str = str(self._content.data_file_edit.text())
-        flist_str = flist_str.replace(',', ';')
-        data_files = flist_str.split(';')
+        data_files = self._get_data_files()
         if len(data_files)<1:
             return
         fname = data_files[0]
         if len(str(fname).strip())>0:
             dataproxy = self._data_proxy(fname)
             if len(dataproxy.errors)>0:
-                QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
             
             self._settings.last_data_ws = dataproxy.data_ws
             if dataproxy.sample_detector_distance is not None:
                 self._content.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
                 util._check_and_get_float_line_edit(self._content.sample_dist_edit, min=0.0)
-                self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
+                #self._settings.emit_key_value("sample_detector_distance", QtCore.QString(str(dataproxy.sample_detector_distance)))
             if dataproxy.wavelength is not None:
                 self._content.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
                 util._check_and_get_float_line_edit(self._content.wavelength_edit, min=0.0)
-                self._settings.emit_key_value("wavelength", QtCore.QString(str(dataproxy.wavelength)))
+                #self._settings.emit_key_value("wavelength", QtCore.QString(str(dataproxy.wavelength)))
             if dataproxy.wavelength_spread is not None:
                 self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
-                self._settings.emit_key_value("wavelength_spread", QtCore.QString(str(dataproxy.wavelength_spread)))
-                 
+                #self._settings.emit_key_value("wavelength_spread", QtCore.QString(str(dataproxy.wavelength_spread)))
+             
+            self._emit_experiment_parameters()    

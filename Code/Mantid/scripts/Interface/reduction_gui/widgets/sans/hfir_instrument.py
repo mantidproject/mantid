@@ -49,13 +49,13 @@ class SANSInstrumentWidget(BaseWidget):
             @param key: key string
             @param value: value string
         """
-        if key == "sample_detector_distance":
+        if key == "sample_detector_distance" and not self._summary.sample_dist_chk.isChecked():
             self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
             util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-        elif key == "wavelength":
+        elif key == "wavelength" and not self._summary.wavelength_chk.isChecked():
             self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
             util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-        elif key == "wavelength_spread":
+        elif key == "wavelength_spread" and not self._summary.wavelength_chk.isChecked():
             self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
 
     def content(self):
@@ -238,6 +238,7 @@ class SANSInstrumentWidget(BaseWidget):
         # Dark current
         self._summary.dark_current_check.setChecked(state.dark_current_corr)
         self._summary.dark_file_edit.setText(QtCore.QString(state.dark_current_data))
+        self._dark_clicked(self._summary.dark_current_check.isChecked())  
         
         # Normalization
         if state.normalization == state.NORMALIZATION_NONE:

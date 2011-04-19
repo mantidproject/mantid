@@ -76,7 +76,19 @@ class LoadRun(ReductionStep):
     def __init__(self, datafile=None):
         super(LoadRun, self).__init__()
         self._data_file = datafile
-                
+   
+    def clone(self, data_file=None):
+        if data_file is None:
+            data_file = self._data_file
+        return LoadRun(datafile=data_file)
+
+    def set_beam_center(self, beam_center):
+        """
+            Sets the beam center to be used when loading the file
+            @param beam_center: [pixel_x, pixel_y]
+        """
+        pass
+             
     def execute(self, reducer, workspace, force=False):      
         # If we don't have a data file, look up the workspace handle
         # Only files that are used for computing data corrections have

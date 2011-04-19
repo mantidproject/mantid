@@ -34,6 +34,7 @@ class DataProxy(object):
     errors = []
     
     def __init__(self, data_file, workspace_name=None):
+        self.errors = []
         if HAS_MANTID:
             try:
                 if workspace_name is None:

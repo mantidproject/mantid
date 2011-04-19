@@ -123,9 +123,11 @@ class BackgroundWidget(BaseWidget):
             Populate the UI elements with the data from the given state.
             @param state: Transmission object
         """
+        bck_file = str(self._content.background_edit.text()).strip()
         self._content.background_chk.setChecked(state.background_corr)
         self._content.background_edit.setText(QtCore.QString(state.background_file))
-        self.get_data_info()
+        if state.background_file.strip() != bck_file:
+            self.get_data_info()
         self._background_clicked(state.background_corr)
 
         if self.show_transmission:
@@ -155,7 +157,7 @@ class BackgroundWidget(BaseWidget):
         #m.dark_current_file = unicode(self._content.dark_current_edit.text())
         
         m.background_corr = self._content.background_chk.isChecked()
-        m.background_file = unicode(self._content.background_edit.text())
+        m.background_file = str(self._content.background_edit.text())
         
         m.bck_transmission_enabled = self.show_transmission
         if self.show_transmission:
@@ -217,8 +219,10 @@ class BackgroundWidget(BaseWidget):
     def _background_browse(self):
         fname = self.data_browse_dialog()
         if fname:
+            bck_file = str(self._content.background_edit.text()).strip()
             self._content.background_edit.setText(fname)   
-            self.get_data_info()
+            if str(fname).strip() != bck_file:
+                self.get_data_info()
                
     def _calculate_clicked(self, is_checked):
         self._content.trans_direct_chk.setEnabled(is_checked)
@@ -245,7 +249,7 @@ class BackgroundWidget(BaseWidget):
         if len(str(fname).strip())>0:
             dataproxy = self._data_proxy(fname, "_background_raw")
             if len(dataproxy.errors)>0:
-                QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
+                #QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
                 return
             
             self._settings.last_data_ws = dataproxy.data_ws
