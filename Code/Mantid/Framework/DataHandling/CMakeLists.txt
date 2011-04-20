@@ -220,4 +220,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS DataHandling DESTINATION ${LIB_DIR} )
+install ( TARGETS DataHandling DESTINATION ${PLUGINS_DIR} )
