@@ -481,7 +481,7 @@ MD_FileHoraceReader::read_pix(MDDataPoints &sqw, bool nothrow)
 			if(nothrow){
 				return false;
 			}else{
-				throw(std::bad_alloc("too many pixels to place in memory for given architecture "));
+				throw(std::runtime_error("too many pixels to place in memory for given architecture "));
 			}
 		}else{
 			max_npix_in_buf= (size_t)n_pix_inDataset;

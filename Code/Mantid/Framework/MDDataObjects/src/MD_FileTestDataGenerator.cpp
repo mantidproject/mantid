@@ -123,7 +123,7 @@ MD_FileTestDataGenerator::read_pix(MDDataPoints & sqw,bool nothrow)
 		sqw.set_file_based();
 		return false;
 	}else{
-		throw(std::bad_alloc("can not place all pixels in memory"));
+		throw(std::runtime_error("can not place all pixels in memory"));
 	}
 }
 //
