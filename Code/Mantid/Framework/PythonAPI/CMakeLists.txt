@@ -68,14 +68,14 @@ add_definitions ( -DBOOST_DEBUG_PYTHON -DBOOST_PYTHON_NO_LIB )
 
 find_package ( Numpy REQUIRED )
 include_directories ( ${PYTHON_NUMPY_INCLUDE_DIR} )
-
 include_directories ( inc )
 
 ###########################################################################
 # Copy the required python files into the build destination
 ###########################################################################
 
-set ( PYTHON_INSTALL_FILES "")
+# Now the common files for all distributions
+set ( PYTHON_INSTALL_FILES "" )
 foreach ( PYFILE ${PY_FILES} )
   add_custom_command ( OUTPUT ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE}
                        DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
@@ -83,7 +83,7 @@ foreach ( PYFILE ${PY_FILES} )
                          ${CMAKE_CURRENT_SOURCE_DIR}/${PYFILE}
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} 
   )
-  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE})
+  set ( PYTHON_INSTALL_FILES ${PYTHON_INSTALL_FILES} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}/${PYFILE} )
 endforeach ( PYFILE )
 
 ###########################################################################
@@ -99,6 +99,47 @@ set_property ( TARGET PythonAPI PROPERTY FOLDER "MantidFramework" )
 if ( PYTHON_DEBUG_LIBRARY )
   set_target_properties ( PythonAPI PROPERTIES DEBUG_OUTPUT_NAME MantidPythonAPI_d )
 endif ()
+
+###########################################################################
+# Bundled Python - A post-build event so must be after target is
+# created.
+###########################################################################
+if( WIN32 )
+  # On Windows we are bundling Python. This requires developers to have the Python directories
+  # next to the Mantid libraries in order for Python to set its sys.path correctly.
+  # We use xcopy to as it has the ability to copy directories but only those files that
+  # have been updated. It requires native paths though.
+  file(TO_NATIVE_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} BIN_CFG_NATIVE)
+  add_custom_command( TARGET PythonAPI POST_BUILD
+                      COMMAND ${CMAKE_COMMAND} ARGS -E echo
+                      "Setting up bundled Python installation"
+  )
+  foreach ( PYDIR ${PY_DIST_DIRS} )
+    string(REGEX REPLACE ".*/(.*)" "\\1" PYDIR_RELATIVE ${PYDIR})
+    file(TO_NATIVE_PATH ${PYDIR} PYDIR_NATIVE)
+    add_custom_command( TARGET PythonAPI POST_BUILD
+                        COMMAND ${CMAKE_COMMAND} ARGS -E echo
+                        "Updating ${PYDIR} directory"
+                        COMMAND XCOPY ARGS /E /F /D /I 
+                        ${PYDIR_NATIVE} ${BIN_CFG_NATIVE}\\${PYDIR_RELATIVE}
+                      )
+  endforeach ( PYDIR )
+  set ( BIN_CFG_NATIVE )
+  set ( PYDIR_NATIVE )
+  
+  # Now the binary files
+  foreach ( TYPE DLL EXE )
+    add_custom_command( TARGET PythonAPI POST_BUILD 
+                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
+                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
+                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_MINSIZEREL=${PY_${TYPE}_SUFFIX_MINSIZEREL}
+                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_DEBUG=${PY_${TYPE}_SUFFIX_DEBUG}
+                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                        ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_CFG_INTDIR}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                       )
+  endforeach ( TYPE )
+endif( WIN32 )
+
 
 ###########################################################################
 # Platform and compiler-dependent parts

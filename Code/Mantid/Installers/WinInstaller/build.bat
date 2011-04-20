@@ -57,7 +57,6 @@ echo Running light to generate %FINALMSI%
 light -out "%FINALMSI%" "%WXSOBJ%" %WIX_LOC%\wixui.wixlib %WIX_LOC%\wixca.wixlib  -loc WixUI_en-us.wxl
 if errorlevel 1 goto light_error
 
-ENDLOCAL
 goto :end
 
 :wxs_error

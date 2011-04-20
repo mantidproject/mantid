@@ -10,17 +10,6 @@ import platform
 import sys
 import subprocess
 
-# Where is the Code directory, i.e. trunk/Code
-CODEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..\..\..'))
-QTDIR = 'c:/qt' #hardcoded to c:/qt location - this is true for build servers and most developers
-QTLIBDIR = QTDIR + '/lib'
-QTPLUGINDIR = QTDIR + '/plugins'
-PYTHONDIR = sys.prefix.replace('\\','/')
-SIPDIR = PYTHONDIR + '/Lib/site-packages'
-PYQTDIR = SIPDIR + '/PyQt4'
-FRAMEWORKDIR = CODEDIR.replace('\\', '/') + '/Mantid/Framework'
-USERALGORITHMSDIR = FRAMEWORKDIR + '/UserAlgorithms'
-
 if len(sys.argv) == 3:
     MANTIDRELEASE = sys.argv[1]
     MANTIDRELEASE = MANTIDRELEASE.replace('\\','/')
@@ -51,8 +40,14 @@ else:
     ARCH = '32'
     toget = 'toget'
     upgrade_uuid = '{E9B6F1A9-8CB7-4441-B783-4E7A921B37F0}'
-    
 
+# Define our source directories
+CODEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__), r'..\..\..'))
+FRAMEWORKDIR = CODEDIR.replace('\\', '/') + '/Mantid/Framework'
+USERALGORITHMSDIR = FRAMEWORKDIR + '/UserAlgorithms'
+LIBDIR = CODEDIR + '/Third_Party/lib/win' + ARCH
+QTPLUGINDIR = LIBDIR + '/qt_plugins'
+    
 # To perform a major upgrade, i.e. uninstall the old version if an old one exists, 
 # the product and package GUIDs need to change everytime
 product_uuid = '{' + str(uuid.uuid1()) + '}'
@@ -79,7 +74,6 @@ if ARCH == '32':
     comp_guid['Temp'] = '{02D25B60-A114-4f2a-A211-DE88CF648C61}'
     comp_guid['Data'] = '{6D9A0A53-42D5-46a5-8E88-6BB4FB7A5FE1}'
     comp_guid['UserAlgorithms'] = '{A82B4540-3CDB-45fa-A7B3-42F392378D3F}'
-    comp_guid['Sip'] = '{A051F48C-CA96-4cd5-B936-D446CBF67588}'
     comp_guid['Colormaps'] = '{902DBDE3-42AE-49d3-819D-1C83C18D280A}'
     comp_guid['QtImagePlugins'] = '{6e3c6f03-5933-40b1-9733-1bd71132404c}'
     comp_guid['MantidQtPlugins'] = '{d035e5aa-2815-4869-836d-8fc4b8e7a418}'
@@ -101,7 +95,6 @@ else:
     comp_guid['Temp'] = '{212cc3fe-95fb-40d9-a3a7-8421791ac19f}'
     comp_guid['Data'] = '{c9577b5b-75e5-4a4a-b2d5-f4905174627c}'
     comp_guid['UserAlgorithms'] = '{496555f0-f719-4db7-bd8e-5bbcd9fe837d}'
-    comp_guid['Sip'] = '{e057fcf0-47ba-4a32-a1af-d6c70e1ff8e4}'
     comp_guid['Colormaps'] = '{9e4a6fc4-39ea-4b8f-ba49-265d6dcfbb4c}'
     comp_guid['QtImagePlugins'] = '{7c1ec169-d331-4b9c-b0e4-3214bcf2cbf4}'
     comp_guid['MantidQtPlugins'] = '{22fa661e-17d5-4e33-8f2c-654c473268c3}'
@@ -286,7 +279,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
         if (fil.find('.svn') < 0 and fil.find('UNIT_TESTING') < 0):
             if ( os.path.isdir(location+'/'+fil) ):
                 idir += 1
-                lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory)[0]
+                lst = lst + addCompList(Id+'_'+str(idir), location+'/'+fil, fil, directory,include_suffix,exclude_suffix)[0]
             else:
                 keep = False
                 if len(include_suffix) > 0: 
@@ -296,7 +289,7 @@ def addCompList(Id,location,name,parent, include_suffix=[],exclude_suffix=[]):
                             break
                 else:
                     keep = True
-                if len(exclude_suffix) > 0: 
+                if len(exclude_suffix) > 0:
                     for sfx in exclude_suffix:
                         if fil.endswith(sfx):
                             keep = False
@@ -427,29 +420,6 @@ Prop.setAttribute('Id','DiskPrompt')
 Prop.setAttribute('Value','Mantid Installation')
 Product.appendChild(Prop)
 
-# Python versioning
-py_dir_prop = 'PYTHONINSTALL'
-py_reg_key = 'Software\\Python\\PythonCore\\%d.%d\\InstallPath' % (sys.version_info.major,sys.version_info.minor)
-PyProp = addTo(Product,'Property',{'Id':py_dir_prop})
-py_lookup = {'Id':'PythonRegistry1','Type':'raw','Root':'HKLM','Key':py_reg_key}
-if ARCH == '64':
-    py_lookup['Win64'] = 'yes'
-# All user search
-addTo(PyProp,'RegistrySearch',py_lookup)
-# Current user search
-py_lookup['Id'] = 'PythonRegistry2'
-py_lookup['Root'] = 'HKCU'
-addTo(PyProp,'RegistrySearch',py_lookup)
-
-# Add a condition element that halts installtion if Python is not installed. Note: If the condition evaluates to false, the dialog pops up.
-Cond = doc.createElement('Condition')
-error_msg = 'Unable to find {0}-bit version of Python {1}.{2}, cannot continue. Please download and install a {0}-bit '\
-            'version from http://www.python.org/download/releases/{1}.{2}.{3}/'.format(ARCH, sys.version_info.major,sys.version_info.minor,sys.version_info.micro)
-Cond.setAttribute('Message', error_msg)
-# Installed is set to TRUE byt the MSI if the product is *already* installed, i.e. the check only gets run on installation and not removal
-Cond.appendChild(doc.createTextNode('Installed OR PYTHONINSTALL'))
-Product.appendChild(Cond)
-
 TargetDir = addDirectory('TARGETDIR','SourceDir','SourceDir',Product)
 InstallDir = addDirectory('INSTALLDIR','MInstall',MantidInstallDir,TargetDir)
 binDir = addDirectory('MantidBin','bin','bin',InstallDir)
@@ -481,11 +451,19 @@ addFileV('QtPropertyBrowser','QTPB.dll','QtPropertyBrowser.dll',MANTIDRELEASE + 
 # NeXus dlls for the main path
 addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll','hdf5dll.dll','hm425m.dll','libNeXus-0.dll'])
 
+#------------- Bundled Python installation ---------------
+pythonDLLs = addCompList('PythonDLLs',LIBDIR + '/Python27/DLLs','DLLs',binDir)[0]
+pythonLib =  addCompList('PythonLib',LIBDIR + '/Python27/Lib','Lib',binDir,exclude_suffix=['_d.pyd'])[0]
+# Python executable
+addFileV('PyEXE', 'Py27.exe','python.exe',LIBDIR + '/Python27/python.exe',MantidDlls)
+# Python dll
+addFileV('PyDLL', 'Py27.dll','python27.dll',LIBDIR + '/Python27/python27.dll',MantidDlls)
+# Our Framework file
+addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
+ 
 #------------- Environment settings ---------------------- 
-addTo(MantidDlls,'Environment',{'Id':'UpdatePath','Name':'PATH','Action':'set','Part':'last','Value':'[PYTHONINSTALL]'})
 # MantidPATH to point to the bin directory
-mantidbin = '[INSTALLDIR]\\bin'
-addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':mantidbin})
+addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':'[INSTALLDIR]\\bin'})
 # Also add binary directory to the path
 addTo(MantidDlls,'Environment',{'Id':'AddMtdPath','Name':'PATH','Action':'set','Part':'last','Value':'%MANTIDPATH%'})
 
@@ -508,7 +486,6 @@ else:
 #---------------------------------------------------------------
 
 QTIPlot = addComponent('QTIPlot',comp_guid['QTIPlot'],binDir)
-addDlls(QTLIBDIR,'qt',QTIPlot)
 QTIPlotEXE = addFileV('QTIPlotEXE','MPlot.exe','MantidPlot.exe',MANTIDRELEASE + '/MantidPlot.exe',QTIPlot)
 # TODO: Currently the MantidLauncher only works for the 32-bit system since the registry access seems more of a pain on a 64 bit system
 if ARCH== '32':
@@ -529,9 +506,6 @@ files_to_remove = ['qtiplotrc.pyc','qtiUtil.pyc','mantidplotrc.pyc','mantidplot.
                    'mantidsimple.py', 'mantidsimple.pyc','mtdpyalgorithm_keywords.txt']
 for index, name in enumerate(files_to_remove):
     addTo(MantidDlls,'RemoveFile',{'Id':'RemFile_' + str(index),'On':'uninstall','LongName': name, 'Name':name[:8]})
-
-if (QTLIBDIR == 'C:/Qt/4_4_0/bin'): 	 
-	     manifestFile = addFileV('qtiplot_manifest','qtiexe.man','MantidPlot.exe.manifest',MANTIDRELEASE + '/MantidPlot.exe.manifest',QTIPlot)
 
 addTo(MantidDlls,'RemoveFile',{'Id':'LogFile','On':'uninstall','Name':'mantid.log'})
 addTo(Product,'Icon',{'Id':'MantidPlot.exe','SourceFile':MANTIDRELEASE + '/MantidPlot.exe'})
@@ -673,11 +647,6 @@ addFileV('MantidCurveFitting_lib','MFit.lib','MantidCurveFitting.lib',MANTIDRELE
 addFileV('poco_foundation_lib','poco_f.lib','PocoFoundation.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/PocoFoundation.lib',UserAlgorithms)
 addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib',CODEDIR + '/Third_Party/lib/win' + ARCH + '/boost_date_time-vc100-mt-1_43.lib',UserAlgorithms)
 
-#--------------- Python ---------------------------------------------------------------------------------
-Sip = addComponent('Sip',comp_guid['Sip'],binDir)
-addSingleFile(SIPDIR,'sip.pyd','sip',Sip)
-PyQtList = addCompList('PyQtDir', PYQTDIR,'PyQt4',binDir, exclude_suffix=['_d.pyd','.pyc'])[0]
-addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
 
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
 scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/scripts","scripts",InstallDir)[0]
@@ -709,6 +678,8 @@ DesktopFolder = addDirectory('DesktopFolder','Desktop','Desktop',TargetDir)
 Complete = addRootFeature('Complete','Mantid','The complete package','1',Product)
 MantidExec = addFeature('MantidExecAndDlls','Mantid binaries','The main executable.','1',Complete)
 addCRef('MantidDLLs',MantidExec)
+addCRefs(pythonDLLs, MantidExec)
+addCRefs(pythonLib,MantidExec)
 addCRef('Plugins',MantidExec)
 addCRef('UserAlgorithms',MantidExec)
 addCRef('Documents',MantidExec)
@@ -720,8 +691,6 @@ addCRef('Data',MantidExec)
 addCRefs(Matlab,MantidExec)
 addCRefs(instrument_ids,MantidExec)
 addCRefs(sconsList,MantidExec)
-addCRef('Sip',MantidExec)
-addCRefs(PyQtList,MantidExec)
 addCRefs(pyalgsList,MantidExec)
 addCRef('QtImagePlugins', MantidExec)
 addCRef('MantidQtPlugins', MantidExec)

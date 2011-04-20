@@ -1,10 +1,26 @@
+
+###########################################################################
+# Set include and library directories so that CMake finds Third_Party
+###########################################################################
 set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
 set ( BOOST_INCLUDEDIR "${THIRD_PARTY}/include" )
 
 set ( CMAKE_LIBRARY_PATH "${THIRD_PARTY}/lib/mac64" )
 set ( BOOST_LIBRARYDIR  "${THIRD_PARTY}/lib/mac64" )
 
-# Force 64 bit compile
+###########################################################################
+# Use the system-installed version of Python.
+###########################################################################
+find_package ( PythonLibs REQUIRED )
+include_directories ( ${PYTHON_INCLUDE_PATH} )
+# If found, need to add debug library into libraries variable
+if ( PYTHON_DEBUG_LIBRARIES )
+  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
+endif ()
+
+###########################################################################
+# Force 64-bit compiler as that's all we support
+###########################################################################
 set ( CMAKE_C_FLAGS ${CMAKE_C_FLAGS} -m64 )
 set ( CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -m64 )
 

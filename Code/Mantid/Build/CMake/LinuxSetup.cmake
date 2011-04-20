@@ -1,4 +1,14 @@
 ###########################################################################
+# Use the system-installed version of Python.
+###########################################################################
+find_package ( PythonLibs REQUIRED )
+include_directories ( ${PYTHON_INCLUDE_PATH} )
+# If found, need to add debug library into libraries variable
+if ( PYTHON_DEBUG_LIBRARIES )
+  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
+endif ()
+
+###########################################################################
 # tcmalloc stuff. Only used on linux for now.
 ###########################################################################
 

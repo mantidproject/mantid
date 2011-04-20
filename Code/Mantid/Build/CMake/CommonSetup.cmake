@@ -54,13 +54,6 @@ set ( CMAKE_INCLUDE_PATH ${CMAKE_INCLUDE_PATH}/zlib123 )
 find_package ( ZLIB REQUIRED )
 set ( CMAKE_INCLUDE_PATH ${MAIN_CMAKE_INCLUDE_PATH} )
 
-find_package ( PythonLibs REQUIRED )
-include_directories ( ${PYTHON_INCLUDE_PATH} )
-# If found, need to add debug library into libraries variable
-if ( PYTHON_DEBUG_LIBRARIES )
-  set ( PYTHON_LIBRARIES optimized ${PYTHON_LIBRARIES} debug ${PYTHON_DEBUG_LIBRARIES} )
-endif ()
-
 ###########################################################################
 # Look for subversion. Used for version headers - faked if not found.
 ###########################################################################
