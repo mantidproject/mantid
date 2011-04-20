@@ -41,7 +41,7 @@ void Workspace::setName(const std::string& name)
  *
  *  @return The title
  */
-const std::string& Workspace::getTitle() const
+const std::string Workspace::getTitle() const
 {
   return m_title;
 }

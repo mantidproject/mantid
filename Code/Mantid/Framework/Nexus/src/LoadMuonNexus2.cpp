@@ -404,7 +404,7 @@ namespace Mantid
     {
       API::Run & runDetails = localWorkspace->mutableRun();
 
-      runDetails.addProperty("run_title", localWorkspace->getTitle());
+      runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
  
       int numSpectra = localWorkspace->getNumberHistograms();
       runDetails.addProperty("nspectra", numSpectra);

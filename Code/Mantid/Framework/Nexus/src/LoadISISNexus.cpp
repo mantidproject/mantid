@@ -571,7 +571,7 @@ namespace Mantid
       getNexusData(&header);
       closeNexusData();
       runDetails.addProperty("run_header", std::string(header,80));
-      runDetails.addProperty("run_title", localWorkspace->getTitle());
+      runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
 
       runDetails.addProperty("nspectra", getNXData<int>("NSP1"));
       runDetails.addProperty("nchannels", getNXData<int>("NTC1"));

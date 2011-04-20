@@ -102,6 +102,39 @@ namespace Mantid
       }
     }
 
+
+    //---------------------------------------------------------------------------------------
+    /** Set the title of the workspace
+     *
+     *  @param t :: The title
+     */
+    void MatrixWorkspace::setTitle(const std::string& t)
+    {
+      Workspace::setTitle(t);
+      
+      // A MatrixWorkspace contains uniquely one Run object, hence for this workspace
+      // keep the Run object run_title property the same as the workspace title
+      m_run.access().addProperty("run_title",t, true);        
+    }
+
+
+    //---------------------------------------------------------------------------------------
+    /** Get the workspace title
+     *
+     *  @return The title
+     */
+    const std::string MatrixWorkspace::getTitle() const
+    {
+      if ( m_run->hasProperty("run_title") )
+      {
+        std::string title = m_run->getProperty("run_title")->value();
+        return title;
+      }
+      else      
+        return Workspace::getTitle();
+    }
+
+
     //---------------------------------------------------------------------------------------
     /** Get a const reference to the SpectraDetectorMap associated with this workspace.
     *  Can ONLY be taken as a const reference!

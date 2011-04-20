@@ -474,7 +474,7 @@ namespace Mantid
         const std::string title = entry.getString("title");
         local_workspace->setTitle(title);
         // write the title into the log file (run object)
-        local_workspace->mutableRun().addProperty("run_title", title);
+        local_workspace->mutableRun().addProperty("run_title", title, true);
       }
       catch (std::runtime_error &)
       {

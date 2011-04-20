@@ -55,10 +55,11 @@ public:
 
     Workspace();
     virtual ~Workspace() {}
-    void setTitle(const std::string&);
+    void virtual setTitle(const std::string&);
     void setComment(const std::string&);
     void setName(const std::string&);
-    const std::string& getTitle() const;
+    //virtual const std::string& getTitle() const;
+    virtual const std::string getTitle() const;
     const std::string& getComment() const;
     const std::string& getName() const;
     bool isDirty(const int n=1) const;

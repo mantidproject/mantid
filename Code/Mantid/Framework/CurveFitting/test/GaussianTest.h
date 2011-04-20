@@ -107,7 +107,7 @@ public:
     loader.setPropertyValue("Filename", inputFile);
     std::string outputSpace = "HRP38692_Dataset";
     loader.setPropertyValue("OutputWorkspace", outputSpace);
-    loader.execute();
+    TS_ASSERT_THROWS_NOTHING(loader.execute());
 
     // reload instrument to test constraint defined in IDF is working
     LoadInstrument reLoadInstrument;

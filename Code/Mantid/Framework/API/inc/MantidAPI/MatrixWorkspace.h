@@ -135,6 +135,11 @@ namespace Mantid
       /// Returns the number of histograms in the workspace
       virtual int getNumberHistograms() const = 0;
 
+      /// Sets MatrixWorkspace title
+      virtual void setTitle(const std::string&);
+      /// Gets MatrixWorkspace title (same as Run object run_title property)
+      virtual const std::string getTitle() const;
+
       /// Returns the bin index for a given X value of a given workspace index
       size_t binIndexOf(const double xValue, const int index = 0) const;
 

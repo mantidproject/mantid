@@ -708,7 +708,7 @@ namespace Mantid
       const std::string run_header(localISISRaw->hdr.inst_abrv, 80);
       runDetails.addProperty("run_header", run_header);
       // Run title is stored in a different attribute
-      runDetails.addProperty("run_title", std::string(localISISRaw->r_title,80));
+      runDetails.addProperty("run_title", std::string(localISISRaw->r_title,80), true);
 
       // Data details on run not the workspace
       runDetails.addProperty("nspectra", static_cast<int>(localISISRaw->t_nsp1));

@@ -204,7 +204,7 @@ using namespace boost::python;
     
     class_<API::Workspace, boost::noncopyable>("Workspace", no_init)
       .def("getTitle", &API::Workspace::getTitle, 
-         return_value_policy< copy_const_reference >())
+         return_value_policy< return_by_value >())
       .def("getComment", &API::MatrixWorkspace::getComment, 
          return_value_policy< copy_const_reference >() )
       .def("getMemorySize", &API::Workspace::getMemorySize)
