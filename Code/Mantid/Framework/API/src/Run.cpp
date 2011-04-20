@@ -202,8 +202,9 @@ const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm"
   {
     // Mmake an exception for the proton charge
     // and overwrite it's value as we don't want to store the proton charge in two separate locations
+    // Similar we don't want more than one run_title
     std::string name = prop->name();
-    if( hasProperty(name) && (overwrite || prop->name() == m_protonChargeName) )
+    if( hasProperty(name) && (overwrite || prop->name() == m_protonChargeName || prop->name()=="run_title") )
     {
       removeProperty(name);
     }
