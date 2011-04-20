@@ -129,10 +129,10 @@ if ( ENABLE_CPACK )
   set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
   set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
   set ( CPACK_PACKAGE_NAME mantid )
-  set ( CPACK_PACKAGE_VERSION 1.1.${Framework_WC_REVISION} )
+  set ( CPACK_PACKAGE_VERSION 1.1.${Framework_WC_LAST_CHANGED_REV} )
   set ( CPACK_PACKAGE_VERSION_MAJOR 1 )
   set ( CPACK_PACKAGE_VERSION_MINOR 1 )
-  set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_REVISION} )
+  set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_LAST_CHANGED_REV} )
   set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
 
   # RPM information - only used if generating a rpm

@@ -670,7 +670,7 @@ if ( Subversion_FOUND )
 else ()
   # Just use a dummy version number and print a warning
   message ( "Subversion not found - using 0 for revision number in MantidPlotReleaseDate.h" )
-  set ( RELDATE_WC_REVISION 0 )
+  set ( RELDATE_WC_LAST_CHANGED_REV 0 )
 endif ()
 # Create the header with the revision number in
 configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/Mantid/MantidPlotReleaseDate.h.in
