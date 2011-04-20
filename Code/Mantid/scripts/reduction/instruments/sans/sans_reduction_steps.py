@@ -992,7 +992,10 @@ class UnitsConvert(ReductionStep):
         Executes ConvertUnits and then Rebin on the same workspace. If no re-bin limits are
         set for the x-values of the final workspace the range of the first spectrum is used.
     """
-    def __init__(self, units, rebin = 'Rebin'):
+    def __init__(self, units, rebin = 'Rebin', bin_alg=None):
+        """
+            @param bin_alg: the name of the Mantid re-bin algorithm to use
+        """
         super(UnitsConvert, self).__init__()
         self._units = units
         self.wav_low = None
@@ -1000,14 +1003,14 @@ class UnitsConvert(ReductionStep):
         self.wav_step = None
         # currently there are two possible re-bin algorithms, the other is InterpolatingRebin
         self.rebin_alg = rebin
+        self._bin_alg = bin_alg
 
-    def execute(self, reducer, workspace, bin_alg=None):
+    def execute(self, reducer, workspace):
         """
             Runs the ConvertUnits() and a rebin algorithm on the specified
             workspace 
             @param reducer: 
             @param workspace: the name of the workspace to convert
-            @param bin_alg: the name of the Mantid re-bin algorithm to use
         """ 
         ConvertUnits(workspace, workspace, self._units)
         
@@ -1019,10 +1022,10 @@ class UnitsConvert(ReductionStep):
             high_wav = max(mtd[workspace].readX(0))
 
          
-        if not bin_alg:
-            bin_alg = self.rebin_alg
+        if not self._bin_alg:
+            self._bin_alg = self.rebin_alg
  
-        rebin_com = bin_alg+'(workspace, workspace, "'+\
+        rebin_com = self._bin_alg+'(workspace, workspace, "'+\
             self._get_rebin(low_wav, self.wav_step, high_wav)+'")'
         eval(rebin_com)
 
@@ -1119,6 +1122,8 @@ class SaveIqAscii(ReductionStep):
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
             filename = os.path.join(reducer._data_path, output_ws+'.txt')
             SaveAscii(Filename=filename, Workspace=output_ws)
+            filename = os.path.join(reducer._data_path, output_ws+'.xml')
+            SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
             
             log_text = "I(Q) saved in %s" % (filename)
         
