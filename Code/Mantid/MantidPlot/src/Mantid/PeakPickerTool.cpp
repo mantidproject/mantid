@@ -346,8 +346,8 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
           p->setPen(pen);
           int x1 = xMap.transform(c - width/2);
           int x2 = xMap.transform(c + width/2);
-          QwtPainter::drawLine(p, x1, yMap.p1(), x1,yMap.p2());
-          QwtPainter::drawLine(p, x2, yMap.p1(), x2,yMap.p2());
+          QwtPainter::drawLine(p, x1, int(yMap.p1()), x1,int(yMap.p2()));
+          QwtPainter::drawLine(p, x2, int(yMap.p1()), x2,int(yMap.p2()));
 
           pen.setStyle(Qt::SolidLine);
           p->setPen(pen);
@@ -359,7 +359,7 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
         else
         {
           p->setPen(QPen(QColor(200,200,200)));
-          QwtPainter::drawLine(p, ic, yMap.p1(), ic, yMap.p2());
+          QwtPainter::drawLine(p, ic, int(yMap.p1()), ic, int(yMap.p2()));
         }
       }
     }
@@ -374,17 +374,17 @@ void PeakPickerTool::draw(QPainter *p, const QwtScaleMap &xMap, const QwtScaleMa
   p->setPen(pen);
   int x1 = xMap.transform(xMin());
   int x2 = xMap.transform(xMax());
-  QwtPainter::drawLine(p, x1, yMap.p1(), x1,yMap.p2());
-  QwtPainter::drawLine(p, x2, yMap.p1(), x2,yMap.p2());
+  QwtPainter::drawLine(p, x1, int(yMap.p1()), x1,int(yMap.p2()));
+  QwtPainter::drawLine(p, x2, int(yMap.p1()), x2,int(yMap.p2()));
 
   pen.setColor(QColor(0,0,255));
   pen.setStyle(Qt::SolidLine);
   p->setPen(pen);
-  QwtPainter::drawLine(p, x1, yMap.p1(), x1+3,yMap.p1());
-  QwtPainter::drawLine(p, x1, yMap.p2(), x1+3,yMap.p2());
+  QwtPainter::drawLine(p, x1, int(yMap.p1()), x1+3,int(yMap.p1()));
+  QwtPainter::drawLine(p, x1, int(yMap.p2()), x1+3,int(yMap.p2()));
 
-  QwtPainter::drawLine(p, x2, yMap.p1(), x2-3,yMap.p1());
-  QwtPainter::drawLine(p, x2, yMap.p2(), x2-3,yMap.p2());
+  QwtPainter::drawLine(p, x2, int(yMap.p1()), x2-3,int(yMap.p1()));
+  QwtPainter::drawLine(p, x2, int(yMap.p2()), x2-3,int(yMap.p2()));
 
 }
 

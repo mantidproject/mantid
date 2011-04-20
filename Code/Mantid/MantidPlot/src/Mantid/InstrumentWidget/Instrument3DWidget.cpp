@@ -481,11 +481,11 @@ void Instrument3DWidget::calculateCounts(bool firstCalculation)
 
 }
 
-void Instrument3DWidget::calculateColors(bool firstCalculation)
+void Instrument3DWidget::calculateColors(bool)
 {
   Timer timerColLists;
 
-  const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
+  const short max_ncols = short(mColorMap.getLargestAllowedCIndex() + 1);
   const int n_spec = static_cast<int>(m_workspace_indices.size());
   mScaledValues = std::vector<unsigned char>(n_spec, 0);
   std::vector<boost::shared_ptr<GLColor> > colorlist(n_spec);
@@ -505,7 +505,7 @@ void Instrument3DWidget::calculateColors(bool firstCalculation)
     {
       // Index to store
       double sum = m_specIntegrs[widx];
-      short index = std::floor( mColorMap.normalize(user_interval, sum)*max_ncols );
+      short index = short(std::floor( mColorMap.normalize(user_interval, sum)*max_ncols ));
       if( index >= max_ncols )
       {
         index = max_ncols;
@@ -566,8 +566,8 @@ void Instrument3DWidget::updateColorsForNewMap()
 {
   Timer timer;
 
-  const short max_ncols = mColorMap.getLargestAllowedCIndex() + 1;
-  const short ncols = mColorMap.getTopCIndex() + 1;
+  const short max_ncols = short(mColorMap.getLargestAllowedCIndex() + 1);
+  const short ncols = short(mColorMap.getTopCIndex() + 1);
 
   //Create a list of GLColor objects for every spectrum in the workspace
   std::vector<boost::shared_ptr<GLColor> > colorlist(mScaledValues.size());
@@ -590,7 +590,7 @@ void Instrument3DWidget::updateColorsForNewMap()
         val_itr != val_end; ++val_itr, ++idx )
     {
       short cache_value = static_cast<short>(*val_itr);
-      short c_index = std::ceil((cache_value + 1)*ratio);
+      short c_index = short(std::ceil((cache_value + 1)*ratio));
       if( c_index <= 0 ) c_index = 1;
       else if( c_index > ncols) c_index = ncols;
       else {}

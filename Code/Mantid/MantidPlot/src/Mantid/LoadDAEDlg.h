@@ -24,7 +24,7 @@ public:
 	const QString& getSpectrumMin() { return m_spectrum_min; }
 	const QString& getSpectrumMax() { return m_spectrum_max; }
 	const QString& getSpectrumList() { return m_spectrum_list; }
-    const int updateInterval(){return m_updateInterval;}
+  int updateInterval(){return m_updateInterval;}
 
 protected:
 	

@@ -222,9 +222,9 @@ int RectangularDetectorActor::genTexture(char * & image_data, std::vector<boost:
       if (useDetectorIDs)
       {
         //Use the rgb int that is incremented for each detector
-        r=(rgb/65536);
-        g=((rgb%65536)/256);
-        b=((rgb%65536)%256);
+        r=char(rgb/65536);
+        g=char((rgb%65536)/256);
+        b=char((rgb%65536)%256);
         rgb++;
       }
       else

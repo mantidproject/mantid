@@ -1068,7 +1068,7 @@ void FindAlgComboBox::keyPressEvent(QKeyEvent *e)
 }
 
 AlgorithmDockWidget::AlgorithmDockWidget(MantidUI *mui, ApplicationWindow *w):
-QDockWidget(w),m_progressBar(NULL),m_algID(NULL),m_mantidUI(mui)
+QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
 {
   setWindowTitle(tr("Algorithms"));
   setObjectName("exploreAlgorithms"); // this is needed for QMainWindow::restoreState()

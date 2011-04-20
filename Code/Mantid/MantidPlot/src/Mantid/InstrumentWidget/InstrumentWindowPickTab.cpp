@@ -212,7 +212,7 @@ void InstrumentWindowPickTab::plotSingle(const Instrument3DWidget::DetInfo & cur
   m_plot->setYScale(*min_it,*max_it);
 }
 
-void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & cursorPos)
+void InstrumentWindowPickTab::plotBox(const Instrument3DWidget::DetInfo & /*cursorPos*/)
 {
 }
 
@@ -277,7 +277,7 @@ void InstrumentWindowPickTab::plotTube(const Instrument3DWidget::DetInfo & curso
         std::vector<double> y(x.size());
         double ymin =  DBL_MAX;
         double ymax = -DBL_MAX;
-        for(int i = 0; i < x.size(); ++i)
+        for(size_t i = 0; i < x.size(); ++i)
         {
           const double val = ymap[x[i]];
           y[i] = val;

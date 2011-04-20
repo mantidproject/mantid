@@ -440,7 +440,7 @@ void SequentialFitDialog::spectraChanged(int row,int col)
       try
       {
         //ui.tWorkspaces->model()->setData(ui.tWorkspaces->model()->index(row,2),(*y)(0));
-        setSpectrum(row,(*y)(0));
+        setSpectrum(row,int((*y)(0)));
       }
       catch(...){}
     }

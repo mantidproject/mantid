@@ -33,7 +33,7 @@ m_maximum(1.0)
   m_slider->installEventFilter(this);
 }
 
-void	XIntegrationScrollBar::resizeEvent (QResizeEvent * e)
+void	XIntegrationScrollBar::resizeEvent (QResizeEvent *)
 {
   if (!m_init)
   {

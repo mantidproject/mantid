@@ -178,8 +178,8 @@ private:
   FitPropertyBrowser* m_browser;
   Mantid::API::CompositeFunction* m_cf;//< if the function is composite holds pointer to it
   Mantid::API::IPeakFunction* m_pf;//< if the function is peak holds pointer to it
-  Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
   Mantid::API::IFitFunction* m_if;//< pointer to IFitFunction
+  Mantid::API::CompositeFunction* m_parent; //< if the function has parent holds pointer to it
   QtProperty* m_type;
   QtBrowserItem* m_item;//< the browser item
   QList<QtProperty*> m_attributes; //< function attribute properties

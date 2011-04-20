@@ -683,9 +683,8 @@ QString InstrumentWindow::saveToString(const QString& geometry, bool saveAsTempl
 
 /** 
  * Called just before a show event
- * @param A :: pointer to the QShowEvent object
  */
-void InstrumentWindow::showEvent(QShowEvent* event)
+void InstrumentWindow::showEvent(QShowEvent*)
 {
   updateWindow();
 }

@@ -254,8 +254,8 @@ void UnwrappedSurface::drawSurface(GL3DWidget *widget,bool picking)
 
       setColor(i,picking);
 
-      int iw = udet.width / dw;
-      int ih = udet.height / dh;
+      int iw = int(udet.width / dw);
+      int ih = int(udet.height / dh);
       if (iw < 6 || ih < 6)
       {
         double w = (iw == 0)?  dw : udet.width/2;
@@ -675,7 +675,7 @@ int UnwrappedSurface::getDetectorID(unsigned char r,unsigned char g,unsigned cha
   id += g;
   id *= 256;
   id += r;
-  if (id == 0 || id > m_unwrappedDetectors.size())
+  if (id == 0 || int(id) > m_unwrappedDetectors.size())
   {
     return -1;
   }
@@ -700,7 +700,7 @@ void UnwrappedSurface::showPickedDetector()
       int x = rect.x() + i;
       int y = rect.y() + j;
       QRgb pixel = m_pickImage->pixel(x,y);
-      int detID = getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+      int detID = getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
       if (detID >= 0)
       {
         detIDs.insert(detID);
@@ -772,7 +772,7 @@ void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
       int x = rect.x() + i;
       int y = rect.y() + j;
       QRgb pixel = m_pickImage->pixel(x,y);
-      int detID = getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+      int detID = getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
       if (detID >= 0)
       {
         dets.insert(detID);
@@ -789,7 +789,7 @@ int UnwrappedSurface::getDetectorID(int x, int y)
   if (!m_pickImage) return -7;
   if (!m_pickImage->valid(x,y)) return -1;
   QRgb pixel = m_pickImage->pixel(x,y);
-  return getDetectorID(qRed(pixel),qGreen(pixel),qBlue(pixel));
+  return getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
 }
 
 bool UnwrappedSurface::hasSelection()const
@@ -809,7 +809,7 @@ void UnwrappedSurface::findAndCorrectUGap()
   for(;ud != m_unwrappedDetectors.end(); ++ud)
   {
     double u = ud->u;
-    int i = (u - m_u_min) / bin_width;
+    int i = int((u - m_u_min) / bin_width);
     ubins[i] = true;
   }
 
@@ -817,7 +817,7 @@ void UnwrappedSurface::findAndCorrectUGap()
   int iTo   = 0; // marks gap end
   int i0 = 0;
   bool inGap = false; 
-  for(int i = 0;i < ubins.size()-1;++i)
+  for(int i = 0;i < int(ubins.size())-1;++i)
   {
     if (!ubins[i])
     {

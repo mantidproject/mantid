@@ -2108,7 +2108,7 @@ void Table::setRandomValues()
   QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
   time_t tmp;
-  srand(time(&tmp));
+  srand((unsigned int)(time(&tmp)));
   int rows=d_table->numRows();
   for (int j=0; j<(int) list.count(); j++){
     QString name=list[j];

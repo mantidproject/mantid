@@ -130,7 +130,7 @@ void CompAssemblyActor::drawUsingColorID()
       r=(rgb/65536);
       g=((rgb%65536)/256);
       b=((rgb%65536)%256);
-      glColor3f(r/255.0,g/255.0,b/255.0);
+      glColor3f(GLfloat(r/255.0),GLfloat(g/255.0),GLfloat(b/255.0));
       if((*itrObjComp)->getVisibility())
         (*itrObjComp)->draw();
       rgb++;

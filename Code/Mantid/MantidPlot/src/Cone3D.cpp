@@ -84,10 +84,10 @@ void Cone3D::draw(Qwt3D::Triple const& pos)
 	glMatrixMode( GL_MODELVIEW );
   glPushMatrix();
 
-  glTranslatef(pos.x, pos.y, pos.z);
+  glTranslatef(GLfloat(pos.x), GLfloat(pos.y), GLfloat(pos.z));
 
   gluCylinder(hat, 0.0, radius_, radius_*2, quality_, 1);
-  glTranslatef(0, 0, radius_*2);
+  glTranslatef(0, 0, GLfloat(radius_*2));
 	gluDisk(disk, 0.0, radius_, quality_, 1);
 
   glPopMatrix();

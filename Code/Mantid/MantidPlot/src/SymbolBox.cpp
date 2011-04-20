@@ -152,11 +152,21 @@ void SymbolBox::init()
 
 void SymbolBox::setStyle(const QwtSymbol::Style& style)
 {
-  const QwtSymbol::Style*ite = std::find(symbols, symbols + sizeof(symbols), style);
-  if (ite == symbols + sizeof(symbols))
-    this->setCurrentItem(0);
-  else 
-    this->setCurrentItem(ite - symbols);
+  size_t n = sizeof(symbols);
+  for(size_t i = 0; i < n; ++i)
+  {
+    if (symbols[i] == style)
+    {
+      setCurrentItem(int(i));
+      return;
+    }
+  }
+  setCurrentItem(0);
+  //const QwtSymbol::Style*ite = std::find(symbols, symbols + sizeof(symbols), style);
+  //if (ite == symbols + sizeof(symbols))
+  //  this->setCurrentItem(0);
+  //else 
+  //  this->setCurrentItem(ite - symbols);
 }
 
 QwtSymbol::Style SymbolBox::selectedSymbol() const
@@ -170,11 +180,20 @@ QwtSymbol::Style SymbolBox::selectedSymbol() const
 
 int SymbolBox::symbolIndex(const QwtSymbol::Style& style)
 {
-  const QwtSymbol::Style*ite = std::find(symbols, symbols + sizeof(symbols), style);
-  if (ite == symbols + sizeof(symbols))
-    return 0; 
-  else
-    return (ite - symbols);
+  size_t n = sizeof(symbols);
+  for(size_t i = 0; i < n; ++i)
+  {
+    if (symbols[i] == style)
+    {
+      return int(i);
+    }
+  }
+  return 0;
+  //const QwtSymbol::Style*ite = std::find(symbols, symbols + sizeof(symbols), style);
+  //if (ite == symbols + sizeof(symbols))
+  //  return 0; 
+  //else
+  //  return (ite - symbols);
 }
 
 QwtSymbol::Style SymbolBox::style(int index)

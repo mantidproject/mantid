@@ -49,9 +49,9 @@ void GLActorCollection::addActor(GLActor* a)
 	int rgb = referenceColorID[0]*65536 + referenceColorID[1]*256 + referenceColorID[2];
 	int noOfColors = a->setStartingReferenceColor(rgb);
 	rgb += noOfColors;
-	referenceColorID[0] = rgb / 65536;
-	referenceColorID[1] = (rgb % 65536) / 256;
-	referenceColorID[2] = (rgb % 65536) % 256;
+	referenceColorID[0] = (unsigned char)(rgb / 65536);
+	referenceColorID[1] = (unsigned char)((rgb % 65536) / 256);
+	referenceColorID[2] = (unsigned char)((rgb % 65536) % 256);
 }
 
 /**

@@ -212,7 +212,7 @@ QRgb MantidColorMap::rgb(const QwtDoubleInterval & interval, double value) const
   boost::shared_ptr<GLColor> col = getColor(colorIndex(interval, value));
   float r(0.0f), g(0.0f), b(0.0f), a(0.0f);
   col->get(r,g,b,a);
-  return qRgb(r*255,g*255,b*255);
+  return qRgb(int(r*255),int(g*255),int(b*255));
 }
 
 
@@ -228,11 +228,11 @@ unsigned char MantidColorMap::colorIndex (const QwtDoubleInterval &interval, dou
   double fraction = normalize(interval, value);
   if( fraction < 0.0 )return static_cast<unsigned char>(0);
 
-  short index = std::floor(fraction * m_num_colors);
+  short index = short(std::floor(fraction * m_num_colors));
   // If the ratio gives back 1 then we need to adjust the index down 1
   if( index >= m_num_colors )
   {
-    index = m_num_colors - 1;
+    index = short(m_num_colors - 1);
   }
   if( index < 0 )
   {

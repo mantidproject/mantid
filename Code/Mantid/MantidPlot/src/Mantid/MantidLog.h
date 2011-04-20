@@ -5,6 +5,7 @@
 #include "AbstractMantidLog.h"
 #include <boost/shared_ptr.hpp>
 
+
 class MantidUI;
 
 class MantidLog: public AbstractMantidLog

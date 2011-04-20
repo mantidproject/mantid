@@ -1989,7 +1989,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   }
 
   Mantid::Kernel::DateAndTime lastTime;
-  double lastValue;
+  double lastValue = 0;
 
   //Iterate through the time-value map.
   int i = 0;
@@ -2070,7 +2070,7 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   if (useAbsoluteDate)
   {
     Mantid::Kernel::DateAndTime label_as_ptime = flt.data()->nthInterval(0).begin();
-    QDateTime dt = QDateTime::fromTime_t( label_as_ptime.to_localtime_t() );
+    QDateTime dt = QDateTime::fromTime_t( uint(label_as_ptime.to_localtime_t()) );
     QString format = dt.toString(Qt::ISODate) + ";HH:mm:ss";
     g->setLabelsDateTimeFormat(2,ScaleDraw::Date,format);
   }
@@ -2467,7 +2467,7 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
   Table* t = new Table(appWindow()->scriptingEnv(), numRows, c*bins.size() + 1, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-"));
   // t->askOnCloseEvent(false);
-  int kY,kErr;
+  int kY,kErr = 0;
   for(int i = 0; i < bins.size(); i++)
   {
     kY = c*i+1;

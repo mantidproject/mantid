@@ -228,7 +228,7 @@ void file_uncompress(file)
     const char  *file;
 {
     local char buf[MAX_NAME_LEN];
-    char *infile, *outfile;
+    const char *infile, *outfile;
     FILE  *out;
     gzFile in;
     uInt len = (uInt)strlen(file);
@@ -238,7 +238,7 @@ void file_uncompress(file)
     if (len > SUFFIX_LEN && strcmp(file+len-SUFFIX_LEN, GZ_SUFFIX) == 0) {
         infile = file;
         outfile = buf;
-        outfile[len-3] = '\0';
+        buf[len-3] = '\0';
     } else {
         outfile = file;
         infile = buf;

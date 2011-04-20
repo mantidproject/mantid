@@ -115,7 +115,7 @@ void GL3DWidget::initializeGL()
   setRenderingOptions();
   
   // Clear the memory buffers
-  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
@@ -237,7 +237,7 @@ void GL3DWidget::draw3D()
   glMatrixMode(GL_MODELVIEW);
   glLoadIdentity();
   // Clear the background to the bg color set previously.
-  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("GL3DWidget::draw3D()[clear] ");
 
@@ -872,7 +872,7 @@ void GL3DWidget::setBackgroundColor(QColor input)
 {
   makeCurrent();
   bgColor = input;
-  glClearColor(bgColor.red()/255.0,bgColor.green()/255.0,bgColor.blue()/255.0,1.0);
+  glClearColor(GLclampf(bgColor.red()/255.0),GLclampf(bgColor.green()/255.0),GLclampf(bgColor.blue()/255.0),1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   OpenGLError::check("GL3DWidget::setBackgroundColor");
   m_unwrappedSurfaceChanged = true;

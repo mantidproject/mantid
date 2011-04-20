@@ -19,9 +19,9 @@ m_pick_data()
   for(int i = 0; i < m_n; ++i)
   {
 //    m_index_to_detID_map[i] = boost::dynamic_pointer_cast<Mantid::Geometry::IDetector>((*obj)[i])->getID();
-    m_data[pos]   = rand() % 256;
-    m_data[pos+1] = rand() % 256;
-    m_data[pos+2] = rand() % 256;
+    m_data[pos]   = (unsigned char)(rand() % 256);
+    m_data[pos+1] = (unsigned char)(rand() % 256);
+    m_data[pos+2] = (unsigned char)(rand() % 256);
     pos += 3;
   }
 

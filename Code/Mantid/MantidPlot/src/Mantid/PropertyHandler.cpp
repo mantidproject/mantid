@@ -228,7 +228,7 @@ void PropertyHandler::initParameters()
       QStringList qc = QString::fromStdString(c->asString()).split("<");
       bool lo = false;
       bool up = false;
-      double loBound, upBound;
+      double loBound=0, upBound=0;
       if (qc.size() == 2)
       {
         if (qc[0].contains(parName))
@@ -324,7 +324,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
       if (ws && wi >= 0 && wi < ws->getNumberHistograms())
       {
         const Mantid::MantidVec& X = ws->readX(wi);
-        double istart = 0, iend = 0;
+        int istart = 0, iend = 0;
         for(int i=0; i < static_cast<int>(X.size())-1; ++i)
         {
           double x = X[i];

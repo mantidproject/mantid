@@ -429,15 +429,15 @@ int OPJFile::ParseFormatOld() {
 			for(i=0;i<size;i++) {	// read data
 				string stmp;
 				if(i<26)
-					stmp=i+0x41;
+					stmp=char(i+0x41);
 				else if(i<26*26) {
-					stmp = 0x40+i/26;
+					stmp = char(0x40+i/26);
 					stmp[1] = i%26+0x41;
 				}
 				else {
-					stmp = 0x40+i/26/26;
-					stmp[1] = i/26%26+0x41;
-					stmp[2] = i%26+0x41;
+					stmp = char(0x40+i/26/26);
+					stmp[1] = char(i/26%26+0x41);
+					stmp[2] = char(i%26+0x41);
 				}
 				SPREADSHEET[SPREADSHEET.size()-1].column.push_back(stmp);
 				fread(&value,8,1,f);
@@ -512,7 +512,7 @@ int OPJFile::ParseFormatOld() {
 	////////////////////// HEADER SECTION //////////////////////////////////////
 	// TODO : use new method ('\n')
 
-	int POS = ftell(f)-11;
+	int POS = int(ftell(f)-11);
 	fprintf(debug,"\nHEADER SECTION\n");
 	fprintf(debug,"	nr_spreads = %d\n",SPREADSHEET.size());
 	fprintf(debug,"	[position @ 0x%X]\n",POS);
@@ -754,7 +754,7 @@ int OPJFile::ParseFormatNew() {
 
 	fread(&c,1,1,f);	// skip '\n'
 	fprintf(debug,"	[column found = %d/0x%X @ 0x%X]\n",col_found,col_found,(unsigned int) ftell(f));
-	int colpos=ftell(f);
+	int colpos=int(ftell(f));
 
 	int current_col=1, nr=0, nbytes=0;
 	double a;
@@ -763,7 +763,7 @@ int OPJFile::ParseFormatNew() {
 //////////////////////////////// COLUMN HEADER /////////////////////////////////////////////
 		short data_type;
 		char data_type_u;
-		int oldpos=ftell(f);
+		int oldpos=int(ftell(f));
 		fseek(f,oldpos+0x16,SEEK_SET);
 		fread(&data_type,2,1,f);
 		if(IsBigEndian()) SwapBytes(data_type);
@@ -943,11 +943,11 @@ int OPJFile::ParseFormatNew() {
 
 				char *cmd;
 				cmd=new char[valuesize+1];
-				cmd[valuesize]='\0';
+				cmd[size_t(valuesize)]='\0';
 				fread(cmd,valuesize,1,f);
 				FUNCTION.back().formula=cmd;
 				int oldpos;
-				oldpos=ftell(f);
+				oldpos=int(ftell(f));
 				short t;
 				fseek(f,colpos+0xA,SEEK_SET);
 				fread(&t,2,1,f);
@@ -1097,7 +1097,7 @@ int OPJFile::ParseFormatNew() {
 		if(IsBigEndian()) SwapBytes(col_found);
 		fseek(f,1,SEEK_CUR);	// skip '\n'
 		fprintf(debug,"	[column found = %d/0x%X (@ 0x%X)]\n",col_found,col_found,(unsigned int) ftell(f)-5);
-		colpos=ftell(f);
+		colpos=int(ftell(f));
 		fflush(debug);
 	}
 
@@ -1113,7 +1113,7 @@ int OPJFile::ParseFormatNew() {
 ////////////////////////////////////////////////////////////////////////////
 ////////////////////// HEADER SECTION //////////////////////////////////////
 
-	int POS = ftell(f)-11;
+	int POS = int(ftell(f)-11);
 	fprintf(debug,"\nHEADER SECTION\n");
 	fprintf(debug,"	nr_spreads = %d\n",SPREADSHEET.size());
 	fprintf(debug,"	[position @ 0x%X]\n",POS);
@@ -1128,7 +1128,7 @@ int OPJFile::ParseFormatNew() {
 		fflush(debug);
 		// HEADER
 		// check header
-		POS=ftell(f);
+		POS=int(ftell(f));
 		int headersize;
 		fread(&headersize,4,1,f);
 		if(IsBigEndian()) SwapBytes(headersize);
@@ -1262,7 +1262,7 @@ int OPJFile::ParseFormatNew() {
 
 void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	int headersize;
 	fread(&headersize,4,1,f);
@@ -1484,7 +1484,7 @@ void OPJFile::readSpreadInfo(FILE *f, FILE *debug)
 
 void OPJFile::readExcelInfo(FILE *f, FILE *debug)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	int headersize;
 	fread(&headersize,4,1,f);
@@ -1719,7 +1719,7 @@ void OPJFile::readExcelInfo(FILE *f, FILE *debug)
 
 void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	int headersize;
 	fread(&headersize,4,1,f);
@@ -1826,7 +1826,7 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 		fseek(f,LAYER+0x2B, SEEK_SET);
 		fread(&width,2,1,f);
 		if(IsBigEndian()) SwapBytes(width);
-		width=(width-55)/0xA;
+		width=short((width-55)/0xA);
 		if(width==0)
 			width=8;
 		MATRIX[idx].width=width;
@@ -1874,7 +1874,7 @@ void OPJFile::readMatrixInfo(FILE *f, FILE *debug)
 
 void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	int headersize;
 	fread(&headersize,4,1,f);
@@ -2513,13 +2513,13 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 				fread(&h,1,1,f);
 				if(h==2)
 				{
-					GRAPH.back().layer.back().xAxisBreak.minor_ticks_before = GRAPH.back().layer.back().xAxis.minorTicks;
+					GRAPH.back().layer.back().xAxisBreak.minor_ticks_before = (unsigned char)(GRAPH.back().layer.back().xAxis.minorTicks);
 					GRAPH.back().layer.back().xAxisBreak.scale_increment_before = GRAPH.back().layer.back().xAxis.step;
 					readGraphAxisBreakInfo(GRAPH.back().layer.back().xAxisBreak, f, LAYER);
 				}
 				else if(h==4)
 				{
-					GRAPH.back().layer.back().yAxisBreak.minor_ticks_before = GRAPH.back().layer.back().yAxis.minorTicks;
+					GRAPH.back().layer.back().yAxisBreak.minor_ticks_before = (unsigned char)(GRAPH.back().layer.back().yAxis.minorTicks);
 					GRAPH.back().layer.back().yAxisBreak.scale_increment_before = GRAPH.back().layer.back().yAxis.step;
 					readGraphAxisBreakInfo(GRAPH.back().layer.back().yAxisBreak, f, LAYER);
 				}
@@ -2597,7 +2597,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 void OPJFile::skipObjectInfo(FILE *f, FILE *)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	int headersize;
 	fread(&headersize,4,1,f);
@@ -2899,7 +2899,7 @@ void OPJFile::readProjectTree(FILE *f, FILE *debug)
 
 void OPJFile::readProjectTreeFolder(FILE *f, FILE *debug, tree<projectNode>::iterator parent)
 {
-	int POS=ftell(f);
+	int POS=int(ftell(f));
 
 	double creation_date, modification_date;
 
