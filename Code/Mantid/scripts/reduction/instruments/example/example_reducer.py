@@ -4,10 +4,10 @@
 from MantidFramework import *
 from reduction import Reducer
 from reduction.instruments.example.ExampleRedStep import ExampleRedStep
-
+from reduction.instruments.example.ExampleRedStep import ExampleLoader
 # Validate_step is a decorator that allows both Python algorithms and ReductionStep objects to be passed to the Reducer.
 # It also does minimal type checking to ensure that the object that is passed is valid
-from reduction import validate_step
+from reduction import validate_step, validate_loader
 from mantidsimple import *
 mtd.initialise()
 
@@ -23,7 +23,8 @@ class ExampleReducer(Reducer):
     def __init__(self):
         super(ExampleReducer, self).__init__()
         
-    @validate_step
+    #@validate_step
+    @validate_loader
     def set_first_step(self, step):
         """
             Set a reduction step. The 'step' parameter is expected to be 
@@ -88,7 +89,10 @@ if __name__ == '__main__':
     
     # Example of a standard algorithm used as a reduction step. Note that InputWorkspace and OutputWorkspace
     # are overwritten by the Reducer. They can be set to Non at this point.
-    r.set_first_step(CreateWorkspace, OutputWorkspace=None, DataX='1', DataY='1', DataE='1')
+    #r.set_first_step(CreateWorkspace, OutputWorkspace=None, DataX='1', DataY='1', DataE='1')
+    step = ExampleLoader()
+    step.initialize()
+    r.set_first_step(step)
     
     # Set up an algorithm to be used as part of a reduction step
     alg = mtd._createAlgProxy("Scale")

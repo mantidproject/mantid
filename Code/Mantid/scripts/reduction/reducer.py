@@ -30,6 +30,141 @@ import mantidsimple
 ## Version number
 __version__ = '1.0'
       
+def validate_loader(f):
+
+    def validated_f(reducer, algorithm, *args, **kwargs):
+        if issubclass(algorithm.__class__, ReductionStep) or algorithm is None:
+            # If we have a ReductionStep object, just use it.
+            # "None" is allowed as an algorithm (usually tells the reducer to skip a step)
+            return f(reducer, algorithm)
+        
+        if isinstance(algorithm, types.FunctionType):
+            # If we get a function, assume its name is an algorithm name
+            algorithm = algorithm.func_name
+
+        if isinstance(algorithm, MantidFramework.IAlgorithmProxy):
+            # If we have an algorithm proxy, get the actual algorithm
+            algorithm = algorithm._getHeldObject()
+            
+        if isinstance(algorithm, types.StringType):
+            raise RuntimeError, "Use an algorithm function you moron"
+        
+        if isinstance(algorithm, types.StringType):
+            # If we have a string, assume it's an algorithm name
+            class _AlgorithmStep(ReductionStep):
+                def __init__(self):
+                    self.algorithm = None
+                    self._data_file = None
+                    if "filename" in kwargs:
+                        self._data_file = kwargs["filename"]
+                def get_algorithm(self):
+                    return self.algorithm
+                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    """
+                        Create a new instance of the requested algorithm object, 
+                        set the algorithm properties replacing the input and output
+                        workspaces.
+                        The execution will work for any combination of mandatory/optional
+                        properties. 
+                        @param reducer: Reducer object managing the reduction
+                        @param inputworkspace: input workspace name [optional]
+                        @param outputworkspace: output workspace name [optional]
+                    """
+                    # If we don't have a data file, look up the workspace handle
+                    if self._data_file is None:
+                        if inputworkspace in reducer._data_files:
+                            data_file = reducer._data_files[inputworkspace]
+                            if data_file is None:
+                                return
+                        else:
+                            raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+                    else:
+                        data_file = self._data_file
+
+                    proxy = MantidFramework.mtd._createAlgProxy(algorithm)
+                    if not isinstance(proxy, MantidFramework.IAlgorithmProxy):
+                        raise RuntimeError, "Reducer expects a ReductionStep or a function returning an IAlgorithmProxy object"                    
+                    
+                    propertyOrder = MantidFramework.mtd._getPropertyOrder(proxy._getHeldObject())
+            
+                    # add the args to the kw list so everything can be set in a single way
+                    for (key, arg) in zip(propertyOrder[:len(args)], args):
+                        kwargs[key] = arg
+
+                    # Override input and output workspaces
+                    if "Workspace" in propertyOrder:
+                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "OutputWorkspace" in propertyOrder:
+                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "Filename" in propertyOrder:
+                        algorithm.setPropertyValue("Filename", data_file)
+
+                    if "AlternateName" in kwargs and \
+                        kwargs["AlternateName"] in propertyOrder:
+                        algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
+
+                    # set the properties of the algorithm                    
+                    ialg = proxy._getHeldObject()
+                    self.algorithm = ialg
+                    for key in kwargs.keys():
+                        ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
+                        
+                    proxy.execute()
+            return f(reducer, _AlgorithmStep())
+        
+        elif isinstance(algorithm, MantidFramework.IAlgorithm) \
+            or type(algorithm).__name__=="IAlgorithm":
+            class _AlgorithmStep(ReductionStep):
+                def __init__(self):
+                    self.algorithm = algorithm
+                    self._data_file = None
+                    if "filename" in kwargs:
+                        self._data_file = kwargs["filename"]
+                def get_algorithm(self):
+                    return self.algorithm
+                def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
+                    """
+                        Create a new instance of the requested algorithm object, 
+                        set the algorithm properties replacing the input and output
+                        workspaces.
+                        The execution will work for any combination of mandatory/optional
+                        properties. 
+                        @param reducer: Reducer object managing the reduction
+                        @param inputworkspace: input workspace name [optional]
+                        @param outputworkspace: output workspace name [optional]
+                    """
+                    # If we don't have a data file, look up the workspace handle
+                    if self._data_file is None:
+                        if inputworkspace in reducer._data_files:
+                            data_file = reducer._data_files[inputworkspace]
+                            if data_file is None:
+                                return
+                        else:
+                            raise RuntimeError, "SANSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
+                    else:
+                        data_file = self._data_file
+                                
+                    propertyOrder = MantidFramework.mtd._getPropertyOrder(algorithm)
+            
+                    # Override input and output workspaces
+                    if "Workspace" in propertyOrder:
+                        algorithm.setPropertyValue("Workspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "OutputWorkspace" in propertyOrder:
+                        algorithm.setPropertyValue("OutputWorkspace", MantidFramework._makeString(inputworkspace).lstrip('? '))
+                    if "Filename" in propertyOrder:
+                        algorithm.setPropertyValue("Filename", data_file)
+
+                    if "AlternateName" in kwargs and \
+                        kwargs["AlternateName"] in propertyOrder:
+                        algorithm.setPropertyValue(kwargs["AlternateName"], data_file)
+
+                    algorithm.execute()
+            return f(reducer, _AlgorithmStep())
+
+        else:
+            raise RuntimeError, "%s expects a ReductionStep object, found %s" % (f.__name__, algorithm.__class__)
+    return validated_f
+                 
 def validate_step(f):
     """
         Decorator for Reducer methods that need a ReductionStep
@@ -72,6 +207,10 @@ def validate_step(f):
         if isinstance(algorithm, types.StringType):
             # If we have a string, assume it's an algorithm name
             class _AlgorithmStep(ReductionStep):
+                def __init__(self):
+                    self.algorithm = None
+                def get_algorithm(self):
+                    return self.algorithm
                 def execute(self, reducer, inputworkspace=None, outputworkspace=None): 
                     """
                         Create a new instance of the requested algorithm object, 
@@ -105,6 +244,7 @@ def validate_step(f):
 
                     # set the properties of the algorithm                    
                     ialg = proxy._getHeldObject()
+                    self.algorithm = ialg
                     for key in kwargs.keys():
                         ialg.setPropertyValue(key, MantidFramework._makeString(kwargs[key]).lstrip('? '))
                         
@@ -321,6 +461,12 @@ class Reducer(object):
                 default will be the name of the file 
             TODO: this needs to be an ordered list
         """
+        if data_file is None:
+            if MantidFramework.mtd.workspaceExists(workspace):
+                self._data_files[workspace] = None
+                return
+            else:
+                raise RuntimeError, "Trying to append a data set without a file name or an existing workspace."
         if type(data_file)==list:
             for item in data_file:
                 # Check that the file exists

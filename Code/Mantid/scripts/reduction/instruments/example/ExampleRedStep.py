@@ -21,3 +21,19 @@ class ExampleRedStep(PythonAlgorithm):
         alg.execute()
 
 #mtd.registerPyAlgorithm(ExampleRedStep())
+
+class ExampleLoader(PythonAlgorithm):
+    
+    def name(self):
+        return "ExampleLoader"
+
+    def PyInit(self):
+        self.declareProperty("File_name", "")
+        self.declareProperty("OutputWorkspace", "")
+
+    def PyExec(self):
+        filename = self.getProperty("File_name")
+        output_ws = self.getProperty("OutputWorkspace")
+        
+        print filename, output_ws
+
