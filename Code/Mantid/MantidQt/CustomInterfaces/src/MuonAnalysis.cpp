@@ -90,9 +90,6 @@ void MuonAnalysis::initLayout()
   m_optionTab = new MuonAnalysisOptionTab(m_uiForm, m_settingsGroup);
   m_optionTab->initLayout();
 
-  // connect exit button
-  //connect(m_uiForm.exitButton, SIGNAL(clicked()), this, SLOT(exitClicked())); 
-
   // connect guess alpha 
   connect(m_uiForm.guessAlphaButton, SIGNAL(clicked()), this, SLOT(guessAlphaClicked())); 
 
@@ -145,10 +142,6 @@ void MuonAnalysis::initLayout()
     m_uiForm.pairTable->setCellWidget(i,1, new QComboBox);
     m_uiForm.pairTable->setCellWidget(i,2, new QComboBox);
   }
-
-  QString filter;
-  filter.append("Files (*.NXS *.nxs)");
-  filter.append(";;All Files (*.*)");
 
   // file input 
   connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
@@ -983,27 +976,17 @@ void MuonAnalysis::inputFileChanged()
     m_uiForm.homePeriodBoxMath->setEnabled(false);
   }
 
+  // Populate bin width info in Plot options
+  double binWidth = matrix_workspace->dataX(0)[1]-matrix_workspace->dataX(0)[0];
+  static const QChar MU_SYM(956);
+  m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of ") + QString::number(binWidth) + QString(" %1s").arg(MU_SYM));
+
   // finally the preferred default by users are to by default
   // straight away plot the data
   if (m_uiForm.frontPlotButton->isEnabled() )
     runFrontPlotButton();
 }
 
-/**
- * Exit the interface (slot)
- */
-/*
-void MuonAnalysis::exitClicked()
-{
-  close();
-  this->close();
-  QObject * obj=parent();
-  QWidget * widget = qobject_cast<QWidget*>(obj);
-  if (widget)
-  {
-    widget->close();
-  }
-}*/
 
 /**
  * Guess Alpha (slot). For now include all data from first good data(bin)
@@ -1244,7 +1227,15 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
   cropStr += ");";
   runPythonCode( cropStr ).trimmed();
 
+  // rebin data if option set in Plot Options
+  if ( m_uiForm.rebinComboBox->currentText() == "Fixed" )
+  {
+    QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
+        + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
+    runPythonCode( reBunchStr ).trimmed(); 
+  }
 
+  // Make group to display more organised in Mantidplot workspace list
   if ( !AnalysisDataService::Instance().doesExist(groupName) )
   {
     QString rubbish = "boevsMoreBoevs";
@@ -1757,12 +1748,16 @@ void MuonAnalysis::nowDataAvailable()
   for (int i = 0; i < m_uiForm.pairTablePlotChoice->count(); i++)
     m_pairPlotFunc.append(m_uiForm.pairTablePlotChoice->itemText(i));
   
-  // Set initial front assuming to alpha specified etc...
+  // Set initial front 
   m_uiForm.frontAlphaLabel->setVisible(false);
   m_uiForm.frontAlphaNumber->setVisible(false);
   m_uiForm.frontAlphaNumber->setEnabled(false);
   m_uiForm.homePeriodBox2->setEditable(false);
   m_uiForm.homePeriodBox2->setEnabled(false);
+
+  // Set initial stuff in Option tab
+  m_uiForm.optionBinStep->setVisible(false);
+  m_uiForm.optionStepSizeText->setVisible(false);
 
   // set various properties of the group table
   m_uiForm.groupTable->setColumnWidth(1, 2*m_uiForm.groupTable->columnWidth(1));
@@ -2180,6 +2175,7 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
   QString instrumentName = prevInstrumentValues.value("name", "MUSR").toString();
   m_uiForm.instrSelector->setCurrentIndex(m_uiForm.instrSelector->findText(instrumentName));
 
+  // load Plot Style options
   QSettings prevPlotStyle;
   prevPlotStyle.beginGroup(group + "plotStyleOptions"); 
   int timeComboBoxIndex = prevPlotStyle.value("timeComboBoxIndex", 0).toInt();
@@ -2210,6 +2206,16 @@ void MuonAnalysis::loadAutoSavedValues(const QString& group)
     double yAxisFinish = prevPlotStyle.value("yAxisFinish").toDouble();
     m_uiForm.yAxisMaximumInput->setText(QString::number(yAxisFinish));
   }
+
+  // Load Plot Binning Options
+  QSettings prevPlotBinning;
+  prevPlotBinning.beginGroup(group + "BinningOptions"); 
+  int constStepSize = prevPlotBinning.value("constStepSize", 1).toInt();
+  m_uiForm.optionStepSizeText->setText(QString::number(constStepSize));
+
+  int rebinComboBoxIndex = prevPlotBinning.value("rebinComboBoxIndex", 0).toInt();
+  m_uiForm.rebinComboBox->setCurrentIndex(rebinComboBoxIndex);
+  m_optionTab->runRebinComboBox(rebinComboBoxIndex);
 }
 
 }

@@ -987,7 +987,7 @@
          <x>10</x>
          <y>140</y>
          <width>461</width>
-         <height>131</height>
+         <height>101</height>
         </rect>
        </property>
        <property name="title" >
@@ -1055,9 +1055,9 @@
        <widget class="QLineEdit" name="optionStepSizeText" >
         <property name="geometry" >
          <rect>
-          <x>230</x>
+          <x>210</x>
           <y>60</y>
-          <width>113</width>
+          <width>51</width>
           <height>20</height>
          </rect>
         </property>

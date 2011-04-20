@@ -33,6 +33,9 @@ void createMicroSecondsLabels(Ui::MuonAnalysis& m_uiForm)
   m_uiForm.First_Good_Data_label->setText(m_uiForm.First_Good_Data_label->text() + QString(" (%1s)").arg(MU_SYM));
   m_uiForm.timeAxisStartAtLabel->setText(m_uiForm.timeAxisStartAtLabel->text() + QString(" (%1s)").arg(MU_SYM));
   m_uiForm.timeAxisFinishAtLabel->setText(m_uiForm.timeAxisFinishAtLabel->text() + QString(" (%1s)").arg(MU_SYM));
+
+  // Plot option binning label
+  m_uiForm.optionLabelBinWidth->setText(QString("Data collected with histogram bins of <width>") + QString(" %1s").arg(MU_SYM));
 }
 
 }

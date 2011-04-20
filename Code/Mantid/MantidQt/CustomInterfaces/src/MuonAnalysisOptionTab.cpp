@@ -41,21 +41,75 @@ namespace Muon
 
 void MuonAnalysisOptionTab::initLayout()
 {
-  ////////////// Plot Option ///////////////
+  ////////////// Default Plot Style slots ///////////////
   connect(m_uiForm.timeComboBox, SIGNAL(currentIndexChanged(int)), this, 
-    SLOT(runTimeComboBox(int)));
+           SLOT(runTimeComboBox(int)));
   connect(m_uiForm.timeAxisStartAtInput, SIGNAL(lostFocus()), this, 
-    SLOT(runTimeAxisStartAtInput()));
+           SLOT(runTimeAxisStartAtInput()));
   connect(m_uiForm.timeAxisFinishAtInput, SIGNAL(lostFocus()), this, 
-    SLOT(runTimeAxisFinishAtInput()));
+           SLOT(runTimeAxisFinishAtInput()));
   connect(m_uiForm.yAxisMinimumInput, SIGNAL(lostFocus()), this, 
-    SLOT(runyAxisMinimumInput()));
+           SLOT(runyAxisMinimumInput()));
   connect(m_uiForm.yAxisMaximumInput, SIGNAL(lostFocus()), this, 
-    SLOT(runyAxisMaximumInput()));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runShowErrorBars(bool)));
-  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, SLOT(runyAxisAutoscale(bool)));
+           SLOT(runyAxisMaximumInput()));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this, 
+             SLOT(runShowErrorBars(bool)));
+  connect(m_uiForm.yAxisAutoscale, SIGNAL(toggled(bool)), this,  
+           SLOT(runyAxisAutoscale(bool)));
+
+  ////////////// Data Binning slots ///////////////
+  connect(m_uiForm.rebinComboBox, SIGNAL(currentIndexChanged(int)), this, 
+           SLOT(runRebinComboBox(int)));
+  connect(m_uiForm.optionStepSizeText, SIGNAL(lostFocus()), this, 
+           SLOT(runOptionStepSizeText()));
 }
 
+////////////// Data Binning slots ///////////////
+
+/**
+* When clicking Rebin combobox (slot)
+*/
+void MuonAnalysisOptionTab::runRebinComboBox(int index)
+{
+  if (index == 0)
+  {
+    m_uiForm.optionBinStep->setVisible(false);
+    m_uiForm.optionStepSizeText->setVisible(false);
+  }
+  else
+  {
+    m_uiForm.optionBinStep->setVisible(true);
+    m_uiForm.optionStepSizeText->setVisible(true);
+  }
+
+  QSettings group;
+  group.beginGroup(m_settingsGroup + "BinningOptions");
+  group.setValue("rebinComboBoxIndex", index); 
+}
+
+
+/**
+* When clicking Rebin step size text box (slot)
+*/  
+void MuonAnalysisOptionTab::runOptionStepSizeText()
+{
+  try 
+  {
+    int boevs = boost::lexical_cast<int>(m_uiForm.optionStepSizeText->text().toStdString());
+
+    QSettings group;
+    group.beginGroup(m_settingsGroup + "BinningOptions");
+    group.setValue("constStepSize", boevs); 
+  }
+  catch (...)
+  {
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Integer not recognised in Binning Option 'Step' input box. Reset to 1.");
+    m_uiForm.optionStepSizeText->setText("1");
+  }
+}
+
+
+////////////// Default Plot Style slots ///////////////
 
 /**
 * When clicking autoscale (slot)

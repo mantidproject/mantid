@@ -65,7 +65,7 @@ public:
 
 public slots:
 
-  ///////////// Plot options ////////////
+  ////////////// Default Plot Style slots ///////////////
   ///
   void runTimeComboBox(int index);
   ///
@@ -80,6 +80,12 @@ public slots:
   void runShowErrorBars(bool state);
   ///
   void runyAxisAutoscale(bool state);
+
+  ////////////// Data Binning slots ///////////////
+  ///
+  void runRebinComboBox(int index);
+  ///
+  void runOptionStepSizeText();
 
 private:
 
