@@ -100,7 +100,7 @@ protected:
   ///Handle time variation.
   unsigned long GetMTime();
 
-  ///Overrriden fill inports so that vtkDataSets may be specified.
+  ///Overriden fill imports so that vtkDataSets may be specified.
   int FillInputPortInformation(int port, vtkInformation* info);
 
 private:
@@ -109,7 +109,7 @@ private:
 
   void operator = (const vtkRebinningCutter&);
 
-  /// Executor peforms the logic associated with running rebinning operations.
+  /// Executor pefroms the logic associated with running rebinning operations.
   Mantid::VATES::RebinningCutterPresenter m_presenter;
   /// Get the x dimension form the input dataset.
   Mantid::VATES::Dimension_sptr getDimensionX(vtkDataSet* in_ds) const;
@@ -128,7 +128,7 @@ private:
   /// Selects the dataset factory to use.
   Mantid::VATES::vtkDataSetFactory_sptr createDataSetFactory(Mantid::API::IMDWorkspace_sptr spRebinnedWs) const;
 
-  /// DataSet handles remappings, so allows regeneration of a visual dataset in rapid time.
+  /// DataSet handles re-mappings, so allows regeneration of a visual dataset in rapid time.
   Mantid::VATES::vtkDataSetFactory_sptr createQuickChangeDataSetFactory(Mantid::API::IMDWorkspace_sptr spRebinnedWs) const;
 
   /// Dataset does not handle remappings and is therefore may be generated quickly.
@@ -143,12 +143,12 @@ private:
   /// Sets the rebinning action to rebin if the number of bins has changed on a dimension.
   void formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim);
 
-  /// handles overriting of time ranges.
+  /// handles overwriting of time ranges.
   void setTimeRange(vtkInformationVector* outputVector);
 
   /// Clip function provided by ClipFunction ProxyProperty
   vtkBox * m_clipFunction;
-  /// Cached vtkDataSet. Enables fast visualisation where possible.
+  /// Cached vtkDataSet. Enables fast visualization where possible.
   vtkDataSet* m_cachedVTKDataSet;
   /// Arguments that cause redrawing are hashed and cached for rapid comparison regarding any changes.
   std::string m_cachedRedrawArguments;
@@ -156,7 +156,7 @@ private:
   Clipping m_clip;
   /// Original extents should be used.
   OrignalExtents m_originalExtents;
-  /// Flag indicating whether set up has occured or not
+  /// Flag indicating whether set up has occurred or not
   SetupStatus m_setup;
   /// Flag containing the timestep.
   int m_timestep;

@@ -35,6 +35,7 @@ inc/MantidVatesAPI/Common.h
 inc/MantidVatesAPI/DimensionComparitor.h
 inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
+inc/MantidVatesAPI/FilteringUpdateProgressAction.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
@@ -59,6 +60,7 @@ test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
 test/FieldDataToMetadataTest.h
+test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h
 test/MultiDimensionalDbPresenterTest.h
 test/MetadataToFieldDataTest.h

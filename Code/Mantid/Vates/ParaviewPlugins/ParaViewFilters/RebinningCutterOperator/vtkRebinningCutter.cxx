@@ -20,12 +20,10 @@
 #include "MantidVatesAPI/IMDWorkspaceProxy.h"
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+
 #include <boost/functional/hash.hpp>
 #include <sstream>
-#include "ParaViewProgressAction.h"
-
-
-
 
 /** Plugin for ParaView. Performs simultaneous rebinning and slicing of Mantid data.
 
@@ -146,7 +144,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
       compFunction,
       inputDataset);
 
-    ParaViewProgressAction updatehandler(this);
+    FilterUpdateProgressAction<vtkRebinningCutter> updatehandler(this);
 
     vtkInformation *outInfo = outputVector->GetInformationObject(0);
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(

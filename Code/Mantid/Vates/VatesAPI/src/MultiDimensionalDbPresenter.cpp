@@ -30,6 +30,30 @@ MultiDimensionalDbPresenter::MultiDimensionalDbPresenter() : m_isExecuted(false)
 
 }
 
+void MultiDimensionalDbPresenter::execute(API::Algorithm& algorithm, const std::string wsId, Mantid::VATES::ProgressAction& eventHandler)
+{
+  using namespace Mantid::API;
+
+  if(true == algorithm.isInitialized())
+  {
+    Poco::NObserver<ProgressAction, Mantid::API::Algorithm::ProgressNotification> observer(eventHandler, &ProgressAction::handler);
+    
+    algorithm.addObserver(observer);
+    
+    //Create and then access a workspace in the ads.
+    algorithm.execute();
+
+    algorithm.removeObserver(observer);
+    
+    extractWorkspaceImplementation(wsId);
+    m_isExecuted = true;
+  }
+  else
+  {
+    throw std::invalid_argument("The algorithm parameter passed to this reader was not initalized");
+  }
+}
+
 void MultiDimensionalDbPresenter::execute(API::Algorithm& algorithm, const std::string wsId)
 { 
   using namespace Mantid::API;

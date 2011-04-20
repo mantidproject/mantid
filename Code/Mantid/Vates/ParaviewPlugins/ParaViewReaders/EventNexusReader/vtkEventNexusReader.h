@@ -23,6 +23,8 @@ public:
   void SetWidth(double width);
   void SetApplyClip(bool applyClip);
   void SetClipFunction( vtkImplicitFunction * func);
+  /// Called by presenter to force progress information updating.
+  void UpdateAlgorithmProgress(double progress);
 
 protected:
   vtkEventNexusReader();

@@ -1,8 +1,8 @@
 #ifndef PARAVIEWPROGRESSACTION_H_
 #define PARAVIEWPROGRESSACTION_H_
 
+#include "MantidKernel/System.h"
 #include "MantidVatesAPI/ProgressAction.h"
-#include "vtkRebinningCutter.h"
 
 /** Adapter for action specific to ParaView RebinningCutter filter. Handles progress actions raised by underlying Mantid Algorithms.
 
@@ -36,12 +36,14 @@ namespace Mantid
 namespace VATES
 {
 
-class ParaViewProgressAction : public ProgressAction
+/// Template argument is the exact filter/source/reader providing the public UpdateAlgorithmProgress method.
+template<typename Filter>
+class DLLExport FilterUpdateProgressAction : public ProgressAction
 {
 
 public:
 
-  ParaViewProgressAction(vtkRebinningCutter* filter) : m_filter(filter)
+  FilterUpdateProgressAction(Filter* filter) : m_filter(filter)
   {
   }
 
@@ -50,9 +52,17 @@ public:
     m_filter->UpdateAlgorithmProgress(progress);
   }
 
+  ~FilterUpdateProgressAction()
+  {
+  }
+
 private:
 
-  vtkRebinningCutter* m_filter;
+  FilterUpdateProgressAction& operator=(FilterUpdateProgressAction&);
+
+  FilterUpdateProgressAction(FilterUpdateProgressAction&);
+
+  Filter* m_filter;
 };
 
 }

@@ -5,6 +5,13 @@
 #include <vtkFieldData.h>
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
+#include "MantidVatesAPI/ProgressAction.h"
+
+#include <Poco/ActiveMethod.h>
+#include <Poco/NotificationCenter.h>
+#include <Poco/Notification.h>
+#include <Poco/NObserver.h>
+#include <MantidAPI/Algorithm.h>
 
 namespace Mantid
 {
@@ -68,6 +75,9 @@ public:
 
   // Performs the rebinning.
   void execute(API::Algorithm& algorithm, const std::string wsId);
+
+  // Performs the rebinning, provides progress updating
+  void execute(API::Algorithm& algorithm, const std::string wsId, Mantid::VATES::ProgressAction& eventHandler);
 
   /// Gets the vtk mesh;
   vtkDataSet* getMesh(RebinningXMLGenerator& serializer, vtkDataSetFactory& vtkFactory) const;

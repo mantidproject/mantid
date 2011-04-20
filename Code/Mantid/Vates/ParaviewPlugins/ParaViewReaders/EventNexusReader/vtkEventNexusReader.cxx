@@ -15,6 +15,8 @@
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
+#include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+
 #include "MantidNexus/LoadEventNexus.h"
 #include <boost/format.hpp>
 #include "MantidMDEvents/MDEventWorkspace.h"
@@ -174,8 +176,9 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
       }
     }
 
+    FilterUpdateProgressAction<vtkEventNexusReader> updatehandler(this);
     // Run the algorithm and cache the output.
-    m_presenter.execute(hist_alg, m_histogrammedWsId);
+    m_presenter.execute(hist_alg, m_histogrammedWsId, updatehandler);
   }
 
   // This object determines how the visualization is made from a given imdworkspace.
@@ -249,4 +252,10 @@ unsigned long vtkEventNexusReader::GetMTime()
   }
 
   return mTime;
+}
+
+void vtkEventNexusReader::UpdateAlgorithmProgress(double progress)
+{
+  this->SetProgressText("Executing Mantid MDEvent Rebinning Algorithm...");
+  this->UpdateProgress(progress);
 }
