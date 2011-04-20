@@ -39,17 +39,17 @@ namespace MDEvents
       PointAdapter(const AdapteeType& adaptee) : m_adaptee(adaptee)
       {
       }
-      virtual double getX() const
+      virtual double getX() const 
       {
-        return (m_adaptee.m_max[0] - m_adaptee.m_min[0]) /2 ;
+        return m_adaptee.m_min[0] + ((m_adaptee.m_max[0] - m_adaptee.m_min[0]) /2);
       }
       virtual double getY() const
       {
-        return (m_adaptee.m_max[1] - m_adaptee.m_min[1]) /2;
+        return m_adaptee.m_min[1] + ((m_adaptee.m_max[1] - m_adaptee.m_min[1]) /2);
       }
       virtual double getZ() const
       {
-        return (m_adaptee.m_max[2] - m_adaptee.m_min[2]) /2;
+        return m_adaptee.m_min[2] + ((m_adaptee.m_max[2] - m_adaptee.m_min[2]) /2);
       }
     };
     return new PointAdapter(adaptee);

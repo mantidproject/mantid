@@ -69,36 +69,16 @@ public:
     TSM_ASSERT_EQUALS("An identity matrix was expected.", true, isIdentityMatrix(rotationMatrix));
   }
 
-  void testLastPlaneApplied()
-  {
-    CompositeImplicitFunction compositeFunction;
-    NormalParameter normalA(1, 0, 0);
-    NormalParameter normalB(1, 1, 1);
-    OriginParameter origin(0, 0, 0);
-    UpParameter up(0, 0, 0);
-    WidthParameter width(3);
-    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin, up, width));
-    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, up, width));
-    compositeFunction.addFunction(functionA);
-    compositeFunction.addFunction(functionB);
-    PlaneInterpreter interpreter;
-    std::vector<double> rotationMatrix = interpreter(&compositeFunction);
-
-    TSM_ASSERT_EQUALS("Should not be a default identity matrix.", true, !isIdentityMatrix(rotationMatrix));
-    TSM_ASSERT_EQUALS("The end rotation matrix should correspond to that of the last plane.", functionB->asRotationMatrixVector() , rotationMatrix);
-  }
-
   void testGetAllPlanes()
   {
     CompositeImplicitFunction compositeFunction;
     NormalParameter normalA(1, 0, 0);
     NormalParameter normalB(1, 1, 1);
     OriginParameter origin(0, 0, 0);
-    UpParameter up(0, 0, 0);
     WidthParameter width(3);
-    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin, up,
+    boost::shared_ptr<PlaneImplicitFunction> functionA(new PlaneImplicitFunction(normalA, origin, 
         width));
-    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, up,
+    boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, 
         width));
     boost::shared_ptr<MockImplicitFunction> functionC(new MockImplicitFunction());
     compositeFunction.addFunction(functionA); // Is a plane (counted)

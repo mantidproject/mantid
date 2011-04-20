@@ -7,7 +7,6 @@
 #include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
-#include "MantidMDAlgorithms/UpParameter.h"
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 class PlaneFunctionBuilderTest: public CxxTest::TestSuite
@@ -22,12 +21,10 @@ public:
     PlaneFunctionBuilder builder;
     OriginParameter o(1, 2, 3);
     NormalParameter n(4, 5, 6);
-    UpParameter up(7, 8, 9);
     WidthParameter width(10);
 
     builder.addOriginParameter(o);
     builder.addNormalParameter(n);
-    builder.addUpParameter(up);
     builder.addWidthParameter(width);
 
     boost::scoped_ptr<ImplicitFunction> impFunc(builder.create());
@@ -40,9 +37,6 @@ public:
     TSM_ASSERT_EQUALS("Normal x value not passed/built in correctly.", 4, planeFunc->getNormalX());
     TSM_ASSERT_EQUALS("Normal y value not passed/built in correctly.", 5, planeFunc->getNormalY());
     TSM_ASSERT_EQUALS("Normal z value not passed/built in correctly.", 6, planeFunc->getNormalZ());
-    TSM_ASSERT_EQUALS("Up x value not passed/built in correctly.", 7, planeFunc->getUpX());
-    TSM_ASSERT_EQUALS("Up y value not passed/built in correctly.", 8, planeFunc->getUpY());
-    TSM_ASSERT_EQUALS("Up z value not passed/built in correctly.", 9, planeFunc->getUpZ());
     TSM_ASSERT_EQUALS("Width value not passed/built in correctly.", 10, planeFunc->getWidth());
 
   }
@@ -53,10 +47,8 @@ public:
 
     PlaneFunctionBuilder builder;
     OriginParameter origin(0, 0, 0);
-    UpParameter up(0, 0, 0);
     WidthParameter width(0);
     builder.addOriginParameter(origin);
-    builder.addUpParameter(up);
     builder.addWidthParameter(width);
     TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as normal parameter is missing.",
     builder.create(), std::invalid_argument);
@@ -68,27 +60,10 @@ public:
 
     PlaneFunctionBuilder builder;
     NormalParameter normal(4, 5, 6);
-    UpParameter up(0, 0, 0);
     WidthParameter width(0);
     builder.addNormalParameter(normal);
-    builder.addUpParameter(up);
     builder.addWidthParameter(width);
     TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as origin parameter is missing.",
-        builder.create(), std::invalid_argument);
-  }
-
-  void testCreateWithoutUpThrows()
-  {
-    using namespace Mantid::MDAlgorithms;
-
-    PlaneFunctionBuilder builder;
-    NormalParameter normal(4, 5, 6);
-    OriginParameter origin(0, 0, 0);
-    WidthParameter width(0);
-    builder.addOriginParameter(origin);
-    builder.addNormalParameter(normal);
-    builder.addWidthParameter(width);
-    TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as up parameter is missing.",
         builder.create(), std::invalid_argument);
   }
 
@@ -99,10 +74,8 @@ public:
     PlaneFunctionBuilder builder;
     NormalParameter normal(4, 5, 6);
     OriginParameter origin(0, 0, 0);
-    UpParameter up(0, 0, 0);
     builder.addOriginParameter(origin);
     builder.addNormalParameter(normal);
-    builder.addUpParameter(up);
     TSM_ASSERT_THROWS("Should have thrown invalid_argument exception as width parameter is missing.",
         builder.create(), std::invalid_argument);
   }
@@ -119,13 +92,11 @@ public:
     OriginParameter origin1(1, 2, 3);
     OriginParameter origin2(4, 5, 6);
     NormalParameter normal(0, 0, 0);
-    UpParameter up(0, 0, 0);
     WidthParameter width(0);
     builder.addOriginParameter(origin1);
     //Overwrite origin
     builder.addOriginParameter(origin2);
     builder.addNormalParameter(normal);
-    builder.addUpParameter(up);
     builder.addWidthParameter(width);
     boost::scoped_ptr<ImplicitFunction> impFunc(builder.create());
     PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*> (impFunc.get());
@@ -146,13 +117,11 @@ public:
     OriginParameter origin(1, 2, 3);
     NormalParameter normal1(1, 2, 3);
     NormalParameter normal2(4, 5, 6);
-    UpParameter up(0, 0, 0);
     WidthParameter width(0);
     builder.addNormalParameter(normal1);
     //Overwrite normal
     builder.addNormalParameter(normal2);
     builder.addOriginParameter(origin);
-    builder.addUpParameter(up);
     builder.addWidthParameter(width);
     boost::scoped_ptr<ImplicitFunction> impFunc(builder.create());
     PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*> (impFunc.get());
@@ -161,35 +130,6 @@ public:
     TSM_ASSERT_EQUALS("Normal x value not passed/built in correctly.", 4, planeFunc->getNormalX());
     TSM_ASSERT_EQUALS("Normal y value not passed/built in correctly.", 5, planeFunc->getNormalY());
     TSM_ASSERT_EQUALS("Normal z value not passed/built in correctly.", 6, planeFunc->getNormalZ());
-  }
-
-  void testOverwiteUp()
-  {
-    using namespace Mantid::MDAlgorithms;
-    using namespace Mantid::API;
-
-    PlaneFunctionBuilder builder;
-
-    OriginParameter origin(1, 2, 3);
-    NormalParameter normal(1, 2, 3);
-    UpParameter up1(1, 2, 3);
-    UpParameter up2(4, 5, 6);
-    WidthParameter width(0);
-
-    builder.addNormalParameter(normal);
-    builder.addOriginParameter(origin);
-    //Add up
-    builder.addUpParameter(up1);
-    //Overwrite up
-    builder.addUpParameter(up2);
-    builder.addWidthParameter(width);
-    boost::scoped_ptr<ImplicitFunction> impFunc(builder.create());
-    PlaneImplicitFunction * planeFunc = dynamic_cast<PlaneImplicitFunction*> (impFunc.get());
-
-    TSM_ASSERT("The function generated by the builder is not a plane function type.", NULL != planeFunc);
-    TSM_ASSERT_EQUALS("Up x value not passed/built in correctly.", 4, planeFunc->getUpX());
-    TSM_ASSERT_EQUALS("Up y value not passed/built in correctly.", 5, planeFunc->getUpY());
-    TSM_ASSERT_EQUALS("Up z value not passed/built in correctly.", 6, planeFunc->getUpZ());
   }
 
   void testOverwiteWidth()
@@ -201,13 +141,11 @@ public:
 
     OriginParameter origin(1, 2, 3);
     NormalParameter normal(1, 2, 3);
-    UpParameter up(1, 2, 3);
     WidthParameter width1(0);
     WidthParameter width2(1);
 
     builder.addNormalParameter(normal);
     builder.addOriginParameter(origin);
-    builder.addUpParameter(up);
     //Add width
     builder.addWidthParameter(width1);
     //Overwrite width

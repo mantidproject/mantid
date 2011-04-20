@@ -11,10 +11,9 @@ namespace Mantid
 namespace MDAlgorithms
 {
 
-PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, UpParameter& up, WidthParameter& width) :
+PlaneImplicitFunction::PlaneImplicitFunction(NormalParameter& normal, OriginParameter& origin, WidthParameter& width) :
   m_origin(origin),
   m_normal(normal),
-  m_up(up),
   m_width(width)
 {
 
@@ -92,8 +91,7 @@ bool PlaneImplicitFunction::operator==(const PlaneImplicitFunction &other) const
 {
   return this->m_normal == other.m_normal
       && this->m_origin == other.m_origin
-      && this->m_width == other.m_width
-      && this->m_up == other.m_up;
+      && this->m_width == other.m_width;
 }
 
 bool PlaneImplicitFunction::operator!=(const PlaneImplicitFunction &other) const
@@ -136,21 +134,6 @@ double PlaneImplicitFunction::getNormalZ() const
   return this->m_normal.getZ();
 }
 
-double PlaneImplicitFunction::getUpX() const
-{
-  return this->m_up.getX();
-}
-
-double PlaneImplicitFunction::getUpY() const
-{
-  return this->m_up.getY();
-}
-
-double PlaneImplicitFunction::getUpZ() const
-{
-  return this->m_up.getZ();
-}
-
 double PlaneImplicitFunction::getWidth() const
 {
   return this->m_width.getValue();
@@ -170,7 +153,7 @@ std::string PlaneImplicitFunction::toXMLString() const
 
   AutoPtr<Element> paramListElement = pDoc->createElement("ParameterList");
 
-  AutoPtr<Text> formatText = pDoc->createTextNode("%s%s%s%s");
+  AutoPtr<Text> formatText = pDoc->createTextNode("%s%s%s");
   paramListElement->appendChild(formatText);
   functionElement->appendChild(paramListElement);
 
@@ -180,70 +163,16 @@ std::string PlaneImplicitFunction::toXMLString() const
   writer.writeNode(xmlstream, pDoc);
 
   std::string formattedXMLString = boost::str(boost::format(xmlstream.str().c_str())
-      % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str() % m_up.toXMLString() % m_width.toXMLString());
+      % m_normal.toXMLString().c_str() % m_origin.toXMLString().c_str() % m_width.toXMLString());
   return formattedXMLString;
 }
 
-std::vector<double> PlaneImplicitFunction::asRotationMatrixVector() const
-{
-  using Mantid::Geometry::V3D;
 
-  //Normal.
-  V3D ax(m_normal.getX(), m_normal.getY(), m_normal.getZ());
-
-  //Up.
-  V3D ay(m_up.getX(), m_up.getY(), m_up.getZ());
-
-  if(dotProduct(ax, ay) != 0)
-  {
-    throw std::logic_error("Normal and Up Vectors must be perpendicular");
-  }
-
-  //Perpendicular. Calculate the cross product of the normal vector with the up vector.
-  Mantid::Geometry::V3D az = crossProduct(ax, ay);
-
-  ax.normalize();
-  ay.normalize();
-  az.normalize();
-
-  //b = vectors from original axes.
-  const V3D bx(1, 0, 0);
-  const V3D by(0, 1, 0);
-  const V3D bz(0, 0, 1);
-
-  std::vector<double> rotationMatrix(9);
-  rotationMatrix[0] = dotProduct(ax, bx);
-  rotationMatrix[1] = dotProduct(ax, by);
-  rotationMatrix[2] = dotProduct(ax, bz);
-  rotationMatrix[3] = dotProduct(ay, bx);
-  rotationMatrix[4] = dotProduct(ay, by);
-  rotationMatrix[5] = dotProduct(ay, bz);
-  rotationMatrix[6] = dotProduct(az, bx);
-  rotationMatrix[7] = dotProduct(az, by);
-  rotationMatrix[8] = dotProduct(az, bz);
-  return rotationMatrix;
-}
-
-/// Convenience method. Translates rotation result into Mantid Matrix form.
-Mantid::Geometry::Matrix<double> extractRotationMatrix(const PlaneImplicitFunction& plane)
-{
-  std::vector<double> rotationMatrixVector = plane.asRotationMatrixVector();
-  Mantid::Geometry::Matrix<double> rotationMatrix(3,3);
-  rotationMatrix[0][0] = rotationMatrixVector[0];
-  rotationMatrix[0][1] = rotationMatrixVector[1];
-  rotationMatrix[0][2] = rotationMatrixVector[2];
-  rotationMatrix[1][0] = rotationMatrixVector[3];
-  rotationMatrix[1][1] = rotationMatrixVector[4];
-  rotationMatrix[1][2] = rotationMatrixVector[5];
-  rotationMatrix[2][0] = rotationMatrixVector[6];
-  rotationMatrix[2][1] = rotationMatrixVector[7];
-  rotationMatrix[2][2] = rotationMatrixVector[8];
-  return rotationMatrix;
-}
 
 PlaneImplicitFunction::~PlaneImplicitFunction()
 {
 }
+
 }
 
 }

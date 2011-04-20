@@ -2,7 +2,9 @@
 #define _vtkEventNexusReader_h
 #include "vtkUnstructuredGridAlgorithm.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
+#include "MantidMDAlgorithms/WidthParameter.h"
 
+class vtkImplicitFunction;
 class VTK_EXPORT vtkEventNexusReader : public vtkUnstructuredGridAlgorithm
 {
 public:
@@ -17,6 +19,9 @@ public:
   void SetZBins(int z);
   void SetMaxThreshold(double maxThreshold);
   void SetMinThreshold(double minThreshold);
+  void SetWidth(double width);
+  void SetApplyClip(bool applyClip);
+  void SetClipFunction( vtkImplicitFunction * func);
 
 protected:
   vtkEventNexusReader();
@@ -24,6 +29,8 @@ protected:
   int RequestInformation(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
   int Canreadfile(const char *fname);
+  ///Handle time variation.
+  unsigned long GetMTime();
   
 private:
   vtkEventNexusReader(const vtkEventNexusReader&);
@@ -36,6 +43,9 @@ private:
   bool m_isSetup;
   double m_maxThreshold;
   double m_minThreshold;
+  bool m_applyClip;
+  vtkImplicitFunction* m_clipFunction;
+  Mantid::MDAlgorithms::WidthParameter m_width;
   const std::string m_mdEventWsId;
   const std::string m_histogrammedWsId;
 };

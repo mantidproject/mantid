@@ -54,7 +54,7 @@ namespace Mantid
       boost::interprocess::unique_ptr<PlaneFunctionBuilder, Mantid::API::DeleterPolicy<PlaneFunctionBuilder> > functionBuilder(new PlaneFunctionBuilder);
       NodeList* parameterList = functionElement->getChildElement("ParameterList")->childNodes();
 
-      //Loop through all parameters and attemp to identify those that are known to belong to this implicit function type.
+      //Loop through all parameters and attempt to identify those that are known to belong to this implicit function type.
       for(unsigned int i = 0; i < parameterList->length(); i++)
       {
         Element* parameterElement = dynamic_cast<Element*>(parameterList->item(i));
@@ -70,12 +70,6 @@ namespace Mantid
           OriginParameter*  pCurr = dynamic_cast<OriginParameter*>(parameter.get());
           OriginParameter origin(pCurr->getX(), pCurr->getY(), pCurr->getZ());
           functionBuilder->addOriginParameter(origin);
-        }
-        else if(UpParameter::parameterName() == parameter->getName())
-        {
-          UpParameter*  pCurr = dynamic_cast<UpParameter*>(parameter.get());
-          UpParameter up(pCurr->getX(), pCurr->getY(), pCurr->getZ());
-          functionBuilder->addUpParameter(up);
         }
         else if(WidthParameter::parameterName() == parameter->getName())
         {

@@ -64,8 +64,6 @@ std::vector<double> PlaneInterpreter::Execute(Mantid::API::ImplicitFunction* imp
     {
       //Use the last defined plane.
       boost::shared_ptr<PlaneImplicitFunction> planeFunction = flattenedPlanes[size - 1];
-      //Get the rotation matrix from the last defined plane.
-      rotationMatrix = planeFunction->asRotationMatrixVector();
     }
   }
 

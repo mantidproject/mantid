@@ -9,6 +9,8 @@
 #include "vtkTransform.h"
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
+#include "vtkPlane.h"
+
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
@@ -20,10 +22,17 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidMDEvents/OneStepMDEW.h"
 
+#include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
 
-vtkEventNexusReader::vtkEventNexusReader() : m_presenter(), m_isSetup(false), m_mdEventWsId("eventWsId"), m_histogrammedWsId("histogramWsId")
+vtkEventNexusReader::vtkEventNexusReader() : 
+  m_presenter(), 
+  m_isSetup(false), 
+  m_mdEventWsId("eventWsId"), 
+  m_histogrammedWsId("histogramWsId"),
+  m_clipFunction(NULL)
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -80,6 +89,34 @@ void vtkEventNexusReader::SetMinThreshold(double minThreshold)
   }
 }
 
+void vtkEventNexusReader::SetApplyClip(bool applyClip)
+{
+  if(m_applyClip != applyClip)
+  {
+    m_applyClip = applyClip;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetWidth(double width)
+{
+  if(m_width.getValue() != width)
+  {
+    m_width = width;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
+{
+  if(m_clipFunction != func)
+  {
+    m_clipFunction = func;
+    this->Modified();
+  }
+}
+
+
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
   using namespace Mantid::VATES;
@@ -104,8 +141,25 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   hist_alg.setPropertyValue("DimX", boost::str(boost::format("Qx, -2.0, 2.0,  %d") % m_nXBins)); 
   hist_alg.setPropertyValue("DimY", boost::str(boost::format("Qy, -2.0, 2.0,  %d") % m_nYBins)); 
   hist_alg.setPropertyValue("DimZ", boost::str(boost::format("Qz, -2.0, 2.0,  %d") % m_nZBins)); 
-  hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");  
+  hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");
   hist_alg.setPropertyValue("OutputWorkspace", m_histogrammedWsId);
+  
+  if(true == m_applyClip)
+  {
+    vtkPlane* plane = dynamic_cast<vtkPlane*>(this->m_clipFunction);
+    if(NULL != plane)
+    {
+      //user has requested the use of implicit functions as part of rebinning. only planes understood for time being.
+      using namespace Mantid::MDAlgorithms;
+      double* pNormal = plane->GetNormal();
+      double* pOrigin = plane->GetOrigin();
+      NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
+      OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
+      PlaneImplicitFunction func(normal, origin, m_width);
+      hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
+    }
+  }
+
   m_presenter.execute(hist_alg, m_histogrammedWsId);
 
   vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> vtkGridFactory("signal", time, m_minThreshold, m_maxThreshold);
@@ -158,4 +212,22 @@ void vtkEventNexusReader::PrintSelf(ostream& os, vtkIndent indent)
 int vtkEventNexusReader::CanReadFile(const char* vtkNotUsed(fname))
 {
   return 1; //TODO: Apply checks here.
+}
+
+unsigned long vtkEventNexusReader::GetMTime()
+{
+  unsigned long mTime = this->Superclass::GetMTime();
+  unsigned long time;
+
+  if (this->m_clipFunction != NULL)
+  {
+
+    time = this->m_clipFunction->GetMTime();
+    if(time > mTime)
+    {
+      mTime = time;
+    }
+  }
+
+  return mTime;
 }

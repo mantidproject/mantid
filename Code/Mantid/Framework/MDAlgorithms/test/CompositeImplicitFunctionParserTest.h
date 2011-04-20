@@ -87,7 +87,6 @@ public:
         "<ParameterList>" +
         "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>" +
         "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>" +
-        "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>" +
         "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>" +
         "</ParameterList>" +
         "</Function>" +
@@ -96,7 +95,6 @@ public:
         "<ParameterList>" +
         "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>" +
         "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>" +
-        "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>" +
         "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>" +
         "</ParameterList>" +
         "</Function>" +

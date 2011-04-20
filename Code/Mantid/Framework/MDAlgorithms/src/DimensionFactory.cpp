@@ -118,6 +118,7 @@ Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
     //Reciprocal dimensions are either q1, q2, or  q3.
     static const boost::regex q1Match("(q1)|(qx)");
     static const boost::regex q2Match("(q2)|(qy)");
+    static const boost::regex q3Match("(q3)|(qz)");
 
     if (regex_match(reciprocalMapping->innerText(), q1Match))
     {
@@ -127,9 +128,13 @@ Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
     {
       recipPrimitiveDirection = q2; //rec_dim::q2
     }
-    else
+    else if (regex_match(reciprocalMapping->innerText(), q3Match))
     {
       recipPrimitiveDirection = q3; //rec_dim::q3
+    }
+    else
+    {
+      throw std::runtime_error("DimensionFactory cannot recognize reciprocal dimension");
     }
     //Create the dimension as a reciprocal dimension
     mdDimension = new MDDimensionRes(id, recipPrimitiveDirection);

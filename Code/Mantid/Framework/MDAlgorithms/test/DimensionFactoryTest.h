@@ -26,6 +26,18 @@ private:
     return pDoc->documentElement();
   }
 
+  static Poco::XML::Element* constructUnknownReciprocalDimensionXML()
+  {
+    std::string xmlToParse = std::string("<Dimension ID=\"unknown\">") + "<Name>Qz</Name>"
+      + "<UpperBounds>6.6</UpperBounds>" + "<LowerBounds>-6.6</LowerBounds>"
+      + "<NumberOfBins>6</NumberOfBins>"
+      + "<ReciprocalDimensionMapping>unknown</ReciprocalDimensionMapping>" + "</Dimension>";
+
+    Poco::XML::DOMParser pParser;
+    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
+    return pDoc->documentElement();
+  }
+
   static std::string constructNonReciprocalDimensionXMLString()
   {
     return std::string("<Dimension ID=\"en\">") + "<Name>Energy</Name>"
@@ -42,6 +54,13 @@ private:
   }
 
 public:
+
+  void testCreationOfReciprocalMDDimensionThrows()
+  {
+    using namespace Mantid::Geometry;
+    DimensionFactory factory(constructUnknownReciprocalDimensionXML());
+    TSM_ASSERT_THROWS("Uses tag/id 'unknown' which should not be possible to match to q1,q2,q3.", factory.create(),  std::runtime_error);
+  }
 
   void testCreationOfReciprocalMDDimension()
   {

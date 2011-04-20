@@ -44,7 +44,7 @@ public:
         using namespace Mantid::MDAlgorithms;
 
         Poco::XML::DOMParser pParser;
-        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>UpParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>1</Value></Parameter></ParameterList></Function>";
+        std::string xmlToParse = "<?xml version=\"1.0\" encoding=\"utf-8\"?><Function><Type>PlaneImplicitFunction</Type><ParameterList><Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter><Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter><Parameter><Type>WidthParameter</Type><Value>1</Value></Parameter></ParameterList></Function>";
         Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
         Poco::XML::Element* pRootElem = pDoc->documentElement();
 
@@ -52,7 +52,6 @@ public:
         EXPECT_CALL(*paramParser, createParameter(testing::_))
             .WillOnce(testing::Return(new OriginParameter(0, 0, 0)))
             .WillOnce(testing::Return(new NormalParameter(0, 0, 0)))
-            .WillOnce(testing::Return(new UpParameter(0, 0, 0)))
             .WillOnce(testing::Return(new WidthParameter(1)));
 
         PlaneImplicitFunctionParser functionParser;
@@ -97,7 +96,6 @@ public:
             "<ParameterList>"+
             "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>"+
             "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>"+
-            "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>"+
             "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>"+
             "</ParameterList>"+
             "</Function>";
@@ -121,9 +119,6 @@ public:
         TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameter parser to give the correct ny value.", -2, planeFunction->getNormalY());
         TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of normal parameter parser to give the correct nz value.", -3, planeFunction->getNormalZ());
 
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct nx value.", 4, planeFunction->getUpX());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct ny value.", 5, planeFunction->getUpY());
-        TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of up parameter parser to give the correct nz value.", 6, planeFunction->getUpZ());
         TSM_ASSERT_EQUALS("The plane parser did not direct the parsing of width parameter parser to give the correct nx value.", 7, planeFunction->getWidth());
     }
 
@@ -138,7 +133,6 @@ public:
                     "<ParameterList>"+
                     "<Parameter><Type>NormalParameter</Type><Value>-1, -2, -3</Value></Parameter>"+
                     "<Parameter><Type>OriginParameter</Type><Value>1, 2, 3</Value></Parameter>"+
-                    "<Parameter><Type>UpParameter</Type><Value>4, 5, 6</Value></Parameter>"+
                     "<Parameter><Type>WidthParameter</Type><Value>7</Value></Parameter>"+
                     "</ParameterList>"+
                     "</X>";
