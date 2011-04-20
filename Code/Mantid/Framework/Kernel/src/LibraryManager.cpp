@@ -33,64 +33,67 @@ namespace Mantid
  *  @return The number of libraries opened.
  */
     int LibraryManagerImpl::OpenAllLibraries(const std::string& filePath,
-      bool isRecursive)
+					     bool isRecursive)
     {
-      int libCount(0);
+      int libCount = 0;
+	  
+      //validate inputs
       Poco::File libPath;
       try
       {
-        libPath = Poco::File(filePath);
+	libPath = Poco::File(filePath);
       }
-      catch(Poco::Exception&)
+      catch(...)
       {
-        return libCount;
+	return libCount;
       }
-
       if ( libPath.exists() && libPath.isDirectory() )
       {
+
         DllOpen::addSearchDirectory(filePath);
-        //iteratate over the available files
-        Poco::DirectoryIterator end_itr;
-        for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr)
-        {
-          if ( Poco::File(itr->path()).isDirectory() )
-          {
-            if (isRecursive)
-            {
-              libCount += OpenAllLibraries(itr->path());
-            }
-          }
-          else
-          {
-            //if they are libraries
-            std::string libName = DllOpen::ConvertToLibName(Poco::Path(itr->path()).getFileName());
-            if( libName.empty() ) continue;
+	
+	//iteratate over the available files
+	Poco::DirectoryIterator end_itr;
+	for (Poco::DirectoryIterator itr(libPath); itr != end_itr; ++itr)
+	{
+	  if ( Poco::Path(itr->path()).isDirectory() )
+	  {
+	    if (isRecursive)
+	    {
+	      libCount += OpenAllLibraries(itr->path());
+	    }
+	  }
+	  else
+	  {
+	    //if they are libraries
+	    std::string libName = DllOpen::ConvertToLibName(Poco::Path(itr->path()).getFileName());
+	    if( libName.empty() ) continue;
 
-            //load them
-            boost::shared_ptr<LibraryWrapper> dlwrap(new LibraryWrapper);
-            //use lower case library name for the map key
-            std::string libNameLower = boost::algorithm::to_lower_copy(libName);
+	    //load them
+	    boost::shared_ptr<LibraryWrapper> dlwrap(new LibraryWrapper);
 
-            //Check that a libray with this name has not already been loaded
-            if (OpenLibs.find(libNameLower) == OpenLibs.end())
-            {
-              g_log.debug("Trying to open library: " + libName + "...");
-              //Try to open the library
-              if (dlwrap->OpenLibrary(libName, filePath))
-              {
-                //Successfully opened, so add to map
-                g_log.debug("Opened library: " + libName + ".\n");
-                OpenLibs.insert(std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, dlwrap) );
-                ++libCount;
-              }
-            }
-            
-          }
-        }
+	    //use lower case library name for the map key
+	    std::string libNameLower = boost::algorithm::to_lower_copy(libName);
+
+	    //Check that a libray with this name has not already been loaded
+	    if (OpenLibs.find(libNameLower) == OpenLibs.end())
+	    {
+	      g_log.debug("Trying to open library: " + libName + "...");
+	      //Try to open the library
+	      if (dlwrap->OpenLibrary(libName, filePath))
+	      {
+		//Successfully opened, so add to map
+		g_log.debug("Opened library: " + libName + ".\n");
+		OpenLibs.insert(std::pair< std::string, boost::shared_ptr<LibraryWrapper> >(libName, dlwrap) );
+		  ++libCount;
+	      }
+	    }
+	  }
+	}
       }
       else
       {
-        g_log.error("In OpenAllLibraries: " + filePath + " must be a directory.");
+	g_log.error("In OpenAllLibraries: " + filePath + " must be a directory.");
       }
 
       return libCount;
