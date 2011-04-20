@@ -57,8 +57,6 @@ private:
       using namespace Mantid::MDAlgorithms;
       using Mantid::VATES::DimensionVec;
       using Mantid::VATES::Dimension_sptr;
-      using Mantid::MDDataObjects::MDImage;
-      using Mantid::MDDataObjects::MDWorkspace_sptr;
 
       RebinningCutterPresenter presenter;
 
@@ -95,10 +93,9 @@ private:
       presenter.constructReductionKnowledge(vec, dimX, dimY, dimZ, dimT, compFunction, in_ds);
       MockProgressAction action;
       Mantid::API::IMDWorkspace_sptr spRebinnedWs = presenter.applyRebinningAction(RecalculateAll, action);
-
-      TimeStepToTimeStep proxy;
-      
-      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<TimeStepToTimeStep>(spRebinnedWs, "", 1, proxy)); 
+ 
+      vtkDataSetFactory_sptr spDataSetFactory = vtkDataSetFactory_sptr(new vtkStructuredGridFactory<TimeStepToTimeStep>("", 1)); 
+      spDataSetFactory->initialize(spRebinnedWs);
         vtkDataSet *ug = presenter.createVisualDataSet(spDataSetFactory);
 
       in_ds->Delete();

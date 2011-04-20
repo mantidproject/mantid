@@ -58,7 +58,7 @@ private:
     MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
-    MOCK_CONST_METHOD4(getSignalAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
+    MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
 
     const Mantid::Geometry::SignalAggregate& getCell(...) const
     {
@@ -72,35 +72,38 @@ private:
 
   void testThresholds()
   {
-
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
-    TimeStepToTimeStep timeMapper;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
+    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).Times(AtLeast(1)).WillRepeatedly(Return(1));
     EXPECT_CALL(*pMockWs, getXDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
         new FakeIMDDimension("x"))));
     EXPECT_CALL(*pMockWs, getYDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
         new FakeIMDDimension("y"))));
     EXPECT_CALL(*pMockWs, getZDimension()).Times(9).WillRepeatedly(Return(IMDDimension_const_sptr(
         new FakeIMDDimension("z"))));
+    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
+      new FakeIMDDimension("t"))));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Set up so that only cells with signal values == 1 should not be filtered out by thresholding.
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside(ws_sptr, "signal", 0, timeMapper,
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside("signal", 0,
         0, 2);
+    inside.initialize(ws_sptr);
     vtkUnstructuredGrid* insideProduct = inside.create();
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below(ws_sptr, "signal", 0, timeMapper,
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below("signal", 0, 
         0, 0.5);
+    below.initialize(ws_sptr);
     vtkUnstructuredGrid* belowProduct = below.create();
 
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above(ws_sptr, "signal", 0, timeMapper,
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above("signal", 0,
         2, 3);
+    above.initialize(ws_sptr);
     vtkUnstructuredGrid* aboveProduct = above.create();
 
     TS_ASSERT_EQUALS((9*9*9), insideProduct->GetNumberOfCells());
@@ -113,23 +116,24 @@ private:
     using namespace Mantid::VATES;
     using namespace Mantid::Geometry;
     using namespace testing;
-    TimeStepToTimeStep timeMapper;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getSignalAt(_, _, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
+    EXPECT_CALL(*pMockWs, getSignalNormalizedAt(_, _, _, _)).WillRepeatedly(Return(1)); //Shouldn't access getSignal At
     EXPECT_CALL(*pMockWs, getXDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
         IMDDimension_const_sptr(new FakeIMDDimension("x"))));
     EXPECT_CALL(*pMockWs, getYDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
         IMDDimension_const_sptr(new FakeIMDDimension("y"))));
     EXPECT_CALL(*pMockWs, getZDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
         IMDDimension_const_sptr(new FakeIMDDimension("z"))));
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
+    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
+      IMDDimension_const_sptr(new FakeIMDDimension("t"))));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
-        vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> (ws_sptr, "signal", 0, timeMapper);
+        vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", 0);
+    factory.initialize(ws_sptr);
 
     vtkDataSet* product = factory.create();
     TSM_ASSERT_EQUALS("A single array should be present on the product dataset.", 1, product->GetCellData()->GetNumberOfArrays());
@@ -140,9 +144,35 @@ private:
     product->Delete();
   }
 
-  void testIsVtkDataSetFactory()
+  void testIsValidThrowsWhenNoWorkspace()
   {
-    //TODO
+    using namespace Mantid::VATES;
+    using namespace Mantid::API;
+
+    IMDWorkspace* nullWorkspace = NULL;
+    Mantid::API::IMDWorkspace_sptr ws_sptr(nullWorkspace);
+
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+
+    TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
+  }
+
+  void testIsValidThrowsWhenNoTDimension()
+  {
+    using namespace Mantid::VATES;
+    using namespace Mantid::API;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    IMDDimension* nullDimension = NULL;
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
+      nullDimension)));
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+
+    TSM_ASSERT_THROWS("No T dimension, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
 };

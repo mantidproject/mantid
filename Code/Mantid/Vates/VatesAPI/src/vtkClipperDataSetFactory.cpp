@@ -20,6 +20,11 @@ vtkClipperDataSetFactory::~vtkClipperDataSetFactory()
 {
 }
 
+void vtkClipperDataSetFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+{
+  throw std::runtime_error("initialize with a workspace does not apply for this type of factory.");
+}
+
 vtkDataSet* vtkClipperDataSetFactory::create() const
 {
   using namespace Mantid::MDAlgorithms;
@@ -52,5 +57,16 @@ vtkDataSet* vtkClipperDataSetFactory::create() const
   }
   return output;
 }
+
+vtkDataSet* vtkClipperDataSetFactory::createMeshOnly() const
+{
+  throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
+}
+
+vtkFloatArray* vtkClipperDataSetFactory::createScalarArray() const
+{
+  throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
+}
+
 }
 }

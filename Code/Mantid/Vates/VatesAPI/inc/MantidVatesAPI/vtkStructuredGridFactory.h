@@ -32,7 +32,7 @@
 #include <vtkPoints.h>
 #include <vtkCellData.h>
 #include "MantidVatesAPI/vtkDataSetFactory.h"
-#include "MDDataObjects/MDWorkspace.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -45,7 +45,7 @@ class DLLExport vtkStructuredGridFactory : public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkStructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarName, const double timeValue, const TimeMapper& timeMapper);
+  vtkStructuredGridFactory(const std::string& scalarName, const double timeValue);
 
   /// Assignment operator
   vtkStructuredGridFactory& operator=(const vtkStructuredGridFactory<TimeMapper>& other);
@@ -57,7 +57,10 @@ public:
   ~vtkStructuredGridFactory();
 
   /// Constructional method. Have to explicitly ask for a mesh only version.
-  static vtkStructuredGridFactory constructAsMeshOnly(Mantid::API::IMDWorkspace_sptr image, const TimeMapper& timeMapper);
+  static vtkStructuredGridFactory constructAsMeshOnly();
+
+  /// Initialize the object with a workspace.
+  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
 
   /// Factory method
   vtkStructuredGrid* create() const;
@@ -68,10 +71,15 @@ public:
   /// Generates a scalar array for signal.
   vtkFloatArray* createScalarArray() const;
 
+protected:
+
+  /// Validate the object.
+  virtual void validate() const;
+
 private:
 
   /// Private constructor for use by constructional static member
-  vtkStructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const TimeMapper& timeMapper);
+  vtkStructuredGridFactory();
 
   Mantid::API::IMDWorkspace_sptr m_workspace;
   std::string m_scalarName;

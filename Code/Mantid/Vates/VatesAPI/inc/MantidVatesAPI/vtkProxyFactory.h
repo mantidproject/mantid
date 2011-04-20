@@ -3,6 +3,7 @@
 
 #include <boost/shared_ptr.hpp>
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include "MantidAPI/IMDWorkspace.h"
 
 namespace Mantid
 {
@@ -53,6 +54,17 @@ public:
 
   /// Factory Method. Returns internal product reference.
   virtual vtkDataSet* create() const;
+
+  /// Initialize the current instance with a workspace.
+  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+
+  vtkDataSet* createMeshOnly() const;
+
+  vtkFloatArray* createScalarArray() const;
+
+  void validate() const
+  {
+  }
 
 private:
 

@@ -42,9 +42,18 @@ private:
   double m_timeMax;
   double m_timeRange;
   size_t m_nIntervalSteps;
+  bool m_runnable;
+  
+  /// Constructor only accessible via 'construct' static member function.
+  TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps);
+
 public:
 
-  TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps);
+  /// Constructional method.
+  static TimeToTimeStep construct(double timeMin, double timeMax, size_t nIntervalSteps);
+
+  TimeToTimeStep();
+
   size_t operator()(double time) const;
 
 };

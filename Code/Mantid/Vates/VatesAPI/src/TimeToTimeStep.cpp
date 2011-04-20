@@ -6,8 +6,14 @@ namespace Mantid
 namespace VATES
 {
 
+/// Make construction explicit.
+TimeToTimeStep TimeToTimeStep::construct(double timeMin, double timeMax, size_t nIntervalSteps)
+{
+  return TimeToTimeStep(timeMin, timeMax, nIntervalSteps);
+}
+
 TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalSteps) : m_timeMin(timeMin), m_timeMax(timeMax),
-  m_timeRange(timeMax - timeMin), m_nIntervalSteps(nIntervalSteps)
+  m_timeRange(timeMax - timeMin), m_nIntervalSteps(nIntervalSteps), m_runnable(true)
 {
   if(m_timeRange <= 0)
   {
@@ -15,8 +21,16 @@ TimeToTimeStep::TimeToTimeStep(double timeMin, double timeMax, size_t nIntervalS
   }
 }
 
+TimeToTimeStep::TimeToTimeStep(): m_runnable(false)
+{
+}
+
 size_t TimeToTimeStep::operator()(double time) const
 {
+  if(!m_runnable)
+  {
+    std::runtime_error("Not properly constructed. TimeToTimeStep instance does not have enough information to interpolate the time value.");
+  }
   if(time > m_timeMax)
   {
     //Don't throw, handle by providing the larget time index. 

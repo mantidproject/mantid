@@ -152,7 +152,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
     vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(outInfo->Get(
       vtkDataObject::DATA_OBJECT()));
 
-    //Acutally perform rebinning or specified action.
+    //Actually perform rebinning or specified action.
     int timestep = 0;
     if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
     {
@@ -505,11 +505,6 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
   //Get the time dimension
   boost::shared_ptr<const Mantid::Geometry::IMDDimension> timeDimension = spRebinnedWs->getTDimension();
 
-  //Create a mapper to transform real time into steps.
-  TimeToTimeStep timeMapper(timeDimension->getMinimum(), timeDimension->getMaximum(),
-      timeDimension->getNBins());
-
-
   Mantid::API::IMDWorkspace_sptr workspaceProxy = IMDWorkspaceProxy::New
       (spRebinnedWs,
           m_appliedXDimension,
@@ -520,8 +515,9 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
 
   //Create a factory for generating a thresholding unstructured grid.
   vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>
-  (workspaceProxy, XMLDefinitions::signalName(), m_timestep,
-      timeMapper, m_thresholdMin, m_thresholdMax);
+  (XMLDefinitions::signalName(), m_timestep, m_thresholdMin, m_thresholdMax);
+
+  pvtkDataSetFactory->initialize(workspaceProxy);
 
   //Return the generated factory.
   return vtkDataSetFactory_sptr(pvtkDataSetFactory);
@@ -530,14 +526,11 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickChangeDataSetFactory(
 vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
     Mantid::API::IMDWorkspace_sptr spRebinnedWs) const
 {
-
-  //Create a mapper to transform real time into steps.
-  TimeToTimeStep timeMapper(m_appliedTDimension->getMinimum(), m_appliedTDimension->getMaximum(),
-      m_appliedTDimension->getNBins());
-
   //Create a factory for generating a thresholding unstructured grid.
-  vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(spRebinnedWs, XMLDefinitions::signalName(), m_timestep,
-      timeMapper, m_thresholdMin, m_thresholdMax);
+  vtkDataSetFactory* pvtkDataSetFactory = new Mantid::VATES::vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(XMLDefinitions::signalName(), m_timestep,
+      m_thresholdMin, m_thresholdMax);
+
+  pvtkDataSetFactory->initialize(spRebinnedWs);
 
   //Return the generated factory.
   return vtkDataSetFactory_sptr(pvtkDataSetFactory);

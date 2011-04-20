@@ -10,8 +10,11 @@
 #include "vtkFloatArray.h"
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
+#include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidNexus/LoadEventNexus.h"
+#include <boost/format.hpp>
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidDataHandling/LoadInstrument.h"
@@ -20,7 +23,7 @@
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
 
-vtkEventNexusReader::vtkEventNexusReader() : m_presenter()
+vtkEventNexusReader::vtkEventNexusReader() : m_presenter(), m_isSetup(false), m_mdEventWsId("eventWsId"), m_histogrammedWsId("histogramWsId")
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -32,6 +35,50 @@ vtkEventNexusReader::~vtkEventNexusReader()
   this->SetFileName(0);
 }
 
+void vtkEventNexusReader::SetXBins(int nbins)
+{
+  if(nbins != m_nXBins)
+  {
+    m_nXBins = nbins;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetYBins(int nbins)
+{
+  if(nbins != m_nYBins)
+  {
+    m_nYBins = nbins;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetZBins(int nbins)
+{
+  if(nbins != m_nZBins)
+  {
+    m_nZBins = nbins;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetMaxThreshold(double maxThreshold)
+{
+  if(maxThreshold != m_maxThreshold)
+  {
+    m_maxThreshold = maxThreshold;
+    this->Modified();
+  }
+}
+
+void vtkEventNexusReader::SetMinThreshold(double minThreshold)
+{
+  if(minThreshold != m_minThreshold)
+  {
+    m_minThreshold = minThreshold;
+    this->Modified();
+  }
+}
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
@@ -39,7 +86,7 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
-  vtkStructuredGrid *output = vtkStructuredGrid::SafeDownCast(
+  vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
   int time;
@@ -47,16 +94,25 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   {
     // usually only one actual step requested
     time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
-  }
+  } 
+
+  Mantid::API::AnalysisDataService::Instance().remove(m_histogrammedWsId);
+
+  Mantid::MDEvents::BinToMDHistoWorkspace hist_alg;
+  hist_alg.initialize();
+  hist_alg.setPropertyValue("InputWorkspace", m_mdEventWsId);
+  hist_alg.setPropertyValue("DimX", boost::str(boost::format("Qx, -2.0, 2.0,  %d") % m_nXBins)); 
+  hist_alg.setPropertyValue("DimY", boost::str(boost::format("Qy, -2.0, 2.0,  %d") % m_nYBins)); 
+  hist_alg.setPropertyValue("DimZ", boost::str(boost::format("Qz, -2.0, 2.0,  %d") % m_nZBins)); 
+  hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");  
+  hist_alg.setPropertyValue("OutputWorkspace", m_histogrammedWsId);
+  m_presenter.execute(hist_alg, m_histogrammedWsId);
+
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> vtkGridFactory("signal", time, m_minThreshold, m_maxThreshold);
 
   RebinningXMLGenerator serializer(LocationNotRequired); //Object handles serialization of meta data.
-  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh(serializer));
-  structuredMesh->GetCellData()->AddArray(m_presenter.getScalarDataFromTime(time, "signal"));
+  vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
 
-  int subext[6];
-  outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), subext);
-
-  output->SetExtent(subext);
   output->ShallowCopy(structuredMesh);
 
   return 1;
@@ -71,46 +127,20 @@ int vtkEventNexusReader::RequestInformation(
   using namespace Mantid::MDEvents;
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
  
-  const std::string mdEventWsId = "mdEventWsId";
-  const std::string histogrammedWsId = "histogrammedWsId";
+  //Ensure that the Event Workspace is only generated once
+  if(!m_isSetup) 
+  {
+    AnalysisDataService::Instance().remove("mdEventWsId");
 
-  // Make sure the existing workspace is erased, otherwise events get added to it.
-  AnalysisDataService::Instance().remove("mdEventWsId");
+    Mantid::MDEvents::OneStepMDEW alg;
+    alg.initialize();
+    alg.setPropertyValue("Filename", this->FileName);
+    alg.setPropertyValue("OutputWorkspace", m_mdEventWsId);
+    alg.execute();
+    m_isSetup = true;
+  }
 
-  Mantid::MDEvents::OneStepMDEW alg;
-  alg.initialize();
-  alg.setPropertyValue("Filename", this->FileName);
-  alg.setPropertyValue("OutputWorkspace", mdEventWsId);
-  alg.execute();
-
-  //Note: this throws for me (JZ) for some reason, even though the workspace should be in the analysis data service
-//  IMDEventWorkspace_sptr eventMDWorkspace = boost::dynamic_pointer_cast<IMDEventWorkspace>(AnalysisDataService::Instance().retrieve(mdEventWsId));
-
-  BinToMDHistoWorkspace hist_alg;
-  hist_alg.initialize();
-  hist_alg.setPropertyValue("InputWorkspace", mdEventWsId);
-  hist_alg.setPropertyValue("DimX", "Qx, -2.0,2.0, 100"); //TODO: provide via Paraview proxy properties
-  hist_alg.setPropertyValue("DimY", "Qy, -2.0,2.0, 100"); //TODO: provide via Paraview proxy properties
-  hist_alg.setPropertyValue("DimZ", "Qz, -2.0,2.0, 100"); //TODO: provide via Paraview proxy properties
-  hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");  //TODO: provide via Paraview proxy properties
-  hist_alg.setPropertyValue("OutputWorkspace", histogrammedWsId);
-  m_presenter.execute(hist_alg, histogrammedWsId);
-
-  int wholeExtent[6];
-
-  Mantid::VATES::VecExtents extents = m_presenter.getExtents();
-  wholeExtent[0] = extents[0];
-  wholeExtent[1] = extents[1];
-  wholeExtent[2] = extents[2];
-  wholeExtent[3] = extents[3]; 
-  wholeExtent[4] = extents[4];
-  wholeExtent[5] = extents[5];
-
-  outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(),
-    wholeExtent, 6);
-
-  std::vector<double> timeStepValues = m_presenter.getTimesteps();
-
+  std::vector<double> timeStepValues(1); //TODO set time-step information.
   outInfo->Set(vtkStreamingDemandDrivenPipeline::TIME_STEPS(), &timeStepValues[0], static_cast<int>(timeStepValues.size()));
   double timeRange[2];
   timeRange[0] = timeStepValues.front();

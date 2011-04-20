@@ -38,10 +38,18 @@ class DLLExport TimeStepToTimeStep: std::unary_function<int, int>
 {
 private:
   double m_timeRange;
+
   int m_nIntervalSteps;
+  
+  TimeStepToTimeStep(double timeMin, double timeMax, size_t intervalStep);
+
 public:
 
+  /// Constructional method.
+  static TimeStepToTimeStep construct(double timeMin, double timeMax, size_t nIntervalSteps);
+
   TimeStepToTimeStep();
+
   int operator()(int timeStep) const;
 
 };

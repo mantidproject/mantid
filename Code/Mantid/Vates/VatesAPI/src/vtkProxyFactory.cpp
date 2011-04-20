@@ -27,11 +27,27 @@ vtkProxyFactory& vtkProxyFactory::operator=(const vtkProxyFactory& other)
   return *this;
 }
 
+void vtkProxyFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+{
+  throw std::runtime_error("initialize with a workspace does not apply for this type of factory.");
+}
+
 vtkDataSet* vtkProxyFactory::create() const
 {
   //Essentially do nothing other than return the cached product.
   return this->m_product;
 }
+
+vtkDataSet* vtkProxyFactory::createMeshOnly() const
+{
+  throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
+}
+
+vtkFloatArray* vtkProxyFactory::createScalarArray() const
+{
+  throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
+}
+
 
 }
 }

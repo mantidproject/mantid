@@ -11,6 +11,8 @@
 #include "vtkStreamingDemandDrivenPipeline.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
+#include "MantidVatesAPI/vtkStructuredGridFactory.h"
+#include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
 vtkCxxRevisionMacro(vtkSQWReader, "$Revision: 1.0 $");
@@ -46,8 +48,9 @@ int vtkSQWReader::RequestData(vtkInformation* vtkNotUsed(request), vtkInformatio
   }
 
   RebinningXMLGenerator serializer;
-  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh(serializer));
-  structuredMesh->GetCellData()->AddArray(m_presenter.getScalarDataFromTime(time, "signal"));
+  vtkStructuredGridFactory<TimeToTimeStep> factory("signal", time);
+  vtkStructuredGrid* structuredMesh = vtkStructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, factory));
+  structuredMesh->GetCellData()->AddArray(m_presenter.getScalarDataFromTime(factory));
 
   int subext[6];
   outInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), subext);

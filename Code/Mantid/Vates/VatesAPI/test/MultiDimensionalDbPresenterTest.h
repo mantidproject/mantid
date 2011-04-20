@@ -5,6 +5,8 @@
 #include <gtest/gtest.h>
 #include <cxxtest/TestSuite.h>
 #include <vtkPointData.h>
+#include "MantidVatesAPI/TimeStepToTimeStep.h"
+#include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
 
@@ -75,9 +77,10 @@ void testConstruction()
   MultiDimensionalDbPresenter mdPresenter;
   mdPresenter.execute(wsLoaderAlg, wsId);
 
-  vtkDataArray* data = mdPresenter.getScalarDataFromTimeBin(1, "signal");
+  vtkStructuredGridFactory<TimeStepToTimeStep> vtkGridFactory("signal", 1);
+  vtkDataArray* data = mdPresenter.getScalarDataFromTimeBin(vtkGridFactory);
   RebinningXMLGenerator serializer;
-  vtkDataSet* visData = mdPresenter.getMesh(serializer);
+  vtkDataSet* visData = mdPresenter.getMesh(serializer, vtkGridFactory);
   TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 125000, data->GetSize());
   TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 132651, visData->GetNumberOfPoints());
   TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 30, mdPresenter.getNumberOfTimesteps());
@@ -118,8 +121,8 @@ void testGetScalarDataThrows()
   MultiDimensionalDbPresenter mdPresenter;
 
   //No execution call. Test that type cannot be used improperly.
-
-  TSM_ASSERT_THROWS("Accessing scalar data without first calling execute should not be possible", mdPresenter.getScalarDataFromTimeBin(1, "signal"), std::runtime_error);
+  vtkStructuredGridFactory<TimeStepToTimeStep> vtkGridFactory("signal", 1);
+  TSM_ASSERT_THROWS("Accessing scalar data without first calling execute should not be possible", mdPresenter.getScalarDataFromTimeBin(vtkGridFactory), std::runtime_error);
 }
 
 void testGetMeshThrows()
@@ -128,7 +131,8 @@ void testGetMeshThrows()
 
   //No execution call. Test that type cannot be used improperly.
   RebinningXMLGenerator serializer;
-  TSM_ASSERT_THROWS("Accessing mesh data without first calling execute should not be possible", mdPresenter.getMesh(serializer), std::runtime_error);
+  vtkStructuredGridFactory<TimeStepToTimeStep> vtkGridFactory("signal", 1);
+  TSM_ASSERT_THROWS("Accessing mesh data without first calling execute should not be possible", mdPresenter.getMesh(serializer, vtkGridFactory), std::runtime_error);
 }
 
 void testGetNumberOfTimestepsThrows()

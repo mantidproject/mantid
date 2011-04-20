@@ -7,14 +7,14 @@ namespace Mantid
 namespace VATES
 {
   template<typename TimeMapper>
-  vtkStructuredGridFactory<TimeMapper>::vtkStructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarName, const double timeValue, const TimeMapper& timeMapper) :
-  m_workspace(workspace), m_scalarName(scalarName), m_timeValue(timeValue), m_meshOnly(false), m_timeMapper(timeMapper)
+  vtkStructuredGridFactory<TimeMapper>::vtkStructuredGridFactory(const std::string& scalarName, const double timeValue) : 
+  m_scalarName(scalarName), m_timeValue(timeValue), m_meshOnly(false)
   {
   }
 
   template<typename TimeMapper>
   vtkStructuredGridFactory<TimeMapper>::vtkStructuredGridFactory(const vtkStructuredGridFactory<TimeMapper>& other):
-  m_workspace(other.m_workspace), m_scalarName(other.m_scalarName), m_timeValue(other.m_timeValue), m_meshOnly(other.m_meshOnly), m_timeMapper(other.m_timeMapper)
+  m_workspace(other.m_workspace), m_scalarName(other.m_scalarName), m_timeValue(other.m_timeValue), m_meshOnly(other.m_meshOnly)
   {
   }
 
@@ -33,14 +33,14 @@ namespace VATES
 
 
   template<typename TimeMapper>
-  vtkStructuredGridFactory<TimeMapper>::vtkStructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const TimeMapper& timeMapper) : m_workspace(workspace), m_scalarName(""), m_timeValue(0),  m_meshOnly(true), m_timeMapper(timeMapper)
+  vtkStructuredGridFactory<TimeMapper>::vtkStructuredGridFactory() :  m_scalarName(""), m_timeValue(0),  m_meshOnly(true)
   {
   }
 
   template<typename TimeMapper>
-  vtkStructuredGridFactory<TimeMapper> vtkStructuredGridFactory<TimeMapper>::constructAsMeshOnly(Mantid::API::IMDWorkspace_sptr workspace, const TimeMapper& timeMapper)
+  vtkStructuredGridFactory<TimeMapper> vtkStructuredGridFactory<TimeMapper>::constructAsMeshOnly()
   {
-    return vtkStructuredGridFactory<TimeMapper>(workspace, timeMapper);
+    return vtkStructuredGridFactory<TimeMapper>();
   }
 
   template<typename TimeMapper>
@@ -49,8 +49,38 @@ namespace VATES
   }
 
   template<typename TimeMapper>
+  void vtkStructuredGridFactory<TimeMapper>::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+  {
+    m_workspace = workspace;
+    validate();
+
+    double tMax = m_workspace->getTDimension()->getMaximum();
+    double tMin = m_workspace->getTDimension()->getMinimum();
+    size_t nbins = m_workspace->getTDimension()->getNBins();
+
+    m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
+  }
+
+  template<typename TimeMapper>
+  void vtkStructuredGridFactory<TimeMapper>::validate() const
+  {
+    if(NULL == m_workspace.get())
+    {
+      throw std::runtime_error("IMDWorkspace is null");
+    }
+    else
+    {
+      if(NULL == m_workspace->getTDimension().get())
+      {
+        throw std::runtime_error("Missing time dimension in IMDWorkspace.");
+      }
+    }
+  }
+
+  template<typename TimeMapper>
   vtkStructuredGrid* vtkStructuredGridFactory<TimeMapper>::create() const
   {
+    validate();
     vtkStructuredGrid* visualDataSet = this->createMeshOnly();
     vtkFloatArray* scalarData = this->createScalarArray();
     visualDataSet->GetCellData()->AddArray(scalarData);
@@ -61,6 +91,7 @@ namespace VATES
   template<typename TimeMapper>
   vtkStructuredGrid* vtkStructuredGridFactory<TimeMapper>::createMeshOnly() const
   {
+    validate();
     const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
     const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
     const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
@@ -115,12 +146,11 @@ namespace VATES
   template<typename TimeMapper>
   vtkFloatArray* vtkStructuredGridFactory<TimeMapper>::createScalarArray() const
   {
+    validate();
     if(true == m_meshOnly)
     {
       throw std::runtime_error("This vtkStructuredGridFactory factory has not been constructed with all the information required to create scalar data.");
     }
-
-    using namespace MDDataObjects;
 
     //Add scalar data to the mesh.
     vtkFloatArray* scalars = vtkFloatArray::New();
@@ -130,7 +160,7 @@ namespace VATES
     const int sizeZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
     scalars->Allocate(sizeX * sizeY * sizeZ);
     scalars->SetName(m_scalarName.c_str());
-    MD_image_point point;
+
     for (int i = 0; i < sizeX; i++)
     {
       for (int j = 0; j < sizeY; j++)

@@ -367,6 +367,11 @@ MDWorkspace::getGeometry()     {
       return m_mdCellMap[singleDimensionIndex];
     }
 
+    double MDWorkspace::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+    {
+      return this->getSignalAt(index1, index2, index3, index4);
+    }
+
     const Mantid::Geometry::SignalAggregate& MDWorkspace::getCell(...) const
     {
       throw std::runtime_error("Not implemented");

@@ -40,6 +40,7 @@ namespace VATES
 
 typedef std::vector<int> VecExtents;
 
+class vtkDataSetFactory;
 class DLLExport MultiDimensionalDbPresenter
 {
 
@@ -69,13 +70,13 @@ public:
   void execute(API::Algorithm& algorithm, const std::string wsId);
 
   /// Gets the vtk mesh;
-  vtkDataSet* getMesh(RebinningXMLGenerator& serializer) const;
+  vtkDataSet* getMesh(RebinningXMLGenerator& serializer, vtkDataSetFactory& vtkFactory) const;
 
   /// Gets the vtk scalar data for the mesh. Generated scalar data is provided with the specified name.
-  vtkDataArray* getScalarDataFromTimeBin(int timeBin, const char *scalarName) const;
+  vtkDataArray* getScalarDataFromTimeBin(vtkDataSetFactory& vtkFactory) const;
 
   /// Gets the vtk scalar data for the mesh. Generated scalar data is provided with a specified name.
-  vtkDataArray* getScalarDataFromTime(double time, const char* scalarName) const;
+  vtkDataArray* getScalarDataFromTime(vtkDataSetFactory& vtkFactory) const;
 
   /// Gets the number of timesteps in the workspace.
   size_t getNumberOfTimesteps() const;

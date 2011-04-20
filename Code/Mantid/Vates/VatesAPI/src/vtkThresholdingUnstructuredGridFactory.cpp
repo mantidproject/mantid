@@ -8,15 +8,45 @@ namespace VATES
 {
 
   template<typename TimeMapper>
-  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarName, const double timestep, const TimeMapper& timeMapper, double minThreshold, double maxThreshold) :
-  m_workspace(workspace), m_timestep(timestep), m_scalarName(scalarName), m_timeMapper(timeMapper), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const std::string& scalarName, const double timestep, double minThreshold, double maxThreshold) :
+  m_timestep(timestep), m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
   {
   }
 
 
   template<typename TimeMapper>
+  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+  {
+    m_workspace = workspace;
+    validate();
+
+    double tMax = m_workspace->getTDimension()->getMaximum();
+    double tMin = m_workspace->getTDimension()->getMinimum();
+    size_t nbins = m_workspace->getTDimension()->getNBins();
+
+    m_timeMapper = TimeMapper::construct(tMin, tMax, nbins);
+  }
+
+  template<typename TimeMapper>
+  void vtkThresholdingUnstructuredGridFactory<TimeMapper>::validate() const
+  {
+    if(NULL == m_workspace.get())
+    {
+      throw std::runtime_error("IMDWorkspace is null");
+    }
+    else
+    {
+      if(NULL == m_workspace->getTDimension().get())
+      {
+        throw std::runtime_error("Missing time dimension in IMDWorkspace.");
+      }
+    }
+  }
+
+  template<typename TimeMapper>
   vtkUnstructuredGrid* vtkThresholdingUnstructuredGridFactory<TimeMapper>::create() const
   {
+    validate();
     const int nBinsX = static_cast<int>( m_workspace->getXDimension()->getNBins() );
     const int nBinsY = static_cast<int>( m_workspace->getYDimension()->getNBins() );
     const int nBinsZ = static_cast<int>( m_workspace->getZDimension()->getNBins() );
@@ -65,7 +95,7 @@ namespace VATES
         {
 
           posZ = minZ + (k * incrementZ); //Calculate increment in z;
-          signalScalar = m_workspace->getSignalAt(i, j, k, m_timeMapper(m_timestep));
+          signalScalar = m_workspace->getSignalNormalizedAt(i, j, k, m_timeMapper(m_timestep));
 
           if ((signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
           {
@@ -150,6 +180,18 @@ namespace VATES
   template<typename TimeMapper>
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::~vtkThresholdingUnstructuredGridFactory()
   {
+  }
+
+  template<typename TimeMapper>
+  vtkDataSet* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createMeshOnly() const
+  {
+    throw std::runtime_error("::createMeshOnly() does not apply for this type of factory.");
+  }
+
+  template<typename TimeMapper>
+  vtkFloatArray* vtkThresholdingUnstructuredGridFactory<TimeMapper>::createScalarArray() const
+  {
+    throw std::runtime_error("::createScalarArray() does not apply for this type of factory.");
   }
 
   template class vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>;

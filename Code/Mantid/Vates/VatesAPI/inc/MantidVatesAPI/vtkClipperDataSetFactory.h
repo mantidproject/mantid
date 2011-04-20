@@ -4,6 +4,7 @@
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidVatesAPI/vtkDataSetFactory.h"
 #include "MantidVatesAPI/Clipper.h"
+#include "MantidAPI/IMDWorkspace.h"
 #include <boost/scoped_ptr.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -50,6 +51,17 @@ public:
 
   /// Factory Method.
   virtual vtkDataSet* create() const;
+
+  /// Initialize the factory.
+  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+
+  vtkDataSet* createMeshOnly() const;
+
+  vtkFloatArray* createScalarArray() const;
+
+  void validate() const
+  {
+  }
 
 private:
   /// Function describing clipping.

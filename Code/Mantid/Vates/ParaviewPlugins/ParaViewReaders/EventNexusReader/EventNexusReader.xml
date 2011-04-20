@@ -2,7 +2,39 @@
   <!-- Begin EventNexusReader -->
   <ProxyGroup name="sources">
     <SourceProxy name="EventNexusReader" class="vtkEventNexusReader">
-      <StringVectorProperty
+      	  <IntVectorProperty
+name="X Bins"
+command="SetXBins"
+number_of_elements="1"
+default_values="50">
+</IntVectorProperty>
+	  <IntVectorProperty
+name="Y Bins"
+command="SetYBins"
+number_of_elements="1"
+default_values="50">
+</IntVectorProperty>
+	  <IntVectorProperty
+name="Z Bins"
+command="SetZBins"
+number_of_elements="1"
+default_values="50">
+</IntVectorProperty>
+ <DoubleVectorProperty
+       name="Min Signal"
+       command="SetMinThreshold"
+       number_of_elements="1"
+	   default_values="0.1"
+	   >
+	   </DoubleVectorProperty>
+	    <DoubleVectorProperty
+       name="Max Signal"
+       command="SetMaxThreshold"
+       number_of_elements="1"
+	   default_values="10000"
+	   >
+	   </DoubleVectorProperty>
+<StringVectorProperty
         name="FileName"
         command="SetFileName"
         number_of_elements="1">

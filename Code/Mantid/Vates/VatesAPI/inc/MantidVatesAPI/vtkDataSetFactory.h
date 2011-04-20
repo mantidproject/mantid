@@ -7,8 +7,14 @@
 #include <boost/shared_ptr.hpp>
 #include "vtkDataSet.h"
 
+class vtkFloatArray;
 namespace Mantid
 {
+  namespace API
+  {
+    class IMDWorkspace;
+  }
+
 namespace VATES
 {
 
@@ -38,8 +44,6 @@ namespace VATES
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
 
-
-
 class DLLExport vtkDataSetFactory
 {
 
@@ -53,7 +57,16 @@ public:
 
   /// Factory Method.
   virtual vtkDataSet* create() const=0;
+  
+  virtual vtkDataSet* createMeshOnly() const=0;
 
+  virtual vtkFloatArray* createScalarArray() const=0;
+
+  virtual void initialize(boost::shared_ptr<Mantid::API::IMDWorkspace>)=0;
+
+protected:
+
+  virtual void validate() const = 0;
 
 };
 

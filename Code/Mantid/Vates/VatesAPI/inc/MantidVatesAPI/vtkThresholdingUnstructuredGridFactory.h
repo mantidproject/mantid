@@ -53,20 +53,31 @@ class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(Mantid::API::IMDWorkspace_sptr workspace, const std::string& scalarname,
-      const double timestep, const TimeMapper& timeMapper, double minThreshold = -10000, double maxThreshold = 10000);
+  vtkThresholdingUnstructuredGridFactory(const std::string& scalarname,
+      const double timestep, double minThreshold = -10000, double maxThreshold = 10000);
 
   /// Destructor
   ~vtkThresholdingUnstructuredGridFactory();
 
+  /// Initialize the object with a workspace.
+  virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
+
   /// Factory method
   vtkUnstructuredGrid* create() const;
+
+  vtkDataSet* createMeshOnly() const;
+
+  vtkFloatArray* createScalarArray() const;
 
   typedef std::vector<std::vector<std::vector<UnstructuredPoint> > > PointMap;
 
   typedef std::vector<std::vector<UnstructuredPoint> > Plane;
 
   typedef std::vector<UnstructuredPoint> Column;
+
+protected:
+
+  virtual void validate() const;
 
 private:
 
