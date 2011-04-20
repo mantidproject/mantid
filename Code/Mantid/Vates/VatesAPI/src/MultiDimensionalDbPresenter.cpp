@@ -36,6 +36,7 @@ void MultiDimensionalDbPresenter::execute(API::Algorithm& algorithm, const std::
 
   if(true == algorithm.isInitialized())
   {
+    //Create and then access a workspace in the ads.
     algorithm.execute();
     extractWorkspaceImplementation(wsId);
     m_isExecuted = true;

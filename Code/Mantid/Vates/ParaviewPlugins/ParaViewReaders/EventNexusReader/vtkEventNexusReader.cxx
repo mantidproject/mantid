@@ -27,6 +27,8 @@
 vtkCxxRevisionMacro(vtkEventNexusReader, "$Revision: 1.0 $");
 vtkStandardNewMacro(vtkEventNexusReader);
 
+using namespace Mantid::VATES;
+
 vtkEventNexusReader::vtkEventNexusReader() : 
   m_presenter(), 
   m_isSetup(false), 
@@ -37,6 +39,8 @@ vtkEventNexusReader::vtkEventNexusReader() :
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
   this->SetNumberOfOutputPorts(1);
+  //On first-pass rebinning is necessary.
+  m_actionManager.ask(RecalculateAll);
 }
 
 vtkEventNexusReader::~vtkEventNexusReader()
@@ -50,6 +54,7 @@ void vtkEventNexusReader::SetXBins(int nbins)
   {
     m_nXBins = nbins;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
@@ -59,6 +64,7 @@ void vtkEventNexusReader::SetYBins(int nbins)
   {
     m_nYBins = nbins;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
@@ -68,6 +74,7 @@ void vtkEventNexusReader::SetZBins(int nbins)
   {
     m_nZBins = nbins;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
@@ -77,6 +84,7 @@ void vtkEventNexusReader::SetMaxThreshold(double maxThreshold)
   {
     m_maxThreshold = maxThreshold;
     this->Modified();
+    m_actionManager.ask(RecalculateVisualDataSetOnly);
   }
 }
 
@@ -86,6 +94,7 @@ void vtkEventNexusReader::SetMinThreshold(double minThreshold)
   {
     m_minThreshold = minThreshold;
     this->Modified();
+    m_actionManager.ask(RecalculateVisualDataSetOnly);
   }
 }
 
@@ -95,6 +104,7 @@ void vtkEventNexusReader::SetApplyClip(bool applyClip)
   {
     m_applyClip = applyClip;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
@@ -104,6 +114,7 @@ void vtkEventNexusReader::SetWidth(double width)
   {
     m_width = width;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
@@ -113,13 +124,13 @@ void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
   {
     m_clipFunction = func;
     this->Modified();
+    m_actionManager.ask(RecalculateAll);
   }
 }
 
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
-  using namespace Mantid::VATES;
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -133,35 +144,41 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
   } 
 
-  Mantid::API::AnalysisDataService::Instance().remove(m_histogrammedWsId);
-
-  Mantid::MDEvents::BinToMDHistoWorkspace hist_alg;
-  hist_alg.initialize();
-  hist_alg.setPropertyValue("InputWorkspace", m_mdEventWsId);
-  hist_alg.setPropertyValue("DimX", boost::str(boost::format("Qx, -2.0, 2.0,  %d") % m_nXBins)); 
-  hist_alg.setPropertyValue("DimY", boost::str(boost::format("Qy, -2.0, 2.0,  %d") % m_nYBins)); 
-  hist_alg.setPropertyValue("DimZ", boost::str(boost::format("Qz, -2.0, 2.0,  %d") % m_nZBins)); 
-  hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");
-  hist_alg.setPropertyValue("OutputWorkspace", m_histogrammedWsId);
-  
-  if(true == m_applyClip)
+  //When RecalculateAll wins-out, configure and run the rebinning algorithm.
+  if(RecalculateAll == m_actionManager.action())
   {
-    vtkPlane* plane = dynamic_cast<vtkPlane*>(this->m_clipFunction);
-    if(NULL != plane)
+    Mantid::API::AnalysisDataService::Instance().remove(m_histogrammedWsId);
+
+    Mantid::MDEvents::BinToMDHistoWorkspace hist_alg;
+    hist_alg.initialize();
+    hist_alg.setPropertyValue("InputWorkspace", m_mdEventWsId);
+    hist_alg.setPropertyValue("DimX", boost::str(boost::format("Qx, -2.0, 2.0,  %d") % m_nXBins)); 
+    hist_alg.setPropertyValue("DimY", boost::str(boost::format("Qy, -2.0, 2.0,  %d") % m_nYBins)); 
+    hist_alg.setPropertyValue("DimZ", boost::str(boost::format("Qz, -2.0, 2.0,  %d") % m_nZBins)); 
+    hist_alg.setPropertyValue("DimT", "NONE,0.0,10.0, 1");
+    hist_alg.setPropertyValue("OutputWorkspace", m_histogrammedWsId);
+
+    if(true == m_applyClip)
     {
-      //user has requested the use of implicit functions as part of rebinning. only planes understood for time being.
-      using namespace Mantid::MDAlgorithms;
-      double* pNormal = plane->GetNormal();
-      double* pOrigin = plane->GetOrigin();
-      NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
-      OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
-      PlaneImplicitFunction func(normal, origin, m_width);
-      hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
+      vtkPlane* plane = dynamic_cast<vtkPlane*>(this->m_clipFunction);
+      if(NULL != plane)
+      {
+        //user has requested the use of implicit functions as part of rebinning. only planes understood for time being.
+        using namespace Mantid::MDAlgorithms;
+        double* pNormal = plane->GetNormal();
+        double* pOrigin = plane->GetOrigin();
+        NormalParameter normal(pNormal[0], pNormal[1], pNormal[2]);
+        OriginParameter origin(pOrigin[0], pOrigin[1], pOrigin[2]);
+        PlaneImplicitFunction func(normal, origin, m_width);
+        hist_alg.setPropertyValue("ImplicitFunctionXML", func.toXMLString());
+      }
     }
+
+    // Run the algorithm and cache the output.
+    m_presenter.execute(hist_alg, m_histogrammedWsId);
   }
 
-  m_presenter.execute(hist_alg, m_histogrammedWsId);
-
+  // This object determines how the visualization is made from a given imdworkspace.
   vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> vtkGridFactory("signal", time, m_minThreshold, m_maxThreshold);
 
   RebinningXMLGenerator serializer(LocationNotRequired); //Object handles serialization of meta data.
@@ -169,6 +186,8 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
 
   output->ShallowCopy(structuredMesh);
 
+  // Reset the action manager fresh for next cycle.
+  m_actionManager.reset();
   return 1;
 }
 
