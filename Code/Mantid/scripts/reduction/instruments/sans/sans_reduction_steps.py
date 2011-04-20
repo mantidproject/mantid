@@ -1001,7 +1001,14 @@ class UnitsConvert(ReductionStep):
         # currently there are two possible re-bin algorithms, the other is InterpolatingRebin
         self.rebin_alg = rebin
 
-    def execute(self, reducer, workspace):
+    def execute(self, reducer, workspace, bin_alg=None):
+        """
+            Runs the ConvertUnits() and a rebin algorithm on the specified
+            workspace 
+            @param reducer: 
+            @param workspace: the name of the workspace to convert
+            @param bin_alg: the name of the Mantid re-bin algorithm to use
+        """ 
         ConvertUnits(workspace, workspace, self._units)
         
         low_wav = self.wav_low
@@ -1012,7 +1019,10 @@ class UnitsConvert(ReductionStep):
             high_wav = max(mtd[workspace].readX(0))
 
          
-        rebin_com = self.rebin_alg+'(workspace, workspace, "'+\
+        if not bin_alg:
+            bin_alg = self.rebin_alg
+ 
+        rebin_com = bin_alg+'(workspace, workspace, "'+\
             self._get_rebin(low_wav, self.wav_step, high_wav)+'")'
         eval(rebin_com)
 
@@ -1206,7 +1216,15 @@ class GetSampleGeom(ReductionStep):
 
         # string specifies the sample's shape
         self._shape = None
-        self._width = self._thickness = self._height = None
+        # sample's width
+        self._width = None
+        self._thickness = None
+        self._height = None
+        
+        self._use_wksp_shape = True
+        self._use_wksp_width = True
+        self._use_wksp_thickness = True
+        self._use_wksp_height = True
 
     def _get_default(self, attrib):
         if attrib == 'shape':
@@ -1229,11 +1247,14 @@ class GetSampleGeom(ReductionStep):
         except KeyError:
             mantid.sendLogMessage("::SANS::Warning: Invalid geometry type for sample: " + str(new_shape) + ". Setting default to " + self._default_shape)
             new_shape = self._default_shape
+
         self._shape = new_shape
+        self._use_wksp_shape = False
+
         #check that the dimensions that we have make sense for our new shape
-        if not self._width is None:
+        if self._width:
             self.width = self._width
-        if not self._thickness is None:
+        if self._thickness:
             self.thickness = self._thickness
     
     def get_shape(self):
@@ -1244,9 +1265,11 @@ class GetSampleGeom(ReductionStep):
         
     def set_width(self, width):
         self._width = float(width)
+        self._use_wksp_width = False
         # For a disk the height=width
-        if (not self._shape is None) and (self._shape.startswith('cylinder')):
+        if self._shape and self._shape.startswith('cylinder'):
             self._height = self._width
+            self._use_wksp_height = False
 
     def get_width(self):
         if self._width is None:
@@ -1256,10 +1279,12 @@ class GetSampleGeom(ReductionStep):
             
     def set_height(self, height):
         self._height = float(height)
+        self._use_wksp_height = False
         
         # For a cylinder and sphere the height=width=radius
         if (not self._shape is None) and (self._shape.startswith('cylinder')):
             self._width = self._height
+        self._use_wksp_widtht = False
 
     def get_height(self):
         if self._height is None:
@@ -1275,6 +1300,7 @@ class GetSampleGeom(ReductionStep):
         #if (not self._shape is None) and (not self._shape == 'cuboid'):
         #    mantid.sendLogMessage('::SANS::Warning: Can\'t set thickness for shape "'+self._shape+'"')
         self._thickness = float(thickness)
+        self._use_wksp_thickness = False
 
     def get_thickness(self):
         if self._thickness is None:
@@ -1287,9 +1313,6 @@ class GetSampleGeom(ReductionStep):
     height = property(get_height, set_height, None, None)
     thickness = property(get_thickness, set_thickness, None, None)
 
-    def set_dimensions_to_unity(self):
-        self._width = self._thickness = self._height = 1.0
-
     def execute(self, reducer, workspace):
         """
             Reads the geometry information stored in the workspace
@@ -1300,13 +1323,13 @@ class GetSampleGeom(ReductionStep):
             wksp = wksp[0]
         sample_details = wksp.getSampleInfo()
 
-        if self._shape is None:
+        if self._use_wksp_shape:
             self.shape = sample_details.getGeometryFlag()
-        if self._thickness is None:
+        if self._use_wksp_thickness:
             self.thickness = sample_details.getThickness()
-        if self._width is None:
+        if self._use_wksp_width:
             self.width = sample_details.getWidth()
-        if self._height is None:
+        if self._use_wksp_height:
             self.height = sample_details.getHeight()
 
     def __str__(self):

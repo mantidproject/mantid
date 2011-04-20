@@ -340,13 +340,23 @@ class LoadTransmissions(sans_reduction_steps.BaseTransmission):
             load = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
             self.TRANS_SAMPLE_N_PERIODS, dummy = \
                                         load._assignHelper(reducer)
+            if not load.wksp_name:
+                # do nothing if no workspace was specified
+                return '', ''
             self.trans_name = load.wksp_name
+
         if self._direct_name not in [None, '']:
             load = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
             self.DIRECT_SAMPLE_N_PERIODS, dummy = \
                                         load._assignHelper(reducer)
+            if not load.wksp_name:
+                raise RuntimeError('Transmission run set without direct run error')
             self.direct_name = load.wksp_name
  
+        #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
+        reducer.instrument.load_transmission_inst(self.trans_name)
+        reducer.instrument.load_transmission_inst(self.direct_name)
+
         return self.trans_name, self.direct_name
 
 class CanSubtraction(LoadRun):
@@ -934,8 +944,6 @@ class ConvertToQ(ReductionStep):
         #if true gravity is taken into account in the Q1D calculation
         self._use_gravity = self._DEFAULT_GRAV
         self._grav_set = False
-        
-        self.error_est_1D = None
     
     def set_output_type(self, discript):
         self._Q_alg = self._OUTPUT_TYPES[discript]
@@ -960,11 +968,11 @@ class ConvertToQ(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._Q_alg == 'Q1D':
-            if self.error_est_1D is None:
+            if reducer.Q_error_est_1D is None:
                 raise RuntimeError('Could not find the workspace containing error estimates')
-            Q1D(workspace, self.error_est_1D, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
-            mtd.deleteWorkspace(self.error_est_1D)
-            self.error_est_1D = None
+            Q1D(workspace, reducer.Q_error_est_1D, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
+            mtd.deleteWorkspace(reducer.Q_error_est_1D)
+            reducer.Q_error_est_1D = None
 
         elif self._Q_alg == 'Qxy':
             Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
@@ -1017,20 +1025,18 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
                 Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
-        sample_rebin = reducer.to_wavelen.rebin_alg 
         if reducer.instrument.is_interpolating_norm():
-            reducer.to_wavelen.rebin_alg = 'InterpolatingRebin'
+            r_alg = 'InterpolatingRebin'
         else :
-            reducer.to_wavelen.rebin_alg = 'Rebin'
-        reducer.to_wavelen.execute(reducer, norm_ws)
-        reducer.to_wavelen.rebin_alg = sample_rebin 
+            r_alg = 'Rebin'
+        reducer.to_wavelen.execute(reducer, norm_ws, bin_alg=r_alg)
 
         out_workspace = workspace
         if reducer.to_Q.get_output_type() == '1D':
             # At this point need to fork off workspace name to keep a workspace containing raw counts
-            reducer.to_Q.error_est_1D = 'to_delete_'+workspace+'_prenormed'
-            RenameWorkspace(workspace, reducer.to_Q.error_est_1D)
-            workspace = reducer.to_Q.error_est_1D
+            reducer.Q_error_est_1D = 'to_delete_'+workspace+'_prenormed'
+            RenameWorkspace(workspace, reducer.Q_error_est_1D)
+            workspace = reducer.Q_error_est_1D
 
         Divide(workspace, norm_ws, out_workspace)
 
@@ -1128,8 +1134,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             @param post_monitor: DETECTOR ID of the transmission monitor
             @return the name of the workspace created
         """
-        inst.load_transmission_inst(inputWS)
-
         #the workspace is forked, below is its new name
         tmpWS = inputWS + '_tmp'
         
@@ -1318,11 +1322,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         return fitted_name, unfitted
 
 
-class ISISCorrections(sans_reduction_steps.CorrectToFileStep):
+class ISISCorrections(ReductionStep):
     DEFAULT_SCALING = 100.0
-    def __init__(self, corr_type = '', operation = ''):
-        super(ISISCorrections, self).__init__('', "Wavelength", "Divide")
-
+    def __init__(self):
         # Scaling values [%]
         self.rescale= self.DEFAULT_SCALING
     
@@ -1331,12 +1333,12 @@ class ISISCorrections(sans_reduction_steps.CorrectToFileStep):
 
     def execute(self, reducer, workspace):
         #use the instrument's correction file
-        self._filename = reducer.instrument.cur_detector().correction_file
-        #do the correct to file
-        super(ISISCorrections, self).execute(reducer, workspace)
+        corr_file = reducer.instrument.cur_detector().correction_file
+        corr = sans_reduction_steps.CorrectToFileStep(corr_file, "Wavelength", "Divide")
+        corr.execute(reducer, workspace)
 
         scalefactor = self.rescale
-        # Data reduced with Mantid is a factor of ~pi higher than colette.
+        # Data reduced with Mantid is a factor of ~pi higher than Colette.
         # For LOQ only, divide by this until we understand why.
         if reducer.instrument.name() == 'LOQ':
             rescaleToColette = math.pi
@@ -1348,7 +1350,7 @@ class ISISCorrections(sans_reduction_steps.CorrectToFileStep):
 class CorrectToFileISIS(sans_reduction_steps.CorrectToFileStep):
     """
         Adds the ability to change the name of the output workspace to
-        it CorrectToFileStep, its base ReductionStep 
+        its CorrectToFileStep (the base ReductionStep) 
     """
     def __init__(self, file='', corr_type='', operation='', name_container=[]):
         super(CorrectToFileISIS, self).__init__(file, corr_type, operation)
@@ -1370,6 +1372,7 @@ class UserFile(ReductionStep):
         self.filename = file
         self._incid_monitor_lckd = False
         self.executed = False
+
         self.key_functions = {
             'BACK/M4/TIME' : self._read_backs,
             'TRANS/': self._read_trans_line}

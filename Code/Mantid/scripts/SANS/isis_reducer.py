@@ -103,6 +103,7 @@ class ISISReducer(SANSReducer):
         self.output_wksp = None
         self.sample_wksp = None
         self.full_trans_wav = False
+        self.Q_error_est_1D = None
         self._monitor_set = False
 
     def _reduce(self):
@@ -281,15 +282,15 @@ class ISISReducer(SANSReducer):
         if override:
             self._monitor_set=True
         
+        self.instrument.set_interpolating_norm(interp)
+        
         if not self._monitor_set or override:
             self.instrument.set_incident_mon(specNum)
-            self.instrument.set_interpolating_norm(interp)
                         
     def set_trans_spectrum(self, specNum, interp=False, override=True):
         self.instrument.incid_mon_4_trans_calc = int(specNum)
 
-        if (interp == None) or override:
-            self.transmission_calculator.interpolate = interp
+        self.transmission_calculator.interpolate = interp
 
     def step_num(self, step):
         """
