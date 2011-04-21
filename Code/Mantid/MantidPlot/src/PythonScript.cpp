@@ -68,8 +68,8 @@ namespace
  * Constructor
  */
 PythonScript::PythonScript(PythonScripting *env, const QString &code, QObject *context, 
-			   const QString &name, bool reportProgress)
-  : Script(env, code, context, name, reportProgress), PyCode(NULL), localDict(NULL), 
+			   const QString &name, bool interactive, bool reportProgress)
+  : Script(env, code, context, name, interactive, reportProgress), PyCode(NULL), localDict(NULL), 
     stdoutSave(NULL), stderrSave(NULL), isFunction(false), m_isInitialized(false)
 {
   ROOT_CODE_OBJECT = NULL;
@@ -441,7 +441,7 @@ PyObject* PythonScript::executeScript(PyObject* return_tuple)
   {
     Py_DECREF(return_tuple);
   }
-  if( pyret )
+  if( m_interactive && pyret )
   {
     emit keywordsChanged(createAutoCompleteList());
   }

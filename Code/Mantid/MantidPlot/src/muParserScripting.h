@@ -54,9 +54,10 @@ class muParserScripting: public ScriptingEnv
 
   bool isRunning() const { return true; }
   Script *newScript(const QString &code = "", QObject *context = NULL,    
-		    const QString &name="<input>", bool reportProgress=false)
+		    const QString &name="<input>", bool interactive=true,bool reportProgress=false)
     {
-      (void)reportProgress;
+      Q_UNUSED(reportProgress);
+      Q_UNUSED(interactive);
       return new muParserScript(this, code, context, name);
     }
     

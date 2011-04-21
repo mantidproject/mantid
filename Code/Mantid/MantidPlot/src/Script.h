@@ -55,7 +55,7 @@ class Script : public QObject
   public:
   /// Constructor
   Script(ScriptingEnv *env, const QString &code, QObject *context=NULL, 
-	 const QString &name="<input>", bool reportProgress = false);
+	 const QString &name="<input>", bool interactive = true, bool reportProgress = false);
   /// Destructor
   virtual ~Script();
   /// Return the code that will be executed when calling exec() or eval()
@@ -77,11 +77,11 @@ class Script : public QObject
   /// Set whether errors / exceptions are to be emitted or silently ignored
   void setEmitErrors(bool yes) { EmitErrors = yes; }
   /// Whether we should be reporting progress  
-  bool reportProgress() const { return m_report_progress; }
+  bool reportProgress() const { return (m_interactive && m_report_progress); }
   //!Set whether we should be reporting progress
   void reportProgress(bool on) 
   { 
-    if( Env->supportsProgressReporting() ) m_report_progress = on; 
+    if( Env->supportsProgressReporting() && m_interactive ) m_report_progress = on; 
     else m_report_progress = false;
   }
   // Set the line offset of the current code
@@ -118,6 +118,8 @@ protected:
   ScriptingEnv *Env;
   QString Code, Name;
   QObject *Context;
+  /// Should this be an interactive environment?
+  bool m_interactive;
   /// Is progress reporting on?
   bool m_report_progress;
   enum compileStatus { notCompiled, isCompiled, compileErr } compiled;

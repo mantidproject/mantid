@@ -16320,7 +16320,7 @@ void ApplicationWindow::runPythonScript(const QString & code, bool quiet)
   if( m_iface_script == NULL )
   {
     setScriptingLanguage("Python");
-    m_iface_script = scriptingEnv()->newScript("",this, "",false);
+    m_iface_script = scriptingEnv()->newScript("",this, "",false, false);
     m_iface_script->setLineOffset(0);
     connect(m_iface_script, SIGNAL(print(const QString &)), this, SLOT(scriptPrint(const QString&)));
     connect(m_iface_script, SIGNAL(error(const QString &, const QString&, int)), this, 

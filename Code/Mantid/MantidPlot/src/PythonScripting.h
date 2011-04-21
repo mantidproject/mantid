@@ -62,9 +62,9 @@ public:
   QStringList toStringList(PyObject *py_seq);
   /// Create a new script object that can execute code within this enviroment
   Script *newScript(const QString &code, QObject *context = NULL, const QString &name="<input>",
-    bool reportProgress = false)
+		    bool interactive = true, bool reportProgress = false)
   {
-    return new PythonScript(this, code, context, name, reportProgress);
+    return new PythonScript(this, code, context, name, interactive, reportProgress);
   }
   ///Return a list of file extensions for Python
   const QStringList fileExtensions() const;

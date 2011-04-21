@@ -68,13 +68,14 @@ class ScriptingEnv : public QObject
   void setIsRunning(bool running) { m_is_running = running; }
   /// Create a script object that is responsible for executing actual code
   virtual Script *newScript(const QString& code = "", QObject* context = NULL, 
-			    const QString &name="<input>",
+			    const QString &name="<input>", bool interactive = true,
 			    bool reportProgress = false)
   {
-    (void)code; //Stop compiler warning
-    (void)context; //Stop compiler warning
-    (void)name; //Stop compiler warning
-    (void)reportProgress; //Stop compiler warning
+    Q_UNUSED(code);
+    Q_UNUSED(context);
+    Q_UNUSED(name);
+    Q_UNUSED(interactive);
+    Q_UNUSED(reportProgress);
     return NULL;
   }
   //! If an exception / error occured, return a nicely formated stack backtrace.

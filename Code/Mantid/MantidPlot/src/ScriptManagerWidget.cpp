@@ -1042,7 +1042,7 @@ void ScriptManagerWidget::open(bool newtab, const QString & filename)
  */
 Script * ScriptManagerWidget::createScriptRunner(ScriptEditor *editor)
 {
-  Script *script = scriptingEnv()->newScript("", this, editor->fileName(), 
+  Script *script = scriptingEnv()->newScript("", this, editor->fileName(), true,
 					     m_toggle_progress->isChecked());
   // Connect the signals that print output and error messages to the formatting functions
   connect(script, SIGNAL(print(const QString &)), this, SLOT(displayOutput(const QString &)));
