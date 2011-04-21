@@ -99,6 +99,12 @@
 #include <stddef.h>
 #include <iostream>
 
+// We can safely ignore warnings about assuming signed overflow does not occur from qvector.h
+// (They really should have implemented it with unsigned types!
+#ifdef __GNUC__
+ #pragma GCC diagnostic ignored "-Wstrict-overflow"
+#endif
+
 //Mantid::Kernel::Logger & Graph::g_log=Mantid::Kernel::Logger::get("Graph");
 Graph::Graph(int x, int y, int width, int height, QWidget* parent, Qt::WFlags f)
 : QWidget(parent, f) //QwtPlot(parent)
@@ -2555,7 +2561,7 @@ void Graph::addArrow(QStringList list, int fileVersion)
 {
   ArrowMarker* mrk = new ArrowMarker();
   int mrkID=d_plot->insertMarker(mrk);
-  int linesOnPlot = (int)d_lines.size();
+  int linesOnPlot = d_lines.size();
   d_lines.resize(++linesOnPlot);
   d_lines[linesOnPlot-1]=mrkID;
 
@@ -2581,7 +2587,7 @@ void Graph::addArrow(QStringList list, int fileVersion)
 ArrowMarker* Graph::addArrow(ArrowMarker* mrk)
 {
   ArrowMarker* aux = new ArrowMarker();
-  int linesOnPlot = (int)d_lines.size();
+  int linesOnPlot = d_lines.size();
   d_lines.resize(++linesOnPlot);
   d_lines[linesOnPlot-1] = d_plot->insertMarker(aux);
 
