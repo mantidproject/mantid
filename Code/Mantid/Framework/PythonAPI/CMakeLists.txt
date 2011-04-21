@@ -120,7 +120,7 @@ if( WIN32 )
     add_custom_command( TARGET PythonAPI POST_BUILD
                         COMMAND ${CMAKE_COMMAND} ARGS -E echo
                         "Updating ${PYDIR} directory"
-                        COMMAND XCOPY ARGS /E /F /D /I 
+                        COMMAND XCOPY ARGS /Y /E /F /D /I 
                         ${PYDIR_NATIVE} ${BIN_CFG_NATIVE}\\${PYDIR_RELATIVE}
                       )
   endforeach ( PYDIR )
