@@ -85,7 +85,7 @@ class ISISReducer(SANSReducer):
         self.samp_trans_load = None
         self.can_trans_load =  None
         self.mask =self._mask= isis_reduction_steps.Mask_ISIS()
-        self.to_wavelen =      sans_reduction_steps.UnitsConvert('Wavelength')
+        self.to_wavelen =      isis_reduction_steps.UnitsConvert('Wavelength')
         self.norm_mon =        isis_reduction_steps.NormalizeToMonitor()
         self.transmission_calculator =\
                                isis_reduction_steps.TransmissionCalc(loader=None)

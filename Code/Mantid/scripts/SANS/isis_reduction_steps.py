@@ -1356,6 +1356,101 @@ class CorrectToFileISIS(sans_reduction_steps.CorrectToFileStep):
                 CorrectToFile(workspace, self._filename, reducer.output_wksp,
                               self._corr_type, self._operation)
 
+class UnitsConvert(ReductionStep):
+    """
+        Executes ConvertUnits and then Rebin on the same workspace. If no re-bin limits are
+        set for the x-values of the final workspace the range of the first spectrum is used.
+    """
+    def __init__(self, units, rebin = 'Rebin', bin_alg=None):
+        """
+            @param bin_alg: the name of the Mantid re-bin algorithm to use
+        """
+        super(UnitsConvert, self).__init__()
+        self._units = units
+        self.wav_low = None
+        self.wav_high = None
+        self.wav_step = None
+        # currently there are two possible re-bin algorithms, the other is InterpolatingRebin
+        self.rebin_alg = rebin
+        self._bin_alg = bin_alg
+
+    #TODO: consider how to remove the extra argument after workspace
+    def execute(self, reducer, workspace, bin_alg=None):
+        """
+            Runs the ConvertUnits() and a rebin algorithm on the specified
+            workspace 
+            @param reducer: 
+            @param workspace: the name of the workspace to convert
+            @param workspace: the name of the workspace to convert
+        """ 
+        ConvertUnits(workspace, workspace, self._units)
+        
+        low_wav = self.wav_low
+        high_wav = self.wav_high
+        
+        if low_wav is None and high_wav is None:
+            low_wav = min(mtd[workspace].readX(0))
+            high_wav = max(mtd[workspace].readX(0))
+
+         
+        if not bin_alg:
+            bin_alg = self.rebin_alg
+ 
+        rebin_com = bin_alg+'(workspace, workspace, "'+\
+            self._get_rebin(low_wav, self.wav_step, high_wav)+'")'
+        eval(rebin_com)
+
+    def _get_rebin(self, low, step, high):
+        """
+            Convert the range limits and step into a form passable to re-bin
+            @param low: first number in the Rebin string, the first bin boundary
+            @param step: bin width
+            @param high: high bin boundary
+        """        
+        return str(low)+', ' + str(step) + ', ' + str(high)
+
+    def get_rebin(self):
+        """
+            Get the string that is passed as the "param" property to Rebin
+            @return the string that is passed to Rebin
+        """
+        return self._get_rebin(self.wav_low, self.wav_step, self.wav_high)
+    
+    def set_rebin(self, w_low = None, w_step = None, w_high = None, override=True):
+        """
+            Set the parameters that are passed to Rebin
+            @param w_low: first number in the Rebin string, the first bin boundary
+            @param w_step: bin width
+            @param w_high: high bin boundary
+        """
+        if not w_low is None:
+            if self.wav_low is None or override:
+                self.wav_low = float(w_low)
+        if not w_step is None:
+            if self.wav_step is None or override:
+                self.wav_step = float(w_step)
+        if not w_high is None:
+            if self.wav_high is None or override:
+                self.wav_high = float(w_high)
+
+    def get_range(self):
+        """
+            Get the values of the highest and lowest boundaries
+            @return low'_'high
+        """
+        return str(self.wav_low)+'_'+str(self.wav_high)
+
+    def set_range(self, w_low = None, w_high = None):
+        """
+            Set the highest and lowest bin boundary values
+            @param w_low: first number in the Rebin string, the first bin boundary
+            @param w_high: high bin boundary
+        """
+        self.set_rebin(w_low, None, w_high)
+
+    def __str__(self):
+        return '    Wavelength range: ' + self.get_rebin()
+
 class UserFile(ReductionStep):
     def __init__(self, file=None):
         """
