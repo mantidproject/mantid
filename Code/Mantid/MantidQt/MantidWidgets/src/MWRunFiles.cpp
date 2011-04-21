@@ -318,7 +318,7 @@ int MWRunFiles::getEntryNum() const
  */
 QVariant MWRunFiles::getUserInput() const
 {
-  return QVariant(m_uiForm.fileEditor->text());
+  return QVariant(getText());
 }
 
 /**
@@ -518,8 +518,8 @@ QString MWRunFiles::createFileFilter()
       ext = sitr.next();
       QString key = ext.toUpper();
       bool found(false);
-      const size_t itemCount = finalIndex.count();
-      for( size_t i = 0 ; i < itemCount; ++i )
+      const int itemCount = finalIndex.count();
+      for( int i = 0 ; i < itemCount; ++i )
       {
         if( key == finalIndex[i].first )
         {

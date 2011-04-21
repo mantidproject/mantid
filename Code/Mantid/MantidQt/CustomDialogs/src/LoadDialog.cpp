@@ -3,6 +3,7 @@
 //------------------------------------------------------------------------------
 #include "MantidQtCustomDialogs/LoadDialog.h"
 #include "MantidQtMantidWidgets/MWRunFiles.h"
+#include "MantidQtAPI/AlgorithmInputHistory.h"
 // Qt
 #include <QLineEdit>
 #include <QCheckBox>
@@ -120,6 +121,9 @@ namespace MantidQt
     {
       m_fileWidget->saveSettings("Mantid/Algorithms/Load");
       AlgorithmDialog::saveInput();
+      //Ensure the filename is store as the full file
+      API::AlgorithmInputHistory::Instance().storeNewValue("Load", 
+							   QPair<QString, QString>("Filename", m_currentFile));
     }
 
     /**
@@ -133,7 +137,9 @@ namespace MantidQt
 
       // Add the helpful summary message
       if( isMessageAvailable() )
+      {
         this->addOptionalMessage(staticLayout);
+      }
 
       // Filename widget
       m_fileWidget = new MantidWidgets::MWRunFiles(this);
@@ -193,7 +199,6 @@ namespace MantidQt
         }
         m_loaderLayout->deleteLater();
         m_loaderLayout = NULL;
-        this->adjustSize();
       }
 
       m_loaderLayout = new QGridLayout;
@@ -250,7 +255,7 @@ namespace MantidQt
       }
 
       // Attempt to set any values that may have been retrieved
-      setPropertyValues();
+      setPropertyValues(QStringList("Filename"));
     }
 
     /**

@@ -241,11 +241,13 @@ namespace Mantid
     */
     void Load::exec()
     {
-      const std::string loaderName = getPropertyValue("LoaderName");
+      std::string loaderName = getPropertyValue("LoaderName");
       IDataFileChecker_sptr loader;
       if( loaderName.empty() )
       {
 	loader = getFileLoader(getPropertyValue("Filename"));
+	loaderName = loader->name();
+	setPropertyValue("LoaderName", loaderName);
       }
       else
       {

@@ -147,8 +147,8 @@ protected:
   /// Adds a property (name,value) pair to the stored map
   void storePropertyValue(const QString & name, const QString & value);
 
-  /// Set the properties that have been parsed from the dialog
-  bool setPropertyValues();
+  /// Set properties on this algorithm by pulling values from the tied widgets
+  bool setPropertyValues(const QStringList & skipList = QStringList());
   //@}
 
   /** @name Dialog information */

@@ -226,22 +226,31 @@ void AlgorithmDialog::storePropertyValue(const QString & name, const QString & v
 
 /**
  * Set the properties that have been parsed from the dialog.
+ * @param skipList :: An optional list of property names whose values will not be set
  * @returns A boolean that indicates if the validation was successful.
  */
-bool AlgorithmDialog::setPropertyValues()
+bool AlgorithmDialog::setPropertyValues(const QStringList & skipList)
 {
   QStringList::const_iterator pend = m_algProperties.end();
   bool allValid(true);
   for( QStringList::const_iterator pitr = m_algProperties.begin(); pitr != pend; ++pitr )
   {
     const QString pName = *pitr;
+    Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
     QString value = getInputValue(pName);
     QLabel *validator = getValidatorMarker(pName);
     std::string error("");
-    Mantid::Kernel::Property *p = getAlgorithmProperty(pName);
+
     try
     {
-      error = p->setValue(value.toStdString());
+      if( skipList.contains(pName) )
+      {
+	error = p->isValid();
+      }
+      else
+      {
+	error = p->setValue(value.toStdString());
+      }
     }
     catch(std::exception & err_details)
     {
