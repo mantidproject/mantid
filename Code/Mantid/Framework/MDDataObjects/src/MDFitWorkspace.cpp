@@ -450,7 +450,8 @@ namespace Mantid{
       }
       MDFitWorkspaceDimension* dim = new MDFitWorkspaceDimension(id,name,x,rec);
       m_dimensions[idim].reset(dim);
-      m_indexCalculator->setDimensionSize(idim,n);
+	  // idim can not be larger then 2^32, so cast to unsigned int
+      m_indexCalculator->setDimensionSize((unsigned int)idim,n);
       if (m_indexCalculator->isValid())
       {
         m_cells.resize(m_indexCalculator->getIndexUpperBounds()+1);

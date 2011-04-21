@@ -148,7 +148,7 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
       pmDim             = (this->pTargetGeom->get_constDimension(source_dimID[i])).get();
 
       shifts[i]        =  pmDim->getDataShift();
-      axis_step[i]     = (pmDim->getMaximum()-pmDim->getMinimum())/pmDim->getNBins();
+      axis_step[i]     = (pmDim->getMaximum()-pmDim->getMinimum())/double(pmDim->getNBins());
       axis_step_inv[i] = 1/axis_step[i];
       cut_max[i]       = pmDim->getMaximum()*axis_step_inv[i];
       cut_min[i]       = pmDim->getMinimum()*axis_step_inv[i];

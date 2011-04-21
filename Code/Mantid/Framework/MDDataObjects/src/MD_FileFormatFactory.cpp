@@ -155,10 +155,10 @@ MD_FileFormatFactory::isHoraceFile(const char *fileName)
 		f_log.debug()<<" the program name is not a Horace, definitely not a Horace file\n";
 		return false;
 	}
+	// version can not be too big
+	int version =(int)*(reinterpret_cast<double *>(DataBuffer+10));
 
-	double version = *(reinterpret_cast<double *>(DataBuffer+10));
-
-	if(abs(version-2)>std::numeric_limits<float>::epsilon()){
+	if(version!=2){
 		f_log.debug()<<" Only version 2 of Horace format file is currently supported and we got the version :"<<version<<std::endl;
 		return false;
 	}

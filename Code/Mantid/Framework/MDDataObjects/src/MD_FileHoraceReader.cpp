@@ -245,7 +245,7 @@ MD_FileHoraceReader::read_MDImg_data(MDImage & mdd)
 {
     size_t i;
     // get size and allocate read buffer;
-    size_t nCells = mdd.getGeometry()->getGeometryExtend();
+    size_t nCells = mdd.get_const_MDGeometry().getGeometryExtend();
     std::vector<char> buff(nCells*8);
 
     // get access to the MD image array;

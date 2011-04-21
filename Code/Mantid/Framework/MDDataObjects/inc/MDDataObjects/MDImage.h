@@ -90,8 +90,8 @@ public:
   /// returns the size occupied by the data part of the MD_IMG_array;
   virtual long getMemorySize()const{return static_cast<long>(MD_IMG_array.data_array_size*sizeof(MD_image_point));}
 
-  /// get constant pointer to geometry for modification in algorithms. (sp may be better?)
-  Geometry::MDGeometry *  const getGeometry(){ return pMDGeometry.get(); }
+  /// get constant pointer (reference for GCC not to complain) to geometry for modification in algorithms. (sp may be better?)
+  Geometry::MDGeometry &  getGeometry(){ return *pMDGeometry; }
   /// get const pointer to const geometry for everything else
   Geometry::MDGeometry const & get_const_MDGeometry()const{ return *pMDGeometry; }
 

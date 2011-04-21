@@ -36,20 +36,20 @@ void minmax(double &rMin,double &rMax,const std::vector<double> &box)
 DynamicCPRRebinning::DynamicCPRRebinning(const MDWorkspace_const_sptr &sourceWS, MDGeometryDescription const *const pTargetDescr,
                                          const MDWorkspace_sptr  & TargetWS ):
 pSourceWS(sourceWS),
-pTargetWS(TargetWS),
 // get pointer to the source image data --> provides number of pixels contributing ;
 pSourceImg(&(sourceWS->get_const_MDImage())),
 pSourceGeom(&(sourceWS->get_const_MDGeometry())),  
 pSourceImgData(pSourceImg->get_const_pData()),
 pSourceDataPoints(&(sourceWS->get_const_MDDPoints())),
-pTargetDescr(pTargetDescr),
-n_preselected_pix(0)
+n_preselected_pix(0),
+pTargetWS(TargetWS),
+pTargetDescr(pTargetDescr)
 {
     // initialisze the target workspace to have proper size and shape
     pTargetWS->init(pSourceWS,pTargetDescr);
 
 	spTargetImage  = pTargetWS->get_spMDImage();
-    pTargetGeom    = pTargetWS->get_spMDImage()->getGeometry();
+    pTargetGeom    = &(pTargetWS->get_spMDImage()->getGeometry());
     //
     n_target_cells = pTargetWS->get_spMDImage()->getDataSize();
     pTargetImgData = pTargetWS->get_spMDImage()->get_pData();
@@ -301,8 +301,8 @@ DynamicCPRRebinning::finalize_rebinning()
   size_t i;
   // normalize signal and error of the dnd object;
   if(pTargetImgData[0].npix>0){
-    pTargetImgData[0].s   /= pTargetImgData[0].npix;
-    pTargetImgData[0].err /=(pTargetImgData[0].npix*pTargetImgData[0].npix);
+    pTargetImgData[0].s   /= (double)pTargetImgData[0].npix;
+    pTargetImgData[0].err /=(double)(pTargetImgData[0].npix*pTargetImgData[0].npix);
   }
 
 
@@ -311,8 +311,8 @@ DynamicCPRRebinning::finalize_rebinning()
   for(i=1;i<n_target_cells;i++){
     if(pTargetImgData[i].npix>0){
       nPix        +=pTargetImgData[i].npix;
-      pTargetImgData[i].s   /=pTargetImgData[i].npix;
-      pTargetImgData[i].err /=(pTargetImgData[i].npix*pTargetImgData[i].npix);
+      pTargetImgData[i].s   /=(double)pTargetImgData[i].npix;
+      pTargetImgData[i].err /=(double)(pTargetImgData[i].npix*pTargetImgData[i].npix);
     }else{
         pTargetImgData[i].s=0;
     }

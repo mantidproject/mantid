@@ -82,31 +82,31 @@ public:
       /// destructor 
     virtual ~DynamicCPRRebinning(){};
 protected:
+//************** Source >>>
     //Do we need these? they can always be obtained from Mantid services;
     /// source workspace:
     MDDataObjects::MDWorkspace_const_sptr pSourceWS;
-    /// target workspace
-    MDDataObjects::MDWorkspace_sptr       pTargetWS;
-    /** the description class, which describes final geometry and the cut. Necessary as 
-     *  preselection works on the basis of this property and final geometry may not be initiated by constructor
-     *  or can be entirely different */
-    Geometry::MDGeometryDescription const * const pTargetDescr;
-
-   /// Number of pixels which contributed into the target image
-    uint64_t n_preselected_pix;
-   /** The indexes of the sells of the source image that can contribute into the target image */
-    //std::vector<const MDDataObjects::MD_image_point *const> preselected_cells;
-    std::vector<size_t> preselected_cells;
- 
- /// pointer to the source image data --> provides number of pixels which may contribute into the cut;
+  /// pointer to the source image data --> provides number of pixels which may contribute into the cut;
     MDDataObjects::MDImage        const *const pSourceImg;
     /// these are the parts of the source workspace
     Geometry::MDGeometry  const         *const pSourceGeom;  
    /// pointer to the MD array of source image points
     MDDataObjects::MD_image_point const *const pSourceImgData; 
-
-    /// pointer to the class which provides MDDataPoints (DataPixels, events);
+  /// pointer to the class which provides MDDataPoints (DataPixels, events);
     MDDataObjects::MDDataPoints        *const pSourceDataPoints;
+//*************** Target >>>
+ /** The indexes of the sells of the source image that can contribute into the target image */
+    //std::vector<const MDDataObjects::MD_image_point *const> preselected_cells;
+    std::vector<size_t> preselected_cells;
+      /// Number of pixels which contributed into the target image
+    uint64_t n_preselected_pix;
+    /// target workspace
+    MDDataObjects::MDWorkspace_sptr       pTargetWS;
+  /** the description class, which describes final geometry and the cut. Necessary as 
+     *  preselection works on the basis of this property and final geometry may not be initiated by constructor
+     *  or can be entirely different */
+    Geometry::MDGeometryDescription const * const pTargetDescr;
+
     /// pointer to the target geometry
     Geometry::MDGeometry                *      pTargetGeom;  
 	/// target image

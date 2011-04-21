@@ -76,7 +76,7 @@ MD_FileTestDataGenerator::read_MDImg_data(MDImage & mdd)
 {
     size_t i;
     // get size and allocate read buffer;
-    size_t nCells = mdd.getGeometry()->getGeometryExtend();
+    size_t nCells = mdd.get_const_MDGeometry().getGeometryExtend();
    
 
     // get access to the MD image array;
@@ -150,14 +150,14 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
         const Geometry::IMDDimension *pDim = spDims[idim].get();
         dimPoints[idim].resize(this->nBins[idim]);
         double min  = pDim->getMinimum();
-        double step = (pDim->getMaximum()-min)/this->nBins[idim];
+        double step = (pDim->getMaximum()-min)/double(this->nBins[idim]);
         //min+=0.5*step;<- we will step through dimensions in a look well below this
         dim_strides[idim] = pDim->getStride();
         if(min!=0){
             min *= (1+FLT_EPSILON*min/fabs(min));
         }
         for(j=0;j<nBins[idim];j++){
-            dimPoints[idim][j]=(float)(min+j*step);
+            dimPoints[idim][j]=(float)(min+double(j)*step);
         }
     }
  
@@ -195,7 +195,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
         for(idim=0;idim<this->nDims;idim++){
             const Geometry::IMDDimension *pDim = spDims[idim].get();
             double min  = pDim->getMinimum();
-            cell_step[idim] = (float)(pDim->getMaximum()-min)/this->nBins[idim]/n_pix;
+            cell_step[idim] = (float)(pDim->getMaximum()-min)/float(this->nBins[idim])/float(n_pix);
          }
    
 
@@ -204,7 +204,7 @@ MD_FileTestDataGenerator::read_pix_subset(const MDImage &dnd,const std::vector<s
         // fill pixels placing points along the biggest diagonal of the multidimensional cell;
         for(j=0;j<n_pix;j++){
             for(idim=0;idim<this->nDims;idim++){
-                dat_sig_fields[idim] = (float)(dimPoints[idim])[cell_ind[idim]]+ cell_step[idim]*j;
+                dat_sig_fields[idim] = (float)(dimPoints[idim])[cell_ind[idim]]+ cell_step[idim]*float(j);
             }
             // signal 
             dat_sig_fields[nDims]  =(float)selected_cells[ic]+1;
