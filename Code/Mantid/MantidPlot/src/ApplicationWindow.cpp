@@ -568,7 +568,7 @@ void ApplicationWindow::initGlobalConstants()
   plot3DColors << "#000000";
   plot3DColors << "#ffffff";
 
-  autoSave = true;
+  autoSave = false;
   autoSaveTime = 15;
   d_backup_files = true;
   defaultScriptingLang = "Python";  //Mantid M. Gigg
