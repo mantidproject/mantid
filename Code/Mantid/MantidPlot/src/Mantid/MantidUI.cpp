@@ -440,8 +440,8 @@ void MantidUI::showAlgorithmHistory()
   if(wsptr)
   {
     WorkspaceHistory wsHistory= wsptr->getHistory();
-    std::vector<AlgorithmHistory>algHistory=wsHistory.getAlgorithmHistories();
-    Mantid::Kernel::EnvironmentHistory envHistory=wsHistory.getEnvironmentHistory();
+    const std::vector<AlgorithmHistory> & algHistory=wsHistory.getAlgorithmHistories();
+    const Mantid::Kernel::EnvironmentHistory &envHistory = wsHistory.getEnvironmentHistory();
     //create a  window to display Algorithmic History
     if(!algHistory.empty())
     {

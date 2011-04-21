@@ -1,5 +1,19 @@
 #include "AlgorithmHistoryWindow.h"
-#include "MantidKernel/DateAndTime.h"
+#include "MantidAPI/AlgorithmManager.h"
+
+#include "MantidQtAPI/AlgorithmInputHistory.h"
+
+#include <QLineEdit>
+#include <QLabel>
+#include <QFileDialog>
+#include <QDateTime>
+#include <QFormLayout>
+#include <QMenu>
+#include <QAction>
+#include <QMessageBox>
+#include <QApplication>
+#include <QClipboard>
+#include <QTextStream>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -150,8 +164,8 @@ AlgHistScriptButton::~AlgHistScriptButton()
 {
 }
 
-AlgorithmHistoryWindow::AlgorithmHistoryWindow(ApplicationWindow *w,const std::vector<AlgorithmHistory> &algHist,const EnvironmentHistory& envHist):
-  MantidDialog(w),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL),m_algName(""),m_nVersion(0)
+AlgorithmHistoryWindow::AlgorithmHistoryWindow(QWidget *parent,const std::vector<AlgorithmHistory> &algHist,const EnvironmentHistory& envHist):
+  MantidDialog(parent),m_algHist(algHist),m_histPropWindow(NULL),m_execSumGrpBox(NULL),m_envHistGrpBox(NULL)
 {
   setWindowTitle(tr("Algorithm History"));
   setMinimumHeight(400);
@@ -274,12 +288,12 @@ void AlgorithmHistoryWindow::handleException( const std::exception& e )
 {
   QMessageBox::critical(0,"Mantid-Error",QString::fromStdString(e.what()));
 }
-void AlgorithmHistoryWindow::generateScript(QString &script)
-{	
+QString AlgorithmHistoryWindow::generateScript()
+{
+  QString script;
+
   std::string algParam("");
   std::string tempScript("");
-  std::vector<Property*> algPropUnmngd;
-  std::vector<Property*>::const_iterator itUmnngd;
   std::vector<PropertyHistory>algHistProp;
   IAlgorithm_sptr  ialg_Sptr;
 	
@@ -291,20 +305,18 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
        algHistIter!=m_algHist.end();algHistIter++)
   {
     algHistProp=(*algHistIter).getProperties();
-    std::string name=(*algHistIter).name();
-    int nVersion=(*algHistIter).version();
-    int nexecCount=(*algHistIter).execCount();
+    const std::string algName=(*algHistIter).name();
+    const int nVersion=(*algHistIter).version();
+    const int nexecCount=(*algHistIter).execCount();
     //creating an unmanaged instance of the selected algorithm
     //this is bcoz algorith history is giving dynamically generated workspaces for some 
     //algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
     //To eliminate the dynamically generated parameters unmanged instances created and compared with it.
 						
-    ialg_Sptr= AlgorithmManager::Instance().createUnmanaged(name,nVersion);
+    ialg_Sptr= AlgorithmManager::Instance().createUnmanaged(algName,nVersion);
     if(ialg_Sptr)
     {	
       ialg_Sptr->initialize();
-      algPropUnmngd= ialg_Sptr->getProperties();
-      itUmnngd=algPropUnmngd.begin();
     }
     //iterating through the properties
     for (std::vector<PropertyHistory>::const_iterator propIter = algHistProp.begin();
@@ -312,7 +324,15 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
     { 
       std::string name= (*propIter).name();
       std::string value=(*propIter).value();
-      bool bdefault=(*propIter).isDefault();
+      const unsigned int direction = (*propIter).direction();
+      bool bdefault=propIter->isDefault();
+      bool outputWkspace(false);
+      if( ialg_Sptr->existsProperty(name) && direction == Mantid::Kernel::Direction::Output )
+      {
+	Property *p = ialg_Sptr->getProperty(name);
+	if( dynamic_cast<IWorkspaceProperty*>(p) ) outputWkspace = true;
+      }
+
       //if it's not a default property  add it to 
       //algorithm parameters to form the script
       if(!bdefault)
@@ -320,7 +340,9 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
 	//if the property name obtained by unmanaged instance of the algorithm
 	//is same as the algorithm history property add it to algParam string
 	//to generate script
-	if (name==(*itUmnngd)->name())
+	if( (algName == "Load" || ialg_Sptr->existsProperty(name) ) &&
+	    (direction == Direction::Input || direction == Direction::InOut || outputWkspace) 
+	  )
 	{
 	  std::string sanitisedname=sanitizePropertyName(name);
 	  algParam+=sanitisedname;
@@ -330,18 +352,17 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
 	}
       }
 
-      itUmnngd++;
-      if(itUmnngd==algPropUnmngd.end())
-	break;
     } //end of properties loop
 
     //erasing the last "," from the parameter list
     //as concatenation is done in loop last "," is erasing 
     int nIndex=static_cast<int>(algParam.find_last_of(","));
     if(static_cast<int>(std::string::npos) != nIndex)
+    {
       algParam=algParam.erase(nIndex);
+    }
     //script string
-    tempScript=tempScript+name+"(";
+    tempScript=tempScript+algName+"(";
     tempScript=tempScript+algParam+")";
     tempScript+="\n";
     //string str=tempScript.toStdString();
@@ -349,7 +370,7 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
     ordMap.insert(orderedHistMap::value_type(nexecCount,tempScript));
     tempScript.clear();
     algParam.clear();
-				
+
   }//end of algorithm history for loop
 
   std::map<unsigned int,std::string>::iterator m3_pIter;
@@ -358,6 +379,7 @@ void AlgorithmHistoryWindow::generateScript(QString &script)
     QString qtemp=QString::fromStdString(m3_pIter->second);
     script+=qtemp;
   }
+  return script;
 }
 void AlgorithmHistoryWindow::writeToScriptFile()
 {
@@ -383,8 +405,7 @@ void AlgorithmHistoryWindow::writeToScriptFile()
     return;
   }
 
-  QString script("");
-  generateScript(script);
+  QString script = generateScript();
   QTextStream out(&scriptfile);
   out<<"######################################################################\n";
   out<<"#Python Script Generated by Algorithm History Display \n";
@@ -410,21 +431,7 @@ std::string AlgorithmHistoryWindow::sanitizePropertyName(const std::string & nam
   }
   return arg;
 }
-void AlgorithmHistoryWindow::setAlgorithmName(const QString& algName)
-{
-  m_algName=algName;
-}
-const QString &AlgorithmHistoryWindow::getAlgorithmName() const
-{	return m_algName;
-}
-void AlgorithmHistoryWindow::setAlgorithmVersion(const int& version) 
-{
-  m_nVersion=version;
-}
-const int& AlgorithmHistoryWindow::getAlgorithmVersion()const
-{
-  return m_nVersion;
-}
+
 void AlgorithmHistoryWindow::populateAlgHistoryTreeWidget()
 {	
   std::vector<AlgorithmHistory>::reverse_iterator ralgHistory_Iter=m_algHist.rbegin( );
@@ -488,8 +495,6 @@ void AlgorithmHistoryWindow::updateAll(QString algName,int version,int index)
   }
   updateAlgHistoryProperties(algName,version,pos);
   updateExecSummaryGrpBox(algName,version,pos);
-  setAlgorithmName(algName);
-  setAlgorithmVersion(version);
 	
 }
 void AlgorithmHistoryWindow::updateAlgHistoryProperties(QString algName,int version,int pos)
@@ -531,8 +536,7 @@ void AlgorithmHistoryWindow::copytoClipboard()
   QString comments ("######################################################################\n"
 		    "#Python Script Generated by Algorithm History Display \n"
 		    "######################################################################\n");
-  QString script("");
-  generateScript(script);
+  QString script = generateScript();
   QClipboard *clipboard = QApplication::clipboard();
   if(clipboard)
   {	QString clipboardData=comments+script;
@@ -547,10 +551,10 @@ AlgHistoryProperties::AlgHistoryProperties(QWidget*w,const std::vector<PropertyH
   hList<<"Name"<<"Value"<<"Default?:"<<"Direction"<<"";
   m_histpropTree = new  QTreeWidget(w);
   if(m_histpropTree)
-  {	m_histpropTree->setColumnCount(5);
+  {
+    m_histpropTree->setColumnCount(5);
     m_histpropTree->setSelectionMode(QAbstractItemView::NoSelection);
     m_histpropTree->setHeaderLabels(hList);
-    //m_histpropTree->setGeometry (213,5,385,200);
     m_histpropTree->setGeometry (213,5,350,200);
   }
 }

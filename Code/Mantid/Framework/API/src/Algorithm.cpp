@@ -785,7 +785,7 @@ namespace Mantid
 
       //getting the input workspace group names
       const std::vector<std::string> inputWSNames=ingrpws_sptr->getNames();
-      int nSize=inputWSNames.size();
+      const size_t nSize=inputWSNames.size();
       //size is one if only group header.
       //return if atleast one meber is not there in group to process
       if(nSize<1)
@@ -794,7 +794,7 @@ namespace Mantid
 
       int execTotal=0;
       //removing the header count from the totalsize
-      execTotal=(nSize)*10;
+      execTotal=(static_cast<int>(nSize))*10;
       m_notificationCenter.postNotification(new StartedNotification(this));
 
       IAlgorithm* alg = API::FrameworkManager::Instance().createAlgorithm(this->name() ,"",this->version());

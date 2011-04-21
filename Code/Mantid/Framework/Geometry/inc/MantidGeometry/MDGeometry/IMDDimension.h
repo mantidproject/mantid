@@ -11,23 +11,23 @@
 
 namespace Mantid
 {
-namespace MDEvents
-{
+  namespace MDEvents
+  {
 
-  /** Typedef for the data type to use for coordinate axes.
-   * This could be a float or a double, depending on requirements.
-   * We can change this in order to compare
-   * performance/memory/accuracy requirements.
-   */
-  typedef double CoordType;
-
-  /// Minimum value (large negative number) that a coordinate can take
-  const CoordType CoordType_min = -std::numeric_limits<double>::max();
-
-  /// Maximum value (large positive number) that a coordinate can take
-  const CoordType CoordType_max = std::numeric_limits<double>::max();
-}
-
+    /** Typedef for the data type to use for coordinate axes.
+     * This could be a float or a double, depending on requirements.
+     * We can change this in order to compare
+     * performance/memory/accuracy requirements.
+     */
+    typedef double CoordType;
+    
+    /// Minimum value (large negative number) that a coordinate can take
+    static const CoordType CoordType_min = -std::numeric_limits<double>::max();
+    
+    /// Maximum value (large positive number) that a coordinate can take
+    static const CoordType CoordType_max = std::numeric_limits<double>::max();
+  }
+  
 }
 
 
