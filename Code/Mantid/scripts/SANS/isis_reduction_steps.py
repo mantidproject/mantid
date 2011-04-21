@@ -1768,6 +1768,7 @@ class UserFile(ReductionStep):
             @param reducer: the object that contains all the settings
             @return any errors encountered or ''
         """
+        #a list of the key words this function can read and the functions it calls in response
         keys = ['MON/TIMES', 'M']
         funcs = [self._read_default_back_region, self._read_back_region]
 
@@ -1780,19 +1781,40 @@ class UserFile(ReductionStep):
                 return funcs[i](params, reducer)
 
     def _read_back_region(self, arguments, reducer):
+        """
+            Parses a line of the form BACK/M... to sets the default TOF
+            window for the background region for a specific monitor
+            @param arguments: the contents of the line after the first keyword
+            @param reducer: the object that contains all the settings
+            @return any errors encountered or ''
+        """
         try:
-            parts = arguments.split('/')
+            # assume a line of the form BACK/M1/TIME 
+            parts = arguments.split('/TIME')
+            if len(parts) == 2:
+                times = parts[1].split()
+            else:
+                #try the other possibility, something like, BACK/M2
+                parts =  arguments.split()
+                times = [parts[1], parts[2]]
+
             monitor = int(parts[0])
-            
-            times = parts[1].split()
+
             # parse the words after 'TIME' as first the start time and then the end 
-            reducer.inst.set_TOFs(int(times[1]), int(times[2]), monitor)
+            reducer.inst.set_TOFs(int(times[0]), int(times[1]), monitor)
             return ''
         except Exception, reason:
-            # return a description of any problems and then continue to the next line
+            # return a description of any problems and then continue to read the next line
             return str(reason) + ' on line: '
     
     def _read_default_back_region(self, arguments, reducer):
+        """
+            Parses a line of the form BACK/MON/TIMES form and sets the default TOF
+            window for the background region assumed for the current instrument
+            @param arguments: the contents of the line after the first keyword
+            @param reducer: the object that contains all the settings
+            @return any errors encountered or ''
+        """
         times = arguments.split()
         if len(times) == 2:
             reducer.inst.set_TOFs(int(times[0]), int(times[1]))
