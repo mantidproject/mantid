@@ -475,8 +475,6 @@ add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMENT "Generating python bindings using sip"
 )
 
-message ( "${SIP_EXECUTABLE} -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS} -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w ${SIP_SPEC}" )
-
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
 include_directories ( ${SIP_INCLUDE_DIR} )
 # Needed for sip generated files to find includes in src
