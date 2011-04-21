@@ -114,6 +114,39 @@ public:
     TSM_ASSERT_EQUALS("Image has to be consistent witn MD data points",spReader->getNPix(),spImg->getNMDDPoints());  
 
   }
+   void testMDImageCorrect(){
+         // if the image we've loaded is correct image (the same as we've put there)
+     
+         std::vector<point3D> img_data;
+         std::vector<unsigned int> selection(2,0);
+
+         spImg->getPointData(selection,img_data);
+         double sum(0);
+         for(size_t i=0;i<img_data.size();i++){
+             sum+=img_data[i].S();
+         }
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.65789,img_data[0 ].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.37786,img_data[10].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.0,    img_data[15].S(),1.e-4);
+         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",7.3273,    sum,1.e-4);
+
+         selection[0]=1;
+         selection[1]=1;
+         spImg->getPointData(selection,img_data);
+
+         sum = 0;
+         for(size_t i=0;i<img_data.size();i++){
+             sum+=img_data[i].S();
+         }
+
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,      img_data[ 0].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.25612,img_data[ 1].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.15172,img_data[15].S(),1.e-4);
+
+         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",2.52227, sum,1.e-4);
+
+  
+     }
   void testReadAllPixels(){
     MDPointStructure  horPointInfo;
 	horPointInfo.NumPixCompressionBits=0;
@@ -147,7 +180,7 @@ public:
   }
   void testReadPixelsSelectionAll(){
     // read all 
-    int nCells = this->spImg->getGeometry()->getGeometryExtend();
+    int nCells = this->spImg->get_const_MDGeometry().getGeometryExtend();
 
     selected_cells.resize(nCells);
     pix_buf.resize(spReader->getNConributedPixels()*9*8);
@@ -224,7 +257,7 @@ public:
     size_t n_pix_in_buffer(0);
 
     selected_cells[0]=0;
-    selected_cells[1]=this->spImg->getGeometry()->getGeometryExtend()-1;
+    selected_cells[1]=this->spImg->get_const_MDGeometry().getGeometryExtend()-1;
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));

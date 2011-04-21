@@ -11,9 +11,7 @@
 
     /** Algorithm loads main part of existing multidimensional workspace and initate workspace for future operations
 
-        TODO: when MDDataPoints class is completed this workspace should also load MDDataPoints lookup tables and other 
-        service information, which is not implemented at the moment 
-
+    
         Another prospective feature would be initate a workspace from a swap file (probably not by this algorithm)
 
 
@@ -63,12 +61,14 @@ public:
       virtual int version() const { return 1;}
       /// Algorithm's category for identification overriding a virtual method
       virtual const std::string category() const { return "MD-Algorithms";}
-  
+     /// temporary function, which would set load algorithm in test mode
+	  void set_test_mode(){test_mode=true;}
 private:
     // Overridden Algorithm methods
       void init();
       void exec();
 
+	  bool test_mode;
 
 protected:
    /// logger -> to provide logging, for MD dataset file operations

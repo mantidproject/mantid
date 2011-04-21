@@ -478,6 +478,7 @@ MD_FileHoraceReader::read_pix(MDDataPoints &sqw, bool nothrow)
 	try{
 		if(n_pix_inDataset>~max_npix_in_buf){
 			f_log.information()<<" pixel array of "<<n_pix_inDataset<<" pixels can not be placed in memory on current architectrue\n";
+			sqw.set_file_based();
 			if(nothrow){
 				return false;
 			}else{

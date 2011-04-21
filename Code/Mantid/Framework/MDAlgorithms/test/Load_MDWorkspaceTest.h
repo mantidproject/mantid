@@ -33,7 +33,10 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
         TSM_ASSERT_THROWS("This file should not exist",loader.setPropertyValue("inFilename","../Test/AutoTestData/test_horace_reader.sqw"),std::invalid_argument);
         // and so this
         TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","test_horace_reader.sqw"));
+		// does not load and check actual file and use test data insteadl
+		loader.set_test_mode();
       //  TSM_ASSERT_THROWS_NOTHING("The test file should exist",loader.setPropertyValue("inFilename","fe_demo.sqw"));
+		 TSM_ASSERT_THROWS_NOTHING("Requesting loading all pixels in memory should not throw",loader.setPropertyValue("LoadPixels","1"));
      }
      void testMDWSExec(){
          // does it add it to analysis data service? -- no
@@ -55,43 +58,11 @@ class Load_MDWorkspaceTest :    public CxxTest::TestSuite
          //
          TSM_ASSERT_EQUALS("The workspace should be 4D",4,pLoadedWS->getNumDims());
 
-         TSM_ASSERT_EQUALS("The number of pixels contributed into this workspace should be 1523850",1523850,pLoadedWS->getNPoints());
+         TSM_ASSERT_EQUALS("The number of pixels contributed into test workspace should be 19531253125000",19531253125000,pLoadedWS->getNPoints());
 
-         TSM_ASSERT_EQUALS("The MD image in this workspace has to had 64 data cells",64,pLoadedWS->get_const_MDImage().getDataSize());
+         TSM_ASSERT_EQUALS("The MD image in this workspace has to had 6250000 data cells",50*50*50*50,pLoadedWS->get_const_MDImage().getDataSize());
      }
-     void testMDImageCorrect(){
-         // if the image we've loaded is correct image (the same as we've put there)
-         MDImage &IMG = pLoadedWS->get_const_MDImage();
-         std::vector<point3D> img_data;
-         std::vector<unsigned int> selection(2,0);
-
-         IMG.getPointData(selection,img_data);
-         double sum(0);
-         for(size_t i=0;i<img_data.size();i++){
-             sum+=img_data[i].S();
-         }
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.65789,img_data[0 ].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.37786,img_data[10].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.0,    img_data[15].S(),1.e-4);
-         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",7.3273,    sum,1.e-4);
-
-         selection[0]=1;
-         selection[1]=1;
-         IMG.getPointData(selection,img_data);
-
-         sum = 0;
-         for(size_t i=0;i<img_data.size();i++){
-             sum+=img_data[i].S();
-         }
-
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,      img_data[ 0].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.25612,img_data[ 1].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.15172,img_data[15].S(),1.e-4);
-
-         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",2.52227, sum,1.e-4);
-
-  
-     }
+    
 
 ~Load_MDWorkspaceTest(){
 }
