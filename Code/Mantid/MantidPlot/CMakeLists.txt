@@ -421,8 +421,7 @@ find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
-set ( SIP_GEN_SRC sipqtipart0.cpp )
-set ( SIP_SRC_WRAP src/sipqti.cpp )
+set ( SIP_SRC sipqtipart0.cpp )
 
 # We need to manually add all the headers that are in qti.sip
 # so that the dependencies are known to CMake
@@ -467,7 +466,7 @@ set ( SIP_HDRS src/MdiSubWindow.h
 
 set( SRC_UNITY_IGNORE_FILES )
 
-add_custom_command ( OUTPUT ${SIP_GEN_SRC}
+add_custom_command ( OUTPUT ${SIP_SRC}
                      COMMAND ${SIP_EXECUTABLE}
                           -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS}
                           -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w 
@@ -475,6 +474,8 @@ add_custom_command ( OUTPUT ${SIP_GEN_SRC}
                      DEPENDS src/qti.sip ${SIP_HDRS}
                      COMMENT "Generating python bindings using sip"
 )
+
+message ( "${SIP_EXECUTABLE} -I ${PYQT4_SIP_DIR} ${PYQT4_SIP_FLAGS} -c ${CMAKE_CURRENT_BINARY_DIR} -j1 -w ${SIP_SPEC}" )
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
 include_directories ( ${SIP_INCLUDE_DIR} )
@@ -688,7 +689,7 @@ add_definitions ( -DQSCINTILLA_DLL )     # Will only have an effect on Windows (
 
 include_directories ( src )
 
-set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC_WRAP} )
+set ( SRC_FILES ${QTIPLOT_SRCS} ${MANTID_SRCS} ${SIP_SRC} )
 set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 
 ###########################################################################

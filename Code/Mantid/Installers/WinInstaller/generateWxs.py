@@ -460,7 +460,14 @@ addFileV('PyEXE', 'Py27.exe','python.exe',LIBDIR + '/Python27/python.exe',Mantid
 addFileV('PyDLL', 'Py27.dll','python27.dll',LIBDIR + '/Python27/python27.dll',MantidDlls)
 # Our Framework file
 addFileV('MtdFramework_py', 'MFWork.py', 'MantidFramework.py', FRAMEWORKDIR + '/PythonAPI/MantidFramework.py', MantidDlls)
- 
+
+# Our old installation would have left a PyQt4 directory lying around, it must be removed or the new bundled python will
+# be confusd
+addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
+addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c rmdir /S /Q "[INSTALLDIR]\\bin\\PyQt4"'})
+addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
+addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
+
 #------------- Environment settings ---------------------- 
 # MantidPATH to point to the bin directory
 addTo(MantidDlls,'Environment',{'Id':'SetMtdPath','Name':'MANTIDPATH','Action':'set','Part':'all','Value':'[INSTALLDIR]\\bin'})
