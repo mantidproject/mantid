@@ -986,6 +986,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         and for LOQ runs also the prompt peak. The input workspace is copied
         and accessible later as prenomed 
     """
+    NORMALISATION_SPEC_NUMBER = 1
+    NORMALISATION_SPEC_INDEX = 0
     def __init__(self, spectrum_number=None, raw_ws=None):
         if not spectrum_number is None:
             index_num = spectrum_number - 1
@@ -1019,10 +1021,11 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
                 Interpolation="Linear")
         
         # Remove flat background
-        if reducer.BACKMON_START != None and reducer.BACKMON_END != None:
-            FlatBackground(norm_ws, norm_ws, StartX = reducer.BACKMON_START,
-                EndX = reducer.BACKMON_END, WorkspaceIndexList = '0',
-                Mode='Mean')
+        TOF_start, TOF_end = reducer.inst.get_TOFs(
+                                    self.NORMALISATION_SPEC_NUMBER)
+        if TOF_start and TOF_end:
+            FlatBackground(norm_ws, norm_ws, StartX=TOF_start, EndX=TOF_end,
+                WorkspaceIndexList=self.NORMALISATION_SPEC_INDEX, Mode='Mean')
 
         #perform the same conversion on the monitor spectrum as was applied to the workspace but with a possibly different rebin
         if reducer.instrument.is_interpolating_norm():
@@ -1120,15 +1123,13 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     def set_loader(self, loader):
         self.loader = loader
         
-    def setup_wksp(self, inputWS, inst, backmon_start, backmon_end, wavbining, pre_monitor, post_monitor):
+    def setup_wksp(self, inputWS, inst, wavbining, pre_monitor, post_monitor):
         """
             Creates a new workspace removing any background from the monitor spectra, converting units
             and re-bins. If the instrument is LOQ it zeros values between the x-values 19900 and 20500
             This method doesn't affect self. 
             @param inputWS: contains the monitor spectra
             @param inst: the selected instrument
-            @param backmon_start: the start of the region that we'll assume is just background
-            @param backmon_end: the end of the background region
             @param wavbinning: the re-bin string to use after convert units
             @param pre_monitor: DETECTOR ID of the incident monitor
             @param post_monitor: DETECTOR ID of the transmission monitor
@@ -1150,18 +1151,12 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')
 
         for spectra_number in [pre_monitor, post_monitor]:
-            back_start = backmon_start
-            back_end = backmon_end
-            if spectra_number == 4:
-                if inst.monitor_4_back['start']:
-                    back_start = inst.monitor_4_back['start']
-                if inst.monitor_4_back['end']:
-                    back_end = inst.monitor_4_back['end']
-            if back_start and backmon_end:
+            back_start, back_end = inst.get_TOFs(spectra_number)
+            if back_start and back_end:
                 index = spectra_number - spectrum1
-                FlatBackground(tmpWS, tmpWS, StartX=back_start, EndX=back_end, WorkspaceIndexList=index, Mode='Mean')
-        
-        
+                FlatBackground(tmpWS, tmpWS, StartX=back_start, EndX=back_end,
+                               WorkspaceIndexList=index, Mode='Mean')
+
         ConvertUnits(tmpWS, tmpWS,"Wavelength")
         
         if self.interpolate:
@@ -1263,11 +1258,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
 
         #set up the input workspaces
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
-            reducer.BACKMON_START, reducer.BACKMON_END, wavbin, 
-            pre_sample, post_sample)
+            wavbin, pre_sample, post_sample)
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
-            reducer.BACKMON_START, reducer.BACKMON_END, wavbin,
-            pre_sample, post_sample)
+            wavbin, pre_sample, post_sample)
         fittedtransws, unfittedtransws = self.get_wksp_names(
                             trans_raw, translambda_min, translambda_max)
         
@@ -1374,7 +1367,7 @@ class UserFile(ReductionStep):
         self.executed = False
 
         self.key_functions = {
-            'BACK/M4/TIME' : self._read_backs,
+            'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line}
 
     def execute(self, reducer, workspace=None):
@@ -1466,16 +1459,6 @@ class UserFile(ReductionStep):
                 _issueWarning("Gravity flag incorrectly specified, disabling gravity correction")
                 reducer.to_Q.set_gravity(False, override=False)
         
-        elif upper_line.startswith('BACK/MON/TIMES'):
-            tokens = upper_line.split()
-            if len(tokens) == 3:
-                reducer.BACKMON_START = int(tokens[1])
-                reducer.BACKMON_END = int(tokens[2])
-            else:
-                _issueWarning('Incorrectly formatted BACK/MON/TIMES line, not running FlatBackground.')
-                reducer.BACKMON_START = None
-                reducer.BACKMON_END = None
-        
         elif upper_line.startswith('FIT/TRANS/'):
             params = upper_line[10:].split()
             nparams = len(params)
@@ -1514,9 +1497,6 @@ class UserFile(ReductionStep):
         reducer.QXY = None
         reducer.DQY = None
          
-        reducer.BACKMON_END = None
-        reducer.BACKMON_START = None
-
         reducer._corr_and_scale.rescale = 100.0
 
     # Read a limit line of a mask file
@@ -1686,11 +1666,45 @@ class UserFile(ReductionStep):
         else:
             raise NotImplemented('Detector correction on "'+det_axis+'" is not supported')
 
-    def _read_backs(self, arguments, reducer):
+    def _read_back_line(self, arguments, reducer):
+        """
+            Parses a line from the settings file
+            @param arguments: the contents of the line after the first keyword
+            @param reducer: the object that contains all the settings
+            @return any errors encountered or ''
+        """
+        keys = ['MON/TIMES', 'M']
+        funcs = [self._read_default_back_region, self._read_back_region]
+
+        #go through the list of recognised commands
+        for i in range(0, len(keys)):
+            if arguments.startswith(keys[i]):
+                #remove the keyword as it has already been parsed
+                params = arguments[len(keys[i]):]
+                #call the handling function for that keyword returning any error
+                return funcs[i](params, reducer)
+
+    def _read_back_region(self, arguments, reducer):
+        try:
+            parts = arguments.split('/')
+            monitor = int(parts[0])
+            
+            times = parts[1].split()
+            # parse the words after 'TIME' as first the start time and then the end 
+            reducer.inst.set_TOFs(int(times[1]), int(times[2]), monitor)
+            return ''
+        except Exception, reason:
+            # return a description of any problems and then continue to the next line
+            return str(reason) + ' on line: '
+    
+    def _read_default_back_region(self, arguments, reducer):
         times = arguments.split()
-        reducer.instrument.monitor_4_back['start'] = int(times[0])
-        reducer.instrument.monitor_4_back['end'] = int(times[1])
-        
+        if len(times) == 2:
+            reducer.inst.set_TOFs(int(times[0]), int(times[1]))
+        else:
+            reducer.inst.set_TOFs(None, None)
+            return 'Only monitor specific backgrounds will be applied, no default is set due to incorrectly formatted background line:'
+
     def _read_trans_line(self, arguments, reducer):
         if arguments.startswith('TRANSPEC'):
             arguments = arguments.split('TRANSPEC')[1]
@@ -1718,7 +1732,7 @@ class UserFile(ReductionStep):
         # Scaling values
         reducer._corr_and_scale.rescale = 100.  # percent
         
-        reducer.BACKMON_START = reducer.BACKMON_END = None
+        reducer.inst.reset_TOFs()
 
 class GetOutputName(ReductionStep):
     def __init__(self):

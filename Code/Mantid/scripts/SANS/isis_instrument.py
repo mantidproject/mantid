@@ -292,8 +292,12 @@ class ISISInstrument(instrument.Instrument):
         #remove this function
         self._del_incidient_set = False
         
-        #the TOF regions of the monitors assumed to be background
-        self.monitor_4_back = {'start' : None, 'end' : None}
+        #it is possible to set the TOF regions that is assumed to be background for each monitors 
+        self._back_ground = {}
+        # the default start region, used for any monitors that a specific one wasn't set for
+        self._back_start = None
+        # default end region
+        self._back_end = None 
 
 
     def get_incident_mon(self):
@@ -392,9 +396,47 @@ class ISISInstrument(instrument.Instrument):
         det = self.getDetector(det_name)
         return det.correction_file
 
+    def get_TOFs(self, monitor):
+        """
+            Gets the start and end time of flights for the region assumed to contain
+            only background counts for this instrument
+            @param monitor: spectrum number of the monitor's spectrum
+            @return: the start time, the end time
+        """
+        monitor = int(monitor)
+        if self._back_ground.has_key(monitor):
+            return self._back_ground[int(monitor)]['start'], \
+                self._back_ground[int(monitor)]['end']
+        else:
+            return self._back_start, self._back_end 
         
+    def set_TOFs(self, start, end, monitor=None):
+        """
+            Defines the start and end time of flights for the assumed background region
+            for this instrument
+            @param: start defines the start of the background region
+            @param: end defines the end
+            @param monitor: spectrum number of the monitor's spectrum, if none given affect the default
+        """
+        start = float(start)
+        end = float(end)
+        
+        if monitor:
+            self._back_ground[int(monitor)] = { 'start' : start, 'end' : end }
+        else:
+            self._back_start = start
+            self._back_end = end 
+
+    def reset_TOFs(self):
+        self._back_ground = {}
+        self._back_start = None
+        self._back_end = None
+
+
 class LOQ(ISISInstrument):
-    
+    """
+        Contains all the LOQ specific data and functions
+    """
     _NAME = 'LOQ'
     #minimum wavelength of neutrons assumed to be measurable by this instrument
     WAV_RANGE_MIN = 2.2
