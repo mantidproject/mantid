@@ -12,6 +12,18 @@ from mantidsimple import *
 import os
 import copy
 
+import sys
+
+################################################################################
+# Avoid a bug with deepcopy in python 2.6, details and workaround here:
+# http://bugs.python.org/issue1515
+if sys.version_info[0] == 2 and sys.version_info[1] == 6:
+    import types
+    def _deepcopy_method(x, memo):
+        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
+################################################################################
+
 ## Version number
 __version__ = '0.0'
 

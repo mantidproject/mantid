@@ -31,6 +31,17 @@
 from ISISCommandInterface import *
 from mantidsimple import *
 import copy
+import sys
+
+################################################################################
+# Avoid a bug with deepcopy in python 2.6, details and workaround here:
+# http://bugs.python.org/issue1515
+if sys.version_info[0] == 2 and sys.version_info[1] == 6:
+    import types
+    def _deepcopy_method(x, memo):
+        return type(x)(x.im_func, copy.deepcopy(x.im_self, memo), x.im_class)
+    copy._deepcopy_dispatch[types.MethodType] = _deepcopy_method
+################################################################################
 
 # Add a CSV line to the input data store
 def addRunToStore(parts, run_store):
@@ -90,6 +101,7 @@ def BatchReduce(filename, format, full_trans_wav=True, plotresults=False, saveAl
 
     if reducer:
         ReductionSingleton().replace(reducer)
+
     #first copy the user settings incase running the reductionsteps can change it
     settings = copy.deepcopy(ReductionSingleton().reference())
 
