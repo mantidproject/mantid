@@ -68,9 +68,9 @@ namespace Mantid
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
       WorkspaceProperty( const std::string &name, const std::string &wsName, const unsigned int direction,
-        Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
-      Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
-      m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(false)
+          Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+        Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
+        m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(false)
       {
       }
 
@@ -80,13 +80,13 @@ namespace Mantid
       *  @param wsName :: The name of the workspace
       *  @param direction :: Whether this is a Direction::Input, Direction::Output or Direction::InOut (Input & Output) workspace
       *  @param optional :: A boolean indicating whether the property is mandatory or not. Only matters 
-      * for input properties
+      *                     for input properties
+      *  @param validator :: The (optional) validator to use for this property
       *  @throw std::out_of_range if the direction argument is not a member of the Direction enum (i.e. 0-2)
       */
-      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction,
-                                 bool optional) :
-        Kernel::PropertyWithValue<boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ),
-              new Kernel::NullValidator<boost::shared_ptr<TYPE> >, direction),
+      explicit WorkspaceProperty(const std::string &name, const std::string &wsName, const unsigned int direction, bool optional,
+          Kernel::IValidator<boost::shared_ptr<TYPE> > *validator = new Kernel::NullValidator<boost::shared_ptr<TYPE> > ) :
+        Kernel::PropertyWithValue <boost::shared_ptr<TYPE> >( name, boost::shared_ptr<TYPE>( ), validator, direction ),
         m_workspaceName( wsName ), m_initialWSName( wsName ), m_optional(optional)
       {
       }

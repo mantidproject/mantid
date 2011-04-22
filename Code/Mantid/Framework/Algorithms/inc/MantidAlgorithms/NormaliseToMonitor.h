@@ -26,24 +26,25 @@ namespace Algorithms
 
     Required Properties:
     <UL>
-    <LI> InputWorkspace   - The name of the input Workspace2D. Must be a histogram
+    <LI> InputWorkspace   - The name of the input workspace. Must be a histogram
                             and not a distribution.</LI>
-    <LI> OutputWorkspace  - The name of the output Workspace2D. </LI>
-    <LI> MonitorSpectrum  - The spectrum number for the monitor to normalise with </LI>
-    <LI> MonitorWorkspace - A workspace containing the monitor spectrum </LI>
+    <LI> OutputWorkspace  - The name of the output workspace. </LI>
+    <LI> MonitorSpectrum  - The spectrum number for the monitor to normalise with. </LI>
+    <LI> MonitorWorkspace - A workspace containing the monitor spectrum. </LI>
     </UL>
 
     Optional Properties:
     These should be set to normalise by an integrated monitor count over the range given
     <UL>
-    <LI> IntegrationRangeMin - The lower bound of the range to use </LI>
-    <LI> IntegrationRangeMax - The upper bound of the range to use </LI>
+    <LI> IntegrationRangeMin - The lower bound of the range to use. </LI>
+    <LI> IntegrationRangeMax - The upper bound of the range to use. </LI>
+    <LI> IncludePartialBins  - Scales counts in end bins if min/max not on bin boundary. </LI>
     </UL>
 
     @author Russell Taylor, Tessella Support Services plc
     @date 30/09/2008
 
-    Copyright &copy; 2008-9 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2008-11 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -76,15 +77,16 @@ public:
   virtual const std::string category() const { return "General";}
 
 private:
-  /// Sets documentation strings for this algorithm
   virtual void initDocs();
   // Overridden Algorithm methods
   void init();
   void exec();
 
   void checkProperties(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace);
+  API::MatrixWorkspace_sptr getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace);
   API::MatrixWorkspace_sptr extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const int index);
-  bool setIntegrationProps(API::MatrixWorkspace_const_sptr inputWorkspace);
+  bool setIntegrationProps();
 
   void normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace, 
                                   API::MatrixWorkspace_sptr& outputWorkspace);

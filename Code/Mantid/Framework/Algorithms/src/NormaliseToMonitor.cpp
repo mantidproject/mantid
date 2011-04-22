@@ -3,7 +3,6 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/NormaliseToMonitor.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/SpectraAxis.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidKernel/VectorHelper.h"
@@ -18,16 +17,7 @@ namespace Algorithms
 // Register with the algorithm factory
 DECLARE_ALGORITHM(NormaliseToMonitor)
 
-/// Sets documentation strings for this algorithm
-void NormaliseToMonitor::initDocs()
-{
-  this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum. ");
-  this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
-}
-
-
 using namespace Kernel;
-using namespace DataObjects;
 using namespace API;
 
 /// Default constructor
@@ -40,6 +30,13 @@ NormaliseToMonitor::NormaliseToMonitor() :
 /// Destructor
 NormaliseToMonitor::~NormaliseToMonitor() {}
 
+/// Sets documentation strings for this algorithm
+void NormaliseToMonitor::initDocs()
+{
+  this->setWikiSummary("Normalises a 2D workspace by a specified monitor spectrum. ");
+  this->setOptionalMessage("Normalises a 2D workspace by a specified monitor spectrum.");
+}
+
 void NormaliseToMonitor::init()
 {
   CompositeValidator<> *val = new CompositeValidator<>;
@@ -47,32 +44,24 @@ void NormaliseToMonitor::init()
   val->add(new RawCountValidator<>);
   // It's been said that we should restrict the unit to being wavelength, but I'm not sure about that...
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,val),
-    "Name of the input workspace2D");
+    "Name of the input workspace. Must be a non-distribution histogram.");
   declareProperty(new WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "Name to use for the output workspace");
 
   // Can either set a spectrum within the workspace to be the monitor spectrum.....
   declareProperty("MonitorSpectrum",-1,
     "The spectrum number of the monitor spectrum within the InputWorkspace");
-  // ...or provide it in a separate workspace
-  std::set<std::string> allowedValues = AnalysisDataService::Instance().getObjectNames();
-  // Empty is allowed because this is an optional property
-  allowedValues.insert("");
-  // Note that this is a text property to enable it to be optional
-  declareProperty("MonitorWorkspace","",new ListValidator(allowedValues),
+  // ...or provide it in a separate workspace (note: optional WorkspaceProperty)
+  declareProperty(new WorkspaceProperty<>("MonitorWorkspace","",Direction::Input,true,val->clone()),
     "A single-spectrum workspace containing the monitor spectrum");
 
-  //If users set either of these optional properties two things happen
-  //1) normalisation is by an integrated count instead of bin-by-bin
-  //2) if the value is within the range of X's in the spectrum it crops the spectrum
+  // If users set either of these optional properties two things happen
+  // 1) normalisation is by an integrated count instead of bin-by-bin
+  // 2) if the value is within the range of X's in the spectrum it crops the spectrum
   declareProperty( "IntegrationRangeMin", EMPTY_DBL(),
-    "Entering a value here will cause normalisation by integrated count\n"
-    "mode to be used and crop the spectrum removing any of the spectrum at\n"
-    "lower X values" );
+    "If set, normalisation will be by integrated count from this minimum x value");
   declareProperty( "IntegrationRangeMax", EMPTY_DBL(),
-    "Entering a value here will cause normalisation by integrated count\n"
-    "mode to be used and crop the spectrum removing any of the spectrum at\n"
-    "higher X values");
+    "If set, normalisation will be by integrated count up to this maximum x value");
   declareProperty("IncludePartialBins", false, 
     "If true and an integration range is set then partial bins at either \n"
     "end of the integration range are also included");
@@ -82,13 +71,13 @@ void NormaliseToMonitor::exec()
 {
   // Get the input workspace
   const MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
   // First check the inputs, throws std::runtime_error if a property is invalid
   this->checkProperties(inputWS);
+
   // See if the normalisation with integration properties are set,
   // throws std::runtime_error if a property is invalid
-  const bool integrate = this->setIntegrationProps(inputWS);
-
-  MatrixWorkspace_sptr outputWS = getProperty("OutputWorkspace");
+  const bool integrate = this->setIntegrationProps();
 
   if ( integrate )
   {
@@ -103,8 +92,8 @@ void NormaliseToMonitor::exec()
 }
 
 /** Makes sure that the input properties are set correctly
- *  @param inputWorkspace :: the input workspace
- *  @throw std::runtime_error If a property is invalid
+ *  @param inputWorkspace The input workspace
+ *  @throw std::runtime_error If the properties are invalid
  */
 void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspace)
 {
@@ -119,86 +108,19 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
   if ( !inWS && !sepWS )
   {
     const std::string mess("Neither the MonitorSpectrum nor the MonitorWorkspace property has been set");
-    g_log.error(mess);
     throw std::runtime_error(mess);
   }
   if ( inWS && sepWS )
   {
     const std::string mess("Only one of the MonitorSpectrum and MonitorWorkspace properties should be set");
-    g_log.error(mess);
     throw std::runtime_error(mess);
   }
 
-  // Do a check for common binning
+  // Do a check for common binning and store
   m_commonBins = API::WorkspaceHelpers::commonBoundaries(inputWorkspace);
 
-  if (inWS)
-  {
-    // Get hold of the monitor spectrum
-    const int monitorSpec = getProperty("MonitorSpectrum");
-    if (monitorSpec < 1)
-    {
-      g_log.error("MonitorSpectrum must be at least 1");
-    }
-    SpectraAxis::spec2index_map specs;
-    const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWorkspace->getAxis(1));
-    if (axis)
-    {
-      axis->getSpectraIndexMap(specs);
-      const int monitorIndex = specs[monitorSpec];
-      m_monitor = this->extractMonitorSpectrum(inputWorkspace,monitorIndex);
-    }
-  }
-  else
-  { 
-    // Get the workspace from the ADS. Will throw if it's not there.
-    MatrixWorkspace_sptr monitorWS = boost::dynamic_pointer_cast<MatrixWorkspace>
-      (AnalysisDataService::Instance().retrieve(getPropertyValue("MonitorWorkspace")));
-    // Check it's the right type
-    if (!monitorWS)
-    {
-      g_log.error("MonitorWorkspace must be a MatrixWorkspace");
-      throw std::runtime_error("MonitorWorkspace must be a MatrixWorkspace");
-    }
-    // Check that it's a single spectrum workspace
-    if ( monitorWS->getNumberHistograms() != 1 )
-    {
-      g_log.error("The MonitorWorkspace must contain only 1 spectrum");
-      throw std::runtime_error("The MonitorWorkspace must contain only 1 spectrum");
-    }
-    // Check it's not a distribution
-    if ( monitorWS->isDistribution() )
-    {
-      g_log.error("The MonitorWorkspace must not be a distribution");
-      throw std::runtime_error("The MonitorWorkspace must not be a distribution");
-    }
-    // Check that it contains histogram data
-    if ( !monitorWS->isHistogramData() )
-    {
-      g_log.error("The MonitorWorkspace must contain histogram data");
-      throw std::runtime_error("The MonitorWorkspace must contain histogram data");
-    }
-    // Check that the two workspace come from the same instrument
-    if ( monitorWS->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
-    {
-      g_log.error("The Input and Monitor workspaces must come from the same instrument");
-      throw std::runtime_error("The Input and Monitor workspaces must come from the same instrument");
-    }
-    // Check that they're in the same units
-    if ( monitorWS->getAxis(0)->unit() != inputWorkspace->getAxis(0)->unit() )
-    {
-      g_log.error("The Input and Monitor workspaces must have the same unit");
-      throw std::runtime_error("The Input and Monitor workspaces must have the same unit");
-    }
-
-    // In this case we need to test whether the bins in the monitor workspace match
-    m_commonBins = (m_commonBins && 
-                    API::WorkspaceHelpers::matchingBins(inputWorkspace,monitorWS,true) );
-
-    // If the workspace passes all these tests, then make a local copy because this will
-    // get changed
-    m_monitor = this->extractMonitorSpectrum(monitorWS,0);
-  }
+  // Check the monitor spectrum or workspace and extract into new workspace
+  m_monitor = inWS ? this->getInWSMonitorSpectrum(inputWorkspace) : this->getMonitorWorkspace(inputWorkspace);
 
   // Check that the 'monitor' spectrum actually relates to a monitor - warn if not
   try {
@@ -213,7 +135,67 @@ void NormaliseToMonitor::checkProperties(API::MatrixWorkspace_sptr inputWorkspac
                   "the instrument is not fully specified.\n"
                   "Continuing with normalisation regardless.");
   }
+}
 
+/** Checks and retrieves the monitor spectrum out of the input workspace
+ *  @param inputWorkspace The input workspace
+ *  @returns A workspace containing the monitor spectrum only
+ *  @throw std::runtime_error If the properties are invalid
+ */
+API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::MatrixWorkspace_sptr inputWorkspace)
+{
+  // Get hold of the monitor spectrum
+  const int monitorSpec = getProperty("MonitorSpectrum");
+  if (monitorSpec < 0)
+  {
+    throw std::runtime_error("MonitorSpectrum must not be negative");
+  }
+  SpectraAxis::spec2index_map specs;
+  const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWorkspace->getAxis(1));
+  if ( ! axis)
+  {
+    throw std::runtime_error("Cannot retrieve monitor spectrum - spectrum numbers no attached to workspace");
+  }
+  axis->getSpectraIndexMap(specs);
+  if ( ! specs.count(monitorSpec) )
+  {
+    throw std::runtime_error("Input workspace does not contain spectrum number given for MonitorSpectrum");
+  }
+
+  return this->extractMonitorSpectrum(inputWorkspace,specs[monitorSpec]);
+}
+
+/** Checks and retrieves the monitor spectrum out of the input workspace
+ *  @param inputWorkspace The input workspace
+ *  @returns A workspace containing the monitor spectrum only
+ *  @throw std::runtime_error If the properties are invalid
+ */
+API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWorkspace_sptr inputWorkspace)
+{
+  // Get the workspace from the ADS. Will throw if it's not there.
+  MatrixWorkspace_sptr monitorWS = getProperty("MonitorWorkspace");
+  // Check that it's a single spectrum workspace
+  if ( monitorWS->getNumberHistograms() != 1 )
+  {
+    throw std::runtime_error("The MonitorWorkspace must contain only 1 spectrum");
+  }
+  // Check that the two workspace come from the same instrument
+  if ( monitorWS->getBaseInstrument() != inputWorkspace->getBaseInstrument() )
+  {
+    throw std::runtime_error("The Input and Monitor workspaces must come from the same instrument");
+  }
+  // Check that they're in the same units
+  if ( monitorWS->getAxis(0)->unit() != inputWorkspace->getAxis(0)->unit() )
+  {
+    throw std::runtime_error("The Input and Monitor workspaces must have the same unit");
+  }
+
+  // In this case we need to test whether the bins in the monitor workspace match
+  m_commonBins = (m_commonBins &&
+                  API::WorkspaceHelpers::matchingBins(inputWorkspace,monitorWS,true) );
+
+  // If the workspace passes all these tests, make a local copy because it will get changed
+  return this->extractMonitorSpectrum(monitorWS,0);
 }
 
 /** Pulls the monitor spectrum out of a larger workspace
@@ -227,58 +209,39 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::Matrix
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
 
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
-    throw std::runtime_error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
-  }
+  childAlg->executeAsSubAlg();
 
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");
 }
 
 /** Sets the maximum and minimum X values of the monitor spectrum to use for integration
- *  @param inputWorkspace :: A constant shared pointer to the input workspace
  *  @return True if the maximum or minimum values are set
  *  @throw std::runtime_error If the minimum was set higher than the maximum
  */
-bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inputWorkspace)
+bool NormaliseToMonitor::setIntegrationProps()
 {
-  (void) inputWorkspace; //Avoid compiler warning
-  //get the values if set the default values of the m_inter*s and the properties are EMPTY_DBL()
   m_integrationMin = getProperty("IntegrationRangeMin");
   m_integrationMax = getProperty("IntegrationRangeMax");
 
-  //check if neither of these have been changed using the function in the MandatoryValidator
+  // Check if neither of these have been changed from their defaults (EMPTY_DBL())
   if ( isEmpty(m_integrationMin) && isEmpty(m_integrationMax) )
   {
-    //nothing has been set so the user doesn't want to use integration so let's move on
+    // Nothing has been set so the user doesn't want to use integration so let's move on
     return false;
   }
-  //yes integration is going to be used
+  // Yes integration is going to be used...
 
-  //There is only one set of values that is unacceptable let's check for that
+  // There is only one set of values that is unacceptable let's check for that
   if ( !isEmpty(m_integrationMin) && !isEmpty(m_integrationMax) )
   {
     if ( m_integrationMin > m_integrationMax )
     {
-      g_log.error("Integration minimum set to larger value than maximum!");
       throw std::runtime_error("Integration minimum set to larger value than maximum!");
     }
   }
 
-  //now check the end X values are within the X value range of the workspace
+  // Now check the end X values are within the X value range of the workspace
   if ( isEmpty(m_integrationMin) || m_integrationMin < m_monitor->readX(0).front() )
   {
     g_log.warning() << "Integration range minimum set to workspace min: " << m_integrationMin << std::endl;
@@ -290,13 +253,13 @@ bool NormaliseToMonitor::setIntegrationProps(API::MatrixWorkspace_const_sptr inp
     m_integrationMax = m_monitor->readX(0).back();
   }
   
-  //Return indicating that these properties should be used
+  // Return indicating that these properties should be used
   return true;
 }
 
 /** Carries out a normalisation based on the integrated count of the monitor over a range
- *  @param inputWorkspace :: A pointer to the input workspace
- *  @param outputWorkspace :: A pointer to the result workspace
+ *  @param inputWorkspace The input workspace
+ *  @param outputWorkspace The result workspace
  */
 void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr inputWorkspace,
                                                     API::MatrixWorkspace_sptr& outputWorkspace)
@@ -306,14 +269,10 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   integrate->setProperty<MatrixWorkspace_sptr>("InputWorkspace", m_monitor);
   integrate->setProperty("RangeLower",m_integrationMin);
   integrate->setProperty("RangeUpper",m_integrationMax);
-  const bool incPartBins = getProperty("IncludePartialBins");
-  integrate->setProperty("IncludePartialBins",incPartBins);
-  try {
-    integrate->execute();
-  } catch (std::runtime_error&) {
-    g_log.error("Unable to successfully run Integration sub-algorithm");
-    throw;
-  }
+  integrate->setProperty<bool>("IncludePartialBins",getProperty("IncludePartialBins"));
+
+  integrate->executeAsSubAlg();
+
   // Get back the result
   m_monitor = integrate->getProperty("OutputWorkspace");
 
@@ -322,19 +281,16 @@ void NormaliseToMonitor::normaliseByIntegratedCount(API::MatrixWorkspace_sptr in
   divide->setProperty<MatrixWorkspace_sptr>("LHSWorkspace", inputWorkspace);
   divide->setProperty<MatrixWorkspace_sptr>("RHSWorkspace", m_monitor);
   divide->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputWorkspace);
-  try {
-    divide->execute();
-  } catch (std::runtime_error&) {
-    g_log.error("Unable to successfully run Divide sub-algorithm");
-    throw;
-  }
+
+  divide->executeAsSubAlg();
+
   // Get back the result
   outputWorkspace = divide->getProperty("OutputWorkspace");
 }
 
 /** Carries out the bin-by-bin normalisation
- *  @param inputWorkspace :: The input workspace
- *  @param outputWorkspace :: The output workspace
+ *  @param inputWorkspace The input workspace
+ *  @param outputWorkspace The result workspace
  */
 void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorkspace,
                                            API::MatrixWorkspace_sptr& outputWorkspace)
@@ -342,21 +298,6 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   // Only create output workspace if different to input one
   if (outputWorkspace != inputWorkspace ) 
     outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
-
-//  // ---- For event workspaces, the Divide operator will do the work. -----
-//  if (boost::dynamic_pointer_cast<const EventWorkspace>(inputWorkspace))
-//  {
-//    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
-//    {
-//      outputWorkspace /= m_monitor;
-//    }
-//    else
-//    {
-//      //outputWorkspace = inputWorkspace / boost::dynamic_pointer_cast<const MatrixWorkspace>(m_monitor);
-//      outputWorkspace = inputWorkspace / m_monitor;
-//    }
-//    return;
-//  }
 
   // Get hold of the monitor spectrum
   const MantidVec& monX = m_monitor->readX(0);
@@ -372,7 +313,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   PARALLEL_FOR3(inputWorkspace,outputWorkspace,m_monitor)
   for (int i = 0; i < numHists; ++i)
   {
-		PARALLEL_START_INTERUPT_REGION
+    PARALLEL_START_INTERUPT_REGION
     prog.report();
 
     const MantidVec& X = inputWorkspace->readX(i);
@@ -418,16 +359,16 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
     } // end loop over current spectrum
 
     if (!m_commonBins) { delete Y; delete E; }
-		PARALLEL_END_INTERUPT_REGION
+    PARALLEL_END_INTERUPT_REGION
   } // end loop over spectra
-	PARALLEL_CHECK_INTERUPT_REGION
+  PARALLEL_CHECK_INTERUPT_REGION
 }
 
 /** Calculates the overall normalisation factor.
  *  This multiplies result by (bin width * sum of monitor counts) / total frame width.
- *  @param X :: The X vector
- *  @param Y :: The data vector
- *  @param E :: The error vector
+ *  @param X The X vector
+ *  @param Y The data vector
+ *  @param E The error vector
  */
 void NormaliseToMonitor::normalisationFactor(const MantidVec& X, MantidVec* Y, MantidVec* E)
 {
