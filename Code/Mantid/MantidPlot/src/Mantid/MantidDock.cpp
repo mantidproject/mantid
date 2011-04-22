@@ -22,6 +22,7 @@
 #include <QMutexLocker>
 #include <QProgressBar>
 #include <QSignalMapper>
+#include <QtGui>
 
 #include <map>
 #include <iostream>
@@ -1087,6 +1088,8 @@ QDockWidget(w),m_progressBar(NULL),m_algID(),m_mantidUI(mui)
   QPushButton *execButton = new QPushButton("Execute");
   m_findAlg = new FindAlgComboBox;
   m_findAlg->setEditable(true);
+  m_findAlg->completer()->setCompletionMode(QCompleter::PopupCompletion);
+
   connect(m_findAlg,SIGNAL(editTextChanged(const QString&)),this,SLOT(findAlgTextChanged(const QString&)));
   connect(m_findAlg,SIGNAL(enterPressed()),m_mantidUI,SLOT(executeAlgorithm()));
   connect(execButton,SIGNAL(clicked()),m_mantidUI,SLOT(executeAlgorithm()));
