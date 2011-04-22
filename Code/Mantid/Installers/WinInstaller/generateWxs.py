@@ -658,14 +658,17 @@ addFileV('boost_date_time_lib','boost_dt.lib','boost_date_time-vc100-mt-1_43.lib
 #-------------------------- Scripts directory and all sub-directories ------------------------------------
 scriptsList = addCompList("ScriptsDir", CODEDIR + "/Mantid/scripts","scripts",InstallDir)[0]
 
+#
+# This is causing problems and shouldn't be necessary anymore
+#
 # M. Gigg 2010-11-19: The Excitations directory was renamed. Unfortunately this causes the directory for the new installer to get left around
 # on certain setups that have used the scripts.  I could force a delete of the folder but if a user has added their own scripts then that would remove them too.
 # Here we just remove the pyc files so should be left with an empty directory
 # TODO: Put in a custom command to remove it if it is empty after install. This sounds simply but alas is not...
-addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
-addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del /q "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
-addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
-addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
+# addTo(exeSec,'Custom',{'Action':'cleanup','After':'InstallInitialize'})
+# addTo(Product,'Property',{'Id':'QtExecCmdLine','Value':'"[SystemFolder]\\cmd.exe" /c del /q "[INSTALLDIR]\\scripts\\Excitations\\*.pyc"'})
+# addTo(Product,'CustomAction',{'Id':'cleanup','BinaryKey':'WixCA','DllEntry':'CAQuietExec','Impersonate':'yes', 'Return':'ignore'})
+# addTo(Product, 'Binary', {'Id':'wixca', 'src':'wixca.dll'})
 
 #-----------------------------------------------------------------------
 
