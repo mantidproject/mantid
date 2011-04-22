@@ -189,7 +189,7 @@ public:
   /// Returns the x position of the error bar for the i-th data point (bin)
   double ex(size_t i)const;
   /// Number of error bars to plot
-  int esize()const;
+  size_t esize()const;
 
   bool isHistogram()const{return m_isHistogram;}
 

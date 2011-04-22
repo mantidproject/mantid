@@ -1,16 +1,14 @@
 #include "MantidCurve.h"
-#include <MantidAPI/MatrixWorkspace.h>
-#include <MantidAPI/AnalysisDataService.h>
+
+#include <qpainter.h>
+#include <qwt_symbol.h>
+
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 
 #include "../Graph.h"
 #include "../ApplicationWindow.h"
 #include "../MultiLayer.h"
-
-#include <qpainter.h>
-#include <stdexcept>
-#include <limits>
-#include <typeinfo>
-#include <algorithm>
 
 using namespace Mantid::API;
 
@@ -109,12 +107,29 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
   if (ml && ml->applicationWindow()->applyCurveStyleToMantid)
   {
     QwtPlotCurve::CurveStyle qwtStyle;
+    // Get the symbol size from the user preferences and create solid black circle symbol
+    // of that size for use if the preferred plot style is scatter or line+symbol
+    const int symbolSize = ml->applicationWindow()->defaultSymbolSize;
+    const QwtSymbol symbol(QwtSymbol::Ellipse,QBrush(Qt::black),QPen(),QSize(symbolSize,symbolSize));
     switch(ml->applicationWindow()->defaultCurveStyle)
     {
-    case Graph::Line:    qwtStyle = QwtPlotCurve::Lines; break;
-    case Graph::Scatter: qwtStyle = QwtPlotCurve::Dots; break;
-    case 15: qwtStyle = QwtPlotCurve::Steps; break;  // should be Graph::HorizontalSteps but it doesn't work
-    default:  qwtStyle = QwtPlotCurve::Lines; break;
+    case Graph::Line :
+      qwtStyle = QwtPlotCurve::Lines;
+      break;
+    case Graph::Scatter:
+      qwtStyle = QwtPlotCurve::NoCurve;
+      this->setSymbol(symbol);
+      break;
+    case Graph::LineSymbols :
+      qwtStyle = QwtPlotCurve::Lines;
+      this->setSymbol(symbol);
+      break;
+    case 15:
+      qwtStyle = QwtPlotCurve::Steps;
+      break;  // should be Graph::HorizontalSteps but it doesn't work
+    default:
+      qwtStyle = QwtPlotCurve::Lines;
+      break;
     }
     setStyle(qwtStyle);
     lineWidth = ml->applicationWindow()->defaultCurveLineWidth;
@@ -421,9 +436,9 @@ double MantidQwtData::e(size_t i) const
   return m_E[i];
 }
 
-int MantidQwtData::esize() const
+size_t MantidQwtData::esize() const
 {
-  return static_cast<int>(m_E.size());
+  return m_E.size();
 }
 
 bool MantidQwtData::sameWorkspace(boost::shared_ptr<const Mantid::API::MatrixWorkspace> workspace)const
