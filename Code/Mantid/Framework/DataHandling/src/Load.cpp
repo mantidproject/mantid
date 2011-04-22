@@ -40,36 +40,25 @@ namespace Mantid
     {
     }
 
-    /**
-    * Override setPropertyValue
-    * @param name The name of the property
-    * @param value The value of the property as a string
-    */
+    /** Override setPropertyValue to catch if filename is being set, as this may mean
+     *  a change of concrete loader. If it's any other property, just forward the call.
+     *  @param name The name of the property
+     *  @param value The value of the property as a string
+     */
     void Load::setPropertyValue(const std::string &name, const std::string &value)
     {
-      IDataFileChecker_sptr loader;
+      // Call base class method in all cases.
+      // For a filename property is deals with resolving the full path.
+      IDataFileChecker::setPropertyValue(name, value);
+
       std::string NAME(name);
       std::transform(name.begin(),name.end(),NAME.begin(),toupper);
       if( NAME == "FILENAME" )
       {
-        // This call makes resolving the filename easier
-        IDataFileChecker::setPropertyValue(name, value);
-        loader = getFileLoader(getPropertyValue(name));
+        // Get back full path before passing to getFileLoader method.
+        IDataFileChecker_sptr loader = getFileLoader(getPropertyValue(name));
+        if( loader ) declareLoaderProperties(loader);
       }
-      else
-      {
-        const std::string loaderName = getProperty("LoaderName");
-        if( !loaderName.empty() )
-        {
-          loader = boost::static_pointer_cast<IDataFileChecker>(
-            API::AlgorithmManager::Instance().createUnmanaged(loaderName));
-          loader->initialize();
-        }
-      }
-      if( loader ) declareLoaderProperties(loader);
-
-      // Set the property after some may have been redeclared
-      if( NAME != "FILENAME") IDataFileChecker::setPropertyValue(name, value);
     }
 
     //--------------------------------------------------------------------------
@@ -118,10 +107,6 @@ namespace Mantid
       size_t nread = fread(&header,sizeof(unsigned char), g_hdr_bytes, fp);
       // Ensure the character string is null terminated.
       header.full_hdr[g_hdr_bytes] = '\0';
-      if (nread == -1)
-      {
-        fclose(fp);
-      }
 
       if (fclose(fp) != 0)
       {
@@ -157,7 +142,7 @@ namespace Mantid
         // Clear what may have been here previously
         setPropertyValue("LoaderName", "");
         throw std::runtime_error("Cannot find an algorithm that is able to load \"" + filePath + "\".\n"
-	  "Check that the file is a supported type.");
+                                 "Check that the file is a supported type.");
       }
       setPropertyValue("LoaderName", winningLoader->name());
       winningLoader->initialize();
@@ -177,12 +162,11 @@ namespace Mantid
       for( size_t i = 0; i < existingProps.size(); ++i )
       {
         const std::string name = existingProps[i]->name();
-        if( m_baseProps.find(name) != m_baseProps.end() ||
-            loader->existsProperty(name) )
+        // Wipe all properties except the Load native ones
+        if( m_baseProps.find(name) == m_baseProps.end() )
         {
-          continue;
+          this->removeProperty(name);
         }
-        this->removeProperty(name);
       }
 
       const std::vector<Property*> &loaderProps = loader->getProperties();
@@ -245,9 +229,9 @@ namespace Mantid
       IDataFileChecker_sptr loader;
       if( loaderName.empty() )
       {
-	loader = getFileLoader(getPropertyValue("Filename"));
-	loaderName = loader->name();
-	setPropertyValue("LoaderName", loaderName);
+        loader = getFileLoader(getPropertyValue("Filename"));
+        loaderName = loader->name();
+        setPropertyValue("LoaderName",loaderName);
       }
       else
       {
