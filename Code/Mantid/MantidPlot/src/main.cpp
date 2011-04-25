@@ -170,21 +170,11 @@ int main( int argc, char ** argv )
       QSplashScreen splash(pixmap);
       splash.show();
       app.processEvents();
-//      QString releaseInfo = QString(MANTIDPLOT_RELEASE_DATE).trimmed();
+
       QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
       QString svnInfo(Mantid::Kernel::MantidVersion::version());
-//      if( releaseInfo.startsWith('(') )
-//      {
-//        releaseDateTime = "Unknown";
-//        svnInfo = "";
-//      }
-//      else
-//      {
-//        releaseDateTime = releaseInfo.section(' ', 0, 1).trimmed();
-//        svnInfo = releaseInfo.section(' ', 7).trimmed();
-//      }
-
       splash.showMessage("Release: " + releaseDateTime + " (Version " + svnInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
+
       bool factorySettings = false;
       if (args.contains("-d") || args.contains("--default-settings"))
         factorySettings = true;
