@@ -13,7 +13,7 @@ namespace MDEvents
   /** Template for shortening template coordinate transform classes. */
   #define TCT template<size_t inD, size_t outD>
 
-  /** Generic class to transform from M input dimensionsto N output dimensions.
+  /** Generic class to transform from M input dimensions to N output dimensions.
    *
    * The types of conversions to account for are:
    * * Simple rotation matrix
