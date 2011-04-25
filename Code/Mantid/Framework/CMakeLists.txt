@@ -23,16 +23,6 @@ if ( NOT COMMONSETUP_DONE )
 endif ()
 
 ###########################################################################
-# This section deals with creating the MantidVersion.h header
-###########################################################################
-
-# Create the header with the revision number in
-set ( HEADER_DIR Kernel/inc/MantidKernel )
-configure_file ( ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h.in
-                 ${PROJECT_SOURCE_DIR}/${HEADER_DIR}/MantidVersion.h 
-)
-
-###########################################################################
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
 

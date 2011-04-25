@@ -30,14 +30,14 @@ AlgExecSummaryGrpBox::AlgExecSummaryGrpBox(QString title,QWidget*w)
   m_execDurationEdit=new QLineEdit("",this);
   if(m_execDurationEdit)
     m_execDurationEdit->setReadOnly(1);
-  m_execDurationlabel=new QLabel("&Duration:",this,0);
+  m_execDurationlabel=new QLabel("Duration:",this,0);
   if(m_execDurationlabel)m_execDurationlabel->setBuddy(m_execDurationEdit);
 
   QDateTime datetime(QDate(0,0,0), QTime(0,0,0),Qt::LocalTime );
   m_execDateTimeEdit=new QLineEdit("",this);
   if(m_execDateTimeEdit)
     m_execDateTimeEdit->setReadOnly(1);
-  m_Datelabel=new QLabel("&Date:",this,0);
+  m_Datelabel=new QLabel("Date:",this,0);
   if(m_Datelabel)m_Datelabel->setBuddy(m_execDateTimeEdit);
 		
   QFormLayout *formLayout = new QFormLayout;
@@ -103,7 +103,7 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(titl
   {
     m_osNameEdit->setReadOnly(1);
   }
-  m_osNameLabel=new QLabel("&OSName:",this,0);
+  m_osNameLabel=new QLabel("OS Name:",this,0);
   if(m_osNameLabel)m_osNameLabel->setBuddy(m_osNameEdit);
 
   //OS Version Label & Edit Box
@@ -111,16 +111,16 @@ AlgEnvHistoryGrpBox::AlgEnvHistoryGrpBox(QString title,QWidget*w):QGroupBox(titl
   if(m_osVersionEdit)
   {
     m_osVersionEdit->setReadOnly(1);
-    m_osVersionLabel=new QLabel("&OSVersion:",this,0);
+    m_osVersionLabel=new QLabel("OS Version:",this,0);
   }
   if(m_osVersionLabel)
     m_osVersionLabel->setBuddy(m_osVersionEdit);
 
-  //Mantid FRamework Version Label & Edit Box
+  //Mantid Framework Version Label & Edit Box
   m_frmwkVersnEdit=new QLineEdit("",this);
   if(m_frmwkVersnEdit)
     m_frmwkVersnEdit->setReadOnly(1);
-  m_frmworkVersionLabel=new QLabel("&FrameWorkVersion:",this,0);
+  m_frmworkVersionLabel=new QLabel("Framework Version:",this,0);
   if(m_frmworkVersionLabel)
     m_frmworkVersionLabel->setBuddy(m_frmwkVersnEdit);
 	

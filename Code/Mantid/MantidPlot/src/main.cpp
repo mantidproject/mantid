@@ -34,7 +34,6 @@
 #include <QThread>
 
 #include "ApplicationWindow.h"
-#include "MantidPlotReleaseDate.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/MantidVersion.h"
 
@@ -146,7 +145,7 @@ int main( int argc, char ** argv )
     std::string str(argv[i]);
     if (str == "-v" || str == "--version")
     {
-      std::cout << MANTID_VERSION << std::endl;
+      std::cout << Mantid::Kernel::MantidVersion::version() << std::endl;
       exit(0);
     }
   }
@@ -171,20 +170,21 @@ int main( int argc, char ** argv )
       QSplashScreen splash(pixmap);
       splash.show();
       app.processEvents();
-      QString releaseInfo = QString(MANTIDPLOT_RELEASE_DATE).trimmed();
-      QString releaseDateTime, svnInfo;
-      if( releaseInfo.startsWith('(') )
-      {
-        releaseDateTime = "Unknown";
-        svnInfo = "";
-      }
-      else
-      {
-        releaseDateTime = releaseInfo.section(' ', 0, 1).trimmed();
-        svnInfo = releaseInfo.section(' ', 7).trimmed(); 
-      }
+//      QString releaseInfo = QString(MANTIDPLOT_RELEASE_DATE).trimmed();
+      QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
+      QString svnInfo(Mantid::Kernel::MantidVersion::version());
+//      if( releaseInfo.startsWith('(') )
+//      {
+//        releaseDateTime = "Unknown";
+//        svnInfo = "";
+//      }
+//      else
+//      {
+//        releaseDateTime = releaseInfo.section(' ', 0, 1).trimmed();
+//        svnInfo = releaseInfo.section(' ', 7).trimmed();
+//      }
 
-      splash.showMessage("Release: " + releaseDateTime + " " + svnInfo, Qt::AlignLeft | Qt::AlignBottom);
+      splash.showMessage("Release: " + releaseDateTime + " (Version " + svnInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
       bool factorySettings = false;
       if (args.contains("-d") || args.contains("--default-settings"))
         factorySettings = true;

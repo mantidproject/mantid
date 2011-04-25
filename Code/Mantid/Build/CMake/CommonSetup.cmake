@@ -63,14 +63,18 @@ if ( SVN_WORKING_COPY )
   include( FindSubversion )
 endif ()
 if ( Subversion_FOUND )
-  # extract working copy information for SOURCE_DIR into Framework_XXX variables                                                                 
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Framework)
+  # extract working copy information for SOURCE_DIR into MtdVersion_XXX variables
+  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} MtdVersion)
+  string ( REGEX MATCH "[\(](.*)[\)]" MtdVersion_WC_LAST_CHANGED_DATE ${MtdVersion_WC_LAST_CHANGED_DATE} )
+  string ( REGEX MATCH "[^\(](.*)[^\)]" MtdVersion_WC_LAST_CHANGED_DATE ${MtdVersion_WC_LAST_CHANGED_DATE} )
+  
 else ()
-  # Just use a dummy version number and print a warning                                                                                          
+  # Just use a dummy version number and print a warning
   message ( STATUS "Subversion not found - using 0 for revision number in MantidVersion.h" )
-  set ( Framework_WC_LAST_CHANGED_REV 0 )
+  set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
+  set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 endif ()
-mark_as_advanced( Framework_WC_LAST_CHANGED_REV )
+mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE )
 
 ###########################################################################
 # Look for OpenMP and set compiler flags if found

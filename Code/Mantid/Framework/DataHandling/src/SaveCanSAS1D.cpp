@@ -591,10 +591,8 @@ void SaveCanSAS1D::createSASProcessElement(std::string& sasProcess)
   sasProcdate+="</date>";
   sasProcess+=sasProcdate;
 
-  std::string version(MANTID_VERSION);
-
   std::string sasProcsvn="\n\t\t\t<term name=\"svn\">";
-  sasProcsvn+=version;
+  sasProcsvn+=MantidVersion::version();
   sasProcsvn+="</term>";
   sasProcess+=sasProcsvn;
 

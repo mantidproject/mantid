@@ -1,3 +1,0 @@
-#ifndef MANTID_VERSION
-#define MANTID_VERSION "1.1.@Framework_WC_LAST_CHANGED_REV@"
-#endif

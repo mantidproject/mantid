@@ -33,7 +33,7 @@ namespace PythonAPI
 
 const char* mantid_version()
 {
-  return MANTID_VERSION;
+  return Mantid::Kernel::MantidVersion::version();
 }
 
 /**

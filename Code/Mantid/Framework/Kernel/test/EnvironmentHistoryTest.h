@@ -13,28 +13,29 @@ class EnvironmentHistoryTest : public CxxTest::TestSuite
 {
 public:
 
- void xtestframeworkVersion()
- {
-	 EnvironmentHistory EH;
-	 TS_ASSERT_EQUALS(EH.frameworkVersion(),MANTID_VERSION);
- }
-void testosName()
- {
-	 EnvironmentHistory EH;
-	 TS_ASSERT_EQUALS(EH.osName(),ConfigService::Instance().getOSName());
- }
-  void testosVersion()
- {
-	 EnvironmentHistory EH;
-	 TS_ASSERT_EQUALS(EH.osVersion(),ConfigService::Instance().getOSVersion());
- }
-  
-  void xtestPopulate()
+  void testframeworkVersion()
   {
-    std::string correctOutput = "Framework Version: "+std::string(MANTID_VERSION)+"\n";
-    correctOutput = correctOutput + "OS name: " + ConfigService::Instance().getOSName() + "\n";
-    correctOutput = correctOutput + "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
-    correctOutput = correctOutput + "username: \n";
+    EnvironmentHistory EH;
+    TS_ASSERT_EQUALS(EH.frameworkVersion(),MantidVersion::version());
+  }
+
+  void testosName()
+ {
+    EnvironmentHistory EH;
+    TS_ASSERT_EQUALS(EH.osName(),ConfigService::Instance().getOSName());
+ }
+
+  void testosVersion()
+  {
+    EnvironmentHistory EH;
+    TS_ASSERT_EQUALS(EH.osVersion(),ConfigService::Instance().getOSVersion());
+  }
+  
+  void testPopulate()
+  {
+    std::string correctOutput = "Framework Version: " + std::string(MantidVersion::version()) + "\n";
+    correctOutput += "OS name: " + ConfigService::Instance().getOSName() + "\n";
+    correctOutput += "OS version: " + ConfigService::Instance().getOSVersion() + "\n";
 
     // Not really much to test
     EnvironmentHistory EH;

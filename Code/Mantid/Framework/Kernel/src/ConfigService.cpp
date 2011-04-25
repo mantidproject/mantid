@@ -200,8 +200,8 @@ ConfigServiceImpl::ConfigServiceImpl() :
   g_log.debug() << "ConfigService created." << std::endl;
   g_log.debug() << "Configured Mantid.properties directory of application as " << getPropertiesDir()
       << std::endl;
+  g_log.information() << "This is Mantid Version " << MantidVersion::version() << std::endl;
   g_log.information() << "Properties file(s) loaded: " << propertiesFilesList << std::endl;
-  g_log.information() << "This is Mantid Version " << MANTID_VERSION << std::endl;
   g_log.information() << "Logging to: " << m_logFilePath << std::endl;
 
   // Make sure the log path is shown somewhere.

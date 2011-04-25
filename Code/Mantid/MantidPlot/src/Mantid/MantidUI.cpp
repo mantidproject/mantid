@@ -17,7 +17,6 @@
 #include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/LogFilter.h"
 #include "MantidKernel/DateAndTime.h"
-#include "MantidPlotReleaseDate.h"
 #include "InstrumentWidget/InstrumentWindow.h"
 #include "MantidKernel/TimeSeriesProperty.h"
 
@@ -230,11 +229,6 @@ void MantidUI::saveSettings() const
 {
   // Save algorithm dialog input
   MantidQt::API::AlgorithmInputHistory::Instance().save();
-}
-
-QString MantidUI::releaseDate()
-{
-  return MANTIDPLOT_RELEASE_DATE;
 }
 
 QStringList MantidUI::getWorkspaceNames()

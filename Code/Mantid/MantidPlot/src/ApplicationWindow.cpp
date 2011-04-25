@@ -168,7 +168,6 @@
 #include "ScriptingWindow.h"
 
 #include "Mantid/MantidUI.h"
-#include "MantidPlotReleaseDate.h"
 #include "Mantid/MantidAbout.h"
 #include "Mantid/PeakPickerTool.h"
 #include "Mantid/ManageCustomMenus.h"
@@ -183,6 +182,7 @@
 #include "MantidQtMantidWidgets/ICatAdvancedSearch.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/MantidVersion.h"
 
 
 using namespace Qwt3D;
@@ -8409,21 +8409,6 @@ void ApplicationWindow::closeWindow(MdiSubWindow* window)
 
 void ApplicationWindow::about()
 {
-  /*
-QString text = "<h2>"+ versionString() + "</h2>";
-text +=	"<h3>" + QString(copyright_string).replace("\n", "<br>") + "</h3>";
-text += "<h3>" + tr("Released") + ": " + QString(release_date) + "</h3>";
-
-text += "<h3> MantidPlot released: " + QString(MANTIDPLOT_RELEASE_DATE) + QString("</h3>");//Mantid
-
-QMessageBox *mb = new QMessageBox();
-mb->setWindowTitle (tr("About QtiPlot"));
-mb->setWindowIcon (getQPixmap("logo_xpm"));
-mb->setIconPixmap(getQPixmap("logo_xpm"));
-mb->setText(text);
-mb->exec();
-   */
-  //Mantid
   MantidAbout *ma = new MantidAbout();
   ma->exec();
   delete ma;
@@ -13948,7 +13933,7 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     else if (str == "-r" || str == "--revision") // Print and return subversion revision number
     {
       hide();
-      QString version(MANTIDPLOT_RELEASE_VERSION);
+      QString version(Mantid::Kernel::MantidVersion::version());
       version.remove(0,4);
       std::cout << version.toStdString() << std::endl;
       exit(version.toInt());
@@ -15649,8 +15634,8 @@ ApplicationWindow::~ApplicationWindow()
 
 QString ApplicationWindow::versionString()
 {
-  QString version(MANTIDPLOT_RELEASE_VERSION);
-  QString date(MANTIDPLOT_RELEASE_DATE);
+  QString version(Mantid::Kernel::MantidVersion::version());
+  QString date(Mantid::Kernel::MantidVersion::releaseDate());
   return "This is MantidPlot version " + version + " of " + date;
 }
 

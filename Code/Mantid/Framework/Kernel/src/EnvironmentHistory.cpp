@@ -16,7 +16,7 @@ namespace Mantid
      */
     std::string EnvironmentHistory::frameworkVersion() const 
     { 
-      return MANTID_VERSION;
+      return MantidVersion::version();
     }
     /**
      * Returns the OS name
@@ -41,7 +41,7 @@ namespace Mantid
      */
     void EnvironmentHistory::printSelf(std::ostream& os, const int indent) const
     {
-      os << std::string(indent,' ') << "Framework Version: " << MANTID_VERSION << std::endl;
+      os << std::string(indent,' ') << "Framework Version: " << frameworkVersion() << std::endl;
       os << std::string(indent,' ') << "OS name: " << osName() << std::endl;
       os << std::string(indent,' ') << "OS version: " << osVersion() << std::endl;
     }

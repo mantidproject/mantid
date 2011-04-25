@@ -615,6 +615,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/SequentialFitDialog.h
                        src/Mantid/UserFitFunctionDialog.h
                        src/Mantid/WorkspaceObserver.h
+                       src/Mantid/InstrumentWidget/XIntegrationControl.h
                        src/Mantid/InstrumentWidget/BinDialog.h
                        src/Mantid/InstrumentWidget/GL3DWidget.h
                        src/Mantid/InstrumentWidget/Instrument3DWidget.h
@@ -626,7 +627,6 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/ColorMapWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
-                       src/Mantid/InstrumentWidget/XIntegrationControl.h
 )
 
 set ( UI_FILES src/Mantid/FirstTimeSetup.ui
@@ -659,23 +659,6 @@ include_directories ( ${QWTPLOT3D_INCLUDE_DIR} )
 
 find_package ( QScintilla REQUIRED )
 include_directories ( ${QSCINTILLA_INCLUDE_DIR} )
-
-###########################################################################
-# This section deals with creating the MantidPlotReleaseDate.h header
-###########################################################################
-
-if ( Subversion_FOUND )
-  # extract working copy information for SOURCE_DIR into RELDATE_XXX variables
-  Subversion_WC_INFO(${PROJECT_SOURCE_DIR} RELDATE)
-else ()
-  # Just use a dummy version number and print a warning
-  message ( "Subversion not found - using 0 for revision number in MantidPlotReleaseDate.h" )
-  set ( RELDATE_WC_LAST_CHANGED_REV 0 )
-endif ()
-# Create the header with the revision number in
-configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/Mantid/MantidPlotReleaseDate.h.in
-                 ${CMAKE_CURRENT_BINARY_DIR}/MantidPlotReleaseDate.h 
-)
 
 ###########################################################################
 # Now create the target and add its dependencies and flags

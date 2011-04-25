@@ -1,0 +1,22 @@
+//----------------------------------------------------------------------
+// Includes
+//----------------------------------------------------------------------
+#include "MantidKernel/MantidVersion.h"
+
+namespace Mantid
+{
+namespace Kernel
+{
+
+const char* MantidVersion::version()
+{
+  return "1.1.@MtdVersion_WC_LAST_CHANGED_REV@";
+}
+
+const char* MantidVersion::releaseDate()
+{
+  return "@MtdVersion_WC_LAST_CHANGED_DATE@";
+}
+
+} // namespace Kernel
+} // namespace Mantid

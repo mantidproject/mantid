@@ -96,9 +96,6 @@ public:
     // Pointer to QtiPLot main window
     ApplicationWindow *appWindow(){return m_appWindow;}
 
-    // Release date string formed during scons building
-    QString releaseDate();
-
     // Returns a list of open workspaces
     QStringList getWorkspaceNames();
 

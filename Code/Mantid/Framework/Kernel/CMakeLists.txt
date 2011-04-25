@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/Logger.cpp
 	src/MagneticIon.cpp
 	src/MandatoryValidator.cpp
+	src/MantidVersion.cpp
 	src/MaskedProperty.cpp
 	src/Memory.cpp
 	src/MersenneTwister.cpp
@@ -243,6 +244,14 @@ if ( CXXTEST_FOUND )
   )
 
 endif ()
+
+###########################################################################
+# This section deals with creating the MantidVersion implementation
+###########################################################################
+
+configure_file ( ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp.in
+                 ${CMAKE_CURRENT_SOURCE_DIR}/src/MantidVersion.cpp
+)
 
 ###########################################################################
 # Manipulate the Mantid.properties file to work wherever you build to
