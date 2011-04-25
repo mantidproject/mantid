@@ -43,6 +43,7 @@ namespace Kernel
     void report(const std::string& msg);
     void report(int i, const std::string& msg = "");
     void reportIncrement(int inc, const std::string& msg = "");
+    void reportIncrement(size_t inc, const std::string& msg = "");
     void setNumSteps(int nsteps);
     void setNotifyStep(double notifyStepPct);
 

@@ -82,7 +82,7 @@ void LoadSPE::exec()
   }
 
   // The first two numbers are the number of histograms and the number of bins
-  unsigned int nhist=0, nbins=0;
+  size_t nhist=0, nbins=0;
   int retval = fscanf(speFile,"%8u%8u\n",&nhist,&nbins);
   if ( retval != 2 ) reportFormatError("Header line");
 

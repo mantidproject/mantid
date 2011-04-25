@@ -61,7 +61,7 @@ namespace MDEvents
       throw std::invalid_argument("PeakParams needs to have ndims+2 arguments.");
     if (params[0] <= 0)
       throw std::invalid_argument("PeakParams: number_of_events needs to be > 0");
-    size_t num = params[0];
+    size_t num = size_t(params[0]);
 
     // Width of the peak
     double width = params.back();
@@ -99,7 +99,7 @@ namespace MDEvents
 
     if (params[0] <= 0)
       throw std::invalid_argument("UniformParams: number_of_events needs to be > 0");
-    size_t num = params[0];
+    size_t num = size_t(params[0]);
 
     if (params.size() == 1)
     {

@@ -158,7 +158,7 @@ CenterpieceRebinning::exec()
     selection_valid = true;
 
     // counter for the rebinning reporting the progress
-    unsigned int ic(0);
+    size_t ic(0);
     std::stringstream message_buf;
     while(selection_valid){
         if(keep_pixels){

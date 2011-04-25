@@ -21,6 +21,18 @@ Progress::Progress(Algorithm* alg,double start,double end, int numSteps)
 {
 }
 
+/** Creates a Progress instance
+    @param alg :: Algorithm reporting its progress
+    @param start :: Starting progress
+    @param end :: Ending progress
+    @param numSteps :: Number of times report(...) method will be called.
+*/
+Progress::Progress(Algorithm* alg,double start,double end, size_t numSteps)
+  : ProgressBase(start, end, int(numSteps)),
+    m_alg(alg)
+{
+}
+
 /** Destructor */
 Progress::~Progress()
 {

@@ -93,6 +93,21 @@ namespace Kernel
 
 
   //----------------------------------------------------------------------------------------------
+  /** Sends the progress notification and increment the loop counter by more than one.
+   *
+      @param inc :: Increment the loop counter by this much
+      @param msg :: Optional message string
+  */
+  void ProgressBase::reportIncrement(size_t inc, const std::string& msg)
+  {
+    m_i += int(inc);
+    if (m_i - m_last_reported < m_notifyStep ) return;
+    m_last_reported = m_i;
+    this->doReport(msg);
+  }
+
+
+  //----------------------------------------------------------------------------------------------
   /** Change the number of steps between start/end.
    *
    * @param nsteps :: the number of steps to take between start and end

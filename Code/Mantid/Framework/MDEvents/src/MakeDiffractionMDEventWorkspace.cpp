@@ -195,12 +195,12 @@ namespace MDEvents
           // (sin(theta))^2 / wavelength^4
           float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
           // Push the MDEvent but correct the weight.
-          out_events.push_back( MDE(it->weight()*correct, it->errorSquared()*correct*correct, center) );
+          out_events.push_back( MDE(float(it->weight()*correct), float(it->errorSquared()*correct*correct), center) );
         }
         else
         {
           // Push the MDEvent with the same weight
-          out_events.push_back( MDE(it->weight(), it->errorSquared(), center) );
+          out_events.push_back( MDE(float(it->weight()), float(it->errorSquared()), center) );
         }
       }
 

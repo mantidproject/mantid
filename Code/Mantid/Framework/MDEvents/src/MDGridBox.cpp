@@ -56,7 +56,7 @@ namespace MDEvents
       split[d] = bc->getSplitInto(d);
       tot *= split[d];
       // Length of the side of a box in this dimension
-      boxSize[d] = (this->extents[d].max - this->extents[d].min) / split[d];
+      boxSize[d] = (this->extents[d].max - this->extents[d].min) / double(split[d]);
       volume *= boxSize[d];
     }
 
@@ -81,7 +81,7 @@ namespace MDEvents
       // Set the extents of this box.
       for (size_t d=0; d<nd; d++)
       {
-        CoordType min = this->extents[d].min + boxSize[d] * indices[d];
+        CoordType min = this->extents[d].min + boxSize[d] * double(indices[d]);
         myBox->setExtents(d, min, min + boxSize[d]);
       }
       myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
@@ -452,7 +452,7 @@ namespace MDEvents
       // The min index in this dimension (we round down - we'll include this edge)
       if (bin.m_min[d] >= this->extents[d].min)
       {
-        min = size_t((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
+        min = int((bin.m_min[d] - this->extents[d].min) / boxSize[d]);
         counters_min[d] = min;
       }
       else
@@ -475,7 +475,7 @@ namespace MDEvents
       }
       else
       {
-        max = split[d]; // Goes past THAT edge
+        max = int(split[d]); // Goes past THAT edge
         counters_max[d] = max; // (the counter looping will NOT include max)
       }
 

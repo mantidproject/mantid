@@ -44,6 +44,7 @@ class DLLExport Progress : public Mantid::Kernel::ProgressBase
 public:
   Progress();
   Progress(Algorithm* alg,double start,double end, int numSteps);
+  Progress(Algorithm* alg,double start,double end, size_t numSteps);
   virtual ~Progress();
 
   void doReport(const std::string& msg = "");

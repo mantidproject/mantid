@@ -281,7 +281,7 @@ namespace Mantid
 
         // do analysis for each top level compoment element
         NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
-        unsigned int pNL_comp_length = pNL_comp->length();
+        size_t pNL_comp_length = pNL_comp->length();
         API::Progress prog(this,0,1,pNL_comp_length);
         for (unsigned int i = 0; i < pNL_comp_length; i++)
         {

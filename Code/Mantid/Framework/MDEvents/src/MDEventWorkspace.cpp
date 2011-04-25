@@ -292,7 +292,7 @@ namespace MDEvents
     if (prog)
     {
       size_t numTasks = events.size()/eventsPerTask;
-      prog->setNumSteps( numTasks + numTasks/numTasksPerBlock);
+      prog->setNumSteps( int( numTasks + numTasks/numTasksPerBlock ));
     }
 
     // Where we are in the list of events
@@ -546,7 +546,7 @@ namespace MDEvents
 
     // For progress reporting, the approx  # of tasks
     if (prog)
-      prog->setNumSteps( ws->getNPoints() / binsPerTask );
+      prog->setNumSteps( int(ws->getNPoints() / binsPerTask) );
 
     // This is the limit to loop over in each dimension
     size_t * index_max = Utils::nestedForLoopSetUp(numBD);
