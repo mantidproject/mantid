@@ -3,6 +3,7 @@ set ( SRC_FILES
 	#	src/MDBoxTask.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/CoordTransform.cpp
+	src/CoordTransformDistance.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
 	src/MDBin.cpp
@@ -30,6 +31,7 @@ set ( INC_FILES
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
+	inc/MantidMDEvents/CoordTransformDistance.h
 	inc/MantidMDEvents/CreateMDEventWorkspace.h
 	inc/MantidMDEvents/FakeMDEventData.h
 	inc/MantidMDEvents/IMDBox.h
@@ -52,6 +54,7 @@ set ( INC_FILES
 set ( TEST_FILES
 	#	test/MDBoxTaskTest.h
 	test/BoxControllerTest.h
+	test/CoordTransformDistanceTest.h
 	test/CoordTransformTest.h
 	test/CreateMDEventWorkspaceTest.h
 	test/FakeMDEventDataTest.h

@@ -10,9 +10,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-  /** Template for shortening template coordinate transform classes. */
-  #define TCT template<size_t inD, size_t outD>
-
   /** Generic class to transform from M input dimensions to N output dimensions.
    *
    * The types of conversions to account for are:
@@ -30,7 +27,7 @@ namespace MDEvents
   {
   public:
     CoordTransform(const size_t inD, const size_t outD);
-    ~CoordTransform();
+    virtual ~CoordTransform();
 
     void addTranslation(const CoordType * translationVector);
     Mantid::Geometry::Matrix<CoordType> getMatrix() const;
@@ -42,7 +39,7 @@ namespace MDEvents
      * @param inputVector :: fixed-size array of input coordinates, of size inD
      * @param outVector :: fixed-size array of output coordinates, of size outD
      */
-    void apply(const CoordType * inputVector, CoordType * outVector)
+    virtual void apply(const CoordType * inputVector, CoordType * outVector)
     {
       // For each output dimension
       for (size_t out = 0; out < outD; ++out)
