@@ -227,9 +227,12 @@ public:
 
 
 
-  /** Test binning into up to 4 dense histogram dimensions. */
+  /** Test binning into up to 4 dense histogram dimensions.
+   * @param nameX : name of the axis
+   * @param expected_events_per_bin :: how many events in the resulting bin
+   * @param unevenSizes :: make the first axis with only 2 bins, for testing*/
   void do_test_centerpointBinToMDHistoWorkspace( std::string name1, std::string name2, std::string name3, std::string name4,
-      size_t expected_events_per_bin)
+      size_t expected_events_per_bin, bool unevenSizes = false)
   {
     size_t len = 10; // Make the box split into this many per size
     double size = len * 1.0;  // Make each grid box 1.0 in size
@@ -256,7 +259,10 @@ public:
 
     // Will bin it into a 5x5x5 workspace
     std::vector<MDHistoDimension_sptr> dims;
-    dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", "m", 0, size, name1 != "NONE" ? binlen : 1)));
+    if (unevenSizes)
+      dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", "m", 0, size, name1 != "NONE" ? 2 : 1)));
+    else
+      dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name1, "id0", "m", 0, size, name1 != "NONE" ? binlen : 1)));
     dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name2, "id1", "m", 0, size, name2 != "NONE" ? binlen : 1)));
     dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name3, "id2", "m", 0, size, name3 != "NONE" ? binlen : 1)));
     dims.push_back(MDHistoDimension_sptr(new MDHistoDimension(name4, "id3", "m", 0, size, name4 != "NONE" ? binlen : 1)));
@@ -281,6 +287,7 @@ public:
       TS_ASSERT_DELTA( out->getErrorAt(i), expected_events_per_bin * 2.0, 1e-5 );
     }
 
+
   }
 
 
@@ -292,6 +299,11 @@ public:
   void test_centerpointBinToMDHistoWorkspace_3D_scrambled_order()
   {
     do_test_centerpointBinToMDHistoWorkspace("Axis1", "Axis0", "NONE", "Axis2", 8); // 2x2x2 blocks
+  }
+
+  void test_centerpointBinToMDHistoWorkspace_3D_unevenSizes()
+  {
+    do_test_centerpointBinToMDHistoWorkspace("Axis0", "Axis1", "Axis2", "NONE", 20, true); // 5x2x2 blocks
   }
 
 //  void test_centerpointBinToMDHistoWorkspace_2D()

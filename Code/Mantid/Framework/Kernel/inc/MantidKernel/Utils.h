@@ -25,8 +25,10 @@ namespace Utils
 
 
 
+  //TODO: Separate these into a namespace like NestedForLoop::
+
   //------------------------------------------------------------------------------------------------
-  /** Set up a nested for loop.
+  /** Set up a nested for loop by creating an array of counters.
    *
    * @param numDims :: how many levels of nesting do the for loops have?
    * @param value :: fill the array to this.
@@ -41,6 +43,76 @@ namespace Utils
     return out;
   }
 
+
+  //------------------------------------------------------------------------------------------------
+  /** Set up an "index maker" for a  nested for loop.
+   *
+   * Makes an array of size [numDims] that is used to make a linearized index
+   * out of dimensional indices. If the output is "out" and the array of indices is "index":
+   *  linear_index = out[0] * index[0] + out[1] * index[1] + ...
+   *
+   * The lowest dimension index (0) will vary the slowest.
+   *
+   * @param numDims :: how many levels of nesting do the for loops have?
+   * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension.
+   *        The minimum must be 0 in each dimension for the algorithm to work
+   * @return an array of linear_index, set to 0, of the right size.
+   */
+  inline size_t * nestedForLoopSetUpIndexMaker(const size_t numDims, size_t * index_max)
+  {
+    // Allocate and start at 1
+    size_t * out = new size_t[numDims];
+    for (size_t d=0; d<numDims; d++)
+      out[d] = 1;
+
+    for (size_t d=1; d<numDims; d++)
+      out[d] =  out[d-1] * index_max[d-1];
+
+    return out;
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Return a linear index from dimensional indices of a nested for loop.
+   *
+   * linear_index = index_maker[0] * index[0] + index_maker[1] * index[1] + ...
+   *
+   * The lowest dimension index (0) will vary the slowest.
+   *
+   * @param numDims :: how many levels of nesting do the for loops have?
+   * @param index :: an array[numDims] of the counter index in each dimension.
+   * @param index_maker :: result of nestedForLoopSetUpIndexMaker()
+   * @return the linear index into the array
+   */
+  inline size_t nestedForLoopGetLinearIndex(const size_t numDims, size_t * index, size_t * index_maker)
+  {
+    size_t out = 0;
+    for (size_t d=0; d<numDims; d++)
+      out += index[d] * index_maker[d];
+    return out;
+  }
+
+
+  //------------------------------------------------------------------------------------------------
+  /** Set up a nested for loop by creating an array of counters.
+   *
+   * @param numDims :: how many levels of nesting do the for loops have?
+   * @param linear_index :: linear index into the nested for loop.
+   * @param index_maker :: an array[numDims], result of nestedForLoopSetUpIndexMaker()
+   * @param index_max :: an array[numDims] of the maximum value (exclusive) of the index in each dimension.
+   *        The minimum must be 0 in each dimension for the algorithm to work
+   * @param[out] out_indices :: an array, sized numDims, which will be
+   *             filled with the index for each dimension, given the linear index
+   */
+  inline void nestedForLoopGetIndicesFromLinearIndex(const size_t numDims, const size_t linear_index,
+      const size_t * index_maker, const size_t * index_max,
+      size_t * out_indices)
+  {
+    for (size_t d=0; d<numDims; d++)
+    {
+      out_indices[d] = (linear_index / index_maker[d]) % index_max[d];
+    }
+  }
 
 
   //------------------------------------------------------------------------------------------------

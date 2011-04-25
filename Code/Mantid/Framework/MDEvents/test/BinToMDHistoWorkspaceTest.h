@@ -36,7 +36,7 @@ private:
   class MockImplicitFunction : public Mantid::API::ImplicitFunction
   {
   public:
-    bool evaluate(const Mantid::API::Point3D* pPoint3D) const
+    bool evaluate(const Mantid::API::Point3D* /*pPoint3D*/) const
     {
       return false; //Always reject points.
     }
@@ -63,12 +63,12 @@ private:
   {
   public:
     MockImplicitFunctionParser() : Mantid::API::ImplicitFunctionParser(NULL){}
-    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement)
+    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* /*functionElement*/)
     {
       return new MockImplicitFunctionBuilder;
     }
-    void setSuccessorParser(Mantid::API::ImplicitFunctionParser* successor){}
-    void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* parser){}
+    void setSuccessorParser(Mantid::API::ImplicitFunctionParser* /*successor*/){}
+    void setParameterParser(Mantid::API::ImplicitFunctionParameterParser* /*parser*/){}
   };
 
 

@@ -2,11 +2,12 @@
 #define MDBOX_H_
 
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/MultiThreaded.h"
+#include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
+#include "MantidMDEvents/MDDimensionStats.h"
 #include "MantidMDEvents/MDEvent.h"
 
 namespace Mantid
@@ -56,7 +57,9 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events);
 
-    void centerpointBin(MDBin<MDE,nd> & bin) const;
+    void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
+
+    void calculateDimensionStats(MDDimensionStats * stats) const;
 
 //    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
 
@@ -82,44 +85,6 @@ namespace MDEvents
 
 
 
-
-
-
-
-
-
-  //===============================================================================================
-  /** Simple class which holds statistics
-   * about a given dimension in a MD workspace or MDBox
-   */
-  DLLExport class MDDimensionStats : public MDDimensionExtents
-  {
-  public:
-
-    /** Empty constructor - reset everything */
-    MDDimensionStats() :
-      MDDimensionExtents(),
-      total( 0 ),
-      approxVariance( 0 )
-    { }
-
-    // ---- Public members ----------
-
-    /** Sum of the coordinate value of all points contained.
-     * Divide by the number of points to get the mean!
-     */
-    CoordType total;
-
-    /** Approximate variance - used for quick std.deviation estimates.
-     *
-     * A running sum of (X - mean(X))^2, where mean(X) is calculated at the
-     * time of adding the point. This approximation gets better as the number of
-     * points increases.
-     *
-     * Divide by the number of points to get the square of the standard deviation!
-     */
-    CoordType approxVariance;
-  };
 
 
 

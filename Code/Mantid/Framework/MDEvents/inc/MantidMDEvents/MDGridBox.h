@@ -49,9 +49,6 @@ namespace MDEvents
 
     size_t getNumMDBoxes() const;
 
-
-    void refreshCache(Kernel::ThreadScheduler * ts = NULL);
-
     std::vector< MDE > * getEventsCopy();
 
     void addEvent(const MDE & point);
@@ -60,11 +57,13 @@ namespace MDEvents
 
     size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
-    void centerpointBin(MDBin<MDE,nd> & bin) const;
+    void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
     void splitAllIfNeeded(Kernel::ThreadScheduler * ts = NULL);
+
+    void refreshCache(Kernel::ThreadScheduler * ts = NULL);
 
 //    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
 

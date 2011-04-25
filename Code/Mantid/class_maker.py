@@ -312,15 +312,17 @@ def redo_cmake_section(lines, cmake_tag, add_this_line):
 
 
 #======================================================================
-def add_to_cmake(subproject, classname, test_only=False):
+def add_to_cmake(subproject, classname, args):
     """ Add the class to the cmake list of the given class """
     cmake_path = os.path.join(os.path.curdir, "Framework/" + subproject + "/CMakeLists.txt")
     source = open(cmake_path).read()
     lines = source.split("\n");
-    if not test_only:
-        lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
+    if args.header:
         lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + classname + ".h")
-    lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
+    if args.cpp:
+        lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
+    if args.test:
+        lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
     
     f = open(cmake_path, 'w')
     text = "\n".join(lines) 
@@ -352,7 +354,7 @@ def fix_all_cmakes():
         fix_cmake_format(proj)
     
 #======================================================================
-def generate(subproject, classname, overwrite, test_only, algorithm):
+def generate(subproject, classname, overwrite, args):
     # Directory at base of subproject
     basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
     
@@ -360,24 +362,26 @@ def generate(subproject, classname, overwrite, test_only, algorithm):
     sourcefile = os.path.join(basedir, "src/" + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
     
-    if not test_only and not overwrite and os.path.exists(headerfile):
+    if args.header and not overwrite and os.path.exists(headerfile):
         print "\nError! Header file %s already exists. Use --force to overwrite.\n" % headerfile
         return
-    if not test_only and not overwrite and os.path.exists(sourcefile):
+    if args.cpp and not overwrite and os.path.exists(sourcefile):
         print "\nError! Source file %s already exists. Use --force to overwrite.\n" % sourcefile
         return
-    if not overwrite and os.path.exists(testfile):
+    if args.test and not overwrite and os.path.exists(testfile):
         print "\nError! Test file %s already exists. Use --force to overwrite.\n" % testfile
         return
       
     print
-    if not test_only:
-        write_header(subproject, classname, headerfile, algorithm)
-        write_source(subproject, classname, sourcefile, algorithm)
-    write_test(subproject, classname, testfile, algorithm)
+    if args.header:
+        write_header(subproject, classname, headerfile, args.alg)
+    if args.cpp:
+        write_source(subproject, classname, sourcefile, args.alg)
+    if args.test:
+        write_test(subproject, classname, testfile, args.alg)
     
     # Insert into the cmake list
-    add_to_cmake(subproject, classname, test_only)
+    add_to_cmake(subproject, classname, args)
     
     print "\n   Files were added to Framework/%s/CMakeLists.txt !" % subproject
     print 
@@ -399,9 +403,15 @@ if __name__ == "__main__":
     parser.add_argument('--force', dest='force', action='store_const',
                         const=True, default=False,
                         help='Force overwriting existing files. Use with caution!')
-    parser.add_argument('--test', dest='test', action='store_const',
-                        const=True, default=False,
-                        help='Create only the test file.')
+    parser.add_argument('--no-header', dest='header', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the header file")
+    parser.add_argument('--no-test', dest='test', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the test file")
+    parser.add_argument('--no-cpp', dest='cpp', action='store_const',
+                        const=False, default=True,
+                        help="Don't create the cpp file")
     parser.add_argument('--alg', dest='alg', action='store_const',
                         const=True, default=False,
                         help='Create an Algorithm stub. This adds some methods common to algorithms.')
@@ -410,7 +420,5 @@ if __name__ == "__main__":
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force
-    test_only = args.test
-    algorithm = args.alg
     
-    generate(subproject, classname, overwrite, test_only, algorithm)
+    generate(subproject, classname, overwrite, args)

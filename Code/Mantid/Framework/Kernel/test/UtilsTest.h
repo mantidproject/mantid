@@ -16,6 +16,87 @@ class UtilsTest : public CxxTest::TestSuite
 public:
 
 
+  /** Set up counter array */
+  void test_nestedForLoopSetUp()
+  {
+    size_t * counters = Utils::nestedForLoopSetUp(3, 123);
+    TS_ASSERT(counters);
+    for (size_t i=0; i<3; i++)
+      TS_ASSERT_EQUALS(counters[i], 123);
+    delete counters;
+  }
+
+  /** Set up an index maker*/
+  void test_nestedForLoopSetUpIndexMaker()
+  {
+    size_t * index_max = Utils::nestedForLoopSetUp(4);
+    index_max[0] = 10;
+    index_max[1] = 5;
+    index_max[2] = 2;
+    index_max[3] = 8;
+
+    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(4, index_max);
+    TS_ASSERT(index_maker);
+    TS_ASSERT_EQUALS(index_maker[0], 1);
+    TS_ASSERT_EQUALS(index_maker[1], 10);
+    TS_ASSERT_EQUALS(index_maker[2], 50);
+    TS_ASSERT_EQUALS(index_maker[3], 100);
+
+    delete index_max;
+    delete index_maker;
+  }
+
+  /** Use the index_maker */
+  void test_nestedForLoopGetLinearIndex()
+  {
+    size_t * index_max = Utils::nestedForLoopSetUp(4);
+    index_max[0] = 10;
+    index_max[1] = 5;
+    index_max[2] = 2;
+    index_max[3] = 8;
+    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(4, index_max);
+    TS_ASSERT(index_maker);
+
+    size_t index[4] = {1,1,1,1};
+    TS_ASSERT_EQUALS( Utils::nestedForLoopGetLinearIndex(4, index, index_maker), 1+10+50+100);
+    size_t index2[4] = {3,2,1,0};
+    TS_ASSERT_EQUALS( Utils::nestedForLoopGetLinearIndex(4, index2, index_maker), 3+20+50);
+
+    delete index_max;
+    delete index_maker;
+  }
+
+  /** Back-conversion from linear index */
+  void test_nestedForLoopGetIndicesFromLinearIndex()
+  {
+    size_t * index_max = Utils::nestedForLoopSetUp(4);
+    index_max[0] = 10;
+    index_max[1] = 5;
+    index_max[2] = 2;
+    index_max[3] = 8;
+    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(4, index_max);
+
+    size_t indices[4] = {0,0,0,0};
+    size_t out_indices[4];
+    bool allDone = false;
+    while (!allDone)
+    {
+      // Convert to linear index
+      size_t linear_index = Utils::nestedForLoopGetLinearIndex(4, indices, index_maker);
+
+      // Back-convert
+      Utils::nestedForLoopGetIndicesFromLinearIndex(4, linear_index, index_maker, index_max, out_indices);
+      for (size_t d=0; d<4; d++)
+      {
+        TS_ASSERT_EQUALS( out_indices[d], indices[d] );
+      }
+
+      // Keep going
+      allDone = Utils::nestedForLoopIncrement(4, indices, index_max);
+    }
+  }
+
+
   /** Make a nested loop with each counter resetting at 0 */
   void test_nestedForLoopIncrement()
   {

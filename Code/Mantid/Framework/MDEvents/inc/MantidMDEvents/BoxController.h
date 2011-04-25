@@ -34,6 +34,7 @@ namespace MDEvents
     :nd(nd)
     {
       // TODO: Smarter ways to determine all of these values
+      m_BinarySplit = false;
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
@@ -74,6 +75,28 @@ namespace MDEvents
     void setSplitThreshold(size_t threshold)
     {
       m_SplitThreshold = threshold;
+    }
+
+    //-----------------------------------------------------------------------------------
+    /** Return whether the WS uses binary tree splitting along one dimension */
+    bool getBinarySplit() const
+    {
+      return m_BinarySplit;
+    }
+
+    /** Set the splitting threshold
+     * @param threshold :: # of points at which the MDBox splits
+     */
+    void setBinarySplit(bool BinarySplit)
+    {
+      m_BinarySplit = BinarySplit;
+      if (BinarySplit)
+      {
+        m_splitInto.clear();
+        m_splitInto.resize(this->nd, 1);
+        m_splitInto[0] = 2;
+        calcNumSplit();
+      }
     }
 
     //-----------------------------------------------------------------------------------
@@ -210,7 +233,16 @@ namespace MDEvents
         m_numMDBoxes[depth]--;
       }
       m_numMDGridBoxes[depth]++;
-      m_numMDBoxes[depth + 1] += m_numSplit;
+
+      if (m_BinarySplit)
+      {
+        m_numMDBoxes[depth + 1] += 2;
+      }
+      else
+      {
+        m_numMDBoxes[depth + 1] += m_numSplit;
+      }
+
       m_mutexNumMDBoxes.unlock();
     }
 
@@ -305,6 +337,9 @@ namespace MDEvents
 
     /// Splitting threshold
     size_t m_SplitThreshold;
+
+    /// Use MDSplitBoxes instead of MDGridBoxes?
+    bool m_BinarySplit;
 
     /** Maximum splitting depth: don't go further than this many levels of recursion.
      * This avoids infinite recursion and should be set to a value that gives a smallest

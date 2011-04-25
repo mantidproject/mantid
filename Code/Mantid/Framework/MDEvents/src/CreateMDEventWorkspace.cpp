@@ -64,6 +64,10 @@ namespace MDEvents
       "A comma separated list of the units of each dimension.");
 
     declareProperty(
+      new PropertyWithValue<bool>("BinarySplit", false),
+      "Set to true to use binary splitting along one dimension. SplitInto parameter is ignored in this case.");
+
+    declareProperty(
       new ArrayProperty<int>("SplitInto", "10"),
       "A comma separated list of into how many sub-grid elements each dimension should split; or just one to split into the same number for all dimensions.");
 
@@ -93,20 +97,35 @@ namespace MDEvents
     bc->setSplitThreshold( val );
     val = this->getProperty("MaxRecursionDepth");
     bc->setMaxDepth( val );
-    std::vector<int> splits = getProperty("SplitInto");
-    if (splits.size() == 1)
+    bool BinarySplit = this->getProperty("BinarySplit");
+
+    if (BinarySplit)
     {
-      bc->setSplitInto(splits[0]);
-    }
-    else if (splits.size() == nd)
-    {
-      for (size_t d=0; d<nd; ++d)
-        bc->setSplitInto(d, splits[0]);
+      // Will use MDSplitBox
+      bc->setBinarySplit(true);
     }
     else
-      throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
+    {
+      // Build MDGridBox
+      bc->setBinarySplit(false);
+      std::vector<int> splits = getProperty("SplitInto");
+      if (splits.size() == 1)
+      {
+        bc->setSplitInto(splits[0]);
+      }
+      else if (splits.size() == nd)
+      {
+        for (size_t d=0; d<nd; ++d)
+          bc->setSplitInto(d, splits[0]);
+      }
+      else
+        throw std::invalid_argument("SplitInto parameter must have 1 or ndims arguments.");
+    }
+    bc->resetNumBoxes();
+
     ws->setBoxController(bc);
     ws->splitBox();
+
   }
 
 

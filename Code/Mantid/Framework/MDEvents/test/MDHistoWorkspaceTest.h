@@ -64,6 +64,31 @@ public:
 
   }
   
+  /** Test for a possible seg-fault if nx != ny etc. */
+  void test_uneven_numbers_of_bins()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 20));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 10));
+
+    MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
+
+    TS_ASSERT_EQUALS( ws.getNumDims(), 4);
+    TS_ASSERT_EQUALS( ws.getNPoints(), 5*10*20*10);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*10*20*10 * sizeof(double)*2);
+
+    // Setting and getting
+    size_t index = 5*10*20*10-1; // The last point
+    ws.setSignalAt(index,2.3456);
+    TS_ASSERT_DELTA( ws.getSignalAt(index), 2.3456, 1e-5);
+
+    // Getter with all indices
+    TS_ASSERT_DELTA( ws.getSignalAt(4,9,19,9), 2.3456, 1e-5);
+
+  }
+
+
   void test_getGeometryXML()
   {
     //If POCO xml supported schema validation, we wouldn't need to check xml outputs like this.

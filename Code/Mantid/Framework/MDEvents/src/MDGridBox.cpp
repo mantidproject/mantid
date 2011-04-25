@@ -14,6 +14,11 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
+#if defined(__GNUC__)
+/// This pragma ignores the warning in the ctor where "d<nd-1" for nd=1. This is okay (though would be better if it were for only that function
+#pragma GCC diagnostic ignored "-Wtype-limits"
+#endif
+
 
 /** If defined, then signal caching is performed as events are added. Otherwise,
  * refreshCache() has to be called.
@@ -26,30 +31,19 @@ namespace MDEvents
 {
 
 
+
   //===============================================================================================
   //===============================================================================================
   //-----------------------------------------------------------------------------------------------
   /** Constructor
    * @param box :: MDBox containing the events to split */
-  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box) :
-    IMDBox<MDE, nd>(),
-    nPoints(0)
+  TMDE(MDGridBox)::MDGridBox(MDBox<MDE, nd> * box)
+   : IMDBox<MDE, nd>(box),
+     nPoints(0)
   {
-    if (!box)
-      throw std::runtime_error("MDGridBox::ctor(): box is NULL.");
     BoxController_sptr bc = box->getBoxController();
     if (!bc)
       throw std::runtime_error("MDGridBox::ctor(): No BoxController specified in box.");
-    // Save the controller in this object.
-    this->m_BoxController = bc;
-
-    // Copy the extents
-    for (size_t d=0; d<nd; d++)
-      this->extents[d] = box->getExtents(d);
-    // Copy the depth
-    this->m_depth = box->getDepth();
-    // Re-calculate the volume of the box
-    this->calcVolume();
 
     // Do some computation based on how many splits per each dim.
     size_t tot = 1;
@@ -109,10 +103,7 @@ namespace MDEvents
     this->addEvents(box->getEvents());
     // Copy the cached numbers from the incoming box. This is quick - don't need to refresh cache
     this->nPoints = box->getNPoints();
-    this->m_signal = box->getSignal();
-    this->m_errorSquared = box->getErrorSquared();
   }
-
 
   //-----------------------------------------------------------------------------------------------
   /// Destructor
@@ -213,11 +204,9 @@ namespace MDEvents
       for (it = boxes.begin(); it != it_end; it++)
       {
         IMDBox<MDE,nd> * ibox = *it;
-        MDGridBox<MDE,nd> * gbox = dynamic_cast<MDGridBox<MDE,nd> *>(ibox);
 
-        // Refresh the cache of the contents. Recursive.
-        if (gbox)
-          gbox->refreshCache(NULL);
+        // Refresh the cache (does nothing for MDBox)
+        ibox->refreshCache();
 
         // Add up what's in there
         nPoints += ibox->getNPoints();
@@ -228,7 +217,7 @@ namespace MDEvents
     else
     {
       //---------- Parallel refresh --------------
-
+      throw std::runtime_error("Not implemented");
     }
 
   }
@@ -445,42 +434,8 @@ namespace MDEvents
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   TMDE(
-  void MDGridBox)::centerpointBin(MDBin<MDE,nd> & bin) const
+  void MDGridBox)::centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const
   {
-//    // We have to find boxes that are partially contained, and those fully contained.
-//    for (size_t i=0; i < numBoxes; i++)
-//    {
-//      // Look at this box
-//      IMDBox<MDE,nd> * box = this->boxes[i];
-//
-//      // Count of dimensions where the box's "min" is contained within the bin
-//      size_t dims_min_contained = 0;
-//      // Count of dimensions where the box's "max" is contained
-//      size_t dims_max_contained = 0;
-//
-//      for (size_t d=0; d<nd; d++)
-//      {
-//        CoordType binMin = bin.m_min[d];
-//        CoordType binMax = bin.m_max[d];
-//        MDDimensionExtents & extents = box->getExtents(d);
-//        if ((extents.min >= binMin) && (extents.min <= binMax))
-//          dims_min_contained++;
-//
-//        if ((extents.max >= binMin) && (extents.max <= binMax))
-//          dims_max_contained++;
-//      }
-//
-//      size_t any_contained = (dims_min_contained + dims_max_contained);
-//      if (any_contained == 2*nd)
-//      {
-//        // The box is fully contained (the min and max of each dimension is within the bin limits)!
-//      }
-//      else if (any_contained > 0)
-//      {
-//        // The box is partly contained.
-//      }
-//    }
-
 
     // The MDBin ranges from index_min to index_max (inclusively) if each dimension. So
     // we'll need to make nested loops from index_min[0] to index_max[0]; from index_min[1] to index_max[1]; etc.
@@ -566,7 +521,7 @@ namespace MDEvents
       else
       {
         // Perform the binning
-        boxes[index]->centerpointBin(bin);
+        boxes[index]->centerpointBin(bin,fullyContained);
       }
 
       // Increment the counter(s) in the nested for loops.

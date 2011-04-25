@@ -36,40 +36,6 @@ public:
     TS_ASSERT_EQUALS( b3.getNumMDBoxes(), 1);
   }
 
-  /** Setting and getting the extents */
-  void test_setExtents()
-  {
-    MDBox<MDEvent<2>,2> b;
-    b.setExtents(0, -10.0, 10.0);
-    TS_ASSERT_DELTA(b.getExtents(0).min, -10.0, 1e-6);
-    TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
-
-    b.setExtents(1, -4.0, 6.0);
-    TS_ASSERT_DELTA(b.getExtents(1).min, -4.0, 1e-6);
-    TS_ASSERT_DELTA(b.getExtents(1).max, +6.0, 1e-6);
-
-    TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
-  }
-
-  /** Calculating volume and normalizing signal by it. */
-  void test_volume()
-  {
-    MDBox<MDEvent<2>,2> b;
-    b.setExtents(0, -10.0, 10.0);
-    b.setExtents(1, -4.0, 6.0);
-    b.calcVolume();
-    TS_ASSERT_DELTA( b.getVolume(), 200.0, 1e-5);
-
-    MDEvent<2> ev(100.0, 300.0);
-    b.addEvent(ev);
-
-    TS_ASSERT_DELTA( b.getSignal(), 100.0, 1e-5);
-    TS_ASSERT_DELTA( b.getSignalNormalized(), 0.5, 1e-5);
-    TS_ASSERT_DELTA( b.getErrorSquared(), 300.0, 1e-5);
-    TS_ASSERT_DELTA( b.getErrorSquaredNormalized(), 1.5, 1e-5);
-  }
-
-
   /** Adding events tracks the total signal */
   void test_addEvent()
   {
@@ -82,6 +48,24 @@ public:
     // Did it keep a running total of the signal and error?
     TS_ASSERT_DELTA( b.getSignal(), 1.2*1, 1e-5);
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*1, 1e-5);
+  }
+
+  void test_calculateDimensionStats()
+  {
+    MDDimensionStats stats[2];
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    b.addEvent(ev);
+    ev.setCenter(0, 4.0);
+    ev.setCenter(1, 5.0);
+    b.addEvent(ev);
+    TS_ASSERT_THROWS_NOTHING( b.calculateDimensionStats(stats); )
+    TS_ASSERT_DELTA( stats[0].getMean(), 3.0, 1e-3);
+    TS_ASSERT_DELTA( stats[1].getMean(), 4.0, 1e-3);
+    TS_ASSERT_DELTA( stats[0].getApproxVariance(), 0.5, 1e-3);
+    TS_ASSERT_DELTA( stats[1].getApproxVariance(), 0.5, 1e-3);
   }
 
   void test_clear()
@@ -214,7 +198,7 @@ public:
     // First, a bin object that holds everything
     MDBin<MDEvent<2>,2> bin;
     // Perform the centerpoint binning
-    box.centerpointBin(bin);
+    box.centerpointBin(bin, NULL);
     // 100 events = 100 weight.
     TS_ASSERT_DELTA( bin.m_signal, 100.0, 1e-4);
     TS_ASSERT_DELTA( bin.m_errorSquared, 150.0, 1e-4);
@@ -226,7 +210,7 @@ public:
     bin.m_max[0] = 6.0;
     bin.m_min[1] = 1.0;
     bin.m_max[1] = 3.0;
-    box.centerpointBin(bin);
+    box.centerpointBin(bin, NULL);
     TS_ASSERT_DELTA( bin.m_signal, 4.0, 1e-4);
     TS_ASSERT_DELTA( bin.m_errorSquared, 6.0, 1e-4);
   }

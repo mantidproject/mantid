@@ -35,15 +35,13 @@ public:
     DODEBUG = false;
   }
 
-protected:
-
   //=====================================================================================
   //===================================== HELPER METHODS ================================
   //=====================================================================================
 
   //-------------------------------------------------------------------------------------
   /** Generate an empty MDBox */
-  MDBox<MDEvent<1>,1> * makeMDBox1()
+  static MDBox<MDEvent<1>,1> * makeMDBox1()
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(1));
@@ -59,7 +57,7 @@ protected:
 
   //-------------------------------------------------------------------------------------
   /** Generate an empty MDBox with 3 dimensions, split 10x5x2 */
-  MDBox<MDEvent<3>,3> * makeMDBox3()
+  static MDBox<MDEvent<3>,3> * makeMDBox3()
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(3));
@@ -82,7 +80,7 @@ protected:
    *        placed in the middle of each sub-box.
    * */
   template<size_t nd>
-  MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t numEventsPerBox)
+  static MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t numEventsPerBox)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
@@ -117,7 +115,7 @@ protected:
    * @param recurseLimit :: this is where to spot
    */
   template<size_t nd>
-  void recurseSplit(MDGridBox<MDEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
+  static void recurseSplit(MDGridBox<MDEvent<nd>,nd> * box, size_t atRecurseLevel, size_t recurseLimit)
   {
     typedef std::vector<IMDBox<MDEvent<nd>,nd> *> boxVector;
     if (atRecurseLevel >= recurseLimit) return;
@@ -149,11 +147,12 @@ protected:
    * @return
    */
   template<size_t nd>
-  MDGridBox<MDEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
+  static MDGridBox<MDEvent<nd>,nd> * makeRecursiveMDGridBox(size_t splitInto, size_t levels)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
     splitter->setSplitThreshold(5);
+    splitter->resetNumBoxes();
     // Splits into splitInto x splitInto x ... boxes
     splitter->setSplitInto(splitInto);
     // Set the size to splitInto*1.0 in all directions
@@ -172,7 +171,7 @@ protected:
 
   //-------------------------------------------------------------------------------------
   /** Return a vector with this many MDEvents, spaced evenly from 0.5, 1.5, etc. */
-  std::vector<MDEvent<1> > makeMDEvents1(size_t num)
+  static std::vector<MDEvent<1> > makeMDEvents1(size_t num)
   {
     std::vector<MDEvent<1> > out;
     for (size_t i=0; i<num; i++)
@@ -183,6 +182,15 @@ protected:
     return out;
   }
 
+
+  //-------------------------------------------------------------------------------------
+  /** Helper function compares the extents of the given box */
+  template<typename MDBOX>
+  static void extents_match(MDBOX box, size_t dim, double min, double max)
+  {
+    TSM_ASSERT_DELTA(dim, box->getExtents(dim).min, min, 1e-6);
+    TSM_ASSERT_DELTA(dim, box->getExtents(dim).max, max, 1e-6);
+  }
 
 
   //=====================================================================================
@@ -259,15 +267,6 @@ public:
     }
   }
 
-
-  //-------------------------------------------------------------------------------------
-  /** Helper function compares the extents of the given box */
-  template<typename MDBOX>
-  void extents_match(MDBOX box, size_t dim, double min, double max)
-  {
-    TSM_ASSERT_DELTA(dim, box->getExtents(dim).min, min, 1e-6);
-    TSM_ASSERT_DELTA(dim, box->getExtents(dim).max, max, 1e-6);
-  }
 
 
   //-------------------------------------------------------------------------------------
@@ -710,7 +709,7 @@ public:
 
     MDBin<MDEvent<2>,2> bin;
     bin = makeMDBin2(minX, maxX, minY, maxY);
-    b->centerpointBin(bin);
+    b->centerpointBin(bin, NULL);
     TSM_ASSERT_DELTA( message, bin.m_signal, expectedSignal, 1e-5);
   }
 
@@ -778,6 +777,60 @@ private:
   std::string message;
 };
 
+
+
+//=====================================================================================
+//===================================== Performance Test ================================
+//=====================================================================================
+class MDGridBoxTestPerformance : public CxxTest::TestSuite
+{
+public:
+
+  MDGridBox<MDEvent<3>,3> * box3;
+  std::vector<MDEvent<3> > events;
+
+  void setUp()
+  {
+    // Split 5x5x5, 2 deep.
+    box3 = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
+
+    // Make the list of fake events, random dist.
+    size_t num = 5e6;
+
+    boost::mt19937 rng;
+    boost::uniform_real<double> u(0, 10.0); // Range
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
+    for (size_t i=0; i<num; ++i)
+    {
+      CoordType centers[3];
+      for (size_t d=0; d<3; d++)
+        centers[d] = gen();
+      // Create and add the event.
+      events.push_back( MDEvent<3>( 1.0, 1.0, centers) );
+    }
+
+  }
+
+  void tearDown()
+  {
+    delete box3;
+  }
+
+
+  /** Performance test that adds lots of events to a recursively split box.
+   * SINGLE-THREADED!
+   */
+  void test_addEvents_lots()
+  {
+    // We built this many MDBoxes
+    TS_ASSERT_EQUALS( box3->getBoxController()->getTotalNumMDBoxes(), 125*125+1); // +1 might be a test issue
+    TS_ASSERT_EQUALS( events.size(), 5e6);
+
+    // Add them!
+    box3->addEvents(events);
+  }
+
+};
 
 #endif
 

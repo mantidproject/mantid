@@ -82,6 +82,26 @@ namespace MDEvents
 
 
 
+  //-----------------------------------------------------------------------------------------------
+  /** Calculate the statistics for each dimension of this MDBox, using
+   * all the contained events
+   * @param stats :: nd-sized fixed array of MDDimensionStats, reset to 0.0 before!
+   */
+  TMDE(
+  void MDBox)::calculateDimensionStats(MDDimensionStats * stats) const
+  {
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+    for(typename std::vector<MDE>::const_iterator it = data.begin(); it != it_end; it++)
+    {
+      const MDE & event = *it;
+      for (size_t d=0; d<nd; d++)
+      {
+        stats[d].addPoint( event.getCenter(d) );
+      }
+    }
+  }
+
+
 
   //-----------------------------------------------------------------------------------------------
   /** Add a MDEvent to the box.
@@ -129,8 +149,25 @@ namespace MDEvents
    * @param bin :: MDBin object giving the limits of events to accept.
    */
   TMDE(
-  void MDBox)::centerpointBin(MDBin<MDE,nd> & bin) const
+  void MDBox)::centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const
   {
+    if (fullyContained)
+    {
+      size_t d;
+      for (d=0; d<nd; ++d)
+      {
+        if (not fullyContained[d]) break;
+      }
+      if (d == nd)
+      {
+//        std::cout << "MDBox at depth " << this->m_depth << " was fully contained in bin " << bin.m_index << ".\n";
+        // All dimensions are fully contained, so just return the cached total signal instead of counting.
+        bin.m_signal += this->m_signal;
+        bin.m_errorSquared += this->m_errorSquared;
+        return;
+      }
+    }
+
     typename std::vector<MDE>::const_iterator it = data.begin();
     typename std::vector<MDE>::const_iterator it_end = data.end();
 

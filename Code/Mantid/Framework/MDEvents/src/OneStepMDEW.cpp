@@ -83,6 +83,7 @@ namespace MDEvents
     childAlg->setPropertyValue("InputWorkspace", tempWsName);
     childAlg->setProperty<bool>("ClearInputWorkspace", false);
     childAlg->setProperty<bool>("LorentzCorrection", true);
+    childAlg->setProperty<bool>("BinarySplit", false);
     childAlg->setPropertyValue("OutputWorkspace", getPropertyValue("OutputWorkspace"));
     childAlg->executeAsSubAlg();
 

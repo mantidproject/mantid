@@ -44,6 +44,29 @@ namespace MDEvents
     {
     }
 
+    //-----------------------------------------------------------------------------------------------
+    /** Copy constructor. Copies the extents, depth, etc.
+     * and recalculates the boxes' volume.
+     */
+    IMDBox(IMDBox<MDE,nd> * box)
+    : m_signal(box->getSignal()), m_errorSquared(box->getErrorSquared()),
+      m_inverseVolume(box->m_inverseVolume), m_depth(box->getDepth())
+    {
+      if (!box)
+        throw std::runtime_error("IMDBox::ctor(): box is NULL.");
+      // Save the controller in this object.
+      this->m_BoxController = box->m_BoxController;
+      // Copy the extents
+      for (size_t d=0; d<nd; d++)
+        this->extents[d] = box->extents[d];
+      // Copy the depth
+      this->m_depth = box->getDepth();
+      // Re-calculate the volume of the box
+      this->calcVolume(); //TODO: Is this necessary or should we copy the volume?
+
+    }
+
+    // -------------------------------------------------------------------------------------------
     /// Destructor
     virtual ~IMDBox() {}
 
@@ -71,11 +94,32 @@ namespace MDEvents
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
      */
-    virtual void centerpointBin(MDBin<MDE,nd> & bin) const = 0;
+    virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
+
+    // -------------------------------------------------------------------------------------------
+    /** Split sub-boxes, if this is possible and neede for this box */
+    virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
+    {
+      // Do nothing by default.
+//      // Can't split it!
+//      throw std::runtime_error("splitAllIfNeeded called on a MDBox (call splitBox() first). Call MDEventWorkspace::splitBox() before!");
+    }
+
+
+    // -------------------------------------------------------------------------------------------
+    /** Recalculate signal etc. */
+    virtual void refreshCache(Kernel::ThreadScheduler * /*ts*/ = NULL)
+    {
+      // Do nothing by default.
+    }
+
+
 
     /// Run a generic MDBoxTask onto this, going recursively.
 //    virtual void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained) = 0;
 
+
+    // -------------------------------------------------------------------------------------------
     /// Return the box controller saved.
     BoxController_sptr getBoxController() const
     { return m_BoxController; }
@@ -137,6 +181,24 @@ namespace MDEvents
     virtual double getErrorSquared() const
     {
       return m_errorSquared;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Sets the integrated signal from all points within  (mostly used for testing)
+     * @param signal :: new Signal amount.
+     */
+    virtual void setSignal(const double signal)
+    {
+      m_signal = signal;
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Sets the integrated error squared from all points within (mostly used for testing)
+     * @param ErrorSquared :: new squared error.
+     */
+    virtual void setErrorSquared(const double ErrorSquared)
+    {
+      m_errorSquared = ErrorSquared;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -202,8 +264,7 @@ namespace MDEvents
     /// Inverse of the volume of the cell, to be used for normalized signal.
     double m_inverseVolume;
 
-
-    /// The box splitting controller
+    /// The box splitting controller, shared with all boxes in the hierarchy
     BoxController_sptr m_BoxController;
 
     /// Recursion depth

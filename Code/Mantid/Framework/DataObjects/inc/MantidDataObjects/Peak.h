@@ -100,7 +100,7 @@ namespace DataObjects
     double m_FinalEnergy;
 
     /// Orientation matrix of the goniometer angles.
-    Mantid::Geometry::Matrix<double> m_GoniometerMatrix;
+    Mantid::Geometry::Matrix<double> m_GoniometerMatrix; //TODO: Set as identity 3x3 matrix by default
 
     /// Originating run number for this peak
     int m_RunNumber;
