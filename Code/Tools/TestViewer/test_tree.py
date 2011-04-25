@@ -534,7 +534,7 @@ class TreeFilterProxyModel(QSortFilterProxyModel):
                 return False
             if self.selected_only:
                 if isinstance(item, TestProject) or  isinstance(item, TestSuite) :
-                    return item.selected
+                    return (item.get_selected() > 0)
                 else:
                     # Don't filter out TestSingles based on selection (since they're all selected)
                     return True

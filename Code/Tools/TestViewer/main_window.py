@@ -168,7 +168,6 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonSelectNone, QtCore.SIGNAL("clicked()"), self.select_none)
         self.connect(self.buttonSelectFailed, QtCore.SIGNAL("clicked()"), self.select_failed)
         self.connect(self.buttonSelectSVN, QtCore.SIGNAL("clicked()"), self.select_svn)
-        self.connect(self.buttonCopyFilename, QtCore.SIGNAL("clicked()"), self.copy_filename_to_clipboard)
         
         # -- Text commands ---
         self.connect(self.textTimeout, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
@@ -536,42 +535,23 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         @param res :: either TestProject, TestSuite, or TestSingle object containing the results to show."""
         if self.current_results is None:
             self.labelTestType.setText("Test Project Results:")
-            self.labelFilename.setText( "" ) 
             self.labelTestName.setText( "" ) 
             self.textResults.setText( "" )
             return
         res = self.current_results
         if isinstance(res, TestProject):
             self.labelTestType.setText("Test Project Results:")
-            self.labelFilename.setText( "" ) 
         elif isinstance(res, TestSuite):
             self.labelTestType.setText("Test Suite Results:") 
-            self.labelFilename.setText( res.source_file ) 
         elif isinstance(res, TestSingle):
             self.labelTestType.setText("Single Test Results:") 
-            self.labelFilename.setText( res.parent.source_file ) 
         else:
             raise "Incorrect object passed to show_results; should be TestProject, TestSuite, or TestSingle."
         self.labelTestName.setText( res.get_fullname() ) 
         self.textResults.setText( u'<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />\n' 
                                   + res.get_results_text() )
 
-                
-    #-----------------------------------------------------------------------------
-    def copy_filename_to_clipboard(self):
-        """Copy the filename in labelFilename to clipboard"""
-        import pygtk
-        pygtk.require('2.0')
-        import gtk
-        # get the clipboard
-        clipboard = gtk.clipboard_get()
-        # set the clipboard text data
-        clipboard.set_text(str(self.labelFilename.text()) )
-        # make our data available to other applications
-        clipboard.store()
-
-                
-                
+                            
     #-----------------------------------------------------------------------------
     def checked_show_fail_only(self, state):
         """ Toggle the filtering """

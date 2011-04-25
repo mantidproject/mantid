@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Wed Mar 16 10:47:37 2011
+# Created: Tue Apr 19 10:21:50 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -496,20 +496,6 @@ class Ui_MainWindow(object):
         self.labelTestName.setPalette(palette)
         self.labelTestName.setObjectName("labelTestName")
         self.verticalLayout_2.addWidget(self.labelTestName)
-        self.horizontalLayout_5 = QtGui.QHBoxLayout()
-        self.horizontalLayout_5.setObjectName("horizontalLayout_5")
-        self.labelFilename = QtGui.QLabel(self.tabResults)
-        self.labelFilename.setObjectName("labelFilename")
-        self.horizontalLayout_5.addWidget(self.labelFilename)
-        self.buttonCopyFilename = QtGui.QPushButton(self.tabResults)
-        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Fixed, QtGui.QSizePolicy.Fixed)
-        sizePolicy.setHorizontalStretch(0)
-        sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.buttonCopyFilename.sizePolicy().hasHeightForWidth())
-        self.buttonCopyFilename.setSizePolicy(sizePolicy)
-        self.buttonCopyFilename.setObjectName("buttonCopyFilename")
-        self.horizontalLayout_5.addWidget(self.buttonCopyFilename)
-        self.verticalLayout_2.addLayout(self.horizontalLayout_5)
         self.textResults = QtGui.QTextEdit(self.tabResults)
         self.textResults.setFrameShape(QtGui.QFrame.StyledPanel)
         self.textResults.setReadOnly(True)
@@ -592,9 +578,6 @@ class Ui_MainWindow(object):
         self.labelResult.setText(QtGui.QApplication.translate("MainWindow", "All Passed! ", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestType.setText(QtGui.QApplication.translate("MainWindow", "Single Test Results:", None, QtGui.QApplication.UnicodeUTF8))
         self.labelTestName.setText(QtGui.QApplication.translate("MainWindow", "(Name of test)", None, QtGui.QApplication.UnicodeUTF8))
-        self.labelFilename.setText(QtGui.QApplication.translate("MainWindow", "(filename)", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCopyFilename.setToolTip(QtGui.QApplication.translate("MainWindow", "Copy the source filename to the clipboard", None, QtGui.QApplication.UnicodeUTF8))
-        self.buttonCopyFilename.setText(QtGui.QApplication.translate("MainWindow", "Copy", None, QtGui.QApplication.UnicodeUTF8))
         self.textResults.setHtml(QtGui.QApplication.translate("MainWindow", "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0//EN\" \"http://www.w3.org/TR/REC-html40/strict.dtd\">\n"
 "<html><head><meta name=\"qrichtext\" content=\"1\" /><style type=\"text/css\">\n"
 "p, li { white-space: pre-wrap; }\n"
@@ -602,6 +585,7 @@ class Ui_MainWindow(object):
 "<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
 "<tr>\n"
 "<td style=\"border: none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
