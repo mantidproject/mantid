@@ -58,7 +58,7 @@ class MuonAnalysis : public MantidQt::API::UserSubWindow
 
 public:
   /// Name of the interface
-  static std::string name() { return "MuonAnalysis"; }
+  static std::string name() { return "Muon Analysis"; }
 
 public:
   /// Default Constructor

@@ -60,7 +60,7 @@ namespace MantidQt
       ///Destructor
       ~ConvertToEnergy();
       /// Interface name
-      static std::string name() { return "ConvertToEnergy"; }
+      static std::string name() { return "Convert To Energy"; }
       /// Aliases for this interface
       static std::set<std::string> aliases()
       { 

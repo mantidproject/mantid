@@ -69,7 +69,7 @@ class SANSRunWindow : public MantidQt::API::UserSubWindow
 
 public:
   /// Name of the interface
-  static std::string name() { return "SANSRunWindow"; }
+  static std::string name() { return "SANS (ISIS)"; }
 
 public:
   /// Default Constructor
