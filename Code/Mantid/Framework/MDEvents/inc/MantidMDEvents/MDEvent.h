@@ -184,7 +184,7 @@ namespace MDEvents
      * */
     float getError() const
     {
-      return sqrt(errorSquared);
+      return float(sqrt(errorSquared));
     }
 
   };

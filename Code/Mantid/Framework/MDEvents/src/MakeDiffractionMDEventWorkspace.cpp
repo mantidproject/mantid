@@ -193,7 +193,7 @@ namespace MDEvents
         {
           //double lambda = 1.0/wavenumber;
           // (sin(theta))^2 / wavelength^4
-          double correct = sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared;
+          float correct = float( sin_theta_squared * wavenumber*wavenumber*wavenumber*wavenumber * sin_theta_squared );
           // Push the MDEvent but correct the weight.
           out_events.push_back( MDE(it->weight()*correct, it->errorSquared()*correct*correct, center) );
         }
@@ -371,11 +371,11 @@ namespace MDEvents
       }
 
       // Give this task to the scheduler
-      double cost = el.getNumberEvents();
+      double cost = double(el.getNumberEvents());
       ts->push( new FunctionTask( func, cost) );
 
       // Keep a running total of how many events we've added
-      eventsAdded += cost;
+      eventsAdded += el.getNumberEvents();
       if (bc->shouldSplitBoxes(eventsAdded, lastNumBoxes))
       {
         if (DODEBUG) std::cout << cputim << ": Added tasks worth " << eventsAdded << " events.\n";

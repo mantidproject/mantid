@@ -156,7 +156,7 @@ namespace MDEvents
     for (size_t i=0; i<num.size(); i++)
     {
       if (i > 0) mess << ", ";
-      double pct = (num[i] / max[i] * 100);
+      double pct = (double(num[i]) / double(max[i] * 100));
       if (pct > 0 && pct < 1e-2) mess << std::scientific; else mess << std::fixed;
       mess << std::setprecision(2) << pct;
     }

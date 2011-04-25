@@ -33,11 +33,11 @@ namespace MDEvents
     //---------------------------------------------------------------------------------------
     /** Returns the mean position of events in this dimension */
     CoordType getMean() const
-    { return total / numPoints; }
+    { return total / double(numPoints); }
 
     /** Returns the approximate standard deviation of the position of events in this dimension */
     CoordType getApproxVariance() const
-    { return totalApproxVariance / numPoints; }
+    { return totalApproxVariance / double(numPoints); }
 
 
     //---------------------------------------------------------------------------------------
@@ -48,7 +48,7 @@ namespace MDEvents
     {
       total += x;
       numPoints++;
-      CoordType diff = (x - total/numPoints);
+      CoordType diff = (x - total/double(numPoints));
       totalApproxVariance += diff * diff;
     }
 
