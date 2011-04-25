@@ -354,126 +354,6 @@ namespace MDEvents
 
 
 
-
-
-  // =============================================================================================
-  /** Task for creating MDBin's and integrating them.
-   * Multitudes of these will be created by binToMDHistoWorkspace() to do a
-   * dense histogram bin.
-   */
-  TMDE_CLASS
-  class MDEventWorkspaceCenterpointBinTask : public Task
-  {
-  public:
-    /** Constructor
-     *
-     * @param inBox :: pointer to the INPUT MDBox containing MDEvents
-     * @param outWS :: pointer to the OUTPUT MDHistoWorkspace containing the result
-     * @param binDimensions :: vector of MDHistoDimensions giving the dimension
-     *        of the OUTPUT MDHistoWorkspace.
-     * @param dimensionToBinFrom :: vector where dimensionToBinFrom[n] =
-     *        the dimension in the INPUT MDEventWorkspace that goes to the nth dimension in the OUTPUT MDHistoWorkspace.
-     * @param linearIndexStart :: Start generating bins at this linear index of the output workspace.
-     * @param linearIndexStop :: Stop generating bins before this linear index.
-     * @param index_max :: array of the maximum index in each OUTPUT dimension.
-     * @param index_maker :: linear index maker array (from Utils::nestedForLoop)
-     * @param implicitFunction :: limiting implicit function, can be NULL
-     */
-    MDEventWorkspaceCenterpointBinTask(IMDBox<MDE,nd> * inBox,
-        MDHistoWorkspace_sptr outWS,
-        const std::vector<MDHistoDimension_sptr> & binDimensions,
-        const std::vector<size_t> & dimensionToBinFrom,
-        const size_t linearIndexStart, const size_t linearIndexStop,
-        const size_t * index_max,
-        const size_t * index_maker,
-        const Mantid::API::ImplicitFunction * implicitFunction)
-    :
-      Task(), inBox(inBox), outWS(outWS),
-      binDimensions(binDimensions),
-      dimensionToBinFrom(dimensionToBinFrom),
-      linearIndexStart(linearIndexStart),
-      linearIndexStop(linearIndexStop),
-      index_max(index_max),
-      index_maker(index_maker),
-      implicitFunction(implicitFunction)
-    {
-    }
-
-    /** - Make a certain number of MDBin's
-     *  - Run the centerpointBinning.
-     *  - Store the result in the output workspace. */
-    void run()
-    {
-      // Number of output binning dimensions found
-      size_t numBD = binDimensions.size();
-      // Counter in each dimension
-      size_t * index = Utils::nestedForLoopSetUp(numBD);
-
-      // Do each bin in this task
-      for (size_t linear_index=linearIndexStart; linear_index<linearIndexStop; linear_index++)
-      {
-        // Get the index at each dimension for this bin.
-        Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
-
-        // Construct the bin and its coordinates
-        MDBin<MDE,nd> bin;
-        for (size_t bd=0; bd<numBD; bd++)
-        {
-          // Index in this binning dimension (i_x, i_y, etc.)
-          size_t idx = index[bd];
-          // Dimension in the MDEventWorkspace
-          size_t d = dimensionToBinFrom[bd];
-          // Corresponding extents
-          bin.m_min[d] = binDimensions[bd]->getX(idx);
-          bin.m_max[d] = binDimensions[bd]->getX(idx+1);
-        }
-        bin.m_index = linear_index;
-
-        // Check if the bin is in the ImplicitFunction (if any)
-        bool binContained = true;
-        if (implicitFunction)
-        {
-          binContained = implicitFunction->evaluate(makePoint3D(bin));
-        }
-
-        if (binContained)
-        {
-          // Array of bools set to true when a dimension is fully contained (binary splitting only)
-          bool fullyContained[nd];
-          for (size_t d=0; d<nd; d++)
-            fullyContained[d] = false;
-
-          // This will recursively bin into the sub grids
-          inBox->centerpointBin(bin, fullyContained);
-
-          // Save the data into the dense histogram
-          outWS->setSignalAt(linear_index, bin.m_signal);
-          outWS->setErrorAt(linear_index, bin.m_errorSquared);
-        }
-
-      } // (for each linear index)
-
-      // Cleanup
-      delete [] index;
-
-    }
-
-  private:
-    /// pointer to the MDBox containing MDEvents
-    IMDBox<MDE,nd> * inBox;
-    /// pointer to the MDHistoWorkspace containing the result
-    MDHistoWorkspace_sptr outWS;
-    const std::vector<MDHistoDimension_sptr> & binDimensions;
-    const std::vector<size_t> & dimensionToBinFrom;
-    const size_t linearIndexStart;
-    const size_t linearIndexStop;
-    const size_t * index_max;
-    const size_t * index_maker;
-    const Mantid::API::ImplicitFunction * implicitFunction;
-
-  };
-
-
   //-----------------------------------------------------------------------------------------------
   /** Bin a MDEventWorkspace into a dense histogram in a MDHistoWorkspace, using the MDBox's
    * centerpointBin routine.
@@ -554,15 +434,56 @@ namespace MDEvents
     // Cache a calculation to convert indices x,y,z,t into a linear index.
     size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(numBD, index_max);
 
-    // Set up a bunch of tasks
-    size_t numPoints = ws->getNPoints();
-    for (size_t start=0; start < numPoints; start += binsPerTask)
+    int numPoints = int(ws->getNPoints());
+    // Run in OpenMP with dynamic scheduling and a smallish chunk size (binsPerTask)
+    PRAGMA_OMP(parallel for schedule(dynamic, binsPerTask))
+    for (int i=0; i < numPoints; i++)
     {
-      size_t stop = start + binsPerTask;
-      if (stop > numPoints) stop = numPoints;
-      ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, binDimensions,
-                        dimensionToBinFrom, start, stop, index_max, index_maker, implicitFunction) );
-    }
+      size_t linear_index = size_t(i);
+      // nd >= numBD in all cases so this is safe.
+      size_t index[nd];
+
+      // Get the index at each dimension for this bin.
+      Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
+
+      // Construct the bin and its coordinates
+      MDBin<MDE,nd> bin;
+      for (size_t bd=0; bd<numBD; bd++)
+      {
+        // Index in this binning dimension (i_x, i_y, etc.)
+        size_t idx = index[bd];
+        // Dimension in the MDEventWorkspace
+        size_t d = dimensionToBinFrom[bd];
+        // Corresponding extents
+        bin.m_min[d] = binDimensions[bd]->getX(idx);
+        bin.m_max[d] = binDimensions[bd]->getX(idx+1);
+      }
+      bin.m_index = linear_index;
+
+      // Check if the bin is in the ImplicitFunction (if any)
+      bool binContained = true;
+      if (implicitFunction)
+      {
+        binContained = implicitFunction->evaluate(makePoint3D(bin));
+      }
+
+      if (binContained)
+      {
+        // Array of bools set to true when a dimension is fully contained (binary splitting only)
+        bool fullyContained[nd];
+        for (size_t d=0; d<nd; d++)
+          fullyContained[d] = false;
+
+        // This will recursively bin into the sub grids
+        data->centerpointBin(bin, fullyContained);
+
+        // Save the data into the dense histogram
+        ws->setSignalAt(linear_index, bin.m_signal);
+        ws->setErrorAt(linear_index, bin.m_errorSquared);
+      }
+
+    } // (for each linear index)
+
 
     if (DODEBUG) std::cout << tim << " to fill up the ThreadPool with all the tasks\n";
 
@@ -582,11 +503,8 @@ namespace MDEvents
 
 
 
-
-//
-//
 //  // =============================================================================================
-//  /** Class for adding up events into a single bin.
+//  /** Task for creating MDBin's and integrating them.
 //   * Multitudes of these will be created by binToMDHistoWorkspace() to do a
 //   * dense histogram bin.
 //   */
@@ -596,38 +514,94 @@ namespace MDEvents
 //  public:
 //    /** Constructor
 //     *
-//     * @param inBox :: pointer to the MDBox containing MDEvents
-//     * @param outWS :: pointer to the MDHistoWorkspace containing the result
-//     * @param bins :: Vector of MDBin object describing the bounds to bin into.
-//     * @return
+//     * @param inBox :: pointer to the INPUT MDBox containing MDEvents
+//     * @param outWS :: pointer to the OUTPUT MDHistoWorkspace containing the result
+//     * @param binDimensions :: vector of MDHistoDimensions giving the dimension
+//     *        of the OUTPUT MDHistoWorkspace.
+//     * @param dimensionToBinFrom :: vector where dimensionToBinFrom[n] =
+//     *        the dimension in the INPUT MDEventWorkspace that goes to the nth dimension in the OUTPUT MDHistoWorkspace.
+//     * @param linearIndexStart :: Start generating bins at this linear index of the output workspace.
+//     * @param linearIndexStop :: Stop generating bins before this linear index.
+//     * @param index_max :: array of the maximum index in each OUTPUT dimension.
+//     * @param index_maker :: linear index maker array (from Utils::nestedForLoop)
+//     * @param implicitFunction :: limiting implicit function, can be NULL
 //     */
 //    MDEventWorkspaceCenterpointBinTask(IMDBox<MDE,nd> * inBox,
-//        MDHistoWorkspace_sptr outWS, std::vector<MDBin<MDE,nd> > & bins) :
-//      Task(), inBox(inBox), outWS(outWS), bins(bins)
+//        MDHistoWorkspace_sptr outWS,
+//        const std::vector<MDHistoDimension_sptr> & binDimensions,
+//        const std::vector<size_t> & dimensionToBinFrom,
+//        const size_t linearIndexStart, const size_t linearIndexStop,
+//        const size_t * index_max,
+//        const size_t * index_maker,
+//        const Mantid::API::ImplicitFunction * implicitFunction)
+//    :
+//      Task(), inBox(inBox), outWS(outWS),
+//      binDimensions(binDimensions),
+//      dimensionToBinFrom(dimensionToBinFrom),
+//      linearIndexStart(linearIndexStart),
+//      linearIndexStop(linearIndexStop),
+//      index_max(index_max),
+//      index_maker(index_maker),
+//      implicitFunction(implicitFunction)
 //    {
 //    }
 //
-//    /** Run the binning and store the result */
+//    /** - Make a certain number of MDBin's
+//     *  - Run the centerpointBinning.
+//     *  - Store the result in the output workspace. */
 //    void run()
 //    {
+//      // Number of output binning dimensions found
+//      size_t numBD = binDimensions.size();
+//      // Counter in each dimension
+//      size_t * index = Utils::nestedForLoopSetUp(numBD);
 //
 //      // Do each bin in this task
-//      for (size_t i=0; i<bins.size(); i++)
+//      for (size_t linear_index=linearIndexStart; linear_index<linearIndexStop; linear_index++)
 //      {
-//        MDBin<MDE,nd> & bin = bins[i];
+//        // Get the index at each dimension for this bin.
+//        Utils::nestedForLoopGetIndicesFromLinearIndex(numBD, linear_index, index_maker, index_max, index);
 //
-//        // Array of bools set to true when a dimension is fully contained (binary splitting only)
-//        bool fullyContained[nd];
-//        for (size_t d=0; d<nd; d++)
-//          fullyContained[d] = false;
+//        // Construct the bin and its coordinates
+//        MDBin<MDE,nd> bin;
+//        for (size_t bd=0; bd<numBD; bd++)
+//        {
+//          // Index in this binning dimension (i_x, i_y, etc.)
+//          size_t idx = index[bd];
+//          // Dimension in the MDEventWorkspace
+//          size_t d = dimensionToBinFrom[bd];
+//          // Corresponding extents
+//          bin.m_min[d] = binDimensions[bd]->getX(idx);
+//          bin.m_max[d] = binDimensions[bd]->getX(idx+1);
+//        }
+//        bin.m_index = linear_index;
 //
-//        // This will recursively bin into the sub grids
-//        inBox->centerpointBin(bin, fullyContained);
+//        // Check if the bin is in the ImplicitFunction (if any)
+//        bool binContained = true;
+//        if (implicitFunction)
+//        {
+//          binContained = implicitFunction->evaluate(makePoint3D(bin));
+//        }
 //
-//        // Save the data into the dense histogram
-//        outWS->setSignalAt(bin.m_index, bin.m_signal);
-//        outWS->setErrorAt(bin.m_index, bin.m_errorSquared);
-//      }
+//        if (binContained)
+//        {
+//          // Array of bools set to true when a dimension is fully contained (binary splitting only)
+//          bool fullyContained[nd];
+//          for (size_t d=0; d<nd; d++)
+//            fullyContained[d] = false;
+//
+//          // This will recursively bin into the sub grids
+//          inBox->centerpointBin(bin, fullyContained);
+//
+//          // Save the data into the dense histogram
+//          outWS->setSignalAt(linear_index, bin.m_signal);
+//          outWS->setErrorAt(linear_index, bin.m_errorSquared);
+//        }
+//
+//      } // (for each linear index)
+//
+//      // Cleanup
+//      delete [] index;
 //
 //    }
 //
@@ -636,8 +610,14 @@ namespace MDEvents
 //    IMDBox<MDE,nd> * inBox;
 //    /// pointer to the MDHistoWorkspace containing the result
 //    MDHistoWorkspace_sptr outWS;
-//    /// Vector of MDBin objects describing the bounds to bin into.
-//    std::vector<MDBin<MDE,nd> > bins;
+//    const std::vector<MDHistoDimension_sptr> & binDimensions;
+//    const std::vector<size_t> & dimensionToBinFrom;
+//    const size_t linearIndexStart;
+//    const size_t linearIndexStop;
+//    const size_t * index_max;
+//    const size_t * index_maker;
+//    const Mantid::API::ImplicitFunction * implicitFunction;
+//
 //  };
 //
 //
@@ -694,88 +674,42 @@ namespace MDEvents
 //          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
 //      }
 //    }
-//    // Number of input binning dimensions found
+//    // Number of output binning dimensions found
 //    size_t numBD = binDimensions.size();
 //
 //    if (numBD == 0)
-//      throw std::runtime_error("No input dimensions were found in the MDEventWorkspace. Cannot bin!");
+//      throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
 //
 //    if (DODEBUG) std::cout << tim << " to cache the binning results.\n";
 //
 //    //Since the costs are not known ahead of time, use a simple FIFO buffer.
 //    ThreadScheduler * ts = new ThreadSchedulerFIFO();
+//
 //    // Create the threadpool with: all CPUs, a progress reporter
 //    ThreadPool tp(ts, 0, prog);
-//    // Start the threadpool, and allow the threads to wait up to 1.0 seconds for tasks to come in.
-//    //tp.start(1.0);
 //
 //    // Big efficiency gain is obtained by grouping a few bins per task.
-//    size_t binsPerTask = 1;
+//    size_t binsPerTask = 100;
 //
-//    // For progress reporting, the approx  # of tasks (might be off with implicit functions)
+//    // For progress reporting, the approx  # of tasks
 //    if (prog)
-//      prog->setNumSteps( ws->getNPoints() / binsPerTask );
+//      prog->setNumSteps( int(ws->getNPoints() / binsPerTask) );
 //
-//    // Now we need to do a nested loop in the N dimensions across which we bin
-//
-//    // Index of the loop in each binning dimension, starting at 0.
-//    size_t * index = Utils::nestedForLoopSetUp(numBD);
 //    // This is the limit to loop over in each dimension
 //    size_t * index_max = Utils::nestedForLoopSetUp(numBD);
 //    for (size_t bd=0; bd<numBD; bd++) index_max[bd] = binDimensions[bd]->getNBins();
 //    // Cache a calculation to convert indices x,y,z,t into a linear index.
-//    size_t * linear_index_maker = Utils::nestedForLoopSetUpIndexMaker(numBD, index_max);
+//    size_t * index_maker = Utils::nestedForLoopSetUpIndexMaker(numBD, index_max);
 //
-//    /// Vector of bins for a given task
-//    std::vector<MDBin<MDE,nd> > bins;
-//
-//    // --- Unrolled Nested Loop ----
-//    bool allDone = false;
-//    while (!allDone)
+//    // Set up a bunch of tasks
+//    size_t numPoints = ws->getNPoints();
+//    for (size_t start=0; start < numPoints; start += binsPerTask)
 //    {
-//      // --- Create a MDBin object for this bit ---
-//      // (this index is where it lands in the MDHistoWorkspace.
-//      size_t linear_index = 0;
-//      MDBin<MDE,nd> bin;
-//      for (size_t bd=0; bd<numBD; bd++)
-//      {
-//        // Index in this binning dimension (i_x, i_y, etc.)
-//        size_t idx = index[bd];
-//        // Dimension in the MDEventWorkspace
-//        size_t d = dimensionToBinFrom[bd];
-//        // Corresponding extents
-//        bin.m_min[d] = binDimensions[bd]->getX(idx);
-//        bin.m_max[d] = binDimensions[bd]->getX(idx+1);
-//        // Count the linear_index
-//        linear_index += linear_index_maker[bd] * idx;
-//      }
-//      bin.m_index = linear_index;
-//
-//      // Check if the bin is in the ImplicitFunction (if any)
-//      bool binContained = true;
-//      if (implicitFunction)
-//      {
-//        binContained = implicitFunction->evaluate(makePoint3D(bin));
-//      }
-//
-//      // Yes, we want to do the bin.
-//      if (binContained)
-//      {
-//        bins.push_back(bin);
-//      }
-//
-//      // --- Increment index in each dimension -----
-//      allDone = Utils::nestedForLoopIncrement(numBD, index, index_max);
-//
-//      // Make one task per X number of bins. This reduces overhead (very significantly ~10x speed up!).
-//      if (allDone || bins.size() == binsPerTask)
-//      {
-//        // Create the task and schedule it
-//        ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, bins) );
-//        bins.clear();
-//      }
-//
-//    } // While !alldone
+//      size_t stop = start + binsPerTask;
+//      if (stop > numPoints) stop = numPoints;
+//      ts->push(  new MDEventWorkspaceCenterpointBinTask<MDE,nd>(data, ws, binDimensions,
+//                        dimensionToBinFrom, start, stop, index_max, index_maker, implicitFunction) );
+//    }
 //
 //    if (DODEBUG) std::cout << tim << " to fill up the ThreadPool with all the tasks\n";
 //
@@ -786,10 +720,11 @@ namespace MDEvents
 //    if (DODEBUG) std::cout << tim << " to run all the tasks\n";
 //
 //    delete index_max;
-//    delete index;
-//    delete linear_index_maker;
+//    delete index_maker;
 //    return ws;
 //  }
+//
+
 
 
 }//namespace MDEvents
