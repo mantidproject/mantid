@@ -372,7 +372,7 @@ namespace MDEvents
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
       Mantid::API::ImplicitFunction * implicitFunction, Mantid::Kernel::ProgressBase * prog) const
   {
-    bool DODEBUG = true;
+    bool DODEBUG = false;
     CPUTimer tim;
 
     // Create the dense histogram. This allocates the memory
@@ -412,8 +412,8 @@ namespace MDEvents
 
     if (numBD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
-
-    if (DODEBUG) std::cout << tim << " to cache the binning results.\n";
+    if (numBD > nd)
+      throw std::runtime_error("More output dimensions were specified than input dimensions exist in the MDEventWorkspace. Cannot bin!");
 
     //Since the costs are not known ahead of time, use a simple FIFO buffer.
     ThreadScheduler * ts = new ThreadSchedulerFIFO();
@@ -426,7 +426,7 @@ namespace MDEvents
 
     // For progress reporting, the approx  # of tasks
     if (prog)
-      prog->setNumSteps( int(ws->getNPoints() / binsPerTask) );
+      prog->setNumSteps( int(ws->getNPoints()/1000) );
 
     // This is the limit to loop over in each dimension
     size_t * index_max = Utils::nestedForLoopSetUp(numBD);
@@ -482,16 +482,11 @@ namespace MDEvents
         ws->setErrorAt(linear_index, bin.m_errorSquared);
       }
 
+      // Report progress but not too often.
+      if (((linear_index % 1000) == 0) && prog ) prog->report();
     } // (for each linear index)
 
-
-    if (DODEBUG) std::cout << tim << " to fill up the ThreadPool with all the tasks\n";
-
-    // OK, all that was just to fill the ThreadScheduler
-    // So now we actually run these.
-    tp.joinAll();
-
-    if (DODEBUG) std::cout << tim << " to run all the tasks\n";
+    if (DODEBUG) std::cout << tim << " to run the openmp loop.\n";
 
     delete index_max;
     delete index_maker;
