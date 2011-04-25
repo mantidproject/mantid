@@ -160,10 +160,10 @@ namespace Mantid
         double SimulateResolution::pop(const double y) const
         {
             double by2=0.5, by6=1./6., by60=1./60., by42=1./42., by40=1./40.;
-            if ( (abs(y) > 0.1 ) )
+            if ( (fabs(y) > 0.1 ) )
             {
-                double ans = (abs(y)) / (1.0 - (exp(-(abs(y)))));
-                return( (y<0)? ( ans*(exp(-abs(y)))) : (ans) );
+                double ans = (fabs(y)) / (1.0 - (exp(-(fabs(y)))));
+                return( (y<0)? ( ans*(exp(-fabs(y)))) : (ans) );
             }
             else
                 return( 1.0 + by2*y*( 1.0 + by6*y*( 1.0 - by60*(y*y)
@@ -174,7 +174,7 @@ namespace Mantid
         */
         double SimulateResolution::tridev(double a)
         {
-            return( (a>0.5)? (1.0-sqrt(abs(1.0-2.0*abs(a-0.5)))):(sqrt(abs(1.0-2.0*abs(a-0.5))-1.0)) );
+            return( (a>0.5)? (1.0-sqrt(fabs(1.0-2.0*fabs(a-0.5)))):(sqrt(fabs(1.0-2.0*fabs(a-0.5))-1.0)) );
         }
         /**
         * monte_carlo_sample_volume function from tobyfit

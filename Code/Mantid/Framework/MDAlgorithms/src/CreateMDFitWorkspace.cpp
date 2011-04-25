@@ -46,7 +46,7 @@ namespace Mantid
       {
         throw std::invalid_argument("Maximum dimensionality of a workspace created by CreateMDFitWorkspace is 4");
       }
-      MDFitWorkspace_sptr ws = MDFitWorkspace_sptr(new MDFitWorkspace(nDim));
+      MDFitWorkspace_sptr ws = MDFitWorkspace_sptr(new MDFitWorkspace( (unsigned int)(nDim)));
       int i = 0;
       for(Poco::StringTokenizer::Iterator it = tkz.begin();it != tkz.end(); it++, i++ )
       {
@@ -77,9 +77,9 @@ namespace Mantid
       boost::scoped_ptr<IMDIterator> it( ws->createIterator() );
       do
       {
-        for(int i = 0; i < nDim; ++i)
+        for(size_t i = 0; i < nDim; ++i)
         {
-          vars[i] = it->getCoordinate(i);
+          vars[i] = it->getCoordinate(int(i));
         }
         double signal = fun.Eval() + noise;
         double error = 1;

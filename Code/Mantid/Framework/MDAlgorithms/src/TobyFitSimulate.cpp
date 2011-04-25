@@ -138,7 +138,7 @@ namespace Mantid
             const double sfa = 0.5+( (modf(ql+1.5,&dint)-1.0>0)?(0.5):(-0.5) ) * alpha/(sqrt((alpha*alpha+beta*beta)));
             const double sfo = 1.0-sfa;
             const double var1=(1./6.)*(alpha*alpha+beta*beta)-0.5;
-            const double var2=(1./3.)*sj1*abs(cos(M_PI*ql))*(sqrt((alpha*alpha+beta*beta)));
+            const double var2=(1./3.)*sj1*fabs(cos(M_PI*ql))*(sqrt((alpha*alpha+beta*beta)));
             const double wacous = (sj1 + sj2*(1.0-var1)) - var2;
             const double woptic = (sj1 + sj2*(1.0-var1)) + var2;
             const double epswacous = (eps*eps-wacous*wacous);
@@ -185,10 +185,10 @@ namespace Mantid
         double TobyFitSimulate::pop(double y)
         {
             double by2=0.5, by6=1./6., by60=1./60., by42=1./42., by40=1./40.;
-            if ( (abs(y) > 0.1 ) )
+            if ( (fabs(y) > 0.1 ) )
             {
-                double ans = (abs(y)) / (1.0 - (exp(-(abs(y)))));
-                return( (y<0)? ( ans*(exp(-abs(y)))) : (ans) );
+                double ans = (fabs(y)) / (1.0 - (exp(-(fabs(y)))));
+                return( (y<0)? ( ans*(exp(-fabs(y)))) : (ans) );
             }
             else
                 return( 1.0 + by2*y*( 1.0 + by6*y*( 1.0 - by60*(y*y)
@@ -199,7 +199,7 @@ namespace Mantid
         */
         double TobyFitSimulate::tridev(double a)
         {
-            return( (a>0.5)? (1.0-sqrt(abs(1.0-2.0*abs(a-0.5)))):(sqrt(abs(1.0-2.0*abs(a-0.5))-1.0)) );
+            return( (a>0.5)? (1.0-sqrt(fabs(1.0-2.0*fabs(a-0.5)))):(sqrt(fabs(1.0-2.0*fabs(a-0.5))-1.0)) );
         }
         /**
         * monte_carlo_sample_volume function from tobyfit
