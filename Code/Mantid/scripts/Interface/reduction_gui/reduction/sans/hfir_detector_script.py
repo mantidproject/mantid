@@ -147,7 +147,7 @@ class Detector(BaseScriptElement):
         mtd_version = BaseScriptElement.getMantidBuildVersion(dom)
 
         # Sensitivity correction - take care of backward compatibility
-        if mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             element_list = dom.getElementsByTagName("Instrument")
             if len(element_list)>0:
                 instrument_dom = element_list[0]

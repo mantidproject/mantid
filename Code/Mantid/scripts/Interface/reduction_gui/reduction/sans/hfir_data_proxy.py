@@ -29,6 +29,7 @@ class DataProxy(object):
     sample_detector_distance = None
     data = None
     data_ws = ''
+    sample_thickness = None
     
     ## Error log
     errors = []
@@ -49,6 +50,7 @@ class DataProxy(object):
                 self.wavelength = (x[0]+x[1])/2.0
                 self.wavelength_spread = x[1]-x[0]
                 self.sample_detector_distance = mtd[self.data_ws].getRun().getProperty("sample_detector_distance").value
+                self.sample_thickness = mtd[self.data_ws].getRun().getProperty("sample-thickness").value
                 
                 if HAS_NUMPY:
                     raw_data = numpy.zeros(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels)

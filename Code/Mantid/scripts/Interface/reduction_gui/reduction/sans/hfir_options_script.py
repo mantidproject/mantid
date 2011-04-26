@@ -37,6 +37,7 @@ class ReductionOptions(BaseScriptElement):
     scaling_direct_file = ''
     scaling_att_trans = 1.0
     scaling_beam_diam = 25.0 
+    sample_thickness = 1.0
     
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0
@@ -119,8 +120,10 @@ class ReductionOptions(BaseScriptElement):
             script += "MonitorNormalization()\n"
         
         if self.calculate_scale:
-            script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g)\n" % \
-             (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans)
+            if self.sample_thickness<=0:
+                raise RuntimeError, "Invalid value for sample thickness: %g cm" % self.sample_thickness
+            script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g, sample_thickness=%g)\n" % \
+             (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans, self.sample_thickness)
         else:
             if self.scaling_factor != 1:
                 script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
@@ -192,6 +195,7 @@ class ReductionOptions(BaseScriptElement):
         xml += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
         xml += "  <scaling_att_trans>%g</scaling_att_trans>\n" % self.scaling_att_trans
         xml += "  <scaling_beam_diam>%g</scaling_beam_diam>\n" % self.scaling_beam_diam
+        xml += "  <sample_thickness>%g</sample_thickness>\n" % self.sample_thickness
         xml += "</AbsScale>\n"
 
         return xml
@@ -229,7 +233,7 @@ class ReductionOptions(BaseScriptElement):
                                                                  default = ReductionOptions.solid_angle_corr)
         
         # Dark current - take care of backward compatibility
-        if mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             bck_entries = dom.getElementsByTagName("Background")
             if len(bck_entries)>0:
                 self.dark_current_corr = BaseScriptElement.getBoolElement(bck_entries[0], "dark_current_corr",
@@ -251,7 +255,7 @@ class ReductionOptions(BaseScriptElement):
                                                              default=ReductionOptions.normalization)
 
         # Mask - take care of backward compatibility
-        if mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             self.top = BaseScriptElement.getIntElement(instrument_dom, "mask_top", default=ReductionOptions.top)
             self.bottom = BaseScriptElement.getIntElement(instrument_dom, "mask_bottom", default=ReductionOptions.bottom)
             self.right = BaseScriptElement.getIntElement(instrument_dom, "mask_right", default=ReductionOptions.right)
@@ -295,6 +299,8 @@ class ReductionOptions(BaseScriptElement):
                                                                        default=ReductionOptions.scaling_att_trans)
             self.scaling_beam_diam = BaseScriptElement.getFloatElement(scale_dom, "scaling_beam_diam",
                                                                        default=ReductionOptions.scaling_beam_diam)
+            self.sample_thickness = BaseScriptElement.getFloatElement(scale_dom, "sample_thickness",
+                                                                       default=ReductionOptions.sample_thickness)
 
     def reset(self):
         """
@@ -310,6 +316,7 @@ class ReductionOptions(BaseScriptElement):
         self.calculate_scale = ReductionOptions.calculate_scale
         self.scaling_att_trans = ReductionOptions.scaling_att_trans
         self.scaling_beam_diam = ReductionOptions.scaling_beam_diam
+        self.sample_thickness = ReductionOptions.sample_thickness
         
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset

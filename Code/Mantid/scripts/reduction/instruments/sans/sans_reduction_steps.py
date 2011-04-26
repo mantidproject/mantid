@@ -631,10 +631,14 @@ class Normalize(ReductionStep):
         # HFIR-specific: If we count for monitor we need to multiply by 1e8
         if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
             Scale(workspace, workspace, 1.0e8, 'Multiply')
-            
+
+        output_msg = "Normalization done"
+                    
         if reducer._absolute_scale is not None:
-            scale,_ = reducer._absolute_scale.get_scaling_factor()
+            scale = reducer._absolute_scale.get_scaling_factor()
             Scale(workspace, workspace, scale, 'Multiply')
+            output_msg += "\n  Absolute scale factor: %g" % scale
+        return output_msg
                         
     def clean(self):
         mtd.deleteWorkspace(norm_ws)

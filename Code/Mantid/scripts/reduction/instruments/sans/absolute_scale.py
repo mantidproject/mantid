@@ -32,7 +32,7 @@ class BaseAbsoluteScale(ReductionStep):
         """
             Returns the beam center
         """
-        return self._scaling_factor, self._error
+        return self._scaling_factor
     
     def execute(self, reducer, workspace=None):
         """
@@ -44,7 +44,8 @@ class BaseAbsoluteScale(ReductionStep):
 class AbsoluteScale(BaseAbsoluteScale):
     """
     """
-    def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0, apply_sensitivity=False):
+    def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0, 
+                 sample_thickness=1.0, apply_sensitivity=False):
         """
             @param beamstop_radius: beamstop radius to use. Will otherwise be read from file, if possible [mm]
             @param attenuator_trans: attenuator transmission
@@ -56,6 +57,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         self._attenuator_trans = attenuator_trans
         self._beamstop_radius = beamstop_radius
         self._apply_sensitivity = apply_sensitivity
+        self._sample_thickness = sample_thickness
         
     def execute(self, reducer, workspace=None):
         """
@@ -114,7 +116,10 @@ class AbsoluteScale(BaseAbsoluteScale):
         else:
             raise RuntimeError, "AbsoluteScale could not read the pixel size"
         
-        self._scaling_factor = 1.0/(det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
+        if self._sample_thickness<=0:
+            raise RuntimeError, "Invalid value for sample thickness: %g cm" % self._sample_thickness
+            
+        self._scaling_factor = 1.0/(self._sample_thickness*det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
 
         return "Absolute scale factor: %6.4g" % self._scaling_factor
     

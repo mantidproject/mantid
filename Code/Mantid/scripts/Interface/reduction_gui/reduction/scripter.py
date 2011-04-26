@@ -117,7 +117,7 @@ class BaseScriptElement(object):
         element_list = dom.getElementsByTagName(tag)
         if len(element_list)>0:
             for l in element_list:
-                elem_list.append(BaseScriptElement.getText(l.childNodes))
+                elem_list.append(BaseScriptElement.getText(l.childNodes).strip())
         return elem_list    
 
     @classmethod
@@ -139,11 +139,10 @@ class BaseScriptElement(object):
             version_str = BaseScriptElement.getText(element_list[0].childNodes)
             version_list = version_str.split('.')
             if len(version_list)==3:
-                return int(version_list[2])
-            else:
-                return 0
-        else:
-            return 0
+                change_set = int(version_list[2])
+                if change_set>0:
+                    return change_set
+        return -1
 
 
 class BaseReductionScripter(object):

@@ -57,6 +57,9 @@ class SANSInstrumentWidget(BaseWidget):
             util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
         elif key == "wavelength_spread" and not self._summary.wavelength_chk.isChecked():
             self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
+        elif key == "sample_thickness"  and not self._summary.thickness_chk.isChecked():
+            self._summary.thickness_edit.setText(QtCore.QString(str(value)))
+            util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
 
     def content(self):
         return self._summary
@@ -69,6 +72,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.wavelength_spread_edit.setValidator(QtGui.QDoubleValidator(self._summary.wavelength_spread_edit))
         self._summary.n_q_bins_edit.setValidator(QtGui.QIntValidator(self._summary.n_q_bins_edit))
         self._summary.n_sub_pix_edit.setValidator(QtGui.QIntValidator(self._summary.n_sub_pix_edit))
+        self._summary.thickness_edit.setValidator(QtGui.QDoubleValidator(self._summary.thickness_edit))
         
         # Event connections
         self.connect(self._summary.detector_offset_chk, QtCore.SIGNAL("clicked(bool)"), self._det_offset_clicked)
@@ -127,6 +131,8 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_data_browse_button.setEnabled(is_checked)
         self._summary.scale_att_trans_edit.setEnabled(is_checked)
         self._summary.scale_beam_radius_edit.setEnabled(is_checked)
+        self._summary.thickness_edit.setEnabled(is_checked)
+        self._summary.thickness_chk.setEnabled(is_checked)
         
         self._summary.att_scale_factor_label.setEnabled(not is_checked)
         self._summary.scale_edit.setEnabled(not is_checked)
@@ -208,6 +214,8 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
         self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
         self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(state.scaling_beam_diam)))
+        self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
+        util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         self._scale_clicked(self._summary.scale_chk.isChecked())
         
         # Detector offset input
@@ -287,6 +295,7 @@ class SANSInstrumentWidget(BaseWidget):
         m.scaling_direct_file = unicode(self._summary.scale_data_edit.text())
         m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
         m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
+        m.sample_thickness = util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         
         # Detector offset input
         if self._summary.detector_offset_chk.isChecked():
@@ -336,42 +345,3 @@ class SANSInstrumentWidget(BaseWidget):
         m.detector_ids = self._masked_detectors
 
         return m
-    
-    def get_data_info(self):
-        """
-            Retrieve information from the data file and update the display
-        """
-        if self._data_proxy is None:
-            return
-        
-        if not self._summary.sample_dist_chk.isChecked() or not self._summary.wavelength_chk.isChecked():
-            flist_str = unicode(self._summary.data_file_edit.text())
-            flist_str = flist_str.replace(',', ';')
-            data_files = flist_str.split(';')
-            if len(data_files)<1:
-                return
-            fname = data_files[0]
-            if len(str(fname).strip())>0:
-                dataproxy = self._data_proxy(fname)
-                if len(dataproxy.errors)>0:
-                    QtGui.QMessageBox.warning(self, "Error", dataproxy.errors[0])
-                    return
-                
-                self._settings.last_data_ws = dataproxy.data_ws
-                if dataproxy.sample_detector_distance is not None and not self._summary.sample_dist_chk.isChecked():
-                    self._summary.sample_dist_edit.setText(QtCore.QString(str(dataproxy.sample_detector_distance)))
-                    util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-                if not self._summary.wavelength_chk.isChecked():
-                    if dataproxy.wavelength is not None:
-                        self._summary.wavelength_edit.setText(QtCore.QString(str(dataproxy.wavelength)))
-                        util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-                    if dataproxy.wavelength_spread is not None:
-                        self._summary.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
-                    if len(dataproxy.errors)>0:
-                        print dataproxy.errors
-                if dataproxy.data is not None:
-                    #self._mask_widget.set_background_data(dataproxy.data)
-                    self._summary.repaint()  
-
-            
-        

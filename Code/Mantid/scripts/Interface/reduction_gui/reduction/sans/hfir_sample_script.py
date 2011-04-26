@@ -181,6 +181,8 @@ class SampleData(BaseScriptElement):
         # Data files
         if len(self.data_files)>0:
             parts = os.path.split(str(self.data_files[0]).strip())
+            if len(parts[0])==0:
+                raise RuntimeError, "Trying to generate reduction script without a data file."
             script += "DataPath(\"%s\")\n" % parts[0]
             script += "AppendDataFile([\"%s\"])\n" % '\",\"'.join(self.data_files)
         else:
@@ -213,7 +215,7 @@ class SampleData(BaseScriptElement):
         xml += "</Transmission>\n"
         xml += "<SampleData>\n"
         for item in self.data_files:
-            xml += "  <data_file>%s</data_file>\n" % item        
+            xml += "  <data_file>%s</data_file>\n" % item.strip()        
         xml += "</SampleData>\n"
 
         return xml
@@ -251,7 +253,7 @@ class SampleData(BaseScriptElement):
                         break
                     
         # Data file section - take care of backward compatibility
-        if mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             element_list = dom.getElementsByTagName("Instrument")
         else:
             element_list = dom.getElementsByTagName("SampleData")
