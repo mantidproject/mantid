@@ -2,7 +2,7 @@ import isis_reducer
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 from mantidsimple import *
 import SANSUtility
-ITER_NUM = 0
+
 #this will be set to the graph that the data will be written to
 RESIDUE_GRAPH = None
 
@@ -15,8 +15,6 @@ def SeekCentre(trial, reducer, iteration):
         @return: the coordinates of a location closer to the centre
     """
     
-    global ITER_NUM
-    ITER_NUM = iteration
     currentDet = reducer.instrument.cur_detector().name()
 
     MoveInstrumentComponent(reducer.sample_wksp,
@@ -38,14 +36,14 @@ def SeekCentre(trial, reducer, iteration):
     try :
         if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
             RESIDUE_GRAPH = plotSpectrum('Left', 0)
-            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
-            mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
-        RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
+        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
+        RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(iteration)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
     except :
         #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
         pass
         
-    mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
+    mantid.sendLogMessage("::SANS::Itr: "+str(iteration)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
 
     return residueX, residueY
     

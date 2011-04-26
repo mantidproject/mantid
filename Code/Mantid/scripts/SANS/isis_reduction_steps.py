@@ -251,7 +251,8 @@ class LoadRun(ReductionStep):
             #means we have windows style their paths contain \ but can't contain /   
             run_string = run_string.replace('\\', '/')
 
-        if run_string.find('/') > -1:
+        #interpret an entire file name
+        if run_string.find('/') > -1 or (prefix and run_string.find(prefix) == 0 ):
             #assume we have a complete filename
             filename = run_string
             #remove the path name
@@ -260,13 +261,13 @@ class LoadRun(ReductionStep):
             #remove the extension
             file_parts = run_name.split('.')
             run_name = file_parts[0]
-            ext = file_parts[len(file_parts)-1]
+            self.ext = file_parts[len(file_parts)-1]
             if run_name.endswith('-add'):
                 #remove the add files specifier, if it's there
                 end = len(run_name)-len('-add')
                 run_name = run_name[0:end]
             names = run_name.split(prefix)
-            shortrun_no = names[len(names)-1]
+            self.shortrun_no = names[len(names)-1]
 
         else:
             #this is a run number dot extension

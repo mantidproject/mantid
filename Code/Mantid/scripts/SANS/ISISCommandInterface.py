@@ -520,8 +520,9 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     XNEW = x_start + XSTEP
     YNEW = y_start + YSTEP
 
-    for it in range(1, MaxIter+1):
-        _printMessage("Iteration " + str(centre.ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
+    for i in range(1, MaxIter+1):
+        it = i
+        _printMessage("Iteration " + str(it) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
 
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
@@ -547,7 +548,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
 	  #remove this 	  
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     
-    if centre.ITER_NUM == MaxIter:
+    if it == MaxIter:
         _printMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP

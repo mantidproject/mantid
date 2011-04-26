@@ -426,7 +426,10 @@ void SANSRunWindow::readSettings()
   g_log.debug("Reading settings.");
   QSettings value_store;
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
+
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
+  selectUserFile();
+
   m_last_dir = value_store.value("last_dir", "").toString();
 
   int index = m_uiForm.inst_opt->findText(
@@ -1651,7 +1654,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     g_log.error() << "Problem loading file\n";
     is_loaded = false;
   }
-  if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
+  if( m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty() )
   {
     is_loaded = false;
     showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
@@ -1662,66 +1665,15 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
-  if(m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty())
+  if( m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty() )
   {
-    can_logs = sample_logs;
-    showInformationBox("Warning: Cannot find log file for can run, using sample values.");
-  }
-
-/*  QHashIterator<RunType, MantidWidgets::MWRunFiles &> itr(m_runs);
-  while( itr.hasNext() )
-  {
-    int key = itr.key();
-
-
-    if( itr.value.isEmpty() ) 
+    if ( m_uiForm.scatCan->isEmpty() )
     {
-      try
-      {
-        //Clear any that are assigned
-        runAssign(key, logs);
-      }
-      catch(std::runtime_error)
-      {//the user should already have seen an error message box pop up
-        g_log.error() << "Problem loading file\n";
-        is_loaded = false;
-        break;
-      }
-      continue;
-    }*/
-/*    try
-    {
-      is_loaded &= runAssign(key, logs);
+      can_logs = sample_logs;
+      showInformationBox("Warning: Cannot find log file for can run, using sample values.");
     }
-    catch(std::runtime_error)
-    {//the user should already have seen an error message box pop up
-      g_log.error() << "Problem loading file\n";
-      is_loaded = false;
-      break;
-     }
-    // Check if the last LoadRaw algorithm was run successfully. If so then any problem with
-    // loading is with the log files for the first 2 keys
-    Mantid::API::IAlgorithm_sptr last_run = Mantid::API::AlgorithmManager::Instance().algorithms().back();
-    bool raw_data_ok = last_run->isExecuted();
-    if( !raw_data_ok )
-    {
-      QString period("");
-      if ( getPeriod(key) > 1 )
-      {
-        period = QString("period ") + QString::number(getPeriod(key));
-      }
-      showInformationBox("Error: Cannot load run \""+run_no+"\" " + period + ", see results log for details.");
-      break;
-    }
+  }
 
-  }
-  if (!is_loaded) 
-  {
-    setProcessingState(false, -1);
-    m_uiForm.load_dataBtn->setText("Load Data");
-    return false;
-  }
-*/
   // Sort out the log information
   setGeometryDetails(sample_logs, can_logs);
   
