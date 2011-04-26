@@ -263,7 +263,8 @@ class LoadRun(ReductionStep):
             ext = file_parts[len(file_parts)-1]
             if run_name.endswith('-add'):
                 #remove the add files specifier, if it's there
-                run_name = run_name.rpartition('-add')[0]        
+                end = len(run_name)-len('-add')
+                run_name = run_name[0:end]
             names = run_name.split(prefix)
             shortrun_no = names[len(names)-1]
 
@@ -1467,15 +1468,19 @@ class UnitsConvert(ReductionStep):
         return '    Wavelength range: ' + self.get_rebin()
 
 class UserFile(ReductionStep):
+    """
+        Reads an ISIS SANS mask file of the format described here mantidproject.org/SANS_User_File_Commands
+    """
     def __init__(self, file=None):
         """
-            Reads a SANS mask file
+            Optionally sets the location of the file and initialise the reader
         """
         super(UserFile, self).__init__()
         self.filename = file
         self._incid_monitor_lckd = False
         self.executed = False
 
+        # maps the keywords that the file can contains to the functions that read them
         self.key_functions = {
             'BACK/' : self._read_back_line,
             'TRANS/': self._read_trans_line}

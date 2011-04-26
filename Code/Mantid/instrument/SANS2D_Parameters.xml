@@ -18,11 +18,6 @@
 <parameter name="low-angle-detector-short-name" type="string">
   <value val="rear"/>
 </parameter>
-<!-- this is the first spectrum number for an empty instrument (used for instrument view), runs generally have a different first number spectrum number-->
-<parameter name="first-low-angle-spec-number">
-  <value val="5"/>
-</parameter>
-
 <parameter name="low-angle-detector-num-columns">
   <value val="192"/>
 </parameter>

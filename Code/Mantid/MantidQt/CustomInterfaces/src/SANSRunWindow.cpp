@@ -6,7 +6,6 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/FileDialogHandler.h"
-#include "MantidQtAPI/PythonRunner.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/Exception.h"
@@ -63,8 +62,8 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_addFilesTab(NULL), m_diagnosticsTab(NULL),
   m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
-  m_cfg_loaded(true), m_userFname(false), m_sample_no(), m_run_no_boxes(),
-  m_period_lbls(), m_warnings_issued(false), m_force_reload(false),
+  m_cfg_loaded(true), m_userFname(false), m_sample_file(), m_run_no_boxes(),
+  m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
   m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
@@ -146,6 +145,17 @@ void SANSRunWindow::initLayout()
 
   //Create the widget hash maps
   initWidgetMaps();
+
+  m_runFiles.reserve(6);
+  //Text edit map
+  m_runFiles.push_back(m_uiForm.scatterSample);
+  m_runFiles.push_back(m_uiForm.scatCan);
+
+  m_runFiles.push_back(m_uiForm.transmis);
+  m_runFiles.push_back(m_uiForm.transCan);
+
+  m_runFiles.push_back(m_uiForm.direct);
+  m_runFiles.push_back(m_uiForm.dirCan);
 
   connectChangeSignals();
 
@@ -315,8 +325,9 @@ void SANSRunWindow::connectButtonSignals()
 */
 void SANSRunWindow::connectChangeSignals()
 {
+  //controls on the first tab page
   //Connect each box's edited signal to flag if the box's text has changed
-  for( int idx = 0; idx < 9; ++idx )
+  for( int idx = 1; idx < 9; ++idx )
   {
     connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
   }
@@ -325,7 +336,10 @@ void SANSRunWindow::connectChangeSignals()
   connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString&)),
     this, SLOT(enableOrDisableDefaultSave()));
 
-  // Combo boxes
+  connect(m_uiForm.allowPeriods_ck, SIGNAL(stateChanged(int)), this,
+    SLOT(disOrEnablePeriods(const int)));
+
+  //controls on the second page
   connect(m_uiForm.wav_dw_opt, SIGNAL(currentIndexChanged(int)), this, 
     SLOT(handleWavComboChange(int)));
   connect(m_uiForm.q_dq_opt, SIGNAL(currentIndexChanged(int)), this, 
@@ -343,29 +357,6 @@ void SANSRunWindow::connectChangeSignals()
  */
 void SANSRunWindow::initWidgetMaps()
 {
-  //          single run mode settings
-    //Text edit map
-    m_run_no_boxes.insert(0, m_uiForm.sct_sample_edit);
-    m_run_no_boxes.insert(1, m_uiForm.sct_can_edit);
-    m_run_no_boxes.insert(2, m_uiForm.sct_bkgd_edit);
-    m_run_no_boxes.insert(3, m_uiForm.tra_sample_edit);
-    m_run_no_boxes.insert(4, m_uiForm.tra_can_edit);
-    m_run_no_boxes.insert(5, m_uiForm.tra_bkgd_edit);
-    m_run_no_boxes.insert(6, m_uiForm.direct_sample_edit);
-    m_run_no_boxes.insert(7, m_uiForm.direct_can_edit);
-    m_run_no_boxes.insert(8, m_uiForm.direct_bkgd_edit);
-
-    //Period label hash. Each label has a buddy set to its corresponding text edit field
-    m_period_lbls.insert(0, m_uiForm.sct_prd_tot1);
-    m_period_lbls.insert(1, m_uiForm.sct_prd_tot2);
-    m_period_lbls.insert(2, m_uiForm.sct_prd_tot3);
-    m_period_lbls.insert(3, m_uiForm.tra_prd_tot1);
-    m_period_lbls.insert(4, m_uiForm.tra_prd_tot2);
-    m_period_lbls.insert(5, m_uiForm.tra_prd_tot3);
-    m_period_lbls.insert(6, m_uiForm.direct_prd_tot1);
-    m_period_lbls.insert(7, m_uiForm.direct_prd_tot2);   
-    m_period_lbls.insert(8, m_uiForm.direct_prd_tot3);
-
   //       batch mode settings
   m_allowed_batchtags.insert("sample_sans",0);
   m_allowed_batchtags.insert("sample_trans",1);
@@ -424,8 +415,7 @@ void SANSRunWindow::initWidgetMaps()
     m_loq_detlabels.append(labelsmap);
 
     // Full workspace names as they appear in the service
-    m_workspace_names.clear();
-
+    m_workspaceNames.clear();
 }
 
 /**
@@ -466,6 +456,9 @@ void SANSRunWindow::readSettings()
   m_uiForm.file_opt->addItem("raw", QVariant(".raw"));
   //Set old file extension
   m_uiForm.file_opt->setCurrentIndex(value_store.value("fileextension", 0).toInt());
+  
+  m_uiForm.allowPeriods_ck->setChecked(
+                   value_store.value("allow_periods",false).toBool());
 
   int i = m_uiForm.wav_dw_opt->findText(
     value_store.value("wave_binning", "Linear").toString());
@@ -496,7 +489,7 @@ void SANSRunWindow::readSaveSettings(QSettings & valueStore)
 }
 
 /**
- * Save input for future use
+ * Save input through QSettings (-> .mantidplot or -> windows registerary) for future use
  */
 void SANSRunWindow::saveSettings()
 {
@@ -511,6 +504,7 @@ void SANSRunWindow::saveSettings()
 
   value_store.setValue("instrum", m_uiForm.inst_opt->currentText());
   value_store.setValue("fileextension", m_uiForm.file_opt->currentIndex());
+  value_store.setValue("allow_periods", m_uiForm.allowPeriods_ck->isChecked());
 
   value_store.setValue("wave_binning", m_uiForm.wav_dw_opt->currentText());
 
@@ -560,7 +554,7 @@ QString SANSRunWindow::runReduceScriptFunction(const QString & pycode)
 
   if ( allOutput.count() < 2 )
   {
-    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script, more information maybe found in the scripting console");
+    QMessageBox::critical(this, "Fatal error found during reduction", "Error reported by Python script, more information maybe found in the scripting console and results log");
     return "Error";
   }
 
@@ -576,42 +570,6 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
  txt.remove(0,1);
  txt.chop(1);
 }
-
-/**
- * Load the user file specified in the text field
- * @returns Boolean indicating whether we were successful or not
- */
-bool SANSRunWindow::oldLoadUserFile()
-{
-  QString filetext = m_uiForm.userfile_edit->text();
-  if( filetext.isEmpty() ) return false;
-  if( QFileInfo(filetext).isRelative() )
-  {
-    QString data_path(m_uiForm.saveDir_lb->text().trimmed());
-
-    filetext = QDir(data_path).absoluteFilePath(filetext);
-  }
-
-  if( !QFileInfo(filetext).exists() ) return false;
-
-  QFile user_file(filetext);
-  if( !user_file.open(QIODevice::ReadOnly) ) return false;
-
-  user_file.close();
-
-  
-  QString instFunc = m_uiForm.inst_opt->currentText().trimmed();
-  instFunc += "()";
-  runReduceScriptFunction("SANSReduction."+instFunc);
-
-  // Use python function to read the file and then extract the fields
-  if ( runReduceScriptFunction("print SANSReduction.MaskFile(r'"+filetext+"')") != "True\n" )
-  {
-    return false;
-  }
-  
-  return true;
-}
 /** Issues a Python command to load the user file and returns any output if
 *  there are warnings or errors
 *  @param[out] errors the output produced by the string
@@ -623,17 +581,6 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   if( filetext.isEmpty() )
   {
     errors = "No user file has been specified";
-    return false;
-  }
-
-  if( QFileInfo(filetext).isRelative() )
-  {
-    QString dataDir(m_uiForm.saveDir_lb->text().trimmed());
-    filetext = QDir(dataDir).absoluteFilePath(filetext);
-  }
-  if( !QFileInfo(filetext).exists() )
-  {
-    errors = "File \""+filetext+"\" not found aborting";
     return false;
   }
   
@@ -657,9 +604,9 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
   pyCode += getInstrumentClass()+")";
   pyCode += "\ni.ReductionSingleton().user_settings =";
+  // Use python function to read the settings file and then extract the fields
   pyCode += "isis_reduction_steps.UserFile(r'"+filetext+"')";
 
-  // Use python function to read the file and then extract the fields
   runReduceScriptFunction(pyCode);
 
   errors = runReduceScriptFunction(
@@ -1254,7 +1201,6 @@ void SANSRunWindow::addUserMaskStrings(QString& exec_script,const QString& impor
   }
  
 }
-
 /** This method applys mask to a given workspace
   * @param wsName name of the workspace
   * @param time_pixel  true if time mask needs to be applied
@@ -1280,97 +1226,6 @@ void SANSRunWindow::applyMask(const QString& wsName,bool time_pixel)
   runPythonCode(script.trimmed());
  
 }
-void SANSRunWindow::oldUserMaskStrings(QString & exec_script)
-{
-  //Clear current
-  exec_script += "SANSReduction.Mask('MASK/CLEAR')\n";
-  exec_script += "SANSReduction.Mask('MASK/CLEAR/TIME')\n";
-
-  //Pull in the table details first, skipping the first two rows
-  int nrows = m_uiForm.mask_table->rowCount();
-  for(int row = 0; row <  nrows; ++row)
-  {
-    if( m_uiForm.mask_table->item(row, 2)->text().startsWith("inf") )
-    {
-      continue;
-    }
-    //Details are in the third column
-    exec_script += "SANSReduction.Mask('MASK";
-    if( m_uiForm.mask_table->item(row, 0)->text() == "time")
-    {
-      exec_script += "/TIME";
-    }
-    QString details = m_uiForm.mask_table->item(row, 2)->text();
-    QString detname = m_uiForm.mask_table->item(row, 1)->text().trimmed();
-    if( detname == "-" )
-    {
-      exec_script += " " + details;
-    }
-    else if( detname == "rear-detector" || detname == "main-detector-bank" )
-    {
-      exec_script += "/REAR " + details;
-    }
-    else
-    {
-      exec_script += "/FRONT " + details;
-    }
-    exec_script += "')\n";
-  }
-
-  //Spectra mask first
-  QStringList mask_params = m_uiForm.user_spec_mask->text().split(",", QString::SkipEmptyParts);
-  QStringListIterator sitr(mask_params);
-  QString bad_masks;
-  while(sitr.hasNext())
-  {
-    QString item = sitr.next().trimmed();
-    if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
-    {
-      exec_script += "SANSReduction.Mask('MASK/" + item + "')\n";
-    }
-    else if( item.startsWith('S', Qt::CaseInsensitive) || item.startsWith('H', Qt::CaseInsensitive) ||
-        item.startsWith('V', Qt::CaseInsensitive) )
-    {
-      exec_script += "SANSReduction.Mask('MASK " + item + "')\n";
-    }
-    else
-    {
-      bad_masks += item + ",";
-    }
-  }
-  if( !bad_masks.isEmpty() )
-  {
-    m_uiForm.tabWidget->setCurrentIndex(3);
-    showInformationBox(QString("Warning: Could not parse the following spectrum masks: ") + bad_masks + ". Values skipped.");
-  }
-
-  //Time masks
-  mask_params = m_uiForm.user_time_mask->text().split(",", QString::SkipEmptyParts);
-  sitr = QStringListIterator(mask_params);
-  bad_masks = "";
-  while(sitr.hasNext())
-  {
-    QString item = sitr.next().trimmed();
-    if( item.startsWith("REAR", Qt::CaseInsensitive) || item.startsWith("FRONT", Qt::CaseInsensitive) )
-    {
-      int ndetails = item.split(" ").count();
-      if( ndetails == 3 || ndetails == 2 )
-      {
-        exec_script += "SANSReduction.Mask('/TIME" + item + "')\n";
-      }
-      else
-      {
-        bad_masks += item + ",";
-      }
-    }
-  }
-  if( !bad_masks.isEmpty() )
-  {
-    m_uiForm.tabWidget->setCurrentIndex(3);
-    showInformationBox(QString("Warning: Could not parse the following time masks: ") + bad_masks + ". Values skipped.");
-  }
-}
-
 /**
  * Set the information about component distances on the geometry tab
  */
@@ -1380,7 +1235,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 
   double unit_conv(1000.);
   
-  QString workspace_name = getWorkspaceName(0);
+  QString workspace_name = m_experWksp;
   if( workspace_name.isEmpty() ) return;
   Workspace_sptr workspace_ptr = AnalysisDataService::Instance().retrieve(workspace_name.toStdString());
   MatrixWorkspace_sptr sample_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
@@ -1420,7 +1275,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
       m_uiForm.dist_mod_mon->setText(formatDouble(dist_mm, colour));
     }
     setLOQGeometry(sample_workspace, 0);
-    QString can = getWorkspaceName(1);
+    QString can = m_experCan;
     if( !can.isEmpty() )
     {
       Workspace_sptr workspace_ptr = Mantid::API::AnalysisDataService::Instance().retrieve(can.toStdString());
@@ -1448,7 +1303,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
     //SANS2D - Sample
     setSANS2DGeometry(sample_workspace, sample_logs, 0);
     //Get the can workspace if there is one
-    QString can = getWorkspaceName(1);
+    QString can = m_experCan;
     if( can.isEmpty() ) 
     {
       return;
@@ -1734,142 +1589,17 @@ bool SANSRunWindow::browseForFile(const QString & box_title, QLineEdit* file_fie
   file_field->setText(file_path);
   return true;
 }
-
-bool SANSRunWindow::oldLoadButtonClick()
-{
-  QString origin_dir = QDir::currentPath();
-
-  QString data_dir(m_uiForm.saveDir_lb->text());
-  if( !data_dir.endsWith('/') ) data_dir += "/";
-  runReduceScriptFunction("import SANSReduction\nSANSReduction.INSTRUMENT = i.ReductionSingleton().instrument\nSANSReduction.DataPath('" + data_dir + "')");
-
-  runReduceScriptFunction("SANSReduction.UserPath('" + QFileInfo(m_uiForm.userfile_edit->text()).path() + "')");
-  oldLoadUserFile();
-
-  setProcessingState(true, -1);
-  m_uiForm.load_dataBtn->setText("Loading ...");
-
-  if( m_force_reload ) cleanup();
-
-  QString run_number = m_run_no_boxes.value(0)->text();
-  if( run_number.isEmpty() )
-  {
-    showInformationBox("Error: No sample run given, cannot continue.");
-    setProcessingState(false, -1);
-    m_uiForm.load_dataBtn->setText("Loading Data");
-    return false;
-  }
-
-  if(!m_run_no_boxes.value(3)->text().isEmpty() && m_run_no_boxes.value(6)->text().isEmpty() )
-  {
-    showInformationBox("Error: Can run supplied without direct run, cannot continue.");
-    setProcessingState(false, -1);
-      m_uiForm.load_dataBtn->setText("Load Data");
-    return false;
-  }
-
-  QString sample_logs, can_logs;
-  bool is_loaded(true);
-  QString error;
-  //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
-  if( !m_run_no_boxes.value(4)->text().isEmpty() && m_run_no_boxes.value(7)->text().isEmpty() )
-  {
-    m_run_no_boxes.value(7)->setText(m_run_no_boxes.value(6)->text());
-  }
-
-  QHashIterator<int, QLineEdit*> itr(m_run_no_boxes);
-  while( itr.hasNext() )
-  {
-    itr.next();
-    int key = itr.key();
-    // Skip background as we are not using those at the moment.
-    if( key == 2 ) continue;
-    if( key == 5 ) break;
-    QString run_no = itr.value()->text();
-    QString logs;
-    if( run_no.isEmpty() )
-    {
-      m_workspace_names.insert(key, "");
-      try
-      {
-        //Clear any that are assigned
-        oldAssign(key, logs);
-      }
-      catch(std::runtime_error)
-      {//the user should already have seen an error message box pop up
-        g_log.error() << "Problem loading file\n";
-        is_loaded = false;
-        break;
-      }
-      continue;
-    }
-    try
-    {
-      is_loaded &= oldAssign(key, logs);
-    }
-    catch(std::runtime_error)
-    {//the user should already have seen an error message box pop up
-      g_log.error() << "Problem loading file\n";
-      is_loaded = false;
-      break;
-     }
-    // Check if the last LoadRaw algorithm was run successfully. If so then any problem with
-    // loading is with the log files for the first 2 keys
-    Mantid::API::IAlgorithm_sptr last_run = Mantid::API::AlgorithmManager::Instance().algorithms().back();
-    bool raw_data_ok = last_run->isExecuted();
-    if( !raw_data_ok )
-    {
-      QString period("");
-      if ( getPeriod(key) > 1 )
-      {
-        period = QString("period ") + QString::number(getPeriod(key));
-      }
-      showInformationBox("Error: Cannot load run \""+run_no+"\" " + period + ", see results log for details.");
-      break;
-    }
-    if( key == 0 )
-    {
-      sample_logs = logs;
-      if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
-      {
-        is_loaded = false;
-        showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
-        break;
-      }
-    }
-    else if( key == 1 )
-    {
-      can_logs = logs;
-      if( m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty() )
-      {
-        can_logs = sample_logs;
-        showInformationBox("Warning: Cannot find log file for can run, using sample values.");
-      }
-    }
-    else{}
-  }
-  if (!is_loaded)
-  {
-    setProcessingState(false, -1);
-    m_uiForm.load_dataBtn->setText("Load Data");
-    return false;
-  }
-
-
-
-  for( int index = 1; index < m_uiForm.tabWidget->count(); ++index )
-  {
-    m_uiForm.tabWidget->setTabEnabled(index, true);
-  }
-  setProcessingState(false, -1);
-  m_uiForm.load_dataBtn->setText("Load Data");
-  return true;
-}
 /**
  * Receive a load button click signal
  */
 bool SANSRunWindow::handleLoadButtonClick()
 {
+  // this function looks for and reports any errors to the user
+  if ( ! entriesAreValid(LOAD) )
+  {
+    return false;
+  }
+
   // Check if we have loaded the data_file
   if( !isUserFileLoaded() )
   {
@@ -1882,16 +1612,8 @@ bool SANSRunWindow::handleLoadButtonClick()
 
   if( m_force_reload ) cleanup();
 
-  QString run_number = m_run_no_boxes.value(0)->text();
-  if( run_number.isEmpty() )
-  {
-    showInformationBox("Error: No sample run given, cannot continue.");
-    setProcessingState(false, -1);
-    m_uiForm.load_dataBtn->setText("Loading Data");
-    return false;
-  }
-
-  if(!m_run_no_boxes.value(3)->text().isEmpty() && m_run_no_boxes.value(6)->text().isEmpty() )
+  bool is_loaded(true);
+  if ( ( ! m_uiForm.transmis->isEmpty() ) && m_uiForm.direct->isEmpty() )
   {
     showInformationBox("Error: Can run supplied without direct run, cannot continue.");
     setProcessingState(false, -1);
@@ -1899,28 +1621,61 @@ bool SANSRunWindow::handleLoadButtonClick()
     return false;
   }
 
-  QString sample_logs, can_logs;
-  bool is_loaded(true); 
   QString error;
   //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
-  if( !m_run_no_boxes.value(4)->text().isEmpty() && m_run_no_boxes.value(7)->text().isEmpty() )
+  if ( ( ! m_uiForm.transCan->isEmpty() ) && m_uiForm.dirCan->isEmpty() )
   {
-    m_run_no_boxes.value(7)->setText(m_run_no_boxes.value(6)->text());
+    m_uiForm.dirCan->setFileText(m_uiForm.transCan->getText());
   }
 
-  QHashIterator<int, QLineEdit*> itr(m_run_no_boxes);
+  QString sample_logs, can_logs;  
+  QString sample = m_uiForm.scatterSample->getFirstFilename();
+  try
+  {//preliminarly error checking is over try to load that data
+    is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample", sample_logs);
+    if ( ! m_uiForm.scatCan->isEmpty() )
+    {
+      is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan", can_logs);
+    }
+    if ( ( ! m_uiForm.transmis->isEmpty() ) && ( ! m_uiForm.direct->isEmpty() ) )
+    {
+      is_loaded &= assignMonitorRun(*(m_uiForm.transmis), *(m_uiForm.direct), "TransmissionSample");
+    }
+    if ( ( ! m_uiForm.transCan->isEmpty() ) && ( ! m_uiForm.dirCan->isEmpty() ) )
+    {
+      is_loaded &= assignMonitorRun(*(m_uiForm.transCan), *(m_uiForm.dirCan), "TransmissionCan");
+    }
+  }
+  catch(std::runtime_error)
+  {//the user should already have seen an error message box pop up
+    g_log.error() << "Problem loading file\n";
+    is_loaded = false;
+  }
+  if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
+  {
+    is_loaded = false;
+    showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
+  }
+  if (!is_loaded) 
+  {
+    setProcessingState(false, -1);
+    m_uiForm.load_dataBtn->setText("Load Data");
+    return false;
+  }
+  if(m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty())
+  {
+    can_logs = sample_logs;
+    showInformationBox("Warning: Cannot find log file for can run, using sample values.");
+  }
+
+/*  QHashIterator<RunType, MantidWidgets::MWRunFiles &> itr(m_runs);
   while( itr.hasNext() )
   {
-    itr.next();
     int key = itr.key();
-    // Skip background as we are not using those at the moment.
-    if( key == 2 ) continue;
-    if( key == 5 ) break;
-    QString run_no = itr.value()->text();
-    QString logs;
-    if( run_no.isEmpty() ) 
+
+
+    if( itr.value.isEmpty() ) 
     {
-      m_workspace_names.insert(key, "");
       try
       {
         //Clear any that are assigned
@@ -1933,8 +1688,8 @@ bool SANSRunWindow::handleLoadButtonClick()
         break;
       }
       continue;
-    }
-    try
+    }*/
+/*    try
     {
       is_loaded &= runAssign(key, logs);
     }
@@ -1958,26 +1713,7 @@ bool SANSRunWindow::handleLoadButtonClick()
       showInformationBox("Error: Cannot load run \""+run_no+"\" " + period + ", see results log for details.");
       break;
     }
-    if( key == 0 ) 
-    { 
-      sample_logs = logs;
-      if(m_uiForm.inst_opt->currentText() == "SANS2D" && sample_logs.isEmpty())
-      {
-        is_loaded = false;
-        showInformationBox("Error: Cannot find log file for sample run, cannot continue.");
-        break;
-      }
-    }
-    else if( key == 1 ) 
-    { 
-      can_logs = logs;
-      if(m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty())
-      {
-        can_logs = sample_logs;
-        showInformationBox("Warning: Cannot find log file for can run, using sample values.");
-      }
-    }
-    else{}
+
   }
   if (!is_loaded) 
   {
@@ -1985,39 +1721,24 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
-
+*/
   // Sort out the log information
   setGeometryDetails(sample_logs, can_logs);
   
   Mantid::API::Workspace_sptr baseWS =
-    Mantid::API::AnalysisDataService::Instance().retrieve(getWorkspaceName(0).toStdString());
+    Mantid::API::AnalysisDataService::Instance().retrieve(m_experWksp.toStdString());
   // Enter information from sample workspace on to analysis and geometry tab
   Mantid::API::MatrixWorkspace_sptr sample_workspace =
     boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(baseWS);
     
-  if ( ! sample_workspace )
-  {
-    try
-    {
-      sample_workspace = getGroupMember(baseWS, m_uiForm.sct_smp_prd->text().toInt());
-    }
-    catch(std::exception &)
-    {
-      setProcessingState(false, -1);
-      m_uiForm.load_dataBtn->setText("Load Data");
-      showInformationBox("Error: Could not retrieve sample workspace from Mantid");
-      return false;
-    }
-  }
-  
-  if( sample_workspace != boost::shared_ptr<Mantid::API::MatrixWorkspace>() && !sample_workspace->readX(0).empty() )
+  if( sample_workspace && ( ! sample_workspace->readX(0).empty() ) )
   {
     m_uiForm.tof_min->setText(QString::number(sample_workspace->readX(0).front())); 
     m_uiForm.tof_max->setText(QString::number(sample_workspace->readX(0).back()));
   }
 
   // Set the geometry if the sample has been changed
-  if ( m_sample_no != run_number )
+  if ( m_sample_file != sample )
   {
     int geomid  = sample_workspace->sample().getGeometryFlag();
     if( geomid > 0 && geomid < 4 )
@@ -2045,12 +1766,11 @@ bool SANSRunWindow::handleLoadButtonClick()
     m_uiForm.tabWidget->setTabEnabled(index, true);
   }
  
-  m_sample_no = run_number;
+  m_sample_file = sample;
   setProcessingState(false, -1);
   m_uiForm.load_dataBtn->setText("Load Data");
   return true;
 }
-
 /** 
  * Construct the python code to perform the analysis based on the 
  * current settings
@@ -2165,120 +1885,17 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
  
   return exec_reduce;
 }
-
-QString SANSRunWindow::createOldAnalysisDetailsScript(const QString & type)
-{
-  //Construct a run script based upon the current values within the various widgets
-  QString exec_reduce = "SANSReduction.Detector('" + m_uiForm.detbank_sel->currentText() + "')\n";
-
-  //Add the path in the single mode data box if it is not empty
-  QString data_path(m_uiForm.saveDir_lb->text().trimmed());
-
-  if( !data_path.isEmpty() )
-  {
-    exec_reduce += "SANSReduction.DataPath('" + data_path + "')\n";
-  }
-
-  if( type.startsWith("1D") )
-  {
-    exec_reduce += "SANSReduction.Set1D()\n";
-  }
-  else
-  {
-    exec_reduce += "SANSReduction.Set2D()\n";
-  }
-  //Analysis details
-  exec_reduce +=
-    "SANSReduction.LimitsR(" + m_uiForm.rad_min->text() + "," + m_uiForm.rad_max->text() + ")\n" +
-    "SANSReduction.LimitsWav(" + m_uiForm.wav_min->text() + "," + m_uiForm.wav_max->text() + "," +
-    m_uiForm.wav_dw->text() + ",'" + m_uiForm.wav_dw_opt->itemData(m_uiForm.wav_dw_opt->currentIndex()).toString() + "')\n";
-  if( m_uiForm.q_dq_opt->currentIndex() == 2 )
-  {
-    exec_reduce += "SANSReduction.LimitsQ('" + m_uiForm.q_rebin->text() + "')\n";
-  }
-  else
-  {
-    exec_reduce += "SANSReduction.LimitsQ(" + m_uiForm.q_min->text() + "," + m_uiForm.q_max->text() + "," +
-      m_uiForm.q_dq->text() + ",'" + m_uiForm.q_dq_opt->itemData(m_uiForm.q_dq_opt->currentIndex()).toString() + "')\n";
-  }
-  exec_reduce += "SANSReduction.LimitsQXY(0.0," + m_uiForm.qy_max->text() + "," +
-    m_uiForm.qy_dqy->text() + ",'" + m_uiForm.qy_dqy_opt->itemData(m_uiForm.qy_dqy_opt->currentIndex()).toString() + "')\n" +
-    "SANSReduction.LimitsPhi(" + m_uiForm.phi_min->text() + "," + m_uiForm.phi_max->text();
-  if ( m_uiForm.mirror_phi->isChecked() )
-  {
-    exec_reduce += ", True)\n";
-  }
-  else
-  {
-    exec_reduce += ", False)\n";
-  }
-  QString floodFile =
-    m_uiForm.enableFlood_ck->isChecked() ? m_uiForm.floodFile->getFirstFilename().trimmed() : "";
-  exec_reduce += "SANSReduction.SetDetectorFloodFile('"+floodFile+"')\n";
-
-  //Transmission behaviour
-  QString fitType = m_uiForm.trans_opt->currentText().trimmed().toUpper();
-  if (fitType == "LOGARITHMIC")
-  {
-    fitType = "LOG";
-  }
-  //Set the wavelength ranges, equal to those for the sample unless this box is checked
-  if (m_uiForm.transFit_ck->isChecked())
-  {
-    exec_reduce += "SANSReduction.TransFit('" + fitType + "'," +
-      m_uiForm.trans_min->text() + "," + m_uiForm.trans_max->text() + ")\n";
-  }
-  else
-  {
-    exec_reduce += "SANSReduction.TransFit('" + fitType + "')\n";
-  }
-
-  //Centre values
-  exec_reduce += "SANSReduction.SetCentre(" + m_uiForm.beam_x->text() + "," + m_uiForm.beam_y->text() + ")\n";
-  //Gravity correction
-  exec_reduce += "SANSReduction.Gravity(";
-  if( m_uiForm.gravity_check->isChecked() )
-  {
-    exec_reduce += "True)\n";
-  }
-  else
-  {
-    exec_reduce += "False)\n";
-  }
-  //Sample offset
-  exec_reduce += "SANSReduction.SetSampleOffset(" + m_uiForm.smpl_offset->text() + ")\n";
-
-  //Monitor spectrum
-  exec_reduce += "SANSReduction.SetMonitorSpectrum(" + m_uiForm.monitor_spec->text() + ",";
-  exec_reduce += m_uiForm.monitor_interp->isChecked() ? "True" : "False";
-  exec_reduce += ")\n";
-  //the monitor to normalise the tranmission spectrum against
-  exec_reduce += "SANSReduction.SetTransSpectrum(" + m_uiForm.trans_monitor->text() + ",";
-  exec_reduce += m_uiForm.trans_interp->isChecked() ? "True" : "False";
-  exec_reduce += ")\n";
-  //Extra mask information
-  oldUserMaskStrings(exec_reduce);
-
-  //Set geometry info
-  exec_reduce +=
-    "SANSReduction.SampleHeight(" + m_uiForm.sample_height->text() + ")\n" +
-    "SANSReduction.SampleWidth(" + m_uiForm.sample_width->text() + ")\n" +
-    "SANSReduction.SampleThickness(" + m_uiForm.sample_thick->text() + ")\n"
-    "SANSReduction.SampleGeometry(" + m_uiForm.sample_geomid->currentText().at(0) + ")\n";
-
-  return exec_reduce;
-}
 /**
  * Run the analysis script
  * @param type :: The data reduction type, 1D or 2D
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
-  if ( ! entriesAreValid() )
+  if ( ! entriesAreValid(ALL) )
   {
-    QMessageBox::warning(this, "Validation Error", "There is a problem with one or more entries on the form. These are marked\nwith an *");
     return;
   }
+
   //new reduction is going to take place, remove the results from the last reduction
   resetDefaultOutput();
 
@@ -2397,22 +2014,56 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   checkLogFlags();
 }
 /** Iterates through the validators and stops if it finds one that is shown and enabled
+*  @param check the validator set to check
 *  @return true if there are no validator problems if false if it finds one
 */
-bool SANSRunWindow::entriesAreValid()
+bool SANSRunWindow::entriesAreValid(const ValCheck check)
 {
-  typedef std::map<QLabel * const, std::pair<QWidget *, QWidget *> >::const_iterator it_type;
-  for( it_type it(m_validators.begin()); it != m_validators.end(); ++it )
-  {// is the validator active denoting a problem? don't do anything if it's been disabled
+  if ( check == LOAD || check == ALL )
+  {
+    return entriesAreValid(m_loadValids) && runFilesAreValid();
+  }
+  if ( check == RUN || check == ALL )
+  {
+    return entriesAreValid(m_validators);
+  }
+  return false;
+}
+bool SANSRunWindow::entriesAreValid(ValMap & vals)
+{
+  for ( ValMap::const_iterator it = vals.begin(); it != vals.end(); ++it )
+  {
+    // is the validator active denoting a problem? don't do anything if it's been disabled
     if ( ( ! it->first->isHidden() ) && ( it->first->isEnabled() ) )
     {// the first in the pair is the widget whose value we're having a problem with
       it->second.first->setFocus();
       //the second part of the pair is the tab it's in
       m_uiForm.tabWidget->setCurrentWidget(it->second.second);
+      QMessageBox::warning(this, "Validation Error", "There is a problem with one or more entries on the form. These are marked\nwith an *");
       return false;
     }
   }
   // no problems have been found
+  return true;
+}
+/** Loop through all the m_runFiles file widgets and check they are all in the
+*  no error state
+*  @return true if there are no red stars on any run widgets, false otherwise
+*/
+bool SANSRunWindow::runFilesAreValid()
+{
+  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  for ( ; it != m_runFiles.end(); ++it )
+  {
+    if ( ! (*it)->isValid() )
+    {
+      m_uiForm.runNumbers->setFocus();
+      m_uiForm.tabWidget->setCurrentWidget(*it);
+      QMessageBox::warning(this, "Validation Error", "There is a problem with one or more entries on the form. These are marked\nwith an *");
+      return false;
+    }
+  }
+  // there are no problems
   return true;
 }
 /** Generates the code that can run a reduction chain (and then reset it)
@@ -2451,6 +2102,12 @@ QString SANSRunWindow::getInstrumentClass() const
 }
 void SANSRunWindow::handleRunFindCentre()
 {
+  // this function looks for and reports any errors to the user
+  if ( ! entriesAreValid() )
+  {
+    return;
+  }
+
   if( m_uiForm.beamstart_box->currentIndex() == 1 && (m_uiForm.beam_x->text().isEmpty() || m_uiForm.beam_y->text().isEmpty()) )
   {
     showInformationBox("Current centre postion is invalid, please check input.");
@@ -2459,13 +2116,15 @@ void SANSRunWindow::handleRunFindCentre()
 
   // Start iteration
   updateCentreFindingStatus("::SANS::Loading data");
-  oldLoadButtonClick();
+  handleLoadButtonClick();
 
   // Disable interaction
   setProcessingState(true, 0);
 
   // This checks whether we have a sample run and that it has been loaded
-  QString py_code = createOldAnalysisDetailsScript("1D");
+  QString py_code(readUserFileGUIChanges("1D"));
+  py_code += readSampleObjectGUIChanges();
+
   if( py_code.isEmpty() )
   {
     setProcessingState(false, 0);
@@ -2494,7 +2153,7 @@ void SANSRunWindow::handleRunFindCentre()
   }
 
   //Find centre function
-  py_code += "SANSReduction.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" + m_uiForm.beam_rmax->text() +
+  py_code += "i.FindBeamCentre(rlow=" + m_uiForm.beam_rmin->text() + ",rupp=" + m_uiForm.beam_rmax->text() +
       ",MaxIter=" + m_uiForm.beam_iter->text() + ",";
 
 
@@ -2522,7 +2181,7 @@ void SANSRunWindow::handleRunFindCentre()
 	     SLOT(updateCentreFindingStatus(const QString&)));
   connect(this, SIGNAL(logMessageReceived(const QString&)), this, SLOT(updateLogWindow(const QString&)));
 
-  QString coordstr = runReduceScriptFunction("SANSReduction.printParameter('XBEAM_CENTRE');SANSReduction.printParameter('YBEAM_CENTRE')");
+  QString coordstr = runReduceScriptFunction("print i.ReductionSingleton()._beam_finder.get_beam_center()[0];print i.ReductionSingleton()._beam_finder.get_beam_center()[1]");
   
   QString result("");
   if( coordstr.isEmpty() )
@@ -2759,6 +2418,19 @@ void SANSRunWindow::enableOrDisableDefaultSave()
   }
   m_uiForm.saveDefault_btn->setEnabled(false);
 }
+/** connected to the Multi-period check box it shows or hides the multi-period boxes
+*  on the file widgets
+*  @param tickState an enum (Qt::CheckState) that indicates if check box was ticked or not
+*/
+void SANSRunWindow::disOrEnablePeriods(const int tickState)
+{
+  const bool enable = tickState == Qt::Checked;
+  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  for ( ; it != m_runFiles.end(); ++it )
+  {
+    (*it)->doMultiEntry(enable);
+  }
+}
 /**
  * Update the logging window with status messages
  * @param msg :: The message received
@@ -2948,285 +2620,89 @@ void SANSRunWindow::resetDefaultOutput(const QString & wsName)
     m_uiForm.outfile_edit->setText(wsName);
   }
 }
-/** 
- * Run a SANS assign command
- * @param key :: The key of the edit box to assign from
- * @param logs :: An output parameter specifying the log data
- */
-bool SANSRunWindow::runAssign(int key, QString & logs)
+/** Passes information about the selected transmission runs to the Python objects
+*  @param trans run widget box with the selected transmission (run with a sample present) file
+*  @param direct run widget box with the selected direct (run with no sample present) file
+*  @para assignFn this is different for can or sample
+*/
+bool SANSRunWindow::assignMonitorRun(const MantidWidgets::MWRunFiles & trans, const MantidWidgets::MWRunFiles & direct, const QString & assignFn)
 {
-  //Work out if sans/trans and sample/can
-  bool is_trans(false);
-  if( key > 2 && key < 6 )
+  //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
+  const static QString PYTHON_SEP("C++assignMonitorRunC++");
+  
+  QString assignCom("i."+assignFn+"('" + trans.getFirstFilename() + "'");
+  assignCom.append(", '"+direct.getFirstFilename()+"'");
+  assignCom.append(", period_t="+QString::number(trans.getEntryNum()));
+  assignCom.append(", period_d="+QString::number(direct.getEntryNum())+")");
+  
+  //assign the workspace name to a Python variable and read back some details
+  QString pythonC="t1, t2 = " + assignCom + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
+  QString ws_names = runReduceScriptFunction(pythonC);
+  if (ws_names.startsWith("error", Qt::CaseInsensitive))
   {
-    is_trans = true;
-  }
-  bool is_can(false);
-  if( key == 1 || key == 4 )
-  {
-    is_can = true;
+    throw std::runtime_error("Couldn't load a transmission file");
   }
   
-  // Default extension if the box run number does not contain one
-  QString extension = m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString();
-  QString run_number = m_run_no_boxes.value(key)->text();
-  if( QFileInfo(run_number).completeSuffix().isEmpty() )
-  {
-    if( run_number.endsWith(".") ) 
-    {
-      run_number.chop(1);
-    }
-    run_number += extension;
-  }
-  bool status(true);
-  //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
-  const static QString PYTHON_SEP("C++runAssignC++");
-  if( is_trans )
-  {
-    QString direct_run = m_run_no_boxes.value(key + 3)->text();
-    QString direct_per = QString::number(getPeriod(key + 3));
-    if( QFileInfo(direct_run).completeSuffix().isEmpty() )
-    {
-      if( direct_run.endsWith(".") ) 
-      {
-        direct_run.chop(1);
-      }
-      direct_run += extension;
-    }
-    QString assign_fn;
-    if( is_can )
-    {
-      assign_fn = "i.TransmissionCan";
-    }
-    else
-    {
-      assign_fn = "i.TransmissionSample";
-    }
-    assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
-    assign_fn += ", period_t = " + QString::number(getPeriod(key));
-    assign_fn += ", period_d = " + direct_per+")";
-    //assign the workspace name to a Python variable and read back some details
-    QString pythonC="t1, t2 = " + assign_fn + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
-    QString ws_names = runReduceScriptFunction(pythonC).trimmed();
-    if (ws_names.startsWith("error", Qt::CaseInsensitive))
-    {
-      throw std::runtime_error("Couldn't load a transmission file");
-    }
-    //read the informtion returned from Python
-    QString trans_ws = ws_names.section(PYTHON_SEP, 1,1).trimmed();
-    QString direct_ws = ws_names.section(PYTHON_SEP, 2).trimmed();
+  //read the informtion returned from Python
+  QString trans_ws = ws_names.section(PYTHON_SEP, 1,1).trimmed();
+  QString direct_ws = ws_names.section(PYTHON_SEP, 2).trimmed();
 
-    status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
+  bool status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
 
-    //if the workspaces have loaded
-    if (status)
-    {//save the workspace names
-      m_workspace_names.insert(key, trans_ws);
-      m_workspace_names.insert(key + 3, direct_ws);
-
-      //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "i.ReductionSingleton().can_trans_load.TRANS_SAMPLE_N_PERIODS" : "i.ReductionSingleton().samp_trans_load.TRANS_SAMPLE_N_PERIODS";
-      int nPeriods =
-        runReduceScriptFunction("print " + pythonVar).toInt();
-      setNumberPeriods(key, nPeriods);
-      
-      pythonVar = is_can ? "i.ReductionSingleton().can_trans_load.DIRECT_SAMPLE_N_PERIODS" : "i.ReductionSingleton().samp_trans_load.DIRECT_SAMPLE_N_PERIODS";
-      nPeriods =
-        runReduceScriptFunction("print " + pythonVar).toInt();
-      setNumberPeriods(key + 3, nPeriods);
-    }
-    else
-    {//workspaces didn't load so remove the (out of date) period information
-      unSetPeriods(key);
-      unSetPeriods(key+3);
-    }
-  }
-  else
-  {
-    QString assign_fn;
-    if( is_can )
-    {
-      assign_fn = "i.AssignCan";
-    }
-    else
-    {
-      assign_fn = "i.AssignSample";
-    }
-    assign_fn += "('" + run_number + "', reload = True";
-    assign_fn += ", period = " + QString::number(getPeriod(key))+")";
-    //assign the workspace name to a Python variable and read back some details
-    QString run_info = "i.SetCentre('" + m_uiForm.beam_x->text();
-    run_info += "','"+m_uiForm.beam_y->text()+"')\n";
-    run_info += "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
-    run_info = runReduceScriptFunction(run_info);
-    if (run_info.startsWith("error", Qt::CaseInsensitive))
-    {
-      throw std::runtime_error("Couldn't sample or can");
-    }
-    //read the informtion returned from Python
-    QString base_workspace = run_info.section(PYTHON_SEP, 1, 1).trimmed();
-
-    logs = run_info.section(PYTHON_SEP, 2);
-    if( !logs.isEmpty() )
-    {
-      trimPyMarkers(logs);
-    }
-    status = ! base_workspace.isEmpty();
-    
-    //if the workspace was loaded
-    if (status)
-    {//save the workspace name
-      m_workspace_names.insert(key, base_workspace);
-      //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "i.ReductionSingleton().background_subtracter._CAN_N_PERIODS" : "i.ReductionSingleton().data_loader._SAMPLE_N_PERIODS";
-      int nPeriods =
-        runReduceScriptFunction("print "+pythonVar).toInt();
-      setNumberPeriods(key, nPeriods);
-    }
-    else
-    {
-      unSetPeriods(key);
-    }
+  //if the workspaces have loaded
+  if (status)
+  {//save the workspace names
+    m_workspaceNames.insert(trans_ws);
+    m_workspaceNames.insert(direct_ws);
   }
   return status;
 }
-/**
- * Run a SANS assign command
- * @param key :: The key of the edit box to assign from
- * @param logs :: An output parameter specifying the log data
+/** 
+ * Load a scatter sample file or can run via Python objects using the passed Python command
+ * @param[in] runFile name of file to load
+ * @param[in] assignFn the Python command to run
+ * @param[out] logs information loaded from the file
+ * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::oldAssign(int key, QString & logs)
+bool SANSRunWindow::assignDetBankRun(const MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs)
 {
-  //Work out if sans/trans and sample/can
-  bool is_trans(false);
-  if( key > 2 && key < 6 )
-  {
-    is_trans = true;
-  }
-  bool is_can(false);
-  if( key == 1 || key == 4 )
-  {
-    is_can = true;
-  }
-
-  // Default extension if the box run number does not contain one
-  QString extension = m_uiForm.file_opt->itemData(m_uiForm.file_opt->currentIndex()).toString();
-  QString run_number = m_run_no_boxes.value(key)->text();
-  if( QFileInfo(run_number).completeSuffix().isEmpty() )
-  {
-    if( run_number.endsWith(".") )
-    {
-      run_number.chop(1);
-    }
-    run_number += extension;
-  }
-  bool status(true);
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
-  const static QString PYTHON_SEP("C++runAssignC++");
-  if( is_trans )
+  const static QString PYTHON_SEP("C++assignDetBankRunC++");
+  
+  QString assignCom("i."+assignFn+"('" + runFile.getFirstFilename() + "'");
+  assignCom.append(", reload = True");
+  assignCom.append(", period = " + QString::number(runFile.getEntryNum())+")");
+
+  //assign the workspace name to a Python variable and read back some details
+  QString run_info = "i.SetCentre('" + m_uiForm.beam_x->text();
+  run_info += "','"+m_uiForm.beam_y->text()+"')\n";
+  run_info += "SCATTER_SAMPLE, logvalues = " + assignCom+";print '"+PYTHON_SEP+"',SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
+  run_info = runReduceScriptFunction(run_info);
+  if (run_info.startsWith("error", Qt::CaseInsensitive))
   {
-    QString direct_run = m_run_no_boxes.value(key + 3)->text();
-    if( QFileInfo(direct_run).completeSuffix().isEmpty() )
-    {
-      if( direct_run.endsWith(".") )
-      {
-        direct_run.chop(1);
-      }
-      direct_run += extension;
-    }
-    QString assign_fn;
-    if( is_can )
-    {
-      assign_fn = "SANSReduction.TransmissionCan";
-    }
-    else
-    {
-      assign_fn = "SANSReduction.TransmissionSample";
-    }
-    assign_fn += "('"+run_number+"','"+direct_run+"', reload = True";
-    assign_fn += ", period = " + QString::number(getPeriod(key))+")";
-    //assign the workspace name to a Python variable and read back some details
-    QString pythonC="t1, t2 = " + assign_fn + ";print t1,'"+PYTHON_SEP+"',t2";
-    QString ws_names = runReduceScriptFunction(pythonC);
-    if (ws_names.startsWith("error", Qt::CaseInsensitive))
-    {
-      throw std::runtime_error("Couldn't load a transmission file");
-    }
-    //read the informtion returned from Python
-    QString trans_ws = ws_names.section(PYTHON_SEP, 0,0).trimmed();
-    QString direct_ws = ws_names.section(PYTHON_SEP, 1).trimmed();
+    throw std::runtime_error("Couldn't sample or can");
+  }
+  //read the informtion returned from Python
+  QString base_workspace = run_info.section(PYTHON_SEP, 1, 1).trimmed();
 
-    status = ( ! trans_ws.isEmpty() ) && ( ! direct_ws.isEmpty() );
-
-    //if the workspaces have loaded
-    if (status)
-    {//save the workspace names
-      m_workspace_names.insert(key, trans_ws);
-      m_workspace_names.insert(key + 3, direct_ws);
-
-      //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "TRANS_CAN_N_PERIODS" : "_TRANS_SAMPLE_N_PERIODS";
-      int nPeriods =
-        runReduceScriptFunction("SANSReduction.printParameter('"+pythonVar+"'),").toInt();
-      setNumberPeriods(key, nPeriods);
-
-      pythonVar = is_can ? "DIRECT_CAN_N_PERIODS" : "DIRECT_SAMPLE_N_PERIODS";
-      nPeriods =
-        runReduceScriptFunction("SANSReduction.printParameter('"+pythonVar+"'),").toInt();
-      setNumberPeriods(key + 3, nPeriods);
-    }
-    else
-    {//workspaces didn't load so remove the (out of date) period information
-      unSetPeriods(key);
-      unSetPeriods(key+3);
-    }
+  logs = run_info.section(PYTHON_SEP, 2);
+  if( !logs.isEmpty() )
+  {
+    trimPyMarkers(logs);
+  }
+  
+  if ( assignFn.contains("can", Qt::CaseInsensitive) )
+  {
+    m_experCan = base_workspace;
   }
   else
   {
-    QString assign_fn;
-    if( is_can )
-    {
-      assign_fn = "SANSReduction.AssignCan";
-    }
-    else
-    {
-      assign_fn = "SANSReduction.AssignSample";
-    }
-    assign_fn += "('" + run_number + "', reload = True";
-    assign_fn += ", period = " + QString::number(getPeriod(key)) + ")";
-    //assign the workspace name to a Python variable and read back some details
-    QString run_info = "SCATTER_SAMPLE, logvalues = " + assign_fn + ";print SCATTER_SAMPLE,'"+PYTHON_SEP+"',logvalues";
-    run_info = runReduceScriptFunction(run_info);
-    if (run_info.startsWith("error", Qt::CaseInsensitive))
-    {
-      throw std::runtime_error("Couldn't sample or can");
-    }
-    //read the informtion returned from Python
-    QString base_workspace = run_info.section(PYTHON_SEP, 0, 0).trimmed();
-
-    logs = run_info.section(PYTHON_SEP, 1);
-    if( !logs.isEmpty() )
-    {
-      trimPyMarkers(logs);
-    }
-    status = ! base_workspace.isEmpty();
-
-    //if the workspace was loaded
-    if (status)
-    {//save the workspace name
-      m_workspace_names.insert(key, base_workspace);
-      //and display to the user how many periods are in the run
-      QString pythonVar = is_can ? "_CAN_N_PERIODS" : "_SAMPLE_N_PERIODS";
-      int nPeriods =
-        runReduceScriptFunction("SANSReduction.printParameter('"+pythonVar+"'),").toInt();
-      setNumberPeriods(key, nPeriods);
-    }
-    else
-    {
-      unSetPeriods(key);
-    }
+    m_experWksp = base_workspace;
   }
-  return status;
+
+  m_workspaceNames.insert(base_workspace);
+
+  return ! base_workspace.isEmpty();
 }
 /** Gets the detectors that the instrument has and fills the
 *  combination box with these, there must exactly two detectors
@@ -3253,54 +2729,6 @@ void SANSRunWindow::fillDetectNames(QComboBox *output)
   
   output->setItemText(0, dets[1]);
   output->setItemText(1, dets[3]);
-}
-/** gets the number entered into the periods box
-* @param key :: The box this applies to
-* @return the entry number the user entered into the box, or -1 if the box is empty
-*/
-int SANSRunWindow::getPeriod(const int key)
-{
-  QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
-  QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
-
-  if ( ! userentry->text().isEmpty() )
-  {
-    return userentry->text().toInt();
-  }
-  else
-  {
-    return -1;
-  }
-}
-/** Set number of periods for the given workspace
-* @param key :: The box this applies to
-* @param num :: the number of periods there are known to be
-*/
-void SANSRunWindow::setNumberPeriods(const int key, const int num)
-{
-  QLabel *label = qobject_cast<QLabel*>(m_period_lbls.value(key));
-  QLineEdit *userentry = qobject_cast<QLineEdit*>(label->buddy());
-
-  if (num > 0)
-  {
-    label->setText("/" + QString::number(num));
-    if (userentry->text().isEmpty())
-    {//default period to analysis is the first one
-      userentry->setText("1");
-    }
-  }
-  else
-  {
-    userentry->clear();
-    label->setText("/??");
-  }
-}
-/** Blank the periods information in a box
-* @param key :: The box this applies to
-*/
-void SANSRunWindow::unSetPeriods(const int key)
-{
-  setNumberPeriods(key, -1);
 }
 /** Checks if the workspace is a group and returns the first member of group, throws
 *  if nothing can be retrived
@@ -3335,13 +2763,6 @@ Mantid::API::MatrixWorkspace_sptr SANSRunWindow::getGroupMember(Mantid::API::Wor
   
   return memberWS;
 }
-/**
- * Get a properly qualified workspace name for the given key
- */
-QString SANSRunWindow::getWorkspaceName(int key)
-{
-  return m_workspace_names.value(key);
-}
 /** Find which save formats have been selected by the user 
 *  @return save algorithm names
 */
@@ -3363,18 +2784,12 @@ QStringList SANSRunWindow::getSaveAlgs()
  */
 void SANSRunWindow::handleMantidDeleteWorkspace(Mantid::API::WorkspaceDeleteNotification_ptr p_dnf)
 {
-  QString wksp_name = QString::fromStdString(p_dnf->object_name());
-  int names_count = m_workspace_names.count();
-  for( int key = 0; key < names_count; ++key )
+  QString wkspName = QString::fromStdString(p_dnf->object_name());
+  if ( m_workspaceNames.find(wkspName) != m_workspaceNames.end() )
   {
-    if( wksp_name == m_workspace_names.value(key) )
-    {
-      forceDataReload();
-      return;
-    }
+    forceDataReload();
   }
 }
-
 /**
  * Format a double as a string
  * @param value :: The double to convert to a string
@@ -3577,7 +2992,7 @@ void SANSRunWindow::checkLogFlags()
   m_log_warnings = false;
 }
 /** Display the first data search and the number of data directorys to users and
-*  update our input directory in m_data_dir
+*  update our input directory
 */
 void SANSRunWindow::upDateDataDir()
 {
@@ -3591,14 +3006,14 @@ void SANSRunWindow::upDateDataDir()
     {
       dataDir.replace('\\', '/');
     }
-    m_uiForm.saveDir_lb->setText(dataDir);
+    m_uiForm.loadDir_lb->setText(dataDir);
 
     m_uiForm.plusDirs_lb->setText(
       QString("+ ") + QString::number(dirs.size()-1) + QString(" others"));
   }
   else
   {
-    m_uiForm.saveDir_lb->setText("No input search directories defined");
+    m_uiForm.loadDir_lb->setText("No input search directories defined");
     m_uiForm.plusDirs_lb->setText("");
   }
 
