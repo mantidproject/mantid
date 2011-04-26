@@ -179,7 +179,32 @@ def write_test(subproject, classname, filename, algorithm):
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
   }
-  """ % classname
+  
+  void test_exec()
+  {
+    // Name of the output workspace.
+    std::string outWSName("%sTest_OutputWS");
+  
+    %s alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() )
+    
+    // Retrieve the workspace from data service. TODO: Change to your desired type
+    Workspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING( ws = boost::dynamic_pointer_cast<Workspace>(AnalysisDataService::Instance().retrieve(outWSName)) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    
+    // TODO: Check the results
+    
+    // Remove workspace from the data service.
+    AnalysisDataService::Instance().remove(outWSName);
+  }
+  """ % (classname,classname,classname);
   
     if not algorithm:
         algorithm_test = ""
@@ -196,6 +221,7 @@ def write_test(subproject, classname, filename, algorithm):
 #include "Mantid%s/%s.h"
 
 using namespace Mantid::%s;
+using namespace Mantid::API;
 
 class %sTest : public CxxTest::TestSuite
 {
@@ -298,6 +324,9 @@ def redo_cmake_section(lines, cmake_tag, add_this_line):
     # Add the new file to the list of files
     if len(add_this_line) > 0:
         files.append(add_this_line)
+    # Use a set to keep only unique linese
+    files = set(files)
+    files = list(files)
     # Sort-em alphabetically
     files.sort()
         
