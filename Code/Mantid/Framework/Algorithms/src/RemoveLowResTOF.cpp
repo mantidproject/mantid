@@ -231,6 +231,8 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
 
   // this is related to the reference tof
   double sqrtdmin = sqrt(m_Tmin / m_DIFCref) + m_K * log10(dspmap * m_DIFCref);
+  if (sqrtdmin <= 0.)
+    return 0.;
   double tmin = sqrtdmin * sqrtdmin / dspmap;
 
   g_log.debug() << "tmin[" << workspaceIndex << "] " << tmin << "\n";
