@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>980</width>
-    <height>1159</height>
+    <width>1026</width>
+    <height>1152</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -57,8 +57,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>960</width>
-        <height>1139</height>
+        <width>998</width>
+        <height>1124</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -113,6 +113,12 @@
                <size>
                 <width>150</width>
                 <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>150</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="text">
@@ -238,6 +244,12 @@
                 <height>0</height>
                </size>
               </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>150</height>
+               </size>
+              </property>
               <property name="text">
                <string>Absolute scale factor</string>
               </property>
@@ -315,6 +327,12 @@
                <size>
                 <width>120</width>
                 <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>120</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="text">
@@ -404,27 +422,46 @@
              </spacer>
             </item>
             <item>
+             <widget class="QCheckBox" name="thickness_chk">
+              <property name="minimumSize">
+               <size>
+                <width>120</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Sample thickness [cm]</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="thickness_edit">
+              <property name="minimumSize">
+               <size>
+                <width>80</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>80</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QLabel" name="att_trans_label">
               <property name="text">
                <string>Attenuator Transmission</string>
               </property>
              </widget>
-            </item>
-            <item>
-             <spacer name="horizontalSpacer_13">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <property name="sizeType">
-               <enum>QSizePolicy::Fixed</enum>
-              </property>
-              <property name="sizeHint" stdset="0">
-               <size>
-                <width>3</width>
-                <height>20</height>
-               </size>
-              </property>
-             </spacer>
             </item>
             <item>
              <widget class="QLineEdit" name="scale_att_trans_edit">
@@ -634,6 +671,12 @@
                <size>
                 <width>150</width>
                 <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>150</width>
+                <height>16777215</height>
                </size>
               </property>
               <property name="text">
@@ -850,6 +893,12 @@ Values can be selected by hand by checking the boxes below.</string>
             </property>
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
+            </property>
+            <property name="labelAlignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+            </property>
+            <property name="formAlignment">
+             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
             </property>
             <item row="0" column="0">
              <widget class="QCheckBox" name="detector_offset_chk">

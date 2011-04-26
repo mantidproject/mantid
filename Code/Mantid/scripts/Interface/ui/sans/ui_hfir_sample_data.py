@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_sample_data.ui'
 #
-# Created: Fri Apr 15 15:10:01 2011
+# Created: Mon Apr 25 19:17:33 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -12,7 +12,7 @@ from PyQt4 import QtCore, QtGui
 class Ui_Frame(object):
     def setupUi(self, Frame):
         Frame.setObjectName("Frame")
-        Frame.resize(936, 651)
+        Frame.resize(1014, 874)
         Frame.setFrameShape(QtGui.QFrame.StyledPanel)
         Frame.setFrameShadow(QtGui.QFrame.Raised)
         self.verticalLayout = QtGui.QVBoxLayout(Frame)
@@ -23,7 +23,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents_2 = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 916, 631))
+        self.scrollAreaWidgetContents_2.setGeometry(QtCore.QRect(0, 0, 986, 846))
         self.scrollAreaWidgetContents_2.setObjectName("scrollAreaWidgetContents_2")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents_2)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -85,6 +85,8 @@ class Ui_Frame(object):
         self.formLayout_3 = QtGui.QFormLayout()
         self.formLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.formLayout_3.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_3.setLabelAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.formLayout_3.setFormAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.formLayout_3.setHorizontalSpacing(0)
         self.formLayout_3.setObjectName("formLayout_3")
         self.label_4 = QtGui.QLabel(self.geometry_options_groupbox)
