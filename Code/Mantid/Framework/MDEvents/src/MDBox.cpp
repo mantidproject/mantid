@@ -156,7 +156,7 @@ namespace MDEvents
       size_t d;
       for (d=0; d<nd; ++d)
       {
-        if (not fullyContained[d]) break;
+        if (!fullyContained[d]) break;
       }
       if (d == nd)
       {
