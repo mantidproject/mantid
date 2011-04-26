@@ -6,7 +6,8 @@
 
 
 /// Default constructor
-MuonNexusReader::MuonNexusReader() : nexus_instrument_name(), corrected_times(0), counts(0)
+MuonNexusReader::MuonNexusReader() : 
+  nexus_instrument_name(), corrected_times(NULL), counts(NULL), detectorGroupings(NULL)
 {
 }
 
@@ -15,6 +16,7 @@ MuonNexusReader::~MuonNexusReader()
 {
   delete[] corrected_times;
   delete[] counts;
+  delete[] detectorGroupings;
 }
 
 // Basic NeXus Muon file reader - simple version based on contents of test files.

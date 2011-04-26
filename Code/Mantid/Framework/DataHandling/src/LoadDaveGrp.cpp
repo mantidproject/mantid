@@ -187,6 +187,9 @@ void LoadDaveGrp::exec()
     delete errors[i];
   }
 
+  delete xAxis;
+  delete yAxis;
+
   this->setProperty("OutputWorkspace", outputWorkspace);
 }
 
