@@ -930,29 +930,41 @@ class CropDetBank(ReductionStep):
             EndWorkspaceIndex = reducer.instrument.cur_detector().last_spec_num - 1)
 
 class ConvertToQ(ReductionStep):
-    _OUTPUT_TYPES = {'1D' : 'Q1D', '2D': 'Qxy'}
+    _OUTPUT_TYPES = {'1D' : 'Q1D',
+                     '2D': 'Qxy'}
     _DEFAULT_GRAV = False
     
-    def __init__(self, type = '1D'):
+    def __init__(self, container=None):
         super(ConvertToQ, self).__init__()
+	#allows running the reducers keep_un_normalised(), if required
+	self._error_holder = container
         
         #this should be set to 1D or 2D
-        self._output_type = None
+        self._output_type = '1D'
         #the algorithm that corrosponds to the above choice
-        self._Q_alg = None
-        self.set_output_type(type)
+        self._Q_alg = self._OUTPUT_TYPES[self._output_type]
         #if true gravity is taken into account in the Q1D calculation
         self._use_gravity = self._DEFAULT_GRAV
         self._grav_set = False
     
-    def set_output_type(self, discript):
-        self._Q_alg = self._OUTPUT_TYPES[discript]
-        self._output_type = discript
-        
+    def set_output_type(self, descript):
+        """
+	    Requests the given output from the Q conversion, either 1D or 2D. For
+	    the 1D calculation it asks the reducer to keep a workspace for error
+	    estimates
+	    @param descript: 1D or 2D
+	"""
+        self._Q_alg = self._OUTPUT_TYPES[descript]
+        self._output_type = descript
+	
+	if self._output_type == '1D':
+	    if not self._error_holder['Q1D errors']:
+	        raise RuntimeError('Could not find the un-normalised sample workspace needed for error estimates')
+	        	
     def get_output_type(self):
         return self._output_type
 
-    output_type = property(get_output_type, set_output_type, None, None)
+    output_type = property(get_output_type, None, None, None)
 
     def get_gravity(self):
         return self._use_gravity
@@ -968,11 +980,13 @@ class ConvertToQ(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._Q_alg == 'Q1D':
-            if reducer.Q_error_est_1D is None:
-                raise RuntimeError('Could not find the workspace containing error estimates')
-            Q1D(workspace, reducer.Q_error_est_1D, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
-            mtd.deleteWorkspace(reducer.Q_error_est_1D)
-            reducer.Q_error_est_1D = None
+	    #use a counts workspace for errors only if it exists, otherwise use the data workspace as a dummy
+            if self._error_holder['Q1D errors']:
+                errors = self._error_holder['Q1D errors']
+	    else:
+	        errors = workspace
+
+            Q1D(workspace, errors, workspace, reducer.Q_REBIN, AccountForGravity=self._use_gravity)
 
         elif self._Q_alg == 'Qxy':
             Qxy(workspace, workspace, reducer.QXY2, reducer.DQXY, AccountForGravity=self._use_gravity)
@@ -995,6 +1009,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
         self._raw_ws = raw_ws
+	#it is possible to keep the un-normalised workspace, to do this set this to the name you want this workspace to have
+	self.save_original = None
 
     def execute(self, reducer, workspace):
         normalization_spectrum = self._normalization_spectrum 
@@ -1035,15 +1051,14 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         reducer.to_wavelen.execute(reducer, norm_ws, bin_alg=r_alg)
 
         out_workspace = workspace
-        if reducer.to_Q.get_output_type() == '1D':
+        if self.save_original:
             # At this point need to fork off workspace name to keep a workspace containing raw counts
-            reducer.Q_error_est_1D = 'to_delete_'+workspace+'_prenormed'
-            RenameWorkspace(workspace, reducer.Q_error_est_1D)
-            workspace = reducer.Q_error_est_1D
+            RenameWorkspace(workspace, self.save_original)
+            workspace = self.save_original
 
         Divide(workspace, norm_ws, out_workspace)
 
-        mantid.deleteWorkspace(norm_ws)
+        DeleteWorkspace(norm_ws)
 
 class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     """
@@ -1271,8 +1286,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
-        mantid.deleteWorkspace(trans_tmp_out)
-        mantid.deleteWorkspace(direct_tmp_out)
+        DeleteWorkspace(trans_tmp_out)
+        DeleteWorkspace(direct_tmp_out)
             
         if fit_meth == 'Off':
             result = unfittedtransws

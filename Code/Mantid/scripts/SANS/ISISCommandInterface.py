@@ -8,13 +8,11 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
 import centre_finder as centre
-import SANSReduction
+#import SANSReduction
 import MantidFramework
 import copy
 from SANSadd2 import *
 
-#remove the following
-DEL__FINDING_CENTRE_ = False
 # disable plotting if running outside Mantidplot
 try:
     import mantidplot
@@ -262,11 +260,11 @@ def _SetWavelengthRange(start, end):
 
 def Set1D():
     _printMessage('Set1D()')
-    ReductionSingleton().to_Q.output_type = '1D'
+    ReductionSingleton().set_Q_output_type('1D')
 
 def Set2D():
     _printMessage('Set2D()')
-    ReductionSingleton().to_Q.output_type = '2D'
+    ReductionSingleton().set_Q_output_type('2D')
 
 def SetRearEfficiencyFile(filename):
     rear_det = ReductionSingleton().instrument.getDetector('rear')
@@ -362,100 +360,6 @@ def LimitsQXY(qmin, qmax, step, type):
         raise RuntimeError('MaskFile() first')
 
     settings.readLimitValues('L/QXY ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + type, ReductionSingleton())
-
-# These variables keep track of the centre coordinates that have been used so that we can calculate a relative shift of the
-# detector
-XVAR_PREV = 0.0
-YVAR_PREV = 0.0
-ITER_NUM = 0
-RESIDUE_GRAPH = None
-
-# Create a workspace with a quadrant value in it 
-def _create_quadrant(reduced_ws, rawcount_ws, quadrant, xcentre, ycentre, q_bins, output):
-    # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
-    CloneWorkspace(reduced_ws,output)
-    objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], RMIN, RMAX, quadrant)
-    # Mask out everything outside the quadrant of interest
-    MaskDetectorsInShape(output,objxml)
-    # Q1D ignores masked spectra/detectors. This is on the InputWorkspace, so we don't need masking of the InputForErrors workspace
-    Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=ReductionSingleton().to_Q.get_gravity())
-
-    flag_value = -10.0
-    ReplaceSpecialValues(InputWorkspace=output,OutputWorkspace=output,NaNValue=flag_value,InfinityValue=flag_value)
-    if ReductionSingleton().to_Q.output_type == '1D':
-        SANSUtility.StripEndZeroes(output, flag_value)
-
-# Create 4 quadrants for the centre finding algorithm and return their names
-def _group_into_quadrants(reduced_ws, final_result, xcentre, ycentre, q_bins):
-    tmp = 'quad_temp_holder'
-    pieces = ['Left', 'Right', 'Up', 'Down']
-    to_group = ''
-    counter = 0
-    for q in pieces:
-        counter += 1
-        to_group += final_result + '_' + str(counter) + ','
-        _create_quadrant(reduced_ws, final_result, q, xcentre, ycentre, q_bins, final_result + '_' + str(counter))
-
-    # We don't need these now
-    mantid.deleteWorkspace(reduced_ws)
-# Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
-# one spectrum for each of the quadrants. The order should be L,R,U,D.
-def CalculateResidue():
-    global XVAR_PREV, YVAR_PREV, RESIDUE_GRAPH
-    yvalsA = mtd.getMatrixWorkspace('Left').readY(0)
-    yvalsB = mtd.getMatrixWorkspace('Right').readY(0)
-    qvalsA = mtd.getMatrixWorkspace('Left').readX(0)
-    qvalsB = mtd.getMatrixWorkspace('Right').readX(0)
-    qrange = [len(yvalsA), len(yvalsB)]
-    nvals = min(qrange)
-    residueX = 0
-    indexB = 0
-    for indexA in range(0, nvals):
-        if qvalsA[indexA] < qvalsB[indexB]:
-            mantid.sendLogMessage("::SANS::LR1 "+str(indexA)+" "+str(indexB))
-            continue
-        elif qvalsA[indexA] > qvalsB[indexB]:
-            while qvalsA[indexA] > qvalsB[indexB]:
-                mantid.sendLogMessage("::SANS::LR2 "+str(indexA)+" "+str(indexB))
-                indexB += 1
-        if indexA > nvals - 1 or indexB > nvals - 1:
-            break
-        residueX += pow(yvalsA[indexA] - yvalsB[indexB], 2)
-        indexB += 1
-
-    yvalsA = mtd.getMatrixWorkspace('Up').readY(0)
-    yvalsB = mtd.getMatrixWorkspace('Down').readY(0)
-    qvalsA = mtd.getMatrixWorkspace('Up').readX(0)
-    qvalsB = mtd.getMatrixWorkspace('Down').readX(0)
-    qrange = [len(yvalsA), len(yvalsB)]
-    nvals = min(qrange)
-    residueY = 0
-    indexB = 0
-    for indexA in range(0, nvals):
-        if qvalsA[indexA] < qvalsB[indexB]:
-            mantid.sendLogMessage("::SANS::UD1 "+str(indexA)+" "+str(indexB))
-            continue
-        elif qvalsA[indexA] > qvalsB[indexB]:
-            while qvalsA[indexA] > qvalsB[indexB]:
-                mantid.sendLogMessage("::SANS::UD2 "+str(indexA)+" "+str(indexB))
-                indexB += 1
-        if indexA > nvals - 1 or indexB > nvals - 1:
-            break
-        residueY += pow(yvalsA[indexA] - yvalsB[indexB], 2)
-        indexB += 1
-                        
-    try :
-        if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
-            RESIDUE_GRAPH = mantidplot.plotSpectrum('Left', 0)
-            mantidplot.mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
-            mantidplot.mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
-        RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-    except:
-        #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
-        pass
-        
-    mantid.sendLogMessage("::SANS::Itr: "+str(ITER_NUM)+" "+str(XVAR_PREV*1000.)+","+str(YVAR_PREV*1000.)+" SX "+str(residueX)+" SY "+str(residueY))              
-    return residueX, residueY
 
 def PlotResult(workspace, canvas=None):
     """
@@ -580,45 +484,11 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
-    """
-        Assumes that the run is setup, sample assigned etc
-    """
-    sample_ws = SANSReduction.AssignSample(run_file)[0]
-    if (not sample_ws) or (len(sample_ws) == 0):
-        issueWarning('Cannot load sample run "' + run_file + '", skipping reduction')
-        return
-    
-    #Sample trans
-    run_file = run['sample_trans']
-    run_file2 = run['sample_direct_beam']
-    ws1, ws2 = TransmissionSample(run_file + format, run_file2 + format)
-    if len(run_file) > 0 and len(ws1) == 0:
-        issueWarning('Cannot load trans sample run "' + run_file + '", skipping reduction')
-        return
-    if len(run_file2) > 0 and len(ws2) == 0: 
-        issueWarning('Cannot load trans direct run "' + run_file2 + '", skipping reduction')
-        return
-    
-    # Sans Can 
-    run_file = run['can_sans']
-    can_ws = AssignCan(run_file + format)[0]
-    if run_file != '' and len(can_ws) == 0:
-        issueWarning('Cannot load can run "' + run_file + '", skipping reduction')
-        return
-
-    #Can trans
-    run_file = run['can_trans']
-    run_file2 = run['can_direct_beam']
-    ws1, ws2 = TransmissionCan(run_file + format, run_file2 + format)
-    
-def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
-    XSTEP = YSTEP = ReductionSingleton().cen_find_step
-
-    setting = copy.deepcopy(ReductionSingleton().reference())
+    XSTEP = YSTEP = ReductionSingleton().inst.cen_find_step
 
     LimitsR(str(float(rlow)/1000.), str(float(rupp)/1000.), quiet=True)
 
-    if ( not x_start is None ) or ( not y_start is None):
+    if x_start or y_start:
         ReductionSingleton().set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(
             float(x_start), float(y_start)))
@@ -626,33 +496,37 @@ def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     beamcoords = ReductionSingleton()._beam_finder.get_beam_center()
     XNEW = beamcoords[0]
     YNEW = beamcoords[1]
-
+    x_start = beamcoords[0]
+    y_start = beamcoords[1]
+    
     mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
     _printMessage("Starting centre finding routine ...")
 
     #make copies of the workspaces and the reduction chain object
     samp = ReductionSingleton().sample_wksp + '_cen'
-    CloneWorkspace(ReductionSingleton().sample_wksp, workspace)
-    if ReductionSingleton().background_subtracter:
-        can = reducer.background_subtracter.workspace.wksp_name+'cen'
-        CloneWorkspace(reducer.background_subtracter.workspace.wksp_name, can)
+    CloneWorkspace(ReductionSingleton().sample_wksp, samp)
+    #remove this if we know running the Reducer() doesn't change it i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     centre_reduction.sample_wksp = samp
-    centre_reduction.background_subtracter.workspace.wksp_name = can
+
+    if centre_reduction.background_subtracter:
+        can = reducer.background_subtracter.workspace.wksp_name+'cen'
+        CloneWorkspace(reducer.background_subtracter.workspace.wksp_name, can)
+        centre_reduction.background_subtracter.workspace.wksp_name = can
 
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
-    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction)
+    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, 0)
     # take first trial step
     XNEW = x_start + XSTEP
     YNEW = y_start + YSTEP
 
-    for ITER_NUM in range(1, MaxIter+1):
-        _printMessage("Iteration " + str(ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
+    for it in range(1, MaxIter+1):
+        _printMessage("Iteration " + str(centre.ITER_NUM) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
 
-        ReductionSingleton().set_beam_finder(
+        centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
-        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, samp, can)
+        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, it)
         
         #have we stepped across the y-axis that goes through the beam center?  
         if newX2 > oldX2:
@@ -669,26 +543,19 @@ def NewFindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
         oldY2 = newY2
         XNEW += XSTEP
         YNEW += YSTEP
+
+	  #remove this 	  
+        centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     
-    if ITER_NUM == MaxIter:
+    if centre.ITER_NUM == MaxIter:
         _printMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP
 
     
-    ReductionSingleton().set_beam_finder(
+    centre_reduction.set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
     _printMessage("Centre coordinates updated: [" + str(XNEW)+ ","+ str(YNEW) + ']')
-    
-
-    
-    # Reload the sample and can
-#    try to get rid of this by leaving the original loaded workspaces unchanged
-    _assignHelper(_SAMPLE_RUN, False, PERIOD_NOS["SCATTER_SAMPLE"])
-    if _CAN_RUN != '':
-        _assignHelper(_CAN_RUN, False, PERIOD_NOS["SCATTER_CAN"])
-        global _CAN_SETUP
-        _CAN_SETUP = None
 
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here

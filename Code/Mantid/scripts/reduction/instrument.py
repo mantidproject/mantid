@@ -1,5 +1,6 @@
 import MantidFramework
 import mantidsimple
+MantidFramework.mtd.initialise()
 
 def instrument_factory(name):
     """
