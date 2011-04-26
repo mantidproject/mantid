@@ -28,12 +28,13 @@ namespace DataObjects
   /// Returns typeid for the data in the column
   const std::type_info& PeakColumn::get_type_info()const
   {
-    //return std::type_info(
+    return typeid(double);
   }
 
   /// Returns typeid for the pointer type to the data element in the column
   const std::type_info& PeakColumn::get_pointer_type_info()const
   {
+    return typeid(double*);
   }
 
   /** Prints out the column string at the given row index.
