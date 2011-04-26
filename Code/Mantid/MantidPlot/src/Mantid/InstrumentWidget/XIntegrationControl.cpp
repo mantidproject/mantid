@@ -54,7 +54,7 @@ void	XIntegrationScrollBar::mouseMoveEvent (QMouseEvent* e)
 }
 
 /**
-  * Process events comming towords the slider
+  * Process events comming to the slider
   * @param object :: pointer to the slider
   * @param e :: event
   */
@@ -211,6 +211,7 @@ void XIntegrationScrollBar::updateMinMax()
 {
   m_minimum = double(m_slider->x()) / this->width();
   m_maximum = m_minimum + double(m_slider->width()) / this->width();
+  emit running(m_minimum,m_maximum);
 }
 
 //---------------------------------------------------------------------------------//
@@ -236,6 +237,9 @@ m_maximum(1)
   layout->addWidget(m_maxText,0);
   setLayout(layout);
   connect(m_scrollBar,SIGNAL(changed(double,double)),this,SLOT(sliderChanged(double,double)));
+  connect(m_scrollBar,SIGNAL(running(double,double)),this,SLOT(sliderRunning(double,double)));
+  connect(m_minText,SIGNAL(editingFinished()),this,SLOT(setMinimum()));
+  connect(m_maxText,SIGNAL(editingFinished()),this,SLOT(setMaximum()));
   updateTextBoxes();
 }
 
@@ -246,6 +250,14 @@ void XIntegrationControl::sliderChanged(double minimum,double maximum)
   m_maximum = m_totalMinimum + maximum * w;
   updateTextBoxes();
   emit changed(m_minimum,m_maximum,(m_minimum == m_totalMinimum && m_maximum == m_totalMaximum));
+}
+
+void XIntegrationControl::sliderRunning(double minimum,double maximum)
+{
+  double w = m_totalMaximum - m_totalMinimum;
+  m_minimum = m_totalMinimum + minimum * w;
+  m_maximum = m_totalMinimum + maximum * w;
+  updateTextBoxes();
 }
 
 void XIntegrationControl::setTotalRange(double minimum,double maximum)
@@ -277,7 +289,7 @@ void XIntegrationControl::setRange(double minimum,double maximum)
   }
   m_minimum = minimum;
   m_maximum = maximum;
-  double w = m_totalMinimum - m_totalMaximum;
+  double w = m_totalMaximum - m_totalMinimum;
   m_scrollBar->set((m_minimum - m_totalMinimum) / w, (m_maximum - m_totalMinimum) / w);
   updateTextBoxes();
 }
@@ -307,4 +319,24 @@ void XIntegrationControl::updateTextBoxes()
 {
   m_minText->setText(QString::number(m_minimum));
   m_maxText->setText(QString::number(m_maximum));
+}
+
+void XIntegrationControl::setMinimum()
+{
+  bool ok;
+  QString text = m_minText->text();
+  double minValue = text.toDouble(&ok);
+  if (!ok) return;
+  double maxValue = getMaximum();
+  setRange(minValue,maxValue);
+}
+
+void XIntegrationControl::setMaximum()
+{
+  bool ok;
+  QString text = m_maxText->text();
+  double maxValue = text.toDouble(&ok);
+  if (!ok) return;
+  double minValue = getMinimum();
+  setRange(minValue,maxValue);
 }

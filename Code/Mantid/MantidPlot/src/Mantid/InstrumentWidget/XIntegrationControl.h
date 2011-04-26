@@ -26,6 +26,7 @@ public:
   void set(double minimum,double maximum);
 signals:
   void changed(double,double);
+  void running(double,double);
 protected:
    void	mouseMoveEvent (QMouseEvent * e);
    void	resizeEvent (QResizeEvent * e);
@@ -62,6 +63,9 @@ signals:
   void changed(double,double,bool);
 private slots:
   void sliderChanged(double,double);
+  void sliderRunning(double,double);
+  void setMinimum();
+  void setMaximum();
 private:
   void updateTextBoxes();
   InstrumentWindow* m_instrWindow;

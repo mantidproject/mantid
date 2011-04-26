@@ -84,7 +84,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   renderControlsLayout->addWidget(renderMode);
   renderControlsLayout->addWidget(axisViewFrame);
   renderControlsLayout->addWidget(displaySettings);
-  renderControlsLayout->addWidget(mSelectBin);
+  //renderControlsLayout->addWidget(mSelectBin);
   renderControlsLayout->addWidget(mSaveImage);
   renderControlsLayout->addWidget(m_colorMapWidget);
 
