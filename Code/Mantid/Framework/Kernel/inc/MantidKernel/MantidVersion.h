@@ -35,8 +35,9 @@ namespace Kernel
 class DLLExport MantidVersion
 {
 public:
-  static const char* version();
-  static const char* releaseDate();
+  static const char* version();     ///< The full version number
+  static const char* revision();    ///< The SVN revision number
+  static const char* releaseDate(); ///< The date of the last commit
 
 private:
   MantidVersion(); ///< Private, unimplemented constructor. Not a class that can be instantiated.
