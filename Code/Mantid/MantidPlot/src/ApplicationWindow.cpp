@@ -4668,7 +4668,7 @@ void ApplicationWindow::readSettings()
   updateRecentProjectsList();
 
   changeAppStyle(settings.value("/Style", appStyle).toString());
-  autoSave = settings.value("/AutoSave",true).toBool();
+  autoSave = settings.value("/AutoSave", false).toBool();
   autoSaveTime = settings.value("/AutoSaveTime",15).toInt();
   d_backup_files = settings.value("/BackupProjects", true).toBool();
   d_init_window_type = (WindowType)settings.value("/InitWindow", NoWindow).toInt();
