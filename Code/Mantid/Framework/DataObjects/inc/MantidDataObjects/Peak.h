@@ -2,6 +2,7 @@
 #define MANTID_DATAOBJECTS_PEAK_H_
     
 #include "MantidKernel/System.h"
+#include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/PhysicalConstants.h"
@@ -20,6 +21,9 @@ namespace DataObjects
   class DLLExport Peak
   {
   public:
+    /// Allow PeakColumn class to directly access members.
+    friend class PeakColumn;
+
     Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_InitialEnergy);
 
     // Copy constructor is compiler-provided.
@@ -37,10 +41,12 @@ namespace DataObjects
     double getH() const;
     double getK() const;
     double getL() const;
+    Mantid::Geometry::V3D getHKL();
     void setH(double m_H);
     void setK(double m_K);
     void setL(double m_L);
     void setHKL(double H, double K, double L);
+    void setHKL(Mantid::Geometry::V3D HKL);
 
     Mantid::Geometry::V3D getQLabFrame() const;
     Mantid::Geometry::V3D getQSampleFrame() const;
@@ -61,12 +67,18 @@ namespace DataObjects
     void setIntensity(double m_Intensity);
     void setSigmaIntensity(double m_SigmaIntensity);
 
+    double getBinCount() const;
+    void setBinCount(double m_BinCount);
+
     Mantid::Geometry::Matrix<double> getGoniometerMatrix() const;
     void setGoniometerMatrix(Mantid::Geometry::Matrix<double> m_GoniometerMatrix);
 
     std::string getBankName() const;
     int getRow() const;
     int getCol() const;
+
+    Mantid::Geometry::V3D getDetPos() const;
+    double getL1() const;
 
   protected:
     /// Shared pointer to the instrument (for calculating some values )
@@ -92,6 +104,9 @@ namespace DataObjects
 
     /// Error (sigma) on peak intensity
     double m_SigmaIntensity;
+
+    /// Count in the bin at the peak
+    double m_BinCount;
 
     /// Initial energy of neutrons at the peak
     double m_InitialEnergy;

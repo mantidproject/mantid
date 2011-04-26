@@ -3,6 +3,7 @@
     
 #include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidDataObjects/PeaksWorkspace.h"
 
 namespace Mantid
 {
@@ -36,6 +37,9 @@ namespace Crystal
     /// Run the algorithm
     void exec();
 
+    std::string readHeader( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::ifstream& in );
+
+    void appendFile( Mantid::DataObjects::PeaksWorkspace_sptr outWS, std::string filename);
 
   };
 

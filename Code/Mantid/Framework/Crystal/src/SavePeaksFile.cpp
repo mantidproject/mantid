@@ -9,7 +9,7 @@ namespace Crystal
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(SavePeaksFile)
+  // DECLARE_ALGORITHM(SavePeaksFile)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -65,7 +65,8 @@ namespace Crystal
 
     std::string filename = getPropertyValue("Filename");
 
-    ws->write(filename);
+    throw std::runtime_error("NOT YET IMPLEMENTED."); //TODO!
+    //ws->write(filename);
   }
 
 

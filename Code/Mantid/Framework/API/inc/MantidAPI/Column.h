@@ -90,6 +90,12 @@ public:
     /// Prints
     virtual void print(std::ostream& s, int index) const = 0;
 
+    /// Specialized type check
+    virtual bool isBool()const = 0;
+
+    /// Must return overall memory size taken by the column.
+    virtual long int sizeOfData()const = 0;
+
     /// Templated method for returning a value. No type checks are done.
     template<class T>
     T& cell(int index)
@@ -111,11 +117,6 @@ public:
         return get_type_info() == typeid(T);
     }
 
-    /// Specialized type check
-    virtual bool isBool()const = 0;
-
-    /// Must return overall memory size taken by the column.
-    virtual long int sizeOfData()const = 0;
 protected:
     /// Sets the new column size.
     virtual void resize(int count) = 0;
@@ -125,7 +126,7 @@ protected:
     virtual void remove(int index) = 0;
     /// Pointer to a data element
     virtual void* void_pointer(int index) = 0;
-private:
+
     std::string m_name;///< name
     std::string m_type;///< type
     friend class ColumnFactoryImpl;

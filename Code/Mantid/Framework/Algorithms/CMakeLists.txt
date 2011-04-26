@@ -28,6 +28,7 @@ set ( SRC_FILES
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
 	src/CreatePSDBleedMask.cpp
+	src/CreatePeaksWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
 	src/CreateWorkspace.cpp
 	src/CropWorkspace.cpp
@@ -174,6 +175,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
+	inc/MantidAlgorithms/CreatePeaksWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
 	inc/MantidAlgorithms/CreateWorkspace.h
 	inc/MantidAlgorithms/CropWorkspace.h
@@ -321,6 +323,7 @@ set ( TEST_FILES
 	test/CreateCalFileByNamesTest.h
 	test/CreateDummyCalFileTest.h
 	test/CreatePSDBleedMaskTest.h
+	test/CreatePeaksWorkspaceTest.h
 	test/CreateSingleValuedWorkspaceTest.h
 	test/CreateWorkspaceTest.h
 	test/CropWorkspaceTest.h

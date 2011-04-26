@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/ManagedDataBlock2D.cpp
 	src/ManagedWorkspace2D.cpp
 	src/Peak.cpp
+	src/PeakColumn.cpp
 	src/PeaksWorkspace.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
@@ -34,6 +35,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/ManagedDataBlock2D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
 	inc/MantidDataObjects/Peak.h
+	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeaksWorkspace.h
 	inc/MantidDataObjects/TableColumn.h
 	inc/MantidDataObjects/TablePointerColumn.h
@@ -51,6 +53,7 @@ set ( TEST_FILES
 	test/LibraryManagerTest.h
 	test/ManagedDataBlock2DTest.h
 	test/ManagedWorkspace2DTest.h
+	test/PeakColumnTest.h
 	test/PeakTest.h
 	test/PeaksWorkspaceTest.h
 	test/RefAxisTest.h

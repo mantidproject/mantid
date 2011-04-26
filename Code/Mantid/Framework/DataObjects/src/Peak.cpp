@@ -56,7 +56,7 @@ namespace DataObjects
     // Velocity of the neutron (non-relativistic)
     double velocity = PhysicalConstants::h / (wavelength * 1e-10 * PhysicalConstants::NeutronMass );
     // Energy in J of the neutron
-    double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2;
+    double energy = PhysicalConstants::NeutronMass * velocity * velocity / 2.0;
     // Convert to meV
     m_InitialEnergy = energy / PhysicalConstants::meV;
     m_FinalEnergy = m_InitialEnergy;
@@ -105,8 +105,8 @@ namespace DataObjects
   {
     // Energy in J of the neutron
     double energy =  PhysicalConstants::meV * m_InitialEnergy;
-    // v = sqrt(E / 2*m)
-    double velocity = sqrt(energy/(2*PhysicalConstants::NeutronMass));
+    // v = sqrt(2.0 * E / m)
+    double velocity = sqrt(2.0*energy/PhysicalConstants::NeutronMass);
     // wavelength = h / mv
     double wavelength = PhysicalConstants::h / (PhysicalConstants::NeutronMass * velocity);
     // Return it in angstroms
@@ -122,8 +122,8 @@ namespace DataObjects
     double distance = (detPos - samplePos).norm() + (samplePos - sourcePos).norm();
     // Energy in J of the neutron
     double energy =  PhysicalConstants::meV * m_InitialEnergy;
-    // v = sqrt(E / 2*m)
-    double velocity = sqrt(energy/(2*PhysicalConstants::NeutronMass));
+    // v = sqrt(2 * E / m)
+    double velocity = sqrt(2.0*energy/PhysicalConstants::NeutronMass);
     // Time of flight in seconds = distance / speed
     double tof = distance / velocity;
     // Return in microsecond units
@@ -138,10 +138,13 @@ namespace DataObjects
     double wavelength = this->getWavelength();
     // The detector is at 2 theta scattering angle
     V3D beamDir = samplePos - sourcePos;
+
     double two_theta = detPos.angle(beamDir);
+    //std::cout << "two_theta" << two_theta << std::endl;
     double sin_theta = sin(two_theta/2.0);
-    // Bragg condition is n*wavelength = 2 * d * sin(theta)
-    return wavelength / (2 * sin_theta);
+
+    // Bragg condition is n*wavelength = 2 * dSpacing * sin(theta)
+    return wavelength / (2.0 * sin_theta);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -226,6 +229,12 @@ namespace DataObjects
   double Peak::getL() const
   {    return m_L;  }
 
+  /** Return the HKL vector */
+  Mantid::Geometry::V3D Peak::getHKL()
+  {
+    return V3D(m_H, m_K, m_L);
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Set the H index of this peak
    * @param m_H :: index to set   */
@@ -251,6 +260,10 @@ namespace DataObjects
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Return the # of counts in the bin at its peak*/
+  double Peak::getBinCount() const
+  {    return m_BinCount;  }
+
   /** Return the integrated peak intensity */
   double Peak::getIntensity() const
   {    return m_Intensity;  }
@@ -263,6 +276,11 @@ namespace DataObjects
    * @param m_Intensity :: intensity value   */
   void Peak::setIntensity(double m_Intensity)
   {    this->m_Intensity = m_Intensity;  }
+
+  /** Set the # of counts in the bin at its peak
+   * @param m_BinCount :: counts  */
+  void Peak::setBinCount(double m_BinCount)
+  {    this->m_BinCount = m_BinCount;  }
 
   /** Set the error on the integrated peak intensity
    * @param m_Intensity :: intensity error value   */
@@ -318,7 +336,18 @@ namespace DataObjects
   int Peak::getCol() const
   {   return m_Col;  }
 
+  // -------------------------------------------------------------------------------------
+  /** Return the detector position vector */
+  Mantid::Geometry::V3D Peak::getDetPos() const
+  {
+    return detPos;
+  }
 
+  /** Return the L1 flight path length (source to sample), in meters. */
+  double Peak::getL1() const
+  {
+    return (samplePos - sourcePos).norm();
+  }
 
 } // namespace Mantid
 } // namespace DataObjects

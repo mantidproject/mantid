@@ -87,51 +87,49 @@ namespace Mantid
       peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
 
 
-      int i, XPeak, YPeak, h, k, l, ipk, detnum;
-      double col, row, chan, l1, l2, wl, I, sigI;
+      int i, XPeak, YPeak;
+      double col, row, l1, l2, wl, I, sigI;
 
-      std::vector <std::pair<int, int> > v1;
-
+      // Build a map to sort by the peak bin count
+      std::vector <std::pair<double, int> > v1;
       for (i = 0; i<peaksW->getNumberPeaks(); i++)
-      v1.push_back(std::pair<int, int>(peaksW->get_ipk(i),i));
+        v1.push_back(std::pair<double, int>(peaksW->getPeaks()[i].getBinCount(), i));
+
       // To sort in descending order
       stable_sort(v1.rbegin(), v1.rend() );
- 
-      std::vector <std::pair<int, int> >::iterator Iter1;
+
+      std::vector <std::pair<double, int> >::iterator Iter1;
       for ( Iter1 = v1.begin() ; Iter1 != v1.end() ; Iter1++ )
       {
+        // Index in the peaksworkspace
         i = (*Iter1).second;
-        l1 = peaksW->get_L1(i);
-        detnum = peaksW->get_Bank(i);
-        Geometry::V3D hkl = peaksW->get_hkl(i);
-        h = hkl[0];
-        k = hkl[1];
-        l = hkl[2];
-        col = peaksW->get_column(i);
-        row = peaksW->get_row(i);
-        chan = peaksW->get_time_channel(i);
-        Geometry::V3D pos = peaksW->getPosition(i);
-        l2 = pos.norm();
-        wl = peaksW->get_wavelength(i);
-        ipk = peaksW->get_ipk(i);
 
-        std::ostringstream Peakbank;
-        Peakbank <<"bank"<<detnum;
+        // Direct ref to that peak
+        Peak & peak = peaksW->getPeaks()[i];
+
+        l1 = peak.getL1();
+
+        col = peak.getCol();
+        row = peak.getRow();
+        Geometry::V3D pos = peak.getDetPos();
+        // NOTE! If sample is not at 0,0,0, this L2 is not correct.
+        l2 = pos.norm();
+        wl = peak.getWavelength();
+
         XPeak = int(col+0.5)-1;
         YPeak = int(row+0.5)-1;
-        tofISAW = wl * (l1+l2) / 3.956058e-3;
+        tofISAW = int(wl * (l1+l2) / 3.956058e-3); //TODO: Check this value; units in ISAW for L1 might have been different????
         TOFPeak = VectorHelper::getBinIndex(XValues.access(), tofISAW);
-  
-  
+
         TOFmin = TOFPeak+Binmin;
         if (TOFmin<0) TOFmin = 0;
         TOFmax = TOFPeak+Binmax;
-  
+
         IAlgorithm_sptr sum_alg;
         try
         {
           sum_alg = createSubAlgorithm("SumNeighbours", -1, -1, false);
-        } 
+        }
         catch (Exception::NotFoundError&)
         {
           g_log.error("Can't locate SumNeighbours algorithm");
@@ -144,8 +142,8 @@ namespace Mantid
         sum_alg->setProperty("SingleNeighbourhood", true);
         sum_alg->setProperty("Xpixel", XPeak+Xmin);
         sum_alg->setProperty("Ypixel", YPeak+Ymin);
-        sum_alg->setProperty("DetectorName", Peakbank.str());
-  
+        sum_alg->setProperty("DetectorName", peak.getBankName());
+
         try
         {
           sum_alg->execute();
@@ -156,7 +154,7 @@ namespace Mantid
           throw;
         }
         outputW = sum_alg->getProperty("OutputWorkspace");
-  
+
         IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
         bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
         bin_alg->setProperty("OutputWorkspace", outputW);
@@ -171,16 +169,16 @@ namespace Mantid
           g_log.information("Unable to successfully run Rebin sub-algorithm");
           throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
         }
-  
+
         outputW = bin_alg->getProperty("OutputWorkspace");
         if (TOFmin > numbins) TOFmin = numbins;
         if (TOFmax > numbins) TOFmax = numbins;
-  
+
         fitSpectra(0, I, sigI);
-        std::cout << peaksW->getPeakIntegrationCount(i)<<"  " << I << "  "<<peaksW->getPeakIntegrationError(i)<< "  "<< sigI << "\n";
-  
-        peaksW->setPeakIntegrateCount(I, i);
-        peaksW->setPeakIntegrateError(sigI, i);
+        std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
+
+        peak.setIntensity(I);
+        peak.setSigmaIntensity(sigI);
       }
     }
 

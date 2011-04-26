@@ -116,62 +116,62 @@ namespace DataObjects
     int insertRow(int index);
     /// Delets a row if it exists.
     void removeRow(int index);
-     
-	 /** This method finds the row and column index of an integer cell value in a table workspace
-	 * @param value :: -value to search
-	 * @param  row  row number of the value  searched
-	 * @param  col  column number of the value searched
-	*/
-	virtual void find(int value,int& row,const int & col)
-	{		
-		findValue(value,row,col);
-	}
-	/** This method finds the row and column index of an string cell value in a table workspace
-	* @param value :: -value to search
-	* @param  row  row number of the value  searched
-	* @param  col  column number of the value searched
-	*/
-	virtual void find(std::string value,int& row,const int & col)
-	{
-		findValue(value,row,col);
-	}
-	/** This method finds the row and column index of an float value in a table workspace
-	* @param value :: -value to search
-	* @param  row  row number of the value  searched
-	* @param  col  column number of the value searched
-	*/
-	virtual void find(float value,int& row,const int & col)
-	{
-		findValue(value,row,col);
-	}
-	/** This method finds the row and column index of an API::Bollean value in a table workspace
-	* @param value :: -value to search
-	* @param  row  row number of the value  searched
-	* @param  col  column number of the value searched
-	*/
-	virtual void find(API::Boolean value,int& row,const int & col)
-	{
-		findValue(value,row,col);
-	}
-	/** This method finds the row and column index of an double cell value in a table workspace
-	* @param value :: -value to search
-	* @param  row  row number of the value  searched
-	* @param  col  column number of the value searched
-	*/
-	virtual void find(double value,int& row,const int & col)
-	{
-		findValue(value,row,col);
-	}
-	/** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
-	* @param value :: -value to search
-	* @param  row  row number of the value  searched
-	* @param  col  column number of the value searched
-	*/
-	void find(Mantid::Geometry::V3D value,int& row,const int & col)
-	{
-		findValue(value,row,col);
-	}
-			
+
+    /** This method finds the row and column index of an integer cell value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    virtual void find(int value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+    /** This method finds the row and column index of an string cell value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    virtual void find(std::string value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+    /** This method finds the row and column index of an float value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    virtual void find(float value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+    /** This method finds the row and column index of an API::Bollean value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    virtual void find(API::Boolean value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+    /** This method finds the row and column index of an double cell value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    virtual void find(double value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+    /** This method finds the row and column index of an Mantid::Geometry::V3D cell value in a table workspace
+     * @param value :: -value to search
+     * @param  row  row number of the value  searched
+     * @param  col  column number of the value searched
+     */
+    void find(Mantid::Geometry::V3D value,int& row,const int & col)
+    {
+      findValue(value,row,col);
+    }
+
 private:
 	
 	/// template method to find a given value in a table.

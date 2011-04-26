@@ -144,10 +144,10 @@ public:
     virtual int columnCount() const = 0;
 
     /// Gets the shared pointer to a column by name.
-    virtual boost::shared_ptr<Column> getColumn(const std::string& name) = 0;
+    virtual boost::shared_ptr<Mantid::API::Column> getColumn(const std::string& name) = 0;
 
     /// Gets the shared pointer to a column by index.
-    virtual boost::shared_ptr<Column> getColumn(int index) = 0;
+    virtual boost::shared_ptr<Mantid::API::Column> getColumn(int index) = 0;
 
     /// Returns a vector of all column names.
     virtual std::vector<std::string> getColumnNames() = 0;

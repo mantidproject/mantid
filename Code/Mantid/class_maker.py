@@ -190,8 +190,8 @@ def write_test(subproject, classname, filename, algorithm):
     TS_ASSERT( alg.isInitialized() )
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("REPLACE_PROPERTY_NAME_HERE!!!!", "value") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
-    TS_ASSERT( alg.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
     
     // Retrieve the workspace from data service. TODO: Change to your desired type
     Workspace_sptr ws;
