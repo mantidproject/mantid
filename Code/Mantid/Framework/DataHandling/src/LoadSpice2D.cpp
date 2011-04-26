@@ -162,6 +162,10 @@ namespace Mantid
       throwException(element, "Instrument", fileName);
       std::string instrument = element->innerText();
 
+      // Read sample thickness
+      double sample_thickness = 0;
+      from_element<double>(sample_thickness, sasEntryElem, "Sample_Thickness", fileName);
+
       // Read in the detector dimensions
       int numberXPixels = 0;
       from_element<int>(numberXPixels, sasEntryElem, "Number_of_X_Pixels", fileName);
@@ -330,6 +334,7 @@ namespace Mantid
       ws->mutableRun().addProperty("source-sample-distance", source_distance, "mm", true);
       ws->mutableRun().addProperty("source-aperture-radius", source_apert, "mm", true);
       ws->mutableRun().addProperty("sample-aperture-radius", sample_apert, "mm", true);
+      ws->mutableRun().addProperty("sample-thickness", sample_thickness, "cm", true);
 
       // Move the detector to the right position
       API::IAlgorithm_sptr mover = createSubAlgorithm("MoveInstrumentComponent");
