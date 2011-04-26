@@ -124,7 +124,7 @@ set ( ENABLE_CPACK CACHE BOOL "Switch to enable CPack package generation")
 if ( ENABLE_CPACK )
   # generic package level information
   set ( CPACK_PACKAGE_DESCRIPTION_SUMMARY "Neutron Scattering Data Analysis" )
-  #set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory" )
+  set ( CPACK_PACKAGE_VENDOR "ISIS Rutherford Appleton Laboratory and NScD Oak Ridge National Laboratory" )
   set ( CPACK_PACKAGE_URL http://www.mantidproject.org/ )
   set ( CPACK_PACKAGE_CONTACT mantid-help@mantidproject.org )
   set ( CPACK_PACKAGE_ICON Images/MantidPlot_Icon_32offset.png )
@@ -134,6 +134,10 @@ if ( ENABLE_CPACK )
   set ( CPACK_PACKAGE_VERSION_MINOR 1 )
   set ( CPACK_PACKAGE_VERSION_PATCH ${Framework_WC_LAST_CHANGED_REV} )
   set ( CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} )
+  
+  # Mac Packagemaker settings
+  set ( CPACK_RESOURCE_FILE_README ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/MacOSX-README.rtf )
+  set ( CPACK_RESOURCE_FILE_LICENSE ${CMAKE_SOURCE_DIR}/Installers/WinInstaller/License.rtf )
 
   # RPM information - only used if generating a rpm
   #set ( CPACK_RPM_PACKAGE_ARCHITECTURE x86_64 )
