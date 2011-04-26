@@ -23,6 +23,7 @@ set ( SRC_UNITY_IGNORE_FILES
     src/MDBox.cpp
     src/MDEventWorkspace.cpp
     src/MDGridBox.cpp
+    src/MDSplitBox.cpp
 )
 
 # Header files
