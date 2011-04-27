@@ -421,7 +421,7 @@ namespace Mantid
           int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
           {
-            read_stop = (fullblocks * blocksize) + m_monitors.size();
+            read_stop = (fullblocks * blocksize);// + m_monitors.size(); RNT: I think monitors are excluded from the data
             for( ; hist_index < read_stop; )
             {
               loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
