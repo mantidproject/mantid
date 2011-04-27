@@ -8,8 +8,8 @@
 
 #include "MantidVatesAPI/DimensionComparitor.h"
 
-#include "boost/function.hpp"
-#include "boost/bind.hpp"
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
 
 namespace Mantid
 {
