@@ -1288,8 +1288,9 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
-#        DeleteWorkspace(trans_tmp_out)
-#        DeleteWorkspace(direct_tmp_out)
+        DeleteWorkspace(trans_tmp_out)
+        if direct_tmp_out != trans_tmp_out:
+            DeleteWorkspace(direct_tmp_out)
             
         if fit_meth == 'Off':
             result = unfittedtransws
