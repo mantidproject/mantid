@@ -70,7 +70,7 @@ class AbsoluteScale(BaseAbsoluteScale):
 
         # Load data file
         filepath = reducer._full_file_path(self._data_file)
-        data_file_ws = "_abs_scale_"+extract_workspace_name(filepath)
+        data_file_ws = "__abs_scale_"+extract_workspace_name(filepath)
         
         loader = reducer._data_loader.clone(data_file=filepath)
         loader.set_beam_center(reducer.get_beam_center())
@@ -106,8 +106,9 @@ class AbsoluteScale(BaseAbsoluteScale):
                  
         det_finder = FindDetectorsInShape(Workspace=data_file_ws, ShapeXML=cylXML)
         det_list = det_finder.getPropertyValue("DetectorList")
-        GroupDetectors(InputWorkspace=data_file_ws,  OutputWorkspace="_absolute_scale",  DetectorList=det_list, KeepUngroupedSpectra="0")
-        det_count = mtd["_absolute_scale"].dataY(0)[0]
+        det_count_ws = "__absolute_scale"
+        GroupDetectors(InputWorkspace=data_file_ws,  OutputWorkspace=det_count_ws,  DetectorList=det_list, KeepUngroupedSpectra="0")
+        det_count = mtd[det_count_ws].dataY(0)[0]
         
         # Pixel size, in mm
         pixel_size_param = mtd[data_file_ws].getInstrument().getNumberParameter("x-pixel-size")
@@ -121,6 +122,9 @@ class AbsoluteScale(BaseAbsoluteScale):
             
         self._scaling_factor = 1.0/(self._sample_thickness*det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
 
+        mtd.deleteWorkspace(data_file_ws)
+        mtd.deleteWorkspace(det_count_ws)
+        
         return "Absolute scale factor: %6.4g" % self._scaling_factor
     
         

@@ -72,6 +72,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         # Note: there is no way to identify which Widget is the ApplicationWindow.
         for w in QtCore.QCoreApplication.instance().topLevelWidgets():
             self.connect(w, QtCore.SIGNAL("shutting_down()"), self.close)
+            
+        self.general_settings.progress.connect(self._progress_updated)        
 
     def _set_window_title(self):
         """
@@ -83,6 +85,8 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             title += ": %s" % self._filename
         self.setWindowTitle(title)
     
+    def _progress_updated(self, value):
+        self.progress_bar.setValue(value)
         
     def setup_layout(self):
         """
@@ -110,6 +114,7 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
                 self.tabWidget.addTab(tab[1], tab[0])
                 
             self._set_window_title()
+            self.progress_bar.hide()
         else:
             self.close()
             
@@ -299,11 +304,15 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
             Create an object capable of using the information in the
             interface and turn it into a reduction process.
         """
+        self.reduce_button.setEnabled(False)   
+        self.export_button.setEnabled(False)
         if IS_IN_MANTIDPLOT:
             qti.app.mantidUI.setIsRunning(True)
         self._interface.reduce()
         if IS_IN_MANTIDPLOT:
             qti.app.mantidUI.setIsRunning(False)
+        self.reduce_button.setEnabled(True)   
+        self.export_button.setEnabled(True)
         
     def open_file(self, file_path=None):
         """

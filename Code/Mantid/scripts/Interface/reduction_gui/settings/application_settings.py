@@ -12,6 +12,7 @@ class GeneralSettings(QtCore.QObject):
     instrument_name = ''
     
     data_updated = QtCore.pyqtSignal('PyQt_PyObject','PyQt_PyObject')
+    progress = QtCore.pyqtSignal(int)
     
     def __init__(self, settings=None):
         """

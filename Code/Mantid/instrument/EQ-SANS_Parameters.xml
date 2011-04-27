@@ -10,6 +10,22 @@
 		<parameter name="detector-name" type="string">
 		  <value val="detector1"/>
 		</parameter>
+		
+		<parameter name="number-of-x-pixels">
+		  <value val="192"/>
+		</parameter>
+		
+		<parameter name="number-of-y-pixels">
+		  <value val="256"/>
+		</parameter>
+		
+		<parameter name="x-pixel-size">
+		  <value val="5.5"/>
+		</parameter>
+		
+		<parameter name="y-pixel-size">
+		  <value val="4.297"/>
+		</parameter>
 
     </component-link>
 </parameter-file>    

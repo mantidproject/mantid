@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>982</width>
-    <height>982</height>
+    <width>1062</width>
+    <height>989</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -50,6 +50,13 @@
     <item>
      <layout class="QHBoxLayout" name="horizontalLayout">
       <item>
+       <widget class="QProgressBar" name="progress_bar">
+        <property name="value">
+         <number>24</number>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -91,8 +98,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>982</width>
-     <height>25</height>
+     <width>1062</width>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="file_menu">

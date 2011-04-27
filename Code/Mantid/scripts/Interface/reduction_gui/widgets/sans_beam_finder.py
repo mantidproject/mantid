@@ -40,8 +40,8 @@ class BeamFinderFrame(QtGui.QFrame, ui.ui_hfir_beam_finder.Ui_Frame):
             Populate the UI elements with the data from the given state.
             @param state: BeamFinder object
         """
-        self.x_pos_edit.setText(QtCore.QString(str(state.x_position)))
-        self.y_pos_edit.setText(QtCore.QString(str(state.y_position)))
+        self.x_pos_edit.setText(QtCore.QString("%6.4f" % state.x_position))
+        self.y_pos_edit.setText(QtCore.QString("%6.4f" % state.y_position))
         self.use_beam_finder_checkbox.setChecked(state.use_finder)
         self.groupBox.setEnabled(state.use_finder)
         self.beam_data_file_edit.setText(QtCore.QString(state.beam_file))

@@ -33,7 +33,7 @@ class DataFileProxy(object):
                 from reduction.instruments.sans.sans_reduction_steps import LoadRun
                 from reduction.instruments.sans.sans_reducer import SANSReducer
                 import reduction.instruments.sans.hfir_instrument as hfir_instrument
-                self.data_ws = "raw_data_file"
+                self.data_ws = "__raw_data_file"
                 reducer = SANSReducer()
                 reducer.set_instrument(hfir_instrument.HFIRSANS())
                 loader = LoadRun(str(data_file))
@@ -44,11 +44,16 @@ class DataFileProxy(object):
                 self.sample_detector_distance = mtd[self.data_ws].getRun().getProperty("sample_detector_distance").value
                 
                 if HAS_NUMPY:
-                    raw_data = numpy.zeros(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels)
-                    for i in range(reducer.instrument.nMonitors-1, reducer.instrument.nx_pixels*reducer.instrument.ny_pixels+reducer.instrument.nMonitors ):
-                        raw_data[i-reducer.instrument.nMonitors] = mtd[self.data_ws].readY(i)[0]
+                    nx_pixels = int(mtd[self.data_ws].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+                    ny_pixels = int(mtd[self.data_ws].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+                    nMonitors = int(mtd[self.data_ws].getInstrument().getNumberParameter("number-of-monitors")[0])
+                    raw_data = numpy.zeros(nx_pixels*ny_pixels)
+                    for i in range(nMonitors-1, nx_pixels*ny_pixels+nMonitors ):
+                        raw_data[i-nMonitors] = mtd[self.data_ws].readY(i)[0]
                         
-                    self.data = numpy.reshape(raw_data, (reducer.instrument.nx_pixels, reducer.instrument.ny_pixels), order='F')
+                    self.data = numpy.reshape(raw_data, (nx_pixels, ny_pixels), order='F')
+                    
+                    
             except:
                 self.errors.append("Error loading data file:\n%s" % sys.exc_value)
             
@@ -65,7 +70,7 @@ class EQSANSDataProxy(DataFileProxy):
                 from reduction.instruments.sans.sns_reduction_steps import QuickLoad
                 from reduction.instruments.sans.sns_reducer import EqSansReducer
                 import reduction.instruments.sans.sns_instrument as sns_instrument
-                self.data_ws = "raw_data_file"
+                self.data_ws = "__raw_data_file"
                 reducer = EqSansReducer()
                 reducer.set_instrument(sns_instrument.EQSANS())
                 loader = QuickLoad(str(self.data_file))

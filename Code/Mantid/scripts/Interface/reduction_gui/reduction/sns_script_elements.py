@@ -247,13 +247,13 @@ class DataFileProxy(object):
                 reducer = EqSansReducer()
                 reducer.set_instrument(EQSANS())
                 loader = LoadRun(str(data_file))
-                loader.execute(reducer, "raw_data_file")
-                self.sample_detector_distance = mtd["raw_data_file"].getRun().getProperty("sample_detector_distance").value
+                loader.execute(reducer, "__raw_data_file")
+                self.sample_detector_distance = mtd["__raw_data_file"].getRun().getProperty("sample_detector_distance").value
                 
                 if HAS_NUMPY:
                     raw_data = numpy.zeros(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels)
                     for i in range(reducer.instrument.nx_pixels*reducer.instrument.ny_pixels):
-                        raw_data[i-reducer.instrument.nMonitors] = mtd["raw_data_file"].readY(i)[0]
+                        raw_data[i-reducer.instrument.nMonitors] = mtd["__raw_data_file"].readY(i)[0]
                         
                     self.data = numpy.reshape(raw_data, (reducer.instrument.nx_pixels, reducer.instrument.ny_pixels), order='F')
             except:

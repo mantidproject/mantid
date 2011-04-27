@@ -92,8 +92,9 @@ class BaseBeamFinder(ReductionStep):
         #                                       BeamRadius = self._beam_radius)
         
         # We must convert the beam radius from pixels to meters
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
         if self._beam_radius is not None:
-            self._beam_radius *= reducer.instrument.pixel_size_x/1000.0
+            self._beam_radius *= pixel_size_x/1000.0
         beam_center = FindCenterOfMassPosition(workspace+'_int',
                                                Output = None,
                                                DirectBeam = direct_beam,
@@ -113,7 +114,8 @@ class BaseBeamFinder(ReductionStep):
         #       the condition below. Check with EQSANS data (where the beam center and the data are the same workspace)
         if not workspace == workspace_default:
             old_ctr = reducer.instrument.get_coordinate_from_pixel(self._beam_center_x, self._beam_center_y)
-            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
+            detector_ID=mtd[workspace].getInstrument().getStringParameter("detector-name")[0]
+            MoveInstrumentComponent(workspace, detector_ID, 
                                     X = old_ctr[0]-float(ctr[0]),
                                     Y = old_ctr[1]-float(ctr[1]),
                                     RelativePosition="1")        
@@ -332,10 +334,11 @@ class DirectBeamTransmission(BaseTransmission):
             # Find which pixels to sum up as our "monitor". At this point we have moved the detector
             # so that the beam is at (0,0), so all we need is to sum the area around that point.
             #TODO: in IGOR, the error-weighted average is computed instead of simply summing up the pixels
+            pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
             cylXML = '<infinite-cylinder id="transmission_monitor">' + \
                        '<centre x="0.0" y="0.0" z="0.0" />' + \
                        '<axis x="0.0" y="0.0" z="1.0" />' + \
-                       '<radius val="%12.10f" />' % (self._beam_radius*reducer.instrument.pixel_size_x/1000.0) + \
+                       '<radius val="%12.10f" />' % (self._beam_radius*pixel_size_x/1000.0) + \
                      '</infinite-cylinder>\n'
                      
             det_finder = FindDetectorsInShape(Workspace=workspace, ShapeXML=cylXML)
@@ -553,25 +556,26 @@ class LoadRun(ReductionStep):
                 if i==0:
                     _load_data_file(data_file[i], workspace)
                 else:
-                    _load_data_file(data_file[i], 'tmp_wksp')
+                    _load_data_file(data_file[i], '__tmp_wksp')
                     Plus(LHSWorkspace=workspace,
-                         RHSWorkspace='tmp_wksp',
+                         RHSWorkspace='__tmp_wksp',
                          OutputWorkspace=workspace)
-            if mtd.workspaceExists('tmp_wksp'):
-                mtd.deleteWorkspace('tmp_wksp')
+            if mtd.workspaceExists('__tmp_wksp'):
+                mtd.deleteWorkspace('__tmp_wksp')
         else:
             _load_data_file(data_file, workspace)
         
         # Get the original sample-detector distance from the data file
         sdd = mtd[workspace].getRun().getProperty("sample-detector-distance").value
+        detector_ID=mtd[workspace].getInstrument().getStringParameter("detector-name")[0]
         
         if self._sample_det_dist is not None:
-            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
+            MoveInstrumentComponent(workspace, detector_ID,
                                     Z = (self._sample_det_dist-sdd)/1000.0, 
                                     RelativePosition="1")
             sdd = self._sample_det_dist            
         elif not self._sample_det_offset == 0:
-            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID,
+            MoveInstrumentComponent(workspace, detector_ID,
                                     Z = self._sample_det_offset/1000.0, 
                                     RelativePosition="1")
             sdd += self._sample_det_offset
@@ -589,7 +593,7 @@ class LoadRun(ReductionStep):
             [beam_ctr_x, beam_ctr_y] = reducer.instrument.get_coordinate_from_pixel(pixel_ctr_x, pixel_ctr_y)
             [default_pixel_x, default_pixel_y] = reducer.instrument.get_default_beam_center()
             [default_x, default_y] = reducer.instrument.get_coordinate_from_pixel(default_pixel_x, default_pixel_y)
-            MoveInstrumentComponent(workspace, reducer.instrument.detector_ID, 
+            MoveInstrumentComponent(workspace, detector_ID, 
                                     X = default_x-beam_ctr_x,
                                     Y = default_y-beam_ctr_y,
                                     RelativePosition="1")
@@ -660,6 +664,8 @@ class WeightedAzimuthalAverage(ReductionStep):
     def execute(self, reducer, workspace):
         # Q range                        
         beam_ctr = reducer._beam_finder.get_beam_center()
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
         if beam_ctr[0] is None or beam_ctr[1] is None:
             raise RuntimeError, "Azimuthal averaging could not proceed: beam center not set"
         if self._binning is None:
@@ -674,14 +680,18 @@ class WeightedAzimuthalAverage(ReductionStep):
                 raise RuntimeError, "Azimuthal averaging needs positive wavelengths"
                     
             sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
+            nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+            ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+            
             # Q min is one pixel from the center, unless we have the beam trap size
             try:
                 mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
             except:
-                mindist = min(reducer.instrument.pixel_size_x, reducer.instrument.pixel_size_y)
+                mindist = min(pixel_size_x, pixel_size_y)
             qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
-            dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
-            dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
+            
+            dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
+            dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
             maxdist = math.sqrt(dxmax*dxmax+dymax*dymax)
             qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
             
@@ -710,8 +720,8 @@ class WeightedAzimuthalAverage(ReductionStep):
         output_ws = workspace+str(self._suffix)    
         Q1DWeighted(workspace, output_ws, self._binning,
                     NPixelDivision=self._nsubpix,
-                    PixelSizeX=reducer.instrument.pixel_size_x,
-                    PixelSizeY=reducer.instrument.pixel_size_y, ErrorWeighting=self._error_weighting)  
+                    PixelSizeX=pixel_size_x,
+                    PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
         ReplaceSpecialValues(output_ws, output_ws, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0)
         return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         
@@ -765,8 +775,12 @@ class IQxQy(ReductionStep):
         if wavelength_min==0:
             raise RuntimeError, "I(Qx,Qy) computation needs positive wavelengths"
         sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
-        dxmax = reducer.instrument.pixel_size_x*max(beam_ctr[0],reducer.instrument.nx_pixels-beam_ctr[0])
-        dymax = reducer.instrument.pixel_size_y*max(beam_ctr[1],reducer.instrument.ny_pixels-beam_ctr[1])
+        nx_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-x-pixels")[0])
+        ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
+        pixel_size_x = mtd[workspace].getInstrument().getNumberParameter("x-pixel-size")[0]
+        pixel_size_y = mtd[workspace].getInstrument().getNumberParameter("y-pixel-size")[0]
+        dxmax = pixel_size_x*max(beam_ctr[0],nx_pixels-beam_ctr[0])
+        dymax = pixel_size_y*max(beam_ctr[1],ny_pixels-beam_ctr[1])
         maxdist = max(dxmax, dymax)
         qmax = 4*math.pi/wavelength_min*math.sin(0.5*math.atan(maxdist/sample_detector_distance))
         
