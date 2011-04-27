@@ -156,6 +156,12 @@ void SANSRunWindow::initLayout()
 
   m_runFiles.push_back(m_uiForm.direct);
   m_runFiles.push_back(m_uiForm.dirCan);
+  std::vector<MWRunFiles *>::const_iterator it = m_runFiles.begin();
+  for ( ; it != m_runFiles.end(); ++it )
+  {
+    (*it)->doButtonOpt(MWRunFiles::Icon);
+  }
+
 
   connectChangeSignals();
 
@@ -249,6 +255,8 @@ void SANSRunWindow::initLocalPython()
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
   handleInstrumentChange();
+
+  loadUserFile();
 }
 /** Initialise some of the data and signal connections in the save box
 */
@@ -428,7 +436,6 @@ void SANSRunWindow::readSettings()
   value_store.beginGroup("CustomInterfaces/SANSRunWindow");
 
   m_uiForm.userfile_edit->setText(value_store.value("user_file").toString());
-  selectUserFile();
 
   m_last_dir = value_store.value("last_dir", "").toString();
 
@@ -578,12 +585,14 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 *  @param[out] errors the output produced by the string
 *  @return the output printed by the Python commands
 */
-bool SANSRunWindow::loadUserFile(QString & errors)
+bool SANSRunWindow::loadUserFile()
 {
+  QString errors;
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if( filetext.isEmpty() )
   {
     errors = "No user file has been specified";
+    m_cfg_loaded = false;
     return false;
   }
   
@@ -591,6 +600,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   if( !user_file.open(QIODevice::ReadOnly) )
   {
     errors = "Could not open user file \""+filetext+"\"";
+    m_cfg_loaded = false;
     return false;
   }
 
@@ -632,6 +642,7 @@ bool SANSRunWindow::loadUserFile(QString & errors)
 
   if ( ! canContinue )
   {
+    m_cfg_loaded = false;
     return false;
   }
 
@@ -780,10 +791,26 @@ bool SANSRunWindow::loadUserFile(QString & errors)
   {
     m_uiForm.mirror_phi->setChecked(false);
   }
-  
+
+  if ( ! errors.isEmpty() )
+  {
+    showInformationBox("User file opened with some warnings:\n"+errors);
+  }
+
   m_cfg_loaded = true;
   m_uiForm.userfileBtn->setText("Reload");
   m_uiForm.tabWidget->setTabEnabled(m_uiForm.tabWidget->count() - 1, true);
+  
+  //Check for warnings
+  checkLogFlags();
+
+  m_cfg_loaded = true;
+  emit userfileLoaded();
+  m_uiForm.tabWidget->setTabEnabled(1, true);
+  m_uiForm.tabWidget->setTabEnabled(2, true);
+  m_uiForm.tabWidget->setTabEnabled(3, true);
+  
+
   return true;
 }
 
@@ -1477,29 +1504,10 @@ void SANSRunWindow::selectUserFile()
   runReduceScriptFunction("i.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'");
 
-  QString loadErrors;
-  if( loadUserFile(loadErrors) )
+  if (! loadUserFile() )
   {// the load was successful
-    if ( ! loadErrors.isEmpty() )
-    {//but there are some warnings to display
-      showInformationBox("User file opened with some warnings:\n"+loadErrors);
-    }
-  }
-  else
-  {// there was a fatal problem with the load we can not continue, the error should already have been raised at this point
-    m_cfg_loaded = false;
     return;
   }
-
-  //Check for warnings
-  checkLogFlags();
-
-  m_cfg_loaded = true;
-  emit userfileLoaded();
-  m_uiForm.tabWidget->setTabEnabled(1, true);
-  m_uiForm.tabWidget->setTabEnabled(2, true);
-  m_uiForm.tabWidget->setTabEnabled(3, true);
-  
 
   //path() returns the directory
   m_last_dir = QFileInfo(m_uiForm.userfile_edit->text()).path();
@@ -1667,7 +1675,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
   if( m_uiForm.inst_opt->currentText() == "SANS2D" && can_logs.isEmpty() )
   {
-    if ( m_uiForm.scatCan->isEmpty() )
+    if ( ! m_uiForm.scatCan->isEmpty() )
     {
       can_logs = sample_logs;
       showInformationBox("Warning: Cannot find log file for can run, using sample values.");
@@ -1843,11 +1851,6 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
  */
 void SANSRunWindow::handleReduceButtonClick(const QString & type)
 {
-  if ( ! entriesAreValid(ALL) )
-  {
-    return;
-  }
-
   //new reduction is going to take place, remove the results from the last reduction
   resetDefaultOutput();
 
@@ -1863,6 +1866,11 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     {
       return;
     }
+  }
+  
+  if ( ! entriesAreValid(RUN) )
+  {
+    return;
   }
 
   QString py_code = readUserFileGUIChanges(type);
@@ -2582,8 +2590,8 @@ bool SANSRunWindow::assignMonitorRun(const MantidWidgets::MWRunFiles & trans, co
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
   const static QString PYTHON_SEP("C++assignMonitorRunC++");
   
-  QString assignCom("i."+assignFn+"('" + trans.getFirstFilename() + "'");
-  assignCom.append(", '"+direct.getFirstFilename()+"'");
+  QString assignCom("i."+assignFn+"(r'" + trans.getFirstFilename() + "'");
+  assignCom.append(", r'"+direct.getFirstFilename()+"'");
   assignCom.append(", period_t="+QString::number(trans.getEntryNum()));
   assignCom.append(", period_d="+QString::number(direct.getEntryNum())+")");
   
@@ -2621,7 +2629,7 @@ bool SANSRunWindow::assignDetBankRun(const MantidWidgets::MWRunFiles & runFile, 
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
   const static QString PYTHON_SEP("C++assignDetBankRunC++");
   
-  QString assignCom("i."+assignFn+"('" + runFile.getFirstFilename() + "'");
+  QString assignCom("i."+assignFn+"(r'" + runFile.getFirstFilename() + "'");
   assignCom.append(", reload = True");
   assignCom.append(", period = " + QString::number(runFile.getEntryNum())+")");
 
@@ -2632,7 +2640,7 @@ bool SANSRunWindow::assignDetBankRun(const MantidWidgets::MWRunFiles & runFile, 
   run_info = runReduceScriptFunction(run_info);
   if (run_info.startsWith("error", Qt::CaseInsensitive))
   {
-    throw std::runtime_error("Couldn't sample or can");
+    throw std::runtime_error("Couldn't load sample or can");
   }
   //read the informtion returned from Python
   QString base_workspace = run_info.section(PYTHON_SEP, 1, 1).trimmed();

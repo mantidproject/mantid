@@ -959,14 +959,14 @@ class ConvertToQ(ReductionStep):
         self._Q_alg = self._OUTPUT_TYPES[descript]
         self._output_type = descript
 	
-	if self._output_type == '1D':
-	    if not self._error_holder['Q1D errors']:
-	        raise RuntimeError('Could not find the un-normalised sample workspace needed for error estimates')
+        if self._output_type == '1D':
+            if not self._error_holder['Q1D errors']:
+                raise RuntimeError('Could not find the un-normalised sample workspace needed for error estimates')
 	        	
     def get_output_type(self):
         return self._output_type
 
-    output_type = property(get_output_type, None, None, None)
+    output_type = property(get_output_type, set_output_type, None, None)
 
     def get_gravity(self):
         return self._use_gravity
@@ -1288,8 +1288,8 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
-        DeleteWorkspace(trans_tmp_out)
-        DeleteWorkspace(direct_tmp_out)
+#        DeleteWorkspace(trans_tmp_out)
+#        DeleteWorkspace(direct_tmp_out)
             
         if fit_meth == 'Off':
             result = unfittedtransws
@@ -1792,14 +1792,7 @@ class UserFile(ReductionStep):
         #a list of the key words this function can read and the functions it calls in response
         keys = ['MON/TIMES', 'M']
         funcs = [self._read_default_back_region, self._read_back_region]
-
-        #go through the list of recognised commands
-        for i in range(0, len(keys)):
-            if arguments.startswith(keys[i]):
-                #remove the keyword as it has already been parsed
-                params = arguments[len(keys[i]):]
-                #call the handling function for that keyword returning any error
-                return funcs[i](params, reducer)
+        self._process(keys, funcs, arguments, reducer)
 
     def _read_back_region(self, arguments, reducer):
         """
@@ -1844,15 +1837,49 @@ class UserFile(ReductionStep):
             return 'Only monitor specific backgrounds will be applied, no default is set due to incorrectly formatted background line:'
 
     def _read_trans_line(self, arguments, reducer):
-        if arguments.startswith('TRANSPEC'):
-            arguments = arguments.split('TRANSPEC')[1]
+        #a list of the key words this function can read and the functions it calls in response
+        keys = ['TRANSPEC', 'SAMPLEWS', 'CANWS']
+        funcs = [self._read_transpec, self._read_trans_samplews, self._read_trans_canws]
+        self._process(keys, funcs, arguments, reducer)
+
+    def _process(self, keys, funcs, params, reducer):
+        #go through the list of recognised commands
+        for i in range(0, len(keys)):
+            if params.startswith(keys[i]):
+                #remove the keyword as it has already been parsed
+                params = params[len(keys[i]):]
+                #call the handling function for that keyword returning any error
+                return funcs[i](params, reducer)
+        return 'Unrecognised line: '
+    
+    def _read_transpec(self, arguments, reducer):        
+        arguments = arguments.split('=')
+        if len(arguments) < 2:
+            raise RuntimeError('An "=" is required after TRANSPEC')
+        reducer.transmission_calculator.trans_spec = arguments[1]
+        return ''
+        
+    def _read_trans_samplews(self, arguments, reducer):
+        if arguments.find('=') > -1:
             arguments = arguments.split('=')
-            if len(arguments) < 2:
-                raise RuntimeError('An "=" is required after TRANSPEC')
-            reducer.transmission_calculator.trans_spec = arguments[1]
-            return ''
         else:
+            arguments = arguments.split()
+        
+        if len(arguments) != 2:
             return 'Unrecognised line: '
+            
+        reducer.transmission_calculator.calculated_samp = arguments[1]
+
+    def _read_trans_canws(self, arguments, reducer):
+        if arguments.find('=') > -1:
+            arguments = arguments.split('=')
+        else:
+            arguments = arguments.split()
+        
+        if len(arguments) != 2:
+            return 'Unrecognised line: '
+            
+        reducer.transmission_calculator.calculated_can = arguments[1]
         
     def _check_instrument(self, inst_name, reducer):
         if reducer.instrument is None:

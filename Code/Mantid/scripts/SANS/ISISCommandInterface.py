@@ -483,21 +483,21 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
         
     return script
 
-def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
+def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     XSTEP = YSTEP = ReductionSingleton().inst.cen_find_step
 
-    LimitsR(str(float(rlow)/1000.), str(float(rupp)/1000.), quiet=True)
+    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True)
 
-    if x_start or y_start:
+    if xstart or ystart:
         ReductionSingleton().set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(
-            float(x_start), float(y_start)))
+            float(xstart), float(ystart)))
 
     beamcoords = ReductionSingleton()._beam_finder.get_beam_center()
     XNEW = beamcoords[0]
     YNEW = beamcoords[1]
-    x_start = beamcoords[0]
-    y_start = beamcoords[1]
+    xstart = beamcoords[0]
+    ystart = beamcoords[1]
     
     mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
     _printMessage("Starting centre finding routine ...")
@@ -517,8 +517,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, x_start = None, y_start = None):
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
     oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, 0)
     # take first trial step
-    XNEW = x_start + XSTEP
-    YNEW = y_start + YSTEP
+    XNEW = xstart + XSTEP
+    YNEW = ystart + YSTEP
 
     for i in range(1, MaxIter+1):
         it = i

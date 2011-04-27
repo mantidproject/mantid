@@ -258,18 +258,18 @@ class ISISReducer(SANSReducer):
 
     def keep_un_normalised(self, keep):
         """
-	    Use this function to keep the un-normalised workspace from the
-	    normalise to monitor step and use it for the Q1D error estimate.
-	    Call this function with keep = False to disable this
-	    @param keep: set tot True to keep the workspace, False to delete it
-	"""
+	        Use this function to keep the un-normalised workspace from the
+	        normalise to monitor step and use it for the Q1D error estimate.
+	        Call this function with keep = False to disable this
+	        @param keep: set tot True to keep the workspace, False to delete it
+        """
         if keep:
-	    self._temporys['Q1D errors'] = 'to_delete_prenormed'
-	else:
-	    if self._temporys['Q1D errors']:
-	        if mtd.workspaceExists(self._temporys['Q1D errors']):
-		    DeleteWorkspace(self._temporys['Q1D errors'])
-            self._temporys['Q1D errors'] = None
+            self._temporys['Q1D errors'] = 'to_delete_prenormed'
+        else:
+            if self._temporys['Q1D errors']:
+               if mtd.workspaceExists(self._temporys['Q1D errors']):
+                   DeleteWorkspace(self._temporys['Q1D errors'])
+                   self._temporys['Q1D errors'] = None
 	    
 	self.norm_mon.save_original = self._temporys['Q1D errors']
 
