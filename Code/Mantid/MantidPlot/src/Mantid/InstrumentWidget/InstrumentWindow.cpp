@@ -408,6 +408,15 @@ void InstrumentWindow::renderInstrument(Mantid::API::MatrixWorkspace* workspace)
   
   mInstrumentDisplay->calculateBinRange();
   m_xIntegration->setTotalRange(mInstrumentDisplay->getBinMinValue(),mInstrumentDisplay->getBinMaxValue());
+  Mantid::Kernel::Unit_sptr unit = workspace->getAxis(0)->unit();
+  if (unit)
+  {
+    m_xIntegration->setUnits(QString::fromStdString(unit->caption()));
+  }
+  else
+  {
+    m_xIntegration->setUnits("Unitless");
+  }
 
   // Setup the colour map details
   GraphOptions::ScaleType type = m_renderTab->getScaleType();

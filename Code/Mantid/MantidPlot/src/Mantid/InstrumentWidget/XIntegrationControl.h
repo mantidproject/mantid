@@ -54,6 +54,7 @@ class XIntegrationControl: public QFrame
 public:
   XIntegrationControl(InstrumentWindow* instrWindow);
   void setTotalRange(double minimum,double maximum);
+  void setUnits(const QString& units);
   void setRange(double minimum,double maximum);
   void setWholeRange();
   double getMinimum()const;
@@ -73,6 +74,7 @@ private:
   XIntegrationScrollBar* m_scrollBar;
   QLineEdit* m_minText;
   QLineEdit* m_maxText;
+  QLabel* m_units;
   double m_totalMinimum;
   double m_totalMaximum;
   double m_minimum;

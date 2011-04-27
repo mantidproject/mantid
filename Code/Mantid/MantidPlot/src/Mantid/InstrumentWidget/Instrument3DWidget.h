@@ -98,6 +98,7 @@ public:
   virtual ~Instrument3DWidget();         ///< Destructor
   void setWorkspace(const QString& name);
   QString getWorkspaceName() const;
+  Mantid::API::MatrixWorkspace_const_sptr getWorkspace()const{return mWorkspace;}
   const MantidColorMap & getColorMap() const;
   MantidColorMap & mutableColorMap();
   double getDataMinValue() const;

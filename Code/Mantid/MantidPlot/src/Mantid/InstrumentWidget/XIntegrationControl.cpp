@@ -231,7 +231,9 @@ m_maximum(1)
   m_minText->setMaximumWidth(100);
   m_maxText = new QLineEdit(this);
   m_maxText->setMaximumWidth(100);
-  //layout->
+  m_units = new QLabel("TOF",this);
+  
+  layout->addWidget(m_units,0);
   layout->addWidget(m_minText,0);
   layout->addWidget(m_scrollBar,1);
   layout->addWidget(m_maxText,0);
@@ -339,4 +341,9 @@ void XIntegrationControl::setMaximum()
   if (!ok) return;
   double minValue = getMinimum();
   setRange(minValue,maxValue);
+}
+
+void XIntegrationControl::setUnits(const QString& units)
+{
+  m_units->setText(units);
 }
