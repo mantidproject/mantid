@@ -511,8 +511,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     centre_reduction.sample_wksp = samp
 
     if centre_reduction.background_subtracter:
-        can = reducer.background_subtracter.workspace.wksp_name+'cen'
-        CloneWorkspace(reducer.background_subtracter.workspace.wksp_name, can)
+        can = centre_reduction.background_subtracter.workspace.wksp_name+'cen'
+        CloneWorkspace(centre_reduction.background_subtracter.workspace.wksp_name, can)
         centre_reduction.background_subtracter.workspace.wksp_name = can
 
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  

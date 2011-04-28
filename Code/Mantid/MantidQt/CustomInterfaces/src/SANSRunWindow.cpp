@@ -2165,7 +2165,19 @@ void SANSRunWindow::handleRunFindCentre()
       result = "::SANS::Incorrect number of parameters returned from function, check script.";
 
     }
-  }
+  }  
+  QString pyCode = "i.ReductionSingleton.clean(isis_reducer.ISISReducer)";
+  pyCode += "\ni.ReductionSingleton().set_instrument(isis_instrument.";
+  pyCode += getInstrumentClass()+")";
+  pyCode += "\ni.ReductionSingleton().user_settings =";
+  // Use python function to read the settings file and then extract the fields
+  pyCode += "isis_reduction_steps.UserFile(r'"+m_uiForm.userfile_edit->text().trimmed()+"')";
+
+  runReduceScriptFunction(pyCode);
+
+  QString errors = runReduceScriptFunction(
+    "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
+
   updateCentreFindingStatus(result);
   
   //Reenable stuff

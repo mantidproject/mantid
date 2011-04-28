@@ -1001,7 +1001,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
     NORMALISATION_SPEC_INDEX = 0
     def __init__(self, spectrum_number=None, raw_ws=None):
         if not spectrum_number is None:
-            index_num = spectrum_number - 1
+            index_num = spectrum_number
         else:
             index_num = None
         super(NormalizeToMonitor, self).__init__(index_num)
@@ -1013,21 +1013,21 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         normalization_spectrum = self._normalization_spectrum 
         if normalization_spectrum is None:
             #the -1 converts from spectrum number to spectrum index
-            normalization_spectrum = reducer.instrument.get_incident_mon()-1
+            normalization_spectrum = reducer.instrument.get_incident_mon()
         
         raw_ws = self._raw_ws
         if raw_ws is None:
             raw_ws = reducer.data_loader.uncropped
 
-        mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(self.normalization_spectrum))
+        mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(normalization_spectrum))
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
         norm_ws = 'Monitor'
 
         
         CropWorkspace(raw_ws, norm_ws,
-                      StartWorkspaceIndex = normalization_spectrum, 
-                      EndWorkspaceIndex   = normalization_spectrum)
+                      StartWorkspaceIndex = normalization_spectrum-1, 
+                      EndWorkspaceIndex   = normalization_spectrum-1)
     
         if reducer.instrument.name() == 'LOQ':
             RemoveBins(norm_ws, norm_ws, '19900', '20500',
