@@ -432,11 +432,6 @@ class CanSubtraction(LoadRun):
         #we now have the can workspace, use it
         Minus(tmp_smp, tmp_can, workspace)
     
-#        if DEL__FINDING_CENTRE_:
-#            mantid.deleteWorkspace(tmp_smp)
-#            mantid.deleteWorkspace(tmp_can)
-#            mantid.deleteWorkspace(workspace)        
-#        else:
         #clean up the workspaces ready users to see them if required
         # Due to rounding errors, small shifts in detector encoders and poor stats in highest Q bins need "minus" the
         # workspaces before removing nan & trailing zeros thus, beware,  _sc,  _sam_tmp and _can_tmp may NOT have same Q bins
@@ -1024,7 +1019,7 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
         if raw_ws is None:
             raw_ws = reducer.data_loader.uncropped
 
-        mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(self._normalization_spectrum))
+        mantid.sendLogMessage('::SANS::Normalizing to monitor ' + str(self.normalization_spectrum))
         # Get counting time or monitor
         norm_ws = workspace+"_normalization"
         norm_ws = 'Monitor'

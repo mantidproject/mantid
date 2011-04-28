@@ -587,11 +587,10 @@ void SANSRunWindow::trimPyMarkers(QString & txt)
 */
 bool SANSRunWindow::loadUserFile()
 {
-  QString errors;
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if( filetext.isEmpty() )
   {
-    errors = "No user file has been specified";
+    QMessageBox::critical(this, "Error loading user file", "No user file has been specified");
     m_cfg_loaded = false;
     return false;
   }
@@ -599,7 +598,7 @@ bool SANSRunWindow::loadUserFile()
   QFile user_file(filetext);
   if( !user_file.open(QIODevice::ReadOnly) )
   {
-    errors = "Could not open user file \""+filetext+"\"";
+    QMessageBox::critical(this, "Error loading user file", "Could not open user file \""+filetext+"\"");
     m_cfg_loaded = false;
     return false;
   }
@@ -622,7 +621,7 @@ bool SANSRunWindow::loadUserFile()
 
   runReduceScriptFunction(pyCode);
 
-  errors = runReduceScriptFunction(
+  QString errors = runReduceScriptFunction(
     "print i.ReductionSingleton().user_settings.execute(i.ReductionSingleton())").trimmed();
   // create a string list with a string for each line
   const QStringList allOutput = errors.split("\n");

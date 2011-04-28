@@ -188,7 +188,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         reset the old setup
         @param wav_start: the first wavelength to be in the output data
         @param wav_end: the last wavelength in the output data
-        @param full_trans_wav: if to use a wide wavelength range (whole range specified by L/WAV) for the transmission correction, false by default
+        @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
     """
     _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
 
@@ -488,6 +488,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True)
 
+    original = ReductionSingleton()._beam_finder.get_beam_center()
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(
@@ -515,7 +516,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction.background_subtracter.workspace.wksp_name = can
 
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
-    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, 0)
+    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
     # take first trial step
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
@@ -527,8 +528,17 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
-        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, it)
+        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
         
+        try :
+            g = plotSpectrum(['Right','Up', 'Left', 'Down'],0)
+            g.activeLayer().setTitle("Itr " + str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+        except :
+            #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
+            pass
+        
+        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+
         #have we stepped across the y-axis that goes through the beam center?  
         if newX2 > oldX2:
             # yes with stepped across the middle, reverse direction and half the step size 

@@ -161,7 +161,7 @@ class ISISReducer(SANSReducer):
                 item.execute(self, self.output_wksp)
 
     
-    def reduce_can(self, to_reduce, new_wksp=None):
+    def reduce_can(self, to_reduce, new_wksp=None, run_Q=True):
         """
             Apply the sample corrections to a can workspace. This reducer is deep copied
             and the output workspace name, transmission and monitor workspaces are changed.
@@ -193,7 +193,10 @@ class ISISReducer(SANSReducer):
         new_reducer._reduction_steps[norm_step_ind] = \
             isis_reduction_steps.NormalizeToMonitor(raw_ws=to_reduce)
            
-        self.run_conv_Q(new_reducer)
+        if run_Q:
+            new_reducer.run_conv_Q()
+        else:
+            new_reducer.run_no_Q('dummy')
 
     def name_outwksp(self, new_name):
         #give the name of the new workspace to the first algorithm that was run

@@ -3,55 +3,53 @@ import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 from mantidsimple import *
 import SANSUtility
 
-#this will be set to the graph that the data will be written to
-RESIDUE_GRAPH = None
 
-def SeekCentre(trial, reducer, iteration):
+
+def SeekCentre(trial, reducer, origin):
     """
         Does four calculations of Q to estimate a better centre location than the one passed
         to it
         @param trial: the coordinates of the location to test as a list in the form [x, y]
         @param reducer: the reduction chain object that contains information about the reduction
+        @param origin: the starting position that the trial x and y are relative to
         @return: the coordinates of a location closer to the centre
     """
     
     currentDet = reducer.instrument.cur_detector().name()
 
     MoveInstrumentComponent(reducer.sample_wksp,
-        ComponentName=currentDet, X=trial[0], Y=trial[1], RelativePosition=False)
+        ComponentName=currentDet, X=trial[0]-origin[0], Y=trial[1]-origin[1], RelativePosition=True)
 
     reducer.output_wksp = reducer.sample_wksp
     reducer.keep_un_normalised(False)
     reducer.run_no_Q('centre')
 
-    #???????????need to deal with the can!!!
+    GroupIntoQuadrants('centre', trial[0], trial[1], reducer)
+
     if reducer.background_subtracter:
         MoveInstrumentComponent(reducer.background_subtracter.workspace.wksp_name,
-            ComponentName=currentDet, X=trial[0], Y=trial[1], RelativePosition=False)
+            ComponentName=currentDet, X=trial[0]-origin[0], Y=trial[1]-origin[1], RelativePosition=True)
         
-    GroupIntoQuadrants(reducer.output_wksp, trial[0], trial[1], reducer)
+        #reduce the can here
+        reducer.reduce_can(reducer.background_subtracter.workspace.wksp_name, 'centre_can', run_Q=False)
+        
+        RenameWorkspace('Left', 'Left_sample')
+        RenameWorkspace('Right', 'Right_sample')
+        RenameWorkspace('Up', 'Up_sample')
+        RenameWorkspace('Down', 'Down_sample')
+        GroupIntoQuadrants('centre_can', trial[0], trial[1], reducer)
+        Minus('Left_sample', 'Left', 'Left')
+        Minus('Right_sample', 'Right', 'Right')
+        Minus('Up_sample', 'Up', 'Up')
+        Minus('Down_sample', 'Down', 'Down')
     
-    residueX, residueY = CalculateResidue()                        
-    global RESIDUE_GRAPH
-    try :
-        if RESIDUE_GRAPH is None or (not RESIDUE_GRAPH in appwidgets()):
-            RESIDUE_GRAPH = plotSpectrum('Left', 0)
-        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Right','Up'],0))
-        mergePlots(RESIDUE_GRAPH, plotSpectrum(['Down'],0))
-        RESIDUE_GRAPH.activeLayer().setTitle("Itr " + str(iteration)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-    except :
-        #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
-        pass
-        
-    mantid.sendLogMessage("::SANS::Itr: "+str(iteration)+" "+str(trial[0]*1000.)+","+str(trial[1]*1000.)+" SX "+str(residueX)+" SY "+str(residueY))
-
-    return residueX, residueY
+    return CalculateResidue()                        
     
 # Create a workspace with a quadrant value in it 
 def CreateQuadrant(reduced_ws, quadrant, xcentre, ycentre, reducer, r_min, r_max):
     # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
     CloneWorkspace(reduced_ws, quadrant)
-    objxml = SANSUtility.QuadrantXML([xcentre, ycentre, 0.0], r_min, r_max, quadrant)
+    objxml = SANSUtility.QuadrantXML([0, 0, 0.0], r_min, r_max, quadrant)
     # Mask out everything outside the quadrant of interest
     MaskDetectorsInShape(quadrant,objxml)
 
@@ -76,7 +74,7 @@ def GroupIntoQuadrants(input, xcentre, ycentre, reducer):
         CreateQuadrant(input, q, xcentre, ycentre, reducer, r_min, r_max)
 
     # We don't need these now
-    mantid.deleteWorkspace(input)
+#    mantid.deleteWorkspace(input)
 
 # Calcluate the sum squared difference of the given workspaces. This assumes that a workspace with
 # one spectrum for each of the quadrants. The order should be L,R,U,D.
