@@ -322,26 +322,33 @@ def mtdGlobalHelp():
     if mtd.__gui__:
         print "Note: Each command also has a counterpart with the word 'Dialog' appended ",
         print "to it, which when run will bring up a property input dialog for that algorithm." 
-        
-# This function should generically go away, but for now...
+
+# Commit on behalf of Pete Peterson:        
 def mantidHelp(cmd = None):
   if cmd == None or cmd == '':
     mtdGlobalHelp()
     return
-  try:
-    cmd = cmd.func_name
-  except AttributeError:
-    pass
-  try:
-    # Try exact case first as it will be quicker
-    exec('help(%s)' % cmd)
-    return
-  except NameError:
-    alg_name = mtd.isAlgorithmName(cmd)
-  if alg_name == '':
-    print 'mtdHelp(): "%s" not found in help list' % cmd
-  else:
-    exec('help(%s)' % alg_name)
+  help(cmd)
+        
+## This function should generically go away, but for now...
+#def mantidHelp(cmd = None):
+#  if cmd == None or cmd == '':
+#    mtdGlobalHelp()
+#    return
+#  try:
+#    cmd = cmd.func_name
+#  except AttributeError:
+#    pass
+#  try:
+#    # Try exact case first as it will be quicker
+#    exec('help(%s)' % cmd)
+#    return
+#  except NameError:
+#    alg_name = mtd.isAlgorithmName(cmd)
+#  if alg_name == '':
+#    print 'mtdHelp(): "%s" not found in help list' % cmd
+#  else:
+#    exec('help(%s)' % alg_name)
 
 # Some case variations on the mantidHelp function
 mantidhelp = mantidHelp

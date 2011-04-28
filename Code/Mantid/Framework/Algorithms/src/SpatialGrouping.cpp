@@ -45,7 +45,7 @@ DECLARE_ALGORITHM(SpatialGrouping)
 void SpatialGrouping::initDocs()
 {
   this->setWikiSummary(" This algorithm creates an XML grouping file, which can be used in [[GroupDetectors]] or [[ReadGroupsFromFile]], which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the [http://doxygen.mantidproject.org/classMantid_1_1Geometry_1_1Detector.html#a3abb2dd5dca89d759b848489360ff9df getNeighbours] method on the Detector object. ");
-  this->setOptionalMessage("This algorithm creates an XML grouping file, which can be used in GroupDetectors or ReadGroupsFromFile, which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the [http://doxygen.mantidproject.org/classMantid_1_1Geometry_1_1Detector.html#a3abb2dd5dca89d759b848489360ff9df getNeighbours] method on the Detector object.");
+  this->setOptionalMessage("This algorithm creates an XML grouping file, which can be used in GroupDetectors or ReadGroupsFromFile, which groups the detectors of an instrument based on the distance between the detectors. It does this by querying the getNeighbours method on the Detector object.");
 }
 
 
