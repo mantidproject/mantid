@@ -121,13 +121,13 @@ class InstrumentInterface(object):
             if self._settings.debug:
                 msg = "Reduction could not be executed:\n\n%s" % unicode(traceback.format_exc())
             else:
-                msg = "Reduction could not be executed:\n\n%s" % unicode(e)
+                msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
                 log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
                 msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path                
             self._warning("Reduction failed", msg)
             self._error_report(traceback.format_exc())
         except:
-            msg = "Reduction could not be executed:\n\n%s" % sys.exc_info()[0]
+            msg = "Reduction could not be executed:\n\n%s" % sys.exc_value
             msg += "\n\nPlease check your reduction parameters\n"
             log_path = os.path.join(self._settings.data_path, self.ERROR_REPORT_NAME)
             msg += "\n\nWhen contacting the Mantid Team, please send this file:\n%s\n" % log_path            

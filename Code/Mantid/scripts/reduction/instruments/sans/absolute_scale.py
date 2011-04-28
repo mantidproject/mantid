@@ -45,7 +45,7 @@ class AbsoluteScale(BaseAbsoluteScale):
     """
     """
     def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0, 
-                 sample_thickness=1.0, apply_sensitivity=False):
+                 sample_thickness=None, apply_sensitivity=False):
         """
             @param beamstop_radius: beamstop radius to use. Will otherwise be read from file, if possible [mm]
             @param attenuator_trans: attenuator transmission
@@ -58,12 +58,38 @@ class AbsoluteScale(BaseAbsoluteScale):
         self._beamstop_radius = beamstop_radius
         self._apply_sensitivity = apply_sensitivity
         self._sample_thickness = sample_thickness
+        self._scaling_factor = None
         
     def execute(self, reducer, workspace=None):
         """
             @param reducer: Reducer object for which this step is executed
         """
+        # If we haven't calculated the scaling factor, do it now
+        if self._scaling_factor is None:
+            self._compute_scaling_factor(reducer)
+            
+        if self._sample_thickness is not None:
+            thickness = self._sample_thickness
+        else:
+            thickness_prop = mtd[workspace].getRun().getProperty("sample-thickness")
+            if thickness_prop is not None:
+                thickness = thickness_prop.value
+            else:
+                raise RuntimeError, "AbsoluteScale could not get the sample thickness"
+                
+        print "THICK", thickness
+        if thickness <= 0:
+            raise RuntimeError, "Invalid value for sample thickness: %g cm" % thickness
+        scale = self._scaling_factor/thickness
+        if workspace is not None:
+            Scale(workspace, workspace, scale, 'Multiply')
+        
+        return "Absolute scaling done [scaling factor = %g]" % scale
 
+    def _compute_scaling_factor(self, reducer):
+        """
+            Compute the scaling factor
+        """
         # Sanity check
         if self._data_file is None:
             raise RuntimeError, "AbsoluteScale called with no defined direct beam file"
@@ -77,7 +103,6 @@ class AbsoluteScale(BaseAbsoluteScale):
         loader.execute(reducer, data_file_ws)        
         
         # Get counting time
-        timer = mtd[data_file_ws].dataY(reducer.NORMALIZATION_TIME)[0]
         monitor = mtd[data_file_ws].dataY(reducer.NORMALIZATION_MONITOR)[0]
         
         sdd_property = mtd[data_file_ws].getRun().getProperty("sample_detector_distance")
@@ -117,16 +142,12 @@ class AbsoluteScale(BaseAbsoluteScale):
         else:
             raise RuntimeError, "AbsoluteScale could not read the pixel size"
         
-        if self._sample_thickness<=0:
-            raise RuntimeError, "Invalid value for sample thickness: %g cm" % self._sample_thickness
-            
-        self._scaling_factor = 1.0/(self._sample_thickness*det_count/timer/self._attenuator_trans/(monitor/timer)*(pixel_size/sdd)*(pixel_size/sdd))
+        # (detector count rate)/(attenuator transmission)/(monitor rate)*(pixel size/SDD)**2
+        self._scaling_factor = 1.0/(det_count/self._attenuator_trans/(monitor)*(pixel_size/sdd)*(pixel_size/sdd))
 
         mtd.deleteWorkspace(data_file_ws)
         mtd.deleteWorkspace(det_count_ws)
         
-        return "Absolute scale factor: %6.4g" % self._scaling_factor
-    
         
 
             

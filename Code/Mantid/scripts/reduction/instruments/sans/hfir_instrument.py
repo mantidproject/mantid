@@ -21,9 +21,6 @@ class HFIRSANS(Instrument):
         self.pixel_size_y = self.definition.getNumberParameter("y-pixel-size")[0]
         ## Detector name
         self.detector_ID = self.definition.getStringParameter("detector-name")[0]
-        ## Wavelength value to be used instead of value read from data file
-        self.wavelength = None
-        self.wavelength_spread = None
 
     def set_wavelength(self, wavelength=None, spread=None):
         """

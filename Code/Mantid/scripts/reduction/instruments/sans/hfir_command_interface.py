@@ -221,17 +221,17 @@ def SetSampleDetectorDistance(distance):
     ReductionSingleton().get_data_loader().set_sample_detector_distance(distance)
     
 def SetWavelength(wavelength, spread):
-    if not isinstance(ReductionSingleton().instrument, hfir_instrument.HFIRSANS):
-        RuntimeError, "SetWavelength was called with the wrong instrument type: re-initialize your instrument (e.g. HFIRSANS() )"    
-    ReductionSingleton().instrument.set_wavelength(wavelength, spread)
+    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
+        raise RuntimeError, "SetWavelength was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
+    ReductionSingleton().get_data_loader().set_wavelength(wavelength, spread)
     
 def ResetWavelength():
     """
         Resets the wavelength to the data file default
     """
-    if not isinstance(ReductionSingleton().instrument, hfir_instrument.HFIRSANS):
-        RuntimeError, "SetWavelength was called with the wrong instrument type: re-initialize your instrument (e.g. HFIRSANS() )"    
-    ReductionSingleton().instrument.set_wavelength()
+    if not isinstance(ReductionSingleton().get_data_loader(), sans_reduction_steps.LoadRun):
+        raise RuntimeError, "ResetWavelength was called with the wrong data loader: re-initialize your instrument (e.g. HFIRSANS() )"    
+    ReductionSingleton().get_data_loader().set_wavelength()
     
 def IQxQy(nbins=100):
     ReductionSingleton().set_IQxQy(sans_reduction_steps.IQxQy(nbins=nbins))
@@ -242,7 +242,7 @@ def NoIQxQy(nbins=100):
 def SetAbsoluteScale(factor):
     ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
     
-def SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0, sample_thickness=1.0, apply_sensitivity=False):
+def SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False):
     ReductionSingleton().set_absolute_scale(absolute_scale.AbsoluteScale(data_file=direct_beam, 
                                                                          beamstop_radius=beamstop_radius, 
                                                                          attenuator_trans=attenuator_trans, 

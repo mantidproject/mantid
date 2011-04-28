@@ -296,10 +296,6 @@ class SANSReducer(Reducer):
             result = self._beam_finder.execute(self)
             self.log_text += "%s\n" % str(result)     
             
-        if self._absolute_scale is not None:
-            result = self._absolute_scale.execute(self)
-            self.log_text += "%s\n" % str(result)
-            
         # Create the list of reduction steps
         self._to_steps()            
     
@@ -356,6 +352,9 @@ class SANSReducer(Reducer):
         if self._background_subtracter is not None:
             self.append_step(self._background_subtracter)
         
+        if self._absolute_scale is not None:
+            self.append_step(self._absolute_scale)
+                    
         # Perform azimuthal averaging
         if self._azimuthal_averager is not None:
             self.append_step(self._azimuthal_averager)

@@ -458,41 +458,49 @@ class LoadRun(ReductionStep):
         to the beam center and normalize the data.
     """
     #TODO: Move this to HFIR-specific module 
-    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, beam_center=None):
+    def __init__(self, datafile=None, sample_det_dist=None, sample_det_offset=0, beam_center=None,
+                 wavelength=None, wavelength_spread=None):
         """
             @param datafile: file path of data to load
             @param sample_det_dist: sample-detector distance [mm] (will overwrite header info)
             @param sample_det_offset: sample-detector distance offset [mm]
             @param beam_center: [center_x, center_y] [pixels]
+            @param wavelength: if provided, wavelength will be fixed at that value [A]
+            @param wavelength_spread: if provided along with wavelength, it will be fixed at that value [A] 
         """
         super(LoadRun, self).__init__()
         self._data_file = datafile
         self.set_sample_detector_distance(sample_det_dist)
         self.set_sample_detector_offset(sample_det_offset)
         self.set_beam_center(beam_center)
+        self.set_wavelength(wavelength, wavelength_spread)
         
     def clone(self, data_file=None):
         if data_file is None:
             data_file = self._data_file
         return LoadRun(datafile=data_file, sample_det_dist=self._sample_det_dist,
-                       sample_det_offset=self._sample_det_offset, beam_center=self._beam_center)
+                       sample_det_offset=self._sample_det_offset, beam_center=self._beam_center,
+                       wavelength=self._wavelength, wavelength_spread=self._wavelength_spread)
+        
+    def set_wavelength(self, wavelength=None, wavelength_spread=None):
+        if wavelength is not None and type(wavelength) != int and type(wavelength) != float:
+            raise RuntimeError, "LoadRun.set_wavelength expects a float: %s" % str(wavelength)
+        self._wavelength = wavelength
+
+        if wavelength_spread is not None and type(wavelength_spread) != int and type(wavelength_spread) != float:
+            raise RuntimeError, "LoadRun.set_wavelength expects a float for wavelength_spread: %s" % str(wavelength_spread)
+        self._wavelength_spread = wavelength_spread
         
     def set_sample_detector_distance(self, distance):
         # Check that the distance given is either None of a float
-        if distance is not None:
-            try:
-                float(distance)
-            except:
-                raise RuntimeError, "LoadRun.set_sample_detector_distance expects a float: %s" % str(distance)
+        if distance is not None and type(distance) != int and type(distance) != float:
+            raise RuntimeError, "LoadRun.set_sample_detector_distance expects a float: %s" % str(distance)
         self._sample_det_dist = distance
         
     def set_sample_detector_offset(self, offset):
         # Check that the offset given is either None of a float
-        if offset is not None:
-            try:
-                float(offset)
-            except:
-                raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
+        if offset is not None and type(offset) != int and type(offset) != float:
+            raise RuntimeError, "LoadRun.set_sample_detector_offset expects a float: %s" % str(offset)
         self._sample_det_offset = offset
         
     def set_beam_center(self, beam_center):
@@ -543,12 +551,12 @@ class LoadRun(ReductionStep):
         
         def _load_data_file(file_name, wks_name):
             filepath = reducer._full_file_path(file_name)
-            if reducer.instrument.wavelength is None:
+            if self._wavelength is None:
                 LoadSpice2D(filepath, wks_name)
             else:
                 LoadSpice2D(filepath, wks_name, 
-                            Wavelength=reducer.instrument.wavelength,
-                            WavelengthSpread=reducer.instrument.wavelength_spread)
+                            Wavelength=self._wavelength,
+                            WavelengthSpread=self._wavelength_spread)
 
         # Check whether we have a list of files that need merging
         if type(data_file)==list:
@@ -610,7 +618,6 @@ class Normalize(ReductionStep):
         Normalize the data to timer or a spectrum, typically a monitor, 
         with in the workspace. By default the normalization is done with 
         respect to the Instrument's incident monitor
-        TODO: Move the HFIR-specific code to its own module
     """
     def __init__(self, normalization_spectrum=None):
         super(Normalize, self).__init__()
@@ -636,13 +643,7 @@ class Normalize(ReductionStep):
         if self._normalization_spectrum == reducer.NORMALIZATION_MONITOR:         
             Scale(workspace, workspace, 1.0e8, 'Multiply')
 
-        output_msg = "Normalization done"
-                    
-        if reducer._absolute_scale is not None:
-            scale = reducer._absolute_scale.get_scaling_factor()
-            Scale(workspace, workspace, scale, 'Multiply')
-            output_msg += "\n  Absolute scale factor: %g" % scale
-        return output_msg
+        return "Normalization done [spectrum %g]" % self._normalization_spectrum
                         
     def clean(self):
         mtd.deleteWorkspace(norm_ws)
