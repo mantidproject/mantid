@@ -47,6 +47,12 @@ SplitThresholdBase_list = [10, 20, 50, 100, 200, 500, 1000]
 SplitInto_list = [4,5]
 SplitThresholdBase_list = [10, 20]
 
+SplitInto_list = [2,3,4,5,6,8,10,12,15]
+SplitThresholdBase_list = [10, 20, 50, 100]
+
+SplitInto_list = [1]
+SplitThresholdBase_list = [10, 20, 50, 100]
+
 for SplitInto in SplitInto_list:
     for SplitThresholdBase in SplitThresholdBase_list:
         par = Params()
@@ -69,7 +75,9 @@ for SplitInto in SplitInto_list:
             DeleteWorkspace("mdew")
         
         CreateMDEventWorkspace(Dimensions="3",Extents="-6,6,-6,6,-6,6",Names="Qx,Qy,Qz",Units="Ang-1,Ang-1,Ang-1", 
-                               SplitInto=str(SplitInto),SplitThreshold=str(SplitThreshold),MaxRecursionDepth="12",OutputWorkspace="mdew")
+                               SplitInto=str(SplitInto),SplitThreshold=str(SplitThreshold),
+                               BinarySplit="1",
+                               MaxRecursionDepth="30",OutputWorkspace="mdew")
         
         start = time.time()
         MakeDiffractionMDEventWorkspace(InputWorkspace="topaz",OutputWorkspace="mdew")
@@ -86,7 +94,7 @@ for SplitInto in SplitInto_list:
         print time.time()-start, " secs to bin medium: %s." % bin_str
         par.MediumBinTime = time.time()-start
 
-        bin_str = "-1.0, 1.0, 100"
+        bin_str = "-1.0, 1.0, 200"
         alg = BinToMDHistoWorkspace(InputWorkspace="mdew", OutputWorkspace="mdhisto", DimX="Qx,%s" % bin_str, DimY="Qy,%s" % bin_str, DimZ="Qz,%s" % bin_str, DimT="NONE,0,10,1")
         print time.time()-start, " secs to bin fine, close up: %s." % bin_str
         par.FineBinTime = time.time()-start
@@ -147,11 +155,11 @@ def plot_results(results, x_field, y_field, other_field):
     legend(loc='best')
     savefig("%s_vs_%s.png" % (y_field, x_field));
 
-plot_results(results, "SplitInto", "MakeTime", "SplitThresholdBase")
-plot_results(results, "SplitInto", "MemoryUsed", "SplitThresholdBase")
-plot_results(results, "SplitInto", "CoarseBinTime", "SplitThresholdBase")
-plot_results(results, "SplitInto", "MediumBinTime", "SplitThresholdBase")
-plot_results(results, "SplitInto", "FineBinTime", "SplitThresholdBase")
+plot_results(results, "SplitInto", "MakeTime", "SplitThreshold")
+plot_results(results, "SplitInto", "MemoryUsed", "SplitThreshold")
+plot_results(results, "SplitInto", "CoarseBinTime", "SplitThreshold")
+plot_results(results, "SplitInto", "MediumBinTime", "SplitThreshold")
+plot_results(results, "SplitInto", "FineBinTime", "SplitThreshold")
 
 #plot_results(results, "SplitThresholdBase", "CoarseBinTime")
 #plot_results(results, "SplitThresholdBase", "CoarseBinTime")
