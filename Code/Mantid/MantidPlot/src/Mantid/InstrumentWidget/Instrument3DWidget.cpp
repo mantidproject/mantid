@@ -598,6 +598,7 @@ void Instrument3DWidget::updateColorsForNewMap()
     }
   }
 
+  m_unwrappedSurfaceChanged = true;
   mInstrumentActor->setDetectorColors(colorlist);
   mInstrumentActor->refresh();
   update();
