@@ -175,7 +175,7 @@ int main( int argc, char ** argv )
       s += "-xq or --executeandquit: execute the script file given as argument and then exit MantidPlot\n\n";
       s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file\n\n";
 #ifdef Q_OS_WIN
-      QMessageBox::information(this, "MantidPlot - Help", s);
+      QMessageBox::information(NULL, "MantidPlot - Help", s);
 #else
       std::wcout << s.toStdWString();
 #endif
