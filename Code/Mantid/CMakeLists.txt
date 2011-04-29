@@ -215,6 +215,10 @@ if ( ENABLE_CPACK )
        
     ENDIF ( RPMBUILD_CMD)
     ENDIF ( ${UNIX_DIST} MATCHES "RedHatEnterprise" )
+
+    # let people know what is coming out the other end
+    message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
+
   ENDIF ()
 
   # rhel requirements
@@ -226,9 +230,6 @@ if ( ENABLE_CPACK )
 
   # TODO get this right <----------------------
   set ( CPACK_DEBIAN_PACKAGE_DEPENDS "boost >= 1.34.1,qt4 >= 4.2,nexus,qscintilla,qwt,gsl,glibc,google-perftools,qwtplot3d-qt4,OpenCASCADE-libs-modelling >= 6.3.0,OpenCASCADE-libs-foundation >= 6.3.0,OpenCASCADE-libs-visualization >= 6.3.0,OpenCASCADE-libs-ocaf >= 6.3.0,OpenCASCADE-libs-ocaf-lite >= 6.3.0,muParser,numpy,poco" )
-
-  # let people know what is coming out the other end
-  message ( status " CPACK_PACKAGE_FILE_NAME = ${CPACK_PACKAGE_FILE_NAME}" )
 
   # run cpack configuration
   include ( CPack )

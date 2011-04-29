@@ -112,4 +112,4 @@ endif ()
 # Installation settings
 ###########################################################################
 
-install ( TARGETS Nexus DESTINATION ${PLUGINS_DIR} )
+install ( TARGETS Nexus DESTINATION ${LIB_DIR} )

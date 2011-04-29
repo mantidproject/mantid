@@ -70,7 +70,7 @@ if ( Subversion_FOUND )
   
 else ()
   # Just use a dummy version number and print a warning
-  message ( STATUS "Subversion not found - using 0 for revision number in MantidVersion.h" )
+  message ( STATUS "SVN_WORKING_COPY set to OFF - using dummy revision number and date" )
   set ( MtdVersion_WC_LAST_CHANGED_REV 0 )
   set ( MtdVersion_WC_LAST_CHANGED_DATE Unknown )
 endif ()
