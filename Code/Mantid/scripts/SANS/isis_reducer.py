@@ -152,6 +152,7 @@ class ISISReducer(SANSReducer):
         self.name_outwksp(output_name)
         self._to_steps()
  
+        self.output_wksp = self.sample_wksp
         self._run(self._no_Q)
         self.clean = False
         
@@ -196,7 +197,7 @@ class ISISReducer(SANSReducer):
         if run_Q:
             new_reducer.run_conv_Q()
         else:
-            new_reducer.run_no_Q('dummy')
+            new_reducer.run_no_Q(new_wksp)
 
     def name_outwksp(self, new_name):
         #give the name of the new workspace to the first algorithm that was run
@@ -251,6 +252,7 @@ class ISISReducer(SANSReducer):
         if stop_ind is None:
             stop_ind = len(self._reduction_steps)
 
+        #TODO: move this command upward
         self.output_wksp = self.sample_wksp
         for item in self._reduction_steps[start_ind:stop_ind+1]:
             if not item is None:

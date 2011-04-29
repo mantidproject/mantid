@@ -20,7 +20,6 @@ def SeekCentre(trial, reducer, origin):
     MoveInstrumentComponent(reducer.sample_wksp,
         ComponentName=currentDet, X=trial[0]-origin[0], Y=trial[1]-origin[1], RelativePosition=True)
 
-    reducer.output_wksp = reducer.sample_wksp
     reducer.keep_un_normalised(False)
     reducer.run_no_Q('centre')
 
@@ -41,7 +40,11 @@ def SeekCentre(trial, reducer, origin):
         Minus('Left_sample', 'Left', 'Left')
         Minus('Right_sample', 'Right', 'Right')
         Minus('Up_sample', 'Up', 'Up')
-        Minus('Down_sample', 'Down', 'Down')
+        Minus('Down_sample', 'Down', 'Down')    
+        DeleteWorkspace('Left_sample')
+        DeleteWorkspace('Right_sample')
+        DeleteWorkspace('Up_sample')
+        DeleteWorkspace('Down_sample')
     
     return CalculateResidue()                        
     
