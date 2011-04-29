@@ -41,7 +41,7 @@ public:
     std::string line;
     getline(is, line);
     //TS_ASSERT_EQUALS(line, std::string("from MantidFramework import mtd, _makeString"));
-    getline(is, line);
+    //getline(is, line);
 
     //next line should be os import
     getline( is, line );
