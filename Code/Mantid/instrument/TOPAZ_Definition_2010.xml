@@ -22,7 +22,7 @@ calibration/geometry/ code. -->
 
   <!--SOURCE-->
   <component type="moderator">
-    <location z="-11.0"/>
+    <location z="-18.0"/>
   </component>
   <type name="moderator" is="Source"/>
 
