@@ -10,7 +10,7 @@ namespace Kernel
 
 const char* MantidVersion::version()
 {
-  return "1.1.@MtdVersion_WC_LAST_CHANGED_REV@";
+  return "@VERSION_MAJOR@.@VERSION_MINOR@.@MtdVersion_WC_LAST_CHANGED_REV@";
 }
 
 const char* MantidVersion::revision()
