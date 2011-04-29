@@ -139,52 +139,81 @@ public:
 
 int main( int argc, char ** argv )
 {
-  /* First, check for the --version flag to give the mantid version without launching everything. */
-  for (int i=1; i<argc; i++)
+  // First, look for command-line arguments that we want to deal with before launching anything
+  if ( argc == 2 )
   {
-    std::string str(argv[i]);
-    if (str == "-v" || str == "--version")
+    QString str(argv[1]);
+    if ( str == "-v" || str == "--version" )
     {
-      std::cout << Mantid::Kernel::MantidVersion::version() << std::endl;
+      std::cout << Mantid::Kernel::MantidVersion::version() << " (" << 
+                   Mantid::Kernel::MantidVersion::releaseDate() << ")" << std::endl;
       exit(0);
     }
+    else if ( str == "-r" || str == "--revision") // Print and return subversion revision number
+    {
+      QString revision(Mantid::Kernel::MantidVersion::revision());
+      std::cout << revision.toStdString() << std::endl;
+      exit(revision.toInt());
+    }
+    else if ( str == "-a" || str == "--about" ) 
+    {
+      MantidApplication app( argc, argv );  // Needed to avoid an error
+      ApplicationWindow::about();
+      exit(0);
+    }
+    else if ( str == "-h" || str == "--help")
+    {
+      QString s = "\nUsage: ";
+      s += "MantidPlot [options] [filename]\n\n";
+      s += "Valid options are:\n";
+      s += "-a or --about: show about dialog and exit\n";
+      s += "-d or --default-settings: start MantidPlot with the default settings\n";
+      s += "-h or --help: show command line options\n";
+      s += "-v or --version: print MantidPlot version and release date\n";
+      s += "-r or --revision: print MantidPlot version and release date\n";
+      s += "-x or --execute: execute the script file given as argument\n";
+      s += "-xq or --executeandquit: execute the script file given as argument and then exit MantidPlot\n\n";
+      s += "'filename' can be any of .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file\n\n";
+#ifdef Q_OS_WIN
+      QMessageBox::information(this, "MantidPlot - Help", s);
+#else
+      std::wcout << s.toStdWString();
+#endif
+      exit(0);
+    }
+    //else if ( str == "-m" || str == "--manual" ) // Not for the time being at least
+    //  ApplicationWindow::showStandAloneHelp();
   }
 
   MantidApplication app( argc, argv );
+
+  QStringList args = app.arguments();
+  args.removeFirst(); // remove application name
+
   WaitThread t;
   try
   {
-    QStringList args = app.arguments();
-    args.removeFirst(); // remove application name
+    t.start();
+    QPixmap pixmap;
+    //if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
+    QSplashScreen splash(pixmap);
+    splash.show();
+    app.processEvents();
 
-    if( (args.count() == 1) && (args[0] == "-m" || args[0] == "--manual") )
-      ApplicationWindow::showStandAloneHelp();
-    else if ( (args.count() == 1) && (args[0] == "-a" || args[0] == "--about") ) {
-      ApplicationWindow::about();
-      exit(0);
-    } else {
+    QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
+    QString svnInfo(Mantid::Kernel::MantidVersion::version());
+    splash.showMessage("Release: " + releaseDateTime + " (Version " + svnInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
 
-      t.start();
-      QPixmap pixmap;
-      if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
-      QSplashScreen splash(pixmap);
-      splash.show();
-      app.processEvents();
+    bool factorySettings = false;
+    if (args.contains("-d") || args.contains("--default-settings"))
+      factorySettings = true;
 
-      QString releaseDateTime(Mantid::Kernel::MantidVersion::releaseDate());
-      QString svnInfo(Mantid::Kernel::MantidVersion::version());
-      splash.showMessage("Release: " + releaseDateTime + " (Version " + svnInfo + ")", Qt::AlignLeft | Qt::AlignBottom);
+    ApplicationWindow *mw = new ApplicationWindow(factorySettings);
+    mw->restoreApplicationGeometry();
+    mw->parseCommandLineArguments(args);
+    t.wait();
+    splash.finish(mw);
 
-      bool factorySettings = false;
-      if (args.contains("-d") || args.contains("--default-settings"))
-        factorySettings = true;
-
-      ApplicationWindow *mw = new ApplicationWindow(factorySettings);
-      mw->restoreApplicationGeometry();
-      mw->parseCommandLineArguments(args);
-      t.wait();
-      splash.finish(mw);
-    }
     app.connect( &app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()) );
     return app.exec();
   }

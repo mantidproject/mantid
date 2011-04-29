@@ -13899,7 +13899,8 @@ void ApplicationWindow::showBugTracker()
 void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
 {
   int num_args = args.count();
-  if(num_args == 0){
+  if(num_args == 0)
+  {
     initWindow();
     savedProject();
     return;
@@ -13909,9 +13910,11 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
   bool exec = false;
   bool quit = false;
   bool default_settings = false;
-  foreach(str, args){
-    if( (str == "-a" || str == "--about") ||
-        (str == "-m" || str == "--manual") )
+  foreach(str, args) {
+    if( (str == "-v" || str == "--version") ||
+        (str == "-r" || str == "--revision") ||
+        (str == "-a" || str == "--about") ||
+        (str == "-h" || str == "--help") )
     {
       QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
           tr("<b> %1 </b>: This command line option must be used without other arguments!").arg(str));
@@ -13919,55 +13922,6 @@ void ApplicationWindow::parseCommandLineArguments(const QStringList& args)
     else if( (str == "-d" || str == "--default-settings"))
     {
       default_settings = true;
-    }
-    else if (str == "-v" || str == "--version")
-    {
-#ifdef Q_OS_WIN
-      hide();
-      about();
-#else
-      std::wcout << versionString().toStdWString();
-#endif
-      exit(0);
-    }
-    else if (str == "-r" || str == "--revision") // Print and return subversion revision number
-    {
-      hide();
-      QString version(Mantid::Kernel::MantidVersion::version());
-      version.remove(0,4);
-      std::cout << version.toStdString() << std::endl;
-      exit(version.toInt());
-    }
-    else if (str == "-h" || str == "--help")
-    {
-      QString s = "\n" + tr("Usage") + ": ";
-      s += "qtiplot [" + tr("options") + "] [" + tr("file") + "_" + tr("name") + "]\n\n";
-      s += tr("Valid options are") + ":\n";
-      s += "-a " + tr("or") + " --about: " + tr("show about dialog and exit") + "\n";
-      s += "-d " + tr("or") + " --default-settings: " + tr("start MantidPlot with the default settings") + "\n";//Mantid
-      s += "-h " + tr("or") + " --help: " + tr("show command line options") + "\n";
-      s += "-l=XX " + tr("or") + " --lang=XX: " + tr("start MantidPlot in language") + " XX ('en', 'fr', 'de', ...)\n";//Mantid
-      s += "-m " + tr("or") + " --manual: " + tr("show MantidPlot manual in a standalone window") + "\n";
-      s += "-v " + tr("or") + " --version: " + tr("print MantidPlot version and release date") + "\n";
-      s += "-x " + tr("or") + " --execute: " + tr("execute the script file given as argument") + "\n\n";
-      s += "'" + tr("file") + "_" + tr("name") + "' " + tr("can be any .qti, qti.gz, .opj, .ogm, .ogw, .ogg, .py or ASCII file") + "\n";
-#ifdef Q_OS_WIN
-      hide();
-      QMessageBox::information(this, tr("MantidPlot") + " - " + tr("Help"), s);//Mantid
-#else
-      std::wcout << s.toStdWString();
-#endif
-      exit(0);
-    }
-    else if (str.startsWith("--lang=") || str.startsWith("-l="))
-    {
-      QString locale = str.mid(str.find('=')+1);
-      if (locales.contains(locale))
-        switchToLanguage(locale);
-
-      if (!locales.contains(locale))
-        QMessageBox::critical(this, tr("MantidPlot - Error"),//Mantid
-            tr("<b> %1 </b>: Wrong locale option or no translation available!").arg(locale));
     }
     else if (str.endsWith("--execute") || str.endsWith("-x"))
     {
