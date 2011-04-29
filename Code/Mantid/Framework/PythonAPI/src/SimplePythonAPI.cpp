@@ -50,7 +50,6 @@ namespace Mantid
       std::ofstream module(getModuleFilename().c_str());
 
       module << "from MantidFramework import *\n";
-      module << "from MantidFramework import _makeString\n";
       module << "import os\n";
       module << "import sys\n";
       module << "import string\n\n";
