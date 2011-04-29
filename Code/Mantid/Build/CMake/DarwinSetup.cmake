@@ -34,6 +34,7 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 
 install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
 install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4 DESTINATION ${BIN_DIR} )
+install ( DIRECTORY /Developer/Applications/Qt/plugins/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
@@ -42,6 +43,7 @@ install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
 
 set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
+set ( CPACK_SYSTEM_NAME SnowLeopard )
 set ( CPACK_OSX_PACKAGE_VERSION 10.6 )
 set ( CPACK_POSTFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/postflight )
 
