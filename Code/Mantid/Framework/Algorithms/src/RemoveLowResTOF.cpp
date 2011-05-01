@@ -196,12 +196,13 @@ void RemoveLowResTOF::execEvent()
         outW->getEventList(workspaceIndex).clear(false);
         numClearedEventLists += 1;
       }
-      else
+      else if (tmin > 0.)
       {
         outW->getEventList(workspaceIndex).maskTof(0., tmin);
         if (outW->getEventList(workspaceIndex).getNumberEvents() == 0)
           numClearedEventLists += 1;
       }
+      // do nothing if tmin <= 0.
     }
   }
   g_log.information() << "Went from " << numEventsOrig << " events to "
