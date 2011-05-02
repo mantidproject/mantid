@@ -138,9 +138,9 @@ namespace DataObjects
     double wavelength = this->getWavelength();
     // The detector is at 2 theta scattering angle
     V3D beamDir = samplePos - sourcePos;
+    V3D detDir = detPos - samplePos;
 
-    double two_theta = detPos.angle(beamDir);
-    //std::cout << "two_theta" << two_theta << std::endl;
+    double two_theta = detDir.angle(beamDir);
     double sin_theta = sin(two_theta/2.0);
 
     // Bragg condition is n*wavelength = 2 * dSpacing * sin(theta)
@@ -259,6 +259,17 @@ namespace DataObjects
     m_L = L;
   }
 
+  /** Set all HKL
+   *
+   * @param HKL :: vector with x,y,z -> h,k,l
+   */
+  void Peak::setHKL(Mantid::Geometry::V3D HKL)
+  {
+    m_H = HKL.X();
+    m_K = HKL.Y();
+    m_L = HKL.Z();
+  }
+
   //----------------------------------------------------------------------------------------------
   /** Return the # of counts in the bin at its peak*/
   double Peak::getBinCount() const
@@ -347,6 +358,12 @@ namespace DataObjects
   double Peak::getL1() const
   {
     return (samplePos - sourcePos).norm();
+  }
+
+  /** Return the L2 flight path length (sample to detector), in meters. */
+  double Peak::getL2() const
+  {
+    return (detPos - samplePos).norm();
   }
 
 } // namespace Mantid

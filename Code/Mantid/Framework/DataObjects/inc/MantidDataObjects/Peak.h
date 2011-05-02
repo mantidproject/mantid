@@ -24,7 +24,7 @@ namespace DataObjects
     /// Allow PeakColumn class to directly access members.
     friend class PeakColumn;
 
-    Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_InitialEnergy);
+    Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength);
 
     // Copy constructor is compiler-provided.
     //    Peak(const Peak & other);
@@ -79,6 +79,7 @@ namespace DataObjects
 
     Mantid::Geometry::V3D getDetPos() const;
     double getL1() const;
+    double getL2() const;
 
   protected:
     /// Shared pointer to the instrument (for calculating some values )
