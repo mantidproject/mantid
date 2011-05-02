@@ -32,7 +32,11 @@ namespace {
 /// Convert a python error state to a C++ exception so that Mantid can catch it
 void handlePythonError(const bool with_trace)
 {
-  if( !PyErr_Occurred() ) return;
+  PythonGIL gil;
+  if( !PyErr_Occurred() ) {
+    boost::python::throw_error_already_set();
+    return;
+  }
   PyObject *exception(NULL), *value(NULL), *traceback(NULL);
   PyErr_Fetch(&exception, &value, &traceback);
   PyErr_NormalizeException(&exception, &value, &traceback);
