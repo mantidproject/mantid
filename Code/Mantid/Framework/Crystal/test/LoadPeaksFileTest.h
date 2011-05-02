@@ -31,7 +31,7 @@ public:
 
 
   /** Test for the older TOPAZ geometry. */
-  void test_exec_TOPAZ_1241()
+  void xtest_exec_TOPAZ_1241()
   {
     LoadPeaksFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -72,7 +72,7 @@ public:
 
 
   /* Test for the newer TOPAZ geometry */
-  void test_exec_TOPAZ_2479()
+  void xtest_exec_TOPAZ_2479()
   {
     LoadPeaksFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
