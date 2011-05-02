@@ -41,118 +41,123 @@ calibration/geometry/ code. -->
       <location z="-4.45" name="monitor1"/>
     </component>
   </type>
+  
+  
+  
 
 <!--- Copy/paste the output from the Translation Service TOPAZ.py script here -->
 
-<!-- XML Code automatically generated on 2010-12-02 15:20:42.800977 for the Mantid instrument definition file -->
+<!-- XML Code automatically generated on 2011-05-02 16:26:04.391248 for the Mantid instrument definition file -->
 <component type="panel" idstart="65536" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.395000" t="36.000027" p="-180.000000" name="bank1" rot="143.999973144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.395000" t="36.000027" p="180.000000" name="bank1" rot="143.999973" axis-x="0" axis-y="1" axis-z="0">
   <rot val="45.000000">
-    <rot val="180.000000" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="131072" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="55.596651" p="160.483782" name="bank2" rot="141.410201144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="55.596651" p="160.483782" name="bank2" rot="141.410201" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="196608" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="74.807731" p="146.694071" name="bank3" rot="135.919796144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.455000" t="74.807731" p="146.694071" name="bank3" rot="135.919796" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
-    <rot val="138.533032" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="-41.466968" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="262144" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="105.192621" p="146.694008" name="bank4" rot="99.919712144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.455000" t="105.192621" p="146.694008" name="bank4" rot="99.919712" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
-    <rot val="138.533032" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="-41.466968" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="327680" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="124.403098" p="160.483843" name="bank5" rot="69.410491144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="124.403098" p="160.483843" name="bank5" rot="69.410491" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="393216" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.395000" t="143.999764" p="-180.000000" name="bank6" rot="36.000236144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.395000" t="143.999764" p="180.000000" name="bank6" rot="36.000236" axis-x="0" axis-y="1" axis-z="0">
   <rot val="45.000000">
-    <rot val="180.000000" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="458752" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="124.403098" p="-160.483843" name="bank7" rot="38.590066144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="124.403098" p="-160.483843" name="bank7" rot="38.590066" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="-157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="524288" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="105.192621" p="-146.694008" name="bank8" rot="44.079783144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.455000" t="105.192621" p="-146.694008" name="bank8" rot="44.079783" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
-    <rot val="-138.533032" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="589824" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.455000" t="74.807731" p="-146.694071" name="bank9" rot="80.079867144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.455000" t="74.807731" p="-146.694071" name="bank9" rot="80.079867" axis-x="0" axis-y="1" axis-z="0">
   <rot val="53.154399">
-    <rot val="-138.533032" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="41.466968" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="655360" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="90.000202" p="-16.000018" name="bank10" rot="-105.410002144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="90.000202" p="-16.000018" name="bank10" rot="-105.410002" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="-157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="720896" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.395000" t="108.000253" p="-180.000000" name="bank11" rot="71.999747144.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="45.000000">
-    <rot val="180.000000" axis-x="0" axis-y="1" axis-z="0" />
+<location r="0.425000" t="90.000202" p="163.999982" name="bank11" rot="105.410002" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="47.178655">
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="786432" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.395000" t="72.000168" p="-180.000000" name="bank12" rot="107.999832144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.395000" t="72.000168" p="180.000000" name="bank12" rot="107.999832" axis-x="0" axis-y="1" axis-z="0">
   <rot val="45.000000">
-    <rot val="180.000000" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="851968" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="90.000202" p="-163.999982" name="bank13" rot="74.589577144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="90.000202" p="-163.999982" name="bank13" rot="74.589577" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="-157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="917504" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="90.000202" p="163.999982" name="bank14" rot="105.410002144.0" axis-x="0" axis-y="1" axis-z="0">
-  <rot val="47.178655">
-    <rot val="157.926476" axis-x="0" axis-y="1" axis-z="0" />
+<location r="0.395000" t="108.000253" p="180.000000" name="bank14" rot="71.999747" axis-x="0" axis-y="1" axis-z="0">
+  <rot val="45.000000">
+    <rot val="0.000000" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <component type="panel" idstart="983040" idfillbyfirst="y" idstepbyrow="256">
-<location r="0.425000" t="23.905622" p="137.140855" name="bank15" rot="177.410228144.0" axis-x="0" axis-y="1" axis-z="0">
+<location r="0.425000" t="23.905622" p="137.140855" name="bank15" rot="177.410228" axis-x="0" axis-y="1" axis-z="0">
   <rot val="47.178655">
-    <rot val="157.926476" axis-x="0" axis-y="1" axis-z="0" />
+    <rot val="-22.073524" axis-x="0" axis-y="1" axis-z="0" />
   </rot>
 </location>
 </component> 
 <!-- List of all the bank names:
 bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11,bank12,bank13,bank14,bank15
 -->
+
+
 
 
 
