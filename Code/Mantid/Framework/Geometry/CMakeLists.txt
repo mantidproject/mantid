@@ -209,6 +209,7 @@ set ( TEST_FILES
 	test/TripleTest.h
 	test/UnitCellTest.h
 	test/V3DTest.h
+	test/IMDDimensionTest.h
 )
 
 if(UNITY_BUILD)
