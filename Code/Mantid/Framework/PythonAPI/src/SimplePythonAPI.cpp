@@ -50,6 +50,7 @@ namespace Mantid
       std::ofstream module(getModuleFilename().c_str());
 
       module << "from MantidFramework import *\n";
+      module << "from MantidFramework import _makeString\n"; // from x import * does not import names beginning with an underscore
       module << "import os\n";
       module << "import sys\n";
       module << "import string\n\n";
