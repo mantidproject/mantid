@@ -377,9 +377,37 @@ namespace Mantid
     */
     void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
     {
-      int hist_index = m_monitors.size();
+      int hist_index = 0;//m_monitors.size();
       int period_index(period - 1);
+      int first_monitor_spectrum = m_numberOfSpectra;
 
+      if( !m_monitors.empty() )
+      {
+        //hist_index = 0;
+        for(std::map<int,std::string>::const_iterator it = m_monitors.begin(); 
+          it != m_monitors.end(); ++it)
+        {
+          NXData monitor = entry.openNXData(it->second);
+          NXInt mondata = monitor.openIntData();
+          m_progress->report("Loading monitor");
+          mondata.load(1,period-1);
+          MantidVec& Y = local_workspace->dataY(hist_index);
+          Y.assign(mondata(),mondata() + m_numberOfChannels);
+          MantidVec& E = local_workspace->dataE(hist_index);
+          std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
+          local_workspace->getAxis(1)->spectraNo(hist_index) = it->first;
+          if (it->first < first_monitor_spectrum)
+          {
+            first_monitor_spectrum = it->first;
+          }
+
+          NXFloat timeBins = monitor.openNXFloat("time_of_flight");
+          timeBins.load();
+          local_workspace->dataX(hist_index).assign(timeBins(),timeBins() + timeBins.dim0());
+          hist_index++;
+        }
+      }
+      
       if( m_have_detector )
       {
         NXData nxdata = entry.openNXData("detector_1");
@@ -416,13 +444,18 @@ namespace Mantid
           const int rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
           const int fullblocks = rangesize / blocksize;
           int read_stop = 0;
-          int spectra_no = m_spec_min + m_monitors.size();
+          int spectra_no = m_spec_min;
+          if (first_monitor_spectrum == 1)
+          {// this if crudely checks whether the monitors are at the begining or end of the spectra
+            spectra_no += m_monitors.size();
+          }
           // For this to work correctly, we assume that the spectrum list increases monotonically
           int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
           {
-            read_stop = (fullblocks * blocksize);// + m_monitors.size(); RNT: I think monitors are excluded from the data
-            for( ; hist_index < read_stop; )
+            read_stop = (fullblocks * blocksize);// + m_monitors.size(); //RNT: I think monitors are excluded from the data
+            //for( ; hist_index < read_stop; )
+            for(int i = 0; i < fullblocks; ++i)
             {
               loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
               filestart += blocksize;
@@ -446,29 +479,6 @@ namespace Mantid
         }
       }
 
-      if( !m_monitors.empty() )
-      {
-        hist_index = 0;
-        for(std::map<int,std::string>::const_iterator it = m_monitors.begin(); 
-          it != m_monitors.end(); ++it)
-        {
-          NXData monitor = entry.openNXData(it->second);
-          NXInt mondata = monitor.openIntData();
-          m_progress->report("Loading monitor");
-          mondata.load(1,period-1);
-          MantidVec& Y = local_workspace->dataY(hist_index);
-          Y.assign(mondata(),mondata() + m_numberOfChannels);
-          MantidVec& E = local_workspace->dataE(hist_index);
-          std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
-          local_workspace->getAxis(1)->spectraNo(hist_index) = it->first;
-
-          NXFloat timeBins = monitor.openNXFloat("time_of_flight");
-          timeBins.load();
-          local_workspace->dataX(hist_index).assign(timeBins(),timeBins() + timeBins.dim0());
-          hist_index++;
-        }
-      }
-      
       try
       {
         const std::string title = entry.getString("title");
