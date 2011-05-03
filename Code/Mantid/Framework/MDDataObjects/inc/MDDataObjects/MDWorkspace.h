@@ -108,38 +108,25 @@ namespace Mantid
       {
       };
 
-      /// read the the pixels corresponding to cells in the vector cell_num
-      size_t read_pix_selection(const std::vector<size_t> &cells_nums,size_t &start_cell,std::vector<char> &pix_buf,size_t &n_pix_in_buffer);
-
-	  /// returns constant pointer to mutable geometry for algorithms to work. Use get_const_geometry in constant methods
-      Mantid::Geometry::MDGeometry const * getGeometry() ;
-      /// read MD image into memory TODO: do we still need this function? Let's try disable and see
-      // void read_MDImg();
-      /// read the whole pixels dataset in the memory
-      void read_pix(void);
-      /// function writes the MDD data using current file reader; if the file is not opened, a default file reader is used. 
-      void write_mdd();
-      /// function writes back MDD data to the existing dataset attached to the class;  Should throw if the size of the data changed (and this should not happen)
-      //    bool write_mdd(void);
-      /// get variois components of the workspace
-	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis.get());}
+    
+	  /// get variois components of the workspace
+	  Mantid::Geometry::MDGeometryBasis &   get_const_MDBaisis()  const{return *(m_spMDBasis);}
       Mantid::Geometry::MDGeometry const&   get_const_MDGeometry()const{return (m_spMDImage->get_const_MDGeometry());}
-      Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage.get());}
-      Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints.get());}
+      Mantid::MDDataObjects::MDImage    &   get_const_MDImage()   const{return *(m_spMDImage);}
+      Mantid::MDDataObjects::MDDataPoints & get_const_MDDPoints() const{return *(m_spDataPoints);}
       IMD_FileFormat                      & get_const_FileReader()const{return *(m_spFile);}      
 
-	  // it seems we can not alow this for safety reasons; From other size, how algorithms  would modify this?
-	  // geometry should be unmutable from outside of workspace and withoug MDImageData;
-      //Mantid::Geometry::MDGeometry const *        get_spMDGeometry(){return m_spMDImage->getGeometry();}
+
+	  // methods which provide access to mutable parts and allow to modify the data 
       boost::shared_ptr<Mantid::MDDataObjects::MDImage> get_spMDImage()      {return m_spMDImage;}
       boost::shared_ptr<Mantid::MDDataObjects::MDDataPoints>get_spMDDPoints(){return m_spDataPoints;}
-      IMD_FileFormat *                                  get_pFileReader(){return m_spFile.get();}
+
 
 	
       
         /// Gets the number of points(MDDataPoints, events) contributed to the workspace.
       ///TODO: resolve -- do we need number of points contributed to workspace or availible in it -- > different things if we 
-      /// assume existence of DND objects
+      /// assume existence of DND objects; currently returns number of points in a sqw object e.g. number of MDDataPoints and throws if MDDPoints are undefined;
       virtual uint64_t getNPoints() const;
 
       /// Get the number of dimensions

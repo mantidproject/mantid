@@ -85,6 +85,16 @@ public:
 		std::vector<double> rez;
 		TS_ASSERT_THROWS(pDim->getAxisPoints(rez),std::runtime_error);
 	}
+	void testDimEqual(){
+		std::auto_ptr<IMDDimensionReal> pDim1 = std::auto_ptr<IMDDimensionReal>(new IMDDimensionReal());
+	    std::auto_ptr<IMDDimensionReal> pDim2 = std::auto_ptr<IMDDimensionReal>(new IMDDimensionReal());
+		TS_ASSERT_THROWS(*pDim1==*pDim2,std::runtime_error);
+	}
+	void testDimNEqual(){
+		std::auto_ptr<IMDDimensionReal> pDim1 = std::auto_ptr<IMDDimensionReal>(new IMDDimensionReal());
+	    std::auto_ptr<IMDDimensionReal> pDim2 = std::auto_ptr<IMDDimensionReal>(new IMDDimensionReal());
+		TS_ASSERT_THROWS(*pDim1!=*pDim2,std::runtime_error);
+	}
 
 };
 

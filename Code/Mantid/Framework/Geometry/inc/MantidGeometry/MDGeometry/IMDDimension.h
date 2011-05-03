@@ -106,6 +106,13 @@ namespace Mantid
     //===============================================================================================
     //========== Virtual Methods used in MDDimension  ===============================================
     //===============================================================================================
+	virtual bool operator==(const IMDDimension &)const{
+		throw std::runtime_error("Not Implemented."); return false; 
+	}
+	virtual bool operator!=(const IMDDimension &)const{
+		throw std::runtime_error("Not Implemented."); return false; 
+	}
+
 
     /// it is sometimes convinient to shift image data by some number along specific dimension
     virtual double getDataShift()const

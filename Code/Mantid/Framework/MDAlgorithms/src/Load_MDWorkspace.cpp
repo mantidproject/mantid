@@ -91,8 +91,8 @@ std::string workspaceFileName;
 
 	bool loadPix =  this->getProperty("LoadPixels");
 	if(loadPix){
-		IMD_FileFormat *pReader = inputWS->get_pFileReader();	
-        bool load_success=pReader->read_pix(*(inputWS->get_spMDDPoints()),true);
+		IMD_FileFormat& Reader = inputWS->get_const_FileReader();	
+        bool load_success=Reader.read_pix(*(inputWS->get_spMDDPoints()),true);
 
 		if(load_success){
 			ldmdws_log.information()<<" successfully loaded "<<inputWS->get_spMDDPoints()->getNumPixels()<<" pixels in memory\n";

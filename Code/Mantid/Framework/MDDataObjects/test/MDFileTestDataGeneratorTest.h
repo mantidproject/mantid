@@ -13,7 +13,7 @@ class MDFileTestDataGeneratorTest : public CxxTest::TestSuite
 {
 
     // auxiliary variables extracted from workspace;
-    IMD_FileFormat           * pReader;
+  
     MDDataPoints             * pMDDPoints;
     MDImage                  * pMDImg;
   // workspace itself
@@ -27,16 +27,17 @@ public:
 
         spMDWs                    = pMDWS->get_spWS();
 
-        pReader                   = spMDWs->get_pFileReader();
+     
         pMDImg                    = spMDWs->get_spMDImage().get();
         pMDDPoints                = spMDWs->get_spMDDPoints().get();
 
  
     }
     void testMDFTDReadData(){
-  
+
+		IMD_FileFormat  & Reader  = spMDWs->get_const_FileReader();
         // read data;
-        TSM_ASSERT_THROWS_NOTHING("Read MD image should not throw",pReader->read_MDImg_data(*pMDImg));
+        TSM_ASSERT_THROWS_NOTHING("Read MD image should not throw",Reader.read_MDImg_data(*pMDImg));
  //       TSM_ASSERT_THROWS_NOTHING("Init pix loactions should not throw",pMDDPoints->init_pix_locations());
     }
     void testWSSizes(){
@@ -49,12 +50,14 @@ public:
         std::vector<size_t> SelectedCells(1);
         SelectedCells[0] =1000;
 
+		IMD_FileFormat  & Reader  = spMDWs->get_const_FileReader();
+
         unsigned int pix_size = pMDDPoints->sizeofMDDataPoint();
         // the buffer to place pixels
         std::vector<char> data_buffer((SelectedCells[0]+1)*pix_size);
         size_t n_pix_in_buffer;
 
-        pReader->read_pix_subset(*pMDImg,SelectedCells,0,data_buffer,n_pix_in_buffer);
+        Reader.read_pix_subset(*pMDImg,SelectedCells,0,data_buffer,n_pix_in_buffer);
 
         TSM_ASSERT_EQUALS("Number of pixels for this datatype should be equal to the cell number",SelectedCells[0]+1,n_pix_in_buffer);
 

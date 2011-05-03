@@ -481,6 +481,34 @@ MDGeometry::getBasisTags(void)const
   }
   return tags;
 }
+//
+bool 
+MDGeometry::operator == (const MDGeometry &other)const
+{
+	if(this->getGeometryExtend()!=other.getGeometryExtend())return false;
+
+	size_t nDims = this->getNumDims();
+	if(nDims!=other.getNumDims())return false;
+
+	for(size_t i=0;i<nDims;i++){
+		if(*(this->get_constDimension(i))!=*other.get_constDimension(i))return false;
+	}
+	return true;
+}
+//
+bool 
+MDGeometry::operator != (const MDGeometry &other)const
+{
+	if(this->getGeometryExtend()!=other.getGeometryExtend())return true;
+
+	size_t nDims = this->getNumDims();
+	if(nDims!=other.getNumDims())return true;
+
+	for(size_t i=0;i<nDims;i++){
+		if(*(this->get_constDimension(i))!=*other.get_constDimension(i))return true;
+	}
+	return false;
+}
 
 } // end namespaces;
 }

@@ -52,11 +52,12 @@ namespace Mantid{
     public:
       ///Embedded type information.
       //typedef MDDimension_sptr Dimension_sptr_type;
-     typedef IMDDimension_sptr Dimension_sptr_type;
+      typedef IMDDimension_sptr Dimension_sptr_type;
+
       MDGeometry(const MDGeometryBasis &basis);
       MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
 
-      ~MDGeometry(void);
+      virtual ~MDGeometry(void);
 
       // the functions return the particular dimensions; Throws if correspondent dimension does not exist (e.g. less th 
       boost::shared_ptr<IMDDimension> getXDimension(void)const{return (theDimension[0]);}
@@ -105,6 +106,12 @@ namespace Mantid{
 
       /// Get the geometry in an xml/serialised form.
       std::string toXMLString() const;
+
+	  /// comparison operator == for a geometry; Incomplete operator -> only dimensions are compared while basises are not. They have to!!!
+	  /// TODO: ref #2886 Make full comparison operators for geometry
+	  bool operator==(const MDGeometry &geom2)const;
+	  /// comparison operator != for a geometry;
+	  bool operator!=(const MDGeometry &geom2)const;
 
     protected: 
      /// functions return the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of

@@ -183,7 +183,7 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// data shift in correspondent direction
     double data_shift; 
     // *************  should be prohibited?:
-    //MDDimension(const MDDimension &);
+   //MDDimension(const MDDimension &);
   public:
     //MDDimension & operator=(const MDDimension &rhs);
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions

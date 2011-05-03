@@ -110,32 +110,7 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
       UNUSED_ARG(nRecDims);
     }
 
-    //----------------------------------------------------------------------------------------------
-   // void MDWorkspace::read_MDImg()
-   // {
-   //   Geometry::MDGeometryDescription Description;
-	  //this->m_spFile->read_MDGeomDescription(Description);
-	  ////
-	  //this->m_spMDImage->initialize(Description);
-   //   //  read image part of the data
-   //   this->m_spFile->read_MDImg_data(*this->m_spMDImage);
-   //   // alocate memory for pixels;
-   //   m_spDataPoints->alloc_pix_array(m_spFile);
-   //   m_spMDImage->identify_SP_points_locations();
-   // }
-    //
-    void
-    MDWorkspace::read_pix(void)
-    {
-      if(this->m_spFile.get()){
-        m_spFile->read_pix(*m_spDataPoints);
-      }else{
-		  throw(std::runtime_error("read_pix: file reader has not been defined"));
-      }
-
-
-    }
-
+ /*
     size_t 
     MDWorkspace::read_pix_selection(const std::vector<size_t> &cells_nums, size_t &start_cell, std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
@@ -143,26 +118,27 @@ MDWorkspace::init(boost::shared_ptr<const MDWorkspace> SourceWorkspace,const Man
 		  throw(std::runtime_error("MDPixels::read_selected_pix: file reader has not been defined"));
       }
       return this->m_spFile->read_pix_subset(*m_spMDImage,cells_nums,start_cell,pix_buf,n_pix_in_buffer);
-    } 
+    } */
 
-Mantid::Geometry::MDGeometry const *  
-MDWorkspace::getGeometry()     {
-      return &(this->m_spMDImage->getGeometry());
-}
+//Mantid::Geometry::MDGeometry const *  
+//MDWorkspace::getGeometry()     
+//{
+//      return &(this->m_spMDImage->getGeometry());
+//}
 
     size_t MDWorkspace::getMemorySize(void) const
     {
       return m_spMDImage->getMemorySize() + m_spDataPoints->getMemorySize() ;
     } 
 
-    void  MDWorkspace::write_mdd(void)
+ /*   void  MDWorkspace::write_mdd(void)
     {
       if(this->m_spFile.get()){
          this->m_spFile->write_mdd(*m_spMDImage);
       }else{
 		  throw(std::runtime_error("MDPixels::read_selected_pix: file reader has not been defined"));
       }
-    }
+    }*/
 
     void  MDWorkspace::setInstrument(const IInstrument_sptr& instr)
     {

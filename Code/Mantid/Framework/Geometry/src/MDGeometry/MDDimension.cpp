@@ -183,7 +183,13 @@ void MDDimension::setIntegrated(double rxMin, double rxMax)
 
 bool MDDimension::operator==(const MDDimension& other) const
 {
-  return this->dimTag == other.dimTag;
+	return (this->dimTag == other.dimTag)&&(this->getNBins() == other.getNBins())&&
+		   (this->getDirection()==other.getDirection());
+}
+bool MDDimension::operator!=(const MDDimension& other) const
+{
+  return (this->dimTag != other.dimTag)||(this->getNBins() != other.getNBins())||
+         (this->getDirection()!=other.getDirection());
 }
 
 ///* Assigment operator */
@@ -202,10 +208,7 @@ bool MDDimension::operator==(const MDDimension& other) const
 //  return *this;
 //}
 
-bool MDDimension::operator!=(const MDDimension& other) const
-{
-  return this->dimTag != other.dimTag;
-}
+
 
 void MDDimension::ApplySerialization(Poco::XML::Document* pDoc, Poco::XML::Element* pDimensionElement) const
 {
