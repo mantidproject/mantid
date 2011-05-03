@@ -22,6 +22,7 @@
 #include <QLineEdit>
 #include <QFileInfo>
 #include <QMenu>
+#include <QTreeWidget>
 
 #include <QDesktopServices>
 #include <QUrl>
@@ -1112,7 +1113,7 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
   if ( index >= nhist )
   {
     showInformationBox("Error: Workspace index out of range.");
-    return 0;
+    return NULL;
   }
 
   const QVector<double> dataX = QVector<double>::fromStdVector(ws->readX(index));
@@ -1146,12 +1147,12 @@ void IndirectDataAnalysis::fitContextMenu(const QPoint &)
 {
   QtBrowserItem* item(NULL);
   QtDoublePropertyManager* dblMng(NULL);
-  
+
   int pageNo = m_uiForm.tabWidget->currentIndex();
   if ( pageNo == 3 )
   { // FuryFit
     item = m_ffTree->currentItem();
-    dblMng = m_ffDblMng;
+    dblMng = m_ffDblMng;  
   }
   else if ( pageNo == 4 )
   { // Convolution Fit
@@ -1166,10 +1167,6 @@ void IndirectDataAnalysis::fitContextMenu(const QPoint &)
 
   // is it a fit property ?
   QtProperty* prop = item->property();
-  if ( prop->propertyManager() != dblMng )
-  {
-    return;
-  }
 
   if ( pageNo == 4 && ( prop == m_cfProp["StartX"] || prop == m_cfProp["EndX"] ) )
   {
@@ -1177,8 +1174,9 @@ void IndirectDataAnalysis::fitContextMenu(const QPoint &)
   }
 
   // is it already fixed?
-  QList<QtProperty*> subProps = prop->subProperties();
-  bool fixed = ! subProps.isEmpty();
+  bool fixed = prop->propertyManager() != dblMng;
+
+  if ( fixed && prop->propertyManager() != m_stringManager ) { return; }
 
   // Create the menu
   QMenu* menu = new QMenu("FuryFit", m_ffTree);
@@ -1218,13 +1216,14 @@ void IndirectDataAnalysis::fixItem()
   // Determine what the property is.
   QtProperty* prop = item->property();
 
-  QtProperty* fixedProp = m_stringManager->addProperty("Fixed:");
+  QtProperty* fixedProp = m_stringManager->addProperty("Fixed: " + prop->propertyName() );
   m_stringManager->setValue(fixedProp, prop->valueText());
-  prop->addSubProperty(fixedProp);
 
-  fixedProp->setEnabled(false);
-  prop->setEnabled(false);
-  
+  item->parent()->property()->addSubProperty(fixedProp);
+
+  m_fixedProps[fixedProp] = prop;
+
+  item->parent()->property()->removeSubProperty(prop);    
 }
 
 void IndirectDataAnalysis::unFixItem()
@@ -1245,15 +1244,10 @@ void IndirectDataAnalysis::unFixItem()
   }
 
   QtProperty* prop = item->property();
-  prop->subProperties().isEmpty();
-  QList<QtProperty*> subProps = prop->subProperties();
-
-  for ( QList<QtProperty*>::iterator it = subProps.begin(); it != subProps.end(); ++it )
-  {
-    if ( (*it)->propertyManager() != dblMng ) { delete (*it); }
-  }
-
-  prop->setEnabled(true);
+  item->parent()->property()->addSubProperty(m_fixedProps[prop]);
+  item->parent()->property()->removeSubProperty(prop);
+  m_fixedProps.remove(prop);
+  delete prop;
 }
 
 void IndirectDataAnalysis::elwinRun()
@@ -1313,6 +1307,11 @@ void IndirectDataAnalysis::elwinPlotInput()
     std::string workspace = wsname.toStdString();
 
     m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, workspace, 0);
+
+    if ( m_elwDataCurve == NULL )
+    {
+      return;
+    }
     
     int npts = m_elwDataCurve->data().size();
     double lower = m_elwDataCurve->data().x(0);
@@ -1395,8 +1394,6 @@ void IndirectDataAnalysis::msdRun()
     "msdfit(inputs, startX, endX, Save=save, Verbose=verbose, Plot=plot)\n";
 
   QString pyOutput = runPythonCode(pyInput).trimmed();
-
-
 }
 
 void IndirectDataAnalysis::msdPlotInput()
@@ -1413,6 +1410,12 @@ void IndirectDataAnalysis::msdPlotInput()
     std::string workspace = wsname.toStdString();
 
     m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, workspace, 0);
+
+    if ( m_msdDataCurve == NULL )
+    {
+      return;
+    }
+
     int npnts = m_msdDataCurve->data().size();
     double lower = m_msdDataCurve->data().x(0);
     double upper = m_msdDataCurve->data().x(npnts-1);
@@ -1532,6 +1535,12 @@ void IndirectDataAnalysis::furyPlotInput()
   }
 
   m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);
+
+  if ( m_furCurve == NULL )
+  {
+    return;
+  }
+
   int npnts = m_furCurve->data().size();
   double lower = m_furCurve->data().x(0);
   double upper = m_furCurve->data().x(npnts-1);
@@ -1745,6 +1754,10 @@ void IndirectDataAnalysis::furyfitPlotInput()
   int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
 
   m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWSName, specNo);
+  if ( m_ffDataCurve == NULL )
+  {
+    return;
+  }
 
   int nopnts =  m_ffDataCurve->data().size();
   double lower = m_ffDataCurve->data().x(0);
@@ -2082,6 +2095,8 @@ void IndirectDataAnalysis::confitPlotInput()
     m_uiForm.confit_leSpecMax->setText(QString::number(specMax));
 
   m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, wsname, specNo);
+  if ( m_cfDataCurve == NULL ) { return; }
+
   int npnts = m_cfDataCurve->data().size();
   const double & lower = m_cfDataCurve->data().x(0);
   const double & upper = m_cfDataCurve->data().x(npnts-1);

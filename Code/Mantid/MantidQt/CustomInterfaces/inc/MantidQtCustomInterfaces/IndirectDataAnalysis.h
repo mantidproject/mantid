@@ -233,6 +233,7 @@ namespace MantidQt
       QtTreePropertyBrowser* m_cfTree;
       QwtPlot* m_cfPlot;
       QMap<QString, QtProperty*> m_cfProp;
+      QMap<QtProperty*, QtProperty*> m_fixedProps;
       MantidWidgets::RangeSelector* m_cfRangeS;
       MantidWidgets::RangeSelector* m_cfBackgS;
       MantidWidgets::RangeSelector* m_cfHwhmRange;
