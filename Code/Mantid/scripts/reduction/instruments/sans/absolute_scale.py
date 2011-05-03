@@ -77,7 +77,6 @@ class AbsoluteScale(BaseAbsoluteScale):
             else:
                 raise RuntimeError, "AbsoluteScale could not get the sample thickness"
                 
-        print "THICK", thickness
         if thickness <= 0:
             raise RuntimeError, "Invalid value for sample thickness: %g cm" % thickness
         scale = self._scaling_factor/thickness
@@ -103,7 +102,12 @@ class AbsoluteScale(BaseAbsoluteScale):
         loader.execute(reducer, data_file_ws)        
         
         # Get counting time
-        monitor = mtd[data_file_ws].dataY(reducer.NORMALIZATION_MONITOR)[0]
+        if reducer._normalizer is None:
+            # Note: this option shouldn't really be allowed
+            monitor = reducer.NORMALIZATION_MONITOR
+        else:
+            monitor = reducer._normalizer.get_normalization_spectrum()
+        monitor = mtd[data_file_ws].dataY(monitor)[0]
         
         sdd_property = mtd[data_file_ws].getRun().getProperty("sample_detector_distance")
         if sdd_property is not None:

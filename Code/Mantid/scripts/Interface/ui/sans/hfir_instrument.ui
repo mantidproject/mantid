@@ -57,8 +57,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>998</width>
-        <height>1124</height>
+        <width>1000</width>
+        <height>1126</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -435,6 +435,9 @@
                 <height>16777215</height>
                </size>
               </property>
+              <property name="toolTip">
+               <string>Select to set the sample thickness.</string>
+              </property>
               <property name="text">
                <string>Sample thickness [cm]</string>
               </property>
@@ -453,6 +456,9 @@
                 <width>80</width>
                 <height>16777215</height>
                </size>
+              </property>
+              <property name="toolTip">
+               <string>Enter a value for the sample thickness in cm.</string>
               </property>
              </widget>
             </item>

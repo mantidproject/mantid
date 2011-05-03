@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_instrument.ui'
 #
-# Created: Mon Apr 25 19:17:33 2011
+# Created: Thu Apr 28 11:06:25 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -35,7 +35,7 @@ class Ui_Frame(object):
         self.scrollArea.setAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 998, 1124))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 1000, 1126))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_4 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -569,7 +569,9 @@ class Ui_Frame(object):
         self.scale_data_browse_button.setText(QtGui.QApplication.translate("Frame", "Browse...", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setToolTip(QtGui.QApplication.translate("Frame", "Click to plot data 2D data.", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_data_plot_button.setText(QtGui.QApplication.translate("Frame", "Plot", None, QtGui.QApplication.UnicodeUTF8))
+        self.thickness_chk.setToolTip(QtGui.QApplication.translate("Frame", "Select to set the sample thickness.", None, QtGui.QApplication.UnicodeUTF8))
         self.thickness_chk.setText(QtGui.QApplication.translate("Frame", "Sample thickness [cm]", None, QtGui.QApplication.UnicodeUTF8))
+        self.thickness_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter a value for the sample thickness in cm.", None, QtGui.QApplication.UnicodeUTF8))
         self.att_trans_label.setText(QtGui.QApplication.translate("Frame", "Attenuator Transmission", None, QtGui.QApplication.UnicodeUTF8))
         self.scale_att_trans_edit.setToolTip(QtGui.QApplication.translate("Frame", "Enter the attenuator transmission.", None, QtGui.QApplication.UnicodeUTF8))
         self.beamstop_label.setText(QtGui.QApplication.translate("Frame", "Beam diameter [mm]", None, QtGui.QApplication.UnicodeUTF8))

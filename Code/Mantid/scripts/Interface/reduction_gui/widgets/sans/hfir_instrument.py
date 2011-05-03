@@ -17,6 +17,12 @@ class SANSInstrumentWidget(BaseWidget):
 
     # Place holder for data read from file
     _sample_thickness = None
+    _sample_thickness_supplied = True
+    _sample_detector_distance = None
+    _sample_detector_distance_supplied = True
+    _wavelength = None
+    _wavelength_supplied = True
+    _wavelength_spread = None
     
     def __init__(self, parent=None, state=None, settings=None, name="BIOSANS", data_proxy=None):      
         super(SANSInstrumentWidget, self).__init__(parent, state, settings, data_proxy=data_proxy) 
@@ -52,14 +58,20 @@ class SANSInstrumentWidget(BaseWidget):
             @param key: key string
             @param value: value string
         """
-        if key == "sample_detector_distance" and not self._summary.sample_dist_chk.isChecked():
-            self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
-            util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
-        elif key == "wavelength" and not self._summary.wavelength_chk.isChecked():
-            self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
-            util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
-        elif key == "wavelength_spread" and not self._summary.wavelength_chk.isChecked():
-            self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
+        if key == "sample_detector_distance":
+            self._sample_detector_distance = value
+            if not self._summary.sample_dist_chk.isChecked():
+                self._summary.sample_dist_edit.setText(QtCore.QString(str(value)))
+                util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0.0)
+        elif key == "wavelength":
+            self._wavelength = value
+            if not self._summary.wavelength_chk.isChecked():
+                self._summary.wavelength_edit.setText(QtCore.QString(str(value)))
+                util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0.0)
+        elif key == "wavelength_spread":
+            self._wavelength_spread = value
+            if not self._summary.wavelength_chk.isChecked():
+                self._summary.wavelength_spread_edit.setText(QtCore.QString(str(value)))
         elif key == "sample_thickness":
             self._sample_thickness = value
             if not self._summary.thickness_chk.isChecked():
@@ -88,6 +100,9 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.dark_browse_button, QtCore.SIGNAL("clicked()"), self._dark_browse)
         self.connect(self._summary.dark_plot_button, QtCore.SIGNAL("clicked()"),
                      functools.partial(self.show_instrument, file_name=self._summary.dark_file_edit.text))
+        self.connect(self._summary.normalization_none_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
+        self.connect(self._summary.normalization_time_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
+        self.connect(self._summary.normalization_monitor_radio, QtCore.SIGNAL("clicked()"), self._normalization_clicked)
 
         # Q range
         self._summary.n_q_bins_edit.setText(QtCore.QString("100"))
@@ -128,14 +143,24 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.dark_plot_button.hide()
             self._summary.scale_data_plot_button.hide()
             
+    def _normalization_clicked(self):
+        if self._summary.normalization_none_radio.isChecked():
+            self._summary.scale_chk.setChecked(False)
+            self._scale_clicked(False)
+            self._summary.scale_chk.setEnabled(False)
+        else:
+            self._summary.scale_chk.setEnabled(True)
+            
     def _thickness_clicked(self, is_checked):
         self._summary.thickness_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
         
         # Keep track of current value so we can restore it if the check box is clicked again
-        current_value = util._check_and_get_float_line_edit(self._summary.thickness_edit)
-        self._summary.thickness_edit.setText(QtCore.QString(str(self._sample_thickness)))
-        util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
-        self._sample_thickness = current_value
+        if self._sample_thickness_supplied != is_checked:
+            current_value = util._check_and_get_float_line_edit(self._summary.thickness_edit)
+            self._summary.thickness_edit.setText(QtCore.QString(str(self._sample_thickness)))
+            util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
+            self._sample_thickness = current_value
+            self._sample_thickness_supplied = is_checked
         
     def _scale_clicked(self, is_checked):
         self._summary.direct_beam_label.setEnabled(is_checked)
@@ -163,6 +188,7 @@ class SANSInstrumentWidget(BaseWidget):
         if is_checked:
             self._summary.sample_dist_chk.setChecked(not is_checked)
             self._summary.sample_dist_edit.setEnabled(not is_checked)
+            self._sample_dist_clicked(not is_checked)
 
     def _sample_dist_clicked(self, is_checked):
         self._summary.sample_dist_edit.setEnabled(is_checked)
@@ -171,9 +197,33 @@ class SANSInstrumentWidget(BaseWidget):
             self._summary.detector_offset_chk.setChecked(not is_checked)
             self._summary.detector_offset_edit.setEnabled(not is_checked)
 
+        # Keep track of current value so we can restore it if the check box is clicked again
+        if self._sample_detector_distance_supplied != is_checked:
+            current_value = util._check_and_get_float_line_edit(self._summary.sample_dist_edit)
+            self._summary.sample_dist_edit.setText(QtCore.QString(str(self._sample_detector_distance)))
+            util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
+            self._sample_detector_distance = current_value
+            
+            self._sample_detector_distance_supplied = is_checked
+
     def _wavelength_clicked(self, is_checked):
         self._summary.wavelength_edit.setEnabled(is_checked)
         self._summary.wavelength_spread_edit.setEnabled(is_checked)
+
+        # Keep track of current value so we can restore it if the check box is clicked again
+        if self._wavelength_supplied != is_checked:
+            current_value = util._check_and_get_float_line_edit(self._summary.wavelength_edit)
+            self._summary.wavelength_edit.setText(QtCore.QString(str(self._wavelength)))
+            util._check_and_get_float_line_edit(self._summary.wavelength_edit, min=0)
+            self._wavelength = current_value
+    
+            current_value = util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
+            self._summary.wavelength_spread_edit.setText(QtCore.QString(str(self._wavelength_spread)))
+            util._check_and_get_float_line_edit(self._summary.wavelength_spread_edit)
+            self._wavelength_spread = current_value
+            
+            self._wavelength_supplied = is_checked
+
 
     def _dark_clicked(self, is_checked):
         self._summary.dark_file_edit.setEnabled(is_checked)
@@ -232,6 +282,7 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
         if self._sample_thickness is None:
             self._sample_thickness = state.sample_thickness
+        self._sample_thickness_supplied = state.manual_sample_thickness
         self._summary.thickness_chk.setChecked(state.manual_sample_thickness)
         util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         self._scale_clicked(self._summary.scale_chk.isChecked())
@@ -247,6 +298,11 @@ class SANSInstrumentWidget(BaseWidget):
                             state.sample_detector_distance, 
                             self._summary.sample_dist_chk, 
                             self._summary.sample_dist_edit)
+        util._check_and_get_float_line_edit(self._summary.sample_dist_edit, min=0)
+        if self._sample_detector_distance is None:
+            self._sample_detector_distance = state.sample_detector_distance
+        self._sample_detector_distance_supplied = self._summary.sample_dist_chk.isChecked()
+        
         # Sample-detector distance takes precedence over offset if both are non-zero
         self._sample_dist_clicked(self._summary.sample_dist_chk.isChecked())
 
@@ -257,6 +313,11 @@ class SANSInstrumentWidget(BaseWidget):
                             self._summary.wavelength_edit,
                             state.wavelength_spread,
                             self._summary.wavelength_spread_edit)
+        if self._wavelength is None:
+            self._wavelength = state.wavelength
+        if self._wavelength_spread is None:
+            self._wavelength_spread = state.wavelength_spread
+        self._wavelength_supplied = self._summary.wavelength_chk.isChecked()
         
         # Solid angle correction flag
         self._summary.solid_angle_chk.setChecked(state.solid_angle_corr)

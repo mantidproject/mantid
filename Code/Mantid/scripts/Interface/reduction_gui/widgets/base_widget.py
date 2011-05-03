@@ -1,7 +1,6 @@
 from PyQt4 import QtGui, uic, QtCore
 import os
 import types
-import functools
 from reduction_gui.settings.application_settings import GeneralSettings
 
 IS_IN_MANTIDPLOT = False

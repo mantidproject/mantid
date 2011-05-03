@@ -41,11 +41,11 @@ class ReductionOptions(BaseScriptElement):
     manual_sample_thickness = False
     
     # Sample-detector distance to force on the data set [mm]
-    sample_detector_distance = 0
+    sample_detector_distance = 0.0
     # Detector distance offset [mm]
     detector_offset = 837.9
     # Wavelength value to force on the data set [Angstrom]
-    wavelength = 0
+    wavelength = 0.0
     wavelength_spread = 0.1
     
     # Flag to perform the solid angle correction

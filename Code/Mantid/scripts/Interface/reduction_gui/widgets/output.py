@@ -7,7 +7,8 @@ import ui.ui_hfir_output
 try:
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
     from matplotlib.figure import Figure
-    HAS_MPL = True
+    # Turn off this option
+    HAS_MPL = False
 except:
     HAS_MPL = False
 
