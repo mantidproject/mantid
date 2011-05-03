@@ -590,7 +590,7 @@ bool SANSRunWindow::loadUserFile()
   QString filetext = m_uiForm.userfile_edit->text().trimmed();
   if( filetext.isEmpty() )
   {
-    QMessageBox::critical(this, "Error loading user file", "No user file has been specified");
+    QMessageBox::warning(this, "Error loading user file", "No user file has been specified");
     m_cfg_loaded = false;
     return false;
   }

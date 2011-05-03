@@ -262,9 +262,10 @@ class LoadRun(ReductionStep):
             file_parts = run_name.split('.')
             run_name = file_parts[0]
             self.ext = file_parts[len(file_parts)-1]
-            if run_name.endswith('-add'):
+            run_name = run_name.upper()
+            if run_name.endswith('-ADD'):
                 #remove the add files specifier, if it's there
-                end = len(run_name)-len('-add')
+                end = len(run_name)-len('-ADD')
                 run_name = run_name[0:end]
             names = run_name.split(prefix)
             self.shortrun_no = names[len(names)-1]
@@ -1252,9 +1253,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         else:
             use_full_range = self._use_full_range
         if use_full_range:
-            wavbin = str(reducer.instrument.WAV_RANGE_MIN) 
-            wavbin +=','+str(reducer.to_wavelen.wav_step)
-            wavbin +=','+str(reducer.instrument.WAV_RANGE_MAX)
             translambda_min = reducer.instrument.WAV_RANGE_MIN
             translambda_max = reducer.instrument.WAV_RANGE_MAX
         else:
@@ -1266,13 +1264,16 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
                 translambda_max = self.lambda_max
             else:
                 translambda_max = reducer.to_wavelen.wav_high
-            wavbin = str(reducer.to_wavelen.get_rebin())
+        wavbin = str(translambda_min) 
+        wavbin +=','+str(reducer.to_wavelen.wav_step)
+        wavbin +=','+str(translambda_max)
 
         #set up the input workspaces
         trans_tmp_out = self.setup_wksp(trans_raw, reducer.instrument,
             wavbin, pre_sample, post_sample)
         direct_tmp_out = self.setup_wksp(direct_raw, reducer.instrument,
             wavbin, pre_sample, post_sample)
+
         fittedtransws, unfittedtransws = self.get_wksp_names(
                             trans_raw, translambda_min, translambda_max)
         
@@ -1294,17 +1295,11 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             result = fittedtransws
     
         try:
-            if use_full_range:
-                tmp_ws = 'trans_' + self.CAN_SAMPLE_SUFFIXES[self.loader.can]
-                tmp_ws += '_' + reducer.to_wavelen.get_range()
-                Rebin(result, tmp_ws, Params = reducer.to_wavelen.get_rebin())
-                trans_ws = tmp_ws
-            else: 
-                trans_ws = result
+            Rebin(result, result, Params = reducer.to_wavelen.get_rebin())
         except:
-            raise RuntimeError("Failed to Rebin the the transmission workspace %s to match the sample" %(workspace))
+            raise RuntimeError("Failed to Rebin the the transmission workspace %s to match the sample" %result)
 
-        return trans_ws
+        return result
     
     def get_trans_spec(self):
         return self._trans_spec

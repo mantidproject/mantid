@@ -183,6 +183,22 @@ public:
     }
   }
 
+  void testFindAddFiles()
+  {
+    //create a test file to find
+    Poco::File file("LOQ00111-add.raw");
+    std::ofstream fil(file.path().c_str());
+    fil << "dummy";
+    fil.close();
+
+
+    ConfigService::Instance().setString("default.facility","ISIS");
+    std::vector<std::string> files = FileFinder::Instance().findRuns("LOQ111-add");
+    TS_ASSERT_EQUALS(files.size(), 1);
+
+    file.remove();
+  }
+
   void testFindFileExt()
   {
     // Set the facility

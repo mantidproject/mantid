@@ -346,6 +346,10 @@ namespace Mantid
         {
           fileSuspected = true;
         }
+        if ((*h).find(ALLOWED_SUFFIX) != std::string::npos)
+        {
+          fileSuspected = true;
+        }
 
         Poco::StringTokenizer range(*h, "-",
             Poco::StringTokenizer::TOK_TRIM | Poco::StringTokenizer::TOK_IGNORE_EMPTY);

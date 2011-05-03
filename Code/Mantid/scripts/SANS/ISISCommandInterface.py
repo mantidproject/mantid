@@ -106,8 +106,8 @@ def Gravity(flag):
 def TransFit(mode,lambdamin=None,lambdamax=None):
     mode = str(mode).strip().upper()
     message = mode
-    if lambdamin: message += str(lambdamin)
-    if lambdamax: message += str(lambdamax)
+    if lambdamin: message += ', ' + str(lambdamin)
+    if lambdamax: message += ', ' + str(lambdamax)
     _printMessage("TransFit(\"" + message + "\")")
 
     ReductionSingleton().set_trans_fit(lambdamin, lambdamax, mode)
@@ -171,7 +171,7 @@ def AssignSample(sample_run, reload = True, period = -1):
     return ReductionSingleton().sample_wksp, logs
 
 def SetCentre(xcoord, ycoord):
-    _printMessage('SetCentre(' + str(xcoord) + ',' + str(ycoord) + ')')
+    _printMessage('SetCentre(' + str(xcoord) + ', ' + str(ycoord) + ')')
 
     ReductionSingleton().set_beam_finder(sans_reduction_steps.BaseBeamFinder(
                                 float(xcoord)/1000.0, float(ycoord)/1000.0))
@@ -190,7 +190,7 @@ def WavRangeReduction(wav_start=None, wav_end=None, full_trans_wav=None, name_su
         @param wav_end: the last wavelength in the output data
         @param full_trans_wav: if to use a wide wavelength range, the instrument's default wavelength range, for the transmission correction, false by default
     """
-    _printMessage('WavRangeReduction(' + str(wav_start) + ',' + str(wav_end) + ','+str(full_trans_wav)+')')
+    _printMessage('WavRangeReduction(' + str(wav_start) + ', ' + str(wav_end) + ', '+str(full_trans_wav)+')')
 
     if not full_trans_wav is None:
         ReductionSingleton().full_trans_wav = full_trans_wav
@@ -315,14 +315,14 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
 
 def LimitsR(rmin, rmax, quiet=False):
     if not quiet:
-        _printMessage('LimitsR(' + str(rmin) + ',' +str(rmax) + ')', ReductionSingleton())
+        _printMessage('LimitsR(' + str(rmin) + ', ' +str(rmax) + ')', ReductionSingleton())
 
     ReductionSingleton().mask.set_radi(rmin, rmax)
     ReductionSingleton().CENT_FIND_RMIN = float(rmin)/1000.
     ReductionSingleton().CENT_FIND_RMAX = float(rmax)/1000.    
 
 def LimitsWav(lmin, lmax, step, bin_type):
-    _printMessage('LimitsWav(' + str(lmin) + ',' + str(lmax) + ',' + str(step) + ','  + bin_type + ')')
+    _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
     
     if ( bin_type.upper().strip() == 'LINEAR'): bin_type = 'LIN'
     if ( bin_type.upper().strip() == 'LOGARITHMIC'): bin_type = 'LOG'
@@ -348,13 +348,13 @@ def LimitsQ(*args):
             issueWarning("LimitsQ can only be called with a single string or 4 values")
     elif len(args) == 4:
         qmin,qmax,step,step_type = args
-        _printMessage('LimitsQ(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(step_type) + ')')
+        _printMessage('LimitsQ(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ','  + str(step_type) + ')')
         settings.readLimitValues('L/Q ' + str(qmin) + ' ' + str(qmax) + ' ' + str(step) + '/'  + step_type, ReductionSingleton())
     else:
         issueWarning("LimitsQ called with " + str(len(args)) + " arguments, 1 or 4 expected.")
 
 def LimitsQXY(qmin, qmax, step, type):
-    _printMessage('LimitsQXY(' + str(qmin) + ',' + str(qmax) +',' + str(step) + ',' + str(type) + ')')
+    _printMessage('LimitsQXY(' + str(qmin) + ', ' + str(qmax) +', ' + str(step) + ', ' + str(type) + ')')
     settings = ReductionSingleton().user_settings
     if settings is None:
         raise RuntimeError('MaskFile() first')
@@ -566,7 +566,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
-    _printMessage("Centre coordinates updated: [" + str(XNEW)+ ","+ str(YNEW) + ']')
+    _printMessage("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
 
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
