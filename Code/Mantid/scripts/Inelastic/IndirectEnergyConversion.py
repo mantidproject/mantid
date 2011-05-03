@@ -9,6 +9,8 @@ except ImportError:
 import re
 from IndirectCommon import *
 
+import inelastic_indirect_reducer as iir
+
 def convert_to_energy(rawfiles, grouping, first, last,
         instrument, analyser, reflection,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
