@@ -21,7 +21,7 @@ namespace Algorithms
     ~PDFFT();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "PDFFT";};
+    virtual const std::string name() const { return "PDFFourierTransform";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification

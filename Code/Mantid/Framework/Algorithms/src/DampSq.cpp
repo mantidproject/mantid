@@ -7,7 +7,7 @@ namespace Algorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  DECLARE_ALGORITHM(DampSq)
+  //DECLARE_ALGORITHM(DampSq)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
