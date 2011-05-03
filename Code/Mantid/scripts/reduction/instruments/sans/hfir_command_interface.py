@@ -242,9 +242,9 @@ def NoIQxQy(nbins=100):
 def SetAbsoluteScale(factor):
     ReductionSingleton().set_absolute_scale(absolute_scale.BaseAbsoluteScale(factor))
     
-def SetDirectBeamAbsoluteScale(direct_beam, beamstop_radius=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False):
+def SetDirectBeamAbsoluteScale(direct_beam, beamstop_diameter=None, attenuator_trans=1.0, sample_thickness=None, apply_sensitivity=False):
     ReductionSingleton().set_absolute_scale(absolute_scale.AbsoluteScale(data_file=direct_beam, 
-                                                                         beamstop_radius=beamstop_radius, 
+                                                                         beamstop_diameter=beamstop_diameter, 
                                                                          attenuator_trans=attenuator_trans, 
                                                                          sample_thickness=sample_thickness,
                                                                          apply_sensitivity=apply_sensitivity))

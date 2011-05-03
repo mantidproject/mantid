@@ -132,15 +132,15 @@ public:
     Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
     TS_ASSERT_EQUALS(*dp,  6000.0);
 
-    prop = ws2d->run().getProperty("beam-trap-radius");
+    prop = ws2d->run().getProperty("beam-trap-diameter");
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
-    TS_ASSERT_EQUALS(*dp,  38.1);
+    TS_ASSERT_EQUALS(*dp,  76.2);
 
-    prop = ws2d->run().getProperty("source-aperture-radius");
+    prop = ws2d->run().getProperty("source-aperture-diameter");
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
     TS_ASSERT_EQUALS(*dp,  40.0);
 
-    prop = ws2d->run().getProperty("sample-aperture-radius");
+    prop = ws2d->run().getProperty("sample-aperture-diameter");
     dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
     TS_ASSERT_EQUALS(*dp,  14.0);
 

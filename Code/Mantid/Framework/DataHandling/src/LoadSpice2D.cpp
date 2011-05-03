@@ -213,27 +213,27 @@ namespace Mantid
       double trap_pos = 0;
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_25mm", fileName);
-      double beam_trap_radius = 25.4/2.0;
+      double beam_trap_diam = 25.4;
 
       from_element<double>(highest_trap, sasEntryElem, "trap_y_101mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 101.6/2.0;
+        beam_trap_diam = 101.6;
       }
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_50mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 50.8/2.0;
+        beam_trap_diam = 50.8;
       }
 
       from_element<double>(trap_pos, sasEntryElem, "trap_y_76mm", fileName);
       if (trap_pos>highest_trap)
       {
         highest_trap = trap_pos;
-        beam_trap_radius = 76.2/2.0;
+        beam_trap_diam = 76.2;
       }
 
       // Read in counters
@@ -329,11 +329,11 @@ namespace Mantid
 
       // Set the run properties
       ws->mutableRun().addProperty("sample-detector-distance", distance, "mm", true);
-      ws->mutableRun().addProperty("beam-trap-radius", beam_trap_radius, "mm", true);
+      ws->mutableRun().addProperty("beam-trap-diameter", beam_trap_diam, "mm", true);
       ws->mutableRun().addProperty("number-of-guides", nguides, true);
       ws->mutableRun().addProperty("source-sample-distance", source_distance, "mm", true);
-      ws->mutableRun().addProperty("source-aperture-radius", source_apert, "mm", true);
-      ws->mutableRun().addProperty("sample-aperture-radius", sample_apert, "mm", true);
+      ws->mutableRun().addProperty("source-aperture-diameter", source_apert, "mm", true);
+      ws->mutableRun().addProperty("sample-aperture-diameter", sample_apert, "mm", true);
       ws->mutableRun().addProperty("sample-thickness", sample_thickness, "cm", true);
 
       // Move the detector to the right position

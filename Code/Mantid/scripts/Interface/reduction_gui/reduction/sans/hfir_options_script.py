@@ -39,6 +39,7 @@ class ReductionOptions(BaseScriptElement):
     scaling_beam_diam = 25.0 
     sample_thickness = 1.0
     manual_sample_thickness = False
+    manual_beam_diam = False
     
     # Sample-detector distance to force on the data set [mm]
     sample_detector_distance = 0.0
@@ -123,12 +124,14 @@ class ReductionOptions(BaseScriptElement):
         if self.calculate_scale:
             if self.sample_thickness<=0:
                 raise RuntimeError, "Invalid value for sample thickness: %g cm" % self.sample_thickness
+            scaling_params = ""
             if self.manual_sample_thickness:
-                script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g, sample_thickness=%g)\n" % \
-                 (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans, self.sample_thickness)
-            else:
-                script += "SetDirectBeamAbsoluteScale(\"%s\", beamstop_radius=%g, attenuator_trans=%g)\n" % \
-                 (self.scaling_direct_file, self.scaling_beam_diam/2.0, self.scaling_att_trans)
+                scaling_params += ", sample_thickness=%g" % self.sample_thickness
+            if self.manual_beam_diam:
+                scaling_params += ", beamstop_diameter=%g" % self.scaling_beam_diam
+            
+            script += "SetDirectBeamAbsoluteScale(\"%s\", attenuator_trans=%g%s)\n" % \
+             (self.scaling_direct_file, self.scaling_att_trans, scaling_params)
         else:
             if self.scaling_factor != 1:
                 script += "SetAbsoluteScale(%g)\n" % self.scaling_factor
@@ -196,6 +199,7 @@ class ReductionOptions(BaseScriptElement):
         
         xml += "<AbsScale>\n"
         xml += "  <manual_sample_thickness>%s</manual_sample_thickness>\n" % str(self.manual_sample_thickness)
+        xml += "  <manual_beam_diam>%s</manual_beam_diam>\n" % str(self.manual_beam_diam)
         xml += "  <scaling_factor>%g</scaling_factor>\n" % self.scaling_factor
         xml += "  <calculate_scale>%s</calculate_scale>\n" % str(self.calculate_scale)
         xml += "  <scaling_direct_file>%s</scaling_direct_file>\n" % self.scaling_direct_file
@@ -295,11 +299,13 @@ class ReductionOptions(BaseScriptElement):
             scale_dom = element_list[0]
 
             self.manual_sample_thickness = BaseScriptElement.getBoolElement(scale_dom, "manual_sample_thickness",
-                                                                      default = ReductionOptions.manual_sample_thickness)
+                                                                            default = ReductionOptions.manual_sample_thickness)
+            self.manual_beam_diam = BaseScriptElement.getBoolElement(scale_dom, "manual_beam_diam",
+                                                                     default = ReductionOptions.manual_beam_diam)
             self.scaling_factor = BaseScriptElement.getFloatElement(scale_dom, "scaling_factor", 
                                                                     default=ReductionOptions.scaling_factor)
             self.calculate_scale = BaseScriptElement.getBoolElement(scale_dom, "calculate_scale",
-                                                                   default = ReductionOptions.calculate_scale)
+                                                                    default = ReductionOptions.calculate_scale)
             self.scaling_direct_file = BaseScriptElement.getStringElement(scale_dom, "scaling_direct_file")
             self.scaling_att_trans = BaseScriptElement.getFloatElement(scale_dom, "scaling_att_trans",
                                                                        default=ReductionOptions.scaling_att_trans)
@@ -324,6 +330,7 @@ class ReductionOptions(BaseScriptElement):
         self.scaling_beam_diam = ReductionOptions.scaling_beam_diam
         self.sample_thickness = ReductionOptions.sample_thickness
         self.manual_sample_thickness = ReductionOptions.manual_sample_thickness
+        self.manual_beam_diam = ReductionOptions.manual_beam_diam
         
         self.sample_detector_distance = ReductionOptions.sample_detector_distance
         self.detector_offset = ReductionOptions.detector_offset

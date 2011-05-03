@@ -20,6 +20,8 @@ class SANSInstrumentWidget(BaseWidget):
     _sample_thickness_supplied = True
     _sample_detector_distance = None
     _sample_detector_distance_supplied = True
+    _beam_diameter = None
+    _beam_diameter_supplied = True
     _wavelength = None
     _wavelength_supplied = True
     _wavelength_spread = None
@@ -77,6 +79,12 @@ class SANSInstrumentWidget(BaseWidget):
             if not self._summary.thickness_chk.isChecked():
                 self._summary.thickness_edit.setText(QtCore.QString(str(value)))
                 util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
+        elif key == "beam_diameter":
+            value_float = float(value)
+            self._beam_diameter = "%-6.1f" % value_float
+            if not self._summary.beamstop_chk.isChecked():
+                self._summary.scale_beam_radius_edit.setText(QtCore.QString(self._beam_diameter))
+                util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
 
     def content(self):
         return self._summary
@@ -136,6 +144,7 @@ class SANSInstrumentWidget(BaseWidget):
         self.connect(self._summary.scale_data_plot_button, QtCore.SIGNAL("clicked()"),
                      functools.partial(self.show_instrument, file_name=self._summary.scale_data_edit.text))
         self.connect(self._summary.thickness_chk, QtCore.SIGNAL("clicked(bool)"), self._thickness_clicked)
+        self.connect(self._summary.beamstop_chk, QtCore.SIGNAL("clicked(bool)"), self._beamstop_clicked)
         self.connect(self._summary.scale_chk, QtCore.SIGNAL("clicked(bool)"), self._scale_clicked)
         self._scale_clicked(self._summary.scale_chk.isChecked())
         
@@ -162,15 +171,26 @@ class SANSInstrumentWidget(BaseWidget):
             self._sample_thickness = current_value
             self._sample_thickness_supplied = is_checked
         
+    def _beamstop_clicked(self, is_checked):
+        self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.scale_chk.isChecked())
+        
+        # Keep track of current value so we can restore it if the check box is clicked again
+        if self._beam_diameter_supplied != is_checked:
+            current_value = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
+            self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(self._beam_diameter)))
+            util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
+            self._beam_diameter = current_value
+            self._beam_diameter_supplied = is_checked
+        
     def _scale_clicked(self, is_checked):
         self._summary.direct_beam_label.setEnabled(is_checked)
         self._summary.att_trans_label.setEnabled(is_checked)
-        self._summary.beamstop_label.setEnabled(is_checked)
+        self._summary.beamstop_chk.setEnabled(is_checked)
         self._summary.scale_data_edit.setEnabled(is_checked)
         self._summary.scale_data_plot_button.setEnabled(is_checked)
         self._summary.scale_data_browse_button.setEnabled(is_checked)
         self._summary.scale_att_trans_edit.setEnabled(is_checked)
-        self._summary.scale_beam_radius_edit.setEnabled(is_checked)
+        self._summary.scale_beam_radius_edit.setEnabled(is_checked and self._summary.beamstop_chk.isChecked())
         self._summary.thickness_chk.setEnabled(is_checked)
         self._summary.thickness_edit.setEnabled(is_checked and self._summary.thickness_chk.isChecked())
         
@@ -278,7 +298,14 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.scale_edit.setText(QtCore.QString(str(state.scaling_factor)))
         self._summary.scale_data_edit.setText(QtCore.QString(state.scaling_direct_file))
         self._summary.scale_att_trans_edit.setText(QtCore.QString(str(state.scaling_att_trans)))
-        self._summary.scale_beam_radius_edit.setText(QtCore.QString(str(state.scaling_beam_diam)))
+        
+        self._summary.scale_beam_radius_edit.setText(QtCore.QString("%-6.1f" % state.scaling_beam_diam))
+        if self._beam_diameter is None:
+            self._beam_diameter = state.scaling_beam_diam
+        self._beam_diameter_supplied = state.manual_beam_diam        
+        self._summary.beamstop_chk.setChecked(state.manual_beam_diam)
+        util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
+        
         self._summary.thickness_edit.setText(QtCore.QString(str(state.sample_thickness)))
         if self._sample_thickness is None:
             self._sample_thickness = state.sample_thickness
@@ -373,7 +400,8 @@ class SANSInstrumentWidget(BaseWidget):
         m.calculate_scale = self._summary.scale_chk.isChecked()
         m.scaling_direct_file = unicode(self._summary.scale_data_edit.text())
         m.scaling_att_trans = util._check_and_get_float_line_edit(self._summary.scale_att_trans_edit)
-        m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit)
+        m.scaling_beam_diam = util._check_and_get_float_line_edit(self._summary.scale_beam_radius_edit, min=0.0)
+        m.manual_beam_diam = self._summary.beamstop_chk.isChecked()
         m.sample_thickness = util._check_and_get_float_line_edit(self._summary.thickness_edit, min=0.0)
         m.manual_sample_thickness = self._summary.thickness_chk.isChecked()
         

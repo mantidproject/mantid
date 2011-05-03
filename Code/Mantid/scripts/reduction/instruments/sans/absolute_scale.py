@@ -44,10 +44,10 @@ class BaseAbsoluteScale(ReductionStep):
 class AbsoluteScale(BaseAbsoluteScale):
     """
     """
-    def __init__(self, data_file, beamstop_radius=None, attenuator_trans=1.0, 
+    def __init__(self, data_file, beamstop_diameter=None, attenuator_trans=1.0, 
                  sample_thickness=None, apply_sensitivity=False):
         """
-            @param beamstop_radius: beamstop radius to use. Will otherwise be read from file, if possible [mm]
+            @param beamstop_diameter: beamstop diameter to use. Will otherwise be read from file, if possible [mm]
             @param attenuator_trans: attenuator transmission
             
             TODO: Read attenuator transmission from file
@@ -55,7 +55,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         super(AbsoluteScale, self).__init__()
         self._data_file = data_file
         self._attenuator_trans = attenuator_trans
-        self._beamstop_radius = beamstop_radius
+        self._beamstop_diameter = beamstop_diameter
         self._apply_sensitivity = apply_sensitivity
         self._sample_thickness = sample_thickness
         self._scaling_factor = None
@@ -115,12 +115,14 @@ class AbsoluteScale(BaseAbsoluteScale):
         else:
             raise RuntimeError, "AbsoluteScale could not read the sample-detector-distance"
         
-        if self._beamstop_radius is None:
-            beamstop_property = mtd[data_file_ws].getRun().getProperty("beam-trap-radius")
+        if self._beamstop_diameter is not None:
+            beam_diameter = self._beamstop_diameter
+        else:
+            beamstop_property = mtd[data_file_ws].getRun().getProperty("beam-diameter")
             if beamstop_property is not None:
-                self._beamstop_radius = beamstop_property.value
+                beam_diameter = beamstop_property.value
             else:
-                raise RuntimeError, "AbsoluteScale could not read the beam stop radius and none was provided"
+                raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"        
         
         # Apply sensitivity correction
         if self._apply_sensitivity and reducer.get_sensitivity_correcter() is not None:
@@ -130,7 +132,7 @@ class AbsoluteScale(BaseAbsoluteScale):
         cylXML = '<infinite-cylinder id="asbsolute_scale">' + \
                    '<centre x="0.0" y="0.0" z="0.0" />' + \
                    '<axis x="0.0" y="0.0" z="1.0" />' + \
-                   '<radius val="%12.10f" />' % (self._beamstop_radius/1000.0) + \
+                   '<radius val="%12.10f" />' % (beam_diameter/2000.0) + \
                  '</infinite-cylinder>\n'
                  
         det_finder = FindDetectorsInShape(Workspace=data_file_ws, ShapeXML=cylXML)

@@ -590,6 +590,14 @@ class LoadRun(ReductionStep):
 
         # Store the sample-detector distance.
         mantid[workspace].getRun().addProperty_dbl("sample_detector_distance", sdd, True)
+        
+        # Compute beam diameter at the detector
+        src_to_sample = mtd[workspace].getRun().getProperty("source-sample-distance").value
+        sample_apert = mtd[workspace].getRun().getProperty("sample-aperture-diameter").value
+        source_apert = mtd[workspace].getRun().getProperty("source-aperture-diameter").value
+        beam_diameter = sdd/src_to_sample*(source_apert+sample_apert)+sample_apert
+        mantid[workspace].getRun().addProperty_dbl("beam-diameter", beam_diameter, "mm", True)
+        
             
         # Move detector array to correct position
         # Note: the position of the detector in Z is now part of the load

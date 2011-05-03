@@ -30,6 +30,7 @@ class DataProxy(object):
     data = None
     data_ws = ''
     sample_thickness = None
+    beam_diameter = None
     
     ## Error log
     errors = []
@@ -51,6 +52,7 @@ class DataProxy(object):
                 self.wavelength_spread = x[1]-x[0]
                 self.sample_detector_distance = mtd[self.data_ws].getRun().getProperty("sample_detector_distance").value
                 self.sample_thickness = mtd[self.data_ws].getRun().getProperty("sample-thickness").value
+                self.beam_diameter = mtd[self.data_ws].getRun().getProperty("beam-diameter").value
                 
                 if False and HAS_NUMPY:
                     nx_pixels = int(mtd[self.data_ws].getInstrument().getNumberParameter("number-of-x-pixels")[0])

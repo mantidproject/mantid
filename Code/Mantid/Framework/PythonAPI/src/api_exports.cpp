@@ -466,6 +466,9 @@ using namespace boost::python;
 #define EXPORT_ADDPROPERTY(type, suffix)\
     .def("addProperty_"#suffix,(void (API::Run::*)(const std::string &, const type&, bool))&Run::addProperty)
 
+#define EXPORT_ADDPROPERTY_UNITS(type, suffix)\
+    .def("addProperty_"#suffix,(void (API::Run::*)(const std::string &, const type&, const std::string &, bool))&Run::addProperty)
+
     //Run class
     class_< API::Run,  boost::noncopyable >("Run", no_init)
       .def("getLogData", (Kernel::Property* (API::Run::*)(const std::string&) const)&Run::getLogData, 
@@ -480,9 +483,13 @@ using namespace boost::python;
       EXPORT_ADDPROPERTY(int, int)
       EXPORT_ADDPROPERTY(double, dbl)
       EXPORT_ADDPROPERTY(std::string, str)
+      EXPORT_ADDPROPERTY_UNITS(int, int)
+      EXPORT_ADDPROPERTY_UNITS(double, dbl)
+      EXPORT_ADDPROPERTY_UNITS(std::string, str)
      ;
 
 #undef EXPORT_ADDPROPERTY
+#undef EXPORT_ADDPROPERTY_UNITS
   }
 
   void export_workspace_property()

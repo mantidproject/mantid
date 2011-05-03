@@ -407,5 +407,7 @@ class SampleDataWidget(BaseWidget):
                 self._content.wavelength_spread_edit.setText(QtCore.QString(str(dataproxy.wavelength_spread)))
             if dataproxy.sample_thickness is not None:
                 self._settings.emit_key_value("sample_thickness", QtCore.QString(str(dataproxy.sample_thickness)))
+            if dataproxy.beam_diameter is not None:
+                self._settings.emit_key_value("beam_diameter", QtCore.QString(str(dataproxy.beam_diameter)))
              
             self._emit_experiment_parameters()    
