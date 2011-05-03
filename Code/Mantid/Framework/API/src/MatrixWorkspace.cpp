@@ -217,6 +217,10 @@ namespace Mantid
     */
     IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
+      if (this->m_axes.size() < 2)
+      {
+        throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] does not exist, so I cannot generate a map.");
+      }
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] is not a SpectraAxis, so I cannot generate a map.");

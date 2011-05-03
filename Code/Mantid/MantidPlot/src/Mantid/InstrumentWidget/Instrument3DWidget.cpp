@@ -990,8 +990,15 @@ Instrument3DWidget::DetInfo::DetInfo(Mantid::API::MatrixWorkspace_const_sptr wor
 {
   if (m_workspace)
   {
-    m_detID_to_wi_map = boost::shared_ptr<const IndexToIndexMap>(
-        m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+    try
+    {
+      m_detID_to_wi_map = boost::shared_ptr<const IndexToIndexMap>(
+          m_workspace->getDetectorIDToWorkspaceIndexMap(false));
+    }
+    catch(...)
+    {
+      // if the workspace has no axes
+    }
   }
 }
 /// set the object to contain data for only one detector
@@ -1122,6 +1129,7 @@ void Instrument3DWidget::DetInfo::printV(Mantid::Geometry::V3D pos, std::ostring
 */
 int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const
 {
+  if (!m_detID_to_wi_map) return -1;
   IndexToIndexMap::const_iterator it(m_detID_to_wi_map->find(someDetID));
   if ( it != m_detID_to_wi_map->end() )
   {
