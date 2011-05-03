@@ -55,8 +55,8 @@ public:
   MantidSampleLogDialog(const QString & wsname, MantidUI* mui, Qt::WFlags flags = 0);
 
 private slots:
-  //Plot log files
-  void importSelectedFiles();
+  //Plot logs
+  void importSelectedLogs();
 
   // Show the stats of the selected log
   void showLogStatistics();

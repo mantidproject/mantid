@@ -1,6 +1,7 @@
 set ( SRC_FILES
 	src/LoadPeaksFile.cpp
 	src/PeakIntegration.cpp
+	src/PredictPeaks.cpp
 	src/SavePeaksFile.cpp
 )
 
@@ -8,11 +9,13 @@ set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/LoadPeaksFile.h
 	inc/MantidCrystal/PeakIntegration.h
+	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SavePeaksFile.h
 )
 
 set ( TEST_FILES
 	test/LoadPeaksFileTest.h
+	test/PredictPeaksTest.h
 	test/SavePeaksFileTest.h
 )
 
@@ -35,7 +38,7 @@ target_link_libraries ( Crystal ${MANTIDLIBS} ${GSL_LIBRARIES} DataObjects)
 if ( CXXTEST_FOUND )
   include_directories ( ../CurveFitting/inc ../DataHandling/inc ../Nexus/inc ../TestHelpers/inc ../Kernel/inc ../DataObjects/inc)
   cxxtest_add_test ( CrystalTest ${TEST_FILES} )
-  target_link_libraries ( CrystalTest Kernel API DataHandling Crystal DataObjects)
+  target_link_libraries ( CrystalTest Kernel API DataHandling Crystal DataObjects TestHelpers)
   add_dependencies ( FrameworkTests CrystalTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET CrystalTest PROPERTY FOLDER "UnitTests" )

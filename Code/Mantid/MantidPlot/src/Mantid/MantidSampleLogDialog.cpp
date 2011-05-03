@@ -111,7 +111,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 
   resize(750,400);
   
-  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedFiles()));
+  connect(buttonPlot, SIGNAL(clicked()), this, SLOT(importSelectedLogs()));
   connect(buttonClose, SIGNAL(clicked()), this, SLOT(close()));
   //want a custom context menu
   m_tree->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -133,7 +133,7 @@ MantidSampleLogDialog::MantidSampleLogDialog(const QString & wsname, MantidUI* m
 /**
  * Plot the selected log entries (TimeSeriesProperty or PropertyWithValue)
  */
-void MantidSampleLogDialog::importSelectedFiles()
+void MantidSampleLogDialog::importSelectedLogs()
 {
   QList<QTreeWidgetItem *> items = m_tree->selectedItems();
   QListIterator<QTreeWidgetItem *> pItr(items);
@@ -268,7 +268,7 @@ void MantidSampleLogDialog::popupMenu(const QPoint & pos)
   QMenu *menu = new QMenu(m_tree);
   
   QAction *action = new QAction("Import", m_tree);
-  connect(action, SIGNAL(triggered()), this, SLOT(importSelectedFiles()));
+  connect(action, SIGNAL(triggered()), this, SLOT(importSelectedLogs()));
   menu->addAction(action);
   
   menu->popup(QCursor::pos());

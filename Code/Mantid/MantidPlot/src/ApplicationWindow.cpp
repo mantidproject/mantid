@@ -2823,6 +2823,10 @@ Table* ApplicationWindow::newHiddenTable(const QString& name, const QString& lab
   return w;
 }
 
+/* Perfom initialization on a Table?
+ * @param w :: table that was created
+ * @param caption :: title to set
+ */
 void ApplicationWindow::initTable(Table* w, const QString& caption)
 {
   QString name = caption;
@@ -12241,6 +12245,7 @@ void ApplicationWindow::createActions()
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
   connect(actionShowColumnOptionsDialog, SIGNAL(activated()), this, SLOT(showColumnOptionsDialog()));
 
+  // JZ May 3, 2011: Removed this because it segfaults.
   actionShowColumnValuesDialog = new QAction(QIcon(getQPixmap("formula_xpm")), tr("Set Column &Values ..."), this);
   connect(actionShowColumnValuesDialog, SIGNAL(activated()), this, SLOT(showColumnValuesDialog()));
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
@@ -13026,7 +13031,7 @@ void ApplicationWindow::translateActionsStrings()
   actionShowTitleDialog->setMenuText(tr("&Title ..."));
   actionShowColumnOptionsDialog->setMenuText(tr("Column &Options ..."));
   actionShowColumnOptionsDialog->setShortcut(tr("Ctrl+Alt+O"));
-  actionShowColumnValuesDialog->setMenuText(tr("Set Column &Values ..."));
+  actionShowColumnValuesDialog->setMenuText(tr("Set Column &Values ...")); // Removed JZ May 3, 2011
   actionShowColumnValuesDialog->setShortcut(tr("Alt+Q"));
   actionTableRecalculate->setMenuText(tr("Recalculate"));
   actionTableRecalculate->setShortcut(tr("Ctrl+Return"));

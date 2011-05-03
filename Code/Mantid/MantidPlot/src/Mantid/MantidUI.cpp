@@ -1767,6 +1767,7 @@ void MantidUI::importString(const QString &logName, const QString &data)
   appWindow()->initTable(t, 
       appWindow()->generateUniqueName(label.section("-",0, 0) + "-"));
   t->setColName(0, "Log entry");
+  t->setReadOnlyColumn(0, true); //Read-only
 
   t->setText(0, 0, data);
 
@@ -1797,6 +1798,10 @@ void MantidUI::importStrSeriesLog(const QString &logName, const QString &data)
   t->setColumnType(0, Table::Time);
   t->setTimeFormat("HH:mm:ss", 0, false);
   t->setColName(1, label.section("-",1));
+
+  // Make both columns read-only
+  t->setReadOnlyColumn(0, true);
+  t->setReadOnlyColumn(1, true);
 
   QStringList::const_iterator sEnd = loglines.end();
   int row(0);
@@ -1861,6 +1866,10 @@ void MantidUI::importNumSeriesLog(const QString &wsName, const QString &logname,
   //Make a unique title, and put in the start time of the log
   QString title = label + QString::fromStdString( " (" + startTime.to_simple_string() + ")" );
   appWindow()->initTable(t, appWindow()->generateUniqueName(title));
+
+  // Make both columns read-only
+  t->setReadOnlyColumn(0, true);
+  t->setReadOnlyColumn(1, true);
 
   //Toggle to switch between using the real date or the change in seconds.
   bool useAbsoluteDate = false;

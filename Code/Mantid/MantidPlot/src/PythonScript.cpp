@@ -562,9 +562,14 @@ QString PythonScript::constructErrorMsg()
 
 bool PythonScript::setQObject(QObject *val, const char *name)
 {
-  if (!PyDict_Contains(localDict, PyString_FromString(name)))
-    compiled = notCompiled;
-  return env()->setQObject(val, name, localDict);
+	if (localDict) // Avoid segfault for un-initialized object
+	{
+		if (!PyDict_Contains(localDict, PyString_FromString(name)))
+			compiled = notCompiled;
+		return env()->setQObject(val, name, localDict);
+	}
+	else
+		return false;
 }
 
 bool PythonScript::setInt(int val, const char *name)
