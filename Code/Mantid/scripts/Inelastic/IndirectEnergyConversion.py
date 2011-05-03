@@ -7,75 +7,47 @@ except ImportError:
     pass
 
 import re
-
 from IndirectCommon import *
 
 def convert_to_energy(rawfiles, grouping, first, last,
         instrument, analyser, reflection,
         SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
-        saveFormats=[], CleanUp = True, Verbose = False):        
-    # Get hold of base empty instrument workspace
-    instWS = '__empty_' + instrument
-    if mtd[instWS] is None:
-        loadInst(instrument)
-    fmon, fdet = getFirstMonFirstDet(instWS)
-    isTosca = adjustTOF(instWS)
-    if ( calib != '' ): # Only load Calibration file once
-        LoadNexusProcessed(calib, '__calibration')
-    # Holds output parameters
-    output_workspace_names = []
-    mon_wsl = loadData(rawfiles, Sum=SumFiles, SpecMin=fmon+1, SpecMax=fmon+1,
-        Suffix='_mon')
-    if isTosca: # Check if we need to use ChopData etc
-        ws = mtd[mon_wsl[0]]
-        if ( ws.readX(0)[ws.getNumberBins()] > 40000 ):
-            for wrks in mon_wsl:
-               DeleteWorkspace(wrks)
-            workspaces = toscaChop(rawfiles, Sum=SumFiles)
-            if ( saveFormats != [] ): # Save data in selected formats
-                saveItems(workspaces, saveFormats)
-            return workspaces
-    ws_names = loadData(rawfiles, Sum=SumFiles, SpecMin=first, SpecMax=last)
-    if ( len(mon_wsl) != len(ws_names) ):
-        print "Indirect CTE: Error loading data files."
-        sys.exit("Indirect CTE: Error loading data files.")
-    for i in range(0, len(ws_names)):
-        ws = ws_names[i]
-        ws_mon = mon_wsl[i]
-        invalid = []
-        if ( analyser != "" and reflection != "" ):
-            applyParameterFile(ws, analyser, reflection)
-        if isTosca:
-            invalid = getBadDetectorList(ws)        
-        timeRegime(monitor=ws_mon, detectors=ws)
-        monitorEfficiency(ws_mon)
-        ## start dealing with detector data here
-        if ( bgremove != [0, 0] ):
-            backgroundRemoval(bgremove[0], bgremove[1], detectors=ws)
-        if ( calib != '' ):
-            useCalib(detectors=ws)
-        normToMon(monitor=ws_mon, detectors=ws)
-        # Remove monitor workspace
-        DeleteWorkspace(ws_mon)
-        conToEnergy(detectors=ws)
-        name = getWSprefix(ws) + 'red'
-        if not CleanUp:
-            CloneWorkspace(ws, name+'_intermediate')
-        if ( rebinParam != ''): # Rebin data
-            rebinData(rebinParam, detectors=ws)
-        if ( tempK != -1 ): # "Detailed Balance" correction
-            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )
-        # Final stage, grouping of detectors - apply name
-        if isTosca: # TOSCA's grouping is pre-determined and fixed
-            name = getRunTitle(ws)
-            groupTosca(name, invalid, detectors=ws)
-        else:
-            groupData(grouping, name, detectors=ws)
-        output_workspace_names.append(name)
+        saveFormats=[], CleanUp=True, Verbose=False):        
+    ## Use the reducer class
+    reducer = iir.IndirectReducer()
+    reducer.set_instrument_name(instrument)
+    reducer.set_detector_range(first-1, last-1)
+    
+    for file in rawfiles:
+        reducer.append_data_file(file)
+        
+    reducer.set_sum(SumFiles)
+    
+    if ( analyser != '' and reflection != '' ):
+        reducer.set_parameter_file(instrument+'_'+analyser+'_'+reflection
+            +'_Parameters.xml')
+    
+    if bgremove != [0, 0]:
+        reducer.set_background(bgremove[0], bgremove[1])
+        
+    if ( calib != '' ):
+        reducer.set_calibration_workspace(loadNexus(calib))
+
+    reducer.set_grouping_policy(grouping)
+    
+    if ( rebinParam != '' ):
+        reducer.set_rebin_string(rebinParam)
+        
+    if ( tempK != -1 ):
+        reducer.set_detailed_balance(tempK)
+        
+    reducer.reduce()
+    
+    output_workspace_names = reducer.get_result_workspaces()
+
     if ( saveFormats != [] ): # Save data in selected formats
         saveItems(output_workspace_names, saveFormats)
-    if ( calib != '' ): # Remove calibration workspace
-        DeleteWorkspace('__calibration')
+
     return output_workspace_names
 
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
@@ -103,72 +75,6 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         return [outWS+Suffix]
     else:
         return workspaces
-
-def toscaChop(files, Sum=False):
-    '''Reduction routine for TOSCA instrument when input workspace must be 
-    "split" into parts and folded together after it has been corrected to the 
-    monitor.'''
-    wslist = []
-    workspace_list = loadData(files, Sum=Sum)
-    for raw in workspace_list:
-        invalid = getBadDetectorList(raw)
-        chopdata = ChopData(raw,raw+'_data')
-        wsgroup = mtd[raw+'_data'].getNames()
-        for ws in wsgroup:
-            ExtractSingleSpectrum(ws, ws+'mon', 140)
-            ConvertUnits(ws+'mon', ws+'mon', 'Wavelength', 'Indirect')
-            monitorEfficiency(ws+'mon')
-            CropWorkspace(ws, ws, StartWorkspaceIndex=0, EndWorkspaceIndex=139)
-            normToMon(monitor=ws+'mon', detectors=ws)
-            DeleteWorkspace(ws+'mon')
-        workspaces = ','.join(wsgroup)
-        ws = raw+'_c'
-        MergeRuns(workspaces, ws)
-        scaling = createScalingWorkspace(wsgroup, ws)
-        Divide(ws, scaling, ws)
-        DeleteWorkspace(scaling)
-        for grpws in wsgroup:
-            DeleteWorkspace(grpws)
-        conToEnergy(detectors=ws)
-        Rebin(ws, ws, '-2.5,0.015,3,-0.005,1000')
-        wstitle = getRunTitle(ws) # Have Run title as Workspace Name
-        ws = groupTosca(wstitle, invalid, detectors=ws)
-        wslist.append(ws)
-        DeleteWorkspace(raw)
-    return wslist
-
-def createScalingWorkspace(wsgroup, merged, wsname='__scaling'):
-    '''Based on the widths of the workspaces in the group once they've been
-    converted into Wavelength and normalised by the monitor, this function
-    uses the CreateWorksapce algorithm to decide how to scale the merged
-    workspace.'''
-    largest = 0
-    nlargest = 0
-    nlrgws = ''
-    for ws in wsgroup:
-        nbin = mtd[ws].getNumberBins()
-        if ( nbin > largest ):
-            nlargest = largest
-            largest = nbin
-        elif ( nbin > nlargest ):
-            nlargest = nbin
-            nlrgws = ws
-    nlargestX = mtd[nlrgws].dataX(0)[nlargest]	
-    largestValInNLrg = nlargestX
-    binIndex = mtd[merged].binIndexOf(largestValInNLrg)	
-    dataX = list(mtd[merged].readX(0))
-    dataY = []
-    dataE = []
-    totalBins = mtd[merged].getNumberBins()
-    nWS = len(wsgroup)
-    for i in range(0, binIndex):
-        dataE.append(0.0)
-        dataY.append(nWS)    
-    for i in range(binIndex, totalBins):
-        dataE.append(0.0)
-        dataY.append(1.0)	
-    CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='Wavelength')
-    return wsname
 
 def getFirstMonFirstDet(inWS):
     workspace = mtd[inWS]
@@ -275,38 +181,6 @@ def groupData(grouping, name, detectors=''):
     if ( detectors != name ):
         DeleteWorkspace(detectors)
     return name
-
-def groupTosca(wsname, invalid, detectors=''):
-    grp = range(0,70)
-    for i in invalid:
-        try:
-            grp.remove(i)
-        except ValueError:
-            pass
-    GroupDetectors(detectors, wsname, WorkspaceIndexList=grp, 
-        Behaviour='Average')
-    grp = range(70,140)
-    for i in invalid:
-        try:
-            grp.remove(i)
-        except ValueError:
-            pass
-    GroupDetectors(detectors, '__front', WorkspaceIndexList=grp, 
-        Behaviour='Average')
-    DeleteWorkspace(detectors)
-    ConjoinWorkspaces(wsname, '__front')
-    return wsname
-
-def getBadDetectorList(workspace):
-    IdentifyNoisyDetectors(workspace, '__temp_tsc_noise')
-    ws = mtd['__temp_tsc_noise']
-    nhist = ws.getNumberHistograms()
-    invalid = []
-    for i in range(0, nhist):
-        if ( ws.readY(i)[0] == 0.0 ):
-            invalid.append(i)
-    DeleteWorkspace('__temp_tsc_noise')
-    return invalid
 
 def backgroundRemoval(tofStart, tofEnd, detectors=''):
     ConvertToDistribution(detectors)
