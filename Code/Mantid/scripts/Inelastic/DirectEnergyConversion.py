@@ -593,7 +593,7 @@ class DirectEnergyConversion(object):
             elif ext == '.nxs':
                 SaveNexus(workspace, filename)
             elif ext == '.nxspe':
-                SaveNXSPE(workspace, filename, kioverkfscaling=self.apply_kikf_correction,psi=self.psi)
+                SaveNXSPE(workspace, filename, ki_over_kf_scaling=self.apply_kikf_correction,psi=self.psi)
             else:
                 self.log('Unknown file format "%s" encountered while saving results.')
     
