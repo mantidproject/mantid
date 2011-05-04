@@ -30,6 +30,7 @@ public:
   void add(Mantid::API::IAlgorithm_sptr alg);
   /// Removes stopped algorithm
   void remove(const Mantid::API::IAlgorithm* alg);
+
   /// Returns number of running algorithms
   int count(){return m_algorithms.size();}
   /// Returns pointers to running algorithms

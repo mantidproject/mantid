@@ -278,8 +278,10 @@ bool PythonScript::exec()
 {
   // Cannot have two things executing at the same time
   if( env()->isRunning() ) return false;
+
   // Must acquire the GIL just in case other Python is running, i.e asynchronous Python algorithm
-  PyGILState_STATE state = PyGILState_Ensure();
+   PyGILState_STATE state = PyGILState_Ensure();
+
   // Make sure we are initialized. Only does something the first time
   initialize();
   env()->setIsRunning(true);

@@ -251,6 +251,14 @@ QStringList MantidUI::getAlgorithmNames()
 }
 
 /**
+ *  Returns the number of algorithms currently executing
+ */
+int MantidUI::runningAlgCount() const
+{
+  return m_algMonitor->count();
+}
+
+/**
     CreateAlgorithm
 
     @param algName :: Algorithm's name

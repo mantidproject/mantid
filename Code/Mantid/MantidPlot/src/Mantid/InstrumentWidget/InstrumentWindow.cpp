@@ -114,8 +114,8 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   observeAfterReplace();
   observeADSClear();
 
-  connect(app->mantidUI->getAlgMinitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
-  connect(app->mantidUI->getAlgMinitor(),SIGNAL(allAlgorithmsStopped()),this,SLOT(unblock()));
+  connect(app->mantidUI->getAlgMonitor(),SIGNAL(algorithmStarted(void*)),this,SLOT(block()));
+  connect(app->mantidUI->getAlgMonitor(),SIGNAL(allAlgorithmsStopped()),this,SLOT(unblock()));
 
   const int windowWidth = 600;
   const int tabsSize = windowWidth / 3;

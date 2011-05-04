@@ -102,6 +102,9 @@ public:
     // Returns a list of registered algorithms
     QStringList getAlgorithmNames();
 
+    // Returns the number of algorithms currently executing
+    int runningAlgCount() const;  
+
     // Create an algorithm using Mantid FrameworkManager
     Mantid::API::IAlgorithm_sptr CreateAlgorithm(const QString& algName);
 
@@ -152,16 +155,16 @@ public:
     // Shows 1D graphs of the spectra (rows) selected in a MantidMatrix
     MultiLayer* plotSelectedRows(MantidMatrix *m, bool errs = true);
 
-	/// This method executes loadraw algorithm from  ICatInterface
-	void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
+  /// This method executes loadraw algorithm from  ICatInterface
+  void loadrawfromICatInterface(const QString& fileName,const QString& wsName);
+  
+  /// This method executes loadnexus algorithm from ICatInterface
+  void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
+  
+  /// This method is to execute download data files algorithm from ICat
+  void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
 
-	/// This method executes loadnexus algorithm from ICatInterface
-	void loadnexusfromICatInterface(const QString& fileName,const QString& wsName);
-	
-	/// This method is to execute download data files algorithm from ICat
-	void executeDownloadDataFiles(const std::vector<std::string>& filenNames,const std::vector<long long>& fileIds);
-
-  AlgorithmMonitor* getAlgMinitor(){return m_algMonitor;}
+  AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
 
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace

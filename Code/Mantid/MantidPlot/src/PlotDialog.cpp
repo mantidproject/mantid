@@ -1653,59 +1653,64 @@ void PlotDialog::showAreaColor(bool show)
 
 void PlotDialog::updateTabWindow(QTreeWidgetItem *currentItem, QTreeWidgetItem *previousItem)
 {
-    if (!previousItem || !currentItem)
-        return;
-	bool forceClearTabs = false;
-	if (!previousItem){
-		previousItem = currentItem;
-		forceClearTabs = true;
-	}
+  if (!currentItem) return;
 
-    if (previousItem->type() == CurveTreeItem::PlotCurveTreeItem)
-        ((CurveTreeItem *)previousItem)->setActive(false);
-    else if (previousItem->type() == LayerItem::LayerTreeItem)
-        ((LayerItem *)previousItem)->setActive(false);
+  bool forceClearTabs = false;
+  if (!previousItem||previousItem == currentItem)
+  {
+    previousItem = currentItem;
+    forceClearTabs = true;
+  }
 
-    boxPlotType->blockSignals(true);
+  if (previousItem->type() == CurveTreeItem::PlotCurveTreeItem)
+    ((CurveTreeItem *)previousItem)->setActive(false);
+  else if (previousItem->type() == LayerItem::LayerTreeItem)
+    ((LayerItem *)previousItem)->setActive(false);
 
-    if (currentItem->type() == CurveTreeItem::PlotCurveTreeItem)
+  boxPlotType->blockSignals(true);
+
+  if (currentItem->type() == CurveTreeItem::PlotCurveTreeItem)
+  {
+    CurveTreeItem *curveItem = dynamic_cast<CurveTreeItem *>(currentItem);
+    if (previousItem->type() != CurveTreeItem::PlotCurveTreeItem ||
+	((CurveTreeItem *)previousItem)->plotItemType() != curveItem->plotItemType()||forceClearTabs)
     {
-        CurveTreeItem *curveItem = (CurveTreeItem *)currentItem;
-        if (previousItem->type() != CurveTreeItem::PlotCurveTreeItem ||
-           ((CurveTreeItem *)previousItem)->plotItemType() != curveItem->plotItemType()||forceClearTabs)
-        {
-	         clearTabWidget();
-            int plot_type = setPlotType(curveItem);
-			if (plot_type >= 0)
-				insertTabs(plot_type);
-            if (!curvePlotTypeBox->isVisible())
-                curvePlotTypeBox->show();
-        }
-		setActiveCurve(curveItem);
+      clearTabWidget();
+      int plot_type = setPlotType(curveItem);
+      if (plot_type >= 0) 
+      {
+	insertTabs(plot_type);
+      }
+      if (!curvePlotTypeBox->isVisible())
+      { 
+	curvePlotTypeBox->show();
+      }
     }
-    else if (currentItem->type() == LayerItem::LayerTreeItem)
+    setActiveCurve(curveItem);
+  }
+  else if (currentItem->type() == LayerItem::LayerTreeItem)
+  {
+    if (previousItem->type() != LayerItem::LayerTreeItem)
     {
-        if (previousItem->type() != LayerItem::LayerTreeItem)
-        {
-            clearTabWidget();
-            privateTabWidget->addTab (layerPage, tr("Layer"));
-			privateTabWidget->addTab (layerGeometryPage, tr("Geometry"));
-            privateTabWidget->showPage(layerPage);
-        }
-        setActiveLayer((LayerItem *)currentItem);
+      clearTabWidget();
+      privateTabWidget->addTab (layerPage, tr("Layer"));
+      privateTabWidget->addTab (layerGeometryPage, tr("Geometry"));
+      privateTabWidget->showPage(layerPage);
     }
-    else
-    {
-        clearTabWidget();
-		privateTabWidget->addTab(printPage, tr("Print"));
-        privateTabWidget->addTab(fontsPage, tr("Fonts"));
-        privateTabWidget->showPage(printPage);
-
-        curvePlotTypeBox->hide();
-        btnWorksheet->hide();
-        btnEditCurve->hide();
-    }
-    boxPlotType->blockSignals(false);
+    setActiveLayer((LayerItem *)currentItem);
+  }
+  else
+  {
+    clearTabWidget();
+    privateTabWidget->addTab(printPage, tr("Print"));
+    privateTabWidget->addTab(fontsPage, tr("Fonts"));
+    privateTabWidget->showPage(printPage);
+    
+    curvePlotTypeBox->hide();
+    btnWorksheet->hide();
+    btnEditCurve->hide();
+  }
+  boxPlotType->blockSignals(false);
 }
 
 void PlotDialog::insertTabs(int plot_type)
@@ -1975,6 +1980,7 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     boxYAxis->setCurrentIndex(i->yAxis());
 
     if (i->rtti() == QwtPlotItem::Rtti_PlotSpectrogram){
+
         btnEditCurve->hide();
         Spectrogram *sp = (Spectrogram *)i;
 
@@ -2033,7 +2039,6 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
 			privateTabWidget->showPage(labelsPage);
 	      return;
     }
-
     PlotCurve *c = (PlotCurve*)i;
 	if (c->type() == Graph::Function)
         btnEditCurve->setText(tr("&Edit..."));
@@ -2078,7 +2083,6 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
 		boxPieWedge->setChecked(pie->fixedLabelsPosition());
         return;
     }
-
     //line page
     int style = c->style();
     if (curveType == Graph::Spline)
@@ -2086,12 +2090,11 @@ void PlotDialog::setActiveCurve(CurveTreeItem *item)
     else if (curveType == Graph::VerticalSteps)
         style = 6;
     boxConnect->setCurrentIndex(style);
-
     setPenStyle(c->pen().style());
     boxLineColor->setColor(c->pen().color());
-	boxLineWidth->blockSignals(true);
+    boxLineWidth->blockSignals(true);
     boxLineWidth->setValue(c->pen().widthF());
-	boxLineWidth->blockSignals(false);
+    boxLineWidth->blockSignals(false);
     fillGroupBox->blockSignals(true);
     fillGroupBox->setChecked(c->brush().style() != Qt::NoBrush );
     fillGroupBox->blockSignals(false);

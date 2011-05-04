@@ -33,6 +33,7 @@
 
 #include "PythonScripting.h"
 #include "ApplicationWindow.h"
+#include "Mantid/MantidUI.h"
 
 #include <QObject>
 #include <QStringList>
@@ -64,7 +65,7 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
   : ScriptingEnv(parent, langName), m_globals(NULL), m_math(NULL),
     m_sys(NULL)
 {
-  // MG (Russell actually found tbis for OS X): We ship SIP and PyQt4 with Mantid and we need to
+  // MG (Russell actually found this for OS X): We ship SIP and PyQt4 with Mantid and we need to
   // ensure that the internal import that sip does of PyQt picks up the correct version.
 #if defined(Q_OS_DARWIN) || defined(Q_OS_LINUX)
  #if defined(Q_OS_DARWIN)
@@ -91,6 +92,11 @@ PythonScripting::PythonScripting(ApplicationWindow *parent)
 PythonScripting::~PythonScripting()
 {
   shutdown();
+}
+
+bool PythonScripting::isRunning() const
+{
+  return (m_is_running || d_parent->mantidUI->runningAlgCount() > 0 );
 }
 
 /**

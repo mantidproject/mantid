@@ -620,7 +620,7 @@ void ApplicationWindow::initGlobalConstants()
   d_scale_plots_on_print = false;
   d_print_cropmarks = false;
 
-  defaultCurveStyle = static_cast<int>(Graph::LineSymbols);
+  defaultCurveStyle = static_cast<int>(Graph::Line);
   defaultCurveLineWidth = 1;
   defaultSymbolSize = 7;
 
@@ -4822,7 +4822,7 @@ void ApplicationWindow::readSettings()
   settings.endGroup(); // General
 
   settings.beginGroup("/Curves");
-  defaultCurveStyle = settings.value("/Style", Graph::LineSymbols).toInt();
+  defaultCurveStyle = settings.value("/Style", Graph::Line).toInt();
   defaultCurveLineWidth = settings.value("/LineWidth", 1).toDouble();
   defaultSymbolSize = settings.value("/SymbolSize", 7).toInt();
   applyCurveStyleToMantid = settings.value("/ApplyMantid", true).toBool();

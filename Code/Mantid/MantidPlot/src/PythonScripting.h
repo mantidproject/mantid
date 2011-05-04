@@ -49,7 +49,7 @@ public:
   /// Destructor
   ~PythonScripting();
   // Is a Python already executing a script
-  virtual bool isRunning() const { return m_is_running; }
+  virtual bool isRunning() const;
   /// Write text to std out
   void write(const QString &text) { emit print(text); }
   /// Create a new code lexer for Python
