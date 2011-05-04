@@ -195,7 +195,7 @@ int main( int argc, char ** argv )
   {
     t.start();
     QPixmap pixmap;
-    //if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","not OK");
+    if (!pixmap.load(":/MantidSplashScreen.png")) QMessageBox::warning(0,"","Couldn't load splashscreen");
     QSplashScreen splash(pixmap);
     splash.show();
     app.processEvents();
