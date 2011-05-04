@@ -521,6 +521,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
 
+    graph_handle = None
     for i in range(1, MaxIter+1):
         it = i
         _printMessage("Iteration " + str(it) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
@@ -531,8 +532,10 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
         
         try :
-            g = plotSpectrum(['Right','Up', 'Left', 'Down'],0)
-            g.activeLayer().setTitle("Itr " + str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+            if not graph_handle:
+                #once we have a plot it wil be updated automatically when the workspaces are updated
+                graph_handle = mantidplot.plotSpectrum(['Right','Up', 'Left', 'Down'],0)
+            graph_handle.activeLayer().setTitle("Itr " + str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
         except :
             #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
             pass
