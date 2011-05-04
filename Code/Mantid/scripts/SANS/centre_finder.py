@@ -20,6 +20,8 @@ def SeekCentre(trial, reducer, origin):
     MoveInstrumentComponent(reducer.sample_wksp,
         ComponentName=currentDet, X=trial[0]-origin[0], Y=trial[1]-origin[1], RelativePosition=True)
 
+    #phi masking will remove areas of the detector that we need 
+    reducer.mask.mask_phi = False
     reducer.keep_un_normalised(False)
     reducer.run_no_Q('centre')
 

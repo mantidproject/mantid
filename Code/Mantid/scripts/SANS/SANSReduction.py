@@ -1592,7 +1592,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     # Run reduction, returning the X and Y sum-squared difference values 
     _printMessage("Running initial reduction: " + str(XVAR_PREV*1000.)+ "  "+ str(YVAR_PREV*1000.))
     oldX2,oldY2 = RunReduction([XVAR_PREV, YVAR_PREV])
-    XSTEP = YSTEP = INSTRUMENT.cen_find_step
+    XSTEP = INSTRUMENT.cen_find_step
+    YSTEP = INSTRUMENT.cen_find_step
     
     # take first trial step
     XNEW = XVAR_PREV + XSTEP

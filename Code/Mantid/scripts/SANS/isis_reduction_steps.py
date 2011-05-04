@@ -16,9 +16,6 @@ import os
 import math
 import copy
 
-#TODO: remove when center finding is working 
-DEL__FINDING_CENTRE_ = False
-
 def _issueWarning(msg):
     """
         Prints a message to the log marked as warning
@@ -457,10 +454,11 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         self.spec_mask_r=specmask_r
         self.spec_mask_f=specmask_f
 
+        self.mask_phi = True
+        self.phi_mirror = True
         self._lim_phi_xml = ''
         self.phi_min = -90.0
         self.phi_max = 90.0
-        self.phi_mirror = True
         self._readonly_phi = False
 
         ########################## Masking  ################################################
@@ -697,11 +695,6 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
         #reset the xml, as execute can be run more than once
         self._xml = []
-        if DEL__FINDING_CENTRE_ == True:
-            if ( not self.min_radius is None) and (self.min_radius > 0.0):
-                self.add_cylinder(self.min_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
-            if ( not self.max_radius is None) and (self.max_radius > 0.0):
-                self.add_outside_cylinder(self.max_radius, self._maskpt_rmin[0], self._maskpt_rmin[1], 'center_find_beam_cen')
 
         if ( not self.min_radius is None ) and ( self.min_radius > 0.0 ):
             self.add_cylinder(self.min_radius, 0, 0, 'beam_stop')
@@ -710,7 +703,7 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         #now do the masking
         sans_reduction_steps.Mask.execute(self, reducer, workspace, instrument)
 
-        if self._lim_phi_xml != '':
+        if self._lim_phi_xml != '' and self.mask_phi:
             MaskDetectorsInShape(workspace, self._lim_phi_xml)
 
     def view(self, instrum):
@@ -1077,7 +1070,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         'OFF' : 'Off'}
     
     
-    # Relate the different ways of doing a fit to teh arguments that can be sent to CalculateTransmission 
+    # Relate the different GUI names for doing a fit to the arguments that can be sent to CalculateTransmission 
     CALC_TRANS_FIT_PARAMS = {
         'Logarithmic' : 'Log',
         'Linear' : 'Linear',
@@ -1089,7 +1082,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         False : 'sample',
         True : 'can'}
     
-    DEFAULT_FIT = 'Log'
+    DEFAULT_FIT = 'Logarithmic'
 
     def __init__(self, loader=None):
         super(TransmissionCalc, self).__init__()

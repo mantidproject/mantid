@@ -1,5 +1,5 @@
 #Make the reduction module available
-from SANSReduction import *
+from ISISCommandInterface import *
 
 # Set a default data path where we look for raw data
 DataPath("/home/m2d/workspace/mantid/Test/Data/SANS2D")
@@ -36,17 +36,18 @@ MaskFile('MASKSANS2D.091A')
 Gravity(True)
 
 # Alter the trans fit type and range. First parameter can be 'OFF','LOG',LIN'
-#TransFit('LOG',3.0,8.0)
+TransFit('LOG',3.0,8.0)
 
 # Assign run numbers (.nxs for nexus)
 AssignSample('992.raw')
 TransmissionSample('988.raw', '987.raw')
 AssignCan('993.raw')
 TransmissionCan('989.raw', '987.raw')
+#TransWorkspace('988_trans_sample_2.0_14.0', '989_trans_can_2.0_14.0')
 
 # Update the centre coordinates
 # Arguments are rmin,rmax, niterations
-FindBeamCentre(50., 170., 2)
+#FindBeamCentre(50., 170., 2)
 
 # Do the reduction
 # WavRangeReduction runs the reduction for the specfied wavelength range

@@ -484,7 +484,8 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
-    XSTEP = YSTEP = ReductionSingleton().inst.cen_find_step
+    XSTEP = ReductionSingleton().inst.cen_find_step
+    YSTEP = ReductionSingleton().inst.cen_find_step
 
     LimitsR(str(float(rlow)), str(float(rupp)), quiet=True)
 
@@ -550,7 +551,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
             YSTEP = -YSTEP/2.
         if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
             # this is the success criteria, we've close enough to the center
-            _printMessage("::SANS:: Converged - check if stuck in local minimum!")
+            mantid.sendLogMessage("::SANS:: Converged - check if stuck in local minimum!")
             break
         
         oldX2 = newX2
@@ -562,7 +563,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     
     if it == MaxIter:
-        _printMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
+        mantid.sendLogMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP
 
