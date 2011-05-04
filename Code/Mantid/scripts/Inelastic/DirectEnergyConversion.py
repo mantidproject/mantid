@@ -261,7 +261,7 @@ class DirectEnergyConversion(object):
             ConvertUnits(result_ws, "_tmp_energy_ws", Target="DeltaE",EMode="Direct", EFixed=ei_value)
             RenameWorkspace("_tmp_energy_ws", result_ws)
             # Histogram
-            Rebin(result_ws, "_tmp_rebin_ws", self.energy_bins)
+            Rebin(result_ws, "_tmp_rebin_ws", self.energy_bins, PreserveEvents=False)
             RenameWorkspace("_tmp_rebin_ws", result_ws)
             # Convert back to TOF
             ConvertUnits(result_ws, result_ws, Target="TOF",EMode="Direct", EFixed=ei_value)
