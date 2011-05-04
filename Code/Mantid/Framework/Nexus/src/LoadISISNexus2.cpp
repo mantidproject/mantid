@@ -377,13 +377,14 @@ namespace Mantid
     */
     void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
     {
-      int hist_index = 0;//m_monitors.size();
+      int hist_index = 0;
       int period_index(period - 1);
-      int first_monitor_spectrum = m_numberOfSpectra;
+      int first_monitor_spectrum = 0;
 
       if( !m_monitors.empty() )
       {
-        //hist_index = 0;
+        first_monitor_spectrum = m_monitors.begin()->first;
+        hist_index = first_monitor_spectrum - 1;
         for(std::map<int,std::string>::const_iterator it = m_monitors.begin(); 
           it != m_monitors.end(); ++it)
         {
@@ -396,15 +397,16 @@ namespace Mantid
           MantidVec& E = local_workspace->dataE(hist_index);
           std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
           local_workspace->getAxis(1)->spectraNo(hist_index) = it->first;
-          if (it->first < first_monitor_spectrum)
-          {
-            first_monitor_spectrum = it->first;
-          }
 
           NXFloat timeBins = monitor.openNXFloat("time_of_flight");
           timeBins.load();
           local_workspace->dataX(hist_index).assign(timeBins(),timeBins() + timeBins.dim0());
           hist_index++;
+        }
+
+        if (first_monitor_spectrum > 1)
+        {
+          hist_index = 0;
         }
       }
       
