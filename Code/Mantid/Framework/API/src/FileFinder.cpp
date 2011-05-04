@@ -263,10 +263,11 @@ namespace Mantid
       {
         extensions.assign(facility_extensions.begin(), facility_extensions.end());
       }
-
-      std::vector<std::string> filenames(2,filename);
-      std::transform(filename.begin(),filename.end(),filenames[0].begin(),toupper);
-      std::transform(filename.begin(),filename.end(),filenames[1].begin(),tolower);
+      // Look first at the original filename then for case variations. This is important
+      // on platforms where file names ARE case sensitive.
+      std::vector<std::string> filenames(3,filename);
+      std::transform(filename.begin(),filename.end(),filenames[1].begin(),toupper);
+      std::transform(filename.begin(),filename.end(),filenames[2].begin(),tolower);
       std::vector<std::string>::const_iterator ext = extensions.begin();
       for (; ext != extensions.end(); ++ext)
       {
