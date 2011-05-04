@@ -8,7 +8,7 @@
 echo "=== Starting postflight installer hook ==="
 echo
 
-# ------------- Environmental variable update -----------------------
+# ------------- Environmental variable update for gui ---------------------
 # Ensure the MANTIDPATH environmental variable is set correctly by either:
 #   (a) Creating a new ~/.MacOS/environment.plist file or
 #   (b) Updating an existing file with the current value.
@@ -37,32 +37,58 @@ env_filepath=${env_dir}/${env_filename}
 if [ -f ${env_filepath} ]; then
     if [ -n "`cat ${env_filepath} | grep -B 0 -A 1 ${var_name} | grep ${var_value}`" ]; then
 	echo "File ${env_filename} exists and contains the correct values"
-	exit 0
-    fi
-    echo "${env_filename} already exists, updating with current values"
-    backup=${env_filepath}.backup
-    echo "A backup has been created at ${backup}"
-    cp -f ${env_filepath} ${backup}
-    done_replace="0"
-    echo -n "" > ${env_filepath}
-    while read line; do
-	if [ -n "`echo ${line} | grep ${var_name}`" ]; then
-	    read line
-	    echo -e ${key_value} >> ${env_filepath}
-	    done_replace="1"
-	    continue
-	fi
-	if [ -n "`echo ${line} | grep "</dict>"`" ]; then
-	    # If we haven't replaced anything yet then append
-	    # the new key
-	    if [ ${done_replace} = "0" ]; then
-		echo "Appending ${var_name} environment variable"
-		echo -e ${key_value} >> ${env_filepath}
+    else
+        echo "${env_filename} already exists, updating with current values"
+        backup=${env_filepath}.backup
+        echo "A backup has been created at ${backup}"
+        cp -f ${env_filepath} ${backup}
+        done_replace="0"
+        echo -n "" > ${env_filepath}
+        while read line; do
+	    if [ -n "`echo ${line} | grep ${var_name}`" ]; then
+	        read line
+	        echo -e ${key_value} >> ${env_filepath}
+	        done_replace="1"
+	        continue
 	    fi
-	fi
-	echo -e ${line} >> ${env_filepath}
-    done < ${backup}
+	    if [ -n "`echo ${line} | grep "</dict>"`" ]; then
+	        # If we haven't replaced anything yet then append
+	        # the new key
+	        if [ ${done_replace} = "0" ]; then
+		    echo "Appending ${var_name} environment variable"
+		    echo -e ${key_value} >> ${env_filepath}
+	        fi
+	    fi
+	    echo -e ${line} >> ${env_filepath}
+        done < ${backup}
+    fi
 else
     echo "${env_filepath} does not exist, creating..."
     echo -e ${file_contents} > ${env_filepath}
 fi
+
+# ------------- Environment variable update for python -------------------
+# Ensure the MANTIDPATH environment variable is set correctly in .profile
+# and that it's included in DYLD_LIBRARY_PATH.
+
+profile=${HOME}/.profile
+dyld=DYLD_LIBRARY_PATH
+
+if [ ! -f ${profile} ]; then
+    touch ${profile}
+fi
+
+if [ -z "`cat ${profile} | grep ${var_name}=${var_value}`" \
+     -a \
+     -z "`cat ${profile} | grep ${dyld}.*\$${var_name}`" ]; then
+    echo "\n# Environment variable additions for Mantid\n"\
+         "export ${var_name}=${var_value}\n"\
+         "export ${dyld}=\$${dyld}:\$${var_name}" >> ${profile}
+fi
+
+# ------------- Install to python site-packages --------------------------
+# Install to /Library/Python/2.6/site-packages so that Mantid is easily
+# available within python no matter where you start it from
+
+cd /Applications/MantidPlot.app/Contents/MacOS/
+python2.6 setup.py install

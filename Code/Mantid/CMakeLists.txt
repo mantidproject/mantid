@@ -104,7 +104,7 @@ if ( APPLE )
 endif ()
 
 # Create instrument directory and make it writable so vtp files can go there
-install ( DIRECTORY DESTINATION instrument 
+install ( DIRECTORY DESTINATION ${INBUNDLE}instrument 
           DIRECTORY_PERMISSIONS OWNER_READ OWNER_EXECUTE OWNER_WRITE
                                 GROUP_READ GROUP_EXECUTE GROUP_WRITE
                                 WORLD_READ WORLD_EXECUTE WORLD_WRITE

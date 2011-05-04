@@ -34,7 +34,7 @@ set ( PLUGINS_DIR MantidPlot.app/plugins )
 
 install ( PROGRAMS /Library/Python/2.6/site-packages/sip.so DESTINATION ${BIN_DIR} )
 install ( DIRECTORY /Library/Python/2.6/site-packages/PyQt4 DESTINATION ${BIN_DIR} )
-install ( DIRECTORY /Developer/Applications/Qt/plugins/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
+install ( DIRECTORY ${QT_PLUGINS_DIR}/imageformats DESTINATION MantidPlot.app/Contents/Frameworks/plugins )
 
 install ( FILES ${CMAKE_SOURCE_DIR}/Images/MantidPlot.icns
                 ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/qt.conf
