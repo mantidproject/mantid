@@ -51,7 +51,7 @@ CenterpieceRebinning::setTargetGeomDescrEqSource()
           throw(std::runtime_error("can not obtain slicing property from the property manager"));
      }
 
-    pSlicing->build_from_geometry(*(inputWS->getGeometry()));
+    pSlicing->build_from_geometry(inputWS->get_const_MDGeometry());
     //pSlicing=NULL; // should remain in Property
  
 }
