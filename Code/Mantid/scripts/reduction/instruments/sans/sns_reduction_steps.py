@@ -178,12 +178,12 @@ class LoadRun(ReductionStep):
         x_min = offset-offset%x_step
         x_max = 2*1e6/60.0+offset
         x_max -= x_max%x_step
-        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), True )
+        Rebin(workspace+'_evt', workspace, "%6.0f, %6.0f, %6.0f" % (x_min, x_step, x_max), False )
 
         ConvertUnits(workspace, workspace, "Wavelength")
         
         # Rebin so all the wavelength bins are aligned
-        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), PreserveEvents=False)
+        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max))
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
