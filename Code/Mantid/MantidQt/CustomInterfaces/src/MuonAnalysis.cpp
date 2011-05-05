@@ -804,7 +804,6 @@ void MuonAnalysis::inputFileChanged()
 
   if ( !m_uiForm.mwRunFiles->isValid() )
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Muon files text string invalid");
     return;
   }
 
