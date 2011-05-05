@@ -183,7 +183,7 @@ class LoadRun(ReductionStep):
         ConvertUnits(workspace, workspace, "Wavelength")
         
         # Rebin so all the wavelength bins are aligned
-        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max))
+        Rebin(workspace, workspace, "%4.2f,%4.2f,%4.2f" % (wl_min, 0.1, wl_max), PreserveEvents=False)
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
