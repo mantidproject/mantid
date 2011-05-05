@@ -25,10 +25,15 @@ if not os.path.exists(MANTIDRELEASE + '/MantidPlot.exe'):
 subp = subprocess.Popen([MANTIDRELEASE + '/MantidPlot',  '-v'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 subout, suberr = subp.communicate()
 if suberr != '':
-    print 'Could not determine Mantid version from MantidPlot using 0.0.0'
-    MantidVersion = '0.0.0'
+    print 'Could not determine Mantid version from MantidPlot using 1.0.0'
+    MantidVersion = '1.0.0'
 else:
-    MantidVersion = subout.strip()
+    MantidVersion = subout.strip() # This contains the date as well, we only want the numbers
+    try:
+        MantidVersion = MantidVersion.split()[0]
+    except IndexError:
+        print ('Invalid version format "%s", expecting "x.x.x (DATE)"' % MantidVersion)
+        MantidVersion = '1.0.0'
 print('Mantid version '+ MantidVersion)
 
 # Architecture
