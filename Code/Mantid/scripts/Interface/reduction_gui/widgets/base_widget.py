@@ -93,21 +93,20 @@ class BaseWidget(QtGui.QWidget):
             if qflist.count()>0:
                 flist = []
                 for i in range(qflist.count()):
-                    flist.append(unicode(qflist[i]))
+                    flist.append(str(QtCore.QFileInfo(qflist[i]).filePath()))
                 # Store the location of the loaded file
-                (folder, file_name) = os.path.split(flist[0])
-                self._settings.data_path = folder
+                self._settings.data_path = str(QtCore.QFileInfo(qflist[i]).path())
                 return flist
             else:
                 return None
         else:       
-            fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+            fname = str(QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
                                                               self._settings.data_path, 
-                                                              data_type))
+                                                              data_type)).filePath())
             if fname:
                 # Store the location of the loaded file
                 (folder, file_name) = os.path.split(fname)
-                self._settings.data_path = folder
+                self._settings.data_path = str(QtCore.QFileInfo(fname).path())
             return fname     
     
     @process_file_parameter
