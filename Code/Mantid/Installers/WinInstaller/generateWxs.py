@@ -459,7 +459,7 @@ addDlls(CODEDIR + '/Third_Party/lib/win' + ARCH,'3dDll',MantidDlls,['hd425m.dll'
 #------------- Bundled Python installation ---------------
 pythonDLLs = addCompList('PythonDLLs',LIBDIR + '/Python27/DLLs','DLLs',binDir)[0]
 pythonLib =  addCompList('PythonLib',LIBDIR + '/Python27/Lib','Lib',binDir,exclude_suffix=['_d.pyd'])[0]
-pythonScripts = addCompList('PythonScripts',LIBDIR + '/Python27/Scripts','Scrs',binDir)[0]
+pythonScripts = addCompList('PythonScripts',LIBDIR + '/Python27/Scripts','Scripts',binDir)[0]
 # Python executable
 addFileV('PyEXE', 'Py27.exe','python.exe',LIBDIR + '/Python27/python.exe',MantidDlls)
 # Python dll
