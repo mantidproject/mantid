@@ -355,7 +355,7 @@ void ScriptingWindow::closeEvent(QCloseEvent *event)
   if( !m_acceptClose ) 
   {
     emit hideMe();
-    this->hide();
+    //this->hide();
     return;
   }
 
@@ -363,6 +363,14 @@ void ScriptingWindow::closeEvent(QCloseEvent *event)
   // This will ensure each is saved correctly
   m_manager->closeAllTabs();
   event->accept();
+}
+
+/// Override the hideEvent
+void ScriptingWindow::hideEvent(QHideEvent *event)
+{
+  Q_UNUSED(event);
+  // This ensures the window size is remembered correctly
+  emit hideMe();
 }
 
 /**

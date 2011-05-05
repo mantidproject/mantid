@@ -4935,7 +4935,9 @@ void ApplicationWindow::readSettings()
 
   settings.beginGroup("/ScriptWindow");
   d_script_win_pos = settings.value("/pos", QPoint(250,200)).toPoint();
+  if( d_script_win_pos.x() < 0 || d_script_win_pos.y() < 0 ) d_script_win_pos = QPoint(250,200);
   d_script_win_size = settings.value("/size", QSize(600,660)).toSize();
+  if( !d_script_win_size.isValid() ) d_script_win_size = QSize(600,660);
   settings.endGroup();
 
   settings.beginGroup("/ToolBars");
@@ -5290,17 +5292,11 @@ void ApplicationWindow::saveSettings()
 
 
   if(m_scriptInterpreter ) m_scriptInterpreter->saveSettings();
-  if( scriptingWindow ) 
-  {
-    this->saveScriptWindowGeometry();
-    settings.beginGroup("/ScriptWindow");
-    // Geometry is applied by the app window
-    settings.setValue("/size", d_script_win_size);
-    settings.setValue("/pos", d_script_win_pos);
-    settings.endGroup();
-    // Other specific settings
-    scriptingWindow->saveSettings();
-  }
+  settings.beginGroup("/ScriptWindow");
+  // Geometry is applied by the app window
+  settings.setValue("/size", d_script_win_size);
+  settings.setValue("/pos", d_script_win_pos);
+  settings.endGroup();
 
   settings.beginGroup("/ToolBars");
   settings.setValue("/FileToolBar", d_file_tool_bar);
@@ -8948,7 +8944,9 @@ void ApplicationWindow::closeEvent( QCloseEvent* ce )
 
   if( scriptingWindow )
   {
+    scriptingWindow->disconnect();
     this->showScriptWindow(true);
+    // Other specific settings
     scriptingWindow->saveSettings();
     scriptingWindow->acceptCloseEvent(true);
     scriptingWindow->close();
@@ -15491,7 +15489,10 @@ void ApplicationWindow::showScriptWindow(bool forceVisible)
   else 
   {
     saveScriptWindowGeometry();
+    // Hide is connect to this function so block it temporarily
+    scriptingWindow->blockSignals(true);
     scriptingWindow->hide();
+    scriptingWindow->blockSignals(false);
   }
 }
 
