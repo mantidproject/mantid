@@ -52,22 +52,24 @@ def SeekCentre(trial, reducer, origin):
     
 # Create a workspace with a quadrant value in it 
 def CreateQuadrant(reduced_ws, quadrant, xcentre, ycentre, reducer, r_min, r_max):
+    tmp_ws = 'quadrant_temp'
     # Need to create a copy because we're going to mask 3/4 out and that's a one-way trip
-    CloneWorkspace(reduced_ws, quadrant)
+    CloneWorkspace(reduced_ws, tmp_ws)
     objxml = SANSUtility.QuadrantXML([0, 0, 0.0], r_min, r_max, quadrant)
     # Mask out everything outside the quadrant of interest
-    MaskDetectorsInShape(quadrant,objxml)
+    MaskDetectorsInShape(tmp_ws,objxml)
 
     # Q1D ignores masked spectra/detectors. This is on the InputWorkspace, so we don't need masking of the InputForErrors workspace
 
-    reducer.to_Q.execute(reducer, quadrant)
+    reducer.to_Q.execute(reducer, tmp_ws)
     #Q1D(output,rawcount_ws,output,q_bins,AccountForGravity=GRAVITY)
 
     flag_value = -10.0
-    ReplaceSpecialValues(InputWorkspace=quadrant,OutputWorkspace=quadrant,NaNValue=flag_value,InfinityValue=flag_value)
+    ReplaceSpecialValues(InputWorkspace=tmp_ws,OutputWorkspace=tmp_ws,NaNValue=flag_value,InfinityValue=flag_value)
 
     rem_zeros = sans_reduction_steps.StripEndZeros()
-    rem_zeros.execute(reducer, quadrant)
+    rem_zeros.execute(reducer, tmp_ws)
+    RenameWorkspace(tmp_ws, quadrant)
 
 # Create 4 quadrants for the centre finding algorithm and return their names
 def GroupIntoQuadrants(input, xcentre, ycentre, reducer):

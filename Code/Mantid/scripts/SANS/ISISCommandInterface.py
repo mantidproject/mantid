@@ -57,18 +57,31 @@ def DataPath(path):
 
 def SANS2D():
     """
-        Initialises the instrument settings for SANS2D()
+        Initialises the instrument settings for SANS2D
+        @return True on success
     """
     _printMessage('SANS2D()')
-    instrument = isis_instrument.SANS2D()
+    try:
+        instrument = isis_instrument.SANS2D()
         
-    ReductionSingleton().set_instrument(instrument)
+        ReductionSingleton().set_instrument(instrument)
+    except:
+        return False
+    return True
 
 def LOQ():
+    """
+        Initialises the instrument settings for LOQ
+        @return True on success
+    """
     _printMessage('LOQ()')
-    instrument = isis_instrument.LOQ()
+    try:
+        instrument = isis_instrument.LOQ()
 
-    ReductionSingleton().set_instrument(instrument)
+        ReductionSingleton().set_instrument(instrument)
+    except:
+        return False
+    return True
     
 def Detector(det_name):
     _printMessage('Detector("' + det_name + '")')
@@ -524,8 +537,9 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
     graph_handle = None
     for i in range(1, MaxIter+1):
-        it = i
-        _printMessage("Iteration " + str(it) + ": " + str(XNEW*1000.)+ "  "+ str(YNEW*1000.))
+        it = i-1
+        newX2, newY2 = oldX2, oldY2
+        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
 
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
@@ -540,8 +554,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         except :
             #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
             pass
-        
-        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
 
         #have we stepped across the y-axis that goes through the beam center?  
         if newX2 > oldX2:
