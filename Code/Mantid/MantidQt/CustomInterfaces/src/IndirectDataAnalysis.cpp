@@ -1216,7 +1216,9 @@ void IndirectDataAnalysis::fixItem()
   // Determine what the property is.
   QtProperty* prop = item->property();
 
-  QtProperty* fixedProp = m_stringManager->addProperty("Fixed: " + prop->propertyName() );
+  QtProperty* fixedProp = m_stringManager->addProperty( prop->propertyName() );
+  QtProperty* fprlbl = m_stringManager->addProperty("Fixed");
+  fixedProp->addSubProperty(fprlbl);
   m_stringManager->setValue(fixedProp, prop->valueText());
 
   item->parent()->property()->addSubProperty(fixedProp);
@@ -1244,9 +1246,17 @@ void IndirectDataAnalysis::unFixItem()
   }
 
   QtProperty* prop = item->property();
+  if ( prop->subProperties().empty() )
+  { 
+    item = item->parent();
+    prop = item->property();
+  }
+
   item->parent()->property()->addSubProperty(m_fixedProps[prop]);
   item->parent()->property()->removeSubProperty(prop);
   m_fixedProps.remove(prop);
+  QtProperty* proplbl = prop->subProperties()[0];
+  delete proplbl;
   delete prop;
 }
 
