@@ -211,9 +211,6 @@ public:
   /// Execute as a sub-algorithm
   void executeAsSubAlg();
 
-  /// Set the maximum number of cores from Properties files
-  void getOpenMPCores();
-
   /// Add an observer for a notification
   void addObserver(const Poco::AbstractObserver& observer)const;
 

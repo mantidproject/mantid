@@ -96,11 +96,6 @@ ManagedWorkspace.FilePath =
 ManagedRawFileWorkspace.DoNotUse = 0
 CompressedWorkspace.DoNotUse = 1
 
-# Defines the maximum number of cores to use for OpenMP
-# For machine default set to 0
-MultiThreaded.MaxCores = 0
-
-
 # Defines the area (in FWHM) on both sides of the peak centre within which peaks are calculated. 
 # Outside this area peak functions return zero.
 curvefitting.peakRadius = 5
