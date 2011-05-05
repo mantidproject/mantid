@@ -2,11 +2,39 @@
 #include <MantidGeometry/V3D.h>
 #include <MantidKernel/System.h>
 #include <stdexcept>
+#include <cfloat>
 
 namespace Mantid
 {
 namespace Geometry
 {
+
+Quat 
+UnitCell::get_transf_matrix(const V3D &u, const V3D &v)const
+{
+	//get  B-matrix of Busing and Lev
+	MantidMat B = this->getB();
+	// get orthogonal system, adjacent to the unit cell;
+	V3D e1 = B*u;
+	V3D V  = B*v;
+	V3D e3  =e1.cross_prod(V);
+	e3.normalize();
+	double norm2 = e3.norm2();
+	if(norm2<FLT_EPSILON){
+		throw(std::invalid_argument(" two parallel vectors do not define the projection plain"));
+	}
+	e1.normalize();
+	V3D e2= e3.cross_prod(e1);
+
+	MantidMat Transf(3,3);
+	Transf.setColumn(0,e1);
+	Transf.setColumn(1,e2);
+	Transf.setColumn(2,e3);
+	Transf.Invert();
+
+	return Quat(Transf);
+}
+
   /** Default constructor. 
   \f$ a = b = c =  1 \mbox{\AA, } \alpha = \beta = \gamma = 90^\circ \f$ */
   UnitCell::UnitCell(): da(6), ra(6), G(3,3), Gstar(3,3), B(3,3)

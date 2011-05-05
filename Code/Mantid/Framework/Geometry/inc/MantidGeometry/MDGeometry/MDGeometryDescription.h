@@ -60,7 +60,7 @@ public:
   size_t nBins; //< number of bins in each direction, bins of size 1 are integrated (collased);
   bool isReciprocal; //< specifies if this dimension is reciprocal or not.
   std::string AxisName; //< new names for axis;
-  V3D direction;   //< direction in reciprocal space for reciprocal dimension, 0 for orthogonal
+
 
   DimensionDescription() :
     Tag(""), data_shift(0), cut_min(-1), cut_max(1), data_scale(1), nBins(1), isReciprocal(false), AxisName("")
@@ -96,7 +96,7 @@ public:
    *  the final projection is then defined as first dimention (X) along direction x, 
    *  third direction (Z) orthogonal to u and v and second (Y) orthogonal to XZ (coinside with v, if u and v are orthogonal)
    */
-  void set_proj_plain(const Geometry::V3D &u, const Geometry::V3D &v,const UnitCell &Lattice);
+  Quat buildRotMatrix(const Geometry::V3D &u, const Geometry::V3D &v,const UnitCell &Lattice);
 /// return the rotations, which transform old coordinate system into the new one, set by the projection axis;
   std::vector<double> getRotations()const;
 
@@ -120,8 +120,8 @@ public:
   {
     return true;
   }
-  
-  Geometry::V3D getDirection(size_t i)const;
+  // Looks like unnesessary here -> we are not setting this for each dimension description any more;
+ // Geometry::V3D getDirection(size_t i)const;
 
   bool isAxisNamePresent(size_t i)const;
 
@@ -157,11 +157,11 @@ public:
 
 
   ////*** SET -> t
-  void setDirection(const std::string &Tag,const V3D &coord)
-  {
-    int index = getTagNum(Tag,true);       this->setDirection(index,coord);
-  }
-  void setDirection(size_t i,const V3D &coord);
+  //void setDirection(const std::string &Tag,const V3D &coord)
+  //{
+  //  int index = getTagNum(Tag,true);       this->setDirection(index,coord);
+  //}
+  //void setDirection(size_t i,const V3D &coord);
 
   /**  function sets the Tag requested into the position, defined by the index i;
    *

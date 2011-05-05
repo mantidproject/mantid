@@ -18,14 +18,16 @@
 /** The class is the part of the VisualisationWorkspace and describes the basic multidimentional geometry of the object, 
 *   e.g. the dimensions of the reciprocal space and other possible dimenions  
 *   the reference reciprocal lattice, the size and shape of a primary crystall cell
-*   and number of additional ortogonal dimensions, e.g. temperature, pressure etc. 
+*   plus number of additional ortogonal dimensions, e.g. temperature, pressure etc. 
 *
 *   Class provides the reference framework for visualisation and analysis operations alowing to compare different workspaces and to modify 
 *   the visualisation geometry as requested by user
-* Obsolete: may be temporary
-*   It also keeps the crystall information necessary to transform a Mantid workspace into MD workspace
-*Current meaning:
-*   It is the collections of the basis vectors of extended reciprocal lattice so, up to 3 vectors in k-space and 
+*
+*   It is the collections of the basis vectors of extended reciprocal lattice namely, from 1 to 3 bais vectors of k-space 
+*   adjacent to reciprocal lattice cell (orts of projection axes defined by u1 || a*, u2 in plane of a* and b* i.e. crystal Cartesian axes)
+*   and all additional basis  vectors for orthogonal dimensions (energy transfer, temperature, etc.) 
+*   In addition to that the class keeps pointer to the the unit crystal cell of the reciprocal lattice 
+*   If the temperature is present among dimensions, the unit cell should depend on it?
 
 @author Alex Buts, RAL ISIS
 @date 27/09/2010
@@ -55,8 +57,6 @@ namespace Mantid
 {
   namespace Geometry
   {
-	/// temporary measure; need to include real class 
-    class OrientedCrystal;
     //****************************************************************************************************************************************
     class EXPORT_OPT_MANTID_GEOMETRY MDGeometryBasis
     {
@@ -80,12 +80,16 @@ namespace Mantid
 	   *  dimID describes one column of MDDPoints table*/
 	  std::vector<std::string> getBasisIDs(void)const;
 
+	  /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
+	  UnitCell const & get_constUnitCell()const{return *spSample;}
+
       /** function checks if the ids supplied  coinside with the tags for current basis e.g all 
 	   *  existing tags have to be there (the order of tags may be different) */
       bool checkIdCompartibility(const std::vector<std::string> &newTags)const;
 
 	  void init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> spSample);
 	  // copy constructor is used and can be default
+
     private:
 	 /// shared pointer to a class, describing reciporcal lattice of the sample and its orientation if crystal;
 	  boost::shared_ptr<UnitCell> spSample;
@@ -104,7 +108,7 @@ namespace Mantid
 
       void checkInputBasisDimensions(const MDBasisDimension& dimension);
 
-      /// it is unclear what is the meaning of =
+      /// it is unclear what would be the meaning of =
       MDGeometryBasis& operator=(const MDGeometryBasis&);
     };
   } // namespace Geometry

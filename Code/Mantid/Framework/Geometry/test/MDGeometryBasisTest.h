@@ -21,14 +21,10 @@ private:
   {
     using namespace Mantid::Geometry;
     std::set<MDBasisDimension> basisDimensions;
-	V3D dir(1,0,0);
-    basisDimensions.insert(MDBasisDimension("qx", true, 0,dir));
-	dir[0]=0;
-	dir[1]=1;
-    basisDimensions.insert(MDBasisDimension("qy", true, 1,dir));
-    dir[1]=0;
-	dir[2]=1;
-	basisDimensions.insert(MDBasisDimension("qz", true, 2,dir));
+
+    basisDimensions.insert(MDBasisDimension("qx", true, 0,"",V3D(1,0,0)));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(0,sqrt(2.)/2,0)));
+    basisDimensions.insert(MDBasisDimension("qz", true, 2,"",V3D(0,0,sqrt(3.)/2)));
     basisDimensions.insert(MDBasisDimension("p", false, 3));
 
 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
@@ -46,7 +42,20 @@ public:
 
  	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87)); 
     TSM_ASSERT_THROWS("Duplicate column numbers were used. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::logic_error);
+   }
+  void testConstructionNonOrthogonalBasisThrows()
+  {
+    using namespace Mantid::Geometry;
+    std::set<MDBasisDimension> basisDimensions;
+
+    basisDimensions.insert(MDBasisDimension("qx", true, 0,"",V3D(1,0,0)));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(1,1,0)));
+
+ 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87)); 
+    TSM_ASSERT_THROWS("Non-orthogonal dimensions were used. Should have thrown.", MDGeometryBasis(basisDimensions,spCell), std::logic_error);
   }
+ 
+
    void testConstructWithWrongColumnNumbersThrows(){
 
     using namespace Mantid::Geometry;
@@ -107,7 +116,7 @@ public:
     TSM_ASSERT_THROWS("Cannot have this many basis dimensions.", MDGeometryBasis(basisDimensions,spCell), std::invalid_argument);
   }
 
- /* This test currently disabled as you can not generage more then 3 reciprocal dimensions
+ /* This test currently disabled as you can not generage more then 3 reciprocal dimensions -- this will throw on MDBasisDimension
  void t__tTooManyReciprocalDimensionsThrows()
   {
     std::set<MDBasisDimension> basisDimensions;

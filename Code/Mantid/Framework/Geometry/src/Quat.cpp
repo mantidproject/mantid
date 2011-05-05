@@ -61,6 +61,10 @@ Quat::Quat(const V3D& src,const V3D& des)
 	}
   }
 }
+Quat::Quat(const Geometry::MantidMat &RotMat)
+{
+	this->setQuat(RotMat);
+}
 
 //! Constructor with values
 Quat::Quat(const double _w,const double _a, const double _b, const double _c):w(_w),a(_a),b(_b),c(_c)

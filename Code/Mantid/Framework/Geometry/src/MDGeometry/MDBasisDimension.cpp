@@ -6,7 +6,7 @@ namespace Mantid
 namespace Geometry
 {
 
-MDBasisDimension::MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const V3D &inDirection,const std::string &UnitID) :
+MDBasisDimension::MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID,const V3D &inDirection) :
 m_id(id), m_isReciprocal(isReciprocal), m_columnNumber(columnNumber),
 direction(inDirection)
 {
@@ -15,29 +15,41 @@ direction(inDirection)
 			 if(columnNumber<0||columnNumber>3){
 					throw(std::invalid_argument("Reciprocal dimension's column numbers have to be 0,1 or 2"));
 			 }else{
-				// default length sould be 1 though there are no real lattice with such parameters
-					this->direction[columnNumber]=1;
+				// default length sould be 0 as these directions are orthogonal to real 3D spaceeters
+       				direction[0] = 0;
+					direction[1] = 0;
+					direction[2] = 0;
+					direction[columnNumber] = 1;
+	
 			 }
 		 }else{
-			 // an ortogonal direction is always 1 in direction[0];
-			 this->direction[0]=1;
+			// default length of non-reciprocal dimension sould be 0 as these directions are orthogonal to real 3D spaceeters
+  				direction[0] = 0;
+				direction[1] = 0;
+				direction[2] = 0;
 		 }
 
     }
 
 	if(isReciprocal){
-		 spUnit = Kernel::UnitFactory::Instance().create("MomentumTransfer");
-		
-		 if(this->direction.norm2()!= 1){
-			 throw(std::invalid_argument("The module of basis reciprocal dimension has to be 1"));
+		if(UnitID==""){
+			spUnit = Kernel::UnitFactory::Instance().create("MomentumTransfer");
+		}else{
+			spUnit = Kernel::UnitFactory::Instance().create(UnitID);
+		}
+		// the length of basis reciprocal dimension is not 1 for non-cubic reciprocal lattice
+		 if(fabs(this->direction.norm2())<FLT_EPSILON){
+			 throw(std::invalid_argument("The module of basis reciprocal dimension can not be 0"));
 		 }
 	 }else{
-		 if(fabs(this->direction.norm()-this->direction[0])>FLT_EPSILON){
-			 throw(std::invalid_argument("The basis orthogonal dimension have to be directed along 0 in V3D"));
-
+		 if(this->direction.norm2()>FLT_EPSILON){
+				 throw(std::invalid_argument("The module of basis orthogonal dimension has to be 0"));
 		 }
-		 this->spUnit = Kernel::UnitFactory::Instance().create(UnitID);
-	
+		 if(UnitID==""){
+			this->spUnit =  Kernel::UnitFactory::Instance().create("DeltaE");
+		 }else{
+			this->spUnit = Kernel::UnitFactory::Instance().create(UnitID);
+		 }
 	 }
 	
 }

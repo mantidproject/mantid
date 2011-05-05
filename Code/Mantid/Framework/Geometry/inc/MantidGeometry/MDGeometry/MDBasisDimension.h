@@ -4,14 +4,19 @@
 /** Represents a 'basis' dimension.e.g. single direction in a multidimensional workspace;
 *
 *   There are two kinds of dimensions in multidimensional workspace: the reciprocal lattice vectors and orthogonal dimensions, describing other independent
-*   variables e.g. energy transfer or temperature;   
-*   A reciprocal basis dimension represent a crystallographic direction in a reciprocal unit cell (a cell of a Bravis lattice) 
+*   variables e.g. energy transfer or temperature;  
+*
+*   A reciprocal basis dimension represents single axis among projection axes defined by u1 || a*, u2 in plane of a* and b* where a* and b* are 
+*   reciprocal basis vectors,
+*   i.e. the crystal Cartesian axis relatied to a reciprocal unit cell (a cell of a Bravis lattice) if this direction is a reciprocal direction 
+*   
+* 
 *
 *   Orthogonal dimensions are always orthogonal to each other and to crystallographic directions, 
-*   Crystallgraphic directions are non-orhtogonal to each other for a non-cubic reciprocal lattice.
+*   Crystallgraphic directions are also orthogonal even for a non-cubic reciprocal lattice.
 *
 *   Basis dimensions are those known from disk, that are in their raw unbinned form.
-
+*
 *   
 
     @author Owen Arnold, RAL ISIS
@@ -65,7 +70,7 @@ namespace Mantid
 	  * @param UnitID        -- the units for this direction. A reciprocal dimension always have a "MomentumTransfer" unit, which overrides the value, specified in 
 	  *                         the constructor. An orthogonal dimention can have any unit, known by the unit factory. The default is enerty transfer. 
 	  */
-      explicit MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const V3D &inDirection=V3D(),const std::string &UnitID="DeltaE");
+      explicit MDBasisDimension(std::string id, bool isReciprocal, int columnNumber,const std::string &UnitID="",const V3D &inDirection=V3D());
       
       bool operator==(const MDBasisDimension &other) const;
       bool operator!=(const MDBasisDimension &other) const;
@@ -83,8 +88,9 @@ namespace Mantid
       int  m_columnNumber;
       //Some convertable Unit e.g. energy for an orthogonal dimension or momentum transfer for a reciprocal
 	  boost::shared_ptr<Kernel::Unit> spUnit;
-      /** the direction of the lattice vector in an ortogonal coordinate system, the length of this vector is equal to lattice 
-	    * parameter in this direction expressed in units above */
+      /** the direction of the lattice vector. The length of this vector is equal to lattice 
+	    * parameter for a reciprocal axis in this direction expressed in units above or 0 if this is an orthogonal direction like T or DE
+		(as orthogonal directions are ortogonal to the 3D space, represented by V3D )*/
 	  V3D direction;
     };
 

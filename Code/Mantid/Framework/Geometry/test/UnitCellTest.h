@@ -7,6 +7,7 @@
 #include <iostream>
 #include <iomanip>
 #include <MantidGeometry/Math/Matrix.h>
+
 #include <MantidGeometry/Crystal/UnitCell.h>
 
 using namespace Mantid::Geometry;
@@ -63,6 +64,26 @@ public:
     // angle
     TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,angRadians),0.471054990614,1e-10);
   }
+  void testUnitRotation(){
+	  UnitCell theCell;
+	  Quat rot;
+	  TSM_ASSERT_THROWS_NOTHING("The transformation should not throw",rot=theCell.get_transf_matrix(V3D(1,0,0),V3D(0,1,0)));
+
+	  std::vector<double> Rot = rot.getRotation();
+	  std::vector<double> rez(9,0);
+	  rez[0]=1;
+	  rez[4]=1;
+	  rez[8]=1;
+	  TSM_ASSERT_EQUALS("This should produce unit matrix defined as a vector",rez,Rot);
+  }
+	void testParallelProjThrows(){
+		 UnitCell theCell;
+		 Quat rot;
+		 TSM_ASSERT_THROWS("The transformation to plain defined by two parallel vectors should throw",
+			rot=theCell.get_transf_matrix(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
+	}
+	
+
 };
 
 

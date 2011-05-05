@@ -23,45 +23,7 @@ struct findDimension
      return m_dimension->getDimensionId() == obj->getDimensionId();
    }
 };
-void 
-MDGeometryDescription::set_proj_plain(const Geometry::V3D &u, const Geometry::V3D &v, const UnitCell &Lattice)
-{
 
-	MantidMat B = Lattice.getB();
-
-	V3D e1 = B*u;
-	V3D V  = B*v;
-	V3D e3  =e1.cross_prod(V);
-	e3.normalize();
-	double norm2 = e3.norm2();
-	if(norm2<FLT_EPSILON){
-		g_log.error()<<"MDGeometryDescription::projection can not be defined by two parallel vectors: "<<u<<" and "<<v<<std::endl;
-		throw(std::invalid_argument(" two parallel vectors do not define the projection lain"));
-	}
-	e1.normalize();
-	V3D e2= e3.cross_prod(e1);
-
-	MantidMat Transf(3,3);
-	Transf.setColumn(0,e1);
-	Transf.setColumn(1,e2);
-	Transf.setColumn(2,e3);
-
-	std::vector<double> view = Transf;
-	Transf.Invert();
-	this->rotations = Transf.get_vector();
-	//bool real_change(false);
-	//if(	proj_plain[0] != u){
-	//	real_change   = true;
-	//	proj_plain[0] = u;
-	//};
-	//if (proj_plain[1] != v){
-	//	real_change   = true;
-	//	proj_plain[1] = v;
-	//}
-	//if(real_change)direction_changed=true;
-	//V3D beamAxis(0,0,1);
-	//this->Rotations = Quat(z,beamAxis);
-}
 //
 std::vector<double> 
 MDGeometryDescription::getRotations()const
@@ -112,7 +74,7 @@ direction_changed(false)
 	this->data.resize(this->nDimensions);
 	unsigned int ic(0);
 	for(it= basisDims.begin();it != basisDims.end();it++){
-		this->data[ic].Tag = it->getId();
+		this->data[ic].Tag          = it->getId();
 		this->data[ic].isReciprocal = it->getIsReciprocal();
 
 		ic++;
@@ -170,6 +132,14 @@ direction_changed(false)
   }
 }
 
+MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
+nDimensions(numDims),
+nReciprocalDimensions(numRecDims)
+{
+    this->intit_default_slicing(nDimensions,nReciprocalDimensions);
+
+}
+
 void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension, const int i)
 {
   this->data[i].data_shift = 0;
@@ -181,12 +151,12 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
 //  this->data[i].data_scale = dimension->getScale();
   this->data[i].Tag = dimension->getDimensionId();
 
-  //Handle reciprocal dimensions.
-  if(dimension->isReciprocal())
-  {
-	  this->data[i].direction = dimension->getDirection();
-        
-  }
+  ////Handle reciprocal dimensions.
+  //if(dimension->isReciprocal())
+  //{
+	 // this->data[i].direction = dimension->getDirection();
+  //      
+  //}
 }
 
 //
@@ -227,6 +197,7 @@ MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
     }
     return iTagNum;
 }
+//
 size_t
 MDGeometryDescription::getImageSize()const
 {
@@ -305,16 +276,7 @@ MDGeometryDescription::getDimensionsTags(void)const
     }
     return tags;
 }
-
-
-MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
-nDimensions(numDims),
-nReciprocalDimensions(numRecDims)
-{
-    this->intit_default_slicing(nDimensions,nReciprocalDimensions);
-
-}
-
+//
 void
 MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
 {
@@ -356,7 +318,7 @@ MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
     
     for(i=0;i<nReciprocalDimensions;i++){ //
 		this->data[i].isReciprocal = true;
-		this->data[i].direction[i] = 1;
+	//	this->data[i].direction[i] = 1;
     }
   
   
@@ -365,17 +327,6 @@ MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
       this->data[i].AxisName = def_tags[i]; //
    }
 
-}
-void 
-MDGeometryDescription::setDirection(size_t i,const V3D &coord)
-{
-    this->check_index(i,"setDirection");
-    if(i<3){
-		this->data[i].direction =coord;
-    }else{
-         throw(std::invalid_argument("SlicingProperty::setDirection wrong parameter, index>=3 and attempting to set a coordinate of orthogonal dimension"));
- 
-    }
 }
 
 /*

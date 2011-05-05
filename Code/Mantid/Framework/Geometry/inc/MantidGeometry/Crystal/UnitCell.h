@@ -2,6 +2,8 @@
 #define MANTID_GEOMETRY_UNITCELL_H_
 #include <MantidKernel/System.h>
 #include <MantidGeometry/Math/Matrix.h>
+#include <MantidGeometry/Quat.h>
+#include <MantidGeometry/V3D.h>
 #include <cmath>
 #include <vector>
 
@@ -118,7 +120,11 @@ namespace Geometry
 	  	double volume()const; 
       double recVolume() const; 
       void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
-
+	  /** function returns a unit quaternion, which defines rotation, allowing to transform a vector, expressed in 
+	      the units of the cell, into the orthogonal system, defined by vectors u and v;
+		  u and v have to be not parallel. 
+	  */
+	  Quat get_transf_matrix(const V3D &u, const V3D &v)const;
     private:	    
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)
       std::vector <double> da; 
