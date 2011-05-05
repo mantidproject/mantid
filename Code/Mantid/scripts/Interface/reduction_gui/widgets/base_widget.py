@@ -100,14 +100,13 @@ class BaseWidget(QtGui.QWidget):
             else:
                 return None
         else:       
-            fname = str(QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
+            fname = QtCore.QFileInfo(QtGui.QFileDialog.getOpenFileName(self, "Data file - Choose a data file",
                                                               self._settings.data_path, 
-                                                              data_type)).filePath())
+                                                              data_type)).filePath()
             if fname:
                 # Store the location of the loaded file
-                (folder, file_name) = os.path.split(fname)
                 self._settings.data_path = str(QtCore.QFileInfo(fname).path())
-            return fname     
+            return str(fname)     
     
     @process_file_parameter
     def show_instrument(self, file_name=''):
