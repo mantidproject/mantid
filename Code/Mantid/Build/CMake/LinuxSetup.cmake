@@ -44,7 +44,7 @@ file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.sh  "#!/bin/sh\n"
 )
 file ( WRITE ${CMAKE_CURRENT_BINARY_DIR}/mantid.csh  "#!/bin/csh\n"
                                                     "setenv MANTIDPATH \"${CMAKE_INSTALL_PREFIX}/${BIN_DIR}\"\n"
-                                                    "setenv PATH \"$PATH:$MANTIDPATH\"\n"
+                                                    "setenv PATH \"\${PATH}:\${MANTIDPATH}\"\n"
 )
 
 # Note: On older versions of CMake, this line may mean that to do a "make package" without being root
