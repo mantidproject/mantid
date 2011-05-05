@@ -3,7 +3,7 @@
 
 #include <boost/functional/hash.hpp>
 #include <sstream>
-
+#include <cfloat>
 
 namespace Mantid
 {
