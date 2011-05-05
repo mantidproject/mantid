@@ -412,6 +412,7 @@ class Reducer(object):
             Set the path for data files
             @param path: data file path
         """
+        path = os.path.normcase(path)
         if os.path.isdir(path):
             self._data_path = path
         else:
