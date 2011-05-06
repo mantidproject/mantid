@@ -37,6 +37,7 @@ public:
   }
   
 
+  /** Run the MDEWPeakIntegration with the given peak radius integration param */
   void doRun(double PeakRadius)
   {
     MDEWPeakIntegration alg;
@@ -51,6 +52,7 @@ public:
   }
 
 
+  /** Full test using faked-out peak data */
   void test_exec()
   {
     outWSName = "MDEWPeakIntegrationTest_MDEWS";

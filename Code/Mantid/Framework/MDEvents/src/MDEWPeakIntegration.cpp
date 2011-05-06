@@ -90,8 +90,6 @@ namespace MDEvents
 
       double radius = getProperty("PeakRadius");
 
-//      std::cout << "\n\n\nStarting peak at " << pos << " with radius " << radius << "\n";
-
       // Build the sphere transformation
       bool dimensionsUsed[nd];
       CoordType center[nd];
@@ -111,7 +109,7 @@ namespace MDEvents
       p.setIntensity(signal);
       p.setSigmaIntensity( sqrt(errorSquared) );
 
-//      std::cout << "Peak " << i << " at " << pos << ": signal " << signal << std::endl;
+      g_log.information() << "Peak " << i << " at " << pos << ": signal " << signal << std::endl;
     }
 
   }
