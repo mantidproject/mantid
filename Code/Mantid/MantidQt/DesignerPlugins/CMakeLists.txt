@@ -30,7 +30,7 @@ add_definitions( -DLIBRARY_NAME=${LIB_NAME} )
 set ( SRC_UNITY_IGNORE_FILES )
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(DesignerPlugins SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(DesignerPlugins SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 add_library ( DesignerPlugins ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} )

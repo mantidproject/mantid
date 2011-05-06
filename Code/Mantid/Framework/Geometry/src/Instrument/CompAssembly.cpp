@@ -1,9 +1,11 @@
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include <algorithm>
-#include <stdexcept> 
 #include <ostream>
+#include <stdexcept> 
+
 namespace Mantid
 {
 namespace Geometry
@@ -295,6 +297,35 @@ void CompAssembly::getBoundingBox(BoundingBox & assemblyBox) const
   }
 }
 
+
+
+//------------------------------------------------------------------------------------------------
+/** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.
+ *
+ * @param testRay :: Track under test. The results are stored here.
+ * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching
+ */
+void CompAssembly::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const
+{
+  int nchildren = this->nelements();
+  for( int i = 0; i < nchildren; ++i )
+  {
+    boost::shared_ptr<Geometry::IComponent> comp = this->getChild(i);
+    if( ICompAssembly_sptr childAssembly = boost::dynamic_pointer_cast<ICompAssembly>(comp) )
+    {
+      searchQueue.push_back(comp);
+    }
+    // Check the physical object intersection
+    else if( IObjComponent *physicalObject = dynamic_cast<IObjComponent*>(comp.get()) )
+    {
+       physicalObject->interceptSurface(testRay);
+    }
+    else {}
+  }
+}
+
+
+//------------------------------------------------------------------------------------------------
 /** Print information about elements in the assembly to a stream
  * @param os :: output stream 
  * 

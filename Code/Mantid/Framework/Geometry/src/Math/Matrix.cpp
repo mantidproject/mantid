@@ -424,8 +424,7 @@ Element by Element comparison
 }
 
 template<typename T>
-bool
-Matrix<T>::operator==(const Matrix<T>& A) const
+bool Matrix<T>::operator==(const Matrix<T>& A) const
 /** 
 Element by element comparison within tolerance.
 Tolerance means that the value must be > tolerance
@@ -436,7 +435,23 @@ Always returns 0 if the Matrix have different sizes
 @return true on success 
 */
 {
-  const double Tolerance(1e-8);
+  return this->equals(A, 1e-8);
+}
+
+
+template<typename T>
+bool Matrix<T>::equals(const Matrix<T>& A, const double Tolerance) const
+/**
+Element by element comparison within tolerance.
+Tolerance means that the value must be > tolerance
+and less than (diff/max)>tolerance
+
+Always returns 0 if the Matrix have different sizes
+@param A :: matrix to check.
+@param Tolerance :: tolerance in comparing elements
+@return true on success
+*/
+{
   if (&A!=this)       // this == A == always true
   {
     if(A.nx!=nx || A.ny!=ny)

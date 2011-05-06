@@ -7,6 +7,7 @@
 #include "MantidKernel/Timer.h"
 #include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/BoxController.h"
+#include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDEventFactory.h"
@@ -140,8 +141,8 @@ public:
 
     TS_ASSERT_THROWS_NOTHING( b->addManyEvents( events, prog ); );
     TS_ASSERT_EQUALS( b->getNPoints(), 100*num_repeat);
-    TS_ASSERT_EQUALS( b->getBox()->getSignal(), 100*num_repeat*2.0);
-    TS_ASSERT_EQUALS( b->getBox()->getErrorSquared(), 100*num_repeat*2.0);
+    TS_ASSERT_EQUALS( b->getBox()->getSignal(), 100*double(num_repeat)*2.0);
+    TS_ASSERT_EQUALS( b->getBox()->getErrorSquared(), 100*double(num_repeat)*2.0);
 
     box_t * gridBox = dynamic_cast<box_t *>(b->getBox());
     std::vector<IMDBox<MDEvent<2>,2>*> boxes = gridBox->getBoxes();
@@ -235,16 +236,16 @@ public:
       size_t expected_events_per_bin, bool unevenSizes = false)
   {
     size_t len = 10; // Make the box split into this many per size
-    double size = len * 1.0;  // Make each grid box 1.0 in size
+    double size = double(len) * 1.0;  // Make each grid box 1.0 in size
     size_t binlen = 5; // And bin more coarsely
 
     // 10x10x10 eventWorkspace
     MDEventWorkspace3::sptr ws = MDEventsHelper::makeMDEW<3>(len, 0.0, size);
 
     // Put one event per bin
-    for (size_t x=0; x<len; x++)
-      for (size_t y=0; y<len; y++)
-        for (size_t z=0; z<len; z++)
+    for (double x=0; x<len; x++)
+      for (double y=0; y<len; y++)
+        for (double z=0; z<len; z++)
         {
           CoordType centers[3] = {x+0.5,y+0.5,z+0.5};
           ws->addEvent( MDEvent<3>(1.0, 2.0, centers) );
@@ -283,8 +284,8 @@ public:
 
     for (size_t i=0; i < out->getNPoints(); i++)
     {
-      TS_ASSERT_DELTA( out->getSignalAt(i), expected_events_per_bin * 1.0, 1e-5 );
-      TS_ASSERT_DELTA( out->getErrorAt(i), expected_events_per_bin * 2.0, 1e-5 );
+      TS_ASSERT_DELTA( out->getSignalAt(i), double(expected_events_per_bin) * 1.0, 1e-5 );
+      TS_ASSERT_DELTA( out->getErrorAt(i), double(expected_events_per_bin) * 2.0, 1e-5 );
     }
 
 
@@ -316,6 +317,29 @@ public:
 //    do_test_centerpointBinToMDHistoWorkspace("NONE", "Axis2", "NONE", "NONE", 200); // 2x10x10 blocks
 //  }
 
+
+
+  void test_integrateSphere()
+  {
+    // 10x10x10 eventWorkspace
+    MDEventWorkspace3::sptr ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    TS_ASSERT_EQUALS( ws->getNPoints(), 1000);
+
+    // The sphere transformation
+    CoordType center[3] = {0,0,0};
+    bool dimensionsUsed[3] = {true,true,true};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    double signal = 0;
+    double errorSquared = 0;
+    ws->getBox()->integrateSphere(sphere, 1.0, signal, errorSquared);
+
+    //TODO:
+//    TS_ASSERT_DELTA( signal, 1.0, 1e-5);
+//    TS_ASSERT_DELTA( errorSquared, 1.0, 1e-5);
+
+
+  }
 
 };
 

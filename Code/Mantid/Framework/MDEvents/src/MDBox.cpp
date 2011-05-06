@@ -195,15 +195,37 @@ namespace MDEvents
     }
   }
 
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Run a MDBox task inside this box */
-//  TMDE(
-//  void MDBox)::runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained)
-//  {
-//    // Fully evaluate this MD Box
-//    task->evaluateMDBox(this, fullyContained);
-//  }
+
+  /** Integrate the signal within a sphere; for example, to perform single-crystal
+   * peak integration.
+   * The CoordTransform object could be used for more complex shapes, e.g. "lentil" integration, as long
+   * as it reduces the dimensions to a single value.
+   *
+   * @param radiusTransform :: nd-to-1 coordinate transformation that converts from these
+   *        dimensions to the distance (squared) from the center of the sphere.
+   * @param radiusSquared :: radius^2 below which to integrate
+   * @param[out] signal :: set to the integrated signal
+   * @param[out] errorSquared :: set to the integrated squared error.
+   */
+  TMDE(
+  void MDBox)::integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const
+  {
+    typename std::vector<MDE>::const_iterator it = data.begin();
+    typename std::vector<MDE>::const_iterator it_end = data.end();
+
+    // For each MDEvent
+    for (; it != it_end; ++it)
+    {
+      CoordType out[nd];
+      radiusTransform.apply(it->getCenter(), out);
+      if (out[0] < radiusSquared)
+      {
+        signal += it->getSignal();
+        errorSquared += it->getErrorSquared();
+      }
+    }
+  }
+
 
 }//namespace MDEvents
 

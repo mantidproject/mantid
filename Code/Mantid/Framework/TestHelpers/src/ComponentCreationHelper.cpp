@@ -268,7 +268,7 @@ namespace ComponentCreationHelper
    * Create an test instrument with n panels of rectangular detectors, pixels*pixels in size,
    * a source and spherical sample shape.
    *
-   * Banks are centered at position (0,0,5*banknum)
+   * Banks' lower-left corner is at position (0,0,5*banknum) and they go up to (pixels*0.008, pixels*0.008, Z)
    * Pixels are 4 mm wide.
    *
    * @param num_banks: number of rectangular banks to create
@@ -296,15 +296,14 @@ namespace ComponentCreationHelper
           banknum*pixels*pixels, true, pixels);
 
       // Mark them all as detectors
-      for (int i=0; i < bank->nelements(); i++)
-      {
-        boost::shared_ptr<Detector> detector = boost::dynamic_pointer_cast<Detector>((*bank)[i]);
-        if (detector)
+      for (int x=0; x<pixels; x++)
+        for (int y=0; y<pixels; y++)
         {
-          //Mark it as a detector (add to the instrument cache)
-          testInst->markAsDetector(detector.get());
+          boost::shared_ptr<Detector> detector = bank->getAtXY(x,y);
+          if (detector)
+            //Mark it as a detector (add to the instrument cache)
+            testInst->markAsDetector(detector.get());
         }
-      }
 
       testInst->add(bank);
       bank->setPos(V3D(0.0, 0.0, 5.0*banknum));

@@ -40,8 +40,8 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void FakeMDEventData::initDocs()
   {
-    this->setWikiSummary("Adds fake multi-dimensional event data to a MDEventWorkspace, for use in testing.");
-    this->setOptionalMessage("Adds fake multi-dimensional event data to a MDEventWorkspace, for use in testing.");
+    this->setWikiSummary("Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDEventWorkspace.");
+    this->setOptionalMessage("Adds fake multi-dimensional event data to an existing MDEventWorkspace, for use in testing.\nYou can create a blank MDEventWorkspace with CreateMDEventWorkspace.");
   }
 
 

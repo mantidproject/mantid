@@ -23,6 +23,8 @@
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 
 #include "MantidPythonAPI/PyAlgorithmWrapper.h"
+//Poco
+#include <Poco/ActiveResult.h>
 
 namespace Mantid
 {
@@ -111,6 +113,12 @@ using namespace boost::python;
   void export_ialgorithm()
   {
     
+    class_<Poco::ActiveResult<bool> >("ActiveResult_bool", no_init)
+      .def("available", &Poco::ActiveResult<bool>::available)
+      .def("wait", (void (Poco::ActiveResult<bool>::*)())&Poco::ActiveResult<bool>::wait)
+      .def("data", (bool& (Poco::ActiveResult<bool>::*)() const)&Poco::ActiveResult<bool>::data,return_value_policy< copy_non_const_reference >())
+      ;
+
     register_ptr_to_python<API::IAlgorithm*>();
     register_ptr_to_python<boost::shared_ptr<API::IAlgorithm> >();
 

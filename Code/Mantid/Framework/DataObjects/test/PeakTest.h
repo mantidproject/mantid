@@ -112,6 +112,11 @@ public:
     TS_ASSERT_EQUALS( p.getH(), 5.0);
     TS_ASSERT_EQUALS( p.getK(), 6.0);
     TS_ASSERT_EQUALS( p.getL(), 7.0);
+    p.setHKL(V3D(1.0, 2.0, 3.0));
+    TS_ASSERT_EQUALS( p.getH(), 1.0);
+    TS_ASSERT_EQUALS( p.getK(), 2.0);
+    TS_ASSERT_EQUALS( p.getL(), 3.0);
+    TS_ASSERT_EQUALS( p.getHKL(), V3D(1.0, 2.0, 3.0));
   }
 
   void test_getBank_and_row()
@@ -126,6 +131,29 @@ public:
     p.setDetectorID(10100);
     TS_ASSERT_EQUALS(p.getRow(), 0)
     TS_ASSERT_EQUALS(p.getCol(), 1)
+  }
+
+  void test_getQSampleFrame()
+  {
+
+    // Peak 3 is phi,chi,omega of 90,0,0; giving this matrix:
+    Matrix<double> r2(3,3,false);
+    r2[0][2] = 1;
+    r2[1][1] = 1;
+    r2[2][0] = -1;
+
+    Peak p(inst, 10000, 2.0);
+    p.setGoniometerMatrix(r2);
+
+    // Q in the lab frame
+    V3D qLab = p.getQLabFrame();
+    // q in the sample frame.
+    V3D qSample = p.getQSampleFrame();
+    // If we re-rotate q in the sample frame by the gonio matrix, we should get q in the lab frame
+    V3D qSampleRotated = r2 * qSample;
+
+    // Did the peak properly invert the rotation matrix?
+    TS_ASSERT_EQUALS(qLab, qSampleRotated);
   }
 
 };

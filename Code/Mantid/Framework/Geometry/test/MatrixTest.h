@@ -72,6 +72,16 @@ public:
     TS_ASSERT_EQUALS(Ident,A);
   }
 
+  /** Test of equals with a user-specified tolerance */
+  void test_equals()
+  {
+    Matrix<double> A(3,3, true);
+    Matrix<double> B(3,3, true);
+    B[1][1] = 1.1;
+    TS_ASSERT( !A.equals(B, 0.05) );
+    TS_ASSERT( A.equals(B, 0.15) );
+  }
+
   /**
   Check that we can swap rows and columns
   */

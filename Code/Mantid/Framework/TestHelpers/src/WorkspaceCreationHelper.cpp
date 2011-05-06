@@ -1,13 +1,12 @@
 //------------------------------------------------------------------------------
 // Includes
 //------------------------------------------------------------------------------
-#include "MantidTestHelpers/WorkspaceCreationHelper.h"
-// Other Helper
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-#include <cmath>
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cmath>
 
 namespace WorkspaceCreationHelper
 {

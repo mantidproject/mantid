@@ -55,7 +55,7 @@ set ( TEST_PY_FILES test/ImportTest.py
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(PythonAPI SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(PythonAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 ###########################################################################

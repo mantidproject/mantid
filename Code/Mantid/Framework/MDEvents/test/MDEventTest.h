@@ -78,6 +78,9 @@ public:
     TS_ASSERT_EQUALS( a.getCenter(0), 0.123);
     TS_ASSERT_EQUALS( a.getCenter(1), 1.234);
     TS_ASSERT_EQUALS( a.getCenter(2), 2.345);
+    TS_ASSERT_EQUALS( a.getCenter()[0], 0.123);
+    TS_ASSERT_EQUALS( a.getCenter()[1], 1.234);
+    TS_ASSERT_EQUALS( a.getCenter()[2], 2.345);
   }
 
   void test_setCenter_array()

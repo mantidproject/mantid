@@ -4,13 +4,15 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidDataObjects/Peak.h"
 #include "MantidKernel/ProgressBase.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
+#include "MantidMDEvents/BoxController.h"
+#include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/IMDBox.h"
 #include "MantidMDEvents/MDEvent.h"
 #include "MantidMDEvents/MDGridBox.h"
-#include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/MDHistoWorkspace.h"
 
 namespace Mantid
@@ -91,10 +93,14 @@ namespace MDEvents
       return (dynamic_cast<MDGridBox<MDE,nd> *>(data) != NULL);
     }
 
-    /** Returns a pointer to the box (MDBox or MDGridBox) contained
-     * within.
-     */
+    /** Returns a pointer to the box (MDBox or MDGridBox) contained within, */
     IMDBox<MDE,nd> * getBox()
+    {
+      return data;
+    }
+
+    /** Returns a pointer to the box (MDBox or MDGridBox) contained within, const version.  */
+    const IMDBox<MDE,nd> * getBox() const
     {
       return data;
     }
@@ -107,15 +113,6 @@ namespace MDEvents
 
     /// Box controller in use
     BoxController_sptr m_BoxController;
-
-
-    //    /** Typedef of the basic MDEvent data type used in this MDEventWorkspace.
-    //     * This is for convenience; an algorithm can declare
-    //     *  MyWorkspace::Event someEvent;
-    //     * without having to look up template parameters...
-    //     */
-    //    //typedef MDEvent<nd> Event;
-
 
   public:
     /// Typedef for a shared pointer of this kind of event workspace

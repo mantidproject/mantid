@@ -78,6 +78,7 @@ namespace Mantid
 
       // The Workspace Factory create-from-parent method needs direct access to the axes.
       friend class WorkspaceFactoryImpl;
+
       /// Typedef for the workspace_iterator to use with a Workspace
       typedef workspace_iterator<LocatedDataRef, MatrixWorkspace> iterator;
       /// Typedef for the const workspace_iterator to use with a Workspace
@@ -301,12 +302,14 @@ namespace Mantid
 
       /// The instrument used for this experiment
       boost::shared_ptr<Geometry::Instrument> sptr_instrument;
+
+    protected:
       /// The SpectraDetector table used for this experiment. Inside a copy-on-write pointer.
       Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
+
       /// The information on the sample environment
       Kernel::cow_ptr<Sample> m_sample;
 
-    protected:
       /// The run information
       Kernel::cow_ptr<Run> m_run;
 

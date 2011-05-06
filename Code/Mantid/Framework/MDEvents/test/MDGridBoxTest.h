@@ -20,6 +20,7 @@
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include "MantidMDEvents/CoordTransformDistance.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -75,25 +76,28 @@ public:
 
 
   //-------------------------------------------------------------------------------------
-  /** Generate an empty MDBox with nd dimensions, splitting in 10x10 boxes
+  /** Generate an empty MDBox with 2 dimensions, splitting in (default) 10x10 boxes.
+   * Box size is 10x10.
+   *
    * @param numEventsPerBox :: each sub-box will get this many events (all
-   *        placed in the middle of each sub-box.
+   *        placed in the middle of each sub-box, aka 0.5, 1.5, 2.5 etc.)
+   * @param split0, split1 :: for uneven splitting
    * */
-  template<size_t nd>
-  static MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t numEventsPerBox)
+  static MDGridBox<MDEvent<2>,2> * makeMDGridBox2(size_t numEventsPerBox, size_t split0=10, size_t split1=10)
   {
     // Split at 5 events
-    BoxController_sptr splitter(new BoxController(nd));
+    BoxController_sptr splitter(new BoxController(2));
     splitter->setSplitThreshold(5);
     // Splits into 10x10x.. boxes
-    splitter->setSplitInto(10);
+    splitter->setSplitInto(0, split0);
+    splitter->setSplitInto(1, split1);
     // Set the size to 10.0 in all directions
-    MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
-    for (size_t d=0; d<nd; d++)
+    MDBox<MDEvent<2>,2> * box = new MDBox<MDEvent<2>,2>(splitter);
+    for (size_t d=0; d<2; d++)
       box->setExtents(d, 0.0, 10.0);
 
     // Split
-    MDGridBox<MDEvent<nd>,nd> * out = new MDGridBox<MDEvent<nd>,nd>(box);
+    MDGridBox<MDEvent<2>,2> * out = new MDGridBox<MDEvent<2>,2>(box);
 
     // Make an event in the middle of each box
     for (size_t i=0; i < numEventsPerBox; i++)
@@ -158,7 +162,7 @@ public:
     // Set the size to splitInto*1.0 in all directions
     MDBox<MDEvent<nd>,nd> * box = new MDBox<MDEvent<nd>,nd>(splitter);
     for (size_t d=0; d<nd; d++)
-      box->setExtents(d, 0.0, splitInto*1.0);
+      box->setExtents(d, 0.0, double(splitInto));
     // Split into the gridbox.
     MDGridBox<MDEvent<nd>,nd> * gridbox = new MDGridBox<MDEvent<nd>,nd>(box);
 
@@ -174,7 +178,7 @@ public:
   static std::vector<MDEvent<1> > makeMDEvents1(size_t num)
   {
     std::vector<MDEvent<1> > out;
-    for (size_t i=0; i<num; i++)
+    for (double i=0; i<num; i++)
     {
       CoordType coords[1] = {i*1.0+0.5};
       out.push_back( MDEvent<1>(1.0, 1.0, coords) );
@@ -244,12 +248,12 @@ public:
     for (size_t i=0; i<boxes.size(); i++)
     {
       MDBox<MDEvent<1>,1> * box = dynamic_cast<MDBox<MDEvent<1>,1> *>(boxes[i]);
-      TS_ASSERT_DELTA(box->getExtents(0).min, i*1.0, 1e-6);
-      TS_ASSERT_DELTA(box->getExtents(0).max, (i+1)*1.0, 1e-6);
+      TS_ASSERT_DELTA(box->getExtents(0).min, double(i)*1.0, 1e-6);
+      TS_ASSERT_DELTA(box->getExtents(0).max, double(i+1)*1.0, 1e-6);
       // Look at the single event in there
       TS_ASSERT_EQUALS(box->getNPoints(), 1);
       MDEvent<1> ev = box->getEvents()[0];
-      TS_ASSERT_DELTA(ev.getCenter(0), i*1.0 + 0.5, 1e-5);
+      TS_ASSERT_DELTA(ev.getCenter(0), double(i)*1.0 + 0.5, 1e-5);
       // Its depth level should be 1 (deeper than parent)
       TS_ASSERT_EQUALS(box->getDepth(), 1);
       // The volume was set correctly
@@ -306,7 +310,7 @@ public:
   /** Start with a grid box, split some of its contents into sub-gridded boxes. */
   void test_splitContents()
   {
-    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>(0);
+    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox2(0);
     MDGridBox<MDEvent<2>,2> * gb;
     MDBox<MDEvent<2>,2> * b;
 
@@ -352,7 +356,7 @@ public:
     std::vector<IMDBox<MDEvent<2>,2>*> boxes;
 
     // 10x10 box, extents 0-10.0
-    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox<2>(0);
+    MDGridBox<MDEvent<2>,2> * superbox = makeMDGridBox2(0);
     // And the 0-th box is further split (
     TS_ASSERT_THROWS_NOTHING(superbox->splitContents(0));
 
@@ -411,8 +415,8 @@ public:
     {
       std::cout << " --- Recursion Level " << recurseLevels << " --- " << std::endl;
       Timer tim1;
-      double boxes_per_side = pow(numSplit*1.0, recurseLevels*1.0);
-      double spacing = (numSplit*1.0)/boxes_per_side;
+      double boxes_per_side = pow(double(numSplit), double(recurseLevels));
+      double spacing = double(numSplit)/boxes_per_side;
       // How many times to add the same event
       size_t num_to_repeat = size_t(1e7 / (boxes_per_side*boxes_per_side));
 
@@ -433,7 +437,7 @@ public:
 
       double sec = tim1.elapsed();
       std::cout << sec << " seconds to add " << box->getNPoints() << " events. Each box had " << num_to_repeat << " events." << std::endl;
-      std::cout << "equals " << 1e6*sec/box->getNPoints() << " seconds per million events." << std::endl;
+      std::cout << "equals " << 1e6*sec/double(box->getNPoints()) << " seconds per million events." << std::endl;
     }
 
   }
@@ -447,7 +451,7 @@ public:
    * */
   void test_addEvents_2D()
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox2(0);
     std::vector< MDEvent<2> > events;
 
     // Make an event in the middle of each box
@@ -506,7 +510,7 @@ public:
    * */
   void test_addEvents_start_stop()
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox2(0);
     std::vector< MDEvent<2> > events;
 
     // Make an event in the middle of each box
@@ -533,7 +537,7 @@ public:
    * */
   void do_test_addEvents_inParallel(ThreadScheduler * ts)
   {
-    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox<2>(0);
+    MDGridBox<MDEvent<2>,2> * b = makeMDGridBox2(0);
     int num_repeat = 1000;
 
     PARALLEL_FOR_NO_WSP_CHECK()
@@ -582,7 +586,7 @@ public:
     typedef MDBox<MDEvent<2>,2> box_t;
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
-    gbox_t * b = makeMDGridBox<2>(0);
+    gbox_t * b = makeMDGridBox2(0);
     b->getBoxController()->setSplitThreshold(100);
     b->getBoxController()->setMaxDepth(4);
 
@@ -643,7 +647,7 @@ public:
     typedef MDBox<MDEvent<2>,2> box_t;
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
-    gbox_t * b = makeMDGridBox<2>(0);
+    gbox_t * b = makeMDGridBox2(0);
     b->getBoxController()->setSplitThreshold(100);
     b->getBoxController()->setMaxDepth(4);
 
@@ -700,6 +704,7 @@ public:
     return bin;
   }
 
+  //------------------------------------------------------------------------------------------------
   /** Helper to test the binning of a 2D bin */
   void doTestMDBin2(MDGridBox<MDEvent<2>,2> * b,
       const std::string & message,
@@ -722,7 +727,7 @@ public:
     typedef IMDBox<MDEvent<2>,2> ibox_t;
 
     // 10x10 bins, 2 events per bin, each weight of 2.0
-    gbox_t * b = makeMDGridBox<2>(2);
+    gbox_t * b = makeMDGridBox2(2);
     TS_ASSERT_DELTA( b->getSignal(), 400.0, 1e-5);
 
     MDBin<MDEvent<2>,2> bin;
@@ -773,32 +778,114 @@ public:
 
 
 
+
+
+  //------------------------------------------------------------------------------------------------
+  /** For test_integrateSphere
+   *
+   * @param box
+   * @param radius :: radius to integrate
+   * @param numExpected :: how many events should be in there
+   */
+  void do_check_integrateSphere(MDGridBox<MDEvent<2>,2> & box, CoordType x, CoordType y, const CoordType radius, double numExpected, std::string message)
+  {
+    //std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
+    // The sphere transformation
+    bool dimensionsUsed[2] = {true,true};
+    CoordType center[2] = {x,y};
+    CoordTransformDistance sphere(2, center, dimensionsUsed);
+
+    double signal = 0;
+    double errorSquared = 0;
+    box.integrateSphere(sphere, radius*radius, signal, errorSquared);
+    TSM_ASSERT_DELTA( message, signal, 2.0*numExpected, 1e-5);
+    TSM_ASSERT_DELTA( message, errorSquared, 2.0*numExpected, 1e-5);
+  }
+
+  /** Re-used suite of tests */
+  void do_test_integrateSphere(MDGridBox<MDEvent<2>,2> * box_ptr)
+  {
+    // Events are at 0.5, 1.5, etc.
+    MDGridBox<MDEvent<2>,2> & box = *box_ptr;
+    TS_ASSERT_EQUALS( box.getNPoints(), 10*10);
+
+    do_check_integrateSphere(box, 4.5,4.5,  0.5,   1.0, "Too small to contain any vertices");
+    do_check_integrateSphere(box, 4.5, 4.5, 0.001, 1.0, "Tiny but still has an event.");
+    do_check_integrateSphere(box, 4.51,4.5, 0.001, 0.0, "Tiny but off the event.");
+    do_check_integrateSphere(box, 2.0,2.0,  0.49,  0.0, "At a corner but grabbing nothing");
+    do_check_integrateSphere(box, 4.8,4.5,  0.35,  1.0, "Too small to contain any vertices");
+    do_check_integrateSphere(box, 5.0,5.0,  1.0,   4.0, "Contains a box completely");
+    do_check_integrateSphere(box, 4.5,4.5,  0.9,   1.0, "Contains one box completely");
+    do_check_integrateSphere(box, 0.5,0.5,  0.9,   1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 9.5,0.5,  0.9,   1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 0.5,9.5,  0.9,   1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 4.5,9.5,  0.9,   1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 9.5,9.5,  0.9,   1.0, "Contains one box completely, at the edges");
+    do_check_integrateSphere(box, 1.5,1.5,  1.95,  9.0, "Contains 5 boxes completely, and 4 boxes with a point");
+    do_check_integrateSphere(box, -1.0,0.5, 1.55,  1.0, "Off an edge but enough to get an event");
+
+    // Now I add an event very near an edge
+    CoordType center[2] = {0.001, 0.5};
+    box.addEvent(MDEvent<2>(2.0, 2.0, center));
+    do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
+    do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
+  }
+
+  /** Test of sphere integration with even splitting*/
+  void test_integrateSphere()
+  {
+    // 10x10 sized box
+    MDGridBox<MDEvent<2>,2> * box_ptr = makeMDGridBox2(1);
+    do_test_integrateSphere(box_ptr);
+  }
+
+  void test_integrateSphere_unevenSplit()
+  {
+    // 10x5 sized box
+    MDGridBox<MDEvent<2>,2> * box_ptr = makeMDGridBox2(1, 10,5);
+    do_test_integrateSphere(box_ptr);
+  }
+
+  void test_integrateSphere_unevenSplit2()
+  {
+    // Funnier splitting: 3x7 sized box
+    MDGridBox<MDEvent<2>,2> * box_ptr = makeMDGridBox2(1, 3,7);
+    do_test_integrateSphere(box_ptr);
+  }
+
+
+
 private:
   std::string message;
 };
 
 
 
+
+
 //=====================================================================================
-//===================================== Performance Test ================================
+//===================================== Performance Test ==============================
 //=====================================================================================
 class MDGridBoxTestPerformance : public CxxTest::TestSuite
 {
 public:
 
   MDGridBox<MDEvent<3>,3> * box3;
+  MDGridBox<MDEvent<3>,3> * box3b;
   std::vector<MDEvent<3> > events;
 
   void setUp()
   {
     // Split 5x5x5, 2 deep.
     box3 = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
+    box3b = MDGridBoxTest::makeRecursiveMDGridBox<3>(5,1);
 
     // Make the list of fake events, random dist.
-    size_t num = 5e6;
+    size_t num = 1e6;
+    events.clear();
 
     boost::mt19937 rng;
-    boost::uniform_real<double> u(0, 10.0); // Range
+    boost::uniform_real<double> u(0, 5.0); // Range
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
     for (size_t i=0; i<num; ++i)
     {
@@ -809,11 +896,14 @@ public:
       events.push_back( MDEvent<3>( 1.0, 1.0, centers) );
     }
 
+    box3b->addEvents(events);
+    box3b->refreshCache();
   }
 
   void tearDown()
   {
     delete box3;
+    delete box3b;
   }
 
 
@@ -824,10 +914,77 @@ public:
   {
     // We built this many MDBoxes
     TS_ASSERT_EQUALS( box3->getBoxController()->getTotalNumMDBoxes(), 125*125+1); // +1 might be a test issue
-    TS_ASSERT_EQUALS( events.size(), 5e6);
+    TS_ASSERT_EQUALS( events.size(), 1e6);
 
     // Add them!
-    box3->addEvents(events);
+    for(size_t i=0; i<5; ++i)
+    {
+      box3->addEvents(events);
+    }
+  }
+
+  /** Smallish sphere in the middle goes partially through lots of boxes */
+  void test_sphereIntegrate_inTheMiddle()
+  {
+    // The sphere transformation
+    bool dimensionsUsed[3] = {true,true,true};
+    CoordType center[3] = {2.5, 2.5, 2.5};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    double signal, errorSquared;
+
+    for (size_t i=0; i < 1000; i++)
+    {
+      signal = 0;
+      errorSquared = 0;
+      box3b->integrateSphere(sphere, 1.0, signal, errorSquared);
+    }
+
+    // The expected number of events, given a sphere of radius 1.0
+    TS_ASSERT_DELTA(signal, (1e6/125)*(4.0*3.14159/3.0), 2000);
+    TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
+  }
+
+  /** Huge sphere containing all within */
+  void test_sphereIntegrate_inTheMiddle_largeSphere()
+  {
+    // The sphere transformation
+    bool dimensionsUsed[3] = {true,true,true};
+    CoordType center[3] = {2.5, 2.5, 2.5};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    double signal, errorSquared;
+
+    for (size_t i=0; i < 1000; i++)
+    {
+      signal = 0;
+      errorSquared = 0;
+      box3b->integrateSphere(sphere, 5.0*5.0, signal, errorSquared);
+    }
+    // Contains everything
+    TS_ASSERT_DELTA(signal, 1e6, 10);
+    TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
+  }
+
+  /** Peak that is off the box entirely */
+  void test_sphereIntegrate_OffTheBox()
+  {
+    // The sphere transformation
+    bool dimensionsUsed[3] = {true,true,true};
+    CoordType center[3] = {11., 5., 5.};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    double signal, errorSquared;
+
+    for (size_t i=0; i < 1000; i++)
+    {
+      signal = 0;
+      errorSquared = 0;
+      box3b->integrateSphere(sphere, 1.0, signal, errorSquared);
+    }
+
+    TS_ASSERT_EQUALS(signal, 0.0);
+    TS_ASSERT_DELTA(signal, errorSquared, 1e-3);
   }
 
 };

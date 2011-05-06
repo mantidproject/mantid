@@ -5,6 +5,7 @@ set ( SRC_FILES
 	src/EventWorkspace.cpp
 	src/EventWorkspaceHelpers.cpp
 	src/Events.cpp
+	src/GroupingWorkspace.cpp
 	src/Histogram1D.cpp
 	src/ManagedDataBlock2D.cpp
 	src/ManagedWorkspace2D.cpp
@@ -31,6 +32,7 @@ set ( INC_FILES
 	inc/MantidDataObjects/EventWorkspace.h
 	inc/MantidDataObjects/EventWorkspaceHelpers.h
 	inc/MantidDataObjects/Events.h
+	inc/MantidDataObjects/GroupingWorkspace.h
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/ManagedDataBlock2D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
@@ -49,6 +51,7 @@ set ( TEST_FILES
 	test/CompressedWorkspace2DTest.h
 	test/EventListTest.h
 	test/EventWorkspaceTest.h
+	test/GroupingWorkspaceTest.h
 	test/Histogram1DTest.h
 	test/LibraryManagerTest.h
 	test/ManagedDataBlock2DTest.h
@@ -70,7 +73,7 @@ set ( TEST_FILES
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(DataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Add the target for this directory

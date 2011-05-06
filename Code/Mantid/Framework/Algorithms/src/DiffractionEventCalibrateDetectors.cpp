@@ -2,22 +2,23 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionEventCalibrateDetectors.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidAPI/TableRow.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidDataObjects/EventList.h"
 #include "MantidAlgorithms/GSLFunctions.h"
-#include "MantidAPI/TextAxis.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/ArrayProperty.h"
-#include "MantidKernel/Exception.h"
 #include "MantidAPI/FileProperty.h"
-#include <Poco/File.h>
-#include <sstream>
-#include <numeric>
+#include "MantidAPI/TableRow.h"
+#include "MantidAPI/TextAxis.h"
+#include "MantidDataObjects/EventList.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/CPUTimer.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <iomanip>
+#include <numeric>
+#include <Poco/File.h>
+#include <sstream>
 
 namespace Mantid
 {
@@ -110,6 +111,7 @@ namespace Algorithms
       throw std::runtime_error("Error while executing MoveInstrumentComponent as a sub algorithm.");
     }
 
+
     IAlgorithm_sptr algx = createSubAlgorithm("RotateInstrumentComponent");
     algx->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
     algx->setPropertyValue("ComponentName", detname);
@@ -127,6 +129,7 @@ namespace Algorithms
       g_log.information("Unable to successfully run RotateInstrumentComponent sub-algorithm");
       throw std::runtime_error("Error while executing RotateInstrumentComponent as a sub algorithm.");
     }
+
 
     IAlgorithm_sptr algy = createSubAlgorithm("RotateInstrumentComponent");
     algy->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
@@ -185,6 +188,9 @@ namespace Algorithms
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
             (AnalysisDataService::Instance().retrieve(inname));
 
+    bool debug = true;
+    CPUTimer tim;
+
     movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
     IAlgorithm_sptr alg2 = createSubAlgorithm("CreateCalFileByNames");
     alg2->setProperty<MatrixWorkspace_sptr>("InstrumentWorkspace", inputW);
@@ -202,6 +208,8 @@ namespace Algorithms
       throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
     }
 
+    if (debug) std::cout << tim << " to CreateCalFileByNames" << std::endl;
+
     IAlgorithm_sptr alg3 = createSubAlgorithm("ConvertUnits");
     alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
     alg3->setPropertyValue("OutputWorkspace", outname);
@@ -218,6 +226,8 @@ namespace Algorithms
     }
     MatrixWorkspace_sptr outputW=alg3->getProperty("OutputWorkspace");
 
+    if (debug) std::cout << tim << " to ConvertUnits" << std::endl;
+
     IAlgorithm_sptr alg4 = createSubAlgorithm("DiffractionFocussing");
     alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
@@ -233,7 +243,10 @@ namespace Algorithms
     }
     outputW=alg4->getProperty("OutputWorkspace");
     //Remove file
-    Poco::File(outputFile).remove();
+    if (Poco::File(outputFile).exists())
+      Poco::File(outputFile).remove();
+
+    if (debug) std::cout << tim << " to DiffractionFocussing" << std::endl;
 
     IAlgorithm_sptr alg5 = createSubAlgorithm("Rebin");
     alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
@@ -250,6 +263,7 @@ namespace Algorithms
     }
     outputW=alg5->getProperty("OutputWorkspace");
 
+    if (debug) std::cout << tim << " to Rebin" << std::endl;
 
   // Find point of peak centre
     const MantidVec & yValues = outputW->readY(0);
@@ -294,11 +308,15 @@ namespace Algorithms
       throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
     }
 
+    if (debug) std::cout << tim << " to Fit" << std::endl;
+
     std::vector<double> params = fit_alg->getProperty("Parameters");
     peakHeight = params[0];
     peakLoc = params[1];
 
     movedetector(-x, -y, -z, -rotx, -roty, -rotz, detname, inputW);
+
+    if (debug) std::cout << tim << " to movedetector()" << std::endl;
 
     //Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of events
     EventWorkspace_const_sptr inputE = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );

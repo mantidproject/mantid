@@ -24,11 +24,14 @@ namespace DataObjects
     : m_inst(m_inst),
       m_H(0), m_K(0), m_L(0),
       m_Intensity(0), m_SigmaIntensity(0),
-      m_GoniometerMatrix(3,3),
+      m_GoniometerMatrix(3,3,true),
       m_RunNumber(0)
   {
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
+    // Calc the inverse rotation matrix
+    m_InverseGoniometerMatrix = m_GoniometerMatrix;
+    m_InverseGoniometerMatrix.Invert();
   }
 
 //  /** Copy constructor
@@ -74,7 +77,6 @@ namespace DataObjects
     this->m_det = m_inst->getDetector(this->m_DetectorID);
     if (!m_det) throw std::runtime_error("No detector was found!");
 
-
     // Cache some positions
     const Geometry::IObjComponent_sptr sourceObj = m_inst->getSource();
     if (sourceObj == NULL)
@@ -90,9 +92,17 @@ namespace DataObjects
     // We now look for the row/column. -1 if not found.
     m_Row = -1;
     m_Col = -1;
-    if (!m_det->getParent()) return;
-    RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(m_det->getParent());
+
+    // Go up 2 parents to find the rectangular detector
+    IComponent_const_sptr parent = m_det->getParent();
+    if (!parent) return;
+    m_BankName = parent->getName(); // Use the parent by default
+    parent = parent->getParent();
+    if (!parent) return;
+    RectangularDetector_const_sptr retDet = boost::dynamic_pointer_cast<const RectangularDetector>(parent);
     if (!retDet) return;
+    m_BankName = retDet->getName(); // Use the grand-parent for rectangular detectors
+
     std::pair<int,int> xy = retDet->getXYForDetectorID(m_DetectorID);
     m_Row = xy.second;
     m_Col = xy.first;
@@ -325,14 +335,12 @@ namespace DataObjects
 
   // -------------------------------------------------------------------------------------
   /** Find the name of the bank that is the parent of the detector. This works
-   * best for RectangularDetector instruments (goes up one level)
+   * best for RectangularDetector instruments (goes up two levels)
    * @return name of the bank.
    */
   std::string Peak::getBankName() const
   {
-    if (!m_det) return "";
-    if (!m_det->getParent()) return "";
-    return m_det->getParent()->getName();
+    return m_BankName;
   }
 
   // -------------------------------------------------------------------------------------
@@ -354,12 +362,14 @@ namespace DataObjects
     return detPos;
   }
 
+  // -------------------------------------------------------------------------------------
   /** Return the L1 flight path length (source to sample), in meters. */
   double Peak::getL1() const
   {
     return (samplePos - sourcePos).norm();
   }
 
+  // -------------------------------------------------------------------------------------
   /** Return the L2 flight path length (sample to detector), in meters. */
   double Peak::getL2() const
   {

@@ -54,7 +54,20 @@ namespace Mantid
       m_resultsTrack.reset(m_instrument->getSource()->getPos(), dir);
       //m_resultsTrack.reset(m_instrument->getSample()->getPos() + V3D(1.0,0.0,0.0), dir);
       // The intersection results are accumulated within the ray object
-      fireRay(m_resultsTrack);
+      fireRay(m_resultsTrack, true);
+    }
+
+    /**
+     * Trace a given track from the sample position in the given direction. For performance reasons the
+     * results are accumulated within the object and can be returned using getResults.
+     * @param dir :: A directional vector. The starting point is defined by the instrument source.
+     */
+    void InstrumentRayTracer::traceFromSample(const V3D & dir) const
+    {
+      // Define the track with the sample position and the given direction.
+      m_resultsTrack.reset(m_instrument->getSample()->getPos(), dir);
+      // The intersection results are accumulated within the ray object
+      fireRay(m_resultsTrack, false);
     }
 
     /**
@@ -75,16 +88,29 @@ namespace Mantid
      * Fire the test ray at the instrument and perform a bread-first search of the 
      * object tree to find the objects that were intersected.
      * @param testRay :: An input/output parameter that defines the track and accumulates the
-     * intersection results
+     *        intersection results
+     * @param checkInstrumentBB :: set to true (default) to check that the ray intersects the
+     *        overall instruement BoundingBox. If the ray emanantes from WITHIN the instrument,
+     *        then the tracing fails, so set this to false then.
      */
-    void InstrumentRayTracer::fireRay(Track & testRay) const
+    void InstrumentRayTracer::fireRay(Track & testRay, bool checkInstrumentBB) const
     {
       // Go through the instrument tree and see if we get any hits by
       // (a) first testing the bounding box and if we're inside that then
       // (b) test the lower components.
       std::deque<IComponent_sptr> nodeQueue;
-      //Start at the root of the tree
-      nodeQueue.push_back(m_instrument);
+
+      if (checkInstrumentBB)
+      {
+        //Start at the root of the tree
+        nodeQueue.push_back(m_instrument);
+      }
+      else
+      {
+        // Skip the instrument (assume it DOES intersect) and do all its children
+        m_instrument->testIntersectionWithChildren(testRay, nodeQueue);
+      }
+
       IComponent_sptr node;
       while( !nodeQueue.empty() )
       {
@@ -97,7 +123,7 @@ namespace Mantid
         {
           if( ICompAssembly_sptr assembly = boost::dynamic_pointer_cast<ICompAssembly>(node) )
           {
-            testIntersectionWithChildren(testRay, assembly, nodeQueue);
+            assembly->testIntersectionWithChildren(testRay, nodeQueue);
           }
           else
           {
@@ -108,32 +134,6 @@ namespace Mantid
 
     }
 
-    /**
-    * Test the intersection of the ray with the children of the component assembly
-    * @param testRay :: Track under test. The results are stored here.
-    * @param assembly :: The children of this assembly will be tested
-    * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching
-    */
-    void InstrumentRayTracer::testIntersectionWithChildren(Track & testRay, 
-      ICompAssembly_sptr assembly, std::deque<IComponent_sptr> & searchQueue) const
-    {
-      int nchildren = assembly->nelements();
-      for( int i = 0; i < nchildren; ++i )
-      {
-        boost::shared_ptr<Geometry::IComponent> comp = assembly->getChild(i);
-        if( ICompAssembly_sptr childAssembly = boost::dynamic_pointer_cast<ICompAssembly>(comp) )
-        {
-          searchQueue.push_back(comp);
-        }
-        // Check the physical object intersection
-        else if( IObjComponent *physicalObject = dynamic_cast<IObjComponent*>(comp.get()) ) 
-        {
-           physicalObject->interceptSurface(testRay);
-        }
-        else {}
-      }
-
-    }
 
 
     ///** 

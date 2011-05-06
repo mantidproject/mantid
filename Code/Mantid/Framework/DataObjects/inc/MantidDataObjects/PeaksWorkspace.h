@@ -94,7 +94,7 @@ namespace DataObjects
      */
     void removePeak(const int peakNum)
     {
-      if (peakNum >= static_cast<int>(peaks.size()) ) throw std::invalid_argument("PeaksWorkspace::removePeak(): peakNum is out of range.");
+      if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::removePeak(): peakNum is out of range.");
       peaks.erase(peaks.begin()+peakNum);
     }
 
@@ -105,6 +105,17 @@ namespace DataObjects
     void addPeak(const Peak peak)
     {
       peaks.push_back(peak);
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Return a reference to the Peak
+     * @param peakNum :: index of the peak to get.
+     * @return a reference to a Peak object.
+     */
+    Peak & getPeak(const int peakNum)
+    {
+      if (peakNum >= static_cast<int>(peaks.size()) || peakNum < 0 ) throw std::invalid_argument("PeaksWorkspace::getPeak(): peakNum is out of range.");
+      return peaks[peakNum];
     }
 
     //---------------------------------------------------------------------------------------------

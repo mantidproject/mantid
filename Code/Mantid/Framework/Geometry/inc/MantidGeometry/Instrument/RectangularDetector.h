@@ -105,6 +105,8 @@ public:
   // the multiple inheritance seems to confuse it so we'll explicityly tell it that here
   using CompAssembly::getBoundingBox;
 
+  virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const;
+
   // ------------ IObjComponent methods ----------------
 
   /// Does the point given lie within this object component?

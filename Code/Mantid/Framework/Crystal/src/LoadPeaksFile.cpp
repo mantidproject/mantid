@@ -1,7 +1,9 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidCrystal/LoadPeaksFile.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/OrientedLattice.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidKernel/System.h"
 #include <algorithm>
@@ -352,6 +354,12 @@ namespace Crystal
     int run, bankNum;
     double chi , phi , omega , monCount;
 
+    // Build the universal goniometer that will build the rotation matrix.
+    Mantid::Geometry::Goniometer uniGonio;
+    uniGonio.pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+    uniGonio.pushAxis("chi",   1., 0., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+    uniGonio.pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+
     while( in.good() )
     {
       // Read the header if necessary
@@ -369,13 +377,13 @@ namespace Crystal
         // Read the peak
         Peak peak = readPeak(outWS, s, in, seqNum, bankName);
 
-        // Convert to radians
-        chi *= M_PI/180;
-        phi *= M_PI/180;
-        omega *= M_PI/180;
+        // Build the Rotation matrix using phi,chi,omega
+        uniGonio.setRotationAngle(0, phi);
+        uniGonio.setRotationAngle(1, chi);
+        uniGonio.setRotationAngle(2, omega);
 
-        // TODO: Make the goniometer matrix using phi,chi,omega
-        Matrix<double> gonMat(3,3,true);
+        // Get the calculated goniometer matrix
+        Matrix<double> gonMat = uniGonio.getR();
 
         peak.setGoniometerMatrix(gonMat);
         peak.setRunNumber(run);

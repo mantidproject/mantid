@@ -133,6 +133,15 @@ namespace MDEvents
     }
 
     //---------------------------------------------------------------------------------------------
+    /** Returns the array of coordinates
+     * @return pointer to the fixed-size array.
+     * */
+    const CoordType * getCenter() const
+    {
+      return center;
+    }
+
+    //---------------------------------------------------------------------------------------------
     /** Sets the n-th coordinate axis value.
      * @param n :: index (0-based) of the dimension you want to set
      * @param value :: value to set.

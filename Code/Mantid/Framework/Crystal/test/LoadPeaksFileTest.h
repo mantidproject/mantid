@@ -1,21 +1,22 @@
 #ifndef MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 #define MANTID_CRYSTAL_LOADPEAKSFILETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
-#include "MantidKernel/System.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidDataObjects/PeaksWorkspace.h"
-#include "MantidDataObjects/Peak.h"
-#include <iostream>
-#include <iomanip>
-
 #include "MantidCrystal/LoadPeaksFile.h"
+#include "MantidDataObjects/Peak.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
-using namespace Mantid::Kernel;
 using namespace Mantid::API;
-using namespace Mantid::DataObjects;
 using namespace Mantid::Crystal;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
+using namespace Mantid::Kernel;
 
 class LoadPeaksFileTest : public CxxTest::TestSuite
 {
@@ -72,7 +73,7 @@ public:
 
 
   /* Test for the newer TOPAZ geometry */
-  void xtest_exec_TOPAZ_2479()
+  void test_exec_TOPAZ_2479()
   {
     LoadPeaksFile alg;
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
@@ -107,10 +108,21 @@ public:
     TS_ASSERT_DELTA( p.getL2(), 0.461, 1e-3);
     TS_ASSERT_DELTA( p.getTOF(), 3560., 10.); // channel number is about TOF
 
-    // TODO: This does not match - needs the goniometer matrix set!
     TS_ASSERT_DELTA( p.getDSpacing(), 0.4723, 0.001);
     TS_ASSERT_DELTA( ws->getPeaks()[1].getDSpacing(), 0.6425, 0.001);
     TS_ASSERT_DELTA( ws->getPeaks()[2].getDSpacing(), 0.8138, 0.001);
+
+    // Now test the goniometer matrix
+    Matrix<double> r1(3,3,true);
+    // First peak has 0,0,0 angles so identity matrix
+    TS_ASSERT( p.getGoniometerMatrix().equals(r1, 1e-5) );
+
+    // Peak 3 is phi,chi,omega of 90,0,0; giving this matrix:
+    Matrix<double> r2(3,3,false);
+    r2[0][2] = 1;
+    r2[1][1] = 1;
+    r2[2][0] = -1;
+    TS_ASSERT( ws->getPeaks()[2].getGoniometerMatrix().equals(r2, 1e-5) );
   }
 
 

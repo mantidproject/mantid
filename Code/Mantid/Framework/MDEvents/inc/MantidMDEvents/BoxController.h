@@ -38,6 +38,7 @@ namespace MDEvents
       m_maxDepth = 5;
       m_addingEvents_eventsPerTask = 1000;
       m_addingEvents_numTasksPerBlock = Kernel::ThreadPool::getNumPhysicalCores() * 5;
+      m_splitInto.resize(this->nd, 1);
       resetNumBoxes();
     }
 
@@ -303,6 +304,7 @@ namespace MDEvents
       m_numMDBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
       m_numMDGridBoxes.resize(m_maxDepth + 1, 0); // Reset to 0
       m_numMDBoxes[0] = 1; // Start at 1 at depth 0.
+      resetMaxNumBoxes(); // Also the maximums
       m_mutexNumMDBoxes.unlock();
     }
 

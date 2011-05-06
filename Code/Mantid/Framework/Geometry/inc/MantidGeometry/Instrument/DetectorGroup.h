@@ -141,6 +141,7 @@ namespace Mantid
       {
         return boost::shared_ptr<const IComponent>();
       }
+      virtual const IComponent* getBareParent() const { return NULL; }
       std::vector<boost::shared_ptr<const IComponent> > getAncestors() const
       {
         return std::vector<boost::shared_ptr<const IComponent> >();

@@ -58,7 +58,7 @@ namespace Utils
    *        The minimum must be 0 in each dimension for the algorithm to work
    * @return an array of linear_index, set to 0, of the right size.
    */
-  inline size_t * nestedForLoopSetUpIndexMaker(const size_t numDims, size_t * index_max)
+  inline size_t * nestedForLoopSetUpIndexMaker(const size_t numDims, const size_t * index_max)
   {
     // Allocate and start at 1
     size_t * out = new size_t[numDims];

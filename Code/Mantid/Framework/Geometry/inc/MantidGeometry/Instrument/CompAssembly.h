@@ -91,6 +91,10 @@ public:
   void printChildren(std::ostream&) const;
   void printTree(std::ostream&) const;
 
+  /** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer  */
+  virtual void testIntersectionWithChildren(Track & testRay,
+      std::deque<IComponent_sptr> & searchQueue) const;
+
 private:
   /// Private copy assignment operator
   CompAssembly& operator=(const ICompAssembly&);

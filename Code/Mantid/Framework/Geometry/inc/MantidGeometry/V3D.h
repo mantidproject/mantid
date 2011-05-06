@@ -95,6 +95,8 @@ namespace Mantid
       //      void rotate(const V3D&,const V3D&,const double);
       void rotate(const Matrix<double>&);
 
+      void round();
+
       /// Make a normalized vector (return norm value)
       double normalize();            // Vec3D::makeUnit
       double norm() const;

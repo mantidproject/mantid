@@ -31,7 +31,7 @@ public:
 		TS_ASSERT_EQUALS(d.Y(),2.0);
 		TS_ASSERT_EQUALS(d.Z(),3.0);
 	}
-	void testAssignement()
+	void testAssignment()
 	{
 		a(1.0,1.0,1.0);
 		TS_ASSERT_EQUALS(a.X(),1.0);
@@ -353,6 +353,18 @@ public:
     TS_ASSERT(a == V3D(0, -2, 0) );
     a.azimuth_polar_SNS( 2, 0, M_PI/4);
     TS_ASSERT(a == V3D(sqrt(2.0), sqrt(2.0), 0) );
+  }
+
+  /** Round each component to the nearest integer */
+  void test_round()
+  {
+    a(1.2, 0.9, 4.34);
+    a.round();
+    TS_ASSERT(a == V3D(1.0, 1.0, 4.0) );
+
+    a(-1.2, -1.9, -3.9);
+    a.round();
+    TS_ASSERT(a == V3D(-1.0, -2.0, -4.0) );
   }
 
 };

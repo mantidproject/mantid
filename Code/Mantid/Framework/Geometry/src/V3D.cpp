@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cmath>
+#include <math.h>
 #include <vector>
 #include <cstdlib>
 
@@ -452,6 +453,15 @@ V3D::normalize()
   const double ND(norm());
   this->operator/=(ND);
   return ND;
+}
+
+
+/** Round each component to the nearest integer */
+void V3D::round()
+{
+  x = double(long(x + (x<0?-0.5:+0.5)));
+  y = double(long(y + (y<0?-0.5:+0.5)));
+  z = double(long(z + (z<0?-0.5:+0.5)));
 }
 
   /**

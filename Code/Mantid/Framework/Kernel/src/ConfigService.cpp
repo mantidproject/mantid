@@ -320,17 +320,21 @@ void ConfigServiceImpl::configureLogging()
   {
     //Ensure that the logging directory exists
     m_logFilePath = getString("logging.channels.fileChannel.path");
-
     Poco::Path logpath(m_logFilePath);
 
     // Undocumented way to override the mantid.log path
     if (Poco::Environment::has("MANTIDLOGPATH"))
+    {
       logpath = Poco::Path(Poco::Environment::get("MANTIDLOGPATH"));
+      logpath = logpath.absolute();
+      m_logFilePath = logpath.toString();
+    }
 
     // An absolute path makes things simpler
     logpath = logpath.absolute();
 
-    // First, try the logpath give
+
+    // First, try the logpath given
     if (!m_logFilePath.empty())
     {
       try

@@ -1,8 +1,11 @@
 #ifndef MANTID_MDEVENTS_MDEWPEAKINTEGRATION_H_
 #define MANTID_MDEVENTS_MDEWPEAKINTEGRATION_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h" 
+#include "MantidAPI/IMDEventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
 
 namespace Mantid
 {
@@ -35,6 +38,14 @@ namespace MDEvents
     /// Run the algorithm
     void exec();
 
+    template<typename MDE, size_t nd>
+    void integrate(typename MDEventWorkspace<MDE, nd>::sptr ws);
+
+    /// Input MDEventWorkspace
+    Mantid::API::IMDEventWorkspace_sptr inWS;
+
+    /// Peak workspace to integrate
+    Mantid::DataObjects::PeaksWorkspace_sptr peakWS;
 
   };
 

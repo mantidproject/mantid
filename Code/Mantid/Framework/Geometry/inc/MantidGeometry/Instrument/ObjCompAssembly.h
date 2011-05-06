@@ -87,6 +87,12 @@ public:
   //! Set the outline of the assembly
   boost::shared_ptr<Object> createOutline();
   void setOutline(boost::shared_ptr<const Object> obj);
+
+  /** Test the intersection of the ray with the children of the component assembly  */
+  virtual void testIntersectionWithChildren(Track & /*testRay*/, std::deque<IComponent_sptr> & /*searchQueue*/) const
+  { throw std::runtime_error("Not implemented."); }
+
+
 private:
   /// Private copy assignment operator
   ObjCompAssembly& operator=(const ICompAssembly&);

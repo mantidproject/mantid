@@ -80,34 +80,52 @@ public:
     }
   }
 
-  void test_trackNumBoxes()
+
+
+  void doTest_numBoxes(BoxController & bc, size_t expectedNumEntries)
   {
-    BoxController sc(2);
-    sc.setSplitInto(10);
-    sc.setMaxDepth(4);
-    const std::vector<size_t> & num = sc.getNumMDBoxes();
-    TS_ASSERT_EQUALS( num.size(), 5);
+    const std::vector<size_t> & num = bc.getNumMDBoxes();
+    TS_ASSERT_EQUALS( num.size(), expectedNumEntries);
     TS_ASSERT_EQUALS( num[0], 1);
     TS_ASSERT_EQUALS( num[1], 0);
 
     // Average depth is 0 = all at level 0.
-    TS_ASSERT_DELTA( sc.getAverageDepth(), 0.0, 1e-5 );
+    TS_ASSERT_DELTA( bc.getAverageDepth(), 0.0, 1e-5 );
 
-    sc.trackNumBoxes(0);
+    bc.trackNumBoxes(0);
     TS_ASSERT_EQUALS( num[0], 0);
     TS_ASSERT_EQUALS( num[1], 100);
 
     // All at depth 1.0
-    TS_ASSERT_DELTA( sc.getAverageDepth(), 1.0, 1e-5 );
+    TS_ASSERT_DELTA( bc.getAverageDepth(), 1.0, 1e-5 );
 
-    sc.trackNumBoxes(1);
-    sc.trackNumBoxes(1);
+    bc.trackNumBoxes(1);
+    bc.trackNumBoxes(1);
     TS_ASSERT_EQUALS( num[0], 0);
     TS_ASSERT_EQUALS( num[1], 98);
     TS_ASSERT_EQUALS( num[2], 200);
 
     // Mostly at depth 1.0
-    TS_ASSERT_DELTA( sc.getAverageDepth(), 1.02, 1e-5 );
+    TS_ASSERT_DELTA( bc.getAverageDepth(), 1.02, 1e-5 );
+  }
+
+  /* Try setting these values in different orders */
+  void test_trackNumBoxes1()
+  {
+    BoxController bc(2);
+    bc.setSplitInto(10);
+    bc.setMaxDepth(4);
+    doTest_numBoxes(bc, 5);
+  }
+
+  /* This used to give wrong values */
+  void test_trackNumBoxes2()
+  {
+    BoxController bc(2);
+    bc.setMaxDepth(4);
+    bc.setSplitInto(10);
+    bc.setMaxDepth(10);
+    doTest_numBoxes(bc, 11);
   }
 
 

@@ -8,8 +8,10 @@
 #include <iomanip>
 
 #include "MantidMDEvents/MDEWPeakIntegration.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 
 using namespace Mantid::MDEvents;
+using Mantid::API::IMDEventWorkspace_sptr;
 
 class MDEWPeakIntegrationTest : public CxxTest::TestSuite
 {
@@ -23,8 +25,14 @@ public:
     TS_ASSERT( alg.isInitialized() )
   }
   
-  void test_Something()
+  void test_exec()
   {
+//    IMDEventWorkspace_sptr inWS;
+
+    MDEWPeakIntegration alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+//    TS_ASSERT_THROWS_NOTHING( alg.setProperty("InputWorkspace", inWS ) );
   }
 
 

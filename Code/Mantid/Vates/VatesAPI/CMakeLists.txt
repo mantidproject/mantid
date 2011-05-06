@@ -90,7 +90,7 @@ include_directories (inc)
 set ( SRC_UNITY_IGNORE_FILES )
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(VatesAPI SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # For Windows:

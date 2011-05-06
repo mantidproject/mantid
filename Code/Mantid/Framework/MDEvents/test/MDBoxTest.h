@@ -9,6 +9,7 @@
 #include "MantidMDEvents/BoxController.h"
 #include <memory>
 #include <map>
+#include "MantidMDEvents/CoordTransformDistance.h"
 
 using namespace Mantid;
 using namespace Mantid::MDEvents;
@@ -215,6 +216,49 @@ public:
     TS_ASSERT_DELTA( bin.m_errorSquared, 6.0, 1e-4);
   }
 
+
+  /** For test_integrateSphere,
+   *
+   * @param box
+   * @param radius :: radius to integrate
+   * @param numExpected :: how many events should be in there
+   */
+  void dotest_integrateSphere(MDBox<MDEvent<3>,3> & box, CoordType x, CoordType y, CoordType z, const CoordType radius, double numExpected)
+  {
+    // The sphere transformation
+    bool dimensionsUsed[3] = {true,true,true};
+    CoordType center[3] = {x,y,z};
+    CoordTransformDistance sphere(3, center, dimensionsUsed);
+
+    double signal = 0;
+    double errorSquared = 0;
+    box.integrateSphere(sphere, radius*radius, signal, errorSquared);
+    TS_ASSERT_DELTA( signal, 1.0*numExpected, 1e-5);
+    TS_ASSERT_DELTA( errorSquared, 1.5*numExpected, 1e-5);
+  }
+
+  void test_integrateSphere()
+  {
+    // One event at each integer coordinate value between 1 and 9
+    MDBox<MDEvent<3>,3> box;
+    for (CoordType x=1.0; x < 10.0; x += 1.0)
+      for (CoordType y=1.0; y < 10.0; y += 1.0)
+        for (CoordType z=1.0; z < 10.0; z += 1.0)
+        {
+          MDEvent<3> ev(1.0, 1.5);
+          ev.setCenter(0, x);
+          ev.setCenter(1, y);
+          ev.setCenter(2, z);
+          box.addEvent(ev);
+        }
+
+    TS_ASSERT_EQUALS( box.getNPoints(), 9*9*9);
+
+    dotest_integrateSphere(box, 5.0,5.0,5.0,  0.5,   1.0);
+    dotest_integrateSphere(box, 0.5,0.5,0.5,  0.5,   0.0);
+    dotest_integrateSphere(box, 5.0,5.0,5.0,  1.1,   7.0);
+    dotest_integrateSphere(box, 5.0,5.0,5.0,  10., 9*9*9);
+  }
 };
 
 

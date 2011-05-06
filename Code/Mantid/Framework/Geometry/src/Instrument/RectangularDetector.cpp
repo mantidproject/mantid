@@ -1,14 +1,15 @@
-#include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidGeometry/Math/Matrix.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/Objects/ShapeFactory.h"
-#include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Rendering/BitmapGeometryHandler.h"
 #include "MantidKernel/Exception.h"
-
 #include <algorithm>
-#include <stdexcept> 
 #include <ostream>
+#include <stdexcept> 
+
 namespace Mantid
 {
 namespace Geometry
@@ -34,7 +35,6 @@ m_minDetId(0),m_maxDetId(0)
 RectangularDetector::RectangularDetector(const RectangularDetector* base, const ParameterMap * map)
  : CompAssembly(base,map), IObjComponent(NULL), m_rectBase(base),m_minDetId(0),m_maxDetId(0)
 {
-
   setGeometryHandler(new BitmapGeometryHandler(this));
 }
 
@@ -93,10 +93,14 @@ boost::shared_ptr<Detector> RectangularDetector::getAtXY(const int X, const int 
     throw std::runtime_error("RectangularDetector::getAtXY: Y specified is out of range.");
 
   //Find the index and return that.
-  int i = X*ypixels() + Y;
+  //int i = X*ypixels() + Y;
+  //return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
 
-  //Use the [] operator to return it (or create the parametrized version if needed)
-  return boost::dynamic_pointer_cast<Detector>( this->operator[](i) );
+  // Get to column
+  ICompAssembly_sptr xCol = boost::dynamic_pointer_cast<ICompAssembly>(this->getChild(X));
+  if (!xCol)
+    throw std::runtime_error("RectangularDetector::getAtXY: X specified is out of range.");
+  return boost::dynamic_pointer_cast<Detector>( xCol->getChild(Y) );
 }
 
 //-------------------------------------------------------------------------------------------------
@@ -258,7 +262,6 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   if (m_isParametrized)
     throw std::runtime_error("RectangularDetector::initialize() called for a parametrized RectangularDetector");
 
-
   m_xpixels = xpixels;
   m_ypixels = ypixels;
   m_xsize = xpixels * xstep;
@@ -284,6 +287,12 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
   //Loop through all the pixels
   int ix, iy;
   for (ix=0; ix<m_xpixels; ix++)
+  {
+    // Create an ICompAssembly for each x-column
+    std::ostringstream oss_col;
+    oss_col << name << "(x=" << ix << ")";
+    CompAssembly * xColumn = new CompAssembly(oss_col.str(), this);
+
     for (iy=0; iy<m_ypixels; iy++)
     {
       //Make the name
@@ -307,8 +316,8 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       {
         maxDetId=id;
       }
-      //Create the detector from the given id & shape and with THIS as the parent.
-      Detector* detector = new Detector(oss.str(), id, shape, this);
+      //Create the detector from the given id & shape and with xColumn as the parent.
+      Detector* detector = new Detector(oss.str(), id, shape, xColumn);
 
       //Calculate the x,y position
       double x = xstart + ix * xstep;
@@ -317,12 +326,14 @@ void RectangularDetector::initialize(boost::shared_ptr<Object> shape,
       //Translate (relative to parent)
       detector->translate(pos);
 
-      //Add it to this assembly
-      this->add(detector);
+      //Add it to the x-colum
+      xColumn->add(detector);
+//      this->add(detector);
 
     }
-    m_minDetId=minDetId;
-    m_maxDetId=maxDetId;
+  }
+  m_minDetId=minDetId;
+  m_maxDetId=maxDetId;
 
    
 }
@@ -351,8 +362,68 @@ int RectangularDetector::maxDetectorID()
 
 
 
+//------------------------------------------------------------------------------------------------
+/** Test the intersection of the ray with the children of the component assembly, for InstrumentRayTracer.
+ * Uses the knowledge of the RectangularDetector shape to significantly speed up tracking.
+ *
+ * @param testRay :: Track under test. The results are stored here.
+ * @param searchQueue :: If a child is a sub-assembly then it is appended for later searching. Unused.
+ */
+void RectangularDetector::testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & /*searchQueue*/) const
+{
+  /// Base point (x,y,z) = position of pixel 0,0
+  V3D basePoint;
 
+  /// Vertical (y-axis) basis vector of the detector
+  V3D vertical;
 
+  /// Horizontal (x-axis) basis vector of the detector
+  V3D horizontal;
+
+  basePoint = getAtXY(0,0)->getPos();
+  horizontal = getAtXY(xpixels()-1, 0)->getPos() - basePoint;
+  vertical   = getAtXY(0, ypixels()-1)->getPos() - basePoint;
+
+  // The beam direction
+  V3D beam = testRay.direction();
+
+  // From: http://en.wikipedia.org/wiki/Line-plane_intersection (taken on May 4, 2011),
+  // We build a matrix to solve the linear equation:
+  Matrix<double> mat(3,3);
+  mat.setColumn(0, beam*-1.0);
+  mat.setColumn(1, horizontal);
+  mat.setColumn(2, vertical);
+  mat.Invert();
+
+  // Multiply by the inverted matrix to find t,u,v
+  V3D tuv = mat * (testRay.startPoint() - basePoint);
+//  std::cout << tuv << "\n";
+
+  // Intersection point
+  V3D intersec = beam; intersec *= tuv[0];
+
+  // t = coordinate along the line
+  // u,v = coordinates along horizontal, vertical
+  // (and correct for it being between 0, xpixels-1).  The +0.5 is because the base point is at the CENTER of pixel 0,0.
+  double u = (double(xpixels()-1) * tuv[1] + 0.5);
+  double v = (double(ypixels()-1) * tuv[2] + 0.5);
+
+//  std::cout << u << ", " << v << "\n";
+
+  // In indices
+  int xIndex = int(u);
+  int yIndex = int(v);
+
+  // Out of range?
+  if (xIndex < 0) return;
+  if (yIndex < 0) return;
+  if (xIndex >= xpixels()) return;
+  if (yIndex >= ypixels()) return;
+
+  // TODO: Do I need to put something smart here for the first 3 parameters?
+  testRay.addLink(intersec, intersec, 0.0,
+      getAtXY(xIndex, yIndex)->getComponentID());
+}
 
 
 
@@ -463,6 +534,7 @@ void RectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
     getAtXY(0, this->ypixels()-1)->getBoundingBox(compBox);
     m_cachedBoundingBox->grow(compBox);
   }
+
   // Use cached box
   assemblyBox = *m_cachedBoundingBox;
 }
@@ -549,10 +621,6 @@ void RectangularDetector::initDraw() const
 /// Returns the shape of the Object
 const boost::shared_ptr<const Object> RectangularDetector::shape() const
 {
-  //std::cout << "RectangularDetector::Shape() called.\n";
-  //throw Kernel::Exception::NotImplementedError("RectangularDetector::Shape() is not implemented.");
-
-
   // --- Create a cuboid shape for your pixels ----
   double szX=m_xpixels;
   double szY=m_ypixels;
@@ -569,19 +637,6 @@ const boost::shared_ptr<const Object> RectangularDetector::shape() const
   std::string xmlCuboidShape(xmlShapeStream.str());
   Geometry::ShapeFactory shapeCreator;
   boost::shared_ptr<Geometry::Object> cuboidShape = shapeCreator.createShape(xmlCuboidShape);
-
-  //TODO: Create the object of the right shape
-  //Geometry::Object baseObj();
-  //Looks like the object doesn't really contain any shape data; that is all in the GeometryHandler (i think)!
-
-  //TODO: Create a shared pointer to this base object.
-
-  //TODO: Here create the real shape of the detector and somehow get the texture on there.
-
-
-  //TODO: Write a special geometry handler for RectangularDetector
-//  boost::shared_ptr<GeometryHandler> handler(new GluGeometryHandler(Obj));
-//  Obj->setGeometryHandler(handler);
 
   return cuboidShape;
 }

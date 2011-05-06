@@ -80,6 +80,8 @@ namespace Mantid
       virtual void setParent(IComponent*)= 0;
       //! Return a pointer to the current parent.
       virtual boost::shared_ptr<const IComponent> getParent() const = 0;
+      /** Returns the bare pointer to the IComponent parent */
+      virtual const IComponent* getBareParent() const = 0;
       //! Return an array of all ancestors, the nearest first
       virtual std::vector<boost::shared_ptr<const IComponent> > getAncestors() const = 0;
       //! Set the IComponent name
@@ -142,6 +144,7 @@ namespace Mantid
       /** Prints a text representation of itself
       */
       virtual void printSelf(std::ostream&) const = 0;
+
     };
 
     ///Typedef of a shared pointer to a IComponent

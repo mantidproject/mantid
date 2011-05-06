@@ -59,6 +59,7 @@ namespace Mantid
       /// Trace a given track from the instrument source in the given direction 
       /// and compile a list of results that this track intersects.
       void trace(const V3D & direction) const;
+      void traceFromSample(const V3D & direction) const;
       /// Get the results of the intersection tests that have been updated 
       /// since the previous call to trace
       Links getResults() const;
@@ -67,10 +68,7 @@ namespace Mantid
       /// Default constructor
       InstrumentRayTracer();
       /// Fire the given track at the instrument
-      void fireRay(Track & testRay) const;
-      /// Test the physical intersection of a track and any component children
-      void testIntersectionWithChildren(Track & testRay, ICompAssembly_sptr assembly, 
-					std::deque<IComponent_sptr> & searchQueue) const;
+      void fireRay(Track & testRay, bool checkInstrumentBB = true) const;
 
       /// Pointer to the instrument
       IInstrument_sptr m_instrument;

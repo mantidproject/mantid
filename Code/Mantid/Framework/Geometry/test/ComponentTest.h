@@ -122,6 +122,21 @@ public:
     TS_ASSERT_EQUALS(q.getParent()->getRelativeRot(),Quat(1,1,1,1));
   }
 
+  void test_isParentNamed()
+  {
+    Component grandParent("GrandParent",V3D(1,1,1),Quat(1,1,1,1));
+    Component parent("Parent",V3D(1,1,1),Quat(1,1,1,1), &grandParent);
+    Component q("Child",V3D(5,6,7),&parent);
+
+    TS_ASSERT(q.isParentNamed("Parent"));
+    TS_ASSERT(q.isParentNamed("GrandParent"));
+    TS_ASSERT(!q.isParentNamed("GrandParent", 1)); // not deep enough
+    TS_ASSERT(q.isParentNamed("GrandParent", 2)); // that reaches it
+    TS_ASSERT(!q.isParentNamed("DeadbeatDad"));
+    TS_ASSERT(!q.isParentNamed("Child"));
+
+  }
+
   void testGetAncestors()
   {
     Component parent("Parent",V3D(1,1,1),Quat(1,1,1,1));

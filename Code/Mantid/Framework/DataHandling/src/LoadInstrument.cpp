@@ -774,17 +774,21 @@ namespace Mantid
         //Loop through all detectors in the newly created bank and mark those in the instrument.
         try
         {
-          for (int i=0; i < bank->nelements(); i++)
+          for (int x=0; x < bank->nelements(); x++)
           {
-            boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*bank)[i]);
-            if (detector)
+            boost::shared_ptr<Geometry::ICompAssembly> xColumn = boost::dynamic_pointer_cast<Geometry::ICompAssembly>((*bank)[x]);
+            for (int y=0; y < xColumn->nelements(); y++)
             {
-              //Make default facing for the pixel
-              Geometry::IComponent* comp = (Geometry::IComponent*) detector.get();
-              if (m_haveDefaultFacing)
-                makeXYplaneFaceComponent(comp, m_defaultFacing);
-              //Mark it as a detector (add to the instrument cache)
-              m_instrument->markAsDetector(detector.get());
+              boost::shared_ptr<Geometry::Detector> detector = boost::dynamic_pointer_cast<Geometry::Detector>((*xColumn)[y]);
+              if (detector)
+              {
+                //Make default facing for the pixel
+                Geometry::IComponent* comp = (Geometry::IComponent*) detector.get();
+                if (m_haveDefaultFacing)
+                  makeXYplaneFaceComponent(comp, m_defaultFacing);
+                //Mark it as a detector (add to the instrument cache)
+                m_instrument->markAsDetector(detector.get());
+              }
             }
           }
         }

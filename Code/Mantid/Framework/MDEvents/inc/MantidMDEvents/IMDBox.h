@@ -4,6 +4,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidMDEvents/BoxController.h"
+#include "MantidMDEvents/CoordTransform.h"
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
@@ -96,6 +97,9 @@ namespace MDEvents
      */
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
 
+    /** Sphere (peak) integration */
+    virtual void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const = 0;
+
     // -------------------------------------------------------------------------------------------
     /** Split sub-boxes, if this is possible and neede for this box */
     virtual void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * /*ts*/ = NULL)
@@ -149,6 +153,16 @@ namespace MDEvents
     MDDimensionExtents & getExtents(size_t dim)
     {
       return extents[dim];
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Get the center of the box
+     * @param center :: bare array of size[nd] that will get set with the mid-point of each dimension.
+     */
+    void getCenter(CoordType * center) const
+    {
+      for (size_t d=0; d<nd; ++d)
+        center[d] = (extents[d].max + extents[d].min) / 2.0;
     }
 
     //-----------------------------------------------------------------------------------------------
@@ -221,21 +235,21 @@ namespace MDEvents
     /** For testing, mostly: return the recursion depth of this box.
      * e.g. 1: means this box is in a MDGridBox, which is the top level.
      *      2: this box's parent MDGridBox is itself a MDGridBox. */
-    size_t getDepth()
+    size_t getDepth() const
     {
       return m_depth;
     }
 
     //-----------------------------------------------------------------------------------------------
     /** Return the volume of the cell */
-    double getVolume()
+    double getVolume() const
     {
       return 1.0 / m_inverseVolume;
     }
 
     //-----------------------------------------------------------------------------------------------
     /** Return the inverse of the volume of the cell */
-    double getInverseVolume()
+    double getInverseVolume() const
     {
       return m_inverseVolume;
     }

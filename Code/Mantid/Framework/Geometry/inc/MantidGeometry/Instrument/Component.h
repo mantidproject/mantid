@@ -84,6 +84,8 @@ namespace Mantid
       //! Return an array of all ancestors
       std::vector<boost::shared_ptr<const IComponent> > getAncestors() const;
 
+      bool isParentNamed(const std::string & expectedName, int maxDepth=-1) const;
+
       //! Set the IComponent name
       void setName(const std::string&);
 
@@ -190,7 +192,12 @@ namespace Mantid
       /// Returns the ScaleFactor
       virtual V3D getScaleFactor() const;
 
+      /** Returns the bare pointer to the IComponent parent */
+      const IComponent* getBareParent() const { return m_parent; }
+
     protected:
+      /// Parent component in the tree
+      const IComponent* m_parent;
       /// The base component - this is the unmodifed component (without the parameters). Stored
       /// as a pointer to Component so that it's properties can be accessed without casting each time
       const Component* m_base;
@@ -205,8 +212,6 @@ namespace Mantid
       V3D m_pos;
       //! Orientation
       Quat m_rot;
-      /// Parent component in the tree
-      const IComponent* m_parent;
 
       /**
       *  Get a parameter from the parameter map

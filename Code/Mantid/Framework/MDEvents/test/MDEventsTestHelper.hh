@@ -59,7 +59,7 @@ namespace MDEventsHelper
           // Put an event in the middle of each box
           Mantid::MDEvents::CoordType centers[nd];
           for (size_t d=0; d<nd; d++)
-            centers[d] = min + (index[d]+0.5)*(max-min)/splitInto;
+            centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
           out->addEvent( Mantid::MDEvents::MDEvent<nd>(1.0, 1.0, centers) );
         }
 

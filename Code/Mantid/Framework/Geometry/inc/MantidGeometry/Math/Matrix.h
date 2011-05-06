@@ -85,6 +85,7 @@ namespace Mantid
 
       bool operator!=(const Matrix<T>&) const;
       bool operator==(const Matrix<T>&) const;
+      bool equals(const Matrix<T>& A, const double Tolerance) const;
       T item(const int a,const int b) const { return V[a][b]; }   ///< disallows access
 
       void print() const;

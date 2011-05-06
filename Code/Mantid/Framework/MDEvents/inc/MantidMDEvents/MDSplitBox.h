@@ -54,6 +54,8 @@ namespace MDEvents
 
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
+    void integrateSphere(CoordTransform & /*radiusTransform*/, const CoordType /*radiusSquared*/, double & /*signal*/, double & /*errorSquared*/) const
+    { throw std::runtime_error("Not implemented."); }
 
     // --------------------------------------------------------------------------------------------
 

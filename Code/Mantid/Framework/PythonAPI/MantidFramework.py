@@ -11,6 +11,7 @@ import __builtin__
 import __main__
 try:
     import qti
+    import PyQt4.QtCore as qtcore
 except:
     pass # ignore this error as you are probably running without the gui
 
@@ -891,8 +892,15 @@ class IAlgorithmProxy(ProxyObject):
 
         if mtd.__gui__:
             name = self._getHeldObject().name()
-            result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(name)
-            if result == False:
+            result = self.executeAsync()
+            while not result.available():
+                qtcore.QCoreApplication.processEvents()
+            try:
+                success = result.data()
+            except:
+                success = false
+
+            if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % name)
         else:
             self._getHeldObject().execute()

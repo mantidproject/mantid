@@ -62,7 +62,7 @@ namespace Mantid
     /**
      * Resets the track starting point and direction. 
      * @param startPoint :: The new starting point
-     * @param direction :: The new direction
+     * @param direction :: The new direction. Must be a unit vector!
      */
     void Track::reset(const V3D& startPoint, const V3D& direction)
     {

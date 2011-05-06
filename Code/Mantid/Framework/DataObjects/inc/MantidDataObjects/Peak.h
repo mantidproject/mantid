@@ -88,6 +88,9 @@ namespace DataObjects
     /// Detector pointed to
     Mantid::Geometry::IDetector_sptr m_det;
 
+    /// Name of the parent bank
+    std::string m_BankName;
+
     /// ID of the detector
     int m_DetectorID;
 
@@ -116,7 +119,10 @@ namespace DataObjects
     double m_FinalEnergy;
 
     /// Orientation matrix of the goniometer angles.
-    Mantid::Geometry::Matrix<double> m_GoniometerMatrix; //TODO: Set as identity 3x3 matrix by default
+    Mantid::Geometry::Matrix<double> m_GoniometerMatrix;
+
+    /// Inverse of the goniometer rotation matrix; used to go from Q in lab frame to Q in sample frame
+    Mantid::Geometry::Matrix<double> m_InverseGoniometerMatrix;
 
     /// Originating run number for this peak
     int m_RunNumber;

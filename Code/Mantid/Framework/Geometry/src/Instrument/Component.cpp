@@ -40,8 +40,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot(),
-    m_parent(parent)
+  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot(), m_parent(parent)
   {
   }
 
@@ -52,8 +51,7 @@ namespace Geometry
    *  @param parent :: parent Component
    */
   Component::Component(const std::string& name, const V3D& position, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position),
-    m_rot(), m_parent(parent)
+  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position), m_rot(), m_parent(parent)
   {
   }
 
@@ -64,8 +62,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position),
-    m_rot(rotation),m_parent(parent)
+  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position), m_rot(rotation), m_parent(parent)
   {
   }
 
@@ -131,6 +128,28 @@ namespace Geometry
   }
 
   //--------------------------------------------------------------------------------------------
+  /** Return true if one of the parents of this component is named something
+   *
+   * @param expectedName :: case-sensitive name to look for.
+   * @param maxDepth :: levels of recursion to look into, -1 for no limit (default)
+   * @return true if a parent matches, false otherwise
+   */
+  bool Component::isParentNamed(const std::string & expectedName, int maxDepth) const
+  {
+    int depth = 0;
+    const IComponent * parent = m_parent;
+    while (parent && (depth < maxDepth || maxDepth < 0))
+    {
+      // Correct name? stop searching
+      if (parent->getName() == expectedName)
+        return true;
+      parent = parent->getBareParent();
+      depth++;
+    }
+    return false;
+  }
+
+  //--------------------------------------------------------------------------------------------
   /** Returns an array of all ancestors of this component,
    *  starting with the direct parent and moving up
    *  @return An array of pointers to ancestor components
@@ -160,6 +179,7 @@ namespace Geometry
 
     return ancs;
   }
+
 
   //--------------------------------------------------------------------------------------------
   /** Set the name of the Component (currently does nothing)

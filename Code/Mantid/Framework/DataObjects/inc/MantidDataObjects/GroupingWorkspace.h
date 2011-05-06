@@ -1,0 +1,54 @@
+#ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
+#define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
+    
+#include "MantidKernel/System.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/Workspace2D.h"
+
+
+namespace Mantid
+{
+namespace DataObjects
+{
+
+  /** A GroupingWorkspace is a subclass of Workspace2D
+   * where each spectrum has a single number entry, the value
+   * of which signifies to which group that workspace index belongs.
+   * 
+   * @author Janik Zikovsky
+   * @date 2011-05-02 10:46:43.466993
+   */
+  class DLLExport GroupingWorkspace : public Workspace2D
+  {
+  public:
+    GroupingWorkspace(Mantid::Geometry::IInstrument_sptr inst);
+    GroupingWorkspace();
+    ~GroupingWorkspace();
+    
+    /** Gets the name of the workspace type
+    @return Standard string name  */
+    virtual const std::string id() const {return "GroupingWorkspace";}
+
+  private:
+    /// Private copy constructor. NO COPY ALLOWED
+    GroupingWorkspace(const GroupingWorkspace&);
+    /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
+    GroupingWorkspace& operator=(const GroupingWorkspace&);
+
+    virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+
+  };
+
+
+  ///shared pointer to the GroupingWorkspace class
+  typedef boost::shared_ptr<GroupingWorkspace> GroupingWorkspace_sptr;
+
+  ///shared pointer to a const GroupingWorkspace
+  typedef boost::shared_ptr<const GroupingWorkspace> GroupingWorkspace_const_sptr;
+
+
+} // namespace Mantid
+} // namespace DataObjects
+
+#endif  /* MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_ */

@@ -91,6 +91,6 @@ protected:
     GeometryPolicy m_geometry;
   };
 
-}
+};
 
 #endif

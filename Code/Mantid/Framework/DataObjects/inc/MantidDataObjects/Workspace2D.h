@@ -110,15 +110,15 @@ protected:
   /// The number of vectors in the workspace
   int m_noVectors;
   /// a vector holding monitors in the workspace
-   std::vector<int> m_monitorList;
-  
+  std::vector<int> m_monitorList;
+
+  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+
 private:
   /// Private copy constructor. NO COPY ALLOWED
   Workspace2D(const Workspace2D&);
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace2D& operator=(const Workspace2D&);
-
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   virtual int getHistogramNumberHelper() const;
 

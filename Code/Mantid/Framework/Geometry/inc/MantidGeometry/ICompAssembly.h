@@ -1,15 +1,20 @@
-#ifndef ICOMPONENT_ASSEMBLY_
-#define ICOMPONENT_ASSEMBLY_
-#include <string> 
-#include <vector>
+#ifndef MANTID_GEOMETRY_ICOMPASSEMBLY_
+#define MANTID_GEOMETRY_ICOMPASSEMBLY_
+
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
+#include <deque>
+#include <string>
+#include <vector>
 
 namespace Mantid
 {
   namespace Geometry
   {
+    // Forward declaration
+    class Track;
+
     /** @class ICompAssembly 
     @brief Class for Assembly of geometric components. 
     @version A
@@ -72,6 +77,9 @@ namespace Mantid
       */
       virtual void printTree(std::ostream&) const = 0;
 
+      /** Test the intersection of the ray with the children of the component assembly  */
+      virtual void testIntersectionWithChildren(Track & testRay, std::deque<IComponent_sptr> & searchQueue) const = 0;
+
     private:
       /// Private copy assignment operator
       ICompAssembly& operator=(const ICompAssembly&);
@@ -85,5 +93,6 @@ namespace Mantid
 
   } //Namespace Geometry
 } //Namespace Mantid
+
 
 #endif

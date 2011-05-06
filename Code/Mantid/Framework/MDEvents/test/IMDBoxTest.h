@@ -53,6 +53,8 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   virtual void centerpointBin(MDBin<MDE,nd> & /*bin*/, bool * ) const
   {}
 
+  virtual void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const {};
+
 };
 
 
@@ -78,19 +80,25 @@ public:
     TS_ASSERT_EQUALS( box.getErrorSquared(), 456.0);
   }
 
-  /** Setting and getting the extents */
+  /** Setting and getting the extents;
+   * also, getting the center */
   void test_setExtents()
   {
     IMDBoxTester<MDEvent<2>,2> b;
-    b.setExtents(0, -10.0, 10.0);
-    TS_ASSERT_DELTA(b.getExtents(0).min, -10.0, 1e-6);
+    b.setExtents(0, -8.0, 10.0);
+    TS_ASSERT_DELTA(b.getExtents(0).min, -8.0, 1e-6);
     TS_ASSERT_DELTA(b.getExtents(0).max, +10.0, 1e-6);
 
-    b.setExtents(1, -4.0, 6.0);
+    b.setExtents(1, -4.0, 12.0);
     TS_ASSERT_DELTA(b.getExtents(1).min, -4.0, 1e-6);
-    TS_ASSERT_DELTA(b.getExtents(1).max, +6.0, 1e-6);
+    TS_ASSERT_DELTA(b.getExtents(1).max, +12.0, 1e-6);
 
     TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
+
+    CoordType center[2];
+    b.getCenter(center);
+    TS_ASSERT_DELTA( center[0], +1.0, 1e-6);
+    TS_ASSERT_DELTA( center[1], +4.0, 1e-6);
   }
 
   void test_copy_constructor()

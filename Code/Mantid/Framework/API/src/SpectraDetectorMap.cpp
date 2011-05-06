@@ -19,6 +19,14 @@ namespace Mantid
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
 
+
+    //------------------------------------------------------------------------------------------------
+    /** Populate the map with 2 arrays; one detector per spectrum
+     *
+     * @param _spectable :: bare vector of the spectrum numbers
+     * @param _udettable :: bare vector of the detector ids (same length as spectable)
+     * @param nentries :: number of entries in the vectors
+     */
     void SpectraDetectorMap::populate(const int* _spectable, const int* _udettable, int nentries)
     {
       m_s2dmap.clear();
@@ -38,6 +46,12 @@ namespace Mantid
       return;
     }
 
+    //------------------------------------------------------------------------------------------------
+    /** Populate a simple spectrum-to-detector map, with a 1:1 correspondence
+     *
+     * @param start :: first spectrum number
+     * @param end :: last spectrum number (not inclusive)
+     */
     void SpectraDetectorMap::populateSimple(const int start, const int end)
     {
       m_s2dmap.clear();
@@ -55,11 +69,11 @@ namespace Mantid
     }
 
 
+    //------------------------------------------------------------------------------------------------
     /** Fill the SpectraDetectorMap with a simple list of pixel ids,
      * where the nth entry in the vector has a single detector, specified
      * by the value at that entry in the vector.
      * @param  udetList list of ints where the index = spectrum number; value = pixel ID.
-
      */
     void SpectraDetectorMap::populateWithVector(const std::vector<int>& udetList)
     {
@@ -69,6 +83,7 @@ namespace Mantid
       }
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Links a list of UDETs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
      *  @param spectrum :: The spectrum number to which detectors should be added
@@ -84,6 +99,7 @@ namespace Mantid
     }
     
 
+    //------------------------------------------------------------------------------------------------
     /** Links a SET of detector IDs to the given spectrum.
      *  THIS METHOD SHOULD BE USED WITH CARE - IT CAN LEAD TO AN INCONSISTENT MAP
      *  @param spectrum :: The spectrum number to which detectors should be added
@@ -98,6 +114,7 @@ namespace Mantid
       }
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Moves all detectors assigned to a particular spectrum number to a different one.
      *  Does nothing if the oldSpectrum number does not exist in the map.
      *  @param oldSpectrum :: The spectrum number to be removed and have its detectors reassigned
@@ -126,17 +143,22 @@ namespace Mantid
       m_s2dmap.erase(oldSpectrum);
     }
 
+    //------------------------------------------------------------------------------------------------
     /// Empties the map - use with care!
     void SpectraDetectorMap::clear()
     {
       m_s2dmap.clear();
     }
     
+    //------------------------------------------------------------------------------------------------
+    /** Return the number of detectors for the given spectrum number
+     * @param spectrum_number :: which spectrum number */
     int SpectraDetectorMap::ndet(const int spectrum_number) const
     {
       return m_s2dmap.count(spectrum_number);
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Get a vector of detectors ids contributing to a spectrum
      * @param spectrum_number :: The # of the spectrum you are looking for.
      * @return list of detector ids in map
@@ -159,6 +181,7 @@ namespace Mantid
       return detectors;
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Gets a list of spectra corresponding to a list of detector numbers.
     *  @param detectorList :: A list of detector Ids
     *  @return A vector where matching indices correspond to the relevant spectra id
@@ -194,6 +217,7 @@ namespace Mantid
       return spectraList;
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Tests whether the present map matches another
      *  @param  other The other map against which to test
      *  @return True if the maps match
@@ -203,6 +227,7 @@ namespace Mantid
       return ( m_s2dmap == other.m_s2dmap );
     }
 
+    //------------------------------------------------------------------------------------------------
     /** Tests whether the present map does not match another
      *  @param  other The other map against which to test
      *  @return True if the maps do not match

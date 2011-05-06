@@ -70,7 +70,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(CustomInterfaces SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(CustomInterfaces SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 add_library ( CustomInterfaces ${SRC_FILES} ${INC_FILES} ${MOCCED_FILES} ${UI_HDRS} )

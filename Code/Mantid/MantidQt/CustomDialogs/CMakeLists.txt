@@ -52,7 +52,7 @@ include_directories ( ${CMAKE_CURRENT_BINARY_DIR} )
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(CustomDialogs SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(CustomDialogs SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 

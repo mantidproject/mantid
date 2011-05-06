@@ -78,7 +78,7 @@ set ( TEST_FILES
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(Nexus SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(Nexus SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Add the dependency on the nexus library

@@ -97,8 +97,6 @@ public:
 private:
   /// Copy Contructor
   SpectraDetectorMap(const SpectraDetectorMap& copy);
-  /// Assignment operator
-  SpectraDetectorMap& operator=(const SpectraDetectorMap& rhs);
   /// internal spectra detector map instance
   smap m_s2dmap;
 

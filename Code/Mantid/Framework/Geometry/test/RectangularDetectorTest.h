@@ -146,6 +146,7 @@ public:
 
     //Name
     TS_ASSERT_EQUALS(det->getAtXY(1,2)->getName(), "MyRectangle(1,2)");
+    TS_ASSERT_EQUALS(det->getChild(1)->getName(), "MyRectangle(x=1)");
 
     BoundingBox box;
     det->getBoundingBox(box);

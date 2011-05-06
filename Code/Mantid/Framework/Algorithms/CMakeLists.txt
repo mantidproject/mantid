@@ -27,6 +27,7 @@ set ( SRC_FILES
 	src/CorrectToFile.cpp
 	src/CreateCalFileByNames.cpp
 	src/CreateDummyCalFile.cpp
+	src/CreateGroupingWorkspace.cpp
 	src/CreatePSDBleedMask.cpp
 	src/CreatePeaksWorkspace.cpp
 	src/CreateSingleValuedWorkspace.cpp
@@ -174,6 +175,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/CorrectToFile.h
 	inc/MantidAlgorithms/CreateCalFileByNames.h
 	inc/MantidAlgorithms/CreateDummyCalFile.h
+	inc/MantidAlgorithms/CreateGroupingWorkspace.h
 	inc/MantidAlgorithms/CreatePSDBleedMask.h
 	inc/MantidAlgorithms/CreatePeaksWorkspace.h
 	inc/MantidAlgorithms/CreateSingleValuedWorkspace.h
@@ -322,6 +324,7 @@ set ( TEST_FILES
 	test/CorrectToFileTest.h
 	test/CreateCalFileByNamesTest.h
 	test/CreateDummyCalFileTest.h
+	test/CreateGroupingWorkspaceTest.h
 	test/CreatePSDBleedMaskTest.h
 	test/CreatePeaksWorkspaceTest.h
 	test/CreateSingleValuedWorkspaceTest.h
@@ -434,7 +437,7 @@ set(SRC_UNITY_IGNORE_FILES src/AlignDetectors.cpp
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(Algorithms SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 # Add the target for this directory

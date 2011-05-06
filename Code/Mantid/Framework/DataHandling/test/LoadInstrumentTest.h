@@ -1,25 +1,25 @@
 #ifndef LOADINSTRUMENTTEST_H_
 #define LOADINSTRUMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidDataHandling/LoadInstrument.h"
-#include "MantidAPI/InstrumentDataService.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidGeometry/Instrument/Instrument.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/InstrumentDataService.h"
+#include "MantidAPI/Workspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IDetector.h"
-#include <vector>
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/FitParameter.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
+#include "MantidKernel/Exception.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 #include <iostream>
+#include <vector>
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -702,8 +702,8 @@ public:
       TS_ASSERT( bank1 );
       if (!bank1) return;
 
-      //Right # of elements?
-      TS_ASSERT_EQUALS( bank1->nelements(), 100*200);
+      //Right # of x columns?
+      TS_ASSERT_EQUALS( bank1->nelements(), 100);
 
       //Positions according to formula
       TS_ASSERT_DELTA( bank1->getAtXY(0,0)->getPos().X(), -0.1, 1e-4 );
@@ -881,6 +881,82 @@ private:
   std::string wsName;
 
 };
+
+
+
+class LoadInstrumentTestPerformance : public CxxTest::TestSuite
+{
+public:
+  MatrixWorkspace_sptr ws;
+
+  void setUp()
+  {
+    ws = WorkspaceCreationHelper::Create2DWorkspace(1,2);
+  }
+
+  void doTest(std::string filename, size_t numTimes = 1)
+  {
+    for (size_t i=0; i < numTimes; ++i)
+    {
+      // Remove any existing instruments, so each time they are loaded.
+      InstrumentDataService::Instance().clear();
+      // Load it fresh
+      LoadInstrument loader;
+      loader.initialize();
+      loader.setProperty("Workspace", ws);
+      loader.setPropertyValue("Filename", filename);
+      loader.execute();
+      TS_ASSERT( loader.isExecuted() );
+    }
+  }
+
+  void test_GEM()
+  {
+    doTest("GEM_Definition.xml", 10);
+  }
+
+  void test_WISH()
+  {
+    doTest("WISH_Definition.xml", 1);
+  }
+
+  void test_BASIS()
+  {
+    doTest("BASIS_Definition.xml", 5);
+  }
+
+  void test_CNCS()
+  {
+    doTest("CNCS_Definition.xml", 5);
+  }
+
+  void test_SEQUOIA()
+  {
+    doTest("SEQUOIA_Definition.xml", 5);
+  }
+
+  void test_POWGEN_2011()
+  {
+    doTest("POWGEN_Definition_2011-02-25.xml", 10);
+  }
+
+  void test_TOPAZ_2010()
+  {
+    doTest("TOPAZ_Definition_2010.xml", 1);
+  }
+
+  void test_TOPAZ_2011()
+  {
+    doTest("TOPAZ_Definition_2011-01-01.xml", 1);
+  }
+
+  void test_SNAP()
+  {
+    doTest("SNAP_Definition.xml", 1);
+  }
+
+};
+
 
 #endif /*LOADINSTRUMENTTEST_H_*/
 

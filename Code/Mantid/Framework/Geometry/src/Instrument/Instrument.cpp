@@ -92,6 +92,7 @@ namespace Mantid
     }
 
 
+    //------------------------------------------------------------------------------------------
     /** Return a vector of detector IDs in this instrument */
     std::vector<int> Instrument::getDetectorIDs(bool skipMonitors) const
     {

@@ -68,7 +68,7 @@ test/MDWorkspaceIteratorTest.h
 
 if(UNITY_BUILD)
   include(UnityBuild)
-  enable_unity_build(MDDataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 1000)
+  enable_unity_build(MDDataObjects SRC_FILES SRC_UNITY_IGNORE_FILES 10)
 endif(UNITY_BUILD)
 
 

@@ -1689,38 +1689,6 @@ MantidMatrix* MantidUI::newMantidMatrix(const QString& wsName, int start, int en
   return importMatrixWorkspace(wsName, false, false, start, end);
 }
 
-/**
- * Run the named algorithm asynchronously
- */
-bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name)
-{
-  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name);
-
-  if( !alg )
-  {
-    return false;
-  }
-  if( m_algMonitor ) 
-  {
-    m_algMonitor->add(alg);
-  }
-  Poco::ActiveResult<bool> result(alg->executeAsync());
-  while( !result.available() )
-  {
-    QCoreApplication::processEvents();
-  }
-  result.wait();
-
-  try
-  {
-    return result.data();
-  }
-  catch( Poco::NullPointerException& )
-  {
-    return false;
-  }
-}
-
 void MantidUI::cancelAllRunningAlgorithms()
 {
   if( m_algMonitor ) m_algMonitor->cancelAll();
