@@ -73,7 +73,7 @@ namespace MDEvents
     boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
     int randomSeed = getProperty("RandomSeed");
-    rng.seed(randomSeed);
+    rng.seed((unsigned int)(randomSeed));
 
     for (size_t i=0; i<num; ++i)
     {
@@ -143,7 +143,7 @@ namespace MDEvents
 
     boost::mt19937 rng;
     int randomSeed = getProperty("RandomSeed");
-    rng.seed(randomSeed);
+    rng.seed((unsigned int)(randomSeed));
 
     // Make a random generator for each dimensions
     typedef boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >   gen_t;
