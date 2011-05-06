@@ -108,6 +108,9 @@ public:
   /// Get the signal at the specified index.
   virtual double getSignalAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
 
+  /// Get the signal at the specified index given in 4 dimensions (typically X,Y,Z,t), normalized by cell volume
+  virtual double getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const;
+
 private:
 
   /// Constructor.

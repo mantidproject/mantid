@@ -3,6 +3,7 @@
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkBox.h>
+#include <map>
 
 #include "MantidAPI/IMDWorkspace.h"
 #include <MantidVatesAPI/Common.h>
@@ -79,6 +80,21 @@ private:
 
   /// Serializer to create and pass on rebinning metadata.
   RebinningXMLGenerator m_serializer;
+
+  typedef std::map<std::string, int> IDtoColumn_map;
+
+  /// Provides an initial record of ids to column numbers. Required for dimension swapping later.
+  mutable IDtoColumn_map m_idToColumnMap;
+
+  /// Create a geometry from dimensions and then serialise it.
+  std::string constructGeometryXML(DimensionVec dimensions,
+      Dimension_sptr dimensionX,
+      Dimension_sptr dimensionY,
+      Dimension_sptr dimensionZ,
+      Dimension_sptr dimensiont);
+
+  /// Populates m_idToColumnMap if the workspace is a MDWorkspace only.
+  void createIdToColumnMappings(Mantid::API::IMDWorkspace_sptr outputWorkspace) const;
 
 public:
 
@@ -162,13 +178,6 @@ public:
 
   /// Construct an input MDWorkspace by loading from a file. This should be achieved via a seperate loading algorithm.
   Mantid::API::IMDWorkspace_sptr constructMDWorkspace(const std::string& wsLocation);
-
-  /// Create a geometry from dimensions and then serialise it.
-  DLLExport std::string constructGeometryXML(DimensionVec dimensions,
-      Dimension_sptr dimensionX,
-      Dimension_sptr dimensionY,
-      Dimension_sptr dimensionZ,
-      Dimension_sptr dimensiont);
 
   /// Helper method to get dimensions from a geometry xml element.
   DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(Poco::XML::Element* geometryElement, bool nonIntegratedOnly = false);

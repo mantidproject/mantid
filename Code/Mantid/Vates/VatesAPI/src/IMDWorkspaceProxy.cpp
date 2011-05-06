@@ -183,6 +183,12 @@ double IMDWorkspaceProxy::getSignalAt(size_t index1, size_t index2, size_t index
   return m_function(index1, index2, index3, index4);
 }
 
+ 
+double IMDWorkspaceProxy::getSignalNormalizedAt(size_t index1, size_t index2, size_t index3, size_t index4) const
+{ 
+  return m_function(index1, index2, index3, index4); //TODO: need to divide by cell volume at this point.
+}
+
 //-----------------------------------------------------------------------------------------------
 /** Creates a remapping for ::getPoint member function of MDImage.
  * @returns A boost::bind as a boost::function in which one of the 4! possible parameter combinations is remapped correctly.

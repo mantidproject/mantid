@@ -256,6 +256,9 @@ public:
     IMDWorkspace_sptr proxy = IMDWorkspaceProxy::New(mock_sptr, xDim, yDim, zDim, tDim);
     uniqueArgumentCombination unique;
     TSM_ASSERT_EQUALS("Rebinding has not been done correctly for xyzt scenario", unique(1, 2, 3, 4), proxy->getSignalAt(1, 2, 3, 4));
+
+    //Additional test to ensure that we have characterised behaviour for getSignalNormalizedAt.
+    TSM_ASSERT_EQUALS("Normalized signal should be characterised to be the same as signal", proxy->getSignalAt(1, 2, 3, 4), proxy->getSignalNormalizedAt(1, 2, 3, 4));
   }
 
   void testremappoints_xzyt()
