@@ -396,44 +396,6 @@ public:
         TS_ASSERT_DELTA( out->getParameter("12SJ_AB"), 0.0 ,0.001);
         TS_ASSERT_DELTA( out->getParameter("Gamma"), 0.0 ,0.001);
 
-        // test with output workspace - ties
-        GenericFit alg3;
-        TS_ASSERT_THROWS_NOTHING(alg3.initialize());
-        TS_ASSERT( alg3.isInitialized() );
-        // Set which spectrum to fit against and initial starting values
-        alg3.setPropertyValue("InputWorkspace", wsName);
-
-        alg3.setPropertyValue("Function",*fn);
-        alg3.setPropertyValue("Output","out");
-
-        // execute fit
-        TS_ASSERT_THROWS_NOTHING(
-            TS_ASSERT( alg3.execute() )
-            )
-        TS_ASSERT( alg3.isExecuted() );
-        algStat = alg3.getPropertyValue("OutputStatus");
-        TS_ASSERT( algStat.compare("success")==0 );
-        TWS_type outParams = getTWS("out_Parameters");
-        TS_ASSERT(outParams);
-        TS_ASSERT_EQUALS(outParams->rowCount(),5);
-        TS_ASSERT_EQUALS(outParams->columnCount(),3);
-
-        TableRow row = outParams->getFirstRow();
-        TS_ASSERT_EQUALS(row.String(0),"Amplitude");
-        TS_ASSERT_DELTA(row.Double(1),0.0,0.001);
-
-        row = outParams->getRow(1);
-        TS_ASSERT_EQUALS(row.String(0),"12SJ_AA");
-        TS_ASSERT_DELTA(row.Double(1),0.0,0.001);
-
-        row = outParams->getRow(2);
-        TS_ASSERT_EQUALS(row.String(0),"12SJ_AB");
-        TS_ASSERT_DELTA(row.Double(1),0.0,0.001);
-
-        row = outParams->getRow(3);
-        TS_ASSERT_EQUALS(row.String(0),"Gamma");
-        TS_ASSERT_DELTA(row.Double(1),0.0,0.001);
-
         AnalysisDataService::Instance().remove(wsName);
         removeWS("out_Parameters");
 

@@ -35,19 +35,15 @@ namespace Mantid
         {
             getParams();
             double fgSignal = 0.;
-            double eps=0.;
+            double fgError = 0.;
             const Mantid::Geometry::SignalAggregate& cell = m_workspace->getPoint(it.getPointer());
             std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points = cell.getContributingPoints();
-            // assume that the first point in the vertexes array is the centre point anf that the gett getter
-            // returns a energy value in the appropriate units.
+            // calculate contribution of each point
             for(size_t i=0; i<points.size();i++){
-                std::vector<Mantid::Geometry::coordinate> vertexes = points[i]->getVertexes();
-                eps=vertexes[0].gett();
-                //int run=points[i]->getRunId(); // testing
-                //TODO implement fg calculation for this point: fgSignal+=constant+eps*(linear+eps*quadratic);
+                sqwConvolution(points[i],fgSignal,fgError);
             }
-            
-            return fgSignal;
+            // Return mean
+            return fgSignal/points.size();
         }
         /*
         // simple test interface for fg model - will need vector of parameters
@@ -79,17 +75,17 @@ namespace Mantid
 
         // SQW convolution choice - currently just MonteCarlo
         void SimulateResolution::sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error) {
-            sqwConvolutionMC(point,answer,error);
+              double & fgSignal, double & fgError) const {
+            sqwConvolutionMC(point,fgSignal,fgError);
         }
 
         // SQW convolution MonteCarlo
         void SimulateResolution::sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-              double answer, double error)
+              double & fgSignal, double & fgError) const
         {
           UNUSED_ARG(point);
-          UNUSED_ARG(answer);
-          UNUSED_ARG(error);
+          UNUSED_ARG(fgSignal);
+          UNUSED_ARG(fgError);
         }
 
         // Return next pseudo or quasi random point in the N dimensional space

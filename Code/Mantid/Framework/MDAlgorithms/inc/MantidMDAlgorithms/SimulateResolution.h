@@ -43,6 +43,8 @@ namespace Mantid
         File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
         Code Documentation is available at: <http://doxygen.mantidproject.org>
         */
+        // This class will  define the "function" method used by GenericFit but will not define the
+        // actual sqwBroad or sqwSharp functions that define the real model
         class DLLExport SimulateResolution : public API::ParamFunction, public API::IFunctionMD
         {
         public:
@@ -63,10 +65,10 @@ namespace Mantid
             virtual void getParams() const = 0;
             /// Perform convolution on one MDPoint
             void sqwConvolution(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-                    double answer, double error);
+                    double & fgSignal, double & fgError) const;
             /// Perform convolution on one MDPoint
             void sqwConvolutionMC(boost::shared_ptr<Mantid::Geometry::MDPoint> & point,
-                    double answer, double error);
+                    double & fgSignal, double & fgError) const;
             /// Pointer to the cut data
             boost::shared_ptr<Mantid::API::IMDWorkspace> imdwCut;
             /// For MC integration return next point in space
@@ -111,6 +113,7 @@ namespace Mantid
             int rlatt(const std::vector<double> & a, const std::vector<double> & ang,
                        std::vector<double> & arlu, std::vector<double> & angrlu,
                        Geometry::Matrix<double> & dMat );
+        private:
             /// The default seed for MT random numbers
             int m_randSeed;
             /// Flag for random number method - may change to enum to allow for several methods
