@@ -68,6 +68,26 @@ private:
     virtual ~MockIMDWorkspace() {}
   };
 
+  /// Mock to allow the behaviour of the chain of responsibility to be tested.
+  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+  {
+  public:
+    MOCK_CONST_METHOD0(create,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createMeshOnly,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createScalarArray,
+      vtkFloatArray*());
+    MOCK_METHOD1(initialize,
+      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+    MOCK_METHOD1(SetSuccessor,
+      void(vtkDataSetFactory* pSuccessor));
+    MOCK_CONST_METHOD0(hasSuccessor,
+      bool());
+    MOCK_CONST_METHOD0(validate,
+      void());
+  };
+
   public:
 
   void testThresholds()
@@ -86,6 +106,7 @@ private:
         new FakeIMDDimension("z"))));
     EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
       new FakeIMDDimension("t"))));
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(6).WillRepeatedly(Return(4));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -94,17 +115,17 @@ private:
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> inside("signal", 0,
         0, 2);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = inside.create();
+    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> below("signal", 0, 
         0, 0.5);
     below.initialize(ws_sptr);
-    vtkUnstructuredGrid* belowProduct = below.create();
+    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> above("signal", 0,
         2, 3);
     above.initialize(ws_sptr);
-    vtkUnstructuredGrid* aboveProduct = above.create();
+    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
     TS_ASSERT_EQUALS((9*9*9), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
@@ -127,6 +148,7 @@ private:
         IMDDimension_const_sptr(new FakeIMDDimension("z"))));
     EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
       IMDDimension_const_sptr(new FakeIMDDimension("t"))));
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(2).WillRepeatedly(Return(4));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -157,24 +179,6 @@ private:
     TSM_ASSERT_THROWS("No workspace, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
-  void testIsValidThrowsWhenNoTDimension()
-  {
-    using namespace Mantid::VATES;
-    using namespace Mantid::API;
-    using namespace Mantid::Geometry;
-    using namespace testing;
-
-    IMDDimension* nullDimension = NULL;
-    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
-      nullDimension)));
-
-    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
-    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
-
-    TSM_ASSERT_THROWS("No T dimension, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
-  }
-
   void testCreateMeshOnlyThrows()
   {
     using namespace Mantid::VATES;
@@ -194,6 +198,83 @@ private:
     using namespace Mantid::VATES;
     vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
     TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+  }
+
+  void testInitializationDelegates()
+  {
+    //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(2)); //2 dimensions on the workspace.
+
+    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
+        vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+
+    //Successor is provided.
+    factory.SetSuccessor(pMockFactorySuccessor);
+    
+    factory.initialize(ws_sptr);
+
+    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+  }
+
+  void testInitializationDelegatesThrows()
+  {
+    //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(2)); //2 dimensions on the workspace.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
+        vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+
+    TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
+  }
+
+  void testCreateDeleagates()
+  {
+    //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(2).WillRepeatedly(Return(2)); //2 dimensions on the workspace.
+
+    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory =
+        vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> ("signal", (double)0);
+
+    //Successor is provided.
+    factory.SetSuccessor(pMockFactorySuccessor);
+    
+    factory.initialize(ws_sptr);
+    factory.create(); // should be called on successor.
+
+    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
 };

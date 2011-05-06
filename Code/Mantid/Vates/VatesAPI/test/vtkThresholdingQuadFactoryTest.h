@@ -140,6 +140,27 @@ private:
     virtual ~MockIMDWorkspace() {}
   };
 
+    /// Mock to allow the behaviour of the chain of responsibility to be tested.
+  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
+  {
+  public:
+    MOCK_CONST_METHOD0(create,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createMeshOnly,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createScalarArray,
+      vtkFloatArray*());
+    MOCK_METHOD1(initialize,
+      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+    MOCK_METHOD1(SetSuccessor,
+      void(vtkDataSetFactory* pSuccessor));
+    MOCK_CONST_METHOD0(hasSuccessor,
+      bool());
+    MOCK_CONST_METHOD0(validate,
+      void());
+  };
+
+
 public:
 
   void testCreateMeshOnlyThrows()
@@ -185,13 +206,14 @@ public:
     EXPECT_CALL(*pMockWs, getCell(_,_)).Times(AtLeast(1)).WillRepeatedly(ReturnRef(fakeCell));
     EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
+    EXPECT_CALL(*pMockWs, getNumDims()).WillRepeatedly(Return(2));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall between the minimum 0 and maximum 2.
     vtkThresholdingQuadFactory inside("signal", 0, 2);
     inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = inside.create();
+    vtkUnstructuredGrid* insideProduct = dynamic_cast<vtkUnstructuredGrid*>(inside.create());
 
     TS_ASSERT_EQUALS((9*9), insideProduct->GetNumberOfCells());
     TS_ASSERT_EQUALS(100, insideProduct->GetNumberOfPoints());
@@ -209,16 +231,17 @@ public:
     EXPECT_CALL(*pMockWs, getCell(_,_)).Times(AtLeast(1)).WillRepeatedly(ReturnRef(fakeCell));
     EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
+    EXPECT_CALL(*pMockWs, getNumDims()).WillRepeatedly(Return(2));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall above and outside the minimum 0 and maximum 0.5.
-    vtkThresholdingQuadFactory inside("signal", 0, 0.5);
-    inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = inside.create();
+    vtkThresholdingQuadFactory above("signal", 0, 0.5);
+    above.initialize(ws_sptr);
+    vtkUnstructuredGrid* aboveProduct = dynamic_cast<vtkUnstructuredGrid*>(above.create());
 
-    TS_ASSERT_EQUALS(0, insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(100, insideProduct->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(0, aboveProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS(100, aboveProduct->GetNumberOfPoints());
   }
 
   void testBelowThreshold()
@@ -233,16 +256,91 @@ public:
     EXPECT_CALL(*pMockWs, getCell(_,_)).Times(AtLeast(1)).WillRepeatedly(ReturnRef(fakeCell));
     EXPECT_CALL(*pMockWs, getZDimension()).Times(0);
     EXPECT_CALL(*pMockWs, getTDimension()).Times(0);
+    EXPECT_CALL(*pMockWs, getNumDims()).WillRepeatedly(Return(2));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Thresholds have been set such that the signal values (hard-coded to 1, see above) will fall below and outside the minimum 1.5 and maximum 2.
-    vtkThresholdingQuadFactory inside("signal", 1.5, 2);
-    inside.initialize(ws_sptr);
-    vtkUnstructuredGrid* insideProduct = inside.create();
+    vtkThresholdingQuadFactory below("signal", 1.5, 2);
+    below.initialize(ws_sptr);
+    vtkUnstructuredGrid* belowProduct = dynamic_cast<vtkUnstructuredGrid*>(below.create());
 
-    TS_ASSERT_EQUALS(0, insideProduct->GetNumberOfCells());
-    TS_ASSERT_EQUALS(100, insideProduct->GetNumberOfPoints());
+    TS_ASSERT_EQUALS(0, belowProduct->GetNumberOfCells());
+    TS_ASSERT_EQUALS(100, belowProduct->GetNumberOfPoints());
+  }
+
+  void testInitializationDelegates()
+  {
+    //If the workspace provided is not a 4D imdworkspace, it should call the successor's initalization
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(1)); //1 dimensions on the workspace.
+
+    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingQuadFactory factory("signal", (double)0);
+
+    //Successor is provided.
+    factory.SetSuccessor(pMockFactorySuccessor);
+    
+    factory.initialize(ws_sptr);
+
+    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+  }
+
+  void testInitializationDelegatesThrows()
+  {
+    //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization. If there is no successor an exception should be thrown.
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(1)); //1 dimensions on the workspace.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingQuadFactory factory =("signal");
+
+    TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
+  }
+
+  void testCreateDeleagates()
+  {
+    //If the workspace provided is not a 2D imdworkspace, it should call the successor's initalization
+    using namespace Mantid::VATES;
+    using namespace Mantid::Geometry;
+    using namespace testing;
+
+    MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
+    EXPECT_CALL(*pMockWs, getNumDims()).Times(2).WillRepeatedly(Return(1)); //1 dimensions on the workspace.
+
+    MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+
+    Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
+
+    //Constructional method ensures that factory is only suitable for providing mesh information.
+    vtkThresholdingQuadFactory factory("signal");
+
+    //Successor is provided.
+    factory.SetSuccessor(pMockFactorySuccessor);
+    
+    factory.initialize(ws_sptr);
+    factory.create(); // should be called on successor.
+
+    TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
+    TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
   }
 
 };

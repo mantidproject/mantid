@@ -48,9 +48,9 @@ however, some visualisation frameworks won't be able to treat these factories in
       virtual ~vtkThresholdingQuadFactory();
 
       /// Factory Method.
-      virtual vtkUnstructuredGrid* create() const;
+      virtual vtkDataSet* create() const;
 
-      virtual vtkUnstructuredGrid* createMeshOnly() const;
+      virtual vtkDataSet* createMeshOnly() const;
 
       virtual vtkFloatArray* createScalarArray() const;
 

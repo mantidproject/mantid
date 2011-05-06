@@ -56,7 +56,7 @@ public:
   virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
 
   /// Factory method
-  vtkUnstructuredGrid* create() const;
+  vtkDataSet* create() const;
 
   vtkDataSet* createMeshOnly() const;
 
@@ -73,6 +73,10 @@ protected:
   virtual void validate() const;
 
 private:
+
+  void validateWsNotNull() const;
+
+  void validateDimensionsPresent() const;
 
   /// Image from which to draw.
   Mantid::API::IMDWorkspace_sptr m_workspace;
@@ -94,8 +98,6 @@ private:
 
   /// Threshold for signal value, above which, we do not provide unstructured topologies for.
   const double m_maxThreshold;
-
-
 
 };
 
