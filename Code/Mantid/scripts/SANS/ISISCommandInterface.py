@@ -531,20 +531,20 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
     oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
+    mantid.sendLogMessage("::SANS::Itr: 0 "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(oldX2)+" SY "+str(oldY2))
     # take first trial step
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
 
     graph_handle = None
     for i in range(1, MaxIter+1):
-        it = i-1
-        newX2, newY2 = oldX2, oldY2
-        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
-
+        it = i
+        
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
         newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
+        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
         
         try :
             if not graph_handle:
