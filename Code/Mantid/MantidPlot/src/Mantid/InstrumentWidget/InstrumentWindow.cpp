@@ -301,7 +301,8 @@ void InstrumentWindow::groupDetectors()
   if( outputWS.isEmpty() ) return;
   QString param_list = "InputWorkspace=%1;OutputWorkspace=%2;WorkspaceIndexList=%3;KeepUngroupedSpectra=1";
   emit execMantidAlgorithm("GroupDetectors",
-			   param_list.arg(inputWS, outputWS, asString(wksp_indices))
+			   param_list.arg(inputWS, outputWS, asString(wksp_indices)),
+         this
 			   );
 }
 
@@ -319,7 +320,7 @@ void InstrumentWindow::maskDetectors()
   // Masking can only replace the input workspace so no need to ask for confirmation
   QString param_list = "Workspace=%1;WorkspaceIndexList=%2";
   QString indices = asString(mInstrumentDisplay->getSelectedWorkspaceIndices());
-  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)));
+  emit execMantidAlgorithm("MaskDetectors",param_list.arg(inputWS, asString(wksp_indices)),this);
 }
 
 /**
@@ -739,4 +740,9 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
   {
     mInstrumentDisplay->setRenderMode(mode);
     tabChanged(0);
+  }
+
+  void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)
+  {
+    mInstrumentDisplay->refreshView();
   }

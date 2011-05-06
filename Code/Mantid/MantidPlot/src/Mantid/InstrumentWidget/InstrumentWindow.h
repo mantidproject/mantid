@@ -14,6 +14,7 @@
 #include "qwt_scale_widget.h"
 #include <Poco/NObserver.h>
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/AlgorithmObserver.h"
 
 
 namespace Mantid
@@ -73,7 +74,7 @@ class QShowEvent;
 
   File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
  */
-class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver
+class InstrumentWindow : public MdiSubWindow, public WorkspaceObserver, public Mantid::API::AlgorithmObserver
 {
   Q_OBJECT
 
@@ -98,6 +99,8 @@ public:
 protected:
   /// Called just before a show event
   virtual void showEvent(QShowEvent* event);
+  /// Implements AlgorithmObserver's finish handler
+  void finishHandle(const Mantid::API::IAlgorithm* alg);
 
 public slots:
   void tabChanged(int i);
@@ -120,7 +123,7 @@ public slots:
 signals:
   void plotSpectra(const QString&,const std::set<int>&);
   void createDetectorTable(const QString&,const std::vector<int>&,bool);
-  void execMantidAlgorithm(const QString&,const QString&);
+  void execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*);
 
 private slots:
   void block();

@@ -36,6 +36,13 @@ class AlgorithmDockWidget;
 class AlgorithmMonitor;
 class InstrumentWindow;
 class FitPropertyBrowser;
+namespace Mantid
+{
+  namespace API
+  {
+    class AlgorithmObserver;
+  }
+}
 
 /**
     MantidUI is the extension of QtiPlot's ApplicationWindow which deals with Mantid framework.
@@ -326,7 +333,7 @@ public slots:
     // Execute algorithm given name and version
     void executeAlgorithm(QString algName, int version = -1);
     //Execute an algorithm with the given parameter list
-    void executeAlgorithm(const QString & algName, const QString & paramList);
+    void executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs = NULL);
     // Find the name of the first input workspace for an algorithm
     QString findInputWorkspaceProperty(Mantid::API::IAlgorithm_sptr algorithm) const;
     // Show Qt critical error message box

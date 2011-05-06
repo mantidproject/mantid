@@ -1028,3 +1028,13 @@ void GL3DWidget::setSelectionType(int type)
 {
   m_detSelector.reset(DetSelector::create((DetSelectionType)type));
 }
+
+void GL3DWidget::refreshView()
+{
+  if( iInteractionMode == GL3DWidget::PickMode) //This is when in picking mode and the window is resized so update the image
+  {
+    mPickingDraw=true;
+  }
+  m_unwrappedViewChanged = true;
+  update();
+}

@@ -938,12 +938,21 @@ void MantidUI::executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::
   }
 }
 
-void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList)
+/**
+  * Execute an algorithm
+  * @param algName :: The algorithm name
+  * @param paramList :: A list of algorithm properties to be passed to Algorithm::setProperties
+  * @param obs :: A pointer to an instance of AlgorithmObserver which will be attached to the finish notification
+  */
+void MantidUI::executeAlgorithm(const QString & algName, const QString & paramList,Mantid::API::AlgorithmObserver* obs)
 {
   //Get latest version of the algorithm
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, -1);
   if( !alg ) return;
-
+  if (obs)
+  {
+    obs->observeFinish(alg);
+  }
   alg->setProperties(paramList.toStdString());
   executeAlgorithmAsync(alg);
 }
@@ -1391,8 +1400,8 @@ InstrumentWindow* MantidUI::getInstrumentView(const QString & wsName)
       SLOT(plotSpectraList(const QString&,const std::set<int>&)));
   connect(insWin,SIGNAL(createDetectorTable(const QString&,const std::vector<int>&,bool)),this,
       SLOT(createDetectorTable(const QString&,const std::vector<int>&,bool)));
-  connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&)), this,
-      SLOT(executeAlgorithm(const QString&, const QString&)));
+  connect(insWin, SIGNAL(execMantidAlgorithm(const QString&,const QString&,Mantid::API::AlgorithmObserver*)), this,
+      SLOT(executeAlgorithm(const QString&, const QString&,Mantid::API::AlgorithmObserver*)));
   return insWin;
 }
 

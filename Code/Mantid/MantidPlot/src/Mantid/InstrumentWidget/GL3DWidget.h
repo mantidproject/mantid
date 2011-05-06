@@ -84,6 +84,7 @@ public slots:
   void setSelectionType(int);
   void set3DAxesState(bool);
   void setRenderMode(int);
+  void refreshView();
 
 protected:
   void initializeGL();
