@@ -1,0 +1,1 @@
+# Fools Visual Studio into thinking it has generated the wrapper sipqti.cpp file which we need kill some compiler warnings from auto-generated code.
