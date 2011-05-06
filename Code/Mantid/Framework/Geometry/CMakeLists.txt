@@ -183,6 +183,7 @@ set ( TEST_FILES
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h
+  test/OrientedLatticeTest.h
 	test/ParCompAssemblyTest.h
 	test/ParDetectorTest.h
 	test/ParInstrumentTest.h
