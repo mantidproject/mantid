@@ -30,7 +30,7 @@ public:
   {
     using namespace Mantid::PythonAPI;
     //first call the function to create the module file
-    SimplePythonAPI::createModule(false);
+    SimplePythonAPI::createModule();
     Poco::File apimodule(SimplePythonAPI::getModuleFilename());
     //has it been written ?
     TS_ASSERT(apimodule.exists());
