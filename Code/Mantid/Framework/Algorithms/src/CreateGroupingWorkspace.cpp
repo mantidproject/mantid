@@ -198,6 +198,7 @@ namespace Algorithms
    */
   void CreateGroupingWorkspace::exec()
   {
+    MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     std::string InputWorkspace = getPropertyValue("InputWorkspace");
     std::string InstrumentName = getPropertyValue("InstrumentName");
     std::string InstrumentFilename = getPropertyValue("InstrumentFilename");
@@ -206,21 +207,22 @@ namespace Algorithms
 
     // Some validation
     int numParams = 0;
-    if (!InputWorkspace.empty()) numParams++;
+    if (inWS) numParams++;
     if (!InstrumentName.empty()) numParams++;
     if (!InstrumentFilename.empty()) numParams++;
 
-    if (numParams != 1)
-      throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file).");
+    if (numParams > 1)
+      throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file). You specified more than one.");
+    if (numParams == 0)
+      throw std::invalid_argument("You must specify exactly ONE way to get an instrument (workspace, instrument name, or IDF file). You specified none.");
 
     if (!OldCalFilename.empty() && !GroupNames.empty())
       throw std::invalid_argument("You must specify either to use the OldCalFilename parameter OR GroupNames but not both!");
 
     // ---------- Get the instrument one of 3 ways ---------------------------
     IInstrument_sptr inst;
-    if (!InputWorkspace.empty())
+    if (inWS)
     {
-      MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
       inst = inWS->getInstrument();
     }
     else

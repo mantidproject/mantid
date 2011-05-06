@@ -114,6 +114,9 @@ protected:
 
   virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
+  /// A vector that holds the 1D histograms
+  std::vector<Histogram1D> data;
+
 private:
   /// Private copy constructor. NO COPY ALLOWED
   Workspace2D(const Workspace2D&);
@@ -122,9 +125,6 @@ private:
 
   virtual int getHistogramNumberHelper() const;
 
-  /// A vector that holds the 1D histograms
-
-  std::vector<Histogram1D> data;
   /// Static reference to the logger class
   static Kernel::Logger &g_log;
 };

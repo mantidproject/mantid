@@ -43,6 +43,20 @@ public:
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
     std::vector<int> dets = ws->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS(dets.size(), 1);
+
+    // Set the group numbers
+    for (int group=0; group<5; group++)
+      for (int i=0; i<9; i++)
+        ws->dataY(group*9+i)[0] = double(group+1);
+
+    // Get the map
+    std::map<int,int> map;
+    ws->makeDetectorIDToGroupMap(map);
+
+    TS_ASSERT_EQUALS( map[1], 1 );
+    TS_ASSERT_EQUALS( map[9], 1 );
+    TS_ASSERT_EQUALS( map[10], 2 );
+    TS_ASSERT_EQUALS( map[45], 5 );
   }
 
 

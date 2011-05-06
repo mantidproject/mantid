@@ -5,6 +5,7 @@
 #include "MantidAPI/SpectraAxis.h"
 
 using Mantid::API::SpectraAxis;
+using Mantid::API::SpectraDetectorMap;
 
 namespace Mantid
 {
@@ -70,8 +71,71 @@ namespace DataObjects
   }
 
 
+  /** Fill a map with key = detector ID, value = group number
+   * by using the values in Y
+   *
+   * @param detIDToGroup :: ref. to map to fill
+   */
+  void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<int, int> & detIDToGroup) const
+  {
+    const SpectraDetectorMap & map = this->spectraMap();
+    for (int wi=0; wi<this->m_noVectors; ++wi)
+    {
+      int specNo = wi;
+      // Convert the Y value to a group number
+      int group = int(this->dataY(wi)[0]);
+      std::vector<int> dets = map.getDetectors(specNo);
+      int detID = dets[0];
+      detIDToGroup[detID] = group;
+    }
+  }
+
 
 
 } // namespace Mantid
 } // namespace DataObjects
 
+
+///\cond TEMPLATE
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+
+    template<> DLLExport
+    Mantid::DataObjects::GroupingWorkspace_sptr IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected GroupingWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> DLLExport
+    Mantid::DataObjects::GroupingWorkspace_const_sptr IPropertyManager::getValue<Mantid::DataObjects::GroupingWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::GroupingWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const GroupingWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+  } // namespace Kernel
+} // namespace Mantid
+
+///\endcond TEMPLATE
