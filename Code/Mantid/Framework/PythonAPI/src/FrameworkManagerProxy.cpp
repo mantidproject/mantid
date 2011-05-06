@@ -29,9 +29,6 @@ typedef std::vector<std::string> StringVector;
 // Initialize the logger
 Mantid::Kernel::Logger& FrameworkManagerProxy::g_log = Mantid::Kernel::Logger::get("MantidPython");
 
-// Save the flag used on the last creation of the simple API
-bool FrameworkManagerProxy::g_last_api_flag = false;
-
 /// Default constructor
 FrameworkManagerProxy::FrameworkManagerProxy() 
   : m_delete_observer(*this, &FrameworkManagerProxy::deleteNotificationReceived),
@@ -450,12 +447,10 @@ std::vector<std::string> FrameworkManagerProxy::getWorkspaceGroupEntries(const s
   * Create the simple Python API module
   * @param gui :: Whether the module is being made for use with qtiplot or not
   **/
-void FrameworkManagerProxy::createPythonSimpleAPI(bool gui)
+void FrameworkManagerProxy::createPythonSimpleAPI()
 {
   //Redirect to static helper class
-  SimplePythonAPI::createModule(gui);
-  //Save the flag so that the module can be recreated
-  g_last_api_flag = gui;
+  SimplePythonAPI::createModule();
 }
 
 /**
@@ -570,7 +565,7 @@ void FrameworkManagerProxy::
 handleAlgorithmFactoryUpdate(Mantid::API::AlgorithmFactoryUpdateNotification_ptr)
 {
   // First rewrite the simple API
-  createPythonSimpleAPI(g_last_api_flag);
+  createPythonSimpleAPI();
   //Call up to python via a virtual function
   algorithmFactoryUpdated();
 }

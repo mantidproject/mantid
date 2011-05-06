@@ -823,7 +823,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
 {
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
-  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
   executeLoadAlgorithm(dlg,alg);
 
 }
@@ -838,7 +838,7 @@ void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& 
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadRaw", -1);
   if( !alg ) return;
 
-  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
   QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
   if(!list.empty())
   {
@@ -859,7 +859,7 @@ void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString&
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm("LoadNexus", -1);
   if( !alg ) return;
 
-  MantidQt::API::AlgorithmDialog* dlg=createLoadAlgorithmDialog(alg);
+  MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
   if(!dlg) return;
   QList<QLineEdit*> list = dlg->findChildren <QLineEdit*>();
   if(!list.empty())
@@ -899,10 +899,10 @@ void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& file
   executeAlgorithmAsync(alg);
 }
 
-/** This creates an algorithm dialog (the default property entry thingie).
- * It is NOT exclusively for "Load" algorithms!
+/** 
+ * This creates an algorithm dialog (the default property entry thingie).
  */
-MantidQt::API::AlgorithmDialog*  MantidUI::createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
+MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg)
 {
   QString presets(""), enabled("");
   //If a workspace is selected in the dock then set this as a preset for the dialog

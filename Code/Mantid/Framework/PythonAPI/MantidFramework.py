@@ -12,8 +12,9 @@ import __main__
 try:
     import qti
     import PyQt4.QtCore as qtcore
+    HAVE_GUI = True
 except:
-    pass # ignore this error as you are probably running without the gui
+    HAVE_GUI = False # Assume no gui
 
 try:
     import numpy
@@ -872,9 +873,6 @@ class IAlgorithmProxy(ProxyObject):
 
         # configure everything for the dialog
         for name in kwargs.keys():
-            if not self.existsProperty(name):
-                msg = 'Unknown property "%s" for %s version %d' % (name, self.name(), self.version())
-                raise AttributeError(msg)
             valpair = mtd._convertToPair(name, kwargs[name], enabled_list, disabled_list)
             values += valpair[0] + '|'
             final_enabled += valpair[1] + ','
@@ -886,12 +884,11 @@ class IAlgorithmProxy(ProxyObject):
 
     def execute(self, *args, **kwargs):
         """
-        Execute the (hopefully) configured algorithm.
+        Execute the configured algorithm.
         """
         self.setPropertyValues(*args, **kwargs)
 
         if mtd.__gui__:
-            name = self._getHeldObject().name()
             result = self.executeAsync()
             while not result.available():
                 qtcore.QCoreApplication.processEvents()
@@ -901,7 +898,7 @@ class IAlgorithmProxy(ProxyObject):
                 success = false
 
             if success == False:
-                sys.exit('An error occurred while running %s. See results log for details.' % name)
+                sys.exit('An error occurred while running %s. See results log for details.' % self.name())
         else:
             self._getHeldObject().execute()
 
@@ -966,20 +963,23 @@ class MantidPyFramework(FrameworkManager):
     
     #### methods ###########################################################
 
-    def initialise(self, GUI = False):
+    def initialise(self, GUI=None):
         """
         Initialise the framework
         """
         if self.__is_initialized == True:
             return
-        self.__gui__ = GUI
+        if GUI is None:
+            self.__gui__ = HAVE_GUI
+        else:
+            self.__gui__ = GUI
 
         # Welcome everyone to the world of MANTID
         print '\n' + self.settings.welcomeMessage() + '\n'
         # Run through init steps
-        self.createPythonSimpleAPI(GUI)
+        self.createPythonSimpleAPI()
         self._pyalg_loader.load_modules(refresh=False)
-        self.createPythonSimpleAPI(GUI) # TODO this line should go
+        self.createPythonSimpleAPI() # TODO this line should go
         self._importSimpleAPIToMain()
 
         self.__is_initialized = True

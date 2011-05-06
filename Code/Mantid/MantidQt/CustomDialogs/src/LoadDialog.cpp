@@ -256,7 +256,7 @@ namespace MantidQt
 
       // Attempt to set any values that may have been retrieved
       setPropertyValues(QStringList("Filename"));
-      this->setMinimumSize(QSize(500, 100+inputProps.size()*30));
+      this->setMinimumSize(QSize(350, 80+static_cast<int>(inputProps.size())*30));
       this->update();
     }
 

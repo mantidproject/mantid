@@ -817,7 +817,9 @@ void AlgorithmDialog::isForScript(bool forScript)
 void AlgorithmDialog::setOptionalMessage(const QString & message)
 {
   m_strMessage = message;
-  if( message.isEmpty() ) m_msgAvailable = false;
+  if( message.isEmpty() ) m_strMessage = QString::fromStdString(getAlgorithm()->getOptionalMessage());
+  if( m_strMessage.isEmpty() ) m_msgAvailable = false;
+  else m_msgAvailable = true;
 }
 
 /**

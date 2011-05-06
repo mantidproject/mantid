@@ -42,10 +42,8 @@ namespace Mantid
     /**
     * Create the python module with function definitions in the
     * file whose name is returned by getModule()
-    * @param gui If this is true create the necessary framework to use the dialog
-    * boxes in qtiplot
     */
-    void SimplePythonAPI::createModule(bool gui)
+    void SimplePythonAPI::createModule()
     {
       std::ofstream module(getModuleFilename().c_str());
 
@@ -88,11 +86,7 @@ namespace Mantid
         std::sort(orderedProperties.begin(), orderedProperties.end(), SimplePythonAPI::PropertyOrdering());
         std::string name(vIter->first);
         const int version(vIter->second);
-        writeFunctionDef(module, name, version, orderedProperties, gui);
-        if( gui ) 
-        {
-          writeGUIFunctionDef(module, name, version, orderedProperties);
-        }
+        writeFunction(module, name, version, orderedProperties);
 
         // Get any aliases
         std::vector<std::string> aliases;
@@ -168,15 +162,13 @@ namespace Mantid
     * @param algm The name of the algorithm
     * @param version The default version of the algorithm
     * @param properties The list of properties
-    * @param async Whether the algorithm should be executed asynchonously or not
     */
-    void SimplePythonAPI::writeFunctionDef(std::ostream & os, const std::string & algm,
-					   const int version,
-					   const PropertyVector & properties, bool async)
+    void SimplePythonAPI::writeFunction(std::ostream & os, const std::string & algm,
+                                        const int version, const PropertyVector & properties)
     {
       if( algm == "Load" )
       {
-        writeLoadFunction(os, async);
+        writeLoadFunction(os);
         return;
       }
       os << "# Definition of \"" << algm << "\" function.\n";
@@ -233,14 +225,16 @@ namespace Mantid
 
       // add the help information as a static thing
       os << algm << ".__doc__ = mtd.createAlgorithmDocs(\"" << algm << "\")\n\n";
+
+      // And the dialog function
+      writeDialogFunction(os, algm, version, properties);
     }
 
     /**
      * Write a spcial function definition for the smarter Load algorithm
      * @param[in,out] os :: The file stream
-     * @param async :: If true then the algorithm will run asynchrnously
      */
-    void SimplePythonAPI::writeLoadFunction(std::ostream & os, bool async)
+    void SimplePythonAPI::writeLoadFunction(std::ostream & os)
     {
       os <<
         "def Load(*args, **kwargs):\n"
@@ -315,25 +309,21 @@ namespace Mantid
         "        algm.setPropertyValue(key, _makeString(value).lstrip('? '))\n"
         "    algm.execute()\n"
         "    return algm\n\n";
+
+        // and the dialog version
+      writeLoadDialog(os);
     }
 
     /**
-    * Write the GUI version of the Python function that raises a Qt dialog
+    * Write the dialog version of the Python function that raises a Qt dialog
     * @param os The stream to use to write the definition
     * @param algm The name of the algorithm
     * @param version The default version to create
     * @param properties The list of properties
     */
-    void SimplePythonAPI::writeGUIFunctionDef(std::ostream & os, const std::string & algm,
-					      const int version,
-					      const PropertyVector & properties)
+    void SimplePythonAPI::writeDialogFunction(std::ostream & os, const std::string & algm,
+					                                    const int version, const PropertyVector & properties)
     {
-      if( algm == "Load" )
-      {
-        writeLoadDialogDef(os);
-        return;
-      }
-
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
       os << "def " << algm << "Dialog(";
@@ -372,7 +362,7 @@ namespace Mantid
      * Write a command for the LoadDialog
      * @param os :: The file stream
      */
-    void SimplePythonAPI::writeLoadDialogDef(std::ostream & os)
+    void SimplePythonAPI::writeLoadDialog(std::ostream & os)
     {
       os << "def LoadDialog(*args, **kwargs):\n"
         "    \"\"\"Popup a dialog for the Load algorithm. More help on the Load function\n"
@@ -383,15 +373,15 @@ namespace Mantid
         "      - Disable :: A CSV list of properties to keep enabled in the dialog\n"
         "      - Message :: An optional message string\n"
         "    \"\"\"\n"
-        "    if 'Enable' in kwargs:\n"
-        "        enabled_list = [s.lstrip(' ') for s in kwargs['Enable'].split(',')]\n"
-        "    else:\n"
-        "        enabled_list = []\n"
-        "    if 'Disable' in kwargs:\n"
-        "        disabled_list = [s.lstrip(' ') for s in kwargs['Disable'].split(',')]\n"
-        "    else:\n"
-        "        disabled_list = []\n"
-        "\n"
+        //"    if 'Enable' in kwargs:\n"
+        //"        enabled_list = [s.lstrip(' ') for s in kwargs['Enable'].split(',')]\n"
+        //"    else:\n"
+        //"        enabled_list = []\n"
+        //"    if 'Disable' in kwargs:\n"
+        //"        disabled_list = [s.lstrip(' ') for s in kwargs['Disable'].split(',')]\n"
+        //"    else:\n"
+        //"        disabled_list = []\n"
+        //"\n"
         "    arguments = {}\n"
         "    filename = None\n"
         "    wkspace = None\n"
@@ -407,40 +397,36 @@ namespace Mantid
         "            filename = args[0]\n"
         "    arguments['Filename'] = filename\n"
         "    arguments['OutputWorkspace'] = wkspace\n"
-        "    # Create lists to pass to create dialog function\n"
-        "    final_enabled = ''\n"
-        "    values = '|'\n"
+        "    arguments.update(kwargs)\n"
+        "    if 'Enable' not in arguments: arguments['Enable']=''\n"
+        "    if 'Disable' not in arguments: arguments['Disable']=''\n"
+        "    if 'Message' not in arguments: arguments['Message']=''\n"
         "    algm = mtd.createAlgorithm('Load')\n"
-        "    if filename is not None:"
-        "        algm.setPropertyValue('Filename', filename)\n"
-        "    props = algm.getProperties()\n"
-        "    for p in props:\n"
-        "        p_name = p.name\n"
-        "        if p_name not in arguments:\n"
-        "            arguments[p_name] = kwargs.get(p_name, None)\n"
-        "    # Everything else\n"
-        "    for key, value in arguments.iteritems():\n"
-        "        valpair = mtd._convertToPair(key, value,enabled_list, disabled_list)\n"
-        "        values += valpair[0] + '|'\n"
-        "        final_enabled += valpair[1] + ','\n"
-        "    final_enabled.rstrip(',')\n"
-        "    # Running algorithm\n"
-        "    dialog = qti.app.mantidUI.createPropertyInputDialog('Load' , values, kwargs.get('Message',''), final_enabled)\n"
-        "    if dialog == True:\n"
-        "        algm.execute()\n"
+        "    algm.setPropertiesDialog(**arguments)\n"
+        "    algm.execute()\n"
         "    return algm\n\n";
-    }
-
-    /**
-    * Write out Python code required to execute an algorithm asynchronously.
-    * @param output The stream to contain the code
-    * @param alg_name The name of the algorithm
-    * @param prefix A prefix to apply to each line
-    */
-    void SimplePythonAPI::writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, 
-      const std::string & prefix)
-    {
-      output << prefix << "result = qti.app.mantidUI.runAlgorithmAsync_PyCallback(\"" << alg_name << "\")\n";
+        //"    # Create lists to pass to create dialog function\n"
+        //"    final_enabled = ''\n"
+        //"    values = '|'\n"
+        //"    algm = mtd.createAlgorithm('Load')\n"
+        //"    if filename is not None:"
+        //"        algm.setPropertyValue('Filename', filename)\n"
+        //"    props = algm.getProperties()\n"
+        //"    for p in props:\n"
+        //"        p_name = p.name\n"
+        //"        if p_name not in arguments:\n"
+        //"            arguments[p_name] = kwargs.get(p_name, None)\n"
+        //"    # Everything else\n"
+        //"    for key, value in arguments.iteritems():\n"
+        //"        valpair = mtd._convertToPair(key, value,enabled_list, disabled_list)\n"
+        //"        values += valpair[0] + '|'\n"
+        //"        final_enabled += valpair[1] + ','\n"
+        //"    final_enabled.rstrip(',')\n"
+        //"    # Running algorithm\n"
+        //"    dialog = qti.app.mantidUI.createPropertyInputDialog('Load' , values, kwargs.get('Message',''), final_enabled)\n"
+        //"    if dialog == True:\n"
+        //"        algm.execute()\n"
+        //"    return algm\n\n";
     }
 
     /**

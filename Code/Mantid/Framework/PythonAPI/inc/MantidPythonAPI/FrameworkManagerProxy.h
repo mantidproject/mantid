@@ -163,7 +163,7 @@ public:
   ///Send a log message to the Mantid Framework with a specified priority
   void sendLogMessage(const std::string & msg);
   /// Create the simple Python API for Mantid
-  void createPythonSimpleAPI(bool);
+  void createPythonSimpleAPI();
   /// Register a Python algorithm object with the algorithm factory
   void registerPyAlgorithm(boost::python::object pyobj);
   /// A function that can be overridden in Python to handle updates of the AlgorithmFactory
@@ -201,8 +201,6 @@ public:
   /// Poco clear notification observer object
   Poco::NObserver<FrameworkManagerProxy, Mantid::API::AlgorithmFactoryUpdateNotification> m_algupdate_observer;
 
-  /// Store the flag used to create the last version of simple API
-  static bool g_last_api_flag;
   /// A Python logger
   static Mantid::Kernel::Logger& g_log;
 };

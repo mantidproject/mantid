@@ -436,8 +436,8 @@ private:
     void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
 	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
 
-	/// This method executes LoadRaw/LoadNexus algorithm from ICat interface
-	 MantidQt::API::AlgorithmDialog * createLoadAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+	/// This creates an algorithm dialog.
+	 MantidQt::API::AlgorithmDialog * createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
 
 	 /// This method accepts user inputs and executes loadraw/load nexus algorithm
 	 void executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);

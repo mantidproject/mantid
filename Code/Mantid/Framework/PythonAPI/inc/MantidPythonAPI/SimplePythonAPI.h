@@ -58,7 +58,7 @@ class DLLExport SimplePythonAPI
 
   /// Public methods
   /// Create the simple API module
-  static void createModule(bool gui);
+  static void createModule();
   /// Create and return the full-qualified path name for the module
   static std::string getModuleFilename(); 
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
@@ -88,18 +88,15 @@ class DLLExport SimplePythonAPI
   /// Gets the algorithm name from a fully qualified name
   static std::string extractAlgName(const std::string & algKey);
   /// Writes the Python function definition for the given algorithm
-  static void writeFunctionDef(std::ostream & module, const std::string & algName,
-			       const int version, const PropertyVector & properties, 
-			       bool async);
+  static void writeFunction(std::ostream & module, const std::string & algName,
+			                      const int version, const PropertyVector & properties);
   /// Write a special definition for the 'Load' algorithm
-  static void writeLoadFunction(std::ostream & module, bool async);
-  /// Writes the GUI version of the Python function definition for the given algorithm
-  static void writeGUIFunctionDef(std::ostream & module, const std::string & algName,
-				  const int version, const PropertyVector & properties);
+  static void writeLoadFunction(std::ostream & module);
+  /// Writes the dialog version of the Python function definition for the given algorithm
+  static void writeDialogFunction(std::ostream & module, const std::string & algName,
+				                          const int version, const PropertyVector & properties);
   /// Write a specialised function for the LoadDialog command
-  static void writeLoadDialogDef(std::ostream & module);
-  /// Write string to run algorithm asynchronously
-  static void writeAsyncFunctionCall(std::ostream & output, const std::string & alg_name, const std::string & prefix = "");
+  static void writeLoadDialog(std::ostream & module);
   /// Convert EOL characters to their string representation
   static std::string convertEOLToString(const std::string & value);
   /// A split function that mimics Python's split function

@@ -14,7 +14,7 @@ if __name__ == '__main__':
     # Make Mantid available
     from MantidFramework import *
     # Initialize the Mantid framework
-    mtd.initialise(GUI = True)
+    mtd.initialise()
 
     # Make MantidPlot Python API available to main user scripts.
     # For modules imported into a main script users will need to do this too
