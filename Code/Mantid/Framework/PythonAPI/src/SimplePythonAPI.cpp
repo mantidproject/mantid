@@ -176,8 +176,8 @@ namespace Mantid
     {
       if( algm == "Load" )
       {
-	writeLoadFunction(os, async);
-	return;
+        writeLoadFunction(os, async);
+        return;
       }
       os << "# Definition of \"" << algm << "\" function.\n";
       //start of definition
@@ -309,28 +309,12 @@ namespace Mantid
         "    \n"
         "    # Create and execute\n"
         "    algm = mtd.createAlgorithm('Load')\n"
-        "    if kwargs.get('execute', True) == True:\n"
-        "        algm.setPropertyValue('Filename', filename)\n"
-        "        algm.setPropertyValue('OutputWorkspace', wkspace)\n"
-        "        for key, value in kwargs.iteritems():\n"
-        "            try:\n"
-        "                algm.setPropertyValue(key, _makeString(value).lstrip('? '))\n"
-        "            except RuntimeError:\n"
-        "                print 'Ignoring Argument \"%s\": not known to this Loading algorithm.' % str(key)\n"
-        "            \n";
-      // Execution
-      if( async )
-      {
-        writeAsyncFunctionCall(os, "Load", "        ");
-        os << "        if result == False:\n"
-          << "            sys.exit('An error occurred while running Load. See results log for details.')\n";
-      }
-      else
-      {
-        os << "        algm.setRethrows(True)\n";
-        os << "        algm.execute()\n";
-      }
-      os << "    return mtd._createAlgProxy(algm)\n\n";
+        "    algm.setPropertyValue('Filename', filename) # Must be set first\n"
+        "    algm.setPropertyValue('OutputWorkspace', wkspace)\n"
+        "    for key, value in kwargs.iteritems():\n"
+        "        algm.setPropertyValue(key, _makeString(value).lstrip('? '))\n"
+        "    algm.execute()\n"
+        "    return algm\n\n";
     }
 
     /**
@@ -346,8 +330,8 @@ namespace Mantid
     {
       if( algm == "Load" )
       {
-	writeLoadDialogDef(os);
-	return;
+        writeLoadDialogDef(os);
+        return;
       }
 
       os << "# Definition of \"" << algm << "\" function.\n";
@@ -391,64 +375,60 @@ namespace Mantid
     void SimplePythonAPI::writeLoadDialogDef(std::ostream & os)
     {
       os << "def LoadDialog(*args, **kwargs):\n"
-	"    \"\"\"Popup a dialog for the Load algorithm. More help on the Load function\n"
-	"    is available via help(Load).\n"
-	"\n"
-	"    Additional arguments available here (as keyword only) are:\n"
-	"      - Enable :: A CSV list of properties to keep enabled in the dialog\n"
-	"      - Disable :: A CSV list of properties to keep enabled in the dialog\n"
-	"      - Message :: An optional message string\n"
-	"    \"\"\"\n"
-	"    if 'Enable' in kwargs:\n"
-	"        enabled_list = [s.lstrip(' ') for s in kwargs['Enable'].split(',')]\n"
-	"    else:\n"
-	"        enabled_list = []\n"
-	"    if 'Disable' in kwargs:\n"
-	"        disabled_list = [s.lstrip(' ') for s in kwargs['Disable'].split(',')]\n"
-	"    else:\n"
-	"        disabled_list = []\n"
-	"\n"
-	"    arguments = {}\n"
-	"    filename = None\n"
-	"    wkspace = None\n"
-	"    if len(args) == 2:\n"
-	"        filename = args[0]\n"
-	"        wkspace = args[1]\n"
-	"    elif len(args) == 1:\n"
-	"        if 'Filename' in kwargs:\n"
-	"            filename = kwargs['Filename']\n"
-	"            wkspace = args[0]\n"
-	"        elif 'OutputWorkspace' in kwargs:\n"
-	"            wkspace = kwargs['OutputWorkspace']\n"
-	"            filename = args[0]\n"
-	"    arguments['Filename'] = filename\n"
-	"    arguments['OutputWorkspace'] = wkspace\n"
-	"    # Create lists to pass to create dialog function\n"
-	"    final_enabled = ''\n"
-	"    values = '|'\n"
-	"    algm = mtd.createAlgorithm('Load')\n"
-	"    if filename is not None:"
-	"        algm.setPropertyValue('Filename', filename)\n"
-	"    props = algm.getProperties()\n"
-	"    for p in props:\n"
-	"        p_name = p.name\n"
-	"        if p_name not in arguments:\n"
-	"            arguments[p_name] = kwargs.get(p_name, None)\n"
-	"    # Everything else\n"
-	"    for key, value in arguments.iteritems():\n"
-	"        valpair = mtd._convertToPair(key, value,enabled_list, disabled_list)\n"
-	"        values += valpair[0] + '|'\n"
-	"        final_enabled += valpair[1] + ','\n"
-	"    final_enabled.rstrip(',')\n"
-	"    # Running algorithm\n"
-	"    dialog = qti.app.mantidUI.createPropertyInputDialog('Load' , values, kwargs.get('Message',''), final_enabled)\n"
-	"    if dialog == True:\n"
-	"        result = qti.app.mantidUI.runAlgorithmAsync_PyCallback('Load')\n"
-	"    else:\n"
-	"        sys.exit('Information: Script execution cancelled')\n"
-	"    if result == False:\n"
-	"        sys.exit('An error occurred while running Load. See results log for details.')\n"
-	"    return mtd._createAlgProxy(algm)\n\n";
+        "    \"\"\"Popup a dialog for the Load algorithm. More help on the Load function\n"
+        "    is available via help(Load).\n"
+        "\n"
+        "    Additional arguments available here (as keyword only) are:\n"
+        "      - Enable :: A CSV list of properties to keep enabled in the dialog\n"
+        "      - Disable :: A CSV list of properties to keep enabled in the dialog\n"
+        "      - Message :: An optional message string\n"
+        "    \"\"\"\n"
+        "    if 'Enable' in kwargs:\n"
+        "        enabled_list = [s.lstrip(' ') for s in kwargs['Enable'].split(',')]\n"
+        "    else:\n"
+        "        enabled_list = []\n"
+        "    if 'Disable' in kwargs:\n"
+        "        disabled_list = [s.lstrip(' ') for s in kwargs['Disable'].split(',')]\n"
+        "    else:\n"
+        "        disabled_list = []\n"
+        "\n"
+        "    arguments = {}\n"
+        "    filename = None\n"
+        "    wkspace = None\n"
+        "    if len(args) == 2:\n"
+        "        filename = args[0]\n"
+        "        wkspace = args[1]\n"
+        "    elif len(args) == 1:\n"
+        "        if 'Filename' in kwargs:\n"
+        "            filename = kwargs['Filename']\n"
+        "            wkspace = args[0]\n"
+        "        elif 'OutputWorkspace' in kwargs:\n"
+        "            wkspace = kwargs['OutputWorkspace']\n"
+        "            filename = args[0]\n"
+        "    arguments['Filename'] = filename\n"
+        "    arguments['OutputWorkspace'] = wkspace\n"
+        "    # Create lists to pass to create dialog function\n"
+        "    final_enabled = ''\n"
+        "    values = '|'\n"
+        "    algm = mtd.createAlgorithm('Load')\n"
+        "    if filename is not None:"
+        "        algm.setPropertyValue('Filename', filename)\n"
+        "    props = algm.getProperties()\n"
+        "    for p in props:\n"
+        "        p_name = p.name\n"
+        "        if p_name not in arguments:\n"
+        "            arguments[p_name] = kwargs.get(p_name, None)\n"
+        "    # Everything else\n"
+        "    for key, value in arguments.iteritems():\n"
+        "        valpair = mtd._convertToPair(key, value,enabled_list, disabled_list)\n"
+        "        values += valpair[0] + '|'\n"
+        "        final_enabled += valpair[1] + ','\n"
+        "    final_enabled.rstrip(',')\n"
+        "    # Running algorithm\n"
+        "    dialog = qti.app.mantidUI.createPropertyInputDialog('Load' , values, kwargs.get('Message',''), final_enabled)\n"
+        "    if dialog == True:\n"
+        "        algm.execute()\n"
+        "    return algm\n\n";
     }
 
     /**
