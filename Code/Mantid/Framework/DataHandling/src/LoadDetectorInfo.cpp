@@ -441,28 +441,6 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
       rot.rotate(newPos);
     }
     det->setPos(newPos);
-
-
-    // if( params.detID == 3110021 )
-    // {
-    //   std::cout << "-----\n";
-    //   std::cout << det->getPos() << "\n";
-    //   std::cout << det->getPos().distance(m_workspace->getInstrument()->getSample()->getPos()) << "\n";
-    //   Geometry::IDetector_sptr parDet = m_workspace->getInstrument()->getDetector(params.detID);
-    //   std::cout << parDet->getPos().distance(m_workspace->getInstrument()->getSample()->getPos()) << "\n";
-    //   std::cout << pmap.contains(comp, "pos") << "\n";;
-    // }
-
-    // IComponent_const_sptr parent = det->getParent();
-    // if (parent)
-    // {
-    //   newPos -= parent->getPos();
-    //   Quat rot = parent->getRelativeRot();
-    //   rot.inverse();
-    //   rot.rotate(newPos);
-    // }
-    
-    //pmap.addV3D(comp, "pos", newPos);
   }
 
 
