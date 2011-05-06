@@ -356,8 +356,7 @@ namespace Mantid
       {
         std::stringstream convert;
         convert << det->getID();
-        g_log.error() << "Not successful in adding Detector " << convert << " to _detectorCache." << std::endl;
-        //throw Kernel::Exception::ExistsError("Not successful in adding Detector to _detectorCache.", convert.str());
+        g_log.error() << "Not successful in adding Detector with ID = " << convert.str() << " and name = " << det->getName() << " to _detectorCache." << std::endl;
       }
     }
 
