@@ -53,7 +53,7 @@ IF(QT4_FOUND)
 ENDIF(QT4_FOUND)
 
 include ( FindPackageHandleStandardArgs )
-find_package_handle_standard_args( QScintille DEFAULT_MSG QSCINTILLA_INCLUDE_DIR QSCINTILLA_LIBRARY )
+find_package_handle_standard_args( QScintilla DEFAULT_MSG QSCINTILLA_INCLUDE_DIR QSCINTILLA_LIBRARY )
 
 #IF (QSCINTILLA_FOUND)
 #  IF (NOT QSCINTILLA_FIND_QUIETLY)
