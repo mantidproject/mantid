@@ -175,6 +175,27 @@ private:
     TSM_ASSERT_THROWS("No T dimension, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
+  void testCreateMeshOnlyThrows()
+  {
+    using namespace Mantid::VATES;
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    TS_ASSERT_THROWS(factory.createMeshOnly() , std::runtime_error);
+  }
+
+  void testCreateScalarArrayThrows()
+  {
+    using namespace Mantid::VATES;
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    TS_ASSERT_THROWS(factory.createScalarArray() , std::runtime_error);
+  }
+
+  void testCreateWithoutInitializeThrows()
+  {
+    using namespace Mantid::VATES;
+    vtkThresholdingUnstructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    TS_ASSERT_THROWS(factory.create(), std::runtime_error);
+  }
+
 };
 
 #endif

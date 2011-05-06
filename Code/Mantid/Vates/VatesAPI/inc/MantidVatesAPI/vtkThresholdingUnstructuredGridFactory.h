@@ -40,13 +40,6 @@ namespace Mantid
 namespace VATES
 {
 
-/// Helper struct allows recognition of points that we should not bother to draw.
-struct UnstructuredPoint
-{
-  bool isSparse;
-  vtkIdType pointId;
-};
-
 template<typename TimeMapper>
 class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
 {

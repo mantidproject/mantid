@@ -26,6 +26,7 @@ src/vtkDataSetFactory.cpp
 src/vtkClipperDataSetFactory.cpp
 src/vtkProxyFactory.cpp
 src/vtkStructuredGridFactory.cpp
+src/vtkThresholdingQuadFactory.cpp
 src/vtkThresholdingUnstructuredGridFactory.cpp
 )
 
@@ -50,6 +51,7 @@ inc/MantidVatesAPI/vtkDataSetFactory.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
+inc/MantidVatesAPI/vtkThresholdingQuadFactory.h
 inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 )
 
@@ -59,6 +61,7 @@ test/vtkClipperDataSetFactoryTest.h
 test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h
+test/vtkThresholdingQuadFactoryTest.h
 test/FieldDataToMetadataTest.h
 test/FilteringUpdateProgressActionTest.h
 test/IMDWorkspaceProxyTest.h

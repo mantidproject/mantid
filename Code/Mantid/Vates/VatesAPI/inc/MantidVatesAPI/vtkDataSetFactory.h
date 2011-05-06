@@ -18,6 +18,13 @@ namespace Mantid
 namespace VATES
 {
 
+  /// Helper struct allows recognition of points that we should not bother to draw.
+  struct UnstructuredPoint
+  {
+    bool isSparse;
+    vtkIdType pointId;
+  };
+
 /** Abstract type to generate a vtk dataset on demand from a MDWorkspace.
 
  @author Owen Arnold, Tessella plc

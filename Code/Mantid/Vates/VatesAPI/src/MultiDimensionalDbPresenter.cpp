@@ -97,7 +97,7 @@ std::string MultiDimensionalDbPresenter::getXAxisName() const
 
 std::string MultiDimensionalDbPresenter::getYAxisName() const
 {
-  //Sanity check. Must run execution sucessfully first.
+  //Sanity check. Must run execution successfully first.
   verifyExecution();
 
   return m_workspace->getYDimension()->getDimensionId();
@@ -105,7 +105,7 @@ std::string MultiDimensionalDbPresenter::getYAxisName() const
 
 std::string MultiDimensionalDbPresenter::getZAxisName() const
 {
-  //Sanity check. Must run execution sucessfully first.
+  //Sanity check. Must run execution successfully first.
   verifyExecution();
 
   return m_workspace->getZDimension()->getDimensionId();
