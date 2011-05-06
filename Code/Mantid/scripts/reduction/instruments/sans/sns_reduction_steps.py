@@ -89,7 +89,8 @@ class LoadRun(ReductionStep):
         """
         pass
              
-    def execute(self, reducer, workspace, force=False):      
+    def execute(self, reducer, workspace, force=False):
+        output_str = ""      
         # If we don't have a data file, look up the workspace handle
         # Only files that are used for computing data corrections have
         # a path that is passed directly. Data files that are reduced
@@ -99,52 +100,72 @@ class LoadRun(ReductionStep):
                 data_file = reducer._data_files[workspace]
             elif workspace in reducer._extra_files:
                 data_file = reducer._extra_files[workspace]
+                force = True
             else:
                 raise RuntimeError, "SNSReductionSteps.LoadRun doesn't recognize workspace handle %s" % workspace
         else:
             data_file = self._data_file
         
         # Load data
-        filepath = reducer._full_file_path(data_file)
-
-        # Check whether that file was already loaded
-        # The file also has to be pristine
-        if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
-            mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
-            return "Data %s is already loaded: delete it first if reloading is intended" % (workspace)
-
-        # Find all the necessary files
-        event_file = ""
-        pulseid_file = ""
-        nxs_file = ""
+        def _load_data_file(file_name, wks_name):
+            filepath = reducer._full_file_path(file_name)
+    
+            # Check whether that file was already loaded
+            # The file also has to be pristine
+            if mtd[workspace] is not None and not force and reducer.is_clean(workspace):
+                mantid.sendLogMessage("Data %s is already loaded: delete it first if reloading is intended" % (workspace))
+                return "Data %s is already loaded: delete it first if reloading is intended\n" % (workspace)
+    
+            # Find all the necessary files
+            event_file = ""
+            pulseid_file = ""
+            nxs_file = ""
+            
+            # Check if we have an event file or a pulseid file.
+            is_event_nxs = False
+            
+            if filepath.find("_neutron_event")>0:
+                event_file = filepath
+                pulseid_file = filepath.replace("_neutron_event", "_pulseid")
+            elif filepath.find("_pulseid")>0:
+                pulseid_file = filepath
+                event_file = filepath.replace("_pulseid", "_neutron_event")
+            else:
+                #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
+                # Doesn't look like event pre-nexus, try event nexus
+                is_event_nxs = True
+            
+            # Mapping file
+            mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
+            directory,_ = os.path.split(event_file)
+            mapping_file = os.path.join(directory, mapping_file)
+            
+            if is_event_nxs:
+                mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
+                LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
+            else:
+                mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
+                nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
+                LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
+                LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
+            
+            return ''
         
-        # Check if we have an event file or a pulseid file.
-        is_event_nxs = False
-        
-        if filepath.find("_neutron_event")>0:
-            event_file = filepath
-            pulseid_file = filepath.replace("_neutron_event", "_pulseid")
-        elif filepath.find("_pulseid")>0:
-            pulseid_file = filepath
-            event_file = filepath.replace("_pulseid", "_neutron_event")
+        # Check whether we have a list of files that need merging
+        if type(data_file)==list:
+            for i in range(len(data_file)):
+                if i==0:
+                    output_str += _load_data_file(data_file[i], workspace)
+                else:
+                    output_str += _load_data_file(data_file[i], '__tmp_wksp')
+                    Plus(LHSWorkspace=workspace,
+                         RHSWorkspace='__tmp_wksp',
+                         OutputWorkspace=workspace)
+            if mtd.workspaceExists('__tmp_wksp'):
+                mtd.deleteWorkspace('__tmp_wksp')
         else:
-            #raise RuntimeError, "SNSReductionSteps.LoadRun couldn't find the event and pulseid files"
-            # Doesn't look like event pre-nexus, try event nexus
-            is_event_nxs = True
+            output_str += _load_data_file(data_file, workspace)
         
-        # Mapping file
-        mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
-        directory,_ = os.path.split(event_file)
-        mapping_file = os.path.join(directory, mapping_file)
-        
-        if is_event_nxs:
-            mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
-            LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
-        else:
-            mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
-            nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
-            LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
-            LoadLogsFromSNSNexus(Workspace=workspace+'_evt', Filename=nxs_file)
         
         # Store the sample-detector distance.
         sdd = mtd[workspace+'_evt'].getRun()["detectorZ"].getStatistics().mean
@@ -187,9 +208,25 @@ class LoadRun(ReductionStep):
         
         mantid.sendLogMessage("Loaded %s: sample-detector distance = %g [frame-skipping: %s]" %(workspace, sdd, str(frame_skipping)))
         
+        #FIXME: We need an unmodified data set to compute the transmission
+        # using the beam stop hole. Since it's quick we do it now. We should split
+        # the computing part from the applying part of the transmission correction
+        if pixel_ctr_x is not None and pixel_ctr_y is not None:
+            transmission_ws = "transmission_"+workspace
+    
+            # Calculate the transmission as a function of wavelength
+            EQSANSTransmission(InputWorkspace=workspace,
+                               OutputWorkspace=transmission_ws,
+                               XCenter=pixel_ctr_x,
+                               YCenter=pixel_ctr_y,
+                               NormalizeToUnity = False)
+            
+            mantid[workspace].getRun().addProperty_str("transmission_ws", transmission_ws, True)
+            
         # Remove the dirty flag if it existed
         reducer.clean(workspace)
-        return "Data file loaded: %s" % (workspace)
+        output_str += "Data file loaded: %s" % (workspace)
+        return output_str
 
 
 
@@ -224,7 +261,14 @@ class Transmission(BaseTransmission):
     def execute(self, reducer, workspace):
         # The transmission calculation only works on the original un-normalized counts
         if not reducer.is_clean(workspace):
-            raise RuntimeError, "The Transmission can only be calculated using un-modified data"
+            trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
+            if trans_prop is not None:
+                if mtd.workspaceExists(trans_prop.value):
+                    self._transmission_ws = trans_prop.value
+                else:
+                    raise RuntimeError, "The transmission workspace for %s is no longer available" % trans_prop.value
+            else:
+                raise RuntimeError, "The transmission can only be calculated using un-modified data"
         
         beam_center = reducer.get_beam_center()
 
@@ -242,6 +286,7 @@ class Transmission(BaseTransmission):
         # transmission instead of using the angular dependence of the
         # correction.
         reducer.dirty(workspace)
+        mantid[workspace].getRun().addProperty_str("transmission_ws", self._transmission_ws, True)
         if self._theta_dependent:
             # To apply the transmission correction using the theta-dependent algorithm
             # we should get the beam spectrum out of the measured transmission

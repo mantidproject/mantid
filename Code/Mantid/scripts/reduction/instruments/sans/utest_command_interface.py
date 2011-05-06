@@ -10,9 +10,12 @@ from sans_reducer import SANSReducer
 from hfir_command_interface import *
 from mantidsimple import *
 
-# Set directory containg the test data, relative to the Mantid release directory.
-#TEST_DIR = "../../../Test/Data/SANS2D/"
-TEST_DIR = "/mnt/hgfs/workspace/mantid_trunk/Test/Data/SANS2D/"
+# Set directory containing the test data, relative to the Mantid release directory.
+TEST_DIR = ""
+data_search_dirs = ConfigService()["datasearch.directories"].split(';')
+for item in data_search_dirs:
+    if item.endswith("AutoTestData/"):
+        TEST_DIR = item.replace("AutoTestData", "Data/SANS2D")
 
 def _diff_iq(x,y): return x-y
 def _add(x,y): return x+y

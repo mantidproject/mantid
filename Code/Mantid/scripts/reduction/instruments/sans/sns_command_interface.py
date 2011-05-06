@@ -6,9 +6,12 @@ from reduction.command_interface import *
 from hfir_command_interface import SetBeamCenter, DirectBeamCenter, ScatteringBeamCenter
 from hfir_command_interface import NoDarkCurrent, NoNormalization, Mask, MaskDetectors, MaskRectangle
 from hfir_command_interface import SensitivityCorrection, NoSensitivityCorrection
-from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission
-from hfir_command_interface import Background, NoBackground, AzimuthalAverage
+from hfir_command_interface import SolidAngle, NoSolidAngle, NoTransmission, SetTransmission
+from hfir_command_interface import Background, NoBackground, AzimuthalAverage, IQxQy, NoIQxQy
 from hfir_command_interface import SaveIqAscii, NoSaveIq
+from hfir_command_interface import ThetaDependentTransmission, BckThetaDependentTransmission, SetBckTransmission
+from hfir_command_interface import TransmissionDarkCurrent, BckTransmissionDarkCurrent
+from hfir_command_interface import SetDirectBeamAbsoluteScale, SetAbsoluteScale
 from sns_reducer import EqSansReducer
 import sns_instrument
 import sns_reduction_steps
@@ -28,7 +31,14 @@ def DarkCurrent(datafile):
 
 def TotalChargeNormalization():
     ReductionSingleton().set_normalizer(sns_reduction_steps.Normalize())
-    
-def MeasureTransmission(normalize_to_unity=False, theta_dependent=False):
+  
+def MonitorNormalization():
+    TotalChargeNormalization()
+      
+def BeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
     ReductionSingleton().set_transmission(sns_reduction_steps.Transmission(normalize_to_unity=normalize_to_unity,
                                                                            theta_dependent=theta_dependent))
+    
+def BckBeamStopTransmission(normalize_to_unity=False, theta_dependent=False):
+    ReductionSingleton().set_bck_transmission(sns_reduction_steps.Transmission(normalize_to_unity=normalize_to_unity,
+                                                                               theta_dependent=theta_dependent))

@@ -140,8 +140,7 @@ class BaseScriptElement(object):
             version_list = version_str.split('.')
             if len(version_list)==3:
                 change_set = int(version_list[2])
-                if change_set>0:
-                    return change_set
+                return change_set
         return -1
 
 
@@ -212,6 +211,12 @@ class BaseReductionScripter(object):
         self.instrument_name = name
         self._observers = []
 
+    def clear(self):
+        """
+            Clear out the observer list
+        """
+        self._observers = []
+        
     def attach(self, subject):
         """
             Append a new widget to be observed

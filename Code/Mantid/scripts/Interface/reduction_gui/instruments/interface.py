@@ -44,7 +44,8 @@ class InstrumentInterface(object):
             Destroys all the widget owner by this interface
         """
         for i in range(len(self.widgets)):
-            self.widgets.pop().deleteLater()
+            self.widgets.pop().destroy()
+        self.scripter.clear()
             
     def _warning(self, title, message):
         """

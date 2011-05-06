@@ -162,7 +162,9 @@ class SampleData(BaseScriptElement):
     # Data file
     data_files = []
 
-            
+     # Option list
+    option_list = [DirectBeam, BeamSpreader]
+           
     def to_script(self):
         """
             Generate reduction script
@@ -245,7 +247,7 @@ class SampleData(BaseScriptElement):
             self.dark_current = BaseScriptElement.getStringElement(instrument_dom, "dark_current")
             
             if self.calculate_transmission:
-                for m in [SampleData.DirectBeam, SampleData.BeamSpreader]:
+                for m in self.option_list:
                     method = m()
                     if method.find(instrument_dom):
                         method.from_xml(instrument_dom)
@@ -253,7 +255,7 @@ class SampleData(BaseScriptElement):
                         break
                     
         # Data file section - take care of backward compatibility
-        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             element_list = dom.getElementsByTagName("Instrument")
         else:
             element_list = dom.getElementsByTagName("SampleData")

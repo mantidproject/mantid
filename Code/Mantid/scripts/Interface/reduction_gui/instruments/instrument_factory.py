@@ -4,14 +4,16 @@
     and its corresponding interface class. 
 """
 #from hfir_interface import HFIRInterface as HFIRInterfaceOld
-from eqsans_interface import EQSANSInterface
+#from eqsans_interface import EQSANSInterface
 from hfir_interface_dev import HFIRInterface
+from eqsans_interface_dev import EQSANSInterface
 
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
                             "GPSANS": HFIRInterface,
                             "HFIRDEV": HFIRInterface},
-                   "SNS":  {"EQSANS": EQSANSInterface}}               
+                   "SNS":  {"EQSANS": EQSANSInterface,
+                            "EQDEV": EQSANSInterface}}               
 
 def instrument_factory(instrument_name, settings=None):
     for facility in INSTRUMENT_DICT:

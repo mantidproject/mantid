@@ -15,6 +15,11 @@ try:
     os.system("pyuic4 -o ui/sans/ui_trans_direct_beam.py ui/sans/trans_direct_beam.ui")
     os.system("pyuic4 -o ui/sans/ui_trans_spreader.py ui/sans/trans_spreader.ui")
 
+    # EQSANS - new
+    os.system("pyuic4 -o ui/sans/ui_eqsans_instrument.py ui/sans/eqsans_instrument.ui")
+    os.system("pyuic4 -o ui/sans/ui_eqsans_sample_data.py ui/sans/eqsans_sample_data.ui")
+    os.system("pyuic4 -o ui/sans/ui_eqsans_background.py ui/sans/eqsans_background.ui")
+    
     # OLD
     os.system("pyuic4 -o ui/ui_reduction_main.py ui/reduction_main.ui")
     os.system("pyuic4 -o ui/ui_hfir_background.py ui/hfir_background.ui")

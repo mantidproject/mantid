@@ -159,9 +159,12 @@ class ReductionOptions(BaseScriptElement):
         """
         xml  = "<Instrument>\n"
         xml += "  <name>%s</name>\n" % self.instrument_name
-        xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
-        xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
-        xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
+        if self.nx_pixels is not None:
+            xml += "  <nx_pixels>%g</nx_pixels>\n" % self.nx_pixels
+        if self.ny_pixels is not None:
+            xml += "  <ny_pixels>%g</ny_pixels>\n" % self.ny_pixels
+        if self.pixel_size is not None:
+            xml += "  <pixel_size>%g</pixel_size>\n" % self.pixel_size
         
         xml += "  <sample_det_dist>%g</sample_det_dist>\n" % self.sample_detector_distance
         xml += "  <detector_offset>%g</detector_offset>\n" % self.detector_offset
@@ -243,7 +246,7 @@ class ReductionOptions(BaseScriptElement):
                                                                  default = ReductionOptions.solid_angle_corr)
         
         # Dark current - take care of backward compatibility
-        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             bck_entries = dom.getElementsByTagName("Background")
             if len(bck_entries)>0:
                 self.dark_current_corr = BaseScriptElement.getBoolElement(bck_entries[0], "dark_current_corr",
@@ -265,7 +268,7 @@ class ReductionOptions(BaseScriptElement):
                                                              default=ReductionOptions.normalization)
 
         # Mask - take care of backward compatibility
-        if mtd_version>0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
+        if mtd_version!=0 and mtd_version<BaseScriptElement.UPDATE_1_CHANGESET_CUTOFF:
             self.top = BaseScriptElement.getIntElement(instrument_dom, "mask_top", default=ReductionOptions.top)
             self.bottom = BaseScriptElement.getIntElement(instrument_dom, "mask_bottom", default=ReductionOptions.bottom)
             self.right = BaseScriptElement.getIntElement(instrument_dom, "mask_right", default=ReductionOptions.right)

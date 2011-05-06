@@ -1054,21 +1054,23 @@ class SaveIqAscii(ReductionStep):
         log_text = ""
         if reducer._azimuthal_averager is not None:
             output_ws = reducer._azimuthal_averager.get_output_workspace(workspace)
-            filename = os.path.join(reducer._data_path, output_ws+'.txt')
-            SaveAscii(Filename=filename, Workspace=output_ws)
-            filename = os.path.join(reducer._data_path, output_ws+'.xml')
-            SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
-            
-            log_text = "I(Q) saved in %s" % (filename)
+            if mtd.workspaceExists(output_ws):
+                filename = os.path.join(reducer._data_path, output_ws+'.txt')
+                SaveAscii(Filename=filename, Workspace=output_ws)
+                filename = os.path.join(reducer._data_path, output_ws+'.xml')
+                SaveCanSAS1D(Filename=filename, InputWorkspace=output_ws)
+                
+                log_text = "I(Q) saved in %s" % (filename)
         
         if reducer._two_dim_calculator is not None:
             output_ws = reducer._two_dim_calculator.get_output_workspace(workspace)
-            filename = os.path.join(reducer._data_path, output_ws+'.dat')
-            SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
-            
-            if len(log_text)>0:
-                log_text += '\n'
-            log_text += "I(Qx,Qy) saved in %s" % (filename)
+            if mtd.workspaceExists(output_ws):
+                filename = os.path.join(reducer._data_path, output_ws+'.dat')
+                SaveNISTDAT(InputWorkspace=output_ws, Filename=filename)
+                
+                if len(log_text)>0:
+                    log_text += '\n'
+                log_text += "I(Qx,Qy) saved in %s" % (filename)
             
         return log_text
             

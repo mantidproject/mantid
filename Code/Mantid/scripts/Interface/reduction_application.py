@@ -101,18 +101,15 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._update_file_menu()
 
         # Clean up the widgets that have already been created
+        self.tabWidget.clear()
         if self._interface is not None:
             self._interface.destroy()
             
         self._interface = instrument_factory(self._instrument, settings=self.general_settings)
-        
         if self._interface is not None:
-            self.tabWidget.clear()
-            
             tab_list = self._interface.get_tabs()
             for tab in tab_list:
                 self.tabWidget.addTab(tab[1], tab[0])
-                
             self._set_window_title()
             self.progress_bar.hide()
         else:
@@ -341,6 +338,10 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         self._update_file_menu()
         self._set_window_title()
         
+        self._recent_files.prepend(file_path)
+        while self._recent_files.count() > 10:
+            self._recent_files.takeLast()
+
     def _new(self, *argv):
         """
             Start new reduction
@@ -354,20 +355,13 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         """
             File chooser for loading UI parameters
         """
-        fname = unicode(QtGui.QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
-                                                          self._last_directory, 
-                                                          "Settings files (*.xml)"))
-        
+        fname_qstr = QtGui.QFileDialog.getOpenFileName(self, "Reduction settings - Choose a settings file",
+                                                       self._last_directory, 
+                                                       "Settings files (*.xml)")
+        fname = str(QtCore.QFileInfo(fname_qstr).filePath())
         if fname:
             # Store the location of the loaded file
-            (folder, file_name) = os.path.split(fname)
-            self._last_directory = folder
-            
-            if fname in self._recent_files:
-                self._recent_files.prepend(QtCore.QString(fname))
-                while self._recent_files.count() > 9:
-                    self._recent_files.takeLast()
-            
+            self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
             self.open_file(fname)
             
     def _save(self):
@@ -399,16 +393,17 @@ class ReductionGUI(QtGui.QMainWindow, ui.ui_reduction_main.Ui_SANSReduction):
         else:
             fname = '.'
         
-        fname = unicode(QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
-                                                          self._last_directory, 
-                                                          "Settings files (*.xml)"))
-        
+        fname_qstr = QtGui.QFileDialog.getSaveFileName(self, "Reduction settings - Save settings",
+                                                       self._last_directory, 
+                                                       "Settings files (*.xml)")
+        fname = str(QtCore.QFileInfo(fname_qstr).filePath())
         if len(fname)>0:
             if not fname.endswith('.xml'):
                 fname += ".xml"
-            self._recent_files.append(fname)
-            (folder, file_name) = os.path.split(fname)
-            self._last_directory = folder
+            self._recent_files.prepend(fname)
+            while self._recent_files.count() > 10:
+                self._recent_files.takeLast()                
+            self._last_directory = str(QtCore.QFileInfo(fname_qstr).path())
             self._filename = fname
             self._save()
         
