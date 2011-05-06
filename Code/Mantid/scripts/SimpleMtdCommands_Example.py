@@ -6,7 +6,7 @@
 mtdHelp()
 
 # Print information on a specific algorithm
-mtdHelp("LoadRaw")
+mtdHelp(LoadRaw)
 
 # Perform some algorithms
 LoadRaw("HET15869.raw","test")
