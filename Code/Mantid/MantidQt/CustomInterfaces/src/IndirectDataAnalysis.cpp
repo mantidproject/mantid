@@ -547,6 +547,32 @@ bool IndirectDataAnalysis::validateFury()
   return valid;
 }
 
+bool IndirectDataAnalysis::validateConfit()
+{
+  bool valid = true;
+
+  if ( m_uiForm.confit_cbInputType->currentIndex() == 0 ) // File
+  {
+    if ( ! m_uiForm.confit_inputFile->isValid() )
+    {
+      valid = false;
+    }
+  }
+  else // Workspace
+  {
+    if ( m_uiForm.confit_wsSample->currentText() == "" )
+    { 
+      valid = false;
+    }
+  }
+
+  if ( m_uiForm.confit_cbFitType->currentIndex() == 0 && ! m_cfBlnMng->value(m_cfProp["UseDeltaFunc"]) )
+  {
+    valid = false;
+  }
+
+  return valid;
+}
 bool IndirectDataAnalysis::validateAbsorption()
 {
   bool valid = true;
@@ -1913,11 +1939,17 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 
 void IndirectDataAnalysis::confitRun()
 {
+  if ( ! validateConfit() )
+  {
+    showInformationBox("Please check your input.");
+    return;
+  }
+
   confitPlotInput();
 
   if ( m_cfDataCurve == NULL )
   {
-    showInformationBox("Input invalid");
+    showInformationBox("There was an error reading the data file.");
     return;
   }
 

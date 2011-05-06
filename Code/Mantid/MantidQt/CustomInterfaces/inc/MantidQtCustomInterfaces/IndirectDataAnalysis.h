@@ -81,6 +81,7 @@ namespace MantidQt
       bool validateElwin();
       bool validateMsd();
       bool validateFury();
+      bool validateConfit();
       bool validateAbsorption();
       bool validateAbsorptionF2Py();
 
