@@ -45,6 +45,7 @@ set ( MACOSX_BUNDLE_ICON_FILE MantidPlot.icns )
 
 set ( CPACK_SYSTEM_NAME SnowLeopard )
 set ( CPACK_OSX_PACKAGE_VERSION 10.6 )
+set ( CPACK_PREFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/preflight )
 set ( CPACK_POSTFLIGHT_SCRIPT ${CMAKE_SOURCE_DIR}/Installers/MacInstaller/installer_hooks/postflight )
 
 set ( CPACK_GENERATOR PackageMaker )

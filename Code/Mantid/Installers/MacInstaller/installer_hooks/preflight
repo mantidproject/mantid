@@ -1,0 +1,16 @@
+#! /bin/sh
+# -------------------------------------------------------------------------
+#
+# Some libraries (DataObjects & Nexus) have moved in the CPack Mac
+# installer. We need to be sure to clean things up if there's a
+# previous Mantid install on the machine.
+#
+# -------------------------------------------------------------------------
+
+echo "=== Starting preflight installer hook ==="
+echo
+
+echo "=== Removing old version ==="
+if [ -d "/Applications/MantidPlot.app" ]; then
+    rm -Rf /Applications/MantidPlot.app
+fi
