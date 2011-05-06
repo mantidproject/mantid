@@ -8,6 +8,7 @@
 #include "MantidMDEvents/MDBin.h"
 #include "MantidMDEvents/MDDimensionExtents.h"
 #include "MantidMDEvents/MDEvent.h"
+#include <iosfwd>
 
 namespace Mantid
 {
@@ -153,6 +154,19 @@ namespace MDEvents
     MDDimensionExtents & getExtents(size_t dim)
     {
       return extents[dim];
+    }
+
+    //-----------------------------------------------------------------------------------------------
+    /** Returns the extents as a string, for convenience */
+    std::string getExtentsStr() const
+    {
+      std::stringstream mess;
+      for (size_t d=0; d<nd; ++d)
+      {
+        mess << extents[d].min << "-"<< extents[d].max;
+        if (d+1 < nd) mess << ",";
+      }
+      return mess.str();
     }
 
     //-----------------------------------------------------------------------------------------------

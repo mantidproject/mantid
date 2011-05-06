@@ -1,14 +1,17 @@
-#include "MantidMDEvents/FakeMDEventData.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/MDEventFactory.h"
-#include "MantidKernel/System.h"
 #include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/System.h"
+#include "MantidMDEvents/FakeMDEventData.h"
+#include "MantidMDEvents/MDEventFactory.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include <boost/math/distributions/normal.hpp>
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <boost/math/special_functions/pow.hpp>
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
-#include <boost/math/distributions/normal.hpp>
+#include <math.h>
 
 namespace Mantid
 {
@@ -64,18 +67,44 @@ namespace MDEvents
     size_t num = size_t(params[0]);
 
     // Width of the peak
-    double width = params.back();
+    double desiredRadius = params.back();
 
     boost::mt19937 rng;
-    boost::uniform_real<double> u(-width, width); // Range
-//    boost::math::normal_distribution<double> u(0, width);
-    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
+    boost::uniform_real<double> u2(0, 1.0); // Random from 0 to 1.0
+    boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > genUnit(rng, u2);
+    int randomSeed = getProperty("RandomSeed");
+    rng.seed(randomSeed);
 
     for (size_t i=0; i<num; ++i)
     {
+      // Algorithm to generate points along a random n-sphere (sphere with not necessarily 3 dimensions)
+      // from http://en.wikipedia.org/wiki/N-sphere as of May 6, 2011.
+
+      // First, points in a hyper-cube of size 1.0, centered at 0.
       CoordType centers[nd];
+      CoordType radiusSquared = 0;
       for (size_t d=0; d<nd; d++)
-        centers[d] = params[d+1] + gen(); // Center + random variation
+      {
+        centers[d] = genUnit();
+        radiusSquared += centers[d]*centers[d];
+      }
+
+      // Make a unit vector pointing in this direction
+      CoordType radius = sqrt(radiusSquared);
+      for (size_t d=0; d<nd; d++)
+        centers[d] /= radius;
+
+      // Now place the point along this radius, scaled with ^1/n for uniformity.
+      double radPos = genUnit();
+      radPos = pow(radPos, 1.0/double(nd));
+      for (size_t d=0; d<nd; d++)
+      {
+        // Multiply by the scaling and the desired peak radius
+        centers[d] *= (radPos * desiredRadius);
+        // Also offset by the center of the peak, as taken in Params
+        centers[d] += params[d+1];
+      }
+
       // Create and add the event.
       ws->addEvent( MDE( 1.0, 1.0, centers) );
     }
@@ -113,6 +142,8 @@ namespace MDEvents
       throw std::invalid_argument("UniformParams: needs to have ndims*2+1 arguments.");
 
     boost::mt19937 rng;
+    int randomSeed = getProperty("RandomSeed");
+    rng.seed(randomSeed);
 
     // Make a random generator for each dimensions
     typedef boost::variate_generator<boost::mt19937&, boost::uniform_real<double> >   gen_t;
@@ -162,7 +193,10 @@ namespace MDEvents
 
     declareProperty(new ArrayProperty<double>("PeakParams", ""),
         "Add a peak with a normal distribution around a central point.\n"
-        "Parameters: number_of_events, x, y, z, ..., width.\n");
+        "Parameters: number_of_events, x, y, z, ..., radius.\n");
+
+    declareProperty(new PropertyWithValue<int>("RandomSeed", 0),
+        "Seed int for the random number generator.");
 
 //    declareProperty(new WorkspaceProperty<IMDEventWorkspace>("OutputWorkspace","",Direction::InOut),
 //        "An input workspace, that will get MDEvents added to it");

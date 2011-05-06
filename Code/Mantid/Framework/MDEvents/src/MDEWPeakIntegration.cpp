@@ -49,6 +49,18 @@ namespace MDEvents
   void MDEWPeakIntegration::init()
   {
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::Input), "An input MDEventWorkspace.");
+
+    std::vector<std::string> propOptions;
+    propOptions.push_back("Q (lab frame)");
+    propOptions.push_back("Q (sample frame)");
+    propOptions.push_back("HKL");
+    declareProperty("CoordinatesToUse", "Q (lab frame)",new ListValidator(propOptions),
+      "Which coordinates of the peak center do you wish to use to integrate the peak? This should match the InputWorkspace's dimensions."
+       );
+
+    declareProperty(new PropertyWithValue<double>("PeakRadius",1.0,Direction::Input),
+        "Fixed radius around each peak position in which to integrate.");
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("PeaksWorkspace","",Direction::InOut),
         "A PeaksWorkspace containing the peaks to integrate. The peaks' integrated intensities will be updated"
         "with the new values.");
@@ -61,13 +73,24 @@ namespace MDEvents
     if (nd != 3)
       throw std::invalid_argument("For now, we expect the input MDEventWorkspace to have 3 dimensions only.");
 
+    //TODO: PRAGMA_OMP(parallel for schedule(dynamic, 10) )
     for (int i=0; i < int(peakWS->getNumberPeaks()); ++i)
     {
       // Get a direct ref to that peak.
       Peak & p = peakWS->getPeak(i);
 
-      // Convert to a position in the dimensions of the workspace
-      V3D pos = p.getQLabFrame();
+      // Get the peak center as a position in the dimensions of the workspace
+      V3D pos;
+      if (CoordinatesToUse == "Q (lab frame)")
+        pos = p.getQLabFrame();
+      else if (CoordinatesToUse == "Q (sample frame)")
+        pos = p.getQSampleFrame();
+      else if (CoordinatesToUse == "HKL")
+        pos = p.getHKL();
+
+      double radius = getProperty("PeakRadius");
+
+//      std::cout << "\n\n\nStarting peak at " << pos << " with radius " << radius << "\n";
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
@@ -79,13 +102,16 @@ namespace MDEvents
       }
       CoordTransformDistance sphere(nd, center, dimensionsUsed);
 
-      // TODO: Determine a radius that makes sense!
-      CoordType radius = 1.0;
-
       // Perform the integration into whatever box is contained within.
       double signal = 0;
       double errorSquared = 0;
       ws->getBox()->integrateSphere(sphere, radius*radius, signal, errorSquared);
+
+      // Save it back in the peak object.
+      p.setIntensity(signal);
+      p.setSigmaIntensity( sqrt(errorSquared) );
+
+//      std::cout << "Peak " << i << " at " << pos << ": signal " << signal << std::endl;
     }
 
   }
@@ -97,6 +123,7 @@ namespace MDEvents
   {
     inWS = getProperty("InputWorkspace");
     peakWS = getProperty("PeaksWorkspace");
+    CoordinatesToUse = getPropertyValue("CoordinatesToUse");
 
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }

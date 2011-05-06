@@ -579,7 +579,7 @@ namespace MDEvents
       // Coordinates of this vertex
       CoordType vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)
-        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d];
+        vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
 
       // Is this vertex contained?
       CoordType out[nd];
@@ -587,7 +587,7 @@ namespace MDEvents
       if (out[0] < radiusSquared)
       {
         // Yes, this vertex is contained within the integration volume!
-        //std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << " is contained\n";
+//        std::cout << "vertex at " << vertexCoord[0] << ", " << vertexCoord[1] << ", " << vertexCoord[2] << " is contained\n";
 
         // This vertex is shared by up to 2^nd adjacent boxes (left-right along each dimension).
         for (size_t neighb=0; neighb<maxVertices; ++neighb)
@@ -611,6 +611,7 @@ namespace MDEvents
             size_t linearIndex = Utils::nestedForLoopGetLinearIndex(nd, boxIndex, indexMaker);
             // So we have one more vertex touching this box that is contained in the integration volume. Whew!
             verticesContained[linearIndex]++;
+//            std::cout << "... added 1 vertex to box " << boxes[linearIndex]->getExtentsStr() << "\n";
           }
         }
       }
@@ -632,10 +633,12 @@ namespace MDEvents
       // Is this box fully contained?
       if (verticesContained[i] >= maxVertices)
       {
-        //std::cout << "box at " << i << " is fully contained\n";
         // Use the integrated sum of signal in the box
         signal += box->getSignal();
         errorSquared += box->getErrorSquared();
+
+//        std::cout << "box at " << i << " (" << box->getExtentsStr() << ") is fully contained. Vertices = " << verticesContained[i] << "\n";
+
         numFullyContained++;
         // Go on to the next box
         continue;
@@ -659,14 +662,14 @@ namespace MDEvents
           // If the center is closer than the size of the box, then it MIGHT be touching.
           // (We multiply by 0.72 (about sqrt(2)) to look for half the diagonal).
           // NOTE! Watch out for non-spherical transforms!
-          //std::cout << "box at " << i << " is maybe touching\n";
+//          std::cout << "box at " << i << " is maybe touching\n";
           partialBox = true;
         }
       }
       else
       {
         partialBox = true;
-        //std::cout << "box at " << i << " has a vertex touching\n";
+//        std::cout << "box at " << i << " has a vertex touching\n";
       }
 
       // We couldn't rule out that the box might be partially contained.
@@ -674,11 +677,12 @@ namespace MDEvents
       {
         // Use the detailed integration method.
         box->integrateSphere(radiusTransform, radiusSquared, signal, errorSquared);
+//        std::cout << ".signal=" << signal << "\n";
         numPartiallyContained++;
       }
     } // (for each box)
 
-//    std::cout << "Depth " << this->getDepth() << " with " << numFullyContained << " fully contained; " << numPartiallyContained << " partial.\n";
+//    std::cout << "Depth " << this->getDepth() << " with " << numFullyContained << " fully contained; " << numPartiallyContained << " partial. Signal = " << signal <<"\n";
 
     delete [] verticesContained;
     delete [] boxMightTouch;

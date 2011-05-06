@@ -36,6 +36,18 @@ public:
     TS_ASSERT_EQUALS(p.getInstrument(), inst)
   }
 
+  void test_constructorHKL()
+  {
+    // detector IDs start at 10000
+    Peak p(inst, 10000, 2.0, V3D(1,2,3) );
+    TS_ASSERT_DELTA(p.getH(), 1.0, 1e-5)
+    TS_ASSERT_DELTA(p.getK(), 2.0, 1e-5)
+    TS_ASSERT_DELTA(p.getL(), 3.0, 1e-5)
+    TS_ASSERT_EQUALS(p.getDetectorID(), 10000)
+    TS_ASSERT_EQUALS(p.getDetector()->getID(), 10000)
+    TS_ASSERT_EQUALS(p.getInstrument(), inst)
+  }
+
   void test_copyConstructor()
   {
     Peak p(inst, 10102, 2.0);

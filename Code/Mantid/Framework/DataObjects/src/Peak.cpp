@@ -21,17 +21,37 @@ namespace DataObjects
    * @return
    */
   Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength)
-    : m_inst(m_inst),
-      m_H(0), m_K(0), m_L(0),
-      m_Intensity(0), m_SigmaIntensity(0),
-      m_GoniometerMatrix(3,3,true),
-      m_RunNumber(0)
+  : m_inst(m_inst),
+    m_H(0), m_K(0), m_L(0),
+    m_Intensity(0), m_SigmaIntensity(0),
+    m_GoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
   {
     this->setDetectorID(m_DetectorID);
     this->setWavelength(m_Wavelength);
-    // Calc the inverse rotation matrix
-    m_InverseGoniometerMatrix = m_GoniometerMatrix;
-    m_InverseGoniometerMatrix.Invert();
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor
+   *
+   * @param m_inst :: Shared pointer to the instrument for this peak detection
+   * @param m_DetectorID :: ID to the detector of the center of the peak
+   * @param m_Wavelength :: incident neutron wavelength, in Angstroms
+   * @param HKL :: vector with H,K,L position of the peak
+   * @return
+   */
+  Peak::Peak(Mantid::Geometry::IInstrument_sptr m_inst, int m_DetectorID, double m_Wavelength, Mantid::Geometry::V3D HKL) :
+    m_inst(m_inst),
+    m_H(HKL[0]), m_K(HKL[1]), m_L(HKL[2]),
+    m_Intensity(0), m_SigmaIntensity(0),
+    m_GoniometerMatrix(3,3,true),
+    m_InverseGoniometerMatrix(3,3,true),
+    m_RunNumber(0)
+  {
+    this->setDetectorID(m_DetectorID);
+    this->setWavelength(m_Wavelength);
   }
 
 //  /** Copy constructor
@@ -330,6 +350,9 @@ namespace DataObjects
     if ((goniometerMatrix.numCols() != 3) || (goniometerMatrix.numRows() != 3))
       throw std::invalid_argument("Goniometer matrix must be 3x3.");
     this->m_GoniometerMatrix = goniometerMatrix;
+    // Calc the inverse rotation matrix
+    m_InverseGoniometerMatrix = m_GoniometerMatrix;
+    m_InverseGoniometerMatrix.Invert();
   }
 
 
