@@ -2,6 +2,7 @@
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 #include "MDDataObjects/MDIndexCalculator.h"
+#include "MDDataObjects/MDWorkspaceIterator.h"
 
 namespace Mantid{
   namespace MDDataObjects{
@@ -340,6 +341,20 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     {
       //Forward request via image and geometry.
       return this->m_spMDImage->get_const_MDGeometry().toXMLString();
+    }
+
+    /// Creates a new iterator pointing to the first cell in the workspace
+    Mantid::API::IMDIterator* MDWorkspace::createIterator() const
+    {
+      typedef std::vector<Mantid::Geometry::IMDDimension_sptr> IMDDimensions_sptr_vec;
+      IMDDimensions_sptr_vec dimensions = m_spMDImage->get_const_MDGeometry().getDimensions();
+      MDWorkspaceIndexCalculator calculator(dimensions.size());
+      for(int i = 0; i < dimensions.size(); i++)
+      {
+        calculator.setDimensionSize(i, dimensions[i]->getNBins());
+      }
+      
+      return new MDWorkspaceIterator(calculator, dimensions);
     }
 
     VecCoordinate create4DPolyhedron(

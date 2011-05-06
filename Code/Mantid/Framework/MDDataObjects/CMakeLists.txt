@@ -11,6 +11,7 @@ set ( SRC_FILES
 	src/MDImage.cpp
 	src/MDIndexCalculator.cpp
 	src/MDWorkspace.cpp
+        src/MDWorkspaceIterator.cpp
 	src/MD_FileFormatFactory.cpp
 	src/MD_FileHoraceReader.cpp
 	src/MD_FileTestDataGenerator.cpp
@@ -34,6 +35,7 @@ set ( INC_FILES
 	inc/MDDataObjects/MDIndexCalculator.h
 	inc/MDDataObjects/MDTestWorkspace.h
 	inc/MDDataObjects/MDWorkspace.h
+        inc/MDDataObjects/MDWorkspaceIterator.h
 	inc/MDDataObjects/MD_FileFormatFactory.h
 	inc/MDDataObjects/MD_FileHoraceReader.h
 	inc/MDDataObjects/MD_FileTestDataGenerator.h
@@ -58,6 +60,7 @@ test/MDDataPointTest.h
 test/MDImageTest.h
 test/MDPixelsTest.h
 test/MDWorkspaceTest.h
+test/MDWorkspaceIteratorTest.h
 #test/MDPointTest.h  
 #test/MDBoxTest.h  
 )

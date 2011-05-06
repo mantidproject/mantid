@@ -179,6 +179,9 @@ namespace Mantid
 
       void setInstrument(const Mantid::Geometry::IInstrument_sptr& instr);
 
+      /// Creates a new iterator pointing to the first cell in the workspace
+      Mantid::API::IMDIterator* createIterator() const;
+
     private:
       /// Cache. Gives MDWorkspace ownership of MDPoints (as an IMDWorkspace), while allowing polymorphic behaviour.
       /// Note this is NOT an optimized implementation yet, but it does support lazy instantiation.
