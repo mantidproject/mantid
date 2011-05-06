@@ -183,12 +183,12 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
 
-    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 65536 * 15+1);
+    TS_ASSERT_EQUALS( ws->getNumberHistograms(), 65536 * 15);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     // Check one entry in each group
     for (int i = 0; i < 15; ++i)
     {
-      TS_ASSERT_EQUALS( ws->dataY(i*65536)[0], double(i)*1.0);
+      TS_ASSERT_EQUALS( ws->dataY(i*65536)[0], double(i+1)*1.0); // Groups start at 1.0
     }
   }
 
