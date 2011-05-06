@@ -479,3 +479,47 @@ namespace DataObjects
 
 }
 }
+
+///\cond TEMPLATE
+
+namespace Mantid
+{
+  namespace Kernel
+  {
+
+    template<> DLLExport
+    Mantid::DataObjects::PeaksWorkspace_sptr IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return *prop;
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected PeaksWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+    template<> DLLExport
+    Mantid::DataObjects::PeaksWorkspace_const_sptr IPropertyManager::getValue<Mantid::DataObjects::PeaksWorkspace_const_sptr>(const std::string &name) const
+    {
+      PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr>* prop =
+        dynamic_cast<PropertyWithValue<Mantid::DataObjects::PeaksWorkspace_sptr>*>(getPointerToProperty(name));
+      if (prop)
+      {
+        return prop->operator()();
+      }
+      else
+      {
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected const PeaksWorkspace.";
+        throw std::runtime_error(message);
+      }
+    }
+
+  } // namespace Kernel
+} // namespace Mantid
+
+///\endcond TEMPLATE

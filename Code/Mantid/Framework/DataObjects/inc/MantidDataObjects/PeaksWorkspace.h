@@ -223,8 +223,11 @@ namespace DataObjects
   };
 
 
-/// Typedef for a shared pointer to a peaks workspace.
-typedef boost::shared_ptr<PeaksWorkspace> PeaksWorkspace_sptr;
+  /// Typedef for a shared pointer to a peaks workspace.
+  typedef boost::shared_ptr<PeaksWorkspace> PeaksWorkspace_sptr;
+
+  /// Typedef for a shared pointer to a const peaks workspace.
+  typedef boost::shared_ptr<const PeaksWorkspace> PeaksWorkspace_const_sptr;
 
 }
 }

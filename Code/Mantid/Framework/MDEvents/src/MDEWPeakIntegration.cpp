@@ -96,7 +96,7 @@ namespace MDEvents
   void MDEWPeakIntegration::exec()
   {
     inWS = getProperty("InputWorkspace");
-//    peakWS = getProperty("PeaksWorkspace");
+    peakWS = getProperty("PeaksWorkspace");
 
     CALL_MDEVENT_FUNCTION(this->integrate, inWS);
   }
