@@ -889,19 +889,11 @@ class IAlgorithmProxy(ProxyObject):
         self.setPropertyValues(*args, **kwargs)
 
         if mtd.__gui__:
-            result = self.executeAsync()
-            while not result.available():
-                qtcore.QCoreApplication.processEvents()
-            try:
-                success = result.data()
-            except:
-                success = False
-
+            success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
         else:
             self._getHeldObject().execute()
-
 #---------------------------------------------------------------------------------------
 
 class MantidPyFramework(FrameworkManager):

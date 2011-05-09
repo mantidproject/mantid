@@ -1,3 +1,4 @@
+#include "PythonSystemHeader.h"
 #include "MantidUI.h"
 #include "MantidMatrix.h"
 #include "MantidDock.h"
@@ -48,6 +49,8 @@
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+
 using namespace std;
 
 using namespace Mantid::API;
@@ -761,6 +764,39 @@ void MantidUI::executeAlgorithm()
   }
   executeAlgorithm(algName, version);
 }
+
+/** 
+ * Run the named algorithm asynchronously 
+ */ 
+bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name) 
+{ 
+  Mantid::API::IAlgorithm_sptr alg = findAlgorithmPointer(alg_name); 
+  
+  if( !alg ) 
+  { 
+    return false; 
+  } 
+  if( m_algMonitor )  
+  { 
+    m_algMonitor->add(alg); 
+	 	  } 
+  Poco::ActiveResult<bool> result(alg->executeAsync()); 
+  while( !result.available() ) 
+  { 
+    QCoreApplication::processEvents(); 
+  } 
+  result.wait(); 
+  
+  try 
+  { 
+    return result.data(); 
+  } 
+  catch( Poco::NullPointerException& ) 
+  { 
+    return false; 
+  } 
+}
+
 /**
     executes Save Nexus
 	saveNexus Input Dialog is a generic dialog.Below code is added to remove
@@ -824,7 +860,7 @@ void MantidUI::executeAlgorithm(QString algName, int version)
   Mantid::API::IAlgorithm_sptr alg = this->createAlgorithm(algName, version);
   if( !alg ) return;
   MantidQt::API::AlgorithmDialog* dlg=createAlgorithmDialog(alg);
-  executeLoadAlgorithm(dlg,alg);
+  executeAlgorithm(dlg,alg);
 
 }
 
@@ -850,7 +886,7 @@ void MantidUI::loadrawfromICatInterface(const QString& fileName ,const QString& 
       list[1]->setText(wsName);
     }
   }
-  executeLoadAlgorithm(dlg,alg);
+  executeAlgorithm(dlg,alg);
 
 
 }
@@ -870,7 +906,7 @@ void MantidUI::loadnexusfromICatInterface(const QString& fileName,const QString&
       list[1]->setText(wsName);
     }
   }
-  executeLoadAlgorithm(dlg,alg);
+  executeAlgorithm(dlg,alg);
 }
 
 void MantidUI ::executeloadAlgorithm(const QString& algName, const QString& fileName, const QString& wsName)
@@ -924,7 +960,7 @@ MantidQt::API::AlgorithmDialog*  MantidUI::createAlgorithmDialog(Mantid::API::IA
 }
 
 
-void MantidUI::executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
+void MantidUI::executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg)
 {
   if( !dlg ) return;
   if ( dlg->exec() == QDialog::Accepted)
@@ -1175,6 +1211,8 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
 {
   m_algMonitor->add(alg);
 
+  PyGILState_STATE saved = PyGILState_Ensure();
+
   try
   {
     alg->executeAsync();
@@ -1183,6 +1221,7 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
   {
     QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
   }
+  PyGILState_Release(saved);
 }
 bool MantidUI::executeICatLogout(int version)
 {

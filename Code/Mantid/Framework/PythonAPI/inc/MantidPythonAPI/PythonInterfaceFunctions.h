@@ -44,39 +44,24 @@ namespace Mantid
     // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information on the GIL
 
     /**
-      * A simple class that checks whether there is a current thread state, i.e. PyThread_GetDict != NULL, and acquires the GIL if not.
-      * If it has been aquired then the lock is release on destruction
-      */
+     * Acquire the GIL on construction and release it on destruction 
+     */
     class PythonGIL
     {
     public:
       ///Constructor
-      PythonGIL() : m_tstate(NULL), m_gil_state(PyGILState_UNLOCKED), m_locked(false)
+      PythonGIL() : m_gil_state(PyGILState_Ensure())
       {
-        if( !PyThreadState_GetDict() )
-        {
-           m_gil_state = PyGILState_Ensure();
-           m_tstate = PyThreadState_GET();
-           m_locked = true;
-        }
       }
 
       ///Destructor
       ~PythonGIL()
       {
-        if( m_locked )
-        {
-          PyThreadState_Swap(m_tstate);
-          PyGILState_Release(m_gil_state);
-        }
+	PyGILState_Release(m_gil_state);
       }
     private:
-      /// Store the thread state
-      PyThreadState *m_tstate;
       /// Store the GIL state
       PyGILState_STATE m_gil_state;
-      /// If we've locked the state
-      bool m_locked;
     };
 
     /// Handle a Python error state

@@ -309,6 +309,7 @@ public:
   /// Called when a delete is performed inside a shared pointer
   virtual void kill()
   {
+    if(!PyThreadState_GetDict()) return;
     PythonGIL gil;
     // !-----
     // This order is very important as the decref causes Python to call the destructor on this object

@@ -173,6 +173,9 @@ public:
 
   AlgorithmMonitor* getAlgMonitor(){return m_algMonitor;}
 
+  
+  bool runAlgorithmAsync_PyCallback(const QString & algName);
+
 public slots:
     // Create a 1d graph form specified spectra in a MatrixWorkspace
     MultiLayer* plotSpectraList(const QString& wsName, const std::set<int>& indexList, bool errs=false);
@@ -429,20 +432,18 @@ private:
   void handleUnGroupWorkspace(Mantid::API::WorkspaceUnGroupingNotification_ptr pNf);
   Poco::NObserver<MantidUI, Mantid::API::WorkspaceUnGroupingNotification> m_ungroupworkspaceObserver;
 
-	//#678
-    //for savenexus algorithm
-	void executeSaveNexus(QString algName,int version);
-
-    void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
-	void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
-
-	/// This creates an algorithm dialog.
-	 MantidQt::API::AlgorithmDialog * createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
-
-	 /// This method accepts user inputs and executes loadraw/load nexus algorithm
-	 void executeLoadAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
-	
-
+  //#678
+  //for savenexus algorithm
+  void executeSaveNexus(QString algName,int version);
+  
+  void copyWorkspacestoVector(const QList<QTreeWidgetItem*> &list,std::vector<std::string> &inputWS);
+  void PopulateData(Mantid::API::Workspace_sptr ws_ptr,QTreeWidgetItem*  wsid_item);
+  
+  /// This creates an algorithm dialog.
+  MantidQt::API::AlgorithmDialog * createAlgorithmDialog(Mantid::API::IAlgorithm_sptr alg);
+  
+  /// This method accepts user inputs and executes loadraw/load nexus algorithm
+  void executeAlgorithm(MantidQt::API::AlgorithmDialog* dlg,Mantid::API::IAlgorithm_sptr alg);
     // Private variables
 
     ApplicationWindow *m_appWindow;             // QtiPlot main ApplicationWindow
