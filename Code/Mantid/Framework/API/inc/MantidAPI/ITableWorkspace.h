@@ -11,6 +11,7 @@
 #include "MantidGeometry/V3D.h"
 
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 #include <sstream>
 
 namespace Mantid
@@ -215,6 +216,10 @@ public:
             ostr << "cell: Type mismatch:\n"<<typeid(T).name()<<" != \n"<<c->get_type_info().name()<<'\n';
             g_log.error(ostr.str());
             throw std::runtime_error(ostr.str());
+        }
+        if (row < 0 || row >= this->rowCount())
+        {
+          throw std::range_error("Table does not have row " + boost::lexical_cast<std::string>(row));
         }
         return *(static_cast<T*>(c->void_pointer(row)));
     }

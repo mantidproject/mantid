@@ -4,6 +4,7 @@
 #include "MantidAPI/Column.h"
 #include "MantidKernel/Logger.h"
 
+#include <boost/lexical_cast.hpp>
 #include <ostream>
 #include <vector>
 #include <stdexcept>
@@ -89,6 +90,11 @@ public:
     template<class T>
     TableRow& operator<<(const T& t)
     {
+        if (m_col < 0 || m_col >= int(m_columns.size()))
+        {
+            g_log.error("Column index out of range.");
+            throw std::range_error("Column index out of range.");
+        }
         Column_sptr c = m_columns[m_col];
         if (!c->isType<T>())
         {
@@ -115,6 +121,11 @@ public:
     template<class T>
     const TableRow& operator>>(T& t)const
     {
+        if (m_col < 0 || m_col >= int(m_columns.size()))
+        {
+            g_log.error("Column index out of range.");
+            throw std::range_error("Column index out of range.");
+        }
         Column_sptr c = m_columns[m_col];
         t = c->cell<T>(m_row);
         ++m_col;
@@ -134,7 +145,7 @@ public:
         if (col < 0 || col >= int(m_columns.size()))
         {
             g_log.error("Column index out of range.");
-            throw std::runtime_error("Column index out of range.");
+            throw std::range_error("Column index out of range.");
         }
         m_col = col;
         Column_sptr c = m_columns[m_col];

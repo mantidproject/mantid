@@ -145,6 +145,34 @@ public:
 
   }
 
+  void testOutOfRange()
+  {
+      TableWorkspace tw(2);
+      tw.addColumn("str","Name");
+      tw.addColumn("int","Number");
+      TS_ASSERT_THROWS(tw.String(0,1),std::runtime_error);
+      TS_ASSERT_THROWS(tw.Int(0,3),std::range_error);
+      TS_ASSERT_THROWS(tw.Int(3,1),std::range_error);
+
+      {
+        TableRow row = tw.appendRow();
+        TS_ASSERT_THROWS(row << "One" << 1 << 2,std::range_error);
+      }
+
+      {
+        std::string str;
+        int i;
+        double d;
+        TableRow row = tw.getFirstRow();
+        TS_ASSERT_THROWS(row >> str >> i >> d,std::range_error);
+      }
+
+      {
+        TableRow row = tw.getFirstRow();
+        TS_ASSERT_THROWS(row.row(3),std::range_error);
+      }
+  }
+
   void testBoolean()
   {
   try

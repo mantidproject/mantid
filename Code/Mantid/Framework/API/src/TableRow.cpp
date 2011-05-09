@@ -31,6 +31,11 @@ void TableRow::row(int i)
         m_row = i;
         m_col = 0;
     }
+    else
+    {
+      g_log.error("Row index out of range.");
+      throw std::range_error("Row index out of range.");
+    }
 }
 
 /**  Steps to the next row in the TableWorkspace if there is one
