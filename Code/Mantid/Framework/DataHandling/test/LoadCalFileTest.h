@@ -46,10 +46,27 @@ public:
     // Retrieve the workspace from data service. TODO: Change to your desired type
     GroupingWorkspace_sptr groupWS;
     TS_ASSERT_THROWS_NOTHING( groupWS = boost::dynamic_pointer_cast<GroupingWorkspace>(AnalysisDataService::Instance().retrieve(outWSName+"_group")) );
-    TS_ASSERT(groupWS);
-    if (!groupWS) return;
-    
-    // TODO: Check the results
+    TS_ASSERT(groupWS);  if (!groupWS) return;
+    TS_ASSERT_EQUALS( int(groupWS->getValue(101001)), 2 );
+    TS_ASSERT_EQUALS( int(groupWS->getValue(715079)), 7 );
+
+    OffsetsWorkspace_sptr offsetsWS;
+    TS_ASSERT_THROWS_NOTHING( offsetsWS = boost::dynamic_pointer_cast<OffsetsWorkspace>(AnalysisDataService::Instance().retrieve(outWSName+"_offsets")) );
+    TS_ASSERT(offsetsWS); if (!offsetsWS) return;
+    TS_ASSERT_DELTA( offsetsWS->getValue(101001), -0.0497075, 1e-7 );
+    TS_ASSERT_DELTA( offsetsWS->getValue(714021), 0.0007437, 1e-7 );
+
+    SpecialWorkspace2D_sptr maskWS;
+    TS_ASSERT_THROWS_NOTHING( maskWS = boost::dynamic_pointer_cast<SpecialWorkspace2D>(AnalysisDataService::Instance().retrieve(outWSName+"_mask")) );
+    TS_ASSERT(maskWS); if (!maskWS) return;
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101001)), 1 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101003)), 0 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(101008)), 0 );
+    TS_ASSERT_EQUALS( int(maskWS->getValue(715079)), 1 );
+    TS_ASSERT( !maskWS->getInstrument()->getDetector(101001)->isMasked() );
+    TS_ASSERT( maskWS->getInstrument()->getDetector(101003)->isMasked() );
+    TS_ASSERT( maskWS->getInstrument()->getDetector(101008)->isMasked() );
+    TS_ASSERT( !maskWS->getInstrument()->getDetector(715079)->isMasked() );
     
     // Remove workspace from the data service.
     AnalysisDataService::Instance().remove(outWSName);

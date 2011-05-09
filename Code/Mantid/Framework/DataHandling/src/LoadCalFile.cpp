@@ -255,13 +255,18 @@ namespace DataHandling
 
       if (doMask)
       {
-        try
+        IndexToIndexMap::const_iterator it = detID_to_wi->find(udet);
+        if (it != detID_to_wi->end())
         {
-          int wi = (*detID_to_wi)[udet];
-          maskWS->maskWorkspaceIndex(wi, 0.0);
+          int wi = it->second;
+          if (select <= 0)
+            maskWS->maskWorkspaceIndex(wi, 0.0);
+          else
+            maskWS->dataY(wi)[0] = 1.0;
         }
-        catch (std::invalid_argument & e)
+        else
         {
+          // Could not find the UDET.
           numErrors++;
         }
       }
