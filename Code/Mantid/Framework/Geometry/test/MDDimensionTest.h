@@ -124,10 +124,12 @@ public:
           TS_ASSERT_EQUALS(pOrtDim->getName(),"en");
     }
     void testGetX(){
-      double x;
       if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
+
+      double x;
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(0));
       TS_ASSERT_DELTA(x,pOrtDim->getMinimum(),FLT_EPSILON);
+
       size_t nBins;
       TS_ASSERT_THROWS_NOTHING(nBins = pOrtDim->getNBins());
 

@@ -79,6 +79,7 @@ namespace Mantid
       V3D operator*(const V3D&) const; ///< Multiply M*Vec
       Matrix<T> operator*(const T&) const;              ///< Multiply by constant
 
+
       Matrix<T>& operator*=(const Matrix<T>&);            ///< Basic matrix multipy
       Matrix<T>& operator*=(const T&);                 ///< Multiply by constant
       Matrix<T>& operator/=(const T&);                 ///< Divide by constant

@@ -66,23 +66,102 @@ public:
   }
   void testUnitRotation(){
 	  UnitCell theCell;
-	  Quat rot;
-	  TSM_ASSERT_THROWS_NOTHING("The transformation should not throw",rot=theCell.get_transf_matrix(V3D(1,0,0),V3D(0,1,0)));
+	  MantidMat rot;
+	  TSM_ASSERT_THROWS_NOTHING("The unit transformation should not throw",rot=theCell.getUBmatrix(V3D(1,0,0),V3D(0,1,0)));
 
-	  std::vector<double> Rot = rot.getRotation();
+	  std::vector<double> Rot = rot.get_vector();
 	  std::vector<double> rez(9,0);
 	  rez[0]=1;
 	  rez[4]=1;
 	  rez[8]=1;
-	  TSM_ASSERT_EQUALS("This should produce unit matrix defined as a vector",rez,Rot);
+      double err=0;
+	  for(int i=0;i<9;i++){
+		  err += (rez[i]-Rot[i])*(rez[i]-Rot[i]);
+	  }
+	  TSM_ASSERT_DELTA("This should produce proper permutation matrix defined as a vector",0,err,1.e-6);
+
   }
-	void testParallelProjThrows(){
+  void testParallelProjThrows(){
 		 UnitCell theCell;
-		 Quat rot;
+		 MantidMat rot;
 		 TSM_ASSERT_THROWS("The transformation to plain defined by two parallel vectors should throw",
-			rot=theCell.get_transf_matrix(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
-	}
+			rot=theCell.getUBmatrix(V3D(0,1,0),V3D(0,1,0)),std::invalid_argument);
+  }
+  void testPermutations(){
+	  UnitCell theCell;
+	  MantidMat rot;
+	  TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBmatrix(V3D(0,1,0),V3D(1,0,0)));
+
+	  std::vector<double> Rot = rot.get_vector();
+	  std::vector<double> rez(9,0);
+	  rez[1]=1;
+	  rez[3]=1;
+	  rez[8]=-1;
+	  double err=0;
+	  for(int i=0;i<9;i++){
+		  err += (rez[i]-Rot[i])*(rez[i]-Rot[i]);
+	  }
+	  TSM_ASSERT_DELTA("This should produce proper permutation matrix defined as a vector",0,err,1.e-6);
+
+  }
 	
+ void testRotations2D(){
+	  UnitCell theCell;
+	  MantidMat rot;
+	  TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBmatrix(V3D(1,1,0),V3D(1,-1,0)));
+	  V3D dir0(sqrt(2.),0,0);
+	
+	  std::vector<double> Rot = rot.get_vector();
+	  double x = Rot[0]*dir0.X()+Rot[3]*dir0.Y()+Rot[6]*dir0.Z();
+	  double y = Rot[1]*dir0.X()+Rot[4]*dir0.Y()+Rot[7]*dir0.Z();
+	  double z = Rot[2]*dir0.X()+Rot[5]*dir0.Y()+Rot[8]*dir0.Z();
+
+	 TSM_ASSERT_DELTA("X-coord shoud be 1",1,x,1.e-5);
+	 TSM_ASSERT_DELTA("Y-coord shoud be 1",1,y,1.e-5);
+	 TSM_ASSERT_DELTA("Z-coord shoud be 0",0,z,1.e-5);
+  }
+   void testRotations3D(){
+	  UnitCell theCell;
+	  MantidMat rot;
+	  // two orthogonal vectors
+	  V3D ort1(sqrt(2.),-1,-1);
+	  V3D ort2(sqrt(2.),1,1);
+	  TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBmatrix(ort1,ort2));
+
+	  V3D dir(1,0,0);
+	  V3D xx = ort1.cross_prod(ort2);
+	  double pp = xx.scalar_prod(dir); // dir should belong to ort1,ort2 plain
+     
+	  double p1=dir.scalar_prod(ort1)/ort1.norm();
+	  double p2=dir.scalar_prod(ort2)/ort2.norm();
+
+	  
+	
+	  std::vector<double> Rot = rot.get_vector();
+	  double x = Rot[0]*dir.X()+Rot[3]*dir.Y()+Rot[6]*dir.Z();
+	  double y = Rot[1]*dir.X()+Rot[4]*dir.Y()+Rot[7]*dir.Z();
+	  double z = Rot[2]*dir.X()+Rot[5]*dir.Y()+Rot[8]*dir.Z();
+
+	 TSM_ASSERT_DELTA("X-coord should be 1/sqrt(2)",p1,x,1.e-5);
+	 TSM_ASSERT_DELTA("Y-coord shlule be 1/sqrt(2)",p2,y,1.e-5);
+	 TSM_ASSERT_DELTA("Z-coord should be 0"  ,0, z,1.e-5);
+  }
+  void testRotations3DNonOrthogonal(){
+	  UnitCell theCell(1,2,3,30,60,45);
+	  MantidMat rot;
+	  TSM_ASSERT_THROWS_NOTHING("The permutation transformation should not throw",rot=theCell.getUBmatrix(V3D(1,0,0),V3D(0,1,0)));
+
+	  V3D dir(1,1,1);
+ 
+	  std::vector<double> Rot = rot.get_vector();
+	  double x = Rot[0]*dir.X()+Rot[3]*dir.Y()+Rot[6]*dir.Z();
+	  double y = Rot[1]*dir.X()+Rot[4]*dir.Y()+Rot[7]*dir.Z();
+	  double z = Rot[2]*dir.X()+Rot[5]*dir.Y()+Rot[8]*dir.Z();
+	// this freeses the interface but unclear how to propelry indentify the 
+	 TSM_ASSERT_DELTA("X-coord should be specified correctly",1.4915578672621419,x,1.e-5);
+	 TSM_ASSERT_DELTA("Y-coord should be specified correctly",0.18234563931714265,y,1.e-5);
+	 TSM_ASSERT_DELTA("Z-coord should be specified correctly",-0.020536948488997286,z,1.e-5);
+  }
 
 };
 

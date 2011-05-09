@@ -5,6 +5,7 @@
 #include <vector>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/Math/Matrix.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -104,7 +105,7 @@ namespace Mantid
       void GLMatrix(double* glmat) const;
 	  //! returns the rotation matrix defined by this quaternion as an 9-point vector representing M33 matrix 
 	  //! (m33 is not used at the moment), if check_normalisation selected, verify if the mod(quat) is indeed == 1 and throws otherwise. 
-	  std::vector<double> getRotation(bool check_normalisation=false)const; 
+	  std::vector<double> getRotation(bool check_normalisation=false,bool throw_on_errors=false)const; 
       //! Convert GL Matrix into Quat
       void setQuat(double[16]);
 	  //! Convert usual 3D rotation matrix into quat; Will throw if matirix is not rotational;
@@ -152,6 +153,9 @@ namespace Mantid
       double b;
       /// Internal value
       double c;
+
+	  //
+     static Kernel::Logger& g_log;
     };
 
     DLLExport std::ostream& operator<<(std::ostream&, const Quat&);

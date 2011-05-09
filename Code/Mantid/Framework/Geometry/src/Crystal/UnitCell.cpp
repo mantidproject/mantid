@@ -9,13 +9,15 @@ namespace Mantid
 namespace Geometry
 {
 
-Quat 
-UnitCell::get_transf_matrix(const V3D &u, const V3D &v)const
+MantidMat
+UnitCell::getUmatrix(const V3D &u, const V3D &v)const
 {
-	//get  B-matrix of Busing and Lev
+	//get  B-matrix of Busing and Levy
 	MantidMat B = this->getB();
+
 	// get orthogonal system, adjacent to the unit cell;
 	V3D e1 = B*u;
+	e1.normalize();
 	V3D V  = B*v;
 	V3D e3  =e1.cross_prod(V);
 	e3.normalize();
@@ -23,16 +25,28 @@ UnitCell::get_transf_matrix(const V3D &u, const V3D &v)const
 	if(norm2<FLT_EPSILON){
 		throw(std::invalid_argument(" two parallel vectors do not define the projection plain"));
 	}
-	e1.normalize();
+
 	V3D e2= e3.cross_prod(e1);
 
 	MantidMat Transf(3,3);
 	Transf.setColumn(0,e1);
 	Transf.setColumn(1,e2);
 	Transf.setColumn(2,e3);
-	Transf.Invert();
+	// some det may be -1
+	double det = Transf.determinant();
+	Transf /=det;
 
-	return Quat(Transf);
+	return Transf;
+
+}
+
+MantidMat
+UnitCell::getUBmatrix(const V3D &u, const V3D &v)const
+{
+	MantidMat Mat =getUmatrix(u, v)*this->getB();
+	
+
+	return Mat;
 }
 
   /** Default constructor. 
@@ -493,7 +507,7 @@ UnitCell::get_transf_matrix(const V3D &u, const V3D &v)const
 	  B[1][1]=ra[1]*sin(ra[5]);
 	  B[1][2]=-ra[2]*sin(ra[4])*cos(da[3]);
 	  B[2][0]=0.;
-    B[2][1]=0.;
+      B[2][1]=0.;
 	  B[2][2]=1./da[2];
 	  return;
   }

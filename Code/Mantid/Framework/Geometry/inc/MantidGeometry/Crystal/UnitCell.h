@@ -114,17 +114,22 @@ namespace Geometry
       const Geometry::MantidMat& getB() const;
 	
       // Calculate things about lattice and vectors      
-	    double d(double h, double k, double l) const; 	    
+	  double d(double h, double k, double l) const; 	    
       double dstar(double h,double k, double l) const; 
-	    double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
-	  	double volume()const; 
+	  double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
+	  double volume()const; 
       double recVolume() const; 
       void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
-	  /** function returns a unit quaternion, which defines rotation, allowing to transform a vector, expressed in 
-	      the units of the cell, into the orthogonal system, defined by vectors u and v;
-		  u and v have to be not parallel. 
-	  */
-	  Quat get_transf_matrix(const V3D &u, const V3D &v)const;
+	  /** funtion returns rotation matrix, used to transform a vector expressed in the 
+	    *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)" 
+		*  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
+	   **/
+	  MantidMat getUmatrix(const V3D &u, const V3D &v)const;
+	  /** function returns a transformattion matix, which allows to transform a vector, expressed in 
+	   *   the units of the cell, into the orthogonal system, defined by vectors u and v;
+	   *  u and v have to be not parallel, throws otherwise. 
+	   **/
+	  MantidMat getUBmatrix(const V3D &u, const V3D &v)const;
     private:	    
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)
       std::vector <double> da; 
