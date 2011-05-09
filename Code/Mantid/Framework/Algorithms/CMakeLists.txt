@@ -349,6 +349,7 @@ set ( TEST_FILES
 	test/FFTDerivativeTest.h
 	test/FFTSmooth2Test.h
 	test/FFTTest.h
+  test/FilterBadPulsesTest.h
 	test/FilterByLogValueTest.h
 	test/FilterByTimeTest.h
 	test/FindCenterOfMassPosition2Test.h

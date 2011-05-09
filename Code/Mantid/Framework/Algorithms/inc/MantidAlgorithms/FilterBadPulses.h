@@ -15,18 +15,17 @@ namespace Mantid
 namespace Algorithms
 {
 
-/** Performs a unit change from TOF to dSpacing, correcting the X values to account for small
-    errors in the detector positions.
+/** Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average. 
 
     Required Properties:
     <UL>
     <LI> InputWorkspace - The name of the Workspace whose detectors are to be aligned </LI>
     <LI> OutputWorkspace - The name of the Workspace in which the result of the algorithm will be stored </LI>
-    <LI> CalibrationFile - The file containing the detector offsets </LI>
+    <LI> LowerCutoff - The percentage of the average to use as the lower bound  </LI>
     </UL>
 
-    @author Russell Taylor, Tessella Support Services plc
-    @date 18/08/2008
+    @author Peter Peterson, ORNL
+    @date 21/12/10
 
     Copyright &copy; 2008 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -54,6 +53,7 @@ public:
   FilterBadPulses();
   virtual ~FilterBadPulses();
 
+
   virtual const std::string name() const;
 
   virtual int version() const;
@@ -61,7 +61,7 @@ public:
   virtual const std::string category() const;
 
 private:
-  /// Sets documentation strings for this algorithm
+  // Sets documentation strings for this algorithm
   virtual void initDocs();
   // Implement abstract Algorithm methods
   void init();

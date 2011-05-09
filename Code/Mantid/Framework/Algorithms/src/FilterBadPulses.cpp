@@ -23,8 +23,8 @@ DECLARE_ALGORITHM(FilterBadPulses)
 /// Sets documentation strings for this algorithm
 void FilterBadPulses::initDocs()
 {
-  this->setWikiSummary(" Filters out events associated with pulses that happen when proton charge is outside of the supplied range. ");
-  this->setOptionalMessage("Filters out events associated with pulses that happen when proton charge is outside of the supplied range.");
+  this->setWikiSummary(" Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average. ");
+  this->setOptionalMessage("Filters out events associated with pulses that happen when proton charge is lower than a given percentage of the average.");
 }
 
 
@@ -68,6 +68,7 @@ const std::string FilterBadPulses::category() const
 }
 
 //-----------------------------------------------------------------------
+/// Initialise the properties
 void FilterBadPulses::init()
 {
   declareProperty(
