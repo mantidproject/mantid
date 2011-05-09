@@ -16343,6 +16343,7 @@ void ApplicationWindow::addUserMenu(const QString & topMenu)
 
 void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QString & itemName, const QString & itemData)
 {
+	QString niceName = QString(itemName).replace("_", " ");
   QMenu* topMenu(NULL);
   foreach(topMenu, d_user_menus)
   {
@@ -16352,16 +16353,16 @@ void ApplicationWindow::addUserMenuAction(const QString & parentMenu, const QStr
   if( !topMenu ) return;
   foreach(QAction* userAction, topMenu->actions())
   {
-    if( userAction->text() == itemName ) return;
+    if( userAction->text() == niceName ) return;
   }
 
-  QAction* scriptAction = new QAction(tr(itemName), topMenu);
+  QAction* scriptAction = new QAction(tr(niceName), topMenu);
   scriptAction->setData(itemData); 
   topMenu->addAction(scriptAction);
   d_user_actions.append(scriptAction);
 
   // Remove name from the list of removed interfaces if applicable
-  removed_interfaces.remove(itemName);
+  removed_interfaces.remove(niceName);
 }
 
 void ApplicationWindow::removeUserMenu(const QString & parentMenu)
