@@ -1,10 +1,11 @@
 #ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
 #define MANTID_DATAOBJECTS_GROUPINGWORKSPACE_H_
     
-#include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 
 namespace Mantid
@@ -19,7 +20,7 @@ namespace DataObjects
    * @author Janik Zikovsky
    * @date 2011-05-02 10:46:43.466993
    */
-  class DLLExport GroupingWorkspace : public Workspace2D
+  class DLLExport GroupingWorkspace : public SpecialWorkspace2D
   {
   public:
     GroupingWorkspace(Mantid::Geometry::IInstrument_sptr inst);
@@ -32,14 +33,11 @@ namespace DataObjects
 
     void makeDetectorIDToGroupMap(std::map<int, int> & detIDToGroup, int & ngroups) const;
 
-
   private:
     /// Private copy constructor. NO COPY ALLOWED
     GroupingWorkspace(const GroupingWorkspace&);
     /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
     GroupingWorkspace& operator=(const GroupingWorkspace&);
-
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength);
 
   };
 

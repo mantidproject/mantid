@@ -9,9 +9,11 @@ set ( SRC_FILES
 	src/Histogram1D.cpp
 	src/ManagedDataBlock2D.cpp
 	src/ManagedWorkspace2D.cpp
+	src/OffsetsWorkspace.cpp
 	src/Peak.cpp
 	src/PeakColumn.cpp
 	src/PeaksWorkspace.cpp
+	src/SpecialWorkspace2D.cpp
 	src/TableColumn.cpp
 	src/TableWorkspace.cpp
 	src/Workspace1D.cpp
@@ -36,9 +38,11 @@ set ( INC_FILES
 	inc/MantidDataObjects/Histogram1D.h
 	inc/MantidDataObjects/ManagedDataBlock2D.h
 	inc/MantidDataObjects/ManagedWorkspace2D.h
+	inc/MantidDataObjects/OffsetsWorkspace.h
 	inc/MantidDataObjects/Peak.h
 	inc/MantidDataObjects/PeakColumn.h
 	inc/MantidDataObjects/PeaksWorkspace.h
+	inc/MantidDataObjects/SpecialWorkspace2D.h
 	inc/MantidDataObjects/TableColumn.h
 	inc/MantidDataObjects/TablePointerColumn.h
 	inc/MantidDataObjects/TableWorkspace.h
@@ -56,10 +60,12 @@ set ( TEST_FILES
 	test/LibraryManagerTest.h
 	test/ManagedDataBlock2DTest.h
 	test/ManagedWorkspace2DTest.h
+	test/OffsetsWorkspaceTest.h
 	test/PeakColumnTest.h
 	test/PeakTest.h
 	test/PeaksWorkspaceTest.h
 	test/RefAxisTest.h
+	test/SpecialWorkspace2DTest.h
 	test/TableWorkspacePropertyTest.h
 	test/TableWorkspaceTest.h
 	test/TofEventTest.h

@@ -1,7 +1,7 @@
-#ifndef MANTID_DATAOBJECTS_GROUPINGWORKSPACETEST_H_
-#define MANTID_DATAOBJECTS_GROUPINGWORKSPACETEST_H_
+#ifndef MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
+#define MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_
 
-#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/SpecialWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Timer.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
@@ -15,16 +15,18 @@ using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-class GroupingWorkspaceTest : public CxxTest::TestSuite
+class SpecialWorkspace2DTest : public CxxTest::TestSuite
 {
 public:
 
+
   void test_default_constructor()
   {
-    GroupingWorkspace_sptr ws(new GroupingWorkspace());
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D());
     TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",  ws->initialize(100, 2, 1));
     TSM_ASSERT_THROWS_ANYTHING("Can't init with > 1 X or Y entries.",  ws->initialize(100, 1, 2));
     TS_ASSERT_THROWS_NOTHING( ws->initialize(100, 1, 1) );
+
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 100);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
   }
@@ -34,7 +36,7 @@ public:
     // Fake instrument with 5*9 pixels
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentCylindrical(5);
 
-    GroupingWorkspace_sptr ws(new GroupingWorkspace(inst));
+    SpecialWorkspace2D_sptr ws(new SpecialWorkspace2D(inst));
 
     TS_ASSERT_EQUALS( ws->getNumberHistograms(), 45);
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
@@ -42,28 +44,10 @@ public:
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
     std::vector<int> dets = ws->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS(dets.size(), 1);
-
-    // Set the group numbers
-    for (int group=0; group<5; group++)
-      for (int i=0; i<9; i++)
-        ws->dataY(group*9+i)[0] = double(group+1);
-
-    // Get the map
-    std::map<int,int> map;
-    int ngroups;
-    ws->makeDetectorIDToGroupMap(map, ngroups);
-
-    TS_ASSERT_EQUALS(ngroups, 5);
-
-    TS_ASSERT_EQUALS( map[1], 1 );
-    TS_ASSERT_EQUALS( map[9], 1 );
-    TS_ASSERT_EQUALS( map[10], 2 );
-    TS_ASSERT_EQUALS( map[45], 5 );
   }
-
 
 };
 
 
-#endif /* MANTID_DATAOBJECTS_GROUPINGWORKSPACETEST_H_ */
+#endif /* MANTID_DATAOBJECTS_SPECIALWORKSPACE2DTEST_H_ */
 
