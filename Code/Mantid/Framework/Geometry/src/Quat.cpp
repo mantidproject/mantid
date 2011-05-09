@@ -12,7 +12,7 @@ namespace Mantid
 namespace Geometry
 {
 
-  Kernel::Logger& Quat::g_log = Kernel::Logger::get("Geometry:Quat");
+  Kernel::Logger& Quat::quatG_log = Kernel::Logger::get("Geometry:Quat");
 /** Null Constructor
  * Initialize the quaternion with the identity q=1.0+0i+0j+0k;
  */
@@ -541,9 +541,10 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 		double normSq=aa+bb+cc+w*w;
 		if(fabs(normSq-1)>FLT_EPSILON){
 			if(throw_on_errors){
+				quatG_log.error()<<" A non-unit quaternion used to obtain a rotation matrix\n";
 				throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
 			}else{
-				g_log.information()<<" Warning; a non-unit quaternion used to obtain a rotation matrix\n";
+				quatG_log.information()<<" Warning; a non-unit quaternion used to obtain a rotation matrix\n";
 				aa/=normSq;
 				ab/=normSq;
 				ac/=normSq;

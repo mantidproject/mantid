@@ -155,7 +155,7 @@ namespace Mantid
       double c;
 
 	  //
-     static Kernel::Logger& g_log;
+     static Kernel::Logger& quatG_log;
     };
 
     DLLExport std::ostream& operator<<(std::ostream&, const Quat&);
