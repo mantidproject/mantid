@@ -32,20 +32,25 @@ namespace DataObjects
   SpecialWorkspace2D::SpecialWorkspace2D(Mantid::Geometry::IInstrument_sptr inst)
   {
     // Get all the detectors IDs
-    std::vector<int> detIDs = inst->getDetectorIDs(true);
+    detectorIDs = inst->getDetectorIDs(true);
 
-    // Init the Workspace2D with one spectrum per detector
-    this->init(int(detIDs.size()), 1, 1);
+    // Init the Workspace2D with one spectrum per detector, in the same order.
+    this->init(int(detectorIDs.size()), 1, 1);
+
+    // Make the mapping, which will be used for speed later.
+    detID_to_WI.clear();
+    for (size_t wi=0; wi<detectorIDs.size(); wi++)
+      detID_to_WI[detectorIDs[wi]] = int(wi);
 
     // Copy the instrument
     this->setInstrument( inst );
 
     // Initialize the spectra-det-map
-    this->mutableSpectraMap().populateWithVector(detIDs);
+    m_spectramap.access().populateWithVector(detectorIDs);
 
     // Make a simple 1-1 workspaceIndex to spectrumNumber axis.
     SpectraAxis * ax1 = dynamic_cast<SpectraAxis *>(this->m_axes[1]);
-    ax1->populateSimple(int(detIDs.size()));
+    ax1->populateSimple(int(detectorIDs.size()));
   }
 
   //----------------------------------------------------------------------------------------------
@@ -71,6 +76,65 @@ namespace DataObjects
   }
 
 
+  //----------------------------------------------------------------------------------------------
+  /** Non-const access to the spectra map is disallowed!
+   * Always throws std::runtime_error
+   * @return nothing, it always throws.
+   */
+  SpectraDetectorMap& SpecialWorkspace2D::mutableSpectraMap()
+  {
+    throw std::runtime_error("Non-const access to the spectra map in a SpecialWorkspace2D is disallowed!");
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the special value (Y) in the workspace at the given detector ID
+   *
+   * @param detectorID :: detector ID to look up
+   * @return the Y value for that detector ID.
+   * @throw std::invalid_argument if the detector ID was not found
+   */
+  double SpecialWorkspace2D::getValue(const int detectorID) const
+  {
+    std::map<int,int>::const_iterator it = detID_to_WI.find(detectorID);
+    if (it == detID_to_WI.end())
+      throw std::invalid_argument("Invalid detectorID provided.");
+    else
+    {
+      return this->dataY(it->second)[0];
+    }
+  }
+
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the special value (Y) in the workspace at the given detector ID
+   *
+   * @param detectorID :: detector ID to look up
+   * @return the Y value for that detector ID.
+   * @throw std::invalid_argument if the detector ID was not found
+   */
+  void SpecialWorkspace2D::setValue(const int detectorID, double value)
+  {
+    std::map<int,int>::iterator it = detID_to_WI.find(detectorID);
+    if (it == detID_to_WI.end())
+      throw std::invalid_argument("Invalid detectorID provided.");
+    else
+    {
+      this->dataY(it->second)[0] = value;
+    }
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Return the detector ID at the given workspace index
+   *
+   * @param workspaceIndex
+   * @return
+   */
+  int SpecialWorkspace2D::getDetectorID(const int workspaceIndex) const
+  {
+    if (size_t(workspaceIndex) > detectorIDs.size())
+      throw std::invalid_argument("SpecialWorkspace2D::getDetectorID: Invalid workspaceIndex given.");
+    return detectorIDs[workspaceIndex];
+  }
 
 
 } // namespace Mantid

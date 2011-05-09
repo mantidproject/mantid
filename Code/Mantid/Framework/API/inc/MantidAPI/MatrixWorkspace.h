@@ -93,7 +93,7 @@ namespace Mantid
 
       // SpectraDetectorMap accessors
       const SpectraDetectorMap& spectraMap() const;
-      SpectraDetectorMap& mutableSpectraMap();
+      virtual SpectraDetectorMap& mutableSpectraMap();
 
       // More mapping
       IndexToIndexMap * getWorkspaceIndexToSpectrumMap() const;

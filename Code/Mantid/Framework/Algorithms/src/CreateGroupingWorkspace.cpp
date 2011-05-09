@@ -254,27 +254,26 @@ namespace Algorithms
 
     if (detIDtoGroup.size() != 0)
     {
+      size_t numNotFound = 0;
       // Make the groups, if any
-      // To put a detector ID with a workspace index
-      IndexToIndexMap * detID_to_WI_ptr = outWS->getDetectorIDToWorkspaceIndexMap(true);
-      IndexToIndexMap & detID_to_WI = *detID_to_WI_ptr;
-
-      // Now go through the map of results and put them in the workspace
       IndexToIndexMap::const_iterator it_end = detIDtoGroup.end();
-      IndexToIndexMap::const_iterator it2_end = detID_to_WI.end();
-      for (IndexToIndexMap::const_iterator it = detIDtoGroup.begin(); it != it_end; ++it)
+      for (size_t wi=0; wi < outWS->getNumberHistograms(); wi++)
       {
-        int detID = it->first;
-        int group = it->second;
-        IndexToIndexMap::const_iterator it2 = detID_to_WI.find(detID);
-        if (it2 != it2_end)
+        int detID = outWS->getDetectorID(wi);
+        // Look for that detector in the map.
+        IndexToIndexMap::const_iterator it = detIDtoGroup.find(detID);
+        if (it != it_end)
         {
-          int wi = it2->second;
-          outWS->dataY(wi)[0] = double(group);
+          // Save the group value in the workspace
+          outWS->dataY(wi)[0] = double(it->second);
         }
+        else
+          numNotFound++;
       }
 
-      delete detID_to_WI_ptr;
+      if (numNotFound > 0)
+        g_log.warning() << numNotFound << " detector IDs listed in the .cal file were not found in the instrument\n.";
+
     }
 
   }

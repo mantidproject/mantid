@@ -17,8 +17,10 @@ namespace DataObjects
    * where each spectrum has a single number entry, the value
    * of which signifies to which group that workspace index belongs.
    * 
+   * Group numbers are counted starting at 1!
+   *
    * @author Janik Zikovsky
-   * @date 2011-05-02 10:46:43.466993
+   * @date 2011-05-02
    */
   class DLLExport GroupingWorkspace : public SpecialWorkspace2D
   {
