@@ -236,10 +236,10 @@ if ( CXXTEST_FOUND )
 
   add_custom_command ( TARGET KernelTest POST_BUILD 
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.properties
+                         ${CMAKE_CURRENT_SOURCE_DIR}/../Properties/MantidTest.properties
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different 
-                         ${CMAKE_CURRENT_SOURCE_DIR}/../Build/Tests/MantidTest.user.properties
+                         ${CMAKE_CURRENT_SOURCE_DIR}/../Properties/MantidTest.user.properties
                          ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
   )
 
