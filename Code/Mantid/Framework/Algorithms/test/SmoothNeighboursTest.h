@@ -1,86 +1,132 @@
 #ifndef SmoothNeighboursTEST_H_
 #define SmoothNeighboursTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidAlgorithms/SmoothNeighbours.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidNexus/LoadSNSEventNexus.h"
+#include <cxxtest/TestSuite.h>
+#include "MantidKernel/Timer.h"
+#include "MantidKernel/System.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <iostream>
+#include <iomanip>
 
-using namespace Mantid::API;
-using namespace Mantid::Geometry;
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
+
+using namespace Mantid;
 using namespace Mantid::Kernel;
-using namespace Mantid::Algorithms;
+using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
+using namespace Mantid::Algorithms;
 
 class SmoothNeighboursTest : public CxxTest::TestSuite
 {
 public:
 
-  SmoothNeighboursTest()
+  /** Create an EventWorkspace containing fake data
+   * of single-crystal diffraction.
+   *
+   * @return EventWorkspace_sptr
+   */
+  EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents)
   {
-//    outputSpace1 = "SNAP_sum";
-//    inputSpace = "SNAP";
-//
-//    Mantid::NeXus::LoadSNSEventNexus loader;
-//    loader.initialize();
-//    loader.setPropertyValue("Filename","/home/janik/data/SNAP_4105_event.nxs");
-//    loader.setPropertyValue("OutputWorkspace",inputSpace);
-//    loader.execute();
+    int numPixels = 10000;
+    int numBins = 1600;
+    double binDelta = 10.0;
 
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(numPixels,1,1);
+
+    // --------- Load the instrument -----------
+    LoadInstrument * loadInst = new LoadInstrument();
+    loadInst->initialize();
+    loadInst->setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/MINITOPAZ_Definition.xml");
+    loadInst->setProperty<MatrixWorkspace_sptr> ("Workspace", retVal);
+    loadInst->execute();
+    delete loadInst;
+    // Populate the instrument parameters in this workspace - this works around a bug
+    retVal->populateInstrumentParameters();
+
+    DateAndTime run_start("2010-01-01");
+
+    for (int pix = 0; pix < numPixels; pix++)
+    {
+      for (int i=0; i<numEvents; i++)
+      {
+        retVal->getEventListAtPixelID(pix) += TofEvent((i+0.5)*binDelta, run_start+double(i));
+      }
+
+    }
+    retVal->doneLoadingData();
+
+    //Create the x-axis for histogramming.
+    MantidVecPtr x1;
+    MantidVec& xRef = x1.access();
+    xRef.resize(numBins);
+    for (int i = 0; i < numBins; ++i)
+    {
+      xRef[i] = i*binDelta;
+    }
+
+    //Set all the histograms at once.
+    retVal->setAllX(x1);
+
+    // Some sanity checks
+    TS_ASSERT_EQUALS( retVal->getInstrument()->getName(), "MINITOPAZ");
+    std::map<int, Geometry::IDetector_sptr> dets;
+    retVal->getInstrument()->getDetectors(dets);
+    TS_ASSERT_EQUALS( dets.size(), 100*100);
+
+    return retVal;
+  }
+  void do_test_MINITOPAZ(EventType type)
+  {
+
+    int numEventsPer = 100;
+    MatrixWorkspace_sptr inputW = createDiffractionEventWorkspace(numEventsPer);
+    EventWorkspace_sptr in_ws = boost::dynamic_pointer_cast<EventWorkspace>( inputW );
+    if (type == WEIGHTED)
+      in_ws *= 2.0;
+    if (type == WEIGHTED_NOTIME)
+    {
+      for (int i =0; i<in_ws->getNumberHistograms(); i++)
+      {
+        EventList & el = in_ws->getEventList(i);
+        el.compressEvents(0.0, &el);
+      }
+    }
+    size_t nevents0 = in_ws->getNumberEvents();
+    // Register the workspace in the data service
+
+    SmoothNeighbours alg;
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
+    TS_ASSERT( alg.isInitialized() )
+    alg.setProperty("InputWorkspace", inputW);
+    alg.setProperty("OutputWorkspace", "testEW");
+    alg.setProperty("AdjX", 1);
+    alg.setProperty("AdjY", 1);
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
+    TS_ASSERT( alg.isExecuted() )
+
+    EventWorkspace_sptr ws;
+    TS_ASSERT_THROWS_NOTHING(
+        ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("testEW")) );
+    TS_ASSERT(ws);
+    if (!ws) return;
+    size_t nevents = ws->getNumberEvents();
+    TS_ASSERT_LESS_THAN( nevents0, nevents);
+
+    AnalysisDataService::Instance().remove("testEW");
   }
 
-  ~SmoothNeighboursTest()
-  {}
-
-
-
-  void testTheBasics()
+  void test_SmoothNeighbours()
   {
-    TS_ASSERT_EQUALS( alg.name(), "SmoothNeighbours" );
-    TS_ASSERT_EQUALS( alg.version(), 1 );
-    TS_ASSERT_EQUALS( alg.category(), "General" );
+    do_test_MINITOPAZ(TOF);
   }
 
-  void testInit()
-  {
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
-    TS_ASSERT( alg.isInitialized() );
-
-    std::vector<Property*> props = alg.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
-  }
-
-
-//
-//
-//  void testExec_SNAP()
-//  {
-//    alg.initialize();
-//    TS_ASSERT( alg.isInitialized() );
-//
-//    // Set the properties
-//    alg.setPropertyValue("InputWorkspace",inputSpace) ;
-//    alg.setPropertyValue("OutputWorkspace",outputSpace1) ;
-//    alg.setPropertyValue("SmoothX","4");
-//    alg.setPropertyValue("SmoothY","16");
-//    //alg.setPropertyValue("DetectorNames","bank1,bank2,bank3,bank4,bank5,bank6,bank7,bank8,bank9,bank10,bank11,bank12,bank13,bank14,bank15,bank16,bank17,bank18");
-//    //alg.setPropertyValue("DetectorNames","bank1,bank2,bank3");
-//
-//    alg.execute();
-//
-//    //TS_ASSERT_EQUALS(
-//  }
-
-
-private:
-  SmoothNeighbours alg;   // Test with range limits
-  std::string outputSpace1;
-  std::string outputSpace2;
-  std::string inputSpace;
 };
 
 #endif /*SmoothNeighboursTEST_H_*/
