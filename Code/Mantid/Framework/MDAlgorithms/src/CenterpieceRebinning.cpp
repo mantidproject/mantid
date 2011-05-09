@@ -1,4 +1,6 @@
 #include "MantidMDAlgorithms/CenterpieceRebinning.h"
+#include <boost/scoped_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <sstream>
 // Availble rebinning methods: Eventually will go to factory
 #include "MantidMDAlgorithms/CpRebinningNx3.h"
@@ -137,8 +139,8 @@ CenterpieceRebinning::exec()
     keep_pixels = getProperty("KeepPixels");
 
    // here we should have the call to factory, providing best rebinning method for the job
-   std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinningNx3(inputWS,pSlicing,outputWS,keep_pixels));
-  //  std::auto_ptr<IDynamicRebinning> pRebin = std::auto_ptr<IDynamicRebinning>(new CpRebinning4x3StructHR(inputWS,pSlicing,outputWS));
+    boost::scoped_ptr<IDynamicRebinning> pRebin(new CpRebinningNx3(inputWS,pSlicing,outputWS,keep_pixels));
+  //  boost::scoped_ptr<IDynamicRebinning> pRebin(new CpRebinning4x3StructHR(inputWS,pSlicing,outputWS));
   
     bool selection_valid(false);
     // indicate cells, which may contribute into cut
@@ -150,9 +152,9 @@ CenterpieceRebinning::exec()
 
    /// The progress reporting object
     int occurance = reportOccurance(nSteps);
-    std::auto_ptr<API::Progress> pProgress;
+    boost::shared_ptr<API::Progress> pProgress;
     if(nSteps>1){
-      pProgress = std::auto_ptr<API::Progress>(new Progress(this,0,1,occurance));
+      pProgress = boost::shared_ptr<API::Progress>(new Progress(this,0,1,occurance));
     }
 
     selection_valid = true;
