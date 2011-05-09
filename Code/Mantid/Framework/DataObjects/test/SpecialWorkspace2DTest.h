@@ -63,6 +63,8 @@ public:
     TS_ASSERT_THROWS_ANYTHING( ws->setValue(-1, 789) );
     TS_ASSERT_THROWS_ANYTHING( ws->getValue(47) );
     TS_ASSERT_THROWS_ANYTHING( ws->getValue(-34) );
+    TS_ASSERT_EQUALS( ws->getValue(47, 5.0), 5.0 );
+    TS_ASSERT_EQUALS( ws->getValue(147, -12.0), -12.0 );
 
 
   }

@@ -104,6 +104,25 @@ namespace DataObjects
     }
   }
 
+  //----------------------------------------------------------------------------------------------
+  /** Return the special value (Y) in the workspace at the given detector ID,
+   * but returns a default value instead of throwing if detector is not found.
+   *
+   * @param detectorID :: detector ID to look up
+   * @param defaultValue :: value returned if the ID is not found.
+   * @return the Y value for that detector ID.
+   */
+  double SpecialWorkspace2D::getValue(const int detectorID, const double defaultValue) const
+  {
+    std::map<int,int>::const_iterator it = detID_to_WI.find(detectorID);
+    if (it == detID_to_WI.end())
+      return defaultValue;
+    else
+    {
+      return this->dataY(it->second)[0];
+    }
+  }
+
 
   //----------------------------------------------------------------------------------------------
   /** Return the special value (Y) in the workspace at the given detector ID

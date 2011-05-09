@@ -39,6 +39,7 @@ namespace DataObjects
     virtual Mantid::API::SpectraDetectorMap& mutableSpectraMap();
 
     double getValue(const int detectorID) const;
+    double getValue(const int detectorID, const double defaultValue) const;
 
     void setValue(const int detectorID, const double value);
 
