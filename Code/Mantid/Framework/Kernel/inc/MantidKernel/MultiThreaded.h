@@ -120,6 +120,8 @@ typedef Poco::FastMutex Mutex;
 #define PARALLEL_ATOMIC \
                 PRAGMA(omp atomic)
 
+#define PARALLEL_SET_NUM_THREADS omp_set_num_threads(MaxCores);
+
 #define PARALLEL_NUMBER_OF_THREADS omp_get_num_threads()
 
 #define PARALLEL_GET_MAX_THREADS omp_get_max_threads()
@@ -158,6 +160,7 @@ typedef Poco::FastMutex Mutex;
 #define PARALLEL_CRITICAL(name)
 #define PARALLEL_ATOMIC
 #define PARALLEL_THREAD_NUMBER 0
+#define PARALLEL_SET_NUM_THREADS
 #define PARALLEL_NUMBER_OF_THREADS 1
 #define PARALLEL_GET_MAX_THREADS 1
 #define PARALLEL

@@ -39,7 +39,7 @@ namespace Kernel
     if (numThreads == 0)
     {
       //Uses OpenMP to find how many cores there are.
-      m_numThreads = getNumPhysicalCores();
+      m_numThreads = PARALLEL_GET_MAX_THREADS;
     }
     else
       m_numThreads = numThreads;

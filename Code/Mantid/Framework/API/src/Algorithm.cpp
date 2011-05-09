@@ -8,6 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidKernel/Timer.h"
+#include "MantidKernel/MultiThreaded.h"
 #include "MantidKernel/DateAndTime.h"
 
 #include <boost/algorithm/string/trim.hpp>
@@ -110,6 +111,10 @@ namespace Mantid
 
       m_notificationCenter.postNotification(new StartedNotification(this));
       Mantid::Kernel::DateAndTime start_time;
+
+      /// Set the maximum number of cores from Properties files
+      getOpenMPCores();
+
       // Return a failure if the algorithm hasn't been initialized
       if ( !isInitialized() )
       {
@@ -451,6 +456,23 @@ namespace Mantid
       }
 
       return alg;
+    }
+
+    /**
+     * Sets the maximum number of cores for OpenMP
+     */
+    void Algorithm::getOpenMPCores()
+    {
+      // Sets the maxiumum number of cores from properties files if not zero
+      int MaxCores;
+      int retVal = ConfigService::Instance().getValue("MultiThreaded.MaxCores", MaxCores);
+      if (MaxCores && retVal)
+      {
+        PARALLEL_SET_NUM_THREADS
+      }
+      //g_log.information() << "OpenMP Max Cores = " << PARALLEL_GET_MAX_THREADS << std::endl;
+    
+      return;
     }
 
     /**  Add an observer to a notification

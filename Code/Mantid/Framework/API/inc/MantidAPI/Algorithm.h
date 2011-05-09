@@ -208,6 +208,9 @@ public:
   /// Asynchronous execution.
   Poco::ActiveResult<bool> executeAsync();
 
+  /// Set the maximum number of cores from Properties files
+  void getOpenMPCores();
+
   /// Execute as a sub-algorithm
   void executeAsSubAlg();
 
