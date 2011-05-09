@@ -1,11 +1,11 @@
-#ifndef MANTID_VATES_VTKUNSTRUCTUREDGRIDFACTORY_H_
-#define MANTID_VATES_VTKUNSTRUCTUREDGRIDFACTORY_H_
+#ifndef MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
+#define MANTID_VATES_VTKTHRESHOLDING_HEXAHEDRON_FACTORY_H_
 
 /** Concrete implementation of vtkDataSetFactory. Creates a vtkUnStructuredGrid. Uses Thresholding technique
- * to create sparse 4D representation of data.
+ * to create sparse 3D representation of data. 
 
  @author Owen Arnold, Tessella plc
- @date 24/01/2010
+ @date 06/05/2011
 
  Copyright &copy; 2010 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
@@ -40,17 +40,15 @@ namespace Mantid
 namespace VATES
 {
 
-template<typename TimeMapper>
-class DLLExport vtkThresholdingUnstructuredGridFactory: public vtkDataSetFactory
+class DLLExport vtkThresholdingHexahedronFactory: public vtkDataSetFactory
 {
 public:
 
   /// Constructor
-  vtkThresholdingUnstructuredGridFactory(const std::string& scalarname,
-      const double timestep, double minThreshold = -10000, double maxThreshold = 10000);
+  vtkThresholdingHexahedronFactory(const std::string& scalarname, double minThreshold = -10000, double maxThreshold = 10000);
 
   /// Destructor
-  ~vtkThresholdingUnstructuredGridFactory();
+  ~vtkThresholdingHexahedronFactory();
 
   /// Initialize the object with a workspace.
   virtual void initialize(Mantid::API::IMDWorkspace_sptr workspace);
@@ -81,17 +79,11 @@ private:
   /// Image from which to draw.
   Mantid::API::IMDWorkspace_sptr m_workspace;
 
-  /// timestep obtained from framework.
-  const double m_timestep;
-
   /// Create a hexahedron.
   inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
 
   /// Name of the scalar to provide on mesh.
   const std::string m_scalarName;
-
-  /// Time mapper.
-  TimeMapper m_timeMapper;
 
   /// Threshold for signal value. below which, we do not provide unstructured topologies for.
   const double m_minThreshold;

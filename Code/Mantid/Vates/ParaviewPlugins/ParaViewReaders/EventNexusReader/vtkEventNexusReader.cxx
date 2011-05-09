@@ -14,6 +14,9 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
+#include "MantidVatesAPI/vtkThresholdingHexahedronFactory.h"
+#include "MantidVatesAPI/vtkThresholdingQuadFactory.h"
+#include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 
@@ -133,6 +136,8 @@ void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
+  try
+  {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -181,9 +186,16 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
     m_presenter.execute(hist_alg, m_histogrammedWsId, updatehandler);
   }
 
-  // This object determines how the visualization is made from a given imdworkspace.
-  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep> vtkGridFactory("signal", time, m_minThreshold, m_maxThreshold);
-
+  // Chain of resposibility setup for visualisation. Encapsulates decision making on how workspace will be rendered.
+  std::string scalarName = "signal";
+  vtkThresholdingLineFactory vtkGridFactory(scalarName, m_minThreshold, m_maxThreshold);
+  vtkThresholdingQuadFactory* p_2dSuccessorFactory = new vtkThresholdingQuadFactory(scalarName, m_minThreshold, m_maxThreshold);
+  vtkThresholdingHexahedronFactory* p_3dSuccessorFactory = new vtkThresholdingHexahedronFactory(scalarName, m_minThreshold, m_maxThreshold);
+  vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>* p_4dSuccessorFactory = new vtkThresholdingUnstructuredGridFactory<TimeToTimeStep>(scalarName, time, m_minThreshold, m_maxThreshold);
+  p_2dSuccessorFactory->SetSuccessor(p_2dSuccessorFactory);
+  p_3dSuccessorFactory->SetSuccessor(p_4dSuccessorFactory);
+  vtkGridFactory.SetSuccessor(p_3dSuccessorFactory);
+  
   RebinningXMLGenerator serializer(LocationNotRequired); //Object handles serialization of meta data.
   vtkUnstructuredGrid* structuredMesh = vtkUnstructuredGrid::SafeDownCast(m_presenter.getMesh(serializer, vtkGridFactory));
 
@@ -192,6 +204,11 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
+  }
+  catch(std::exception& ex)
+  {
+    std::string mess = ex.what();
+  }
 }
 
 int vtkEventNexusReader::RequestInformation(
