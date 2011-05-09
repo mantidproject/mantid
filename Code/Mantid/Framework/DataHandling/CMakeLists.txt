@@ -71,7 +71,7 @@ set ( SRC_FILES
 	src/SaveSPE.cpp
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
-	src/UpdateInstrumentFromRaw.cpp
+	src/UpdateInstrumentFromFile.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -136,7 +136,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveSPE.h
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
-	inc/MantidDataHandling/UpdateInstrumentFromRaw.h
+	inc/MantidDataHandling/UpdateInstrumentFromFile.h
 )
 
 set ( TEST_FILES
@@ -190,7 +190,7 @@ set ( TEST_FILES
 	test/SaveRKHTest.h
 	test/SaveSPETest.h
 	test/SetScalingPSDTest.h
-	test/UpdateInstrumentFromRawTest.h
+	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
 )
 

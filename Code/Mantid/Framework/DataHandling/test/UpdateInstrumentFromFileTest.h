@@ -1,23 +1,16 @@
-#ifndef UPDATEINSTRUMENTTESTFROMRAW_H_
-#define UPDATEINSTRUMENTTESTFROMRAW_H_
+#ifndef UPDATEINSTRUMENTTESTFROMFILE_H_
+#define UPDATEINSTRUMENTTESTFROMFILE_H_
 
 #include <cxxtest/TestSuite.h>
 
-#include "MantidDataHandling/UpdateInstrumentFromRaw.h"
+#include "MantidDataHandling/UpdateInstrumentFromFile.h"
 #include "MantidDataHandling/LoadInstrumentFromRaw.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/InstrumentDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/AnalysisDataService.h"
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/Algorithm.h"
-#include "MantidGeometry/Instrument/Component.h"
-#include "MantidGeometry/Instrument/FitParameter.h"
-#include <vector>
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -25,13 +18,13 @@ using namespace Mantid::Geometry;
 using namespace Mantid::DataHandling;
 using namespace Mantid::DataObjects;
 
-class UpdateInstrumentFromRawTest : public CxxTest::TestSuite
+class UpdateInstrumentFromFileTest : public CxxTest::TestSuite
 {
 public:
-    static UpdateInstrumentFromRawTest *createSuite() { return new UpdateInstrumentFromRawTest(); }
-  static void destroySuite(UpdateInstrumentFromRawTest *suite) { delete suite; }
+    static UpdateInstrumentFromFileTest *createSuite() { return new UpdateInstrumentFromFileTest(); }
+  static void destroySuite(UpdateInstrumentFromFileTest *suite) { delete suite; }
 
-  UpdateInstrumentFromRawTest()
+  UpdateInstrumentFromFileTest()
   {
   }
 
@@ -55,7 +48,7 @@ public:
     TS_ASSERT( loaderHRP.isExecuted() );
 
     // now try to reload in detector positions from raw file
-    UpdateInstrumentFromRaw loadRawPos;
+    UpdateInstrumentFromFile loadRawPos;
     loadRawPos.initialize();
     loadRawPos.setPropertyValue("Filename", "HRP38692.raw");
     loadRawPos.setPropertyValue("Workspace", wsName);
@@ -80,10 +73,10 @@ public:
 
 
 private:
-  UpdateInstrumentFromRaw loader;
+  UpdateInstrumentFromFile loader;
   std::string inputFile;
   std::string wsName;
 
 };
 
-#endif /*UPDATEINSTRUMENTTESTFROMRAW_H_*/
+#endif /*UPDATEINSTRUMENTTESTFROMFILE_H_*/

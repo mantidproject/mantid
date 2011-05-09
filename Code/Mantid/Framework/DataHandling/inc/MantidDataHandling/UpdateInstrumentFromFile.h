@@ -1,5 +1,5 @@
-#ifndef MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMRAW_H_
-#define MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMRAW_H_
+#ifndef MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMFILE_H_
+#define MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMFILE_H_
 
 //----------------------------------------------------------------------
 // Includes
@@ -8,20 +8,17 @@
 
 namespace Mantid
 {
-	
   namespace Geometry
   {
-    class CompAssembly;
-    class Component;
     class Instrument;
   }
 	
   namespace DataHandling
   {
-    /** @class UpdateInstrumentFromRaw UpdateInstrumentFromRaw.h DataHandling/UpdateInstrumentFromRaw.h
+    /**
 
-    Updating detector positions initially loaded in from Instrument Defintion File (IDF) from information in raw files. 
-    Note doing this will results in a slower performance (likely slightly slower performance) compared to specifying the 
+    Update detector positions initially loaded in from Instrument Defintion File (IDF) from information in the provided files. 
+    Note doing this will result in a slower performance (likely slightly slower performance) compared to specifying the 
     correct detector positions in the IDF in the first place. 
 
     Note that this algorithm moves the detectors without subsequent rotation, hence this means that detectors may not for 
@@ -33,10 +30,9 @@ namespace Mantid
     <LI> Filename - The name of and path to the input RAW file </LI>
     </UL>
 
-    @author Anders Markvardsen, ISIS, RAL
-    @date 6/5/2010
+    @author Martyn Gigg, Tessella plc
 
-    Copyright &copy; 2007-10 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
+    Copyright &copy; 2011 ISIS Rutherford Appleton Laboratory & NScD Oak Ridge National Laboratory
 
     This file is part of Mantid.
 
@@ -55,17 +51,19 @@ namespace Mantid
 
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>    
     */
-    class DLLExport UpdateInstrumentFromRaw : public API::Algorithm
+    class DLLExport UpdateInstrumentFromFile : public API::Algorithm
     {
     public:
       /// Default constructor
-      UpdateInstrumentFromRaw();
+      UpdateInstrumentFromFile();
 
       /// Destructor
-      ~UpdateInstrumentFromRaw() {}
+      ~UpdateInstrumentFromFile() {}
 
       /// Algorithm's name for identification overriding a virtual method
-      virtual const std::string name() const { return "UpdateInstrumentFromRaw";};
+      virtual const std::string name() const { return "UpdateInstrumentFromFile"; }
+      /// Algorithm's alias for the old UpdateInstrumentFromRaw
+      virtual const std::string alias() const { return "UpdateInstrumentFromRaw"; }
 
       /// Algorithm's version for identification overriding a virtual method
       virtual int version() const { return 1;};
@@ -76,19 +74,21 @@ namespace Mantid
     private:
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
-
       /// Overwrites Algorithm method. Does nothing at present
       void init();
-
       /// Overwrites Algorithm method
       void exec();
 
-      /// The name and path of the input file
-      std::string m_filename;
+      /// Assumes the file is a raw file
+      void updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, 
+                         const std::string & filename);
+      /// Assumes the file is an ISIS NeXus file
+      void updateFromIsisNeXus(boost::shared_ptr<Geometry::Instrument> instrument, 
+                               const std::string & filename);
     };
 
   } // namespace DataHandling
 } // namespace Mantid
 
-#endif /*MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMRAW_H_*/
+#endif /*MANTID_DATAHANDLING_UPDATEINSTRUMENTFROMFILE_H_*/
 

@@ -14,7 +14,6 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "LoadRaw/isisraw2.h"
 #include "MantidDataHandling/LoadLog.h"
-//#include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidAPI/LoadAlgorithmFactory.h"
 
 #include <boost/date_time/gregorian/gregorian.hpp>
@@ -553,11 +552,9 @@ namespace Mantid
 
       std::string instrumentID = isisRaw->i_inst; // get the instrument name
       size_t i = instrumentID.find_first_of(' '); // cut trailing spaces
-      if (i != std::string::npos)
-        instrumentID.erase(i);
+      if (i != std::string::npos) instrumentID.erase(i);
 
       IAlgorithm_sptr loadInst= createSubAlgorithm("LoadInstrument");
-
       // Now execute the sub-algorithm. Catch and log any error, but don't stop.
       bool executionSuccessful(true);
       try
@@ -585,6 +582,21 @@ namespace Mantid
       }
       else
       {
+        // If requested update the instrument to positions in the raw file
+        const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
+        if( pmap.contains(localWorkspace->getBaseInstrument().get(),"det-pos-source") )
+        {
+          boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getBaseInstrument().get(),"det-pos-source");
+          if( updateDets->value<std::string>() == "datafile" )
+          {
+            IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
+            updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+            updateInst->setPropertyValue("Filename", fileName);
+            // We want this to throw if it fails to warn the user that the information is not correct.
+            updateInst->execute();
+          }
+        }
+        // Debugging code??
         m_monitordetectorList = loadInst->getProperty("MonitorList");
         std::vector<int>::const_iterator itr;
         for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
@@ -1048,11 +1060,11 @@ namespace Mantid
       bool braw = (!extn.compare("raw")||!extn.compare("add")||extn[0]=='s') ? true : false;
       if( isRawFileHeader(static_cast<int>(nread), header.full_hdr) || braw )
       {
-	return true;
+	      return true;
       }
       else
       {
-	return false;
+	      return false;
       }
     }
     /**Checks the file by opening it and reading few lines 
@@ -1068,7 +1080,7 @@ namespace Mantid
       FILE* fp = fopen(filePath.c_str(), "rb");
       if (fp == NULL)
       {
-	return bret;
+        return bret;
       }
       file_header header;
       int nread(static_cast<int>(fread(
@@ -1081,7 +1093,7 @@ namespace Mantid
       
       if( isRawFileHeader(nread, header.full_hdr) )
       {
-	bret=80;
+        bret=80;
       }
       return bret;
     }
