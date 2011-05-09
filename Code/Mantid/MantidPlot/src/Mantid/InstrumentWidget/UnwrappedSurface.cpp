@@ -668,6 +668,23 @@ void UnwrappedSurface::setColor(int index,bool picking)
   }
 }
 
+int UnwrappedSurface::getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const
+{
+  unsigned int id = b;
+  id *= 256;
+  id += g;
+  id *= 256;
+  id += r;
+  if (id == 0 || int(id) > m_unwrappedDetectors.size())
+  {
+    return -1;
+  }
+  else
+  {
+    return id-1;
+  }
+}
+
 int UnwrappedSurface::getDetectorID(unsigned char r,unsigned char g,unsigned char b)const
 {
   unsigned int id = b;
@@ -765,20 +782,65 @@ void UnwrappedSurface::getPickedDetector(QSet<int>& dets)
   }
   QRect rect = selectionRect();
 
-  for(int i=0;i<rect.width();++i)
+  double vtop = m_v_max;
+  double vbottom = m_v_min;
+  double uleft = m_u_min;
+  double uright = m_u_max;
+
+  // find the first picking colours different form black (0,0,0) to get the top-left
+  // and bottom-right detectors
+  int rwidth = rect.width();
+  int rheight = rect.height();
+  for(int i=0;i<rwidth;++i)
   {
-    for(int j=0;j<rect.height();++j)
+    bool stop = false;
+    for(int j=0;j<rheight;++j)
     {
       int x = rect.x() + i;
       int y = rect.y() + j;
       QRgb pixel = m_pickImage->pixel(x,y);
-      int detID = getDetectorID((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
-      if (detID >= 0)
+      int ind = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+      if (ind >= 0)
       {
-        dets.insert(detID);
+        uleft = m_unwrappedDetectors[ind].u - m_unwrappedDetectors[ind].width / 2;
+        vtop = m_unwrappedDetectors[ind].v + m_unwrappedDetectors[ind].height / 2;
+        stop = true;
+        break;
       }
     }
+    if (stop) break;
   }
+
+  for(int i=rwidth-1;i >= 0; --i)
+  {
+    bool stop = false;
+    for(int j=rheight-1;j >= 0;--j)
+    {
+      int x = rect.x() + i;
+      int y = rect.y() + j;
+      QRgb pixel = m_pickImage->pixel(x,y);
+      int ind = getDetectorIndex((unsigned char)qRed(pixel),(unsigned char)qGreen(pixel),(unsigned char)qBlue(pixel));
+      if (ind >= 0)
+      {
+        uright = m_unwrappedDetectors[ind].u + m_unwrappedDetectors[ind].width / 2;
+        vbottom = m_unwrappedDetectors[ind].v - m_unwrappedDetectors[ind].height / 2;
+        stop = true;
+        break;
+      }
+    }
+    if (stop) break;
+  }
+
+  // select detectors with u,v within the allowed boundaries
+  for(int i = 0; i < m_unwrappedDetectors.size(); ++i)
+  {
+    UnwrappedDetector& udet = m_unwrappedDetectors[i];
+    if (udet.u >= uleft && udet.u <= uright && udet.v >= vbottom && udet.v <= vtop)
+    {
+      dets.insert(udet.detector->getID());
+    }
+  }
+
 }
 
 /**

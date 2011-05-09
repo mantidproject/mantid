@@ -91,6 +91,7 @@ protected:
   void clear();
   void setColor(int index,bool picking);
   void showPickedDetector();
+  int getDetectorIndex(unsigned char r,unsigned char g,unsigned char b)const;
   int getDetectorID(unsigned char r,unsigned char g,unsigned char b)const;
   QRect selectionRect()const;
   QRectF selectionRectUV()const;
