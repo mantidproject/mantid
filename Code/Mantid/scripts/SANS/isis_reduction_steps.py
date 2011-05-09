@@ -305,7 +305,7 @@ class LoadRun(ReductionStep):
         return numPeriods
 
 
-class LoadTransmissions(sans_reduction_steps.BaseTransmission):
+class LoadTransmissions(ReductionStep):
     """
         Loads the file used to apply the transmission correction to the
         sample or can 
@@ -1053,8 +1053,8 @@ class NormalizeToMonitor(sans_reduction_steps.Normalize):
 
 class TransmissionCalc(sans_reduction_steps.BaseTransmission):
     """
-        Calculatates the proportion of neutrons that are transmitted through the sample
-        as a function of wavelenth. The resulsts are stored aas a workspace
+        Calculates the proportion of neutrons that are transmitted through the sample
+        as a function of wavelength. The results are stored as a workspace
     """
     
     # The different ways of doing a fit, convert the possible ways of specifying this into the stand way it's shown on the GUI 
@@ -1144,14 +1144,12 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         #the workspace is forked, below is its new name
         tmpWS = inputWS + '_tmp'
         
-        #exclude unused spectra because the empty spectra can cause errors
+        #exclude unused spectra because the sometimes empty/sometimes not spectra can cause errors with interpolate
         spectrum1 = min(pre_monitor, post_monitor)
-        #index numbers are one less than spectrum number for raw data files
-        index1 = spectrum1-1
-        index2 = max(pre_monitor, post_monitor)-1
+        spectrum2 = max(pre_monitor, post_monitor)
         CropWorkspace(inputWS, tmpWS,
-            StartWorkspaceIndex=index1, EndWorkspaceIndex=index2)
-    
+            StartWorkspaceIndex=self._get_index(spectrum1),
+            EndWorkspaceIndex=self._get_index(spectrum2))
 
         if inst.name() == 'LOQ':
             RemoveBins(tmpWS, tmpWS, 19900, 20500, Interpolation='Linear')
@@ -1171,6 +1169,15 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             Rebin(tmpWS, tmpWS, wavbining)
     
         return tmpWS
+    
+    def _get_index(self, number):
+        """
+            Converts spectrum numbers to indices using the simple (minus 1) relationship
+            that is true for raw files
+            @param number: a spectrum number
+            @return: its index
+        """
+        return number - 1
 
     def execute(self, reducer, workspace):
         """
@@ -1187,27 +1194,17 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             trans_ws = self.calculate(reducer)
         else:
             if self.calculated_samp:
-                temp_ws = self.calculated_samp+'_rebinned'
-                RebinToWorkspace(self.calculated_samp, workspace, temp_ws)
-                trans_ws = temp_ws
+                trans_ws = self.calculated_samp
             else:
                 #if no transmission files were specified this isn't an error, we just do nothing
                 return None
 
-        try:
-            Divide(workspace, trans_ws, workspace)
-        except:
-#when we are all up to Python 2.5 replace the duplicated code below with one finally:
-            if self.calculated_samp:
-                if mtd.workspaceExists(temp_ws):
-                    DeleteWorkspace(temp_ws)
+        rebinned = trans_ws+'_rebinned'
+        RebinToWorkspace(trans_ws, workspace, rebinned)
+        
+        Divide(workspace, rebinned, workspace)
 
-            raise RuntimeError("Failed to correct for transmission, are the bin boundaries for %s and %s the same?"%(workspace, trans_ws))
-
-
-        if self.calculated_samp:
-            if mtd.workspaceExists(temp_ws):
-                DeleteWorkspace(temp_ws)
+        DeleteWorkspace(rebinned)
 
     def _get_run_wksps(self):
         """
@@ -1287,11 +1284,6 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         else:
             result = fittedtransws
     
-        try:
-            Rebin(result, result, Params = reducer.to_wavelen.get_rebin())
-        except:
-            raise RuntimeError("Failed to Rebin the the transmission workspace %s to match the sample" %result)
-
         return result
     
     def get_trans_spec(self):

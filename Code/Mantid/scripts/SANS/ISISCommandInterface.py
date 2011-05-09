@@ -531,7 +531,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
     oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
-    mantid.sendLogMessage("::SANS::Itr: 0 "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(oldX2)+" SY "+str(oldY2))
+    mantid.sendLogMessage("::SANS::Itr: 0 "+str(XNEW*1000.)+","+str(YNEW*1000.)+
+        'SX '+str(oldX2).ljust(6)[0:5]+' SY '+str(oldY2).ljust(6)[0:5])
     # take first trial step
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
@@ -544,13 +545,15 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
         newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
-        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+
+            'SX '+str(newX2).ljust(6)[0:5]+' SY '+str(newY2).ljust(6)[0:5])
         
         try :
             if not graph_handle:
                 #once we have a plot it wil be updated automatically when the workspaces are updated
                 graph_handle = mantidplot.plotSpectrum(['Right','Up', 'Left', 'Down'],0)
-            graph_handle.activeLayer().setTitle("Itr " + str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+            graph_handle.activeLayer().setTitle("Itr " + str(it)+" "
+                +str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
         except :
             #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
             pass
