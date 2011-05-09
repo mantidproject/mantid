@@ -51,7 +51,10 @@ public:
 
     // Get the map
     std::map<int,int> map;
-    ws->makeDetectorIDToGroupMap(map);
+    int ngroups;
+    ws->makeDetectorIDToGroupMap(map, ngroups);
+
+    TS_ASSERT_EQUALS(ngroups, 5);
 
     TS_ASSERT_EQUALS( map[1], 1 );
     TS_ASSERT_EQUALS( map[9], 1 );

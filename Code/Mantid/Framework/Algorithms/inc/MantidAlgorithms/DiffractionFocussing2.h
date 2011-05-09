@@ -6,12 +6,14 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
 
 // To be compatible with VSC Express edition that does not have tr1
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
 #else
 #include <tr1/unordered_map>
+#include "MantidDataObjects/GroupingWorkspace.h"
 #endif
 
 namespace Mantid
@@ -101,9 +103,6 @@ private:
   // For events
   void execEvent();
 
-  /// Read the calibration file and construct the udet2group map
-  void readGroupingFile(const std::string& groupingFileName);
-
   /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
@@ -112,17 +111,17 @@ private:
   /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;
 
+  /// Grouping workspace with groups to build
+  Mantid::DataObjects::GroupingWorkspace_sptr groupWS;
+
   /// Shared pointer to the event workspace
   DataObjects::EventWorkspace_sptr eventW;
 
 
   // This map does not need to be ordered, just a lookup for udet
-#ifndef HAS_UNORDERED_MAP_H
   /// typedef for the storage of the UDET-group mapping
   typedef std::map<int, int> udet2groupmap;
-#else
-  typedef std::tr1::unordered_map<int,int> udet2groupmap;
-#endif
+
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
   typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
@@ -136,8 +135,6 @@ private:
   group2vectormap group2wgtvector;
   /// The number of (used) groups
   int nGroups;
-  /// The maximum # of the group in the file - for workspace2Ds, this can be > than nGroups.
-  int maxgroup_in_file;
   /// Number of histograms
   int nHist;
   /// Number of points in the 2D workspace

@@ -11,6 +11,7 @@
 #include "MantidAlgorithms/MaskBins.h"
 #include "MantidDataHandling/LoadEventPreNeXus.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -82,6 +83,8 @@ public:
     AnalysisDataService::Instance().remove("focusedWS");
 	}
 
+
+
   void test_EventWorkspace_SameOutputWS()
   {
     dotestEventWorkspace(true);
@@ -94,28 +97,24 @@ public:
 
   void dotestEventWorkspace(bool inplace)
   {
+    std::string nxsWSname("DiffractionFocussing2Test_ws");
     //----- Load some event data --------
-    LoadEventPreNeXus * eventLoader;
-    eventLoader = new LoadEventPreNeXus();
-    eventLoader->initialize();
-    eventLoader->setPropertyValue("EventFilename", "REF_L_32035_neutron_event.dat");
-    eventLoader->setProperty("PulseidFilename",  "REF_L_32035_pulseid.dat");
-    eventLoader->setPropertyValue("MappingFilename", "REF_L_TS_2010_02_19.dat");
-    eventLoader->setPropertyValue("OutputWorkspace", "refl");
-    TS_ASSERT( eventLoader->execute() );
+    AlgorithmHelper::runAlgorithm("LoadEventNexus", 4,
+        "Filename", "CNCS_7860_event.nxs",
+        "OutputWorkspace", nxsWSname.c_str());
 
-    //Check on the input workspace
+    //-------- Check on the input workspace ---------------
     EventWorkspace_sptr inputW = boost::dynamic_pointer_cast<EventWorkspace>
-            (AnalysisDataService::Instance().retrieve("refl"));
-    int numpixels_with_events = 4753;
-    TS_ASSERT_EQUALS( inputW->getNumberHistograms(), numpixels_with_events);
+            (AnalysisDataService::Instance().retrieve(nxsWSname));
+    TS_ASSERT(inputW);
+    if (!inputW) return;
     int old_numevents = inputW->getNumberEvents();
 
     //Fake a d-spacing unit in the data.
     inputW->getAxis(0)->unit() =UnitFactory::Instance().create("dSpacing");
 
     //Create a DIFFERENT x-axis for each pixel. Starting bin = the input workspace index #
-    for (int pix=0; pix < numpixels_with_events; pix++)
+    for (int pix=0; pix < inputW->getNumberHistograms(); pix++)
     {
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec& xRef = axis.access();
@@ -123,28 +122,37 @@ public:
       for (int i = 0; i < 5; ++i)
         xRef[i] = 1 + pix + i*1.0;
       xRef[4] = 1e6;
-
       //Set an X-axis
       inputW->setX(pix, axis);
     }
 
-    focus.setPropertyValue("InputWorkspace", "refl");
-    std::string outputws = "refl2";
-    if (inplace) outputws = "refl";
-    focus.setPropertyValue("OutputWorkspace", outputws);
+    // ------------ Create a grouping workspace by name -------------
+    std::string groupWSName("DiffractionFocussing2Test_group");
+    AlgorithmHelper::runAlgorithm("CreateGroupingWorkspace", 6,
+        "InputWorkspace",  nxsWSname.c_str(),
+        "GroupNames", "bank36,bank37",
+        "OutputWorkspace", groupWSName.c_str());
+
+    // ------------ Create a grouping workspace by name -------------
+    DiffractionFocussing2 focus;
+    focus.initialize();
+    TS_ASSERT_THROWS_NOTHING( focus.setPropertyValue("InputWorkspace", nxsWSname) );
+    std::string outputws = nxsWSname + "_focussed";
+    if (inplace) outputws = nxsWSname;
+    TS_ASSERT_THROWS_NOTHING( focus.setPropertyValue("OutputWorkspace", outputws) );
 
     //This fake calibration file was generated using DiffractionFocussing2Test_helper.py
-    focus.setPropertyValue("GroupingFileName","refl_fake.cal");
+    TS_ASSERT_THROWS_NOTHING( focus.setPropertyValue("GroupingWorkspace", groupWSName) );
 
     //OK, run the algorithm
-    focus.execute();
+    TS_ASSERT_THROWS_NOTHING( focus.execute(); )
     TS_ASSERT( focus.isExecuted() );
 
     EventWorkspace_const_sptr output;
-    output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
+    TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws)) );
+    if (!output) return;
 
-    //The fake grouping file has 100 groups, starting at 1, so there'll be 100 histograms
-    int numgroups = 100;
+    int numgroups = 2;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
     if (output->getNumberHistograms() != numgroups)
       return;
@@ -154,87 +162,44 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(0), 0);
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups-1);
 
-    //Because no pixels are rejected or anything, the total # of events should stay the same.
-    TS_ASSERT_EQUALS(old_numevents, output->getNumberEvents());
-
-    //List of the expected total # of events in each group
-    int * expected_total_events = new int[numgroups+1];
+    //Events in these two banks alone
+    TS_ASSERT_EQUALS(output->getNumberEvents(), 16260);
 
     //Now let's test the grouping of detector UDETS to groups
     for (int group=1; group<=numgroups; group++)
     {
       int workspaceindex_in_output = group-1;
-
       //This is the list of the detectors (grouped)
       std::vector<int> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
-
-      //Each group has around 47 detectors, but there is some variation. They are all above 35 though
-      TS_ASSERT_LESS_THAN(35, mylist.size());
-      int numevents = 0;
-
-      //This is to find the workspace index for a given original spectrum #
-      Mantid::API::IndexToIndexMap * mymap = inputW->getDetectorIDToWorkspaceIndexMap(true);
-
-      if (inplace)
-      {
-        TS_ASSERT_LESS_THAN(0, output->getEventList(workspaceindex_in_output).getNumberEvents());
-      }
-      else
-      {
-        for (int i=0; i<mylist.size(); i++)
-        {
-          //The formula for assigning fake group #
-          TS_ASSERT_EQUALS( (mylist[i] % numgroups)+1, group );
-          //The workspace index in the input workspace for this detector #
-          int workspaceIndex_in_input = (*mymap)[ mylist[i] ];
-          //Add up the events
-          numevents += inputW->getEventList(workspaceIndex_in_input).getNumberEvents();
-        }
-        //Look up how many events in the output, summed up spectrum (workspace index = group-1)
-        TS_ASSERT_EQUALS(numevents, output->getEventList(workspaceindex_in_output).getNumberEvents());
-      }
-
-      //The first X bin of each group corresponds to the lowest workspace index - since the limits in X are used.
-      const MantidVec & X = (*output->refX(workspaceindex_in_output));
-      TS_ASSERT_EQUALS( X.size(), 5);
-      TS_ASSERT_EQUALS( X[0], (*mymap)[ mylist[0] ] + 1);
-
-      //Save the # of events for later
-      expected_total_events[workspaceindex_in_output] = numevents;
-
-      delete mymap;
-
+      //1024 pixels in a bank
+      TS_ASSERT_EQUALS(mylist.size(), 1024);
     }
 
-    //Now let's try to rebin using log parameters
+    //Now let's try to rebin using log parameters (this used to fail?)
     Rebin rebin;
     rebin.initialize();
     rebin.setPropertyValue("InputWorkspace", outputws);
     rebin.setPropertyValue("OutputWorkspace", outputws);
     // Check it fails if "Params" property not set
-    rebin.setPropertyValue("Params", "1.0,-1.0,32768");
+    rebin.setPropertyValue("Params", "2.0,-1.0,65535");
     TS_ASSERT(rebin.execute());
     TS_ASSERT(rebin.isExecuted());
 
     /* Get the output ws again */
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
-
-
+    double events_after_binning = 0;
     for (int workspace_index=0; workspace_index<output->getNumberHistograms(); workspace_index++)
     {
       //should be 16 bins
       TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
       //There should be some data in the bins
-      int events_after_binning = 0;
       for (int i=0; i<15; i++)
         events_after_binning += output->dataY(workspace_index)[i];
-      if (!inplace)
-        TS_ASSERT_EQUALS( events_after_binning, expected_total_events[workspace_index]);
     }
-
-
-    delete [] expected_total_events;
+    // The count sums up to the same as the number of events
+    TS_ASSERT_DELTA( events_after_binning, 16260.0, 1e-4);
   }
+
 
 
 

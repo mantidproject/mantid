@@ -72,21 +72,27 @@ namespace DataObjects
 
 
   /** Fill a map with key = detector ID, value = group number
-   * by using the values in Y
+   * by using the values in Y.
+   * Group values of 0 are converted to -1.
    *
    * @param detIDToGroup :: ref. to map to fill
+   * @param[out] ngroups :: the number of groups found (equal to the largest group number found)
    */
-  void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<int, int> & detIDToGroup) const
+  void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<int, int> & detIDToGroup, int & ngroups) const
   {
+    ngroups = 0;
     const SpectraDetectorMap & map = this->spectraMap();
     for (int wi=0; wi<this->m_noVectors; ++wi)
     {
       int specNo = wi;
       // Convert the Y value to a group number
       int group = int(this->dataY(wi)[0]);
+      if (group == 0) group = -1;
       std::vector<int> dets = map.getDetectors(specNo);
       int detID = dets[0];
       detIDToGroup[detID] = group;
+      if (group > ngroups)
+        ngroups = group;
     }
   }
 

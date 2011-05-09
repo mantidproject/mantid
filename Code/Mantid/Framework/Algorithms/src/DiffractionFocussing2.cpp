@@ -2,24 +2,26 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/DiffractionFocussing2.h"
-#include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidAPI/FileProperty.h"
-#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidAPI/MemoryManager.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/VectorHelper.h"
 #include <cfloat>
 #include <fstream>
-#include "MantidKernel/VectorHelper.h"
 #include <iterator>
 #include <numeric>
 
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::DataObjects;
 
 namespace Mantid
 {
-using namespace Kernel;
-using namespace API;
 
 namespace Algorithms
 {
@@ -35,13 +37,6 @@ void DiffractionFocussing2::initDocs()
 }
 
 
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D;
-using DataObjects::Workspace2D_sptr;
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
 
 /// Constructor
 DiffractionFocussing2::DiffractionFocussing2() : 
@@ -68,8 +63,11 @@ void DiffractionFocussing2::init()
   declareProperty(new API::WorkspaceProperty<>("OutputWorkspace","",Direction::Output),
     "The result of diffraction focussing of InputWorkspace" );
 
-  declareProperty(new FileProperty("GroupingFileName", "", FileProperty::Load, ".cal"),
-		  "The name of the CalFile with grouping data" );
+  declareProperty(new FileProperty("GroupingFileName", "", FileProperty::OptionalLoad, ".cal"),
+      "Optional: The name of the CalFile with grouping data." );
+
+  declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, true),
+      "Optional: GroupingWorkspace to use instead of a grouping file." );
 
   declareProperty("PreserveEvents", true, "Keep the output workspace as an EventWorkspace, if the input has events (default).\n"
       "If false, then the workspace gets converted to a Workspace2D histogram.");
@@ -100,14 +98,38 @@ void DiffractionFocussing2::exec()
 {
   // retrieve the properties
   std::string groupingFileName=getProperty("GroupingFileName");
+  std::string GroupingWorkspaceName=getPropertyValue("GroupingWorkspace");
 
-  progress(0.01, "Reading grouping file");
-  readGroupingFile(groupingFileName);
+  if (GroupingWorkspaceName.empty() && groupingFileName.empty())
+    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace, not both!");
+
+  if (!GroupingWorkspaceName.empty() && !groupingFileName.empty())
+    throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace!");
 
   // Get the input workspace
   matrixInputW = getProperty("InputWorkspace");
   nPoints = matrixInputW->blocksize();
   nHist = matrixInputW->getNumberHistograms();
+
+  // --- Do we need to read the grouping workspace? ----
+  if (groupingFileName != "")
+  {
+    progress(0.01, "Reading grouping file");
+    IAlgorithm_sptr childAlg = createSubAlgorithm("CreateGroupingWorkspace");
+    childAlg->setProperty("InputWorkspace", matrixInputW);
+    childAlg->setProperty("OldCalFilename", groupingFileName);
+    childAlg->executeAsSubAlg();
+    groupWS = childAlg->getProperty("OutputWorkspace");
+  }
+  else
+  {
+    groupWS = getProperty("GroupingWorkspace");
+  }
+
+  // Fill the map
+  udet2group.clear();
+  groupWS->makeDetectorIDToGroupMap(udet2group, nGroups);
+  //std::cout << "nGroups " << nGroups << "\n";
 
   //This finds the rebin parameters (used in both versions)
   // It also initializes the groupAtWorkspaceIndex[] array.
@@ -142,7 +164,8 @@ void DiffractionFocussing2::exec()
 
     //Check whether this spectra is in a valid group
     const int group=groupAtWorkspaceIndex[i];
-    if (group==-1) // Not in a group
+    //std::cout << "Wi " << i << " is at group " << group << "\n";
+    if (group<=0) // Not in a group
       continue;
     //Get reference to its old X,Y,and E.
     const MantidVec& Xin=matrixInputW->readX(i);
@@ -287,18 +310,15 @@ void DiffractionFocussing2::execEvent()
 
   bool inPlace = (this->getPropertyValue("InputWorkspace") == this->getPropertyValue("OutputWorkspace"));
   if (inPlace)
-    g_log.information("Focussing EventWorkspace in-place.");
-
-  //BUT! We want to use all groups, even if no pixels ever refer to them.
-  nGroups = maxgroup_in_file+1;
-  //g_log.information() << nGroups << " groups found in .cal file (counting group 0).\n";
+    g_log.debug("Focussing EventWorkspace in-place.");
+  g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   Progress * prog;
   prog = new Progress(this,0.0,0.15,nHist);
 
   // ------------- Pre-allocate Event Lists ----------------------------
-  std::vector< std::vector<int> > ws_indices(nGroups);
-  std::vector<size_t> size_required(nGroups,0);
+  std::vector< std::vector<int> > ws_indices(nGroups+1);
+  std::vector<size_t> size_required(nGroups+1,0);
   Geometry::IInstrument_const_sptr instrument = eventW->getInstrument();
   Geometry::IObjComponent_const_sptr source;
   Geometry::IObjComponent_const_sptr sample;
@@ -330,7 +350,7 @@ void DiffractionFocussing2::execEvent()
 
   delete prog; prog = new Progress(this,0.15,0.3,nGroups);
   // This creates and reserves the space required
-  for (int group=1; group<nGroups; group++)
+  for (int group=1; group<nGroups+1; group++)
   {
     out->getOrAddEventList(group-1).reserve(size_required[group]);
     prog->reportIncrement(1, "Allocating");
@@ -339,7 +359,7 @@ void DiffractionFocussing2::execEvent()
   // ----------- Focus ---------------
   delete prog; prog = new Progress(this,0.3,0.9,nHist);
   PARALLEL_FOR1(eventW)
-  for (int group=1; group<nGroups; group++)
+  for (int group=1; group<nGroups+1; group++)
   {
     PARALLEL_START_INTERUPT_REGION
     std::vector<int> indices = ws_indices[group];
@@ -367,7 +387,7 @@ void DiffractionFocussing2::execEvent()
 
   //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
   delete prog; prog = new Progress(this,0.9,1.0,nGroups);
-  for (int g=1; g < nGroups; g++)
+  for (int g=1; g < nGroups+1; g++)
   {
     //Now this is the workspace index of that group; simply 1 offset
     int workspaceIndex = g-1;
@@ -433,42 +453,8 @@ int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
   return group;
 }
 
-//=============================================================================
-/// Reads in the file with the grouping information
-/// @param groupingFileName :: The file that contains the group information
-///
-void DiffractionFocussing2::readGroupingFile(const std::string& groupingFileName)
-{
-  std::ifstream grFile(groupingFileName.c_str());
-  if (!grFile.is_open())
-  {
-    g_log.error() << "Unable to open grouping file " << groupingFileName << std::endl;
-    throw Exception::FileError("Error reading .cal file",groupingFileName);
-  }
-  maxgroup_in_file = 0;
 
-  udet2group.clear();
-  std::string str;
-  while(getline(grFile,str))
-  {
-    //Comment
-    if (str.empty() || str[0] == '#') continue;
-    std::istringstream istr(str);
-    int n,udet,sel,group;
-    double offset;
-    istr >> n >> udet >> offset >> sel >> group;
-    if ((sel) && (group>0))
-    {
-      udet2group[udet]=group; //Register this udet
-      //Track the highest group #
-      if (group > maxgroup_in_file)
-        maxgroup_in_file = group;
-    }
-  }
-  grFile.close();
 
-  return;
-}
 
 //=============================================================================
 /** Determine the rebinning parameters, i.e Xmin, Xmax and logarithmic step for each group
