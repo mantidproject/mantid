@@ -19,7 +19,7 @@ default.facility = ISIS
 default.instrument = 
 
 # Set of PyQt interfaces to add to the Interfaces menu, separated by a space
-mantidqt.python_interfaces = HFIR_Reduction.py
+mantidqt.python_interfaces = ORNL_SANS.py
 mantidqt.python_interfaces_directory = @MANTID_ROOT@/scripts
 
 # Where to find mantid plugin libraries
