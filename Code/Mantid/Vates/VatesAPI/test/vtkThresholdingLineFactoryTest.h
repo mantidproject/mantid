@@ -309,7 +309,7 @@ public:
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
     //Constructional method ensures that factory is only suitable for providing mesh information.
-    vtkThresholdingLineFactory factory =("signal");
+    vtkThresholdingLineFactory factory("signal");
 
     TSM_ASSERT_THROWS("Should have thrown an execption given that no successor was available.", factory.initialize(ws_sptr), std::runtime_error);
   }
