@@ -264,6 +264,10 @@ public:
   static IAlgorithm_sptr fromHistory(const AlgorithmHistory & history);
   //@}
 
+  //creates a sub algorithm for use in this algorithm
+  boost::shared_ptr<Algorithm> createSubAlgorithm(const std::string& name, const double startProgress = -1.,
+      const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
+
 protected:
 
   // Equivalents of Gaudi's initialize & execute  methods
@@ -276,15 +280,11 @@ protected:
   /// Initialize with properties from an algorithm proxy
   void initializeFromProxy(const AlgorithmProxy&);
 
-  //creates a sub algorithm for use in this algorithm
-  boost::shared_ptr<Algorithm> createSubAlgorithm(const std::string& name, const double startProgress = -1.,
-      const double endProgress = -1., const bool enableLogging=true, const int& version = -1);
-
   void setInitialized();
   void setExecuted(bool state);
 
-  // Make PropertyManager's declareProperty methods protected in Algorithm
-  using Kernel::PropertyManagerOwner::declareProperty;
+//  // Make PropertyManager's declareProperty methods protected in Algorithm
+//  using Kernel::PropertyManagerOwner::declareProperty;
 
   /// Sends notifications to observers. Observers can subscribe to notificationCenter
   /// using Poco::NotificationCenter::addObserver(...);

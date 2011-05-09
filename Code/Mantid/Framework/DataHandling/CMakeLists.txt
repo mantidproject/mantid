@@ -9,6 +9,7 @@ set ( SRC_FILES
 	src/ISISDataArchive.cpp
 	src/Load.cpp
 	src/LoadAscii.cpp
+	src/LoadCalFile.cpp
 	src/LoadCanSAS1D.cpp
 	src/LoadDAE.cpp
 	src/LoadDAE/idc.cpp
@@ -88,6 +89,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/ISISDataArchive.h
 	inc/MantidDataHandling/Load.h
 	inc/MantidDataHandling/LoadAscii.h
+	inc/MantidDataHandling/LoadCalFile.h
 	inc/MantidDataHandling/LoadCanSAS1D.h
 	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
@@ -149,6 +151,7 @@ set ( TEST_FILES
 	test/GroupDetectorsTest.h
 	test/ISISDataArchiveTest.h
 	test/LoadAsciiTest.h
+	test/LoadCalFileTest.h
 	test/LoadCanSAS1dTest.h
 	test/LoadDAETest.h
 	test/LoadDaveGrpTest.h
