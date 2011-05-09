@@ -11,4 +11,4 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewEventNexusReaderSMPlugin "1.0"
 	GUI_RESOURCE_FILES EventNexusReaderGUI.xml
 	)
 
-TARGET_LINK_LIBRARIES(MantidParaViewEventNexusReaderSMPlugin ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+TARGET_LINK_LIBRARIES(MantidParaViewEventNexusReaderSMPlugin ${MANTID_SUBPROJECT_LIBS})

@@ -98,7 +98,7 @@ SET(INSTALLTARGETS ICutterOperatorOperator)
 
 IF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
     ADD_LIBRARY(GCutterOperatorOperator ${LIBG_SOURCES})
-    TARGET_LINK_LIBRARIES(GCutterOperatorOperator visitcommon gui ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+    TARGET_LINK_LIBRARIES(GCutterOperatorOperator visitcommon gui ${MANTID_SUBPROJECT_LIBS})
 
     ADD_LIBRARY(VCutterOperatorOperator ${LIBV_SOURCES})
     TARGET_LINK_LIBRARIES(VCutterOperatorOperator visitcommon viewer )
@@ -121,14 +121,8 @@ IF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO
     ENDIF(VISIT_JAVA)
 ENDIF(NOT VISIT_SERVER_COMPONENTS_ONLY AND NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
 
-# TODO: Deal with this library better
-find_library(HDF5_LIBRARY
-  NAMES hdf5
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/usr/lib
-)
-
 ADD_LIBRARY(ECutterOperatorOperator_ser ${LIBE_SOURCES})
-TARGET_LINK_LIBRARIES(ECutterOperatorOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+TARGET_LINK_LIBRARIES(ECutterOperatorOperator_ser visitcommon avtexpressions_ser avtfilters_ser avtpipeline_ser ${MANTID_SUBPROJECT_LIBS})
 SET(INSTALLTARGETS ${INSTALLTARGETS} ECutterOperatorOperator_ser)
 
 IF(VISIT_PARALLEL)

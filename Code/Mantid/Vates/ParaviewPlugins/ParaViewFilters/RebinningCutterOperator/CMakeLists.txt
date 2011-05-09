@@ -13,4 +13,4 @@ ADD_PARAVIEW_PLUGIN(MantidParaViewRebinningCutterSMPlugin "1.0"
 		GUI_RESOURCE_FILES RebinningCutterGUI.xml
 )
 
-TARGET_LINK_LIBRARIES(MantidParaViewRebinningCutterSMPlugin ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+TARGET_LINK_LIBRARIES(MantidParaViewRebinningCutterSMPlugin ${MANTID_SUBPROJECT_LIBS})

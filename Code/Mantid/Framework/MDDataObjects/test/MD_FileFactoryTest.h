@@ -8,8 +8,6 @@
 #include <boost/algorithm/string/case_conv.hpp>
 
 // existing file formats
-#include "MDDataObjects/MD_File_hdfV1.h"
-#include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 
@@ -44,24 +42,7 @@ public:
     }
 
   }
-  void testReturnsNewHDFV1format(){
-    std::auto_ptr<IMD_FileFormat> newFormat;
 
-    std::string new_sqw_file("newDataFile.sqw");
-
-    TS_ASSERT_THROWS_NOTHING(newFormat=MD_FileFormatFactory::getFileReader(best_fit,new_sqw_file.c_str()));
-    TSM_ASSERT("FileFormat factory should returned a pointer to new file format ",dynamic_cast<MD_File_hdfV1*>(newFormat.get())!=0);
-    // clear the pointer and deleted test file for future tests not to fail or work independently;
-    newFormat.reset();
-    std::remove(new_sqw_file.c_str());
-  }
-  void testReturnsMatlabReader(){
-    std::auto_ptr<IMD_FileFormat> oldFormat;
-    std::string testFile = API::FileFinder::Instance().getFullPath("fe_demo.sqw");
-    TS_ASSERT_THROWS_NOTHING(oldFormat=MD_FileFormatFactory::getFileReader(testFile.c_str()));
-
-    TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader ",dynamic_cast<MD_File_hdfMatlab*>(oldFormat.get())!=0);
-  }
   //void t__tReturnsOldMatlabReader(){
   //	std::auto_ptr<IMD_FileFormat> oldFormat;
   //	std::string testFile = findTestFileLocation("../../../../Test/VATES/fe_demo.sqw","fe_demo.sqw");

@@ -155,24 +155,6 @@ set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 include_directories ( inc )
 include_directories (MDDataObjects/inc)
 
-
-# sorting out hdf5 links for MDAlgorithms -- included through MDDataObjects and should be refractored to go out of here
-if( WIN32 )
-	set ( HDF5_INCLUDE_DIRS ${CMAKE_INCLUDE_PATH}/hdf5 )
-	# separate configuration files h5config.h for hdf5 in 32 and 64 bit versions
-	if ( CMAKE_CL_64 )
-		set ( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}/win64 )
-	else()
-		set ( HDF5_INCLUDE_DIRS ${HDF5_INCLUDE_DIRS} ${HDF5_INCLUDE_DIRS}/win32 )
-	endif()
-else()
-# unix build currently works wirh hdf1.6 linked against Nexus.
-# Some preprocessor command should already be defined to distinguish between 5.1.6 and 5.1.8 
-	find_package (HDF5 REQUIRED)
-	add_definitions ( -DHDF_1_6 )
-endif()
-include_directories (${HDF5_INCLUDE_DIRS})
-
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 
 # Create test file projects

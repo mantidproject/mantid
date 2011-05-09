@@ -1,7 +1,5 @@
 #include "MDDataObjects/MD_FileFormatFactory.h"
 // existing file formats
-#include "MDDataObjects/MD_File_hdfV1.h"
-#include "MDDataObjects/MD_File_hdfMatlab.h"
 #include "MDDataObjects/MD_FileHoraceReader.h"
 #include "MDDataObjects/MD_FileTestDataGenerator.h"
 
@@ -84,47 +82,36 @@ std::string get_unique_tmp_fileName(void){
 }
 //
 IMD_FileFormat *
-MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
+  MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
 {
-	if(rec == test_data){
-		f_log.information()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
-        return (new MD_FileTestDataGenerator(file_name));
-	}
+  if(rec == test_data){
+    f_log.information()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
+    return (new MD_FileTestDataGenerator(file_name));
+  }
 
-// check if the file exist;
-    std::ifstream infile;
-    infile.open(file_name);
-    infile.close();
-    if (infile.fail()){  // new real file can be the new file format only;
-		std::ofstream outfile;
-		outfile.open(file_name);
-		if(outfile.fail()){
-			f_log.error()<<"MD_FileFactory: can not open or create file: "<<file_name<<std::endl;
-			throw(Exception::FileError("MDData::select_file_reader: Error->can not found or open",file_name));
-		}else{
-			outfile.close();
-			return (new MD_File_hdfV1(file_name));
-		}
-    }
-// check existing file is hdf5 file;
-    htri_t rez=H5Fis_hdf5(file_name);
-    if (rez<=0){
-        if (rez==0){
-			if(isHoraceFile(file_name)){
-				return (new HoraceReader::MD_FileHoraceReader(file_name));
-			}
-            //HACK temporary return new file reader which will be hdf later
-            return (new MD_File_hdfV1(file_name));
-	/*		f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
-            throw(Exception::FileError("MDData::select_file_reader: Error->the file is not hdf5 file",file_name));*/
-        }else{
-			f_log.error()<<" HDF5 error dealing with file"<<file_name<<std::endl;
-            throw(Exception::FileError("MDData::select_file_reader: Error->unspecified hdf5 error ",file_name));
-        }
+  // check if the file exist;
+  std::ifstream infile;
+  infile.open(file_name);
+  infile.close();
+  if (infile.fail())
+  {  // new real file can be the new file format only;
+    std::ofstream outfile;
+    outfile.open(file_name);
+    if(outfile.fail()){
+      f_log.error()<<"MD_FileFactory: can not open or create file: "<<file_name<<std::endl;
+      throw(Exception::FileError("MDData::select_file_reader: Error->can not found or open",file_name));
     }else{
-        // ***> to do:: identify internal hdf5 format; only MATLAB is supported at the moment;
-          return (new MD_File_hdfMatlab(file_name));
+      outfile.close();
     }
+  }
+  if(isHoraceFile(file_name))
+  {
+    return (new HoraceReader::MD_FileHoraceReader(file_name));
+  }
+  else
+  {
+    throw(Exception::FileError("There is no reader suitable for this file.",file_name));
+  }
 }
 // 
 bool 

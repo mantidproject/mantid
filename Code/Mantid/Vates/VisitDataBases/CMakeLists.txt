@@ -54,12 +54,6 @@ ${VTK_INCLUDE_DIRS}
 ${CMAKE_CURRENT_SOURCE_DIR}/inc/VisitDataBases
 )
 
-# TODO: Deal with this library better
-find_library(HDF5_LIBRARY
-  NAMES hdf5
-  PATHS ${CMAKE_CURRENT_SOURCE_DIR}/usr/lib
-)
-
 LINK_DIRECTORIES(${VISIT_LIBRARY_DIR} ${VTK_LIBRARY_DIRS})
 
 ADD_LIBRARY(IMDFileReaderDatabase ${LIBI_SOURCES})
@@ -68,13 +62,13 @@ SET(INSTALLTARGETS IMDFileReaderDatabase)
 
 IF(NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
     ADD_LIBRARY(MMDFileReaderDatabase ${LIBM_SOURCES}    )
-    TARGET_LINK_LIBRARIES(MMDFileReaderDatabase visitcommon avtdbatts avtdatabase_ser ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+    TARGET_LINK_LIBRARIES(MMDFileReaderDatabase visitcommon avtdbatts avtdatabase_ser ${MANTID_SUBPROJECT_LIBS})
     ADD_TARGET_DEFINITIONS(MMDFileReaderDatabase MDSERVER)
     SET(INSTALLTARGETS ${INSTALLTARGETS} MMDFileReaderDatabase)
 ENDIF(NOT VISIT_ENGINE_ONLY AND NOT VISIT_DBIO_ONLY)
 
 ADD_LIBRARY(EMDFileReaderDatabase_ser ${LIBE_SOURCES})
-TARGET_LINK_LIBRARIES(EMDFileReaderDatabase_ser visitcommon avtdatabase_ser avtpipeline_ser ${MANTID_SUBPROJECT_LIBS} ${HDF5_LIBRARY})
+TARGET_LINK_LIBRARIES(EMDFileReaderDatabase_ser visitcommon avtdatabase_ser avtpipeline_ser ${MANTID_SUBPROJECT_LIBS})
 ADD_TARGET_DEFINITIONS(EMDFileReaderDatabase_ser ENGINE)
 SET(INSTALLTARGETS ${INSTALLTARGETS} EMDFileReaderDatabase_ser)
 

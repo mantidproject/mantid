@@ -1,7 +1,5 @@
 #include "MantidMDAlgorithms/CpRebinningNx3.h"
 #include <boost/ptr_container/ptr_vector.hpp>
-// temporary -- to provide size of sqw pixel
-#include "MDDataObjects/MD_File_hdfMatlab.h"
 
 namespace Mantid{
 namespace MDAlgorithms{
