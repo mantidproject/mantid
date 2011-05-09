@@ -41,9 +41,12 @@ ELSE(SIP_VERSION)
     IF(NOT SIP_DEFAULT_SIP_DIR)
         STRING(REGEX REPLACE ".*\ndefault_sip_dir:([^\n]+).*$" "\\1" SIP_DEFAULT_SIP_DIR ${sip_config})
     ENDIF(NOT SIP_DEFAULT_SIP_DIR)
-    STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIR ${sip_config})
+    STRING(REGEX REPLACE ".*\nsip_inc_dir:([^\n]+).*$" "\\1" SIP_INCLUDE_DIRECTORY ${sip_config})
     SET(SIP_FOUND TRUE)
   ENDIF(sip_config)
+
+  # Check that it really exists
+  FIND_PATH( SIP_INCLUDE_DIR sip.h PATHS ${SIP_INCLUDE_DIRECTORY} )
 
   include ( FindPackageHandleStandardArgs )
   find_package_handle_standard_args( SIP DEFAULT_MSG SIP_VERSION_STR SIP_INCLUDE_DIR SIP_EXECUTABLE )
