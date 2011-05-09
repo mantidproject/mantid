@@ -895,7 +895,7 @@ class IAlgorithmProxy(ProxyObject):
             try:
                 success = result.data()
             except:
-                success = false
+                success = False
 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
