@@ -3,7 +3,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include "MantidMDAlgorithms/VectorParameterParser.h"
@@ -70,7 +70,7 @@ public:
         OriginParameterParser parser;
         Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         OriginParameter* pOriginParam = dynamic_cast<OriginParameter*>(iparam);
-        std::auto_ptr<OriginParameter> oparam = std::auto_ptr<OriginParameter>(pOriginParam);
+        boost::scoped_ptr<OriginParameter> oparam(pOriginParam);
         TSM_ASSERT("The paramter generated should be an OriginParamter", NULL != pOriginParam);
     }
 

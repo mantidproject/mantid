@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/PerpendicularParameter.h"
 
@@ -74,7 +74,7 @@ public:
         PerpendicularParameterParser parser;
         Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         PerpendicularParameter* pNormalParam = dynamic_cast<PerpendicularParameter*>(iparam);
-        std::auto_ptr<PerpendicularParameter> nparam = std::auto_ptr<PerpendicularParameter>(pNormalParam);
+        boost::scoped_ptr<PerpendicularParameter> nparam(pNormalParam);
         TSM_ASSERT("The paramter generated should be an PerpendicularParamter", NULL != pNormalParam);
     }
     void testChainOfResponsibility()

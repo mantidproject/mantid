@@ -6,7 +6,7 @@
 #include <gtest/gtest.h>
 
 #include <vector>
-#include <memory>
+#include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/VectorParameterParser.h"
 #include "MantidMDAlgorithms/NormalParameter.h"
 
@@ -74,7 +74,7 @@ public:
         NormalParameterParser parser;
         Mantid::API::ImplicitFunctionParameter* iparam = parser.createParameter(pRootElem);
         NormalParameter* pNormalParam = dynamic_cast<NormalParameter*>(iparam);
-        std::auto_ptr<NormalParameter> nparam = std::auto_ptr<NormalParameter>(pNormalParam);
+        boost::scoped_ptr<NormalParameter> nparam(pNormalParam);
         TSM_ASSERT("The paramter generated should be an NormalParamter", NULL != pNormalParam);
     }
     void testChainOfResponsibility()

@@ -28,7 +28,7 @@ namespace Mantid
         void InvalidParameterParser::setSuccessorParser(ImplicitFunctionParameterParser* parser)
         {
           UNUSED_ARG(parser);
-            //Do nothing. No sucessor allowed.
+            //Do nothing. No successor allowed.
         }
     }
 

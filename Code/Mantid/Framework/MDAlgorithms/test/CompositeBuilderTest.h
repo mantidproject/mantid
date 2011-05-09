@@ -52,9 +52,7 @@ private:
     {
     public:
         mutable bool isInvoked;
-        void addParameter(std::auto_ptr<Mantid::API::ImplicitFunctionParameter> parameter)
-        {
-        }
+
         Mantid::API::ImplicitFunction* create() const
         {
             isInvoked = true;

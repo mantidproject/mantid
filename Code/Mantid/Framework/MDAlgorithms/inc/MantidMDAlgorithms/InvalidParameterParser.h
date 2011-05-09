@@ -59,7 +59,8 @@ namespace Mantid
             Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement);
             void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser);
         protected:
-            std::auto_ptr<ImplicitFunctionParameterParser> m_successor;
+
+            ImplicitFunctionParameterParser::SuccessorType m_successor;
             InvalidParameter* parseInvalidParameter(std::string value);
         };
     }
