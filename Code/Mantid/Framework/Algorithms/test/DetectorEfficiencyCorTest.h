@@ -107,9 +107,10 @@ public:
     //Affected spectra
     TS_ASSERT_DELTA(result->readY(firstNonMonitor).front(), 0.0, 1e-6);
     TS_ASSERT_DELTA(result->readY(firstNonMonitor).back(), 476.908328, 1e-6);
+
     // Random spectra
-    TS_ASSERT_DELTA(result->readY(42).front(), 32.567835, 1e-6);
-    TS_ASSERT_DELTA(result->readY(42)[1225], 1.052719 , 1e-6);
+    TS_ASSERT_DELTA(result->readY(42).front(), 31.81723326, 1e-8);
+    TS_ASSERT_DELTA(result->readY(42)[1225], 1.04999955 , 1e-8);
 
     AnalysisDataService::Instance().remove(inName);
   }
