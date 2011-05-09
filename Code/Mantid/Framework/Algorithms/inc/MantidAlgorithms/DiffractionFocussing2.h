@@ -139,6 +139,7 @@ private:
   int nHist;
   /// Number of points in the 2D workspace
   int nPoints;
+
 };
 
 } // namespace Algorithm

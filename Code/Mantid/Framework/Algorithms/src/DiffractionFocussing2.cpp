@@ -127,6 +127,7 @@ void DiffractionFocussing2::exec()
   }
 
   // Fill the map
+  progress(0.2, "Determine Rebin Params");
   udet2group.clear();
   groupWS->makeDetectorIDToGroupMap(udet2group, nGroups);
   //std::cout << "nGroups " << nGroups << "\n";
@@ -157,10 +158,11 @@ void DiffractionFocussing2::exec()
   const API::SpectraDetectorMap& inSpecMap = matrixInputW->spectraMap();
   const API::Axis* const inSpecAxis = matrixInputW->getAxis(1);
   
-  API::Progress progress(this,0.0,1.0,nHist+nGroups);
+  Progress * prog;
+  prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
   for (int i=0;i<nHist;i++)
   {
-    progress.report();
+    prog->report();
 
     //Check whether this spectra is in a valid group
     const int group=groupAtWorkspaceIndex[i];
@@ -284,11 +286,12 @@ void DiffractionFocussing2::exec()
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
-    progress.report();
+    prog->report();
   }
   
   setProperty("OutputWorkspace",out);
 
+  delete prog;
   this->cleanup();
 }
 
@@ -314,7 +317,7 @@ void DiffractionFocussing2::execEvent()
   g_log.debug() << nGroups << " groups found in .cal file (counting group 0).\n";
 
   Progress * prog;
-  prog = new Progress(this,0.0,0.15,nHist);
+  prog = new Progress(this,0.2,0.35,nHist);
 
   // ------------- Pre-allocate Event Lists ----------------------------
   std::vector< std::vector<int> > ws_indices(nGroups+1);
@@ -357,7 +360,7 @@ void DiffractionFocussing2::execEvent()
   }
 
   // ----------- Focus ---------------
-  delete prog; prog = new Progress(this,0.3,0.9,nHist);
+  delete prog; prog = new Progress(this,0.40,0.9,nHist);
   PARALLEL_FOR1(eventW)
   for (int group=1; group<nGroups+1; group++)
   {
