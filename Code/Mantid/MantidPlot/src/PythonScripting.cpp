@@ -116,10 +116,7 @@ bool PythonScripting::start()
   {
     if( Py_IsInitialized() ) return true;
     // Initialize interpreter, disabling signal registration as we don't need it
-    Py_Initialize();
-    // initialize thread support
-    PyEval_InitThreads();
-    PyEval_ReleaseLock();
+    Py_InitializeEx(0);
 
     // Add in Mantid paths.
     QDir mantidbin(QString::fromStdString(Mantid::Kernel::ConfigService::Instance().getPropertiesDir()));
