@@ -779,14 +779,14 @@ bool MantidUI::runAlgorithmAsync_PyCallback(const QString & alg_name)
   if( m_algMonitor )  
   { 
     m_algMonitor->add(alg); 
-	 	  } 
+  } 
   Poco::ActiveResult<bool> result(alg->executeAsync()); 
   while( !result.available() ) 
   { 
     QCoreApplication::processEvents(); 
   } 
   result.wait(); 
-  
+
   try 
   { 
     return result.data(); 
@@ -1211,8 +1211,6 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
 {
   m_algMonitor->add(alg);
 
-  PyGILState_STATE saved = PyGILState_Ensure();
-
   try
   {
     alg->executeAsync();
@@ -1221,7 +1219,6 @@ void MantidUI::executeAlgorithmAsync(Mantid::API::IAlgorithm_sptr alg)
   {
     QMessageBox::critical(appWindow(),"MantidPlot - Algorithm error","Exception is caught");
   }
-  PyGILState_Release(saved);
 }
 bool MantidUI::executeICatLogout(int version)
 {

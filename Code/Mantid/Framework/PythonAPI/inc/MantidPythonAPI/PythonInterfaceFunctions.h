@@ -43,25 +43,36 @@ namespace Mantid
 
     // See http://docs.python.org/c-api/init.html#thread-state-and-the-global-interpreter-lock for more information on the GIL
 
-    /**
-     * Acquire the GIL on construction and release it on destruction 
-     */
     class PythonGIL
     {
     public:
       ///Constructor
-      PythonGIL() : m_gil_state(PyGILState_Ensure())
+      PythonGIL() : m_tstate(NULL), m_gil_state(PyGILState_UNLOCKED), m_locked(false)
       {
+        if( !PyThreadState_GetDict() )
+        {
+          m_gil_state = PyGILState_Ensure();
+          m_tstate = PyThreadState_GET();
+          m_locked = true;
+        }
       }
 
       ///Destructor
       ~PythonGIL()
       {
-	PyGILState_Release(m_gil_state);
+        if( m_locked )
+        {
+          PyThreadState_Swap(m_tstate);
+          PyGILState_Release(m_gil_state);
+        }
       }
     private:
+      /// Store the thread state
+      PyThreadState *m_tstate;
       /// Store the GIL state
       PyGILState_STATE m_gil_state;
+      /// If we've locked the state
+      bool m_locked;
     };
 
     /// Handle a Python error state
