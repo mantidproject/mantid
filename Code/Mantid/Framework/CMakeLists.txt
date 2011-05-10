@@ -87,18 +87,16 @@ if ( CXXTEST_FOUND )
 endif ()
 
 
-# set hdf5 include directories as a global variable to define it later
-#  set ( HDF5_INCLUDE_DIRS "")
+if( MAKE_MULTIDIMENSIONAL )
+  add_subdirectory (MDDataObjects)
+  set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
+  include_directories(MDDataObjects/inc)
   
-add_subdirectory (MDDataObjects)
-set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
-include_directories(MDDataObjects/inc)
-  
-set(MANTIDLIBS ${MANTIDLIBS} CurveFitting) 
-add_subdirectory (MDAlgorithms)
-set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
-include_directories(MDAlgorithms/inc)
-
+  set(MANTIDLIBS ${MANTIDLIBS} CurveFitting) 
+  add_subdirectory (MDAlgorithms)
+  set(MANTIDLIBS ${MANTIDLIBS} MDAlgorithms) 
+  include_directories(MDAlgorithms/inc)
+endif ()
 
 if ( MAKE_MDEVENTS )
   add_subdirectory (MDEvents)

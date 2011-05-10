@@ -107,7 +107,7 @@ set ( TEST_FILES
 	test/NormalParameterTest.h
 	test/OriginParameterTest.h
 	test/PlaneFunctionBuilderTest.h
-	test/QuadEnBackgroundTest.h
+	#test/QuadEnBackgroundTest.h 
 	test/RunParamTest.h
 	test/SimulateMDDataTest.h
 	test/TobyFitSimulateTest.h
