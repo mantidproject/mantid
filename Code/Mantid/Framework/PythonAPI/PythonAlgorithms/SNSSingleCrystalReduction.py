@@ -175,9 +175,9 @@ class SNSSingleCrystalReduction(PythonAlgorithm):
         filter = {}
         if filterWall is not None:
             if filterWall[0] > 0.:
-                filter["FilterByTimeStart"] = filterWall[0]
+                filter["FilterByTime_Start"] = filterWall[0]
             if filterWall[1] > 0.:
-                filter["FilterByTimeStop"] = filterWall[1]
+                filter["FilterByTime_Stop"] = filterWall[1]
 
         if  runnumber is None or runnumber <= 0:
             return None
