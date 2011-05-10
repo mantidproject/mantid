@@ -1,4 +1,4 @@
-﻿#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include "MantidMDAlgorithms/CompositeImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/InvalidParameterParser.h"

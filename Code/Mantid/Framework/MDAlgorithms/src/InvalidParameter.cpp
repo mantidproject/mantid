@@ -1,4 +1,3 @@
-﻿
 #include "MantidMDAlgorithms/InvalidParameter.h"
 
 namespace Mantid

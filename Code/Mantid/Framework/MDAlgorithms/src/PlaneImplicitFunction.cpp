@@ -1,4 +1,4 @@
-﻿#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidAPI/Point3D.h"

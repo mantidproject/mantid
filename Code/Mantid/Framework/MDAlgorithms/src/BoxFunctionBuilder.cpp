@@ -1,4 +1,4 @@
-﻿#include "MantidMDAlgorithms/BoxFunctionBuilder.h"
+#include "MantidMDAlgorithms/BoxFunctionBuilder.h"
 
 namespace Mantid
 {

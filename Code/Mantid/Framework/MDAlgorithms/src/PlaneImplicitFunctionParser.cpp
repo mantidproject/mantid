@@ -1,4 +1,4 @@
-﻿#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
+#include <boost/interprocess/smart_ptr/unique_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 #include "MantidMDAlgorithms/PlaneImplicitFunctionParser.h"
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"

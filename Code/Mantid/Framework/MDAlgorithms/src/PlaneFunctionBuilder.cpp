@@ -1,4 +1,4 @@
-﻿#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
+#include "MantidMDAlgorithms/PlaneFunctionBuilder.h"
 #include "MantidMDAlgorithms/InvalidParameter.h"
 #include "MantidMDAlgorithms/OriginParameter.h"
 #include "MantidMDAlgorithms/NormalParameter.h"

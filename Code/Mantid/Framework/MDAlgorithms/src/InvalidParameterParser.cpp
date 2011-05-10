@@ -1,4 +1,4 @@
-﻿#include "MantidMDAlgorithms/InvalidParameterParser.h"
+#include "MantidMDAlgorithms/InvalidParameterParser.h"
 #include <boost/algorithm/string.hpp>
 #include "MantidAPI/ImplicitFunctionParameterParserFactory.h"
 

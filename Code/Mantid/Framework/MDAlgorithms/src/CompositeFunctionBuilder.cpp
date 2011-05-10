@@ -1,4 +1,4 @@
-﻿#include <exception>
+#include <exception>
 #include "MantidMDAlgorithms/CompositeFunctionBuilder.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 

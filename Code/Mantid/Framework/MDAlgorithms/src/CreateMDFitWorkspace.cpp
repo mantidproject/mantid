@@ -1,4 +1,4 @@
-﻿#include <exception>
+#include <exception>
 #include "MantidMDAlgorithms/CreateMDFitWorkspace.h"
 #include "MDDataObjects/MDFitWorkspace.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
