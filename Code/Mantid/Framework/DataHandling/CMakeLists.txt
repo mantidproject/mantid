@@ -61,6 +61,7 @@ set ( SRC_FILES
 	src/RotateInstrumentComponent.cpp
 	src/SaveAscii.cpp
 	src/SaveCSV.cpp
+	src/SaveCalFile.cpp
 	src/SaveCanSAS1D.cpp
 	src/SaveDASC.cpp
 	src/SaveFocusedXYE.cpp
@@ -127,6 +128,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/RotateInstrumentComponent.h
 	inc/MantidDataHandling/SaveAscii.h
 	inc/MantidDataHandling/SaveCSV.h
+	inc/MantidDataHandling/SaveCalFile.h
 	inc/MantidDataHandling/SaveCanSAS1D.h
 	inc/MantidDataHandling/SaveDASC.h
 	inc/MantidDataHandling/SaveFocusedXYE.h
@@ -184,6 +186,7 @@ set ( TEST_FILES
 	test/OrbiterDataArchiveTest.h
 	test/RawFileInfoTest.h
 	test/SaveCSVTest.h
+	test/SaveCalFileTest.h
 	test/SaveCanSAS1dTest.h
 	test/SaveDASCTest.h
 	test/SaveFocussedXYETest.h

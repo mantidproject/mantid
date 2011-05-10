@@ -1,47 +1,39 @@
-#ifndef MANTID_DATAHANDLING_LOADCALFILE_H_
-#define MANTID_DATAHANDLING_LOADCALFILE_H_
+#ifndef MANTID_DATAHANDLING_SAVECALFILE_H_
+#define MANTID_DATAHANDLING_SAVECALFILE_H_
     
-#include "MantidAPI/Algorithm.h"
-#include "MantidAPI/IAlgorithm.h"
-#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
+#include "MantidAPI/Algorithm.h" 
 #include "MantidDataObjects/GroupingWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidGeometry/IInstrument.h"
-#include "MantidKernel/System.h"
-
+#include "MantidAPI/MatrixWorkspace.h"
 
 namespace Mantid
 {
 namespace DataHandling
 {
 
-  /** Algorithm to load a 5-column ascii .cal file into up to 3 workspaces:
+  /** Algorithm to save a 5-column ascii .cal file from  to 3 workspaces:
    * a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.
    * 
-   * @author Janik Zikovsky
-   * @date 2011-05-09
+   * @author
+   * @date 2011-05-10 09:48:31.796980
    */
-  class DLLExport LoadCalFile  : public API::Algorithm
+  class DLLExport SaveCalFile  : public API::Algorithm
   {
   public:
-    LoadCalFile();
-    ~LoadCalFile();
+    SaveCalFile();
+    ~SaveCalFile();
     
     /// Algorithm's name for identification 
-    virtual const std::string name() const { return "LoadCalFile";};
+    virtual const std::string name() const { return "SaveCalFile";};
     /// Algorithm's version for identification 
     virtual int version() const { return 1;};
     /// Algorithm's category for identification
     virtual const std::string category() const { return "DataHandling";}
 
-    static void getInstrument3WaysInit(Mantid::API::Algorithm * alg);
-
-    static Mantid::Geometry::IInstrument_sptr getInstrument3Ways(Mantid::API::Algorithm * alg);
-
-    static void readCalFile(const std::string& calFileName,
+    static void saveCalFile(const std::string& calFileName,
         Mantid::DataObjects::GroupingWorkspace_sptr groupWS, Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, Mantid::API::MatrixWorkspace_sptr maskWS);
 
-    
   private:
     /// Sets documentation strings for this algorithm
     virtual void initDocs();
@@ -50,7 +42,6 @@ namespace DataHandling
     /// Run the algorithm
     void exec();
 
-    static Kernel::Logger& g_log;    ///< reference to the logger class
 
   };
 
@@ -58,4 +49,4 @@ namespace DataHandling
 } // namespace Mantid
 } // namespace DataHandling
 
-#endif  /* MANTID_DATAHANDLING_LOADCALFILE_H_ */
+#endif  /* MANTID_DATAHANDLING_SAVECALFILE_H_ */
