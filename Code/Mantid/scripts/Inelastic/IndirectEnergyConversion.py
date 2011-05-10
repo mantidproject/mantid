@@ -6,51 +6,8 @@ except ImportError:
     print "Could not import MantidPlot module. Plotting is disabled."
     pass
 
-import re
 from IndirectCommon import *
-
-import inelastic_indirect_reducer as iir
-
-def convert_to_energy(rawfiles, grouping, first, last,
-        instrument, analyser, reflection,
-        SumFiles=False, bgremove=[0, 0], tempK=-1, calib='', rebinParam='',
-        saveFormats=[], CleanUp=True, Verbose=False):        
-    ## Use the reducer class
-    reducer = iir.IndirectReducer()
-    reducer.set_instrument_name(instrument)
-    reducer.set_detector_range(first-1, last-1)
-    
-    for file in rawfiles:
-        reducer.append_data_file(file)
-        
-    reducer.set_sum(SumFiles)
-    
-    if ( analyser != '' and reflection != '' ):
-        reducer.set_parameter_file(instrument+'_'+analyser+'_'+reflection
-            +'_Parameters.xml')
-    
-    if bgremove != [0, 0]:
-        reducer.set_background(bgremove[0], bgremove[1])
-        
-    if ( calib != '' ):
-        reducer.set_calibration_workspace(loadNexus(calib))
-
-    reducer.set_grouping_policy(grouping)
-    
-    if ( rebinParam != '' ):
-        reducer.set_rebin_string(rebinParam)
-        
-    if ( tempK != -1 ):
-        reducer.set_detailed_balance(tempK)
-        
-    reducer.reduce()
-    
-    output_workspace_names = reducer.get_result_workspaces()
-
-    if ( saveFormats != [] ): # Save data in selected formats
-        saveItems(output_workspace_names, saveFormats)
-
-    return output_workspace_names
+import inelastic_indirect_reducer
 
 def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         Suffix=''):
@@ -77,146 +34,6 @@ def loadData(rawfiles, outWS='RawFile', Sum=False, SpecMin=-1, SpecMax=-1,
         return [outWS+Suffix]
     else:
         return workspaces
-
-def getFirstMonFirstDet(inWS):
-    workspace = mtd[inWS]
-    FirstDet = FirstMon = -1
-    nhist = workspace.getNumberHistograms()
-    for counter in range(0, nhist):
-        try:
-            detector = workspace.getDetector(counter)
-        except RuntimeError: # This causes problems when encountering some
-            pass             # incomplete instrument definition files (TOSCA)
-        if detector.isMonitor():
-            if (FirstMon == -1):
-                FirstMon = counter
-        else:
-            if (FirstDet == -1):
-                FirstDet = counter
-        if ( FirstMon != -1 and FirstDet != -1 ):
-            break
-    return FirstMon, FirstDet
-
-def timeRegime(Smooth=True, monitor='', detectors=''):
-    SpecMon = mtd[monitor].readX(0)[0]
-    SpecDet = mtd[detectors].readX(0)[0]
-    if ( SpecMon == SpecDet ) and not adjustTOF(monitor):
-        LRef = getReferenceLength(detectors, 0)
-        alg = Unwrap(monitor, monitor, LRef = LRef)
-        join = float(alg.getPropertyValue('JoinWavelength'))
-        RemoveBins(monitor, monitor, join-0.001, join+0.001, 
-                Interpolation='Linear')
-        if Smooth:
-            FFTSmooth(monitor, monitor, 0)
-    else:
-        ConvertUnits(monitor, monitor, 'Wavelength', 'Indirect')
-    return monitor
-
-def monitorEfficiency(inWS):
-    inst = mtd[inWS].getInstrument()
-    try:
-        area = inst.getNumberParameter('Workflow.MonitorArea')[0]
-        thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
-        OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
-    except IndexError:
-        print "Unable to take Monitor Area and Thickness from Paremeter File."
-    return inWS
-
-def getReferenceLength(inWS, fdi):
-    workspace = mtd[inWS]
-    instrument = workspace.getInstrument()
-    sample = instrument.getSample()
-    source = instrument.getSource()
-    detector = workspace.getDetector(fdi)
-    sample_to_source = sample.getPos() - source.getPos()
-    r = detector.getDistance(sample)
-    x = sample_to_source.getZ()
-    LRef = x + r
-    return LRef
-
-def useCalib(detectors=''):
-    tmp = mtd[detectors]
-    shist = tmp.getNumberHistograms()
-    tmp = mtd['__calibration']
-    chist = tmp.getNumberHistograms()
-    if chist != shist:
-        msg = 'Number of spectra in calibration file does not match number \
-                that exist in the data file.'
-        print msg
-        sys.exit(msg)
-    else:
-        Divide(detectors,'__calibration',detectors)
-    return detectors
-
-def normToMon(monitor='', detectors=''):
-    ConvertUnits(detectors, detectors, 'Wavelength', 'Indirect')
-    RebinToWorkspace(detectors,monitor,detectors)
-    Divide(detectors,monitor,detectors)
-    try:
-        factor = mtd[detectors].getInstrument().getNumberParameter(
-            'Workflow.MonitorScalingFactor')[0]
-        Scale(detectors, detectors, factor)
-    except IndexError:
-        pass
-    return detectors
-
-def conToEnergy(detectors=''):
-    ConvertUnits(detectors, detectors, 'DeltaE', 'Indirect')
-    CorrectKiKf(detectors, detectors, 'Indirect')
-    return detectors
-
-def rebinData(rebinParam, detectors=''):
-    Rebin(detectors, detectors, rebinParam)
-    return detectors
-
-def groupData(grouping, name, detectors=''):
-    if (grouping == 'Individual'):
-        if ( detectors != name ):
-            RenameWorkspace(detectors, name)
-        return name
-    elif ( grouping == 'All' ):
-        nhist = mtd[detectors].getNumberHistograms()
-        GroupDetectors(detectors, name, WorkspaceIndexList=range(0,nhist),
-            Behaviour='Average')
-    else:
-        GroupDetectors(detectors, name, MapFile=grouping, Behaviour='Average')
-    if ( detectors != name ):
-        DeleteWorkspace(detectors)
-    return name
-
-def backgroundRemoval(tofStart, tofEnd, detectors=''):
-    ConvertToDistribution(detectors)
-    FlatBackground(detectors, detectors, tofStart, tofEnd, Mode='Mean')
-    ConvertFromDistribution(detectors)
-    return detectors
-
-def cte_rebin(grouping, tempK, rebinParam, saveFormats, CleanUp=False, 
-        Verbose=False):
-    # Generate list
-    ws_list = []
-    for workspace in list(mantid.getWorkspaceNames()):
-        if workspace.endswith('_intermediate'):
-            ws_list.append(workspace)
-    if ( len(ws_list) == 0 ):
-        message = "No intermediate workspaces were found. Run with "
-        message += "'Keep Intermediate Workspaces' checked."
-        print message
-        sys.exit(message)
-    output = []
-    for ws in ws_list:
-        name = getWSprefix(ws) + 'red'
-        if not CleanUp:
-            CloneWorkspace(ws, name)
-            ws = name
-        if ( rebinParam != ''):
-            rebin = rebinData(rebinParam, detectors=ws)
-        if ( tempK != -1 ): # Detailed Balance correction
-            ExponentialCorrection(ws, ws, 1.0, ( 11.606 / ( 2 * tempK ) ) )
-        groupData(grouping, name, detectors=ws)
-        output.append(name)
-    if ( saveFormats != [] ):
-        saveItems(output, saveFormats)
-    return output
 
 def createMappingFile(groupFile, ngroup, nspec, first):
     if ( ngroup == 1 ): return 'All'
@@ -274,20 +91,25 @@ def createCalibFile(rawfiles, suffix, peakMin, peakMax, backMin, backMax,
     SaveNexusProcessed(outWS_n, savefile, 'Calibration')
     if PlotOpt:
         graph = plotTimeBin(outWS_n, 0)
-    ## Tidyup
     DeleteWorkspace(cwsn)
     return savefile
 
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
         plotOpt=False, Res=True):
-    workspace_list = convert_to_energy(files, 'All', 
-        iconOpt['first'], iconOpt['last'], SumFiles=True, 
-        instrument=instrument, analyser=analyser, reflection=reflection)
-    iconWS = workspace_list[0]
+    reducer = inelastic_indirect_reducer.IndirectReducer()
+    reducer.set_instrument_name('IRIS')
+    reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
+    for file in files:
+        reducer.append_data_file(file)
+    reducer.set_parameter_file(instrument + '_' + analyser + '_' + reflection
+        + '_Parameters.xml')
+    reducer.set_grouping_policy('All')
+    reducer.set_sum(True)
+    reducer.reduce()
+    iconWS = reducer.get_result_workspaces()[0]
     if Res:
-        run = mtd[iconWS].getRun().getLogData("run_number").value
-        name = iconWS[:3].lower() + run + '_' + analyser + reflection + '_res'
+        name = getWSprefix(iconWS) + 'res'
         FlatBackground(iconWS, '__background', bground[0], bground[1], 
             Mode='Mean', OutputMode='Return Background')
         Rebin(iconWS, iconWS, rebinParam)
@@ -317,7 +139,7 @@ def saveItems(workspaces, fileFormats, Verbose=False):
                 print 'Save: unknown file type.'
                 system.exit('Save: unknown file type.')
 
-def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
+def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=False,
         Plot=False):
     outWSlist = []
     if  not ( ( len(xrange) == 2 ) or ( len(xrange) == 4 ) ):
@@ -349,7 +171,21 @@ def slice(inputfiles, calib, xrange, spec,  suffix, Save=False, Verbose=False,
         DeleteWorkspace(root)
     if Plot:
         graph = plotBin(outWSlist, 0)
-
+        
+def useCalib(detectors=''):
+    tmp = mtd[detectors]
+    shist = tmp.getNumberHistograms()
+    tmp = mtd['__calibration']
+    chist = tmp.getNumberHistograms()
+    if chist != shist:
+        msg = 'Number of spectra in calibration file does not match number \
+                that exist in the data file.'
+        print msg
+        sys.exit(msg)
+    else:
+        Divide(detectors,'__calibration',detectors)
+    return detectors
+    
 def getInstrumentDetails(instrument):
     workspace = mtd['__empty_' + instrument]
     if ( workspace == None ):
@@ -406,23 +242,6 @@ def getReflectionDetails(inst, analyser, refl):
     except IndexError:
         pass
     return result
-
-def adjustTOF(ws='', inst=''):
-    if ( ws != '' ):
-        ins = mtd[ws].getInstrument()
-    elif ( inst != ''):
-        idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-        idf = idf_dir + inst + '_Definition.xml'
-        LoadEmptyInstrument(idf, 'ins')
-        ins = mtd['ins'].getInstrument()
-    try:
-        val = ins.getNumberParameter('adjustTOF')[0]
-    except IndexError:
-        val = 0
-    if ( val == 1 ):
-        return True
-    else:
-        return False
 
 def applyParameterFile(workspace, analyser, refl):
     inst = mtd[workspace].getInstrument().getName()

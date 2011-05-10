@@ -1,6 +1,5 @@
 from mantidsimple import *
 from mantidplot import *
-import IndirectEnergyConversion as IEC
 from IndirectCommon import *
 
 import math

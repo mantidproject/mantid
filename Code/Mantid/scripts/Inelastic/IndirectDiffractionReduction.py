@@ -12,13 +12,13 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
     # Get instrument workspace for gathering parameters and such
     wsInst = mtd['__empty_' + instrument]
     if wsInst is None:
-        IEC.loadInst(instrument)
+        loadInst(instrument)
         wsInst = mtd['__empty_' + instrument]
     # short name of instrument for saving etc
     isn = ConfigService().facility().instrument(instrument).shortName().lower()
     # parameters to do with monitor
     if Monitor:
-        fmon, fdet = IEC.getFirstMonFirstDet('__empty_'+instrument)
+        fmon, fdet = getFirstMonFirstDet('__empty_'+instrument)
         ws_mon_l = IEC.loadData(rawfiles, Sum=SumFiles, Suffix='_mon',
             SpecMin=fmon+1, SpecMax=fmon+1)
     ws_det_l = IEC.loadData(rawfiles, Sum=SumFiles, SpecMin=first, 
@@ -32,9 +32,9 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         if Monitor:
             mon_ws = ws_mon_l[i]
             # Get Monitor WS
-            IEC.timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
-            IEC.monitorEfficiency(mon_ws)
-            IEC.normToMon(monitor=mon_ws, detectors=det_ws)
+            timeRegime(monitor=mon_ws, detectors=det_ws, Smooth=Smooth)
+            monitorEfficiency(mon_ws)
+            normToMon(monitor=mon_ws, detectors=det_ws)
             # Remove monitor workspace
             DeleteWorkspace(mon_ws)
         if ( cal != '' ): # AlignDetectors and Group by .cal file
@@ -48,7 +48,7 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
         else: ## Do it the old fashioned way
             # Convert to dSpacing - need to AlignBins so we can group later
             ConvertUnits(det_ws, det_ws, 'dSpacing', AlignBins=True)
-            IEC.groupData(grouping, savefile, detectors=det_ws)
+            groupData(grouping, savefile, detectors=det_ws)
         if Save:
             SaveNexusProcessed(savefile, savefile+'.nxs')
         workspaces.append(savefile)
@@ -60,7 +60,22 @@ def demon(rawfiles, first, last, instrument, Smooth=False, SumFiles=False,
                 nspec = mtd[demon].getNumberHistograms()
                 plotSpectrum(demon, range(0, nspec))
     return workspaces
-
+    
+def groupData(grouping, name, detectors=''):
+    if (grouping == 'Individual'):
+        if ( detectors != name ):
+            RenameWorkspace(detectors, name)
+        return name
+    elif ( grouping == 'All' ):
+        nhist = mtd[detectors].getNumberHistograms()
+        GroupDetectors(detectors, name, WorkspaceIndexList=range(0,nhist),
+            Behaviour='Average')
+    else:
+        GroupDetectors(detectors, name, MapFile=grouping, Behaviour='Average')
+    if ( detectors != name ):
+        DeleteWorkspace(detectors)
+    return name
+    
 def useCalFile(workspace, result):
     AlignDetectors(workspace, workspace, cal)
     DiffractionFocussing(workspace, result, cal)
@@ -117,3 +132,71 @@ def vanaStage1(van):
     DeleteWorkspace('__cor')
     Scale(result, result, (1.0/100000), 'Multiply')
     return result
+    
+def getFirstMonFirstDet(inWS):
+    workspace = mtd[inWS]
+    FirstDet = FirstMon = -1
+    nhist = workspace.getNumberHistograms()
+    for counter in range(0, nhist):
+        try:
+            detector = workspace.getDetector(counter)
+        except RuntimeError: # This causes problems when encountering some
+            pass             # incomplete instrument definition files (TOSCA)
+        if detector.isMonitor():
+            if (FirstMon == -1):
+                FirstMon = counter
+        else:
+            if (FirstDet == -1):
+                FirstDet = counter
+        if ( FirstMon != -1 and FirstDet != -1 ):
+            break
+    return FirstMon, FirstDet
+    
+def timeRegime(Smooth=True, monitor='', detectors=''):
+    SpecMon = mtd[monitor].readX(0)[0]
+    SpecDet = mtd[detectors].readX(0)[0]
+    if ( SpecMon == SpecDet ):
+        LRef = getReferenceLength(detectors, 0)
+        alg = Unwrap(monitor, monitor, LRef = LRef)
+        join = float(alg.getPropertyValue('JoinWavelength'))
+        RemoveBins(monitor, monitor, join-0.001, join+0.001, 
+                Interpolation='Linear')
+        if Smooth:
+            FFTSmooth(monitor, monitor, 0)
+    else:
+        ConvertUnits(monitor, monitor, 'Wavelength')
+    return monitor
+
+def monitorEfficiency(inWS):
+    inst = mtd[inWS].getInstrument()
+    try:
+        area = inst.getNumberParameter('Workflow.MonitorArea')[0]
+        thickness = inst.getNumberParameter('Workflow.MonitorThickness')[0]
+        OneMinusExponentialCor(inWS, inWS, (8.3 * thickness), area)
+    except IndexError:
+        print "Unable to take Monitor Area and Thickness from Paremeter File."
+    return inWS
+
+def getReferenceLength(inWS, fdi):
+    workspace = mtd[inWS]
+    instrument = workspace.getInstrument()
+    sample = instrument.getSample()
+    source = instrument.getSource()
+    detector = workspace.getDetector(fdi)
+    sample_to_source = sample.getPos() - source.getPos()
+    r = detector.getDistance(sample)
+    x = sample_to_source.getZ()
+    LRef = x + r
+    return LRef
+    
+def normToMon(monitor='', detectors=''):
+    ConvertUnits(detectors, detectors, 'Wavelength')
+    RebinToWorkspace(detectors,monitor,detectors)
+    Divide(detectors,monitor,detectors)
+    try:
+        factor = mtd[detectors].getInstrument().getNumberParameter(
+            'Workflow.MonitorScalingFactor')[0]
+        Scale(detectors, detectors, factor)
+    except IndexError:
+        pass
+    return detectors
