@@ -1,4 +1,4 @@
-###########################################################################
+##########################################################################
 # Set include and library directories so that CMake finds Third_Party
 ###########################################################################
 set ( CMAKE_INCLUDE_PATH "${THIRD_PARTY}/include" )
@@ -56,6 +56,8 @@ add_definitions ( -DWIN32 -D_WINDOWS -DMS_VISUAL_STUDIO )
 add_definitions ( -D_USE_MATH_DEFINES -DNOMINMAX )
 add_definitions ( -DGSL_DLL )
 add_definitions ( -DPOCO_NO_UNWINDOWS )
+
+set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
 
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )

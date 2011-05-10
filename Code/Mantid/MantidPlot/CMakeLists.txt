@@ -694,6 +694,11 @@ set ( INC_FILES ${QTIPLOT_HDRS} ${MANTID_HDRS} )
 ###########################################################################
 if( WIN32 )
    set ( MANTID_RC_FILE icons/MantidPlotDesktop.rc )
+   if ( CONSOLE )
+     set ( WIN_CONSOLE )
+   else ()
+     set( WIN_CONSOLE WIN32 )
+   endif( CONSOLE )
 endif( WIN32 )
 
 if ( APPLE )
@@ -701,7 +706,7 @@ if ( APPLE )
   set_source_files_properties(MANTID_RC_FILE PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 endif ()
 
-add_executable ( MantidPlot WIN32 MACOSX_BUNDLE ${SRC_FILES} ${INC_FILES} 
+add_executable ( MantidPlot ${WIN_CONSOLE} MACOSX_BUNDLE ${SRC_FILES} ${INC_FILES} 
                             ${MOCCED_FILES} ${UI_HDRS} ${RES_FILES} 
                             ${MANTID_RC_FILE}
 )
@@ -717,15 +722,13 @@ target_link_libraries ( MantidPlot
 )
 
 ###########################################################################
-# Console and entry point flags for Windows
+# Entry point flag for Windows to ensure we always link to standard main 
 ###########################################################################
 if( WIN32 )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup" )
-   set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_DEBUG "_CONSOLE" )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELWITHDEBINFO "/SUBSYSTEM:CONSOLE /ENTRY:mainCRTStartup" )
-   set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS_RELWITHDEBINFO "_CONSOLE" )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_RELEASE "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup" )
-   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS_MINSIZEREL "/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup")
+   set_target_properties( MantidPlot PROPERTIES LINK_FLAGS "/ENTRY:mainCRTStartup" )
+   if ( CONSOLE )
+     set_target_properties( MantidPlot PROPERTIES COMPILE_DEFINITIONS "_CONSOLE" )
+   endif ( CONSOLE )
 endif( WIN32 )
 
 ###########################################################################
