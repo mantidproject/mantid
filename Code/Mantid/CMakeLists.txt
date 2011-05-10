@@ -81,7 +81,7 @@ endif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
 
 set ( MAKE_VATES OFF CACHE BOOL "Switch for compiling the Vates project")
 set ( REDUCER_TEST OFF CACHE BOOL "Switch for running flaky Reducer test")
-set ( MAKE_MDEVENTS OFF CACHE BOOL "Switch for compiling the MDEvents project")
+set ( MAKE_MDEVENTS ON CACHE BOOL "Switch for compiling the MDEvents project")
 set ( CXXTEST_SINGLE_LOGFILE CACHE BOOL "Switch to have the tests for each package run together")
 set ( CXXTEST_ADD_PERFORMANCE OFF CACHE BOOL "Switch to add Performance tests to the list of tests run by ctest?") 
 
