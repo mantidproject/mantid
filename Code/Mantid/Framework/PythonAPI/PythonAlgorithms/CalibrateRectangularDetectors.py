@@ -140,6 +140,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         if self._grouping == "All":
             if str(self._instrument) == "PG3":
                 groups = "POWGEN"
+            elif str(self._instrument) == "NOM":
+                groups = "NOMAD"
             else:
                 groups = str(self._instrument)
         elif str(self._instrument) == "SNAP" and self._grouping == "Group":
