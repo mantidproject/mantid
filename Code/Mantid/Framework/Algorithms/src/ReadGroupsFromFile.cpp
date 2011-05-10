@@ -52,6 +52,8 @@ namespace Algorithms
 
   ReadGroupsFromFile::ReadGroupsFromFile():API::Algorithm(),calibration()
   {
+    this->useAlgorithm("LoadCalFile");
+    this->deprecatedDate("2011-05-10");
   }
 
   //-----------------------------------------------------------------------------------------------

@@ -42,8 +42,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CreateDummyCalFile::initDocs()
     {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration. ");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration.");
+      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration. Deprecated: use [[CreateGroupingWorkspace]] instead.");
+      this->setOptionalMessage("Create a calibration file (extension *.cal) from a workspace by harvesting the detector ids from the instrument. All of the offsets will be zero, and the pixels will be all grouped into group one and the final column should be one. This will allow generating powder patterns from instruments that have not done a proper calibration. Deprecated: use CreateGroupingWorkspace instead.");
     }
     
 
@@ -54,6 +54,8 @@ namespace Mantid
 
     CreateDummyCalFile::CreateDummyCalFile():API::Algorithm(),group_no(0)
     {
+      this->useAlgorithm("CreateGroupingWorkspace");
+      this->deprecatedDate("2011-05-10");
     }
 
     /** Initialisation method. Declares properties to be used in algorithm.

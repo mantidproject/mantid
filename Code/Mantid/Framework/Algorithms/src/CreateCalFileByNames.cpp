@@ -29,8 +29,8 @@ namespace Mantid
     /// Sets documentation strings for this algorithm
     void CreateCalFileByNames::initDocs()
     {
-      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree. ");
-      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree.");
+      this->setWikiSummary("Create a [[CalFile|calibration file]] (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree. Deprecated: use [[CreateGroupingWorkspace]] instead.");
+      this->setOptionalMessage("Create a calibration file (extension *.cal) for diffraction focusing based on the names of the components in the instrument tree. Deprecated: use [[CreateGroupingWorkspace]] instead.");
     }
     
 
@@ -41,6 +41,8 @@ namespace Mantid
 
     CreateCalFileByNames::CreateCalFileByNames():API::Algorithm(),group_no(0)
     {
+      this->useAlgorithm("CreateGroupingWorkspace");
+      this->deprecatedDate("2011-05-10");
     }
 
     /** Initialisation method. Declares properties to be used in algorithm.

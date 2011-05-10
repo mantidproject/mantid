@@ -1,13 +1,10 @@
 #ifndef MANTID_ALGORITHMS_CREATEDUMMYCALFILE_H_
 #define MANTID_ALGORITHMS_CREATEDUMMYCALFILE_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include <map>
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -53,7 +50,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CreateDummyCalFile : public API::Algorithm
+class DLLExport CreateDummyCalFile : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// (Empty) Constructor

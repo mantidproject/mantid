@@ -8,6 +8,7 @@
 // To be compatible with MSVC++ Express Edition that does not have TR1 headers
 #include <map>
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 namespace Mantid
 {
@@ -53,7 +54,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CreateCalFileByNames : public API::Algorithm
+class DLLExport CreateCalFileByNames : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// (Empty) Constructor

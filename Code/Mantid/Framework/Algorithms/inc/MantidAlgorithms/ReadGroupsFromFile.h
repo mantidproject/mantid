@@ -13,6 +13,7 @@
 #endif
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 
 
 namespace Mantid
@@ -68,7 +69,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport ReadGroupsFromFile : public API::Algorithm
+class DLLExport ReadGroupsFromFile : public API::Algorithm, API::DeprecatedAlgorithm
 {
 public:
   /// (Empty) Constructor
