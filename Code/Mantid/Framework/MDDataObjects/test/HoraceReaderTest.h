@@ -27,14 +27,14 @@ public:
         cdp.n_dims_start = 22;
         cdp.sqw_header_start=26;
         //cdp.component_headers_starts //= 106; 2 contributing files
-        cdp.detectors_start = 906;
-        cdp.data_start      = 676819;
-        cdp.n_cell_pix_start= 677679;
-        cdp.pix_start       = 678235;
+        cdp.detectors_start = 902;
+        cdp.data_start      = 676815;
+        cdp.n_cell_pix_start= 677439;
+        cdp.pix_start       = 677771;
         //
         nTestDim = 4;
         nTestFiles=2;
-        nTestPixels=1523850;
+        nTestPixels=580;
 
       }
       size_t getNConributedPixels()const{return nTestPixels;}
@@ -83,7 +83,7 @@ public:
     TSM_ASSERT_EQUALS("Number of values from the test file have not been read correctly",spReader->check_values_correct(),0);
   }
   void testGetNpixCorrect(){
-    TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",1523850,spReader->getNPix());
+    TSM_ASSERT_EQUALS("Not getting proper Number of pixels contiributed into dataset",580,spReader->getNPix());
   }
 
   void testReadBasis(){
@@ -125,10 +125,10 @@ public:
          for(size_t i=0;i<img_data.size();i++){
              sum+=img_data[i].S();
          }
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.65789,img_data[0 ].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.37786,img_data[10].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.0,    img_data[15].S(),1.e-4);
-         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",7.3273,    sum,1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,img_data[0 ].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.3792,img_data[3].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.0,    img_data[8].S(),1.e-4);
+         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",0.3792,    sum,1.e-4);
 
          selection[0]=1;
          selection[1]=1;
@@ -140,10 +140,10 @@ public:
          }
 
          TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,      img_data[ 0].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.25612,img_data[ 1].S(),1.e-4);
-         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0.15172,img_data[15].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,img_data[ 3].S(),1.e-4);
+         TSM_ASSERT_DELTA("The signal in this cell should be specified value",0,img_data[8].S(),1.e-4);
 
-         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",2.52227, sum,1.e-4);
+         TSM_ASSERT_DELTA("The sum of all signals in the signals selection should be specific value",0, sum,1.e-4);
 
   
      }
@@ -175,7 +175,7 @@ public:
 		//TSM_ASSERT_EQUALS(" All data are in memory so these values have to be equal",points.getNumPointsInMemory(),spReader->getNPix());
 
 	}else{
-		TS_FAIL("This test request enough memory to read all MDDPoints (~1.5M*36 bytes)");
+		TS_FAIL("This test request enough memory to read all MDDPoints (~580*36 bytes)");
 	}
   }
   void testReadPixelsSelectionAll(){
@@ -195,8 +195,8 @@ public:
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1523850,n_pix_in_buffer);
-    TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 64,n_cell_read);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",580,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 36,n_cell_read);
   }
   void testReadFirst2Selection(){
     // read first two (buffer is already allocated above)
@@ -206,14 +206,14 @@ public:
 
     selected_cells.resize(2);
     selected_cells[0]=0;
-    selected_cells[1]=1;
+    selected_cells[1]=3;
 
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",77292,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",300,n_pix_in_buffer);
     TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
   }
   void testReadOneSelection(){
@@ -230,7 +230,7 @@ public:
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",1,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",300,n_pix_in_buffer);
     TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 1,n_cell_read);
   }
   void testRead2Selection(){
@@ -240,14 +240,14 @@ public:
 
     selected_cells.resize(2);
     selected_cells[0]=3;
-    selected_cells[1]=10;
+    selected_cells[1]=7;
 
 
     TSM_ASSERT_THROWS_NOTHING("Horace reader should not normaly throw",
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",447,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",300,n_pix_in_buffer);
     TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
 
   }
@@ -263,7 +263,7 @@ public:
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",21496,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",0,n_pix_in_buffer);
     TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 2,n_cell_read);
   }
 
@@ -272,7 +272,7 @@ public:
     size_t starting_cell(0),n_cell_read;
     size_t n_pix_in_buffer(0);
 
-    selected_cells[0]=1;
+    selected_cells[0]=3;
     selected_cells[1]=10;
     pix_buf.resize(100);
 
@@ -280,7 +280,7 @@ public:
       n_cell_read=this->spReader->read_pix_subset(*spImg,selected_cells,starting_cell,pix_buf, n_pix_in_buffer));
 
     // check if the data coinside with what was put there;
-    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",63006,n_pix_in_buffer);
+    TSM_ASSERT_EQUALS("Have not read all pixels epxected: ",300,n_pix_in_buffer);
     TSM_ASSERT_EQUALS("Have not read all cells epxected: ", 1,n_cell_read);
     TSM_ASSERT_EQUALS("Data buffer size differs from expected: ", n_pix_in_buffer*9*4,pix_buf.size());
 
@@ -306,9 +306,9 @@ public:
     }
     // check if the data coinside with what was put there;
     // the buffer size defived from the largest cell exceeding 100
-    TSM_ASSERT_EQUALS("Data buffer size differs from expected: ", 63006*9*4,pix_buf.size());
+    TSM_ASSERT_EQUALS("Data buffer size differs from expected: ", 300*9*4,pix_buf.size());
     TSM_ASSERT_EQUALS("Number of cells read differs from expected: ",selected_cells.size(),starting_cell);
-    TSM_ASSERT_EQUALS("Number of read attempts differs from expected: ",3,ic);
+    TSM_ASSERT_EQUALS("Number of read attempts differs from expected: ",2,ic);
   }
 
 
