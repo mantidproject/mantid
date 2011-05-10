@@ -573,6 +573,7 @@ bool IndirectDataAnalysis::validateConfit()
 
   return valid;
 }
+
 bool IndirectDataAnalysis::validateAbsorption()
 {
   bool valid = true;
@@ -1076,7 +1077,6 @@ QtProperty* IndirectDataAnalysis::createExponential(const QString & name)
 {
   QtProperty* expGroup = m_groupManager->addProperty(name);
   m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
-  m_ffDblMng->setRange(m_ffProp[name+".Intensity"], 0.0, 1.0);
   m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], m_nDec);
   m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
   m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], m_nDec);
@@ -1089,13 +1089,11 @@ QtProperty* IndirectDataAnalysis::createStretchedExp(const QString & name)
 {
   QtProperty* prop = m_groupManager->addProperty(name);
   m_ffProp[name+".Intensity"] = m_ffDblMng->addProperty("Intensity");
-  m_ffDblMng->setRange(m_ffProp[name+".Intensity"], 0.0, 1.0);
   m_ffProp[name+".Tau"] = m_ffDblMng->addProperty("Tau");
   m_ffProp[name+".Beta"] = m_ffDblMng->addProperty("Beta");
   m_ffDblMng->setDecimals(m_ffProp[name+".Intensity"], m_nDec);
   m_ffDblMng->setDecimals(m_ffProp[name+".Tau"], m_nDec);
   m_ffDblMng->setDecimals(m_ffProp[name+".Beta"], m_nDec);
-  m_ffDblMng->setRange(m_ffProp[name+".Beta"], 0.0, 1.0);
   prop->addSubProperty(m_ffProp[name+".Intensity"]);
   prop->addSubProperty(m_ffProp[name+".Tau"]);
   prop->addSubProperty(m_ffProp[name+".Beta"]);
@@ -1630,6 +1628,20 @@ void IndirectDataAnalysis::furyfitRun()
       break;
     }
   }
+  QString ftype;
+  switch ( fitType )
+  {
+  case 0:
+    ftype = "1E_s"; break;
+  case 1:
+    ftype = "2E_s"; break;
+  case 2:
+    ftype = "1S_s"; break;
+  case 3:
+    ftype = "1E1S_s"; break;
+  default:
+    ftype = "s"; break;
+  }
 
   furyfitPlotInput();
   if ( m_ffInputWS == NULL )
@@ -1637,7 +1649,12 @@ void IndirectDataAnalysis::furyfitRun()
     return;
   }
 
-  std::string output = m_ffInputWSName + "_fit_s" + m_uiForm.furyfit_leSpecNo->text().toStdString();
+  QString pyInput = "from IndirectCommon import getWSprefix\nprint getWSprefix('%1')\n";
+  pyInput = pyInput.arg(QString::fromStdString(m_ffInputWSName));
+  QString outputNm = runPythonCode(pyInput).trimmed();
+  outputNm += QString("fury_") + ftype + m_uiForm.furyfit_leSpecNo->text();
+  std::string output = outputNm.toStdString();
+
   // Create the Fit Algorithm
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
@@ -1647,7 +1664,7 @@ void IndirectDataAnalysis::furyfitRun()
   alg->setProperty("EndX", m_ffRangeManager->value(m_ffProp["EndX"]));
   alg->setProperty("Ties", m_furyfitTies.toStdString());
   alg->setPropertyValue("Function", *function);
-  alg->setPropertyValue("Output",output);
+  alg->setPropertyValue("Output", output);
   alg->execute();
 
   if ( ! alg->isExecuted() )
@@ -1956,7 +1973,33 @@ void IndirectDataAnalysis::confitRun()
   m_uiForm.confit_ckPlotGuess->setChecked(false);
 
   Mantid::API::CompositeFunction* function = confitCreateFunction();
-  std::string output = m_cfInputWSName + "_convfit_s" + m_uiForm.confit_leSpecNo->text().toStdString();
+
+  // get output name
+  QString ftype = "";
+  switch ( m_uiForm.confit_cbFitType->currentIndex() )
+  {
+  case 0:
+    ftype += "Delta"; break;
+  case 1:
+    ftype += "1L"; break;
+  case 2:
+    ftype += "2L"; break;
+  default:
+    break;
+  }
+  switch ( m_uiForm.confit_cbBackground->currentIndex() )
+  {
+  case 0:
+    ftype += "FixF_s"; break;
+  case 1:
+    ftype += "FitF_s"; break;
+  case 2:
+    ftype += "FitL_s"; break;
+  }
+
+  QString outputNm = runPythonCode(QString("from IndirectCommon import getWSprefix\nprint getWSprefix('") + QString::fromStdString(m_cfInputWSName) + QString("')\n")).trimmed();
+  outputNm += QString("conv_") + ftype + m_uiForm.confit_leSpecNo->text();  
+  std::string output = outputNm.toStdString();
 
   Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("Fit");
   alg->initialize();
