@@ -84,7 +84,6 @@ set ( INC_FILES
 	      
 set ( TEST_FILES
 	test/BackToBackExponentialTest.h
-	test/BivariateNormalTest.h
 	test/BoundaryConstraintTest.h
 	test/ChebyshevTest.h
 	test/CompositeFunctionTest.h
