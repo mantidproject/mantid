@@ -61,7 +61,7 @@ namespace DataHandling
     exts.push_back(".dat");
     exts.push_back(".bin");
 
-    declareProperty(new FileProperty("DspacemapFile", "", FileProperty::Load, exts),
+    declareProperty(new FileProperty("Filename", "", FileProperty::Load, exts),
        "The DspacemapFile containing the d-space mapping.");
 
     std::vector<std::string> propOptions;
@@ -85,7 +85,7 @@ namespace DataHandling
     IInstrument_sptr inst = LoadCalFile::getInstrument3Ways(this);
 
     // Read in the calibration data
-    const std::string DFileName = getProperty("DspacemapFile");
+    const std::string DFileName = getProperty("Filename");
 
     // Create the blank output
     OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inst));
