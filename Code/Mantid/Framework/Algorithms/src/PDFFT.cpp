@@ -7,7 +7,7 @@ namespace Algorithms
 {
 
   // Register the algorithm into the AlgorithmFactory
-  //DECLARE_ALGORITHM(PDFFT)
+  DECLARE_ALGORITHM(PDFFT)
   
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
