@@ -130,7 +130,7 @@ namespace DataHandling
       // Find the selection, if any
       bool selected = true;
       if (doMask)
-        selected = not maskWS->getInstrument()->getDetector(detectorID)->isMasked();
+        selected = !maskWS->getInstrument()->getDetector(detectorID)->isMasked();
 
       //if(group > 0)
         fout << std::fixed << std::setw(9) << number <<
