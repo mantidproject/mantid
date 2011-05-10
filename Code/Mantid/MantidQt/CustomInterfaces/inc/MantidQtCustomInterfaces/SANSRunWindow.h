@@ -9,6 +9,7 @@
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtMantidWidgets/SaveWorkspaces.h"
 #include "MantidQtCustomInterfaces/SANSDiagnostics.h"
+#include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
 
 #include <QHash>
 #include <QSettings>
@@ -258,6 +259,8 @@ private:
   Ui::SANSRunWindow m_uiForm;
   /// this object holds the functionality in the Add Files tab
   SANSAddFiles *m_addFilesTab;
+  /// this object holds the functionality/ui for the "Display" tab
+  SANSPlotSpecial* m_displayTab;
 
   SANSDiagnostics* m_diagnosticsTab;
   /// this points to a saveWorkspaces, which allows users to save any workspace, when one is opened

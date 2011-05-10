@@ -10,6 +10,7 @@ set ( SRC_FILES src/background.cpp
                 src/MuonAnalysisHelper.cpp
                 src/MuonAnalysisOptionTab.cpp
                 src/SANSAddFiles.cpp
+				src/SANSPlotSpecial.cpp
                 src/SANSRunWindow.cpp
                 src/SANSUtilityDialogs.cpp
 				src/SANSDiagnostics.cpp
@@ -28,6 +29,7 @@ set ( INC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisHelper.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
+				inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
 				inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -44,6 +46,7 @@ set ( MOC_FILES inc/MantidQtCustomInterfaces/Background.h
                 inc/MantidQtCustomInterfaces/MuonAnalysis.h
                 inc/MantidQtCustomInterfaces/MuonAnalysisOptionTab.h
                 inc/MantidQtCustomInterfaces/SANSAddFiles.h
+				inc/MantidQtCustomInterfaces/SANSPlotSpecial.h
                 inc/MantidQtCustomInterfaces/SANSRunWindow.h
                 inc/MantidQtCustomInterfaces/SANSUtilityDialogs.h
 				inc/MantidQtCustomInterfaces/SANSDiagnostics.h
@@ -53,6 +56,7 @@ set ( UI_FILES inc/MantidQtCustomInterfaces/ConvertToEnergy.ui
                inc/MantidQtCustomInterfaces/IndirectDataAnalysis.ui
                inc/MantidQtCustomInterfaces/IndirectDiffractionReduction.ui
                inc/MantidQtCustomInterfaces/MuonAnalysis.ui
+			   inc/MantidQtCustomInterfaces/SANSPlotSpecial.ui
                inc/MantidQtCustomInterfaces/SANSRunWindow.ui
 )
 

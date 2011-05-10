@@ -60,7 +60,7 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 //----------------------------------------------
 ///Constructor
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
-  UserSubWindow(parent), m_addFilesTab(NULL), m_diagnosticsTab(NULL),
+  UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL), m_diagnosticsTab(NULL),
   m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
   m_cfg_loaded(true), m_userFname(false), m_sample_file(), m_run_no_boxes(),
   m_warnings_issued(false), m_force_reload(false),
@@ -85,6 +85,7 @@ SANSRunWindow::~SANSRunWindow()
       saveSettings();
       delete m_addFilesTab;
     }
+    delete m_displayTab;
     delete m_diagnosticsTab;
   }
   catch(...)
@@ -170,7 +171,15 @@ void SANSRunWindow::initLayout()
   if( ! m_addFilesTab )
   {//sets up the AddFiles tab which must be deleted in the destructor
     m_addFilesTab = new SANSAddFiles(this, &m_uiForm);
-  } 
+  }
+
+  // Create the "Display" tab
+  if ( ! m_displayTab )
+  {
+    m_displayTab = new SANSPlotSpecial(this);
+    m_uiForm.displayLayout->addWidget(m_displayTab);
+  }
+
   //diagnostics tab
   if(!m_diagnosticsTab)
   {
