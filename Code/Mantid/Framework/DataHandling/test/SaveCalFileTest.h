@@ -78,7 +78,7 @@ public:
     getline(grFile,str);
     TS_ASSERT_EQUALS(str, "        2              3      0.0000000       1      45");
 
-
+    grFile.close();
     if (Poco::File(filename).exists())
       Poco::File(filename).remove();
     
