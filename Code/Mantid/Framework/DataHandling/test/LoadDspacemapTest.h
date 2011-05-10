@@ -37,7 +37,7 @@ public:
     for (int i=0; i<147; i++)
         fout.write( reinterpret_cast<char*>( &read ), sizeof read );
     fout.close();
-    testerDSP.setPropertyValue("DspacemapFile", dspaceFile);
+    testerDSP.setPropertyValue("Filename", dspaceFile);
     testerDSP.setPropertyValue("OutputWorkspace", "ines_offsets");
     TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
     TS_ASSERT(testerDSP.isExecuted());
@@ -64,7 +64,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
     testerDSP.setPropertyValue("InstrumentFilename", ConfigService::Instance().getString(
         "instrumentDefinition.directory")+"/VULCAN_Definition.xml");
-    testerDSP.setPropertyValue("DspacemapFile", dspaceFile);
+    testerDSP.setPropertyValue("Filename", dspaceFile);
     testerDSP.setPropertyValue("FileType", fileType);
     testerDSP.setPropertyValue("OutputWorkspace", "test_vulcan_offset");
     TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
