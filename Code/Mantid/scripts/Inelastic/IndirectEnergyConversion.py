@@ -53,52 +53,11 @@ def createMappingFile(groupFile, ngroup, nspec, first):
     handle.close()
     return filename
 
-def createCalibFile(rawfiles, suffix, peakMin, peakMax, backMin, backMax, 
-        specMin, specMax, PlotOpt=False):
-    savepath = mantid.getConfigProperty('defaultsave.directory')
-    runs = []
-    for file in rawfiles:
-        (direct, filename) = os.path.split(file)
-        (root, ext) = os.path.splitext(filename)
-        try:
-            LoadRaw(file, root, SpectrumMin=specMin, SpectrumMax=specMax,
-                LoadLogFiles=False)
-            runs.append(root)
-        except:
-            sys.exit('Indirect-Could not load raw file: ' + file)
-    cwsn = '__calibration'
-    if ( len(runs) > 1 ):
-        MergeRuns(",".join(runs), cwsn)
-        factor = 1.0 / len(runs)
-        Scale(cwsn, cwsn, factor)
-    else:
-        cwsn = runs[0]
-    tmp = mtd[cwsn]
-    nhist = tmp.getNumberHistograms()
-    FlatBackground(cwsn, cwsn, StartX=backMin, EndX=backMax, Mode='Mean')
-    Integration(cwsn, cwsn, peakMin, peakMax)
-    cal_ws = mtd[cwsn]
-    sum = 0
-    for i in range(0, nhist):
-        sum += cal_ws.readY(i)[0]
-    value = sum / nhist
-    CreateSingleValuedWorkspace('__cal_avg', value)
-    runNo = mtd[cwsn].getRun().getLogData("run_number").value
-    outWS_n = runs[0][:3] + runNo + suffix
-    Divide(cwsn, '__cal_avg', outWS_n)
-    DeleteWorkspace('__cal_avg')
-    savefile = os.path.join(savepath, outWS_n+'.nxs')
-    SaveNexusProcessed(outWS_n, savefile, 'Calibration')
-    if PlotOpt:
-        graph = plotTimeBin(outWS_n, 0)
-    DeleteWorkspace(cwsn)
-    return savefile
-
 def resolution(files, iconOpt, rebinParam, bground, 
         instrument, analyser, reflection,
         plotOpt=False, Res=True):
     reducer = inelastic_indirect_reducer.IndirectReducer()
-    reducer.set_instrument_name('IRIS')
+    reducer.set_instrument_name(instrument)
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
     for file in files:
         reducer.append_data_file(file)

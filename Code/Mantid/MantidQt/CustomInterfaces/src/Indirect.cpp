@@ -1247,27 +1247,27 @@ void Indirect::calibCreate()
 
     QString filenames = "[r'"+m_uiForm.cal_leRunNo->getFilenames().join("', r'")+"']";
 
-    QString pyInput =
-      "from IndirectEnergyConversion import createCalibFile\n"
-      "plot = ";
+    QString reducer = "from mantidsimple import *\n"
+      "from inelastic_indirect_reduction_steps import CreateCalibrationWorkspace\n"
+      "calib = CreateCalibrationWorkspace()\n"
+      "calib.set_files(" + filenames + ")\n"
+      "calib.set_detector_range(" + m_uiForm.leSpectraMin->text() + "-1, " + m_uiForm.leSpectraMax->text() + "-1)\n"
+      "calib.set_parameters(" + m_calCalProp["BackMin"]->valueText() + "," 
+        + m_calCalProp["BackMax"]->valueText() + ","
+        + m_calCalProp["PeakMin"]->valueText() + ","
+        + m_calCalProp["PeakMax"]->valueText() + ")\n"
+      "calib.execute(None, None)\n"
+      "result = calib.result_workspace()\n"
+      "print result\n"
+      "SaveNexus(result, result+'.nxs')\n";
 
     if ( m_uiForm.cal_ckPlotResult->isChecked() )
-      pyInput +=	"True\n";
-    else
-      pyInput += "False\n";
+    {
+      reducer += "from mantidplot import *\n"
+        "plotTimeBin(result, 0)\n";
+    }
 
-    pyInput +=
-      "file = createCalibFile("+filenames+", '"+suffix+"', %1, %2, %3, %4, %5, %6, PlotOpt=plot)\n"
-      "print file\n";
-
-    pyInput = pyInput.arg(QString::number(m_calDblMng->value(m_calCalProp["PeakMin"])));
-    pyInput = pyInput.arg(QString::number(m_calDblMng->value(m_calCalProp["PeakMax"])));
-    pyInput = pyInput.arg(QString::number(m_calDblMng->value(m_calCalProp["BackMin"])));
-    pyInput = pyInput.arg(QString::number(m_calDblMng->value(m_calCalProp["BackMax"])));
-    pyInput = pyInput.arg(m_uiForm.leSpectraMin->text());
-    pyInput = pyInput.arg(m_uiForm.leSpectraMax->text());
-
-    QString pyOutput = runPythonCode(pyInput).trimmed();
+    QString pyOutput = runPythonCode(reducer).trimmed();
 
     if ( pyOutput == "" )
     {
@@ -1279,7 +1279,7 @@ void Indirect::calibCreate()
       {
         createRESfile(filenames);
       }
-      m_uiForm.ind_calibFile->setFileText(pyOutput);
+      m_uiForm.ind_calibFile->setFileText(pyOutput + ".nxs");
       m_uiForm.ckUseCalib->setChecked(true);
     }
   }

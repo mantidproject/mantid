@@ -272,6 +272,9 @@ class CreateCalibrationWorkspace(ReductionStep):
 
         RenameWorkspace(cwsn, outWS_n)
         self._calib_workspace = outWS_n # Set result workspace value
+        if ( len(runs) > 1 ):
+            for run in runs:
+                DeleteWorkspace(run)
 
     def set_parameters(self, back_min, back_max, peak_min, peak_max):
         self._back_min = back_min
