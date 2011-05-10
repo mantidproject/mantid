@@ -36,124 +36,6 @@ void AlignDetectors::initDocs()
 }
 
 
-
-const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
-
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing) for a single pixel.
- *
- * @param l1 :: Primary flight path.
- * @param beamline: vector = samplePos-sourcePos = a vector pointing from the source to the sample,
- *        the length of the distance between the two.
- * @param beamline_norm: (source to sample distance) * 2.0 (apparently)
- * @param samplePos: position of the sample
- * @param det: Geometry object representing the detector (position of the pixel)
- * @param offset: value (close to zero) that changes the factor := factor * (1+offset).
- * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
- * @return conversion factor for pixel
- */
-double AlignDetectors::calcConversion(const double l1,
-                      const Geometry::V3D &beamline,
-                      const double beamline_norm,
-                      const Geometry::V3D &samplePos,
-                      const Geometry::IDetector_const_sptr &det,
-                      const double offset, 
-                      bool vulcancorrection)
-{
-  // Get the sample-detector distance for this detector (in metres)
-
-  // The scattering angle for this detector (in radians).
-  Geometry::V3D detPos;
-  if (vulcancorrection)
-  {
-    detPos = det->getParent()->getPos();
-  }
-  else
-  {
-    detPos = det->getPos();
-  }
-
-  // Now detPos will be set with respect to samplePos
-  detPos -= samplePos;
-  // 0.5*cos(2theta)
-  double l2=detPos.norm();
-  double halfcosTwoTheta=detPos.scalar_prod(beamline)/(l2*beamline_norm);
-  // This is sin(theta)
-  double sinTheta=sqrt(0.5-halfcosTwoTheta);
-  const double numerator = (1.0+offset);
-  sinTheta *= (l1+l2);
-  return (numerator * CONSTANT) / sinTheta;
-}
-
-
-//-----------------------------------------------------------------------
-/** Calculate the conversion factor (tof -> d-spacing)
- * for a LIST of detectors assigned to a single spectrum.
- */
-double AlignDetectors::calcConversion(const double l1,
-                      const Geometry::V3D &beamline,
-                      const double beamline_norm,
-                      const Geometry::V3D &samplePos,
-                      const IInstrument_const_sptr &instrument,
-                      const std::vector<int> &detectors,
-                      const std::map<int,double> &offsets,
-                      bool vulcancorrection)
-{
-  double factor = 0.;
-  double offset;
-  for (std::vector<int>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
-  {
-    std::map<int,double>::const_iterator off_iter = offsets.find(*iter);
-    if( off_iter != offsets.end() )
-    {
-      offset = offsets.find(*iter)->second;
-    }
-    else
-    {
-      offset = 0.;
-    }
-    factor += calcConversion(l1, beamline, beamline_norm, samplePos,
-                             instrument->getDetector(*iter), offset, vulcancorrection);
-  }
-  return factor / static_cast<double>(detectors.size());
-}
-
-
-/** Get several instrument parameters used in tof to D-space conversion
- *
- * @param instrument
- * @param l1 :: primary flight path (source-sample distance)
- * @param beamline :: vector of the direction and length of the beam (source to samepl)
- * @param beamline_norm :: 2 * the length of beamline
- * @param samplePos :: vector of the position of the sample
- */
-void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
-    double & l1, Geometry::V3D & beamline,
-    double & beamline_norm, Geometry::V3D & samplePos)
-{
-  // Get some positions
-  const Geometry::IObjComponent_sptr sourceObj = instrument->getSource();
-  if (sourceObj == NULL)
-  {
-    throw Exception::InstrumentDefinitionError("Failed to get source component from instrument");
-  }
-  const Geometry::V3D sourcePos = sourceObj->getPos();
-  samplePos = instrument->getSample()->getPos();
-  beamline = samplePos-sourcePos;
-  beamline_norm=2.0*beamline.norm();
-
-  // Get the distance between the source and the sample (assume in metres)
-  Geometry::IObjComponent_const_sptr sample = instrument->getSample();
-  try
-  {
-    l1 = instrument->getSource()->getDistance(*sample);
-  }
-  catch (Exception::NotFoundError &)
-  {
-    throw Exception::InstrumentDefinitionError("Unable to calculate source-sample distance ", instrument->getName());
-  }
-}
-
 //-----------------------------------------------------------------------
 /**
  * Make a map of the conversion factors between tof and D-spacing
@@ -174,7 +56,7 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
   Geometry::V3D beamline,samplePos;
   double beamline_norm;
 
-  getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
+  instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
   std::map<int, double> * myMap = new std::map<int, double>();
 
@@ -193,7 +75,7 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
     double offset = offsetsWS->getValue(detectorID, 0.0);
 
     //Compute the factor
-    double factor = calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, vulcancorrection);
+    double factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, vulcancorrection);
 
     //Save in map
     (*myMap)[detectorID] = factor;

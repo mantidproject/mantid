@@ -97,7 +97,7 @@ namespace DataObjects
   {
     std::map<int,int>::const_iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end())
-      throw std::invalid_argument("Invalid detectorID provided.");
+      throw std::invalid_argument("SpecialWorkspace2D::getValue(): Invalid detectorID provided.");
     else
     {
       return this->dataY(it->second)[0];
@@ -135,7 +135,7 @@ namespace DataObjects
   {
     std::map<int,int>::iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end())
-      throw std::invalid_argument("Invalid detectorID provided.");
+      throw std::invalid_argument("SpecialWorkspace2D::setValue(): Invalid detectorID provided.");
     else
     {
       this->dataY(it->second)[0] = value;
@@ -151,7 +151,7 @@ namespace DataObjects
   int SpecialWorkspace2D::getDetectorID(const int workspaceIndex) const
   {
     if (size_t(workspaceIndex) > detectorIDs.size())
-      throw std::invalid_argument("SpecialWorkspace2D::getDetectorID: Invalid workspaceIndex given.");
+      throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");
     return detectorIDs[workspaceIndex];
   }
 

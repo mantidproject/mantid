@@ -59,24 +59,6 @@ public:
   virtual const std::string category() const { return "Diffraction";}
 
   // ----- Useful static functions ------
-
-  static double calcConversion(const double l1, const Geometry::V3D &beamline, const double beamline_norm,
-      const Geometry::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset,
-      bool vulcancorrection);
-
-  static double calcConversion(const double l1,
-                        const Geometry::V3D &beamline,
-                        const double beamline_norm,
-                        const Geometry::V3D &samplePos,
-                        const Geometry::IInstrument_const_sptr &instrument,
-                        const std::vector<int> &detectors,
-                        const std::map<int,double> &offsets,
-                        bool vulcancorrection);
-
-  static void getInstrumentParameters(Geometry::IInstrument_const_sptr instrument,
-      double & l1, Geometry::V3D & beamline,
-      double & beamline_norm, Geometry::V3D & samplePos);
-
   static std::map<int, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, bool vulcancorrection);
 

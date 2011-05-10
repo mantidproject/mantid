@@ -101,6 +101,9 @@ public:
   virtual  const std::vector<int> getMonitors()const=0;
   /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
   virtual std::string getDefaultAxis() const=0;
+
+  virtual void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
+      double & beamline_norm, Geometry::V3D & samplePos) const = 0;
 };
 
 /// Shared pointer to IInstrument

@@ -18,6 +18,7 @@ set ( SRC_FILES
 	src/LoadDAE/isisds_command.h
 	src/LoadDaveGrp.cpp
 	src/LoadDetectorInfo.cpp
+	src/LoadDspacemap.cpp
 	src/LoadEmptyInstrument.cpp
 	src/LoadEventPreNeXus.cpp
 	src/LoadGSS.cpp
@@ -95,6 +96,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/LoadDAE.h
 	inc/MantidDataHandling/LoadDaveGrp.h
 	inc/MantidDataHandling/LoadDetectorInfo.h
+	inc/MantidDataHandling/LoadDspacemap.h
 	inc/MantidDataHandling/LoadEmptyInstrument.h
 	inc/MantidDataHandling/LoadEventPreNeXus.h
 	inc/MantidDataHandling/LoadGSS.h
@@ -158,6 +160,7 @@ set ( TEST_FILES
 	test/LoadDAETest.h
 	test/LoadDaveGrpTest.h
 	test/LoadDetectorInfoTest.h
+	test/LoadDspacemapTest.h
 	test/LoadEmptyInstrumentTest.h
 	test/LoadEventPreNeXusTest.h
 	test/LoadInstrumentFromRawTest.h

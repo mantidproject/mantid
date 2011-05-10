@@ -1,0 +1,101 @@
+#ifndef MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
+#define MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_
+
+#include "MantidDataHandling/LoadDspacemap.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
+#include "MantidKernel/Timer.h"
+#include <cstring>
+#include <cxxtest/TestSuite.h>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <vector>
+
+using namespace Mantid::DataHandling;
+using namespace Mantid::DataObjects;
+using namespace Mantid::API;
+using Mantid::DataObjects::OffsetsWorkspace_sptr;
+using Mantid::Kernel::ConfigService;
+
+class LoadDspacemapTest : public CxxTest::TestSuite
+{
+public:
+
+  void testINES()
+  {
+    LoadDspacemap testerDSP;
+    TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
+    TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
+    testerDSP.setPropertyValue("InstrumentFilename", ConfigService::Instance().getString(
+        "instrumentDefinition.directory")+"/INES_Definition.xml");
+    std::string dspaceFile = "./INES_DspacemaptoCalTest.dat";
+    std::ofstream fout("./INES_DspacemaptoCalTest.dat", std::ios_base::out|std::ios_base::binary);
+    double read = 3.1992498205034756E-6;
+    for (int i=0; i<147; i++)
+        fout.write( reinterpret_cast<char*>( &read ), sizeof read );
+    fout.close();
+    testerDSP.setPropertyValue("DspacemapFile", dspaceFile);
+    testerDSP.setPropertyValue("OutputWorkspace", "ines_offsets");
+    TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
+    TS_ASSERT(testerDSP.isExecuted());
+
+    // Get the offsets out
+    OffsetsWorkspace_sptr offsetsWS = boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        AnalysisDataService::Instance().retrieve("ines_offsets"));
+    TS_ASSERT(offsetsWS);
+    if (!offsetsWS) return;
+
+    // Check one point.
+    TS_ASSERT_DELTA( offsetsWS->dataY(0)[0],  -0.6162, 0.0001 );
+
+  }
+
+
+
+  void doTestVulcan(std::string dspaceFile, std::string fileType)
+  {
+    std::string outputFile = "./VULCAN_dspacemaptocal_test.cal";
+
+    LoadDspacemap testerDSP;
+    TS_ASSERT_THROWS_NOTHING(testerDSP.initialize());
+    TS_ASSERT_THROWS_NOTHING(testerDSP.isInitialized());
+    testerDSP.setPropertyValue("InstrumentFilename", ConfigService::Instance().getString(
+        "instrumentDefinition.directory")+"/VULCAN_Definition.xml");
+    testerDSP.setPropertyValue("DspacemapFile", dspaceFile);
+    testerDSP.setPropertyValue("FileType", fileType);
+    testerDSP.setPropertyValue("OutputWorkspace", "test_vulcan_offset");
+    TS_ASSERT_THROWS_NOTHING(testerDSP.execute());
+    TS_ASSERT(testerDSP.isExecuted());
+
+    // Get the offsets out
+    OffsetsWorkspace_sptr offsetsWS = boost::dynamic_pointer_cast<OffsetsWorkspace>(
+        AnalysisDataService::Instance().retrieve("test_vulcan_offset"));
+    TS_ASSERT(offsetsWS);
+    if (!offsetsWS) return;
+
+    // Check one point.
+    TS_ASSERT_DELTA( offsetsWS->dataY(0)[0],  0.0938, 0.0001 );
+
+
+  }
+
+  void testVulcan_ASCII()
+  {
+    doTestVulcan("pid_offset_vulcan_new.dat", "VULCAN-ASCII");
+  }
+
+  void testVulcan_Binary()
+  {
+    doTestVulcan("pid_offset_vulcan_new.dat.bin", "VULCAN-Binary");
+  }
+
+
+
+};
+
+
+#endif /* MANTID_DATAHANDLING_LOADDSPACEMAPTEST_H_ */
+

@@ -185,7 +185,7 @@ void DspacemaptoCal::CalculateOffsetsFromDSpacemapFile(Mantid::API::MatrixWorksp
 
     //Compute the factor
     double offset = 0.0;
-    double factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, false);
+    double factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, false);
     offset=dspace[detectorID]/factor -1.0 ;
     // Save in the map
     offsets[detectorID] = offset;

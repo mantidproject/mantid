@@ -325,7 +325,7 @@ namespace MDEvents
 
     // ------------------- Cache values that are common for all ---------------------------
     // Extract some parameters global to the instrument
-    AlignDetectors::getInstrumentParameters(in_ws->getInstrument(),l1,beamline,beamline_norm, samplePos);
+    in_ws->getInstrument()->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
     beamline_norm = beamline.norm();
     beamDir = beamline / beamline.norm();
 

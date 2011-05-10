@@ -1,6 +1,7 @@
 #include "MantidAlgorithms/AlignDetectors.h"
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include <limits>
 #include <map>
 #include <math.h>
@@ -12,6 +13,7 @@ namespace Algorithms
 
 using namespace Kernel;
 using namespace API;
+using namespace Geometry;
 using DataObjects::EventWorkspace;
 using Geometry::IInstrument_const_sptr;
 using Kernel::Exception::InstrumentDefinitionError;
@@ -227,7 +229,7 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   const int spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
   std::vector<int> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
   std::map<int,double> offsets; // just an empty offsets map
-  double dspmap = AlignDetectors::calcConversion(m_L1, beamline, beamline_norm, samplePos,
+  double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
                                      m_instrument, detNumbers, offsets, false);
 
   // this is related to the reference tof

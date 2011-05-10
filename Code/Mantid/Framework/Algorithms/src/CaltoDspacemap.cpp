@@ -15,8 +15,10 @@
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <fstream>
+#include "MantidGeometry/Instrument/Instrument.h"
 
 using Mantid::DataHandling::LoadCalFile;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -120,7 +122,7 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
   double l1;
   Geometry::V3D beamline,samplePos;
   double beamline_norm;
-  AlignDetectors::getInstrumentParameters(instrument,l1,beamline,beamline_norm, samplePos);
+  instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
   //To get all the detector ID's
   std::map<int, Geometry::IDetector_sptr> allDetectors;
@@ -155,7 +157,7 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
     det = it->second;
     if(det)
     {
-      factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
+      factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
       //Factor of 10 between ISAW and Mantid
       factor *= 0.1 ;
       if(factor<0)factor = 0.0;

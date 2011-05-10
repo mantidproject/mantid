@@ -135,6 +135,22 @@ namespace Mantid
       /// Pointer to the NOT const ParameterMap holding the parameters of the modified instrument components.
       boost::shared_ptr<ParameterMap> getParameterMap() const;
 
+      // ----- Useful static functions ------
+      static double calcConversion(const double l1, const Geometry::V3D &beamline, const double beamline_norm,
+          const Geometry::V3D &samplePos, const Geometry::IDetector_const_sptr &det, const double offset,
+          bool vulcancorrection);
+
+      static double calcConversion(const double l1,
+                            const Geometry::V3D &beamline,
+                            const double beamline_norm,
+                            const Geometry::V3D &samplePos,
+                            const Geometry::IInstrument_const_sptr &instrument,
+                            const std::vector<int> &detectors,
+                            const std::map<int,double> &offsets,
+                            bool vulcancorrection);
+
+      void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
+          double & beamline_norm, Geometry::V3D & samplePos) const;
 
     private:
       /// Private copy assignment operator
