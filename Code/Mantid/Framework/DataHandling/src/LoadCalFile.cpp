@@ -47,8 +47,8 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void LoadCalFile::initDocs()
   {
-    this->setWikiSummary("TODO: Enter a quick description of your algorithm.");
-    this->setOptionalMessage("TODO: Enter a quick description of your algorithm.");
+    this->setWikiSummary("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.");
+    this->setOptionalMessage("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.");
   }
 
 
@@ -206,7 +206,7 @@ namespace DataHandling
 
     size_t numErrors = 0;
 
-    IndexToIndexMap * detID_to_wi;
+    IndexToIndexMap * detID_to_wi = NULL;
     if (doMask)
     {
       detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap( false );

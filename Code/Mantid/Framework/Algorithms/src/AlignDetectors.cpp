@@ -2,16 +2,24 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/AlignDetectors.h"
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/WorkspaceValidators.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/FileProperty.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidGeometry/V3D.h"
-
+#include "MantidKernel/PhysicalConstants.h"
+#include "MantidKernel/UnitFactory.h"
 #include <fstream>
 #include <sstream>
+
+using namespace Mantid::Kernel;
+using namespace Mantid::API;
+using namespace Mantid::Geometry;
+using namespace Mantid::DataObjects;
+using namespace Mantid::DataHandling;
+using Mantid::DataObjects::OffsetsWorkspace;
 
 namespace Mantid
 {
@@ -28,13 +36,6 @@ void AlignDetectors::initDocs()
 }
 
 
-using namespace Kernel;
-using namespace API;
-using Geometry::IInstrument_const_sptr;
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
 
 const double CONSTANT = (PhysicalConstants::h * 1e10) / (2.0 * PhysicalConstants::NeutronMass * 1e6);
 
@@ -163,7 +164,7 @@ void AlignDetectors::getInstrumentParameters(IInstrument_const_sptr instrument,
  * @return map of conversion factors between TOF and dSpacing
  */
 std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  const std::map<int,double> &offsets,
+                                  OffsetsWorkspace_sptr offsetsWS,
                                   bool vulcancorrection)
 {
   // Get a pointer to the instrument contained in the workspace
@@ -189,12 +190,7 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
     Geometry::IDetector_sptr det = it->second;
 
     //Find the offset, if any
-    double offset;
-    std::map<int,double>::const_iterator off_iter = offsets.find(detectorID);
-    if( off_iter != offsets.end() )
-      offset = off_iter->second;
-    else
-      offset = 0.;
+    double offset = offsetsWS->getValue(detectorID, 0.0);
 
     //Compute the factor
     double factor = calcConversion(l1, beamline, beamline_norm, samplePos, det, offset, vulcancorrection);
@@ -257,16 +253,20 @@ void AlignDetectors::init()
   wsValidator->add(new WorkspaceUnitValidator<>("TOF"));
   wsValidator->add(new RawCountValidator<>);
   wsValidator->add(new InstrumentValidator<>);
-  declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
+
+  declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("InputWorkspace","",Direction::Input,wsValidator),
     "A workspace with units of TOF" );
-  declareProperty(
-    new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
+
+  declareProperty( new WorkspaceProperty<API::MatrixWorkspace>("OutputWorkspace","",Direction::Output),
     "The name to use for the output workspace" );
-  declareProperty(new FileProperty("CalibrationFile", "", FileProperty::Load, ".cal"),
-     "The CalFile containing the position correction factors");
-  declareProperty(
-      new PropertyWithValue<bool>("VULCANDspacemapFile", false, Direction::Input),
+
+  declareProperty(new FileProperty("CalibrationFile", "", FileProperty::OptionalLoad, ".cal"),
+     "Optional: The .cal file containing the position correction factors");
+
+  declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, true),
+     "Optional: A OffsetsWorkspace containing the calibration offsets.");
+
+  declareProperty( new PropertyWithValue<bool>("VULCANDspacemapFile", false, Direction::Input),
     "Optional: Only applies if you ran DspacemaptoCal file for VULCAN corrections.\n");
 }
 
@@ -280,22 +280,32 @@ void AlignDetectors::exec()
 {
   // Get the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  bool vulcancorrection = getProperty("VULCANDspacemapFile");
 
   // Read in the calibration data
   const std::string calFileName = getProperty("CalibrationFile");
-  bool vulcancorrection = getProperty("VULCANDspacemapFile");
-  std::map<int,double> offsets;
-  std::map<int,int> groups; // will be ignored
+  OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
+
   progress(0.0,"Reading calibration file");
-  if ( ! this->readCalFile(calFileName, offsets, groups) )
-    throw Exception::FileError("Problem reading calibration file", calFileName);
+  if (offsetsWS && !calFileName.empty())
+      throw std::invalid_argument("You must specify either CalibrationFile or OffsetsWorkspace but not both.");
+  if (!offsetsWS && calFileName.empty())
+      throw std::invalid_argument("You must specify either CalibrationFile or OffsetsWorkspace.");
+
+  if (!calFileName.empty())
+  {
+    // Create the blank OffsetsWorkspace
+    offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
+    // Load the .cal file
+    LoadCalFile::readCalFile(calFileName, GroupingWorkspace_sptr(), offsetsWS, MatrixWorkspace_sptr() );
+  }
 
   // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
   const int numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
-  this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsets, vulcancorrection);
+  this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsetsWS, vulcancorrection);
 
   //Check if its an event workspace
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(inputWS);
@@ -421,49 +431,8 @@ void AlignDetectors::execEvent()
         <<  outputWS->getTofMin() << " d_max " << outputWS->getTofMax();
     throw std::runtime_error(msg.str());
   }
-
 }
 
-//-----------------------------------------------------------------------
-/** Reads the calibration file. Returns true for success, false otherwise.
- *
- * @param calFileName :: .cal file path
- * @param offsets :: map of udet::offset value
- * @param groups :: map of udet::group number
- * @return true if successful.
- * @throw std::runtime_error if cannot open file
- */
-bool AlignDetectors::readCalFile(const std::string& calFileName, std::map<int,double>& offsets, std::map<int,int>& groups)
-{
-    std::ifstream grFile(calFileName.c_str());
-    if (!grFile)
-    {
-        throw std::runtime_error("Unable to open calibration file " + calFileName);
-        return false;
-    }
-
-    offsets.clear();
-    groups.clear();
-    std::string str;
-    while(getline(grFile,str))
-    {
-      if (str.empty() || str[0] == '#') continue;
-      std::istringstream istr(str);
-      int n,udet,select,group;
-      double offset;
-      istr >> n >> udet >> offset >> select >> group;
-      if (offset < -1.) // should never happen
-      {
-        std::stringstream msg;
-        msg << "Encountered offset = " << offset << " at index " << n << " for udet = " << udet
-            << ". Offsets must be greater than -1.";
-        throw std::runtime_error(msg.str());
-      }
-      offsets.insert(std::make_pair(udet,offset));
-      groups.insert(std::make_pair(udet,group));
-    }
-    return true;
-}
 
 
 } // namespace Algorithms

@@ -1,19 +1,13 @@
 #ifndef MANTID_ALGORITHMS_CALTODSPACEMAP_H_
 #define MANTID_ALGORITHMS_CALTODSPACEMAP_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidKernel/System.h"
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
-using DataObjects::EventList;
-using DataObjects::EventWorkspace;
-using DataObjects::EventWorkspace_sptr;
-using DataObjects::EventWorkspace_const_sptr;
 
 namespace Algorithms
 {
@@ -77,10 +71,10 @@ private:
 
   void CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                     const std::string DFileName,
-                                    std::map<int,double> &offsets);
+                                    Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
   /// Pointer for an event workspace
-  EventWorkspace_const_sptr eventW;
+  Mantid::DataObjects::EventWorkspace_const_sptr eventW;
 
 };
 

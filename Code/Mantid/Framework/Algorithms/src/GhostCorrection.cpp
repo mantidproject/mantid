@@ -13,6 +13,8 @@
 #include "MantidKernel/BinFinder.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAlgorithms/AlignDetectors.h"
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid
 {
@@ -48,6 +50,8 @@ namespace Mantid
       this->groupedGhostMaps.clear();
       this->rawGhostMap = NULL;
       this->input_detectorIDToWorkspaceIndexMap = NULL;
+      this->useAlgorithm("");
+      this->deprecatedDate("2011-05-10");
     }
 
     //=============================================================================
@@ -89,8 +93,11 @@ namespace Mantid
         "this can be followed by a comma and more widths and last boundary pairs.\n"
         "Negative width values indicate logarithmic binning.");
 
-      declareProperty(new FileProperty("GroupingFilename", "", FileProperty::Load, ".cal"),
-          "The name of the CalFile with grouping data" );
+      declareProperty(new WorkspaceProperty<GroupingWorkspace>("GroupingWorkspace", "", Direction::Input, false),
+          "GroupingWorkspace that specifies how to group spectra together." );
+
+      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OffsetsWorkspace", "", Direction::Input, false),
+          "OffsetsWorkspace that specifies how to calibrate detector positions." );
 
       declareProperty(new FileProperty("GhostCorrectionFilename", "", FileProperty::Load, "dat"),
           "The name of the file containing the ghost correction mapping." );
@@ -99,53 +106,6 @@ namespace Mantid
 //        new PropertyWithValue<bool>("UseParallelAlgorithm", false),
 //        "Check to use the parallelized algorithm; unchecked uses a simpler direct one.");
 
-    }
-
-
-
-    //=============================================================================
-    /** Reads in the file with the grouping information
-     * @param groupingFilename :: The file that contains the group information
-     * TODO: Abstract this out into its own class, to reuse code better.
-     */
-    void GhostCorrection::readGroupingFile(const std::string& groupingFilename)
-    {
-      std::ifstream grFile(groupingFilename.c_str());
-      if (!grFile.is_open())
-      {
-        g_log.error() << "Unable to open grouping file " << groupingFilename << std::endl;
-        throw Exception::FileError("Error reading .cal file",groupingFilename);
-      }
-
-      int maxGroup = -1;
-
-      detId_to_group.clear();
-      std::string str;
-      while(getline(grFile,str))
-      {
-        //Comment
-        if (str.empty() || str[0] == '#') continue;
-        std::istringstream istr(str);
-        int n,udet,sel,group;
-        double offset;
-        istr >> n >> udet >> offset >> sel >> group;
-        if ((sel) && (group>0))
-        {
-          //Save the group of this detector ID
-          detId_to_group[udet]=group;
-          //Save the offset
-          detId_to_offset[udet]=offset;
-          //Count the groups
-          if (group > maxGroup)
-            maxGroup = group;
-        }
-      }
-      grFile.close();
-
-      //Count the # of groups this way.
-      nGroups = maxGroup+1;
-
-      return;
     }
 
 
@@ -207,7 +167,7 @@ namespace Mantid
             if (ghostVal.weight > 0.0)
             {
               //Find the group # for this ghost pixel id
-              ghostGroup = this->detId_to_group[ghostPixelId];
+              ghostGroup = detId_to_group[ghostPixelId];
               //Check for changing group #
               if (lastGroup == -1)
                 lastGroup = ghostGroup;
@@ -275,10 +235,14 @@ namespace Mantid
       if (eventW == NULL)
         throw std::runtime_error("Invalid workspace type provided to GhostCorrection. Only EventWorkspaces work with this algorithm.");
 
-      //Load the grouping (and offsets) file
-      this->readGroupingFile( getProperty("GroupingFilename") );
+      //Load the grouping
+      GroupingWorkspace_sptr groupWS = getProperty("GroupingWorkspace");
+      groupWS->makeDetectorIDToGroupMap(detId_to_group, nGroups);
       if (this->nGroups <= 0)
         throw std::runtime_error("The # of groups found in the Grouping file is 0.");
+
+      // Now the offsets
+      OffsetsWorkspace_sptr offsetsWS = getProperty("OffsetsWorkspace");
 
       //Make the X axis to bin to.
       MantidVecPtr XValues_new;
@@ -316,7 +280,7 @@ namespace Mantid
       Progress prog(this, 0.0, 1.0, numsteps);
 
       //Set up the tof-to-d_spacing map for all pixel ids.
-      this->tof_to_d = Mantid::Algorithms::AlignDetectors::calcTofToD_ConversionMap(inputW, this->detId_to_offset, false);
+      this->tof_to_d = Mantid::Algorithms::AlignDetectors::calcTofToD_ConversionMap(inputW, offsetsWS, false);
 
       // Set the final unit that our output workspace will have
       outputW->getAxis(0)->unit() = UnitFactory::Instance().create("dSpacing");

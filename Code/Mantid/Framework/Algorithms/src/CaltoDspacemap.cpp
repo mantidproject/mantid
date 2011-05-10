@@ -6,13 +6,17 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
+#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <fstream>
+
+using Mantid::DataHandling::LoadCalFile;
 
 namespace Mantid
 {
@@ -31,6 +35,7 @@ void CaltoDspacemap::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using namespace DataObjects;
 using Geometry::IInstrument_const_sptr;
 using DataObjects::EventList;
 using DataObjects::EventWorkspace;
@@ -87,14 +92,13 @@ void CaltoDspacemap::exec()
   const std::string DFileName = getProperty("DspacemapFile");
 
   const std::string calFileName = getProperty("CalibrationFile");
-  std::map<int,double> offsets;
-  std::map<int,int> groups;
+
   progress(0.0,"Reading calibration file");
-  if ( ! AlignDetectors::readCalFile(calFileName, offsets, groups) )
-    throw Exception::FileError("Problem reading calibration file", calFileName);
+  OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inputWS->getInstrument()) );
+  LoadCalFile::readCalFile(calFileName, GroupingWorkspace_sptr(), offsetsWS, MatrixWorkspace_sptr());
 
   // generate map of the tof->d conversion factors
-  CalculateDspaceFromCal(inputWS, DFileName, offsets);
+  CalculateDspaceFromCal(inputWS, DFileName, offsetsWS);
 
 }
 //-----------------------------------------------------------------------
@@ -108,7 +112,7 @@ void CaltoDspacemap::exec()
  */
 void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   std::string DFileName, 
-                                  std::map<int,double> &offsets)
+                                  Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS)
 {
   const char * filename = DFileName.c_str();
   // Get a pointer to the instrument contained in the workspace
@@ -151,7 +155,7 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
     det = it->second;
     if(det)
     {
-      factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsets[i], false);
+      factor = AlignDetectors::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
       //Factor of 10 between ISAW and Mantid
       factor *= 0.1 ;
       if(factor<0)factor = 0.0;

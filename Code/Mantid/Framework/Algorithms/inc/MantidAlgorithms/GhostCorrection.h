@@ -1,17 +1,8 @@
-/*
- * GhostCorrection.h
- *
- *  Created on: Aug 13, 2010
- *      Author: janik
- */
-
 #ifndef GHOSTCORRECTION_H_
 #define GHOSTCORRECTION_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/UnitFactory.h"
@@ -114,7 +105,7 @@ typedef std::map<int, int> GhostSourcesMap;
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
     Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-class DLLExport GhostCorrection : public API::Algorithm
+class DLLExport GhostCorrection : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   /// Default constructor
@@ -134,22 +125,11 @@ protected:
   // Overridden Algorithm methods
   void init();
   virtual void exec();
-//  void execWrong();
-//  void execSerial();
   void loadGhostMap(std::string ghostMapFile);
   void readGroupingFile(const std::string& groupingFilename);
-//  void initializeTofToD();
 
-  // --- For grouping ---
-// This map does not need to be ordered, just a lookup for udet
-#ifndef HAS_UNORDERED_MAP_H
-  /// typedef for the storage of the UDET-group mapping
-  typedef std::map<int, int> udet2groupmap;
-#else
-  typedef std::tr1::unordered_map<int,int> udet2groupmap;
-#endif
-  /// Map from udet (detector ID) to group
-  udet2groupmap detId_to_group;
+  /// Grouping map
+  Mantid::API::IndexToIndexMap detId_to_group;
 
   /// Map from detector ID to the offset (used in alignment)
   std::map<int, double> detId_to_offset;

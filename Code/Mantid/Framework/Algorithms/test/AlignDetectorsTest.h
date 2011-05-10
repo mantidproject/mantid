@@ -46,9 +46,6 @@ public:
   {
     TS_ASSERT_THROWS_NOTHING( align.initialize() );
     TS_ASSERT( align.isInitialized() );
-
-    std::vector<Property*> props = align.getProperties();
-    TS_ASSERT_EQUALS( static_cast<int>(props.size()), 4 );
   }
 
   /** Test alignDetectors for a Workspace2D loaded from some

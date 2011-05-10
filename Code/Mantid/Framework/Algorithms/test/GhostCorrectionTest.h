@@ -13,6 +13,7 @@
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <Poco/File.h>
+#include "MantidTestHelpers/AlgorithmHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -111,7 +112,8 @@ public:
 
 
   //--------------------------------------------------------------------------------------------------------
-  void testExecDummy()
+  /** Test disabled may 10, 2011 due to algorithm deprecated */
+  void xtestExecDummy()
   {
     std::string wsName("dummy");
     std::string outwsName("ghost_corrected");
@@ -137,6 +139,11 @@ public:
     //Make the units in X to be TOF
     inputW->getAxis(0)->unit() = UnitFactory::Instance().create("TOF");
 
+    std::cout << "LoadCalFile\n";
+    AlgorithmHelper::runAlgorithm("LoadCalFile", 4,
+        "Filename", "FakeGroupingFile.cal",
+        "WorkspaceName", "GhostCorrectionTest");
+
 
     //----- Now do ghost correction ------
     GhostCorrection gc;
@@ -147,7 +154,8 @@ public:
     std::stringstream params;
     params << "0.0," << BIN_DELTA << "," << BIN_DELTA*NUMBINS;
     gc.setPropertyValue("BinParams", params.str());
-    gc.setPropertyValue("GroupingFilename", groupingFile);
+    gc.setPropertyValue("GroupingWorkspace", "GhostCorrectionTest_group");
+    gc.setPropertyValue("OffsetsWorkspace", "GhostCorrectionTest_offsets");
     gc.setPropertyValue("GhostCorrectionFilename", ghostFilename);
 
     TS_ASSERT(gc.execute());
@@ -177,11 +185,6 @@ public:
       MantidVec Y = outWS->dataY(workspaceIndex);
       TS_ASSERT_EQUALS( Y.size(), NUMBINS ); //Proper size
 
-      //Not checking for value. This does not work due to tof-to-d conversion :(
-//      std::cout << "\ngroup " << group << "\n";
-//      for (int i=0; i<NUMBINS; i++)
-//        std::cout << Y[i] << ", ";
-//        //TS_ASSERT_EQUALS( Y[i], expected_value ); //Proper size
     }
 
 

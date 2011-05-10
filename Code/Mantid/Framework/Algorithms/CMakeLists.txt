@@ -46,7 +46,7 @@ set ( SRC_FILES
 	src/DiffractionFocussing.cpp
 	src/DiffractionFocussing2.cpp
 	src/Divide.cpp
-	src/DspacemaptoCal.cpp
+	# src/DspacemaptoCal.cpp
 	src/EQSANSTofStructure.cpp
 	src/ElasticWindow.cpp
 	src/Exponential.cpp
@@ -194,7 +194,7 @@ set ( INC_FILES
 	inc/MantidAlgorithms/DiffractionFocussing.h
 	inc/MantidAlgorithms/DiffractionFocussing2.h
 	inc/MantidAlgorithms/Divide.h
-	inc/MantidAlgorithms/DspacemaptoCal.h
+	# inc/MantidAlgorithms/DspacemaptoCal.h
 	inc/MantidAlgorithms/EQSANSTofStructure.h
 	inc/MantidAlgorithms/ElasticWindow.h
 	inc/MantidAlgorithms/Exponential.h
@@ -340,7 +340,7 @@ set ( TEST_FILES
 	test/DiffractionFocussing2Test.h
 	test/DiffractionFocussingTest.h
 	test/DivideTest.h
-	test/DspacemaptoCalTest.h
+	# test/DspacemaptoCalTest.h
 	test/ExponentialCorrectionTest.h
 	test/ExponentialTest.h
 	test/ExtractFFTSpectrumTest.h
@@ -450,7 +450,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} DataHandling )
 
 if ( CXXTEST_FOUND )
   # Generate the MultiplyTest.h and DivideTest.h
