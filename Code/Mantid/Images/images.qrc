@@ -19,5 +19,6 @@
         <file>selection-circle.png</file>
         <file>selection-pointer.png</file>
         <file>selection-text.png</file>
+        <file>selection-peak.png</file>
     </qresource>
 </RCC>
