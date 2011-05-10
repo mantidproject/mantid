@@ -3,7 +3,7 @@
      see http://www.mantidproject.org/IDF -->
 <instrument name="SNAP" valid-from   ="1900-01-31 23:59:59"
                         valid-to     ="2100-01-31 23:59:59"
-		        last-modified="2011-03-28 10:50:00">
+		        last-modified="2011-05-09 14:20:00">
   <!--Data taken from /SNS/SNAP/2010_2_3_CAL/calibrations/SNAP_geom_2010_03_22.xml-->
   <!--Created by Vickie Lynch, modified by Janik Zikovsky -->
   <!-- Modified by Vickie Lynch, Feb 17,2011 Bank names changed from local_name to name -->
@@ -36,7 +36,7 @@
       <location z="-3.0" name="monitor1"/>
     </component>
   </type>
-  <component type="Group1" idstart="983040" idfillbyfirst="y" idstepbyrow="256">
+  <component type="East" idstart="983040" idfillbyfirst="y" idstepbyrow="256">
     <location >
       <parameter name="roty">
         <logfile id="det_arc2" eq="180.0+value"/>
@@ -49,7 +49,7 @@
       </parameter>
     </location>
   </component>
-  <component type="Group2" idstart="0" idfillbyfirst="y" idstepbyrow="256">
+  <component type="West" idstart="0" idfillbyfirst="y" idstepbyrow="256">
     <location >
       <parameter name="roty">
         <logfile id="det_arc1" eq="180.0+value"/>
@@ -63,7 +63,7 @@
     </location>
   </component>
 
-  <type name="Group1">
+  <type name="East">
     <component type="Column1">
       <location/>
     </component>
@@ -74,7 +74,7 @@
       <location/>
     </component>
   </type>
-  <type name="Group2">
+  <type name="West">
     <component type="Column4">
       <location/>
     </component>
@@ -222,7 +222,7 @@
   </type>
 
 <!-- 
-  <idlist idname="Group1">
+  <idlist idname="East">
     <id start="720896" end="786431"/>
     <id start="917504" end="983039"/>
     <id start="1114112" end="1179647"/>
@@ -233,7 +233,7 @@
     <id start="786432" end="851967"/>
     <id start="983040" end="1048575"/>
   </idlist>
-  <idlist idname="Group2">
+  <idlist idname="West">
     <id start="524288" end="589823"/>
     <id start="327680" end="393215"/>
     <id start="131072" end="196607"/>

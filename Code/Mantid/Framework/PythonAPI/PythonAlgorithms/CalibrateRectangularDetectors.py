@@ -43,7 +43,7 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
         self.declareListProperty("Binning", [0.,0.,0.],
                              Description="Min, Step, and Max of d-space bins.  Linear binning is better for finding offsets.")
         self.declareProperty("DiffractionFocus", False, Description="Diffraction focus by detectors.  Default is False")
-        grouping = ["All", "Group", "Column", "bank"]
+        grouping = ["All", "Group(East,West)", "Column", "bank"]
         self.declareProperty("GroupDetectorsBy", "All", Validator=ListValidator(grouping),
                              Description="Detector groups to use for future focussing: All detectors as one group, Groups (East,West for SNAP), Columns for SNAP, detector banks")
         self.declareProperty("FilterBadPulses", True, Description="Filter out events measured while proton charge is more than 5% below average")
@@ -142,6 +142,8 @@ class CalibrateRectangularDetectors(PythonAlgorithm):
                 groups = "POWGEN"
             else:
                 groups = str(self._instrument)
+        elif str(self._instrument) == "SNAP" and self._grouping == "Group(East,West)":
+                groups = "East,West"
         else:
             groups = ""
             numrange = 200
