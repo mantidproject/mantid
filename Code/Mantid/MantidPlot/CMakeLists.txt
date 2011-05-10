@@ -421,7 +421,8 @@ find_package ( SIP REQUIRED )
 separate_arguments ( PYQT4_SIP_FLAGS )
 
 set ( SIP_SPEC ${CMAKE_CURRENT_SOURCE_DIR}/src/qti.sip )
-set ( SIP_SRC ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp )
+set ( SIP_SRC_IN ${CMAKE_CURRENT_SOURCE_DIR}/src/sipqti.cpp.in )
+set ( SIP_SRC ${CMAKE_CURRENT_BINARY_DIR}/sipqti.cpp )
 set ( SIP_SRC_AUTO sipqtipart0.cpp )
 
 
@@ -487,8 +488,9 @@ add_custom_command ( OUTPUT ${SIP_SRC_AUTO}
 )
 
 add_custom_command ( OUTPUT ${SIP_SRC}
-                     COMMAND ${CMAKE_COMMAND} ARGS -E echo_append ""
+                     COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different ${SIP_SRC_IN} ${SIP_SRC}
                      DEPENDS ${SIP_SRC_AUTO}
+                     COMMENT "Generating sip wrapper"
 )                     
 
 # Needed for sip.h header that can end up in a different place to to the main Python include directory
