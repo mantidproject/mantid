@@ -66,3 +66,74 @@ class EqSansReducer(SANSReducer):
         if value not in [True, False]:
             raise ValueError, "Set_frame_skipping only accepts True or False"
         self.frame_skipping = value
+
+    def _2D_steps(self):
+        """
+            Creates a list of reduction steps to be applied to
+            each data set, including the background file. 
+            Only the steps applied to a data set
+            before azimuthal averaging are included.
+        """
+        reduction_steps = []
+        
+        # Load file
+        reduction_steps.append(self._data_loader)
+        
+        # Apply transmission correction
+        if self._transmission_calculator is not None:
+            reduction_steps.append(self._transmission_calculator) 
+                
+        # Dark current subtraction
+        if self._dark_current_subtracter is not None:
+            reduction_steps.append(self._dark_current_subtracter)
+        
+        # Normalize
+        if self._normalizer is not None:
+            reduction_steps.append(self._normalizer)
+        
+        # Mask
+        if self._mask is not None:
+            reduction_steps.append(self._mask)
+        
+        # Sensitivity correction
+        if self._sensitivity_correcter is not None:
+            reduction_steps.append(self._sensitivity_correcter)
+            
+        # Solid angle correction
+        if self._solid_angle_correcter is not None:
+            reduction_steps.append(self._solid_angle_correcter)
+        
+        return reduction_steps
+    
+    def _to_steps(self):
+        """
+            Creates a list of reduction steps for each data set
+            following a predefined reduction approach. For each 
+            predefined step, we check that a ReductionStep object 
+            exists to take of it. If one does, we append it to the 
+            list of steps to be executed.
+        """
+        # Get the basic 2D steps
+        self._reduction_steps = self._2D_steps()
+        
+        # Subtract the background
+        if self._background_subtracter is not None:
+            self.append_step(self._background_subtracter)
+        
+        if self._absolute_scale is not None:
+            self.append_step(self._absolute_scale)
+                    
+        # Perform azimuthal averaging
+        if self._azimuthal_averager is not None:
+            self.append_step(self._azimuthal_averager)
+            
+        # Perform I(Qx,Qy) calculation
+        if self._two_dim_calculator is not None:
+            self.append_step(self._two_dim_calculator)
+            
+        # Save output to file
+        if self._save_iq is not None:
+            self.append_step(self._save_iq)
+            
+        if self.geometry_correcter is not None:
+            self.append_step(self.geometry_correcter)
