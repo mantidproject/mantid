@@ -77,15 +77,16 @@ GL3DWidget::~GL3DWidget()
   }
 }
 
-void GL3DWidget::setInteractionModePick()
+void GL3DWidget::setInteractionModePick(PickType type)
 {
   iInteractionMode = GL3DWidget::PickMode;// Pick mode
   setMouseTracking(true);
   mPickingDraw = true;
+  m_pickType = type;
   update();
 }
 
-void GL3DWidget::setInteractionModeNormal()
+void GL3DWidget::setInteractionModeMove()
 {
   iInteractionMode = GL3DWidget::MoveMode;//Normal mode
   setMouseTracking(false);
@@ -415,24 +416,33 @@ void GL3DWidget::resizeGL(int width, int height)
  */
 void GL3DWidget::mousePressEvent(QMouseEvent* event)
 {
+  // if it's unwrapped view
   if (m_renderMode != FULL3D && m_unwrappedSurface)
   {
     if(event->buttons() & Qt::RightButton)
-    {
-      if (getInteractionMode() == MoveMode)
+    {// right button
+      if (iInteractionMode == MoveMode)
       {
         m_unwrappedSurface->unzoom();
       }
     }
     else
-    {
-      m_unwrappedSurface->startSelection(event->x(),event->y());
+    {// left button
+      if (iInteractionMode == PickMode && m_pickType == SelectPeaks)
+      {
+        std::cerr << "Select peak\n";
+      }
+      else
+      {
+        m_unwrappedSurface->startSelection(event->x(),event->y());
+      }
     }
     update();
     OpenGLError::check("GL3DWidget::mousePressEvent");
     return;
   }
 
+  // if it's full 3D view
   // Pick Mode
   if( iInteractionMode == GL3DWidget::PickMode && (event->buttons() & Qt::LeftButton) )
   { 
@@ -498,22 +508,27 @@ void GL3DWidget::contextMenuEvent(QContextMenuEvent * event)
 void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
 {
   makeCurrent();
+  // unwrapped view
   if (m_renderMode != FULL3D && m_unwrappedSurface)
   {
     if (event->buttons() & Qt::LeftButton)
-    {
+    {// left button
       m_unwrappedSurface->moveSelection(event->x(),event->y());
       update();
     }
     else
-    {
-      int detId = m_unwrappedSurface->getDetectorID(event->x(),event->y());
-      emit actorHighlighted(detId);
+    {// no buttons
+      if (iInteractionMode == PickMode && m_pickType == SelectDetectors)
+      {
+        int detId = m_unwrappedSurface->getDetectorID(event->x(),event->y());
+        emit actorTouched(detId);
+      }
     }
     OpenGLError::check("GL3DWidget::mouseMoveEvent");
     return;
   }
 
+  // full 3D view
   if(iInteractionMode == GL3DWidget::PickMode)
   {
     setCursor(Qt::CrossCursor);
@@ -526,7 +541,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
     }
     else
     {
-      emit actorHighlighted(tmpColor);
+      emit actorTouched(tmpColor);
     }
   }
   else
@@ -562,17 +577,28 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
  */
 void GL3DWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+  // unwrapped view
   if (m_renderMode != FULL3D && m_unwrappedSurface)
   {
-    if (getInteractionMode() == PickMode && m_unwrappedSurface->hasSelection())
+    if (getInteractionMode() == PickMode )
     {
-      showUnwrappedContextMenu();
+      if (m_unwrappedSurface->hasSelection())
+      {
+        showUnwrappedContextMenu();
+      }
+      else
+      {
+        int detId = m_unwrappedSurface->getDetectorID(event->x(),event->y());
+        emit actorHighlighted(detId);
+        return;
+      }
     }
     m_unwrappedSurface->endSelection(event->x(),event->y());
     update();
     return;
   }
 
+  // full 3D view
   setCursor(Qt::PointingHandCursor);
   isKeyPressed=false;
   setSceneHighResolution();

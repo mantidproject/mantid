@@ -105,6 +105,7 @@ protected:
 public slots:
   void tabChanged(int i);
   void detectorHighlighted(const Instrument3DWidget::DetInfo & cursorPos);
+  void detectorTouched(const Instrument3DWidget::DetInfo & cursorPos);
   void showPickOptions();
   void spectraInfoDialog();
   void plotSelectedSpectra();

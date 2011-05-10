@@ -66,6 +66,7 @@ InstrumentWindow::InstrumentWindow(const QString& label, ApplicationWindow *app 
   mInteractionInfo = new QLabel();
   mainLayout->addWidget(mInteractionInfo);
   connect(mInstrumentDisplay, SIGNAL(actionDetectorHighlighted(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorHighlighted(const Instrument3DWidget::DetInfo &)));
+  connect(mInstrumentDisplay, SIGNAL(actionDetectorTouched(const Instrument3DWidget::DetInfo &)),this,SLOT(detectorTouched(const Instrument3DWidget::DetInfo &)));
   connect(mInstrumentDisplay, SIGNAL(detectorsSelected()), this, SLOT(showPickOptions()));
 
   // Load settings is called after mInstrumentDisplay is created but before m_renderTab
@@ -143,7 +144,7 @@ void InstrumentWindow::tabChanged(int i)
   }
   else
   {
-    mInstrumentDisplay->setInteractionModeNormal();
+    mInstrumentDisplay->setInteractionModeMove();
     if (mInstrumentDisplay->getRenderMode() == GL3DWidget::FULL3D)
     {
       text = tr("Mouse Button: Left -- Rotation, Middle -- Zoom, Right -- Translate\nKeyboard: NumKeys -- Rotation, PageUp/Down -- Zoom, ArrowKeys -- Translate");
@@ -196,20 +197,23 @@ void InstrumentWindow::changeColormap(const QString &filename)
 
 void InstrumentWindow::showPickOptions()
 {
-  QMenu context(mInstrumentDisplay);
-  
-  context.addAction(mInfoAction);
-  context.addAction(mPlotAction);
-  context.addAction(mDetTableAction);
-
-  if( mInstrumentDisplay->getSelectedWorkspaceIndices().size() > 1 )
+  if (m_pickTab->canUpdateTouchedDetector())
   {
-    context.insertSeparator();
-    context.addAction(mGroupDetsAction);
-    context.addAction(mMaskDetsAction);
-  }
+    QMenu context(mInstrumentDisplay);
 
-  context.exec(QCursor::pos());
+    context.addAction(mInfoAction);
+    context.addAction(mPlotAction);
+    context.addAction(mDetTableAction);
+
+    if( mInstrumentDisplay->getSelectedWorkspaceIndices().size() > 1 )
+    {
+      context.insertSeparator();
+      context.addAction(mGroupDetsAction);
+      context.addAction(mMaskDetsAction);
+    }
+
+    context.exec(QCursor::pos());
+  }
   mInstrumentDisplay->hidePickBox();
 }
 
@@ -221,6 +225,14 @@ void InstrumentWindow::detectorHighlighted(const Instrument3DWidget::DetInfo & c
 {
   mInteractionInfo->setText(cursorPos.display());
   m_pickTab->updatePick(cursorPos);
+}
+void InstrumentWindow::detectorTouched(const Instrument3DWidget::DetInfo & cursorPos)
+{
+  if (m_pickTab->canUpdateTouchedDetector())
+  {
+    mInteractionInfo->setText(cursorPos.display());
+    m_pickTab->updatePick(cursorPos);
+  }
 }
 /**
  * This is slot for the dialog to appear when a detector is picked and the info menu is selected

@@ -26,6 +26,7 @@ public slots:
   void setYLinearScale();
 signals:
   void showContextMenu();
+  void clickedAt(double,double);
 protected:
   void resizeEvent(QResizeEvent *e);
   void mousePressEvent(QMouseEvent*);

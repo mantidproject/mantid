@@ -130,7 +130,9 @@ public:
 public slots:
   void fireDetectorsPicked(const std::set<QRgb>& );
   void fireDetectorHighligted(QRgb);
+  void fireDetectorTouched(QRgb);
   void fireDetectorHighligted(int detID);
+  void fireDetectorTouched(int detID);
   void detectorsHighligted(QRgb);
   void setTimeBin(int value);
   void setColorMapMinValue(double minValue);
@@ -155,6 +157,7 @@ public slots:
 signals:
   void detectorsSelected();
   void actionDetectorHighlighted(const Instrument3DWidget::DetInfo &);
+  void actionDetectorTouched(const Instrument3DWidget::DetInfo &);
 
 public:
   void calculateBinRange();

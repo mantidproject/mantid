@@ -1,8 +1,13 @@
 #include "InstrumentWindow.h"
 #include "InstrumentWindowPickTab.h"
-#include "MantidKernel/ConfigService.h"
 #include "OneCurvePlot.h"
 #include "CollapsiblePanel.h"
+
+#include "MantidKernel/ConfigService.h"
+#include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidAPI/TableRow.h"
 
 #include "qwt_scale_widget.h"
 #include "qwt_scale_div.h"
@@ -14,6 +19,7 @@
 #include <QMenu>
 #include <QAction>
 #include <QLabel>
+#include <QMessageBox>
 
 #include <numeric>
 #include <cfloat>
@@ -35,6 +41,7 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_plot->setXScale(0,1);
   m_plot->setYScale(-1.2,1.2);
   connect(m_plot,SIGNAL(showContextMenu()),this,SLOT(plotContextMenu()));
+  connect(m_plot,SIGNAL(clickedAt(double,double)),this,SLOT(addPeak(double,double)));
 
   m_sumDetectors = new QAction("Sum",this);
   m_integrateTimeBins = new QAction("Integrate",this);
@@ -56,27 +63,37 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   m_one->setAutoExclusive(true);
   m_one->setChecked(true);
   m_one->setToolTip("Select single pixel");
-
   m_one->setIcon(QIcon(":/PickTools/selection-pointer.png"));
+
   m_box = new QPushButton();
   m_box->setCheckable(true);
   m_box->setAutoExclusive(true);
   m_box->setIcon(QIcon(":/PickTools/selection-box.png"));
+
   m_tube = new QPushButton();
   m_tube->setCheckable(true);
   m_tube->setAutoExclusive(true);
   m_tube->setIcon(QIcon(":/PickTools/selection-tube.png"));
   m_tube->setToolTip("Select whole tube");
+
+  m_peak = new QPushButton();
+  m_peak->setCheckable(true);
+  m_peak->setAutoExclusive(true);
+  m_peak->setIcon(QIcon(":/PickTools/selection-peak.png"));
+  m_peak->setToolTip("Select single crystal peak");
+
   QHBoxLayout* toolBox = new QHBoxLayout();
   toolBox->addWidget(m_one);
   toolBox->addWidget(m_box); 
   m_box->setVisible(false); //Hidden by Owen Arnold 14/02/2011 because box picking doesn't exhibit correct behaviour and is not necessary for current release 
   toolBox->addWidget(m_tube);
+  toolBox->addWidget(m_peak);
   toolBox->addStretch();
   toolBox->setSpacing(2);
   connect(m_one,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_box,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   connect(m_tube,SIGNAL(clicked()),this,SLOT(setSelectionType()));
+  connect(m_peak,SIGNAL(clicked()),this,SLOT(setSelectionType()));
   setSelectionType();
 
   // lay out the widgets
@@ -85,6 +102,14 @@ QFrame(instrWindow),m_instrWindow(instrWindow)
   layout->addWidget(panelStack);
 
   setPlotCaption();
+}
+
+/**
+  * Returns true if the plot can be updated when the mouse moves over detectors
+  */
+bool InstrumentWindowPickTab::canUpdateTouchedDetector()const
+{
+  return ! m_peak->isChecked();
 }
 
 void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cursorPos)
@@ -99,11 +124,11 @@ void InstrumentWindowPickTab::updatePlot(const Instrument3DWidget::DetInfo & cur
   int wi = cursorPos.getWorkspaceIndex();
   if (cursorPos.getDetID() >= 0 && wi >= 0)
   {
-    if (m_one->isChecked())
+    if (m_one->isChecked() || m_peak->isChecked())
     {// plot spectrum of a single detector
       plotSingle(cursorPos);
     }
-    else
+    else if (m_tube->isChecked())
     {// plot integrals
       plotTube(cursorPos);
     }
@@ -195,6 +220,7 @@ void InstrumentWindowPickTab::integrateTimeBins()
 
 void InstrumentWindowPickTab::updatePick(const Instrument3DWidget::DetInfo & cursorPos)
 {
+  m_currentPos = cursorPos;
   updatePlot(cursorPos);
   updateSelectionInfo(cursorPos);
 }
@@ -313,6 +339,67 @@ void InstrumentWindowPickTab::setSelectionType()
     m_selectionType = Tube;
     m_activeTool->setText("Tool: Tube/bank selection");
   }
+  else if (m_peak->isChecked())
+  {
+    m_selectionType = Peak;
+    m_activeTool->setText("Tool: Single crystal peak selection");
+  }
   setPlotCaption();
   mInstrumentDisplay->setSelectionType(m_selectionType);
+}
+
+/**
+  * Add a peak to the single crystal peak table.
+  * @param x :: Time of flight
+  * @param y :: Peak height (counts)
+  */
+void InstrumentWindowPickTab::addPeak(double x,double y)
+{
+  if (!m_peak->isChecked() ||  m_currentPos.getDetID() < 0) return;
+  std::string peakTableName = "SingleCrystalPeakTable";
+  Mantid::API::ITableWorkspace_sptr tw;
+  if (! Mantid::API::AnalysisDataService::Instance().doesExist(peakTableName))
+  {
+    tw = Mantid::API::WorkspaceFactory::Instance().createTable();
+    tw->addColumn("double","Qx");
+    tw->addColumn("double","Qy");
+    tw->addColumn("double","Qz");
+    Mantid::API::AnalysisDataService::Instance().add(peakTableName,tw);
+  }
+  else
+  {
+    tw = boost::dynamic_pointer_cast<Mantid::API::ITableWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(peakTableName));
+    if (!tw)
+    {
+      QMessageBox::critical(this,"Mantid - Error","Workspace " + QString::fromStdString(peakTableName) + " is not a TableWorkspace");
+      return;
+    }
+  }
+  const double mN =   1.67492729e-27;
+  const double hbar = 1.054571628e-34;
+  
+  Mantid::Geometry::IInstrument_const_sptr instr = m_currentPos.getWorkspace()->getInstrument();
+  Mantid::Geometry::IObjComponent_const_sptr source = instr->getSource();
+  Mantid::Geometry::IObjComponent_const_sptr sample = instr->getSample();
+  Mantid::Geometry::IDetector_const_sptr det = instr->getDetector(m_currentPos.getDetID());
+
+  const Mantid::Geometry::V3D samplePos = sample->getPos();
+  const Mantid::Geometry::V3D beamLine = samplePos - source->getPos();
+  double theta2 = det->getTwoTheta(samplePos,beamLine);
+  double phi = det->getPhi();
+
+  double Qx=sin(theta2)*cos(phi);
+  double Qy=sin(theta2)*sin(phi);
+  double Qz=cos(theta2)-1.0;
+  double knorm=mN*(source->getDistance(*sample) + det->getDistance(*sample))/(hbar*x*1e-6)/1e10;
+  Qx *= knorm;
+  Qy *= knorm;
+  Qz *= knorm;
+
+  Mantid::API::TableRow row = tw->appendRow();
+  row << Qx << Qy << Qz;
+
+  //std::cerr << "id=" << det->getID() << std::endl;
+  //std::cerr << "l1=" << source->getDistance(*sample) << " l2=" << det->getDistance(*sample) << std::endl;
+  //std::cerr << "2th=" << theta2/M_PI*180 << " phi=" << phi/M_PI*180 << std::endl;
 }

@@ -27,12 +27,14 @@ public:
   
   InstrumentWindowPickTab(InstrumentWindow* instrWindow);
   void updatePick(const Instrument3DWidget::DetInfo & cursorPos);
+  bool canUpdateTouchedDetector()const;
 private slots:
   void plotContextMenu();
   void sumDetectors();
   void integrateTimeBins();
   void setPlotCaption();
   void setSelectionType();
+  void addPeak(double,double);
 private:
   void updatePlot(const Instrument3DWidget::DetInfo & cursorPos);
   void updateSelectionInfo(const Instrument3DWidget::DetInfo & cursorPos);
@@ -48,6 +50,7 @@ private:
   QPushButton *m_one; ///< Button switching on single detector selection mode
   QPushButton *m_tube; ///< Button switching on detector's parent selection mode
   QPushButton *m_box; ///< Button switching on box selection mode
+  QPushButton *m_peak; ///< Button switching on box selection mode
   bool m_plotSum; 
   // Actions to set integration option for the detector's parent selection mode
   QAction *m_sumDetectors;      ///< Sets summation over detectors (m_plotSum = true)
@@ -58,6 +61,7 @@ private:
   QTextEdit* m_selectionInfoDisplay; ///< Text control for displaying selection information
   CollapsiblePanel* m_infoPanel;
   DetSelectionType m_selectionType;
+  Instrument3DWidget::DetInfo m_currentPos;
 };
 
 

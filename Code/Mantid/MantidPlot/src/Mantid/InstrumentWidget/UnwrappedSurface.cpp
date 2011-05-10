@@ -856,7 +856,7 @@ int UnwrappedSurface::getDetectorID(int x, int y)
 
 bool UnwrappedSurface::hasSelection()const
 {
-  return ! m_selectRect.isNull();
+  return ! m_selectRect.isNull() && m_selectRect.width() > 1;
 }
 
 void UnwrappedSurface::findAndCorrectUGap()

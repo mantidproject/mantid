@@ -51,6 +51,7 @@ private slots:
   void groupingButtonClick();
   void plotSpectra();
   void drawColorFillPlot();
+  void showDetectorTable();
 
 private:
   void createWorkspaceMenuActions();
@@ -85,7 +86,7 @@ private:
   QSignalMapper *m_loadMapper;
 
   //Context-menu actions
-  QAction *m_showData, *m_showInst, *m_plotSpec, *m_colorFill, *m_showLogs, *m_showHist, 
+  QAction *m_showData, *m_showInst, *m_plotSpec, *m_showDetectors, *m_colorFill, *m_showLogs, *m_showHist, 
     *m_saveNexus, *m_rename, *m_delete;
 
   static Mantid::Kernel::Logger& logObject;

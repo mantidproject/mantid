@@ -217,6 +217,9 @@ void MantidDockWidget::createWorkspaceMenuActions()
   m_colorFill = new QAction(tr("Color fill plot"), this);
   connect(m_colorFill, SIGNAL(triggered()), this, SLOT(drawColorFillPlot()));
 
+  m_showDetectors = new QAction(tr("Show Detectors"),this);
+  connect(m_showDetectors,SIGNAL(activated()),this,SLOT(showDetectorTable()));
+
   m_showLogs = new QAction(tr("Sample Logs..."), this);
   connect(m_showLogs,SIGNAL(triggered()),m_mantidUI,SLOT(showLogFileWindow()));
 
@@ -675,6 +678,7 @@ void MantidDockWidget::addMatrixWorspaceMenuItems(QMenu *menu, Mantid::API::Matr
   menu->addAction(m_colorFill);
   // Show the color fill plot if you have more than one histogram
   m_colorFill->setEnabled( ( matrixWS->axes() > 1 && matrixWS->getNumberHistograms() > 1) );
+  menu->addAction(m_showDetectors);
   menu->addAction(m_showLogs);
   menu->addAction(m_showHist);
   menu->addAction(m_saveNexus);
@@ -773,6 +777,18 @@ void MantidDockWidget::renameWorkspace()
     selctedwsName=selectedItems[0]->text(0);
   }
   m_mantidUI->renameWorkspace(selctedwsName);
+}
+
+void MantidDockWidget::showDetectorTable()
+{
+  //get selected workspace
+  QList<QTreeWidgetItem*>selectedItems=m_tree->selectedItems();
+  QString selctedwsName;
+  if(!selectedItems.empty())
+  {
+    selctedwsName=selectedItems[0]->text(0);
+  }
+  m_mantidUI->createDetectorTable(selctedwsName,std::vector<int>());
 }
 
 void MantidDockWidget::popupMenu(const QPoint & pos)

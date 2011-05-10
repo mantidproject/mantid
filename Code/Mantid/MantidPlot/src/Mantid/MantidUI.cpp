@@ -626,7 +626,18 @@ Table* MantidUI::createTableDetectors(MantidMatrix *m)
 
 Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<int>& indices, bool include_data)
 {
-  const int nrows = static_cast<int>(indices.size());
+  MatrixWorkspace_sptr ws;
+  if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
+  {
+    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
+  }
+
+  if( !ws ) 
+  {
+    return NULL;
+  }
+
+  const int nrows = indices.empty()? ws->getNumberHistograms() : static_cast<int>(indices.size());
   int ncols = 6;
   QStringList col_names;
   col_names << "Index" << "Spectra" << "Detector ID";
@@ -645,24 +656,12 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     t->setColName(col, col_names[col]);
   }
 
-  MatrixWorkspace_sptr ws;
-  if( AnalysisDataService::Instance().doesExist(wsName.toStdString()) )
-  {
-    ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName.toStdString()));
-  }
-
-  if( !ws ) 
-  {
-    delete t;
-    return NULL;
-  }
-
   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
   QList<double> col_values;
   for( int row = 0; row < nrows; ++row )
   {
-    int ws_index = indices[row];
+    int ws_index = indices.empty()? row : indices[row];
 
     int currentSpec;
     try

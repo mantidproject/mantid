@@ -128,13 +128,16 @@ void GLGroupPickBox::mouseReleased (Qt::MouseButtons buttons, const QPoint & pos
     {
       height=1;
     }
-    QImage selectedImage=mPickImage.copy(x,y,width,height);
-    for(int iPix=0;iPix<selectedImage.width();iPix++)
+    if (height > 1 && width > 1)
     {
-      for(int jPix=0;jPix<selectedImage.height();jPix++)
+      QImage selectedImage=mPickImage.copy(x,y,width,height);
+      for(int iPix=0;iPix<selectedImage.width();iPix++)
       {
-	QRgb colorVal=selectedImage.pixel(iPix,jPix);
-	colorSet.insert(colorVal);
+        for(int jPix=0;jPix<selectedImage.height();jPix++)
+        {
+          QRgb colorVal=selectedImage.pixel(iPix,jPix);
+          colorSet.insert(colorVal);
+        }
       }
     }
     mColorSet=colorSet;

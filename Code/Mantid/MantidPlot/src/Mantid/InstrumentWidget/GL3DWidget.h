@@ -50,15 +50,16 @@ class GL3DWidget : public QGLWidget
 {
   Q_OBJECT
 public:
-  enum InteractionMode {MoveMode = 0, PickMode = 1};
+  enum InteractionMode {MoveMode = 0, PickMode = 1}; ///< Move around or select things
+  enum PickType {SelectDetectors, SelectPeaks};      ///< What to select
   enum AxisDirection{ XPOSITIVE,YPOSITIVE,ZPOSITIVE,XNEGATIVE,YNEGATIVE,ZNEGATIVE};
   enum PolygonMode{ SOLID, WIREFRAME };
   enum RenderMode{ FULL3D = 0, CYLINDRICAL_Y, CYLINDRICAL_Z, CYLINDRICAL_X, SPHERICAL_Y, SPHERICAL_Z, SPHERICAL_X, RENDERMODE_SIZE };
   GL3DWidget(QWidget* parent=0); ///< Constructor
   virtual ~GL3DWidget();         ///< Destructor
   void setActorCollection(boost::shared_ptr<GLActorCollection>);
-  void setInteractionModePick();
-  void setInteractionModeNormal();
+  void setInteractionModeMove();
+  void setInteractionModePick(PickType type = SelectDetectors);
   InteractionMode getInteractionMode()const{return iInteractionMode;}
   GLActor* getPickedActor();
   void setViewDirection(AxisDirection);
@@ -72,7 +73,9 @@ public:
 signals:
   void actorsPicked(const std::set<QRgb>& );
   void actorHighlighted( QRgb );
+  void actorTouched( QRgb );
   void actorHighlighted( int );
+  void actorTouched( int );
   void increaseSelection(QRgb);                   ///< emitted while the user is draging with the left mouse button clicked over detectors
 
 public slots:
@@ -123,8 +126,9 @@ private:
   void draw3D();
   void drawUnwrapped();
 
-  QColor bgColor; ///< Background color
+  QColor bgColor;                 ///< Background color
   InteractionMode iInteractionMode;
+  PickType m_pickType;
   bool mPickingDraw;
   GLGroupPickBox* mPickBox;      ///< Picker used for user selecting a object in window
   GLActor* mPickedActor;

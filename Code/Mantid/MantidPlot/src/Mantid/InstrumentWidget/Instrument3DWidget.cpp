@@ -159,7 +159,9 @@ Instrument3DWidget::Instrument3DWidget(InstrumentWindow* parent):
 {
   connect(this, SIGNAL(actorsPicked(const std::set<QRgb>&)), this, SLOT(fireDetectorsPicked(const std::set<QRgb>&)));
   connect(this, SIGNAL(actorHighlighted(QRgb)),this,SLOT(fireDetectorHighligted(QRgb)));
+  connect(this, SIGNAL(actorTouched(QRgb)),this,SLOT(fireDetectorTouched(QRgb)));
   connect(this, SIGNAL(actorHighlighted(int)),this,SLOT(fireDetectorHighligted(int)));
+  connect(this, SIGNAL(actorTouched(int)),this,SLOT(fireDetectorTouched(int)));
   connect(this, SIGNAL(increaseSelection(QRgb)),this,SLOT(detectorsHighligted(QRgb)));
 
   m_ExtractDetsToWorkspaceAction = new QAction("Extract to new workspace",this);
@@ -238,6 +240,20 @@ void Instrument3DWidget::fireDetectorHighligted(QRgb pickedColor)
   //send this detector information off
   emit actionDetectorHighlighted(m_detInfo);
 }
+void Instrument3DWidget::fireDetectorTouched(QRgb pickedColor)
+{
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
+  //get the data for the detector currently under the cursor
+  const int iDetId = mInstrumentActor->getDetectorIDFromColor(qRed(pickedColor)*65536 + qGreen(pickedColor)*256 + qBlue(pickedColor));
+
+  //retrieve information about the selected detector
+  m_detInfo.setDet(iDetId);
+  //send this detector information off
+  emit actionDetectorTouched(m_detInfo);
+}
 /**
  * This method is the slot when the detector is highlighted using mouse move. This method emits
  * signals the id of the detector and the spectra index(not spectra number).
@@ -266,6 +282,15 @@ void Instrument3DWidget::fireDetectorHighligted(int detID)
   }
   m_detInfo.setDet(detID);
   emit actionDetectorHighlighted(m_detInfo);
+}
+void Instrument3DWidget::fireDetectorTouched(int detID)
+{
+  if (m_instrumentWindow->blocked())
+  {
+    return;
+  }
+  m_detInfo.setDet(detID);
+  emit actionDetectorTouched(m_detInfo);
 }
 //------------------------------------------------------------------------------------------------
 /**

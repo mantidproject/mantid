@@ -117,6 +117,11 @@ void OneCurvePlot::mousePressEvent(QMouseEvent* e)
     e->accept();
     emit showContextMenu();
   }
+  if (e->buttons() & Qt::LeftButton)
+  {
+    e->accept();
+    emit clickedAt(invTransform(xBottom,e->x()),invTransform(yLeft,e->y()));
+  }
 }
 
 void OneCurvePlot::setYAxisLabelRotation(double degrees)
