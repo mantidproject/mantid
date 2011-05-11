@@ -268,7 +268,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
 
     // check if parameter are specified in instrument definition file
 
-    Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
+    const Geometry::ParameterMap& paramMap = m_workspace->instrumentParameters();
 
     // in some tests where workspace a created on the fly a spectra to detector map
     // is for convenience not created. 

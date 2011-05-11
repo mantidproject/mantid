@@ -103,7 +103,7 @@ namespace Algorithms
   {
 
     // Get the input workspace
-    MatrixWorkspace_const_sptr inputW = getProperty("InputWorkspace");
+    MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
 
     //Get some stuff from the input workspace
     IInstrument_sptr inst = inputW->getInstrument();
@@ -267,8 +267,8 @@ namespace Algorithms
         Geometry::ParameterMap& pmap = inputW->instrumentParameters();
 
         // Set or overwrite "rot" instrument parameter.
-	pmap.addQuat(comp.get(),"rot",Rot);
-                std::cout <<Rot<<"\n";
+        pmap.addQuat(comp.get(),"rot",Rot);
+        std::cout <<Rot<<"\n";
 
       } 
     } 

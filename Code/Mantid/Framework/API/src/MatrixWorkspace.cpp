@@ -534,15 +534,24 @@ namespace Mantid
     *
     *  @return The instrument class
     */
-    boost::shared_ptr<Instrument> MatrixWorkspace::getBaseInstrument()const
+    boost::shared_ptr<Instrument> MatrixWorkspace::getBaseInstrument() const
     {
       return sptr_instrument;
     }
 
+    /**  Returns a const reference to the instrument parameters.
+    *    @return a const reference to the instrument ParameterMap.
+    */
+    const Geometry::ParameterMap& MatrixWorkspace::instrumentParameters() const
+    {
+      return *m_parmap.get();
+    }
+
+
     /**  Returns a new copy of the instrument parameters
     *    @return a (new) copy of the instruments parameter map
     */
-    Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()const
+    Geometry::ParameterMap& MatrixWorkspace::instrumentParameters()
     {
       //TODO: Here duplicates cow_ptr. Figure out if there's a better way
 
@@ -564,7 +573,6 @@ namespace Mantid
       }
 
       return *m_parmap;
-
       //return m_parmap.access(); //old cow_ptr thing
     }
 

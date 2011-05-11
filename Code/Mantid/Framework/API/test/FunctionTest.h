@@ -444,7 +444,7 @@ public:
   void test_setWorkspace_works_inParallel()
   {
     double expected;
-    int numpixels = 5000;
+    int numpixels = 15000;
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,10);
     for (int wi=0; wi<ws->getNumberHistograms(); wi++)
     {
@@ -460,7 +460,7 @@ public:
     }
 
     // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
-    //PARALLEL_FOR_NO_WSP_CHECK()
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<numpixels; i++)
     {
       IFT_Funct f;

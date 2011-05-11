@@ -72,7 +72,7 @@ public:
     MatrixWorkspace_const_sptr WS = boost::dynamic_pointer_cast<MatrixWorkspace>(
         AnalysisDataService::Instance().retrieve(m_InoutWS));
 
-    ParameterMap& pmap = WS->instrumentParameters();
+    const ParameterMap& pmap = WS->instrumentParameters();
 
     for ( int j = 0; j < NDETECTS; ++j)
     {

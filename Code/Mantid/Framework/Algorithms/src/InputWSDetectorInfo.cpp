@@ -14,7 +14,7 @@ using namespace API;
 * @param input :: A pointer to a workspace that contains instrument information
 * @throw invalid_argument if there is no instrument information in the workspace
 */
-InputWSDetectorInfo::InputWSDetectorInfo(API::MatrixWorkspace_const_sptr input) :
+InputWSDetectorInfo::InputWSDetectorInfo(API::MatrixWorkspace_sptr input) :
   m_Input(input), m_Pmap(NULL)
 {
   // first something that points to the detectors

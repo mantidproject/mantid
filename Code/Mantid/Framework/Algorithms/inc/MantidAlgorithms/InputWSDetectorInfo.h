@@ -47,14 +47,14 @@ namespace Mantid
     class InputWSDetectorInfo
     {
     public:
-      explicit InputWSDetectorInfo(API::MatrixWorkspace_const_sptr input);
+      explicit InputWSDetectorInfo(API::MatrixWorkspace_sptr input);
       bool aDetecIsMaskedinSpec(int SpecIndex) const;
       void maskAllDetectorsInSpec(int SpecIndex);
       int getSpecNum(int SpecIndex) const;
       std::vector<int> getDetectors(int SpecIndex) const;
     protected:
       /// a pointer the workspace with the detector information
-      const API::MatrixWorkspace_const_sptr m_Input;
+      const API::MatrixWorkspace_sptr m_Input;
       /// following the example MaskDetectors write to this version of the instrument
       boost::shared_ptr<Geometry::Instrument> m_WInstru;
       /// when we read need to read from here

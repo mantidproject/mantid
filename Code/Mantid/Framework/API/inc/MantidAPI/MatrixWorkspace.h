@@ -122,7 +122,8 @@ namespace Mantid
       virtual size_t getMemorySizeForXAxes() const;
 
       /// Returns the set of parameters modifying the base instrument
-      Geometry::ParameterMap& instrumentParameters()const;
+      const Geometry::ParameterMap& instrumentParameters() const;
+      Geometry::ParameterMap& instrumentParameters();
       /// Const version
       const Geometry::ParameterMap& constInstrumentParameters() const;
       // Add parameters to the instrument parameter map
@@ -329,8 +330,7 @@ namespace Mantid
       bool m_isDistribution;
 
       /// Parameters modifying the base instrument
-      //mutable Kernel::cow_ptr<Geometry::ParameterMap> m_parmap;
-      mutable boost::shared_ptr<Geometry::ParameterMap> m_parmap;
+      boost::shared_ptr<Geometry::ParameterMap> m_parmap;
 
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int, MaskList > m_masks;
