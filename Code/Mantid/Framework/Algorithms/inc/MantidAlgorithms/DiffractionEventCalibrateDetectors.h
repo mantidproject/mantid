@@ -1,14 +1,12 @@
 #ifndef MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORS_H_
 #define MANTID_ALGORITHMS_DIFFRACTIONEVENTCALIBRATEDETECTORS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
-#include <gsl/gsl_statistics.h>
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 #include <gsl/gsl_multimin.h>
-#include <gsl/gsl_blas.h>
+#include <gsl/gsl_statistics.h>
 
 namespace Mantid
 {
@@ -54,7 +52,7 @@ public:
   /// Algorithm's category for identification overriding a virtual method
   virtual const std::string category() const { return "Diffraction"; }
   /// Function to optimize
-  double intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param);
+  double intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param, std::string groupWSName);
   void movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, API::MatrixWorkspace_sptr inputW);
 
 private:

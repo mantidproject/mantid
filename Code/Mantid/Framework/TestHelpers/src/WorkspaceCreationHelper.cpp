@@ -213,6 +213,7 @@ namespace WorkspaceCreationHelper
   }
 
 
+  //================================================================================================================
   /**
    * Create a test workspace with a fully defined instrument
    * Each spectra will have a cylindrical detector defined 2*cylinder_radius away from the centre of the
@@ -282,6 +283,34 @@ namespace WorkspaceCreationHelper
     return space;
   }
 
+
+  //================================================================================================================
+  /** Create an Eventworkspace with an instrument that contains RectangularDetector's
+   *
+   * @param numBanks :: number of rectangular banks
+   * @param numPixels :: each bank will be numPixels*numPixels
+   * @return The EventWorkspace
+   */
+  Mantid::DataObjects::EventWorkspace_sptr createEventWorkspaceWithFullInstrument(int numBanks, int numPixels)
+  {
+    IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(numBanks, numPixels);
+    EventWorkspace_sptr ws = CreateEventWorkspace2(numBanks*numPixels*numPixels, 10);
+    ws->setInstrument(inst);
+    ws->getAxis(0)->setUnit("dSpacing");
+    int detID = numPixels*numPixels;
+    for (int wi=0; wi<ws->getNumberHistograms(); wi++)
+    {
+      ws->getEventList(wi).clear(true);
+      ws->getEventList(wi).addDetectorID(detID);
+      detID++;
+    }
+    ws->doneAddingEventLists();
+    // std::vector<int> dets = ws->getInstrument()->getDetectorIDs();  std::cout << dets.size() << " dets found " << dets[0] <<","<<dets[1]<<"\n";
+    return ws;
+  }
+
+
+  //================================================================================================================
   WorkspaceSingleValue_sptr CreateWorkspaceSingleValue(double value)
   {
     WorkspaceSingleValue_sptr retVal(new WorkspaceSingleValue(value,sqrt(value)));

@@ -19,6 +19,8 @@
 #include <numeric>
 #include <Poco/File.h>
 #include <sstream>
+#include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidAPI/AlgorithmFactory.h"
 
 namespace Mantid
 {
@@ -61,13 +63,14 @@ namespace Algorithms
   static double gsl_costFunction(const gsl_vector *v, void *params)
   {
     double x, y, z, rotx, roty, rotz;
-    std::string detname, inname, outname, peakOpt, rb_param;
+    std::string detname, inname, outname, peakOpt, rb_param, groupWSName;
     std::string *p = (std::string *)params;
     detname = p[0];
     inname = p[1];
     outname = p[2];
     peakOpt = p[3];
     rb_param = p[4];
+    groupWSName = p[5];
     x = gsl_vector_get(v, 0);
     y = gsl_vector_get(v, 1);
     z = gsl_vector_get(v, 2);
@@ -75,7 +78,7 @@ namespace Algorithms
     roty = gsl_vector_get(v, 4);
     rotz = gsl_vector_get(v, 5);
     Mantid::Algorithms::DiffractionEventCalibrateDetectors u;
-    return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, peakOpt, rb_param);
+    return u.intensity(x, y, z, rotx, roty, rotz, detname, inname, outname, peakOpt, rb_param, groupWSName);
   }
 
 /**
@@ -90,7 +93,8 @@ namespace Algorithms
  * @param inputW :: The workspace
  */
 
-  void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, MatrixWorkspace_sptr inputW)
+  void DiffractionEventCalibrateDetectors::movedetector(double x, double y, double z, double rotx, double roty, double rotz,
+      std::string detname, MatrixWorkspace_sptr inputW)
   {
 
     IAlgorithm_sptr alg1 = createSubAlgorithm("MoveInstrumentComponent");
@@ -101,15 +105,7 @@ namespace Algorithms
     alg1->setProperty("Y", y*0.01);
     alg1->setProperty("Z", z*0.01);
     alg1->setPropertyValue("RelativePosition", "1");
-    try
-    {
-      alg1->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run MoveInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing MoveInstrumentComponent as a sub algorithm.");
-    }
+    alg1->executeAsSubAlg();
 
 
     IAlgorithm_sptr algx = createSubAlgorithm("RotateInstrumentComponent");
@@ -120,15 +116,7 @@ namespace Algorithms
     algx->setProperty("Z", 0.0);
     algx->setProperty("Angle", rotx);
     algx->setPropertyValue("RelativeRotation", "1");
-    try
-    {
-      algx->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run RotateInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing RotateInstrumentComponent as a sub algorithm.");
-    }
+    algx->executeAsSubAlg();
 
 
     IAlgorithm_sptr algy = createSubAlgorithm("RotateInstrumentComponent");
@@ -139,15 +127,7 @@ namespace Algorithms
     algy->setProperty("Z", 0.0);
     algy->setProperty("Angle", roty);
     algy->setPropertyValue("RelativeRotation", "1");
-    try
-    {
-      algy->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run RotateInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing RotateInstrumentComponent as a sub algorithm.");
-    }
+    algy->executeAsSubAlg();
 
     IAlgorithm_sptr algz = createSubAlgorithm("RotateInstrumentComponent");
     algz->setProperty<MatrixWorkspace_sptr>("Workspace", inputW);
@@ -157,15 +137,7 @@ namespace Algorithms
     algz->setProperty("Z", 1.0);
     algz->setProperty("Angle", rotz);
     algz->setPropertyValue("RelativeRotation", "1");
-    try
-    {
-      algz->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run RotateInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing RotateInstrumentComponent as a sub algorithm.");
-    }
+    algz->executeAsSubAlg();
   }
 /**
  * The intensity function calculates the intensity as a function of detector position and angles
@@ -180,9 +152,12 @@ namespace Algorithms
  * @param outname :: The workspace name
  * @param peakOpt :: Location of optimized peak
  * @param rb_param :: Bin boundary string
- */
+ * @param groupWS :: GroupingWorkspace for this detector only.
+ *  */
 
-  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz, std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param)
+  double DiffractionEventCalibrateDetectors::intensity(double x, double y, double z, double rotx, double roty, double rotz,
+      std::string detname, std::string inname, std::string outname, std::string peakOpt, std::string rb_param,
+      std::string groupWSName)
   {
 
     MatrixWorkspace_sptr inputW = boost::dynamic_pointer_cast<MatrixWorkspace>
@@ -192,38 +167,13 @@ namespace Algorithms
     CPUTimer tim;
 
     movedetector(x, y, z, rotx, roty, rotz, detname, inputW);
-    IAlgorithm_sptr alg2 = createSubAlgorithm("CreateCalFileByNames");
-    alg2->setProperty<MatrixWorkspace_sptr>("InstrumentWorkspace", inputW);
-    std::string outputFile;
-    outputFile = detname+".cal";
-    alg2->setPropertyValue("GroupingFileName", outputFile);
-    alg2->setPropertyValue("GroupNames", detname);
-    try
-    {
-      alg2->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run CreateCalFileByNames sub-algorithm.");
-      throw std::runtime_error("Error while executing CreateCalFileByNames as a sub algorithm.");
-    }
-
-    if (debug) std::cout << tim << " to CreateCalFileByNames" << std::endl;
+    if (debug) std::cout << tim << " to movedetector()" << std::endl;
 
     IAlgorithm_sptr alg3 = createSubAlgorithm("ConvertUnits");
     alg3->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputW);
     alg3->setPropertyValue("OutputWorkspace", outname);
-    //alg3->setPropertyValue("CalibrationFile", outputFile);
     alg3->setPropertyValue("Target","dSpacing");
-    try
-    {
-      alg3->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run ConvertUnits sub-algorithm");
-      throw std::runtime_error("Error while executing ConvertUnits as a sub algorithm.");
-    }
+    alg3->executeAsSubAlg();
     MatrixWorkspace_sptr outputW=alg3->getProperty("OutputWorkspace");
 
     if (debug) std::cout << tim << " to ConvertUnits" << std::endl;
@@ -231,36 +181,19 @@ namespace Algorithms
     IAlgorithm_sptr alg4 = createSubAlgorithm("DiffractionFocussing");
     alg4->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg4->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
-    alg4->setPropertyValue("GroupingFileName", outputFile);
-    try
-    {
-      alg4->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run DiffractionFocussing sub-algorithm");
-      throw std::runtime_error("Error while executing DiffractionFocussing as a sub algorithm.");
-    }
+    alg4->setPropertyValue("GroupingFileName", "");
+    alg4->setPropertyValue("GroupingWorkspace", groupWSName);
+    alg4->executeAsSubAlg();
     outputW=alg4->getProperty("OutputWorkspace");
-    //Remove file
-    if (Poco::File(outputFile).exists())
-      Poco::File(outputFile).remove();
 
+    //Remove file
     if (debug) std::cout << tim << " to DiffractionFocussing" << std::endl;
 
     IAlgorithm_sptr alg5 = createSubAlgorithm("Rebin");
     alg5->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
     alg5->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", outputW);
     alg5->setPropertyValue("Params", rb_param);
-    try
-    {
-      alg5->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run Rebin sub-algorithm");
-      throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
-    }
+    alg5->executeAsSubAlg();
     outputW=alg5->getProperty("OutputWorkspace");
 
     if (debug) std::cout << tim << " to Rebin" << std::endl;
@@ -321,7 +254,9 @@ namespace Algorithms
     //Optimize C/peakheight + |peakLoc-peakOpt|  where C is scaled by number of events
     EventWorkspace_const_sptr inputE = boost::dynamic_pointer_cast<const EventWorkspace>( inputW );
     return (inputE->getNumberEvents()/1.e6)/peakHeight+std::fabs(peakLoc-boost::lexical_cast<double>(peakOpt));
-}
+  }
+
+
   /** Initialisation method
   */
   void DiffractionEventCalibrateDetectors::init()
@@ -485,13 +420,13 @@ namespace Algorithms
       outfile << "4 DETNUM  NROWS  NCOLS  WIDTH   HEIGHT   DEPTH   DETD   CenterX   CenterY   CenterZ    BaseX    BaseY    BaseZ      UpX      UpY      UpZ\n";
     }
 
-    Progress prog(this,0.0,1.0,detList.size());
+    Progress prog(this,0.0,1.0,detList.size()*(maxIterations+1));
     //omp_set_nested(1);
     //PARALLEL_FOR1(inputW)
     for (int det=0; det < static_cast<int>(detList.size()); det++)
     {
-      //PARALLEL_START_INTERUPT_REGION
-      std::string par[5];
+//      PARALLEL_START_INTERUPT_REGION
+      std::string par[6];
       par[0]=detList[det]->getName();
       par[1]=inname;
       par[2]=outname;
@@ -499,6 +434,19 @@ namespace Algorithms
       strpeakOpt<<peakOpt;
       par[3]=strpeakOpt.str();
       par[4]=rb_params;
+
+      // --- Create a GroupingWorkspace for this detector name ------
+      CPUTimer tim;
+      IAlgorithm_sptr alg2 = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+      alg2->initialize();
+      alg2->setPropertyValue("InputWorkspace", getPropertyValue("InputWorkspace"));
+      alg2->setPropertyValue("GroupNames", detList[det]->getName());
+      std::string groupWSName = "group_" + detList[det]->getName();
+      alg2->setPropertyValue("OutputWorkspace", groupWSName);
+      alg2->executeAsSubAlg();
+      par[5] = groupWSName;
+      std::cout << tim << " to CreateGroupingWorkspace" << std::endl;
+
       const gsl_multimin_fminimizer_type *T =
       gsl_multimin_fminimizer_nmsimplex;
       gsl_multimin_fminimizer *s = NULL;
@@ -544,6 +492,7 @@ namespace Algorithms
         size = gsl_multimin_fminimizer_size (s);
         status = gsl_multimin_test_size (size, 1e-2);
 
+        prog.report(detList[det]->getName());
       }
       while (status == GSL_CONTINUE && iter < maxIterations && s->fval != -0.000 );
 
@@ -657,8 +606,11 @@ namespace Algorithms
       gsl_vector_free(x);
       gsl_vector_free(ss);
       gsl_multimin_fminimizer_free (s);
+
+      // Remove the now-unneeded grouping workspace
+      AnalysisDataService::Instance().remove("groupWSName");
       prog.report();
-      //PARALLEL_END_INTERUPT_REGION
+//      PARALLEL_END_INTERUPT_REGION
     }
     //PARALLEL_CHECK_INTERUPT_REGION
 

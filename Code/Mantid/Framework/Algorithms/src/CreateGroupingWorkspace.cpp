@@ -252,27 +252,33 @@ namespace Algorithms
     else if (OldCalFilename != "")
       readGroupingFile(OldCalFilename, detIDtoGroup, prog);
 
+    g_log.information() << detIDtoGroup.size() << " entries in the detectorID-to-group map.\n";
+
+
+
     if (detIDtoGroup.size() != 0)
     {
       size_t numNotFound = 0;
+
       // Make the groups, if any
       IndexToIndexMap::const_iterator it_end = detIDtoGroup.end();
-      for (size_t wi=0; wi < outWS->getNumberHistograms(); wi++)
+      IndexToIndexMap::const_iterator it;
+      for (it = detIDtoGroup.begin(); it != it_end; it++)
       {
-        int detID = outWS->getDetectorID(wi);
-        // Look for that detector in the map.
-        IndexToIndexMap::const_iterator it = detIDtoGroup.find(detID);
-        if (it != it_end)
+        int detID = it->first;
+        int group = it->second;
+        try
         {
-          // Save the group value in the workspace
-          outWS->dataY(wi)[0] = double(it->second);
+          outWS->setValue(detID, double(group));
         }
-        else
+        catch (std::invalid_argument & e)
+        {
           numNotFound++;
+        }
       }
 
       if (numNotFound > 0)
-        g_log.warning() << numNotFound << " detector IDs listed in the .cal file were not found in the instrument\n.";
+        g_log.warning() << numNotFound << " detector IDs (out of " << detIDtoGroup.size() << ") were not found in the instrument\n.";
 
     }
 

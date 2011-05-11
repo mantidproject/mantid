@@ -336,6 +336,7 @@ set ( TEST_FILES
 	test/DeleteWorkspaceTest.h
 	test/DetectorEfficiencyCorTest.h
 	test/DetectorEfficiencyVariationTest.h
+	test/DiffractionEventCalibrateDetectorsTest.h
 	test/DiffractionEventReadDetCalTest.h
 	test/DiffractionFocussing2Test.h
 	test/DiffractionFocussingTest.h
@@ -349,7 +350,7 @@ set ( TEST_FILES
 	test/FFTDerivativeTest.h
 	test/FFTSmooth2Test.h
 	test/FFTTest.h
-  	test/FilterBadPulsesTest.h
+	test/FilterBadPulsesTest.h
 	test/FilterByLogValueTest.h
 	test/FilterByTimeTest.h
 	test/FindCenterOfMassPosition2Test.h
