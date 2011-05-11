@@ -527,11 +527,7 @@ namespace Mantid
     */
     IInstrument_sptr MatrixWorkspace::getInstrument()const
     {
-      // Instruments are not always parameterized!
-      if (sptr_instrument->isParametrized())
-        return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
-      else
-        return sptr_instrument;
+      return Geometry::ParComponentFactory::createInstrument(sptr_instrument, m_parmap);
     }
 
     /** Get a shared pointer to the instrument associated with this workspace
