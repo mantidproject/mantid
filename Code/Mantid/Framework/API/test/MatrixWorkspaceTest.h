@@ -42,9 +42,11 @@ public:
   MantidVec& dataX(int const ) {return vec;}
   MantidVec& dataY(int const ) {return vec;}
   MantidVec& dataE(int const ) {return vec;}
+  MantidVec& dataDx(int const ) {return vec;}
   const MantidVec& dataX(int const) const {return vec;}
   const MantidVec& dataY(int const) const {return vec;}
   const MantidVec& dataE(int const) const {return vec;}
+  const MantidVec& dataDx(int const) const {return vec;}
   Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
   void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
 
@@ -90,9 +92,11 @@ public:
   MantidVec& dataX(int const ) {return vec;}
   MantidVec& dataY(int const ) {return vec;}
   MantidVec& dataE(int const ) {return vec;}
+  MantidVec& dataDx(int const ) {return vec;}
   const MantidVec& dataX(int const) const {return vec;}
   const MantidVec& dataY(int const) const {return vec;}
   const MantidVec& dataE(int const) const {return vec;}
+  const MantidVec& dataDx(int const) const {return vec;}
   Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
   void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
 
@@ -145,9 +149,11 @@ public:
   MantidVec& dataX(int const i) {return vec[i];}
   MantidVec& dataY(int const i) {return vec[i];}
   MantidVec& dataE(int const i) {return vec[i];}
+  MantidVec& dataDx(int const i) {return vec[i];}
   const MantidVec& dataX(int const i) const {return vec[i];}
   const MantidVec& dataY(int const i) const {return vec[i];}
   const MantidVec& dataE(int const i) const {return vec[i];}
+  const MantidVec& dataDx(int const i) const {return vec[i];}
   Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
   void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
 

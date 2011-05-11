@@ -69,12 +69,16 @@ public:
   // Reimplemented these Histogram1D methods simply to hide the other ones
   /// Sets the x data.
   void setX(const MantidVecPtr& X) { Histogram1D::setX(X); }
+  /// Sets the x data and error.
+  void setX(const MantidVecPtr& X, const MantidVecPtr& dX) { Histogram1D::setX(X,dX); }
   /// Sets the data.
   void setData(const MantidVecPtr& Y) { Histogram1D::setData(Y); }
   /// Sets the data and errors
   void setData(const MantidVecPtr& Y, const MantidVecPtr& E) { Histogram1D::setData(Y,E); }  
   /// Sets the x data
   void setX(const MantidVecPtr::ptr_type& X) { Histogram1D::setX(X); }
+  /// Sets the x data and error
+  void setX(const MantidVecPtr::ptr_type& X, const MantidVecPtr::ptr_type& dX) { Histogram1D::setX(X,dX); }
   /// Sets the data and errors
   void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { Histogram1D::setData(Y,E); }  
   
@@ -84,12 +88,16 @@ public:
   virtual MantidVec& dataY(int const index) { (void) index; return Histogram1D::dataY(); }
   ///Returns the error data
   virtual MantidVec& dataE(int const index) { (void) index; return Histogram1D::dataE(); }
+  ///Returns the x error data
+  virtual MantidVec& dataDx(int const index) { (void) index; return Histogram1D::dataDx(); }
   /// Returns the x data const
   virtual const MantidVec& dataX(int const index) const { (void) index; return dataX();}
   /// Returns the y data const
   virtual const MantidVec& dataY(int const index) const { (void) index; return dataY();}
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const { (void) index; return dataE();}
+  /// Returns the x error const
+  virtual const MantidVec& dataDx(int const index) const { (void) index; return dataDx();}
 
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const { (void) index; return Histogram1D::ptrX(); }
@@ -102,12 +110,16 @@ public:
   virtual MantidVec& dataY() { return Histogram1D::dataY(); }
   ///Returns non-const vector of the error data
   virtual MantidVec& dataE() { return Histogram1D::dataE(); }
+  ///Returns non-const vector of the x error data
+  virtual MantidVec& dataDx() { return Histogram1D::dataDx(); }
   /// Returns the x data const
   virtual const MantidVec& dataX() const { return Histogram1D::dataX(); }
   /// Returns the y data const
   virtual const MantidVec& dataY() const { return Histogram1D::dataY(); }
   /// Returns the error data const
   virtual const MantidVec& dataE() const { return Histogram1D::dataE(); }
+  /// Returns the x error data const
+  virtual const MantidVec& dataDx() const { return Histogram1D::dataDx(); }
 
 private:
   /// Private copy constructor. NO COPY ALLOWED

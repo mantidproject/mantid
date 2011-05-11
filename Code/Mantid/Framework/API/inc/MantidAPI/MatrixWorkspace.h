@@ -159,6 +159,9 @@ namespace Mantid
       /// Returns a read-only (i.e. const) reference to the specified E array
       /// @param index :: workspace index to retrieve.
       const MantidVec& readE(int const index) const { return dataE(index); }
+      /// Returns a read-only (i.e. const) reference to the specified X error array
+      /// @param index :: workspace index to retrieve.
+      const MantidVec& readDx(int const index) const { return dataDx(index); }
 
       /** Returns a read-only (i.e. const) reference to both the Y
        * and E arrays
@@ -178,12 +181,16 @@ namespace Mantid
       virtual MantidVec& dataY(int const index) = 0;
       /// Returns the error data
       virtual MantidVec& dataE(int const index) = 0;
+      /// Returns the x error data
+      virtual MantidVec& dataDx(int const index) = 0;
       /// Returns the x data const
       virtual const MantidVec& dataX(int const index) const = 0;
       /// Returns the y data const
       virtual const MantidVec& dataY(int const index) const = 0;
       /// Returns the error const
       virtual const MantidVec& dataE(int const index) const = 0;
+      /// Returns the error const
+      virtual const MantidVec& dataDx(int const index) const = 0;
 
       /// Returns a pointer to the x data
       virtual Kernel::cow_ptr<MantidVec> refX(const int index) const = 0;

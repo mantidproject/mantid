@@ -1271,12 +1271,44 @@ namespace DataObjects
     this->refX.access()=X;
   }
 
+  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
+   * @param X :: The vector of doubles to set as the histogram limits.
+   */
+  void EventList::setDx(const MantidVecPtr::ptr_type& dX)
+  {
+    this->refX = dX;
+  }
+
+  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
+   * @param X :: The vector of doubles to set as the histogram limits.
+   */
+  void EventList::setDx(const MantidVecPtr& dX)
+  {
+    this->refDx = dX;
+  }
+
+  /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
+   * @param X :: The vector of doubles to set as the histogram limits.
+   */
+  void EventList::setDx(const MantidVec& dX)
+  {
+    this->refDx.access()=dX;
+  }
+
   /** Returns a reference to the x data.
    *  @return a reference to the X (bin) vector.
    */
   MantidVec& EventList::dataX()
   {
     return this->refX.access();
+  }
+
+  /** Returns a reference to the x error data.
+   *  @return a reference to the X (bin) error vector.
+   */
+  MantidVec& EventList::dataDx()
+  {
+    return this->refDx.access();
   }
 
   // ==============================================================================================
@@ -1295,6 +1327,14 @@ namespace DataObjects
   const MantidVec& EventList::dataX() const
   {
     return *(this->refX);
+  }
+
+  /** Returns the x error data.
+   * @return a const reference to the X (bin) error vector.
+   *  */
+  const MantidVec& EventList::dataDx() const
+  {
+    return *(this->refDx);
   }
 
   /** Returns a reference to the X data

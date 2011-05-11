@@ -45,7 +45,7 @@ namespace Mantid
       t2.access().resize(YLength);
       for (int i=0;i<m_noVectors;i++)
       {
-        this->setX(i,t1);
+        this->setX(i,t1,t1);
         // Y,E arrays populated
         this->setData(i,t2,t2);
       }
@@ -68,6 +68,22 @@ namespace Mantid
     }
 
     /**
+    Set the x values and errors
+    @param histnumber :: Index to the histogram
+    @param Vec :: Shared ptr base object
+    */
+    void Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec, const MantidVecPtr::ptr_type& Err)
+    {
+
+      if (histnumber<0 || histnumber>=m_noVectors)
+        throw std::range_error("Workspace2D::setX, histogram number out of range");
+
+      data[histnumber].setX(Vec, Err);
+
+      return;
+    }
+
+    /**
     Set the x values
     @param histnumber :: Index to the histogram
     @param PA :: Reference counted histogram
@@ -78,6 +94,21 @@ namespace Mantid
         throw std::range_error("Workspace2D::setX, histogram number out of range");
       
       data[histnumber].setX(PA);
+
+      return;
+    }
+
+    /**
+    Set the x values and errors
+    @param histnumber :: Index to the histogram
+    @param PA :: Reference counted histogram
+    */
+    void Workspace2D::setX(const int histnumber, const MantidVecPtr& PA, const MantidVecPtr& Err)
+    {
+      if (histnumber<0 || histnumber>=m_noVectors)
+        throw std::range_error("Workspace2D::setX, histogram number out of range");
+
+      data[histnumber].setX(PA, Err);
 
       return;
     }
@@ -177,6 +208,19 @@ namespace Mantid
       return data[index].dataE();
     }
 
+    /**
+    Get the error x data for a specified histogram
+    @param index :: The number of the histogram
+    @return A vector of doubles containing the error x data
+    */
+    const MantidVec& Workspace2D::dataDx(const int index) const
+    {
+      if (index<0 || index>=m_noVectors)
+        throw std::range_error("Workspace2D::dataDx, histogram number out of range");
+
+      return data[index].dataDx();
+    }
+
     /// get pseudo size
     int Workspace2D::size() const
     {
@@ -219,6 +263,15 @@ namespace Mantid
       return data[index].dataE();
     }
     
+    ///Returns the error x data
+    MantidVec& Workspace2D::dataDx(int const index)
+    {
+      if (index<0 || index>=m_noVectors)
+        throw std::range_error("Workspace2D::dataDx, histogram number out of range");
+
+      return data[index].dataDx();
+    }
+
     /// Returns a pointer to the x data
     Kernel::cow_ptr<MantidVec> Workspace2D::refX(const int index) const
     {

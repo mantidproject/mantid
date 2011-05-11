@@ -248,9 +248,11 @@ using namespace boost::python;
       .def("readX", &PythonAPI::MatrixWorkspaceWrapper::readX)
       .def("readY", &PythonAPI::MatrixWorkspaceWrapper::readY)
       .def("readE", &PythonAPI::MatrixWorkspaceWrapper::readE)
+      .def("readDx", &PythonAPI::MatrixWorkspaceWrapper::readDx)
       .def("dataX", (data_modifier)&API::MatrixWorkspace::dataX, return_internal_reference<>() ) 
       .def("dataY", (data_modifier)&API::MatrixWorkspace::dataY, return_internal_reference<>() )
       .def("dataE", (data_modifier)&API::MatrixWorkspace::dataE, return_internal_reference<>() )
+      .def("dataDx", (data_modifier)&API::MatrixWorkspace::dataDx, return_internal_reference<>() )
       .def("isDistribution", (const bool& (API::MatrixWorkspace::*)() const)&API::MatrixWorkspace::isDistribution, 
          return_value_policy< copy_const_reference >() )
       .def("setYUnitLabel", &API::MatrixWorkspace::setYUnitLabel)

@@ -49,9 +49,11 @@ namespace Mantid { namespace DataObjects {
     MantidVec& dataX(int const i) {return m_dataX.at(i);}
     MantidVec& dataY(int const i) {return m_dataY.at(i);}
     MantidVec& dataE(int const i) {return m_dataE.at(i);}
+    MantidVec& dataDx(int const i) {return m_dataE.at(i);}
     const MantidVec& dataX(int const i) const {return m_dataX.at(i);}
     const MantidVec& dataY(int const i) const {return m_dataY.at(i);}
     const MantidVec& dataE(int const i) const {return m_dataE.at(i);}
+    const MantidVec& dataDx(int const i) const {return m_dataE.at(i);}
     Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
     void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
 

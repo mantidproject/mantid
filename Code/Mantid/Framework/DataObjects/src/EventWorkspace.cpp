@@ -640,6 +640,17 @@ namespace DataObjects
     return this->data[index]->dataX();
   }
 
+  /// Return the data X error vector at a given workspace index
+  /// Note: the MRUlist should be cleared before calling getters for the Y or E data
+  /// @param index :: the workspace index to return
+  /// @returns A reference to the vector of binned error values
+  MantidVec& EventWorkspace::dataDx(const int index)
+  {
+    if ((index >= this->m_noVectors) || (index < 0))
+      throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
+    return this->data[index]->dataDx();
+  }
+
   /// Return the data Y vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
@@ -725,6 +736,14 @@ namespace DataObjects
     if ((index >= this->m_noVectors) || (index < 0))
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
+  }
+
+  /// Return the const data X error vector at a given workspace index
+  const MantidVec& EventWorkspace::dataDx(const int index) const
+  {
+    if ((index >= this->m_noVectors) || (index < 0))
+      throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
+    return this->data[index]->dataDx();
   }
 
 

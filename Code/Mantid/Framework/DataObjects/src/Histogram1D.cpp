@@ -19,7 +19,7 @@ Histogram1D::Histogram1D()
  @param A :: Histogram to copy
  */
 Histogram1D::Histogram1D(const Histogram1D& A) :
-  refX(A.refX), refY(A.refY), refE(A.refE)
+  refX(A.refX), refY(A.refY), refE(A.refE), refDx(A.refDx)
 {}
 
 /**
@@ -34,6 +34,7 @@ Histogram1D& Histogram1D::operator=(const Histogram1D& A)
     refX=A.refX;
     refY=A.refY;
     refE=A.refE;
+    refDx=A.refDx;
   }
   return *this;
 }

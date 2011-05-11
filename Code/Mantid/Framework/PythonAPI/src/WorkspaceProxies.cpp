@@ -52,6 +52,17 @@ namespace Mantid
       return MantidVecHelper::createPythonWrapper(self.readE(index), true);
     }
 
+    /**
+    * Returns the Dx values from the spectra at the given index wrapped in a read-only numpy array
+    * @param self :: A reference to the workspace
+    * @param index :: The index of the workspace
+    * @returns A numpy array for the given index
+    */
+    PyObject * MatrixWorkspaceWrapper::readDx(API::MatrixWorkspace& self, int index)
+    {
+      return MantidVecHelper::createPythonWrapper(self.readDx(index), true);
+    }
+
     //*********************************************************************************
     //
     // Binary Operation helpers

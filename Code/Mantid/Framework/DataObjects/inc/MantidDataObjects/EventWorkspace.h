@@ -166,6 +166,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Return the data E vector at a given workspace index
   MantidVec& dataE(const int);
 
+  /// Return the X data erro vector at a given workspace index
+  MantidVec& dataDx(const int);
+
 
   /// Return the const data X vector at a given workspace index
   const MantidVec& dataX(const int) const;
@@ -175,6 +178,9 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   /// Return the const data E vector at a given workspace index
   const MantidVec& dataE(const int) const;
+
+  /// Return the const X data error vector at a given workspace index
+  const MantidVec& dataDx(const int) const;
 
   /// Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const int) const;

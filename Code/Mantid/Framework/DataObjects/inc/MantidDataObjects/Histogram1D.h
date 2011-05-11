@@ -50,6 +50,7 @@ private:
   MantidVecPtr refX;   ///< RefCounted X
   MantidVecPtr refY;   ///< RefCounted Y
   MantidVecPtr refE;   ///< RefCounted Error
+  MantidVecPtr refDx;   ///< RefCounted X Error
 
 public:
   Histogram1D();
@@ -59,6 +60,11 @@ public:
 
   /// Sets the x data.
   void setX(const MantidVec& X) {  refX.access()=X; }
+  /// Sets the x data and errors.
+  void setX(const MantidVec& X, const MantidVec& Dx)
+    {  refX.access()=X; refDx.access()=Dx; }
+  /// Sets the x error data.
+  void setDx(const MantidVec& X) {  refDx.access()=X; }
   /// Sets the data.
   void setData(const MantidVec& Y) {  refY.access()=Y; };
   /// Sets the data and errors
@@ -67,6 +73,10 @@ public:
 
   /// Sets the x data.
   void setX(const MantidVecPtr& X) { refX=X; }
+  /// Sets the x data and errors.
+  void setX(const MantidVecPtr& X, const MantidVecPtr& Dx) { refX=X; refDx=Dx; }
+  /// Sets the x error data.
+  void setDx(const MantidVecPtr& X) { refDx=X; }
   /// Sets the data.
   void setData(const MantidVecPtr& Y) { refY=Y; }
   /// Sets the data and errors
@@ -74,6 +84,8 @@ public:
   
   /// Sets the x data
   void setX(const MantidVecPtr::ptr_type& X) { refX=X; }
+  /// Sets the x data and errors
+  void setX(const MantidVecPtr::ptr_type& X, const MantidVecPtr::ptr_type& Dx) { refX=X; refDx=Dx;}
   /// Sets the data.
   void setData(const MantidVecPtr::ptr_type& Y) { refY=Y; }
   /// Sets the data and errors
@@ -86,6 +98,8 @@ public:
   virtual const MantidVec& dataY() const { return *refY; }
   /// Returns the error data const
   virtual const MantidVec& dataE() const { return *refE; }
+  /// Returns the x error data const
+  virtual const MantidVec& dataDx() const { return *refDx; }
 
   ///Returns the x data
   virtual MantidVec& dataX() { return refX.access(); }
@@ -93,6 +107,8 @@ public:
   virtual MantidVec& dataY() { return refY.access(); }
   ///Returns the error data
   virtual MantidVec& dataE() { return refE.access(); }
+  ///Returns the x error data
+  virtual MantidVec& dataDx() { return refDx.access(); }
 
   /// Returns a pointer to the x data
   virtual MantidVecPtr ptrX() const { return refX; }  
@@ -103,6 +119,8 @@ public:
   MantidVec& emptyY() { refY.access().clear(); return refY.access(); }
   ///Clear the error data
   MantidVec& emptyE() { refE.access().clear(); return refE.access(); }
+  ///Clear the error data
+  MantidVec& emptyDx() { refDx.access().clear(); return refDx.access(); }
 
   int nxbin() const { return static_cast<int>(refX->size()); }         ///< Return the number of X bins
   int nybin() const { return static_cast<int>(refY->size()); }         ///< Return the number of data bin (Y or YE)
@@ -112,7 +130,7 @@ public:
   bool isError() const { return refE->empty(); }
   /// Gets the memory size of the histogram
   size_t getMemorySize() const 
-    { return static_cast<long int>((refX->size()+refY->size()+refE->size())*sizeof(double)); }
+    { return static_cast<long int>((refX->size()+refY->size()+refE->size()+refDx->size())*sizeof(double)); }
 };
 
 } // namespace DataObjects

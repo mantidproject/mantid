@@ -68,6 +68,8 @@ public:
 
   virtual void setX(int const, const MantidVecPtr&);
   virtual void setX(int const, const MantidVecPtr::ptr_type&);
+  virtual void setX(int const, const MantidVecPtr&, const MantidVecPtr&);
+  virtual void setX(int const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
   virtual void setData(int const, const MantidVecPtr&);
   virtual void setData(int const, const MantidVecPtr&, const MantidVecPtr&);
   virtual void setData(int const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
@@ -85,12 +87,16 @@ public:
   virtual MantidVec& dataY(int const index);
   /// Returns the error data
   virtual MantidVec& dataE(int const index);
+  /// Returns the x error data
+  virtual MantidVec& dataDx(int const index);
   /// Returns the x data const
   virtual const MantidVec& dataX(int const index) const;
   /// Returns the y data const
   virtual const MantidVec& dataY(int const index) const;
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const;
+  /// Returns the x error const
+  virtual const MantidVec& dataDx(int const index) const;
 
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;

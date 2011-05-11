@@ -80,17 +80,24 @@ public:
   virtual MantidVec& dataY(int const index) { (void) index; return _Y; }
   ///Returns the error data
   virtual MantidVec& dataE(int const index) { (void) index; return _E; }
+  ///Returns the x error data
+  virtual MantidVec& dataDx(int const index) { (void) index; return _Dx; }
   /// Returns the x data const
   virtual const MantidVec& dataX(int const index) const { (void) index; return _X;}
   /// Returns the y data const
   virtual const MantidVec& dataY(int const index) const { (void) index; return _Y;}
   /// Returns the error const
   virtual const MantidVec& dataE(int const index) const { (void) index; return _E;}
+  /// Returns the x error const
+  virtual const MantidVec& dataDx(int const index) const { (void) index; return _Dx;}
   
   /// Returns a pointer to the x data
   virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
   /// Set the specified X array to point to the given existing array
   virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; _X = *X; }
+  /// Set the specified X array to point to the given existing array, with error
+  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X,
+      const Kernel::cow_ptr<MantidVec>& dX) { (void) index; _X = *X; _Dx = *dX;}
 
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return _X; }
@@ -98,12 +105,16 @@ public:
   virtual MantidVec& dataY() { return _Y; }
   ///Returns non-const vector of the error data
   virtual MantidVec& dataE() { return _E; }
+  ///Returns non-const vector of the x error data
+  virtual MantidVec& dataDx() { return _Dx; }
   /// Returns the x data const
   virtual const MantidVec& dataX() const { return _X; }
   /// Returns the y data const
   virtual const MantidVec& dataY() const { return _Y; }
   /// Returns the error data const
   virtual const MantidVec& dataE() const { return _E; }
+  /// Returns the x error data const
+  virtual const MantidVec& dataDx() const { return _Dx; }
 
 private:
   /// Private copy constructor. NO COPY ALLOWED
@@ -120,6 +131,8 @@ private:
   MantidVec _Y;
   ///Internal cache of E data
   MantidVec _E;
+  ///Internal cache of x error data
+  MantidVec _Dx;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

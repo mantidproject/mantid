@@ -205,9 +205,19 @@ public:
 
   void setX(const MantidVec& X);
 
+  void setDx(const MantidVecPtr::ptr_type& dX);
+
+  void setDx(const MantidVecPtr& dX);
+
+  void setDx(const MantidVec& dX);
+
   virtual MantidVec& dataX();
 
+  virtual MantidVec& dataDx();
+
   virtual const MantidVec& dataX() const;
+
+  virtual const MantidVec& dataDx() const;
 
   virtual MantidVec * dataY() const;
 
@@ -307,6 +317,7 @@ private:
 
   /// Cached version of the x axis.
   mutable MantidVecPtr refX;
+  mutable MantidVecPtr refDx;
 
   /// Set of the detector IDs associated with this EventList
   std::set<int> detectorIDs;
