@@ -82,8 +82,8 @@ namespace MDEvents
 
     void addManyEvents(const std::vector<MDE> & events, Mantid::Kernel::ProgressBase * prog);
 
-    Mantid::API::IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-        Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
+    Mantid::API::IMDWorkspace_sptr centerpointBinToMDHistoWorkspace(
+        std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions,
         Mantid::API::ImplicitFunction *_implicitFunction,
         Mantid::Kernel::ProgressBase * prog) const;
 

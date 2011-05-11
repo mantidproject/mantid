@@ -61,9 +61,69 @@ public:
     std::vector<double> data = ws.getSignalDataVector();
     TS_ASSERT_EQUALS(data.size(), 5*5*5*5);
     TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
-
   }
-  
+
+
+  //---------------------------------------------------------------------------------------------------
+  /** Create a dense histogram with only 2 dimensions */
+  void test_constructor_fewerDimensions()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 5));
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 5));
+
+    MDHistoWorkspace ws(dimX, dimY);
+
+    TS_ASSERT_EQUALS( ws.getNumDims(), 2);
+    TS_ASSERT_EQUALS( ws.getNPoints(), 5*5);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), 5*5 * sizeof(double)*2);
+    TS_ASSERT_EQUALS( ws.getXDimension(), dimX);
+    TS_ASSERT_EQUALS( ws.getYDimension(), dimY);
+    TS_ASSERT_THROWS_ANYTHING( ws.getZDimension());
+    TS_ASSERT_THROWS_ANYTHING( ws.getTDimension());
+
+    // Setting and getting
+    ws.setSignalAt(5,2.3456);
+    TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
+
+    ws.setErrorAt(5,1.234);
+    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+
+    std::vector<double> data = ws.getSignalDataVector();
+    TS_ASSERT_EQUALS(data.size(), 5*5);
+    TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
+  }
+
+  //---------------------------------------------------------------------------------------------------
+  /** Create a dense histogram with 7 dimensions */
+  void test_constructor_MoreThanFourDimensions()
+  {
+    std::vector<MDHistoDimension_sptr> dimensions;
+    for (size_t i=0; i<7; i++)
+    {
+      dimensions.push_back(MDHistoDimension_sptr(new MDHistoDimension("Dim", "Dim", "m", -10, 10, 3)));
+    }
+
+    MDHistoWorkspace ws(dimensions);
+
+    TS_ASSERT_EQUALS( ws.getNumDims(), 7);
+    TS_ASSERT_EQUALS( ws.getNPoints(), 3*3*3*3*3*3*3);
+    TS_ASSERT_EQUALS( ws.getMemorySize(), ws.getNPoints() * sizeof(double)*2);
+
+    // Setting and getting
+    ws.setSignalAt(5,2.3456);
+    TS_ASSERT_DELTA( ws.getSignalAt(5), 2.3456, 1e-5);
+
+    ws.setErrorAt(5,1.234);
+    TS_ASSERT_DELTA( ws.getErrorAt(5), 1.234, 1e-5);
+
+    std::vector<double> data = ws.getSignalDataVector();
+    TS_ASSERT_EQUALS(data.size(), 3*3*3*3*3*3*3);
+    TS_ASSERT_DELTA( data[5], 2.3456, 1e-5);
+  }
+
+
+
+  //---------------------------------------------------------------------------------------------------
   /** Test for a possible seg-fault if nx != ny etc. */
   void test_uneven_numbers_of_bins()
   {
@@ -89,6 +149,7 @@ public:
   }
 
 
+  //---------------------------------------------------------------------------------------------------
   void test_getGeometryXML()
   {
     //If POCO xml supported schema validation, we wouldn't need to check xml outputs like this.

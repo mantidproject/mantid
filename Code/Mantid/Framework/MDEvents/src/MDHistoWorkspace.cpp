@@ -16,8 +16,6 @@ namespace Mantid
 {
 namespace MDEvents
 {
-
-
   //----------------------------------------------------------------------------------------------
   /** Constructor given the 4 dimensions
    * @param dimX :: X dimension binning parameters
@@ -29,17 +27,59 @@ namespace MDEvents
       Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT)
   : numDimensions(0)
   {
+    std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    if (dimX) dimensions.push_back(dimX);
+    if (dimY) dimensions.push_back(dimY);
+    if (dimZ) dimensions.push_back(dimZ);
+    if (dimT) dimensions.push_back(dimT);
+    this->init(dimensions);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor given a vector of dimensions
+   * @param dimensions :: vector of MDHistoDimension; no limit to how many.
+   */
+  MDHistoWorkspace::MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
+  : numDimensions(0)
+  {
+    this->init(dimensions);
+  }
+
+  //----------------------------------------------------------------------------------------------
+  /** Constructor helper method
+   * @param dimensions :: vector of MDHistoDimension; no limit to how many.
+   */
+  void MDHistoWorkspace::init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions)
+  {
+    if (dimensions.size() == 0)
+      throw std::invalid_argument("0 valid dimensions were given to the MDHistoWorkspace constructor!");
+
+    // Copy the dimensions array
+    m_dimensions = dimensions;
+    numDimensions = m_dimensions.size();
+
+    // For indexing.
+    if (numDimensions < 4)
+      indexMultiplier = new size_t[4];
+    else
+      indexMultiplier = new size_t[numDimensions];
+
     // For quick indexing, accumulate these values
-    indexMultiplier[0] = dimX->getNBins();
-    indexMultiplier[1] = dimY->getNBins() * indexMultiplier[0];
-    indexMultiplier[2] = dimZ->getNBins() * indexMultiplier[1];
-    m_length = dimT->getNBins() * indexMultiplier[2];
+    // First multiplier
+    indexMultiplier[0] = m_dimensions[0]->getNBins();
+    for (size_t d=1; d<numDimensions; d++)
+      indexMultiplier[d] = indexMultiplier[d-1] * m_dimensions[d]->getNBins();
+
+    // This is how many dense data points
+    m_length = indexMultiplier[numDimensions-1];
+
+    // Now fix things for < 4 dimensions. Indices > the number of dimensions will be ignored (*0)
+    for (size_t d=numDimensions-1; d<4; d++)
+      indexMultiplier[d] = 0;
+
     // Allocate the linear arrays
     m_signals = new double[m_length];
     m_errors = new double[m_length];
-
-    //memset(m_signals, 0, sizeof(double)*m_length);
-    //memset(m_errors, 0, sizeof(double)*m_length);
 
     // Initialize them to NAN (quickly)
     double nan = std::numeric_limits<double>::quiet_NaN();
@@ -49,12 +89,6 @@ namespace MDEvents
       m_errors[i] = nan;
     }
 
-    // Add all the dimensions
-    m_dimensions.clear();
-    addDimension(dimX);
-    addDimension(dimY);
-    addDimension(dimZ);
-    addDimension(dimT);
     // Compute the volume of each cell.
     double volume = 1.0;
     for (size_t i=0; i < m_dimensions.size(); ++i)
@@ -70,6 +104,7 @@ namespace MDEvents
   {
     delete [] m_signals;
     delete [] m_errors;
+    delete [] indexMultiplier;
   }
   
   //----------------------------------------------------------------------------------------------
@@ -77,20 +112,6 @@ namespace MDEvents
   size_t MDHistoWorkspace::getMemorySize() const
   {
     return m_length * 2 * sizeof(double);
-  }
-
-
-  //----------------------------------------------------------------------------------------------
-  /** Add a dimension to the workspace. These must be added in order of X, Y, Z, time
-   *
-   * @param dim :: sptr to the dimension object.
-   */
-  void MDHistoWorkspace::addDimension(Mantid::Geometry::MDHistoDimension_sptr dim)
-  {
-    if (numDimensions >= 4)
-      throw std::runtime_error("MDHistoWorkspace can only have a maximum of 4 dimensions.");
-    this->m_dimensions.push_back(dim);
-    numDimensions = m_dimensions.size();
   }
 
   //----------------------------------------------------------------------------------------------
@@ -101,7 +122,7 @@ namespace MDEvents
     std::vector<double> out;
     out.resize(m_length, 0.0);
     for (size_t i=0; i<m_length; ++i)
-        out[i] = m_signals[i];
+      out[i] = m_signals[i];
     // This copies again! :(
     return out;
   }
@@ -118,6 +139,8 @@ namespace MDEvents
     return out;
   }
 
+
+  //---------------------------------------------------------------------------------------------------
   std::string MDHistoWorkspace::getGeometryXML() const
   {
     using namespace Poco::XML;

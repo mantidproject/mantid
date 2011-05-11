@@ -30,10 +30,16 @@ namespace MDEvents
   class DLLExport MDHistoWorkspace : public API::IMDWorkspace
   {
   public:
-    MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-        Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT);
+    MDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX,
+        Mantid::Geometry::MDHistoDimension_sptr dimY=Mantid::Geometry::MDHistoDimension_sptr(),
+        Mantid::Geometry::MDHistoDimension_sptr dimZ=Mantid::Geometry::MDHistoDimension_sptr(),
+        Mantid::Geometry::MDHistoDimension_sptr dimT=Mantid::Geometry::MDHistoDimension_sptr());
 
-    ~MDHistoWorkspace();
+    MDHistoWorkspace(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
+
+    virtual ~MDHistoWorkspace();
+
+    void init(std::vector<Mantid::Geometry::MDHistoDimension_sptr> & dimensions);
 
     virtual const std::string id() const
     { return "MDHistoWorkspace"; }
@@ -61,23 +67,27 @@ namespace MDEvents
     /// Get the y-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const
     {
+      if (m_dimensions.size() < 2) throw std::runtime_error("MDHistoWorkspace does not have a Y dimension.");
       return m_dimensions[1];
     }
 
     /// Get the z-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const
     {
+      if (m_dimensions.size() < 3) throw std::runtime_error("MDHistoWorkspace does not have a X dimension.");
       return m_dimensions[2];
     }
 
     /// Get the t-dimension mapping.
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const
     {
+      if (m_dimensions.size() < 4) throw std::runtime_error("MDHistoWorkspace does not have a T dimension.");
       return m_dimensions[3];
     }
 
     boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
     {
+      if (index >= m_dimensions.size()) throw std::runtime_error("MDHistoWorkspace does not have a dimension at that index.");
       return m_dimensions[index];
     }
 
@@ -245,13 +255,10 @@ namespace MDEvents
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> m_dimensions;
 
     /// To find the index into the linear array, dim0 + indexMultiplier[0]*dim1 + ...
-    size_t indexMultiplier[3];
+    size_t * indexMultiplier;
 
     /// Inverse of the volume of EACH cell
     double m_inverseVolume;
-
-    // ========================== METHODS ===========================================
-    void addDimension(Mantid::Geometry::MDHistoDimension_sptr dim);
 
   };
 

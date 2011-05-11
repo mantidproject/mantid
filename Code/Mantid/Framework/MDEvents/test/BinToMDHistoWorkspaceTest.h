@@ -103,7 +103,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", "NONE,0.0,10.0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
 
     TS_ASSERT_THROWS_NOTHING( alg.execute(); )
@@ -151,7 +151,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 6"));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 6"));
-    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", "NONE,0.0,10.0,1"));
+    TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
 
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("ImplicitFunctionXML",functionXML));
     TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws"));
@@ -211,7 +211,7 @@ public:
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimX", "Axis0,2.0,8.0, 60"));
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimY", "Axis1,2.0,8.0, 60"));
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimZ", "Axis2,2.0,8.0, 60"));
-      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", "NONE,0.0,10.0,1"));
+      TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("DimT", ""));
       TS_ASSERT_THROWS_NOTHING(alg.setPropertyValue("OutputWorkspace", "BinToMDHistoWorkspaceTest_ws_histo"));
       TS_ASSERT_THROWS_NOTHING( alg.execute(); )
       TS_ASSERT( alg.isExecuted() );

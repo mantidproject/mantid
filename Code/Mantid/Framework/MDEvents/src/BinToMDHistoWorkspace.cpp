@@ -68,39 +68,49 @@ namespace MDEvents
    */
   MDHistoDimension_sptr makeMDHistoDimensionFromString(const std::string & str)
   {
-    std::string name, id;
-    double min, max;
-    int numBins = 0;
-    std::vector<std::string> strs;
-    boost::split(strs, str, boost::is_any_of(","));
-    if (strs.size() != 4)
-      throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
-    // Extract the arguments
-    name = Strings::strip(strs[0]);
-    id = name;
-    Strings::convert(strs[1], min);
-    Strings::convert(strs[2], max);
-    Strings::convert(strs[3], numBins);
-    if (name.size() == 0)
-      throw std::invalid_argument("Name should not be blank.");
-    if (min >= max)
-      throw std::invalid_argument("Min should be > max.");
-    if (numBins < 1)
-      throw std::invalid_argument("Number of bins should be >= 1.");
+    if (str.empty())
+    {
+      // Make a blank dimension
+      MDHistoDimension_sptr out;
+      return out;
+    }
+    else
+    {
+      std::string name, id;
+      double min, max;
+      int numBins = 0;
+      std::vector<std::string> strs;
+      boost::split(strs, str, boost::is_any_of(","));
+      if (strs.size() != 4)
+        throw std::invalid_argument("Wrong number of values (4 are expected) in the dimensions string: " + str);
+      // Extract the arguments
+      name = Strings::strip(strs[0]);
+      id = name;
+      Strings::convert(strs[1], min);
+      Strings::convert(strs[2], max);
+      Strings::convert(strs[3], numBins);
+      if (name.size() == 0)
+        throw std::invalid_argument("Name should not be blank.");
+      if (min >= max)
+        throw std::invalid_argument("Min should be > max.");
+      if (numBins < 1)
+        throw std::invalid_argument("Number of bins should be >= 1.");
 
-    MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
-    return out;
+      MDHistoDimension_sptr out(new MDHistoDimension(name, id, "", min, max, numBins));
+      return out;
+    }
   }
 
   //----------------------------------------------------------------------------------------------
   /** Templated method to apply the binning operation to the particular
    * MDEventWorkspace passed in.
-   * @param ws ::MDEventWorkspace
+   *
+   * @param ws :: MDEventWorkspace of the given type
    */
   template<typename MDE, size_t nd>
   void BinToMDHistoWorkspace::do_centerpointBin(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {
-    out = ws->centerpointBinToMDHistoWorkspace(dimX,dimY,dimZ,dimT, implicitFunc, prog);
+    out = ws->centerpointBinToMDHistoWorkspace(dimensions, implicitFunc, prog);
   }
 
   //----------------------------------------------------------------------------------------------
@@ -109,10 +119,10 @@ namespace MDEvents
   void BinToMDHistoWorkspace::exec()
   {
     // Create the dimensions based on the strings from the user
-    dimX = makeMDHistoDimensionFromString( getPropertyValue("DimX"));
-    dimY = makeMDHistoDimensionFromString( getPropertyValue("DimY"));
-    dimZ = makeMDHistoDimensionFromString( getPropertyValue("DimZ"));
-    dimT = makeMDHistoDimensionFromString( getPropertyValue("DimT"));
+    dimensions.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimX")) );
+    dimensions.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimY")) );
+    dimensions.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimZ")) );
+    dimensions.push_back( makeMDHistoDimensionFromString( getPropertyValue("DimT")) );
 
     IMDEventWorkspace_sptr in_ws = getProperty("InputWorkspace");
 
@@ -124,7 +134,7 @@ namespace MDEvents
       implicitFunc = Mantid::API::ImplicitFunctionFactory::Instance().createUnwrapped(ImplicitFunctionXML);
     }
 
-    prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool!
+    prog = new Progress(this, 0, 1.0, 1); // This gets deleted by the thread pool; don't delete it in here.
 
     // Wrapper to cast to MDEventWorkspace then call the function
     CALL_MDEVENT_FUNCTION(this->do_centerpointBin, in_ws);

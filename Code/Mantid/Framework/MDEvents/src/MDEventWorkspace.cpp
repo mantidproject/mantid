@@ -359,56 +359,49 @@ namespace MDEvents
    * centerpointBin routine.
    * You must give 4 dimensions, with names matching those in the MDEventWorkspace.
    *
-   * @param dimX :: X dimension binning parameters
-   * @param dimY :: Y dimension binning parameters
-   * @param dimZ :: Z dimension binning parameters
-   * @param dimT :: T (time) dimension binning parameters
+   * @param binDimensionsIn :: vector with 1+ valid dimension binning parameters
    * @param implicitFunction :: a ImplicitFunction defining which bins to calculate. NULL if all bins will be calculated.
    * @param prog :: Progress reporter, can be NULL.
    * @return a shared ptr to MDHistoWorkspace created.
    */
   TMDE(
-  IMDWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(Mantid::Geometry::MDHistoDimension_sptr dimX, Mantid::Geometry::MDHistoDimension_sptr dimY,
-      Mantid::Geometry::MDHistoDimension_sptr dimZ, Mantid::Geometry::MDHistoDimension_sptr dimT,
+  IMDWorkspace_sptr MDEventWorkspace)::centerpointBinToMDHistoWorkspace(
+      std::vector<Mantid::Geometry::MDHistoDimension_sptr> & binDimensionsIn,
       Mantid::API::ImplicitFunction * implicitFunction, Mantid::Kernel::ProgressBase * prog) const
   {
     bool DODEBUG = false;
     CPUTimer tim;
 
-    // Create the dense histogram. This allocates the memory
-    MDHistoWorkspace_sptr ws(new MDHistoWorkspace(dimX, dimY, dimZ, dimT));
-
-    if (DODEBUG) std::cout << tim << " to create the MDHistoWorkspace.\n";
-
-    // Make it into a vector of dimensions to which to bin.
-    std::vector<MDHistoDimension_sptr> binDimensionsIn;
-    binDimensionsIn.push_back(dimX);
-    binDimensionsIn.push_back(dimY);
-    binDimensionsIn.push_back(dimZ);
-    binDimensionsIn.push_back(dimT);
-
-    // Thin it down for invalid dimensions
+    // Thin down the input dimensions for any invalid ones
     std::vector<MDHistoDimension_sptr> binDimensions;
     std::vector<size_t> dimensionToBinFrom;
     for (size_t i = 0; i < binDimensionsIn.size(); ++i)
     {
-      if (binDimensionsIn[i]->getNBins() == 0)
-        throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
-
-      try {
-        size_t dim_index = this->getDimensionIndexByName(binDimensionsIn[i]->getName());
-        dimensionToBinFrom.push_back(dim_index);
-        binDimensions.push_back(binDimensionsIn[i]);
-      }
-      catch (std::runtime_error & e)
+      if (binDimensionsIn[i]) // (valid pointer?)
       {
-        // The dimension was not found, so we are not binning across it. TODO: Log message?
-        if (binDimensionsIn[i]->getNBins() > 1)
-          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
+        if (binDimensionsIn[i]->getNBins() == 0)
+          throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was set to have 0 bins. Cannot continue.");
+
+        try {
+          size_t dim_index = this->getDimensionIndexByName(binDimensionsIn[i]->getName());
+          dimensionToBinFrom.push_back(dim_index);
+          binDimensions.push_back(binDimensionsIn[i]);
+        }
+        catch (std::runtime_error & e)
+        {
+          // The dimension was not found, so we are not binning across it. TODO: Log message?
+          if (binDimensionsIn[i]->getNBins() > 1)
+            throw std::runtime_error("Dimension " + binDimensionsIn[i]->getName() + " was not found in the MDEventWorkspace and has more than one bin! Cannot continue.");
+        }
       }
     }
     // Number of output binning dimensions found
     size_t numBD = binDimensions.size();
+
+    // Create the dense histogram. This allocates the memory
+    MDHistoWorkspace_sptr ws(new MDHistoWorkspace(binDimensions));
+    if (DODEBUG) std::cout << tim << " to create the MDHistoWorkspace.\n";
+
 
     if (numBD == 0)
       throw std::runtime_error("No output dimensions were found in the MDEventWorkspace. Cannot bin!");
