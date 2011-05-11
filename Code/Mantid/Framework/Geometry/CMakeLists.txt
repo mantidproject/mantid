@@ -29,6 +29,7 @@ set ( SRC_FILES
 	src/MDGeometry/MDGeometry.cpp
 	src/MDGeometry/MDGeometryBasis.cpp
 	src/MDGeometry/MDGeometryDescription.cpp
+	src/MDGeometry/MDGeometryXMLBuilder.cpp
 	src/MDGeometry/MDHistoDimension.cpp
 	src/MDGeometry/MDPoint.cpp
 	src/Math/Acomp.cpp
@@ -111,6 +112,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDGeometry.h
 	inc/MantidGeometry/MDGeometry/MDGeometryBasis.h
 	inc/MantidGeometry/MDGeometry/MDGeometryDescription.h
+    inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDHistoDimension.h
 	inc/MantidGeometry/MDGeometry/MDPoint.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
@@ -213,6 +215,10 @@ set ( TEST_FILES
 	test/IMDDimensionTest.h
 )
 
+set ( GMOCK_TEST_FILES
+    test/MDGeometryXMLBuilderTest.h
+)
+
 if(UNITY_BUILD)
   include(UnityBuild)
   enable_unity_build(Geometry SRC_FILES SRC_UNITY_IGNORE_FILES 10)
@@ -247,9 +253,16 @@ set_property ( TARGET Geometry PROPERTY FOLDER "MantidFramework" )
 target_link_libraries ( Geometry ${MANTIDLIBS} ${OPENCASCADE_LIBRARIES} ${OPENGL_LIBRARIES} ${GSL_LIBRARIES} )
 
 if ( CXXTEST_FOUND )
-  cxxtest_add_test ( GeometryTest ${TEST_FILES} )
   include_directories( ../TestHelpers/inc ../DataObjects/inc ../API/inc )
-  target_link_libraries( GeometryTest Geometry TestHelpers )
+  
+  if ( GMOCK_FOUND AND GTEST_FOUND )
+    cxxtest_add_test ( GeometryTest ${TEST_FILES} ${GMOCK_TEST_FILES})
+    target_link_libraries( GeometryTest Geometry TestHelpers ${GMOCK_LIBRARIES} )
+  else ()
+    cxxtest_add_test ( GeometryTest ${TEST_FILES} )
+    target_link_libraries( GeometryTest Geometry TestHelpers )
+  endif()
+  
   add_dependencies ( FrameworkTests GeometryTest )
   # Add to the 'FrameworkTests' group in VS
   set_property ( TARGET GeometryTest PROPERTY FOLDER "UnitTests" )
