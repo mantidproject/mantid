@@ -97,6 +97,10 @@ namespace Mantid
           wi++;
         }
         localWorkspace->doneAddingEventLists();
+        MantidVecPtr X;
+        X.access().push_back(0.0);
+        X.access().push_back(1.0);
+        localWorkspace->setAllX(X);
 
         //Cast to the matrixOutputWS and save it
         MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
