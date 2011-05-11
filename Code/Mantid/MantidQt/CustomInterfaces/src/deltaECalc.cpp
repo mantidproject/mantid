@@ -67,7 +67,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
   QString pySeOffset = (seOffset.isEmpty()) ? "None" : seOffset;
   // SE Motor Name
   QString motorName = m_sets.motorNameEdit->text();
-  QString pyMotorName = (motorName.isEmpty()) ? "None" : motorName;
+  QString pyMotorName = (motorName.isEmpty()) ? "None" : QString("r'" + motorName + "'");
 
   if( m_sets.ckSumSpecs->isChecked() || runFiles.size() == 1)
   {
@@ -80,7 +80,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
       pySaveName = "r'" + saveName + "'";
     }
-    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, motor='%8', offset=%9)");
+    pyCode += QString("mono_sample.convert_to_energy(%1, %2, %3, %4, %5, %6, %7, motor=%8, offset=%9)");
     pyCode = pyCode.arg(pyRunFiles, eiGuess,pyWhiteBeam,pyAbsRunFiles,absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
   }
   else
@@ -99,7 +99,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
     {
       pyCode +=
         "for run in rfiles:\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3,motor='%4', offset=%5)\n";
+        "  mono_sample.convert_to_energy(run, %1, %2, save_path=%3, motor=%4, offset=%5)\n";
       pyCode = pyCode.arg(eiGuess, pyWhiteBeam, pySaveName, pyMotorName, pySeOffset);
     }
     else
@@ -107,7 +107,7 @@ void deltaECalc::createProcessingScript(const QStringList &runFiles, const QStri
       pyCode += "abs_rfiles = " + pyAbsRunFiles + "\n";
       pyCode +=
         "for run, abs in zip(rfiles, abs_rfiles):\n"
-        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5,motor=%6, offset=%7)\n";
+        "  mono_sample.convert_to_energy(run, %1, %2, abs, %3, %4, save_path=%5, motor=%6, offset=%7)\n";
       pyCode = pyCode.arg(eiGuess, pyWhiteBeam, absEiGuess, pyAbsWhiteBeam, pySaveName, pyMotorName, pySeOffset);
     }
   }
