@@ -8,11 +8,14 @@
 
 namespace Mantid
 {
+  //----------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------
   namespace Geometry
   {
     class Instrument;
   }
-	
+
   namespace DataHandling
   {
     /**
@@ -81,10 +84,14 @@ namespace Mantid
 
       /// Assumes the file is a raw file
       void updateFromRaw(boost::shared_ptr<Geometry::Instrument> instrument, 
-                         const std::string & filename);
+        const std::string & filename);
       /// Assumes the file is an ISIS NeXus file
-      void updateFromIsisNeXus(boost::shared_ptr<Geometry::Instrument> instrument, 
-                               const std::string & filename);
+      void updateFromNeXus(boost::shared_ptr<Geometry::Instrument> instrument, 
+        const std::string & filename);
+      /// Set the new detector positions
+      void setDetectorPositions(boost::shared_ptr<Geometry::Instrument> instrument,
+        const std::vector<int32_t> & detID, const std::vector<float> & l2, 
+        const std::vector<float> & theta, const std::vector<float> & phi);
     };
 
   } // namespace DataHandling

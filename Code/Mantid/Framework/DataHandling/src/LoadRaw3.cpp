@@ -137,8 +137,8 @@ void LoadRaw3::exec()
 
   // Only run the sub-algorithms once
   loadRunParameters(localWorkspace);
-  runLoadInstrument(m_filename,localWorkspace);
   runLoadMappingTable(m_filename,localWorkspace);
+  runLoadInstrument(m_filename,localWorkspace);
   Run& run = localWorkspace->mutableRun();
   if (bLoadlogFiles)
   {

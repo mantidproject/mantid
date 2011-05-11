@@ -75,8 +75,9 @@ namespace Mantid
     */
     void LoadISISNexus2::exec()
     {
+      m_filename = getPropertyValue("Filename");
       // Create the root Nexus class
-      NXRoot root(getPropertyValue("Filename"));
+      NXRoot root(m_filename);
 
       // Open the raw data group 'raw_data_1'
       NXEntry entry = root.openEntry("raw_data_1");
@@ -191,7 +192,7 @@ namespace Mantid
       }
       else
       {
-        total_specs = m_spec_list.size() + m_monitors.size();
+        total_specs = list_size + static_cast<int>(m_monitors.size());
       }
 
       m_progress = boost::shared_ptr<API::Progress>(new Progress(this, 0.0, 1.0, total_specs * m_numberOfPeriods));
@@ -204,10 +205,10 @@ namespace Mantid
 
       //Load instrument and other data once then copy it later
       m_progress->report("Loading instrument");
-      loadRunDetails(local_workspace, entry);  
+      loadRunDetails(local_workspace, entry);
+      local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
       runLoadInstrument(local_workspace);
 
-      local_workspace->mutableSpectraMap().populate(spec(),udet(),udet.dim0());
       loadSampleData(local_workspace, entry);
       m_progress->report("Loading logs");
       loadLogs(local_workspace, entry);
@@ -432,7 +433,7 @@ namespace Mantid
             // Load each
             int spectra_no = (*itr);
             // For this to work correctly, we assume that the spectrum list increases monotonically
-            int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
+            int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
             m_progress->report("Loading data");
             loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
           }
@@ -443,16 +444,16 @@ namespace Mantid
           // When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
           // and if not have an extra read of the left overs
           const int blocksize = 8;
-          const int rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
+          const int rangesize = (m_spec_max - m_spec_min + 1) - static_cast<int>(m_monitors.size());
           const int fullblocks = rangesize / blocksize;
           int read_stop = 0;
           int spectra_no = m_spec_min;
           if (first_monitor_spectrum == 1)
           {// this if crudely checks whether the monitors are at the begining or end of the spectra
-            spectra_no += m_monitors.size();
+            spectra_no += static_cast<int>(m_monitors.size());
           }
           // For this to work correctly, we assume that the spectrum list increases monotonically
-          int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
+          int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
           if( fullblocks > 0 )
           {
             read_stop = (fullblocks * blocksize);// + m_monitors.size(); //RNT: I think monitors are excluded from the data
@@ -476,7 +477,7 @@ namespace Mantid
           // Load each
           int spectra_no = (*itr);
           // For this to work correctly, we assume that the spectrum list increases monotonically
-          int filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
+          int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
           loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
         }
       }
@@ -553,15 +554,24 @@ namespace Mantid
         g_log.information("Unable to successfully run LoadInstrument sub-algorithm");
         executionSuccessful = false;
       }
+      if( executionSuccessful )
+      {
+        // If requested update the instrument to positions in the raw file
+        const Geometry::ParameterMap & pmap = localWorkspace->instrumentParameters();
+        if( pmap.contains(localWorkspace->getBaseInstrument().get(),"det-pos-source") )
+        {
+          boost::shared_ptr<Geometry::Parameter> updateDets = pmap.get(localWorkspace->getBaseInstrument().get(),"det-pos-source");
+          if( updateDets->value<std::string>() == "datafile" )
+          {
+            IAlgorithm_sptr updateInst = createSubAlgorithm("UpdateInstrumentFromFile");
+            updateInst->setProperty<MatrixWorkspace_sptr>("Workspace", localWorkspace);
+            updateInst->setPropertyValue("Filename", m_filename);
+            // We want this to throw if it fails to warn the user that the information is not correct.
+            updateInst->execute();
+          }
+        }
+      }
 
-      // If loading instrument definition file fails, run LoadInstrumentFromNexus instead
-      // This does not work at present as the example files do not hold the necessary data
-      // but is a place holder. Hopefully the new version of Nexus Muon files should be more
-      // complete.
-      //if ( ! loadInst->isExecuted() )
-      //{
-      //    runLoadInstrumentFromNexus(localWorkspace);
-      //}
     }
     
     /**
@@ -804,11 +814,11 @@ namespace Mantid
       int confidence(0);
       try
       {
-	::NeXus::File file = ::NeXus::File(filePath);
-	// Open the base group called 'entry'
-	file.openGroup("raw_data_1", "NXentry");
-	// If all this succeeded then we'll assume this is an ISIS NeXus file
-	confidence = 80;
+        ::NeXus::File file = ::NeXus::File(filePath);
+        // Open the base group called 'entry'
+        file.openGroup("raw_data_1", "NXentry");
+        // If all this succeeded then we'll assume this is an ISIS NeXus file
+        confidence = 80;
       }
       catch(::NeXus::Exception&)
       {
