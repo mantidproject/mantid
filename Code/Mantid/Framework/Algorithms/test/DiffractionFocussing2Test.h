@@ -1,17 +1,17 @@
 #ifndef DIFFRACTIONFOCUSSING2TEST_H_
 #define DIFFRACTIONFOCUSSING2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidAlgorithms/Rebin.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidAlgorithms/DiffractionFocussing2.h"
-#include "MantidDataHandling/LoadRaw.h"
 #include "MantidAlgorithms/AlignDetectors.h"
+#include "MantidAlgorithms/DiffractionFocussing2.h"
 #include "MantidAlgorithms/MaskBins.h"
-#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidAlgorithms/Rebin.h"
 #include "MantidAPI/SpectraAxis.h"
+#include "MantidDataHandling/LoadEventPreNeXus.h"
+#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/AlgorithmHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::DataHandling;
@@ -205,9 +205,25 @@ public:
 
 
 
-
 private:
   DiffractionFocussing2 focus;
 };
+
+
+
+class DiffractionFocussing2TestPerformance : public CxxTest::TestSuite
+{
+public:
+  void setUp()
+  {
+//    EventWorkspace_sptr ws(new EventWorkspace());
+//    ws->initialize()
+  }
+
+  void test_SNAP_event_one_group()
+  {
+  }
+};
+
 
 #endif /*DIFFRACTIONFOCUSSING2TEST_H_*/

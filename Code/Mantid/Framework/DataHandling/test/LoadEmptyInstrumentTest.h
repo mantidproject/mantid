@@ -16,6 +16,7 @@
 #include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/FitParameter.h"
 #include <vector>
+#include "MantidDataObjects/EventWorkspace.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -675,14 +676,24 @@ public:
     AnalysisDataService::Instance().remove(wsName);
   }
 
+  void test_DUM_Instrument_asEventWorkspace()
+  {
+    do_test_DUM_Instrument(true);
+  }
 
   void test_DUM_Instrument()
+  {
+    do_test_DUM_Instrument(false);
+  }
+
+  void do_test_DUM_Instrument(bool asEvent)
   {
     LoadEmptyInstrument loader;
 
     TS_ASSERT_THROWS_NOTHING(loader.initialize());
     TS_ASSERT( loader.isInitialized() );
     loader.setPropertyValue("Filename", "IDFs_for_UNIT_TESTING/DUM_Definition.xml");
+    loader.setProperty("MakeEventWorkspace", asEvent);
     inputFile = loader.getPropertyValue("Filename");
     wsName = "LoadEmptyDUMInstrumentTest";
     loader.setPropertyValue("OutputWorkspace", wsName);
@@ -692,6 +703,15 @@ public:
 
     MatrixWorkspace_sptr ws;
     ws = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
+    TS_ASSERT(ws);
+    if (!ws) return;
+
+    if (asEvent)
+    {
+      EventWorkspace_sptr eventWS =
+          boost::dynamic_pointer_cast<EventWorkspace>(ws);
+      TS_ASSERT(eventWS);
+    }
 
     // get parameter map
     ParameterMap& paramMap = ws->instrumentParameters();
@@ -733,6 +753,12 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
   }
+
+
+  void test_loadIntoEventWorkspace_DUM()
+  {
+  }
+
 
 
   void test_BIOSANS_Instrument()
@@ -896,6 +922,7 @@ void testCheckIfVariousInstrumentsLoad()
     AnalysisDataService::Instance().remove(wsName);
 
   }
+
 
 
 private:

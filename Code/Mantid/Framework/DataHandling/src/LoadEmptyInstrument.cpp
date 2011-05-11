@@ -1,14 +1,11 @@
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
-#include "MantidDataHandling/LoadEmptyInstrument.h"
-#include "MantidDataObjects/Workspace2D.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidKernel/ConfigService.h"
 #include "MantidAPI/FileProperty.h"
-
-#include <Poco/Path.h>
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidDataHandling/LoadEmptyInstrument.h"
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/ConfigService.h"
 #include <cmath>
+#include <Poco/Path.h>
 
 namespace Mantid
 {
@@ -28,6 +25,7 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using namespace Geometry;
+    using namespace DataObjects;
 
     /// Empty default constructor
     LoadEmptyInstrument::LoadEmptyInstrument() : Algorithm()
@@ -37,10 +35,10 @@ namespace Mantid
     void LoadEmptyInstrument::init()
     {
       declareProperty(new FileProperty("Filename","", FileProperty::Load, ".xml"),
-		      "The filename (including its full or relative path) of an ISIS instrument\n"
-		      "defintion file");
+		      "The filename (including its full or relative path) of an instrument\n"
+		      "definition file");
       declareProperty(
-        new WorkspaceProperty<DataObjects::Workspace2D>("OutputWorkspace","",Direction::Output),
+        new WorkspaceProperty<MatrixWorkspace>("OutputWorkspace","",Direction::Output),
         "The name of the workspace in which to store the imported instrument" );
       
       BoundedValidator<double> *mustBePositive = new BoundedValidator<double>();
@@ -51,6 +49,9 @@ namespace Mantid
       declareProperty("MonitorValue",2.0, mustBePositive->clone(),
         "This value affects the colour of the monitors in the instrument\n"
         "display window (default 2)");
+
+      declareProperty(new PropertyWithValue<bool>("MakeEventWorkspace", false),
+          "Set to True to create an EventWorkspace (with no events) instead of a Workspace2D.");
     }
 
     /** Executes the algorithm. Reading in the file and creating and populating
@@ -76,48 +77,76 @@ namespace Mantid
       instrument->getDetectors(detCache);
       const int number_spectra = static_cast<int>(detCache.size());
       
-      // Now create the outputworkspace and copy over the instrument object
-      DataObjects::Workspace2D_sptr localWorkspace = 
-        boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
-      //localWorkspace->setInstrument(instrument);
+      bool MakeEventWorkspace = getProperty("MakeEventWorkspace");
       
-      int *spec = new int[number_spectra];
-      int *udet = new int[number_spectra];
-
-      std::map<int, Geometry::IDetector_sptr>::const_iterator it;
-      int counter = 0;
-      for ( it = detCache.begin(); it != detCache.end(); ++it )
+      if (MakeEventWorkspace)
       {
-        counter++;
-        spec[counter-1] = counter;    // have no feeling of how best to number these spectra
-                                      // and sure whether the way it is done here is the best way...
-        udet[counter-1] = it->first;
+        //Make a brand new EventWorkspace
+        EventWorkspace_sptr localWorkspace = boost::dynamic_pointer_cast<EventWorkspace>(
+            API::WorkspaceFactory::Instance().create("EventWorkspace", ws->getNumberHistograms(), 2, 1));
+        //Copy geometry over.
+        API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace, false);
+
+        // Make one pixel per detector
+        int wi=0;
+        std::map<int, Geometry::IDetector_sptr>::const_iterator it;
+        for ( it = detCache.begin(); it != detCache.end(); ++it )
+        {
+          localWorkspace->getOrAddEventList(wi).clear(true);
+          localWorkspace->getEventList(wi).addDetectorID(it->first);
+          wi++;
+        }
+        localWorkspace->doneAddingEventLists();
+
+        //Cast to the matrixOutputWS and save it
+        MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+        this->setProperty("OutputWorkspace", matrixOutputWS);
       }
-
-      localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
-
-      counter = 0;
-      MantidVecPtr x,v,v_monitor;
-      x.access().resize(2); x.access()[0]=1.0; x.access()[1]=2.0;
-      v.access().resize(1); v.access()[0]=detector_value;
-      v_monitor.access().resize(1); v_monitor.access()[0]=monitor_value;
-
-      for ( it = detCache.begin(); it != detCache.end(); ++it )
+      else
       {
-        if ( (it->second)->isMonitor() )
-          localWorkspace->setData(counter, v_monitor, v_monitor);
-        else
-          localWorkspace->setData(counter, v, v);
-        localWorkspace->setX(counter, x);
-        localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
-        ++counter;
-      }
+        // Now create the outputworkspace and copy over the instrument object
+        DataObjects::Workspace2D_sptr localWorkspace =
+          boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
 
-      setProperty("OutputWorkspace",localWorkspace);
-      
-      // Clean up
-      delete[] spec;
-      delete[] udet;
+        int *spec = new int[number_spectra];
+        int *udet = new int[number_spectra];
+
+        std::map<int, Geometry::IDetector_sptr>::const_iterator it;
+        int counter = 0;
+        for ( it = detCache.begin(); it != detCache.end(); ++it )
+        {
+          counter++;
+          spec[counter-1] = counter;    // have no feeling of how best to number these spectra
+                                        // and sure whether the way it is done here is the best way...
+          udet[counter-1] = it->first;
+        }
+
+        localWorkspace->mutableSpectraMap().populate(spec,udet,number_spectra);
+
+        counter = 0;
+        MantidVecPtr x,v,v_monitor;
+        x.access().resize(2); x.access()[0]=1.0; x.access()[1]=2.0;
+        v.access().resize(1); v.access()[0]=detector_value;
+        v_monitor.access().resize(1); v_monitor.access()[0]=monitor_value;
+
+        for ( it = detCache.begin(); it != detCache.end(); ++it )
+        {
+          if ( (it->second)->isMonitor() )
+            localWorkspace->setData(counter, v_monitor, v_monitor);
+          else
+            localWorkspace->setData(counter, v, v);
+          localWorkspace->setX(counter, x);
+          localWorkspace->getAxis(1)->spectraNo(counter)= counter+1;  // Not entirely sure if this 100% ok
+          ++counter;
+        }
+
+        MatrixWorkspace_sptr matrixOutputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(localWorkspace);
+        this->setProperty("OutputWorkspace", matrixOutputWS);
+
+        // Clean up
+        delete[] spec;
+        delete[] udet;
+      }
     }
     
     /// Run the sub-algorithm LoadInstrument (or LoadInstrumentFromRaw)
