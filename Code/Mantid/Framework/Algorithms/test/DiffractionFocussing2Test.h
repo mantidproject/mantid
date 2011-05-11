@@ -88,15 +88,24 @@ public:
 
   void test_EventWorkspace_SameOutputWS()
   {
-    dotestEventWorkspace(true);
+    dotestEventWorkspace(true, 2);
   }
 
   void test_EventWorkspace_DifferentOutputWS()
   {
-    dotestEventWorkspace(false);
+    dotestEventWorkspace(false, 2);
+  }
+  void test_EventWorkspace_SameOutputWS_oneGroup()
+  {
+    dotestEventWorkspace(true, 1);
   }
 
-  void dotestEventWorkspace(bool inplace)
+  void test_EventWorkspace_DifferentOutputWS_oneGroup()
+  {
+    dotestEventWorkspace(false, 1);
+  }
+
+  void dotestEventWorkspace(bool inplace, int numgroups)
   {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
     //----- Load some event data --------
@@ -128,10 +137,12 @@ public:
     }
 
     // ------------ Create a grouping workspace by name -------------
+    std::string GroupNames = "bank36,bank37";
+    if (numgroups == 1) GroupNames = "bank36";
     std::string groupWSName("DiffractionFocussing2Test_group");
     AlgorithmHelper::runAlgorithm("CreateGroupingWorkspace", 6,
         "InputWorkspace",  nxsWSname.c_str(),
-        "GroupNames", "bank36,bank37",
+        "GroupNames", GroupNames.c_str(),
         "OutputWorkspace", groupWSName.c_str());
 
     // ------------ Create a grouping workspace by name -------------
@@ -153,7 +164,6 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws)) );
     if (!output) return;
 
-    int numgroups = 2;
     TS_ASSERT_EQUALS( output->getNumberHistograms(), numgroups);
     if (output->getNumberHistograms() != numgroups)
       return;
@@ -164,7 +174,7 @@ public:
     TS_ASSERT_EQUALS( output->getAxis(1)->spectraNo(numgroups-1), numgroups-1);
 
     //Events in these two banks alone
-    TS_ASSERT_EQUALS(output->getNumberEvents(), 16260);
+    TS_ASSERT_EQUALS(output->getNumberEvents(), (numgroups==2) ? 16260 : 7274);
 
     //Now let's test the grouping of detector UDETS to groups
     for (int group=1; group<=numgroups; group++)
@@ -198,7 +208,7 @@ public:
         events_after_binning += output->dataY(workspace_index)[i];
     }
     // The count sums up to the same as the number of events
-    TS_ASSERT_DELTA( events_after_binning, 16260.0, 1e-4);
+    TS_ASSERT_DELTA( events_after_binning, (numgroups==2) ? 16260.0 : 7274.0, 1e-4);
   }
 
 
@@ -298,7 +308,6 @@ public:
     MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
-    TS_ASSERT_DELTA( outWS->dataY(0)[0], 20*65536, 1e-3);
     AnalysisDataService::Instance().remove("SNAP_focus");
   }
 
@@ -314,7 +323,6 @@ public:
     MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
 
     TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
-    TS_ASSERT_DELTA( outWS->dataY(0)[0], 20*65536, 1e-3);
     AnalysisDataService::Instance().remove("SNAP_focus");
   }
 

@@ -315,74 +315,120 @@ void DiffractionFocussing2::execEvent()
   Progress * prog;
   prog = new Progress(this,0.2,0.35,nHist);
 
-  // ------------- Pre-allocate Event Lists ----------------------------
-  std::vector< std::vector<int> > ws_indices(nGroups+1);
-  std::vector<size_t> size_required(nGroups+1,0);
-  Geometry::IInstrument_const_sptr instrument = eventW->getInstrument();
-  Geometry::IObjComponent_const_sptr source;
-  Geometry::IObjComponent_const_sptr sample;
-  if (instrument != NULL) 
+  if (nGroups == 1)
   {
-    source = instrument->getSource();
-    sample = instrument->getSample();
-  }
+    g_log.information() << "Performing focussing on a single group\n";
+    // Special case of a single group - parallelize differently
+    EventList & groupEL = out->getOrAddEventList(0);
 
-  for (int wi=0;wi<nHist;wi++)
-  {
-    if (instrument != NULL) 
+    int chunkSize = 200;
+
+    PRAGMA_OMP(parallel for schedule(dynamic, 1) if (eventW->threadSafe()) )
+    for (int wiChunk=0;wiChunk<nHist/chunkSize;wiChunk++)
     {
-      if ( source != NULL && sample != NULL ) 
+      PARALLEL_START_INTERUPT_REGION
+
+      // Make a blank EventList that will accumulate the chunk.
+      EventList chunkEL;
+
+      // Perform in chunks for more efficiency
+      int max = (wiChunk+1)*chunkSize;
+      if (max > nHist) max = nHist;
+      for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {
-        Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
-        if ( det->isMasked() ) continue;
+        const int group = groupAtWorkspaceIndex[wi];
+        if (group == 1)
+        {
+          // Accumulate the chunk
+          chunkEL += eventW->getEventList(wi);
+        }
       }
+
+      // Rejoin the chunk with the rest.
+      PARALLEL_CRITICAL( DiffractionFocussing2_JoinChunks )
+      {
+        groupEL += chunkEL;
+      }
+
+      PARALLEL_END_INTERUPT_REGION
     }
-    //i is the workspace index (of the input)
-    const int group = groupAtWorkspaceIndex[wi];
-    if (group < 1) // Not in a group
-      continue;
-    size_required[group] += eventW->getEventList(wi).getNumberEvents();
-    // Also record a list of workspace indices
-    ws_indices[group].push_back(wi);
-    prog->reportIncrement(1, "Pre-counting");
-  }
+    PARALLEL_CHECK_INTERUPT_REGION
 
-  delete prog; prog = new Progress(this,0.15,0.3,nGroups);
-  // This creates and reserves the space required
-  for (int group=1; group<nGroups+1; group++)
-  {
-    out->getOrAddEventList(group-1).reserve(size_required[group]);
-    prog->reportIncrement(1, "Allocating");
+    out->doneAddingEventLists();
   }
-
-  // ----------- Focus ---------------
-  delete prog; prog = new Progress(this,0.40,0.9,nHist);
-  PARALLEL_FOR1(eventW)
-  for (int group=1; group<nGroups+1; group++)
+  else
   {
-    PARALLEL_START_INTERUPT_REGION
-    std::vector<int> indices = ws_indices[group];
-    for (size_t i=0; i<indices.size(); i++)
+    // ------ PARALLELIZE BY GROUPS -------------------------
+    // ------------- Pre-allocate Event Lists ----------------------------
+    std::vector< std::vector<int> > ws_indices(nGroups+1);
+    std::vector<size_t> size_required(nGroups+1,0);
+    Geometry::IInstrument_const_sptr instrument = eventW->getInstrument();
+    Geometry::IObjComponent_const_sptr source;
+    Geometry::IObjComponent_const_sptr sample;
+    if (instrument != NULL)
     {
-      int wi = indices[i];
-
-      //In workspace index group-1, put what was in the OLD workspace index wi
-      out->getOrAddEventList(group-1) += eventW->getEventList(wi);
-      prog->reportIncrement(1, "Appending Lists");
-
-      // When focussing in place, you can clear out old memory from the input one!
-      if (inPlace)
-      {
-        eventW->getEventList(wi).clear();
-        Mantid::API::MemoryManager::Instance().releaseFreeMemory();
-      }
+      source = instrument->getSource();
+      sample = instrument->getSample();
     }
-    PARALLEL_END_INTERUPT_REGION
-  }
-  PARALLEL_CHECK_INTERUPT_REGION
 
-  //Finalize the maps
-  out->doneAddingEventLists();
+    for (int wi=0;wi<nHist;wi++)
+    {
+      if (instrument != NULL)
+      {
+        if ( source != NULL && sample != NULL )
+        {
+          Geometry::IDetector_const_sptr det = eventW->getDetector(static_cast<size_t>(wi));
+          if ( det->isMasked() ) continue;
+        }
+      }
+      //i is the workspace index (of the input)
+      const int group = groupAtWorkspaceIndex[wi];
+      if (group < 1) // Not in a group
+        continue;
+      size_required[group] += eventW->getEventList(wi).getNumberEvents();
+      // Also record a list of workspace indices
+      ws_indices[group].push_back(wi);
+      prog->reportIncrement(1, "Pre-counting");
+    }
+
+    delete prog; prog = new Progress(this,0.15,0.3,nGroups);
+    // This creates and reserves the space required
+    for (int group=1; group<nGroups+1; group++)
+    {
+      out->getOrAddEventList(group-1).reserve(size_required[group]);
+      prog->reportIncrement(1, "Allocating");
+    }
+
+    // ----------- Focus ---------------
+    delete prog; prog = new Progress(this,0.40,0.9,nHist);
+    PARALLEL_FOR1(eventW)
+    for (int group=1; group<nGroups+1; group++)
+    {
+      PARALLEL_START_INTERUPT_REGION
+      std::vector<int> indices = ws_indices[group];
+      for (size_t i=0; i<indices.size(); i++)
+      {
+        int wi = indices[i];
+
+        //In workspace index group-1, put what was in the OLD workspace index wi
+        out->getOrAddEventList(group-1) += eventW->getEventList(wi);
+        prog->reportIncrement(1, "Appending Lists");
+
+        // When focussing in place, you can clear out old memory from the input one!
+        if (inPlace)
+        {
+          eventW->getEventList(wi).clear();
+          Mantid::API::MemoryManager::Instance().releaseFreeMemory();
+        }
+      }
+      PARALLEL_END_INTERUPT_REGION
+    }
+    PARALLEL_CHECK_INTERUPT_REGION
+
+    //Finalize the maps
+    out->doneAddingEventLists();
+
+  } // (done with parallel by groups)
 
   //Now that the data is cleaned up, go through it and set the X vectors to the input workspace we first talked about.
   delete prog; prog = new Progress(this,0.9,1.0,nGroups);
