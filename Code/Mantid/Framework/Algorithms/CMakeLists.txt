@@ -450,7 +450,7 @@ set_property ( TARGET Algorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
 
-target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} )
+target_link_libraries ( Algorithms ${MANTIDLIBS} ${GSL_LIBRARIES} DataHandling )
 
 if ( CXXTEST_FOUND )
   # Generate the MultiplyTest.h and DivideTest.h
