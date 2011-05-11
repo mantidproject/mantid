@@ -128,16 +128,29 @@ if( WIN32 )
   set ( PYDIR_NATIVE )
   
   # Now the binary files
-  foreach ( TYPE DLL EXE )
-    add_custom_command( TARGET PythonAPI POST_BUILD 
-                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
-                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
-                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_MINSIZEREL=${PY_${TYPE}_SUFFIX_MINSIZEREL}
-                        COMMAND SET ARGS PY_${TYPE}_SUFFIX_DEBUG=${PY_${TYPE}_SUFFIX_DEBUG}
-                        COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
-                        ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_CFG_INTDIR}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
-                       )
-  endforeach ( TYPE )
+  if ( MSVC_IDE )
+    foreach ( TYPE DLL EXE )
+      add_custom_command( TARGET PythonAPI POST_BUILD 
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_MINSIZEREL=${PY_${TYPE}_SUFFIX_MINSIZEREL}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_DEBUG=${PY_${TYPE}_SUFFIX_DEBUG}
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                          ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_CFG_INTDIR}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR}
+                        )
+    endforeach ( TYPE )
+  else () # Need to do things slightly differently for nmake
+    foreach ( TYPE DLL EXE )
+      add_custom_command( TARGET PythonAPI POST_BUILD 
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELEASE=${PY_${TYPE}_SUFFIX_RELEASE}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_RELWITHDEBINFO=${PY_${TYPE}_SUFFIX_RELWITHDEBINFO}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_MINSIZEREL=${PY_${TYPE}_SUFFIX_MINSIZEREL}
+                          COMMAND SET ARGS PY_${TYPE}_SUFFIX_DEBUG=${PY_${TYPE}_SUFFIX_DEBUG}
+                          COMMAND ${CMAKE_COMMAND} ARGS -E copy_if_different
+                          ${PY_${TYPE}_PREFIX}%PY_${TYPE}_SUFFIX_${CMAKE_BUILD_TYPE}% ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+                        )
+    endforeach ( TYPE )
+  endif ()
 endif( WIN32 )
 
 
