@@ -227,7 +227,7 @@ class DiffractionFocussing2TestPerformance : public CxxTest::TestSuite
 public:
   EventWorkspace_sptr ws;
 
-  void setUp()
+  DiffractionFocussing2TestPerformance()
   {
     IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
     alg->initialize();
@@ -263,6 +263,13 @@ public:
     alg->setPropertyValue("GroupNames", "bank1,bank2,bank3,bank4,bank5,bank6");
     alg->setPropertyValue("OutputWorkspace", "SNAP_group_several");
     alg->execute();
+  }
+
+  ~DiffractionFocussing2TestPerformance()
+  {
+    AnalysisDataService::Instance().remove("SNAP_empty");
+    AnalysisDataService::Instance().remove("SNAP_group_bank1");
+    AnalysisDataService::Instance().remove("SNAP_group_several");
   }
 
   void test_SNAP_event_one_group()
