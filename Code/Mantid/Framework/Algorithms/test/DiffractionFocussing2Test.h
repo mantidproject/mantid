@@ -236,6 +236,7 @@ public:
     alg->setPropertyValue("MakeEventWorkspace", "1");
     alg->execute();
     ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_empty"));
+    ws->sortAll(TOF_SORT, NULL);
 
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()
