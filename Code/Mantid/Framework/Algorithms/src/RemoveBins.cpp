@@ -212,23 +212,7 @@ void RemoveBins::crop(const double& start, const double& end)
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", boost::const_pointer_cast<MatrixWorkspace>(m_inputWorkspace));
   childAlg->setProperty<double>("XMin", start);
   childAlg->setProperty<double>("XMax", end);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run sub-algorithm");
-    throw std::runtime_error("Unable to successfully run sub-algorithm");
-  }
+  childAlg->executeAsSubAlg();
 
   // Only get to here if successful
   // Assign the result to the output workspace property

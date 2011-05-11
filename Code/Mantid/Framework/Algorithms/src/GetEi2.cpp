@@ -238,21 +238,7 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(int ws_index, const double start, c
   childAlg->setProperty("EndWorkspaceIndex", ws_index);
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::exception&)
-  {
-    g_log.error("Exception thrown while running CropWorkspace as a sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("The CropWorkspace algorithm failed unexpectedly, aborting.");
-    throw std::runtime_error(name() + " failed trying to run CropWorkspace");
-  }
+  childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 
@@ -497,22 +483,7 @@ API::MatrixWorkspace_sptr GetEi2::rebin(API::MatrixWorkspace_sptr monitor_ws, co
   std::ostringstream binParams;
   binParams << first << "," << width << "," << end;
   childAlg->setPropertyValue( "Params", binParams.str());
-
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::exception&)
-  {
-    g_log.error("Exception thrown while running Rebin as a sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("The Rebin algorithm failed unexpectedly, aborting.");
-    throw std::runtime_error(name() + " failed trying to run Rebin");
-  }
+  childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

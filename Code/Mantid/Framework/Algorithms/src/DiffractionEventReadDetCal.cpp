@@ -73,15 +73,7 @@ namespace Algorithms
     alg1->setProperty("Y", y);
     alg1->setProperty("Z", z);
     alg1->setPropertyValue("RelativePosition", "0");
-    try
-    {
-      alg1->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run MoveInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing MoveInstrumentComponent as a sub algorithm.");
-    }
+    alg1->executeAsSubAlg();
 } 
 
   /** Initialisation method

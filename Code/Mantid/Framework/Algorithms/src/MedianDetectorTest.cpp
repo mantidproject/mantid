@@ -180,24 +180,24 @@ namespace Mantid
       childAlg->setProperty( "EndWorkspaceIndex", lastSpec );
       try
       {
-	// Execute the sub-algorithm, it could throw a runtime_error at this point which would abort execution
-	childAlg->execute();
-	if ( ! childAlg->isExecuted() )
-	{
-	  throw std::runtime_error("Unexpected problem calculating solid angles");
-	}
+        // Execute the sub-algorithm, it could throw a runtime_error at this point which would abort execution
+        childAlg->execute();
+        if ( ! childAlg->isExecuted() )
+        {
+          throw std::runtime_error("Unexpected problem calculating solid angles");
+        }
       }
       //catch all exceptions because the solid angle calculation is optional
       catch(std::exception e)
       {
-	g_log.warning(
-	  "Precision warning:  Can't find detector geometry " + name() +
-	  " will continue with the solid angles of all spectra set to the same value" );
-	failProgress(RTGetSolidAngle);
-	//The return is an empty workspace pointer, which must be handled by the calling function
-	MatrixWorkspace_sptr empty;
-	//function returns normally
-	return empty;
+        g_log.warning(
+            "Precision warning:  Can't find detector geometry " + name() +
+            " will continue with the solid angles of all spectra set to the same value" );
+        failProgress(RTGetSolidAngle);
+        //The return is an empty workspace pointer, which must be handled by the calling function
+        MatrixWorkspace_sptr empty;
+        //function returns normally
+        return empty;
       }
       return childAlg->getProperty("OutputWorkspace");
     }

@@ -191,23 +191,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWork
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
   childAlg->setProperty<int>("WorkspaceIndex", index);
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
-    throw std::runtime_error("Unable to successfully run ExtractSingleSpectrum sub-algorithm");
-  }
-
+  childAlg->executeAsSubAlg();
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");
 }
@@ -225,23 +209,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
   const double lambdaMax = getProperty("MaxWavelength");
   childAlg->setProperty<double>("StartX",lambdaMin);
   childAlg->setProperty<double>("EndX",lambdaMax);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Linear fit sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run Linear fit sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Linear fit sub-algorithm");
-  }
+  childAlg->executeAsSubAlg();
 
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )

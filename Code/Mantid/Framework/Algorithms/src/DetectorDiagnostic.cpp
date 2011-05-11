@@ -65,23 +65,7 @@ namespace Mantid
       // pass inputed values straight to this integration trusting the checking done there
       childAlg->setProperty("RangeLower",  lower );
       childAlg->setProperty("RangeUpper", upper);
-      try
-
-      {
-        // Now execute integrate
-        childAlg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Exception thrown while running the Integration sub-algorithm");
-        throw;
-      }
-
-      if ( ! childAlg->isExecuted() )
-      {
-        g_log.error("The Integration algorithm failed unexpectedly, aborting.");
-        throw std::runtime_error(name() + " failed trying to run Integration");
-      }
+      childAlg->executeAsSubAlg();
 
       // Convert to 2D if desired, and if the input was an EventWorkspace.
       MatrixWorkspace_sptr outputW = childAlg->getProperty("OutputWorkspace");

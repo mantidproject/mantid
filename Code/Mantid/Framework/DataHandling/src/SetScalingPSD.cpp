@@ -262,36 +262,6 @@ namespace DataHandling
       return true;
   }
 
-/* This was used initially to move each detector using MoveInstrumentComponent alg
- *  but is too slow on a large instrument like Merlin.
- *  param detIndex The detector ID to move
- *  param shift    The vector to move the detector by
- 
-void SetScalingPSD::runMoveInstrumentComp(const int& detIndex, const Geometry::V3D& shift)
-{
-   IAlgorithm_sptr moveInstruComp = createSubAlgorithm("MoveInstrumentComponent");
-   moveInstruComp->setProperty<MatrixWorkspace_sptr>("Workspace",m_workspace); //?
-   std::ostringstream tmpstmd,tmpstmx,tmpstmy,tmpstmz;
-   tmpstmd << detIndex;
-   moveInstruComp->setPropertyValue("DetectorID", tmpstmd.str());
-   tmpstmx << shift[0];
-   moveInstruComp->setPropertyValue("X", tmpstmx.str());
-   tmpstmy << shift[1];
-   moveInstruComp->setPropertyValue("Y", tmpstmy.str());
-   tmpstmz << shift[2];
-   moveInstruComp->setPropertyValue("Z", tmpstmz.str());
-
-   // Now execute the sub-algorithm. Catch and log any error, but don't stop.
-   try
-   {
-      moveInstruComp->execute();
-   }
-   catch (std::runtime_error& err)
-   {
-      g_log.information("Unable to successfully run moveIntrumentComp sub-algorithm");
-   }
-}
-*/
 
 
 void SetScalingPSD::movePos(API::MatrixWorkspace_sptr& WS, std::map<int,Geometry::V3D>& posMap,

@@ -370,20 +370,10 @@ void LoadEventPreNeXus::runLoadInstrument(const std::string &eventfilename, Matr
   {
     g_log.error() << "Error loading Instrument definition file\n";
     //TODO: Load some other way???
-//    g_log.information() << "Instrument definition file "
-//      << fullPathIDF << " not found. Attempt to load information about \n"
-//      << "the instrument from raw data file.\n";
-//    runLoadInstrumentFromRaw(fileName,localWorkspace);
   }
   else
   {
     this->instrument_loaded_correctly = true;
-//    m_monitordetectorList = loadInst->getProperty("MonitorList");
-//    std::vector<int>::const_iterator itr;
-//    for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
-//    {
-//      g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
-//    }
   }
 }
 

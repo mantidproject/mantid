@@ -92,19 +92,7 @@ API::ITableWorkspace_sptr StripPeaks::findPeaks(API::MatrixWorkspace_sptr WS)
 
   //Get the specified peak positions, which is optional
   findpeaks->setProperty<std::string>("PeakPositions", getProperty("PeakPositions"));
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    findpeaks->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run FindPeaks sub-algorithm");
-    throw;
-  }
-   if ( ! findpeaks->isExecuted() ) g_log.error("Unable to successfully run FindPeaks sub-algorithm");
-
+  findpeaks->executeAsSubAlg();
   return findpeaks->getProperty("PeaksList");
 }
 

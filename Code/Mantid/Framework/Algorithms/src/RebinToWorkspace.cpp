@@ -51,23 +51,12 @@ void RebinToWorkspace::exec()
   createRebinParameters(toMatch, rb_params);
 
   IAlgorithm_sptr runRebin = createSubAlgorithm("Rebin");
-  
   runRebin->setProperty<MatrixWorkspace_sptr>("InputWorkspace", toRebin);
   runRebin->setPropertyValue("OutputWorkspace", "rebin_out");
   runRebin->setProperty("params", rb_params);
-  
-  try
-  {
-    runRebin->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.information("Unable to successfully run Rebin sub-algorithm");
-    throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
-  }
+  runRebin->executeAsSubAlg();
   progress(1);
   MatrixWorkspace_sptr ws = runRebin->getProperty("OutputWorkspace");
-
   setProperty("OutputWorkspace", ws);
 }
 

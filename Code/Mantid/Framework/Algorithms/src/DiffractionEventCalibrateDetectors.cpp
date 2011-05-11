@@ -224,22 +224,7 @@ namespace Algorithms
     std::ostringstream fun_str;
     fun_str << "name=Gaussian,Height="<<peakHeight<<",Sigma=0.01,PeakCentre="<<peakLoc;
     fit_alg->setProperty("Function",fun_str.str());
-
-    try
-    {
-      fit_alg->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.error("Unable to successfully run Fit sub-algorithm");
-      throw;
-    }
-
-    if ( ! fit_alg->isExecuted() )
-    {
-      g_log.error("Unable to successfully run Fit sub-algorithm");
-      throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
-    }
+    fit_alg->executeAsSubAlg();
 
     if (debug) std::cout << tim << " to Fit" << std::endl;
 
@@ -380,15 +365,7 @@ namespace Algorithms
     IAlgorithm_sptr algS = createSubAlgorithm("Sort");
     algS->setPropertyValue("InputWorkspace",inname);
     algS->setPropertyValue("SortBy", "X Value");
-    try
-    {
-      algS->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run Sort sub-algorithm");
-      throw std::runtime_error("Error while executing Sort as a sub algorithm.");
-    }
+    algS->executeAsSubAlg();
     matrixInWS=algS->getProperty("InputWorkspace");
 
     //Write DetCal File

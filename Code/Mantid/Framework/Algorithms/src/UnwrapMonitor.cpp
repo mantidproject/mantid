@@ -402,26 +402,8 @@ API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr& 
   g_log.debug() << "Rebinning unwrapped data into " << numBins << " bins of width " << step
                 << " Angstroms, running from " << min << " to " << max << std::endl;
 
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Rebinning sub-algorithm");
-  }
-  else
-  {
-    return childAlg->getProperty("OutputWorkspace");
-  }
+  childAlg->executeAsSubAlg();
+  return childAlg->getProperty("OutputWorkspace");
 }
 
 } // namespace Algorithm

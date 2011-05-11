@@ -143,16 +143,7 @@ namespace Mantid
         sum_alg->setProperty("Xpixel", XPeak+Xmin);
         sum_alg->setProperty("Ypixel", YPeak+Ymin);
         sum_alg->setProperty("DetectorName", peak.getBankName());
-
-        try
-        {
-          sum_alg->execute();
-        }
-        catch (std::runtime_error&)
-        {
-          g_log.error("Unable to successfully run SumNeighbours sub-algorithm");
-          throw;
-        }
+        sum_alg->executeAsSubAlg();
         outputW = sum_alg->getProperty("OutputWorkspace");
 
         IAlgorithm_sptr bin_alg = createSubAlgorithm("Rebin");
@@ -160,15 +151,7 @@ namespace Mantid
         bin_alg->setProperty("OutputWorkspace", outputW);
         bin_alg->setProperty("PreserveEvents", false);
         bin_alg->setProperty<std::vector<double> >("Params", rb_params);
-        try
-        {
-          bin_alg->execute();
-        }
-        catch (std::runtime_error&)
-        {
-          g_log.information("Unable to successfully run Rebin sub-algorithm");
-          throw std::runtime_error("Error while executing Rebin as a sub algorithm.");
-        }
+        bin_alg->executeAsSubAlg();
 
         outputW = bin_alg->getProperty("OutputWorkspace");
         if (TOFmin > numbins) TOFmin = numbins;
@@ -240,22 +223,7 @@ namespace Mantid
               <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;*/
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
-
-      try
-      {
-        fit_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-
-      if ( ! fit_alg->isExecuted() )
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw std::runtime_error("Unable to successfully run Fit sub-algorithm");
-      }
+      fit_alg->executeAsSubAlg();
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
       const MantidVec &  DataValues = ws->readY(0);
 

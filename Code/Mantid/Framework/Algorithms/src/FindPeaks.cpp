@@ -374,18 +374,7 @@ void FindPeaks::smoothData(API::MatrixWorkspace_sptr &WS, const int &w)
   smooth->setProperty("InputWorkspace", WS);
   // The number of points which contribute to each smoothed point
   smooth->setProperty("NPoints",w);
-  try {
-    smooth->execute();
-  } catch (std::runtime_error &) {
-    g_log.error("Unable to successfully run SmoothData sub-algorithm");
-    throw;
-  }
-
-  if ( ! smooth->isExecuted() )
-  {
-    g_log.error("Unable to successfully run SmoothData sub-algorithm");
-    throw std::runtime_error("Unable to successfully run SmoothData sub-algorithm");
-  }
+  smooth->executeAsSubAlg();
   // Get back the result
   WS = smooth->getProperty("OutputWorkspace");
 }
@@ -529,19 +518,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
     fit->setProperty("height",in_height);
     fit->setProperty("StartX",(X[i0]-5*(X[i0]-X[i2])));
     fit->setProperty("EndX",(X[i0]+5*(X[i0]-X[i2])));
-  
-    try {
-      fit->execute();
-    } catch (std::runtime_error &) {
-      g_log.error("Unable to successfully run Gaussian Fit sub-algorithm");
-      throw;
-    }
-
-    if ( ! fit->isExecuted() )
-    {
-      g_log.error("Unable to successfully run Gaussian Fit sub-algorithm");
-      throw std::runtime_error("Unable to successfully run Gaussian Fit sub-algorithm");
-    }
+    fit->executeAsSubAlg();
  
     std::string fitStatus = fit->getProperty("OutputStatus");
     const double height = fit->getProperty("height");

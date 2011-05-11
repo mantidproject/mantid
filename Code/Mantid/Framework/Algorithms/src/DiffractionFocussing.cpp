@@ -101,9 +101,9 @@ void DiffractionFocussing::exec()
     API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
     childAlg->setProperty("Workspace", tmpW);
     childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
+    childAlg->executeAsSubAlg();
     try
     {
-      childAlg->execute();
       // get the index of the combined spectrum
       int ri = childAlg->getProperty("ResultIndex");
       if (ri >= 0)
@@ -113,8 +113,7 @@ void DiffractionFocussing::exec()
     }
     catch(...)
     {
-      g_log.error("Unable to successfully run GroupDetectors sub-algorithm");
-      throw std::runtime_error("Unable to successfully run GroupDetectors sub-algorithm");
+      throw std::runtime_error("Unable to get Properties from GroupDetectors sub-algorithm");
     }
   }
 
@@ -178,19 +177,7 @@ MatrixWorkspace_sptr DiffractionFocussing::convertUnitsToDSpacing(const API::Mat
   API::IAlgorithm_sptr childAlg = createSubAlgorithm("ConvertUnits", 0.34, 0.66);
   childAlg->setProperty("InputWorkspace", workspace);
   childAlg->setPropertyValue("Target",CONVERSION_UNIT);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run ConvertUnits sub-algorithm");
+  childAlg->executeAsSubAlg();
 
   return childAlg->getProperty("OutputWorkspace");
 }
@@ -215,23 +202,8 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
   API::IAlgorithm_sptr childAlg = createSubAlgorithm("Rebin");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("Params",paramArray);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() ) g_log.error("Unable to successfully run Rebinning sub-algorithm");
-  else
-  {
-    workspace = childAlg->getProperty("OutputWorkspace");
-  }
+  childAlg->executeAsSubAlg();
+  workspace = childAlg->getProperty("OutputWorkspace");
 
 }
 

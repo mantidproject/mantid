@@ -501,27 +501,8 @@ API::MatrixWorkspace_sptr ConvertUnits::alignBins(API::MatrixWorkspace_sptr work
   // Next line for EventWorkspaces - needed for as long as in/out set same keeps as events.
   childAlg->setProperty<MatrixWorkspace_sptr>("OutputWorkspace", workspace);
   childAlg->setProperty<std::vector<double> >("Params",this->calculateRebinParams(workspace));
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run Rebinning sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Rebinning sub-algorithm");
-  }
-  else
-  {
-    return childAlg->getProperty("OutputWorkspace");
-  }
+  childAlg->executeAsSubAlg();
+  return childAlg->getProperty("OutputWorkspace");
 }
 
 namespace // anonymous

@@ -177,24 +177,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   // Valid values are 0.2,0.5,1.0 & 1.5 - would be nice to have a numeric list validator
   const std::string thickness = getPropertyValue("Thickness");
   childAlg->setPropertyValue("SampleThickness", thickness);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
-    throw std::runtime_error("Unable to successfully run FlatPlateAbsorption sub-algorithm");
-  }
-
+  childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

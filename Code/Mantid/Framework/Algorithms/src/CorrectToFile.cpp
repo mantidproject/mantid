@@ -167,16 +167,7 @@ MatrixWorkspace_sptr CorrectToFile::loadInFile(const std::string & corrFile)
   loadRKH->setPropertyValue("OutputWorkspace", "rkhout");
   std::string columnValue = getProperty("FirstColumnValue");
   loadRKH->setPropertyValue("FirstColumnValue", columnValue);
-
-  try
-  {
-    loadRKH->execute();
-  }
-  catch(std::runtime_error&)
-  {
-    g_log.error() << "Unable to successfully run the LoadRKH sub algorithm.";
-    throw std::runtime_error("Error executing LoadRKH as a sub algorithm.");
-  }
+  loadRKH->executeAsSubAlg();
 
   g_log.debug() << corrFile << " loaded\n";
   return loadRKH->getProperty("OutputWorkspace");

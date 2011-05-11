@@ -120,15 +120,7 @@ namespace DataHandling
     alg->setPropertyValue("ComponentName", comp_name);
     alg->setProperty("Z", zshift);
     alg->setPropertyValue("RelativePosition", "1");
-    try
-    {
-      alg->execute();
-    }
-    catch (std::runtime_error&)
-    {
-      g_log.information("Unable to successfully run MoveInstrumentComponent sub-algorithm");
-      throw std::runtime_error("Error while executing MoveInstrumentComponent as a sub algorithm.");
-    }
+    alg->executeAsSubAlg();
 
   }
 

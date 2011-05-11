@@ -156,22 +156,7 @@ namespace Mantid
       fun_str << "PeakCentre="<<peakLoc<<",Sigma=10.0";
 
       fit_alg->setProperty("Function",fun_str.str());
-
-      try
-      {
-        fit_alg->execute();
-      }
-      catch (std::runtime_error&)
-      {
-        g_log.error("Unable to successfully run Fit sub-algorithm");
-        throw;
-      }
-
-      if ( ! fit_alg->isExecuted() )
-      {
-        g_log.error("Unable to successfully run Gaussian1D sub-algorithm");
-        throw std::runtime_error("Unable to successfully run Gaussian1D sub-algorithm");
-      }
+      fit_alg->executeAsSubAlg();
       std::string fitStatus = fit_alg->getProperty("OutputStatus");
       if ( fitStatus.compare("success") ) return (0.);
 

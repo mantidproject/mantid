@@ -339,23 +339,7 @@ double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, dou
   childAlg->setProperty<int>("WorkspaceIndex",spectrum);
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Linear fit sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("Unable to successfully run Linear fit sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Linear fit sub-algorithm");
-  }
+  childAlg->executeAsSubAlg();
 
   std::string fitStatus = childAlg->getProperty("FitStatus");
   if ( fitStatus != "success" )

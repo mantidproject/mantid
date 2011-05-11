@@ -113,25 +113,7 @@ MatrixWorkspace_sptr SumRowColumn::integrateWorkspace()
   childAlg->setPropertyValue( "InputWorkspace", getPropertyValue("InputWorkspace") );
   childAlg->setPropertyValue( "RangeLower",  getPropertyValue("XMin") );
   childAlg->setPropertyValue( "RangeUpper", getPropertyValue("XMax") );
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Integration sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    const std::string mess("Unable to successfully run Integration sub-algorithm");
-    g_log.error(mess);
-    throw std::runtime_error(mess);
-  }
-
+  childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
 

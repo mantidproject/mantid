@@ -647,21 +647,7 @@ API::MatrixWorkspace_sptr MergeRuns::rebinInput(const API::MatrixWorkspace_sptr&
   IAlgorithm_sptr rebin = createSubAlgorithm("Rebin");
   rebin->setProperty("InputWorkspace", workspace);
   rebin->setProperty("Params",params);
-
-  // Now execute the sub-algorithm. Catch and log any error
-  try { rebin->execute(); }
-  catch (std::runtime_error&)
-  {
-    g_log.error("Unable to successfully run Rebin sub-algorithm");
-    throw;
-  }
-
-  if ( !rebin->isExecuted() )
-  {
-    g_log.error("Unable to successfully run Rebin sub-algorithm");
-    throw std::runtime_error("Unable to successfully run Rebin sub-algorithm");
-  }
-
+  rebin->executeAsSubAlg();
   return rebin->getProperty("OutputWorkspace");
 }
 

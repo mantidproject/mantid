@@ -68,21 +68,8 @@ void CalculateEfficiency::exec()
 
   // Sum up all the wavelength bins
   IAlgorithm_sptr childAlg = createSubAlgorithm("Integration");
-  try
-  {
-    childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
-    childAlg->execute();
-  } catch (std::invalid_argument& err)
-  {
-    std::stringstream e;
-    e << "Invalid argument to Integration sub-algorithm: " << err.what();
-    g_log.error(e.str());
-  } catch (std::runtime_error& err)
-  {
-    std::stringstream e;
-    e << "Unable to successfully run Integration sub-algorithm: " << err.what();
-    g_log.error(e.str());
-  }
+  childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", inputWS);
+  childAlg->executeAsSubAlg();
 
   MatrixWorkspace_sptr rebinnedWS = childAlg->getProperty("OutputWorkspace");
 

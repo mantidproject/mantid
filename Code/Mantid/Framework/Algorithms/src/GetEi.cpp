@@ -264,22 +264,8 @@ void GetEi::extractSpec(int specInd, double start, double end)
   childAlg->setProperty( "XMax", end);
   childAlg->setProperty( "StartWorkspaceIndex", specInd);
   childAlg->setProperty( "EndWorkspaceIndex", specInd);
+  childAlg->executeAsSubAlg();
 
-  try
-  {
-    childAlg->execute();
-  }
-  catch (std::exception&)
-  {
-    g_log.error("Exception thrown while running CropWorkspace as a sub-algorithm");
-    throw;
-  }
-
-  if ( ! childAlg->isExecuted() )
-  {
-    g_log.error("The CropWorkspace algorithm failed unexpectedly, aborting.");
-    throw std::runtime_error(name() + " failed trying to run CropWorkspace");
-  }
   m_tempWS = childAlg->getProperty("OutputWorkspace");
 
 //DEBUGGING CODE uncomment out the line below if you want to see the TOF window that was analysed
