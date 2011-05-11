@@ -47,8 +47,8 @@ namespace DataHandling
   /// Sets documentation strings for this algorithm
   void LoadCalFile::initDocs()
   {
-    this->setWikiSummary("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.");
-    this->setOptionalMessage("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.");
+    this->setWikiSummary("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
+    this->setOptionalMessage("Loads a 5-column ASCII .cal file into up to 3 workspaces: a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.");
   }
 
 
@@ -128,8 +128,8 @@ namespace DataHandling
     declareProperty(new PropertyWithValue<bool>("MakeOffsetsWorkspace",true,Direction::Input),
         "Set to true to create a OffsetsWorkspace with called WorkspaceName_offsets.");
 
-    declareProperty(new PropertyWithValue<bool>("MakeMaskingWorkspace",true,Direction::Input),
-        "Set to true to create a MaskingWorkspace with called WorkspaceName_mask.");
+    declareProperty(new PropertyWithValue<bool>("MakeMaskWorkspace",true,Direction::Input),
+        "Set to true to create a MaskWorkspace with called WorkspaceName_mask.");
 
     declareProperty(new PropertyWithValue<std::string>("WorkspaceName", "", Direction::Input),
         "The base of the output workspace names. Names will have '_group', '_offsets', '_mask' appended to them.");
@@ -144,7 +144,7 @@ namespace DataHandling
     std::string WorkspaceName = getPropertyValue("WorkspaceName");
     bool MakeGroupingWorkspace = getProperty("MakeGroupingWorkspace");
     bool MakeOffsetsWorkspace = getProperty("MakeOffsetsWorkspace");
-    bool MakeMaskingWorkspace = getProperty("MakeMaskingWorkspace");
+    bool MakeMaskWorkspace = getProperty("MakeMaskWorkspace");
 
     if (WorkspaceName.empty())
       throw std::invalid_argument("Must specify WorkspaceName.");
@@ -155,22 +155,29 @@ namespace DataHandling
     OffsetsWorkspace_sptr offsetsWS;
     MatrixWorkspace_sptr maskWS;
 
+    // Initialize all required workspaces.
     if (MakeGroupingWorkspace)
     {
       groupWS = GroupingWorkspace_sptr(new GroupingWorkspace(inst));
-      AnalysisDataService::Instance().addOrReplace(WorkspaceName + "_group", groupWS);
+      declareProperty(new WorkspaceProperty<GroupingWorkspace>("OutputGroupingWorkspace", WorkspaceName + "_group", Direction::Output),
+              "Set the the output GroupingWorkspace, if any.");
+      setProperty("OutputGroupingWorkspace", groupWS);
     }
 
     if (MakeOffsetsWorkspace)
     {
       offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inst));
-      AnalysisDataService::Instance().addOrReplace(WorkspaceName + "_offsets", offsetsWS);
+      declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputOffsetsWorkspace", WorkspaceName + "_offsets", Direction::Output),
+              "Set the the output OffsetsWorkspace, if any.");
+      setProperty("OutputOffsetsWorkspace", offsetsWS);
     }
 
-    if (MakeMaskingWorkspace)
+    if (MakeMaskWorkspace)
     {
       maskWS = MatrixWorkspace_sptr(new SpecialWorkspace2D(inst));
-      AnalysisDataService::Instance().addOrReplace(WorkspaceName + "_mask", maskWS);
+      declareProperty(new WorkspaceProperty<MatrixWorkspace>("OutputMaskWorkspace", WorkspaceName + "_mask", Direction::Output),
+              "Set the the output MaskWorkspace, if any.");
+      setProperty("OutputMaskWorkspace", maskWS);
     }
 
     LoadCalFile::readCalFile(CalFilename, groupWS, offsetsWS, maskWS);

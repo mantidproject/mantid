@@ -16,7 +16,7 @@ namespace DataHandling
 {
 
   /** Algorithm to load a 5-column ascii .cal file into up to 3 workspaces:
-   * a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.
+   * a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.
    * 
    * @author Janik Zikovsky
    * @date 2011-05-09

@@ -37,7 +37,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("InstrumentName", "GEM") );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeGroupingWorkspace", true) );
     TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeOffsetsWorkspace", true) );
-    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeMaskingWorkspace", true) );
+    TS_ASSERT_THROWS_NOTHING( alg.setProperty("MakeMaskWorkspace", true) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("CalFilename", "offsets_2006_cycle064.cal") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WorkspaceName", outWSName ) );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );

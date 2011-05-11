@@ -13,7 +13,7 @@ namespace DataHandling
 {
 
   /** Algorithm to save a 5-column ascii .cal file from  to 3 workspaces:
-   * a GroupingWorkspace, OffsetsWorkspace and/or MaskingWorkspace.
+   * a GroupingWorkspace, OffsetsWorkspace and/or MaskWorkspace.
    * 
    * @author
    * @date 2011-05-10 09:48:31.796980

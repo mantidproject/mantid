@@ -96,8 +96,15 @@ void CaltoDspacemap::exec()
   const std::string calFileName = getProperty("CalibrationFile");
 
   progress(0.0,"Reading calibration file");
-  OffsetsWorkspace_sptr offsetsWS(new OffsetsWorkspace(inputWS->getInstrument()) );
-  LoadCalFile::readCalFile(calFileName, GroupingWorkspace_sptr(), offsetsWS, MatrixWorkspace_sptr());
+  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
+  alg->setPropertyValue("CalFilename", calFileName);
+  alg->setProperty<bool>("MakeGroupingWorkspace", false);
+  alg->setProperty<bool>("MakeOffsetsWorkspace", true);
+  alg->setProperty<bool>("MakeMaskWorkspace", false);
+  alg->setPropertyValue("WorkspaceName", "temp");
+  alg->executeAsSubAlg();
+  OffsetsWorkspace_sptr offsetsWS;
+  offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
 
   // generate map of the tof->d conversion factors
   CalculateDspaceFromCal(inputWS, DFileName, offsetsWS);

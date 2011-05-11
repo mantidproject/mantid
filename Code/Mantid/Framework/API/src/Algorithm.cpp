@@ -376,14 +376,14 @@ namespace Mantid
       }
       catch (std::runtime_error&)
       {
-        g_log.error() << "Unable to successfully run " << this->name() << std::endl;
+        g_log.error() << "Unable to successfully run subAlgorithm " << this->name() << std::endl;
         throw;
       }
 
       if ( ! executed )
       {
-        g_log.error() << "Unable to successfully run " << this->name() << std::endl;
-        throw std::runtime_error("Unable to successfully run " + this->name());
+        g_log.error() << "Unable to successfully run subAlgorithm " << this->name() << std::endl;
+        throw std::runtime_error("Unable to successfully run subAlgorithm " + this->name());
       }
     }
 

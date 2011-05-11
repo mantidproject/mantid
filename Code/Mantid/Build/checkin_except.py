@@ -7,11 +7,13 @@ Prompts the user for the checkin message."""
 import os, sys
 
 
-def do_checkin(only_this):
+def do_checkin(only_this, exclude_this):
     """Parameters:
         only_this: a list of strings. The string must be in the filename
             for the file to be checked in. Leave None to check in
-            all matching files."""
+            all matching files.
+        exclude_this: a list of strings to EXCLUDE from the list
+                    """
     import subprocess
     p = subprocess.Popen("svn status", shell=True, bufsize=10000,
           stdin=subprocess.PIPE, stdout=subprocess.PIPE, close_fds=True)
@@ -35,14 +37,25 @@ def do_checkin(only_this):
 #                or ("test/runTests.sh" in filename) :
                     print "NOT CHECKING IN:", filename
             else:
-                if only_this is None:
-                    good_files.append(filename)
+                includeit = False
+                
+                if len(only_this) == 0:
+                    includeit = True
                 else:
                     #Check for any entry in the list only_this
                     for only_this_one in only_this:
                         if only_this_one in filename:
-                            good_files.append(filename)
+                            includeit = True
                             break
+
+                # Remove any excluded ones
+                if len(exclude_this) > 0:
+                    for exclude_this_one in exclude_this:
+                        if exclude_this_one in filename:
+                            includeit = False
+                              
+                if includeit:                  
+                    good_files.append(filename)
                         
         line=get.readline()
 
@@ -68,17 +81,36 @@ def do_checkin(only_this):
 
 
 if __name__=="__main__":
-	if len(sys.argv)>1:
-		only_this = sys.argv[1:]
-	else:
-		only_this = None
+    if len(sys.argv)>1:
+        only_this = []
+        exclude_this = []
+        for i in xrange(1, len(sys.argv)):
+            arg = sys.argv[i]
+            if arg.startswith("-"):
+                if arg == "-h" or arg == "--help":
+                    print "checkin_except.py: Script to check in selected files.\n"
+                    print "USAGE: "
+                    print "    checkin_except.py = Do all files."
+                    print "    checkin_except.py String1 String2 = Only match the given strings"
+                    print "    checkin_except.py -String3 -String4 = Exclude any filename matching any of the given strings"
+                    print "\n"
+                    sys.exit()
+                    
+                if len(arg)>1: arg = arg[1:]
+                exclude_this.append(arg)
+            else:
+                only_this.append(arg)
+    else:
+        only_this = []
+        exclude_this = []
+        
 
 	# Also list the new svn files
-	try:
-		import svn_new_files
-		svn_new_files.do_list_new_files(None)
-	except:
-		pass
+	#try:
+    import svn_new_files
+    svn_new_files.do_list_new_files()
+	#except:
+#		pass
 	
 	# Now the checkin part	
-	do_checkin(only_this)	
+    do_checkin(only_this, exclude_this)	

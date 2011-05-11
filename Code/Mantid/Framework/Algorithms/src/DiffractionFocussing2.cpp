@@ -98,12 +98,12 @@ void DiffractionFocussing2::exec()
 {
   // retrieve the properties
   std::string groupingFileName=getProperty("GroupingFileName");
-  std::string GroupingWorkspaceName=getPropertyValue("GroupingWorkspace");
+  groupWS = getProperty("GroupingWorkspace");
 
-  if (GroupingWorkspaceName.empty() && groupingFileName.empty())
+  if (!groupingFileName.empty() && groupWS)
     throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace, not both!");
 
-  if (!GroupingWorkspaceName.empty() && !groupingFileName.empty())
+  if (groupingFileName.empty() && !groupWS)
     throw std::invalid_argument("You must enter a GroupingFileName or a GroupingWorkspace!");
 
   // Get the input workspace
@@ -120,10 +120,6 @@ void DiffractionFocussing2::exec()
     childAlg->setProperty("OldCalFilename", groupingFileName);
     childAlg->executeAsSubAlg();
     groupWS = childAlg->getProperty("OutputWorkspace");
-  }
-  else
-  {
-    groupWS = getProperty("GroupingWorkspace");
   }
 
   // Fill the map

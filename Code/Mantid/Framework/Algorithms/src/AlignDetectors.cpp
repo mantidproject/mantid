@@ -161,7 +161,7 @@ void AlignDetectors::init()
 void AlignDetectors::exec()
 {
   // Get the input workspace
-  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   bool vulcancorrection = getProperty("VULCANDspacemapFile");
 
   // Read in the calibration data
@@ -176,10 +176,16 @@ void AlignDetectors::exec()
 
   if (!calFileName.empty())
   {
-    // Create the blank OffsetsWorkspace
-    offsetsWS = OffsetsWorkspace_sptr(new OffsetsWorkspace(inputWS->getInstrument()));
     // Load the .cal file
-    LoadCalFile::readCalFile(calFileName, GroupingWorkspace_sptr(), offsetsWS, MatrixWorkspace_sptr() );
+    IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
+    alg->setPropertyValue("CalFilename", calFileName);
+    alg->setProperty("InputWorkspace", inputWS);
+    alg->setProperty<bool>("MakeGroupingWorkspace", false);
+    alg->setProperty<bool>("MakeOffsetsWorkspace", true);
+    alg->setProperty<bool>("MakeMaskWorkspace", false);
+    alg->setPropertyValue("WorkspaceName", "temp");
+    alg->executeAsSubAlg();
+    offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
   }
 
   // Ref. to the SpectraDetectorMap

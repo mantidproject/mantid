@@ -99,12 +99,10 @@ void DspacemaptoCal::exec()
   childAlg->setPropertyValue("CalFilename", getPropertyValue("CalibrationFile"));
   childAlg->setProperty<bool>("MakeGroupingWorkspace", true);
   childAlg->setProperty<bool>("MakeOffsetsWorkspace", false);
-  childAlg->setProperty<bool>("MakeMaskingWorkspace", false);
+  childAlg->setProperty<bool>("MakeMaskWorkspace", false);
   childAlg->setPropertyValue("WorkspaceName", "__temp");
   childAlg->executeAsSubAlg();
-  GroupingWorkspace_sptr groupWS = boost::dynamic_pointer_cast<GroupingWorkspace>(
-      AnalysisDataService::Instance().retrieve("__temp_group"));
-  AnalysisDataService::Instance().remove("__temp_group");
+  GroupingWorkspace_sptr groupWS = childAlg->getProperty("OutputGroupingWorkspace");
 
   childAlg = createSubAlgorithm("SaveCalFile");
   childAlg->setProperty<GroupingWorkspace_sptr>("GroupingWorkspace", groupWS);
