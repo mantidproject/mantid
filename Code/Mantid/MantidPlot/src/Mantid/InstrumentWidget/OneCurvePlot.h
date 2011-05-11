@@ -2,10 +2,10 @@
 #define ONECURVEPLOT_H_
 
 #include <qwt_plot.h>
-
-#include <iostream>
+#include <QList>
 
 class QwtPlotCurve;
+class QwtPlotZoomer;
 
 /**
   * Implements a simple widget for plotting a single curve.
@@ -29,11 +29,14 @@ signals:
   void clickedAt(double,double);
 protected:
   void resizeEvent(QResizeEvent *e);
+  void contextMenuEvent (QContextMenuEvent *e);
   void mousePressEvent(QMouseEvent*);
-  //void mouseMoveEvent(QMouseEvent*);
-  //bool event(QEvent *);
+  void mouseReleaseEvent(QMouseEvent*);
 private:
   QwtPlotCurve* m_curve;
+  QwtPlotZoomer* m_zoomer; ///< does zooming
+  int m_x0; ///< save x coord of last left mouse click
+  int m_y0; ///< save y coord of last left mouse click
 };
 
 

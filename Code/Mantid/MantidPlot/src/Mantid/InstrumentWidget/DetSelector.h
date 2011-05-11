@@ -30,7 +30,12 @@
 
 class QPainter;
 
-enum DetSelectionType {Single,BoxType,Tube,Peak};
+/**
+  * Enumerates the ways teh detectors can be selected.
+  * SingleDetectorSelection separates ways of selecting a single detector from
+  * those of groups of detectors
+  */
+enum DetSelectionType {Single=0,Peak,SingleDetectorSelection,BoxType,Tube};
 
 class DetSelector
 {

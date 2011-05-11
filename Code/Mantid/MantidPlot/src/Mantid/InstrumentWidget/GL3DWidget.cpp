@@ -81,6 +81,7 @@ void GL3DWidget::setInteractionModePick(PickType type)
 {
   iInteractionMode = GL3DWidget::PickMode;// Pick mode
   setMouseTracking(true);
+  setCursor(Qt::ArrowCursor);
   mPickingDraw = true;
   m_pickType = type;
   update();
@@ -90,7 +91,7 @@ void GL3DWidget::setInteractionModeMove()
 {
   iInteractionMode = GL3DWidget::MoveMode;//Normal mode
   setMouseTracking(false);
-  setCursor(Qt::PointingHandCursor);
+  //setCursor(Qt::PointingHandCursor);
   glEnable(GL_NORMALIZE);
   if (m_lightingState > 0)
   {
@@ -446,7 +447,7 @@ void GL3DWidget::mousePressEvent(QMouseEvent* event)
   // Pick Mode
   if( iInteractionMode == GL3DWidget::PickMode && (event->buttons() & Qt::LeftButton) )
   { 
-    setCursor(Qt::CrossCursor);
+    setCursor(Qt::ArrowCursor);
     QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
     emit actorHighlighted(tmpColor);
     mPickBox->mousePressed(event->buttons(), event->pos());
@@ -531,7 +532,7 @@ void GL3DWidget::mouseMoveEvent(QMouseEvent* event)
   // full 3D view
   if(iInteractionMode == GL3DWidget::PickMode)
   {
-    setCursor(Qt::CrossCursor);
+    setCursor(Qt::ArrowCursor);
     QRgb tmpColor = mPickBox->pickPoint(event->x(), event->y());
     if (event->buttons() & Qt::LeftButton)
     {
@@ -648,28 +649,28 @@ void GL3DWidget::keyPressEvent(QKeyEvent *event)
       //-----------------------Translation-----------------
     case Qt::Key_Left:
       isKeyPressed=true;
-      setCursor(Qt::CrossCursor);
+      setCursor(Qt::ArrowCursor);
       _trackball->initTranslateFrom(1,0);
       _trackball->generateTranslationTo(0,0);
       update();
       break;
     case Qt::Key_Right:
       isKeyPressed=true;
-      setCursor(Qt::CrossCursor);
+      setCursor(Qt::ArrowCursor);
       _trackball->initTranslateFrom(0,0);
       _trackball->generateTranslationTo(1,0);
       update();
       break;
     case Qt::Key_Up:
       isKeyPressed=true;
-      setCursor(Qt::CrossCursor);
+      setCursor(Qt::ArrowCursor);
       _trackball->initTranslateFrom(0,1);
       _trackball->generateTranslationTo(0,0);
       update();
       break;
     case Qt::Key_Down:
       isKeyPressed=true;
-      setCursor(Qt::CrossCursor);
+      setCursor(Qt::ArrowCursor);
       _trackball->initTranslateFrom(0,0);
       _trackball->generateTranslationTo(0,1);
       update();

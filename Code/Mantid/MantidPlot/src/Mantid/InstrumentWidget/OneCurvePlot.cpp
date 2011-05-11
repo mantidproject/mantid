@@ -6,18 +6,27 @@
 #include <qwt_scale_draw.h>
 #include <qwt_plot_canvas.h>
 #include <qwt_compat.h>
+#include <qwt_plot_zoomer.h>
 
 #include <QFontMetrics>
 #include <QMouseEvent>
+#include <QContextMenuEvent>
+
+#include <iostream>
 
 OneCurvePlot::OneCurvePlot(QWidget* parent):
 QwtPlot(parent),m_curve(NULL)
 {
   setAxisFont(QwtPlot::xBottom, parent->font());
   setAxisFont(QwtPlot::yLeft, parent->font());
+  canvas()->setCursor(Qt::ArrowCursor);
   //setMouseTracking(true);
   //canvas()->setMouseTracking(true);
- }
+  setContextMenuPolicy(Qt::DefaultContextMenu);
+  m_zoomer = new QwtPlotZoomer(QwtPlot::xBottom, QwtPlot::yLeft,
+      QwtPicker::DragSelection | QwtPicker::CornerToCorner, QwtPicker::AlwaysOff, canvas());
+  m_zoomer->setRubberBandPen(QPen(Qt::black));
+}
 
 /**
   * Set the scale of the horizontal axis
@@ -37,6 +46,7 @@ void OneCurvePlot::setXScale(double from, double to)
   //std::cerr << "ticks: " << labelWidth << ' ' << nMajorTicks << std::endl;
   const QwtScaleDiv div = axisScaleEngine(QwtPlot::xBottom)->divideScale(from,to,nMajorTicks,nMajorTicks);
   setAxisScaleDiv(xBottom,div);
+  m_zoomer->setZoomBase();
 }
 
 /**
@@ -62,6 +72,7 @@ void OneCurvePlot::setYScale(double from, double to)
     from = yPositiveMin;
   }
   setAxisScale(QwtPlot::yLeft,from,to);
+  m_zoomer->setZoomBase();
 }
 
 /**
@@ -110,17 +121,39 @@ void OneCurvePlot::recalcAxisDivs()
   setXScale(from,to);
 }
 
+void OneCurvePlot::contextMenuEvent (QContextMenuEvent *e)
+{
+  // context menu will be handled with mouse events
+  e->accept();
+}
+
 void OneCurvePlot::mousePressEvent(QMouseEvent* e)
 {
   if (e->buttons() & Qt::RightButton)
   {
-    e->accept();
-    emit showContextMenu();
+    if (m_zoomer->zoomRectIndex() == 0)
+    {
+      e->accept();
+      emit showContextMenu();
+    }
+    return;
   }
   if (e->buttons() & Qt::LeftButton)
   {
     e->accept();
-    emit clickedAt(invTransform(xBottom,e->x()),invTransform(yLeft,e->y()));
+    m_x0 = e->x();
+    m_y0 = e->y();
+  }
+}
+
+void OneCurvePlot::mouseReleaseEvent(QMouseEvent* e)
+{
+  if (e->button() == Qt::LeftButton)
+  {
+    if (m_x0 == e->x() && m_y0 == e->y())
+    {// there were no dragging
+      emit clickedAt(invTransform(xBottom,e->x()-canvas()->x()),invTransform(yLeft,e->y()-canvas()->y()));
+    }
   }
 }
 
@@ -136,6 +169,7 @@ void OneCurvePlot::setYLogScale()
 {
   QwtLog10ScaleEngine* logEngine = new QwtLog10ScaleEngine();
   setAxisScaleEngine(yLeft,logEngine);
+  update();
 }
 
 /**
@@ -145,4 +179,6 @@ void OneCurvePlot::setYLinearScale()
 {
   QwtLinearScaleEngine* engine = new QwtLinearScaleEngine();
   setAxisScaleEngine(yLeft,engine);
+  update();
 }
+

@@ -177,8 +177,11 @@ void InstrumentWindowPickTab::plotContextMenu()
 {
   QMenu context(this);
   
-  context.addAction(m_sumDetectors);
-  context.addAction(m_integrateTimeBins);
+  if (m_selectionType > SingleDetectorSelection)
+  {// only for multiple detector selectors
+    context.addAction(m_sumDetectors);
+    context.addAction(m_integrateTimeBins);
+  }
 
   QMenu* axes = new QMenu("Axes",this);
   axes->addAction(m_logY);
@@ -191,7 +194,7 @@ void InstrumentWindowPickTab::plotContextMenu()
 void InstrumentWindowPickTab::setPlotCaption()
 {
   QString caption;
-  if (m_selectionType == Single)
+  if (m_selectionType < SingleDetectorSelection)
   {
     caption = "Plotting detector spectra";
   }
@@ -400,6 +403,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
   row << Qx << Qy << Qz;
 
   //std::cerr << "id=" << det->getID() << std::endl;
+  //std::cerr << "x=" << x << std::endl;
   //std::cerr << "l1=" << source->getDistance(*sample) << " l2=" << det->getDistance(*sample) << std::endl;
   //std::cerr << "2th=" << theta2/M_PI*180 << " phi=" << phi/M_PI*180 << std::endl;
 }
