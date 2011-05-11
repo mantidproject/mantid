@@ -184,7 +184,6 @@ public:
   }
 
 
-
 private:
 
   void checkBaseParameterNamesExist(const std::set<std::string> & paramNames)

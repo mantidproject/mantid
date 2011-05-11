@@ -4,12 +4,15 @@
 #include <cxxtest/TestSuite.h>
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/IDetector.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace std;
 using namespace Mantid;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Kernel;
 using Mantid::MantidVec;
+using Mantid::Geometry::IDetector_sptr;
 
 class Workspace2DTest : public CxxTest::TestSuite
 {
@@ -178,6 +181,23 @@ public:
     // Now there is a different one for each
     TS_ASSERT_EQUALS( ws->getMemorySizeForXAxes(), nhist*(nbins+1)*sizeof(double));
   }
+
+
+  /** Refs #3003: very odd bug when getting detector in parallel only!
+   * This does not reproduce it :( */
+  void test_getDetector_parallel()
+  {
+    int numpixels = 10000;
+    Workspace2D_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels, 200);
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i<numpixels; i++)
+    {
+      IDetector_sptr det = ws->getDetector(i);
+      TS_ASSERT(det);
+    }
+  }
+
 
 };
 

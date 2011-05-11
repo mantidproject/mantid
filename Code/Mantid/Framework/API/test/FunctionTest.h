@@ -8,6 +8,7 @@
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -437,6 +438,37 @@ public:
     TS_ASSERT_EQUALS(f.dataSize(),8);
     TS_ASSERT_EQUALS(f.getData(),&y[2]);
     AnalysisDataService::Instance().remove("IFT_Test_WS");
+  }
+
+  /** Refs #3003: Test to make sure setMatrix works in parallel */
+  void test_setWorkspace_works_inParallel()
+  {
+    double expected;
+    int numpixels = 5000;
+    MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,10);
+    for (int wi=0; wi<ws->getNumberHistograms(); wi++)
+    {
+      MantidVec& x = ws->dataX(wi);
+      MantidVec& y = ws->dataY(wi);
+      for(size_t i=0; i < y.size(); ++i)
+      {
+        x[i] = 0.1 * double(i);
+        y[i] = double(i);
+      }
+      x.back() = 0.1 * double(y.size());
+      expected = y[2];
+    }
+
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i<numpixels; i++)
+    {
+      IFT_Funct f;
+      std::stringstream mess;
+      mess << "WorkspaceIndex=" << i << ",StartX=0.2,EndX = 0.8";
+      TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws, mess.str() ));
+      TS_ASSERT_EQUALS(f.dataSize(),8);
+      TS_ASSERT_EQUALS(*f.getData(), expected);
+    }
   }
 
   private:

@@ -74,49 +74,49 @@ private:
   GetDetectorOffsets offsets;
 };
 
-//class GetDetectorOffsetsTestPerformance : public CxxTest::TestSuite
-//{
-//public:
-//  MatrixWorkspace_sptr WS;
-//  int numpixels;
-//
-//  void setUp()
-//  {
-//    numpixels = 5;
-//    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,200, false);
-//    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-//    for (int wi=0; wi<WS->getNumberHistograms(); wi++)
-//    {
-//      const Mantid::MantidVec &X = WS->readX(wi);
-//      Mantid::MantidVec &Y = WS->dataY(wi);
-//      Mantid::MantidVec &E = WS->dataE(wi);
-//      for (int i = 0; i < static_cast<int>(Y.size()); ++i)
-//      {
-//        const double x = (X[i]+X[i+1])/2;
-//        Y[i] = exp(-0.5*pow((x-1)/10.0,2));
-//        E[i] = 0.001;
-//      }
-//    }
-//  }
-//
-//  void test_performance()
-//  {
-//    GetDetectorOffsets offsets;
-//    if ( !offsets.isInitialized() ) offsets.initialize();
-//    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace", WS) );
-//    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("Step","0.02"));
-//    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("DReference","1.00"));
-//    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("XMin","-20"));
-//    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("XMax","20"));
-//    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace","dummyname"));
-//    TS_ASSERT_THROWS_NOTHING( offsets.execute() );
-//    TS_ASSERT( offsets.isExecuted() );
-//    OffsetsWorkspace_sptr output;
-//    TS_ASSERT_THROWS_NOTHING( output = offsets.getProperty("OutputWorkspace") );
-//    if (!output) return;
-//    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
-//  }
-//
-//};
+class GetDetectorOffsetsTestPerformance : public CxxTest::TestSuite
+{
+public:
+  MatrixWorkspace_sptr WS;
+  int numpixels;
+
+  void setUp()
+  {
+    numpixels = 10000;
+    WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,200, false);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    for (int wi=0; wi<WS->getNumberHistograms(); wi++)
+    {
+      const Mantid::MantidVec &X = WS->readX(wi);
+      Mantid::MantidVec &Y = WS->dataY(wi);
+      Mantid::MantidVec &E = WS->dataE(wi);
+      for (int i = 0; i < static_cast<int>(Y.size()); ++i)
+      {
+        const double x = (X[i]+X[i+1])/2;
+        Y[i] = exp(-0.5*pow((x-1)/10.0,2));
+        E[i] = 0.001;
+      }
+    }
+  }
+
+  void test_performance()
+  {
+    GetDetectorOffsets offsets;
+    if ( !offsets.isInitialized() ) offsets.initialize();
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace", WS) );
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("Step","0.02"));
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("DReference","1.00"));
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("XMin","-20"));
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("XMax","20"));
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace","dummyname"));
+    TS_ASSERT_THROWS_NOTHING( offsets.execute() );
+    TS_ASSERT( offsets.isExecuted() );
+    OffsetsWorkspace_sptr output;
+    TS_ASSERT_THROWS_NOTHING( output = offsets.getProperty("OutputWorkspace") );
+    if (!output) return;
+    TS_ASSERT_DELTA( output->dataY(0)[0], -0.0196, 0.0001);
+  }
+
+};
 
 #endif /*GETDETECTOROFFSETSTEST_H_*/

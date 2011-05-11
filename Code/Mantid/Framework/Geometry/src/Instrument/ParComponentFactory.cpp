@@ -1,15 +1,11 @@
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include "MantidGeometry/Instrument/ParComponentFactory.h"
-
-#include "MantidGeometry/Instrument/Component.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
-#include "MantidGeometry/Instrument/ObjCompAssembly.h" 
-#include "MantidGeometry/Instrument/Detector.h" 
-#include "MantidGeometry/Instrument/RectangularDetector.h"
-#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/Component.h"
+#include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/Instrument/ObjCompAssembly.h" 
+#include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidGeometry/Instrument/ParComponentFactory.h"
+#include "MantidGeometry/Instrument/RectangularDetector.h"
 
 namespace Mantid
 {
@@ -119,7 +115,7 @@ namespace Mantid
       const Detector *baseDet = dynamic_cast<const Detector*>(base);
       if( baseDet )
       {
-	return g_detPool.create(baseDet,map);
+        return g_detPool.create(baseDet,map);
       }
       return boost::shared_ptr<Detector>();
     }
@@ -160,30 +156,30 @@ namespace Mantid
       // short out this problem with different classes carrying different types of pointers around
       if( inst_sptr )
       {
-	return createInstrument(boost::const_pointer_cast<Instrument>(inst_sptr), 
-				boost::shared_ptr<ParameterMap>(const_cast<ParameterMap*>(map), NoDeleting()));
+        return createInstrument(boost::const_pointer_cast<Instrument>(inst_sptr),
+            boost::shared_ptr<ParameterMap>(const_cast<ParameterMap*>(map), NoDeleting()));
       }
 
       // Everything gets created on the fly. Note that the order matters here
       // @todo Really could do with a better system than this. Virtual function maybe?
       const RectangularDetector* rd = dynamic_cast<const RectangularDetector*>(base.get());
       if (rd)
-	return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
+        return boost::shared_ptr<IComponent>(new RectangularDetector(rd,map));
 
       const CompAssembly* ac = dynamic_cast<const CompAssembly*>(base.get());
       if (ac)
-	return boost::shared_ptr<IComponent>(new CompAssembly(ac,map));
+        return boost::shared_ptr<IComponent>(new CompAssembly(ac,map));
       const ObjCompAssembly* oac = dynamic_cast<const ObjCompAssembly*>(base.get());
       if (oac)
-	return boost::shared_ptr<IComponent>(new ObjCompAssembly(oac,map));
-      
+        return boost::shared_ptr<IComponent>(new ObjCompAssembly(oac,map));
+
       const ObjComponent* oc = dynamic_cast<const ObjComponent*>(base.get());
       if (oc)
-	return boost::shared_ptr<IComponent>(new ObjComponent(oc,map));
+        return boost::shared_ptr<IComponent>(new ObjComponent(oc,map));
       // Must be a component
       const IComponent* cc = dynamic_cast<const IComponent*>(base.get());
       if (cc)
-	return boost::shared_ptr<IComponent>(new Component(cc,map));
+        return boost::shared_ptr<IComponent>(new Component(cc,map));
 
       return IComponent_sptr();
     }

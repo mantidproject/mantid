@@ -165,7 +165,8 @@ set ( TEST_FILES
 	test/DetectorTest.h
 	test/FitParameterTest.h
 	test/GeneralTest.h
-  test/GoniometerTest.h
+	test/GoniometerTest.h
+	test/IMDDimensionTest.h
 	test/InstrumentRayTracerTest.h
 	test/InstrumentTest.h
 	test/LineIntersectVisitTest.h
@@ -185,8 +186,9 @@ set ( TEST_FILES
 	test/ObjCompAssemblyTest.h
 	test/ObjComponentTest.h
 	test/ObjectTest.h
-  test/OrientedLatticeTest.h
+	test/OrientedLatticeTest.h
 	test/ParCompAssemblyTest.h
+	test/ParComponentFactoryTest.h
 	test/ParDetectorTest.h
 	test/ParInstrumentTest.h
 	test/ParObjCompAssemblyTest.h
@@ -212,7 +214,6 @@ set ( TEST_FILES
 	test/TripleTest.h
 	test/UnitCellTest.h
 	test/V3DTest.h
-	test/IMDDimensionTest.h
 )
 
 set ( GMOCK_TEST_FILES
