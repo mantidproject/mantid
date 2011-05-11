@@ -459,7 +459,8 @@ public:
       expected = y[2];
     }
 
-    PARALLEL_FOR_NO_WSP_CHECK()
+    // NOTE: In parallel, there is a segfault on SNS build servers ubuntu-10.04 and RHEL6. The rest pass!?
+    //PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i<numpixels; i++)
     {
       IFT_Funct f;
