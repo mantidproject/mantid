@@ -6,7 +6,6 @@
 #include "MantidAPI/FileProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceValidators.h"
-#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidGeometry/V3D.h"
@@ -17,7 +16,6 @@
 #include <fstream>
 #include "MantidGeometry/Instrument/Instrument.h"
 
-using Mantid::DataHandling::LoadCalFile;
 using namespace Mantid::Geometry;
 
 namespace Mantid

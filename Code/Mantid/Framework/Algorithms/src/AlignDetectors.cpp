@@ -7,7 +7,6 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
-#include "MantidDataHandling/LoadCalFile.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
@@ -18,7 +17,6 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
-using namespace Mantid::DataHandling;
 using Mantid::DataObjects::OffsetsWorkspace;
 
 namespace Mantid
