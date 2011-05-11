@@ -87,17 +87,21 @@ namespace Mantid
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
-//      PARALLEL_FOR1(inputW)
+      PARALLEL_FOR1(inputW)
       for (int i=0;i<nspec;++i)
       {
-//        PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
         double offset=fitSpectra(i);
         int detID = inputW->getDetector(i)->getID();
-        outputW->setValue(detID, offset);
+
+        PARALLEL_CRITICAL(GetDetectorOffsets_setValue)
+        { // Most of the exec time is in FitSpectra, so this critical block should not be a problem.
+          outputW->setValue(detID, offset);
+        }
         prog.report();
-//        PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
-//      PARALLEL_CHECK_INTERUPT_REGION
+      PARALLEL_CHECK_INTERUPT_REGION
 
       // Return the output
       setProperty("OutputWorkspace",outputW);
