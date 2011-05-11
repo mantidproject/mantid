@@ -116,6 +116,7 @@ namespace CurveFitting
 
     boost::shared_ptr<GenericFit> fit = boost::dynamic_pointer_cast<GenericFit>(createSubAlgorithm("GenericFit"));
     fit->setChild(false);
+    fit->setLogging(this->g_log.getEnabled()); // Copy the logging status
     fit->initialize();
     fit->setProperty("InputWorkspace",boost::dynamic_pointer_cast<API::Workspace>(ws));
     fit->setProperty("Input",input);

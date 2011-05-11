@@ -1,10 +1,8 @@
 #ifndef MANTID_ALGORITHMS_GETDETECTOROFFSETS_H_
 #define MANTID_ALGORITHMS_GETDETECTOROFFSETS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid
 {
@@ -39,7 +37,7 @@ namespace Algorithms
 class DLLExport GetDetectorOffsets: public API::Algorithm
 {
 public:
-  /// Default constructor
+  /// Default constructorMatrix
   GetDetectorOffsets();
   /// Destructor
   virtual ~GetDetectorOffsets();
@@ -53,8 +51,6 @@ public:
 private:
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
-  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
-  API::MatrixWorkspace_sptr outputW; ///< A pointer to the output workspace
   // Overridden Algorithm methods
   void init();
   void exec();
@@ -64,6 +60,8 @@ private:
   void retrieveProperties();
   
   
+  API::MatrixWorkspace_sptr inputW;  ///< A pointer to the input workspace
+  DataObjects::OffsetsWorkspace_sptr outputW; ///< A pointer to the output workspace
   double Xmin;        ///< The start of the X range for fitting
   double Xmax;        ///< The end of the X range for fitting
   double dreference;  ///< The expected peak position in d-spacing (?)
