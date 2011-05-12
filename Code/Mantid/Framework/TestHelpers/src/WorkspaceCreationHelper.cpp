@@ -84,8 +84,8 @@ namespace WorkspaceCreationHelper
 
 
 
-  Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins,bool isHist,
-					const std::set<int> & maskedWorkspaceIndices)
+  Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins,bool isHist,
+					const std::set<int64_t> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?nBins+1:nBins,1);
@@ -104,8 +104,8 @@ namespace WorkspaceCreationHelper
     return retVal;
   }
 
-  Workspace2D_sptr Create2DWorkspace154(int nHist, int nBins,bool isHist,
-					const std::set<int> & maskedWorkspaceIndices)
+  Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins,bool isHist,
+					const std::set<int64_t> & maskedWorkspaceIndices)
   {
     MantidVecPtr x1,y1,e1;
     x1.access().resize(isHist?nBins+1:nBins,1);
@@ -124,7 +124,7 @@ namespace WorkspaceCreationHelper
     return retVal;
   }
 
-  Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int> & maskedWorkspaceIndices)
+  Workspace2D_sptr maskSpectra(Workspace2D_sptr workspace, const std::set<int64_t> & maskedWorkspaceIndices)
   {
     // We need detectors to be able to mask them.
     workspace->setInstrument(boost::shared_ptr<Instrument>(new Instrument));
@@ -139,16 +139,16 @@ namespace WorkspaceCreationHelper
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
 
-    const int nhist(workspace->getNumberHistograms());
+    const int64_t nhist(workspace->getNumberHistograms());
 
     ParameterMap& pmap = workspace->instrumentParameters();
-    for( int i = 0; i < nhist; ++i )
+    for( int64_t i = 0; i < nhist; ++i )
     {
       workspace->getAxis(1)->spectraNo(i) = i;
     }
     workspace->mutableSpectraMap().populateSimple(0, nhist);
 
-    for( int i = 0; i < nhist; ++i )
+    for( int64_t i = 0; i < nhist; ++i )
     {
       Detector *det = new Detector("det",i,shape, NULL);
       det->setPos(i,i+1,1);

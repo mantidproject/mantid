@@ -29,12 +29,12 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::Workspace1D_sptr Create1DWorkspaceFib(int size);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace(int nHist, int nBins);
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspaceWhereYIsWorkspaceIndex(int nhist, int numBoundaries);
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int nHist, int nBins, bool isHist=false, const std::set<int> &
-					       maskedWorkspaceIndices = std::set<int>());
-  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int nHist, int nBins, bool isHist=false,
-					       const std::set<int> & maskedWorkspaceIndices = std::set<int>());
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace123(int64_t nHist, int64_t nBins, bool isHist=false, const std::set<int64_t> &
+					       maskedWorkspaceIndices = std::set<int64_t>());
+  DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr Create2DWorkspace154(int64_t nHist, int64_t nBins, bool isHist=false,
+					       const std::set<int64_t> & maskedWorkspaceIndices = std::set<int64_t>());
   DLL_TESTHELPERS Mantid::DataObjects::Workspace2D_sptr maskSpectra(Mantid::DataObjects::Workspace2D_sptr workspace, 
-								    const std::set<int> & maskedWorkspaceIndices);
+								    const std::set<int64_t> & maskedWorkspaceIndices);
   /** Create a 2D workspace with this many histograms and bins.
    * Filled with Y = 2.0 and E = sqrt(2.0)w
    */
