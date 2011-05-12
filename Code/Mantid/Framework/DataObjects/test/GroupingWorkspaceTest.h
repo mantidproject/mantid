@@ -11,9 +11,10 @@
 #include <iomanip>
 #include <iostream>
 
+using namespace Mantid;
+using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
-using namespace Mantid::API;
 
 class GroupingWorkspaceTest : public CxxTest::TestSuite
 {
@@ -40,7 +41,7 @@ public:
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<int64_t> dets = ws->spectraMap().getDetectors(0);
+    std::vector<detid_t> dets = ws->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     // Set the group numbers
@@ -49,7 +50,7 @@ public:
         ws->dataY(group*9+i)[0] = double(group+1);
 
     // Get the map
-    std::map<int64_t,int64_t> map;
+    std::map<detid_t,int> map;
     int64_t ngroups;
     ws->makeDetectorIDToGroupMap(map, ngroups);
 

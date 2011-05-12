@@ -14,6 +14,7 @@
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
+using namespace Mantid;
 
 class SpecialWorkspace2DTest : public CxxTest::TestSuite
 {
@@ -44,7 +45,7 @@ public:
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<int64_t> dets = ws->spectraMap().getDetectors(0);
+    std::vector<detid_t> dets = ws->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     TS_ASSERT_EQUALS( ws->getDetectorID(0), 1);
