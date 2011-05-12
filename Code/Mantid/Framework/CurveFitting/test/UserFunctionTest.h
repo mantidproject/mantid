@@ -22,11 +22,11 @@ public:
     {
       m_buffer.resize(nData*nParams);
     }
-    void set(int iY, int iP, double value)
+    void set(size_t iY, size_t iP, double value)
     {
       m_buffer[iY*m_nParams + iP] = value;
     }
-    double get(int iY, int iP)
+    double get(size_t iY, size_t iP)
     {
       return m_buffer[iY*m_nParams + iP];
     }

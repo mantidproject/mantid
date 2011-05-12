@@ -37,18 +37,18 @@ public:
     m_axes.resize(1);
     m_axes[0] = new NumericAxis(1);
   }
-  int size() const {return vec.size();}
-  int blocksize() const {return vec.size();}
-  MantidVec& dataX(int const ) {return vec;}
-  MantidVec& dataY(int const ) {return vec;}
-  MantidVec& dataE(int const ) {return vec;}
-  MantidVec& dataDx(int const ) {return vec;}
-  const MantidVec& dataX(int const) const {return vec;}
-  const MantidVec& dataY(int const) const {return vec;}
-  const MantidVec& dataE(int const) const {return vec;}
-  const MantidVec& dataDx(int const) const {return vec;}
-  Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
-  void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
+  size_t size() const {return vec.size();}
+  size_t blocksize() const {return vec.size();}
+  MantidVec& dataX(size_t const ) {return vec;}
+  MantidVec& dataY(size_t const ) {return vec;}
+  MantidVec& dataE(size_t const ) {return vec;}
+  MantidVec& dataDx(size_t const ) {return vec;}
+  const MantidVec& dataX(size_t const) const {return vec;}
+  const MantidVec& dataY(size_t const) const {return vec;}
+  const MantidVec& dataE(size_t const) const {return vec;}
+  const MantidVec& dataDx(size_t const) const {return vec;}
+  Kernel::cow_ptr<MantidVec> refX(const size_t) const {return Kernel::cow_ptr<MantidVec>();}
+  void setX(const size_t, const Kernel::cow_ptr<MantidVec>&) {}
 
 private:
   MantidVec vec;

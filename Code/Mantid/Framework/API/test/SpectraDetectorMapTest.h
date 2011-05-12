@@ -30,7 +30,7 @@ public:
     SpectraDetectorMap sdMapLocal;
     sdMapLocal.populateSimple(10, 200);
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),200-10);
-    std::vector<int> detsOut = sdMapLocal.getDetectors(10);
+    std::vector<int64_t> detsOut = sdMapLocal.getDetectors(10);
     TS_ASSERT_EQUALS(detsOut.size(),1);
     TS_ASSERT_EQUALS(detsOut[0], 10);
     detsOut = sdMapLocal.getDetectors(199);
@@ -42,13 +42,13 @@ public:
     //use my own local sdmap as I will be altering it
     SpectraDetectorMap sdMapLocal;
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),0);
-    std::vector<int> dets;
+    std::vector<int64_t> dets;
     dets.push_back(10);
     dets.push_back(20);
     TS_ASSERT_THROWS_NOTHING(sdMapLocal.addSpectrumEntries(1,dets));
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),2);
     TS_ASSERT_EQUALS(sdMapLocal.ndet(1),2);
-    std::vector<int> detsOut = sdMapLocal.getDetectors(1);
+    std::vector<int64_t> detsOut = sdMapLocal.getDetectors(1);
     TS_ASSERT_EQUALS(detsOut.size(),2);
     TS_ASSERT_EQUALS(detsOut[0],10);
     TS_ASSERT_EQUALS(detsOut[1],20);
@@ -77,7 +77,7 @@ public:
   {
     for (int i = 0; i < length; i++)
     {
-      std::vector<int> dvec = sdMap.getDetectors(offset+i);
+      std::vector<int64_t> dvec = sdMap.getDetectors(offset+i);
       TS_ASSERT_EQUALS(dvec.size(),1);
       TS_ASSERT_EQUALS(dvec[0],i);
     }
@@ -113,7 +113,7 @@ public:
     }
 
     //remap them
-    std::vector<int> spectra = sdMap.getSpectra(dets);
+    std::vector<int64_t> spectra = sdMap.getSpectra(dets);
     for (int i = 0; i < detLength; i++)
     {
       TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);

@@ -35,17 +35,17 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     ///Returns the error data
     virtual MantidVec& dataE(const size_t) {return data;}
     ///Returns the x error data
-    virtual MantidVec& dataDx(int const) {return data;}
+    virtual MantidVec& dataDx(size_t const) {return data;}
 
     virtual const MantidVec& dataX(const size_t)const {return data;}
     ///Returns the y data
     virtual const MantidVec& dataY(const size_t)const {return data;}
     ///Returns the error data
-    virtual const MantidVec& dataE(int const)const {return data;}
+    virtual const MantidVec& dataE(size_t const)const {return data;}
     ///Returns the x error data
-    virtual const MantidVec& dataDx(int const)const {return data;}
-    cow_ptr<MantidVec> refX(const int) const {return cow_ptr<MantidVec>();}
-    void setX(const int, const cow_ptr<MantidVec>& ) {}
+    virtual const MantidVec& dataDx(size_t const)const {return data;}
+    cow_ptr<MantidVec> refX(const size_t) const {return cow_ptr<MantidVec>();}
+    void setX(const size_t, const cow_ptr<MantidVec>& ) {}
     
     virtual void init(const size_t &, const size_t &, const size_t &){};
 
