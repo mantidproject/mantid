@@ -732,6 +732,25 @@ class WeightedAzimuthalAverage(ReductionStep):
                     PixelSizeX=pixel_size_x,
                     PixelSizeY=pixel_size_y, ErrorWeighting=self._error_weighting)  
         ReplaceSpecialValues(output_ws, output_ws, NaNValue=0.0, NaNError=0.0, InfinityValue=0.0, InfinityError=0.0)
+        
+        # Q resolution calculation
+        # All distances in mm
+        wvl = (x[0]+x[1])/2.0
+        d_wvl = (x[1]-x[0])
+        source_apert_radius = mtd[workspace].getRun().getProperty("source-aperture-diameter").value/2.0
+        sample_apert_radius = mtd[workspace].getRun().getProperty("sample-aperture-diameter").value/2.0
+        source_sample_distance = mtd[workspace].getRun().getProperty("source-sample-distance").value
+        sample_detector_distance = mtd[workspace].getRun().getProperty("sample_detector_distance").value
+        
+        k = 2.0*math.pi/wvl
+        res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
+        res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/(source_sample_distance*sample_detector_distance), 2)/4.0)
+        res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/sample_detector_distance
+        
+        #q_resolution = [math.sqrt(res_factor+math.pow((q*d_wvl), 2)/6.0) for q in mtd[output_ws].readX(0)]
+        for i in range(len(mtd[output_ws].readX(0))):
+             mtd[output_ws].dataDx(0)[i] = math.sqrt(res_factor+math.pow((mtd[output_ws].readX(0)[i]*d_wvl), 2)/6.0)
+        
         return "Performed radial averaging between Q=%g and Q=%g" % (qmin, qmax)
         
     def get_output_workspace(self, workspace):

@@ -157,6 +157,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   MantidVec& X = dataWS->dataX(0);
   MantidVec& Y = dataWS->dataY(0);
   MantidVec& E = dataWS->dataE(0);
+  MantidVec& Dx = dataWS->dataDx(0);
   int vecindex = 0;
   //iterate through each Idata element  and get the values of "Q",
   //"I" and "Idev" text nodes and fill X,Y,E vectors
@@ -176,6 +177,16 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
       x >> d;
       X[vecindex] = d;
       
+      //setting dX vector [optional]
+      Element*dqElem = elem->getChildElement("Qdev");
+      if( dqElem )
+      {
+        nodeVal = dqElem->innerText();
+        std::stringstream dx(nodeVal);
+        dx >> d;
+        Dx[vecindex] = d;
+      }
+
       //setting Y vector
       Element*iElem = elem->getChildElement("I");
       check(qElem, "I");
