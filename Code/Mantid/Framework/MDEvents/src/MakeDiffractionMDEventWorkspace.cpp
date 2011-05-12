@@ -132,7 +132,7 @@ namespace MDEvents
         return;
       }
 
-      int detID = *(detectors.begin());
+      int64_t detID = *(detectors.begin());
       IDetector_sptr det = allDetectors[detID];
 
       // Vector between the sample and the detector
@@ -331,8 +331,6 @@ namespace MDEvents
 
     //To get all the detector ID's
     in_ws->getInstrument()->getDetectors(allDetectors);
-
-
 
     size_t totalCost = in_ws->getNumberEvents();
     prog = new Progress(this, 0, 1.0, totalCost);

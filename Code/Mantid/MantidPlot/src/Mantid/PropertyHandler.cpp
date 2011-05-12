@@ -27,6 +27,8 @@
   #endif
 #endif
 
+using std::size_t;
+
 // Constructor
 PropertyHandler::PropertyHandler(Mantid::API::IFitFunction* fun,
                 Mantid::API::CompositeFunction* parent,
@@ -124,7 +126,7 @@ void PropertyHandler::init()
   // set handlers for the child functions
   if (m_cf && m_cf->nFunctions() > 0)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       Mantid::API::IFitFunction* f = m_cf->getFunction(i);
       PropertyHandler* h = new PropertyHandler(f,m_cf,m_browser);
@@ -199,7 +201,7 @@ void PropertyHandler::initParameters()
     m_item->property()->removeSubProperty(m_parameters[i]);
   }
   m_parameters.clear();
-  for(int i=0;i<function()->nParams();i++)
+  for(size_t i=0;i<function()->nParams();i++)
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
@@ -315,17 +317,17 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
   }
   catch(...){}
 
-  int wi = m_browser->workspaceIndex();
+  size_t wi = m_browser->workspaceIndex();
 
   // if it's a LinearBackground estimate its A0 and A1 parameters
   // from data values at the ends of the fitting interval
     if (f->name() == "LinearBackground" && !m_browser->workspaceName().empty())
     {
-      if (ws && wi >= 0 && wi < ws->getNumberHistograms())
+      if (ws && wi < ws->getNumberHistograms())
       {
         const Mantid::MantidVec& X = ws->readX(wi);
-        int istart = 0, iend = 0;
-        for(int i=0; i < static_cast<int>(X.size())-1; ++i)
+        size_t istart = 0, iend = 0;
+        for(size_t i=0; i < X.size()-1; ++i)
         {
           double x = X[i];
           if (x < m_browser->startX())
@@ -356,7 +358,7 @@ PropertyHandler* PropertyHandler::addFunction(const std::string& fnName)
     m_browser->setWorkspace(f);
   }
 
-  int nFunctions = m_cf->nFunctions()+1;
+  size_t nFunctions = m_cf->nFunctions()+1;
   m_cf->addFunction(f);
   m_browser->compositeFunction()->checkFunction();
 
@@ -400,7 +402,7 @@ void PropertyHandler::removeFunction()
     }
     ph->item()->property()->removeSubProperty(m_item->property());
     Mantid::API::CompositeFunction* cf = ph->cfun();
-    for(int i=0;i<cf->nFunctions();i++)
+    for(size_t i=0;i<cf->nFunctions();i++)
     {
       if (cf->getFunction(i) == function())
       {
@@ -430,7 +432,7 @@ void PropertyHandler::renameChildren()const
   }
   if (!m_cf) return;
   // rename children
-  for(int i=0;i<m_cf->nFunctions();i++)
+  for(size_t i=0;i<m_cf->nFunctions();i++)
   {
     PropertyHandler* h = getHandler(i);
     if (!h) continue;
@@ -459,9 +461,9 @@ QString PropertyHandler::functionPrefix()const
   PropertyHandler* ph = parentHandler();
   if (ph)
   {
-    int iFun = -1;
+    size_t iFun = -1;
     Mantid::API::CompositeFunction* cf = ph->cfun();
-    for(int i=0;i<cf->nFunctions();i++)
+    for(size_t i=0;i<cf->nFunctions();i++)
     {
       if (cf->getFunction(i) == function())
       {
@@ -484,7 +486,7 @@ PropertyHandler* PropertyHandler::parentHandler()const
   return ph;
 }
 // Return the child's handler
-PropertyHandler* PropertyHandler::getHandler(int i)const
+PropertyHandler* PropertyHandler::getHandler(size_t i)const
 {
   if (!m_cf || i >= m_cf->nFunctions()) return 0;
   PropertyHandler* ph = static_cast<PropertyHandler*>(m_cf->getFunction(i)->getHandler());
@@ -498,7 +500,7 @@ const Mantid::API::CompositeFunction* PropertyHandler::findCompositeFunction(QtB
 {
   if (!m_cf) return 0;
   if (item == m_item) return m_cf;
-  for(int i=0;i<m_cf->nFunctions();i++)
+  for(size_t i=0;i<m_cf->nFunctions();i++)
   {
     const Mantid::API::CompositeFunction* res = getHandler(i)->findCompositeFunction(item);
     if (res != NULL) return res;
@@ -513,7 +515,7 @@ const Mantid::API::IFitFunction* PropertyHandler::findFunction(QtBrowserItem* it
 {
   if (item == m_item) return static_cast<const Mantid::API::IFitFunction*>(function());
   if (!m_cf) return 0;
-  for(int i=0;i<m_cf->nFunctions();i++)
+  for(size_t i=0;i<m_cf->nFunctions();i++)
   {
     const Mantid::API::IFitFunction* res = getHandler(i)->findFunction(item);
     if (res != NULL) return res;
@@ -537,7 +539,7 @@ PropertyHandler* PropertyHandler::findHandler(QtProperty* prop)
     }
   }
   if (!m_cf) return 0;
-  for(int i=0;i<m_cf->nFunctions();i++)
+  for(size_t i=0;i<m_cf->nFunctions();i++)
   {
     PropertyHandler* h = getHandler(i)->findHandler(prop);
     if (h != NULL) return h;
@@ -550,7 +552,7 @@ PropertyHandler* PropertyHandler::findHandler(const Mantid::API::IFitFunction* f
   if (fun == function()) return this;
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       PropertyHandler* h = getHandler(i)->findHandler(fun);
       if (h) return h;
@@ -576,7 +578,7 @@ bool PropertyHandler::setParameter(QtProperty* prop)
   }
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       bool res = getHandler(i)->setParameter(prop);
       if (res) return true;
@@ -686,7 +688,7 @@ bool PropertyHandler::setAttribute(QtProperty* prop)
   }
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       bool res = getHandler(i)->setAttribute(prop);
       if (res) return true;
@@ -717,7 +719,7 @@ void PropertyHandler::setAttribute(const QString& attName, const double& attValu
   }
   if (cfun())
   {
-    for(int i=0;i<cfun()->nFunctions();++i)
+    for(size_t i=0;i<cfun()->nFunctions();++i)
     {
       PropertyHandler* h = getHandler(i);
       h->setAttribute(attName,attValue);
@@ -762,7 +764,7 @@ void PropertyHandler::updateParameters()
   }
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       getHandler(i)->updateParameters();
     }
@@ -851,7 +853,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
         m_browser->m_autoBackground = NULL;
       }
     }
-    m_parent->replaceFunction(f_old,f);
+    m_parent->replaceOldFunction(f_old,f);
     f->setHandler(h);
     // calculate the baseline
     if (h->pfun())

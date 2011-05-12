@@ -69,7 +69,7 @@ public:
   // Return the parent handler
   PropertyHandler* parentHandler()const;
   // Return the child's handler
-  PropertyHandler* getHandler(int i)const;
+  PropertyHandler* getHandler(std::size_t i)const;
   /** Returns 'this' if item == m_item and this is a composite function or
    * calls findCompositeFunction recursively with all its children or
    * zero
