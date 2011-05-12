@@ -47,35 +47,33 @@ class testCPrebinning :    public CxxTest::TestSuite
    // test centerpiece rebinning 
        CenterpieceRebinning cpr;
  public:
-	 void testDiabled(){
-		 TS_WARN(" failing tests are temporary disabled");
-	 }
+	
 
-  //  void t__tRebinInit(void){
+    void testRebinInit(void){
 
-  //   InputWorkspaceName = "testCPrebinningIn";
-  //   OutWorkspaceName   = "testCPrebinningOut";
+     InputWorkspaceName = "testCPrebinningIn";
+     OutWorkspaceName   = "testCPrebinningOut";
 
-  //   TS_ASSERT_THROWS_NOTHING(cpr.initialize());
-  //   TS_ASSERT( cpr.isInitialized() );
+     TS_ASSERT_THROWS_NOTHING(cpr.initialize());
+     TS_ASSERT( cpr.isInitialized() );
 
-  //   TSM_ASSERT("We should be able to load the initial workspace successfully",load_existing_workspace(InputWorkspaceName));
+     TSM_ASSERT("We should be able to load the initial workspace successfully",load_existing_workspace(InputWorkspaceName));
 
-  // 
-  //    cpr.setPropertyValue("Input", InputWorkspaceName);      
-  //    cpr.setPropertyValue("Result",OutWorkspaceName);
-  //    cpr.setProperty("KeepPixels",false);
-  //    // set slicing property for the target workspace to the size and shape of the current workspace
-  //    cpr.setTargetGeomDescrEqSource();
+   
+      cpr.setPropertyValue("Input", InputWorkspaceName);      
+      cpr.setPropertyValue("Result",OutWorkspaceName);
+      cpr.setProperty("KeepPixels",false);
+      // set slicing property for the target workspace to the size and shape of the current workspace
+      cpr.setTargetGeomDescrEqSource();
 
-  //  }
-  //  void t__tGetSlicingProperty(){      
+    }
+    void testGetSlicingProperty(){      
 
-  //  // retrieve slicing property for modifications
-  //    Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-  //    TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
-  //
-  //  }
+    // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+  
+    }
   //  void testCPRExec(){
   //     cpr.setProperty("KeepPixels",false);
   //      // rebin image into the same grid as an initial image, which should provide the same image as before

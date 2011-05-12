@@ -88,6 +88,7 @@ std::string workspaceFileName;
 	// this function will read MDImage and initiate MDDataPoints accordingly
     inputWS->init(pFileReader,pBasis,geomDescr,pd);
 
+    ldmdws_log.information()<<" successfully loaded residental parts of the MDWorkspace for file \""<<workspaceFileName<<"\"in memory\n";
 
 	bool loadPix =  this->getProperty("LoadPixels");
 	if(loadPix){
