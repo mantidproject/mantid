@@ -132,9 +132,9 @@ public:
   /// Remove a function
   void removeFunction(std::size_t i, bool del=true);
   /// Replace a function
-  void replaceFunction(std::size_t i,IFitFunction* f);
+  void replaceFunction(std::size_t i, IFitFunction* f);
   /// Replace a function
-  void replaceFunction(const IFitFunction* f_old,IFitFunction* f_new);
+  void replaceOldFunction(const IFitFunction* f_old,IFitFunction* f_new);
   /// Get the function index
   std::size_t functionIndex(std::size_t i)const;
   /// Get the function index

@@ -441,7 +441,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
  *  a member of this composite function nothing happens
  * @param f_new :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* f_new)
+void CompositeFunction::replaceOldFunction(const IFitFunction* f_old,IFitFunction* f_new)
 {
   std::vector<IFitFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);

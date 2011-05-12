@@ -968,7 +968,7 @@ public:
     cub1->setParameter("c3",4.4);
 
     clearDeleted();
-    mfun->replaceFunction(int64_t(0),cub1);
+    mfun->replaceFunction(0, cub1);
     TS_ASSERT(isDeleted(bk));
 
     mfun->applyTies();
@@ -1202,7 +1202,7 @@ public:
     mfun->addFunction(cf);
     mfun->addFunction(cub);
 
-    mfun->replaceFunction(cf,g);
+    mfun->replaceOldFunction(cf,g);
 
     TS_ASSERT_EQUALS(mfun->asString(),"name=Linear,a=0,b=0;name=Gauss,c=0,h=1,s=1;name=Cubic,c0=0,c1=0,c2=0,c3=0");
 
