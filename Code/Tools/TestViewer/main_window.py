@@ -168,6 +168,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         self.connect(self.buttonSelectNone, QtCore.SIGNAL("clicked()"), self.select_none)
         self.connect(self.buttonSelectFailed, QtCore.SIGNAL("clicked()"), self.select_failed)
         self.connect(self.buttonSelectSVN, QtCore.SIGNAL("clicked()"), self.select_svn)
+        self.connect(self.buttonSelectByString, QtCore.SIGNAL("clicked()"), self.select_by_string)
         
         # -- Text commands ---
         self.connect(self.textTimeout, QtCore.SIGNAL("textChanged()"), self.text_settings_changed) 
@@ -298,6 +299,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         timeout = s.value("process_timeout_sec", 30).toInt()[0]
         test_info.process_timeout_sec = timeout;
         self.textTimeout.setPlainText("%d" % timeout)
+        self.select_by_string_lastValue = str(s.value("select_by_string_lastValue", "-Performance").toString())
         
     #-----------------------------------------------------------------------------
     def saveSettings(self):
@@ -312,6 +314,7 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
         s.setValue("TestViewerMainWindow.height", self.height())
         s.setValue("TestViewerMainWindow.x", self.x())
         s.setValue("TestViewerMainWindow.y", self.y())
+        s.setValue("select_by_string_lastValue", self.select_by_string_lastValue)
         
     #-----------------------------------------------------------------------------
     def get_int_from_text(self, plainTextBox):
@@ -617,6 +620,18 @@ class TestViewerMainWindow(QtGui.QMainWindow, ui_main_window.Ui_MainWindow):
     def select_svn(self):
         """ Select all files modified by SVN st """
         test_info.all_tests.select_svn()
+        self.proxy.invalidateFilter()
+        self.treeTests.update()
+        
+    def select_by_string(self):
+        """ Use a string to select """
+        dlg = QtGui.QInputDialog(self)
+        dlg.setLabelText("Select tests by strings, separated by spaces. Use a '-' before a word to select all except that word.")
+        dlg.setTextValue(self.select_by_string_lastValue)
+        dlg.setModal(True)
+        dlg.exec_()
+        self.select_by_string_lastValue = str(dlg.textValue())
+        test_info.all_tests.select_by_string(self.select_by_string_lastValue)
         self.proxy.invalidateFilter()
         self.treeTests.update()
        

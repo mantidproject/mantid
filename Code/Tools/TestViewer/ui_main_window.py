@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'main_window.ui'
 #
-# Created: Tue Apr 19 10:21:50 2011
+# Created: Thu May 12 14:39:51 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -126,7 +126,7 @@ class Ui_MainWindow(object):
         self.buttonTest.setFlat(False)
         self.buttonTest.setObjectName("buttonTest")
         self.horizontalLayoutWidget_5 = QtGui.QWidget(self.frameTreeFilter)
-        self.horizontalLayoutWidget_5.setGeometry(QtCore.QRect(10, 70, 501, 41))
+        self.horizontalLayoutWidget_5.setGeometry(QtCore.QRect(10, 70, 508, 41))
         self.horizontalLayoutWidget_5.setObjectName("horizontalLayoutWidget_5")
         self.horizontalLayout_4 = QtGui.QHBoxLayout(self.horizontalLayoutWidget_5)
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
@@ -145,6 +145,9 @@ class Ui_MainWindow(object):
         self.buttonSelectSVN = QtGui.QPushButton(self.horizontalLayoutWidget_5)
         self.buttonSelectSVN.setObjectName("buttonSelectSVN")
         self.horizontalLayout_4.addWidget(self.buttonSelectSVN)
+        self.buttonSelectByString = QtGui.QPushButton(self.horizontalLayoutWidget_5)
+        self.buttonSelectByString.setObjectName("buttonSelectByString")
+        self.horizontalLayout_4.addWidget(self.buttonSelectByString)
         self.vlTree.addWidget(self.frameTreeFilter)
         self.treeTests = QtGui.QTreeView(self.verticalLayoutWidget_2)
         self.treeTests.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
@@ -572,6 +575,7 @@ class Ui_MainWindow(object):
         self.buttonSelectNone.setText(QtGui.QApplication.translate("MainWindow", "None", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSelectFailed.setText(QtGui.QApplication.translate("MainWindow", "Failures", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonSelectSVN.setText(QtGui.QApplication.translate("MainWindow", "Using SVN", None, QtGui.QApplication.UnicodeUTF8))
+        self.buttonSelectByString.setText(QtGui.QApplication.translate("MainWindow", "By String", None, QtGui.QApplication.UnicodeUTF8))
         self.label_2.setText(QtGui.QApplication.translate("MainWindow", "Test Run Progress:", None, QtGui.QApplication.UnicodeUTF8))
         self.buttonAbort.setText(QtGui.QApplication.translate("MainWindow", "Abort Tests", None, QtGui.QApplication.UnicodeUTF8))
         self.label_3.setText(QtGui.QApplication.translate("MainWindow", "Overall Test Results:", None, QtGui.QApplication.UnicodeUTF8))
@@ -585,6 +589,7 @@ class Ui_MainWindow(object):
 "<table border=\"0\" style=\"-qt-table-type: root; margin-top:4px; margin-bottom:4px; margin-left:4px; margin-right:4px;\">\n"
 "<tr>\n"
 "<td style=\"border: none;\">\n"
+"<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"
 "<p style=\"-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;\"></p>\n"

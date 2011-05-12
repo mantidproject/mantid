@@ -287,7 +287,7 @@ class TestSuite(object):
         # Source file (BlaBlaTest.h) for this suite
         self.source_file = source_file
         if not os.path.exists(self.source_file):
-            print "Warning! Source file for test %s not found: %s" % (self.name, self.source_file)
+            #print "Warning! Source file for test %s not found: %s" % (self.name, self.source_file)
             self.source_file_mtime = time.time()
         else:
             # Last modified time of the source file
@@ -296,7 +296,7 @@ class TestSuite(object):
         # A list of test singles inside this suite
         self.tests = []
         # Is it selected to run?
-        self.selected = True
+        self.selected = not name.endswith("Performance")
         # Was it made correctly?
         self.build_succeeded = True
         self.build_stdout = ""
@@ -1006,7 +1006,32 @@ class MultipleProjects(object):
                     print "%s: No test found." % (filename)
                 else:
                     print "%s: Test found: '%s'" % ( filename, foundit.get_fullname() )
-                 
+            
+            
+    #--------------------------------------------------------------------------        
+    def select_by_string(self, val):
+        """ Search by words """
+        if len(val) < 2:
+            print "Too few characters!"
+            return 
+        
+        num = 0
+            
+        if val.startswith("-"):
+            # Select all and exclude
+            word = val[1:]
+            for pj in self.projects:
+                for suite in pj.suites:
+                    suite.selected = not (word in suite.name)
+                    if suite.selected: num += 1
+        else:
+            word = val
+            for pj in self.projects:
+                for suite in pj.suites:
+                    suite.selected = word in suite.name 
+                    if suite.selected: num += 1
+                    
+        print num, " suites were selected."
             
     #--------------------------------------------------------------------------        
     def discover_CXX_projects(self, path, source_path):
