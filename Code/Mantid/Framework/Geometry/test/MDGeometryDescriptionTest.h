@@ -74,6 +74,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(pSlice = new MDGeometryDescription());
   }
 
+void testMDGDDefaultConstructor(){
+	std::auto_ptr<MDGeometryDescription> pDescr;
+	TSM_ASSERT_THROWS_NOTHING("The default constructor should not throw",pDescr=std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription)) ;
+	MantidMat rot = pDescr->getRotations();
+	TSM_ASSERT_EQUALS("default rotation matrix should me unit matrix",true,rot.equals(MantidMat(3,3,true),FLT_EPSILON));
+}
   // these functions has not been written yet
   void testMDGDInput()
   {

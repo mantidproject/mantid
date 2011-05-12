@@ -122,7 +122,8 @@ Rotations(3,3,true)
 
 MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
 nDimensions(numDims),
-nReciprocalDimensions(numRecDims)
+nReciprocalDimensions(numRecDims),
+Rotations(3,3,true)
 {
     this->intit_default_slicing(nDimensions,nReciprocalDimensions);
 
