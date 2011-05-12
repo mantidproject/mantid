@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include <boost/shared_ptr.hpp>
@@ -56,7 +57,7 @@ class DLLExport IDetector : public virtual IObjComponent
 {
 public:
   /// Get the detector ID
-  virtual int getID() const = 0;
+  virtual detid_t getID() const = 0;
 
   /// Get the number of physical detectors this object represents
   virtual std::size_t nDets() const = 0;
@@ -84,7 +85,7 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Get Nearest Neighbours
-  virtual std::map<int64_t, double> getNeighbours(double radius = 0.0) = 0;
+  virtual std::map<detid_t, double> getNeighbours(double radius = 0.0) = 0;
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();

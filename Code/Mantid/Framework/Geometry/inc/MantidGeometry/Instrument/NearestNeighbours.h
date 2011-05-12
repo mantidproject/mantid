@@ -6,6 +6,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -69,11 +70,11 @@ public:
   /// whether or not the graph has been created
   bool isPopulated() const;
   /// query the graph for the eight nearest neighbours to specified detector
-  std::map<int64_t, double> neighbours(const int detID) const;
+  std::map<detid_t, double> neighbours(const detid_t detID) const;
   /// as above, but filter based on the distance given
-  std::map<int64_t, double> neighbours(const int detID, const double radius) const;
+  std::map<detid_t, double> neighbours(const detid_t detID, const double radius) const;
   /// as above, but taking input as an IComponent pointer
-  std::map<int64_t, double> neighbours(const IComponent *component, const double radius=0.0) const;
+  std::map<detid_t, double> neighbours(const IComponent *component, const double radius=0.0) const;
 
 private:
   /// typedef for Graph object used to hold the calculated information

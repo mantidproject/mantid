@@ -57,14 +57,14 @@ public:
   virtual Component* clone() const {return new Detector(*this);}
 
   // IDetector methods
-  int getID() const;
+  detid_t getID() const;
   std::size_t nDets() const { return 1; } ///< A Detector object represents a single physical detector
   double getDistance(const IComponent& comp) const;
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double getPhi() const;
   bool isMasked() const;
   bool isMonitor() const;
-  std::map<int64_t, double> getNeighbours(double radius = 0.0);
+  std::map<detid_t, double> getNeighbours(double radius = 0.0);
   /// Returns a reference to itself
   IComponent* getComponent(){return static_cast<IComponent*>(this);}
   // end IDetector methods
@@ -73,7 +73,7 @@ public:
 
 private:
   /// The detector id
-  mutable int m_id;
+  mutable detid_t m_id;
   /// Flags if this is a monitor
   bool m_isMonitor;
 

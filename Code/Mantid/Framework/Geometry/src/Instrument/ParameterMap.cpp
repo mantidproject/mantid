@@ -620,7 +620,7 @@ namespace Mantid
      * @param radius :: distance from detector on which to filter results
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<int64_t, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
+    std::map<detid_t, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
     {
       if ( ! m_nearestNeighbours || ! m_nearestNeighbours->isPopulated() )
       {

@@ -46,7 +46,7 @@ Detector::~Detector()
 /** Gets the detector id
  *  @returns the detector id
  */
-int Detector::getID() const
+detid_t Detector::getID() const
 {
   if (m_isParametrized)
     return dynamic_cast<const Detector *>(m_base)->getID();
@@ -112,7 +112,7 @@ bool Detector::isMonitor() const
 /**
 *
 */
-std::map<int64_t, double> Detector::getNeighbours(double radius)
+std::map<detid_t, double> Detector::getNeighbours(double radius)
 {
   return m_map->getNeighbours(getComponent(), radius);
 }

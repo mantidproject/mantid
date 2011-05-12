@@ -66,7 +66,7 @@ namespace Mantid
       bool isMasked() const;
       bool isMonitor() const;
       bool isValid(const V3D& point) const;
-      std::map<int64_t, double> getNeighbours(double) { throw Mantid::Kernel::Exception::NotImplementedError("getNeighbours not implemented for DetectorGroups"); };
+      std::map<detid_t, double> getNeighbours(double) { throw Mantid::Kernel::Exception::NotImplementedError("getNeighbours not implemented for DetectorGroups"); };
       virtual bool isOnSide(const V3D& point) const;
       ///Try to find a point that lies within (or on) the object
       int getPointInObject(V3D& point) const;
