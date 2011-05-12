@@ -185,7 +185,7 @@ void testExecOnLoadraw()
         std::vector<int64_t> detectorgroup;
         //std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
         detectorgroup=map.getDetectors(2084);
-        std::vector<int>::const_iterator it;
+        std::vector<int64_t>::const_iterator it;
         int pixnum=101191;
         for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
           TS_ASSERT_EQUALS(*it,pixnum++);
