@@ -5,12 +5,12 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1036</width>
-    <height>626</height>
+    <width>689</width>
+    <height>397</height>
    </rect>
   </property>
   <property name="windowTitle" >
-   <string>Frame</string>
+   <string>Display</string>
   </property>
   <property name="frameShape" >
    <enum>QFrame::StyledPanel</enum>
@@ -18,145 +18,346 @@
   <property name="frameShadow" >
    <enum>QFrame::Raised</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout_2" >
-   <item row="0" column="0" >
-    <widget class="QGroupBox" name="groupBox" >
-     <property name="title" >
-      <string>Plot Options</string>
-     </property>
-     <layout class="QGridLayout" name="gridLayout" >
-      <item row="0" column="0" >
-       <widget class="QLabel" name="label" >
-        <property name="text" >
-         <string>Workspace</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1" colspan="2" >
-       <widget class="QComboBox" name="comboBox" />
-      </item>
-      <item row="1" column="0" colspan="2" >
-       <widget class="QLabel" name="label_2" >
-        <property name="text" >
-         <string>Background Value</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="2" >
-       <widget class="QDoubleSpinBox" name="doubleSpinBox" />
-      </item>
-      <item row="2" column="0" colspan="2" >
-       <widget class="QLabel" name="label_3" >
-        <property name="text" >
-         <string>Background Workspace</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="2" >
-       <widget class="QComboBox" name="comboBox_2" />
-      </item>
-      <item row="3" column="0" colspan="2" >
-       <widget class="QLabel" name="label_4" >
-        <property name="text" >
-         <string>Plot Type</string>
-        </property>
-       </widget>
-      </item>
-      <item row="3" column="2" >
-       <widget class="QComboBox" name="comboBox_3" >
+  <layout class="QVBoxLayout" name="verticalLayout" >
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" >
+     <item>
+      <widget class="QGroupBox" name="gbPlotOptions" >
+       <property name="title" >
+        <string>Plot Options</string>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout_2" >
         <item>
-         <property name="text" >
-          <string>Guinier (spheres)</string>
-         </property>
+         <layout class="QHBoxLayout" name="layoutInput" >
+          <item>
+           <widget class="QLabel" name="lbInput" >
+            <property name="text" >
+             <string>Workspace</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="wsInput" />
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Guinier (rods)</string>
-         </property>
+         <layout class="QHBoxLayout" name="layoutBackground" >
+          <item>
+           <widget class="QLabel" name="lbBackground" >
+            <property name="text" >
+             <string>Background</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbBackground" >
+            <item>
+             <property name="text" >
+              <string>Value</string>
+             </property>
+            </item>
+            <item>
+             <property name="text" >
+              <string>Workspace</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item>
+           <widget class="QStackedWidget" name="swBackground" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="currentIndex" >
+             <number>0</number>
+            </property>
+            <widget class="QWidget" name="page" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_3" >
+              <property name="spacing" >
+               <number>0</number>
+              </property>
+              <property name="margin" >
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="QDoubleSpinBox" name="dsBackground" />
+              </item>
+             </layout>
+            </widget>
+            <widget class="QWidget" name="page_2" >
+             <property name="sizePolicy" >
+              <sizepolicy vsizetype="Maximum" hsizetype="Preferred" >
+               <horstretch>0</horstretch>
+               <verstretch>0</verstretch>
+              </sizepolicy>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_4" >
+              <property name="spacing" >
+               <number>0</number>
+              </property>
+              <property name="margin" >
+               <number>0</number>
+              </property>
+              <item>
+               <widget class="MantidQt::MantidWidgets::WorkspaceSelector" name="wsBackground" />
+              </item>
+             </layout>
+            </widget>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Guinier (sheets)</string>
-         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_3" >
+          <item>
+           <widget class="QLabel" name="label_4" >
+            <property name="text" >
+             <string>Plot Type</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="cbPlotType" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Fixed" hsizetype="Expanding" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Zimm</string>
-         </property>
+         <layout class="QHBoxLayout" name="layoutXAxis" >
+          <property name="spacing" >
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string>X Axis:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_3" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Kratky</string>
-         </property>
+         <layout class="QHBoxLayout" name="layoutYAxis" >
+          <property name="spacing" >
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="label_2" >
+            <property name="sizePolicy" >
+             <sizepolicy vsizetype="Preferred" hsizetype="Maximum" >
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text" >
+             <string>Y Axis:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="horizontalSpacer_4" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Debye-Bueche</string>
-         </property>
+         <widget class="QLabel" name="lbPlotOptionsError" >
+          <property name="styleSheet" >
+           <string notr="true" >color:rgb(255, 0, 0)</string>
+          </property>
+          <property name="text" >
+           <string/>
+          </property>
+         </widget>
         </item>
         <item>
-         <property name="text" >
-          <string>Log-Log</string>
-         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_4" >
+          <item>
+           <spacer name="horizontalSpacer" >
+            <property name="orientation" >
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0" >
+             <size>
+              <width>148</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="pbPlot" >
+            <property name="text" >
+             <string>Plot</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
         <item>
-         <property name="text" >
-          <string>Porod</string>
-         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout_5" >
+          <item>
+           <widget class="QLabel" name="label_5" >
+            <property name="text" >
+             <string>Intercept:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbInterceptValue" >
+            <property name="styleSheet" >
+             <string notr="true" >color:rgb(0, 0, 255)</string>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
-       </widget>
-      </item>
-      <item row="4" column="2" >
-       <spacer name="verticalSpacer" >
-        <property name="orientation" >
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0" >
-         <size>
-          <width>20</width>
-          <height>86</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="5" column="0" colspan="2" >
-       <spacer name="horizontalSpacer" >
-        <property name="orientation" >
-         <enum>Qt::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0" >
-         <size>
-          <width>148</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="5" column="2" >
-       <widget class="QPushButton" name="pushButton" >
-        <property name="text" >
-         <string>Plot</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_6" >
+          <item>
+           <widget class="QLabel" name="label_3" >
+            <property name="text" >
+             <string>Gradient:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbGradientValue" >
+            <property name="styleSheet" >
+             <string notr="true" >color: rgb(0,0,255)</string>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_7" >
+          <item>
+           <widget class="QLabel" name="label_7" >
+            <property name="text" >
+             <string>Chi Squared:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="lbChiSqrdValue" >
+            <property name="styleSheet" >
+             <string notr="true" >color: rgb(0,0,255)</string>
+            </property>
+            <property name="text" >
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <spacer name="verticalSpacer" >
+          <property name="orientation" >
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0" >
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+     </item>
+     <item>
+      <widget class="QwtPlot" name="plotWindow" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
-   <item rowspan="2" row="0" column="1" >
-    <widget class="QwtPlot" name="qwtPlot" />
-   </item>
-   <item row="1" column="0" >
-    <spacer name="verticalSpacer_2" >
-     <property name="orientation" >
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0" >
-      <size>
-       <width>20</width>
-       <height>296</height>
-      </size>
-     </property>
-    </spacer>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" >
+     <item>
+      <widget class="QPushButton" name="pbHelp" >
+       <property name="sizePolicy" >
+        <sizepolicy vsizetype="Fixed" hsizetype="Minimum" >
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text" >
+        <string>?</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <spacer name="horizontalSpacer_2" >
+       <property name="orientation" >
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0" >
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>
@@ -166,6 +367,11 @@
    <extends>QFrame</extends>
    <header>qwt_plot.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MantidQt::MantidWidgets::WorkspaceSelector</class>
+   <extends>QComboBox</extends>
+   <header>MantidQtMantidWidgets/WorkspaceSelector.h</header>
   </customwidget>
  </customwidgets>
  <resources/>
