@@ -72,10 +72,11 @@ void SANSDirectBeamScaling::exec()
   const double attTransErr = getProperty("AttenuatorTransmissionError");
 
   // Extract the required spectra into separate workspaces
-  std::vector<int64_t> udet,index;
+  std::vector<detid_t> udet;
+  std::vector<size_t> index;
   udet.push_back(getProperty("BeamMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<int64_t> sampleSpectra = inputWS->spectraMap().getSpectra(udet);
+  const std::vector<specid_t> sampleSpectra = inputWS->spectraMap().getSpectra(udet);
   inputWS->getIndicesFromSpectra(sampleSpectra,index);
   if (index.size() < 1)
   {
