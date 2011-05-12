@@ -227,17 +227,17 @@ std::pair<double, double> RangeSelector::getRange()
 
 void RangeSelector::setRange(double min, double max)
 {
-  m_lower = min;
-  m_higher = max;
+  m_lower = ( min < max ) ? min : max;
+  m_higher = ( min < max ) ? max : min;
   verify();
   emit rangeChanged(min, max);
 }
 
 void RangeSelector::setRange(std::pair<double,double> range)
 {
-  double min = range.first;
-  double max = range.second;
-  this->setRange(min, max);
+  //double min = range.first;
+  //double max = range.second;
+  this->setRange(range.first, range.second);
 }
 
 void RangeSelector::minChanged(double val)
@@ -330,6 +330,7 @@ void RangeSelector::setMin(double val)
   {
     m_min = val;
     emit minValueChanged(val);
+    emit selectionChanged(val, m_max);
   }
 }
 
@@ -339,6 +340,7 @@ void RangeSelector::setMax(double val)
   {
     m_max = val;
     emit maxValueChanged(val);
+    emit selectionChanged(m_min, val);
   }
 }
 

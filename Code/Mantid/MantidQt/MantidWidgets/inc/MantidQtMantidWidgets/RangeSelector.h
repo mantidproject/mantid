@@ -39,6 +39,7 @@ namespace MantidWidgets
     void minValueChanged(double);
     void maxValueChanged(double);
     void rangeChanged(double, double);
+    void selectionChanged(double, double);
     
   public slots:
     void setRange(double, double);
