@@ -36,8 +36,8 @@ DECLARE_ALGORITHM(GroupDetectors2)
 /// Sets documentation strings for this algorithm
 void GroupDetectors2::initDocs()
 {
-  this->setWikiSummary("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file. ");
-  this->setOptionalMessage("Sums spectra bin-by-bin, equilivent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
+  this->setWikiSummary("Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file. ");
+  this->setOptionalMessage("Sums spectra bin-by-bin, equivalent to grouping the data from a set of detectors.  Individual groups can be specified by passing the algorithm a list of spectrum numbers, detector IDs or workspace indices. Many spectra groups can be created in one execution via an input file.");
 }
 
 using namespace Kernel;
@@ -68,10 +68,10 @@ void GroupDetectors2::init()
   declareProperty(new FileProperty("MapFile", "", FileProperty::OptionalLoad, fileExts),
     "A file that consists of lists of spectra numbers to group. See the help\n"
     "for the file format");
-  declareProperty(new ArrayProperty<int64_t>("SpectraList"),
+  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
     "An array containing a list of the spectrum numbers to combine\n"
     "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
-  declareProperty(new ArrayProperty<int64_t>("DetectorList"),
+  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
     "An array of detector IDs to combine (WorkspaceIndexList is ignored if this is\n"
     "set)" );
   declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),

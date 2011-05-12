@@ -178,7 +178,7 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
     /// map of groups
     storage_map m_groups;
     /// group currently being read from file
-    std::vector<specid_t> m_currentGroup;
+    std::vector<size_t> m_currentGroup;
     /// whether reading spectra numbers or detector ids
     bool m_specNo;
     /// whether currently inside a group element
