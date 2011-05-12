@@ -150,7 +150,7 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getInWSMonitorSpectrum(API::Matrix
   {
     throw std::runtime_error("MonitorSpectrum must not be negative");
   }
-  SpectraAxis::spec2index_map specs;
+  spec2index_map specs;
   const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(inputWorkspace->getAxis(1));
   if ( ! axis)
   {

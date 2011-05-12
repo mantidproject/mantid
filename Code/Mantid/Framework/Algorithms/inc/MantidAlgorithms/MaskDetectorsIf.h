@@ -67,10 +67,10 @@ private:
   virtual void initDocs();
 #ifndef HAS_UNORDERED_MAP_H
   /// Typedef for detector to value map
-	typedef std::map<int64_t,bool> udet2valuem;
+	typedef std::map<detid_t,bool> udet2valuem;
 #else
   // Typedef for det to value map
-	typedef std::tr1::unordered_map<int64_t,bool> udet2valuem;
+	typedef std::tr1::unordered_map<detid_t,bool> udet2valuem;
 #endif
 	/// A map of detector numbers to mask boolean
 	udet2valuem umap;

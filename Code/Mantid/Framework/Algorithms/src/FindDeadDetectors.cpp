@@ -105,12 +105,12 @@ namespace Mantid
         {
           ++countSpec;
           y = deadValue;
-          const int64_t specNo = specAxis->spectraNo(i);
+          const specid_t specNo = specAxis->spectraNo(i);
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<int64_t> dets = specMap.getDetectors(specNo);
-          std::vector<int64_t>::const_iterator it;
+          const std::vector<detid_t> dets = specMap.getDetectors(specNo);
+          std::vector<detid_t>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             // Write the detector ID to file, log & the FoundDead output property

@@ -287,14 +287,15 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
   const SpectraDetectorMap& specmap1 = ws1->spectraMap();
-  std::set<int64_t> spectra, detectors;
-  const int64_t& nhist1 = ws1->getNumberHistograms();
-  for (int64_t i = 0; i < nhist1; ++i)
+  std::set<specid_t> spectra;
+  std::set<detid_t> detectors;
+  const size_t& nhist1 = ws1->getNumberHistograms();
+  for (size_t i = 0; i < nhist1; ++i)
   {
-    const int64_t spectrum = axis1->spectraNo(i);
+    const specid_t spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    const std::vector<int64_t> dets = specmap1.getDetectors(spectrum);
-    std::vector<int64_t>::const_iterator it;
+    const std::vector<detid_t> dets = specmap1.getDetectors(spectrum);
+    std::vector<detid_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       detectors.insert(*it);
@@ -304,10 +305,10 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
   const Axis* axis2 = ws2->getAxis(1);
   const SpectraDetectorMap& specmap2 = ws2->spectraMap();
-  const int64_t& nhist2 = ws2->getNumberHistograms();
-  for (int64_t j = 0; j < nhist2; ++j)
+  const size_t& nhist2 = ws2->getNumberHistograms();
+  for (size_t j = 0; j < nhist2; ++j)
   {
-    const int64_t spectrum = axis2->spectraNo(j);
+    const specid_t spectrum = axis2->spectraNo(j);
     if (checkSpectra)
     {
       if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
@@ -316,8 +317,8 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
         throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
       }
     }
-    std::vector<int64_t> dets = specmap2.getDetectors(spectrum);
-    std::vector<int64_t>::const_iterator it;
+    std::vector<detid_t> dets = specmap2.getDetectors(spectrum);
+    std::vector<detid_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       if ( detectors.find(*it) != detectors.end() )

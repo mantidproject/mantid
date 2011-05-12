@@ -129,10 +129,10 @@ protected:
   void readGroupingFile(const std::string& groupingFilename);
 
   /// Grouping map
-  Mantid::API::IndexToIndexMap detId_to_group;
+  std::map<detid_t, int> detId_to_group;
 
   /// Map from detector ID to the offset (used in alignment)
-  std::map<int64_t, double> detId_to_offset;
+  std::map<detid_t, double> detId_to_offset;
 
   /// Pointer to the raw ghost map info
   std::vector<GhostDestinationValue> * rawGhostMap;
@@ -147,10 +147,10 @@ protected:
   Mantid::API::MatrixWorkspace_const_sptr inputW;
 
   /// Mapping between indices
-  Mantid::API::IndexToIndexMap * input_detectorIDToWorkspaceIndexMap;
+  detid2index_map * input_detectorIDToWorkspaceIndexMap;
 
   /// Map where KEY = pixel ID; value = tof to D conversion factor (tof * factor = d).
-  std::map<int64_t, double> * tof_to_d;
+  std::map<detid_t, double> * tof_to_d;
 };
 
 } // namespace Algorithms

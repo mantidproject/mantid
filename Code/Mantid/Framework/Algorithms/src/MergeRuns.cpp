@@ -143,9 +143,9 @@ void MergeRuns::buildAdditionTables()
 
   //This is the workspace against which everything will be added
   EventWorkspace_sptr lhs = inEventWS[0];
-  int64_t lhs_nhist = lhs->getNumberHistograms();
+  size_t lhs_nhist = lhs->getNumberHistograms();
 
-  IndexToIndexMap * lhs_det_to_wi = NULL;
+  detid2index_map * lhs_det_to_wi = NULL;
   try
   {
     lhs_det_to_wi = lhs->getDetectorIDToWorkspaceIndexMap(true);
@@ -155,7 +155,7 @@ void MergeRuns::buildAdditionTables()
     //If it fails, then there are some grouped detector IDs, and the map cannot exist
   }
 
-  for (int64_t workspaceNum=1; workspaceNum < static_cast<int64_t>(inEventWS.size()); workspaceNum++)
+  for (size_t workspaceNum=1; workspaceNum < inEventWS.size(); workspaceNum++)
   {
     //Get the workspace
     EventWorkspace_sptr ews = inEventWS[workspaceNum];
@@ -166,19 +166,19 @@ void MergeRuns::buildAdditionTables()
     AdditionTable * table = new AdditionTable();
 
     //Loop through the input workspace indices
-    int64_t nhist = ews->getNumberHistograms();
-    for (int64_t inWI = 0; inWI < nhist; inWI++)
+    size_t nhist = ews->getNumberHistograms();
+    for (size_t inWI = 0; inWI < nhist; inWI++)
     {
       //Get the set of detectors in the output
-      std::set<int64_t>& inDets = ews->getEventList(inWI).getDetectorIDs();
+      std::set<detid_t>& inDets = ews->getEventList(inWI).getDetectorIDs();
 
       bool done=false;
 
       //First off, try to match the workspace indices. Most times, this will be ok right away.
-      int64_t outWI = inWI;
+      size_t outWI = inWI;
       if (outWI < lhs_nhist) //don't go out of bounds
       {
-        std::set<int64_t>& outDets = lhs->getEventList(outWI).getDetectorIDs();
+        std::set<detid_t>& outDets = lhs->getEventList(outWI).getDetectorIDs();
 
         //Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
@@ -194,11 +194,11 @@ void MergeRuns::buildAdditionTables()
         //Didn't find it. Try to use the LHS map.
 
         //First, we have to get the (single) detector ID of the RHS
-        std::set<int64_t>::iterator inDets_it = inDets.begin();
-        int64_t rhs_detector_ID = *inDets_it;
+        std::set<detid_t>::iterator inDets_it = inDets.begin();
+        detid_t rhs_detector_ID = *inDets_it;
 
         //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-        IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
+        detid2index_map::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
         if (map_it != lhs_det_to_wi->end())
         {
           outWI = map_it->second; //This is the workspace index in the LHS that matched rhs_detector_ID
@@ -219,7 +219,7 @@ void MergeRuns::buildAdditionTables()
         // NOTE: This can be SUPER SLOW!
         for (outWI=0; outWI < lhs_nhist; outWI++)
         {
-          std::set<int64_t>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
+          std::set<detid_t>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
           //Another subset check
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(), inDets.end()))
           {

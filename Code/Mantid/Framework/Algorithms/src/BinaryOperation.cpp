@@ -973,7 +973,7 @@ namespace Mantid
           //Didn't find it. Try to use the RHS map.
 
           //First, we have to get the (single) detector ID of the LHS
-          std::vector<int64_t>::const_iterator lhsDets_it = lhsDets.begin();
+          std::vector<detid_t>::const_iterator lhsDets_it = lhsDets.begin();
           int64_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel

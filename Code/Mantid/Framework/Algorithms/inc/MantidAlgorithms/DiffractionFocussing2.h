@@ -107,7 +107,7 @@ private:
   /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
-  int validateSpectrumInGroup(int64_t spectrum_number);
+  int validateSpectrumInGroup(specid_t spectrum_number);
   
   /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;
@@ -121,15 +121,15 @@ private:
 
   // This map does not need to be ordered, just a lookup for udet
   /// typedef for the storage of the UDET-group mapping
-  typedef std::map<int64_t, int64_t> udet2groupmap;
+  typedef std::map<detid_t, int> udet2groupmap;
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  typedef std::map<int64_t, boost::shared_ptr<MantidVec> > group2vectormap;
+  typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
   /// Map from udet to group
   udet2groupmap udet2group;
   /// The list of group numbers
-  std::vector<int64_t> groupAtWorkspaceIndex;
+  std::vector<int> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
   group2vectormap group2xvector;
   /// Map from the group number to the group's summed weight vector

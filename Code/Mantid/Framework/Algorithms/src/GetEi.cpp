@@ -101,7 +101,7 @@ void GetEi::exec()
   g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%\n";
 
     // get the histograms created by the monitors
-  std::vector<int64_t> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
+  std::vector<size_t> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
 
   g_log.information() << "Looking for a peak in the first monitor spectrum, spectra index " << indexes[0] << std::endl;
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
@@ -135,7 +135,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, in
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
-  std::vector<int64_t> dets = WS->spectraMap().getDetectors(mon0Spec);
+  std::vector<detid_t> dets = WS->spectraMap().getDetectors(mon0Spec);
   if ( dets.size() != 1 )
   {
     g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm\n";
@@ -163,12 +163,12 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, in
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int64_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int64_t specNum1, int64_t specNum2) const
+std::vector<size_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int64_t specNum1, int64_t specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
-  std::vector<int64_t> specInds;
+  std::vector<size_t> specInds;
   
   // get the index number of the histogram for the first monitor
-  std::vector<int64_t> specNumTemp(&specNum1, &specNum1+1);
+  std::vector<specid_t> specNumTemp(&specNum1, &specNum1+1);
   WS->getIndicesFromSpectra(specNumTemp, specInds);
   if ( specInds.size() != 1 )
   {// the monitor spectrum isn't present in the workspace, we can't continue from here
@@ -177,7 +177,7 @@ std::vector<int64_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr
   }
 
   // nowe the second monitor
-  std::vector<int64_t> specIndexTemp;
+  std::vector<size_t> specIndexTemp;
   specNumTemp[0] = specNum2;
   WS->getIndicesFromSpectra(specNumTemp, specIndexTemp);
   if ( specIndexTemp.size() != 1 )

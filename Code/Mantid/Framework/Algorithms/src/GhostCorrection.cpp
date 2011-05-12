@@ -141,7 +141,7 @@ namespace Mantid
       for (size_t inPixelId = 0; inPixelId < numInPixels; inPixelId++)
       {
         //Find the input workspace index corresponding to this input Pixel ID
-        IndexToIndexMap::iterator it;
+        detid2index_map::iterator it;
         it = input_detectorIDToWorkspaceIndexMap->find(inPixelId);
 
         if (it != input_detectorIDToWorkspaceIndexMap->end())

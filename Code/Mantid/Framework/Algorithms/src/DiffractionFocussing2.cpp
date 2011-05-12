@@ -468,23 +468,23 @@ void DiffractionFocussing2::execEvent()
  *  @param spectrum_number :: The spectrum number in the workspace
  *  @return Group number if successful otherwise return -1
  */
-int DiffractionFocussing2::validateSpectrumInGroup(int64_t spectrum_number)
+int DiffractionFocussing2::validateSpectrumInGroup(specid_t spectrum_number)
 {
   // Get the spectra to detector map
   const API::SpectraDetectorMap& spectramap = matrixInputW->spectraMap();
-  const std::vector<int64_t> dets = spectramap.getDetectors(spectrum_number);
+  const std::vector<detid_t> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
   {
     std::cout << spectrum_number << " <- this spectrum is empty!\n";
     return -1;
   }
 
-  std::vector<int64_t>::const_iterator it = dets.begin();
+  std::vector<detid_t>::const_iterator it = dets.begin();
   udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
   if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
     return -1;
-  const int64_t group = (*mapit).second;
-  int64_t new_group;
+  const int group = (*mapit).second;
+  int new_group;
   for (it + 1; it != dets.end(); it++) // Loop other all other udets
   {
     mapit = udet2group.find((*it));

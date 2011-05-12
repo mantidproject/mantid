@@ -74,15 +74,15 @@ void MaskDetectorsIf::init()
 void MaskDetectorsIf::exec()
 {
 	retrieveProperties();
-	const int64_t nspec=inputW->getNumberHistograms();
+	const size_t nspec=inputW->getNumberHistograms();
 	const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
 
-	for (int64_t i=0;i<nspec;++i)
+	for (size_t i=0;i<nspec;++i)
 	{
 		// Get the spectrum number
-		const int64_t spec = inputW->getAxis(1)->spectraNo(i);
+		const specid_t spec = inputW->getAxis(1)->spectraNo(i);
 		// Get the list of udets contributing to this spectra
-		std::vector<int64_t> dets = spectramap.getDetectors(spec);
+		std::vector<detid_t> dets = spectramap.getDetectors(spec);
 		if (dets.empty())
 			continue;
 		else
@@ -91,7 +91,7 @@ void MaskDetectorsIf::exec()
 			if (compar_f(val,value))
 			{
 			for (unsigned int j=0;j<dets.size();++j)
-				umap.insert(std::make_pair<int64_t,bool>(dets[j],select_on));
+				umap.insert(std::make_pair<detid_t,bool>(dets[j],select_on));
 			}
 		}
 		double p=static_cast<double>(i)/static_cast<double>(nspec);
