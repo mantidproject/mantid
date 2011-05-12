@@ -35,7 +35,7 @@ public:
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
     ParameterMap_sptr pmap(new ParameterMap());
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
-    std::map<int, IDetector_sptr> m_detectors;
+    std::map<int64_t, IDetector_sptr> m_detectors;
     m_instrument->getDetectors(m_detectors);
 
     // Need scaling vector since changes to NN ( 22/12/10 )
@@ -51,8 +51,8 @@ public:
     TS_ASSERT_EQUALS(m_detectors.size(), 18);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<int, double> distances = m_detectors[5]->getNeighbours();
-    std::map<int, double>::iterator distIt;
+    std::map<int64_t, double> distances = m_detectors[5]->getNeighbours();
+    std::map<int64_t, double>::iterator distIt;
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(distances.size(), 8);
@@ -89,7 +89,7 @@ public:
     RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);
     TS_ASSERT( det );
-    std::map<int, double> nb;
+    std::map<int64_t, double> nb;
 
     // Too close!
     nb = det->getNeighbours(0.003);
@@ -98,10 +98,10 @@ public:
     // The ones above below and next to it
     nb = det->getNeighbours(2);
     TS_ASSERT_EQUALS( nb.size(), 4 );
-    int id = det->getID();
-    for (std::map<int, double>::iterator it = nb.begin(); it != nb.end(); it++)
+    int64_t id = det->getID();
+    for (std::map<int64_t, double>::iterator it = nb.begin(); it != nb.end(); it++)
     {
-      int nid = it->first;
+      int64_t nid = it->first;
       // One of 4 neighbors - we know what ID's they should be.
       // TS_ASSERT(  (nid==id+1) || (nid==id-1) || (nid==id+16) || (nid==id-16) ); disable this for now as I can't
       // work out how to get it to work, and it relies on the "old" form of NN which no one cares about AFAIK. MW 22/12/10

@@ -171,7 +171,7 @@ public:
   {
     // 5 banks with 6x6 pixels in them.
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::map<int, Mantid::Geometry::IDetector_sptr> dets;
+    std::map<int64_t, Mantid::Geometry::IDetector_sptr> dets;
     inst->getDetectors(dets);
     TS_ASSERT_EQUALS(dets.size(), 36*5);
   }
@@ -180,7 +180,7 @@ public:
   {
     // 5 banks with 6x6 pixels in them.
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::vector<int> dets;
+    std::vector<int64_t> dets;
     dets = inst->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 36*5);
   }
