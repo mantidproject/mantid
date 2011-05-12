@@ -519,7 +519,7 @@ namespace Mantid
 
       int64_t ndet = static_cast<int64_t>(dims[0]);
 
-      boost::shared_array<int64_t> udet(new int64_t[ndet]);
+      boost::shared_array<detid_t> udet(new detid_t[ndet]);
 
       getNexusData(udet.get());
 
@@ -541,7 +541,7 @@ namespace Mantid
         throw std::runtime_error("Cannot open load spectra-detector map: data sizes do not match.");
       }
 
-      m_spec.reset(new int64_t[ndet]);
+      m_spec.reset(new specid_t[ndet]);
 
       getNexusData(m_spec.get());
 

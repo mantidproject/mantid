@@ -19,6 +19,7 @@
 #include "MantidKernel/cow_ptr.h"
 #include <boost/shared_ptr.hpp>
 #include <set>
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -100,7 +101,7 @@ namespace Mantid
       IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
       IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
       IndexToIndexMap * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
-      void getIndicesFromSpectra(const std::vector<int64_t>& spectraList, std::vector<int64_t>& indexList) const;
+      void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
 
       /// Sample accessors
       const  Sample& sample() const;
@@ -112,7 +113,7 @@ namespace Mantid
       Run& mutableRun();
 
       /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
-      Geometry::IDetector_sptr getDetector(const int64_t index) const;
+      Geometry::IDetector_sptr getDetector(const specid_t spectrumNumber) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
       /// Calculates the drop of a neutron coming from the sample, there isn't currently a Mantid convention for which axis is vertical
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;

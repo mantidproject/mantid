@@ -584,7 +584,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
     for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
     {
-      std::vector<int64_t> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
+      std::vector<detid_t> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
       EventList & el = ew->getEventList(wi);
       for (size_t i=0; i < dets.size(); i++)
         el.addDetectorID(dets[i]);

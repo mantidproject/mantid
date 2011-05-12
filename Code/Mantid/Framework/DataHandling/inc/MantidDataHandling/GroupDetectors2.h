@@ -13,6 +13,7 @@
 #endif
 
 #include <Poco/SAX/ContentHandler.h>
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -173,24 +174,24 @@ private:
     /// map of groups
     storage_map m_groups;
     /// group currently being read from file
-    std::vector<int64_t> m_currentGroup;
+    std::vector<specid_t> m_currentGroup;
     /// whether reading spectra numbers or detector ids
     bool m_specNo;
     /// whether currently inside a group element
     bool m_inGroup;
     /// map of spectra number to workspace index
-    std::map<int64_t,int64_t> m_specnTOwi;
+    std::map<specid_t,size_t> m_specnTOwi;
     /// map of detector id to workspace index
     Mantid::API::IndexToIndexMap* m_detidTOwi;
     /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
-    std::vector<int64_t> m_unused;
+    std::vector<specid_t> m_unused;
   };
 
 	#ifndef HAS_UNORDERED_MAP_H
   /// used to store the lists of spectra numbers that will be grouped, the keys are not used
-  typedef std::map<int64_t, std::vector<int64_t> > storage_map;
+  typedef std::map<specid_t, std::vector<specid_t> > storage_map;
 	#else
-  typedef std::tr1::unordered_map<int64_t, std::vector<int64_t> > storage_map;
+  typedef std::tr1::unordered_map<specid_t, std::vector<specid_t> > storage_map;
 	#endif
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
@@ -213,7 +214,9 @@ private:
                                                 std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
+
   void readFile(std::map<int64_t, int64_t> &specs2index, std::ifstream &File, size_t &lineNum, std::vector<int64_t> &unUsedSpec);
+
   /// used while reading the file reads reads spectra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, std::map<int64_t, int64_t> &specs2index,
                    std::vector<int64_t> &output, std::vector<int64_t> &unUsedSpec, std::string seperator="#");

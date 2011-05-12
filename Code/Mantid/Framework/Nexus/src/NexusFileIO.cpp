@@ -852,8 +852,8 @@ using namespace DataObjects;
     status=NXopengroup(fileID, group_name.c_str(), "NXdata");
 
     // Copy the detector IDs to an array.
-    const std::set<int64_t>& dets = el.getDetectorIDs();
-    int64_t * detectorIDs = VectorHelper::iteratorToArray<int64_t>(dets.begin(), dets.end(), dims_array);
+    const std::set<detid_t>& dets = el.getDetectorIDs();
+    detid_t * detectorIDs = VectorHelper::iteratorToArray<detid_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
     if (dets.size() > 0)
@@ -863,7 +863,7 @@ using namespace DataObjects;
     }
 
     std::string eventType("UNKNOWN");
-    int64_t num = el.getNumberEvents();
+    size_t num = el.getNumberEvents();
     switch (el.getEventType())
     {
     case TOF:
@@ -1283,13 +1283,13 @@ using namespace DataObjects;
     {
       int si = spec[i];
       spectra[i] = int32_t(spectraAxis->spectraNo(si));
-      const int ndet1=spectraMap.ndet(spectra[i]);
+      const size_t ndet1=spectraMap.ndet(spectra[i]);
       detector_index[i+1]= int32_t(detector_index[i]+ndet1); // points to start of detector list for the next spectrum
       detector_count[i]= int32_t(ndet1);
       ndet += ndet1;
 
-      const std::vector<int64_t> detectorgroup = spectraMap.getDetectors(spectra[i]);
-      std::vector<int64_t>::const_iterator it;
+      const std::vector<detid_t> detectorgroup = spectraMap.getDetectors(spectra[i]);
+      std::vector<detid_t>::const_iterator it;
       for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       {
         detector_list[id++]=int32_t(*it);

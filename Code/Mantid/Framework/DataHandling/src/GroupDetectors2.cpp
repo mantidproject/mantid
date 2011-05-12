@@ -179,9 +179,9 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
     }
     return;
   }
-  const std::vector<int64_t> spectraList = getProperty("SpectraList");
-  const std::vector<int64_t> detectorList = getProperty("DetectorList");
-  const std::vector<int64_t> indexList = getProperty("WorkspaceIndexList");
+  const std::vector<specid_t> spectraList = getProperty("SpectraList");
+  const std::vector<detid_t> detectorList = getProperty("DetectorList");
+  const std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
 
   // only look at these other parameters if the file wasn't set
   if ( ! spectraList.empty() )
@@ -572,11 +572,11 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     // Copy over X data from first spectrum, the bin boundaries for all spectra are assumed to be the same here
     outputWS->dataX(outIndex) = inputWS->readX(0);
     // the Y values and errors from spectra being grouped are combined in the output spectrum
-    for( std::vector<int64_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
+    for( std::vector<detid_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
     {
-      const int64_t copyFrom = *specIt;
+      const detid_t copyFrom = *specIt;
       // detectors to add to firstSpecNum
-      std::vector<int64_t> moreDet = inputSpecDetecMap.getDetectors(inputSpecNums->spectraNo(copyFrom));
+      std::vector<detid_t> moreDet = inputSpecDetecMap.getDetectors(inputSpecNums->spectraNo(copyFrom));
       for (size_t iDet = 0; iDet < moreDet.size(); iDet++)
         detToClump.push_back(moreDet[iDet]);
 

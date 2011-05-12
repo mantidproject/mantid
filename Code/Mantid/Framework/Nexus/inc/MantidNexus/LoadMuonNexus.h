@@ -9,6 +9,7 @@
 #include "MantidAPI/IDataFileChecker.h"
 #include "MantidKernel/System.h"
 #include <napi.h>
+#include "MantidAPI/SpectraDetectorMap.h"
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -105,13 +106,13 @@ namespace Mantid
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int64_t> m_spec_list;
+      std::vector<specid_t> m_spec_list;
       /// The value of the spectrum_min property
       int64_t m_spec_min;
       /// The value of the spectrum_max property
       int64_t m_spec_max;
       /// The group which each detector belongs to in order
-      std::vector<int64_t> m_groupings;
+      std::vector<specid_t> m_groupings;
 
     private:
       /// Sets documentation strings for this algorithm
@@ -119,7 +120,8 @@ namespace Mantid
       /// Overwrites Algorithm method.
       void init();
       
-      void loadData(const MantidVecPtr::ptr_type&,int64_t, int64_t&, MuonNexusReader& , const int64_t, DataObjects::Workspace2D_sptr );
+      void loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
+          MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace);
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);

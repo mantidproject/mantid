@@ -220,11 +220,11 @@ namespace Mantid
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
 
-        int64_t counter = 0;
-        for (int64_t i = m_spec_min; i < m_spec_max; ++i)
+        size_t counter = 0;
+        for (size_t i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
-          int64_t histToRead = i + period*total_specs;
+          specid_t histToRead = i + period*total_specs;
           loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
           counter++;
           progress.report();
@@ -339,15 +339,15 @@ namespace Mantid
           DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
 
-          boost::shared_array<int64_t> spec(new int64_t[numHists]);
-          boost::shared_array<int64_t> dets(new int64_t[numHists]);
+          boost::shared_array<specid_t> spec(new specid_t[numHists]);
+          boost::shared_array<detid_t> dets(new detid_t[numHists]);
 
           //Compile the groups
-          for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i)
+          for (size_t i = 0; i < static_cast<size_t>(numHists); ++i)
           {    
-            int64_t k = groups[ m_groupings[numHists*period + i] ];
+            specid_t k = groups[ m_groupings[numHists*period + i] ];
 
-            for (int64_t j = 0; j < static_cast<int64_t>(localWorkspace->blocksize()); ++j)
+            for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
             {
               groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
 
@@ -365,7 +365,7 @@ namespace Mantid
           m_groupings.clear();
 
           // All two spectra
-          for(int64_t k=0; k<static_cast<int64_t>(ngroups); k++)
+          for(detid_t k=0; k<static_cast<detid_t>(ngroups); k++)
           {
             groupedWS->getAxis(1)->spectraNo(k)= k + 1;
           }
@@ -414,8 +414,8 @@ namespace Mantid
       // Check validity of spectra list property, if set
       if ( m_list )
       {
-        const int64_t minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-        const int64_t maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+        const specid_t minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+        const specid_t maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
         {
           g_log.error("Invalid list of spectra");
@@ -443,7 +443,7 @@ namespace Mantid
     *  @param lengthIn :: The number of elements in a spectrum
     *  @param localWorkspace :: A pointer to the workspace in which the data will be stored
     */
-    void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,int64_t hist, int64_t& i,
+    void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,size_t hist, specid_t& i,
       MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
@@ -556,9 +556,9 @@ namespace Mantid
       NXRoot root(m_filename);
       NXInt number = root.openNXInt("run/instrument/detector/number");
       number.load();
-      int64_t ndet = number[0]/m_numberOfPeriods;
-      boost::shared_array<int64_t> det(new int64_t[ndet]);
-      for(int64_t i=0;i<ndet;i++)
+      detid_t ndet = number[0]/m_numberOfPeriods;
+      boost::shared_array<detid_t> det(new detid_t[ndet]);
+      for(detid_t i=0;i<ndet;i++)
         det[i] = i + 1;
       localWorkspace->mutableSpectraMap().populate(det.get(),det.get(),ndet);
     }

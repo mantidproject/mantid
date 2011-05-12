@@ -98,8 +98,8 @@ void LoadNexusMonitors::exec()
       this->nMonitors, 1, 1);
 
   // a temporary place to put the spectra/detector numbers
-  boost::shared_array<int64_t> spectra_numbers(new int64_t[this->nMonitors]);
-  boost::shared_array<int64_t> detector_numbers(new int64_t[this->nMonitors]);
+  boost::shared_array<specid_t> spectra_numbers(new specid_t[this->nMonitors]);
+  boost::shared_array<detid_t> detector_numbers(new detid_t[this->nMonitors]);
 
   API::Progress prog3(this, 0.6, 1.0, this->nMonitors);
 
@@ -111,8 +111,8 @@ void LoadNexusMonitors::exec()
     std::string monitorName = monPath.getBaseName();
     std::string::size_type loc = monitorName.rfind('r');
 
-    int64_t monIndex = boost::lexical_cast<int64_t>(monitorName.substr(loc+1));
-    int64_t spectraIndex = i;
+    detid_t monIndex = boost::lexical_cast<int64_t>(monitorName.substr(loc+1));
+    specid_t spectraIndex = i;
 
     g_log.debug() << "monIndex = " << monIndex << std::endl;
     g_log.debug() << "spectraIndex = " << spectraIndex << std::endl;

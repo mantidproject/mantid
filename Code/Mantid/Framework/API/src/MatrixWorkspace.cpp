@@ -304,7 +304,7 @@ namespace Mantid
     *  @param spectraList :: The list of spectrum numbers required
     *  @param indexList ::   Returns a reference to the vector of indices (empty if not a Workspace2D)
     */
-    void MatrixWorkspace::getIndicesFromSpectra(const std::vector<int64_t>& spectraList, std::vector<int64_t>& indexList) const
+    void MatrixWorkspace::getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const
     {
       // Clear the output index list
       indexList.clear();
@@ -319,7 +319,7 @@ namespace Mantid
       // Just return an empty list if this isn't a Workspace2D
       else return;
 
-      std::vector<int64_t>::const_iterator iter = spectraList.begin();
+      std::vector<specid_t>::const_iterator iter = spectraList.begin();
       while( iter != spectraList.end() )
       {
         for (size_t i = 0; i < this->getNumberHistograms(); ++i)
@@ -443,7 +443,7 @@ namespace Mantid
     *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
     do not contain the requested spectrum number of detector ID
     */
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int64_t index) const
+    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const specid_t index) const
     {
       if ( ! m_spectramap->nElements() )
       {

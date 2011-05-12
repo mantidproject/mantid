@@ -13,6 +13,7 @@
 
 #include <boost/shared_array.hpp>
 #include "MantidAPI/WorkspaceGroup.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------
@@ -143,7 +144,7 @@ namespace Mantid
             /// Proton charge
             double m_proton_charge;
             /// Spectra numbers
-            boost::shared_array<int64_t> m_spec;
+            boost::shared_array<specid_t> m_spec;
 
             /// Nexus file id
             NXhandle m_fileID;
