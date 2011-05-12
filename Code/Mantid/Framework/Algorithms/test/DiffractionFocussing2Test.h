@@ -181,7 +181,7 @@ public:
     {
       int workspaceindex_in_output = group-1;
       //This is the list of the detectors (grouped)
-      std::vector<int> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
+      std::vector<int64_t> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
       //1024 pixels in a bank
       TS_ASSERT_EQUALS(mylist.size(), 1024);
     }

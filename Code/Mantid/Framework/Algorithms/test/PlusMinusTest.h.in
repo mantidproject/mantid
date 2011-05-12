@@ -550,7 +550,7 @@ public:
       //But two detector IDs in each one
       for (int i=0; i<3; i++)
       {
-        std::vector<int> detList = work_out->spectraMap().getDetectors(i);
+        std::vector<int64_t> detList = work_out->spectraMap().getDetectors(i);
         TS_ASSERT_EQUALS( detList[0], 0+i );
         if (DO_PLUS)
         {

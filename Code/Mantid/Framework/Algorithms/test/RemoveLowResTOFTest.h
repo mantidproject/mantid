@@ -42,8 +42,8 @@ private:
     myMap.clear();
     for (int i = 0; i < NUMPIXELS; i++)
     {
-      std::set<int> detids;
-      detids.insert(static_cast<int>(i+1));
+      std::set<int64_t> detids;
+      detids.insert(static_cast<int64_t>(i+1));
       myMap.addSpectrumEntries(i, detids);
     }
     //Add it to the workspace

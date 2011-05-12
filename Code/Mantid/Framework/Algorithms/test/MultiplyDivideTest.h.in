@@ -881,7 +881,7 @@ public:
   void doDivideWithMaskedTest(bool replaceInput)
   {
     const int nHist = 10,nBins=20;
-    std::set<int> masking;
+    std::set<int64_t> masking;
     masking.insert(0);
     masking.insert(2);
     masking.insert(7);

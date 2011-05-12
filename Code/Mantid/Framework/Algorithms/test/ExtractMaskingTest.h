@@ -49,7 +49,7 @@ public:
     const int nvectors(50), nbins(10);
     Workspace2D_sptr inputWS = WorkspaceCreationHelper::Create2DWorkspace(nvectors,nbins);
     // Mask every 10th spectra
-    std::set<int> maskedIndices;
+    std::set<int64_t> maskedIndices;
     for( int i = 0; i < 50; i += 10 )
     {
       maskedIndices.insert(i);
