@@ -118,12 +118,12 @@ CenterpieceRebinning::exec()
      outputWS = getProperty("Result");
      std::string ws_name = this->getPropertyValue("Result");
      if(!outputWS){
-         bin_log.information()<<" new target MD Worokspace "<<ws_name<<" will be created\n";
+         bin_log.information()<<" New target MD Workspace "<<ws_name<<" will be created\n";
          outputWS      = MDWorkspace_sptr(new MDWorkspace());
         // this adds workspace to dataservice
         setProperty("Result", outputWS);
      }else{
-         bin_log.information()<<" Target MD Wororkspace "<<ws_name<<" will be owerwritten\n";
+         bin_log.information()<<" Target MD Workspace "<<ws_name<<" will be overwritten\n";
          Workspace_sptr result = AnalysisDataService::Instance().retrieve(ws_name);
          outputWS = boost::dynamic_pointer_cast<MDWorkspace>(result);
          if(outputWS.get()==NULL){
@@ -138,7 +138,7 @@ CenterpieceRebinning::exec()
     bool keep_pixels(false);
     keep_pixels = getProperty("KeepPixels");
 
-   // here we should have the call to factory, providing best rebinning method for the job
+   //TODO: here we should have the call to factory, providing best rebinning method for the job
     boost::scoped_ptr<IDynamicRebinning> pRebin(new CpRebinningNx3(inputWS,pSlicing,outputWS,keep_pixels));
   //  boost::scoped_ptr<IDynamicRebinning> pRebin(new CpRebinning4x3StructHR(inputWS,pSlicing,outputWS));
   

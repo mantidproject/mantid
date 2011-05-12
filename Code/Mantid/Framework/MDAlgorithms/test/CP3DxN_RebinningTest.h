@@ -51,8 +51,8 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 
     void testRebinInit(void){
 
-     InputWorkspaceName = "testCPrebinningIn";
-     OutWorkspaceName   = "testCPrebinningOut";
+     InputWorkspaceName = "testCP_rebinningIn";
+     OutWorkspaceName   = "testCP_rebinningOut";
 
      TS_ASSERT_THROWS_NOTHING(cpr.initialize());
      TS_ASSERT( cpr.isInitialized() );
@@ -100,64 +100,74 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 
         for(size_t i=0;i<OldIMG.getDataSize();i++){
             TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
-			if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
+			/*if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
 				continue;
-			}
+			}*/
         }
     }
 
-  //  void t__tCPRRebinAgainSmaller(){
-  // // now rebin into slice
-  //// retrieve slicing property for modifications
-  //    Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-  //    TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+    void testCPRRebinAgainSmaller(){
+   // now rebin into slice
+  // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
-  // // now modify it as we need/want;
-  //      double r0=0;
-  //      pSlicing->pDimDescription("qx")->cut_min = r0;
-		//pSlicing->pDimDescription("qx")->cut_max = r0+1;
-		//pSlicing->pDimDescription("qy")->cut_min = r0;
-		//pSlicing->pDimDescription("qy")->cut_max = r0+1;
-		//pSlicing->pDimDescription("qz")->cut_min = r0;
-		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
-		//pSlicing->pDimDescription("en")->cut_max = 50;
-  //
-  // /*     pSlicing->pDimDescription("qx")->nBins = 200;
-		//pSlicing->pDimDescription("qy")->nBins = 200;
-		//pSlicing->pDimDescription("qz")->nBins = 200;
-		//pSlicing->pDimDescription("en")->nBins  = 0;*/
+   // now modify it as we need/want;
+        double r0=0;
+        pSlicing->pDimDescription("qx")->cut_min = r0;
+		pSlicing->pDimDescription("qx")->cut_max = r0+1;
+		pSlicing->pDimDescription("qx")->nBins = 200;
+		pSlicing->pDimDescription("qy")->cut_min = r0;
+		pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		pSlicing->pDimDescription("qz")->cut_min = r0;
+		pSlicing->pDimDescription("qz")->cut_max = r0+1;
+		pSlicing->pDimDescription("en")->cut_max = 50;
+		// and set a rotation
+		Geometry::UnitCell rotator(1,1,1);
+		Geometry::MantidMat Rot = rotator.getUmatrix(Geometry::V3D(1,1,1),Geometry::V3D(1,-1,-1));
+		pSlicing->setRotationMatrix(Rot);
+  
+   /*     pSlicing->pDimDescription("qx")->nBins = 200;
+		pSlicing->pDimDescription("qy")->nBins = 200;
+		pSlicing->pDimDescription("qz")->nBins = 200;
+		pSlicing->pDimDescription("en")->nBins  = 0;*/
 
 
-  //      TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
-  //  }
-  //void t__tCPRRebinSmallerInto3D(){
-  // // now rebin into slice
-  //// retrieve slicing property for modifications
-  //    Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
-  //    TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
+  void t__tCPRRebinSmallerInto3D(){
+   // now rebin into slice
+  // retrieve slicing property for modifications
+      Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
+      TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
 
-  // // now modify it as we need/want;
-  //      double r0=0;
-  //      pSlicing->pDimDescription("qx")->cut_min = r0;
-		//pSlicing->pDimDescription("qx")->cut_max = r0+1;
-	 //   pSlicing->pDimDescription("qx")->nBins   = 1; // integrate over qx dimension and produce 2D+1 dataset;
-		//// despite that the dataset always remains 3D+1 internaly
+   // now modify it as we need/want;
+        double r0=0;
+        pSlicing->pDimDescription("qx")->cut_min = r0;
+		pSlicing->pDimDescription("qx")->cut_max = r0+1;
+	    pSlicing->pDimDescription("qx")->nBins   = 1; // integrate over qx dimension and produce 2D+1 dataset;
+		// despite that the dataset always remains 3D+1 internaly
 	
 
-		//pSlicing->pDimDescription("qy")->cut_min = r0;
-		//pSlicing->pDimDescription("qy")->cut_max = r0+1;
-		//pSlicing->pDimDescription("qz")->cut_min = r0;
-		//pSlicing->pDimDescription("qz")->cut_max = r0+1;
-		//pSlicing->pDimDescription("en")->cut_max = 50;
-  //
-  // /*     pSlicing->pDimDescription("qx")->nBins = 200;
-		//pSlicing->pDimDescription("qy")->nBins = 200;
-		//pSlicing->pDimDescription("qz")->nBins = 200;
-		//pSlicing->pDimDescription("en")->nBins  = 0;*/
+		pSlicing->pDimDescription("qy")->cut_min = r0;
+		pSlicing->pDimDescription("qy")->cut_max = r0+1;
+		pSlicing->pDimDescription("qz")->cut_min = r0;
+		pSlicing->pDimDescription("qz")->cut_max = r0+1;
+		pSlicing->pDimDescription("en")->cut_max = 50;
+  
+   /*     pSlicing->pDimDescription("qx")->nBins = 200;
+		pSlicing->pDimDescription("qy")->nBins = 200;
+		pSlicing->pDimDescription("qz")->nBins = 200;
+		pSlicing->pDimDescription("en")->nBins  = 0;*/
+		// and set a rotation
+		Geometry::UnitCell rotator(1,1,1);
+		Geometry::MantidMat Rot = rotator.getUmatrix(Geometry::V3D(0,1,1),Geometry::V3D(1,-1,-1));
+		pSlicing->setRotationMatrix(Rot);
 
 
-  //      TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
-  //  }
+
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
 };
 
 

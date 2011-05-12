@@ -82,7 +82,7 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 
      }
      void testPreselectAllUnique(){
-		 size_t nCells;
+		 size_t nCells(0);
 
 		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
 		 // check if the generic properties of the preselection are correct:
@@ -93,7 +93,7 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 
      }
      void testPreselect3DWorks(){
-		 size_t nCells;
+		 size_t nCells(0);
 		 pTargDescr->pDimDescription(3)->cut_max = 0;  
 		 // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
 		 pTargDescr->pDimDescription(2)->cut_max = 0.99;
@@ -110,35 +110,35 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 		 TSM_ASSERT_EQUALS("The selection should refer to nCells*(nCells+1)/2 pixels but it is not",nCells*(nCells+1)/2,pRebin->getNumPreselectedPixels());
 
      }
-  //  void t__tPreselect3Dx2Works(){
-		// size_t nCells;
-		// pTargDescr->pDimDescription(3)->cut_max = 1;  
+    void testPreselect3Dx2Works(){
+		 size_t nCells;
+		 pTargDescr->pDimDescription(3)->cut_max = 1;  
 
-		// TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
-		// // check if the generic properties of the preselection are correct:
-		// TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*2*1 geometry",50*50*2*2,nCells);
+		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
+		 // check if the generic properties of the preselection are correct:
+		 TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*2*1 geometry",50*50*2*2,nCells);
 
-		// const std::vector<size_t> psCells = pRebin->getPreselectedCells();
-		// TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
+		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
+		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
 
-		// //
-		// size_t nHalfCells = nCells/2;
-		// // number of pixels in the first half of the selection; verified above
-		// uint64_t nPix   = nHalfCells*(nHalfCells+1)/2;
-		// // other half of the selection:
-		// nPix          += pOrigin->get_const_MDGeometry().get_constDimension(3)->getStride()*nHalfCells+(nHalfCells+1)*nHalfCells/2;
+		 //
+		 size_t nHalfCells = nCells/2;
+		 // number of pixels in the first half of the selection; verified above
+		 uint64_t nPix   = nHalfCells*(nHalfCells+1)/2;
+		 // other half of the selection:
+		 nPix          += pOrigin->get_const_MDGeometry().get_constDimension(3)->getStride()*nHalfCells+(nHalfCells+1)*nHalfCells/2;
 
-		// TSM_ASSERT_EQUALS("The selection should refer to proper number of pixels but it is not",nPix,pRebin->getNumPreselectedPixels());
+		 TSM_ASSERT_EQUALS("The selection should refer to proper number of pixels but it is not",nPix,pRebin->getNumPreselectedPixels());
 
-  //   }
-	 //void t__tClearWorkspaces(){
-		// //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
-		// // before the real destructor is called
-		// this->pOrigin.reset();
-		// this->pTarget.reset();
-		// this->pTargDescr.reset();
-		// this->pRebin.reset();
-	 //}
+     }
+	 void testClearWorkspaces(){
+		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
+		 // before the real destructor is called
+		 this->pOrigin.reset();
+		 this->pTarget.reset();
+		 this->pTargDescr.reset();
+		 this->pRebin.reset();
+	 }
 };
 
 #endif
