@@ -161,7 +161,7 @@ if ( CXXTEST_FOUND )
   if ( GMOCK_FOUND AND GTEST_FOUND )
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} ${GMOCK_TEST_FILES})
     target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting
-      ${GMOCK_LIBRARIES} )
+      ${GMOCK_LIBRARIES} ${GTEST_LIBRARIES})
   else ()
     cxxtest_add_test ( MDAlgorithmsTest ${TEST_FILES} )
     target_link_libraries( MDAlgorithmsTest MDAlgorithms MDDataObjects CurveFitting )
