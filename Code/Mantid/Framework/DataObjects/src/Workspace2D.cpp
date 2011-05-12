@@ -73,7 +73,7 @@ namespace Mantid
     @param histnumber :: Index to the histogram
     @param Vec :: Shared ptr base object
     */
-    void Workspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec, const MantidVecPtr::ptr_type& Err)
+    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec, const MantidVecPtr::ptr_type& Err)
     {
 
       if (histnumber<0 || histnumber>=m_noVectors)
@@ -104,7 +104,7 @@ namespace Mantid
     @param histnumber :: Index to the histogram
     @param PA :: Reference counted histogram
     */
-    void Workspace2D::setX(const int histnumber, const MantidVecPtr& PA, const MantidVecPtr& Err)
+    void Workspace2D::setX(const size_t histnumber, const MantidVecPtr& PA, const MantidVecPtr& Err)
     {
       if (histnumber<0 || histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
