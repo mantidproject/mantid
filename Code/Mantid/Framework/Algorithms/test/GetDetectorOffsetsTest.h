@@ -9,6 +9,7 @@
 #include <cxxtest/TestSuite.h>
 #include <Poco/File.h>
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidAPI/AlgorithmManager.h"
 
 using namespace Mantid::API;
 using Mantid::Algorithms::GetDetectorOffsets;
@@ -101,6 +102,7 @@ public:
 
   void test_performance()
   {
+    AlgorithmManager::Instance(); //Initialize here to avoid an odd ABORT
     GetDetectorOffsets offsets;
     if ( !offsets.isInitialized() ) offsets.initialize();
     TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace", WS) );
