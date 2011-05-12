@@ -111,7 +111,7 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 
      }
     void testPreselect3Dx2Works(){
-		 size_t nCells;
+		 size_t nCells(0);
 		 pTargDescr->pDimDescription(3)->cut_max = 1;  
 
 		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
