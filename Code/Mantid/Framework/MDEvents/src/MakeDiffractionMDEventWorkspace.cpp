@@ -118,7 +118,7 @@ namespace MDEvents
     size_t numEvents = el.getNumberEvents();
 
     // Get the position of the detector there.
-    std::set<int>& detectors = el.getDetectorIDs();
+    std::set<int64_t>& detectors = el.getDetectorIDs();
     if (detectors.size() > 0)
     {
       // The 3D MDEvents that will be added into the MDEventWorkspce
