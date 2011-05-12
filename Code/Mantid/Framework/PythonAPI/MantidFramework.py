@@ -172,6 +172,7 @@ __operator_names=set(['CALL_FUNCTION','UNARY_POSITIVE','UNARY_NEGATIVE','UNARY_N
                       'INPLACE_LSHIFT','INPLACE_RSHIFT','INPLACE_AND', 'INPLACE_XOR',
                       'INPLACE_OR'])
 
+#-------------------------------------------------------------------------------
 
 def lhs_info(output_type='both'):
     """Returns the number of arguments on the left of assignment along 
@@ -222,6 +223,8 @@ def lhs_info(output_type='both'):
         pass
 
     return ret_vals
+
+#-------------------------------------------------------------------------------
 
 def _process_frame(frame):
     """Returns the number of arguments on the left of assignment along 
@@ -298,6 +301,30 @@ def _process_frame(frame):
             count = count + 1
 
     return (max_returns,output_var_names)
+
+#-------------------------------------------------------------------------------
+
+def in_callstack(fn_name, frame):
+    """Check whether the call stack from the given frame contains the given 
+    function name.
+    
+    @param fn_name :: The function name to search for
+    @param frame :: Start the search at this frame
+    @returns True if the function name exists in the stack, false otherwise
+    """
+    if frame.f_code.co_name == fn_name: 
+        return True
+    while True:
+        if frame.f_back:
+            if frame.f_back.f_code.co_name == fn_name: 
+                return True
+            frame = frame.f_back
+        else:
+            break
+    if frame.f_code.co_name == fn_name: 
+        return True
+    else:
+        return False
 
 #-------------------------------------------------------------------------------
 def mtdGlobalHelp():
@@ -726,7 +753,7 @@ class IAlgorithmProxy(ProxyObject):
     """
     A proxy object for IAlgorithm returns
     """
-    
+
     def __init__(self, ialg, framework):
         super(IAlgorithmProxy, self).__init__(ialg)
         self.__framework = framework
@@ -887,8 +914,7 @@ class IAlgorithmProxy(ProxyObject):
         Execute the configured algorithm.
         """
         self.setPropertyValues(*args, **kwargs)
-
-        if mtd.__gui__:
+        if self.__async__:
             success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
@@ -966,10 +992,9 @@ class MantidPyFramework(FrameworkManager):
         else:
             self.__gui__ = GUI
 
-        # Welcome everyone to the world of MANTID
-        print '\n' + self.settings.welcomeMessage() + '\n'
-        # Run through init steps
+        # Run through init steps 
         self.createPythonSimpleAPI()
+        # Load and register python algorithm modules (these will try to call this function too)
         self._pyalg_loader.load_modules(refresh=False)
         self.createPythonSimpleAPI() # TODO this line should go
         self._importSimpleAPIToMain()
@@ -996,7 +1021,7 @@ class MantidPyFramework(FrameworkManager):
                 output[i][1] = 'WorkspaceGroup'
         
         max_width += 3
-        output_table = '\nWorkspace list:\n'
+        output_table = 'Mantid currently holds the following workspaces:\n'
         for row in output:
             output_table += '\t' + row[0].ljust(max_width, ' ') + '-   ' + row[1] + '\n'
 
@@ -1033,13 +1058,29 @@ class MantidPyFramework(FrameworkManager):
         This allows things such as alg.workspace() to be 
         used.
 
-        @see createBareAlgorithm for creating an algorithm
+        @see createManagedAlgorithm for creating an algorithm
         object alone
         """
         if isinstance(name, IAlgorithmProxy): # it already is the right thing
             return name
         else:
             return self._createAlgProxy(name, version)
+
+    def _createAlgProxy(self, ialg, version=-1):
+        """
+        Will accept either a IAlgorithm or a string specifying the algorithm name.
+        """
+        if isinstance(ialg, IAlgorithmProxy):
+            return ialg
+        if isinstance(ialg, str):
+            if in_callstack('PyExec',inspect.currentframe()) == True:
+                ialg = self.createUnmanagedAlgorithm(ialg, version)
+                ialg.__async__ = False
+            else:
+                ialg = self.createManagedAlgorithm(ialg, version) 
+                ialg.__async__ = mtd.__gui__
+        ialg.setRethrows(not mtd.__gui__) # TODO get rid of this line
+        return IAlgorithmProxy(ialg, self)
 
     # make what comes out of C++ a little friendlier to use
     def _getRegisteredAlgorithms(self):
@@ -1206,17 +1247,6 @@ class MantidPyFramework(FrameworkManager):
         """
         # Reload the simple api
         self._importSimpleAPIToMain()
-
-    def _createAlgProxy(self, ialg, version=-1):
-        """
-        Will accept either a IAlgorithm or a string specifying the algorithm name.
-        """
-        if isinstance(ialg, IAlgorithmProxy):
-            return ialg
-        if isinstance(ialg, str):
-            ialg = self.createBareAlgorithm(str(ialg), version) 
-        ialg.setRethrows(not mtd.__gui__) # TODO get rid of this line
-        return IAlgorithmProxy(ialg, self)
 
       
 # *** Legacy functions ***

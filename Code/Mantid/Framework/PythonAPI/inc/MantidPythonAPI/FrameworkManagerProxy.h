@@ -101,8 +101,10 @@ public:
   //@{
   ///  * Check whether a given name is an algorithm using a case-insensitive search
   std::string isAlgorithmName(std::string name) const;
-  /// Creates and instance of an algorithm
-  API::IAlgorithm* createAlgorithm(const std::string& algName, const int version = -1);
+  /// Creates and instance of a managed algorithm
+  API::IAlgorithm* createManagedAlgorithm(const std::string& algName, const int version = -1);
+  /// Creates an instance of an unmanaged algorithm
+  boost::shared_ptr<API::IAlgorithm> createUnmanagedAlgorithm(const std::string& algName, const int version = -1);
   /// Creates an ordered vector for knowing which parameters go where.
   std::vector<std::string> * getPropertyOrder(const API::IAlgorithm * alg);
   /// Create the doc string for the supplied algorithm.

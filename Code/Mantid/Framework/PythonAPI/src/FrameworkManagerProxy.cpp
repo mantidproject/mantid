@@ -144,16 +144,34 @@ std::string FrameworkManagerProxy::isAlgorithmName(std::string testName) const
 }
 
 /**
- * Creates a specified algorithm.
+ * Creates a managed version of a specified algorithm.
  * @param algName :: The name of the algorithm to execute.
  * @param version :: The version number (default=-1=highest version).
  * @return Pointer to algorithm.
  **/
-API::IAlgorithm* FrameworkManagerProxy::createAlgorithm(const std::string& algName, const int version)
+API::IAlgorithm* FrameworkManagerProxy::createManagedAlgorithm(const std::string& algName, const int version)
 {
   return API::FrameworkManager::Instance().createAlgorithm(algName, version);
 }
 
+/**
+ * Creates a managed version of a specified algorithm.
+ * @param algName :: The name of the algorithm to execute.
+ * @param version :: The version number (default=-1=highest version).
+ * @return Pointer to algorithm.
+ **/
+API::IAlgorithm_sptr FrameworkManagerProxy::createUnmanagedAlgorithm(const std::string& algName, const int version)
+{
+  API::IAlgorithm_sptr alg = API::AlgorithmManager::Instance().createUnmanaged(algName, version);
+  alg->initialize();
+  return alg;
+}
+
+/**
+ * Return a vector of strings containing the properties in their correct order
+ * @param algm :: A pointer to the algorithm
+ * @returns A pointer to a vector of strings
+ */
 std::vector<std::string> * FrameworkManagerProxy::getPropertyOrder(const API::IAlgorithm * algm)
 {
   if (algm == NULL)

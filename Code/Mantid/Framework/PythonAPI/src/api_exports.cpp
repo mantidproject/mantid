@@ -39,8 +39,9 @@ using namespace boost::python;
   // Class export functions
   //---------------------------------------------------------------------------
 
-  // Overloads for createAlgorithm function which has 1 optional argument
-  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FrameworkManager_createAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createAlgorithm, 1, 2)
+  // Overloads for create*Algorithms function which has 1 optional argument
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FM_createManagedAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createManagedAlgorithm, 1, 2)
+  BOOST_PYTHON_MEMBER_FUNCTION_OVERLOADS(FM_createUnmanagedAlgorithmOverloader, PythonAPI::FrameworkManagerProxy::createUnmanagedAlgorithm, 1, 2)
 
   void export_frameworkmanager()
   {
@@ -56,7 +57,10 @@ using namespace boost::python;
       .def("clearData", &FrameworkManagerProxy::clearData)
       .def("clearInstruments", &FrameworkManagerProxy::clearInstruments)
       .def("isAlgorithmName", &FrameworkManagerProxy::isAlgorithmName)
-      .def("createBareAlgorithm", &FrameworkManagerProxy::createAlgorithm, FrameworkManager_createAlgorithmOverloader()[return_internal_reference<>()] )
+      .def("createManagedAlgorithm", &FrameworkManagerProxy::createManagedAlgorithm, 
+	   FM_createManagedAlgorithmOverloader()[return_internal_reference<>()] )
+      .def("createUnmanagedAlgorithm", &FrameworkManagerProxy::createUnmanagedAlgorithm, 
+	   FM_createUnmanagedAlgorithmOverloader()[return_value_policy< return_by_value >()])
       .def("_getPropertyOrder", &FrameworkManagerProxy::getPropertyOrder, return_internal_reference<>())
       .def("createAlgorithmDocs", &FrameworkManagerProxy::createAlgorithmDocs)
       .def("registerPyAlgorithm", &FrameworkManagerProxy::registerPyAlgorithm)
