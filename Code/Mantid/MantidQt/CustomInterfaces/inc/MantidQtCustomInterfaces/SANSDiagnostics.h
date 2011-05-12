@@ -6,6 +6,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace MantidQt
 {
@@ -150,13 +151,13 @@ private:
   void disableDetectorGroupBoxes(bool bStatus);
    
   /// minimum and maximum spectrum ids for detector 
-  void minandMaxSpectrumIds(const std::vector<int64_t>& specList,QString& minSpec, QString& maxSpec);
+  void minandMaxSpectrumIds(const std::vector<Mantid::specid_t>& specList,QString& minSpec, QString& maxSpec);
 
   /// get workspaceIndexes from spectrum list
-  void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const std::vector<int64_t>& specList,
+  void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const std::vector<Mantid::specid_t>& specList,
                                               QString& startWSIndex,QString& endWSIndex);
   ///get spectra list from workspace.
-  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int64_t detNum,std::vector<int64_t>&specList);
+  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const Mantid::detid_t detNum,std::vector<Mantid::specid_t>&specList);
 
   /// get detector name
  const  QString getDetectorName(int index);

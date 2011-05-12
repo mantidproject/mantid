@@ -7,6 +7,9 @@
 #include <vector>
 #include "MantidGeometry/V3D.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidGeometry/IDetector.h"
+
+using Mantid::detid2index_map;
 
 class QAction;
 
@@ -80,7 +83,7 @@ public:
     static const int ERROR_FLAG = -2;                             ///< flags missing values but indicates an inconsistency in the data state
     Mantid::API::MatrixWorkspace_const_sptr m_workspace;          ///< All data refer to this workspace
     const std::vector<double> * m_integrals;                      ///< the integral of each spectra
-    boost::shared_ptr<const Mantid::API::IndexToIndexMap> m_detID_to_wi_map;///< used to get workspace indices from detector IDs
+    boost::shared_ptr<const detid2index_map> m_detID_to_wi_map;///< used to get workspace indices from detector IDs
     int m_firstDet;                                               ///< id number of the detector that was selected first
     int m_lastDet;                                                ///< if more than one detector is selected this is the id number of the one selected last otherwise the NO_DATA value
 

@@ -35,6 +35,9 @@
 
 #include <Poco/StringTokenizer.h>
 #include <boost/lexical_cast.hpp>
+#include "MantidGeometry/IDetector.h"
+
+using Mantid::detid_t;
 
 //Add this class to the list of specialised dialogs in this namespace
 namespace MantidQt
@@ -49,6 +52,7 @@ using namespace MantidQt::API;
 using namespace MantidQt::CustomInterfaces;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid;
 using Mantid::Geometry::IInstrument_sptr;
 using Mantid::Geometry::IInstrument;
 
@@ -1281,7 +1285,7 @@ void SANSRunWindow::setGeometryDetails(const QString & sample_logs, const QStrin
 
   // Moderator-monitor distance is common to LOQ and S2D
   int monitor_spectrum = m_uiForm.monitor_spec->text().toInt();
-  std::vector<int64_t> dets = sample_workspace->spectraMap().getDetectors(monitor_spectrum);
+  std::vector<detid_t> dets = sample_workspace->spectraMap().getDetectors(monitor_spectrum);
   if( dets.empty() ) return;
   double dist_mm(0.0);
   QString colour("black");
