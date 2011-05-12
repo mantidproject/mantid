@@ -147,9 +147,9 @@ void NearestNeighbours::populate()
   // maps
   MapIV pointNoToVertex;
   
-  std::map<int64_t, Mantid::Geometry::IDetector_sptr> detectors;
+  std::map<detid_t, Mantid::Geometry::IDetector_sptr> detectors;
   m_instrument->getDetectors(detectors);
-  std::map<int64_t, Mantid::Geometry::IDetector_sptr>::iterator detIt;
+  std::map<detid_t, Mantid::Geometry::IDetector_sptr>::iterator detIt;
 
   size_t ndets = detectors.size(); // also number of points in array  
   int ndet = 0;

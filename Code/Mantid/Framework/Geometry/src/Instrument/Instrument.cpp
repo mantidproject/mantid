@@ -74,17 +74,17 @@ namespace Mantid
     /**	Fills a copy of the detector cache
     * @returns a map of the detectors hold by the instrument
     */
-    void Instrument::getDetectors(std::map<int64_t, Geometry::IDetector_sptr> & out_map) const
+    void Instrument::getDetectors(std::map<detid_t, Geometry::IDetector_sptr> & out_map) const
     { 
       if (m_isParametrized)
       {
         //Get the base instrument detectors
         out_map.clear();
-        const std::map<int64_t, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
+        const std::map<detid_t, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
         //And turn them into parametrized versions
-        for(std::map<int64_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        for(std::map<detid_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
         {
-          out_map.insert(std::pair<int64_t, IDetector_sptr>
+          out_map.insert(std::pair<detid_t, IDetector_sptr>
           (it->first, ParComponentFactory::createDetector(it->second.get(), m_map)));
         }
       }
@@ -98,20 +98,20 @@ namespace Mantid
 
     //------------------------------------------------------------------------------------------
     /** Return a vector of detector IDs in this instrument */
-    std::vector<int64_t> Instrument::getDetectorIDs(bool skipMonitors) const
+    std::vector<detid_t> Instrument::getDetectorIDs(bool skipMonitors) const
     {
-      std::vector<int64_t> out;
+      std::vector<detid_t> out;
       if (m_isParametrized)
       {
-        const std::map<int64_t, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
-        for(std::map<int64_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        const std::map<detid_t, IDetector_sptr> & in_dets = dynamic_cast<const Instrument*>(m_base)->_detectorCache;
+        for(std::map<detid_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
           if (!skipMonitors || !it->second->isMonitor())
             out.push_back(it->first);
       }
       else
       {
-        const std::map<int64_t, IDetector_sptr> & in_dets = _detectorCache;
-        for(std::map<int64_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
+        const std::map<detid_t, IDetector_sptr> & in_dets = _detectorCache;
+        for(std::map<detid_t, IDetector_sptr>::const_iterator it=in_dets.begin();it!=in_dets.end();it++)
           if (!skipMonitors || !it->second->isMonitor())
             out.push_back(it->first);
       }
@@ -229,7 +229,7 @@ namespace Mantid
     *  @returns A pointer to the detector object
     *  @throw   NotFoundError If no detector is found for the detector ID given
     */
-    Geometry::IDetector_sptr Instrument::getDetector(const int64_t &detector_id) const
+    Geometry::IDetector_sptr Instrument::getDetector(const detid_t &detector_id) const
     {
       if (m_isParametrized)
       {
@@ -238,7 +238,7 @@ namespace Mantid
       }
       else
       {
-        std::map<int64_t, Geometry::IDetector_sptr >::const_iterator it = _detectorCache.find(detector_id);
+        std::map<detid_t, Geometry::IDetector_sptr >::const_iterator it = _detectorCache.find(detector_id);
         if ( it == _detectorCache.end() )
         {
           g_log.debug() << "Detector with ID " << detector_id << " not found." << std::endl;
@@ -261,7 +261,7 @@ namespace Mantid
     {
       //No parametrized monitors - I guess ....
 
-      std::vector<int64_t>::const_iterator itr;
+      std::vector<detid_t>::const_iterator itr;
       itr=find(m_monitorCache.begin(),m_monitorCache.end(),detector_id);
       if ( itr == m_monitorCache.end() )
       {
@@ -396,7 +396,7 @@ namespace Mantid
     /** This method returns monitor detector ids
     *@return a vector holding detector ids of  monitors
     */
-    const std::vector<int64_t> Instrument::getMonitors()const
+    const std::vector<detid_t> Instrument::getMonitors()const
     {
       //Monitors cannot be parametrized. So just return the base.
       if (m_isParametrized)

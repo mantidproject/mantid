@@ -39,7 +39,7 @@ namespace Mantid
 //      {
 //        // Uncomment the line below to get a print out of the mapping as it's loaded
 //        // g_log.error() << *_spectable << " " << *_udettable << std::endl;
-//        m_s2dmap.insert(std::pair<int64_t,int64_t>(static_cast<int64_t>(*_spectable),static_cast<int64_t>(*_udettable))); // Insert current detector with Spectra number as key
+//        m_s2dmap.insert(std::pair<specid_t,detid_t>(static_cast<int64_t>(*_spectable),static_cast<int64_t>(*_udettable))); // Insert current detector with Spectra number as key
 //        ++_spectable;
 //        ++_udettable;
 //      }
@@ -88,7 +88,7 @@ namespace Mantid
       for (int64_t i=start; i<end; ++i)
       {
         // Uncomment the line below to get a print out of the mapping as it's loaded
-        m_s2dmap.insert(std::pair<int64_t,int64_t>(i,i)); // Insert current detector with Spectra number as key
+        m_s2dmap.insert(std::pair<specid_t,detid_t>(i,i)); // Insert current detector with Spectra number as key
       }
       return;
     }
@@ -102,10 +102,10 @@ namespace Mantid
      */
     void SpectraDetectorMap::populateWithVector(const std::vector<detid_t>& udetList)
     {
-      int64_t size = static_cast<int64_t>(udetList.size());
-      for (int64_t i=0; i < size; i++)
+      specid_t size = static_cast<specid_t>(udetList.size());
+      for (specid_t i=0; i < size; i++)
       {
-        m_s2dmap.insert(std::pair<int64_t,int64_t>(i, udetList[i]));
+        m_s2dmap.insert(std::pair<specid_t,detid_t>(i, udetList[i]));
       }
     }
 
@@ -120,7 +120,7 @@ namespace Mantid
       std::vector<detid_t>::const_iterator it;
       for (it = udetList.begin(); it != udetList.end(); ++it)
       {
-        m_s2dmap.insert(std::pair<int64_t,int64_t>(spectrum,*it));
+        m_s2dmap.insert(std::pair<specid_t,detid_t>(spectrum,*it));
       }
     }
     
@@ -136,7 +136,7 @@ namespace Mantid
       std::set<detid_t>::const_iterator it;
       for (it = detectorIDs.begin(); it != detectorIDs.end(); ++it)
       {
-        m_s2dmap.insert(std::pair<int64_t,int64_t>(spectrum,*it));
+        m_s2dmap.insert(std::pair<specid_t,detid_t>(spectrum,*it));
       }
     }
 

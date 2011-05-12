@@ -324,7 +324,7 @@ namespace DataObjects
     //No guaranteed order
     this->order = UNSORTED;
     //Do a union between the detector IDs of both lists
-    std::set<int64_t>::const_iterator it;
+    std::set<detid_t>::const_iterator it;
     for (it = more_events.detectorIDs.begin(); it != more_events.detectorIDs.end(); it++ )
       this->detectorIDs.insert( *it );
 
@@ -486,14 +486,14 @@ namespace DataObjects
    *
    * @param detID :: detector ID to insert in set.
    */
-  void EventList::addDetectorID(const int64_t detID)
+  void EventList::addDetectorID(const detid_t detID)
   {
     this->detectorIDs.insert( detID );
   }
 
   // --------------------------------------------------------------------------
   /** Return true if the given detector ID is in the list for this eventlist */
-  bool EventList::hasDetectorID(const int64_t detID) const
+  bool EventList::hasDetectorID(const detid_t detID) const
   {
     return ( detectorIDs.find(detID) != detectorIDs.end() );
   }
@@ -501,14 +501,14 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Get a const reference to the detector IDs set.
    */
-  const std::set<int64_t>& EventList::getDetectorIDs() const
+  const std::set<detid_t>& EventList::getDetectorIDs() const
   {
     return this->detectorIDs;
   }
 
   /** Get a mutable reference to the detector IDs set.
    */
-  std::set<int64_t>& EventList::getDetectorIDs()
+  std::set<detid_t>& EventList::getDetectorIDs()
   {
     return this->detectorIDs;
   }

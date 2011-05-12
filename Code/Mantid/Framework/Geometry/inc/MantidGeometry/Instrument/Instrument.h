@@ -70,7 +70,7 @@ namespace Mantid
 
       IObjComponent_sptr getSource() const;
       IObjComponent_sptr getSample() const;
-      IDetector_sptr getDetector(const int64_t &detector_id) const;
+      IDetector_sptr getDetector(const detid_t &detector_id) const;
 
       /// Returns a pointer to the geometrical object representing the monitor with the given ID
       IDetector_sptr getMonitor(const int &detector_id) const;
@@ -94,14 +94,15 @@ namespace Mantid
       void markAsMonitor(Geometry::IDetector*);
 
       /// return reference to detector cache 
-      void getDetectors(std::map<int64_t, Geometry::IDetector_sptr> & out_map) const;
+      void getDetectors(std::map<detid_t, Geometry::IDetector_sptr> & out_map) const;
 
-      std::vector<int64_t> getDetectorIDs(bool skipMonitors = false) const;
+      std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
 
       void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName);
 
       /// returns a list containing  detector ids of monitors
-      const std::vector<int64_t> getMonitors()const ;
+      const std::vector<detid_t> getMonitors()const ;
+
       /// Get the bounding box for this component and store it in the given argument
       void getBoundingBox(BoundingBox& boundingBox) const;
 
@@ -175,7 +176,7 @@ namespace Mantid
       void swap(const Instrument* base, const ParameterMap * map);
 
       /// Map which holds detector-IDs and pointers to detector components
-      std::map<int64_t, Geometry::IDetector_sptr > _detectorCache;
+      std::map<detid_t, Geometry::IDetector_sptr > _detectorCache;
 
       /// Purpose to hold copy of source component. For now assumed to be just one component
       Geometry::ObjComponent* _sourceCache;
@@ -195,7 +196,7 @@ namespace Mantid
       std::map<std::string, std::string> _logfileUnit;
 
       /// a vector holding detector ids of monitor s
-      std::vector<int64_t> m_monitorCache;
+      std::vector<detid_t> m_monitorCache;
 
       /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;

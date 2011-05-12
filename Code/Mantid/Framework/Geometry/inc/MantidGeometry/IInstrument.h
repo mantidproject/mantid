@@ -55,23 +55,38 @@ public:
   ///Virtual destructor
   virtual ~IInstrument() {}
 
+  virtual std::string getName() const = 0;
+
   /// Returns a pointer to the geometrical object representing the source
   virtual Geometry::IObjComponent_sptr getSource() const = 0;
+
   /// Returns a pointer to the geometrical object representing the sample
   virtual Geometry::IObjComponent_sptr getSample() const = 0;
+
   /// Returns a unit vector pointing in the direction of the beam
   Geometry::V3D getBeamDirection() const;
 
+
+
   /// Returns a pointer to the geometrical object for the detector with the given ID
-  virtual Geometry::IDetector_sptr getDetector(const int64_t &detector_id) const = 0;
+  virtual Geometry::IDetector_sptr getDetector(const detid_t &detector_id) const = 0;
 
   /// Fill a vector with all the detectors contained in a named component
   virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
 
+  /// return map of detector ID : detector sptr
+  virtual void getDetectors(std::map<detid_t, Geometry::IDetector_sptr>  & out_dets) const = 0;
+
+  /// return a vector with a list of the detector IDs
+  virtual std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const = 0;
+
   /// Returns a pointer to the geometrical object representing the monitor with the given ID
   virtual Geometry::IDetector_sptr getMonitor(const int &detector_id) const = 0;
 
-  virtual std::string getName() const = 0;
+  /// returns a list containing  detector ids of monitors
+  virtual const std::vector<detid_t> getMonitors()const = 0;
+
+
 
   /// Returns a shared pointer to a component
   virtual boost::shared_ptr<Geometry::IComponent> getComponentByID(Geometry::ComponentID id) = 0;
@@ -85,21 +100,15 @@ public:
   /// Returns pointers to all components encountered with the given name
   std::vector<boost::shared_ptr<Geometry::IComponent> > getAllComponentsWithName(const std::string & cname);
 
-  /// return map of detector ID : detector sptr
-  virtual void getDetectors(std::map<int64_t, Geometry::IDetector_sptr>  & out_dets) const = 0;
-
-  /// return a vector with a list of the detector IDs
-  virtual std::vector<int64_t> getDetectorIDs(bool skipMonitors = false) const = 0;
 
   /// The type used to deliver the set of plottable components
   typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;
   /// A constant shared pointer to a vector of plotables
   typedef const boost::shared_ptr<const plottables> plottables_const_sptr;
+
   /// Get pointers to plottable components
   virtual plottables_const_sptr getPlottable() const = 0;
 
-  /// returns a list containing  detector ids of monitors
-  virtual  const std::vector<int64_t> getMonitors()const=0;
   /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
   virtual std::string getDefaultAxis() const=0;
 

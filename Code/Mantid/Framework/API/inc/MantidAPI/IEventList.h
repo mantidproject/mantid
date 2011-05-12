@@ -23,8 +23,8 @@ namespace API
   public:
     virtual Mantid::API::EventType getEventType() const = 0;
     virtual void switchTo(Mantid::API::EventType newType) = 0;
-    virtual void addDetectorID(const int64_t detID) = 0;
-    virtual bool hasDetectorID(const int64_t detID) const = 0;
+    virtual void addDetectorID(const detid_t detID) = 0;
+    virtual bool hasDetectorID(const detid_t detID) const = 0;
     virtual void clear(const bool removeDetIDs) = 0;
     virtual void reserve(size_t num) = 0;
     virtual bool isSortedByTof() const = 0;

@@ -483,7 +483,7 @@ namespace DataObjects
   void EventWorkspace::padPixels(bool parallel)
   {
     //Build a vector with the pixel IDs in order; skipping the monitors
-    std::vector<int64_t> pixelIDs = this->getInstrument()->getDetectorIDs(true);
+    std::vector<detid_t> pixelIDs = this->getInstrument()->getDetectorIDs(true);
     size_t numpixels = pixelIDs.size();
 
     //Remove all old EventLists and resize the vector to hold everything
@@ -493,7 +493,7 @@ namespace DataObjects
 
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
-    for (int64_t i = 0; i < numpixels; i++)
+    for (size_t i = 0; i < numpixels; i++)
     {
       //Create an event list for here
       EventList * newel = new EventList();
