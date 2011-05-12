@@ -20,6 +20,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidAPI/SpectraDetectorMap.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
@@ -134,7 +135,7 @@ public:
    // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS(map.ndet(6),1);
     
-    std::vector<int64_t> detectorgroup = map.getDetectors(100);
+    std::vector<detid_t> detectorgroup = map.getDetectors(100);
     TS_ASSERT_EQUALS(detectorgroup.size(),1);
     TS_ASSERT_EQUALS(detectorgroup.front(),100);
 
@@ -374,7 +375,7 @@ public:
    // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS(map.ndet(6),1);
     
-    std::vector<int64_t> detectorgroup = map.getDetectors(100);
+    std::vector<detid_t> detectorgroup = map.getDetectors(100);
     TS_ASSERT_EQUALS(detectorgroup.size(),1);
     TS_ASSERT_EQUALS(detectorgroup.front(),100);
 
@@ -476,7 +477,7 @@ public:
    // Test one to one mapping, for example spectra 6 has only 1 pixel
     TS_ASSERT_EQUALS(map.ndet(6),1);
     
-    std::vector<int64_t> detectorgroup = map.getDetectors(100);
+    std::vector<detid_t> detectorgroup = map.getDetectors(100);
     TS_ASSERT_EQUALS(detectorgroup.size(),1);
     TS_ASSERT_EQUALS(detectorgroup.front(),100);
 

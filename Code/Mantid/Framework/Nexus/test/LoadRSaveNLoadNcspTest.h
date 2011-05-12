@@ -1,35 +1,31 @@
 #ifndef LOADRSAVENLOADNTEST_H_
 #define LOADRSAVENLOADNTEST_H_
 
-
-#include <fstream>
-#include <cxxtest/TestSuite.h>
-
-// These includes seem to make the difference between initialization of the
-// workspace names (workspace2D/1D etc), instrument classes and not for this test case.
-#include "MantidDataObjects/WorkspaceSingleValue.h"
-#include "MantidDataHandling/LoadInstrument.h"
-//
-#include "MantidDataHandling/LoadRaw3.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
+#include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidNexus/SaveNexusProcessed.h"
-#include "MantidNexus/LoadNexusProcessed.h"
-#include "MantidNexus/LoadMuonNexus.h"
-#include "MantidNexus/LoadNeXus.h"
-#include "MantidKernel/UnitFactory.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadInstrument.h"
+#include "MantidDataHandling/LoadRaw3.h"
+#include "MantidDataObjects/Workspace2D.h"
+#include "MantidDataObjects/WorkspaceSingleValue.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidKernel/TimeSeriesProperty.h"
+#include "MantidKernel/UnitFactory.h"
+#include "MantidNexus/LoadMuonNexus.h"
+#include "MantidNexus/LoadNeXus.h"
+#include "MantidNexus/LoadNexusProcessed.h"
+#include "MantidNexus/SaveNexusProcessed.h"
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 #include <Poco/Path.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
+using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 using namespace Mantid::Kernel;
 using namespace Mantid::NeXus;
-using namespace Mantid::Geometry;
-using namespace Mantid::DataObjects;
 
 class LoadRSaveNLoadNcspTest : public CxxTest::TestSuite
 {
@@ -182,10 +178,10 @@ void testExecOnLoadraw()
         TS_ASSERT_EQUALS(map.ndet(3),1);
 
         // Check the id number of all pixels contributing
-        std::vector<int64_t> detectorgroup;
+        std::vector<detid_t> detectorgroup;
         //std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
         detectorgroup=map.getDetectors(2084);
-        std::vector<int64_t>::const_iterator it;
+        std::vector<detid_t>::const_iterator it;
         int pixnum=101191;
         for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
           TS_ASSERT_EQUALS(*it,pixnum++);
@@ -194,7 +190,7 @@ void testExecOnLoadraw()
         // Test that number of pixel=0
         TS_ASSERT_EQUALS(map.ndet(5),0);
         // Test that trying to get the Detector throws.
-        std::vector<int64_t> test = map.getDetectors(5);
+        std::vector<detid_t> test = map.getDetectors(5);
         TS_ASSERT(test.empty());
         //
     }
