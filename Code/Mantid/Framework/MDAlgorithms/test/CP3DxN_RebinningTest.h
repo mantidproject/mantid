@@ -1,5 +1,5 @@
-#ifndef H_CP_REBINNING
-#define H_CP_REBINNING
+#ifndef H_CP3DxN_REBINNING
+#define H_CP3DxN_REBINNING
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidAPI/WorkspaceFactory.h"
@@ -74,37 +74,37 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
       TSM_ASSERT("Slicing property should be easy obtainable from property manager",pSlicing!=0)
   
     }
-  //  void testCPRExec(){
-  //     cpr.setProperty("KeepPixels",false);
-  //      // rebin image into the same grid as an initial image, which should provide the same image as before
-  //      TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
-  //  }
-  //  void t__tRebinnedWSExists(){
-  //      // now test if we can get the resulting workspace
+    void testCPRExec(){
+       cpr.setProperty("KeepPixels",false);
+        // rebin image into the same grid as an initial image, which should provide the same image as before
+        TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
+    }
+    void testRebinnedWSExists(){
+        // now test if we can get the resulting workspace
 
-  //      Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve(OutWorkspaceName);
+        Workspace_sptr rezWS = AnalysisDataService::Instance().retrieve(OutWorkspaceName);
 
-  //      MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
-  //      TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
+        MDWorkspace_sptr targetWS = boost::dynamic_pointer_cast<MDWorkspace>(rezWS);
+        TSM_ASSERT("The workspace obtained is not target MD workspace",targetWS!=0);
 
-  //  }
-  //  void t__tEqRebinCorrectness(){
-  //      // we did rebinning on the full image and initial image have to be equal to the target image; Let's compare them
-	 //   MDWorkspace_sptr inputWS, outWS;
-  //      // Get the workspaces
-  //      inputWS = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(InputWorkspaceName));
-  //      outWS   = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(OutWorkspaceName));
-  //       
-  //      const MDImage &OldIMG = inputWS->get_const_MDImage();
-  //      const MDImage &NewIMG = outWS->get_const_MDImage();
+    }
+    void testEqRebinCorrectness(){
+        // we did rebinning on the full image and initial image have to be equal to the target image; Let's compare them
+	    MDWorkspace_sptr inputWS, outWS;
+        // Get the workspaces
+        inputWS = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(InputWorkspaceName));
+        outWS   = boost::dynamic_pointer_cast<MDWorkspace>(AnalysisDataService::Instance().retrieve(OutWorkspaceName));
+         
+        const MDImage &OldIMG = inputWS->get_const_MDImage();
+        const MDImage &NewIMG = outWS->get_const_MDImage();
 
-  //      for(size_t i=0;i<OldIMG.getDataSize();i++){
-  //          TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
-		///*	if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
-		//		continue;
-		//	}*/
-  //      }
-  //  }
+        for(size_t i=0;i<OldIMG.getDataSize();i++){
+            TSM_ASSERT_DELTA("Old and new images points in this case have to be equal",OldIMG.getSignal(i),NewIMG.getSignal(i),1.e-4);
+			if(abs(OldIMG.getSignal(i)-NewIMG.getSignal(i))>1.e-4){
+				continue;
+			}
+        }
+    }
 
   //  void t__tCPRRebinAgainSmaller(){
   // // now rebin into slice

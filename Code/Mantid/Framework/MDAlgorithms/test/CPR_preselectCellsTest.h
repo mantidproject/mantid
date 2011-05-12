@@ -1,5 +1,5 @@
-#ifndef H_CP_REBINNING
-#define H_CP_REBINNING
+#ifndef H_CPR_PRESELECT_CELLS
+#define H_CPR_PRESELECT_CELLS
 #include <cxxtest/TestSuite.h>
 #include "MDDataObjects/MDWorkspace.h"
 #include "MantidMDAlgorithms/DynamicCPRRebinning.h"
@@ -54,64 +54,62 @@ class CPR_preselectCellsTest :    public CxxTest::TestSuite
 		return false;
 	}
  public:
-	 void testDiabled(){
-		 TS_WARN(" failing tests are temporary disabled");
+
+
+
+     void testINIT_WS(){
+         std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
+		 // get usual workspace from the test workspace
+         pOrigin = tw->get_spWS();
+
+         TSM_ASSERT_THROWS_NOTHING("Source WS should be constructed not throwing",pTarget= boost::shared_ptr<MDDataObjects::MDWorkspace>(new MDDataObjects::MDWorkspace()));
+
+		 // init geometry description equal to the source geometry;
+         TSM_ASSERT_THROWS_NOTHING("Target WS descr should be constructed not throwing",pTargDescr = 
+             std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(pOrigin->get_const_MDGeometry())));
+
+
+         TSM_ASSERT_THROWS_NOTHING("Target empty WS  should be constructed not throwing",pTarget = 
+             boost::shared_ptr<MDDataObjects::MDWorkspace>(new MDDataObjects::MDWorkspace()));
+
+		 // init target workspace as we need
+		 TSM_ASSERT_THROWS_NOTHING("Target workspace initialisation should not throw",pTarget->init(pOrigin,pTargDescr.get()));
 	 }
+	 void testCPRConstructor(){
+
+         TSM_ASSERT_THROWS_NOTHING("Rebinning should be constructed withoug throwing",pRebin  = 
+             std::auto_ptr<DynamicCPRRt>(new DynamicCPRRt(pOrigin,pTargDescr.get(),pTarget)));
+
+     }
+     void testPreselectAllUnique(){
+		 size_t nCells;
+
+		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
+		 // check if the generic properties of the preselection are correct:
+		 TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*nDim2*nDim3 geometry",50*50*50*50,nCells);
+
+		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
+		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
+
+     }
+     void testPreselect3DWorks(){
+		 size_t nCells;
+		 pTargDescr->pDimDescription(3)->cut_max = 0;  
+		 // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
+		 pTargDescr->pDimDescription(2)->cut_max = 0.99;
 
 
-  //   void t__tINIT_WS(){
-  //       std::auto_ptr<MDTestWorkspace> tw = std::auto_ptr<MDTestWorkspace>(new MDTestWorkspace());
-		// // get usual workspace from the test workspace
-  //       pOrigin = tw->get_spWS();
+		 TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
+		 // check if the generic properties of the preselection are correct:
+		 TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*2*1 geometry",50*50*2*1,nCells);
 
-  //       TSM_ASSERT_THROWS_NOTHING("Source WS should be constructed not throwing",pTarget= boost::shared_ptr<MDDataObjects::MDWorkspace>(new MDDataObjects::MDWorkspace()));
+		 const std::vector<size_t> psCells = pRebin->getPreselectedCells();
+		 TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
 
-		// // init geometry description equal to the source geometry;
-  //       TSM_ASSERT_THROWS_NOTHING("Target WS descr should be constructed not throwing",pTargDescr = 
-  //           std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(pOrigin->get_const_MDGeometry())));
+		 //
+		 TSM_ASSERT_EQUALS("The selection should refer to nCells*(nCells+1)/2 pixels but it is not",nCells*(nCells+1)/2,pRebin->getNumPreselectedPixels());
 
-
-  //       TSM_ASSERT_THROWS_NOTHING("Target empty WS  should be constructed not throwing",pTarget = 
-  //           boost::shared_ptr<MDDataObjects::MDWorkspace>(new MDDataObjects::MDWorkspace()));
-
-		// // init target workspace as we need
-		// TSM_ASSERT_THROWS_NOTHING("Target workspace initialisation should not throw",pTarget->init(pOrigin,pTargDescr.get()));
-	 //}
-	 //void t__tCPRConstructor(){
-
-  //       TSM_ASSERT_THROWS_NOTHING("Rebinning should be constructed withoug throwing",pRebin  = 
-  //           std::auto_ptr<DynamicCPRRt>(new DynamicCPRRt(pOrigin,pTargDescr.get(),pTarget)));
-
-  //   }
-  //   void t__tPreselectAllUnique(){
-		// size_t nCells;
-
-		// TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
-		// // check if the generic properties of the preselection are correct:
-		// TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*nDim2*nDim3 geometry",50*50*50*50,nCells);
-
-		// const std::vector<size_t> psCells = pRebin->getPreselectedCells();
-		// TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
-
-  //   }
-  //   void t__tPreselect3DWorks(){
-		// size_t nCells;
-		// pTargDescr->pDimDescription(3)->cut_max = 0;  
-		// // modify description: The numbers have to be known from the source workspace and the workpsace range is from -1 to 49
-		// pTargDescr->pDimDescription(2)->cut_max = 0.99;
-
-
-		// TSM_ASSERT_THROWS_NOTHING("Preselect cells should not normaly throw",nCells=pRebin->preselect_cells());
-		// // check if the generic properties of the preselection are correct:
-		// TSM_ASSERT_EQUALS("The selection above should describe nDim0*nDim1*2*1 geometry",50*50*2*1,nCells);
-
-		// const std::vector<size_t> psCells = pRebin->getPreselectedCells();
-		// TSM_ASSERT_EQUALS("All selected cells have to be unique but found non-unique numbers:",false,check_cell_unique(psCells));
-
-		// //
-		// TSM_ASSERT_EQUALS("The selection should refer to nCells*(nCells+1)/2 pixels but it is not",nCells*(nCells+1)/2,pRebin->getNumPreselectedPixels());
-
-  //   }
+     }
   //  void t__tPreselect3Dx2Works(){
 		// size_t nCells;
 		// pTargDescr->pDimDescription(3)->cut_max = 1;  

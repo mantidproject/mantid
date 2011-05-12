@@ -14,10 +14,8 @@ set ( SRC_FILES
 	src/DepthParameter.cpp
 	src/DimensionFactory.cpp
 	src/DynamicCPRRebinning.cpp
-	src/DynamicCPRRebinning.cpp
 	src/DynamicRebinFromXML.cpp
 	src/HeightParameter.cpp
-	src/IDynamicRebinning.cpp
 	src/IDynamicRebinning.cpp
 	src/InvalidParameter.cpp
 	src/InvalidParameterParser.cpp
@@ -43,9 +41,8 @@ set ( SRC_FILES
 	src/WidthParameter.cpp
 )
 
-set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
-src/DynamicCPRRebinning.cpp
-)
+#set ( SRC_UNITY_IGNORE_FILES src/IDynamicRebinning.cpp
+#)
 
 set ( INC_FILES
 	inc/MantidMDAlgorithms/BoxFunctionBuilder.h
