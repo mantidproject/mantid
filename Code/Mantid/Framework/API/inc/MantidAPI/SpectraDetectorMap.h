@@ -14,6 +14,9 @@
 
 namespace Mantid
 {
+typedef int32_t detid_t;
+typedef int32_t specid_t;
+
 namespace API
 {
 /** SpectraDetectorMap provides a multimap between Spectra number (int)
