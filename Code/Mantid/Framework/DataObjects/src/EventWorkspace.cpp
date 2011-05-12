@@ -493,7 +493,7 @@ namespace DataObjects
 
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
-    for (size_t i = 0; i < numpixels; i++)
+    for (int i = 0; i < numpixels; i++)
     {
       //Create an event list for here
       EventList * newel = new EventList();
