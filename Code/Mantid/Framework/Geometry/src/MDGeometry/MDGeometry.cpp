@@ -364,6 +364,7 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
 MantidMat 
 MDGeometry::getRotations()const
 {
+
 	MantidMat rez(3,3);
 	if(this->m_basis.getNumReciprocalDims()==1){
 		rez.identityMatrix();
@@ -376,14 +377,23 @@ MDGeometry::getRotations()const
 	}
 
 	UnitCell fakeCell(geomBasis[0].norm(),geomBasis[1].norm(),geomBasis[2].norm());
-	rez = fakeCell.getUmatrix(this->get_constDimension(0)->getDirection(),this->get_constDimension(1)->getDirection());
-	if(geomBasis[2].scalar_prod(this->get_constDimension(2)->getDirection())<0){ // this should not happen
-		g_log.information()<<"MDGeometry::getRotations: MDGeometry transformed into left-handed coordinate system; this arrangement have never been tested\n";
-		MantidMat reflection(3,3);
-		reflection.identityMatrix();
-		reflection[2][2] = -1;
-		rez*=reflection;
+	// we have at least two base directions here 
+	std::vector<V3D> baseDir(2);	
+	int ic=0;
+	std::vector<boost::shared_ptr<MDDimension> >::const_iterator it=this->theDimension.begin();
+	for(;it!=this->theDimension.end();it++){
+		if(it->get()->isReciprocal()){
+			baseDir[ic]=it->get()->getDirection();
+			ic++;
+			if(ic>=2)break;
+		}
 	}
+	if(ic!=2){
+		throw(std::logic_error("we have to had 2 reciprocal dimensions here"));
+	}
+
+	rez = fakeCell.getUmatrix(baseDir[0],baseDir[1]);
+
 	return rez;
 }
 

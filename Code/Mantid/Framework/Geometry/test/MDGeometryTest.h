@@ -260,7 +260,34 @@ void testMDGeometryUnitRotations(){
     TS_ASSERT_EQUALS(pDim->getStride(),0);
     TS_ASSERT_EQUALS(pDim->getIntegrated(),true);
   }
+  void testReducedBasisRotations(){
+	  // build default geometrh
+	  std::auto_ptr<MDGeometry>  pGeom = std::auto_ptr<MDGeometry>(constructGeometry());
+	  // end default description for this geometry
+	  std::auto_ptr<MDGeometryDescription> pDescr = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*pGeom));
+	  // set the geometry 
+	  pDescr->pDimDescription("q1")->nBins=200;
+	  pDescr->pDimDescription("p")->nBins =200;
+      pDescr->setPAxis(0,"p");
+	  pDescr->setPAxis(1,"q1");
+	  pDescr->setPAxis(2,"q3");
 
+	  pGeom->initialize(*pDescr);
+	  // this new geomerty should have left-hand rotation matrix;
+	  std::vector<double> rm = pGeom->getRotations().get_vector();
+	  std::vector<double> sample(9,0);
+	  sample[0]=1;
+	  sample[5]=-1;
+	  sample[7]=1;
+	  double err(0);
+	  for(int i=0;i<9;i++){
+		  err+=fabs(rm[i]-sample[i]);
+	  }
+	  TSM_ASSERT_DELTA("samples should coinside with mathematical presision",0,err,FLT_EPSILON);
+
+
+
+  }
   void testgetNumDims()
   {
      TSM_ASSERT_EQUALS("The number of dimensions returned is not equal to the expected value.", 4, tDND_geometry->getNumDims());
