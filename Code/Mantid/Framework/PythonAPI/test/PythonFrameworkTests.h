@@ -46,13 +46,13 @@ public:
   void testCreateAlgorithmMethod1()
   {
     Mantid::API::IAlgorithm* alg(NULL);
-    TS_ASSERT_THROWS_NOTHING( alg = mgr->createAlgorithm("HelloWorldAlgorithm") );
+    TS_ASSERT_THROWS_NOTHING( alg = mgr->createManagedAlgorithm("HelloWorldAlgorithm") );
     if (alg) TS_ASSERT_EQUALS(alg->name(), "HelloWorldAlgorithm");
   }
 
   void testCreateAlgorithmNotFoundThrows()
   {
-    TS_ASSERT_THROWS_ANYTHING(mgr->createAlgorithm("Rubbish!"));
+    TS_ASSERT_THROWS_ANYTHING(mgr->createManagedAlgorithm("Rubbish!"));
   }
 
   void testGetDeleteWorkspace()

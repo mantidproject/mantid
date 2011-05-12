@@ -914,7 +914,12 @@ class IAlgorithmProxy(ProxyObject):
         Execute the configured algorithm.
         """
         self.setPropertyValues(*args, **kwargs)
-        if self.__async__:
+        try:
+            # Was the async property added ?
+            run_async = self.__async__
+        except AttributeError:
+            run_async = False
+        if run_async:
             success = qti.app.mantidUI.runAlgorithmAsync_PyCallback(self.name()) 
             if success == False:
                 sys.exit('An error occurred while running %s. See results log for details.' % self.name())
