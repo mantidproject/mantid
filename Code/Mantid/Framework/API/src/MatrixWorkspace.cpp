@@ -231,10 +231,10 @@ namespace Mantid
       for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
         //Get the spectrum # from the WS index
-        int64_t specNo = ax->spectraNo(workspaceIndex);
+        specid_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<int64_t> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<detid_t> detList = this->m_spectramap->getDetectors(specNo);
         if (throwIfMultipleDets)
         {
           if (detList.size() > 1)
@@ -250,7 +250,7 @@ namespace Mantid
         else
         {
           //Allow multiple detectors per workspace index
-          for (std::vector<int64_t>::iterator it = detList.begin(); it != detList.end(); it++)
+          for (std::vector<detid_t>::iterator it = detList.begin(); it != detList.end(); it++)
             (*map)[ *it ] = workspaceIndex;
         }
 
@@ -278,10 +278,10 @@ namespace Mantid
       for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
         //Get the spectrum # from the WS index
-        int64_t specNo = ax->spectraNo(workspaceIndex);
+        specid_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<int64_t> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<detid_t> detList = this->m_spectramap->getDetectors(specNo);
         if (detList.size() > 1)
         {
           delete map;
@@ -450,8 +450,8 @@ namespace Mantid
         throw std::runtime_error("SpectraDetectorMap has not been populated.");
       }
 
-      const int64_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<int64_t> dets = m_spectramap->getDetectors(spectrum_number);
+      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<detid_t> dets = m_spectramap->getDetectors(spectrum_number);
       if ( dets.empty() )
       {
         throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
@@ -471,7 +471,7 @@ namespace Mantid
       // Else need to construct a DetectorGroup and return that
       std::vector<Geometry::IDetector_sptr> dets_ptr;
       dets_ptr.reserve(ndets);
-      std::vector<int64_t>::const_iterator it;
+      std::vector<detid_t>::const_iterator it;
       for ( it = dets.begin(); it != dets.end(); ++it )
       {
         dets_ptr.push_back( localInstrument->getDetector(*it) );
@@ -727,9 +727,9 @@ namespace Mantid
         return;
       }
       
-      int64_t spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<int64_t> dets = m_spectramap->getDetectors(spectrum_number);
-      for (std::vector<int64_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+      specid_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<detid_t> dets = m_spectramap->getDetectors(spectrum_number);
+      for (std::vector<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
         try
         {

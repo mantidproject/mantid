@@ -14,6 +14,10 @@
 
 namespace Mantid
 {
+
+/// Typedef for the ID of a detector
+typedef int32_t detid_t;
+
 namespace Geometry
 {
 
