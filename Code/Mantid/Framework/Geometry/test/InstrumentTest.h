@@ -1,13 +1,14 @@
 #ifndef INSTRUMENTTEST_H_
 #define INSTRUMENTTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/Exception.h"
 #include "MantidTestHelpers/ComponentCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::Geometry;
 
@@ -171,7 +172,7 @@ public:
   {
     // 5 banks with 6x6 pixels in them.
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::map<int64_t, Mantid::Geometry::IDetector_sptr> dets;
+    detid2det_map dets;
     inst->getDetectors(dets);
     TS_ASSERT_EQUALS(dets.size(), 36*5);
   }
@@ -180,7 +181,7 @@ public:
   {
     // 5 banks with 6x6 pixels in them.
     IInstrument_sptr inst = ComponentCreationHelper::createTestInstrumentRectangular(5, 6);
-    std::vector<int64_t> dets;
+    std::vector<detid_t> dets;
     dets = inst->getDetectorIDs();
     TS_ASSERT_EQUALS(dets.size(), 36*5);
   }
