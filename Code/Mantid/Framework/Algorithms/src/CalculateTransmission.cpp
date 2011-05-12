@@ -83,12 +83,12 @@ void CalculateTransmission::exec()
   }
   
   // Extract the required spectra into separate workspaces
-  std::vector<int> udets,indices;
+  std::vector<int64_t> udets,indices;
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
   udets.push_back(getProperty("IncidentBeamMonitor"));
   udets.push_back(getProperty("TransmissionMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<int> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
+  const std::vector<int64_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
   if (indices.size() < 2)
   {
@@ -113,7 +113,7 @@ void CalculateTransmission::exec()
   }
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
-  const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
+  const std::vector<int64_t> directSpectra = directWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(directSpectra,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor() )
@@ -159,7 +159,7 @@ void CalculateTransmission::exec()
  *  @return A Workspace2D containing the extracted spectrum
  *  @throw runtime_error if the ExtractSingleSpectrum algorithm fails during execution
  */
-API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int index)
+API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum", m_done, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
