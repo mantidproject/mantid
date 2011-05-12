@@ -112,24 +112,24 @@ public:
 
 
 	}
-	//void t__tMDImageReadDescription(){
-	//	MockFileFormat file("");
+	void testMDImageReadDescription(){
+		MockFileFormat file("");
 
- //       Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-	//	file.read_MDGeomDescription(geom_description);
-	//	TS_ASSERT_THROWS_NOTHING(pImage->initialize(geom_description));
+        Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+		file.read_MDGeomDescription(geom_description);
+		TS_ASSERT_THROWS_NOTHING(pImage->initialize(geom_description));
 
-	//	TSM_ASSERT_EQUALS("An image with this geometry should be specific size ",50*50*50*50,pImage->getDataSize());
-	//}
-  //void t__tGet2DData(void){
+		TSM_ASSERT_EQUALS("An image with this geometry should be specific size ",50*50*50*50,pImage->getDataSize());
+	}
+  void testGet2DData(void){
 
-  //  this->selection.assign(2,1);
+    this->selection.assign(2,1);
 
-  //  // returns 2D image 
-  //
-  //  pImage->getPointData(selection,img);
-  //  TS_ASSERT_EQUALS(img.size(),2500);
-  //}
+    // returns 2D image 
+  
+    pImage->getPointData(selection,img);
+    TS_ASSERT_EQUALS(img.size(),2500);
+  }
 
   void testExpandedSelectionFails(){
 
@@ -138,43 +138,43 @@ public:
     TS_ASSERT_THROWS_ANYTHING(pImage->getPointData(selection,img) );
   }
 
- // void t__tGet3DData(void){
+  void testGet3DData(void){
 
- //   // returns 3D image with 4-th dimension selected at 20;
- //   selection.assign(1,20);
+    // returns 3D image with 4-th dimension selected at 20;
+    selection.assign(1,20);
 
- // 
- //   pImage->getPointData(selection,img);
- //   TS_ASSERT_EQUALS(img.size(),50*50*50); 
- // }
+  
+    pImage->getPointData(selection,img);
+    TS_ASSERT_EQUALS(img.size(),50*50*50); 
+  }
 
- // void t__tGet0Ddata(void){
- //   // this should return single point at (20,20,20,20)
- //   selection.assign(4,20);
+  void testGet0Ddata(void){
+    // this should return single point at (20,20,20,20)
+    selection.assign(4,20);
 
- //   pImage->getPointData(selection,img);
- //   TS_ASSERT_EQUALS(img.size(),1);
- // }
+    pImage->getPointData(selection,img);
+    TS_ASSERT_EQUALS(img.size(),1);
+  }
 
- // void t__tGet1Ddata(void){
- //   // this should return line of size 50 
- //   selection.assign(3,10);
- //
- //   pImage->getPointData(selection,img);
- //   TS_ASSERT_EQUALS(img.size(),50);
- // }
- ///* void t__tSetValues(){
-	//  this->setFakeImageValuesIncompletely();
-	//  TSM_ASSERT_THROWS("This validation should throw as the npix control sum has not been set properly",pImage->validateNPix(),std::invalid_argument);
- // }*/
- // void t__tValidationSetCorrect(){
-	//  TSM_ASSERT_THROWS_NOTHING("This should not throw as the previous check set correct number of pixels contributed",pImage->validateNPix());
- // }
- // void t__tNpixCorrect(){
-	//  size_t nCells = pImage->getDataSize();
-	//  uint64_t nPix = ((uint64_t)nCells)*(nCells-1)/2;
-	//  TSM_ASSERT_EQUALS("setFakeImage function set number of contributing pixels which is not consistent with the number expected or getNMDDPoints returned wrong number",nPix,pImage->getNMDDPoints());
- // }
+  void testGet1Ddata(void){
+    // this should return line of size 50 
+    selection.assign(3,10);
+ 
+    pImage->getPointData(selection,img);
+    TS_ASSERT_EQUALS(img.size(),50);
+  }
+  void testSetValues(){
+	  this->setFakeImageValuesIncompletely();
+	  TSM_ASSERT_THROWS("This validation should throw as the npix control sum has not been set properly",pImage->validateNPix(),std::invalid_argument);
+  }
+  void testValidationSetCorrect(){
+	  TSM_ASSERT_THROWS_NOTHING("This should not throw as the previous check set correct number of pixels contributed",pImage->validateNPix());
+  }
+  void testNpixCorrect(){
+	  size_t nCells = pImage->getDataSize();
+	  uint64_t nPix = ((uint64_t)nCells)*(nCells-1)/2;
+	  TSM_ASSERT_EQUALS("setFakeImage function set number of contributing pixels which is not consistent with the number expected or getNMDDPoints returned wrong number",nPix,pImage->getNMDDPoints());
+  }
 
 private:
 
