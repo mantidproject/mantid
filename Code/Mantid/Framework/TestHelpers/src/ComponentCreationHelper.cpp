@@ -18,10 +18,15 @@
 
 #include <Poco/Path.h>
 #include <boost/shared_array.hpp>
+#include "MantidGeometry/IDetector.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
+using namespace Mantid;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
+using Mantid::detid_t;
+using Mantid::specid_t;
 
 namespace ComponentCreationHelper
 {
@@ -401,7 +406,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     // Get the number of monitor channels
     int64_t nMonitors = 0;
     boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
-    std::vector<int64_t> monitors = instrument->getMonitors();
+    std::vector<detid_t> monitors = instrument->getMonitors();
     nMonitors = monitors.size();
 
     // Number of monitors should be consistent with data file format
@@ -413,8 +418,8 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     }
 
     int ndet = nxbins*nybins + nMonitors;
-    boost::shared_array<int64_t> udet(new int64_t[ndet]);
-    boost::shared_array<int64_t> spec(new int64_t[ndet]);
+    boost::shared_array<detid_t> udet(new detid_t[ndet]);
+    boost::shared_array<specid_t> spec(new specid_t[ndet]);
 
     // Generate mapping of detector/channel IDs to spectrum ID
 

@@ -1,14 +1,14 @@
 #ifndef SPECTRADETECTORMAPTEST_H_
 #define SPECTRADETECTORMAPTEST_H_
 
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/Exception.h"
 #include <cxxtest/TestSuite.h>
 #include <vector>
 
-#include "MantidKernel/Exception.h"
-#include "MantidAPI/SpectraDetectorMap.h"
-
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using namespace Mantid;
 
 class SpectraDetectorMapTest : public CxxTest::TestSuite
 {
@@ -30,7 +30,7 @@ public:
     SpectraDetectorMap sdMapLocal;
     sdMapLocal.populateSimple(10, 200);
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),200-10);
-    std::vector<int64_t> detsOut = sdMapLocal.getDetectors(10);
+    std::vector<detid_t> detsOut = sdMapLocal.getDetectors(10);
     TS_ASSERT_EQUALS(detsOut.size(),1);
     TS_ASSERT_EQUALS(detsOut[0], 10);
     detsOut = sdMapLocal.getDetectors(199);
@@ -42,13 +42,13 @@ public:
     //use my own local sdmap as I will be altering it
     SpectraDetectorMap sdMapLocal;
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),0);
-    std::vector<int64_t> dets;
+    std::vector<detid_t> dets;
     dets.push_back(10);
     dets.push_back(20);
     TS_ASSERT_THROWS_NOTHING(sdMapLocal.addSpectrumEntries(1,dets));
     TS_ASSERT_EQUALS(sdMapLocal.nElements(),2);
     TS_ASSERT_EQUALS(sdMapLocal.ndet(1),2);
-    std::vector<int64_t> detsOut = sdMapLocal.getDetectors(1);
+    std::vector<detid_t> detsOut = sdMapLocal.getDetectors(1);
     TS_ASSERT_EQUALS(detsOut.size(),2);
     TS_ASSERT_EQUALS(detsOut[0],10);
     TS_ASSERT_EQUALS(detsOut[1],20);
@@ -77,7 +77,7 @@ public:
   {
     for (int i = 0; i < length; i++)
     {
-      std::vector<int64_t> dvec = sdMap.getDetectors(offset+i);
+      std::vector<detid_t> dvec = sdMap.getDetectors(offset+i);
       TS_ASSERT_EQUALS(dvec.size(),1);
       TS_ASSERT_EQUALS(dvec[0],i);
     }
@@ -105,7 +105,7 @@ public:
   void testGetSpectra()
   {
     //create a vector of detectorids to map
-    std::vector<int64_t> dets;
+    std::vector<detid_t> dets;
     int detLength=20;
     for (int i = 0; i < detLength; i++)
     {
@@ -113,7 +113,7 @@ public:
     }
 
     //remap them
-    std::vector<int64_t> spectra = sdMap.getSpectra(dets);
+    std::vector<specid_t> spectra = sdMap.getSpectra(dets);
     for (int i = 0; i < detLength; i++)
     {
       TS_ASSERT_EQUALS(spectra[i],dets[i]+offset);

@@ -14,6 +14,7 @@ using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
+using namespace Mantid;
 
 namespace Mantid 
 {
@@ -81,7 +82,7 @@ public:
     //Detector id is 100 + workspace index = 80 + spectrum #
     for (int i=20; i<20+m_NVectors; i++)
     {
-      std::vector<int64_t> vec;
+      std::vector<detid_t> vec;
       vec.push_back(i+80);
       this->mutableSpectraMap().addSpectrumEntries(i, vec);
     }
@@ -423,28 +424,31 @@ public:
     //Spectrum = WS + 20
     //Detector ID = WS + 100
     wsm->initialize(10, 4, 2);
-    IndexToIndexMap * m;
 
-    m = wsm->getWorkspaceIndexToSpectrumMap();
-    for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS((*m)[i], 20+i);
-    delete m;
-
-    m = wsm->getSpectrumToWorkspaceIndexMap();
-    for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS((*m)[i+20], i);
-    delete m;
-
-    m = wsm->getWorkspaceIndexToDetectorIDMap();
-    for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS((*m)[i], i+100);
-    delete m;
-
-    m = wsm->getDetectorIDToWorkspaceIndexMap(true);
-    for (int i=0; i < 10; i++)
-      TS_ASSERT_EQUALS((*m)[i+100], i);
-    delete m;
-
+    {
+      index2spec_map * m = wsm->getWorkspaceIndexToSpectrumMap();
+      for (int i=0; i < 10; i++)
+        TS_ASSERT_EQUALS((*m)[i], 20+i);
+      delete m;
+    }
+    {
+      spec2index_map * m = wsm->getSpectrumToWorkspaceIndexMap();
+      for (int i=0; i < 10; i++)
+        TS_ASSERT_EQUALS((*m)[i+20], i);
+      delete m;
+    }
+    {
+      index2detid_map * m = wsm->getWorkspaceIndexToDetectorIDMap();
+      for (int i=0; i < 10; i++)
+        TS_ASSERT_EQUALS((*m)[i], i+100);
+      delete m;
+    }
+    {
+      detid2index_map * m = wsm->getDetectorIDToWorkspaceIndexMap(true);
+      for (int i=0; i < 10; i++)
+        TS_ASSERT_EQUALS((*m)[i+100], i);
+      delete m;
+    }
   }
 
 
