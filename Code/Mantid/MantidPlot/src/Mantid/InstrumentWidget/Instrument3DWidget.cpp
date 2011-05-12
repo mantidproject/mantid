@@ -40,6 +40,7 @@
 #include <cfloat>
 #include <numeric>
 #include <fstream>
+#include "MantidGeometry/IDetector.h"
 
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
@@ -1017,7 +1018,7 @@ Instrument3DWidget::DetInfo::DetInfo(Mantid::API::MatrixWorkspace_const_sptr wor
   {
     try
     {
-      m_detID_to_wi_map = boost::shared_ptr<const IndexToIndexMap>(
+      m_detID_to_wi_map = boost::shared_ptr<const detid2index_map>(
           m_workspace->getDetectorIDToWorkspaceIndexMap(false));
     }
     catch(...)
@@ -1155,7 +1156,7 @@ void Instrument3DWidget::DetInfo::printV(Mantid::Geometry::V3D pos, std::ostring
 int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const
 {
   if (!m_detID_to_wi_map) return -1;
-  IndexToIndexMap::const_iterator it(m_detID_to_wi_map->find(someDetID));
+  detid2index_map::const_iterator it(m_detID_to_wi_map->find(someDetID));
   if ( it != m_detID_to_wi_map->end() )
   {
     return it->second;
