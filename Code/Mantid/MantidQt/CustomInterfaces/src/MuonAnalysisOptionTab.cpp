@@ -162,7 +162,7 @@ void MuonAnalysisOptionTab::runTimeAxisStartAtInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start at (ms)' input box. Reset to zero.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Start (ms):' input box. Reset to zero.");
     m_uiForm.timeAxisStartAtInput->setText("0");
   }
 }
@@ -186,7 +186,7 @@ void MuonAnalysisOptionTab::runTimeAxisFinishAtInput()
   }
   catch (...)
   {
-    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish at (ms)' input box.");
+    QMessageBox::warning(this,"Mantid - MuonAnalysis", "Number not recognised in Plot Option 'Finish (ms):' input box.");
     m_uiForm.timeAxisFinishAtInput->setText("");
   }
 }

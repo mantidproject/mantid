@@ -1,1068 +1,967 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>MuonAnalysis</class>
- <widget class="QWidget" name="MuonAnalysis" >
-  <property name="geometry" >
+ <widget class="QWidget" name="MuonAnalysis">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>495</width>
-    <height>619</height>
+    <width>467</width>
+    <height>584</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Muon Analysis</string>
   </property>
-  <layout class="QHBoxLayout" name="horizontalLayout_8" >
-   <property name="margin" >
+  <layout class="QVBoxLayout" name="verticalLayout_4">
+   <property name="margin">
     <number>1</number>
    </property>
    <item>
-    <widget class="QTabWidget" name="tabWidget" >
-     <property name="currentIndex" >
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
       <number>0</number>
      </property>
-     <widget class="QWidget" name="Home" >
-      <attribute name="title" >
+     <widget class="QWidget" name="Home">
+      <attribute name="title">
        <string>Home</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>441</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Instrument</string>
-       </property>
-       <widget class="QLabel" name="Time_Zero_label" >
-        <property name="geometry" >
-         <rect>
-          <x>110</x>
-          <y>20</y>
-          <width>91</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Time Zero</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="timeZeroFront" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>230</x>
-          <y>20</y>
-          <width>31</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>0.2</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="First_Good_Data_label" >
-        <property name="geometry" >
-         <rect>
-          <x>110</x>
-          <y>50</y>
-          <width>121</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>First Good Data</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="firstGoodBinFront" >
-        <property name="geometry" >
-         <rect>
-          <x>230</x>
-          <y>50</y>
-          <width>31</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>0.3</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="instrumentDescription" >
-        <property name="geometry" >
-         <rect>
-          <x>20</x>
-          <y>90</y>
-          <width>421</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Description:</string>
-        </property>
-       </widget>
-       <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="instrSelector" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>20</y>
-          <width>74</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="techniques" >
-         <stringlist>
-          <string>Muon spectroscopy</string>
-         </stringlist>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_12" >
-        <property name="geometry" >
-         <rect>
-          <x>270</x>
-          <y>50</y>
-          <width>161</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>(measured from Time Zero)</string>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_2" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>140</y>
-         <width>461</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Data Files</string>
-       </property>
-       <widget class="QPushButton" name="loadCurrent" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>20</y>
-          <width>101</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Load current run</string>
-        </property>
-       </widget>
-       <widget class="QWidget" name="horizontalLayoutWidget_2" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>50</y>
-          <width>441</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <layout class="QHBoxLayout" name="fileInputLayout" >
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QGroupBox" name="groupBox">
+         <property name="title">
+          <string>Instrument</string>
+         </property>
+         <layout class="QGridLayout" name="gridLayout_2">
+          <item row="0" column="0">
+           <widget class="MantidQt::MantidWidgets::InstrumentSelector" name="instrSelector">
+            <property name="techniques">
+             <stringlist>
+              <string>Muon spectroscopy</string>
+             </stringlist>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="Time_Zero_label">
+            <property name="text">
+             <string>Time Zero</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="timeZeroFront">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0.2</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="First_Good_Data_label">
+            <property name="text">
+             <string>First Good Data</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="firstGoodBinFront">
+            <property name="maximumSize">
+             <size>
+              <width>40</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0.3</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="label_12">
+            <property name="text">
+             <string>(measured from Time Zero)</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="5">
+           <widget class="QLabel" name="instrumentDescription">
+            <property name="text">
+             <string>Description:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <spacer name="horizontalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="5">
+           <spacer name="horizontalSpacer_3">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_2">
+         <property name="title">
+          <string>Data Files</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_2">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="QPushButton" name="loadCurrent">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Load current run</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="frontWarningMessage">
+              <property name="font">
+               <font>
+                <pointsize>12</pointsize>
+                <weight>75</weight>
+                <bold>true</bold>
+               </font>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="fileInputLayout">
+            <item>
+             <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles">
+              <property name="findRunFiles" stdset="0">
+               <bool>true</bool>
+              </property>
+              <property name="label" stdset="0">
+               <string>Load run</string>
+              </property>
+              <property name="multipleFiles" stdset="0">
+               <bool>false</bool>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>Detector Grouping</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_5">
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_5">
+            <item>
+             <widget class="QLabel" name="label">
+              <property name="text">
+               <string>Group / Group Pair:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="frontGroupGroupPairComboBox">
+              <property name="minimumSize">
+               <size>
+                <width>140</width>
+                <height>0</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_5">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="frontAlphaLabel">
+              <property name="text">
+               <string>Alpha:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="frontAlphaNumber">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="homePeriodsLabel">
+              <property name="text">
+               <string>Data collected in &lt;n&gt; Periods. Plot/analyse Period:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="homePeriodBox1">
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="homePeriodBoxMath">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>40</width>
+                <height>16777215</height>
+               </size>
+              </property>
+              <item>
+               <property name="text">
+                <string>-</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>+</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="homePeriodBox2">
+              <property name="enabled">
+               <bool>true</bool>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>50</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_4">
+         <property name="title">
+          <string>Plot Data</string>
+         </property>
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="maximumSize">
+             <size>
+              <width>100000</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Plot type:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QComboBox" name="frontPlotFuncs">
+            <property name="maximumSize">
+             <size>
+              <width>140</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="frontPlotButton">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>100</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <weight>75</weight>
+              <bold>true</bold>
+             </font>
+            </property>
+            <property name="text">
+             <string>Plot</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_5">
+         <property name="title">
+          <string>Run Information</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout">
+          <item>
+           <widget class="QTextBrowser" name="infoBrowser"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
          <item>
-          <widget class="MantidQt::MantidWidgets::MWRunFiles" name="mwRunFiles" >
-           <property name="findRunFiles" stdset="0" >
-            <bool>true</bool>
+          <widget class="QPushButton" name="muonAnalysisHelp">
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
            </property>
-           <property name="label" stdset="0" >
-            <string>Load run</string>
+           <property name="text">
+            <string>?</string>
            </property>
-           <property name="multipleFiles" stdset="0" >
-            <bool>false</bool>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="GroupingOptions">
+      <attribute name="title">
+       <string>Grouping Options</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_8">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
+         <item>
+          <widget class="QPushButton" name="clearGroupingButton">
+           <property name="text">
+            <string>Clear Grouping</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveGroupButton">
+           <property name="text">
+            <string>Save Grouping</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="loadGroupButton">
+           <property name="text">
+            <string>Load Grouping File</string>
            </property>
           </widget>
          </item>
         </layout>
-       </widget>
-       <widget class="QLabel" name="frontWarningMessage" >
-        <property name="geometry" >
-         <rect>
-          <x>140</x>
-          <y>20</y>
-          <width>371</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="font" >
-         <font>
-          <pointsize>12</pointsize>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text" >
-         <string/>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_3" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>260</y>
-         <width>461</width>
-         <height>121</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Detector Grouping</string>
-       </property>
-       <widget class="QLabel" name="label" >
-        <property name="geometry" >
-         <rect>
-          <x>20</x>
-          <y>30</y>
-          <width>131</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Group / Group Pair:</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="homePeriodsLabel" >
-        <property name="geometry" >
-         <rect>
-          <x>20</x>
-          <y>80</y>
-          <width>271</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Data collected in &lt;n> Periods. Plot/analyse Period:</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="frontGroupGroupPairComboBox" >
-        <property name="geometry" >
-         <rect>
-          <x>130</x>
-          <y>30</y>
-          <width>181</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QLabel" name="frontAlphaLabel" >
-        <property name="geometry" >
-         <rect>
-          <x>330</x>
-          <y>30</y>
-          <width>71</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>with alpha:</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="homePeriodBox1" >
-        <property name="geometry" >
-         <rect>
-          <x>280</x>
-          <y>80</y>
-          <width>51</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="homePeriodBoxMath" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>340</x>
-          <y>80</y>
-          <width>41</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text" >
-          <string>-</string>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_8">
+         <item>
+          <widget class="QLabel" name="label_9">
+           <property name="text">
+            <string>Description:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="groupDescription"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_8">
+         <property name="title">
+          <string>Group Table</string>
          </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>+</string>
+         <layout class="QVBoxLayout" name="verticalLayout_6">
+          <item>
+           <widget class="QTableWidget" name="groupTable">
+            <property name="rowCount">
+             <number>20</number>
+            </property>
+            <property name="columnCount">
+             <number>3</number>
+            </property>
+            <attribute name="horizontalHeaderCascadingSectionResizes">
+             <bool>false</bool>
+            </attribute>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <column>
+             <property name="text">
+              <string>Group
+(Name)</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Detector IDs</string>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Ndet</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <spacer name="horizontalSpacer_6">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_5">
+              <property name="text">
+               <string>Plot type:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="groupTablePlotChoice">
+              <item>
+               <property name="text">
+                <string>Asymmetry</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Counts</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Logorithm</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="groupTablePlotButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_9">
+         <property name="title">
+          <string>Pair Table</string>
          </property>
-        </item>
-       </widget>
-       <widget class="QComboBox" name="homePeriodBox2" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>390</x>
-          <y>80</y>
-          <width>51</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="frontAlphaNumber" >
-        <property name="geometry" >
-         <rect>
-          <x>390</x>
-          <y>30</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_4" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>390</y>
-         <width>461</width>
-         <height>81</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Plot Data</string>
-       </property>
-       <widget class="QPushButton" name="frontPlotButton" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>240</x>
-          <y>30</y>
-          <width>75</width>
-          <height>24</height>
-         </rect>
-        </property>
-        <property name="font" >
-         <font>
-          <weight>75</weight>
-          <bold>true</bold>
-         </font>
-        </property>
-        <property name="text" >
-         <string>Plot</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_2" >
-        <property name="geometry" >
-         <rect>
-          <x>20</x>
-          <y>30</y>
-          <width>61</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Plot type:</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="frontPlotFuncs" >
-        <property name="geometry" >
-         <rect>
-          <x>100</x>
-          <y>30</y>
-          <width>111</width>
-          <height>22</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_5" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>480</y>
-         <width>461</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Run Information</string>
-       </property>
-       <widget class="QTextBrowser" name="infoBrowser" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>20</y>
-          <width>441</width>
-          <height>71</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QPushButton" name="muonAnalysisHelp" >
-       <property name="geometry" >
-        <rect>
-         <x>457</x>
-         <y>20</y>
-         <width>20</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>?</string>
-       </property>
-      </widget>
-     </widget>
-     <widget class="QWidget" name="GroupingOptions" >
-      <attribute name="title" >
-       <string>Grouping Options</string>
-      </attribute>
-      <widget class="QPushButton" name="loadGroupButton" >
-       <property name="geometry" >
-        <rect>
-         <x>20</x>
-         <y>20</y>
-         <width>111</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Load Grouping File</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="saveGroupButton" >
-       <property name="geometry" >
-        <rect>
-         <x>150</x>
-         <y>20</y>
-         <width>111</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Save Grouping</string>
-       </property>
-      </widget>
-      <widget class="QTableWidget" name="pairTable" >
-       <property name="geometry" >
-        <rect>
-         <x>20</x>
-         <y>410</y>
-         <width>451</width>
-         <height>131</height>
-        </rect>
-       </property>
-       <property name="rowCount" >
-        <number>10</number>
-       </property>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <column>
-        <property name="text" >
-         <string>Group Pair &#xd;
+         <layout class="QVBoxLayout" name="verticalLayout_7">
+          <item>
+           <widget class="QTableWidget" name="pairTable">
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>115</height>
+             </size>
+            </property>
+            <property name="rowCount">
+             <number>10</number>
+            </property>
+            <attribute name="horizontalHeaderStretchLastSection">
+             <bool>true</bool>
+            </attribute>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <row/>
+            <column>
+             <property name="text">
+              <string>Group Pair 
 (Name)</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Forward &#xd;
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Forward 
 (Group name)</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Backward &#xd;
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Backward 
 (Group name)</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Alpha</string>
-        </property>
-       </column>
-      </widget>
-      <widget class="QPushButton" name="clearGroupingButton" >
-       <property name="geometry" >
-        <rect>
-         <x>280</x>
-         <y>20</y>
-         <width>101</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Clear Grouping</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_5" >
-       <property name="geometry" >
-        <rect>
-         <x>210</x>
-         <y>350</y>
-         <width>46</width>
-         <height>14</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Plot type:</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_6" >
-       <property name="geometry" >
-        <rect>
-         <x>160</x>
-         <y>550</y>
-         <width>101</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Plot type (for pair):</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="groupTablePlotButton" >
-       <property name="enabled" >
-        <bool>false</bool>
-       </property>
-       <property name="geometry" >
-        <rect>
-         <x>390</x>
-         <y>350</y>
-         <width>75</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Plot</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="pairTablePlotButton" >
-       <property name="enabled" >
-        <bool>false</bool>
-       </property>
-       <property name="geometry" >
-        <rect>
-         <x>390</x>
-         <y>550</y>
-         <width>75</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Plot</string>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="guessAlphaButton" >
-       <property name="enabled" >
-        <bool>false</bool>
-       </property>
-       <property name="geometry" >
-        <rect>
-         <x>20</x>
-         <y>550</y>
-         <width>75</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Guess Alpha</string>
-       </property>
-      </widget>
-      <widget class="QComboBox" name="groupTablePlotChoice" >
-       <property name="geometry" >
-        <rect>
-         <x>260</x>
-         <y>350</y>
-         <width>111</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <item>
-        <property name="text" >
-         <string>Asymmetry</string>
-        </property>
+             </property>
+            </column>
+            <column>
+             <property name="text">
+              <string>Alpha</string>
+             </property>
+            </column>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_10">
+            <item>
+             <widget class="QPushButton" name="guessAlphaButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Guess Alpha</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_7">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_6">
+              <property name="text">
+               <string>Plot type (for pair):</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="pairTablePlotChoice">
+              <item>
+               <property name="text">
+                <string>Asymmetry</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="pairTablePlotButton">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
+              <property name="text">
+               <string>Plot</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
        </item>
        <item>
-        <property name="text" >
-         <string>Counts</string>
-        </property>
+        <layout class="QHBoxLayout" name="horizontalLayout_7">
+         <item>
+          <widget class="QPushButton" name="muonAnalysisHelpGrouping">
+           <property name="maximumSize">
+            <size>
+             <width>30</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>?</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_4">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+        </layout>
        </item>
-       <item>
-        <property name="text" >
-         <string>Logorithm</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QComboBox" name="pairTablePlotChoice" >
-       <property name="geometry" >
-        <rect>
-         <x>260</x>
-         <y>550</y>
-         <width>111</width>
-         <height>22</height>
-        </rect>
-       </property>
-       <item>
-        <property name="text" >
-         <string>Asymmetry</string>
-        </property>
-       </item>
-      </widget>
-      <widget class="QTableWidget" name="groupTable" >
-       <property name="geometry" >
-        <rect>
-         <x>20</x>
-         <y>120</y>
-         <width>451</width>
-         <height>221</height>
-        </rect>
-       </property>
-       <property name="rowCount" >
-        <number>20</number>
-       </property>
-       <property name="columnCount" >
-        <number>3</number>
-       </property>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <row/>
-       <column>
-        <property name="text" >
-         <string>Group&#xd;
-(Name)</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Detector IDs</string>
-        </property>
-       </column>
-       <column>
-        <property name="text" >
-         <string>Ndet</string>
-        </property>
-       </column>
-      </widget>
-      <widget class="QLabel" name="label_7" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>71</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font" >
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text" >
-        <string>Group Table</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_8" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>380</y>
-         <width>81</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="font" >
-        <font>
-         <weight>75</weight>
-         <bold>true</bold>
-        </font>
-       </property>
-       <property name="text" >
-        <string>Pair Table</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_9" >
-       <property name="geometry" >
-        <rect>
-         <x>20</x>
-         <y>90</y>
-         <width>61</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>Description:</string>
-       </property>
-      </widget>
-      <widget class="QLineEdit" name="groupDescription" >
-       <property name="geometry" >
-        <rect>
-         <x>80</x>
-         <y>90</y>
-         <width>391</width>
-         <height>20</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QPushButton" name="muonAnalysisHelpGrouping" >
-       <property name="geometry" >
-        <rect>
-         <x>457</x>
-         <y>20</y>
-         <width>20</width>
-         <height>24</height>
-        </rect>
-       </property>
-       <property name="text" >
-        <string>?</string>
-       </property>
-      </widget>
+      </layout>
      </widget>
-     <widget class="QWidget" name="PlotOptions" >
-      <attribute name="title" >
+     <widget class="QWidget" name="PlotOptions">
+      <attribute name="title">
        <string>Plot Options</string>
       </attribute>
-      <widget class="QGroupBox" name="groupBox_6" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>20</y>
-         <width>461</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Default Plot Style</string>
-       </property>
-       <widget class="QLabel" name="label_10" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>20</y>
-          <width>51</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Time axis:</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="timeAxisStartAtLabel" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>220</x>
-          <y>20</y>
-          <width>71</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Start at</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="timeAxisFinishAtLabel" >
-        <property name="geometry" >
-         <rect>
-          <x>340</x>
-          <y>20</y>
-          <width>71</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Finish at</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="timeAxisStartAtInput" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>290</x>
-          <y>20</y>
-          <width>41</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>0.3</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="timeAxisFinishAtInput" >
-        <property name="geometry" >
-         <rect>
-          <x>410</x>
-          <y>20</y>
-          <width>41</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>16.0</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_11" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>50</y>
-          <width>46</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Y-axis:</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="yAxisAutoscale" >
-        <property name="geometry" >
-         <rect>
-          <x>70</x>
-          <y>50</y>
-          <width>72</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Autoscale</string>
-        </property>
-        <property name="checked" >
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QLabel" name="yAxisMinimumLabel" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>170</x>
-          <y>50</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Minimum:</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="yAxisMinimumInput" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>220</x>
-          <y>50</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QLabel" name="yAxisMaximumLabel" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>290</x>
-          <y>50</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Maximum:</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="yAxisMaximumInput" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>340</x>
-          <y>50</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="showErrorBars" >
-        <property name="enabled" >
-         <bool>true</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>80</y>
-          <width>101</width>
-          <height>18</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Show error bars</string>
-        </property>
-       </widget>
-       <widget class="QCheckBox" name="connectPoints" >
-        <property name="enabled" >
-         <bool>false</bool>
-        </property>
-        <property name="geometry" >
-         <rect>
-          <x>140</x>
-          <y>80</y>
-          <width>101</width>
-          <height>18</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Connect points</string>
-        </property>
-        <property name="checked" >
-         <bool>true</bool>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="timeComboBox" >
-        <property name="geometry" >
-         <rect>
-          <x>70</x>
-          <y>20</y>
-          <width>141</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text" >
-          <string>Start at First Good Data</string>
+      <layout class="QVBoxLayout" name="verticalLayout_10">
+       <item>
+        <widget class="QGroupBox" name="groupBox_6">
+         <property name="title">
+          <string>Default Plot Style</string>
          </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Start at Time Zero</string>
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_10">
+            <property name="text">
+             <string>Time axis:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1" colspan="3">
+           <widget class="QComboBox" name="timeComboBox">
+            <item>
+             <property name="text">
+              <string>Start at First Good Data</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Start at Time Zero</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QLabel" name="timeAxisStartAtLabel">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Start</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QLineEdit" name="timeAxisStartAtInput">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>33</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>0.3</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="6">
+           <widget class="QLabel" name="timeAxisFinishAtLabel">
+            <property name="text">
+             <string>Finish</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="7">
+           <widget class="QLineEdit" name="timeAxisFinishAtInput">
+            <property name="maximumSize">
+             <size>
+              <width>33</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>16.0</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_11">
+            <property name="text">
+             <string>Y-axis:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="2">
+           <widget class="QCheckBox" name="yAxisAutoscale">
+            <property name="text">
+             <string>Autoscale</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QLabel" name="yAxisMinimumLabel">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Minimum:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="5">
+           <widget class="QLineEdit" name="yAxisMinimumInput">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>33</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="6">
+           <widget class="QLabel" name="yAxisMaximumLabel">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Maximum:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="7">
+           <widget class="QLineEdit" name="yAxisMaximumInput">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>33</width>
+              <height>16777215</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="0" colspan="2">
+           <widget class="QCheckBox" name="showErrorBars">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="text">
+             <string>Show error bars</string>
+            </property>
+           </widget>
+          </item>
+          <item row="2" column="2" colspan="3">
+           <widget class="QCheckBox" name="connectPoints">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="text">
+             <string>Connect points</string>
+            </property>
+            <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_7">
+         <property name="title">
+          <string>Data Binning</string>
          </property>
-        </item>
-       </widget>
-      </widget>
-      <widget class="QGroupBox" name="groupBox_7" >
-       <property name="geometry" >
-        <rect>
-         <x>10</x>
-         <y>140</y>
-         <width>461</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <property name="title" >
-        <string>Data Binning</string>
-       </property>
-       <widget class="QLabel" name="optionLabelBinWidth" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>30</y>
-          <width>281</width>
-          <height>16</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Data collected with histogram bins of</string>
-        </property>
-       </widget>
-       <widget class="QLabel" name="label_4" >
-        <property name="geometry" >
-         <rect>
-          <x>10</x>
-          <y>60</y>
-          <width>71</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Rebin data:</string>
-        </property>
-       </widget>
-       <widget class="QComboBox" name="rebinComboBox" >
-        <property name="geometry" >
-         <rect>
-          <x>80</x>
-          <y>60</y>
-          <width>69</width>
-          <height>22</height>
-         </rect>
-        </property>
-        <item>
-         <property name="text" >
-          <string>None</string>
+         <layout class="QVBoxLayout" name="verticalLayout_9">
+          <item>
+           <widget class="QLabel" name="optionLabelBinWidth">
+            <property name="text">
+             <string>Data collected with histogram bins of</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_11">
+            <item>
+             <widget class="QLabel" name="label_4">
+              <property name="text">
+               <string>Rebin data:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QComboBox" name="rebinComboBox">
+              <item>
+               <property name="text">
+                <string>None</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Fixed</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="optionBinStep">
+              <property name="text">
+               <string>Step:</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="optionStepSizeText">
+              <property name="maximumSize">
+               <size>
+                <width>35</width>
+                <height>16777215</height>
+               </size>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer_8">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>40</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
          </property>
-        </item>
-        <item>
-         <property name="text" >
-          <string>Fixed</string>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>347</height>
+          </size>
          </property>
-        </item>
-       </widget>
-       <widget class="QLabel" name="optionBinStep" >
-        <property name="geometry" >
-         <rect>
-          <x>170</x>
-          <y>60</y>
-          <width>46</width>
-          <height>21</height>
-         </rect>
-        </property>
-        <property name="text" >
-         <string>Step:</string>
-        </property>
-       </widget>
-       <widget class="QLineEdit" name="optionStepSizeText" >
-        <property name="geometry" >
-         <rect>
-          <x>210</x>
-          <y>60</y>
-          <width>51</width>
-          <height>20</height>
-         </rect>
-        </property>
-       </widget>
-      </widget>
+        </spacer>
+       </item>
+      </layout>
      </widget>
     </widget>
    </item>

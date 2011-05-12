@@ -1759,8 +1759,8 @@ void MuonAnalysis::nowDataAvailable()
   m_uiForm.optionStepSizeText->setVisible(false);
 
   // set various properties of the group table
-  m_uiForm.groupTable->setColumnWidth(1, 2*m_uiForm.groupTable->columnWidth(1));
-  m_uiForm.groupTable->setColumnWidth(3, 0.5*m_uiForm.groupTable->columnWidth(3));
+  m_uiForm.groupTable->setColumnWidth(0, 100);
+  m_uiForm.groupTable->setColumnWidth(1, 200);
   for (int i = 0; i < m_uiForm.groupTable->rowCount(); i++)
   {
     
