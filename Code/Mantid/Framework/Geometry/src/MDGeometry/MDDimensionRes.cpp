@@ -18,15 +18,32 @@ namespace Mantid{
     namespace Geometry{
 
 
+MDDimensionRes::MDDimensionRes(const MDBasisDimension &Dim):
+MDDimension(Dim.getId()),
+nRecDim((rec_dim)Dim.getColumnNumber())
+{
+	if(!Dim.getIsReciprocal()){
+		throw(std::invalid_argument(" Reciprocal dimension can be initiated by an Reciprocal Basis Dimension only"));
+	}
+	if(Dim.getColumnNumber()<=0||Dim.getColumnNumber()>2){
+		throw(std::invalid_argument(" This constructor can be used only when when a Reciprocal Basis Dimension has column number 0,1 or 2 "));
+	}
+	this->direction = Dim.getDirection();
+	
+
+}
 
 
 
-
-MDDimensionRes::MDDimensionRes(const std::string &ID,const rec_dim nRecDim0):
+MDDimensionRes::MDDimensionRes(const std::string &ID,const rec_dim nRecDim0,const V3D *pDir):
 MDDimension(ID),
 nRecDim(nRecDim0)
 {
-    this->direction[nRecDim] = 1;
+	if(!pDir){
+		this->direction[nRecDim] = 1;
+	}else{
+		this->setDirection(*pDir);
+	}
 }
 void 
 MDDimensionRes::setDirection(const V3D &theDirection)

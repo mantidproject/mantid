@@ -60,7 +60,7 @@ MDDimension::initialize(const DimensionDescription &descr)
     if(descr.Tag!=this->dimTag){
         g_log.error()<<"Attempt to initialize the dimension, ID"<<this->dimTag<<" with wrong dimension description: "<<descr.Tag<<std::endl;
     }
-    //TODO:  the dimensin direction to be introduced and set-up here soon;
+   //
     this->setRange(descr.cut_min,descr.cut_max,descr.nBins);
     // stride now reset which makes this dimension invalid in group of dimensions
     this->nStride = 0;

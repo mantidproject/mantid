@@ -2,6 +2,7 @@
 #define MANTIDGEOMETRY_V3D_H_
 
 #include <cmath>
+#include <cfloat>
 #include <complex>
 #include <vector>
 #include "MantidKernel/System.h"
@@ -73,6 +74,7 @@ namespace Mantid
       bool operator==(const V3D&) const;
       bool operator!=(const V3D&) const;
       bool operator<(const V3D&) const;
+      
       // Access
       // Setting x, y and z values
       void operator()(const double xx, const double yy, const double zz);

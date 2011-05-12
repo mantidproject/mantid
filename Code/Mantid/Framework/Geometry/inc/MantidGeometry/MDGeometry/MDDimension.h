@@ -109,7 +109,7 @@ namespace Geometry
   
     ///virtual Get coordinate for index; Throws through vector if ind out of range 
     double getX(size_t ind)const{return Axis.at(ind);}
-    ///virtual it is not reciprocal dimension -> convenience function
+    ///virtual; and it is not reciprocal dimension; convenient to use instead of dynamic cast 
      bool isReciprocal(void)const{return false;}
     ///virtual  get data shif in this direction (original data were shifted when rebinnded)
     double getDataShift()const{return data_shift;}
@@ -118,23 +118,25 @@ namespace Geometry
 
     bool operator==(const MDDimension& other) const;
     bool operator!=(const MDDimension& other) const;
+	/// function sets axis name (meaningfull value displayed by graphth) One of a few public MDDimension setters
+	void  setName(const std::string & name){this->AxisName.assign(name); }    
+
+   //Serialization as an xml string.
+    virtual std::string toXMLString() const;
+
 
 //HACK -- these methods should be protected or everything goes through IMD 
 virtual void  setRange(double rMin=-1,double rMax=1,size_t nBins=1);
-void  setName(const std::string & name){this->AxisName.assign(name); }
+
   protected:
     /// this is to initiate and set the Dimensions from the Geometry; The geometry is in fact a collection of Dimensions + a bit more
     friend class MDGeometry;
     // set all non-inter-dimension-dependent values on the dimesion from the dimension description
-    virtual void initialize(const DimensionDescription &descr);
-
-    //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage;
-    // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it
+    virtual void initialize(const DimensionDescription &descr); //, const std::vector<double> &rotation_mat=std::vector<double>Rot(9) );
+    // function sets the coordinates of the dimension; An orthogonal dimension does nothing with it; Part of initialisation routine if rotations are present
 	virtual void setDirection(const V3D &){};
-    // function sets the dimension as a linear dimension with specific ranges and number of bins
-    
-    void  setName(const char *name) {this->AxisName.assign(name);}
-    
+
+    //********  SET. -> geometry should set it properly as any set operation here is also rebinning operation on MDImage; 
     /** Set the scale of a particular dimension
      * @param Value :: -- the value to set;    */
     //void   setScale(double Value){latticeParam=Value;}
@@ -166,7 +168,7 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
   private:
     /// name of the axis;
     std::string AxisName;
-    /// the name of the dimension in the dimensions basis;
+    /// the name of the dimension in the dimensions basis; Has to coinside with the name of the MDGeometryBasis dimension
     std::string dimTag;
 
     /// The parameter, which specify if the axis is integraged. If it is, nBins =1;
@@ -189,9 +191,7 @@ void  setName(const std::string & name){this->AxisName.assign(name); }
     /// internal function which verify if the ranges of the argumens are permitted; Used by many setRanges functions
     void check_ranges(double rxMin,double rxMax);
 
-    //Serialization as an xml string.
-    virtual std::string toXMLString() const;
-
+ 
   };
 
   /// Shared pointer to a IMDDimension

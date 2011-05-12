@@ -44,7 +44,7 @@ class DLLExport MDDimensionRes :   public MDDimension
 public:
     virtual ~MDDimensionRes(void);
 
-  ///virtual  it is reciprocal dimension -> convenience function
+  ///virtual;  it is reciprocal dimension -> convenient to use instead of dynamic cast 
     bool isReciprocal(void)const{return true;}
 
 
@@ -58,8 +58,9 @@ public:
      std::string toXMLString() const;
     /// virtual 
 	V3D getDirectionCryst(void)const;
-
-    MDDimensionRes(const std::string &ID,const rec_dim nDim);
+	/**Main constructor for a reciprocal dimension Initial direction should be set as in MDGeometryBasis, correspondent direction */
+    MDDimensionRes(const std::string &ID,const rec_dim nDim, const V3D *pDir=NULL);
+	MDDimensionRes(const MDBasisDimension &Dim);
 protected:
     // function sets the coordinates of the dimension;
     virtual void setDirection(const V3D &theDirection);

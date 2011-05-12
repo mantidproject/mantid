@@ -2,6 +2,8 @@
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
 #include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
+#include "MantidGeometry/Math/Matrix.h"
+
 
 using namespace Mantid::Kernel;
 
@@ -39,6 +41,30 @@ MDGeometry::setRanges(MDGeometryDescription const &trf)
     if(!pDim->getIntegrated()){
       this->n_expanded_dim++;
     }
+  }
+  // if rotations are present, the directions of new transformed reciprocal dimensions are set as proper transformation of MDGeometryBasis dimensions;
+  MantidMat Rot = trf.getRotations();
+  MantidMat test(3,3);
+  test.identityMatrix();
+  // set the directions of the reciprocal dimensions availible as proper rotations of MDGeometry basis
+  if(!Rot.equals(test,FLT_EPSILON)){
+	  V3D newDirection;
+	  std::map<std::string,boost::shared_ptr<MDDimension> >::iterator itDim; //=this->dimensions_map.begin();
+	  std::set<MDBasisDimension> recBasDims = this->m_basis.getReciprocalDimensions();
+
+	  std::set<MDBasisDimension>::iterator itBasis = recBasDims.begin();
+	  for(;itBasis!=recBasDims.end();itBasis++){
+		  std::string dimTag = itBasis->getId();
+		  itDim = this->dimensions_map.find(dimTag);
+		  if(itDim==this->dimensions_map.end()){
+			  g_log.error()<<" Can not find the dimension with ID: "<<dimTag<<" among reciprocal dimensions; MDGeometryBasis and MDGeometry are inconsistent\n";
+			  throw(std::logic_error("MDGeometryBasis and MDGeometry are inconsistent"));
+		  }
+		  newDirection = Rot*itBasis->getDirection();
+		  itDim->second->setDirection(newDirection);
+	  }
+
+  
   }
   
 
@@ -78,23 +104,7 @@ MDGeometry::initialize(const MDGeometryDescription &trf)
     this->initialize(dimID);
     this->setRanges(trf);
     this->arrangeDimensionsProperly(dimID);
-//TODO:
-  /*
-  // all reciprocal dimensions may have new coordinates in the WorkspaceGeometry coordinate system, so these coordinates have to 
-  // be set properly;
-  Dimension *pDim;
-  DimensionsID id;
-  for(i=0;i<3;i++){
-  id=DimensionsID(i);
-  // get nDim and cycle if this dim does not exist
-  if(getDimRefNum(id,true)<0)continue;
 
-  // get a reciprocal dimension with proper ID
-  pDim = this->getDimension(id);
-  // and set its coordinate from the transformation matrix;
-  pDim->setCoord(trf.getCoord(id));
-  }
-  */
 }
 
     //
@@ -350,7 +360,32 @@ n_expanded_dim(0), nGeometrySize(0), m_basis(basis)
   this->theDimension.resize(basis.getNumDims());
   this->init_empty_dimensions();
 }
+//
+MantidMat 
+MDGeometry::getRotations()const
+{
+	MantidMat rez(3,3);
+	if(this->m_basis.getNumReciprocalDims()==1){
+		rez.identityMatrix();
+		return rez;
+	}
+	std::vector<V3D> geomBasis = this->m_basis.get_constRecBasis();
+	if(geomBasis.size()==2){
+		V3D third = geomBasis[0].cross_prod(geomBasis[1]);
+		geomBasis.push_back(third);
+	}
 
+	UnitCell fakeCell(geomBasis[0].norm(),geomBasis[1].norm(),geomBasis[2].norm());
+	rez = fakeCell.getUmatrix(this->get_constDimension(0)->getDirection(),this->get_constDimension(1)->getDirection());
+	if(geomBasis[2].scalar_prod(this->get_constDimension(2)->getDirection())<0){ // this should not happen
+		g_log.information()<<"MDGeometry::getRotations: MDGeometry transformed into left-handed coordinate system; this arrangement have never been tested\n";
+		MantidMat reflection(3,3);
+		reflection.identityMatrix();
+		reflection[2][2] = -1;
+		rez*=reflection;
+	}
+	return rez;
+}
 
 std::string MDGeometry::toXMLString() const
 {

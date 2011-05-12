@@ -541,10 +541,10 @@ Quat::getRotation(bool check_normalisation,bool throw_on_errors)const
 		double normSq=aa+bb+cc+w*w;
 		if(fabs(normSq-1)>FLT_EPSILON){
 			if(throw_on_errors){
-				quatG_log.error()<<" A non-unit quaternion used to obtain a rotation matrix\n";
+				quatG_log.error()<<" A non-unit quaternion used to obtain a rotation matrix; need to notmalize it first\n";
 				throw(std::invalid_argument("Attempt to use non-normalized quaternion to define rotation matrix; need to notmalize it first"));
 			}else{
-				quatG_log.information()<<" Warning; a non-unit quaternion used to obtain a rotation matrix\n";
+				quatG_log.information()<<" Warning; a non-unit quaternion used to obtain the rotation matrix; using normalized quat\n";
 				aa/=normSq;
 				ab/=normSq;
 				ac/=normSq;

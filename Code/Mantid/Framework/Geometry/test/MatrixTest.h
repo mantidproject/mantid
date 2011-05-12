@@ -8,6 +8,7 @@
 #include <algorithm>
 
 #include "MantidGeometry/Math/Matrix.h" 
+#include "MantidGeometry/V3D.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -149,6 +150,32 @@ public:
     Eval*=Diag;
     Eval*=EvalT;
     TS_ASSERT(Eval==A);
+  }
+
+  void testFromVectorThrows()
+  {
+	  std::vector<double> data(5,0);
+
+	  TSM_ASSERT_THROWS("building matrix by this construcor and data with wrong number of elements should throw",(Matrix<double>(data)),std::invalid_argument);
+  }
+
+
+  void testFromVectorBuildCorrect()
+  {
+	  std::vector<int> data(9,0);
+	  for(int i=0;i<9;i++){
+		  data[i]=i;
+	  }
+	  Matrix<int> myMat;
+	  TSM_ASSERT_THROWS_NOTHING("building matrix by this construcor and data with correct number of elements should not throw",myMat=Matrix<int>(data));
+
+	  // and the range of the elements in the matrix is correct;
+	  V3D rez1 = myMat*V3D(1,0,0);
+	  V3D rez2 = myMat*V3D(0,1,0);
+	  V3D rez3 = myMat*V3D(0,0,1);
+	  TSM_ASSERT_EQUALS("The data in a matrix have to be located row-wise, so multiplication by (1,0,0)^T selects 1-st column ",true,V3D(0,3,6)==rez1);
+	  TSM_ASSERT_EQUALS("The data in a matrix have to be located row-wise, so multiplication by (0,1,0)^T selects 2-nd column ",true,V3D(1,4,7)==rez2);
+	  TSM_ASSERT_EQUALS("The data in a matrix have to be located row-wise, so multiplication by (0,0,1)^T selects 3-rd column ",true,V3D(2,5,8)==rez3);
   }
 
 };

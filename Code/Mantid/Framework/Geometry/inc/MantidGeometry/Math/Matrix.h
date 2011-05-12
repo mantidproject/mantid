@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include <vector>
+#include <cfloat>
 
 namespace Mantid
 {
@@ -56,7 +57,10 @@ namespace Mantid
     public:
 
       Matrix(const size_t nrow = 0, const size_t ncol = 0, bool const makeIdentity=false);
+/**     Constructor to take two vectors and multiply them to  construct a matrix. (assuming that we have columns x row vector. */
       Matrix(const std::vector<T>&,const std::vector<T>&);
+/// build square matrix from a linear vector. Throw if the vector.size() != nx*nx;
+      Matrix(const std::vector<T>&);
       Matrix(const Matrix<T>&,const size_t nrow,const size_t ncol);
 
       Matrix(const Matrix<T>&);
@@ -86,7 +90,7 @@ namespace Mantid
 
       bool operator!=(const Matrix<T>&) const;
       bool operator==(const Matrix<T>&) const;
-      bool equals(const Matrix<T>& A, const double Tolerance) const;
+      bool equals(const Matrix<T>& A, const double Tolerance=FLT_EPSILON) const;
       T item(const int a,const int b) const { return V[a][b]; }   ///< disallows access
 
       void print() const;

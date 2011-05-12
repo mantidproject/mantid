@@ -22,6 +22,24 @@ n_total_dim(nDimensions), n_reciprocal_dimensions(nReciprocalDimensions), m_mdBa
   m_mdBasisDimensions.insert(MDBasisDimension("q0", true, 0));
 }
 //
+std::vector<V3D>  
+MDGeometryBasis::get_constRecBasis(void)const
+{
+	
+   std::vector<V3D> rez(this->getNumReciprocalDims());
+   std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
+// loop through all reciprocal dimensions and return their directions according to their column numbers; 
+   for( ;it != m_mdBasisDimensions.end(); ++it)
+   {  
+     if((*it).getIsReciprocal()){
+		 unsigned int ndim = it->getColumnNumber();
+		 rez[ndim] = it->getDirection();
+     }
+   }
+
+	return rez;
+}
+//
 void
 MDGeometryBasis::init(const std::set<MDBasisDimension>& mdBasisDimensions,boost::shared_ptr<UnitCell> theSample)
 { 
@@ -107,20 +125,20 @@ MDGeometryBasis::checkIdCompartibility(const std::vector<std::string> &newTags)c
      }
      return true;
 }
-
-    std::set<MDBasisDimension> MDGeometryBasis::getReciprocalDimensions() const
-    {
-      std::set<MDBasisDimension> reciprocalDims;
-      std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
-      for( ;it != m_mdBasisDimensions.end(); ++it)
-      {  
-        if((*it).getIsReciprocal())
-        {
-          reciprocalDims.insert((*it));
-        }
-      }
-      return reciprocalDims;
-    }
+//
+ std::set<MDBasisDimension> MDGeometryBasis::getReciprocalDimensions() const
+ {
+   std::set<MDBasisDimension> reciprocalDims;
+   std::set<MDBasisDimension>::const_iterator it = m_mdBasisDimensions.begin();
+   for( ;it != m_mdBasisDimensions.end(); ++it)
+   {  
+     if((*it).getIsReciprocal())
+     {
+       reciprocalDims.insert((*it));
+     }
+   }
+   return reciprocalDims;
+ }
 
     std::set<MDBasisDimension> MDGeometryBasis::getNonReciprocalDimensions() const
     {

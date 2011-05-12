@@ -90,15 +90,13 @@ public:
   MDGeometryDescription(size_t numDims=4, size_t nReciprocalDims=3);
   MDGeometryDescription(const MDGeometry &origin);
   virtual ~MDGeometryDescription(void);
-  /** sets the projection plain which vould specify the geometry; 
-   *  two input vectors are expressed in reciprocal lattice units;
-   *
-   *  the final projection is then defined as first dimention (X) along direction x, 
-   *  third direction (Z) orthogonal to u and v and second (Y) orthogonal to XZ (coinside with v, if u and v are orthogonal)
-   */
-  Quat buildRotMatrix(const Geometry::V3D &u, const Geometry::V3D &v,const UnitCell &Lattice);
+  /** sets the transformation matrix, () which would transform MDDPoints from MDDData system of coordinates
+   *  into MDImage system of coordinates  As there are no info about 
+      MDDPoints system of coodinates in this class, the matrix has to be calculated externaly (except when building from geomerty,
+	  which provides example of retrieving this matrix	  */
+  void setRotationMatrix(const MantidMat &rotMatrix){this->Rotations = rotMatrix;}
 /// return the rotations, which transform old coordinate system into the new one, set by the projection axis;
-  std::vector<double> getRotations()const;
+  MantidMat const & getRotations()const;
 
   /// obtain number of dimensions in the geometry
   size_t getNumDims(void)const{return nDimensions;}
@@ -109,10 +107,7 @@ public:
   /// returns the size of the image, described by this class
   size_t getImageSize()const;
 
-  ///// the function sets the rotation matrix which allows to transform vector inumber i into the basis;
-  //// TODO : it is currently a stub returning argument independant unit matrix; has to be written propely
-  //std::vector<double> setRotations(unsigned int i,const std::vector<double> basis[3]);
-
+ 
   void build_from_geometry(const MDGeometry &origin);
 
   std::string toXMLstring(void)const{return std::string("TEST PROPERTY");}
@@ -156,12 +151,6 @@ public:
   }
 
 
-  ////*** SET -> t
-  //void setDirection(const std::string &Tag,const V3D &coord)
-  //{
-  //  int index = getTagNum(Tag,true);       this->setDirection(index,coord);
-  //}
-  //void setDirection(size_t i,const V3D &coord);
 
   /**  function sets the Tag requested into the position, defined by the index i;
    *
@@ -177,16 +166,11 @@ private:
 
   /// number of reciprocal dimensions from the nDimensions
   size_t nReciprocalDimensions;
+  /** the matrix which would allow to thransform a vector, expressed in MDGeomBasis (MDDPoints) system of coordinates into 
+      MDImage system of coordinates. */
+   MantidMat  Rotations;
 
-  /// two vectors which define the projection plane on which the target geometry would be build;
-  Geometry::V3D   proj_plain[2];
-  Geometry::Quat  Rotations;
-  // obsolete
-  std::vector<double> rotations;
-  /** the variable specifies if the projection has been changed. Changes in dimension limints in this case are interpreted in 
-   * new (rotated) coordinate system */
-  bool direction_changed;
-
+ 
   /** auxiliary function which check if the index requested is allowed. ErrinFuncName allows to add to the error message the name of the calling function*/
   void check_index(size_t i,const char *ErrinFuncName)const;
 

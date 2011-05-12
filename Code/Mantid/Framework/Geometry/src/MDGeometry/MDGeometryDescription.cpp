@@ -25,42 +25,27 @@ struct findDimension
 };
 
 //
-std::vector<double> 
+MantidMat const & 
 MDGeometryDescription::getRotations()const
 {
 
-	return rotations;
+	return Rotations;
 }
 
-///// the function returns the rotation vector which allows to transform vector inumber i into the basis;
-//std::vector<double> 
-//MDGeometryDescription::setRotations(unsigned int i,const std::vector<double> basis[3])
-//{
-//// STUB  !!! 
-//    this->check_index(i,"rotations");
-//    if(i>2){
-//        return std::vector<double>(1,1);
-//    }
-//
-//    std::vector<double> tmp;
-//    tmp.assign(3,0);
-//    tmp[i]=1;
-// 
-//    rotations.assign(i*3+i,1);
-//    return tmp;
-//}
 
 /// this extracts the size and shape of the current DND object
 MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin):
-direction_changed(false)
+Rotations(3,3,true)
 {
-    this->build_from_geometry(origin);
+     this->build_from_geometry(origin);
 }
 
 
 MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis):
-direction_changed(false)
+Rotations(3,3,true)
 {
+
+
 	std::set<MDBasisDimension> basisDims = basis.getBasisDimensions();
 	this->nDimensions           = 0 ;
 	this->nReciprocalDimensions = 0;
@@ -96,15 +81,18 @@ MDGeometryDescription::MDGeometryDescription(
       Dimension_sptr dimensiont,
       RotationMatrix rotationMatrix
 ):
-direction_changed(false)
+Rotations(3,3,true)
 {
+
   this->nDimensions = dimensions.size();
   this->data.resize(dimensions.size());
-  this->rotations = rotationMatrix;
-  if(rotations.size() != 9)
+
+  if(rotationMatrix.size() != 9)
   {
     throw std::logic_error("Nine components are required for a rotation matrix.");
   }
+ 
+  this->Rotations = MantidMat(rotationMatrix);
 
   //To get this to work with the rest of MDGeometeryDescription. have to order certain dimensions in a specific fashion.
   DimensionVecIterator dimX = find_if(dimensions.begin(), dimensions.end(), findDimension(dimensionX));
@@ -151,33 +139,28 @@ void MDGeometryDescription::createDimensionDescription(Dimension_sptr dimension,
 //  this->data[i].data_scale = dimension->getScale();
   this->data[i].Tag = dimension->getDimensionId();
 
-  ////Handle reciprocal dimensions.
-  //if(dimension->isReciprocal())
-  //{
-	 // this->data[i].direction = dimension->getDirection();
-  //      
-  //}
+ 
 }
 
 //
 void
 MDGeometryDescription::build_from_geometry(const MDGeometry &origin)
 {
-  this->Rotations  = Quat();
-  this->direction_changed       = false;
-  this->nDimensions             = origin.getNumDims();
-  this->nReciprocalDimensions   = origin.getNumReciprocalDims();
-  std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);
+	this->setRotationMatrix(origin.getRotations());
+	
+ 
+    this->nDimensions             = origin.getNumDims();
+    this->nReciprocalDimensions   = origin.getNumReciprocalDims();
+    std::vector<boost::shared_ptr<IMDDimension> > Dims = origin.getDimensions(false);
   
-  DimensionDescription any;
-  this->data.assign(nDimensions,any);    
+    DimensionDescription any;
+    this->data.assign(nDimensions,any);    
   
-  for(unsigned int i=0; i < this->nDimensions;i++)
-  {
-    this->createDimensionDescription(Dims[i],i);
-  }
+    for(unsigned int i=0; i < this->nDimensions;i++){
+		this->createDimensionDescription(Dims[i],i);
+    }
   
- }
+}
 //
 int 
 MDGeometryDescription::getTagNum(const std::string &Tag,bool do_throw)const{
@@ -286,9 +269,7 @@ MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
     nDimensions          = nDims;
     nReciprocalDimensions= nRecDims;
 
-
-    rotations.assign(9,0);
-    rotations[0]=rotations[4]=rotations[8]=1;
+	this->Rotations.identityMatrix();
 
     nDimensions=nDims;
     
@@ -329,17 +310,7 @@ MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
 
 }
 
-/*
-std::vector<double> 
-SlicingProperty::getCoord(DimensionsID id)const
-{
-    if(id>2){
-        throw(std::invalid_argument("SlicingProperty::getCoord attemt to get coordinate of non-reciprocal dimension"));
-    }
-    return this->coordinates[id];
-}
 
-*/
 MDGeometryDescription::~MDGeometryDescription(void)
 {
 }

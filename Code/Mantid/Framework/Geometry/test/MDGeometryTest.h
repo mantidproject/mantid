@@ -14,6 +14,7 @@
 #include <Poco/DOM/NodeFilter.h>
 #include <Poco/File.h>
 #include <Poco/Path.h>
+#include <cfloat>
 
 
 using namespace Mantid::Geometry;
@@ -44,9 +45,9 @@ class MDGeometryTest : public CxxTest::TestSuite
 
     //Dimensions generated, but have default values for bins and extents.
     std::vector<boost::shared_ptr<IMDDimension> > dimensions;
-    boost::shared_ptr<IMDDimension> dimX = boost::shared_ptr<MDDimension>(new MDDimension("q1"));
-    boost::shared_ptr<IMDDimension> dimY = boost::shared_ptr<MDDimension>(new MDDimension("q2"));
-    boost::shared_ptr<IMDDimension> dimZ = boost::shared_ptr<MDDimension>(new MDDimension("q3"));
+    boost::shared_ptr<IMDDimension> dimX = boost::shared_ptr<MDDimension>(new MDDimensionRes("q1",q1));
+    boost::shared_ptr<IMDDimension> dimY = boost::shared_ptr<MDDimension>(new MDDimensionRes("q2",q2));
+    boost::shared_ptr<IMDDimension> dimZ = boost::shared_ptr<MDDimension>(new MDDimensionRes("q3",q3));
     boost::shared_ptr<IMDDimension> dimt = boost::shared_ptr<MDDimension>(new MDDimension("p"));
     boost::shared_ptr<IMDDimension> dimTemp = boost::shared_ptr<MDDimension>(new MDDimension("T"));
 
@@ -83,7 +84,12 @@ public:
 	TSM_ASSERT_EQUALS("Empty geometry initiated by MDBasis only should be size 0",0,tDND_geometry->getGeometryExtend());
 
   }
- 
+void testMDGeometryUnitRotations(){
+	MantidMat rotMat = tDND_geometry->getRotations();
+	MantidMat uno(3,3,true);
+
+	TSM_ASSERT_EQUALS("Natural rotation matrix for unmodified geomerty should be unit matrix",true,rotMat.equals(uno,FLT_EPSILON));
+}
 
   void testMDGeometryDimAccessors(void){
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->getXDimension());
@@ -91,6 +97,12 @@ public:
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->getZDimension());
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->getTDimension());
 
+  }
+  void testGetDefaultDimDirections(void){
+	  TSM_ASSERT_EQUALS("first  default direction should be along first  basis direction",true,V3D(1,0,0)==tDND_geometry->getXDimension()->getDirection());
+	  TSM_ASSERT_EQUALS("second default direction should be along second basis direction",true,V3D(0,1,0)==tDND_geometry->getYDimension()->getDirection());
+	  TSM_ASSERT_EQUALS("third  default direction should be along third  basis direction",true,V3D(0,0,1)==tDND_geometry->getZDimension()->getDirection());
+	  TSM_ASSERT_EQUALS("fourth default direction should be 0",true,V3D(0,0,0)==tDND_geometry->getTDimension()->getDirection());
   }
   void testMDGeomIntegrated(void){
     std::vector<boost::shared_ptr<IMDDimension> > Dims = tDND_geometry->getIntegratedDimensions();
@@ -113,6 +125,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(pDim0=tDND_geometry->getDimension("qx"));
     TS_ASSERT_EQUALS(pDim0.get(),pDim.get());
   }
+
   void testSlicingProperty(void){
     pSlice = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*tDND_geometry));
 
@@ -122,7 +135,9 @@ public:
 	TS_ASSERT_THROWS_ANYTHING(pSlice->pDimDescription("eh")->nBins=200);
     // right tag
 	TS_ASSERT_THROWS_NOTHING(pSlice->pDimDescription("qx")->nBins=200);
-
+	// it is reciprocal dimension
+	TSM_ASSERT_EQUALS("qx defined as reciprocal dimension",true,pSlice->pDimDescription("qx")->isReciprocal);
+	TSM_ASSERT_EQUALS("p  defined as orthogonal dimension",false,pSlice->pDimDescription("p")->isReciprocal);
     // we want first (0) axis to be energy 
     TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"p"));
     TS_ASSERT_THROWS_NOTHING(pSlice->setPAxis(0,"p"));
@@ -139,8 +154,13 @@ public:
     }
 	TSM_ASSERT_EQUALS("The slice describes grid of specific size: ",100*200,pSlice->getImageSize());
   }
+  void testSetSlicingRotations(){
+	  MantidMat rot = tDND_geometry->get_constMDGeomBasis().get_constUnitCell().getUmatrix(V3D(1,1,0),V3D(1,-1,0));
+
+	  TSM_ASSERT_THROWS_NOTHING("It is nothing to throw here",pSlice->setRotationMatrix(rot));
+  }
   void testMDGeomSetFromSlice1(void){
-   // pSlice describes 4x3 geometry with 200x100 dimensions expanded and others integrated;
+   // pSlice describes 4x3 geometry with 200x100 dimensions expanded and others integrated; rotated by 45% around z axis;
     TS_ASSERT_THROWS_NOTHING(tDND_geometry->initialize(*pSlice));
     unsigned int i,ic;
 
@@ -182,7 +202,18 @@ public:
         TS_ASSERT_EQUALS(pDim->getStride(),0);
         TS_ASSERT_EQUALS(pDim->getIntegrated(),true);
   }
- void testDimArrangementByBasis(){
+  void testDimDirections(){
+	  V3D dir1(1,1,0);
+	  V3D dir2(1,-1,0);
+	  dir1.normalize();
+	  dir2.normalize();
+	  TSM_ASSERT_EQUALS("qx difection should rougly coinside with (1,1,0)",true,dir1==tDND_geometry->getDimension("qx")->getDirection());
+	  TSM_ASSERT_EQUALS("qy difection should rougly coinside with (1,-1,0)",true,dir2==tDND_geometry->getDimension("qy")->getDirection());
+	  TSM_ASSERT_EQUALS("qz difection should go to z (0,0,-1)",true,V3D(0,0,-1)==tDND_geometry->getDimension("qz")->getDirection());
+	  TSM_ASSERT_EQUALS("p difection should be 0    (0,0,0)",true,V3D(0,0,0)==tDND_geometry->getDimension("p")->getDirection());
+  }
+
+  void testDimArrangementByBasis(){
      // here we check if the dimension returned in a way, as they are arranged in basis and MDDataPoints
      std::vector<boost::shared_ptr<IMDDimension> > psDims = tDND_geometry->getDimensions(true);
      std::vector<std::string> dimID(4);

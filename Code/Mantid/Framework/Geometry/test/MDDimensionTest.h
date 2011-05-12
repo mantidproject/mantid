@@ -74,6 +74,19 @@ public:
        // and one orthogonal dimension
        TS_ASSERT_THROWS_NOTHING(pOrtDim = new tDimension("en"));
     }
+	void testDimConstrFromMDBD(){
+		std::auto_ptr<MDBasisDimension> pBasDim = std::auto_ptr<MDBasisDimension>(new MDBasisDimension("xx",true,1,"",V3D(1,1,0)));
+		TSM_ASSERT_THROWS_NOTHING("Correct constructor should not throw",std::auto_ptr<MDDimension> pDim=std::auto_ptr<MDDimension>(new MDDimensionRes(*pBasDim)));
+	}
+	void testDimConstrFromMDBDThrows1(){
+		std::auto_ptr<MDBasisDimension> pBasDim = std::auto_ptr<MDBasisDimension>(new MDBasisDimension("xx",false,1,"",V3D(0,0,0)));
+		TSM_ASSERT_THROWS("Reciprocal dimension can not be intiated by non-reciprocal basis dimension",std::auto_ptr<MDDimension> pDim=std::auto_ptr<MDDimension>(new MDDimensionRes(*pBasDim)),std::invalid_argument);
+	}
+	void testDimConstrFromMDBDThrows2(){
+		std::auto_ptr<MDBasisDimension> pBasDim = std::auto_ptr<MDBasisDimension>(new MDBasisDimension("xx",true,3,"",V3D(1,1,0)));
+		TSM_ASSERT_THROWS("Reciprocal dimension can not be intiated by a column with number not from (0,1,2)",std::auto_ptr<MDDimension> pDim=std::auto_ptr<MDDimension>(new MDDimensionRes(*pBasDim)),std::invalid_argument);
+	}
+
 	void testDirections(void){
 		V3D dirOrt = pOrtDim->getDirection();
 		V3D dirRec = pResDim->getDirection();

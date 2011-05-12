@@ -83,6 +83,30 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
     }
   }  
 }
+//
+template<typename T>
+Matrix<T>::Matrix(const std::vector<T>&data):
+V(NULL),nx(0),ny(0)
+{
+	size_t numel = data.size();
+	size_t nxt =(size_t)sqrt(double(numel));
+	size_t test = nxt*nxt;
+	if(test != numel){
+		throw(std::invalid_argument("number of elements in input vector have to be square of some value"));
+	}
+
+	setMem(nxt,nxt);
+
+	size_t ic(0);
+	for(size_t i=0;i<nx;i++)
+	{
+		for(size_t j=0;j<ny;j++)
+		{
+			V[i][j]=data[ic];
+			ic++;
+		}
+	}  
+}
 
 template<typename T>
 Matrix<T>::Matrix(const Matrix<T>& A,const size_t nrow,const size_t ncol)

@@ -56,6 +56,13 @@ namespace Mantid{
 
       MDGeometry(const MDGeometryBasis &basis);
       MDGeometry(const MDGeometryBasis &basis, const MDGeometryDescription &description);
+    /** function resets MDGeometryBasis and MDGeometry to new state;
+      *   
+	  *  modified substantially from initial idea
+	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
+      */
+      void initialize(const MDGeometryDescription &trf);
+
 
       virtual ~MDGeometry(void);
 
@@ -78,7 +85,9 @@ namespace Mantid{
 
  	  /// function returns the number of cells, which an Image with this geometry would have;
 	  size_t getGeometryExtend()const{return nGeometrySize;}
-
+	  /** function returns the rotations matrix, used to transform reciprocal MDDimensions of the MDImage 
+	     from MDGeometryBasis to whaterver position it currently occupies */
+	  MantidMat getRotations()const;
  
       /// return the numbers of dimensions in current geometry; 
       size_t getNumDims()const{return m_basis.getNumDims();}
@@ -96,14 +105,8 @@ namespace Mantid{
           (or NULL if not throwing parameter is specified); */
       boost::shared_ptr<const MDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;
 
-
-      /** function resets MDGeometryBasis and MDGeometry to new state;
-      *   
-	  *  modified substantially from initial idea
-	  *  throws if any dimension ID in geometry descrition (trf) lies outside of the id-s currently present in the geometry;
-      */
-      void initialize(const MDGeometryDescription &trf);
-
+	  MDGeometryBasis const & get_constMDGeomBasis()const{return m_basis;}
+  
       /// Get the geometry in an xml/serialised form.
       std::string toXMLString() const;
 
@@ -127,12 +130,8 @@ namespace Mantid{
       std::vector<boost::shared_ptr<MDDimension> >  theDimension;
 
 
-      /* function returns tne location of the dimension specified by the tag, in the array theDimension (in the MDGeomerty)
-      negative value specifies that the requested dimension is not present in the array. */
-      //  int getDimNum(const std::string &tag,bool do_trow=false)const;
-
     private:
-      /** function sets ranges of the data as in transformation request; Useless without real change of the ranges */
+      /** function sets ranges of the data as in transformation request; Useless without real change of the ranges e.g. rebinning */
       void setRanges(const MDGeometryDescription &trf);
 	  /// the number of data cells, which such geometry would occupy
 	  size_t nGeometrySize;

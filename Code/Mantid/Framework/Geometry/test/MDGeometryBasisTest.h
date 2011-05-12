@@ -23,8 +23,8 @@ private:
     std::set<MDBasisDimension> basisDimensions;
 
     basisDimensions.insert(MDBasisDimension("qx", true, 0,"",V3D(1,0,0)));
-    basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(0,sqrt(2.)/2,0)));
-    basisDimensions.insert(MDBasisDimension("qz", true, 2,"",V3D(0,0,sqrt(3.)/2)));
+    basisDimensions.insert(MDBasisDimension("qz", true, 2,"",V3D(0,sqrt(2.)/2,0)));
+    basisDimensions.insert(MDBasisDimension("qy", true, 1,"",V3D(0,0,sqrt(3.)/2)));
     basisDimensions.insert(MDBasisDimension("p", false, 3));
 
 	boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell(2.87,2.87,2.87));
@@ -74,6 +74,15 @@ public:
     std::set<MDBasisDimension> reciprocalDimensions = basisDimension->getReciprocalDimensions();
     TSM_ASSERT_LESS_THAN_EQUALS("Too many reciprocal dimensions.", 3, reciprocalDimensions.size());
     TSM_ASSERT("Expect to have at least 1 reciprocal dimension.", reciprocalDimensions.size() > 0);  
+  }
+
+  void testGetRecDimBasis(){
+	  boost::scoped_ptr<MDGeometryBasis> basisDimension(constructMDGeometryBasis());
+	  std::vector<V3D> basis = basisDimension->get_constRecBasis();
+	  //TODO: Clarify: there is question, if we should allow geometry basis to have non-unit vectors; does it have any physical meaning?
+	  TSM_ASSERT_EQUALS("first basis dimension in this case should be 1,0,0",true,basis[0]==V3D(1,0,0));
+	  TSM_ASSERT_EQUALS("second basis dimension in this case should be 0,0,sqrt(3.)/2",true,basis[1]==V3D(0,0,sqrt(3.)/2));
+	  TSM_ASSERT_EQUALS("Third basis dimension in this case should be 0,sqrt(2.)/2,0",true,basis[2]==V3D(0,sqrt(2.)/2,0));
   }
 
   void testGetNonReciprocalDimensions()

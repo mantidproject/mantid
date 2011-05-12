@@ -79,6 +79,14 @@ namespace Mantid
 	   *  These names have to coinside with  id-s found in MDDataPoints as each 
 	   *  dimID describes one column of MDDPoints table*/
 	  std::vector<std::string> getBasisIDs(void)const;
+	  /** function returns the existing Reciprocal geometry basis, which describes MDDPoints basis too; 
+	    *  It is an orthogonal basis which differs from the basis attached to the reciprocal cell as some axis 
+		*  can be in different position in relation to the cell (cell has x-axis placed along a* direction of unit cell 
+		   when recBasis can have it everywhere
+
+		   TODO: what to return in 1D mode (powder) (rather how to interpret this mode)
+		*/
+	  std::vector<V3D>  get_constRecBasis(void)const;
 
 	  /// Returns reference to the unit cell, which used in basis; Will throw through dereference of sp if unit cell is not defined;
 	  UnitCell const & get_constUnitCell()const{return *spSample;}
