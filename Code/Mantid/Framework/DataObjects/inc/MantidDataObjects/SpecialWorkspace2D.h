@@ -51,7 +51,7 @@ namespace DataObjects
     /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
     SpecialWorkspace2D& operator=(const SpecialWorkspace2D&);
 
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+    virtual void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength);
 
   protected:
     /** Vector with all the detector IDs, in the same order as the workspace indices.

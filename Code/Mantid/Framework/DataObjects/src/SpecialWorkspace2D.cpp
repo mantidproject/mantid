@@ -68,7 +68,7 @@ namespace DataObjects
   *  @param XLength :: Must be 1
   *  @param YLength :: Must be 1
   */
-  void SpecialWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
+  void SpecialWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
   {
     if ((XLength != 1) || (YLength != 1))
       throw std::invalid_argument("SpecialWorkspace2D must have 'spectra' of length 1 only.");
