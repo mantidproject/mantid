@@ -5,6 +5,7 @@
 #include "MantidAPI/Algorithm.h" 
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -37,13 +38,13 @@ namespace DataHandling
     /// Run the algorithm
     void exec();
 
-    void readVulcanAsciiFile(const std::string& fileName, std::map<int64_t,double> & vulcan);
-    void readVulcanBinaryFile(const std::string& fileName, std::map<int64_t,double> & vulcan);
+    void readVulcanAsciiFile(const std::string& fileName, std::map<detid_t,double> & vulcan);
+    void readVulcanBinaryFile(const std::string& fileName, std::map<detid_t,double> & vulcan);
 
     void CalculateOffsetsFromDSpacemapFile(const std::string DFileName,
         Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
-    void CalculateOffsetsFromVulcanFactors(std::map<int64_t, double> & vulcan,
+    void CalculateOffsetsFromVulcanFactors(std::map<detid_t, double> & vulcan,
         Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
   };

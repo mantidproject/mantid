@@ -574,7 +574,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     // Copy over X data from first spectrum, the bin boundaries for all spectra are assumed to be the same here
     outputWS->dataX(outIndex) = inputWS->readX(0);
     // the Y values and errors from spectra being grouped are combined in the output spectrum
-    for( std::vector<specid_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
+    for( std::vector<size_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
     {
       const specid_t copyFrom = *specIt;
       // detectors to add to firstSpecNum
@@ -643,7 +643,7 @@ void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::Matr
   API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
   const API::SpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
 
-  std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
+  std::set<size_t>::const_iterator copyFrIt = unGroupedSet.begin();
   // move passed the one GroupDetectors2::USED value at the start of the set
   copyFrIt ++;
   // go thorugh all the spectra in the input workspace

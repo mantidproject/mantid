@@ -130,6 +130,15 @@ private:
     };
   };
 
+
+#ifndef HAS_UNORDERED_MAP_H
+/// used to store the lists of spectra numbers that will be grouped, the keys are not used
+typedef std::map<specid_t, std::vector<size_t> > storage_map;
+#else
+typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
+#endif
+
+
   /**
   * This class implements the Poco SAX ContentHandler class for reading of detector grouping files.
   * @author Michael Whitty, ISIS
@@ -139,11 +148,6 @@ private:
   class GroupXmlReader : public Poco::XML::ContentHandler
   {
   public:
-    #ifndef HAS_UNORDERED_MAP_H
-    typedef std::map<int64_t, std::vector<int64_t> > storage_map; ///< typedef to match that in GroupDetectors
-	  #else
-    typedef std::tr1::unordered_map<int64_t, std::vector<int64_t> > storage_map; ///< typedef to match that in GroupDetectors
-	  #endif
 
     /// Constructor
     GroupXmlReader();
@@ -186,13 +190,6 @@ private:
     /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
     std::vector<size_t> m_unused;
   };
-
-	#ifndef HAS_UNORDERED_MAP_H
-  /// used to store the lists of spectra numbers that will be grouped, the keys are not used
-  typedef std::map<specid_t, std::vector<size_t> > storage_map;
-	#else
-  typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
-	#endif
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
   double m_FracCompl;

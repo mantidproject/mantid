@@ -161,7 +161,7 @@ void LoadRaw3::exec()
   DataObjects::Workspace2D_sptr monitorWorkspace;
   int64_t normalwsSpecs = 0;
   int64_t monitorwsSpecs = 0;
-  std::vector<int64_t> monitorSpecList;
+  std::vector<specid_t> monitorSpecList;
 
   if (bincludeMonitors)
   {

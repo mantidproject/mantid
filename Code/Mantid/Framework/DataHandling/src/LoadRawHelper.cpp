@@ -440,7 +440,7 @@ namespace Mantid
     *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
     */
     void LoadRawHelper::getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,
-      std::vector<detid_t>& monitorSpecList)
+      std::vector<specid_t>& monitorSpecList)
     {
       if (!m_monitordetectorList.empty())
       {
@@ -606,7 +606,7 @@ namespace Mantid
         }
         // Debugging code??
         m_monitordetectorList = loadInst->getProperty("MonitorList");
-        std::vector<int64_t>::const_iterator itr;
+        std::vector<specid_t>::const_iterator itr;
         for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
         {
           g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
@@ -633,7 +633,7 @@ namespace Mantid
         g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
       }
       m_monitordetectorList = loadInst->getProperty("MonitorList");
-      std::vector<int64_t>::const_iterator itr;
+      std::vector<specid_t>::const_iterator itr;
       for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
       {
         g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
@@ -912,12 +912,12 @@ namespace Mantid
     /// @param monitorSpecList :: the vector of the monitor spectra
     /// @param normalwsSpecs :: the spectra for the detector workspace
     /// @param monitorwsSpecs :: the spectra for the monitor workspace
-    void LoadRawHelper::calculateWorkspacesizes(const std::vector<int64_t>& monitorSpecList,
-      int64_t& normalwsSpecs, int64_t & monitorwsSpecs)
+    void LoadRawHelper::calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
+      specid_t& normalwsSpecs, specid_t & monitorwsSpecs)
     {
       if (!m_interval && !m_bmspeclist)
       {
-        monitorwsSpecs = static_cast<int64_t>(monitorSpecList.size());
+        monitorwsSpecs = static_cast<specid_t>(monitorSpecList.size());
         normalwsSpecs = m_total_specs - monitorwsSpecs;
         g_log.debug() << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  " << normalwsSpecs
           << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
@@ -927,7 +927,7 @@ namespace Mantid
         int msize = 0;
         if (m_interval)
         {
-          std::vector<int64_t>::const_iterator itr1;
+          std::vector<specid_t>::const_iterator itr1;
           for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end(); ++itr1)
           {
             if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
@@ -942,7 +942,7 @@ namespace Mantid
         {
           if (m_interval)
           {
-            std::vector<int64_t>::iterator itr;
+            std::vector<specid_t>::iterator itr;
             for (itr = m_spec_list.begin(); itr != m_spec_list.end();)
             { //if  the m_spec_list elements are in the range between m_spec_min & m_spec_max
               if (*itr >= m_spec_min && *itr < m_spec_max)
@@ -958,9 +958,9 @@ namespace Mantid
             else
             { //at this point there are monitors in the list which are not in the min& max range
               // so find those  monitors  count and calculate the workspace specs 
-              std::vector<int64_t>::const_iterator itr;
-              std::vector<int64_t>::const_iterator monitr;
-              int64_t monCounter = 0;
+              std::vector<specid_t>::const_iterator itr;
+              std::vector<specid_t>::const_iterator monitr;
+              specid_t monCounter = 0;
               for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr)
               {
                 monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
@@ -975,9 +975,9 @@ namespace Mantid
           }//end if loop for m_interval  
           else
           { //if only List true
-            int64_t mSize = 0;
-            std::vector<int64_t>::const_iterator itr;
-            std::vector<int64_t>::const_iterator monitr;
+            specid_t mSize = 0;
+            std::vector<specid_t>::const_iterator itr;
+            std::vector<specid_t>::const_iterator monitr;
             for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr)
             {
               monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);

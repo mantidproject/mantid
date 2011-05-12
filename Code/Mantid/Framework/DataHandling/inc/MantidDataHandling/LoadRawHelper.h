@@ -121,7 +121,7 @@ namespace Mantid
 
 
       ///gets the monitor spectrum list from the workspace
-      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<detid_t>& monitorSpecList);
+      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<specid_t>& monitorSpecList);
 
       /// sets the workspace property 
       void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
@@ -159,8 +159,8 @@ namespace Mantid
       /// calculate workspace size
       int64_t  calculateWorkspaceSize();
       /// calculate workspace sizes if separate or exclude monitors are selected
-      void calculateWorkspacesizes(const std::vector<int64_t>& monitorSpecList,
-				   int64_t& normalwsSpecs, int64_t& monitorwsSpecs);
+      void calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
+				   specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
       /// load the specra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
 		       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >); 
@@ -171,11 +171,11 @@ namespace Mantid
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int64_t> m_spec_list;
+      std::vector<specid_t> m_spec_list;
       /// The value of the spectrum_min property
-      int64_t m_spec_min;
+      specid_t m_spec_min;
       /// The value of the spectrum_max property
-      int64_t m_spec_max;
+      specid_t m_spec_max;
 
     private:
      
@@ -187,7 +187,7 @@ namespace Mantid
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
       /// A map for storing the time regime for each spectrum
-      std::map<int64_t,int64_t> m_specTimeRegimes;
+      std::map<specid_t,specid_t> m_specTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
 
@@ -196,7 +196,7 @@ namespace Mantid
       int64_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
-      std::vector<int64_t> m_monitordetectorList;
+      std::vector<specid_t> m_monitordetectorList;
       
       /// TimeSeriesProperty<int> containing data periods.
       boost::shared_ptr<Kernel::Property> m_perioids;
