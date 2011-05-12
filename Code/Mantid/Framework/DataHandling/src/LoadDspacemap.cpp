@@ -140,7 +140,7 @@ namespace DataHandling
     instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
     //To get all the detector ID's
-    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
+    detid2det_map allDetectors;
     instrument->getDetectors(allDetectors);
 
     //Read in the POWGEN-style Dspace mapping file
@@ -160,7 +160,7 @@ namespace DataHandling
     // Selects (empty, will default to true)
     std::map<detid_t, bool> selects;
 
-    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+    detid2det_map::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       detid_t detectorID = it->first;
@@ -196,13 +196,13 @@ namespace DataHandling
     IInstrument_const_sptr instrument = offsetsWS->getInstrument();
 
     //To get all the detector ID's
-    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
+    detid2det_map allDetectors;
     instrument->getDetectors(allDetectors);
 
     // Selects (empty, will default to true)
     std::map<detid_t, bool> selects;
 
-    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+    detid2det_map::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       int detectorID = it->first;

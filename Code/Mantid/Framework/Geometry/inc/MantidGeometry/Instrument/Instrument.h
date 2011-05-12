@@ -94,7 +94,7 @@ namespace Mantid
       void markAsMonitor(Geometry::IDetector*);
 
       /// return reference to detector cache 
-      void getDetectors(std::map<detid_t, Geometry::IDetector_sptr> & out_map) const;
+      void getDetectors(detid2det_map & out_map) const;
 
       std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const;
 

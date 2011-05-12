@@ -76,7 +76,7 @@ public:
 
     // Some sanity checks
     TS_ASSERT_EQUALS( retVal->getInstrument()->getName(), "MINITOPAZ");
-    std::map<int64_t, Geometry::IDetector_sptr> dets;
+    detid2det_map dets;
     retVal->getInstrument()->getDetectors(dets);
     TS_ASSERT_EQUALS( dets.size(), 100*100);
 

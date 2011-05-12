@@ -74,7 +74,7 @@ namespace Mantid
     /**	Fills a copy of the detector cache
     * @returns a map of the detectors hold by the instrument
     */
-    void Instrument::getDetectors(std::map<detid_t, Geometry::IDetector_sptr> & out_map) const
+    void Instrument::getDetectors(detid2det_map & out_map) const
     { 
       if (m_isParametrized)
       {

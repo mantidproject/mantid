@@ -917,32 +917,32 @@ namespace Mantid
       const SpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
       const SpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
 
-      int64_t rhs_nhist = rhs->getNumberHistograms();
-      int64_t lhs_nhist = lhs->getNumberHistograms();
+      size_t rhs_nhist = rhs->getNumberHistograms();
+      size_t lhs_nhist = lhs->getNumberHistograms();
 
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
 
       // We'll need maps from WI to Spectrum Number.
       Timer timer1;
-      API::IndexToIndexMap * lhs_wi_to_spec = lhs->getWorkspaceIndexToSpectrumMap();
-      API::IndexToIndexMap * rhs_wi_to_spec = rhs->getWorkspaceIndexToSpectrumMap();
+      index2spec_map * lhs_wi_to_spec = lhs->getWorkspaceIndexToSpectrumMap();
+      index2spec_map * rhs_wi_to_spec = rhs->getWorkspaceIndexToSpectrumMap();
       //std::cout << timer1.elapsed() << " sec to getWorkspaceIndexToSpectrumMap\n";
 
-      API::IndexToIndexMap * rhs_det_to_wi;
+      detid2index_map * rhs_det_to_wi;
       rhs_det_to_wi = rhs->getDetectorIDToWorkspaceIndexMap(false);
       //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
       PARALLEL_FOR_NO_WSP_CHECK()
-      for (int64_t lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
+      for (size_t lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
       {
-        int64_t rhs_spec_no;
+        specid_t rhs_spec_no;
         bool done=false;
 
         // Spectrum number for this lhs workspace index.
-        int64_t lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
+        specid_t lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
         // List of detectors on lhs side
-        std::vector<int64_t> lhsDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
+        std::vector<detid_t> lhsDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
         // For proper includes, it needs to be sorted
         std::sort(lhsDets.begin(), lhsDets.end());
 
@@ -954,7 +954,7 @@ namespace Mantid
         {
           // Get the detector IDs at that workspace index.
           rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
-          std::vector<int64_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+          std::vector<detid_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
           std::sort(rhsDets.begin(), rhsDets.end());
 
           //Checks that lhsDets is a subset of rhsDets
@@ -977,7 +977,7 @@ namespace Mantid
           int64_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
-          IndexToIndexMap::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
+          detid2index_map::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
           if (map_it != rhs_det_to_wi->end())
           {
             rhsWI = map_it->second; //This is the workspace index in the RHS that matched lhs_detector_ID
@@ -1006,7 +1006,7 @@ namespace Mantid
           for (rhsWI=0; rhsWI < rhs_nhist; rhsWI++)
           {
             rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
-            std::vector<int64_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+            std::vector<detid_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
             std::sort(rhsDets.begin(), rhsDets.end());
 
             //Checks that lhsDets is a subset of rhsDets

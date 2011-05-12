@@ -58,7 +58,7 @@ namespace MDEvents
     /// Perform LorentzCorrection on the fly.
     bool LorentzCorrection;
     /// Map of all the detectors in the instrument
-    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+    detid2det_map allDetectors;
     /// Primary flight path (source to sample)
     double l1;
     /// Beam direction and length

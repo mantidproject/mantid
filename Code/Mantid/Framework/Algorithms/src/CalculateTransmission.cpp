@@ -83,12 +83,13 @@ void CalculateTransmission::exec()
   }
   
   // Extract the required spectra into separate workspaces
-  std::vector<int64_t> udets,indices;
+  std::vector<detid_t> udets;
+  std::vector<size_t> indices;
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
   udets.push_back(getProperty("IncidentBeamMonitor"));
   udets.push_back(getProperty("TransmissionMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<int64_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
+  const std::vector<specid_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
   if (indices.size() < 2)
   {
@@ -113,7 +114,7 @@ void CalculateTransmission::exec()
   }
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
-  const std::vector<int64_t> directSpectra = directWS->spectraMap().getSpectra(udets);
+  const std::vector<specid_t> directSpectra = directWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(directSpectra,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor() )

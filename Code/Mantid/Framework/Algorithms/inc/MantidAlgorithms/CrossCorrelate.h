@@ -71,9 +71,9 @@ private:
   ///Execution code
   void exec();
   /// Spectra to index map
-  API::SpectraAxis::spec2index_map index_map;
+  spec2index_map index_map;
   /// Iterator for the spectra to index map
-  API::SpectraAxis::spec2index_map::iterator index_map_it;
+  spec2index_map::iterator index_map_it;
 
   /// Progress reporting
   API::Progress* m_progress;

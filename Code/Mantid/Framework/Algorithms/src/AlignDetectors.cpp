@@ -43,7 +43,7 @@ void AlignDetectors::initDocs()
  * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return map of conversion factors between TOF and dSpacing
  */
-std::map<int64_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+std::map<detid_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   OffsetsWorkspace_sptr offsetsWS,
                                   bool vulcancorrection)
 {
@@ -56,17 +56,17 @@ std::map<int64_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
 
   instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
-  std::map<int64_t, double> * myMap = new std::map<int64_t, double>();
+  std::map<detid_t, double> * myMap = new std::map<detid_t, double>();
 
   //To get all the detector ID's
-  std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+  detid2det_map allDetectors;
   instrument->getDetectors(allDetectors);
 
   //Now go through all
-  std::map<int64_t, Geometry::IDetector_sptr>::iterator it;
+  detid2det_map::iterator it;
   for (it = allDetectors.begin(); it != allDetectors.end(); it++)
   {
-    int64_t detectorID = it->first;
+    detid_t detectorID = it->first;
     Geometry::IDetector_sptr det = it->second;
 
     //Find the offset, if any
@@ -87,15 +87,20 @@ std::map<int64_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API
 //-----------------------------------------------------------------------
 /** Compute a conversion factor for a LIST of detectors.
  * Averages out the conversion factors if there are several.
+ *
+ * @param tofToDmap :: detectord id to double conversions map
+ * @param detectors :: list of detector IDS
+ * @return
  */
-double calcConversionFromMap(std::map<int64_t, double> * tofToDmap, const std::vector<int64_t> &detectors)
+
+double calcConversionFromMap(std::map<detid_t, double> * tofToDmap, const std::vector<detid_t> &detectors)
 {
   double factor = 0.;
-  int64_t numDetectors = 0;
-  for (std::vector<int64_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+  detid_t numDetectors = 0;
+  for (std::vector<detid_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
   {
-    int64_t detectorID = *iter;
-    std::map<int64_t, double>::iterator it;
+    detid_t detectorID = *iter;
+    std::map<detid_t, double>::iterator it;
     it = tofToDmap->find(detectorID);
     if (it != tofToDmap->end())
     {
@@ -222,7 +227,7 @@ void AlignDetectors::exec()
     PARALLEL_START_INTERUPT_REGION
     try {
       // Get the spectrum number for this histogram
-      const int64_t spec = inputWS->getAxis(1)->spectraNo(i);
+      const specid_t spec = inputWS->getAxis(1)->spectraNo(i);
       double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
       // Get references to the x data
@@ -289,17 +294,17 @@ void AlignDetectors::execEvent()
 
   // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
-  const int64_t numberOfSpectra = inputWS->getNumberHistograms();
+  const size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int64_t i = 0; i < numberOfSpectra; ++i)
+  for (size_t i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the spectrum number for this histogram
-    int64_t spec = inputWS->getAxis(1)->spectraNo(i);
+    specid_t spec = inputWS->getAxis(1)->spectraNo(i);
     double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
     //Perform the multiplication on all events

@@ -81,7 +81,7 @@ namespace Algorithms
    * @param detIDtoGroup :: map of key=detectorID, value=group number.
    * @param prog :: progress reporter
    */
-  void readGroupingFile(const std::string& groupingFileName, IndexToIndexMap & detIDtoGroup, Progress & prog )
+  void readGroupingFile(const std::string& groupingFileName, std::map<detid_t, int> & detIDtoGroup, Progress & prog )
   {
     std::ifstream grFile(groupingFileName.c_str());
     if (!grFile.is_open())
@@ -117,7 +117,7 @@ namespace Algorithms
    * @param detIDtoGroup :: output: map of detID: to group number
    * @param prog :: progress report
    */
-  void makeGroupingByNames(std::string GroupNames, IInstrument_sptr inst, IndexToIndexMap & detIDtoGroup, Progress & prog)
+  void makeGroupingByNames(std::string GroupNames, IInstrument_sptr inst, std::map<detid_t, int> & detIDtoGroup, Progress & prog)
   {
     // Split the names of the group and insert in a vector
     std::vector<std::string> vgroups;
@@ -242,7 +242,7 @@ namespace Algorithms
     this->setProperty("OutputWorkspace", outWS);
 
     // This will get the grouping
-    IndexToIndexMap detIDtoGroup;
+    std::map<detid_t, int> detIDtoGroup;
 
     Progress prog(this,0.2,1.0, outWS->getNumberHistograms() );
 
@@ -261,8 +261,8 @@ namespace Algorithms
       size_t numNotFound = 0;
 
       // Make the groups, if any
-      IndexToIndexMap::const_iterator it_end = detIDtoGroup.end();
-      IndexToIndexMap::const_iterator it;
+      std::map<detid_t, int>::const_iterator it_end = detIDtoGroup.end();
+      std::map<detid_t, int>::const_iterator it;
       for (it = detIDtoGroup.begin(); it != it_end; it++)
       {
         int detID = it->first;

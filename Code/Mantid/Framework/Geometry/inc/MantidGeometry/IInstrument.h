@@ -15,6 +15,10 @@
 namespace Mantid
 {
 
+/// Typedef of a map from detector ID to detector shared pointer.
+typedef std::map<detid_t, Mantid::Geometry::IDetector_sptr> detid2det_map;
+
+
 namespace Geometry
 {
 
@@ -75,7 +79,7 @@ public:
   virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
 
   /// return map of detector ID : detector sptr
-  virtual void getDetectors(std::map<detid_t, Geometry::IDetector_sptr>  & out_dets) const = 0;
+  virtual void getDetectors( detid2det_map & out_dets) const = 0;
 
   /// return a vector with a list of the detector IDs
   virtual std::vector<detid_t> getDetectorIDs(bool skipMonitors = false) const = 0;

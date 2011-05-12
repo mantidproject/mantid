@@ -473,9 +473,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
     else
     {
-      std::map<detid_t, Geometry::IDetector_sptr> detector_map;
+      detid2det_map detector_map;
       workspace->getInstrument()->getDetectors(detector_map);
-      std::map<detid_t, Geometry::IDetector_sptr>::iterator it;
+      detid2det_map::iterator it;
       for (it = detector_map.begin(); it != detector_map.end(); it++)
       {
         //Go through each pixel in the map, but forget monitors.

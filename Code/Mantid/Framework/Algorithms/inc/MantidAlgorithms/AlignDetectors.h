@@ -59,7 +59,7 @@ public:
   virtual const std::string category() const { return "Diffraction";}
 
   // ----- Useful static functions ------
-  static std::map<int64_t, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+  static std::map<detid_t, double> * calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS, bool vulcancorrection);
 
 private:
@@ -75,7 +75,7 @@ private:
   Mantid::DataObjects::EventWorkspace_const_sptr eventW;
 
   /// Map of conversion factors for TOF to d-Spacing conversion
-  std::map<int64_t, double> * tofToDmap;
+  std::map<detid_t, double> * tofToDmap;
 };
 
 

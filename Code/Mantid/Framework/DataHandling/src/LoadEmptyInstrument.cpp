@@ -89,7 +89,7 @@ namespace Mantid
 
         // Make one pixel per detector
         size_t wi=0;
-        std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+        detid2det_map::const_iterator it;
         for ( it = detCache.begin(); it != detCache.end(); ++it )
         {
           localWorkspace->getOrAddEventList(wi).clear(true);
@@ -115,7 +115,7 @@ namespace Mantid
         specid_t *spec = new specid_t[number_spectra];
         detid_t *udet = new detid_t[number_spectra];
 
-        std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+        detid2det_map::const_iterator it;
         size_t counter = 0;
         for ( it = detCache.begin(); it != detCache.end(); ++it )
         {

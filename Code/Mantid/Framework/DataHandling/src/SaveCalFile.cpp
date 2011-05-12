@@ -107,11 +107,11 @@ namespace DataHandling
     fout <<"# Format: number    UDET         offset    select    group\n";
 
     // Get all the detectors
-    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
+    detid2det_map allDetectors;
     inst->getDetectors(allDetectors);
     int64_t number=0;
 
-    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+    detid2det_map::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       detid_t detectorID = it->first;
