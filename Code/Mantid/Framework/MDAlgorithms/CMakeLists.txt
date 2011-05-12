@@ -93,8 +93,6 @@ set ( INC_FILES
 # Test files. Other source files required.
 set ( TEST_FILES
 	#test/testCPComponents.h TODO: Is this test really necessary?
-	#test/CPR_preselectCellsTest.h
-	#test/CPRebinKeepPixTest.h
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	test/DepthParameterTest.h
@@ -113,7 +111,10 @@ set ( TEST_FILES
 	test/TobyFitSimulateTest.h
 	test/VectorMathematicsTest.h
 	test/WidthParameterTest.h
-	test/testCPrebinning.h
+	# these tests are as they test verify different parts of the CPR algorithms
+	test/CPR_preselectCellsTest.h
+	test/CP3DxN_RebinningTest.h
+	test/CPRebinKeepPixTest.h	
 )
 
 set ( GMOCK_TEST_FILES

@@ -72,10 +72,12 @@ DynamicCPRRebinning::preselect_cells()
   size_t       sizem;
   double       xt1,yt1,zt1,Etm,Etp;
 
-  //TODO: this will be obtained from the taget and source?
+
   double rotations[9];
-  rotations[0]=rotations[1]=rotations[2]=rotations[3]=rotations[4]=rotations[5]=rotations[6]=rotations[7]=rotations[8]=0;
-  rotations[0]=rotations[4]=rotations[8]=1;
+  std::vector<double> rot = pTargetDescr->getRotations().get_vector();
+  for(int i=0;i<9;i++){
+	  rotations[i]=rot[i];
+  }
 
  
   // evaluate the capacity of the orthogonal dimensions;

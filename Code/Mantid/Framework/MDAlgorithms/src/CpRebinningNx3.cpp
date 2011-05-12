@@ -157,8 +157,8 @@ CpRebinningNx3::build_scaled_transformation_matrix(const Geometry::MDGeometry &S
       }
  
   }
-  std::vector<double> rot = target.getRotations();
-  //std::vector<double> basis[3]; // not used at the momemnt;
+
+  std::vector<double> rot = target.getRotations().get_vector();
 
   for(i=0;i<3;i++){
     ic = i*3;

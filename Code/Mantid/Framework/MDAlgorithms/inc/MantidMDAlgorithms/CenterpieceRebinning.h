@@ -61,8 +61,9 @@ public:
       virtual const std::string category() const { return "MD-Algorithms";}
 
 
-      /// set up slicing property as to the state of input workspace e.g. the rebinning would be
-      /// done on the whole workspace and would provide a workspace, which is equivalent to the input workspace
+     /** set up Target geometry description to describe the input workspace e.g. the rebinning would be
+       * done on the whole workspace and would provide a workspace, which is equivalent to the input workspace.
+	   * The description can be then modified in necessary places to provide meaningfull rebinning operation */
       void setTargetGeomDescrEqSource();
     
 private:

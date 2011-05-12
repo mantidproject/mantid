@@ -112,15 +112,15 @@ public:
 
 
 	}
-	void testMDImageReadDescription(){
-		MockFileFormat file("");
+	//void t__tMDImageReadDescription(){
+	//	MockFileFormat file("");
 
-        Mantid::Geometry::MDGeometryDescription geom_description(4,3);
-		file.read_MDGeomDescription(geom_description);
-		TS_ASSERT_THROWS_NOTHING(pImage->initialize(geom_description));
+ //       Mantid::Geometry::MDGeometryDescription geom_description(4,3);
+	//	file.read_MDGeomDescription(geom_description);
+	//	TS_ASSERT_THROWS_NOTHING(pImage->initialize(geom_description));
 
-		TSM_ASSERT_EQUALS("An image with this geometry should be specific size ",50*50*50*50,pImage->getDataSize());
-	}
+	//	TSM_ASSERT_EQUALS("An image with this geometry should be specific size ",50*50*50*50,pImage->getDataSize());
+	//}
   void testGet2DData(void){
 
     this->selection.assign(2,1);
@@ -163,10 +163,10 @@ public:
     pImage->getPointData(selection,img);
     TS_ASSERT_EQUALS(img.size(),50);
   }
-  void testSetValues(){
+ /* void t__tSetValues(){
 	  this->setFakeImageValuesIncompletely();
 	  TSM_ASSERT_THROWS("This validation should throw as the npix control sum has not been set properly",pImage->validateNPix(),std::invalid_argument);
-  }
+  }*/
   void testValidationSetCorrect(){
 	  TSM_ASSERT_THROWS_NOTHING("This should not throw as the previous check set correct number of pixels contributed",pImage->validateNPix());
   }
