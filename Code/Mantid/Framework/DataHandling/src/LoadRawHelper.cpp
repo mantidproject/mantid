@@ -532,7 +532,7 @@ namespace Mantid
         }
         // In this case, also need to populate the map of spectrum-regime correspondence
         const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
-        std::map<int64_t, int64_t>::iterator hint = m_specTimeRegimes.begin();
+        std::map<specid_t, specid_t>::iterator hint = m_specTimeRegimes.begin();
         for (int64_t j = 0; j < ndet; ++j)
         {
           // No checking for consistency here - that all detectors for given spectrum
@@ -882,7 +882,7 @@ namespace Mantid
         {
           if (m_interval)
           {
-            for (std::vector<int64_t>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
+            for (std::vector<specid_t>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
               if (*it >= m_spec_min && *it < m_spec_max)
               {
                 it = m_spec_list.erase(it);

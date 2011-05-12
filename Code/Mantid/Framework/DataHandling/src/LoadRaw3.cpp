@@ -159,8 +159,8 @@ void LoadRaw3::exec()
   WorkspaceGroup_sptr ws_grp = createGroupWorkspace();
   WorkspaceGroup_sptr monitorws_grp;
   DataObjects::Workspace2D_sptr monitorWorkspace;
-  int64_t normalwsSpecs = 0;
-  int64_t monitorwsSpecs = 0;
+  specid_t normalwsSpecs = 0;
+  specid_t monitorwsSpecs = 0;
   std::vector<specid_t> monitorSpecList;
 
   if (bincludeMonitors)
@@ -305,7 +305,7 @@ void LoadRaw3::exec()
   *@param monitorList :: a list conatining the spectrum numbers for monitors
   *@param ws_sptr :: shared pointer to workspace
 */
-void LoadRaw3::excludeMonitors(FILE* file,const int64_t& period,const std::vector<int64_t>& monitorList,
+void LoadRaw3::excludeMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
 							   DataObjects::Workspace2D_sptr ws_sptr)
 {
 	int64_t histCurrent = -1;
@@ -314,7 +314,7 @@ void LoadRaw3::excludeMonitors(FILE* file,const int64_t& period,const std::vecto
 	//loop through the spectra
 	for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
 	{
-		int64_t histToRead = i + period * (m_numberOfSpectra + 1);
+	  specid_t histToRead = i + period * (m_numberOfSpectra + 1);
 		if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
 			i) != m_spec_list.end()))
 		{
@@ -408,7 +408,7 @@ void LoadRaw3::includeMonitors(FILE* file,const int64_t& period,DataObjects::Wor
   *@param mws_sptr :: -shared pointer to monitor workspace
 */
 
-void LoadRaw3::separateMonitors(FILE* file,const int64_t& period,const std::vector<int64_t>& monitorList,
+void LoadRaw3::separateMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
 								DataObjects::Workspace2D_sptr ws_sptr,DataObjects::Workspace2D_sptr mws_sptr)
 {
   int64_t histCurrent = -1;
@@ -532,10 +532,10 @@ bool LoadRaw3::isSeparateMonitors()
  *  @param spectrumNum ::  the requested spectrum number
  *  @return true if it's a monitor 
  */
-bool LoadRaw3::isMonitor(const std::vector<int64_t>& monitorIndexes, int64_t spectrumNum)
+bool LoadRaw3::isMonitor(const std::vector<specid_t>& monitorIndexes, specid_t spectrumNum)
 {
   bool bMonitor;
-  std::vector<int64_t>::const_iterator itr;
+  std::vector<specid_t>::const_iterator itr;
   itr = find(monitorIndexes.begin(), monitorIndexes.end(), spectrumNum);
   (itr != monitorIndexes.end()) ? (bMonitor = true) : (bMonitor = false);
   return bMonitor;
@@ -603,8 +603,8 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
 {
   (void) binclude; // Avoid compiler warning
 
-  std::vector<int64_t> monitorSpecList;
-  std::vector<int64_t> monitorwsList;
+  std::vector<specid_t> monitorSpecList;
+  std::vector<specid_t> monitorwsList;
   DataObjects::Workspace2D_sptr monitorWorkspace;
   FILE *file(NULL);
   getmonitorSpectrumList(localWorkspace, monitorSpecList);

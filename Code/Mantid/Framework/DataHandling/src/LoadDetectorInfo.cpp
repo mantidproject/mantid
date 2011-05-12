@@ -563,8 +563,7 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
   for ( size_t specInd = 0; specInd < m_numHists; ++specInd )
   {// check if we dealing with a monitor as these are dealt by a different function
     const specid_t specNum = m_workspace->getAxis(1)->spectraNo(specInd);
-    const std::vector<int64_t> dets =
-      m_workspace->spectraMap().getDetectors(specNum);
+    const std::vector<detid_t> dets = m_workspace->spectraMap().getDetectors(specNum);
     if ( dets.size() > 0 ) 
     {// is it in the monitors list
       if ( m_monitors.find(dets[0]) == m_monitors.end() )
@@ -652,7 +651,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
     }
     const int64_t specIndex = specs2index[spectraList[j]];
     // check if we dealing with a monitor as these are dealt by a different function
-    const std::vector<int64_t> dets =
+    const std::vector<detid_t> dets =
       m_workspace->spectraMap().getDetectors(spectraList[j]);
     if ( dets.size() > 0 )
     {// is it in the monitors list

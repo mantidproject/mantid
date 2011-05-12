@@ -107,14 +107,14 @@ namespace DataHandling
     fout <<"# Format: number    UDET         offset    select    group\n";
 
     // Get all the detectors
-    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
     inst->getDetectors(allDetectors);
     int64_t number=0;
 
-    std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
+    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
-      int64_t detectorID = it->first;
+      detid_t detectorID = it->first;
       Geometry::IDetector_sptr det = it->second;
 
       //Find the offset, if any

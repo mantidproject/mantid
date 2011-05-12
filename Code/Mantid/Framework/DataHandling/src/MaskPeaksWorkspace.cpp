@@ -78,7 +78,7 @@ namespace Mantid
         v1.push_back(std::pair<double, int>(peaksW->getPeaks()[i].getBinCount(), i));
 
       //To get the workspace index from the detector ID
-      IndexToIndexMap * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
+      detid2index_map * pixel_to_wi = inputW->getDetectorIDToWorkspaceIndexMap(true);
       //Get some stuff from the input workspace
       Geometry::IInstrument_sptr inst = inputW->getInstrument();
       if (!inst)

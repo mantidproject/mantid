@@ -104,7 +104,7 @@ public:
   /** sets the monitorWorkspace indexlist
 	@param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<int64_t>& mList){m_monitorList=mList;}
+  void setMonitorList(std::vector<specid_t>& mList){m_monitorList=mList;}
 
    /** sets the number of histograms.This method is mainly useful when the user selects 
    monitor 'select' or 'exclude' options from loadraw UI
@@ -116,8 +116,8 @@ public:
 protected:
   /// The number of vectors in the workspace
   std::size_t m_noVectors;
-  /// a vector holding monitors in the workspace
-  std::vector<int64_t> m_monitorList;
+  /// a vector holding workspace index of monitors in the workspace
+  std::vector<specid_t> m_monitorList;
 
   virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 

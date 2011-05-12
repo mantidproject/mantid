@@ -276,9 +276,9 @@ namespace Mantid
 	  * @param readIndex :: a spectrum index
 	  * @return true if it's a monitor ,otherwise false
 	*/
-	bool ManagedRawFileWorkspace2D::isMonitor(const int64_t readIndex)const
+	bool ManagedRawFileWorkspace2D::isMonitor(const specid_t readIndex)const
 	{
-		std::vector<int64_t>::const_iterator itr;
+		std::vector<specid_t>::const_iterator itr;
 		for(itr=m_monitorList.begin();itr!=m_monitorList.end();++itr)
 		{
 			if((*itr)==readIndex)

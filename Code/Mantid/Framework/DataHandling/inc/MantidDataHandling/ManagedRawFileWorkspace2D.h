@@ -7,6 +7,7 @@
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/System.h"
 #include <Poco/Mutex.h>
+#include "MantidGeometry/IDetector.h"
 
 class ISISRAW2;
 
@@ -83,7 +84,7 @@ private:
   void openTempFile();
   void removeTempFile()const;
   /// returns true if the given spectrum index is a monitor
-  bool isMonitor(const int64_t readIndex) const;
+  bool isMonitor(const detid_t readIndex) const;
 
   boost::shared_ptr<ISISRAW2> isisRaw;        ///< Pointer to an ISISRAW2 object
   const std::string m_filenameRaw;///< RAW file name.

@@ -86,13 +86,13 @@ namespace DataHandling
     instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
     //To get all the detector ID's
-    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
     instrument->getDetectors(allDetectors);
 
     // Selects (empty, will default to true)
     std::map<int, bool> selects;
 
-    std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
+    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
     int64_t maxdetID = 0;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {

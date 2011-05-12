@@ -93,7 +93,7 @@ namespace Mantid
       void exec();
 	        
       /// returns true if the given spectrum is a monitor
-      bool isMonitor(const std::vector<int64_t>& monitorIndexes,int64_t spectrumNum);
+      bool isMonitor(const std::vector<specid_t>& monitorIndexes,specid_t spectrumNum);
       /// returns true if the Exclude Monitor option(property) selected
       bool isExcludeMonitors();
       ///  returns true if the Separate Monitor Option  selected
@@ -116,14 +116,14 @@ namespace Mantid
                                       int64_t numberOfSpectra,const std::string &fileName);
 
       /// creates output workspace, monitors excluded from this workspace
-      void excludeMonitors(FILE* file,const int64_t& period,const std::vector<int64_t>& monitorList,
+      void excludeMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
                            DataObjects::Workspace2D_sptr ws_sptr);
 
       /// creates output workspace whcih includes monitors
       void includeMonitors(FILE* file,const int64_t& period,DataObjects::Workspace2D_sptr ws_sptr);
 
       /// creates two output workspaces none normal workspace and separate one for monitors
-      void separateMonitors(FILE* file,const int64_t& period,const std::vector<int64_t>& monitorList,
+      void separateMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
                             DataObjects::Workspace2D_sptr ws_sptr,DataObjects::Workspace2D_sptr mws_sptr);
 
       ///sets optional properties

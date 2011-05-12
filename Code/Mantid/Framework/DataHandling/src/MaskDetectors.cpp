@@ -66,9 +66,9 @@ void MaskDetectors::exec()
   //Is it an event workspace?
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
 
-  std::vector<int64_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<int64_t> spectraList = getProperty("SpectraList");
-  const std::vector<int64_t> detectorList = getProperty("DetectorList");
+  std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
+  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  const std::vector<detid_t> detectorList = getProperty("DetectorList");
   const MatrixWorkspace_sptr prevMasking = getProperty("MaskedWorkspace");
 
   //each one of these values is optional but the user can't leave all four blank
@@ -94,7 +94,7 @@ void MaskDetectors::exec()
   else if ( ! detectorList.empty() )
   {
     // Convert from detectors to spectra numbers
-    std::vector<int64_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
+    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     fillIndexListFromSpectra(indexList,mySpectraList,WS);
   }
@@ -111,7 +111,7 @@ void MaskDetectors::exec()
   // If explicitly given a list of detectors to mask, just mark those.
   // Otherwise, mask all detectors pointing to the requested spectra in indexlist loop below
   bool detsMasked = false;
-  std::vector<int64_t>::const_iterator it;
+  std::vector<detid_t>::const_iterator it;
   boost::shared_ptr<Instrument> instrument = WS->getBaseInstrument();
   if ( !detectorList.empty() )
   {
@@ -141,14 +141,15 @@ void MaskDetectors::exec()
   // Get a reference to the spectra-detector map to get hold of detector ID's
   const SpectraDetectorMap& specMap = WS->spectraMap();
   double prog=0.0;
-  for (it = indexList.begin(); it != indexList.end(); ++it)
+  std::vector<size_t>::const_iterator wit;
+  for (wit = indexList.begin(); wit != indexList.end(); ++wit)
   {
     if (!detsMasked)
     {
       // In this case, mask all detectors contributing to spectrum
-      int spectrum_number = WS->getAxis(1)->spectraNo(*it);
-      const std::vector<int64_t> dets = specMap.getDetectors(spectrum_number);
-      for (std::vector<int64_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+      int spectrum_number = WS->getAxis(1)->spectraNo(*wit);
+      const std::vector<detid_t> dets = specMap.getDetectors(spectrum_number);
+      for (std::vector<detid_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
         try
         {
@@ -167,13 +168,13 @@ void MaskDetectors::exec()
     if (eventWS)
     {
       //Valid event workspace - clear the event list.
-      eventWS->getEventList(*it).clear();
+      eventWS->getEventList(*wit).clear();
     }
     else
     {
       // Zero the workspace spectra (data and errors, not X values)
-      WS->dataY(*it).assign(vectorSize,0.0);
-      WS->dataE(*it).assign(vectorSize,0.0);
+      WS->dataY(*wit).assign(vectorSize,0.0);
+      WS->dataE(*wit).assign(vectorSize,0.0);
     }
 
     //Progress
@@ -195,7 +196,7 @@ void MaskDetectors::exec()
  * @param spectraList :: A list of spectra numbers
  * @param WS :: The input workspace to be masked
  */
-void MaskDetectors::fillIndexListFromSpectra(std::vector<int64_t>& indexList, const std::vector<int64_t>& spectraList,
+void MaskDetectors::fillIndexListFromSpectra(std::vector<size_t>& indexList, const std::vector<specid_t>& spectraList,
 					     const API::MatrixWorkspace_sptr WS)
 {
   // Convert the vector of properties into a set for easy searching
@@ -221,7 +222,7 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<int64_t>& indexList, co
  * @param indexList :: An existing list of indices
  * @param maskedWorkspace :: An workspace with masked spectra
  */
-void MaskDetectors::appendToIndexListFromWS(std::vector<int64_t>& indexList, const MatrixWorkspace_sptr maskedWorkspace)
+void MaskDetectors::appendToIndexListFromWS(std::vector<size_t>& indexList, const MatrixWorkspace_sptr maskedWorkspace)
 {
   // Convert the vector of properties into a set for easy searching
   std::set<int64_t> existingIndices(indexList.begin(), indexList.end());

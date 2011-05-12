@@ -402,7 +402,7 @@ namespace Mantid
     {
       // Get the number of monitor channels
       boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
-      std::vector<int64_t> monitors = instrument->getMonitors();
+      std::vector<detid_t> monitors = instrument->getMonitors();
       int64_t nMonitors = static_cast<int64_t>(monitors.size());
 
       // Number of monitors should be consistent with data file format
@@ -414,8 +414,8 @@ namespace Mantid
       }
 
       int ndet = nxbins*nybins + nMonitors;
-      boost::shared_array<int64_t> udet(new int64_t[ndet]);
-      boost::shared_array<int64_t> spec(new int64_t[ndet]);
+      boost::shared_array<detid_t> udet(new detid_t[ndet]);
+      boost::shared_array<specid_t> spec(new specid_t[ndet]);
 
       // Generate mapping of detector/channel IDs to spectrum ID
 
