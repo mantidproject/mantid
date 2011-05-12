@@ -352,7 +352,7 @@ namespace Mantid
 
       //Run in parallel if the implementation is threadsafe
       PARALLEL_FOR_IF( this->threadSafe() )
-      for (size_t wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
+      for (int wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
       {
         // Get Handle to data
         const Mantid::MantidVec& x=this->readX(wksp_index);
