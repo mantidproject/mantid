@@ -14,6 +14,7 @@
 #include "MantidAPI/WorkspaceProperty.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::Algorithms;
@@ -537,7 +538,7 @@ public:
       MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateEventWorkspace(3,10,100, 0.0, 1.0, 2, 100); //200 events per spectrum, but the spectra are at different pixel ids
 
       //First pixel id of rhs is 100
-      IndexToIndexMap *rhs_map = work_in2->getWorkspaceIndexToDetectorIDMap();
+      index2detid_map *rhs_map = work_in2->getWorkspaceIndexToDetectorIDMap();
       TS_ASSERT_EQUALS( (*rhs_map)[0], 100);
 
       MatrixWorkspace_sptr work_out = performTest(work_in1,work_in2, inplace, true /*outputIsEvent*/,
@@ -550,7 +551,7 @@ public:
       //But two detector IDs in each one
       for (int i=0; i<3; i++)
       {
-        std::vector<int64_t> detList = work_out->spectraMap().getDetectors(i);
+        std::vector<detid_t> detList = work_out->spectraMap().getDetectors(i);
         TS_ASSERT_EQUALS( detList[0], 0+i );
         if (DO_PLUS)
         {

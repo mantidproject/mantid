@@ -18,6 +18,7 @@
 
 #include "MantidAlgorithms/RemoveLowResTOF.h"
 
+using namespace Mantid;
 using namespace Mantid::Algorithms;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
@@ -42,7 +43,7 @@ private:
     myMap.clear();
     for (int i = 0; i < NUMPIXELS; i++)
     {
-      std::set<int64_t> detids;
+      std::set<detid_t> detids;
       detids.insert(static_cast<int64_t>(i+1));
       myMap.addSpectrumEntries(i, detids);
     }

@@ -131,7 +131,7 @@ public:
     //Checks on the workspace
     EventWorkspace_const_sptr inputW = boost::dynamic_pointer_cast<const EventWorkspace>(AnalysisDataService::Instance().retrieve(wsName));
     TS_ASSERT_EQUALS( inputW->getNumberHistograms(), NUMPIXELS);
-    IndexToIndexMap * m;
+    detid2index_map * m;
     m = inputW->getDetectorIDToWorkspaceIndexMap(true);
     TS_ASSERT_EQUALS( m->size(), NUMPIXELS);
     //2 events per bin

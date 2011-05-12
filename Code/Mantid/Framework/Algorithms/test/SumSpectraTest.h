@@ -1,16 +1,16 @@
 #ifndef SUMSPECTRATEST_H_
 #define SUMSPECTRATEST_H_
 
-#include <cxxtest/TestSuite.h>
-
 #include "MantidAlgorithms/SumSpectra.h"
 #include "MantidAPI/AnalysisDataService.h"
-#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidAPI/SpectraDetectorMap.h"
-#include "MantidGeometry/Instrument/ParameterMap.h"
+#include "MantidAPI/WorkspaceFactory.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidGeometry/Instrument/ParameterMap.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 
@@ -90,7 +90,7 @@ public:
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int64_t> dets = specMap_out.getDetectors(newSpectrumNo);
+    std::vector<detid_t> dets = specMap_out.getDetectors(newSpectrumNo);
     if( dets.size() == 0 ) 
     {
       TS_FAIL("SpectraMap has been remapped incorrectly");
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int64_t> dets = specMap_out.getDetectors(newSpectrumNo);
+    std::vector<detid_t> dets = specMap_out.getDetectors(newSpectrumNo);
     if( dets.size() == 0 ) 
     {
       TS_FAIL("SpectraMap has been remapped incorrectly");
