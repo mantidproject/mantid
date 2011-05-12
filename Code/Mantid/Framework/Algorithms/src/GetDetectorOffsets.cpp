@@ -60,8 +60,8 @@ namespace Mantid
       declareProperty("XMin",0.0, "Minimum of CrossCorrelation data to search for peak, usually negative");
       declareProperty("XMax",0.0, "Maximum of CrossCorrelation data to search for peak, usually positive");
 
-//      declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
-//          "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
+      declareProperty(new FileProperty("GroupingFileName","", FileProperty::OptionalSave, ".cal"),
+          "Optional: The name of the output CalFile to save the generated OffsetsWorkspace." );
 
       declareProperty(new WorkspaceProperty<OffsetsWorkspace>("OutputWorkspace","",Direction::Output),
           "An output workspace containing the offsets.");
@@ -105,6 +105,18 @@ namespace Mantid
 
       // Return the output
       setProperty("OutputWorkspace",outputW);
+
+      // Also save to .cal file, if requested
+      std::string filename=getProperty("GroupingFileName");
+      if (!filename.empty())
+      {
+        progress(0.9, "Saving .cal file");
+        IAlgorithm_sptr childAlg = createSubAlgorithm("SaveCalFile");
+        childAlg->setProperty("OffsetsWorkspace", outputW);
+        childAlg->setPropertyValue("Filename", filename);
+        childAlg->executeAsSubAlg();
+      }
+
     }
 
 
