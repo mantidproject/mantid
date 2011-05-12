@@ -438,7 +438,7 @@ public:
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
 
     const SpectraDetectorMap &specDetecMap = output2D1->spectraMap();
-    std::vector<int> specDet = specDetecMap.getDetectors(1);
+    std::vector<int64_t> specDet = specDetecMap.getDetectors(1);
     TS_ASSERT_EQUALS( specDet[0], 1);
     specDet = specDetecMap.getDetectors(2);
     TS_ASSERT_EQUALS( specDet[0], 2);
