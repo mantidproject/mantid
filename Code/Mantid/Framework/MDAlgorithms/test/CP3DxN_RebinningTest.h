@@ -40,7 +40,7 @@ bool load_existing_workspace(const std::string &workspace_name){
 
 }
 
-class testCPrebinning :    public CxxTest::TestSuite
+class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 {
        std::string InputWorkspaceName;
        std::string OutWorkspaceName;
