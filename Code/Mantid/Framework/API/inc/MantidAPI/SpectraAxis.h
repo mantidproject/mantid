@@ -4,19 +4,13 @@
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
+#include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
-#include "MantidAPI/Axis.h"
-
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>
-
-#ifndef HAS_UNORDERED_MAP_H
-#include <map>
-#else
-#include <tr1/unordered_map>
-#endif
 
 namespace Mantid
 {
@@ -55,11 +49,6 @@ class MatrixWorkspace;
 class DLLExport SpectraAxis: public Axis
 {
 public:
-	#ifndef HAS_UNORDERED_MAP_H
-    typedef std::map<int64_t,int64_t> spec2index_map; ///< The storage for the spectrum number to index map
-	#else
-    typedef std::tr1::unordered_map<int64_t,int64_t> spec2index_map;
-	#endif
   SpectraAxis(const std::size_t& length);
   virtual ~SpectraAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
@@ -71,11 +60,11 @@ public:
   virtual bool operator==(const Axis&) const;
   std::string label(const std::size_t& index)const;
 
-  const int64_t& spectraNo(const std::size_t& index) const;
-  int64_t& spectraNo(const std::size_t& index);
+  const specid_t& spectraNo(const std::size_t& index) const;
+  specid_t& spectraNo(const std::size_t& index);
   // Get a map that contains the spectra index as the key and the index in the array as teh value
   void getSpectraIndexMap(spec2index_map&) const;
-  void getIndexSpectraMap(spec2index_map& map) const;
+  void getIndexSpectraMap(index2spec_map& map) const;
 
   void populateSimple(int64_t end);
 
@@ -83,7 +72,7 @@ private:
   /// Private, undefined copy assignment operator
   const SpectraAxis& operator=(const SpectraAxis&);
   /// A vector holding the axis values for the axis.
-  std::vector<int64_t> m_values;
+  std::vector<specid_t> m_values;
 };
 
 } // namespace API

@@ -166,12 +166,12 @@ namespace Mantid
     *    KEY is the Workspace Index
     *    VALUE is the Spectrum #
     */
-    IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToSpectrumMap() const
+    index2spec_map * MatrixWorkspace::getWorkspaceIndexToSpectrumMap() const
     {
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToSpectrumMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-      IndexToIndexMap * map = new IndexToIndexMap();
+      index2spec_map * map = new index2spec_map();
       try
       {
         ax->getIndexSpectraMap(*map);
@@ -189,12 +189,12 @@ namespace Mantid
     *    KEY is the Spectrum #
     *    VALUE is the Workspace Index
     */
-    IndexToIndexMap * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
+    spec2index_map * MatrixWorkspace::getSpectrumToWorkspaceIndexMap() const
     {
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getSpectrumToWorkspaceIndexMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
-      IndexToIndexMap * map = new IndexToIndexMap();
+      spec2index_map * map = new spec2index_map();
       try
       {
         ax->getSpectraIndexMap(*map);
@@ -216,7 +216,7 @@ namespace Mantid
     *  @throw runtime_error if there is more than one detector per spectrum (if throwIfMultipleDets is true)
     *  @return Index to Index Map object
     */
-    IndexToIndexMap * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
+    detid2index_map * MatrixWorkspace::getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const
     {
       if (this->m_axes.size() < 2)
       {
@@ -226,7 +226,7 @@ namespace Mantid
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getDetectorIDToWorkspaceIndexMap(): axis[1] is not a SpectraAxis, so I cannot generate a map.");
 
-      IndexToIndexMap * map = new IndexToIndexMap();
+      detid2index_map * map = new detid2index_map();
       //Loop through the workspace index
       for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
@@ -267,13 +267,13 @@ namespace Mantid
     *  @throw runtime_error if there is more than one detector per spectrum, or other incompatibilities.
     *  @return Map of workspace index to detector/pixel id.
     */
-    IndexToIndexMap * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
+    index2detid_map * MatrixWorkspace::getWorkspaceIndexToDetectorIDMap() const
     {
       SpectraAxis * ax = dynamic_cast<SpectraAxis * >( this->m_axes[1] );
       if (!ax)
         throw std::runtime_error("MatrixWorkspace::getWorkspaceIndexToDetectorIDMap: axis[1] is not a SpectraAxis, so I cannot generate a map.");
 
-      IndexToIndexMap * map = new IndexToIndexMap();
+      index2detid_map * map = new index2detid_map();
       //Loop through the workspace index
       for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
@@ -443,14 +443,14 @@ namespace Mantid
     *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
     do not contain the requested spectrum number of detector ID
     */
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const specid_t index) const
+    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const size_t workspaceIndex) const
     {
       if ( ! m_spectramap->nElements() )
       {
         throw std::runtime_error("SpectraDetectorMap has not been populated.");
       }
 
-      const specid_t spectrum_number = getAxis(1)->spectraNo(index);
+      const specid_t spectrum_number = getAxis(1)->spectraNo(workspaceIndex);
       const std::vector<detid_t> dets = m_spectramap->getDetectors(spectrum_number);
       if ( dets.empty() )
       {

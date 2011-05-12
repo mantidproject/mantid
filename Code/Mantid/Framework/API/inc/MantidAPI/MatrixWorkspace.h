@@ -34,10 +34,10 @@ namespace Mantid
   namespace API
   {
 
-    /** Map from one type of index (e.g. workspace index) to another type (e.g. spectrum # or detector id #).
-    * Used by MatrixWorkspace to return maps.
-    */
-    typedef std::map<int64_t, int64_t> IndexToIndexMap;
+//    /** Map from one type of index (e.g. workspace index) to another type (e.g. spectrum # or detector id #).
+//    * Used by MatrixWorkspace to return maps.
+//    */
+//    typedef std::map<int64_t, int64_t> IndexToIndexMap;
 
     // Map for associating indexes to generated MDPoints.
     typedef std::map<int64_t, Mantid::Geometry::MDPoint> MatrixMDPointMap;
@@ -97,10 +97,10 @@ namespace Mantid
       virtual SpectraDetectorMap& mutableSpectraMap();
 
       // More mapping
-      IndexToIndexMap * getWorkspaceIndexToSpectrumMap() const;
-      IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
-      IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
-      IndexToIndexMap * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
+      index2spec_map * getWorkspaceIndexToSpectrumMap() const;
+      spec2index_map * getSpectrumToWorkspaceIndexMap() const;
+      index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
+      detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
 
       /// Sample accessors
@@ -112,10 +112,8 @@ namespace Mantid
       /// Writable version of the run object
       Run& mutableRun();
 
-      /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
-      Geometry::IDetector_sptr getDetector(const specid_t spectrumNumber) const;
+      Geometry::IDetector_sptr getDetector(const size_t workspaceIndex) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
-      /// Calculates the drop of a neutron coming from the sample, there isn't currently a Mantid convention for which axis is vertical
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
 
       /// Get the footprint in memory in bytes.

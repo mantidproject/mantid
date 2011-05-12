@@ -1,9 +1,7 @@
 #ifndef MANTID_API_AXIS_H_
 #define MANTID_API_AXIS_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include <boost/shared_ptr.hpp>
@@ -78,8 +76,8 @@ public:
   /// @param index :: The index
   /// @param value :: The new value
   virtual void setValue(const std::size_t& index, const double& value) = 0;
-  virtual const int64_t& spectraNo(const std::size_t& index) const;
-  virtual int64_t& spectraNo(const std::size_t& index);
+  virtual const specid_t& spectraNo(const std::size_t& index) const;
+  virtual specid_t& spectraNo(const std::size_t& index);
 
   /// Get the length of the axis
   virtual std::size_t length() const = 0;

@@ -71,7 +71,7 @@ void Axis::setUnit(const std::string & unit)
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-const int64_t& Axis::spectraNo(const size_t& index) const
+const specid_t& Axis::spectraNo(const size_t& index) const
 {
   UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
@@ -82,7 +82,7 @@ const int64_t& Axis::spectraNo(const size_t& index) const
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-int64_t& Axis::spectraNo(const size_t& index)
+specid_t& Axis::spectraNo(const size_t& index)
 {
   UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");

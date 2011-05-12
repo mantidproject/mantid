@@ -5,6 +5,7 @@
 #include "MantidKernel/Exception.h"
 
 #include <boost/lexical_cast.hpp>
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -67,7 +68,7 @@ void SpectraAxis::setValue(const size_t& index, const double& value)
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const int64_t& SpectraAxis::spectraNo(const size_t& index) const
+const specid_t& SpectraAxis::spectraNo(const size_t& index) const
 {
   if (index >= length())
   {
@@ -83,7 +84,7 @@ const int64_t& SpectraAxis::spectraNo(const size_t& index) const
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-int64_t& SpectraAxis::spectraNo(const size_t& index)
+specid_t& SpectraAxis::spectraNo(const size_t& index)
 {
   if (index >= length())
   {
@@ -97,7 +98,7 @@ int64_t& SpectraAxis::spectraNo(const size_t& index)
  *  This is used for efficient search of spectra number within a workspace
  *  @param  map Reference to the map
  */
-void SpectraAxis::getIndexSpectraMap(spec2index_map& map)const
+void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
 {
   int64_t nel=m_values.size();
 

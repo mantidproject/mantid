@@ -7,6 +7,7 @@
 #include "MantidGeometry/IDetector.h"
 #include <boost/shared_ptr.hpp>
 #include <vector>
+
 #ifndef HAS_UNORDERED_MAP_H
   #include <map>
 #else
@@ -16,8 +17,20 @@
 namespace Mantid
 {
 
-/// Typedef for a spectrum index (ID)
-typedef int32_t specid_t;
+  /// Typedef for a spectrum index (ID)
+  typedef int32_t specid_t;
+
+#ifndef HAS_UNORDERED_MAP_H
+  /// Map with key = spectrum number, value = workspace index
+  typedef std::map<specid_t,size_t> spec2index_map;
+  /// Map with key = workspace index, value = spectrum number
+  typedef std::map<size_t, specid_t> index2spec_map;
+#else
+  /// Map with key = spectrum number, value = workspace index
+  typedef std::tr1::unordered_map<specid_t,size_t> spec2index_map;
+  /// Map with key = workspace index, value = spectrum number
+  typedef std::tr1::unordered_map<size_t,specid_t> spec2index_map;
+#endif
 
 namespace API
 {
