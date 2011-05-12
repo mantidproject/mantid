@@ -8,13 +8,13 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
+#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/BinaryFile.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidKernel/UnitFactory.h"
 #include <cmath>
 #include <fstream>
-#include "MantidGeometry/Instrument/Instrument.h"
 
 using namespace Mantid::Geometry;
 
@@ -50,6 +50,8 @@ using DataObjects::EventWorkspace_const_sptr;
 /// (Empty) Constructor
 CaltoDspacemap::CaltoDspacemap()
 {
+  this->useAlgorithm("LoadCalFile, then SaveDspacemap");
+  this->deprecatedDate("2011-05-12");
 }
 
 /// Destructor
@@ -85,16 +87,13 @@ void CaltoDspacemap::init()
  */
 void CaltoDspacemap::exec()
 {
-  // Get the input workspace
   const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-
-  // Read in the calibration data
   const std::string DFileName = getProperty("DspacemapFile");
-
   const std::string calFileName = getProperty("CalibrationFile");
 
   progress(0.0,"Reading calibration file");
-  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile");
+  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile", 0.0, 0.5);
+  alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("CalFilename", calFileName);
   alg->setProperty<bool>("MakeGroupingWorkspace", false);
   alg->setProperty<bool>("MakeOffsetsWorkspace", true);
@@ -104,80 +103,12 @@ void CaltoDspacemap::exec()
   OffsetsWorkspace_sptr offsetsWS;
   offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
 
-  // generate map of the tof->d conversion factors
-  CalculateDspaceFromCal(inputWS, DFileName, offsetsWS);
-
-}
-//-----------------------------------------------------------------------
-/**
- * Make a map of the conversion factors between tof and D-spacing
- * for all pixel IDs in a workspace.
- * @param inputWS the workspace containing the instrument geometry
- *    of interest.
- * @param DFileName name of dspacemap file
- * @param offsets map between pixelID and offset (from the calibration file)
- */
-void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_sptr inputWS,
-                                  std::string DFileName, 
-                                  Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS)
-{
-  const char * filename = DFileName.c_str();
-  // Get a pointer to the instrument contained in the workspace
-  IInstrument_const_sptr instrument = inputWS->getInstrument();
-  double l1;
-  Geometry::V3D beamline,samplePos;
-  double beamline_norm;
-  instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
-
-  //To get all the detector ID's
-  std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
-  instrument->getDetectors(allDetectors);
-
-  // Selects (empty, will default to true)
-  std::map<int64_t, bool> selects;
-
-  std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
-  int64_t maxdetID = 0;
-  for (it = allDetectors.begin(); it != allDetectors.end(); it++)
-  {
-    int64_t detectorID = it->first;
-    if(detectorID > maxdetID) maxdetID = detectorID;
-  }
-  int paddetID = getProperty("PadDetID");
-  if (maxdetID < paddetID)maxdetID = paddetID;
-
-  // Now write the POWGEN-style Dspace mapping file
-  std::ofstream fout(filename, std::ios_base::out|std::ios_base::binary);
-  Progress prog(this,0.0,1.0,maxdetID);
-
-  for (int i = 0; i != maxdetID; i++)
-  {
-    //Compute the factor
-    double factor;
-    Geometry::IDetector_sptr det;
-    for (it = allDetectors.begin(); it != allDetectors.end(); it++)
-    {
-      if(it->first == i) break;
-    }
-    det = it->second;
-    if(det)
-    {
-      factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
-      //Factor of 10 between ISAW and Mantid
-      factor *= 0.1 ;
-      if(factor<0)factor = 0.0;
-      fout.write( reinterpret_cast<char*>( &factor ), sizeof(double) );
-    }
-    else
-    {
-      factor = 0;
-      fout.write( reinterpret_cast<char*>( &factor ), sizeof(double) );
-    }
-    //Report progress
-    prog.report();
-
-  }
-  fout.close();
+  progress(0.5,"Saving dspacemap file");
+  alg = createSubAlgorithm("SaveDspacemap", 0.5, 1.0);
+  alg->setPropertyValue("Filename", DFileName);
+  alg->setProperty<int>("PadDetID", getProperty("PadDetID"));
+  alg->setProperty("InputWorkspace", offsetsWS);
+  alg->executeAsSubAlg();
 }
 
 } // namespace Algorithms

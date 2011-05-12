@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_CALTODSPACEMAP_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidAPI/DeprecatedAlgorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 #include "MantidKernel/System.h"
@@ -44,7 +45,7 @@ namespace Algorithms
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
-class DLLExport CaltoDspacemap : public API::Algorithm
+class DLLExport CaltoDspacemap : public API::Algorithm, public API::DeprecatedAlgorithm
 {
 public:
   CaltoDspacemap();
