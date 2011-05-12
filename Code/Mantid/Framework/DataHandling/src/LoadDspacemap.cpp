@@ -140,7 +140,7 @@ namespace DataHandling
     instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
     //To get all the detector ID's
-    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
     instrument->getDetectors(allDetectors);
 
     //Read in the POWGEN-style Dspace mapping file
@@ -196,13 +196,13 @@ namespace DataHandling
     IInstrument_const_sptr instrument = offsetsWS->getInstrument();
 
     //To get all the detector ID's
-    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
+    std::map<detid_t, Geometry::IDetector_sptr> allDetectors;
     instrument->getDetectors(allDetectors);
 
     // Selects (empty, will default to true)
-    std::map<int64_t, bool> selects;
+    std::map<detid_t, bool> selects;
 
-    std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
+    std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       int detectorID = it->first;
@@ -212,7 +212,7 @@ namespace DataHandling
 
       // Find the vulcan factor;
       double vulcan_factor = 0.0;
-      std::map<int64_t,double>::const_iterator vulcan_iter = vulcan.find(detectorID);
+      std::map<detid_t,double>::const_iterator vulcan_iter = vulcan.find(detectorID);
       if( vulcan_iter != vulcan.end() )
         vulcan_factor = vulcan_iter->second;
       // The actual factor is 10^(-value_in_the_file)

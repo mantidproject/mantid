@@ -121,7 +121,7 @@ namespace Mantid
 
 
       ///gets the monitor spectrum list from the workspace
-      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int64_t>& monitorSpecList);
+      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<detid_t>& monitorSpecList);
 
       /// sets the workspace property 
       void setWorkspaceProperty(const std::string & propertyName,const std::string& title,

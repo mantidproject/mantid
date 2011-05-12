@@ -109,15 +109,15 @@ private:
   void readRAW(const std::string& fName);
 
   void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int64_t> &detectIDs=std::vector<int64_t>(), const std::vector<float> &delays=std::vector<float>());
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, std::size_t numDetectors);
-  void adjustXs(const std::vector<int64_t> &detIDs, const std::vector<float> &offsets);
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs=std::vector<detid_t>(), const std::vector<float> &delays=std::vector<float>());
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, std::size_t numDetectors);
+  void adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets);
   void adjustXs(const double detectorOffset);
-  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors);
-  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors);
-  void noteMonitorOffset(const float offSet, const int64_t detID);
-  void setUpXArray(MantidVecPtr &theXValuesArray, int64_t specInd, double offset);
-  void logErrorsFromRead(const std::vector<int64_t> &missingDetectors);
+  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
+  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
+  void noteMonitorOffset(const float offSet, const detid_t detID);
+  void setUpXArray(MantidVecPtr &theXValuesArray, specid_t specInd, double offset);
+  void logErrorsFromRead(const std::vector<detid_t> &missingDetectors);
   void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
 
   /// used to check that all the monitors have the same offset time

@@ -72,7 +72,7 @@ namespace Mantid
 
       // Get detectors stored in instrument and create dummy c-arrays for the purpose
       // of calling method of SpectraDetectorMap 
-      std::map<int64_t, IDetector_sptr> detCache;
+      std::map<detid_t, IDetector_sptr> detCache;
       //FIXME: Use GetDetectorID's here since it'll be way faster.
       instrument->getDetectors(detCache);
       const int64_t number_spectra = static_cast<int64_t>(detCache.size());
@@ -88,8 +88,8 @@ namespace Mantid
         API::WorkspaceFactory::Instance().initializeFromParent(ws, localWorkspace, false);
 
         // Make one pixel per detector
-        int64_t wi=0;
-        std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
+        size_t wi=0;
+        std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
         for ( it = detCache.begin(); it != detCache.end(); ++it )
         {
           localWorkspace->getOrAddEventList(wi).clear(true);
@@ -112,11 +112,11 @@ namespace Mantid
         DataObjects::Workspace2D_sptr localWorkspace =
           boost::dynamic_pointer_cast<DataObjects::Workspace2D>(WorkspaceFactory::Instance().create(ws,number_spectra,2,1));
 
-        int64_t *spec = new int64_t[number_spectra];
-        int64_t *udet = new int64_t[number_spectra];
+        specid_t *spec = new specid_t[number_spectra];
+        detid_t *udet = new detid_t[number_spectra];
 
-        std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
-        int64_t counter = 0;
+        std::map<detid_t, Geometry::IDetector_sptr>::const_iterator it;
+        size_t counter = 0;
         for ( it = detCache.begin(); it != detCache.end(); ++it )
         {
           counter++;

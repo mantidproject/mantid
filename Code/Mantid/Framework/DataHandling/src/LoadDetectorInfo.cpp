@@ -160,7 +160,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
   getline(sFile,str);
 
   // will store all hte detector IDs that we get data for
-  std::vector<int64_t> detectorList;
+  std::vector<detid_t> detectorList;
   detectorList.reserve(detectorCount);
   // stores the time offsets that the TOF X-values will be adjusted by at the end
   std::vector<float> offsets;
@@ -168,7 +168,7 @@ void LoadDetectorInfo::readDAT(const std::string& fName)
   float detectorOffset = UNSETOFFSET;
   bool differentOffsets = false;
   // used only for progress and logging
-  std::vector<int64_t> missingDetectors;
+  std::vector<detid_t> missingDetectors;
   int count = 0, detectorProblemCount = 0;
   detectorInfo log;
   bool noneSet = true;
@@ -310,7 +310,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
   }
 
   int detectorProblemCount = 0;
-  std::vector<int64_t> missingDetectors;
+  std::vector<detid_t> missingDetectors;
   // the process will run a lot more quickly if all the detectors have the same offset time, monitors can have a different offset but it is an error if the offset for two monitors is different
   float detectorOffset =  UNSETOFFSET;
   bool differentOffsets = false;
@@ -455,7 +455,8 @@ void LoadDetectorInfo::setDetectorParams(const detectorInfo &params, detectorInf
 *  @param detectIDs :: the list of detector IDs needs to corrospond to the next argument, list of delays
 *  @param delays :: ommitting or passing an empty list of delay times forces common bins to be used, any delays need to be in the same order as detectIDs
 */
-void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int64_t> &detectIDs, const std::vector<float> &delays)
+void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs,
+    const std::vector<float> &delays)
 {
   // a spectra wont be adjusted if their detector wasn't included in the input file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace
   differentDelays = differentDelays || ( delays.size() < m_numHists );
@@ -480,13 +481,14 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 *  @param detectIDs :: the list of detector IDs is required regardless of how differentDelays is needs to be in the same order as delays
 *  @param delays :: required regardless of if differentDelays is true or false and needs to be in the same order as detectIDs
 *  @param numDetectors :: the size of the arrays pointed to by delays and detectIDs
-*/void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, size_t numDetectors)
+*/void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs,
+    const float * const delays, size_t numDetectors)
 {
   // a spectra wont be adjusted if their detector wasn't included in the RAW file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace 
   differentDelays = differentDelays || ( numDetectors < m_numHists );
   if ( differentDelays )
   {
-    const std::vector<int64_t> detectorList(detectIDs, detectIDs + numDetectors);
+    const std::vector<detid_t> detectorList(detectIDs, detectIDs + numDetectors);
     const std::vector<float> offsets(delays, delays + numDetectors);
     adjDelayTOFs(lastOffset, differentDelays, detectorList, offsets);
   }
@@ -504,14 +506,14 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 *  @throw IndexError if there is a problem converting spectra indexes to spectra numbers, which would imply there is a problem with the workspace
 *  @throw runtime_error if the SpectraDetectorMap had not been filled
 */
-void LoadDetectorInfo::adjustXs(const std::vector<int64_t> &detIDs, const std::vector<float> &offsets)
+void LoadDetectorInfo::adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets)
 {
   // getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   // function adds zero if it can't find a detector into the new, probably large, multimap of detectorIDs to spectra numbers
-  std::vector<int64_t> spectraList = m_workspace->spectraMap().getSpectra(detIDs);
+  std::vector<specid_t> spectraList = m_workspace->spectraMap().getSpectra(detIDs);
 
   // allow spectra number to spectra index look ups
-  std::map<int64_t,int64_t> specs2index;
+  spec2index_map specs2index;
   const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(m_workspace->getAxis(1));
   if (axis)
   {
@@ -524,7 +526,7 @@ void LoadDetectorInfo::adjustXs(const std::vector<int64_t> &detIDs, const std::v
     throw Exception::MisMatch<size_t>(spectraList.size(), detIDs.size(), "Couldn't associate some detectors or monitors to spectra, are there some spectra missing?");
   }
   //used for logging
-  std::vector<int64_t> missingDetectors;
+  std::vector<detid_t> missingDetectors;
 
   if ( m_commonXs )
   {// we can be memory efficient and only write a new set of bins when the offset has changed
@@ -560,7 +562,7 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
 
   for ( size_t specInd = 0; specInd < m_numHists; ++specInd )
   {// check if we dealing with a monitor as these are dealt by a different function
-    const int64_t specNum = m_workspace->getAxis(1)->spectraNo(specInd);
+    const specid_t specNum = m_workspace->getAxis(1)->spectraNo(specInd);
     const std::vector<int64_t> dets =
       m_workspace->spectraMap().getDetectors(specNum);
     if ( dets.size() > 0 ) 
@@ -630,7 +632,8 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
 * @param specs2index :: a map that allows finding a spectra indexes from spectra numbers
 * @param missingDetectors :: this will be filled with the array indices of the detector offsets that we can't find spectra indices for
 */
-void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors)
+void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList,
+    spec2index_map &specs2index, std::vector<detid_t> missingDetectors)
 {
   // space for cached values
   float cachedOffSet = UNSETOFFSET;
@@ -687,7 +690,8 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
 * @param specs2index :: a map that allows finding a spectra indexes from spectra numbers
 * @param missingDetectors :: this will be filled with the array indices of the detector offsets that we can't find spectra indices for
 */
-void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors)
+void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList,
+    spec2index_map &specs2index, std::vector<detid_t> missingDetectors)
 {// the monitors can't have diferent offsets so I can cache the bin boundaries for all the monitors
   MantidVecPtr monitorXs;
 
@@ -701,9 +705,9 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
       // and then move on to the next detector in the loop
       continue;
     }
-    const int64_t specIndex = specs2index[spectraList[j]];
+    const specid_t specIndex = specs2index[spectraList[j]];
     // check if we dealing with a monitor as these are dealt by a different function
-    const std::vector<int64_t> dets =
+    const std::vector<detid_t> dets =
       m_workspace->spectraMap().getDetectors(spectraList[j]);
     if ( dets.size() > 0 ) 
     {// is it in the monitors list
@@ -737,7 +741,7 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
 *  @param detID :: the the monitor's detector ID number
 *  @throw invalid_argument if it finds a monitor that has a different offset from the rest
 */
-void LoadDetectorInfo::noteMonitorOffset(const float offSet, const int64_t detID)
+void LoadDetectorInfo::noteMonitorOffset(const float offSet, const detid_t detID)
 {
   // this algorithm assumes monitors have the same offset (it saves looking for the "master" or "time zero" monitor). So the first time this function is called we accept any offset, on subsequent calls we check
   if ( offSet != m_monitOffset && m_monitOffset != UNSETOFFSET )
@@ -756,7 +760,7 @@ void LoadDetectorInfo::noteMonitorOffset(const float offSet, const int64_t detID
 * @param specInd :: index number of histogram from with to take the original X-values 
 * @param offset :: _subtract_ this number from all the X-values
 */
-void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, int64_t specInd, double offset)
+void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, specid_t specInd, double offset)
 {
   std::vector<double> &AllXbins = theXValuesArray.access();
   AllXbins.resize(m_workspace->dataX(specInd).size());
@@ -769,7 +773,7 @@ void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, int64_t specIn
 /** Reports information on detectors that we couldn't get a pointer to, if any of these errors occured
 *  @param missingDetectors :: detector IDs of detectors that we couldn't get a pointer to
 */
-void LoadDetectorInfo::logErrorsFromRead(const std::vector<int64_t> &missingDetectors)
+void LoadDetectorInfo::logErrorsFromRead(const std::vector<detid_t> &missingDetectors)
 {
   if ( missingDetectors.size() > 0 )
   {

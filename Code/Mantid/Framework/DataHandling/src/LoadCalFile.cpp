@@ -213,7 +213,7 @@ namespace DataHandling
 
     size_t numErrors = 0;
 
-    IndexToIndexMap * detID_to_wi = NULL;
+    detid2index_map * detID_to_wi = NULL;
     if (doMask)
     {
       detID_to_wi = maskWS->getDetectorIDToWorkspaceIndexMap( false );
@@ -262,7 +262,7 @@ namespace DataHandling
 
       if (doMask)
       {
-        IndexToIndexMap::const_iterator it = detID_to_wi->find(udet);
+        detid2index_map::const_iterator it = detID_to_wi->find(udet);
         if (it != detID_to_wi->end())
         {
           int wi = it->second;

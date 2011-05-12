@@ -440,21 +440,21 @@ namespace Mantid
     *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
     */
     void LoadRawHelper::getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,
-      std::vector<int64_t>& monitorSpecList)
+      std::vector<detid_t>& monitorSpecList)
     {
       if (!m_monitordetectorList.empty())
       {
         const SpectraDetectorMap& specdetMap = localWorkspace->spectraMap();
         //get the monitor spectrum list from SpectraDetectorMap
-        std::vector<int64_t> specList = specdetMap.getSpectra(m_monitordetectorList);
+        std::vector<specid_t> specList = specdetMap.getSpectra(m_monitordetectorList);
         // remove duplicates by calling  sort & unique algorithms
         sort(specList.begin(), specList.end(), std::less<int>());
-        std::vector<int64_t>::iterator uEnd;
+        std::vector<specid_t>::iterator uEnd;
         uEnd = unique(specList.begin(), specList.end());
-        std::vector<int64_t> newVec;
+        std::vector<specid_t> newVec;
         newVec.assign(specList.begin(), uEnd);
         //remove if zeroes are  there in the Spectra list
-        std::vector<int64_t>::iterator itr;
+        std::vector<specid_t>::iterator itr;
         itr = find(newVec.begin(), newVec.end(), 0);
         if (itr != newVec.end())
           newVec.erase(itr);

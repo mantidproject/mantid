@@ -88,7 +88,7 @@ namespace Mantid
       std::string m_inputWorkspaceName;
 
       // Map from detector ID to WS index
-      API::IndexToIndexMap * map;
+      detid2index_map * map;
 
       // Progress reporting
       API::Progress * prog;

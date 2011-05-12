@@ -37,7 +37,7 @@ void GetMaskedDetectors::init()
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","", Direction::Input),
     "The name of the workspace that will be used as input for the algorithm" );
-  declareProperty(new ArrayProperty<int64_t>("DetectorList", new NullValidator<std::vector<int64_t> >, Direction::Output),
+  declareProperty(new ArrayProperty<detid_t>("DetectorList", new NullValidator<std::vector<detid_t> >, Direction::Output),
     "A comma separated list or array containing a list of masked detector ID's" );
 }
 
@@ -47,12 +47,12 @@ void GetMaskedDetectors::exec()
   const MatrixWorkspace_sptr WS = getProperty("InputWorkspace");
 
   // List masked of detector IDs
-  std::vector<int64_t> detectorList;
+  std::vector<detid_t> detectorList;
 
-  std::map<int64_t, Geometry::IDetector_sptr> det_map;
+  std::map<detid_t, Geometry::IDetector_sptr> det_map;
   WS->getInstrument()->getDetectors(det_map);
 
-  for (std::map<int64_t, Geometry::IDetector_sptr>::const_iterator iter = det_map.begin();
+  for (std::map<detid_t, Geometry::IDetector_sptr>::const_iterator iter = det_map.begin();
       iter != det_map.end(); ++iter )
   {
     if ( iter->second->isMasked() )

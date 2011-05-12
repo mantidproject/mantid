@@ -649,10 +649,10 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     {
       if (isMonitor(monitorSpecList, i + 1))
       {
-        std::map<int64_t, int64_t> wsIndexmap;
+        spec2index_map wsIndexmap;
         SpectraAxis* axis = dynamic_cast<SpectraAxis*>(localWorkspace->getAxis(1));
         axis->getSpectraIndexMap(wsIndexmap);
-        std::map<int64_t, int64_t>::const_iterator wsItr;
+        spec2index_map::const_iterator wsItr;
         wsItr = wsIndexmap.find(i + 1);
         if (wsItr != wsIndexmap.end())
           monitorwsList.push_back(wsItr->second);

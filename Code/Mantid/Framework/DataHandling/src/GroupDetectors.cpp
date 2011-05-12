@@ -55,9 +55,9 @@ void GroupDetectors::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
-  std::vector<int64_t> indexList = getProperty("WorkspaceIndexList");
-  std::vector<int64_t> spectraList = getProperty("SpectraList");
-  const std::vector<int64_t> detectorList = getProperty("DetectorList");
+  std::vector<size_t> indexList = getProperty("WorkspaceIndexList");
+  std::vector<specid_t> spectraList = getProperty("SpectraList");
+  const std::vector<detid_t> detectorList = getProperty("DetectorList");
 
   // Could create a Validator to replace the below
   if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
@@ -86,7 +86,7 @@ void GroupDetectors::exec()
   else if ( ! detectorList.empty() )
   {// Dealing with DetectorList
     //convert from detectors to spectra numbers
-    std::vector<int64_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
+    std::vector<specid_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     WS->getIndicesFromSpectra(mySpectraList,indexList);
   }

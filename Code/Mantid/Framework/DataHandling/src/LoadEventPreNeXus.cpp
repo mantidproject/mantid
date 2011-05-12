@@ -25,6 +25,7 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidDataHandling/LoadInstrumentHelper.h"
 #include "MantidKernel/DateAndTime.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace Mantid
 {
@@ -472,9 +473,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
     else
     {
-      std::map<int64_t, Geometry::IDetector_sptr> detector_map;
+      std::map<detid_t, Geometry::IDetector_sptr> detector_map;
       workspace->getInstrument()->getDetectors(detector_map);
-      std::map<int64_t, Geometry::IDetector_sptr>::iterator it;
+      std::map<detid_t, Geometry::IDetector_sptr>::iterator it;
       for (it = detector_map.begin(); it != detector_map.end(); it++)
       {
         //Go through each pixel in the map, but forget monitors.

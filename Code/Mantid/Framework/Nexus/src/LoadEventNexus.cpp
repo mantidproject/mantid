@@ -75,7 +75,7 @@ public:
    * @param event_index_ptr :: ptr to a vector of event index (length of # of pulses)
    * @return
    */
-  ProcessBankData(LoadEventNexus * alg, std::string entry_name, IndexToIndexMap * pixelID_to_wi_map,
+  ProcessBankData(LoadEventNexus * alg, std::string entry_name, detid2index_map * pixelID_to_wi_map,
       Progress * prog, ThreadScheduler * scheduler,
       uint32_t * event_id, float * event_time_of_flight,
       size_t numEvents, size_t startAt, std::vector<uint64_t> * event_index_ptr)
@@ -246,7 +246,7 @@ private:
   /// NXS path to bank
   std::string entry_name;
   /// Map of pixel ID to Workspace Index
-  IndexToIndexMap * pixelID_to_wi_map;
+  detid2index_map * pixelID_to_wi_map;
   /// Progress reporting
   Progress * prog;
   /// ThreadScheduler running this task
@@ -284,7 +284,7 @@ public:
    * @param ioMutex :: a mutex shared for all Disk I-O tasks
    * @param scheduler :: the ThreadScheduler that runs this task.
    */
-  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, IndexToIndexMap * pixelID_to_wi_map,
+  LoadBankFromDiskTask(LoadEventNexus * alg, std::string entry_name, detid2index_map * pixelID_to_wi_map,
       Progress * prog, Mutex * ioMutex, ThreadScheduler * scheduler)
   : Task(),
     alg(alg), entry_name(entry_name), pixelID_to_wi_map(pixelID_to_wi_map), prog(prog), scheduler(scheduler)
@@ -521,7 +521,7 @@ private:
   /// NXS path to bank
   std::string entry_name;
   /// Map of pixel ID to Workspace Index
-  IndexToIndexMap * pixelID_to_wi_map;
+  detid2index_map * pixelID_to_wi_map;
   /// Progress reporting
   Progress * prog;
   /// ThreadScheduler running this task
@@ -872,7 +872,7 @@ void LoadEventNexus::exec()
   Progress * prog2 = new Progress(this,0.3,1.0, bankNames.size()*3);
 
   //This map will be used to find the workspace index
-  IndexToIndexMap * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
+  detid2index_map * pixelID_to_wi_map = WS->getDetectorIDToWorkspaceIndexMap(false);
 
 //  // Now go through each bank.
 //  // This'll be parallelized - but you can't run it in parallel if you couldn't pad the pixels.
