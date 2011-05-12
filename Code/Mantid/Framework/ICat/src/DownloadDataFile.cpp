@@ -50,7 +50,7 @@ namespace Mantid
     /// declaring algorithm properties
     void CDownloadDataFile::init()
     {
-      declareProperty(new ArrayProperty<long long> ("FileIds"),"List of fileids to download from the data server");
+      declareProperty(new ArrayProperty<int64_t> ("FileIds"),"List of fileids to download from the data server");
       declareProperty(new ArrayProperty<std::string> ("FileNames"),"List of filenames to download from the data server");
       declareProperty( new ArrayProperty<std::string>("FileLocations",std::vector<std::string>(),new NullValidator<std::vector<std::string> >,
           Direction::Output),"A list of containing  locations of files downloaded from data server");
@@ -74,12 +74,12 @@ namespace Mantid
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
       //get file ids
-      std::vector<long long> fileids = getProperty("FileIds");
+      std::vector<int64_t> fileids = getProperty("FileIds");
       //get file names
       std::vector<std::string> filenames= getProperty("FileNames");
 
       std::vector<std::string> filelocations;
-      std::vector<long long>::const_iterator citr1 =fileids.begin();
+      std::vector<int64_t>::const_iterator citr1 =fileids.begin();
       std::vector<std::string>::const_iterator citr2=filenames.begin();
       m_prog =0.0;
       //loop over file ids
