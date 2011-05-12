@@ -118,7 +118,7 @@ namespace MDEvents
     size_t numEvents = el.getNumberEvents();
 
     // Get the position of the detector there.
-    std::set<int64_t>& detectors = el.getDetectorIDs();
+    std::set<detid_t>& detectors = el.getDetectorIDs();
     if (detectors.size() > 0)
     {
       // The 3D MDEvents that will be added into the MDEventWorkspce
@@ -132,7 +132,7 @@ namespace MDEvents
         return;
       }
 
-      int64_t detID = *(detectors.begin());
+      detid_t detID = *(detectors.begin());
       IDetector_sptr det = allDetectors[detID];
 
       // Vector between the sample and the detector
