@@ -142,7 +142,7 @@ public:
     TS_ASSERT_EQUALS( ew->getAxis(1)->spectraNo(122), 122);
 
     //First pixel with events.
-    std::vector<int64_t> dets = ew->spectraMap().getDetectors(1);
+    std::vector<detid_t> dets = ew->spectraMap().getDetectors(1);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( dets[0], 12085); //This is the pixel ID of the first spectrum
 
@@ -342,7 +342,7 @@ public:
     TS_ASSERT_EQUALS( ew->getAxis(1)->length(), 2);
 
     //Are the pixel IDs ok?
-    std::vector<int64_t> dets = ew->spectraMap().getDetectors(0);
+    std::vector<detid_t> dets = ew->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS( dets.size(), 1);
     TS_ASSERT_EQUALS( dets[0], 45);
 

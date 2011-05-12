@@ -1,25 +1,25 @@
 #ifndef GROUPDETECTORS2TEST_H_
 #define GROUPDETECTORS2TEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidDataHandling/GroupDetectors2.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/WorkspaceProperty.h"
-#include "MantidKernel/ArrayProperty.h"
+#include "MantidDataHandling/GroupDetectors2.h"
 #include "MantidDataObjects/Workspace2D.h"
-#include "MantidKernel/UnitFactory.h"
-#include "MantidKernel/Exception.h"
-#include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidKernel/ArrayProperty.h"
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/UnitFactory.h"
 #include "MantidNexus/LoadMuonNexus2.h"
+#include <cxxtest/TestSuite.h>
+#include <fstream>
 #include <iostream>
 #include <numeric>
-#include <fstream>
 #include <Poco/Path.h>
 
 using Mantid::DataHandling::GroupDetectors2;
+using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -438,7 +438,7 @@ public:
     TS_ASSERT_EQUALS( output2D1->getNumberHistograms(), 4);
 
     const SpectraDetectorMap &specDetecMap = output2D1->spectraMap();
-    std::vector<int64_t> specDet = specDetecMap.getDetectors(1);
+    std::vector<detid_t> specDet = specDetecMap.getDetectors(1);
     TS_ASSERT_EQUALS( specDet[0], 1);
     specDet = specDetecMap.getDetectors(2);
     TS_ASSERT_EQUALS( specDet[0], 2);

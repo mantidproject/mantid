@@ -1,18 +1,18 @@
 #ifndef LOADRAWTEST_H_
 #define LOADRAWTEST_H_
 
-#include <cxxtest/TestSuite.h>
-
-#include "MantidDataHandling/LoadRaw.h"
-#include "MantidAPI/WorkspaceFactory.h"
-#include "MantidDataObjects/ManagedWorkspace2D.h"
-#include "MantidDataObjects/CompressedWorkspace2D.h"
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/FrameworkManager.h"
+#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/WorkspaceFactory.h"
+#include "MantidDataHandling/LoadRaw.h"
+#include "MantidDataObjects/CompressedWorkspace2D.h"
+#include "MantidDataObjects/ManagedWorkspace2D.h"
 #include "MantidKernel/ConfigService.h"
 #include "MantidKernel/TimeSeriesProperty.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include <cxxtest/TestSuite.h>
 
+using namespace Mantid;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataHandling;
@@ -119,9 +119,9 @@ public:
     // Test one to many mapping, for example 10 pixels contribute to spectra 2084
     TS_ASSERT_EQUALS(map.ndet(2084),10);
     // Check the id number of all pixels contributing
-    std::vector<int64_t> detectorgroup;
+    std::vector<detid_t> detectorgroup;
     detectorgroup=map.getDetectors(2084);
-    std::vector<int64_t>::const_iterator it;
+    std::vector<detid_t>::const_iterator it;
     int pixnum=101191;
     for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
     TS_ASSERT_EQUALS(*it,pixnum++);
@@ -130,7 +130,7 @@ public:
     // Test that number of pixel=0
     TS_ASSERT_EQUALS(map.ndet(5),0);
     // Test that trying to get the Detector throws.
-    std::vector<int64_t> test = map.getDetectors(5);
+    std::vector<detid_t> test = map.getDetectors(5);
     TS_ASSERT(test.empty());
     
     AnalysisDataService::Instance().remove(outputSpace);    
