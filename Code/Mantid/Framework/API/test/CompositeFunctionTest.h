@@ -968,7 +968,7 @@ public:
     cub1->setParameter("c3",4.4);
 
     clearDeleted();
-    mfun->replaceFunction(0,cub1);
+    mfun->replaceFunction(int64_t(0),cub1);
     TS_ASSERT(isDeleted(bk));
 
     mfun->applyTies();

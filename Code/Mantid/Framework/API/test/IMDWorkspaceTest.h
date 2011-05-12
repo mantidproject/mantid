@@ -45,18 +45,18 @@ namespace Mantid { namespace DataObjects {
       m_axes[1]->title() = "2";
     }
     bool isHistogramData() const {return true;}
-    int size() const {return vec.size();}
-    int blocksize() const {return vec.size();}
-    MantidVec& dataX(int const i) {return m_dataX.at(i);}
-    MantidVec& dataY(int const i) {return m_dataY.at(i);}
-    MantidVec& dataE(int const i) {return m_dataE.at(i);}
-    MantidVec& dataDx(int const i) {return m_dataE.at(i);}
-    const MantidVec& dataX(int const i) const {return m_dataX.at(i);}
-    const MantidVec& dataY(int const i) const {return m_dataY.at(i);}
-    const MantidVec& dataE(int const i) const {return m_dataE.at(i);}
-    const MantidVec& dataDx(int const i) const {return m_dataE.at(i);}
-    Kernel::cow_ptr<MantidVec> refX(const int) const {return Kernel::cow_ptr<MantidVec>();}
-    void setX(const int, const Kernel::cow_ptr<MantidVec>&) {}
+    size_t size() const {return vec.size();}
+    size_t blocksize() const {return vec.size();}
+    MantidVec& dataX(size_t const i) {return m_dataX.at(i);}
+    MantidVec& dataY(size_t const i) {return m_dataY.at(i);}
+    MantidVec& dataE(size_t const i) {return m_dataE.at(i);}
+    MantidVec& dataDx(size_t const i) {return m_dataE.at(i);}
+    const MantidVec& dataX(size_t const i) const {return m_dataX.at(i);}
+    const MantidVec& dataY(size_t const i) const {return m_dataY.at(i);}
+    const MantidVec& dataE(size_t const i) const {return m_dataE.at(i);}
+    const MantidVec& dataDx(size_t const i) const {return m_dataE.at(i);}
+    Kernel::cow_ptr<MantidVec> refX(const size_t) const {return Kernel::cow_ptr<MantidVec>();}
+    void setX(const size_t, const Kernel::cow_ptr<MantidVec>&) {}
 
   private:
     std::vector<MantidVec> m_dataX;

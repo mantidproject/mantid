@@ -105,7 +105,7 @@ public:
   void testGetSpectra()
   {
     //create a vector of detectorids to map
-    std::vector<int> dets;
+    std::vector<int64_t> dets;
     int detLength=20;
     for (int i = 0; i < detLength; i++)
     {
