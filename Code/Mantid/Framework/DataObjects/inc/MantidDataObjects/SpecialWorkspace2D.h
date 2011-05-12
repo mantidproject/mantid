@@ -38,12 +38,12 @@ namespace DataObjects
     /// Non-const access to the spectra map is disallowed!
     virtual Mantid::API::SpectraDetectorMap& mutableSpectraMap();
 
-    double getValue(const int detectorID) const;
-    double getValue(const int detectorID, const double defaultValue) const;
+    double getValue(const int64_t detectorID) const;
+    double getValue(const int64_t detectorID, const double defaultValue) const;
 
-    void setValue(const int detectorID, const double value);
+    void setValue(const int64_t detectorID, const double value);
 
-    int getDetectorID(const int workspaceIndex) const;
+    int64_t getDetectorID(const std::size_t workspaceIndex) const;
 
   private:
     /// Private copy constructor. NO COPY ALLOWED
@@ -56,10 +56,10 @@ namespace DataObjects
   protected:
     /** Vector with all the detector IDs, in the same order as the workspace indices.
      * Therefore, detectorIDs[workspaceIndex] = that detector ID.  */
-    std::vector<int> detectorIDs;
+    std::vector<int64_t> detectorIDs;
 
     /// Map with key = detector ID, and value = workspace index.
-    std::map<int,int> detID_to_WI;
+    std::map<int64_t,std::size_t> detID_to_WI;
   };
 
 

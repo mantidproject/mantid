@@ -49,16 +49,16 @@ class MatrixWorkspace;
 class DLLExport NumericAxis: public Axis
 {
 public:
-  NumericAxis(const int& length);
+  NumericAxis(const std::size_t& length);
   virtual ~NumericAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
   ///Is the axis numeric - always true for this class
   virtual bool isNumeric() const{return true;}
-  virtual int length() const{return static_cast<int>(m_values.size());}
-  virtual double operator()(const int& index, const int& verticalIndex = 0) const;
-  virtual void setValue(const int& index, const double& value);
+  virtual std::size_t length() const{return m_values.size();}
+  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
-  std::string label(const int& index)const;
+  std::string label(const std::size_t& index)const;
 private:
   /// Private, undefined copy assignment operator
   const NumericAxis& operator=(const NumericAxis&);

@@ -49,7 +49,7 @@ public:
 
   explicit AlgorithmHistory(const Algorithm* const alg,
 			    const Mantid::Kernel::DateAndTime& start = Mantid::Kernel::DateAndTime::defaultTime(),
-                            const double& duration = -1,unsigned int uexeccount=0);
+                            const double& duration = -1,std::size_t uexeccount=0);
   virtual ~AlgorithmHistory();
   AlgorithmHistory& operator=(const AlgorithmHistory&);
   AlgorithmHistory(const AlgorithmHistory&);
@@ -69,7 +69,7 @@ public:
   /// get execution date 
   Mantid::Kernel::DateAndTime executionDate() const {return m_executionDate;}
   ///get the execution count
-  const int& execCount() const {return m_execCount;}
+  const std::size_t& execCount() const {return m_execCount;}
   /// get parameter list of algorithm in history const
   const std::vector<Kernel::PropertyHistory>& getProperties() const {return m_properties;}
   /// print contents of object
@@ -96,7 +96,7 @@ private:
   /// The PropertyHistory's defined for the algorithm
   std::vector<Kernel::PropertyHistory> m_properties;
   ///count keeps track of execution order of an algorithm
-  int m_execCount;
+  std::size_t m_execCount;
 };
 
 DLLExport std::ostream& operator<<(std::ostream&, const AlgorithmHistory&);

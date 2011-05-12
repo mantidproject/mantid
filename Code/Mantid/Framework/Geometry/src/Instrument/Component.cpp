@@ -31,7 +31,7 @@ namespace Geometry
    *  Create a component with null parent
    */
   Component::Component()
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(), m_pos(), m_rot(), m_parent(NULL)
+    : m_parent(NULL), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(), m_pos(), m_rot()
   {
   }
 
@@ -40,7 +40,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot(), m_parent(parent)
+    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(), m_rot()
   {
   }
 
@@ -51,7 +51,7 @@ namespace Geometry
    *  @param parent :: parent Component
    */
   Component::Component(const std::string& name, const V3D& position, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position), m_rot(), m_parent(parent)
+    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name), m_pos(position), m_rot()
   {
   }
 
@@ -62,7 +62,7 @@ namespace Geometry
    *  @param parent :: parent Component (optional)
    */
   Component::Component(const std::string& name, const V3D& position, const Quat& rotation, IComponent* parent)
-  : m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position), m_rot(rotation), m_parent(parent)
+    : m_parent(parent), m_base(NULL), m_map(NULL), m_isParametrized(false), m_name(name),m_pos(position), m_rot(rotation)
   {
   }
 

@@ -6,6 +6,7 @@
 
 using Mantid::API::SpectraAxis;
 using Mantid::API::SpectraDetectorMap;
+using std::size_t;
 
 namespace Mantid
 {
@@ -93,9 +94,9 @@ namespace DataObjects
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
-  double SpecialWorkspace2D::getValue(const int detectorID) const
+  double SpecialWorkspace2D::getValue(const int64_t detectorID) const
   {
-    std::map<int,int>::const_iterator it = detID_to_WI.find(detectorID);
+    std::map<int64_t,size_t>::const_iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end())
       throw std::invalid_argument("SpecialWorkspace2D::getValue(): Invalid detectorID provided.");
     else
@@ -112,9 +113,9 @@ namespace DataObjects
    * @param defaultValue :: value returned if the ID is not found.
    * @return the Y value for that detector ID.
    */
-  double SpecialWorkspace2D::getValue(const int detectorID, const double defaultValue) const
+  double SpecialWorkspace2D::getValue(const int64_t detectorID, const double defaultValue) const
   {
-    std::map<int,int>::const_iterator it = detID_to_WI.find(detectorID);
+    std::map<int64_t,size_t>::const_iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end())
       return defaultValue;
     else
@@ -131,9 +132,9 @@ namespace DataObjects
    * @return the Y value for that detector ID.
    * @throw std::invalid_argument if the detector ID was not found
    */
-  void SpecialWorkspace2D::setValue(const int detectorID, double value)
+  void SpecialWorkspace2D::setValue(const int64_t detectorID, double value)
   {
-    std::map<int,int>::iterator it = detID_to_WI.find(detectorID);
+    std::map<int64_t,size_t>::iterator it = detID_to_WI.find(detectorID);
     if (it == detID_to_WI.end())
       throw std::invalid_argument("SpecialWorkspace2D::setValue(): Invalid detectorID provided.");
     else
@@ -148,7 +149,7 @@ namespace DataObjects
    * @param workspaceIndex
    * @return
    */
-  int SpecialWorkspace2D::getDetectorID(const int workspaceIndex) const
+  int64_t SpecialWorkspace2D::getDetectorID(const size_t workspaceIndex) const
   {
     if (size_t(workspaceIndex) > detectorIDs.size())
       throw std::invalid_argument("SpecialWorkspace2D::getDetectorID(): Invalid workspaceIndex given.");

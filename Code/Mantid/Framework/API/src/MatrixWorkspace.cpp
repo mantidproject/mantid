@@ -26,6 +26,7 @@ namespace Mantid
 {
   namespace API
   {
+    using std::size_t;
     using namespace Geometry;
 
     Kernel::Logger& MatrixWorkspace::g_log = Kernel::Logger::get("MatrixWorkspace");
@@ -55,7 +56,7 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries in each vector (must all be the same)
     *  @param YLength :: The number of data/error points in each vector (must all be the same)
     */
-    void MatrixWorkspace::initialize(const int &NVectors, const int &XLength, const int &YLength)
+    void MatrixWorkspace::initialize(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       // Check validity of arguments
       if (NVectors <= 0 || XLength <= 0 || YLength <= 0)
@@ -227,13 +228,13 @@ namespace Mantid
 
       IndexToIndexMap * map = new IndexToIndexMap();
       //Loop through the workspace index
-      for (int ws=0; ws < this->getNumberHistograms(); ws++)
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
         //Get the spectrum # from the WS index
-        int specNo = ax->spectraNo(ws);
+        int64_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<int> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<int64_t> detList = this->m_spectramap->getDetectors(specNo);
         if (throwIfMultipleDets)
         {
           if (detList.size() > 1)
@@ -244,13 +245,13 @@ namespace Mantid
 
           //Set the KEY to the detector ID and the VALUE to the workspace index.
           if (detList.size() == 1)
-            (*map)[ detList[0] ] = ws;
+            (*map)[ detList[0] ] = workspaceIndex;
         }
         else
         {
           //Allow multiple detectors per workspace index
-          for (std::vector<int>::iterator it = detList.begin(); it != detList.end(); it++)
-            (*map)[ *it ] = ws;
+          for (std::vector<int64_t>::iterator it = detList.begin(); it != detList.end(); it++)
+            (*map)[ *it ] = workspaceIndex;
         }
 
         //Ignore if the detector list is empty.
@@ -274,13 +275,13 @@ namespace Mantid
 
       IndexToIndexMap * map = new IndexToIndexMap();
       //Loop through the workspace index
-      for (int ws=0; ws < this->getNumberHistograms(); ws++)
+      for (size_t workspaceIndex=0; workspaceIndex < this->getNumberHistograms(); workspaceIndex++)
       {
         //Get the spectrum # from the WS index
-        int specNo = ax->spectraNo(ws);
+        int64_t specNo = ax->spectraNo(workspaceIndex);
 
         //Now the list of detectors
-        std::vector<int> detList = this->m_spectramap->getDetectors(specNo);
+        std::vector<int64_t> detList = this->m_spectramap->getDetectors(specNo);
         if (detList.size() > 1)
         {
           delete map;
@@ -289,7 +290,7 @@ namespace Mantid
 
         //Set the KEY to the detector ID and the VALUE to the workspace index.
         if (detList.size() == 1)
-          (*map)[ws] = detList[0];
+          (*map)[workspaceIndex] = detList[0];
 
         //Ignore if the detector list is empty.
       }
@@ -303,7 +304,7 @@ namespace Mantid
     *  @param spectraList :: The list of spectrum numbers required
     *  @param indexList ::   Returns a reference to the vector of indices (empty if not a Workspace2D)
     */
-    void MatrixWorkspace::getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const
+    void MatrixWorkspace::getIndicesFromSpectra(const std::vector<int64_t>& spectraList, std::vector<int64_t>& indexList) const
     {
       // Clear the output index list
       indexList.clear();
@@ -318,10 +319,10 @@ namespace Mantid
       // Just return an empty list if this isn't a Workspace2D
       else return;
 
-      std::vector<int>::const_iterator iter = spectraList.begin();
+      std::vector<int64_t>::const_iterator iter = spectraList.begin();
       while( iter != spectraList.end() )
       {
-        for (int i = 0; i < this->getNumberHistograms(); ++i)
+        for (size_t i = 0; i < this->getNumberHistograms(); ++i)
         {
           if ( spectraAxis->spectraNo(i) == *iter )
           {
@@ -351,7 +352,7 @@ namespace Mantid
 
       //Run in parallel if the implementation is threadsafe
       PARALLEL_FOR_IF( this->threadSafe() )
-      for (int wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
+      for (size_t wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
       {
         // Get Handle to data
         const Mantid::MantidVec& x=this->readX(wksp_index);
@@ -442,15 +443,15 @@ namespace Mantid
     *  @throw  Kernel::Exception::NotFoundError if the SpectraDetectorMap or the Instrument
     do not contain the requested spectrum number of detector ID
     */
-    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int index) const
+    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int64_t index) const
     {
       if ( ! m_spectramap->nElements() )
       {
         throw std::runtime_error("SpectraDetectorMap has not been populated.");
       }
 
-      const int spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
+      const int64_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<int64_t> dets = m_spectramap->getDetectors(spectrum_number);
       if ( dets.empty() )
       {
         throw Kernel::Exception::NotFoundError("Spectrum number not found", spectrum_number);
@@ -470,7 +471,7 @@ namespace Mantid
       // Else need to construct a DetectorGroup and return that
       std::vector<Geometry::IDetector_sptr> dets_ptr;
       dets_ptr.reserve(ndets);
-      std::vector<int>::const_iterator it;
+      std::vector<int64_t>::const_iterator it;
       for ( it = dets.begin(); it != dets.end(); ++it )
       {
         dets_ptr.push_back( localInstrument->getDetector(*it) );
@@ -594,9 +595,9 @@ namespace Mantid
     *  @throw IndexError If the argument given is outside the range of axes held by this workspace
     *  @return Pointer to Axis object
     */
-    Axis* MatrixWorkspace::getAxis(const int& axisIndex) const
+    Axis* MatrixWorkspace::getAxis(const size_t& axisIndex) const
     {
-      if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
+      if ( axisIndex >= m_axes.size() )
       {
         g_log.error() << "Argument to getAxis (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Argument to getAxis is invalid for this workspace");
@@ -611,17 +612,17 @@ namespace Mantid
     *  @throw IndexError If the axisIndex given is outside the range of axes held by this workspace
     *  @throw std::runtime_error If the new axis is not of the correct length (within one of the old one)
     */
-    void MatrixWorkspace::replaceAxis(const int& axisIndex, Axis* const newAxis)
+    void MatrixWorkspace::replaceAxis(const size_t& axisIndex, Axis* const newAxis)
     {
       // First check that axisIndex is in range
-      if ( axisIndex < 0 || axisIndex >= static_cast<int>(m_axes.size()) )
+      if ( axisIndex >= m_axes.size() )
       {
         g_log.error() << "Value of axisIndex (" << axisIndex << ") is invalid for this (" << m_axes.size() << " axis) workspace" << std::endl;
         throw Kernel::Exception::IndexError(axisIndex, m_axes.size(),"Value of axisIndex is invalid for this workspace");
       }
       // Now check that the new axis is of the correct length
       // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
-      if ( std::abs(newAxis->length() - m_axes[axisIndex]->length()) > 1 )
+      if ( newAxis->length() != m_axes[axisIndex]->length() )
       {
         std::stringstream msg;
         msg << "replaceAxis: The new axis is not a valid length (original axis: "
@@ -704,9 +705,9 @@ namespace Mantid
      * @param index :: The index within the workspace to mask
      * @param maskValue :: A value to assign to the data and error values of the spectra
      */
-    void MatrixWorkspace::maskWorkspaceIndex(const int index, const double maskValue)
+    void MatrixWorkspace::maskWorkspaceIndex(const size_t index, const double maskValue)
     {
-      if(index < 0 || index >= this->getNumberHistograms() )
+      if(index >= this->getNumberHistograms() )
         throw Kernel::Exception::IndexError(index,this->getNumberHistograms(),
             "MatrixWorkspace::maskWorkspaceIndex,index");
 
@@ -726,9 +727,9 @@ namespace Mantid
         return;
       }
       
-      int spectrum_number = getAxis(1)->spectraNo(index);
-      const std::vector<int> dets = m_spectramap->getDetectors(spectrum_number);
-      for (std::vector<int>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
+      int64_t spectrum_number = getAxis(1)->spectraNo(index);
+      const std::vector<int64_t> dets = m_spectramap->getDetectors(spectrum_number);
+      for (std::vector<int64_t>::const_iterator iter=dets.begin(); iter != dets.end(); ++iter)
       {
         try
         {
@@ -748,13 +749,13 @@ namespace Mantid
     *  @param binIndex ::      The index of the bin in the spectrum
     *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
     */
-    void MatrixWorkspace::maskBin(const int& spectrumIndex, const int& binIndex, const double& weight)
+    void MatrixWorkspace::maskBin(const int64_t& spectrumIndex, const int64_t& binIndex, const double& weight)
     {
       // First check the spectrumIndex is valid
-      if (spectrumIndex < 0 || spectrumIndex >= this->getNumberHistograms() )
+      if (spectrumIndex < 0 || spectrumIndex >= static_cast<int64_t>(this->getNumberHistograms()) )
         throw Kernel::Exception::IndexError(spectrumIndex,this->getNumberHistograms(),"MatrixWorkspace::maskBin,spectrumIndex");
       // Then check the bin index
-      if (binIndex < 0 || binIndex>= this->blocksize() )
+      if (binIndex < 0 || binIndex>= static_cast<int64_t>(this->blocksize()) )
         throw Kernel::Exception::IndexError(binIndex,this->blocksize(),"MatrixWorkspace::maskBin,binIndex");
 
       // Writing to m_masks is not thread-safe, so put in some protection
@@ -776,10 +777,11 @@ namespace Mantid
     *  @param spectrumIndex :: The workspace spectrum index to test
     *  @return True if there are masked bins for this spectrum
     */
-    bool MatrixWorkspace::hasMaskedBins(const int& spectrumIndex) const
+    bool MatrixWorkspace::hasMaskedBins(const int64_t& spectrumIndex) const
     {
       // First check the spectrumIndex is valid. Return false if it isn't (decided against throwing here).
-      if (spectrumIndex < 0 || spectrumIndex >= this->getNumberHistograms() ) return false;
+      if (spectrumIndex < 0 || spectrumIndex >= static_cast<int64_t>(this->getNumberHistograms()) )
+        return false;
       return (m_masks.find(spectrumIndex)==m_masks.end()) ? false : true;
     }
 
@@ -788,9 +790,9 @@ namespace Mantid
     *  @return A const reference to the list of masked bins
     *  @throw  Kernel::Exception::IndexError if there are no bins masked for this spectrum (so call hasMaskedBins first!)
     */
-    const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int& spectrumIndex) const
+    const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int64_t& spectrumIndex) const
     {
-      std::map<int,MaskList>::const_iterator it = m_masks.find(spectrumIndex);
+      std::map<int64_t,MaskList>::const_iterator it = m_masks.find(spectrumIndex);
       // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
       if (it==m_masks.end())
       {
@@ -818,7 +820,7 @@ namespace Mantid
     {
       size_t total = 0;
       MantidVecPtr lastX = this->refX(0);
-      for (int wi=0; wi < getNumberHistograms(); wi++)
+      for (size_t wi=0; wi < getNumberHistograms(); wi++)
       {
         MantidVecPtr X = this->refX(wi);
         // If the pointers are the same
@@ -867,8 +869,8 @@ namespace Mantid
       // loop over all logfiles and see if any of these are associated with parameters in the
       // IDF
 
-      unsigned int N = logfileProp.size();
-      for (unsigned int i = 0; i < N; i++)
+      size_t N = logfileProp.size();
+      for (size_t i = 0; i < N; i++)
       {
         // Get the name of the timeseries property
 
@@ -998,9 +1000,9 @@ namespace Mantid
     * @param index :: The index within the workspace to search within (default = 0)
     * @returns An index that 
     */
-    size_t MatrixWorkspace::binIndexOf(const double xValue, const int index) const
+    size_t MatrixWorkspace::binIndexOf(const double xValue, const size_t index) const
     {
-      if( index < 0 || index >= getNumberHistograms() )
+      if( index >= getNumberHistograms() )
       {
         throw std::out_of_range("MatrixWorkspace::binIndexOf - Index out of range.");
       }
@@ -1043,9 +1045,9 @@ namespace Mantid
       //Create the MDPoint if it is not already present.
       if(m_mdPointMap.end() ==  iter)
       {
-        m_mdPointMap[index] = createPoint(histInd, binInd);
+        m_mdPointMap[static_cast<int64_t>(index)] = createPoint(histInd, binInd);
       }
-      return m_mdPointMap[index];
+      return m_mdPointMap[static_cast<int64_t>(index)];
     }
 
     const Mantid::Geometry::SignalAggregate& MatrixWorkspace::getPointImp(size_t histogram, size_t bin) const
@@ -1059,20 +1061,21 @@ namespace Mantid
       return m_mdPointMap[oneDimIndex];
     }
 
-    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(unsigned int histogram, unsigned int bin) const
+    Mantid::Geometry::MDPoint  MatrixWorkspace::createPoint(HistogramIndex histogram, BinIndex bin) const
     {
       VecCoordinate verts(4);
 
       double x = this->dataX(histogram)[bin];
       double signal = this->dataY(histogram)[bin];
       double error = this->dataE(histogram)[bin];
+      double histogram_d = static_cast<double>(histogram);
 
       if(isHistogramData()) //TODO. complete vertex generating cases.
       {
-        verts[0] = coordinate::createCoordinate2D(x, histogram);
-        verts[1] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram);
-        verts[2] = coordinate::createCoordinate2D(x, histogram+1);
-        verts[3] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram+1);
+        verts[0] = coordinate::createCoordinate2D(x, histogram_d);
+        verts[1] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d);
+        verts[2] = coordinate::createCoordinate2D(x, histogram_d+1.);
+        verts[3] = coordinate::createCoordinate2D(this->dataX(histogram)[bin+1], histogram_d+1.);
       }
 
       IDetector_sptr detector;

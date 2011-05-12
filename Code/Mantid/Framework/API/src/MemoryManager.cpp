@@ -52,7 +52,7 @@ MemoryInfo MemoryManagerImpl::getMemoryInfo()
     @param isCompressedOK :: The address of a boolean indicating if the compression succeeded or not
     @return true is managed workspace is needed
  */
-bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLength, bool* isCompressedOK)
+bool MemoryManagerImpl::goForManagedWorkspace(size_t NVectors, size_t XLength, size_t YLength, bool* isCompressedOK)
 {
   int AlwaysInMemory;// Check for disabling flag
   if (Kernel::ConfigService::Instance().getValue("ManagedWorkspace.AlwaysInMemory", AlwaysInMemory)
@@ -81,9 +81,9 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
     g_log.warning("ManagedWorkspace.LowerMemoryLimit is greater than 90%. Danger of memory errors.");
   }
   MemoryInfo mi = getMemoryInfo();
-  unsigned int triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
+  size_t triggerSize = mi.availMemory / 100 * availPercent / sizeof(double);
   // Avoid int overflow
-  unsigned int wsSize = 0;
+  size_t wsSize = 0;
   if (NVectors > 1024)
       wsSize = NVectors / 1024 * (YLength * 2 + XLength);
   else if (YLength * 2 + XLength > 1024)
@@ -125,13 +125,14 @@ bool MemoryManagerImpl::goForManagedWorkspace(int NVectors, int XLength, int YLe
         if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.EstimatedCompressRatio",compressRatio)) compressRatio = 4.;
         int VectorsPerBlock;
         if (!Kernel::ConfigService::Instance().getValue("CompressedWorkspace.VectorsPerBlock",VectorsPerBlock)) VectorsPerBlock = 4;
-        double compressedSize = (1./compressRatio + 100.0*VectorsPerBlock/NVectors) * wsSize;
-        double memoryLeft = (double(triggerSize)/availPercent*100 - compressedSize)/1024 * sizeof(double);
+        double compressedSize = (1./compressRatio + 100.0*static_cast<double>(VectorsPerBlock)/static_cast<double>(NVectors))
+                                      * static_cast<double>(wsSize);
+        double memoryLeft = (static_cast<double>(triggerSize)/availPercent*100. - compressedSize)/1024. * sizeof(double);
         // To prevent bad allocation on Windows when free memory is too low.
         if (memoryLeft < 200.)
           *isCompressedOK = false;
         else
-          *isCompressedOK =  compressedSize < double(triggerSize);
+          *isCompressedOK =  compressedSize < static_cast<double>(triggerSize);
       }
     }
     else
@@ -183,7 +184,8 @@ void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
 #ifdef USE_TCMALLOC
     Kernel::MemoryStats mem;
     mem.update();
-    double fraction_available = (mem.availMem() * 1.0) / (mem.totalMem() * 1.0);
+    double fraction_available = static_cast<double>(mem.availMem())
+                                / static_cast<double>(mem.totalMem());
     if (fraction_available < (1.0 - threshold))
     {
       // Make TCMALLOC release memory to the system

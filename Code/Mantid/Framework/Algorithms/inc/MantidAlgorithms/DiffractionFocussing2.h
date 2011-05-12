@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
+#include "MantidKernel/System.h"
 
 // To be compatible with VSC Express edition that does not have tr1
 #ifndef HAS_UNORDERED_MAP_H
@@ -106,7 +107,7 @@ private:
   /// Loop over the workspace and determine the rebin parameters (Xmin,Xmax,step) for each group.
   /// The result is stored in group2params
   void determineRebinParameters();
-  int validateSpectrumInGroup(int spectrum_number);
+  int validateSpectrumInGroup(int64_t spectrum_number);
   
   /// Shared pointer to a mutable input workspace
   API::MatrixWorkspace_sptr matrixInputW;
@@ -120,25 +121,25 @@ private:
 
   // This map does not need to be ordered, just a lookup for udet
   /// typedef for the storage of the UDET-group mapping
-  typedef std::map<int, int> udet2groupmap;
+  typedef std::map<int64_t, int64_t> udet2groupmap;
 
   // This map needs to be ordered to process the groups in order.
   /// typedef for the storage of each group's X vector
-  typedef std::map<int, boost::shared_ptr<MantidVec> > group2vectormap;
+  typedef std::map<int64_t, boost::shared_ptr<MantidVec> > group2vectormap;
   /// Map from udet to group
   udet2groupmap udet2group;
   /// The list of group numbers
-  std::vector<int> groupAtWorkspaceIndex;
+  std::vector<int64_t> groupAtWorkspaceIndex;
   /// Map from the group number to the group's X vector
   group2vectormap group2xvector;
   /// Map from the group number to the group's summed weight vector
   group2vectormap group2wgtvector;
   /// The number of (used) groups
-  int nGroups;
+  int64_t nGroups;
   /// Number of histograms
-  int nHist;
+  int64_t nHist;
   /// Number of points in the 2D workspace
-  int nPoints;
+  int64_t nPoints;
 
 };
 

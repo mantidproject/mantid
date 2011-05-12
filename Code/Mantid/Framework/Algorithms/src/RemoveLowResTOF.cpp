@@ -209,7 +209,7 @@ void RemoveLowResTOF::execEvent()
   }
   g_log.information() << "Went from " << numEventsOrig << " events to "
                       << outW->getNumberEvents() << " events ("
-                      << ((numEventsOrig - outW->getNumberEvents())*100./numEventsOrig) << "% removed)\n";
+                      << (static_cast<double>(numEventsOrig - outW->getNumberEvents())*100./static_cast<double>(numEventsOrig)) << "% removed)\n";
   if (numClearedEventLists > 0)
     g_log.warning() << numClearedEventLists << " spectra of " << m_numberOfSpectra
                     << " had all data removed\n";
@@ -226,9 +226,9 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   const Geometry::V3D& beamline = samplePos - sourcePos;
   double beamline_norm = 2. * beamline.norm();
 
-  const int spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
-  std::vector<int> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
-  std::map<int,double> offsets; // just an empty offsets map
+  const int64_t spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
+  std::vector<int64_t> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
+  std::map<int64_t,double> offsets; // just an empty offsets map
   double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
                                      m_instrument, detNumbers, offsets, false);
 

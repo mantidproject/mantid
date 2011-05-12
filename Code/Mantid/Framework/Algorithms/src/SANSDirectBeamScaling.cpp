@@ -72,10 +72,10 @@ void SANSDirectBeamScaling::exec()
   const double attTransErr = getProperty("AttenuatorTransmissionError");
 
   // Extract the required spectra into separate workspaces
-  std::vector<int> udet,index;
+  std::vector<int64_t> udet,index;
   udet.push_back(getProperty("BeamMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<int> sampleSpectra = inputWS->spectraMap().getSpectra(udet);
+  const std::vector<int64_t> sampleSpectra = inputWS->spectraMap().getSpectra(udet);
   inputWS->getIndicesFromSpectra(sampleSpectra,index);
   if (index.size() < 1)
   {
@@ -83,16 +83,16 @@ void SANSDirectBeamScaling::exec()
     throw std::invalid_argument("Could not find the incident beam monitor spectra\n");
   }
 
-  const int numHists = inputWS->getNumberHistograms();
+  const int64_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
   // Number of X bins
-  const int xLength = inputWS->readY(0).size();
+  const int64_t xLength = inputWS->readY(0).size();
 
   // Monitor counts
   double monitor = 0.0;
   const MantidVec& MonIn = inputWS->readY(index[0]);
-  for (int j = 0; j < xLength; j++)
+  for (int64_t j = 0; j < xLength; j++)
     monitor += MonIn[j];
 
   const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
@@ -103,7 +103,7 @@ void SANSDirectBeamScaling::exec()
   // Sample-detector distance for the contributing pixels
   double sdd = 0.0;
 
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < numHists; ++i)
   {
     IDetector_const_sptr det;
     try {
@@ -125,7 +125,7 @@ void SANSDirectBeamScaling::exec()
     pos.setZ(0.0);
     if (pos.norm() <= beamRadius) {
       // Correct data for all X bins
-      for (int j = 0; j < xLength; j++)
+      for (int64_t j = 0; j < xLength; j++)
       {
         counts += YIn[j];
         error += EIn[j]*EIn[j];

@@ -150,13 +150,13 @@ private:
   void disableDetectorGroupBoxes(bool bStatus);
    
   /// minimum and maximum spectrum ids for detector 
-  void minandMaxSpectrumIds(const std::vector<int>& specList,QString& minSpec, QString& maxSpec);
+  void minandMaxSpectrumIds(const std::vector<int64_t>& specList,QString& minSpec, QString& maxSpec);
 
   /// get workspaceIndexes from spectrum list
-  void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const std::vector<int>& specList,
+  void getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const std::vector<int64_t>& specList,
                                               QString& startWSIndex,QString& endWSIndex);
   ///get spectra list from workspace.
-  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int detNum,std::vector<int>&specList);
+  void getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int64_t detNum,std::vector<int64_t>&specList);
 
   /// get detector name
  const  QString getDetectorName(int index);

@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAlgorithms/FindDeadDetectors.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidKernel/System.h"
 #include <fstream>
 
 namespace Mantid
@@ -20,7 +21,6 @@ namespace Mantid
       this->setOptionalMessage("Identifies and flags empty spectra caused by 'dead' detectors.");
     }
     
-
     using namespace Kernel;
     using namespace API;
 
@@ -60,7 +60,7 @@ namespace Mantid
       declareProperty("OutputFile","",
         "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
-      declareProperty("FoundDead",std::vector<int>(),Direction::Output);
+      declareProperty("FoundDead",std::vector<int64_t>(),Direction::Output);
     }
 
     /** Executes the algorithm
@@ -84,16 +84,17 @@ namespace Mantid
       const SpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
       Axis* specAxis = integratedWorkspace->getAxis(1);
 
-      std::vector<int> deadDets;
+      std::vector<int64_t> deadDets;
       int countSpec = 0, countDets = 0;
 
 
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
-      const int numSpec = integratedWorkspace->getNumberHistograms();
-      int iprogress_step = numSpec / 100;
+      const int64_t numSpec = integratedWorkspace->getNumberHistograms();
+      const double numSpec_d = static_cast<double>(numSpec);
+      int64_t iprogress_step = numSpec / 100;
       if (iprogress_step == 0) iprogress_step = 1;
-      for (int i = 0; i < numSpec; ++i)
+      for (int64_t i = 0; i < numSpec; ++i)
       {
         double &y = integratedWorkspace->dataY(i)[0];
         if ( y > deadThreshold )
@@ -104,12 +105,12 @@ namespace Mantid
         {
           ++countSpec;
           y = deadValue;
-          const int specNo = specAxis->spectraNo(i);
+          const int64_t specNo = specAxis->spectraNo(i);
           // Write the spectrum number to file
           file << i << " " << specNo;
           // Get the list of detectors for this spectrum and iterate over
-          const std::vector<int> dets = specMap.getDetectors(specNo);
-          std::vector<int>::const_iterator it;
+          const std::vector<int64_t> dets = specMap.getDetectors(specNo);
+          std::vector<int64_t>::const_iterator it;
           for (it = dets.begin(); it != dets.end(); ++it)
           {
             // Write the detector ID to file, log & the FoundDead output property
@@ -122,7 +123,7 @@ namespace Mantid
         }
         if (i % iprogress_step == 0)
         {
-            progress(double(i)/numSpec);
+            progress(static_cast<double>(i)/numSpec_d);
             interruption_point();
         }
       }

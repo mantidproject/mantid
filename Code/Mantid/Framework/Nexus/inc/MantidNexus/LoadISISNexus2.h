@@ -98,10 +98,10 @@ namespace Mantid
       /// Load log data from the nexus file
       void loadLogs(DataObjects::Workspace2D_sptr, NXEntry & entry,int period = 1);
       // Load a given period into the workspace
-      void loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
+      void loadPeriodData(int64_t period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace);
       // Load a data block
-      void loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start, 
-        int &hist, int& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
+      void loadBlock(NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
+          int64_t &hist, int64_t& spec_num, DataObjects::Workspace2D_sptr localWorkspace);
 
 
       /// The name and path of the input file
@@ -112,28 +112,28 @@ namespace Mantid
       std::string m_samplename;
 
       /// The number of spectra
-      int m_numberOfSpectra;
+      std::size_t m_numberOfSpectra;
       /// The number of spectra in the raw file
-      int m_numberOfSpectraInFile;
+      std::size_t m_numberOfSpectraInFile;
       /// The number of periods
-      int m_numberOfPeriods;
+      std::size_t m_numberOfPeriods;
       /// The number of periods in the raw file
-      int m_numberOfPeriodsInFile;
+      std::size_t m_numberOfPeriodsInFile;
       /// The nuber of time chanels per spectrum
-      int m_numberOfChannels;
+      std::size_t m_numberOfChannels;
       /// The nuber of time chanels per spectrum in the raw file
-      int m_numberOfChannelsInFile;
+      std::size_t m_numberOfChannelsInFile;
       /// Is there a detector block
       bool m_have_detector;
 
       /// The value of the SpectrumMin property
-      int m_spec_min;
+      int64_t m_spec_min;
       /// The value of the SpectrumMax property
-      int m_spec_max;
+      int64_t m_spec_max;
       /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
+      std::vector<int64_t> m_spec_list;
       /// The number of the input entry
-      int m_entrynumber;
+      int64_t m_entrynumber;
 
       /// Have the spectrum_min/max properties been set?
       bool m_range_supplied;
@@ -146,7 +146,7 @@ namespace Mantid
       /// Pointer to one-past-the-end of spectrum number array (m_spec)
       const int * m_spec_end;
       /// Monitors
-      std::map<int,std::string> m_monitors;
+      std::map<int64_t,std::string> m_monitors;
 
       ///Progress reporting object
       boost::shared_ptr<API::Progress> m_progress;

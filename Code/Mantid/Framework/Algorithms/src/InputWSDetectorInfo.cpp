@@ -32,11 +32,11 @@ InputWSDetectorInfo::InputWSDetectorInfo(API::MatrixWorkspace_sptr input) :
 *  @param SpecIndex :: The number of spectrum, starting at zero is passed to axis::spectraNo(.)
 *  @return True if there is a masked detector, otherwise false
 */
-bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex) const
+bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int64_t SpecIndex) const
 {
-  const std::vector<int> dets = getDetectors(SpecIndex);
+  const std::vector<int64_t> dets = getDetectors(SpecIndex);
   // we are going to go through all of them, if you know this is not neccessary then change it
-  std::vector<int>::const_iterator it;
+  std::vector<int64_t>::const_iterator it;
   for ( it = dets.begin(); it != dets.end(); ++it)
   {
     if (m_RInstru->getDetector(*it).get()->isMasked()) return true;
@@ -50,12 +50,12 @@ bool InputWSDetectorInfo::aDetecIsMaskedinSpec(int SpecIndex) const
 *  @throw IndexError if the spectra index number isn't in the workspace
 *  @throw NotFoundError if we can't get a pointer to the detector that the detector map says is linked to the spectrum
 */
-void InputWSDetectorInfo::maskAllDetectorsInSpec(int SpecIndex)
+void InputWSDetectorInfo::maskAllDetectorsInSpec(int64_t SpecIndex)
 {
-  std::vector<int> dets = getDetectors(SpecIndex);
+  std::vector<int64_t> dets = getDetectors(SpecIndex);
   // there may be many detectors that are responsible for the spectrum, loop through them
-  std::vector<int>::const_iterator it;
-  int missing = 0;
+  std::vector<int64_t>::const_iterator it;
+  int64_t missing = 0;
   for ( it = dets.begin(); it != dets.end(); ++it)
   {
     Geometry::Detector* det =
@@ -82,7 +82,7 @@ void InputWSDetectorInfo::maskAllDetectorsInSpec(int SpecIndex)
   }
 }
 /// convert spectrum index to spectrum number
-int InputWSDetectorInfo::getSpecNum(int SpecIndex) const
+int64_t InputWSDetectorInfo::getSpecNum(int64_t SpecIndex) const
 {
   return m_Input->getAxis(1)->spectraNo(SpecIndex);
 }
@@ -91,7 +91,7 @@ int InputWSDetectorInfo::getSpecNum(int SpecIndex) const
 * @return An array of detector identification numbers
 * @throw IndexError if you give it an index number that's out of range
 */
-std::vector<int> InputWSDetectorInfo::getDetectors(int SpecIndex) const
+std::vector<int64_t> InputWSDetectorInfo::getDetectors(int64_t SpecIndex) const
 {
   return m_Input->spectraMap().getDetectors(getSpecNum(SpecIndex)); 
 }

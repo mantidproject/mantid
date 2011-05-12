@@ -63,38 +63,38 @@ public:
 
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
-  virtual int size() const
+  virtual std::size_t size() const
   { return 1; }
 
   ///Returns the size of each block of data returned by the dataX accessors
-  virtual int blocksize() const
+  virtual std::size_t blocksize() const
   { return 1; }
 
-  int getNumberHistograms() const
+  std::size_t getNumberHistograms() const
   { return 1; }
 
   //inheritance redirections
   ///Returns the x data
-  virtual MantidVec& dataX(int const index) { (void) index; return _X; }
+  virtual MantidVec& dataX(const std::size_t index) { (void) index; return _X; }
   ///Returns the y data
-  virtual MantidVec& dataY(int const index) { (void) index; return _Y; }
+  virtual MantidVec& dataY(const std::size_t index) { (void) index; return _Y; }
   ///Returns the error data
-  virtual MantidVec& dataE(int const index) { (void) index; return _E; }
+  virtual MantidVec& dataE(const std::size_t index) { (void) index; return _E; }
   ///Returns the x error data
-  virtual MantidVec& dataDx(int const index) { (void) index; return _Dx; }
+  virtual MantidVec& dataDx(const std::size_t index) { (void) index; return _Dx; }
   /// Returns the x data const
-  virtual const MantidVec& dataX(int const index) const { (void) index; return _X;}
+  virtual const MantidVec& dataX(const std::size_t index) const { (void) index; return _X;}
   /// Returns the y data const
-  virtual const MantidVec& dataY(int const index) const { (void) index; return _Y;}
+  virtual const MantidVec& dataY(const std::size_t index) const { (void) index; return _Y;}
   /// Returns the error const
-  virtual const MantidVec& dataE(int const index) const { (void) index; return _E;}
+  virtual const MantidVec& dataE(const std::size_t index) const { (void) index; return _E;}
   /// Returns the x error const
-  virtual const MantidVec& dataDx(int const index) const { (void) index; return _Dx;}
+  virtual const MantidVec& dataDx(const std::size_t index) const { (void) index; return _Dx;}
   
   /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
+  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; _X = *X; }
+  virtual void setX(const std::size_t index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; _X = *X; }
   /// Set the specified X array to point to the given existing array, with error
   virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X,
       const Kernel::cow_ptr<MantidVec>& dX) { (void) index; _X = *X; _Dx = *dX;}
@@ -123,7 +123,7 @@ private:
   WorkspaceSingleValue& operator=(const WorkspaceSingleValue&);
 
   // allocates space in a new workspace - does nothing in this case
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
   ///Internal cache of X data
   MantidVec _X;

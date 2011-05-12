@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include <climits>
 #include <map>
 #ifdef HAS_UNORDERED_MAP_H
@@ -118,7 +119,7 @@ private:
   class RangeHelper
   {
   public:
-    static void getList(const std::string &line, std::vector<int> &outList);
+    static void getList(const std::string &line, std::vector<int64_t> &outList);
   private:
     /// this class can't be constructed it is just a holder for some static things
     RangeHelper() {};
@@ -138,9 +139,9 @@ private:
   {
   public:
     #ifndef HAS_UNORDERED_MAP_H
-    typedef std::map<int, std::vector<int> > storage_map; ///< typedef to match that in GroupDetectors
+    typedef std::map<int64_t, std::vector<int64_t> > storage_map; ///< typedef to match that in GroupDetectors
 	  #else
-    typedef std::tr1::unordered_map<int, std::vector<int> > storage_map; ///< typedef to match that in GroupDetectors
+    typedef std::tr1::unordered_map<int64_t, std::vector<int64_t> > storage_map; ///< typedef to match that in GroupDetectors
 	  #endif
 
     /// Constructor
@@ -152,9 +153,9 @@ private:
     /// Signals end of element
     void endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&);
     /// Used to return information to the GroupDetectors algorithm
-    void getItems(storage_map & map, std::vector<int> & unused);
+    void getItems(storage_map & map, std::vector<int64_t> & unused);
     /// Provides some information that is needed for the process to work
-    void setMaps(std::map<int,int> spec, Mantid::API::IndexToIndexMap* det, std::vector<int> & unused);
+    void setMaps(std::map<int64_t,int64_t> spec, Mantid::API::IndexToIndexMap* det, std::vector<int64_t> & unused);
 
     // These functions must be present as they are abstract in the base class. They are not used them here.
     void setDocumentLocator(const Poco::XML::Locator*) {} ///< Not used
@@ -172,24 +173,24 @@ private:
     /// map of groups
     storage_map m_groups;
     /// group currently being read from file
-    std::vector<int> m_currentGroup;
+    std::vector<int64_t> m_currentGroup;
     /// whether reading spectra numbers or detector ids
     bool m_specNo;
     /// whether currently inside a group element
     bool m_inGroup;
     /// map of spectra number to workspace index
-    std::map<int,int> m_specnTOwi;
+    std::map<int64_t,int64_t> m_specnTOwi;
     /// map of detector id to workspace index
     Mantid::API::IndexToIndexMap* m_detidTOwi;
     /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
-    std::vector<int> m_unused;
+    std::vector<int64_t> m_unused;
   };
 
 	#ifndef HAS_UNORDERED_MAP_H
   /// used to store the lists of spectra numbers that will be grouped, the keys are not used
-  typedef std::map<int, std::vector<int> > storage_map;
+  typedef std::map<int64_t, std::vector<int64_t> > storage_map;
 	#else
-  typedef std::tr1::unordered_map<int, std::vector<int> > storage_map;
+  typedef std::tr1::unordered_map<int64_t, std::vector<int64_t> > storage_map;
 	#endif
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
@@ -203,20 +204,19 @@ private:
   void exec();
   
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<int> &unUsedSpec);
+  void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
   void processFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
-                                                std::vector<int> &unUsedSpec);
+                                                std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file 
   void processXMLFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
-                                                std::vector<int> &unUsedSpec);
+                                                std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
-  void readFile(std::map<int,int> &specs2index, std::ifstream &File,
-    int &lineNum, std::vector<int> &unUsedSpec);
+  void readFile(std::map<int64_t, int64_t> &specs2index, std::ifstream &File, size_t &lineNum, std::vector<int64_t> &unUsedSpec);
   /// used while reading the file reads reads spectra numbers from the string and returns spectra indexes 
-  void readSpectraIndexes(std::string line, std::map<int,int> &specs2index,
-                   std::vector<int> &output, std::vector<int> &unUsedSpec, std::string seperator="#");
+  void readSpectraIndexes(std::string line, std::map<int64_t, int64_t> &specs2index,
+                   std::vector<int64_t> &output, std::vector<int64_t> &unUsedSpec, std::string seperator="#");
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists);
@@ -225,8 +225,8 @@ private:
   int formGroups(API::MatrixWorkspace_const_sptr inputWS,
                  API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
-  void moveOthers(const std::set<int> &unGroupedSet,
-    API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS,int outIndex);
+  void moveOthers(const std::set<int64_t> &unGroupedSet,
+    API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS,int64_t outIndex);
 
   /// flag values
   enum {

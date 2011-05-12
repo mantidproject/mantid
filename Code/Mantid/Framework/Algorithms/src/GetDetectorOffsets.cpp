@@ -26,9 +26,9 @@ namespace Mantid
       this->setOptionalMessage("Creates an OffsetsWorkspace containing offsets for each detector. You can then save these to a .cal file using SaveCalFile.");
     }
     
-
     using namespace Kernel;
     using namespace API;
+    using std::size_t;
     using namespace DataObjects;
 
     /// Constructor
@@ -126,7 +126,7 @@ namespace Mantid
     *  @param s :: The Workspace Index to fit
     *  @return The calculated offset value
     */
-    double GetDetectorOffsets::fitSpectra(const int s)
+    double GetDetectorOffsets::fitSpectra(const int64_t s)
     {
       // Find point of peak centre
       const MantidVec & yValues = inputW->readY(s);
@@ -163,7 +163,7 @@ namespace Mantid
 
       std::vector<double> params = fit_alg->getProperty("Parameters");
       const double offset = params[3]; // f1.PeakCentre
-      return (-offset*step/(dreference+offset*step));
+      return (-1.*offset*step/(dreference+offset*step));
     }
 
 

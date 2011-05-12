@@ -43,7 +43,7 @@ void AlignDetectors::initDocs()
  * @param vulcancorrection:  boolean to use l2 from Rectangular Detector parent
  * @return map of conversion factors between TOF and dSpacing
  */
-std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
+std::map<int64_t, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::MatrixWorkspace_const_sptr inputWS,
                                   OffsetsWorkspace_sptr offsetsWS,
                                   bool vulcancorrection)
 {
@@ -56,17 +56,17 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
 
   instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
-  std::map<int, double> * myMap = new std::map<int, double>();
+  std::map<int64_t, double> * myMap = new std::map<int64_t, double>();
 
   //To get all the detector ID's
-  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
   instrument->getDetectors(allDetectors);
 
   //Now go through all
-  std::map<int, Geometry::IDetector_sptr>::iterator it;
+  std::map<int64_t, Geometry::IDetector_sptr>::iterator it;
   for (it = allDetectors.begin(); it != allDetectors.end(); it++)
   {
-    int detectorID = it->first;
+    int64_t detectorID = it->first;
     Geometry::IDetector_sptr det = it->second;
 
     //Find the offset, if any
@@ -88,14 +88,14 @@ std::map<int, double> * AlignDetectors::calcTofToD_ConversionMap(Mantid::API::Ma
 /** Compute a conversion factor for a LIST of detectors.
  * Averages out the conversion factors if there are several.
  */
-double calcConversionFromMap(std::map<int, double> * tofToDmap, const std::vector<int> &detectors)
+double calcConversionFromMap(std::map<int64_t, double> * tofToDmap, const std::vector<int64_t> &detectors)
 {
   double factor = 0.;
-  int numDetectors = 0;
-  for (std::vector<int>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+  int64_t numDetectors = 0;
+  for (std::vector<int64_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
   {
-    int detectorID = *iter;
-    std::map<int, double>::iterator it;
+    int64_t detectorID = *iter;
+    std::map<int64_t, double>::iterator it;
     it = tofToDmap->find(detectorID);
     if (it != tofToDmap->end())
     {
@@ -188,7 +188,7 @@ void AlignDetectors::exec()
 
   // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
-  const int numberOfSpectra = inputWS->getNumberHistograms();
+  const int64_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // generate map of the tof->d conversion factors
   this->tofToDmap = calcTofToD_ConversionMap(inputWS, offsetsWS, vulcancorrection);
@@ -217,12 +217,12 @@ void AlignDetectors::exec()
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i)
+  for (int64_t i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     try {
       // Get the spectrum number for this histogram
-      const int spec = inputWS->getAxis(1)->spectraNo(i);
+      const int64_t spec = inputWS->getAxis(1)->spectraNo(i);
       double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
       // Get references to the x data
@@ -289,17 +289,17 @@ void AlignDetectors::execEvent()
 
   // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
-  const int numberOfSpectra = inputWS->getNumberHistograms();
+  const int64_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i)
+  for (int64_t i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the spectrum number for this histogram
-    int spec = inputWS->getAxis(1)->spectraNo(i);
+    int64_t spec = inputWS->getAxis(1)->spectraNo(i);
     double factor = calcConversionFromMap(this->tofToDmap, specMap.getDetectors(spec));
 
     //Perform the multiplication on all events

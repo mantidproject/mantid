@@ -86,6 +86,26 @@ std::runtime_error(Desc)
 	outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
 }
 
+NotFoundError::NotFoundError(const std::string& Desc,const int64_t& ObjectNum) :
+std::runtime_error(Desc)
+{
+  std::stringstream ss;
+  std::string obName;
+  ss << ObjectNum;
+  ss >> obName;
+  outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
+}
+
+NotFoundError::NotFoundError(const std::string& Desc,const std::size_t& ObjectNum) :
+std::runtime_error(Desc)
+{
+  std::stringstream ss;
+  std::string obName;
+  ss << ObjectNum;
+  ss >> obName;
+  outMessage = std::string(std::runtime_error::what()) + " search object " + obName;
+}
+
 /// Copy constructor
 NotFoundError::NotFoundError(const NotFoundError& A) :
   std::runtime_error(A),objectName(A.objectName)

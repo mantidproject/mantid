@@ -80,7 +80,7 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Get Nearest Neighbours
-  virtual std::map<int, double> getNeighbours(double radius = 0.0) = 0;
+  virtual std::map<int64_t, double> getNeighbours(double radius = 0.0) = 0;
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();

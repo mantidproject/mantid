@@ -144,7 +144,7 @@ namespace Mantid
         while( getline(file,line) )
         {
           ++row;
-          int nchars = (int)line.length();
+          //int nchars = (int)line.length(); TODO dead code?
           boost::trim(line);
           if( this->skipLine(line) )
           {

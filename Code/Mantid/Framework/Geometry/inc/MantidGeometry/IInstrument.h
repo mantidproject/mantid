@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidGeometry/ICompAssembly.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include <boost/shared_ptr.hpp>
@@ -62,7 +63,7 @@ public:
   Geometry::V3D getBeamDirection() const;
 
   /// Returns a pointer to the geometrical object for the detector with the given ID
-  virtual Geometry::IDetector_sptr getDetector(const int &detector_id) const = 0;
+  virtual Geometry::IDetector_sptr getDetector(const int64_t &detector_id) const = 0;
 
   /// Fill a vector with all the detectors contained in a named component
   virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
@@ -85,10 +86,10 @@ public:
   std::vector<boost::shared_ptr<Geometry::IComponent> > getAllComponentsWithName(const std::string & cname);
 
   /// return map of detector ID : detector sptr
-  virtual void getDetectors(std::map<int, Geometry::IDetector_sptr>  & out_dets) const = 0;
+  virtual void getDetectors(std::map<int64_t, Geometry::IDetector_sptr>  & out_dets) const = 0;
 
   /// return a vector with a list of the detector IDs
-  virtual std::vector<int> getDetectorIDs(bool skipMonitors = false) const = 0;
+  virtual std::vector<int64_t> getDetectorIDs(bool skipMonitors = false) const = 0;
 
   /// The type used to deliver the set of plottable components
   typedef std::vector<Geometry::IObjComponent_const_sptr> plottables;
@@ -98,7 +99,7 @@ public:
   virtual plottables_const_sptr getPlottable() const = 0;
 
   /// returns a list containing  detector ids of monitors
-  virtual  const std::vector<int> getMonitors()const=0;
+  virtual  const std::vector<int64_t> getMonitors()const=0;
   /// Retrieves from which side the instrument to be viewed from when the instrument viewer first starts, possiblities are "Z+, Z-, X+, ..."
   virtual std::string getDefaultAxis() const=0;
 

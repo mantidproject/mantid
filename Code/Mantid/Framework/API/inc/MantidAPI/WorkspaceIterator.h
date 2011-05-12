@@ -51,18 +51,18 @@ private:
   ///The number of times this iterator should loop before ending
   const unsigned int m_loopOrientation;
   /// internal index of location within the workspace
-  int m_index;
+  std::size_t m_index;
   ///Internal cache of the workspace size
-  int m_wsSize;
+  std::size_t m_wsSize;
   ///Internal cache of the workspace blocksize
-  int m_blocksize;
+  std::size_t m_blocksize;
 
   ///Internal cache of the current datablock index
-  int m_dataBlockIndex;
+  std::size_t m_dataBlockIndex;
   ///Internal cache of the current datablock index minimum value
-  int m_blockMin;
+  std::size_t m_blockMin;
   ///Internal cache of the current datablock index maximum value
-  int m_blockMax;
+  std::size_t m_blockMax;
   ///Internal flag to indicate if the X2 value is present
   bool m_IsX2Present;
   

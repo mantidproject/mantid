@@ -6,14 +6,14 @@ namespace Mantid
 namespace API
 {
 
-void ParameterReference::reset(IFitFunction* fun,int index)
+void ParameterReference::reset(IFitFunction* fun,size_t index)
 {
   IFitFunction* fLocal = fun;
-  int iLocal = index;
+  size_t iLocal = index;
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)
   {
-    int iFun = cf->functionIndex(iLocal);
+    size_t iFun = cf->functionIndex(iLocal);
     fLocal = cf->getFunction(iFun);
     iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
     cf = dynamic_cast<CompositeFunction*>(fLocal);

@@ -11,6 +11,8 @@ namespace Mantid
 namespace DataObjects
 {
 
+using std::size_t;
+
 // Get a reference to the logger
 Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBlock2D");
 
@@ -20,15 +22,10 @@ Kernel::Logger& ManagedDataBlock2D::g_log = Kernel::Logger::get("ManagedDataBloc
  *  @param XLength ::  The number of elements in the X data
  *  @param YLength ::  The number of elements in the Y/E data
  */
-ManagedDataBlock2D::ManagedDataBlock2D(const int &minIndex, const int &NVectors, 
-    const int &XLength, const int &YLength) :
+ManagedDataBlock2D::ManagedDataBlock2D(const size_t &minIndex, const size_t &NVectors, 
+    const size_t &XLength, const size_t &YLength) :
   m_data(NVectors), m_XLength(XLength), m_YLength(YLength), m_minIndex(minIndex), m_hasChanges(false)
 {
-  if (minIndex < 0 || NVectors < 0 || XLength < 0 || YLength < 0)
-  {
-    throw std::out_of_range("All arguments to ManagedDataBlock constructor must be positive");
-  }
-
   // Set all the internal vectors to the right size
   for (std::vector<Histogram1D>::iterator it = m_data.begin(); it != m_data.end(); ++it)
   {
@@ -78,7 +75,7 @@ void ManagedDataBlock2D::hasChanges(bool has)
  @param index :: Index to the histogram
  @param vec :: Shared ptr base object
  */
-void ManagedDataBlock2D::setX(const int index, const MantidVecPtr::ptr_type& vec)
+void ManagedDataBlock2D::setX(const size_t index, const MantidVecPtr::ptr_type& vec)
 {
   if ( ( index < m_minIndex ) 
       || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
@@ -94,10 +91,10 @@ void ManagedDataBlock2D::setX(const int index, const MantidVecPtr::ptr_type& vec
  @param index :: Index to the histogram
  @param PA :: Reference counted histogram
  */
-void ManagedDataBlock2D::setX(const int index, const MantidVecPtr& PA)
+void ManagedDataBlock2D::setX(const size_t index, const MantidVecPtr& PA)
 {
-  if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+  if ( ( index < m_minIndex )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
   m_data[index-m_minIndex].setX(PA);
@@ -110,10 +107,10 @@ void ManagedDataBlock2D::setX(const int index, const MantidVecPtr& PA)
  @param index :: The histogram to be set
  @param PY :: A reference counted data range  
  */
-void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY)
+void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr& PY)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
   m_data[index-m_minIndex].setData(PY);
@@ -127,11 +124,11 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY)
  @param PY :: A reference counted data range  
  @param PE :: A reference containing the corresponding errors
  */
-void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY,
+void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr& PY,
     const MantidVecPtr& PE)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
   m_data[index-m_minIndex].setData(PY, PE);
@@ -145,11 +142,11 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr& PY,
  @param PY :: A reference counted data range  
  @param PE :: A reference containing the corresponding errors
  */
-void ManagedDataBlock2D::setData(const int index, const MantidVecPtr::ptr_type& PY,
+void ManagedDataBlock2D::setData(const size_t index, const MantidVecPtr::ptr_type& PY,
     const MantidVecPtr::ptr_type& PE)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::setData, histogram number out of range");
 
   m_data[index-m_minIndex].setData(PY, PE);
@@ -162,10 +159,10 @@ void ManagedDataBlock2D::setData(const int index, const MantidVecPtr::ptr_type& 
   @param index :: The number of the histogram
   @return A vector of doubles containing the x data
 */
-MantidVec& ManagedDataBlock2D::dataX(const int index)
+MantidVec& ManagedDataBlock2D::dataX(const size_t index)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
 
   m_hasChanges = true;  
@@ -177,10 +174,10 @@ MantidVec& ManagedDataBlock2D::dataX(const int index)
   @param index :: The number of the histogram
   @return A vector of doubles containing the y data
 */
-MantidVec& ManagedDataBlock2D::dataY(const int index)
+MantidVec& ManagedDataBlock2D::dataY(const size_t index)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
 
   m_hasChanges = true;
@@ -192,10 +189,10 @@ MantidVec& ManagedDataBlock2D::dataY(const int index)
   @param index :: The number of the histogram
   @return A vector of doubles containing the error data
 */
-MantidVec& ManagedDataBlock2D::dataE(const int index)
+MantidVec& ManagedDataBlock2D::dataE(const size_t index)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
 
   m_hasChanges = true;
@@ -207,10 +204,10 @@ MantidVec& ManagedDataBlock2D::dataE(const int index)
   @param index :: The number of the histogram
   @return A vector of doubles containing the x data
 */
-const MantidVec& ManagedDataBlock2D::dataX(const int index) const
+const MantidVec& ManagedDataBlock2D::dataX(const size_t index) const
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataX, histogram number out of range");
 
   return m_data[index-m_minIndex].dataX();
@@ -221,10 +218,10 @@ const MantidVec& ManagedDataBlock2D::dataX(const int index) const
   @param index :: The number of the histogram
   @return A vector of doubles containing the y data
 */
-const MantidVec& ManagedDataBlock2D::dataY(const int index) const
+const MantidVec& ManagedDataBlock2D::dataY(const size_t index) const
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataY, histogram number out of range");
 
   return m_data[index-m_minIndex].dataY();
@@ -235,10 +232,10 @@ const MantidVec& ManagedDataBlock2D::dataY(const int index) const
   @param index :: The number of the histogram
   @return A vector of doubles containing the error data
 */
-const MantidVec& ManagedDataBlock2D::dataE(const int index) const
+const MantidVec& ManagedDataBlock2D::dataE(const size_t index) const
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::dataE, histogram number out of range");
 
   return m_data[index-m_minIndex].dataE();
@@ -249,10 +246,10 @@ const MantidVec& ManagedDataBlock2D::dataE(const int index) const
   @param index :: The number of the histogram
   @return A reference to the X vector of the specified histogram
 */
-MantidVecPtr ManagedDataBlock2D::refX(const int index) const
+MantidVecPtr ManagedDataBlock2D::refX(const size_t index) const
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= (m_minIndex + m_data.size()) ) )
     throw std::range_error("ManagedDataBlock2D::refX, histogram number out of range");
 
   return m_data[index-m_minIndex].ptrX();

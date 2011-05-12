@@ -238,7 +238,7 @@ namespace Geometry
     /// Build and populate the NearestNeighbours object
     void buildNearestNeighbours(const IComponent *comp) const;
     /// Query the NearestNeighbours object for a detector
-    std::map<int, double> getNeighbours(const IComponent *comp, const double radius = 0.0) const;
+    std::map<int64_t, double> getNeighbours(const IComponent *comp, const double radius = 0.0) const;
 
   private:
     ///Assignment operator

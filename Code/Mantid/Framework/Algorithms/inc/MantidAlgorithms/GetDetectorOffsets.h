@@ -2,6 +2,7 @@
 #define MANTID_ALGORITHMS_GETDETECTOROFFSETS_H_
 
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 #include "MantidDataObjects/OffsetsWorkspace.h"
 
 namespace Mantid
@@ -55,7 +56,7 @@ private:
   void init();
   void exec();
   /// Call Gaussian as a sub-algorithm to fit the peak in a spectrum
-  double fitSpectra(const int s);
+  double fitSpectra(const int64_t s);
   /// Read in all the input parameters
   void retrieveProperties();
   
@@ -66,7 +67,7 @@ private:
   double Xmax;        ///< The end of the X range for fitting
   double dreference;  ///< The expected peak position in d-spacing (?)
   double step;        ///< The step size
-  int nspec;          ///< The number of spectra in the input workspace
+  int64_t nspec;          ///< The number of spectra in the input workspace
 };
 
 } // namespace Algorithm

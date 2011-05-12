@@ -13,7 +13,7 @@ namespace API
  *  @param length :: The length of this axis
  *  @param parentWorkspace :: A pointer to the workspace that holds this axis
  */
-RefAxis::RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace) : 
+RefAxis::RefAxis(const size_t& length, const MatrixWorkspace* const parentWorkspace) : 
   NumericAxis(length),  m_parentWS(parentWorkspace)
 {
   m_size = length;
@@ -49,9 +49,9 @@ Axis* RefAxis::clone(const MatrixWorkspace* const parentWorkspace)
  *  @throw  IndexError If 'index' is not in the range of this axis
  *  @throw  std::range_error If 'verticalIndex' is not in the range of the parent workspace
  */
-double RefAxis::operator()(const int& index, const int& verticalIndex) const
+double RefAxis::operator()(const size_t& index, const size_t& verticalIndex) const
 {
-  if (index < 0 || index >= m_size)
+  if (index >= m_size)
   {
     throw Kernel::Exception::IndexError(index, m_size-1, "Axis: Index out of range.");
   }
@@ -60,9 +60,10 @@ double RefAxis::operator()(const int& index, const int& verticalIndex) const
 }
 
 /// Method not available for RefAxis. Will always throw.
-void RefAxis::setValue(const int& index, const double& value)
+void RefAxis::setValue(const size_t& index, const double& value)
 {
-  (void) index; (void) value; //Avoid compiler warning
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
   throw std::domain_error("This method cannot be used on a RefAxis.");
 }
 

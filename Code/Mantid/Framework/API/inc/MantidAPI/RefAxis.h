@@ -42,13 +42,13 @@ namespace API
 class DLLExport RefAxis : public NumericAxis
 {
 public:
-	RefAxis(const int& length, const MatrixWorkspace* const parentWorkspace);
-	virtual ~RefAxis();
+  RefAxis(const std::size_t& length, const MatrixWorkspace* const parentWorkspace);
+  virtual ~RefAxis();
 
-	Axis* clone(const MatrixWorkspace* const parentWorkspace);
-  virtual int length() const{return m_size;}
-  virtual double operator()(const int& index, const int& verticalIndex) const;
-  virtual void setValue(const int& index, const double& value);
+  Axis* clone(const MatrixWorkspace* const parentWorkspace);
+  virtual std::size_t length() const{return m_size;}
+  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex) const;
+  virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
 
 private:
@@ -61,7 +61,7 @@ private:
   /// A pointer to the workspace holding the axis
   const MatrixWorkspace* const m_parentWS;
   /// Length of the axis
-  int m_size;
+  std::size_t m_size;
 };
 
 } // namespace API

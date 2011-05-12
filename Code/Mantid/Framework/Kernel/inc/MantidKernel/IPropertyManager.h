@@ -246,10 +246,12 @@ protected:
     // into what we actually want. It can't even handle just having a specialization for strings.
     // So we have to explicitly define an operator for each type of property that we have.
 
-    /// explicit specialization for int()
-    operator int ();
-    /// explicit specialization for long long()
-    operator long long ();
+    operator int16_t ();
+    operator uint16_t ();
+    operator int32_t ();
+    operator uint32_t ();
+    operator int64_t ();
+    operator uint64_t ();
     /// explicit specialization for bool()
     operator bool ();
     /// explicit specialization for double()

@@ -37,13 +37,13 @@ namespace DataHandling
     /// Run the algorithm
     void exec();
 
-    void readVulcanAsciiFile(const std::string& fileName, std::map<int,double> & vulcan);
-    void readVulcanBinaryFile(const std::string& fileName, std::map<int,double> & vulcan);
+    void readVulcanAsciiFile(const std::string& fileName, std::map<int64_t,double> & vulcan);
+    void readVulcanBinaryFile(const std::string& fileName, std::map<int64_t,double> & vulcan);
 
     void CalculateOffsetsFromDSpacemapFile(const std::string DFileName,
         Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
-    void CalculateOffsetsFromVulcanFactors(std::map<int, double> & vulcan,
+    void CalculateOffsetsFromVulcanFactors(std::map<int64_t, double> & vulcan,
         Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS);
 
   };

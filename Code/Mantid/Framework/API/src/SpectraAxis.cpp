@@ -11,8 +11,10 @@ namespace Mantid
 namespace API
 {
 
+using std::size_t;
+
 /// Constructor
-SpectraAxis::SpectraAxis(const int& length): Axis()
+SpectraAxis::SpectraAxis(const size_t& length): Axis()
 {
   m_values.resize(length);
 }
@@ -33,10 +35,10 @@ Axis* SpectraAxis::clone(const MatrixWorkspace* const parentWorkspace)
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double SpectraAxis::operator()(const int& index, const int& verticalIndex) const
+double SpectraAxis::operator()(const size_t& index, const size_t& verticalIndex) const
 {
-  (void) verticalIndex; //Avoid compiler warning
-  if (index < 0 || index >= length())
+  UNUSED_ARG(verticalIndex)
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
@@ -49,14 +51,14 @@ double SpectraAxis::operator()(const int& index, const int& verticalIndex) const
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void SpectraAxis::setValue(const int& index, const double& value)
+void SpectraAxis::setValue(const size_t& index, const double& value)
 {
-  if (index < 0 || index >= length())
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
 
-  m_values[index] = static_cast<int>(value);
+  m_values[index] = static_cast<int64_t>(value);
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)
@@ -65,9 +67,9 @@ void SpectraAxis::setValue(const int& index, const double& value)
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-const int& SpectraAxis::spectraNo(const int& index) const
+const int64_t& SpectraAxis::spectraNo(const size_t& index) const
 {
-  if (index < 0 || index >= length())
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
@@ -81,9 +83,9 @@ const int& SpectraAxis::spectraNo(const int& index) const
  *  @throw  domain_error If this method is called on a numeric axis
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-int& SpectraAxis::spectraNo(const int& index)
+int64_t& SpectraAxis::spectraNo(const size_t& index)
 {
-  if (index < 0 || index >= length())
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
@@ -97,14 +99,14 @@ int& SpectraAxis::spectraNo(const int& index)
  */
 void SpectraAxis::getIndexSpectraMap(spec2index_map& map)const
 {
-  std::size_t nel=m_values.size();
+  int64_t nel=m_values.size();
 
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
-  for (int i=nel-1;i>=0;--i)
+  for (int64_t i=nel-1;i>=0;--i)
   {
-    map.insert(std::make_pair<int,int>(i, m_values[i]));
+    map.insert(std::make_pair<int64_t,int64_t>(i, m_values[i]));
   }
 }
 
@@ -115,23 +117,23 @@ void SpectraAxis::getIndexSpectraMap(spec2index_map& map)const
  */
 void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
 {
-  std::size_t nel=m_values.size();
+  size_t nel=m_values.size();
 
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
-  for (int i=nel-1;i>=0;--i)
+  for (size_t i=nel-1;i>=0;--i)
   {
-    map.insert(std::make_pair<int,int>(m_values[i],i));
+    map.insert(std::make_pair<int64_t,int64_t>(m_values[i],i));
   }
 }
 
 /** Populate the SpectraAxis with a simple 1:1 map from 0 to end-1.
  */
-void SpectraAxis::populateSimple(int end)
+void SpectraAxis::populateSimple(int64_t end)
 {
   m_values.resize(static_cast<size_t>(end), 0);
-  for (int i=0; i < end; i++)
+  for (int64_t i=0; i < end; i++)
     m_values[i] = i;
 }
 
@@ -151,7 +153,7 @@ bool SpectraAxis::operator==(const Axis& axis2) const
   {
     return false;
   }
-	return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
+  return std::equal(m_values.begin(),m_values.end(),spec2->m_values.begin());
 }
 
 /** Returns a text label which shows the value at index and identifies the
@@ -159,7 +161,7 @@ bool SpectraAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return label of requested axis index
  */
-std::string SpectraAxis::label(const int& index)const
+std::string SpectraAxis::label(const size_t& index)const
 {
   return "sp-" + boost::lexical_cast<std::string>(spectraNo(index));
 }

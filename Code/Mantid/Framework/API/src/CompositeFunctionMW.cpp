@@ -50,7 +50,7 @@ std::string CompositeFunctionMW::asString()const
   {
     ostr << "composite=" <<name() << ";";
   }
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFitFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunctionMW*>(fun) != 0;
@@ -63,7 +63,7 @@ std::string CompositeFunctionMW::asString()const
     }
   }
   std::string ties;
-  for(int i=0;i<nParams();i++)
+  for(size_t i=0;i<nParams();i++)
   {
     const ParameterTie* tie = getTie(i);
     if (tie)
@@ -96,7 +96,7 @@ void CompositeFunctionMW::function(double* out, const double* xValues, const int
 {
   if (nData <= 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     if (i == 0)
@@ -112,7 +112,7 @@ void CompositeFunctionMW::function(double* out, const double* xValues, const int
 /// Derivatives of function with respect to active parameters
 void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
 {
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     PartialJacobian J(out,paramOffset(i),activeOffset(i));
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
@@ -124,7 +124,7 @@ void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, co
 void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData)
 {
   if (nData <= 0) return;
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     PartialJacobian J(out,paramOffset(i),activeOffset(i));
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
@@ -141,7 +141,7 @@ void CompositeFunctionMW::calJacobianForCovariance(Jacobian* out, const double* 
 void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int spec,int xMin,int xMax)
 {
   IFunctionMW::setMatrixWorkspace(workspace,spec,xMin,xMax);
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     fun->setMatrixWorkspace(workspace,spec,xMin,xMax);
@@ -151,7 +151,7 @@ void CompositeFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::Matrix
 void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,const std::string& slicing,bool)
 {
   IFunctionMW::setWorkspace(ws,slicing);
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
     fun->setUpNewStuff(m_xValues,m_weights);
@@ -161,7 +161,7 @@ void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,con
 void CompositeFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_array<double> weights)
 {
   IFunctionMW::setUpNewStuff(xs,weights);
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
     fun->setUpNewStuff(xs,weights);

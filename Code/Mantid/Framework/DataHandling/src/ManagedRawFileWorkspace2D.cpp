@@ -28,7 +28,7 @@ namespace Mantid
     Kernel::Logger& ManagedRawFileWorkspace2D::g_log = Kernel::Logger::get("ManagedRawFileWorkspace2D");
 
     // Initialise the instance count
-    int ManagedRawFileWorkspace2D::g_uniqueID = 1;    
+    int64_t ManagedRawFileWorkspace2D::g_uniqueID = 1;
 
     /// Constructor
     ManagedRawFileWorkspace2D::ManagedRawFileWorkspace2D(const std::string& fileName, int opt) :
@@ -68,7 +68,7 @@ namespace Mantid
       m_numberOfBinBoundaries = isisRaw->t_ntc1 + 1;    
       m_numberOfPeriods = isisRaw->t_nper;
       initialize(isisRaw->t_nsp1,m_numberOfBinBoundaries,isisRaw->t_ntc1);
-      int noOfBlocks = m_noVectors / m_vectorsPerBlock;
+      int64_t noOfBlocks = m_noVectors / m_vectorsPerBlock;
       if ( noOfBlocks * m_vectorsPerBlock != m_noVectors ) ++noOfBlocks;
       m_changedBlock.resize(noOfBlocks,false);
 
@@ -85,7 +85,7 @@ namespace Mantid
     void ManagedRawFileWorkspace2D::getTimeChannels()
     {
       float* const timeChannels = new float[m_numberOfBinBoundaries];
-      isisRaw->getTimeChannels(timeChannels, m_numberOfBinBoundaries);
+      isisRaw->getTimeChannels(timeChannels, static_cast<int>(m_numberOfBinBoundaries));
 
       const int regimes = isisRaw->daep.n_tr_shift;
       if ( regimes >=2 )
@@ -105,9 +105,9 @@ namespace Mantid
           m_timeChannels.push_back(channelsVec);
         }
         // In this case, also need to populate the map of spectrum-regime correspondence
-        const int ndet = isisRaw->i_det;
-        std::map<int,int>::iterator hint = m_specTimeRegimes.begin();
-        for (int j=0; j < ndet; ++j)
+        const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
+        std::map<int64_t,int64_t>::iterator hint = m_specTimeRegimes.begin();
+        for (int64_t j=0; j < ndet; ++j)
         {
           // No checking for consistency here - that all detectors for given spectrum
           // are declared to use same time regime. Will just use first encountered
@@ -138,7 +138,7 @@ namespace Mantid
         g_log.error("Raw file was not open.");
         throw std::runtime_error("Raw file was not open.");
       }
-      int blockIndex = startIndex / m_vectorsPerBlock;
+      int64_t blockIndex = startIndex / m_vectorsPerBlock;
       // Modified data is stored in ManagedWorkspace2D flat file.
       if (m_changedBlock[blockIndex])
       {
@@ -175,9 +175,9 @@ namespace Mantid
 				  throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 			  }
 		  }
-		  int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-		  if (endIndex >= m_noVectors) endIndex = m_noVectors;
-		  int index=startIndex;
+		  int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+		  if (endIndex >= static_cast<int64_t>(m_noVectors)) endIndex = static_cast<int64_t>(m_noVectors);
+		  int64_t index=startIndex;
 		  while(index<endIndex)
 		  {
 			  if(isMonitor(m_readIndex))
@@ -190,7 +190,7 @@ namespace Mantid
 			  {
 				  isisRaw->readData(m_fileRaw,m_readIndex+1);
 				  //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
-				  if( m_readIndex == ( m_noVectors+static_cast<int>(m_monitorList.size()) ) )
+				  if( m_readIndex == static_cast<int64_t>(m_noVectors+m_monitorList.size()) )
 					  break;
 				  MantidVec& y = newBlock->dataY(index);
 				  y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);  
@@ -202,7 +202,7 @@ namespace Mantid
 				  else
 				  {
 					 // std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
-					  std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(m_readIndex+1);
+					  std::map<int64_t,int64_t>::const_iterator regime = m_specTimeRegimes.find(m_readIndex+1);
 					  if ( regime == m_specTimeRegimes.end() ) 
 					  {
 						  g_log.error() << "Spectrum " << index << " not present in spec array:\n";
@@ -243,9 +243,9 @@ namespace Mantid
 				  throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 			  }
 		  }
-		  int endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+		  int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
 		  if (endIndex >= m_noVectors) endIndex = m_noVectors;
-		  for(int index = startIndex;index<endIndex;index++,m_readIndex++)
+		  for(int64_t index = startIndex;index<endIndex;index++,m_readIndex++)
 		  {
 			  isisRaw->readData(m_fileRaw,m_readIndex+1);
 			  // g_log.error()<<"counter is "<<counter<<std::endl;
@@ -257,7 +257,7 @@ namespace Mantid
 				  newBlock->setX(index,m_timeChannels[0]);
 			  else
 			  {
-				  std::map<int,int>::const_iterator regime = m_specTimeRegimes.find(index+1);
+				  std::map<int64_t,int64_t>::const_iterator regime = m_specTimeRegimes.find(index+1);
 				  if ( regime == m_specTimeRegimes.end() ) 
 				  {
 					  g_log.error() << "Spectrum " << index << " not present in spec array:\n";
@@ -276,9 +276,9 @@ namespace Mantid
 	  * @param readIndex :: a spectrum index
 	  * @return true if it's a monitor ,otherwise false
 	*/
-	bool ManagedRawFileWorkspace2D::isMonitor(const int readIndex)const
+	bool ManagedRawFileWorkspace2D::isMonitor(const int64_t readIndex)const
 	{
-		std::vector<int>::const_iterator itr;
+		std::vector<int64_t>::const_iterator itr;
 		for(itr=m_monitorList.begin();itr!=m_monitorList.end();++itr)
 		{
 			if((*itr)==readIndex)

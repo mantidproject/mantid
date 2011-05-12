@@ -56,7 +56,7 @@ public:
 protected:
 
   /// Reads in a data block.
-  virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
+  virtual void readDataBlock(ManagedDataBlock2D *newBlock,std::size_t startIndex)const;
   /// Saves the dropped data block to disk.
   virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const;
 
@@ -67,14 +67,14 @@ private:
   /// Private copy assignment operator
   ManagedWorkspace2D& operator=(const ManagedWorkspace2D&);
 
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
-  virtual int getHistogramNumberHelper() const;
+  virtual std::size_t getHistogramNumberHelper() const;
 
-  ManagedDataBlock2D* getDataBlock(const int index) const;
+  ManagedDataBlock2D* getDataBlock(const std::size_t index) const;
 
   /// The number of blocks per temporary file
-  int m_blocksPerFile;
+  std::size_t m_blocksPerFile;
 
   /// The name of the temporary file
   std::string m_filename;

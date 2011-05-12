@@ -32,6 +32,7 @@ namespace Mantid
     using namespace Kernel;
     using namespace API;
     using Geometry::IInstrument;
+    using std::size_t;
 
     /// Empty default constructor
     LoadISISNexus::LoadISISNexus() : 
@@ -99,7 +100,7 @@ namespace Mantid
 
       }
 
-      const int lengthIn = m_numberOfChannels + 1;
+      const size_t lengthIn = m_numberOfChannels + 1;
 
       // Need to extract the user-defined output workspace name
       Property *ws = getProperty("OutputWorkspace");
@@ -116,7 +117,7 @@ namespace Mantid
       closeNexusGroup();// go back to raw_data_1
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int total_specs;
+      size_t total_specs;
       if( m_interval || m_list)
       {
         total_specs = m_spec_list.size();
@@ -154,7 +155,7 @@ namespace Mantid
 
       Progress prog(this,0.,1.,total_specs*m_numberOfPeriods);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
-      for (int period = 0; period < m_numberOfPeriods; ++period) {
+      for (size_t period = 0; period < m_numberOfPeriods; ++period) {
 
         if(m_entrynumber!=0)
         {
@@ -185,8 +186,8 @@ namespace Mantid
 
         openNexusGroup("detector_1","NXdata");
 
-        int counter = 0;
-        for (int i = m_spec_min; i < m_spec_max; ++i)
+        size_t counter = 0;
+        for (size_t i = m_spec_min; i < m_spec_max; ++i)
         {
           loadData(period, counter,i,localWorkspace ); // added -1 for NeXus
           counter++;
@@ -195,7 +196,7 @@ namespace Mantid
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
-          for(unsigned int i=0; i < m_spec_list.size(); ++i)
+          for(size_t i=0; i < m_spec_list.size(); ++i)
           {
             loadData(period, counter,m_spec_list[i],localWorkspace );
             counter++;
@@ -242,8 +243,8 @@ namespace Mantid
       m_spec_list = getProperty("SpectrumList");
       m_spec_max = getProperty("SpectrumMax");
       //now check that data
-      m_interval = !( m_spec_max == Mantid::EMPTY_INT() );
-      if ( m_spec_max == Mantid::EMPTY_INT() ) m_spec_max = 0;
+      m_interval = !( m_spec_max == static_cast<size_t>(Mantid::EMPTY_INT()) );
+      if ( m_spec_max == static_cast<size_t>(Mantid::EMPTY_INT()) ) m_spec_max = 0;
       m_list = !m_spec_list.empty();
 
       // If a multiperiod dataset, ignore the optional parameters (if set) and print a warning
@@ -261,8 +262,8 @@ namespace Mantid
       if ( m_list )
       {
         m_list = true;
-        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+        const size_t minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+        const size_t maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
         {
           g_log.error("Invalid list of spectra");
@@ -409,7 +410,7 @@ namespace Mantid
       int rank,type,dims[4];
       NXgetinfo(m_fileID,&rank,dims,&type);
 
-      if (m_numberOfChannels + 1 != dims[0])
+      if (static_cast<int>(m_numberOfChannels + 1) != dims[0])
       {
         g_log.error("Number of time channels does not match the data dimensions");
         throw std::runtime_error("Number of time channels does not match the data dimensions");
@@ -433,7 +434,7 @@ namespace Mantid
     *  @param i :: The index of the histogram in the file
     *  @param localWorkspace :: The workspace
     */
-    void LoadISISNexus::loadData(int period, int hist, int& i, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadISISNexus::loadData(size_t period, size_t hist, size_t& i, DataObjects::Workspace2D_sptr localWorkspace)
     {
       openNexusData("counts");
 
@@ -441,13 +442,13 @@ namespace Mantid
       NXgetinfo(m_fileID,&rank,dims,&type);
 
       int start[3], size[3];
-      start[0] = period;
-      start[1] = i;
+      start[0] = static_cast<int>(period);
+      start[1] = static_cast<int>(i);
       start[2] = 0;
 
       size[0] = 1;
       size[1] = 1;
-      size[2] = m_numberOfChannels;
+      size[2] = static_cast<int>(m_numberOfChannels);
 
       if (NX_ERROR == NXgetslab(m_fileID, m_data.get(), start, size))
       {
@@ -516,9 +517,9 @@ namespace Mantid
       int rank,type,dims[4];
       NXgetinfo(m_fileID,&rank,dims,&type);
 
-      int ndet = dims[0];
+      int64_t ndet = static_cast<int64_t>(dims[0]);
 
-      boost::shared_array<int> udet(new int[ndet]);
+      boost::shared_array<int64_t> udet(new int64_t[ndet]);
 
       getNexusData(udet.get());
 
@@ -540,7 +541,7 @@ namespace Mantid
         throw std::runtime_error("Cannot open load spectra-detector map: data sizes do not match.");
       }
 
-      m_spec.reset(new int[ndet]);
+      m_spec.reset(new int64_t[ndet]);
 
       getNexusData(m_spec.get());
 
@@ -659,7 +660,7 @@ namespace Mantid
     *   @param ws :: The workspace to load the logs to.
     *   @param period :: The period of this workspace
     */
-    void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,int period)
+    void LoadISISNexus::loadLogs(DataObjects::Workspace2D_sptr ws,size_t period)
     {
 
       std::string stime = getNexusString("start_time");
@@ -717,7 +718,7 @@ namespace Mantid
                 if (std::string(nxname.get()) == "icp_event")
                 {
                   LogParser parser(logv);
-                  ws->mutableRun().addLogData(parser.createPeriodLog(period));
+                  ws->mutableRun().addLogData(parser.createPeriodLog(static_cast<int>(period)));
                   ws->mutableRun().addLogData(parser.createAllPeriodsLog());
                   ws->mutableRun().addLogData(parser.createRunningLog());
                 }

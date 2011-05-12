@@ -335,12 +335,12 @@ using namespace DataObjects;
   {
     NXstatus status;
     int dimensions[1];
-    dimensions[0]=values.size();
+    dimensions[0]=static_cast<int>(values.size());
     status=NXmakedata(fileID, name.c_str(), NX_FLOAT64, 1, dimensions);
     if(status==NX_ERROR) return(false);
     status=NXopendata(fileID, name.c_str());
-    for(unsigned int it=0; it<attributes.size(); ++it)
-      status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+    for(size_t it=0; it<attributes.size(); ++it)
+      status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
     status=NXputdata(fileID, (void*)&(values[0]));
     status=NXclosedata(fileID);
     return(true);
@@ -357,15 +357,15 @@ using namespace DataObjects;
     NXstatus status;
     int dimensions[2];
     size_t maxlen=0;
-    dimensions[0]=values.size();
+    dimensions[0]=static_cast<int>(values.size());
     for(size_t i=0;i<values.size();i++)
       if(values[i].size()>maxlen) maxlen=values[i].size();
-    dimensions[1]=maxlen;
+    dimensions[1]=static_cast<int>(maxlen);
     status=NXmakedata(fileID, name.c_str(), NX_CHAR, 2, dimensions);
     if(status==NX_ERROR) return(false);
     status=NXopendata(fileID, name.c_str());
-    for(unsigned int it=0; it<attributes.size(); ++it)
-      status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+    for(size_t it=0; it<attributes.size(); ++it)
+      status=NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
     char* strs=new char[values.size()*maxlen];
     for(size_t i=0;i<values.size();i++)
     {
@@ -550,12 +550,12 @@ using namespace DataObjects;
       return(2);
     status=NXopengroup(fileID,group_name,"NXdata");
     // write workspace data
-    const int nHist=localworkspace->getNumberHistograms();
+    const size_t nHist=localworkspace->getNumberHistograms();
     if(nHist<1)
       return(2);
-    const int nSpectBins=localworkspace->readY(0).size();
-    const int nSpect=int(spec.size());
-    int dims_array[2] = { nSpect,nSpectBins };
+    const size_t nSpectBins=localworkspace->readY(0).size();
+    const size_t nSpect=spec.size();
+    int dims_array[2] = { static_cast<int>(nSpect),static_cast<int>(nSpectBins) };
 
 
     // Set the axis labels and values
@@ -577,13 +577,14 @@ using namespace DataObjects;
     // Get the values on the vertical axis
     std::vector<double> axis2;
     if (nSpect < nHist)
-      for (int i=0;i<nSpect;i++)
+      for (size_t i=0;i<nSpect;i++)
         axis2.push_back((*sAxis)(spec[i]));
     else
-      for (int i=0;i<sAxis->length();i++)
+      for (size_t i=0;i<sAxis->length();i++)
         axis2.push_back((*sAxis)(i));
 
-    int start[2]={0,0},asize[2]={1,dims_array[1]};
+    int start[2]={0,0};
+    int asize[2]={1,dims_array[1]};
 
 
     // -------------- Actually write the 2D data ----------------------------
@@ -592,7 +593,7 @@ using namespace DataObjects;
       std::string name="values";
       status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
       status=NXopendata(fileID, name.c_str());
-      for(int i=0;i<nSpect;i++)
+      for(size_t i=0;i<nSpect;i++)
       {
         int s = spec[i];
         status=NXputslab(fileID, (void*)&(localworkspace->readY(s)[0]),start,asize);
@@ -602,11 +603,11 @@ using namespace DataObjects;
       status=NXputattr (fileID, "signal", &signal, 1, NX_INT32);
       // More properties
       const std::string axesNames="axis1,axis2";
-      status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), axesNames.size(), NX_CHAR);
+      status=NXputattr (fileID, "axes", (void*)axesNames.c_str(), static_cast<int>(axesNames.size()), NX_CHAR);
       std::string yUnits=localworkspace->YUnit();
       std::string yUnitLabel=localworkspace->YUnitLabel();
-      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
-      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
+      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), static_cast<int>(yUnits.size()), NX_CHAR);
+      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), static_cast<int>(yUnitLabel.size()), NX_CHAR);
       status=NXclosedata(fileID);
 
       // error
@@ -614,7 +615,7 @@ using namespace DataObjects;
       status=NXcompmakedata(fileID, name.c_str(), NX_FLOAT64, 2, dims_array,m_nexuscompression,asize);
       status=NXopendata(fileID, name.c_str());
       start[0]=0;
-      for(int i=0;i<nSpect;i++)
+      for(size_t i=0;i<nSpect;i++)
       {
         int s = spec[i];
         status=NXputslab(fileID, (void*)&(localworkspace->readE(s)[0]),start,asize);
@@ -626,19 +627,19 @@ using namespace DataObjects;
     // write X data, as single array or all values if "ragged"
     if(uniformSpectra)
     {
-      dims_array[0]=localworkspace->readX(0).size();
+      dims_array[0]=static_cast<int>(localworkspace->readX(0).size());
       status=NXmakedata(fileID, "axis1", NX_FLOAT64, 1, dims_array);
       status=NXopendata(fileID, "axis1");
       status=NXputdata(fileID, (void*)&(localworkspace->readX(0)[0]));
     }
     else
     {
-      dims_array[0]=nSpect;
-      dims_array[1]=localworkspace->readX(0).size();
+      dims_array[0]=static_cast<int>(nSpect);
+      dims_array[1]=static_cast<int>(localworkspace->readX(0).size());
       status=NXmakedata(fileID, "axis1", NX_FLOAT64, 2, dims_array);
       status=NXopendata(fileID, "axis1");
       start[0]=0; asize[1]=dims_array[1];
-      for(int i=0;i<nSpect;i++)
+      for(size_t i=0;i<nSpect;i++)
       {
         status=NXputslab(fileID, (void*)&(localworkspace->readX(i)[0]),start,asize);
         start[0]++;
@@ -646,28 +647,28 @@ using namespace DataObjects;
     }
     std::string dist=(localworkspace->isDistribution()) ? "1" : "0";
     status=NXputattr(fileID, "distribution", (void*)dist.c_str(), 2, NX_CHAR);
-    NXputattr (fileID, "units", (void*)xLabel.c_str(), xLabel.size(), NX_CHAR);
+    NXputattr (fileID, "units", (void*)xLabel.c_str(), static_cast<int>(xLabel.size()), NX_CHAR);
     status=NXclosedata(fileID);
 
     if ( ! sAxis->isText() )
     {
       // write axis2, maybe just spectra number
-      dims_array[0]=axis2.size();
+      dims_array[0]=static_cast<int>(axis2.size());
       status=NXmakedata(fileID, "axis2", NX_FLOAT64, 1, dims_array);
       status=NXopendata(fileID, "axis2");
       status=NXputdata(fileID, (void*)&(axis2[0]));
-      NXputattr (fileID, "units", (void*)sLabel.c_str(), sLabel.size(), NX_CHAR);
+      NXputattr (fileID, "units", (void*)sLabel.c_str(), static_cast<int>(sLabel.size()), NX_CHAR);
       status=NXclosedata(fileID);
     }
     else
     {
       std::string textAxis;
-      for ( int i = 0; i < sAxis->length(); i ++ )
+      for ( size_t i = 0; i < sAxis->length(); i ++ )
       {
         std::string label = sAxis->label(i);
         textAxis += label + "\n";
       }
-      dims_array[0] = textAxis.size();
+      dims_array[0] = static_cast<int>(textAxis.size());
       status = NXmakedata(fileID, "axis2", NX_CHAR, 2, dims_array);
       status = NXopendata(fileID, "axis2");
       status = NXputdata(fileID, (void*)textAxis.c_str());
@@ -680,12 +681,6 @@ using namespace DataObjects;
     status=NXclosegroup(fileID);
     return((status==NX_ERROR)?3:0);
   }
-
-
-
-
-
-
 
   //-------------------------------------------------------------------------------------
   /** Write out a combined chunk of event data
@@ -718,14 +713,14 @@ using namespace DataObjects;
       status=NXputdata(fileID, (void*)(indices_array) );
       std::string yUnits=ws->YUnit();
       std::string yUnitLabel=ws->YUnitLabel();
-      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), yUnits.size(), NX_CHAR);
-      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), yUnitLabel.size(), NX_CHAR);
+      status=NXputattr (fileID, "units", (void*)yUnits.c_str(), static_cast<int>(yUnits.size()), NX_CHAR);
+      status=NXputattr (fileID, "unit_label", (void*)yUnitLabel.c_str(), static_cast<int>(yUnitLabel.size()), NX_CHAR);
       status=NXclosedata(fileID);
       delete [] indices_array;
     }
 
     // Write out each field
-    dims_array[0] = indices.back(); // This is the # of events
+    dims_array[0] = static_cast<int>(indices.back()); // TODO big truncation error! This is the # of events
     if (tofs)
       NXwritedata("tof", NX_FLOAT64, 1, dims_array, (void *)(tofs), compress);
     if (pulsetimes)
@@ -756,7 +751,7 @@ using namespace DataObjects;
     if(status==NX_ERROR) return(2);
     status=NXopengroup(fileID,"event_workspace","NXdata");
 
-    for (int wi=0; wi < ws->getNumberHistograms(); wi++)
+    for (size_t wi=0; wi < ws->getNumberHistograms(); wi++)
     {
       std::ostringstream group_name;
       group_name << "event_list_" << wi;
@@ -857,7 +852,7 @@ using namespace DataObjects;
     status=NXopengroup(fileID, group_name.c_str(), "NXdata");
 
     // Copy the detector IDs to an array.
-    const std::set<int>& dets = el.getDetectorIDs();
+    const std::set<int64_t>& dets = el.getDetectorIDs();
     int64_t * detectorIDs = VectorHelper::iteratorToArray<int64_t>(dets.begin(), dets.end(), dims_array);
 
     // Write out the detector IDs
@@ -1293,8 +1288,8 @@ using namespace DataObjects;
       detector_count[i]= int32_t(ndet1);
       ndet += ndet1;
 
-      const std::vector<int> detectorgroup = spectraMap.getDetectors(spectra[i]);
-      std::vector<int>::const_iterator it;
+      const std::vector<int64_t> detectorgroup = spectraMap.getDetectors(spectra[i]);
+      std::vector<int64_t>::const_iterator it;
       for (it=detectorgroup.begin();it!=detectorgroup.end();it++)
       {
         detector_list[id++]=int32_t(*it);

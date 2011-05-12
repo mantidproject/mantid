@@ -24,6 +24,7 @@ void CalculateTransmission::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using std::size_t;
 
 CalculateTransmission::CalculateTransmission() : API::Algorithm(), logFit(false)
 {}
@@ -81,12 +82,12 @@ void CalculateTransmission::exec()
   }
   
   // Extract the required spectra into separate workspaces
-  std::vector<int> udets,indices;
+  std::vector<int64_t> udets,indices;
   // For LOQ at least, the incident beam monitor's UDET is 2 and the transmission monitor is 3
   udets.push_back(getProperty("IncidentBeamMonitor"));
   udets.push_back(getProperty("TransmissionMonitor"));
   // Convert UDETs to workspace indices via spectrum numbers
-  const std::vector<int> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
+  const std::vector<int64_t> sampleSpectra = sampleWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(sampleSpectra,indices);
   if (indices.size() < 2)
   {
@@ -111,7 +112,7 @@ void CalculateTransmission::exec()
   }
   MatrixWorkspace_sptr M2_sample = this->extractSpectrum(sampleWS,indices[0]);
   MatrixWorkspace_sptr M3_sample = this->extractSpectrum(sampleWS,indices[1]);
-  const std::vector<int> directSpectra = directWS->spectraMap().getSpectra(udets);
+  const std::vector<int64_t> directSpectra = directWS->spectraMap().getSpectra(udets);
   sampleWS->getIndicesFromSpectra(directSpectra,indices);
   // Check that given spectra are monitors
   if ( !directWS->getDetector(indices.front())->isMonitor() )
@@ -161,7 +162,7 @@ void CalculateTransmission::exec()
       MantidVec & Y = logTransmission->dataY(0);
       MantidVec & E = logTransmission->dataE(0);
       Progress progress(this,0.4,0.6,Y.size());
-      for (unsigned int i=0; i < Y.size(); ++i)
+      for (size_t i=0; i < Y.size(); ++i)
       {
         E[i] = std::abs(E[i]/Y[i]);
         Y[i] = std::log10(Y[i]);
@@ -186,11 +187,11 @@ void CalculateTransmission::exec()
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int index)
+API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", index);
+  childAlg->setProperty<int64_t>("WorkspaceIndex", index);
   childAlg->executeAsSubAlg();
   // Only get to here if successful
   return childAlg->getProperty("OutputWorkspace");
@@ -232,7 +233,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::fitToData(API::MatrixWorkspace_
     const MantidVec & X = result->readX(0);
     MantidVec & Y = result->dataY(0);
     MantidVec & E = result->dataE(0);
-    for (unsigned int i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y.size(); ++i)
     {
       Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
       E[i] = std::abs(E[i]*Y[i]);

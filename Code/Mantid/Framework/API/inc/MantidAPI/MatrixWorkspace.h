@@ -36,10 +36,10 @@ namespace Mantid
     /** Map from one type of index (e.g. workspace index) to another type (e.g. spectrum # or detector id #).
     * Used by MatrixWorkspace to return maps.
     */
-    typedef std::map<int, int> IndexToIndexMap;
+    typedef std::map<int64_t, int64_t> IndexToIndexMap;
 
     // Map for associating indexes to generated MDPoints.
-    typedef std::map<int, Mantid::Geometry::MDPoint> MatrixMDPointMap;
+    typedef std::map<int64_t, Mantid::Geometry::MDPoint> MatrixMDPointMap;
 
     //----------------------------------------------------------------------
     // Forward Declaration
@@ -84,7 +84,7 @@ namespace Mantid
       /// Typedef for the const workspace_iterator to use with a Workspace
       typedef workspace_iterator<const LocatedDataRef, const MatrixWorkspace> const_iterator;
 
-      void initialize(const int &NVectors, const int &XLength, const int &YLength);
+      void initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
       virtual ~MatrixWorkspace();
 
       void setInstrument(const Geometry::IInstrument_sptr&);
@@ -100,7 +100,7 @@ namespace Mantid
       IndexToIndexMap * getSpectrumToWorkspaceIndexMap() const;
       IndexToIndexMap * getWorkspaceIndexToDetectorIDMap() const;
       IndexToIndexMap * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
-      void getIndicesFromSpectra(const std::vector<int>& spectraList, std::vector<int>& indexList) const;
+      void getIndicesFromSpectra(const std::vector<int64_t>& spectraList, std::vector<int64_t>& indexList) const;
 
       /// Sample accessors
       const  Sample& sample() const;
@@ -112,7 +112,7 @@ namespace Mantid
       Run& mutableRun();
 
       /// Get a detector object (Detector or DetectorGroup) for the given spectrum index
-      Geometry::IDetector_sptr getDetector(const int index) const;
+      Geometry::IDetector_sptr getDetector(const int64_t index) const;
       double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
       /// Calculates the drop of a neutron coming from the sample, there isn't currently a Mantid convention for which axis is vertical
       double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
@@ -131,11 +131,11 @@ namespace Mantid
 
       // Section required for iteration
       /// Returns the number of single indexable items in the workspace
-      virtual int size() const = 0;
+      virtual std::size_t size() const = 0;
       /// Returns the size of each block of data returned by the dataY accessors
-      virtual int blocksize() const = 0;
+      virtual std::size_t blocksize() const = 0;
       /// Returns the number of histograms in the workspace
-      virtual int getNumberHistograms() const = 0;
+      virtual std::size_t getNumberHistograms() const = 0;
 
       /// Sets MatrixWorkspace title
       virtual void setTitle(const std::string&);
@@ -143,7 +143,7 @@ namespace Mantid
       virtual const std::string getTitle() const;
 
       /// Returns the bin index for a given X value of a given workspace index
-      size_t binIndexOf(const double xValue, const int index = 0) const;
+      size_t binIndexOf(const double xValue, const std::size_t = 0) const;
 
       //----------------------------------------------------------------------
       // DATA ACCESSORS
@@ -153,13 +153,13 @@ namespace Mantid
 
       /// Returns a read-only (i.e. const) reference to the specified X array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readX(int const index) const { return dataX(index); }
+      const MantidVec& readX(std::size_t const index) const { return dataX(index); }
       /// Returns a read-only (i.e. const) reference to the specified Y array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readY(int const index) const { return dataY(index); }
+      const MantidVec& readY(std::size_t const index) const { return dataY(index); }
       /// Returns a read-only (i.e. const) reference to the specified E array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readE(int const index) const { return dataE(index); }
+      const MantidVec& readE(std::size_t const index) const { return dataE(index); }
       /// Returns a read-only (i.e. const) reference to the specified X error array
       /// @param index :: workspace index to retrieve.
       const MantidVec& readDx(int const index) const { return dataDx(index); }
@@ -170,33 +170,33 @@ namespace Mantid
        * @param[out] Y :: reference to the pointer to the const data vector
        * @param[out] E :: reference to the pointer to the const error vector
        */
-      virtual void readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const
+      virtual void readYE(std::size_t const index, MantidVec const*& Y, MantidVec const*& E) const
       {
         Y = &dataY(index);
         E = &dataE(index);
       }
 
       /// Returns the x data
-      virtual MantidVec& dataX(int const index) = 0;
+      virtual MantidVec& dataX(const std::size_t index) = 0;
       /// Returns the y data
-      virtual MantidVec& dataY(int const index) = 0;
+      virtual MantidVec& dataY(const std::size_t index) = 0;
       /// Returns the error data
-      virtual MantidVec& dataE(int const index) = 0;
+      virtual MantidVec& dataE(const std::size_t index) = 0;
       /// Returns the x error data
-      virtual MantidVec& dataDx(int const index) = 0;
+      virtual MantidVec& dataDx(const std::size_t index) = 0;
       /// Returns the x data const
-      virtual const MantidVec& dataX(int const index) const = 0;
+      virtual const MantidVec& dataX(const std::size_t index) const = 0;
       /// Returns the y data const
-      virtual const MantidVec& dataY(int const index) const = 0;
+      virtual const MantidVec& dataY(const std::size_t index) const = 0;
       /// Returns the error const
-      virtual const MantidVec& dataE(int const index) const = 0;
+      virtual const MantidVec& dataE(const std::size_t index) const = 0;
       /// Returns the error const
-      virtual const MantidVec& dataDx(int const index) const = 0;
+      virtual const MantidVec& dataDx(const std::size_t index) const = 0;
 
       /// Returns a pointer to the x data
-      virtual Kernel::cow_ptr<MantidVec> refX(const int index) const = 0;
+      virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const = 0;
       /// Set the specified X array to point to the given existing array
-      virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) = 0;
+      virtual void setX(const std::size_t index, const Kernel::cow_ptr<MantidVec>& X) = 0;
 
       /// Return a vector with the integrated counts for all spectra withing the given range
       virtual void getIntegratedSpectra(std::vector<double> & out, const double minX, const double maxX, const bool entireRange) const;
@@ -204,8 +204,8 @@ namespace Mantid
       //----------------------------------------------------------------------
 
       int axes() const;
-      Axis* getAxis(const int& axisIndex) const;
-      void replaceAxis(const int& axisIndex, Axis* const newAxis);
+      Axis* getAxis(const std::size_t& axisIndex) const;
+      void replaceAxis(const std::size_t& axisIndex, Axis* const newAxis);
 
       /// Returns true if the workspace contains data in histogram form (as opposed to point-like)
       virtual bool isHistogramData() const;
@@ -220,14 +220,14 @@ namespace Mantid
       bool& isDistribution(bool newValue);
 
       /// Mask a given workspace index, setting the data and error values to the given value
-      void maskWorkspaceIndex(const int index, const double maskValue = 0.0);
+      void maskWorkspaceIndex(const std::size_t index, const double maskValue = 0.0);
 
       // Methods to set and access masked bins
-      void maskBin(const int& spectrumIndex, const int& binIndex, const double& weight = 1.0);
-      bool hasMaskedBins(const int& spectrumIndex) const;
+      void maskBin(const int64_t& spectrumIndex, const int64_t& binIndex, const double& weight = 1.0);
+      bool hasMaskedBins(const int64_t& spectrumIndex) const;
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
-      typedef std::set< std::pair<int,double> > MaskList;
-      const MaskList& maskedBins(const int& spectrumIndex) const;
+      typedef std::set< std::pair<int64_t,double> > MaskList;
+      const MaskList& maskedBins(const int64_t& spectrumIndex) const;
 
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
@@ -287,7 +287,7 @@ namespace Mantid
       MatrixWorkspace();
 
       /// Initialises the workspace. Sets the size and lengths of the arrays. Must be overloaded.
-      virtual void init(const int &NVectors, const int &XLength, const int &YLength) = 0;
+      virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength) = 0;
 
       /// A vector of pointers to the axes for this workspace
       std::vector<Axis*> m_axes;
@@ -298,7 +298,7 @@ namespace Mantid
       const Mantid::Geometry::SignalAggregate& getPointImp(size_t histogram, size_t bin) const;
 
       /// Creates a point for a given histogram/bin.
-      Mantid::Geometry::MDPoint createPoint(unsigned int histogram, unsigned int bin) const;
+      Mantid::Geometry::MDPoint createPoint(HistogramIndex histogram, BinIndex bin) const;
      
       /// Private copy constructor. NO COPY ALLOWED
       MatrixWorkspace(const MatrixWorkspace&);
@@ -333,7 +333,7 @@ namespace Mantid
       boost::shared_ptr<Geometry::ParameterMap> m_parmap;
 
       /// The set of masked bins in a map keyed on spectrum index
-      std::map< int, MaskList > m_masks;
+      std::map< int64_t, MaskList > m_masks;
 
       /// Associates indexes to MDPoints. Dynamic cache.
       mutable MatrixMDPointMap m_mdPointMap;

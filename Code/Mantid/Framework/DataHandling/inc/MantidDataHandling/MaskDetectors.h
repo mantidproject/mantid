@@ -68,9 +68,9 @@ private:
   // Implement abstract Algorithm methods
   void init();
   void exec();
-  void fillIndexListFromSpectra(std::vector<int>& indexList, const std::vector<int>& spectraList,
+  void fillIndexListFromSpectra(std::vector<int64_t>& indexList, const std::vector<int64_t>& spectraList,
                                 const API::MatrixWorkspace_sptr WS);
-  void appendToIndexListFromWS(std::vector<int>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);
+  void appendToIndexListFromWS(std::vector<int64_t>& indexList, const API::MatrixWorkspace_sptr maskedWorkspace);
 };
 
 } // namespace DataHandling

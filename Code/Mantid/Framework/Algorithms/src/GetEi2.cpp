@@ -106,13 +106,13 @@ void GetEi2::exec()
  */
 double GetEi2::calculateEi(const double initial_guess)
 {
-  const int monitor1_spec = getProperty("Monitor1Spec");
-  const int monitor2_spec = getProperty("Monitor2Spec");
+  const int64_t monitor1_spec = getProperty("Monitor1Spec");
+  const int64_t monitor2_spec = getProperty("Monitor2Spec");
 
   //Covert spectrum numbers to workspace indices
-  std::vector<int> spec_nums(2, monitor1_spec);
+  std::vector<int64_t> spec_nums(2, monitor1_spec);
   spec_nums[1] = monitor2_spec;
-  std::vector<int> mon_indices;
+  std::vector<int64_t> mon_indices;
   mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
   m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);
@@ -128,7 +128,7 @@ double GetEi2::calculateEi(const double initial_guess)
   double det_distances[2] = {0.0, 0.0};
   for( unsigned int i = 0; i < 2; ++i )
   { 
-    int ws_index = mon_indices[i]; 
+    int64_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index);
     const double peak_guess = det_distances[i]*std::sqrt(m_t_to_mev/initial_guess);
     if( m_fixedei && i == 0 )
@@ -174,7 +174,7 @@ double GetEi2::calculateEi(const double initial_guess)
  *  @return The distance between the source and the given detector(or DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(int ws_index) const
+double GetEi2::getDistanceFromSource(int64_t ws_index) const
 {
   const IObjComponent_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
@@ -195,7 +195,7 @@ double GetEi2::getDistanceFromSource(int ws_index) const
  * @param t_max :: the max time to consider
  * @return the peak position
  */
-double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
+double GetEi2::calculatePeakPosition(int64_t ws_index, double t_min, double t_max)
 {
    //Crop out the current monitor workspace to the min/max times defined
   MatrixWorkspace_sptr monitor_ws = extractSpectrum(ws_index, t_min, t_max);
@@ -230,7 +230,7 @@ double GetEi2::calculatePeakPosition(int ws_index, double t_min, double t_max)
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
  */
-MatrixWorkspace_sptr GetEi2::extractSpectrum(int ws_index, const double start, const double end)
+MatrixWorkspace_sptr GetEi2::extractSpectrum(int64_t ws_index, const double start, const double end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
@@ -268,7 +268,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   const std::vector<double>::size_type nxvals = Xs.size();
 
   //! Find data range that satisfies prominence criterion: im < ipk < ip will be nearest points that satisfy this
-  int im = (int)iPeak-1;
+  int64_t im = static_cast<int64_t>(iPeak-1);
   for( ; im >= 0; --im )
   {
     const double ratio = Ys[im]/peakY;
@@ -385,15 +385,15 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
   std::copy( Es.begin()+im, Es.begin() + ip + 1, peak_e.begin());
 
   // FWHH:
-  int ipk_int = (int)iPeak - im;  //       ! peak position in internal array
+  int64_t ipk_int = static_cast<int64_t>(iPeak) - im;  //       ! peak position in internal array
   double hby2 = 0.5*peak_y[ipk_int];
-  int ip1(0), ip2(0);
+  int64_t ip1(0), ip2(0);
   double xp_hh(0);
 
-  int nyvals = (int)peak_y.size();     
+  int64_t nyvals = static_cast<int64_t>(peak_y.size());
   if (peak_y[nyvals-1] < hby2)
   {
-    for( int i = ipk_int; i < nyvals;  ++i )
+    for( int64_t i = ipk_int; i < nyvals;  ++i )
     {
       if (peak_y[i] < hby2)
       {
@@ -402,7 +402,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
         break;
       }
     }
-    for ( int i = nyvals-1; i >= ipk_int; --i )
+    for ( int64_t i = nyvals-1; i >= ipk_int; --i )
     {
       if (peak_y[i]>hby2)
       {
@@ -417,11 +417,11 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
     xp_hh = peak_x[nyvals-1];
   }
 
-  int im1(0), im2(0);
+  int64_t im1(0), im2(0);
   double xm_hh(0);
   if (peak_y[0]<hby2)
   {
-    for( int i = ipk_int; i >= 0; --i )
+    for( int64_t i = ipk_int; i >= 0; --i )
     {
       if (peak_y[i]<hby2)
       {
@@ -429,7 +429,7 @@ double GetEi2::calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws,
         break;
       }
     }
-    for ( int i=0; i <= ipk_int; ++i )
+    for ( int64_t i=0; i <= ipk_int; ++i )
     {
       if (peak_y[i]>hby2)
       {

@@ -54,7 +54,7 @@ namespace Mantid
     /// The pointer to the GSL's internal jacobian matrix
     gsl_matrix * m_J;
     /// Maps declared indeces to active. For fixed (tied) parameters holds -1
-    std::vector<int> m_index;
+    std::vector<int64_t> m_index;
 
     /// Set the pointer to the GSL's jacobian
     void setJ(gsl_matrix * J){m_J = J;}
@@ -63,7 +63,7 @@ namespace Mantid
     /// @param value :: the value
     /// @param iActiveP :: the index of the parameter
     ///  @throw runtime_error Thrown if column of Jacobian to add number to does not exist
-    void addNumberToColumn(const double& value, const int& iActiveP) 
+    void addNumberToColumn(const double& value, const int64_t& iActiveP)
     {
       if (iActiveP < static_cast<int>(m_J->size2) )
       {
@@ -79,15 +79,15 @@ namespace Mantid
       }   
     }
     /// overwrite base method
-    void set(int iY, int iP, double value)
+    void set(std::size_t iY, std::size_t iP, double value)
     {
-      int j = m_index[iP];
+      std::size_t j = m_index[iP];
       if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /// overwrite base method
-    double get(int iY, int iP)
+    double get(std::size_t iY, std::size_t iP)
     {
-      int j = m_index[iP];
+      std::size_t j = m_index[iP];
       if (j >= 0) return gsl_matrix_get(m_J,iY,j);
       return 0.0;
     }

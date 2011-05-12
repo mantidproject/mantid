@@ -413,7 +413,7 @@ namespace MantidQt
     * @param detNum number used to identify detector
     * @param specList  -list of spectrum
     */
-    void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int detNum,std::vector<int>&specList)
+    void SANSDiagnostics::getSpectraList(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,const int64_t detNum,std::vector<int64_t>&specList)
     {
       boost::shared_ptr<RectDetectorDetails> rectDet;
       try
@@ -437,7 +437,7 @@ namespace MantidQt
         g_log.error()<<"Error when accessing the details of rectangular detector"<<std::endl;
         return;
       }
-      std::vector<int> detIdList;
+      std::vector<int64_t> detIdList;
       detIdList.push_back(rectDet->getMinimumDetcetorId());
       detIdList.push_back(rectDet->getMaximumDetcetorId());
       specList= mws_sptr->spectraMap().getSpectra(detIdList);
@@ -448,10 +448,10 @@ namespace MantidQt
     * @param minSpec - minimum spectrum number
     * @param maxSpec - maximum spectrum number
     */
-    void SANSDiagnostics::minandMaxSpectrumIds(const std::vector<int>& specList,QString& minSpec, QString& maxSpec)
+    void SANSDiagnostics::minandMaxSpectrumIds(const std::vector<int64_t>& specList,QString& minSpec, QString& maxSpec)
     {      
-      int spec_min =*std::min_element(specList.begin(),specList.end());
-      int spec_max=*std::max_element(specList.begin(),specList.end());
+      int64_t spec_min =*std::min_element(specList.begin(),specList.end());
+      int64_t spec_max=*std::max_element(specList.begin(),specList.end());
     
       std::string s_min,s_max;
       try
@@ -487,11 +487,11 @@ namespace MantidQt
     */
 
     void SANSDiagnostics::getWorkspaceIndexes(const Mantid::API::MatrixWorkspace_sptr& mws_sptr,
-                                              const std::vector<int>& specList,
+                                              const std::vector<int64_t>& specList,
                                               QString& startWSIndex,QString& endWSIndex)
     {      
             
-      std::vector<int> wsindexList;
+      std::vector<int64_t> wsindexList;
       mws_sptr->getIndicesFromSpectra(specList,wsindexList);
       std::string wsStart;
       std::string wsEnd;
@@ -636,7 +636,7 @@ namespace MantidQt
       {
         return;
       }
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
@@ -662,7 +662,7 @@ namespace MantidQt
       QString orientation("D_V");
       QString minSpec;
       QString maxSpec;
-      int detNum=0;//first detector
+      int64_t detNum=0;//first detector
      
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -683,7 +683,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
 
@@ -707,7 +707,7 @@ namespace MantidQt
     /// Handler for first detector time integral button
     void SANSDiagnostics::firstDetectorTimeIntegralClicked()
     {
-      int detNum=0;//first detector
+      int64_t detNum=0;//first detector
       QString minSpec;
       QString maxSpec;
      
@@ -730,7 +730,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       QString wsStartIndex, wsEndIndex;
@@ -959,7 +959,7 @@ namespace MantidQt
       QString orientation("D_H");
       QString minSpec;
       QString maxSpec;
-      int detNum=1;//second detector
+      int64_t detNum=1;//second detector
       
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -980,7 +980,7 @@ namespace MantidQt
         return;
       }
       
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
        
@@ -1004,7 +1004,7 @@ namespace MantidQt
       QString orientation("D_V");
       QString minSpec;
       QString maxSpec;
-      int detNum=1;//first detector
+      int64_t detNum=1;//first detector
 
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -1025,7 +1025,7 @@ namespace MantidQt
         return;
       }
 
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       getSpectraList(mws_sptr,detNum,specList);
       minandMaxSpectrumIds(specList,minSpec,maxSpec);
       if(!isValidSpectra(minSpec,maxSpec))
@@ -1046,7 +1046,7 @@ namespace MantidQt
     void SANSDiagnostics::secondDetectorTimeIntegralClicked()
     {
       //second detector
-      int detNum=1;
+      int64_t detNum=1;
       QString minSpec;
       QString maxSpec;
 
@@ -1068,7 +1068,7 @@ namespace MantidQt
         return;
       }
             
-      std::vector<int> specList;
+      std::vector<int64_t> specList;
       //get spectrum list from detector ids
       getSpectraList(mws_sptr,detNum,specList);
       // get maximum and minimum spectrum ids

@@ -73,22 +73,22 @@ public:
   /// Returns the value at a specified index
   /// @param index :: the index
   /// @param verticalIndex :: The verticalIndex
-  virtual double operator()(const int& index, const int& verticalIndex = 0) const = 0;
+  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const = 0;
   /// Sets the value at the specified index
   /// @param index :: The index
   /// @param value :: The new value
-  virtual void setValue(const int& index, const double& value) = 0;
-  virtual const int& spectraNo(const int& index) const;
-  virtual int& spectraNo(const int& index);
+  virtual void setValue(const std::size_t& index, const double& value) = 0;
+  virtual const int64_t& spectraNo(const std::size_t& index) const;
+  virtual int64_t& spectraNo(const std::size_t& index);
 
   /// Get the length of the axis
-  virtual int length() const = 0;
+  virtual std::size_t length() const = 0;
 
   /// Check whether two axis are the same, i.e same length and same spectra_values for all elements in the axis
   virtual bool operator==(const Axis&) const = 0;
 
   /// Returns a text label of for a value
-  virtual std::string label(const int& index)const = 0;
+  virtual std::string label(const std::size_t& index)const = 0;
 
 protected:
   Axis(const Axis& right);

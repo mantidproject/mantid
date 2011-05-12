@@ -53,16 +53,16 @@ public:
   /// Return pointer to the function
   IFitFunction* getFunction()const{return m_function;}
   /// Return parameter index in that function
-  int getIndex()const{return m_index;}
+  std::size_t getIndex()const{return m_index;}
   /// Reset the reference
-  void reset(IFitFunction* fun,int index);
+  void reset(IFitFunction* fun,std::size_t index);
   /// Set the parameter
   void setParameter(const double& value) {m_function->setParameter(m_index,value);}
   /// Get the value of the parameter
   double getParameter()const{return m_function->getParameter(m_index);}
 private:
   IFitFunction* m_function; ///< pointer to the function
-  int m_index; ///< parameter index
+  std::size_t m_index; ///< parameter index
 };
 
 } // namespace API

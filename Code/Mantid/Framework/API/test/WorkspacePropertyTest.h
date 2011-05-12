@@ -10,6 +10,7 @@
 using Mantid::MantidVec;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
+using std::size_t;
 
 class WorkspacePropertyTest : public CxxTest::TestSuite
 {
@@ -18,23 +19,23 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest: public MatrixWorkspace
   {
   public:
-    virtual int getNumberHistograms() const { return 1;}
+    virtual size_t getNumberHistograms() const { return 1;}
 
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
-    virtual int size() const {return 0;}
-    virtual int blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(int const) {return data;}
+    virtual size_t size() const {return 0;}
+    virtual size_t blocksize() const  {return 1000000;}
+    virtual MantidVec& dataX(size_t const) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const) {return data;}
+    virtual MantidVec& dataY(size_t const) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const) {return data;}
+    virtual MantidVec& dataE(size_t const) {return data;}
     ///Returns the x error data
     virtual MantidVec& dataDx(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const)const {return data;}
+    virtual const MantidVec& dataX(size_t const)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const )const {return data;}
+    virtual const MantidVec& dataY(size_t const )const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const)const {return data;}
     ///Returns the x error data
@@ -52,23 +53,23 @@ class WorkspacePropertyTest : public CxxTest::TestSuite
   class WorkspaceTest2 : public MatrixWorkspace
   {
   public:
-    virtual int getNumberHistograms() const { return 1;}
+    virtual size_t getNumberHistograms() const { return 1;}
 
     const std::string id() const {return "WorkspacePropTest";}
     //section required to support iteration
-    virtual int size() const {return 0;}
-    virtual int blocksize() const  {return 1000000;}
-    virtual MantidVec& dataX(int const) {return data;}
+    virtual size_t size() const {return 0;}
+    virtual size_t blocksize() const  {return 1000000;}
+    virtual MantidVec& dataX(size_t const) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const) {return data;}
+    virtual MantidVec& dataY(size_t const) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const) {return data;}
+    virtual MantidVec& dataE(size_t const) {return data;}
     ///Returns the x error data
     virtual MantidVec& dataDx(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const)const {return data;}
+    virtual const MantidVec& dataX(size_t const)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const)const {return data;}
+    virtual const MantidVec& dataY(size_t const)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const)const {return data;}
     ///Returns the x error data

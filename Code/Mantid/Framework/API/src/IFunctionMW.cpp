@@ -188,7 +188,7 @@ namespace API
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  int IFunctionMW::dataSize()const
+  size_t IFunctionMW::dataSize()const
   {
     return m_dataSize;
   }

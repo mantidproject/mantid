@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidDataObjects/ManagedWorkspace2D.h"
+#include "MantidKernel/System.h"
 #include <Poco/Mutex.h>
 
 class ISISRAW2;
@@ -82,7 +83,7 @@ private:
   void openTempFile();
   void removeTempFile()const;
   /// returns true if the given spectrum index is a monitor
-  bool isMonitor(const int readIndex) const;
+  bool isMonitor(const int64_t readIndex) const;
 
   boost::shared_ptr<ISISRAW2> isisRaw;        ///< Pointer to an ISISRAW2 object
   const std::string m_filenameRaw;///< RAW file name.
@@ -90,19 +91,19 @@ private:
   fpos_t m_data_pos;        ///< Position in the file where the data start.
   mutable int m_readIndex;  ///< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
   std::vector<boost::shared_ptr<MantidVec> > m_timeChannels; ///< Time bins
-  std::map<int,int> m_specTimeRegimes;   ///< Stores the time regime for each spectrum
+  std::map<int64_t,int64_t> m_specTimeRegimes;   ///< Stores the time regime for each spectrum
 
   // For each data block holds true if it has been modified and must read from ManagedWorkspace2D flat file
   // of false if it must be read from the RAW file.
   // The block's index = startIndex / m_vectorsPerBlock.
   mutable std::vector<bool> m_changedBlock;  ///< Flags for modified blocks. Modified blocks are accessed through ManagedWorkspace2D interface
-  static int g_uniqueID;             ///< Counter used to create unique file names
+  static int64_t g_uniqueID;             ///< Counter used to create unique file names
   std::string m_tempfile;            ///< The temporary file name
 
-  int m_numberOfTimeChannels;  ///< The number of time channels (i.e. bins) from the RAW file 
-  int m_numberOfBinBoundaries; ///< The number of time bin boundaries == m_numberOfTimeChannels + 1
-  int m_numberOfSpectra;       ///< The number of spectra in the raw file
-  int m_numberOfPeriods;       ///< The number of periods in the raw file
+  int64_t m_numberOfTimeChannels;  ///< The number of time channels (i.e. bins) from the RAW file
+  int64_t m_numberOfBinBoundaries; ///< The number of time bin boundaries == m_numberOfTimeChannels + 1
+  int64_t m_numberOfSpectra;       ///< The number of spectra in the raw file
+  int64_t m_numberOfPeriods;       ///< The number of periods in the raw file
 
   mutable Poco::FastMutex m_mutex;  ///< The mutex
 
@@ -110,7 +111,7 @@ private:
   static Kernel::Logger &g_log;
 
   /// a counter used for skipping the raw file if it's a monitor
-  mutable int m_nmonitorSkipCounter;
+  mutable int64_t m_nmonitorSkipCounter;
  
 };
 

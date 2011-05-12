@@ -18,7 +18,7 @@ using Kernel::DateAndTime;
  *  @param duration :: The time (in seconds) that it took to run this algorithm (optional)
  *  @param uexeccount :: an  unsigned int for algorithm execution order
  */
-AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const DateAndTime& start, const double& duration,unsigned int uexeccount) :
+AlgorithmHistory::AlgorithmHistory(const Algorithm* const alg, const DateAndTime& start, const double& duration,std::size_t uexeccount) :
   m_name(alg->name()), m_version(alg->version()), m_executionDate(start), m_executionDuration(duration),m_execCount(uexeccount)
 {
   // Now go through the algorithm's properties and create the PropertyHistory objects.

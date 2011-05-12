@@ -49,17 +49,17 @@ class MatrixWorkspace;
 class DLLExport TextAxis: public Axis
 {
 public:
-  TextAxis(const int& length);
+  TextAxis(const std::size_t& length);
   virtual ~TextAxis(){}
   virtual Axis* clone(const MatrixWorkspace* const parentWorkspace = NULL);
-  virtual int length() const{return static_cast<int>(m_values.size());}
+  virtual std::size_t length() const{return m_values.size();}
   /// If this is a TextAxis, always return true for this class
   virtual bool isText() const{return true;}
-  virtual double operator()(const int& index, const int& verticalIndex = 0) const;
-  virtual void setValue(const int& index, const double& value);
+  virtual double operator()(const std::size_t& index, const std::size_t& verticalIndex = 0) const;
+  virtual void setValue(const std::size_t& index, const double& value);
   virtual bool operator==(const Axis&) const;
-  std::string label(const int& index)const;
-  void setLabel(const int& index, const std::string& lbl);
+  std::string label(const std::size_t& index)const;
+  void setLabel(const std::size_t& index, const std::string& lbl);
 private:
   /// Private, undefined copy assignment operator
   const TextAxis& operator=(const TextAxis&);

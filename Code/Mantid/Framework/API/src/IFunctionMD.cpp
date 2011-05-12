@@ -50,8 +50,8 @@ namespace API
 
       m_dataSize = 1;
       m_dimensions.resize(m_dimensionIndexMap.size());
-      std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
-      std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.end();
+      std::map<std::string,size_t>::const_iterator it = m_dimensionIndexMap.begin();
+      std::map<std::string,size_t>::const_iterator end = m_dimensionIndexMap.end();
       for(; it != end; ++it)
       {
         boost::shared_ptr<const Mantid::Geometry::IMDDimension> dim = m_workspace->getDimension(it->first);
@@ -79,7 +79,7 @@ namespace API
 
         do
         {
-          int i = r->getPointer();
+          size_t i = r->getPointer();
           const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
           double signal = point.getSignal();
           double error  = point.getError();
@@ -105,7 +105,7 @@ namespace API
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  int IFunctionMD::dataSize()const
+  size_t IFunctionMD::dataSize()const
   {
     return m_dataSize;
   }
@@ -129,7 +129,7 @@ namespace API
     IMDIterator* r = m_workspace->createIterator();
     do
     {
-      int i = r->getPointer();
+      size_t i = r->getPointer();
       out[i] = function(*r);
     }while(r->next());
     delete r;
@@ -143,10 +143,8 @@ namespace API
     // claculate numerically
     double stepPercentage = DBL_EPSILON*1000; // step percentage
     double step; // real step
-    double minDouble = std::numeric_limits<double>::min();
-    double cutoff = 100.0*minDouble/stepPercentage;
-    const int nParam = nParams();
-    const int nData  = dataSize();
+    const size_t nParam = nParams();
+    const size_t nData  = dataSize();
 
     // allocate memory if not already done
     if (!m_tmpFunctionOutputMinusStep && nData>0)
@@ -157,7 +155,7 @@ namespace API
 
     function(m_tmpFunctionOutputMinusStep.get());
 
-    for (int iP = 0; iP < nParam; iP++)
+    for (size_t iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {
@@ -182,7 +180,7 @@ namespace API
         step = paramPstep - val;
         setParameter(iP, val);
 
-        for (int i = 0; i < nData; i++) {
+        for (size_t i = 0; i < nData; i++) {
          // out->set(i,iP, 
          //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
           double value = (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step;
@@ -199,7 +197,7 @@ namespace API
     */
   void IFunctionMD::useDimension(const std::string& id)
   {
-    int n = m_dimensionIndexMap.size();
+    size_t n = m_dimensionIndexMap.size();
     if (m_dimensionIndexMap.find(id) != m_dimensionIndexMap.end())
     {
       throw std::invalid_argument("Dimension "+id+" has already been used.");
@@ -251,8 +249,8 @@ namespace Mantid
       void initDimensions()
       {
         if (!getWorkspace()) return;
-        std::map<std::string,int>::const_iterator it = m_dimensionIndexMap.begin();
-        std::map<std::string,int>::const_iterator end = m_dimensionIndexMap.end();
+        std::map<std::string,size_t>::const_iterator it = m_dimensionIndexMap.begin();
+        std::map<std::string,size_t>::const_iterator end = m_dimensionIndexMap.end();
         for(; it != end; ++it)
         {
           declareParameter(it->first+"_centre",0.0);
@@ -270,8 +268,8 @@ namespace Mantid
       double function(IMDIterator& r) const
       {
         double arg = 0.0;
-        int n = m_dimensions.size();
-        for(int i = 0; i < n; ++i)
+        size_t n = m_dimensions.size();
+        for(size_t i = 0; i < n; ++i)
         {
           double c = getParameter(2*i);
           double a = getParameter(2*i + 1);
@@ -301,7 +299,7 @@ namespace Mantid
         m_vars.resize(4);
         std::string varNames[] = {"x","y","z","t"};
         m_varNames.assign(varNames,varNames+m_vars.size());
-        for(int i = 0; i < m_vars.size(); ++i)
+        for(size_t i = 0; i < m_vars.size(); ++i)
         {
           m_parser.DefineVar(m_varNames[i],&m_vars[i]);
         }
@@ -312,7 +310,7 @@ namespace Mantid
       }
       Attribute getAttribute(const std::string& attName)const
       {
-        return Attribute(m_formula);
+        return Attribute(m_formula); // TODO this looks wrong
       }
       
       void setAttribute(const std::string& attName,const Attribute& attr)
@@ -334,7 +332,7 @@ namespace Mantid
         {
           m_vars.resize(m_dimensionIndexMap.size());
           m_varNames.resize(m_dimensionIndexMap.size());
-          for(int i = 0; i < m_vars.size(); ++i)
+          for(size_t i = 0; i < m_vars.size(); ++i)
           {
             m_varNames[i] = "x" + boost::lexical_cast<std::string>(i);
             m_parser.DefineVar(m_varNames[i],&m_vars[i]);
@@ -352,8 +350,8 @@ namespace Mantid
         */
       double function(IMDIterator& r) const
       {
-        int n = m_dimensions.size();
-        for(int i = 0; i < n; ++i)
+        size_t n = m_dimensions.size();
+        for(size_t i = 0; i < n; ++i)
         {
           m_vars[i] = r.getCoordinate(i);
         }
@@ -408,7 +406,7 @@ namespace Mantid
         {
           m_parser.DefineVar(m_varNames[i],&m_vars[i]);
         }
-        for(int i=0;i<nParams();i++)
+        for(size_t i=0;i<nParams();i++)
         {
           m_parser.DefineVar(parameterName(i),getParameterAddress(i));
         }

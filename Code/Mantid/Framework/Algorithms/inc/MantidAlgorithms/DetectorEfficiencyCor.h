@@ -99,7 +99,7 @@ class DLLExport DetectorEfficiencyCor : public API::Algorithm
   /// Retrieve algorithm properties
   void retrieveProperties();
   /// Correct the given spectra index for efficiency
-  void correctForEfficiency(int spectraIndex);
+  void correctForEfficiency(int64_t spectraIndex);
   /// Calculate one over the wave vector for 2 bin bounds
   double calculateOneOverK(double loBinBound, double uppBinBound) const;
   /// Sets the detector geometry cache if necessary
@@ -132,7 +132,7 @@ private:
   /// Sample position
   Geometry::V3D m_samplePos;
   /// The spectra numbers that were skipped
-  std::vector<int> m_spectraSkipped;
+  std::vector<int64_t> m_spectraSkipped;
 
 
   // Implement abstract Algorithm methods

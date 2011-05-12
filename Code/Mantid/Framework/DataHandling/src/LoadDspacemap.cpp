@@ -100,7 +100,7 @@ namespace DataHandling
     else
     {
       // Map of udet:funny vulcan correction factor.
-      std::map<int,double> vulcan;
+      std::map<int64_t,double> vulcan;
       if (type == "VULCAN-ASCII")
       {
         readVulcanAsciiFile(DFileName, vulcan);
@@ -140,7 +140,7 @@ namespace DataHandling
     instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
     //To get all the detector ID's
-    std::map<int, Geometry::IDetector_sptr> allDetectors;
+    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
     instrument->getDetectors(allDetectors);
 
     //Read in the POWGEN-style Dspace mapping file
@@ -158,12 +158,12 @@ namespace DataHandling
     }
 
     // Selects (empty, will default to true)
-    std::map<int, bool> selects;
+    std::map<int64_t, bool> selects;
 
-    std::map<int, Geometry::IDetector_sptr>::const_iterator it;
+    std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
-      int detectorID = it->first;
+      int64_t detectorID = it->first;
       Geometry::IDetector_sptr det = it->second;
 
       //Compute the factor
@@ -181,11 +181,6 @@ namespace DataHandling
 
   }
 
-
-
-
-
-
   //-----------------------------------------------------------------------
   /**
    * Make a map of the conversion factors between tof and D-spacing
@@ -194,20 +189,20 @@ namespace DataHandling
    * @param vulcan :: map between detector ID and vulcan correction factor.
    * @param offsetsWS :: OffsetsWorkspace to be filled.
    */
-  void LoadDspacemap::CalculateOffsetsFromVulcanFactors(std::map<int, double> & vulcan,
+  void LoadDspacemap::CalculateOffsetsFromVulcanFactors(std::map<int64_t, double> & vulcan,
       Mantid::DataObjects::OffsetsWorkspace_sptr offsetsWS)
   {
     // Get a pointer to the instrument contained in the workspace
     IInstrument_const_sptr instrument = offsetsWS->getInstrument();
 
     //To get all the detector ID's
-    std::map<int, Geometry::IDetector_sptr> allDetectors;
+    std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
     instrument->getDetectors(allDetectors);
 
     // Selects (empty, will default to true)
-    std::map<int, bool> selects;
+    std::map<int64_t, bool> selects;
 
-    std::map<int, Geometry::IDetector_sptr>::const_iterator it;
+    std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
       int detectorID = it->first;
@@ -217,7 +212,7 @@ namespace DataHandling
 
       // Find the vulcan factor;
       double vulcan_factor = 0.0;
-      std::map<int,double>::const_iterator vulcan_iter = vulcan.find(detectorID);
+      std::map<int64_t,double>::const_iterator vulcan_iter = vulcan.find(detectorID);
       if( vulcan_iter != vulcan.end() )
         vulcan_factor = vulcan_iter->second;
       // The actual factor is 10^(-value_in_the_file)
@@ -247,7 +242,7 @@ namespace DataHandling
    * @param fileName :: vulcan file name
    * @param[out] vulcan :: a map of pixel ID : correction factor in the file (2nd column)
    */
-  void LoadDspacemap::readVulcanAsciiFile(const std::string& fileName, std::map<int,double> & vulcan)
+  void LoadDspacemap::readVulcanAsciiFile(const std::string& fileName, std::map<int64_t,double> & vulcan)
   {
     std::ifstream grFile(fileName.c_str());
     if (!grFile)
@@ -261,7 +256,7 @@ namespace DataHandling
     {
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int udet;
+      int64_t udet;
       double correction;
       istr >> udet >> correction;
       vulcan.insert(std::make_pair(udet,correction));
@@ -286,7 +281,7 @@ namespace DataHandling
    * @param fileName :: vulcan file name
    * @param[out] vulcan :: a map of pixel ID : correction factor in the file (2nd column)
    */
-  void LoadDspacemap::readVulcanBinaryFile(const std::string& fileName, std::map<int,double> & vulcan)
+  void LoadDspacemap::readVulcanBinaryFile(const std::string& fileName, std::map<int64_t,double> & vulcan)
   {
     BinaryFile<VulcanCorrectionFactor> file(fileName);
     std::vector<VulcanCorrectionFactor> * results = file.loadAll();

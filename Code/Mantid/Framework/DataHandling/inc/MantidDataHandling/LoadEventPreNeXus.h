@@ -133,7 +133,7 @@ private:
   ///Execution code
   void exec();
 
-  std::vector<int> spectra_list; ///<the list of Spectra
+  std::vector<int64_t> spectra_list; ///<the list of Spectra
 
   /// The times for each pulse.
   std::vector<Kernel::DateAndTime> pulsetimes;
@@ -166,7 +166,7 @@ private:
   /// For loading only some spectra
   bool loadOnlySomeSpectra;
   /// Handle to the loaded spectra map
-  std::map<int, bool> spectraLoadMap;
+  std::map<int64_t, bool> spectraLoadMap;
 
   /// Longest TOF limit
   double longest_tof;

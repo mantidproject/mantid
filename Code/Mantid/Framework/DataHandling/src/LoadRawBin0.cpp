@@ -61,7 +61,7 @@ void LoadRawBin0::init()
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
-  declareProperty(new ArrayProperty<int> ("SpectrumList"),
+  declareProperty(new ArrayProperty<int64_t> ("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if\n"
       "explicitly set.");
 
@@ -111,8 +111,8 @@ void LoadRawBin0::exec()
   // Need to extract the user-defined output workspace name
   const std::string wsName = getPropertyValue("OutputWorkspace");
 
-  int histTotal = m_total_specs * m_numberOfPeriods;
-  int histCurrent = -1;
+  double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
+  int64_t histCurrent = -1;
  
   // Create the 2D workspace for the output xlength and ylength is one 
   DataObjects::Workspace2D_sptr localWorkspace = createWorkspace(m_total_specs, 1,1,title);
@@ -153,10 +153,10 @@ void LoadRawBin0::exec()
 
     }
     skipData(file, period * (m_numberOfSpectra + 1));
-    int wsIndex = 0;
-    for (int i = 1; i <= m_numberOfSpectra; ++i)
+    int64_t wsIndex = 0;
+    for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
     {
-      int histToRead = i + period * (m_numberOfSpectra + 1);
+      int64_t histToRead = i + period * (m_numberOfSpectra + 1);
       if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
           i) != m_spec_list.end()))
       {
@@ -167,7 +167,7 @@ void LoadRawBin0::exec()
 		{
 			throw std::runtime_error("Error reading raw file");
 		}
-		int binStart=0;
+		int64_t binStart=0;
 		setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
 		++wsIndex;
 
@@ -192,7 +192,7 @@ void LoadRawBin0::exec()
 	{
 		setWorkspaceProperty(localWorkspace, ws_grp, period, false);
 		// progress for workspace groups 
-		m_prog = (double(period) / (m_numberOfPeriods - 1));
+		m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
 	}
   
   } // loop over periods

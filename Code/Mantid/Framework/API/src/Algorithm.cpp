@@ -665,7 +665,7 @@ namespace Mantid
     *  @param duration :: a double defining the length of duration of the algorithm
     *  @param  uexecCount an unsigned int for defining the excution order of algorithm
     */
-    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,unsigned int uexecCount)
+    void Algorithm::fillHistory(Mantid::Kernel::DateAndTime start,double duration,size_t uexecCount)
     {
       // Create two vectors to hold a list of pointers to the input & output workspaces (InOut's go in both)
       std::vector<Workspace_sptr> inputWorkspaces, outputWorkspaces;

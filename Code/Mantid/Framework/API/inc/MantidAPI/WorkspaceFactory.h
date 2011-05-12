@@ -19,6 +19,7 @@
 #include "MantidAPI/DllExport.h"
 #include "MantidKernel/DynamicFactory.h"
 #include "MantidKernel/SingletonHolder.h"
+#include "MantidKernel/System.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ITableWorkspace.h"
@@ -61,9 +62,9 @@ class EXPORT_OPT_MANTID_API WorkspaceFactoryImpl : public Kernel::DynamicFactory
 {
 public:
   MatrixWorkspace_sptr create(const MatrixWorkspace_const_sptr& parent,
-                        int NVectors = -1, int XLength = -1, int YLength = -1) const;
-  MatrixWorkspace_sptr create(const std::string& className, const int& NVectors,
-                                   const int& XLength, const int& YLength) const;
+                        int64_t NVectors = -1, int64_t XLength = -1, int64_t YLength = -1) const;
+  MatrixWorkspace_sptr create(const std::string& className, const int64_t& NVectors,
+                                   const int64_t& XLength, const int64_t& YLength) const;
   
   IMDWorkspace_sptr create(const std::string & className, const Geometry::MDGeometryDescription &) const;
  /// this create method is currently used to build MD workspaces, but may be used to build MD workspaces from matrix workspaces in a future;

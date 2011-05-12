@@ -135,8 +135,29 @@ namespace DataObjects
    * @param weight: weight of this neutron event.
    * @param errorSquared: the square of the error on the event
    */
+  WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime, double weight, double errorSquared)
+  : TofEvent(tof, pulsetime), m_weight(static_cast<float>(weight)), m_errorSquared(static_cast<float>(errorSquared))
+  {
+  }
+
+  /** Constructor, full:
+   * @param tof: tof in microseconds.
+   * @param pulsetime: absolute pulse time
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+   */
   WeightedEvent::WeightedEvent(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared)
   : TofEvent(tof, pulsetime), m_weight(weight), m_errorSquared(errorSquared)
+  {
+  }
+
+  /** Constructor, copy from a TofEvent object but add weights
+   * @param rhs: TofEvent to copy into this.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+  */
+  WeightedEvent::WeightedEvent(const TofEvent& rhs, double weight, double errorSquared)
+  : TofEvent(rhs.m_tof, rhs.m_pulsetime), m_weight(static_cast<float>(weight)), m_errorSquared(static_cast<float>(errorSquared))
   {
   }
 
@@ -236,6 +257,16 @@ namespace DataObjects
    * @param weight: weight of this neutron event.
    * @param errorSquared: the square of the error on the event
    */
+  WeightedEventNoTime::WeightedEventNoTime(double tof, double weight, double errorSquared)
+  : m_tof(tof), m_weight(static_cast<float>(weight)), m_errorSquared(static_cast<float>(errorSquared))
+  {
+  }
+
+  /** Constructor, full:
+   * @param tof: tof in microseconds.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+   */
   WeightedEventNoTime::WeightedEventNoTime(double tof, float weight, float errorSquared)
   : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared)
   {
@@ -247,8 +278,29 @@ namespace DataObjects
    * @param weight: weight of this neutron event.
    * @param errorSquared: the square of the error on the event
    */
+  WeightedEventNoTime::WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime , double weight, double errorSquared)
+  : m_tof(tof), m_weight(static_cast<float>(weight)), m_errorSquared(static_cast<float>(errorSquared))
+  {
+  }
+
+  /** Constructor that ignores a time:
+   * @param tof: tof in microseconds.
+   * @param pulsetime: an ignored pulse time.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+   */
   WeightedEventNoTime::WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime , float weight, float errorSquared)
   : m_tof(tof), m_weight(weight), m_errorSquared(errorSquared)
+  {
+  }
+
+  /** Constructor, copy from a TofEvent object but add weights
+   * @param rhs: TofEvent to copy into this.
+   * @param weight: weight of this neutron event.
+   * @param errorSquared: the square of the error on the event
+  */
+  WeightedEventNoTime::WeightedEventNoTime(const TofEvent& rhs, double weight, double errorSquared)
+  : m_tof(rhs.m_tof), m_weight(static_cast<float>(weight)), m_errorSquared(static_cast<float>(errorSquared))
   {
   }
 

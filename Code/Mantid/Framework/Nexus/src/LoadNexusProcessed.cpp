@@ -111,10 +111,10 @@ void LoadNexusProcessed::exec()
   NXRoot root(getPropertyValue("Filename"));
 
   //Find out how many first level entries there are
-  int nperiods = root.groups().size();
+  int64_t nperiods = static_cast<int64_t>(root.groups().size());
 
   // Check for an entry number property
-  int entrynumber = getProperty("EntryNumber");
+  int64_t entrynumber = static_cast<int64_t>(getProperty("EntryNumber"));
 
   if( entrynumber > 0 && entrynumber > nperiods )
   {
@@ -140,11 +140,12 @@ void LoadNexusProcessed::exec()
     // First member of group should be the group itself, for some reason!
     base_name += "_";
     const std::string prop_name = "OutputWorkspace_";
-    for( int p = 1; p <= nperiods; ++p )
+    double nperiods_d = static_cast<double>(nperiods);
+    for( int64_t p = 1; p <= nperiods; ++p )
     {
       std::ostringstream os;
       os << p;
-      Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), (p-1)/nperiods, 1/nperiods);
+      Workspace_sptr local_workspace = loadEntry(root, basename + os.str(), static_cast<double>(p-1)/nperiods_d, 1./nperiods_d);
       declareProperty(new WorkspaceProperty<API::Workspace>(prop_name + os.str(), base_name + os.str(),
           Direction::Output));
       wksp_group->add(base_name + os.str());
@@ -351,8 +352,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
 
   // The workspace being worked on
   API::MatrixWorkspace_sptr local_workspace;
-  int nspectra;
-  int nchannels;
+  size_t nspectra;
+  int64_t nchannels;
 
   // -------- Process as event ? --------------------
   if (isEvent)
@@ -392,15 +393,15 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     readBinMasking(wksp_cls, local_workspace);
     NXDataSetTyped<double> errors = wksp_cls.openNXDouble("errors");
 
-    int blocksize(8);
+    int64_t blocksize(8);
     //const int fullblocks = nspectra / blocksize;
     //size of the workspace
-    int fullblocks = total_specs / blocksize;
-    int read_stop = (fullblocks * blocksize);
+    int64_t fullblocks = total_specs / blocksize;
+    int64_t read_stop = (fullblocks * blocksize);
     const double progressBegin = progressStart+0.25*progressRange;
     const double progressScaler = 0.75*progressRange;
-    int hist_index = 0;
-    int wsIndex=0;
+    int64_t hist_index = 0;
+    int64_t wsIndex=0;
     if( m_shared_bins )
     {
       //if spectrum min,max,list properties are set
@@ -424,10 +425,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
 
           for( ; hist_index < read_stop; )
           {
-            progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+            progress(progressBegin+progressScaler*static_cast<double>(hist_index)/static_cast<double>(read_stop),"Reading workspace data...");
             loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
           }
-          int finalblock = m_spec_max-1 - read_stop;
+          int64_t finalblock = m_spec_max-1 - read_stop;
           if( finalblock > 0 )
           {
             loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
@@ -436,12 +437,12 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
         // if spectrum list property is set read each spectrum separately by setting blocksize=1
         if(m_list)
         {
-          std::vector<int>::iterator itr=m_spec_list.begin();
+          std::vector<int64_t>::iterator itr=m_spec_list.begin();
           for(;itr!=m_spec_list.end();++itr)
           {
-            int specIndex=(*itr)-1;
-            progress(progressBegin+progressScaler*specIndex/m_spec_list.size(),"Reading workspace data...");
-            loadBlock(data, errors, 1, nchannels, specIndex,wsIndex, local_workspace);
+            int64_t specIndex=(*itr)-1;
+            progress(progressBegin+progressScaler*static_cast<double>(specIndex)/static_cast<double>(m_spec_list.size()),"Reading workspace data...");
+            loadBlock(data, errors, static_cast<int64_t>(1), nchannels, specIndex,wsIndex, local_workspace);
           }
 
         }
@@ -450,10 +451,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
       {
         for( ; hist_index < read_stop; )
         {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+          progress(progressBegin+progressScaler*static_cast<double>(hist_index)/static_cast<double>(read_stop),"Reading workspace data...");
           loadBlock(data, errors, blocksize, nchannels, hist_index,wsIndex, local_workspace);
         }
-        int finalblock = total_specs - read_stop;
+        int64_t finalblock = total_specs - read_stop;
         if( finalblock > 0 )
         {
           loadBlock(data, errors, finalblock, nchannels, hist_index,wsIndex,local_workspace);
@@ -467,7 +468,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
       {
         if(m_interval)
         {
-          int interval_specs=m_spec_max-m_spec_min;
+          int64_t interval_specs=m_spec_max-m_spec_min;
           fullblocks=(interval_specs)/blocksize;
           read_stop = (fullblocks * blocksize)+m_spec_min-1;
 
@@ -480,10 +481,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
 
           for( ; hist_index < read_stop; )
           {
-            progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+            progress(progressBegin+progressScaler*static_cast<double>(hist_index)/static_cast<double>(read_stop),"Reading workspace data...");
             loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
           }
-          int finalblock = m_spec_max-1 - read_stop;
+          int64_t finalblock = m_spec_max-1 - read_stop;
           if( finalblock > 0 )
           {
             loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
@@ -492,11 +493,11 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
         //
         if(m_list)
         {
-          std::vector<int>::iterator itr=m_spec_list.begin();
+          std::vector<int64_t>::iterator itr=m_spec_list.begin();
           for(;itr!=m_spec_list.end();++itr)
           {
-            int specIndex=(*itr)-1;
-            progress(progressBegin+progressScaler*specIndex/read_stop,"Reading workspace data...");
+            int64_t specIndex=(*itr)-1;
+            progress(progressBegin+progressScaler*static_cast<double>(specIndex)/static_cast<double>(read_stop),"Reading workspace data...");
             loadBlock(data, errors, xbins, 1, nchannels, specIndex,wsIndex,local_workspace);
           }
 
@@ -506,10 +507,10 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
       {
         for( ; hist_index < read_stop; )
         {
-          progress(progressBegin+progressScaler*hist_index/read_stop,"Reading workspace data...");
+          progress(progressBegin+progressScaler*static_cast<double>(hist_index)/static_cast<double>(read_stop),"Reading workspace data...");
           loadBlock(data, errors, xbins, blocksize, nchannels, hist_index,wsIndex,local_workspace);
         }
-        int finalblock = total_specs - read_stop;
+        int64_t finalblock = total_specs - read_stop;
         if( finalblock > 0 )
         {
           loadBlock(data, errors, xbins, finalblock, nchannels, hist_index,wsIndex, local_workspace);
@@ -581,9 +582,9 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
   {
     //TODO: This could be a method in EventWorkspace
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
-    for (int wi=0; wi<local_workspace->getNumberHistograms(); wi++)
+    for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
     {
-      std::vector<int> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
+      std::vector<int64_t> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
       EventList & el = ew->getEventList(wi);
       for (size_t i=0; i < dets.size(); i++)
         el.addDetectorID(dets[i]);
@@ -735,7 +736,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
   {
     NXDouble axisData = data.openNXDouble("axis2");
     axisData.load();
-    for ( int i = 0; i < axis->length(); i++ )
+    for ( size_t i = 0; i < axis->length(); i++ )
     {
       axis->setValue(i, axisData[i]);
     }
@@ -972,7 +973,7 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
       NXNote entry(history,itr->nxname);
       entry.openLocal();
       const std::vector<std::string> & info = entry.data();
-      const int nlines = info.size();
+      const size_t nlines = info.size();
       if( nlines < 4 )
       {// ignore badly formed history entries
         continue;
@@ -1018,7 +1019,7 @@ void LoadNexusProcessed::readAlgorithmHistory(NXEntry & mtd_entry, API::MatrixWo
       API::AlgorithmHistory alg_hist(algName, version, utc_start, dur,exeCount);
 
       //Add property information
-      for( int index = static_cast<int>(PARAMS)+1;index < nlines;++index )
+      for( size_t index = static_cast<size_t>(PARAMS)+1;index < nlines;++index )
       {
         const std::string line = info[index];
         std::string::size_type colon = line.find(":");
@@ -1225,16 +1226,16 @@ void LoadNexusProcessed::runLoadInstrument(const std::string & inst_name,
  * @param local_workspace :: A pointer to the workspace
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
-    int blocksize, int nchannels, int &hist,
+    int64_t blocksize, int64_t nchannels, int64_t &hist,
     API::MatrixWorkspace_sptr local_workspace)
 {
-  data.load(blocksize,hist);
-  errors.load(blocksize,hist);
+  data.load(static_cast<int>(blocksize),static_cast<int>(hist));
+  errors.load(static_cast<int>(blocksize),static_cast<int>(hist));
   double *data_start = data();
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while( hist < final )
   {
     MantidVec& Y = local_workspace->dataY(hist);
@@ -1261,16 +1262,16 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
  */
 
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors,
-    int blocksize, int nchannels, int &hist,int& wsIndex,
+    int64_t blocksize, int64_t nchannels, int64_t &hist,int64_t& wsIndex,
     API::MatrixWorkspace_sptr local_workspace)
 {
-  data.load(blocksize,hist);
-  errors.load(blocksize,hist);
+  data.load(static_cast<int>(blocksize),static_cast<int>(hist));
+  errors.load(static_cast<int>(blocksize),static_cast<int>(hist));
   double *data_start = data();
   double *data_end = data_start + nchannels;
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while( hist < final )
   {
     MantidVec& Y = local_workspace->dataY(wsIndex);
@@ -1299,20 +1300,20 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
  * @param local_workspace :: A pointer to the workspace
  */
 void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins,
-    int blocksize, int nchannels, int &hist, int& wsIndex,
+    int64_t blocksize, int64_t nchannels, int64_t &hist, int64_t& wsIndex,
     API::MatrixWorkspace_sptr local_workspace)
 {
-  data.load(blocksize,hist);
+  data.load(static_cast<int>(blocksize),static_cast<int>(hist));
   double *data_start = data();
   double *data_end = data_start + nchannels;
-  errors.load(blocksize,hist);
+  errors.load(static_cast<int>(blocksize),static_cast<int>(hist));
   double *err_start = errors();
   double *err_end = err_start + nchannels;
-  xbins.load(blocksize, hist);
-  const int nxbins(nchannels + 1);
+  xbins.load(static_cast<int>(blocksize),static_cast<int>(hist));
+  const int64_t nxbins(nchannels + 1);
   double *xbin_start = xbins();
   double *xbin_end = xbin_start + nxbins;
-  int final(hist + blocksize);
+  int64_t final(hist + blocksize);
   while( hist < final )
   {
     MantidVec& Y = local_workspace->dataY(wsIndex);
@@ -1334,7 +1335,7 @@ void LoadNexusProcessed::loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped
  *Validates the optional 'spectra to read' properties, if they have been set
  * @param numberofspectra :: number of spectrum
  */
-void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
+void LoadNexusProcessed::checkOptionalProperties(const size_t numberofspectra )
 {
   //read in the settings passed to the algorithm
   m_spec_list = getProperty("SpectrumList");
@@ -1349,8 +1350,8 @@ void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
   if (m_list)
   {
     m_list = true;
-    const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
-    const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
+    const int64_t minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+    const int64_t maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
     if (maxlist > numberofspectra || minlist == 0)
     {
       g_log.error("Invalid list of spectra");
@@ -1380,7 +1381,7 @@ void LoadNexusProcessed::checkOptionalProperties(const int numberofspectra )
  * @param numberofspectra :: number of spectrums
  * @return the size of a workspace
  */
-int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
+size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
 {
   // Calculate the size of a workspace, given its number of spectra to read
   int total_specs;
@@ -1402,7 +1403,7 @@ int LoadNexusProcessed::calculateWorkspacesize(const int numberofspectra)
     {
       if (m_interval)
       {
-        for(std::vector<int>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
+        for(std::vector<int64_t>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
           if (*it >= m_spec_min && *it <m_spec_max)
           {
             it = m_spec_list.erase(it);

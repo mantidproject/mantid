@@ -20,6 +20,8 @@ namespace Mantid
 namespace DataObjects
 {
 
+using std::size_t;
+
 DECLARE_WORKSPACE(CompressedWorkspace2D)
 
 // Get a reference to the logger
@@ -37,7 +39,7 @@ AbsManagedWorkspace2D(100)
 *  @param YLength :: The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
-void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
+void CompressedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
 {
   g_log.information("Creating a CompressedWorkspace2D");
 
@@ -64,7 +66,7 @@ void CompressedWorkspace2D::init(const int &NVectors, const int &XLength, const 
   CompressedPointer tmpBuff = compressBlock(newBlock,0);
   m_compressedData[0] = tmpBuff;
 
-  for(int i=0;i<NVectors;i+=m_vectorsPerBlock)
+  for(size_t i=0;i<NVectors;i+=m_vectorsPerBlock)
   {
     CompressedPointer p(nullptr,tmpBuff.second);
     p.first = new Bytef[p.second];
@@ -89,7 +91,7 @@ be loaded from storage and loads it.
 @param newBlock :: Returned data block address
 @param startIndex :: Starting spectrum index in the block
 */
-void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
+void CompressedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
 {
   uncompressBlock(newBlock,startIndex);
 }
@@ -106,11 +108,11 @@ size_t CompressedWorkspace2D::getMemorySize() const
 {
   double sz = 0.;
   for(CompressedMap::const_iterator it=m_compressedData.begin();it!= m_compressedData.end();it++)
-    sz += it->second.second;
+    sz += static_cast<double>(it->second.second);
   //std::cerr<<"Memory: "<<sz/1e6<<" + "<<double(getNumberBlocks()) * double(m_blockSize)/1e6
   //  << " + " << double(m_inBuffer.size())*sizeof(double)/1e6<< " + " << double(m_outBuffer.size())/1e6<<'\n';
-  sz += double(getNumberBlocks()) * m_blockSize + double(m_inBuffer.size())*sizeof(double) + double(m_outBuffer.size());
-  return (size_t)(sz);
+  sz += static_cast<double>(getNumberBlocks() * m_blockSize + m_inBuffer.size()*sizeof(double) + m_outBuffer.size());
+  return static_cast<size_t>(sz);
 }
 
 /**
@@ -118,7 +120,7 @@ size_t CompressedWorkspace2D::getMemorySize() const
  *  @param startIndex :: The starting index of the block
  *  @return pointer to the compressed block
  */
-CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,int startIndex) const
+CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(ManagedDataBlock2D* block,size_t startIndex) const
 {
   //std::cerr<<"compress "<<startIndex<<'\n';
 
@@ -135,20 +137,20 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
 
   //}
   // --- new way -----
-  int j = 0;
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  size_t j = 0;
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& X = block->dataX(startIndex + i);
     MantidVec::iterator it = std::copy(X.begin(),X.end(),m_inBuffer.begin() + j);
     j += m_XLength;
   }
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& Y = block->dataY(startIndex + i);
     MantidVec::iterator it = std::copy(Y.begin(),Y.end(),m_inBuffer.begin() + j);
     j += m_YLength;
   }
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& E = block->dataE(startIndex + i);
     MantidVec::iterator it = std::copy(E.begin(),E.end(),m_inBuffer.begin() + j);
@@ -169,7 +171,7 @@ CompressedWorkspace2D::CompressedPointer CompressedWorkspace2D::compressBlock(Ma
  *  @param block :: Pointer to the destination decompressed block
  *  @param startIndex :: The starting index of the block
  */
-void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,int startIndex)const
+void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,size_t startIndex)const
 {
   //std::cerr<<"uncompress "<<startIndex<<'\n';
   uLongf nBuff = m_outBuffer.size();
@@ -207,20 +209,20 @@ void CompressedWorkspace2D::uncompressBlock(ManagedDataBlock2D* block,int startI
   //    E.assign(out + iE,out + iEnd);
   //}
   //---------- new way -----------------
-  int j = 0;
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  size_t j = 0;
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& X = block->dataX(startIndex + i);
     X.assign(out + j,out + j + m_XLength);
     j += m_XLength;
   }
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& Y = block->dataY(startIndex + i);
     Y.assign(out + j,out + j + m_YLength);
     j += m_YLength;
   }
-  for(int i=0;i<m_vectorsPerBlock;i++)
+  for(size_t i=0;i<m_vectorsPerBlock;i++)
   {
     MantidVec& E = block->dataE(startIndex + i);
     E.assign(out + j,out + j + m_YLength);

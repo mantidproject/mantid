@@ -4,6 +4,7 @@
 #include "MantidAlgorithms/DiffractionFocussing.h"
 #include "MantidAPI/FileProperty.h"
 
+#include <limits>
 #include <map>
 #include <fstream>
 
@@ -60,7 +61,7 @@ void DiffractionFocussing::exec()
   bool dist = inputW->isDistribution();
 
   //do this first to check that a valid file is available before doing any work
-  std::multimap<int,int> detectorGroups;// <group, UDET>
+  std::multimap<int64_t,int64_t> detectorGroups;// <group, UDET>
   if (!readGroupingFile(groupingFileName, detectorGroups))
   {
     throw Exception::FileError("Error reading .cal file",groupingFileName);
@@ -72,8 +73,8 @@ void DiffractionFocussing::exec()
   //Rebin to a common set of bins
   RebinWorkspace(tmpW);
 
-  std::set<int> groupNumbers;
-  for(std::multimap<int,int>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
+  std::set<int64_t> groupNumbers;
+  for(std::multimap<int64_t,int64_t>::const_iterator d = detectorGroups.begin();d!=detectorGroups.end();d++)
   {
     if (groupNumbers.find(d->first) == groupNumbers.end())
     {
@@ -82,25 +83,25 @@ void DiffractionFocussing::exec()
   }
 
   int iprogress = 0;
-  int iprogress_count = groupNumbers.size();
+  int iprogress_count = static_cast<int>(groupNumbers.size());
   int iprogress_step = iprogress_count / 100;
   if (iprogress_step == 0) iprogress_step = 1;
-  std::vector<int> resultIndeces;
-  for(std::set<int>::const_iterator g = groupNumbers.begin();g!=groupNumbers.end();g++)
+  std::vector<int64_t> resultIndeces;
+  for(std::set<int64_t>::const_iterator g = groupNumbers.begin();g!=groupNumbers.end();g++)
   {
     if (iprogress++ % iprogress_step == 0)
     {
       progress(0.68 + double(iprogress)/iprogress_count/3);
     }
-    std::multimap<int,int>::const_iterator from = detectorGroups.lower_bound(*g);
-    std::multimap<int,int>::const_iterator to =   detectorGroups.upper_bound(*g);
-    std::vector<int> detectorList;
-    for(std::multimap<int,int>::const_iterator d = from;d!=to;d++)
+    std::multimap<int64_t,int64_t>::const_iterator from = detectorGroups.lower_bound(*g);
+    std::multimap<int64_t,int64_t>::const_iterator to =   detectorGroups.upper_bound(*g);
+    std::vector<int64_t> detectorList;
+    for(std::multimap<int64_t,int64_t>::const_iterator d = from;d!=to;d++)
       detectorList.push_back(d->second);
     // Want version 1 of GroupDetectors here
     API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
     childAlg->setProperty("Workspace", tmpW);
-    childAlg->setProperty< std::vector<int> >("DetectorList",detectorList);
+    childAlg->setProperty< std::vector<int64_t> >("DetectorList",detectorList);
     childAlg->executeAsSubAlg();
     try
     {
@@ -119,9 +120,9 @@ void DiffractionFocussing::exec()
 
   // Discard left-over spectra, but print warning message giving number discarded
   int discarded = 0;
-  const int oldHistNumber = tmpW->getNumberHistograms();
+  const int64_t oldHistNumber = tmpW->getNumberHistograms();
   API::Axis *spectraAxis = tmpW->getAxis(1);
-  for(int i=0; i < oldHistNumber; i++)
+  for(int64_t i=0; i < oldHistNumber; i++)
     if ( spectraAxis->spectraNo(i) >= 0 && find(resultIndeces.begin(),resultIndeces.end(),i) == resultIndeces.end())
     {
       ++discarded;
@@ -130,7 +131,7 @@ void DiffractionFocussing::exec()
 
   // Running GroupDetectors leads to a load of redundant spectra
   // Create a new workspace that's the right size for the meaningful spectra and copy them in
-  int newSize = tmpW->blocksize();
+  int64_t newSize = tmpW->blocksize();
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(tmpW,resultIndeces.size(),newSize+1,newSize);
   // Copy units
   outputW->getAxis(0)->unit() = tmpW->getAxis(0)->unit();
@@ -138,10 +139,10 @@ void DiffractionFocussing::exec()
 
   API::Axis *spectraAxisNew = outputW->getAxis(1);
 
-  for(int hist=0; hist < static_cast<int>(resultIndeces.size()); hist++)
+  for(int64_t hist=0; hist < static_cast<int64_t>(resultIndeces.size()); hist++)
   {
-    int i = resultIndeces[hist];
-    int spNo = spectraAxis->spectraNo(i);
+    int64_t i = resultIndeces[hist];
+    double spNo = static_cast<double>(spectraAxis->spectraNo(i));
     MantidVec &tmpE = tmpW->dataE(i);
     MantidVec &outE = outputW->dataE(hist);
     MantidVec &tmpY = tmpW->dataY(i);
@@ -218,10 +219,10 @@ void DiffractionFocussing::RebinWorkspace(API::MatrixWorkspace_sptr& workspace)
 void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const_sptr& workspace,double& min,double& max,double& step)
 {
 
-  min=999999999;
+  min=std::numeric_limits<double>::max();
   //for min and max we need to iterate over the data block and investigate each one
-  int length = workspace->getNumberHistograms();
-  for (int i = 0; i < length; i++)
+  int64_t length = workspace->getNumberHistograms();
+  for (int64_t i = 0; i < length; i++)
   {
     const MantidVec& xVec = workspace->readX(i);
     const double& localMin = xVec[0];
@@ -237,12 +238,12 @@ void DiffractionFocussing::calculateRebinParams(const API::MatrixWorkspace_const
   if (min <= 0.) min = 1e-6;
 
   //step is easy
-  int n = workspace->blocksize();
+  double n = static_cast<double>(workspace->blocksize());
   step = ( log(max) - log(min) )/n;
 }
 
 /// Reads in the file with the grouping information
-bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::multimap<int,int>& detectorGroups)
+bool DiffractionFocussing::readGroupingFile(std::string groupingFileName, std::multimap<int64_t,int64_t>& detectorGroups)
 {
   std::ifstream grFile(groupingFileName.c_str());
   if (!grFile)

@@ -37,13 +37,13 @@ void GroupDetectors::init()
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,
     new CommonBinsValidator<>),
     "The name of the workspace2D on which to perform the algorithm");
-  declareProperty(new ArrayProperty<int>("SpectraList"),
+  declareProperty(new ArrayProperty<int64_t>("SpectraList"),
     "An array containing a list of the indexes of the spectra to combine\n"
     "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
-  declareProperty(new ArrayProperty<int>("DetectorList"), 
+  declareProperty(new ArrayProperty<int64_t>("DetectorList"),
     "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
     "set)" );
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+  declareProperty(new ArrayProperty<int64_t>("WorkspaceIndexList"),
     "An array of workspace indices to combine" );
   declareProperty("ResultIndex", -1,
     "The workspace index of the summed spectrum (or -1 on error)",
@@ -55,9 +55,9 @@ void GroupDetectors::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
 
-  std::vector<int> indexList = getProperty("WorkspaceIndexList");
-  std::vector<int> spectraList = getProperty("SpectraList");
-  const std::vector<int> detectorList = getProperty("DetectorList");
+  std::vector<int64_t> indexList = getProperty("WorkspaceIndexList");
+  std::vector<int64_t> spectraList = getProperty("SpectraList");
+  const std::vector<int64_t> detectorList = getProperty("DetectorList");
 
   // Could create a Validator to replace the below
   if ( indexList.empty() && spectraList.empty() && detectorList.empty() )
@@ -86,7 +86,7 @@ void GroupDetectors::exec()
   else if ( ! detectorList.empty() )
   {// Dealing with DetectorList
     //convert from detectors to spectra numbers
-    std::vector<int> mySpectraList = WS->spectraMap().getSpectra(detectorList);
+    std::vector<int64_t> mySpectraList = WS->spectraMap().getSpectra(detectorList);
     //then from spectra numbers to indices
     WS->getIndicesFromSpectra(mySpectraList,indexList);
   }
@@ -97,15 +97,15 @@ void GroupDetectors::exec()
       return;
   }
 
-  const int vectorSize = WS->blocksize();
-  const int firstIndex = indexList[0];
-  const int firstSpectrum = spectraAxis->spectraNo(firstIndex);
+  const size_t vectorSize = WS->blocksize();
+  const size_t firstIndex = indexList[0];
+  const size_t firstSpectrum = spectraAxis->spectraNo(firstIndex);
   setProperty("ResultIndex",firstIndex);
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
-  for (unsigned int i = 0; i < indexList.size()-1; ++i)
+  for (size_t i = 0; i < indexList.size()-1; ++i)
   {
-    const int currentIndex = indexList[i+1];
+    const size_t currentIndex = indexList[i+1];
     // Move the current detector to belong to the first spectrum
     WS->mutableSpectraMap().remap(spectraAxis->spectraNo(currentIndex),firstSpectrum);
     // Add up all the Y spectra and store the result in the first one

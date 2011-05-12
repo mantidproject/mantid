@@ -59,7 +59,7 @@ class DLLExport ManagedDataBlock2D
   friend DLLExport std::fstream& operator>>(std::fstream&, ManagedDataBlock2D&);
   
 public:
-  ManagedDataBlock2D(const int &minIndex, const int &noVectors, const int &XLength, const int &YLength);
+  ManagedDataBlock2D(const std::size_t &minIndex, const std::size_t &noVectors, const std::size_t &XLength, const std::size_t &YLength);
   virtual ~ManagedDataBlock2D();
 
   int minIndex() const;
@@ -68,19 +68,19 @@ public:
   void hasChanges(bool has);
 
   // Must be a case for having an interface for these accessor methods, which are the same as Workspace2D
-  void setX(const int histnumber, const MantidVecPtr&);
-  void setX(const int histnumber, const MantidVecPtr::ptr_type&);
-  void setData(const int histnumber, const MantidVecPtr&);
-  void setData(const int histnumber, const MantidVecPtr&, const MantidVecPtr&);
-  void setData(const int histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
+  void setX(const std::size_t histnumber, const MantidVecPtr&);
+  void setX(const std::size_t histnumber, const MantidVecPtr::ptr_type&);
+  void setData(const std::size_t histnumber, const MantidVecPtr&);
+  void setData(const std::size_t histnumber, const MantidVecPtr&, const MantidVecPtr&);
+  void setData(const std::size_t histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
 	
-  MantidVec& dataX(const int index);
-  MantidVec& dataY(const int index);
-  MantidVec& dataE(const int index);
-  const MantidVec& dataX(const int index) const;
-  const MantidVec& dataY(const int index) const;
-  const MantidVec& dataE(const int index) const;
-  MantidVecPtr refX(const int index) const;
+  MantidVec& dataX(const std::size_t index);
+  MantidVec& dataY(const std::size_t index);
+  MantidVec& dataE(const std::size_t index);
+  const MantidVec& dataX(const std::size_t index) const;
+  const MantidVec& dataY(const std::size_t index) const;
+  const MantidVec& dataE(const std::size_t index) const;
+  MantidVecPtr refX(const std::size_t index) const;
   
 private:
   // Make copy constructor and copy assignment operator private (and without definition) unless they're needed

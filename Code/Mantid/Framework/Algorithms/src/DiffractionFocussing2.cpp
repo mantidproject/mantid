@@ -156,7 +156,7 @@ void DiffractionFocussing2::exec()
   
   Progress * prog;
   prog = new API::Progress(this,0.2,1.0,nHist+nGroups);
-  for (int i=0;i<nHist;i++)
+  for (int64_t i=0;i<nHist;i++)
   {
     prog->report();
 
@@ -176,18 +176,18 @@ void DiffractionFocussing2::exec()
     // Assign the new X axis only once (i.e when this group is encountered the first time)
     if (flags[dif])
     {
-      out->dataX(static_cast<int>(dif))=Xout;
+      out->dataX(static_cast<int64_t>(dif))=Xout;
       flags[dif]=false;
       // Initialize the group's weight vector here too
       group2wgtvector[group] = boost::shared_ptr<MantidVec>(new MantidVec(nPoints,0.0));
       // Also set the spectrum number to the group number
-      out->getAxis(1)->spectraNo(static_cast<int>(dif)) = group;
+      out->getAxis(1)->spectraNo(static_cast<int64_t>(dif)) = group;
     }
     // Add the detectors for this spectrum to the output workspace's spectra-detector map
     out->mutableSpectraMap().addSpectrumEntries(group,inSpecMap.getDetectors(inSpecAxis->spectraNo(i)));
     // Get the references to Y and E output and rebin
-    MantidVec& Yout=out->dataY(static_cast<int>(dif));
-    MantidVec& Eout=out->dataE(static_cast<int>(dif));
+    MantidVec& Yout=out->dataY(static_cast<int64_t>(dif));
+    MantidVec& Eout=out->dataE(static_cast<int64_t>(dif));
     try
     {
       VectorHelper::rebinHistogram(Xin,Yin,Ein,Xout,Yout,Eout,true);
@@ -256,7 +256,7 @@ void DiffractionFocussing2::exec()
   
   group2vectormap::const_iterator wit = group2wgtvector.begin();
 
-  for (int i=0; i < nGroups; ++i,++wit)
+  for (int64_t i=0; i < nGroups; ++i,++wit)
   {
     const MantidVec& Xout = out->readX(i);
     // Calculate the bin widths
@@ -468,23 +468,23 @@ void DiffractionFocussing2::execEvent()
  *  @param spectrum_number :: The spectrum number in the workspace
  *  @return Group number if successful otherwise return -1
  */
-int DiffractionFocussing2::validateSpectrumInGroup(int spectrum_number)
+int DiffractionFocussing2::validateSpectrumInGroup(int64_t spectrum_number)
 {
   // Get the spectra to detector map
   const API::SpectraDetectorMap& spectramap = matrixInputW->spectraMap();
-  const std::vector<int> dets = spectramap.getDetectors(spectrum_number);
+  const std::vector<int64_t> dets = spectramap.getDetectors(spectrum_number);
   if (dets.empty()) // Not in group
   {
     std::cout << spectrum_number << " <- this spectrum is empty!\n";
     return -1;
   }
 
-  std::vector<int>::const_iterator it = dets.begin();
+  std::vector<int64_t>::const_iterator it = dets.begin();
   udet2groupmap::const_iterator mapit = udet2group.find((*it)); //Find the first udet
   if (mapit == udet2group.end()) // The first udet that contributes to this spectra is not assigned to a group
     return -1;
-  const int group = (*mapit).second;
-  int new_group;
+  const int64_t group = (*mapit).second;
+  int64_t new_group;
   for (it + 1; it != dets.end(); it++) // Loop other all other udets
   {
     mapit = udet2group.find((*it));
@@ -518,7 +518,7 @@ void DiffractionFocussing2::determineRebinParameters()
   std::ostringstream mess;
 
   // typedef for the storage of the group ranges
-  typedef std::map<int, std::pair<double, double> > group2minmaxmap;
+  typedef std::map<int64_t, std::pair<double, double> > group2minmaxmap;
   // Map from group number to its associated range parameters <Xmin,Xmax,step>
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
@@ -526,9 +526,9 @@ void DiffractionFocussing2::determineRebinParameters()
   groupAtWorkspaceIndex.resize(nHist);
   const API::Axis* const spectra_Axis = matrixInputW->getAxis(1);
 
-  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
+  for (int64_t i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
+    const int64_t group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
     groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;
@@ -550,7 +550,7 @@ void DiffractionFocussing2::determineRebinParameters()
   nGroups=group2minmax.size(); // Number of unique groups
 
   double Xmin, Xmax, step;
-  const int xPoints = nPoints + 1;
+  const int64_t xPoints = nPoints + 1;
 
   //Iterator over all groups to create the new X vectors
   for (gpit = group2minmax.begin(); gpit != group2minmax.end(); gpit++)
@@ -578,7 +578,7 @@ void DiffractionFocussing2::determineRebinParameters()
     //Build up the X vector.
     boost::shared_ptr<MantidVec> xnew = boost::shared_ptr<MantidVec>(new MantidVec(xPoints)); //New X vector
     (*xnew)[0] = Xmin;
-    for (int j = 1; j < xPoints; j++)
+    for (int64_t j = 1; j < xPoints; j++)
     {
       (*xnew)[j] = Xmin * (1.0 + step);
       Xmin = (*xnew)[j];

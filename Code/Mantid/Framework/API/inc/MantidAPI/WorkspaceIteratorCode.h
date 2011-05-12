@@ -88,7 +88,7 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     void workspace_iterator<_Iterator, _Container>::validateIndex()
     {
-      if (m_index<0 || !m_workspace)
+      if (!m_workspace)
         m_index=0;
       else if (m_index>m_wsSize)
         m_index=m_wsSize;
@@ -118,7 +118,7 @@ namespace Mantid
             else
             {
               //Horizontal Orientation we want to loop over the same datablock loopcount times.
-              int realWsSize = m_wsSize/m_loopCount;
+	      std::size_t realWsSize = m_wsSize/m_loopCount;
               m_dataBlockIndex = (m_index % realWsSize)/m_blocksize;
             }
           }
@@ -128,7 +128,7 @@ namespace Mantid
           it_dataY = m_workspace->dataY(m_dataBlockIndex).begin();
           it_dataE = m_workspace->dataE(m_dataBlockIndex).begin();
         }
-        int iteratorPos;
+        size_t iteratorPos;
         if ((m_loopCount != 1) && (m_loopOrientation))
         {
           //vertical Orientation we want to loop over each index value loopcount times.

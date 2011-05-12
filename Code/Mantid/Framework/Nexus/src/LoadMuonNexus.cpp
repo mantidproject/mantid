@@ -13,7 +13,7 @@
 #include "MantidKernel/TimeSeriesProperty.h"
 
 #include <Poco/Path.h>
-
+#include <limits>
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include "MantidNexus/MuonNexusReader.h"
@@ -147,7 +147,7 @@ namespace Mantid
         (new MantidVec(timeChannels, timeChannels + lengthIn));
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int total_specs;
+      int64_t total_specs;
       if( m_interval || m_list)
       {
         total_specs = m_spec_list.size();
@@ -180,7 +180,7 @@ namespace Mantid
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
-      for (int period = 0; period < m_numberOfPeriods; ++period) {
+      for (int64_t period = 0; period < m_numberOfPeriods; ++period) {
         if(m_entrynumber!=0)
         {
           period=m_entrynumber-1;
@@ -220,11 +220,11 @@ namespace Mantid
           if(wsGrpSptr)wsGrpSptr->add(WSName);
         }
 
-        int counter = 0;
-        for (int i = m_spec_min; i < m_spec_max; ++i)
+        int64_t counter = 0;
+        for (int64_t i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
-          int histToRead = i + period*total_specs;
+          int64_t histToRead = i + period*total_specs;
           loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
           counter++;
           progress.report();
@@ -232,7 +232,7 @@ namespace Mantid
         // Read in the spectra in the optional list parameter, if set
         if (m_list)
         {
-          for(unsigned int i=0; i < m_spec_list.size(); ++i)
+          for(size_t i=0; i < m_spec_list.size(); ++i)
           {
             loadData(timeChannelsVec,counter,m_spec_list[i],nxload,lengthIn-1, localWorkspace );
             counter++;
@@ -248,15 +248,15 @@ namespace Mantid
         {
 
           //Get the groupings
-          int max_group = 0;
+          int64_t max_group = 0;
           // use a map for mapping group number and output workspace index in case 
           // there are group numbers > number of groups
-          std::map<int,int> groups;
+          std::map<int64_t,int64_t> groups;
           m_groupings.resize(nxload.numDetectors);
           bool thereAreZeroes = false;
-          for (int i =0; i < nxload.numDetectors; ++i)
+          for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
           {
-            int ig = nxload.detectorGroupings[i];
+            int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
             if (ig == 0)
             {
               thereAreZeroes = true;
@@ -264,14 +264,14 @@ namespace Mantid
             }
             m_groupings[i] = ig;
             if (groups.find(ig) == groups.end())
-              groups[ig] = groups.size();
+              groups[ig] = static_cast<int64_t>(groups.size());
             if (ig > max_group) max_group = ig;
           }
 
           if (thereAreZeroes)
-            for (int i =0; i < nxload.numDetectors; ++i)
+            for (int64_t i =0; i < static_cast<int64_t>(nxload.numDetectors); ++i)
             {
-              int ig = nxload.detectorGroupings[i];
+              int64_t ig = static_cast<int64_t>(nxload.detectorGroupings[i]);
               if (ig == 0)
               {
                 ig = ++max_group;
@@ -280,19 +280,20 @@ namespace Mantid
               }
             }
 
-          int numHists = localWorkspace->getNumberHistograms();
-          int ngroups = int(groups.size()); // number of groups
+          size_t numHists = localWorkspace->getNumberHistograms();
+          size_t ngroups = groups.size(); // number of groups
 
           // to output groups in ascending order
           {
-            int i=0;
-            for(std::map<int,int>::iterator it=groups.begin();it!=groups.end();it++,i++)
+            int64_t i=0;
+            for(std::map<int64_t,int64_t>::iterator it=groups.begin();it!=groups.end();it++,i++)
             {
               it->second = i;
               g_log.information()<<"group "<<it->first<<": ";
               bool first = true;
-              int first_i(-INT_MAX),last_i(-INT_MAX);
-              for(int i=0;i<numHists;i++)
+              int64_t first_i = -1 * std::numeric_limits<int64_t>::max();
+              int64_t last_i = -1 * std::numeric_limits<int64_t>::max();
+              for(int64_t i=0;i<static_cast<int64_t>(numHists);i++)
                 if (m_groupings[i] == it->first)
                 {
                   if (first) 
@@ -338,15 +339,15 @@ namespace Mantid
           DataObjects::Workspace2D_sptr  groupedWS = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
             (API::WorkspaceFactory::Instance().create(localWorkspace, ngroups, localWorkspace->dataX(0).size(), localWorkspace->blocksize()));
 
-          boost::shared_array<int> spec(new int[numHists]);
-          boost::shared_array<int> dets(new int[numHists]);
+          boost::shared_array<int64_t> spec(new int64_t[numHists]);
+          boost::shared_array<int64_t> dets(new int64_t[numHists]);
 
           //Compile the groups
-          for (int i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < static_cast<int64_t>(numHists); ++i)
           {    
-            int k = groups[ m_groupings[numHists*period + i] ];
+            int64_t k = groups[ m_groupings[numHists*period + i] ];
 
-            for (int j = 0; j < localWorkspace->blocksize(); ++j)
+            for (int64_t j = 0; j < static_cast<int64_t>(localWorkspace->blocksize()); ++j)
             {
               groupedWS->dataY(k)[j] = groupedWS->dataY(k)[j] + localWorkspace->dataY(i)[j];
 
@@ -364,7 +365,7 @@ namespace Mantid
           m_groupings.clear();
 
           // All two spectra
-          for(int k=0;k<ngroups;k++)
+          for(int64_t k=0; k<static_cast<int64_t>(ngroups); k++)
           {
             groupedWS->getAxis(1)->spectraNo(k)= k + 1;
           }
@@ -413,8 +414,8 @@ namespace Mantid
       // Check validity of spectra list property, if set
       if ( m_list )
       {
-        const int minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
-        const int maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
+        const int64_t minlist = *min_element(m_spec_list.begin(),m_spec_list.end());
+        const int64_t maxlist = *max_element(m_spec_list.begin(),m_spec_list.end());
         if ( maxlist > m_numberOfSpectra || minlist == 0)
         {
           g_log.error("Invalid list of spectra");
@@ -442,8 +443,8 @@ namespace Mantid
     *  @param lengthIn :: The number of elements in a spectrum
     *  @param localWorkspace :: A pointer to the workspace in which the data will be stored
     */
-    void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,int hist, int& i,
-      MuonNexusReader& nxload, const int lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadMuonNexus::loadData(const MantidVecPtr::ptr_type& tcbs,int64_t hist, int64_t& i,
+      MuonNexusReader& nxload, const int64_t lengthIn, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
       // Put it into a vector, discarding the 1st entry, which is rubbish
@@ -471,7 +472,7 @@ namespace Mantid
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
  
-      int numSpectra = localWorkspace->getNumberHistograms();
+      size_t numSpectra = localWorkspace->getNumberHistograms();
       runDetails.addProperty("nspectra", numSpectra);
 
       NXRoot root(m_filename);
@@ -555,9 +556,9 @@ namespace Mantid
       NXRoot root(m_filename);
       NXInt number = root.openNXInt("run/instrument/detector/number");
       number.load();
-      int ndet = number[0]/m_numberOfPeriods;
-      boost::shared_array<int> det(new int[ndet]);
-      for(int i=0;i<ndet;i++)
+      int64_t ndet = number[0]/m_numberOfPeriods;
+      boost::shared_array<int64_t> det(new int64_t[ndet]);
+      for(int64_t i=0;i<ndet;i++)
         det[i] = i + 1;
       localWorkspace->mutableSpectraMap().populate(det.get(),det.get(),ndet);
     }

@@ -24,6 +24,7 @@ void CalculateTransmissionBeamSpreader::initDocs()
 
 using namespace Kernel;
 using namespace API;
+using std::size_t;
 
 CalculateTransmissionBeamSpreader::CalculateTransmissionBeamSpreader() : API::Algorithm(), logFit(false)
 {}
@@ -97,11 +98,11 @@ void CalculateTransmissionBeamSpreader::exec()
   }
   
   // Extract the required spectra into separate workspaces
-  std::vector<int> udets,indices;
+  std::vector<int64_t> udets,indices;
   udets.push_back(getProperty("IncidentBeamMonitor"));
 
   // Convert UDETs to workspace indices via spectrum numbers
-  std::vector<int> spectra = sample_scatterWS->spectraMap().getSpectra(udets);
+  std::vector<int64_t> spectra = sample_scatterWS->spectraMap().getSpectra(udets);
 
   // Get monitors (assume that the detector mapping is the same for all data sets)
   sample_scatterWS->getIndicesFromSpectra(spectra, indices);
@@ -189,7 +190,7 @@ void CalculateTransmissionBeamSpreader::exec()
       MantidVec & Y = logTransmission->dataY(0);
       MantidVec & E = logTransmission->dataE(0);
       Progress progress(this,0.4,0.6,Y.size());
-      for (unsigned int i=0; i < Y.size(); ++i)
+      for (size_t i=0; i < Y.size(); ++i)
       {
         E[i] = std::abs(E[i]/Y[i]);
         Y[i] = std::log10(Y[i]);
@@ -227,7 +228,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::Mat
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS, const int index)
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
 {
   // Check that given spectra are monitors
   if ( !WS->getDetector(index)->isMonitor() )
@@ -237,7 +238,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
 
   Algorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", index);
+  childAlg->setProperty<int64_t>("WorkspaceIndex", index);
   childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
@@ -278,7 +279,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::fitToData(API::Matr
     const MantidVec & X = result->readX(0);
     MantidVec & Y = result->dataY(0);
     MantidVec & E = result->dataE(0);
-    for (unsigned int i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y.size(); ++i)
     {
       Y[i] = b*(std::pow(m,0.5*(X[i]+X[i+1])));
       E[i] = std::abs(E[i]*Y[i]);

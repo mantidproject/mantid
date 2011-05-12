@@ -130,7 +130,7 @@ public:
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual int dataSize()const;
+  virtual std::size_t dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const;
   virtual const double* getWeights()const;
@@ -186,7 +186,7 @@ protected:
   /// Upper bin index
   int m_xMaxIndex;
   /// Size of the fitted data
-  int m_dataSize;
+  std::size_t m_dataSize;
   /// Pointer to the fitted data
   const double* m_data;
   /// Pointer to the fitting weights

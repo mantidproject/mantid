@@ -56,14 +56,14 @@ namespace DataObjects
     ~CompressedWorkspace2D();
     virtual const std::string id() const {return "CompressedWorkspace2D";}
     /// Returns the size of physical memory the workspace takes
-    size_t getMemorySize() const;
+    std::size_t getMemorySize() const;
 
   protected:
 
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+    virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
     /// Reads in a data block.
-    virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const;
+    virtual void readDataBlock(ManagedDataBlock2D *newBlock,std::size_t startIndex)const;
     /// Saves the dropped data block to disk.
     virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const;
 
@@ -80,9 +80,9 @@ namespace DataObjects
     typedef std::map<size_t,CompressedPointer > CompressedMap;
 
     /// Compresses a block
-    CompressedPointer compressBlock(ManagedDataBlock2D* block,int startIndex) const;
+    CompressedPointer compressBlock(ManagedDataBlock2D* block,std::size_t startIndex) const;
     /// Uncompress a block
-    void uncompressBlock(ManagedDataBlock2D* block,int startIndex)const;
+    void uncompressBlock(ManagedDataBlock2D* block,std::size_t startIndex)const;
 
     /// Data buffer used in compression and decompression
     mutable MantidVec m_inBuffer;

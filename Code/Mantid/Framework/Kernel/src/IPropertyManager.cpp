@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/IPropertyManager.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/System.h"
 #include <algorithm>
 
 namespace Mantid
@@ -18,31 +19,92 @@ namespace Kernel
     // package dependency rules).
 
     template<> DLLExport
-    int IPropertyManager::getValue<int>(const std::string &name) const
+    int16_t IPropertyManager::getValue<int16_t>(const std::string &name) const
     {
-        PropertyWithValue<int> *prop = dynamic_cast<PropertyWithValue<int>*>(getPointerToProperty(name));
+        PropertyWithValue<int16_t> *prop = dynamic_cast<PropertyWithValue<int16_t>*>(getPointerToProperty(name));
         if (prop)
         {
             return *prop;
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected int.";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected int16.";
             throw std::runtime_error(message);
         }
     }
 
     template<> DLLExport
-    long long IPropertyManager::getValue<long long>(const std::string &name) const
+    uint16_t IPropertyManager::getValue<uint16_t>(const std::string &name) const
     {
-        PropertyWithValue<long long> *prop = dynamic_cast<PropertyWithValue<long long>*>(getPointerToProperty(name));
+        PropertyWithValue<uint16_t> *prop = dynamic_cast<PropertyWithValue<uint16_t>*>(getPointerToProperty(name));
         if (prop)
         {
             return *prop;
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected long long.";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint16.";
+            throw std::runtime_error(message);
+        }
+    }
+
+
+    template<> DLLExport
+    int32_t IPropertyManager::getValue<int32_t>(const std::string &name) const
+    {
+        PropertyWithValue<int32_t> *prop = dynamic_cast<PropertyWithValue<int32_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected int32.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    uint32_t IPropertyManager::getValue<uint32_t>(const std::string &name) const
+    {
+        PropertyWithValue<uint32_t> *prop = dynamic_cast<PropertyWithValue<uint32_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint32.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    int64_t IPropertyManager::getValue<int64_t>(const std::string &name) const
+    {
+        PropertyWithValue<int64_t> *prop = dynamic_cast<PropertyWithValue<int64_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected int64.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    uint64_t IPropertyManager::getValue<uint64_t>(const std::string &name) const
+    {
+        PropertyWithValue<uint64_t> *prop = dynamic_cast<PropertyWithValue<uint64_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint64.";
             throw std::runtime_error(message);
         }
     }
@@ -78,16 +140,91 @@ namespace Kernel
     }
 
     template<> DLLExport
-    std::vector<int> IPropertyManager::getValue<std::vector<int> >(const std::string &name) const
+    std::vector<int16_t> IPropertyManager::getValue<std::vector<int16_t> >(const std::string &name) const
     {
-        PropertyWithValue<std::vector<int> > *prop = dynamic_cast<PropertyWithValue<std::vector<int> >*>(getPointerToProperty(name));
+        PropertyWithValue<std::vector<int16_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<int16_t> >*>(getPointerToProperty(name));
         if (prop)
         {
             return *prop;
         }
         else
         {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<int>.";
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<int16>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<uint16_t> IPropertyManager::getValue<std::vector<uint16_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<uint16_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint16_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint16>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<int32_t> IPropertyManager::getValue<std::vector<int32_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<int32_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<int32_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<int32>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<uint32_t> IPropertyManager::getValue<std::vector<uint32_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<uint32_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint32_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint32>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<int64_t> IPropertyManager::getValue<std::vector<int64_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<int64_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<int64_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<int64>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<uint64_t> IPropertyManager::getValue<std::vector<uint64_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<uint64_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint64_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint64>.";
             throw std::runtime_error(message);
         }
     }
@@ -118,20 +255,6 @@ namespace Kernel
         else
         {
             std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<string>.";
-            throw std::runtime_error(message);
-        }
-    }
-	 template<> DLLExport
-    std::vector<long long> IPropertyManager::getValue<std::vector<long long> >(const std::string &name) const
-    {
-        PropertyWithValue<std::vector<long long> > *prop = dynamic_cast<PropertyWithValue<std::vector<long long> >*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<long long>.";
             throw std::runtime_error(message);
         }
     }
@@ -168,8 +291,12 @@ namespace Kernel
 
     // Definitions for TypedValue cast operators
     // Have to come after getValue definitions above to keep MSVS2010 happy
-    IPropertyManager::TypedValue::operator int () { return pm.getValue<int>(prop); }
-    IPropertyManager::TypedValue::operator long long () { return pm.getValue<long long>(prop); }
+    IPropertyManager::TypedValue::operator int16_t () { return pm.getValue<int16_t>(prop); }
+    IPropertyManager::TypedValue::operator uint16_t () { return pm.getValue<uint16_t>(prop); }
+    IPropertyManager::TypedValue::operator int32_t () { return pm.getValue<int32_t>(prop); }
+    IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
+    IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }
+    IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<uint64_t>(prop); }
     IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }

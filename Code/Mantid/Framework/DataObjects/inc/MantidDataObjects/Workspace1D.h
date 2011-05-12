@@ -58,12 +58,12 @@ public:
 
   //section required for iteration
   ///Returns the number of single indexable items in the workspace
-  virtual int size() const;
+  virtual std::size_t size() const;
   ///Returns the size of each block of data returned by the dataX accessors
-  virtual int blocksize() const;
+  virtual std::size_t blocksize() const;
 
   ///Returns the number of histgrams - always 1 in this case
-  int getNumberHistograms() const { return 1; }
+  std::size_t getNumberHistograms() const { return 1; }
 
   //inheritance redirections
   // Reimplemented these Histogram1D methods simply to hide the other ones
@@ -83,26 +83,26 @@ public:
   void setData(const MantidVecPtr::ptr_type& Y, const MantidVecPtr::ptr_type& E) { Histogram1D::setData(Y,E); }  
   
   ///Returns the x data
-  virtual MantidVec& dataX(int const index) { (void) index; return Histogram1D::dataX(); }
+  virtual MantidVec& dataX(std::size_t const index) { (void) index; return Histogram1D::dataX(); }
   ///Returns the y data
-  virtual MantidVec& dataY(int const index) { (void) index; return Histogram1D::dataY(); }
+  virtual MantidVec& dataY(std::size_t const index) { (void) index; return Histogram1D::dataY(); }
   ///Returns the error data
-  virtual MantidVec& dataE(int const index) { (void) index; return Histogram1D::dataE(); }
+  virtual MantidVec& dataE(std::size_t const index) { (void) index; return Histogram1D::dataE(); }
   ///Returns the x error data
-  virtual MantidVec& dataDx(int const index) { (void) index; return Histogram1D::dataDx(); }
+  virtual MantidVec& dataDx(std::size_t const index) { (void) index; return Histogram1D::dataDx(); }
   /// Returns the x data const
-  virtual const MantidVec& dataX(int const index) const { (void) index; return dataX();}
+  virtual const MantidVec& dataX(std::size_t const index) const { (void) index; return dataX();}
   /// Returns the y data const
-  virtual const MantidVec& dataY(int const index) const { (void) index; return dataY();}
+  virtual const MantidVec& dataY(std::size_t const index) const { (void) index; return dataY();}
   /// Returns the error const
-  virtual const MantidVec& dataE(int const index) const { (void) index; return dataE();}
+  virtual const MantidVec& dataE(std::size_t const index) const { (void) index; return dataE();}
   /// Returns the x error const
-  virtual const MantidVec& dataDx(int const index) const { (void) index; return dataDx();}
+  virtual const MantidVec& dataDx(std::size_t const index) const { (void) index; return dataDx();}
 
   /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const { (void) index; return Histogram1D::ptrX(); }
+  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const { (void) index; return Histogram1D::ptrX(); }
   /// Set the specified X array to point to the given existing array
-  virtual void setX(const int index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; setX(X); }
+  virtual void setX(const std::size_t index, const Kernel::cow_ptr<MantidVec>& X) { (void) index; setX(X); }
 
   ///Returns non-const vector of the x data
   virtual MantidVec& dataX() { return Histogram1D::dataX(); }
@@ -128,7 +128,7 @@ private:
   Workspace1D& operator=(const Workspace1D&);
 
   // allocates space in a new workspace
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

@@ -52,14 +52,14 @@ public:
   
 #ifndef HAS_UNORDERED_MAP_H
   /// Spectra Detector map typedef
-  typedef std::multimap<int,int> smap;
+  typedef std::multimap<int64_t,int64_t> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::multimap<int,int>::const_iterator smap_it;
+  typedef std::multimap<int64_t,int64_t>::const_iterator smap_it;
 #else
   /// Spectra Detector map typedef
-  typedef std::tr1::unordered_multimap<int,int> smap;
+  typedef std::tr1::unordered_multimap<int64_t,int64_t> smap;
   /// Spectra Detector map iterator typedef
-  typedef std::tr1::unordered_multimap<int,int>::const_iterator smap_it;
+  typedef std::tr1::unordered_multimap<int64_t,int64_t>::const_iterator smap_it;
 #endif
   
   /// Constructor
@@ -67,28 +67,30 @@ public:
   /// Virtual destructor
   virtual ~SpectraDetectorMap();
   /// Populate the Map with _spec and _udet C array
-  void populate(const int* _spec, const int* _udet, int nentries);
+  void populate(const int* _spec, const int* _udet, int64_t nentries);
+  /// Populate the Map with _spec and _udet C array
+  void populate(const int64_t* _spec, const int64_t* _udet, int64_t nentries);
   /// Populate with a simple 1-1 correspondance between spec and udet; from start (inclusive) to end (exclusive).
-  void populateSimple(const int start, const int end);
+  void populateSimple(const int64_t start, const int64_t end);
   /// Populate with a vector of pixel IDs
-  void populateWithVector(const std::vector<int>& udetList);
+  void populateWithVector(const std::vector<int64_t>& udetList);
 
   /// Link a list of UDETs to the given spectrum
-  void addSpectrumEntries(const int spectrum, const std::vector<int>& udetList);
-  void addSpectrumEntries(const int spectrum, const std::set<int>& detectorIDs);
+  void addSpectrumEntries(const int64_t spectrum, const std::vector<int64_t>& udetList);
+  void addSpectrumEntries(const int64_t spectrum, const std::set<int64_t>& detectorIDs);
 
   /// Move a detector from one spectrum to another
-  void remap(const int oldSpectrum, const int newSpectrum);
+  void remap(const int64_t oldSpectrum, const int64_t newSpectrum);
   /// Empties the map
   void clear();
   /// Return number of detectors contributing to this spectrum
-  int ndet(const int spectrum_number) const;
+  std::size_t ndet(const int64_t spectrum_number) const;
   /// Get a vector of detectors ids contributing to a spectrum
-  std::vector<int> getDetectors(const int spectrum_number) const;
+  std::vector<int64_t> getDetectors(const int64_t spectrum_number) const;
   /// Gets a list of spectra corresponding to a list of detector numbers
-  std::vector<int> getSpectra(const std::vector<int>& detectorList) const;
+  std::vector<int64_t> getSpectra(const std::vector<int64_t>& detectorList) const;
   /// Return the size of the map
-  int nElements() const {return static_cast<int>(m_s2dmap.size());}
+  std::size_t nElements() const {return m_s2dmap.size();}
   /// Tests two maps for equality
   bool operator==(const SpectraDetectorMap& other) const;
   /// Tests two maps for inequality

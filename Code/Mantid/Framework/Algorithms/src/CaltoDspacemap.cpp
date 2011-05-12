@@ -130,17 +130,17 @@ void CaltoDspacemap::CalculateDspaceFromCal(Mantid::API::MatrixWorkspace_const_s
   instrument->getInstrumentParameters(l1,beamline,beamline_norm, samplePos);
 
   //To get all the detector ID's
-  std::map<int, Geometry::IDetector_sptr> allDetectors;
+  std::map<int64_t, Geometry::IDetector_sptr> allDetectors;
   instrument->getDetectors(allDetectors);
 
   // Selects (empty, will default to true)
-  std::map<int, bool> selects;
+  std::map<int64_t, bool> selects;
 
-  std::map<int, Geometry::IDetector_sptr>::const_iterator it;
-  int maxdetID = 0;
+  std::map<int64_t, Geometry::IDetector_sptr>::const_iterator it;
+  int64_t maxdetID = 0;
   for (it = allDetectors.begin(); it != allDetectors.end(); it++)
   {
-    int detectorID = it->first;
+    int64_t detectorID = it->first;
     if(detectorID > maxdetID) maxdetID = detectorID;
   }
   int paddetID = getProperty("PadDetID");

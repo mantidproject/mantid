@@ -109,24 +109,24 @@ namespace Mantid
       /// Run LoadInstrument sub algorithm
       void runLoadInstrument(const std::string & inst_name, API::MatrixWorkspace_sptr local_workspace);
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
-      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
-		     int nchannels, int &hist, API::MatrixWorkspace_sptr local_workspace);
+      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int64_t blocksize,
+          int64_t nchannels, int64_t &hist, API::MatrixWorkspace_sptr local_workspace);
 
       /// Load a block of data into the workspace where it is assumed that the x bins have already been cached
-      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int blocksize, 
-		     int nchannels, int &hist,int& wsIndex, API::MatrixWorkspace_sptr local_workspace);
+      void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, int64_t blocksize,
+          int64_t nchannels, int64_t &hist,int64_t& wsIndex, API::MatrixWorkspace_sptr local_workspace);
       /// Load a block of data into the workspace
       void loadBlock(NXDataSetTyped<double> & data, NXDataSetTyped<double> & errors, NXDouble & xbins, 
-		     int blocksize, int nchannels, int &hist,int& wsIndex, API::MatrixWorkspace_sptr local_workspace);
+          int64_t blocksize, int64_t nchannels, int64_t &hist,int64_t& wsIndex, API::MatrixWorkspace_sptr local_workspace);
 
       /// Load the data from a non-spectra axis (Numeric/Text) into the workspace
       void loadNonSpectraAxis(API::MatrixWorkspace_sptr local_workspace, NXData & data);
 
       /// Validates the optional 'spectra to read' properties, if they have been set
-      void checkOptionalProperties(const int numberofspectra);
+      void checkOptionalProperties(const std::size_t numberofspectra);
 
       /// calculates the workspace size
-      int calculateWorkspacesize(const int numberofspectra);
+      std::size_t calculateWorkspacesize(const std::size_t numberofspectra);
      
       /// Does the current workspace have uniform binning
       bool m_shared_bins;
@@ -140,7 +140,7 @@ namespace Mantid
       /// Flag set if interval of spectra to write is set
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
+      std::vector<int64_t> m_spec_list;
       /// The value of the spectrum_min property
       int m_spec_min;
       /// The value of the spectrum_max property

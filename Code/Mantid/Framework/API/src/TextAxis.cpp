@@ -10,7 +10,7 @@ namespace API
 {
 
 /// Constructor
-TextAxis::TextAxis(const int& length): Axis()
+TextAxis::TextAxis(const size_t& length): Axis()
 {
   m_values.resize(length);
 }
@@ -21,7 +21,7 @@ TextAxis::TextAxis(const int& length): Axis()
  */
 Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
-  (void) parentWorkspace; //Avoid compiler warning
+  UNUSED_ARG(parentWorkspace)
   return new TextAxis(*this);
 }
 
@@ -31,10 +31,10 @@ Axis* TextAxis::clone(const MatrixWorkspace* const parentWorkspace)
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double TextAxis::operator()(const int& index, const int& verticalIndex) const
+double TextAxis::operator()(const size_t& index, const size_t& verticalIndex) const
 {
-  (void) verticalIndex; //Avoid compiler warning
-  if (index < 0 || index >= length())
+  UNUSED_ARG(verticalIndex)
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "TextAxis: Index out of range.");
   }
@@ -47,10 +47,10 @@ double TextAxis::operator()(const int& index, const int& verticalIndex) const
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void TextAxis::setValue(const int& index, const double& value)
+void TextAxis::setValue(const size_t& index, const double& value)
 {
-  (void) index; //Avoid compiler warning
-  (void) value; //Avoid compiler warning
+  UNUSED_ARG(index)
+  UNUSED_ARG(value)
   throw std::domain_error("setValue method cannot be used on a TextAxis.");
 }
 
@@ -77,7 +77,7 @@ bool TextAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return The label
  */
-std::string TextAxis::label(const int& index)const
+std::string TextAxis::label(const size_t& index)const
 {
   return m_values.at(index);
 }
@@ -87,9 +87,9 @@ std::string TextAxis::label(const int& index)const
   * @param index :: Index
   * @param lbl :: The text label
   */
-void TextAxis::setLabel(const int& index, const std::string& lbl)
+void TextAxis::setLabel(const size_t& index, const std::string& lbl)
 {
-  if (index < 0 || index >= length())
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "TextAxis: Index out of range.");
   }

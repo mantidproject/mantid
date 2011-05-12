@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -69,11 +70,11 @@ namespace Algorithms
       /// Calculate Ei from the initial guess given
       double calculateEi(const double initial_guess);
       /// Get the distance from the source of the detector at the workspace index given
-      double getDistanceFromSource(const int ws_index) const;
+      double getDistanceFromSource(const int64_t ws_index) const;
       /// Calculate the peak position within the given window
-      double calculatePeakPosition(const int ws_index, const double t_min, const double t_max);
+      double calculatePeakPosition(const int64_t ws_index, const double t_min, const double t_max);
       /// Extract the required spectrum from the input workspace
-      API::MatrixWorkspace_sptr extractSpectrum(const int ws_index, const double start, const double end);
+      API::MatrixWorkspace_sptr extractSpectrum(const int64_t ws_index, const double start, const double end);
       /// Calculate peak width
       double calculatePeakWidthAtHalfHeight(API::MatrixWorkspace_sptr data_ws, const double prominence,
                                             std::vector<double> & peak_x, std::vector<double> & peak_y, std::vector<double> & peak_e) const;
@@ -89,7 +90,7 @@ namespace Algorithms
       /// The input workspace
       API::MatrixWorkspace_sptr m_input_ws;
       /// The calculated position of the first peak
-      std::pair<int, double> m_peak1_pos;
+      std::pair<int64_t, double> m_peak1_pos;
       /// True if the Ei should be fixed at the guess energy
       bool m_fixedei;
       /// Conversion factor between time and energy

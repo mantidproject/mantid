@@ -74,15 +74,15 @@ void MaskDetectorsIf::init()
 void MaskDetectorsIf::exec()
 {
 	retrieveProperties();
-	const int nspec=inputW->getNumberHistograms();
+	const int64_t nspec=inputW->getNumberHistograms();
 	const API::SpectraDetectorMap& spectramap = inputW->spectraMap();
 
-	for (int i=0;i<nspec;++i)
+	for (int64_t i=0;i<nspec;++i)
 	{
 		// Get the spectrum number
-		const int spec = inputW->getAxis(1)->spectraNo(i);
+		const int64_t spec = inputW->getAxis(1)->spectraNo(i);
 		// Get the list of udets contributing to this spectra
-		std::vector<int> dets = spectramap.getDetectors(spec);
+		std::vector<int64_t> dets = spectramap.getDetectors(spec);
 		if (dets.empty())
 			continue;
 		else
@@ -91,10 +91,10 @@ void MaskDetectorsIf::exec()
 			if (compar_f(val,value))
 			{
 			for (unsigned int j=0;j<dets.size();++j)
-				umap.insert(std::make_pair<int,bool>(dets[j],select_on));
+				umap.insert(std::make_pair<int64_t,bool>(dets[j],select_on));
 			}
 		}
-		double p=static_cast<double>(i)/nspec;
+		double p=static_cast<double>(i)/static_cast<double>(nspec);
 		progress(p,"Generating detector map");
 	}
 	std::string oldf=getProperty("InputCalFile");
@@ -169,7 +169,7 @@ void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::st
       continue;
     }
     std::istringstream istr(str);
-    int n,udet,sel,group;
+    int64_t n,udet,sel,group;
     double offset;
     istr >> n >> udet >> offset >> sel >> group;
     udet2valuem::iterator it=umap.find(udet);

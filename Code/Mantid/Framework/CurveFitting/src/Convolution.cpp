@@ -21,6 +21,7 @@ namespace CurveFitting
 
 using namespace Kernel;
 using namespace API;
+using std::size_t;
 
 DECLARE_FUNCTION(Convolution)
 
@@ -245,7 +246,7 @@ void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int&
  * @param f :: A pointer to the function to add
  * @return The index of the new function which will be 0 for the resolution and 1 for the model
  */
-int Convolution::addFunction(IFitFunction* f)
+size_t Convolution::addFunction(IFitFunction* f)
 {
   if (nFunctions() == 0)
   {

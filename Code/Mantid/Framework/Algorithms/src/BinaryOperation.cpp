@@ -14,6 +14,7 @@ using namespace Mantid::Geometry;
 using namespace Mantid::API;
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using std::size_t;
 
 namespace Mantid
 {
@@ -222,7 +223,8 @@ namespace Mantid
      */
     void BinaryOperation::execEvent( DataObjects::EventWorkspace_const_sptr lhs, DataObjects::EventWorkspace_const_sptr rhs )
     {
-      (void) lhs;(void) rhs; //Avoid compiler warnings
+      UNUSED_ARG(lhs);
+      UNUSED_ARG(rhs);
       //This should never happen
       throw Exception::NotImplementedError("BinaryOperation::execEvent() is not implemented for this operation.");
     }
@@ -283,7 +285,8 @@ namespace Mantid
      */
     bool BinaryOperation::checkEventCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs)
     {
-      (void) lhs; (void) rhs; //Avoid compiler warning
+      UNUSED_ARG(lhs);
+      UNUSED_ARG(rhs);
       return false;
     }
 
@@ -299,8 +302,8 @@ namespace Mantid
      */
     bool BinaryOperation::checkSizeCompatibility(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs) const
     {
-      const int lhsSize = lhs->size();
-      const int rhsSize = rhs->size();
+      const size_t lhsSize = lhs->size();
+      const size_t rhsSize = rhs->size();
       // A SingleValueWorkspace on the right matches anything
       if ( rhsSize == 1 ) return true;
       // The rhs must not be smaller than the lhs
@@ -316,7 +319,7 @@ namespace Mantid
       // Past this point, we require the X arrays to match. Note this only checks the first spectrum
       if ( !WorkspaceHelpers::matchingBins(lhs,rhs,true) ) return false;
       
-      const int rhsSpec = rhs->getNumberHistograms();
+      const size_t rhsSpec = rhs->getNumberHistograms();
 
       return ( lhs->blocksize() == rhs->blocksize() && ( rhsSpec==1 || lhs->getNumberHistograms() == rhsSpec ) );
     }
@@ -333,7 +336,7 @@ namespace Mantid
      * @returns True if further processing is not required on the spectra, false if the binary operation should be performed.
      */
     bool BinaryOperation::propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs, const API::MatrixWorkspace_const_sptr rhs, 
-        const int index, API::MatrixWorkspace_sptr out)
+        const int64_t index, API::MatrixWorkspace_sptr out)
     {
       bool continueOp(true);
       IDetector_sptr det_lhs, det_rhs;
@@ -390,13 +393,13 @@ namespace Mantid
       const double rhsE = m_rhs->readE(0)[0];
       
       // Now loop over the spectra of the left hand side calling the virtual function
-      const int numHists = m_lhs->getNumberHistograms();
+      const int64_t numHists = m_lhs->getNumberHistograms();
 
       if (m_eout)
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i, m_lhs->refX(i));
@@ -412,7 +415,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
@@ -436,13 +439,13 @@ namespace Mantid
 
       // Now loop over the spectra of the left hand side pulling m_out the single value from each m_rhs 'spectrum'
       // and then calling the virtual function
-      const int numHists = m_lhs->getNumberHistograms();
+      const int64_t numHists = m_lhs->getNumberHistograms();
 
       if (m_eout)
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -464,7 +467,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -510,9 +513,9 @@ namespace Mantid
           const EventList & rhs_spectrum = m_erhs->getEventList(0);
 
           // Now loop over the spectra of the left hand side calling the virtual function
-          const int numHists = m_lhs->getNumberHistograms();
+          const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -533,11 +536,11 @@ namespace Mantid
           const MantidVec& rhsE = m_rhs->readE(0);
 
           // Now loop over the spectra of the left hand side calling the virtual function
-          const int numHists = m_lhs->getNumberHistograms();
+          const int64_t numHists = m_lhs->getNumberHistograms();
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-          for (int i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -561,11 +564,11 @@ namespace Mantid
         const MantidVec& rhsE = m_rhs->readE(0);
 
         // Now loop over the spectra of the left hand side calling the virtual function
-        const int numHists = m_lhs->getNumberHistograms();
+        const int64_t numHists = m_lhs->getNumberHistograms();
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
@@ -605,14 +608,14 @@ namespace Mantid
         {
            // ------------ The rhs is ALSO an EventWorkspace ---------------
           // Now loop over the spectra of each one calling the virtual function
-          const int numHists = m_lhs->getNumberHistograms();
+          const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report();
 
-            int rhs_wi = i;
+            int64_t rhs_wi = i;
             if (mismatchedSpectra && table)
             {
               rhs_wi = (*table)[i];
@@ -641,15 +644,15 @@ namespace Mantid
           // -------- The rhs is a histogram, or we want to use the histogram representation of it ---------
 
           // Now loop over the spectra of each one calling the virtual function
-          const int numHists = m_lhs->getNumberHistograms();
+          const int64_t numHists = m_lhs->getNumberHistograms();
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-          for (int i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < numHists; ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report();
-            int rhs_wi = i;
+            int64_t rhs_wi = i;
             if (mismatchedSpectra && table)
             {
               rhs_wi = (*table)[i];
@@ -683,16 +686,16 @@ namespace Mantid
         //  will be used instead)
 
         // Now loop over the spectra of each one calling the virtual function
-        const int numHists = m_lhs->getNumberHistograms();
+        const int64_t numHists = m_lhs->getNumberHistograms();
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < numHists; ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_progress->report();
           m_out->setX(i,m_lhs->refX(i));
-          int rhs_wi = i;
+          int64_t rhs_wi = i;
           if (mismatchedSpectra && table)
           {
             rhs_wi = (*table)[i];
@@ -736,9 +739,9 @@ namespace Mantid
      */
     void BinaryOperation::propagateBinMasks(const API::MatrixWorkspace_const_sptr rhs, API::MatrixWorkspace_sptr out)
     {
-      const int outHists = out->getNumberHistograms();
-      const int rhsHists = rhs->getNumberHistograms();
-      for (int i = 0; i < outHists; ++i)
+      const int64_t outHists = out->getNumberHistograms();
+      const int64_t rhsHists = rhs->getNumberHistograms();
+      for (int64_t i = 0; i < outHists; ++i)
       {
         // Copy over masks from the rhs, if any exist.
         // If rhs is single spectrum, copy masks from that to all spectra in the output.
@@ -762,10 +765,10 @@ namespace Mantid
      */
     void BinaryOperation::applyMaskingToOutput(API::MatrixWorkspace_sptr out)
     {
-      int nindices = static_cast<int>(m_indicesToMask.size());
+      int64_t nindices = static_cast<int64_t>(m_indicesToMask.size());
       ParameterMap &pmap = out->instrumentParameters();
       PARALLEL_FOR1(out)
-      for(int i = 0; i < nindices; ++i)
+      for(int64_t i = 0; i < nindices; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
 
@@ -800,7 +803,8 @@ namespace Mantid
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const DataObjects::EventList & rhs)
     {
-      (void) lhs; (void) rhs; //Avoid compiler warnings
+      UNUSED_ARG(lhs);
+      UNUSED_ARG(rhs);
       throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
     }
 
@@ -816,8 +820,10 @@ namespace Mantid
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const MantidVec& rhsX, const MantidVec& rhsY, const MantidVec& rhsE)
     {
-      (void) lhs;  //Avoid compiler warnings
-      (void) rhsX; (void) rhsY; (void) rhsE;
+      UNUSED_ARG(lhs);
+      UNUSED_ARG(rhsX);
+      UNUSED_ARG(rhsY);
+      UNUSED_ARG(rhsE);
       throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
     }
 
@@ -832,8 +838,9 @@ namespace Mantid
     void BinaryOperation::performEventBinaryOperation(DataObjects::EventList & lhs,
         const double& rhsY, const double& rhsE)
     {
-      (void) lhs;  //Avoid compiler warnings
-      (void) rhsY; (void) rhsE;
+      UNUSED_ARG(lhs);
+      UNUSED_ARG(rhsY);
+      UNUSED_ARG(rhsE);
       throw Exception::NotImplementedError("BinaryOperation::performEventBinaryOperation() not implemented.");
     }
 
@@ -910,8 +917,8 @@ namespace Mantid
       const SpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
       const SpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
 
-      int rhs_nhist = rhs->getNumberHistograms();
-      int lhs_nhist = lhs->getNumberHistograms();
+      int64_t rhs_nhist = rhs->getNumberHistograms();
+      int64_t lhs_nhist = lhs->getNumberHistograms();
 
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
@@ -927,27 +934,27 @@ namespace Mantid
       //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
       PARALLEL_FOR_NO_WSP_CHECK()
-      for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
+      for (int64_t lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
       {
-        int rhs_spec_no;
+        int64_t rhs_spec_no;
         bool done=false;
 
         // Spectrum number for this lhs workspace index.
-        int lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
+        int64_t lhs_spec_no = (*lhs_wi_to_spec)[lhsWI];
         // List of detectors on lhs side
-        std::vector<int> lhsDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
+        std::vector<int64_t> lhsDets = lhs_spec_det_map.getDetectors(lhs_spec_no);
         // For proper includes, it needs to be sorted
         std::sort(lhsDets.begin(), lhsDets.end());
 
 
         // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
         //First off, try to match the workspace indices. Most times, this will be ok right away.
-        int rhsWI = lhsWI;
+        int64_t rhsWI = lhsWI;
         if (rhsWI < rhs_nhist) //don't go out of bounds
         {
           // Get the detector IDs at that workspace index.
           rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
-          std::vector<int> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+          std::vector<int64_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
           std::sort(rhsDets.begin(), rhsDets.end());
 
           //Checks that lhsDets is a subset of rhsDets
@@ -966,8 +973,8 @@ namespace Mantid
           //Didn't find it. Try to use the RHS map.
 
           //First, we have to get the (single) detector ID of the LHS
-          std::vector<int>::const_iterator lhsDets_it = lhsDets.begin();
-          int lhs_detector_ID = *lhsDets_it;
+          std::vector<int64_t>::const_iterator lhsDets_it = lhsDets.begin();
+          int64_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
           IndexToIndexMap::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);
@@ -999,7 +1006,7 @@ namespace Mantid
           for (rhsWI=0; rhsWI < rhs_nhist; rhsWI++)
           {
             rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
-            std::vector<int> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
+            std::vector<int64_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);
             std::sort(rhsDets.begin(), rhsDets.end());
 
             //Checks that lhsDets is a subset of rhsDets
@@ -1027,11 +1034,6 @@ namespace Mantid
 
       return table;
     }
-
-
-
-
-
 
   } // namespace Algorithms
 } // namespace Mantid

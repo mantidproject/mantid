@@ -86,7 +86,7 @@ void LoadRawSpectrum0::initDocs()
             readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
 
 			// Calculate the size of a workspace, given its number of periods & spectra to read
-			const int total_specs = 1;
+			const int64_t total_specs = 1;
 
 			// Get the time channel array(s) and store in a vector inside a shared pointer
 			std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec =
@@ -95,8 +95,8 @@ void LoadRawSpectrum0::initDocs()
 			// Need to extract the user-defined output workspace name
 			const std::string localWSName = getPropertyValue("OutputWorkspace");
 
-			int histTotal = total_specs * m_numberOfPeriods;
-			int histCurrent = -1;
+			double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
+			int64_t histCurrent = -1;
 
 			// Create the 2D workspace for the output
 			DataObjects::Workspace2D_sptr localWorkspace =createWorkspace(total_specs, m_lengthIn,m_lengthIn-1,title);
@@ -116,7 +116,7 @@ void LoadRawSpectrum0::initDocs()
 			setWorkspaceProperty("OutputWorkspace", title, wsgrp_sptr, localWorkspace,m_numberOfPeriods, false);
 			
 			// Loop over the number of periods in the raw file, putting each period in a separate workspace
-			for (int period = 0; period < m_numberOfPeriods; ++period)
+			for (int64_t period = 0; period < m_numberOfPeriods; ++period)
 			{
 				if (period > 0)
 				{
@@ -131,7 +131,7 @@ void LoadRawSpectrum0::initDocs()
 						Run& runObj = localWorkspace->mutableRun();
 						runObj.removeLogData(prevPeriod.str());
 						//add current period data
-						Property* log = createPeriodLog(period+1);
+						Property* log = createPeriodLog(static_cast<int>(period+1));
 						if (log) 
 						{ 
 						  runObj.addLogData(log);
@@ -144,9 +144,9 @@ void LoadRawSpectrum0::initDocs()
 					}
 
 				}
-				int wsIndex = 0;
+				int64_t wsIndex = 0;
 				// for each period read first spectrum
-				int histToRead = period*(m_numberOfSpectra+1);
+				int64_t histToRead = period*(m_numberOfSpectra+1);
 
 				progress(m_prog, "Reading raw file data...");
 				//isisRaw->readData(file, histToRead);
@@ -172,7 +172,7 @@ void LoadRawSpectrum0::initDocs()
 				{
 					setWorkspaceProperty(localWorkspace, wsgrp_sptr, period, false);
 					// progress for workspace groups 
-					m_prog = (double(period) / (m_numberOfPeriods - 1));
+					m_prog = static_cast<double>(period) / static_cast<double>(m_numberOfPeriods - 1);
 				}
 
 			} // loop over periods

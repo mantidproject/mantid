@@ -324,7 +324,7 @@ namespace DataObjects
     //No guaranteed order
     this->order = UNSORTED;
     //Do a union between the detector IDs of both lists
-    std::set<int>::const_iterator it;
+    std::set<int64_t>::const_iterator it;
     for (it = more_events.detectorIDs.begin(); it != more_events.detectorIDs.end(); it++ )
       this->detectorIDs.insert( *it );
 
@@ -486,14 +486,14 @@ namespace DataObjects
    *
    * @param detID :: detector ID to insert in set.
    */
-  void EventList::addDetectorID(const int detID)
+  void EventList::addDetectorID(const int64_t detID)
   {
     this->detectorIDs.insert( detID );
   }
 
   // --------------------------------------------------------------------------
   /** Return true if the given detector ID is in the list for this eventlist */
-  bool EventList::hasDetectorID(const int detID) const
+  bool EventList::hasDetectorID(const int64_t detID) const
   {
     return ( detectorIDs.find(detID) != detectorIDs.end() );
   }
@@ -501,14 +501,14 @@ namespace DataObjects
   // --------------------------------------------------------------------------
   /** Get a const reference to the detector IDs set.
    */
-  const std::set<int>& EventList::getDetectorIDs() const
+  const std::set<int64_t>& EventList::getDetectorIDs() const
   {
     return this->detectorIDs;
   }
 
   /** Get a mutable reference to the detector IDs set.
    */
-  std::set<int>& EventList::getDetectorIDs()
+  std::set<int64_t>& EventList::getDetectorIDs()
   {
     return this->detectorIDs;
   }
@@ -644,7 +644,7 @@ namespace DataObjects
     case WEIGHTED:
       return weightedEvents[event_number];
     case WEIGHTED_NOTIME:
-      return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0, weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
+      return WeightedEvent(weightedEventsNoTime[event_number].tof(), 0., weightedEventsNoTime[event_number].weight(), weightedEventsNoTime[event_number].errorSquared());
     }
     throw std::runtime_error("EventList: invalid event type value was found.");
   }
@@ -2269,8 +2269,8 @@ namespace DataObjects
       // Error-less calculation
       for (itev = events.begin(); itev != itev_end; itev++)
       {
-        itev->m_errorSquared = (itev->m_errorSquared * valueSquared);
-        itev->m_weight *= value;
+        itev->m_errorSquared = static_cast<float>(itev->m_errorSquared * valueSquared);
+        itev->m_weight *= static_cast<float>(value);
       }
     }
     else
@@ -2278,8 +2278,8 @@ namespace DataObjects
       // Carry the scalar error
       for (itev = events.begin(); itev != itev_end; itev++)
       {
-        itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
-        itev->m_weight *= value;
+        itev->m_errorSquared = static_cast<float>(itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight);
+        itev->m_weight *= static_cast<float>(value);
       }
     }
   }
@@ -2415,8 +2415,8 @@ namespace DataObjects
         if ((tof >= X[bin]) && (tof < X[bin+1]))
         {
           //Process this event. Multilpy and calculate error.
-          itev->m_errorSquared = itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight;
-          itev->m_weight *= value;
+          itev->m_errorSquared = static_cast<float>(itev->m_errorSquared*valueSquared  +  errorSquared * itev->m_weight*itev->m_weight);
+          itev->m_weight *= static_cast<float>(value);
           break; //out of the bin-searching-while-loop
         }
         ++bin;
@@ -2543,9 +2543,9 @@ namespace DataObjects
         {
           //Process this event. Divide and calculate error.
           double newWeight = itev->m_weight / value;
-          itev->m_errorSquared = newWeight * newWeight *
-                                ((itev->m_errorSquared / (itev->m_weight*itev->m_weight)) + valError_over_value_squared);
-          itev->m_weight = newWeight;
+          itev->m_errorSquared = static_cast<float>(newWeight * newWeight *
+                                ((itev->m_errorSquared / (itev->m_weight*itev->m_weight)) + valError_over_value_squared));
+          itev->m_weight = static_cast<float>(newWeight);
           break; //out of the bin-searching-while-loop
         }
         ++bin;
@@ -2837,13 +2837,13 @@ namespace DataObjects
   template< class T >
   void EventList::splitByTimeHelper(Kernel::TimeSplitterType & splitter, std::vector< EventList * > outputs, typename std::vector<T> & events) const
   {
-    int numOutputs = outputs.size();
+    size_t numOutputs = outputs.size();
 
     //Iterate through the splitter at the same time
     Kernel::TimeSplitterType::iterator itspl = splitter.begin();
     Kernel::TimeSplitterType::iterator itspl_end = splitter.end();
     DateAndTime start, stop;
-    int index;
+    size_t index;
 
     //Iterate through all events (sorted by tof)
     typename std::vector<T>::iterator itev = events.begin();
@@ -2866,7 +2866,7 @@ namespace DataObjects
       {
         //Copy the event into another
         const T eventCopy(*itev);
-        if ((index >= 0) && (index < numOutputs))
+        if (index < numOutputs)
         {
           EventList * myOutput = outputs[index];
           //Add the copy to the output
@@ -2905,8 +2905,8 @@ namespace DataObjects
     this->sortPulseTime();
 
     //Initialize all the outputs
-    int numOutputs = outputs.size();
-    for (int i=0; i<numOutputs; i++)
+    size_t numOutputs = outputs.size();
+    for (size_t i=0; i<numOutputs; i++)
     {
       outputs[i]->clear();
       outputs[i]->detectorIDs = this->detectorIDs;

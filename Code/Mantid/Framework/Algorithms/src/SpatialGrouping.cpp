@@ -28,7 +28,7 @@ namespace
 * @param right :: element to compare
 * @return true if left should come before right in the order
 */
-static bool compareIDPair(const std::pair<int,double> & left, const std::pair<int,double> & right)
+static bool compareIDPair(const std::pair<int64_t,double> & left, const std::pair<int64_t,double> & right)
 {
   return ( left.second < right.second );
 }
@@ -76,7 +76,7 @@ void SpatialGrouping::exec()
   
   Mantid::API::Progress prog(this, 0.0, 1.0, m_detectors.size());
     
-  for ( std::map<int, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
+  for ( std::map<int64_t, Mantid::Geometry::IDetector_sptr>::iterator detIt = m_detectors.begin(); detIt != m_detectors.end(); ++detIt )
   {
     prog.report();
 
@@ -89,13 +89,13 @@ void SpatialGrouping::exec()
     }
 
     // Or detectors already flagged as included in a group
-    std::map<int, bool>::iterator inclIt = m_included.find(detIt->first);
+    std::map<int64_t, bool>::iterator inclIt = m_included.find(detIt->first);
     if ( inclIt != m_included.end() )
     {
       continue;
     }
 
-    std::map<int, double> nearest;
+    std::map<int64_t, double> nearest;
 
     const double empty = EMPTY_DBL();
     Mantid::Geometry::V3D scale(empty,empty,empty);
@@ -104,18 +104,18 @@ void SpatialGrouping::exec()
     createBox(detIt->second, bbox, scale);
 
     bool extend = true;
-    while ( ( nNeighbours > static_cast<int>(nearest.size()) ) && extend )
+    while ( ( nNeighbours > static_cast<int64_t>(nearest.size()) ) && extend )
     {
       extend = expandNet(nearest, detIt->second, nNeighbours, bbox, scale);
     }
 
-    if ( static_cast<int>(nearest.size()) != nNeighbours ) continue;
+    if ( static_cast<int64_t>(nearest.size()) != nNeighbours ) continue;
 
     // if we've gotten to this point, we want to go and make the group list.
-    std::vector<int> group;
+    std::vector<int64_t> group;
     m_included[detIt->first] = true;
     group.push_back(detIt->first);
-    std::map<int, double>::iterator nrsIt;
+    std::map<int64_t, double>::iterator nrsIt;
     for ( nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
       m_included[nrsIt->first] = true;
@@ -132,7 +132,7 @@ void SpatialGrouping::exec()
 
   // Create grouping XML file
   g_log.information() << "Creating XML Grouping File." << std::endl;
-  std::vector<std::vector<int> >::iterator grpIt;
+  std::vector<std::vector<int64_t> >::iterator grpIt;
   std::ofstream xml;
   std::string fname = getPropertyValue("Filename");
   
@@ -154,7 +154,7 @@ void SpatialGrouping::exec()
     << "<!-- XML Grouping File created by SpatialGrouping Algorithm -->\n"
     << "<detector-grouping>\n";
 
-  int grpID = 1;
+  int64_t grpID = 1;
   for ( grpIt = m_groups.begin(); grpIt != m_groups.end(); ++grpIt )
   {
     xml << "<group name=\"group" << grpID++ << "\"><detids val=\"" << (*grpIt)[0];
@@ -183,12 +183,12 @@ void SpatialGrouping::exec()
 * @param scale :: V3D object used for scaling in determination of distances
 * @return true if neighbours were found matching the parameters, false otherwise
 */
-bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry::IDetector_sptr det, const int & noNeighbours, const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale)
+bool SpatialGrouping::expandNet(std::map<int64_t,double> & nearest, Mantid::Geometry::IDetector_sptr det, const int64_t & noNeighbours, const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale)
 {
-  const int incoming = nearest.size();
+  const int64_t incoming = nearest.size();
 
-  const int centDetID = det->getID();
-  std::map<int, double> potentials;
+  const int64_t centDetID = det->getID();
+  std::map<int64_t, double> potentials;
 
   // Special case for first run for this detector
   if ( incoming == 0 )
@@ -197,28 +197,28 @@ bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry
   }
   else
   {
-    for ( std::map<int,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
+    for ( std::map<int64_t,double>::iterator nrsIt = nearest.begin(); nrsIt != nearest.end(); ++nrsIt )
     {
-      std::map<int, double> results;
+      std::map<int64_t, double> results;
       results = m_detectors[nrsIt->first]->getNeighbours();
-      for ( std::map<int, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
+      for ( std::map<int64_t, double>::iterator resIt = results.begin(); resIt != results.end(); ++resIt )
       {
         potentials[resIt->first] = resIt->second;
       }
     }
   }
 
-  for ( std::map<int,double>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
+  for ( std::map<int64_t,double>::iterator potIt = potentials.begin(); potIt != potentials.end(); ++potIt )
   {
     // We do not want to include the detector in it's own list of nearest neighbours
     if ( potIt->first == centDetID ) { continue; }
 
     // Or detectors that are already in the nearest list passed into this function
-    std::map<int, double>::iterator nrsIt = nearest.find(potIt->first);
+    std::map<int64_t, double>::iterator nrsIt = nearest.find(potIt->first);
     if ( nrsIt != nearest.end() ) { continue; }
 
     // We should not include detectors already included in a group (or monitors for that matter)
-    std::map<int,bool>::iterator inclIt = m_included.find(potIt->first);
+    std::map<int64_t,bool>::iterator inclIt = m_included.find(potIt->first);
     if ( inclIt != m_included.end() ) { continue; }
 
     // If we get this far, we need to determine if the detector is of a suitable distance
@@ -234,9 +234,9 @@ bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry
     nearest[potIt->first] = distance;
   }
 
-  if ( static_cast<int>(nearest.size()) == incoming ) { return false; }
+  if ( static_cast<int64_t>(nearest.size()) == incoming ) { return false; }
 
-  if ( static_cast<int>(nearest.size()) > noNeighbours )
+  if ( static_cast<int64_t>(nearest.size()) > noNeighbours )
   {
     sortByDistance(nearest, noNeighbours);
   }
@@ -250,17 +250,17 @@ bool SpatialGrouping::expandNet(std::map<int,double> & nearest, Mantid::Geometry
 * @param input :: map of values that need to be sorted, will be modified by the method
 * @param noNeighbours :: number of elements that should be kept
 */
-void SpatialGrouping::sortByDistance(std::map<int,double> & input, const int & noNeighbours)
+void SpatialGrouping::sortByDistance(std::map<int64_t,double> & input, const int64_t & noNeighbours)
 {
-  std::vector<std::pair<int,double> > order(input.begin(), input.end());
+  std::vector<std::pair<int64_t,double> > order(input.begin(), input.end());
 
   std::sort(order.begin(), order.end(), compareIDPair);
 
-  int current = order.size();
-  int lose = current - noNeighbours;
+  int64_t current = order.size();
+  int64_t lose = current - noNeighbours;
   if ( lose < 1 ) return;
 
-  for ( int i = 1; i <= lose; i++ )
+  for ( int64_t i = 1; i <= lose; i++ )
   {
     input.erase(order[current-i].first);
   }

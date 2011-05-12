@@ -18,6 +18,8 @@ namespace Mantid
 namespace API
 {
 
+using std::size_t;
+
 /// Private constructor for singleton class
 WorkspaceFactoryImpl::WorkspaceFactoryImpl() :
   Mantid::Kernel::DynamicFactory<Workspace>(), g_log(Kernel::Logger::get("WorkspaceFactory"))
@@ -50,7 +52,7 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  @throw  NotFoundException If the class is not registered in the factory
  */
 MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr& parent,
-                                            int NVectors, int XLength, int YLength) const
+                                            int64_t NVectors, int64_t XLength, int64_t YLength) const
 {
 
   // Flag to indicate whether this workspace is the same size as the parent
@@ -108,10 +110,10 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
   }
 
   // deal with axis
-  for (unsigned int i = 0; i < parent->m_axes.size(); ++i)
+  for (size_t i = 0; i < parent->m_axes.size(); ++i)
   {
-    const int newAxisLength = child->getAxis(i)->length();
-    const int oldAxisLength = parent->getAxis(i)->length();
+    const size_t newAxisLength = child->getAxis(i)->length();
+    const size_t oldAxisLength = parent->getAxis(i)->length();
 
     if ( !differentSize || newAxisLength == oldAxisLength )
     {
@@ -155,8 +157,8 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int& NVectors,
-                                            const int& XLength, const int& YLength) const
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int64_t& NVectors,
+                                            const int64_t& XLength, const int64_t& YLength) const
 {
   MatrixWorkspace_sptr ws;
 
@@ -164,7 +166,8 @@ MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, 
   // Otherwise calls the vanilla create method.
   bool is2D = className.find("2D") != std::string::npos;
   bool isCompressedOK = false;
-  if ( MemoryManager::Instance().goForManagedWorkspace(NVectors,XLength,YLength,&isCompressedOK) && is2D )
+  if ( MemoryManager::Instance().goForManagedWorkspace(static_cast<size_t>(NVectors), static_cast<size_t>(XLength),
+                                                          static_cast<size_t>(YLength),&isCompressedOK) && is2D )
   {
       // check if there is enough memory for 100 data blocks
       int blockMemory;

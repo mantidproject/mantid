@@ -11,6 +11,7 @@
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/System.h"
 
 // Poco XML Headers for Grouping File
 #include <Poco/DOM/Document.h>
@@ -127,7 +128,7 @@ namespace Algorithms
     }
 
     // Get the instrument.
-    const int nHist=localWorkspace->getNumberHistograms();
+    const int64_t nHist=localWorkspace->getNumberHistograms();
     API::Axis* specAxis=localWorkspace->getAxis(1);
     // Get the spectra to detector map
     const API::SpectraDetectorMap& spectramap=localWorkspace->spectraMap();
@@ -137,10 +138,10 @@ namespace Algorithms
     bool showunselected=(!su.compare("True"));
     bool success=false;
 
-    for (int i=0;i<nHist;i++)
+    for (int64_t i=0;i<nHist;i++)
     {
-      int spec=specAxis->spectraNo(i);
-      std::vector<int> dets=spectramap.getDetectors(spec);
+      int64_t spec=specAxis->spectraNo(i);
+      std::vector<int64_t> dets=spectramap.getDetectors(spec);
       if (dets.empty()) // Nothing
       {
         localWorkspace->dataY(i)[0]=0.0;
@@ -198,7 +199,7 @@ namespace Algorithms
       // Comment, not read
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int n,udet,sel,group;
+      int64_t n,udet,sel,group;
       double offset;
       istr >> n >> udet >> offset >> sel >> group;
       calibration[udet]=std::make_pair<int,int>(group,sel);

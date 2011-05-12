@@ -66,59 +66,60 @@ public:
   Workspace2D();
   virtual ~Workspace2D();
 
-  virtual void setX(int const, const MantidVecPtr&);
-  virtual void setX(int const, const MantidVecPtr::ptr_type&);
+  virtual void setX(std::size_t const, const MantidVecPtr&);
+  virtual void setX(std::size_t const, const MantidVecPtr::ptr_type&);
+  virtual void setData(std::size_t const, const MantidVecPtr&);
+  virtual void setData(std::size_t const, const MantidVecPtr&, const MantidVecPtr&);
+  virtual void setData(std::size_t const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
   virtual void setX(int const, const MantidVecPtr&, const MantidVecPtr&);
   virtual void setX(int const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
-  virtual void setData(int const, const MantidVecPtr&);
-  virtual void setData(int const, const MantidVecPtr&, const MantidVecPtr&);
-  virtual void setData(int const, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
   
   /// Returns the histogram number
-  int getNumberHistograms() const;
+  std::size_t getNumberHistograms() const;
 
   //section required for iteration
-  virtual int size() const;
-  virtual int blocksize() const;
+  virtual std::size_t size() const;
+  virtual std::size_t blocksize() const;
 
   /// Returns the x data
-  virtual MantidVec& dataX(int const index);
+  virtual MantidVec& dataX(std::size_t const index);
   /// Returns the y data
-  virtual MantidVec& dataY(int const index);
+  virtual MantidVec& dataY(std::size_t const index);
   /// Returns the error data
-  virtual MantidVec& dataE(int const index);
+  virtual MantidVec& dataE(std::size_t const index);
   /// Returns the x error data
-  virtual MantidVec& dataDx(int const index);
+  virtual MantidVec& dataDx(std::size_t const index);
   /// Returns the x data const
-  virtual const MantidVec& dataX(int const index) const;
+  virtual const MantidVec& dataX(std::size_t const index) const;
   /// Returns the y data const
-  virtual const MantidVec& dataY(int const index) const;
+  virtual const MantidVec& dataY(std::size_t const index) const;
   /// Returns the error const
-  virtual const MantidVec& dataE(int const index) const;
+  virtual const MantidVec& dataE(std::size_t const index) const;
   /// Returns the x error const
-  virtual const MantidVec& dataDx(int const index) const;
+  virtual const MantidVec& dataDx(std::size_t const index) const;
 
   /// Returns a pointer to the x data
-  virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
+  virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
 
   /** sets the monitorWorkspace indexlist
 	@param mList :: a vector holding the monitor workspace indexes
   */
-  void setMonitorList(std::vector<int>& mList){m_monitorList=mList;}
+  void setMonitorList(std::vector<int64_t>& mList){m_monitorList=mList;}
 
    /** sets the number of histograms.This method is mainly useful when the user selects 
    monitor 'select' or 'exclude' options from loadraw UI
 	@param nhistograms :: is the number of histograms
   */
-  void sethistogramNumbers(const int &nhistograms ){m_noVectors=nhistograms;}
- 
+  void sethistogramNumbers(const int64_t &nhistograms ){m_noVectors=static_cast<std::size_t>(nhistograms);}
+  void sethistogramNumbers(const std::size_t &nhistograms ){m_noVectors=nhistograms;}
+
 protected:
   /// The number of vectors in the workspace
-  int m_noVectors;
+  std::size_t m_noVectors;
   /// a vector holding monitors in the workspace
-  std::vector<int> m_monitorList;
+  std::vector<int64_t> m_monitorList;
 
-  virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+  virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
 
   /// A vector that holds the 1D histograms
   std::vector<Histogram1D> data;
@@ -129,7 +130,7 @@ private:
   /// Private copy assignment operator. NO ASSIGNMENT ALLOWED
   Workspace2D& operator=(const Workspace2D&);
 
-  virtual int getHistogramNumberHelper() const;
+  virtual std::size_t getHistogramNumberHelper() const;
 
   /// Static reference to the logger class
   static Kernel::Logger &g_log;

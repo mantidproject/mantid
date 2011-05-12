@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -74,12 +75,12 @@ private:
   void init();
   void exec();
   
-  void getGeometry(API::MatrixWorkspace_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
-  std::vector<int> getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int specNum1, int specNum2) const;
+  void getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, int64_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const;
+  std::vector<int64_t> getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int64_t specNum1, int64_t specNum2) const;
   double timeToFly(double s, double E_KE) const;
-  double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime);
-  void extractSpec(int specInd, double start, double end);
-  void getPeakEstimates(double &height, int &centreInd, double &background) const;
+  double getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int64_t monitIn, const double peakTime);
+  void extractSpec(int64_t specInd, double start, double end);
+  void getPeakEstimates(double &height, int64_t &centreInd, double &background) const;
   double findHalfLoc(MantidVec::size_type startInd, const double height, const double noise, const direction go) const;
   double neutron_E_At(double speed) const;
   void advanceProgress(double toAdd);
@@ -91,7 +92,7 @@ private:
   /// ignore peaks where the half width times the ratio of the peak height to the background is less this 
   static const double PEAK_THRESH_A;
   /// for peaks where the distance to the half heigth is less than this number of bins in either direction e.g. the FWHM is less than twice this number
-  static const int PEAK_THRESH_W;
+  static const int64_t PEAK_THRESH_W;
 
   // for estimating algorithm progress
   static const double CROP;                                ///< fraction of algorithm time taken up with running CropWorkspace

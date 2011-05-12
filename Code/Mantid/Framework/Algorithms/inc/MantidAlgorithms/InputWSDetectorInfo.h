@@ -3,6 +3,7 @@
 
 #include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -48,10 +49,10 @@ namespace Mantid
     {
     public:
       explicit InputWSDetectorInfo(API::MatrixWorkspace_sptr input);
-      bool aDetecIsMaskedinSpec(int SpecIndex) const;
-      void maskAllDetectorsInSpec(int SpecIndex);
-      int getSpecNum(int SpecIndex) const;
-      std::vector<int> getDetectors(int SpecIndex) const;
+      bool aDetecIsMaskedinSpec(int64_t SpecIndex) const;
+      void maskAllDetectorsInSpec(int64_t SpecIndex);
+      int64_t getSpecNum(int64_t SpecIndex) const;
+      std::vector<int64_t> getDetectors(int64_t SpecIndex) const;
     protected:
       /// a pointer the workspace with the detector information
       const API::MatrixWorkspace_sptr m_Input;

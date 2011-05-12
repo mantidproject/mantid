@@ -332,11 +332,11 @@ std::string FileProperty::convertExtension(const std::string & filepath) const
     int c = static_cast<int>(ext[i]);
     if( std::islower(c) )
     {
-      ext[i] = std::toupper(c);
+      ext[i] = static_cast<char>(std::toupper(c));
     }
     else if( std::isupper(c) )
     {
-      ext[i] = std::tolower(c);
+      ext[i] = static_cast<char>(std::tolower(c));
     }
     else {}
   }

@@ -6,6 +6,7 @@
 #include "MantidDataObjects/ManagedWorkspace2D.h"
 
 using Mantid::MantidVec;
+using std::size_t;
 
 class ManagedWorkspace2DTest : public CxxTest::TestSuite
 {
@@ -15,27 +16,37 @@ public:
 
   ManagedWorkspace2DTest()
   {
+    std::cout << "01:" << std::endl; // REMOVE
     smallWorkspace.setTitle("ManagedWorkspace2DTest_smallWorkspace");
+    std::cout << "02:" << std::endl; // REMOVE
     smallWorkspace.initialize(2,4,3);
-    for (int i = 0; i < 4; ++i)
+    std::cout << "03:" << std::endl; // REMOVE
+    for (size_t i = 0; i < 4; ++i)
     {
+      std::cout << "a:" << i << std::endl;
       smallWorkspace.dataX(0)[i] = i;
+      std::cout << "b:" << std::endl;
       smallWorkspace.dataX(1)[i] = i+4;
     }
+    std::cout << "04:" << std::endl; // REMOVE
     
-    for (int i = 0; i < 3; ++i)
+    for (size_t i = 0; i < 3; ++i)
     {
-      smallWorkspace.dataY(0)[i] = i*10;
+      smallWorkspace.dataY(0)[i] = static_cast<double>(i*10);
       smallWorkspace.dataE(0)[i] = sqrt(smallWorkspace.dataY(0)[i]);
-      smallWorkspace.dataY(1)[i] = i*100;
+      smallWorkspace.dataY(1)[i] = static_cast<double>(i*100);
       smallWorkspace.dataE(1)[i] = sqrt(smallWorkspace.dataY(1)[i]);     
     }
     
+    std::cout << "05:" << std::endl; // REMOVE
     bigWorkspace.setTitle("ManagedWorkspace2DTest_bigWorkspace");
-    int nVec = 1250;
-    int vecLength = 25;
+    std::cout << "06:" << std::endl; // REMOVE
+    size_t nVec = 1250;
+    size_t vecLength = 25;
+    std::cout << "07:" << std::endl; // REMOVE
     bigWorkspace.initialize(nVec, vecLength, vecLength);
-    for (int i=0; i< nVec; i++)
+    std::cout << "08:" << std::endl; // REMOVE
+    for (size_t i=0; i< nVec; i++)
     {
       boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
       boost::shared_ptr<MantidVec > y1(new MantidVec(vecLength,5+i) );
@@ -43,6 +54,7 @@ public:
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
     }
+    std::cout << "09:" << std::endl; // REMOVE
   }
   
   void testInit()
@@ -54,7 +66,7 @@ public:
     TS_ASSERT_EQUALS( ws.blocksize(), 5 );;
     TS_ASSERT_EQUALS( ws.size(), 25 );;
 
-    for (int i = 0; i < 5; ++i)
+    for (size_t i = 0; i < 5; ++i)
     {
       TS_ASSERT_EQUALS( ws.dataX(i).size(), 5 );;
       TS_ASSERT_EQUALS( ws.dataY(i).size(), 5 );;
@@ -164,7 +176,7 @@ public:
     TS_ASSERT_THROWS( smallWorkspace.dataX(2), std::range_error );
     TS_ASSERT_EQUALS( x.size(), 4 );
     TS_ASSERT_EQUALS( xx.size(), 4 );
-    for (unsigned int i = 0; i < x.size(); ++i)
+    for (size_t i = 0; i < x.size(); ++i)
     {
       TS_ASSERT_EQUALS( x[i], i );
       TS_ASSERT_EQUALS( xx[i], i+4 );
@@ -178,7 +190,7 @@ public:
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataX(2), std::range_error );
     TS_ASSERT_EQUALS( xc.size(), 4 );
     TS_ASSERT_EQUALS( xxc.size(), 4 );
-    for (unsigned int i = 0; i < xc.size(); ++i)
+    for (size_t i = 0; i < xc.size(); ++i)
     {
       TS_ASSERT_EQUALS( xc[i], i );
       TS_ASSERT_EQUALS( xxc[i], i+4 );
@@ -200,7 +212,7 @@ public:
     TS_ASSERT_THROWS( smallWorkspace.dataY(2), std::range_error );
     TS_ASSERT_EQUALS( y.size(), 3 );
     TS_ASSERT_EQUALS( yy.size(), 3 );
-    for (unsigned int i = 0; i < y.size(); ++i)
+    for (size_t i = 0; i < y.size(); ++i)
     {
       TS_ASSERT_EQUALS( y[i], i*10 );
       TS_ASSERT_EQUALS( yy[i], i*100 );
@@ -214,7 +226,7 @@ public:
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataY(2), std::range_error );
     TS_ASSERT_EQUALS( yc.size(), 3 );
     TS_ASSERT_EQUALS( yyc.size(), 3 );
-    for (unsigned int i = 0; i < yc.size(); ++i)
+    for (size_t i = 0; i < yc.size(); ++i)
     {
       TS_ASSERT_EQUALS( yc[i], i*10 );
       TS_ASSERT_EQUALS( yyc[i], i*100 );
@@ -236,7 +248,7 @@ public:
     TS_ASSERT_THROWS( smallWorkspace.dataE(2), std::range_error );
     TS_ASSERT_EQUALS( e.size(), 3 );
     TS_ASSERT_EQUALS( ee.size(), 3 );
-    for (unsigned int i = 0; i < e.size(); ++i)
+    for (size_t i = 0; i < e.size(); ++i)
     {
       TS_ASSERT_EQUALS( e[i], sqrt(i*10.0) );
       TS_ASSERT_EQUALS( ee[i], sqrt(i*100.0) );
@@ -250,7 +262,7 @@ public:
     TS_ASSERT_THROWS( const MantidVec v = constRefToData.dataE(2), std::range_error );
     TS_ASSERT_EQUALS( ec.size(), 3 );
     TS_ASSERT_EQUALS( eec.size(), 3 );
-    for (unsigned int i = 0; i < ec.size(); ++i)
+    for (size_t i = 0; i < ec.size(); ++i)
     {
       TS_ASSERT_EQUALS( ec[i], sqrt(i*10.0) );
       TS_ASSERT_EQUALS( eec[i], sqrt(i*100.0) );

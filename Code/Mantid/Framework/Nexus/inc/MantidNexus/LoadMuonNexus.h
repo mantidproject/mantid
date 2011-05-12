@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidDataObjects/Workspace2D.h"
 #include "MantidAPI/IDataFileChecker.h"
+#include "MantidKernel/System.h"
 #include <napi.h>
 //----------------------------------------------------------------------
 // Forward declaration
@@ -93,24 +94,24 @@ namespace Mantid
       std::string m_samplename;
 
       /// The number of the input entry
-      int m_entrynumber;
+      int64_t m_entrynumber;
      
       /// The number of spectra in the raw file
-      int m_numberOfSpectra;
+      int64_t m_numberOfSpectra;
       /// The number of periods in the raw file
-      int m_numberOfPeriods;
+      int64_t m_numberOfPeriods;
       /// Has the spectrum_list property been set?
       bool m_list;
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
+      std::vector<int64_t> m_spec_list;
       /// The value of the spectrum_min property
-      int m_spec_min;
+      int64_t m_spec_min;
       /// The value of the spectrum_max property
-      int m_spec_max;
+      int64_t m_spec_max;
       /// The group which each detector belongs to in order
-      std::vector<int> m_groupings;
+      std::vector<int64_t> m_groupings;
 
     private:
       /// Sets documentation strings for this algorithm
@@ -118,7 +119,7 @@ namespace Mantid
       /// Overwrites Algorithm method.
       void init();
       
-      void loadData(const MantidVecPtr::ptr_type&,int, int&, MuonNexusReader& , const int, DataObjects::Workspace2D_sptr );
+      void loadData(const MantidVecPtr::ptr_type&,int64_t, int64_t&, MuonNexusReader& , const int64_t, DataObjects::Workspace2D_sptr );
       void runLoadInstrumentFromNexus(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
       void runLoadLog(DataObjects::Workspace2D_sptr);

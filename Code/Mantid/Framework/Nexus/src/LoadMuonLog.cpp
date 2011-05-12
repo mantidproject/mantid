@@ -138,7 +138,7 @@ std::string LoadMuonLog::stringToLower(std::string strToConvert)
 {
   for(unsigned int i=0;i<strToConvert.length();i++)
   {
-    strToConvert[i] = tolower(strToConvert[i]);
+    strToConvert[i] = static_cast<char>(tolower(strToConvert[i]));
   }
   return strToConvert; //return the converted string
 }

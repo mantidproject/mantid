@@ -343,7 +343,7 @@ private:
     //there being only one or zero histograms is accepted as not being an error
     if ( !value->blocksize() || value->getNumberHistograms() < 2) return "";
     //otherwise will compare some of the data, to save time just check two the first and the last
-    const int lastSpec = value->getNumberHistograms() - 1;
+    const size_t lastSpec = value->getNumberHistograms() - 1;
     // Quickest check is to see if they are actually the same vector
     if ( &(value->readX(0)[0]) == &(value->readX(lastSpec)[0]) ) return "";
     // Now check numerically

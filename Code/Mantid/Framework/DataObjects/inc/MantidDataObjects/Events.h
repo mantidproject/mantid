@@ -163,8 +163,10 @@ public:
   WeightedEvent(double time_of_flight);
 
   /// Constructor, full
+  WeightedEvent(double time_of_flight, const Mantid::Kernel::DateAndTime pulsetime, double weight, double errorSquared);
   WeightedEvent(double time_of_flight, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared);
 
+  WeightedEvent(const TofEvent&, double weight, double errorSquared);
   WeightedEvent(const TofEvent&, float weight, float errorSquared);
 
   WeightedEvent(const WeightedEvent&);
@@ -216,13 +218,6 @@ public:
 #pragma pack(pop)
 
 
-
-
-
-
-
-
-
 //==========================================================================================
 /** Info about a single neutron detection event, including a weight and error value,
  * but excluding the pulsetime to save memory:
@@ -255,10 +250,13 @@ public:
   WeightedEventNoTime(double time_of_flight);
 
   /// Constructor, full
+  WeightedEventNoTime(double time_of_flight, double weight, double errorSquared);
   WeightedEventNoTime(double time_of_flight, float weight, float errorSquared);
 
+  WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime, double weight, double errorSquared);
   WeightedEventNoTime(double tof, const Mantid::Kernel::DateAndTime pulsetime, float weight, float errorSquared);
 
+  WeightedEventNoTime(const TofEvent&, double weight, double errorSquared);
   WeightedEventNoTime(const TofEvent&, float weight, float errorSquared);
 
   WeightedEventNoTime(const WeightedEventNoTime&);

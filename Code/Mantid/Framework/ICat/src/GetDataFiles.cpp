@@ -14,6 +14,7 @@ namespace Mantid
   {
     using namespace Kernel;
     using namespace API;
+    using std::size_t;
 
     DECLARE_ALGORITHM(CGetDataFiles)
 
@@ -27,9 +28,9 @@ namespace Mantid
     /// Initialising the algorithm
     void CGetDataFiles::init()
     {
-      BoundedValidator<long long>* mustBePositive = new BoundedValidator<long long>();
+      BoundedValidator<size_t>* mustBePositive = new BoundedValidator<size_t>();
       mustBePositive->setLower(0);
-      declareProperty<long long>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
+      declareProperty<size_t>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
 
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace to store the file data search details");
@@ -55,7 +56,7 @@ namespace Mantid
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
 
-      long long investigationId = getProperty("InvestigationId");
+      size_t investigationId = getProperty("InvestigationId");
       bool bfiletrLog =getProperty("FilterLogFiles");
 
       API::ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");

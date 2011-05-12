@@ -1,4 +1,5 @@
 #include "MantidKernel/PropertyWithValue.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -12,10 +13,14 @@ template DLLExport class PropertyWithValue<bool>;
 template DLLExport class PropertyWithValue<double>;
 template DLLExport class PropertyWithValue<std::string>;
 
-template DLLExport class PropertyWithValue<std::vector<int> >;
 template DLLExport class PropertyWithValue<std::vector<double> >;
 template DLLExport class PropertyWithValue<std::vector<std::string> >;
-template DLLExport class PropertyWithValue<std::vector<long long> >;
+template DLLExport class PropertyWithValue<std::vector<uint16_t> >;
+template DLLExport class PropertyWithValue<std::vector<int16_t> >;
+template DLLExport class PropertyWithValue<std::vector<uint32_t> >;
+template DLLExport class PropertyWithValue<std::vector<int32_t> >;
+template DLLExport class PropertyWithValue<std::vector<uint64_t> >;
+template DLLExport class PropertyWithValue<std::vector<int64_t> >;
 
 /// @endcond
 

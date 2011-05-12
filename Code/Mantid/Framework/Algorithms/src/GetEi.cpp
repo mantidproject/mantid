@@ -33,7 +33,7 @@ using namespace Geometry;
 const double GetEi::HALF_WINDOW = 8.0/100;
 const double GetEi::PEAK_THRESH_H = 3.0;
 const double GetEi::PEAK_THRESH_A = 5.0;
-const int GetEi::PEAK_THRESH_W = 3;
+const int64_t GetEi::PEAK_THRESH_W = 3;
 
 // progress estimates
 const double GetEi::CROP = 0.15;
@@ -86,8 +86,8 @@ void GetEi::init()
 void GetEi::exec()
 {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const int mon1Spec = getProperty("Monitor1Spec");
-  const int mon2Spec = getProperty("Monitor2Spec");
+  const int64_t mon1Spec = getProperty("Monitor1Spec");
+  const int64_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
   getGeometry(inWS, mon1Spec, mon2Spec, dist2moni0, dist2moni1);
 
@@ -101,7 +101,7 @@ void GetEi::exec()
   g_log.information() << "Based on the user selected energy the second peak will be searched for at TOF " << peakLoc1 << " micro seconds +/-" << boost::lexical_cast<std::string>(100.0*HALF_WINDOW) << "%\n";
 
     // get the histograms created by the monitors
-  std::vector<int> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
+  std::vector<int64_t> indexes = getMonitorSpecIndexs(inWS, mon1Spec, mon2Spec);
 
   g_log.information() << "Looking for a peak in the first monitor spectrum, spectra index " << indexes[0] << std::endl;
   double t_monitor0 = getPeakCentre(inWS, indexes[0], peakLoc0);
@@ -130,12 +130,12 @@ void GetEi::exec()
 *  @throw NotFoundError if no detector is found for the detector ID given
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int mon0Spec, int mon1Spec, double &monitor0Dist, double &monitor1Dist) const
+void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, int64_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
   // retrieve a pointer to the first detector and get its distance
-  std::vector<int> dets = WS->spectraMap().getDetectors(mon0Spec);
+  std::vector<int64_t> dets = WS->spectraMap().getDetectors(mon0Spec);
   if ( dets.size() != 1 )
   {
     g_log.error() << "The detector for spectrum number " << mon0Spec << " was either not found or is a group, grouped monitors are not supported by this algorithm\n";
@@ -163,12 +163,12 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int mon0Spec, int mo
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<int> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int specNum1, int specNum2) const
+std::vector<int64_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int64_t specNum1, int64_t specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
-  std::vector<int> specInds;
+  std::vector<int64_t> specInds;
   
   // get the index number of the histogram for the first monitor
-  std::vector<int> specNumTemp(&specNum1, &specNum1+1);
+  std::vector<int64_t> specNumTemp(&specNum1, &specNum1+1);
   WS->getIndicesFromSpectra(specNumTemp, specInds);
   if ( specInds.size() != 1 )
   {// the monitor spectrum isn't present in the workspace, we can't continue from here
@@ -177,7 +177,7 @@ std::vector<int> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS,
   }
 
   // nowe the second monitor
-  std::vector<int> specIndexTemp;
+  std::vector<int64_t> specIndexTemp;
   specNumTemp[0] = specNum2;
   WS->getIndicesFromSpectra(specNumTemp, specIndexTemp);
   if ( specIndexTemp.size() != 1 )
@@ -217,7 +217,7 @@ double GetEi::timeToFly(double s, double E_KE) const
 *  @throw out_of_range if the peak runs off the edge of the histogram
 *  @throw runtime_error a sub-algorithm just falls over
 */
-double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitIn, const double peakTime)
+double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int64_t monitIn, const double peakTime)
 {
   const MantidVec& timesArray = WS->readX(monitIn);
   // we search for the peak only inside some window because there are often more peaks in the monitor histogram
@@ -230,7 +230,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitI
   advanceProgress(GET_COUNT_RATE);
 
   // to store fit results
-  int centreGausInd;
+  int64_t centreGausInd;
   double height, backGroundlev;
   getPeakEstimates(height, centreGausInd, backGroundlev);
   // look out for user cancel messgages
@@ -252,7 +252,7 @@ double GetEi::getPeakCentre(API::MatrixWorkspace_const_sptr WS, const int monitI
 *  @throw runtime_error if the algorithm just falls over
 *  @throw invalid_argument if the input workspace does not have common binning
 */
-void GetEi::extractSpec(int specInd, double start, double end)
+void GetEi::extractSpec(int64_t specInd, double start, double end)
 {
   IAlgorithm_sptr childAlg =
     createSubAlgorithm("CropWorkspace", 100*m_fracCompl, 100*(m_fracCompl+CROP) );
@@ -281,7 +281,7 @@ void GetEi::extractSpec(int specInd, double start, double end)
 * @param background :: passed value ignored set mean number of counts per bin in the spectrum
 * @throw invalid_argument if the peak is not clearly above the background
 */
-void GetEi::getPeakEstimates(double &height, int &centreInd, double &background) const
+void GetEi::getPeakEstimates(double &height, int64_t &centreInd, double &background) const
 {
   // take note of the number of background counts as error checking, do we have a peak or just a bump in the background
   background = 0;
@@ -299,7 +299,7 @@ void GetEi::getPeakEstimates(double &height, int &centreInd, double &background)
     }
   }
   
-  background = background/m_tempWS->readY(0).size();
+  background = background/static_cast<double>(m_tempWS->readY(0).size());
   if ( height < PEAK_THRESH_H*background )
   {
     throw std::invalid_argument("No peak was found or its height is less than the threshold of " + boost::lexical_cast<std::string>(PEAK_THRESH_H) + " times the mean background, was the energy estimate (" + getPropertyValue("EnergyEstimate") + " meV) close enough?");
@@ -335,13 +335,13 @@ double GetEi::findHalfLoc(MantidVec::size_type startInd, const double height, co
     }
   }
 
-  if ( std::abs(static_cast<int>(endInd - startInd)) < PEAK_THRESH_W )
+  if ( std::abs(static_cast<int64_t>(endInd - startInd)) < PEAK_THRESH_W )
   {// we didn't find a significant peak
     g_log.error() << "Likely precision problem or error, one half height distance is less than the threshold number of bins from the central peak: " << std::abs(static_cast<int>(endInd - startInd)) << "<" << PEAK_THRESH_W << ". Check the monitor peak\n";
   }
   // we have a peak in range, do an area check to see if the peak has any significance
   double hOverN = (height-noise)/noise;
-  if ( hOverN < PEAK_THRESH_A && std::abs(hOverN*(endInd - startInd)) < PEAK_THRESH_A )
+  if ( hOverN < PEAK_THRESH_A && std::abs(hOverN*static_cast<double>(endInd - startInd)) < PEAK_THRESH_A )
   {// the peak could just be noise on the background, ignore it
     throw std::invalid_argument("No good peak was found. The ratio of the height to the background multiplied either half widths must be above the threshold (>" + boost::lexical_cast<std::string>(PEAK_THRESH_A) + " bins). Was the energy estimate close enough?");
   }

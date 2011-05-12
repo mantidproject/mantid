@@ -21,13 +21,14 @@ namespace Mantid
 namespace DataObjects
 {
 
+using std::size_t;
 
 // Get a reference to the logger
 Kernel::Logger& AbsManagedWorkspace2D::g_log = Kernel::Logger::get("AbsManagedWorkspace2D");
 
 
 /// Constructor
-AbsManagedWorkspace2D::AbsManagedWorkspace2D(int NBlocks) :
+AbsManagedWorkspace2D::AbsManagedWorkspace2D(size_t NBlocks) :
 Workspace2D(), m_bufferedData(NBlocks)
 {
 }
@@ -39,7 +40,7 @@ Workspace2D(), m_bufferedData(NBlocks)
 *  @param YLength :: The number of data/error points in each vector (must all be the same)
 *  @throw std::runtime_error if unable to open a temporary file
 */
-void AbsManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
+void AbsManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
 {
   m_noVectors = NVectors;
   m_axes.resize(2);
@@ -62,13 +63,13 @@ AbsManagedWorkspace2D::~AbsManagedWorkspace2D()
 }
 
 /// Get pseudo size
-int AbsManagedWorkspace2D::size() const
+size_t AbsManagedWorkspace2D::size() const
 {
   return m_noVectors * blocksize();
 }
 
 /// Get the size of each vector
-int AbsManagedWorkspace2D::blocksize() const
+size_t AbsManagedWorkspace2D::blocksize() const
 {
   return (m_noVectors > 0) ? static_cast<int>(m_YLength) : 0;
 }
@@ -77,9 +78,9 @@ int AbsManagedWorkspace2D::blocksize() const
 *  @param histnumber :: Index of the histogram to be set
 *  @param PA :: The data to enter
 */
-void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr& PA)
+void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr& PA)
 {
-  if ( histnumber<0 || histnumber>=m_noVectors )
+  if ( histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
 
   getDataBlock(histnumber)->setX(histnumber, PA);
@@ -90,9 +91,9 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr& PA)
 *  @param histnumber :: Index of the histogram to be set
 *  @param Vec :: The data to enter
 */
-void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr::ptr_type& Vec)
+void AbsManagedWorkspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec)
 {
-  if ( histnumber<0 || histnumber>=m_noVectors )
+  if ( histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setX, histogram number out of range");
 
   getDataBlock(histnumber)->setX(histnumber, Vec);
@@ -103,9 +104,9 @@ void AbsManagedWorkspace2D::setX(const int histnumber, const MantidVecPtr::ptr_t
 *  @param histnumber :: Index of the histogram to be set
 *  @param PY :: The data to enter
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY)
+void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY)
 {
-  if ( histnumber<0 || histnumber>=m_noVectors )
+  if ( histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY);
@@ -117,10 +118,10 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY
 *  @param PY :: The data to enter
 *  @param PE :: The corresponding errors
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY,
+void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr& PY,
                                     const MantidVecPtr& PE)
 {
-  if ( histnumber<0 || histnumber>=m_noVectors )
+  if ( histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE);
@@ -132,10 +133,10 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr& PY
 *  @param PY :: The data to enter
 *  @param PE :: The corresponding errors
 */
-void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr::ptr_type& PY,
+void AbsManagedWorkspace2D::setData(const size_t histnumber, const MantidVecPtr::ptr_type& PY,
                                     const MantidVecPtr::ptr_type& PE)
 {
-  if ( histnumber<0 || histnumber>=m_noVectors )
+  if ( histnumber>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::setData, histogram number out of range");
 
   getDataBlock(histnumber)->setData(histnumber, PY, PE);
@@ -146,9 +147,9 @@ void AbsManagedWorkspace2D::setData(const int histnumber, const MantidVecPtr::pt
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the x data
 */
-MantidVec& AbsManagedWorkspace2D::dataX(const int index)
+MantidVec& AbsManagedWorkspace2D::dataX(const size_t index)
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
 
   return getDataBlock(index)->dataX(index);
@@ -158,9 +159,9 @@ MantidVec& AbsManagedWorkspace2D::dataX(const int index)
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the y data
 */
-MantidVec& AbsManagedWorkspace2D::dataY(const int index)
+MantidVec& AbsManagedWorkspace2D::dataY(const size_t index)
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
 
   return getDataBlock(index)->dataY(index);
@@ -170,9 +171,9 @@ MantidVec& AbsManagedWorkspace2D::dataY(const int index)
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the error data
 */
-MantidVec& AbsManagedWorkspace2D::dataE(const int index)
+MantidVec& AbsManagedWorkspace2D::dataE(const size_t index)
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
 
   return getDataBlock(index)->dataE(index);
@@ -182,9 +183,9 @@ MantidVec& AbsManagedWorkspace2D::dataE(const int index)
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the x data
 */
-const MantidVec& AbsManagedWorkspace2D::dataX(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataX(const size_t index) const
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataX(index);
@@ -194,9 +195,9 @@ const MantidVec& AbsManagedWorkspace2D::dataX(const int index) const
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the y data
 */
-const MantidVec& AbsManagedWorkspace2D::dataY(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataY(const size_t index) const
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataY, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataY(index);
@@ -206,17 +207,17 @@ const MantidVec& AbsManagedWorkspace2D::dataY(const int index) const
 *  @param index :: The number of the histogram
 *  @return A vector of doubles containing the error data
 */
-const MantidVec& AbsManagedWorkspace2D::dataE(const int index) const
+const MantidVec& AbsManagedWorkspace2D::dataE(const size_t index) const
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataE, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->dataE(index);
 }
 
-Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const int index) const
+Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const size_t index) const
 {
-  if ( index<0 || index>=m_noVectors )
+  if ( index>=m_noVectors )
     throw std::range_error("AbsManagedWorkspace2D::dataX, histogram number out of range");
 
   return const_cast<const ManagedDataBlock2D*>(getDataBlock(index))->refX(index);
@@ -227,7 +228,7 @@ Kernel::cow_ptr<MantidVec> AbsManagedWorkspace2D::refX(const int index) const
  *  being virtual so it now just calls this private (and virtual) method which does the work.
  *  @return the number of histograms associated with the workspace
  */
-int AbsManagedWorkspace2D::getHistogramNumberHelper() const
+size_t AbsManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;
 }
@@ -237,9 +238,11 @@ int AbsManagedWorkspace2D::getHistogramNumberHelper() const
 *  @return A pointer to the data block containing the index requested
 */
 // not really a const method, but need to pretend it is so that const data getters can call it
-ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const int index) const
+ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const size_t index) const
 {
-  int startIndex = index - ( index%m_vectorsPerBlock );
+  std::cout << "AbsManagedWorkspace2d::getDataBlock(" << index << ")" << std::endl; // REMOVE
+  size_t startIndex = index - ( index%m_vectorsPerBlock );
+  std::cout << "   startIndex = " << startIndex << std::endl; // REMOVE
 
   // Look to see if the data block is already buffered
   ManagedDataBlock2D *existingBlock =  m_bufferedData.find(startIndex);

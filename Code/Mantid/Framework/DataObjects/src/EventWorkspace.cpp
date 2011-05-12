@@ -24,6 +24,7 @@ namespace DataObjects
   DECLARE_WORKSPACE(EventWorkspace)
 
   using Kernel::Exception::NotImplementedError;
+  using std::size_t;
   using namespace Mantid::Kernel;
 
   // get a reference to the logger
@@ -72,7 +73,7 @@ namespace DataObjects
   {
     //Return false if ANY event list is not sorted. You can't have 2 threads trying to sort the
     //  same event list simultaneously.
-    for (int i=0; i<static_cast<int>(data.size()); i++)
+    for (size_t i=0; i<data.size(); i++)
       if (!data[i]->isSortedByTof())
         return false;
     return true;
@@ -86,7 +87,7 @@ namespace DataObjects
     *  @param XLength :: The number of X data points/bin boundaries in each vector (ignored)
     *  @param YLength :: The number of data/error points in each vector (ignored)
    */
-  void EventWorkspace::init(const int &NVectors, const int &XLength, const int &YLength)
+  void EventWorkspace::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
   {
     (void) YLength; //Avoid compiler warning
 
@@ -100,7 +101,7 @@ namespace DataObjects
     m_noVectors = NVectors;
     data.resize(m_noVectors, NULL);
     //Make sure SOMETHING exists for all initialized spots.
-    for (int i=0; i < m_noVectors; i++)
+    for (size_t i=0; i < m_noVectors; i++)
       data[i] = new EventList();
     this->done_loading_data = false;
 
@@ -127,7 +128,7 @@ namespace DataObjects
    *          Default: -1, meaning copy all.
    *
    */
-  void EventWorkspace::copyDataFrom(const EventWorkspace& source, int sourceStartWorkspaceIndex, int sourceEndWorkspaceIndex)
+  void EventWorkspace::copyDataFrom(const EventWorkspace& source, size_t sourceStartWorkspaceIndex, size_t sourceEndWorkspaceIndex)
   {
     //Start with nothing.
     this->clearData(); //properly de-allocates memory!
@@ -137,11 +138,11 @@ namespace DataObjects
     EventListVector::iterator it;
     EventListVector::iterator it_start = source_data.begin();
     EventListVector::iterator it_end = source_data.end();
-    int source_data_size = static_cast<int>(source_data.size());
+    size_t source_data_size = source_data.size();
 
+    // TODO the new default values may be doing the wrong thing now.
     //Do we copy only a range?
-    if ((sourceStartWorkspaceIndex >=0) && (sourceStartWorkspaceIndex < source_data_size)
-        && (sourceEndWorkspaceIndex >= 0) && (sourceEndWorkspaceIndex < source_data_size)
+    if ((sourceStartWorkspaceIndex < source_data_size) && (sourceEndWorkspaceIndex < source_data_size)
         && (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex))
     {
       it_start = source_data.begin() + sourceStartWorkspaceIndex;
@@ -168,7 +169,7 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /// The total size of the workspace
   /// @returns the number of single indexable items in the workspace
-  int EventWorkspace::size() const
+  size_t EventWorkspace::size() const
   {
     return this->data.size() * this->blocksize();
   }
@@ -176,7 +177,7 @@ namespace DataObjects
   //-----------------------------------------------------------------------------
   /// Get the blocksize, aka the number of bins in the histogram
   /// @returns the number of bins in the Y data
-  int EventWorkspace::blocksize() const
+  size_t EventWorkspace::blocksize() const
   {
     // Pick the first pixel to find the blocksize.
     EventListVector::const_iterator it = data.begin();
@@ -194,7 +195,7 @@ namespace DataObjects
   /** Get the number of histograms, usually the same as the number of pixels or detectors. 
   @returns the number of histograms / event lists
   */
-  int EventWorkspace::getNumberHistograms() const
+  size_t EventWorkspace::getNumberHistograms() const
   {
     return this->data.size();
   }
@@ -299,7 +300,7 @@ namespace DataObjects
    * Only used in tests. It only returns the 0-th MRU list size.
    * @return :: number of entries in the MRU list.
    */
-  int EventWorkspace::MRUSize() const
+  size_t EventWorkspace::MRUSize() const
   {
     return this->m_bufferedDataY[0]->size();
   }
@@ -336,7 +337,7 @@ namespace DataObjects
   void EventWorkspace::clearData()
   {
     m_noVectors = data.size();
-    for (int i=0; i < m_noVectors; i++)
+    for (size_t i=0; i < m_noVectors; i++)
     {
       if (data[i])
         delete data[i];
@@ -380,7 +381,7 @@ namespace DataObjects
    * @param pixelID :: pixelID of this event list. This is not necessarily the same as the workspace Index.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventListAtPixelID(const int pixelID)
+  EventList& EventWorkspace::getEventListAtPixelID(const int64_t pixelID)
   {
     if (this->done_loading_data)
       throw std::runtime_error("EventWorkspace::getEventListAtPixelID called after doneLoadingData(). Try getEventList() instead.");
@@ -408,7 +409,7 @@ namespace DataObjects
    * @param workspace_index :: The histogram workspace index number.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventList(const int workspace_index)
+  EventList& EventWorkspace::getEventList(const size_t workspace_index)
   {
     EventList * result = data[workspace_index];
     if (!result)
@@ -422,7 +423,7 @@ namespace DataObjects
    * @param workspace_index :: The workspace index number.
    * @returns A const reference to the eventlist
    */
-  const EventList& EventWorkspace::getEventList(const int workspace_index) const
+  const EventList& EventWorkspace::getEventList(const size_t workspace_index) const
   {
     EventList * result = data[workspace_index];
     if (!result)
@@ -434,7 +435,7 @@ namespace DataObjects
 
   //-----------------------------------------------------------------------------
   /// Get an EventList pointer at the given workspace index number
-  EventList * EventWorkspace::getEventListPtr(const int workspace_index)
+  EventList * EventWorkspace::getEventListPtr(const size_t workspace_index)
   {
     return data[workspace_index];
   }
@@ -449,16 +450,13 @@ namespace DataObjects
    * @param workspace_index :: The workspace index number.
    * @return An event list (new or existing) at the index provided
    */
-  EventList& EventWorkspace::getOrAddEventList(const int workspace_index)
+  EventList& EventWorkspace::getOrAddEventList(const size_t workspace_index)
     {
-    if (workspace_index < 0)
-      throw std::invalid_argument("EventWorkspace::getOrAddEventList: workspace_index < 0 is not valid.");
-
-    int old_size = static_cast<int>(data.size());
+      size_t old_size = data.size();
     if (workspace_index >= old_size)
     {
       //Increase the size of the eventlist lists.
-      for (int wi = old_size; wi <= workspace_index; wi++)
+      for (size_t wi = old_size; wi <= workspace_index; wi++)
       {
         //Need to make a new one!
         EventList * newel = new EventList();
@@ -490,8 +488,8 @@ namespace DataObjects
   void EventWorkspace::padPixels(bool parallel)
   {
     //Build a vector with the pixel IDs in order; skipping the monitors
-    std::vector<int> pixelIDs = this->getInstrument()->getDetectorIDs(true);
-    int numpixels = pixelIDs.size();
+    std::vector<int64_t> pixelIDs = this->getInstrument()->getDetectorIDs(true);
+    size_t numpixels = pixelIDs.size();
 
     //Remove all old EventLists and resize the vector to hold everything
     this->clearData();
@@ -500,7 +498,7 @@ namespace DataObjects
 
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
-    for (int i = 0; i < numpixels; i++)
+    for (int64_t i = 0; i < numpixels; i++)
     {
       //Create an event list for here
       EventList * newel = new EventList();
@@ -536,7 +534,7 @@ namespace DataObjects
     myMap.clear();
 
     //Go through all the spectra
-    for (int wi=0; wi<this->m_noVectors; wi++)
+    for (size_t wi=0; wi<this->m_noVectors; wi++)
     {
       //And copy over the set of detector IDs. Not the smartest way to do it, but we are kinda stuck.
       myMap.addSpectrumEntries(wi, this->data[wi]->getDetectorIDs() );
@@ -633,9 +631,9 @@ namespace DataObjects
   /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataX(const int index)
+  MantidVec& EventWorkspace::dataX(const size_t index)
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
   }
@@ -644,9 +642,9 @@ namespace DataObjects
   /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataDx(const int index)
+  MantidVec& EventWorkspace::dataDx(const size_t index)
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
     return this->data[index]->dataDx();
   }
@@ -655,9 +653,9 @@ namespace DataObjects
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataY(const int index)
+  MantidVec& EventWorkspace::dataY(const size_t index)
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
     throw NotImplementedError("EventWorkspace::dataY cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
@@ -666,15 +664,12 @@ namespace DataObjects
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
   /// @returns A reference to the vector of binned error values
-  MantidVec& EventWorkspace::dataE(const int index)
+  MantidVec& EventWorkspace::dataE(const size_t index)
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
     throw NotImplementedError("EventWorkspace::dataE cannot return a non-const array: you can't modify the histogrammed data in an EventWorkspace!");
   }
-
-
-
 
   //-----------------------------------------------------------------------------
   // --- Const Data Access ----
@@ -684,14 +679,11 @@ namespace DataObjects
   /** This function makes sure that there are enough data
    * buffers (MRU's) for E for the number of threads requested.
    */
-  void EventWorkspace::ensureEnoughBuffersE(int thread_num) const
+  void EventWorkspace::ensureEnoughBuffersE(size_t thread_num) const
   {
-    if (thread_num < 0)
-      throw std::runtime_error("EventWorkspace::ensureEnoughBuffersE() called with a negative thread number.");
-
     PARALLEL_CRITICAL(EventWorkspace_MRUE_access)
     {
-      if (static_cast<int>(m_bufferedDataE.size()) <= thread_num)
+      if (m_bufferedDataE.size() <= thread_num)
       {
         m_bufferedDataE.resize(thread_num+1);
         for (size_t i=0; i < m_bufferedDataE.size(); i++)
@@ -708,14 +700,11 @@ namespace DataObjects
   /** This function makes sure that there are enough data
    * buffers (MRU's) for Y for the number of threads requested.
    */
-  void EventWorkspace::ensureEnoughBuffersY(int thread_num) const
+  void EventWorkspace::ensureEnoughBuffersY(size_t thread_num) const
   {
-    if (thread_num < 0)
-      throw std::runtime_error("EventWorkspace::ensureEnoughBuffersY() called with a negative thread number.");
-
     PARALLEL_CRITICAL(EventWorkspace_MRUY_access)
     {
-      if (static_cast<int>(m_bufferedDataY.size()) <= thread_num)
+      if (m_bufferedDataY.size() <= thread_num)
       {
         m_bufferedDataY.resize(thread_num+1);
         for (size_t i=0; i < m_bufferedDataY.size(); i++)
@@ -731,17 +720,17 @@ namespace DataObjects
 
   //---------------------------------------------------------------------------
   /// Return the const data X vector at a given workspace index
-  const MantidVec& EventWorkspace::dataX(const int index) const
+  const MantidVec& EventWorkspace::dataX(const size_t index) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataX, histogram number out of range");
     return this->data[index]->dataX();
   }
 
   /// Return the const data X error vector at a given workspace index
-  const MantidVec& EventWorkspace::dataDx(const int index) const
+  const MantidVec& EventWorkspace::dataDx(const size_t index) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataDx, histogram number out of range");
     return this->data[index]->dataDx();
   }
@@ -750,9 +739,9 @@ namespace DataObjects
 
   //---------------------------------------------------------------------------
   /// Return the const data Y vector at a given workspace index
-  const MantidVec& EventWorkspace::dataY(const int index) const
+  const MantidVec& EventWorkspace::dataY(const size_t index) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataY, histogram number out of range");
 
     // This is the thread number from which this function was called.
@@ -791,9 +780,9 @@ namespace DataObjects
 
   //---------------------------------------------------------------------------
   /// Return the const data E vector at a given workspace index
-  const MantidVec& EventWorkspace::dataE(const int index) const
+  const MantidVec& EventWorkspace::dataE(const size_t index) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::dataE, histogram number out of range");
 
     // This is the thread number from which this function was called.
@@ -837,9 +826,9 @@ namespace DataObjects
 
   //---------------------------------------------------------------------------
   /// Get a pointer to the x data at the given workspace index
-  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const int index) const
+  Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const size_t index) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::refX, histogram number out of range");
     return this->data[index]->getRefX();
   }
@@ -855,9 +844,9 @@ namespace DataObjects
    * @param[out] Y :: reference to the pointer to the const data vector
    * @param[out] E :: reference to the pointer to the const error vector
    */
-  void EventWorkspace::readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const
+  void EventWorkspace::readYE(size_t const index, MantidVec const*& Y, MantidVec const*& E) const
   {
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::readYE, histogram number out of range");
 
     // This is the thread number from which this function was called.
@@ -918,11 +907,11 @@ namespace DataObjects
    * @param index :: Workspace histogram index to set.
    * @param x :: The X vector of histogram bins to use.
    */
-  void EventWorkspace::setX(const int index, const Kernel::cow_ptr<MantidVec> &x)
+  void EventWorkspace::setX(const size_t index, const Kernel::cow_ptr<MantidVec> &x)
   {
     if (!this->done_loading_data)
       throw std::runtime_error("EventWorkspace::setX called before doneLoadingData().");
-    if ((index >= this->m_noVectors) || (index < 0))
+    if (index >= this->m_noVectors)
       throw std::range_error("EventWorkspace::setX, histogram number out of range");
     this->data[index]->setX(x);
 
@@ -954,7 +943,7 @@ namespace DataObjects
    * @param index :: Workspace histogram index to set.
    * @param x :: The X vector of histogram bins to use.
    */
-  void EventWorkspace::setX(const int index, const MantidVec &X)
+  void EventWorkspace::setX(const size_t index, const MantidVec &X)
   {
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
@@ -997,7 +986,7 @@ namespace DataObjects
 
       for (int wi=m_wiStart; wi < m_wiStop; wi++)
       {
-        double n = m_WS->getEventList(wi).getNumberEvents();
+        double n = static_cast<double>(m_WS->getEventList(wi).getNumberEvents());
         // Sorting time is approximately n * ln (n)
         m_cost += n * log(n);
       }
@@ -1051,13 +1040,13 @@ namespace DataObjects
    */
   void EventWorkspace::sortAll(EventSortType sortType, Mantid::API::Progress * prog) const
   {
-    int num_threads;
+    size_t num_threads;
     num_threads = ThreadPool::getNumPhysicalCores();
     g_log.debug() << num_threads << " cores found. ";
 
     // Initial chunk size: set so that each core will be called for 20 tasks.
     // (This is to avoid making too small tasks.)
-    int chunk_size = m_noVectors/(num_threads*20);
+    size_t chunk_size = m_noVectors/(num_threads*20);
     if (chunk_size < 1) chunk_size = 1;
 
     // Sort with 1 core per event list by default
@@ -1082,7 +1071,7 @@ namespace DataObjects
 
     // Create the thread pool, and optimize by doing the longest sorts first.
     ThreadPool pool(new ThreadSchedulerLargestCost(), howManyThreads);
-    for (int i=0; i < m_noVectors; i+=chunk_size)
+    for (size_t i=0; i < m_noVectors; i+=chunk_size)
     {
       pool.schedule(new EventSortingTask(this, i, i+chunk_size, sortType, howManyCores, prog));
     }

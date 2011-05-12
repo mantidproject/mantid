@@ -1238,6 +1238,7 @@ void ConfigServiceImpl::removeObserver(const Poco::AbstractObserver& observer) c
 template DLLExport int ConfigServiceImpl::getValue(const std::string&, double&);
 template DLLExport int ConfigServiceImpl::getValue(const std::string&, std::string&);
 template DLLExport int ConfigServiceImpl::getValue(const std::string&, int&);
+template DLLExport int ConfigServiceImpl::getValue(const std::string&, std::size_t&);
 /// \endcond TEMPLATE
 
 } // namespace Kernel

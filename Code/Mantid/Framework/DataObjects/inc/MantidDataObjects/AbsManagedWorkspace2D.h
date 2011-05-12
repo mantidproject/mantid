@@ -46,28 +46,28 @@ namespace DataObjects
     //friend class mru_list;
 
   public:
-    AbsManagedWorkspace2D(int NBlocks=100);
+    AbsManagedWorkspace2D(std::size_t NBlocks=100);
     virtual ~AbsManagedWorkspace2D();
 
     virtual const std::string id() const {return "AbsManagedWorkspace2D";}
 
-    virtual void setX(const int histnumber, const MantidVecPtr&);
-    virtual void setX(const int histnumber, const MantidVecPtr::ptr_type&);
-    virtual void setData(int const histnumber, const MantidVecPtr&);
-    virtual void setData(int const histnumber, const MantidVecPtr&, const MantidVecPtr&);
-    virtual void setData(int const histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
+    virtual void setX(const std::size_t histnumber, const MantidVecPtr&);
+    virtual void setX(const std::size_t histnumber, const MantidVecPtr::ptr_type&);
+    virtual void setData(std::size_t const histnumber, const MantidVecPtr&);
+    virtual void setData(std::size_t const histnumber, const MantidVecPtr&, const MantidVecPtr&);
+    virtual void setData(std::size_t const histnumber, const MantidVecPtr::ptr_type&, const MantidVecPtr::ptr_type&);
 
     //section required for iteration
-    virtual int size() const;
-    virtual int blocksize() const;
+    virtual std::size_t size() const;
+    virtual std::size_t blocksize() const;
 
-    virtual MantidVec& dataX(const int index);
-    virtual MantidVec& dataY(const int index);
-    virtual MantidVec& dataE(const int index);
-    virtual const MantidVec& dataX(int const index) const;
-    virtual const MantidVec& dataY(int const index) const;
-    virtual const MantidVec& dataE(int const index) const;
-    virtual Kernel::cow_ptr<MantidVec> refX(const int index) const;
+    virtual MantidVec& dataX(const std::size_t index);
+    virtual MantidVec& dataY(const std::size_t index);
+    virtual MantidVec& dataE(const std::size_t index);
+    virtual const MantidVec& dataX(std::size_t const index) const;
+    virtual const MantidVec& dataY(std::size_t const index) const;
+    virtual const MantidVec& dataE(std::size_t const index) const;
+    virtual Kernel::cow_ptr<MantidVec> refX(const std::size_t index) const;
 
     /// Returns the size of physical memory the workspace takes
     virtual size_t getMemorySize() const = 0;
@@ -75,26 +75,26 @@ namespace DataObjects
 
   protected:
 
-    virtual void init(const int &NVectors, const int &XLength, const int &YLength);
+    virtual void init(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
     /// Number of blocks in temporary storage
-    int getNumberBlocks() const
+    std::size_t getNumberBlocks() const
     {return m_bufferedData.size();}
 
     /// Reads in a data block.
-    virtual void readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const = 0;
+    virtual void readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const = 0;
     /// Saves the dropped data block to disk.
     virtual void writeDataBlock(ManagedDataBlock2D *toWrite) const = 0;
 
     /// The number of vectors in each data block
-    int m_vectorsPerBlock;
+    std::size_t m_vectorsPerBlock;
     /// The length of the X vector in each Histogram1D. Must all be the same.
-    int m_XLength;
+    std::size_t m_XLength;
     /// The length of the Y & E vectors in each Histogram1D. Must all be the same.
-    int m_YLength;
+    std::size_t m_YLength;
     /// The size in bytes of each vector
-    size_t m_vectorSize;
+    std::size_t m_vectorSize;
     /// The size in bytes of one block
-    size_t m_blockSize;
+    std::size_t m_blockSize;
 
     /// Static reference to the logger class
     static Kernel::Logger &g_log;
@@ -109,9 +109,9 @@ namespace DataObjects
     /// Private copy assignment operator
     AbsManagedWorkspace2D& operator=(const AbsManagedWorkspace2D&);
 
-    virtual int getHistogramNumberHelper() const;
+    virtual std::size_t getHistogramNumberHelper() const;
 
-    ManagedDataBlock2D* getDataBlock(const int index) const;
+    ManagedDataBlock2D* getDataBlock(const std::size_t index) const;
 
 
   public:

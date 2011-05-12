@@ -95,7 +95,7 @@ void MergeRuns::exec()
     std::list<MatrixWorkspace_sptr>::iterator it = inWS.begin();
     // Take the first input workspace as the first argument to the addition
     MatrixWorkspace_sptr outWS = inWS.front();
-    int n=inWS.size()-1;
+    int64_t n=inWS.size()-1;
     m_progress=new Progress(this,0.0,1.0,n);
     // Note that the iterator is incremented before first pass so that 1st workspace isn't added to itself
     for (++it; it != inWS.end(); ++it)
@@ -143,7 +143,7 @@ void MergeRuns::buildAdditionTables()
 
   //This is the workspace against which everything will be added
   EventWorkspace_sptr lhs = inEventWS[0];
-  int lhs_nhist = lhs->getNumberHistograms();
+  int64_t lhs_nhist = lhs->getNumberHistograms();
 
   IndexToIndexMap * lhs_det_to_wi = NULL;
   try
@@ -155,7 +155,7 @@ void MergeRuns::buildAdditionTables()
     //If it fails, then there are some grouped detector IDs, and the map cannot exist
   }
 
-  for (int workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
+  for (int64_t workspaceNum=1; workspaceNum < static_cast<int64_t>(inEventWS.size()); workspaceNum++)
   {
     //Get the workspace
     EventWorkspace_sptr ews = inEventWS[workspaceNum];
@@ -166,25 +166,25 @@ void MergeRuns::buildAdditionTables()
     AdditionTable * table = new AdditionTable();
 
     //Loop through the input workspace indices
-    int nhist = ews->getNumberHistograms();
-    for (int inWI = 0; inWI < nhist; inWI++)
+    int64_t nhist = ews->getNumberHistograms();
+    for (int64_t inWI = 0; inWI < nhist; inWI++)
     {
       //Get the set of detectors in the output
-      std::set<int>& inDets = ews->getEventList(inWI).getDetectorIDs();
+      std::set<int64_t>& inDets = ews->getEventList(inWI).getDetectorIDs();
 
       bool done=false;
 
       //First off, try to match the workspace indices. Most times, this will be ok right away.
-      int outWI = inWI;
+      int64_t outWI = inWI;
       if (outWI < lhs_nhist) //don't go out of bounds
       {
-        std::set<int>& outDets = lhs->getEventList(outWI).getDetectorIDs();
+        std::set<int64_t>& outDets = lhs->getEventList(outWI).getDetectorIDs();
 
         //Checks that inDets is a subset of outDets
         if (std::includes(outDets.begin(), outDets.end(), inDets.begin(), inDets.end()))
         {
           //We found the workspace index right away. No need to keep looking
-          table->push_back( std::pair<int,int>(inWI, outWI) );
+          table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
           done = true;
         }
       }
@@ -194,8 +194,8 @@ void MergeRuns::buildAdditionTables()
         //Didn't find it. Try to use the LHS map.
 
         //First, we have to get the (single) detector ID of the RHS
-        std::set<int>::iterator inDets_it = inDets.begin();
-        int rhs_detector_ID = *inDets_it;
+        std::set<int64_t>::iterator inDets_it = inDets.begin();
+        int64_t rhs_detector_ID = *inDets_it;
 
         //Now we use the LHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
         IndexToIndexMap::iterator map_it = lhs_det_to_wi->find(rhs_detector_ID);
@@ -208,7 +208,7 @@ void MergeRuns::buildAdditionTables()
           //Did not find it!
           outWI = -1; //Marker to mean its not in the LHS.
         }
-        table->push_back( std::pair<int,int>(inWI, outWI) );
+        table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
         done = true; //Great, we did it.
       }
 
@@ -219,12 +219,12 @@ void MergeRuns::buildAdditionTables()
         // NOTE: This can be SUPER SLOW!
         for (outWI=0; outWI < lhs_nhist; outWI++)
         {
-          std::set<int>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
+          std::set<int64_t>& outDets2 = lhs->getEventList(outWI).getDetectorIDs();
           //Another subset check
           if (std::includes(outDets2.begin(), outDets2.end(), inDets.begin(), inDets.end()))
           {
             //This one is right. Now we can stop looking.
-            table->push_back( std::pair<int,int>(inWI, outWI) );
+            table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
             done = true;
             continue;
           }
@@ -238,7 +238,7 @@ void MergeRuns::buildAdditionTables()
         //TODO: should we check that none of the output ones are subsets of this one?
 
         //So we need to add it as a new workspace index
-        table->push_back( std::pair<int,int>(inWI, -1) );
+        table->push_back( std::pair<int64_t,int64_t>(inWI, -1) );
       }
 
     }
@@ -279,11 +279,11 @@ void MergeRuns::execEvent()
   //You need to copy over the data as well.
   outWS->copyDataFrom( (*inputWS) );
 
-  int n=inEventWS.size()-1;
+  int64_t n=inEventWS.size()-1;
   m_progress=new Progress(this,0.0,1.0,n);
 
   // Note that we start at 1, since we already have the 0th workspace
-  for (int workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
+  for (int64_t workspaceNum=1; workspaceNum < static_cast<int>(inEventWS.size()); workspaceNum++)
   {
     //You are adding this one here
     EventWorkspace_sptr addee = inEventWS[workspaceNum];
@@ -294,8 +294,8 @@ void MergeRuns::execEvent()
     AdditionTable::iterator it;
     for (it = table->begin(); it != table->end(); it++)
     {
-      int inWI = it->first;
-      int outWI = it->second;
+      int64_t inWI = it->first;
+      int64_t outWI = it->second;
       if (outWI >= 0)
       {
         outWS->getEventList(outWI) += addee->getEventList(inWI);
@@ -352,7 +352,7 @@ bool MergeRuns::validateInputsForEventWorkspaces(const std::vector<std::string>&
   //   because if instrument is created from raw file it'll be a different object
   std::string instrument;
 
-  for ( unsigned int i = 0; i < inputWorkspaces.size(); ++i )
+  for ( size_t i = 0; i < inputWorkspaces.size(); ++i )
   {
     // Fetch the next input workspace as an - throw an error if it's not there
     EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWorkspaces[i]));
@@ -404,7 +404,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
 {
   std::list<MatrixWorkspace_sptr> inWS;
 
-  int numSpec(0);
+  size_t numSpec(0);
   Unit_sptr unit;
   std::string YUnit;
   bool dist(false);
@@ -412,7 +412,7 @@ std::list<API::MatrixWorkspace_sptr> MergeRuns::validateInputs(const std::vector
   //   because if instrument is created from raw file it'll be a different object
   std::string instrument;
 
-  for ( unsigned int i = 0; i < inputWorkspaces.size(); ++i )
+  for ( size_t i = 0; i < inputWorkspaces.size(); ++i )
   {
     MatrixWorkspace_sptr ws;
     // Fetch the next input workspace - throw an error if it's not there
@@ -493,7 +493,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1,
   {
     // Add the bins from the first workspace up to the start of the overlap
     params.push_back(X1[0]);
-    int i;
+    int64_t i;
     for (i = 1; X1[i] <= start2; ++i)
     {
       params.push_back(X1[i]-X1[i-1]);
@@ -521,7 +521,7 @@ void MergeRuns::calculateRebinParams(const API::MatrixWorkspace_const_sptr& ws1,
 void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::vector<double>& params) const
 {
   // Add all the bins from the first workspace
-  for (unsigned int i = 1; i < X1.size(); ++i)
+  for (size_t i = 1; i < X1.size(); ++i)
   {
     params.push_back(X1[i-1]);
     params.push_back(X1[i]-X1[i-1]);
@@ -533,7 +533,7 @@ void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::v
     params.push_back(X2.front()-X1.back());
   }
   // Now add all the bins from the second workspace
-  for (unsigned int j = 1; j < X2.size(); ++j)
+  for (size_t j = 1; j < X2.size(); ++j)
   {
     params.push_back(X2[j-1]);
     params.push_back(X2[j]-X2[j-1]);
@@ -549,10 +549,10 @@ void MergeRuns::noOverlapParams(const MantidVec& X1, const MantidVec& X2, std::v
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
+void MergeRuns::intersectionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const
 {
   // First calculate the number of bins in each workspace that are in the overlap region
-  int overlapbins1, overlapbins2;
+  int64_t overlapbins1, overlapbins2;
   overlapbins1 = X1.size()-i;
   for (overlapbins2 = 0; X2[overlapbins2] < X1.back(); ++overlapbins2) {}
 
@@ -560,7 +560,7 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
   if ( overlapbins1 < overlapbins2 )
   {
     // In this case we want the rest of the bins from the first workspace.....
-    for (; i < static_cast<int>(X1.size()); ++i)
+    for (; i < static_cast<int64_t>(X1.size()); ++i)
     {
       params.push_back(X1[i]-X1[i-1]);
       params.push_back(X1[i]);
@@ -569,7 +569,7 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
     params.pop_back();
     params.pop_back();
     // ....and then the non-overlap ones from the second workspace
-    for (unsigned int j = overlapbins2; j < X2.size(); ++j)
+    for (size_t j = overlapbins2; j < X2.size(); ++j)
     {
       params.push_back(X2[j]-params.back());
       params.push_back(X2[j]);
@@ -578,7 +578,7 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
   else
   {
     // In this case we just have to add all the bins from the second workspace
-    for (unsigned int j = 1; j < X2.size(); ++j)
+    for (size_t j = 1; j < X2.size(); ++j)
     {
       params.push_back(X2[j]-params.back());
       params.push_back(X2[j]);
@@ -596,10 +596,10 @@ void MergeRuns::intersectionParams(const MantidVec& X1, int& i, const MantidVec&
  *  @param X2 ::     The bin boundaries from the second workspace
  *  @param params :: A reference to the vector of rebinning parameters
  */
-void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2, std::vector<double>& params) const
+void MergeRuns::inclusionParams(const MantidVec& X1, int64_t& i, const MantidVec& X2, std::vector<double>& params) const
 {
   // First calculate the number of bins in each workspace that are in the overlap region
-  int overlapbins1, overlapbins2;
+  int64_t overlapbins1, overlapbins2;
   for (overlapbins1 = 1; X1[i+overlapbins1] < X2.back(); ++overlapbins1 ) {}
   //++overlapbins1;
   overlapbins2 = X2.size()-1;
@@ -609,7 +609,7 @@ void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2
   {
     // In the case where the first workspace has larger bins it's easy
     // - just add the rest of X1's bins
-    for (; i < static_cast<int>(X1.size()); ++i)
+    for (; i < static_cast<int64_t>(X1.size()); ++i)
     {
       params.push_back(X1[i]-X1[i-1]);
       params.push_back(X1[i]);
@@ -618,14 +618,14 @@ void MergeRuns::inclusionParams(const MantidVec& X1, int& i, const MantidVec& X2
   else
   {
     // In this case we want all of X2's bins first (without the first and last boundaries)
-    for (unsigned int j = 1; j < X2.size()-1; ++j)
+    for (size_t j = 1; j < X2.size()-1; ++j)
     {
       params.push_back(X2[j]-params.back());
       params.push_back(X2[j]);
     }
     // And now those from X1 that lie above the overlap region
     i += overlapbins1;
-    for (; i < static_cast<int>(X1.size()); ++i)
+    for (; i < static_cast<int64_t>(X1.size()); ++i)
     {
       params.push_back(X1[i]-params.back());
       params.push_back(X1[i]);

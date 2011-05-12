@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/NumericAxis.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/System.h"
 
 #include <boost/lexical_cast.hpp>
 
@@ -12,7 +13,7 @@ namespace API
 {
 
 /// Constructor
-NumericAxis::NumericAxis(const int& length): Axis()
+NumericAxis::NumericAxis(const size_t& length): Axis()
 {
   m_values.resize(length);
 }
@@ -23,7 +24,7 @@ NumericAxis::NumericAxis(const int& length): Axis()
  */
 Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
 {
-  (void) parentWorkspace; //Avoid compiler warning
+  UNUSED_ARG(parentWorkspace)
   return new NumericAxis(*this);
 }
 
@@ -33,10 +34,10 @@ Axis* NumericAxis::clone(const MatrixWorkspace* const parentWorkspace)
  *  @return The value of the axis as a double
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-double NumericAxis::operator()(const int& index, const int& verticalIndex) const
+double NumericAxis::operator()(const size_t& index, const size_t& verticalIndex) const
 {
-  (void) verticalIndex; //Avoid compiler warning
-  if (index < 0 || index >= length())
+  UNUSED_ARG(verticalIndex)
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "NumericAxis: Index out of range.");
   }
@@ -49,9 +50,9 @@ double NumericAxis::operator()(const int& index, const int& verticalIndex) const
  *  @param value :: The new value
  *  @throw  IndexError If the index requested is not in the range of this axis
  */
-void NumericAxis::setValue(const int& index, const double& value)
+void NumericAxis::setValue(const size_t& index, const double& value)
 {
-  if (index < 0 || index >= length())
+  if (index >= length())
   {
     throw Kernel::Exception::IndexError(index, length()-1, "NumericAxis: Index out of range.");
   }
@@ -82,7 +83,7 @@ bool NumericAxis::operator==(const Axis& axis2) const
  *  @param index :: The index of an axis value
  *  @return the label of the requested axis
  */
-std::string NumericAxis::label(const int& index)const
+std::string NumericAxis::label(const size_t& index)const
 {
   return boost::lexical_cast<std::string>((*this)(index));
 }

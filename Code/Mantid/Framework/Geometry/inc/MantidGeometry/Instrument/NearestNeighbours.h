@@ -69,31 +69,31 @@ public:
   /// whether or not the graph has been created
   bool isPopulated() const;
   /// query the graph for the eight nearest neighbours to specified detector
-  std::map<int, double> neighbours(const int detID) const;
+  std::map<int64_t, double> neighbours(const int detID) const;
   /// as above, but filter based on the distance given
-  std::map<int, double> neighbours(const int detID, const double radius) const;
+  std::map<int64_t, double> neighbours(const int detID, const double radius) const;
   /// as above, but taking input as an IComponent pointer
-  std::map<int, double> neighbours(const IComponent *component, const double radius=0.0) const;
+  std::map<int64_t, double> neighbours(const IComponent *component, const double radius=0.0) const;
 
 private:
   /// typedef for Graph object used to hold the calculated information
   typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::directedS,
-    boost::property<boost::vertex_name_t, int>,
+    boost::property<boost::vertex_name_t, int64_t>,
     boost::property<boost::edge_name_t, double>
   > Graph;
   /// Vertex descriptor object for Graph
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
   /// map object of int to int
-  typedef boost::unordered_map<int,int> MapII;
+  typedef boost::unordered_map<int64_t,int64_t> MapII;
   /// map object of int to Graph Vertex descriptor
-  typedef boost::unordered_map<int,Vertex> MapIV;
+  typedef boost::unordered_map<int64_t,Vertex> MapIV;
 
   /// populates the graph with the nodes (detectors with id) and edges (neighbour links with distances)
   void populate();
 
   /// pointer to the instrument object from which to build the graph
   boost::shared_ptr<const Mantid::Geometry::IInstrument> m_instrument;
-  /// number of neighbours to find. always set to 8.
+  /// number of neighbours to find. always set to 8. Unfortunately ANN requires this be an int.
   int m_noNeighbours;
   /// flag for whether the graph has been populated
   bool m_isPopulated;

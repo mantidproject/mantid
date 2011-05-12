@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/cow_ptr.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -69,7 +70,7 @@ namespace Mantid
 
       IObjComponent_sptr getSource() const;
       IObjComponent_sptr getSample() const;
-      IDetector_sptr getDetector(const int &detector_id) const;
+      IDetector_sptr getDetector(const int64_t &detector_id) const;
 
       /// Returns a pointer to the geometrical object representing the monitor with the given ID
       IDetector_sptr getMonitor(const int &detector_id) const;
@@ -93,14 +94,14 @@ namespace Mantid
       void markAsMonitor(Geometry::IDetector*);
 
       /// return reference to detector cache 
-      void getDetectors(std::map<int, Geometry::IDetector_sptr> & out_map) const;
+      void getDetectors(std::map<int64_t, Geometry::IDetector_sptr> & out_map) const;
 
-      std::vector<int> getDetectorIDs(bool skipMonitors = false) const;
+      std::vector<int64_t> getDetectorIDs(bool skipMonitors = false) const;
 
       void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName);
 
       /// returns a list containing  detector ids of monitors
-      const std::vector<int> getMonitors()const ;
+      const std::vector<int64_t> getMonitors()const ;
       /// Get the bounding box for this component and store it in the given argument
       void getBoundingBox(BoundingBox& boundingBox) const;
 
@@ -145,8 +146,8 @@ namespace Mantid
                             const double beamline_norm,
                             const Geometry::V3D &samplePos,
                             const Geometry::IInstrument_const_sptr &instrument,
-                            const std::vector<int> &detectors,
-                            const std::map<int,double> &offsets,
+                            const std::vector<int64_t> &detectors,
+                            const std::map<int64_t,double> &offsets,
                             bool vulcancorrection);
 
       void getInstrumentParameters(double & l1, Geometry::V3D & beamline,
@@ -174,7 +175,7 @@ namespace Mantid
       void swap(const Instrument* base, const ParameterMap * map);
 
       /// Map which holds detector-IDs and pointers to detector components
-      std::map<int, Geometry::IDetector_sptr > _detectorCache;
+      std::map<int64_t, Geometry::IDetector_sptr > _detectorCache;
 
       /// Purpose to hold copy of source component. For now assumed to be just one component
       Geometry::ObjComponent* _sourceCache;
@@ -194,7 +195,7 @@ namespace Mantid
       std::map<std::string, std::string> _logfileUnit;
 
       /// a vector holding detector ids of monitor s
-      std::vector<int> m_monitorCache;
+      std::vector<int64_t> m_monitorCache;
 
       /// Stores from which side the instrument will be viewed from, initially in the instrument viewer, possiblities are "Z+, Z-, X+, ..."
       std::string m_defaultViewAxis;

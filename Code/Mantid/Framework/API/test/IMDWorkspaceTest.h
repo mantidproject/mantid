@@ -15,6 +15,7 @@
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 
+using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
@@ -28,9 +29,9 @@ namespace Mantid { namespace DataObjects {
     virtual ~MatrixWorkspaceTester() {}
 
     // Empty overrides of virtual methods
-    virtual int getNumberHistograms() const { return 1;}
+    virtual size_t getNumberHistograms() const { return 1;}
     const std::string id() const {return "MatrixWorkspaceTester";}
-    void init(const int& i, const int& j, const int& k)
+    void init(const size_t& i, const size_t& j, const size_t& k)
     {
       vec.resize(j,1.0);
       m_dataX.resize(j, vec);

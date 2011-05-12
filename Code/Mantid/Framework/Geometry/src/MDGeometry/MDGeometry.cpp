@@ -6,6 +6,7 @@
 
 
 using namespace Mantid::Kernel;
+using std::size_t;
 
 namespace Mantid{
   namespace Geometry{
@@ -317,7 +318,7 @@ MDGeometry::getDimension(const std::string &tag,bool do_throw)
 }
 
 boost::shared_ptr<const MDDimension>
-MDGeometry::get_constDimension(unsigned int i)const
+MDGeometry::get_constDimension(size_t i)const
 {
 	  
       if(i>=m_basis.getNumDims()){

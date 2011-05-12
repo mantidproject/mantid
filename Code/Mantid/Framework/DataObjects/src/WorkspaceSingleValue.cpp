@@ -10,6 +10,8 @@ namespace Mantid
   namespace DataObjects
   {
 
+    using std::size_t;
+
     DECLARE_WORKSPACE(WorkspaceSingleValue)
 
     // Get a reference to the logger
@@ -30,12 +32,12 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries
     *  @param YLength :: The number of data/error points
     */
-    void WorkspaceSingleValue::init(const int &NVectors, const int &XLength, const int &YLength)
+    void WorkspaceSingleValue::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       (void) NVectors; (void) XLength; (void) YLength; //Avoid compiler warning
     }
 
-    Kernel::cow_ptr<MantidVec> WorkspaceSingleValue::refX(const int index) const
+    Kernel::cow_ptr<MantidVec> WorkspaceSingleValue::refX(const size_t index) const
     {
       (void) index; //Avoid compiler warning
       Kernel::cow_ptr<MantidVec> ret;

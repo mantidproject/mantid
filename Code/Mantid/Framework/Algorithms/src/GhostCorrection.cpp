@@ -132,7 +132,7 @@ namespace Mantid
 
       //Prepare the groups' ghost sources lists
       this->groupedGhostMaps.clear();
-      for (int i=0; i < this->nGroups; i++)
+      for (int64_t i=0; i < this->nGroups; i++)
         this->groupedGhostMaps.push_back( new GhostSourcesMap() );
 
       size_t numInPixels = rawGhostMap->size() / NUM_GHOSTS;
@@ -147,14 +147,14 @@ namespace Mantid
         if (it != input_detectorIDToWorkspaceIndexMap->end())
         {
           //A valid workspace index was found, this one:
-          int inputWorkspaceIndex = it->second;
+          int64_t inputWorkspaceIndex = it->second;
 
           //To check for sameness of group in all ghosts
-          int lastGroup = -1;
-          int ghostGroup = -1;
+          int64_t lastGroup = -1;
+          int64_t ghostGroup = -1;
           bool allSameGroup = true;
 
-          for (int g=0; g < NUM_GHOSTS; g++)
+          for (int64_t g=0; g < NUM_GHOSTS; g++)
           {
             //Calculate the index into the file
             fileIndex = inPixelId * NUM_GHOSTS + g;
@@ -246,7 +246,7 @@ namespace Mantid
 
       //Make the X axis to bin to.
       MantidVecPtr XValues_new;
-      const int numbins = VectorHelper::createAxisFromRebinParams(getProperty("BinParams"), XValues_new.access());
+      const int64_t numbins = VectorHelper::createAxisFromRebinParams(getProperty("BinParams"), XValues_new.access());
 
       //Prepare the binfinder class
       BinFinder binner( getProperty("BinParams") );
@@ -264,7 +264,7 @@ namespace Mantid
 
       //Set the X bins in the output WS.
       Workspace2D_sptr outputWS2D = boost::dynamic_pointer_cast<Workspace2D>(outputW);
-      for (int i=0; i < outputWS2D->getNumberHistograms(); i++)
+      for (std::size_t i=0; i < outputWS2D->getNumberHistograms(); i++)
         outputWS2D->setX(i, XValues_new);
 
       //Prepare the maps you need
@@ -274,8 +274,8 @@ namespace Mantid
       this->loadGhostMap( getProperty("GhostCorrectionFilename") );
 
       //Initialize progress reporting.
-      int numsteps = 0; //count how many steps
-      for (int gr=1; gr < this->nGroups; ++gr)
+      int64_t numsteps = 0; //count how many steps
+      for (int64_t gr=1; gr < this->nGroups; ++gr)
         numsteps += this->groupedGhostMaps[gr]->size();
       Progress prog(this, 0.0, 1.0, numsteps);
 
@@ -287,13 +287,13 @@ namespace Mantid
 
       //Go through the groups, starting at #1!
       PARALLEL_FOR2(eventW, outputW)
-      for (int gr=1; gr < this->nGroups; ++gr)
+      for (int64_t gr=1; gr < this->nGroups; ++gr)
       {
         PARALLEL_START_INTERUPT_REGION
 
         //TODO: Convert between group # and workspace index. Sigh.
         //Groups normally start at 1 and so the workspace index will be one below that.
-        int outputWorkspaceIndex = gr-1;
+        int64_t outputWorkspaceIndex = gr-1;
 
         //Start by making sure the Y and E values are 0.
         MantidVec& Y = outputW->dataY(outputWorkspaceIndex);
@@ -309,8 +309,8 @@ namespace Mantid
         for (it = thisGroupsGhostMap->begin(); it != thisGroupsGhostMap->end(); it++)
         {
           //This workspace index is causing 16 ghosts in this group.
-          int inputWorkspaceIndex = it->first;
-          int inputDetectorID = it->second;
+          int64_t inputWorkspaceIndex = it->first;
+          int64_t inputDetectorID = it->second;
 
           //This is the events in the pixel CAUSING the ghost.
           const EventList & sourceEventList = eventW->getEventList(inputWorkspaceIndex);
@@ -324,17 +324,17 @@ namespace Mantid
           {
             const TofEvent& event = events[i];
 
-            for (int g=0; g < NUM_GHOSTS; g++)
+            for (int64_t g=0; g < NUM_GHOSTS; g++)
             {
               //Find the ghost correction
-              int fileIndex = inputDetectorID * NUM_GHOSTS + g;
+              int64_t fileIndex = inputDetectorID * NUM_GHOSTS + g;
               GhostDestinationValue ghostVal = (*rawGhostMap)[fileIndex];
 
               //Convert to d-spacing using the factor of the GHOST pixel id
               double d_spacing = event.tof() * (*tof_to_d)[ghostVal.pixelId];
 
               //Find the bin for this d-spacing
-              int binIndex = binner.bin(d_spacing);
+              int64_t binIndex = binner.bin(d_spacing);
 
               if (binIndex >= 0)
               {

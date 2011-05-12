@@ -29,6 +29,7 @@ using API::MatrixWorkspace_const_sptr;
 using API::MatrixWorkspace;
 using API::Algorithm;
 using API::Progress;
+using std::size_t;
 
 /// The implementation of Jacobian
 class JacobianImpl: public Jacobian
@@ -37,15 +38,15 @@ class JacobianImpl: public Jacobian
     gsl_matrix * m_J;
 public:
     /// The index map
-    std::map<int,int> m_map;
+    std::map<size_t,size_t> m_map;
     /**  Set a value to a Jacobian matrix element.
     *   @param iY :: The index of the data point.
     *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
     *   @param value :: The derivative value.
     */
-    void set(int iY, int iP, double value)
+    void set(size_t iY, size_t iP, double value)
     {
-        int j = m_map[iP];
+      size_t j = m_map[iP];
         if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /** Get a value to a Jacobian matrix element.
@@ -53,9 +54,9 @@ public:
     *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
     *   @param value :: The derivative value.
     */
-    double get(int iY, int iP)
+    double get(size_t iY, size_t iP)
     {
-        int j = m_map[iP];
+        size_t j = m_map[iP];
         if (j >= 0) return gsl_matrix_get(m_J,iY,j);
         return 0.0;
     }

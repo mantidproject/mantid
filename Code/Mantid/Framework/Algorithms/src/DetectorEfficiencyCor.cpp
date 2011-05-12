@@ -112,11 +112,12 @@ void DetectorEfficiencyCor::exec()
   // Store some information about the instrument setup that will not change
   m_samplePos = m_inputWS->getInstrument()->getSample()->getPos();
 
-  int numHists = m_inputWS->getNumberHistograms();
-  const int progStep = static_cast<int>(ceil(numHists/100.0));
+  int64_t numHists = m_inputWS->getNumberHistograms();
+  double numHists_d = static_cast<double>(numHists);
+  const int64_t progStep = static_cast<int64_t>(ceil(numHists_d/100.0));
 
   PARALLEL_FOR2(m_inputWS,m_outputWS)
-  for (int i = 0; i < numHists; ++i )
+  for (int64_t i = 0; i < numHists; ++i )
   {
     PARALLEL_START_INTERUPT_REGION
       
@@ -139,7 +140,7 @@ void DetectorEfficiencyCor::exec()
     // make regular progress reports and check for cancelling the algorithm
     if ( i % progStep == 0 )
     {
-      progress(static_cast<double>(i)/numHists);
+      progress(static_cast<double>(i)/numHists_d);
       interruption_point();
     }
 
@@ -191,7 +192,7 @@ Gets the detector information and uses this to calculate its efficiency
 *  @throw runtime_error if the SpectraDetectorMap has not been filled
 *  @throw NotFoundError if the detector or its gas pressure or wall thickness were not found
 */
-void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
+void DetectorEfficiencyCor::correctForEfficiency(int64_t spectraIn)
 {
   IDetector_sptr det = m_inputWS->getDetector(spectraIn);
   if( det->isMonitor() || det->isMasked() )
@@ -206,11 +207,11 @@ void DetectorEfficiencyCor::correctForEfficiency(int spectraIn)
   const MantidVec eValues = m_inputWS->readE(spectraIn);
 
   // get a pointer to the detectors that created the spectrum
-  const int specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
-  const std::vector<int> dets = m_inputWS->spectraMap().getDetectors(specNum);
+  const int64_t specNum = m_inputWS->getAxis(1)->spectraNo(spectraIn);
+  const std::vector<int64_t> dets = m_inputWS->spectraMap().getDetectors(specNum);
 
-  std::vector<int>::const_iterator it = dets.begin();
-  std::vector<int>::const_iterator iend = dets.end();
+  std::vector<int64_t>::const_iterator it = dets.begin();
+  std::vector<int64_t>::const_iterator iend = dets.end();
   if ( it == iend )
   {
     throw Exception::NotFoundError("No detectors found", spectraIn);

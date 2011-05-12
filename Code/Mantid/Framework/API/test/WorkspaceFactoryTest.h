@@ -11,6 +11,7 @@
 #include "MantidAPI/MemoryManager.h"
 
 using Mantid::MantidVec;
+using std::size_t;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
@@ -20,25 +21,25 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class WorkspaceTest: public MatrixWorkspace
   {
   public:
-    virtual int getNumberHistograms() const { return 1;}
+    virtual size_t getNumberHistograms() const { return 1;}
 
     WorkspaceTest() : data(MantidVec(1,1)) {}
    	//  static std::string WSTYPE;
 	virtual const std::string id() const {return "WorkspaceTest";}
     //section required to support iteration
-    virtual int size() const {return 1000000;}
-    virtual int blocksize() const  {return 10000;}
-    virtual MantidVec& dataX(int const) {return data;}
+    virtual size_t size() const {return 1000000;}
+    virtual size_t blocksize() const  {return 10000;}
+    virtual MantidVec& dataX(const size_t) {return data;}
     ///Returns the y data
-    virtual MantidVec& dataY(int const) {return data;}
+    virtual MantidVec& dataY(const size_t) {return data;}
     ///Returns the error data
-    virtual MantidVec& dataE(int const) {return data;}
+    virtual MantidVec& dataE(const size_t) {return data;}
     ///Returns the x error data
     virtual MantidVec& dataDx(int const) {return data;}
 
-    virtual const MantidVec& dataX(int const)const {return data;}
+    virtual const MantidVec& dataX(const size_t)const {return data;}
     ///Returns the y data
-    virtual const MantidVec& dataY(int const)const {return data;}
+    virtual const MantidVec& dataY(const size_t)const {return data;}
     ///Returns the error data
     virtual const MantidVec& dataE(int const)const {return data;}
     ///Returns the x error data
@@ -46,7 +47,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
     cow_ptr<MantidVec> refX(const int) const {return cow_ptr<MantidVec>();}
     void setX(const int, const cow_ptr<MantidVec>& ) {}
     
-    virtual void init(const int &, const int &, const int &){};
+    virtual void init(const size_t &, const size_t &, const size_t &){};
 
   private:
     MantidVec data;
@@ -56,7 +57,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   class Workspace1DTest: public WorkspaceTest
   {
   public:
-    int getNumberHistograms() const { return 1;}
+    size_t getNumberHistograms() const { return 1;}
     //  static std::string WSTYPE;
     const std::string id() const {return "Workspace1DTest";}
   };
@@ -66,15 +67,15 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   public:
   	//  static std::string WSTYPE;
     const std::string id() const {return "Workspace2DTest";}
-    int getNumberHistograms() const { return 2;}
+    size_t getNumberHistograms() const { return 2;}
 
-    void init(const int &NVectors, const int &XLength, const int &YLength)
+    void init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       size.push_back(NVectors);
       size.push_back(XLength);
       size.push_back(YLength);
     }
-    std::vector<int> size;
+    std::vector<size_t> size;
   };
 
   class ManagedWorkspace2DTest: public Workspace2DTest
@@ -82,7 +83,7 @@ class WorkspaceFactoryTest : public CxxTest::TestSuite
   public:
   	//  static std::string WSTYPE;
     const std::string id() const {return "ManagedWorkspace2DTest";}
-    int getNumberHistograms() const { return 2;}
+    size_t getNumberHistograms() const { return 2;}
   };
 
   class NotInFactory : public WorkspaceTest
@@ -148,7 +149,7 @@ public:
 
     // ManagedWorkspace.LowerMemoryLimit should be set to 1 in MantidTest.properties file
     MemoryInfo mi = MemoryManager::Instance().getMemoryInfo();
-    int nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
+    size_t nHist = mi.availMemory / 50 / 100 / 3 * 1024 / 8;// this shoulf fill about 2% of free memory
     //TS_ASSERT_THROWS_NOTHING( ws = WorkspaceFactory::Instance().create("Workspace2DTest",nHist,100,100) )
     //TS_ASSERT_EQUALS( ws->id(), "Workspace2D")
 

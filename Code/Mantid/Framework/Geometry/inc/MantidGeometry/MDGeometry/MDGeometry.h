@@ -100,7 +100,7 @@ namespace Mantid{
       size_t getNumExpandedDims()const{return n_expanded_dim;}
       /// function returns the pointer to the dimension requested as the dimension num. Throws if dimension is out of range. Convenient for looping though dimensions instead of
       /// asking for DimX, Y and Z;
-      boost::shared_ptr<const MDDimension>  get_constDimension(unsigned int i)const;
+      boost::shared_ptr<const MDDimension>  get_constDimension(std::size_t i)const;
       /** functions return the pointer to the dimension requested by the dimension tag(ID). throws if such dimension is not present in the Geometry 
           (or NULL if not throwing parameter is specified); */
       boost::shared_ptr<const MDDimension>  get_constDimension(const std::string &tag,bool do_throw=true)const;

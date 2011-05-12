@@ -127,16 +127,16 @@ namespace Mantid
          *    between j and k contains the operator connecting the next token to this one.
          * @param p :: The precedence of the connecting operator.
          */
-        Token(unsigned int i,unsigned int j,unsigned int k,size_t p)
+        Token(size_t i, size_t j, size_t k,size_t p)
           :is(i),ie(j),is1(k),prec(p){}
         /**
          * The copy constructor.
          */
         Token(const Token& t)
           :is(t.is),ie(t.ie),is1(t.is1),prec(t.prec){}
-        unsigned int is;  ///< The index of the first symbol of the token.
-        unsigned int ie;  ///< The index of the last symbol of the token.
-        unsigned int is1; ///< The index of the first symbol of the next token.
+        size_t is;  ///< The index of the first symbol of the token.
+        size_t ie;  ///< The index of the last symbol of the token.
+        size_t is1; ///< The index of the first symbol of the next token.
         size_t prec;      ///< The precedence of the connecting operator.
       };
       /// The container type

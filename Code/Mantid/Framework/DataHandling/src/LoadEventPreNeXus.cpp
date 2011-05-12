@@ -433,7 +433,7 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
   loadOnlySomeSpectra = (this->spectra_list.size() > 0);
 
   //Turn the spectra list into a map, for speed of access
-  for (std::vector<int>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
+  for (std::vector<int64_t>::iterator it = spectra_list.begin(); it != spectra_list.end(); it++)
     spectraLoadMap[*it] = true;
 
   //Allocate the intermediate buffer, if it will be used in parallel processing
@@ -472,9 +472,9 @@ void LoadEventPreNeXus::procEvents(DataObjects::EventWorkspace_sptr & workspace)
     }
     else
     {
-      std::map<int, Geometry::IDetector_sptr> detector_map;
+      std::map<int64_t, Geometry::IDetector_sptr> detector_map;
       workspace->getInstrument()->getDetectors(detector_map);
-      std::map<int, Geometry::IDetector_sptr>::iterator it;
+      std::map<int64_t, Geometry::IDetector_sptr>::iterator it;
       for (it = detector_map.begin(); it != detector_map.end(); it++)
       {
         //Go through each pixel in the map, but forget monitors.
@@ -528,12 +528,12 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
 
   //Starting pulse time
   DateAndTime pulsetime;
-  int pulse_i = 0;
-  int numPulses = static_cast<int>(this->pulsetimes.size());
-  if (static_cast<int>(event_indices.size()) < numPulses)
+  int64_t pulse_i = 0;
+  int64_t numPulses = static_cast<int64_t>(this->pulsetimes.size());
+  if (static_cast<int64_t>(event_indices.size()) < numPulses)
   {
     g_log.warning() << "Event_indices vector is smaller than the pulsetimes array.\n";
-    numPulses = static_cast<int>(event_indices.size());
+    numPulses = static_cast<int64_t>(event_indices.size());
   }
 
   // process the individual events
@@ -554,7 +554,7 @@ void LoadEventPreNeXus::procEventsLinear(DataObjects::EventWorkspace_sptr & work
     //Now check if this pid we want to load.
     if (loadOnlySomeSpectra)
     {
-      std::map<int, bool>::iterator it;
+      std::map<int64_t, bool>::iterator it;
       it = spectraLoadMap.find(pid);
       if (it == spectraLoadMap.end())
       {

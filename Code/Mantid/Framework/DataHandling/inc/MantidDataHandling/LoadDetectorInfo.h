@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
 #include "MantidGeometry/Instrument/Component.h"
+#include "MantidKernel/System.h"
 #include <vector>
 #include <string>
 #include <climits>
@@ -82,9 +83,9 @@ private:
   /// will store a pointer to the user selected workspace
   API::MatrixWorkspace_sptr m_workspace;
   /// number of histograms in the workspace
-  int m_numHists;
+  std::size_t m_numHists;
   /// the detector IDs that are monitors, according to the raw file
-  std::set<int> m_monitors;
+  std::set<int64_t> m_monitors;
   /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
   MantidVecPtr m_monitorXs;
   /// stores if the bin boundary values, X arrays, we initially common, because if that is we'll work to maximise sharing
@@ -108,15 +109,15 @@ private:
   void readRAW(const std::string& fName);
 
   void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int> &detectIDs=std::vector<int>(), const std::vector<float> &delays=std::vector<float>());
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, int numDetectors);
-  void adjustXs(const std::vector<int> &detIDs, const std::vector<float> &offsets);
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<int64_t> &detectIDs=std::vector<int64_t>(), const std::vector<float> &delays=std::vector<float>());
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const int * const detectIDs, const float * const delays, std::size_t numDetectors);
+  void adjustXs(const std::vector<int64_t> &detIDs, const std::vector<float> &offsets);
   void adjustXs(const double detectorOffset);
-  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
-  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int> &spectraList, std::map<int,int> &specs2index, std::vector<int> missingDetectors);
-  void noteMonitorOffset(const float offSet, const int detID);
-  void setUpXArray(MantidVecPtr &theXValuesArray, int specInd, double offset);
-  void logErrorsFromRead(const std::vector<int> &missingDetectors);
+  void adjustXsCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors);
+  void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<int64_t> &spectraList, std::map<int64_t,int64_t> &specs2index, std::vector<int64_t> missingDetectors);
+  void noteMonitorOffset(const float offSet, const int64_t detID);
+  void setUpXArray(MantidVecPtr &theXValuesArray, int64_t specInd, double offset);
+  void logErrorsFromRead(const std::vector<int64_t> &missingDetectors);
   void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
 
   /// used to check that all the monitors have the same offset time

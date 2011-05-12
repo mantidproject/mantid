@@ -44,7 +44,7 @@ namespace API
     virtual double getTofMin() const = 0;
     virtual double getTofMax() const = 0;
     virtual EventType getEventType() const = 0;
-    virtual IEventList * getEventListPtr(const int workspace_index) = 0;
+    virtual IEventList * getEventListPtr(const std::size_t workspace_index) = 0;
     virtual void clearMRU() const = 0;
   };
 

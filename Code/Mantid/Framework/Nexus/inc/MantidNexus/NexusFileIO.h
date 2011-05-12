@@ -226,12 +226,12 @@ namespace Mantid
       int dimensions[1] = { 0 };
       std::string nxstr = value;
       if( nxstr.empty() ) nxstr += " ";
-      dimensions[0] = nxstr.size() + 1;
+      dimensions[0] = static_cast<int>(nxstr.size() + 1);
       if( NXmakedata(fileID, name.c_str(), nxType, 1, dimensions) == NX_ERROR ) return false;
       if( NXopendata(fileID, name.c_str()) == NX_ERROR )return false;
       for(unsigned int it=0; it < attributes.size(); ++it)
       {
-        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
       }
       NXputdata(fileID, (void*)nxstr.c_str());
       NXclosedata(fileID);
@@ -259,7 +259,7 @@ namespace Mantid
       if( NXopendata(fileID, "value") == NX_ERROR )return false;
       for(unsigned int it=0; it < attributes.size(); ++it)
       {
-        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
       }
       NXputdata(fileID, (void*)&value);
       NXclosedata(fileID);
@@ -287,12 +287,12 @@ namespace Mantid
       int dimensions[1] = { 0 };
       std::string nxstr = value;
       if( nxstr.empty() ) nxstr += " ";
-      dimensions[0] = nxstr.size() + 1; // Allow for null-terminator
+      dimensions[0] = static_cast<int>(nxstr.size() + 1); // Allow for null-terminator
       if( NXmakedata(fileID, "value", NX_CHAR, 1, dimensions) == NX_ERROR ) return false;
       if( NXopendata(fileID, "value") == NX_ERROR )return false;
       for(unsigned int it=0; it < attributes.size(); ++it)
       {
-        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
       }
       NXputdata(fileID, (void*)nxstr.c_str());
       NXclosedata(fileID);

@@ -241,7 +241,7 @@ using namespace boost::python;
  
 
     /// Typedef for data access
-    typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(int const);
+    typedef MantidVec&(API::MatrixWorkspace::*data_modifier)(const std::size_t);
 
     //MatrixWorkspace class
     class_< API::MatrixWorkspace, bases<API::Workspace>, MatrixWorkspaceWrapper, 
@@ -443,7 +443,7 @@ using namespace boost::python;
       ;
     // Spectra Axis subclass
     class_< API::SpectraAxis, bases<API::Axis>, boost::noncopyable >("SpectraAxis", no_init)
-      .def("spectraNumber", (const int & (Mantid::API::SpectraAxis::*)(const int &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() ) // (const int & (Mantid::API::SpectraAxis::*)() const) 
+      .def("spectraNumber", (const int64_t & (Mantid::API::SpectraAxis::*)(const size_t &) const) & API::SpectraAxis::spectraNo, return_value_policy<copy_const_reference>() ) // (const int & (Mantid::API::SpectraAxis::*)() const)
       .def("setValue", & API::SpectraAxis::setValue)
       .def("populateSimple", & API::SpectraAxis::populateSimple)
       ;

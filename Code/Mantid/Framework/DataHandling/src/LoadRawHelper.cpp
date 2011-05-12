@@ -111,6 +111,10 @@ namespace Mantid
     {
       isisRaw->skipData(file, hist);
     }
+    void LoadRawHelper::skipData(FILE* file,int64_t hist)
+    {
+     skipData(file, static_cast<int>(hist));
+    }
     /// calls isisRaw ioRaw.
     /// @param file :: the file pointer
     /// @param from_file :: unknown
@@ -136,6 +140,10 @@ namespace Mantid
     bool LoadRawHelper::readData(FILE* file,int hist)
     {
       return isisRaw->readData(file, hist);
+    }
+    bool LoadRawHelper::readData(FILE* file,int64_t hist)
+    {
+       return readData(file, static_cast<int>(hist));
     }
 
     float LoadRawHelper::getProtonCharge()const
@@ -165,14 +173,14 @@ namespace Mantid
      * @param lengthIn :: size of workspace vectors
      * @param noTimeRegimes :: number of time regime.
      */
-    void LoadRawHelper::readworkspaceParameters(int& numberOfSpectra,int& numberOfPeriods,int& lengthIn,int & noTimeRegimes )
+    void LoadRawHelper::readworkspaceParameters(int64_t& numberOfSpectra,int64_t& numberOfPeriods,int64_t& lengthIn,int64_t & noTimeRegimes )
     {
       // Read in the number of spectra in the RAW file
-      m_numberOfSpectra=numberOfSpectra = isisRaw->t_nsp1;
+      m_numberOfSpectra=numberOfSpectra = static_cast<int64_t>(isisRaw->t_nsp1);
       // Read the number of periods in this file
       numberOfPeriods = isisRaw->t_nper;
       // Read the number of time channels (i.e. bins) from the RAW file
-      const int channelsPerSpectrum = isisRaw->t_ntc1;
+      const int64_t channelsPerSpectrum = isisRaw->t_ntc1;
       // Read in the time bin boundaries
       lengthIn = channelsPerSpectrum + 1;
       // Now check whether there is more than one time regime in use
@@ -186,7 +194,7 @@ namespace Mantid
      * @return an empty workspace of the given parameters
      */
     DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
-      int nVectors,int xLengthIn,int yLengthIn)
+      int64_t nVectors,int64_t xLengthIn,int64_t yLengthIn)
     {
       DataObjects::Workspace2D_sptr empty;
       if(!ws_sptr)return empty;
@@ -202,7 +210,7 @@ namespace Mantid
     *  @param title :: title of the workspace
     *  @return Workspace2D_sptr shared pointer to the workspace
     */
-    DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(int nVectors, int xlengthIn,int ylengthIn,const std::string& title)
+    DataObjects::Workspace2D_sptr LoadRawHelper::createWorkspace(int64_t nVectors, int64_t xlengthIn,int64_t ylengthIn,const std::string& title)
     {
       DataObjects::Workspace2D_sptr workspace;
       if(nVectors>0)
@@ -230,8 +238,8 @@ namespace Mantid
 
     */
     void LoadRawHelper::createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,DataObjects::Workspace2D_sptr& normalws_sptr,
-      WorkspaceGroup_sptr& mongrp_sptr,const int mwsSpecs,const int nwsSpecs,
-      const int numberOfPeriods,const int lengthIn,const std::string title)
+      WorkspaceGroup_sptr& mongrp_sptr,const int64_t mwsSpecs,const int64_t nwsSpecs,
+      const int64_t numberOfPeriods,const int64_t lengthIn,const std::string title)
     {
       try
       { 
@@ -320,7 +328,7 @@ namespace Mantid
     *  @param bmonitors :: boolean flag to name  the workspaces
     */
     void LoadRawHelper::setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr, WorkspaceGroup_sptr grpws_sptr,
-      const int period, bool bmonitors)
+      const int64_t period, bool bmonitors)
     {
       if(!ws_sptr) return;
       if(!grpws_sptr) return;
@@ -355,7 +363,7 @@ namespace Mantid
     *  @param  bMonitor to identify the workspace is an output workspace or monitor workspace
     */
     void LoadRawHelper::setWorkspaceProperty(const std::string& propertyName, const std::string& title,
-      WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int numberOfPeriods, bool bMonitor)
+      WorkspaceGroup_sptr grpws_sptr, DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods, bool bMonitor)
     {
       Property *ws = getProperty("OutputWorkspace");
 	  if(!ws) return;
@@ -390,7 +398,7 @@ namespace Mantid
     *  @param binStart :: start of bin
     */
     void LoadRawHelper::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace, const std::vector<
-      boost::shared_ptr<MantidVec> >& timeChannelsVec, int wsIndex, int nspecNum, int noTimeRegimes,int lengthIn,int binStart)
+      boost::shared_ptr<MantidVec> >& timeChannelsVec, int64_t wsIndex, int64_t nspecNum, int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart)
     {
       if(!newWorkspace)return;
       typedef double (*uf)(double);
@@ -432,21 +440,21 @@ namespace Mantid
     *  @param monitorSpecList :: a list holding the spectrum indexes of the monitors
     */
     void LoadRawHelper::getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,
-      std::vector<int>& monitorSpecList)
+      std::vector<int64_t>& monitorSpecList)
     {
       if (!m_monitordetectorList.empty())
       {
         const SpectraDetectorMap& specdetMap = localWorkspace->spectraMap();
         //get the monitor spectrum list from SpectraDetectorMap
-        std::vector<int> specList = specdetMap.getSpectra(m_monitordetectorList);
+        std::vector<int64_t> specList = specdetMap.getSpectra(m_monitordetectorList);
         // remove duplicates by calling  sort & unique algorithms
         sort(specList.begin(), specList.end(), std::less<int>());
-        std::vector<int>::iterator uEnd;
+        std::vector<int64_t>::iterator uEnd;
         uEnd = unique(specList.begin(), specList.end());
-        std::vector<int> newVec;
+        std::vector<int64_t> newVec;
         newVec.assign(specList.begin(), uEnd);
         //remove if zeroes are  there in the Spectra list
-        std::vector<int>::iterator itr;
+        std::vector<int64_t>::iterator itr;
         itr = find(newVec.begin(), newVec.end(), 0);
         if (itr != newVec.end())
           newVec.erase(itr);
@@ -500,18 +508,18 @@ namespace Mantid
     *  @param lengthIn :: The number of time channels
     *  @return The vector(s) containing the time channel boundaries, in a vector of shared ptrs
     */
-    std::vector<boost::shared_ptr<MantidVec> > LoadRawHelper::getTimeChannels(const int& regimes,
-      const int& lengthIn)
+    std::vector<boost::shared_ptr<MantidVec> > LoadRawHelper::getTimeChannels(const int64_t& regimes,
+      const int64_t& lengthIn)
     {
       float* const timeChannels = new float[lengthIn];
-      isisRaw->getTimeChannels(timeChannels, lengthIn);
+      isisRaw->getTimeChannels(timeChannels, static_cast<int>(lengthIn));
 
       std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec;
       if (regimes >= 2)
       {
         g_log.debug() << "Raw file contains " << regimes << " time regimes\n";
         // If more than 1 regime, create a timeChannelsVec for each regime
-        for (int i = 0; i < regimes; ++i)
+        for (int64_t i = 0; i < regimes; ++i)
         {
           // Create a vector with the 'base' time channels
           boost::shared_ptr<MantidVec> channelsVec(new MantidVec(timeChannels, timeChannels + lengthIn));
@@ -523,9 +531,9 @@ namespace Mantid
           timeChannelsVec.push_back(channelsVec);
         }
         // In this case, also need to populate the map of spectrum-regime correspondence
-        const int ndet = isisRaw->i_det;
-        std::map<int, int>::iterator hint = m_specTimeRegimes.begin();
-        for (int j = 0; j < ndet; ++j)
+        const int64_t ndet = static_cast<int64_t>(isisRaw->i_det);
+        std::map<int64_t, int64_t>::iterator hint = m_specTimeRegimes.begin();
+        for (int64_t j = 0; j < ndet; ++j)
         {
           // No checking for consistency here - that all detectors for given spectrum
           // are declared to use same time regime. Will just use first encountered
@@ -598,7 +606,7 @@ namespace Mantid
         }
         // Debugging code??
         m_monitordetectorList = loadInst->getProperty("MonitorList");
-        std::vector<int>::const_iterator itr;
+        std::vector<int64_t>::const_iterator itr;
         for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
         {
           g_log.debug() << "Monitor detector id is " << (*itr) << std::endl;
@@ -625,7 +633,7 @@ namespace Mantid
         g_log.error("Unable to successfully run LoadInstrumentFromRaw sub-algorithm");
       }
       m_monitordetectorList = loadInst->getProperty("MonitorList");
-      std::vector<int>::const_iterator itr;
+      std::vector<int64_t>::const_iterator itr;
       for (itr = m_monitordetectorList.begin(); itr != m_monitordetectorList.end(); ++itr)
       {
         g_log.debug() << "Monitor dtector id is " << (*itr) << std::endl;
@@ -826,8 +834,8 @@ namespace Mantid
         }
         else
         {
-          const int minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
-          const int maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
+          const int64_t minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
+          const int64_t maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
           if (maxlist >m_numberOfSpectra || minlist <= 0)
           {
             g_log.error("Invalid list of spectra");
@@ -854,9 +862,9 @@ namespace Mantid
      * Calculates the total number of spectra in the workspace, given the input properties
      * @return the size of the workspace (number of spectra)
      */
-    int LoadRawHelper::calculateWorkspaceSize()
+    int64_t LoadRawHelper::calculateWorkspaceSize()
     {
-      int total_specs(0);
+      int64_t total_specs(0);
       if (m_interval || m_list)
       {
         if (m_interval)
@@ -874,7 +882,7 @@ namespace Mantid
         {
           if (m_interval)
           {
-            for (std::vector<int>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
+            for (std::vector<int64_t>::iterator it = m_spec_list.begin(); it != m_spec_list.end();)
               if (*it >= m_spec_min && *it < m_spec_max)
               {
                 it = m_spec_list.erase(it);
@@ -884,7 +892,7 @@ namespace Mantid
           }
           if (m_spec_list.size() == 0)
             m_list = false;
-          total_specs += static_cast<int>(m_spec_list.size());
+          total_specs += static_cast<int64_t>(m_spec_list.size());
           m_total_specs=total_specs;
 
         }
@@ -904,12 +912,12 @@ namespace Mantid
     /// @param monitorSpecList :: the vector of the monitor spectra
     /// @param normalwsSpecs :: the spectra for the detector workspace
     /// @param monitorwsSpecs :: the spectra for the monitor workspace
-    void LoadRawHelper::calculateWorkspacesizes(const std::vector<int>& monitorSpecList, 
-      int& normalwsSpecs, int & monitorwsSpecs)
+    void LoadRawHelper::calculateWorkspacesizes(const std::vector<int64_t>& monitorSpecList,
+      int64_t& normalwsSpecs, int64_t & monitorwsSpecs)
     {
       if (!m_interval && !m_bmspeclist)
       {
-        monitorwsSpecs = static_cast<int>(monitorSpecList.size());
+        monitorwsSpecs = static_cast<int64_t>(monitorSpecList.size());
         normalwsSpecs = m_total_specs - monitorwsSpecs;
         g_log.debug() << "normalwsSpecs   when m_interval  & m_bmspeclist are  false is  " << normalwsSpecs
           << "  monitorwsSpecs is " << monitorwsSpecs << std::endl;
@@ -919,7 +927,7 @@ namespace Mantid
         int msize = 0;
         if (m_interval)
         {
-          std::vector<int>::const_iterator itr1;
+          std::vector<int64_t>::const_iterator itr1;
           for (itr1 = monitorSpecList.begin(); itr1 != monitorSpecList.end(); ++itr1)
           {
             if (*itr1 >= m_spec_min && *itr1 < m_spec_max)
@@ -934,7 +942,7 @@ namespace Mantid
         {
           if (m_interval)
           {
-            std::vector<int>::iterator itr;
+            std::vector<int64_t>::iterator itr;
             for (itr = m_spec_list.begin(); itr != m_spec_list.end();)
             { //if  the m_spec_list elements are in the range between m_spec_min & m_spec_max
               if (*itr >= m_spec_min && *itr < m_spec_max)
@@ -950,9 +958,9 @@ namespace Mantid
             else
             { //at this point there are monitors in the list which are not in the min& max range
               // so find those  monitors  count and calculate the workspace specs 
-              std::vector<int>::const_iterator itr;
-              std::vector<int>::const_iterator monitr;
-              int monCounter = 0;
+              std::vector<int64_t>::const_iterator itr;
+              std::vector<int64_t>::const_iterator monitr;
+              int64_t monCounter = 0;
               for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr)
               {
                 monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
@@ -967,9 +975,9 @@ namespace Mantid
           }//end if loop for m_interval  
           else
           { //if only List true
-            int mSize = 0;
-            std::vector<int>::const_iterator itr;
-            std::vector<int>::const_iterator monitr;
+            int64_t mSize = 0;
+            std::vector<int64_t>::const_iterator itr;
+            std::vector<int64_t>::const_iterator monitr;
             for (itr = m_spec_list.begin(); itr != m_spec_list.end(); ++itr)
             {
               monitr = find(monitorSpecList.begin(), monitorSpecList.end(), *itr);
@@ -990,17 +998,17 @@ namespace Mantid
     void LoadRawHelper::loadSpectra(FILE* file,const int& period,const int& total_specs,
       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> > timeChannelsVec)
     {
-      int histCurrent = -1;
-      int wsIndex=0;
-      int numberOfPeriods=isisRaw->t_nper;
-      int histTotal = total_specs * numberOfPeriods;
-      int noTimeRegimes=getNumberofTimeRegimes();
-      int lengthIn = isisRaw->t_ntc1+1;
+      int64_t histCurrent = -1;
+      int64_t wsIndex=0;
+      int64_t numberOfPeriods=static_cast<int64_t>(isisRaw->t_nper);
+      double histTotal = static_cast<double>(total_specs * numberOfPeriods);
+      int64_t noTimeRegimes=getNumberofTimeRegimes();
+      int64_t lengthIn = static_cast<int64_t>(isisRaw->t_ntc1+1);
 
       //loop through spectra
-      for (int i = 1; i <= m_numberOfSpectra; ++i)
+      for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
       {
-        int histToRead = i + period * (m_numberOfSpectra + 1);
+        int64_t histToRead = i + period * (m_numberOfSpectra + 1);
         if ((i >= m_spec_min && i < m_spec_max) || 
            (m_list && find(m_spec_list.begin(), m_spec_list.end(),i) != m_spec_list.end()))
         {
@@ -1016,7 +1024,7 @@ namespace Mantid
           {
             if (++histCurrent % 100 == 0)
             {
-              m_prog = double(histCurrent) / histTotal;
+              m_prog = static_cast<double>(histCurrent) / histTotal;
             }
             interruption_point();
           }

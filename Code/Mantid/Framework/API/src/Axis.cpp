@@ -12,6 +12,8 @@ namespace Mantid
 namespace API
 {
 
+using std::size_t;
+
 /// Constructor
 Axis::Axis() :
 m_title(),m_unit(Mantid::Kernel::UnitFactory::Instance().create("Empty"))
@@ -69,9 +71,9 @@ void Axis::setUnit(const std::string & unit)
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-const int& Axis::spectraNo(const int& index) const
+const int64_t& Axis::spectraNo(const size_t& index) const
 {
-  (void) index; //Avoid compiler warning
+  UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 
@@ -80,9 +82,9 @@ const int& Axis::spectraNo(const int& index) const
  *  @return The spectrum number as an int
  *  @throw  domain_error If this method is called on a numeric axis
  */
-int& Axis::spectraNo(const int& index)
+int64_t& Axis::spectraNo(const size_t& index)
 {
-  (void) index; //Avoid compiler warning
+  UNUSED_ARG(index)
   throw std::domain_error("Cannot call spectraNo() on a non-spectra axis.");
 }
 

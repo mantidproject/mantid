@@ -172,12 +172,12 @@ public:
   std::vector<WeightedEventNoTime>& getWeightedEventsNoTime();
   const std::vector<WeightedEventNoTime>& getWeightedEventsNoTime() const;
 
-  void addDetectorID(const int detID);
+  void addDetectorID(const int64_t detID);
 
-  bool hasDetectorID(const int detID) const;
+  bool hasDetectorID(const int64_t detID) const;
 
-  std::set<int>& getDetectorIDs();
-  const std::set<int>& getDetectorIDs() const;
+  std::set<int64_t>& getDetectorIDs();
+  const std::set<int64_t>& getDetectorIDs() const;
 
   void clear(const bool removeDetIDs=true);
   void clearUnused();
@@ -320,7 +320,7 @@ private:
   mutable MantidVecPtr refDx;
 
   /// Set of the detector IDs associated with this EventList
-  std::set<int> detectorIDs;
+  std::set<int64_t> detectorIDs;
 
   void convertTof_onList(const double factor, const double offset);
 

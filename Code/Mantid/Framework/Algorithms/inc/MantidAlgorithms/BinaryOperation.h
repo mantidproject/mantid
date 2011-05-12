@@ -10,6 +10,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/EventList.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -79,7 +80,7 @@ namespace Mantid
        * Index into vector: workspace index in the lhs;
        * Value at that index: workspace index of the rhs to apply to the WI in the lhs. -1 if not found.
        */
-      typedef std::vector< int >  BinaryOperationTable;
+      typedef std::vector< int64_t >  BinaryOperationTable;
 
       static BinaryOperationTable * buildBinaryOperationTable(API::MatrixWorkspace_const_sptr lhs, API::MatrixWorkspace_const_sptr rhs);
 
@@ -113,7 +114,7 @@ namespace Mantid
       /// Checks if the spectra at the given index of either input workspace is masked. If so then the output spectra has zeroed data
       /// and is also masked. The function returns true if further processing is not required on the spectra.
       virtual bool propagateSpectraMask(const API::MatrixWorkspace_const_sptr lhs,const API::MatrixWorkspace_const_sptr rhs, 
-                                        const int index, API::MatrixWorkspace_sptr out);
+                                        const int64_t index, API::MatrixWorkspace_sptr out);
 
       /** Carries out the binary operation on a single spectrum, with another spectrum as the right-hand operand.
        *
@@ -265,7 +266,7 @@ namespace Mantid
 
 
       /// A store for accumulated spectra that should be masked in the output workspace
-      std::vector<int> m_indicesToMask;
+      std::vector<int64_t> m_indicesToMask;
       /// Progress reporting
       API::Progress* m_progress;  
     };

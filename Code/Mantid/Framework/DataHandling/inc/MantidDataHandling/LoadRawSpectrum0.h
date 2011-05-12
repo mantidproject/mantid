@@ -84,20 +84,20 @@ namespace Mantid
       std::string m_filename;
 
       /// The number of spectra in the raw file
-      int m_numberOfSpectra;
+      int64_t m_numberOfSpectra;
       /// The number of periods in the raw file
-      int m_numberOfPeriods;
+      int64_t m_numberOfPeriods;
 
 	   /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
       /// A map for storing the time regime for each spectrum
-      std::map<int,int> m_specTimeRegimes;
+      std::map<int64_t,int64_t> m_specTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
       /// Read in the time bin boundaries
-      int m_lengthIn;
-	  /// number of time regime
-	  int m_noTimeRegimes;
+      int64_t m_lengthIn;
+      /// number of time regime
+      int64_t m_noTimeRegimes;
      
       /// TimeSeriesProperty<int> containing data periods.
       boost::shared_ptr<Kernel::Property> m_perioids;

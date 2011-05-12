@@ -108,7 +108,7 @@ namespace Mantid
       // ignore any file extension in checking if a suffix is present
       Poco::Path entry(userString);
       std::string noExt(entry.getBaseName());
-      const int repNumChars = ALLOWED_SUFFIX.size();
+      const size_t repNumChars = ALLOWED_SUFFIX.size();
       if (noExt.find(ALLOWED_SUFFIX) == noExt.size() - repNumChars)
       {
         userString.replace(userString.size() - repNumChars, repNumChars, "");
@@ -230,7 +230,7 @@ namespace Mantid
       std::string extension;
       if (hintPath.depth() == 0)
       {
-        std::string::difference_type i = filename.find_last_of('.');
+        std::size_t i = filename.find_last_of('.');
         if (i != std::string::npos)
         {
           extension = filename.substr(i);

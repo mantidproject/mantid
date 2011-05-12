@@ -99,10 +99,10 @@ void ConjoinWorkspaces::exec()
 
   // Loop over the input workspaces in turn copying the data into the output one
   Axis* outAxis = output->getAxis(1);
-  const int& nhist1 = ws1->getNumberHistograms();
+  const int64_t& nhist1 = ws1->getNumberHistograms();
   const Axis* axis1 = ws1->getAxis(1);
   PARALLEL_FOR2(ws1, output)
-  for (int i = 0; i < nhist1; ++i)
+  for (int64_t i = 0; i < nhist1; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     output->setX(i,XValues);
@@ -125,11 +125,11 @@ void ConjoinWorkspaces::exec()
   }
   PARALLEL_CHECK_INTERUPT_REGION
   //For second loop we use the offset from the first
-  const int& nhist2 = ws2->getNumberHistograms();
+  const int64_t& nhist2 = ws2->getNumberHistograms();
   const Axis* axis2 = ws2->getAxis(1);
 
   PARALLEL_FOR2(ws2, output)
-  for (int j = 0; j < nhist2; ++j)
+  for (int64_t j = 0; j < nhist2; ++j)
   {
     PARALLEL_START_INTERUPT_REGION
     output->setX(nhist1 + j,XValues);
@@ -185,8 +185,8 @@ void ConjoinWorkspaces::execEvent()
   // Initialize the progress reporting object
   m_progress = new API::Progress(this, 0.0, 1.0, totalHists);
 
-  const int& nhist1 = event_ws1->getNumberHistograms();
-  for (int i = 0; i < nhist1; ++i)
+  const int64_t& nhist1 = event_ws1->getNumberHistograms();
+  for (int64_t i = 0; i < nhist1; ++i)
   {
     //Copy the events over
     output->getOrAddEventList(i) = event_ws1->getEventList(i); //Should fire the copy constructor
@@ -194,8 +194,8 @@ void ConjoinWorkspaces::execEvent()
   }
 
   //For second loop we use the offset from the first
-  const int& nhist2 = event_ws2->getNumberHistograms();
-  for (int j = 0; j < nhist2; ++j)
+  const int64_t& nhist2 = event_ws2->getNumberHistograms();
+  for (int64_t j = 0; j < nhist2; ++j)
   {
     //This is the workspace index at which we assign in the output
     int output_wi = j + nhist1;
@@ -287,14 +287,14 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   // Loop through the first workspace adding all the spectrum numbers & UDETS to a set
   const Axis* axis1 = ws1->getAxis(1);
   const SpectraDetectorMap& specmap1 = ws1->spectraMap();
-  std::set<int> spectra, detectors;
-  const int& nhist1 = ws1->getNumberHistograms();
-  for (int i = 0; i < nhist1; ++i)
+  std::set<int64_t> spectra, detectors;
+  const int64_t& nhist1 = ws1->getNumberHistograms();
+  for (int64_t i = 0; i < nhist1; ++i)
   {
-    const int spectrum = axis1->spectraNo(i);
+    const int64_t spectrum = axis1->spectraNo(i);
     spectra.insert(spectrum);
-    const std::vector<int> dets = specmap1.getDetectors(spectrum);
-    std::vector<int>::const_iterator it;
+    const std::vector<int64_t> dets = specmap1.getDetectors(spectrum);
+    std::vector<int64_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       detectors.insert(*it);
@@ -304,10 +304,10 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
   // Now go throught the spectrum numbers & UDETS in the 2nd workspace, making sure that there's no overlap
   const Axis* axis2 = ws2->getAxis(1);
   const SpectraDetectorMap& specmap2 = ws2->spectraMap();
-  const int& nhist2 = ws2->getNumberHistograms();
-  for (int j = 0; j < nhist2; ++j)
+  const int64_t& nhist2 = ws2->getNumberHistograms();
+  for (int64_t j = 0; j < nhist2; ++j)
   {
-    const int spectrum = axis2->spectraNo(j);
+    const int64_t spectrum = axis2->spectraNo(j);
     if (checkSpectra)
     {
       if ( spectrum > 0 && spectra.find(spectrum) != spectra.end() )
@@ -316,8 +316,8 @@ void ConjoinWorkspaces::checkForOverlap(API::MatrixWorkspace_const_sptr ws1, API
         throw std::invalid_argument("The input workspaces have overlapping spectrum numbers");
       }
     }
-    std::vector<int> dets = specmap2.getDetectors(spectrum);
-    std::vector<int>::const_iterator it;
+    std::vector<int64_t> dets = specmap2.getDetectors(spectrum);
+    std::vector<int64_t>::const_iterator it;
     for (it = dets.begin(); it != dets.end(); ++it)
     {
       if ( detectors.find(*it) != detectors.end() )

@@ -7,6 +7,7 @@
 #include "MantidAPI/Algorithm.h"
 #include "MantidAPI/Sample.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 #include <napi.h>
 #include <climits>
 
@@ -96,7 +97,7 @@ namespace Mantid
             void exec();
 
             void checkOptionalProperties();
-            void loadData(int, int, int&, DataObjects::Workspace2D_sptr );
+            void loadData(std::size_t, std::size_t, std::size_t&, DataObjects::Workspace2D_sptr );
             void runLoadInstrument(DataObjects::Workspace2D_sptr);
             void loadMappingTable(DataObjects::Workspace2D_sptr);
             void loadRunDetails(DataObjects::Workspace2D_sptr localWorkspace);
@@ -106,7 +107,7 @@ namespace Mantid
             template<class TYPE>
             TYPE getNXData(const std::string & name);
 
-            void loadLogs(DataObjects::Workspace2D_sptr,int period = 1);
+            void loadLogs(DataObjects::Workspace2D_sptr,std::size_t period = 1);
 
             /// The name and path of the input file
             std::string m_filename;
@@ -116,25 +117,25 @@ namespace Mantid
             std::string m_samplename;
 
             /// The number of spectra in the raw file
-            int m_numberOfSpectra;
+            std::size_t m_numberOfSpectra;
             /// The number of periods in the raw file
-            int m_numberOfPeriods;
+            std::size_t m_numberOfPeriods;
             /// The nuber of time chanels per spectrum
-            int m_numberOfChannels;
+            std::size_t m_numberOfChannels;
             /// Has the spectrum_list property been set?
             bool m_list;
             /// Have the spectrum_min/max properties been set?
             bool m_interval;
 			  /// The number of the input entry
-            int m_entrynumber;
+            std::size_t m_entrynumber;
             /// The value of the spectrum_list property
-            std::vector<int> m_spec_list;
+            std::vector<std::size_t> m_spec_list;
             /// The value of the spectrum_min property
-            int m_spec_min;
+            std::size_t m_spec_min;
             /// The value of the spectrum_max property
-            int m_spec_max;
+            std::size_t m_spec_max;
             /// The group which each detector belongs to in order
-            std::vector<int> m_groupings;
+            std::vector<int64_t> m_groupings;
             /// Time channels
             boost::shared_ptr<MantidVec> m_timeChannelsVec;
             /// Counts buffer
@@ -142,7 +143,7 @@ namespace Mantid
             /// Proton charge
             double m_proton_charge;
             /// Spectra numbers
-            boost::shared_array<int> m_spec;
+            boost::shared_array<int64_t> m_spec;
 
             /// Nexus file id
             NXhandle m_fileID;

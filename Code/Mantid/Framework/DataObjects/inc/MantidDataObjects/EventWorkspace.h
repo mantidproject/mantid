@@ -129,88 +129,88 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   virtual ~EventWorkspace();
 
   /// Initialize the pixels */
-  void init(const int&, const int&, const int&);
+  void init(const std::size_t&, const std::size_t&, const std::size_t&);
 
   virtual bool threadSafe() const;
 
   //------------------------------------------------------------
 
   /// Returns the number of single indexable items in the workspace
-  int size() const;
+  std::size_t size() const;
 
   /// Get the blocksize, aka the number of bins in the histogram
-  int blocksize() const;
+  std::size_t blocksize() const;
 
   /// Get the number of histograms. aka the number of pixels or detectors.
-  int getNumberHistograms() const;
+  std::size_t getNumberHistograms() const;
 
   size_t getMemorySize() const;
 
   void copyDataFrom(const EventWorkspace& source,
-      int sourceStartWorkspaceIndex=-1, int sourceEndWorkspaceIndex=-1);
+		    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=0);
 
   double getTofMin() const;
 
   double getTofMax() const;
 
   //------------------------------------------------------------
-  void ensureEnoughBuffersY(int thread_num) const;
-  void ensureEnoughBuffersE(int thread_num) const;
+  void ensureEnoughBuffersY(std::size_t thread_num) const;
+  void ensureEnoughBuffersE(std::size_t thread_num) const;
 
   /// Return the data X vector at a given workspace index
-  MantidVec& dataX(const int);
+  MantidVec& dataX(const std::size_t);
 
   /// Return the data Y vector at a given workspace index
-  MantidVec& dataY(const int);
+  MantidVec& dataY(const std::size_t);
 
   /// Return the data E vector at a given workspace index
-  MantidVec& dataE(const int);
+  MantidVec& dataE(const std::size_t);
 
   /// Return the X data erro vector at a given workspace index
-  MantidVec& dataDx(const int);
+  MantidVec& dataDx(const std::size_t);
 
 
   /// Return the const data X vector at a given workspace index
-  const MantidVec& dataX(const int) const;
+  const MantidVec& dataX(const std::size_t) const;
 
   /// Return the const data Y vector at a given workspace index
-  const MantidVec& dataY(const int) const;
+  const MantidVec& dataY(const std::size_t) const;
 
   /// Return the const data E vector at a given workspace index
-  const MantidVec& dataE(const int) const;
+  const MantidVec& dataE(const std::size_t) const;
 
   /// Return the const X data error vector at a given workspace index
-  const MantidVec& dataDx(const int) const;
+  const MantidVec& dataDx(const std::size_t) const;
 
   /// Get a pointer to the x data at the given workspace index
-  Kernel::cow_ptr<MantidVec> refX(const int) const;
+  Kernel::cow_ptr<MantidVec> refX(const std::size_t) const;
 
-  void readYE(int const index, MantidVec const*& Y, MantidVec const*& E) const;
+  void readYE(std::size_t const index, MantidVec const*& Y, MantidVec const*& E) const;
 
   //------------------------------------------------------------
 
   /// Set the x-axis data for the given pixel via cow_ptr.
-  void setX(const int, const  Kernel::cow_ptr<MantidVec> &);
+  void setX(const std::size_t, const  Kernel::cow_ptr<MantidVec> &);
   /// Set the x-axis data for the given pixel via MantidVec.
-  void setX(const int, const MantidVec &);
+  void setX(const std::size_t, const MantidVec &);
 
   /// Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
   /// Get an EventList object at the given pixelid/spectrum number
-  EventList& getEventListAtPixelID(const int pixelid);
+  EventList& getEventListAtPixelID(const int64_t pixelid);
 
   /// Get an EventList object at the given workspace index number
-  EventList& getEventList(const int workspace_index);
+  EventList& getEventList(const std::size_t workspace_index);
 
   /// Get a const EventList object at the given workspace index number
-  const EventList& getEventList(const int workspace_index) const;
+  const EventList& getEventList(const std::size_t workspace_index) const;
 
   /// Get an EventList pointer at the given workspace index number
-  EventList * getEventListPtr(const int workspace_index);
+  EventList * getEventListPtr(const std::size_t workspace_index);
 
   /// Get or add an EventList
-  EventList& getOrAddEventList(const int workspace_index);
+  EventList& getOrAddEventList(const std::size_t workspace_index);
 
   /// Pad pixels in the workspace using the detectors in the instrument.
   void padPixels(bool parallel);
@@ -237,7 +237,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Returns true always - an EventWorkspace always represents histogramm-able data
   virtual bool isHistogramData() const;
 
-  int MRUSize() const;
+  std::size_t MRUSize() const;
 
   void clearMRU() const;
 
@@ -276,7 +276,7 @@ private:
   static Kernel::Logger & g_log;
 
   /// The number of vectors in the workspace
-  int m_noVectors;
+  std::size_t m_noVectors;
 
   /// The most-recently-used list of dataY histograms
   mutable mru_lists m_bufferedDataY;

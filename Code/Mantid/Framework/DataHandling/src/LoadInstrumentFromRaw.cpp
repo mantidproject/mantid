@@ -156,7 +156,7 @@ void LoadInstrumentFromRaw::exec()
 	instrument->markAsMonitor(det.get());
     g_log.information() << "Detector with ID " << detectorToMark << " marked as a monitor." << std::endl;
   }
-  std::vector<int> monitorList=instrument->getMonitors();
+  std::vector<int64_t> monitorList=instrument->getMonitors();
   setProperty("MonitorList",monitorList);
   // Information to the user about what info is extracted from raw file
   g_log.information() << "SamplePos component added with position set to (0,0,0).\n"

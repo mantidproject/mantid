@@ -142,6 +142,8 @@ NotFoundError : public std::runtime_error
  public:
   NotFoundError(const std::string&,const std::string&);
   NotFoundError(const std::string&,const int&);
+  NotFoundError(const std::string&,const int64_t&);
+  NotFoundError(const std::string&,const std::size_t&);
   NotFoundError(const NotFoundError& A);
   /// Assignment operator
   NotFoundError& operator=(const NotFoundError& A);

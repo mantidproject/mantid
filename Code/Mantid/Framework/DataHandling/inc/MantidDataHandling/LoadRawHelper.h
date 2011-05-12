@@ -77,34 +77,36 @@ namespace Mantid
       /// Reads title from the isisraw class
       void readTitle(FILE* file,std::string & title);
       /// reads workspace parameters like number of histograms,size of vectors etc
-      void readworkspaceParameters(int &numberOfSpectra,int & numberOfPeriods,int& lengthIn,int& noTimeRegimes ); 
+      void readworkspaceParameters(int64_t &numberOfSpectra,int64_t & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
       
       /// skips histrogram data from raw file.
       void skipData(FILE* file,int hist);
+      void skipData(FILE* file,int64_t hist);
 
       ///calls isisRaw ioraw
       void ioRaw(FILE* file,bool from_file );
 
       /// reads data
       bool readData(FILE* file,int histToRead);
+      bool readData(FILE* file,int64_t histToRead);
       
       ///creates shared pointer to workspace from parent workspace
       DataObjects::Workspace2D_sptr createWorkspace(DataObjects::Workspace2D_sptr ws_sptr,
-						    int nVectors=-1,int xLengthIn=-1,int yLengthIn=-1); 
+						    int64_t nVectors=-1,int64_t xLengthIn=-1,int64_t yLengthIn=-1);
           
       /// overloaded method to create shared pointer to workspace
-      DataObjects::Workspace2D_sptr createWorkspace(int nVectors,int xlengthIn,int ylengthIn,const std::string& title);
+      DataObjects::Workspace2D_sptr createWorkspace(int64_t nVectors,int64_t xlengthIn,int64_t ylengthIn,const std::string& title);
       ///creates monitor workspace
       void createMonitorWorkspace(DataObjects::Workspace2D_sptr& monws_sptr,
 				  DataObjects::Workspace2D_sptr& ws_sptr,API::WorkspaceGroup_sptr& mongrp_sptr,
-				  const int mwsSpecs,const int nwsSpecs,const int numberOfPeriods,const int lenthIn,std::string title);
+				  const int64_t mwsSpecs,const int64_t nwsSpecs,const int64_t numberOfPeriods,const int64_t lenthIn,std::string title);
       
       /// creates  shared pointer to group workspace 
       API::WorkspaceGroup_sptr createGroupWorkspace();
      
       //Constructs the time channel (X) vector(s)     
-      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int& regimes,
-                                                                 const int& lengthIn);
+      std::vector<boost::shared_ptr<MantidVec> > getTimeChannels(const int64_t& regimes,
+                                                                 const int64_t& lengthIn);
       /// loadinstrument sub algorithm
       void runLoadInstrument(const std::string& fileName,DataObjects::Workspace2D_sptr);
 
@@ -119,18 +121,18 @@ namespace Mantid
 
 
       ///gets the monitor spectrum list from the workspace
-      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int>& monitorSpecList);
+      void getmonitorSpectrumList(DataObjects::Workspace2D_sptr localWorkspace,std::vector<int64_t>& monitorSpecList);
 
       /// sets the workspace property 
       void setWorkspaceProperty(const std::string & propertyName,const std::string& title,
-				API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int numberOfPeriods,bool bMonitor);
+				API::WorkspaceGroup_sptr grpws_sptr,DataObjects::Workspace2D_sptr ws_sptr,int64_t numberOfPeriods,bool bMonitor);
 
       /// overloaded method to set the workspace property 
-      void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int period,bool bmonitors);
+      void setWorkspaceProperty(DataObjects::Workspace2D_sptr ws_sptr,API::WorkspaceGroup_sptr grpws_sptr,const int64_t period,bool bmonitors);
 
       /// This method sets the raw file data to workspace vectors
       void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,const std::vector<boost::shared_ptr<MantidVec> >& 
-			    timeChannelsVec,int wsIndex,int nspecNum,int noTimeRegimes,int lengthIn,int binStart);
+			    timeChannelsVec,int64_t wsIndex,int64_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
           
       /// creates time series property showing times when when a particular period was active.
       Kernel::Property* createPeriodLog(int period)const;
@@ -155,10 +157,10 @@ namespace Mantid
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties();
       /// calculate workspace size
-      int  calculateWorkspaceSize();
+      int64_t  calculateWorkspaceSize();
       /// calculate workspace sizes if separate or exclude monitors are selected
-      void calculateWorkspacesizes(const std::vector<int>& monitorSpecList, 
-				   int& normalwsSpecs, int& monitorwsSpecs);
+      void calculateWorkspacesizes(const std::vector<int64_t>& monitorSpecList,
+				   int64_t& normalwsSpecs, int64_t& monitorwsSpecs);
       /// load the specra
       void loadSpectra(FILE* file,const int& period, const int& m_total_specs,
 		       DataObjects::Workspace2D_sptr ws_sptr,std::vector<boost::shared_ptr<MantidVec> >); 
@@ -169,11 +171,11 @@ namespace Mantid
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
+      std::vector<int64_t> m_spec_list;
       /// The value of the spectrum_min property
-      int m_spec_min;
+      int64_t m_spec_min;
       /// The value of the spectrum_max property
-      int m_spec_max;
+      int64_t m_spec_max;
 
     private:
      
@@ -185,16 +187,16 @@ namespace Mantid
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
       /// A map for storing the time regime for each spectrum
-      std::map<int,int> m_specTimeRegimes;
+      std::map<int64_t,int64_t> m_specTimeRegimes;
       /// The current value of the progress counter
       double m_prog;
 
         
       /// number of spectra
-      int m_numberOfSpectra;
+      int64_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
-      std::vector<int> m_monitordetectorList;
+      std::vector<int64_t> m_monitordetectorList;
       
       /// TimeSeriesProperty<int> containing data periods.
       boost::shared_ptr<Kernel::Property> m_perioids;
@@ -203,7 +205,7 @@ namespace Mantid
       bool m_bmspeclist;
 
       ///the total nuumber of spectra
-      int m_total_specs;
+      int64_t m_total_specs;
       
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;

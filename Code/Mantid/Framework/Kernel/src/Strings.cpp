@@ -748,9 +748,11 @@ template DLLExport int sectionMCNPX(std::string&,double&);
 template DLLExport int convert(const std::string&,double&);
 template DLLExport int convert(const std::string&,std::string&);
 template DLLExport int convert(const std::string&,int&);
+template DLLExport int convert(const std::string&,std::size_t&);
 template DLLExport int convert(const char*,std::string&);
 template DLLExport int convert(const char*,double&);
 template DLLExport int convert(const char*,int&);
+template DLLExport int convert(const char*,std::size_t&);
 
 template DLLExport int convPartNum(const std::string&,double&);
 template DLLExport int convPartNum(const std::string&,int&);

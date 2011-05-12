@@ -48,19 +48,19 @@ void NearestNeighbours::build()
 * @return map of detID to distance
 * @throw NotFoundError if detector ID is not recognised
 */
-std::map<int, double> NearestNeighbours::neighbours(const int detID) const
+std::map<int64_t, double> NearestNeighbours::neighbours(const int detID) const
 {  
   MapIV::const_iterator vertex = m_detIDtoVertex.find(detID);
 
   if ( vertex != m_detIDtoVertex.end() )
   {
-    std::map<int, double> result;
+    std::map<int64_t, double> result;
     std::pair<Graph::adjacency_iterator, Graph::adjacency_iterator> adjacent = boost::adjacent_vertices(vertex->second, m_graph);
     Graph::adjacency_iterator adjIt;  
     for ( adjIt = adjacent.first; adjIt != adjacent.second; adjIt++ )
     {
       Vertex nearest = (*adjIt);
-      int nrID = m_vertexID[nearest];
+      int64_t nrID = m_vertexID[nearest];
       std::pair<Graph::edge_descriptor, bool> nrEd = boost::edge(vertex->second, nearest, m_graph);
       double distance = m_edgeLength[nrEd.first];
       distance = sqrt(distance);
@@ -83,11 +83,11 @@ std::map<int, double> NearestNeighbours::neighbours(const int detID) const
 * @return map of detID to distance
 * @throw NotFoundError if detID is not recognised
 */
-std::map<int, double> NearestNeighbours::neighbours(const int detID, const double radius) const
+std::map<int64_t, double> NearestNeighbours::neighbours(const int detID, const double radius) const
 {
-  std::map<int, double> nn = neighbours(detID);
-  std::map<int, double> result;
-  std::map<int, double>::iterator nnIt;
+  std::map<int64_t, double> nn = neighbours(detID);
+  std::map<int64_t, double> result;
+  std::map<int64_t, double>::iterator nnIt;
   for ( nnIt = nn.begin(); nnIt != nn.end(); ++nnIt )
   {
     if ( nnIt->second <= radius )
@@ -107,17 +107,17 @@ std::map<int, double> NearestNeighbours::neighbours(const int detID, const doubl
 * @return map of Detector ID's to distance
 * @throw NotFoundError if component is not recognised as a detector
 */
-std::map<int, double> NearestNeighbours::neighbours(const IComponent *component, const double radius) const
+std::map<int64_t, double> NearestNeighbours::neighbours(const IComponent *component, const double radius) const
 {
   const IDetector* detector = dynamic_cast<const Mantid::Geometry::IDetector*>(component);
   int detID = detector->getID();
-  std::map<int, double> nearest = neighbours(detID);
+  std::map<int64_t, double> nearest = neighbours(detID);
   if ( radius == 0.0 )
   {
     return nearest;
   }
-  std::map<int, double> result;
-  std::map<int, double>::iterator nnIt;
+  std::map<int64_t, double> result;
+  std::map<int64_t, double>::iterator nnIt;
   for ( nnIt = nearest.begin(); nnIt != nearest.end(); ++nnIt )
   {
     if ( nnIt->second <= radius )
@@ -146,9 +146,9 @@ void NearestNeighbours::populate()
   // maps
   MapIV pointNoToVertex;
   
-  std::map<int, Mantid::Geometry::IDetector_sptr> detectors;
+  std::map<int64_t, Mantid::Geometry::IDetector_sptr> detectors;
   m_instrument->getDetectors(detectors);
-  std::map<int, Mantid::Geometry::IDetector_sptr>::iterator detIt;
+  std::map<int64_t, Mantid::Geometry::IDetector_sptr>::iterator detIt;
 
   size_t ndets = detectors.size(); // also number of points in array  
   int ndet = 0;

@@ -84,7 +84,7 @@ namespace Mantid
 
       bool isAscii(const std::string & filename) const;
       void checkOptionalProperties();
-      void loadData(const MantidVecPtr::ptr_type&,int, int&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
+      void loadData(const MantidVecPtr::ptr_type&,int64_t, int64_t&, ISISRAW& , const int& , int*, DataObjects::Workspace2D_sptr );
       void runLoadInstrument(DataObjects::Workspace2D_sptr);
       void runLoadInstrumentFromRaw(DataObjects::Workspace2D_sptr);
       void runLoadMappingTable(DataObjects::Workspace2D_sptr);
@@ -104,11 +104,11 @@ namespace Mantid
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int> m_spec_list;
+      std::vector<int64_t> m_spec_list;
       /// The value of the spectrum_min property
-      int m_spec_min;
+      int64_t m_spec_min;
       /// The value of the spectrum_max property
-      int m_spec_max;
+      int64_t m_spec_max;
       
       /// Personal wrapper for sqrt to allow msvs to compile
       static double dblSqrt(double in);

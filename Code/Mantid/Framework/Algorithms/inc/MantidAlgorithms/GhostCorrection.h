@@ -40,7 +40,7 @@ struct GhostDestinationValue
  * KEY = the workspace Index in the input workspace that is causing the ghost.
  * VALUE = corresponding input detector ID (saved to speed up a bit)
  */
-typedef std::map<int, int> GhostSourcesMap;
+typedef std::map<int64_t, int64_t> GhostSourcesMap;
 
 
 /** Takes an EventWorkspace and performs Ghost correction for ghost peaks in
@@ -132,13 +132,13 @@ protected:
   Mantid::API::IndexToIndexMap detId_to_group;
 
   /// Map from detector ID to the offset (used in alignment)
-  std::map<int, double> detId_to_offset;
+  std::map<int64_t, double> detId_to_offset;
 
   /// Pointer to the raw ghost map info
   std::vector<GhostDestinationValue> * rawGhostMap;
 
   /// Number of groups (max group # + 1)
-  int nGroups;
+  int64_t nGroups;
 
   /// List of lists of ghost correction sources.
   std::vector< GhostSourcesMap * > groupedGhostMaps;
@@ -150,7 +150,7 @@ protected:
   Mantid::API::IndexToIndexMap * input_detectorIDToWorkspaceIndexMap;
 
   /// Map where KEY = pixel ID; value = tof to D conversion factor (tof * factor = d).
-  std::map<int, double> * tof_to_d;
+  std::map<int64_t, double> * tof_to_d;
 };
 
 } // namespace Algorithms

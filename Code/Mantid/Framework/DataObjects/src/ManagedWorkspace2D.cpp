@@ -14,6 +14,8 @@ namespace Mantid
 namespace DataObjects
 {
 
+using std::size_t;
+
 DECLARE_WORKSPACE(ManagedWorkspace2D)
 
 // Initialise the instance count
@@ -41,7 +43,7 @@ ManagedWorkspace2D::ManagedWorkspace2D() :
  *  @param YLength :: The number of data/error points in each vector (must all be the same)
  *  @throw std::runtime_error if unable to open a temporary file
  */
-void ManagedWorkspace2D::init(const int &NVectors, const int &XLength, const int &YLength)
+void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
 {
   m_noVectors = NVectors;
   m_axes.resize(2);
@@ -172,7 +174,7 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
      @param newBlock :: Returned data block address
      @param startIndex :: Starting spectrum index in the block
 */
-void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,int startIndex)const
+void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
 {
   // Check whether datablock has previously been saved. If so, read it in.
   if (startIndex <= m_indexWrittenTo)
@@ -251,7 +253,7 @@ void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
  *  being virtual so it now just calls this private (and virtual) method which does the work.
  *  @return the number of histograms assocaited with the workspace
  */
-int ManagedWorkspace2D::getHistogramNumberHelper() const
+size_t ManagedWorkspace2D::getHistogramNumberHelper() const
 {
   return m_noVectors;
 }

@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Algorithm.h"
+#include "MantidKernel/System.h"
 
 namespace Mantid
 {
@@ -81,7 +82,7 @@ private:
   void exec();
 
   /// Pull out a single spectrum from a 2D workspace
-  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS, const int index);
+  API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index);
   /// Call the Linear fitting algorithm as a child algorithm
   API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
   /// Sum the total detector, excluding masked pixels and monitors

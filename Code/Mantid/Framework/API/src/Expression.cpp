@@ -197,7 +197,7 @@ void Expression::tokenize()
 {
   m_tokens.clear();
 
-  unsigned int min_prec = 1000;
+  size_t min_prec = 1000;
   size_t is = 0;
   size_t is1 = 0;
   unsigned int lvl = 0;
@@ -346,7 +346,8 @@ void Expression::tokenize()
 
         if (prec <= min_prec)
         {
-          if (prec < min_prec) min_prec = prec;
+          if (prec < min_prec)
+	    min_prec = prec;
           Token tok(is,i-1,is1,prec);
           tokens.push_back(tok);
           is = is1;

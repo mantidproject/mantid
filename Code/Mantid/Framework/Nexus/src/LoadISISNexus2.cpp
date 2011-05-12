@@ -38,6 +38,7 @@ namespace Mantid
     
     using namespace Kernel;
     using namespace API;
+    using std::size_t;
 
     /// Empty default constructor
     LoadISISNexus2::LoadISISNexus2() : 
@@ -86,7 +87,7 @@ namespace Mantid
       m_instrument_name = entry.getString("name");
 
       //Test if we have a detector block
-      int ndets(0);
+      size_t ndets(0);
       try
       {
         NXClass det_class = entry.openNXGroup("detector_1");
@@ -111,7 +112,7 @@ namespace Mantid
       spec.load();
 
       //Pull out the monitor blocks, if any exist
-      int nmons(0);
+      size_t nmons(0);
       for(std::vector<NXClassInfo>::const_iterator it = entry.groups().begin(); 
         it != entry.groups().end(); ++it) 
       {
@@ -147,26 +148,26 @@ namespace Mantid
         m_numberOfSpectraInFile = m_numberOfSpectra = nsp1[0];
         m_numberOfChannelsInFile = m_numberOfChannels = data.dim2();
 
-        if( nmons > 0 && m_numberOfSpectra == data.dim1() )
+        if( nmons > 0 && m_numberOfSpectra == static_cast<size_t>(data.dim1()) )
         {
           m_monitors.clear();
         }
       }
-      const int x_length = m_numberOfChannels + 1;
+      const size_t x_length = m_numberOfChannels + 1;
 
       // Check input is consistent with the file, throwing if not
       checkOptionalProperties();
 
       // Check which monitors need loading
       const bool empty_spec_list = m_spec_list.empty(); 
-      for( std::map<int, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); )
+      for( std::map<int64_t, std::string>::iterator itr = m_monitors.begin(); itr != m_monitors.end(); )
       {
-        int index = itr->first;
-        std::vector<int>::iterator spec_it = std::find(m_spec_list.begin(), m_spec_list.end(), index);
+        int64_t index = itr->first;
+        std::vector<int64_t>::iterator spec_it = std::find(m_spec_list.begin(), m_spec_list.end(), index);
         if( (!empty_spec_list && spec_it == m_spec_list.end()) ||
           (m_range_supplied && (index < m_spec_min || index > m_spec_max)) )
         {
-          std::map<int, std::string>::iterator itr1 = itr;
+          std::map<int64_t, std::string>::iterator itr1 = itr;
           ++itr;
           m_monitors.erase(itr1);
         }
@@ -183,8 +184,8 @@ namespace Mantid
       }
 
 
-      int total_specs(0);
-      int list_size = static_cast<int>(m_spec_list.size());
+      size_t total_specs(0);
+      size_t list_size = m_spec_list.size();
       if( m_range_supplied )
       {
         //Inclusive range + list size
@@ -222,7 +223,7 @@ namespace Mantid
         timeBins.load();
         m_tof_data.reset(new MantidVec(timeBins(), timeBins() + x_length));
       }
-      int firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
+      int64_t firstentry = (m_entrynumber > 0) ? m_entrynumber : 1;
       loadPeriodData(firstentry, entry, local_workspace);
 
       if( m_numberOfPeriods > 1 && m_entrynumber == 0 )
@@ -234,7 +235,7 @@ namespace Mantid
         const std::string base_name = getPropertyValue("OutputWorkspace") + "_";
         const std::string prop_name = "OutputWorkspace_";
 
-        for( int p = 1; p <= m_numberOfPeriods; ++p )
+        for( size_t p = 1; p <= m_numberOfPeriods; ++p )
         {
           std::ostringstream os;
           os << p;
@@ -270,16 +271,16 @@ namespace Mantid
       //Check the numbers supplied are not in the range and erase the ones that are
       struct range_check
       {	
-        range_check(int min, int max) : m_min(min), m_max(max) {}
+        range_check(int64_t min, int64_t max) : m_min(min), m_max(max) {}
 
-        bool operator()(int x)
+        bool operator()(int64_t x)
         {
           return (x >= m_min && x <= m_max);
         }
 
       private:
-        int m_min;
-        int m_max;
+        int64_t m_min;
+        int64_t m_max;
       };
 
     }
@@ -314,7 +315,7 @@ namespace Mantid
         throw std::invalid_argument("Inconsistent range properties defined.");
       }
 
-      if( m_spec_max > m_numberOfSpectra )
+      if( static_cast<size_t>(m_spec_max) > m_numberOfSpectra )
       {
         g_log.error() << "Inconsistent range property. SpectrumMax is larger than number of spectra: " 
           << m_numberOfSpectra << std::endl;
@@ -323,7 +324,7 @@ namespace Mantid
 
       // Check the entry number
       m_entrynumber = getProperty("EntryNumber");
-      if( m_entrynumber > m_numberOfPeriods || m_entrynumber < 0 )
+      if( static_cast<size_t>(m_entrynumber) > m_numberOfPeriods || m_entrynumber < 0 )
       {
         g_log.error() << "Invalid entry number entered. File contains " << m_numberOfPeriods << " period. " 
           << std::endl;
@@ -345,7 +346,7 @@ namespace Mantid
       // Sort the list so that we can check it's range
       std::sort(m_spec_list.begin(), m_spec_list.end());
 
-      if( m_spec_list.back() > m_numberOfSpectra )
+      if( m_spec_list.back() > static_cast<int64_t>(m_numberOfSpectra) )
       {
         g_log.error() << "Inconsistent SpectraList property defined for a total of " << m_numberOfSpectra 
           << " spectra." << std::endl;
@@ -353,7 +354,7 @@ namespace Mantid
       }
 
       //Check no negative numbers have been passed
-      std::vector<int>::iterator itr = 
+      std::vector<int64_t>::iterator itr =
         std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::less<int>(), 0));
       if( itr != m_spec_list.end() )
       {
@@ -376,23 +377,23 @@ namespace Mantid
     * @param entry :: The opened root entry node for accessing the monitor and data nodes
     * @param local_workspace :: The workspace to place the data in
     */
-    void LoadISISNexus2::loadPeriodData(int period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
+    void LoadISISNexus2::loadPeriodData(int64_t period, NXEntry & entry, DataObjects::Workspace2D_sptr local_workspace)
     {
-      int hist_index = 0;
-      int period_index(period - 1);
-      int first_monitor_spectrum = 0;
+      int64_t hist_index = 0;
+      int64_t period_index(period - 1);
+      int64_t first_monitor_spectrum = 0;
 
       if( !m_monitors.empty() )
       {
         first_monitor_spectrum = m_monitors.begin()->first;
         hist_index = first_monitor_spectrum - 1;
-        for(std::map<int,std::string>::const_iterator it = m_monitors.begin(); 
+        for(std::map<int64_t,std::string>::const_iterator it = m_monitors.begin();
           it != m_monitors.end(); ++it)
         {
           NXData monitor = entry.openNXData(it->second);
           NXInt mondata = monitor.openIntData();
           m_progress->report("Loading monitor");
-          mondata.load(1,period-1);
+          mondata.load(1,static_cast<int>(period-1)); // TODO this is just wrong
           MantidVec& Y = local_workspace->dataY(hist_index);
           Y.assign(mondata(),mondata() + m_numberOfChannels);
           MantidVec& E = local_workspace->dataE(hist_index);
@@ -418,7 +419,7 @@ namespace Mantid
         data.open();
         //Start with thelist members that are lower than the required spectrum
         const int * const spec_begin = m_spec.get();
-        std::vector<int>::iterator min_end = m_spec_list.end();
+        std::vector<int64_t>::iterator min_end = m_spec_list.end();
         if( !m_spec_list.empty() )
         {
           // If we have a list, by now it is ordered so first pull in the range below the starting block range
@@ -428,14 +429,14 @@ namespace Mantid
             min_end = std::find_if(m_spec_list.begin(), m_spec_list.end(), std::bind2nd(std::greater<int>(), m_spec_min));
           }
 
-          for( std::vector<int>::iterator itr = m_spec_list.begin(); itr < min_end; ++itr )
+          for( std::vector<int64_t>::iterator itr = m_spec_list.begin(); itr < min_end; ++itr )
           {
             // Load each
-            int spectra_no = (*itr);
+            int64_t spectra_no = (*itr);
             // For this to work correctly, we assume that the spectrum list increases monotonically
-            int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
+            int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
             m_progress->report("Loading data");
-            loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
+            loadBlock(data, static_cast<int64_t>(1), period_index, filestart, hist_index, spectra_no, local_workspace);
           }
         }    
 
@@ -443,28 +444,28 @@ namespace Mantid
         {
           // When reading in blocks we need to be careful that the range is exactly divisible by the blocksize
           // and if not have an extra read of the left overs
-          const int blocksize = 8;
-          const int rangesize = (m_spec_max - m_spec_min + 1) - static_cast<int>(m_monitors.size());
-          const int fullblocks = rangesize / blocksize;
-          int read_stop = 0;
-          int spectra_no = m_spec_min;
+          const int64_t blocksize = 8;
+          const int64_t rangesize = (m_spec_max - m_spec_min + 1) - m_monitors.size();
+          const int64_t fullblocks = rangesize / blocksize;
+          int64_t read_stop = 0;
+          int64_t spectra_no = m_spec_min;
           if (first_monitor_spectrum == 1)
           {// this if crudely checks whether the monitors are at the begining or end of the spectra
             spectra_no += static_cast<int>(m_monitors.size());
           }
           // For this to work correctly, we assume that the spectrum list increases monotonically
-          int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
+          int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           if( fullblocks > 0 )
           {
             read_stop = (fullblocks * blocksize);// + m_monitors.size(); //RNT: I think monitors are excluded from the data
             //for( ; hist_index < read_stop; )
-            for(int i = 0; i < fullblocks; ++i)
+            for(int64_t i = 0; i < fullblocks; ++i)
             {
               loadBlock(data, blocksize, period_index, filestart, hist_index, spectra_no, local_workspace);
               filestart += blocksize;
             }
           }
-          int finalblock = rangesize - (fullblocks * blocksize);
+          int64_t finalblock = rangesize - (fullblocks * blocksize);
           if( finalblock > 0 )
           {
             loadBlock(data, finalblock, period_index, filestart, hist_index, spectra_no,  local_workspace);
@@ -472,12 +473,12 @@ namespace Mantid
         }
 
         //Load in the last of the list indices
-        for( std::vector<int>::iterator itr = min_end; itr < m_spec_list.end(); ++itr )
+        for( std::vector<int64_t>::iterator itr = min_end; itr < m_spec_list.end(); ++itr )
         {
           // Load each
-          int spectra_no = (*itr);
+          int64_t spectra_no = (*itr);
           // For this to work correctly, we assume that the spectrum list increases monotonically
-          int filestart = static_cast<int>(std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin);
+          int64_t filestart = std::lower_bound(spec_begin,m_spec_end,spectra_no) - spec_begin;
           loadBlock(data, 1, period_index, filestart, hist_index, spectra_no, local_workspace);
         }
       }
@@ -506,14 +507,14 @@ namespace Mantid
     * @param spec_num :: The spectrum number that matches the hist variable
     * @param local_workspace :: The workspace to fill the data with
     */
-    void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int blocksize, int period, int start,
-      int &hist, int& spec_num, 
+    void LoadISISNexus2::loadBlock(NXDataSetTyped<int> & data, int64_t blocksize, int64_t period, int64_t start,
+        int64_t &hist, int64_t& spec_num,
       DataObjects::Workspace2D_sptr local_workspace)
     {
-      data.load(blocksize, period, start);
+      data.load(static_cast<int>(blocksize), static_cast<int>(period), static_cast<int>(start)); // TODO this is just wrong
       int *data_start = data();
       int *data_end = data_start + m_numberOfChannels;
-      int final(hist + blocksize);
+      int64_t final(hist + blocksize);
       while( hist < final )
       {
         m_progress->report("Loading data");

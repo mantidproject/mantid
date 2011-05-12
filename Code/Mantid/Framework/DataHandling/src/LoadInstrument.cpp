@@ -203,7 +203,7 @@ namespace Mantid
         // Get reference to Instrument 
         m_instrument = m_workspace->getBaseInstrument();
         //get list of monitors and set the property
-        std::vector<int>monitordetIdList=m_instrument->getMonitors();
+        std::vector<int64_t>monitordetIdList=m_instrument->getMonitors();
         setProperty("MonitorList",monitordetIdList);
       }
       else
@@ -357,7 +357,7 @@ namespace Mantid
                 appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
               }
             }
-            std::vector<int>monitordetIdList=m_instrument->getMonitors();
+            std::vector<int64_t>monitordetIdList=m_instrument->getMonitors();
             setProperty("MonitorList",monitordetIdList);
             pNL_location->release();
           }

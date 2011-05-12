@@ -112,7 +112,7 @@ bool Detector::isMonitor() const
 /**
 *
 */
-std::map<int, double> Detector::getNeighbours(double radius)
+std::map<int64_t, double> Detector::getNeighbours(double radius)
 {
   return m_map->getNeighbours(getComponent(), radius);
 }

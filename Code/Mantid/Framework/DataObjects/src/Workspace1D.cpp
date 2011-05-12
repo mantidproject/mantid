@@ -11,6 +11,8 @@ namespace Mantid
   namespace DataObjects
   {
 
+    using std::size_t;
+
     DECLARE_WORKSPACE(Workspace1D)
 
     // Get a reference to the logger
@@ -30,7 +32,7 @@ namespace Mantid
     *  @param XLength :: The number of X data points/bin boundaries
     *  @param YLength :: The number of data/error points
     */
-    void Workspace1D::init(const int &NVectors, const int &XLength, const int &YLength)
+    void Workspace1D::init(const size_t &NVectors, const size_t &XLength, const size_t &YLength)
     {
       if(NVectors != 1)
         throw std::out_of_range("Workspace1D::init() cannot create a workspace1D with Nvectors > 1");
@@ -49,7 +51,7 @@ namespace Mantid
     /** Returns the size of the workspace
     * @return The number of items the workspace contains
     */
-    int Workspace1D::size() const
+    size_t Workspace1D::size() const
     {
       return Histogram1D::size();
     }
@@ -57,7 +59,7 @@ namespace Mantid
     /** get the size of each vector
      * @return the blocksize of the workspace
      */
-    int Workspace1D::blocksize() const
+    size_t Workspace1D::blocksize() const
     {
       int retVal = 1000000000;
       //if not empty

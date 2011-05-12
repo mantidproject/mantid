@@ -85,7 +85,7 @@ public:
     event_index_ptr(event_index_ptr), event_index(*event_index_ptr)
   {
     // Cost is approximately proportional to the number of events to process.
-    m_cost = numEvents;
+    m_cost = static_cast<double>(numEvents);
   }
 
   //----------------------------------------------------
@@ -123,7 +123,7 @@ public:
       for (pixID = counts.begin(); pixID != counts.end(); pixID++)
       {
         //Find the the workspace index corresponding to that pixel ID
-        int wi((*pixelID_to_wi_map)[ pixID->first ]);
+        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[ pixID->first ]);
         // Allocate it
         alg->WS->getEventList(wi).reserve( pixID->second );
         if (alg->getCancel()) break; // User cancellation
@@ -157,7 +157,7 @@ public:
     // Will we need to compress?
     bool compress = (alg->compressTolerance >= 0);
     // Which workspace indices were touched?
-    std::set<int> usedWI;
+    std::set<size_t> usedWI;
 
     //Go through all events in the list
     for (std::size_t i = 0; i < numEvents; i++)
@@ -191,7 +191,7 @@ public:
         TofEvent event(tof, pulsetime);
 
         //Find the the workspace index corresponding to that pixel ID
-        int wi((*pixelID_to_wi_map)[event_id[i]]);
+        size_t wi = static_cast<size_t>((*pixelID_to_wi_map)[event_id[i]]);
         // Add it to the list at that workspace index
         WS->getEventList(wi).addEventQuickly( event );
 
@@ -214,7 +214,7 @@ public:
     if (compress)
     {
       // Do it on all the workspace indices we touched
-      std::set<int>::iterator it;
+      std::set<size_t>::iterator it;
       for (it=usedWI.begin(); it!=usedWI.end(); it++)
       {
         EventList * el = WS->getEventListPtr(*it);
@@ -368,9 +368,9 @@ public:
       }
 
       // By default, use all available indices
-      int start_event = 0;
+      size_t start_event = 0;
       ::NeXus::Info id_info = file.getInfo();
-      int stop_event = id_info.dims[0];
+      size_t stop_event = static_cast<size_t>(id_info.dims[0]);
 
       //TODO: Handle the time filtering by changing the start/end offsets.
       for (size_t i=0; i < alg->pulseTimes.size(); i++)
@@ -392,16 +392,14 @@ public:
       }
 
       // Make sure it is within range
-      if ((stop_event > id_info.dims[0]) || (stop_event < 0))
+      if (stop_event > static_cast<size_t>(id_info.dims[0]))
         stop_event = id_info.dims[0];
-      if (start_event < 0)
-        start_event = 0;
 
       alg->getLogger().debug() << entry_name << ": start_event " << start_event << " stop_event "<< stop_event << std::endl;
 
       // These are the arguments to getSlab()
-      load_start[0] = start_event;
-      load_size[0] = stop_event - start_event;
+      load_start[0] = static_cast<int>(start_event);
+      load_size[0] = static_cast<int>(stop_event - start_event);
 
       if ((load_size[0] > 0) && (load_start[0]>=0) )
       {
