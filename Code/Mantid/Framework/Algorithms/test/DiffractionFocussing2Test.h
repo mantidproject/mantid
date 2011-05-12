@@ -222,119 +222,128 @@ private:
 
 
 
-//class DiffractionFocussing2TestPerformance : public CxxTest::TestSuite
-//{
-//public:
-//  EventWorkspace_sptr ws;
-//
-//  DiffractionFocussing2TestPerformance()
-//  {
-//    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
-//    alg->initialize();
-//    alg->setPropertyValue("Filename", "SNAP_Definition.xml");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("MakeEventWorkspace", "1");
-//    alg->execute();
-//    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_empty"));
-//    ws->sortAll(TOF_SORT, NULL);
-//
-//    // Fill a whole bunch of events
-//    PARALLEL_FOR_NO_WSP_CHECK()
-//    for (int i=0; i < ws->getNumberHistograms(); i++)
-//    {
-//      EventList & el = ws->getEventList(i);
-//      for (size_t j=0; j < 20; j++)
-//      {
-//        el.addEventQuickly( TofEvent(double(j)*1e-3) );
-//      }
-//    }
-//    ws->getAxis(0)->setUnit("dSpacing");
-//
-//    alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupNames", "bank1");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_group_bank1");
-//    alg->execute();
-//
-//    alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupNames", "bank1,bank2,bank3,bank4,bank5,bank6");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_group_several");
-//    alg->execute();
-//  }
-//
-//  ~DiffractionFocussing2TestPerformance()
-//  {
-//    AnalysisDataService::Instance().remove("SNAP_empty");
-//    AnalysisDataService::Instance().remove("SNAP_group_bank1");
-//    AnalysisDataService::Instance().remove("SNAP_group_several");
-//  }
-//
-//  void test_SNAP_event_one_group()
-//  {
-//    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
-//    alg->setPropertyValue("PreserveEvents", "1");
-//    alg->execute();
-//    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
-//
-//    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
-//    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 20*65536);
-//    AnalysisDataService::Instance().remove("SNAP_focus");
-//  }
-//
-//  void test_SNAP_event_six_groups()
-//  {
-//    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
-//    alg->setPropertyValue("PreserveEvents", "1");
-//    alg->execute();
-//    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
-//
-//    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
-//    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 6*20*65536);
-//    AnalysisDataService::Instance().remove("SNAP_focus");
-//  }
-//
-//  void test_SNAP_event_one_group_dontPreserveEvents()
-//  {
-//    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
-//    alg->setPropertyValue("PreserveEvents", "0");
-//    alg->execute();
-//    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
-//
-//    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
-//    AnalysisDataService::Instance().remove("SNAP_focus");
-//  }
-//
-//  void test_SNAP_event_six_groups_dontPreserveEvents()
-//  {
-//    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
-//    alg->initialize();
-//    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
-//    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
-//    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
-//    alg->setPropertyValue("PreserveEvents", "0");
-//    alg->execute();
-//    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
-//
-//    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
-//    AnalysisDataService::Instance().remove("SNAP_focus");
-//  }
-//
-//};
+//================================================================================================
+//================================================================================================
+//================================================================================================
+
+class DiffractionFocussing2TestPerformance : public CxxTest::TestSuite
+{
+public:
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static DiffractionFocussing2TestPerformance *createSuite() { return new DiffractionFocussing2TestPerformance(); }
+  static void destroySuite( DiffractionFocussing2TestPerformance *suite ) { delete suite; }
+
+  EventWorkspace_sptr ws;
+
+  DiffractionFocussing2TestPerformance()
+  {
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("LoadEmptyInstrument", 1);
+    alg->initialize();
+    alg->setPropertyValue("Filename", "SNAP_Definition.xml");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("MakeEventWorkspace", "1");
+    alg->execute();
+    ws = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_empty"));
+    ws->sortAll(TOF_SORT, NULL);
+
+    // Fill a whole bunch of events
+    PARALLEL_FOR_NO_WSP_CHECK()
+    for (int i=0; i < ws->getNumberHistograms(); i++)
+    {
+      EventList & el = ws->getEventList(i);
+      for (size_t j=0; j < 20; j++)
+      {
+        el.addEventQuickly( TofEvent(double(j)*1e-3) );
+      }
+    }
+    ws->getAxis(0)->setUnit("dSpacing");
+
+    alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupNames", "bank1");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_group_bank1");
+    alg->execute();
+
+    alg = AlgorithmFactory::Instance().create("CreateGroupingWorkspace", 1);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupNames", "bank1,bank2,bank3,bank4,bank5,bank6");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_group_several");
+    alg->execute();
+  }
+
+  ~DiffractionFocussing2TestPerformance()
+  {
+    AnalysisDataService::Instance().remove("SNAP_empty");
+    AnalysisDataService::Instance().remove("SNAP_group_bank1");
+    AnalysisDataService::Instance().remove("SNAP_group_several");
+  }
+
+  void test_SNAP_event_one_group()
+  {
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
+    alg->setPropertyValue("PreserveEvents", "1");
+    alg->execute();
+    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+
+    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 20*65536);
+    AnalysisDataService::Instance().remove("SNAP_focus");
+  }
+
+  void test_SNAP_event_six_groups()
+  {
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
+    alg->setPropertyValue("PreserveEvents", "1");
+    alg->execute();
+    EventWorkspace_sptr outWS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+
+    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
+    TS_ASSERT_EQUALS( outWS->getNumberEvents(), 6*20*65536);
+    AnalysisDataService::Instance().remove("SNAP_focus");
+  }
+
+  void test_SNAP_event_one_group_dontPreserveEvents()
+  {
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_bank1");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
+    alg->setPropertyValue("PreserveEvents", "0");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+
+    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 1);
+    AnalysisDataService::Instance().remove("SNAP_focus");
+  }
+
+  void test_SNAP_event_six_groups_dontPreserveEvents()
+  {
+    IAlgorithm_sptr alg = AlgorithmFactory::Instance().create("DiffractionFocussing", 2);
+    alg->initialize();
+    alg->setPropertyValue("InputWorkspace", "SNAP_empty");
+    alg->setPropertyValue("GroupingWorkspace", "SNAP_group_several");
+    alg->setPropertyValue("OutputWorkspace", "SNAP_focus");
+    alg->setPropertyValue("PreserveEvents", "0");
+    alg->execute();
+    MatrixWorkspace_sptr outWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("SNAP_focus"));
+
+    TS_ASSERT_EQUALS( outWS->getNumberHistograms(), 6);
+    AnalysisDataService::Instance().remove("SNAP_focus");
+  }
+
+};
 
 
 #endif /*DIFFRACTIONFOCUSSING2TEST_H_*/
