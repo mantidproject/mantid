@@ -66,12 +66,20 @@ namespace CustomInterfaces
 class SANSRunWindow : public MantidQt::API::UserSubWindow
 {
   Q_OBJECT
+  Q_ENUMS(States)
 
 public:
   /// Name of the interface
-  static std::string name() { return "ISIS SANS"; }
+  static std::string name() { return "SANS ISIS"; }
 
-public:
+  ///Stores the batch or single run mode selection
+  enum States {
+    NoSample,                                           ///< No sample workspace has yet been loaded
+    Loading,                                            ///< Workspaces are loading
+    Ready,                                              ///< A sample workspace is loaded and the reduce buttons should be active
+    OneD,                                               ///< Signifies a 1D reduction
+    TwoD                                                ///< For 2D reductions
+  };
   /// Default Constructor
   SANSRunWindow(QWidget *parent = 0);
   /// Destructor
@@ -85,7 +93,7 @@ signals:
   void userfileLoaded();
 
 private:
-  ///Mode enumeration
+  ///Stores the batch or single run mode selection
   enum RunMode { SingleMode = 0, BatchMode };
 
   /// mask type
@@ -129,13 +137,12 @@ private:
   void addSpectrumMasksToTable(const QString & mask_string, const QString & det_name);
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
-  /// Construct the reduction code from the Python script template
-  QString readUserFileGUIChanges(const QString & type);
+  QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
   void componentLOQDistances(boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace, double & lms, double & lsda, double & lsdb);
   /// Enable/disable user interaction
-  void setProcessingState(bool running, int type);
+  void setProcessingState(const States action);
   ///Check for workspace name in the AnalysisDataService
   bool workspaceExists(const QString & ws_name) const;
   Mantid::API::MatrixWorkspace_sptr getGroupMember(Mantid::API::Workspace_const_sptr in, const int member) const;
@@ -314,8 +321,6 @@ private:
   QList<QHash<QString, QLabel*> > m_loq_detlabels;
   /// A map of allowed batch csv tags to column numbers
   QHash<QString,int> m_allowed_batchtags;
-  /// An integer to save the last run reduction type
-  int m_lastreducetype;
   /// Indicate if the reduce module has been loaded?
   bool m_have_reducemodule;
   /// A flag marking if the batch grid has been changed

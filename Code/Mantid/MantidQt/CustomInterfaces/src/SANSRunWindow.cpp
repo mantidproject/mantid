@@ -66,7 +66,7 @@ SANSRunWindow::SANSRunWindow(QWidget *parent) :
   m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
-  m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(), m_lastreducetype(-1),
+  m_s2d_detlabels(), m_loq_detlabels(), m_allowed_batchtags(),
   m_have_reducemodule(false), m_dirty_batch_grid(false), m_tmp_batchfile("")
 {
   ConfigService::Instance().addObserver(m_newInDir);
@@ -259,7 +259,7 @@ void SANSRunWindow::initLocalPython()
   {
     showInformationBox(result);
     m_have_reducemodule = false;
-    setProcessingState(true, -1);    
+    setProcessingState(NoSample);
   }
   runPythonCode("import ISISCommandInterface as i\nimport copy");
   runPythonCode("import isis_instrument\nimport isis_reduction_steps");
@@ -1035,8 +1035,11 @@ void SANSRunWindow::componentLOQDistances(Mantid::API::MatrixWorkspace_sptr work
  * @param running :: If we are processing then some interaction is disabled
  * @param type :: The reduction type, 0 = 1D and 1 = 2D
  */
-void SANSRunWindow::setProcessingState(bool running, int type)
+void SANSRunWindow::setProcessingState(const States action)
 {
+  const bool running(action == Loading || action == OneD || action == TwoD);
+  
+  //we only need a load button for single run mode and even then only when the form isn't busy
   if( m_uiForm.single_mode_btn->isChecked() )
   {
     m_uiForm.load_dataBtn->setEnabled(!running);
@@ -1054,26 +1057,16 @@ void SANSRunWindow::setProcessingState(bool running, int type)
   m_uiForm.userfileBtn->setEnabled(!running);
   m_uiForm.data_dirBtn->setEnabled(!running);
   
+  m_uiForm.oneDBtn->setText(action == OneD ? "Running ..." : "1D Reduce");
+  m_uiForm.twoDBtn->setText(action == TwoD ? "Running ..." : "2D Reduce");
+
   if( running )
   {
     m_uiForm.saveDefault_btn->setEnabled(false);
-
-    if( type == 0 )
-    {   
-      m_uiForm.oneDBtn->setText("Running ...");
-    }
-    else if( type == 1 )
-    {
-      m_uiForm.twoDBtn->setText("Running ...");
-    }
-    else {}
   }
   else
   {
     enableOrDisableDefaultSave();
-
-    m_uiForm.oneDBtn->setText("1D Reduce");
-    m_uiForm.twoDBtn->setText("2D Reduce");
   }
 
   for( int i = 0; i < 4; ++i)
@@ -1543,7 +1536,7 @@ void SANSRunWindow::selectCSVFile()
   }
   //path() returns the directory
   m_last_dir = QFileInfo(m_uiForm.csv_filename->text()).path();
-  if( m_cfg_loaded ) setProcessingState(false, -1);
+  if( m_cfg_loaded ) setProcessingState(Ready);
 }
 /** Raises a browse dialog and inserts the selected file into the
 *  save text edit box, outfile_edit
@@ -1626,7 +1619,7 @@ bool SANSRunWindow::handleLoadButtonClick()
     return false;
   }
 
-  setProcessingState(true, -1);
+  setProcessingState(Loading);
   m_uiForm.load_dataBtn->setText("Loading ...");
 
   if( m_force_reload ) cleanup();
@@ -1635,8 +1628,8 @@ bool SANSRunWindow::handleLoadButtonClick()
   if ( ( ! m_uiForm.transmis->isEmpty() ) && m_uiForm.direct->isEmpty() )
   {
     showInformationBox("Error: Can run supplied without direct run, cannot continue.");
-    setProcessingState(false, -1);
-      m_uiForm.load_dataBtn->setText("Load Data");
+    setProcessingState(NoSample);
+    m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
 
@@ -1677,7 +1670,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
   if (!is_loaded) 
   {
-    setProcessingState(false, -1);
+    setProcessingState(NoSample);
     m_uiForm.load_dataBtn->setText("Load Data");
     return false;
   }
@@ -1735,22 +1728,22 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
  
   m_sample_file = sample;
-  setProcessingState(false, -1);
+  setProcessingState(Ready);
   m_uiForm.load_dataBtn->setText("Load Data");
   return true;
 }
-/** 
- * Construct the python code to perform the analysis based on the 
+/** Construct the python code to perform the analysis using the 
  * current settings
  * @param type :: The reduction type: 1D or 2D
  */
-QString SANSRunWindow::readUserFileGUIChanges(const QString & type)
+QString SANSRunWindow::readUserFileGUIChanges(const States type)
 {
   //Construct a run script based upon the current values within the various widgets
   QString exec_reduce = "i.ReductionSingleton().instrument.setDetector('" +
                             m_uiForm.detbank_sel->currentText() + "')\n";
 
-  exec_reduce += "i.ReductionSingleton().to_Q.output_type='"+type+"'\n";
+  const QString outType(type == OneD ? "1D" : "2D");
+  exec_reduce += "i.ReductionSingleton().to_Q.output_type='"+outType+"'\n";
   //Analysis details
   exec_reduce +="i.ReductionSingleton().user_settings.readLimitValues('L/R '+'"+
     //get rid of the 1 in the line below, a character is need at the moment to give the correct number of characters
@@ -1857,8 +1850,9 @@ QString SANSRunWindow::readSampleObjectGUIChanges()
  * Run the analysis script
  * @param type :: The data reduction type, 1D or 2D
  */
-void SANSRunWindow::handleReduceButtonClick(const QString & type)
+void SANSRunWindow::handleReduceButtonClick(const QString & typeStr)
 {
+  const States type = typeStr == "1D" ? OneD : TwoD;
   //new reduction is going to take place, remove the results from the last reduction
   resetDefaultOutput();
 
@@ -1940,11 +1934,8 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
     py_code += ", reducer=i.ReductionSingleton().reference())";
   }
 
-  int idtype(0);
-  if( type.startsWith("2") ) idtype = 1;
   //Disable buttons so that interaction is limited while processing data
-  setProcessingState(true, idtype);
-  m_lastreducetype = idtype;
+  setProcessingState(type);
 
   QString pythonStdOut = runReduceScriptFunction(py_code);
 
@@ -1971,7 +1962,7 @@ void SANSRunWindow::handleReduceButtonClick(const QString & type)
   // Mark that a reload is necessary to rerun the same reduction
   forceDataReload();
   //Reenable stuff
-  setProcessingState(false, idtype);
+  setProcessingState(Ready);
 
   //If we used a temporary file in batch mode, remove it
   if( m_uiForm.batch_mode_btn->isChecked() && !m_tmp_batchfile.isEmpty() )
@@ -2087,15 +2078,15 @@ void SANSRunWindow::handleRunFindCentre()
   handleLoadButtonClick();
 
   // Disable interaction
-  setProcessingState(true, 0);
+  setProcessingState(OneD);
 
   // This checks whether we have a sample run and that it has been loaded
-  QString py_code(readUserFileGUIChanges("1D"));
+  QString py_code(readUserFileGUIChanges(OneD));
   py_code += readSampleObjectGUIChanges();
 
   if( py_code.isEmpty() )
   {
-    setProcessingState(false, 0);
+    setProcessingState(Ready);
     return;
   }
 
@@ -2190,7 +2181,7 @@ void SANSRunWindow::handleRunFindCentre()
   updateCentreFindingStatus(result);
   
   //Reenable stuff
-  setProcessingState(false, 0);
+  setProcessingState(Ready);
 }
 /** Save the output workspace from a single run reduction (i.e. the
 *  workspace m_outputWS) in all the user selected formats
@@ -2495,7 +2486,7 @@ void SANSRunWindow::pasteToBatchTable()
   if( m_uiForm.batch_table->rowCount() > 0 )
   {
     m_dirty_batch_grid = true;
-    setProcessingState(false, -1);
+    setProcessingState(Ready);
   }
 }
 
@@ -2559,7 +2550,8 @@ void SANSRunWindow::checkList()
   const std::string input(toValdate->text().trimmed().toStdString());
 
   bool valid(false);
-  Poco::StringTokenizer in(input, ",");
+  //split up the comma separated list ignoring spaces
+  Poco::StringTokenizer in(input, ",", Poco::StringTokenizer::TOK_TRIM);
   try
   {
     for(Poco::StringTokenizer::Iterator i=in.begin(), end=in.end(); i!=end; ++i)

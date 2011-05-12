@@ -72,6 +72,8 @@ public:
   virtual const std::string category() const { return "SANS"; }
 
 private:
+  /// stores an estimate of the progress so far as a proportion (starts at zero goes to 1.0)
+  mutable double m_done;
   /// Sets documentation strings for this algorithm
   virtual void initDocs();
   /// Initialisation code
@@ -81,10 +83,12 @@ private:
 
   /// Pull out a single spectrum from a 2D workspace
   API::MatrixWorkspace_sptr extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index);
+  /// Returns a workspace with the evaulation of the fit to the calculated transmission fraction
+  API::MatrixWorkspace_sptr fit(API::MatrixWorkspace_sptr raw, std::vector<double> rebinParams, const std::string fitMethod);
   /// Call the Linear fitting algorithm as a child algorithm
-  API::MatrixWorkspace_sptr fitToData(API::MatrixWorkspace_sptr WS);
-
-  bool logFit; ///< If true, will take log of transmission curve before fitting 
+  API::MatrixWorkspace_sptr fitData(API::MatrixWorkspace_sptr WS, double & grad, double & offset);
+  /// Calls the rebin algorithm
+  API::MatrixWorkspace_sptr rebin(std::vector<double> & binParams, API::MatrixWorkspace_sptr output);
 };
 
 } // namespace Algorithm

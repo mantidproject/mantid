@@ -1270,8 +1270,7 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
         # If no fitting is required just use linear and get unfitted data from CalculateTransmission algorithm
         fit_type = self.CALC_TRANS_FIT_PARAMS[fit_meth]
         CalculateTransmission(trans_tmp_out,direct_tmp_out, fittedtransws,
-            pre_sample, post_sample, MinWavelength=translambda_min,
-            MaxWavelength=translambda_max, FitMethod=fit_type, OutputUnfittedData=True)
+            pre_sample, post_sample, reducer.to_wavelen.get_rebin(), FitMethod=fit_type, OutputUnfittedData=True)
 
         # Remove temporaries
         DeleteWorkspace(trans_tmp_out)
