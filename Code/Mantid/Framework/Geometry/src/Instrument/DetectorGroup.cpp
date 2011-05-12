@@ -61,7 +61,7 @@ namespace Mantid
       }
     }
 
-    int DetectorGroup::getID() const
+    detid_t DetectorGroup::getID() const
     {
       return m_id;
     }
@@ -134,9 +134,9 @@ namespace Mantid
     * 
     *  @return vector of detector IDs
     */
-    std::vector<int> DetectorGroup::getDetectorIDs()
+    std::vector<detid_t> DetectorGroup::getDetectorIDs()
     {
-      std::vector<int> result;
+      std::vector<detid_t> result;
       result.reserve(m_detectors.size());
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)

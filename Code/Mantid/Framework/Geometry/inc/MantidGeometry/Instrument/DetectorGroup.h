@@ -55,7 +55,7 @@ namespace Mantid
       void addDetector(IDetector_sptr det, bool& warn);
 
       // IDetector methods
-      int getID() const;
+      detid_t getID() const;
       std::size_t nDets() const;
       V3D getPos() const;
       double getDistance(const IComponent& comp) const;
@@ -74,7 +74,7 @@ namespace Mantid
       virtual void getBoundingBox(BoundingBox& boundingBox) const;
 
       /// What detectors are contained in the group?
-      std::vector<int> getDetectorIDs();
+      std::vector<detid_t> getDetectorIDs();
       /// What detectors are contained in the group?
       std::vector<IDetector_sptr> getDetectors() const;
 
