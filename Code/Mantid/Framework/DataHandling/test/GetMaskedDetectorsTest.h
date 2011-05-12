@@ -96,7 +96,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( marker.execute());
     TS_ASSERT( marker.isExecuted() );
 
-    std::vector<int> list = marker.getProperty("DetectorList");
+    std::vector<int64_t> list = marker.getProperty("DetectorList");
 
     TS_ASSERT_EQUALS(list.size(), 2);
     TS_ASSERT_EQUALS(list[0], 1);

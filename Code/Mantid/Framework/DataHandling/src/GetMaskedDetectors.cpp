@@ -37,7 +37,7 @@ void GetMaskedDetectors::init()
   declareProperty(
     new WorkspaceProperty<>("InputWorkspace","", Direction::Input),
     "The name of the workspace that will be used as input for the algorithm" );
-  declareProperty(new ArrayProperty<int>("DetectorList", new NullValidator<std::vector<int> >, Direction::Output),
+  declareProperty(new ArrayProperty<int64_t>("DetectorList", new NullValidator<std::vector<int64_t> >, Direction::Output),
     "A comma separated list or array containing a list of masked detector ID's" );
 }
 
