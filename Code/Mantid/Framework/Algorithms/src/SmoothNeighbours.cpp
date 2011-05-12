@@ -96,7 +96,7 @@ void SmoothNeighbours::exec()
 //  boost::split(det_names, det_name_list, boost::is_any_of(", "));
 
   //To get the workspace index from the detector ID
-  IndexToIndexMap * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
+  detid2index_map * pixel_to_wi = inWS->getDetectorIDToWorkspaceIndexMap(true);
 
   int outWI = 0;
   //std::cout << " inst->nelements() " << inst->nelements() << "\n";

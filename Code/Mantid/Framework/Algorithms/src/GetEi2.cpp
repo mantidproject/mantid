@@ -110,9 +110,9 @@ double GetEi2::calculateEi(const double initial_guess)
   const int64_t monitor2_spec = getProperty("Monitor2Spec");
 
   //Covert spectrum numbers to workspace indices
-  std::vector<int64_t> spec_nums(2, monitor1_spec);
+  std::vector<specid_t> spec_nums(2, monitor1_spec);
   spec_nums[1] = monitor2_spec;
-  std::vector<int64_t> mon_indices;
+  std::vector<size_t> mon_indices;
   mon_indices.reserve(2);
   // get the index number of the histogram for the first monitor
   m_input_ws->getIndicesFromSpectra(spec_nums, mon_indices);

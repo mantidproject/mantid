@@ -147,8 +147,8 @@ namespace Mantid
                             const double beamline_norm,
                             const Geometry::V3D &samplePos,
                             const Geometry::IInstrument_const_sptr &instrument,
-                            const std::vector<int64_t> &detectors,
-                            const std::map<int64_t,double> &offsets,
+                            const std::vector<detid_t> &detectors,
+                            const std::map<detid_t,double> &offsets,
                             bool vulcancorrection);
 
       void getInstrumentParameters(double & l1, Geometry::V3D & beamline,

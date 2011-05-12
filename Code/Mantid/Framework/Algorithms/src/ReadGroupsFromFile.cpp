@@ -141,7 +141,7 @@ namespace Algorithms
     for (int64_t i=0;i<nHist;i++)
     {
       int64_t spec=specAxis->spectraNo(i);
-      std::vector<int64_t> dets=spectramap.getDetectors(spec);
+      std::vector<detid_t> dets=spectramap.getDetectors(spec);
       if (dets.empty()) // Nothing
       {
         localWorkspace->dataY(i)[0]=0.0;

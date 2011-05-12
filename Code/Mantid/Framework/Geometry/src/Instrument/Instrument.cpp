@@ -589,15 +589,15 @@ namespace Mantid
                           const double beamline_norm,
                           const Geometry::V3D &samplePos,
                           const IInstrument_const_sptr &instrument,
-                          const std::vector<int64_t> &detectors,
-                          const std::map<int64_t,double> &offsets,
+                          const std::vector<detid_t> &detectors,
+                          const std::map<detid_t,double> &offsets,
                           bool vulcancorrection)
     {
       double factor = 0.;
       double offset;
-      for (std::vector<int64_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
+      for (std::vector<detid_t>::const_iterator iter = detectors.begin(); iter != detectors.end(); ++iter)
       {
-        std::map<int64_t,double>::const_iterator off_iter = offsets.find(*iter);
+        std::map<detid_t,double>::const_iterator off_iter = offsets.find(*iter);
         if( off_iter != offsets.end() )
         {
           offset = offsets.find(*iter)->second;

@@ -226,9 +226,9 @@ double RemoveLowResTOF::calcTofMin(const size_t workspaceIndex)
   const Geometry::V3D& beamline = samplePos - sourcePos;
   double beamline_norm = 2. * beamline.norm();
 
-  const int64_t spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
-  std::vector<int64_t> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
-  std::map<int64_t,double> offsets; // just an empty offsets map
+  const specid_t spec = m_inputWS->getAxis(1)->spectraNo(workspaceIndex);
+  std::vector<detid_t> detNumbers = m_inputWS->spectraMap().getDetectors(spec);
+  std::map<detid_t,double> offsets; // just an empty offsets map
   double dspmap = Instrument::calcConversion(m_L1, beamline, beamline_norm, samplePos,
                                      m_instrument, detNumbers, offsets, false);
 

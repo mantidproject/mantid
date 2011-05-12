@@ -33,7 +33,7 @@ namespace DataObjects
     @return Standard string name  */
     virtual const std::string id() const {return "GroupingWorkspace";}
 
-    void makeDetectorIDToGroupMap(std::map<int64_t, int64_t> & detIDToGroup, int64_t & ngroups) const;
+    void makeDetectorIDToGroupMap(std::map<detid_t, int> & detIDToGroup, int64_t & ngroups) const;
 
   private:
     /// Private copy constructor. NO COPY ALLOWED

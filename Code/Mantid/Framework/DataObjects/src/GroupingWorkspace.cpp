@@ -51,15 +51,15 @@ namespace DataObjects
    * @param detIDToGroup :: ref. to map to fill
    * @param[out] ngroups :: the number of groups found (equal to the largest group number found)
    */
-  void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<int64_t, int64_t> & detIDToGroup, int64_t & ngroups) const
+  void GroupingWorkspace::makeDetectorIDToGroupMap(std::map<detid_t, int> & detIDToGroup, int64_t & ngroups) const
   {
     ngroups = 0;
     for (size_t wi=0; wi<this->m_noVectors; ++wi)
     {
       // Convert the Y value to a group number
-      int64_t group = static_cast<int64_t>(this->dataY(wi)[0]);
+      int group = static_cast<int>(this->dataY(wi)[0]);
       if (group == 0) group = -1;
-      int64_t detID = detectorIDs[wi];
+      detid_t detID = detectorIDs[wi];
       detIDToGroup[detID] = group;
       if (group > ngroups)
         ngroups = group;
