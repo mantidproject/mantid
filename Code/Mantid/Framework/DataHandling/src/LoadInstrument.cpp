@@ -81,7 +81,7 @@ namespace Mantid
       declareProperty(new FileProperty("Filename","", FileProperty::OptionalLoad, ".xml"),
         "The filename (including its full or relative path) of an instrument\n"
         "definition file");
-      declareProperty(new ArrayProperty<int64_t>("MonitorList"),
+      declareProperty(new ArrayProperty<detid_t>("MonitorList"),
         "List of detector ids of monitors loaded in to the workspace");
       declareProperty( "InstrumentName", "",
         "Name of instrument. Can be used instead of Filename to specify an IDF" );
