@@ -71,7 +71,7 @@ size_t AbsManagedWorkspace2D::size() const
 /// Get the size of each vector
 size_t AbsManagedWorkspace2D::blocksize() const
 {
-  return (m_noVectors > 0) ? static_cast<int>(m_YLength) : 0;
+  return (m_noVectors > 0) ? m_YLength : 0;
 }
 
 /** Set the x values

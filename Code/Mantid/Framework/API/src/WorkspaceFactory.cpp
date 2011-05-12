@@ -52,12 +52,12 @@ WorkspaceFactoryImpl::~WorkspaceFactoryImpl()
  *  @throw  NotFoundException If the class is not registered in the factory
  */
 MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const MatrixWorkspace_const_sptr& parent,
-                                            int64_t NVectors, int64_t XLength, int64_t YLength) const
+    size_t NVectors, size_t XLength, size_t YLength) const
 {
 
   // Flag to indicate whether this workspace is the same size as the parent
   bool differentSize = true;
-  if ( YLength < 0 ) differentSize = false;
+  if ( YLength == size_t(-1) ) differentSize = false;
 
   // If the size parameters have not been specified, get them from the parent
   if ( !differentSize )
@@ -157,8 +157,8 @@ void WorkspaceFactoryImpl::initializeFromParent(const MatrixWorkspace_const_sptr
  *  @throw  std::out_of_range If invalid (0 or less) size arguments are given
  *  @throw  NotFoundException If the class is not registered in the factory
  */
-MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const int64_t& NVectors,
-                                            const int64_t& XLength, const int64_t& YLength) const
+MatrixWorkspace_sptr WorkspaceFactoryImpl::create(const std::string& className, const size_t& NVectors,
+                                            const size_t& XLength, const size_t& YLength) const
 {
   MatrixWorkspace_sptr ws;
 

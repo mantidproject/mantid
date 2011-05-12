@@ -159,7 +159,7 @@ void LoadEventPreNeXus::init()
                         "TS mapping file converting detector id to pixel id. Used only if specified.");
 
   // which pixels to load
-  this->declareProperty(new ArrayProperty<int>(PID_PARAM),
+  this->declareProperty(new ArrayProperty<int64_t>(PID_PARAM),
                         "A list of individual spectra (pixel IDs) to read. Only used if set.");
 
   // Pad out empty pixels?

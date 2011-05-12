@@ -147,7 +147,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   size_t getMemorySize() const;
 
   void copyDataFrom(const EventWorkspace& source,
-		    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=0);
+		    std::size_t sourceStartWorkspaceIndex=0, std::size_t sourceEndWorkspaceIndex=size_t(-1));
 
   double getTofMin() const;
 

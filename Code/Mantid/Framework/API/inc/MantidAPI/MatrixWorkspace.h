@@ -162,7 +162,7 @@ namespace Mantid
       const MantidVec& readE(std::size_t const index) const { return dataE(index); }
       /// Returns a read-only (i.e. const) reference to the specified X error array
       /// @param index :: workspace index to retrieve.
-      const MantidVec& readDx(int const index) const { return dataDx(index); }
+      const MantidVec& readDx(size_t const index) const { return dataDx(index); }
 
       /** Returns a read-only (i.e. const) reference to both the Y
        * and E arrays
