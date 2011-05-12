@@ -182,7 +182,7 @@ void testExecOnLoadraw()
         TS_ASSERT_EQUALS(map.ndet(3),1);
 
         // Check the id number of all pixels contributing
-        std::vector<int> detectorgroup;
+        std::vector<int64_t> detectorgroup;
         //std::vector<boost::shared_ptr<Mantid::Geometry::IDetector> > detectorgroup;
         detectorgroup=map.getDetectors(2084);
         std::vector<int>::const_iterator it;
@@ -194,7 +194,7 @@ void testExecOnLoadraw()
         // Test that number of pixel=0
         TS_ASSERT_EQUALS(map.ndet(5),0);
         // Test that trying to get the Detector throws.
-        std::vector<int> test = map.getDetectors(5);
+        std::vector<int64_t> test = map.getDetectors(5);
         TS_ASSERT(test.empty());
         //
     }

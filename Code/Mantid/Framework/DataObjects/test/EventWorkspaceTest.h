@@ -295,9 +295,9 @@ public:
 
     Timer timer;
 
-    std::map<int, Geometry::IDetector_sptr> detector_map;
+    std::map<int64_t, Geometry::IDetector_sptr> detector_map;
     ew->getInstrument()->getDetectors(detector_map);
-    std::map<int, Geometry::IDetector_sptr>::iterator it;
+    std::map<int64_t, Geometry::IDetector_sptr>::iterator it;
     for (it = detector_map.begin(); it != detector_map.end(); it++)
     {
       //Go through each pixel in the map, but forget monitors.

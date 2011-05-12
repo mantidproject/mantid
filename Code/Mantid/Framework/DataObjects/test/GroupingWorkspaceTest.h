@@ -40,7 +40,7 @@ public:
     TS_ASSERT_EQUALS( ws->blocksize(), 1);
     TS_ASSERT_EQUALS( ws->getInstrument()->getName(), "basic"); // Name of the test instrument
     TS_ASSERT_EQUALS( ws->spectraMap().nElements(), 45);
-    std::vector<int> dets = ws->spectraMap().getDetectors(0);
+    std::vector<int64_t> dets = ws->spectraMap().getDetectors(0);
     TS_ASSERT_EQUALS(dets.size(), 1);
 
     // Set the group numbers
@@ -49,8 +49,8 @@ public:
         ws->dataY(group*9+i)[0] = double(group+1);
 
     // Get the map
-    std::map<int,int> map;
-    int ngroups;
+    std::map<int64_t,int64_t> map;
+    int64_t ngroups;
     ws->makeDetectorIDToGroupMap(map, ngroups);
 
     TS_ASSERT_EQUALS(ngroups, 5);

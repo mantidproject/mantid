@@ -90,7 +90,7 @@ public:
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int> dets = specMap_out.getDetectors(newSpectrumNo);
+    std::vector<int64_t> dets = specMap_out.getDetectors(newSpectrumNo);
     if( dets.size() == 0 ) 
     {
       TS_FAIL("SpectraMap has been remapped incorrectly");
@@ -158,7 +158,7 @@ public:
     TS_ASSERT_EQUALS( specMap_out.ndet(newSpectrumNo), nspecEntries);
 
     // And their values
-    std::vector<int> dets = specMap_out.getDetectors(newSpectrumNo);
+    std::vector<int64_t> dets = specMap_out.getDetectors(newSpectrumNo);
     if( dets.size() == 0 ) 
     {
       TS_FAIL("SpectraMap has been remapped incorrectly");
