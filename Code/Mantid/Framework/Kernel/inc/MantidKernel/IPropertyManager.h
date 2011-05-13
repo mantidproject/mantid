@@ -251,10 +251,8 @@ protected:
     operator int32_t ();
     operator uint32_t ();
     operator int64_t ();
-    operator size_t ();
-#ifdef __INTEL_COMPILER
     operator uint64_t ();
-#endif
+    operator unsigned long ();
 
     /// explicit specialization for bool()
     operator bool ();

@@ -153,7 +153,7 @@ inline void toValue<int>(const std::string& strvalue, std::vector<int>& value)
 }
 
 template <>
-inline void toValue<unsigned int>(const std::string& strvalue, std::vector<unsigned int>& value)
+inline void toValue<uint32_t>(const std::string& strvalue, std::vector<uint32_t>& value)
 {
   // Split up comma-separated properties
   typedef Poco::StringTokenizer tokenizer;
@@ -169,7 +169,7 @@ inline void toValue<unsigned int>(const std::string& strvalue, std::vector<unsig
 }
 
 template <>
-inline void toValue<size_t>(const std::string& strvalue, std::vector<size_t>& value)
+inline void toValue<uint64_t>(const std::string& strvalue, std::vector<uint64_t>& value)
 {
   // Split up comma-separated properties
   typedef Poco::StringTokenizer tokenizer;
@@ -183,7 +183,6 @@ inline void toValue<size_t>(const std::string& strvalue, std::vector<size_t>& va
     appendValue(*it, value);
   }
 }
-
 
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
