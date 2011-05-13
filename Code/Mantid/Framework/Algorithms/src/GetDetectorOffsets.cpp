@@ -81,22 +81,33 @@ namespace Mantid
         throw std::runtime_error("Must specify Xmin<Xmax");
       dreference=getProperty("DReference");
       step=getProperty("Step");
-      nspec=inputW->getNumberHistograms();
+      size_t nspec=inputW->getNumberHistograms();
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
 
       // Fit all the spectra with a gaussian
       Progress prog(this, 0, 1.0, nspec);
+      const SpectraDetectorMap & specMap = inputW->spectraMap();
       PARALLEL_FOR1(inputW)
-      for (int i=0;i<nspec;++i)
+      for (size_t wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
-        double offset=fitSpectra(i);
-        int detID = inputW->getDetector(i)->getID();
+        // Fit the peak
+        double offset=fitSpectra(wi);
 
+        // Get the list of detectors in this pixel
+        specid_t spec = inputW->getAxis(1)->spectraNo(wi);
+        std::vector<detid_t> dets = specMap.getDetectors(spec);
+
+        // Most of the exec time is in FitSpectra, so this critical block should not be a problem.
         PARALLEL_CRITICAL(GetDetectorOffsets_setValue)
-        { // Most of the exec time is in FitSpectra, so this critical block should not be a problem.
-          outputW->setValue(detID, offset);
+        {
+          // Use the same offset for all detectors from this pixel
+          std::vector<detid_t>::iterator it;
+          for (it = dets.begin(); it != dets.end(); it++)
+          {
+            outputW->setValue(*it, offset);
+          }
         }
         prog.report();
         PARALLEL_END_INTERUPT_REGION
