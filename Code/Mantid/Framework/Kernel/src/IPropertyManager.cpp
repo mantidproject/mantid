@@ -18,6 +18,22 @@ namespace Kernel
     // Note that other implementations can be found in Workspace.cpp & Workspace1D/2D.cpp (to satisfy
     // package dependency rules).
 
+  template<> DLLExport
+  size_t IPropertyManager::getValue<size_t>(const std::string &name) const
+  {
+    PropertyWithValue<size_t> *prop = dynamic_cast<PropertyWithValue<size_t>*>(getPointerToProperty(name));
+    if (prop)
+      {
+	return *prop;
+      }
+    else
+      {
+	std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected size_t";
+        throw std::runtime_error(message);
+      }
+  }
+
+
     template<> DLLExport
     int16_t IPropertyManager::getValue<int16_t>(const std::string &name) const
     {
@@ -95,21 +111,6 @@ namespace Kernel
     }
 
     template<> DLLExport
-    uint64_t IPropertyManager::getValue<uint64_t>(const std::string &name) const
-    {
-        PropertyWithValue<uint64_t> *prop = dynamic_cast<PropertyWithValue<uint64_t>*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint64.";
-            throw std::runtime_error(message);
-        }
-    }
-
-    template<> DLLExport
     bool IPropertyManager::getValue<bool>(const std::string &name) const
     {
         PropertyWithValue<bool> *prop = dynamic_cast<PropertyWithValue<bool>*>(getPointerToProperty(name));
@@ -135,6 +136,21 @@ namespace Kernel
         else
         {
             std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected double.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<size_t> IPropertyManager::getValue<std::vector<size_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<size_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<size_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<size_t>.";
             throw std::runtime_error(message);
         }
     }
@@ -215,21 +231,6 @@ namespace Kernel
     }
 
     template<> DLLExport
-    std::vector<uint64_t> IPropertyManager::getValue<std::vector<uint64_t> >(const std::string &name) const
-    {
-        PropertyWithValue<std::vector<uint64_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint64_t> >*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint64>.";
-            throw std::runtime_error(message);
-        }
-    }
-
-    template<> DLLExport
     std::vector<double> IPropertyManager::getValue<std::vector<double> >(const std::string &name) const
     {
         PropertyWithValue<std::vector<double> > *prop = dynamic_cast<PropertyWithValue<std::vector<double> >*>(getPointerToProperty(name));
@@ -287,7 +288,6 @@ namespace Kernel
         this->setPropertyValue(name, value);
         return this;
     }
-	
 
     // Definitions for TypedValue cast operators
     // Have to come after getValue definitions above to keep MSVS2010 happy
@@ -295,12 +295,49 @@ namespace Kernel
     IPropertyManager::TypedValue::operator uint16_t () { return pm.getValue<uint16_t>(prop); }
     IPropertyManager::TypedValue::operator int32_t () { return pm.getValue<int32_t>(prop); }
     IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
-    IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }
-    IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<uint64_t>(prop); }
+    IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }    
+    IPropertyManager::TypedValue::operator size_t () { return pm.getValue<size_t>(prop); }
     IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }
     IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
+
+   // The Mac has different definitions for size_t and uint64_t
+#ifdef __INTEL_COMPILER
+   template<> DLLExport
+    uint64_t IPropertyManager::getValue<uint64_t>(const std::string &name) const
+    {
+        PropertyWithValue<uint64_t> *prop = dynamic_cast<PropertyWithValue<uint64_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint64.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<uint64_t> IPropertyManager::getValue<std::vector<uint64_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<uint64_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint64_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint64>.";
+            throw std::runtime_error(message);
+        }
+    }
+
+   IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<uint64_t>(prop); }
+
+#endif
+
 
     /// @endcond
 
