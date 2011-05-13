@@ -93,31 +93,29 @@ namespace DataHandling
     std::map<int, bool> selects;
 
     detid2det_map::const_iterator it;
-    int64_t maxdetID = 0;
+    detid_t maxdetID = 0;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
     {
-      int64_t detectorID = it->first;
+      detid_t detectorID = it->first;
       if(detectorID > maxdetID) maxdetID = detectorID;
     }
-    int paddetID = getProperty("PadDetID");
+    detid_t paddetID = detid_t(getProperty("PadDetID"));
     if (maxdetID < paddetID)maxdetID = paddetID;
 
     // Now write the POWGEN-style Dspace mapping file
     std::ofstream fout(filename, std::ios_base::out|std::ios_base::binary);
     Progress prog(this,0.0,1.0,maxdetID);
 
-    for (int i = 0; i != maxdetID; i++)
+    for (detid_t i = 0; i != maxdetID; i++)
     {
       //Compute the factor
       double factor;
       Geometry::IDetector_sptr det;
-      for (it = allDetectors.begin(); it != allDetectors.end(); it++)
+      // Find the detector with that detector id
+      it = allDetectors.find(i);
+      if (it != allDetectors.end())
       {
-        if(it->first == i) break;
-      }
-      det = it->second;
-      if(det)
-      {
+        det = it->second;
         factor = Instrument::calcConversion(l1, beamline, beamline_norm, samplePos, det, offsetsWS->getValue(i, 0.0), false);
         //Factor of 10 between ISAW and Mantid
         factor *= 0.1 ;
