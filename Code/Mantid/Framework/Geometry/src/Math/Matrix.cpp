@@ -85,8 +85,7 @@ Matrix<T>::Matrix(const std::vector<T>& A,const std::vector<T>& B)
 }
 //
 template<typename T>
-Matrix<T>::Matrix(const std::vector<T>&data):
-V(NULL),nx(0),ny(0)
+Matrix<T>::Matrix(const std::vector<T>&data) : nx(0),ny(0),V(0)
 {
 	size_t numel = data.size();
 	size_t nxt =(size_t)sqrt(double(numel));
