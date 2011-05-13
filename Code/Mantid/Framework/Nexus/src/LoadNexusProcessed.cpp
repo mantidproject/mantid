@@ -79,20 +79,20 @@ void LoadNexusProcessed::init()
 
 
   // optional
-  BoundedValidator<int> *mustBePositive = new BoundedValidator<int> ();
+  BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t> ();
   mustBePositive->setLower(0);
 
-  declareProperty("SpectrumMin", 1, mustBePositive,
+  declareProperty("SpectrumMin", (int64_t)1, mustBePositive,
       "Index number of the first spectrum to read, only used if\n"
       "spectrum_max is set and only for single period data, not\n"
       " yet implemented (default 0)");
-  declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+  declareProperty("SpectrumMax", (int64_t)Mantid::EMPTY_INT(), mustBePositive->clone(),
       "Index of last spectrum to read, only for single period data,\n"
       " not yet implemented (default the last spectrum).");
-  declareProperty(new ArrayProperty<int> ("SpectrumList"),
+  declareProperty(new ArrayProperty<int64_t> ("SpectrumList"),
       "Array, or comma separated list, of indexes of spectra to\n"
       "load. Not yet implemented.");
-  declareProperty("EntryNumber", 0, mustBePositive->clone(),
+  declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
       "The particular entry number to read (default: read all entries)" );
 }
 

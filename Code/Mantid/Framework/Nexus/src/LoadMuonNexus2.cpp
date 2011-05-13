@@ -58,8 +58,8 @@ namespace Mantid
       // Create the root Nexus class
       NXRoot root(getPropertyValue("Filename"));
 
-      int iEntry = getProperty("EntryNumber");
-      if (iEntry >= static_cast<int>(root.groups().size()) )
+      int64_t iEntry = getProperty("EntryNumber");
+      if (iEntry >= static_cast<int64_t>(root.groups().size()) )
       {
         throw std::invalid_argument("EntryNumber is out of range");
       }

@@ -140,9 +140,15 @@ namespace DataObjects
     EventListVector::iterator it_end = source_data.end();
     size_t source_data_size = source_data.size();
 
-    // If a non-default value is given for the end, we are doing only a range.
-    if (sourceEndWorkspaceIndex != size_t(-1))
+    //Do we copy only a range?
+    if( sourceEndWorkspaceIndex == size_t(-1) ) sourceEndWorkspaceIndex = source_data_size - 1;
+    if ((sourceStartWorkspaceIndex < source_data_size) && (sourceEndWorkspaceIndex < source_data_size)
+	&& (sourceEndWorkspaceIndex >= sourceStartWorkspaceIndex))
+    {
+      it_start += sourceStartWorkspaceIndex;
       it_end = source_data.begin() + sourceEndWorkspaceIndex + 1;
+    }
+
 
     for (it = it_start; it != it_end; it++ )
     {

@@ -95,13 +95,13 @@ void DiffractionFocussing::exec()
     }
     std::multimap<int64_t,int64_t>::const_iterator from = detectorGroups.lower_bound(*g);
     std::multimap<int64_t,int64_t>::const_iterator to =   detectorGroups.upper_bound(*g);
-    std::vector<int64_t> detectorList;
+    std::vector<detid_t> detectorList;
     for(std::multimap<int64_t,int64_t>::const_iterator d = from;d!=to;d++)
-      detectorList.push_back(d->second);
+      detectorList.push_back(static_cast<detid_t>(d->second));
     // Want version 1 of GroupDetectors here
     API::IAlgorithm_sptr childAlg = createSubAlgorithm("GroupDetectors",-1.0,-1.0,true,1);
     childAlg->setProperty("Workspace", tmpW);
-    childAlg->setProperty< std::vector<int64_t> >("DetectorList",detectorList);
+    childAlg->setProperty< std::vector<detid_t> >("DetectorList",detectorList);
     childAlg->executeAsSubAlg();
     try
     {

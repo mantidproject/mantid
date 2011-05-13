@@ -8,7 +8,8 @@ namespace Kernel
 
 /// @cond
 
-template DLLExport class PropertyWithValue<int>;
+template DLLExport class PropertyWithValue<int32_t>;
+template DLLExport class PropertyWithValue<int64_t>;
 template DLLExport class PropertyWithValue<bool>;
 template DLLExport class PropertyWithValue<double>;
 template DLLExport class PropertyWithValue<std::string>;

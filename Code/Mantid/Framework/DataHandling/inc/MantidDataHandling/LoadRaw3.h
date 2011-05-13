@@ -145,8 +145,6 @@ namespace Mantid
       /// The current value of the progress counter
       double m_prog;
 
-      /// a vector holding the indexes of monitors
-      std::vector<int64_t> m_monitordetectorList;
       /// Read in the time bin boundaries
       int64_t m_lengthIn;
       /// boolean for list spectra options

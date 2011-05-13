@@ -37,13 +37,13 @@ void GroupDetectors::init()
   declareProperty(new WorkspaceProperty<>("Workspace","",Direction::InOut,
     new CommonBinsValidator<>),
     "The name of the workspace2D on which to perform the algorithm");
-  declareProperty(new ArrayProperty<int64_t>("SpectraList"),
+  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
     "An array containing a list of the indexes of the spectra to combine\n"
     "(DetectorList and WorkspaceIndexList are ignored if this is set)" );
-  declareProperty(new ArrayProperty<int64_t>("DetectorList"),
+  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
     "An array of detector ID's (WorkspaceIndexList is ignored if this is\n"
     "set)" );
-  declareProperty(new ArrayProperty<int64_t>("WorkspaceIndexList"),
+  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
     "An array of workspace indices to combine" );
   declareProperty("ResultIndex", -1,
     "The workspace index of the summed spectrum (or -1 on error)",
@@ -100,7 +100,7 @@ void GroupDetectors::exec()
   const size_t vectorSize = WS->blocksize();
   const size_t firstIndex = indexList[0];
   const size_t firstSpectrum = spectraAxis->spectraNo(firstIndex);
-  setProperty("ResultIndex",firstIndex);
+  setProperty<int>("ResultIndex",firstIndex);
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
   for (size_t i = 0; i < indexList.size()-1; ++i)

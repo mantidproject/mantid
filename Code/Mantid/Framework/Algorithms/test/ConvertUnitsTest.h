@@ -221,11 +221,11 @@ public:
     ConvertUnits conv2;
     conv2.initialize();
     conv2.setPropertyValue("InputWorkspace",ws);
-    conv.setPropertyValue("OutputWorkspace",outputSpace);
-    conv.setPropertyValue("Target","DeltaE_inWavenumber");
-    conv.setPropertyValue("Emode","Indirect");
-    conv.setPropertyValue("Efixed","10");
-    conv.execute();
+    conv2.setPropertyValue("OutputWorkspace",outputSpace);
+    conv2.setPropertyValue("Target","DeltaE_inWavenumber");
+    conv2.setPropertyValue("Emode","Indirect");
+    conv2.setPropertyValue("Efixed","10");
+    conv2.execute();
 
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)) );
     TS_ASSERT_EQUALS( output->getAxis(0)->unit()->unitID(), "DeltaE_inWavenumber");

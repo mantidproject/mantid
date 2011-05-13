@@ -210,7 +210,7 @@ public:
     outputSpace="outer2";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace); 
     nxLoad.setPropertyValue("EntryNumber", "1");  
-    int entryNumber=nxLoad.getProperty("EntryNumber");
+    int64_t entryNumber=nxLoad.getProperty("EntryNumber");
     
     //
     // Test execute to read file and populate workspace
@@ -308,7 +308,7 @@ public:
     outputSpace="outer2";
     nxLoad.setPropertyValue("OutputWorkspace", outputSpace); 
 	nxLoad.setPropertyValue("EntryNumber", "0");  
-	int entryNumber=nxLoad.getProperty("EntryNumber");
+	int64_t entryNumber=nxLoad.getProperty("EntryNumber");
     
     //
     // Test execute to read file and populate workspace

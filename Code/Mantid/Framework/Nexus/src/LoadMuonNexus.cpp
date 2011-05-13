@@ -58,17 +58,17 @@ namespace Mantid
         "generated for each period");
 
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t>();
       mustBePositive->setLower(0);
-      declareProperty( "SpectrumMin",0, mustBePositive,
+      declareProperty( "SpectrumMin",(int64_t)0, mustBePositive,
         "Index number of the first spectrum to read, only used if\n"
         "spectrum_max is set and only for single period data\n"
         "(default 0)" );
-      declareProperty( "SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
+      declareProperty( "SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive->clone(),
         "Index of last spectrum to read, only for single period data\n"
         "(default the last spectrum)");
 
-      declareProperty(new ArrayProperty<int>("SpectrumList"), 
+      declareProperty(new ArrayProperty<specid_t>("SpectrumList"), 
         "Array, or comma separated list, of indexes of spectra to\n"
         "load");
       declareProperty("AutoGroup",false,
@@ -76,7 +76,7 @@ namespace Mantid
         "together based on the groupings in the NeXus file, only\n"
         "for single period data (default no)");
 
-      declareProperty("EntryNumber", 0, mustBePositive->clone(),
+      declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
 
       std::vector<std::string> FieldOptions;

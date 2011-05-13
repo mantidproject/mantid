@@ -71,7 +71,7 @@ namespace Mantid
         "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
-      declareProperty(new ArrayProperty<int64_t>("SpectrumList"),
+      declareProperty(new ArrayProperty<specid_t>("SpectrumList"),
         "A comma-separated list of individual spectra to read.  Only used if\n"
         "explicitly set.");
     }
@@ -119,10 +119,10 @@ namespace Mantid
       int* spectrum = new int[lengthIn];
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int64_t total_specs;
+      specid_t total_specs;
       if( m_interval || m_list)
       {
-        total_specs = static_cast<int64_t>(m_spec_list.size());
+        total_specs = static_cast<specid_t>(m_spec_list.size());
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
@@ -138,7 +138,7 @@ namespace Mantid
       }
 
       double histTotal = static_cast<double>(total_specs * m_numberOfPeriods);
-      int64_t histCurrent = -1;
+      int32_t histCurrent = -1;
 
       // Create the 2D workspace for the output
       DataObjects::Workspace2D_sptr localWorkspace = boost::dynamic_pointer_cast<DataObjects::Workspace2D>
@@ -157,11 +157,11 @@ namespace Mantid
         if ( period > 0 ) localWorkspace =  boost::dynamic_pointer_cast<DataObjects::Workspace2D>
                                               (WorkspaceFactory::Instance().create(localWorkspace));
 
-        int64_t counter = 0;
-        for (int64_t i = m_spec_min; i < m_spec_max; ++i)
+        specid_t counter = 0;
+        for (specid_t i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
-          int64_t histToRead = i + period*total_specs;
+          int32_t histToRead = i + period*total_specs;
           loadData(timeChannelsVec,counter,histToRead,iraw,lengthIn,spectrum,localWorkspace );
           counter++;
           if (++histCurrent % 100 == 0) progress(static_cast<double>(histCurrent)/histTotal);
@@ -311,7 +311,7 @@ Kernel::Property*  LoadRaw::createPeriodLog(int period)const
      *  @param spectrum :: Pointer to the array into which the spectrum will be read
      *  @param localWorkspace :: A pointer to the workspace in which the data will be stored
      */
-    void LoadRaw::loadData(const MantidVecPtr::ptr_type& tcbs,int64_t hist, int64_t& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
+    void LoadRaw::loadData(const MantidVecPtr::ptr_type& tcbs, int32_t hist, specid_t& i, ISISRAW& iraw, const int& lengthIn, int* spectrum, DataObjects::Workspace2D_sptr localWorkspace)
     {
       // Read in a spectrum
       memcpy(spectrum, iraw.dat1 + i * lengthIn, lengthIn * sizeof(int));

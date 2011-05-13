@@ -59,12 +59,12 @@ namespace Mantid
         "The name of the Nexus file to load" );
       declareProperty(new WorkspaceProperty<Workspace>("OutputWorkspace","",Direction::Output));
 
-      BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
+      BoundedValidator<int64_t> *mustBePositive = new BoundedValidator<int64_t>();
       mustBePositive->setLower(0);
-      declareProperty("SpectrumMin", 0, mustBePositive);
-      declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
-      declareProperty("EntryNumber", 0, mustBePositive->clone(),
+      declareProperty("SpectrumMin",(int64_t)0, mustBePositive);
+      declareProperty("SpectrumMax",(int64_t)EMPTY_INT(), mustBePositive->clone());
+      declareProperty(new ArrayProperty<int64_t>("SpectrumList"));
+      declareProperty("EntryNumber", (int64_t)0, mustBePositive->clone(),
         "The particular entry number to read (default: Load all workspaces and creates a workspace group)");
     }
 
