@@ -19,7 +19,15 @@ class MD_FileFactoryTest :    public CxxTest::TestSuite
 public:
   void testFormatImplemented(){
     std::auto_ptr<IMD_FileFormat> testFormat;
-    TSM_ASSERT_THROWS_NOTHING("test data format should be initiated without throwing",testFormat=MD_FileFormatFactory::getFileReader("testFile",test_data));
+    TSM_ASSERT_THROWS_NOTHING("test default data format should be initiated without throwing",testFormat=MD_FileFormatFactory::getFileReader("testFile",test_data));
+
+    TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader, should be test data ",dynamic_cast<MD_FileTestDataGenerator*>(testFormat.get())!=0);	
+  }
+  void testTestFileFormatDataProvided(){
+    std::auto_ptr<IMD_FileFormat> testFormat;
+	std::auto_ptr<Geometry::MDGeometryDescription> pGeomDescr = std::auto_ptr<Geometry::MDGeometryDescription>
+		                                                        (new Geometry::MDGeometryDescription(6,3));
+	TSM_ASSERT_THROWS_NOTHING("test default data format should be initiated without throwing",testFormat=MD_FileFormatFactory::getFileReader("testFile",test_data,pGeomDescr.get()));
 
     TSM_ASSERT("FileFormat factory returned a pointer to a wrong file reader, should be test data ",dynamic_cast<MD_FileTestDataGenerator*>(testFormat.get())!=0);	
   }
@@ -57,6 +65,8 @@ public:
     TS_ASSERT_THROWS_NOTHING(horaceFormat= MD_FileFormatFactory::getFileReader(testFile.c_str()));
 
     TSM_ASSERT("FileFormat factory have not returned a pointer to a Horace file reader ",dynamic_cast<HoraceReader::MD_FileHoraceReader*>(horaceFormat.get())!=0);
+  }
+  ~MD_FileFactoryTest(){
   }
 
 };

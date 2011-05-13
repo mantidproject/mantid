@@ -146,6 +146,15 @@ MD_FileHoraceReader::read_MDGeomDescription(Mantid::Geometry::MDGeometryDescript
         }
     }
     i0 += ic*4;
+	MantidMat UEmat(u_to_Rlu);
+	MantidMat Rot(3,3);
+	for(int i=0;i<3;i++){
+		for(j=0;j<3;j++){
+			Rot[i][j]=UEmat[i][j];
+		}
+	}
+	dscrptn.setRotationMatrix(Rot);
+
 // [data.ulen, count, ok, mess] = fread_catch(fid,[1,4],'float32'); if ~all(ok); return; end;
 //  Length of projection axes vectors in Ang^-1 or meV [row vector]
     for(i=0;i<this->nDims;i++){

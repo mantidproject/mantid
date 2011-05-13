@@ -30,10 +30,11 @@ MD_FileFormatFactory::~MD_FileFormatFactory()
 }
 //
 std::auto_ptr<IMD_FileFormat> 
-MD_FileFormatFactory::getFileReader(const char *fileName,user_request rec)
+MD_FileFormatFactory::getFileReader(const char *fileName,user_request rec,
+									const Geometry::MDGeometryDescription *const pDescr)
 {
 	if(!pFactory)pFactory = new MD_FileFormatFactory();
-	return std::auto_ptr<IMD_FileFormat>(pFactory->select_file_reader(fileName,rec));
+	return std::auto_ptr<IMD_FileFormat>(pFactory->select_file_reader(fileName,rec,pDescr));
 }
 //
 std::auto_ptr<IMD_FileFormat> 
@@ -82,11 +83,16 @@ std::string get_unique_tmp_fileName(void){
 }
 //
 IMD_FileFormat *
-  MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec)
+  MD_FileFormatFactory::select_file_reader(const char *file_name,user_request rec,const Geometry::MDGeometryDescription *const pDescr)
 {
   if(rec == test_data){
     f_log.information()<<"MD_FileFactory: Enabled test file format for the file: "<<file_name<<std::endl;
-    return (new MD_FileTestDataGenerator(file_name));
+	if(pDescr){
+		return (new MD_FileTestDataGenerator(pDescr));
+	}else{
+		std::auto_ptr<Geometry::MDGeometryDescription> pDs = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription());
+		return (new MD_FileTestDataGenerator(pDs.get()));
+	}
   }
 
   // check if the file exist;

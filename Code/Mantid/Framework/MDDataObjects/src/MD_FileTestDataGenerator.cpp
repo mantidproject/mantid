@@ -6,13 +6,17 @@
 namespace Mantid{
 namespace MDDataObjects{
 //
-MD_FileTestDataGenerator::MD_FileTestDataGenerator(const char *file_name):
-IMD_FileFormat(file_name),
+MD_FileTestDataGenerator::MD_FileTestDataGenerator(const Geometry::MDGeometryDescription *const pDescr):
+IMD_FileFormat("test_memory_file.sqw"),
 mdImageSize(0),
 nDataPoints(0),
-pPointDescr(NULL)
+pPointDescr(NULL),
+GeomDescription(*pDescr)
 {
-    this->nDims = 4;
+
+
+	this->nDims = GeomDescription.getNumDims();
+	
     this->sizeof_pixel=4*(nDims+2+nDims);
 
     this->dat_sig_fields= new float[nDims+2];

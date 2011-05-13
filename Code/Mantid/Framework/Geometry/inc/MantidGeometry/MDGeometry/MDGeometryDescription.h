@@ -63,7 +63,7 @@ public:
 
 
   DimensionDescription() :
-    Tag(""), data_shift(0), cut_min(-1), cut_max(1), data_scale(1), nBins(1), isReciprocal(false), AxisName("")
+    Tag(""), data_shift(0), cut_min(-1), cut_max(4), data_scale(1), nBins(50), isReciprocal(false), AxisName("")
   {}
 };
 
@@ -157,7 +157,8 @@ public:
    * The requested tag is deleted from old location and inserted into the new location, leaving all other data as before.
    * the tag has to be present in the array initially -> throws otherwise */
   void setPAxis(size_t i, const std::string &tag);
-
+  ///the variable used to generate test data only
+  uint64_t nContributedPixels;
 private:
 
   /**< real number of dimensions in the target dataset.

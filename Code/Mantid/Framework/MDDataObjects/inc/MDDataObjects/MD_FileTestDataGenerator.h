@@ -7,6 +7,7 @@
 #include "MDDataObjects/IMD_FileFormat.h"
 
 
+
 /**  Class generates test data for in-depth testing dynamic rebinning algorithms 
 
     @author Alex Buts, RAL ISIS
@@ -42,14 +43,9 @@ class MDPointDescription;
 class DLLExport MD_FileTestDataGenerator :    public IMD_FileFormat
 {  
 public:
-    /** test file generator takes its parameters from file name e.g:
-     data4x3_a0b50c50d50 defines 4 dimensional dataset with 3 reciprocal dimensions where 
-     the structure is as above and 
-     data, x, a, b, c, d [e etc] are the key-words defining the values;
-     e.g. here the first dimension is integrated and three others have 50 bins; 
-     TODO: not implemented -- implement; currently doung 4x3 
-    */
-	MD_FileTestDataGenerator(const char *file_name);
+    /** test file generator takes its parameters from geometry description;
+     */
+	MD_FileTestDataGenerator(const Geometry::MDGeometryDescription *const pDescr);
 
 	virtual bool is_open(void)const{return true;}
 
@@ -86,8 +82,8 @@ public:
 	// private, but protected for test purposes;
 private:
  // these values imitate the values that shoud be located in file 
-
 	unsigned int nDims; //< number of dimensions;
+	Geometry::MDGeometryDescription GeomDescription;
 	/// number of bins in every non-integrated dimension
 	std::vector<size_t> nBins;
 	// size of the multidimensional image in the HDD file (in cells)

@@ -28,21 +28,22 @@ struct findDimension
 MantidMat const & 
 MDGeometryDescription::getRotations()const
 {
-
 	return Rotations;
 }
 
 
 /// this extracts the size and shape of the current DND object
 MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin):
-Rotations(3,3,true)
+Rotations(3,3,true),
+nContributedPixels(0)
 {
      this->build_from_geometry(origin);
 }
 
 
 MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis):
-Rotations(3,3,true)
+Rotations(3,3,true),
+nContributedPixels(0)
 {
 
 
@@ -81,7 +82,8 @@ MDGeometryDescription::MDGeometryDescription(
       Dimension_sptr dimensiont,
       RotationMatrix rotationMatrix
 ):
-Rotations(3,3,true)
+Rotations(3,3,true),
+nContributedPixels(0)
 {
 
   this->nDimensions = dimensions.size();
@@ -123,7 +125,8 @@ Rotations(3,3,true)
 MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
 nDimensions(numDims),
 nReciprocalDimensions(numRecDims),
-Rotations(3,3,true)
+Rotations(3,3,true),
+nContributedPixels(19531253125000)
 {
     this->intit_default_slicing(nDimensions,nReciprocalDimensions);
 
@@ -291,8 +294,8 @@ MDGeometryDescription::intit_default_slicing(size_t nDims, size_t nRecDims)
     DimensionDescription defaults;
     defaults.data_shift=0;
     defaults.cut_min =-1;
-    defaults.cut_max = 1;
-    defaults.nBins   = 1;
+    defaults.cut_max = 5;
+    defaults.nBins   = 50;
     defaults.AxisName.assign("");
 
 

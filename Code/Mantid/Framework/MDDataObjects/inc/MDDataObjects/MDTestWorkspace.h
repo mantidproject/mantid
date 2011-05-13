@@ -79,7 +79,8 @@ class MDTestWorkspace
     }
 public:
     MDTestWorkspace() {
-        pReader=new MD_FileTestDataGenerator("testFile");
+		std::auto_ptr<Geometry::MDGeometryDescription> pDs = std::auto_ptr<Geometry::MDGeometryDescription>(new Geometry::MDGeometryDescription(4,3));
+		pReader=new MD_FileTestDataGenerator(pDs.get());
         createTestWorkspace(pReader);
     }
 

@@ -155,6 +155,8 @@ void testMDGeometryUnitRotations(){
 	TSM_ASSERT_EQUALS("The slice describes grid of specific size: ",100*200,pSlice->getImageSize());
   }
   void testSetSlicingRotations(){
+	  // get access to geometry basis and derive new transformation matrix, which would transform data into new basis, defined
+	  // by two vectors expressed in the units of the reciprocal lattice
 	  MantidMat rot = tDND_geometry->get_constMDGeomBasis().get_constUnitCell().getUmatrix(V3D(1,1,0),V3D(1,-1,0));
 
 	  TSM_ASSERT_THROWS_NOTHING("It is nothing to throw here",pSlice->setRotationMatrix(rot));
@@ -263,9 +265,9 @@ void testMDGeometryUnitRotations(){
   void testReducedBasisRotations(){
 	  // build default geometrh
 	  std::auto_ptr<MDGeometry>  pGeom = std::auto_ptr<MDGeometry>(constructGeometry());
-	  // end default description for this geometry
+	  // and default description for this geometry
 	  std::auto_ptr<MDGeometryDescription> pDescr = std::auto_ptr<MDGeometryDescription>(new MDGeometryDescription(*pGeom));
-	  // set the geometry 
+	  // set the geometry description
 	  pDescr->pDimDescription("q1")->nBins=200;
 	  pDescr->pDimDescription("p")->nBins =200;
       pDescr->setPAxis(0,"p");
