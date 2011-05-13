@@ -934,7 +934,7 @@ namespace Mantid
       //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
       PARALLEL_FOR_NO_WSP_CHECK()
-      for (size_t lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
+	for (int64_t lhsWI = 0; lhsWI < (int64_t)lhs_nhist; lhsWI++)
       {
         specid_t rhs_spec_no;
         bool done=false;
@@ -950,7 +950,7 @@ namespace Mantid
         // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
         //First off, try to match the workspace indices. Most times, this will be ok right away.
         int64_t rhsWI = lhsWI;
-        if (rhsWI < rhs_nhist) //don't go out of bounds
+        if (rhsWI < (int64_t)rhs_nhist) //don't go out of bounds
         {
           // Get the detector IDs at that workspace index.
           rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];

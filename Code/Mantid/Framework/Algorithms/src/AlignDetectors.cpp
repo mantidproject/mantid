@@ -300,7 +300,7 @@ void AlignDetectors::execEvent()
   Progress progress(this,0.0,1.0,numberOfSpectra);
 
   PARALLEL_FOR2(inputWS,outputWS)
-  for (size_t i = 0; i < numberOfSpectra; ++i)
+  for (int64_t i = 0; i < numberOfSpectra; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the spectrum number for this histogram
