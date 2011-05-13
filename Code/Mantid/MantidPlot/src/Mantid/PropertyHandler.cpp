@@ -853,7 +853,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
         m_browser->m_autoBackground = NULL;
       }
     }
-    m_parent->replaceOldFunction(f_old,f);
+    m_parent->replaceFunction(f_old,f);
     f->setHandler(h);
     // calculate the baseline
     if (h->pfun())
