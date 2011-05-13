@@ -200,7 +200,7 @@ namespace Kernel
         }
     }
 
-#ifdef WIN32
+#ifndef WIN32
     /// On windows 32-bit, this definition overlaps with size_t !!!
     template<> DLLExport
     std::vector<uint32_t> IPropertyManager::getValue<std::vector<uint32_t> >(const std::string &name) const
