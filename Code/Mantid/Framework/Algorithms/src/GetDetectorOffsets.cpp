@@ -145,7 +145,7 @@ namespace Mantid
       const double peakHeight = *it; 
       const double peakLoc = inputW->readX(s)[it - yValues.begin()];
       // Return offset of 0 if peak of Cross Correlation is nan (Happens when spectra is zero)
-      if ( peakHeight < 0.75 || boost::math::isnan(peakHeight) ) return (0.);
+      if ( boost::math::isnan(peakHeight) ) return (0.);
 
       IAlgorithm_sptr fit_alg;
       try
