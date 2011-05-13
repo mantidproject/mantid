@@ -18,20 +18,20 @@ namespace Kernel
     // Note that other implementations can be found in Workspace.cpp & Workspace1D/2D.cpp (to satisfy
     // package dependency rules).
 
-  template<> DLLExport
-  size_t IPropertyManager::getValue<size_t>(const std::string &name) const
-  {
-    PropertyWithValue<size_t> *prop = dynamic_cast<PropertyWithValue<size_t>*>(getPointerToProperty(name));
-    if (prop)
+    template<> DLLExport
+    size_t IPropertyManager::getValue<size_t>(const std::string &name) const
+    {
+      PropertyWithValue<size_t> *prop = dynamic_cast<PropertyWithValue<size_t>*>(getPointerToProperty(name));
+      if (prop)
       {
-	return *prop;
+        return *prop;
       }
-    else
+      else
       {
-	std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected size_t";
+        std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected size_t";
         throw std::runtime_error(message);
       }
-  }
+    }
 
 
     template<> DLLExport
@@ -200,6 +200,8 @@ namespace Kernel
         }
     }
 
+#ifdef WIN32
+    /// On windows 32-bit, this definition overlaps with size_t !!!
     template<> DLLExport
     std::vector<uint32_t> IPropertyManager::getValue<std::vector<uint32_t> >(const std::string &name) const
     {
@@ -214,6 +216,8 @@ namespace Kernel
             throw std::runtime_error(message);
         }
     }
+#endif
+
 
     template<> DLLExport
     std::vector<int64_t> IPropertyManager::getValue<std::vector<int64_t> >(const std::string &name) const
