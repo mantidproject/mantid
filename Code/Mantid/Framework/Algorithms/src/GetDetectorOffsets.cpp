@@ -147,7 +147,7 @@ namespace Mantid
         throw ;
       }
       fit_alg->setProperty("InputWorkspace",inputW);
-      fit_alg->setProperty("WorkspaceIndex",s);
+      fit_alg->setProperty<int>("WorkspaceIndex",s);
       fit_alg->setProperty("StartX",Xmin);
       fit_alg->setProperty("EndX",Xmax);
       fit_alg->setProperty("MaxIterations",100);

@@ -60,7 +60,7 @@ namespace Mantid
       declareProperty("OutputFile","",
         "A filename to which to write the list of dead detector UDETs" );
       // This output property will contain the list of UDETs for the dead detectors
-      declareProperty("FoundDead",std::vector<int64_t>(),Direction::Output);
+      declareProperty("FoundDead",std::vector<detid_t>(),Direction::Output);
     }
 
     /** Executes the algorithm
@@ -84,7 +84,7 @@ namespace Mantid
       const SpectraDetectorMap& specMap = integratedWorkspace->spectraMap();
       Axis* specAxis = integratedWorkspace->getAxis(1);
 
-      std::vector<int64_t> deadDets;
+      std::vector<detid_t> deadDets;
       int countSpec = 0, countDets = 0;
 
 

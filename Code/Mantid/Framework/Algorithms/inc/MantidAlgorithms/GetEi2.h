@@ -90,7 +90,7 @@ namespace Algorithms
       /// The input workspace
       API::MatrixWorkspace_sptr m_input_ws;
       /// The calculated position of the first peak
-      std::pair<int64_t, double> m_peak1_pos;
+      std::pair<size_t, double> m_peak1_pos;
       /// True if the Ei should be fixed at the guess energy
       bool m_fixedei;
       /// Conversion factor between time and energy

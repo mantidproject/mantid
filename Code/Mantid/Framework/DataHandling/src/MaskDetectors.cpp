@@ -41,14 +41,14 @@ void MaskDetectors::init()
     new WorkspaceProperty<>("Workspace","", Direction::InOut),
     "The name of the workspace that will be used as input and\n"
     "output for the algorithm" );
-  declareProperty(new ArrayProperty<int64_t>("SpectraList"),
+  declareProperty(new ArrayProperty<specid_t>("SpectraList"),
     "A comma separated list or array containing a list of spectra to\n"
     "mask (DetectorList and WorkspaceIndexList are ignored if this\n"
     "is set)" );
-  declareProperty(new ArrayProperty<int64_t>("DetectorList"),
+  declareProperty(new ArrayProperty<detid_t>("DetectorList"),
     "A comma separated list or array containing a list of detector ID's\n"
     "to mask (WorkspaceIndexList is ignored if this is set)" );
-  declareProperty(new ArrayProperty<int64_t>("WorkspaceIndexList"),
+  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
     "A comma separated list or array containing the workspace indices\n"
     "to mask" );
   declareProperty(

@@ -216,12 +216,12 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       {
         // First we mask detectors in the output workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", outputWS);
-        mask->setProperty< std::vector<int> >("SpectraList", dets_to_mask);
+        mask->setProperty< std::vector<specid_t> >("SpectraList", dets_to_mask);
         mask->execute();
 
         // Then we mask the same detectors in the input workspace
         mask->setProperty<MatrixWorkspace_sptr>("Workspace", rebinnedWS);
-        mask->setProperty< std::vector<int> >("SpectraList", dets_to_mask);
+        mask->setProperty< std::vector<specid_t> >("SpectraList", dets_to_mask);
         mask->execute();
       } catch (std::invalid_argument& err)
       {

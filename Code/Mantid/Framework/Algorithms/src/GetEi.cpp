@@ -86,8 +86,8 @@ void GetEi::init()
 void GetEi::exec()
 {
   MatrixWorkspace_const_sptr inWS = getProperty("InputWorkspace");
-  const int64_t mon1Spec = getProperty("Monitor1Spec");
-  const int64_t mon2Spec = getProperty("Monitor2Spec");
+  const specid_t mon1Spec = getProperty("Monitor1Spec");
+  const specid_t mon2Spec = getProperty("Monitor2Spec");
   double dist2moni0 = -1, dist2moni1 = -1;
   getGeometry(inWS, mon1Spec, mon2Spec, dist2moni0, dist2moni1);
 

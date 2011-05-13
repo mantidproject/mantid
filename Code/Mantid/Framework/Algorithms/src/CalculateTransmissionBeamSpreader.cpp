@@ -239,7 +239,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
 
   Algorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int64_t>("WorkspaceIndex", index);
+  childAlg->setProperty<int>("WorkspaceIndex", index);
   childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }

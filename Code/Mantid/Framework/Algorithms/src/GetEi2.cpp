@@ -68,7 +68,7 @@ void GetEi2::init()
     "EnergyEstimate property.");
   declareProperty("IncidentEnergy", -1.0, Direction::Output);
   declareProperty("FirstMonitorPeak", -1.0, Direction::Output);
-  declareProperty("FirstMonitorIndex", 0, Direction::Output);
+  declareProperty("FirstMonitorIndex", (size_t)0, Direction::Output);
   declareProperty("Tzero", EMPTY_DBL(), Direction::Output);
 
 }
@@ -106,8 +106,8 @@ void GetEi2::exec()
  */
 double GetEi2::calculateEi(const double initial_guess)
 {
-  const int64_t monitor1_spec = getProperty("Monitor1Spec");
-  const int64_t monitor2_spec = getProperty("Monitor2Spec");
+  const specid_t monitor1_spec = getProperty("Monitor1Spec");
+  const specid_t monitor2_spec = getProperty("Monitor2Spec");
 
   //Covert spectrum numbers to workspace indices
   std::vector<specid_t> spec_nums(2, monitor1_spec);
@@ -234,8 +234,8 @@ MatrixWorkspace_sptr GetEi2::extractSpectrum(int64_t ws_index, const double star
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
-  childAlg->setProperty("StartWorkspaceIndex", ws_index);
-  childAlg->setProperty("EndWorkspaceIndex", ws_index);
+  childAlg->setProperty<int>("StartWorkspaceIndex", ws_index);
+  childAlg->setProperty<int>("EndWorkspaceIndex", ws_index);
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   childAlg->executeAsSubAlg();
