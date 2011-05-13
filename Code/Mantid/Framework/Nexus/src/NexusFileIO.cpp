@@ -295,6 +295,18 @@ using namespace DataObjects;
         success = true;
       }
     }
+    else if(PropertyWithValue<size_t> *intProp = dynamic_cast<PropertyWithValue<size_t>*>(prop) )
+    {
+      try
+      {
+        int value = boost::lexical_cast<int>(intProp->value());
+        writeSingleValueNXLog(intProp->name(), value, NX_INT32, attrs, attrValues);
+      }
+      catch(boost::bad_lexical_cast &)
+      {
+        success = true;
+      }
+    }
     else if(PropertyWithValue<int> *intProp = dynamic_cast<PropertyWithValue<int>*>(prop) )
     {
       try
@@ -432,7 +444,7 @@ using namespace DataObjects;
         return(3);
     // Write proton_charge here, if available and there's no log with the same name. Note that TOFRaw has this at the NXentry level, though there is
     // some debate if this is appropriate. Hence for Mantid write it to the NXsample section as it is stored in Sample.
-    if( !runProperties.hasProperty("proton_charge") )
+    if( runProperties.hasProperty("proton_charge") )
     {
       try
       {
@@ -444,6 +456,7 @@ using namespace DataObjects;
       }
       catch(Exception::NotFoundError&)
       {
+        std::cout << "Could not find proton charge\n";
       }
     }
 
