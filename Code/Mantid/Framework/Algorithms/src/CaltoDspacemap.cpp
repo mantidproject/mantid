@@ -87,12 +87,12 @@ void CaltoDspacemap::init()
  */
 void CaltoDspacemap::exec()
 {
-  const MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
+  MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const std::string DFileName = getProperty("DspacemapFile");
   const std::string calFileName = getProperty("CalibrationFile");
 
   progress(0.0,"Reading calibration file");
-  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile", 0.0, 0.5);
+  IAlgorithm_sptr alg = createSubAlgorithm("LoadCalFile", 0.0, 0.5, true);
   alg->setProperty("InputWorkspace", inputWS);
   alg->setPropertyValue("CalFilename", calFileName);
   alg->setProperty<bool>("MakeGroupingWorkspace", false);
@@ -104,8 +104,8 @@ void CaltoDspacemap::exec()
   offsetsWS = alg->getProperty("OutputOffsetsWorkspace");
 
   progress(0.5,"Saving dspacemap file");
-  alg = createSubAlgorithm("SaveDspacemap", 0.5, 1.0);
-  alg->setPropertyValue("Filename", DFileName);
+  alg = createSubAlgorithm("SaveDspacemap", 0.5, 1.0, true);
+  alg->setPropertyValue("DspacemapFile", DFileName);
   alg->setProperty<int>("PadDetID", getProperty("PadDetID"));
   alg->setProperty("InputWorkspace", offsetsWS);
   alg->executeAsSubAlg();
