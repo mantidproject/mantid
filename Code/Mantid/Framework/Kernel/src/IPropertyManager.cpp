@@ -81,21 +81,6 @@ namespace Kernel
     }
 
     template<> DLLExport
-    uint32_t IPropertyManager::getValue<uint32_t>(const std::string &name) const
-    {
-        PropertyWithValue<uint32_t> *prop = dynamic_cast<PropertyWithValue<uint32_t>*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint32.";
-            throw std::runtime_error(message);
-        }
-    }
-
-    template<> DLLExport
     int64_t IPropertyManager::getValue<int64_t>(const std::string &name) const
     {
         PropertyWithValue<int64_t> *prop = dynamic_cast<PropertyWithValue<int64_t>*>(getPointerToProperty(name));
@@ -139,6 +124,51 @@ namespace Kernel
             throw std::runtime_error(message);
         }
     }
+
+
+
+
+
+#ifndef WIN32
+    /// On windows 32-bit, this definition overlaps with size_t !!!
+
+    template<> DLLExport
+    uint32_t IPropertyManager::getValue<uint32_t>(const std::string &name) const
+    {
+        PropertyWithValue<uint32_t> *prop = dynamic_cast<PropertyWithValue<uint32_t>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected uint32.";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<uint32_t> IPropertyManager::getValue<std::vector<uint32_t> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<uint32_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint32_t> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint32>.";
+            throw std::runtime_error(message);
+        }
+    }
+#endif
+
+
+
+
+
+
+
 
     template<> DLLExport
     std::vector<size_t> IPropertyManager::getValue<std::vector<size_t> >(const std::string &name) const
@@ -199,24 +229,6 @@ namespace Kernel
             throw std::runtime_error(message);
         }
     }
-
-#ifndef WIN32
-    /// On windows 32-bit, this definition overlaps with size_t !!!
-    template<> DLLExport
-    std::vector<uint32_t> IPropertyManager::getValue<std::vector<uint32_t> >(const std::string &name) const
-    {
-        PropertyWithValue<std::vector<uint32_t> > *prop = dynamic_cast<PropertyWithValue<std::vector<uint32_t> >*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<uint32>.";
-            throw std::runtime_error(message);
-        }
-    }
-#endif
 
 
     template<> DLLExport
@@ -298,13 +310,16 @@ namespace Kernel
     IPropertyManager::TypedValue::operator int16_t () { return pm.getValue<int16_t>(prop); }
     IPropertyManager::TypedValue::operator uint16_t () { return pm.getValue<uint16_t>(prop); }
     IPropertyManager::TypedValue::operator int32_t () { return pm.getValue<int32_t>(prop); }
-    IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
     IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }    
     IPropertyManager::TypedValue::operator size_t () { return pm.getValue<size_t>(prop); }
     IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }
     IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
+#ifndef WIN32
+    /// uint32_t overlaps size_t on win32
+    IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
+#endif
 
    // The Mac has different definitions for size_t and uint64_t
 #ifdef __INTEL_COMPILER
