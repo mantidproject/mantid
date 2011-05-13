@@ -72,6 +72,7 @@ namespace DataHandling
     Progress* prog = NULL;
 
     char currentLine[256];
+    char filetype = 'x';
 
     // Gather data
     if ( input.is_open() )
@@ -88,9 +89,9 @@ namespace DataHandling
         {
           prog = new Progress(this, 0.0, 1.0, nSpec);
         }
-        double bc1;
-        double bc2;
-        double bc4;
+        double bc1 = 0;
+        double bc2 = 0;
+        double bc4 = 0;
         if (  currentLine[0] == '\n' || currentLine[0] == '#' )
         {
           if ( nSpec == 0 )
@@ -111,6 +112,7 @@ namespace DataHandling
         }
         else if ( currentLine[0] == 'B' )
         {
+        	// Line start with Bank including file format, X0 information and etc.
           if ( X->size() != 0 )
           {
             gsasDataX.push_back(X);
@@ -124,18 +126,46 @@ namespace DataHandling
               prog->report();
           }
 
-          /* BANK <SpectraNo> <NBins> <NBins> RALF <BC1> <BC2> <BC1> <BC4>
+          /*    BANK <SpectraNo> <NBins> <NBins> RALF <BC1> <BC2> <BC1> <BC4>
+           * OR
+           *    BANK <SpectraNo> <NBins> <NBins> SLOG <BC1> <BC2> <BC3> 0>
           *  BC1 = X[0] * 32
           *  BC2 = X[1] * 32 - BC1
           *  BC4 = ( X[1] - X[0] ) / X[0]
           */
 
+          // Parse B-line
+          int specno, nbin1, nbin2, bc3;
           std::istringstream inputLine(currentLine, std::ios::in);
+
+          /*
           inputLine.ignore(256, 'F');
           inputLine >> bc1 >> bc2 >> bc1 >> bc4;
+          */
 
-          double x0 = bc1 / 32;
+          inputLine.ignore(256, 'K');
+          std::string filetypestring;
+
+          inputLine >> specno >> nbin1 >> nbin2 >> filetypestring;
+          if (filetypestring[0] == 'S'){
+        	  filetype = 's';
+          } else if (filetypestring[0] == 'R'){
+        	  filetype = 'r';
+          } else {
+        	  std::cout << "Unsupported File Type: " << filetypestring << std::endl;
+        	  std::cout << "Returned with error!\n";
+        	  return;
+          }
+
+          // Determine x0
+          double x0 = 0;
+          if (filetype == 'r'){
+        	  x0 = bc1 / 32;
+          } else {
+        	  x0 = bc1;
+          }
           X->push_back(x0);
+
         }
         else
         {
@@ -157,9 +187,14 @@ namespace DataHandling
           std::istringstream inputLine(currentLine, std::ios::in);
           inputLine >> xValue >> yValue >> eValue;
 
-          xValue = (2 * xValue) - xPrev;
-          yValue = yValue / ( xPrev * bc4 );
-          eValue = eValue / ( xPrev * bc4 );
+          // It is different for the defintion of X, Y, Z in SLOG and RALF format
+          if (filetype == 'r'){
+        	  xValue = (2 * xValue) - xPrev;
+        	  yValue = yValue / ( xPrev * bc4 );
+        	  eValue = eValue / ( xPrev * bc4 );
+          } else if (filetype == 's'){
+        	  xValue = (2 * xValue) - xPrev;
+          }
           X->push_back(xValue);
           Y->push_back(yValue);
           E->push_back(eValue);
@@ -227,7 +262,7 @@ namespace DataHandling
       }
 
   /**checks the file by opening it and reading few lines
-   *  @param filePath :: name of the file inluding its path
+   *  @param filePath :: name of the file including its path
    *  @return an integer value how much this algorithm can load the file
    */
       int LoadGSS::fileCheck(const std::string& filePath)
@@ -239,7 +274,7 @@ namespace DataHandling
           throw Exception::FileError("Unable to open file: " , filePath);
         }
         std::string str;
-        getline(file,str);//workspace ttile first line
+        getline(file,str);//workspace title first line
         while (!file.eof())
         {
           getline(file,str);
@@ -247,7 +282,7 @@ namespace DataHandling
           {
             continue;
           }
-          if(!str.substr(0,4).compare("BANK")&& (str.find("RALF")!=std::string::npos)&& (str.find("FXYE")!=std::string::npos))
+          if(!str.substr(0,4).compare("BANK")&& (str.find("RALF")!=std::string::npos || str.find("SLOG")!=std::string::npos)&& (str.find("FXYE")!=std::string::npos))
           {
             return 80;
           }
