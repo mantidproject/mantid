@@ -2,6 +2,7 @@ import unittest
 
 from MantidFramework import mtd
 mtd.initialise()
+from mantidsimple import *
 
 class PythonAlgorithmTest(unittest.TestCase):
     """
