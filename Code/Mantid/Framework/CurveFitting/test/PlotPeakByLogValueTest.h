@@ -86,7 +86,7 @@ public:
     TS_ASSERT_DELTA(result->Double(0,5),2,1e-12);
     TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
     TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
-/*
+
     TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
     TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
     TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
@@ -100,7 +100,7 @@ public:
     TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
     TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
     TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
-*/
+
     deleteData();
     AnalysisDataService::Instance().remove("PlotPeakResult");
 
@@ -142,7 +142,7 @@ public:
     TS_ASSERT_DELTA(result->Double(0,5),2,1e-12);
     TS_ASSERT_DELTA(result->Double(0,7),5,1e-12);
     TS_ASSERT_DELTA(result->Double(0,9),0.1,1e-12);
-/*
+
     TS_ASSERT_DELTA(result->Double(1,0),1.3,1e-12);
     TS_ASSERT_DELTA(result->Double(1,1),1.1,1e-12);
     TS_ASSERT_DELTA(result->Double(1,3),0.28,1e-12);
@@ -156,7 +156,7 @@ public:
     TS_ASSERT_DELTA(result->Double(2,5),1.6,1e-12);
     TS_ASSERT_DELTA(result->Double(2,7),5.06,1e-12);
     TS_ASSERT_DELTA(result->Double(2,9),0.12,1e-12);
-*/
+
     deleteData();
     AnalysisDataService::Instance().remove("PlotPeakResult");
 
