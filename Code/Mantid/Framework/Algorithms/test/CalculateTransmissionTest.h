@@ -22,8 +22,8 @@ public:
 
   // This pair of boilerplate methods prevent the suite being created statically
   // This means the constructor isn't called when running other tests
-  static AlgorithmTest *createSuite() { return new AlgorithmTest(); }
-  static void destroySuite( AlgorithmTest *suite ) { delete suite; }
+  static CalculateTransmissionTest *createSuite() { return new CalculateTransmissionTest(); }
+  static void destroySuite( CalculateTransmissionTest *suite ) { delete suite; }
 
 
   void testBasics()
