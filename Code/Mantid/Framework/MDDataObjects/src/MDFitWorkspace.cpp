@@ -309,7 +309,7 @@ namespace Mantid{
         return m_indexCalculator->getIndexUpperBounds() + 1;
       }
       /// Get the i-th coordinate of the current cell
-      virtual double getCoordinate(int i)const
+      virtual double getCoordinate(size_t i)const
       {
         return m_dimensions[i]->getX(m_index[i]);
       }

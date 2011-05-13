@@ -49,7 +49,7 @@ namespace Mantid
       virtual size_t getDataSize() const;
 
       /// Get the i-th coordinate of the current cell
-      virtual double getCoordinate(int i) const;
+      virtual double getCoordinate(size_t i) const;
 
       /// Advance to the next cell. If the current cell is the last one in the workspace
       /// do nothing and return false.

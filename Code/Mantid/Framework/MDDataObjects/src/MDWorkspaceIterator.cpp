@@ -24,7 +24,7 @@ namespace Mantid
       return m_indexCalculator.getIndexUpperBounds() + 1;
     }
 
-    double MDWorkspaceIterator::getCoordinate(int i)const
+    double MDWorkspaceIterator::getCoordinate(size_t i)const
     {
       return m_dimensions[i]->getX(m_index[i]);
     }
