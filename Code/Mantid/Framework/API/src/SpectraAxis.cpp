@@ -7,6 +7,8 @@
 #include <boost/lexical_cast.hpp>
 #include "MantidAPI/SpectraDetectorMap.h"
 
+#include <iostream>
+
 namespace Mantid
 {
 namespace API
@@ -100,12 +102,12 @@ specid_t& SpectraAxis::spectraNo(const size_t& index)
  */
 void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
 {
-  int64_t nel=m_values.size();
+  size_t nel=m_values.size();
 
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
-  for (int64_t i=nel-1;i>=0;--i)
+  for (size_t i=0; i < nel; ++i )
   {
     map.insert(std::make_pair<int64_t,int64_t>(i, m_values[i]));
   }
@@ -119,11 +121,11 @@ void SpectraAxis::getIndexSpectraMap(index2spec_map& map)const
 void SpectraAxis::getSpectraIndexMap(spec2index_map& map)const
 {
   size_t nel=m_values.size();
-
+  
   if (nel==0)
     throw std::runtime_error("getSpectraIndexMap(),  zero elements");
   map.clear();
-  for (size_t i=nel-1;i>=0;--i)
+  for (size_t i=0; i < nel; ++i )
   {
     map.insert(std::make_pair<int64_t,int64_t>(m_values[i],i));
   }
