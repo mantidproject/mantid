@@ -89,7 +89,7 @@ namespace Mantid
       Progress prog(this, 0, 1.0, nspec);
       const SpectraDetectorMap & specMap = inputW->spectraMap();
       PARALLEL_FOR1(inputW)
-      for (size_t wi=0;wi<nspec;++wi)
+      for (int64_t wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak

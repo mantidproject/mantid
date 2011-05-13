@@ -209,7 +209,7 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
     // Take the bin width dependency out of the Y & E data
     if (m_distribution)
     {
-      for (size_t j = 0; j < size; ++j)
+      for (int j = 0; j < size; ++j)
       {
         const double width = std::abs( inputWS->dataX(i)[j+1] - inputWS->dataX(i)[j] );
         outputWS->dataY(i)[j] = inputWS->dataY(i)[j]*width;
@@ -576,7 +576,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
     assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
     PARALLEL_FOR1(WS)
-    for (size_t j = 0; j < m_numberOfSpectra; ++j)
+    for (int64_t j = 0; j < m_numberOfSpectra; ++j)
     {
       PARALLEL_START_INTERUPT_REGION
       if ( m_inputEvents )
