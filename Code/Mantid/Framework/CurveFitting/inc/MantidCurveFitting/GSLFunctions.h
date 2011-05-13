@@ -81,13 +81,13 @@ namespace Mantid
     /// overwrite base method
     void set(std::size_t iY, std::size_t iP, double value)
     {
-      std::size_t j = m_index[iP];
+      int64_t j = m_index[iP];
       if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /// overwrite base method
     double get(std::size_t iY, std::size_t iP)
     {
-      std::size_t j = m_index[iP];
+      int64_t j = m_index[iP];
       if (j >= 0) return gsl_matrix_get(m_J,iY,j);
       return 0.0;
     }

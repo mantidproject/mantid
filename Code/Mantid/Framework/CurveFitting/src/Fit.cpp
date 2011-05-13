@@ -56,8 +56,8 @@ namespace CurveFitting
 
     BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
     mustBePositive->setLower(0);
-    declareProperty("WorkspaceIndex",0, mustBePositive,
-      "The Workspace to fit, uses the workspace numbering of the spectra (default 0)");
+    declareProperty(new PropertyWithValue<int>("WorkspaceIndex",0, mustBePositive),
+                    "The Workspace Index to fit in the input workspace");
     declareProperty("StartX", EMPTY_DBL(),
       "A value of x in, or on the low x boundary of, the first bin to include in\n"
       "the fit (default lowest value of x)" );
@@ -152,9 +152,11 @@ namespace CurveFitting
         setPropertyValue("OutputWorkspace",output+"_Workspace");
 
         // Save the fitted and simulated spectra in the output workspace
-        int iSpec = getProperty("WorkspaceIndex");
+        int temp = getProperty("WorkspaceIndex");
+        if (temp < 0) throw std::invalid_argument("WorkspaceIndex must be >= 0");
+        size_t workspaceIndex = static_cast<size_t>(temp);
         funmw->setWorkspace(ws,input);
-        API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,iSpec);
+        API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,workspaceIndex);
 
         setProperty("OutputWorkspace",outws);
       }

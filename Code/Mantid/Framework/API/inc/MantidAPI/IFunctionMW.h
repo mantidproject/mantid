@@ -172,7 +172,7 @@ protected:
     boost::shared_ptr<const MatrixWorkspace> ws,
     size_t wsIndex) const;
 
-  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const;
+  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, size_t wi)const;
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData);

@@ -5,6 +5,8 @@
 
 #include "MantidAPI/IPeakFunction.h"
 #include "MantidAPI/CompositeFunctionMW.h"
+#include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/WorkspaceFactory.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -1207,6 +1209,30 @@ public:
     TS_ASSERT_EQUALS(mfun->asString(),"name=Linear,a=0,b=0;name=Gauss,c=0,h=1,s=1;name=Cubic,c0=0,c1=0,c2=0,c3=0");
 
     delete mfun;
+  }
+
+  void test_setWorkspaceWorks()
+  {
+    CompositeFunctionMW *mfun = new CompositeFunctionMW();
+    Gauss *g1 = new Gauss();
+    Linear *bk = new Linear();
+
+    mfun->addFunction(bk);
+    mfun->addFunction(g1);
+
+    MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
+    MantidVec& x = ws->dataX(3);
+    MantidVec& y = ws->dataY(3);
+    for(int i=0; i < y.size(); ++i)
+    {
+      x[i] = 0.1 * i;
+      y[i] = i;
+    }
+    x.back() = 0.1 * y.size();
+
+    TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
+    TS_ASSERT_EQUALS(mfun->dataSize(),8);
+    TS_ASSERT_EQUALS(mfun->getData(),&y[2]);
   }
 
 private:

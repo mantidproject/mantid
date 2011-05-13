@@ -60,7 +60,7 @@ namespace API
       expr.parse(slicing);
       if (expr.name() == ",")
       {
-        for(int i = 0; i < expr.size(); ++i)
+        for(size_t i = 0; i < expr.size(); ++i)
         {
           const Expression& e = expr[i];
           if (e.size() == 2 && e.name() == "=")
@@ -285,7 +285,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
       det = inst->getDetector(det->getID());
     }
 
-    for (int i = 0; i < nParams(); i++)
+    for (size_t i = 0; i < nParams(); i++)
     {
       if ( !isExplicitlySet(i) )
       {
@@ -581,13 +581,19 @@ void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_arr
 
 }
 
-boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const
+/** TODO: Fill comment !!!!!!!!!!!!!!!!!!!!!!!!!!11
+ *
+ * @param inWS :: input workspace
+ * @param wi :: workspace index
+ * @return
+ */
+boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, size_t wi)const
 {
       const MantidVec& inputX = inWS->readX(wi);
       const MantidVec& inputY = inWS->readY(wi);
-      int nData = dataSize();
+      size_t nData = dataSize();
 
-      int histN = inWS->isHistogramData() ? 1 : 0;
+      size_t histN = inWS->isHistogramData() ? 1 : 0;
       API::MatrixWorkspace_sptr ws =
         Mantid::API::WorkspaceFactory::Instance().create(
             "Workspace2D",
@@ -606,7 +612,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
 
       assert(m_xMaxIndex-m_xMinIndex+1 == nData);
 
-      for(int i=0;i<3;i++)
+      for(size_t i=0;i<3;i++)
       {
         ws->dataX(i).assign(inputX.begin()+m_xMinIndex,inputX.begin()+m_xMaxIndex+1+histN);
       }
@@ -619,7 +625,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       double* lOut = new double[nData];  // to capture output from call to function()
       function( lOut );
 
-      for(int i=0; i<nData; i++)
+      for(size_t i=0; i<nData; i++)
       {
         Ycal[i] = lOut[i]; 
         E[i] = m_data[i] - Ycal[i];
@@ -641,7 +647,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
     double step; // real step
     double minDouble = std::numeric_limits<double>::min();
     double cutoff = 100.0*minDouble/stepPercentage;
-    int nParam = nParams();
+    size_t nParam = nParams();
 
     // allocate memory if not already done
     if (!m_tmpFunctionOutputMinusStep && nData>0)
@@ -652,7 +658,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
 
     function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-    for (int iP = 0; iP < nParam; iP++)
+    for (size_t iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {
