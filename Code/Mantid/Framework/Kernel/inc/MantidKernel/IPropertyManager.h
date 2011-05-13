@@ -252,8 +252,9 @@ protected:
     operator uint32_t ();
     operator int64_t ();
     operator uint64_t ();
+  #ifdef __INTEL_COMPILER
     operator unsigned long ();
-
+  #endif
     /// explicit specialization for bool()
     operator bool ();
     /// explicit specialization for double()

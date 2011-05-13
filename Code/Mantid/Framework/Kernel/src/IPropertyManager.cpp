@@ -110,23 +110,6 @@ namespace Kernel
     }
 
     template<> DLLExport
-    unsigned long IPropertyManager::getValue<unsigned long>(const std::string &name) const
-    {
-        PropertyWithValue<unsigned long> *prop = 
-	  dynamic_cast<PropertyWithValue<unsigned long>*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected unsigned long";
-            throw std::runtime_error(message);
-        }
-    }
-
-
-    template<> DLLExport
     bool IPropertyManager::getValue<bool>(const std::string &name) const
     {
         PropertyWithValue<bool> *prop = dynamic_cast<PropertyWithValue<bool>*>(getPointerToProperty(name));
@@ -247,24 +230,6 @@ namespace Kernel
     }
 
     template<> DLLExport
-    std::vector<unsigned long>
-    IPropertyManager::getValue<std::vector<unsigned long> >(const std::string &name) const
-    {
-        PropertyWithValue<std::vector<unsigned long> > *prop = 
-	  dynamic_cast<PropertyWithValue<std::vector<unsigned long> >*>(getPointerToProperty(name));
-        if (prop)
-        {
-            return *prop;
-        }
-        else
-        {
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<unsigned long>";
-            throw std::runtime_error(message);
-        }
-    }
-
-
-    template<> DLLExport
     std::vector<double> IPropertyManager::getValue<std::vector<double> >(const std::string &name) const
     {
         PropertyWithValue<std::vector<double> > *prop = dynamic_cast<PropertyWithValue<std::vector<double> >*>(getPointerToProperty(name));
@@ -331,13 +296,50 @@ namespace Kernel
     IPropertyManager::TypedValue::operator uint32_t () { return pm.getValue<uint32_t>(prop); }
     IPropertyManager::TypedValue::operator int64_t () { return pm.getValue<int64_t>(prop); }    
     IPropertyManager::TypedValue::operator uint64_t () { return pm.getValue<int64_t>(prop); }    
-    // Intel 64-bit size_t   
-    IPropertyManager::TypedValue::operator unsigned long () { return pm.getValue<unsigned long>(prop); }
     IPropertyManager::TypedValue::operator bool () { return pm.getValue<bool>(prop); }
     IPropertyManager::TypedValue::operator double () { return pm.getValue<double>(prop); }
     IPropertyManager::TypedValue::operator std::string () { return pm.getPropertyValue(prop); }
     IPropertyManager::TypedValue::operator Property* () { return pm.getPointerToProperty(prop); }
     /// @endcond
+
+  #ifdef __INTEL_COMPILER
+    template<> DLLExport
+    unsigned long IPropertyManager::getValue<unsigned long>(const std::string &name) const
+    {
+        PropertyWithValue<unsigned long> *prop = 
+	  dynamic_cast<PropertyWithValue<unsigned long>*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected unsigned long";
+            throw std::runtime_error(message);
+        }
+    }
+
+    template<> DLLExport
+    std::vector<unsigned long>
+    IPropertyManager::getValue<std::vector<unsigned long> >(const std::string &name) const
+    {
+        PropertyWithValue<std::vector<unsigned long> > *prop = 
+	  dynamic_cast<PropertyWithValue<std::vector<unsigned long> >*>(getPointerToProperty(name));
+        if (prop)
+        {
+            return *prop;
+        }
+        else
+        {
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected vector<unsigned long>";
+            throw std::runtime_error(message);
+        }
+    }
+
+    // Intel 64-bit size_t   
+    IPropertyManager::TypedValue::operator unsigned long () { return pm.getValue<unsigned long>(prop); }
+  #endif
+
 
 } // namespace Kernel
 } // namespace Mantid
