@@ -81,6 +81,9 @@ namespace WorkspaceCreationHelper
    */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
 							 int numBins, double binDelta=1.0);
+
+  DLL_TESTHELPERS Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
+
   //not strictly creating a workspace, but really helpfull to see what one contains
   DLL_TESTHELPERS void DisplayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
   //not strictly creating a workspace, but really helpfull to see what one contains

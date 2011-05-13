@@ -188,6 +188,7 @@ namespace ComponentCreationHelper
   //----------------------------------------------------------------------------------------------
   /**
    * Create an test instrument with n panels of 9 cylindrical detectors, a source and spherical sample shape.
+   * Detector ID's start at 1.
    *
    * @param num_banks: number of 9-cylinder banks to create
    * @param verbose: prints out the instrument after creation.

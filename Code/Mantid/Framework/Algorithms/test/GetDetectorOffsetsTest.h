@@ -71,6 +71,46 @@ public:
     AnalysisDataService::Instance().remove(outputWS);
   }
 
+
+  void testExecWithGroup()
+  {
+    // --------- Workspace with summed spectra -------
+    MatrixWorkspace_sptr WS = WorkspaceCreationHelper::CreateGroupedWorkspace2D(3, 200, 1.0);
+    WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
+    const Mantid::MantidVec &X = WS->readX(0);
+    Mantid::MantidVec &Y = WS->dataY(0);
+    Mantid::MantidVec &E = WS->dataE(0);
+    for (int i = 0; i < Y.size(); ++i)
+    {
+      const double x = (X[i]+X[i+1])/2;
+      Y[i] = exp(-0.5*pow((x-1)/10.0,2));
+      E[i] = 0.001;
+    }
+
+    // ---- Run algo -----
+    if ( !offsets.isInitialized() ) offsets.initialize();
+    TS_ASSERT_THROWS_NOTHING( offsets.setProperty("InputWorkspace",WS) );
+    std::string outputWS("offsetsped");
+    TS_ASSERT_THROWS_NOTHING( offsets.setPropertyValue("OutputWorkspace",outputWS) );
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("Step","0.02"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("DReference","1.00"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMin","-20"));
+    TS_ASSERT_THROWS_NOTHING(offsets.setPropertyValue("XMax","20"));
+    TS_ASSERT_THROWS_NOTHING( offsets.execute() );
+    TS_ASSERT( offsets.isExecuted() );
+
+    OffsetsWorkspace_sptr output = offsets.getProperty("OutputWorkspace");
+    if (!output) return;
+
+    TS_ASSERT_DELTA( output->getValue(1), -0.0196, 0.0001);
+    TS_ASSERT_EQUALS( output->getValue(1), output->getValue(2));
+    TS_ASSERT_EQUALS( output->getValue(1), output->getValue(3));
+
+    AnalysisDataService::Instance().remove(outputWS);
+  }
+
+
+
 private:
   GetDetectorOffsets offsets;
 };

@@ -410,11 +410,11 @@ namespace WorkspaceCreationHelper
   }
 
 
-  /** Create event workspace, with several detector IDs
-   * in one event list.
-   */
+  // =====================================================================================
+  /** Create event workspace, with several detector IDs in one event list.
+     */
   EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
-						  int numBins, double binDelta)
+              int numBins, double binDelta)
   {
 
     EventWorkspace_sptr retVal(new EventWorkspace);
@@ -448,6 +448,31 @@ namespace WorkspaceCreationHelper
 
     return retVal;
   }
+
+
+
+  // =====================================================================================
+  /** Create Workspace2d, with numHist spectra, each with 9 detectors,
+   * with IDs 1-9, 10-18, 19-27
+   */
+  MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta)
+  {
+    Workspace2D_sptr retVal = Create2DWorkspaceBinned(numHist, numBins, 0.0, binDelta);
+    retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(numHist) );
+
+    // Set the detector IDs
+    for (size_t g=0; g < numHist; g++)
+    {
+      std::vector<int> dets;
+      for (int i=1; i<=9; i++)
+        dets.push_back(g*9+i);
+      retVal->mutableSpectraMap().addSpectrumEntries(g, dets);
+    }
+
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
+  }
+
+
 
   //not strictly creating a workspace, but really helpfull to see what one contains
   void DisplayDataY(const MatrixWorkspace_sptr ws)

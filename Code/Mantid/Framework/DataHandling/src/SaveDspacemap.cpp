@@ -89,9 +89,6 @@ namespace DataHandling
     detid2det_map allDetectors;
     instrument->getDetectors(allDetectors);
 
-    // Selects (empty, will default to true)
-    std::map<int, bool> selects;
-
     detid2det_map::const_iterator it;
     detid_t maxdetID = 0;
     for (it = allDetectors.begin(); it != allDetectors.end(); it++)
