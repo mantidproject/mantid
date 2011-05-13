@@ -27,7 +27,6 @@ void ConvertUnits::initDocs()
   this->setOptionalMessage("Performs a unit change on the X values of a workspace");
 }
 
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
@@ -202,8 +201,9 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
 
   // Loop over the histograms (detector spectra)
   Progress prog(this,0.0,0.2,m_numberOfSpectra);
+  int64_t numberOfSpectra_i = static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < m_numberOfSpectra; ++i)
+  for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Take the bin width dependency out of the Y & E data
@@ -240,6 +240,7 @@ void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS,
 void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const double& factor, const double& power)
 {
   Progress prog(this,0.2,1.0,m_numberOfSpectra);
+  int64_t numberOfSpectra_i = static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // See if the workspace has common bins - if so the X vector can be common
   // First a quick check using the validator
@@ -262,7 +263,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
       xVals.access() = outputWS->dataX(0);
 
       PARALLEL_FOR1(outputWS)
-      for (int j = 1; j < m_numberOfSpectra; ++j)
+      for (int64_t j = 1; j < numberOfSpectra_i; ++j)
       {
         PARALLEL_START_INTERUPT_REGION
         outputWS->setX(j,xVals);
@@ -281,7 +282,7 @@ void ConvertUnits::convertQuickly(API::MatrixWorkspace_sptr outputWS, const doub
   // If we get to here then the bins weren't aligned and each spectrum is unique
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int k = 0; k < m_numberOfSpectra; ++k) {
+  for (int64_t k = 0; k < numberOfSpectra_i; ++k) {
     PARALLEL_START_INTERUPT_REGION
     if (!commonBoundaries) {
       MantidVec::iterator it;
@@ -325,6 +326,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
   assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
   Progress prog(this,0.2,1.0,m_numberOfSpectra);
+  int64_t numberOfSpectra_i = static_cast<int64_t>(m_numberOfSpectra); // cast to make openmp happy
 
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = outputWS->getInstrument();
@@ -404,7 +406,7 @@ void ConvertUnits::convertViaTOF(Kernel::Unit_const_sptr fromUnit, API::MatrixWo
 
   // Loop over the histograms (detector spectra)
   PARALLEL_FOR1(outputWS)
-  for (int i = 0; i < m_numberOfSpectra; ++i)
+  for (int64_t i = 0; i < numberOfSpectra_i; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     double efixed = efixedProp;
@@ -519,8 +521,8 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
 {
   // Need to loop round and find the full range
   double XMin = DBL_MAX, XMax = DBL_MIN;
-  const int numSpec = workspace->getNumberHistograms();
-  for (int i = 0; i < numSpec; ++i)
+  const size_t numSpec = workspace->getNumberHistograms();
+  for (size_t i = 0; i < numSpec; ++i)
   {
     try {
       Geometry::IDetector_const_sptr det = workspace->getDetector(i);
@@ -537,7 +539,7 @@ const std::vector<double> ConvertUnits::calculateRebinParams(const API::MatrixWo
       }
     } catch (Exception::NotFoundError &) {} //Do nothing
   }
-  const double step = ( XMax - XMin ) / workspace->blocksize();
+  const double step = ( XMax - XMin ) / static_cast<double>(workspace->blocksize());
 
   std::vector<double> retval;
   retval.push_back(XMin);
@@ -560,7 +562,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
 
     MantidVecPtr xVals;
     xVals.access() = WS->dataX(0);
-    for (int j = 1; j < m_numberOfSpectra; ++j)
+    for (size_t j = 1; j < m_numberOfSpectra; ++j)
     {
       WS->setX(j,xVals);
       std::reverse(WS->dataY(j).begin(),WS->dataY(j).end());
@@ -574,7 +576,7 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
     assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
     PARALLEL_FOR1(WS)
-    for (int j = 0; j < m_numberOfSpectra; ++j)
+    for (size_t j = 0; j < m_numberOfSpectra; ++j)
     {
       PARALLEL_START_INTERUPT_REGION
       if ( m_inputEvents )
@@ -610,14 +612,14 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
   Axis *specAxis = NULL, *outAxis = NULL;
   if (workspace->axes() > 1) specAxis = workspace->getAxis(1);
 
-  const int numSpec = workspace->getNumberHistograms();
+  const size_t numSpec = workspace->getNumberHistograms();
   const std::string emode = getProperty("Emode");
   if (emode=="Direct")
   {
     // First the easy case of direct instruments, where all spectra will need the
     // same number of bins removed
     // Need to make sure we don't pick a monitor as the 'reference' X spectrum (X0)
-    int i = 0;
+    size_t i = 0;
     for ( ; i < numSpec; ++i )
     {
       try {
@@ -640,7 +642,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     result = WorkspaceFactory::Instance().create(workspace,numSpec,bins,bins-1);
     if (specAxis) outAxis = result->getAxis(1);
 
-    for (int i = 0; i < numSpec; ++i)
+    for (size_t i = 0; i < numSpec; ++i)
     {
       const MantidVec& X = workspace->readX(i);
       const MantidVec& Y = workspace->readY(i);
@@ -659,7 +661,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     // Thus, we first need to loop to find largest 'good' range
     std::vector<MantidVec::difference_type> lastBins(numSpec);
     int maxBins = 0;
-    for (int i = 0; i < numSpec; ++i)
+    for (size_t i = 0; i < numSpec; ++i)
     {
       const MantidVec& X = workspace->readX(i);
       MantidVec::const_iterator end = std::lower_bound(X.begin(),X.end(),1.0e-10*DBL_MAX);

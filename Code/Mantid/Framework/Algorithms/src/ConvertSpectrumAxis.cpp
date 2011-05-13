@@ -41,7 +41,7 @@ namespace Algorithms
   using namespace Kernel;
   using namespace API;
   using namespace Geometry;
-  
+
   /// Sets documentation strings for this algorithm
   void ConvertSpectrumAxis::initDocs()
   {
@@ -80,10 +80,10 @@ namespace Algorithms
     // and storing it's corresponding workspace index
     // Map will be sorted on theta, so resulting axis will be ordered as well
     std::multimap<double,int> indexMap;
-    const int nHist = inputWS->getNumberHistograms();
-    const int nBins = inputWS->blocksize();
+    const size_t nHist = inputWS->getNumberHistograms();
+    const size_t nBins = inputWS->blocksize();
     const bool isHist = inputWS->isHistogramData();
-    int nxBins;
+    size_t nxBins;
     if ( isHist ) { nxBins = nBins+1; }
     else { nxBins = nBins; }
     bool warningGiven = false;
@@ -101,7 +101,7 @@ namespace Algorithms
       else if (emodeStr == "Indirect") emode=2;
       const double delta = 0.0;
       double efixed;
-      for ( int i = 0; i < nHist; i++ )
+      for ( size_t i = 0; i < nHist; i++ )
       {
         std::vector<double> xval;
         xval.push_back(inputWS->readX(i).front());
@@ -149,7 +149,7 @@ namespace Algorithms
     }
     else
     {
-      for (int i = 0; i < nHist; ++i)
+      for (size_t i = 0; i < nHist; ++i)
       {
         try 
         {

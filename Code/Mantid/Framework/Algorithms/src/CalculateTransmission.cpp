@@ -23,7 +23,6 @@ void CalculateTransmission::initDocs()
   this->setOptionalMessage("Calculates the transmission correction, as a function of wavelength, for a SANS instrument.");
 }
 
-
 using namespace Kernel;
 using namespace API;
 
@@ -164,7 +163,7 @@ API::MatrixWorkspace_sptr CalculateTransmission::extractSpectrum(API::MatrixWork
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum", m_done, m_done += 0.1);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", index);
+  childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
   childAlg->executeAsSubAlg();
 
   // Only get to here if successful

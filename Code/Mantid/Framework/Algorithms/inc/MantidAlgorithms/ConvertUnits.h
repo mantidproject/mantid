@@ -100,7 +100,7 @@ private:
 
   void putBackBinWidth(const API::MatrixWorkspace_sptr outputWS);
 
-  int m_numberOfSpectra;     ///< The number of spectra in the input workspace
+  std::size_t m_numberOfSpectra;     ///< The number of spectra in the input workspace
   bool m_distribution;       ///< Whether input is a distribution. Only applies to histogram workspaces.
   bool m_inputEvents;        ///< Flag indicating whether input workspace is an EventWorkspace
   Kernel::Unit_const_sptr m_inputUnit;  ///< The unit of the input workspace

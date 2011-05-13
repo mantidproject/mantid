@@ -15,7 +15,7 @@ namespace Mantid
 
     // Register the class into the algorithm factory
     DECLARE_ALGORITHM(ChangeBinOffset)
-    
+
     /// Sets documentation strings for this algorithm
     void ChangeBinOffset::initDocs()
     {
@@ -84,17 +84,17 @@ namespace Mantid
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
 	    
 	    //Get number of histograms
-	    int histnumber = inputW->getNumberHistograms();
+	    size_t histnumber = inputW->getNumberHistograms();
 	    
 	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 	    
-      int wi_min = 0;
-      int wi_max=histnumber-1;
+      size_t wi_min = 0;
+      size_t wi_max=histnumber-1;
 
       //check if workspace indexes have been set
-      int tempwi_min = getProperty("IndexMin");
-      int tempwi_max = getProperty("IndexMax");
-      if ( tempwi_max != Mantid::EMPTY_INT() ) 
+      size_t tempwi_min = getProperty("IndexMin");
+      size_t tempwi_max = getProperty("IndexMax");
+      if ( static_cast<int>(tempwi_max) != Mantid::EMPTY_INT() )
       {
         //check wimin<=tempwi_min<=tempwi_max<=wi_max
         if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
@@ -112,7 +112,7 @@ namespace Mantid
 
       // do the shift in X
 	    PARALLEL_FOR2(inputW, outputW)
-	    for (int i=0; i < histnumber; ++i)
+	    for (size_t i=0; i < histnumber; ++i)
 	    {		    
 				PARALLEL_START_INTERUPT_REGION
 		    //Do the offsetting
@@ -192,15 +192,15 @@ namespace Mantid
       }
 
       double offset = getProperty("Offset");
-      const int numberOfSpectra = inputWS->getNumberHistograms();
+      const size_t numberOfSpectra = inputWS->getNumberHistograms();
 
       m_progress = new API::Progress(this, 0.0, 1.0, numberOfSpectra);
-      int wi_min = 0;
-      int wi_max = numberOfSpectra-1;
+      size_t wi_min = 0;
+      size_t wi_max = numberOfSpectra-1;
       //check if workspace indexes have been set
-      int tempwi_min = getProperty("IndexMin");
-      int tempwi_max = getProperty("IndexMax");
-      if ( tempwi_max != Mantid::EMPTY_INT() ) 
+      size_t tempwi_min = getProperty("IndexMin");
+      size_t tempwi_max = getProperty("IndexMax");
+      if ( static_cast<int>(tempwi_max) != Mantid::EMPTY_INT() )
       {
         //check wimin<=tempwi_min<=tempwi_max<=wi_max
         if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
@@ -216,7 +216,7 @@ namespace Mantid
       }
 
       PARALLEL_FOR1(outputWS)
-      for (int i=0; i < numberOfSpectra; ++i)
+      for (size_t i=0; i < numberOfSpectra; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
