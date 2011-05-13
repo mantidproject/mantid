@@ -36,7 +36,7 @@ namespace Mantid
     {
       if( m_progress )
       {
-	delete m_progress;
+        delete m_progress;
       }
     }
 
@@ -113,7 +113,7 @@ namespace Mantid
 
       // do the shift in X
 	    PARALLEL_FOR2(inputW, outputW)
-	    for (size_t i=0; i < histnumber; ++i)
+	    for (int i=0; i < histnumber; ++i)
 	    {		    
 				PARALLEL_START_INTERUPT_REGION
 		    //Do the offsetting
@@ -196,7 +196,7 @@ namespace Mantid
       }
 
       PARALLEL_FOR1(outputWS)
-      for (size_t i=0; i < inputWS->getNumberHistograms(); ++i)
+      for (int i=0; i < inputWS->getNumberHistograms(); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
