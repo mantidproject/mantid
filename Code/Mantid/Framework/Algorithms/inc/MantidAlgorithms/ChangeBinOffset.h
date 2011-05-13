@@ -72,6 +72,13 @@ namespace Mantid
        
       /// The progress reporting object
       API::Progress *m_progress;
+
+      /// Offset to shift by
+      double offset;
+      /// Start workspace index
+      size_t wi_min;
+      /// Stop workspace index
+      size_t wi_max;
        
     };
 

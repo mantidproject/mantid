@@ -71,15 +71,8 @@ namespace Mantid
     {
 	    //Get input workspace and offset
 	    const MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-	    //Check if its an event workspace
-	    EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
-	    if (eventWS != NULL)
-	    {
-	      this->execEvent();
-	      return;
-	    }
 
-	    double offset = getProperty("Offset");
+	    offset = getProperty("Offset");
 	    
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
 	    
@@ -87,26 +80,34 @@ namespace Mantid
 	    size_t histnumber = inputW->getNumberHistograms();
 	    
 	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
-	    
-      size_t wi_min = 0;
-      size_t wi_max=histnumber-1;
 
+	    wi_min = 0;
+      wi_max = histnumber-1;
       //check if workspace indexes have been set
-      size_t tempwi_min = getProperty("IndexMin");
-      size_t tempwi_max = getProperty("IndexMax");
-      if ( static_cast<int>(tempwi_max) != Mantid::EMPTY_INT() )
+      int tempwi_min = getProperty("IndexMin");
+      int tempwi_max = getProperty("IndexMax");
+      if ( tempwi_max != Mantid::EMPTY_INT() )
       {
         //check wimin<=tempwi_min<=tempwi_max<=wi_max
         if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
         {
-          wi_min = tempwi_min;
-          wi_max = tempwi_max;
+          wi_min = size_t(tempwi_min);
+          wi_max = size_t(tempwi_max);
         }
         else
         {
           g_log.error("Invalid Workspace Index min/max properties");
           throw std::invalid_argument("Inconsistent properties defined");
         }
+      }
+
+
+      //Check if its an event workspace
+      EventWorkspace_const_sptr eventWS = boost::dynamic_pointer_cast<const EventWorkspace>(inputW);
+      if (eventWS != NULL)
+      {
+        this->execEvent();
+        return;
       }
 
 
@@ -146,22 +147,25 @@ namespace Mantid
 	    setProperty("OutputWorkspace",outputW);
     }
     
+
     API::MatrixWorkspace_sptr ChangeBinOffset::createOutputWS(API::MatrixWorkspace_sptr input)
-   {
-	   //Check whether input = output to see whether a new workspace is required.
-	    if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
-	    {
-		    //Overwrite the original
-		    return input;
-	    }
-	    else
-	    {	    
-		//Create new workspace for output from old
-		API::MatrixWorkspace_sptr output = API::WorkspaceFactory::Instance().create(input);
-		output->isDistribution(input->isDistribution());
-		return output;
-	    }
+    {
+      //Check whether input = output to see whether a new workspace is required.
+      if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"))
+      {
+        //Overwrite the original
+        return input;
+      }
+      else
+      {
+        //Create new workspace for output from old
+        API::MatrixWorkspace_sptr output = API::WorkspaceFactory::Instance().create(input);
+        output->isDistribution(input->isDistribution());
+        return output;
+      }
     }	
+
+
     
     void ChangeBinOffset::execEvent()
     {
@@ -191,32 +195,8 @@ namespace Mantid
         this->setProperty("OutputWorkspace", matrixOutputWS);
       }
 
-      double offset = getProperty("Offset");
-      const size_t numberOfSpectra = inputWS->getNumberHistograms();
-
-      m_progress = new API::Progress(this, 0.0, 1.0, numberOfSpectra);
-      size_t wi_min = 0;
-      size_t wi_max = numberOfSpectra-1;
-      //check if workspace indexes have been set
-      size_t tempwi_min = getProperty("IndexMin");
-      size_t tempwi_max = getProperty("IndexMax");
-      if ( static_cast<int>(tempwi_max) != Mantid::EMPTY_INT() )
-      {
-        //check wimin<=tempwi_min<=tempwi_max<=wi_max
-        if ((wi_min <= tempwi_min) && (tempwi_min <= tempwi_max) && (tempwi_max <= wi_max))
-        {
-          wi_min = tempwi_min;
-          wi_max = tempwi_max;
-        }
-        else
-        {
-          g_log.error("Invalid Workspace Index min/max properties");
-          throw std::invalid_argument("Inconsistent properties defined");
-        }
-      }
-
       PARALLEL_FOR1(outputWS)
-      for (size_t i=0; i < numberOfSpectra; ++i)
+      for (size_t i=0; i < inputWS->getNumberHistograms(); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting

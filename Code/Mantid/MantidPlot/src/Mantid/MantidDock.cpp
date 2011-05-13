@@ -502,6 +502,10 @@ void MantidDockWidget::populateMDEventWorkspaceData(Mantid::API::IMDEventWorkspa
 */
 void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_sptr workspace, QTreeWidgetItem* ws_item)
 {
+  // Are we showing one of the special workspaces, OffsetsWorkspace or GroupingWorkspace
+  bool specialWorkspace = false;
+  specialWorkspace = (workspace->id() == "SpecialWorkspace2D" || workspace->id() == "OffsetsWorkspace" || workspace->id() == "GroupingWorkspace");
+
   QTreeWidgetItem* data_item = new QTreeWidgetItem(QStringList("Title: "+QString::fromStdString(workspace->getTitle())));
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
@@ -510,33 +514,37 @@ void MantidDockWidget::populateMatrixWorkspaceData(Mantid::API::MatrixWorkspace_
   data_item->setFlags(Qt::NoItemFlags);
   ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList("Bins: "+QString::number(workspace->blocksize())));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
-
-  data_item = new QTreeWidgetItem(QStringList(workspace->isHistogramData() ? "Histogram" : "Data points"));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
-
-  std::string s = "X axis: ";
-  if (workspace->axes() > 0 )
+  if (!specialWorkspace)
   {
-    Mantid::API::Axis *ax = workspace->getAxis(0);
-    if ( ax && ax->unit() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
-    else s += "Not set";
-  }
-  else
-  {
-    s += "N/A";
-  }
-  data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
-  s = "Y axis: " + workspace->YUnitLabel();
+    data_item = new QTreeWidgetItem(QStringList("Bins: "+QString::number(workspace->blocksize())));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
 
-  data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
-  data_item->setFlags(Qt::NoItemFlags);
-  ws_item->addChild(data_item);
+    data_item = new QTreeWidgetItem(QStringList(workspace->isHistogramData() ? "Histogram" : "Data points"));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+
+    std::string s = "X axis: ";
+    if (workspace->axes() > 0 )
+    {
+      Mantid::API::Axis *ax = workspace->getAxis(0);
+      if ( ax && ax->unit() ) s += ax->unit()->caption() + " / " + ax->unit()->label();
+      else s += "Not set";
+    }
+    else
+    {
+      s += "N/A";
+    }
+    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+
+    s = "Y axis: " + workspace->YUnitLabel();
+    data_item = new QTreeWidgetItem(QStringList(QString::fromStdString(s)));
+    data_item->setFlags(Qt::NoItemFlags);
+    ws_item->addChild(data_item);
+  }
+
 
   //Extra stuff for EventWorkspace
   Mantid::API::IEventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<Mantid::API::IEventWorkspace> ( workspace );

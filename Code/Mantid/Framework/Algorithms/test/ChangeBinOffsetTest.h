@@ -21,7 +21,6 @@ using namespace Mantid::DataObjects;
 class ChangeBinOffsetTest : public CxxTest::TestSuite
 {
 public:
-
 	void testExec1D()
 	{
 		double offset = 2.0;
