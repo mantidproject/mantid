@@ -76,7 +76,7 @@ namespace Mantid
     void Workspace2D::setX(const size_t histnumber, const MantidVecPtr::ptr_type& Vec, const MantidVecPtr::ptr_type& Err)
     {
 
-      if (histnumber<0 || histnumber>=m_noVectors)
+      if (histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
       data[histnumber].setX(Vec, Err);
@@ -106,7 +106,7 @@ namespace Mantid
     */
     void Workspace2D::setX(const size_t histnumber, const MantidVecPtr& PA, const MantidVecPtr& Err)
     {
-      if (histnumber<0 || histnumber>=m_noVectors)
+      if (histnumber>=m_noVectors)
         throw std::range_error("Workspace2D::setX, histogram number out of range");
 
       data[histnumber].setX(PA, Err);
@@ -216,7 +216,7 @@ namespace Mantid
     */
     const MantidVec& Workspace2D::dataDx(const size_t index) const
     {
-      if (index<0 || index>=m_noVectors)
+      if (index>=m_noVectors)
         throw std::range_error("Workspace2D::dataDx, histogram number out of range");
 
       return data[index].dataDx();
@@ -267,7 +267,7 @@ namespace Mantid
     ///Returns the error x data
     MantidVec& Workspace2D::dataDx(const size_t index)
     {
-      if (index<0 || index>=m_noVectors)
+      if (index>=m_noVectors)
         throw std::range_error("Workspace2D::dataDx, histogram number out of range");
 
       return data[index].dataDx();

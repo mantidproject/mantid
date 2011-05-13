@@ -644,14 +644,15 @@ void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::Matr
   const API::SpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
 
   std::set<size_t>::const_iterator copyFrIt = unGroupedSet.begin();
-  // move passed the one GroupDetectors2::USED value at the start of the set
-  copyFrIt ++;
   // go thorugh all the spectra in the input workspace
   for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
-  {// error checking code that code be added if ( outIndex == outputWS->getNumberHistograms() ) throw std::logic_error("Couldn't copy all of the spectra into the output workspace");
-    outputWS->dataX(outIndex) = inputWS->readX(*copyFrIt);
-    outputWS->dataY(outIndex) = inputWS->readY(*copyFrIt);
-    outputWS->dataE(outIndex) = inputWS->readE(*copyFrIt);
+  {
+    size_t sourceIndex = *copyFrIt;
+    if( sourceIndex == USED ) continue; //Marked as not to be used
+
+    outputWS->dataX(outIndex) = inputWS->readX(sourceIndex);
+    outputWS->dataY(outIndex) = inputWS->readY(sourceIndex);
+    outputWS->dataE(outIndex) = inputWS->readE(sourceIndex);
     const int64_t specNum = inputWS->getAxis(1)->spectraNo(*copyFrIt);
     outputWS->getAxis(1)->spectraNo(outIndex) = specNum;
     specDetecMap.addSpectrumEntries(specNum, inputSpecDetecMap.getDetectors(specNum));

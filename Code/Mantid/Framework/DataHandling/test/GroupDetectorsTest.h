@@ -20,6 +20,8 @@ using namespace Mantid::Kernel;
 using namespace Mantid::API;
 using namespace Mantid::Geometry;
 using namespace Mantid::DataObjects;
+using Mantid::detid_t;
+using Mantid::specid_t;
 
 class GroupDetectorsTest : public CxxTest::TestSuite
 {
@@ -98,15 +100,15 @@ public:
 
     TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" )
     TS_ASSERT( props[1]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) )
+    TS_ASSERT( dynamic_cast<ArrayProperty<specid_t>* >(props[1]) )
 
     TS_ASSERT_EQUALS( props[2]->name(), "DetectorList" )
     TS_ASSERT( props[2]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) )
+    TS_ASSERT( dynamic_cast<ArrayProperty<detid_t>* >(props[2]) )
 
     TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" )
     TS_ASSERT( props[3]->isDefault() )
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) )
+    TS_ASSERT( dynamic_cast<ArrayProperty<size_t>* >(props[3]) )
  	}
 
   void testExec()

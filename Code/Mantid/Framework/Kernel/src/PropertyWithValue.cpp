@@ -22,7 +22,6 @@ template DLLExport class PropertyWithValue<std::vector<uint32_t> >;
 template DLLExport class PropertyWithValue<std::vector<int32_t> >;
 template DLLExport class PropertyWithValue<std::vector<uint64_t> >;
 template DLLExport class PropertyWithValue<std::vector<int64_t> >;
-
 /// @endcond
 
 } // namespace Kernel

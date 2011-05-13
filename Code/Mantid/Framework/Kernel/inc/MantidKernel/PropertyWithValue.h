@@ -168,6 +168,23 @@ inline void toValue<unsigned int>(const std::string& strvalue, std::vector<unsig
   }
 }
 
+template <>
+inline void toValue<size_t>(const std::string& strvalue, std::vector<size_t>& value)
+{
+  // Split up comma-separated properties
+  typedef Poco::StringTokenizer tokenizer;
+  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
+
+  value.clear();
+  value.reserve(values.count());
+
+  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
+  {
+    appendValue(*it, value);
+  }
+}
+
+
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types
 template<typename T>

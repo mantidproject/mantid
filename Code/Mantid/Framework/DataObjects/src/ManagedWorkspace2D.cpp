@@ -177,7 +177,10 @@ ManagedWorkspace2D::~ManagedWorkspace2D()
 void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t startIndex)const
 {
   // Check whether datablock has previously been saved. If so, read it in.
-  if (startIndex <= m_indexWrittenTo)
+  // @todo: Careful here. Without the (int)cast the m_indexWrittenTo variable is cast to a size_t and if it
+  // is at its default (-1) then this wraps around and the if evaluates to true when it should not, i.e. the 
+  // first time the function is called with startIndex = 0 and m_indexWrittenTo = -1
+  if ((int)startIndex <= m_indexWrittenTo)
   {
     long long seekPoint = startIndex * m_vectorSize;
 
