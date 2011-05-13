@@ -89,7 +89,7 @@ namespace Mantid
       Progress prog(this, 0, 1.0, nspec);
       const SpectraDetectorMap & specMap = inputW->spectraMap();
       PARALLEL_FOR1(inputW)
-      for (int wi=0;wi<nspec;++wi)
+      for (size_t wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
@@ -158,7 +158,7 @@ namespace Mantid
         throw ;
       }
       fit_alg->setProperty("InputWorkspace",inputW);
-      fit_alg->setProperty<int>("WorkspaceIndex",s);
+      fit_alg->setProperty<int>("WorkspaceIndex",static_cast<int>(s)); // TODO what is the right thing to do here?
       fit_alg->setProperty("StartX",Xmin);
       fit_alg->setProperty("EndX",Xmax);
       fit_alg->setProperty("MaxIterations",100);

@@ -60,7 +60,7 @@ void ApplyTransmissionCorrection::exec()
     setProperty("OutputWorkspace",outputWS);
   }
 
-  const int numHists = inputWS->getNumberHistograms();
+  const std::size_t numHists = inputWS->getNumberHistograms();
 
   Progress progress(this,0.0,1.0,numHists);
 
@@ -86,7 +86,7 @@ void ApplyTransmissionCorrection::exec()
     ETrIn = transWS->readE(0);
   }
   // Loop through the spectra and apply correction
-  for (int i = 0; i < numHists; ++i)
+  for (std::size_t i = 0; i < numHists; ++i)
   {
     IDetector_const_sptr det;
     try {

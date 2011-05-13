@@ -59,11 +59,11 @@ void CloneWorkspace::exec()
 
     // ...but not the data, so do that here.
 
-    const int numHists = inputWorkspace->getNumberHistograms();
+    const int64_t numHists = static_cast<int64_t>(inputWorkspace->getNumberHistograms());
     Progress prog(this,0.0,1.0,numHists);
 
     PARALLEL_FOR2(inputWorkspace,outputWorkspace)
-    for (int i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < numHists; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
   
