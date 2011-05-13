@@ -44,7 +44,7 @@ namespace Algorithms
   void CreateGroupingWorkspace::initDocs()
   {
     this->setWikiSummary("Creates a new GroupingWorkspace using an instrument from one of: an input workspace, an instrument name, or an instrument IDF file.\nOptionally uses bank names to create the groups.");
-    this->setOptionalMessage("Creates a new GroupingWorkspace using an instrument from one of: an input workspace, an instrument name, or an instrument IDF file.\Optionally uses bank names to create the groups.");
+    this->setOptionalMessage("Creates a new GroupingWorkspace using an instrument from one of: an input workspace, an instrument name, or an instrument IDF file.\nOptionally uses bank names to create the groups.");
   }
 
   //----------------------------------------------------------------------------------------------
