@@ -76,7 +76,7 @@ namespace Mantid
       declareProperty("SpectrumMax",Mantid::EMPTY_INT(), mustBePositive->clone(), "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
-      declareProperty(new ArrayProperty<int64_t>("SpectrumList"), "A comma-separated list of individual spectra to read.  Only used if\n"
+      declareProperty(new ArrayProperty<specid_t>("SpectrumList"), "A comma-separated list of individual spectra to read.  Only used if\n"
         "explicitly set.");
       m_cache_options.push_back("If Slow");
       m_cache_options.push_back("Always");
@@ -116,7 +116,7 @@ namespace Mantid
 	   std::vector<Kernel::Property*> period1logProp;
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int64_t total_specs;
+      specid_t total_specs;
       if( m_interval || m_list)
       {
         if (m_interval)
@@ -131,7 +131,7 @@ namespace Mantid
         {
             if (m_interval)
             {
-                for(std::vector<int64_t>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
+                for(std::vector<specid_t>::iterator it=m_spec_list.begin();it!=m_spec_list.end();)
                     if (*it >= m_spec_min && *it <m_spec_max)
                     {
                         it = m_spec_list.erase(it);
@@ -141,7 +141,7 @@ namespace Mantid
 
             }
             if (m_spec_list.size() == 0) m_list = false;
-            total_specs += static_cast<int64_t>(m_spec_list.size());
+            total_specs += static_cast<specid_t>(m_spec_list.size());
         }
       }
       else

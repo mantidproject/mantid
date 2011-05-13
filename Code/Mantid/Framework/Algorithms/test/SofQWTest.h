@@ -48,6 +48,9 @@ public:
                                 (Mantid::API::AnalysisDataService::Instance().retrieve(inputWS)) );
     WorkspaceHelpers::makeDistribution(inWS);
 
+    std::cout << "Testing axis 1 " << inWS->getNumberHistograms() << "\n";
+
+
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("InputWorkspace",inputWS) );
     const std::string outputWS = "result";
     TS_ASSERT_THROWS_NOTHING( sqw.setPropertyValue("OutputWorkspace",outputWS) );

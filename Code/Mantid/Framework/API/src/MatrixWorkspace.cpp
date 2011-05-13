@@ -622,18 +622,23 @@ namespace Mantid
       }
       // Now check that the new axis is of the correct length
       // Later, may want to allow axis to be one longer than number of vectors, to allow bins.
-      if ( newAxis->length() != m_axes[axisIndex]->length() )
+      const size_t oldLength = m_axes[axisIndex]->length();
+      const size_t newLength = newAxis->length();
+      if( newLength <= oldLength + 1 && newLength >= oldLength - 1 )
+      {
+	// If we're OK, then delete the old axis and set the pointer to the new one
+	delete m_axes[axisIndex];
+	m_axes[axisIndex] = newAxis;
+      }
+      else
       {
         std::stringstream msg;
         msg << "replaceAxis: The new axis is not a valid length (original axis: "
-          << m_axes[axisIndex]->length() << "; new axis: " << newAxis->length() << ")." << std::endl;
+          << oldLength << "; new axis: " << newLength << ")." << std::endl;
         g_log.error(msg.str());
         throw std::runtime_error("replaceAxis: The new axis is not a valid length");
       }
 
-      // If we're OK, then delete the old axis and set the pointer to the new one
-      delete m_axes[axisIndex];
-      m_axes[axisIndex] = newAxis;
     }
 
     /**

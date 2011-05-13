@@ -108,11 +108,11 @@ namespace Mantid
       /// Have the spectrum_min/max properties been set?
       bool m_interval;
       /// The value of the spectrum_list property
-      std::vector<int64_t> m_spec_list;
+      std::vector<specid_t> m_spec_list;
       /// The value of the spectrum_min property
-      int64_t m_spec_min;
+      specid_t m_spec_min;
       /// The value of the spectrum_max property
-      int64_t m_spec_max;
+      specid_t m_spec_max;
       /// Allowed values for the cache property
       std::vector<std::string> m_cache_options;
      
