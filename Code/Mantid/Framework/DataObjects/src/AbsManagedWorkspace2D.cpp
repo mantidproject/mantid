@@ -240,9 +240,7 @@ size_t AbsManagedWorkspace2D::getHistogramNumberHelper() const
 // not really a const method, but need to pretend it is so that const data getters can call it
 ManagedDataBlock2D* AbsManagedWorkspace2D::getDataBlock(const size_t index) const
 {
-  std::cout << "AbsManagedWorkspace2d::getDataBlock(" << index << ")" << std::endl; // REMOVE
   size_t startIndex = index - ( index%m_vectorsPerBlock );
-  std::cout << "   startIndex = " << startIndex << std::endl; // REMOVE
 
   // Look to see if the data block is already buffered
   ManagedDataBlock2D *existingBlock =  m_bufferedData.find(startIndex);

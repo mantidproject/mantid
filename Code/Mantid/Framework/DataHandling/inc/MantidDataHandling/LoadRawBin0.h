@@ -114,7 +114,7 @@ namespace Mantid
       boost::shared_ptr<Kernel::Property> m_perioids;
 
       /// total number of specs
-      int64_t m_total_specs;
+      specid_t m_total_specs;
       /// time channel vector
       std::vector<boost::shared_ptr<MantidVec> > m_timeChannelsVec;
 	};

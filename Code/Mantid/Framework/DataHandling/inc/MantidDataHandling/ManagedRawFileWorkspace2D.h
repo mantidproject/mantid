@@ -67,7 +67,7 @@ public:
  
 protected:
   /// Reads in a data block.
-  virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,int startIndex)const;
+  virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,size_t startIndex)const;
   /// Saves the dropped data block to disk.
   virtual void writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite) const;
 

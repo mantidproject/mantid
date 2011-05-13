@@ -61,7 +61,7 @@ void LoadRawBin0::init()
   declareProperty("SpectrumMax", EMPTY_INT(), mustBePositive->clone(),
       "The number of the last spectrum to read. Only used if explicitly\n"
       "set.");
-  declareProperty(new ArrayProperty<int64_t> ("SpectrumList"),
+  declareProperty(new ArrayProperty<specid_t> ("SpectrumList"),
       "A comma-separated list of individual spectra to read.  Only used if\n"
       "explicitly set.");
 

@@ -20,6 +20,8 @@ using namespace Mantid::API;
 using namespace Mantid::DataObjects;
 using namespace Mantid::Geometry;
 using Mantid::MantidVecPtr;
+using Mantid::detid_t;
+using Mantid::specid_t;
 
 class MaskDetectorsTest : public CxxTest::TestSuite
 {
@@ -127,15 +129,15 @@ public:
 
     TS_ASSERT_EQUALS( props[1]->name(), "SpectraList" );
     TS_ASSERT( props[1]->isDefault() );
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[1]) );
+    TS_ASSERT( dynamic_cast<ArrayProperty<specid_t>* >(props[1]) );
 
     TS_ASSERT_EQUALS( props[2]->name(), "DetectorList" );
     TS_ASSERT( props[2]->isDefault() );
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[2]) );
+    TS_ASSERT( dynamic_cast<ArrayProperty<detid_t>* >(props[2]) );
 
     TS_ASSERT_EQUALS( props[3]->name(), "WorkspaceIndexList" );
     TS_ASSERT( props[3]->isDefault() );
-    TS_ASSERT( dynamic_cast<ArrayProperty<int>* >(props[3]) );
+    TS_ASSERT( dynamic_cast<ArrayProperty<size_t>* >(props[3]) );
 
     TS_ASSERT_EQUALS( props[4]->name(), "MaskedWorkspace" );
     TS_ASSERT( props[4]->isDefault() );
