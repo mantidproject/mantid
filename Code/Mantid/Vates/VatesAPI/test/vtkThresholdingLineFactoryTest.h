@@ -55,7 +55,7 @@ private:
     {
       return dimension_size * dimension_size; 
     }
-    double getCoordinate(int i)const
+    double getCoordinate(size_t i)const
     {
       std::string id = m_mockWorkspace->getDimensionIDs()[i];
       std::vector<size_t> indexes;
