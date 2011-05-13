@@ -19,6 +19,13 @@ using Mantid::API::MatrixWorkspace;
 class CalculateTransmissionTest : public CxxTest::TestSuite
 {
 public:
+
+  // This pair of boilerplate methods prevent the suite being created statically
+  // This means the constructor isn't called when running other tests
+  static AlgorithmTest *createSuite() { return new AlgorithmTest(); }
+  static void destroySuite( AlgorithmTest *suite ) { delete suite; }
+
+
   void testBasics()
   {
     Mantid::Algorithms::CalculateTransmission trans;
