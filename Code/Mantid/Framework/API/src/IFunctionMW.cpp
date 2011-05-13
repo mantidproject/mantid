@@ -254,7 +254,7 @@ void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int&
  * @param xMin :: The lower bin index
  * @param xMax :: The upper bin index
  */
-void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
+void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,size_t xMin,size_t xMax)
 {
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
@@ -412,7 +412,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
  */
 double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex)const
+                               size_t wsIndex)const
 {
   double retVal = value;
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
@@ -474,7 +474,7 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
  */
 void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               int wsIndex) const
+                               size_t wsIndex) const
 {
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
@@ -485,7 +485,7 @@ void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& o
     double factor,power;
     if (wsUnit->quickConversion(*outUnit,factor,power) )
     {
-      for (unsigned int i = 0; i < values.size(); i++)
+      for (size_t i = 0; i < values.size(); i++)
         values[i] = factor * std::pow(values[i],power);
     }
     else

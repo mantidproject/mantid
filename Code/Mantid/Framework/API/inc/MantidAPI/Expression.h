@@ -77,7 +77,7 @@ namespace Mantid
       /// Returns the top level terms of the expression (function arguments). For a variable it empty.
       const std::vector<Expression>& terms()const{return m_terms;}
       /// Returns the number of argumens
-      int size()const{return static_cast<int>(m_terms.size());}
+      size_t size()const{return m_terms.size();}
       /// Const Iterator tpyedef
       typedef std::vector<Expression>::const_iterator iterator;
 
@@ -90,7 +90,7 @@ namespace Mantid
        * @param i :: the index
        * @return Expression at the given index
        */
-      const Expression& operator[](int i)const{return m_terms.at(i);}
+      const Expression& operator[](size_t i)const{return m_terms.at(i);}
       /// If the expression has 1 argument and empty function name it means it is wrapped in brackets
       /// This method returns first sub-expression without brackets
       const Expression& bracketsRemoved()const;

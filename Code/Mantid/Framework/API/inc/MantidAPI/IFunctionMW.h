@@ -143,7 +143,7 @@ public:
   /* MatrixWorkspace specific methods */
 
   /// Set the workspace
-  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax);
+  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, size_t xMin, size_t xMax);
   /// Get the workspace
   virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
   /// Get workspace index
@@ -166,11 +166,11 @@ protected:
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
-                      int wsIndex)const;
+                      size_t wsIndex)const;
 
   void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
-    int wsIndex) const;
+    size_t wsIndex) const;
 
   boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS,int wi)const;
 
@@ -180,11 +180,11 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Spectrum index
-  int m_workspaceIndex;
+  size_t m_workspaceIndex;
   /// Lower bin index
-  int m_xMinIndex;
+  size_t m_xMinIndex;
   /// Upper bin index
-  int m_xMaxIndex;
+  size_t m_xMaxIndex;
   /// Size of the fitted data
   std::size_t m_dataSize;
   /// Pointer to the fitted data

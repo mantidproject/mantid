@@ -17,6 +17,7 @@
 #include "LoadRaw/isisraw.h"
 #include <cstdio> // Required for gcc 4.4
 #include "MantidDataHandling/LoadInstrumentHelper.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
@@ -64,10 +65,10 @@ namespace Mantid
 
       BoundedValidator<int> *mustBePositive = new BoundedValidator<int>();
       mustBePositive->setLower(1);
-      declareProperty("SpectrumMin", 1, mustBePositive,
+      declareProperty(new PropertyWithValue<specid_t>("SpectrumMin", 1, mustBePositive),
         "The index number of the first spectrum to read.  Only used if\n"
         "spectrum_max is set.");
-      declareProperty("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone(),
+      declareProperty(new PropertyWithValue<specid_t>("SpectrumMax", Mantid::EMPTY_INT(), mustBePositive->clone()),
         "The number of the last spectrum to read. Only used if explicitly\n"
         "set.");
 
