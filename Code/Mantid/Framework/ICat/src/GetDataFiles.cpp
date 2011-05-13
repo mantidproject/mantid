@@ -28,9 +28,9 @@ namespace Mantid
     /// Initialising the algorithm
     void CGetDataFiles::init()
     {
-      BoundedValidator<size_t>* mustBePositive = new BoundedValidator<size_t>();
+      BoundedValidator<int64_t>* mustBePositive = new BoundedValidator<int64_t>();
       mustBePositive->setLower(0);
-      declareProperty<size_t>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
+      declareProperty<int64_t>("InvestigationId",-1,mustBePositive,"Id of the selected investigation");
 
       declareProperty(new WorkspaceProperty<API::ITableWorkspace> ("OutputWorkspace", "", Direction::Output),
           "The name of the workspace to store the file data search details");
