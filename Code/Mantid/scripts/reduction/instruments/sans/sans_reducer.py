@@ -61,6 +61,9 @@ class SANSReducer(Reducer):
     ## Data loader
     _data_loader = None
     
+    ## Q resolution calculation
+    _resolution_calculator = None
+    
     ## Extra data files
     _extra_files = {}
     
@@ -83,6 +86,9 @@ class SANSReducer(Reducer):
         
         # Default dark current subtracter class
         self._dark_current_subtracter_class = sans_reduction_steps.SubtractDarkCurrent
+        
+        # Resolution calculator
+        self._resolution_calculator = ReactorSANSResolution
     
     def set_instrument(self, configuration):
         """

@@ -51,6 +51,7 @@ set ( TEST_PY_FILES test/ImportTest.py
 		    test/WorkspaceHistoryTest.py
 		    test/WorkspaceTests.py
 		    test/SettingsTest.py
+		    test/SANSWorkflowTest.py
 )
 
 if(UNITY_BUILD)
