@@ -100,7 +100,6 @@ public:
   void testAgainstHRPD_DatasetLookUpTable()
   {
     // load dataset to test against
-    //std::string inputFile = "../../../../Test/AutoTestData/HRP38692.raw";
     std::string inputFile = "HRP38692.raw";
     LoadRaw3 loader;
     loader.initialize();
@@ -541,9 +540,6 @@ public:
     Mantid::MantidVec& e = ws2D->dataE(0); // error values of counts
     getMockData(y, e);
 
-    //put this workspace in the data service
-    TS_ASSERT_THROWS_NOTHING(AnalysisDataService::Instance().add(wsName, ws2D));
-
     Fit alg2;
     TS_ASSERT_THROWS_NOTHING(alg2.initialize());
     TS_ASSERT( alg2.isInitialized() );
@@ -558,7 +554,7 @@ public:
     alg2.setPropertyValue("Function",*gaus);
 
     // Set which spectrum to fit against and initial starting values
-    alg2.setPropertyValue("InputWorkspace", wsName);
+    alg2.setProperty("InputWorkspace", boost::dynamic_pointer_cast<MatrixWorkspace>(ws2D) );
     alg2.setPropertyValue("WorkspaceIndex","0");
     alg2.setPropertyValue("StartX","0");
     alg2.setPropertyValue("EndX","20");
@@ -581,8 +577,6 @@ public:
     TS_ASSERT_DELTA( pk->height(), 97.8035 ,0.0001);
     TS_ASSERT_DELTA( pk->centre(), 11.2356 ,0.0001);
     TS_ASSERT_DELTA( pk->width(), 2.6237 ,0.0001);
-
-    AnalysisDataService::Instance().remove(wsName);
   }
 
   void testAgainstMockDataSimplex()

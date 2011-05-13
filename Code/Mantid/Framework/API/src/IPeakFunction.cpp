@@ -24,7 +24,7 @@ public:
    * @param J :: A pointer to the overall Jacobian
    * @param iY0 :: The data offset for a particular function
    */
-  PartialJacobian1(Jacobian* J,size_t iY0):m_J(J),m_iY0(iY0)
+  PartialJacobian1(Jacobian* J,int iY0):m_J(J),m_iY0(iY0)
   {}
   /**
    * Overridden Jacobian::set(...).
@@ -32,7 +32,7 @@ public:
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(size_t iY, size_t iP, double value)
+  void set(int iY, int iP, double value)
   {
       m_J->set(m_iY0 + iY,iP,value);
   }
@@ -41,7 +41,7 @@ public:
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    */
-  double get(size_t iY, size_t iP)
+  double get(int iY, int iP)
   {
       return m_J->get(m_iY0 + iY,iP);
   }
@@ -117,7 +117,7 @@ void IPeakFunction::functionDeriv(Jacobian* out, const double* xValues, const in
     }
     else
     {
-      for(size_t ip = 0; ip < this->nParams(); ++ip)
+      for(int ip = 0; ip < this->nParams(); ++ip)
       {
         out->set(i,ip, 0.0);
       }

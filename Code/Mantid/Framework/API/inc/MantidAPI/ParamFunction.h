@@ -66,42 +66,42 @@ public:
   virtual ~ParamFunction ();
 
   /// Set i-th parameter
-  virtual void setParameter(std::size_t, const double& value, bool explicitlySet = true);
+  virtual void setParameter(int, const double& value, bool explicitlySet = true);
   /// Get i-th parameter
-  virtual double getParameter(std::size_t i)const;
+  virtual double getParameter(int i)const;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
-  virtual std::size_t nParams()const{return m_parameters.size();}
+  virtual int nParams()const{return static_cast<int>(m_parameters.size());}
   /// Returns the index of parameter name
-  virtual std::size_t parameterIndex(const std::string& name)const;
+  virtual int parameterIndex(const std::string& name)const;
   /// Returns the index of a parameter
-  //virtual std::size_t parameterIndex(const double* p)const;
+  //virtual int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
-  virtual std::string parameterName(std::size_t i)const;
+  virtual std::string parameterName(int i)const;
   /// Checks if a parameter has been set explicitly
-  virtual bool isExplicitlySet(std::size_t i)const;
+  virtual bool isExplicitlySet(int i)const;
 
   /// Number of active (in terms of fitting) parameters
-  virtual std::size_t nActive()const{return m_indexMap.size();}
+  virtual int nActive()const{return static_cast<int>(m_indexMap.size());}
   /// Returns "global" index of active parameter i
-  virtual std::size_t indexOfActive(std::size_t i)const;
+  virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i
-  virtual std::string nameOfActive(std::size_t i)const;
+  virtual std::string nameOfActive(int i)const;
 
   /// Check if a declared parameter i is active
-  virtual bool isActive(std::size_t i)const;
+  virtual bool isActive(int i)const;
   /// Get active index for a declared parameter i
-  virtual int64_t activeIndex(std::size_t i)const;
+  virtual int activeIndex(int i)const;
   /// Removes a declared parameter i from the list of active
-  virtual void removeActive(std::size_t i);
+  virtual void removeActive(int i);
   /// Restores a declared parameter i to the active status
-  virtual void restoreActive(std::size_t i);
+  virtual void restoreActive(int i);
 
   /// Return parameter index from a parameter reference. Usefull for constraints and ties in composite functions
-  virtual int64_t getParameterIndex(const ParameterReference& ref)const;
+  virtual int getParameterIndex(const ParameterReference& ref)const;
   /// Get the containing function
   IFitFunction* getContainingFunction(const ParameterReference& ref)const;
   /// Get the containing function
@@ -113,14 +113,14 @@ public:
   virtual void clearTies();
   virtual void removeTie(const std::string& parName){IFitFunction::removeTie(parName);}
   /// Removes i-th parameter's tie
-  virtual bool removeTie(std::size_t i);
+  virtual bool removeTie(int i);
   /// Get the tie of i-th parameter
-  virtual ParameterTie* getTie(std::size_t i)const;
+  virtual ParameterTie* getTie(int i)const;
 
   /// Add a constraint to function
   virtual void addConstraint(IConstraint* ic);
   /// Get constraint of i-th parameter
-  virtual IConstraint* getConstraint(std::size_t i)const;
+  virtual IConstraint* getConstraint(int i)const;
   /// Remove a constraint
   virtual void removeConstraint(const std::string& parName);
   /// Set parameters to satisfy constraints
@@ -138,14 +138,14 @@ protected:
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
   /// Get the address of the parameter. For use in UserFunction with mu::Parser
-  virtual double* getParameterAddress(std::size_t i);
+  virtual double* getParameterAddress(int i);
 
   /// Nonvirtual member which removes all declared parameters
   void clearAllParameters();
 
 private:
   /// The index map. m_indexMap[i] gives the total index for active parameter i
-  std::vector<size_t> m_indexMap;
+  std::vector<int> m_indexMap;
   /// Keeps parameter names
   std::vector<std::string> m_parameterNames;
   /// Keeps parameter values

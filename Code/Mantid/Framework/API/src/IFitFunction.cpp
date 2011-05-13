@@ -51,7 +51,7 @@ void IFitFunction::functionDeriv(Jacobian* out)
 void IFitFunction::updateActive(const double* in)
 {
   if (in)
-    for(size_t i=0;i<nActive();i++)
+    for(int i=0;i<nActive();i++)
     {
       setActiveParameter(i,in[i]);
     }
@@ -63,15 +63,15 @@ void IFitFunction::updateActive(const double* in)
  * @param i :: The index of active parameter to set
  * @param value :: The new value for the parameter
  */
-void IFitFunction::setActiveParameter(size_t i,double value)
+void IFitFunction::setActiveParameter(int i,double value)
 {
-  size_t j = indexOfActive(i);
+  int j = indexOfActive(i);
   setParameter(j,value,false);
 }
 
-double IFitFunction::activeParameter(size_t i)const
+double IFitFunction::activeParameter(int i)const
 {
-  size_t j = indexOfActive(i);
+  int j = indexOfActive(i);
   return getParameter(j);
 }
 
@@ -129,7 +129,7 @@ void IFitFunction::removeTie(const std::string& parName)
 void IFitFunction::addPenalty(double *out)const
 {
     double penalty = 0.;
-    for(size_t i=0;i<nParams();++i)
+    for(int i=0;i<nParams();++i)
     {
       API::IConstraint* c = getConstraint(i);
       if (c)
@@ -138,14 +138,14 @@ void IFitFunction::addPenalty(double *out)const
       }
     }
 
-    size_t n = dataSize() - 1;
+    int n = dataSize() - 1;
     // add penalty to first and last point and every 10th point in between
     if ( penalty != 0.0 )
     {
       out[0] += penalty;
       out[n] += penalty;
 
-      for (size_t i = 9; i < n; i+=10)
+      for (int i = 9; i < n; i+=10)
       {
         out[i] += penalty;
       }
@@ -159,8 +159,8 @@ void IFitFunction::addPenalty(double *out)const
   */
 void IFitFunction::addPenaltyDeriv(Jacobian *out)const
 {
-  size_t n = dataSize() - 1;
-  for(size_t i=0;i<nParams();++i)
+  int n = dataSize() - 1;
+  for(int i=0;i<nParams();++i)
   {  
     API::IConstraint* c = getConstraint(i);
     if (c)
@@ -174,7 +174,7 @@ void IFitFunction::addPenaltyDeriv(Jacobian *out)const
         deriv = out->get(n,ia);
         out->set(n,ia,deriv+penalty);
 
-        for (size_t j = 9; j < n; j+=10)
+        for (int j = 9; j < n; j+=10)
         {
           deriv = out->get(j,ia);
           out->set(j,ia,deriv+penalty);
@@ -203,12 +203,12 @@ std::string IFitFunction::asString()const
       ostr<<','<<attName<<'='<<attValue;
     }
   }
-  for(size_t i=0;i<nParams();i++)
+  for(int i=0;i<nParams();i++)
   {
     ostr<<','<<parameterName(i)<<'='<<getParameter(i);
   }
   std::string constraints;
-  for(size_t i=0;i<nParams();i++)
+  for(int i=0;i<nParams();i++)
   {
     const IConstraint* c = getConstraint(i);
     if (c)
@@ -230,7 +230,7 @@ std::string IFitFunction::asString()const
   }
 
   std::string ties;
-  for(size_t i=0;i<nParams();i++)
+  for(int i=0;i<nParams();i++)
   {
     const ParameterTie* tie = getTie(i);
     if (tie)

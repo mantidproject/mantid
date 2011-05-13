@@ -17,8 +17,6 @@ namespace Mantid
 namespace API
 {
 
-  using std::size_t;
-
 //DECLARE_FUNCTION(CompositeFunction)
 
 /// Copy contructor
@@ -45,7 +43,7 @@ CompositeFunction& CompositeFunction::operator=(const CompositeFunction& f)
 ///Destructor
 CompositeFunction::~CompositeFunction()
 {
-  for(size_t i=0;i<nFunctions();i++)
+  for(int i=0;i<nFunctions();i++)
     if (m_functions[i]) delete m_functions[i];
 }
 
@@ -71,7 +69,7 @@ void CompositeFunction::init()
 std::string CompositeFunction::asString()const
 {
   std::ostringstream ostr;
-  for(size_t i=0;i<nFunctions();i++)
+  for(int i=0;i<nFunctions();i++)
   {
     IFitFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
@@ -84,7 +82,7 @@ std::string CompositeFunction::asString()const
     }
   }
   std::string ties;
-  for(size_t i=0;i<nParams();i++)
+  for(int i=0;i<nParams();i++)
   {
     const ParameterTie* tie = getTie(i);
     if (tie)
@@ -117,9 +115,9 @@ std::string CompositeFunction::asString()const
  *  @param value :: The new value
  *  @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
-void CompositeFunction::setParameter(size_t i, const double& value, bool explicitlySet)
+void CompositeFunction::setParameter(int i, const double& value, bool explicitlySet)
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   m_functions[ iFun ]->setParameter(i - m_paramOffsets[iFun],value,explicitlySet);
 }
 
@@ -127,9 +125,9 @@ void CompositeFunction::setParameter(size_t i, const double& value, bool explici
  *  @param i :: The parameter index
  *  @return value of the requested parameter
  */
-double CompositeFunction::getParameter(size_t i)const
+double CompositeFunction::getParameter(int i)const
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   return m_functions[ iFun ]->getParameter(i - m_paramOffsets[iFun]);
 }
 
@@ -142,9 +140,14 @@ double CompositeFunction::getParameter(size_t i)const
 void CompositeFunction::setParameter(const std::string& name, const double& value, bool explicitlySet)
 {
   std::string pname;
-  size_t index;
+  int index;
   parseName(name,index,pname);
-  getFunction(index)->setParameter(pname,value,explicitlySet);
+  if (index < 0)
+    throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
+  else
+  {   
+    getFunction(index)->setParameter(pname,value,explicitlySet);
+  }
 }
 
 /**
@@ -155,13 +158,18 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
 double CompositeFunction::getParameter(const std::string& name)const
 {
   std::string pname;
-  size_t index;
+  int index;
   parseName(name,index,pname);
-  return getFunction(index)->getParameter(pname);
+  if (index < 0)
+    throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
+  else
+  {   
+    return getFunction(index)->getParameter(pname);
+  }
 }
 
 /// Total number of parameters
-size_t CompositeFunction::nParams()const
+int CompositeFunction::nParams()const
 {
   return m_nParams;
 }
@@ -171,27 +179,30 @@ size_t CompositeFunction::nParams()const
  * @param name :: The name of a parameter
  * @return index of the requested named parameter
  */
-size_t CompositeFunction::parameterIndex(const std::string& name)const
+int CompositeFunction::parameterIndex(const std::string& name)const
 {
   std::string pname;
-  size_t index;
+  int index;
   parseName(name,index,pname);
+  if (index < 0)
+    throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
+
   return getFunction(index)->parameterIndex(pname) + m_paramOffsets[index];
 }
 
 /// Returns the name of parameter
 /// @param i :: The index
 /// @return The name of the parameter
-std::string CompositeFunction::parameterName(size_t i)const
+std::string CompositeFunction::parameterName(int i)const
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   std::ostringstream ostr;
   ostr << 'f' << iFun << '.' << m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
   return ostr.str();
 }
 
 /// Number of active (in terms of fitting) parameters
-size_t CompositeFunction::nActive()const
+int CompositeFunction::nActive()const
 {
   return m_nActive;
 }
@@ -206,7 +217,7 @@ double CompositeFunction::activeParameter(int i)const
 /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
 void CompositeFunction::setActiveParameter(int i, double value)
 {
-  size_t iFun = functionIndexActive(i);
+  int iFun = functionIndexActive(i);
   m_functions[ iFun ]->setActiveParameter(i - m_activeOffsets[iFun],value);
 }
 
@@ -221,16 +232,16 @@ void CompositeFunction::updateActive(const double* in)
 }
 
 /// Returns "global" index of active parameter i
-size_t CompositeFunction::indexOfActive(size_t i)const
+int CompositeFunction::indexOfActive(int i)const
 {
-  size_t iFun = functionIndexActive(i);
+  int iFun = functionIndexActive(i);
   return m_paramOffsets[ iFun ] + m_functions[ iFun ]->indexOfActive(i - m_activeOffsets[iFun]);
 }
 
 /// Returns the name of active parameter i
-std::string CompositeFunction::nameOfActive(size_t i)const
+std::string CompositeFunction::nameOfActive(int i)const
 {
-  size_t iFun = functionIndexActive(i);
+  int iFun = functionIndexActive(i);
   std::ostringstream ostr;
   ostr << 'f' << iFun << '.' << m_functions[ iFun ]->nameOfActive(i - m_activeOffsets[iFun]);
   return ostr.str();
@@ -241,7 +252,7 @@ std::string CompositeFunction::nameOfActive(size_t i)const
  * @param i :: The index of a declared parameter
  * @return true if parameter i is active
  */
-bool CompositeFunction::isActive(size_t i)const
+bool CompositeFunction::isActive(int i)const
 {
   int iFun = functionIndex(i);
   return m_functions[ iFun ]->isActive(i - m_paramOffsets[iFun]);
@@ -250,35 +261,35 @@ bool CompositeFunction::isActive(size_t i)const
 /**
  * @param i :: A declared parameter index to be removed from active
  */
-void CompositeFunction::removeActive(size_t i)
+void CompositeFunction::removeActive(int i)
 {
   if (!isActive(i)) return;
-  size_t iFun = functionIndex(i);
-  size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
+  int iFun = functionIndex(i);
+  int ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
   m_IFitFunctionActive.erase(m_IFitFunctionActive.begin()+ia);
   m_functions[ iFun ]->removeActive(i - m_paramOffsets[iFun]);
 
   m_nActive--;
-  for(size_t j=iFun+1;j<nFunctions();j++)
+  for(int j=iFun+1;j<nFunctions();j++)
     m_activeOffsets[j] -= 1;
 }
 
 /** Makes a parameter active again. It doesn't change the parameter's tie.
  * @param i :: A declared parameter index to be restored to active
  */
-void CompositeFunction::restoreActive(size_t i)
+void CompositeFunction::restoreActive(int i)
 {
-  size_t iFun = functionIndex(i);
-  size_t ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
+  int iFun = functionIndex(i);
+  int ia = m_activeOffsets[iFun] + m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
 
-  std::vector<size_t>::iterator itFun = 
+  std::vector<int>::iterator itFun = 
     std::find_if(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),std::bind2nd(std::greater<int>(),i));
 
   m_IFitFunctionActive.insert(itFun,1,ia);
   m_functions[ iFun ]->restoreActive(i - m_paramOffsets[iFun]);
 
   m_nActive++;
-  for(size_t j=iFun+1;j<nFunctions();j++)
+  for(int j=iFun+1;j<nFunctions();j++)
     m_activeOffsets[j] += 1;
 }
 
@@ -287,10 +298,10 @@ void CompositeFunction::restoreActive(size_t i)
  * @return The index of declared parameter i in the list of active parameters or -1
  *         if the parameter is tied.
  */
-int64_t CompositeFunction::activeIndex(size_t i)const
+int CompositeFunction::activeIndex(int i)const
 {
-  size_t iFun = functionIndex(i);
-  int64_t j = m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
+  int iFun = functionIndex(i);
+  int j = m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);
 
   if (j == -1) 
   {
@@ -327,7 +338,7 @@ void CompositeFunction::checkFunction()
  * @param f :: A pointer to the added function
  * @return The function index
  */
-size_t CompositeFunction::addFunction(IFitFunction* f)
+int CompositeFunction::addFunction(IFitFunction* f)
 {
   m_IFitFunction.insert(m_IFitFunction.end(),f->nParams(),m_functions.size());
   m_IFitFunctionActive.insert(m_IFitFunctionActive.end(),f->nActive(),m_functions.size());
@@ -354,17 +365,17 @@ size_t CompositeFunction::addFunction(IFitFunction* f)
  * @param i :: The index of the function to remove
  * @param del :: The deletion flag. If true the function will be deleted otherwise - simply detached
  */
-void CompositeFunction::removeFunction(size_t i, bool del)
+void CompositeFunction::removeFunction(int i, bool del)
 {
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
   IFitFunction* fun = getFunction(i);
 
-  size_t dna = fun->nActive();
-  size_t dnp = fun->nParams();
+  int dna = fun->nActive();
+  int dnp = fun->nParams();
 
-  for(size_t j=0;j<nParams();)
+  for(int j=0;j<nParams();)
   {
     ParameterTie* tie = getTie(j);
     if (tie && tie->findParametersOf(fun))
@@ -378,7 +389,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
   }
 
   // Shift down the function indeces for parameters
-  for(std::vector<size_t>::iterator it=m_IFitFunction.begin();it!=m_IFitFunction.end();)
+  for(std::vector<int>::iterator it=m_IFitFunction.begin();it!=m_IFitFunction.end();)
   {
 
     if (*it == i)
@@ -396,7 +407,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
   }
 
   // Shift down the function indeces for active parameters
-  for(std::vector<size_t>::iterator it=m_IFitFunctionActive.begin();it!=m_IFitFunctionActive.end();)
+  for(std::vector<int>::iterator it=m_IFitFunctionActive.begin();it!=m_IFitFunctionActive.end();)
   {
     if (*it == i)
     {
@@ -414,7 +425,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
 
   m_nActive -= dna;
   // Shift the active offsets down by the number of i-th function's active params
-  for(size_t j=i+1;j<nFunctions();j++)
+  for(int j=i+1;j<nFunctions();j++)
   {
     m_activeOffsets[j] -= dna;
   }
@@ -422,7 +433,7 @@ void CompositeFunction::removeFunction(size_t i, bool del)
 
   m_nParams -= dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
-  for(size_t j=i+1;j<nFunctions();j++)
+  for(int j=i+1;j<nFunctions();j++)
   {
     m_paramOffsets[j] -= dnp;
   }
@@ -441,13 +452,13 @@ void CompositeFunction::removeFunction(size_t i, bool del)
  *  a member of this composite function nothing happens
  * @param f_new :: A pointer to the new function
  */
-void CompositeFunction::replaceOldFunction(const IFitFunction* f_old,IFitFunction* f_new)
+void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* f_new)
 {
   std::vector<IFitFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
 //  f_new->setMatrixWorkspace(f_old->getMatrixWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
-  size_t iFun = it - m_functions.begin();
+  int iFun = it - m_functions.begin();
   replaceFunction(iFun,f_new);
 }
 
@@ -455,21 +466,21 @@ void CompositeFunction::replaceOldFunction(const IFitFunction* f_old,IFitFunctio
  * @param i :: The index of the function to replace
  * @param f :: A pointer to the new function
  */
-void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
+void CompositeFunction::replaceFunction(int i,IFitFunction* f)
 {
   if ( i >= nFunctions() )
     throw std::out_of_range("Function index out of range.");
 
   IFitFunction* fun = getFunction(i);
-  size_t na_old = fun->nActive();
-  size_t np_old = fun->nParams();
+  int na_old = fun->nActive();
+  int np_old = fun->nParams();
 
-  size_t na_new = f->nActive();
-  size_t np_new = f->nParams();
+  int na_new = f->nActive();
+  int np_new = f->nParams();
 
   // Modify function indeces: The new function may have different number of parameters
   {
-    std::vector<size_t>::iterator itFun = std::find(m_IFitFunction.begin(),m_IFitFunction.end(),i);
+    std::vector<int>::iterator itFun = std::find(m_IFitFunction.begin(),m_IFitFunction.end(),i);
     if(itFun != m_IFitFunction.end()) // functions must have at least 1 parameter
     {
       if (np_old > np_new)
@@ -490,7 +501,7 @@ void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
 
   // Modify function indeces: The new function may have different number of active parameters
   {
-    std::vector<size_t>::iterator itFun = std::find(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),i);
+    std::vector<int>::iterator itFun = std::find(m_IFitFunctionActive.begin(),m_IFitFunctionActive.end(),i);
     if (itFun != m_IFitFunctionActive.end())
     {
       if (na_old > na_new)
@@ -509,18 +520,18 @@ void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
     }
   }
 
-  size_t dna = na_new - na_old;
+  int dna = na_new - na_old;
   m_nActive += dna;
   // Recalc the active offsets 
-  for(size_t j=i+1;j<nFunctions();j++)
+  for(int j=i+1;j<nFunctions();j++)
   {
     m_activeOffsets[j] += dna;
   }
 
-  size_t dnp = np_new - np_old;
+  int dnp = np_new - np_old;
   m_nParams += dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
-  for(size_t j=i+1;j<nFunctions();j++)
+  for(int j=i+1;j<nFunctions();j++)
   {
     m_paramOffsets[j] += dnp;
   }
@@ -533,9 +544,9 @@ void CompositeFunction::replaceFunction(size_t i,IFitFunction* f)
  * @param i :: The index of the function
  * @return function at the requested index
  */
-IFitFunction* CompositeFunction::getFunction(size_t i)const
+IFitFunction* CompositeFunction::getFunction(int i)const
 {
-  if ( i >= nFunctions() )
+  if ( i >= nFunctions()  || i < 0)
   {
     throw std::out_of_range("Function index out of range.");
   }
@@ -547,9 +558,9 @@ IFitFunction* CompositeFunction::getFunction(size_t i)const
  * @param i :: The parameter index
  * @return function index of the requested parameter
  */
-size_t CompositeFunction::functionIndex(size_t i)const
+int CompositeFunction::functionIndex(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -561,9 +572,9 @@ size_t CompositeFunction::functionIndex(size_t i)const
  * @param i :: The active parameter index
  * @return active function index of the requested parameter
  */
-size_t CompositeFunction::functionIndexActive(size_t i)const
+int CompositeFunction::functionIndexActive(int i)const
 {
-  if (i >= nParams())
+  if (i >= nParams() || i < 0)
     throw std::out_of_range("Function parameter index out of range.");
   return m_IFitFunctionActive[i];
 }
@@ -573,13 +584,14 @@ size_t CompositeFunction::functionIndexActive(size_t i)const
 * @param index :: Receives function index or -1 
 * @param name :: Receives the parameter name
 */
-void CompositeFunction::parseName(const std::string& varName,size_t& index, std::string& name)
+void CompositeFunction::parseName(const std::string& varName,int& index, std::string& name)
 {
   size_t i = varName.find('.');
   if (i == std::string::npos)
   {
     name = varName;
-    throw std::invalid_argument("CompositeFunction::parseName: parameter name must contain function index");
+    index = -1;
+    return;
   }
   else
   {
@@ -600,7 +612,7 @@ void CompositeFunction::parseName(const std::string& varName,size_t& index, std:
  * @param i :: The parameter index
  * @return The local index of the parameter
  */
-size_t CompositeFunction::parameterLocalIndex(size_t i)const
+int CompositeFunction::parameterLocalIndex(int i)const
 {
   int iFun = functionIndex(i);
   return i - m_paramOffsets[iFun];
@@ -610,7 +622,7 @@ size_t CompositeFunction::parameterLocalIndex(size_t i)const
  * @param i :: The parameter index
  * @return The pure parameter name (without the function identifier f#.)
  */
-std::string CompositeFunction::parameterLocalName(size_t i)const
+std::string CompositeFunction::parameterLocalName(int i)const
 {
   int iFun = functionIndex(i);
   return m_functions[ iFun ]->parameterName(i - m_paramOffsets[iFun]);
@@ -636,7 +648,7 @@ std::string CompositeFunction::parameterLocalName(size_t i)const
  */
 void CompositeFunction::applyTies()
 {
-  for(size_t i=0;i<nFunctions();i++)
+  for(int i=0;i<nFunctions();i++)
   {
     getFunction(i)->applyTies();
   }
@@ -647,7 +659,7 @@ void CompositeFunction::applyTies()
  */
 void CompositeFunction::clearTies()
 {
-  for(size_t i=0;i<nFunctions();i++)
+  for(int i=0;i<nFunctions();i++)
   {
     getFunction(i)->clearTies();
   }
@@ -657,9 +669,9 @@ void CompositeFunction::clearTies()
  * @param i :: The index of the tied parameter.
  * @return True if successfull
  */
-bool CompositeFunction::removeTie(size_t i)
+bool CompositeFunction::removeTie(int i)
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   bool res = m_functions[ iFun ]->removeTie(i - m_paramOffsets[iFun]);
   if (res)
   {
@@ -672,7 +684,7 @@ bool CompositeFunction::removeTie(size_t i)
  * @param i :: The parameter index
  * @return A pointer to the tie.
  */
-ParameterTie* CompositeFunction::getTie(size_t i)const
+ParameterTie* CompositeFunction::getTie(int i)const
 {
   int iFun = functionIndex(i);
   return m_functions[ iFun ]->getTie(i - m_paramOffsets[iFun]);
@@ -717,7 +729,7 @@ void CompositeFunction::addConstraint(IConstraint* ic)
 
 void CompositeFunction::setParametersToSatisfyConstraints()
 {
-  for(size_t i=0;i<nFunctions();i++)
+  for(int i=0;i<nFunctions();i++)
   {
     getFunction(i)->setParametersToSatisfyConstraints();
   }
@@ -726,9 +738,9 @@ void CompositeFunction::setParametersToSatisfyConstraints()
 /// Get constraint
 /// @param i :: the index
 /// @return A pointer to the constraint
-IConstraint* CompositeFunction::getConstraint(size_t i)const
+IConstraint* CompositeFunction::getConstraint(int i)const
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   return m_functions[ iFun ]->getConstraint(i - m_paramOffsets[iFun]);
 }
 
@@ -746,9 +758,9 @@ void CompositeFunction::removeConstraint(const std::string& parName)
  *  @param i :: The parameter index
  *  @return true if the function is explicitly set
  */
-bool CompositeFunction::isExplicitlySet(size_t i)const
+bool CompositeFunction::isExplicitlySet(int i)const
 {
-  size_t iFun = functionIndex(i);
+  int iFun = functionIndex(i);
   return m_functions[ iFun ]->isExplicitlySet(i - m_paramOffsets[iFun]);
 }
 
@@ -757,15 +769,15 @@ bool CompositeFunction::isExplicitlySet(size_t i)const
  * @param ref :: A reference to a parameter
  * @return Parameter index or -1
  */
-int64_t CompositeFunction::getParameterIndex(const ParameterReference& ref)const
+int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
 {
   if (ref.getFunction() == this && ref.getIndex() < nParams())
   {
     return ref.getIndex();
   }
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
+  for(int iFun=0;iFun<nFunctions();iFun++)
   {
-    int64_t iLocalIndex = getFunction(iFun)->getParameterIndex(ref);
+    int iLocalIndex = getFunction(iFun)->getParameterIndex(ref);
     if (iLocalIndex >= 0)
     {
       return m_paramOffsets[iFun] + iLocalIndex;
@@ -784,7 +796,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
   {
     return ref.getFunction();
   }
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
+  for(int iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* fun = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(ref));
     if (fun)
@@ -805,7 +817,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
   {
     return this;
   }
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
+  for(int iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* f = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(fun));
     if (f)

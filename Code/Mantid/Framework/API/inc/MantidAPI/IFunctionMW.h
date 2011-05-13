@@ -130,7 +130,7 @@ public:
   virtual boost::shared_ptr<const API::Workspace> getWorkspace()const;
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  virtual std::size_t dataSize()const;
+  virtual int dataSize()const;
   /// Returns a reference to the fitted data. These data are taken from the workspace set by setWorkspace() method.
   virtual const double* getData()const;
   virtual const double* getWeights()const;
@@ -143,7 +143,7 @@ public:
   /* MatrixWorkspace specific methods */
 
   /// Set the workspace
-  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, size_t wi, size_t xMin, size_t xMax);
+  virtual void setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace, int wi, int xMin, int xMax);
   /// Get the workspace
   virtual boost::shared_ptr<const API::MatrixWorkspace> getMatrixWorkspace()const{return m_workspace;}
   /// Get workspace index
@@ -166,13 +166,13 @@ protected:
   /// Convert a value from one unit (inUnit) to unit defined in workspace (ws) 
   double convertValue(double value, Kernel::Unit_sptr& inUnit, 
                       boost::shared_ptr<const MatrixWorkspace> ws,
-                      size_t wsIndex)const;
+                      int wsIndex)const;
 
   void convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
     boost::shared_ptr<const MatrixWorkspace> ws,
-    size_t wsIndex) const;
+    int wsIndex) const;
 
-  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, size_t wi)const;
+  boost::shared_ptr<API::MatrixWorkspace> createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, int wi)const;
 
   /// Calculate numerical derivatives
   void calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData);
@@ -180,13 +180,13 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::MatrixWorkspace> m_workspace;
   /// Spectrum index
-  size_t m_workspaceIndex;
+  int m_workspaceIndex;
   /// Lower bin index
-  size_t m_xMinIndex;
+  int m_xMinIndex;
   /// Upper bin index
-  size_t m_xMaxIndex;
+  int m_xMaxIndex;
   /// Size of the fitted data
-  std::size_t m_dataSize;
+  int m_dataSize;
   /// Pointer to the fitted data
   const double* m_data;
   /// Pointer to the fitting weights

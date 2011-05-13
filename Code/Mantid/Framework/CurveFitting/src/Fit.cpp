@@ -152,9 +152,8 @@ namespace CurveFitting
         setPropertyValue("OutputWorkspace",output+"_Workspace");
 
         // Save the fitted and simulated spectra in the output workspace
-        int temp = getProperty("WorkspaceIndex");
-        if (temp < 0) throw std::invalid_argument("WorkspaceIndex must be >= 0");
-        size_t workspaceIndex = static_cast<size_t>(temp);
+        int workspaceIndex  = getProperty("WorkspaceIndex");
+        if (workspaceIndex < 0) throw std::invalid_argument("WorkspaceIndex must be >= 0");
         funmw->setWorkspace(ws,input);
         API::MatrixWorkspace_sptr outws = funmw->createCalculatedWorkspace(ws,workspaceIndex);
 

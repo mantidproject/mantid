@@ -124,7 +124,7 @@ namespace Mantid
       void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
 
       /// Add a function. 
-      std::size_t addFunction(IFitFunction* f);
+      int addFunction(IFitFunction* f);
 
       /// Deletes and zeroes pointer m_resolution forsing function(...) to recalculate the resolution function
       void refreshResolution()const;

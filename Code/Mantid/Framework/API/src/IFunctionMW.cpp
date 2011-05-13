@@ -188,7 +188,7 @@ namespace API
   }
 
   /// Returns the size of the fitted data (number of double values returned by the function)
-  size_t IFunctionMW::dataSize()const
+  int IFunctionMW::dataSize()const
   {
     return m_dataSize;
   }
@@ -254,7 +254,7 @@ void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int&
  * @param xMin :: The lower bin index
  * @param xMax :: The upper bin index
  */
-void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,size_t wi,size_t xMin,size_t xMax)
+void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspace> workspace,int wi,int xMin,int xMax)
 {
   m_workspaceIndex = wi;
   m_xMinIndex = xMin;
@@ -412,7 +412,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
  */
 double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               size_t wsIndex)const
+                               int wsIndex)const
 {
   double retVal = value;
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
@@ -474,7 +474,7 @@ double IFunctionMW::convertValue(double value, Kernel::Unit_sptr& outUnit,
  */
 void IFunctionMW::convertValue(std::vector<double>& values, Kernel::Unit_sptr& outUnit, 
                                boost::shared_ptr<const MatrixWorkspace> ws,
-                               size_t wsIndex) const
+                               int wsIndex) const
 {
   Kernel::Unit_sptr wsUnit = ws->getAxis(0)->unit();
 
@@ -587,7 +587,7 @@ void IFunctionMW::setUpNewStuff(boost::shared_array<double> xs,boost::shared_arr
  * @param wi :: workspace index
  * @return
  */
-boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, size_t wi)const
+boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(boost::shared_ptr<const API::MatrixWorkspace> inWS, int wi)const
 {
       const MantidVec& inputX = inWS->readX(wi);
       const MantidVec& inputY = inWS->readY(wi);

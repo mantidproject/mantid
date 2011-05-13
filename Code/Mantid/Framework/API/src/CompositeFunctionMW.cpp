@@ -154,7 +154,7 @@ void CompositeFunctionMW::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(iFun));
-    fun->setWorkspace(ws, slicing, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
+    //fun->setWorkspace(ws, slicing, copyData); // TODO: This was added by JZ May 13, 2011, to fix tests. Does this make sense to someone who knows?
     fun->setUpNewStuff(m_xValues,m_weights);
   }
 }

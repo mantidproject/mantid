@@ -1204,7 +1204,7 @@ public:
     mfun->addFunction(cf);
     mfun->addFunction(cub);
 
-    mfun->replaceOldFunction(cf,g);
+    mfun->replaceFunction(cf,g);
 
     TS_ASSERT_EQUALS(mfun->asString(),"name=Linear,a=0,b=0;name=Gauss,c=0,h=1,s=1;name=Cubic,c0=0,c1=0,c2=0,c3=0");
 
