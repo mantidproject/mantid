@@ -136,53 +136,30 @@ void toValue(const std::string& strvalue, std::vector<T>& value)
   }
 }
 
-template <>
-inline void toValue<int>(const std::string& strvalue, std::vector<int>& value)
-{
-  // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-  value.clear();
-  value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-  {
-    appendValue(*it, value);
+/// Macro for the vector<int> specializations
+#define PROPERTYWITHVALUE_TOVALUE(type) \
+  template <> \
+  inline void toValue<type>(const std::string& strvalue, std::vector<type>& value) \
+  { \
+    typedef Poco::StringTokenizer tokenizer; \
+    tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM); \
+    value.clear(); \
+    value.reserve(values.count()); \
+    for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it) \
+    { \
+      appendValue(*it, value); \
+    } \
   }
-}
+  
+  PROPERTYWITHVALUE_TOVALUE(int);
+  PROPERTYWITHVALUE_TOVALUE(uint32_t);
+  PROPERTYWITHVALUE_TOVALUE(uint64_t);
+  #ifdef __INTEL_COMPILER
+    PROPERTYWITHVALUE_TOVALUE(unsigned long);
+  #endif
 
-template <>
-inline void toValue<uint32_t>(const std::string& strvalue, std::vector<uint32_t>& value)
-{
-  // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-  value.clear();
-  value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-  {
-    appendValue(*it, value);
-  }
-}
-
-template <>
-inline void toValue<uint64_t>(const std::string& strvalue, std::vector<uint64_t>& value)
-{
-  // Split up comma-separated properties
-  typedef Poco::StringTokenizer tokenizer;
-  tokenizer values(strvalue, ",", tokenizer::TOK_IGNORE_EMPTY | tokenizer::TOK_TRIM);
-
-  value.clear();
-  value.reserve(values.count());
-
-  for (tokenizer::Iterator it = values.begin(); it != values.end(); ++it)
-  {
-    appendValue(*it, value);
-  }
-}
+// Clear up the namespace
+#undef PROPERTYWITHVALUE_TOVALUE
 
 //------------------------------------------------------------------------------------------------
 // Templated += operator functions for specific types

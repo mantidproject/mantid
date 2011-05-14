@@ -56,7 +56,7 @@ namespace Mantid
         throw std::runtime_error("Error when getting the catalog information from the Facilities.xml file");
       }
 
-      size_t investigationId = getProperty("InvestigationId");
+      int64_t investigationId = getProperty("InvestigationId");
       bool bfiletrLog =getProperty("FilterLogFiles");
 
       API::ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");

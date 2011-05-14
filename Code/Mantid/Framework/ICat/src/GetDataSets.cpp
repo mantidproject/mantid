@@ -53,7 +53,7 @@ namespace Mantid
       }
 
       API::ITableWorkspace_sptr ws_sptr = WorkspaceFactory::Instance().createTable("TableWorkspace");
-      size_t investigationId = getProperty("InvestigationId");
+      int64_t investigationId = getProperty("InvestigationId");
       catalog_sptr->getDataSets(investigationId,ws_sptr);
       setProperty("OutputWorkspace",ws_sptr);
     }
