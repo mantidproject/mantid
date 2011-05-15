@@ -14,8 +14,7 @@ set ( INC_FILES
 )
 
 # Requires DataHandling for a load call
-include_directories (../DataHandling/inc ../MDEvents/inc)
-include_directories ( inc )
+include_directories (inc ../DataHandling/inc ../MDEvents/inc)
 
 # For Windows:
 add_definitions ( -DIN_MANTID_TESTHELPERS )
