@@ -47,6 +47,10 @@ namespace DataHandling
   {
     this->setWikiSummary("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
     this->setOptionalMessage("Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace.");
+    this->setWikiDescription(
+        "Loads a Dspacemap file (POWGEN binary, VULCAN binary or ascii format) into an OffsetsWorkspace."
+        "\n\n"
+        "The resulting workspace can then be used with, e.g. [[AlignDetectors]] to perform calibration.");
   }
 
   //----------------------------------------------------------------------------------------------

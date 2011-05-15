@@ -36,6 +36,17 @@ namespace MDEvents
   {
     this->setWikiSummary("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
     this->setOptionalMessage("Create a MDEventWorkspace with events in reciprocal space (Qx, Qy, Qz) from an input EventWorkspace. If the OutputWorkspace exists, then events are added to it.");
+    this->setWikiDescription(""
+        "The algorithm takes every event in a [[EventWorkspace]] from detector/time-of-flight space, "
+        "and converts it into reciprocal space, and places the resulting MDEvents into a [[MDEventWorkspace]]."
+        "\n\n"
+        "The conversion can be done either to Q-space in the lab or sample frame, or to HKL of the crystal."
+        "\n\n"
+        "If the OutputWorkspace does NOT already exist, a default one is created. In order to define "
+        "more precisely the parameters of the [[MDEventWorkspace]], use the "
+        "[[CreateMDEventWorkspace]] algorithm first."
+        ""
+        );
   }
 
   //----------------------------------------------------------------------------------------------

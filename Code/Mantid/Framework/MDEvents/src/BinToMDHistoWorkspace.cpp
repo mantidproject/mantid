@@ -42,6 +42,20 @@ namespace MDEvents
   {
     this->setWikiSummary("Take a [[MDEventWorkspace]] and bin into into a dense, multi-dimensional histogram workspace ([[MDHistoWorkspace]]).");
     this->setOptionalMessage("Take a MDEventWorkspace and bin into into a dense, multi-dimensional histogram workspace (MDHistoWorkspace).");
+    this->setWikiDescription(
+        "This algorithm performs dense binning of the events in multiple dimensions of an input [[MDEventWorkspace]] "
+        "and places them into a dense MDHistoWorkspace with 1-4 dimensions."
+        "\n\n"
+        "The input MDEventWorkspace may have more dimensions than the number of output dimensions. "
+        "The names of the dimensions in the DimX, etc. parameters are used to find the corresponding dimensions that will "
+        "be created in the output."
+        "\n\n"
+        "An ImplicitFunction can be defined using the ImplicitFunctionXML parameter; any points NOT belonging inside of the "
+        "ImplicitFunction will be set as NaN (not-a-number). "
+        "\n\n"
+        "As of now, binning is only performed along axes perpendicular to the dimensions defined "
+        "in the MDEventWorkspace."
+        );
   }
 
   //----------------------------------------------------------------------------------------------
@@ -49,7 +63,7 @@ namespace MDEvents
    */
   void BinToMDHistoWorkspace::init()
   {
-    std::string dimHelp = "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'.";
+    std::string dimHelp = "Enter it as a comma-separated list of values with the format: 'name,minimum,maximum,number_of_bins'. Leave blank for NONE.";
     declareProperty(new WorkspaceProperty<IMDEventWorkspace>("InputWorkspace","",Direction::InOut), "An input MDEventWorkspace.");
     declareProperty(new PropertyWithValue<std::string>("DimX","",Direction::Input), "Binning parameters for the X dimension.\n" + dimHelp);
     declareProperty(new PropertyWithValue<std::string>("DimY","",Direction::Input), "Binning parameters for the Y dimension.\n" + dimHelp);
