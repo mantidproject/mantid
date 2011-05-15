@@ -1,6 +1,7 @@
 #include "MantidCrystal/PredictPeaks.h"
 #include "MantidDataObjects/Peak.h"
 #include "MantidDataObjects/PeaksWorkspace.h"
+#include "MantidGeometry/Crystal/UnitCell.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/Objects/InstrumentRayTracer.h"
@@ -61,6 +62,11 @@ namespace Crystal
     declareProperty(new PropertyWithValue<double>("WavelengthMax",100.0,Direction::Input),
         "Maximum wavelength limit at which to stop looking for single-crystal peaks.");
 
+    declareProperty(new PropertyWithValue<double>("MinDSpacing",1.0,Direction::Input),
+        "Minimum d-spacing of peaks to consider.");
+
+
+
     declareProperty(new WorkspaceProperty<PeaksWorkspace>("OutputWorkspace","",Direction::Output), "An output PeaksWorkspace.");
   }
 
@@ -73,11 +79,13 @@ namespace Crystal
     MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
     double wlMin = getProperty("WavelengthMin");
     double wlMax = getProperty("WavelengthMax");
+    double minD = getProperty("MinDSpacing");
 
     // Check the values.
     if (!inWS) throw std::invalid_argument("Did not specify a valid InputWorkspace.");
     if (wlMin >= wlMax) throw std::invalid_argument("WavelengthMin must be < WavelengthMax.");
     if (wlMin < 1e-5) throw std::invalid_argument("WavelengthMin must be stricly positive.");
+    if (minD < 1e-4) throw std::invalid_argument("MinDSpacing must be stricly positive.");
 
     // Get the instrument and its detectors
     IInstrument_sptr inst;
@@ -88,11 +96,13 @@ namespace Crystal
     PeaksWorkspace_sptr pw(new PeaksWorkspace());
     setProperty<PeaksWorkspace_sptr>("OutputWorkspace", pw);
 
-    // Get the UB matrix
+    // Get the UB matrix. TODO: Get from workspace somehow
     Matrix<double> ub(3,3, true);
     ub = ub * 0.05;
 
-    // TODO: Retrieve UB from the workspace
+    // TODO: Retrieve UnitCell from the workspace
+    UnitCell crystal;
+
     // TODO: Retrieve the goniometer rotation matrix.
     Matrix<double> gonio(3,3, true);
 
@@ -110,10 +120,35 @@ namespace Crystal
         throw std::invalid_argument("Instrument must have a beam direction that is only in the +Z direction for this algorithm to be valid..");
 
     // TODO: Determine which HKL to look for
+    // Inverse d-spacing that is the limit to look for.
+    double dstar = 1.0/minD;
+    V3D hklMin(0,0,0);
+    V3D hklMax(0,0,0);
+    for (double qx=-1; qx < 2; qx += 2)
+      for (double qy=-1; qy < 2; qy += 2)
+        for (double qz=-1; qz < 2; qz += 2)
+        {
+          // Build a q-vector for this corner of a cube
+          V3D Q(qx,qy,qz);
+          Q *= dstar;
+          V3D hkl = crystal.hklFromQ(Q);
+          // Find the limits of each hkl
+          for (size_t i=0; i<3; i++)
+          {
+            if (hkl[i] < hklMin[i]) hklMin[i] = hkl[i];
+            if (hkl[i] > hklMax[i]) hklMax[i] = hkl[i];
+          }
+        }
+    // Round to nearest int
+    hklMin.round();
+    hklMax.round();
+
+    g_log.information() << "HKL range for d_min of " << minD << " is from " << hklMin << " to " << hklMax << "\n";
+
     std::vector<V3D> hkls;
-    for (double h=-10; h < 10; h++)
-      for (double k=-10; k < 10; k++)
-        for (double l=-10; l < 10; l++)
+    for (double h=hklMin[0]; h <= hklMax[0]; h++)
+      for (double k=hklMin[1]; k <= hklMax[1]; k++)
+        for (double l=hklMin[2]; l <= hklMax[2]; l++)
           hkls.push_back(V3D(h,k,l));
 
     // PARALLEL!!!
@@ -121,63 +156,67 @@ namespace Crystal
     {
       V3D hkl = hkls[i];
 
-      // The q-vector direction of the peak is = goniometer * ub * hkl_vector
-      V3D q = mat * hkl;
-
-      // The incident wavevector is in the +Z direction, ki = 1/wl (in z direction)
-      // For elastic diffraction, kf - ki = q, therefore:
-      // kf = qx in x; qy in y; and (qz+2pi/wl) in z.
-      // AND: norm(kf) = norm(ki) = 1.0/wavelength
-      // THEREFORE: 1/wl = - norm(q)^2 / (2*qz)
-
-      double norm_q = q.norm();
-      double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
-      double wl = 1.0/one_over_wl;
-
-      // Only keep going for accepted wavelengths.
-      if (wl >= wlMin && wl <= wlMax)
+      // Skip those with unacceptable d-spacings
+      double d = crystal.d(hkl);
+      if (d > minD)
       {
-        // This is the scattered direction, kf = ki but with kf_z = (qz+1/wl)
-        V3D beam = q;
-        beam.setZ(q.Z() + one_over_wl);
+        // The q-vector direction of the peak is = goniometer * ub * hkl_vector
+        V3D q = mat * hkl;
 
-        std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
+        // The incident wavevector is in the +Z direction, ki = 1/wl (in z direction)
+        // For elastic diffraction, kf - ki = q, therefore:
+        // kf = qx in x; qy in y; and (qz+2pi/wl) in z.
+        // AND: norm(kf) = norm(ki) = 1.0/wavelength
+        // THEREFORE: 1/wl = - norm(q)^2 / (2*qz)
 
-        // Create a ray tracer
-        InstrumentRayTracer tracker(inst);
-        // Find intersecting instrument components in this direction.
-        V3D beamNormalized = beam;
-        beamNormalized.normalize();
-        //tracker.traceFromSample(beamNormalized);
-        Links results = tracker.getResults();
+        double norm_q = q.norm();
+        double one_over_wl = -(norm_q*norm_q) / (2.0 * q.Z());
+        double wl = 1.0/one_over_wl;
 
-        // Go through all results
-        Links::const_iterator resultItr = results.begin();
-        for (; resultItr != results.end(); resultItr++)
+        // Only keep going for accepted wavelengths.
+        if (wl >= wlMin && wl <= wlMax)
         {
-          IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
-          IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
-          if (det)
+          // This is the scattered direction, kf = ki but with kf_z = (qz+1/wl)
+          V3D beam = q;
+          beam.setZ(q.Z() + one_over_wl);
+
+          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
+
+          // Create a ray tracer
+          InstrumentRayTracer tracker(inst);
+          // Find intersecting instrument components in this direction.
+          V3D beamNormalized = beam;
+          beamNormalized.normalize();
+          //tracker.traceFromSample(beamNormalized);
+          Links results = tracker.getResults();
+
+          // Go through all results
+          Links::const_iterator resultItr = results.begin();
+          for (; resultItr != results.end(); resultItr++)
           {
-            if (!det->isMonitor())
+            IComponent_sptr component = inst->getComponentByID(resultItr->componentID);
+            IDetector_sptr det = boost::dynamic_pointer_cast<IDetector>(component);
+            if (det)
             {
-              // Found a detector (not a monitor) that intersected the ray. Take the first one!
-              std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
+              if (!det->isMonitor())
+              {
+                // Found a detector (not a monitor) that intersected the ray. Take the first one!
+                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
 
-              // Create the peak
-              Peak p(inst, det->getID(), wl);
-              p.setHKL(hkl);
+                // Create the peak
+                Peak p(inst, det->getID(), wl);
+                p.setHKL(hkl);
 
-              // Add it to the workspace
-              pw->addPeak(p);
+                // Add it to the workspace
+                pw->addPeak(p);
 
-              break;
-            }
-          }
-        }
-      }
-
-    }
+                break;
+              }
+            } // (is a detector)
+          } // each ray tracer result
+        } // (wavelength is okay)
+      } // (d is acceptable)
+    } // for each hkl
 
 //    2pi/wl = - norm(q)^2 / (2*qz)
 //So this goes into the kf_z = (qz+2pi/wl)

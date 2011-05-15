@@ -61,7 +61,7 @@ UnitCell::getUBmatrix(const V3D &u, const V3D &v)const
   /** Copy constructor
   @param other :: The UnitCell from which to copy lattice parameters
   */
-  UnitCell::UnitCell(const UnitCell& other):da(other.da),ra(other.ra),G(other.G),Gstar(other.Gstar),B(other.B)
+  UnitCell::UnitCell(const UnitCell& other):da(other.da),ra(other.ra),G(other.G),Gstar(other.Gstar),B(other.B),Binv(other.Binv)
   {
   }
 
@@ -385,15 +385,37 @@ UnitCell::getUBmatrix(const V3D &u, const V3D &v)const
   /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
   double UnitCell::d(double h, double k, double l) const
   {
-	  return 1./dstar(h,k,l);
+    return 1.0/dstar(V3D(h,k,l));
+  }
+
+  /// Return d-spacing (\f$ \mbox{ \AA } \f$) for a given h,k,l coordinate
+  double UnitCell::d(const V3D & hkl) const
+  {
+    return 1.0/dstar(hkl);
   }
 
   /// Return d*=1/d (\f$ \mbox{ \AA }^{-1} \f$) for a given h,k,l coordinate
   double UnitCell::dstar(double h, double k, double l) const
   {
-	  V3D Q(h,k,l); //create a V3D vector h,k,l
-    Q=B*Q; //transform into $AA^-1$
-	  return Q.norm();
+    return dstar(V3D(h,k,l)); //create a V3D vector h,k,l
+  }
+
+  /// Return d*=1/d (\f$ \mbox{ \AA }^{-1} \f$) for a given h,k,l coordinate
+  double UnitCell::dstar(const V3D & hkl) const
+  {
+    V3D Q = B*hkl; //transform into $AA^-1$
+    return Q.norm();
+  }
+
+
+  /** Calculate the hkl corresponding to a given Q-vector
+   * @param Q :: Q-vector in $AA^-1 in the sample frame
+   * @return a V3D with H,K,L
+   */
+  V3D UnitCell::hklFromQ(V3D Q) const
+  {
+    V3D out = Binv*Q; //transform back to HKL
+    return out;
   }
 
   /// Calculate the angle in degrees or radians between two reciprocal vectors (h1,k1,l1) and (h2,k2,l2)
@@ -438,12 +460,19 @@ UnitCell::getUBmatrix(const V3D &u, const V3D &v)const
   {
     return Gstar;
   }
-	    
+
   /// Get the B-matrix
   /// @return B :: B matrix in Busing-Levy convention
   const Geometry::MantidMat& UnitCell::getB() const
   {
     return B;
+  }
+
+  /// Get the inverse of the B-matrix
+  /// @return Binv :: inverse of the B matrix in Busing-Levy convention
+  const Geometry::MantidMat& UnitCell::getBinv() const
+  {
+    return Binv;
   }
 
   /// Private function, called at initialization or whenever lattice parameters are changed
@@ -509,6 +538,10 @@ UnitCell::getUBmatrix(const V3D &u, const V3D &v)const
 	  B[2][0]=0.;
       B[2][1]=0.;
 	  B[2][2]=1./da[2];
+
+	  /// Now let's cache the inverse B
+	  Binv = B;
+	  Binv.Invert();
 	  return;
   }
 

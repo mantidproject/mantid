@@ -1,5 +1,6 @@
 #ifndef MANTID_GEOMETRY_UNITCELL_H_
 #define MANTID_GEOMETRY_UNITCELL_H_
+
 #include <MantidKernel/System.h>
 #include <MantidGeometry/Math/Matrix.h>
 #include <MantidGeometry/Quat.h>
@@ -112,28 +113,33 @@ namespace Geometry
       const Geometry::MantidMat& getG() const;
       const Geometry::MantidMat& getGstar() const;
       const Geometry::MantidMat& getB() const;
-	
+      const Geometry::MantidMat& getBinv() const;
+
       // Calculate things about lattice and vectors      
-	  double d(double h, double k, double l) const; 	    
+      double d(double h, double k, double l) const;
       double dstar(double h,double k, double l) const; 
-	  double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
-	  double volume()const; 
+      double d(const V3D & hkl) const;
+      double dstar(const V3D & hkl) const;
+      V3D hklFromQ(V3D Q) const;
+      double recAngle(double h1, double k1, double l1, double h2, double k2, double l2, const int angleunit=angDegrees) const;
+      double volume()const;
       double recVolume() const; 
       void recalculateFromGstar(Geometry::Matrix<double>& NewGstar);
-	  /** funtion returns rotation matrix, used to transform a vector expressed in the 
-	    *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)" 
-		*  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
-	   **/
-	  MantidMat getUmatrix(const V3D &u, const V3D &v)const;
-	  /** function returns a transformattion matix, which allows to transform a vector, expressed in 
-	   *   the units of the cell, into the orthogonal system, defined by vectors u and v;
-	   *  u and v have to be not parallel, throws otherwise. 
-	   **/
-	  MantidMat getUBmatrix(const V3D &u, const V3D &v)const;
+      /** funtion returns rotation matrix, used to transform a vector expressed in the
+       *  "orthogonal associated with the reciprocal lattice cell system of coordinates (RLU)"
+       *  into another coordinate system defined by vectors u and v, expressed in RLU coordinate system
+       **/
+      MantidMat getUmatrix(const V3D &u, const V3D &v)const;
+      /** function returns a transformattion matix, which allows to transform a vector, expressed in
+       *   the units of the cell, into the orthogonal system, defined by vectors u and v;
+       *  u and v have to be not parallel, throws otherwise.
+       **/
+      MantidMat getUBmatrix(const V3D &u, const V3D &v)const;
+
     private:	    
       /// Lattice parameter a,b,c,alpha,beta,gamma (in \f$ \mbox{ \AA } \f$ and radians)
       std::vector <double> da; 
-	    /// Reciprocal lattice parameters (in \f$ \mbox{ \AA }^{-1} \f$ and radians)
+      /// Reciprocal lattice parameters (in \f$ \mbox{ \AA }^{-1} \f$ and radians)
       std::vector <double> ra; 
       /** Metric tensor
        \f[ \left( \begin{array}{ccc}
@@ -141,28 +147,32 @@ namespace Geometry
         ab\cos(\gamma) & bb & bc\cos(\alpha) \\
         ac\cos(\beta) & bc\cos(\alpha) & cc \end{array} \right) \f]
        */
-	    MantidMat G;
-	    /** Reciprocal lattice tensor
-	     *\f[ \left( \begin{array}{ccc}
+      MantidMat G;
+      /** Reciprocal lattice tensor
+       *\f[ \left( \begin{array}{ccc}
         a^*a^* & a^*b^*\cos(\gamma^*) & a^*c^*\cos(\beta^*) \\
         a^*b^*\cos(\gamma^*) & b^*b^* & b^*c^*\cos(\alpha^*) \\
         a^*c^*\cos(\beta^*) & b^*c^*\cos(\alpha^*) & c^*c^* \end{array} \right) \f]
-	     */
+       */
       MantidMat Gstar; 
-	  	/** B matrix for a right-handed coordinate system, in Busing-Levy convention
-	  	 \f[ \left( \begin{array}{ccc}
+      /** B matrix for a right-handed coordinate system, in Busing-Levy convention
+       \f[ \left( \begin{array}{ccc}
         a^* & b^*\cos(\gamma^*) & c^*\cos(\beta^*) \\
         0 & b^*\sin(\gamma^*) & -c^*\sin(\beta^*)\cos(\alpha) \\
         0 & 0 & 1/c \end{array} \right) \f]
-	  	 */
+       */
       MantidMat B;  
+
+      /** Inverse of the B matrix.
+       */
+      MantidMat Binv;
 
       // Private functions
       void recalculate();
-	    void calculateG();
-	    void calculateGstar();
-	    void calculateReciprocalLattice();
-	    void calculateB();   
+      void calculateG();
+      void calculateGstar();
+      void calculateReciprocalLattice();
+      void calculateB();
   };
 } // namespace Mantid
 } // namespace Geometry

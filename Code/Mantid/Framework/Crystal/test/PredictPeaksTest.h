@@ -47,6 +47,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("OutputWorkspace", outWSName) );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMin", "0.1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("WavelengthMax", "10.0") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("MinDSpacing", "0.5") );
     TS_ASSERT_THROWS_NOTHING( alg.execute(); );
     TS_ASSERT( alg.isExecuted() );
     
@@ -56,7 +57,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     
-    // TODO: Check the results
+//    // TODO: Check the results
 //    TS_ASSERT_EQUALS( ws->getNumberPeaks(), 9);
     
     // Remove workspace from the data service.

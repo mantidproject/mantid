@@ -30,6 +30,37 @@ public:
     TS_ASSERT_DELTA(u2.a(),3,1e-10);
   }
 
+  void checkCell(UnitCell & u)
+  {
+    TS_ASSERT_DELTA(u.a(),2.5,1e-10);
+    TS_ASSERT_DELTA(u.b(),6,1e-10);
+    TS_ASSERT_DELTA(u.c(),8,1e-10);
+    TS_ASSERT_DELTA(u.alpha(),93,1e-10);
+    TS_ASSERT_DELTA(u.beta(),88,1e-10);
+    TS_ASSERT_DELTA(u.gamma(),97,1e-10);
+
+    // get the some elements of the B matrix
+    TS_ASSERT_DELTA(u.getB()[0][0],0.403170877311,1e-10);
+    TS_ASSERT_DELTA(u.getB()[2][0],0.0,1e-10);
+    TS_ASSERT_DELTA(u.getB()[0][2],-0.00360329991666,1e-10);
+    TS_ASSERT_DELTA(u.getB()[2][2],0.125,1e-10);
+
+    // Inverse B matrix
+    MantidMat I = u.getB() * u.getBinv();
+    TS_ASSERT_EQUALS( I, Matrix<double>(3,3,true));
+
+    // d spacing for direct lattice at (1,1,1) (will automatically check dstar)
+    TS_ASSERT_DELTA(u.d(1.,1.,1.),2.1227107587,1e-10);
+    TS_ASSERT_DELTA(u.d(V3D(1.,1.,1.)),2.1227107587,1e-10);
+    // angle
+    TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,angRadians),0.471054990614,1e-10);
+
+    // Convert to and from HKL
+    V3D hkl = u.hklFromQ(V3D(1.0, 2.0, 3.0));
+    double dstar = u.dstar(hkl[0], hkl[1], hkl[2]);
+    TS_ASSERT_DELTA( dstar, sqrt(1+4.0+9.0), 1e-4); // The d-spacing after a round trip matches the Q we put in
+  }
+
   void test_Advanced()
   {
     // test more advanced calculations
@@ -47,23 +78,17 @@ public:
 
     UnitCell u;
     u.recalculateFromGstar(newGstar);
-    TS_ASSERT_DELTA(u.a(),2.5,1e-10);
-    TS_ASSERT_DELTA(u.b(),6,1e-10);
-    TS_ASSERT_DELTA(u.c(),8,1e-10);
-    TS_ASSERT_DELTA(u.alpha(),93,1e-10);
-    TS_ASSERT_DELTA(u.beta(),88,1e-10);
-    TS_ASSERT_DELTA(u.gamma(),97,1e-10);
 
-    // get the some elements of the B matrix
-    TS_ASSERT_DELTA(u.getB()[0][0],0.403170877311,1e-10);
-    TS_ASSERT_DELTA(u.getB()[2][0],0.0,1e-10);
-    TS_ASSERT_DELTA(u.getB()[0][2],-0.00360329991666,1e-10);
-    TS_ASSERT_DELTA(u.getB()[2][2],0.125,1e-10);
-    // d spacing for direct lattice at (1,1,1) (will automatically check dstar)
-    TS_ASSERT_DELTA(u.d(1.,1.,1.),2.1227107587,1e-10);
-    // angle
-    TS_ASSERT_DELTA(u.recAngle(1,1,1,1,0,0,angRadians),0.471054990614,1e-10);
+    // Check the directly-created one
+    checkCell(u);
+
+    // Check if copy constructor is also good.
+    UnitCell u2 = u;
+    checkCell(u2);
+
   }
+
+
   void testUnitRotation(){
 	  UnitCell theCell;
 	  MantidMat rot;
