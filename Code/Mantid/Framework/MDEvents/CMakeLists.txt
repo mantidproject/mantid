@@ -6,6 +6,7 @@ set ( SRC_FILES
 	src/CoordTransformDistance.cpp
 	src/CreateMDEventWorkspace.cpp
 	src/FakeMDEventData.cpp
+	src/IMDBox.cpp
 	src/MDBin.cpp
 	src/MDBox.cpp
 	src/MDEWPeakIntegration.cpp

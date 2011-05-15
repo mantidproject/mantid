@@ -133,6 +133,25 @@ public:
     TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
   }
 
+  /** Add a vector of events and give start/end spots*/
+  void test_addEvents_with_start_stop()
+  {
+    MDBox<MDEvent<2>,2> b;
+    MDEvent<2> ev(1.2, 3.4);
+    std::vector< MDEvent<2> > vec;
+    ev.setCenter(0, 2.0);
+    ev.setCenter(1, 3.0);
+    for (size_t i=0; i<10; i++)
+      vec.push_back(ev);
+
+    b.addEvents(vec, 5, 8);
+    TS_ASSERT_EQUALS( b.getNPoints(), 3)
+    TS_ASSERT_DELTA( b.getEvents()[2].getSignal(), 1.2, 1e-5)
+    // Did it keep a running total of the signal and error?
+    TS_ASSERT_DELTA( b.getSignal(), 1.2*3, 1e-5);
+    TS_ASSERT_DELTA( b.getErrorSquared(), 3.4*3, 1e-5);
+  }
+
 
   /** Try to add a large number of events in parallel
    * to the same MDBox, to make sure it is thread-safe.
@@ -177,7 +196,7 @@ public:
 
     MDEvent<3> ev(1.2, 3.4);
     std::vector< MDEvent<3> > vec;
-    for(int i=0; i < 12; i++) vec.push_back(ev);
+    for(size_t i=0; i < 12; i++) vec.push_back(ev);
     b3.addEvents( vec );
 
     TS_ASSERT_EQUALS( b3.getBoxController(), sc);

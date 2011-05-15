@@ -39,10 +39,6 @@ namespace MDEvents
 
     void addEvent(const MDE & point);
 
-    size_t addEvents(const std::vector<MDE> & events);
-
-    size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
-
     void splitContents(size_t index, Mantid::Kernel::ThreadScheduler * ts);
 
     void splitAllIfNeeded(Mantid::Kernel::ThreadScheduler * ts);

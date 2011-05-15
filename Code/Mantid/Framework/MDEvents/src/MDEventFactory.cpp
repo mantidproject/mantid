@@ -19,6 +19,7 @@
 
 // We need to include the .cpp files so that the declarations are picked up correctly. Weird, I know. 
 // See http://www.parashift.com/c++-faq-lite/templates.html#faq-35.13 
+#include "IMDBox.cpp"
 #include "MDBox.cpp"
 #include "MDEventWorkspace.cpp"
 #include "MDGridBox.cpp"
@@ -43,6 +44,7 @@ template DLLExport class MDEvent<9>;
 
 
 // Instantiations for MDBox
+template DLLExport class IMDBox<MDEvent<1>, 1>;
 template DLLExport class MDBox<MDEvent<1>, 1>;
 template DLLExport class MDBox<MDEvent<2>, 2>;
 template DLLExport class MDBox<MDEvent<3>, 3>;

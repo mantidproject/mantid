@@ -59,7 +59,7 @@ public:
   }
 
 
-  int test_value;
+  size_t test_value;
 
 };
 

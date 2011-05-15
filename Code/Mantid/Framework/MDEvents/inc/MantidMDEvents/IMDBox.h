@@ -43,30 +43,10 @@ namespace MDEvents
     /** Default constructor.
      */
     IMDBox() : m_signal(0.0), m_errorSquared(0.0), m_depth(0)
-    {
-    }
+    { }
 
-    //-----------------------------------------------------------------------------------------------
-    /** Copy constructor. Copies the extents, depth, etc.
-     * and recalculates the boxes' volume.
-     */
-    IMDBox(IMDBox<MDE,nd> * box)
-    : m_signal(box->getSignal()), m_errorSquared(box->getErrorSquared()),
-      m_inverseVolume(box->m_inverseVolume), m_depth(box->getDepth())
-    {
-      if (!box)
-        throw std::runtime_error("IMDBox::ctor(): box is NULL.");
-      // Save the controller in this object.
-      this->m_BoxController = box->m_BoxController;
-      // Copy the extents
-      for (size_t d=0; d<nd; d++)
-        this->extents[d] = box->extents[d];
-      // Copy the depth
-      this->m_depth = box->getDepth();
-      // Re-calculate the volume of the box
-      this->calcVolume(); //TODO: Is this necessary or should we copy the volume?
-
-    }
+    /// Copy constructor
+    IMDBox(IMDBox<MDE,nd> * box);
 
     // -------------------------------------------------------------------------------------------
     /// Destructor
@@ -90,8 +70,17 @@ namespace MDEvents
     /// Add a single event
     virtual void addEvent(const MDE & point) = 0;
 
-    /// Add several events
-    virtual size_t addEvents(const std::vector<MDE> & events) = 0;
+    /** Add several events from a vector
+     * @param events :: vector of MDEvents to add (all of it)
+     * @return the number of events that were rejected (because of being out of bounds)
+     */
+    virtual size_t addEvents(const std::vector<MDE> & events)
+    {
+      return addEvents(events, 0, events.size());
+    }
+
+    /// Add several events, within a given range
+    virtual size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.

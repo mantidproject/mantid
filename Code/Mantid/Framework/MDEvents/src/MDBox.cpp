@@ -119,7 +119,6 @@ namespace MDEvents
     dataMutex.unlock();
   }
 
-
   //-----------------------------------------------------------------------------------------------
   /** Add several events. No bounds checking is made!
    *
@@ -127,14 +126,16 @@ namespace MDEvents
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
-  size_t MDBox)::addEvents(const std::vector<MDE> & events)
+  size_t MDBox)::addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
   {
     dataMutex.lock();
+    typename std::vector<MDE>::const_iterator start = events.begin()+start_at;
+    typename std::vector<MDE>::const_iterator end = events.begin()+stop_at;
     // Copy all the events
-    this->data.insert(this->data.end(), events.begin(), events.end());
+    this->data.insert(this->data.end(), start, end);
 
     //Running total of signal/error
-    for(typename std::vector<MDE>::const_iterator it = events.begin(); it != events.end(); it++)
+    for(typename std::vector<MDE>::const_iterator it = start; it != end; it++)
     {
       this->m_signal += it->getSignal();
       this->m_errorSquared += it->getErrorSquared();

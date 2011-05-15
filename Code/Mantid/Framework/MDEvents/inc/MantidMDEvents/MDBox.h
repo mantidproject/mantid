@@ -55,7 +55,12 @@ namespace MDEvents
 
     void addEvent(const MDE & point);
 
-    size_t addEvents(const std::vector<MDE> & events);
+    size_t addEvents(const std::vector<MDE> & events)
+    {
+      return this->addEvents(events, 0, events.size());
+    }
+
+    size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 

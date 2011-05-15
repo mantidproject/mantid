@@ -53,10 +53,6 @@ namespace MDEvents
 
     void addEvent(const MDE & point);
 
-    size_t addEvents(const std::vector<MDE> & events);
-
-    size_t addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at);
-
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
     void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const;

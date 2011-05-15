@@ -53,7 +53,7 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   virtual void centerpointBin(MDBin<MDE,nd> & /*bin*/, bool * ) const
   {}
 
-  virtual void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const {};
+  virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const CoordType /*radiusSquared*/, double & /*signal*/, double & /*errorSquared*/) const {};
 
 };
 

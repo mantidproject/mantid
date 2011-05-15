@@ -250,7 +250,8 @@ public:
   {
     MDBox<MDEvent<1>,1> * b = makeMDBox1();
     // Give it 10 events
-    b->addEvents( makeMDEvents1(10) );
+    const std::vector<MDEvent<1> > events = makeMDEvents1(10);
+    b->addEvents( events );
     TS_ASSERT_EQUALS( b->getNPoints(), 10 );
     TS_ASSERT_DELTA(b->getVolume(), 10.0, 1e-5);
 

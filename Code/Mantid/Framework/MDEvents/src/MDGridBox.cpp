@@ -376,64 +376,6 @@ namespace MDEvents
 
 
   //-----------------------------------------------------------------------------------------------
-  /** Add several events.
-   *
-   * @param events :: vector of events to be copied.
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  inline size_t MDGridBox)::addEvents(const std::vector<MDE> & events)
-  {
-    return this->addEvents(events, 0, events.size());
-  }
-
-  //-----------------------------------------------------------------------------------------------
-  /** Add several events, starting and stopping at particular point in a vector.
-   * Bounds checking IS performed, and events outside the range are rejected.
-   *
-   * NOTE: You must call refreshCache() after you are done, to calculate the
-   *  nPoints, signal and error.
-   *
-   * @param events :: vector of events to be copied.
-   * @param start_at :: begin at this index in the array
-   * @param stop_at :: stop at this index in the array
-   * @return the number of events that were rejected (because of being out of bounds)
-   */
-  TMDE(
-  size_t MDGridBox)::addEvents(const std::vector<MDE> & events, const size_t start_at, const size_t stop_at)
-  {
-    size_t numBad = 0;
-    // --- Go event by event and add them ----
-    typename std::vector<MDE>::const_iterator it = events.begin() + start_at;
-    typename std::vector<MDE>::const_iterator it_end = events.begin() + stop_at;
-    for (; it != it_end; it++)
-    {
-      //Check out-of-bounds-ness
-      bool badEvent = false;
-      for (size_t d=0; d<nd; d++)
-      {
-        double x = it->getCenter(d);
-        if ((x < this->extents[d].min) || (x >= this->extents[d].max))
-        {
-          badEvent = true;
-          break;
-        }
-      }
-
-      if (badEvent)
-        // Event was out of bounds. Count it
-        ++numBad;
-      else
-        // Event was in bounds; add it
-        addEvent(*it);
-    }
-
-    return numBad;
-  }
-
-
-
-  //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.
    * @param bin :: MDBin object giving the limits of events to accept.
    */

@@ -23,7 +23,7 @@ namespace Mantid
     
     /// Minimum value (large negative number) that a coordinate can take
     static const CoordType CoordType_min = -std::numeric_limits<double>::max();
-    
+
     /// Maximum value (large positive number) that a coordinate can take
     static const CoordType CoordType_max = std::numeric_limits<double>::max();
   }
