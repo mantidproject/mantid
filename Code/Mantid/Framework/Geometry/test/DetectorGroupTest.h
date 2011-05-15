@@ -1,13 +1,14 @@
 #ifndef TESTDETECTORGROUP_H_
 #define TESTDETECTORGROUP_H_
 
+#include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
+#include "MantidTestHelpers/ComponentCreationHelper.h"
 #include <cxxtest/TestSuite.h>
 
-#include "MantidGeometry/Instrument/DetectorGroup.h"
-#include "MantidGeometry/Instrument/Detector.h"
-#include "MantidTestHelpers/ComponentCreationHelper.h"
-
 using namespace Mantid::Geometry;
+using namespace Mantid;
 
 class DetectorGroupTest : public CxxTest::TestSuite
 {
@@ -34,9 +35,9 @@ public:
 
   void testGetDetectorIDs()
   {
-    std::vector<int> detIDs = m_detGroup->getDetectorIDs();
+    std::vector<detid_t> detIDs = m_detGroup->getDetectorIDs();
     TS_ASSERT_EQUALS( detIDs.size(), 5 );
-    for(int i = 0; i < detIDs.size(); ++i )
+    for(size_t i = 0; i < detIDs.size(); ++i )
     {
       TS_ASSERT_EQUALS(detIDs[i], i + 1);
     }
@@ -47,7 +48,7 @@ public:
   {
     std::vector<IDetector_sptr> dets = m_detGroup->getDetectors();
     TS_ASSERT_EQUALS( dets.size(), 5 );
-    for(int i = 0; i < dets.size(); ++i )
+    for(size_t i = 0; i < dets.size(); ++i )
     {
       TS_ASSERT(dets[i]);
     }

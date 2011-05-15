@@ -61,7 +61,7 @@ std::map<detid_t, double> NearestNeighbours::neighbours(const detid_t detID) con
     for ( adjIt = adjacent.first; adjIt != adjacent.second; adjIt++ )
     {
       Vertex nearest = (*adjIt);
-      detid_t nrID = m_vertexID[nearest];
+      detid_t nrID = detid_t(m_vertexID[nearest]);
       std::pair<Graph::edge_descriptor, bool> nrEd = boost::edge(vertex->second, nearest, m_graph);
       double distance = m_edgeLength[nrEd.first];
       distance = sqrt(distance);

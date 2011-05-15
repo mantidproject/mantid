@@ -61,8 +61,8 @@ namespace CxxTest
                 return !EOF;
              else
              {
-                int const ans1 = buffer1->sputc(c);
-                int const ans2 = buffer2->sputc(c);
+                int const ans1 = buffer1->sputc(static_cast<char>(c));
+                int const ans2 = buffer2->sputc(static_cast<char>(c));
                 return ans1 == EOF || ans2 == EOF ? EOF : c;
              }
           }
@@ -425,12 +425,12 @@ namespace CxxTest
            const double testRunTime = double(testRunStopTime - testRunStartTime)/CLOCKS_PER_SEC;
         #else
            gettimeofday(&testStopTime, 0);
-           double sec = testStopTime.tv_sec - testStartTime.tv_sec;
-           double usec = testStopTime.tv_usec - testStartTime.tv_usec;
+           double sec = double(testStopTime.tv_sec - testStartTime.tv_sec);
+           double usec = double(testStopTime.tv_usec - testStartTime.tv_usec);
            double testTime = sec + (usec / 1000000.0);
 
-           sec = testRunStopTime.tv_sec - testRunStartTime.tv_sec;
-           usec = testRunStopTime.tv_usec - testRunStartTime.tv_usec;
+           sec = double(testRunStopTime.tv_sec - testRunStartTime.tv_sec);
+           usec = double(testRunStopTime.tv_usec - testRunStartTime.tv_usec);
            double testRunTime = sec + (usec / 1000000.0);
         #endif
 

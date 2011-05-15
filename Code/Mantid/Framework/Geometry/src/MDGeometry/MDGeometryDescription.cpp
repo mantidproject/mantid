@@ -34,16 +34,16 @@ MDGeometryDescription::getRotations()const
 
 /// this extracts the size and shape of the current DND object
 MDGeometryDescription::MDGeometryDescription(const MDGeometry &origin):
-Rotations(3,3,true),
-nContributedPixels(0)
+    nContributedPixels(0),
+    Rotations(3,3,true)
 {
      this->build_from_geometry(origin);
 }
 
 
 MDGeometryDescription::MDGeometryDescription(const MDGeometryBasis &basis):
-Rotations(3,3,true),
-nContributedPixels(0)
+    nContributedPixels(0),
+    Rotations(3,3,true)
 {
 
 
@@ -82,8 +82,7 @@ MDGeometryDescription::MDGeometryDescription(
       Dimension_sptr dimensiont,
       RotationMatrix rotationMatrix
 ):
-Rotations(3,3,true),
-nContributedPixels(0)
+nContributedPixels(0), Rotations(3,3,true)
 {
 
   this->nDimensions = dimensions.size();
@@ -123,10 +122,10 @@ nContributedPixels(0)
 }
 
 MDGeometryDescription::MDGeometryDescription(size_t numDims, size_t numRecDims):
-nDimensions(numDims),
-nReciprocalDimensions(numRecDims),
-Rotations(3,3,true),
-nContributedPixels(19531253125000)
+    nContributedPixels(19531253125000),
+    nDimensions(numDims),
+    nReciprocalDimensions(numRecDims),
+    Rotations(3,3,true)
 {
     this->intit_default_slicing(nDimensions,nReciprocalDimensions);
 

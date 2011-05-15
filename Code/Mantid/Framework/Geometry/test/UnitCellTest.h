@@ -130,7 +130,7 @@ public:
 
 	  V3D dir(1,0,0);
 	  V3D xx = ort1.cross_prod(ort2);
-	  double pp = xx.scalar_prod(dir); // dir should belong to ort1,ort2 plain
+	  //double pp = xx.scalar_prod(dir); // dir should belong to ort1,ort2 plain
      
 	  double p1=dir.scalar_prod(ort1)/ort1.norm();
 	  double p2=dir.scalar_prod(ort2)/ort2.norm();

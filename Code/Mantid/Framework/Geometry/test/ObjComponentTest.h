@@ -192,7 +192,6 @@ public:
     ObjComponent A("ocyl", createCappedCylinder());
     A.setPos(10,0,0);
     A.setRot(Quat(90.0,V3D(0,0,1)));
-    const double big=1e6;
     double xmax,ymax,zmax,xmin,ymin,zmin;
     xmax=15; ymax=15; zmax=3;
     xmin=5;  ymin=-5; zmin=-3;

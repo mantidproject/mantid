@@ -92,14 +92,6 @@ public:
     // The ones above below and next to it
     nb = det->getNeighbours(2);
     TS_ASSERT_EQUALS( nb.size(), 4 );
-    detid_t id = det->getID();
-    for (std::map<detid_t, double>::iterator it = nb.begin(); it != nb.end(); it++)
-    {
-      detid_t nid = it->first;
-      // One of 4 neighbors - we know what ID's they should be.
-      // TS_ASSERT(  (nid==id+1) || (nid==id-1) || (nid==id+16) || (nid==id-16) ); disable this for now as I can't
-      // work out how to get it to work, and it relies on the "old" form of NN which no one cares about AFAIK. MW 22/12/10
-    }
 
   }
 

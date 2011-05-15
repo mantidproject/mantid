@@ -37,7 +37,7 @@ public:
     TS_ASSERT_EQUALS(geom_obj->str(),"68 -6 5 -4 3 -2 1");
 
     double xmin(0.0), xmax(0.0), ymin(0.0), ymax(0.0), zmin(0.0), zmax(0.0);
-    geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymax,zmin);
+    geom_obj->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
 
   }
 
@@ -644,25 +644,25 @@ public:
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,1.0)),M_PI*2.0/3.0,satol);
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0,0,-1.0)),M_PI*2.0/3.0,satol);
 
-    if(timeTest)
-    {
-      // block to test time of solid angle methods
-      // change false to true to include
-      double saRay,saTri;
-      V3D observer(1.0,0,0);
-      int iter=4000;
-      int starttime=clock();
-      for (int i=0;i<iter;i++)
-        saTri=geom_obj->triangleSolidAngle(observer);
-      int endtime=clock();
-      std::cout << std::endl << "Cube tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-      iter=50;
-      starttime=clock();
-      for (int i=0;i<iter;i++)
-        saRay=geom_obj->rayTraceSolidAngle(observer);
-      endtime=clock();
-      std::cout << "Cube ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-    }
+//    if(timeTest)
+//    {
+//      // block to test time of solid angle methods
+//      // change false to true to include
+//      double saRay,saTri;
+//      V3D observer(1.0,0,0);
+//      int iter=4000;
+//      int starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saTri=geom_obj->triangleSolidAngle(observer);
+//      int endtime=clock();
+//      std::cout << std::endl << "Cube tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//      iter=50;
+//      starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saRay=geom_obj->rayTraceSolidAngle(observer);
+//      endtime=clock();
+//      std::cout << "Cube ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//    }
 
   }
 
@@ -739,23 +739,23 @@ public:
 
     double satol=1e-3; // typical result tolerance
 
-    if(timeTest)
-    {
-      // block to test time of solid angle methods
-      // change false to true to include
-      int iter=4000;
-      int starttime=clock();
-      for (int i=0;i<iter;i++)
-        saTri=geom_obj->triangleSolidAngle(observer);
-      int endtime=clock();
-      std::cout << std::endl << "Cyl tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-      iter=50;
-      starttime=clock();
-      for (int i=0;i<iter;i++)
-        saRay=geom_obj->rayTraceSolidAngle(observer);
-      endtime=clock();
-      std::cout << "Cyl ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-    }
+//    if(timeTest)
+//    {
+//      // block to test time of solid angle methods
+//      // change false to true to include
+//      int iter=4000;
+//      int starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saTri=geom_obj->triangleSolidAngle(observer);
+//      int endtime=clock();
+//      std::cout << std::endl << "Cyl tri time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//      iter=50;
+//      starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saRay=geom_obj->rayTraceSolidAngle(observer);
+//      endtime=clock();
+//      std::cout << "Cyl ray time=" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//    }
 
     saTri=geom_obj->triangleSolidAngle(observer);
     saRay=geom_obj->rayTraceSolidAngle(observer);
@@ -806,25 +806,25 @@ public:
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(200,0,0)),0.0013204,satol*0.00132);
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(2000,0,0)),1.32025e-5,satol*1.32e-5);
 
-    if(timeTest)
-    {
-      // block to test time of solid angle methods
-      // change false to true to include
-      double saTri,saRay;
-      int iter=400;
-      V3D observer(8.1,0,0);
-      int starttime=clock();
-      for (int i=0;i<iter;i++)
-        saTri=geom_obj->triangleSolidAngle(observer);
-      int endtime=clock();
-      std::cout << std::endl << "Sphere tri time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-      iter=40;
-      starttime=clock();
-      for (int i=0;i<iter;i++)
-        saRay=geom_obj->rayTraceSolidAngle(observer);
-      endtime=clock();
-      std::cout << "Sphere ray time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
-    }
+//    if(timeTest)
+//    {
+//      // block to test time of solid angle methods
+//      // change false to true to include
+//      double saTri,saRay;
+//      int iter=400;
+//      V3D observer(8.1,0,0);
+//      int starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saTri=geom_obj->triangleSolidAngle(observer);
+//      int endtime=clock();
+//      std::cout << std::endl << "Sphere tri time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//      iter=40;
+//      starttime=clock();
+//      for (int i=0;i<iter;i++)
+//        saRay=geom_obj->rayTraceSolidAngle(observer);
+//      endtime=clock();
+//      std::cout << "Sphere ray time =" << (endtime-starttime)/(static_cast<double>(CLOCKS_PER_SEC*iter)) << std::endl;
+//    }
 
   }
 

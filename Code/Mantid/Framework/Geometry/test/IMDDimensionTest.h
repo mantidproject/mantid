@@ -18,7 +18,7 @@ public:
     virtual double getMaximum()    const{throw(Mantid::Kernel::Exception::NotImplementedError(""));return 0;}
     virtual double getMinimum()    const{throw(Mantid::Kernel::Exception::NotImplementedError(""));return 0;}
     virtual size_t getNBins()      const{throw(Mantid::Kernel::Exception::NotImplementedError(""));return 0;}
-    virtual double getX(size_t ind)const{throw(Mantid::Kernel::Exception::NotImplementedError(""));return 0;}
+    virtual double getX(size_t /*ind*/)const{throw(Mantid::Kernel::Exception::NotImplementedError(""));return 0;}
 
 //    virtual bool getIsIntegrated() const -- should trhow not-implemented through getNbins;
  

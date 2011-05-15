@@ -84,10 +84,8 @@ private:
   > Graph;
   /// Vertex descriptor object for Graph
   typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
-  /// map object of int to int
-  typedef boost::unordered_map<int64_t,int64_t> MapII;
   /// map object of int to Graph Vertex descriptor
-  typedef boost::unordered_map<int64_t,Vertex> MapIV;
+  typedef boost::unordered_map<detid_t,Vertex> MapIV;
 
   /// populates the graph with the nodes (detectors with id) and edges (neighbour links with distances)
   void populate();
