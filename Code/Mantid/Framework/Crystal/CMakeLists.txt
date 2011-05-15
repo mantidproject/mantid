@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/LoadPeaksFile.cpp
+	src/MaskPeaksWorkspace.cpp
 	src/PeakIntegration.cpp
 	src/PredictPeaks.cpp
 	src/SavePeaksFile.cpp
@@ -8,6 +9,7 @@ set ( SRC_FILES
 set ( SRC_UNITY_IGNORE_FILES )
 set ( INC_FILES
 	inc/MantidCrystal/LoadPeaksFile.h
+	inc/MantidCrystal/MaskPeaksWorkspace.h
 	inc/MantidCrystal/PeakIntegration.h
 	inc/MantidCrystal/PredictPeaks.h
 	inc/MantidCrystal/SavePeaksFile.h
@@ -15,6 +17,7 @@ set ( INC_FILES
 
 set ( TEST_FILES
 	test/LoadPeaksFileTest.h
+	test/MaskPeaksWorkspaceTest.h
 	test/PredictPeaksTest.h
 	test/SavePeaksFileTest.h
 )
@@ -32,6 +35,7 @@ set_target_properties ( Crystal PROPERTIES OUTPUT_NAME MantidCrystal )
 set_property ( TARGET Crystal PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc ../DataObjects/inc)
+include_directories ( ../MDEvents/inc)
 
 target_link_libraries ( Crystal ${MANTIDLIBS} ${GSL_LIBRARIES} DataObjects)
 

@@ -55,7 +55,6 @@ set ( SRC_FILES
 	src/ManagedRawFileWorkspace2D.cpp
 	src/MaskDetectors.cpp
 	src/MaskDetectorsInShape.cpp
-	src/MaskPeaksWorkspace.cpp
 	src/MoveInstrumentComponent.cpp
 	src/OrbiterDataArchive.cpp
 	src/RawFileInfo.cpp
@@ -124,7 +123,6 @@ set ( INC_FILES
 	inc/MantidDataHandling/ManagedRawFileWorkspace2D.h
 	inc/MantidDataHandling/MaskDetectors.h
 	inc/MantidDataHandling/MaskDetectorsInShape.h
-	inc/MantidDataHandling/MaskPeaksWorkspace.h
 	inc/MantidDataHandling/MoveInstrumentComponent.h
 	inc/MantidDataHandling/OrbiterDataArchive.h
 	inc/MantidDataHandling/RawFileInfo.h
@@ -186,7 +184,6 @@ set ( TEST_FILES
 	test/ManagedRawFileWorkspace2DTest.h
 	test/MaskDetectorsInShapeTest.h
 	test/MaskDetectorsTest.h
-	test/MaskPeaksWorkspaceTest.h
 	test/MoveInstrumentComponentTest.h
 	test/OrbiterDataArchiveTest.h
 	test/RawFileInfoTest.h
