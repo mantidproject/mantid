@@ -32,19 +32,9 @@ namespace MDEvents
   //### BEGIN AUTO-GENERATED CODE #################################################################
   
   /** Macro that makes it possible to call a templated method for
-    a MDEventWorkspace using a IMDEventWorkspace_sptr as the input.
-
-    The function should be declared in this way:
-
-    template<typename MDE, size_t nd>
-    void Algorithm::MyFunctionName(typename MDEventWorkspace<MDE, nd>::sptr ws)
-
-    ... which you the call with
-
-    CALL_MDEVENT_FUNCTION(this->MyFunctionName, imdEventWorkspace)
-
-    @param funcname :: name of the function that will be called.
-    @param workspace :: IMDEventWorkspace_sptr input workspace.
+   * a MDEventWorkspace using a IMDEventWorkspace_sptr as the input.
+   * @param funcname :: name of the function that will be called.
+   * @param workspace :: IMDEventWorkspace_sptr input workspace.
    */
    
   #define CALL_MDEVENT_FUNCTION(funcname, workspace) \
@@ -192,6 +182,8 @@ namespace MDEvents
 } // namespace MDEvents
 
 #endif  /* MANTID_MDEVENTS_MDEVENTFACTORY_H_ */
+
+
 
 
 

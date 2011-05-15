@@ -146,9 +146,9 @@ def generate():
     print "Generating MDEventFactory.cpp"
 
     # Classes that have a .cpp file (and will get an Include line)
-    classes_cpp = ["MDBox", "MDEventWorkspace", "MDGridBox", "MDBin", "MDSplitBox"]
+    classes_cpp = ["IMDBox", "MDBox", "MDEventWorkspace", "MDGridBox", "MDBin", "MDSplitBox"]
     # All of the classes to instantiate
-    classes = classes_cpp + ["MDEvent",  "IMDBox"]
+    classes = classes_cpp + ["MDEvent"]
     
     # First, open the header and read all the lines
     f = open("../inc/MantidMDEvents/MDEventFactory.h", 'r')
