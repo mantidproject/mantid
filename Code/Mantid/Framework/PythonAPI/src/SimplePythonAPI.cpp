@@ -45,7 +45,16 @@ namespace Mantid
     */
     void SimplePythonAPI::createModule()
     {
-      std::ofstream module(getModuleFilename().c_str());
+      createModule(getModuleFilename());
+    }
+
+    /** Create the python module at the given filename
+     *
+     * @param filename :: filename at which to create the module
+     */
+    void SimplePythonAPI::createModule(const std::string filename)
+    {
+      std::ofstream module(filename.c_str());
 
       module << "from MantidFramework import *\n";
       module << "from MantidFramework import _makeString\n"; // from x import * does not import names beginning with an underscore

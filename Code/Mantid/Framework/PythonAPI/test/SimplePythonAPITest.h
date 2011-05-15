@@ -29,9 +29,12 @@ public:
   void testCreateModule()
   {
     using namespace Mantid::PythonAPI;
+
+    std::string tempFileName = "./temp_mantidsimple.py";
+
     //first call the function to create the module file
-    SimplePythonAPI::createModule();
-    Poco::File apimodule(SimplePythonAPI::getModuleFilename());
+    SimplePythonAPI::createModule(tempFileName);
+    Poco::File apimodule(tempFileName);
     //has it been written ?
     TS_ASSERT(apimodule.exists());
 
@@ -97,6 +100,7 @@ public:
     // remove
     TS_ASSERT_THROWS_NOTHING( apimodule.remove() );
     TS_ASSERT( !apimodule.exists() );
+
   }
 
 };

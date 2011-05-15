@@ -59,6 +59,9 @@ class DLLExport SimplePythonAPI
   /// Public methods
   /// Create the simple API module
   static void createModule();
+
+  static void createModule(const std::string filename);
+
   /// Create and return the full-qualified path name for the module
   static std::string getModuleFilename(); 
   /// Removes all non-alphanumeric characters (those not [0-9, a-z, A-Z])
