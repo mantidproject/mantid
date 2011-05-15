@@ -157,13 +157,13 @@ namespace Mantid
       /// Returns the number of elements along i-th dimension
       int dims(int i)const{return i<4?m_info.dims[i]:0;}
       /// Returns the number of elements along the first dimension
-      int dim0()const{return m_info.dims[0];}
+      int dim0() const;
       /// Returns the number of elements along the second dimension
-      int dim1()const{return m_info.dims[1];}
+      int dim1() const;
       /// Returns the number of elements along the third dimension
-      int dim2()const{return m_info.dims[2];}
+      int dim2() const;
       /// Returns the number of elements along the fourth dimension
-      int dim3()const{return m_info.dims[3];}
+      int dim3() const;
       /// Returns the name of the data set
       std::string name()const{return m_info.nxname;}
       /// Returns the Nexus type of the data. The types are defied in napi.h

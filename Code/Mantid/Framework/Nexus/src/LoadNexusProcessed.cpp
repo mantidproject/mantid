@@ -178,7 +178,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
   boost::shared_array<int64_t> indices = indices_data.sharedBuffer();
   int numspec = indices_data.dim0()-1;
 
-  int num_xbins = xbins.dim1();
+  int num_xbins = xbins.dim0();
   if (num_xbins < 2) num_xbins = 2;
   EventWorkspace_sptr ws = boost::dynamic_pointer_cast<EventWorkspace>
   (WorkspaceFactory::Instance().create("EventWorkspace", numspec, num_xbins, num_xbins-1));
@@ -275,8 +275,8 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEventEntry(NXData & wksp_cls, 
       else
       {
         MantidVec x;
-        x.resize(xbins.dim1());
-        for (int i=0; i < xbins.dim1(); i++)
+        x.resize(xbins.dim0());
+        for (int i=0; i < xbins.dim0(); i++)
           x[i] = xbins(wi, i);
         el.setX(x);
       }

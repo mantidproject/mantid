@@ -478,10 +478,12 @@ void NXDataSet::open()
   {
     throw std::runtime_error("Error opening data in group \"" + name() + "\"");
   }
+
   if( NXgetinfo(m_fileID, &m_info.rank, m_info.dims, &m_info.type) != NX_OK )
   {
     throw std::runtime_error("Error retrieving information for " + name() + " group");
   }
+
   getAttributes();
   NXclosedata(m_fileID);
 }
@@ -498,6 +500,62 @@ void NXDataSet::openLocal()
   }
   getAttributes();
   NXclosedata(m_fileID);
+}
+
+/**
+ * The size of the first dimension of data
+ * @returns An integer indicating the size of the dimension.
+ * @throws out_of_range error if requested on an object of rank 0
+ */
+int NXDataSet::dim0() const
+{
+  if( m_info.rank == 0 )
+  {
+    throw std::out_of_range("NXDataSet::dim0() - Requested dimension greater than rank.");
+  }
+  return m_info.dims[0];
+}
+
+/**
+ * The size of the second dimension of data
+ * @returns An integer indicating the size of the dimension
+ * @throws out_of_range error if requested on an object of rank < 2
+ */
+int NXDataSet::dim1() const
+{
+  if( m_info.rank < 2 )
+  {
+    throw std::out_of_range("NXDataSet::dim1() - Requested dimension greater than rank.");
+  }
+  return m_info.dims[1];
+}
+
+/**
+ * The size of the third dimension of data
+ * @returns An integer indicating the size of the dimension
+ * @throws out_of_range error if requested on an object of rank < 3
+ */
+int NXDataSet::dim2() const
+{
+  if( m_info.rank < 3 )
+  {
+    throw std::out_of_range("NXDataSet::dim2() - Requested dimension greater than rank.");
+  }
+  return m_info.dims[2];
+}
+
+/**
+ * The size of the fourth dimension of data
+ * @returns An integer indicating the size of the dimension
+ * @throws out_of_range error if requested on an object of rank < 4
+ */
+int NXDataSet::dim3() const
+{
+  if( m_info.rank < 4 )
+  {
+    throw std::out_of_range("NXDataSet::dim3() - Requested dimension greater than rank.");
+  }
+  return m_info.dims[3];
 }
 
 /**  Wrapper to the NXgetdata.
