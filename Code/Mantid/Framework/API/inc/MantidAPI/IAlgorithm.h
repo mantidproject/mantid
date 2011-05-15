@@ -78,6 +78,12 @@ public:
   /// function returns an optional message that will be displayed in the default GUI, at the top.
   virtual const std::string getOptionalMessage() const = 0;
 
+  /// Get a summary to be used in the wiki page.
+  virtual const std::string getWikiSummary() const = 0;
+
+  /// Get a description to be used in the wiki page.
+  virtual const std::string getWikiDescription() const = 0;
+
   /** Initialization method invoked by the framework. This method is responsible
    *  for any bookkeeping of initialization required by the framework itself.
    *  It will in turn invoke the init() method of the derived algorithm,

@@ -42,7 +42,7 @@ std::string makeWikiText(IAlgorithm * alg)
   // To pipe out the string
   std::ostringstream out;
   out << "== Summary ==\n\n";
-  out << Strings::replace( alg->getOptionalMessage(), "\n", " ") << "\n\n";
+  out << Strings::replace( alg->getWikiSummary(), "\n", " ") << "\n\n";
   out << "== Properties ==\n\n";
 
   out << "{| border=\"1\" cellpadding=\"5\" cellspacing=\"0\" \n"
@@ -88,7 +88,11 @@ std::string makeWikiText(IAlgorithm * alg)
 
   out << "== Description ==\n";
   out << "\n";
-  out << "INSERT FULL DESCRIPTION HERE\n";
+  std::string desc = alg->getWikiDescription();
+  if (desc == "")
+    out << "INSERT FULL DESCRIPTION HERE\n";
+  else
+    out << desc << "\n";
   out << "\n";
   out << "[[Category:Algorithms]]\n";
   out << "[[Category:" << alg->category() << "]]\n";

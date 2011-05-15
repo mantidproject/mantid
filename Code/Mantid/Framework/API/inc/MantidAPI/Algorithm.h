@@ -246,8 +246,17 @@ public:
   /// Set  an optional message that will be displayed in the default GUI, at the top.
   void setOptionalMessage(const std::string optionalMessage) { m_OptionalMessage = optionalMessage;}
 
+  /// Get a summary to be used in the wiki page.
+  const std::string getWikiSummary() const { return m_WikiSummary;}
+
   /// Set a summary to be used in the wiki page. Normally, this is approx. the same as the optional message.
   void setWikiSummary(const std::string WikiSummary) { m_WikiSummary = WikiSummary;}
+
+  /// Get a description to be used in the wiki page.
+  const std::string getWikiDescription() const { return m_WikiDescription;}
+
+  /// Set a string to be used as the Description field in the wiki page.
+  void setWikiDescription(const std::string WikiDescription) { m_WikiDescription = WikiDescription;}
 
   ///setting the child start progress
   void setChildStartProgress(const double startProgress)const{m_startChildProgress=startProgress;}
@@ -367,6 +376,7 @@ private:
   AlgorithmID m_algorithmID; ///< Algorithm ID for managed algorithms
   std::string m_OptionalMessage; ///< An optional message string to be displayed in the GUI.
   std::string m_WikiSummary; ///< A summary line for the wiki page.
+  std::string m_WikiDescription; ///< Description in the wiki page.
   std::vector<IAlgorithm_wptr> m_ChildAlgorithms; ///< A list of weak pointers to any child algorithms created
 
   static size_t g_execCount; ///< Counter to keep track of algorithm execution order

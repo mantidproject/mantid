@@ -52,6 +52,13 @@ namespace Crystal
   {
     this->setWikiSummary("Load an ISAW-style .peaks file into a [[PeaksWorkspace]].");
     this->setOptionalMessage("Load an ISAW-style .peaks file into a PeaksWorkspace.");
+    this->setWikiDescription(
+        "Reads an ISAW-style .peaks or .integrate file into a PeaksWorkspace. Any detector calibration information is ignored."
+        "\n\n"
+        "NOTE: The instrument used is determined by reading the 'Instrument:' and 'Date:' tags at the start of the file."
+        "If the date is not present, the latest [[Instrument Definition File]] is used."
+        );
+
   }
 
   //----------------------------------------------------------------------------------------------

@@ -45,6 +45,18 @@ namespace Algorithms
   {
     this->setWikiSummary("Creates a new GroupingWorkspace using an instrument from one of: an input workspace, an instrument name, or an instrument IDF file.\nOptionally uses bank names to create the groups.");
     this->setOptionalMessage("Creates a new GroupingWorkspace using an instrument from one of: an input workspace, an instrument name, or an instrument IDF file.\nOptionally uses bank names to create the groups.");
+    this->setWikiDescription(
+        "A [[GroupingWorkspace]] is a simple workspace with one value per detector pixel; "
+        "this value corresponds to the group number that will be used when focussing or summing another workspace."
+        "\n\n"
+        "This algorithm creates a blank GroupingWorkspace. It uses the InputWorkspace, InstrumentName, OR InstrumentFilename parameter"
+        "to determine which Instrument to create."
+        "\n\n"
+        "If the OldCalFilename parameter is given, the .cal ASCII file will be loaded to fill the group data."
+        "\n\n"
+        "If the GroupNames parameter is given, the names of banks matching the comma-separated strings in the parameter will be used to "
+        "sequentially number the groups in the output."
+        );
   }
 
   //----------------------------------------------------------------------------------------------

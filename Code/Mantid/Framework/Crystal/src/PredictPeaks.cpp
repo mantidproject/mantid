@@ -44,6 +44,14 @@ namespace Crystal
   {
     this->setWikiSummary("Using a known crystal lattice and UB matrix, predict where single crystal peaks should be found in detector/TOF space. Creates a PeaksWorkspace containing the peaks at the expected positions.");
     this->setOptionalMessage("Using a known crystal lattice and UB matrix, predict where single crystal peaks should be found in detector/TOF space. Creates a PeaksWorkspace containing the peaks at the expected positions.");
+    this->setWikiDescription(
+        "This algorithm uses the InputWorkspace to determine the instrument in use, as well as the UB Matrix and Unit Cell of the sample used."
+        "\n\n"
+        "The algorithm operates by calculating the scattering direction (given the UB matrix) for a particular HKL, "
+        "and determining whether that hits a detector. The MinDSpacing parameter is used to determine what HKL's to try."
+        "\n\n"
+        "The parameters of WavelengthMin/WavelengthMax also limit the peaks attempted to those that can be detected/produced by your instrument."
+    );
   }
 
   //----------------------------------------------------------------------------------------------

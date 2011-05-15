@@ -33,6 +33,8 @@ namespace Mantid
       }
       alg->initialize();
       m_OptionalMessage = alg->getOptionalMessage();
+      m_WikiSummary = alg->getWikiSummary();
+      m_WikiDescription = alg->getWikiDescription();
       copyPropertiesFrom(*alg);
     }
 

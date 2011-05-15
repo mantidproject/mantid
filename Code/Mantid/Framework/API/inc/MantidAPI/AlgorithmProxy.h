@@ -77,6 +77,8 @@ namespace Mantid
       AlgorithmID getAlgorithmID() const {return AlgorithmID(this);}
 
       virtual const std::string getOptionalMessage() const { return m_OptionalMessage; }
+      virtual const std::string getWikiSummary() const { return m_WikiSummary; }
+      virtual const std::string getWikiDescription() const { return m_WikiDescription; }
 
       void initialize();
       bool execute();
@@ -139,6 +141,8 @@ namespace Mantid
       const std::string m_category; ///< category of the real algorithm
       const std::string m_alias;    ///< alias to the algorithm
       std::string m_OptionalMessage; ///<Message to display in GUI
+      std::string m_WikiSummary; ///< A summary line for the wiki page.
+      std::string m_WikiDescription; ///< Description in the wiki page.
       const int m_version;          ///< version of the real algorithm
 
       mutable boost::shared_ptr<Algorithm> m_alg;  ///< Shared pointer to a real algorithm. Created on demand

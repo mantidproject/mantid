@@ -40,6 +40,10 @@ namespace DataHandling
   {
     this->setWikiSummary("Saves an [[OffsetsWorkspace]] into a POWGEN-format binary dspace map file.");
     this->setOptionalMessage("Saves an OffsetsWorkspace into a POWGEN-format binary dspace map file.");
+    this->setWikiDescription(
+        "The POWGEN d-space map file format is a binary list of the "
+        "conversion. It needs to be a minimum size, determined by the PadDetID parameter."
+        );
   }
 
   //----------------------------------------------------------------------------------------------
