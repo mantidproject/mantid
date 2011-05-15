@@ -1,13 +1,6 @@
 #ifndef MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 #define MANTID_MDEVENTS_BINTOMDHISTOWORKSPACETEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include <iostream>
-#include <iomanip>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <boost/math/special_functions/fpclassify.hpp>
-
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
 #include "MantidAPI/ImplicitFunctionFactory.h"
@@ -21,7 +14,13 @@
 #include "MantidKernel/Timer.h"
 #include "MantidMDEvents/BinToMDHistoWorkspace.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MDEventsTestHelper.hh"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <boost/math/special_functions/fpclassify.hpp>
+#include <cxxtest/TestSuite.h>
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -94,7 +93,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
-    IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
@@ -142,7 +141,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
-    IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     AnalysisDataService::Instance().addOrReplace("BinToMDHistoWorkspaceTest_ws", in_ws);
     // 1000 boxes with 1 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000);
@@ -184,7 +183,7 @@ public:
   void setUp()
   {
     Mantid::Kernel::CPUTimer tim;
-    in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1000);
+    in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1000);
     // 1000 boxes with 1000 event each
     TS_ASSERT_EQUALS( in_ws->getNPoints(), 1000*1000);
     in_ws->splitAllIfNeeded(NULL);

@@ -1,11 +1,9 @@
 #ifndef MDEVENTWORKSPACETEST_H
 #define MDEVENTWORKSPACETEST_H
 
-#include <cxxtest/TestSuite.h>
-
+#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidKernel/ProgressText.h"
 #include "MantidKernel/Timer.h"
-#include "MantidGeometry/MDGeometry/MDHistoDimension.h"
 #include "MantidMDEvents/BoxController.h"
 #include "MantidMDEvents/CoordTransformDistance.h"
 #include "MantidMDEvents/MDBox.h"
@@ -13,15 +11,16 @@
 #include "MantidMDEvents/MDEventFactory.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
 #include "MantidMDEvents/MDGridBox.h"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
 #include <boost/random/linear_congruential.hpp>
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int.hpp>
 #include <boost/random/uniform_real.hpp>
 #include <boost/random/variate_generator.hpp>
+#include <cxxtest/TestSuite.h>
 #include <map>
 #include <memory>
 #include <vector>
-#include "MDEventsTestHelper.hh"
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -116,7 +115,7 @@ public:
     if (DODEBUG) prog = new ProgressText(0.0, 1.0, 10, false);
 
     typedef MDGridBox<MDEvent<2>,2> box_t;
-    MDEventWorkspace2::sptr b = MDEventsHelper::makeMDEW<2>(10, 0.0, 10.0);
+    MDEventWorkspace2::sptr b = MDEventsTestHelper::makeMDEW<2>(10, 0.0, 10.0);
     box_t * subbox;
 
     // Manually set some of the tasking parameters
@@ -240,7 +239,7 @@ public:
     size_t binlen = 5; // And bin more coarsely
 
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3::sptr ws = MDEventsHelper::makeMDEW<3>(len, 0.0, size);
+    MDEventWorkspace3::sptr ws = MDEventsTestHelper::makeMDEW<3>(len, 0.0, size);
 
     // Put one event per bin
     for (double x=0; x<len; x++)
@@ -322,7 +321,7 @@ public:
   void test_integrateSphere()
   {
     // 10x10x10 eventWorkspace
-    MDEventWorkspace3::sptr ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
+    MDEventWorkspace3::sptr ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1 /*event per box*/);
     TS_ASSERT_EQUALS( ws->getNPoints(), 1000);
 
     // The sphere transformation

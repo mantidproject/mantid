@@ -1,16 +1,15 @@
 #ifndef MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 #define MANTID_MDEVENTS_FAKEMDEVENTDATATEST_H_
 
-#include <cxxtest/TestSuite.h>
-#include "MantidKernel/Timer.h"
+#include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/System.h"
-#include <iostream>
-#include <iomanip>
-
+#include "MantidKernel/Timer.h"
 #include "MantidMDEvents/FakeMDEventData.h"
 #include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidAPI/IMDEventWorkspace.h"
-#include "MDEventsTestHelper.hh"
+#include "MantidTestHelpers/MDEventsTestHelper.h"
+#include <cxxtest/TestSuite.h>
+#include <iomanip>
+#include <iostream>
 
 using namespace Mantid::MDEvents;
 using namespace Mantid::API;
@@ -35,7 +34,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.initialize() )
     TS_ASSERT( alg.isInitialized() )
 
-    IMDEventWorkspace_sptr in_ws = MDEventsHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
+    IMDEventWorkspace_sptr in_ws = MDEventsTestHelper::makeMDEW<3>(10, 0.0, 10.0, 1);
     AnalysisDataService::Instance().addOrReplace("FakeMDEventDataTest_ws", in_ws);
 
     // 1000 boxes with 1 event each

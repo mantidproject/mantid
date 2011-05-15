@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/AlgorithmHelper.cpp
 	src/WorkspaceCreationHelper.cpp 
 	src/ComponentCreationHelper.cpp 
+	src/MDEventsTestHelper.cpp 
 )
 
 set ( INC_FILES
@@ -9,10 +10,11 @@ set ( INC_FILES
 	inc/MantidTestHelpers/AlgorithmHelper.h
 	inc/MantidTestHelpers/WorkspaceCreationHelper.h
 	inc/MantidTestHelpers/ComponentCreationHelper.h 
+	inc/MantidTestHelpers/MDEventsTestHelper.h 
 )
 
 # Requires DataHandling for a load call
-include_directories (../DataHandling/inc)
+include_directories (../DataHandling/inc ../MDEvents/inc)
 include_directories ( inc )
 
 # For Windows:
@@ -39,4 +41,4 @@ set ( TMP_MANTIDLIBS )
 #add_executable(WikiMaker EXCLUDE_FROM_ALL ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
 
 add_executable(WikiMaker ${CMAKE_CURRENT_SOURCE_DIR}/src/WikiMaker.cpp )
-target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling DataObjects Geometry )
+target_link_libraries ( WikiMaker ${MANTIDLIBS} Algorithms DataHandling DataObjects Geometry MDEvents)

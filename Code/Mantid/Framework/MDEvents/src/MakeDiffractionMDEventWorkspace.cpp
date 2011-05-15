@@ -346,7 +346,7 @@ namespace MDEvents
     size_t lastNumBoxes = ws->getBoxController()->getTotalNumMDBoxes();
     if (DODEBUG) std::cout << cputim << ": initial setup. There are " << lastNumBoxes << " MDBoxes.\n";
 
-    for (int wi=0; wi < in_ws->getNumberHistograms(); wi++)
+    for (size_t wi=0; wi < in_ws->getNumberHistograms(); wi++)
     {
       // Equivalent of: this->convertEventList(wi);
       EventList & el = in_ws->getEventList(wi);

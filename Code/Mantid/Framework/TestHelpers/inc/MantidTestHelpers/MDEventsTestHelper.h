@@ -1,20 +1,30 @@
 #ifndef MDEVENTSTEST_HELPER_H
 #define MDEVENTSTEST_HELPER_H
-//------------------------------------------------------------------------------
-// Includes
-//------------------------------------------------------------------------------
-#include "MantidTestHelpers/DLLExport.h"
-#include "MantidMDEvents/MDEventWorkspace.h"
-#include "MantidMDEvents/BoxController.h"
+
+#include "MantidDataObjects/EventWorkspace.h"
+#include "MantidKernel/DateAndTime.h"
 #include "MantidKernel/Utils.h"
+#include "MantidMDEvents/BoxController.h"
+#include "MantidMDEvents/MDEventWorkspace.h"
+#include "MantidTestHelpers/DLLExport.h"
+
 
 /** Set of helper methods for testing MDEventWorkspace things
  *
  * @author Janik Zikovsky
  * @date March 29, 2011
  * */
-namespace MDEventsHelper
+namespace MDEventsTestHelper
 {
+
+  /** Create an EventWorkspace containing fake data
+   * of single-crystal diffraction.
+   * Instrument is MINITOPAZ
+   *
+   * @return EventWorkspace_sptr
+   */
+  DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr createDiffractionEventWorkspace(int numEvents);
+
 
 
   /** Create a test MDEventWorkspace<nd> . Dimensions are names Axis0, Axis1, etc.
@@ -70,7 +80,6 @@ namespace MDEventsHelper
 
     return out;
   }
-
 
 
 } // namespace
