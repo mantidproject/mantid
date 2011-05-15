@@ -114,7 +114,7 @@ namespace Crystal
 
     // L1 path and direction
     V3D beamDir = inst->getSource()->getPos() - samplePos;
-    double L1 = beamDir.normalize(); // Normalize to unity
+    //double L1 = beamDir.normalize(); // Normalize to unity
 
     if ((fabs(beamDir.X()) > 1e-2) || (fabs(beamDir.Y()) > 1e-2)) // || (beamDir.Z() < 0))
         throw std::invalid_argument("Instrument must have a beam direction that is only in the +Z direction for this algorithm to be valid..");
@@ -151,6 +151,11 @@ namespace Crystal
         for (double l=hklMin[2]; l <= hklMax[2]; l++)
           hkls.push_back(V3D(h,k,l));
 
+    // Counter of possible peaks
+    size_t numInRange = 0;
+
+    Progress prog(this, 0.0, 1.0, hkls.size());
+
     // PARALLEL!!!
     for (int i=0; i < static_cast<int>(hkls.size()); ++i)
     {
@@ -180,14 +185,17 @@ namespace Crystal
           V3D beam = q;
           beam.setZ(q.Z() + one_over_wl);
 
-          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
+//          std::cout << hkl << ", q = " << q << "; beam = " << beam << "; wl = " << wl << "\n";
+          PARALLEL_CRITICAL(PredictPeaks_numInRange)
+          { numInRange++;
+          }
 
           // Create a ray tracer
           InstrumentRayTracer tracker(inst);
           // Find intersecting instrument components in this direction.
           V3D beamNormalized = beam;
           beamNormalized.normalize();
-          //tracker.traceFromSample(beamNormalized);
+          tracker.traceFromSample(beamNormalized);
           Links results = tracker.getResults();
 
           // Go through all results
@@ -201,14 +209,17 @@ namespace Crystal
               if (!det->isMonitor())
               {
                 // Found a detector (not a monitor) that intersected the ray. Take the first one!
-                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
+//                std::cout << "HKL " << hkl << " and q " << q << " will project on id " << det->getID() << " at wl " << 1.0/one_over_wl << "\n";
 
                 // Create the peak
                 Peak p(inst, det->getID(), wl);
                 p.setHKL(hkl);
 
                 // Add it to the workspace
-                pw->addPeak(p);
+                PARALLEL_CRITICAL(PredictPeaks_appendPeak)
+                {
+                  pw->addPeak(p);
+                }
 
                 break;
               }
@@ -216,27 +227,10 @@ namespace Crystal
           } // each ray tracer result
         } // (wavelength is okay)
       } // (d is acceptable)
+      prog.report();
     } // for each hkl
 
-//    2pi/wl = - norm(q)^2 / (2*qz)
-//So this goes into the kf_z = (qz+2pi/wl)
-//"""
-//#Calcualte the scattered q-vector.
-//matrix = np.dot(rot_matrix, ub_matrix)
-//q_vector = np.dot(matrix, hkl)
-//squared_norm_of_q = np.sum( q_vector**2, axis=0)
-//# 2pi/wl = - norm(q)^2 / (2*qz)
-//two_pi_over_wl = -0.5 * squared_norm_of_q / q_vector[2,:]
-//#Calculate the scattered beam direction
-//beam = q_vector.copy()
-//#Add 2pi/wl to the Z component only
-//beam[2,:] += two_pi_over_wl
-//#if the qz is positive, then that scattering does not happen.
-//#   set those to nan.
-//beam[2, (q_vector[2,:]>0) ] = np.nan
-//#And return it.
-//return beam
-
+    g_log.information() << "Out of " << numInRange << " peaks within parameters, " << pw->getNumberPeaks() << " were found to hit a detector.\n";
   }
 
 
