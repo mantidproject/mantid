@@ -43,6 +43,10 @@ namespace Mantid
   {
     class EventWorkspace;
     class PeaksWorkspace;
+    class GroupingWorkspace;
+    class OffsetsWorkspace;
+    class SpecialWorkspace2D;
+    class Workspace2D;
   }
   namespace MDDataObjects
   {
@@ -210,8 +214,12 @@ std::string  Mantid::Kernel::getUnmangledTypeName(const std::type_info& type)
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IMDWorkspace>).name(), std::string("IMDWorkspace")));
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IMDEventWorkspace>).name(), std::string("MDEventWorkspace")));
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::API::IEventWorkspace>).name(), std::string("IEventWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::Workspace2D>).name(), std::string("Workspace2D")));
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::EventWorkspace>).name(), std::string("EventWorkspace")));
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::PeaksWorkspace>).name(), std::string("PeaksWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::GroupingWorkspace>).name(), std::string("GroupingWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::OffsetsWorkspace>).name(), std::string("OffsetsWorkspace")));
+    typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::DataObjects::SpecialWorkspace2D>).name(), std::string("SpecialWorkspace2D")));
     typestrings.insert(std::make_pair(typeid(boost::shared_ptr<Mantid::MDDataObjects::MDWorkspace>).name(), std::string("MDWorkspace")));
 
 
