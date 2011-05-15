@@ -30,7 +30,7 @@ set_property ( TARGET TestHelpers PROPERTY FOLDER "UnitTests" )
 
 # Set library dependencies
 # Bring in DataHandling
-set ( TMP_MANTIDLIBS ${MANTIDLIBS} DataHandling )
+set ( TMP_MANTIDLIBS ${MANTIDLIBS} DataHandling MDEvents )
 target_link_libraries ( TestHelpers ${TMP_MANTIDLIBS}  )
 
 # Cleanup
