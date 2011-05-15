@@ -11,6 +11,7 @@
 namespace WorkspaceCreationHelper
 {
 
+  using namespace Mantid;
   using namespace Mantid::DataObjects;
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
@@ -449,6 +450,44 @@ namespace WorkspaceCreationHelper
     return retVal;
   }
 
+
+  // =====================================================================================
+  /** Create an event workspace with randomized TOF and pulsetimes
+   *
+   * @param numbins :: # of bins to set. This is also = # of events per EventList
+   * @param numpixels :: number of pixels
+   * @return EventWorkspace
+   */
+  EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels, double bin_delta)
+  {
+    EventWorkspace_sptr retVal(new EventWorkspace);
+    retVal->initialize(numpixels,numbins,numbins-1);
+
+    //Create the original X axis to histogram on.
+    //Create the x-axis for histogramming.
+    Kernel::cow_ptr<MantidVec> axis;
+    MantidVec& xRef = axis.access();
+    xRef.resize(numbins);
+    for (size_t i = 0; i < numbins; ++i)
+      xRef[i] = i*bin_delta;
+
+    //Make up some data for each pixels
+    for (size_t i=0; i< numpixels; i++)
+    {
+      //Create one event for each bin
+      EventList& events = retVal->getEventListAtPixelID(i);
+      for (double ie=0; ie<numbins; ie++)
+      {
+        //Create a list of events, randomize
+        events += TofEvent( std::rand() , std::rand());
+      }
+    }
+    retVal->doneLoadingData();
+    retVal->setAllX(axis);
+
+
+    return retVal;
+  }
 
 
   // =====================================================================================

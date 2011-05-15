@@ -65,6 +65,7 @@ namespace WorkspaceCreationHelper
    * 1000 histogrammed bins.
    */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace();
+
   /** Create event workspace with:
    * 50 pixels
    * 100 histogrammed bins from 0.0 in steps of 1.0
@@ -72,15 +73,15 @@ namespace WorkspaceCreationHelper
    * PulseTime = 1 second, 2 seconds, etc.
    */
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateEventWorkspace2(int numPixels=50, int numBins=100);
-  /** Create event workspace
-   */
+
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr 
   CreateEventWorkspace(int numPixels, int numBins, int numEvents = 100, double x0=0.0, double binDelta=1.0,
 		       int eventPattern = 1, int start_at_pixelID = 0);
-  /** Create event workspace
-   */
+
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateGroupedEventWorkspace(std::vector< std::vector<int> > groups,
 							 int numBins, double binDelta=1.0);
+
+  DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels, double bin_delta=1.0);
 
   DLL_TESTHELPERS Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
 

@@ -136,35 +136,6 @@ public:
 
 
 
-  EventWorkspace_sptr CreateRandomEventWorkspace(int numbins, int numpixels)
-  {
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numpixels,numbins,numbins-1);
-    //Create the original X axis to histogram on.
-    //Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(numbins);
-    for (int i = 0; i < numbins; ++i)
-      xRef[i] = i*BIN_DELTA;
-
-    //Make up some data for each pixels
-    for (int i=0; i< numpixels; i++)
-    {
-      //Create one event for each bin
-      EventList& events = retVal->getEventListAtPixelID(i);
-      for (double ie=0; ie<numbins; ie++)
-      {
-        //Create a list of events, randomize
-        events += TofEvent( std::rand() , std::rand());
-      }
-    }
-    retVal->doneLoadingData();
-    retVal->setAllX(axis);
-
-    return retVal;
-  }
-
 
   //------------------------------------------------------------------------------
   void setUp()
@@ -652,7 +623,7 @@ public:
 
   void test_sortAll_TOF()
   {
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress * prog = NULL;
 
     test_in->sortAll(TOF_SORT, prog);
@@ -675,7 +646,7 @@ public:
   void test_sortAll_SingleEventList()
   {
     int numEvents = 30;
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(numEvents, 1);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
     Progress * prog = NULL;
 
     test_in->sortAll(TOF_SORT, prog);
@@ -694,7 +665,7 @@ public:
   void test_sortAll_byTime_SingleEventList()
   {
     int numEvents = 30;
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(numEvents, 1);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(numEvents, 1);
     Progress * prog = NULL;
 
     test_in->sortAll(PULSETIME_SORT, prog);
@@ -709,7 +680,7 @@ public:
 
   void test_sortAll_ByTime()
   {
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     Progress * prog = NULL;
 
     test_in->sortAll(PULSETIME_SORT, prog);
@@ -737,7 +708,7 @@ public:
     //std::cout << " Starting testSegFault 1 \n\n";    std::cout.flush();
 
     int numpix = 100000;
-    EventWorkspace_const_sptr ew1 = CreateRandomEventWorkspace(50, numpix);
+    EventWorkspace_const_sptr ew1 = WorkspaceCreationHelper::CreateRandomEventWorkspace(50, numpix);
 
     //std::cout << " Starting testSegFault 2 \n\n";    std::cout.flush();
     //#pragma omp parallel for
@@ -773,7 +744,7 @@ public:
       // Vector with 10 bins, 10 wide
       MantidVec X;
       for (size_t j=0; j<11; j++)
-        X.push_back(j*10.0);
+        X.push_back(double(j)*10.0);
       ew1->setX(i, X);
 
       // Now it should be 20 in that spot

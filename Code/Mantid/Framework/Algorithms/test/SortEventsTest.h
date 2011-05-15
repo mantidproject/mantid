@@ -1,14 +1,13 @@
 #ifndef MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 #define MANTID_ALGORITHMS_SORTEVENTSTEST_H_
 
-
-#include <cxxtest/TestSuite.h>
-
-#include "MantidDataObjects/EventWorkspace.h"
-#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAlgorithms/SortEvents.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceProperty.h"
+#include "MantidDataObjects/EventWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidTestHelpers/WorkspaceCreationHelper.h"
+#include <cxxtest/TestSuite.h>
 
 using namespace Mantid;
 using namespace Mantid::Kernel;
@@ -34,10 +33,10 @@ public:
   void testSortByTof()
   {
     std::string wsName("test_inEvent3");
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
-    Workspace2D_sptr test_in_ws2d = Create2DWorkspaceToSort(NUMBINS, NUMPIXELS);
+    Workspace2D_sptr test_in_ws2d = WorkspaceCreationHelper::Create2DWorkspaceBinned(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add("workspace2d", test_in_ws2d);
 
     SortEvents sort;
@@ -67,7 +66,7 @@ public:
   void testSortByPulseTime()
   {
     std::string wsName("test_inEvent4");
-    EventWorkspace_sptr test_in = CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
+    EventWorkspace_sptr test_in = WorkspaceCreationHelper::CreateRandomEventWorkspace(NUMBINS, NUMPIXELS);
     AnalysisDataService::Instance().add(wsName, test_in);
 
     SortEvents sort;
@@ -85,63 +84,6 @@ public:
 
     AnalysisDataService::Instance().remove(wsName);
 
-  }
-
-
-private:
-
-  EventWorkspace_sptr CreateRandomEventWorkspace(int numbins, int numpixels)
-  {
-    EventWorkspace_sptr retVal(new EventWorkspace);
-    retVal->initialize(numpixels,numbins,numbins-1);
-
-    //Create the original X axis to histogram on.
-    //Create the x-axis for histogramming.
-    Kernel::cow_ptr<MantidVec> axis;
-    MantidVec& xRef = axis.access();
-    xRef.resize(numbins);
-    for (int i = 0; i < numbins; ++i)
-      xRef[i] = i*BIN_DELTA;
-
-
-    //Make up some data for each pixels
-    for (int i=0; i< numpixels; i++)
-    {
-      //Create one event for each bin
-      EventList& events = retVal->getEventListAtPixelID(i);
-      for (double ie=0; ie<numbins; ie++)
-      {
-        //Create a list of events, randomize
-        events += TofEvent( std::rand() , std::rand());
-      }
-   }
-    retVal->doneLoadingData();
-    retVal->setAllX(axis);
-
-
-    return retVal;
-  }
-
-
-  Workspace2D_sptr Create2DWorkspaceToSort(int xlen, int ylen)
-  {
-    boost::shared_ptr<Mantid::MantidVec> x1(new Mantid::MantidVec(xlen,0.0));
-    boost::shared_ptr<Mantid::MantidVec> y1(new Mantid::MantidVec(xlen-1,3.0));
-    boost::shared_ptr<Mantid::MantidVec> e1(new Mantid::MantidVec(xlen-1,sqrt(3.0)));
-    Workspace2D_sptr retVal(new Workspace2D);
-    retVal->initialize(ylen,xlen,xlen-1);
-    double j=1.0;
-    for (int i=0; i<xlen; i++)
-    {
-      (*x1)[i]=j*0.5;
-      j+=1.5;
-    }
-    for (int i=0; i< ylen; i++)
-    {
-      retVal->setX(i,x1);
-      retVal->setData(i,y1,e1);
-    }
-    return retVal;
   }
 
 
