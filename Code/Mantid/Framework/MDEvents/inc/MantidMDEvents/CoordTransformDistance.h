@@ -27,20 +27,20 @@ namespace MDEvents
   class DLLExport CoordTransformDistance : public CoordTransform
   {
   public:
-    CoordTransformDistance(const size_t inD, const CoordType * center, const bool * dimensionsUsed);
+    CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed);
     virtual ~CoordTransformDistance();
 
-    virtual void apply(const CoordType * inputVector, CoordType * outVector);
+    virtual void apply(const coord_t * inputVector, coord_t * outVector);
 
     /// Return the center coordinate array
-    const CoordType * getCenter() { return m_center; }
+    const coord_t * getCenter() { return m_center; }
 
     /// Return the dimensions used bool array
     const bool * getDimensionsUsed() { return m_dimensionsUsed; }
 
   protected:
     /// array of size[inD], with the coordinates at the center
-    CoordType * m_center;
+    coord_t * m_center;
 
     /// bool array of size[inD] where True is set for those dimensions that are considered when calculating distance
     bool * m_dimensionsUsed;

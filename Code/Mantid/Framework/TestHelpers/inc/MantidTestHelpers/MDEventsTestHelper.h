@@ -67,7 +67,7 @@ namespace MDEventsTestHelper
         for (size_t i=0; i < numEventsPerBox; i++)
         {
           // Put an event in the middle of each box
-          Mantid::MDEvents::CoordType centers[nd];
+          Mantid::MDEvents::coord_t centers[nd];
           for (size_t d=0; d<nd; d++)
             centers[d] = min + (double(index[d])+0.5)*(max-min)/double(splitInto);
           out->addEvent( Mantid::MDEvents::MDEvent<nd>(1.0, 1.0, centers) );

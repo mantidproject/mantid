@@ -187,7 +187,7 @@ namespace MDEvents
         double wavenumber = wavenumber_in_angstrom_times_tof_in_microsec / it->tof();
 
         // Q vector = K_final - K_initial = wavenumber * (output_direction - input_direction)
-        CoordType center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
+        coord_t center[3] = {Q_dir_x * wavenumber, Q_dir_y * wavenumber, Q_dir_z * wavenumber};
 
         if (LorentzCorrection)
         {

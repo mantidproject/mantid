@@ -85,7 +85,7 @@ namespace MDEvents
       // Set the extents of this box.
       for (size_t d=0; d<nd; d++)
       {
-        CoordType min = this->extents[d].min + boxSize[d] * double(indices[d]);
+        coord_t min = this->extents[d].min + boxSize[d] * double(indices[d]);
         myBox->setExtents(d, min, min + boxSize[d]);
       }
       myBox->setInverseVolume(inverseVolume); // Set the cached inverse volume
@@ -352,7 +352,7 @@ namespace MDEvents
     size_t index = 0;
     for (size_t d=0; d<nd; d++)
     {
-      CoordType x = event.getCenter(d);
+      coord_t x = event.getCenter(d);
       int i = int((x - this->extents[d].min) / boxSize[d]);
       // NOTE: No bounds checking is done (for performance).
       //if (i < 0 || i >= int(split[d])) return;
@@ -489,7 +489,7 @@ namespace MDEvents
    * @param[out] errorSquared :: set to the integrated squared error.
    */
   TMDE(
-  void MDGridBox)::integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const
+  void MDGridBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
   {
     // We start by looking at the vertices at every corner of every box contained,
     // to see which boxes are partially contained/fully contained.
@@ -519,12 +519,12 @@ namespace MDEvents
     while (!allDone)
     {
       // Coordinates of this vertex
-      CoordType vertexCoord[nd];
+      coord_t vertexCoord[nd];
       for (size_t d=0; d<nd; ++d)
         vertexCoord[d] = double(vertexIndex[d]) * boxSize[d] + this->extents[d].min;
 
       // Is this vertex contained?
-      CoordType out[nd];
+      coord_t out[nd];
       radiusTransform.apply(vertexCoord, out);
       if (out[0] < radiusSquared)
       {
@@ -592,11 +592,11 @@ namespace MDEvents
         // even if no vertex of it is.
 
         IMDBox<MDE, nd> * box = boxes[i];
-        CoordType boxCenter[nd];
+        coord_t boxCenter[nd];
         box->getCenter(boxCenter);
 
         // Distance from center to the peak integration center
-        CoordType out[nd];
+        coord_t out[nd];
         radiusTransform.apply(boxCenter, out);
 
         if (out[0] < diagonalSquared*0.72 + radiusSquared)

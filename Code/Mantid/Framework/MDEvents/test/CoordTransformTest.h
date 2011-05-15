@@ -26,7 +26,7 @@ public:
   }
 
   /** Helper to compare two "vectors" (bare float arrays) */
-  void compare(size_t numdims, CoordType * value, const CoordType * expected)
+  void compare(size_t numdims, coord_t * value, const coord_t * expected)
   {
     for (size_t i=0; i< numdims; i++)
       TS_ASSERT_DELTA( value[i], expected[i], 1e-5);
@@ -35,8 +35,8 @@ public:
   /** Simple identity transform */
   void test_donothing()
   {
-    CoordType in[2] = {1.5, 2.5};
-    CoordType out[2];
+    coord_t in[2] = {1.5, 2.5};
+    coord_t out[2];
     CoordTransform ct(2,2); // defaults to identity
     ct.apply(in, out);
     compare(2, out, in);
@@ -45,10 +45,10 @@ public:
   /** Translate in 2D */
   void test_translate()
   {
-    CoordType in[2] = {1.5, 2.5};
-    CoordType out[2];
-    CoordType translation[2] = {2.0, 3.0};
-    CoordType expected[2] = {3.5, 5.5};
+    coord_t in[2] = {1.5, 2.5};
+    coord_t out[2];
+    coord_t translation[2] = {2.0, 3.0};
+    coord_t expected[2] = {3.5, 5.5};
     CoordTransform ct(2,2);
     ct.addTranslation(translation);
     ct.apply(in, out);
@@ -66,9 +66,9 @@ public:
   {
     // Do a simple 3-3 transform.
     CoordTransform ct(3,3);
-    CoordType translation[3] = {2.0, 3.0, 4.0};
-    CoordType in[3] = {1.5, 2.5, 3.5};
-    CoordType out[3];
+    coord_t translation[3] = {2.0, 3.0, 4.0};
+    coord_t in[3] = {1.5, 2.5, 3.5};
+    coord_t out[3];
     ct.addTranslation(translation);
 
     for (size_t i=0; i<1000*1000*10; ++i)
@@ -79,9 +79,9 @@ public:
   void test_apply_4D_performance()
   {
     CoordTransform ct(4,4);
-    CoordType translation[4] = {2.0, 3.0, 4.0, 5.0};
-    CoordType in[4] = {1.5, 2.5, 3.5, 4.5};
-    CoordType out[4];
+    coord_t translation[4] = {2.0, 3.0, 4.0, 5.0};
+    coord_t in[4] = {1.5, 2.5, 3.5, 4.5};
+    coord_t out[4];
     ct.addTranslation(translation);
 
     for (size_t i=0; i<1000*1000*10; ++i)

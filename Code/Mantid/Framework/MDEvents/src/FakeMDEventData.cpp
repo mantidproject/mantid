@@ -81,8 +81,8 @@ namespace MDEvents
       // from http://en.wikipedia.org/wiki/N-sphere as of May 6, 2011.
 
       // First, points in a hyper-cube of size 1.0, centered at 0.
-      CoordType centers[nd];
-      CoordType radiusSquared = 0;
+      coord_t centers[nd];
+      coord_t radiusSquared = 0;
       for (size_t d=0; d<nd; d++)
       {
         centers[d] = genUnit();
@@ -90,7 +90,7 @@ namespace MDEvents
       }
 
       // Make a unit vector pointing in this direction
-      CoordType radius = sqrt(radiusSquared);
+      coord_t radius = sqrt(radiusSquared);
       for (size_t d=0; d<nd; d++)
         centers[d] /= radius;
 
@@ -161,7 +161,7 @@ namespace MDEvents
     // Create all the requested events
     for (size_t i=0; i<num; ++i)
     {
-      CoordType centers[nd];
+      coord_t centers[nd];
       for (size_t d=0; d<nd; d++)
         centers[d] = (*gens[d])(); // use a different generator for each dimension
       // Create and add the event.

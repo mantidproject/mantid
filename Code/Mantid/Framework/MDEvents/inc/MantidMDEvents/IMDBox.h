@@ -88,7 +88,7 @@ namespace MDEvents
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
 
     /** Sphere (peak) integration */
-    virtual void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const = 0;
+    virtual void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const = 0;
 
     // -------------------------------------------------------------------------------------------
     /** Split sub-boxes, if this is possible and neede for this box */
@@ -130,7 +130,7 @@ namespace MDEvents
      * @param min :: min edge of the dimension
      * @param max :: max edge of the dimension
      */
-    void setExtents(size_t dim, CoordType min, CoordType max)
+    void setExtents(size_t dim, coord_t min, coord_t max)
     {
       if (dim >= nd)
         throw std::invalid_argument("Invalid dimension passed to MDBox::setExtents");
@@ -162,7 +162,7 @@ namespace MDEvents
     /** Get the center of the box
      * @param center :: bare array of size[nd] that will get set with the mid-point of each dimension.
      */
-    void getCenter(CoordType * center) const
+    void getCenter(coord_t * center) const
     {
       for (size_t d=0; d<nd; ++d)
         center[d] = (extents[d].max + extents[d].min) / 2.0;
@@ -174,7 +174,7 @@ namespace MDEvents
      * This is saved for getSignalNormalized() */
     inline void calcVolume()
     {
-      double volume = 1;
+      coord_t volume = 1;
       for (size_t d=0; d<nd; d++)
       {
         volume *= (extents[d].max - extents[d].min);
@@ -187,7 +187,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated signal from all points within.
      */
-    virtual double getSignal() const
+    virtual signal_t getSignal() const
     {
       return m_signal;
     }
@@ -195,7 +195,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated error squared from all points within.
      */
-    virtual double getErrorSquared() const
+    virtual signal_t getErrorSquared() const
     {
       return m_errorSquared;
     }
@@ -221,7 +221,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated signal from all points within, normalized for the cell volume
      */
-    virtual double getSignalNormalized() const
+    virtual signal_t getSignalNormalized() const
     {
       return m_signal * m_inverseVolume;
     }
@@ -229,7 +229,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Returns the integrated error squared from all points within, normalized for the cell volume
      */
-    virtual double getErrorSquaredNormalized() const
+    virtual signal_t getErrorSquaredNormalized() const
     {
       return m_errorSquared * m_inverseVolume;
     }
@@ -245,14 +245,14 @@ namespace MDEvents
 
     //-----------------------------------------------------------------------------------------------
     /** Return the volume of the cell */
-    double getVolume() const
+    coord_t getVolume() const
     {
       return 1.0 / m_inverseVolume;
     }
 
     //-----------------------------------------------------------------------------------------------
     /** Return the inverse of the volume of the cell */
-    double getInverseVolume() const
+    coord_t getInverseVolume() const
     {
       return m_inverseVolume;
     }
@@ -260,7 +260,7 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** Sets the inverse of the volume of the cell
      * @param invVolume :: value to set. */
-    void setInverseVolume(double invVolume)
+    void setInverseVolume(coord_t invVolume)
     {
       m_inverseVolume = invVolume;
     }
@@ -273,13 +273,13 @@ namespace MDEvents
     MDDimensionExtents extents[nd];
 
     /** Cached total signal from all points within */
-    double m_signal;
+    signal_t m_signal;
 
     /** Cached total error (squared) from all points within */
-    double m_errorSquared;
+    signal_t m_errorSquared;
 
     /// Inverse of the volume of the cell, to be used for normalized signal.
-    double m_inverseVolume;
+    coord_t m_inverseVolume;
 
     /// The box splitting controller, shared with all boxes in the hierarchy
     BoxController_sptr m_BoxController;

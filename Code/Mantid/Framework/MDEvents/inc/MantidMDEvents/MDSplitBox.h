@@ -25,7 +25,7 @@ namespace MDEvents
   public:
     MDSplitBox(MDBox<MDE, nd> * box);
 
-    MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, CoordType _splitPoint);
+    MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint);
 
     virtual ~MDSplitBox();
     
@@ -50,7 +50,7 @@ namespace MDEvents
 
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void integrateSphere(CoordTransform & /*radiusTransform*/, const CoordType /*radiusSquared*/, double & /*signal*/, double & /*errorSquared*/) const
+    void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const
     { throw std::runtime_error("Not implemented."); }
 
     // --------------------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ namespace MDEvents
     { return dimSplit; }
 
     /// Return the X value in the split dimension that was the left/right splitting point
-    CoordType getSplitPoint() const
+    coord_t getSplitPoint() const
     { return splitPoint; }
 
     /// Returns the IMDBox on the left side (x[dimSplit] < splitPoint)
@@ -79,7 +79,7 @@ namespace MDEvents
     size_t dimSplit;
 
     /// X-value that splits the dimension at index dimSplit.
-    CoordType splitPoint;
+    coord_t splitPoint;
 
     /// IMDBox on the left of the split (x[dimSplit] < splitPoint)
     IMDBox<MDE,nd> * left;

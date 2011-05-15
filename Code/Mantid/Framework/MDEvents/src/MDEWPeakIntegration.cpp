@@ -92,7 +92,7 @@ namespace MDEvents
 
       // Build the sphere transformation
       bool dimensionsUsed[nd];
-      CoordType center[nd];
+      coord_t center[nd];
       for (size_t d=0; d<nd; ++d)
       {
         dimensionsUsed[d] = true; // Use all dimensions

@@ -180,7 +180,7 @@ namespace MDEvents
       for (d=0; d<nd; ++d)
       {
         // Check that the value is within the bounds given. (Rotation is for later)
-        CoordType x = it->getCenter(d);
+        coord_t x = it->getCenter(d);
         if (x < bin.m_min[d])
           break;
         if (x >= bin.m_max[d])
@@ -209,7 +209,7 @@ namespace MDEvents
    * @param[out] errorSquared :: set to the integrated squared error.
    */
   TMDE(
-  void MDBox)::integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const
+  void MDBox)::integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const
   {
     typename std::vector<MDE>::const_iterator it = data.begin();
     typename std::vector<MDE>::const_iterator it_end = data.end();
@@ -217,7 +217,7 @@ namespace MDEvents
     // For each MDEvent
     for (; it != it_end; ++it)
     {
-      CoordType out[nd];
+      coord_t out[nd];
       radiusTransform.apply(it->getCenter(), out);
       if (out[0] < radiusSquared)
       {

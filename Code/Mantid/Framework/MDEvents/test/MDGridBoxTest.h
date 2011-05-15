@@ -83,7 +83,7 @@ public:
    * @param split0, split1 :: for uneven splitting
    * */
   template <size_t nd>
-  static MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, CoordType dimensionMin=0.0)
+  static MDGridBox<MDEvent<nd>,nd> * makeMDGridBox(size_t split0=10, size_t split1=10, coord_t dimensionMin=0.0)
   {
     // Split at 5 events
     BoxController_sptr splitter(new BoxController(nd));
@@ -113,7 +113,7 @@ public:
    * @param step :: x-coordinate increases by this much.
    */
   template <size_t nd>
-  static void feedMDBox(MDGridBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, CoordType start=0.5, CoordType step=1.0)
+  static void feedMDBox(MDGridBox<MDEvent<nd>,nd> * box, size_t repeat=1, size_t numPerSide=10, coord_t start=0.5, coord_t step=1.0)
   {
     size_t * counters = Utils::nestedForLoopSetUp(nd,0);
     size_t * index_max = Utils::nestedForLoopSetUp(nd,numPerSide);
@@ -208,7 +208,7 @@ public:
     std::vector<MDEvent<1> > out;
     for (double i=0; i<num; i++)
     {
-      CoordType coords[1] = {i*1.0+0.5};
+      coord_t coords[1] = {i*1.0+0.5};
       out.push_back( MDEvent<1>(1.0, 1.0, coords) );
     }
     return out;
@@ -817,12 +817,12 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere(MDGridBox<MDEvent<2>,2> & box, CoordType x, CoordType y, const CoordType radius, double numExpected, std::string message)
+  void do_check_integrateSphere(MDGridBox<MDEvent<2>,2> & box, coord_t x, coord_t y, const coord_t radius, double numExpected, std::string message)
   {
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "------" << message << "--\n";
     // The sphere transformation
     bool dimensionsUsed[2] = {true,true};
-    CoordType center[2] = {x,y};
+    coord_t center[2] = {x,y};
     CoordTransformDistance sphere(2, center, dimensionsUsed);
 
     double signal = 0;
@@ -855,7 +855,7 @@ public:
     do_check_integrateSphere(box, -1.0,0.5, 1.55,  1.0, "Off an edge but enough to get an event");
 
     // Now I add an event very near an edge
-    CoordType center[2] = {0.001, 0.5};
+    coord_t center[2] = {0.001, 0.5};
     box.addEvent(MDEvent<2>(1.0, 1.0, center));
     do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
     do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
@@ -911,13 +911,13 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void do_check_integrateSphere3d(MDGridBox<MDEvent<3>,3> & box, CoordType x, CoordType y, CoordType z,
-      const CoordType radius, double numExpected, std::string message)
+  void do_check_integrateSphere3d(MDGridBox<MDEvent<3>,3> & box, coord_t x, coord_t y, coord_t z,
+      const coord_t radius, double numExpected, std::string message)
   {
     std::cout << "Sphere of radius " << radius << " at " << x << "," << y << "," << z << "--- " << message << " ---------\n";
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true, true};
-    CoordType center[3] = {x,y,z};
+    coord_t center[3] = {x,y,z};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     double signal = 0;
@@ -942,7 +942,7 @@ public:
     do_check_integrateSphere3d(box, 9.0,9.0,9.0,  1.70, 20.0, "Does NOT contains one box completely, at a corner");
 
     // Now I add an event very near an edge
-    CoordType center[3] = {0.001, 0.5, 0.5};
+    coord_t center[3] = {0.001, 0.5, 0.5};
     box.addEvent(MDEvent<3>(2.0, 2.0, center));
 //    do_check_integrateSphere(box, -1.0,0.5, 1.01,  1.0, "Off an edge but just barely enough to get an event");
 //    do_check_integrateSphere(box, 0.0,0.5, 0.01,  1.0, "Tiny, but just barely enough to get an event");
@@ -983,7 +983,7 @@ public:
     boost::variate_generator<boost::mt19937&, boost::uniform_real<double> > gen(rng, u);
     for (size_t i=0; i<num; ++i)
     {
-      CoordType centers[3];
+      coord_t centers[3];
       for (size_t d=0; d<3; d++)
         centers[d] = gen();
       // Create and add the event.
@@ -1022,7 +1022,7 @@ public:
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    CoordType center[3] = {2.5, 2.5, 2.5};
+    coord_t center[3] = {2.5, 2.5, 2.5};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     double signal, errorSquared;
@@ -1044,7 +1044,7 @@ public:
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    CoordType center[3] = {2.5, 2.5, 2.5};
+    coord_t center[3] = {2.5, 2.5, 2.5};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     double signal, errorSquared;
@@ -1065,7 +1065,7 @@ public:
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    CoordType center[3] = {11., 5., 5.};
+    coord_t center[3] = {11., 5., 5.};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
     double signal, errorSquared;

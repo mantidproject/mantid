@@ -206,8 +206,8 @@ public:
   void test_centerpointBin()
   {
     MDBox<MDEvent<2>,2> box;
-    for (CoordType x=0.5; x < 10.0; x += 1.0)
-      for (CoordType y=0.5; y < 10.0; y += 1.0)
+    for (coord_t x=0.5; x < 10.0; x += 1.0)
+      for (coord_t y=0.5; y < 10.0; y += 1.0)
       {
         MDEvent<2> ev(1.0, 1.5);
         ev.setCenter(0, x);
@@ -242,15 +242,15 @@ public:
    * @param radius :: radius to integrate
    * @param numExpected :: how many events should be in there
    */
-  void dotest_integrateSphere(MDBox<MDEvent<3>,3> & box, CoordType x, CoordType y, CoordType z, const CoordType radius, double numExpected)
+  void dotest_integrateSphere(MDBox<MDEvent<3>,3> & box, coord_t x, coord_t y, coord_t z, const coord_t radius, double numExpected)
   {
     // The sphere transformation
     bool dimensionsUsed[3] = {true,true,true};
-    CoordType center[3] = {x,y,z};
+    coord_t center[3] = {x,y,z};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
-    double signal = 0;
-    double errorSquared = 0;
+    signal_t signal = 0;
+    signal_t errorSquared = 0;
     box.integrateSphere(sphere, radius*radius, signal, errorSquared);
     TS_ASSERT_DELTA( signal, 1.0*numExpected, 1e-5);
     TS_ASSERT_DELTA( errorSquared, 1.5*numExpected, 1e-5);
@@ -260,9 +260,9 @@ public:
   {
     // One event at each integer coordinate value between 1 and 9
     MDBox<MDEvent<3>,3> box;
-    for (CoordType x=1.0; x < 10.0; x += 1.0)
-      for (CoordType y=1.0; y < 10.0; y += 1.0)
-        for (CoordType z=1.0; z < 10.0; z += 1.0)
+    for (coord_t x=1.0; x < 10.0; x += 1.0)
+      for (coord_t y=1.0; y < 10.0; y += 1.0)
+        for (coord_t z=1.0; z < 10.0; z += 1.0)
         {
           MDEvent<3> ev(1.0, 1.5);
           ev.setCenter(0, x);

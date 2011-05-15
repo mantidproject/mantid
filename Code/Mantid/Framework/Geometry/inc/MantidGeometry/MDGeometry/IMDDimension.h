@@ -19,13 +19,21 @@ namespace Mantid
      * We can change this in order to compare
      * performance/memory/accuracy requirements.
      */
-    typedef double CoordType;
+    typedef double coord_t;
     
     /// Minimum value (large negative number) that a coordinate can take
-    static const CoordType CoordType_min = -std::numeric_limits<double>::max();
+    static const coord_t coord_t_min = -std::numeric_limits<double>::max();
 
     /// Maximum value (large positive number) that a coordinate can take
-    static const CoordType CoordType_max = std::numeric_limits<double>::max();
+    static const coord_t coord_t_max = std::numeric_limits<double>::max();
+
+    /** Typedef for the data type to use for the signal and error
+     * integrated in a MDBin or MDBox.
+     *
+     * This could be a float or a double, depending on requirements/platform.
+     * We can change this in order to compare performance/memory/accuracy requirements.
+     */
+    typedef double signal_t;
   }
   
 }

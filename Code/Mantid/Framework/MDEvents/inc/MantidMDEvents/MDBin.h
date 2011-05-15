@@ -18,7 +18,7 @@ namespace MDEvents
    * NOTE: For now, will only support bins that are aligned with the workspace axes (no rotation!),
    * but in future it will be extended.
    *
-   * @tparam nd :: the number of dimensions **in the workspace being binned**
+   * @tparam nd :: the number of dimensions **in the workspace being binned, not the output workspace **
    *
    * @author Janik Zikovsky, SNS
    * @date 2011-03-23 17:04:02.621325
@@ -36,18 +36,18 @@ namespace MDEvents
     /** The accumulated signal in this bin.
      * This is public so as to avoid the need (and slowdown) of getters/setters
      */
-    double m_signal;
+    signal_t m_signal;
 
     /** The accumulated error (squared) in this bin.
     * This is public so as to avoid the need (and slowdown) of getters/setters
     */
-    double m_errorSquared;
+    signal_t m_errorSquared;
 
     /// The minimum edge of the bin for each dimension in the workspace
-    CoordType m_min[nd];
+    coord_t m_min[nd];
 
     /// The maximum edge of the bin for each dimension in the workspace
-    CoordType m_max[nd];
+    coord_t m_max[nd];
 
     /// Index of where this bin lands into the broader histogrammed workspace.
     size_t m_index;

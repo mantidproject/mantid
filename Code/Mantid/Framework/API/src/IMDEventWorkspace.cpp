@@ -2,7 +2,7 @@
 #include "MantidAPI/IMDEventWorkspace.h"
 #include "MantidKernel/IPropertyManager.h"
 
-using Mantid::MDEvents::CoordType;
+using Mantid::MDEvents::coord_t;
 using namespace Mantid::Geometry;
 
 namespace Mantid

@@ -22,8 +22,8 @@ public:
     MDBin<MDE,3> bin;
     for (size_t d=0; d<3; d++)
     {
-      TS_ASSERT_EQUALS( bin.m_min[d], CoordType_min );
-      TS_ASSERT_EQUALS( bin.m_max[d], CoordType_max );
+      TS_ASSERT_EQUALS( bin.m_min[d], coord_t_min );
+      TS_ASSERT_EQUALS( bin.m_max[d], coord_t_max );
     }
   }
 

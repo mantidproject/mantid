@@ -53,7 +53,7 @@ class IMDBoxTester : public IMDBox<MDE,nd>
   virtual void centerpointBin(MDBin<MDE,nd> & /*bin*/, bool * ) const
   {}
 
-  virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const CoordType /*radiusSquared*/, double & /*signal*/, double & /*errorSquared*/) const {};
+  virtual void integrateSphere(CoordTransform & /*radiusTransform*/, const coord_t /*radiusSquared*/, signal_t & /*signal*/, signal_t & /*errorSquared*/) const {};
 
 };
 
@@ -95,7 +95,7 @@ public:
 
     TS_ASSERT_THROWS( b.setExtents(2, 0, 1.0), std::invalid_argument);
 
-    CoordType center[2];
+    coord_t center[2];
     b.getCenter(center);
     TS_ASSERT_DELTA( center[0], +1.0, 1e-6);
     TS_ASSERT_DELTA( center[1], +4.0, 1e-6);

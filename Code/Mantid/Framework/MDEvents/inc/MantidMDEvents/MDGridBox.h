@@ -55,7 +55,7 @@ namespace MDEvents
 
     void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const;
 
-    void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const;
+    void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
     void splitContents(size_t index, Kernel::ThreadScheduler * ts = NULL);
 
@@ -97,11 +97,11 @@ namespace MDEvents
     size_t numBoxes;
 
     /// Size of each box size in the i^th dimension
-    CoordType boxSize[nd];
+    coord_t boxSize[nd];
 
     /** Length (squared) of the diagonal through every dimension = sum( boxSize[i]^2 )
      * Used in some calculations like peak integration */
-    CoordType diagonalSquared;
+    coord_t diagonalSquared;
 
     /// Cached number of points contained (including all sub-boxes)
     size_t nPoints;

@@ -29,9 +29,9 @@ namespace MDEvents
     CoordTransform(const size_t inD, const size_t outD);
     virtual ~CoordTransform();
 
-    void addTranslation(const CoordType * translationVector);
-    Mantid::Geometry::Matrix<CoordType> getMatrix() const;
-    void setMatrix(const Mantid::Geometry::Matrix<CoordType> newMatrix);
+    void addTranslation(const coord_t * translationVector);
+    Mantid::Geometry::Matrix<coord_t> getMatrix() const;
+    void setMatrix(const Mantid::Geometry::Matrix<coord_t> newMatrix);
 
     //----------------------------------------------------------------------------------------------
     /** Apply the coordinate transformation
@@ -39,14 +39,14 @@ namespace MDEvents
      * @param inputVector :: fixed-size array of input coordinates, of size inD
      * @param outVector :: fixed-size array of output coordinates, of size outD
      */
-    virtual void apply(const CoordType * inputVector, CoordType * outVector)
+    virtual void apply(const coord_t * inputVector, coord_t * outVector)
     {
       // For each output dimension
       for (size_t out = 0; out < outD; ++out)
       {
         //Cache the row pointer to make the matrix access a bit faster
-        CoordType * rawMatrixRow = rawMatrix[out];
-        CoordType outVal = 0.0;
+        coord_t * rawMatrixRow = rawMatrix[out];
+        coord_t outVal = 0.0;
         size_t in;
         for (in = 0; in < inD; ++in)
           outVal += rawMatrixRow[in] * inputVector[in];
@@ -71,10 +71,10 @@ namespace MDEvents
      * By using an affine, translations and rotations (or other linear transforms) can be
      * combined by simply multiplying the matrices.
      */
-    Mantid::Geometry::Matrix<CoordType> affineMatrix;
+    Mantid::Geometry::Matrix<coord_t> affineMatrix;
 
     /// Raw pointer to the same underlying matrix as affineMatrix.
-    CoordType ** rawMatrix;
+    coord_t ** rawMatrix;
 
     void copyRawMatrix();
   };

@@ -32,8 +32,8 @@ namespace MDEvents
     // Allocate the raw matrix
     size_t nx = affineMatrix.numRows();
     size_t ny = affineMatrix.numCols();
-    CoordType * tmpX = new CoordType[nx*ny];
-    rawMatrix = new CoordType*[nx];
+    coord_t * tmpX = new coord_t[nx*ny];
+    rawMatrix = new coord_t*[nx];
     for (size_t i=0;i<nx;i++)
       rawMatrix[i] = tmpX + (i*ny);
     // Copy into the raw matrix (for speed)
@@ -72,7 +72,7 @@ namespace MDEvents
    * @param newMatrix :: (outD+1 * inD+1) matrix to set.
    * @throw runtime_error if the matrix dimensions are incompatible.
    */
-  void CoordTransform::setMatrix(const Mantid::Geometry::Matrix<CoordType> newMatrix)
+  void CoordTransform::setMatrix(const Mantid::Geometry::Matrix<coord_t> newMatrix)
   {
     if (newMatrix.numRows() != outD+1)
       throw std::runtime_error("setMatrix(): Number of rows must match!");
@@ -87,7 +87,7 @@ namespace MDEvents
   //----------------------------------------------------------------------------------------------
   /** Return the affine matrix in the transform.
    */
-  Mantid::Geometry::Matrix<CoordType> CoordTransform::getMatrix() const
+  Mantid::Geometry::Matrix<coord_t> CoordTransform::getMatrix() const
   {
     return affineMatrix;
   }
@@ -97,9 +97,9 @@ namespace MDEvents
    *
    * @param translationVector :: fixed-size array of the translation vector, of size outD
    */
-  void CoordTransform::addTranslation(const CoordType * translationVector)
+  void CoordTransform::addTranslation(const coord_t * translationVector)
   {
-    Matrix<CoordType> translationMatrix(outD+1, inD+1);
+    Matrix<coord_t> translationMatrix(outD+1, inD+1);
     // Start with identity
     translationMatrix.identityMatrix();
     // Fill the last column with the translation value
@@ -121,7 +121,7 @@ namespace MDEvents
 //   * @throw runtime_error if inD != outD
 //   */
 //  TCT
-//  void CoordTransform::setRotation(const CoordType * translationVector)
+//  void CoordTransform::setRotation(const coord_t * translationVector)
 //  {
 //    if (inD != outD) throw std::runtime_error("Translation required inD == outD.");
 //  }

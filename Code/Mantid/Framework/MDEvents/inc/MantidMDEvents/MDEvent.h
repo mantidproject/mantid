@@ -71,7 +71,7 @@ namespace MDEvents
     /** The N-dimensional coordinates of the center of the event.
      * A simple fixed-sized array of (floats or doubles).
      */
-    CoordType center[nd];
+    coord_t center[nd];
 
   public:
     /* Will be keeping functions inline for (possible?) performance improvements */
@@ -102,7 +102,7 @@ namespace MDEvents
      * @param errorSquared :: errorSquared
      * @param centers :: pointer to a nd-sized array of values to set for all coordinates.
      * */
-    MDEvent(const float signal, const float errorSquared, const CoordType * centers) :
+    MDEvent(const float signal, const float errorSquared, const coord_t * centers) :
       signal(signal), errorSquared(errorSquared)
     {
       for (size_t i=0; i<nd; i++)
@@ -127,7 +127,7 @@ namespace MDEvents
     /** Returns the n-th coordinate axis value.
      * @param n :: index (0-based) of the dimension you want.
      * */
-    CoordType getCenter(const size_t n) const
+    coord_t getCenter(const size_t n) const
     {
       return center[n];
     }
@@ -136,7 +136,7 @@ namespace MDEvents
     /** Returns the array of coordinates
      * @return pointer to the fixed-size array.
      * */
-    const CoordType * getCenter() const
+    const coord_t * getCenter() const
     {
       return center;
     }
@@ -146,7 +146,7 @@ namespace MDEvents
      * @param n :: index (0-based) of the dimension you want to set
      * @param value :: value to set.
      * */
-    void setCenter(const size_t n, const CoordType value)
+    void setCenter(const size_t n, const coord_t value)
     {
       center[n] = value;
     }
@@ -156,7 +156,7 @@ namespace MDEvents
      *
      * @param centers :: pointer to a nd-sized array of the values to set.
      * */
-    void setCoords(const CoordType * centers)
+    void setCoords(const coord_t * centers)
     {
       for (size_t i=0; i<nd; i++)
         center[i] = centers[i];

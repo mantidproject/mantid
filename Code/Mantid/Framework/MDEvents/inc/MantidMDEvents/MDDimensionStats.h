@@ -32,11 +32,11 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------
     /** Returns the mean position of events in this dimension */
-    CoordType getMean() const
+    coord_t getMean() const
     { return total / double(numPoints); }
 
     /** Returns the approximate standard deviation of the position of events in this dimension */
-    CoordType getApproxVariance() const
+    coord_t getApproxVariance() const
     { return totalApproxVariance / double(numPoints); }
 
 
@@ -44,11 +44,11 @@ namespace MDEvents
     /** Add a point with the given coordinate; track the mean and variance
      * @param x :: coordinate value of the point in this dimension.
      */
-    void addPoint(const CoordType x)
+    void addPoint(const coord_t x)
     {
       total += x;
       numPoints++;
-      CoordType diff = (x - total/double(numPoints));
+      coord_t diff = (x - total/double(numPoints));
       totalApproxVariance += diff * diff;
     }
 
@@ -57,7 +57,7 @@ namespace MDEvents
     //--- Public members ---
 
     /// Total dimension (summed by each event). Divide by numPoints to get the mean
-    CoordType total;
+    coord_t total;
 
     /** Approximate variance - used for quick std.deviation estimates.
      *
@@ -67,7 +67,7 @@ namespace MDEvents
      *
      * Divide by the number of points to get the square of the standard deviation!
      */
-    CoordType totalApproxVariance;
+    coord_t totalApproxVariance;
 
     /// Number of points counted (used to give the mean).
     size_t numPoints;

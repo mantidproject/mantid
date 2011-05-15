@@ -22,11 +22,11 @@ namespace MDEvents
    *        calculating distance.
    * @return
    */
-  CoordTransformDistance::CoordTransformDistance(const size_t inD, const CoordType * center, const bool * dimensionsUsed)
+  CoordTransformDistance::CoordTransformDistance(const size_t inD, const coord_t * center, const bool * dimensionsUsed)
   : CoordTransform(inD, 1)
   {
     // Create and copy the arrays.
-    m_center = new CoordType[inD];
+    m_center = new coord_t[inD];
     m_dimensionsUsed = new bool[inD];
     for (size_t d=0; d<inD; d++)
     {
@@ -54,14 +54,14 @@ namespace MDEvents
    * @param inputVector :: fixed-size array of input coordinates, of size inD
    * @param outVector :: fixed-size array of output coordinates, of size 1
    */
-  void CoordTransformDistance::apply(const CoordType * inputVector, CoordType * outVector)
+  void CoordTransformDistance::apply(const coord_t * inputVector, coord_t * outVector)
   {
-    CoordType distanceSquared = 0;
+    coord_t distanceSquared = 0;
     for (size_t d=0; d<inD; d++)
     {
       if (m_dimensionsUsed[d])
       {
-        CoordType dist = inputVector[d] - m_center[d];
+        coord_t dist = inputVector[d] - m_center[d];
         distanceSquared += (dist * dist);
       }
     }

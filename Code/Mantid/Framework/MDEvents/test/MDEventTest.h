@@ -31,14 +31,14 @@ public:
     TS_ASSERT_EQUALS( b.getSignal(), 2.5);
     TS_ASSERT_EQUALS( b.getErrorSquared(), 1.5);
 
-    TS_ASSERT_EQUALS( sizeof(a), sizeof(CoordType)*3+8);
-    TS_ASSERT_EQUALS( sizeof(b), sizeof(CoordType)*4+8);
+    TS_ASSERT_EQUALS( sizeof(a), sizeof(coord_t)*3+8);
+    TS_ASSERT_EQUALS( sizeof(b), sizeof(coord_t)*4+8);
   }
 
   void test_ConstructorsWithCoords()
   {
     // Fixed-size array
-    CoordType coords[3] = {0.123, 1.234, 2.345};
+    coord_t coords[3] = {0.123, 1.234, 2.345};
     MDEvent<3> a(2.5, 1.5, coords );
     TS_ASSERT_EQUALS( a.getSignal(), 2.5);
     TS_ASSERT_EQUALS( a.getErrorSquared(), 1.5);
@@ -47,7 +47,7 @@ public:
     TS_ASSERT_EQUALS( a.getCenter(2), 2.345);
 
     // Dynamic array
-    CoordType * coords2 = new CoordType[5];
+    coord_t * coords2 = new coord_t[5];
     coords2[0] = 1.0;
     coords2[1] = 2.0;
     coords2[2] = 3.0;
@@ -86,7 +86,7 @@ public:
   void test_setCenter_array()
   {
     MDEvent<3> a;
-    CoordType coords[3] = {0.123, 1.234, 2.345};
+    coord_t coords[3] = {0.123, 1.234, 2.345};
     a.setCoords( coords );
     TS_ASSERT_EQUALS( a.getCenter(0), 0.123);
     TS_ASSERT_EQUALS( a.getCenter(1), 1.234);
@@ -95,7 +95,7 @@ public:
 
   void test_CopyConstructor()
   {
-    CoordType coords[3] = {0.123, 1.234, 2.345};
+    coord_t coords[3] = {0.123, 1.234, 2.345};
     MDEvent<3> b(2.5, 1.5, coords );
     MDEvent<3> a(b);
     TS_ASSERT_EQUALS( a.getNumDims(), 3);

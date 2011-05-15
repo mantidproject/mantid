@@ -66,7 +66,7 @@ namespace MDEvents
 
     void calculateDimensionStats(MDDimensionStats * stats) const;
 
-    void integrateSphere(CoordTransform & radiusTransform, const CoordType radiusSquared, double & signal, double & errorSquared) const;
+    void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
 //    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
 

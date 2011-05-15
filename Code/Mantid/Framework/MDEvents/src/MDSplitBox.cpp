@@ -33,11 +33,11 @@ namespace MDEvents
     box->calculateDimensionStats(stats);
 
     // Now we look for the dimension that is the widest spread (highest variance)
-    CoordType highestVariance = -1.0;
+    coord_t highestVariance = -1.0;
     size_t widestDimension = 0;
     for (size_t d=0; d<nd; d++)
     {
-      CoordType var = stats[d].getApproxVariance();
+      coord_t var = stats[d].getApproxVariance();
 //      std::cout << "dim " << d << " has variance " << var << std::endl;
       if (var > highestVariance)
       {
@@ -66,7 +66,7 @@ namespace MDEvents
    * @param _splitPoint :: left/right split point in that dimension.
    */
   TMDE(
-  MDSplitBox)::MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, CoordType _splitPoint)
+  MDSplitBox)::MDSplitBox(IMDBox<MDE, nd> * box, size_t _dimSplit, coord_t _splitPoint)
   : IMDBox<MDE, nd>(box) // copy extents, etc, other common values
   {
     // Directly use the given split dimensions and values
@@ -353,8 +353,8 @@ namespace MDEvents
 //    left->centerpointBin(bin);
 //    right->centerpointBin(bin);
 
-    CoordType bin_xmin = bin.m_min[dimSplit];
-    CoordType bin_xmax = bin.m_max[dimSplit];
+    coord_t bin_xmin = bin.m_min[dimSplit];
+    coord_t bin_xmax = bin.m_max[dimSplit];
     // Bin is out of range in the small side
     if (bin_xmax < this->extents[dimSplit].min)
       return;

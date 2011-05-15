@@ -26,15 +26,15 @@ namespace MDEvents
     /** Empty constructor - reset everything.
      *  */
     MDDimensionExtents() :
-      min( std::numeric_limits<CoordType>::max() ),
-      max( -std::numeric_limits<CoordType>::max() )
+      min( std::numeric_limits<coord_t>::max() ),
+      max( -std::numeric_limits<coord_t>::max() )
     { }
 
     // ---- Public members ----------
     /// Extent: minimum value in that dimension
-    CoordType min;
+    coord_t min;
     /// Extent: maximum value in that dimension
-    CoordType max;
+    coord_t max;
   };
 
 

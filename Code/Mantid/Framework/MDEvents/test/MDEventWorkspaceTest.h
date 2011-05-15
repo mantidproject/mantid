@@ -246,7 +246,7 @@ public:
       for (double y=0; y<len; y++)
         for (double z=0; z<len; z++)
         {
-          CoordType centers[3] = {x+0.5,y+0.5,z+0.5};
+          coord_t centers[3] = {x+0.5,y+0.5,z+0.5};
           ws->addEvent( MDEvent<3>(1.0, 2.0, centers) );
         }
 
@@ -325,7 +325,7 @@ public:
     TS_ASSERT_EQUALS( ws->getNPoints(), 1000);
 
     // The sphere transformation
-    CoordType center[3] = {0,0,0};
+    coord_t center[3] = {0,0,0};
     bool dimensionsUsed[3] = {true,true,true};
     CoordTransformDistance sphere(3, center, dimensionsUsed);
 
