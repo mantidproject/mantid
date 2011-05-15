@@ -43,7 +43,7 @@ namespace Mantid
                 sqwConvolution(points[i],fgSignal,fgError);
             }
             // Return mean
-            return fgSignal/points.size();
+            return fgSignal/double(points.size());
         }
         /*
         // simple test interface for fg model - will need vector of parameters
