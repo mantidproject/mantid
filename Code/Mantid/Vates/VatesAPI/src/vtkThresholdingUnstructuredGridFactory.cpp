@@ -10,8 +10,39 @@ namespace VATES
 
   template<typename TimeMapper>
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const std::string& scalarName, const double timestep, double minThreshold, double maxThreshold) :
-  m_timestep(timestep), m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
+  m_timestep(timestep), m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold) 
   {
+  }
+
+    /**
+  Assigment operator
+  @param other : vtkThresholdingHexahedronFactory to assign to this instance from.
+  @return ref to assigned current instance.
+  */
+  template<typename TimeMapper>
+  vtkThresholdingUnstructuredGridFactory<TimeMapper>& vtkThresholdingUnstructuredGridFactory<TimeMapper>::operator=(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
+  {
+    if(this != &other)
+    {
+      this->m_scalarName = other.m_scalarName;
+      this->m_minThreshold = other.m_minThreshold;
+      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_workspace = other.m_workspace;
+      this->m_timestep = other.m_timestep;
+      this->m_timeMapper = other.m_timeMapper;
+    }
+    return *this;
+  }
+
+  /**
+  Copy Constructor
+  @param other : instance to copy from.
+  */
+  template<typename TimeMapper>
+  vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
+    : m_timestep(other.m_timestep), m_timeMapper(other.m_timeMapper), m_scalarName( other.m_scalarName), m_minThreshold(other.m_minThreshold), m_maxThreshold(other.m_maxThreshold), m_workspace(other.m_workspace)
+  {
+
   }
 
 

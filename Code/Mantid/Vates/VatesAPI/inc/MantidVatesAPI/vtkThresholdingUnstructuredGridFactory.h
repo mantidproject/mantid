@@ -49,6 +49,12 @@ public:
   vtkThresholdingUnstructuredGridFactory(const std::string& scalarname,
       const double timestep, double minThreshold = -10000, double maxThreshold = 10000);
 
+  /// Assignment operator
+  vtkThresholdingUnstructuredGridFactory& operator=(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other);
+
+  /// Copy constructor.
+  vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other);
+
   /// Destructor
   ~vtkThresholdingUnstructuredGridFactory();
 
@@ -85,22 +91,22 @@ private:
   Mantid::API::IMDWorkspace_sptr m_workspace;
 
   /// timestep obtained from framework.
-  const double m_timestep;
+  double m_timestep;
 
   /// Create a hexahedron.
   inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
 
   /// Name of the scalar to provide on mesh.
-  const std::string m_scalarName;
+  std::string m_scalarName;
 
   /// Time mapper.
   TimeMapper m_timeMapper;
 
   /// Threshold for signal value. below which, we do not provide unstructured topologies for.
-  const double m_minThreshold;
+  double m_minThreshold;
 
   /// Threshold for signal value, above which, we do not provide unstructured topologies for.
-  const double m_maxThreshold;
+  double m_maxThreshold;
 
 };
 

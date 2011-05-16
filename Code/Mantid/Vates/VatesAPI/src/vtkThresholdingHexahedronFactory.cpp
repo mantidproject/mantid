@@ -3,12 +3,41 @@
 
 namespace Mantid
 {
-namespace VATES
+namespace VATES 
 {
 
   vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const std::string& scalarName, double minThreshold, double maxThreshold) :
   m_scalarName(scalarName), m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
   {
+  }
+
+  /**
+  Assigment operator
+  @param other : vtkThresholdingHexahedronFactory to assign to this instance from.
+  @return ref to assigned current instance.
+  */
+  vtkThresholdingHexahedronFactory& vtkThresholdingHexahedronFactory::operator=(const vtkThresholdingHexahedronFactory& other)
+  {
+    if(this != &other)
+    {
+      this->m_scalarName = other.m_scalarName;
+      this->m_minThreshold = other.m_minThreshold;
+      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_workspace = other.m_workspace;
+    }
+    return *this;
+  }
+
+  /**
+  Copy Constructor
+  @param other : instance to copy from.
+  */
+  vtkThresholdingHexahedronFactory::vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other)
+  {
+   this->m_scalarName = other.m_scalarName;
+   this->m_minThreshold = other.m_minThreshold;
+   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_workspace = other.m_workspace;
   }
 
   void vtkThresholdingHexahedronFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)

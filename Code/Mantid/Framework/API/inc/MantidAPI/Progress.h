@@ -53,6 +53,7 @@ public:
 private:
   /// Owning algorithm
   Algorithm* const m_alg;
+  Progress& operator=(const Progress&);
 
 };
 

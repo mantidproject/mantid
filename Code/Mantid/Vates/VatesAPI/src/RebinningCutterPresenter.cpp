@@ -59,19 +59,6 @@ using namespace Mantid::MDDataObjects;
 using namespace Mantid::Geometry;
 using namespace Mantid::API;
 
-struct findID : public std::unary_function <IMDDimension, bool>
-{
-  const std::string m_id;
-  findID(const std::string id) :
-    m_id(id)
-  {
-  }
-  bool operator ()(const boost::shared_ptr<IMDDimension> obj) const
-  {
-    return m_id == obj->getDimensionId();
-  }
-};
-
 RebinningCutterPresenter::RebinningCutterPresenter() : m_initalized(false), m_serializer()
 {
 }

@@ -29,6 +29,7 @@ namespace Mantid
       {
         return m_id == obj->getDimensionId();
       }
+      findID& operator=(const  findID&);
     };
 
      /**

@@ -45,7 +45,7 @@ class EXPORT_OPT_MANTID_MDDATAOBJECTS MDWorkspaceIndexCalculator
 private:
 
   /// Stores the number of dimensions == m_dimSizes.size()
-  const unsigned int m_nDimensions;
+  unsigned int m_nDimensions;
 
   /// Stores maximum size in each dimension.
   std::vector<unsigned int> m_dimSizes;
@@ -93,6 +93,11 @@ public:
   /// Get number of dimensions
   size_t getNDimensions()const{return m_nDimensions;}
 
+  /// Assignment operator
+  MDWorkspaceIndexCalculator&  operator=(const MDWorkspaceIndexCalculator&);
+
+  /// Copy constructor
+  MDWorkspaceIndexCalculator(const MDWorkspaceIndexCalculator&);
 
 };
 

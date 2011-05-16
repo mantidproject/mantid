@@ -2,7 +2,7 @@
 #include "vtkCellArray.h"
 #include "vtkCellData.h"
 #include "vtkFloatArray.h"
-#include "vtkSmartPointer.h"
+#include "vtkSmartPointer.h" 
 #include "vtkQuad.h"
 #include "MantidGeometry/MDGeometry/Coordinate.h"
 #include "MDDataObjects/MDIndexCalculator.h"
@@ -19,6 +19,35 @@ namespace Mantid
       m_minThreshold(minThreshold), m_maxThreshold(maxThreshold)
     {
     }
+
+          /**
+  Assigment operator
+  @param other : vtkThresholdingQuadFactory to assign to this instance from.
+  @return ref to assigned current instance.
+  */
+  vtkThresholdingQuadFactory& vtkThresholdingQuadFactory::operator=(const vtkThresholdingQuadFactory& other)
+  {
+    if(this != &other)
+    {
+      this->m_scalarName = other.m_scalarName;
+      this->m_minThreshold = other.m_minThreshold;
+      this->m_maxThreshold = other.m_maxThreshold;
+      this->m_workspace = other.m_workspace;
+    }
+    return *this;
+  }
+
+  /**
+  Copy Constructor
+  @param other : instance to copy from.
+  */
+  vtkThresholdingQuadFactory::vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other)
+  {
+   this->m_scalarName = other.m_scalarName;
+   this->m_minThreshold = other.m_minThreshold;
+   this->m_maxThreshold = other.m_maxThreshold;
+   this->m_workspace = other.m_workspace;
+  }
 
     vtkDataSet* vtkThresholdingQuadFactory::create() const
     {

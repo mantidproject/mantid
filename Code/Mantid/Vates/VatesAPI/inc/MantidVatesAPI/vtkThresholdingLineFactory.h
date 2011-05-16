@@ -43,6 +43,12 @@ namespace Mantid
       /// Constructor
       vtkThresholdingLineFactory(const std::string& scalarName, double minThreshold = -10000, double maxThreshold  = -10000);
 
+      /// Assignment operator
+      vtkThresholdingLineFactory& operator=(const vtkThresholdingLineFactory& other);
+
+      /// Copy constructor.
+      vtkThresholdingLineFactory(const vtkThresholdingLineFactory& other);
+
       /// Destructor
       virtual ~vtkThresholdingLineFactory();
 

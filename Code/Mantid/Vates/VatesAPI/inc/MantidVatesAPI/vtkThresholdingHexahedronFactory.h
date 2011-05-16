@@ -47,6 +47,12 @@ public:
   /// Constructor
   vtkThresholdingHexahedronFactory(const std::string& scalarname, double minThreshold = -10000, double maxThreshold = 10000);
 
+  /// Assignment operator
+  vtkThresholdingHexahedronFactory& operator=(const vtkThresholdingHexahedronFactory& other);
+
+  /// Copy constructor.
+  vtkThresholdingHexahedronFactory(const vtkThresholdingHexahedronFactory& other);
+
   /// Destructor
   ~vtkThresholdingHexahedronFactory();
 
@@ -88,13 +94,13 @@ private:
   inline vtkHexahedron* createHexahedron(PointMap& pointMap, const int& i, const int& j, const int& k) const;
 
   /// Name of the scalar to provide on mesh.
-  const std::string m_scalarName;
+  std::string m_scalarName;
 
   /// Threshold for signal value. below which, we do not provide unstructured topologies for.
-  const double m_minThreshold;
+  double m_minThreshold;
 
   /// Threshold for signal value, above which, we do not provide unstructured topologies for.
-  const double m_maxThreshold;
+  double m_maxThreshold;
 
 };
 

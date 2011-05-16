@@ -44,6 +44,12 @@ however, some visualisation frameworks won't be able to treat these factories in
       /// Constructor
       vtkThresholdingQuadFactory(const std::string& scalarName, double minThreshold = -10000, double maxThreshold  = -10000);
 
+      /// Assignment operator
+      vtkThresholdingQuadFactory& operator=(const vtkThresholdingQuadFactory& other);
+
+      /// Copy constructor.
+      vtkThresholdingQuadFactory(const vtkThresholdingQuadFactory& other);
+
       /// Destructor
       virtual ~vtkThresholdingQuadFactory();
 

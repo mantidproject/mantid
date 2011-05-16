@@ -69,6 +69,13 @@ public:
   }
 
 private:
+
+  /// Disabled copy constructor.
+  vtkClipperDataSetFactory(const vtkClipperDataSetFactory&);
+
+  /// Disabled assignment operator.
+  vtkClipperDataSetFactory& operator=(const vtkClipperDataSetFactory&);
+
   /// Function describing clipping.
   boost::shared_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;
 

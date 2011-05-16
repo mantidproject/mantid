@@ -27,6 +27,34 @@ MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(unsigned int nDimensions,
   setDimensionSize(3,size4);
 }
 
+/**
+  * Assigment operator.
+  * @param other :: other calculator rhs.
+  */
+MDWorkspaceIndexCalculator&  MDWorkspaceIndexCalculator::operator=(const MDWorkspaceIndexCalculator& other)
+{
+  if(this != &other)
+  {
+    m_nDimensions = other.m_nDimensions;
+    m_coeffs = other.m_coeffs;
+    m_isSetup = other.m_isSetup;
+    m_dimSizes = other.m_dimSizes;
+  }
+  return *this;
+}
+
+/**
+  * Copy constructor.
+  * @param other :: other calculator rhs.
+  */
+MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(const MDWorkspaceIndexCalculator& other):
+  m_nDimensions(other.m_nDimensions),
+  m_coeffs(other.m_coeffs),
+  m_isSetup(other.m_isSetup),
+  m_dimSizes(other.m_dimSizes)
+{
+}
+
 std::vector<int> MDWorkspaceIndexCalculator::cacluateCoefficients() const
 {
   std::vector<int> coeffs(m_nDimensions);
