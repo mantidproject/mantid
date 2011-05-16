@@ -170,7 +170,7 @@ std::vector<double> MultiDimensionalDbPresenter::getTimesteps() const
   using namespace Mantid::Geometry;
   verifyExecution();
   boost::shared_ptr<const IMDDimension> tDimension = m_workspace->getTDimension();
-  const double increment = (tDimension->getMaximum() - tDimension->getMinimum())/tDimension->getNBins();
+  const double increment = (tDimension->getMaximum() - tDimension->getMinimum())/ static_cast<double>(tDimension->getNBins());
   std::vector<double> times(tDimension->getNBins());
   for(unsigned int i=0; i < tDimension->getNBins(); i++)
   {
