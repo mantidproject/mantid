@@ -52,7 +52,7 @@ void ConvertToMatrixWorkspace::exec()
 
     // ...but not the data, so do that here.
     PARALLEL_FOR2(inputWorkspace,outputWorkspace)
-    for (size_t i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < (int64_t)numHists; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 	  
