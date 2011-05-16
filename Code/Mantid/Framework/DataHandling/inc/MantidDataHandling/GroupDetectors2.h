@@ -158,9 +158,9 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
     /// Signals end of element
     void endElement(const Poco::XML::XMLString&, const Poco::XML::XMLString& localName, const Poco::XML::XMLString&);
     /// Used to return information to the GroupDetectors algorithm
-    void getItems(storage_map & map, std::vector<size_t> & unused);
+    void getItems(storage_map & map, std::vector<int64_t> & unused);
     /// Provides some information that is needed for the process to work
-    void setMaps(spec2index_map spec, detid2index_map * det, std::vector<size_t> & unused);
+    void setMaps(spec2index_map spec, detid2index_map * det, std::vector<int64_t> & unused);
 
     // These functions must be present as they are abstract in the base class. They are not used them here.
     void setDocumentLocator(const Poco::XML::Locator*) {} ///< Not used
@@ -188,7 +188,7 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
     /// map of detector id to workspace index
     detid2index_map * m_detidTOwi;
     /// vector where value represent whether the workspace index corresponding to that position in the vector has been used
-    std::vector<size_t> m_unused;
+    std::vector<int64_t> m_unused;
   };
 
   /// An estimate of the percentage of the algorithm runtimes that has been completed 
@@ -202,21 +202,21 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
   void exec();
   
   /// read in the input parameters and see what findout what will be to grouped
-  void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<size_t> &unUsedSpec);
+  void getGroups(API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec);
   /// gets the list of spectra _index_ _numbers_ from a file of _spectra_ _numbers_ 
   void processFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
-                                                std::vector<size_t> &unUsedSpec);
+                                                std::vector<int64_t> &unUsedSpec);
   /// gets groupings from XML file 
   void processXMLFile(std::string fname,  API::MatrixWorkspace_const_sptr workspace,
-                                                std::vector<size_t> &unUsedSpec);
+                                                std::vector<int64_t> &unUsedSpec);
   /// used while reading the file turns the string into an integer number (if possible), white space and # comments ignored
   int readInt(std::string line);
 
-  void readFile(spec2index_map &specs2index, std::ifstream &File, size_t &lineNum, std::vector<size_t> &unUsedSpec);
+  void readFile(spec2index_map &specs2index, std::ifstream &File, size_t &lineNum, std::vector<int64_t> &unUsedSpec);
 
   /// used while reading the file reads reads spectra numbers from the string and returns spectra indexes 
   void readSpectraIndexes(std::string line, spec2index_map &specs2index,
-                   std::vector<size_t> &output, std::vector<size_t> &unUsedSpec, std::string seperator="#");
+                   std::vector<size_t> &output, std::vector<int64_t> &unUsedSpec, std::string seperator="#");
 
   /// Estimate how much what has been read from the input file constitutes progress for the algorithm
   double fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists);
@@ -225,8 +225,7 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
   int formGroups(API::MatrixWorkspace_const_sptr inputWS,
                  API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
-  void moveOthers(const std::set<size_t> &unGroupedSet,
-    API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS,int64_t outIndex);
+  void moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int64_t outIndex);
 
   /// flag values
   enum {

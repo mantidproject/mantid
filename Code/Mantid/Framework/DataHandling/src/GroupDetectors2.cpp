@@ -101,8 +101,9 @@ void GroupDetectors2::exec()
   progress( m_FracCompl = CHECKBINS );
   interruption_point();
 
-  // There may be alot of spectra so listing the the ones that aren't grouped could be a big deal
-  std::vector<size_t> unGroupedInds;
+  // some values loaded into this vector can be negative so this needs to be a signed type
+  std::vector<int64_t> unGroupedInds;
+  //the ungrouped list could be very big but might be none at all
   unGroupedInds.reserve(numInHists);
   for( size_t i = 0; i < numInHists ; i++ )
   {
@@ -113,7 +114,7 @@ void GroupDetectors2::exec()
   getGroups(inputWS, unGroupedInds);
 
   // converting the list into a set gets rid of repeated values, here the multiple GroupDetectors2::USED become one USED at the start
-  const std::set<size_t> unGroupedSet(unGroupedInds.begin(), unGroupedInds.end());
+  const std::set<int64_t> unGroupedSet(unGroupedInds.begin(), unGroupedInds.end());
 
   // Check what the user asked to be done with ungrouped spectra
   const bool keepAll = getProperty("KeepUngroupedSpectra");
@@ -148,7 +149,7 @@ void GroupDetectors2::exec()
 *  @param unUsedSpec :: spectra indexes that are not members of any group
 */
 void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
-                       std::vector<size_t> &unUsedSpec)
+                       std::vector<int64_t> &unUsedSpec)
 {
   // this is the map that we are going to fill
   m_GroupSpecInds.clear();
@@ -241,7 +242,7 @@ void GroupDetectors2::getGroups(API::MatrixWorkspace_const_sptr workspace,
 *  @throw FileError if there's any problem with the file or its format
 */
 void GroupDetectors2::processFile(std::string fname,
-  API::MatrixWorkspace_const_sptr workspace, std::vector<size_t> &unUsedSpec)
+  API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec)
 {
   // tring to open the file the user told us exists, skip down 20 lines to find out what happens if we can read from it
   g_log.debug() << "Opening input file ... " << fname;
@@ -326,7 +327,7 @@ void GroupDetectors2::processFile(std::string fname,
 *  @throw FileError if there's any problem with the file or its format
 */
 void GroupDetectors2::processXMLFile(std::string fname,
-  API::MatrixWorkspace_const_sptr workspace, std::vector<size_t> &unUsedSpec)
+  API::MatrixWorkspace_const_sptr workspace, std::vector<int64_t> &unUsedSpec)
 {
   spec2index_map specs2index;
   const SpectraAxis* axis = dynamic_cast<const SpectraAxis*>(workspace->getAxis(1));
@@ -408,7 +409,7 @@ int GroupDetectors2::readInt(std::string line)
 * @param unUsedSpec :: list of spectra that haven't yet been included in a group
 * @throw invalid_argument if there is any problem with the file
 */
-void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File, size_t &lineNum, std::vector<size_t> &unUsedSpec)
+void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File, size_t &lineNum, std::vector<int64_t> &unUsedSpec)
 {
   // used in writing the spectra to the outData map
   int arbitaryMapKey = 0;
@@ -469,7 +470,7 @@ void GroupDetectors2::readFile(spec2index_map &specs2index, std::ifstream &File,
 *  @throw invalid_argument when a number couldn't be found or the number is not in the spectra map
 */
 void GroupDetectors2::readSpectraIndexes(std::string line, spec2index_map &specs2index,
-    std::vector<size_t> &output, std::vector<size_t> &unUsedSpec, std::string seperator)
+    std::vector<size_t> &output, std::vector<int64_t> &unUsedSpec, std::string seperator)
 {
   // remove comments and white space
   Poco::StringTokenizer dataComment(line, seperator, IGNORE_SPACES);
@@ -635,7 +636,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
 */
-void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int64_t outIndex)
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int64_t outIndex)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = (1. - 1.*static_cast<double>(m_FracCompl))/static_cast<double>(unGroupedSet.size());
@@ -644,11 +645,12 @@ void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::Matr
   API::SpectraDetectorMap &specDetecMap = outputWS->mutableSpectraMap();
   const API::SpectraDetectorMap &inputSpecDetecMap = inputWS->spectraMap();
 
-  std::set<size_t>::const_iterator copyFrIt = unGroupedSet.begin();
+  std::set<int64_t>::const_iterator copyFrIt = unGroupedSet.begin();
   // go thorugh all the spectra in the input workspace
   for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
   {
-    size_t sourceIndex = *copyFrIt;
+    //this needs to be signed because
+    int64_t sourceIndex = *copyFrIt;
     if( sourceIndex == USED ) continue; //Marked as not to be used
 
     outputWS->dataX(outIndex) = inputWS->readX(sourceIndex);
@@ -797,7 +799,7 @@ void GroupDetectors2::GroupXmlReader::endElement(const Poco::XML::XMLString&, co
 * @param map mapping of groups
 * @param unused vector where value represent whether the workspace index corresponding to that position in the vector has been used
 */
-void GroupDetectors2::GroupXmlReader::getItems(storage_map & map, std::vector<size_t> & unused)
+void GroupDetectors2::GroupXmlReader::getItems(storage_map & map, std::vector<int64_t> & unused)
 {
   map = m_groups;
   unused = m_unused;
@@ -808,7 +810,7 @@ void GroupDetectors2::GroupXmlReader::getItems(storage_map & map, std::vector<si
 * @param det map of detector id to workspace index
 * @param unused vector where value represent whether the workspace index corresponding to that position in the vector has been used
 */
-void GroupDetectors2::GroupXmlReader::setMaps(spec2index_map spec, detid2index_map * det, std::vector<size_t> & unused)
+void GroupDetectors2::GroupXmlReader::setMaps(spec2index_map spec, detid2index_map * det, std::vector<int64_t> & unused)
 {
   m_specnTOwi = spec;
   m_detidTOwi = det;
