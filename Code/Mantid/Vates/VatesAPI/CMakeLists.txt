@@ -122,6 +122,7 @@ vtkFiltering
 # Create test file projects
 if ( CXXTEST_FOUND AND GMOCK_FOUND AND GTEST_FOUND )
   cxxtest_add_test ( VatesAPITest ${TEST_FILES} )
-  target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} )
+  target_link_libraries( VatesAPITest VatesAPI ${GMOCK_LIBRARIES} 
+      ${GTEST_LIBRARIES})
   add_dependencies ( FrameworkTests VatesAPITest )
 endif ()
