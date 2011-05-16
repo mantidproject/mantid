@@ -37,9 +37,9 @@ void HRPDSlabCanAbsorption::init()
   declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
     "The number density of the sample in number per cubic angstrom");
 
-  BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
+  BoundedValidator<int64_t> *positiveInt = new BoundedValidator<int64_t> ();
   positiveInt->setLower(1);
-  declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
+  declareProperty("NumberOfWavelengthPoints", int64_t(EMPTY_INT()), positiveInt,
     "The number of wavelength points for which the numerical integral is\n"
     "calculated (default: all points)");
 
@@ -92,12 +92,12 @@ void HRPDSlabCanAbsorption::exec()
   const double vanScat = -5.1 * vanRho;
 
 
-  const int numHists = workspace->getNumberHistograms();
-  const int specSize = workspace->blocksize();
+  const size_t numHists = workspace->getNumberHistograms();
+  const size_t specSize = workspace->blocksize();
   const bool isHist = workspace->isHistogramData();
   //
   Progress progress(this,0.91,1.0,numHists);
-  for (int i = 0; i < numHists; ++i)
+  for (size_t i = 0; i < numHists; ++i)
   {
     const MantidVec& X = workspace->readX(i);
     MantidVec& Y = workspace->dataY(i);
@@ -133,7 +133,7 @@ void HRPDSlabCanAbsorption::exec()
       angleFactor = 1.0 / std::abs(cos(theta));
     }
     
-    for (int j = 0; j < specSize; ++j)
+    for (size_t j = 0; j < specSize; ++j)
     {
       const double lambda = (isHist ? (0.5 * (X[j] + X[j+1])) : X[j]);
 
@@ -167,7 +167,7 @@ API::MatrixWorkspace_sptr HRPDSlabCanAbsorption::runFlatPlateAbsorption()
   childAlg->setProperty<double>("AttenuationXSection", getProperty("SampleAttenuationXSection"));
   childAlg->setProperty<double>("ScatteringXSection", getProperty("SampleScatteringXSection"));
   childAlg->setProperty<double>("SampleNumberDensity", getProperty("SampleNumberDensity"));
-  childAlg->setProperty<int>("NumberOfWavelengthPoints", getProperty("NumberOfWavelengthPoints"));
+  childAlg->setProperty<int64_t>("NumberOfWavelengthPoints", getProperty("NumberOfWavelengthPoints"));
   childAlg->setProperty<std::string>("ExpMethod", getProperty("ExpMethod"));
   // The height and width of the sample holder are standard for HRPD
   const double HRPDCanHeight = 2.3;

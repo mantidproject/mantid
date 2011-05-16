@@ -45,9 +45,9 @@ void AbsorptionCorrection::init()
   declareProperty("SampleNumberDensity", -1.0, mustBePositive->clone(),
     "The number density of the sample in number per cubic angstrom");
 
-  BoundedValidator<int> *positiveInt = new BoundedValidator<int> ();
+  BoundedValidator<int64_t> *positiveInt = new BoundedValidator<int64_t> ();
   positiveInt->setLower(1);
-  declareProperty("NumberOfWavelengthPoints", EMPTY_INT(), positiveInt,
+  declareProperty("NumberOfWavelengthPoints", static_cast<int64_t>(EMPTY_INT()), positiveInt,
     "The number of wavelength points for which the numerical integral is\n"
     "calculated (default: all points)");
 
