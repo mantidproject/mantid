@@ -1,5 +1,6 @@
 set ( SRC_FILES
 	src/Crystal/OrientedLattice.cpp
+	src/Crystal/ReflectionCondition.cpp
 	src/Crystal/UnitCell.cpp
 	src/IDetector.cpp
 	src/IInstrument.cpp
@@ -36,7 +37,7 @@ set ( SRC_FILES
 	src/Math/Algebra.cpp
 	src/Math/BnId.cpp
 	src/Math/Matrix.cpp
-    src/Math/PolyBase.cpp
+	src/Math/PolyBase.cpp
 	src/Math/RotCounter.cpp
 	src/Math/Triple.cpp
 	src/Math/mathSupport.cpp
@@ -80,6 +81,7 @@ set ( SRC_UNITY_IGNORE_FILES src/Instrument/CompAssembly.cpp
         
 set ( INC_FILES
 	inc/MantidGeometry/Crystal/OrientedLattice.h
+	inc/MantidGeometry/Crystal/ReflectionCondition.h
 	inc/MantidGeometry/Crystal/UnitCell.h
 	inc/MantidGeometry/DllExport.h
 	inc/MantidGeometry/ICompAssembly.h
@@ -112,7 +114,7 @@ set ( INC_FILES
 	inc/MantidGeometry/MDGeometry/MDGeometry.h
 	inc/MantidGeometry/MDGeometry/MDGeometryBasis.h
 	inc/MantidGeometry/MDGeometry/MDGeometryDescription.h
-    inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
+	inc/MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h
 	inc/MantidGeometry/MDGeometry/MDHistoDimension.h
 	inc/MantidGeometry/MDGeometry/MDPoint.h
 	inc/MantidGeometry/MDGeometry/MDWorkspaceConstants.h
@@ -121,7 +123,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Math/BnId.h
 	inc/MantidGeometry/Math/MapSupport.h
 	inc/MantidGeometry/Math/Matrix.h
-    inc/MantidGeometry/Math/PolyBase.h
+	inc/MantidGeometry/Math/PolyBase.h
 	inc/MantidGeometry/Math/RotCounter.h
 	inc/MantidGeometry/Math/Triple.h
 	inc/MantidGeometry/Math/mathSupport.h
@@ -197,6 +199,7 @@ set ( TEST_FILES
 	test/PlaneTest.h
 	test/QuatTest.h
 	test/RectangularDetectorTest.h
+	test/ReflectionConditionTest.h
 	test/RotCounterTest.h
 	test/RulesBoolValueTest.h
 	test/RulesCompGrpTest.h

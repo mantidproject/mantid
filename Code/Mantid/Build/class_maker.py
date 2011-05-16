@@ -11,7 +11,7 @@ from cmakelists_utils import *
 
 
 #======================================================================
-def write_header(subproject, classname, filename, algorithm):
+def write_header(subproject, classname, filename, args):
     """Write a class header file"""
     print "Writing header file to %s" % filename
     f = open(filename, 'w')
@@ -40,7 +40,7 @@ def write_header(subproject, classname, filename, algorithm):
     alg_class_declare = " : public API::Algorithm"
     alg_include = """#include "MantidAPI/Algorithm.h" """
     
-    if not algorithm:
+    if not args.alg:
         algorithm_header = ""
         alg_class_declare = ""
         alg_include = ""
@@ -84,7 +84,7 @@ namespace %s
 
 
 #======================================================================
-def write_source(subproject, classname, filename, algorithm):
+def write_source(subproject, classname, filename, args):
     """Write a class source file"""
     print "Writing source file to %s" % filename
     f = open(filename, 'w')
@@ -125,12 +125,12 @@ def write_source(subproject, classname, filename, algorithm):
 
 """ % (classname, classname, classname)   
 
-    if not algorithm:
+    if not args.alg:
         algorithm_top = ""
         algorithm_source = ""
         
     
-    s = """#include "Mantid%s/%s.h"
+    s = """#include "Mantid%s/%s%s.h"
 #include "MantidKernel/System.h"
 
 namespace Mantid
@@ -160,14 +160,14 @@ namespace %s
 } // namespace Mantid
 } // namespace %s
 
-""" % (subproject, classname, subproject, algorithm_top, classname, classname, classname, classname, algorithm_source, subproject)
+""" % (subproject, args.subfolder, classname, subproject, algorithm_top, classname, classname, classname, classname, algorithm_source, subproject)
     f.write(s)
     f.close()
 
 
     
 #======================================================================
-def write_test(subproject, classname, filename, algorithm):
+def write_test(subproject, classname, filename, args):
     """Write a class test file"""
     print "Writing test file to %s" % filename
     f = open(filename, 'w')
@@ -208,7 +208,7 @@ def write_test(subproject, classname, filename, algorithm):
   }
   """ % (classname,classname,classname);
   
-    if not algorithm:
+    if not args.alg:
         algorithm_test = ""
   
     s = """#ifndef %s
@@ -220,7 +220,7 @@ def write_test(subproject, classname, filename, algorithm):
 #include <iostream>
 #include <iomanip>
 
-#include "Mantid%s/%s.h"
+#include "Mantid%s/%s%s.h"
 
 using namespace Mantid::%s;
 using namespace Mantid::API;
@@ -239,7 +239,7 @@ public:
 
 #endif /* %s */
 
-""" % (guard, guard, subproject, classname, subproject, classname, algorithm_test, guard)
+""" % (guard, guard, subproject, args.subfolder, classname, subproject, classname, algorithm_test, guard)
     f.write(s)
     f.close()
     
@@ -289,8 +289,8 @@ def generate(subproject, classname, overwrite, args):
     # Directory at base of subproject
     basedir = os.path.join(os.path.curdir, "Framework/" + subproject)
     
-    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + classname + ".h")
-    sourcefile = os.path.join(basedir, "src/" + classname + ".cpp")
+    headerfile = os.path.join(basedir, "inc/Mantid" + subproject + "/" + args.subfolder + classname + ".h")
+    sourcefile = os.path.join(basedir, "src/" + args.subfolder + classname + ".cpp")
     testfile = os.path.join(basedir, "test/" + classname + "Test.h")
     
     if args.header and not overwrite and os.path.exists(headerfile):
@@ -305,11 +305,11 @@ def generate(subproject, classname, overwrite, args):
       
     print
     if args.header:
-        write_header(subproject, classname, headerfile, args.alg)
+        write_header(subproject, classname, headerfile, args)
     if args.cpp:
-        write_source(subproject, classname, sourcefile, args.alg)
+        write_source(subproject, classname, sourcefile, args)
     if args.test:
-        write_test(subproject, classname, testfile, args.alg)
+        write_test(subproject, classname, testfile, args)
     
     # Insert into the cmake list
     add_to_cmake(subproject, classname, args)
@@ -346,10 +346,14 @@ if __name__ == "__main__":
     parser.add_argument('--alg', dest='alg', action='store_const',
                         const=True, default=False,
                         help='Create an Algorithm stub. This adds some methods common to algorithms.')
+    parser.add_argument('--subfolder', dest='subfolder', 
+                        default="",
+                        help='Put the source under a subfolder below the main part of the project, e.g. Geometry/Instrument.')
      
     args = parser.parse_args()
     subproject = args.subproject
     classname = args.classname
     overwrite = args.force
+    if args.subfolder != "": args.subfolder = args.subfolder + "/"
     
     generate(subproject, classname, overwrite, args)

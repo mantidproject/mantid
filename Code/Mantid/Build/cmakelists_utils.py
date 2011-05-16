@@ -104,9 +104,9 @@ def add_to_cmake(subproject, classname, args):
     source = open(cmake_path).read()
     lines = source.split("\n");
     if args.header:
-        lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + classname + ".h")
+        lines = redo_cmake_section(lines, "INC_FILES", "inc/Mantid" + subproject + "/" + args.subfolder + classname + ".h")
     if args.cpp:
-        lines = redo_cmake_section(lines, "SRC_FILES", "src/" + classname + ".cpp")
+        lines = redo_cmake_section(lines, "SRC_FILES", "src/" + args.subfolder + classname + ".cpp")
     if args.test:
         lines = redo_cmake_section(lines, "TEST_FILES", "test/" + classname + "Test.h")
     
