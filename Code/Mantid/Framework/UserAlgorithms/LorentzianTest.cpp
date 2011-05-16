@@ -36,7 +36,7 @@ void LorentzianTest::init()
 //               provided in the xValues array
 //     nData   - the number of data points where a function value
 //               must be calculated
-void LorentzianTest::functionLocal(double* out, const double* xValues, const int& nData)const
+void LorentzianTest::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");
@@ -57,7 +57,7 @@ void LorentzianTest::functionLocal(double* out, const double* xValues, const int
 //        calNumericalDeriv(out, xValues, nData);
 //      }
 // I.e. substitute the code below with the four lines of code above
-void LorentzianTest::functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
+void LorentzianTest::functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");
