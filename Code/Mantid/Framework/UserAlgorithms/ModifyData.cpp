@@ -49,9 +49,9 @@ void ModifyData::exec()
     {
         g_log.information() << "Option 1. Original values:" << std::endl;
         // Get the count of histograms in the input workspace
-        int histogramCount = inputW->getNumberHistograms();
+        size_t histogramCount = inputW->getNumberHistograms();
         // Loop over spectra
-        for (int i = 0; i < histogramCount; ++i)
+        for (size_t i = 0; i < histogramCount; ++i)
         {
             // Retrieve the data into a vector
             const MantidVec& XValues = inputW->readX(i);
@@ -62,7 +62,7 @@ void ModifyData::exec()
             MantidVec& newE = outputW->dataE(i);
 
             // Iterate over i-th spectrum and modify the data
-            for(int j=0;j<inputW->blocksize();j++)
+            for(size_t j=0; j<inputW->blocksize(); j++)
             {
                 g_log.information() << "Spectrum " << i << " Point " << j << " values: "
                     << XValues[j] << ' ' << YValues[j] << ' ' << EValues[j] << std::endl;
@@ -81,9 +81,9 @@ void ModifyData::exec()
         for(MatrixWorkspace::const_iterator ti(*inputW); ti != ti.end(); ++ti,++ti_out)
         {
             // get the spectrum number
-            int i = count / inputW->blocksize();
+            size_t i = count / inputW->blocksize();
             // get the point number
-            int j = count % inputW->blocksize();
+            size_t j = count % inputW->blocksize();
             // Get the reference to a data point
             LocatedDataRef tr = *ti;
             LocatedDataRef tr_out = *ti_out;
