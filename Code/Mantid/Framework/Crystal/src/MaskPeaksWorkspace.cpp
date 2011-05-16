@@ -118,7 +118,7 @@ namespace Mantid
             //Find the corresponding workspace index, if any
             if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
             {
-              int wi = (*pixel_to_wi)[pixelID];
+              size_t wi = (*pixel_to_wi)[pixelID];
               const MantidVec& X = inputW->readX(wi);
               eventW->getEventList(wi).maskTof(X[0],X[X.size()-1]);
             }
