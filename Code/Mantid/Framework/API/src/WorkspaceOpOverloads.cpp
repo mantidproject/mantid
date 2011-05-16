@@ -358,7 +358,7 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
   // If this results in infinity or NaN, then we can't tell - return false
   if ( commonSum == std::numeric_limits<double>::infinity() || commonSum != commonSum ) return false;
   const size_t numHist = WS->getNumberHistograms();
-  for (int j = 1; j < numHist; ++j)
+  for (size_t j = 1; j < numHist; ++j)
   {
     const double sum = std::accumulate(WS->readX(j).begin(),WS->readX(j).end(),0.);
     // If this results in infinity or NaN, then we can't tell - return false
@@ -397,12 +397,12 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 
   // If that didn't pass then explicitly check 1 in 10 of the vectors (min 10, max 100)
   const size_t numHist = ws1->getNumberHistograms();
-  int numberToCheck = numHist / 10;
+  size_t numberToCheck = numHist / 10;
   if (numberToCheck<10) numberToCheck = 10;
   if (numberToCheck>100) numberToCheck = 100;
-  int step = numHist / numberToCheck;
+  size_t step = numHist / numberToCheck;
   if (!step) step=1;
-  for (int i = step; i < numHist; i+=step)
+  for (size_t i = step; i < numHist; i+=step)
   {
     const double firstWS = std::accumulate(ws1->readX(i).begin(),ws1->readX(i).end(),0.);
     const double secondWS = std::accumulate(ws2->readX(i).begin(),ws2->readX(i).end(),0.);
@@ -417,7 +417,7 @@ bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS)
 {
   const double& first = WS->readX(0)[0];
   const size_t numHist = WS->getNumberHistograms();
-  for (int i = 1; i < numHist; ++i)
+  for (size_t i = 1; i < numHist; ++i)
   {
     if ( &first != &(WS->readX(i)[0]) ) return false;
   }
@@ -439,7 +439,7 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
 
   std::vector<double> widths(workspace->readX(0).size());
 
-  for (int i = 0; i < numberOfSpectra; ++i)
+  for (size_t i = 0; i < numberOfSpectra; ++i)
   {
 	  const MantidVec& X=workspace->readX(i);
 	  MantidVec& Y=workspace->dataY(i);
