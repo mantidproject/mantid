@@ -297,7 +297,7 @@ QString AlgorithmHistoryWindow::generateScript()
   std::vector<PropertyHistory>algHistProp;
   IAlgorithm_sptr  ialg_Sptr;
 	
-  typedef std::map<unsigned int,std::string> orderedHistMap;
+  typedef std::map<size_t,std::string> orderedHistMap;
   orderedHistMap ordMap;
 	
   //getting the properties from the algorithmhistory
@@ -307,7 +307,7 @@ QString AlgorithmHistoryWindow::generateScript()
     algHistProp=(*algHistIter).getProperties();
     const std::string algName=(*algHistIter).name();
     const int nVersion=(*algHistIter).version();
-    const int nexecCount=(*algHistIter).execCount();
+    size_t nexecCount=(*algHistIter).execCount();
     //creating an unmanaged instance of the selected algorithm
     //this is bcoz algorith history is giving dynamically generated workspaces for some 
     //algorithms like LoadRaw.But python script for LoadRaw has only one output workspace parameter
@@ -373,7 +373,7 @@ QString AlgorithmHistoryWindow::generateScript()
 
   }//end of algorithm history for loop
 
-  std::map<unsigned int,std::string>::iterator m3_pIter;
+  orderedHistMap::iterator m3_pIter;
   for (m3_pIter=ordMap.begin( );m3_pIter!=ordMap.end( );m3_pIter++)
   {
     QString qtemp=QString::fromStdString(m3_pIter->second);
