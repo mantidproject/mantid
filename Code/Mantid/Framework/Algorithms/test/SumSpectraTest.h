@@ -50,7 +50,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("StartWorkspaceIndex","1") );
     TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue("EndWorkspaceIndex","3") );
 
-    int nspecEntries(0);
+    size_t nspecEntries(0);
     const Mantid::API::SpectraDetectorMap & specMap_in = inputSpace->spectraMap();
     // Spectra at workspace index 1 is masked
     for( int i = 2; i < 4; ++i )
@@ -66,7 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_const_sptr output2D = boost::dynamic_pointer_cast<const Workspace2D>(output);
-    int max;
+    size_t max;
     TS_ASSERT_EQUALS( max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
 
@@ -77,7 +77,7 @@ public:
     TS_ASSERT_EQUALS( y.size(), 102 );
     TS_ASSERT_EQUALS( e.size(), 102 );
 
-    for (int i = 0; i < max; ++i)
+    for (size_t i = 0; i < max; ++i)
     {
       TS_ASSERT_EQUALS( x[i], inputSpace->readX(0)[i] );
       TS_ASSERT_EQUALS( y[i], inputSpace->readY(2)[i]+inputSpace->readY(3)[i] );
@@ -115,11 +115,11 @@ public:
     // Check setting of invalid property value causes failure
     TS_ASSERT_THROWS( alg2.setPropertyValue("StartWorkspaceIndex","-1"), std::invalid_argument) ;
 
-    int nspecEntries(0);
-    const int nHist(inputSpace->getNumberHistograms());
+    size_t nspecEntries(0);
+    const size_t nHist(inputSpace->getNumberHistograms());
     const SpectraDetectorMap & specMap_in = inputSpace->spectraMap();
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
-    for( int i = 1; i < nHist-2; ++i )
+    for( size_t i = 1; i < nHist-2; ++i )
     {
       nspecEntries += specMap_in.ndet(i);
     }

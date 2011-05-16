@@ -92,7 +92,7 @@ public:
       in_ws *= 2.0;
     if (type == WEIGHTED_NOTIME)
     {
-      for (int i =0; i<in_ws->getNumberHistograms(); i++)
+      for (size_t i =0; i<in_ws->getNumberHistograms(); i++)
       {
         EventList & el = in_ws->getEventList(i);
         el.compressEvents(0.0, &el);
@@ -102,14 +102,14 @@ public:
     // Register the workspace in the data service
 
     SmoothNeighbours alg;
-    TS_ASSERT_THROWS_NOTHING( alg.initialize() )
-    TS_ASSERT( alg.isInitialized() )
+    TS_ASSERT_THROWS_NOTHING( alg.initialize() );
+    TS_ASSERT( alg.isInitialized() );
     alg.setProperty("InputWorkspace", inputW);
     alg.setProperty("OutputWorkspace", "testEW");
     alg.setProperty("AdjX", 1);
     alg.setProperty("AdjY", 1);
-    TS_ASSERT_THROWS_NOTHING( alg.execute(); )
-    TS_ASSERT( alg.isExecuted() )
+    TS_ASSERT_THROWS_NOTHING( alg.execute(); );
+    TS_ASSERT( alg.isExecuted() );
 
     EventWorkspace_sptr ws;
     TS_ASSERT_THROWS_NOTHING(
