@@ -184,7 +184,8 @@ namespace Mantid
 
    /** Calls Fit as a child algorithm to fit the offset peak in a spectrum
     *  @param s :: The spectrum index to fit
-    *  @return The calculated offset value
+    *  @param[out] I :: integrated intensity returned
+    *  @param[out] sigI :: integrated intensity error returned
     */
     void PeakIntegration::fitSpectra(const int s, double& I, double& sigI)
     {

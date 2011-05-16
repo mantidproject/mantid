@@ -45,14 +45,13 @@ namespace MDEvents
 
     virtual const std::string id() const;
 
-    /** Returns the number of dimensions in this workspace */
+    /** @returns the number of dimensions in this workspace */
     virtual size_t getNumDims() const;
 
-    /** Returns the total number of points (events) in this workspace */
+    /** @returns the total number of points (events) in this workspace */
     virtual size_t getNPoints() const;
 
-    /** Returns the number of bytes of memory
-     * used by the workspace. */
+    /** @returns the number of bytes of memory used by the workspace. */
     virtual size_t getMemorySize() const;
 
     void setBoxController(BoxController_sptr controller);
@@ -71,11 +70,6 @@ namespace MDEvents
 
     void refreshCache();
 
-    /** Sample function returning (a copy of) the n-th event in the workspace.
-     * This may not be needed.
-     *  */
-    MDE getEvent(size_t n);
-
     void addEvent(const MDE & event);
 
     void addEvents(const std::vector<MDE> & events);
@@ -93,13 +87,13 @@ namespace MDEvents
       return (dynamic_cast<MDGridBox<MDE,nd> *>(data) != NULL);
     }
 
-    /** Returns a pointer to the box (MDBox or MDGridBox) contained within, */
+    /** @returns a pointer to the box (MDBox or MDGridBox) contained within, */
     IMDBox<MDE,nd> * getBox()
     {
       return data;
     }
 
-    /** Returns a pointer to the box (MDBox or MDGridBox) contained within, const version.  */
+    /** @returns a pointer to the box (MDBox or MDGridBox) contained within, const version.  */
     const IMDBox<MDE,nd> * getBox() const
     {
       return data;

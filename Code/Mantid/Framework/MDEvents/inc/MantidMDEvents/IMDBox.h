@@ -84,6 +84,7 @@ namespace MDEvents
 
     /** Perform centerpoint binning of events
      * @param bin :: MDBin object giving the limits of events to accept.
+     * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
      */
     virtual void centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const = 0;
 
@@ -114,7 +115,7 @@ namespace MDEvents
 
 
     // -------------------------------------------------------------------------------------------
-    /// Return the box controller saved.
+    /// @return the box controller saved.
     BoxController_sptr getBoxController() const
     { return m_BoxController; }
 
@@ -237,7 +238,8 @@ namespace MDEvents
     //-----------------------------------------------------------------------------------------------
     /** For testing, mostly: return the recursion depth of this box.
      * e.g. 1: means this box is in a MDGridBox, which is the top level.
-     *      2: this box's parent MDGridBox is itself a MDGridBox. */
+     *      2: this box's parent MDGridBox is itself a MDGridBox.
+     * @return split recursion depth*/
     size_t getDepth() const
     {
       return m_depth;

@@ -165,8 +165,7 @@ namespace MDEvents
   }
 
   //-----------------------------------------------------------------------------------------------
-  /** Returns the number of bytes of memory
-   * used by the workspace. */
+  /** @returns the number of bytes of memory used by the workspace. */
   TMDE(
   size_t MDEventWorkspace)::getMemorySize() const
   {

@@ -44,6 +44,7 @@ factory_top = """
 /** Create a MDEventWorkspace of the given type
 @param nd :: number of dimensions
 @param eventType :: string describing the event type (currently ignored) 
+@return shared pointer to the MDEventWorkspace created (as a IMDEventWorkspace).
 */
 API::IMDEventWorkspace_sptr MDEventFactory::CreateMDEventWorkspace(size_t nd, std::string eventType)
 {

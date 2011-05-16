@@ -74,6 +74,9 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
+  /** Integrate the peaks of the workspace using parameters saved in the algorithm class
+   * @param ws ::  MDEventWorkspace to integrate
+   */
   template<typename MDE, size_t nd>
   void MDEWPeakIntegration::integrate(typename MDEventWorkspace<MDE, nd>::sptr ws)
   {

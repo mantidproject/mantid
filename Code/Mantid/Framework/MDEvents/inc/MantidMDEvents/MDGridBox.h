@@ -142,6 +142,7 @@ namespace MDEvents
        * @param events :: Reference to the MD events that will be added
        * @param start_at :: Where to start in vector
        * @param stop_at :: Where to stop in vector
+       * @param prog :: ProgressReporting
        * @return
        */
       AddEventsTask(MDGridBox<MDE, nd> * box, const std::vector<MDE> & events,

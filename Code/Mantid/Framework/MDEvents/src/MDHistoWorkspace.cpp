@@ -105,7 +105,7 @@ namespace MDEvents
   }
 
   //----------------------------------------------------------------------------------------------
-  /// Return a vector containing a copy of the signal data in the workspace.
+  /// @return a vector containing a copy of the signal data in the workspace.
   std::vector<double> MDHistoWorkspace::getSignalDataVector() const
   {
     // TODO: Make this more efficient if needed.
@@ -117,7 +117,7 @@ namespace MDEvents
     return out;
   }
 
-  /// Return a vector containing a copy of the error data in the workspace.
+  /// @return a vector containing a copy of the error data in the workspace.
   std::vector<double> MDHistoWorkspace::getErrorDataVector() const
   {
     // TODO: Make this more efficient if needed.
@@ -131,6 +131,7 @@ namespace MDEvents
 
 
   //---------------------------------------------------------------------------------------------------
+  /** @return a XML representation of the geometry of the workspace */
   std::string MDHistoWorkspace::getGeometryXML() const
   {
     using Mantid::Geometry::MDGeometryBuilderXML;

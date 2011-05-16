@@ -16,6 +16,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** ctor
    * @param controller :: BoxController that controls how boxes split
+   * @param depth :: splitting depth of the new box.
    */
   TMDE(MDBox)::MDBox(BoxController_sptr controller, const size_t depth)
   {
@@ -123,6 +124,8 @@ namespace MDEvents
   /** Add several events. No bounds checking is made!
    *
    * @param events :: vector of events to be copied.
+   * @param start_at :: index to start at in vector
+   * @param stop_at :: index to stop at in vector (exclusive)
    * @return the number of events that were rejected (because of being out of bounds)
    */
   TMDE(
@@ -148,6 +151,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.
    * @param bin :: MDBin object giving the limits of events to accept.
+   * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
    */
   TMDE(
   void MDBox)::centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const

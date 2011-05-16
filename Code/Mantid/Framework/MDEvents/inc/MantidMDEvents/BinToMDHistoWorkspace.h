@@ -48,8 +48,11 @@ namespace MDEvents
 
     /// Arguments passed to do_centerpointBin()
     std::vector<Mantid::Geometry::MDHistoDimension_sptr> dimensions;
+    /// The output MDHistoWorkspace
     Mantid::API::IMDWorkspace_sptr out;
+    /// Progress reporting
     Mantid::API::Progress * prog;
+    /// ImplicitFunction used
     Mantid::API::ImplicitFunction * implicitFunc;
 
 

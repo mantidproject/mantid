@@ -82,6 +82,7 @@ namespace MDEvents
   /** Initialize the left/right boxes using the
    * dimSplit and splitPoint values saved before.
    * Private method used by constructor(s)
+   * @param box :: incoming box to use as dimensions to split.
    */
   TMDE(
   void MDSplitBox)::initBoxes(IMDBox<MDE, nd> * box)
@@ -337,6 +338,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning on the boxes contained.
    * @param bin :: MDBin object giving the rectangular bound in which to integrate.
+   * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
    */
   TMDE(
   void MDSplitBox)::centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const

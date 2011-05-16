@@ -378,6 +378,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Perform centerpoint binning of events.
    * @param bin :: MDBin object giving the limits of events to accept.
+   * @param fullyContained :: optional bool array sized [nd] of which dimensions are known to be fully contained (for MDSplitBox)
    */
   TMDE(
   void MDGridBox)::centerpointBin(MDBin<MDE,nd> & bin, bool * fullyContained) const

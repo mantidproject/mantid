@@ -122,9 +122,7 @@ namespace MDEvents
 
     //---------------------------------------------------------------------------------------------
     /** Copy constructor
-     *
      * @param rhs :: mdevent to copy
-     * @param errorSquared :: errorSquared
      * */
     MDEvent(const MDEvent &rhs) :
       signal(rhs.signal), errorSquared(rhs.errorSquared)
@@ -135,7 +133,7 @@ namespace MDEvents
 
 
     //---------------------------------------------------------------------------------------------
-    /** Returns the n-th coordinate axis value.
+    /** @return the n-th coordinate axis value.
      * @param n :: index (0-based) of the dimension you want.
      * */
     coord_t getCenter(const size_t n) const
@@ -201,6 +199,7 @@ namespace MDEvents
     /** Returns the error (not squared) of this event.
      *
      * Performance note: This calls sqrt(), which is a slow function. Use getErrorSquared() if possible.
+     * @return the error (not squared) of this event.
      * */
     float getError() const
     {

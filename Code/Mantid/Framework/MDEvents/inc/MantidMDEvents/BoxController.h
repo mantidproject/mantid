@@ -85,8 +85,8 @@ namespace MDEvents
       return m_BinarySplit;
     }
 
-    /** Set the splitting threshold
-     * @param threshold :: # of points at which the MDBox splits
+    /** Set whether the splitter will split in a binary way, using MDSplitBox'es
+     * @param BinarySplit :: true to do binary splitting
      */
     void setBinarySplit(bool BinarySplit)
     {
@@ -141,27 +141,34 @@ namespace MDEvents
     }
 
     //-----------------------------------------------------------------------------------
-    /// Getters/setters
+    /** When adding events, how many events per task should be done?
+     *
+     * @param m_addingEvents_eventsPerTask :: events per task
+     */
+    void setAddingEvents_eventsPerTask(size_t m_addingEvents_eventsPerTask)
+    {
+      this->m_addingEvents_eventsPerTask = m_addingEvents_eventsPerTask;
+    }
+    /// @return When adding events, how many events per task should be done?
     size_t getAddingEvents_eventsPerTask() const
     {
       return m_addingEvents_eventsPerTask;
     }
 
-    void setAddingEvents_eventsPerTask(size_t m_addingEvents_eventsPerTask)
-    {
-      this->m_addingEvents_eventsPerTask = m_addingEvents_eventsPerTask;
-    }
-
+    /** When adding events, how many events tasks per block should be done?
+     *
+     * @param m_addingEvents_numTasksPerBlock :: tasks/block
+     */
     void setAddingEvents_numTasksPerBlock(size_t m_addingEvents_numTasksPerBlock)
     {
       this->m_addingEvents_numTasksPerBlock = m_addingEvents_numTasksPerBlock;
     }
 
+    /// @return When adding events, how many tasks per block should be done?
     size_t getAddingEvents_numTasksPerBlock() const
     {
       return m_addingEvents_numTasksPerBlock;
     }
-
 
     //-----------------------------------------------------------------------------------
     /** Get parameters for adding events to a MDGridBox, trying to optimize parallel CPU use.
@@ -182,7 +189,7 @@ namespace MDEvents
 
 
     //-----------------------------------------------------------------------------------
-    /** Return the max recursion depth allowed for grid box splitting. */
+    /** @return the max recursion depth allowed for grid box splitting. */
     size_t getMaxDepth() const
     {
       return m_maxDepth;
@@ -190,6 +197,7 @@ namespace MDEvents
 
     /** Sets the max recursion depth allowed for grid box splitting.
      * NOTE! This resets numMDBoxes stats!
+     * @param value :: the max depth for splitting
      *  */
     void setMaxDepth(size_t value)
     {
@@ -205,6 +213,7 @@ namespace MDEvents
      *
      * @param eventsAdded :: How many events were added since the last split?
      * @param numMDBoxes :: How many un-split MDBoxes are there (total) in the workspace
+     * @return true if the boxes should get split.
      */
     bool shouldSplitBoxes(size_t eventsAdded, size_t numMDBoxes) const
     {

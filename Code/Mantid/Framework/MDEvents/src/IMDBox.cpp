@@ -9,6 +9,7 @@ namespace MDEvents
   //-----------------------------------------------------------------------------------------------
   /** Copy constructor. Copies the extents, depth, etc.
    * and recalculates the boxes' volume.
+   * @param box :: incoming box to copy.
    */
   TMDE(
   IMDBox)::IMDBox(IMDBox<MDE,nd> * box)

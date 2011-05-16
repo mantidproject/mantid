@@ -135,9 +135,8 @@ namespace Mantid
 	return Mantid::Kernel::ConfigService::Instance().getUserFilename();
       }
 
-      /**
-       * Saves and properties changed from the default to the given file
-       * @param A filename to write the settings to
+      /** Saves and properties changed from the default to the given file
+       * @param filename :: A filename to write the settings to
        */
       void saveConfig(const std::string &filename) const
       {
