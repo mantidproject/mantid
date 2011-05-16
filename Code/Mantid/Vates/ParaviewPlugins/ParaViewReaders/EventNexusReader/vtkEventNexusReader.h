@@ -4,6 +4,7 @@
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 class vtkImplicitFunction;
 class VTK_EXPORT vtkEventNexusReader : public vtkUnstructuredGridAlgorithm
@@ -26,6 +27,13 @@ public:
   /// Called by presenter to force progress information updating.
   void UpdateAlgorithmProgress(double progress);
 
+  void SetAppliedXDimensionXML(std::string xml);
+  void SetAppliedYDimensionXML(std::string xml);
+  void SetAppliedZDimensionXML(std::string xml);
+  void SetAppliedtDimensionXML(std::string xml);
+
+  const char* GetInputGeometryXML();
+
 protected:
   vtkEventNexusReader();
   ~vtkEventNexusReader();
@@ -36,8 +44,50 @@ protected:
   unsigned long GetMTime();
   
 private:
+  
   vtkEventNexusReader(const vtkEventNexusReader&);
+  
   void operator = (const vtkEventNexusReader&);
+
+  std::string extractFormattedPropertyFromDimension(Mantid::Geometry::IMDDimension_sptr dimension) const;
+
+  void doRebinning();
+
+  /**
+   Detect wheter x dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasXDimension() const
+  {
+    return NULL != m_appliedXDimension.get();
+  }
+
+  /**
+   Detect wheter y dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasYDimension() const
+  {
+    return NULL != m_appliedYDimension.get();
+  }
+
+  /**
+   Detect wheter z dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasZDimension() const
+  {
+    return NULL != m_appliedZDimension.get();
+  }
+
+  /**
+   Detect wheter t dimension is available.
+   @return true available, false otherwise.
+ */
+  bool hasTDimension() const
+  {
+    return NULL != m_appliedTDimension.get();
+  }
 
   /// File name from which to read.
   char *FileName;
@@ -80,5 +130,23 @@ private:
 
   /// Abstracts the handling of rebinning states and rules govening when those states should apply.
   Mantid::VATES::EscalatingRebinningActionManager m_actionManager;
+
+  /// Converts dimension objects into well-formed xml describing the overall geometry
+  const Mantid::Geometry::MDGeometryBuilderXML m_geometryXmlBuilder;
+
+  /// Sets the rebinning action to rebin if the number of bins has changed on a dimension.
+  void formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim);
+
+  /// the dimension information applied to the XDimension Mapping.
+  Mantid::VATES::Dimension_sptr m_appliedXDimension;
+
+  /// the dimension information applied to the yDimension Mapping.
+  Mantid::VATES::Dimension_sptr m_appliedYDimension;
+
+  // the dimension information applied to the zDimension Mapping.
+  Mantid::VATES::Dimension_sptr m_appliedZDimension;
+
+  /// the dimension information applied to the tDimension Mapping.
+  Mantid::VATES::Dimension_sptr m_appliedTDimension;
 };
 #endif

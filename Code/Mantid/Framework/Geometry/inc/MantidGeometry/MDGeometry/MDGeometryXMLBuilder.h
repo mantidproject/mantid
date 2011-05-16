@@ -53,37 +53,37 @@ public:
   ~MDGeometryBuilderXML();
 
   /// Add a dimension that is neither considered x, y, z or t.
-  bool addOrdinaryDimension(IMDDimension_const_sptr dimension);
+  bool addOrdinaryDimension(IMDDimension_const_sptr dimension) const;
 
   /// Add x dimension.
-  bool addXDimension(IMDDimension_const_sptr dimension);
+  bool addXDimension(IMDDimension_const_sptr dimension) const;
 
   /// Add y dimension.
-  bool addYDimension(IMDDimension_const_sptr dimension);
+  bool addYDimension(IMDDimension_const_sptr dimension) const;
 
   /// Add z dimension.
-  bool addZDimension(IMDDimension_const_sptr dimension);
+  bool addZDimension(IMDDimension_const_sptr dimension) const;
 
   /// Add t dimension.
-  bool addTDimension(IMDDimension_const_sptr dimension);
+  bool addTDimension(IMDDimension_const_sptr dimension) const;
 
 
   /// Create the xml.
-  std::string create();
+  const std::string& create() const;
 
 private:
 
   typedef std::vector<IMDDimension_const_sptr> DimensionContainerType;
 
-  DimensionContainerType m_vecDimensions;
+  mutable DimensionContainerType m_vecDimensions;
 
-  IMDDimension_const_sptr m_spXDimension;
+  mutable IMDDimension_const_sptr m_spXDimension;
 
-  IMDDimension_const_sptr m_spYDimension;
+  mutable IMDDimension_const_sptr m_spYDimension;
 
-  IMDDimension_const_sptr m_spZDimension;
+  mutable IMDDimension_const_sptr m_spZDimension;
 
-  IMDDimension_const_sptr m_spTDimension;
+  mutable IMDDimension_const_sptr m_spTDimension;
 
   MDGeometryBuilderXML(const MDGeometryBuilderXML&);
 
@@ -100,6 +100,12 @@ private:
 
   /// Determine whetether a valid t dimension has been provided.
   bool hasTDimension() const;
+
+  /// Flag indicating that some change in the inputs has occured. Triggers full recreation.
+  mutable bool m_changed;
+
+  /// Variable suports lazy calculation.
+  mutable std::string m_lastResult;
 
 };
 

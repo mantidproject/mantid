@@ -84,6 +84,8 @@ private:
       bool());
     MOCK_CONST_METHOD0(validate,
       void());
+    MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+  
   };
 
   public:
@@ -203,6 +205,7 @@ private:
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -249,6 +252,7 @@ private:
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
     EXPECT_CALL(*pMockFactorySuccessor, create()).Times(1); //expect it then to call create on the successor.
+    EXPECT_CALL(*pMockFactorySuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -263,6 +267,13 @@ private:
 
     TSM_ASSERT("Workspace not used as expected", Mock::VerifyAndClearExpectations(pMockWs));
     TSM_ASSERT("successor factory not used as expected.", Mock::VerifyAndClearExpectations(pMockFactorySuccessor));
+  }
+
+  void testTypeName()
+  {
+    using namespace Mantid::VATES;
+    vtkThresholdingHexahedronFactory factory ("signal");
+    TS_ASSERT_EQUALS("vtkThresholdingHexahedronFactory", factory.getFactoryTypeName());
   }
 
 };

@@ -1,7 +1,7 @@
 #include <Poco/DOM/Element.h>
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
-#include <Poco/DOM/NodeList.h>
+#include <Poco/DOM/NodeList.h> 
 #include <Poco/DOM/NamedNodeMap.h>
 
 #include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
@@ -146,6 +146,38 @@ Mantid::Geometry::MDDimension* DimensionFactory::createRawDimension(
   }
   return mdDimension;
 }
+
+/**
+ Convenience service non-member function. Hides use of factory. Creates IMDDimension.
+ @param dimensionXMLString :: Dimension xml.
+ @return new IMDDimension in a shared pointer.
+ */
+Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString)
+ {
+   using Mantid::MDAlgorithms::DimensionFactory;
+   DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+   return Mantid::Geometry::IMDDimension_sptr(factory.create());
+ }
+
+/**
+ Convenience service non-member function. Hides use of factory. Creates IMDDimension. Also sets min max and number of bins on the dimension.
+ @param dimensionXMLString :: Dimension xml.
+ @param nBins :: Number of bins.
+ @param min :: Minimum
+ @param max :: Maximum
+ @return new IMDDimension in a shared pointer.
+ */
+ Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max)
+ {
+   using Mantid::MDAlgorithms::DimensionFactory;
+   DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
+   Mantid::Geometry::MDDimension* dimension = factory.createAsMDDimension();
+   double currentMin = min;
+   double currentMax = max;
+   //Set the number of bins to use for a given dimension.
+   dimension->setRange(currentMin, currentMax, nBins);
+   return Mantid::Geometry::IMDDimension_sptr(dimension);
+ }
 
 }
 }

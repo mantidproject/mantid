@@ -68,6 +68,11 @@ public:
 
   typedef std::vector<UnstructuredPoint> Column;
 
+  virtual std::string getFactoryTypeName() const
+  {
+    return "vtkThresholdingUnstructuredGridFactory";
+  }
+
 protected:
 
   virtual void validate() const;

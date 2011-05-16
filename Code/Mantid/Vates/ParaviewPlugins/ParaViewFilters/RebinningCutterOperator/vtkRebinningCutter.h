@@ -111,17 +111,7 @@ private:
 
   /// Executor pefroms the logic associated with running rebinning operations.
   Mantid::VATES::RebinningCutterPresenter m_presenter;
-  /// Get the x dimension form the input dataset.
-  Mantid::VATES::Dimension_sptr getDimensionX(vtkDataSet* in_ds) const;
 
-  /// Get the y dimension form the input dataset.
-  Mantid::VATES::Dimension_sptr getDimensionY(vtkDataSet* in_ds) const;
-
-  /// Get the z dimension form the input dataset.
-  Mantid::VATES::Dimension_sptr getDimensionZ(vtkDataSet* in_ds) const;
-
-  /// Get the t dimension form the input dataset.
-  Mantid::VATES::Dimension_sptr getDimensiont(vtkDataSet* in_ds) const;
 
   BoxFunction_sptr constructBox(vtkDataSet* ) const;
 

@@ -62,8 +62,11 @@ public:
 
   vtkFloatArray* createScalarArray() const;
 
-  void validate() const
+  void validate() const{}
+
+  virtual std::string getFactoryTypeName() const
   {
+    return "vtkProxyFactory";
   }
 
 private:

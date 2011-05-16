@@ -66,6 +66,11 @@ public:
 
   typedef std::vector<UnstructuredPoint> Column;
 
+  virtual std::string getFactoryTypeName() const
+  {
+    return "vtkThresholdingHexahedronFactory";
+  }
+
 protected:
 
   virtual void validate() const;

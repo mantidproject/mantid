@@ -1,5 +1,5 @@
 #ifndef DIMENSIONFACTORY_H_
-#define DIMENSIONFACTORY_H_
+#define DIMENSIONFACTORY_H_ 
 
 /**
 *  DimensionFactory. Handles conversion of dimension xml to IMDDimension objects.
@@ -74,7 +74,7 @@ public:
 
   /// Factory method. More explicit naming as create() should be preferred.
   Mantid::Geometry::MDDimension* createAsMDDimension() const;
-
+  
 private:
 
   DimensionFactory();
@@ -87,6 +87,12 @@ private:
   /// Create an instance of a dimension of the correct type (reciprocal or otherwise)
   Mantid::Geometry::MDDimension* createRawDimension(Poco::XML::Element* reciprocalMapping, const std::string& id) const;
 };
+
+  DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString);
+
+  DLLExport Mantid::Geometry::IMDDimension_sptr createDimension(const std::string& dimensionXMLString, int nBins, double min, double max);
+
+
 
 }
 }

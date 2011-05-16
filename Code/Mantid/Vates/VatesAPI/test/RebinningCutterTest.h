@@ -60,16 +60,20 @@ private:
 
       RebinningCutterPresenter presenter;
 
-      DimensionVec vec;
-      MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1); //In reality these commands come from UI inputs.
+      Mantid::Geometry::V3D x(1, 0, 0);
+      Mantid::Geometry::V3D y(0, 1, 0);
+      Mantid::Geometry::V3D z(0, 0, 1);
+
+        DimensionVec vec;
+      MDDimensionRes* pDimQx = new MDDimensionRes("qx", q1, &x); //In reality these commands come from UI inputs.
       pDimQx->setRange(-1.5, 5, 5);
       Dimension_sptr dimX = Dimension_sptr(pDimQx);
 
-      MDDimensionRes* pDimQy = new MDDimensionRes("qy", q2); //In reality these commands come from UI inputs.
+      MDDimensionRes* pDimQy = new MDDimensionRes("qy", q2, &y); //In reality these commands come from UI inputs.
       pDimQy->setRange(-6.6, 6.6, 5);
       Dimension_sptr dimY = Dimension_sptr(pDimQy);
 
-      MDDimensionRes* pDimQz = new MDDimensionRes("qz", q3); //In reality these commands come from UI inputs.
+      MDDimensionRes* pDimQz = new MDDimensionRes("qz", q3, &z); //In reality these commands come from UI inputs.
       pDimQz->setRange(-6.6, 6.6, 5);
       Dimension_sptr dimZ = Dimension_sptr(pDimQz);
 
@@ -385,50 +389,6 @@ void testGetDimensionFromWorkspaceThrows()
   vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
   std::string idToRequest = "----";
   TSM_ASSERT_THROWS("Should have thrown a std::invalid_argument exception.", presenter.getDimensionFromWorkspace(idToRequest), std::invalid_argument);
-  dataSet->Delete();
-}
-
-void testGetXDimension()
-{
-  Mantid::VATES::RebinningCutterPresenter presenter;
-  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr xDimension = presenter.getXDimensionFromDS(dataSet);
-  TSM_ASSERT_EQUALS("Wrong number of x dimension bins", 5, xDimension->getNBins());
-  TSM_ASSERT_EQUALS("Wrong minimum x obtained", 5, xDimension->getMaximum());
-  TSM_ASSERT_EQUALS("Wrong maximum x obtained", -1.5, xDimension->getMinimum());
-  dataSet->Delete();
-}
-
-void testGetYDimension()
-{
-  Mantid::VATES::RebinningCutterPresenter presenter;
-    vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-    Mantid::VATES::Dimension_sptr yDimension = presenter.getYDimensionFromDS(dataSet);
-    TSM_ASSERT_EQUALS("Wrong number of y dimension bins", 5, yDimension->getNBins());
-    TSM_ASSERT_EQUALS("Wrong minimum y obtained", 6.6, yDimension->getMaximum());
-    TSM_ASSERT_EQUALS("Wrong maximum y obtained", -6.6, yDimension->getMinimum());
-    dataSet->Delete();
-}
-
-void testGetZDimension()
-{
-  Mantid::VATES::RebinningCutterPresenter presenter;
-  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr zDimension = presenter.getZDimensionFromDS(dataSet);
-  TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, zDimension->getNBins());
-  TSM_ASSERT_EQUALS("Wrong minimum z obtained", -6.6, zDimension->getMinimum());
-  TSM_ASSERT_EQUALS("Wrong maximum z obtained", 6.6, zDimension->getMaximum());
-  dataSet->Delete();
-}
-
-void testGettDimension()
-{
-  Mantid::VATES::RebinningCutterPresenter presenter;
-  vtkDataSet* dataSet = constructInputDataSet(); //Creates a vtkDataSet with fielddata containing geomtry xml.
-  Mantid::VATES::Dimension_sptr tDimension = presenter.getTDimensionFromDS(dataSet);
-  TSM_ASSERT_EQUALS("Wrong number of z dimension bins", 5, tDimension->getNBins());
-  TSM_ASSERT_EQUALS("Wrong minimum t obtained", 0, tDimension->getMinimum());
-  TSM_ASSERT_EQUALS("Wrong maximum t obtained", 150, tDimension->getMaximum());
   dataSet->Delete();
 }
 

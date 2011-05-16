@@ -14,6 +14,7 @@
 #include "MantidMDAlgorithms/PlaneImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
 #include "MantidMDAlgorithms/NullImplicitFunction.h"
+#include "MantidMDAlgorithms/DimensionFactory.h"
 #include "MantidVatesAPI/EscalatingRebinningActionManager.h"
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h"
@@ -21,6 +22,8 @@
 #include "MantidVatesAPI/vtkProxyFactory.h"
 #include "MantidVatesAPI/TimeToTimeStep.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/Common.h"
+#include "MantidVatesAPI/vtkDataSetToGeometry.h" 
 
 #include <boost/functional/hash.hpp>
 #include <sstream>
@@ -209,15 +212,17 @@ int vtkRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), 
     if(true == bGoodInputProvided)
     { 
       DimensionVec dimensionsVec(4);
-      dimensionsVec[0] = m_presenter.getXDimensionFromDS(inputDataset);
-      dimensionsVec[1] = m_presenter.getYDimensionFromDS(inputDataset);
-      dimensionsVec[2] = m_presenter.getZDimensionFromDS(inputDataset);
-      dimensionsVec[3] = m_presenter.getTDimensionFromDS(inputDataset);
 
-      m_appliedXDimension = dimensionsVec[0];
-      m_appliedYDimension = dimensionsVec[1];
-      m_appliedZDimension = dimensionsVec[2];
-      m_appliedTDimension = dimensionsVec[3];
+      vtkDataSetToGeometry metaDataProcessor(inputDataset);
+      metaDataProcessor.execute();
+      dimensionsVec[0] = metaDataProcessor.getXDimension();
+      dimensionsVec[1] = metaDataProcessor.getYDimension();
+      dimensionsVec[2] = metaDataProcessor.getZDimension();
+      dimensionsVec[3] = metaDataProcessor.getTDimension();
+      m_appliedXDimension = metaDataProcessor.getXDimension();
+      m_appliedYDimension = metaDataProcessor.getYDimension();
+      m_appliedZDimension = metaDataProcessor.getZDimension();
+      m_appliedTDimension = metaDataProcessor.getTDimension();
 
       // Construct reduction knowledge.
       m_presenter.constructReductionKnowledge(dimensionsVec, dimensionsVec[0], dimensionsVec[1],
@@ -326,7 +331,8 @@ void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
     if (m_appliedXDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      
+      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
       m_actionRequester->ask(RecalculateVisualDataSetOnly);
       //The visualisation dataset will at least need to be recalculated.
       formulateRequestUsingNBins(temp);
@@ -342,7 +348,8 @@ void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
     if (m_appliedYDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      using Mantid::MDAlgorithms::DimensionFactory;
+      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
@@ -358,7 +365,7 @@ void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
     if (m_appliedZDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
@@ -374,7 +381,7 @@ void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
     if (m_appliedTDimension->toXMLString() != xml && !xml.empty())
     {
       this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::VATES::createDimension(xml);
+      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
       //The visualisation dataset will at least need to be recalculated.
       m_actionRequester->ask(RecalculateVisualDataSetOnly);
       formulateRequestUsingNBins(temp);
@@ -413,25 +420,6 @@ unsigned long vtkRebinningCutter::GetMTime()
   return mTime;
 }
 
-Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionX(vtkDataSet* in_ds) const
-{
-  return m_presenter.getXDimensionFromDS(in_ds);
-}
-
-Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionY(vtkDataSet* in_ds) const
-{
-  return m_presenter.getYDimensionFromDS(in_ds);
-}
-
-Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensionZ(vtkDataSet* in_ds) const
-{
-  return m_presenter.getZDimensionFromDS(in_ds);
-}
-
-Mantid::VATES::Dimension_sptr vtkRebinningCutter::getDimensiont(vtkDataSet* in_ds) const
-{
-  return m_presenter.getTDimensionFromDS(in_ds);
-}
 
 
 BoxFunction_sptr vtkRebinningCutter::constructBox(vtkDataSet* inputDataset) const

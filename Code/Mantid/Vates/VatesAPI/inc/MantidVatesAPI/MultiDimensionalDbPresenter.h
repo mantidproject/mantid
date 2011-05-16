@@ -6,6 +6,7 @@
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidVatesAPI/ProgressAction.h"
+#include "MantidVatesAPI/Common.h"
 
 #include <Poco/ActiveMethod.h>
 #include <Poco/NotificationCenter.h>
@@ -111,6 +112,12 @@ public:
 
   /// Get extents
   VecExtents getExtents() const;
+
+ /// Get the dimension from the image with the id.
+ Mantid::VATES::Dimension_const_sptr getDimensionFromWorkspace(const std::string& id)
+ {
+   return m_workspace->getDimension(id);
+ }
 };
 }
 }

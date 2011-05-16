@@ -57,6 +57,11 @@ namespace Mantid
 
       typedef std::vector<UnstructuredPoint> Column;
 
+      virtual std::string getFactoryTypeName() const
+      {
+        return "vtkThresholdingLineFactory";
+      }
+
     protected:
 
       virtual void validate() const;

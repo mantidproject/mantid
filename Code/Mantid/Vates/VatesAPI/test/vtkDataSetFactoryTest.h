@@ -2,94 +2,70 @@
 #ifndef VTKDATASETFACTORYTEST_H_
 #define VTKDATASETFACTORYTEST_H_
 
-#include "MantidMDAlgorithms/Load_MDWorkspace.h"
-#include "MDDataObjects/MDWorkspace.h"
+#include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <cxxtest/TestSuite.h>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
+#include "vtkDataSet.h"
+#include "vtkFloatArray.h"
 
-
-class vtkDataSetFactoryTest
+class vtkDataSetFactoryTest : public CxxTest::TestSuite
 {
 
-protected:
+private:
 
-  /// Geometry Policy utilises compile-time polymorphism in vtkDataSetFactories
-  /// for testing purposes. Otherwise too unwieldy to generate MDGeometry from scratch.
-  class GeometryPolicy
+  class MockvtkDataSetFactory : public Mantid::VATES::vtkDataSetFactory 
   {
   public:
+    MOCK_CONST_METHOD0(create,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createMeshOnly,
+      vtkDataSet*());
+    MOCK_CONST_METHOD0(createScalarArray,
+      vtkFloatArray*());
+    MOCK_METHOD1(initialize,
+      void(boost::shared_ptr<Mantid::API::IMDWorkspace>));
+    MOCK_CONST_METHOD0(validate,
+      void());
+    MOCK_CONST_METHOD0(getFactoryTypeName, std::string());
+    void SetSuccessorConcrete(vtkDataSetFactory* pSuccessor)
+    {
+      return vtkDataSetFactory::SetSuccessor(pSuccessor);
+    }
+    bool hasSuccessorConcrete() const
+    {
 
-    GeometryPolicy(int i, int j, int k, int t) : m_i(i), m_j(j), m_k(k), m_t(t)
-    {
+      return vtkDataSetFactory::hasSuccessor();
     }
-
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getXDimension() const
-    {
-      using namespace Mantid::Geometry;
-      MDDimension* dimension = new MDDimension("qx");
-      dimension->setRange(0, 1, m_i);
-      return boost::shared_ptr<IMDDimension>(dimension);
-    }
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getYDimension() const
-    {
-      using namespace Mantid::Geometry;
-      MDDimension* dimension = new MDDimension("qy");
-      dimension->setRange(0, 1, m_j);
-      return boost::shared_ptr<IMDDimension>(dimension);
-    }
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getZDimension() const
-    {
-      using namespace Mantid::Geometry;
-      MDDimension* dimension = new MDDimension("qz");
-      dimension->setRange(0, 1, m_k);
-      return boost::shared_ptr<IMDDimension>(dimension);
-    }
-    boost::shared_ptr<Mantid::Geometry::IMDDimension> getTDimension() const
-    {
-      using namespace Mantid::Geometry;
-      MDDimension* dimension = new MDDimension("t");
-      dimension->setRange(0, 1, m_t);
-      return boost::shared_ptr<IMDDimension>(dimension);
-    }
-
-  private:
-    const int m_i;
-    const int m_j;
-    const int m_k;
-    const int m_t;
   };
 
-  /// Image Policy utilises compile-time polymorphism in vtkDataSetFactories
-  /// for testing purposes. Otherwise too unwieldy to generate MDImage from scratch.
-  class ImagePolicy
+
+public:
+
+  void testSetSuccessor()
   {
+    MockvtkDataSetFactory factory;
+    MockvtkDataSetFactory* pSuccessor = new MockvtkDataSetFactory;
+    
+    EXPECT_CALL(factory, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
+    EXPECT_CALL(*pSuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeB")); //Different type name, so setting the successor should work.
+    factory.SetSuccessor(pSuccessor);
 
+    TSM_ASSERT("Successor should have been set", factory.hasSuccessor());
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(pSuccessor));
+  }
 
-  public:
-    /// Embedded type information
-    typedef GeometryPolicy GeometryType;
-    /// Get the Geometry
-
-    ImagePolicy(int i, int j, int k, int t): m_geometry(i, j, k, t)
-    {
-    }
-
-    GeometryType* getGeometry()
-    {
-      return &m_geometry;
-    }
-
-    /// Get the MDImagePoint
-    Mantid::MDDataObjects::MD_image_point getPoint(int i, int j, int k, int t) const
-    {
-      Mantid::MDDataObjects::MD_image_point point;
-      point.s = i;
-      return point;
-    }
-
-    private:
-    GeometryPolicy m_geometry;
-  };
+  void testSetSuccessorThrows()
+  {
+    MockvtkDataSetFactory factory;
+    MockvtkDataSetFactory* pSuccessor = new MockvtkDataSetFactory;
+    EXPECT_CALL(factory, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); 
+    EXPECT_CALL(*pSuccessor, getFactoryTypeName()).WillOnce(testing::Return("TypeA")); //Same type name. should NOT work.
+    TSM_ASSERT_THROWS("By default, should throw when successor type is the same as the container.", factory.SetSuccessor(pSuccessor), std::runtime_error);
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(&factory));
+    TS_ASSERT(testing::Mock::VerifyAndClearExpectations(pSuccessor));
+  }
 
 };
 

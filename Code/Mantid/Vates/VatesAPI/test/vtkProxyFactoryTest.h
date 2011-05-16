@@ -56,6 +56,14 @@ public:
     inputProductB->Delete();
   }
 
+  void testTypeName()
+  {
+    vtkRectilinearGrid* inputProduct = vtkRectilinearGrid::New();
+    Mantid::VATES::vtkProxyFactory factory(inputProduct);
+    TS_ASSERT_EQUALS("vtkProxyFactory", factory.getFactoryTypeName());
+    inputProduct->Delete();
+  }
+
 };
 
 #endif

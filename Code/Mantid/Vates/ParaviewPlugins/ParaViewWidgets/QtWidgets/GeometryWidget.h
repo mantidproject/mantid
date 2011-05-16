@@ -86,6 +86,26 @@ QString getZDimensionXML() const;
 /// Gets the t dimension in a serialzed form
 QString gettDimensionXML() const;
 
+bool hasXDimension() const
+{
+  return m_xDimensionWidget != NULL;
+}
+
+bool hasYDimension() const
+{
+  return m_yDimensionWidget != NULL;
+}
+
+bool hasZDimension() const
+{
+  return m_zDimensionWidget != NULL;
+}
+
+bool hasTDimension() const
+{
+  return m_tDimensionWidget != NULL;
+}
+
 void setXDimensionXML(QString value)
 {
   //Do nothing.

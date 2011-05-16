@@ -63,6 +63,11 @@ public:
   {
   }
 
+  virtual std::string getFactoryTypeName() const
+  {
+    return "vtkClipperDataSetFactory";
+  }
+
 private:
   /// Function describing clipping.
   boost::shared_ptr<Mantid::API::ImplicitFunction> m_implicitFunction;

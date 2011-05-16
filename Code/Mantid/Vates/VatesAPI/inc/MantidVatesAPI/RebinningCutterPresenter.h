@@ -3,7 +3,6 @@
 
 #include <vtkUnstructuredGrid.h>
 #include <vtkBox.h>
-#include <map>
 
 #include "MantidAPI/IMDWorkspace.h"
 #include <MantidVatesAPI/Common.h>
@@ -81,20 +80,12 @@ private:
   /// Serializer to create and pass on rebinning metadata.
   RebinningXMLGenerator m_serializer;
 
-  typedef std::map<std::string, int> IDtoColumn_map;
-
-  /// Provides an initial record of ids to column numbers. Required for dimension swapping later.
-  mutable IDtoColumn_map m_idToColumnMap;
-
   /// Create a geometry from dimensions and then serialise it.
   std::string constructGeometryXML(DimensionVec dimensions,
       Dimension_sptr dimensionX,
       Dimension_sptr dimensionY,
       Dimension_sptr dimensionZ,
       Dimension_sptr dimensiont);
-
-  /// Populates m_idToColumnMap if the workspace is a MDWorkspace only.
-  void createIdToColumnMappings(Mantid::API::IMDWorkspace_sptr outputWorkspace) const;
 
 public:
 
@@ -139,18 +130,6 @@ public:
   /// Get the dimension from the image with the id.
   Dimension_const_sptr getDimensionFromWorkspace(const std::string& id);
 
-  /// Get the x dimension from vtkDataSet field data.
-  Dimension_sptr getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
-
-  /// Get the y dimension from vtkDataSet field data.
-  Dimension_sptr getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
-
-  /// Get the z dimension from vtkDataSet field data.
-  Dimension_sptr getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
-
-  /// Get the t dimension from vtkDataSet field data.
-  Dimension_sptr getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const;
-
   /// Get the workspace geometry as an xml string.
   const std::string& getWorkspaceGeometry() const;
 
@@ -184,15 +163,6 @@ public:
 
   /// Helper method to get dimensions from a geometry xml string.
   DLLExport std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(const std::string& geometryXMLString, bool nonIntegratedOnly = false);
-
-  /// helper method to get a dimension from a dimension xml element.
-  DLLExport Mantid::Geometry::MDDimension* createDimension(Poco::XML::Element* dimensionXML);
-
-  /// helper method to get a dimension from a dimension xml element string.
-  DLLExport Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString);
-
-  /// helper method to get a dimension from a dimension xml element string and set the number of bins for that dimension to a specified value.
-  DLLExport Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins);
 
   /// helper method to extract the bounding box.
   DLLExport std::vector<double> getBoundingBox(const std::string& functionXMLString);

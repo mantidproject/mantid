@@ -60,6 +60,11 @@ however, some visualisation frameworks won't be able to treat these factories in
 
       typedef std::vector<UnstructuredPoint> Column;
 
+      virtual std::string getFactoryTypeName() const
+      {
+        return "vtkThresholdingQuadFactory";
+      }
+
     protected:
 
       virtual void validate() const;

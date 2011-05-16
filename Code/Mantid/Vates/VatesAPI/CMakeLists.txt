@@ -10,6 +10,7 @@ project ( VatesAPI )
 
 set ( SRC_FILES 
 src/Clipper.cpp
+src/Common.cpp
 src/DimensionComparitor.cpp
 src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
@@ -23,6 +24,7 @@ src/RebinningXMLGenerator.cpp
 src/TimeStepToTimeStep.cpp
 src/TimeToTimeStep.cpp
 src/vtkDataSetFactory.cpp
+src/vtkDataSetToGeometry.cpp
 src/vtkClipperDataSetFactory.cpp
 src/vtkProxyFactory.cpp
 src/vtkStructuredGridFactory.cpp
@@ -50,6 +52,7 @@ inc/MantidVatesAPI/RebinningXMLGenerator.h
 inc/MantidVatesAPI/TimeStepToTimeStep.h
 inc/MantidVatesAPI/TimeToTimeStep.h
 inc/MantidVatesAPI/vtkDataSetFactory.h
+inc/MantidVatesAPI/vtkDataSetToGeometry.h
 inc/MantidVatesAPI/vtkClipperDataSetFactory.h
 inc/MantidVatesAPI/vtkProxyFactory.h
 inc/MantidVatesAPI/vtkStructuredGridFactory.h
@@ -61,7 +64,9 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 
 set (TEST_FILES
 test/EscalatingRebinningActionManagerTest.h
+test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
+test/vtkDataSetToGeometryTest.h
 test/vtkProxyFactoryTest.h
 test/vtkStructuredGridFactoryTest.h
 test/vtkThresholdingUnstructuredGridFactoryTest.h

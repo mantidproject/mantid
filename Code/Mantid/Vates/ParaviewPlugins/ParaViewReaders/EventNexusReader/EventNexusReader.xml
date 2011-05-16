@@ -57,12 +57,44 @@
          number_of_elements="1"
 	     default_values="10000">
 	   </DoubleVectorProperty>
+	   <StringVectorProperty
+         name="InputGeometryXML"
+         command="GetInputGeometryXML"
+         number_of_elements="1"
+         information_only="1">
+        <SimpleStringInformationHelper /> 
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedXDimensionXML"
+         command="SetAppliedXDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedYDimensionXML"
+         command="SetAppliedYDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedZDimensionXML"
+         command="SetAppliedZDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
+       <StringVectorProperty
+         name="AppliedtDimensionXML"
+         command="SetAppliedtDimensionXML"
+         number_of_elements="1"
+         default_values="--">
+       </StringVectorProperty>
        <StringVectorProperty
         name="FileName"
         command="SetFileName"
         number_of_elements="1">
         <FileListDomain name="files"/>
       </StringVectorProperty>
+	  
     </SourceProxy>
   </ProxyGroup>
   <!-- End EventNexusReader -->

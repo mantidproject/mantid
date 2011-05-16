@@ -3,6 +3,7 @@
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
+
 namespace Mantid
 {
 namespace Geometry
@@ -28,7 +29,6 @@ enum RebinningIterationAction {
   RecalculateVisualDataSetOnly, // 4D data set has not altered so create a new visual 3D slice only.
   RecalculateAll // Rebin and create 3D visualisation slice from 4D dataset.
 };
-
 
 }
 

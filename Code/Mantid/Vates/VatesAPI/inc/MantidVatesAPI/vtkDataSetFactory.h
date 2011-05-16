@@ -5,6 +5,7 @@
 
 #include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
+#include <string>
 #include "vtkDataSet.h"
 
 class vtkFloatArray;
@@ -82,6 +83,9 @@ public:
 
   /// Determine whether a successor factory has been provided.
   virtual bool hasSuccessor() const;
+
+  /// Get the name of the type.
+  virtual std::string getFactoryTypeName() const =0;
 
 protected:
 

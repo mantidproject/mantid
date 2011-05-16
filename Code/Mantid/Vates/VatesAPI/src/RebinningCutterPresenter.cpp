@@ -31,6 +31,7 @@
 #include "MantidAPI/AnalysisDataService.h"
 #include "MantidAPI/WorkspaceFactory.h"
 #include "MDDataObjects/MD_FileFormatFactory.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
@@ -178,8 +179,6 @@ Mantid::API::IMDWorkspace_sptr RebinningCutterPresenter::applyRebinningAction(
        IMDWorkspace_sptr outputWs = boost::dynamic_pointer_cast<IMDWorkspace>(
            AnalysisDataService::Instance().retrieve(outputWorkspace));
 
-       //Seam method. Should make it easier to remove in future.
-       createIdToColumnMappings(outputWs);
        
        return outputWs;
 }
@@ -214,83 +213,6 @@ Dimension_const_sptr RebinningCutterPresenter::getDimensionFromWorkspace(const s
   return outputWs->getDimension(id);
 }
 
-Dimension_sptr RebinningCutterPresenter::getXDimensionFromDS(vtkDataSet* vtkDataSetInput) const
-{
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
-
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* xDimensionElement = geometryXMLElement->getChildElement("XDimension");
-  std::string xDimId = xDimensionElement->getChildElement("RefDimensionId")->innerText();
-  std::vector<boost::shared_ptr<IMDDimension> >::iterator xDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(xDimId));
-
-  if (xDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine x-dimension mapping.");
-  }
-
-  return *xDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getYDimensionFromDS(vtkDataSet* vtkDataSetInput) const
-{
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
-
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* yDimensionElement = geometryXMLElement->getChildElement("YDimension");
-  std::string yDimId = yDimensionElement->getChildElement("RefDimensionId")->innerText();
-  std::vector<boost::shared_ptr<IMDDimension> >::iterator yDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(yDimId));
-
-  if (yDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine y-dimension mapping.");
-  }
-
-  return *yDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getZDimensionFromDS(vtkDataSet* vtkDataSetInput) const
-{
-
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
-
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* zDimensionElement = geometryXMLElement->getChildElement("ZDimension");
-  std::string zDimId = zDimensionElement->getChildElement("RefDimensionId")->innerText();
-  std::vector<boost::shared_ptr<IMDDimension> >::iterator zDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(zDimId));
-
-  if (zDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine z-dimension mapping.");
-  }
-
-  return *zDimensionIt;
-}
-
-Dimension_sptr RebinningCutterPresenter::getTDimensionFromDS(vtkDataSet* vtkDataSetInput) const
-{
-  Poco::XML::Element* geometryXMLElement = findExistingGeometryInformation(vtkDataSetInput, XMLDefinitions::metaDataId().c_str() );
-
-  std::vector<boost::shared_ptr<IMDDimension> > dimensionVec = getDimensions(geometryXMLElement);
-
-  //Find the requested xDimension alignment from the dimension id provided in the xml.
-  Poco::XML::Element* tDimensionElement = geometryXMLElement->getChildElement("TDimension");
-  std::string tDimId = tDimensionElement->getChildElement("RefDimensionId")->innerText();
-  std::vector<boost::shared_ptr<IMDDimension> >::iterator tDimensionIt = find_if(dimensionVec.begin(), dimensionVec.end(), findID(tDimId));
-
-  if (tDimensionIt == dimensionVec.end())
-  {
-    throw std::invalid_argument("Cannot determine t-dimension mapping.");
-  }
-
-  return *tDimensionIt;
-}
-
 const std::string& RebinningCutterPresenter::getWorkspaceGeometry() const
 {
   VerifyInitalization();
@@ -314,99 +236,19 @@ std::string RebinningCutterPresenter::constructGeometryXML(
   Dimension_sptr dimensionZ,
   Dimension_sptr dimensiont)
 {
-  using namespace Mantid::Geometry;
-  std::set<MDBasisDimension> basisDimensions;
-  for(unsigned int i = 0; i < dimensions.size(); i++)
+  Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+  DimensionVec::iterator it = dimensions.begin();
+  for(;it != dimensions.end(); ++it)
   {
-    //read dimension.
-    std::string dimensionId = dimensions[i]->getDimensionId();
-    bool isReciprocal = boost::dynamic_pointer_cast<MDDimension>(dimensions[i])->isReciprocal();
-    //basis dimension.
-    if(!m_idToColumnMap.empty())
-    {
-     basisDimensions.insert(MDBasisDimension(dimensionId, isReciprocal, m_idToColumnMap[dimensionId]));
-    }
-    else
-    {
-      basisDimensions.insert(MDBasisDimension(dimensionId, isReciprocal, i));
-    }
-
-    //NB: Geometry requires both a basis and geometry description to work. Initially all cuts and dimensions treated as orthogonal.
-    //So that congruent checks pass on the geometry, the basis is fabricated from the dimensions. This is not an ideal implementation. Other designs will
-    //be considered.
+    xmlBuilder.addOrdinaryDimension(*it);
   }
-
-  boost::shared_ptr<UnitCell> spCell = boost::shared_ptr<UnitCell>(new UnitCell()); // Unit cell currently does nothing.
-  MDGeometryBasis basis(basisDimensions, spCell);
-
-  //TODO: Get Rotation matrix from Plane ImplicitFunction
-        RotationMatrix identityMatrix(9, 0);
-        identityMatrix[0] = 1;
-        identityMatrix[4] = 1;
-        identityMatrix[8] = 1;
-
-  // Convert IMDDimensions to MDDimensions
-  std::vector<IMDDimension_sptr> md_dimensions;
-  for (size_t i=0; i<dimensions.size(); i++)
-    md_dimensions.push_back( boost::dynamic_pointer_cast<MDDimension>(dimensions[i]));
-
-  MDGeometryDescription description(md_dimensions, boost::dynamic_pointer_cast<MDDimension>(dimensionX), boost::dynamic_pointer_cast<MDDimension>(dimensionY),
-      boost::dynamic_pointer_cast<MDDimension>(dimensionZ), boost::dynamic_pointer_cast<MDDimension>(dimensiont), identityMatrix);
-
-  //Create a geometry.
-  MDGeometry geometry(basis, description);
-  return geometry.toXMLString();
-
+  xmlBuilder.addXDimension(dimensionX);
+  xmlBuilder.addYDimension(dimensionY);
+  xmlBuilder.addZDimension(dimensionZ);
+  xmlBuilder.addTDimension(dimensiont);
+  return xmlBuilder.create();
 }
 
-void RebinningCutterPresenter::createIdToColumnMappings(IMDWorkspace_sptr outputWorkspace) const
-{
-
-  /*
-  This method is necessary to solve a problem that should have been solved elsewhere but 
-  hasn't been: The column information (i.e. which column in the file!) a particular basis 
-  dimension represents has penetrated the file-access boundary. Basically then, the high-level 
-  code needs to know how the data is arranged in the underlying file format. A 
-  consequence of this is that here we have to keep a running map of the original 
-  columnnumbers to dimension ids so that we can provide MDGeometryBasis with the corresponding columnnumbers. 
-  This has been hived-off into a separate method in the hope that the situation will improved, and this function can be deleted.
-  */
-
-  //Is this an MDWorkspace?
-  Mantid::MDDataObjects::MDWorkspace_sptr mdWorkspace = boost::dynamic_pointer_cast<Mantid::MDDataObjects::MDWorkspace>(outputWorkspace);
-  if(NULL != mdWorkspace.get())
-  {
-    //Are there no existing column mappings?
-    if(m_idToColumnMap.empty())
-    {
-      //The implementation of MDGeometry shows that it implitily sets the index of the vector up to the the column number.
-      //The tag is an alias for the dimension id.
-      std::vector<std::string> idsIndexedByColumnNumber = mdWorkspace->get_const_MDGeometry().getBasisTags();
-      //Loop through all columns and store the mapping.
-      for(int i = 0; i < idsIndexedByColumnNumber.size(); i++)
-      {
-        m_idToColumnMap.insert(std::make_pair(idsIndexedByColumnNumber[i], i));
-      }
-    }
-  }
-}
-
-Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString)
-{
-  DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
-  return Mantid::VATES::Dimension_sptr(factory.create());
-}
-
-Mantid::VATES::Dimension_sptr createDimension(const std::string& dimensionXMLString, int nBins)
-{
-  DimensionFactory factory = DimensionFactory::createDimensionFactory(dimensionXMLString);
-  MDDimension* dimension = factory.createAsMDDimension();
-  double currentMin = dimension->getMinimum();
-  double currentMax = dimension->getMaximum();
-  //Set the number of bins to use for a given dimension.
-  dimension->setRange(currentMin, currentMax, nBins);
-  return Mantid::VATES::Dimension_sptr(dimension);
-}
 
 std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > getDimensions(
     Poco::XML::Element* geometryXMLElement, bool nonIntegratedOnly)

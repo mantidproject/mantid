@@ -71,6 +71,11 @@ public:
   /// Generates a scalar array for signal.
   vtkFloatArray* createScalarArray() const;
 
+  virtual std::string getFactoryTypeName() const
+  {
+    return "vtkStructuredGridFactory";
+  }
+
 protected:
 
   /// Validate the object.

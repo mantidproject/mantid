@@ -260,6 +260,13 @@ public:
     TSM_ASSERT_THROWS("No T dimension, so should not be possible to complete initialization.", factory.initialize(ws_sptr), std::runtime_error);
   }
 
+  void testTypeName()
+  {
+    using namespace Mantid::VATES;
+    vtkStructuredGridFactory<TimeStepToTimeStep> factory("signal", 1);
+    TS_ASSERT_EQUALS("vtkStructuredGridFactory", factory.getFactoryTypeName());
+  }
+
 };
 
 #endif
