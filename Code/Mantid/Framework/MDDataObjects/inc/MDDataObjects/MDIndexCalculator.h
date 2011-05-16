@@ -49,8 +49,8 @@ private:
   /// Stores the number of dimensions == m_dimSizes.size()
   unsigned int m_nDimensions;
  
-  /// Stores maximum size in each dimension.
-  std::vector<unsigned int> m_dimSizes;
+  /// Stores maximum size in each dimension. 
+  std::vector<size_t> m_dimSizes; // Though biggish value on 64 bit machine, can be reached in some odd scenario 
 
   /// Cached coefficients
   std::vector<int> m_coeffs;
@@ -67,7 +67,7 @@ public:
   MDWorkspaceIndexCalculator(unsigned int nDimensions, int size1 = -1, int size2 = -1, int size3 = -1, int size4 = -1);
 
   /// Set the dimension size limit for a specified index/dimension.
-  void setDimensionSize(unsigned int indexOfDimension, int size);
+  void setDimensionSize(unsigned int indexOfDimension, size_t size);
 
   /// Get the dimension size limit for a specified index/dimension.
   int getDimensionSize(unsigned int indexOfDimension) const;

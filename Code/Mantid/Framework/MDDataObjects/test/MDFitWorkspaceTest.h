@@ -33,7 +33,7 @@ public:
       std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> > points(2);
       points[0].reset(new MDPoint(double(rand() % 100),1.0,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
       points[1].reset(new MDPoint(double(rand() % 100),1.0,std::vector<coordinate>(),IDetector_sptr(),IInstrument_sptr()));
-      int i = it->getPointer();
+      size_t i = it->getPointer();
       ws.setCell(i,points);
     }
     while(it->next());
@@ -44,8 +44,11 @@ public:
     {
       size_t i = it->getPointer();
       const SignalAggregate& cell = ws.getCell(i);
+	  if(cell.getSignal()){ // fulling the compiler our of warning of unused variable
       //std::cerr << "cell " << i << " " << cell.getSignal() << ' ' << cell.getError() << ' ' << cell.getContributingPoints().size() << std::endl;
+	  }
     }
+
     while(it->next());
     delete it;
 

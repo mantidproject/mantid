@@ -368,7 +368,7 @@ namespace Mantid{
       std::vector<double> x;
       bool rec = false;
       // parse the input expression
-      for(int i = 0; i < expr.size(); ++i)
+      for(size_t i = 0; i < expr.size(); ++i)
       {
         const Expression& key_value = expr[i];
         std::string key = key_value[0].name();

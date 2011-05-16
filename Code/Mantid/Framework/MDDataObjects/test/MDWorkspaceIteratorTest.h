@@ -95,7 +95,7 @@ public:
 
     MDWorkspaceIndexCalculator calculator(dimensionality, 10, 10); // 100 cells.
     MDWorkspaceIterator iterator(calculator, dimensions);
-    size_t valuePointer;
+    size_t valuePointer(0);
     while(iterator.next())
     {
       valuePointer = iterator.getPointer();

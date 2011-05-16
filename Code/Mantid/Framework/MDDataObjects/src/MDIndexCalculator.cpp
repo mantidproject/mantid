@@ -48,10 +48,10 @@ MDWorkspaceIndexCalculator&  MDWorkspaceIndexCalculator::operator=(const MDWorks
   * @param other :: other calculator rhs.
   */
 MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(const MDWorkspaceIndexCalculator& other):
-  m_nDimensions(other.m_nDimensions),
-  m_coeffs(other.m_coeffs),
-  m_isSetup(other.m_isSetup),
-  m_dimSizes(other.m_dimSizes)
+   m_isSetup(other.m_isSetup),
+   m_nDimensions(other.m_nDimensions),
+   m_coeffs(other.m_coeffs),
+   m_dimSizes(other.m_dimSizes)
 {
 }
 
@@ -66,7 +66,7 @@ std::vector<int> MDWorkspaceIndexCalculator::cacluateCoefficients() const
   return coeffs;
 }
 
-void MDWorkspaceIndexCalculator::setDimensionSize(unsigned int indexOfDimension, int size)
+void MDWorkspaceIndexCalculator::setDimensionSize(unsigned int indexOfDimension, size_t size)
 {
   if (indexOfDimension >= m_nDimensions)
   {
