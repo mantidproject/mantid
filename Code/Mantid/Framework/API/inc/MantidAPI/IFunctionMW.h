@@ -25,9 +25,7 @@ namespace CurveFitting
 
 namespace API
 {
-#ifndef IGNORE_IFunctionMW_ARGUMENT
-#define IGNORE_IFunctionMW_ARGUMENT(x)
-#endif
+
 //----------------------------------------------------------------------
 // Forward declaration
 //----------------------------------------------------------------------

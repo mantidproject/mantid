@@ -57,9 +57,9 @@ public:
   /// Reset the reference
   void reset(IFitFunction* fun,std::size_t index);
   /// Set the parameter
-  void setParameter(const double& value) {m_function->setParameter(m_index,value);}
+  void setParameter(const double& value) {m_function->setParameter(static_cast<int>(m_index),value);}
   /// Get the value of the parameter
-  double getParameter()const{return m_function->getParameter(m_index);}
+  double getParameter()const{return m_function->getParameter(static_cast<int>(m_index));}
 private:
   IFitFunction* m_function; ///< pointer to the function
   std::size_t m_index; ///< parameter index

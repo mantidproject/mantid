@@ -42,7 +42,7 @@ void CompositeFunctionMD::function(double* out)const
 {
   boost::scoped_array<double> tmpOut(new double[dataSize()]);
   std::fill_n(out,m_dataSize,0);
-  for(size_t i = 0; i < nFunctions(); i++)
+  for(int i = 0; i < nFunctions(); i++)
   {
     //IFunctionMD* fun = dynamic_cast<IFunctionMD*>(getFunction(i));
     IFitFunction* fun = getFunction(i);
@@ -87,8 +87,8 @@ void CompositeFunctionMD::functionDeriv(Jacobian* out)
     // claculate numerically
     double stepPercentage = DBL_EPSILON*1000; // step percentage
     double step; // real step
-    const size_t nParam = nParams();
-    const size_t nData  = dataSize();
+    const int nParam = nParams();
+    const int nData  = dataSize();
 
     // allocate memory if not already done
     if (!m_tmpFunctionOutputMinusStep && nData>0)
@@ -99,7 +99,7 @@ void CompositeFunctionMD::functionDeriv(Jacobian* out)
 
     function(m_tmpFunctionOutputMinusStep.get());
 
-    for (size_t iP = 0; iP < nParam; iP++)
+    for (int iP = 0; iP < nParam; iP++)
     {
       if ( isActive(iP) )
       {
@@ -120,7 +120,8 @@ void CompositeFunctionMD::functionDeriv(Jacobian* out)
         step = paramPstep - val;
         setParameter(iP, val);
 
-        for (size_t i = 0; i < nData; i++) {
+        for (int i = 0; i < nData; i++) 
+	{
           double value = (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/step;
           out->set(i,iP,value);
         }
@@ -143,7 +144,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   }
   m_wsIndex.resize(nFunctions());
 
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
+  for(int iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* fun = getFunction(iFun);
     if (fun->getWorkspace())
@@ -169,7 +170,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     //}
   }
 
-  for(size_t iFun=0;iFun<nFunctions();iFun++)
+  for(int iFun=0;iFun<nFunctions();iFun++)
   {
     std::vector<size_t>& index = m_wsIndex[iFun];
     if (index.empty())
@@ -190,7 +191,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     IMDIterator* r = mws->createIterator();
     size_t n = r->getDataSize();
     m_offset[i] = m_dataSize;
-    m_dataSize += n;
+    m_dataSize += static_cast<int>(n);
     delete r;
   }
 

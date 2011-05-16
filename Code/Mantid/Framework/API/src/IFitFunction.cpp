@@ -39,7 +39,7 @@ namespace API
  */
 void IFitFunction::functionDeriv(Jacobian* out)
 {
-  (void) out; //Avoid compiler warning
+  UNUSED_ARG(out);
   throw ("No derivative IFitFunction provided");
 }
 

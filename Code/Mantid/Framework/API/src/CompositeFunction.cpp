@@ -340,8 +340,8 @@ void CompositeFunction::checkFunction()
  */
 int CompositeFunction::addFunction(IFitFunction* f)
 {
-  m_IFitFunction.insert(m_IFitFunction.end(),f->nParams(),m_functions.size());
-  m_IFitFunctionActive.insert(m_IFitFunctionActive.end(),f->nActive(),m_functions.size());
+  m_IFitFunction.insert(m_IFitFunction.end(),f->nParams(), static_cast<int>(m_functions.size()));
+  m_IFitFunctionActive.insert(m_IFitFunctionActive.end(),f->nActive(),static_cast<int>(m_functions.size()));
   m_functions.push_back(f);
   //?f->init();
   if (m_paramOffsets.size() == 0)
@@ -358,7 +358,7 @@ int CompositeFunction::addFunction(IFitFunction* f)
     m_nParams += f->nParams();
     m_nActive += f->nActive();
   }
-  return m_functions.size()-1;
+  return static_cast<int>(m_functions.size())-1;
 }
 
 /** Remove a function
@@ -457,9 +457,8 @@ void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* 
   std::vector<IFitFunction*>::const_iterator it = 
     std::find(m_functions.begin(),m_functions.end(),f_old);
   if (it == m_functions.end()) return;
-//  f_new->setMatrixWorkspace(f_old->getMatrixWorkspace(),f_old->getWorkspaceIndex(),-1,-1);
-  int iFun = it - m_functions.begin();
-  replaceFunction(iFun,f_new);
+  std::vector<IFitFunction*>::difference_type iFun = it - m_functions.begin();
+  replaceFunction(static_cast<int>(iFun),f_new);
 }
 
 /** Replace a function with a new one. The old function is deleted.
@@ -771,9 +770,9 @@ bool CompositeFunction::isExplicitlySet(int i)const
  */
 int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
   {
-    return ref.getIndex();
+    return static_cast<int>(ref.getIndex());
   }
   for(int iFun=0;iFun<nFunctions();iFun++)
   {
@@ -792,7 +791,7 @@ int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
  */
 IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
   {
     return ref.getFunction();
   }
