@@ -48,8 +48,8 @@ void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec
                                           const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
 {
   (void) lhsX; //Avoid compiler warning
-  const int bins = lhsY.size();
-  for (int j=0; j<bins; ++j)
+  const size_t bins = lhsY.size();
+  for (size_t j=0; j<bins; ++j)
   {
     if (lhsE[j] > 0.0 && rhsE[j] > 0.0)
     {
@@ -81,6 +81,7 @@ void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec
 void WeightedMean::performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                                           const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
 {
+	UNUSED_ARG(lhsX);
   assert( lhsX.size() == 1 );
   // If we get here we've got two single column workspaces so it's easy.
   if (lhsE[0] > 0.0 && rhsE > 0.0)
