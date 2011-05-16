@@ -43,7 +43,7 @@ public:
    * Constructor.
    * @param the_index :: unique index into the workspace of this data
    */
-  MantidVecWithMarker(const int the_index)
+  MantidVecWithMarker(const size_t the_index)
   : m_index(the_index)
   {
   }
@@ -77,7 +77,7 @@ private:
 
 public:
   /// Unique index value.
-  int m_index;
+  size_t m_index;
 
   /// Pointer to a vector of data
   MantidVec m_data;
@@ -85,19 +85,19 @@ public:
   /// Function returns a unique index, used for hashing for MRU list
   int hashIndexFunction() const
   {
-    return m_index;
+    return int(m_index);
   }
 
   /// Set the unique index value.
-  void setIndex(const int the_index)
+  void setIndex(const size_t the_index)
   {
     m_index = the_index;
   }
 };
 
 
-///Map to EventList objects, with an int as the index.
-typedef std::map<const int, EventList*> EventListMap;
+///Map to EventList objects, with the detector ID as the index.
+typedef std::map<detid_t, EventList*> EventListMap;
 typedef std::vector<EventList*> EventListVector;
 
 
@@ -198,7 +198,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
   // Get an EventList object at the given pixelid/spectrum number
-  EventList& getEventListAtPixelID(const int64_t pixelid);
+  EventList& getEventListAtPixelID(const detid_t pixelid);
 
   // Get an EventList object at the given workspace index number
   EventList& getEventList(const std::size_t workspace_index);

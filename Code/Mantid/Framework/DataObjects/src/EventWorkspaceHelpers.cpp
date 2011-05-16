@@ -30,7 +30,7 @@ MatrixWorkspace_sptr EventWorkspaceHelpers::convertEventTo2D(MatrixWorkspace_spt
   WorkspaceFactory::Instance().initializeFromParent(inputW, outputW, true);
 
   // Now let's set all the X bins and values
-  for (int i=0; i<inputW->getNumberHistograms(); i++)
+  for (size_t i=0; i<inputW->getNumberHistograms(); i++)
   {
     outputW->setX(i, inputW->refX(i));
 

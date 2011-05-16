@@ -382,7 +382,7 @@ namespace DataObjects
    * @param pixelID :: pixelID of this event list. This is not necessarily the same as the workspace Index.
    * @returns A reference to the eventlist
    */
-  EventList& EventWorkspace::getEventListAtPixelID(const int64_t pixelID)
+  EventList& EventWorkspace::getEventListAtPixelID(const detid_t pixelID)
   {
     if (this->done_loading_data)
       throw std::runtime_error("EventWorkspace::getEventListAtPixelID called after doneLoadingData(). Try getEventList() instead.");
@@ -502,14 +502,15 @@ namespace DataObjects
 
     //Do each block in parallel
     PARALLEL_FOR_IF(parallel)
-    for (int i = 0; i < numpixels; i++)
+    for (int i = 0; i < static_cast<int>(numpixels); i++)
     {
+      size_t wi = size_t(i);
       //Create an event list for here
       EventList * newel = new EventList();
       //Set the (single) entry in the detector ID set
-      newel->addDetectorID( pixelIDs[i] );
+      newel->addDetectorID( pixelIDs[wi] );
       //Save it in the list
-      data[i] = newel;
+      data[wi] = newel;
     }
 
     //Finalize by building the spectra map, etc.
@@ -541,7 +542,7 @@ namespace DataObjects
     for (size_t wi=0; wi<this->m_noVectors; wi++)
     {
       //And copy over the set of detector IDs. Not the smartest way to do it, but we are kinda stuck.
-      myMap.addSpectrumEntries(wi, this->data[wi]->getDetectorIDs() );
+      myMap.addSpectrumEntries(specid_t(wi), this->data[wi]->getDetectorIDs() );
     }
   }
 
@@ -988,14 +989,14 @@ namespace DataObjects
   {
   public:
     /// ctor
-    EventSortingTask(const EventWorkspace * WS, int wiStart, int wiStop, EventSortType sortType, size_t howManyCores, Mantid::API::Progress * prog)
+    EventSortingTask(const EventWorkspace * WS, size_t wiStart, size_t wiStop, EventSortType sortType, size_t howManyCores, Mantid::API::Progress * prog)
     : Task(), m_wiStart(wiStart), m_wiStop(wiStop),  m_sortType(sortType), m_howManyCores(howManyCores), m_WS(WS), prog(prog)
     {
       m_cost = 0;
       if (m_wiStop > m_WS->getNumberHistograms())
         m_wiStop = m_WS->getNumberHistograms();
 
-      for (int wi=m_wiStart; wi < m_wiStop; wi++)
+      for (size_t wi=m_wiStart; wi < m_wiStop; wi++)
       {
         double n = static_cast<double>(m_WS->getEventList(wi).getNumberEvents());
         // Sorting time is approximately n * ln (n)
@@ -1010,7 +1011,7 @@ namespace DataObjects
     void run()
     {
       if (!m_WS) return;
-      for (int wi=m_wiStart; wi < m_wiStop; wi++)
+      for (size_t wi=m_wiStart; wi < m_wiStop; wi++)
       {
         if (m_sortType != TOF_SORT)
           m_WS->getEventList(wi).sort(m_sortType);
@@ -1030,9 +1031,9 @@ namespace DataObjects
 
   private:
     /// Start workspace index to process
-    int m_wiStart;
+    size_t m_wiStart;
     /// Stop workspace index to process
-    int m_wiStop;
+    size_t m_wiStop;
     /// How to sort
     EventSortType m_sortType;
     /// How many cores for each sort
@@ -1160,7 +1161,7 @@ namespace DataObjects
 
     //We can run in parallel since there is no cross-reading of event lists
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
+    for (size_t wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
     {
       // Get Handle to data
       EventList * el = this->data[wksp_index];

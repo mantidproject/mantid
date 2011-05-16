@@ -162,7 +162,7 @@ namespace Kernel
     /** Delete the T at the given index.
      * @param index :: the key (index) for this T that you want to remove from the MRU.
      */
-    void deleteIndex(const unsigned int index)
+    void deleteIndex(const size_t index)
     {
       using namespace boost::multi_index;
       typename ordered_item_list::iterator it;
@@ -189,7 +189,7 @@ namespace Kernel
      *  @param index :: The index value to search the list for
      *  @return The object found, or NULL if not found.
      */
-    T* find(const unsigned int index) const
+    T* find(const size_t index) const
     {
       using namespace boost::multi_index;
       typename ordered_item_list::const_iterator it;
