@@ -491,7 +491,7 @@ public:
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
 
-    size_t numbad;
+    size_t numbad = 0;
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events ); );
     // Get the right totals again
     b->refreshCache(NULL);
@@ -550,7 +550,7 @@ public:
         events.push_back( MDEvent<2>(2.0, 2.0, centers) );
       }
 
-    size_t numbad;
+    size_t numbad = 0;
     TS_ASSERT_THROWS_NOTHING( numbad = b->addEvents( events, 50, 60 ); );
     // Get the right totals again
     b->refreshCache(NULL);

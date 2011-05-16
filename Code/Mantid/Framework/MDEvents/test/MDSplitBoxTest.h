@@ -70,7 +70,7 @@ public:
     // Build the splitbox
     typedef MDSplitBox<MDEvent<2>,2> MDSplitBox2;
     typedef IMDBox<MDEvent<2>,2> IMDBox2;
-    MDSplitBox2 * box;
+    MDSplitBox2 * box = NULL;
     TS_ASSERT_THROWS_NOTHING( box = new MDSplitBox2(mdbox) );
 
     TS_ASSERT_EQUALS(box->getNPoints(), 20*60);
@@ -122,7 +122,7 @@ public:
 
     typedef MDSplitBox<MDEvent<2>,2> MDSplitBox2;
     typedef IMDBox<MDEvent<2>,2> IMDBox2;
-    MDSplitBox2 * box;
+    MDSplitBox2 * box = NULL;
 
     //Manually create it
     TS_ASSERT_THROWS_NOTHING( box = new MDSplitBox2(mdbox, 1, 5.0) );
