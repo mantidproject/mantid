@@ -750,17 +750,17 @@ namespace Mantid
     }
 
     /** Masks a single bin. It's value (and error) will be scaled by (1-weight).
-    *  @param spectrumIndex :: The workspace spectrum index of the bin
+    *  @param workspaceIndex :: The workspace spectrum index of the bin
     *  @param binIndex ::      The index of the bin in the spectrum
     *  @param weight ::        'How heavily' the bin is to be masked. =1 for full masking (the default).
     */
-    void MatrixWorkspace::maskBin(const int64_t& spectrumIndex, const int64_t& binIndex, const double& weight)
+    void MatrixWorkspace::maskBin(const size_t& workspaceIndex, const size_t& binIndex, const double& weight)
     {
-      // First check the spectrumIndex is valid
-      if (spectrumIndex < 0 || spectrumIndex >= static_cast<int64_t>(this->getNumberHistograms()) )
-        throw Kernel::Exception::IndexError(spectrumIndex,this->getNumberHistograms(),"MatrixWorkspace::maskBin,spectrumIndex");
+      // First check the workspaceIndex is valid
+      if (workspaceIndex >= this->getNumberHistograms() )
+        throw Kernel::Exception::IndexError(workspaceIndex,this->getNumberHistograms(),"MatrixWorkspace::maskBin,workspaceIndex");
       // Then check the bin index
-      if (binIndex < 0 || binIndex>= static_cast<int64_t>(this->blocksize()) )
+      if (binIndex>= this->blocksize() )
         throw Kernel::Exception::IndexError(binIndex,this->blocksize(),"MatrixWorkspace::maskBin,binIndex");
 
       // Writing to m_masks is not thread-safe, so put in some protection
@@ -768,41 +768,41 @@ namespace Mantid
       {
         // If a mask for this bin already exists, it would be replaced. But I think that is OK.
         // First get a reference to the list for this spectrum (or create a new list)
-        MatrixWorkspace::MaskList& specList = m_masks[spectrumIndex];
+        MatrixWorkspace::MaskList& specList = m_masks[workspaceIndex];
         // Add the new value. Will automatically be put in the right place (ordered by binIndex)
         specList.insert( std::make_pair(binIndex,weight) );
       }
 
-      this->dataY(spectrumIndex)[binIndex] *= (1-weight);
+      this->dataY(workspaceIndex)[binIndex] *= (1-weight);
       // Do we want to scale the error?
-      this->dataE(spectrumIndex)[binIndex] *= (1-weight);
+      this->dataE(workspaceIndex)[binIndex] *= (1-weight);
     }
 
     /** Does this spectrum contain any masked bins 
-    *  @param spectrumIndex :: The workspace spectrum index to test
+    *  @param workspaceIndex :: The workspace spectrum index to test
     *  @return True if there are masked bins for this spectrum
     */
-    bool MatrixWorkspace::hasMaskedBins(const int64_t& spectrumIndex) const
+    bool MatrixWorkspace::hasMaskedBins(const size_t& workspaceIndex) const
     {
-      // First check the spectrumIndex is valid. Return false if it isn't (decided against throwing here).
-      if (spectrumIndex < 0 || spectrumIndex >= static_cast<int64_t>(this->getNumberHistograms()) )
+      // First check the workspaceIndex is valid. Return false if it isn't (decided against throwing here).
+      if ( workspaceIndex >= this->getNumberHistograms() )
         return false;
-      return (m_masks.find(spectrumIndex)==m_masks.end()) ? false : true;
+      return (m_masks.find(workspaceIndex)==m_masks.end()) ? false : true;
     }
 
     /** Returns the list of masked bins for a spectrum. 
-    *  @param  spectrumIndex
+    *  @param  workspaceIndex
     *  @return A const reference to the list of masked bins
     *  @throw  Kernel::Exception::IndexError if there are no bins masked for this spectrum (so call hasMaskedBins first!)
     */
-    const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const int64_t& spectrumIndex) const
+    const MatrixWorkspace::MaskList& MatrixWorkspace::maskedBins(const size_t& workspaceIndex) const
     {
-      std::map<int64_t,MaskList>::const_iterator it = m_masks.find(spectrumIndex);
+      std::map<int64_t,MaskList>::const_iterator it = m_masks.find(workspaceIndex);
       // Throw if there are no masked bins for this spectrum. The caller should check first using hasMaskedBins!
       if (it==m_masks.end())
       {
-        g_log.error() << "There are no masked bins for spectrum index " << spectrumIndex << std::endl;
-        throw Kernel::Exception::IndexError(spectrumIndex,0,"MatrixWorkspace::maskedBins");
+        g_log.error() << "There are no masked bins for spectrum index " << workspaceIndex << std::endl;
+        throw Kernel::Exception::IndexError(workspaceIndex,0,"MatrixWorkspace::maskedBins");
       }
 
       return it->second;

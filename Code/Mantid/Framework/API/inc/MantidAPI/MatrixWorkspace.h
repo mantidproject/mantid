@@ -222,11 +222,11 @@ namespace Mantid
       void maskWorkspaceIndex(const std::size_t index, const double maskValue = 0.0);
 
       // Methods to set and access masked bins
-      void maskBin(const int64_t& spectrumIndex, const int64_t& binIndex, const double& weight = 1.0);
-      bool hasMaskedBins(const int64_t& spectrumIndex) const;
+      void maskBin(const size_t& spectrumIndex, const size_t& binIndex, const double& weight = 1.0);
+      bool hasMaskedBins(const size_t& spectrumIndex) const;
       /// Masked bins for each spectrum are stored as a set of pairs containing <bin index, weight>
-      typedef std::set< std::pair<int64_t,double> > MaskList;
-      const MaskList& maskedBins(const int64_t& spectrumIndex) const;
+      typedef std::set< std::pair<size_t,double> > MaskList;
+      const MaskList& maskedBins(const size_t& spectrumIndex) const;
 
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
