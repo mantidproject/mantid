@@ -1161,7 +1161,7 @@ namespace DataObjects
 
     //We can run in parallel since there is no cross-reading of event lists
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (size_t wksp_index = 0; wksp_index < this->getNumberHistograms(); wksp_index++)
+    for (int wksp_index = 0; wksp_index < int(this->getNumberHistograms()); wksp_index++)
     {
       // Get Handle to data
       EventList * el = this->data[wksp_index];
