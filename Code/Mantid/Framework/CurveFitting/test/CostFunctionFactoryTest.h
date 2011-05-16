@@ -21,9 +21,9 @@ public:
 
   std::string name()const {return "fido";}
 
-  double val(const double* yData, const double* inverseError, double* yCal, const int& n) { return 0.0;}
+  double val(const double* yData, const double* inverseError, double* yCal, const size_t& n) { return 0.0;}
   void deriv(const double* yData, const double* inverseError, const double* yCal, 
-    const double* jacobian, double* outDerivs, const int& p, const int& n) {}
+    const double* jacobian, double* outDerivs, const size_t& p, const size_t& n) {}
 
 };
 
