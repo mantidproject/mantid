@@ -57,11 +57,11 @@ public:
     }
     // 1d int16 array
     for (size_t i = 0; i < 4; i++) {
-      i2_array.push_back(1000*(i+1));
+      i2_array.push_back(static_cast<int16_t>(1000*(i+1)));
     }
     // 1d int32 data
     for (size_t i = 0; i < 4; i++) {
-      i4_array.push_back(1000000*(i+1));
+      i4_array.push_back(static_cast<int32_t>(1000000*(i+1)));
     }
     // 1d int64 data
     for (size_t i = 0; i < 4; i++) {

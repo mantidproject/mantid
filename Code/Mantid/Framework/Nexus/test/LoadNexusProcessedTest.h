@@ -320,7 +320,7 @@ public:
      workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(output_ws) );
      TS_ASSERT( workspace.get() );
 
-     for(int si = 0; si < workspace->getNumberHistograms(); ++si)
+     for(size_t si = 0; si < workspace->getNumberHistograms(); ++si)
      {
        workspace->maskBin(si,0,1.0);
        workspace->maskBin(si,1,1.0);
