@@ -81,6 +81,7 @@ namespace DataObjects
   /** Add a column (used by constructor). */
   bool PeaksWorkspace::addColumn(const std::string& type, const std::string& name)
   {
+    UNUSED_ARG(type)
     // Create the PeakColumn.
     columns.push_back( boost::shared_ptr<Mantid::DataObjects::PeakColumn>(new Mantid::DataObjects::PeakColumn( this->peaks, name) ) );
     // Cache the names
