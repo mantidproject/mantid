@@ -236,7 +236,7 @@ namespace Mantid
       loadWsAlg->initialize();
       loadWsAlg->setPropertyValue("inFilename", location);
       loadWsAlg->setPropertyValue("MDWorkspace",name);
-      loadWsAlg->execute();
+	  loadWsAlg->execute();
 
       IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.01, 1, true, 1);
 

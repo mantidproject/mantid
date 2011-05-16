@@ -56,11 +56,11 @@ private:
     using namespace Mantid::Geometry;
 
     Load_MDWorkspace loader;
-	// this will set loader to work with thest file format rather then with real file on HDD
-	// loader.set_test_mode();
+    // this will set loader to work with thest file format rather then with real file on HDD
+    // loader.set_test_mode();
     loader.initialize();
     loader.setPropertyValue("inFilename","fe_demo_bin.sqw");
-	
+    
     std::string targetWorkspaceName = "Input";
     loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
     loader.execute();
@@ -291,20 +291,20 @@ public:
     TSM_ASSERT_EQUALS("The xml generated from the dimension description did not match the expectation.", geomDescription->toXMLstring(), "TEST PROPERTY"); 
 
     //Note that the MDGeometry description orders dimensions passed to it internally.
-	TSM_ASSERT_EQUALS("Wrong number of bins returned for first dimension", 7,  geomDescription->pDimDescription(0)->nBins);
-	TSM_ASSERT_EQUALS("Wrong number of bins returned for second dimension", 5, geomDescription->pDimDescription(1)->nBins);
-	TSM_ASSERT_EQUALS("Wrong number of bins returned for third dimension", 6,  geomDescription->pDimDescription(2)->nBins);
-	TSM_ASSERT_EQUALS("Wrong number of bins returned for fourth dimension", 4, geomDescription->pDimDescription(3)->nBins);
+    TSM_ASSERT_EQUALS("Wrong number of bins returned for first dimension", 7,  geomDescription->pDimDescription(0)->nBins);
+    TSM_ASSERT_EQUALS("Wrong number of bins returned for second dimension", 5, geomDescription->pDimDescription(1)->nBins);
+    TSM_ASSERT_EQUALS("Wrong number of bins returned for third dimension", 6,  geomDescription->pDimDescription(2)->nBins);
+    TSM_ASSERT_EQUALS("Wrong number of bins returned for fourth dimension", 4, geomDescription->pDimDescription(3)->nBins);
  
-	TSM_ASSERT_EQUALS("Incorrect axis name for first dimension", "Qx",     geomDescription->pDimDescription(0)->AxisName);
-	TSM_ASSERT_EQUALS("Incorrect axis name for second dimension", "Qy",    geomDescription->pDimDescription(1)->AxisName);
-	TSM_ASSERT_EQUALS("Incorrect axis name for third dimension", "Qz",     geomDescription->pDimDescription(2)->AxisName);
-	TSM_ASSERT_EQUALS("Incorrect axis name for fourth dimension", "Energy",geomDescription->pDimDescription(3)->AxisName);
+    TSM_ASSERT_EQUALS("Incorrect axis name for first dimension", "Qx",     geomDescription->pDimDescription(0)->AxisName);
+    TSM_ASSERT_EQUALS("Incorrect axis name for second dimension", "Qy",    geomDescription->pDimDescription(1)->AxisName);
+    TSM_ASSERT_EQUALS("Incorrect axis name for third dimension", "Qz",     geomDescription->pDimDescription(2)->AxisName);
+    TSM_ASSERT_EQUALS("Incorrect axis name for fourth dimension", "Energy",geomDescription->pDimDescription(3)->AxisName);
     
-	TSM_ASSERT_EQUALS("Incorrect id for first dimension", "qx",  geomDescription->pDimDescription(0)->Tag);
+    TSM_ASSERT_EQUALS("Incorrect id for first dimension", "qx",  geomDescription->pDimDescription(0)->Tag);
     TSM_ASSERT_EQUALS("Incorrect id for second dimension", "qy", geomDescription->pDimDescription(1)->Tag);
-	TSM_ASSERT_EQUALS("Incorrect id for third dimension", "qz",  geomDescription->pDimDescription(2)->Tag);
-	TSM_ASSERT_EQUALS("Incorrect id for fourth dimension", "en", geomDescription->pDimDescription(3)->Tag);
+    TSM_ASSERT_EQUALS("Incorrect id for third dimension", "qz",  geomDescription->pDimDescription(2)->Tag);
+    TSM_ASSERT_EQUALS("Incorrect id for fourth dimension", "en", geomDescription->pDimDescription(3)->Tag);
 
   }
 
@@ -329,12 +329,12 @@ public:
 
     xmlRebinAlg.ApplyImplicitFunctionToMDGeometryDescription(description, impFunction);
 
-	TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -0.75, description->pDimDescription(0)->cut_min);
-  TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 0.75,  description->pDimDescription(0)->cut_max);
-  TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -0.75, description->pDimDescription(1)->cut_min);
-  TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 0.75,  description->pDimDescription(1)->cut_max);
-	TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", -3, description->pDimDescription(2)->cut_min);
-  TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
+    TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", -0.75, description->pDimDescription(0)->cut_min);
+    TSM_ASSERT_EQUALS("Wrong x-min set via cut box.", 0.75,  description->pDimDescription(0)->cut_max);
+    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", -0.75, description->pDimDescription(1)->cut_min);
+    TSM_ASSERT_EQUALS("Wrong y-min set via cut box.", 0.75,  description->pDimDescription(1)->cut_max);
+    TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", -3, description->pDimDescription(2)->cut_min);
+    TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
   }
 
   void testExecute()

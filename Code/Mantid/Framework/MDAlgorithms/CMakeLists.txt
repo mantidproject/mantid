@@ -89,12 +89,11 @@ set ( INC_FILES
 
 # Test files. Other source files required.
 set ( TEST_FILES
-	#test/testCPComponents.h TODO: Is this test really necessary?
 	#test/CobaltSWDTest.h
 	#test/CreateMDFitWorkspaceTest.h
 	test/DepthParameterTest.h
 	test/DimensionFactoryTest.h
-	test/DynamicRebinFromXMLAlgorithmTest.h
+	test/DynamicRebinFromXMLAlgorithmTest.h 
 	test/HeightParameterTest.h
 	test/InvalidParameterParserTest.h
 	test/InvalidParameterTest.h

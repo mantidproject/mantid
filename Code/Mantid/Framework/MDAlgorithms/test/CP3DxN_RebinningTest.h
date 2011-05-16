@@ -135,7 +135,7 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
-  void t__tCPRRebinSmallerInto3D(){
+  void testCPRRebinSmallerInto3D(){
    // now rebin into slice
   // retrieve slicing property for modifications
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Property *)(cpr.getProperty("SlicingData")));
@@ -168,6 +168,12 @@ class CP3DxN_RebinningTest :  public CxxTest::TestSuite
 
         TSM_ASSERT_THROWS_NOTHING("Good rebinning should not throw",cpr.execute());
     }
+	 void testClearWorkspaces(){
+		 //  not entirely according to standarts, but does not test anything but deletes workpsaces to free memory when running in suite
+		 // before the real destructor is called
+		 AnalysisDataService::Instance().remove(InputWorkspaceName);
+		 AnalysisDataService::Instance().remove(OutWorkspaceName);
+	 }
 };
 
 
