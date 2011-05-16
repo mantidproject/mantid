@@ -128,7 +128,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   /// Destructor
   virtual ~EventWorkspace();
 
-  /// Initialize the pixels */
+  /// Initialize the pixels
   void init(const std::size_t&, const std::size_t&, const std::size_t&);
 
   virtual bool threadSafe() const;

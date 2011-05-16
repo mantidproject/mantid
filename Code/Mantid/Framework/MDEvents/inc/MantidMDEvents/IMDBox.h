@@ -15,10 +15,6 @@ namespace Mantid
 namespace MDEvents
 {
 
-  /// Forward declaration
-  TMDE_CLASS
-  class MDBoxTask;
-
   //===============================================================================================
   /** Abstract Interface for a multi-dimensional event "box".
    * To be subclassed by MDBox and MDGridBox
@@ -107,11 +103,6 @@ namespace MDEvents
     {
       // Do nothing by default.
     }
-
-
-
-    /// Run a generic MDBoxTask onto this, going recursively.
-//    virtual void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained) = 0;
 
 
     // -------------------------------------------------------------------------------------------

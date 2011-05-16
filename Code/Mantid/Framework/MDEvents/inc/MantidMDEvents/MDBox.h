@@ -68,8 +68,6 @@ namespace MDEvents
 
     void integrateSphere(CoordTransform & radiusTransform, const coord_t radiusSquared, signal_t & signal, signal_t & errorSquared) const;
 
-//    void runMDBoxTask(MDBoxTask<MDE,nd> * task, const bool fullyContained);
-
   protected:
 
     /** Vector of MDEvent's, in no particular order.

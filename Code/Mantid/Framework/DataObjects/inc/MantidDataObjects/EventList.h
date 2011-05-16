@@ -322,8 +322,6 @@ private:
   /// Set of the detector IDs associated with this EventList
   std::set<detid_t> detectorIDs;
 
-  void convertTof_onList(const double factor, const double offset);
-
   template<class T>
   static typename std::vector<T>::const_iterator findFirstEvent(const std::vector<T> & events, const double seek_tof);
 

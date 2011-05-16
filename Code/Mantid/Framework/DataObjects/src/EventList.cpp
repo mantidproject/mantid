@@ -1272,7 +1272,7 @@ namespace DataObjects
   }
 
   /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param X :: The vector of doubles to set as the histogram limits.
+   * @param dX :: The vector of doubles to set as the histogram x-errors.
    */
   void EventList::setDx(const MantidVecPtr::ptr_type& dX)
   {
@@ -1280,7 +1280,7 @@ namespace DataObjects
   }
 
   /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param X :: The vector of doubles to set as the histogram limits.
+   * @param dX :: The vector of doubles to set as the histogram x-errors.
    */
   void EventList::setDx(const MantidVecPtr& dX)
   {
@@ -1288,7 +1288,7 @@ namespace DataObjects
   }
 
   /** Set the x error-component for the histogram view. This will NOT cause the histogram to be calculated.
-   * @param X :: The vector of doubles to set as the histogram limits.
+   * @param dX :: The vector of doubles to set as the histogram x-errors.
    */
   void EventList::setDx(const MantidVec& dX)
   {
@@ -2196,7 +2196,7 @@ namespace DataObjects
 
 
   // --------------------------------------------------------------------------
-  /* Set a list of TOFs to the current event list.
+  /** Set a list of TOFs to the current event list.
    *
    * @param events :: source vector of events
    * @param tofs :: The vector of doubles to set the tofs to.

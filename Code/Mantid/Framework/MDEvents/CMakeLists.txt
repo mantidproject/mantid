@@ -1,6 +1,5 @@
 # Source files
 set ( SRC_FILES
-	#	src/MDBoxTask.cpp
 	src/BinToMDHistoWorkspace.cpp
 	src/CoordTransform.cpp
 	src/CoordTransformDistance.cpp
@@ -30,7 +29,6 @@ set ( SRC_UNITY_IGNORE_FILES
 
 # Header files
 set ( INC_FILES
-	#	inc/MantidMDEvents/MDBoxTask.h
 	inc/MantidMDEvents/BinToMDHistoWorkspace.h
 	inc/MantidMDEvents/BoxController.h
 	inc/MantidMDEvents/CoordTransform.h
@@ -55,7 +53,6 @@ set ( INC_FILES
 
 # Test files. Other source files required.
 set ( TEST_FILES
-	#	test/MDBoxTaskTest.h
 	test/BoxControllerTest.h
 	test/CoordTransformDistanceTest.h
 	test/CoordTransformTest.h

@@ -126,7 +126,12 @@ EXCLUDE                = \
 						../Kernel/src/ANN \
 						../ICat/inc/MantidICat/GSoapGenerated \
 						../ICat/inc/MantidICat/GSoap \
-						../ICat/src/GSoapGenerated 
+						../ICat/src/GSoapGenerated \
+						../MDAlgorithms/inc/MantidMDAlgorithms \ 
+						../MDAlgorithms/src \
+						../MDDataObjects/src \
+						../MDDataObjects/inc/MantidMDDataObjects \
+						../Geometry/inc/MantidGeometry/MDGeometry 
 
 EXCLUDE_SYMLINKS       = NO
 EXCLUDE_PATTERNS       = 

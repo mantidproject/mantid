@@ -636,18 +636,6 @@ namespace MDEvents
   }
 
 
-//
-//  //-----------------------------------------------------------------------------------------------
-//  /** Run a MDBox task inside this box */
-//  TMDE(
-//  void MDGridBox)::runMDBoxTask(MDBoxTask<MDE,nd> * /*task*/ , const bool /*fullyContained*/)
-//  {
-//    //if (task->stopOnFullyContained()
-//
-////    // Fully evaluate this MD Box (we assume that it is NOT fully contained).
-////    task->evaluateMDGridBox(this, false);
-//  }
-
 }//namespace MDEvents
 
 }//namespace Mantid

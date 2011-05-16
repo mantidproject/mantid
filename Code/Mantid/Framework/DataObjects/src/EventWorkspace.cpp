@@ -435,7 +435,10 @@ namespace DataObjects
 
 
   //-----------------------------------------------------------------------------
-  /// Get an EventList pointer at the given workspace index number
+  /** Get an EventList pointer at the given workspace index number
+   * @param workspace_index :: index into WS
+   * @return an EventList pointer at the given workspace index number
+   */
   EventList * EventWorkspace::getEventListPtr(const size_t workspace_index)
   {
     return data[workspace_index];
@@ -452,8 +455,8 @@ namespace DataObjects
    * @return An event list (new or existing) at the index provided
    */
   EventList& EventWorkspace::getOrAddEventList(const size_t workspace_index)
-    {
-      size_t old_size = data.size();
+  {
+    size_t old_size = data.size();
     if (workspace_index >= old_size)
     {
       //Increase the size of the eventlist lists.
