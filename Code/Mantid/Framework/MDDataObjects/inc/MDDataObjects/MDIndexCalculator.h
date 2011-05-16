@@ -53,10 +53,10 @@ private:
   std::vector<size_t> m_dimSizes; // Though biggish value on 64 bit machine, can be reached in some odd scenario 
 
   /// Cached coefficients
-  std::vector<int> m_coeffs;
+  std::vector<size_t> m_coeffs;
 
   /// Calculate coefficients of form i + aj + ck
-  std::vector<int> cacluateCoefficients() const;
+  std::vector<size_t> cacluateCoefficients() const;
 
   /// Checks that non-zero dimension sizes have been provided for all the required dimensions.
   bool checkValidSetUp() const;
@@ -70,7 +70,7 @@ public:
   void setDimensionSize(unsigned int indexOfDimension, size_t size);
 
   /// Get the dimension size limit for a specified index/dimension.
-  int getDimensionSize(unsigned int indexOfDimension) const;
+  size_t getDimensionSize(unsigned int indexOfDimension) const;
 
   /// Checks that non-zero dimension sizes have been provided for all the required dimensions.
   bool isValid() const{return m_isSetup;}

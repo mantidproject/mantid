@@ -55,9 +55,9 @@ MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(const MDWorkspaceIndexCal
 {
 }
 
-std::vector<int> MDWorkspaceIndexCalculator::cacluateCoefficients() const
+std::vector<size_t> MDWorkspaceIndexCalculator::cacluateCoefficients() const
 {
-  std::vector<int> coeffs(m_nDimensions);
+  std::vector<size_t> coeffs(m_nDimensions);
   coeffs[0] = 1;
   for (unsigned int i = 1; i < m_nDimensions; i++)
   {
@@ -80,7 +80,7 @@ void MDWorkspaceIndexCalculator::setDimensionSize(unsigned int indexOfDimension,
   }
 }
 
-int MDWorkspaceIndexCalculator::getDimensionSize(unsigned int indexOfDimension) const
+size_t MDWorkspaceIndexCalculator::getDimensionSize(unsigned int indexOfDimension) const
 {
   if (indexOfDimension >= m_nDimensions)
   {
