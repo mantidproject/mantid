@@ -120,7 +120,7 @@ private:
   class RangeHelper
   {
   public:
-    static void getList(const std::string &line, std::vector<int64_t> &outList);
+    static void getList(const std::string &line, std::vector<size_t> &outList);
   private:
     /// this class can't be constructed it is just a holder for some static things
     RangeHelper() {};

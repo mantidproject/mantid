@@ -242,7 +242,7 @@ namespace DataHandling
         {
           offsetsWS->setValue(udet, offset);
         }
-        catch (std::invalid_argument & e)
+        catch (std::invalid_argument &)
         {
           numErrors++;
         }
@@ -254,7 +254,7 @@ namespace DataHandling
         {
           groupWS->setValue(udet, double(group) );
         }
-        catch (std::invalid_argument & e)
+        catch (std::invalid_argument &)
         {
           numErrors++;
         }

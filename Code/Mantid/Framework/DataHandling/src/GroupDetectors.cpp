@@ -98,9 +98,9 @@ void GroupDetectors::exec()
   }
 
   const size_t vectorSize = WS->blocksize();
-  const size_t firstIndex = indexList[0];
-  const size_t firstSpectrum = spectraAxis->spectraNo(firstIndex);
-  setProperty<int>("ResultIndex",firstIndex);
+  const specid_t firstIndex = static_cast<specid_t>(indexList[0]);
+  const specid_t firstSpectrum = spectraAxis->spectraNo(firstIndex);
+  setProperty("ResultIndex",firstIndex);
   // loop over the spectra to group
   Progress progress(this, 0.0, 1.0, static_cast<int>(indexList.size()-1));
   for (size_t i = 0; i < indexList.size()-1; ++i)

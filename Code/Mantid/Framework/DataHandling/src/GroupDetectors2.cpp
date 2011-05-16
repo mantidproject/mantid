@@ -476,19 +476,20 @@ void GroupDetectors2::readSpectraIndexes(std::string line, spec2index_map &specs
   Poco::StringTokenizer::Iterator iend = dataComment.end();
   for( Poco::StringTokenizer::Iterator itr = dataComment.begin(); itr != iend; ++itr )
   {
-    std::vector<int64_t> specNums;
+    std::vector<size_t> specNums;
     specNums.reserve(output.capacity());
 
     RangeHelper::getList(*itr, specNums);
 
-    std::vector<int64_t>::const_iterator specN = specNums.begin();
+    std::vector<size_t>::const_iterator specN = specNums.begin();
     for( ;specN!=specNums.end(); ++specN)
     {
-      spec2index_map::const_iterator ind = specs2index.find(*specN);
+      specid_t spectrumNum = static_cast<specid_t>(*specN);
+      spec2index_map::const_iterator ind = specs2index.find(spectrumNum);
       if ( ind == specs2index.end() )
       {
-        g_log.debug() << name() << ": spectrum number " << *specN << " refered to in the input file was not found in the input workspace\n";
-        throw std::invalid_argument("Spectrum number " + boost::lexical_cast<std::string>(*specN) + " not found");
+        g_log.debug() << name() << ": spectrum number " << spectrumNum << " refered to in the input file was not found in the input workspace\n";
+        throw std::invalid_argument("Spectrum number " + boost::lexical_cast<std::string>(spectrumNum) + " not found");
       } 
       if ( unUsedSpec[ind->second] != USED )
       {// this array is used when the user sets KeepUngroupedSpectra, as well as to find duplicates
@@ -576,7 +577,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
     // the Y values and errors from spectra being grouped are combined in the output spectrum
     for( std::vector<size_t>::const_iterator specIt = it->second.begin(); specIt != it->second.end(); ++specIt)
     {
-      const specid_t copyFrom = *specIt;
+      const specid_t copyFrom = static_cast<specid_t>(*specIt);
       // detectors to add to firstSpecNum
       std::vector<detid_t> moreDet = inputSpecDetecMap.getDetectors(inputSpecNums->spectraNo(copyFrom));
       for (size_t iDet = 0; iDet < moreDet.size(); iDet++)
@@ -653,7 +654,7 @@ void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::Matr
     outputWS->dataX(outIndex) = inputWS->readX(sourceIndex);
     outputWS->dataY(outIndex) = inputWS->readY(sourceIndex);
     outputWS->dataE(outIndex) = inputWS->readE(sourceIndex);
-    const int64_t specNum = inputWS->getAxis(1)->spectraNo(*copyFrIt);
+    const specid_t specNum = inputWS->getAxis(1)->spectraNo(*copyFrIt);
     outputWS->getAxis(1)->spectraNo(outIndex) = specNum;
     specDetecMap.addSpectrumEntries(specNum, inputSpecDetecMap.getDetectors(specNum));
     // go to the next free index in the output workspace
@@ -673,12 +674,12 @@ void GroupDetectors2::moveOthers(const std::set<size_t> &unGroupedSet, API::Matr
   g_log.debug() << name() << " copied " << unGroupedSet.size()-1 << " ungrouped spectra\n";
 }
 //RangeHelper
-/** Expands any ranges in the input string, eg. "1 3-5 4" -> "1 3 4 5 4"
+/** Expands any ranges in the input string of non-negative integers, eg. "1 3-5 4" -> "1 3 4 5 4"
 *  @param line :: a line of input that is interpreted and expanded
 *  @param outList :: all integers specified both as ranges and individually in order
 *  @throw invalid_argument if a character is found that is not an integer or hypehn and when a hyphen occurs at the start or the end of the line
 */
-void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<int64_t> &outList)
+void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<size_t> &outList)
 {
   if ( line.empty() )
   {// it is not an error to have an empty line but it would cause problems with an error check a the end of this function
@@ -824,7 +825,7 @@ void GroupDetectors2::GroupXmlReader::getIDNumbers(const Poco::XML::Attributes& 
   {
     if ( attr.getLocalName(i) == "val" )
     {
-      std::vector<int64_t> idlist;
+      std::vector<specid_t> idlist;
       // Read from string list into std::vector<int> using Poco StringTokenizer
       Poco::StringTokenizer list(attr.getValue(i), ",", Poco::StringTokenizer::TOK_TRIM);
       for( Poco::StringTokenizer::Iterator itr = list.begin(); itr != list.end(); ++itr )
@@ -832,20 +833,20 @@ void GroupDetectors2::GroupXmlReader::getIDNumbers(const Poco::XML::Attributes& 
         int id;
         try
         {
-          id = boost::lexical_cast<int>(*itr);
+          id = boost::lexical_cast<specid_t>(*itr);
           idlist.push_back(id);
         }
         catch ( boost::bad_lexical_cast & )
         {
-          std::vector<int64_t> temp;
+          std::vector<size_t> temp;
           RangeHelper::getList(*itr, temp);
-          for ( std::vector<int64_t>::iterator it = temp.begin(); it != temp.end(); ++it )
+          for ( std::vector<size_t>::iterator it = temp.begin(); it != temp.end(); ++it )
           {
-            idlist.push_back(*it);
+            idlist.push_back(static_cast<specid_t>(*it));
           }
         }
       }
-      for ( std::vector<int64_t>::iterator itr = idlist.begin(); itr != idlist.end(); ++itr )
+      for ( std::vector<specid_t>::iterator itr = idlist.begin(); itr != idlist.end(); ++itr )
       {
         int64_t id;
         if ( m_specNo )

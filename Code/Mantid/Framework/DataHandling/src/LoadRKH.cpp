@@ -235,9 +235,9 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
   MatrixWorkspace_sptr outWrksp;
   MantidVec axis0Data;
   Progress prog(  read2DHeader(firstLine, outWrksp, axis0Data) );
-  const int nAxis1Values = outWrksp->getNumberHistograms();
+  const size_t nAxis1Values = outWrksp->getNumberHistograms();
 
-  for ( int i = 0; i < nAxis1Values; ++i )
+  for ( size_t i = 0; i < nAxis1Values; ++i )
   {
     //set the X-values to the common bin values we read above
     MantidVecPtr toPass;

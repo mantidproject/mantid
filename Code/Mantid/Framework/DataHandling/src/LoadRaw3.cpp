@@ -44,9 +44,8 @@ using namespace API;
 
 /// Constructor
 LoadRaw3::LoadRaw3() :
-  m_filename(), m_numberOfPeriods(0),
-  m_specTimeRegimes(), m_noTimeRegimes(0),m_prog(0.0),m_lengthIn(0),
-  m_timeChannelsVec(),m_total_specs(0)
+  m_filename(), m_numberOfPeriods(0), m_noTimeRegimes(0),m_prog(0.0),
+  m_lengthIn(0), m_timeChannelsVec(),m_total_specs(0)
 {
 }
 
@@ -305,14 +304,14 @@ void LoadRaw3::exec()
   *@param monitorList :: a list conatining the spectrum numbers for monitors
   *@param ws_sptr :: shared pointer to workspace
 */
-void LoadRaw3::excludeMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
+void LoadRaw3::excludeMonitors(FILE* file,const int & period,const std::vector<specid_t>& monitorList,
 							   DataObjects::Workspace2D_sptr ws_sptr)
 {
 	int64_t histCurrent = -1;
 	int64_t wsIndex=0;
 	double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
 	//loop through the spectra
-	for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
+	for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
 	{
 	  specid_t histToRead = i + period * (m_numberOfSpectra + 1);
 		if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
@@ -365,7 +364,7 @@ void LoadRaw3::includeMonitors(FILE* file,const int64_t& period,DataObjects::Wor
   int64_t wsIndex=0;
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
 	//loop through spectra
-	for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
+	for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
     {
 	  int64_t histToRead = i + period * (m_numberOfSpectra + 1);
       if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
@@ -416,7 +415,7 @@ void LoadRaw3::separateMonitors(FILE* file,const int64_t& period,const std::vect
   int64_t mwsIndex=0;
   double histTotal = static_cast<double>(m_total_specs * m_numberOfPeriods);
 	//loop through spectra
-	for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
+	for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
     {
 	  int64_t histToRead = i + period * (m_numberOfSpectra + 1);
       if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
@@ -635,7 +634,7 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
    	  readData(file, 0);
   }
   int64_t monitorwsIndex = 0;
-  for (int64_t i = 0; i < m_numberOfSpectra; ++i)
+  for (specid_t i = 0; i < m_numberOfSpectra; ++i)
   {
     int64_t histToRead = i + 1;
     if (bseparate && monitorSpecList.size() > 0)
@@ -647,18 +646,19 @@ void LoadRaw3::separateOrexcludeMonitors(DataObjects::Workspace2D_sptr localWork
     }
     if ((bseparate && monitorSpecList.size() > 0) || bexclude)
     {
-      if (isMonitor(monitorSpecList, i + 1))
+      if (isMonitor(monitorSpecList, static_cast<specid_t>(i) + 1))
       {
         spec2index_map wsIndexmap;
         SpectraAxis* axis = dynamic_cast<SpectraAxis*>(localWorkspace->getAxis(1));
         axis->getSpectraIndexMap(wsIndexmap);
         spec2index_map::const_iterator wsItr;
-        wsItr = wsIndexmap.find(i + 1);
+        wsItr = wsIndexmap.find(static_cast<specid_t>(i + 1));
         if (wsItr != wsIndexmap.end())
-          monitorwsList.push_back(wsItr->second);
+          monitorwsList.push_back(static_cast<specid_t>(wsItr->second));
         if (bseparate)
         { 
-          monitorWorkspace->getAxis(1)->spectraNo(monitorwsIndex) = i + 1;
+          monitorWorkspace->getAxis(1)->spectraNo(monitorwsIndex) =
+            static_cast<specid_t>(i + 1);
           setWorkspaceData(monitorWorkspace, m_timeChannelsVec, monitorwsIndex, i + 1, m_noTimeRegimes,m_lengthIn,1);
           ++monitorwsIndex;
         }

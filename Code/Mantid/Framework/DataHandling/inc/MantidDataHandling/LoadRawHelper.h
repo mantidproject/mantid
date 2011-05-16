@@ -77,7 +77,7 @@ namespace Mantid
       /// Reads title from the isisraw class
       void readTitle(FILE* file,std::string & title);
       /// reads workspace parameters like number of histograms,size of vectors etc
-      void readworkspaceParameters(int64_t &numberOfSpectra,int64_t & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
+      void readworkspaceParameters(specid_t &numberOfSpectra,int64_t & numberOfPeriods,int64_t& lengthIn,int64_t& noTimeRegimes );
       
       /// skips histrogram data from raw file.
       void skipData(FILE* file,int hist);
@@ -132,7 +132,7 @@ namespace Mantid
 
       /// This method sets the raw file data to workspace vectors
       void setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace,const std::vector<boost::shared_ptr<MantidVec> >& 
-			    timeChannelsVec,int64_t wsIndex,int64_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
+			    timeChannelsVec,int64_t wsIndex,specid_t nspecNum,int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart);
           
       /// creates time series property showing times when when a particular period was active.
       Kernel::Property* createPeriodLog(int period)const;
@@ -157,7 +157,7 @@ namespace Mantid
       /// Validates the optional 'spectra to read' properties, if they have been set
       void checkOptionalProperties();
       /// calculate workspace size
-      int64_t  calculateWorkspaceSize();
+      specid_t  calculateWorkspaceSize();
       /// calculate workspace sizes if separate or exclude monitors are selected
       void calculateWorkspacesizes(const std::vector<specid_t>& monitorSpecList,
 				   specid_t& normalwsSpecs, specid_t& monitorwsSpecs);
@@ -193,7 +193,7 @@ namespace Mantid
 
         
       /// number of spectra
-      int64_t m_numberOfSpectra;
+      specid_t m_numberOfSpectra;
 
       /// a vector holding the indexes of monitors
       std::vector<specid_t> m_monitordetectorList;
@@ -205,7 +205,7 @@ namespace Mantid
       bool m_bmspeclist;
 
       ///the total nuumber of spectra
-      int64_t m_total_specs;
+      specid_t m_total_specs;
       
       /// convert month label to int string
       std::string convertMonthLabelToIntStr(std::string month) const;

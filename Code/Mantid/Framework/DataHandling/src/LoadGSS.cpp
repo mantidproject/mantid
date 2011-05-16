@@ -135,7 +135,7 @@ namespace DataHandling
           */
 
           // Parse B-line
-          int specno, nbin1, nbin2, bc3;
+          int specno, nbin1, nbin2;
           std::istringstream inputLine(currentLine, std::ios::in);
 
           /*

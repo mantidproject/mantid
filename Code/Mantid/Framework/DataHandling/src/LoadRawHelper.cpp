@@ -173,10 +173,10 @@ namespace Mantid
      * @param lengthIn :: size of workspace vectors
      * @param noTimeRegimes :: number of time regime.
      */
-    void LoadRawHelper::readworkspaceParameters(int64_t& numberOfSpectra,int64_t& numberOfPeriods,int64_t& lengthIn,int64_t & noTimeRegimes )
+    void LoadRawHelper::readworkspaceParameters(specid_t& numberOfSpectra,int64_t& numberOfPeriods,int64_t& lengthIn,int64_t & noTimeRegimes )
     {
       // Read in the number of spectra in the RAW file
-      m_numberOfSpectra=numberOfSpectra = static_cast<int64_t>(isisRaw->t_nsp1);
+      m_numberOfSpectra=numberOfSpectra = static_cast<specid_t>(isisRaw->t_nsp1);
       // Read the number of periods in this file
       numberOfPeriods = isisRaw->t_nper;
       // Read the number of time channels (i.e. bins) from the RAW file
@@ -398,7 +398,7 @@ namespace Mantid
     *  @param binStart :: start of bin
     */
     void LoadRawHelper::setWorkspaceData(DataObjects::Workspace2D_sptr newWorkspace, const std::vector<
-      boost::shared_ptr<MantidVec> >& timeChannelsVec, int64_t wsIndex, int64_t nspecNum, int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart)
+      boost::shared_ptr<MantidVec> >& timeChannelsVec, int64_t wsIndex, specid_t nspecNum, int64_t noTimeRegimes,int64_t lengthIn,int64_t binStart)
     {
       if(!newWorkspace)return;
       typedef double (*uf)(double);
@@ -862,9 +862,9 @@ namespace Mantid
      * Calculates the total number of spectra in the workspace, given the input properties
      * @return the size of the workspace (number of spectra)
      */
-    int64_t LoadRawHelper::calculateWorkspaceSize()
+    specid_t LoadRawHelper::calculateWorkspaceSize()
     {
-      int64_t total_specs(0);
+      specid_t total_specs(0);
       if (m_interval || m_list)
       {
         if (m_interval)
@@ -892,7 +892,7 @@ namespace Mantid
           }
           if (m_spec_list.size() == 0)
             m_list = false;
-          total_specs += static_cast<int64_t>(m_spec_list.size());
+          total_specs += static_cast<specid_t>(m_spec_list.size());
           m_total_specs=total_specs;
 
         }
@@ -1006,7 +1006,7 @@ namespace Mantid
       int64_t lengthIn = static_cast<int64_t>(isisRaw->t_ntc1+1);
 
       //loop through spectra
-      for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
+      for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
       {
         int64_t histToRead = i + period * (m_numberOfSpectra + 1);
         if ((i >= m_spec_min && i < m_spec_max) || 

@@ -116,7 +116,7 @@ namespace Mantid
                                       int64_t numberOfSpectra,const std::string &fileName);
 
       /// creates output workspace, monitors excluded from this workspace
-      void excludeMonitors(FILE* file,const int64_t& period,const std::vector<specid_t>& monitorList,
+      void excludeMonitors(FILE* file,const int& period,const std::vector<specid_t>& monitorList,
                            DataObjects::Workspace2D_sptr ws_sptr);
 
       /// creates output workspace whcih includes monitors
@@ -133,7 +133,7 @@ namespace Mantid
       std::string m_filename;
 
       /// The number of spectra in the raw file
-      int64_t m_numberOfSpectra;
+      specid_t m_numberOfSpectra;
       /// The number of periods in the raw file
       int64_t m_numberOfPeriods;
       /// Allowed values for the cache property

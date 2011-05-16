@@ -154,7 +154,7 @@ void LoadRawBin0::exec()
     }
     skipData(file, period * (m_numberOfSpectra + 1));
     int64_t wsIndex = 0;
-    for (int64_t i = 1; i <= m_numberOfSpectra; ++i)
+    for (specid_t i = 1; i <= m_numberOfSpectra; ++i)
     {
       int64_t histToRead = i + period * (m_numberOfSpectra + 1);
       if ((i >= m_spec_min && i < m_spec_max) || (m_list && find(m_spec_list.begin(), m_spec_list.end(),
@@ -162,25 +162,25 @@ void LoadRawBin0::exec()
       {
         progress(m_prog, "Reading raw file data...");
         //readData(file, histToRead);
-		//read spectrum 
-		if (!readData(file, histToRead))
-		{
-			throw std::runtime_error("Error reading raw file");
-		}
-		int64_t binStart=0;
-		setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
-		++wsIndex;
+		  //read spectrum 
+		  if (!readData(file, histToRead))
+		  {
+			  throw std::runtime_error("Error reading raw file");
+		  }
+		  int64_t binStart=0;
+		  setWorkspaceData(localWorkspace, m_timeChannelsVec, wsIndex, i, m_noTimeRegimes,1,binStart);
+		  ++wsIndex;
 
-        if (m_numberOfPeriods == 1)
+      if (m_numberOfPeriods == 1)
+      {
+        if (++histCurrent % 100 == 0)
         {
-          if (++histCurrent % 100 == 0)
-          {
-            m_prog = double(histCurrent) / histTotal;
-          }
-          interruption_point();
+          m_prog = double(histCurrent) / histTotal;
         }
-
+        interruption_point();
       }
+
+    }
 	  else
 	  {
 		  skipData(file, histToRead);

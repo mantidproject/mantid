@@ -93,7 +93,7 @@ namespace Mantid
       std::string m_filename;
 
       /// The number of spectra in the raw file
-      int64_t m_numberOfSpectra;
+      specid_t m_numberOfSpectra;
       /// The number of periods in the raw file
       int64_t m_numberOfPeriods;
       /// number of time regime

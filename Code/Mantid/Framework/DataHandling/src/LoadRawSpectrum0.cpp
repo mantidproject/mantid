@@ -83,7 +83,7 @@ void LoadRawSpectrum0::initDocs()
 			std::string title;
 			readTitle(file,title);
   
-            readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
+      readworkspaceParameters(m_numberOfSpectra,m_numberOfPeriods,m_lengthIn,m_noTimeRegimes);
 
 			// Calculate the size of a workspace, given its number of periods & spectra to read
 			const int64_t total_specs = 1;
