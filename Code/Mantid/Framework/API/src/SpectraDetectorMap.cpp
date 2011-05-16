@@ -85,7 +85,7 @@ namespace Mantid
         g_log.error("populateSimple : end should be > start");
         throw std::invalid_argument("populateSimple : end should be > start");
       }
-      for (int i=start; i<end; ++i)
+      for (detid_t i=start; i<end; ++i)
       {
         // Uncomment the line below to get a print out of the mapping as it's loaded
         m_s2dmap.insert(std::pair<specid_t,detid_t>(i,i)); // Insert current detector with Spectra number as key
