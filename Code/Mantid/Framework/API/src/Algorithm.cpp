@@ -31,15 +31,16 @@ namespace Mantid
     }
 
     template <>
+    DLLExport
     bool Algorithm::isEmpty(const double toCheck)
     {
       return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;
     }
 
     // concrete instantiations
-    template bool Algorithm::isEmpty<int> (const int);
-    template bool Algorithm::isEmpty<int64_t> (const int64_t);
-    template bool Algorithm::isEmpty<std::size_t> (const std::size_t);
+    template DLLExport bool Algorithm::isEmpty<int> (const int);
+    template DLLExport bool Algorithm::isEmpty<int64_t> (const int64_t);
+    template DLLExport bool Algorithm::isEmpty<std::size_t> (const std::size_t);
 
     /// Initialize static algorithm counter
     size_t Algorithm::g_execCount=0;
