@@ -97,20 +97,20 @@ private:
 
   void checkData(const MatrixWorkspace_sptr work_in1,const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1)
   {
-    int ws2LoopCount;
+    size_t ws2LoopCount;
     if (work_in2->size() > 0)
     {
       ws2LoopCount = work_in1->size()/work_in2->size();
     }
     ws2LoopCount = (ws2LoopCount==0) ? 1 : ws2LoopCount;
 
-    for (int i = 0; i < work_out1->size(); i++)
+    for (size_t i = 0; i < work_out1->size(); i++)
     {
       checkDataItem(work_in1,work_in2,work_out1,i,i/ws2LoopCount);
     }
   }
 
-  void checkDataItem (const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1, int i, int ws2Index)
+  void checkDataItem (const MatrixWorkspace_sptr work_in1, const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1, size_t i, size_t ws2Index)
   {
       double sig1 = work_in1->readY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double sig2 = work_in2->readY(ws2Index/work_in1->blocksize())[ws2Index%work_in1->blocksize()];

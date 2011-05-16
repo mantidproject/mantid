@@ -158,9 +158,9 @@ public:
     in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
     in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
     size_t nHist1 = in1->getNumberHistograms();
-    int nEvents1 = in1->getNumberEvents();
+    size_t nEvents1 = in1->getNumberEvents();
     size_t nHist2 = in2->getNumberHistograms();
-    int nEvents2 = in2->getNumberEvents();
+    size_t nEvents2 = in2->getNumberEvents();
 
     // Check it runs with the two separate ones
     conj = new ConjoinWorkspaces();
@@ -175,7 +175,7 @@ public:
     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
 
     size_t nHist = out->getNumberHistograms();
-    int nEvents = out->getNumberEvents();
+    size_t nEvents = out->getNumberEvents();
 
     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
     TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
@@ -195,9 +195,9 @@ public:
     AnalysisDataService::Instance().add("grp1_1", in1);
     AnalysisDataService::Instance().add("grp2_1", in2);
     size_t nHist1 = in1->getNumberHistograms();
-    int nEvents1 = in1->getNumberEvents();
+    size_t nEvents1 = in1->getNumberEvents();
     size_t nHist2 = in2->getNumberHistograms();
-    int nEvents2 = in2->getNumberEvents();
+    size_t nEvents2 = in2->getNumberEvents();
 
     WorkspaceGroup_sptr wsSptr1 = WorkspaceGroup_sptr(new WorkspaceGroup);
     if (wsSptr1)
@@ -227,7 +227,7 @@ public:
     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("grp1_1"));
 
     size_t nHist = out->getNumberHistograms();
-    int nEvents = out->getNumberEvents();
+    size_t nEvents = out->getNumberEvents();
 
     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
     TS_ASSERT_EQUALS( nEvents1+nEvents2, nEvents);
@@ -290,8 +290,8 @@ public:
     TS_ASSERT_EQUALS( out->getNumberHistograms(), 15);
     TS_ASSERT_EQUALS( out->blocksize(), numBins);
 
-    for(int wi=0; wi<out->getNumberHistograms(); wi++)
-      for(int x=0; x<out->blocksize(); x++)
+    for(size_t wi=0; wi<out->getNumberHistograms(); wi++)
+      for(size_t x=0; x<out->blocksize(); x++)
         TS_ASSERT_DELTA(out->readY(wi)[x], 2.0, 1e-5);
 
     delete conj;

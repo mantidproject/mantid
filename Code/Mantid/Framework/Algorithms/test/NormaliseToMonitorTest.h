@@ -108,9 +108,9 @@ public:
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("normMon2")) )
 
     // Check the non-monitor spectra
-    for (int i = 1; i < output->getNumberHistograms(); ++i)
+    for (size_t i = 1; i < output->getNumberHistograms(); ++i)
     {
-      for (int j = 0; j < output->blocksize(); ++j)
+      for (size_t j = 0; j < output->blocksize(); ++j)
       {
         TS_ASSERT_EQUALS( output->readX(i)[j], j )
         TS_ASSERT_DELTA( output->readY(i)[j], 2, 0.00001 )
@@ -119,7 +119,7 @@ public:
     }
 
     // Now check the monitor one
-    for (int k = 0; k < output->blocksize(); ++k)
+    for (size_t k = 0; k < output->blocksize(); ++k)
     {
       TS_ASSERT_EQUALS( output->readX(0)[k], k )
       TS_ASSERT_DELTA( output->readY(0)[k], 10, 0.00001 )
@@ -145,9 +145,9 @@ public:
     TS_ASSERT( output->YUnit().empty() )
 
     // Check the non-monitor spectra
-    for (int i = 1; i < output->getNumberHistograms(); ++i)
+    for (size_t i = 1; i < output->getNumberHistograms(); ++i)
     {
-      for (int j = 0; j < output->blocksize(); ++j)
+      for (size_t j = 0; j < output->blocksize(); ++j)
       {
         TS_ASSERT_EQUALS( output->readX(i)[j], j )
         TS_ASSERT_EQUALS( output->readY(i)[j], 0.04 )
@@ -156,7 +156,7 @@ public:
     }
 
     // Now check the monitor one
-    for (int k = 0; k < output->blocksize(); ++k)
+    for (size_t k = 0; k < output->blocksize(); ++k)
     {
       TS_ASSERT_EQUALS( output->readX(0)[k], k )
       TS_ASSERT_EQUALS( output->readY(0)[k], 0.2 )
@@ -183,9 +183,9 @@ public:
     TS_ASSERT( output->YUnit().empty() )
 
     // Check the non-monitor spectra
-    for (int i = 1; i < output->getNumberHistograms(); ++i)
+    for (size_t i = 1; i < output->getNumberHistograms(); ++i)
     {
-      for (int j = 0; j < output->blocksize(); ++j)
+      for (size_t j = 0; j < output->blocksize(); ++j)
       {
         TS_ASSERT_EQUALS( output->readX(i)[j], j )
         TS_ASSERT_DELTA( output->readY(i)[j], 0.0323, 0.0001 )
@@ -194,7 +194,7 @@ public:
     }
 
     // Now check the monitor one
-    for (int k = 0; k < output->blocksize(); ++k)
+    for (size_t k = 0; k < output->blocksize(); ++k)
     {
       TS_ASSERT_EQUALS( output->readX(0)[k], k )
       TS_ASSERT_DELTA( output->readY(0)[k], 0.1613, 0.0001 )

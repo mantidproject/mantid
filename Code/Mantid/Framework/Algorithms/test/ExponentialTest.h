@@ -62,7 +62,7 @@ private:
   void checkData( MatrixWorkspace_sptr work_in1, MatrixWorkspace_sptr work_out1)
   {
 
-    for (int i = 0; i < work_out1->size(); i++)
+    for (size_t i = 0; i < work_out1->size(); i++)
     {
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       double sig3 = work_out1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
@@ -79,7 +79,7 @@ private:
   void setError( MatrixWorkspace_sptr work_in1)
   {
 
-    for (int i = 0; i < work_in1->size(); i++)
+    for (size_t i = 0; i < work_in1->size(); i++)
     {
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];
       work_in1->dataE(i/work_in1->blocksize())[i%work_in1->blocksize()]=sqrt(sig1);

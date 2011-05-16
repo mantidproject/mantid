@@ -6,6 +6,7 @@
 
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
 #include "MantidAlgorithms/CommutativeBinaryOperation.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -33,10 +34,26 @@ private:
   // Overridden BinaryOperation methods
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                               const MantidVec& rhsY, const MantidVec& rhsE, MantidVec& YOut, MantidVec& EOut)
-  {}
+  {
+    UNUSED_ARG(lhsX);
+    UNUSED_ARG(lhsY);
+    UNUSED_ARG(lhsE);
+    UNUSED_ARG(rhsY);
+    UNUSED_ARG(rhsE);
+    UNUSED_ARG(YOut);
+    UNUSED_ARG(EOut);
+  }
   void performBinaryOperation(const MantidVec& lhsX, const MantidVec& lhsY, const MantidVec& lhsE,
                               const double rhsY, const double rhsE, MantidVec& YOut, MantidVec& EOut)
-  {}
+  {
+    UNUSED_ARG(lhsX);
+    UNUSED_ARG(lhsY);
+    UNUSED_ARG(lhsE);
+    UNUSED_ARG(rhsY);
+    UNUSED_ARG(rhsE);
+    UNUSED_ARG(YOut);
+    UNUSED_ARG(EOut);
+  }
 };
 
 class CommutativeBinaryOperationTest : public CxxTest::TestSuite

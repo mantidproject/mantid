@@ -38,16 +38,16 @@ private:
       TSM_ASSERT( "One or more empty workspace pointers.", 0);
       return;
     }
-    int ws2LoopCount = 0;
+    size_t ws2LoopCount = 0;
     if (work_in2->size() > 0)
     {
       ws2LoopCount = work_in1->size() / work_in2->size();
     }
     ws2LoopCount = (ws2LoopCount == 0) ? 1 : ws2LoopCount;
 
-    for (int i = 0; i < work_out1->size(); i++)
+    for (size_t i = 0; i < work_out1->size(); i++)
     {
-      int ws2Index = i;
+      size_t ws2Index = i;
 
       if (ws2LoopCount > 1)
       {
@@ -65,7 +65,7 @@ private:
   }
 
   void checkDataItem(MatrixWorkspace_sptr work_in1, MatrixWorkspace_sptr work_in2,
-      MatrixWorkspace_sptr work_out1, int i, int ws2Index)
+      MatrixWorkspace_sptr work_out1, size_t i, size_t ws2Index)
   {
     double sig1 = work_in1->dataY(i / work_in1->blocksize())[i % work_in1->blocksize()];
     double sig2 = work_in2->dataY(ws2Index / work_in1->blocksize())[ws2Index % work_in2->blocksize()];
@@ -111,7 +111,7 @@ public:
     if (work_in)
     {
       std::vector<std::string> GroupNames = work_in->getNames();
-      int nSize = GroupNames.size();
+      size_t nSize = GroupNames.size();
       TS_ASSERT_EQUALS(nSize, 4);
     }
     Plus alg;
@@ -322,7 +322,7 @@ public:
       if(worklhsgrp_in)
       {
         std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
-        int nSize=GroupNames.size();
+        size_t nSize=GroupNames.size();
         TS_ASSERT_EQUALS(nSize,4);
       }
 
@@ -345,7 +345,7 @@ public:
       if(workrhsgrp_in)
       {
         std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
-        int nSize=GroupNames.size();
+        size_t nSize=GroupNames.size();
         TS_ASSERT_EQUALS(nSize,4);
       }
 
@@ -430,7 +430,7 @@ public:
       if(workrhsgrp_in)
       {
         std::vector<std::string> GroupNames=workrhsgrp_in->getNames();
-        int nSize=GroupNames.size();
+        size_t nSize=GroupNames.size();
         TS_ASSERT_EQUALS(nSize,4);
       }
 
@@ -506,7 +506,7 @@ public:
       if(worklhsgrp_in)
       {
         std::vector<std::string> GroupNames=worklhsgrp_in->getNames();
-        int nSize=GroupNames.size();
+        size_t nSize=GroupNames.size();
         TS_ASSERT_EQUALS(nSize,4);
       }
 

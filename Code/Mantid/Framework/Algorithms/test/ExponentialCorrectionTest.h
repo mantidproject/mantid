@@ -79,7 +79,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) )
     TS_ASSERT( result )
     
-    for (int i = 0; i < result->getNumberHistograms(); ++i)
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i)
     {
       for (int j = 0; j < 3; ++j)
       {
@@ -114,7 +114,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) )
     TS_ASSERT( result )
     
-    for (int i = 0; i < result->getNumberHistograms(); ++i)
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i)
     {
       for (int j = 0; j < 3; ++j)
       {
