@@ -39,7 +39,7 @@ static void MakeDummyFile(std::string filename, size_t num_bytes)
   {
     // Put 1,2,3 in 32-bit ints
     if (i%4==0)
-      buffer[i]=i/4;
+      buffer[i]=static_cast<char>(i/4);
     else
       buffer[i]=0;
   }

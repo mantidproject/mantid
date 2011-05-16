@@ -196,10 +196,8 @@ public:
     for (size_t i=0; i<100000; i++)
     {
       total += 1;
-      sched->push(new FunctionTask( boost::bind(TimeWaster::waste_time, i*1.0), i*1.0 ));
+      sched->push(new FunctionTask( boost::bind(TimeWaster::waste_time, i), static_cast<double>(i) ));
     }
-    size_t other = total;
-    //std::cout << total << std::endl;
   }
 
 //
@@ -450,7 +448,7 @@ public:
     Mutex * lastMutex = NULL;
     for (size_t i=0; i<=num; i++)
     {
-      Task * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), i*1.0 );
+        Task * task = new FunctionTask( boost::bind(&TimeWaster::add_to_number, &mywaster, i), static_cast<double>(i) );
       // Create a new mutex every 1000 tasks. This is more relevant to the ThreadSchedulerMutexes; others ignore it.
       if (i % 1000 == 0)
         lastMutex = new Mutex();
@@ -550,7 +548,6 @@ public:
     ThreadPoolTest_TaskThatThrows_counter = 0;
     for (int i=0; i< 10; i++)
     {
-      double cost = i;
       p.schedule( new TaskThatThrows());
     }
     // joinAll rethrows

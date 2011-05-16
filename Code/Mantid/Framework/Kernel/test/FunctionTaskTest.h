@@ -27,7 +27,7 @@ void my_int_function(int arg)
 
 double my_complicated_function(int arg1, double arg2)
 {
-  my_check_value = arg1 + arg2;
+  my_check_value = arg1 + static_cast<int>(arg2);
   return -1.0;
 }
 

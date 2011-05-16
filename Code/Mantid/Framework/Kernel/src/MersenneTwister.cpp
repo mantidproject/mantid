@@ -24,7 +24,7 @@ namespace Mantid
      * (Re-)seed the generator
      * @param seedValue :: A seed for the generator
      */
-    void MersenneTwister::setSeed(unsigned int seedValue)
+    void MersenneTwister::setSeed(size_t seedValue)
     {
       // Bug in earlier versions of this implementation meant
       // that a unsigned int could not be past to the seed function

@@ -18,7 +18,8 @@ void MemoryTest_myTaskFunction()
 {
   MemoryStats mem;
   mem.update();
-  double dummy = mem.getFreeRatio();
+  mem.getFreeRatio();
+
 }
 
 class MemoryTest : public CxxTest::TestSuite
@@ -45,7 +46,7 @@ public:
     {
       MemoryStats mem;
       mem.update();
-      double dummy = mem.getFreeRatio();
+      mem.getFreeRatio();
     }
   }
 

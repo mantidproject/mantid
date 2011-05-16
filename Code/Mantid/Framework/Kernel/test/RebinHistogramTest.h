@@ -21,7 +21,7 @@ public:
   void TestRebinSmallerSteps()
   {
     // Size of vectors
-    int size1=12, size2=23;
+    size_t size1=12, size2=23;
     std::vector<double> xin(size1);
     std::vector<double> yin(size1-1);
     std::vector<double> ein(size1-1);
@@ -34,9 +34,9 @@ public:
       yin[i]=1.0;
       ein[i]=1.0;
     }
-    xin[size1-1]=size1-1;
+    xin[size1-1]=static_cast<double>(size1-1);
     for (std::size_t i=0;i<size2;i++)
-      xout[i]=0.5*i;
+      xout[i]=0.5*static_cast<double>(i);
     Mantid::Kernel::VectorHelper::rebinHistogram(xin,yin,ein,xout,yout,eout,false);
     for (std::size_t i=0;i<size2-1;i++)
     {

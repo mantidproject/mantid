@@ -43,7 +43,7 @@ namespace Mantid
       /// Virtual destructor to ensure that all inheriting classes have one
       virtual ~RandomNumberGenerator() {};
       /// Set the random number seed
-      virtual void setSeed(unsigned int seedValue) = 0;
+      virtual void setSeed(size_t seedValue) = 0;
       /// Sets the range of the subsequent calls to next;
       virtual void setRange(double start, double end) = 0;
       /// Generate the next random number in the sequence within the given range.

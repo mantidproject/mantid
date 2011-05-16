@@ -40,31 +40,31 @@ public:
     UnitTester t;
     double factor;
     double power;
-    TS_ASSERT( t.quickConversion("a",factor,power) )
-    TS_ASSERT_EQUALS( factor, 1.1 )
-    TS_ASSERT_EQUALS( power, 1.0 )
-    TS_ASSERT( t.quickConversion("b",factor,power) )
-    TS_ASSERT_EQUALS( factor, 2.2 )
-    TS_ASSERT_EQUALS( power, 0.5 )
-    TS_ASSERT( ! t.quickConversion("notThere",factor,power) )
+    TS_ASSERT( t.quickConversion("a",factor,power) );
+    TS_ASSERT_EQUALS( factor, 1.1 );
+    TS_ASSERT_EQUALS( power, 1.0 );
+    TS_ASSERT( t.quickConversion("b",factor,power) );
+    TS_ASSERT_EQUALS( factor, 2.2 );
+    TS_ASSERT_EQUALS( power, 0.5 );
+    TS_ASSERT( ! t.quickConversion("notThere",factor,power) );
 
     // Test the quickConversion method that takes a Unit
     Units::TOF tof;
-    TS_ASSERT( ! t.quickConversion(tof,factor,power) )
+    TS_ASSERT( ! t.quickConversion(tof,factor,power) );
   }
-
+    
   //----------------------------------------------------------------------
   // TOF tests
   //----------------------------------------------------------------------
 
   void testTOF_unitID()
   {
-    TS_ASSERT_EQUALS( tof.unitID(), "TOF" )
+    TS_ASSERT_EQUALS( tof.unitID(), "TOF" );
   }
 
   void testTOF_caption()
   {
-    TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" )
+    TS_ASSERT_EQUALS( tof.caption(), "Time-of-flight" );
   }
 
   void testTOF_label()
@@ -74,7 +74,9 @@ public:
 
   void testTOF_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( Unit & u = dynamic_cast<Unit&>(tof) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&tof) );
+    TS_ASSERT_EQUALS(u->unitID(), "TOF");
   }
 
   void testTOF_toTOF()
@@ -120,7 +122,9 @@ public:
 
   void testWavelength_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(lambda) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&lambda) );
+    TS_ASSERT_EQUALS(u->unitID(), "Wavelength");
   }
 
   void testWavelength_toTOF()
@@ -175,7 +179,9 @@ public:
 
   void testEnergy_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(energy) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&energy) );
+    TS_ASSERT_EQUALS(u->unitID(), "Energy");
   }
 
   void testEnergy_toTOF()
@@ -230,8 +236,10 @@ public:
 
   void testdSpacing_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(d) )
-  }
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&d) );
+    TS_ASSERT_EQUALS(u->unitID(), "dSpacing");
+   }
 
   void testdSpacing_toTOF()
   {
@@ -295,7 +303,9 @@ public:
 
   void testQTransfer_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(q) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&q) );
+    TS_ASSERT_EQUALS(u->unitID(), "MomentumTransfer");
   }
 
   void testQTransfer_toTOF()
@@ -360,7 +370,9 @@ public:
 
   void testQ2_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(q2) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&q2) );
+    TS_ASSERT_EQUALS(u->unitID(), "QSquared");
   }
 
   void testQ2_toTOF()
@@ -425,7 +437,9 @@ public:
 
   void testDeltaE_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(dE) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&dE) );
+    TS_ASSERT_EQUALS(u->unitID(), "DeltaE");
   }
 
   void testDeltaE_toTOF()
@@ -483,7 +497,9 @@ public:
 
   void testDeltaEk_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(dEk) )
+    Unit *u = NULL;
+    TS_ASSERT_THROWS_NOTHING( u = dynamic_cast<Unit*>(&dEk) );
+    TS_ASSERT_EQUALS(u->unitID(), "DeltaE_inWavenumber");
   }
 
   void testDeltaEk_toTOF()

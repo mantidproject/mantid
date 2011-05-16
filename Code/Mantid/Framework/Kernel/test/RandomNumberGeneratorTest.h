@@ -13,11 +13,13 @@ private:
   class FakeRandomNumberGenerator : public Mantid::Kernel::RandomNumberGenerator
   {
   public:
-    void setSeed(unsigned int seedValue)
+    void setSeed(size_t seedValue)
     {
+      UNUSED_ARG(seedValue);
     }
     void setRange(double start, double end)
     {
+      UNUSED_ARG(start); UNUSED_ARG(end);
     }
     double next()
     {

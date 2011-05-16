@@ -127,7 +127,7 @@ private:
 
     Poco::XML::Element* pRootElem = pDoc->documentElement();
     Poco::XML::NodeList* pNL_facility = pRootElem->getElementsByTagName("facility");
-    unsigned int n = pNL_facility->length();
+    size_t n = pNL_facility->length();
 
     TS_ASSERT(n > 0);
 

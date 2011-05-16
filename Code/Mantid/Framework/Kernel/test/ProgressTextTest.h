@@ -25,9 +25,9 @@ public:
   void test_constructors()
   {
     // No steps?
-    TS_ASSERT_THROWS_NOTHING(ProgressText p(0.0, 1.0, 0); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 0); );
     // Max is < min
-    TS_ASSERT_THROWS_NOTHING(ProgressText p(NULL, 1.0, 0.5, 10); );
+    TS_ASSERT_THROWS_NOTHING(ProgressText(0.0, 1.0, 2, true); );
   }
 
 

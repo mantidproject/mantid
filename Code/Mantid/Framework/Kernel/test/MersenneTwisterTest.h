@@ -21,7 +21,7 @@ public:
   void test_That_Next_For_Given_Seed_Returns_Same_Value()
   {
     MersenneTwister gen_1, gen_2;
-    long seed(212437999);
+    size_t seed(212437999);
     gen_1.setSeed(seed);
     gen_2.setSeed(seed);
 

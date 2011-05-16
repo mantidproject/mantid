@@ -21,7 +21,7 @@ public:
     PARALLEL_FOR_IF(do_parallel)
     for (int i=0; i<1000; i++)
     {
-      Logger & g_log = Logger::get("MyTestLogger");
+      Logger::get("MyTestLogger");
     }
   }
 

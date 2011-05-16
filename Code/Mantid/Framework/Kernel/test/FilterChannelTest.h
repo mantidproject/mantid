@@ -24,17 +24,17 @@ public:
   void testContructor()
   {
     TS_ASSERT_THROWS_NOTHING
-    (
-      Poco::FilterChannel a;
-    )
-  }
+      (
+	Poco::FilterChannel a;
+	)
+      }
 
   void testContructorDefaults()
   {
     Poco::FilterChannel a;
     TestChannel* empty=0;
     TS_ASSERT_EQUALS(a.getPriority(),8);
-	  TS_ASSERT_EQUALS(a.getChannel(),empty);
+    TS_ASSERT_EQUALS(a.getChannel(),empty);
   }
 
   void testSetPriority()
@@ -113,19 +113,19 @@ public:
     Poco::FilterChannel a;
     TestChannel* empty=0;
     
-	  TS_ASSERT_EQUALS(a.getChannel(),empty);
-	  a.addChannel(tChannel.get());
-	  TS_ASSERT_EQUALS(a.getChannel(),tChannel.get());
+    TS_ASSERT_EQUALS(a.getChannel(),empty);
+    a.addChannel(tChannel.get());
+    TS_ASSERT_EQUALS(a.getChannel(),tChannel.get());
   }
   
   void testLogMessage()
   {
     boost::shared_ptr<TestChannel> tChannel(new TestChannel);
     Poco::FilterChannel a;
-	  a.addChannel(tChannel.get());
-	  Poco::Message msg;
-	  a.log(msg);
-	  TS_ASSERT_EQUALS(tChannel->list().size(),1);
+    a.addChannel(tChannel.get());
+    Poco::Message msg;
+    a.log(msg);
+    TS_ASSERT_EQUALS(tChannel->list().size(),1);
   }
 
   void testLogMessagesByPriority()
@@ -133,7 +133,7 @@ public:
     //initialise the channel
     boost::shared_ptr<TestChannel> tChannel(new TestChannel);
     Poco::FilterChannel a;
-	  a.addChannel(tChannel.get());
+    a.addChannel(tChannel.get());
 
     //create a priority map
     typedef std::map<unsigned int,std::string> priorityMap;
@@ -148,23 +148,23 @@ public:
     pMap.insert(priorityMap::value_type(8,"TRACE"));
 
     
-	  Poco::Message msg;
+    Poco::Message msg;
     int totalCount=0;
 
     priorityMap::iterator iter;   
-		for( iter = pMap.begin(); iter != pMap.end(); ++iter) 
-		{
-      int channelPriority = (*iter).first;
+    for( iter = pMap.begin(); iter != pMap.end(); ++iter) 
+    {
+      size_t channelPriority = (*iter).first;
       std::string priorityString = (*iter).second;
       a.setPriority(priorityString);
 
-      for (unsigned int msgPriority = 0; msgPriority < 8; ++msgPriority)
+      for (size_t msgPriority = 0; msgPriority < 8; ++msgPriority)
       {
         msg.setPriority(static_cast<Poco::Message::Priority>(msgPriority));
 
-        int previousMessageCount = tChannel->list().size();
-	      a.log(msg);
-        int addedMessageCount = tChannel->list().size() - previousMessageCount;
+        size_t previousMessageCount = tChannel->list().size();
+	a.log(msg);
+        size_t addedMessageCount = tChannel->list().size() - previousMessageCount;
 
         if ((channelPriority >= msgPriority)&&(addedMessageCount==1))
         {
@@ -189,7 +189,7 @@ public:
       }
     }
 
-	  TS_ASSERT_EQUALS(tChannel->list().size(),totalCount);
+    TS_ASSERT_EQUALS(tChannel->list().size(),totalCount);
   }
 
   void testAddChannelThroughProperty()
@@ -200,15 +200,15 @@ public:
     TestChannel* tChannel = new TestChannel;
     Poco::LoggingRegistry::defaultRegistry().registerChannel("tChannel", tChannel);
     
-	  TS_ASSERT_EQUALS(a.getChannel(),empty);
-	  a.setProperty("channel","tChannel");
+    TS_ASSERT_EQUALS(a.getChannel(),empty);
+    a.setProperty("channel","tChannel");
 
     Poco::Channel* createdChannel = a.getChannel();
     TestChannel* castedTestChannel = dynamic_cast<TestChannel*>(createdChannel);
-	  TS_ASSERT_EQUALS(castedTestChannel,tChannel);
+    TS_ASSERT_EQUALS(castedTestChannel,tChannel);
     
-	  Poco::LoggingRegistry::defaultRegistry().unregisterChannel("tChannel");
-	  tChannel->release();
+    Poco::LoggingRegistry::defaultRegistry().unregisterChannel("tChannel");
+    tChannel->release();
   }
 
   void testCreateThroughFactory()
@@ -220,8 +220,8 @@ public:
    
     Poco::Channel* createdChannel = Poco::LoggingFactory::defaultFactory().createChannel("FilterChannel");
     Poco::FilterChannel* castedFilterChannel = dynamic_cast<Poco::FilterChannel*>(createdChannel);
-	  TS_ASSERT_DIFFERS(castedFilterChannel,empty);
-	  createdChannel->release();
+    TS_ASSERT_DIFFERS(castedFilterChannel,empty);
+    createdChannel->release();
   }
 
 };
