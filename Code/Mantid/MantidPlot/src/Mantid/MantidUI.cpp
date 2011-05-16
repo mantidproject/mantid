@@ -2666,7 +2666,7 @@ void countVirtual(vector<mem_block>& mem, int& total)
   {
     VirtualQuery(addr,&info,sizeof(MEMORY_BASIC_INFORMATION));
 
-    int state;
+    int state = 0;
     if (info.State == MEM_FREE)
     {
       free += info.RegionSize;

@@ -2,6 +2,7 @@
 // Includes
 //--------------------------------
 #include "DetSelector.h"
+#include "MantidKernel/System.h"
 
 #include <QPainter>
 #include <algorithm>
@@ -13,16 +14,18 @@ m_xStart(0),m_yStart(0),m_inProgress(false),m_color(Qt::blue)
 
 void DetSelector::draw(QPainter& painter)
 {
+  UNUSED_ARG(painter);
 }
 
 DetSelector* DetSelector::create(DetSelectionType type)
 {
   switch(type)
   {
-  case Single: return new DetSelector(); 
-  default: return new BoxDetSelector();
+  case Single:
+    return new DetSelector(); 
+  default:
+    return new BoxDetSelector();
   };
-  return NULL;
 }
 
 void DetSelector::start(int x, int y)

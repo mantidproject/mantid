@@ -246,12 +246,11 @@ double MatrixModel::x(int col) const
 
 	double start = d_matrix->xStart();
 	double end = d_matrix->xEnd();
+
 	if (start < end)
 		return start + col*d_matrix->dx();
 	else
 		return start - col*d_matrix->dx();
-
-	return 0.0;
 }
 
 double MatrixModel::y(int row) const
@@ -261,12 +260,11 @@ double MatrixModel::y(int row) const
 
 	double start = d_matrix->yStart();
 	double end = d_matrix->yEnd();
+
 	if (start < end)
 		return start + row*d_matrix->dy();
 	else
 		return start - row*d_matrix->dy();
-
-	return 0.0;
 }
 
 QVariant MatrixModel::headerData ( int section, Qt::Orientation orientation, int role) const

@@ -15319,57 +15319,6 @@ bool ApplicationWindow::copyFolder(Folder *src, Folder *dest)
   }
   return true;
 }
-//Mantid commented out
-//void ApplicationWindow::searchForUpdates()
-//{
-//    int choice = QMessageBox::question(this, tr("QtiPlot"),
-//					tr("QtiPlot will try to download necessary information about the last available updates. Please modify your firewall settings in order to allow QtiPlot to connect to the internet!") + "\n" +
-//					tr("Do you wish to continue?"),
-//					QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape);
-//
-//    if (choice == QMessageBox::Yes){
-//        version_buffer.open(IO_WriteOnly);
-//        http.setHost("soft.proindependent.com");
-//        http.get("/version.txt", &version_buffer);
-//        http.closeConnection();
-//    }
-//}
-//
-//void ApplicationWindow::receivedVersionFile(bool error)
-//{
-//	if (error){
-//		QMessageBox::warning(this, tr("QtiPlot - HTTP get version file"),
-//				tr("Error while fetching version file with HTTP: %1.").arg(http.errorString()));
-//		return;
-//	}
-//
-//	version_buffer.close();
-//
-//	if (version_buffer.open(IO_ReadOnly))
-//	{
-//		QTextStream t( &version_buffer );
-//		t.setEncoding(QTextStream::UnicodeUTF8);
-//		QString version = t.readLine();
-//		version_buffer.close();
-//
-//		QString currentVersion = QString::number(maj_version) + "." + QString::number(min_version) +
-//			"." + QString::number(patch_version) + QString(extra_version);
-//
-//		if (currentVersion != version)
-//		{
-//			if(QMessageBox::question(this, tr("QtiPlot - Updates Available"),
-//						tr("There is a newer version of QtiPlot (%1) available for download. Would you like to download it?").arg(version),
-//						QMessageBox::Yes|QMessageBox::Default, QMessageBox::No|QMessageBox::Escape) == QMessageBox::Yes)
-//				QDesktopServices::openUrl(QUrl("http://soft.proindependent.com/download.html"));
-//		}
-//		else if (!autoSearchUpdatesRequest)
-//		{
-//			QMessageBox::information(this, tr("QtiPlot - No Updates Available"),
-//					tr("No updates available. Your current version %1 is the last version available!").arg(version));
-//		}
-//		autoSearchUpdatesRequest = false;
-//	}
-//}
 
 /**
   Turns 3D animation on or off
