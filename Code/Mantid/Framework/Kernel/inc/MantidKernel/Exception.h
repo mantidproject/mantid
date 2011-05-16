@@ -290,9 +290,8 @@ class DLLExport OpenGLError: public std::runtime_error
   public:
 
     MisMatch(const T&,const T&,const std::string&);
-
-
     MisMatch(const MisMatch<T>& A);
+    MisMatch & operator=(const MisMatch & rhs);
     ~MisMatch() throw() {}
 
     /// Overloaded reporting method
@@ -322,6 +321,7 @@ class DLLExport OpenGLError: public std::runtime_error
     // Unsigned versions
     IndexError(const size_t V, const size_t B, const std::string& Place);
     IndexError(const IndexError& A);
+    IndexError & operator=(const IndexError & A);
     ~IndexError() throw() {}
 
     /// Overloaded reporting method
@@ -349,6 +349,8 @@ class DLLExport OpenGLError: public std::runtime_error
     NullPointerException(const std::string& place, const std::string& objectName);
     NullPointerException(const NullPointerException&);
     ~NullPointerException() throw() {}
+
+    NullPointerException & operator=(const NullPointerException &);
 
     /// Overloaded reporting method
     const char* what() const throw();

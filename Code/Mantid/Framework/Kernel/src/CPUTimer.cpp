@@ -46,6 +46,7 @@ namespace Kernel
   {
     float retval = 0;
   #ifdef _WIN32
+    UNUSED_ARG(doReset);
   #else /* linux & mac */
     clock_t end = clock();
     retval = ((float)(end - m_start)) / CLOCKS_PER_SEC;
