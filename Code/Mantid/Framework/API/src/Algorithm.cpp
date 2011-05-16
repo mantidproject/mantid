@@ -24,6 +24,23 @@ namespace Mantid
 {
   namespace API
   {
+    template <typename NumT>
+    bool Algorithm::isEmpty(const NumT toCheck)
+    {
+      return static_cast<int>(toCheck) == EMPTY_INT();
+    }
+
+    template <>
+    bool Algorithm::isEmpty(const double toCheck)
+    {
+      return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;
+    }
+
+    // concrete instantiations
+    template bool Algorithm::isEmpty<int> (const int);
+    template bool Algorithm::isEmpty<int64_t> (const int64_t);
+    template bool Algorithm::isEmpty<std::size_t> (const std::size_t);
+
     /// Initialize static algorithm counter
     size_t Algorithm::g_execCount=0;
 

@@ -310,10 +310,10 @@ protected:
   void handleChildProgressNotification(const Poco::AutoPtr<ProgressNotification>& pNf);
   ///Child algorithm progress observer
   Poco::NObserver<Algorithm, ProgressNotification> m_progressObserver;
-  ///checks that the value was not set by users, uses the value in EMPTY_DBL()
-  static bool isEmpty(double toCheck) { return std::abs( (toCheck - EMPTY_DBL())/(EMPTY_DBL()) ) < 1e-8  ;}
-  ///checks that the value was not set by users, uses the value in EMPTY_INT()
-  static bool isEmpty(int toCheck) { return toCheck == EMPTY_INT(); }
+  ///checks that the value was not set by users, uses the value in empty double/int.
+  template <typename NumT>
+  static bool isEmpty(const NumT toCheck);
+
   ///checks the property is a workspace property
   bool isWorkspaceProperty(const Kernel::Property* const prop) const;
   /// checks the property is input workspace property
