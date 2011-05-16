@@ -348,8 +348,10 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
     {
       typedef std::vector<Mantid::Geometry::IMDDimension_sptr> IMDDimensions_sptr_vec;
       IMDDimensions_sptr_vec dimensions = m_spMDImage->get_const_MDGeometry().getDimensions();
-      MDWorkspaceIndexCalculator calculator(dimensions.size());
-      for(int i = 0; i < dimensions.size(); i++)
+      // if dimensions.size is higher then 2^32 it is somethign seriously wrong somewhere, but not here
+	  MDWorkspaceIndexCalculator calculator((unsigned int)dimensions.size());
+
+      for(unsigned int i = 0; i < (unsigned int)dimensions.size(); i++)
       {
         calculator.setDimensionSize(i, dimensions[i]->getNBins());
       }

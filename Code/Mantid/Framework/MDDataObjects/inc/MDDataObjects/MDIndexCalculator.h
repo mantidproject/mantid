@@ -43,17 +43,17 @@ typedef std::vector<size_t> VecIndexes;
 class EXPORT_OPT_MANTID_MDDATAOBJECTS MDWorkspaceIndexCalculator
 {
 private:
+ /// 
+  bool m_isSetup;
 
   /// Stores the number of dimensions == m_dimSizes.size()
   unsigned int m_nDimensions;
-
+ 
   /// Stores maximum size in each dimension.
   std::vector<unsigned int> m_dimSizes;
 
   /// Cached coefficients
   std::vector<int> m_coeffs;
-
-  bool m_isSetup;
 
   /// Calculate coefficients of form i + aj + ck
   std::vector<int> cacluateCoefficients() const;

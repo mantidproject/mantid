@@ -15,7 +15,7 @@ namespace MDDataObjects
   * @param size4 :: Size of the fourth dimension. Passing -1 (default) means the dimension is undefined.
   */
 MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(unsigned int nDimensions, int size1, int size2, int size3, int size4) :
-  m_nDimensions(nDimensions),m_dimSizes(nDimensions, 0),m_isSetup(false)
+  m_isSetup(false),m_nDimensions(nDimensions),m_dimSizes(nDimensions, 0)
 {
   if (size1 <= 0) return;
   setDimensionSize(0,size1);
