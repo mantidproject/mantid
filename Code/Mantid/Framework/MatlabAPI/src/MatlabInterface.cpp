@@ -512,7 +512,7 @@ int WorkspaceSetField(int nlhs, mxArray *plhs[], int nrhs, const mxArray* prhs[]
   */
 static mxArray* WorkspaceGetFieldHelper(MatrixWorkspace_sptr wksptr, char field, int ispec)
 {
-	int nHist = wksptr->getNumberHistograms();
+	const size_t nHist = wksptr->getNumberHistograms();
   mxArray* mptr = NULL;
 
 	switch(field)

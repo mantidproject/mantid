@@ -1640,7 +1640,7 @@ bool SANSRunWindow::handleLoadButtonClick()
   //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
   if ( ( ! m_uiForm.transCan->isEmpty() ) && m_uiForm.dirCan->isEmpty() )
   {
-    m_uiForm.dirCan->setFileText(m_uiForm.transCan->getText());
+    m_uiForm.dirCan->setFileText(m_uiForm.direct->getText());
   }
 
   QString sample_logs, can_logs;  

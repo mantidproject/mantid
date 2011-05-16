@@ -7,7 +7,7 @@ from reduction.command_interface import ReductionSingleton
 import reduction.instruments.sans.sans_reduction_steps as sans_reduction_steps
 import isis_reduction_steps
 import isis_reducer
-import centre_finder as centre
+from centre_finder import CentreFinder as CentreFinder
 #import SANSReduction
 import MantidFramework
 import copy
@@ -497,6 +497,17 @@ def createColetteScript(inputdata, format, reduced, centreit , plotresults, csvf
     return script
 
 def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
+    """
+        Estimates the location of the effective beam centre given a good initial estimate. For more
+        information go to this page
+        mantidproject.org/Using_the_SANS_GUI_Beam_Centre_Finder
+        @param rlow: mask around the (estimated) centre to this radius (in millimetres)
+        @param rupp: don't include further out than this distance (mm) from the centre point
+        @param MaxInter: don't calculate more than this number of iterations (default = 10)
+        @param xstart: x-coordinate of the initial guess for the centre point (default the values in the mask file)
+        @param ystart: y-coordinate of the initial guess for the centre point (default the values in the mask file)
+        @return: the best guess for the beam centre point
+    """
     XSTEP = ReductionSingleton().inst.cen_find_step
     YSTEP = ReductionSingleton().inst.cen_find_step
 
@@ -529,14 +540,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         CloneWorkspace(centre_reduction.background_subtracter.workspace.wksp_name, can)
         centre_reduction.background_subtracter.workspace.wksp_name = can
 
+    centre = CentreFinder(centre_reduction, original)
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
-    oldX2,oldY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
-    mantid.sendLogMessage("::SANS::Itr: 0 "+str(XNEW*1000.)+","+str(YNEW*1000.)+
-        'SX '+str(oldX2).ljust(6)[0:5]+' SY '+str(oldY2).ljust(6)[0:5])
+    resX_old, resY_old = centre.SeekCentre([XNEW, YNEW])
+    mantid.sendLogMessage(centre.status_str(0, XNEW, YNEW, resX_old, resY_old))
+    
     # take first trial step
     XNEW = xstart + XSTEP
     YNEW = ystart + YSTEP
-
     graph_handle = None
     for i in range(1, MaxIter+1):
         it = i
@@ -544,33 +555,32 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         centre_reduction.set_beam_finder(
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
-        newX2,newY2 = centre.SeekCentre([XNEW, YNEW], centre_reduction, original)
-        mantid.sendLogMessage("::SANS::Itr: "+str(it)+" "+str(XNEW*1000.)+","+str(YNEW*1000.)+
-            'SX '+str(newX2).ljust(6)[0:5]+' SY '+str(newY2).ljust(6)[0:5])
+        resX, resY = centre.SeekCentre([XNEW, YNEW])
+        mantid.sendLogMessage(centre.status_str(it, XNEW, YNEW, resX, resY))
         
         try :
             if not graph_handle:
-                #once we have a plot it wil be updated automatically when the workspaces are updated
-                graph_handle = mantidplot.plotSpectrum(['Right','Up', 'Left', 'Down'],0)
-            graph_handle.activeLayer().setTitle("Itr " + str(it)+" "
-                +str(XNEW*1000.)+","+str(YNEW*1000.)+" SX "+str(newX2)+" SY "+str(newY2))
+                #once we have a plot it will be updated automatically when the workspaces are updated
+                graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
+            graph_handle.activeLayer().setTitle(
+                        centre.status_str(it, XNEW, YNEW, resX, resY))
         except :
             #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
             pass
 
         #have we stepped across the y-axis that goes through the beam center?  
-        if newX2 > oldX2:
+        if resX > resX_old:
             # yes with stepped across the middle, reverse direction and half the step size 
             XSTEP = -XSTEP/2.
-        if newY2 > oldY2:
+        if resY > resY_old:
             YSTEP = -YSTEP/2.
         if abs(XSTEP) < 0.1251/1000. and abs(YSTEP) < 0.1251/1000. :
             # this is the success criteria, we've close enough to the center
             mantid.sendLogMessage("::SANS:: Converged - check if stuck in local minimum!")
             break
         
-        oldX2 = newX2
-        oldY2 = newY2
+        resX_old = resX
+        resY_old = resY
         XNEW += XSTEP
         YNEW += YSTEP
 
@@ -586,7 +596,7 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
     _printMessage("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
-
+    return XNEW, YNEW
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here
 DefaultTrans = 'True'
