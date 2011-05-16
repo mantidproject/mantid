@@ -172,7 +172,7 @@ void FilterByLogValue::exec()
   {
     // Filtering in place! -------------------------------------------------------------
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < numberOfSpectra; ++i)
+    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 
@@ -210,7 +210,7 @@ void FilterByLogValue::exec()
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < numberOfSpectra; ++i)
+    for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 

@@ -293,7 +293,7 @@ void AbsorptionCorrection::calculateDistances(const Geometry::IDetector_const_sp
                           detector->getPhi()*180.0/M_PI);
   }
   
-  for (int i = 0; i < m_numVolumeElements; ++i)
+  for (size_t i = 0; i < m_numVolumeElements; ++i)
   {
     // Create track for distance in cylinder between scattering point and detector
     V3D direction = detectorPos - m_elementPositions[i];

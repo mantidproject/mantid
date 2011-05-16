@@ -94,7 +94,7 @@ void UnwrapMonitor::exec()
   unsigned int max_bins = 0;
   m_progress=new Progress(this,0.0,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
-  for (int i = 0; i < numberOfSpectra; ++i)
+  for (size_t i = 0; i < numberOfSpectra; ++i)
   {
     // Flag indicating whether the current detector is a monitor, Set in calculateFlightpath below.
     bool isMonitor;

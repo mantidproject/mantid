@@ -151,7 +151,7 @@ public:
    
 		const size_t numberOfSpectra = output2D->getNumberHistograms();
 		TS_ASSERT_EQUALS(numberOfSpectra,10);
-		for (int i = 0; i < numberOfSpectra; ++i) {
+		for (size_t i = 0; i < numberOfSpectra; ++i) {
 			//all of the values should fall in this range for INES
 			TS_ASSERT_DELTA(output2D->readY(i)[0],0.0013,0.0001);
 			

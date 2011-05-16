@@ -711,11 +711,11 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
  */
 void ConvertUnits::putBackBinWidth(const API::MatrixWorkspace_sptr outputWS)
 {
-  const unsigned int outSize = outputWS->blocksize();
+  const size_t outSize = outputWS->blocksize();
 
-  for (int i = 0; i < m_numberOfSpectra; ++i)
+  for (size_t i = 0; i < m_numberOfSpectra; ++i)
   {
-    for (unsigned int j = 0; j < outSize; ++j)
+    for (size_t j = 0; j < outSize; ++j)
     {
       const double width = std::abs( outputWS->dataX(i)[j+1] - outputWS->dataX(i)[j] );
       outputWS->dataY(i)[j] = outputWS->dataY(i)[j]/width;

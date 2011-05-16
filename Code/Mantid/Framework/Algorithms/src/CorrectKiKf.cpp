@@ -117,7 +117,7 @@ void CorrectKiKf::exec()
 
 
   PARALLEL_FOR2(inputWS,outputWS)
-  for (int i = 0; i < numberOfSpectra; ++i) 
+  for (int64_t i = 0; i < int64_t(numberOfSpectra); ++i)
   {
     PARALLEL_START_INTERUPT_REGION 
     double Efi = 0;
