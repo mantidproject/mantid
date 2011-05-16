@@ -20,9 +20,9 @@ TimeStepToTimeStep::TimeStepToTimeStep()
 {
 }
 
-int TimeStepToTimeStep::operator()(int timeStep) const
+size_t TimeStepToTimeStep::operator()(double timeStep) const
 {
-  return timeStep;
+  return static_cast<size_t>(timeStep);
 }
 }
 }

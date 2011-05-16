@@ -40,7 +40,7 @@ namespace VATES
   */
   template<typename TimeMapper>
   vtkThresholdingUnstructuredGridFactory<TimeMapper>::vtkThresholdingUnstructuredGridFactory(const vtkThresholdingUnstructuredGridFactory<TimeMapper>& other)
-    : m_timestep(other.m_timestep), m_timeMapper(other.m_timeMapper), m_scalarName( other.m_scalarName), m_minThreshold(other.m_minThreshold), m_maxThreshold(other.m_maxThreshold), m_workspace(other.m_workspace)
+    : m_workspace(other.m_workspace), m_timestep(other.m_timestep), m_scalarName( other.m_scalarName), m_timeMapper(other.m_timeMapper), m_minThreshold(other.m_minThreshold), m_maxThreshold(other.m_maxThreshold)
   {
 
   }
