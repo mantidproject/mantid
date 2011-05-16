@@ -114,34 +114,34 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 {
 
  public:
-  /// Typedef for a Most-Recently-Used list of Data objects.
+  // Typedef for a Most-Recently-Used list of Data objects.
   typedef Mantid::Kernel::MRUList<MantidVecWithMarker> mru_list;
-  /// Typedef for a vector of MRUlists.
+  // Typedef for a vector of MRUlists.
   typedef std::vector< mru_list * > mru_lists;
 
-  /// The name of the workspace type.
+  // The name of the workspace type.
   virtual const std::string id() const {return "EventWorkspace";}
 
-  /// Constructor
+  // Constructor
   EventWorkspace();
 
-  /// Destructor
+  // Destructor
   virtual ~EventWorkspace();
 
-  /// Initialize the pixels
+  // Initialize the pixels
   void init(const std::size_t&, const std::size_t&, const std::size_t&);
 
   virtual bool threadSafe() const;
 
   //------------------------------------------------------------
 
-  /// Returns the number of single indexable items in the workspace
+  // Returns the number of single indexable items in the workspace
   std::size_t size() const;
 
-  /// Get the blocksize, aka the number of bins in the histogram
+  // Get the blocksize, aka the number of bins in the histogram
   std::size_t blocksize() const;
 
-  /// Get the number of histograms. aka the number of pixels or detectors.
+  // Get the number of histograms. aka the number of pixels or detectors.
   std::size_t getNumberHistograms() const;
 
   size_t getMemorySize() const;
@@ -157,84 +157,84 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
   void ensureEnoughBuffersY(std::size_t thread_num) const;
   void ensureEnoughBuffersE(std::size_t thread_num) const;
 
-  /// Return the data X vector at a given workspace index
+  // Return the data X vector at a given workspace index
   MantidVec& dataX(const std::size_t);
 
-  /// Return the data Y vector at a given workspace index
+  // Return the data Y vector at a given workspace index
   MantidVec& dataY(const std::size_t);
 
-  /// Return the data E vector at a given workspace index
+  // Return the data E vector at a given workspace index
   MantidVec& dataE(const std::size_t);
 
-  /// Return the X data erro vector at a given workspace index
+  // Return the X data erro vector at a given workspace index
   MantidVec& dataDx(const std::size_t);
 
 
-  /// Return the const data X vector at a given workspace index
+  // Return the const data X vector at a given workspace index
   const MantidVec& dataX(const std::size_t) const;
 
-  /// Return the const data Y vector at a given workspace index
+  // Return the const data Y vector at a given workspace index
   const MantidVec& dataY(const std::size_t) const;
 
-  /// Return the const data E vector at a given workspace index
+  // Return the const data E vector at a given workspace index
   const MantidVec& dataE(const std::size_t) const;
 
-  /// Return the const X data error vector at a given workspace index
+  // Return the const X data error vector at a given workspace index
   const MantidVec& dataDx(const std::size_t) const;
 
-  /// Get a pointer to the x data at the given workspace index
+  // Get a pointer to the x data at the given workspace index
   Kernel::cow_ptr<MantidVec> refX(const std::size_t) const;
 
   void readYE(std::size_t const index, MantidVec const*& Y, MantidVec const*& E) const;
 
   //------------------------------------------------------------
 
-  /// Set the x-axis data for the given pixel via cow_ptr.
+  // Set the x-axis data for the given pixel via cow_ptr.
   void setX(const std::size_t, const  Kernel::cow_ptr<MantidVec> &);
-  /// Set the x-axis data for the given pixel via MantidVec.
+  // Set the x-axis data for the given pixel via MantidVec.
   void setX(const std::size_t, const MantidVec &);
 
-  /// Set the x-axis data (histogram bins) for all pixels
+  // Set the x-axis data (histogram bins) for all pixels
   void setAllX(Kernel::cow_ptr<MantidVec> &x);
 
-  /// Get an EventList object at the given pixelid/spectrum number
+  // Get an EventList object at the given pixelid/spectrum number
   EventList& getEventListAtPixelID(const int64_t pixelid);
 
-  /// Get an EventList object at the given workspace index number
+  // Get an EventList object at the given workspace index number
   EventList& getEventList(const std::size_t workspace_index);
 
-  /// Get a const EventList object at the given workspace index number
+  // Get a const EventList object at the given workspace index number
   const EventList& getEventList(const std::size_t workspace_index) const;
 
-  /// Get an EventList pointer at the given workspace index number
+  // Get an EventList pointer at the given workspace index number
   EventList * getEventListPtr(const std::size_t workspace_index);
 
-  /// Get or add an EventList
+  // Get or add an EventList
   EventList& getOrAddEventList(const std::size_t workspace_index);
 
-  /// Pad pixels in the workspace using the detectors in the instrument.
+  // Pad pixels in the workspace using the detectors in the instrument.
   void padPixels(bool parallel);
 
-  /// Make all the mapping stuff
+  // Make all the mapping stuff
   void makeSpectraMap();
   void makeAxis1();
   void doneAddingEventLists();
 
-  /// Call this method when loading event data is complete.
+  // Call this method when loading event data is complete.
   void doneLoadingData();
 
 
   //------------------------------------------------------------
-  /// The total number of events across all of the spectra.
+  // The total number of events across all of the spectra.
   std::size_t getNumberEvents() const;
 
-  /// Type of the events
+  // Type of the events
   Mantid::API::EventType getEventType() const;
 
-  /// Change the event type
+  // Change the event type
   void switchEventType(const Mantid::API::EventType type);
 
-  /// Returns true always - an EventWorkspace always represents histogramm-able data
+  // Returns true always - an EventWorkspace always represents histogramm-able data
   virtual bool isHistogramData() const;
 
   std::size_t MRUSize() const;
@@ -243,7 +243,7 @@ class DLLExport EventWorkspace : public API::IEventWorkspace
 
   void clearData();
 
-  /// Sort all event lists. Uses a parallelized algorithm
+  // Sort all event lists. Uses a parallelized algorithm
   void sortAll(EventSortType sortType, Mantid::API::Progress * prog) const;
   void sortAllOld(EventSortType sortType, Mantid::API::Progress * prog) const;
 

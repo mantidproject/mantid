@@ -317,6 +317,7 @@ private:
 
   /// Cached version of the x axis.
   mutable MantidVecPtr refX;
+  /// Cached version of the error on X axis.
   mutable MantidVecPtr refDx;
 
   /// Set of the detector IDs associated with this EventList

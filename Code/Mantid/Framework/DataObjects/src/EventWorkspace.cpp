@@ -634,7 +634,7 @@ namespace DataObjects
   /// Return the data X vector at a given workspace index
   /// Note: the MRUlist should be cleared before calling getters for the Y or E data
   /// @param index :: the workspace index to return
-  /// @returns A reference to the vector of binned error values
+  /// @returns A reference to the vector of binned X values
   MantidVec& EventWorkspace::dataX(const size_t index)
   {
     if (index >= this->m_noVectors)
@@ -656,7 +656,7 @@ namespace DataObjects
   /// Return the data Y vector at a given workspace index
   /// Note: these non-const access methods will throw NotImplementedError
   /// @param index :: the workspace index to return
-  /// @returns A reference to the vector of binned error values
+  /// @returns A reference to the vector of binned Y values
   MantidVec& EventWorkspace::dataY(const size_t index)
   {
     if (index >= this->m_noVectors)
@@ -682,6 +682,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** This function makes sure that there are enough data
    * buffers (MRU's) for E for the number of threads requested.
+   * @param thread_num :: thread number that wants a MRU buffer
    */
   void EventWorkspace::ensureEnoughBuffersE(size_t thread_num) const
   {
@@ -703,6 +704,7 @@ namespace DataObjects
   //---------------------------------------------------------------------------
   /** This function makes sure that there are enough data
    * buffers (MRU's) for Y for the number of threads requested.
+   * @param thread_num :: thread number that wants a MRU buffer
    */
   void EventWorkspace::ensureEnoughBuffersY(size_t thread_num) const
   {
@@ -723,7 +725,8 @@ namespace DataObjects
 
 
   //---------------------------------------------------------------------------
-  /// Return the const data X vector at a given workspace index
+  /** @return the const data X vector at a given workspace index
+   * @param index :: workspace index   */
   const MantidVec& EventWorkspace::dataX(const size_t index) const
   {
     if (index >= this->m_noVectors)
@@ -731,7 +734,8 @@ namespace DataObjects
     return this->data[index]->dataX();
   }
 
-  /// Return the const data X error vector at a given workspace index
+  /** @return the const data X error vector at a given workspace index
+   * @param index :: workspace index   */
   const MantidVec& EventWorkspace::dataDx(const size_t index) const
   {
     if (index >= this->m_noVectors)
@@ -742,7 +746,8 @@ namespace DataObjects
 
 
   //---------------------------------------------------------------------------
-  /// Return the const data Y vector at a given workspace index
+  /** @return the const data Y vector at a given workspace index
+   * @param index :: workspace index   */
   const MantidVec& EventWorkspace::dataY(const size_t index) const
   {
     if (index >= this->m_noVectors)
@@ -783,7 +788,8 @@ namespace DataObjects
 
 
   //---------------------------------------------------------------------------
-  /// Return the const data E vector at a given workspace index
+  /** @return the const data E (error) vector at a given workspace index
+   * @param index :: workspace index   */
   const MantidVec& EventWorkspace::dataE(const size_t index) const
   {
     if (index >= this->m_noVectors)
@@ -829,7 +835,8 @@ namespace DataObjects
   }
 
   //---------------------------------------------------------------------------
-  /// Get a pointer to the x data at the given workspace index
+  /** @return a pointer to the X data vector at a given workspace index
+   * @param index :: workspace index   */
   Kernel::cow_ptr<MantidVec> EventWorkspace::refX(const size_t index) const
   {
     if (index >= this->m_noVectors)
