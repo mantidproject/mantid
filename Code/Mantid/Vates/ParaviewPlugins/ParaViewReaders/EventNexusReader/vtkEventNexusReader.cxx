@@ -262,7 +262,7 @@ std::string vtkEventNexusReader::extractFormattedPropertyFromDimension(Mantid::G
 {
   double min = dimension->getMinimum();
   double max = dimension->getMaximum();
-  int nbins = dimension->getNBins();
+  size_t nbins = dimension->getNBins();
   std::string id = dimension->getDimensionId();
   return boost::str(boost::format("%s, %f, %f, %d") %id %min %max % nbins);
 }
@@ -385,7 +385,7 @@ int vtkEventNexusReader::RequestInformation(
     Workspace_sptr result=AnalysisDataService::Instance().retrieve(m_mdEventWsId);
     Mantid::API::IMDEventWorkspace_sptr eventWs = boost::dynamic_pointer_cast<Mantid::API::IMDEventWorkspace>(result);
 
-    int nDimensions = eventWs->getNumDims();
+    size_t nDimensions = eventWs->getNumDims();
     
     //Configuring the geometry xml builder allows the object panel associated with this reader to later
     //determine how to display all geometry related properties.

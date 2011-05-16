@@ -3,7 +3,7 @@
 #include "MantidVatesAPI/RebinningCutterXMLDefinitions.h"
 #include "MantidMDAlgorithms/DimensionFactory.h"
 
-#include "vtkDataSet.h"; 
+#include "vtkDataSet.h"
 
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>

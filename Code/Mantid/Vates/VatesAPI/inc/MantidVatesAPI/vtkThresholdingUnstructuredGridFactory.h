@@ -81,8 +81,6 @@ private:
 
   void validateWsNotNull() const;
 
-  void validateDimensionsPresent() const;
-
   /// Image from which to draw.
   Mantid::API::IMDWorkspace_sptr m_workspace;
 

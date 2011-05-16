@@ -341,9 +341,6 @@ public:
   {
     using namespace Mantid::MDDataObjects;
 
-    MDWorkspace * baseWs = constructMDWorkspace();
-    //AnalysisDataService::Instance().add("Input", baseWs); // you can not do it twice
-
     Mantid::MDAlgorithms::DynamicRebinFromXML xmlRebinAlg;
     xmlRebinAlg.setRethrows(true); 
     xmlRebinAlg.initialize();
