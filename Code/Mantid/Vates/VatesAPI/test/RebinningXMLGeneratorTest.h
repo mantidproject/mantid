@@ -9,6 +9,7 @@
 #include "MantidVatesAPI/RebinningXMLGenerator.h"
 #include "MantidAPI/IMDWorkspace.h"
 #include "MantidAPI/ImplicitFunction.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 
 using namespace Mantid::VATES;
@@ -64,6 +65,7 @@ private:
     }
     boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
     {
+      UNUSED_ARG(id);
       throw std::runtime_error("Not Implemented");
     }
     const Mantid::Geometry::SignalAggregate& getCell(...) const
