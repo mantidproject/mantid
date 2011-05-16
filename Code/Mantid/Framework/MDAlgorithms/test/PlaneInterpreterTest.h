@@ -80,7 +80,9 @@ public:
         width));
     boost::shared_ptr<PlaneImplicitFunction> functionB(new PlaneImplicitFunction(normalB, origin, 
         width));
-    boost::shared_ptr<MockImplicitFunction> functionC(new MockImplicitFunction());
+    MockImplicitFunction* mock_function = new MockImplicitFunction();
+    EXPECT_CALL(*mock_function, getName()).Times(2).WillRepeatedly(testing::Return("Mock_Function"));
+    boost::shared_ptr<MockImplicitFunction> functionC(mock_function);
     compositeFunction.addFunction(functionA); // Is a plane (counted)
     compositeFunction.addFunction(functionB); // Is a plane (counted)
     compositeFunction.addFunction(functionC); // Not a plane (not counted)
@@ -88,6 +90,7 @@ public:
     planeVector planes = interpreter.getAllPlanes(&compositeFunction);
 
     TSM_ASSERT_EQUALS("There should have been exactly two planes in the product vector.", 2, planes.size());
+    TSM_ASSERT("Mock function has not been used as expected.", testing::Mock::VerifyAndClear(mock_function));
   }
 
 };
