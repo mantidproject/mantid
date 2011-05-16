@@ -49,7 +49,7 @@ void LinearBackground::fit(const std::vector<double>& X,const std::vector<double
   {
     throw std::runtime_error("Background fit: different array sizes");
   }
-  int n = X.size();
+  size_t n = X.size();
   if (n == 0)
   {
     setParameter("A0",0);

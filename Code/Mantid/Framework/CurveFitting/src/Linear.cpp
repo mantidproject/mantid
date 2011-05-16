@@ -91,7 +91,7 @@ void Linear::exec()
   const MatrixWorkspace::MaskList * const maskedBins = 
     ( inputWorkspace->hasMaskedBins(histNumber) ? &(inputWorkspace->maskedBins(histNumber)) : NULL );
   // Put indices of masked bins into a set for easy searching later
-  std::set<int> maskedIndices;
+  std::set<size_t> maskedIndices;
   if (maskedBins)
   {
     MatrixWorkspace::MaskList::const_iterator it;
@@ -178,7 +178,7 @@ void Linear::exec()
   setProperty("Chi2",*chisq);
   
   // Create and fill a workspace2D with the same bins as the fitted spectrum and the value of the fit for the centre of each bin
-  const int YSize = Y.size();
+  const size_t YSize = Y.size();
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,1,X.size(),YSize);
   
   // Copy over the X bins
