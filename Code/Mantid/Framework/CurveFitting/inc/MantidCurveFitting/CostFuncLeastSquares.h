@@ -49,11 +49,11 @@ public:
 
   /// Calculate value of cost function from observed
   /// and calculated values
-  virtual double val(const double* yData, const double* inverseError, double* yCal, const int& n);
+  virtual double val(const double* yData, const double* inverseError, double* yCal, const size_t& n);
 
   /// Calculate the derivatives of the cost function
   virtual void deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const int& p, const int& n);
+                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n);
 
 private:
   /// name of this minimizer

@@ -20,16 +20,16 @@ DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks,Ignore positive peaks)
   /// @param yCal :: Calculated y
   /// @param n :: The number of points 
   /// @return The calculated cost value
-  double CostFuncIgnorePosPeaks::val(const double* yData, const double* inverseError, double* yCal, const int& n)
+  double CostFuncIgnorePosPeaks::val(const double* yData, const double* inverseError, double* yCal, const size_t& n)
   {
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
       yCal[i] = ( yData[i] - yCal[i] ) * inverseError[i];
 
     double retVal = 0.0;
 
     double a = 2.0 / sqrt(M_PI);
     double b = 1/sqrt(2.0); 
-    for (int i = 0; i < n; i++)
+    for (size_t i = 0; i < n; i++)
     {
       if ( yCal[i] <= 0.0 )
         retVal += yCal[i]*yCal[i];
@@ -41,16 +41,22 @@ DECLARE_COSTFUNCTION(CostFuncIgnorePosPeaks,Ignore positive peaks)
   }
 
   /// Calculate the derivatives of the cost function
+  /// @param yData :: Array of yData
+  /// @param inverseError :: Array of inverse error values
+  /// @param yCal :: Calculated y
+  /// @param jacobian :: Output jacobian 
+  /// @param p :: The number of parameters 
+  /// @param n :: The number of points 
   void CostFuncIgnorePosPeaks::deriv(const double* yData, const double* inverseError, const double* yCal, 
-                     const double* jacobian, double* outDerivs, const int& p, const int& n)
+                     const double* jacobian, double* outDerivs, const size_t& p, const size_t& n)
   {
     double a = 2.0 / sqrt(M_PI);
     double b = 1/sqrt(2.0); 
 
-    for (int iP = 0; iP < p; iP++) 
+    for (size_t iP = 0; iP < p; iP++) 
     {
       outDerivs[iP] = 0.0;
-      for (int iY = 0; iY < n; iY++) 
+      for (size_t iY = 0; iY < n; iY++) 
       {
         if ( yCal[iY] >= yData[iY] )
           outDerivs[iP] += 2.0*(yCal[iY]-yData[iY]) * jacobian[iY*p + iP] 
