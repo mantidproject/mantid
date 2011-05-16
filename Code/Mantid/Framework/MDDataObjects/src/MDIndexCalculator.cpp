@@ -50,8 +50,8 @@ MDWorkspaceIndexCalculator&  MDWorkspaceIndexCalculator::operator=(const MDWorks
 MDWorkspaceIndexCalculator::MDWorkspaceIndexCalculator(const MDWorkspaceIndexCalculator& other):
    m_isSetup(other.m_isSetup),
    m_nDimensions(other.m_nDimensions),
-   m_coeffs(other.m_coeffs),
-   m_dimSizes(other.m_dimSizes)
+   m_dimSizes(other.m_dimSizes),
+   m_coeffs(other.m_coeffs)
 {
 }
 
