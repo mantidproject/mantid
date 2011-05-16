@@ -27,7 +27,7 @@ void GeometryWidget::validateSetup() const
   }
 }
 
-GeometryWidget::GeometryWidget() : m_isConstructed(false), m_xDimensionWidget(NULL), m_yDimensionWidget(NULL), m_zDimensionWidget(NULL), m_tDimensionWidget(NULL)
+GeometryWidget::GeometryWidget() : m_xDimensionWidget(NULL), m_yDimensionWidget(NULL), m_zDimensionWidget(NULL), m_tDimensionWidget(NULL), m_isConstructed(false)
 {
 }
 
