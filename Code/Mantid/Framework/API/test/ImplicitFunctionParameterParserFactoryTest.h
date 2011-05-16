@@ -34,11 +34,11 @@ class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite
   class MockImplicitFunctionParameterParserA : public Mantid::API::ImplicitFunctionParameterParser
   {
   public:
-      virtual Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement)
+      virtual Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element*)
 	  {
 	      return new MockImplicitFunctionParameter;
 	  }
-      virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser)
+      virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser*)
 	  {
 	  }
   };
@@ -46,11 +46,11 @@ class ImplicitFunctionParameterParserFactoryTest : public CxxTest::TestSuite
   class MockImplicitFunctionParameterParserB : public Mantid::API::ImplicitFunctionParameterParser
   {
   public:
-      virtual Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* parameterElement)
+      virtual Mantid::API::ImplicitFunctionParameter* createParameter(Poco::XML::Element* )
 	  {
 	      return new MockImplicitFunctionParameter;
 	  }
-      virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser* paramParser)
+      virtual void setSuccessorParser(Mantid::API::ImplicitFunctionParameterParser*)
 	  {
 	  }
   };

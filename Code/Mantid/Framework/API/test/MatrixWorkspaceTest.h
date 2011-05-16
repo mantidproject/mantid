@@ -31,7 +31,7 @@ public:
   // Empty overrides of virtual methods
   virtual size_t getNumberHistograms() const { return 1;}
   const std::string id() const {return "WorkspaceTester";}
-  void init(const size_t& i, const size_t& j, const size_t& k)
+  void init(const size_t&, const size_t& j, const size_t&)
   {
     vec.resize(j,1.0);
     // Put an 'empty' axis in to test the getAxis method
@@ -65,7 +65,7 @@ public:
   // Empty overrides of virtual methods
   virtual size_t getNumberHistograms() const { return m_NVectors;}
   const std::string id() const {return "WorkspaceTester";}
-  void init(const size_t& NVectors, const size_t& j, const size_t& k)
+  void init(const size_t& NVectors, const size_t& j, const size_t&)
   {
     m_NVectors = NVectors;
     vec.resize(j,1.0);
@@ -75,16 +75,16 @@ public:
 
     //Spectrum # = 20 + workspace index.
     SpectraAxis * ax =  new SpectraAxis(m_NVectors);
-    for (int i=0; i<m_NVectors; i++)
-      ax->setValue(i, i+20);
+    for (size_t i=0; i<m_NVectors; i++)
+      ax->setValue(i, static_cast<double>(i)+20);
     m_axes[1] = ax;
 
     //Detector id is 100 + workspace index = 80 + spectrum #
-    for (int i=20; i<20+m_NVectors; i++)
+    for (size_t i=20; i<20+m_NVectors; i++)
     {
       std::vector<detid_t> vec;
-      vec.push_back(i+80);
-      this->mutableSpectraMap().addSpectrumEntries(i, vec);
+      vec.push_back(static_cast<detid_t>(i)+80);
+      this->mutableSpectraMap().addSpectrumEntries(static_cast<specid_t>(i), vec);
     }
 
   }
@@ -103,8 +103,8 @@ public:
 
 private:
   MantidVec vec;
-  int spec;
-  int m_NVectors;
+  Mantid::specid_t spec;
+  size_t m_NVectors;
 };
 
 DECLARE_WORKSPACE(WorkspaceTester)
@@ -118,7 +118,7 @@ public:
   // Empty overrides of virtual methods
   virtual size_t getNumberHistograms() const { return m_NVectors;}
   const std::string id() const {return "WorkspaceTester";}
-  void init(const size_t& NVectors, const size_t& j, const size_t& k)
+  void init(const size_t& NVectors, const size_t&, const size_t&)
   {
     m_NVectors = NVectors;
     vec.resize(NVectors, MantidVec(1, 1.0));
@@ -127,19 +127,19 @@ public:
     m_axes[0] = new NumericAxis(1);
 
     m_axes[1] =  new SpectraAxis(m_NVectors);
-    for (int i=0; i<m_NVectors; i++)
+    for (size_t i=0; i<m_NVectors; i++)
     {
-      this->getAxis(1)->spectraNo(i) = i;
+      this->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i);
     }
-    this->mutableSpectraMap().populateSimple(0, NVectors);
+    this->mutableSpectraMap().populateSimple(0, static_cast<detid_t>(NVectors));
 
     setInstrument(Instrument_sptr(new Instrument("TestInstrument")));
     Instrument_sptr inst = getBaseInstrument();
     
-    for( int i = 0; i < NVectors; ++i )
+    for( size_t i = 0; i < NVectors; ++i )
     {
       // Create a detector for each spectra
-      Detector * det = new Detector("pixel", i, inst.get());
+      Detector * det = new Detector("pixel", static_cast<int>(i), inst.get());
       inst->add(det);
       inst->markAsDetector(det);
     }
@@ -160,8 +160,8 @@ public:
 
 private:
   std::vector<MantidVec> vec;
-  int spec;
-  int m_NVectors;
+  specid_t spec;
+  size_t m_NVectors;
 };
 
 }
@@ -223,9 +223,7 @@ public:
 
   void testHistory()
   {
-    TS_ASSERT_THROWS_NOTHING( WorkspaceHistory& h = ws->history() );
-    const Mantid::DataObjects::WorkspaceTester wsc;
-    const WorkspaceHistory& hh = wsc.getHistory();
+    TS_ASSERT_THROWS_NOTHING( ws->history() );
   }
 
   void testAxes()

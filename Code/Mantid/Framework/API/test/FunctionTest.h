@@ -32,7 +32,7 @@ public:
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
     double c3 = getParameter("c3");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i];
       out[i] = c0 + x*(c1 + x*(c2 + x*c3));
@@ -40,13 +40,13 @@ public:
   }
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i];
-      out->set(i,0,1.);
-      out->set(i,1,x);
-      out->set(i,2,x*x);
-      out->set(i,3,x*x*x);
+      out->set(static_cast<int>(i),0,1.);
+      out->set(static_cast<int>(i),1,x);
+      out->set(static_cast<int>(i),2,x*x);
+      out->set(static_cast<int>(i),3,x*x*x);
     }
   }
 
@@ -426,12 +426,12 @@ public:
 
     MantidVec& x = ws->dataX(3);
     MantidVec& y = ws->dataY(3);
-    for(int i=0; i < y.size(); ++i)
+    for(size_t i=0; i < y.size(); ++i)
     {
-      x[i] = 0.1 * i;
-      y[i] = i;
+      x[i] = 0.1 * static_cast<double>(i);
+      y[i] = static_cast<double>(i);
     }
-    x.back() = 0.1 * y.size();
+    x.back() = 0.1 * static_cast<double>(y.size());
     AnalysisDataService::Instance().add("IFT_Test_WS",ws);
     IFT_Funct f;
     TS_ASSERT_THROWS_NOTHING(f.setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
@@ -446,7 +446,7 @@ public:
     double expected;
     int numpixels = 15000;
     MatrixWorkspace_sptr ws = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,10);
-    for (int wi=0; wi<ws->getNumberHistograms(); wi++)
+    for (size_t wi=0; wi<ws->getNumberHistograms(); wi++)
     {
       MantidVec& x = ws->dataX(wi);
       MantidVec& y = ws->dataY(wi);

@@ -20,7 +20,7 @@ namespace
     bool isDefault() const { return true; }
     std::string getDefault() const { return "getDefault() is not implemented in this class"; }
     std::string value() const { return "Nothing"; }
-    std::string setValue( const std::string& value ) { return ""; }
+    std::string setValue( const std::string& ) { return ""; }
   };
 }
 

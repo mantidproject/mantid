@@ -46,10 +46,10 @@ class AsynchronousTest : public CxxTest::TestSuite
 public: 
 
     AsynchronousTest():
-      m_finishedObserver(*this,&AsynchronousTest::handleFinished),
-      finishedNotificationReseived(false),
       m_startedObserver(*this,&AsynchronousTest::handleStarted),
       startedNotificationReseived(false),
+      m_finishedObserver(*this,&AsynchronousTest::handleFinished),
+      finishedNotificationReseived(false),
       m_errorObserver(*this,&AsynchronousTest::handleError),
       errorNotificationReseived(false),
       m_progressObserver(*this,&AsynchronousTest::handleProgress),
@@ -58,14 +58,14 @@ public:
   
     Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::StartedNotification> m_startedObserver;
     bool startedNotificationReseived;
-    void handleStarted(const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification>& pNf)
+    void handleStarted(const Poco::AutoPtr<Mantid::API::Algorithm::StartedNotification>&)
     {
         startedNotificationReseived = true;
     }
 
     Poco::NObserver<AsynchronousTest, Mantid::API::Algorithm::FinishedNotification> m_finishedObserver;
     bool finishedNotificationReseived;
-    void handleFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>& pNf)
+    void handleFinished(const Poco::AutoPtr<Mantid::API::Algorithm::FinishedNotification>&)
     {
         finishedNotificationReseived = true;
     }

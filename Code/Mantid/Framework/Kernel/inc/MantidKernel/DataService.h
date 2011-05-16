@@ -268,7 +268,7 @@ public:
   }
 
   /// Return the number of objects stored by the data service
-  int size() const
+  size_t size() const
   {
     return datamap.size();
   }

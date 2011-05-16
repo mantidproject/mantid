@@ -26,7 +26,7 @@ public:
     double c = getParameter("cen");
     double h = getParameter("hi");
     double w = getParameter("sig");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-0.5*x*x*w);
@@ -38,13 +38,13 @@ public:
     double c = getParameter("cen");
     double h = getParameter("hi");
     double w = getParameter("sig");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-0.5*x*x*w);
-      out->set(i,0,x*h*e*w);
-      out->set(i,1,e);
-      out->set(i,2,-0.5*x*x*h*e);
+      out->set(static_cast<int>(i),0,x*h*e*w);
+      out->set(static_cast<int>(i),1,e);
+      out->set(static_cast<int>(i),2,-0.5*x*x*h*e);
     }
   }
 
@@ -92,7 +92,7 @@ public:
   {
     double a = getParameter("a");
     double b = getParameter("b");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out[i] = a + b * xValues[i];
     }
@@ -100,10 +100,10 @@ public:
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
-      out->set(i,0,1.);
-      out->set(i,1,xValues[i]);
+      out->set(static_cast<int>(i),0,1.);
+      out->set(static_cast<int>(i),1,xValues[i]);
     }
   }
 };
@@ -118,7 +118,7 @@ public:
     declareParameter("B1e2Ta_");
   }
   std::string name()const{return "ParameterTieTest_Nothing";}
-  void function(double* out, const double* xValues, const size_t nData)const{}
+  void function(double* , const double*, const size_t)const{}
 };
 
 class ParameterTieTest : public CxxTest::TestSuite

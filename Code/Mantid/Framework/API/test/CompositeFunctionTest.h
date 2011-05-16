@@ -41,7 +41,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-0.5*x*x*w);
@@ -53,13 +53,13 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-0.5*x*x*w);
-      out->set(i,0,x*h*e*w);
-      out->set(i,1,e);
-      out->set(i,2,-0.5*x*x*h*e);
+      out->set(static_cast<int>(i),0,x*h*e*w);
+      out->set(static_cast<int>(i),1,e);
+      out->set(static_cast<int>(i),2,-0.5*x*x*h*e);
     }
   }
 
@@ -110,7 +110,7 @@ public:
   {
     double a = getParameter("a");
     double b = getParameter("b");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out[i] = a + b * xValues[i];
     }
@@ -118,10 +118,10 @@ public:
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
-      out->set(i,0,1.);
-      out->set(i,1,xValues[i]);
+      out->set(static_cast<int>(i),0,1.);
+      out->set(static_cast<int>(i),1,xValues[i]);
     }
   }
 
@@ -146,7 +146,7 @@ public:
     double c1 = getParameter("c1");
     double c2 = getParameter("c2");
     double c3 = getParameter("c3");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i];
       out[i] = c0 + x*(c1 + x*(c2 + x*c3));
@@ -154,13 +154,13 @@ public:
   }
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i];
-      out->set(i,0,1.);
-      out->set(i,1,x);
-      out->set(i,2,x*x);
-      out->set(i,3,x*x*x);
+      out->set(static_cast<int>(i),0,1.);
+      out->set(static_cast<int>(i),1,x);
+      out->set(static_cast<int>(i),2,x*x);
+      out->set(static_cast<int>(i),3,x*x*x);
     }
   }
 
@@ -1223,12 +1223,12 @@ public:
     MatrixWorkspace_sptr ws = WorkspaceFactory::Instance().create("Workspace2D",10,11,10);
     MantidVec& x = ws->dataX(3);
     MantidVec& y = ws->dataY(3);
-    for(int i=0; i < y.size(); ++i)
+    for(size_t i=0; i < y.size(); ++i)
     {
-      x[i] = 0.1 * i;
-      y[i] = i;
+      x[i] = 0.1 * static_cast<double>(i);
+      y[i] = static_cast<double>(i);
     }
-    x.back() = 0.1 * y.size();
+    x.back() = 0.1 * static_cast<double>(y.size());
 
     TS_ASSERT_THROWS_NOTHING(mfun->setWorkspace(ws,"WorkspaceIndex=3,StartX=0.2,EndX = 0.8"));
     TS_ASSERT_EQUALS(mfun->dataSize(),8);

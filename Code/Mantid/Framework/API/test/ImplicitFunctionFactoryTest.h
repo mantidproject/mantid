@@ -47,7 +47,7 @@ private:
     MockImplicitFunctionParserA() : Mantid::API::ImplicitFunctionParser(new MockImplicitFunctionParameterParserA)
     {
     }
-    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement)
+    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element*)
     {
       return new MockImplicitFunctionBuilderA;
     }
@@ -69,7 +69,7 @@ private:
     MockImplicitFunctionParserB() : Mantid::API::ImplicitFunctionParser(new MockImplicitFunctionParameterParserB)
     {
     }
-    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element* functionElement)
+    Mantid::API::ImplicitFunctionBuilder* createFunctionBuilder(Poco::XML::Element*)
     {
       return new MockImplicitFunctionBuilderB;
     }
