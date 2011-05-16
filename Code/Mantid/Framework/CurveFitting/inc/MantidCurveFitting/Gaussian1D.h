@@ -69,9 +69,9 @@ namespace Mantid
       /// Sets documentation strings for this algorithm
       virtual void initDocs();
       /// overwrite base class methods
-      virtual void function(const double* in, double* out, const double* xValues, const int& nData);
+      virtual void function(const double* in, double* out, const double* xValues, const size_t nData);
       virtual void declareParameters();
-      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData);
+      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
       virtual void modifyStartOfRange(double& startX);
       virtual void modifyEndOfRange(double& endX);
       virtual void modifyInitialFittedParameters(std::vector<double>& fittedParameter);

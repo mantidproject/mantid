@@ -59,15 +59,15 @@ namespace Mantid
       std::string name()const{return "DeltaFunction";}
 
     protected:
-      virtual void function(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
-      virtual void functionLocal(double* out, const double* xValues, const int& nData)const
+      virtual void function(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
+      virtual void functionLocal(double* out, const double* xValues, const size_t nData)const
       {
-        (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
       {
-        (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
     };
 

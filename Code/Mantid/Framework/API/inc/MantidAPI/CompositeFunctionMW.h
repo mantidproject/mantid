@@ -63,9 +63,9 @@ public:
   std::string asString()const;
 
   /// Function you want to fit to.
-  void function(double* out, const double* xValues, const int& nData)const;
+  void function(double* out, const double* xValues, const size_t nData)const;
   /// Derivatives of function with respect to active parameters
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData);
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData);
   /// Derivatives to be used in covariance matrix calculation. 
   void calJacobianForCovariance(Jacobian* out, const double* xValues, const int& nData);
 

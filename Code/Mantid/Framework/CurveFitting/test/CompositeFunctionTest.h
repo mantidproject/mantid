@@ -38,7 +38,7 @@ public:
 
   std::string name()const{return "CurveFittingGauss";}
 
-  void functionLocal(double* out, const double* xValues, const int& nData)const
+  void functionLocal(double* out, const double* xValues, const size_t nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
@@ -49,7 +49,7 @@ public:
       out[i] = h*exp(-0.5*x*x*w);
     }
   }
-  void functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("c");
@@ -115,7 +115,7 @@ public:
 
   std::string name()const{return "CurveFittingLinear";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -124,10 +124,10 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out->set(i,0,1.);
       out->set(i,1,xValues[i]);

@@ -66,22 +66,22 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "BackToBackExponential";}
-      virtual void function(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void function(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
 
     protected:
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
       /// Function evaluation method to be implemented in the inherited classes
-      virtual void functionLocal(double* out, const double* xValues, const int& nData)const
+      virtual void functionLocal(double* out, const double* xValues, const size_t nData)const
       {
-        (void) out; (void) xValues; (void) nData;
+        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
 
       /// Derivative evaluation method to be implemented in the inherited classes
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
       {
-        (void) out; (void) xValues; (void) nData;
+        UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
       }
 
     };

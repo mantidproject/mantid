@@ -30,7 +30,7 @@ public:
   const std::string category() const { return "Cat";} ///< Algorithm's category for identification
 
 protected:
-  void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const int& nData)
+  void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const size_t nData)
   {
     throw Exception::NotImplementedError("No derivative function provided");
   }

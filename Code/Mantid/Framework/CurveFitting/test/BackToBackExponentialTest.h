@@ -28,7 +28,7 @@ public:
   virtual ~SimplexBackToBackExponential() {}
 
 protected:
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     throw Exception::NotImplementedError("No derivative function provided");
   }

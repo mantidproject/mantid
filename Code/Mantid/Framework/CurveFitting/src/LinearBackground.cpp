@@ -20,19 +20,19 @@ void LinearBackground::init()
 } 
 
 
-void LinearBackground::function(double* out, const double* xValues, const int& nData)const
+void LinearBackground::function(double* out, const double* xValues, const size_t nData)const
 {
     const double& a0 = getParameter("A0");
     const double& a1 = getParameter("A1");
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         out[i] = a0+a1*xValues[i];
     }
 }
 
-void LinearBackground::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void LinearBackground::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         out->set(i,0, 1);
         out->set(i,1, xValues[i]);
     }

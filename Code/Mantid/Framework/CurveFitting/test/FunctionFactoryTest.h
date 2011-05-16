@@ -26,8 +26,8 @@ public:
     declareParameter("a1");
   }
   std::string name()const{return "FunctionFactoryTest_FunctA";}
-  void function(double* out, const double* xValues, const int& nData)const{}
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData){}
+  void function(double* out, const double* xValues, const size_t nData)const{}
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData){}
   bool hasAttribute(const std::string& attName)const
   {
     if (attName == "attr") return true;
@@ -73,10 +73,10 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_FunctB";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
   }
 };
@@ -89,8 +89,8 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_CompFunctA";}
 
-  void function(double* out, const double* xValues, const int& nData)const{}
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData){}
+  void function(double* out, const double* xValues, const size_t nData)const{}
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData){}
   bool hasAttribute(const std::string& attName)const
   {
     if (attName == "attr") return true;
@@ -114,10 +114,10 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_CompFunctB";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
   }
 };

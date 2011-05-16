@@ -18,19 +18,19 @@ using namespace API;
 
 DECLARE_FUNCTION(Resolution)
 
-void Resolution::function(double* out, const double* xValues, const int& nData)const
+void Resolution::function(double* out, const double* xValues, const size_t nData)const
 {
-  if (nData <= 0) return;
+  if (nData == 0) return;
 
   if (m_xStart >= xValues[nData-1] || m_xEnd <= xValues[0]) return;
 
-  int i = 0;
+  size_t i = 0;
   while(i < nData - 1 && xValues[i] < m_xStart)
   {
     out[i] = 0;
     i++;
   }
-  int j = 0;
+  size_t j = 0;
   for(;i<nData;i++)
   {
     if (j >= size()-1)

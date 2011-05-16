@@ -28,11 +28,11 @@ using namespace API;
 
 DECLARE_FUNCTION(ProductFunctionMW)
 
-void ProductFunctionMW::function(double* out, const double* xValues, const int& nData)const
+void ProductFunctionMW::function(double* out, const double* xValues, const size_t nData)const
 {
-  if (nData <= 0) return;
+  if (nData == 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     if (i == 0)
@@ -45,7 +45,7 @@ void ProductFunctionMW::function(double* out, const double* xValues, const int& 
   }
 }
 
-void ProductFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void ProductFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
   calNumericalDeriv(out, xValues, nData);
 }

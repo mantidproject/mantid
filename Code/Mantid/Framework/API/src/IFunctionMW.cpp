@@ -223,13 +223,6 @@ namespace API
     }
     if (m_dataSize == 0) return;
     functionDeriv(out,m_xValues.get(),m_dataSize);
-
-    if (m_dataSize <= 0) return;
-
-    //std::cerr<<"-------------- Jacobian ---------------\n";
-    //for(int i=0;i<nActive();i++)
-    //  for(int j=0;j<nData;j++)
-    //    std::cerr<<i<<' '<<j<<' '<<gsl_matrix_get(((JacobianImpl1*)out)->m_J,j,i)<<'\n';
   }
 
 
@@ -242,9 +235,9 @@ namespace API
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void IFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
-  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+  UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
   throw Kernel::Exception::NotImplementedError("No derivative IFunctionMW provided");
 }
 

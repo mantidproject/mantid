@@ -113,12 +113,12 @@ void UserFunction1D::prepare()
  *  @param xValues :: The array of nData x-values.
  *  @param nData :: The size of the fitted data.
  */
-void UserFunction1D::function(const double* in, double* out, const double* xValues, const int& nData)
+void UserFunction1D::function(const double* in, double* out, const double* xValues, const size_t nData)
 {
-    for(int i=0;i<m_nPars;i++)
+    for(size_t i=0;i<m_nPars;i++)
         m_parameters[i] = in[i];
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         m_x = xValues[i];
         out[i] = m_parser.Eval();
     }
@@ -130,7 +130,7 @@ void UserFunction1D::function(const double* in, double* out, const double* xValu
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
+void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
 {
   //throw Exception::NotImplementedError("No derivative function provided");
   if (nData == 0) return;

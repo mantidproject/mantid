@@ -21,14 +21,14 @@ DeltaFunction::DeltaFunction()
 }
 
 
-void DeltaFunction::function(double* out, const double* xValues, const int& nData)const
+void DeltaFunction::function(double* out, const double* xValues, const size_t nData)const
 {
   std::fill(out,out+nData,0);
 }
 
-void DeltaFunction::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void DeltaFunction::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
-  (void) out; (void) xValues; (void) nData; //Avoid compiler warning
+  UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
   std::runtime_error("Cannot compute derivative of a delta function");
 }
 

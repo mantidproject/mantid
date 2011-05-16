@@ -21,23 +21,23 @@ ExpDecay::ExpDecay()
 }
 
 
-void ExpDecay::function(double* out, const double* xValues, const int& nData)const
+void ExpDecay::function(double* out, const double* xValues, const size_t nData)const
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");
 
-    for (int i = 0; i < nData; i++) 
+    for (size_t i = 0; i < nData; i++) 
     {
         out[i] = h*exp( -(xValues[i])/t );
     }
 }
 
-void ExpDecay::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void ExpDecay::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& h = getParameter("Height");
     const double& t = getParameter("Lifetime");
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double x = xValues[i];
         double e = exp( -x/t );
         out->set(i,0, e);

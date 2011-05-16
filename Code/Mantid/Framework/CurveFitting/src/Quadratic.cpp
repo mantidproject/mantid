@@ -29,14 +29,14 @@ void Quadratic::init()
  * @param xValues :: Array of double x values
  * @param nData :: Array of integer data
  */
-void Quadratic::function(double* out, const double* xValues, const int& nData)const
+void Quadratic::function(double* out, const double* xValues, const size_t nData)const
 {
     const double& a0 = getParameter("A0");
     const double& a1 = getParameter("A1");
     const double& a2 = getParameter("A2");
 
-    for (int i = 0; i < nData; i++) {
-        //double diff = xValues[i] - xValues[0];
+    for (size_t i = 0; i < nData; i++) 
+    {
         out[i] = a0+a1*xValues[i]+a2*xValues[i]*xValues[i];
     }
 }
@@ -47,10 +47,9 @@ void Quadratic::function(double* out, const double* xValues, const int& nData)co
  * @param xValues :: Array of double x values
  * @param nData :: Array of integer data
  */
-void Quadratic::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void Quadratic::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
-    for (int i = 0; i < nData; i++) {
-        //double diff = xValues[i] - xValues[0];
+    for (size_t i = 0; i < nData; i++) {
         out->set(i,0, 1);
         out->set(i,1, xValues[i]);
         out->set(i,2, xValues[i]*xValues[i]);

@@ -45,7 +45,7 @@ void Convolution::init()
 /**
  * Calculates convolution of the two member functions. 
  */
-void Convolution::function(double* out, const double* xValues, const int& nData)const
+void Convolution::function(double* out, const double* xValues, const size_t nData)const
 {
   if (nFunctions() == 0)
   {
@@ -200,7 +200,7 @@ void Convolution::function(double* out, const double* xValues, const int& nData)
 
 }
 
-void Convolution::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void Convolution::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
   if (nData == 0) return;
   std::vector<double> dp(nParams());

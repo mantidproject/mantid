@@ -287,7 +287,7 @@ void IkedaCarpenterPV::constFunction(double* out, const double* xValues, const i
 
 }
 
-void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const int& nData)const
+void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
     const double& I = getParameter("I");
     const double& alpha0 =getParameter("Alpha0");
@@ -332,7 +332,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     // update wavelength vector
     calWavelengthAtEachDataPoint(xValues, nData);
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-X0;
 
 
@@ -375,7 +375,7 @@ void IkedaCarpenterPV::functionLocal(double* out, const double* xValues, const i
     }
 }
 
-void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData)
+void IkedaCarpenterPV::functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData)
 {
   calNumericalDeriv(out, xValues, nData);
 }

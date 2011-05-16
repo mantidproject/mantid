@@ -21,7 +21,7 @@ Chebyshev::Chebyshev():m_n(0),m_StartX(-1.),m_EndX(1.)
   declareParameter("A0");
 };
 
-void Chebyshev::function(double* out, const double* xValues, const int& nData)const
+void Chebyshev::function(double* out, const double* xValues, const size_t nData)const
 {
   if (m_StartX >= m_EndX)
   {
@@ -33,7 +33,7 @@ void Chebyshev::function(double* out, const double* xValues, const int& nData)co
   {
     m_b.resize(m_n + 3);
   }
-  for(int i = 0; i< nData; ++i)
+  for(size_t i = 0; i< nData; ++i)
   {
     // scale to interval -1 < x < 1
     double x = a + b * xValues[i];
@@ -47,7 +47,7 @@ void Chebyshev::function(double* out, const double* xValues, const int& nData)co
   }
 }
 
-void Chebyshev::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void Chebyshev::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
   if (m_n < 0)
   {

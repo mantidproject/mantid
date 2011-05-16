@@ -66,13 +66,13 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "Gaussian";}
-      virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void calJacobianForCovariance(API::Jacobian* out, const double* xValues, const size_t nData);
       virtual void setActiveParameter(int i,double value);
       virtual double activeParameter(int i)const;
 
     protected:
-      virtual void functionLocal(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void functionLocal(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData);
       /// overwrite IFunction base class method, which declare function parameters
       virtual void init();
     };

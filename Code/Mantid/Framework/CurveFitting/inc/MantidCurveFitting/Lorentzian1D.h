@@ -69,8 +69,8 @@ namespace Mantid
       virtual void initDocs();
       // Overridden Fit1D methods
       void declareParameters();
-      void function(const double* in, double* out, const double* xValues, const int& nData);
-      void functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData);
+      void function(const double* in, double* out, const double* xValues, const size_t nData);
+      void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
 
     };
 

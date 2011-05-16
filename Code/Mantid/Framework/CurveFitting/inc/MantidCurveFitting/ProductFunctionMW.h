@@ -49,8 +49,8 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "ProductFunctionMW";}
-      void function(double* out, const double* xValues, const int& nData)const;
-      void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+      void function(double* out, const double* xValues, const size_t nData)const;
+      void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
 
     protected:
       /// overwrite IFunction base class method, which declare function parameters

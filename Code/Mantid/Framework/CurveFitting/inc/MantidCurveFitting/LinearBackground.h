@@ -51,8 +51,8 @@ namespace Mantid
 
       /// overwrite IFunction base class methods
       std::string name()const{return "LinearBackground";}
-      virtual void function(double* out, const double* xValues, const int& nData)const;
-      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+      virtual void function(double* out, const double* xValues, const size_t nData)const;
+      virtual void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
 
       void fit(const std::vector<double>& X,const std::vector<double>& Y);
 

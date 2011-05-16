@@ -92,9 +92,9 @@ std::string CompositeFunctionMW::asString()const
 }
 
 /// Function you want to fit to.
-void CompositeFunctionMW::function(double* out, const double* xValues, const int& nData)const
+void CompositeFunctionMW::function(double* out, const double* xValues, const size_t nData)const
 {
-  if (nData <= 0) return;
+  if (nData == 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
   for(size_t i=0;i<nFunctions();i++)
   {
@@ -110,7 +110,7 @@ void CompositeFunctionMW::function(double* out, const double* xValues, const int
 }
 
 /// Derivatives of function with respect to active parameters
-void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+void CompositeFunctionMW::functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
 {
   for(size_t i=0;i<nFunctions();i++)
   {

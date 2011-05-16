@@ -73,9 +73,9 @@ namespace Mantid
       virtual const std::string category() const { return "CurveFitting";}
 
       /// Function you want to fit to.
-      virtual void function(const double* in, double* out, const double* xValues, const int& nData) = 0;
+      virtual void function(const double* in, double* out, const double* xValues, const size_t nData) = 0;
       /// Derivatives of function with respect to parameters you are trying to fit
-      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData);
+      virtual void functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData);
 
     protected:
       // Overridden Algorithm methods

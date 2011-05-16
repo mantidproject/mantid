@@ -40,23 +40,23 @@ public:
 
   std::string name()const{return "ProductFunctionMWTest_Gauss";}
 
-  void functionLocal(double* out, const double* xValues, const int& nData)const
+  void functionLocal(double* out, const double* xValues, const size_t nData)const
   {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-x*x*w);
     }
   }
-  void functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
   {
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-x*x*w);
@@ -109,18 +109,18 @@ public:
 
   std::string name()const{return "ProductFunctionMWTest_Linear";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out->set(i,0,1.);
       out->set(i,1,xValues[i]);

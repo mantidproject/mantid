@@ -22,7 +22,7 @@ void Lorentzian::init()
 }
 
 
-void Lorentzian::functionLocal(double* out, const double* xValues, const int& nData)const
+void Lorentzian::functionLocal(double* out, const double* xValues, const size_t nData)const
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");
@@ -34,7 +34,7 @@ void Lorentzian::functionLocal(double* out, const double* xValues, const int& nD
     }
 }
 
-void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
+void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& height = getParameter("Height");
     const double& peakCentre = getParameter("PeakCentre");

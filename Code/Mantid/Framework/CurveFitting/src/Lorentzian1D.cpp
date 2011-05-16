@@ -36,7 +36,7 @@ void Lorentzian1D::declareParameters()
   declareProperty("HWHM",1.0, positiveDouble, "half-width at half-maximum (default 1)", Direction::InOut);
 }
 
-void Lorentzian1D::function(const double* in, double* out, const double* xValues, const int& nData)
+void Lorentzian1D::function(const double* in, double* out, const double* xValues, const size_t nData)
 {
     const double& bg0 = in[0];
     const double& bg1 = in[1];
@@ -50,7 +50,7 @@ void Lorentzian1D::function(const double* in, double* out, const double* xValues
     }
 }
 
-void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
+void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
 {
     const double& height = in[2];
     const double& peakCentre = in[3];

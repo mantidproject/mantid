@@ -48,17 +48,17 @@ public:
   virtual void setWidth(const double w) = 0;
 
   /// General implementation of the method for all peaks. 
-  void function(double* out, const double* xValues, const int& nData)const;
+  void function(double* out, const double* xValues, const size_t nData)const;
   /// General implementation of the method for all peaks. 
-  void functionDeriv(API::Jacobian* out, const double* xValues, const int& nData);
+  void functionDeriv(API::Jacobian* out, const double* xValues, const size_t nData);
   /// Set new peak radius
   static void setPeakRadius(const int& r);
 
 protected:
   /// Function evaluation method to be implemented in the inherited classes
-  virtual void functionLocal(double* out, const double* xValues, const int& nData)const = 0;
+  virtual void functionLocal(double* out, const double* xValues, const size_t nData)const = 0;
   /// Derivative evaluation method to be implemented in the inherited classes
-  virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const int& nData) = 0;
+  virtual void functionDerivLocal(API::Jacobian* out, const double* xValues, const size_t nData) = 0;
   /// Defines the area around the centre where the peak values are to be calculated (in FWHM).
   static int s_peakRadius; 
 };

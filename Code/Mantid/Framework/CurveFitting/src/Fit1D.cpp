@@ -200,7 +200,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 
 /** Base class implementation of derivative function throws error. This is to check if such a function is provided
     by derivative class. In the derived classes this method must return the derivatives of the resuduals function
-    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const int&))
+    (defined in void Fit1D::function(const double*, double*, const double*, const double*, const double*, const size_t))
     with respect to the fit parameters. If this method is not reimplemented the derivative free simplex minimization
     algorithm is used.
 * @param in :: Input fitting parameter values
@@ -208,9 +208,9 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
 * @param xValues :: X values for data points
 * @param nData :: Number of data points
  */
-void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const int& nData)
+void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
 {
-  (void)in; (void)out; (void)xValues; (void)nData; //Avoid compiler warnings
+  UNUSED_ARG(in); UNUSED_ARG(out); UNUSED_ARG(nData);
   throw Exception::NotImplementedError("No derivative function provided");
 }
 
