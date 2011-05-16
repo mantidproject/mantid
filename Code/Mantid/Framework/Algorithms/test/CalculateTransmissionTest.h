@@ -193,6 +193,10 @@ public:
     Mantid::API::AnalysisDataService::Instance().remove("CalculateTransmissionTest_linear");
   }
 
+  ///stops the construtor below from being run automatically for all tests
+  static CalculateTransmissionTest *createSuite() { return new CalculateTransmissionTest(); }
+  static void destroySuite(CalculateTransmissionTest *suite) { delete suite; }
+
   CalculateTransmissionTest() :
     m_dirWS("CalculateTransmissionTest_direct"), m_transWS("CalculateTransmissionTest_trans")
   {
