@@ -13,7 +13,7 @@ public:
   {
     //Check that this type works as a compile-time proxy. Should do nothing with argument other than return it.
     Mantid::VATES::TimeStepToTimeStep proxy;
-    double argument = 1;
+    int argument = 1;
     TSM_ASSERT_EQUALS("The TimeStepToTimeStep proxy should return its own argument", argument, proxy(argument));
   }
 

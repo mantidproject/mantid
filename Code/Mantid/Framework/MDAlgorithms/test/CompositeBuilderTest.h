@@ -40,7 +40,7 @@ private:
     class FakeImplicitFunction : public Mantid::API::ImplicitFunction
     {
     public:
-        bool evaluate(const Mantid::API::Point3D* pPoint3D) const
+        bool evaluate(const Mantid::API::Point3D*) const
         {    
             return false;
         }

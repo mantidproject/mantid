@@ -144,7 +144,7 @@ namespace VATES
             {
               if ((i < (nBinsX -1)) && (j < (nBinsY - 1)) && (k < (nBinsZ -1)))
               {
-                signal->InsertNextValue(signalScalar);
+                signal->InsertNextValue(static_cast<float>(signalScalar));
               }
               unstructPoint.isSparse = false;
             }

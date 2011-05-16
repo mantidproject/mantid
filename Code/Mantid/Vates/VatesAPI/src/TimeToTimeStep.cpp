@@ -43,7 +43,7 @@ size_t TimeToTimeStep::operator()(double time) const
   }
   else
   {
-    return (int) ((time / (m_timeRange)) * m_nIntervalSteps);
+    return static_cast<size_t>(time / (m_timeRange) * static_cast<double>(m_nIntervalSteps));
   }
 }
 

@@ -170,7 +170,7 @@ namespace VATES
           // Create an image from the point data.
           double signal =  m_workspace->getSignalAt(i, j, k, m_timeMapper(m_timeValue));
           // Insert scalar data.
-          scalars->InsertNextValue(signal);
+          scalars->InsertNextValue(static_cast<float>(signal));
         }
       }
     }

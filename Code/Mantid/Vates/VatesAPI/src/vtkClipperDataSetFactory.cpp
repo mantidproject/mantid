@@ -20,7 +20,7 @@ vtkClipperDataSetFactory::~vtkClipperDataSetFactory()
 {
 }
 
-void vtkClipperDataSetFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+void vtkClipperDataSetFactory::initialize(Mantid::API::IMDWorkspace_sptr)
 {
   throw std::runtime_error("initialize with a workspace does not apply for this type of factory.");
 }

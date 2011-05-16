@@ -27,7 +27,7 @@ vtkProxyFactory& vtkProxyFactory::operator=(const vtkProxyFactory& other)
   return *this;
 }
 
-void vtkProxyFactory::initialize(Mantid::API::IMDWorkspace_sptr workspace)
+void vtkProxyFactory::initialize(Mantid::API::IMDWorkspace_sptr)
 {
   throw std::runtime_error("initialize with a workspace does not apply for this type of factory.");
 }

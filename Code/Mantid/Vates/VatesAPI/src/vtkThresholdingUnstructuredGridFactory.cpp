@@ -130,7 +130,7 @@ namespace VATES
       double posX, posY, posZ;
 
       UnstructuredPoint unstructPoint;
-      double signalScalar;
+      float signalScalar;
       const int nPointsX = nBinsX;
       const int nPointsY = nBinsY;
       const int nPointsZ = nBinsZ;
@@ -150,7 +150,7 @@ namespace VATES
           {
 
             posZ = minZ + (k * incrementZ); //Calculate increment in z;
-            signalScalar = m_workspace->getSignalNormalizedAt(i, j, k, m_timeMapper(m_timestep));
+            signalScalar = static_cast<float>(m_workspace->getSignalNormalizedAt(i, j, k, m_timeMapper(m_timestep)));
 
             if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
             {

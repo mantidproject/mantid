@@ -83,7 +83,7 @@ namespace Mantid
         double posX, posY;
 
         UnstructuredPoint unstructPoint;
-        double signalScalar;
+        float signalScalar;
         const int nPointsX = nBinsX;
         const int nPointsY = nBinsY;
         Plane plane(nPointsX);
@@ -97,7 +97,7 @@ namespace Mantid
           {
             posY = minY + (j * incrementY); //Calculate increment in y;
 
-            signalScalar = m_workspace->getCell(i,j).getSignal();
+            signalScalar = static_cast<float>(m_workspace->getCell(i,j).getSignal());
 
             if (boost::math::isnan( signalScalar ) || (signalScalar <= m_minThreshold) || (signalScalar >= m_maxThreshold))
             {

@@ -100,7 +100,7 @@ namespace Mantid
             {
               if (i < (nBinsX -1))
               {
-                signal->InsertNextValue(signalScalar);
+                signal->InsertNextValue(static_cast<float>(signalScalar));
               }
               unstructPoint.isSparse = false;
             }

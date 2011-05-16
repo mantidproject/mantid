@@ -36,7 +36,7 @@ namespace Mantid
             virtual std::string toXMLString() const { return "";}
             virtual size_t getStride()const {throw std::runtime_error("Not Implemented");}
             virtual double getScale()const {throw std::runtime_error("Not Implemented");} 
-            virtual double getX(size_t ind)const {throw std::runtime_error("Not Implemented");}
+            virtual double getX(size_t)const {throw std::runtime_error("Not Implemented");}
             virtual std::vector<double>const & getCoord(void)const {throw std::runtime_error("Not Implemented");}
             virtual void getAxisPoints(std::vector<double>  &)const {throw std::runtime_error("Not Implemented");}
             virtual double getDataShift()const{return 0;}
@@ -91,7 +91,7 @@ public:
         throw std::runtime_error("Not implemented");
     }
 
-    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const
+    virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t) const
     {
         throw std::runtime_error("Not implemented");
     }
@@ -101,17 +101,17 @@ public:
         return(m_mdcells.at(dim1Increment));
     };
 
-    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const
+    virtual const Mantid::Geometry::SignalAggregate& getCell(size_t , size_t ) const
     {
         throw std::runtime_error("Not implemented");
     }
 
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const
+    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t , size_t , size_t ) const
     {
         throw std::runtime_error("Not implemented");
     }
 
-    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const
+    virtual const Mantid::Geometry::SignalAggregate&  getCell(size_t , size_t , size_t , size_t ) const
     {
         throw std::runtime_error("Not implemented");
     }
@@ -121,7 +121,7 @@ public:
         throw std::runtime_error("Not implemented");
     }
 
-    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const
+    virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string ) const
     {
         throw std::runtime_error("Not implemented");
     }
