@@ -138,7 +138,7 @@ void CalculateEfficiency::sumUnmaskedDetectors(MatrixWorkspace_sptr rebinnedWS,
     error = 0.0;
     nPixels = 0;
 
-    for (int i = 0; i < numberOfSpectra; i++)
+    for (size_t i = 0; i < numberOfSpectra; i++)
     {
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);
@@ -181,7 +181,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     // Empty vector to store the pixels that outside the acceptable efficiency range
     std::vector<int> dets_to_mask;
 
-    for (int i = 0; i < numberOfSpectra; i++)
+    for (size_t i = 0; i < numberOfSpectra; i++)
     {
       // Get the detector object for this spectrum
       IDetector_const_sptr det = rebinnedWS->getDetector(i);

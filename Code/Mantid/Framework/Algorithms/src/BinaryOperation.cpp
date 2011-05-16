@@ -949,8 +949,8 @@ namespace Mantid
 
         // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
         //First off, try to match the workspace indices. Most times, this will be ok right away.
-        int64_t rhsWI = lhsWI;
-        if (rhsWI < (int64_t)rhs_nhist) //don't go out of bounds
+        size_t rhsWI = lhsWI;
+        if (rhsWI < rhs_nhist) //don't go out of bounds
         {
           // Get the detector IDs at that workspace index.
           rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
@@ -974,7 +974,7 @@ namespace Mantid
 
           //First, we have to get the (single) detector ID of the LHS
           std::vector<detid_t>::const_iterator lhsDets_it = lhsDets.begin();
-          int64_t lhs_detector_ID = *lhsDets_it;
+          detid_t lhs_detector_ID = *lhsDets_it;
 
           //Now we use the RHS map to find it. This only works if both the lhs and rhs have 1 detector per pixel
           detid2index_map::iterator map_it = rhs_det_to_wi->find(lhs_detector_ID);

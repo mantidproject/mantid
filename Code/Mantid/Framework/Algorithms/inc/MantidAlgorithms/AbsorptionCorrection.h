@@ -87,7 +87,7 @@ protected:
   std::vector<double> m_L1s,                     ///< Cached L1 distances
                       m_elementVolumes;          ///< Cached element volumes
   std::vector<Geometry::V3D> m_elementPositions; ///< Cached element positions
-  int m_numVolumeElements;                       ///< The number of volume elements
+  size_t m_numVolumeElements;                    ///< The number of volume elements
   double m_sampleVolume;                         ///< The total volume of the sample
 
 private:
