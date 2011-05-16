@@ -30,7 +30,7 @@ public:
   {
     TS_ASSERT_THROWS( factory.createUnwrapped("testUnrappedEntry"), std::runtime_error )
     factory.subscribe<int>("testUnwrappedEntry");
-    int *i;
+    int *i = NULL;
     TS_ASSERT_THROWS_NOTHING( i = factory.createUnwrapped("testEntry") );
     delete i;
   }

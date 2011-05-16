@@ -119,7 +119,7 @@ public:
     PropertyManagerHelper mgr;
     TS_ASSERT_THROWS_NOTHING( mgr.declareProperty("myProp", "theValue", new MandatoryValidator<std::string>, "hello") );
     TS_ASSERT_EQUALS( mgr.getPropertyValue("myProp"), "theValue" );
-      Property *p;
+    Property *p = NULL;
     TS_ASSERT_THROWS_NOTHING( p = mgr.getProperty("myProp") );
     TS_ASSERT_EQUALS(p->documentation(),"hello");
 
@@ -201,14 +201,14 @@ public:
 
     TS_ASSERT_THROWS( p = manager->getProperty("werhui"), Exception::NotFoundError );
 
-    int i;
+    int i(0);
     TS_ASSERT_THROWS_NOTHING( i = manager->getProperty("aprop") );
     TS_ASSERT_EQUALS( i, 1 );
-    double dd;
+    double dd(0.0);
     TS_ASSERT_THROWS( dd= manager->getProperty("aprop"), std::runtime_error );
     std::string s = manager->getProperty("aprop");
     TS_ASSERT( ! s.compare("1") );
-    double d;
+    double d(0.0);
     TS_ASSERT_THROWS_NOTHING( d = manager->getProperty("anotherProp") );
     TS_ASSERT_EQUALS( d, 1.11 );
     int ii;
@@ -242,7 +242,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( mgr.setProperty("llprop",static_cast<int64_t>(52147900000)) );
     TS_ASSERT_EQUALS( mgr.getPropertyValue("llprop"), "52147900000" );
     TS_ASSERT_THROWS_NOTHING( mgr.setPropertyValue("llprop","1234567890123456789") );
-    int64_t retrieved;
+    int64_t retrieved(0);
     TS_ASSERT_THROWS_NOTHING( retrieved = mgr.getProperty("llprop") );
     TS_ASSERT_EQUALS( retrieved, static_cast<int64_t>(1234567890123456789) );
   }

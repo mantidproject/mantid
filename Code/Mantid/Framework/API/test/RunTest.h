@@ -40,7 +40,7 @@ public:
     Property *p = new ConcreteProperty();
     TS_ASSERT_THROWS_NOTHING( runInfo.addProperty(p) );
 
-    Property *pp;
+    Property *pp = NULL;
     TS_ASSERT_THROWS_NOTHING( pp = runInfo.getProperty("Test") );
     TS_ASSERT_EQUALS( p, pp );
     TS_ASSERT( ! pp->name().compare("Test") );
