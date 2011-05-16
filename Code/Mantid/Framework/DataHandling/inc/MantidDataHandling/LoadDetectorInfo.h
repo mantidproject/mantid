@@ -145,7 +145,7 @@ private:
     *  @param pressure :: value pressureTabNum will be set to
     *  @param wall :: value to set wallThickTabNum to
     */    
-    detectDatForm(unsigned int total=-1, unsigned int pressure=-1, unsigned int wall=-1) :
+    detectDatForm(unsigned int total=0, unsigned int pressure=0, unsigned int wall=0) :
       totalNumTabs(total), pressureTabNum(pressure), wallThickTabNum(wall) {}
     unsigned int totalNumTabs;                      ///< total number of tables in the user area of the raw file
     unsigned int pressureTabNum;                    ///< user table that contains detector pressures (set this > totalNumTabs to crash the app!)
