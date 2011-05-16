@@ -15,7 +15,7 @@ pPointDescr(NULL)
 {
 
 
-	this->nDims = GeomDescription.getNumDims();
+	this->nDims = (unsigned int)GeomDescription.getNumDims();
 	
     this->sizeof_pixel=4*(nDims+2+nDims);
 

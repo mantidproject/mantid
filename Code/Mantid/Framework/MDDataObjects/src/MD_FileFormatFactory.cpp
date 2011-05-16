@@ -119,7 +119,12 @@ IMD_FileFormat *
     throw(Exception::FileError("There is no reader suitable for this file.",file_name));
   }
 }
-// 
+//
+union horaceHead{
+	char     DataBuffer[4+6+8];
+	uint32_t dataDescr;
+};
+
 bool 
 MD_FileFormatFactory::isHoraceFile(const char *fileName)
 {
@@ -129,27 +134,28 @@ MD_FileFormatFactory::isHoraceFile(const char *fileName)
 		std::string errorName(fileName);
 		throw(Kernel::Exception::FileError(" can not open existing file to check if it Horace written",errorName));
 	}
-	char DataBuffer[4+6+8];
-	aFile.read(DataBuffer,4+6+8);
+	horaceHead head;
+
+	aFile.read(head.DataBuffer,4+6+8);
 	if(aFile.bad()){
-		f_log.debug()<< "Can not read first 18 bytes of data from existing binary file: "<<fileName<<" It is probably not a Horace file\n";
+		f_log.information()<< "Can not read first 18 bytes of data from existing binary file: "<<fileName<<" File does not exist or inaccessible\n";
 		return false; // probably not Horace file
 	}
-
-
-	int n_symbols= *(reinterpret_cast<uint32_t*>(DataBuffer));
+	
+	//n_symbols should occupy first 4 bytes
+	int n_symbols=head.dataDescr;
 	if(n_symbols!=6){
 		f_log.debug()<<" first number of the file header is not 6, It is probably not a Horace file\n";
 		return false;
 	}
 	// 6 symbols starting from 4-th 
-	std::string buf(DataBuffer+4,6);
+	std::string buf(head.DataBuffer+4,6);
 	if(buf != "horace"){
 		f_log.debug()<<" the program name is not a Horace, definitely not a Horace file\n";
 		return false;
 	}
 	// version can not be too big
-	int version =(int)*(reinterpret_cast<double *>(DataBuffer+10));
+	int version =(int)*(reinterpret_cast<double *>(head.DataBuffer+10));
 
 	if(version!=2){
 		f_log.debug()<<" Only version 2 of Horace format file is currently supported and we got the version :"<<version<<std::endl;
