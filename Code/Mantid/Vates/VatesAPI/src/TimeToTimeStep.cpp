@@ -33,7 +33,7 @@ size_t TimeToTimeStep::operator()(double time) const
   }
   if(time > m_timeMax)
   {
-    //Don't throw, handle by providing the larget time index. 
+    //Don't throw, handle by providing the largest time index.
     return 0;
   }
   else if(time < m_timeMin)
