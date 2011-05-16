@@ -337,7 +337,7 @@ public:
   TSM_ASSERT_EQUALS("Wrong z-min set via cut box.", 3,  description->pDimDescription(2)->cut_max);
   }
 
-  void t__tExecute()
+  void testExecute()
   {
     using namespace Mantid::MDDataObjects;
 

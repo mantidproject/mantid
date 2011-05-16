@@ -236,11 +236,12 @@ namespace Mantid
       loadWsAlg->initialize();
       loadWsAlg->setPropertyValue("inFilename", location);
       loadWsAlg->setPropertyValue("MDWorkspace",name);
+      loadWsAlg->execute();
 
       IAlgorithm_sptr rebinningAlg = this->createSubAlgorithm("CenterpieceRebinning", 0.01, 1, true, 1);
 
       rebinningAlg->initialize();
-      rebinningAlg->setPropertyValue("Input", name);
+      rebinningAlg->setProperty<MDWorkspace_sptr>("Input", loadWsAlg->getProperty("MDWorkspace"));
       
       //HACK: only way to apply a geometry description seems to be to grab it from the algorithm and apply it after initalize!
       Geometry::MDGeometryDescription *pSlicing = dynamic_cast< Geometry::MDGeometryDescription *>((Mantid::Kernel::Property *)(rebinningAlg->getProperty("SlicingData")));
