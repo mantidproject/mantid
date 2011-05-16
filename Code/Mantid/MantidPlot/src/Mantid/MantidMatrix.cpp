@@ -186,11 +186,11 @@ void MantidMatrix::setup(Mantid::API::MatrixWorkspace_sptr ws, int start, int en
   }
 
   m_workspace = ws;
-  m_workspaceTotalHist = ws->getNumberHistograms();
+  m_workspaceTotalHist = static_cast<int>(ws->getNumberHistograms());
   m_startRow = (start<0 || start>=m_workspaceTotalHist)?0:start;
   m_endRow   = (end<0 || end>=m_workspaceTotalHist || end < start)? m_workspaceTotalHist - 1 : end;
   m_rows = m_endRow - m_startRow + 1;
-  m_cols = ws->blocksize();
+  m_cols = static_cast<int>(ws->blocksize());
   if ( ws->isHistogramData() ) m_histogram = true;
   connect(this,SIGNAL(needsUpdating()),this,SLOT(repaintAll()));
 
@@ -784,7 +784,7 @@ void MantidMatrixFunction::getRowYRange(int row,double& ymin, double& ymax)const
   int i = row + m_matrix->m_startRow;
   double y = yAxis(i);
 
-  int imax = m_matrix->m_workspace->getNumberHistograms()-1;
+  int imax = static_cast<int>(m_matrix->m_workspace->getNumberHistograms())-1;
   if (yAxis.isNumeric())
   {
     if (i < imax)
@@ -827,7 +827,7 @@ const Mantid::MantidVec& MantidMatrixFunction::getMantidVec(int row)const
 
 int MantidMatrix::indexX(int row,double s)const
 {
-  int n = m_workspace->blocksize();
+  int n = static_cast<int>(m_workspace->blocksize());
 
   //bool isHistogram = m_workspace->isHistogramData();
 

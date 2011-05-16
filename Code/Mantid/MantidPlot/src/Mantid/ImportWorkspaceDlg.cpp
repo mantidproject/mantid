@@ -4,7 +4,7 @@
 
 #include "ImportWorkspaceDlg.h"
 
-ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(parent), numHists(num),minValue(0),maxValue(100.)
+ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, size_t num) : QDialog(parent), numHists(num),minValue(0),maxValue(100.)
 {
 	label = new QLabel(tr("Set Histogram Range to Load (Max Number = " + QString::number(numHists) + "):"));
 	
@@ -16,7 +16,7 @@ ImportWorkspaceDlg::ImportWorkspaceDlg(QWidget *parent, int num) : QDialog(paren
 	labelHigh = new QLabel(tr("To:"));
 	lineHigh = new QLineEdit;
 	lineHigh->setText(QString::number(numHists));
-	labelHigh->setBuddy(lineHigh);
+  labelHigh->setBuddy(lineHigh);
 
     checkFilter = new QCheckBox(tr("Set range for 2D plots"));
 

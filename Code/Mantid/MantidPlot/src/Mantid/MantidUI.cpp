@@ -637,7 +637,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     return NULL;
   }
 
-  const int nrows = indices.empty()? ws->getNumberHistograms() : static_cast<int>(indices.size());
+  const size_t nrows = indices.empty()? ws->getNumberHistograms() : indices.size();
   int ncols = 6;
   QStringList col_names;
   col_names << "Index" << "Spectra" << "Detector ID";
@@ -648,7 +648,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   }
   col_names << "R" << "Theta" << "Phi";
 
-  Table* t = new Table(appWindow()->scriptingEnv(), nrows, ncols, "", appWindow(), 0);
+  Table* t = new Table(appWindow()->scriptingEnv(), static_cast<int>(nrows), ncols, "", appWindow(), 0);
   appWindow()->initTable(t, appWindow()->generateUniqueName(wsName + "-Detectors-"));
   //Set the column names
   for( int col = 0; col < ncols; ++col )
@@ -659,11 +659,11 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
   Mantid::API::Axis *spectraAxis = ws->getAxis(1);
   Mantid::Geometry::IObjComponent_const_sptr sample = ws->getInstrument()->getSample();
   QList<double> col_values;
-  for( int row = 0; row < nrows; ++row )
+  for( size_t row = 0; row < nrows; ++row )
   {
-    int ws_index = indices.empty()? row : indices[row];
+    size_t ws_index = indices.empty() ? row : indices[row];
 
-    int currentSpec;
+    Mantid::specid_t currentSpec;
     try
     {
       currentSpec = spectraAxis->spectraNo(ws_index);
@@ -699,7 +699,7 @@ Table* MantidUI::createDetectorTable(const QString & wsName, const std::vector<i
     col_values << R << Theta << Phi;
     for(int col = 0; col < ncols; ++col)
     {
-      t->setCell(row, col, col_values[col]);
+      t->setCell(static_cast<int>(row), col, col_values[col]);
     }
 
   }
@@ -2156,7 +2156,7 @@ void MantidUI::showLogFileWindow()
  */
 Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::API::MatrixWorkspace_sptr workspace, QList<int> indexList, bool errs, bool binCentres)
 {
-  int nspec = workspace->getNumberHistograms();
+  int nspec = static_cast<int>(workspace->getNumberHistograms());
   //Loop through the list of index and remove all the indexes that are out of range
 
   for(QList<int>::iterator it=indexList.begin();it!=indexList.end();it++)
@@ -2166,7 +2166,7 @@ Table* MantidUI::createTableFromSpectraList(const QString& tableName, Mantid::AP
   if ( indexList.empty() ) return 0;
 
   int c = errs?2:1;
-  int numRows = workspace->blocksize();
+  int numRows = static_cast<int>(workspace->blocksize());
   bool isHistogram = workspace->isHistogramData();
   int no_cols = static_cast<int>(indexList.size());
   Table* t = new Table(appWindow()->scriptingEnv(), numRows, (1+c)*no_cols, "", appWindow(), 0);
@@ -2480,7 +2480,7 @@ Table* MantidUI::createTableFromBins(const QString& wsName, Mantid::API::MatrixW
   if (bins.empty()) return NULL;
 
   int c = errs?2:1;
-  int numRows = workspace->getNumberHistograms();
+  int numRows = static_cast<int>(workspace->getNumberHistograms());
 
   int j0 = fromRow >= 0? fromRow : 0;
   int j1 = toRow   >= 0? toRow   : numRows - 1;

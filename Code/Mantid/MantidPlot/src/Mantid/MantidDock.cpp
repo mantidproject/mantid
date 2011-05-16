@@ -1041,16 +1041,16 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
 {
   // Get hold of the names of all the selected workspaces
   QList<QString> wsNames = this->getSelectedWorkspaceNames();
-  QList<int> wsSizes;
+  QList<size_t> wsSizes;
 
   // Find out if they are all single-spectrum workspaces
   QList<QString>::const_iterator it = wsNames.constBegin();
-  int maxHists = -1;
+  size_t maxHists = 0;
   for ( ; it != wsNames.constEnd(); ++it )
   {
     MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve((*it).toStdString()));
     if ( !ws ) continue;
-    const int currentHists = ws->getNumberHistograms();
+    const size_t currentHists = ws->getNumberHistograms();
     wsSizes.append(currentHists);
     if ( currentHists > maxHists ) maxHists = currentHists;
   }
@@ -1060,7 +1060,7 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
   if ( maxHists > 1 )
   {
     bool goAhead;
-    spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,maxHists-1,1,&goAhead);
+    spec = QInputDialog::getInteger(m_mantidUI->appWindow(),tr("MantidPlot"),tr("Enter the workspace index to plot"),0,0,static_cast<int>(maxHists-1),1,&goAhead);
     if (!goAhead) return toPlot;
   }
 

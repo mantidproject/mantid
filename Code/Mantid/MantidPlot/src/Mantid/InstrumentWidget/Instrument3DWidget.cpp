@@ -371,10 +371,10 @@ void Instrument3DWidget::calculateBinRange()
   if (( std::fabs(mWkspBinMin - DBL_MAX)/DBL_MAX < 1e-08 ) && ( (mWkspBinMax + DBL_MAX)/DBL_MAX < 1e-08 ))
   {
     //Then we need to calculate
-    const int nHist = workspace->getNumberHistograms();
+    const size_t nHist = workspace->getNumberHistograms();
     mWkspBinMin = DBL_MAX;
     mWkspBinMax = -DBL_MAX;
-    for (int i = 0; i < nHist; ++i)
+    for (size_t i = 0; i < nHist; ++i)
     {
       const Mantid::MantidVec & values = workspace->readX(i);
       double xtest = values.front();
@@ -1159,7 +1159,7 @@ int Instrument3DWidget::DetInfo::getIndexOf(const int someDetID) const
   detid2index_map::const_iterator it(m_detID_to_wi_map->find(someDetID));
   if ( it != m_detID_to_wi_map->end() )
   {
-    return it->second;
+    return static_cast<int>(it->second);
   }
   else return NO_INDEX;
 }
