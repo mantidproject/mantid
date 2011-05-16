@@ -8,10 +8,10 @@ namespace MDDataObjects{
 //
 MD_FileTestDataGenerator::MD_FileTestDataGenerator(const Geometry::MDGeometryDescription *const pDescr):
 IMD_FileFormat("test_memory_file.sqw"),
+GeomDescription(*pDescr),
 mdImageSize(0),
 nDataPoints(0),
-pPointDescr(NULL),
-GeomDescription(*pDescr)
+pPointDescr(NULL)
 {
 
 
