@@ -40,8 +40,8 @@ void ChopData::exec()
   const double rLower = getProperty("IntegrationRangeLower");
   const double rUpper = getProperty("IntegrationRangeUpper");
   const int monitorWi = getProperty("MonitorWorkspaceIndex");
-  const int nHist = inputWS->getNumberHistograms();
-  const int nBins = inputWS->blocksize();
+  const size_t nHist = inputWS->getNumberHistograms();
+  const size_t nBins = inputWS->blocksize();
   const double maxX = inputWS->readX(0)[nBins];
   std::map<int, double> intMap;
   int prelow = -1;
@@ -89,7 +89,7 @@ void ChopData::exec()
   {
     const double stepDiff = ( i * step );
 
-    int indexLow, indexHigh;
+    size_t indexLow, indexHigh;
     
     try
     {
@@ -106,7 +106,7 @@ void ChopData::exec()
     }
     catch ( std::out_of_range & ) { indexHigh = nBins; }
     
-    int nbins = indexHigh - indexLow;
+    size_t nbins = indexHigh - indexLow;
     
     MatrixWorkspace_sptr workspace = 
       Mantid::API::WorkspaceFactory::Instance().create(inputWS, nHist, 
@@ -118,9 +118,9 @@ void ChopData::exec()
     {
       PARALLEL_START_INTERUPT_REGION
       ;
-      for ( int k = 0 ; k < nbins ; k++ )
+      for ( size_t k = 0 ; k < nbins ; k++ )
       {
-        int oldbin = indexLow + k;
+        size_t oldbin = indexLow + k;
         workspace->dataY(j)[k] = inputWS->readY(j)[oldbin];
         workspace->dataE(j)[k] = inputWS->readE(j)[oldbin];
         workspace->dataX(j)[k] = inputWS->readX(j)[oldbin] - stepDiff;
