@@ -39,9 +39,9 @@ using namespace Mantid::VATES;
 vtkEventNexusReader::vtkEventNexusReader() : 
   m_presenter(), 
   m_isSetup(false), 
-  m_mdEventWsId("eventWsId"), 
-  m_histogrammedWsId("histogramWsId"),
-  m_clipFunction(NULL)
+  m_clipFunction(NULL),
+  m_mdEventWsId("eventWsId"),
+  m_histogrammedWsId("histogramWsId")
 {
   this->FileName = NULL;
   this->SetNumberOfInputPorts(0);
@@ -277,9 +277,6 @@ void vtkEventNexusReader::doRebinning()
   Mantid::MDEvents::BinToMDHistoWorkspace hist_alg;
   hist_alg.initialize();
   hist_alg.setPropertyValue("InputWorkspace", m_mdEventWsId);
-  double min = 0;
-  double max = 0;
-  int nbins = 0;
   std::string id; 
   if(this->hasXDimension())
   {
@@ -329,11 +326,11 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   vtkUnstructuredGrid *output = vtkUnstructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  int time;
+  int time = 0;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
     // usually only one actual step requested
-    time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+    time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
   } 
 
   //When RecalculateAll wins-out, configure and run the rebinning algorithm.

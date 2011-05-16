@@ -20,6 +20,7 @@ set ( SRC_FILES
 )
 
 set ( SRC_UNITY_IGNORE_FILES 
+    src/IMDBox.cpp
 	src/MDBin.cpp
     src/MDBox.cpp
     src/MDEventWorkspace.cpp

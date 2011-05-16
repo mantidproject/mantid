@@ -45,7 +45,7 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
     delete m_zDimensionWidget;
     delete m_tDimensionWidget;
   }
-  unsigned int size = nonIntegratedVector.size();
+  size_t size = nonIntegratedVector.size();
   //Create widget to display/control the aligned x-dimension
   if(size > 0)
   {

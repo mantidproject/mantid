@@ -40,11 +40,11 @@ int vtkSQWReader::RequestData(vtkInformation* vtkNotUsed(request), vtkInformatio
   vtkStructuredGrid *output = vtkStructuredGrid::SafeDownCast(
     outInfo->Get(vtkDataObject::DATA_OBJECT()));
 
-  int time;
+  int time = 0;
   if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
   {
      // usually only one actual step requested
-     time = outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0];
+     time = static_cast<int>(outInfo->Get(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS())[0]);
   }
 
   RebinningXMLGenerator serializer;
