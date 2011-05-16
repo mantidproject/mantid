@@ -1247,12 +1247,14 @@ namespace Mantid
      */
     void CICatHelper::doLogin(const std::string& name,const std::string& password,const std::string & url)
     {
+      UNUSED_ARG(url)
+
       ICATPortBindingProxy icat;
       // Define ssl authentication scheme
       if (soap_ssl_client_context(&icat,
           SOAP_SSL_NO_AUTHENTICATION, /* use SOAP_SSL_DEFAULT in production code */
           NULL,       /* keyfile: required only when client must authenticate to
-							server (see SSL docs on how to obtain this file) */
+                                  server (see SSL docs on how to obtain this file) */
           NULL,       /* password to read the keyfile */
           NULL,      /* optional cacert file to store trusted certificates */
           NULL,      /* optional capath to directory with trusted certificates */
