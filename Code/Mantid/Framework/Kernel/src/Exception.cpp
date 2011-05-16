@@ -268,6 +268,17 @@ MisMatch<T>::MisMatch(const MisMatch<T>& A) :
 {}
 
 template<typename T>
+MisMatch<T> & MisMatch<T>::operator=(const MisMatch<T> &)
+{
+  /**
+    Copy assignment
+    @param A :: MisMatch to copy
+  */
+  throw NotImplementedError("MisMatch<T>::operator=");
+}
+
+
+template<typename T>
 const char*
 MisMatch<T>::what() const throw()
   /**

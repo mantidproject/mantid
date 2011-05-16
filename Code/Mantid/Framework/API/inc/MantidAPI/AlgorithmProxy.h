@@ -9,6 +9,10 @@
 #include <boost/shared_ptr.hpp>
 #include <Poco/ActiveMethod.h>
 
+#ifdef _MSC_VER
+  #pragma warning( disable: 4250 ) // Disable warning regarding inheritance via dominance, we have no way around it with the design
+#endif
+
 #ifndef PACKAGE_VERSION
 #define PACKAGE_VERSION "unknown"
 #endif

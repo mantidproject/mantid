@@ -291,7 +291,7 @@ class DLLExport OpenGLError: public std::runtime_error
 
     MisMatch(const T&,const T&,const std::string&);
     MisMatch(const MisMatch<T>& A);
-    MisMatch & operator=(const MisMatch & rhs);
+    MisMatch<T> & operator=(const MisMatch<T> & rhs);
     ~MisMatch() throw() {}
 
     /// Overloaded reporting method

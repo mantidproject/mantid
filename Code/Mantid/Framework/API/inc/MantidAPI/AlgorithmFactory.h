@@ -60,6 +60,8 @@ class CloneableAlgorithm;
 class EXPORT_OPT_MANTID_API AlgorithmFactoryImpl : public Kernel::DynamicFactory<Algorithm>
 {
 public:
+  // Unhide the base class version (to satisfy the intel compiler)
+  using Kernel::DynamicFactory<Algorithm>::create;
   ///Creates an instance of an algorithm
   boost::shared_ptr<Algorithm> create(const std::string& ,const int& ) const;
 
