@@ -19,6 +19,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidGeometry/IInstrument.h"
 #include "MantidGeometry/IComponent.h"
+#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/Instrument/XMLlogfile.h"
@@ -1823,7 +1824,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
 
   // check if there is any grouping in file
   bool thereIsGrouping = false;
-  int numOfHist = matrix_workspace->getNumberHistograms();
+  int numOfHist = static_cast<int>(matrix_workspace->getNumberHistograms()); //Qt has no size_t understanding
   for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
   {
     IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
@@ -1833,7 +1834,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
       // prepare IDs string
 
       boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
-      std::vector<int> detIDs = detG->getDetectorIDs();
+      std::vector<Mantid::detid_t> detIDs = detG->getDetectorIDs();
       if (detIDs.size() > 1)
       {
         thereIsGrouping = true;
@@ -1849,7 +1850,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
   }
 
   // Add info about grouping from Nexus file to group table
-  for (int wsIndex = 0; wsIndex < matrix_workspace->getNumberHistograms(); wsIndex++)
+  for (int wsIndex = 0; wsIndex < numOfHist; wsIndex++)
   {
     IDetector_sptr det = matrix_workspace->getDetector(wsIndex);
 
@@ -1858,7 +1859,7 @@ void MuonAnalysis::setGroupingFromNexus(const QString& nexusFile)
       // prepare IDs string
 
       boost::shared_ptr<DetectorGroup> detG = boost::dynamic_pointer_cast<DetectorGroup>(det);
-      std::vector<int> detIDs = detG->getDetectorIDs();
+      std::vector<Mantid::detid_t> detIDs = detG->getDetectorIDs();
       std::stringstream idstr;
       int leftInt = detIDs[0];  // meaning left as in the left number of the range 8-18 for instance
       int numIDs = static_cast<int>(detIDs.size());
@@ -2080,7 +2081,7 @@ std::string MuonAnalysis::isGroupingAndDataConsistent()
     matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(workspace_ptr);
   }
 
-  int nDet = matrix_workspace->getNumberHistograms();
+  int nDet = static_cast<int>(matrix_workspace->getNumberHistograms());
 
   complaint += "Number of spectra in data = " + boost::lexical_cast<std::string>(nDet) + ". ";
 

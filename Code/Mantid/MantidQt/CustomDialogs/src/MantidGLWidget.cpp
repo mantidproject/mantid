@@ -200,13 +200,15 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent *event)
 {
   int dx = event->x() - m_click_point.x();
   int dy = event->y() - m_click_point.y();
+  // Points in Qt only have integer precision
+  int x_rot = static_cast<int>(m_x_rot);
   
   if (event->buttons() & Qt::LeftButton) {
-    setXRotation(m_x_rot + 8 * dy);
-    setYRotation(m_y_rot + 8 * dx);
+    setXRotation(x_rot + 8 * dy);
+    setYRotation(static_cast<int>(m_y_rot) + 8 * dx);
   } else if (event->buttons() & Qt::RightButton) {
-    setXRotation(m_x_rot + 8 * dy);
-    setZRotation(m_z_rot + 8 * dx);
+    setXRotation(x_rot + 8 * dy);
+    setZRotation(static_cast<int>(m_z_rot) + 8 * dx);
   }
   m_click_point = event->pos();
 

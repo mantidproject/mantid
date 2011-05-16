@@ -101,7 +101,8 @@ namespace MantidQt
       QtProperty* createStretchedExp(const QString &);
 
       void populateFunction(Mantid::API::IFitFunction*, Mantid::API::IFitFunction*, QtProperty*, int, const bool tie=false);
-      QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index);
+      QwtPlotCurve* plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index);
+      std::pair<double,double> getCurveRange(QwtPlotCurve* curve);
       
       virtual void closeEvent(QCloseEvent*);
 

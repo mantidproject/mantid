@@ -7,6 +7,7 @@
 #include "MantidKernel/Logger.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidGeometry/IDetector.h"
 
 namespace MantidQt
 {
@@ -48,26 +49,25 @@ namespace CustomInterfaces
     ///destructor
     ~RectDetectorDetails(){}
     /// set minimum detector id
-    void setMinimumDetcetorId(const int& minDetId){m_minDetId=minDetId;}
-
+    inline void setMinimumDetectorId(const Mantid::detid_t minDetId){ m_minDetId=minDetId; }
     /// set maximum detector id
-    void setMaximumDetcetorId(const int& minDetId){m_maxDetId=minDetId;}
+    inline void setMaximumDetectorId(const Mantid::detid_t maxDetId){m_maxDetId=maxDetId;}
     /// set detector name
-    void setDetcetorName(const QString & detName){m_detName=detName;}
+    void setDetectorName(const QString & detName){m_detName=detName;}
 
     /// get minimum detector id
-    const int&  getMinimumDetcetorId(){return m_minDetId;}
+    inline Mantid::detid_t getMinimumDetectorId(){return m_minDetId;}
     /// get maximum detector id
-    const int& getMaximumDetcetorId(){return m_maxDetId;}
+    inline Mantid::detid_t getMaximumDetectorId(){return m_maxDetId;}
     /// get detector name
-    const QString& getDetcetorName(){return m_detName;}
+    const QString& getDetectorName(){return m_detName;}
   private:
-      /// minimum detecor id
-      int m_minDetId;
-      /// maximum detecor id
-      int m_maxDetId;
-      /// detector name
-      QString m_detName;
+    /// minimum detecor id
+    Mantid::detid_t m_minDetId;
+    /// maximum detecor id
+    Mantid::detid_t m_maxDetId;
+    /// detector name
+    QString m_detName;
   };
      
 /** 

@@ -348,7 +348,7 @@ namespace MantidQt
       } 
       if(rectDet)
       {  
-        return rectDet->getDetcetorName();
+        return rectDet->getDetectorName();
       }
       return "";
     }
@@ -379,9 +379,9 @@ namespace MantidQt
         if (det)
         { 
           boost::shared_ptr<RectDetectorDetails> rect(new RectDetectorDetails);
-          rect->setDetcetorName(QString::fromStdString(det->getName()));
-          rect->setMinimumDetcetorId(det->minDetectorID());
-          rect->setMaximumDetcetorId(det->maxDetectorID());
+          rect->setDetectorName(QString::fromStdString(det->getName()));
+          rect->setMinimumDetectorId(det->minDetectorID());
+          rect->setMaximumDetectorId(det->maxDetectorID());
           rectDetectors.push_back(rect);
 
         }
@@ -399,9 +399,9 @@ namespace MantidQt
               { 
 
                 boost::shared_ptr<RectDetectorDetails> rect(new RectDetectorDetails);
-                rect->setDetcetorName(QString::fromStdString(det->getName()));
-                rect->setMinimumDetcetorId(det->minDetectorID());
-                rect->setMaximumDetcetorId(det->maxDetectorID());
+                rect->setDetectorName(QString::fromStdString(det->getName()));
+                rect->setMinimumDetectorId(det->minDetectorID());
+                rect->setMaximumDetectorId(det->maxDetectorID());
                 rectDetectors.push_back(rect);
               }
 
@@ -442,8 +442,8 @@ namespace MantidQt
         return;
       }
       std::vector<detid_t> detIdList;
-      detIdList.push_back(rectDet->getMinimumDetcetorId());
-      detIdList.push_back(rectDet->getMaximumDetcetorId());
+      detIdList.push_back(rectDet->getMinimumDetectorId());
+      detIdList.push_back(rectDet->getMaximumDetectorId());
       specList= mws_sptr->spectraMap().getSpectra(detIdList);
      
     }
@@ -666,7 +666,7 @@ namespace MantidQt
       QString orientation("D_V");
       QString minSpec;
       QString maxSpec;
-      int64_t detNum=0;//first detector
+      detid_t detNum=0;//first detector
      
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -711,7 +711,7 @@ namespace MantidQt
     /// Handler for first detector time integral button
     void SANSDiagnostics::firstDetectorTimeIntegralClicked()
     {
-      int64_t detNum=0;//first detector
+      detid_t detNum=0;//first detector
       QString minSpec;
       QString maxSpec;
      
@@ -963,7 +963,7 @@ namespace MantidQt
       QString orientation("D_H");
       QString minSpec;
       QString maxSpec;
-      int64_t detNum=1;//second detector
+      detid_t detNum=1;//second detector
       
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -1008,7 +1008,7 @@ namespace MantidQt
       QString orientation("D_V");
       QString minSpec;
       QString maxSpec;
-      int64_t detNum=1;//first detector
+      detid_t detNum=1;//first detector
 
       QString ipwsName= getWorkspaceToProcess();
       Mantid::API::Workspace_sptr ws_sptr;
@@ -1050,7 +1050,7 @@ namespace MantidQt
     void SANSDiagnostics::secondDetectorTimeIntegralClicked()
     {
       //second detector
-      int64_t detNum=1;
+      detid_t detNum=1;
       QString minSpec;
       QString maxSpec;
 

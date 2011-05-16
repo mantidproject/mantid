@@ -2,7 +2,6 @@
 // Includes
 //----------------------
 #include "MantidQtCustomInterfaces/SANSRunWindow.h"
-#include "MantidQtCustomInterfaces/SANSUtilityDialogs.h"
 #include "MantidQtCustomInterfaces/SANSAddFiles.h"
 #include "MantidQtAPI/ManageUserDirectories.h"
 #include "MantidQtAPI/FileDialogHandler.h"

@@ -219,7 +219,7 @@ void UserFunctionDialog::checkParameters(QString& expr)
   }
 
   // compare variable names and collect common names
-  std::vector<std::string> common(std::min<int>(vars1.size(), vars2.size()),"");
+  std::vector<std::string> common(std::min<size_t>(vars1.size(), vars2.size()),"");
   std::set_intersection(vars1.begin(),vars1.end(),vars2.begin(),vars2.end(),common.begin());
   it = std::find(common.begin(),common.end(),"");
   if (it != common.end())

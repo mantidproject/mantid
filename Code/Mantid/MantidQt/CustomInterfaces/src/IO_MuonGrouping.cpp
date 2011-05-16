@@ -60,8 +60,8 @@ void saveGroupingTabletoXML(Ui::MuonAnalysis& m_uiForm, const std::string& filen
   std::vector<int> groupToRow;
   whichGroupToWhichRow(m_uiForm, groupToRow);
 
-  int num = groupToRow.size();
-  for (size_t i = 0; i < groupToRow.size(); i++)
+  int num = static_cast<int>(groupToRow.size());
+  for (int i = 0; i < num; i++)
   {
     Element* gElem = mDoc->createElement("group");
     gElem->setAttribute("name", m_uiForm.groupTable->item(groupToRow[i],0)->text().toStdString());
@@ -146,8 +146,8 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
   // add content to group table
 
   QStringList allGroupNames;  // used to populate combo boxes 
-  unsigned int numberGroups = pNL_group->length();
-  for (unsigned int iGroup = 0; iGroup < numberGroups; iGroup++)
+  int numberGroups = static_cast<int>(pNL_group->length());
+  for (int iGroup = 0; iGroup < numberGroups; iGroup++)
   {
     Element* pGroupElem = static_cast<Element*>(pNL_group->item(iGroup));
 
@@ -162,9 +162,9 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
       std::string ids = idlistElement->getAttribute("val");
 
       // add info to table
-      m_uiForm.groupTable->setItem(iGroup,0, new QTableWidgetItem(gName.c_str()) );
+      m_uiForm.groupTable->setItem(iGroup, 0, new QTableWidgetItem(gName.c_str()) );
       m_uiForm.groupTable->setItem(iGroup,1, new QTableWidgetItem(ids.c_str()) );
-      allGroupNames.push_back( m_uiForm.groupTable->item(iGroup,0)->text() );
+      allGroupNames.push_back( m_uiForm.groupTable->item(static_cast<int>(iGroup),0)->text() );
     }
     else
     {
@@ -200,7 +200,7 @@ void loadGroupingXMLtoTable(Ui::MuonAnalysis& m_uiForm, const std::string& filen
 
   QStringList allPairNames;  
   NodeList* pNL_pair = pRootElem->getElementsByTagName("pair");
-  int nPairs = pNL_pair->length();
+  int nPairs = static_cast<int>(pNL_pair->length());
   if ( pNL_pair->length() > 0 )
   {
     for (int iPair = 0; iPair < nPairs; iPair++)

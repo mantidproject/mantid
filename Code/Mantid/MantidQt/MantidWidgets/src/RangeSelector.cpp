@@ -12,7 +12,7 @@ RangeSelector::RangeSelector(QwtPlot* plot, SelectType type,
   : QwtPlotPicker(plot->canvas()), m_type(type), m_min(0.0),m_max(0.0), m_lower(0.0), 
     m_higher(0.0), m_canvas(plot->canvas()), m_plot(plot),m_mrkMin(NULL), m_mrkMax(NULL),
     m_minChanging(false), m_maxChanging(false),m_infoOnly(infoOnly), m_visible(visible),
-    m_pen(NULL), m_movCursor(NULL)
+    m_pen(NULL), m_movCursor()
 {
   m_canvas->installEventFilter(this);
 

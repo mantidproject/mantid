@@ -1122,7 +1122,7 @@ void IndirectDataAnalysis::populateFunction(Mantid::API::IFitFunction* func, Man
   }
 }
 
-QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, int index)
+QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* curve, std::string workspace, size_t index)
 {
   if ( curve != NULL )
   {
@@ -1133,7 +1133,7 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
 
   Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(Mantid::API::AnalysisDataService::Instance().retrieve(workspace));
 
-  int nhist = ws->getNumberHistograms();
+  size_t nhist = ws->getNumberHistograms();
   if ( index >= nhist )
   {
     showInformationBox("Error: Workspace index out of range.");
@@ -1151,6 +1151,27 @@ QwtPlotCurve* IndirectDataAnalysis::plotMiniplot(QwtPlot* plot, QwtPlotCurve* cu
 
   return curve;
 }
+
+/**
+ * Returns the range of the given curve data.
+ * @param curve :: A Qwt plot curve
+ * @returns A pair of doubles indicating the range
+ * @throws std::invalid_argument If the curve has too few points (<2) or is NULL
+ */
+std::pair<double,double> IndirectDataAnalysis::getCurveRange(QwtPlotCurve* curve)
+{
+  if( !curve )
+  {
+    throw std::invalid_argument("Invalid curve as argument to getCurveRange");
+  }  
+  size_t npts = curve->data().size();
+  if( npts < 2 )
+  {
+    throw std::invalid_argument("Too few points on data curve to determine range.");
+  }
+  return std::make_pair(m_elwDataCurve->data().x(0), m_elwDataCurve->data().x(npts-1));
+}
+
 
 void IndirectDataAnalysis::run()
 {
@@ -1341,20 +1362,18 @@ void IndirectDataAnalysis::elwinPlotInput()
     std::string workspace = wsname.toStdString();
 
     m_elwDataCurve = plotMiniplot(m_elwPlot, m_elwDataCurve, workspace, 0);
-
-    if ( m_elwDataCurve == NULL )
+    try
     {
-      return;
+      const std::pair<double, double> range = getCurveRange(m_elwDataCurve);    
+      m_elwR1->setRange(range.first, range.second);
+      // Replot
+      m_elwPlot->replot();
     }
-    
-    int npts = m_elwDataCurve->data().size();
-    double lower = m_elwDataCurve->data().x(0);
-    double upper = m_elwDataCurve->data().x(npts-1);
-    
-    m_elwR1->setRange(lower, upper);
+    catch(std::invalid_argument & exc)
+    {
+      showInformationBox(exc.what());
+    }
 
-    // Replot
-    m_elwPlot->replot();
   }
   else
   {
@@ -1444,20 +1463,17 @@ void IndirectDataAnalysis::msdPlotInput()
     std::string workspace = wsname.toStdString();
 
     m_msdDataCurve = plotMiniplot(m_msdPlot, m_msdDataCurve, workspace, 0);
-
-    if ( m_msdDataCurve == NULL )
+    try
     {
-      return;
+      const std::pair<double, double> range = getCurveRange(m_msdDataCurve);    
+      m_msdRange->setRange(range.first, range.second);
+      // Replot
+      m_msdPlot->replot();
     }
-
-    int npnts = m_msdDataCurve->data().size();
-    double lower = m_msdDataCurve->data().x(0);
-    double upper = m_msdDataCurve->data().x(npnts-1);
-
-    m_msdRange->setRange(lower, upper);
-
-    // Replot
-    m_msdPlot->replot();
+    catch(std::invalid_argument & exc)
+    {
+      showInformationBox(exc.what());
+    }
   }
   else
   {
@@ -1569,20 +1585,16 @@ void IndirectDataAnalysis::furyPlotInput()
   }
 
   m_furCurve = plotMiniplot(m_furPlot, m_furCurve, workspace, 0);
-
-  if ( m_furCurve == NULL )
+  try
   {
-    return;
+    const std::pair<double, double> range = getCurveRange(m_furCurve);    
+    m_furRange->setRange(range.first, range.second);
+    m_furPlot->replot();
   }
-
-  int npnts = m_furCurve->data().size();
-  double lower = m_furCurve->data().x(0);
-  double upper = m_furCurve->data().x(npnts-1);
-
-  m_furRange->setRange(lower, upper);
-
-  m_furPlot->replot();
-
+  catch(std::invalid_argument & exc)
+  {
+    showInformationBox(exc.what());
+  }
 }
 
 void IndirectDataAnalysis::furyMaxChanged(double val)
@@ -1807,22 +1819,21 @@ void IndirectDataAnalysis::furyfitPlotInput()
   int specNo = m_uiForm.furyfit_leSpecNo->text().toInt();
 
   m_ffDataCurve = plotMiniplot(m_ffPlot, m_ffDataCurve, m_ffInputWSName, specNo);
-  if ( m_ffDataCurve == NULL )
+  try
   {
-    return;
+    const std::pair<double, double> range = getCurveRange(m_ffDataCurve);
+    m_ffRangeS->setRange(range.first, range.second);
+    m_ffRangeManager->setRange(m_ffProp["StartX"], range.first, range.second);
+    m_ffRangeManager->setRange(m_ffProp["EndX"], range.first, range.second);
+    
+    m_ffPlot->setAxisScale(QwtPlot::xBottom, range.first, range.second);
+    m_ffPlot->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
+    m_ffPlot->replot();
   }
-
-  int nopnts =  m_ffDataCurve->data().size();
-  double lower = m_ffDataCurve->data().x(0);
-  double upper = m_ffDataCurve->data().x(nopnts-1);
-
-  m_ffRangeS->setRange(lower, upper);
-  m_ffRangeManager->setRange(m_ffProp["StartX"], lower, upper);
-  m_ffRangeManager->setRange(m_ffProp["EndX"], lower, upper);
-
-  m_ffPlot->setAxisScale(QwtPlot::xBottom, lower, upper);
-  m_ffPlot->setAxisScale(QwtPlot::yLeft, 0.0, 1.0);
-  m_ffPlot->replot();
+  catch(std::invalid_argument & exc)
+  {
+    showInformationBox(exc.what());
+  }
 }
 
 void IndirectDataAnalysis::furyfitXMinSelected(double val)
@@ -1908,9 +1919,9 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   Mantid::API::CompositeFunctionMW* function = furyfitCreateFunction(true);
 
   // Create the double* array from the input workspace
-  int binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["StartX"]));
-  int binIndxHigh = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["EndX"]));
-  const int nData = binIndxHigh - binIndxLow;
+  const size_t binIndxLow = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["StartX"]));
+  const size_t binIndxHigh = m_ffInputWS->binIndexOf(m_ffRangeManager->value(m_ffProp["EndX"]));
+  const size_t nData = binIndxHigh - binIndxLow;
 
   double* inputXData = new double[nData];
   double* outputData = new double[nData];
@@ -1919,7 +1930,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
 
   const bool isHistogram = m_ffInputWS->isHistogramData();
 
-  for ( int i = 0; i < nData ; i++ )
+  for ( size_t i = 0; i < nData ; i++ )
   {
     if ( isHistogram )
       inputXData[i] = 0.5*(XValues[binIndxLow+i]+XValues[binIndxLow+i+1]);
@@ -1932,7 +1943,7 @@ void IndirectDataAnalysis::furyfitPlotGuess(QtProperty*)
   QVector<double> dataX;
   QVector<double> dataY;
 
-  for ( int i = 0; i < nData; i++ )
+  for ( size_t i = 0; i < nData; i++ )
   {
     dataX.append(inputXData[i]);
     dataY.append(outputData[i]);
@@ -2169,25 +2180,30 @@ void IndirectDataAnalysis::confitPlotInput()
 
   int specNo = m_uiForm.confit_leSpecNo->text().toInt();
   // Set spectra max value
-  int specMax = m_cfInputWS->getNumberHistograms() - 1;
-  if ( specNo < 0 || specNo > specMax )
+  size_t specMax = m_cfInputWS->getNumberHistograms();
+  if( specMax > 0 ) specMax -= 1;
+  if ( specNo < 0 || static_cast<size_t>(specNo) > specMax ) //cast is okay as the first check is for less-than-zero
   {
     m_uiForm.confit_leSpecNo->setText("0");
     specNo = 0;
   }
   int smCurrent = m_uiForm.confit_leSpecMax->text().toInt();
-  if ( smCurrent < 0 || smCurrent > specMax )
+  if ( smCurrent < 0 || static_cast<size_t>(smCurrent) > specMax )
+  {
     m_uiForm.confit_leSpecMax->setText(QString::number(specMax));
+  }
 
   m_cfDataCurve = plotMiniplot(m_cfPlot, m_cfDataCurve, wsname, specNo);
-  if ( m_cfDataCurve == NULL ) { return; }
-
-  int npnts = m_cfDataCurve->data().size();
-  const double & lower = m_cfDataCurve->data().x(0);
-  const double & upper = m_cfDataCurve->data().x(npnts-1);
-  m_cfRangeS->setRange(lower, upper);
-
-  m_uiForm.confit_ckPlotGuess->setChecked(plotGuess);
+  try
+  {
+    const std::pair<double, double> range = getCurveRange(m_cfDataCurve);    
+    m_cfRangeS->setRange(range.first, range.second);
+    m_uiForm.confit_ckPlotGuess->setChecked(plotGuess);
+  }
+  catch(std::invalid_argument & exc)
+  {
+    showInformationBox(exc.what());
+  }
 }
 
 void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
@@ -2207,9 +2223,9 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
 
   std::string inputName = m_cfInputWS->getName();
 
-  const int binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
-  const int binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
-  const int nData = binIndexHigh - binIndexLow;
+  const size_t binIndexLow = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["StartX"]));
+  const size_t binIndexHigh = m_cfInputWS->binIndexOf(m_cfDblMng->value(m_cfProp["EndX"]));
+  const size_t nData = binIndexHigh - binIndexLow;
 
   double* inputXData = new double[nData];
   double* outputData = new double[nData];
@@ -2217,7 +2233,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
   const Mantid::MantidVec& XValues = m_cfInputWS->readX(0);
   const bool isHistogram = m_cfInputWS->isHistogramData();
 
-  for ( int i = 0; i < nData; i++ )
+  for ( size_t i = 0; i < nData; i++ )
   {
     if ( isHistogram )
     {
@@ -2233,7 +2249,7 @@ void IndirectDataAnalysis::confitPlotGuess(QtProperty*)
 
   QVector<double> dataX, dataY;
 
-  for ( int i = 0; i < nData; i++ )
+  for ( size_t i = 0; i < nData; i++ )
   {
     dataX.append(inputXData[i]);
     dataY.append(outputData[i]);
