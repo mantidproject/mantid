@@ -19,10 +19,10 @@ void ConvertToMatrixWorkspace::initDocs()
   this->setOptionalMessage("Converts an EventWorkspace into a Workspace2D, using the input workspace's current X bin values.");
 }
 
-
 using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
+using std::size_t;
 
 void ConvertToMatrixWorkspace::init()
 {
@@ -41,7 +41,7 @@ void ConvertToMatrixWorkspace::exec()
   {
     g_log.information() << "Converting EventWorkspace to Workspace2D.\n";
 
-    const int numHists = inputWorkspace->getNumberHistograms();
+    const size_t numHists = inputWorkspace->getNumberHistograms();
     Progress prog(this,0.0,1.0,numHists*2);
 
     // Sort the input workspace in-place by TOF. This can be faster if there are few event lists.
@@ -52,7 +52,7 @@ void ConvertToMatrixWorkspace::exec()
 
     // ...but not the data, so do that here.
     PARALLEL_FOR2(inputWorkspace,outputWorkspace)
-    for (int i = 0; i < numHists; ++i)
+    for (size_t i = 0; i < numHists; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
 	  

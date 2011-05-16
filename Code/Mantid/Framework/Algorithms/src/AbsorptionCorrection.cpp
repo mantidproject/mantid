@@ -92,8 +92,8 @@ void AbsorptionCorrection::exec()
 
   constructSample(correctionFactors->mutableSample());
 
-  const int numHists = m_inputWS->getNumberHistograms();
-  const int specSize = m_inputWS->blocksize();
+  const int64_t numHists = static_cast<int64_t>(m_inputWS->getNumberHistograms());
+  const int64_t specSize = static_cast<int64_t>(m_inputWS->blocksize());
 
   // If the number of wavelength points has not been given, use them all
   if ( isEmpty(n_lambda) ) n_lambda = specSize;
@@ -125,7 +125,7 @@ void AbsorptionCorrection::exec()
   Progress prog(this,0.0,1.0,numHists);
   // Loop over the spectra
   PARALLEL_FOR2(m_inputWS,correctionFactors)
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < numHists; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
 
@@ -171,7 +171,7 @@ void AbsorptionCorrection::exec()
     MantidVec& Y = correctionFactors->dataY(i);
 
     // Loop through the bins in the current spectrum every x_step
-    for (int j = 0; j < specSize; j = j + x_step)
+    for (int64_t j = 0; j < specSize; j = j + x_step)
     {
       const double lambda = (isHist ? (0.5 * (X[j] + X[j + 1])) : X[j]);
       if ( m_emode == 0 ) // Elastic
@@ -197,7 +197,7 @@ void AbsorptionCorrection::exec()
 
     if (x_step > 1) // Interpolate linearly between points separated by x_step, last point required
     {
-      VectorHelper::linearlyInterpolateY(X, Y, x_step);
+      VectorHelper::linearlyInterpolateY(X, Y, static_cast<double>(x_step));
     }
 
     prog.report();
@@ -333,9 +333,9 @@ double AbsorptionCorrection::doIntegration(const double& lambda, const std::vect
 {
   double integral = 0.0;
 
-  int el = L2s.size();
+  size_t el = L2s.size();
   // Iterate over all the elements, summing up the integral
-  for (int i = 0; i < el; ++i)
+  for (size_t i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )
@@ -351,9 +351,9 @@ double AbsorptionCorrection::doIntegration(const double& lambda_i,const double& 
 {
   double integral = 0.0;
 
-  int el = L2s.size();
+  size_t el = L2s.size();
   // Iterate over all the elements, summing up the integral
-  for (int i = 0; i < el; ++i)
+  for (size_t i = 0; i < el; ++i)
   {
     // Equation is exponent * element volume
     // where exponent is e^(-mu * wavelength/1.8 * (L1+L2) )

@@ -104,9 +104,9 @@ private:
   
   double m_refAtten;    ///< The attenuation cross-section in barns at 1.8A
   double m_scattering;  ///< The scattering cross-section in barns
-  int n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
-  int x_step;           ///< The step in bin number between adjacent points
-  int m_emode;          ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
+  int64_t n_lambda;         ///< The number of points in wavelength, the rest is interpolated linearly
+  int64_t x_step;           ///< The step in bin number between adjacent points
+  int64_t m_emode;          ///< The energy mode: 0 - elastic, 1 - direct, 2 - indirect
   double m_lambdaFixed; ///< The wavelength corresponding to the fixed energy, if provided
 
   typedef double (*expfunction)(double); ///< Typedef pointer to exponential function

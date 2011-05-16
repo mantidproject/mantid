@@ -14,7 +14,7 @@ namespace Algorithms
   using namespace Mantid::Kernel;
   using namespace Mantid::API;
   using namespace Mantid::DataObjects;
-
+  using std::size_t;
 
   //----------------------------------------------------------------------------------------------
   /** Constructor
@@ -71,7 +71,7 @@ namespace Algorithms
 
     // Either use the given list or use all spectra
     std::vector<int> workspaceIndices = getProperty("WorkspaceIndexList");
-    int num_to_do = workspaceIndices.size();
+    int64_t num_to_do = static_cast<int64_t>(workspaceIndices.size());
     bool doAll = false;
     if (workspaceIndices.size() == 0)
     {
@@ -82,10 +82,10 @@ namespace Algorithms
     double timeOffset = getProperty("TimeOffset");
 
     PARALLEL_FOR_IF(true)
-    for (int i=0; i < num_to_do; i++)
+    for (int64_t i=0; i < num_to_do; i++)
     {
       // What worksapce index?
-      int wi;
+      int64_t wi;
       if (doAll)
         wi = i;
       else
