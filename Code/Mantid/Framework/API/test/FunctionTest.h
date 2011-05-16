@@ -26,7 +26,7 @@ public:
 
   std::string name()const{return "IFT_Funct";}
 
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
     double c0 = getParameter("c0");
     double c1 = getParameter("c1");
@@ -38,7 +38,7 @@ public:
       out[i] = c0 + x*(c1 + x*(c2 + x*c3));
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     for(int i=0;i<nData;i++)
     {

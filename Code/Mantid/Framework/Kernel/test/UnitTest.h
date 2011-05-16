@@ -74,7 +74,7 @@ public:
 
   void testTOF_cast()
   {
-    TS_ASSERT_THROWS_NOTHING( dynamic_cast<Unit&>(tof) )
+    TS_ASSERT_THROWS_NOTHING( Unit & u = dynamic_cast<Unit&>(tof) )
   }
 
   void testTOF_toTOF()

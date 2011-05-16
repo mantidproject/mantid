@@ -98,7 +98,7 @@ BivariateNormal::~BivariateNormal()
 /// overwrite IFunction base class methods
 
 
-void BivariateNormal::function(double *out, const double *xValues, const int &nData)
+void BivariateNormal::function(double *out, const double *xValues, const size_t nData)
 {
   initCommon();
 
@@ -107,7 +107,7 @@ void BivariateNormal::function(double *out, const double *xValues, const int &nD
 
 }
 
-void BivariateNormal::functionDeriv(API::Jacobian *out, const double *xValues, const int &nData)
+void BivariateNormal::functionDeriv(API::Jacobian *out, const double *xValues, const size_t nData)
 {
   initCommon();
   int x = 0;

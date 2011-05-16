@@ -94,9 +94,9 @@ using namespace Mantid;
       std::string name()const
           {return "BivariateNormal";}
           
-      void 	function  (double *out, const double *xValues, const int &nData) ; 
+      void 	function  (double *out, const double *xValues, const size_t nData) ; 
       
-      void 	functionDeriv  (API::Jacobian  *out, const double *xValues, const int &nData);
+      void 	functionDeriv  (API::Jacobian  *out, const double *xValues, const size_t nData);
       
       int 	nAttributes  () const
            { return 16;}

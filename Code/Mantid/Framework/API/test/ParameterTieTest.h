@@ -21,7 +21,7 @@ public:
     declareParameter("sig",1.);
   }
   std::string name()const{return "ParameterTieTest_Gauss";}
-  void functionLocal(double* out, const double* xValues, const int& nData)const
+  void functionLocal(double* out, const double* xValues, const size_t nData)const
   {
     double c = getParameter("cen");
     double h = getParameter("hi");
@@ -32,7 +32,7 @@ public:
       out[i] = h*exp(-0.5*x*x*w);
     }
   }
-  void functionDerivLocal(Jacobian* out, const double* xValues, const int& nData)
+  void functionDerivLocal(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     double c = getParameter("cen");
@@ -88,7 +88,7 @@ public:
     declareParameter("b");
   }
   std::string name()const{return "ParameterTieTest_Linear";}
-  void function(double* out, const double* xValues, const int& nData)const
+  void function(double* out, const double* xValues, const size_t nData)const
   {
     double a = getParameter("a");
     double b = getParameter("b");
@@ -97,7 +97,7 @@ public:
       out[i] = a + b * xValues[i];
     }
   }
-  void functionDeriv(Jacobian* out, const double* xValues, const int& nData)
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
     for(int i=0;i<nData;i++)
@@ -118,7 +118,7 @@ public:
     declareParameter("B1e2Ta_");
   }
   std::string name()const{return "ParameterTieTest_Nothing";}
-  void function(double* out, const double* xValues, const int& nData)const{}
+  void function(double* out, const double* xValues, const size_t nData)const{}
 };
 
 class ParameterTieTest : public CxxTest::TestSuite
