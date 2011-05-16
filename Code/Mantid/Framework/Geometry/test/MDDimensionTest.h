@@ -139,11 +139,11 @@ public:
     void testGetX(){
       if(!pOrtDim)TS_FAIL("pOrtDim class has not been constructed properly");
 
-      double x;
+      double x(0);
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(0));
       TS_ASSERT_DELTA(x,pOrtDim->getMinimum(),FLT_EPSILON);
 
-      size_t nBins;
+      size_t nBins(0);
       TS_ASSERT_THROWS_NOTHING(nBins = pOrtDim->getNBins());
 
       TS_ASSERT_THROWS_NOTHING(x=pOrtDim->getX(nBins));
