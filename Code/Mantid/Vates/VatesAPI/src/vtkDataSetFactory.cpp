@@ -1,4 +1,5 @@
 #include "MantidVatesAPI/vtkDataSetFactory.h"
+#include <stdexcept>
 
 namespace Mantid
 {
