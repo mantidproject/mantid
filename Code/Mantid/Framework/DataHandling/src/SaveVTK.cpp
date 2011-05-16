@@ -95,7 +95,7 @@ namespace Mantid
       {
         const Workspace2D_sptr localWorkspace = 
           boost::dynamic_pointer_cast<Workspace2D>(inputWorkspace);
-        //      const int numberOfHist = localWorkspace->getNumberHistograms();
+        //      const size_t numberOfHist = localWorkspace->getNumberHistograms();
 
         //Write out whole range
         bool xMin(m_Xmin > 0.0), xMax(m_Xmax > 0.0);

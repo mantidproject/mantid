@@ -65,7 +65,7 @@ public:
 
     //There are three outputs, a workspace (tested in the next code block), an array (later, this test) and a file (next test)
     //were all the spectra output?
-    const int numberOfSpectra = outputMat->getNumberHistograms();
+    const size_t numberOfSpectra = outputMat->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
     const int numFailed = alg.getProperty("NumberOfFailures");
     TS_ASSERT_EQUALS(numFailed, 84);

@@ -64,7 +64,7 @@ void FlatBackground::exec()
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Copy over all the data
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   const int blocksize = inputWS->blocksize();
 
   // Get the required X range

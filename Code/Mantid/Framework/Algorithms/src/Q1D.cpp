@@ -80,7 +80,7 @@ void Q1D::exec()
   // And one for the solid angles
   MantidVec anglesSum(sizeOut-1);
 
-  const int numSpec = inputWS->getNumberHistograms();
+  const size_t numSpec = inputWS->getNumberHistograms();
 
   // Get a reference to the spectra-detector map
   SpectraDetectorMap& specMap = outputWS->mutableSpectraMap();

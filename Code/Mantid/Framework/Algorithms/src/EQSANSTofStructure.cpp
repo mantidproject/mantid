@@ -85,7 +85,7 @@ void EQSANSTofStructure::exec()
 void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, double threshold, double frame_offset,
        double tmp_frame_width, double frequency)
 {
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
   // Find the new binning first
@@ -172,7 +172,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
 void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inputWS, double threshold,
     double frame_offset, double tof_frame_width, double tmp_frame_width)
 {
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
   // Loop through the spectra and apply correction

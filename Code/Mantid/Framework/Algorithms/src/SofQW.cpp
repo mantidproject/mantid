@@ -102,7 +102,7 @@ void SofQW::exec()
     (PhysicalConstants::h*PhysicalConstants::h);
 
   // Loop over input workspace bins, reassigning data to correct bin in output qw workspace
-  const int numHists = inputWorkspace->getNumberHistograms();
+  const size_t numHists = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
   Progress prog(this,0.0,1.0,numHists);
   for (int i = 0; i < numHists; ++i)
@@ -238,7 +238,7 @@ void SofQW::makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vect
   std::vector<double> widths(qAxis.size());
   std::adjacent_difference(qAxis.begin(),qAxis.end(),widths.begin());
 
-  const int numQBins = outputWS->getNumberHistograms();
+  const size_t numQBins = outputWS->getNumberHistograms();
   for (int i=0; i < numQBins; ++i)
   {
     MantidVec& Y = outputWS->dataY(i);

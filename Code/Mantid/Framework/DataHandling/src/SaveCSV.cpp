@@ -157,7 +157,7 @@ void SaveCSV::exec()
 
     // Get info from 2D workspace
 
-    const int numberOfHist = localworkspace->getNumberHistograms();
+    const size_t numberOfHist = localworkspace->getNumberHistograms();
     
 	
     // Add first x-axis line to output file

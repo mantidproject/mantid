@@ -357,7 +357,7 @@ bool WorkspaceHelpers::commonBoundaries(const MatrixWorkspace_const_sptr WS)
   const double commonSum = std::accumulate(WS->readX(0).begin(),WS->readX(0).end(),0.);
   // If this results in infinity or NaN, then we can't tell - return false
   if ( commonSum == std::numeric_limits<double>::infinity() || commonSum != commonSum ) return false;
-  const int numHist = WS->getNumberHistograms();
+  const size_t numHist = WS->getNumberHistograms();
   for (int j = 1; j < numHist; ++j)
   {
     const double sum = std::accumulate(WS->readX(j).begin(),WS->readX(j).end(),0.);
@@ -396,7 +396,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
   if ( sharedXData(ws1) && sharedXData(ws2) ) return true;
 
   // If that didn't pass then explicitly check 1 in 10 of the vectors (min 10, max 100)
-  const int numHist = ws1->getNumberHistograms();
+  const size_t numHist = ws1->getNumberHistograms();
   int numberToCheck = numHist / 10;
   if (numberToCheck<10) numberToCheck = 10;
   if (numberToCheck>100) numberToCheck = 100;
@@ -416,7 +416,7 @@ bool WorkspaceHelpers::matchingBins(const MatrixWorkspace_const_sptr ws1,
 bool WorkspaceHelpers::sharedXData(const MatrixWorkspace_const_sptr WS)
 {
   const double& first = WS->readX(0)[0];
-  const int numHist = WS->getNumberHistograms();
+  const size_t numHist = WS->getNumberHistograms();
   for (int i = 1; i < numHist; ++i)
   {
     if ( &first != &(WS->readX(i)[0]) ) return false;
@@ -435,7 +435,7 @@ void WorkspaceHelpers::makeDistribution(MatrixWorkspace_sptr workspace, const bo
   // Check workspace isn't already in the correct state - do nothing if it is
   if ( workspace->isDistribution() == forwards ) return;
 
-  const int numberOfSpectra = workspace->getNumberHistograms();
+  const size_t numberOfSpectra = workspace->getNumberHistograms();
 
   std::vector<double> widths(workspace->readX(0).size());
 

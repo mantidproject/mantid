@@ -34,7 +34,7 @@ void IdentifyNoisyDetectors::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr inputWs = getProperty("InputWorkspace");
-  const int nHist = inputWS->getNumberHistograms();
+  const size_t nHist = inputWS->getNumberHistograms();
 
   const double rangeLower = 2000;
   const double rangeUpper = 19000;

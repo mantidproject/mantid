@@ -88,7 +88,7 @@ namespace Mantid
 
       const double liveValue(1.0);
       // iterate over the data values setting the live and dead values
-      const int numSpec = integratedWorkspace->getNumberHistograms();
+      const size_t numSpec = integratedWorkspace->getNumberHistograms();
       const int progStep = static_cast<int>(ceil(numSpec / 100.0));
 
       // Keep track of those reading low/high

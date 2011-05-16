@@ -107,7 +107,7 @@ public:
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF")
    
 			
-		const int numberOfSpectra = output2D->getNumberHistograms();
+		const size_t numberOfSpectra = output2D->getNumberHistograms();
     TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
 		for (int i = 0; i < numberOfSpectra-1; ++i) {
 			//all of the values should fall in this range for INES
@@ -149,7 +149,7 @@ public:
     // Check that the output unit is correct
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF")
    
-		const int numberOfSpectra = output2D->getNumberHistograms();
+		const size_t numberOfSpectra = output2D->getNumberHistograms();
 		TS_ASSERT_EQUALS(numberOfSpectra,10);
 		for (int i = 0; i < numberOfSpectra; ++i) {
 			//all of the values should fall in this range for INES

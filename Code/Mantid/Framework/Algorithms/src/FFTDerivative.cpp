@@ -26,7 +26,7 @@ void FFTDerivative::exec()
   MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   MatrixWorkspace_sptr outWS;
 
-  int n = inWS->getNumberHistograms();
+  size_t n = inWS->getNumberHistograms();
   API::Progress progress(this,0,1,n);
 
   int ny = inWS->readY(0).size();

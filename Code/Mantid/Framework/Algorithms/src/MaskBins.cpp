@@ -73,7 +73,7 @@ void MaskBins::exec()
   this->spectra_list = this->getProperty("SpectraList");
   if (this->spectra_list.size() > 0)
   {
-    int numHist = inputWS->getNumberHistograms();
+    size_t numHist = inputWS->getNumberHistograms();
     //--- Validate spectra list ---
     for (size_t i = 0; i < this->spectra_list.size(); ++i)
     {
@@ -118,7 +118,7 @@ void MaskBins::exec()
     }
     
 
-    const int numHists = inputWS->getNumberHistograms();
+    const size_t numHists = inputWS->getNumberHistograms();
     Progress progress(this,0.0,1.0,numHists);
     //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
 
@@ -190,7 +190,7 @@ void MaskBins::execEvent()
   }
 
   //Go through all histograms
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
   if (this->spectra_list.size() > 0)

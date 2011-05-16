@@ -340,7 +340,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
   // We need a new workspace the same size as the input ont
   MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
 
-  const int numHists = input->getNumberHistograms();
+  const size_t numHists = input->getNumberHistograms();
   const int blocksize = input->blocksize();
 
   // Loop over spectra
@@ -397,7 +397,7 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
 
   const double constant = sqrt(static_cast<double>(this->computePhi(w))) / factor;
   
-  const int numHists = smoothed->getNumberHistograms();
+  const size_t numHists = smoothed->getNumberHistograms();
   const int blocksize = smoothed->blocksize();
   for (int i = 0; i < numHists; ++i)
   {

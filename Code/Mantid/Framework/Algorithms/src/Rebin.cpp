@@ -78,7 +78,7 @@ namespace Mantid
       const bool hist = inputWS->isHistogramData();
 
       // workspace independent determination of length
-      const int histnumber = inputWS->getNumberHistograms();
+      const size_t histnumber = inputWS->getNumberHistograms();
       MantidVecPtr XValues_new;
       // create new output X axis
       const int ntcnew = VectorHelper::createAxisFromRebinParams(rb_params, XValues_new.access());

@@ -50,7 +50,7 @@ namespace Mantid
 
       // Get the input workspace
       MatrixWorkspace_sptr inputW = getProperty("InputWorkspace");
-      const int nHists = inputW->getNumberHistograms();
+      const size_t nHists = inputW->getNumberHistograms();
       // make output Workspace the same type as the input but with the new axes
       MatrixWorkspace_sptr outputW =
         WorkspaceFactory::Instance().create(inputW, nHists, ntcnew, ntcnew-1);
@@ -124,7 +124,7 @@ namespace Mantid
       // prepare to use GSL functions but don't let them terminate Mantid
       gsl_error_handler_t * old_handler = gsl_set_error_handler(NULL);
 
-      const int histnumber = inputW->getNumberHistograms();
+      const size_t histnumber = inputW->getNumberHistograms();
       Progress prog(this,0.0,1.0,histnumber);
       for (int hist=0; hist <  histnumber;++hist)
       {

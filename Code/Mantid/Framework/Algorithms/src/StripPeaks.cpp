@@ -109,7 +109,7 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(input);
   // Copy the data over from the input to the output workspace
-  const int hists = input->getNumberHistograms();
+  const size_t hists = input->getNumberHistograms();
   //progress 0.2 to 0.3 in this loop
   double prg=0.2;
   for (int k = 0; k < hists; ++k)

@@ -59,7 +59,7 @@ void SetUncertaintiesToZero::exec()
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
 
   // ...but not the data, so do that here.
-  const int numHists = inputWorkspace->getNumberHistograms();
+  const size_t numHists = inputWorkspace->getNumberHistograms();
   Progress prog(this,0.0,1.0,numHists);
 
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)

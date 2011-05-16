@@ -76,7 +76,7 @@ namespace Mantid
         throw std::invalid_argument("The input workspace must have common binning");
       }
 
-      const int nHist = inputWS->getNumberHistograms();
+      const size_t nHist = inputWS->getNumberHistograms();
       m_nBins = inputWS->blocksize();
 
       // Retrieve the filename from the properties
@@ -169,7 +169,7 @@ namespace Mantid
       // We write out values NUM_PER_LINE at a time, so will need to do extra work if nBins isn't a factor of NUM_PER_LINE
       m_remainder = m_nBins % NUM_PER_LINE;
       bool isNumericAxis = WS->getAxis(1)->isNumeric();
-      const int nHist = WS->getNumberHistograms();
+      const size_t nHist = WS->getNumberHistograms();
       // Create a progress reporting object
       Progress progress(this,0,1,100);
       const int progStep = static_cast<int>(ceil(nHist/100.0));

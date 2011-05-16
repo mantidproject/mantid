@@ -55,7 +55,7 @@ void SANSSolidAngleCorrection::exec()
     setProperty("OutputWorkspace",outputWS);
   }
 
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,numHists);
 
   // Number of X bins

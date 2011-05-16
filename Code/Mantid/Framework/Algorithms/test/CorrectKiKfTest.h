@@ -43,7 +43,7 @@ public:
     TS_ASSERT( alg.isExecuted() );
     Workspace2D_sptr result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     double ei,ef,factor,deltaE;
-    int numHists = result->getNumberHistograms();
+    size_t numHists = result->getNumberHistograms();
     for (int i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;

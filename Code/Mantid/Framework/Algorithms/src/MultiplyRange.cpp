@@ -73,7 +73,7 @@ void MultiplyRange::exec()
   }
 
   // Get the count of histograms in the input workspace
-  const int histogramCount = inputWS->getNumberHistograms();
+  const size_t histogramCount = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,histogramCount);
   // Loop over spectra
   PARALLEL_FOR2(inputWS,outputWS)

@@ -85,7 +85,7 @@ void SumNeighbours::exec()
     throw std::invalid_argument("InputWorkspace should be an EventWorkspace.");
 
   //Get some stuff from the input workspace
-  //const int numberOfSpectra = inWS->getNumberHistograms();
+  //const size_t numberOfSpectra = inWS->getNumberHistograms();
   const int YLength = inWS->blocksize();
   IInstrument_sptr inst = inWS->getInstrument();
   if (!inst)

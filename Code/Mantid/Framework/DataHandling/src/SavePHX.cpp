@@ -43,7 +43,7 @@ void SavePHX::exec() {
 	const std::string filename = getProperty("Filename");
 
 	// Get the number of spectra
-	const int nHist = inputWorkspace->getNumberHistograms();
+	const size_t nHist = inputWorkspace->getNumberHistograms();
 
 	// Get a pointer to the sample
 	IObjComponent_const_sptr sample =

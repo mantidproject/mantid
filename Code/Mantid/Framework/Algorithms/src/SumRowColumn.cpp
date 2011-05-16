@@ -50,7 +50,7 @@ void SumRowColumn::exec()
   // First task is to integrate the input workspace
   MatrixWorkspace_const_sptr integratedWS = integrateWorkspace();
 
-  const int numSpec = integratedWS->getNumberHistograms();
+  const size_t numSpec = integratedWS->getNumberHistograms();
   // Check number of spectra is 128*128 or 192*192. Print warning if not.
   if (numSpec != 16384 && numSpec != 36864)
   {

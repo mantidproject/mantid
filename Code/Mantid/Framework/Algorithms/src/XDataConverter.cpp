@@ -53,7 +53,7 @@ namespace Mantid
 	throw std::runtime_error("Invalid InputWorkspace data structure. Check log for details.");
       }
 
-      const int numSpectra = inputWS->getNumberHistograms();
+      const size_t numSpectra = inputWS->getNumberHistograms();
       const int numYValues = inputWS->blocksize();
       const int numXValues = getNewXSize(inputWS);
       m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);

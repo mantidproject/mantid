@@ -82,7 +82,7 @@ void CorrectToFile::exec()
     const bool divide = (operation == "Divide") ? true : false;
     double Yfactor,correctError;
 
-    const int nOutSpec = outputWS->getNumberHistograms();
+    const size_t nOutSpec = outputWS->getNumberHistograms();
     // Set the progress bar
     Progress prg(this,0/*LOAD_TIME*/,1.0, nOutSpec);
     

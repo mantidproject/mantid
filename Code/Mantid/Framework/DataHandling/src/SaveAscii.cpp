@@ -58,7 +58,7 @@ namespace Mantid
     {
         // Get the workspace
         MatrixWorkspace_const_sptr ws = getProperty("Workspace");
-        int nSpectra = ws->getNumberHistograms();
+        size_t nSpectra = ws->getNumberHistograms();
         int nBins = ws->blocksize();
 
         // Get the properties

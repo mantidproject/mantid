@@ -85,7 +85,7 @@ void StripVanadiumPeaks::exec()
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Copy the data over from the input to the output workspace
-  const int nhists = inputWS->getNumberHistograms();
+  const size_t nhists = inputWS->getNumberHistograms();
   Progress progress(this,0.0,1.0,nhists*2);
   for (int k = 0; k < nhists; ++k)
   {

@@ -75,7 +75,7 @@ void CheckWorkspacesMatch::doComparison()
     return;
   }
 
-  int numhist = ws1->getNumberHistograms();
+  size_t numhist = ws1->getNumberHistograms();
 
   // Check some event-based stuff
   if (ews1 && ews2)
@@ -157,7 +157,7 @@ void CheckWorkspacesMatch::doComparison()
 bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
   // Cache a few things for later use
-  const int numHists = ws1->getNumberHistograms();
+  const size_t numHists = ws1->getNumberHistograms();
   const int numBins = ws1->blocksize();
   const bool histogram = ws1->isHistogramData();
   
@@ -356,7 +356,7 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
 /// @retval false The masking does not match
 bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
-  const int numHists = ws1->getNumberHistograms();
+  const size_t numHists = ws1->getNumberHistograms();
   
   for ( int i = 0; i < numHists; ++i)
   {

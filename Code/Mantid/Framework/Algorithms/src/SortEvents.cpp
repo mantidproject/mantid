@@ -67,7 +67,7 @@ namespace Mantid
       if (eventW != NULL)
       {
         //------- EventWorkspace ---------------------------
-        const int histnumber = inputW->getNumberHistograms();
+        const size_t histnumber = inputW->getNumberHistograms();
 
         //Initialize progress reporting.
         Progress prog(this,0.0,1.0, histnumber);

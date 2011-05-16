@@ -193,7 +193,7 @@ void SaveRKH::write2D()
 
   // Now the data
   const int xSize = m_workspace->blocksize();
-  const int ySize = m_workspace->getNumberHistograms();
+  const size_t ySize = m_workspace->getNumberHistograms();
   m_outRKH << "\n   " << xSize << "   " << ySize << "  " 
            << std::scientific << std::setprecision(12) << 1.0 << "\n";
   const int iflag = 3;

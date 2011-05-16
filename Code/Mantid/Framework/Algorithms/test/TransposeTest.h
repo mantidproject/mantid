@@ -63,7 +63,7 @@ public:
     // Input workspace
     MatrixWorkspace_const_sptr inputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("transpose_irs_r"));
 
-    const int nHist = inputWS->getNumberHistograms();
+    const size_t nHist = inputWS->getNumberHistograms();
     const int nBins = inputWS->blocksize();
 
     TS_ASSERT_THROWS(transpose->execute(), std::runtime_error);

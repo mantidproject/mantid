@@ -539,7 +539,7 @@ namespace Mantid
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
  
-      int numSpectra = localWorkspace->getNumberHistograms();
+      size_t numSpectra = localWorkspace->getNumberHistograms();
       runDetails.addProperty("nspectra", numSpectra);
 
       runDetails.addProperty("run_start", Kernel::DateAndTime::get_current_time().to_ISO8601_string());

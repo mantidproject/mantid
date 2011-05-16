@@ -148,7 +148,7 @@ namespace Mantid
       {
 	throw std::invalid_argument("The two input white beam vanadium workspaces must be from the same instrument");
       }
-      int maxSpecIndex = whiteBeam1->getNumberHistograms() - 1;
+      size_t maxSpecIndex = whiteBeam1->getNumberHistograms() - 1;
       if ( maxSpecIndex != whiteBeam2->getNumberHistograms() - 1 )
       {//we would get a crash later on if this were not true
 	throw std::invalid_argument("The input white beam vanadium workspaces must be have the same number of histograms");
@@ -219,7 +219,7 @@ namespace Mantid
       // criterion for if the the first spectrum is lower than expected
       double lowest = average/variation;
 
-      const int numSpec = counts1->getNumberHistograms();
+      const size_t numSpec = counts1->getNumberHistograms();
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
       // Create a workspace for the output

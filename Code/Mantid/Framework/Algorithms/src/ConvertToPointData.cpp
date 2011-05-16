@@ -111,7 +111,7 @@ namespace Mantid
     // 		      << "Found nbins=" << numBins << " and nBoundaries=" << numBoundaries << "\n";
     // 	throw std::runtime_error("Invalid X data structure.");
     //   }
-    //   const int numSpectra = inputWS->getNumberHistograms();
+    //   const size_t numSpectra = inputWS->getNumberHistograms();
     //   m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);
 
     //   // Create a new workspace where size(Y)=size(X)

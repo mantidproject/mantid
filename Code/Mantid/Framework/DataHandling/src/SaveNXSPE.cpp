@@ -88,7 +88,7 @@ namespace Mantid
         }
 
       // Number of spectra
-      const int nHist = inputWS->getNumberHistograms();
+      const size_t nHist = inputWS->getNumberHistograms();
       // Number of energy bins
       this->nBins = inputWS->blocksize();
 

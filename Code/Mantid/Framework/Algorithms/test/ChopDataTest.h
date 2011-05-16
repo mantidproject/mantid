@@ -46,7 +46,7 @@ public:
 
     TS_ASSERT_THROWS_NOTHING(Mantid::API::AnalysisDataService::Instance().add("chopdatatest_input", inputWS));
 
-    const int nHist = inputWS->getNumberHistograms();
+    const size_t nHist = inputWS->getNumberHistograms();
 
     TS_ASSERT_EQUALS(nHist, 149);
 

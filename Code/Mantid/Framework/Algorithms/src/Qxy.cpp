@@ -68,7 +68,7 @@ void Qxy::exec()
   axis.access() = outputWorkspace->readX(0);
   for ( int i = 0; i < weights->getNumberHistograms(); ++i ) weights->setX(i,axis);
   
-  const int numSpec = inputWorkspace->getNumberHistograms();
+  const size_t numSpec = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
   
   // the samplePos is often not (0, 0, 0) because the instruments components are moved to account for the beam centre

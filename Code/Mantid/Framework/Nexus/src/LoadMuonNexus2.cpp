@@ -406,7 +406,7 @@ namespace Mantid
 
       runDetails.addProperty("run_title", localWorkspace->getTitle(), true);
  
-      int numSpectra = localWorkspace->getNumberHistograms();
+      size_t numSpectra = localWorkspace->getNumberHistograms();
       runDetails.addProperty("nspectra", numSpectra);
 
       m_filename = getPropertyValue("Filename");

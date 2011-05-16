@@ -89,7 +89,7 @@ void Q1DWeighted::exec()
   MantidVec& YOut = outputWS->dataY(0);
   MantidVec& EOut = outputWS->dataE(0);
 
-  const int numSpec = inputWS->getNumberHistograms();
+  const size_t numSpec = inputWS->getNumberHistograms();
 
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);

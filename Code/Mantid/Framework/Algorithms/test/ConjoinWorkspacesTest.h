@@ -157,9 +157,9 @@ public:
     EventWorkspace_sptr in1, in2, out;
     in1 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
     in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
-    int nHist1 = in1->getNumberHistograms();
+    size_t nHist1 = in1->getNumberHistograms();
     int nEvents1 = in1->getNumberEvents();
-    int nHist2 = in2->getNumberHistograms();
+    size_t nHist2 = in2->getNumberHistograms();
     int nEvents2 = in2->getNumberEvents();
 
     // Check it runs with the two separate ones
@@ -174,7 +174,7 @@ public:
     // Get the two input workspaces for later
     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan0"));
 
-    int nHist = out->getNumberHistograms();
+    size_t nHist = out->getNumberHistograms();
     int nEvents = out->getNumberEvents();
 
     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);
@@ -194,9 +194,9 @@ public:
     in2 = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("vulcan1"));
     AnalysisDataService::Instance().add("grp1_1", in1);
     AnalysisDataService::Instance().add("grp2_1", in2);
-    int nHist1 = in1->getNumberHistograms();
+    size_t nHist1 = in1->getNumberHistograms();
     int nEvents1 = in1->getNumberEvents();
-    int nHist2 = in2->getNumberHistograms();
+    size_t nHist2 = in2->getNumberHistograms();
     int nEvents2 = in2->getNumberEvents();
 
     WorkspaceGroup_sptr wsSptr1 = WorkspaceGroup_sptr(new WorkspaceGroup);
@@ -226,7 +226,7 @@ public:
     // Get the two input workspaces for later
     out = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("grp1_1"));
 
-    int nHist = out->getNumberHistograms();
+    size_t nHist = out->getNumberHistograms();
     int nEvents = out->getNumberEvents();
 
     TS_ASSERT_EQUALS( nHist1+nHist2, nHist);

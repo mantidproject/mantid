@@ -71,7 +71,7 @@ public:
       TS_FAIL("Cannot find output workspace");
     }
 
-    const int numSpectra = outputWS->getNumberHistograms();
+    const size_t numSpectra = outputWS->getNumberHistograms();
     TS_ASSERT_EQUALS(numSpectra, testWS->getNumberHistograms());
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
     const int numMasked = diagnostic.getProperty("NumberOfFailures");

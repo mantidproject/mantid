@@ -306,7 +306,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   // Calculate the overall normalisation just the once if bins are all matching
   if (m_commonBins) this->normalisationFactor(m_monitor->readX(0),&monY,&monE);
 
-  const int numHists = inputWorkspace->getNumberHistograms();
+  const size_t numHists = inputWorkspace->getNumberHistograms();
   MantidVec::size_type specLength = inputWorkspace->blocksize();
   Progress prog(this,0.0,1.0,numHists);
   // Loop over spectra

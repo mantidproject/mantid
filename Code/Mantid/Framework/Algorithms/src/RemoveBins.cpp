@@ -117,7 +117,7 @@ void RemoveBins::exec()
   // Loop over the spectra
   int start=0,end=0;
   const int blockSize = m_inputWorkspace->readX(0).size();
-  const int numHists = m_inputWorkspace->getNumberHistograms();
+  const size_t numHists = m_inputWorkspace->getNumberHistograms();
   Progress prog(this,0.0,1.0,numHists);
   for (int i=0; i < numHists; ++i)
   {

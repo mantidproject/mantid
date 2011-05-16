@@ -72,7 +72,7 @@ namespace Mantid
       int m_MinSpec = getProperty("StartWorkspaceIndex");
       int m_MaxSpec = getProperty("EndWorkspaceIndex");
 
-      const int numberOfSpectra = inputWS->getNumberHistograms();
+      const size_t numberOfSpectra = inputWS->getNumberHistograms();
 
       // Check 'StartSpectrum' is in range 0-numberOfSpectra
       if ( m_MinSpec > numberOfSpectra )

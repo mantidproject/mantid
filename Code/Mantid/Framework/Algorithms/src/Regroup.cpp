@@ -75,7 +75,7 @@ void Regroup::exec()
 
   bool dist = inputW->isDistribution();
 
-  int histnumber = inputW->getNumberHistograms();
+  size_t histnumber = inputW->getNumberHistograms();
   MantidVecPtr XValues_new;
   const MantidVec & XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old

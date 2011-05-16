@@ -84,7 +84,7 @@ void ConjoinWorkspaces::exec()
   this->validateInputs(ws1,ws2);
 
   // Create the output workspace
-  const int totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
+  const size_t totalHists = ws1->getNumberHistograms() + ws2->getNumberHistograms();
   MatrixWorkspace_sptr output = WorkspaceFactory::Instance().create("Workspace2D",totalHists,ws1->readX(0).size(),
                                                                              ws1->readY(0).size());
   // Copy over stuff from first input workspace
@@ -169,7 +169,7 @@ void ConjoinWorkspaces::execEvent()
   this->checkForOverlap(event_ws1, event_ws2, false);
 
   // Create the output workspace
-  const int totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
+  const size_t totalHists = event_ws1->getNumberHistograms() + event_ws2->getNumberHistograms();
   // Have the minimum # of histograms in the output.
   EventWorkspace_sptr output = boost::dynamic_pointer_cast<EventWorkspace>(
       WorkspaceFactory::Instance().create("EventWorkspace",

@@ -199,7 +199,7 @@ namespace Mantid
       }
 
       // We don't need to check for matching bins for events. Yay events!
-      const int rhsSpec = rhs->getNumberHistograms();
+      const size_t rhsSpec = rhs->getNumberHistograms();
 
       // If the rhs has a single spectrum, then we can divide. The block size does NOT need to match,
       if (rhsSpec == 1) return true;

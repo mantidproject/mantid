@@ -179,7 +179,7 @@ namespace NeXus
     prog_init.reportIncrement(1, "Writing sample");
 
 
-    const int numberOfHist = m_inputWorkspace->getNumberHistograms();
+    const size_t numberOfHist = m_inputWorkspace->getNumberHistograms();
     std::vector<int> spec;
     // check if all X() are in fact the same array
     const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);

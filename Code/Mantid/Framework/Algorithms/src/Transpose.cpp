@@ -33,7 +33,7 @@ void Transpose::init()
 void Transpose::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
-  const int numHists = inputWorkspace->getNumberHistograms();
+  const size_t numHists = inputWorkspace->getNumberHistograms();
   const int numBins = inputWorkspace->blocksize();
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,numBins,numHists,numHists);
   Mantid::API::Axis* inputAxis;

@@ -165,7 +165,7 @@ void CropWorkspace::checkProperties()
   if ( !m_commonBoundaries ) m_maxX = m_inputWorkspace->readX(0).size();
 
   m_minSpec = getProperty("StartWorkspaceIndex");
-  const int numberOfSpectra = m_inputWorkspace->getNumberHistograms();
+  const size_t numberOfSpectra = m_inputWorkspace->getNumberHistograms();
   m_maxSpec = getProperty("EndWorkspaceIndex");
   if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
 

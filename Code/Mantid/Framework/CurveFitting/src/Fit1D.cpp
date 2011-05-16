@@ -316,7 +316,7 @@ void Fit1D::exec()
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
   // number of histogram is equal to the number of spectra
-  const int numberOfSpectra = localworkspace->getNumberHistograms();
+  const size_t numberOfSpectra = localworkspace->getNumberHistograms();
   // Check that the index given is valid
   if ( histNumber >= numberOfSpectra )
   {

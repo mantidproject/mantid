@@ -35,7 +35,7 @@ void ExtractFFTSpectrum::exec()
 {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
   const int fftPart = getProperty("FFTPart");
-  const int numHists = inputWS->getNumberHistograms();
+  const size_t numHists = inputWS->getNumberHistograms();
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
 
   Progress prog(this, 0.0, 1.0, numHists);

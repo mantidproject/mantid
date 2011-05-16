@@ -71,7 +71,7 @@ void UnwrapMonitor::exec()
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Get the number of spectra in this workspace
-  const int numberOfSpectra = m_inputWS->getNumberHistograms();
+  const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra << std::endl;
 
   // Get the "reference" flightpath (currently passed in as a property)

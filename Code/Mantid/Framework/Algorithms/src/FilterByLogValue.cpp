@@ -160,7 +160,7 @@ void FilterByLogValue::exec()
   }
 
   g_log.information() << splitter.size() << " entries in the filter.\n";
-  int numberOfSpectra = inputWS->getNumberHistograms();
+  size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this,0.0,1.0,numberOfSpectra);

@@ -44,7 +44,7 @@ namespace Mantid
       // Now fetch any properties defined by concrete algorithm
       retrieveProperties();
       
-      const int numSpec = in_work->getNumberHistograms();
+      const size_t numSpec = in_work->getNumberHistograms();
       const int specSize = in_work->blocksize();
       const bool isHist = in_work->isHistogramData();
 

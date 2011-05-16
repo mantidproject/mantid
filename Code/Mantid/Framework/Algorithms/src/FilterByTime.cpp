@@ -156,7 +156,7 @@ void FilterByTime::exec()
 
 
 
-  int numberOfSpectra = inputWS->getNumberHistograms();
+  size_t numberOfSpectra = inputWS->getNumberHistograms();
 
   // Initialise the progress reporting object
   Progress prog(this,0.0,1.0,numberOfSpectra);
