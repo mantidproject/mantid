@@ -141,7 +141,7 @@ namespace MDEvents
       xmlBuilder.addOrdinaryDimension(this->m_dimensions[i]);
     }
     // Add mapping dimensions
-    const unsigned int nDimensions = m_dimensions.size();
+    const size_t nDimensions = m_dimensions.size();
     if(nDimensions > 0)
     {
      xmlBuilder.addXDimension(this->getXDimension());

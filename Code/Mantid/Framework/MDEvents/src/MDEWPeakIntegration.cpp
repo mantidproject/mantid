@@ -39,8 +39,15 @@ namespace MDEvents
   /// Sets documentation strings for this algorithm
   void MDEWPeakIntegration::initDocs()
   {
-    this->setWikiSummary("Integrate single-crystal peaks in reciprocal space, for MDEventWorkspaces.");
+    this->setWikiSummary("Integrate single-crystal peaks in reciprocal space, for [[MDEventWorkspace]]s.");
     this->setOptionalMessage("Integrate single-crystal peaks in reciprocal space, for MDEventWorkspaces.");
+    this->setWikiDescription(
+        "This algorithm takes two input workspaces: a MDEventWorkspace containing the events in "
+        "multi-dimensional space, as well as a PeaksWorkspace containing single-crystal peak locations."
+        "\n\n"
+        "The PeaksWorkspace will be modified with the integrated intensity and error found being"
+        "filled in."
+        );
   }
 
   //----------------------------------------------------------------------------------------------

@@ -90,6 +90,17 @@ namespace MDEvents
      * @param signal :: signal
      * @param errorSquared :: errorSquared
      * */
+    MDEvent(const double signal, const double errorSquared) :
+      signal(float(signal)), errorSquared(float(errorSquared))
+    {
+    }
+
+    //---------------------------------------------------------------------------------------------
+    /** Constructor with signal and error
+     *
+     * @param signal :: signal
+     * @param errorSquared :: errorSquared
+     * */
     MDEvent(const float signal, const float errorSquared) :
       signal(signal), errorSquared(errorSquared)
     {

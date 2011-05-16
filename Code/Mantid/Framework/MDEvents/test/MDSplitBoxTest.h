@@ -59,7 +59,7 @@ public:
     MDBox<MDEvent<2>,2> * mdbox = makeMDBox2();
 
     // Fill events that are more spread in dimension 1.
-    for (size_t x=40; x<60; x++) //20
+    for (double x=40; x<60; x++) //20
       for (double y=20; y<80; y++) //60
       {
         double centers[2] = {x*0.1,y*0.1 + 0.05};
@@ -74,8 +74,8 @@ public:
     TS_ASSERT_THROWS_NOTHING( box = new MDSplitBox2(mdbox) );
 
     TS_ASSERT_EQUALS(box->getNPoints(), 20*60);
-    TS_ASSERT_DELTA(box->getSignal(), box->getNPoints()*2.0, 1e-5);
-    TS_ASSERT_DELTA(box->getErrorSquared(), box->getNPoints()*2.0, 1e-5);
+    TS_ASSERT_DELTA(box->getSignal(), double(box->getNPoints())*2.0, 1e-5);
+    TS_ASSERT_DELTA(box->getErrorSquared(), double(box->getNPoints())*2.0, 1e-5);
 
     // Where did it split?
     TS_ASSERT_EQUALS(box->getSplitDimension(), 1);
@@ -98,8 +98,8 @@ public:
     TS_ASSERT_EQUALS(right->getNPoints(), 600);
 
     // Signals etc. are okay
-    TS_ASSERT_EQUALS(left->getSignal(), left->getNPoints()*2.0);
-    TS_ASSERT_EQUALS(left->getErrorSquared(), left->getNPoints()*2.0);
+    TS_ASSERT_EQUALS(left->getSignal(), double(left->getNPoints())*2.0);
+    TS_ASSERT_EQUALS(left->getErrorSquared(), double(left->getNPoints())*2.0);
 
     // Depths is deeper?
     TS_ASSERT_EQUALS(left->getDepth(), 1);
