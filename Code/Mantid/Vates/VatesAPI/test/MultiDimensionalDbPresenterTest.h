@@ -9,6 +9,7 @@
 #include "MantidVatesAPI/vtkStructuredGridFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidMDAlgorithms/Load_MDWorkspace.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::VATES;
 
@@ -25,6 +26,7 @@ private:
   protected:
     virtual void extractWorkspaceImplementation(const std::string& wsId)
     {
+      UNUSED_ARG(wsId);
       //Do nothing!.
     }
   };

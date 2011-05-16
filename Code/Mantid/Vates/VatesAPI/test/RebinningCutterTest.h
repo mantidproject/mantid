@@ -8,6 +8,7 @@
 #include <cmath>
 #include <typeinfo>
 
+#include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
 #include "MantidMDAlgorithms/CompositeImplicitFunction.h"
 #include "MantidMDAlgorithms/BoxImplicitFunction.h"
@@ -34,6 +35,7 @@ private:
   {
     virtual void eventRaised(double progress)
     {
+      UNUSED_ARG(progress);
       //Do nothing.
     }
   };
