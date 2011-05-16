@@ -276,20 +276,20 @@ public:
     TSM_ASSERT_THROWS_NOTHING("The rotator quaternion has to be a unit quaternion",rotMatrix= rotator.getRotation(true));
 
 	// Kroniker Deltas valid for valid rotational matrix; a_ij*a_jk=delta_jk 
-	double cron00= rotMatrix[0]*rotMatrix[0]+rotMatrix[1]*rotMatrix[1]+rotMatrix[2]*rotMatrix[2];	TSM_ASSERT_DELTA("delta_00 should be 1",1,cron00,FLT_EPSILON);
-	double cron11= rotMatrix[3]*rotMatrix[3]+rotMatrix[4]*rotMatrix[4]+rotMatrix[5]*rotMatrix[5];	TSM_ASSERT_DELTA("delta_11 should be 1",1,cron11,FLT_EPSILON);
-	double cron22= rotMatrix[6]*rotMatrix[6]+rotMatrix[7]*rotMatrix[7]+rotMatrix[8]*rotMatrix[8];   TSM_ASSERT_DELTA("delta_22 should be 1",1,cron22,FLT_EPSILON);
+	double cron00= rotMatrix[0]*rotMatrix[0]+rotMatrix[1]*rotMatrix[1]+rotMatrix[2]*rotMatrix[2];	TSM_ASSERT_DELTA("delta_00 should be 1",1.0,cron00,FLT_EPSILON);
+	double cron11= rotMatrix[3]*rotMatrix[3]+rotMatrix[4]*rotMatrix[4]+rotMatrix[5]*rotMatrix[5];	TSM_ASSERT_DELTA("delta_11 should be 1",1.0,cron11,FLT_EPSILON);
+	double cron22= rotMatrix[6]*rotMatrix[6]+rotMatrix[7]*rotMatrix[7]+rotMatrix[8]*rotMatrix[8];   TSM_ASSERT_DELTA("delta_22 should be 1",1.0,cron22,FLT_EPSILON);
 
-	double cron01= rotMatrix[0]*rotMatrix[1]+rotMatrix[3]*rotMatrix[4]+rotMatrix[6]*rotMatrix[7];	TSM_ASSERT_DELTA("delta_01 should be 0",0,cron01,FLT_EPSILON);
-	double cron02= rotMatrix[0]*rotMatrix[2]+rotMatrix[3]*rotMatrix[5]+rotMatrix[6]*rotMatrix[8];	TSM_ASSERT_DELTA("delta_02 should be 0",0,cron02,FLT_EPSILON);
-	double cron12= rotMatrix[1]*rotMatrix[2]+rotMatrix[4]*rotMatrix[5]+rotMatrix[7]*rotMatrix[8];	TSM_ASSERT_DELTA("delta_12 should be 0",0,cron12,FLT_EPSILON);
+	double cron01= rotMatrix[0]*rotMatrix[1]+rotMatrix[3]*rotMatrix[4]+rotMatrix[6]*rotMatrix[7];	TSM_ASSERT_DELTA("delta_01 should be 0",0.0,cron01,FLT_EPSILON);
+	double cron02= rotMatrix[0]*rotMatrix[2]+rotMatrix[3]*rotMatrix[5]+rotMatrix[6]*rotMatrix[8];	TSM_ASSERT_DELTA("delta_02 should be 0",0.0,cron02,FLT_EPSILON);
+	double cron12= rotMatrix[1]*rotMatrix[2]+rotMatrix[4]*rotMatrix[5]+rotMatrix[7]*rotMatrix[8];	TSM_ASSERT_DELTA("delta_12 should be 0",0.0,cron12,FLT_EPSILON);
 
 
 	double det =  rotMatrix[0]*(rotMatrix[4]*rotMatrix[8]-rotMatrix[5]*rotMatrix[7])
 	            + rotMatrix[1]*(rotMatrix[5]*rotMatrix[6]-rotMatrix[3]*rotMatrix[8])
 		        + rotMatrix[2]*(rotMatrix[3]*rotMatrix[7]-rotMatrix[4]*rotMatrix[6]);
 
-	TSM_ASSERT_DELTA("Determinant for the proper rotation matrix has to be equal to 1 ",1,det,FLT_EPSILON);
+	TSM_ASSERT_DELTA("Determinant for the proper rotation matrix has to be equal to 1 ",1.0,det,FLT_EPSILON);
 
 	double x1=(rotMatrix[0]*some.X()+rotMatrix[3]*some.Y()+rotMatrix[6]*some.Z())*targ_norm/some_norm;
 	TSM_ASSERT_DELTA("X -coordinate obtained using the rotation matxis have to coinside with the one obtained by rotation via quat",x1,target.X(),FLT_EPSILON);

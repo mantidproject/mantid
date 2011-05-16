@@ -91,8 +91,8 @@ public:
 		V3D dirOrt = pOrtDim->getDirection();
 		V3D dirRec = pResDim->getDirection();
 		
-		TSM_ASSERT_DELTA("The norm for the orthogonal dimension direction should be close to 0",0,dirOrt.norm2(),FLT_EPSILON);
-		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1,dirRec.norm2(),FLT_EPSILON);
+		TSM_ASSERT_DELTA("The norm for the orthogonal dimension direction should be close to 0",0.0,dirOrt.norm2(),FLT_EPSILON);
+		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1.0,dirRec.norm2(),FLT_EPSILON);
 		V3D desDir(1,0,0);
 		TSM_ASSERT_EQUALS("First reciprocal dimension direction should be {1,0,0}",desDir,dirRec);
 	}
@@ -104,7 +104,7 @@ public:
 		V3D desDir(1,-2,0);
 		TSM_ASSERT_THROWS_NOTHING("Setting an direction should not throw",pResDim->setDirection(desDir));
 
-		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1,pResDim->getDirection().norm2(),FLT_EPSILON);
+		TSM_ASSERT_DELTA("The norm for the reciprocal dimension direction should be close to 1",1.0,pResDim->getDirection().norm2(),FLT_EPSILON);
 
 		TSM_ASSERT_EQUALS("The actual reciprocal dimension should be as set ",desDir,pResDim->getDirectionCryst());
 
