@@ -104,7 +104,7 @@ void SANSDirectBeamScaling::exec()
   // Sample-detector distance for the contributing pixels
   double sdd = 0.0;
 
-  for (int64_t i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     IDetector_const_sptr det;
     try {

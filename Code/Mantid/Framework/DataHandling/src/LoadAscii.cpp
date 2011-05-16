@@ -260,7 +260,7 @@ namespace Mantid
           throw std::runtime_error("Invalid value encountered.");
         }
 
-        for(int i = 0; i < numSpectra; ++i)
+        for (int64_t i = 0; i < int64_t(numSpectra); ++i)
         {
           spectra[i].dataX().push_back(values[0]);
           spectra[i].dataY().push_back(values[i*2+1]);
@@ -288,7 +288,7 @@ namespace Mantid
         // Asked for dimensionless workspace (obviously not in unit factory)
       }
 
-      for(int i = 0; i < numSpectra; ++i)
+      for (int64_t i = 0; i < int64_t(numSpectra); ++i)
       {
         localWorkspace->dataX(i) = spectra[i].dataX();
         localWorkspace->dataY(i) = spectra[i].dataY();

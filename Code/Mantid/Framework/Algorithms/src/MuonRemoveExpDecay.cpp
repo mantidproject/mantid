@@ -61,7 +61,7 @@ void MuonRemoveExpDecay::exec()
     Progress prog(this, 0.0, 1.0, numSpectra);
     //Do all the spectra	
     PARALLEL_FOR2(inputWS,outputWS)
-    for (int i = 0; i < numSpectra; ++i)
+    for (int64_t i = 0; i < int64_t(numSpectra); ++i)
     {
 			PARALLEL_START_INTERUPT_REGION
       removeDecay(inputWS->readX(i), inputWS->readY(i), outputWS->dataY(i));
@@ -81,7 +81,7 @@ void MuonRemoveExpDecay::exec()
 
       //Copy all the X,Y and E data
       PARALLEL_FOR2(inputWS,outputWS)
-      for (int i = 0; i < numSpectra; ++i)
+      for (int64_t i = 0; i < int64_t(numSpectra); ++i)
       {
 				PARALLEL_START_INTERUPT_REGION
         outputWS->dataX(i) = inputWS->readX(i);

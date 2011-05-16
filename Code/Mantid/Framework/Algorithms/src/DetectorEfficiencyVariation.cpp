@@ -231,7 +231,7 @@ namespace Mantid
       const double liveValue(1.0);
       int numFailed(0);
       PARALLEL_FOR3(counts1, counts2, maskWS)
-      for (int i = 0; i < numSpec; ++i)
+      for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
 	PARALLEL_START_INTERUPT_REGION
 

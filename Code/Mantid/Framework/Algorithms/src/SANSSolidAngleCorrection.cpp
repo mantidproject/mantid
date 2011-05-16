@@ -61,7 +61,7 @@ void SANSSolidAngleCorrection::exec()
   // Number of X bins
   const int xLength = inputWS->readY(0).size();
 
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     IDetector_const_sptr det;
     try {

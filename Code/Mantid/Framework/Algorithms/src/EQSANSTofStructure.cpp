@@ -117,7 +117,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
 
   // Loop through the spectra and apply correction
   PARALLEL_FOR1(inputWS)
-  for (int ispec = 0; ispec < numHists; ispec++)
+  for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec)
   {
     PARALLEL_START_INTERUPT_REGION
     // Keep a copy of the input data since we may end up overwriting it
@@ -177,7 +177,7 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
 
   // Loop through the spectra and apply correction
   PARALLEL_FOR1(inputWS)
-  for (int ispec = 0; ispec < numHists; ispec++)
+  for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec)
   {
     PARALLEL_START_INTERUPT_REGION
 

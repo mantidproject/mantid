@@ -53,7 +53,7 @@ namespace Mantid
       
       // Loop over every cell in the workspace, calling the abstract correction function
       PARALLEL_FOR2(in_work,out_work)
-      for (int i = 0; i < numSpec; ++i)
+      for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         // Copy the X values over

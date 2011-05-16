@@ -34,7 +34,7 @@ void Transpose::exec()
 {
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   const size_t numHists = inputWorkspace->getNumberHistograms();
-  const int numBins = inputWorkspace->blocksize();
+  const size_t numBins = inputWorkspace->blocksize();
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,numBins,numHists,numHists);
   Mantid::API::Axis* inputAxis;
   try
@@ -48,9 +48,9 @@ void Transpose::exec()
   }
   Mantid::API::NumericAxis* newAxis = new NumericAxis(numBins);
   Progress prog(this,0.0,1.0,numBins);
-  for ( int j=0; j < numBins; ++j )
+  for ( size_t j=0; j < numBins; ++j )
   {
-    for (int i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
       outputWorkspace->dataX(j)[i] = inputAxis->operator()(i);
       outputWorkspace->dataY(j)[i] = inputWorkspace->readY(i)[j];

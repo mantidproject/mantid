@@ -517,7 +517,7 @@ namespace WorkspaceCreationHelper
   void DisplayDataY(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
       std::cout << "Histogram " << i << " = ";
       for (int j = 0; j < ws->blocksize(); ++j)
@@ -536,7 +536,7 @@ namespace WorkspaceCreationHelper
   void DisplayDataX(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
       std::cout << "Histogram " << i << " = ";
       for (int j = 0; j < ws->blocksize(); ++j)
@@ -551,7 +551,7 @@ namespace WorkspaceCreationHelper
   void DisplayDataE(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int i = 0; i < numHists; ++i)
+    for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
       std::cout << "Histogram " << i << " = ";
       for (int j = 0; j < ws->blocksize(); ++j)

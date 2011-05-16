@@ -103,9 +103,9 @@ void SofQW::exec()
 
   // Loop over input workspace bins, reassigning data to correct bin in output qw workspace
   const size_t numHists = inputWorkspace->getNumberHistograms();
-  const int numBins = inputWorkspace->blocksize();
+  const size_t numBins = inputWorkspace->blocksize();
   Progress prog(this,0.0,1.0,numHists);
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     try {
       // Now get the detector object for this histogram
@@ -137,19 +137,19 @@ void SofQW::exec()
       {
 	      detectors.push_back(spectrumDet);
       }
-      const int numDets = detectors.size();
+      const size_t numDets = detectors.size();
       const MantidVec& Y = inputWorkspace->readY(i);
       const MantidVec& E = inputWorkspace->readE(i);
       const MantidVec& X = inputWorkspace->readX(i);
 
       // Loop over the detectors and for each bin calculate Q
-      for( int idet = 0; idet < numDets; ++idet )
+      for( size_t idet = 0; idet < numDets; ++idet )
       {
 	      IDetector_sptr det = detectors[idet];
 	      // Calculate kf vector direction and then Q for each energy bin
 	      V3D scatterDir = (det->getPos() - sample->getPos());
  	      scatterDir.normalize();
-	      for (int j = 0; j < numBins; ++j)
+	      for (size_t j = 0; j < numBins; ++j)
 	      {
  	        const double deltaE = 0.5*(X[j] + X[j+1]);
 	        // Compute ki and kf wave vectors and therefore q = ki - kf

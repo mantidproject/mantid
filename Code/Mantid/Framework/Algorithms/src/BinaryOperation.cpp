@@ -399,7 +399,7 @@ namespace Mantid
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i, m_lhs->refX(i));
@@ -415,7 +415,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
@@ -445,7 +445,7 @@ namespace Mantid
       {
         // ---- The output is an EventWorkspace ------
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -467,7 +467,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           const double rhsY = m_rhs->readY(i)[0];
@@ -515,7 +515,7 @@ namespace Mantid
           // Now loop over the spectra of the left hand side calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int64_t i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -540,7 +540,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-          for (int64_t i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             //m_out->setX(i,m_lhs->refX(i)); //unnecessary - that was copied before.
@@ -568,7 +568,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_out->setX(i,m_lhs->refX(i));
@@ -610,7 +610,7 @@ namespace Mantid
           // Now loop over the spectra of each one calling the virtual function
           const int64_t numHists = m_lhs->getNumberHistograms();
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
-          for (int64_t i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report();
@@ -648,7 +648,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
           PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-          for (int64_t i = 0; i < numHists; ++i)
+          for (int64_t i = 0; i < int64_t(numHists); ++i)
           {
             PARALLEL_START_INTERUPT_REGION
             m_progress->report();
@@ -690,7 +690,7 @@ namespace Mantid
 #ifndef __INTEL_COMPILER  // THIS MUST BE TEMPORARY! Turn off openmp until we understand test failures
         PARALLEL_FOR3(m_lhs,m_rhs,m_out)
 #endif
-        for (int64_t i = 0; i < numHists; ++i)
+        for (int64_t i = 0; i < int64_t(numHists); ++i)
         {
           PARALLEL_START_INTERUPT_REGION
           m_progress->report();

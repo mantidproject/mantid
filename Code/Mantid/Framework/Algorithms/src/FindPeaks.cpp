@@ -344,7 +344,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
   const int blocksize = input->blocksize();
 
   // Loop over spectra
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     // Copy over the X values
     diffed->dataX(i) = input->readX(i);
@@ -399,7 +399,7 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
   
   const size_t numHists = smoothed->getNumberHistograms();
   const int blocksize = smoothed->blocksize();
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     const MantidVec &E = input->readE(i);
     MantidVec &Fi = smoothed->dataE(i);

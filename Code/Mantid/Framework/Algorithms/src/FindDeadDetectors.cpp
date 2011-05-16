@@ -94,7 +94,7 @@ namespace Mantid
       const double numSpec_d = static_cast<double>(numSpec);
       int64_t iprogress_step = numSpec / 100;
       if (iprogress_step == 0) iprogress_step = 1;
-      for (int64_t i = 0; i < numSpec; ++i)
+      for (int64_t i = 0; i < int64_t(numSpec); ++i)
       {
         double &y = integratedWorkspace->dataY(i)[0];
         if ( y > deadThreshold )

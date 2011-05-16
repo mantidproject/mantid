@@ -104,7 +104,7 @@ void Q1D::exec()
   const double fmp=4.0*M_PI;
 
   PARALLEL_FOR3(inputWS,outputWS,errorsWS)
-  for (int i = 0; i < numSpec; ++i)
+  for (int64_t i = 0; i < int64_t(numSpec); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum

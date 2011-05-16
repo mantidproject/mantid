@@ -66,10 +66,10 @@ void Qxy::exec()
   // Copy the X values from the output workspace to the solidAngles one
   cow_ptr<MantidVec> axis;
   axis.access() = outputWorkspace->readX(0);
-  for ( int i = 0; i < weights->getNumberHistograms(); ++i ) weights->setX(i,axis);
+  for ( size_t i = 0; i < weights->getNumberHistograms(); ++i ) weights->setX(i,axis);
   
   const size_t numSpec = inputWorkspace->getNumberHistograms();
-  const int numBins = inputWorkspace->blocksize();
+  const size_t numBins = inputWorkspace->blocksize();
   
   // the samplePos is often not (0, 0, 0) because the instruments components are moved to account for the beam centre
   const V3D samplePos = inputWorkspace->getInstrument()->getSample()->getPos();
@@ -78,7 +78,7 @@ void Qxy::exec()
   Progress prog(this, 0.05, 1.0, numSpec);
 
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
-  for (int i = 0; i < numSpec; ++i)
+  for (int64_t i = 0; i < int64_t(numSpec); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum

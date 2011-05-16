@@ -674,7 +674,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     result = WorkspaceFactory::Instance().create(workspace,numSpec,maxBins,maxBins-1);
     if (specAxis) outAxis = result->getAxis(1);
     // Next, loop again copying in the correct range for each spectrum
-    for (int j = 0; j < numSpec; ++j)
+    for (int64_t j = 0; j < int64_t(numSpec); ++j)
     {
       const MantidVec& X = workspace->readX(j);
       const MantidVec& Y = workspace->readY(j);

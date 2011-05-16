@@ -62,7 +62,7 @@ namespace Mantid
 
       Progress prog(this,0.0,1.0,numSpectra);
       PARALLEL_FOR2(inputWS,outputWS)
-      for(int i = 0; i < numSpectra; ++i)
+      for (int64_t i = 0; i < int64_t(numSpectra); ++i)
       {
 	PARALLEL_START_INTERUPT_REGION
 

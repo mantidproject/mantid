@@ -119,7 +119,7 @@ void RemoveBins::exec()
   const int blockSize = m_inputWorkspace->readX(0).size();
   const size_t numHists = m_inputWorkspace->getNumberHistograms();
   Progress prog(this,0.0,1.0,numHists);
-  for (int i=0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     // Copy over the data
     const MantidVec& X = m_inputWorkspace->readX(i);

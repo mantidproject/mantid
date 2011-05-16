@@ -88,7 +88,7 @@ void FlatBackground::exec()
   {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
     PARALLEL_FOR2(inputWS,outputWS)
-    for (int i=0; i < numHists; ++i)
+    for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
 		  PARALLEL_START_INTERUPT_REGION
       outputWS->dataX(i) = inputWS->readX(i);

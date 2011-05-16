@@ -311,7 +311,7 @@ void NormaliseToMonitor::normaliseBinByBin(API::MatrixWorkspace_sptr inputWorksp
   Progress prog(this,0.0,1.0,numHists);
   // Loop over spectra
   PARALLEL_FOR3(inputWorkspace,outputWorkspace,m_monitor)
-  for (int i = 0; i < numHists; ++i)
+  for (int64_t i = 0; i < int64_t(numHists); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     prog.report();
