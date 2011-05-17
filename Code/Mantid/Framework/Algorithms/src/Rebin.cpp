@@ -75,7 +75,7 @@ namespace Mantid
 
       const bool dist = inputWS->isDistribution();
 
-      const bool hist = inputWS->isHistogramData();
+      const bool isHist = inputWS->isHistogramData();
 
       // workspace independent determination of length
       const size_t histnumber = inputWS->getNumberHistograms();
@@ -181,7 +181,7 @@ namespace Mantid
 
       { //------- Workspace2D or other MatrixWorkspace ---------------------------
 
-        if ( ! hist )
+        if ( ! isHist )
         {
           g_log.information() << "Rebin: Converting Data to Histogram." << std::endl;
           Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToHistogram");
@@ -249,7 +249,7 @@ namespace Mantid
           outputWS->getAxis(i)->unit() = inputWS->getAxis(i)->unit();
         }
 
-        if ( ! hist )
+        if ( ! isHist )
         {
           g_log.information() << "Rebin: Converting Data back to Data Points." << std::endl;
           Mantid::API::Algorithm_sptr subAlg = createSubAlgorithm("ConvertToPointData");
