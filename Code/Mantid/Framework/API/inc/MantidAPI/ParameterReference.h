@@ -46,20 +46,14 @@ namespace API
 class DLLExport ParameterReference
 {
 public:
-  /// Default constructor
-  ParameterReference():m_function(0),m_index(-1){}
-  /// Constructor
-  ParameterReference(IFitFunction* fun,int index){reset(fun,index);}
-  /// Return pointer to the function
-  IFitFunction* getFunction()const{return m_function;}
-  /// Return parameter index in that function
-  std::size_t getIndex()const{return m_index;}
-  /// Reset the reference
-  void reset(IFitFunction* fun,std::size_t index);
-  /// Set the parameter
-  void setParameter(const double& value) {m_function->setParameter(static_cast<int>(m_index),value);}
-  /// Get the value of the parameter
-  double getParameter()const{return m_function->getParameter(static_cast<int>(m_index));}
+  ParameterReference();
+  ParameterReference(IFitFunction* fun, std::size_t index);
+  IFitFunction* getFunction() const;
+  std::size_t getIndex() const;
+  void reset(IFitFunction* fun, std::size_t index);
+  void setParameter(const double& value);
+  double getParameter() const;
+
 private:
   IFitFunction* m_function; ///< pointer to the function
   std::size_t m_index; ///< parameter index

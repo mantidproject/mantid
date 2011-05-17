@@ -90,14 +90,14 @@ void FlatBackground::exec()
     PARALLEL_FOR2(inputWS,outputWS)
     for (int64_t i = 0; i < int64_t(numHists); ++i)
     {
-		  PARALLEL_START_INTERUPT_REGION
+      PARALLEL_START_INTERUPT_REGION
       outputWS->dataX(i) = inputWS->readX(i);
       outputWS->dataY(i) = inputWS->readY(i);
       outputWS->dataE(i) = inputWS->readE(i);
-		  m_progress->report();
-		  PARALLEL_END_INTERUPT_REGION
+      m_progress->report();
+      PARALLEL_END_INTERUPT_REGION
     }
-	  PARALLEL_CHECK_INTERUPT_REGION
+    PARALLEL_CHECK_INTERUPT_REGION
   }
 
   convertToDistribution(outputWS);
@@ -210,11 +210,11 @@ void FlatBackground::convertToDistribution(API::MatrixWorkspace_sptr workspace)
   
   bool variationFound(false);
   // the number of spectra we need to check to assess if the bin widths are all the same
-  const int total = WorkspaceHelpers::commonBoundaries(workspace) ?
+  const size_t total = WorkspaceHelpers::commonBoundaries(workspace) ?
                     1 : workspace->getNumberHistograms();
 
   MantidVec adjacents(workspace->readX(0).size()-1);
-  for ( int i = 0; i < total; ++i)
+  for ( std::size_t i = 0; i < total; ++i)
   {
     MantidVec X = workspace->readX(i);
     // Calculate bin widths
@@ -305,23 +305,21 @@ double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int 
     throw std::out_of_range("Either the property startX or endX is outside the range of X-values present in one of the specified spectra");
   }
   // Get the index of the first bin contains the X-value, which means this is an inclusive sum. The minus one is because lower_bound() returns index past the last index pointing to a lower value. For example if startX has a higher X value than the first bin boundary but lower than the second lower_bound returns 1, which is the index of the second bin boundary
-  size_t startInd =
-    std::lower_bound(XS.begin(),XS.end(),startX) - XS.begin() - 1;
+  ptrdiff_t startInd = std::lower_bound(XS.begin(),XS.end(),startX) - XS.begin() - 1;
   if ( startInd == -1 )
   {// happens if startX is the first X-value, e.g. the first X-value is zero and the user selects zero
     startInd = 0;
   }
 
   // the -1 matches definition of startIn, see the comment above that statement
-  size_t endInd =
-    std::lower_bound(XS.begin()+startInd,XS.end(),endX) -XS.begin() -1;
+  const ptrdiff_t endInd = std::lower_bound(XS.begin()+startInd,XS.end(),endX) -XS.begin() -1;
   if ( endInd == -1 )
   {// 
     throw std::invalid_argument("EndX was set to the start of one of the spectra, it must greater than the first X-value in any of the specified spectra");
   }
   
   // the +1 is because this is an inclusive sum (includes each bin that contains each X-value). Hence if startInd == endInd we are still analysising one bin
-  const int numBins = (1+endInd-startInd);
+  const double numBins = static_cast<double>(1 + endInd - startInd);
   // the +1 here is because the accumulate() stops one before the location of the last iterator
   double background =
     std::accumulate( YS.begin()+startInd, YS.begin()+endInd+1, 0.0 )/numBins;

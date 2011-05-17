@@ -150,7 +150,6 @@ set_target_properties ( MDAlgorithms PROPERTIES OUTPUT_NAME MantidMDAlgorithms
 set_property ( TARGET MDAlgorithms PROPERTY FOLDER "MantidFramework" )
 
 include_directories ( inc )
-include_directories (MDDataObjects/inc)
 
 target_link_libraries ( MDAlgorithms ${MANTIDLIBS} )
 

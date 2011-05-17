@@ -59,6 +59,9 @@ add_definitions ( -DPOCO_NO_UNWINDOWS )
 
 set ( CONSOLE ON CACHE BOOL "Switch for enabling/disabling the console" )
 
+###########################################################################
+# (Fake) installation variables to keep windows sweet
+###########################################################################
 set ( BIN_DIR bin )
 set ( LIB_DIR ${BIN_DIR} )
 set ( PLUGINS_DIR plugins )
