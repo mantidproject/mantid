@@ -275,6 +275,8 @@ public:
 	/// find method to get the index of  Mantid::Geometry::V3D cell value in a table workspace
 	virtual void find(Mantid::Geometry::V3D value,int& row,const int & col)=0;
 
+  void modified();
+
 protected:
 
     /**  Resize a column.

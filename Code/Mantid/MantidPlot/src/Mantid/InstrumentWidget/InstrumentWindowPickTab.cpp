@@ -401,6 +401,7 @@ void InstrumentWindowPickTab::addPeak(double x,double y)
 
   Mantid::API::TableRow row = tw->appendRow();
   row << Qx << Qy << Qz;
+  tw->modified();
 
   //std::cerr << "id=" << det->getID() << std::endl;
   //std::cerr << "x=" << x << std::endl;

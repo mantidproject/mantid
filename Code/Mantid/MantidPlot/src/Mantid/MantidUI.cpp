@@ -8,6 +8,7 @@
 #include "AlgorithmHistoryWindow.h"
 #include "MantidCurve.h"
 #include "FitPropertyBrowser.h"
+#include "MantidTable.h"
 
 #include "../Spectrogram.h"
 #include "../pixmaps.h"
@@ -484,30 +485,33 @@ Table* MantidUI::importTableWorkspace(const QString& wsName, bool, bool makeVisi
   }
 
   // Create new Table
-  Table* t = new Table(appWindow()->scriptingEnv(), ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
-  appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
-  //  t->askOnCloseEvent(false);
+  //Table* t = new MantidTable(appWindow()->scriptingEnv(), ws->rowCount(), ws->columnCount(), "", appWindow(), 0);
+  //appWindow()->initTable(t, appWindow()->generateUniqueName(wsName+"-"));
+  ////  t->askOnCloseEvent(false);
+  //if (makeVisible) t->showNormal();
+  //else t->showMinimized();
+
+  //for(int i=0;i<ws->columnCount();i++)
+  //{
+  //  Column_sptr c = ws->getColumn(i);
+  //  QString colName = QString::fromStdString(c->name());
+  //  t->setColName(i,colName);
+  //  t->setReadOnlyColumn(i);
+  //  if (colName.endsWith("_err",Qt::CaseInsensitive) ||
+  //      colName.endsWith("_error",Qt::CaseInsensitive))
+  //  {
+  //    t->setColPlotDesignation(i,Table::yErr);
+  //  }
+  //  for(int j=0;j<ws->rowCount();j++)
+  //  {
+  //    std::ostringstream ostr;
+  //    c->print(ostr,j);
+  //    t->setText(j,i,QString::fromStdString(ostr.str()));
+  //  }
+  //}
+  Table* t = new MantidTable(appWindow()->scriptingEnv(), ws, wsName, appWindow(), 0);
   if (makeVisible) t->showNormal();
   else t->showMinimized();
-
-  for(int i=0;i<ws->columnCount();i++)
-  {
-    Column_sptr c = ws->getColumn(i);
-    QString colName = QString::fromStdString(c->name());
-    t->setColName(i,colName);
-    t->setReadOnlyColumn(i);
-    if (colName.endsWith("_err",Qt::CaseInsensitive) ||
-        colName.endsWith("_error",Qt::CaseInsensitive))
-    {
-      t->setColPlotDesignation(i,Table::yErr);
-    }
-    for(int j=0;j<ws->rowCount();j++)
-    {
-      std::ostringstream ostr;
-      c->print(ostr,j);
-      t->setText(j,i,QString::fromStdString(ostr.str()));
-    }
-  }
   return t;
 }
 

@@ -1,4 +1,5 @@
 #include "MantidAPI/ITableWorkspace.h"
+#include "MantidAPI/AnalysisDataService.h"
 #include "MantidKernel/Logger.h"
 #include "MantidKernel/IPropertyManager.h"
 
@@ -9,6 +10,17 @@ namespace API
 
 // Get a reference to the logger
 Kernel::Logger& ITableWorkspace::g_log = Kernel::Logger::get("ITableWorkspace");
+
+void ITableWorkspace::modified()
+{
+  if (!AnalysisDataService::Instance().doesExist(this->getName())) return;
+  Workspace_sptr ws =  AnalysisDataService::Instance().retrieve(this->getName());
+  if (!ws) return;
+  ITableWorkspace_sptr tws = boost::dynamic_pointer_cast<ITableWorkspace>(ws);
+  if (!tws) return;
+  AnalysisDataService::Instance().notificationCenter.postNotification(
+    new Kernel::DataService<API::Workspace>::AfterReplaceNotification(this->getName(),tws));
+}
 
 } // namespace API
 } // Namespace Mantid
