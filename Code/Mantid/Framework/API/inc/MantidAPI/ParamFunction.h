@@ -66,11 +66,11 @@ public:
   virtual ~ParamFunction ();
 
   /// Set i-th parameter
-  virtual void setParameter(size_t, const double& value, bool explicitlySet = true);
+  virtual void setParameter(int, const double& value, bool explicitlySet = true);
   /// Set i-th parameter description
   virtual void setParameterDescription(int, const std::string& description);
   /// Get i-th parameter
-  virtual double getParameter(size_t i)const;
+  virtual double getParameter(int i)const;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Set description of parameter by name.
@@ -84,7 +84,7 @@ public:
   /// Returns the index of a parameter
   //virtual int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
-  virtual std::string parameterName(size_t i)const;
+  virtual std::string parameterName(int i)const;
   /// Returns the description of parameter i
   virtual std::string parameterDescription(int i)const;
   /// Checks if a parameter has been set explicitly
@@ -93,7 +93,7 @@ public:
   /// Number of active (in terms of fitting) parameters
   virtual int nActive()const{return static_cast<int>(m_indexMap.size());}
   /// Returns "global" index of active parameter i
-  virtual int indexOfActive(size_t i)const;
+  virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const;
   /// Returns the name of active parameter i
@@ -102,7 +102,7 @@ public:
   /// Check if a declared parameter i is active
   virtual bool isActive(int i)const;
   /// Get active index for a declared parameter i
-  virtual int activeIndex(size_t i)const;
+  virtual int activeIndex(int i)const;
   /// Removes a declared parameter i from the list of active
   virtual void removeActive(int i);
   /// Restores a declared parameter i to the active status

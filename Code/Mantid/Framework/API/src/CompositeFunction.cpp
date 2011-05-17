@@ -115,7 +115,7 @@ std::string CompositeFunction::asString()const
  *  @param value :: The new value
  *  @param explicitlySet :: A boolean falgging the parameter as explicitly set (by user)
  */
-void CompositeFunction::setParameter(size_t i, const double& value, bool explicitlySet)
+void CompositeFunction::setParameter(int i, const double& value, bool explicitlySet)
 {
   int iFun = functionIndex(i);
   m_functions[ iFun ]->setParameter(i - m_paramOffsets[iFun],value,explicitlySet);
@@ -125,7 +125,7 @@ void CompositeFunction::setParameter(size_t i, const double& value, bool explici
  *  @param i :: The parameter index
  *  @return value of the requested parameter
  */
-double CompositeFunction::getParameter(size_t i)const
+double CompositeFunction::getParameter(int i)const
 {
   int iFun = functionIndex(i);
   return m_functions[ iFun ]->getParameter(i - m_paramOffsets[iFun]);
@@ -193,7 +193,7 @@ int CompositeFunction::parameterIndex(const std::string& name)const
 /// Returns the name of parameter
 /// @param i :: The index
 /// @return The name of the parameter
-std::string CompositeFunction::parameterName(size_t i)const
+std::string CompositeFunction::parameterName(int i)const
 {
   int iFun = functionIndex(i);
   std::ostringstream ostr;
@@ -208,7 +208,7 @@ int CompositeFunction::nActive()const
 }
 
 /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-double CompositeFunction::activeParameter(size_t i)const
+double CompositeFunction::activeParameter(int i)const
 {
   int iFun = functionIndexActive(i);
   return m_functions[ iFun ]->activeParameter(i - m_activeOffsets[iFun]);
@@ -232,7 +232,7 @@ void CompositeFunction::updateActive(const double* in)
 }
 
 /// Returns "global" index of active parameter i
-int CompositeFunction::indexOfActive(size_t i)const
+int CompositeFunction::indexOfActive(int i)const
 {
   int iFun = functionIndexActive(i);
   return m_paramOffsets[ iFun ] + m_functions[ iFun ]->indexOfActive(i - m_activeOffsets[iFun]);
@@ -298,7 +298,7 @@ void CompositeFunction::restoreActive(int i)
  * @return The index of declared parameter i in the list of active parameters or -1
  *         if the parameter is tied.
  */
-int CompositeFunction::activeIndex(size_t i)const
+int CompositeFunction::activeIndex(int i)const
 {
   int iFun = functionIndex(i);
   int j = m_functions[iFun]->activeIndex(i - m_paramOffsets[iFun]);

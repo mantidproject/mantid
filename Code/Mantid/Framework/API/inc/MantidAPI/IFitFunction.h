@@ -250,9 +250,9 @@ public:
   virtual void functionDeriv(Jacobian* out);
 
   /// Set i-th parameter
-  virtual void setParameter(size_t, const double& value, bool explicitlySet = true) = 0;
+  virtual void setParameter(int, const double& value, bool explicitlySet = true) = 0;
   /// Get i-th parameter
-  virtual double getParameter(size_t i)const = 0;
+  virtual double getParameter(int i)const = 0;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true) = 0;
   /// Get parameter by name.
@@ -262,27 +262,27 @@ public:
   /// Returns the index of parameter name
   virtual int parameterIndex(const std::string& name)const = 0;
   /// Returns the name of parameter i
-  virtual std::string parameterName(size_t i)const = 0;
+  virtual std::string parameterName(int i)const = 0;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(int i)const = 0;
 
   /// Number of active (in terms of fitting) parameters
   virtual int nActive()const = 0;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  virtual double activeParameter(size_t i)const;
+  virtual double activeParameter(int i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
   virtual void setActiveParameter(int i, double value);
   /// Update parameters after a fitting iteration
   virtual void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  virtual int indexOfActive(size_t i)const = 0;
+  virtual int indexOfActive(int i)const = 0;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const = 0;
 
   /// Check if a declared parameter i is active
   virtual bool isActive(int i)const = 0;
   /// Get active index for a declared parameter i
-  virtual int activeIndex(size_t i)const = 0;
+  virtual int activeIndex(int i)const = 0;
   /// Removes a declared parameter i from the list of active
   virtual void removeActive(int i) = 0;
   /// Restores a declared parameter i to the active status
