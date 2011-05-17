@@ -145,7 +145,7 @@ void MuonAnalysis::initLayout()
   }
 
   // file input 
-  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged()));
+  connect(m_uiForm.mwRunFiles, SIGNAL(fileEditingFinished()), this, SLOT(inputFileChanged_MWRunFiles()));
 
   // Input check for First Good Data
   connect(m_uiForm.firstGoodBinFront, SIGNAL(lostFocus()), this, 
@@ -378,6 +378,26 @@ void MuonAnalysis::runGroupTablePlotButton()
 void MuonAnalysis::runLoadCurrent()
 {
   QString instname = m_uiForm.instrSelector->currentText().toUpper();
+
+  // If Argus data then simple
+  if ( instname == "ARGUS" )
+  {
+    QString argusDAE = "\\\\ndw828\\argusdata\\current cycle\\nexus\\argus0000000.nxs";
+    Poco::File l_path( argusDAE.toStdString() );
+    if ( !l_path.exists() )
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", 
+        QString("Can't load ARGUS Current data since\n") +
+        argusDAE + QString("\n") +
+        QString("does not seem to exist"));
+      return;
+    }
+    inputFileChanged(argusDAE);
+    return;
+  }
+
+  // \\ndw828\argusdata\current cycle\nexus\argus0000000.nxs
+
   QString daename = "NDX" + instname;
 
   // Load dae file
@@ -795,10 +815,11 @@ void MuonAnalysis::updatePairTable()
   }
 }
 
+
 /**
- * Input file changed. Update information accordingly (slot)
+ * Do some check when reading from MWRun, before actually reading new data file, to see if file is valid (slot)
  */
-void MuonAnalysis::inputFileChanged()
+void MuonAnalysis::inputFileChanged_MWRunFiles()
 {
   if ( m_uiForm.mwRunFiles->getText().isEmpty() )
     return;
@@ -823,6 +844,20 @@ void MuonAnalysis::inputFileChanged()
 
   // save selected browse file directory to be reused next time interface is started up
   m_uiForm.mwRunFiles->saveSettings(m_settingsGroup + "mwRunFilesBrowse");
+
+  inputFileChanged(m_previousFilename);
+}
+
+/**
+ * Input file changed. Update GUI accordingly.
+ * Note this method does no check of input filename assumed
+ * done elsewhere depending on e.g. whether filename came from
+ * MWRunFiles or 'get current run' button
+ * @param filename Filename of new data file
+ */
+void MuonAnalysis::inputFileChanged(const QString& filename)
+{
+  Poco::File l_path( filename.toStdString() );
 
   // and check if file is from a recognised instrument and update instrument combo box
   QString filenamePart = (Poco::Path(l_path.path()).getFileName()).c_str();
@@ -852,7 +887,7 @@ void MuonAnalysis::inputFileChanged()
   QString pyString = "from mantidsimple import *\n"
       "import sys\n"
       "try:\n"
-      "  alg = LoadMuonNexus(r'" + m_previousFilename+"','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
+      "  alg = LoadMuonNexus(r'" + filename + "','" + m_workspace_name.c_str() + "', AutoGroup='0')\n"
       "  print alg.getPropertyValue('MainFieldDirection'), alg.getPropertyValue('TimeZero'), alg.getPropertyValue('FirstGoodData')\n"
       "except SystemExit, message:\n"
       "  print ''";
@@ -892,7 +927,7 @@ void MuonAnalysis::inputFileChanged()
 
   // if grouping not set, first see if grouping defined in Nexus
   if ( !isGroupingSet() )
-    setGroupingFromNexus(m_previousFilename);
+    setGroupingFromNexus(filename);
   // if grouping still not set, then take grouping from IDF
   if ( !isGroupingSet() )
     setGroupingFromIDF(mainFieldDirection, matrix_workspace);
@@ -904,9 +939,6 @@ void MuonAnalysis::inputFileChanged()
 
   if ( !applyGroupingToWS(m_workspace_name, m_workspace_name+"Grouped") )
     return;
-
-
-
 
   // Populate instrument fields
 

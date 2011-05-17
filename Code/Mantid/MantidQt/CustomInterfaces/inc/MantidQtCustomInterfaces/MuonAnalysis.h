@@ -71,8 +71,8 @@ private slots:
   /// Guess Alpha clicked
   void guessAlphaClicked();
 
-  /// Input file changed
-  void inputFileChanged();
+  /// Input file changed in MWRunFiles widget
+  void inputFileChanged_MWRunFiles();
 
   // Load current button
   void runLoadCurrent();
@@ -134,8 +134,8 @@ private:
   /// Set start up interface look
   void startUpLook();
 
-  /// Return the group which is in focus and -1 if none
-  //int groupInFocus();
+  /// Input file changed - update GUI accordingly
+  void inputFileChanged(const QString& filename);
 
   /// Return the pair which is in focus and -1 if none
   int pairInFocus();
