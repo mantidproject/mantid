@@ -288,9 +288,10 @@ public:
   {
     using namespace Mantid::API;
     boost::scoped_ptr<IMDWorkspace> workspace(constructMDWorkspaceAsIMDWorkspace());
-    const SignalAggregate& cell = workspace->getCell(0);
-    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, workspace->getCell(0, 0, 0, 0).getSignal());
-    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, workspace->getCell(0, 0, 0, 0).getError());
+// done to see if getCell throws
+    const SignalAggregate& cell = workspace->getCell(0,0,0,0);
+    TSM_ASSERT_EQUALS("The first MDCell's signal value is incorrect", 1, cell.getSignal());
+    TSM_ASSERT_EQUALS("The first MDCell's error value is incorrect", 0, cell.getError());
     TSM_ASSERT_EQUALS("The MDCell's signal value is incorrect", 2, workspace->getCell(1, 0, 0, 0).getSignal());
     TSM_ASSERT_EQUALS("The MDCell's error value is incorrect", 1, workspace->getCell(1, 0, 0, 0).getError());
     TSM_ASSERT_EQUALS("Wrong number of vertexes generated.", 16, workspace->getCell(1, 0, 0, 0).getVertexes().size());
