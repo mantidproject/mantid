@@ -161,6 +161,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/MantidMatrixDialog.cpp
                    src/Mantid/MantidSampleLogDialog.cpp
                    src/Mantid/MantidUI.cpp
+                   src/Mantid/MantidTable.cpp
                    src/Mantid/PeakPickerTool.cpp
                    src/Mantid/Preferences.cpp
                    src/Mantid/PropertyHandler.cpp
@@ -188,6 +189,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.cpp
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.cpp
                    src/Mantid/InstrumentWidget/MantidColorMap.cpp
+                   src/Mantid/InstrumentWidget/MantidGLWidget.cpp
                    src/Mantid/InstrumentWidget/ColorMapWidget.cpp
                    src/Mantid/InstrumentWidget/MantidObject.cpp
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.cpp
@@ -198,6 +200,7 @@ set ( MANTID_SRCS  src/Mantid/AbstractMantidLog.cpp
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSphere.cpp
                    src/Mantid/InstrumentWidget/UnwrappedSurface.cpp
+                   src/Mantid/InstrumentWidget/ProjectionSurface.cpp
                    src/Mantid/InstrumentWidget/OneCurvePlot.cpp
                    src/Mantid/InstrumentWidget/CollapsiblePanel.cpp
                    src/Mantid/InstrumentWidget/DetSelector.cpp
@@ -369,6 +372,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/MantidMatrix.h
                    src/Mantid/MantidSampleLogDialog.h
                    src/Mantid/MantidUI.h
+                   src/Mantid/MantidTable.h
                    src/Mantid/PeakPickerTool.h
                    src/Mantid/Preferences.h
                    src/Mantid/PropertyHandler.h
@@ -396,6 +400,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                    src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                    src/Mantid/InstrumentWidget/MantidColorMap.h
+                   src/Mantid/InstrumentWidget/MantidGLWidget.h
                    src/Mantid/InstrumentWidget/ColorMapWidget.h
                    src/Mantid/InstrumentWidget/MantidObject.h
                    src/Mantid/InstrumentWidget/ObjCompAssemblyActor.h
@@ -406,6 +411,7 @@ set ( MANTID_HDRS  src/Mantid/AbstractMantidLog.h
                    src/Mantid/InstrumentWidget/UnwrappedCylinder.h
                    src/Mantid/InstrumentWidget/UnwrappedSphere.h
                    src/Mantid/InstrumentWidget/UnwrappedSurface.h
+                   src/Mantid/InstrumentWidget/ProjectionSurface.h
                    src/Mantid/InstrumentWidget/OneCurvePlot.h
                    src/Mantid/InstrumentWidget/CollapsiblePanel.h
                    src/Mantid/InstrumentWidget/DetSelector.h
@@ -626,6 +632,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/MantidMatrix.h
                        src/Mantid/MantidSampleLogDialog.h
                        src/Mantid/MantidUI.h
+                       src/Mantid/MantidTable.h
                        src/Mantid/PeakPickerTool.h
                        src/Mantid/PropertyHandler.h
                        src/Mantid/RemoveErrorsDialog.h
@@ -643,6 +650,7 @@ set ( MANTID_MOC_FILES src/Mantid/AlgMonitor.h
                        src/Mantid/InstrumentWidget/InstrumentWindowRenderTab.h
                        src/Mantid/InstrumentWidget/InstrumentWindowPickTab.h
                        src/Mantid/InstrumentWidget/ColorMapWidget.h
+					   src/Mantid/InstrumentWidget/MantidGLWidget.h
                        src/Mantid/InstrumentWidget/OneCurvePlot.h
                        src/Mantid/InstrumentWidget/CollapsiblePanel.h
 )
