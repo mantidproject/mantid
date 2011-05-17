@@ -44,14 +44,18 @@ public:
     ~Transform();
     void init();
     std::vector<double> functionConstants();
-    QList<QWidget*> xWidgets() { return m_xWidgets; };
-    QList<QWidget*> yWidgets() { return m_yWidgets; };
+    QPair<QStringList, QList<QPair<int, int> > > derivatives();
+    QList<QWidget*> xWidgets() { return m_xWidgets; }
+    QList<QWidget*> yWidgets() { return m_yWidgets; }
+    TransformType type() { return m_type; }
     void tidyGeneral();
     
   private:
-    TransformType m_type;    
+    TransformType m_type;
     QList<QWidget*> m_xWidgets;
     QList<QWidget*> m_yWidgets;
+    QString m_gDeriv;
+    QString m_iDeriv;
     QWidget* m_parent;
   };
 
@@ -64,11 +68,16 @@ public slots:
   void plot();
   void help();
   void updateAxisLabels(const QString&);
+  void clearTable();
+  void calculateDerivatives();
+  void tableUpdated(int row, int column);
 
 private:
   void initLayout();
   boost::shared_ptr<Mantid::API::MatrixWorkspace> runIQTransform();
+  void tableDisplay(QStringList properties, QList<QPair<int, int> > positions);
   bool validatePlotOptions();
+  void setupTable();
   void createTransforms();
   QwtPlotCurve* plotMiniplot(QwtPlotCurve* curve, 
     boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
@@ -77,11 +86,15 @@ private:
   Ui::SANSPlotSpecial m_uiForm;
   MantidWidgets::RangeSelector* m_rangeSelector;
   QMap<QString, Transform*> m_transforms;
+  QMap<QString, QTableWidgetItem*> m_fitProperties;
+  QMap<QString, QTableWidgetItem*> m_derivatives;
   QString m_current;
   QwtPlotCurve* m_dataCurve;
   QwtPlotCurve* m_linearCurve;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspaceIQT;
   boost::shared_ptr<Mantid::API::MatrixWorkspace> m_workspaceLinear;
+  bool m_rearrangingTable;
+  QTableWidgetItem* m_emptyCell;
 };
 
 }

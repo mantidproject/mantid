@@ -5,8 +5,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>689</width>
-    <height>397</height>
+    <width>668</width>
+    <height>449</height>
    </rect>
   </property>
   <property name="windowTitle" >
@@ -238,82 +238,6 @@
           </item>
          </layout>
         </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_5" >
-          <item>
-           <widget class="QLabel" name="label_5" >
-            <property name="text" >
-             <string>Intercept:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbInterceptValue" >
-            <property name="styleSheet" >
-             <string notr="true" >color:rgb(0, 0, 255)</string>
-            </property>
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_6" >
-          <item>
-           <widget class="QLabel" name="label_3" >
-            <property name="text" >
-             <string>Gradient:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbGradientValue" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(0,0,255)</string>
-            </property>
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_7" >
-          <item>
-           <widget class="QLabel" name="label_7" >
-            <property name="text" >
-             <string>Chi Squared:</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLabel" name="lbChiSqrdValue" >
-            <property name="styleSheet" >
-             <string notr="true" >color: rgb(0,0,255)</string>
-            </property>
-            <property name="text" >
-             <string/>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <spacer name="verticalSpacer" >
-          <property name="orientation" >
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0" >
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
        </layout>
       </widget>
      </item>
@@ -328,6 +252,55 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QTableWidget" name="tbDerived" >
+     <property name="sizePolicy" >
+      <sizepolicy vsizetype="Expanding" hsizetype="Expanding" >
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="rowCount" >
+      <number>3</number>
+     </property>
+     <property name="columnCount" >
+      <number>6</number>
+     </property>
+     <row/>
+     <row/>
+     <row/>
+     <column>
+      <property name="text" >
+       <string>Item</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Result</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>G Derived</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Result</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>I Derived</string>
+      </property>
+     </column>
+     <column>
+      <property name="text" >
+       <string>Result</string>
+      </property>
+     </column>
+    </widget>
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout_2" >
