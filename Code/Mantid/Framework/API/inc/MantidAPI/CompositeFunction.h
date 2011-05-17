@@ -55,9 +55,9 @@ public:
   std::string asString()const;
 
   /// Set i-th parameter
-  void setParameter(int, const double& value, bool explicitlySet = true);
+  void setParameter(size_t, const double& value, bool explicitlySet = true);
   /// Get i-th parameter
-  double getParameter(int i)const;
+  double getParameter(size_t i)const;
   /// Set parameter by name.
   void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
   /// Get parameter by name.
@@ -69,27 +69,27 @@ public:
   /// Returns the index of a parameter
   //int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
-  std::string parameterName(int i)const;
+  std::string parameterName(size_t i)const;
   /// Checks if a parameter has been set explicitly
   bool isExplicitlySet(int i)const;
 
   /// Number of active (in terms of fitting) parameters
   int nActive()const;
   /// Value of i-th active parameter. Override this method to make fitted parameters different from the declared
-  double activeParameter(int i)const;
+  double activeParameter(size_t i)const;
   /// Set new value of i-th active parameter. Override this method to make fitted parameters different from the declared
   void setActiveParameter(int i, double value);
   /// Update parameters after a fitting iteration
   void updateActive(const double* in);
   /// Returns "global" index of active parameter i
-  int indexOfActive(int i)const;
+  int indexOfActive(size_t i)const;
   /// Returns the name of active parameter i
   std::string nameOfActive(int i)const;
 
   /// Check if a parameter is active
   bool isActive(int i)const;
   /// Get active index for a declared parameter i
-  int activeIndex(int i)const;
+  int activeIndex(size_t i)const;
   /// Removes a parameter from the list of active
   void removeActive(int i);
   /// Restores a declared parameter i to the active status

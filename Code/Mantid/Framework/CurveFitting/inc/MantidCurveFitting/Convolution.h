@@ -138,7 +138,7 @@ namespace Mantid
       /// To keep the Fourier transform of the resolution function (divided by the step in xValues)
       mutable double* m_resolution;
       /// To keep the size of m_resolution
-      mutable int m_resolutionSize;
+      mutable size_t m_resolutionSize;
       /// Temporary data storage used in functionDeriv
       mutable boost::shared_array<double> m_tmp;
       /// Temporary data storage used in functionDeriv

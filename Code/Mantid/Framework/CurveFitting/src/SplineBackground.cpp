@@ -69,7 +69,7 @@ void SplineBackground::exec()
   gsl_multifit_linear_workspace *mw;
   double chisq;
 
-  int n = Y.size();
+  size_t n = Y.size();
   bool isMasked = inWS->hasMaskedBins(spec);
   std::vector<int> masked(Y.size());
   if (isMasked)

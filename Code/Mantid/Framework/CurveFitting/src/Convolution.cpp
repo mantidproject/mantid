@@ -61,7 +61,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
   gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(nData);
   gsl_fft_real_wavetable * wavetable = gsl_fft_real_wavetable_alloc(nData);
 
-  int n2 = nData / 2;
+  int n2 = static_cast<int>(nData) / 2;
   bool odd = n2*2 != nData;
   if (m_resolution == 0)
   {

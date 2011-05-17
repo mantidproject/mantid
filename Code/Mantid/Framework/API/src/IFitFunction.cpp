@@ -69,9 +69,9 @@ void IFitFunction::setActiveParameter(int i,double value)
   setParameter(j,value,false);
 }
 
-double IFitFunction::activeParameter(int i)const
+double IFitFunction::activeParameter(size_t i)const
 {
-  int j = indexOfActive(i);
+  size_t j = indexOfActive(i);
   return getParameter(j);
 }
 
