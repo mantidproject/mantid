@@ -143,8 +143,6 @@ namespace API
     // claculate numerically
     double stepPercentage = DBL_EPSILON*1000; // step percentage
     double step; // real step
-    double minDouble = std::numeric_limits<double>::min();
-    double cutoff = 100.0*minDouble/stepPercentage;
     const int nParam = nParams();
     const int nData  = dataSize();
 
@@ -308,10 +306,12 @@ namespace Mantid
       }
       bool hasAttribute(const std::string& attName)const 
       { 
+        UNUSED_ARG(attName);
         return attName == "Formula";
       }
       Attribute getAttribute(const std::string& attName)const
       {
+        UNUSED_ARG(attName);
         return Attribute(m_formula);
       }
       

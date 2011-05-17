@@ -180,7 +180,7 @@ void MemoryManagerImpl::releaseFreeMemory()
  */
 void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
 {
-
+    UNUSED_ARG(threshold);
 #ifdef USE_TCMALLOC
     Kernel::MemoryStats mem;
     mem.update();
@@ -205,6 +205,8 @@ void MemoryManagerImpl::releaseFreeMemoryIfAbove(double threshold)
  */
 void MemoryManagerImpl::releaseFreeMemoryIfAccumulated(size_t adding, size_t threshold)
 {
+  UNUSED_ARG(adding);
+  UNUSED_ARG(threshold);
 #ifdef USE_TCMALLOC
   accumulatorMutex.lock();
 

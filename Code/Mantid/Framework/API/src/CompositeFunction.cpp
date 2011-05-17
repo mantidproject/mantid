@@ -713,6 +713,7 @@ void CompositeFunction::declareParameter(const std::string& name, double initVal
 {
   (void) name; //Avoid compiler warning
   (void) initValue; //Avoid compiler warning
+  (void) description; //Avoid compiler warning
   throw Kernel::Exception::NotImplementedError("CompositeFunction cannot not have its own parameters.");
 }
 
