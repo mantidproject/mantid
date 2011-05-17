@@ -6,7 +6,7 @@
 #include "MantidKernel/System.h"
 #include "MantidGeometry/V3D.h"
 #include <boost/shared_ptr.hpp>
-//#include <limits>
+
 
 
 

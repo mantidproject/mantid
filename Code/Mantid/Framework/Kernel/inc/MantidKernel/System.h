@@ -2,6 +2,7 @@
 #define MANTID_KERNEL_SYSTEM_H_
 
 #include <typeinfo>
+#include <limits>
 
 /*  A system-wide file to contain, e.g., useful system-dependent macros
 
