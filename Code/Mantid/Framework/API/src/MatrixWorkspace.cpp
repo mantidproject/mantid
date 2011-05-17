@@ -480,6 +480,16 @@ namespace Mantid
       return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
     }
 
+    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int workspaceIndex) const
+    {
+      return this->getDetector(static_cast<size_t>(workspaceIndex));
+    }
+
+    Geometry::IDetector_sptr MatrixWorkspace::getDetector(const int64_t workspaceIndex) const
+    {
+      return this->getDetector(static_cast<size_t>(workspaceIndex));
+    }
+
     /** Returns the 2Theta scattering angle for a detector
      *  @param det :: A pointer to the detector object (N.B. might be a DetectorGroup)
      *  @return The scattering angle (0 < theta < pi)
