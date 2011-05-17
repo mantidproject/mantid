@@ -66,7 +66,7 @@ class ReactorSANSResolution(PythonAlgorithm):
             k = 2.0*math.pi/wvl
             res_factor = math.pow(k*source_apert_radius/source_sample_distance, 2)
             res_factor += (math.pow(k*sample_apert_radius*(source_sample_distance+sample_detector_distance)/(source_sample_distance*sample_detector_distance), 2)/4.0)
-            res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/sample_detector_distance
+            res_factor += math.pow(k*pixel_size_x/sample_detector_distance, 2)/12.0
             
             for i in range(len(output_ws.readX(0))):
                  output_ws.dataDx(0)[i] = math.sqrt(res_factor+math.pow((output_ws.readX(0)[i]*d_wvl), 2)/6.0)       
