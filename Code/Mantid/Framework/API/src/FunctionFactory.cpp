@@ -229,7 +229,7 @@ namespace Mantid
       for(;it!=terms.end();it++)
       {
         const Expression& term = it->bracketsRemoved();
-        IFitFunction* fun;
+        IFitFunction* fun = NULL;
         if (term.name() == ";")
         {
           fun = createComposite(term);
