@@ -61,7 +61,7 @@ void SpectraAxis::setValue(const size_t& index, const double& value)
     throw Kernel::Exception::IndexError(index, length()-1, "SpectraAxis: Index out of range.");
   }
 
-  m_values[index] = static_cast<int64_t>(value);
+  m_values[index] = static_cast<specid_t>(value);
 }
 
 /** Returns the spectrum number at the position given (Spectra axis only)
@@ -137,7 +137,7 @@ void SpectraAxis::populateSimple(int64_t end)
 {
   m_values.resize(static_cast<size_t>(end), 0);
   for (int64_t i=0; i < end; i++)
-    m_values[i] = i;
+    m_values[i] = static_cast<specid_t>(i);
 }
 
 
