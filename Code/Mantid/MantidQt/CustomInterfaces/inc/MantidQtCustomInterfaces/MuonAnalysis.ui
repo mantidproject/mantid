@@ -417,9 +417,9 @@
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
-          <widget class="QPushButton" name="clearGroupingButton">
+          <widget class="QPushButton" name="loadGroupButton">
            <property name="text">
-            <string>Clear Grouping</string>
+            <string>Load Grouping File</string>
            </property>
           </widget>
          </item>
@@ -431,9 +431,9 @@
           </widget>
          </item>
          <item>
-          <widget class="QPushButton" name="loadGroupButton">
+          <widget class="QPushButton" name="clearGroupingButton">
            <property name="text">
-            <string>Load Grouping File</string>
+            <string>Clear Grouping</string>
            </property>
           </widget>
          </item>
