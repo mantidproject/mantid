@@ -9,11 +9,11 @@ namespace API
 void ParameterReference::reset(IFitFunction* fun,size_t index)
 {
   IFitFunction* fLocal = fun;
-  size_t iLocal = index;
+  int iLocal = static_cast<int>(index);
   CompositeFunction* cf = dynamic_cast<CompositeFunction*>(fun);
   while (cf)
   {
-    size_t iFun = cf->functionIndex(iLocal);
+    int iFun = cf->functionIndex(iLocal);
     fLocal = cf->getFunction(iFun);
     iLocal = fLocal->parameterIndex(cf->parameterLocalName(iLocal));
     cf = dynamic_cast<CompositeFunction*>(fLocal);

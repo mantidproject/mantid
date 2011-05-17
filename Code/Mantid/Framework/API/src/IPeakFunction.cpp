@@ -80,7 +80,7 @@ void IPeakFunction::function(double* out, const double* xValues, const size_t nD
   {
     if (fabs(xValues[i] - c) < dx)
     {
-      if (i0 < 0) i0 = i;
+      if (i0 < 0) i0 = static_cast<int>(i);
       ++n;
     }
     else
@@ -112,7 +112,7 @@ void IPeakFunction::functionDeriv(Jacobian* out, const double* xValues, const si
   {
     if (fabs(xValues[i] - c) < dx)
     {
-      if (i0 < 0) i0 = i;
+      if (i0 < 0) i0 = static_cast<int>(i);
       ++n;
     }
     else
