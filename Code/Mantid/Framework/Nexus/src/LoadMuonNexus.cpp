@@ -147,7 +147,7 @@ namespace Mantid
         (new MantidVec(timeChannels, timeChannels + lengthIn));
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      int64_t total_specs;
+      std::size_t total_specs;
       if( m_interval || m_list)
       {
         total_specs = m_spec_list.size();
@@ -180,7 +180,7 @@ namespace Mantid
 
       API::Progress progress(this,0.,1.,m_numberOfPeriods * total_specs);
       // Loop over the number of periods in the Nexus file, putting each period in a separate workspace
-      for (int64_t period = 0; period < m_numberOfPeriods; ++period) {
+      for (int period = 0; period < m_numberOfPeriods; ++period) {
         if(m_entrynumber!=0)
         {
           period=m_entrynumber-1;
@@ -221,7 +221,7 @@ namespace Mantid
         }
 
         size_t counter = 0;
-        for (size_t i = m_spec_min; i < m_spec_max; ++i)
+        for (specid_t i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
           specid_t histToRead = i + period*total_specs;
@@ -248,7 +248,7 @@ namespace Mantid
         {
 
           //Get the groupings
-          int64_t max_group = 0;
+          std::size_t max_group = 0;
           // use a map for mapping group number and output workspace index in case 
           // there are group numbers > number of groups
           std::map<int64_t,int64_t> groups;
@@ -280,8 +280,8 @@ namespace Mantid
               }
             }
 
-          size_t numHists = localWorkspace->getNumberHistograms();
-          size_t ngroups = groups.size(); // number of groups
+          std::size_t numHists = localWorkspace->getNumberHistograms();
+          std::size_t ngroups = groups.size(); // number of groups
 
           // to output groups in ascending order
           {
@@ -343,9 +343,9 @@ namespace Mantid
           boost::shared_array<detid_t> dets(new detid_t[numHists]);
 
           //Compile the groups
-          for (size_t i = 0; i < static_cast<size_t>(numHists); ++i)
+          for (std::size_t i = 0; i < numHists; ++i)
           {    
-            specid_t k = groups[ m_groupings[numHists*period + i] ];
+            specid_t k = groups[ m_groupings[static_cast<specid_t>(numHists)*period + i] ];
 
             for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
             {
@@ -459,7 +459,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= hist + 1;
+      localWorkspace->getAxis(1)->spectraNo(hist)= static_cast<int>(hist) + 1;
     }
 
 
