@@ -326,5 +326,14 @@ boost::function<double(size_t, size_t, size_t, size_t)> IMDWorkspaceProxy::getMa
   }
 }
 
+/*
+  Getter for non-integrated dimensions.
+  @return A vector of non-integrated dimensions within the workspace.
+*/
+Mantid::Geometry::VecIMDDimension_const_sptr IMDWorkspaceProxy::getNonIntegratedDimensions() const
+{
+  return m_workspace->getNonIntegratedDimensions();
+}
+
 }
 }

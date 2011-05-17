@@ -148,6 +148,22 @@ public:
 
   }
 
+    //Test for the IMDWorkspace aspects of MDWorkspace.
+  void testGetNonIntegratedDimensions()
+  {
+    MDHistoDimension_sptr dimX(new MDHistoDimension("X", "x", "m", -10, 10, 1)); //Integrated.
+    MDHistoDimension_sptr dimY(new MDHistoDimension("Y", "y", "m", -10, 10, 10));
+    MDHistoDimension_sptr dimZ(new MDHistoDimension("Z", "z", "m", -10, 10, 20));
+    MDHistoDimension_sptr dimT(new MDHistoDimension("T", "t", "m", -10, 10, 10));
+
+    MDHistoWorkspace ws(dimX, dimY, dimZ, dimT);
+    Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims = ws.getNonIntegratedDimensions();
+    TSM_ASSERT_EQUALS("Only 3 of the 4 dimensions should be non-integrated", 3, vecNonIntegratedDims.size());
+    TSM_ASSERT_EQUALS("First non-integrated dimension should be Y", "y", vecNonIntegratedDims[0]->getDimensionId());
+    TSM_ASSERT_EQUALS("Second non-integrated dimension should be Z", "z", vecNonIntegratedDims[1]->getDimensionId());
+    TSM_ASSERT_EQUALS("Third non-integrated dimension should be T", "t", vecNonIntegratedDims[2]->getDimensionId());
+  }
+
 
   //---------------------------------------------------------------------------------------------------
   void test_getGeometryXML()

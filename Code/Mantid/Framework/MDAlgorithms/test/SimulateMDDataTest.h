@@ -126,6 +126,11 @@ public:
         throw std::runtime_error("Not implemented");
     }
 
+    Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
+    {
+      throw std::runtime_error("Not implemented");
+    }
+
     /// return ID specifying the workspace kind
     virtual const std::string id() const {return "TestIMDDWorkspace";}
     /// return number of dimensions in MD workspace

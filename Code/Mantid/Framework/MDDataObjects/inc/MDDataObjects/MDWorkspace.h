@@ -182,6 +182,14 @@ namespace Mantid
       /// Creates a new iterator pointing to the first cell in the workspace
       Mantid::API::IMDIterator* createIterator() const;
 
+      /// Getter for those dimensions that are not collapsed.
+      Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
+
+    protected:
+
+      /// Getter via geometry for dimensions. Not part of public API.
+      virtual Mantid::Geometry::VecIMDDimension_sptr getDimensions() const;
+
     private:
       /// Cache. Gives MDWorkspace ownership of MDPoints (as an IMDWorkspace), while allowing polymorphic behaviour.
       /// Note this is NOT an optimized implementation yet, but it does support lazy instantiation.

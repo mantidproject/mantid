@@ -282,6 +282,12 @@ namespace Mantid
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
 
+      /// Getter for collapsed dimensions.
+      Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
+      {
+        throw std::runtime_error("Not yet implemented");
+      }
+
     protected:
       MatrixWorkspace();
 

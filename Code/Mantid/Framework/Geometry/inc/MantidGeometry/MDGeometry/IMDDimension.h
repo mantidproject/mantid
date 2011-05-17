@@ -134,6 +134,10 @@ namespace Mantid
   typedef boost::shared_ptr<IMDDimension> IMDDimension_sptr;
   /// Shared Pointer to const IMDDimension. Not stictly necessary since IMDDimension is pure abstract.
   typedef boost::shared_ptr<const IMDDimension> IMDDimension_const_sptr;
+  /// Vector of constant shared pointers to IMDDimensions.
+  typedef std::vector<IMDDimension_const_sptr> VecIMDDimension_const_sptr;
+  /// Vector of shared pointers to IMDDimensions.
+  typedef std::vector<IMDDimension_sptr> VecIMDDimension_sptr;
 
   }
 }

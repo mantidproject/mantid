@@ -133,6 +133,9 @@ namespace Mantid
       void setDimension(size_t idim,const std::string& paramString);
       void setCell(size_t index,const std::vector<boost::shared_ptr<Mantid::Geometry::MDPoint> >& points);
 
+      /// Getter for those dimensions that are not collapsed.
+      Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const;
+
     private:
       /// Cells of this workspace
       mutable MDCellMap m_cells;

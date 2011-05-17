@@ -225,7 +225,17 @@ public:
     TSM_ASSERT_THROWS("Index should be out of bounds", workspace->getPoint(-1), std::range_error);
   }
 
+  //Test for the IMDWorkspace aspects of MDWorkspace.
+  void testGetNonIntegratedDimensions()
+  {
+    using namespace Mantid::API;
+    using namespace Mantid::MDDataObjects;
 
+    MDWorkspace* mdWorkspace = constructMDWorkspace();
+    boost::scoped_ptr<IMDWorkspace> workspace(mdWorkspace);
+
+    TSM_ASSERT_EQUALS("In test example all dimensions should be non-integrated.", 4, workspace->getNonIntegratedDimensions().size());
+  }
 
   //Test for the IMDWorkspace aspects of MDWorkspace.
   void testGetCellOneArgument()

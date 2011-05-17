@@ -127,6 +127,7 @@ private:
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
     MOCK_CONST_METHOD4(getSignalNormalizedAt, double(size_t index1, size_t index2, size_t index3, size_t index4));
+     MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
     virtual Mantid::API::IMDIterator* createIterator() const
     {
       return new FakeIterator(this);

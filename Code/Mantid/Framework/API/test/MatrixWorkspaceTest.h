@@ -449,7 +449,12 @@ public:
     }
   }
 
-
+  void testGetNonIntegratedDimensionsThrows()
+  {
+    //No implementation yet. 
+    MatrixWorkspace *ws = new Mantid::DataObjects::WorkspaceTester;
+    TSM_ASSERT_THROWS("Characterisation tests fail", ws->getNonIntegratedDimensions(), std::runtime_error);
+  }
 
 private:
   boost::shared_ptr<MatrixWorkspace> ws;

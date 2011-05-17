@@ -10,6 +10,7 @@
 #include "MantidGeometry/MDGeometry/MDCell.h"
 #include "MantidGeometry/MDGeometry/MDPoint.h"
 #include <boost/shared_ptr.hpp>
+#include <vector>
 #include <stdarg.h>
 
 namespace Mantid
@@ -63,22 +64,25 @@ namespace Mantid
       virtual size_t getNumDims() const = 0;
 
       /// Get the x-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension_const_sptr getXDimension() const = 0;
 
       /// Get the y-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension_const_sptr getYDimension() const = 0;
 
       /// Get the z-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension_const_sptr getZDimension() const = 0;
 
       /// Get the t-dimension mapping.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const = 0;
+      virtual Mantid::Geometry::IMDDimension_const_sptr getTDimension() const = 0;
 
       /// Get the dimension with the specified id.
-      virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const = 0;
+      virtual Mantid::Geometry::IMDDimension_const_sptr getDimension(std::string id) const = 0;
+
+      /// Get those dimensions which have not been collapsed.
+      virtual Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const = 0;
 
       /// Get the dimension
-      virtual boost::shared_ptr<Mantid::Geometry::IMDDimension> getDimensionNum(size_t index)
+      virtual Mantid::Geometry::IMDDimension_sptr getDimensionNum(size_t index)
       { (void) index;
       throw std::runtime_error("Not implemented yet.");
       }

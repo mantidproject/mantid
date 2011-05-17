@@ -84,6 +84,7 @@ private:
     MOCK_CONST_METHOD0(getDimensionIDs,const std::vector<std::string>());
     MOCK_CONST_METHOD0(getNPoints, uint64_t());
     MOCK_CONST_METHOD0(getNumDims, size_t());
+    MOCK_CONST_METHOD0(getNonIntegratedDimensions, Mantid::Geometry::VecIMDDimension_const_sptr());
 
     const Mantid::Geometry::SignalAggregate& getCell(...) const
     {

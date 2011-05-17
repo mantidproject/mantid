@@ -343,6 +343,35 @@ MDWorkspace::MDWorkspace(unsigned int nDimensions, unsigned int nRecDims)
       return this->m_spMDImage->get_const_MDGeometry().toXMLString();
     }
 
+    /*
+    Get non-collapsed dimensions
+    @return vector of collapsed dimensions in the workspace geometry.
+    */
+    VecIMDDimension_const_sptr MDWorkspace::getNonIntegratedDimensions() const
+    {
+      VecIMDDimension_sptr vecAllDimensions = this->getDimensions();
+      VecIMDDimension_const_sptr vecCollapsedDimensions;
+      VecIMDDimension_sptr::iterator it = vecAllDimensions.begin();
+      for(; it != vecAllDimensions.end(); ++it)
+      {
+        IMDDimension_sptr current = (*it);
+        if(!current->getIsIntegrated())
+        {
+          vecCollapsedDimensions.push_back(current);
+        }
+      }
+      return vecCollapsedDimensions;
+    }
+
+    /*
+     Get dimensions via geometry. Also provides seam for testability.
+     @return vector of all dimensions in the workspace geometry.
+    */
+    Mantid::Geometry::VecIMDDimension_sptr MDWorkspace::getDimensions() const
+    {
+      return this->get_const_MDGeometry().getDimensions();
+    }
+
     /// Creates a new iterator pointing to the first cell in the workspace
     Mantid::API::IMDIterator* MDWorkspace::createIterator() const
     {

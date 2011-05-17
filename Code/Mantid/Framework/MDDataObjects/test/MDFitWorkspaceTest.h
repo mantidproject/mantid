@@ -54,6 +54,17 @@ public:
 
   }
 
+  void testGetNonIntegratedDimensions()
+  {
+    MDFitWorkspace ws(2,2);
+    TS_ASSERT_EQUALS(ws.getNumDims(),2);
+    ws.setDimension(0,"id=x,xmin=0,n=1,dx=2");
+    ws.setDimension(1,"id=y,xmin=-1,xmax=1,n=10");
+    Mantid::Geometry::VecIMDDimension_const_sptr vecNonIntegratedDims = ws.getNonIntegratedDimensions();
+    TSM_ASSERT_EQUALS("Only 1 of the 2 dimensions should be non-integrated", 1, vecNonIntegratedDims.size());
+    TSM_ASSERT_EQUALS("Non-integrated dimension should have id=='y'", "y", vecNonIntegratedDims[0]->getDimensionId());
+  }
+
 
 
 };
