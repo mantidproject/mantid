@@ -85,7 +85,7 @@ namespace Crystal
     std::string s;
     char c = 0;
     if( in.good() )
-      for(  c = in.get() ; c == ' ' && in.good() ; c = in.get() )
+      for(  c = static_cast<char>(in.get()) ; c == ' ' && in.good() ; c = static_cast<char>(in.get()) )
       {}
     else
       return std::string();
@@ -101,7 +101,7 @@ namespace Crystal
     s.push_back( c );
 
     if( in.good() )
-      for(  c = in.get() ; in.good()&&c != ' ' && c != '\n' && c != '\r' ; c = in.get() )
+      for(  c = static_cast<char>(in.get()) ; in.good()&&c != ' ' && c != '\n' && c != '\r' ; c = static_cast<char>(in.get()) )
         s.push_back( c );
 
     if( ((c == '\n') || (c == '\r')) && !consumeEOL )
