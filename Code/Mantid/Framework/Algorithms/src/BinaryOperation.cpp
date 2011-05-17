@@ -949,7 +949,7 @@ namespace Mantid
 
         // ----------------- Matching Workspace Indices and Detector IDs --------------------------------------
         //First off, try to match the workspace indices. Most times, this will be ok right away.
-        size_t rhsWI = lhsWI;
+        int64_t rhsWI = lhsWI;
         if (rhsWI < rhs_nhist) //don't go out of bounds
         {
           // Get the detector IDs at that workspace index.
