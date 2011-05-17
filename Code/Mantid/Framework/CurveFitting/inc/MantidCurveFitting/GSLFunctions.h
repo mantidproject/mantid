@@ -79,13 +79,13 @@ namespace Mantid
       }   
     }
     /// overwrite base method
-    void set(int iY, int iP, double value)
+    void set(size_t iY, size_t iP, double value)
     {
       int j = m_index[iP];
       if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /// overwrite base method
-    double get(int iY, int iP)
+    double get(size_t iY, size_t iP)
     {
       int j = m_index[iP];
       if (j >= 0) return gsl_matrix_get(m_J,iY,j);

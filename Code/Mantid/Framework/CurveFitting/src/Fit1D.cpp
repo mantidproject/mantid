@@ -43,9 +43,9 @@ public:
     *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
     *   @param value :: The derivative value.
     */
-    void set(int iY, int iP, double value)
+    void set(size_t iY, size_t iP, double value)
     {
-        int j = m_map[iP];
+        int j = m_map[static_cast<int>(iP)];
         if (j >= 0) gsl_matrix_set(m_J,iY,j,value);
     }
     /** Get a value to a Jacobian matrix element.
@@ -53,9 +53,9 @@ public:
     *   @param iP :: The index of the parameter. It does not depend on the number of fixed parameters in a particular fit.
     *   @param value :: The derivative value.
     */
-    double get(int iY, int iP)
+    double get(size_t iY, size_t iP)
     {
-        int j = m_map[iP];
+        int j = m_map[static_cast<int>(iP)];
         if (j >= 0) return gsl_matrix_get(m_J,iY,j);
         return 0.0;
     }

@@ -32,7 +32,7 @@ public:
    * @param iP :: The parameter index of an individual function.
    * @param value :: The derivative value
    */
-  void set(int iY, int iP, double value)
+  void set(size_t iY, size_t iP, double value)
   {
       m_J->set(m_iY0 + iY,iP,value);
   }
@@ -41,7 +41,7 @@ public:
    * @param iY :: The index of the data point
    * @param iP :: The parameter index of an individual function.
    */
-  double get(int iY, int iP)
+  double get(size_t iY, size_t iP)
   {
       return m_J->get(m_iY0 + iY,iP);
   }

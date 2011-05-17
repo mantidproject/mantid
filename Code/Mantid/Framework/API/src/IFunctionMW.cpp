@@ -634,7 +634,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
  * @param xValues :: X values for data points
  * @param nData :: Number of data points
  */
-void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const int& nData)
+void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const size_t& nData)
 {
     double stepPercentage = 0.001; // step percentage
     double step; // real step

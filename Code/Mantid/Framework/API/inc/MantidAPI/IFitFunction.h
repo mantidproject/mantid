@@ -385,13 +385,13 @@ public:
   *   @param iP :: The index of a declared parameter.
   *   @param value :: The derivative value.
   */
-  virtual void set(int iY, int iP, double value) = 0;
+  virtual void set(size_t iY, size_t iP, double value) = 0;
 
   /**  Get the value to a Jacobian matrix element.
   *   @param iY :: The index of a data point.
   *   @param iP :: The index of a declared parameter.
   */
-  virtual double get(int iY, int iP) = 0;
+  virtual double get(size_t iY, size_t iP) = 0;
 
   ///@cond do not document
   /**  Add number to all iY (data) Jacobian elements for a given iP (parameter)
