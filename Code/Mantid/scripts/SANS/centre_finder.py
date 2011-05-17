@@ -18,7 +18,7 @@ class CentreFinder():
             @param guess_centre: the starting position that the trial x and y are relative to
         """
         self.reducer = setup
-        self.initial_pos = guess_centre
+        self._last_pos = guess_centre
 
     def SeekCentre(self,trial):
         """
@@ -31,8 +31,8 @@ class CentreFinder():
         currentDet = self.reducer.instrument.cur_detector().name()
     
         MoveInstrumentComponent(self.reducer.sample_wksp,
-            ComponentName=currentDet, X=trial[0]-self.initial_pos[0],
-            Y=trial[1]-self.initial_pos[1], RelativePosition=True)
+            ComponentName=currentDet, X=trial[0]-self._last_pos[0],
+            Y=trial[1]-self._last_pos[1], RelativePosition=True)
     
         #phi masking will remove areas of the detector that we need 
         self.reducer.mask.mask_phi = False
@@ -43,8 +43,8 @@ class CentreFinder():
     
         if self.reducer.background_subtracter:
             MoveInstrumentComponent(self.reducer.background_subtracter.workspace.wksp_name,
-                ComponentName=currentDet, X=trial[0]-self.initial_pos[0],
-                Y=trial[1]-self.initial_pos[1], RelativePosition=True)
+                ComponentName=currentDet, X=trial[0]-self._last_pos[0],
+                Y=trial[1]-self._last_pos[1], RelativePosition=True)
             
             #reduce the can here
             self.reducer.reduce_can(self.reducer.background_subtracter.workspace.wksp_name, 'centre_can', run_Q=False)
@@ -58,6 +58,8 @@ class CentreFinder():
             DeleteWorkspace('Right_can')
             DeleteWorkspace('Up_can')
             DeleteWorkspace('Down_can')
+        
+        self._last_pos = trial
         
         #prepare the workspaces for "publication", after they have their standard names calculations will be done on them and they will be plotted
         for out_wksp in self.QUADS:
@@ -82,7 +84,7 @@ class CentreFinder():
         """ 
         x_str = str(x*1000.).ljust(10)[0:9]
         y_str = str(y*1000.).ljust(10)[0:9]
-        x_res = '    SY='+str(x_res).ljust(7)[0:6]
+        x_res = '    SX='+str(x_res).ljust(7)[0:6]
         y_res = '    SY='+str(y_res).ljust(7)[0:6]
         return '::SANS::Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
             
