@@ -79,7 +79,7 @@ namespace API
 
         do
         {
-          int i = r->getPointer();
+          int i = static_cast<int>(r->getPointer());
           const Mantid::Geometry::SignalAggregate& point = m_workspace->getCell(i);
           double signal = point.getSignal();
           double error  = point.getError();
@@ -107,7 +107,7 @@ namespace API
   /// Returns the size of the fitted data (number of double values returned by the function)
   int IFunctionMD::dataSize()const
   {
-    return m_dataSize;
+    return static_cast<int>(m_dataSize);
   }
 
   /// Returns a pointer to the fitted data. These data are taken from the workspace set by setWorkspace() method.
@@ -129,7 +129,7 @@ namespace API
     IMDIterator* r = m_workspace->createIterator();
     do
     {
-      int i = r->getPointer();
+      int i = static_cast<int>(r->getPointer());
       out[i] = function(*r);
     }while(r->next());
     delete r;
@@ -197,7 +197,7 @@ namespace API
     */
   void IFunctionMD::useDimension(const std::string& id)
   {
-    int n = m_dimensionIndexMap.size();
+    int n = static_cast<int>(m_dimensionIndexMap.size());
     if (m_dimensionIndexMap.find(id) != m_dimensionIndexMap.end())
     {
       throw std::invalid_argument("Dimension "+id+" has already been used.");
@@ -268,7 +268,7 @@ namespace Mantid
       double function(IMDIterator& r) const
       {
         double arg = 0.0;
-        int n = m_dimensions.size();
+        int n = static_cast<int>(m_dimensions.size());
         for(int i = 0; i < n; ++i)
         {
           double c = getParameter(2*i);
@@ -299,7 +299,7 @@ namespace Mantid
         m_vars.resize(4);
         std::string varNames[] = {"x","y","z","t"};
         m_varNames.assign(varNames,varNames+m_vars.size());
-        for(int i = 0; i < m_vars.size(); ++i)
+        for(int i = 0; i < static_cast<int>(m_vars.size()); ++i)
         {
           m_parser.DefineVar(m_varNames[i],&m_vars[i]);
         }
@@ -317,6 +317,7 @@ namespace Mantid
       
       void setAttribute(const std::string& attName,const Attribute& attr)
       {
+        UNUSED_ARG(attName);
         m_formula = attr.asString();
         if (!m_vars.empty())
         {
@@ -334,7 +335,7 @@ namespace Mantid
         {
           m_vars.resize(m_dimensionIndexMap.size());
           m_varNames.resize(m_dimensionIndexMap.size());
-          for(int i = 0; i < m_vars.size(); ++i)
+          for(int i = 0; i < static_cast<int>(m_vars.size()); ++i)
           {
             m_varNames[i] = "x" + boost::lexical_cast<std::string>(i);
             m_parser.DefineVar(m_varNames[i],&m_vars[i]);
@@ -352,7 +353,7 @@ namespace Mantid
         */
       double function(IMDIterator& r) const
       {
-        int n = m_dimensions.size();
+        int n = static_cast<int>(m_dimensions.size());
         for(int i = 0; i < n; ++i)
         {
           m_vars[i] = r.getCoordinate(i);

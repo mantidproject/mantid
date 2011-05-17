@@ -151,7 +151,7 @@ protected:
   /// Shared pointer to the workspace
   boost::shared_ptr<const API::IMDWorkspace> m_workspace;
   /// Size of the fitted data
-  int m_dataSize;
+  size_t m_dataSize;
   /// Pointer to the fitted data
   boost::shared_array<double> m_data;
   /// Pointer to the fitting weights
