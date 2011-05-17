@@ -87,7 +87,7 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     white_counts = None
     if white_run is not None and str(white_run) != '':
         # Load and integrate
-        data_ws = common.load_run(white_run, 'white-beam')
+        data_ws = common.load_run(white_run)
         # Make sure we have a matrix workspace otherwise Integration() returns all zeros.
         ConvertToMatrixWorkspace(data_ws, data_ws)
         white_counts = Integration(data_ws, "__counts_white-beam").workspace()
@@ -106,7 +106,7 @@ def diagnose(white_run, sample_run=None, other_white=None, remove_zero=None,
     second_white_counts = None
     if other_white is not None and str(other_white) != '':
         # Load and integrate
-        data_ws = common.load_run(other_white, 'white-beam2')
+        data_ws = common.load_run(other_white)
         second_white_counts = Integration(data_ws, "__counts_white-beam2").workspace()
         MaskDetectors(white_counts, SpectraList=hard_mask_spectra)
         # Run tests
@@ -284,7 +284,7 @@ def _do_background_test(sample_run, white_counts, comp_white_counts, bkgd_range,
     mtd.sendLogMessage('Running background count test')
     # Load and integrate the sample using the defined background range. If none is given use the
     # instrument defaults
-    data_ws = common.load_runs(sample_run, 'mono-sample')
+    data_ws = common.load_runs(sample_run)
     instrument = data_ws.getInstrument()
     if bkgd_range is None:
         min_value = float(instrument.getNumberParameter('bkgd-range-min')[0])
@@ -356,7 +356,7 @@ def _do_bleed_test(sample_run, max_framerate, ignored_pixels):
     """
     mtd.sendLogMessage('Running PSD bleed test')
     # Load the sample run
-    data_ws = common.load_run(sample_run, 'mono-sample')
+    data_ws = common.load_run(sample_run)
 
     if max_framerate is None:
         max_framerate = float(data_ws.getInstrument().getNumberParameter('max-tube-framerate')[0])

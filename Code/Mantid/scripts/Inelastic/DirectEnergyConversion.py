@@ -124,7 +124,7 @@ class DirectEnergyConversion(object):
             return mtd[whitews_name]
 
         # Load
-        white_data = self.load_data(white_run, 'white-beam')
+        white_data = self.load_data(white_run)
         # Normalise
         white_ws = self.normalise(white_data, whitews_name, self.normalise_method)
         # Units conversion
@@ -153,7 +153,7 @@ class DirectEnergyConversion(object):
         If multiple run files are passed to this function, they are summed into a run and then processed         
         """
         # Load data
-        sample_data = self.load_data(mono_van, 'mono-van')
+        sample_data = self.load_data(mono_van)
         # Create the result name if necessary
         if result_name is None:
             result_name = common.create_resultname(mono_van)
@@ -167,7 +167,7 @@ class DirectEnergyConversion(object):
         If multiple run files are passed to this function, they are summed into a run and then processed
         """
         # Load data
-        sample_data = self.load_data(mono_run, 'mono-sample')
+        sample_data = self.load_data(mono_run)
         # Create the result name if necessary
         if result_name is None:
             result_name = common.create_resultname(mono_run, prefix=self.instr_name)
@@ -198,7 +198,8 @@ class DirectEnergyConversion(object):
             ChangeBinOffset(data_ws, result_name, -tzero)
             mon1_peak = 0.0
         elif (self.instr_name == "ARCS" or self.instr_name == "SEQUOIA"):
-            mono_run = common.last_mono_file()
+            if 'Filename' in data_ws.getRun(): mono_run = data_ws.getRun()['Filename']
+            else: raise RuntimeError('Cannot load monitors for event reduction. Unable to determine Filename from mono workspace, it should have been added as a run log.')
                            
             if mono_run.endswith("_event.nxs"):
                 loader=LoadNexusMonitors(Filename=mono_run, OutputWorkspace="monitor_ws")    
@@ -270,8 +271,12 @@ class DirectEnergyConversion(object):
             # do the correction as well so that it can be moved next to LoadRaw where
             # it belongs
             if self.det_cal_file == None:
+                if 'Filename' in result_ws.getRun(): 
+                    filename = result_ws.getRun()['Filename'].value
+                else:
+                    raise RuntimeError('Cannot run LoadDetectorInfo: "Filename" property not found on input mono workspace')
                 if self.relocate_dets: self.log('Moving detectors to positions specified in RAW file.')
-            	LoadDetectorInfo(result_ws, common.last_mono_file(), self.relocate_dets)
+            	LoadDetectorInfo(result_ws, result_ws.getRun()['Filename'].value, self.relocate_dets)
             else:
                 self.log('Loading detector info from file ' + self.det_cal_file)
                 self.log('Raw file detector header is superceeded') 
@@ -599,12 +604,12 @@ class DirectEnergyConversion(object):
     
 
     #-------------------------------------------------------------------------------
-    def load_data(self, runs, file_type):
+    def load_data(self, runs):
         """
         Load a run or list of runs. If a list of runs is given then
         they are summed into one.
         """
-        result_ws = common.load_runs(runs, file_type, sum=True)
+        result_ws = common.load_runs(runs, sum=True)
         self.setup_mtd_instrument(result_ws)
         return result_ws
 

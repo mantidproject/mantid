@@ -5,7 +5,6 @@
 #include <Poco/Path.h>
 #include <boost/shared_ptr.hpp>
 #include <climits>
-#include <limits>
 #include <cfloat>
 #include <typeinfo>
 #include <map>

@@ -1644,7 +1644,7 @@ class PythonAlgorithm(PyAlgorithmBase):
                 raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function."
 
         if not isinstance(proxy, IAlgorithmProxy):
-            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                    
+            raise RuntimeError, "PythonAlgorithm.executeSubAlg expects a function returning an IAlgorithm object"                
         
         proxy.setPropertyValues(*args, **kwargs)
         proxy.execute()

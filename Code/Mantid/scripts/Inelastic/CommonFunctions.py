@@ -23,13 +23,14 @@ def create_resultname(run_number, prefix='', suffix=''):
     elif type(run_number) == int:
         name = prefix + str(run_number) + '.spe' + suffix
     else:
-        name = os.path.basename(run_number)
+        name = os.path.basename(str(run_number))
         # Hack any instrument name off the front so the output is the same as if you give it a run number
         name = name.lstrip(string.ascii_letters)
         if (suffix is None):
             name = os.path.splitext(name)[0] + '.spe'
         else:
             name = os.path.splitext(name)[0] + '.spe' + suffix
+
     return name
     
 def create_dataname(input):
@@ -40,15 +41,6 @@ def create_dataname(input):
 
 # Keeps track of loaded data files so that they can be clean up easily
 _loaded_data = []
-
-#--- Temporary ----
-# This is temporary so that the correct file can be picked up for LoadDetectorInfo & LoadEventNexusMonitors
-# When the scripts do the splitting of montors correctlyt this can go
-_last_mono_file = None
-
-def last_mono_file():
-    return _last_mono_file
-#----------------------
 
 def clear_loaded_data():
     """Clears any previously loaded data workspaces
@@ -69,61 +61,60 @@ def is_loaded(filename):
     else:
         return False
     
-def mark_as_loaded(filename, is_mono_file=False):
+def mark_as_loaded(filename):
     """Mark a file as loaded.
     """
-    global _last_mono_file, _loaded_data
+    global _loaded_data
     data_name =  create_dataname(filename)
     if data_name not in _loaded_data:
         mtd.sendLogMessage("Marking %s as loaded." % filename)
         _loaded_data.append(data_name)
-    if is_mono_file:
-        _last_mono_file = filename
-        mtd.sendLogMessage("Marking %s as last mono file used." % filename)
 
-def load_runs(runs, file_type, sum=True):
+def load_runs(runs, sum=True):
     """
-    Loads a list of files, summing if the required.
-    
-    file_type is used to see if we need to keep track of a loaded mono run
-    This is a hack for the moment while the LoadDetectorInfo algorithm and 
-    splitting monitors is sorted out.
+    Loads a list of files, summing if the required.    
     """
     if type(runs) == list:
         if len(runs) == 1:
             sum = False
         if sum == True:
             if len(runs) == 0: raise RuntimeError("load_runs was supplied an empty list.")
-            result_ws = load_run(runs[0], file_type)
+            result_ws = load_run(runs[0])
             summed = 'summed-run-files'
-            if len(file_type) > 0: 
-                summed += '-' + file_type
             CloneWorkspace(result_ws, summed)
-            sum_files(summed, runs[1:], file_type)
+            sum_files(summed, runs[1:])
             result_ws = mtd[summed]
-            mark_as_loaded(summed, False)
+            mark_as_loaded(summed)
             return result_ws
         else:
             loaded = []
             for r in runs:
-                loaded.append(load_run(r, file_type))
+                loaded.append(load_run(r))
             if len(loaded) == 1:
                 return loaded[0]
             else:
                 return loaded
     else:
         # Try a single run
-        return load_run(runs, file_type)
+        return load_run(runs)
 
-def load_run(run_number, file_type='mono-sample',force=False):
+def load_run(run_number, force=False):
     """Loads run into the given workspace. 
     
-    The file_type is used to track whether this is a mono run.
-    This is a hack for the moment while the LoadDetectorInfo algorithm and 
-    splitting monitors is sorted out.
+    The AddSampleLog algorithm is used to add a Filename property
+    to the resulting workspace so that it can be retrieved later
+    in the reduction chain
+
     If force is true then the file is loaded regardless of whether
     its workspace exists already.
     """
+    # If a workspace with this name exists, then assume it is to be used in place of a file
+    if mtd.workspaceExists(str(run_number)):
+        mtd.sendLogMessage("%s already loaded as workspace." % str(run_number))
+        if type(run_number) == str: return mtd[run_number]
+        else: return run_number
+
+    # If it doesn't exists as a workspace assume we have to try and load a file
     if type(run_number) == int: 
         filename = find_file(run_number)
     elif type(run_number) == list:
@@ -154,9 +145,9 @@ def load_run(run_number, file_type='mono-sample',force=False):
         LoadRaw(filename, output_name)
         #LoadDetectorInfo(output_name, filename)
 
+    # Attach the filename to the workspace so that it can be retrieved later in the reduction chain
+    AddSampleLog(output_name, "Filename", filename)
     mtd.sendLogMessage("Loaded %s" % filename)
-    is_mono_file = file_type.startswith('mono')
-    mark_as_loaded(filename, is_mono_file)
     return mtd[output_name]
 
 def sum_files(accumulator, files, file_type):
