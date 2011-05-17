@@ -112,7 +112,7 @@ void ParamFunction::setParameter(const std::string& name, const double& value, b
     msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
-  setParameter(it - m_parameterNames.begin(),value,explicitlySet);
+  setParameter(static_cast<int>(it - m_parameterNames.begin()),value,explicitlySet);
 }
 
 /**
@@ -132,7 +132,7 @@ void ParamFunction::setParameterDescription(const std::string& name, const std::
     msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
     throw std::invalid_argument(msg.str());
   }
-  setParameterDescription(it - m_parameterNames.begin(),description);
+  setParameterDescription(static_cast<int>(it - m_parameterNames.begin()),description);
 }
 
 
@@ -335,7 +335,7 @@ int ParamFunction::activeIndex(int i)const
  */
 void ParamFunction::addTie(ParameterTie* tie)
 {
-  int iPar = tie->getIndex();
+  size_t iPar = tie->getIndex();
   bool found = false;
   for(std::vector<ParameterTie*>::size_type i=0;i<m_ties.size();i++)
   {
@@ -369,7 +369,7 @@ void ParamFunction::applyTies()
  */
 class ReferenceEqual
 {
-  const int m_i;///< index to find
+  const size_t m_i;///< index to find
 public:
   /** Constructor
    */
@@ -441,7 +441,7 @@ void ParamFunction::clearTies()
  */
 void ParamFunction::addConstraint(IConstraint* ic)
 {
-  int iPar = ic->getIndex();
+  size_t iPar = ic->getIndex();
   bool found = false;
   for(std::vector<IConstraint*>::size_type i=0;i<m_constraints.size();i++)
   {
@@ -482,7 +482,7 @@ IConstraint* ParamFunction::getConstraint(int i)const
  */
 void ParamFunction::removeConstraint(const std::string& parName)
 {
-  int iPar = parameterIndex(parName);
+  size_t iPar = parameterIndex(parName);
   for(std::vector<IConstraint*>::iterator it=m_constraints.begin();it!=m_constraints.end();it++)
   {
     if (iPar == (**it).getIndex())
@@ -553,9 +553,9 @@ bool ParamFunction::isExplicitlySet(int i)const
  */
 int ParamFunction::getParameterIndex(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
   {
-    return ref.getIndex();
+    return static_cast<int>(ref.getIndex());
   }
   return -1;
 }
@@ -566,7 +566,7 @@ int ParamFunction::getParameterIndex(const ParameterReference& ref)const
  */
 IFitFunction* ParamFunction::getContainingFunction(const ParameterReference& ref)const
 {
-  if (ref.getFunction() == this && ref.getIndex() < nParams())
+  if (ref.getFunction() == this && static_cast<int>(ref.getIndex()) < nParams())
   {
     return ref.getFunction();
   }
