@@ -7,7 +7,7 @@
 #include "MantidGeometry/MDGeometry/MDGeometryBasis.h"
 //#include "MantidGeometry/MDGeometry/MDDimension.h"
 #include "MantidGeometry/MDGeometry/MDDimensionRes.h"
-//#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+
 
 
 /** The class describes the geometry of the N-D visualisation workspace
