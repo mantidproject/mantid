@@ -136,7 +136,7 @@ namespace Mantid
       int total_specs;
       if( m_interval || m_list)
       {
-        total_specs = static_cast<int>(m_spec_list.size());
+        total_specs = m_spec_list.size();
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
@@ -166,7 +166,7 @@ namespace Mantid
       wsGrpSptr->setTitle(entry.getString("title"));
 
       if(m_numberOfPeriods>1)
-      {	
+      {
         setProperty("OutputWorkspace",boost::dynamic_pointer_cast<Workspace>(wsGrpSptr));
       }
 
