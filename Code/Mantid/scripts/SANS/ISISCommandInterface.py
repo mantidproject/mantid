@@ -528,22 +528,18 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     mantid.sendLogMessage("::SANS:: xstart,ystart="+str(XNEW*1000.)+" "+str(YNEW*1000.)) 
     _printMessage("Starting centre finding routine ...")
 
-    #make copies of the workspaces and the reduction chain object
-    samp = ReductionSingleton().sample_wksp + '_cen'
-    CloneWorkspace(ReductionSingleton().sample_wksp, samp)
     #remove this if we know running the Reducer() doesn't change it i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
-    centre_reduction.sample_wksp = samp
+    centre_reduction.sample_wksp = ReductionSingleton().sample_wksp
 
     if centre_reduction.background_subtracter:
-        can = centre_reduction.background_subtracter.workspace.wksp_name+'_cen'
-        CloneWorkspace(centre_reduction.background_subtracter.workspace.wksp_name, can)
+        can = centre_reduction.background_subtracter.workspace.wksp_name
         centre_reduction.background_subtracter.workspace.wksp_name = can
 
     centre = CentreFinder(centre_reduction, original)
     #this function moves the detector to the beam center positions defined above and returns an estimate of where the beam center is relative to the new center  
     resX_old, resY_old = centre.SeekCentre([XNEW, YNEW])
-    mantid.sendLogMessage(centre.status_str(0, XNEW, YNEW, resX_old, resY_old))
+    mantid.sendLogMessage(centre.status_str(0, resX_old, resY_old))
     
     # take first trial step
     XNEW = xstart + XSTEP
@@ -556,14 +552,14 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
             sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
 
         resX, resY = centre.SeekCentre([XNEW, YNEW])
-        mantid.sendLogMessage(centre.status_str(it, XNEW, YNEW, resX, resY))
+        mantid.sendLogMessage(centre.status_str(it, resX, resY))
         
         try :
             if not graph_handle:
                 #once we have a plot it will be updated automatically when the workspaces are updated
                 graph_handle = mantidplot.plotSpectrum(centre.QUADS, 0)
             graph_handle.activeLayer().setTitle(
-                        centre.status_str(it, XNEW, YNEW, resX, resY))
+                        centre.status_str(it, resX, resY))
         except :
             #if plotting is not available it probably means we are running outside a GUI, in which case do everything but don't plot
             pass
@@ -591,11 +587,12 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         mantid.sendLogMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP
-
+        centre.move(-XSTEP, -YSTEP)
     
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
     _printMessage("Centre coordinates updated: [" + str(XNEW)+ ", "+ str(YNEW) + ']')
+    
     return XNEW, YNEW
 
 #this is like a #define I'd like to get rid of it because it seems meaningless here

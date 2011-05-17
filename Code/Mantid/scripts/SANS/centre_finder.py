@@ -19,6 +19,7 @@ class CentreFinder():
         """
         self.reducer = setup
         self._last_pos = guess_centre
+        self.detector = None
 
     def SeekCentre(self,trial):
         """
@@ -28,11 +29,9 @@ class CentreFinder():
             @return: the asymmetry in the calculated Q in the x and y directions  
         """
         
-        currentDet = self.reducer.instrument.cur_detector().name()
+        self.detector = self.reducer.instrument.cur_detector().name()
     
-        MoveInstrumentComponent(self.reducer.sample_wksp,
-            ComponentName=currentDet, X=trial[0]-self._last_pos[0],
-            Y=trial[1]-self._last_pos[1], RelativePosition=True)
+        self.move(trial[0]-self._last_pos[0], trial[1]-self._last_pos[1])
     
         #phi masking will remove areas of the detector that we need 
         self.reducer.mask.mask_phi = False
@@ -42,10 +41,6 @@ class CentreFinder():
         self._group_into_quadrants('centre', trial[0], trial[1], suffix='_tmp')
     
         if self.reducer.background_subtracter:
-            MoveInstrumentComponent(self.reducer.background_subtracter.workspace.wksp_name,
-                ComponentName=currentDet, X=trial[0]-self._last_pos[0],
-                Y=trial[1]-self._last_pos[1], RelativePosition=True)
-            
             #reduce the can here
             self.reducer.reduce_can(self.reducer.background_subtracter.workspace.wksp_name, 'centre_can', run_Q=False)
             
@@ -58,7 +53,9 @@ class CentreFinder():
             DeleteWorkspace('Right_can')
             DeleteWorkspace('Up_can')
             DeleteWorkspace('Down_can')
+            DeleteWorkspace('centre_can')
         
+        DeleteWorkspace('centre')
         self._last_pos = trial
         
         #prepare the workspaces for "publication", after they have their standard names calculations will be done on them and they will be plotted
@@ -72,22 +69,35 @@ class CentreFinder():
     
         return self._calculate_residue()                        
     
-    def status_str(self, iter, x, y, x_res, y_res):
+    def status_str(self, iter, x_res, y_res):
         """
             Creates a human readble string from the numbers passed to it
             @param iter: iteration number
-            @param x: current x-coordinate
-            @param y: current y-coordinate
             @param x_res: asymmetry in the x direction
             @param y_res: asymmetry in y
             @return: a human readable string
         """ 
-        x_str = str(x*1000.).ljust(10)[0:9]
-        y_str = str(y*1000.).ljust(10)[0:9]
+        x_str = str(self._last_pos[0]*1000.).ljust(10)[0:9]
+        y_str = str(self._last_pos[1]*1000.).ljust(10)[0:9]
         x_res = '    SX='+str(x_res).ljust(7)[0:6]
         y_res = '    SY='+str(y_res).ljust(7)[0:6]
         return '::SANS::Itr '+str(iter)+':  ('+x_str+',  '+y_str+')'+x_res+y_res
-            
+    
+    def move(self, x, y):
+        """
+            Move the selected detector in both the can and sample workspaces, remembering the
+            that ISIS SANS team see the detector from the other side
+            @param x: the distance to move in the x (-x) direction in metres
+            @param y: the distance to move in the y (-y) direction in metres
+        """
+        x = -x
+        y = -y
+        MoveInstrumentComponent(self.reducer.sample_wksp,
+            ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
+        if self.reducer.background_subtracter:
+            MoveInstrumentComponent(self.reducer.background_subtracter.workspace.wksp_name,
+                ComponentName=self.detector, X=x, Y=y, RelativePosition=True)
+
     # Create a workspace with a quadrant value in it 
     def _create_quadrant(self, reduced_ws, quadrant, xcentre, ycentre, r_min, r_max, suffix):
         out_ws = quadrant+suffix
