@@ -78,7 +78,7 @@ private:
   void loadNexus(const std::string& fname);
 
   /// Size of the data
-  int size()const{return m_yData.size();}
+  size_t size()const{return m_yData.size();}
 
   /// The file name
   std::string m_fileName;

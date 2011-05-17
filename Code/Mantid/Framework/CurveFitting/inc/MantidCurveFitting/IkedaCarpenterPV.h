@@ -79,7 +79,7 @@ namespace Mantid
       void constFunction(double* out, const double* xValues, const int& nData) const;
 
       /// method for updating m_waveLength
-      void calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const;
+      void calWavelengthAtEachDataPoint(const double* xValues, const size_t& nData) const;
 
       /// convert voigt params to pseudo voigt params
       void convertVoigtToPseudo(const double& voigtSigmaSq, const double& voigtGamma, 

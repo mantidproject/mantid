@@ -121,18 +121,18 @@ void IkedaCarpenterPV::init()
  *  @param xValues :: x values
  *  @param nData :: length of xValues
  */
-void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const int& nData) const
+void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const size_t& nData) const
 {
     // if wavelength vector already have the right size no need for resizing it
     // further we make the assumption that no need to recalculate this vector if
     // it already has the right size
 
-    if (static_cast<int>(m_waveLength.size()) != nData)
+    if (m_waveLength.size() != nData)
     {
       m_waveLength.resize(nData);
 
       Mantid::Kernel::Unit_sptr wavelength = Mantid::Kernel::UnitFactory::Instance().create("Wavelength");
-      for (int i = 0; i < nData; i++)
+      for (size_t i = 0; i < nData; i++)
       {
         m_waveLength[i] = xValues[i]; 
       }
@@ -154,7 +154,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
                           << "Can't calculate wavelength in IkedaCarpenter.\n"
                           << "Default all wavelengths to one.\n"
                           << "Solution is to load appropriate instrument into workspace.\n";
-          for (int i = 0; i < nData; i++)
+          for (size_t i = 0; i < nData; i++)
             m_waveLength[i] = 1.0; 
         }
       }
@@ -164,7 +164,7 @@ void IkedaCarpenterPV::calWavelengthAtEachDataPoint(const double* xValues, const
                         << "Can't calculate wavelength in IkedaCarpenter.\n"
                         << "Default all wavelengths to one.\n"
                         << "Solution call setMatrixWorkspace() for function.\n";
-        for (int i = 0; i < nData; i++)
+        for (size_t i = 0; i < nData; i++)
           m_waveLength[i] = 1.0; 
       
       }

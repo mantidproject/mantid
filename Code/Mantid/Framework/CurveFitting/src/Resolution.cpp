@@ -179,7 +179,7 @@ void Resolution::loadNexus(const std::string& fname)
   MatrixWorkspace_sptr resData = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
   
   const bool hist = resData->isHistogramData();
-  const int nbins = resData->blocksize();
+  const size_t nbins = resData->blocksize();
 
   double first = resData->readX(0)[0];
   double last;
@@ -188,7 +188,7 @@ void Resolution::loadNexus(const std::string& fname)
   double adjustX = ( first + last ) / 2;
 
 
-  for ( int i = 0; i < nbins; i++ )
+  for ( size_t i = 0; i < nbins; i++ )
   {
     double x = 0.0;
     m_yData.push_back(resData->readY(0)[i]);

@@ -361,7 +361,7 @@ void Fit1D::exec()
   {
     g_log.warning("EndX out of range! Set to end of frame");
     endX = XValues.back();
-    m_maxX = YValues.size();
+    m_maxX = static_cast<int>(YValues.size());
   }
   else
   {
@@ -495,7 +495,7 @@ void Fit1D::exec()
   int status;
   double size; // for simplex algorithm
   double finalCostFuncVal;
-  double dof = l_data.n - l_data.p;  // dof stands for degrees of freedom
+  double dof = static_cast<double>(l_data.n - l_data.p);  // dof stands for degrees of freedom
 
   // Standard least-squares used if derivative function defined otherwise simplex
   Progress prog(this,0.0,1.0,maxInterations);
@@ -756,7 +756,7 @@ FitData::FitData(Fit1D* fit, const std::string& fixed):fit1D(fit)
     p = 0;
     for(int i=0; i<int(active.size()); i++)
         if (active[i])
-            J.m_map[i] = p++;
+            J.m_map[i] = static_cast<int>(p++);
         else
             J.m_map[i] = -1;
 }

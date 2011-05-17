@@ -129,7 +129,7 @@ void Linear::exec()
   progress(0.3);
   
   // If masked bins present, need to recalculate numPoints here
-  if (maskedBins) numPoints = unmaskedY.size();
+  if (maskedBins) numPoints = static_cast<int>(unmaskedY.size());
   // If no points left for any reason, bail out
   if (numPoints == 0)
   {
@@ -229,7 +229,7 @@ void Linear::setRange(const MantidVec& X, const MantidVec& Y)
       g_log.warning("EndX out of range! Set to end of frame");
       endX = X.back();
     }
-    m_maxX = Y.size();
+    m_maxX = static_cast<int>(Y.size());
   }
   else
   {
