@@ -60,7 +60,7 @@ namespace API
           throw std::invalid_argument("Dimension "+it->first+" dos not exist in workspace "+ws->getName());
         }
         m_dimensions[it->second] = dim;
-        m_dataSize *= dim->getNBins();
+        m_dataSize *= static_cast<int>(dim->getNBins());
       }
 
       if (m_dataSize == 0)

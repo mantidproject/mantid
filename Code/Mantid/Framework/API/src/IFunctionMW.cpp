@@ -91,7 +91,7 @@ namespace API
       {
         g_log.warning("WorkspaceIndex not set, defaulting to 0");
       }
-      else if (index >= mws->getNumberHistograms())
+      else if (index >= static_cast<int>(mws->getNumberHistograms()))
       {
         throw std::range_error("WorkspaceIndex outside range");
       }
@@ -145,7 +145,7 @@ namespace API
       m_weights.reset(new double[m_dataSize]);
       bool isHist = x.size() > y.size();
 
-      for (int i = 0; i < m_dataSize; ++i)
+      for (int i = 0; i < static_cast<int>(m_dataSize); ++i)
       {
         if (isHist)
         {
@@ -278,7 +278,7 @@ void IFunctionMW::setMatrixWorkspace(boost::shared_ptr<const API::MatrixWorkspac
       det = inst->getDetector(det->getID());
     }
 
-    for (size_t i = 0; i < nParams(); i++)
+    for (int i = 0; i < nParams(); i++)
     {
       if ( !isExplicitlySet(i) )
       {
@@ -651,7 +651,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
 
     function(m_tmpFunctionOutputMinusStep.get(), xValues, nData);
 
-    for (size_t iP = 0; iP < nParam; iP++)
+    for (int iP = 0; iP < static_cast<int>(nParam); iP++)
     {
       if ( isActive(iP) )
       {
@@ -676,7 +676,7 @@ void IFunctionMW::calNumericalDeriv(Jacobian* out, const double* xValues, const 
         step = paramPstep - val;
         setParameter(iP, val);
 
-        for (int i = 0; i < nData; i++) {
+        for (int i = 0; i < static_cast<int>(nData); i++) {
          // out->set(i,iP, 
          //   (m_tmpFunctionOutputPlusStep[i]-m_tmpFunctionOutputMinusStep[i])/(2.0*step));
           out->set(i,iP, 
