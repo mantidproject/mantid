@@ -117,7 +117,7 @@ namespace Mantid
 
       //--------------------------------------------------------------------------------------
       ///Add the value of another property
-      virtual WorkspaceProperty& operator+=( Kernel::Property * )
+      virtual WorkspaceProperty& operator+=( Kernel::Property const * )
       {
         throw Kernel::Exception::NotImplementedError("+= operator is not implemented for WorkspaceProperty.");
         return *this;

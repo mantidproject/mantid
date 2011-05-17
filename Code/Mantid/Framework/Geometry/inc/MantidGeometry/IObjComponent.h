@@ -55,7 +55,7 @@ class DLLExport IObjComponent : public virtual IComponent
 {
 public:
   ///type string
-  virtual std::string type() {return "IObjComponent";}
+  virtual std::string type() const {return "IObjComponent";}
 
   IObjComponent();
 

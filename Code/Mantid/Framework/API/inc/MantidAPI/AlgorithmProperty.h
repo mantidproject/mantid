@@ -63,7 +63,7 @@ namespace Mantid
       ~AlgorithmProperty();
 
       ///Add the value of another property. Doesn't make sense here.
-      virtual AlgorithmProperty& operator+=( Kernel::Property *)
+      virtual AlgorithmProperty& operator+=( Kernel::Property const *)
       {
         throw Kernel::Exception::NotImplementedError("+= operator is not implemented for AlgorithmProperty.");
         return *this;

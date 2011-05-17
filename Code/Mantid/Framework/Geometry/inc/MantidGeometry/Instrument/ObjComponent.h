@@ -56,7 +56,7 @@ class DLLExport ObjComponent : public virtual IObjComponent, public Component
 {
 public:
   ///type string
-  virtual std::string type() {return "PhysicalComponent";}
+  virtual std::string type() const {return "PhysicalComponent";}
 
   /// Constructor for parametrized component
   ObjComponent(const IComponent* base, const ParameterMap * map);

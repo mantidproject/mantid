@@ -44,11 +44,11 @@ Property::~Property()
 * @param right :: The right hand side value
 * @return pointer to this
 */
-Property& Property::operator=( const Property& right )
-{
-  UNUSED_ARG(right);
-  return *this;
-}
+//Property& Property::operator=( const Property& right )
+//{
+//  UNUSED_ARG(right);
+//  return *this;
+//}
 
 /** Get the property's name
  *  @return The name of the property
@@ -154,23 +154,6 @@ std::string Property::units() const
 void Property::setUnits(std::string unit)
 {
   m_units = std::string(unit); //force the copy constructor
-}
-
-
-
-
-//-------------------------------------------------------------------------------------------------
-/** Add to the property.
- * @param rhs :: the property to get more information
- * @return the augmented property
- * @throw NotImplementedError always, since this should have been overridden
- */
-Property& Property::operator+=( Property const * rhs )
-{
-  UNUSED_ARG(rhs);
-  std::stringstream msg;
-  msg << "Property object '" << m_name << "' of type '" << type() << "' has not implemented a operator+=() method.";
-  throw Exception::NotImplementedError(msg.str());
 }
 
 //-------------------------------------------------------------------------------------------------

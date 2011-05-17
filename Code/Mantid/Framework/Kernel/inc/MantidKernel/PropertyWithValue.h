@@ -302,7 +302,7 @@ public:
   {
     if ( &right == this ) return *this;
     // Chain the base class assignment operator for clarity (although it does nothing)
-    Property::operator=( right );
+    //Property::operator=( right );
     m_value = right.m_value;
     // Delete the existing validator
     delete m_validator;

@@ -122,7 +122,7 @@ public:
   }
 
   /// Add to this
-  virtual Property& operator+=( Property const * rhs );
+  virtual Property& operator+=( Property const * rhs ) = 0;
   virtual void filterByTime(const Kernel::DateAndTime start, const Kernel::DateAndTime stop);
   virtual void splitByTime(Kernel::TimeSplitterType& splitter, std::vector< Property * > outputs) const;
 
@@ -146,10 +146,11 @@ protected:
   Property( const std::string& name, const std::type_info& type, const unsigned int direction = Direction::Input);
   /// Copy constructor
   Property( const Property& right );
-  /// Copy assignment operator
-  virtual Property& operator=( const Property& right );
 
 private:
+  /// Private, unimplemented copy assignment operator
+  Property& operator=( const Property& right );
+
   /// The name of the property
   const std::string m_name;
   /// Longer, optional description of property

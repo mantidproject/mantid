@@ -17,6 +17,7 @@ public:
   std::string setValue( const std::string&) { return ""; }
   bool isDefault() const { return true; }
   std::string getDefault() const { return "Is not implemented in this class, should be overriden"; }
+  Property& operator+=( Property const * ) { return *this; }
 };
 
 class PropertyTest : public CxxTest::TestSuite
