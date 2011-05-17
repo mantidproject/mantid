@@ -62,8 +62,8 @@ private:
   void execEvent();
   void runMaskDetectors();
 
-  double calculateFlightpath(const std::size_t& spectrum, bool& isMonitor) const;
-  size_t unwrapX(const MantidVec&, MantidVec&, const double& Ld);
+  double calculateFlightpath(const int& spectrum, bool& isMonitor) const;
+  int unwrapX(const MantidVec&, MantidVec&, const double& Ld);
   void getTofRangeData(const bool);
   double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace
@@ -73,8 +73,8 @@ private:
   double m_Tmin; ///< The start of the time-of-flight frame
   double m_Tmax; ///< The end of the time-of-flight frame
   double m_frameWidth; ///< The width of the frame cached to speed up things
-  std::size_t m_numberOfSpectra; ///< The number of spectra in the workspace
-  std::size_t m_XSize; ///< The size of the X vectors in the input workspace
+  int m_numberOfSpectra; ///< The number of spectra in the workspace
+  int m_XSize; ///< The size of the X vectors in the input workspace
   /// Progress reporting
   API::Progress* m_progress;
 };

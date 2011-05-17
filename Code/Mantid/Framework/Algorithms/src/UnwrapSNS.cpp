@@ -123,8 +123,8 @@ void UnwrapSNS::exec()
   // Get the "reference" flightpath (currently passed in as a property)
   m_LRef = getProperty("LRef");
 
-  m_XSize = m_inputWS->dataX(0).size();
-  m_numberOfSpectra = m_inputWS->getNumberHistograms();
+  m_XSize = static_cast<int>(m_inputWS->dataX(0).size());
+  m_numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << m_numberOfSpectra << "\n";
 
 
@@ -264,7 +264,7 @@ void UnwrapSNS::execEvent()
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained
  */
-double UnwrapSNS::calculateFlightpath(const size_t& spectrum, bool& isMonitor) const
+double UnwrapSNS::calculateFlightpath(const int& spectrum, bool& isMonitor) const
 {
   double Ld = -1.0;
   try
@@ -294,7 +294,7 @@ double UnwrapSNS::calculateFlightpath(const size_t& spectrum, bool& isMonitor) c
   return Ld;
 }
 
-size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const double& Ld)
+int UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const double& Ld)
 {
   MantidVec tempX_L; // lower half - to be frame wrapped
   tempX_L.reserve(m_XSize);
@@ -305,8 +305,8 @@ size_t UnwrapSNS::unwrapX(const MantidVec& datain, MantidVec& dataout, const dou
 
   double filterVal = m_Tmin * Ld / m_LRef;
   dataout.clear();
-  size_t specialBin = 0;
-  for (size_t bin = 0; bin < m_XSize; ++bin)
+  int specialBin = 0;
+  for (int bin = 0; bin < m_XSize; ++bin)
   {
     // This is the time-of-flight value under consideration in the current iteration of the loop
     const double tof = datain[bin];
@@ -349,7 +349,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
     }
     else
     {
-      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
       {
         temp = m_inputWS->dataX(workspaceIndex).front();
         if (temp < m_Tmin)
@@ -373,7 +373,7 @@ void UnwrapSNS::getTofRangeData(const bool isEvent)
     }
     else
     {
-      for (size_t workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
+      for (int workspaceIndex = 0; workspaceIndex < m_numberOfSpectra; workspaceIndex++)
       {
         temp = m_inputWS->dataX(workspaceIndex).back();
         if (temp > m_Tmax)
