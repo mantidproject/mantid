@@ -42,6 +42,7 @@ private:
       
     size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
+      UNUSED_ARG(dnd);	UNUSED_ARG(selected_cells);	UNUSED_ARG(starting_cell);	UNUSED_ARG(pix_buf);UNUSED_ARG(n_pix_in_buffer);
       return 0;
     }
 //    MOCK_METHOD0(getNPix, uint64_t());
@@ -106,11 +107,11 @@ public:
 	}
 	void testReallocateBuffer(){
 
-		std::vector<char> *data_buf;
+		std::vector<char> *data_buf(NULL);
 		TSM_ASSERT_THROWS_NOTHING("retrievimng allocated memory should not throw",data_buf  = points->get_pBuffer(1000));
 		(*data_buf)[0]='B';
 		// this should do nothing as nPoints = 0;
-		std::vector<char> *buf_again;
+		std::vector<char> *buf_again(NULL);
 	    TSM_ASSERT_THROWS_NOTHING("this should not change the buffer and should not throw",buf_again  = points->get_pBuffer(500));
 		TSM_ASSERT_EQUALS("The data in the buffer should not change too",(*data_buf)[0],(*buf_again)[0]);
 		TSM_ASSERT_EQUALS("The data in the buffer should not change",'B',(*buf_again)[0]);

@@ -29,13 +29,15 @@ private:
   
 	MockFileFormat(const char *file_name):IMD_FileFormat(file_name){};
     MOCK_CONST_METHOD0(is_open, bool());
-    virtual void read_MDImg_data(Mantid::MDDataObjects::MDImage& dnd)
+    virtual void read_MDImg_data(Mantid::MDDataObjects::MDImage& )
     {
 		// this function fills data arrays with values obtained from Hdd
     }
     MOCK_METHOD2(read_pix, bool(Mantid::MDDataObjects::MDDataPoints&,bool nothrow)); 
     size_t read_pix_subset(const MDImage &dnd,const std::vector<size_t> &selected_cells,size_t starting_cell,std::vector<char> &pix_buf, size_t &n_pix_in_buffer)
     {
+		UNUSED_ARG(dnd);	UNUSED_ARG(selected_cells);	UNUSED_ARG(starting_cell);	UNUSED_ARG(pix_buf);UNUSED_ARG(n_pix_in_buffer);
+
       return 0;
     }
     MOCK_METHOD0(getNPix, uint64_t());
@@ -45,7 +47,7 @@ private:
    MOCK_METHOD1(read_basis,void(Mantid::Geometry::MDGeometryBasis &));
    void read_MDGeomDescription(Mantid::Geometry::MDGeometryDescription &description){
 	  using namespace Mantid::Geometry;
-	  for(int i=0;i<description.getNumDims();i++){
+	  for(unsigned int i=0;i<description.getNumDims();i++){
 		  description.pDimDescription(i)->nBins=50;
 	  }
 

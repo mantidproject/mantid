@@ -103,7 +103,7 @@ public:
 
   void testMDPoint4fx1dx2u8Constructors()
   {
-    MDDataPoint<float,uint8_t>  *pPoints;
+    MDDataPoint<float,uint8_t>  *pPoints(NULL);
     char *dataBuf(NULL);
     // this constructor acutally owerwirtes default value for 8-bit fields as a TOF-kind of pixel is constructed which redefines 2 first fields as 32-bit field; MESS!
 
@@ -131,7 +131,7 @@ public:
 
   void testMDPointDefaultConstructor()
   {
-    MDDataPoint<float,uint16_t> *pPoint;
+    MDDataPoint<float,uint16_t> *pPoint(NULL);
     char *dataBuf(NULL);
     MDPointStructure defaultPoint;
     MDPointDescription sig(defaultPoint,fieldNames4D);
