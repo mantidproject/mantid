@@ -357,7 +357,7 @@ protected:
   /// Function initialization. Declare function parameters in this method.
   virtual void init(){};
   /// Declare a new parameter
-  virtual void declareParameter(const std::string& name,double initValue = 0) = 0;
+  virtual void declareParameter(const std::string& name, double initValue = 0, const std::string& description="") = 0;
 
   /// Create an instance of a tie without actually tying it to anything
   virtual ParameterTie* createTie(const std::string& parName);

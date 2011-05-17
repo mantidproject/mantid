@@ -709,7 +709,7 @@ void CompositeFunction::addTie(ParameterTie* tie)
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
  */
-void CompositeFunction::declareParameter(const std::string& name,double initValue )
+void CompositeFunction::declareParameter(const std::string& name, double initValue, const std::string& description)
 {
   (void) name; //Avoid compiler warning
   (void) initValue; //Avoid compiler warning

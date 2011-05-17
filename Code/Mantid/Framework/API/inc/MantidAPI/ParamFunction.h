@@ -67,10 +67,14 @@ public:
 
   /// Set i-th parameter
   virtual void setParameter(int, const double& value, bool explicitlySet = true);
+  /// Set i-th parameter description
+  virtual void setParameterDescription(int, const std::string& description);
   /// Get i-th parameter
   virtual double getParameter(int i)const;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+  /// Set description of parameter by name.
+  virtual void setParameterDescription(const std::string& name, const std::string& description);
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const;
   /// Total number of parameters
@@ -81,6 +85,8 @@ public:
   //virtual int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const;
+  /// Returns the description of parameter i
+  virtual std::string parameterDescription(int i)const;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(int i)const;
 
@@ -90,6 +96,8 @@ public:
   virtual int indexOfActive(int i)const;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const;
+  /// Returns the name of active parameter i
+  virtual std::string descriptionOfActive(int i)const;
 
   /// Check if a declared parameter i is active
   virtual bool isActive(int i)const;
@@ -133,7 +141,7 @@ protected:
   /// Function initialization. Declare function parameters in this method.
   virtual void init(){};
   /// Declare a new parameter
-  virtual void declareParameter(const std::string& name,double initValue = 0);
+  virtual void declareParameter(const std::string& name,double initValue = 0, const std::string& description="");
 
   /// Add a new tie
   virtual void addTie(ParameterTie* tie);
@@ -156,10 +164,8 @@ private:
   std::vector<IConstraint*> m_constraints;
   /// Flags of explicitly set parameters
   std::vector<bool> m_explicitlySet;
-  /// Temporary data storage used in functionDeriv
-  //mutable boost::shared_array<double> m_tmpFunctionOutputMinusStep;
-  /// Temporary data storage used in functionDeriv
-  //mutable boost::shared_array<double> m_tmpFunctionOutputPlusStep;
+  /// parameter descriptions
+  std::vector<std::string> m_parameterDescriptions;
 };
 
 } // namespace API

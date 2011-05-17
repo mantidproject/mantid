@@ -20,6 +20,7 @@ ParamFunction::ParamFunction(const ParamFunction& f)
 {
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
 }
 
@@ -28,6 +29,7 @@ ParamFunction& ParamFunction::operator=(const ParamFunction& f)
 {
   m_indexMap.assign(f.m_indexMap.begin(),f.m_indexMap.end());
   m_parameterNames.assign(f.m_parameterNames.begin(),f.m_parameterNames.end());
+  m_parameterDescriptions.assign(f.m_parameterDescriptions.begin(),f.m_parameterDescriptions.end());
   m_parameters.assign(f.m_parameters.begin(),f.m_parameters.end());
   return *this;
 }
@@ -66,6 +68,19 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
   }
 }
 
+/** Sets a new parameter description to the i-th parameter.
+ *  @param i :: The parameter index
+ *  @param description :: New parameter description
+ */
+void ParamFunction::setParameterDescription(int i, const std::string& description)
+{
+  if (i >= nParams() || i < 0)
+  {
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  }
+  m_parameterDescriptions[i] = description;
+}
+
 /** Get the i-th parameter.
  *  @param i :: The parameter index
  *  @return the value of the requested parameter
@@ -99,6 +114,27 @@ void ParamFunction::setParameter(const std::string& name, const double& value, b
   }
   setParameter(it - m_parameterNames.begin(),value,explicitlySet);
 }
+
+/**
+ * Sets a new description to a parameter by name.
+ * @param name :: The name of the parameter.
+ * @param description :: New parameter description
+ */
+void ParamFunction::setParameterDescription(const std::string& name, const std::string& description)
+{
+  std::string ucName(name);
+  //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
+  std::vector<std::string>::const_iterator it = 
+    std::find(m_parameterNames.begin(),m_parameterNames.end(),ucName);
+  if (it == m_parameterNames.end())
+  {
+    std::ostringstream msg;
+    msg << "ParamFunction parameter ("<<ucName<<") does not exist.";
+    throw std::invalid_argument(msg.str());
+  }
+  setParameterDescription(it - m_parameterNames.begin(),description);
+}
+
 
 /**
  * Parameters by name.
@@ -152,12 +188,27 @@ std::string ParamFunction::parameterName(int i)const
   }
   return m_parameterNames[i];
 }
+
+/** Returns the description of parameter i
+ * @param i :: The index of a parameter
+ * @return the description of the parameter at the requested index
+ */
+std::string ParamFunction::parameterDescription(int i)const
+{
+  if (i >= nParams() || i < 0)
+  {
+    throw std::out_of_range("ParamFunction parameter index out of range.");
+  }
+  return m_parameterDescriptions[i];
+}
+
 /**
  * Declare a new parameter. To used in the implementation'c constructor.
  * @param name :: The parameter name.
  * @param initValue :: The initial value for the parameter
+ * @param description :: The description for the parameter
  */
-void ParamFunction::declareParameter(const std::string& name,double initValue )
+void ParamFunction::declareParameter(const std::string& name,double initValue, const std::string& description)
 {
   std::string ucName(name);
   //std::transform(name.begin(), name.end(), ucName.begin(), toupper);
@@ -172,6 +223,7 @@ void ParamFunction::declareParameter(const std::string& name,double initValue )
 
   m_indexMap.push_back(nParams());
   m_parameterNames.push_back(ucName);
+  m_parameterDescriptions.push_back(description);
   m_parameters.push_back(initValue);
   m_explicitlySet.push_back(false);
 }
@@ -197,6 +249,16 @@ int ParamFunction::indexOfActive(int i)const
 std::string ParamFunction::nameOfActive(int i)const
 {
   return m_parameterNames[indexOfActive(i)];
+}
+
+/**
+ * Returns the description of an active parameter.
+ * @param i :: The index of an active parameter
+ * @return the description of the active parameter
+ */
+std::string ParamFunction::descriptionOfActive(int i)const
+{
+  return m_parameterDescriptions[indexOfActive(i)];
 }
 
 /**
@@ -458,6 +520,7 @@ void ParamFunction::clearAllParameters()
 
   m_parameters.clear();
   m_parameterNames.clear();
+  m_parameterDescriptions.clear();
   m_indexMap.clear();
 }
 
