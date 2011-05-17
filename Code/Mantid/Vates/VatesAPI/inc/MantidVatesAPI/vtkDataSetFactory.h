@@ -87,6 +87,9 @@ public:
   /// Get the name of the type.
   virtual std::string getFactoryTypeName() const =0;
 
+  /// Dimensionalities of interest.
+  enum{OneDimensional=1, TwoDimensional=2, ThreeDimensional=3, FourDimensional=4};
+
 protected:
 
   /// Typedef for internal unique shared pointer for successor types.

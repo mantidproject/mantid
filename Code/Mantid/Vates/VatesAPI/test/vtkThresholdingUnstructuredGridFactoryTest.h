@@ -108,7 +108,7 @@ private:
         new FakeIMDDimension("z"))));
     EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(IMDDimension_const_sptr(
       new FakeIMDDimension("t"))));
-    EXPECT_CALL(*pMockWs, getNumDims()).Times(6).WillRepeatedly(Return(4));
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(6).WillRepeatedly(Return(VecIMDDimension_const_sptr(4)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -150,7 +150,7 @@ private:
         IMDDimension_const_sptr(new FakeIMDDimension("z"))));
     EXPECT_CALL(*pMockWs, getTDimension()).Times(AtLeast(1)).WillRepeatedly(Return(
       IMDDimension_const_sptr(new FakeIMDDimension("t"))));
-    EXPECT_CALL(*pMockWs, getNumDims()).Times(2).WillRepeatedly(Return(4));
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(4)));
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -210,7 +210,7 @@ private:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(2)); //2 dimensions on the workspace.
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
@@ -239,7 +239,7 @@ private:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNumDims()).Times(1).WillOnce(Return(2)); //2 dimensions on the workspace.
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(1).WillOnce(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     Mantid::API::IMDWorkspace_sptr ws_sptr(pMockWs);
 
@@ -258,7 +258,7 @@ private:
     using namespace testing;
 
     MockIMDWorkspace* pMockWs = new MockIMDWorkspace;
-    EXPECT_CALL(*pMockWs, getNumDims()).Times(2).WillRepeatedly(Return(2)); //2 dimensions on the workspace.
+    EXPECT_CALL(*pMockWs, getNonIntegratedDimensions()).Times(2).WillRepeatedly(Return(VecIMDDimension_const_sptr(2))); //2 dimensions on the workspace.
 
     MockvtkDataSetFactory* pMockFactorySuccessor = new MockvtkDataSetFactory;
     EXPECT_CALL(*pMockFactorySuccessor, initialize(_)).Times(1); //expect it then to call initialize on the successor.
