@@ -135,10 +135,10 @@ namespace Mantid
       for (int64_t i=0; i < this->nGroups; i++)
         this->groupedGhostMaps.push_back( new GhostSourcesMap() );
 
-      size_t numInPixels = rawGhostMap->size() / NUM_GHOSTS;
+      int numInPixels = static_cast<int>(rawGhostMap->size()) / NUM_GHOSTS;
       size_t fileIndex = 0;
 
-      for (size_t inPixelId = 0; inPixelId < numInPixels; inPixelId++)
+      for (int inPixelId = 0; inPixelId < numInPixels; inPixelId++)
       {
         //Find the input workspace index corresponding to this input Pixel ID
         detid2index_map::iterator it;
@@ -161,7 +161,7 @@ namespace Mantid
 
             //This is where the ghost ends up
             GhostDestinationValue ghostVal = (*rawGhostMap)[fileIndex];
-            size_t ghostPixelId = ghostVal.pixelId;
+            int ghostPixelId = ghostVal.pixelId;
 
             //Don't do anything if the weight is <0
             if (ghostVal.weight > 0.0)
