@@ -38,7 +38,7 @@ void ExtractSingleSpectrum::exec()
   MatrixWorkspace_const_sptr inputWorkspace = getProperty("InputWorkspace");
   // Get the desired spectrum number and check it's in range
   const int desiredSpectrum = getProperty("WorkspaceIndex");
-  if ( desiredSpectrum >= inputWorkspace->getNumberHistograms() )
+  if ( desiredSpectrum >= static_cast<int>(inputWorkspace->getNumberHistograms()) )
   {
     g_log.error("WorkspaceIndex is greater than the number of entries in this workspace.");
     throw Exception::IndexError(desiredSpectrum,inputWorkspace->getNumberHistograms(),this->name());
