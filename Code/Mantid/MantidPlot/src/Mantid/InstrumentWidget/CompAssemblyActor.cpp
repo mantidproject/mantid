@@ -359,7 +359,9 @@ int CompAssemblyActor::findDetectorIDUsingColor(int rgb)
   {
     int colorStart = (*iAssem)->getColorStartID();
     if(rgb >= colorStart && rgb < (*iAssem)->getNumberOfDetectors()+colorStart )
+    {
       return (*iAssem)->findDetectorIDUsingColor(rgb);
+    }
   }
   return -1;
 }

@@ -36,7 +36,7 @@ RectangularDetectorActor::RectangularDetectorActor(boost::shared_ptr<Mantid::Geo
   {
     BoundingBox compBox;
     mDet->getBoundingBox(compBox);
-    mNumberOfDetectors = mDet->nelements();
+    mNumberOfDetectors =  mDet->xpixels() * mDet->ypixels();
     this->AppendBoundingBox(compBox.minPoint(), compBox.maxPoint());
   }
 
