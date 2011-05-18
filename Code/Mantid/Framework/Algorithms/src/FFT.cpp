@@ -70,14 +70,14 @@ void FFT::exec()
   const bool isComplex = iImag != EMPTY_INT();
 
   const MantidVec& X = inWS->readX(iReal);
-  const int ySize = inWS->blocksize();
-  const int xSize = X.size();
+  const int ySize = static_cast<int>(inWS->blocksize());
+  const int xSize = static_cast<int>(X.size());
 
   if (iReal >= ySize) throw std::invalid_argument("Property Real is out of range");
   if (isComplex && iImag >= ySize) throw std::invalid_argument("Property Imaginary is out of range");
 
   //Check that the x values are evenly spaced
-  const double dx = (X.back() - X.front()) / (X.size() - 1);
+  const double dx = (X.back() - X.front()) / (static_cast<int>(X.size()) - 1);
   for(size_t i=0;i<X.size()-2;i++)
     if (std::abs(dx - X[i+1] + X[i])/dx > 1e-7) throw std::invalid_argument("X axis must be linear (all bins have same width)");
 
