@@ -229,7 +229,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::sumSpectra(API::Mat
  *  @param index :: The workspace index of the spectrum to extract
  *  @return A Workspace2D containing the extracted spectrum
  */
-API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS, const int64_t index)
+API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API::MatrixWorkspace_sptr WS, const size_t index)
 {
   // Check that given spectra are monitors
   if ( !WS->getDetector(index)->isMonitor() )
@@ -239,7 +239,7 @@ API::MatrixWorkspace_sptr CalculateTransmissionBeamSpreader::extractSpectrum(API
 
   Algorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum",0.0,0.4);
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", index);
+  childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
   childAlg->executeAsSubAlg();
   return childAlg->getProperty("OutputWorkspace");
 }
