@@ -144,7 +144,7 @@ namespace Mantid
         outputW = bin_alg->getProperty("OutputWorkspace");
 
         fitSpectra(0, I, sigI);
-        //std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
+        std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
       }
@@ -252,6 +252,8 @@ namespace Mantid
       }
       pk->setMatrixWorkspace(outputW, 0, -1, -1);
       pk->function(y,x,n);
+      for (int i = 0; i < 1000; i+=100) std::cout << y[i] <<"  ";
+      std::cout <<"\n";
 
       I = 0.0;
       for (int i = 0; i < n; i++) I+= y[i];
