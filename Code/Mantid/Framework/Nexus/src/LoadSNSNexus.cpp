@@ -71,7 +71,7 @@ void LoadSNSNexus::exec()
     // Create the root Nexus class
     NXRoot root(getPropertyValue("Filename"));
 
-    int nPeriods = root.groups().size();
+    int nPeriods = static_cast<int>(root.groups().size());
     WorkspaceGroup_sptr sptrWSGrp= WorkspaceGroup_sptr(new WorkspaceGroup);
     std::cerr << "01:" << std::endl; // REMOVE
     if (nPeriods > 1)
