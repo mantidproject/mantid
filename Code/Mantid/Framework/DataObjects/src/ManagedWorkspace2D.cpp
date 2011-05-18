@@ -82,7 +82,7 @@ void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, con
   // Now work out the number of files needed
   size_t totalBlocks = m_noVectors / m_vectorsPerBlock;
   if (m_noVectors%m_vectorsPerBlock != 0) ++totalBlocks;
-  int numberOfFiles = totalBlocks / m_blocksPerFile;
+  size_t numberOfFiles = totalBlocks / m_blocksPerFile;
   if (totalBlocks%m_blocksPerFile != 0) ++numberOfFiles;
   m_datafile.resize(numberOfFiles);
 
@@ -205,9 +205,9 @@ void ManagedWorkspace2D::readDataBlock(ManagedDataBlock2D *newBlock,size_t start
  */
 void ManagedWorkspace2D::writeDataBlock(ManagedDataBlock2D *toWrite) const
 {
-      int fileIndex = 0;
+      size_t fileIndex = 0;
       // Check whether we need to pad file with zeroes before writing data
-      if ( toWrite->minIndex() > m_indexWrittenTo+m_vectorsPerBlock && m_indexWrittenTo >= 0 )
+      if ( toWrite->minIndex() > static_cast<int>(m_indexWrittenTo+m_vectorsPerBlock) && m_indexWrittenTo >= 0 )
       {
         fileIndex = m_indexWrittenTo / (m_vectorsPerBlock * m_blocksPerFile);
 
