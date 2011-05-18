@@ -24,6 +24,8 @@
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
 #include "MantidVatesAPI/Common.h"
 #include "MantidVatesAPI/vtkDataSetToGeometry.h" 
+#include "MantidVatesAPI/GeometryXMLParser.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 
 #include <boost/functional/hash.hpp>
 #include <sstream>
@@ -120,7 +122,7 @@ int vtkRebinningCutter::RequestData(vtkInformation* vtkNotUsed(request), vtkInfo
   using Mantid::VATES::DimensionVec;
 
   //Setup is not complete until metadata has been correctly provided.
-  if(IsSetup == m_setup)
+  if(SetupDone == m_setup)
   {
     vtkInformation * inputInf = inputVector[0]->GetInformationObject(0);
     vtkDataSet * inputDataset = vtkDataSet::SafeDownCast(inputInf->Get(vtkDataObject::DATA_OBJECT()));
@@ -229,7 +231,7 @@ int vtkRebinningCutter::RequestInformation(vtkInformation* vtkNotUsed(request), 
         dimensionsVec[2], dimensionsVec[3], inputDataset);
       //First time round, rebinning has to occur.
       m_actionRequester->ask(RecalculateAll);
-      m_setup = IsSetup;
+      m_setup = SetupDone;
     }
     else
     {
@@ -306,84 +308,60 @@ void vtkRebinningCutter::SetMinThreshold(double minThreshold)
 void vtkRebinningCutter::formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim)
 {
   using Mantid::VATES::Dimension_const_sptr;
-  try
+  if(newDim.get() != NULL)
   {
-     //Requests that the dimension is found in the workspace.
-     Dimension_const_sptr wsDim = m_presenter.getDimensionFromWorkspace(newDim->getDimensionId());
-     //
-     if(newDim->getNBins() != wsDim->getNBins())
-     {
-       //The number of bins has changed. Rebinning cannot be avoided.
-       m_actionRequester->ask(RecalculateAll);
-     }
-  }
-  catch(Mantid::Kernel::Exception::NotFoundError&)
-  {
-    //This happens if the workspace is not available in the analysis data service. Hence the rebinning algorithm has not yet been run.
-    m_actionRequester->ask(RecalculateAll);
+    try
+    {
+      //Requests that the dimension is found in the workspace.
+      Dimension_const_sptr wsDim = m_presenter.getDimensionFromWorkspace(newDim->getDimensionId());
+      //
+      if(newDim->getNBins() != wsDim->getNBins())
+      {
+        //The number of bins has changed. Rebinning cannot be avoided.
+        m_actionRequester->ask(RecalculateAll);
+      }
+    }
+    catch(Mantid::Kernel::Exception::NotFoundError&)
+    {
+      //This happens if the workspace is not available in the analysis data service. Hence the rebinning algorithm has not yet been run.
+      m_actionRequester->ask(RecalculateAll);
+    }
   }
 }
 
-void vtkRebinningCutter::SetAppliedXDimensionXML(std::string xml)
+void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
 {
-  if (NULL != m_appliedXDimension.get())
+  if(SetupDone == m_setup)
   {
-    if (m_appliedXDimension->toXMLString() != xml && !xml.empty())
+    //Generate an xml representation of the existing geometry.
+    Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+    xmlBuilder.addXDimension(m_appliedXDimension);
+    xmlBuilder.addYDimension(m_appliedYDimension);
+    xmlBuilder.addZDimension(m_appliedZDimension);
+    xmlBuilder.addTDimension(m_appliedTDimension);
+    const std::string existingGeometryXML = xmlBuilder.create();
+
+    //When geometry xml is provided and that xml is different from the exising xml.
+    if(!appliedGeometryXML.empty() && existingGeometryXML != appliedGeometryXML)
     {
       this->Modified();
-      
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
+      Mantid::VATES::GeometryXMLParser xmlParser(appliedGeometryXML);
+      xmlParser.execute();
       m_actionRequester->ask(RecalculateVisualDataSetOnly);
-      //The visualisation dataset will at least need to be recalculated.
+
+      Mantid::VATES::Dimension_sptr temp = xmlParser.getXDimension();
       formulateRequestUsingNBins(temp);
       this->m_appliedXDimension = temp;
-    }
-  }
-}
 
-void vtkRebinningCutter::SetAppliedYDimensionXML(std::string xml)
-{
-  if (NULL != m_appliedYDimension.get())
-  {
-    if (m_appliedYDimension->toXMLString() != xml && !xml.empty())
-    {
-      this->Modified();
-      using Mantid::MDAlgorithms::DimensionFactory;
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester->ask(RecalculateVisualDataSetOnly);
+      temp = xmlParser.getYDimension();
       formulateRequestUsingNBins(temp);
       this->m_appliedYDimension = temp;
-    }
-  }
-}
 
-void vtkRebinningCutter::SetAppliedZDimensionXML(std::string xml)
-{
-  if (NULL != m_appliedZDimension.get())
-  {
-    if (m_appliedZDimension->toXMLString() != xml && !xml.empty())
-    {
-      this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester->ask(RecalculateVisualDataSetOnly);
+      temp = xmlParser.getZDimension();
       formulateRequestUsingNBins(temp);
       this->m_appliedZDimension = temp;
-    }
-  }
-}
 
-void vtkRebinningCutter::SetAppliedtDimensionXML(std::string xml)
-{
-  if (NULL != m_appliedTDimension.get())
-  {
-    if (m_appliedTDimension->toXMLString() != xml && !xml.empty())
-    {
-      this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionRequester->ask(RecalculateVisualDataSetOnly);
+      temp = xmlParser.getTDimension();
       formulateRequestUsingNBins(temp);
       this->m_appliedTDimension = temp;
     }
@@ -524,7 +502,7 @@ vtkDataSetFactory_sptr vtkRebinningCutter::createQuickRenderDataSetFactory(
 
 void vtkRebinningCutter::setTimeRange(vtkInformationVector* outputVector)
 {
-  if(IsSetup == m_setup)
+  if(SetupDone == m_setup)
   {
     double min = m_appliedTDimension->getMinimum();
     double max = m_appliedTDimension->getMaximum();

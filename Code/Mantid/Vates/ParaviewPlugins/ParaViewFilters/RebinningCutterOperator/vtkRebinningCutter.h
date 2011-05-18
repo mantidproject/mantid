@@ -50,7 +50,7 @@ typedef boost::shared_ptr<Mantid::MDAlgorithms::BoxImplicitFunction> BoxFunction
 ///Typedef scoped pointer to a rebinning action manager.
 typedef boost::scoped_ptr<Mantid::VATES::RebinningActionManager> RebinningActionManager_scptr;
 ///Type marks setup status
-enum SetupStatus{ IsSetup, Pending};
+enum SetupStatus{ Pending, SetupDone};
 ///Type marks wheter clipping is to be applied or ignored
 enum Clipping{ ApplyClipping, IgnoreClipping};
 ///Type marks wheter original extents should be used over box extents.
@@ -68,10 +68,7 @@ public:
   void SetClipFunction( vtkImplicitFunction * func);
   void SetMaxThreshold(double maxThreshold);
   void SetMinThreshold(double minThreshold);
-  void SetAppliedXDimensionXML(std::string xml);
-  void SetAppliedYDimensionXML(std::string xml);
-  void SetAppliedZDimensionXML(std::string xml);
-  void SetAppliedtDimensionXML(std::string xml);
+  void SetAppliedGeometryXML(std::string xml);
   void SetApplyClip(int applyClip);
   const char* GetInputGeometryXML();
   /// Paraview Related Commands. See *.xml proxy/property file --------------------------------

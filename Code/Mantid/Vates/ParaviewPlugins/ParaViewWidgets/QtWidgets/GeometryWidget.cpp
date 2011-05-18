@@ -1,7 +1,8 @@
 #include "GeometryWidget.h"
 #include "DimensionWidget.h"
-#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
-#include "MantidGeometry/MDGeometry/MDGeometry.h"
+//#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
+//#include "MantidGeometry/MDGeometry/MDGeometry.h"
+#include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include <boost/shared_ptr.hpp>
 #include <map>
 #include <functional>
@@ -31,10 +32,9 @@ GeometryWidget::GeometryWidget() : m_xDimensionWidget(NULL), m_yDimensionWidget(
 {
 }
 
-void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector)
+void GeometryWidget::constructWidget(Mantid::VATES::GeometryXMLParser& source)
 {
-
-  m_nonIntegratedVector = nonIntegratedVector;
+  source.execute();
   delete layout();
 
   QGridLayout* layout = new QGridLayout;
@@ -45,30 +45,31 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
     delete m_zDimensionWidget;
     delete m_tDimensionWidget;
   }
-  size_t size = nonIntegratedVector.size();
+  Mantid::Geometry::VecIMDDimension_sptr nonIntegratedVector = source.getNonIntegratedDimensions();
+
   //Create widget to display/control the aligned x-dimension
-  if(size > 0)
+  if(source.hasXDimension())
   {
     m_xDimensionWidget = new DimensionWidget(this, "x Dimension", 0, nonIntegratedVector);
     layout->addWidget(m_xDimensionWidget, 0, 0);
   }
 
   //Create widget to display/control the aligned y-dimension
-  if(size > 1)
+  if(source.hasYDimension())
   {
     m_yDimensionWidget = new DimensionWidget(this, "y Dimension", 1, nonIntegratedVector);
     layout->addWidget(m_yDimensionWidget, 1, 0);
   }
 
   //Create widget to display/control the aligned z-dimension
-  if(size > 2)
+  if(source.hasZDimension())
   {
     m_zDimensionWidget = new DimensionWidget(this, "z Dimension", 2, nonIntegratedVector);
     layout->addWidget(m_zDimensionWidget, 2, 0);
   }
 
   //Create widget to display/control the aligned t-dimension
-  if(size > 3)
+  if(source.hasTDimension())
   {
     m_tDimensionWidget = new DimensionWidget(this, "t Dimension", 3, nonIntegratedVector);
     layout->addWidget(m_tDimensionWidget, 3, 0);
@@ -79,59 +80,29 @@ void GeometryWidget::constructWidget(std::vector<boost::shared_ptr<Mantid::Geome
 }
 
 
-QString GeometryWidget::getXDimensionXML() const
+QString GeometryWidget::getGeometryXML() const
 {
   validateSetup();
   //Get the selected alignment for the xdimension.
+  Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
   if(hasXDimension())
   {
-    return m_xDimensionWidget->getDimension()->toXMLString().c_str();
+    xmlBuilder.addXDimension(m_xDimensionWidget->getDimension());
   }
-  else
-  {
-    return "";
-  }
-}
-
-QString GeometryWidget::getYDimensionXML() const
-{
-  validateSetup();
   if(hasYDimension())
   {
-    return m_yDimensionWidget->getDimension()->toXMLString().c_str();
+    xmlBuilder.addYDimension(m_yDimensionWidget->getDimension());
   }
-  else
-  {
-    return "";
-  }
-}
-
-QString GeometryWidget::getZDimensionXML() const
-{
-  validateSetup();
   if(hasZDimension())
   {
-    return m_zDimensionWidget->getDimension()->toXMLString().c_str();
+    xmlBuilder.addZDimension(m_zDimensionWidget->getDimension());
   }
-  else
-  {
-    return "";
-  }
-}
-
-QString GeometryWidget::gettDimensionXML() const
-{
-  validateSetup();
   if(hasTDimension())
   {
-    return m_tDimensionWidget->getDimension()->toXMLString().c_str();
+    xmlBuilder.addTDimension(m_tDimensionWidget->getDimension());
   }
-  else
-  {
-    return "";
-  }
+  return xmlBuilder.create().c_str();
 }
-
 
 GeometryWidget::~GeometryWidget()
 {

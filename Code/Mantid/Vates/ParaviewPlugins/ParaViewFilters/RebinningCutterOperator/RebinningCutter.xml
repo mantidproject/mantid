@@ -61,26 +61,8 @@
         <SimpleStringInformationHelper /> 
        </StringVectorProperty>
        <StringVectorProperty
-         name="AppliedXDimensionXML"
-         command="SetAppliedXDimensionXML"
-         number_of_elements="1"
-         default_values="--">
-       </StringVectorProperty>
-       <StringVectorProperty
-         name="AppliedYDimensionXML"
-         command="SetAppliedYDimensionXML"
-         number_of_elements="1"
-         default_values="--">
-       </StringVectorProperty>
-       <StringVectorProperty
-         name="AppliedZDimensionXML"
-         command="SetAppliedZDimensionXML"
-         number_of_elements="1"
-         default_values="--">
-       </StringVectorProperty>
-       <StringVectorProperty
-         name="AppliedtDimensionXML"
-         command="SetAppliedtDimensionXML"
+         name="AppliedGeometryXML"
+         command="SetAppliedGeometryXML"
          number_of_elements="1"
          default_values="--">
        </StringVectorProperty>

@@ -27,10 +27,7 @@ public:
   /// Called by presenter to force progress information updating.
   void UpdateAlgorithmProgress(double progress);
 
-  void SetAppliedXDimensionXML(std::string xml);
-  void SetAppliedYDimensionXML(std::string xml);
-  void SetAppliedZDimensionXML(std::string xml);
-  void SetAppliedtDimensionXML(std::string xml);
+  void SetAppliedGeometryXML(std::string xml);
 
   const char* GetInputGeometryXML();
 

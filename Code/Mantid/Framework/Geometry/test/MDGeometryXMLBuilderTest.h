@@ -74,6 +74,18 @@ void testCannotAddDimensionTwice()
   TSM_ASSERT("Addition of same dimension to set should have failed.", !builder.addOrdinaryDimension(dimension));
 }
 
+void testAddingNullDimensionReturnsFalse()
+{
+  Mantid::Geometry::IMDDimension* pDim = NULL;
+  IMDDimension_const_sptr nullDimension(pDim);
+  MDGeometryBuilderXML builder;
+  TSM_ASSERT("Adding null dimension should return false.", !builder.addOrdinaryDimension(nullDimension));
+  TSM_ASSERT("Adding null x dimension should return false.", !builder.addXDimension(nullDimension));
+  TSM_ASSERT("Adding null y dimension should return false.", !builder.addYDimension(nullDimension));
+  TSM_ASSERT("Adding null z dimension should return false.", !builder.addZDimension(nullDimension));
+  TSM_ASSERT("Adding null t dimension should return false.", !builder.addTDimension(nullDimension));
+}
+
 
 
 void testWithOrinaryDimensionOnly()

@@ -36,6 +36,7 @@
 #include <memory>
 #include <boost/shared_ptr.hpp>
 #include "WidgetDllOption.h"
+#include "MantidVatesAPI/GeometryXMLParser.h"
 
 //Foward decs
 class QLabel;
@@ -58,12 +59,9 @@ class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget
 {
 Q_OBJECT
 public:
-Q_PROPERTY(QString XDimensionXML READ getXDimensionXML WRITE setXDimensionXML NOTIFY valueChanged)
-Q_PROPERTY(QString YDimensionXML READ getYDimensionXML WRITE setYDimensionXML NOTIFY valueChanged)
-Q_PROPERTY(QString ZDimensionXML READ getZDimensionXML WRITE setZDimensionXML NOTIFY valueChanged)
-Q_PROPERTY(QString tDimensionXML READ gettDimensionXML WRITE settDimensionXML NOTIFY valueChanged)
+Q_PROPERTY(QString GeometryXML READ getGeometryXML WRITE setGeometryXML NOTIFY valueChanged)
 GeometryWidget();
-void constructWidget(std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedVector);
+void constructWidget(Mantid::VATES::GeometryXMLParser& source);
 
 void childAppliedNewDimensionSelection(
     const unsigned int oldDimensionIndex,
@@ -74,17 +72,8 @@ void dimensionWidgetChanged(BinChangeStatus status);
 
 ~GeometryWidget();
 
-/// Gets the x dimension in a serialized form
-QString getXDimensionXML() const;
-
-/// Gets the y dimension in a serialized form
-QString getYDimensionXML() const;
-
-/// Gets the z dimension in a serialzed form
-QString getZDimensionXML() const;
-
-/// Gets the t dimension in a serialzed form
-QString gettDimensionXML() const;
+/// Gets the chosen geometry configuration.
+QString getGeometryXML() const;
 
 bool hasXDimension() const
 {
@@ -106,29 +95,12 @@ bool hasTDimension() const
   return m_tDimensionWidget != NULL;
 }
 
-void setXDimensionXML(QString value)
+void setGeometryXML(QString value)
 {
   //Do nothing.
   UNUSED_ARG(value);
 }
 
-void setYDimensionXML(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
-
-void setZDimensionXML(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
-
-void settDimensionXML(QString value)
-{
-  //Do nothing.
-  UNUSED_ARG(value);
-}
 
 bool isSetup() const
 {
@@ -154,8 +126,6 @@ DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
 DimensionWidget* m_tDimensionWidget;
 bool m_isConstructed;
-
-std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_nonIntegratedVector;
 
 };
 

@@ -37,18 +37,19 @@ public:
  */
 bool MDGeometryBuilderXML::addOrdinaryDimension(IMDDimension_const_sptr dimensionToAdd) const
 {
-  CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
-  DimensionContainerType::iterator location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
-  m_changed = true;
-  if(location == m_vecDimensions.end())
+  bool bAdded = false; //Addition fails by default.
+  if(dimensionToAdd.get() != NULL)
   {
-    m_vecDimensions.push_back(dimensionToAdd);
-    return true;
+    CompareIMDDimension_const_sptr comparitor(dimensionToAdd);
+    DimensionContainerType::iterator location = std::find_if(m_vecDimensions.begin(), m_vecDimensions.end(), comparitor);
+    if(location == m_vecDimensions.end())
+    {
+      m_vecDimensions.push_back(dimensionToAdd);
+      bAdded = true;
+      m_changed = true;
+    }
   }
-  else
-  {
-    return false;
-  }
+  return bAdded;
 }
 
 /**
@@ -58,8 +59,15 @@ bool MDGeometryBuilderXML::addOrdinaryDimension(IMDDimension_const_sptr dimensio
  */
 bool MDGeometryBuilderXML::addXDimension(IMDDimension_const_sptr dimension) const
 {
-  m_spXDimension = dimension;
-  return addOrdinaryDimension(dimension);
+  bool bAdded = false;
+  if(dimension.get() != NULL)
+  {
+    addOrdinaryDimension(dimension);
+    m_spXDimension = dimension;
+    m_changed = true;
+    bAdded = true;
+  }
+  return bAdded;
 }
 
 /**
@@ -69,8 +77,15 @@ bool MDGeometryBuilderXML::addXDimension(IMDDimension_const_sptr dimension) cons
  */
 bool MDGeometryBuilderXML::addYDimension(IMDDimension_const_sptr dimension) const
 {
-  m_spYDimension = dimension;
-  return addOrdinaryDimension(dimension);
+  bool bAdded = false;
+  if(dimension.get() != NULL)
+  {
+    addOrdinaryDimension(dimension);
+    m_spYDimension = dimension;
+    m_changed = true;
+    bAdded = true;
+  }
+  return bAdded;
 }
 
 /**
@@ -80,8 +95,15 @@ bool MDGeometryBuilderXML::addYDimension(IMDDimension_const_sptr dimension) cons
  */
 bool MDGeometryBuilderXML::addZDimension(IMDDimension_const_sptr dimension) const
 {
-  m_spZDimension = dimension;
-  return addOrdinaryDimension(dimension);
+  bool bAdded = false;
+  if(dimension.get() != NULL)
+  {
+    addOrdinaryDimension(dimension);
+    m_spZDimension = dimension;
+    m_changed = true;
+    bAdded = true;
+  }
+  return bAdded;
 }
 
 /**
@@ -91,8 +113,15 @@ bool MDGeometryBuilderXML::addZDimension(IMDDimension_const_sptr dimension) cons
  */
 bool MDGeometryBuilderXML::addTDimension(IMDDimension_const_sptr dimension) const
 {
-  m_spTDimension = dimension;
-  return addOrdinaryDimension(dimension);
+  bool bAdded = false;
+  if(dimension.get() != NULL)
+  {
+    addOrdinaryDimension(dimension);
+    m_spTDimension = dimension;
+    m_changed = true;
+    bAdded = true;
+  }
+  return bAdded;
 }
 
 /**

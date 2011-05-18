@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include "MantidKernel/System.h"
+#include "MantidVatesAPI/GeometryXMLParser.h"
 
 class vtkDataSet;
 namespace Mantid
@@ -37,28 +38,12 @@ namespace Mantid
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
  Code Documentation is available at: <http://doxygen.mantidproject.org>
  */
-    class DLLExport vtkDataSetToGeometry
+    class DLLExport vtkDataSetToGeometry : public GeometryXMLParser
     {
 
     private:
 
       vtkDataSet* m_dataSet;
-
-      bool m_executed;
-
-      vtkDataSetToGeometry& operator=(const vtkDataSetToGeometry&);
-      
-      vtkDataSetToGeometry(const vtkDataSetToGeometry&);
-
-      Mantid::Geometry::IMDDimension_sptr m_xDimension;
-
-      Mantid::Geometry::IMDDimension_sptr m_yDimension;
-
-      Mantid::Geometry::IMDDimension_sptr m_zDimension;
-
-      Mantid::Geometry::IMDDimension_sptr m_tDimension;
-
-      void validate() const;
 
     public:
 
@@ -66,49 +51,11 @@ namespace Mantid
 
       ~vtkDataSetToGeometry();
 
-      void execute();
+      virtual void execute();
 
+      vtkDataSetToGeometry(const vtkDataSetToGeometry& other);
 
-      /**
-     Getter for x dimension
-     @return x dimension.
-     */
-      Mantid::Geometry::IMDDimension_sptr getXDimension() const
-      {
-        validate();
-        return m_xDimension;
-      }
-
-      /**
-     Getter for y dimension
-     @return y dimension.
-     */
-      Mantid::Geometry::IMDDimension_sptr getYDimension() const
-      {
-        validate();
-        return m_yDimension;
-      }
-
-      /**
-     Getter for z dimension
-     @return z dimension.
-     */
-      Mantid::Geometry::IMDDimension_sptr getZDimension() const
-      {
-        validate();
-        return m_zDimension;
-      }
-
-     /**
-     Getter for t dimension
-     @return t dimension.
-     */
-      Mantid::Geometry::IMDDimension_sptr getTDimension() const
-      {
-        validate();
-        return m_tDimension;
-      }
-
+      vtkDataSetToGeometry& operator=(const vtkDataSetToGeometry& other);
 
     };
   }

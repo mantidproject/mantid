@@ -19,6 +19,7 @@
 #include "MantidVatesAPI/vtkThresholdingLineFactory.h"
 #include "MantidVatesAPI/MultiDimensionalDbPresenter.h"
 #include "MantidVatesAPI/FilteringUpdateProgressAction.h"
+#include "MantidVatesAPI/GeometryXMLParser.h"
 
 #include "MantidNexus/LoadEventNexus.h"
 #include <boost/format.hpp>
@@ -168,78 +169,33 @@ void vtkEventNexusReader::SetClipFunction(vtkImplicitFunction* func)
 }
   
 /**
-  Sets applied X Dimensional xml. Provided by object panel.
+  Sets applied geometry xml. Provided by object panel.
   @xml. Dimension xml.
 */
-void vtkEventNexusReader::SetAppliedXDimensionXML(std::string xml)
+void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
 {
-  if (hasXDimension())
+  if(m_isSetup)
   {
-    if (m_appliedXDimension->toXMLString() != xml && !xml.empty())
+    //Create xml to represent the current applied geometry.
+    Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+    xmlBuilder.addXDimension(m_appliedXDimension);
+    xmlBuilder.addYDimension(m_appliedYDimension);
+    xmlBuilder.addZDimension(m_appliedZDimension);
+    xmlBuilder.addTDimension(m_appliedTDimension);
+    const std::string existingGeometryXML = xmlBuilder.create();
+    //If new xml has been provided and if that is different in any way from the existing.
+    if(!appliedGeometryXML.empty() && existingGeometryXML != appliedGeometryXML)
     {
-      this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionManager.ask(RecalculateAll);
-      this->m_appliedXDimension = temp;
-    }
-  }
-}
+      Mantid::VATES::GeometryXMLParser xmlParser(appliedGeometryXML);
+      xmlParser.execute();
 
-/**
-  Sets applied Y Dimensional xml. Provided by object panel.
-  @xml. Dimension xml.
-*/
-void vtkEventNexusReader::SetAppliedYDimensionXML(std::string xml)
-{
-  if (hasYDimension())
-  {
-    if (m_appliedYDimension->toXMLString() != xml && !xml.empty())
-    {
-      this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionManager.ask(RecalculateAll);
-      this->m_appliedYDimension = temp;
-    }
-  }
-}
+      this->m_appliedXDimension = xmlParser.getXDimension();
+      this->m_appliedYDimension = xmlParser.getYDimension();
+      this->m_appliedZDimension = xmlParser.getZDimension();
+      this->m_appliedTDimension = xmlParser.getTDimension();
 
-/**
-  Sets applied Z Dimensional xml. Provided by object panel.
-  @xml. Dimension xml.
-*/
-void vtkEventNexusReader::SetAppliedZDimensionXML(std::string xml)
-{
-  if (hasZDimension())
-  {
-    if (m_appliedZDimension->toXMLString() != xml && !xml.empty())
-    {
-      this->Modified();
-      
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
       m_actionManager.ask(RecalculateAll);
-      this->m_appliedZDimension = temp;
-    }
-  }
-}
-
-/**
-  Sets applied T Dimensional xml. Provided by object panel.
-  @xml. Dimension xml.
-*/
-void vtkEventNexusReader::SetAppliedtDimensionXML(std::string xml)
-{
-  if (hasTDimension())
-  {
-    if (m_appliedTDimension->toXMLString() != xml && !xml.empty())
-    {
       this->Modified();
-      Mantid::VATES::Dimension_sptr temp = Mantid::MDAlgorithms::createDimension(xml);
-      //The visualisation dataset will at least need to be recalculated.
-      m_actionManager.ask(RecalculateAll);
-      this->m_appliedTDimension = temp;
     }
   }
 }
@@ -320,6 +276,8 @@ void vtkEventNexusReader::doRebinning()
 
 int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkInformationVector ** vtkNotUsed(inputVector), vtkInformationVector *outputVector)
 {
+  try
+  {
   //get the info objects
   vtkInformation *outInfo = outputVector->GetInformationObject(0);
 
@@ -357,6 +315,11 @@ int vtkEventNexusReader::RequestData(vtkInformation * vtkNotUsed(request), vtkIn
   // Reset the action manager fresh for next cycle.
   m_actionManager.reset();
   return 1;
+  }
+  catch(std::exception& ex)
+  {
+    std::string msg = ex.what();
+  }
 }
 
 int vtkEventNexusReader::RequestInformation(

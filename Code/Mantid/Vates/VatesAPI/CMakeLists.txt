@@ -14,6 +14,7 @@ src/Common.cpp
 src/DimensionComparitor.cpp
 src/EscalatingRebinningActionManager.cpp
 src/FieldDataToMetadata.cpp
+src/GeometryXMLParser.cpp
 src/IMDWorkspaceProxy.cpp
 src/MetadataToFieldData.cpp
 src/MultiDimensionalDbPresenter.cpp
@@ -41,6 +42,7 @@ inc/MantidVatesAPI/DimensionComparitor.h
 inc/MantidVatesAPI/EscalatingRebinningActionManager.h
 inc/MantidVatesAPI/FieldDataToMetadata.h
 inc/MantidVatesAPI/FilteringUpdateProgressAction.h
+inc/MantidVatesAPI/GeometryXMLParser.h
 inc/MantidVatesAPI/IMDWorkspaceProxy.h
 inc/MantidVatesAPI/MetadataToFieldData.h
 inc/MantidVatesAPI/MultiDimensionalDbPresenter.h
@@ -64,6 +66,7 @@ inc/MantidVatesAPI/vtkThresholdingUnstructuredGridFactory.h
 
 set (TEST_FILES
 test/EscalatingRebinningActionManagerTest.h
+test/GeometryXMLParserTest.h
 test/vtkDataSetFactoryTest.h
 test/vtkClipperDataSetFactoryTest.h
 test/vtkDataSetToGeometryTest.h
