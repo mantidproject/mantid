@@ -81,20 +81,20 @@ private:
   void exec();
 
   void checkProperties();
-  int getXMin(const int wsIndex = 0);
-  int getXMax(const int wsIndex = 0);
+  std::size_t getXMin(const int wsIndex = 0);
+  std::size_t getXMax(const int wsIndex = 0);
   void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex);
 
   /// The input workspace
   API::MatrixWorkspace_const_sptr m_inputWorkspace;
   /// The bin index to start the cropped workspace from
-  int m_minX;
+  std::size_t m_minX;
   /// The bin index to end the cropped workspace at
-  int m_maxX;
+  std::size_t m_maxX;
   /// The spectrum index to start the cropped workspace from
-  int m_minSpec;
+  specid_t m_minSpec;
   /// The spectrum index to end the cropped workspace at
-  int m_maxSpec;
+  specid_t m_maxSpec;
   /// Flag indicating whether the input workspace has common boundaries
   bool m_commonBoundaries;
   /// Flag indicating whether we're dealing with histogram data

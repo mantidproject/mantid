@@ -15,6 +15,8 @@ namespace Mantid
 namespace Algorithms
 {
 
+using std::size_t;
+
 // Register the algorithm into the AlgorithmFactory
 DECLARE_ALGORITHM(CropWorkspace)
 
@@ -126,7 +128,7 @@ void CropWorkspace::exec()
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        const int maskIndex = (*it).first;
+        const size_t maskIndex = (*it).first;
         if ( maskIndex >= m_minX && maskIndex < m_maxX-m_histogram )
           outputWorkspace->maskBin(j,maskIndex-m_minX,(*it).second);
       }
@@ -146,7 +148,7 @@ void CropWorkspace::checkProperties()
 {
   m_minX = this->getXMin();
   m_maxX = this->getXMax();
-  const int xSize = m_inputWorkspace->readX(0).size();
+  const size_t xSize = m_inputWorkspace->readX(0).size();
   if ( m_minX > 0 || m_maxX < xSize )
   {
     if ( m_minX > m_maxX )
@@ -161,11 +163,11 @@ void CropWorkspace::checkProperties()
     }
     m_croppingInX = true;
   }
-  if ( m_minX < 0 || !m_commonBoundaries ) m_minX = 0;
-  if ( !m_commonBoundaries ) m_maxX = m_inputWorkspace->readX(0).size();
+  if ( !m_commonBoundaries ) m_minX = 0;
+  if ( !m_commonBoundaries ) m_maxX = static_cast<int>(m_inputWorkspace->readX(0).size());
 
   m_minSpec = getProperty("StartWorkspaceIndex");
-  const size_t numberOfSpectra = m_inputWorkspace->getNumberHistograms();
+  const int numberOfSpectra = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   m_maxSpec = getProperty("EndWorkspaceIndex");
   if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
 
@@ -192,10 +194,10 @@ void CropWorkspace::checkProperties()
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMin value.
  */
-int CropWorkspace::getXMin(const int wsIndex)
+size_t CropWorkspace::getXMin(const int wsIndex)
 {
   double minX_val = getProperty("XMin");
-  int xIndex = 0;
+  size_t xIndex = 0;
   if ( ! isEmpty(minX_val) )
   {//A value has been passed to the algorithm, check it and maybe store it
     const MantidVec& X = m_inputWorkspace->readX(wsIndex);
@@ -217,10 +219,10 @@ int CropWorkspace::getXMin(const int wsIndex)
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMax value.
  */
-int CropWorkspace::getXMax(const int wsIndex)
+size_t CropWorkspace::getXMax(const int wsIndex)
 {
   const MantidVec& X = m_inputWorkspace->readX(wsIndex);
-  int xIndex = X.size();
+  size_t xIndex = X.size();
   //get the value that the user entered if they entered one at all
   double maxX_val = getProperty("XMax");
   if ( ! isEmpty(maxX_val) )
@@ -247,17 +249,17 @@ void CropWorkspace::cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int in
 {
   MantidVec& Y = outputWorkspace->dataY(outIndex);
   MantidVec& E = outputWorkspace->dataE(outIndex);
-  const int size = Y.size();
-  int startX = this->getXMin(inIndex);
+  const size_t size = Y.size();
+  size_t startX = this->getXMin(inIndex);
   if (startX > size) startX = size;
-  for (int i = 0; i < startX; ++i)
+  for (size_t i = 0; i < startX; ++i)
   {
     Y[i] = 0.0;
     E[i] = 0.0;
   }
-  int endX = this->getXMax(inIndex);
+  size_t endX = this->getXMax(inIndex);
   if ( endX > 0 ) endX -= m_histogram;
-  for (int i = endX; i < size; ++i)
+  for (size_t i = endX; i < size; ++i)
   {
     Y[i] = 0.0;
     E[i] = 0.0;
