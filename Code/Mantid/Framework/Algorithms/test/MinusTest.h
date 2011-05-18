@@ -766,16 +766,16 @@ public:
     if (expectedValue == -1.0 && expectedError == -1.0)
     {
       // --- Perform an automatic test ------------
-      int ws2LoopCount;
+      size_t ws2LoopCount;
       if (work_in2->size() > 0)
       {
         ws2LoopCount = work_in1->size()/work_in2->size();
       }
       ws2LoopCount = (ws2LoopCount==0) ? 1 : ws2LoopCount;
 
-      for (int i = 0; i < work_out1->size(); i++)
+      for (size_t i = 0; i < work_out1->size(); i++)
       {
-        int ws2Index = i;
+        size_t ws2Index = i;
 
         if (ws2LoopCount > 1)
         {
@@ -796,9 +796,9 @@ public:
     {
       // ------ Use expected answer --------------------
       bool breakOut=false;
-      for (int wi=0; wi < work_out1->getNumberHistograms(); wi++)
+      for (size_t wi=0; wi < work_out1->getNumberHistograms(); wi++)
       {
-        for (int i=0; i<work_out1->blocksize(); i++)
+        for (size_t i=0; i<work_out1->blocksize(); i++)
         {
           std::ostringstream mess;
           mess << message << ", evaluated at wi " << wi << ", i " << i;
@@ -822,7 +822,7 @@ public:
   }
 
   bool checkDataItem (const MatrixWorkspace_sptr work_in1,  const MatrixWorkspace_sptr work_in2, const MatrixWorkspace_sptr work_out1,
-      int i, int ws2Index)
+      size_t i, size_t ws2Index)
   {
     // Avoid going out of bounds! For some of the grouped ones
 //    if (i/work_in1->blocksize() >= work_in1->getNumberHistograms())

@@ -76,13 +76,13 @@ public:
     MatrixWorkspace_const_sptr output;
     TS_ASSERT_THROWS_NOTHING( output = boost::dynamic_pointer_cast<const MatrixWorkspace>(AnalysisDataService::Instance().retrieve(wsNameOut)) );
 
-    for (int i=0; i < output->getNumberHistograms(); i++)
+    for (size_t i=0; i < output->getNumberHistograms(); i++)
     {
       const MantidVec &  inX = input->readX(i);
       const MantidVec &  X = output->readX(i);
       const MantidVec &  Y = output->dataY(i);
       const MantidVec &  E = output->dataE(i);
-      for (int j=0; j < Y.size(); j++)
+      for (size_t j=0; j < Y.size(); j++)
       {
         TS_ASSERT_EQUALS( X[j], inX[j] );
         TS_ASSERT_EQUALS( Y[j], expectedY );

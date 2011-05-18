@@ -66,11 +66,11 @@ public:
     TS_ASSERT(factorWS);
     if( !factorWS ) TS_FAIL("Cannot retrieve output workspace");
 
-    const int nbins(factorWS->blocksize());
+    const size_t nbins(factorWS->blocksize());
 
     // Pick out some random values
     const double delta(1e-08);
-    const int middle_index = (nbins/2) - 1;
+    const size_t middle_index = (nbins/2) - 1;
     TS_ASSERT_DELTA(factorWS->readY(0).front(), 0.00478216, delta);
     TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 0.000134138, delta);
     TS_ASSERT_DELTA(factorWS->readY(0).back(), 1.18e-7, delta);
@@ -109,11 +109,11 @@ public:
     TS_ASSERT(factorWS);
     if( !factorWS ) TS_FAIL("Cannot retrieve output workspace");
 
-    const int nbins(factorWS->blocksize());
+    const size_t nbins(factorWS->blocksize());
 
     // Pick out some random values
     const double delta(1e-08);
-    const int middle_index = (nbins/2) - 1;
+    const size_t middle_index = (nbins/2) - 1;
     TS_ASSERT_DELTA(factorWS->readY(0).front(), 1.96018e-05, delta);
     TS_ASSERT_DELTA(factorWS->readY(0)[middle_index], 6.56478e-09, 1e-9);
     TS_ASSERT_DELTA(factorWS->readY(0).back(), 2.3604e-11, 1e-12);
