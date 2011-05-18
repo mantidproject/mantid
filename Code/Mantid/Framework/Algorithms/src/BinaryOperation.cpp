@@ -917,8 +917,8 @@ namespace Mantid
       const SpectraDetectorMap & lhs_spec_det_map = lhs->spectraMap();
       const SpectraDetectorMap & rhs_spec_det_map = rhs->spectraMap();
 
-      size_t rhs_nhist = rhs->getNumberHistograms();
-      size_t lhs_nhist = lhs->getNumberHistograms();
+      int rhs_nhist = static_cast<int>(rhs->getNumberHistograms());
+      int lhs_nhist = static_cast<int>(lhs->getNumberHistograms());
 
       // Initialize the table; filled with -1 meaning no match
       table->resize(lhs_nhist, -1);
@@ -934,7 +934,7 @@ namespace Mantid
       //std::cout << timer1.elapsed() << " sec to getDetectorIDToWorkspaceIndexMap\n";
 
       PARALLEL_FOR_NO_WSP_CHECK()
-	for (int64_t lhsWI = 0; lhsWI < (int64_t)lhs_nhist; lhsWI++)
+	for (int lhsWI = 0; lhsWI < lhs_nhist; lhsWI++)
       {
         specid_t rhs_spec_no;
         bool done=false;

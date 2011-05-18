@@ -198,7 +198,7 @@ void ConjoinWorkspaces::execEvent()
   for (int64_t j = 0; j < nhist2; ++j)
   {
     //This is the workspace index at which we assign in the output
-    int output_wi = j + nhist1;
+    int64_t output_wi = j + nhist1;
     //Copy the events over
     output->getOrAddEventList(output_wi) = event_ws2->getEventList(j); //Should fire the copy constructor
     m_progress->report();
