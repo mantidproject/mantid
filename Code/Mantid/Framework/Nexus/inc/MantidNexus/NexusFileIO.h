@@ -201,7 +201,7 @@ namespace Mantid
       if( NXopendata(fileID, name.c_str()) == NX_ERROR )return false;
       for(unsigned int it=0; it < attributes.size(); ++it)
       {
-        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), avalues[it].size()+1, NX_CHAR);
+        NXputattr(fileID, attributes[it].c_str(), (void*)avalues[it].c_str(), static_cast<int>(avalues[it].size()+1), NX_CHAR);
       }
       NXputdata(fileID, (void*)&value);
       NXclosedata(fileID);
