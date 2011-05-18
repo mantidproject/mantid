@@ -40,7 +40,7 @@ void ChopData::exec()
   const double rLower = getProperty("IntegrationRangeLower");
   const double rUpper = getProperty("IntegrationRangeUpper");
   const int monitorWi = getProperty("MonitorWorkspaceIndex");
-  const int64_t nHist = static_cast<int64_t>(inputWS->getNumberHistograms());
+  const int nHist = static_cast<int>(inputWS->getNumberHistograms());
   const size_t nBins = inputWS->blocksize();
   const double maxX = inputWS->readX(0)[nBins];
   std::map<int, double> intMap;
@@ -114,7 +114,7 @@ void ChopData::exec()
 
     // Copy over X, Y and E data
     PARALLEL_FOR2(inputWS, workspace)
-    for ( int64_t j = 0 ; j < nHist ; j++ )
+    for ( int j = 0 ; j < nHist ; j++ )
     {
       PARALLEL_START_INTERUPT_REGION
       ;
