@@ -94,8 +94,8 @@ void CreateWorkspace::exec()
     throw std::runtime_error("DataY and DataE must have the same dimensions");
   }
 
-  int ySize = dataY.size() / nSpec;
-  int xSize = dataX.size() / nSpec;
+  int ySize = static_cast<int>(dataY.size()) / nSpec;
+  int xSize = static_cast<int>(dataX.size()) / nSpec;
 
   if ( xSize < ySize || xSize > ySize + 1 )
   {
