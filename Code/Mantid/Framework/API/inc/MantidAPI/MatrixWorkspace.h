@@ -232,7 +232,7 @@ namespace Mantid
       const MaskList& maskedBins(const size_t& spectrumIndex) const;
 
       /// Gets the number of points available on the workspace.
-      virtual size_t getNPoints() const;
+      virtual uint64_t getNPoints() const;
 
       /// Get the number of dimensions
       virtual size_t getNumDims() const;
