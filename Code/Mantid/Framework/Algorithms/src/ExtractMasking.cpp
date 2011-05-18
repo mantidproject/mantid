@@ -55,7 +55,7 @@ namespace Mantid
 	throw std::invalid_argument("Invalid input workspace, the spectra map is not populated.");
       }
 
-      const size_t nHist = inputWS->getNumberHistograms();
+      const int nHist = static_cast<int>(inputWS->getNumberHistograms());
       const int xLength(1), yLength(1);
       // Create a new workspace for the results, copy from the input to ensure that we copy over the instrument and current masking
       MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, nHist, xLength, yLength);
