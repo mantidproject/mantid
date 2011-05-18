@@ -265,7 +265,7 @@ namespace DataHandling
         detid2index_map::const_iterator it = detID_to_wi->find(udet);
         if (it != detID_to_wi->end())
         {
-          int wi = it->second;
+          size_t wi = it->second;
           if (select <= 0)
             maskWS->maskWorkspaceIndex(wi, 0.0);
           else

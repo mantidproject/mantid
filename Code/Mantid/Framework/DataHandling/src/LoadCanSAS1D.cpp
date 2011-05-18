@@ -92,7 +92,7 @@ void LoadCanSAS1D::exec()
   }
   // there can be multiple <SASentry> elements, each one contains a period which will go into a workspace group if there are more than one of them
   NodeList* entryList = pRootElem->getElementsByTagName("SASentry");
-  unsigned int numEntries = entryList->length();
+  size_t numEntries = entryList->length();
   Workspace_sptr outputWork;
   std::string runName;
   switch(numEntries)
@@ -140,7 +140,7 @@ MatrixWorkspace_sptr LoadCanSAS1D::loadEntry(Poco::XML::Node * const workspaceDa
   check(sasDataElem, "<SASdata>");
   // getting number of Idata elements in the xml file
   NodeList* idataElemList = sasDataElem->getElementsByTagName("Idata");
-  unsigned int nBins = idataElemList->length();
+  size_t nBins = idataElemList->length();
 
   MatrixWorkspace_sptr dataWS =
     WorkspaceFactory::Instance().create("Workspace2D", 1, nBins, nBins);

@@ -210,7 +210,7 @@ namespace Mantid
         g_log.error() << "Invalid data format found in file \"" << getPropertyValue("Filename") << "\"\n";
         throw std::runtime_error("Invalid data format. Fewer than 2 columns found.");
       }
-      int numSpectra(0);
+      size_t numSpectra(0);
       bool haveErrors(false);
       // Assume single data set with no errors
       if( numCols == 2 )
@@ -260,7 +260,7 @@ namespace Mantid
           throw std::runtime_error("Invalid value encountered.");
         }
 
-        for (int64_t i = 0; i < int64_t(numSpectra); ++i)
+        for (size_t i = 0; i < numSpectra; ++i)
         {
           spectra[i].dataX().push_back(values[0]);
           spectra[i].dataY().push_back(values[i*2+1]);
@@ -288,13 +288,13 @@ namespace Mantid
         // Asked for dimensionless workspace (obviously not in unit factory)
       }
 
-      for (int64_t i = 0; i < int64_t(numSpectra); ++i)
+      for (size_t i = 0; i < numSpectra; ++i)
       {
         localWorkspace->dataX(i) = spectra[i].dataX();
         localWorkspace->dataY(i) = spectra[i].dataY();
         localWorkspace->dataE(i) = spectra[i].dataE();
         // Just have spectrum number start at 1 and count up
-        localWorkspace->getAxis(1)->spectraNo(i) = i+1;
+        localWorkspace->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i+1);
       }
       return localWorkspace;
     }

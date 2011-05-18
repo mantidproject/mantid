@@ -80,13 +80,15 @@ void CompressEvents::exec()
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < noSpectra; ++i)
+    for (int64_t i = 0; i < noSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
+      //the loop variable i can't be signed because of OpenMp rules inforced in Linux. Using this signed type suppresses warnings below
+      const size_t index = static_cast<size_t>(i);
       // The input event list
-      EventList& input_el = inputWS->getEventList(i);
+      EventList& input_el = inputWS->getEventList(index);
       // And on the output side
-      EventList & output_el = outputWS->getOrAddEventList(i);
+      EventList & output_el = outputWS->getOrAddEventList(index);
       // Copy other settings into output
       output_el.setX( input_el.getRefX() );
 
@@ -105,11 +107,11 @@ void CompressEvents::exec()
     // ---- In-place -----
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i = 0; i < noSpectra; ++i)
+    for (int64_t i = 0; i < noSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
       // The input (also output) event list
-      EventList * output_el = outputWS->getEventListPtr(i);
+      EventList * output_el =outputWS->getEventListPtr(static_cast<size_t>(i));
       if (output_el)
       {
         // The EventList method does the work.

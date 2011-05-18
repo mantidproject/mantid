@@ -103,7 +103,7 @@ void FindDetectorsInShape::initDocs()
 				int i = static_cast<int>(objCmptList->end()-it);
 				if (i % iprogress_step == 0)
 				{
-					progress(double(i)/objCmptCount);
+					progress(static_cast<double>(i)/static_cast<double>(objCmptCount));
 					interruption_point();
 				}
 			}
