@@ -113,7 +113,7 @@ void He3TubeEfficiency::exec()
   // Store some information about the instrument setup that will not change
   this->samplePos = this->inputWS->getInstrument()->getSample()->getPos();
 
-  int numHists = this->inputWS->getNumberHistograms();
+  int numHists = static_cast<int>(this->inputWS->getNumberHistograms());
   this->progress = new API::Progress(this, 0.0, 1.0, numHists);
 
   PARALLEL_FOR2(inputWS, outputWS)
