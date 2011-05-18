@@ -184,6 +184,11 @@ namespace Mantid
       int numbins = static_cast<int>(Y.size());
       if (TOFmin > numbins) TOFmin = numbins;
       if (TOFmax > numbins) TOFmax = numbins;
+      std::cout <<TOFPeakd<<"  "<<TOFPeak<<"  "<<TOFmin<<"  "<<TOFmax<<"  "<<numbins<<"\n";
+      for (int i = TOFmin; i < TOFmax; i++) std::cout << X[i] <<"  ";
+      std::cout <<"\n";
+      for (int i = TOFmin; i < TOFmax; i++) std::cout << Y[i] <<"  ";
+      std::cout <<"\n";
 
       double bktime = X[TOFmin] + X[TOFmax];
       double bkg0 = Y[TOFmin] + Y[TOFmax];
@@ -231,6 +236,7 @@ namespace Mantid
         X0 = params[7];
       }
       std::string funct = fit_alg->getPropertyValue("Function");
+      std::cout <<funct<<"\n";
 
       setProperty("OutputWorkspace", ws);
 
