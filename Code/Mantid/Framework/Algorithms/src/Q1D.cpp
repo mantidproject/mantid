@@ -80,7 +80,7 @@ void Q1D::exec()
   // And one for the solid angles
   MantidVec anglesSum(sizeOut-1);
 
-  const size_t numSpec = inputWS->getNumberHistograms();
+  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Get a reference to the spectra-detector map
   SpectraDetectorMap& specMap = outputWS->mutableSpectraMap();
@@ -100,11 +100,11 @@ void Q1D::exec()
   const bool doGravity = getProperty("AccountForGravity");
 
 
-  const int xLength = inputWS->readX(0).size();
+  const int xLength = static_cast<int>(inputWS->readX(0).size());
   const double fmp=4.0*M_PI;
 
   PARALLEL_FOR3(inputWS,outputWS,errorsWS)
-  for (int64_t i = 0; i < int64_t(numSpec); ++i)
+  for (int i = 0; i < numSpec; ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Get the pixel relating to this spectrum
