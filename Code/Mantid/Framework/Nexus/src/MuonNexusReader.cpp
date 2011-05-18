@@ -360,7 +360,7 @@ int MuonNexusReader::numberOfLogs() const
 
 int MuonNexusReader::getLogLength(const int i) const
 {
-  return(logTimes[i].size());
+  return(static_cast<int>(logTimes[i].size()));
 }
 
 bool MuonNexusReader::logTypeNumeric(const int i) const
