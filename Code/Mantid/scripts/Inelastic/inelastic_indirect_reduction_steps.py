@@ -544,11 +544,26 @@ class ConvertToEnergy(ReductionStep):
             ConvertUnits(ws, ws, 'DeltaE', 'Indirect')
             CorrectKiKf(ws, ws, 'Indirect')
             if self._rebin_string is not None:
-                Rebin(ws, ws, self._rebin_string)
-            
+                if not self._multiple_frames:
+                    Rebin(ws, ws, self._rebin_string)
+                    
+        if self._multiple_frames:
+            self._rebin_mf(workspaces)
+
     def set_rebin_string(self, value):
         if value is not None:
             self._rebin_string = value
+
+    def _rebin_mf(self, workspaces):
+        nbin = 0
+        for ws in workspaces:
+            nbins = mtd[ws].getNumberBins()
+            if nbins > nbin: nbin = nbins
+        for ws in workspaces:
+            if (mtd[ws].getNumberBins() == nbin):
+                Rebin(ws, ws, self._rebin_string)
+            else:
+                Rebin(ws, ws, '3,-0.005,1000')
 
 class DetailedBalance(ReductionStep):
     """
