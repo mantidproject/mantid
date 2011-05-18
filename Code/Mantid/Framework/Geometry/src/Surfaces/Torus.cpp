@@ -132,7 +132,7 @@ int sectionV3D(std::string& A,Mantid::Geometry::V3D& out)
   if (cx.fail())
     return 0;
   const std::streamoff xpt = cx.tellg();
-  const char xc=static_cast<const char>(cx.get());
+  const char xc=static_cast<char>(cx.get());
   if (!cx.fail() && !isspace(xc))
     return 0;
   A.erase(0, static_cast<unsigned int>(xpt));

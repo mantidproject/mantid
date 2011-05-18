@@ -1135,7 +1135,7 @@ namespace Mantid
       {
         return false;
       }
-      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
       return (wsProp ? true : false);	
     }
 
@@ -1149,7 +1149,7 @@ namespace Mantid
       {
         return false;
       }
-      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
       if(!wsProp) return false;
       unsigned int direction = prop->direction();
       return ((direction == Kernel::Direction::Input || direction==Kernel::Direction::InOut)?true :false);
@@ -1165,7 +1165,7 @@ namespace Mantid
       {
         return false;
       }
-      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty* const>(prop);
+      const IWorkspaceProperty * const wsProp = dynamic_cast<const IWorkspaceProperty*>(prop);
       if(!wsProp) return false;
       unsigned int direction = prop->direction();
       return((direction == Kernel::Direction::Output || direction==Kernel::Direction::InOut)? true :false);

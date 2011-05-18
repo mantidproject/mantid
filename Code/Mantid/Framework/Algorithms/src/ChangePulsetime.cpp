@@ -81,7 +81,7 @@ namespace Algorithms
 
     double timeOffset = getProperty("TimeOffset");
 
-    PARALLEL_FOR_IF(true)
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int64_t i=0; i < num_to_do; i++)
     {
       // What worksapce index?

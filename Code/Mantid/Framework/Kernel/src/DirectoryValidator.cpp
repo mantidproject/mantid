@@ -4,19 +4,6 @@
 #include <Poco/Path.h>
 #include <iostream>
 
-
-namespace
-{
-/// Functor object to supply to for_each
-struct lowercase
-{
-  void operator()(std::string s)
-  {
-    std::transform(s.begin(), s.end(), s.begin(), tolower);
-  }
-};
-}
-
 namespace Mantid
 {
 namespace Kernel

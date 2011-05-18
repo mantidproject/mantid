@@ -3871,7 +3871,7 @@ FunctionCurve* Graph::addFunction(const QStringList &formulas, double start, dou
   else
     name = generateFunctionName();
 
-  FunctionCurve *c = new FunctionCurve((const FunctionCurve::FunctionType)type, name);
+  FunctionCurve *c = new FunctionCurve((FunctionCurve::FunctionType)type, name);
   c->setRange(start, end);
   c->setFormulas(formulas);
   c->setVariable(var);
