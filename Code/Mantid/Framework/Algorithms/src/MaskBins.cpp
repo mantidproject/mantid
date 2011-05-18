@@ -73,7 +73,7 @@ void MaskBins::exec()
   this->spectra_list = this->getProperty("SpectraList");
   if (this->spectra_list.size() > 0)
   {
-    size_t numHist = inputWS->getNumberHistograms();
+    const int numHist = static_cast<int>(inputWS->getNumberHistograms());
     //--- Validate spectra list ---
     for (size_t i = 0; i < this->spectra_list.size(); ++i)
     {
@@ -118,7 +118,7 @@ void MaskBins::exec()
     }
     
 
-    const size_t numHists = inputWS->getNumberHistograms();
+    const int numHists = static_cast<int>(inputWS->getNumberHistograms());
     Progress progress(this,0.0,1.0,numHists);
     //Parallel running has problems with a race condition, leading to occaisional test failures and crashes
 
@@ -126,7 +126,7 @@ void MaskBins::exec()
 
     //Alter the for loop ending based on what we are looping on
     int for_end = numHists;
-    if (useSpectraList) for_end = this->spectra_list.size();
+    if (useSpectraList) for_end = static_cast<int>(this->spectra_list.size());
 
     for (int i = 0; i < for_end; ++i)
     {
@@ -147,7 +147,7 @@ void MaskBins::exec()
       if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
 
       // Loop over masking each bin in the range
-      for (int j = startBinLoop; j < endBinLoop; ++j)
+      for (int j = static_cast<int>(startBinLoop); j < static_cast<int>(endBinLoop); ++j)
       {
         outputWS->maskBin(wi,j);
       }
