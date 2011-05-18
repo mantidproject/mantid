@@ -53,7 +53,6 @@ public:
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     TS_ASSERT( WS ); //workspace is loaded
 
-    size_t start_blocksize = WS->blocksize();
     size_t num_events = WS->getNumberEvents();
     double start_proton_charge = WS->run().getProtonCharge();
     size_t num_sample_logs = WS->run().getProperties().size();

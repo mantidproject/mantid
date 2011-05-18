@@ -43,7 +43,7 @@ public:
     const Mantid::MantidVec &X = WS->readX(0);
     Mantid::MantidVec &Y = WS->dataY(0);
     Mantid::MantidVec &E = WS->dataE(0);
-    for (int i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
       Y[i] = exp(-0.5*pow((x-1)/10.0,2));
@@ -80,7 +80,7 @@ public:
     const Mantid::MantidVec &X = WS->readX(0);
     Mantid::MantidVec &Y = WS->dataY(0);
     Mantid::MantidVec &E = WS->dataE(0);
-    for (int i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
       Y[i] = exp(-0.5*pow((x-1)/10.0,2));
@@ -126,7 +126,7 @@ public:
     numpixels = 10000;
     WS = WorkspaceCreationHelper::create2DWorkspaceWithFullInstrument(numpixels,200, false);
     WS->getAxis(0)->unit() = Mantid::Kernel::UnitFactory::Instance().create("dSpacing");
-    for (int wi=0; wi<WS->getNumberHistograms(); wi++)
+    for (size_t wi=0; wi<WS->getNumberHistograms(); wi++)
     {
       const Mantid::MantidVec &X = WS->readX(wi);
       Mantid::MantidVec &Y = WS->dataY(wi);

@@ -103,9 +103,9 @@ private:
   void doTest(MatrixWorkspace_const_sptr inputWS, MatrixWorkspace_const_sptr outputWS)
   {
     TS_ASSERT_EQUALS(outputWS->blocksize(), 1);
-    int nOutputHists(outputWS->getNumberHistograms());
+    size_t nOutputHists(outputWS->getNumberHistograms());
     TS_ASSERT_EQUALS(nOutputHists, inputWS->getNumberHistograms());
-    for( int i = 0; i < nOutputHists; ++i )
+    for( size_t i = 0; i < nOutputHists; ++i )
     {
       // Sizes
       TS_ASSERT_EQUALS(outputWS->readX(i).size(), 1);

@@ -95,10 +95,10 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace));
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    int max = 0;
+    size_t max = 0;
     TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
     double yy[3] = {36,51,66};
-    for (int i = 0; i < max; ++i)
+    for (size_t i = 0; i < max; ++i)
     {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
@@ -149,11 +149,11 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve("out3"));
 
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
-    int max = 0;
+    size_t max = 0;
     TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
     const double yy[3] = {52.,74.,96.};
     const double ee[3] = {6.899,8.240,9.391};
-    for (int i = 0; i < max; ++i)
+    for (size_t i = 0; i < max; ++i)
     {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
@@ -183,7 +183,7 @@ public:
 
     output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     TS_ASSERT_EQUALS( max = output2D->getNumberHistograms(), 3);
-    for (int i = 0; i < max; ++i)
+    for (size_t i = 0; i < max; ++i)
     {
       Mantid::MantidVec &x = output2D->dataX(i);
       Mantid::MantidVec &y = output2D->dataY(i);
@@ -228,7 +228,7 @@ public:
 
     TS_ASSERT_EQUALS( output->getNumberHistograms(), EndWorkspaceIndex -StartWorkspaceIndex+1 );
 
-    for (int i=0; i< output->getNumberHistograms(); i++)
+    for (size_t i=0; i< output->getNumberHistograms(); i++)
     {
       MantidVec X = output->readX(i);
       MantidVec Y = output->readY(i);

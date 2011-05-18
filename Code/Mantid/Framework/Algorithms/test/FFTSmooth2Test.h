@@ -99,7 +99,7 @@ public:
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
 
-    for ( int i = 0; i < test_output_WS->size(); i++ )
+    for ( size_t i = 0; i < test_output_WS->size(); i++ )
     {
       TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 );
     }
@@ -147,7 +147,7 @@ public:
 
     TS_ASSERT_EQUALS( test_output_WS->size(), gold_output_WS->size() );
 
-    for ( int i = 0; i < test_output_WS->size(); i++ )
+    for ( size_t i = 0; i < test_output_WS->size(); i++ )
     {
       TS_ASSERT_DELTA( test_output_WS->dataY(0)[i], gold_output_WS->dataY(0)[i], 0.00001 );
     }
@@ -208,12 +208,12 @@ public:
     else
     {  TS_ASSERT_EQUALS( out->getNumberHistograms(), 1); }
 
-    for (int wi=0; wi < out->getNumberHistograms(); wi++)
-      for (int x=0; x<out->blocksize(); x++)
+    for (size_t wi=0; wi < out->getNumberHistograms(); wi++)
+      for (size_t x=0; x<out->blocksize(); x++)
       {
         if (AllSpectra)
         {
-          TS_ASSERT_DELTA( out->readY(wi)[x], wi*1.0, 0.02); // Because the spectra are flat, the smoothing won't do much
+          TS_ASSERT_DELTA( out->readY(wi)[x], static_cast<double>(wi)*1.0, 0.02); // Because the spectra are flat, the smoothing won't do much
         }
         else
         {

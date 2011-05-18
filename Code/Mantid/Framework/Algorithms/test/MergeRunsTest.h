@@ -43,7 +43,7 @@ public:
     EventWorkspace_sptr output;
     TimeSeriesProperty<double>* log;
     int log1, log2, logTot;
-    int nev1, nev2, nevTot;
+    size_t nev1, nev2, nevTot;
     double pc1, pc2, pcTot;
 
     TS_ASSERT_THROWS_NOTHING( output =  boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve("cncs1")); )

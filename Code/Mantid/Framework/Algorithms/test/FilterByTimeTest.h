@@ -95,8 +95,6 @@ public:
     //Retrieve Workspace
     WS = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(inputWS));
     TS_ASSERT( WS ); //workspace is loaded
-    size_t start_blocksize = WS->blocksize();
-    size_t num_events = WS->getNumberEvents();
 
     //Do the filtering now.
     FilterByTime * alg = new FilterByTime();
@@ -152,7 +150,7 @@ public:
     //Similar total number of events
     TS_ASSERT_DELTA( outWS->getNumberEvents(), outWS2->getNumberEvents(), 10 );
     int count = 0;
-    for (int i=0; i<outWS->getNumberHistograms(); i++)
+    for (size_t i=0; i<outWS->getNumberHistograms(); i++)
     {
       double diff = fabs(double(outWS->getEventList(i).getNumberEvents() - outWS2->getEventList(i).getNumberEvents()));
       //No more than 2 events difference because of rounding to 0.01 second

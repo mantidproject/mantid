@@ -42,7 +42,7 @@ public:
 
     TS_ASSERT_EQUALS(Y.size(),101);
 
-    for(int i=0; i < Y.size(); ++i)
+    for(size_t i=0; i < Y.size(); ++i)
     {
       double xx = X[i] - 5.1;
       TS_ASSERT_DELTA( Y[i],(-2 * xx * exp(-(xx*xx)*2)*2),0.000001);

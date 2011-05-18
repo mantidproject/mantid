@@ -63,7 +63,7 @@ public:
     
     MatrixWorkspace_const_sptr outputWS = boost::dynamic_pointer_cast<MatrixWorkspace>(ads.retrieve(resultWorkspaceName));
     
-    for (int i = 0; i < outputWS->getNumberHistograms(); ++i)
+    for (size_t i = 0; i < outputWS->getNumberHistograms(); ++i)
     {
       TS_ASSERT( outputWS->hasMaskedBins(i) );
       const MatrixWorkspace::MaskList& mask = outputWS->maskedBins(i);
@@ -76,7 +76,7 @@ public:
         TS_ASSERT_EQUALS( (*it).second, 1.0 );
       }
       
-      for (int j = 0; j < outputWS->blocksize(); ++j)
+      for (size_t j = 0; j < outputWS->blocksize(); ++j)
       {
         if ( j >= 20 && j < 23 )
         {
