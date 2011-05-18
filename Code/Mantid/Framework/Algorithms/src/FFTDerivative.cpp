@@ -29,8 +29,8 @@ void FFTDerivative::exec()
   size_t n = inWS->getNumberHistograms();
   API::Progress progress(this,0,1,n);
 
-  int ny = inWS->readY(0).size();
-  int nx = inWS->readX(0).size();
+  size_t ny = inWS->readY(0).size();
+  size_t nx = inWS->readX(0).size();
 
   // Workspace for holding a copy of a spectrum. Each spectrum is symmetrized to minimize
   // possible edge effects.
@@ -39,7 +39,7 @@ void FFTDerivative::exec()
 
   bool isHist = (nx != ny);
 
-  for(int spec = 0; spec < n; ++spec)
+  for(size_t spec = 0; spec < n; ++spec)
   {
 
     const Mantid::MantidVec& x0 = inWS->readX(spec);
@@ -53,10 +53,10 @@ void FFTDerivative::exec()
     x1[ny] = x0[0];
     y1[ny] = y0[0];
 
-    for(int i = 1; i < ny; ++i)
+    for(size_t i = 1; i < ny; ++i)
     {
-      int j1 = ny - i;
-      int j2 = ny + i;
+      size_t j1 = ny - i;
+      size_t j2 = ny + i;
       x1[j1] = xx - x0[i];
       x1[j2] = x0[i];
       y1[j1] = y1[j2] = y0[i];
@@ -84,7 +84,7 @@ void FFTDerivative::exec()
     Mantid::MantidVec& im = transWS->dataY(1);
 
     // Multiply the transform by 2*pi*i*w
-    for(int j=0; j < re.size(); ++j)
+    for(size_t j=0; j < re.size(); ++j)
     {
       double w = 2 * M_PI * nu[j];
       double a =  re[j]*w;
@@ -101,9 +101,9 @@ void FFTDerivative::exec()
 
     transWS = fft->getProperty("OutputWorkspace");
 
-    int m2 = transWS->readY(0).size() / 2;
-    int my = m2 + (transWS->readY(0).size() % 2 ? 1 : 0);
-    int mx = my + (transWS->isHistogramData() ? 1 : 0);
+    size_t m2 = transWS->readY(0).size() / 2;
+    size_t my = m2 + (transWS->readY(0).size() % 2 ? 1 : 0);
+    size_t mx = my + (transWS->isHistogramData() ? 1 : 0);
 
     if (!outWS)
     {
