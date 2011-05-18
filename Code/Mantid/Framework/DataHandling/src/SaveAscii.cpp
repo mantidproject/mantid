@@ -47,7 +47,7 @@ namespace Mantid
       mustBePositive->setLower(1);
       declareProperty("WorkspaceIndexMin", 1, mustBePositive);
       declareProperty("WorkspaceIndexMax", EMPTY_INT(), mustBePositive->clone());
-      declareProperty(new ArrayProperty<int>("SpectrumList"));
+      declareProperty(new ArrayProperty<size_t>("SpectrumList"));
       declareProperty("Precision", EMPTY_INT(), mustBePositive->clone());
     }
 
@@ -62,19 +62,19 @@ namespace Mantid
         int nBins = ws->blocksize();
 
         // Get the properties
-        std::vector<int> spec_list = getProperty("SpectrumList");
-        int spec_min = getProperty("WorkspaceIndexMin");
-        int spec_max = getProperty("WorkspaceIndexMax");
+        std::vector<size_t> spec_list = getProperty("SpectrumList");
+        const size_t spec_min = getProperty("WorkspaceIndexMin");
+        const size_t spec_max = getProperty("WorkspaceIndexMax");
 
         // Create an spectra index list for output
-        std::set<int> idx;
+        std::set<size_t> idx;
 
         // Add spectra interval into the index list
         if (spec_max != EMPTY_INT() && spec_min != EMPTY_INT())
         {
             if (spec_min >= nSpectra || spec_max >= nSpectra || spec_min > spec_max)
                 throw std::invalid_argument("Inconsistent spectra interval");
-            for(int spec=spec_min;spec<=spec_max;spec++)
+            for(size_t spec=spec_min;spec<=spec_max;spec++)
                     idx.insert(spec);
         }
 
@@ -101,12 +101,12 @@ namespace Mantid
         // Write the column captions
         file << "X";
         if (idx.empty())
-            for(int spec=0;spec<nSpectra;spec++)
+            for(size_t spec=0;spec<nSpectra;spec++)
             {
                 file << " , Y" << spec << " , E" << spec;
             }
         else
-            for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
+            for(std::set<size_t>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
             {
                 file << " , Y" << *spec << " , E" << *spec;
             }
@@ -131,12 +131,12 @@ namespace Mantid
             }
 
             if (idx.empty())
-                for(int spec=0;spec<nSpectra;spec++)
+                for(size_t spec=0;spec<nSpectra;spec++)
                 {
                     file << " , " << ws->readY(spec)[bin] << " , " << ws->readE(spec)[bin];
                 }
             else
-                for(std::set<int>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
+                for(std::set<size_t>::const_iterator spec=idx.begin();spec!=idx.end();spec++)
                 {
                     file << " , " << ws->readY(*spec)[bin] << " , " << ws->readE(*spec)[bin];
                 }

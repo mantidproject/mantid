@@ -222,10 +222,10 @@ typedef std::tr1::unordered_map<specid_t, std::vector<size_t> > storage_map;
   double fileReadProg(Mantid::DataHandling::GroupDetectors2::storage_map::size_type numGroupsRead, Mantid::DataHandling::GroupDetectors2::storage_map::size_type numInHists);
 
   /// Copy the and combine the histograms that the user requested from the input into the output workspace
-  int formGroups(API::MatrixWorkspace_const_sptr inputWS,
+  size_t formGroups(API::MatrixWorkspace_const_sptr inputWS,
                  API::MatrixWorkspace_sptr outputWS, const double prog4Copy);
   /// Copy the data data in ungrouped histograms from the input workspace to the output
-  void moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int64_t outIndex);
+  void moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, size_t outIndex);
 
   /// flag values
   enum {

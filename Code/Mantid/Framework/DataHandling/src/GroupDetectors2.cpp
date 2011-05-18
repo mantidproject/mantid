@@ -129,7 +129,7 @@ void GroupDetectors2::exec()
   double prog4Copy=( (1.0 - m_FracCompl)/(static_cast<double>(numInHists-unGroupedSet.size())+1.) )*
     (keepAll ? static_cast<double>(numInHists-unGroupedSet.size())/static_cast<double>(numInHists): 1.);
   // now do all the moving
-  int outIndex = formGroups(inputWS, outputWS, prog4Copy);
+  const size_t outIndex = formGroups(inputWS, outputWS, prog4Copy);
 
   // If we're keeping ungrouped spectra
   if (keepAll)
@@ -531,7 +531,7 @@ double GroupDetectors2::fileReadProg(Mantid::DataHandling::GroupDetectors2::stor
 *  @param prog4Copy :: the amount of algorithm progress to attribute to moving a single spectra
 *  @return number of new grouped spectra
 */
-int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, const double prog4Copy)
+size_t GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, const double prog4Copy)
 {
   // Get hold of the axis that holds the spectrum numbers
   Axis *inputSpecNums = inputWS->getAxis(1);
@@ -554,7 +554,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
   g_log.debug() << name() << ": Preparing to group spectra into " << m_GroupSpecInds.size() << " groups\n";
 
   // where we are copying spectra to, we start copying to the start of the output workspace
-  int outIndex = 0;
+  size_t outIndex = 0;
 
   for ( storage_map::const_iterator it = m_GroupSpecInds.begin(); it != m_GroupSpecInds.end() ; ++it )
   {
@@ -636,7 +636,7 @@ int GroupDetectors2::formGroups( API::MatrixWorkspace_const_sptr inputWS, API::M
 *  @param outputWS :: user selected output workspace for the algorithm
 *  @param outIndex :: the next spectra index available after the grouped spectra
 */
-void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, int64_t outIndex)
+void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::MatrixWorkspace_const_sptr inputWS, API::MatrixWorkspace_sptr outputWS, size_t outIndex)
 {
   g_log.debug() << "Starting to copy the ungrouped spectra" << std::endl;
   double prog4Copy = (1. - 1.*static_cast<double>(m_FracCompl))/static_cast<double>(unGroupedSet.size());
@@ -649,9 +649,8 @@ void GroupDetectors2::moveOthers(const std::set<int64_t> &unGroupedSet, API::Mat
   // go thorugh all the spectra in the input workspace
   for ( ; copyFrIt != unGroupedSet.end(); ++copyFrIt )
   {
-    //this needs to be signed because
-    int64_t sourceIndex = *copyFrIt;
-    if( sourceIndex == USED ) continue; //Marked as not to be used
+    if( *copyFrIt == USED ) continue; //Marked as not to be used
+    size_t sourceIndex = static_cast<size_t>(*copyFrIt);
 
     outputWS->dataX(outIndex) = inputWS->readX(sourceIndex);
     outputWS->dataY(outIndex) = inputWS->readY(sourceIndex);
@@ -702,10 +701,10 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
       }
       for ( ; readPostion != beforeHyphen.end(); ++readPostion )
       {
-        outList.push_back(boost::lexical_cast<int64_t>(*readPostion));
+        outList.push_back(boost::lexical_cast<size_t>(*readPostion));
       }
       // this will be the start of a range if it was followed by a - i.e. another token was captured
-      const int64_t rangeStart = outList.back();
+      const size_t rangeStart = outList.back();
       if (loop+1 == ranges.count())
       {// there is no more input
         break;
@@ -719,7 +718,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
       }
 
       // the tokenizer will always return at least on string
-      const int64_t rangeEnd = boost::lexical_cast<int64_t>(*readPostion);
+      const size_t rangeEnd = boost::lexical_cast<size_t>(*readPostion);
 
       // this is unanticipated and marked as an error, it would be easy to change this to count down however
       if ( rangeStart > rangeEnd )
@@ -728,7 +727,7 @@ void GroupDetectors2::RangeHelper::getList(const std::string &line, std::vector<
       }
 
       // expand the range
-      for ( int64_t j = rangeStart+1; j < rangeEnd; j++ )
+      for ( size_t j = rangeStart+1; j < rangeEnd; j++ )
       {
         outList.push_back(j);
       }

@@ -254,7 +254,7 @@ const MatrixWorkspace_sptr LoadRKH::read2D(const std::string & firstLine)
   }// loop on to the next spectrum
   
   // the error values form one big block after the Y-values
-  for ( int i = 0; i < nAxis1Values; ++i )
+  for ( size_t i = 0; i < nAxis1Values; ++i )
   {
     MantidVec & EOut = outWrksp->dataE(i);
     for (MantidVec::iterator it = EOut.begin(), end=EOut.end();it != end;++it)
