@@ -195,7 +195,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
       const MantidVec& Y2 = ws2->readY(i);
       const MantidVec& E2 = ws2->readE(i);
 
-      for ( int j = 0; j < numBins; ++j )
+      for ( int j = 0; j < static_cast<int>(numHists); ++j )
       {
         if ( std::abs(X1[j]-X2[j]) > tolerance || std::abs(Y1[j]-Y2[j]) > tolerance || std::abs(E1[j]-E2[j]) > tolerance )
         {

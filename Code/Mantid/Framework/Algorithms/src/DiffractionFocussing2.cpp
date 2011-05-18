@@ -108,8 +108,8 @@ void DiffractionFocussing2::exec()
 
   // Get the input workspace
   matrixInputW = getProperty("InputWorkspace");
-  nPoints = matrixInputW->blocksize();
-  nHist = matrixInputW->getNumberHistograms();
+  nPoints = static_cast<int>(matrixInputW->blocksize());
+  nHist = static_cast<int>(matrixInputW->getNumberHistograms());
 
   // --- Do we need to read the grouping workspace? ----
   if (groupingFileName != "")
@@ -278,7 +278,7 @@ void DiffractionFocussing2::exec()
     std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
     std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
     // Now multiply by the number of spectra in the group
-    const int groupSize = std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first);
+    const int groupSize = static_cast<int>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
@@ -438,7 +438,7 @@ void DiffractionFocussing2::execEvent()
     int workspaceIndex = g-1;
     prog->reportIncrement(1, "Setting X");
 
-    if (workspaceIndex >= out->getNumberHistograms())
+    if (workspaceIndex >= static_cast<int>(out->getNumberHistograms()))
     {
       g_log.warning() << "Warning! Invalid workspace index found for group # " << g << ". Histogram will be empty.\n";
       continue;
@@ -518,7 +518,7 @@ void DiffractionFocussing2::determineRebinParameters()
   std::ostringstream mess;
 
   // typedef for the storage of the group ranges
-  typedef std::map<int64_t, std::pair<double, double> > group2minmaxmap;
+  typedef std::map<int, std::pair<double, double> > group2minmaxmap;
   // Map from group number to its associated range parameters <Xmin,Xmax,step>
   group2minmaxmap group2minmax;
   group2minmaxmap::iterator gpit;
@@ -526,9 +526,9 @@ void DiffractionFocussing2::determineRebinParameters()
   groupAtWorkspaceIndex.resize(nHist);
   const API::Axis* const spectra_Axis = matrixInputW->getAxis(1);
 
-  for (int64_t i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
+  for (int i = 0; i < nHist; i++) //  Iterate over all histograms to find X boundaries for each group
   {
-    const int64_t group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
+    const int group = validateSpectrumInGroup(spectra_Axis->spectraNo(i));
     groupAtWorkspaceIndex[i] = group;
     if (group == -1)
       continue;

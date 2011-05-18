@@ -137,9 +137,9 @@ private:
   /// The number of (used) groups
   int64_t nGroups;
   /// Number of histograms
-  int64_t nHist;
+  int nHist;
   /// Number of points in the 2D workspace
-  int64_t nPoints;
+  int nPoints;
 
 };
 
