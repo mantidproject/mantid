@@ -48,6 +48,10 @@ class OsirisDiffractionReducer(Reducer):
         MergeRuns(','.join(wsl), self._result_workspace)
         for i in range(1,6):
             DeleteWorkspace(sam[i])
+        # Divide/scale _result_workspace
+        scale = self._create_scalar()
+        Divide(self._result_workspace, scale, self._result_workspace)
+        DeleteWorkspace(scale)
 
     def set_cal_file(self, cal_file):
         self._cal = cal_file
@@ -57,6 +61,33 @@ class OsirisDiffractionReducer(Reducer):
         
     def result_workspace(self):
         return self._result_workspace
+        
+    def _create_scalar(self):
+        ws = mtd[self._result_workspace]
+        dataX = ws.dataX(0)
+        dataY = []; dataE = []
+        for i in range(0, len(dataX)-1):
+            x = ( dataX[i] + dataX[i+1] ) / 2.0
+            if x < 2.1:
+                dataY.append(1); dataE.append(1)
+            elif x < 2.5:
+                dataY.append(2); dataE.append(2)
+            elif x < 3.1:
+                dataY.append(1); dataE.append(1)
+            elif x < 3.3:
+                dataY.append(2); dataE.append(2)
+            elif x < 4.1:
+                dataY.append(1); dataE.append(1)
+            elif x < 4.3:
+                dataY.append(2); dataE.append(2)
+            elif x < 5.2:
+                dataY.append(1); dataE.append(1)
+            elif x < 5.3:
+                dataY.append(2); dataE.append(2)
+            else:
+                dataY.append(1); dataE.append(1)
+        CreateWorkspace("scaling", dataX, dataY, dataE, UnitX="dSpacing")
+        return "scaling"
 
 class DRangeIdentifier(ReductionStep):
     """This step creates a map linking each sample file to the corresponing

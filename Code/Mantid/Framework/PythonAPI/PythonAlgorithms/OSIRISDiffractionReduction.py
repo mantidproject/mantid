@@ -44,11 +44,7 @@ class OSIRISDiffractionReduction(PythonAlgorithm):
         
         self.setProperty("OutputWorkspace", mtd[reducer.result_workspace()])
         
-        sys.exit("OSIRISDiffractionReduction Finished") #MantidPlot crashes if
-            # algorithm continues to end ?
-        
     def category(self):
         return 'Diffraction'
-
 
 mtd.registerPyAlgorithm(OSIRISDiffractionReduction())
