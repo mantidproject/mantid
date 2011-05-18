@@ -8,7 +8,7 @@
 
 namespace Mantid
 {
-namespace Algorithms
+namespace Crystal
 {
 /**
  Find the offsets for each detector
@@ -71,7 +71,7 @@ private:
   int TOFmin;        ///< The start of the TOF range for fitting
   int TOFmax;        ///< The end of the TOF range for fitting
   int TOFPeak;       ///< The peak in the TOF range for fitting
-  int tofISAW;       /// check if bin agrees with peak from ISAW
+  double TOFPeakd;    /// TOF Peak as double
   int nspec;          ///< The number of spectra in the input workspace
   double IKI, Alpha0, Alpha1, Beta0, Kappa, SigmaSquared, Gamma, X0; ///<Ikeda-Carpender function 
 

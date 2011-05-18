@@ -19,7 +19,7 @@
 
 namespace Mantid
 {
-  namespace Algorithms
+  namespace Crystal
   {
 
     // Register the class into the algorithm factory
@@ -78,17 +78,14 @@ namespace Mantid
       Kappa = 4.3558;
       SigmaSquared = 396.9;
       Gamma = 0.57103;
+
   
-      // create TOF axis from Params
-      const std::vector<double> rb_params = getProperty("Params");
-      MantidVecPtr XValues;
-      const int numbins = VectorHelper::createAxisFromRebinParams(rb_params, XValues.access());
       PeaksWorkspace_sptr peaksW;
       peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
 
 
       int i, XPeak, YPeak;
-      double col, row, l1, l2, wl, I, sigI;
+      double col, row, I, sigI;
 
       // Build a map to sort by the peak bin count
       std::vector <std::pair<double, int> > v1;
@@ -107,23 +104,13 @@ namespace Mantid
         // Direct ref to that peak
         Peak & peak = peaksW->getPeaks()[i];
 
-        l1 = peak.getL1();
-
         col = peak.getCol();
         row = peak.getRow();
         Geometry::V3D pos = peak.getDetPos();
-        // NOTE! If sample is not at 0,0,0, this L2 is not correct.
-        l2 = pos.norm();
-        wl = peak.getWavelength();
 
         XPeak = int(col+0.5)-1;
         YPeak = int(row+0.5)-1;
-        tofISAW = int(wl * (l1+l2) / 3.956058e-3); //TODO: Check this value; units in ISAW for L1 might have been different????
-        TOFPeak = VectorHelper::getBinIndex(XValues.access(), tofISAW);
-
-        TOFmin = TOFPeak+Binmin;
-        if (TOFmin<0) TOFmin = 0;
-        TOFmax = TOFPeak+Binmax;
+        TOFPeakd = peak.getTOF();
 
         IAlgorithm_sptr sum_alg;
         try
@@ -150,16 +137,14 @@ namespace Mantid
         bin_alg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", outputW);
         bin_alg->setProperty("OutputWorkspace", outputW);
         bin_alg->setProperty("PreserveEvents", false);
+        const std::vector<double> rb_params = getProperty("Params");
         bin_alg->setProperty<std::vector<double> >("Params", rb_params);
         bin_alg->executeAsSubAlg();
 
         outputW = bin_alg->getProperty("OutputWorkspace");
-        if (TOFmin > numbins) TOFmin = numbins;
-        if (TOFmax > numbins) TOFmax = numbins;
 
         fitSpectra(0, I, sigI);
-        std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
-
+        //std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
       }
@@ -184,15 +169,21 @@ namespace Mantid
 
    /** Calls Fit as a child algorithm to fit the offset peak in a spectrum
     *  @param s :: The spectrum index to fit
-    *  @param[out] I :: integrated intensity returned
-    *  @param[out] sigI :: integrated intensity error returned
+    *  @return The calculated offset value
     */
     void PeakIntegration::fitSpectra(const int s, double& I, double& sigI)
     {
       // Find point of peak centre
       // Get references to the current spectrum
-      MantidVec & X = outputW->dataX(s);
-      MantidVec & Y = outputW->dataY(s);
+      MantidVec& X = outputW->dataX(s);
+      MantidVec& Y = outputW->dataY(s);
+      TOFPeak = VectorHelper::getBinIndex(X, TOFPeakd);
+      TOFmin = TOFPeak+Binmin;
+      if (TOFmin<0) TOFmin = 0;
+      TOFmax = TOFPeak+Binmax;
+      int numbins = static_cast<int>(Y.size());
+      if (TOFmin > numbins) TOFmin = numbins;
+      if (TOFmax > numbins) TOFmax = numbins;
 
       double bktime = X[TOFmin] + X[TOFmax];
       double bkg0 = Y[TOFmin] + Y[TOFmax];
@@ -220,13 +211,11 @@ namespace Mantid
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
       fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa<<",SigmaSquared="<<SigmaSquared<<",Gamma="<<Gamma<<",X0="<<peakLoc;
-      /*fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = "<<SigmaSquared<<";name=Lorentzian, Height = "
-              <<peakHeight<<", PeakCentre = "<<peakLoc<<", HWHM = "<<Gamma;*/
+      /*fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = 1.";*/
       fit_alg->setProperty("Function", fun_str.str());
       std::ostringstream tie_str;
       fit_alg->executeAsSubAlg();
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
-      const MantidVec &  DataValues = ws->readY(0);
 
       double chisq = fit_alg->getProperty("OutputChi2overDoF");
       if(chisq < 0.0) // Find some chisq for a good fit to initialize parameters for next peak
@@ -242,7 +231,6 @@ namespace Mantid
         X0 = params[7];
       }
       std::string funct = fit_alg->getPropertyValue("Function");
-      std::cout <<funct<<"\n";
 
       setProperty("OutputWorkspace", ws);
 
@@ -261,7 +249,7 @@ namespace Mantid
 
       I = 0.0;
       for (int i = 0; i < n; i++) I+= y[i];
-      I*= double(DataValues.size())/double(n);
+      I*= double(TOFmax-TOFmin+1)/double(n);
       sigI = sqrt(I+ratio*ratio*bkg0);
       I-= ratio*bkg0;
       delete [] x;
