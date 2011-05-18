@@ -247,7 +247,7 @@ public:
     ws->sortAll(TOF_SORT, NULL);
 
     // Fill a whole bunch of events
-    PARALLEL_FOR_NO_WSP_CHECK();
+    PARALLEL_FOR_NO_WSP_CHECK()
     for (int i=0; i < static_cast<int>(ws->getNumberHistograms()); i++)
     {
       EventList & el = ws->getEventList(i);
