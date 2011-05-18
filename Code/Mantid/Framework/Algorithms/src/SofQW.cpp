@@ -138,6 +138,7 @@ void SofQW::exec()
 	      detectors.push_back(spectrumDet);
       }
       const size_t numDets = detectors.size();
+      const double numDets_d = static_cast<double>(numDets); // cache to reduce number of static casts
       const MantidVec& Y = inputWorkspace->readY(i);
       const MantidVec& E = inputWorkspace->readE(i);
       const MantidVec& X = inputWorkspace->readX(i);
@@ -175,9 +176,9 @@ void SofQW::exec()
 	        std::upper_bound(verticalAxis.begin(),verticalAxis.end(),q) - verticalAxis.begin() - 1;
 	  
 	        // And add the data and it's error to that bin, taking into account the number of detectors contributing to this bin
-	        outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets;
+                outputWorkspace->dataY(qIndex)[j] += Y[j]/numDets_d;
 	        // Standard error on the average
-	        outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets );
+                outputWorkspace->dataE(qIndex)[j] = sqrt( (pow(outputWorkspace->readE(qIndex)[j],2) + pow(E[j],2))/numDets_d );
 	      }
       }
 
@@ -203,9 +204,9 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Create vector to hold the new X axis values
   MantidVecPtr xAxis;
   xAxis.access() = inputWorkspace->readX(0);
-  const int xLength = xAxis->size();
+  const int xLength = static_cast<int>(xAxis->size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate that
-  const int yLength = VectorHelper::createAxisFromRebinParams(getProperty("QAxisBinning"),newAxis);
+  const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(getProperty("QAxisBinning"),newAxis));
   
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);
@@ -239,7 +240,7 @@ void SofQW::makeDistribution(API::MatrixWorkspace_sptr outputWS, const std::vect
   std::adjacent_difference(qAxis.begin(),qAxis.end(),widths.begin());
 
   const size_t numQBins = outputWS->getNumberHistograms();
-  for (int i=0; i < numQBins; ++i)
+  for (size_t i=0; i < numQBins; ++i)
   {
     MantidVec& Y = outputWS->dataY(i);
     MantidVec& E = outputWS->dataE(i);
