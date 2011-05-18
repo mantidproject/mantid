@@ -79,7 +79,7 @@ void CrossCorrelate::exec()
    	index_map_it=index_map.find(reference);
    	if (index_map_it==index_map.end()) // Not in the map
    		throw std::runtime_error("Can't find reference spectra");
-   	const int index_ref=index_map_it->second;
+   	const size_t index_ref=index_map_it->second;
 
    	// check that the data range specified makes sense
     double xmin=getProperty("XMin");
@@ -107,7 +107,7 @@ void CrossCorrelate::exec()
    	  throw std::runtime_error("Must specify WorkspaceIndexMin<WorkspaceIndexMax");
    	// Get the number of spectra in range specmin to specmax
    	int nspecs=0;
-   	std::vector<int> indexes; // Indexes of all spectra in range
+   	std::vector<size_t> indexes; // Indexes of all spectra in range
     indexes.reserve(specmax-specmin); //reserve at leat enough space
    	for (int i=specmin;i<=specmax;++i)
    	{
@@ -147,7 +147,7 @@ void CrossCorrelate::exec()
 
   // Now start the real stuff
 	// Create a 2DWorkspace that will hold the result
- 	const int nY=refY.size();
+ 	const int nY=static_cast<int>(refY.size());
 	const int npoints=2*nY-3;
 	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
@@ -184,7 +184,7 @@ void CrossCorrelate::exec()
   m_progress = new Progress(this,0.0,1.0,nspecs);
   for (int i=0;i<nspecs;++i) // Now loop on all spectra
 	{
-		int spec_index=indexes[i]; // Get the spectrum index from the table
+		size_t spec_index=indexes[i]; // Get the spectrum index from the table
 		//Copy spectra info from input Workspace
 		out->getAxis(1)->spectraNo(i)=inputWS->getAxis(1)->spectraNo(spec_index);
 		out->dataX(i)=XX;
