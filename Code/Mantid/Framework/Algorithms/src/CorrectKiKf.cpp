@@ -27,6 +27,7 @@ using namespace Kernel;
 using namespace API;
 using namespace DataObjects;
 using namespace Geometry;
+using std::size_t;
 
 /// Default constructor
 CorrectKiKf::CorrectKiKf() : Algorithm()
@@ -82,9 +83,9 @@ void CorrectKiKf::exec()
   }  
   
 
-  const unsigned int size = this->inputWS->blocksize();
+  const size_t size = this->inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = this->inputWS->size() / size;
+  const int numberOfSpectra = static_cast<int>(this->inputWS->size() / size);
   Progress prog(this,0.0,1.0,numberOfSpectra);
   const bool histogram = this->inputWS->isHistogramData();
   bool negativeEnergyWarning = false;

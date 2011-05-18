@@ -197,7 +197,7 @@ API::MatrixWorkspace_sptr ConvertUnits::setupOutputWorkspace(const API::MatrixWo
  */
 void ConvertUnits::fillOutputHist(const API::MatrixWorkspace_const_sptr inputWS, const API::MatrixWorkspace_sptr outputWS)
 {
-  const size_t size = inputWS->blocksize();
+  const int size = static_cast<int>(inputWS->blocksize());
 
   // Loop over the histograms (detector spectra)
   Progress prog(this,0.0,0.2,m_numberOfSpectra);
@@ -575,8 +575,9 @@ void ConvertUnits::reverse(API::MatrixWorkspace_sptr WS)
     EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);
     assert ( static_cast<bool>(eventWS) == m_inputEvents ); // Sanity check
 
+    int m_numberOfSpectra_i = static_cast<int>(m_numberOfSpectra);
     PARALLEL_FOR1(WS)
-    for (int64_t j = 0; j < m_numberOfSpectra; ++j)
+    for (int j = 0; j < m_numberOfSpectra_i; ++j)
     {
       PARALLEL_START_INTERUPT_REGION
       if ( m_inputEvents )
@@ -667,7 +668,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
       MantidVec::const_iterator end = std::lower_bound(X.begin(),X.end(),1.0e-10*DBL_MAX);
       MantidVec::difference_type bins = end - X.begin();
       lastBins[i] = bins;
-      if (bins > maxBins) maxBins = bins;
+      if (bins > maxBins) maxBins = static_cast<int>(bins);
     }
     g_log.debug() << maxBins << std::endl;
     // Now create an output workspace large enough for the longest 'good' range

@@ -21,6 +21,7 @@ namespace Mantid
 
     using API::MatrixWorkspace_sptr;
     using Mantid::MantidVec;
+    using std::size_t;
 
     //------------------------------------------------------------------------------
     // Private member functions
@@ -49,9 +50,9 @@ namespace Mantid
      */
     bool ConvertToHistogram::isWorkspaceLogical(const MatrixWorkspace_sptr inputWS) const
     {
-      const int numYPoints = inputWS->blocksize();
+      const size_t numYPoints = inputWS->blocksize();
       //Workspace guarantees that each X-vector is the same size
-      const int numXPoints = inputWS->readX(0).size();
+      const size_t numXPoints = inputWS->readX(0).size();
       if( numYPoints != numXPoints )
       {
         g_log.error() << "The number of Y data points must equal the number of X data points on the InputWorkspace. "
@@ -66,7 +67,7 @@ namespace Mantid
      * @param inputWS pointer to input workspace
      * @returns An integer giving the size of the new X vector
      */
-    int ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const
+    size_t ConvertToHistogram::getNewXSize(const MatrixWorkspace_sptr inputWS) const
     {
       return (inputWS->blocksize() + 1);
     }

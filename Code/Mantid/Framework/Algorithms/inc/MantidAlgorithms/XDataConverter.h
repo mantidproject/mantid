@@ -54,7 +54,7 @@ namespace Mantid
       /// Checks the input workspace is consistent, throwing if not
       virtual bool isWorkspaceLogical(const API::MatrixWorkspace_sptr inputWS) const = 0;
       /// Returns the size of the new X vector
-      virtual int getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
+      virtual std::size_t getNewXSize(const API::MatrixWorkspace_sptr inputWS) const = 0;
       /// Calculate the X point values. Implement in an inheriting class.
       virtual void calculateXPoints(const MantidVec & inputX, MantidVec &outputX) const = 0;
       

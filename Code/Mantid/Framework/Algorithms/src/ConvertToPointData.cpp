@@ -20,6 +20,7 @@ namespace Mantid
 
     using API::MatrixWorkspace_sptr;
     using Mantid::MantidVec;
+    using std::size_t;
 
     //------------------------------------------------------------------------------
     // Private member functions
@@ -64,7 +65,7 @@ namespace Mantid
      * @param inputWS pointer to input workspace
      * @returns An integer giving the size of the new X vector
      */
-    int ConvertToPointData::getNewXSize(const MatrixWorkspace_sptr inputWS) const
+    size_t ConvertToPointData::getNewXSize(const MatrixWorkspace_sptr inputWS) const
     {
       return static_cast<int>(inputWS->blocksize());
     }
