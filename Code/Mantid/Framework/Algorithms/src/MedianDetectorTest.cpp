@@ -130,7 +130,7 @@ namespace Mantid
     void MedianDetectorTest::retrieveProperties()
     {
       m_inputWS = getProperty("InputWorkspace");
-      size_t maxSpecIndex = m_inputWS->getNumberHistograms() - 1;
+      int maxSpecIndex = static_cast<int>(m_inputWS->getNumberHistograms()) - 1;
 
       m_minSpec = getProperty("StartWorkspaceIndex");
       if ( (m_minSpec < 0) || (m_minSpec > maxSpecIndex) )
