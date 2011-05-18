@@ -164,7 +164,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( result = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve("WSCor")) );
     TS_ASSERT( result );
 
-    for (int i = 0; i < result->getNumberHistograms(); ++i)
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i)
     {
       for (int j = 0; j < 4; ++j)
       {
@@ -209,7 +209,7 @@ public:
   void checkValues(MatrixWorkspace_sptr inputWS, MatrixWorkspace_sptr result, bool naNCheck, bool infCheck)
   {
 
-    for (int i = 0; i < result->getNumberHistograms(); ++i)
+    for (size_t i = 0; i < result->getNumberHistograms(); ++i)
     {
       for (int j = 1; j < 5; ++j)
       {

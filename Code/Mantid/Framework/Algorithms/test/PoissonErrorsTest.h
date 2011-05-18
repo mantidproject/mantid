@@ -35,9 +35,9 @@ public:
     TS_ASSERT_THROWS_NOTHING(alg.initialize());
     TS_ASSERT(alg.isInitialized());
     //Setting properties to input workspaces that don't exist throws
-    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp1,"test_in21"), std::invalid_argument )
-    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp2,"test_in22"), std::invalid_argument )    
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out2") )
+    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp1,"test_in21"), std::invalid_argument );
+    TS_ASSERT_THROWS( alg.setPropertyValue(inputProp2,"test_in22"), std::invalid_argument );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out2") );
   }
 
   void testExec1D1D()
@@ -52,9 +52,9 @@ public:
     PoissonErrors alg;
 
     alg.initialize();
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp1,"test_in11") )
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp2,"test_in12") )    
-    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out1") )
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp1,"test_in11") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(inputProp2,"test_in12") );
+    TS_ASSERT_THROWS_NOTHING( alg.setPropertyValue(outputProp,"test_out1") );
     alg.execute();
 
     MatrixWorkspace_sptr work_out1;
@@ -201,7 +201,7 @@ public:
   
   void testExec2DSingleValue()
   {
-    int nHist = 5,nBins=300;
+    int nBins=300;
     // Register the workspace in the data service
     MatrixWorkspace_sptr work_in1 = WorkspaceCreationHelper::Create1DWorkspaceFib(nBins);
     MatrixWorkspace_sptr work_in2 = WorkspaceCreationHelper::CreateWorkspaceSingleValue(4.455);
@@ -238,16 +238,16 @@ private:
   // loopOrientation 0=Horizontal, 1=Vertical
   void checkData( MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, int loopOrientation)
   {
-    int ws2LoopCount;
+    size_t ws2LoopCount;
     if (work_in2->size() > 0)
     {
       ws2LoopCount = work_in1->size()/work_in2->size();
     }
     ws2LoopCount = (ws2LoopCount==0) ? 1 : ws2LoopCount;
 
-    for (int i = 0; i < work_out1->size(); i++)
+    for (size_t i = 0; i < work_out1->size(); i++)
     {
-      int ws2Index = i;
+      size_t ws2Index = i;
     
       if (ws2LoopCount > 1)
       {
@@ -264,7 +264,7 @@ private:
     }
   }
 
-  void checkDataItem (MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, int i, int ws2Index)
+  void checkDataItem (MatrixWorkspace_sptr work_in1,  MatrixWorkspace_sptr work_in2, MatrixWorkspace_sptr work_out1, size_t i, size_t ws2Index)
   {
     //printf("I=%d\tws2Index=%d\n",i,ws2Index);
       double sig1 = work_in1->dataY(i/work_in1->blocksize())[i%work_in1->blocksize()];

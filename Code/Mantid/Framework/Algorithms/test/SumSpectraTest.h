@@ -121,7 +121,7 @@ public:
     // Spectra at workspace index 1 is masked, 8 & 9 are monitors
     for( size_t i = 1; i < nHist-2; ++i )
     {
-      nspecEntries += specMap_in.ndet(i);
+      nspecEntries += specMap_in.ndet(static_cast<specid_t>(i));
     }
 
     TS_ASSERT_THROWS_NOTHING( alg2.execute());

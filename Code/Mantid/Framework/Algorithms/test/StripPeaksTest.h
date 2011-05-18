@@ -28,7 +28,7 @@ public:
     Mantid::MantidVec &Y = WS->dataY(1);
     Mantid::MantidVec &E = WS->dataE(1);
     Mantid::MantidVec &Y0 = WS->dataY(0);
-    for (int i = 0; i < Y.size(); ++i)
+    for (size_t i = 0; i < Y.size(); ++i)
     {
       const double x = (X[i]+X[i+1])/2;
       double funcVal = 2500*exp(-0.5*pow((x-3.14)/0.012,2));

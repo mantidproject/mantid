@@ -8,6 +8,7 @@
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/Workspace2D.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid;
 using namespace Mantid::API;
@@ -72,6 +73,7 @@ public:
 
     void dotestForward(std::string IgnoreXBins)
     {
+      UNUSED_ARG(IgnoreXBins);
       IAlgorithm* fft = Mantid::API::FrameworkManager::Instance().createAlgorithm("RealFFT");
       fft->initialize();
       fft->setPropertyValue("InputWorkspace","RealFFT_WS");
@@ -129,7 +131,6 @@ public:
         MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
             (AnalysisDataService::Instance().retrieve("RealFFT_WS_backward"));
 
-        const MantidVec& X0 = WS->readX(0);
         const MantidVec& Y0 = WS->readY(0);
 
         const MantidVec& X = fWS->readX(0);
@@ -189,7 +190,6 @@ public:
         MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
             (AnalysisDataService::Instance().retrieve("RealFFT_WS_backward_hist"));
 
-        const MantidVec& X0 = WS->readX(0);
         const MantidVec& Y0 = WS->readY(0);
 
         const MantidVec& X = fWS->readX(0);
