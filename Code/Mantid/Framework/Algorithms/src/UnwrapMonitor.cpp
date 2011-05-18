@@ -71,7 +71,7 @@ void UnwrapMonitor::exec()
   // Get the input workspace
   m_inputWS = getProperty("InputWorkspace");
   // Get the number of spectra in this workspace
-  const size_t numberOfSpectra = m_inputWS->getNumberHistograms();
+  const int numberOfSpectra = static_cast<int>(m_inputWS->getNumberHistograms());
   g_log.debug() << "Number of spectra in input workspace: " << numberOfSpectra << std::endl;
 
   // Get the "reference" flightpath (currently passed in as a property)
@@ -91,10 +91,10 @@ void UnwrapMonitor::exec()
   tempWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
   // This will be used later to store the maximum number of bin BOUNDARIES for the rebinning
-  unsigned int max_bins = 0;
+  int max_bins = 0;
   m_progress=new Progress(this,0.0,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
-  for (size_t i = 0; i < numberOfSpectra; ++i)
+  for (int i = 0; i < numberOfSpectra; ++i)
   {
     // Flag indicating whether the current detector is a monitor, Set in calculateFlightpath below.
     bool isMonitor;
@@ -118,7 +118,7 @@ void UnwrapMonitor::exec()
     // Get the maximum number of bins (excluding monitors) for the rebinning below
     if ( !isMonitor )
     {
-      const unsigned int XLen = tempWS->dataX(i).size();
+      const int XLen = static_cast<int>(tempWS->dataX(i).size());
       if ( XLen > max_bins ) max_bins = XLen;
     }
     m_progress->report();
@@ -298,7 +298,7 @@ std::pair<int,int> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, 
     return std::make_pair(0,xdata.size()-1);
   }
 
-  int min = 0, max = xdata.size();
+  int min = 0, max = static_cast<int>(xdata.size());
   for (unsigned int j = 0; j < m_XSize; ++j)
   {
     const double T = xdata[j];
@@ -342,7 +342,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        if ( (*it).first >= rangeBounds[2] )
+        if ( static_cast<int>((*it).first) >= rangeBounds[2] )
           tempWS->maskBin(spectrum,(*it).first-rangeBounds[2],(*it).second);
       }
     }
@@ -367,7 +367,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        const int maskIndex = (*it).first;
+        const int maskIndex = static_cast<int>((*it).first);
         if ( maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1] )
           tempWS->maskBin(spectrum,maskIndex-rangeBounds[0],(*it).second);
       }
