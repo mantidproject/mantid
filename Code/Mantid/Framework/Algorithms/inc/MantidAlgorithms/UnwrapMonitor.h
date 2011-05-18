@@ -74,7 +74,7 @@ private:
   double m_LRef; ///< The 'reference' flightpath
   double m_Tmin; ///< The start of the time-of-flight frame
   double m_Tmax; ///< The end of the time-of-flight frame
-  unsigned int m_XSize; ///< The size of the X vectors in the input workspace
+  size_t m_XSize; ///< The size of the X vectors in the input workspace
   /// Progress reporting
   API::Progress* m_progress;
 };
