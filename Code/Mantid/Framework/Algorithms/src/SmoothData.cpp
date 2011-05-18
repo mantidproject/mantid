@@ -53,7 +53,7 @@ void SmoothData::exec()
   }
 
   // Check that the number of points in the smoothing isn't larger than the spectrum length
-  const int vecSize = inputWorkspace->blocksize();
+  const int vecSize = static_cast<int>(inputWorkspace->blocksize());
   if ( npts >= vecSize )
   {
     g_log.error("The number of averaging points requested is larger than the spectrum length");
@@ -67,7 +67,7 @@ void SmoothData::exec()
   Progress progress(this,0.0,1.0,inputWorkspace->getNumberHistograms());
   PARALLEL_FOR2(inputWorkspace,outputWorkspace)
   // Loop over all the spectra in the workspace
-  for (int i = 0; i < inputWorkspace->getNumberHistograms(); ++i)
+  for (int i = 0; i < static_cast<int>(inputWorkspace->getNumberHistograms()); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
     // Copy the X data over. Preserves data sharing if present in input workspace.
