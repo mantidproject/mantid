@@ -18,7 +18,7 @@ class IFT_Funct: public ParamFunction, public IFunctionMW
 public:
   IFT_Funct()
   {
-    declareParameter("c0");
+    declareParameter("c0", 0.0, "this is the famous c0 blah...");
     declareParameter("c1");
     declareParameter("c2");
     declareParameter("c3");
@@ -60,10 +60,14 @@ public:
   {
     IFT_Funct f;
 
+    TS_ASSERT_EQUALS(f.parameterDescription(0),"this is the famous c0 blah...");
+
     f.setParameter("c0",1.0);
     f.setParameter("c1",1.1);
     f.setParameter("c2",1.2);
     f.setParameter("c3",1.3);
+
+    TS_ASSERT_EQUALS(f.parameterDescription(0),"this is the famous c0 blah...");
 
     TS_ASSERT_EQUALS(f.nParams(),4);
     TS_ASSERT_EQUALS(f.nActive(),4);

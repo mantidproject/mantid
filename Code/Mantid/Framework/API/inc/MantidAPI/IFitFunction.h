@@ -251,10 +251,14 @@ public:
 
   /// Set i-th parameter
   virtual void setParameter(int, const double& value, bool explicitlySet = true) = 0;
+  /// Set i-th parameter description
+  virtual void setParameterDescription(size_t, const std::string& description) = 0;
   /// Get i-th parameter
   virtual double getParameter(int i)const = 0;
   /// Set parameter by name.
   virtual void setParameter(const std::string& name, const double& value, bool explicitlySet = true) = 0;
+  /// Set description of parameter by name.
+  virtual void setParameterDescription(const std::string& name, const std::string& description) = 0;
   /// Get parameter by name.
   virtual double getParameter(const std::string& name)const = 0;
   /// Total number of parameters
@@ -263,6 +267,8 @@ public:
   virtual int parameterIndex(const std::string& name)const = 0;
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const = 0;
+  /// Returns the description of parameter i
+  virtual std::string parameterDescription(size_t i)const = 0;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(int i)const = 0;
 
@@ -278,6 +284,8 @@ public:
   virtual int indexOfActive(int i)const = 0;
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const = 0;
+  /// Returns the name of active parameter i
+  virtual std::string descriptionOfActive(size_t i)const = 0;
 
   /// Check if a declared parameter i is active
   virtual bool isActive(int i)const = 0;

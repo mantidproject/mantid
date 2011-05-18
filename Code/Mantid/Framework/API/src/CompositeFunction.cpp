@@ -121,6 +121,16 @@ void CompositeFunction::setParameter(int i, const double& value, bool explicitly
   m_functions[ iFun ]->setParameter(i - m_paramOffsets[iFun],value,explicitlySet);
 }
 
+/** Sets a new description to the i-th parameter.
+ *  @param i :: The parameter index
+ *  @param description :: The new description
+ */
+void CompositeFunction::setParameterDescription(size_t i, const std::string& description)
+{
+  int iFun = functionIndex(i);
+  m_functions[ iFun ]->setParameterDescription(i - m_paramOffsets[iFun],description);
+}
+
 /** Get the i-th parameter.
  *  @param i :: The parameter index
  *  @return value of the requested parameter
@@ -147,6 +157,24 @@ void CompositeFunction::setParameter(const std::string& name, const double& valu
   else
   {   
     getFunction(index)->setParameter(pname,value,explicitlySet);
+  }
+}
+
+/**
+ * Sets a new description to a parameter by name.
+ * @param name :: The name of the parameter.
+ * @param value :: The new description
+ */
+void CompositeFunction::setParameterDescription(const std::string& name, const std::string& description)
+{
+  std::string pname;
+  int index;
+  parseName(name,index,pname);
+  if (index < 0)
+    throw std::invalid_argument("CompositeFunction::getParameter: parameter name must contain function index");
+  else
+  {   
+    getFunction(index)->setParameterDescription(pname,description);
   }
 }
 
@@ -201,6 +229,17 @@ std::string CompositeFunction::parameterName(int i)const
   return ostr.str();
 }
 
+/// Returns the description of parameter
+/// @param i :: The index
+/// @return The description of the parameter
+std::string CompositeFunction::parameterDescription(size_t i)const
+{
+  int iFun = functionIndex(i);
+  std::ostringstream ostr;
+  ostr << m_functions[ iFun ]->parameterDescription(i - m_paramOffsets[iFun]);
+  return ostr.str();
+}
+
 /// Number of active (in terms of fitting) parameters
 int CompositeFunction::nActive()const
 {
@@ -244,6 +283,15 @@ std::string CompositeFunction::nameOfActive(int i)const
   int iFun = functionIndexActive(i);
   std::ostringstream ostr;
   ostr << 'f' << iFun << '.' << m_functions[ iFun ]->nameOfActive(i - m_activeOffsets[iFun]);
+  return ostr.str();
+}
+
+/// Returns the description of active parameter i
+std::string CompositeFunction::descriptionOfActive(size_t i)const
+{
+  int iFun = functionIndexActive(i);
+  std::ostringstream ostr;
+  ostr << m_functions[ iFun ]->descriptionOfActive(i - m_activeOffsets[iFun]);
   return ostr.str();
 }
 

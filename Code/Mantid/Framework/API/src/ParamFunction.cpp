@@ -72,7 +72,7 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
  *  @param i :: The parameter index
  *  @param description :: New parameter description
  */
-void ParamFunction::setParameterDescription(int i, const std::string& description)
+void ParamFunction::setParameterDescription(size_t i, const std::string& description)
 {
   if (i >= nParams() || i < 0)
   {
@@ -193,7 +193,7 @@ std::string ParamFunction::parameterName(int i)const
  * @param i :: The index of a parameter
  * @return the description of the parameter at the requested index
  */
-std::string ParamFunction::parameterDescription(int i)const
+std::string ParamFunction::parameterDescription(size_t i)const
 {
   if (i >= nParams() || i < 0)
   {
@@ -256,7 +256,7 @@ std::string ParamFunction::nameOfActive(int i)const
  * @param i :: The index of an active parameter
  * @return the description of the active parameter
  */
-std::string ParamFunction::descriptionOfActive(int i)const
+std::string ParamFunction::descriptionOfActive(size_t i)const
 {
   return m_parameterDescriptions[indexOfActive(i)];
 }

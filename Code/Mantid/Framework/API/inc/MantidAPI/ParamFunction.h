@@ -68,7 +68,7 @@ public:
   /// Set i-th parameter
   virtual void setParameter(int, const double& value, bool explicitlySet = true);
   /// Set i-th parameter description
-  virtual void setParameterDescription(int, const std::string& description);
+  virtual void setParameterDescription(size_t, const std::string& description);
   /// Get i-th parameter
   virtual double getParameter(int i)const;
   /// Set parameter by name.
@@ -86,7 +86,7 @@ public:
   /// Returns the name of parameter i
   virtual std::string parameterName(int i)const;
   /// Returns the description of parameter i
-  virtual std::string parameterDescription(int i)const;
+  virtual std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   virtual bool isExplicitlySet(int i)const;
 
@@ -97,7 +97,7 @@ public:
   /// Returns the name of active parameter i
   virtual std::string nameOfActive(int i)const;
   /// Returns the name of active parameter i
-  virtual std::string descriptionOfActive(int i)const;
+  virtual std::string descriptionOfActive(size_t i)const;
 
   /// Check if a declared parameter i is active
   virtual bool isActive(int i)const;

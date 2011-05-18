@@ -56,10 +56,14 @@ public:
 
   /// Set i-th parameter
   void setParameter(int, const double& value, bool explicitlySet = true);
+  /// Set i-th parameter description
+  void setParameterDescription(size_t, const std::string& description);
   /// Get i-th parameter
   double getParameter(int i)const;
   /// Set parameter by name.
   void setParameter(const std::string& name, const double& value, bool explicitlySet = true);
+  /// Set description of parameter by name.
+  void setParameterDescription(const std::string& name, const std::string& description);
   /// Get parameter by name.
   double getParameter(const std::string& name)const;
   /// Total number of parameters
@@ -70,6 +74,8 @@ public:
   //int parameterIndex(const double* p)const;
   /// Returns the name of parameter i
   std::string parameterName(int i)const;
+  /// Returns the description of parameter i
+  std::string parameterDescription(size_t i)const;
   /// Checks if a parameter has been set explicitly
   bool isExplicitlySet(int i)const;
 
@@ -85,6 +91,8 @@ public:
   int indexOfActive(int i)const;
   /// Returns the name of active parameter i
   std::string nameOfActive(int i)const;
+  /// Returns the name of active parameter i
+  std::string descriptionOfActive(size_t i)const;
 
   /// Check if a parameter is active
   bool isActive(int i)const;
