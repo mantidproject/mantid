@@ -164,7 +164,7 @@ static int check_char_too_big[1 - sizeof(char) + ARRAY_OFFSET]; // error if char
 */
 
 static void inner_malloc(void* & data, const std::vector<int>& dims, NXnumtype type) {
-  int rank = dims.size();
+  int rank = static_cast<int>(dims.size());
   int c_dims[NX_MAXRANK];
   for (int i = 0; i < rank; i++) {
     c_dims[i] = dims[i];
@@ -320,7 +320,7 @@ void File::makeData(const string& name, NXnumtype type,
 
   // do the work
   NXstatus status = NXmakedata(this->m_file_id, name.c_str(), (int)type,
-                               dims.size(), const_cast<int*>(&(dims[0])));
+                               static_cast<int>(dims.size()), const_cast<int*>(&(dims[0])));
   // report errors
   if (status != NX_OK) {
     stringstream msg;
@@ -355,7 +355,7 @@ void File::writeData(const string& name, const string& value) {
     throw Exception("Supplied empty value to makeData");
   }
   vector<int> dims;
-  dims.push_back(value.size());
+  dims.push_back(static_cast<int>(value.size()));
   this->makeData(name, CHAR, dims, true);
 
   string my_value(value);
@@ -367,7 +367,7 @@ void File::writeData(const string& name, const string& value) {
 
 template <typename NumT>
 void File::writeData(const string& name, const vector<NumT>& value) {
-  vector<int> dims(1, value.size());
+  vector<int> dims(1, static_cast<int>(value.size()));
   this->writeData(name, value, dims);
 }
 
@@ -405,7 +405,7 @@ void File::makeCompData(const string& name, const NXnumtype type,
   int i_type = static_cast<int>(type);
   int i_comp = static_cast<int>(comp);
   NXstatus status = NXcompmakedata(this->m_file_id, name.c_str(), i_type,
-                                   dims.size(),
+                                   static_cast<int>(dims.size()),
                                    const_cast<int *>(&(dims[0])), i_comp,
                                    const_cast<int *>(&(bufsize[0])));
 
@@ -520,7 +520,7 @@ void File::putAttr(const std::string& name, const std::string value) {
   string my_value(value);
   AttrInfo info;
   info.name = name;
-  info.length = my_value.size();
+  info.length = static_cast<int>(my_value.size());
   info.type = CHAR;
   this->putAttr(info, &(my_value[0]));
 }
@@ -909,13 +909,11 @@ void File::getSlab(void* data, const vector<int>& start,
     throw Exception(msg.str());
   }
 
-  int rank = start.size();
+  int rank = static_cast<int>(start.size());
   int i_start[NX_MAXRANK];
-  for (int i = 0; i < rank; i++) {
-    i_start[i] = start[i];
-  }
   int i_size[NX_MAXRANK];
   for (int i = 0; i < rank; i++) {
+    i_start[i] = start[i];
     i_size[i] = size[i];
   }
 
