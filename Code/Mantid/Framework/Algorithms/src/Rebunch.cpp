@@ -62,7 +62,7 @@ void Rebunch::initDocs()
 			bool dist = inputW->isDistribution();
 
 			// workspace independent determination of length
-			int histnumber = inputW->size()/inputW->blocksize();
+                        int histnumber = static_cast<int>(inputW->size()/inputW->blocksize());
 
 			/*
 			const std::vector<double>& Xold = inputW->readX(0);
@@ -70,8 +70,8 @@ void Rebunch::initDocs()
 			int size_x=Xold.size();
 			int size_y=Yold.size();
 			*/
-			int size_x = inputW->readX(0).size();
-			int size_y = inputW->readY(0).size();
+                        int size_x = static_cast<int>(inputW->readX(0).size());
+                        int size_y = static_cast<int>(inputW->readY(0).size());
 
 			//signal is the same length for histogram and point data
 			int ny=(size_y/n_bunch);
@@ -265,7 +265,7 @@ void Rebunch::initDocs()
 			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch)
 		{
 			int i,j;
-			int size_y=yold.size();
+                        int size_y=static_cast<int>(yold.size());
 			double xsum,ysum,esum;
 			int wbins=size_y/n_bunch;
 			int rem=size_y%n_bunch;
