@@ -116,10 +116,10 @@ void RemoveBins::exec()
 
   // Loop over the spectra
   int start=0,end=0;
-  const int blockSize = m_inputWorkspace->readX(0).size();
-  const size_t numHists = m_inputWorkspace->getNumberHistograms();
+  const int blockSize = static_cast<int>(m_inputWorkspace->readX(0).size());
+  const int numHists = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this,0.0,1.0,numHists);
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
+  for (int i = 0; i < numHists; ++i)
   {
     // Copy over the data
     const MantidVec& X = m_inputWorkspace->readX(i);
@@ -190,7 +190,7 @@ void RemoveBins::checkProperties()
 
   // If WorkspaceIndex has been set it must be valid
   const int index = getProperty("WorkspaceIndex");
-  if ( !isEmpty(index) && index >= m_inputWorkspace->getNumberHistograms() )
+  if ( !isEmpty(index) && index >= static_cast<int>(m_inputWorkspace->getNumberHistograms()) )
   {
     g_log.error() << "The value of WorkspaceIndex provided (" << index << 
       ") is larger than the size of this workspace (" <<
@@ -306,7 +306,7 @@ void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double&
 int RemoveBins::findIndex(const double& value, const MantidVec& vec)
 {
   MantidVec::const_iterator pos = std::lower_bound(vec.begin(),vec.end(),value);
-  return pos-vec.begin();
+  return static_cast<int>(pos-vec.begin());
 }
 
 /** Zeroes data (Y/E) at the end of a spectrum
@@ -318,7 +318,8 @@ int RemoveBins::findIndex(const double& value, const MantidVec& vec)
 void RemoveBins::RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E)
 {
   if ( start ) --start;
-  if ( end > static_cast<int>(Y.size()) ) end = Y.size();
+  int size = static_cast<int>(Y.size());
+  if ( end > size ) end = size;
   for (int j = start; j < end; ++j)
   {
     Y[j] = 0.0;
