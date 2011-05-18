@@ -75,7 +75,7 @@ void SmoothNeighbours::exec()
 
   //Get some stuff from the input workspace
   //const size_t numberOfSpectra = inWS->getNumberHistograms();
-  const int YLength = inWS->blocksize();
+  const int YLength = static_cast<int>(inWS->blocksize());
   IInstrument_sptr inst = inWS->getInstrument();
   if (!inst)
     throw std::runtime_error("The InputWorkspace does not have a valid instrument attached to it!");
@@ -185,7 +185,7 @@ void SmoothNeighbours::exec()
               //Find the corresponding workspace index, if any
               if (pixel_to_wi->find(pixelID) != pixel_to_wi->end())
               {
-                int wi = (*pixel_to_wi)[pixelID];
+                size_t wi = (*pixel_to_wi)[pixelID];
                 //Get the event list on the input and add it
                 outEL += inWS->getEventList(wi);
                 count++;
