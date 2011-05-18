@@ -73,7 +73,7 @@ void StripVanadiumPeaks::exec()
   // If WorkspaceIndex has been set it must be valid
   int singleIndex = getProperty("WorkspaceIndex");
   bool singleSpectrum = !isEmpty(singleIndex);
-  if ( singleSpectrum && singleIndex >= inputWS->getNumberHistograms() )
+  if ( singleSpectrum && singleIndex >= static_cast<int>(inputWS->getNumberHistograms()) )
   {
     g_log.error() << "The value of WorkspaceIndex provided (" << singleIndex <<
                   ") is larger than the size of this workspace (" <<
@@ -85,7 +85,7 @@ void StripVanadiumPeaks::exec()
   // Create an output workspace - same size as input one
   MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS);
   // Copy the data over from the input to the output workspace
-  const size_t nhists = inputWS->getNumberHistograms();
+  const int nhists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this,0.0,1.0,nhists*2);
   for (int k = 0; k < nhists; ++k)
   {
