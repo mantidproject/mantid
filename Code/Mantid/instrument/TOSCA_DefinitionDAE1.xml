@@ -652,21 +652,21 @@
     <component type="tube" > 
          <location r="0.16" t="51.3710592" p="30" rot="300.0" name="Diff #4" /> 
     </component>
-    <!-- ... 177 -->
+    <!-- ... 177 --> <!-- (Spectra 146) -->
     <component type="tube" > 
-         <location r="0.18" t="49.6277789" p="30" rot="300.0" name="Diff #5" /> 
+         <location r="1.21" t="179" p="0" rot="0" name="Diff #5" /> 
     </component> 
     <!-- ... 178 -->
     <component type="tube" > 
-         <location r="0.20" t="50.7897939" p="30" rot="300.0" name="Diff #6" /> 
+         <location r="1.21" t="179" p="0" rot="0" name="Diff #6" /> 
     </component>
     <!-- ... 179 -->    
     <component type="tube" > 
-         <location r="0.22" t="51.7033958" p="30" rot="300.0" name="Diff #7" /> 
+         <location r="1.21" t="179" p="0" rot="0" name="Diff #7" /> 
     </component>
     <!-- ... 180 -->
     <component type="tube" > 
-         <location r="0.24" t="51.3710592" p="30" rot="300.0" name="Diff #8" /> 
+         <location r="1.21" t="179" p="0" rot="0" name="Diff #8" /> 
     </component>
   </type>
 
