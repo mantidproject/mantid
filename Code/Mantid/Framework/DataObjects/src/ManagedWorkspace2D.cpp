@@ -80,7 +80,7 @@ void ManagedWorkspace2D::init(const size_t &NVectors, const size_t &XLength, con
   if (std::numeric_limits<int>::max()%(m_vectorsPerBlock * m_vectorSize) != 0) ++m_blocksPerFile; 
 
   // Now work out the number of files needed
-  int totalBlocks = m_noVectors / m_vectorsPerBlock;
+  size_t totalBlocks = m_noVectors / m_vectorsPerBlock;
   if (m_noVectors%m_vectorsPerBlock != 0) ++totalBlocks;
   int numberOfFiles = totalBlocks / m_blocksPerFile;
   if (totalBlocks%m_blocksPerFile != 0) ++numberOfFiles;
