@@ -77,12 +77,12 @@ void RealFFT::exec()
     int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 
     const MantidVec& X = inWS->readX(spec);
-    int ySize = inWS->blocksize();
+    int ySize = static_cast<int>(inWS->blocksize());
 
     if (spec >= ySize) throw std::invalid_argument("Property WorkspaceIndex is out of range");
 
     //Check that the x values are evenly spaced
-    double dx = (X.back() - X.front()) / (X.size() - 1);
+    double dx = (X.back() - X.front()) / static_cast<double>(X.size() - 1);
     if (!IgnoreXBins)
     {
       for(size_t i=0;i<X.size()-2;i++)
