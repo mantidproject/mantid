@@ -45,7 +45,7 @@ namespace Mantid
       retrieveProperties();
       
       const size_t numSpec = in_work->getNumberHistograms();
-      const int specSize = in_work->blocksize();
+      const size_t specSize = in_work->blocksize();
       const bool isHist = in_work->isHistogramData();
 
       // Initialise the progress reporting object
@@ -67,7 +67,7 @@ namespace Mantid
         const MantidVec& Y = in_work->readY(i);
         const MantidVec& E = in_work->readE(i);
         
-        for (int j = 0; j < specSize; ++j)
+        for (size_t j = 0; j < specSize; ++j)
         {
           // Use the bin centre for the X value if this is histogram data
           const double XIn = isHist ? (X[j]+X[j+1])/2.0 : X[j];
