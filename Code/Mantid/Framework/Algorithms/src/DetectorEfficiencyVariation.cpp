@@ -148,8 +148,8 @@ namespace Mantid
       {
 	throw std::invalid_argument("The two input white beam vanadium workspaces must be from the same instrument");
       }
-      size_t maxSpecIndex = whiteBeam1->getNumberHistograms() - 1;
-      if ( maxSpecIndex != whiteBeam2->getNumberHistograms() - 1 )
+      int maxSpecIndex = static_cast<int>(whiteBeam1->getNumberHistograms()) - 1;
+      if ( maxSpecIndex != static_cast<int>(whiteBeam2->getNumberHistograms()) - 1 )
       {//we would get a crash later on if this were not true
 	throw std::invalid_argument("The input white beam vanadium workspaces must be have the same number of histograms");
       }
@@ -219,7 +219,7 @@ namespace Mantid
       // criterion for if the the first spectrum is lower than expected
       double lowest = average/variation;
 
-      const size_t numSpec = counts1->getNumberHistograms();
+      const int numSpec = static_cast<int>(counts1->getNumberHistograms());
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
       // Create a workspace for the output
@@ -231,42 +231,42 @@ namespace Mantid
       const double liveValue(1.0);
       int numFailed(0);
       PARALLEL_FOR3(counts1, counts2, maskWS)
-      for (int64_t i = 0; i < int64_t(numSpec); ++i)
+      for (int i = 0; i < numSpec; ++i)
       {
-	PARALLEL_START_INTERUPT_REGION
+        PARALLEL_START_INTERUPT_REGION
 
-	// move progress bar
-	if (i % progStep == 0)
-	{
-	  advanceProgress( progStep*static_cast<double>(RTMarkDetects)/numSpec );
-	  progress( m_fracDone );
-	  interruption_point();
-	}
+        // move progress bar
+        if (i % progStep == 0)
+        {
+          advanceProgress( progStep*static_cast<double>(RTMarkDetects)/numSpec );
+          progress( m_fracDone );
+          interruption_point();
+        }
 
-	// If the index is marked as bad then just give it the dead value as
-	// it means that either there is no detector, it's masked already or it is NAN/INF
-	if( badIndices.count(i) == 1)
-	{
-	  maskWS->maskWorkspaceIndex(i);
-	  continue;
-	}
-	// Check the ratio is within the given range
-	const double ratio = counts1->readY(i)[0]/counts2->readY(i)[0];
-	if( ratio < lowest || ratio > largest )
-	{
-	  PARALLEL_CRITICAL(detEfficVar_critical_a)
-	  {
-	    maskWS->maskWorkspaceIndex(i);
-	    ++numFailed;
-	  }
-	}
-	else
-	{
-	  // Mark it with the "live" value
-	  maskWS->dataY(i)[0] = liveValue;
-	}
+        // If the index is marked as bad then just give it the dead value as
+        // it means that either there is no detector, it's masked already or it is NAN/INF
+        if( badIndices.count(i) == 1)
+        {
+          maskWS->maskWorkspaceIndex(i);
+          continue;
+        }
+        // Check the ratio is within the given range
+        const double ratio = counts1->readY(i)[0]/counts2->readY(i)[0];
+        if( ratio < lowest || ratio > largest )
+        {
+          PARALLEL_CRITICAL(detEfficVar_critical_a)
+          {
+            maskWS->maskWorkspaceIndex(i);
+            ++numFailed;
+          }
+        }
+        else
+        {
+          // Mark it with the "live" value
+          maskWS->dataY(i)[0] = liveValue;
+        }
 
-	PARALLEL_END_INTERUPT_REGION
+        PARALLEL_END_INTERUPT_REGION
       }
       PARALLEL_CHECK_INTERUPT_REGION
 
