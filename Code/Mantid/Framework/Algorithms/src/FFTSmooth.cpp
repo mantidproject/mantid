@@ -68,12 +68,12 @@ void FFTSmooth::exec()
   m_x0 = m_inWS->readX(spec)[0];
 
   // Symmetrize the input spectrum 
-  int dn = m_inWS->readY(0).size();
+  int dn = static_cast<int>(m_inWS->readY(0).size());
 
   API::MatrixWorkspace_sptr symmWS = 
     API::WorkspaceFactory::Instance().create("Workspace2D",1,m_inWS->readX(0).size()+dn,m_inWS->readY(0).size()+dn);
 
-  double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) / (m_inWS->readX(spec).size() - 1);
+  double dx = (m_inWS->readX(spec).back() - m_inWS->readX(spec).front()) / static_cast<double>(m_inWS->readX(spec).size() - 1);
   for(int i=0;i<dn;i++)
   {
     symmWS->dataX(0)[dn + i] = m_inWS->readX(spec)[i];
@@ -150,7 +150,7 @@ void FFTSmooth::exec()
   API::MatrixWorkspace_sptr outWS = 
     API::WorkspaceFactory::Instance().create(m_inWS,1,m_inWS->readX(0).size(),m_inWS->readY(0).size());
 
-  dn = tmpWS->blocksize()/2;
+  dn = static_cast<int>(tmpWS->blocksize())/2;
 
   // x-value correction is needed if the size of the spectrum is changed (e.g. after truncation)
   // but it doesn't work accurately enough, so commented out
@@ -180,7 +180,7 @@ void FFTSmooth::exec()
  */
 void FFTSmooth::truncate(int n)
 {
-  int my = m_unfilteredWS->readY(0).size();
+  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
   int ny = my / n;
 
   double f = double(ny)/my;
@@ -240,8 +240,8 @@ void FFTSmooth::truncate(int n)
  */
 void FFTSmooth::zero(int n)
 {
-  int mx = m_unfilteredWS->readX(0).size();
-  int my = m_unfilteredWS->readY(0).size();
+  int mx = static_cast<int>(m_unfilteredWS->readX(0).size());
+  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
   int ny = my / n;
 
   if (ny == 0) ny = 1;
