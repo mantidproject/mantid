@@ -290,7 +290,8 @@ namespace Mantid
 	  //
 	  FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
 	  if(!pCalcDetPar){
-		  throw(std::bad_cast("can not get pointer to FindDetectorsPar algorithm"));
+		  // "can not get pointer to FindDetectorsPar algorithm"
+		  throw(std::bad_cast());
 	  }
       const std::vector<double> & azimuthal           = pCalcDetPar->getAzimuthal();
       const std::vector<double> & polar               = pCalcDetPar->getPolar();
