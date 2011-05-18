@@ -111,8 +111,8 @@ void LoadNexusMonitors::exec()
     std::string monitorName = monPath.getBaseName();
     std::string::size_type loc = monitorName.rfind('r');
 
-    detid_t monIndex = boost::lexical_cast<int64_t>(monitorName.substr(loc+1));
-    specid_t spectraIndex = i;
+    detid_t monIndex = boost::lexical_cast<int>(monitorName.substr(loc+1));
+    std::size_t spectraIndex = i;
 
     g_log.debug() << "monIndex = " << monIndex << std::endl;
     g_log.debug() << "spectraIndex = " << spectraIndex << std::endl;
