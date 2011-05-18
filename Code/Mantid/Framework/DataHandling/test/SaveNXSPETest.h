@@ -126,7 +126,7 @@ private:
     inputWS = setUpWorkspace(input, inputWS);
     API::Axis * axisOne = inputWS->getAxis(1);
     API::NumericAxis *newAxisOne = new NumericAxis(axisOne->length());
-    for( int i = 0; i < axisOne->length(); ++i)
+    for(size_t i = 0; i < axisOne->length(); ++i)
     {
       newAxisOne->setValue(i, axisOne->operator()((i)));
     }

@@ -61,7 +61,7 @@ public:
 	inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
 
     int forSpecDetMap[NHIST];
-    for (int j = 0; j < NHIST; ++j)
+    for (size_t j = 0; j < NHIST; ++j)
     {
       // Just set the spectrum number to match the index
       inputWS->getAxis(1)->spectraNo(j) = j+1;

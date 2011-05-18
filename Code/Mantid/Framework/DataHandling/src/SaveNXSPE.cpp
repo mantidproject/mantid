@@ -76,8 +76,6 @@ namespace Mantid
     {
       using namespace Mantid::API;
 
-      // Constant for converting Radians to Degrees
-      const double rad2deg = 180.0 / M_PI;
       double efixed = 0.0;
 
       // Retrieve the input workspace
@@ -204,8 +202,8 @@ namespace Mantid
       // let's create some blank arrays in the nexus file
 
       std::vector<int> array_dims;
-      array_dims.push_back(nHist);
-      array_dims.push_back(static_cast<int>(nBins));
+      array_dims.push_back((int)nHist);
+      array_dims.push_back((int)nBins);
 
       nxFile.makeData("data", ::NeXus::FLOAT64, array_dims, false);
       nxFile.makeData("error", ::NeXus::FLOAT64, array_dims, false);
@@ -215,7 +213,7 @@ namespace Mantid
 
       // What size slabs are we going to write...
       slab_size.push_back(1);
-      slab_size.push_back(static_cast<int>(nBins));
+      slab_size.push_back((int)nBins);
 
       // And let's start at the beginning
       slab_start.push_back(0);
@@ -227,10 +225,10 @@ namespace Mantid
        
       // Create a progress reporting object
       Progress progress(this,0,1,100);
-      const int progStep = static_cast<int>(ceil(nHist/100.0));
+      const int progStep = (int)(ceil(nHist/100.0));
       
       // Loop over spectra
-      for (int i = 0; i < nHist; i++)
+      for (size_t i = 0; i < nHist; i++)
         {
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())
