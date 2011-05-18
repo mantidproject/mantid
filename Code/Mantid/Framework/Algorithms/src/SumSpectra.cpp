@@ -70,8 +70,8 @@ void SumSpectra::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  numberOfSpectra = localworkspace->getNumberHistograms();
-  const int YLength = localworkspace->blocksize();
+  numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
+  const int YLength = static_cast<int>(localworkspace->blocksize());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
