@@ -92,11 +92,11 @@ private:
   /// The data 'chunk'
   std::vector<Histogram1D> m_data;
   /// The length of the X vector in each Histogram1D. Must all be the same. 
-  const int m_XLength;
+  const std::size_t m_XLength;
   /// The length of the Y & E vectors in each Histogram1D. Must all be the same. 
-  const int m_YLength;
+  const std::size_t m_YLength;
   /// The index of the workspace that this datablock starts from.
-  const int m_minIndex;
+  const std::size_t m_minIndex;
   /// A 'dirty' flag. Set if any of the elements of m_data are accessed through non-const accessors.
   bool m_hasChanges;
   

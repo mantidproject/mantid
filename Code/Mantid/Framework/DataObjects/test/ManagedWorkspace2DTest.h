@@ -16,19 +16,13 @@ public:
 
   ManagedWorkspace2DTest()
   {
-    std::cout << "01:" << std::endl; // REMOVE
     smallWorkspace.setTitle("ManagedWorkspace2DTest_smallWorkspace");
-    std::cout << "02:" << std::endl; // REMOVE
     smallWorkspace.initialize(2,4,3);
-    std::cout << "03:" << std::endl; // REMOVE
     for (size_t i = 0; i < 4; ++i)
     {
-      std::cout << "a:" << i << std::endl;
-      smallWorkspace.dataX(0)[i] = i;
-      std::cout << "b:" << std::endl;
-      smallWorkspace.dataX(1)[i] = i+4;
+      smallWorkspace.dataX(0)[i] = static_cast<double>(i);
+      smallWorkspace.dataX(1)[i] = static_cast<double>(i+4);
     }
-    std::cout << "04:" << std::endl; // REMOVE
     
     for (size_t i = 0; i < 3; ++i)
     {
@@ -38,14 +32,10 @@ public:
       smallWorkspace.dataE(1)[i] = sqrt(smallWorkspace.dataY(1)[i]);     
     }
     
-    std::cout << "05:" << std::endl; // REMOVE
     bigWorkspace.setTitle("ManagedWorkspace2DTest_bigWorkspace");
-    std::cout << "06:" << std::endl; // REMOVE
     size_t nVec = 1250;
     size_t vecLength = 25;
-    std::cout << "07:" << std::endl; // REMOVE
     bigWorkspace.initialize(nVec, vecLength, vecLength);
-    std::cout << "08:" << std::endl; // REMOVE
     for (size_t i=0; i< nVec; i++)
     {
       boost::shared_ptr<MantidVec > x1(new MantidVec(vecLength,1+i) );
@@ -54,7 +44,6 @@ public:
       bigWorkspace.setX(i,x1);     
       bigWorkspace.setData(i,y1,e1);
     }
-    std::cout << "09:" << std::endl; // REMOVE
   }
   
   void testInit()
@@ -250,8 +239,8 @@ public:
     TS_ASSERT_EQUALS( ee.size(), 3 );
     for (size_t i = 0; i < e.size(); ++i)
     {
-      TS_ASSERT_EQUALS( e[i], sqrt(i*10.0) );
-      TS_ASSERT_EQUALS( ee[i], sqrt(i*100.0) );
+      TS_ASSERT_EQUALS( e[i], sqrt(static_cast<double>(i)*10.0) );
+      TS_ASSERT_EQUALS( ee[i], sqrt(static_cast<double>(i)*100.0) );
     }    
     
     // test const version
@@ -264,8 +253,8 @@ public:
     TS_ASSERT_EQUALS( eec.size(), 3 );
     for (size_t i = 0; i < ec.size(); ++i)
     {
-      TS_ASSERT_EQUALS( ec[i], sqrt(i*10.0) );
-      TS_ASSERT_EQUALS( eec[i], sqrt(i*100.0) );
+      TS_ASSERT_EQUALS( ec[i], sqrt(static_cast<double>(i)*10.0) );
+      TS_ASSERT_EQUALS( eec[i], sqrt(static_cast<double>(i)*100.0) );
     }    
 
     TS_ASSERT_EQUALS( bigWorkspace.dataE(0)[23], 4 );

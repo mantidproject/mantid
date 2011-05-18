@@ -41,15 +41,15 @@ ManagedDataBlock2D::~ManagedDataBlock2D()
 }
 
 /// The minimum index of the workspace data that this data block contains
-int ManagedDataBlock2D::minIndex() const
+int ManagedDataBlock2D::minIndex() const // TODO this should return size_t but it breaks lots of things
 {
-  return m_minIndex;
+  return static_cast<int>(m_minIndex);
 }
 
 /// Function used by hash indexer (used by the MRUList) to ensure uniqueness
-int ManagedDataBlock2D::hashIndexFunction() const
+int ManagedDataBlock2D::hashIndexFunction() const // TODO this should return size_t but it breaks lots of things
 {
-  return m_minIndex;
+  return static_cast<int>(m_minIndex);
 }
 
 /** Flags whether the data has changed since being read in.
@@ -266,24 +266,24 @@ std::fstream& operator<<(std::fstream& fs, ManagedDataBlock2D& data)
   {
     // If anyone's gone and changed the size of the vectors then get them back to the
     // correct size, removing elements or adding zeroes as appropriate.
-    if (it->dataX().size() != static_cast<unsigned int>(data.m_XLength))
+    if (it->dataX().size() != data.m_XLength)
     {
       it->dataX().resize(data.m_XLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "X vector resized to " << data.m_XLength << " elements.";
     }
-    fs.write((char *) &*it->dataX().begin(), data.m_XLength * sizeof(double));
-    if (it->dataY().size() != static_cast<unsigned int>(data.m_YLength))
+    fs.write(reinterpret_cast<char *>(&(it->dataX().front())), data.m_XLength * sizeof(double));
+    if (it->dataY().size() != data.m_YLength)
     {
       it->dataY().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "Y vector resized to " << data.m_YLength << " elements.";
     }
-    fs.write((char *) &*it->dataY().begin(), data.m_YLength * sizeof(double));
-    if (it->dataE().size() != static_cast<unsigned int>(data.m_YLength))
+    fs.write(reinterpret_cast<char *>(&(it->dataY().front())), data.m_YLength * sizeof(double));
+    if (it->dataE().size() != data.m_YLength)
     {
       it->dataE().resize(data.m_YLength, 0.0);
       ManagedDataBlock2D::g_log.warning() << "E vector resized to " << data.m_YLength << " elements.";
     }
-    fs.write((char *) &*it->dataE().begin(), data.m_YLength * sizeof(double));
+    fs.write(reinterpret_cast<char *>(&(it->dataE().front())), data.m_YLength * sizeof(double));
     
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
@@ -302,11 +302,11 @@ std::fstream& operator>>(std::fstream& fs, ManagedDataBlock2D& data)
   for (std::vector<Histogram1D>::iterator it = data.m_data.begin(); it != data.m_data.end(); ++it)
   {
     it->dataX().resize(data.m_XLength, 0.0);
-    fs.read((char *) &*it->dataX().begin(), data.m_XLength * sizeof(double));
+    fs.read(reinterpret_cast<char *>(&(it->dataX().front())), data.m_XLength * sizeof(double));
     it->dataY().resize(data.m_YLength, 0.0);
-    fs.read((char *) &*it->dataY().begin(), data.m_YLength * sizeof(double));
+    fs.read(reinterpret_cast<char *>(&(it->dataY().front())), data.m_YLength * sizeof(double));
     it->dataE().resize(data.m_YLength, 0.0);
-    fs.read((char *) &*it->dataE().begin(), data.m_YLength * sizeof(double));
+    fs.read(reinterpret_cast<char *>(&(it->dataE().front())), data.m_YLength * sizeof(double));
     
     // N.B. ErrorHelper member not stored to file so will always be Gaussian default
   }
