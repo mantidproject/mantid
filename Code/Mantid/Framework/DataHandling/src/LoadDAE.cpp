@@ -281,10 +281,10 @@ namespace Mantid
       m_proton_charge = rpb[8];
 
       // Calculate the size of a workspace, given its number of periods & spectra to read
-      long total_specs;
+      int total_specs;
       if( m_interval || m_list)
       {
-        total_specs = static_cast<long>(m_spec_list.size());
+        total_specs = static_cast<int>(m_spec_list.size());
         if (m_interval)
         {
           total_specs += (m_spec_max-m_spec_min+1);
@@ -331,7 +331,7 @@ namespace Mantid
 
       loadSpectraMap(dae_handle, localWorkspace);
 
-      int histTotal = total_specs * m_numberOfPeriods;
+      const int histTotal = static_cast<int>(total_specs) * m_numberOfPeriods;
       int histCurrent = -1;
       // Loop over the number of periods in the raw file, putting each period in a separate workspace
       for (int period = 0; period < m_numberOfPeriods; ++period) {

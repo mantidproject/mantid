@@ -1320,7 +1320,10 @@ class ISISCorrections(ReductionStep):
         #use the instrument's correction file
         corr_file = reducer.instrument.cur_detector().correction_file
         corr = sans_reduction_steps.CorrectToFileStep(corr_file, "Wavelength", "Divide")
-        corr.execute(reducer, workspace)
+        try:
+            corr.execute(reducer, workspace)
+        except ValueError:
+            raise ValueError('Could not find the correction file %s, is the path incorrect or is it not the same directory as your user file?' % corr_file)
 
         scalefactor = self.rescale
         # Data reduced with Mantid is a factor of ~pi higher than Colette.

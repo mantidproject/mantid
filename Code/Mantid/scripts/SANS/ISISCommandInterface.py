@@ -326,13 +326,16 @@ def LimitsPhi(phimin, phimax, use_mirror=True):
         _printMessage("LimitsPHI(" + str(phimin) + ' ' + str(phimax) + 'use_mirror=False)')
         ReductionSingleton().mask.set_phi_limit(phimin, phimax, False)
 
-def LimitsR(rmin, rmax, quiet=False):
-    if not quiet:
-        _printMessage('LimitsR(' + str(rmin) + ', ' +str(rmax) + ')', ReductionSingleton())
+def LimitsR(rmin, rmax, quiet=False, reducer=None):
+    if reducer == None:
+        reducer = ReductionSingleton().reference()
 
-    ReductionSingleton().mask.set_radi(rmin, rmax)
-    ReductionSingleton().CENT_FIND_RMIN = float(rmin)/1000.
-    ReductionSingleton().CENT_FIND_RMAX = float(rmax)/1000.    
+    if not quiet:
+        _printMessage('LimitsR(' + str(rmin) + ', ' +str(rmax) + ')', reducer)
+
+    reducer.mask.set_radi(rmin, rmax)
+    reducer.CENT_FIND_RMIN = float(rmin)/1000.
+    reducer.CENT_FIND_RMAX = float(rmax)/1000.    
 
 def LimitsWav(lmin, lmax, step, bin_type):
     _printMessage('LimitsWav(' + str(lmin) + ', ' + str(lmax) + ', ' + str(step) + ', '  + bin_type + ')')
@@ -511,8 +514,6 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
     XSTEP = ReductionSingleton().inst.cen_find_step
     YSTEP = ReductionSingleton().inst.cen_find_step
 
-    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True)
-
     original = ReductionSingleton()._beam_finder.get_beam_center()
     if xstart or ystart:
         ReductionSingleton().set_beam_finder(
@@ -530,6 +531,8 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
 
     #remove this if we know running the Reducer() doesn't change it i.e. all execute() methods are const
     centre_reduction = copy.deepcopy(ReductionSingleton().reference())
+    LimitsR(str(float(rlow)), str(float(rupp)), quiet=True, reducer=centre_reduction)
+
     centre_reduction.sample_wksp = ReductionSingleton().sample_wksp
 
     if centre_reduction.background_subtracter:
@@ -580,14 +583,13 @@ def FindBeamCentre(rlow, rupp, MaxIter = 10, xstart = None, ystart = None):
         XNEW += XSTEP
         YNEW += YSTEP
 
-	  #remove this 	  
+        #remove this 	  
         centre_reduction = copy.deepcopy(ReductionSingleton().reference())
     
     if it == MaxIter:
         mantid.sendLogMessage("::SANS:: Out of iterations, new coordinates may not be the best!")
         XNEW -= XSTEP
         YNEW -= YSTEP
-        centre.move(-XSTEP, -YSTEP)
     
     ReductionSingleton().set_beam_finder(
         sans_reduction_steps.BaseBeamFinder(XNEW, YNEW))
