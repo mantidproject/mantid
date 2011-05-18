@@ -85,19 +85,6 @@ def resolution(files, iconOpt, rebinParam, bground,
             graph = plotSpectrum(iconWS, 0)
         return iconWS
 
-def saveItems(workspaces, fileFormats, Verbose=False):
-    for workspace in workspaces:
-        for j in fileFormats:
-            if j == 'spe':
-                SaveSPE(workspace, workspace+'.spe')
-            elif j == 'nxs':
-                SaveNexusProcessed(workspace, workspace+'.nxs')
-            elif j == 'nxspe':
-                SaveNXSPE(workspace, workspace+'.nxspe')
-            else:
-                print 'Save: unknown file type.'
-                system.exit('Save: unknown file type.')
-
 def slice(inputfiles, calib, xrange, spec, suffix, Save=False, Verbose=False,
         Plot=False):
     outWSlist = []
@@ -201,9 +188,3 @@ def getReflectionDetails(inst, analyser, refl):
     except IndexError:
         pass
     return result
-
-def applyParameterFile(workspace, analyser, refl):
-    inst = mtd[workspace].getInstrument().getName()
-    idf_dir = mantid.getConfigProperty('instrumentDefinition.directory')
-    ipf = idf_dir + inst + '_' + analyser + '_' + refl + '_Parameters.xml'
-    LoadParameterFile(workspace, ipf)

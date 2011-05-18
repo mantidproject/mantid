@@ -37,6 +37,8 @@ class IndirectReducer(Reducer):
     _background_start = None
     _background_end = None
     _detailed_balance_temp = None
+    _rename_result = True
+    _save_formats = []
     
     def __init__(self):
         """Constructor function for IndirectReducer.
@@ -60,6 +62,8 @@ class IndirectReducer(Reducer):
         self._background_start = None
         self._background_end = None
         self._detailed_balance_temp = None
+        self._rename_result = True
+        self._save_formats = []
         
     def pre_process(self):
         """Handles the loading of the data files. This is done once, at the
@@ -146,8 +150,14 @@ class IndirectReducer(Reducer):
         if self._multiple_frames:
             self.append_step(steps.FoldData())
             
-        step = steps.Naming()
-        self.append_step(step)
+        if (len(self._save_formats) > 0):
+            step = steps.SaveItem()
+            step.set_formats(self._save_formats)
+            self.append_step(step)
+        
+        if self._rename_result:
+            step = steps.Naming()
+            self.append_step(step)
     
     def post_process(self):
         """Deletes the calibration workspace (if we created it).
@@ -160,7 +170,10 @@ class IndirectReducer(Reducer):
         self._instrument_name = instrument
         self._load_empty_instrument()
         self._get_monitor_index()
-        
+
+    def set_save_formats(self, formats):
+        self._save_formats = formats
+
     def set_detector_range(self, start, end):
         self._detector_range_start = start
         self._detector_range_end = end
@@ -191,8 +204,19 @@ class IndirectReducer(Reducer):
         self._detailed_balance_temp = temp
         
     def get_result_workspaces(self):
-        step = self._reduction_steps[len(self._reduction_steps)-1]
-        return step.get_result_workspaces()
+        nsteps = len(self._reduction_steps)
+        for i in range(0, nsteps):
+            try:
+                step = self._reduction_steps[nsteps-(i+1)]
+                return step.get_result_workspaces()
+            except AttributeError:
+                pass
+            except IndexError:
+                raise RuntimeError("None of the reduction steps implement "
+                    "the get_result_workspaces() method.")
+        
+    def set_rename(self, value):
+        self._rename_result = value
         
     def _load_empty_instrument(self):
         """Returns an empty workspace for the instrument.

@@ -170,12 +170,6 @@ void Indirect::runConvertToEnergy()
     return;
   }
 
-  QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
-  if ( grouping == "" )
-  {
-    return;
-  }
-
   QString pyInput =
     "import inelastic_indirect_reducer as iir\n"
     "reducer = iir.IndirectReducer()\n"
@@ -226,16 +220,22 @@ void Indirect::runConvertToEnergy()
     pyInput += "reducer.set_detailed_balance(" + m_uiForm.leDetailedBalance->text() + ")\n";
   }
 
-  pyInput += "reducer.set_grouping_policy('" + grouping + "')\n";
+  if ( m_uiForm.cbMappingOptions->currentText() != "Default" )
+  {
+    QString grouping = createMapFile(m_uiForm.cbMappingOptions->currentText());
+    pyInput += "reducer.set_grouping_policy('" + grouping + "')\n";
+  }
+
+  if ( ! m_uiForm.ckRenameWorkspace->isChecked() )
+  {
+    pyInput += "reducer.set_rename(False)\n";
+  }
+
+  pyInput += "reducer.set_save_formats([" + savePyCode() + "])\n";
 
   pyInput +=
     "reducer.reduce()\n"
     "ws_list = reducer.get_result_workspaces()\n";
-
-  // Saving
-  pyInput += "from IndirectEnergyConversion import saveItems\n"
-    "formats = [" + savePyCode() + "]\n"
-    "saveItems(ws_list, formats)\n";
 
   // Plot Output options
   switch ( m_uiForm.ind_cbPlotOutput->currentIndex() )
@@ -419,6 +419,8 @@ QString Indirect::savePyCode()
     fileFormats << "spe";
   if ( m_uiForm.save_ckNxSPE->isChecked() )
     fileFormats << "nxspe";
+  if ( m_uiForm.save_ckAscii->isChecked() )
+    fileFormats << "ascii";
 
   if ( fileFormats.size() != 0 )
     fileFormatList = "'" + fileFormats.join("', '") + "'";

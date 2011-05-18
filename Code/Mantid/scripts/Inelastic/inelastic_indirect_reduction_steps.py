@@ -474,8 +474,11 @@ class FoldData(ReductionStep):
     """
     """
 
+    _result_workspaces = []
+    
     def __init__(self):
         super(FoldData, self).__init__()
+        self._result_workspaces = []
         
     def execute(self, reducer, file_ws):
         """Folds data back into a single workspace if it has been "chopped".
@@ -489,36 +492,36 @@ class FoldData(ReductionStep):
         Divide(ws, scaling, ws)
         DeleteWorkspace(scaling)
         RenameWorkspace(ws, file_ws)
-
+        self._result_workspaces.append(file_ws)
+        
+    def get_result_workspaces(self):
+        return self._result_workspaces
+        
     def _create_scaling_workspace(self, wsgroup, merged):
         wsname = '__scaling'
-        largest = 0
-        nlargest = 0
-        nlrgws = ''
+        ranges = []
+        lowest = 0
+        highest = 0
         for ws in wsgroup:
-            nbin = mtd[ws].getNumberBins()
-            if ( nbin > largest ):
-                nlargest = largest
-                largest = nbin
-            elif ( nbin > nlargest ):
-                nlargest = nbin
-                nlrgws = ws
-        nlargestX = mtd[nlrgws].dataX(0)[nlargest]	
-        largestValInNLrg = nlargestX
-        binIndex = mtd[merged].binIndexOf(largestValInNLrg)	
-        dataX = list(mtd[merged].readX(0))
+            low = mtd[ws].dataX(0)[0]
+            high = mtd[ws].dataX(0)[mtd[ws].getNumberBins()-1]
+            ranges.append([low, high])
+            if low < lowest: lowest = low
+            if high > highest: highest = high
+        dataX = mtd[merged].readX(0)
         dataY = []
         dataE = []
-        totalBins = mtd[merged].getNumberBins()
-        nWS = len(wsgroup)
-        for i in range(0, binIndex):
+        for i in range(0, mtd[merged].getNumberBins()):
             dataE.append(0.0)
-            dataY.append(nWS)    
-        for i in range(binIndex, totalBins):
-            dataE.append(0.0)
-            dataY.append(1.0)	
+            dataY.append(self._ws_in_range(ranges, dataX[i]))
         CreateWorkspace(wsname, dataX, dataY, dataE, UnitX='DeltaE')
         return wsname
+
+    def _ws_in_range(self, ranges, xval):
+        result = 0
+        for range in ranges:
+            if ( xval >= range[0] and xval <= range[1] ): result += 1
+        return result
 
 class ConvertToEnergy(ReductionStep):
     """
@@ -613,15 +616,18 @@ class Grouping(ReductionStep):
             workspaces = [file_ws]
             
         for ws in workspaces:
-            try:
-                group = mtd[ws].getInstrument().getStringParameter(
-                    'Workflow.GroupingMethod')[0]
-            except IndexError:
-                group = 'User'
-            if ( group == 'Fixed' ):
-                self._result_workspaces.append(self._group_fixed(ws))
-            else:
+            if self._grouping_policy is not None:
                 self._result_workspaces.append(self._group_data(ws))
+            else:
+                try:
+                    group = mtd[ws].getInstrument().getStringParameter(
+                        'Workflow.GroupingMethod')[0]
+                except IndexError:
+                    group = 'User'
+                if ( group == 'Fixed' ):
+                    self._result_workspaces.append(self._group_fixed(ws))
+                else:
+                    self._result_workspaces.append(self._group_data(ws))
             
     def set_grouping_policy(self, value):
         self._grouping_policy = value
@@ -688,8 +694,30 @@ class Grouping(ReductionStep):
                 Behaviour='Average')
         return workspace
 
-
+class SaveItem(ReductionStep):
+    
+    _formats = []
+    
+    def __init__(self):
+        super(SaveItem, self).__init__()
+        self._formats = []
         
+    def execute(self, reducer, file_ws):
+        naming = Naming()
+        filename = naming._get_ws_name(file_ws)
+        for format in self._formats:
+            if format == 'spe':
+                SaveSPE(file_ws, filename+'.spe')
+            elif format == 'nxs':
+                SaveNexusProcessed(file_ws, filename+'.nxs')
+            elif format == 'nxspe':
+                SaveNXSPE(file_ws, filename+'.nxspe')
+            elif format == 'ascii':
+                SaveAscii(file_ws, filename+'.dat')
+            
+    def set_formats(self, formats):
+        self._formats = formats
+
 class Naming(ReductionStep):
     """Takes the responsibility of naming the results away from the Grouping
     step so that ws names are consistent right up until the last step. This
@@ -751,4 +779,4 @@ class Naming(ReductionStep):
             analyser = ''
             reflection = ''
         prefix = ins + run + '_' + analyser + reflection + '_red'
-        return prefix        
+        return prefix
