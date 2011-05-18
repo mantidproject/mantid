@@ -96,7 +96,7 @@ namespace Mantid
       // The median should only include "good" spectra, i.e. those not INF, NAN or without
       // a detector
       std::vector<double> goodValues;
-      const int nhists(input->getNumberHistograms());
+      const int nhists = static_cast<int>(input->getNumberHistograms());
       // The maximum possible length is that of workspace length
       goodValues.reserve(nhists);
       // Track the indices or the bad detectors so that we don't need to double check later
