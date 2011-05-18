@@ -28,7 +28,7 @@ namespace Mantid
     {
       (void) lhsX; //Avoid compiler warning
 
-      const int bins = lhsE.size();
+      const int bins = static_cast<int>(lhsE.size());
       for (int j=0; j<bins; ++j)
       {
         // Get references to the input Y's
@@ -53,7 +53,7 @@ namespace Mantid
       (void) lhsX; //Avoid compiler warning
       // Do the right-hand part of the error calculation just once
       const double rhsFactor = pow(rhsE/rhsY,2);
-      const int bins = lhsE.size();
+      const int bins = static_cast<int>(lhsE.size());
       for (int j=0; j<bins; ++j)
       {
         // Get reference to input Y
