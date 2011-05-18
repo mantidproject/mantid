@@ -140,7 +140,7 @@ namespace Algorithms
 
     for (int64_t i=0;i<nHist;i++)
     {
-      int64_t spec=specAxis->spectraNo(i);
+      specid_t spec=specAxis->spectraNo(i);
       std::vector<detid_t> dets=spectramap.getDetectors(spec);
       if (dets.empty()) // Nothing
       {
@@ -202,7 +202,7 @@ namespace Algorithms
       int64_t n,udet,sel,group;
       double offset;
       istr >> n >> udet >> offset >> sel >> group;
-      calibration[udet]=std::make_pair<int,int>(group,sel);
+      calibration[static_cast<int>(udet)]=std::make_pair<int,int>(static_cast<int>(group),static_cast<int>(sel));
     }
     grFile.close();
     progress(0.7);
@@ -243,7 +243,7 @@ namespace Algorithms
       throw Kernel::Exception::FileError("XML group file contains no group elements:", filename);
     }
 
-    unsigned int nGroups = groups->length();
+    unsigned int nGroups = static_cast<unsigned int>(groups->length());
     for ( unsigned int i = 0; i < nGroups; i++ )
     {
       // Get the "detids" element from the grouping file
