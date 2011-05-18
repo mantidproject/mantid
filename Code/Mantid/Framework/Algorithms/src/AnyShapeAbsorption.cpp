@@ -128,8 +128,8 @@ void AnyShapeAbsorption::initialiseCachedDistances()
   }
 
   // Record the number of elements we ended up with
-  m_numVolumeElements = m_L1s.size();
-  m_sampleVolume = m_numVolumeElements * XSliceThickness * YSliceThickness * ZSliceThickness;
+  m_numVolumeElements = static_cast<int>(m_L1s.size());
+  m_sampleVolume = static_cast<double>(m_numVolumeElements) * XSliceThickness * YSliceThickness * ZSliceThickness;
 }
 
 Geometry::Object AnyShapeAbsorption::constructGaugeVolume()

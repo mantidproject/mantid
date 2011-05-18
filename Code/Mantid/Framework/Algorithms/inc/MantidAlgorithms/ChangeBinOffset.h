@@ -76,9 +76,9 @@ namespace Mantid
       /// Offset to shift by
       double offset;
       /// Start workspace index
-      size_t wi_min;
+      int64_t wi_min;
       /// Stop workspace index
-      size_t wi_max;
+      int64_t wi_max;
        
     };
 

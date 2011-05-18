@@ -179,7 +179,7 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
     const int numberOfSpectra = static_cast<int>(rebinnedWS->getNumberHistograms());
 
     // Empty vector to store the pixels that outside the acceptable efficiency range
-    std::vector<int> dets_to_mask;
+    std::vector<detid_t> dets_to_mask;
 
     for (int i = 0; i < numberOfSpectra; i++)
     {

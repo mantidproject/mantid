@@ -294,7 +294,7 @@ void AlignDetectors::execEvent()
 
   // Ref. to the SpectraDetectorMap
   const SpectraDetectorMap& specMap = inputWS->spectraMap();
-  const size_t numberOfSpectra = inputWS->getNumberHistograms();
+  const int64_t numberOfSpectra = static_cast<int64_t>(inputWS->getNumberHistograms());
 
   // Initialise the progress reporting object
   Progress progress(this,0.0,1.0,numberOfSpectra);

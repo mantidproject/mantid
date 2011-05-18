@@ -1003,7 +1003,7 @@ namespace Mantid
           //Didn't find it? Now we need to iterate through the output workspace to
           //  match the detector ID.
           // NOTE: This can be SUPER SLOW!
-          for (rhsWI=0; rhsWI < rhs_nhist; rhsWI++)
+          for (rhsWI=0; rhsWI < static_cast<int64_t>(rhs_nhist); rhsWI++)
           {
             rhs_spec_no = (*rhs_wi_to_spec)[rhsWI];
             std::vector<detid_t> rhsDets = rhs_spec_det_map.getDetectors(rhs_spec_no);

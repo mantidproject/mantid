@@ -77,7 +77,7 @@ namespace Mantid
 	    API::MatrixWorkspace_sptr outputW = createOutputWS(inputW);	    
 	    
 	    //Get number of histograms
-	    size_t histnumber = inputW->getNumberHistograms();
+            int64_t histnumber = static_cast<int64_t>(inputW->getNumberHistograms());
 	    
 	    m_progress = new API::Progress(this, 0.0, 1.0, histnumber);
 
@@ -113,7 +113,7 @@ namespace Mantid
 
       // do the shift in X
 	    PARALLEL_FOR2(inputW, outputW)
-	    for (int i=0; i < histnumber; ++i)
+            for (int64_t i=0; i < histnumber; ++i)
 	    {		    
 				PARALLEL_START_INTERUPT_REGION
 		    //Do the offsetting
@@ -195,8 +195,9 @@ namespace Mantid
         this->setProperty("OutputWorkspace", matrixOutputWS);
       }
 
+      int64_t numHistograms = static_cast<int64_t>(inputWS->getNumberHistograms());
       PARALLEL_FOR1(outputWS)
-      for (int i=0; i < inputWS->getNumberHistograms(); ++i)
+      for (int64_t i=0; i < numHistograms; ++i)
       {
         PARALLEL_START_INTERUPT_REGION
         //Do the offsetting
