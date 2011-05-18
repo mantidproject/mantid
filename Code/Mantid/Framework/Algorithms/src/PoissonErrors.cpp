@@ -40,7 +40,7 @@ namespace Mantid
       // Just copy over the lhs data
       YOut = lhsY;
       // Now make the fractional error the same as it was on the rhs
-      const int bins = lhsE.size();
+      const int bins = static_cast<int>(lhsE.size());
       for (int j=0; j<bins; ++j)
       {
          const double fractional = rhsY[j] ? rhsE[j]/rhsY[j] : 0.0;
