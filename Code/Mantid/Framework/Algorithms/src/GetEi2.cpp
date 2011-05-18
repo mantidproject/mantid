@@ -128,7 +128,7 @@ double GetEi2::calculateEi(const double initial_guess)
   double det_distances[2] = {0.0, 0.0};
   for( unsigned int i = 0; i < 2; ++i )
   { 
-    int64_t ws_index = mon_indices[i];
+    size_t ws_index = mon_indices[i];
     det_distances[i] = getDistanceFromSource(ws_index);
     const double peak_guess = det_distances[i]*std::sqrt(m_t_to_mev/initial_guess);
     if( m_fixedei && i == 0 )
@@ -174,7 +174,7 @@ double GetEi2::calculateEi(const double initial_guess)
  *  @return The distance between the source and the given detector(or DetectorGroup)
  *  @throw runtime_error if there is a problem
  */
-double GetEi2::getDistanceFromSource(int64_t ws_index) const
+double GetEi2::getDistanceFromSource(size_t ws_index) const
 {
   const IObjComponent_sptr source = m_input_ws->getInstrument()->getSource();
   // Retrieve a pointer detector
@@ -195,7 +195,7 @@ double GetEi2::getDistanceFromSource(int64_t ws_index) const
  * @param t_max :: the max time to consider
  * @return the peak position
  */
-double GetEi2::calculatePeakPosition(int64_t ws_index, double t_min, double t_max)
+double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max)
 {
    //Crop out the current monitor workspace to the min/max times defined
   MatrixWorkspace_sptr monitor_ws = extractSpectrum(ws_index, t_min, t_max);
@@ -230,12 +230,12 @@ double GetEi2::calculatePeakPosition(int64_t ws_index, double t_min, double t_ma
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
  */
-MatrixWorkspace_sptr GetEi2::extractSpectrum(int64_t ws_index, const double start, const double end)
+MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
-  childAlg->setProperty<int>("StartWorkspaceIndex", ws_index);
-  childAlg->setProperty<int>("EndWorkspaceIndex", ws_index);
+  childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
+  childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<int>(ws_index));
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   childAlg->executeAsSubAlg();
