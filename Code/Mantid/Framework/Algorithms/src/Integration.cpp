@@ -66,7 +66,7 @@ void Integration::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  const size_t numberOfSpectra = localworkspace->getNumberHistograms();
+  const int numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
@@ -229,7 +229,7 @@ void Integration::execEvent()
 
   // Changing in place, and not changing the number of histograms?
   if (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace") &&
-      (m_MaxSpec == inputEventWS->getNumberHistograms()-1) && (m_MinSpec == 0))
+      (m_MaxSpec == static_cast<int>(inputEventWS->getNumberHistograms())-1) && (m_MinSpec == 0))
   {
     // Then we don't need to copy the data.
     // OutputWorkspace property will point to input workspace, just need to cast.
