@@ -214,7 +214,7 @@ namespace Mantid
       const size_t topEnd(midIndex - m_numIgnoredPixels/2);
       const size_t bottomBegin(midIndex + m_numIgnoredPixels/2);
 
-      const size_t numBins = inputWS->blocksize();
+      const int numBins = static_cast<int>(inputWS->blocksize());
       std::vector<double> totalRate(numBins, 0.0);
       size_t top=0, bot=bottomBegin;
       for(; top < topEnd; ++top, ++bot )
