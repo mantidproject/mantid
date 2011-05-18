@@ -130,7 +130,7 @@ void GetEi::exec()
 *  @throw NotFoundError if no detector is found for the detector ID given
 *  @throw runtime_error if there is a problem with the SpectraDetectorMap
 */
-void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, int64_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
+void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, specid_t mon0Spec, specid_t mon1Spec, double &monitor0Dist, double &monitor1Dist) const
 {
   const IObjComponent_sptr source = WS->getInstrument()->getSource();
 
@@ -163,7 +163,7 @@ void GetEi::getGeometry(API::MatrixWorkspace_const_sptr WS, int64_t mon0Spec, in
 *  @return the indexes of the histograms created by the detector whose ID were passed
 *  @throw NotFoundError if one of the requested spectrum numbers was not found in the workspace
 */
-std::vector<size_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, int64_t specNum1, int64_t specNum2) const
+std::vector<size_t> GetEi::getMonitorSpecIndexs(API::MatrixWorkspace_const_sptr WS, specid_t specNum1, specid_t specNum2) const
 {// getting spectra numbers from detector IDs is hard because the map works the other way, getting index numbers from spectra numbers has the same problem and we are about to do both
   std::vector<size_t> specInds;
   
