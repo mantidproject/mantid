@@ -55,13 +55,13 @@ void SANSSolidAngleCorrection::exec()
     setProperty("OutputWorkspace",outputWS);
   }
 
-  const size_t numHists = inputWS->getNumberHistograms();
+  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this,0.0,1.0,numHists);
 
   // Number of X bins
-  const int xLength = inputWS->readY(0).size();
+  const int xLength = static_cast<int>(inputWS->readY(0).size());
 
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
+  for (int i = 0; i < numHists; ++i)
   {
     IDetector_const_sptr det;
     try {
