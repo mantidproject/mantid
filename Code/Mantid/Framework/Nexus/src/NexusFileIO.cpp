@@ -810,8 +810,8 @@ using namespace DataObjects;
       return;
 
     double * tofs = new double[num];
-    float * weights = new float[num];
-    float * errorSquareds = new float[num];
+    double * weights = new double[num];
+    double * errorSquareds = new double[num];
     int64_t * pulsetimes = new int64_t[num];
 
     typename std::vector<T>::const_iterator it;
@@ -829,7 +829,7 @@ using namespace DataObjects;
     }
 
     // Write out all the required arrays.
-    int dims_array[1] = { num };
+    int dims_array[1] = { static_cast<int>(num) };
     // In this mode, compressing makes things extremely slow! Not to be used for managed event workspaces.
     bool compress = true; //(num > 100);
     if (writeTOF)
@@ -907,10 +907,10 @@ using namespace DataObjects;
     default:
       sortType = "UNSORTED";
     }
-    NXputattr (fileID, "sort_type", (void*)(sortType.c_str()), sortType.size(), NX_CHAR);
+    NXputattr (fileID, "sort_type", (void*)(sortType.c_str()), static_cast<int>(sortType.size()), NX_CHAR);
 
     // Save an attribute with the type of each event.
-    NXputattr (fileID, "event_type", (void*)eventType.c_str(), eventType.size(), NX_CHAR);
+    NXputattr (fileID, "event_type", (void*)eventType.c_str(), static_cast<int>(eventType.size()), NX_CHAR);
     // Save an attribute with the number of events
     NXputattr (fileID, "num_events", (void*)(&num), 1, NX_INT64);
 
@@ -963,7 +963,7 @@ using namespace DataObjects;
     len=NX_MAXNAMELEN;
     if(checkAttributeName("units"))
     {
-      status=NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
+      status=NXgetattr(fileID,const_cast<char*>("units"),(void *)sbuf,&len,&type);
       if(status!=NX_ERROR)
         yUnits=sbuf;
       status=NXclosedata(fileID);
@@ -975,7 +975,7 @@ using namespace DataObjects;
       return(4);
     len=NX_MAXNAMELEN;
     type=NX_CHAR;
-    NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
+    NXgetattr(fileID,const_cast<char*>("units"),(void *)sbuf,&len,&type);
     axesUnits = std::string(sbuf,len);
     status=NXgetinfo(fileID, &rank, dim, &type);
     // non-uniform X has 2D axis1 data
@@ -993,7 +993,7 @@ using namespace DataObjects;
     status=NXopendata(fileID,"axis2");
     len=NX_MAXNAMELEN;
     type=NX_CHAR;
-    NXgetattr(fileID,(char*)"units",(void *)sbuf,&len,&type);
+    NXgetattr(fileID,const_cast<char*>("units"),(void *)sbuf,&len,&type);
     axesUnits += std::string(":") + std::string(sbuf,len);
     NXclosedata(fileID);
     status=NXclosegroup(fileID);
@@ -1129,22 +1129,22 @@ using namespace DataObjects;
     time(&now);
     strftime (buffer,25,"%Y-%b-%d %H:%M:%S",localtime(&now));
     writeNxNote("MantidEnvironment","mantid",buffer,"Mantid Environment data",output.str());
-    typedef std::map <unsigned int,std::string> orderedHistMap;
+    typedef std::map <std::size_t,std::string> orderedHistMap;
     orderedHistMap ordMap;
-    for(unsigned int i=0;i<algHist.size();i++)
+    for(std::size_t i=0;i<algHist.size();i++)
     {
       std::stringstream algNumber,algData;
       // algNumber << "MantidAlgorithm_" << i;
       algHist[i].printSelf(algData);
 
       //get execute count
-      int nexecCount=algHist[i].execCount();
+      std::size_t nexecCount=algHist[i].execCount();
       //order by execute count
       ordMap.insert(orderedHistMap::value_type(nexecCount,algData.str()));
       //writeNxNote(algNumber.str(),"mantid","","Mantid Algorithm data",algData.str());
     }
     int num=0;
-    std::map <unsigned int,std::string>::iterator m_Iter;
+    std::map <std::size_t,std::string>::iterator m_Iter;
     for (m_Iter=ordMap.begin( );m_Iter!=ordMap.end( );++m_Iter)
     {
       ++num;
@@ -1258,7 +1258,7 @@ using namespace DataObjects;
 
     const SpectraDetectorMap& spectraMap=localWorkspace->spectraMap();
     API::Axis *spectraAxis = localWorkspace->getAxis(1);
-    const int nDetectors = spectraMap.nElements();
+    const std::size_t nDetectors = spectraMap.nElements();
     if(nDetectors<1)
     {
       // No data in spectraMap to write
@@ -1296,7 +1296,7 @@ using namespace DataObjects;
     {
       int si = spec[i];
       spectra[i] = int32_t(spectraAxis->spectraNo(si));
-      const size_t ndet1=spectraMap.ndet(spectra[i]);
+      const int ndet1=static_cast<int>(spectraMap.ndet(spectra[i]));
       detector_index[i+1]= int32_t(detector_index[i]+ndet1); // points to start of detector list for the next spectrum
       detector_count[i]= int32_t(ndet1);
       ndet += ndet1;
@@ -1409,11 +1409,11 @@ using namespace DataObjects;
   bool NexusFileIO::writeNexusBinMasking(API::MatrixWorkspace_const_sptr ws) const
   {
     std::vector< int > spectra;
-    std::vector< int > bins;
+    std::vector< std::size_t > bins;
     std::vector< double > weights;
-    size_t spectra_count = 0;
-    size_t offset = 0;
-    for(int i=0;i<ws->getNumberHistograms(); ++i)
+    int spectra_count = 0;
+    int offset = 0;
+    for(std::size_t i=0;i<ws->getNumberHistograms(); ++i)
     {
       if (ws->hasMaskedBins(i))
       {
@@ -1427,7 +1427,7 @@ using namespace DataObjects;
           weights.push_back(it->second);
         }
         ++spectra_count;
-        offset += mList.size();
+        offset += static_cast<int>(mList.size());
       }
     }
 
@@ -1443,12 +1443,12 @@ using namespace DataObjects;
     if(status==NX_ERROR) return false;
     status=NXopendata(fileID, "masked_spectra");
     const std::string description = "spectra index,offset in masked_bins and mask_weights";
-    NXputattr(fileID, "description", (void*)description.c_str(), description.size()+1, NX_CHAR);
+    NXputattr(fileID, "description", (void*)description.c_str(), static_cast<int>(description.size()+1), NX_CHAR);
     status=NXputdata(fileID, (void*)&spectra[0]);
     status=NXclosedata(fileID);
 
     // save masked bin indices
-    dimensions[0]=bins.size();
+    dimensions[0]=static_cast<int>(bins.size());
     status=NXmakedata(fileID, "masked_bins", NX_INT32, 1, dimensions);
     if(status==NX_ERROR) return false;
     status=NXopendata(fileID, "masked_bins");
@@ -1456,7 +1456,7 @@ using namespace DataObjects;
     status=NXclosedata(fileID);
 
     // save masked bin weights
-    dimensions[0]=bins.size();
+    dimensions[0]=static_cast<int>(bins.size());
     status=NXmakedata(fileID, "mask_weights", NX_FLOAT64, 1, dimensions);
     if(status==NX_ERROR) return false;
     status=NXopendata(fileID, "mask_weights");
@@ -1551,7 +1551,7 @@ using namespace DataObjects;
     stat=NXclose(&fileH);
     delete[] nxname;
     delete[] nxclass;
-    return(entryName.size());
+    return(static_cast<int>(entryName.size()));
   }
 
 
