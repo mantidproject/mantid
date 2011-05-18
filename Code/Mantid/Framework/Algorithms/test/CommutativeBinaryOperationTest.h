@@ -126,7 +126,7 @@ public:
 
   void checkOutputWorkspace(MatrixWorkspace_sptr ws, MatrixWorkspace_sptr wsIn1,MatrixWorkspace_sptr wsIn2 ) const
   {
-    int targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
+    size_t targetsize = (wsIn1->size()>wsIn2->size())?wsIn1->size():wsIn2->size();
     TS_ASSERT_EQUALS(ws->size(),targetsize);
     //check they are all 0
     for(MatrixWorkspace::iterator ti(*ws); ti != ti.end(); ++ti)

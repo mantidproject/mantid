@@ -105,7 +105,7 @@ public:
     dotestEventWorkspace(false, 1);
   }
 
-  void dotestEventWorkspace(bool inplace, int numgroups)
+  void dotestEventWorkspace(bool inplace, size_t numgroups)
   {
     std::string nxsWSname("DiffractionFocussing2Test_ws");
     //----- Load some event data --------
@@ -118,19 +118,18 @@ public:
             (AnalysisDataService::Instance().retrieve(nxsWSname));
     TS_ASSERT(inputW);
     if (!inputW) return;
-    int old_numevents = inputW->getNumberEvents();
 
     //Fake a d-spacing unit in the data.
     inputW->getAxis(0)->unit() =UnitFactory::Instance().create("dSpacing");
 
     //Create a DIFFERENT x-axis for each pixel. Starting bin = the input workspace index #
-    for (int pix=0; pix < inputW->getNumberHistograms(); pix++)
+    for (size_t pix=0; pix < inputW->getNumberHistograms(); pix++)
     {
       Kernel::cow_ptr<MantidVec> axis;
       MantidVec& xRef = axis.access();
       xRef.resize(5);
       for (int i = 0; i < 5; ++i)
-        xRef[i] = 1 + pix + i*1.0;
+        xRef[i] = static_cast<double>(1 + pix) + i*1.0;
       xRef[4] = 1e6;
       //Set an X-axis
       inputW->setX(pix, axis);
@@ -177,9 +176,9 @@ public:
     TS_ASSERT_EQUALS(output->getNumberEvents(), (numgroups==2) ? 16260 : 7274);
 
     //Now let's test the grouping of detector UDETS to groups
-    for (int group=1; group<=numgroups; group++)
+    for (size_t group=1; group<=numgroups; group++)
     {
-      int workspaceindex_in_output = group-1;
+      specid_t workspaceindex_in_output = static_cast<specid_t>(group-1);
       //This is the list of the detectors (grouped)
       std::vector<detid_t> mylist = output->spectraMap().getDetectors(workspaceindex_in_output);
       //1024 pixels in a bank
@@ -199,7 +198,7 @@ public:
     /* Get the output ws again */
     output = boost::dynamic_pointer_cast<EventWorkspace>(AnalysisDataService::Instance().retrieve(outputws));
     double events_after_binning = 0;
-    for (int workspace_index=0; workspace_index<output->getNumberHistograms(); workspace_index++)
+    for (size_t workspace_index=0; workspace_index<output->getNumberHistograms(); workspace_index++)
     {
       //should be 16 bins
       TS_ASSERT_EQUALS( output->refX(workspace_index)->size(), 16);
@@ -249,7 +248,7 @@ public:
 
     // Fill a whole bunch of events
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int i=0; i < ws->getNumberHistograms(); i++)
+    for (size_t i=0; i < ws->getNumberHistograms(); i++)
     {
       EventList & el = ws->getEventList(i);
       for (size_t j=0; j < 20; j++)

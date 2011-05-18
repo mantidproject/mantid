@@ -86,7 +86,7 @@ public:
     double xBoundaries[11] = {0.0,1.0,3.0,5.0,6.0,7.0,10.0,13.0,16.0,17.0,17.5};
     const int numSpectra(2);
     Workspace2D_sptr testWS = WorkspaceCreationHelper::Create2DWorkspaceBinned(numSpectra, 11, xBoundaries);
-    const int numBins = testWS->blocksize();
+    const size_t numBins = testWS->blocksize();
     TS_ASSERT_EQUALS(testWS->isHistogramData(), true);
     
     MatrixWorkspace_sptr outputWS = runAlgorithm(testWS);
@@ -107,7 +107,7 @@ public:
       TS_ASSERT_EQUALS(yValues.size(), numBins);
       TS_ASSERT_EQUALS(eValues.size(), numBins);
 
-      for( int j = 0; j < numBins; ++j )
+      for( size_t j = 0; j < numBins; ++j )
       {
 	// Now the data. Y and E unchanged
 	TS_ASSERT_EQUALS(yValues[j], 2.0);

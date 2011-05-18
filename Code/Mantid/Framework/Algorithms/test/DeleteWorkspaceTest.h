@@ -22,7 +22,7 @@ public:
     const int yLength2 = 20;
     Workspace2D_sptr testWS2 = WorkspaceCreationHelper::Create2DWorkspace(yLength2, 10);
     AnalysisDataServiceImpl & dataStore = AnalysisDataService::Instance();
-    const int storeSizeAtStart(dataStore.size());
+    const size_t storeSizeAtStart(dataStore.size());
     const std::string testName1 = "DeleteWorkspace_testWS1";
     const std::string testName2 = "DeleteWorkspace_testWS2";
     dataStore.add(testName1, testWS1);

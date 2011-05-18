@@ -66,13 +66,9 @@ public:
     TS_ASSERT_EQUALS(outputWS->isHistogramData(), true);
     const int numBoundaries = numYPoints + 1;
 
-    // Test some random points
-    const int testSpectraIndex = 0;
-
     // This makes the new X values more readable rather than using a dynamic array
     // so I'll live with the hard coding
     const double expectedX[11] = {-0.5, 0.5, 1.5, 2.5, 3.5, 4.5, 5.5, 6.5, 7.5, 8.5, 9.5};
-    const double delta(1e-08);
     for( int j = 0; j < numBoundaries; ++j )
     {
       TS_ASSERT_EQUALS(outputWS->readX(0)[j], expectedX[j]);

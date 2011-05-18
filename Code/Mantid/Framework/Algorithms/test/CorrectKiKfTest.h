@@ -42,16 +42,17 @@ public:
     alg.execute();
     TS_ASSERT( alg.isExecuted() );
     Workspace2D_sptr result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
-    double ei,ef,factor,deltaE;
+    double ei,ef,factor,deltaE,stdval;
     size_t numHists = result->getNumberHistograms();
-    for (int i = 0; i < result->blocksize(); ++i)
+    for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
-      deltaE = (i-2.)*5.;
+      deltaE = (static_cast<double>(i)-2.)*5.;
       ef = ei-deltaE;
+      stdval = static_cast<double>(i) + 1.;
       if (ei*ef < 0) {factor=0.;} else {factor=std::sqrt(ei/ef);}
-      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(i+1.),1e-8);
-      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(i+1.),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(stdval),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(stdval),1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -67,14 +68,15 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    for (int i = 0; i < result->blocksize(); ++i)
+    for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ei = 7.5;
-      deltaE = (i-2.)*5.;
+      deltaE = (static_cast<double>(i)-2.)*5.;
       ef = ei-deltaE;
+      stdval = static_cast<double>(i) + 1.;
       if (ei*ef < 0) {factor=0.;} else {factor=std::sqrt(ei/ef);}
-      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(i+1.),1e-8);
-      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(i+1.),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(stdval),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(stdval),1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -90,14 +92,15 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    for (int i = 0; i < result->blocksize(); ++i)
+    for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
-      deltaE = (i-2.)*5.;
+      deltaE = (static_cast<double>(i)-2.)*5.;
       ei = ef+deltaE;
+      stdval = static_cast<double>(i) + 1.;
       if (ei*ef < 0) {factor=0.;} else {factor=std::sqrt(ei/ef);}
-      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(i+1.),1e-8);
-      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(i+1.),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(stdval),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(stdval),1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
@@ -113,14 +116,15 @@ public:
     TS_ASSERT( alg.isExecuted() );
     result = boost::dynamic_pointer_cast<Workspace2D>(AnalysisDataService::Instance().retrieve(outputWSname));
     numHists = result->getNumberHistograms();
-    for (int i = 0; i < result->blocksize(); ++i)
+    for (size_t i = 0; i < result->blocksize(); ++i)
     {  
       ef = 7.5;
-      deltaE = (i-2.)*5.;
+      deltaE = (static_cast<double>(i)-2.)*5.;
       ei = ef+deltaE;
+      stdval = static_cast<double>(i) + 1.;
       if (ei*ef < 0) {factor=0.;} else {factor=std::sqrt(ei/ef);}
-      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(i+1.),1e-8);
-      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(i+1.),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readY(0)[i])/(stdval),1e-8);
+      TS_ASSERT_DELTA(factor,(result->readE(0)[i])/std::sqrt(stdval),1e-8);
     }
     AnalysisDataService::Instance().remove(outputWSname);
     AnalysisDataService::Instance().remove(inputWSname);
