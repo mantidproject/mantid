@@ -129,6 +129,9 @@ namespace Algorithms
   }
 
   double DampSq::dampcoeff3(double q, double qmax, double dqmax){
+    UNUSED_ARG(q)
+    UNUSED_ARG(qmax)
+    UNUSED_ARG(dqmax)
 	  double damp=1;
 	  return damp;
   }
