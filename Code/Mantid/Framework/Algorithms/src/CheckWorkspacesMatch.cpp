@@ -94,7 +94,7 @@ void CheckWorkspacesMatch::doComparison()
     bool mismatchedEvent = false;
     int mismatchedEventWI = 0;
     //PARALLEL_FOR2(ews1, ews2)
-    for (int i=0; i<ews1->getNumberHistograms(); i++)
+    for (int i=0; i<static_cast<int>(ews1->getNumberHistograms()); i++)
     {
       PARALLEL_START_INTERUPT_REGION
       prog->reportIncrement(1, "EventLists");
@@ -158,7 +158,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
 {
   // Cache a few things for later use
   const size_t numHists = ws1->getNumberHistograms();
-  const int numBins = ws1->blocksize();
+  const size_t numBins = ws1->blocksize();
   const bool histogram = ws1->isHistogramData();
   
   // First check that the workspace are the same size
@@ -180,7 +180,7 @@ bool CheckWorkspacesMatch::checkData(API::MatrixWorkspace_const_sptr ws1, API::M
   
   // Now check the data itself
   //PARALLEL_FOR2(ws1, ws2)
-  for ( int i = 0; i < numHists; ++i )
+  for ( int i = 0; i < static_cast<int>(numHists); ++i )
   {
     PARALLEL_START_INTERUPT_REGION
     prog->reportIncrement(1, "Histograms");
@@ -356,7 +356,7 @@ bool CheckWorkspacesMatch::checkInstrument(API::MatrixWorkspace_const_sptr ws1, 
 /// @retval false The masking does not match
 bool CheckWorkspacesMatch::checkMasking(API::MatrixWorkspace_const_sptr ws1, API::MatrixWorkspace_const_sptr ws2)
 {
-  const size_t numHists = ws1->getNumberHistograms();
+  const int numHists = static_cast<int>(ws1->getNumberHistograms());
   
   for ( int i = 0; i < numHists; ++i)
   {
