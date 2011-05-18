@@ -64,8 +64,8 @@ void FlatBackground::exec()
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Copy over all the data
-  const size_t numHists = inputWS->getNumberHistograms();
-  const int blocksize = inputWS->blocksize();
+  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
+  const int blocksize = static_cast<int>(inputWS->blocksize());
 
   // Get the required X range
   double startX,endX;
@@ -88,7 +88,7 @@ void FlatBackground::exec()
   {
     outputWS = WorkspaceFactory::Instance().create(inputWS);
     PARALLEL_FOR2(inputWS,outputWS)
-    for (int64_t i = 0; i < int64_t(numHists); ++i)
+    for (int i = 0; i < numHists; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
       outputWS->dataX(i) = inputWS->readX(i);
