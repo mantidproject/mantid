@@ -75,7 +75,7 @@ void Regroup::exec()
 
   bool dist = inputW->isDistribution();
 
-  size_t histnumber = inputW->getNumberHistograms();
+  int histnumber = static_cast<int>(inputW->getNumberHistograms());
   MantidVecPtr XValues_new;
   const MantidVec & XValues_old = inputW->readX(0);
   std::vector<int> xoldIndex;// indeces of new x in XValues_old
@@ -204,7 +204,7 @@ int Regroup::newAxis(const std::vector<double>& params,
 {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
-  int ibounds=params.size(); //highest index in params array containing a bin boundary
+  int ibounds=static_cast<int>(params.size()); //highest index in params array containing a bin boundary
   int isteps=ibounds-1; // highest index in params array containing a step
 
   xcurr = params[0];
