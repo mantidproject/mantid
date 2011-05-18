@@ -90,7 +90,7 @@ namespace Mantid
         }
 
       // Number of spectra
-      const size_t nHist = inputWS->getNumberHistograms();
+      const int nHist = static_cast<int>(inputWS->getNumberHistograms());
       // Number of energy bins
       this->nBins = inputWS->blocksize();
 
@@ -228,7 +228,7 @@ namespace Mantid
       const int progStep = (int)(ceil(nHist/100.0));
       
       // Loop over spectra
-      for (size_t i = 0; i < nHist; i++)
+      for (int i = 0; i < nHist; i++)
         {
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())
