@@ -81,7 +81,7 @@ namespace Mantid
         throw std::runtime_error("Must specify Xmin<Xmax");
       dreference=getProperty("DReference");
       step=getProperty("Step");
-      size_t nspec=inputW->getNumberHistograms();
+      int nspec=static_cast<int>(inputW->getNumberHistograms());
       // Create the output OffsetsWorkspace
       OffsetsWorkspace_sptr outputW(new OffsetsWorkspace(inputW->getInstrument()));
 
@@ -89,7 +89,7 @@ namespace Mantid
       Progress prog(this, 0, 1.0, nspec);
       const SpectraDetectorMap & specMap = inputW->spectraMap();
       PARALLEL_FOR1(inputW)
-      for (int64_t wi=0;wi<nspec;++wi)
+      for (int wi=0;wi<nspec;++wi)
       {
         PARALLEL_START_INTERUPT_REGION
         // Fit the peak
