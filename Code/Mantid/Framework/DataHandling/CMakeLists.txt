@@ -75,6 +75,7 @@ set ( SRC_FILES
 	src/SaveVTK.cpp
 	src/SetScalingPSD.cpp
 	src/UpdateInstrumentFromFile.cpp
+	src/FindDetectorsPar.cpp
 )
 
 set ( SRC_UNITY_IGNORE_FILES src/LoadDAE/idc.cpp
@@ -143,6 +144,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/SaveVTK.h
 	inc/MantidDataHandling/SetScalingPSD.h
 	inc/MantidDataHandling/UpdateInstrumentFromFile.h
+	inc/MantidDataHandling/FindDetectorsPar.h 
 )
 
 set ( TEST_FILES
@@ -201,6 +203,7 @@ set ( TEST_FILES
 	test/SetScalingPSDTest.h
 	test/UpdateInstrumentFromFileTest.h
 	test/XMLlogfileTest.h
+	test/FindDetectorsParTest.h
 )
 
 if(UNITY_BUILD)

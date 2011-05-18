@@ -5,6 +5,8 @@
 // Includes
 //----------------------------------------------------------------------
 
+#include "MantidKernel/System.h"
+
 #include <Poco/DOM/DOMParser.h>
 #include <Poco/DOM/Document.h>
 #include <Poco/DOM/Element.h>
@@ -14,9 +16,8 @@
 #include <Poco/File.h>
 #include <Poco/Path.h>
 
-#include "MantidKernel/System.h"
-#include "MantidAPI/ImplicitFunctionParameterParser.h"
 
+#include "MantidAPI/ImplicitFunctionParameterParser.h"
 #include "MantidMDAlgorithms/WidthParameter.h"
 #include "MantidMDAlgorithms/HeightParameter.h"
 #include "MantidMDAlgorithms/DepthParameter.h"

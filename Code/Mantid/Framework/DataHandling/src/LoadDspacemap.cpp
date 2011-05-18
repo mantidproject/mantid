@@ -179,7 +179,7 @@ namespace DataHandling
       {
         offsetsWS->setValue(detectorID, offset);
       }
-      catch (std::invalid_argument & e)
+      catch (std::invalid_argument & )
       {}
     }
 
@@ -231,7 +231,7 @@ namespace DataHandling
       {
         offsetsWS->setValue(detectorID, offset);
       }
-      catch (std::invalid_argument & e)
+      catch (std::invalid_argument & )
       {}
     }
   }

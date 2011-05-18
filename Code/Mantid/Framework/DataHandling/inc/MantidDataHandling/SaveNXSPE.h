@@ -92,6 +92,8 @@ namespace Mantid
       static const double MASK_FLAG;
       /// Value for error if pixel is masked
       static const double MASK_ERROR;
+	  /// file format version
+	  static const std::string NXSPE_VER;
     };
 
   } // namespace DataHandling

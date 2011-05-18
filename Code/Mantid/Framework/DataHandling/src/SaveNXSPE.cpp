@@ -4,6 +4,7 @@
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
+#include "MantidDataHandling/FindDetectorsPar.h"
 
 #include <Poco/File.h>
 #include <Poco/Path.h>
@@ -21,8 +22,11 @@ namespace Mantid
 
     const double SaveNXSPE::MASK_FLAG = -1e30;
     const double SaveNXSPE::MASK_ERROR = 0.0;
+   // TODO: Get the correct version number
+	// works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
+    const std::string SaveNXSPE::NXSPE_VER = "1.1";
 
-    SaveNXSPE::SaveNXSPE() :
+	SaveNXSPE::SaveNXSPE() :
       API::Algorithm()
     {
     }
@@ -101,7 +105,8 @@ namespace Mantid
 
       // Create the file.
       ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
-
+	  // define nxspe version as the file attribute
+       nxFile.putAttr("nxspe_version", NXSPE_VER);
       // Make the top level entry (and open it)
       nxFile.makeGroup(inputWS->getName(), "NXentry", true);
 
@@ -109,14 +114,14 @@ namespace Mantid
       nxFile.writeData("definition", "NXSPE");
       nxFile.openData("definition");
       // Make Version 1.0 as we don't have all the metadata yet!
-      nxFile.putAttr("version", "1.0");
+   
       nxFile.closeData();
 
       // Program name and version
       nxFile.writeData("program_name", "mantid");
       nxFile.openData("program_name");
-      // TODO: Get the correct version number
-      nxFile.putAttr("version", "1.1");
+    
+      nxFile.putAttr("version", NXSPE_VER);
       nxFile.closeData();
 
       // Create NXSPE_info
@@ -198,16 +203,6 @@ namespace Mantid
 
       // let's create some blank arrays in the nexus file
 
-      std::vector<double> azimuthal;
-      std::vector<double> polar;
-      std::vector<double> azimuthal_width;
-      std::vector<double> polar_width;
-      std::vector<double> secondary_flightpath;
-
-      double delta_polar = 0.0;
-      double delta_azimuthal = 0.0;
-      double distance = 0.0;
-
       std::vector<int> array_dims;
       array_dims.push_back(nHist);
       array_dims.push_back(static_cast<int>(nBins));
@@ -241,35 +236,7 @@ namespace Mantid
           if (!inputWS->getDetector(i)->isMonitor())
             {
               Geometry::IDetector_sptr det = inputWS->getDetector(i);
-              polar.push_back(inputWS->detectorTwoTheta(det) * rad2deg);
-              azimuthal.push_back(det->getPhi() * rad2deg);
-
-              // Get Sample->Detector distance
-              distance = det->getDistance(*sample);
-              // ... and store it
-              secondary_flightpath.push_back(distance);
-
-              // Now let's work out the detector widths
-              // TODO: This is the historically wrong method...update it!
-
-              // Initialise to large values
-              double xmin = -1000.0;
-              double xmax = 1000.0;
-              double ymin = -1000.0;
-              double ymax = 1000.0;
-              double zmin = -1000.0;
-              double zmax = 1000.0;
-              // Get the bounding box
-              det->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
-              double xsize = xmax - xmin;
-              double ysize = ymax - ymin;
-              delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
-              delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
-
-              // Now store the widths...
-              polar_width.push_back(delta_polar);
-              azimuthal_width.push_back(delta_azimuthal);
-
+  
               if (!inputWS->getDetector(i)->isMasked())
                 {
                   // no masking...
@@ -313,6 +280,24 @@ namespace Mantid
             progress.report();
           }
         }
+	 // execute the subalgorithm to calculate the detector's parameters;
+	  IAlgorithm_sptr   spCalcDetPar = this->createSubAlgorithm("FindDetectorsPar", 0, 0.01, true, 1);
+
+	  spCalcDetPar->initialize();
+	  spCalcDetPar->setPropertyValue("InputWorkspace", inputWS->getName());
+	  spCalcDetPar->execute();
+
+	  //
+	  FindDetectorsPar * pCalcDetPar = dynamic_cast<FindDetectorsPar *>(spCalcDetPar.get());
+	  if(!pCalcDetPar){
+		  throw(std::bad_cast("can not get pointer to FindDetectorsPar algorithm"));
+	  }
+      const std::vector<double> & azimuthal           = pCalcDetPar->getAzimuthal();
+      const std::vector<double> & polar               = pCalcDetPar->getPolar();
+      const std::vector<double> & azimuthal_width     = pCalcDetPar->getAzimWidth();
+      const std::vector<double> & polar_width         = pCalcDetPar->getPolarWidth();
+      const std::vector<double> & secondary_flightpath= pCalcDetPar->getFlightPath();
+
 
       // Write the Polar (2Theta) angles
       nxFile.writeData("polar", polar);

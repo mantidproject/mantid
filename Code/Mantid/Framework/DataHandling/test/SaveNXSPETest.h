@@ -6,14 +6,14 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidKernel/UnitFactory.h"
 #include "MantidTestHelpers/WorkspaceCreationHelper.h"
-#include "MantidAPI/FrameworkManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+//#include "MantidAPI/FrameworkManager.h"
+//#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/NumericAxis.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include <Poco/File.h>
-#include <boost/lexical_cast.hpp>
-#include <fstream>
-#include <numeric>
+//#include <boost/lexical_cast.hpp>
+//#include <fstream>
+//#include <numeric>
 
 using namespace Mantid;
 using namespace Mantid::API;
