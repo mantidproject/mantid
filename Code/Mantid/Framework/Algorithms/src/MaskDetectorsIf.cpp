@@ -169,7 +169,7 @@ void MaskDetectorsIf::createNewCalFile(const std::string& oldfile, const std::st
       continue;
     }
     std::istringstream istr(str);
-    int64_t n,udet,sel,group;
+    int n,udet,sel,group;
     double offset;
     istr >> n >> udet >> offset >> sel >> group;
     udet2valuem::iterator it=umap.find(udet);
