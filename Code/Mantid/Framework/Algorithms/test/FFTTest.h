@@ -48,7 +48,7 @@ public:
     const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
 
     TS_ASSERT( it != X.end() );
-    int i0 = it - X.begin();
+    int i0 = static_cast<int>(it - X.begin());
 
     for(int i=0;i<N/4;i++)
     {
@@ -68,8 +68,6 @@ public:
   void testBackward()
   {
     const int N = 100;
-    const double XX = dX * N;
-    double dx = 1/(XX);
 
     MatrixWorkspace_sptr WS = createWS(N,0,"even_points");
 
@@ -92,7 +90,6 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
 
-    const MantidVec& X0 = WS->readX(0);
     const MantidVec& Y0 = WS->readY(0);
 
     const MantidVec& X = fWS->readX(0);
@@ -134,7 +131,7 @@ public:
     const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
 
     TS_ASSERT( it != X.end() );
-    int i0 = it - X.begin();
+    int i0 = static_cast<int>(it - X.begin());
 
     for(int i=0;i<N/4;i++)
     {
@@ -154,8 +151,6 @@ public:
   void testBackwardHist()
   {
     const int N = 100;
-    const double XX = dX * N;
-    double dx = 1/(XX);
 
     MatrixWorkspace_sptr WS = createWS(N,1,"even_points");
 
@@ -178,7 +173,6 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
 
-    const MantidVec& X0 = WS->readX(0);
     const MantidVec& Y0 = WS->readY(0);
 
     const MantidVec& X = fWS->readX(0);
@@ -220,7 +214,7 @@ public:
     const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
 
     TS_ASSERT( it != X.end() );
-    int i0 = it - X.begin();
+    int i0 = static_cast<int>(it - X.begin());
 
     for(int i=0;i<N/4;i++)
     {
@@ -240,8 +234,6 @@ public:
   void testOddBackward()
   {
     const int N = 101;
-    const double XX = dX * N;
-    double dx = 1/(XX);
 
     MatrixWorkspace_sptr WS = createWS(N,0,"odd_points");
 
@@ -264,7 +256,6 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
 
-    const MantidVec& X0 = WS->readX(0);
     const MantidVec& Y0 = WS->readY(0);
 
     const MantidVec& X = fWS->readX(0);
@@ -307,14 +298,14 @@ public:
     const MantidVec::const_iterator it = std::find(X.begin(),X.end(),0.);
 
     TS_ASSERT( it != X.end() );
-    int i0 = it - X.begin();
+    int i0 = static_cast<int>(it - X.begin());
 
     for(int i=0;i<N/4;i++)
     {
       int j = i0 + i;
       double x = X[j];
       //std::cerr<<j<<' '<<x<<' '<<Yr[j]<<' '<<h*exp(-a*x*x)<<'\n';
-      TS_ASSERT_DELTA(x,dx*i,0.00001);
+      TS_ASSERT_DELTA(x, dx*i,0.00001);
       TS_ASSERT_DELTA(Yr[i0+i] / (h*exp(-a*x*x)),1.,0.001);
       TS_ASSERT_DELTA(Yi[i0+i],0.0,0.00001);
       TS_ASSERT_DELTA(Yr[i0-i] / (h*exp(-a*x*x)),1.,0.001);
@@ -327,8 +318,6 @@ public:
   void testOddBackwardHist()
   {
     const int N = 101;
-    const double XX = dX * N;
-    double dx = 1/(XX);
 
     MatrixWorkspace_sptr WS = createWS(N,1,"odd_hist");
 
@@ -351,7 +340,6 @@ public:
     MatrixWorkspace_sptr fWS = boost::dynamic_pointer_cast<MatrixWorkspace>
       (AnalysisDataService::Instance().retrieve("FFT_WS_backward"));
 
-    const MantidVec& X0 = WS->readX(0);
     const MantidVec& Y0 = WS->readY(0);
 
     const MantidVec& X = fWS->readX(0);
