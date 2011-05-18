@@ -89,7 +89,7 @@ void FindPeaks::exec()
   // If WorkspaceIndex has been set it must be valid
   index = getProperty("WorkspaceIndex");
   singleSpectrum = !isEmpty(index);
-  if ( singleSpectrum && index >= inputWS->getNumberHistograms() )
+  if ( singleSpectrum && index >= static_cast<int>(inputWS->getNumberHistograms()) )
   {
     g_log.error() << "The value of WorkspaceIndex provided (" << index << 
       ") is larger than the size of this workspace (" <<
@@ -133,7 +133,7 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
 
   // Loop over the spectra searching for peaks
   const int start = singleSpectrum ? index : 0;
-  const int end = singleSpectrum ? index+1 : inputWS->getNumberHistograms();
+  const int end = singleSpectrum ? index+1 : static_cast<int>(inputWS->getNumberHistograms());
   m_progress = new Progress(this,0.0,1.0,end-start);
 
   for (int spec = start; spec < end; ++spec)
@@ -187,9 +187,9 @@ void FindPeaks::findPeaksUsingMariscotti()
 
   // Loop over the spectra searching for peaks
   const int start = singleSpectrum ? index : 0;
-  const int end = singleSpectrum ? index+1 : smoothedData->getNumberHistograms();
+  const int end = singleSpectrum ? index+1 : static_cast<int>(smoothedData->getNumberHistograms());
   m_progress = new Progress(this,0.0,1.0,end-start);
-  const int blocksize = smoothedData->blocksize();
+  const int blocksize = static_cast<int>(smoothedData->blocksize());
 
   for (int k = start; k < end; ++k)
   {
@@ -341,10 +341,10 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
   MatrixWorkspace_sptr diffed = WorkspaceFactory::Instance().create(input);
 
   const size_t numHists = input->getNumberHistograms();
-  const int blocksize = input->blocksize();
+  const size_t blocksize = input->blocksize();
 
   // Loop over spectra
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
+  for (size_t i = 0; i < size_t(numHists); ++i)
   {
     // Copy over the X values
     diffed->dataX(i) = input->readX(i);
@@ -353,7 +353,7 @@ API::MatrixWorkspace_sptr FindPeaks::calculateSecondDifference(const API::Matrix
     MantidVec &S = diffed->dataY(i);
     // Go through each spectrum calculating the second difference at each point
     // First and last points in each spectrum left as zero (you'd never be able to find peaks that close to the edge anyway)
-    for (int j = 1; j < blocksize-1; ++j)
+    for (size_t j = 1; j < blocksize-1; ++j)
     {
       S[j] = Y[j-1] - 2*Y[j] + Y[j+1];
     }
@@ -398,13 +398,13 @@ void FindPeaks::calculateStandardDeviation(const API::MatrixWorkspace_const_sptr
   const double constant = sqrt(static_cast<double>(this->computePhi(w))) / factor;
   
   const size_t numHists = smoothed->getNumberHistograms();
-  const int blocksize = smoothed->blocksize();
-  for (int64_t i = 0; i < int64_t(numHists); ++i)
+  const size_t blocksize = smoothed->blocksize();
+  for (size_t i = 0; i < size_t(numHists); ++i)
   {
     const MantidVec &E = input->readE(i);
     MantidVec &Fi = smoothed->dataE(i);
 
-    for (int j = 0; j < blocksize; ++j)
+    for (size_t j = 0; j < blocksize; ++j)
     {
       Fi[j] = constant * E[j];
     }
@@ -498,7 +498,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   unsigned int i_max = i0 + 5*fitWidth;
   // Bounds checks
   if (i_min<1) i_min=1;
-  if (i_max>=Y.size()-1) i_max=Y.size()-2;
+  if (i_max>=Y.size()-1) i_max=static_cast<unsigned int>(Y.size()-2); // TODO this is dangerous
   const double bg_lowerSum = Y[i_min-1] + Y[i_min] + Y[i_min+1];
   const double bg_upperSum = Y[i_max-1] + Y[i_max] + Y[i_max+1];
 
