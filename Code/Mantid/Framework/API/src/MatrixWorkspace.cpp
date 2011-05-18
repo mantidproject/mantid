@@ -1042,9 +1042,9 @@ namespace Mantid
       return hops - 1;
     }
 
-    uint64_t MatrixWorkspace::getNPoints() const
+    size_t MatrixWorkspace::getNPoints() const
     {
-      return (uint64_t)(this->size());
+      return this->size();
     }
 
     size_t MatrixWorkspace::getNumDims() const
