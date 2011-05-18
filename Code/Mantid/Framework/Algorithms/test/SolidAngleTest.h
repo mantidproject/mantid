@@ -104,28 +104,29 @@ public:
     Workspace2D_sptr output2D = boost::dynamic_pointer_cast<Workspace2D>(output);
     Workspace2D_sptr input2D = boost::dynamic_pointer_cast<Workspace2D>(input);
     // Check that the output unit is correct
-    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF")
-   
-			
-		const size_t numberOfSpectra = output2D->getNumberHistograms();
-    TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
-		for (size_t i = 0; i < numberOfSpectra-1; ++i) {
-			//all of the values should fall in this range for INES
-			TS_ASSERT_DELTA(output2D->readY(i)[0],0.00139,0.00001);
-			
-			TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
-			TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
-			TS_ASSERT_DELTA(output2D->readE(i)[0],0.0,0.000001);
-		}
-
-		//some specific, more accurate values
-		TS_ASSERT_DELTA(output2D->readY(5)[0],0.00139822,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(10)[0],0.00139822,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(20)[0],0.00139822,0.0000001);
-		TS_ASSERT_DELTA(output2D->readY(50)[0],0.00139822,0.0000001);
+    TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF");
+      
     
-		// Check 'dead' detector spectrum gives zero solid angle
-		TS_ASSERT_EQUALS(output2D->readY(143).front(), 0)
+    const size_t numberOfSpectra = output2D->getNumberHistograms();
+    TS_ASSERT_EQUALS(numberOfSpectra, (int)Nhist);
+    for (size_t i = 0; i < numberOfSpectra-1; ++i) 
+    {
+      //all of the values should fall in this range for INES
+      TS_ASSERT_DELTA(output2D->readY(i)[0],0.00139,0.00001);
+      
+      TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
+      TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
+      TS_ASSERT_DELTA(output2D->readE(i)[0],0.0,0.000001);
+    }
+    
+    //some specific, more accurate values
+    TS_ASSERT_DELTA(output2D->readY(5)[0],0.00139822,0.0000001);
+    TS_ASSERT_DELTA(output2D->readY(10)[0],0.00139822,0.0000001);
+    TS_ASSERT_DELTA(output2D->readY(20)[0],0.00139822,0.0000001);
+    TS_ASSERT_DELTA(output2D->readY(50)[0],0.00139822,0.0000001);
+    
+    // Check 'dead' detector spectrum gives zero solid angle
+    TS_ASSERT_EQUALS(output2D->readY(143).front(), 0);
   }
 
   void testExecSubset()
@@ -149,20 +150,19 @@ public:
     // Check that the output unit is correct
     TS_ASSERT_EQUALS( output2D->getAxis(0)->unit()->unitID(), "TOF")
    
-		const size_t numberOfSpectra = output2D->getNumberHistograms();
-		TS_ASSERT_EQUALS(numberOfSpectra,10);
-		for (size_t i = 0; i < numberOfSpectra; ++i) {
-			//all of the values should fall in this range for INES
-			TS_ASSERT_DELTA(output2D->readY(i)[0],0.0013,0.0001);
-			
-			TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
-			TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
-			TS_ASSERT_DELTA(output2D->readE(i)[0],0.0,0.000001);
-		}
+      const size_t numberOfSpectra = output2D->getNumberHistograms();
+    TS_ASSERT_EQUALS(numberOfSpectra,10);
+    for (size_t i = 0; i < numberOfSpectra; ++i) {
+      //all of the values should fall in this range for INES
+      TS_ASSERT_DELTA(output2D->readY(i)[0],0.0013,0.0001);
+      
+      TS_ASSERT_DELTA(output2D->readX(i)[0],0.0,0.000001);
+      TS_ASSERT_DELTA(output2D->readX(i)[1],10000.0,0.000001);
+      TS_ASSERT_DELTA(output2D->readE(i)[0],0.0,0.000001);
+    }
     
   }
 
- 
 private:
   SolidAngle alg;
   std::string inputSpace;

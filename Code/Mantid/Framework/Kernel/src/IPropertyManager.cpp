@@ -25,7 +25,7 @@ namespace Kernel
         } \
         else \
         { \
-            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected type."; \
+            std::string message = "Attempt to assign property "+ name +" to incorrect type. Expected type "#type; \
             throw std::runtime_error(message); \
         } \
     }

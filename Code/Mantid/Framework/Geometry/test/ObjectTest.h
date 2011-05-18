@@ -7,6 +7,7 @@
 #include <vector>
 #include <algorithm>
 #include <ctime>
+#include <iomanip>
 
 #include <boost/shared_ptr.hpp>
 
@@ -597,22 +598,22 @@ public:
     Object_sptr geom_obj = createSmallCappedCylinder();
     // Want to test triangulation so setup a geometry handler
     boost::shared_ptr<GluGeometryHandler> h = boost::shared_ptr<GluGeometryHandler>(new GluGeometryHandler(geom_obj.get()));
-    h->setCylinder(V3D(-1.0,0.0,0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
+    h->setCylinder(V3D(-0.0015,0.0,0.0), V3D(1., 0.0, 0.0), 0.005, 0.003);
     geom_obj->setGeometryHandler(h);
 
-    double satol(1e-4); // tolerance for solid angle
+    double satol(1e-8); // tolerance for solid angle
 
     // solid angle at point -0.5 from capped cyl -1.0 -0.997 in x, rad 0.005 - approx WISH cylinder
-    //
-    // soild angle of circle radius 3, distance 3 is 2pi(1-cos(t)) where
-    // t is atan(3/3), should be 0.000317939
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.000317939, satol);
+    // We intentionally exclude the cylinder end caps so they this should produce 0
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.5, 0.0, 0.0)), 0.0, satol);
     // Other end
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.000317939, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-1.497, 0.0, 0.0)), 0.0, satol);
 
-    // No analytic value for side on SA, using hi-res value
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 8.03225e-05, satol);
-    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0.1, 0)), 8.03225e-05, satol);
+    // Side values
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, 0.1)), 0.00301186, satol);
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0, 0, -0.1)), 0.00301186, satol);
+    // Sweep in the axis of the cylinder angle to see if the solid angle decreases (as we are excluding the end caps)
+    TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(0.1, 0.0, 0.1)), 0.00100267, satol);
 
     // internal point (should be 4pi)
     TS_ASSERT_DELTA(geom_obj->triangleSolidAngle(V3D(-0.999, 0.0, 0.0)),4*M_PI,satol);
