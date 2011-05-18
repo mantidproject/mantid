@@ -89,7 +89,7 @@ void Q1DWeighted::exec()
   MantidVec& YOut = outputWS->dataY(0);
   MantidVec& EOut = outputWS->dataE(0);
 
-  const size_t numSpec = inputWS->getNumberHistograms();
+  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
 
   // Set up the progress reporting object
   Progress progress(this,0.0,1.0,numSpec);
@@ -97,7 +97,7 @@ void Q1DWeighted::exec()
   const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
-  const int xLength = inputWS->readX(0).size();
+  const int xLength = static_cast<int>(inputWS->readX(0).size());
   const double fmp=4.0*M_PI;
 
   // Count histogram for normalization
