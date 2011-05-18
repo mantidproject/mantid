@@ -76,7 +76,7 @@ void GeneralisedSecondDifference::exec()
   	MatrixWorkspace_const_sptr inputWS=getProperty("InputWorkspace");
   	int spec_min=getProperty("WorkspaceIndexMin");
   	int spec_max=getProperty("WorkspaceIndexMax");
-  	int n_hists=inputWS->getNumberHistograms();
+  	int n_hists= static_cast<int>(inputWS->getNumberHistograms());
 
   	if (spec_min==0 && spec_max==0) // Values per default, take all spectra
   		spec_max=n_hists-1;
@@ -101,7 +101,7 @@ void GeneralisedSecondDifference::exec()
   	computePrefactors();
 
 	const int n_specs=spec_max-spec_min+1;
-	const int n_points=inputWS->dataY(0).size()-2*n_av;
+	const int n_points=static_cast<int>(inputWS->dataY(0).size())-2*n_av;
   	//Create OuputWorkspace
   	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,n_specs,n_points+1,n_points);
 
