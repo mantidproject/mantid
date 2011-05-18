@@ -156,7 +156,7 @@ public:
     TS_ASSERT_THROWS_NOTHING( focus.setPropertyValue("GroupingWorkspace", groupWSName) );
 
     //OK, run the algorithm
-    TS_ASSERT_THROWS_NOTHING( focus.execute(); )
+    TS_ASSERT_THROWS_NOTHING( focus.execute(); );
     TS_ASSERT( focus.isExecuted() );
 
     EventWorkspace_const_sptr output;
@@ -247,11 +247,11 @@ public:
     ws->sortAll(TOF_SORT, NULL);
 
     // Fill a whole bunch of events
-    PARALLEL_FOR_NO_WSP_CHECK()
-    for (size_t i=0; i < ws->getNumberHistograms(); i++)
+    PARALLEL_FOR_NO_WSP_CHECK();
+    for (int i=0; i < static_cast<int>(ws->getNumberHistograms()); i++)
     {
       EventList & el = ws->getEventList(i);
-      for (size_t j=0; j < 20; j++)
+      for (int j=0; j < 20; j++)
       {
         el.addEventQuickly( TofEvent(double(j)*1e-3) );
       }
