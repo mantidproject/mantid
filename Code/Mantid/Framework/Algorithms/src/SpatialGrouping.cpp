@@ -186,7 +186,7 @@ void SpatialGrouping::exec()
 bool SpatialGrouping::expandNet(std::map<detid_t,double> & nearest, Mantid::Geometry::IDetector_sptr det,
     const size_t & noNeighbours, const Mantid::Geometry::BoundingBox & bbox, const Mantid::Geometry::V3D & scale)
 {
-  const detid_t incoming = nearest.size();
+  const detid_t incoming = static_cast<detid_t>(nearest.size());
 
   const detid_t centDetID = det->getID();
   std::map<detid_t, double> potentials;
@@ -237,7 +237,7 @@ bool SpatialGrouping::expandNet(std::map<detid_t,double> & nearest, Mantid::Geom
 
   if ( static_cast<detid_t>(nearest.size()) == incoming ) { return false; }
 
-  if ( static_cast<detid_t>(nearest.size()) > noNeighbours )
+  if ( nearest.size() > noNeighbours )
   {
     sortByDistance(nearest, noNeighbours);
   }
