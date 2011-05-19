@@ -736,7 +736,7 @@ void LoadNexusProcessed::loadNonSpectraAxis(API::MatrixWorkspace_sptr local_work
   {
     NXDouble axisData = data.openNXDouble("axis2");
     axisData.load();
-    for ( size_t i = 0; i < axis->length(); i++ )
+    for ( int i = 0; i < static_cast<int>(axis->length()); i++ )
     {
       axis->setValue(i, axisData[i]);
     }
@@ -1352,7 +1352,7 @@ void LoadNexusProcessed::checkOptionalProperties(const size_t numberofspectra )
     m_list = true;
     const int64_t minlist = *min_element(m_spec_list.begin(), m_spec_list.end());
     const int64_t maxlist = *max_element(m_spec_list.begin(), m_spec_list.end());
-    if (maxlist > numberofspectra || minlist == 0)
+    if (maxlist > static_cast<int>(numberofspectra) || minlist == 0)
     {
       g_log.error("Invalid list of spectra");
       throw std::invalid_argument("Inconsistent properties defined");
@@ -1368,7 +1368,7 @@ void LoadNexusProcessed::checkOptionalProperties(const size_t numberofspectra )
     {
       m_spec_max = numberofspectra;
     }
-    if (m_spec_max < m_spec_min || m_spec_max >numberofspectra)
+    if (m_spec_max < m_spec_min || m_spec_max > static_cast<int>(numberofspectra))
     {
       g_log.error("Invalid Spectrum min/max properties");
       throw std::invalid_argument("Inconsistent properties defined");
@@ -1413,14 +1413,14 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
 
       }
       if (m_spec_list.size() == 0) m_list = false;
-      total_specs += m_spec_list.size();
+      total_specs += static_cast<int>(m_spec_list.size());
     }
   }
   else
   {
-    total_specs = numberofspectra;
+    total_specs = static_cast<int>(numberofspectra);
     m_spec_min = 1;
-    m_spec_max = numberofspectra +1;
+    m_spec_max = static_cast<int>(numberofspectra) +1;
   }
   return total_specs;
 }
