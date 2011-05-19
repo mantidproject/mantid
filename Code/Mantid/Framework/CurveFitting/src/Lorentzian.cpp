@@ -28,7 +28,7 @@ void Lorentzian::functionLocal(double* out, const double* xValues, const size_t 
     const double& peakCentre = getParameter("PeakCentre");
     const double& hwhm = getParameter("HWHM");
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) );
     }
@@ -40,7 +40,7 @@ void Lorentzian::functionDerivLocal(Jacobian* out, const double* xValues, const 
     const double& peakCentre = getParameter("PeakCentre");
     const double& hwhm = getParameter("HWHM");
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
         double invDenominator =  1/((diff*diff+hwhm*hwhm));
         out->set(i,0, hwhm*hwhm*invDenominator);
