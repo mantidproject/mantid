@@ -20,6 +20,7 @@
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidAPI/AlgorithmFactory.h"
 #include "MantidDataHandling/LoadRaw3.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -37,6 +38,9 @@ public:
 protected:
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
     throw Exception::NotImplementedError("No derivative function provided");
   }
 };
@@ -401,7 +405,7 @@ public:
     bk->setParameter("A1",0.0);
     bk->tie("A1","0");
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
+    //BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
     // set up Gaussian fitting function
@@ -492,8 +496,8 @@ public:
     fn->setParameter("Sigma",300.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
+    //BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
+    //BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
     //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);
@@ -912,7 +916,7 @@ public:
     bk->setParameter("A1",0.0);
     bk->tie("A1","0");
 
-    BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
+    //BoundaryConstraint* bc_b = new BoundaryConstraint(bk,"A0",0, 20.0);
     //bk->addConstraint(bc_b);
 
     // set up Gaussian fitting function
@@ -925,8 +929,8 @@ public:
     fn->setParameter("Sigma",10.0);
 
     // add constraint to function
-    BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
-    BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
+    //BoundaryConstraint* bc1 = new BoundaryConstraint(fn,"Height",100, 300.0);
+    //BoundaryConstraint* bc2 = new BoundaryConstraint(fn,"PeakCentre",79200, 79700.0);
     BoundaryConstraint* bc3 = new BoundaryConstraint(fn,"Sigma",20, 100.0);
     //fn->addConstraint(bc1);
     //fn->addConstraint(bc2);

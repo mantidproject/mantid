@@ -33,7 +33,7 @@ public:
     const MantidVec& X = outWS->readX(0);
     const MantidVec& Y = outWS->readY(0);
 
-    for(int i=0;i<outWS->blocksize();i++)
+    for(size_t i=0;i<outWS->blocksize();i++)
     {
       TS_ASSERT_DELTA(Y[i],sin(X[i]),0.2);
     }

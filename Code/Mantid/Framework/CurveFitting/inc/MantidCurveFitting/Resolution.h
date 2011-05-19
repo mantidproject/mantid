@@ -6,6 +6,7 @@
 //----------------------------------------------------------------------
 #include "MantidAPI/ParamFunction.h"
 #include "MantidAPI/IFunctionMW.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid
@@ -60,7 +61,11 @@ public:
   /// Returns a list of attribute names
   std::vector<std::string> getAttributeNames()const;
   /// Return a value of attribute attName
-  IFitFunction::Attribute getAttribute(const std::string& attName)const{return IFitFunction::Attribute(m_fileName, true);}
+  IFitFunction::Attribute getAttribute(const std::string& attName)const
+  {
+    UNUSED_ARG(attName);
+    return IFitFunction::Attribute(m_fileName, true);
+  }
   /// Set a value to attribute attName
   void setAttribute(const std::string& attName,const IFitFunction::Attribute& value);
   /// Check if attribute attName exists

@@ -298,11 +298,11 @@ private:
 
   void addNoise(WS_type ws,double noise)
   {
-    for(int iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
+    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
     {
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(int i=0;i<Y.size();i++)
+      for(size_t i=0;i<Y.size();i++)
       {
         Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
         E[i] += noise;

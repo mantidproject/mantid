@@ -51,7 +51,7 @@ public:
     std::vector<double> x(nData),y(nData);
     for(size_t i=0;i<nData;i++)
     {
-      x[i] = 0.1*i;
+      x[i] = 0.1*static_cast<double>(i);
     }
     fun.function(&y[0],&x[0],nData);
     for(size_t i=0;i<nData;i++)

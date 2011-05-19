@@ -32,7 +32,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-x*x*w);
@@ -43,7 +43,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-x*x*w);
