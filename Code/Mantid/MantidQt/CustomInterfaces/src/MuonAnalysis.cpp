@@ -392,11 +392,10 @@ void MuonAnalysis::runLoadCurrent()
         QString("does not seem to exist"));
       return;
     }
+    m_previousFilename = argusDAE;
     inputFileChanged(argusDAE);
     return;
   }
-
-  // \\ndw828\argusdata\current cycle\nexus\argus0000000.nxs
 
   QString daename = "NDX" + instname;
 
