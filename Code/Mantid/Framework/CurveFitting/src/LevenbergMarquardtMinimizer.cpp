@@ -7,6 +7,7 @@
 #include "MantidAPI/IFitFunction.h"
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Logger.h"
+#include "MantidKernel/System.h"
 
 #include <gsl/gsl_blas.h>
 #include <iostream>
@@ -25,6 +26,9 @@ void LevenbergMarquardtMinimizer::initialize(double* X, const double* Y,
                                              const int& nParam, gsl_vector* startGuess, 
                                              API::IFitFunction* function, const std::string& costFunction)
 {
+  UNUSED_ARG(X);
+  UNUSED_ARG(Y);
+  UNUSED_ARG(sqrtWeight);
   // set-up GSL container to be used with GSL simplex algorithm
 
   if ( costFunction.compare("Least squares") == 0 )
