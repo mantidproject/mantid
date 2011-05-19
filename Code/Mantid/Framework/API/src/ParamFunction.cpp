@@ -74,7 +74,7 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
  */
 void ParamFunction::setParameterDescription(size_t i, const std::string& description)
 {
-  if (i >= nParams() || i < 0)
+  if (static_cast<int>(i) >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -195,7 +195,7 @@ std::string ParamFunction::parameterName(int i)const
  */
 std::string ParamFunction::parameterDescription(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (static_cast<int>(i) >= nParams())
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
@@ -258,7 +258,7 @@ std::string ParamFunction::nameOfActive(int i)const
  */
 std::string ParamFunction::descriptionOfActive(size_t i)const
 {
-  return m_parameterDescriptions[indexOfActive(i)];
+  return m_parameterDescriptions[indexOfActive(static_cast<int>(i))];
 }
 
 /**

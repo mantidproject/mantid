@@ -42,7 +42,7 @@ void CompositeFunctionMD::function(double* out)const
 {
   boost::scoped_array<double> tmpOut(new double[dataSize()]);
   std::fill_n(out,m_dataSize,0);
-  for(int i = 0; i < nFunctions(); i++)
+  for(size_t i = 0; i < nFunctions(); i++)
   {
     //IFunctionMD* fun = dynamic_cast<IFunctionMD*>(getFunction(i));
     IFitFunction* fun = getFunction(i);
@@ -144,7 +144,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
   }
   m_wsIndex.resize(nFunctions());
 
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* fun = getFunction(iFun);
     if (fun->getWorkspace())
@@ -170,7 +170,7 @@ void CompositeFunctionMD::setWorkspace(boost::shared_ptr<const Workspace> ws,con
     //}
   }
 
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     std::vector<size_t>& index = m_wsIndex[iFun];
     if (index.empty())
