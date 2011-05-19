@@ -150,11 +150,16 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
     XOut[nTOF-1] = XOut[nTOF-2]+10.0;
 
     // Move down the high TOFs
-    for (size_t i=cutoff+1; i<tof_bin_range-1; i++)
     {
-      XOut[i-cutoff-1] = XIn[i] + frame_offset;
-      YOut[i-cutoff-1] = YIn[i];
-      EOut[i-cutoff-1] = EIn[i];
+      if (tof_bin_range == 0)
+          throw std::runtime_error("Encountered case where tof_bin_range is 0");
+      size_t end = static_cast<size_t>(tof_bin_range - 1);
+      for (size_t i=cutoff+1; i<end; i++)
+      {
+        XOut[i-cutoff-1] = XIn[i] + frame_offset;
+        YOut[i-cutoff-1] = YIn[i];
+        EOut[i-cutoff-1] = EIn[i];
+      }
     }
     // Don't forget the low boundary
     XOut[tof_bin_range-2-cutoff] = XIn[tof_bin_range-1] + frame_offset;
