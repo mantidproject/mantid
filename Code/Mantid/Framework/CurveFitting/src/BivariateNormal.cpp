@@ -9,6 +9,7 @@
 #include "MantidCurveFitting/BoundaryConstraint.h"
 #include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/ParameterTie.h"
+#include "MantidKernel/System.h"
 #include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <math.h>
@@ -100,15 +101,18 @@ BivariateNormal::~BivariateNormal()
 
 void BivariateNormal::function(double *out, const double *xValues, const size_t nData)
 {
+  UNUSED_ARG(xValues);
   initCommon();
 
-  for (int i = 0; i < nData; i++)
+  for (size_t i = 0; i < nData; i++)
     out[i] = LastParams[IBACK] + coefNorm * LastParams[ITINTENS] * expVals[i];
 
 }
 
 void BivariateNormal::functionDeriv(API::Jacobian *out, const double *xValues, const size_t nData)
 {
+  UNUSED_ARG(xValues);
+  UNUSED_ARG(nData);
   initCommon();
   int x = 0;
   double uu = LastParams[IVXX] * LastParams[IVYY] - LastParams[IVXY] * LastParams[IVXY];
@@ -270,7 +274,7 @@ void BivariateNormal::initCommon()
         << ")";
 
     // std::cout<<"row formula="<< ssyy.str()<<std::endl;
-    API::ParameterTie* pt = tie("SSrow", ssyy.str());
+    //API::ParameterTie* pt = tie("SSrow", ssyy.str());
     //  std::cout << "  ddK" <<pt->eval()<< std::endl;
 
     ssxx << std::string("(") << (SIxx) << "+(Mcol-" << (mIx) << ")*(Mcol-" << (mIx) << ")*"
@@ -279,7 +283,7 @@ void BivariateNormal::initCommon()
         << ")";
 
     // std::cout<<"col formula="<< ssxx.str()<<std::endl;
-    API::ParameterTie* ptx = tie("SScol", ssxx.str());
+    //API::ParameterTie* ptx = tie("SScol", ssxx.str());
     // std::cout << "  ddK" <<ptx->eval()<< std::endl;
 
     ssxy << std::string("(") << (SIxy) << "+(Mcol-" << (mIx) << ")*(Mrow-" << (mIy) << ")*"
@@ -288,7 +292,7 @@ void BivariateNormal::initCommon()
         << ")";
 
     //std::cout<<"cov formula="<< ssxy.str()<<std::endl;
-    API::ParameterTie* ptxy = tie("SSrc", ssxy.str());
+    //API::ParameterTie* ptxy = tie("SSrc", ssxy.str());
     //std::cout << "   ddK" <<ptxy->eval()<< std::endl;
 
 
