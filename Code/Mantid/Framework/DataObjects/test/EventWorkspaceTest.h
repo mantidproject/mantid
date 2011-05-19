@@ -323,7 +323,7 @@ public:
     TS_ASSERT_EQUALS( uneven->getAxis(1)->length(), NUMPIXELS/10 );
 
     //The spectra map should take each workspace index and point to the right pixel id: 5,15,25, etc.
-    for (int i=0; i<uneven->getNumberHistograms(); i++)
+    for (int i=0; i<static_cast<int>(uneven->getNumberHistograms()); i++)
       TS_ASSERT_EQUALS( uneven->spectraMap().getDetectors(i)[0], 5 + i*10);
 
     //Workspace index 0 is at pixelid 5 and has 5 events
