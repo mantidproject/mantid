@@ -5286,11 +5286,11 @@ void QtSizePolicyPropertyManagerPrivate::slotIntChanged(QtProperty *property, in
 {
     if (QtProperty *prop = m_hStretchToProperty.value(property, 0)) {
         QSizePolicy sp = m_values[prop];
-        sp.setHorizontalStretch(value);
+        sp.setHorizontalStretch(static_cast<uchar>(value));
         q_ptr->setValue(prop, sp);
     } else if (QtProperty *prop = m_vStretchToProperty.value(property, 0)) {
         QSizePolicy sp = m_values[prop];
-        sp.setVerticalStretch(value);
+        sp.setVerticalStretch(static_cast<uchar>(value));
         q_ptr->setValue(prop, sp);
     }
 }
