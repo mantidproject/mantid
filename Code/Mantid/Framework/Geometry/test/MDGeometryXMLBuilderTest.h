@@ -111,10 +111,10 @@ void testNoPolicy()
   IMDDimension_const_sptr dimension(pDimensionX);
 
   MDGeometryBuilderXML<NoDimensionPolicy> builder;
-  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the x mapping, which is integrated.", builder.addXDimension(dimension), std::invalid_argument);
-  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the y mapping, which is integrated.", builder.addYDimension(dimension), std::invalid_argument);
-  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the z mapping, which is integrated.", builder.addZDimension(dimension), std::invalid_argument);
-  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the t mapping, which is integrated.", builder.addTDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the x mapping, which is integrated.", builder.addXDimension(dimension));
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the y mapping, which is integrated.", builder.addYDimension(dimension));
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the z mapping, which is integrated.", builder.addZDimension(dimension));
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the t mapping, which is integrated.", builder.addTDimension(dimension));
 }
 
 
