@@ -186,7 +186,7 @@ public:
     el2 += el1;
     TS_ASSERT_EQUALS( el2.getDetectorIDs().size(), 4);
     //Find the right stuff
-    for (size_t i=7; i< 35; i+=7)
+    for (int i=7; i< 35; i+=7)
       TS_ASSERT( el2.hasDetectorID(i) );
     TS_ASSERT( !el2.hasDetectorID(0) );
   }
@@ -457,8 +457,8 @@ public:
     X = this->makeX(step, NUMBINS/10+1);
     for (std::size_t i=0; i < X.size()-1; i++)
     {
-      Y.push_back( 1.0 * (i+1));
-      E.push_back( sqrt(double(1.0 * (i+1))) );
+      Y.push_back( static_cast<double>(i+1));
+      E.push_back( sqrt(static_cast<double>(i+1)) );
     }
 
     // Go through each possible EventType as the input
