@@ -116,7 +116,7 @@ namespace Mantid
         detid_t *udet = new detid_t[number_spectra];
 
         detid2det_map::const_iterator it;
-        size_t counter = 0;
+        specid_t counter = 0;
         for ( it = detCache.begin(); it != detCache.end(); ++it )
         {
           counter++;
