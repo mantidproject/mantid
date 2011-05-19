@@ -23,6 +23,7 @@ DeltaFunction::DeltaFunction()
 
 void DeltaFunction::function(double* out, const double* xValues, const size_t nData)const
 {
+  UNUSED_ARG(xValues);
   std::fill(out,out+nData,0);
 }
 

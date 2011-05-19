@@ -5,6 +5,7 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IPeakFunction.h"
+#include "MantidKernel/System.h"
 #include <cmath>
 
 namespace Mantid
@@ -51,9 +52,9 @@ namespace Mantid
       virtual double centre()const {return 0;}
       virtual double height()const {return getParameter("Height");}
       virtual double width()const {return 0;}
-      virtual void setCentre(const double c) {}
+      virtual void setCentre(const double c) { UNUSED_ARG(c); }
       virtual void setHeight(const double h) {setParameter("Height",h);}
-      virtual void setWidth(const double w) {}
+      virtual void setWidth(const double w) { UNUSED_ARG(w); }
 
       /// overwrite IFunction base class methods
       std::string name()const{return "DeltaFunction";}
