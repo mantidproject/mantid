@@ -201,7 +201,7 @@ void PropertyHandler::initParameters()
     m_item->property()->removeSubProperty(m_parameters[i]);
   }
   m_parameters.clear();
-  for(size_t i=0;i<function()->nParams();i++)
+  for(int i=0;i<function()->nParams();i++)
   {
     QString parName = QString::fromStdString(function()->parameterName(i));
     if (parName.contains('.')) continue;
@@ -402,7 +402,7 @@ void PropertyHandler::removeFunction()
     }
     ph->item()->property()->removeSubProperty(m_item->property());
     Mantid::API::CompositeFunction* cf = ph->cfun();
-    for(size_t i=0;i<cf->nFunctions();i++)
+    for(int i=0;i<static_cast<int>(cf->nFunctions());i++)
     {
       if (cf->getFunction(i) == function())
       {
@@ -867,7 +867,7 @@ Mantid::API::IFitFunction* PropertyHandler::changeType(QtProperty* prop)
   }
   else if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();i++)
+    for(size_t i=0;i<m_cf->nFunctions();i++)
     {
       Mantid::API::IFitFunction* f = getHandler(i)->changeType(prop);
       if (f) return f;
@@ -918,7 +918,7 @@ void PropertyHandler::addTie(const QString& tieStr)
       m_browser->compositeFunction()->tie(name,expr);
     if (tie == NULL) return;
     QString parName = QString::fromStdString(
-      tie->getFunction()->parameterName(tie->getIndex())
+      tie->getFunction()->parameterName(static_cast<int>(tie->getIndex()))
      );
     foreach(QtProperty* parProp,m_parameters)
     {
@@ -1031,7 +1031,7 @@ void PropertyHandler::calcBaseAll()
 {
   if (!m_browser->m_autoBackground) return;
   if (!m_cf) return;
-  for(int i=0;i<m_cf->nFunctions();++i)
+  for(size_t i=0;i<m_cf->nFunctions();++i)
   {
     PropertyHandler* h = getHandler(i);
     if (h->pfun())
@@ -1227,7 +1227,7 @@ QList<PropertyHandler*> PropertyHandler::getPeakList()
   }
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();++i)
+    for(size_t i=0;i<m_cf->nFunctions();++i)
     {
       PropertyHandler* h = getHandler(i);
       if ( !h )  continue;
@@ -1318,7 +1318,7 @@ void PropertyHandler::removeAllPlots()
   removePlot();
   if (m_cf)
   {
-    for(int i=0;i<m_cf->nFunctions();++i)
+    for(size_t i=0;i<m_cf->nFunctions();++i)
     {
       getHandler(i)->removeAllPlots();
     }
