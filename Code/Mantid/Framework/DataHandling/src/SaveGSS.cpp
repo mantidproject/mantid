@@ -96,7 +96,7 @@ void SaveGSS::exec()
   using namespace Mantid::API;
   //Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const int nHist=inputWS->getNumberHistograms();
+  const int nHist=static_cast<int>(inputWS->getNumberHistograms());
 
   std::string filename = getProperty("Filename");
   std::string inputWSName = getProperty("InputWorkspace");
