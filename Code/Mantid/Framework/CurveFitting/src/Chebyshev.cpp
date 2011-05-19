@@ -57,7 +57,7 @@ void Chebyshev::functionDeriv(Jacobian* out, const double* xValues, const size_t
   double b = 2./(m_EndX - m_StartX);
   double a = 1. - b * m_EndX;
 
-  for (int i = 0; i < nData; i++) {
+  for (size_t i = 0; i < nData; i++) {
     double t0 = 1.;
     double x = a + b * xValues[i];
     double t1 = x;
