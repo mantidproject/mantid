@@ -130,7 +130,7 @@ namespace Mantid
 
     // readData(int) should be changed to readNextSpectrum() returning the spectrum index
     // and skipData to skipNextSpectrum()
-    void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,size_t startIndex)const
+    void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock, int startIndex)const
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
       if (!m_fileRaw)
@@ -138,7 +138,7 @@ namespace Mantid
         g_log.error("Raw file was not open.");
         throw std::runtime_error("Raw file was not open.");
       }
-      int64_t blockIndex = startIndex / m_vectorsPerBlock;
+      int blockIndex = static_cast<int>(startIndex / m_vectorsPerBlock);
       // Modified data is stored in ManagedWorkspace2D flat file.
       if (m_changedBlock[blockIndex])
       {
@@ -175,9 +175,9 @@ namespace Mantid
 	    throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 	  }
 	}
-	int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-	if (endIndex >= static_cast<int64_t>(m_noVectors)) endIndex = static_cast<int64_t>(m_noVectors);
-	int64_t index=startIndex;
+	size_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+	if (endIndex >= m_noVectors) endIndex = m_noVectors;
+	size_t index=startIndex;
 	while(index<endIndex)
 	{
 	  if(isMonitor(m_readIndex))
@@ -243,9 +243,9 @@ namespace Mantid
 	    throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 	  }
 	}
-	int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+	size_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
 	if (endIndex >= m_noVectors) endIndex = m_noVectors;
-	for(int64_t index = startIndex;index<endIndex;index++,m_readIndex++)
+	for(size_t index = startIndex;index<endIndex;index++,m_readIndex++)
 	{
 	  isisRaw->readData(m_fileRaw,m_readIndex+1);
 	  // g_log.error()<<"counter is "<<counter<<std::endl;
