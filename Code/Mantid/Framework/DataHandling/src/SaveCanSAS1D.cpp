@@ -423,14 +423,14 @@ void SaveCanSAS1D::createSASDataElement(std::string& sasData)
   std::string sasIData;
   std::string sasIBlockData;
   std::string sasIHistData;
-  for (int i = 0; i < m_workspace->getNumberHistograms(); ++i)
+  for (size_t i = 0; i < m_workspace->getNumberHistograms(); ++i)
   {
     const MantidVec& xdata = m_workspace->readX(i);
     const MantidVec& ydata = m_workspace->readY(i);
     const MantidVec& edata = m_workspace->readE(i);
     const MantidVec& dxdata = m_workspace->readDx(i);
     const bool isHistogram = m_workspace->isHistogramData();
-    for (int j = 0; j < m_workspace->blocksize(); ++j)
+    for (size_t j = 0; j < m_workspace->blocksize(); ++j)
     {
       //x data is the QData in xml.If histogramdata take the mean
       double intensity = isHistogram ? (xdata[j] + xdata[j + 1]) / 2 : xdata[j];
