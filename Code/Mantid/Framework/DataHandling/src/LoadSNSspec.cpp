@@ -164,7 +164,7 @@ namespace Mantid
 
 	    localWorkspace->getAxis(0)->unit() = UnitFactory::Instance().create(getProperty("Unit"));
 
-	    for(unsigned int i=0;i<nSpectra;i++)
+	    for(int i=0;i<nSpectra;i++)
 	    {
 		  localWorkspace->dataX(i) = spectra[i].dataX();
 		  localWorkspace->dataY(i) = spectra[i].dataY();
