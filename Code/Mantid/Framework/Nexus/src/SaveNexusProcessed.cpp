@@ -179,7 +179,7 @@ namespace NeXus
     prog_init.reportIncrement(1, "Writing sample");
 
 
-    const size_t numberOfHist = m_inputWorkspace->getNumberHistograms();
+    const int numberOfHist = static_cast<int>(m_inputWorkspace->getNumberHistograms());
     std::vector<int> spec;
     // check if all X() are in fact the same array
     const bool uniformSpectra = API::WorkspaceHelpers::commonBoundaries(m_inputWorkspace);
@@ -281,8 +281,9 @@ namespace NeXus
     for (it = events.begin(); it != it_end; it++)
     {
       if (tofs) tofs[i] = it->tof();
-      if (weights) weights[i] = it->weight();
-      if (errorSquareds) errorSquareds[i] = it->errorSquared();
+      // FIXME: ticket #3051
+      if (weights) weights[i] = static_cast<float>(it->weight());
+      if (errorSquareds) errorSquareds[i] = static_cast<float>(it->errorSquared());
       if (pulsetimes) pulsetimes[i] = it->pulseTime().total_nanoseconds();
       i++;
     }
@@ -306,7 +307,7 @@ namespace NeXus
     indices.reserve( m_eventWorkspace->getNumberHistograms()+1 );
     // First we need to index the events in each spectrum
     size_t index = 0;
-    for (int wi =0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    for (int wi =0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++)
     {
       indices.push_back(index);
       // Track the total # of events
@@ -356,7 +357,7 @@ namespace NeXus
 
     // --- Fill in the combined event arrays ----
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int wi=0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    for (std::size_t wi=0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
     {
       PARALLEL_START_INTERUPT_REGION
       const DataObjects::EventList & el = m_eventWorkspace->getEventList(wi);
