@@ -192,9 +192,9 @@ public:
       TableColumn_ptr<bool> bc = tw.getColumn("OK");
 
       //std::vector<bool>& bv = bc->data();  // doesn't work
-      std::vector<Boolean>& bv = bc->data();  // works
+      //std::vector<Boolean>& bv = bc->data();  // works
       //bool& br = bc->data()[1]; // doesn't work
-      bool b = bc->data()[1]; // works
+      //bool b = bc->data()[1]; // works
       bc->data()[1] = true;
 
       for(int i=0;i<tw.rowCount();i++)
