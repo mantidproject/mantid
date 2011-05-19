@@ -118,7 +118,7 @@ namespace Mantid
       delete ifun;
       setProperty("OutputWorkspace",result);
 
-      double dProg = 1./wsNames.size();
+      double dProg = 1./static_cast<double>(wsNames.size());
       double Prog = 0.;
       for(int i=0;i<static_cast<int>(wsNames.size());++i)
       {
@@ -307,24 +307,24 @@ namespace Mantid
           }
           else
           {// i < 0 && spec < 0 => use start and end
-            for(int i=0;i<axis->length();++i)
+            for(size_t i=0;i<axis->length();++i)
             {
               double s = double(axis->spectraNo(i));
               if (s >= out.start && s <= out.end)
               {
-                out.indx.push_back(i);
+                out.indx.push_back(static_cast<int>(i));
               }
             }
           }
         }
         else
         {
-          for(int i=0;i<axis->length();++i)
+          for(size_t i=0;i<axis->length();++i)
           {
             int j = axis->spectraNo(i);
             if (j == out.spec)
             {
-              out.i = i;
+              out.i = static_cast<int>(i);
               break;
             }
           }
@@ -348,12 +348,12 @@ namespace Mantid
             out.start = (*axis)(0);
             out.end = (*axis)(axis->length()-1);
           }
-          for(int i=0;i<axis->length();++i)
+          for(size_t i=0;i<axis->length();++i)
           {
             double s = (*axis)(i);
             if (s >= out.start && s <= out.end)
             {
-              out.indx.push_back(i);
+              out.indx.push_back(static_cast<int>(i));
             }
           }
         }
