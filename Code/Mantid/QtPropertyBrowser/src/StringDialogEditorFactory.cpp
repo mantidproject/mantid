@@ -12,15 +12,18 @@
 
 void StringDialogEditorFactory::connectPropertyManager(QtStringPropertyManager *manager)
 {
+    (void) manager;
 }
 
 QWidget* StringDialogEditorFactory::createEditor(QtStringPropertyManager *manager, QtProperty *property,QWidget *parent)
 {
+    (void) manager;
   return new StringDialogEditor(property,parent);
 }
 
 void StringDialogEditorFactory::disconnectPropertyManager(QtStringPropertyManager *manager)
 {
+    (void) manager;
 }
 
 StringDialogEditor::StringDialogEditor(QtProperty *property, QWidget *parent):QWidget(parent),m_property(property)
