@@ -155,7 +155,7 @@ namespace CurveFitting
 
     for (size_t i = 0; i < p; i++)
     {
-        gsl_vector_set(initFuncParams, i, fun->activeParameter(i));
+        gsl_vector_set(initFuncParams, i, fun->activeParameter(static_cast<int>(i)));
     }
 
     int j = 0;
