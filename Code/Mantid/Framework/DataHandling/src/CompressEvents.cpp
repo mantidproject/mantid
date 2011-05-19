@@ -62,7 +62,7 @@ void CompressEvents::exec()
 
   // Some starting things
   bool inplace = (getPropertyValue("InputWorkspace") == getPropertyValue("OutputWorkspace"));
-  const size_t noSpectra = inputWS->getNumberHistograms();
+  const int noSpectra = static_cast<int>(inputWS->getNumberHistograms());
   Progress prog(this,0.0,1.0, noSpectra*2);
 
   // Sort the input workspace in-place by TOF. This can be faster if there are few event lists.
@@ -80,7 +80,7 @@ void CompressEvents::exec()
 
     // Loop over the histograms (detector spectra)
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (int64_t i = 0; i < noSpectra; ++i)
+    for (int i = 0; i < noSpectra; ++i)
     {
       PARALLEL_START_INTERUPT_REGION
       //the loop variable i can't be signed because of OpenMp rules inforced in Linux. Using this signed type suppresses warnings below
