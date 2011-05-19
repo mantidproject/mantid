@@ -176,7 +176,7 @@ void SaveCSV::exec()
 	  progress(0.2);
     }
     Progress p(this,0.2,1.0,2*numberOfHist);
-    for (int i = 0; i < numberOfHist; i++)
+    for (size_t i = 0; i < numberOfHist; i++)
     {
       // check if x-axis has changed. If yes print out new x-axis line
 
@@ -216,7 +216,7 @@ void SaveCSV::exec()
 
     outCSV_File << "\nERRORS\n";
 
-    for (int i = 0; i < numberOfHist; i++)
+    for (size_t i = 0; i < numberOfHist; i++)
     {
       const MantidVec& eValue = localworkspace->dataE(i);
 
