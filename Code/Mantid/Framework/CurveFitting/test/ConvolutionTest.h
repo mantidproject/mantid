@@ -54,7 +54,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-x*x*w);
@@ -66,7 +66,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-x*x*w);
@@ -123,7 +123,7 @@ public:
   {
     double a = getParameter("a");
     double b = getParameter("b");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out[i] = a + b * xValues[i];
     }
@@ -131,7 +131,7 @@ public:
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
     //throw Mantid::Kernel::Exception::NotImplementedError("");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       out->set(i,0,1.);
       out->set(i,1,xValues[i]);
@@ -333,7 +333,6 @@ public:
     double sp = s1*s2/(s1+s2);
     double hp = h1*h2*sqrt(pi/(s1+s2));
 
-    double df = 1/Dx;
     //std::cerr<<hp<<' '<<sp<<'\n';
     //std::cerr<<"test.df="<<df<<'\n';
     //std::ofstream fconv("conv.txt");
@@ -412,11 +411,11 @@ private:
 
   void addNoise(WS_type ws,double noise)
   {
-    for(int iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
+    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
     {
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(int i=0;i<Y.size();i++)
+      for(size_t i=0;i<Y.size();i++)
       {
         Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
         E[i] += noise;

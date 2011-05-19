@@ -6,6 +6,7 @@
 #include "MantidCurveFitting/CostFunctionFactory.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidCurveFitting/ICostFunction.h"
+#include "MantidKernel/System.h"
 
 #include <sstream>
 
@@ -21,9 +22,25 @@ public:
 
   std::string name()const {return "fido";}
 
-  double val(const double* yData, const double* inverseError, double* yCal, const size_t& n) { return 0.0;}
+  double val(const double* yData, const double* inverseError, double* yCal, const size_t& n)
+  {
+    UNUSED_ARG(yData);
+    UNUSED_ARG(inverseError);
+    UNUSED_ARG(yCal);
+    UNUSED_ARG(n);
+    return 0.0;
+  }
   void deriv(const double* yData, const double* inverseError, const double* yCal, 
-    const double* jacobian, double* outDerivs, const size_t& p, const size_t& n) {}
+    const double* jacobian, double* outDerivs, const size_t& p, const size_t& n)
+  {
+    UNUSED_ARG(yData);
+    UNUSED_ARG(inverseError);
+    UNUSED_ARG(yCal);
+    UNUSED_ARG(jacobian);
+    UNUSED_ARG(outDerivs);
+    UNUSED_ARG(p);
+    UNUSED_ARG(n);
+  }
 
 };
 

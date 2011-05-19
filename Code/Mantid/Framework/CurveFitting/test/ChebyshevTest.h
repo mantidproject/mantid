@@ -48,7 +48,7 @@ public:
     Mantid::MantidVec& X = ws->dataX(0);
     Mantid::MantidVec& Y = ws->dataY(0);
     Mantid::MantidVec& E = ws->dataE(0);
-    for(int i=0;i<Y.size();i++)
+    for(size_t i=0;i<Y.size();i++)
     {
       double x = -1. + 0.1*i;
       X[i] = x;
