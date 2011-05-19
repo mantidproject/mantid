@@ -78,15 +78,15 @@ void SaveDASC::exec()
   outDASC_File << "# Group" << std::endl;
 
   // prepare to loop through all the values in all the spectra, preparing to update the progress bar 100 times
-  int progInt = static_cast<int>(ceil(inputWS->getNumberHistograms()/100.0));
+  int progInt = static_cast<int>(ceil(static_cast<int>(inputWS->getNumberHistograms())/100.0));
   double progInc = (1-fracComp)/100.0;
 
-  const int nBins = inputWS->blocksize();
-  for (int i = 0; i < inputWS->getNumberHistograms(); i++)
+  const size_t nBins = inputWS->blocksize();
+  for (size_t i = 0; i < inputWS->getNumberHistograms(); i++)
   {
     const MantidVec& Y = inputWS->readY(i);
     const MantidVec& E = inputWS->readE(i);
-    for (int j = 0; j < nBins; j++)
+    for (size_t j = 0; j < nBins; j++)
     {
       outDASC_File << Y[j] << " " << E[j] << std::endl;
     }
@@ -140,14 +140,14 @@ void SaveDASC::writeHeader(API::MatrixWorkspace_const_sptr WS, std::ofstream &ou
 
   // now the X-values (specifically values at the centre of bins)
   output << "# " << XunitDist << " values (x)" << std::endl;
-  for (int i = 0; i < WS->blocksize(); i++)
+  for (size_t i = 0; i < WS->blocksize(); i++)
   {// the centre of the bin = mean of the bin boundaries
     output << (WS->readX(0)[i] +  WS->readX(0)[i+1])/2 << std::endl;
   }
 
   // the Y-values coordinate values, these are NOT number of counts
   output << "# " << YunitDist << " values (y)" << std::endl;
-  for (int i = 0; i < WS->getNumberHistograms(); i++)
+  for (size_t i = 0; i < WS->getNumberHistograms(); i++)
   {
     Axis *YValues = WS->getAxis(1);
     output << (*YValues)(i) << std::endl;
