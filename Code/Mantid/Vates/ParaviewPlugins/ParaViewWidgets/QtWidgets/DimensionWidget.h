@@ -7,12 +7,12 @@
 #include <boost/shared_ptr.hpp>
 #include <vector>
 #include "WidgetDllOption.h"
+#include "GeometryWidget.h"
 
 //Foward decs
 class QLabel;
 class QComboBox;
 class QLineEdit;
-class GeometryWidget;
 
 namespace Mantid
 {
@@ -30,7 +30,7 @@ public:
 
   /// Constructor.
   DimensionWidget(GeometryWidget* geometryWidget, const std::string& name, const int dimensionIndex,
-      std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedDimensions );
+      std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > nonIntegratedDimensions, DimensionLimitsOption limitsOption );
 
   /// Destructor
   ~DimensionWidget();
@@ -86,8 +86,7 @@ private:
   std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > m_vecNonIntegratedDimensions;
 
   /// Creates gui layout and controls.
-  void constructWidget(const int dimensionIndex);
-
+  void constructWidget(const int dimensionIndex, DimensionLimitsOption limitsOption);
 
 
 private slots:

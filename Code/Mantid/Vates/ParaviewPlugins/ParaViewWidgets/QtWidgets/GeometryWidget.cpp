@@ -28,7 +28,13 @@ void GeometryWidget::validateSetup() const
   }
 }
 
-GeometryWidget::GeometryWidget() : m_xDimensionWidget(NULL), m_yDimensionWidget(NULL), m_zDimensionWidget(NULL), m_tDimensionWidget(NULL), m_isConstructed(false)
+GeometryWidget::GeometryWidget(DimensionLimitsOption limitsOption) : 
+  m_xDimensionWidget(NULL), 
+  m_yDimensionWidget(NULL), 
+  m_zDimensionWidget(NULL), 
+  m_tDimensionWidget(NULL), 
+  m_isConstructed(false), 
+  m_limitsOption(limitsOption)
 {
 }
 
@@ -50,28 +56,28 @@ void GeometryWidget::constructWidget(Mantid::VATES::GeometryXMLParser& source)
   //Create widget to display/control the aligned x-dimension
   if(source.hasXDimension())
   {
-    m_xDimensionWidget = new DimensionWidget(this, "x Dimension", 0, nonIntegratedVector);
+    m_xDimensionWidget = new DimensionWidget(this, "x Dimension", 0, nonIntegratedVector, m_limitsOption);
     layout->addWidget(m_xDimensionWidget, 0, 0);
   }
 
   //Create widget to display/control the aligned y-dimension
   if(source.hasYDimension())
   {
-    m_yDimensionWidget = new DimensionWidget(this, "y Dimension", 1, nonIntegratedVector);
+    m_yDimensionWidget = new DimensionWidget(this, "y Dimension", 1, nonIntegratedVector, m_limitsOption);
     layout->addWidget(m_yDimensionWidget, 1, 0);
   }
 
   //Create widget to display/control the aligned z-dimension
   if(source.hasZDimension())
   {
-    m_zDimensionWidget = new DimensionWidget(this, "z Dimension", 2, nonIntegratedVector);
+    m_zDimensionWidget = new DimensionWidget(this, "z Dimension", 2, nonIntegratedVector, m_limitsOption);
     layout->addWidget(m_zDimensionWidget, 2, 0);
   }
 
   //Create widget to display/control the aligned t-dimension
   if(source.hasTDimension())
   {
-    m_tDimensionWidget = new DimensionWidget(this, "t Dimension", 3, nonIntegratedVector);
+    m_tDimensionWidget = new DimensionWidget(this, "t Dimension", 3, nonIntegratedVector, m_limitsOption);
     layout->addWidget(m_tDimensionWidget, 3, 0);
   }
 

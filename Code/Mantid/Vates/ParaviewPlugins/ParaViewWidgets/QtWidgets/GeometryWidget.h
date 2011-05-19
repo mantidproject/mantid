@@ -55,12 +55,15 @@ namespace Mantid
 
 enum BinChangeStatus{ApplyBinChanges, IgnoreBinChanges};
 
+/// Enum describes options of enabling or disabling interaction with limits in the nested dimensions.
+enum DimensionLimitsOption{EnableDimensionLimits, DisableDimensionLimits};
+
 class EXPORT_OPT_MANTIDPARVIEW GeometryWidget: public QWidget
 {
 Q_OBJECT
 public:
 Q_PROPERTY(QString GeometryXML READ getGeometryXML WRITE setGeometryXML NOTIFY valueChanged)
-GeometryWidget();
+GeometryWidget(DimensionLimitsOption limitsOption);
 void constructWidget(Mantid::VATES::GeometryXMLParser& source);
 
 void childAppliedNewDimensionSelection(
@@ -126,6 +129,7 @@ DimensionWidget* m_yDimensionWidget;
 DimensionWidget* m_zDimensionWidget;
 DimensionWidget* m_tDimensionWidget;
 bool m_isConstructed;
+DimensionLimitsOption m_limitsOption;
 
 };
 

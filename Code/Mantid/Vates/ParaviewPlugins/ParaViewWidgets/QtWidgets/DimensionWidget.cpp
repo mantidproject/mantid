@@ -8,7 +8,6 @@
 #include <string>
 #include <vector>
 #include <iostream>
-#include "GeometryWidget.h"
 #include "DimensionWidget.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
 #include <boost/algorithm/string.hpp>
@@ -20,7 +19,7 @@ DimensionWidget::DimensionWidget(
     GeometryWidget* geometryWidget,
     const std::string& name,
     const int dimensionIndex,
-    std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > vecNonIntegratedDimensions )
+    std::vector<boost::shared_ptr<Mantid::Geometry::IMDDimension> > vecNonIntegratedDimensions, DimensionLimitsOption limitsOption )
 :
     m_layout(NULL),
     m_nBinsBox(NULL),
@@ -32,11 +31,11 @@ DimensionWidget::DimensionWidget(
     m_geometryWidget(geometryWidget),
     m_vecNonIntegratedDimensions(vecNonIntegratedDimensions)
 {
-  constructWidget(dimensionIndex);
+  constructWidget(dimensionIndex, limitsOption);
   populateWidget(dimensionIndex);
 }
 
-void DimensionWidget::constructWidget(const int dimensionIndex)
+void DimensionWidget::constructWidget(const int dimensionIndex, DimensionLimitsOption limitsOption )
 {
   using namespace Mantid::Geometry;
 
@@ -73,7 +72,7 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   maxLabel->setText("Maximum");
   m_layout->addWidget(maxLabel, 2, 0, Qt::AlignLeft);
   m_maxBox = new QLineEdit();
-  //m_maxBox->setEnabled(false);
+
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
   m_layout->addWidget(m_maxBox, 2, 1, Qt::AlignLeft);
 
@@ -81,9 +80,15 @@ void DimensionWidget::constructWidget(const int dimensionIndex)
   minLabel->setText("Minimum");
   m_layout->addWidget(minLabel, 3, 0, Qt::AlignLeft);
   m_minBox = new QLineEdit();
-  //m_minBox->setEnabled(false);
+  
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
   m_layout->addWidget(m_minBox, 3, 1, Qt::AlignLeft);
+
+  if(DisableDimensionLimits == limitsOption)
+  {
+    m_maxBox->setEnabled(false);
+    m_minBox->setEnabled(false);
+  }
 
   this->setLayout(m_layout);
 }
