@@ -53,7 +53,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
     return;
   }
 
-  if (m_resolutionSize != nData)
+  if (m_resolutionSize != static_cast<int>(nData))
   {
     refreshResolution();
   }
@@ -61,15 +61,15 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
   gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(nData);
   gsl_fft_real_wavetable * wavetable = gsl_fft_real_wavetable_alloc(nData);
 
-  int n2 = nData / 2;
-  bool odd = n2*2 != nData;
+  int n2 = static_cast<int>(nData) / 2;
+  bool odd = n2*2 != static_cast<int>(nData);
   if (m_resolution == 0)
   {
-    m_resolutionSize = nData;
+    m_resolutionSize = static_cast<int>(nData);
     m_resolution = new double[nData];
     // the resolution must be defined on interval -L < xr < L, L == (xValues[nData-1] - xValues[0]) / 2 
     double* xr = new double[nData];
-    double dx = (xValues[nData-1] - xValues[0]) / (nData - 1);
+    double dx = (xValues[nData-1] - xValues[0]) / static_cast<double>((nData - 1));
     // make sure that xr[nData/2] == 0.0
     xr[n2] = 0.0;
     for(int i=1;i<n2;i++)
@@ -132,7 +132,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
   CompositeFunctionMW* cf = dynamic_cast<CompositeFunctionMW*>(getFunction(1));
   if (cf)
   {
-    for(int i = 0; i < cf->nFunctions(); ++i)
+    for(size_t i = 0; i < cf->nFunctions(); ++i)
     {
       DeltaFunction* df = dynamic_cast<DeltaFunction*>(cf->getFunction(i));
       if (df)
@@ -141,7 +141,7 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
         dltF += df->getParameter("Height");
       }
     }
-    if (static_cast<int>(dltFuns.size()) == cf->nFunctions())
+    if (dltFuns.size() == cf->nFunctions())
     {// all delta functions - return scaled reslution
       resolution->function(out,xValues,nData);
       std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dltF));
@@ -163,8 +163,8 @@ void Convolution::function(double* out, const double* xValues, const size_t nDat
   double dx = nData > 1? xValues[1] - xValues[0]: 1.;
   std::transform(out,out+nData,out,std::bind2nd(std::multiplies<double>(),dx));
 
-  HalfComplex res(m_resolution,nData);
-  HalfComplex fun(out,nData);
+  HalfComplex res(m_resolution,static_cast<int>(nData));
+  HalfComplex fun(out,static_cast<int>(nData));
 
   //double df = nData > 1? 1./(xValues[nData-1] - xValues[0]): 1.;
   //std::cerr<<"df="<<df<<'\n';
@@ -231,7 +231,7 @@ void Convolution::functionDeriv(Jacobian* out, const double* xValues, const size
     double p0 = getParameter(j);
     setParameter(j,p0 + dp[j],false);
     function(m_tmp1.get(),xValues, nData);
-    for (int i = 0; i < nData; i++) 
+    for (size_t i = 0; i < nData; i++)
     {
       out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
     }
