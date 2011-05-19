@@ -294,7 +294,7 @@ namespace DataHandling
       for (std::vector<VulcanCorrectionFactor>::iterator it = results->begin(); it!= results->end(); it++)
       {
         //std::cout << it->pixelID << " :! " << it->factor << std::endl;
-        vulcan[it->pixelID] = it->factor;
+        vulcan[static_cast<detid_t>(it->pixelID)] = it->factor;
       }
     }
   }
