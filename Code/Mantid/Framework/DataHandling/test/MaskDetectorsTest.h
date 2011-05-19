@@ -61,7 +61,7 @@ public:
       for (int j = 0; j < 5; ++j)
       {
         //Just one event per pixel
-        TofEvent event(1.23, 4.56);
+        TofEvent event(1.23, int64_t(4.56));
         spaceEvent->getEventListAtPixelID(j).addEventQuickly(event);
         spaceEvent->getAxis(1)->spectraNo(j) = j;
         forSpecDetMap[j] = j;
@@ -279,7 +279,7 @@ public:
     masked_indices.insert(4);
     
     ParameterMap & pmap = existingMask->instrumentParameters();
-    for( int i = 0; i < existingMask->getNumberHistograms(); ++i )
+    for( int i = 0; i < static_cast<int>(existingMask->getNumberHistograms()); ++i )
     {
       if( masked_indices.count(i) == 1 )
       {
@@ -304,7 +304,7 @@ public:
 
     TS_ASSERT(originalWS);
     if( !originalWS ) return;
-    for( int i = 0; i < originalWS->getNumberHistograms(); ++i )
+    for( int i = 0; i < static_cast<int>(originalWS->getNumberHistograms()); ++i )
     {
       IDetector_sptr det;
       TS_ASSERT_THROWS_NOTHING(det = existingMask->getDetector(i));
