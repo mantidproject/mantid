@@ -90,11 +90,11 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
 
   // Find the new binning first
   const MantidVec XIn = inputWS->readX(0); // Copy here to avoid holding on to reference for too long (problem with managed workspaces)
-  const int nTOF = XIn.size();
+  const size_t nTOF = XIn.size();
 
   // Loop through each bin
-  int cutoff = 0;
-  for (int i=0; i<nTOF; i++)
+  size_t cutoff = 0;
+  for (size_t i=0; i<nTOF; i++)
   {
       if (XIn[i] < threshold) cutoff = i;
   }
@@ -107,7 +107,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
   // there is the potential for having an overlap between the two regions. We exclude
   // the region beyond a single frame by considering only the first 1/60 sec of the
   // TOF histogram. (Bins 1 to 1666, as opposed to 1 to 2000)
-  int tof_bin_range = (int)(100000.0/frequency);
+  int tof_bin_range = static_cast<int>(100000.0/frequency);
   //int tof_bin_range = nTOF;
 
   g_log.information() << "Low TOFs: old = [" << (cutoff+1) << ", " << (tof_bin_range-2) << "]  ->  new = [0, " << (tof_bin_range-3-cutoff) << "]" << std::endl;
@@ -133,7 +133,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
     MantidVec& EOut = inputWS->dataE(ispec);
 
     // Move up the low TOFs
-    for (int i=0; i<cutoff; i++)
+    for (size_t i=0; i<cutoff; i++)
     {
       XOut[i+tof_bin_range-1-cutoff] = XIn[i] + frame_offset + tmp_frame_width;
       YOut[i+tof_bin_range-1-cutoff] = YIn[i];
@@ -141,7 +141,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
     }
 
     // Get rid of extra bins
-    for (int i=tof_bin_range-1; i<nTOF-1; i++)
+    for (size_t i=tof_bin_range-1; i<nTOF-1; i++)
     {
       XOut[i] = XOut[i-1]+10.0;
       YOut[i] = 0.0;
@@ -150,7 +150,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
     XOut[nTOF-1] = XOut[nTOF-2]+10.0;
 
     // Move down the high TOFs
-    for (int i=cutoff+1; i<tof_bin_range-1; i++)
+    for (size_t i=cutoff+1; i<tof_bin_range-1; i++)
     {
       XOut[i-cutoff-1] = XIn[i] + frame_offset;
       YOut[i-cutoff-1] = YIn[i];
