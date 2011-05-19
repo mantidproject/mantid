@@ -129,7 +129,7 @@ private:
   {
     // NOTE: The only values read by the algorithm are the number of detectors and then from each detector line
     // det no., (l2,theta,phi). All other values will be set to -1 here
-    const size_t ndets = testWS->getNumberHistograms();    
+    const int ndets = static_cast<int>(testWS->getNumberHistograms());
     const std::string filename = "test-setscalingpsd.sca";
     std::ofstream writer(filename.c_str());
     writer << filename << " created by unit test\n";
