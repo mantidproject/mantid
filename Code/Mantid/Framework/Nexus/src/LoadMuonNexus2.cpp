@@ -139,7 +139,7 @@ namespace Mantid
         total_specs = static_cast<int>(m_spec_list.size());
         if (m_interval)
         {
-          total_specs += (m_spec_max-m_spec_min+1);
+          total_specs += static_cast<int>((m_spec_max-m_spec_min+1));
         }
         else
         {
@@ -148,7 +148,7 @@ namespace Mantid
       }
       else
       {
-        total_specs = m_numberOfSpectra;
+        total_specs = static_cast<int>(m_numberOfSpectra);
         // for nexus return all spectra
         m_spec_min = 1;
         m_spec_max = m_numberOfSpectra;  // was +1?
@@ -232,7 +232,7 @@ namespace Mantid
         }
 
         int counter = 0;
-        for (int spec = m_spec_min; spec <= m_spec_max; ++spec)
+        for (int spec = static_cast<int>(m_spec_min); spec <= static_cast<int>(m_spec_max); ++spec)
         {
           int i = index_spectrum[spec]; // if spec not found i is 0
           loadData(counts,timeBins,counter,period,i,localWorkspace);
