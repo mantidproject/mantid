@@ -32,7 +32,7 @@ void ProductFunctionMW::function(double* out, const double* xValues, const size_
 {
   if (nData == 0) return;
   boost::shared_array<double> tmpOut(new double[nData]);
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFunctionMW* fun = dynamic_cast<IFunctionMW*>(getFunction(i));
     if (i == 0)
