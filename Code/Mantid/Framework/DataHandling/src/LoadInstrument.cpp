@@ -220,8 +220,8 @@ namespace Mantid
           throw Kernel::Exception::InstrumentDefinitionError("No type elements in XML instrument file", m_filename);
         }
 
-        unsigned int numberTypes = pNL_type->length();
-        for (unsigned int iType = 0; iType < numberTypes; iType++)
+        size_t numberTypes = pNL_type->length();
+        for (size_t iType = 0; iType < numberTypes; iType++)
         {
           Element* pTypeElem = static_cast<Element*>(pNL_type->item(iType));
           std::string typeName = pTypeElem->getAttribute("name");
@@ -245,7 +245,7 @@ namespace Mantid
             // for now try to create a geometry shape associated with every type
             // that does not contain any component elements
             mapTypeNameToShape[typeName] = shapeCreator.createShape(pTypeElem);
-            mapTypeNameToShape[typeName]->setName(iType);
+            mapTypeNameToShape[typeName]->setName(static_cast<int>(iType));
           }
           else
           {
@@ -262,8 +262,8 @@ namespace Mantid
         // create hasParameterElement
         NodeList* pNL_parameter = pRootElem->getElementsByTagName("parameter");
 
-        unsigned int numParameter = pNL_parameter->length();
-        for (unsigned int i = 0; i < numParameter; i++)
+        size_t numParameter = pNL_parameter->length();
+        for (size_t i = 0; i < numParameter; i++)
         {
           Element* pParameterElem = static_cast<Element*>(pNL_parameter->item(i));
           hasParameterElement.push_back( static_cast<Element*>(pParameterElem->parentNode()) );
@@ -283,7 +283,7 @@ namespace Mantid
         NodeList* pNL_comp = pRootElem->childNodes(); // here get all child nodes
         size_t pNL_comp_length = pNL_comp->length();
         API::Progress prog(this,0,1,pNL_comp_length);
-        for (unsigned int i = 0; i < pNL_comp_length; i++)
+        for (size_t i = 0; i < pNL_comp_length; i++)
         {
           if (VERBOSE) std::cout << "exec(): Node = "<< pNL_comp->item(i)->nodeName() << "\n";
           prog.report();
@@ -299,7 +299,7 @@ namespace Mantid
 
             // get all location elements contained in component element
             NodeList* pNL_location = pElem->getElementsByTagName("location");
-            unsigned int pNL_location_length = pNL_location->length();
+            size_t pNL_location_length = pNL_location->length();
             if (pNL_location_length == 0)
             {
               g_log.error(std::string("A component element must contain at least one location element") +
@@ -314,15 +314,15 @@ namespace Mantid
             {
               if (VERBOSE) std::cout << "exec(): This element has a type that is an assembly\n";
 
-              for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
+              for (size_t i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 Element* pLocElem = static_cast<Element*>(pNL_location->item(i_loc));
 
                 // check if <exclude> sub-elements for this location and create new exclude list to pass on 
                 NodeList* pNLexclude = pLocElem->getElementsByTagName("exclude");
-                unsigned int numberExcludeEle = pNLexclude->length();
+                size_t numberExcludeEle = pNLexclude->length();
                 std::vector<std::string> newExcludeList;
-                for (unsigned int i = 0; i < numberExcludeEle; i++)
+                for (size_t i = 0; i < numberExcludeEle; i++)
                 {
                   Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
                   if ( pExElem->hasAttribute("sub-part") )
@@ -352,7 +352,7 @@ namespace Mantid
             else
             {	
 
-              for (unsigned int i_loc = 0; i_loc < pNL_location_length; i_loc++)
+              for (size_t i_loc = 0; i_loc < pNL_location_length; i_loc++)
               {
                 appendLeaf(m_instrument, static_cast<Element*>(pNL_location->item(i_loc)), idList);
               }
@@ -596,9 +596,9 @@ namespace Mantid
 
               // check if <exclude> sub-elements for this location and create new exclude list to pass on 
               NodeList* pNLexclude = pElem->getElementsByTagName("exclude");
-              unsigned int numberExcludeEle = pNLexclude->length();
+              size_t numberExcludeEle = pNLexclude->length();
               std::vector<std::string> newExcludeList;
-              for (unsigned int i = 0; i < numberExcludeEle; i++)
+              for (size_t i = 0; i < numberExcludeEle; i++)
               {
                 Element* pExElem = static_cast<Element*>(pNLexclude->item(i));
                 if ( pExElem->hasAttribute("sub-part") )
@@ -1429,9 +1429,9 @@ namespace Mantid
         if ( hasParameterElement.end() == std::find(hasParameterElement.begin(),hasParameterElement.end(),pElem) ) return;
 
       NodeList* pNL_comp = pElem->childNodes(); // here get all child nodes
-      unsigned int pNL_comp_length = pNL_comp->length();
+      size_t pNL_comp_length = pNL_comp->length();
 
-      for (unsigned int i = 0; i < pNL_comp_length; i++)
+      for (size_t i = 0; i < pNL_comp_length; i++)
       {
         // we are only interest in the top level parameter elements hence
         // the reason for the if statement below
@@ -1464,18 +1464,18 @@ namespace Mantid
           std::string eq = "";
 
           NodeList* pNLvalue = pParamElem->getElementsByTagName("value");
-          unsigned int numberValueEle = pNLvalue->length();
+          size_t numberValueEle = pNLvalue->length();
           Element* pValueElem;
 
           NodeList* pNLlogfile = pParamElem->getElementsByTagName("logfile");
-          unsigned int numberLogfileEle = pNLlogfile->length();
+          size_t numberLogfileEle = pNLlogfile->length();
           Element* pLogfileElem;
 
           NodeList* pNLLookUp = pParamElem->getElementsByTagName("lookuptable");
-          unsigned int numberLookUp = pNLLookUp->length();
+          size_t numberLookUp = pNLLookUp->length();
 
           NodeList* pNLFormula = pParamElem->getElementsByTagName("formula");
-          unsigned int numberFormula = pNLFormula->length();
+          size_t numberFormula = pNLFormula->length();
 
           if ( numberValueEle+numberLogfileEle+numberLookUp+numberFormula > 1 )
           {
@@ -1531,7 +1531,7 @@ namespace Mantid
 
           bool fixed = false;
           NodeList* pNLFixed = pParamElem->getElementsByTagName("fixed");
-          unsigned int numberFixed = pNLFixed->length();
+          size_t numberFixed = pNLFixed->length();
           if ( numberFixed >= 1 )
           {
             fixed = true;
@@ -1575,9 +1575,9 @@ namespace Mantid
           std::vector<std::string> constraint(2, ""); 
 
           NodeList* pNLMin = pParamElem->getElementsByTagName("min");
-          unsigned int numberMin = pNLMin->length();
+          size_t numberMin = pNLMin->length();
           NodeList* pNLMax = pParamElem->getElementsByTagName("max");
-          unsigned int numberMax = pNLMax->length();
+          size_t numberMax = pNLMax->length();
 
           if ( numberMin >= 1)
           {
@@ -1598,7 +1598,7 @@ namespace Mantid
           std::string penaltyFactor; 
 
           NodeList* pNL_penaltyFactor = pParamElem->getElementsByTagName("penalty-factor");
-          unsigned int numberPenaltyFactor =  pNL_penaltyFactor->length();
+          size_t numberPenaltyFactor =  pNL_penaltyFactor->length();
 
           if ( numberPenaltyFactor>= 1)
           {
@@ -1646,9 +1646,9 @@ namespace Mantid
             }
 
             NodeList* pNLpoint = pLookUp->getElementsByTagName("point");
-            unsigned int numberPoint = pNLpoint->length();
+            size_t numberPoint = pNLpoint->length();
 
-            for ( unsigned int i = 0; i < numberPoint; i++)
+            for ( size_t i = 0; i < numberPoint; i++)
             {
               Element* pPoint = static_cast<Element*>(pNLpoint->item(i));
               double x = atof( pPoint->getAttribute("x").c_str() );
@@ -1706,7 +1706,7 @@ namespace Mantid
     void LoadInstrument::setComponentLinks(boost::shared_ptr<Geometry::Instrument>& instrument, Poco::XML::Element* pRootElem)
     {
       NodeList* pNL_link = pRootElem->getElementsByTagName("component-link");
-      unsigned int numberLinks = pNL_link->length();
+      size_t numberLinks = pNL_link->length();
 
 
       // check if any logfile cache units set. As of this writing the only unit to check is if "angle=radian"
@@ -1718,13 +1718,13 @@ namespace Mantid
           m_angleConvertConst = 180.0/M_PI;
       
 
-      for (unsigned int iLink = 0; iLink < numberLinks; iLink++)
+      for (size_t iLink = 0; iLink < numberLinks; iLink++)
       {
         Element* pLinkElem = static_cast<Element*>(pNL_link->item(iLink));
         std::string name = pLinkElem->getAttribute("name");
         std::vector<boost::shared_ptr<Geometry::IComponent> > sharedIComp = instrument->getAllComponentsWithName(name);
 
-        for (unsigned int i = 0; i < sharedIComp.size(); i++)
+        for (size_t i = 0; i < sharedIComp.size(); i++)
         {
           boost::shared_ptr<Geometry::Component> sharedComp = boost::dynamic_pointer_cast<Geometry::Component>(sharedIComp[i]);
           if ( sharedComp )
