@@ -140,16 +140,16 @@ namespace WorkspaceCreationHelper
     ShapeFactory sFactory;
     boost::shared_ptr<Object> shape = sFactory.createShape(xmlShape);
 
-    const int64_t nhist(workspace->getNumberHistograms());
+    const int nhist = static_cast<int>(workspace->getNumberHistograms());
 
     ParameterMap& pmap = workspace->instrumentParameters();
-    for( int64_t i = 0; i < nhist; ++i )
+    for( int i = 0; i < nhist; ++i )
     {
       workspace->getAxis(1)->spectraNo(i) = i;
     }
     workspace->mutableSpectraMap().populateSimple(0, nhist);
 
-    for( int64_t i = 0; i < nhist; ++i )
+    for( int i = 0; i < nhist; ++i )
     {
       Detector *det = new Detector("det",i,shape, NULL);
       det->setPos(i,i+1,1);
@@ -299,7 +299,7 @@ namespace WorkspaceCreationHelper
     ws->setInstrument(inst);
     ws->getAxis(0)->setUnit("dSpacing");
     int detID = numPixels*numPixels;
-    for (int wi=0; wi<ws->getNumberHistograms(); wi++)
+    for (int wi=0; wi< static_cast<int>(ws->getNumberHistograms()); wi++)
     {
       ws->getEventList(wi).clear(true);
       ws->getEventList(wi).addDetectorID(detID);
@@ -468,14 +468,14 @@ namespace WorkspaceCreationHelper
     Kernel::cow_ptr<MantidVec> axis;
     MantidVec& xRef = axis.access();
     xRef.resize(numbins);
-    for (size_t i = 0; i < numbins; ++i)
+    for (int i = 0; i < static_cast<int>(numbins); ++i)
       xRef[i] = i*bin_delta;
 
     //Make up some data for each pixels
     for (size_t i=0; i< numpixels; i++)
     {
       //Create one event for each bin
-      EventList& events = retVal->getEventListAtPixelID(i);
+      EventList& events = retVal->getEventListAtPixelID(static_cast<detid_t>(i));
       for (double ie=0; ie<numbins; ie++)
       {
         //Create a list of events, randomize
@@ -496,11 +496,12 @@ namespace WorkspaceCreationHelper
    */
   MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta)
   {
-    Workspace2D_sptr retVal = Create2DWorkspaceBinned(numHist, numBins, 0.0, binDelta);
-    retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(numHist) );
+
+    Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
+    retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
 
     // Set the detector IDs
-    for (size_t g=0; g < numHist; g++)
+    for (int g=0; g < static_cast<int>(numHist); g++)
     {
       std::vector<int> dets;
       for (int i=1; i<=9; i++)
@@ -517,10 +518,10 @@ namespace WorkspaceCreationHelper
   void DisplayDataY(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int64_t i = 0; i < int64_t(numHists); ++i)
+    for (size_t i = 0; i < numHists; ++i)
     {
       std::cout << "Histogram " << i << " = ";
-      for (int j = 0; j < ws->blocksize(); ++j)
+      for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
 	std::cout <<ws->readY(i)[j]<<" ";
       }
@@ -536,10 +537,10 @@ namespace WorkspaceCreationHelper
   void DisplayDataX(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int64_t i = 0; i < int64_t(numHists); ++i)
+    for (size_t i = 0; i < numHists; ++i)
     {
       std::cout << "Histogram " << i << " = ";
-      for (int j = 0; j < ws->blocksize(); ++j)
+      for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
 	std::cout <<ws->readX(i)[j]<<" ";
       }
@@ -551,10 +552,10 @@ namespace WorkspaceCreationHelper
   void DisplayDataE(const MatrixWorkspace_sptr ws)
   {
     const size_t numHists = ws->getNumberHistograms();
-    for (int64_t i = 0; i < int64_t(numHists); ++i)
+    for (size_t i = 0; i < numHists; ++i)
     {
       std::cout << "Histogram " << i << " = ";
-      for (int j = 0; j < ws->blocksize(); ++j)
+      for (size_t j = 0; j < ws->blocksize(); ++j)
       {  
 	std::cout <<ws->readE(i)[j]<<" ";
       }
