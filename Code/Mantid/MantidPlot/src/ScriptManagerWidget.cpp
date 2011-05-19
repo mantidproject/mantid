@@ -1074,7 +1074,7 @@ void ScriptManagerWidget::closeTabAtIndex(int index)
   askSave(index);
   editor->disconnect();
   // Remove the path from the script runner
-  Script *runner = m_script_runners.take(index);
+  /*Script *runner =*/m_script_runners.take(index);
   //delete runner;
   //Get the widget attached to the tab first as this is not deleted
   //when remove is called
