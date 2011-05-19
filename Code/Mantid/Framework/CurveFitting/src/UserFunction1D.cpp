@@ -115,7 +115,7 @@ void UserFunction1D::prepare()
  */
 void UserFunction1D::function(const double* in, double* out, const double* xValues, const size_t nData)
 {
-    for(size_t i=0;i<m_nPars;i++)
+    for(size_t i=0;i<static_cast<size_t>(m_nPars);i++)
         m_parameters[i] = in[i];
 
     for (size_t i = 0; i < nData; i++) {
@@ -158,7 +158,7 @@ void UserFunction1D::functionDeriv(const double* in, Jacobian* out, const double
   {
     in1[j] += dp[j];
     function(&in1[0], m_tmp1.get(),xValues, nData);
-    for (int i = 0; i < nData; i++) 
+    for (size_t i = 0; i < nData; i++)
     {
       out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
     }

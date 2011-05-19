@@ -210,7 +210,7 @@ static double gsl_costFunction(const gsl_vector * x, void *params)
  */
 void Fit1D::functionDeriv(const double* in, Jacobian* out, const double* xValues, const size_t nData)
 {
-  UNUSED_ARG(in); UNUSED_ARG(out); UNUSED_ARG(nData);
+  UNUSED_ARG(in); UNUSED_ARG(out); UNUSED_ARG(xValues); UNUSED_ARG(nData);
   throw Exception::NotImplementedError("No derivative function provided");
 }
 

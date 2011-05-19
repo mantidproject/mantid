@@ -109,8 +109,8 @@ namespace Mantid
     {
       for (size_t i = 0; i < nData; i++) 
       {
-	m_x = xValues[i];
-	out[i] = m_parser->Eval();
+        m_x = xValues[i];
+        out[i] = m_parser->Eval();
       }
     }
 
@@ -124,7 +124,7 @@ namespace Mantid
       if (nData == 0) return;
       std::vector<double> dp(nParams());
       std::vector<double> param(nParams());
-      for(size_t i=0;i<nParams();i++)
+      for(int i=0;i<nParams();i++)
       {
         double param = getParameter(i);
         if (param != 0.0)
@@ -145,12 +145,12 @@ namespace Mantid
 
       function(m_tmp.get(),xValues, nData);
 
-      for (size_t j = 0; j < nParams(); j++) 
+      for (int j = 0; j < nParams(); j++)
       {
         double p0 = getParameter(j);
         setParameter(j,p0 + dp[j],false);
         function(m_tmp1.get(),xValues, nData);
-        for (int i = 0; i < nData; i++) 
+        for (size_t i = 0; i < nData; i++)
         {
           out->set(i,j, (m_tmp1[i] - m_tmp[i])/dp[j]);
         }
