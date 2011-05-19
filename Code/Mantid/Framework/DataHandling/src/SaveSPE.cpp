@@ -34,12 +34,12 @@ namespace Mantid
     ///@endcond
 
     /// set to the number of numbers on each line (the length of lines is hard-coded in other parts of the code too)
-    static const int NUM_PER_LINE = 8;
+    static const unsigned int NUM_PER_LINE = 8;
 
     const double SaveSPE::MASK_FLAG=-1e30;
     const double SaveSPE::MASK_ERROR=0.0;
 
-    SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(-1) {}
+    SaveSPE::SaveSPE() : API::Algorithm(), m_remainder(-1), m_nBins(0) {}
 
     //---------------------------------------------------
     // Private member functions
@@ -94,15 +94,15 @@ namespace Mantid
       fprintf(outSPE_File,"%8u%8u\n",nHist, m_nBins);
 
       // Write the angle grid (dummy if no 'vertical' axis)
-      int phiPoints(0);
+      size_t phiPoints(0);
       if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
       {
         const Axis& axis = *inputWS->getAxis(1);
         const std::string commentLine = "### " + axis.unit()->caption() + " Grid\n";
         fprintf(outSPE_File,"%s",commentLine.c_str());
-        const int axisLength = axis.length();
+        const size_t axisLength = axis.length();
         phiPoints = (axisLength==nHist) ? axisLength+1 : axisLength;
-        for (int i = 0; i < phiPoints; i++)
+        for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = (i < axisLength) ? axis(i) : axis(axisLength-1)+1;
           fprintf(outSPE_File,NUM_FORM,value);
@@ -116,7 +116,7 @@ namespace Mantid
       {
         fprintf(outSPE_File,"### Phi Grid\n");
         phiPoints = nHist + 1; // Pretend this is binned
-        for (int i = 0; i < phiPoints; i++)
+        for (size_t i = 0; i < phiPoints; i++)
         {
           const double value = i + 0.5;
           fprintf(outSPE_File,NUM_FORM,value);
@@ -138,8 +138,8 @@ namespace Mantid
 
       // Write the energy grid
       fprintf(outSPE_File,"### Energy Grid\n");
-      const int energyPoints = m_nBins + 1; // Validator enforces binned data
-      int i = NUM_PER_LINE-1;
+      const size_t energyPoints = m_nBins + 1; // Validator enforces binned data
+      size_t i = NUM_PER_LINE-1;
       for (  ; i < energyPoints; i += NUM_PER_LINE)
       {// output a whole line of numbers at once
         fprintf(outSPE_File,NUMS_FORM,
@@ -177,7 +177,7 @@ namespace Mantid
       // there are very often spectra that are missing detectors, as this can be a lot of detectors log it once at the end
       std::vector<int> spuriousSpectra;
       // used only for debugging
-      int nMasked = 0;
+      size_t nMasked = 0;
       // Loop over the spectra, writing out Y and then E values for each
       for (int i = 0; i < nHist; i++)
       {
@@ -237,14 +237,14 @@ namespace Mantid
     */
     void SaveSPE::writeBins(const MantidVec &Vs, FILE * const outFile) const
     {
-      for(int j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
+      for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
         fprintf(outFile,NUMS_FORM,
           Vs[j-7],Vs[j-6],Vs[j-5],Vs[j-4],Vs[j-3],Vs[j-2],Vs[j-1],Vs[j]);
       }
       if (m_remainder)
       {
-        for ( int l = m_nBins - m_remainder; l < m_nBins; ++l)
+        for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
           fprintf(outFile,NUM_FORM,Vs[l]);
         }
@@ -264,7 +264,7 @@ namespace Mantid
       }
       if (m_remainder)
       {
-        for ( int l = m_nBins - m_remainder; l < m_nBins; ++l)
+        for ( size_t l = m_nBins - m_remainder; l < m_nBins; ++l)
         {
           fprintf(outFile,NUM_FORM,value);
         }
@@ -277,7 +277,7 @@ namespace Mantid
     *  @param nonMasked :: the number of histograms saved successfully
     *  @param masked :: the number of histograms for which mask values were writen
     */
-    void SaveSPE::logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const
+    void SaveSPE::logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const
     {
       std::vector<int>::const_iterator index = inds.begin(), end = inds.end();
       if (index != end)

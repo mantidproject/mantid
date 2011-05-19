@@ -70,12 +70,12 @@ private:
   void writeMaskFlags(FILE * const outFile) const;
   void writeBins(const MantidVec &Vs, FILE * const outFile) const;
   void writeValue(const double value, FILE * const outFile) const;
-  void logMissingMasked(const std::vector<int> &inds, const int nonMasked, const int masked) const;
+  void logMissingMasked(const std::vector<int> &inds, const size_t nonMasked, const int masked) const;
   
   ///the SPE files have a constant number of numbers writen on each line, but depending on the number of bins there will be some "spare" numbers at the end of the block, this holds that number of spares
   int m_remainder;
   ///the number of bins in each histogram, as the histogram must have common bins this shouldn't change
-  int m_nBins;
+  size_t m_nBins;
 
   /// the error value (=0.0) for spectra whose detectors are all masked, from the SPE specification http://www.mantidproject.org/images/3/3d/Spe_file_format.pdf
   static const double MASK_ERROR;
