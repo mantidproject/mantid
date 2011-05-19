@@ -786,7 +786,7 @@ void FitPropertyBrowser::intChanged(QtProperty* prop)
       setWorkspaceIndex(0);
       return;
     }
-    int n = ws->getNumberHistograms();
+    int n = static_cast<int>(ws->getNumberHistograms());
     int wi = workspaceIndex();
     if (wi < 0)
     {
@@ -1020,7 +1020,7 @@ void FitPropertyBrowser::populateFunctionNames()
 /// Get number of functions in CompositeFunction
 int FitPropertyBrowser::count()const
 {
-  return m_compositeFunction->nFunctions();
+  return static_cast<int>(m_compositeFunction->nFunctions());
 }
 
 /// Get the current function
@@ -1460,7 +1460,7 @@ void FitPropertyBrowser::addTieToFunction()
     Mantid::API::ParameterReference ref(m_compositeFunction,i);
     Mantid::API::IFitFunction* fun = ref.getFunction();
     // Pick out parameters with the same name as the one we're tying from
-    if ( fun->parameterName(ref.getIndex()) == parName )
+    if ( fun->parameterName(static_cast<int>(ref.getIndex())) == parName )
     {
       if ( iPar == -1 && fun == h->function() ) // If this is the 'tied from' parameter, remember it
       {
