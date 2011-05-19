@@ -37,7 +37,7 @@ m_lowerBound(lowerBound),
 m_upperBound(upperBound)
 {
   reset(fun,fun->parameterIndex(paramName)),
-  m_activeParameterIndex = fun->activeIndex(getIndex());
+  m_activeParameterIndex = fun->activeIndex(static_cast<int>(getIndex()));
 }
 
 /** Initialize the constraint from an expression.
@@ -60,7 +60,7 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
   int ilow = -1;
   int ihi = -1;
   std::string parName;
-  for(int i=0;i<terms.size();i++)
+  for(size_t i=0;i<terms.size();i++)
   {
     std::string name = terms[i].str();
     try
@@ -73,11 +73,11 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
         op = terms[i+1].operator_name();
         if (op[0] == '<')
         {
-          ilow = i;
+          ilow = static_cast<int>(i);
         }
         else if (op[0] == '>')
         {
-          ihi = i;
+          ihi = static_cast<int>(i);
         }
         else
         {
@@ -89,11 +89,11 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
       {
         if (op[0] == '<')
         {
-          ihi = i;
+          ihi = static_cast<int>(i);
         }
         else if (op[0] == '>')
         {
-          ilow = i;
+          ilow = static_cast<int>(i);
         }
         else
         {
@@ -125,7 +125,7 @@ void BoundaryConstraint::initialize(API::IFitFunction* fun, const API::Expressio
     throw;
   }
 
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
+  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
 
   if (m_activeParameterIndex < 0)
   {
@@ -189,7 +189,7 @@ void BoundaryConstraint::setPenaltyFactor(const double& c)
 
 void BoundaryConstraint::setParamToSatisfyConstraint()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
+  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
 
   if (m_activeParameterIndex < 0)
   {
@@ -206,20 +206,20 @@ void BoundaryConstraint::setParamToSatisfyConstraint()
     return;
   }
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
-      getFunction()->setParameter(getIndex(),m_lowerBound,false);
+      getFunction()->setParameter(static_cast<int>(getIndex()),m_lowerBound,false);
   if (m_hasUpperBound)
     if ( paramValue > m_upperBound )
-      getFunction()->setParameter(getIndex(),m_upperBound,false);
+      getFunction()->setParameter(static_cast<int>(getIndex()),m_upperBound,false);
 }
 
 
 double BoundaryConstraint::check()
 {
-  m_activeParameterIndex = getFunction()->activeIndex(getIndex());
+  m_activeParameterIndex = getFunction()->activeIndex(static_cast<int>(getIndex()));
 
   if (m_activeParameterIndex < 0)
   {
@@ -237,7 +237,7 @@ double BoundaryConstraint::check()
   }
 
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
 
   double penalty = 0.0;
 
@@ -262,7 +262,7 @@ double BoundaryConstraint::checkDeriv()
     return penalty;
   } 
 
-  double paramValue = getFunction()->getParameter(getIndex());
+  double paramValue = getFunction()->getParameter(static_cast<int>(getIndex()));
 
   if (m_hasLowerBound)
     if ( paramValue < m_lowerBound )
@@ -281,7 +281,7 @@ std::string BoundaryConstraint::asString()const
   {
     ostr << m_lowerBound << '<';
   }
-  ostr << getFunction()->parameterName(getIndex());
+  ostr << getFunction()->parameterName(static_cast<int>(getIndex()));
   if (m_hasUpperBound)
   {
     ostr<< '<' << m_upperBound;
