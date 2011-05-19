@@ -91,7 +91,7 @@ namespace Mantid
       }
 
       // Number of Workspaces and Number of Energy Bins
-      fprintf(outSPE_File,"%8u%8u\n",nHist, m_nBins);
+      fprintf(outSPE_File,"%8u%8u\n",static_cast<int>(nHist), static_cast<int>(m_nBins));
 
       // Write the angle grid (dummy if no 'vertical' axis)
       size_t phiPoints(0);
@@ -118,7 +118,7 @@ namespace Mantid
         phiPoints = nHist + 1; // Pretend this is binned
         for (size_t i = 0; i < phiPoints; i++)
         {
-          const double value = i + 0.5;
+          const double value = static_cast<int>(i) + 0.5;
           fprintf(outSPE_File,NUM_FORM,value);
           if ( (i + 1) % 8 == 0 )
           {
@@ -172,14 +172,14 @@ namespace Mantid
       const size_t nHist = WS->getNumberHistograms();
       // Create a progress reporting object
       Progress progress(this,0,1,100);
-      const int progStep = static_cast<int>(ceil(nHist/100.0));
+      const int progStep = static_cast<int>(ceil(static_cast<int>(nHist)/100.0));
 
       // there are very often spectra that are missing detectors, as this can be a lot of detectors log it once at the end
       std::vector<int> spuriousSpectra;
       // used only for debugging
-      size_t nMasked = 0;
+      int nMasked = 0;
       // Loop over the spectra, writing out Y and then E values for each
-      for (int i = 0; i < nHist; i++)
+      for (int i = 0; i < static_cast<int>(nHist); i++)
       {
         try
         {//need to check if _all_ the detectors for the spectrum are masked, as we don't have output values for those
@@ -257,7 +257,7 @@ namespace Mantid
     */
     void SaveSPE::writeValue(const double value, FILE * const outFile) const
     {
-      for(int j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
+      for(size_t j = NUM_PER_LINE-1; j < m_nBins; j+=NUM_PER_LINE)
       {// output a whole line of numbers at once
         fprintf(outFile,NUMS_FORM,
           value,value,value,value,value,value,value,value);
