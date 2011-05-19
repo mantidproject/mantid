@@ -1468,6 +1468,7 @@ class UserFile(ReductionStep):
         if self.filename is None:
             raise AttributeError('The user file must be set, use the function MaskFile')
         user_file = self.filename
+        
         #Check that the file exists.
         if not os.path.isfile(user_file):
             user_file = os.path.join(reducer.user_file_path, self.filename)
@@ -1476,6 +1477,7 @@ class UserFile(ReductionStep):
                 if not os.path.isfile(user_file):
                     raise RuntimeError, "Cannot read mask. File path '%s' does not exist or is not in the user path." % self.filename
             
+        reducer.user_file_path = os.path.dirname(user_file)
         # Re-initializes default values
         self._initialize_mask(reducer)
         reducer.flood_file.set_filename("")
