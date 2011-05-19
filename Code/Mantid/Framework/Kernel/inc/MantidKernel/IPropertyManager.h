@@ -112,7 +112,7 @@ public:
         return this;
     }
     /// Return the property manager serialized as a string.
-    virtual std::string toString(bool withDefaultValues = false) const = 0;
+    virtual std::string asString(bool withDefaultValues = false) const = 0;
 
 protected:
 

@@ -266,7 +266,7 @@ public:
   /** @name Serialization functions */
   //@{
   /// Serialize an object to a string
-  virtual std::string toString(bool withDefaultValues = false) const;
+  virtual std::string toString() const;
   /// De-serialize an object from a string
   static IAlgorithm_sptr fromString(const std::string & input);
   /// Construct an object from a history entry

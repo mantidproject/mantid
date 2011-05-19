@@ -230,10 +230,10 @@ namespace Mantid
     * Serialize this object to a string. Simple routes the call the algorithm
     * @returns This object serialized as a string 
     */
-    std::string AlgorithmProxy::toString(bool withDefaultValues) const
+    std::string AlgorithmProxy::toString() const
     {
       const_cast<AlgorithmProxy*>(this)->createConcreteAlg();
-      std::string serialized = m_alg->toString(withDefaultValues);
+      std::string serialized = m_alg->toString();
       m_alg.reset();
       return serialized;
     }

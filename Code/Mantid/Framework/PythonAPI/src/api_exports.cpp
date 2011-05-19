@@ -146,7 +146,7 @@ using namespace boost::python;
       .def("_setWorkspaceProperty", &_setMatrixWorkspaceProperty)
       .def("_getWorkspaceProperty", &_getMatrixWorkspaceProperty)
       // Special methods
-      .def("__str__", (std::string (IAlgorithm::*)() const)&IAlgorithm::toString)
+      .def("__str__", &API::IAlgorithm::toString)
       ;
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
@@ -154,11 +154,11 @@ using namespace boost::python;
       ;
     
     /// Algorithm properties
-   	class_<Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>,
-	       bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_AlgorithmProperty", no_init)
-      .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>::operator(), return_value_policy<copy_const_reference>()))
+    class_<Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>,
+      bases<Mantid::Kernel::Property>, boost::noncopyable>("PropertyWithValue_AlgorithmProperty", no_init)
+    .add_property("value", make_function(&Mantid::Kernel::PropertyWithValue<IAlgorithm_sptr>::operator(), return_value_policy<copy_const_reference>()))
       ;
-    class_<API::AlgorithmProperty, bases<Kernel::PropertyWithValue<IAlgorithm_sptr> >, boost::noncopyable>("AlgorithmProperty", no_init)
+  class_<API::AlgorithmProperty, bases<Kernel::PropertyWithValue<IAlgorithm_sptr> >, boost::noncopyable>("AlgorithmProperty", no_init)
       ;
     
     //PyAlgorithmBase

@@ -514,12 +514,12 @@ namespace Mantid
      * AlgorithmName.version(prop1=value1,prop2=value2,...)
      * @returns This object serialized as a string 
      */
-    std::string Algorithm::toString(bool withDefaultValues) const
+    std::string Algorithm::toString() const
     {
       std::ostringstream writer;
       writer << name() << "." << this->version() 
         << "("
-        << Kernel::PropertyManagerOwner::toString(withDefaultValues)
+        << Kernel::PropertyManagerOwner::asString(false)
         << ")";
       return writer.str();
     }

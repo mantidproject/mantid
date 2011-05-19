@@ -351,7 +351,7 @@ namespace Mantid
     * @param withDefaultValues :: If true then the value of default parameters will be included
     * @returns A serialized version of the manager
     */
-    std::string PropertyManager::toString(bool withDefaultValues) const
+    std::string PropertyManager::asString(bool withDefaultValues) const
     {
       std::ostringstream writer;
       const size_t count = propertyCount();
