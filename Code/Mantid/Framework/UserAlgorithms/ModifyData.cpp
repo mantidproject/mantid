@@ -66,8 +66,8 @@ void ModifyData::exec()
             {
                 g_log.information() << "Spectrum " << i << " Point " << j << " values: "
                     << XValues[j] << ' ' << YValues[j] << ' ' << EValues[j] << std::endl;
-                newX[j] = XValues[j] + i + j;
-                newY[j] = YValues[j]*(2. + 0.1*j);
+                newX[j] = XValues[j] + static_cast<double>(i + j);
+                newY[j] = YValues[j]*(2. + 0.1*static_cast<double>(j));
                 newE[j] = EValues[j]+0.1;
             }
         }

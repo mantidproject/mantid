@@ -50,7 +50,7 @@ void LorentzianTest::functionLocal(double* out, const double* xValues, const siz
     const double& hwhm = getParameter("HWHM");
 
     // This for-loop calculates the function for nData data-points
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) );
     }
@@ -70,7 +70,7 @@ void LorentzianTest::functionDerivLocal(Jacobian* out, const double* xValues, co
     const double& peakCentre = getParameter("PeakCentre");
     const double& hwhm = getParameter("HWHM");
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
         double invDenominator =  1/((diff*diff+hwhm*hwhm));
         out->set(i,0, hwhm*hwhm*invDenominator);
