@@ -78,7 +78,7 @@ public:
     TS_ASSERT_EQUALS(c.hitRatio(), 0);
 
     //test hit
-    int value;
+    int value = 0;
     TS_ASSERT_EQUALS(c.getCache(1,value), true);
     TS_ASSERT_EQUALS(value, 1);
     TS_ASSERT_EQUALS(c.hitCount(), 1);
