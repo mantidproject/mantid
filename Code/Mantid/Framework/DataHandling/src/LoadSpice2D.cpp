@@ -405,7 +405,7 @@ namespace Mantid
       // Get the number of monitor channels
       boost::shared_ptr<Geometry::Instrument> instrument = localWorkspace->getBaseInstrument();
       std::vector<detid_t> monitors = instrument->getMonitors();
-      int64_t nMonitors = static_cast<int64_t>(monitors.size());
+      const int nMonitors = static_cast<int>(monitors.size());
 
       // Number of monitors should be consistent with data file format
       if( nMonitors != LoadSpice2D::nMonitors ) {
@@ -415,7 +415,7 @@ namespace Mantid
         throw std::runtime_error(error.str());
       }
 
-      int ndet = nxbins*nybins + nMonitors;
+      const size_t ndet = nxbins*nybins + nMonitors;
       boost::shared_array<detid_t> udet(new detid_t[ndet]);
       boost::shared_array<specid_t> spec(new specid_t[ndet]);
 
