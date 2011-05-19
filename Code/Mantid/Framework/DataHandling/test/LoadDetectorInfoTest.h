@@ -116,7 +116,7 @@ public:
     TS_ASSERT( WS->readX(0).size() > 0);
     // test sharing X-value arrays
     const double *previous = (&(WS->dataX(0)[0]));
-    for (int k = 1; k < WS->getNumberHistograms(); ++k)
+    for (std::size_t k = 1; k < WS->getNumberHistograms(); ++k)
     {
       if ( k == 3 )// the third and fourth times are the same so their array should be shared
       {
@@ -127,7 +127,7 @@ public:
       previous = &(WS->dataX(k)[0]);
     }
     // test x offsets
-    for (int x = 0; x < WS->getNumberHistograms(); x++ )
+    for (std::size_t x = 0; x < WS->getNumberHistograms(); x++ )
     {
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
@@ -170,7 +170,7 @@ public:
 
     // test x offsets
     TS_ASSERT( WS->getNumberHistograms() > 0 );
-    for (int x = 0; x < WS->getNumberHistograms(); x++ )
+    for (int x = 0; x < static_cast<int>(WS->getNumberHistograms()); x++ )
     {
       for (int j = 0; j < static_cast<int>(WS->readX(0).size()); j++ )
       {
