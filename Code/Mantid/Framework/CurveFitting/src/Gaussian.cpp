@@ -28,7 +28,7 @@ void Gaussian::functionLocal(double* out, const double* xValues, const size_t nD
     const double& peakCentre = getParameter("PeakCentre");
     const double& weight = pow(1/getParameter("Sigma"),2);
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         out[i] = height*exp(-0.5*diff*diff*weight);
     }
@@ -40,7 +40,7 @@ void Gaussian::functionDerivLocal(Jacobian* out, const double* xValues, const si
     const double& peakCentre = getParameter("PeakCentre");
     const double& weight = pow(1/getParameter("Sigma"),2);
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
         double e = exp(-0.5*diff*diff*weight);
         out->set(i,0, e);
@@ -57,7 +57,7 @@ void Gaussian::calJacobianForCovariance(Jacobian* out, const double* xValues, co
 
     double weight = 1/(sigma*sigma);
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
         double e = exp(-0.5*diff*diff*weight);
         out->set(i,0, e);
