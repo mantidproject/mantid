@@ -41,7 +41,7 @@ static void default_status_reporter(int status, int code, const char* message)
 static idc_error_report_t status_reporter = default_status_reporter;
 
 // diable warning about vsprintf and strncpy
-#pragma warning(disable:4996)
+//#pragma warning(disable:4996)
 /** report an error */
 int IDCreport(int status, int code, const char* format, ... )
 {
