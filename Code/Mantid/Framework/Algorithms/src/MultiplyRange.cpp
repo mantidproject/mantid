@@ -50,7 +50,7 @@ void MultiplyRange::exec()
   m_factor = getProperty("Factor");
 
   // A few checks on the input properties
-  const int specSize = inputWS->blocksize();
+  const int specSize = static_cast<int>(inputWS->blocksize());
   if ( isEmpty(m_endBin) ) m_endBin = specSize - 1;
 
   if ( m_endBin >= specSize )
@@ -73,7 +73,7 @@ void MultiplyRange::exec()
   }
 
   // Get the count of histograms in the input workspace
-  const size_t histogramCount = inputWS->getNumberHistograms();
+  const int histogramCount = static_cast<int>(inputWS->getNumberHistograms());
   Progress progress(this,0.0,1.0,histogramCount);
   // Loop over spectra
   PARALLEL_FOR2(inputWS,outputWS)
