@@ -16,11 +16,18 @@ DECLARE_FUNCTION(LorentzianTest)
 
 // ** MODIFY THIS **
 // Here specify/declare the parameters of your Fit Function
+// 
+// declareParameter takes three arguments:
+//
+//   1st: The name of the parameter
+//   2nd: The default (initial) value of the parameter
+//   3rd: A description of the parameter (optional)
+//
 void LorentzianTest::init()
 {
-  declareParameter("Height", 0.0);     // the second argument is its default value, here 0.0
-  declareParameter("PeakCentre", 0.0);
-  declareParameter("HWHM", 0.0);
+  declareParameter("Height", 0.0, "Height at peak maximum"); 
+  declareParameter("PeakCentre", 0.0, "Centre of peak");
+  declareParameter("HWHM", 0.0, "Half-Width Half-Maximum");
 }
 
 
