@@ -154,7 +154,7 @@ public:
     TS_ASSERT_EQUALS(xMin,m_xMinIndex);
     TS_ASSERT_EQUALS(xMax,m_xMaxIndex);
 
-    for(int i=0;i<nFunctions();i++)
+    for(size_t i=0;i<nFunctions();i++)
     {
       ITestFunction* f = dynamic_cast<ITestFunction*>(getFunction(i));
       f->testInit(ws,spec,xMin,xMax);
