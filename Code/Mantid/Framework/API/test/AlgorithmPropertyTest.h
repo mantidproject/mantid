@@ -104,7 +104,7 @@ public:
 
     TS_ASSERT_EQUALS(adder.getPropertyValue("Output1"), "3"); 
     AlgorithmProperty *testProp = new AlgorithmProperty("CalculateStep");
-    TS_ASSERT_EQUALS(testProp->setValue(adder.toString(false)), "");
+    TS_ASSERT_EQUALS(testProp->setValue(adder.toString()), "");
   }
 
   void test_An_Invalid_String_Returns_An_Appropriate_Error()
