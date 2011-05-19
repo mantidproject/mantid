@@ -223,7 +223,9 @@ std::string RebinningCutterPresenter::constructGeometryXML(
   Dimension_sptr dimensionZ,
   Dimension_sptr dimensiont)
 {
-  Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+  using Mantid::Geometry::MDGeometryBuilderXML;
+  using Mantid::Geometry::StrictDimensionPolicy;
+  MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
   DimensionVec::iterator it = dimensions.begin();
   for(;it != dimensions.end(); ++it)
   {

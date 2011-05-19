@@ -3,8 +3,10 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include "MantidKernel/System.h"
 #include "MantidGeometry/MDGeometry/IMDDimension.h"
+#include "MantidKernel/Logger.h"
 
 namespace Mantid
 {
@@ -14,8 +16,8 @@ namespace Geometry
 /**
  @class  MDGeometryBuliderXML
  @brief Computes Boolean algebra for simplification
- @author S. Ansell
- @date August 2005
+ @author Owen Arnold
+ @date May 2011
  @version 1.0
 
  Handles the generation of well formed description of a geometry based on input IMDDimensions.
@@ -41,6 +43,7 @@ namespace Geometry
  File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>
 
  */
+template <typename CheckDimensionPolicy>
 class DLLExport MDGeometryBuilderXML
 {
 
@@ -101,12 +104,54 @@ private:
   /// Determine whetether a valid t dimension has been provided.
   bool hasTDimension() const;
 
+  /// Instantiate and apply the checking policy.
+  void applyPolicyChecking(IMDDimension_const_sptr dimensionToAdd) const;
+
   /// Flag indicating that some change in the inputs has occured. Triggers full recreation.
   mutable bool m_changed;
 
   /// Variable suports lazy calculation.
   mutable std::string m_lastResult;
 
+};
+
+/*
+ @class StrictDimensionPolicy
+ @brief Unary operator that throws if the dimension provided is integrated.
+ @author Owen Arnold
+ @date May 2011
+ @version 1.0
+*/
+struct StrictDimensionPolicy: public std::unary_function<IMDDimension_const_sptr, void>
+{
+private:
+  Kernel::Logger& g_log;
+public:
+  StrictDimensionPolicy() : g_log(Kernel::Logger::get("StrictDimensionPolicy")){}
+  void operator()(IMDDimension_const_sptr item)
+  {
+    if(true == item->getIsIntegrated())
+    {
+      std::string message = "StrictDimensionPolicy bans the use of integrated IMDDimensions mapped to x, y, z or t in a IMDWorkspace.";
+      message += "Attempted to do so with IMDDimension: " + item->getDimensionId();
+      g_log.error(message);
+      throw std::invalid_argument(message);
+    }
+  }
+};
+
+/*
+ @class NoDimensionPolicy
+ @brief Unary operator that has no effect.
+ @author Owen Arnold
+ @date May 2011
+*/
+struct NoDimensionPolicy: public std::unary_function<IMDDimension_const_sptr, void>
+{
+  void operator()(IMDDimension_const_sptr item)
+  {
+    //Do nothing.
+  }
 };
 
 }

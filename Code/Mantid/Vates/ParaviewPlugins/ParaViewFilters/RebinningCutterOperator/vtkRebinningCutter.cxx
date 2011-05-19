@@ -334,7 +334,8 @@ void vtkRebinningCutter::SetAppliedGeometryXML(std::string appliedGeometryXML)
   if(SetupDone == m_setup)
   {
     //Generate an xml representation of the existing geometry.
-    Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+    using namespace Mantid::Geometry;
+    MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
     xmlBuilder.addXDimension(m_appliedXDimension);
     xmlBuilder.addYDimension(m_appliedYDimension);
     xmlBuilder.addZDimension(m_appliedZDimension);

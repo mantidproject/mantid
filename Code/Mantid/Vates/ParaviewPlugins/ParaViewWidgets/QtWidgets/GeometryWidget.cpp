@@ -84,7 +84,8 @@ QString GeometryWidget::getGeometryXML() const
 {
   validateSetup();
   //Get the selected alignment for the xdimension.
-  Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+  using namespace Mantid::Geometry;
+  MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
   if(hasXDimension())
   {
     xmlBuilder.addXDimension(m_xDimensionWidget->getDimension());

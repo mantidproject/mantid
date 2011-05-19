@@ -306,36 +306,6 @@ void testMDGeometryUnitRotations(){
     TSM_ASSERT_EQUALS("The number of expanded dimensions returned is not equal to the expected value.", 2, tDND_geometry->getNumExpandedDims());
   }
 
-  void testToXMLString()
-  {
-
-    boost::scoped_ptr<MDGeometry> geometry(constructGeometry());
-
-    //Only practicle way to check the xml output in the absense of xsd is as part of a dom tree.
-    Poco::XML::DOMParser pParser;
-    std::string xmlToParse = geometry->toXMLString(); //Serialize the geometry.
-    Poco::XML::Document* pDoc = pParser.parseString(xmlToParse);
-    Poco::XML::Element* pRootElem = pDoc->documentElement();
-
-    //Check that the number of dimensions provided is correct.
-    TSM_ASSERT_EQUALS("Wrong number of dimension in geometry xml", 5, pRootElem->getElementsByTagName("Dimension")->length());
-
-    //Check that mapping nodes have been provided.
-    TSM_ASSERT_EQUALS("No DimensionX in geometry xml", 1, pRootElem->getElementsByTagName("XDimension")->length());
-    TSM_ASSERT_EQUALS("No DimensionY in geometry xml", 1, pRootElem->getElementsByTagName("YDimension")->length());
-    TSM_ASSERT_EQUALS("No DimensionZ in geometry xml", 1, pRootElem->getElementsByTagName("ZDimension")->length());
-    TSM_ASSERT_EQUALS("No DimensionT in geometry xml", 1, pRootElem->getElementsByTagName("TDimension")->length());
-
-    //Check that mapping nodes give correct mappings.
-    Poco::XML::Element* dimensionSetElement = pRootElem;
-    TSM_ASSERT_EQUALS("No DimensionX mapping is incorrect", "q1", dimensionSetElement->getChildElement("XDimension")->getChildElement("RefDimensionId")->innerText());
-    TSM_ASSERT_EQUALS("No DimensionY mapping is incorrect", "q2", dimensionSetElement->getChildElement("YDimension")->getChildElement("RefDimensionId")->innerText());
-    TSM_ASSERT_EQUALS("No DimensionZ mapping is incorrect", "q3", dimensionSetElement->getChildElement("ZDimension")->getChildElement("RefDimensionId")->innerText());
-    TSM_ASSERT_EQUALS("No DimensionT mapping is incorrect", "T",  dimensionSetElement->getChildElement("TDimension")->getChildElement("RefDimensionId")->innerText());
-
-
-  }
-
   ~MDGeometryTest()
   {
   }

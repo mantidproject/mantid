@@ -177,7 +177,8 @@ void vtkEventNexusReader::SetAppliedGeometryXML(std::string appliedGeometryXML)
   if(m_isSetup)
   {
     //Create xml to represent the current applied geometry.
-    Mantid::Geometry::MDGeometryBuilderXML xmlBuilder;
+    using namespace Mantid::Geometry;
+    MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
     xmlBuilder.addXDimension(m_appliedXDimension);
     xmlBuilder.addYDimension(m_appliedYDimension);
     xmlBuilder.addZDimension(m_appliedZDimension);

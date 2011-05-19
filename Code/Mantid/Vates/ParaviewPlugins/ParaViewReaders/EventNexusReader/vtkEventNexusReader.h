@@ -129,7 +129,7 @@ private:
   Mantid::VATES::EscalatingRebinningActionManager m_actionManager;
 
   /// Converts dimension objects into well-formed xml describing the overall geometry
-  const Mantid::Geometry::MDGeometryBuilderXML m_geometryXmlBuilder;
+  const Mantid::Geometry::MDGeometryBuilderXML<Mantid::Geometry::StrictDimensionPolicy> m_geometryXmlBuilder;
 
   /// Sets the rebinning action to rebin if the number of bins has changed on a dimension.
   void formulateRequestUsingNBins(Mantid::VATES::Dimension_sptr newDim);

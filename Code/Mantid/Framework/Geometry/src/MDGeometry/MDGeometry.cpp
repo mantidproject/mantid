@@ -400,7 +400,7 @@ MDGeometry::getRotations()const
 
 std::string MDGeometry::toXMLString() const
 {
-  MDGeometryBuilderXML xmlBuilder;
+  MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
   // Add all dimensions.
   for(size_t i = 0; i <this->theDimension.size(); i++)
   {

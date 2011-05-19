@@ -135,7 +135,8 @@ namespace MDEvents
   std::string MDHistoWorkspace::getGeometryXML() const
   {
     using Mantid::Geometry::MDGeometryBuilderXML;
-    MDGeometryBuilderXML xmlBuilder;
+    using Mantid::Geometry::StrictDimensionPolicy;
+    MDGeometryBuilderXML<StrictDimensionPolicy> xmlBuilder;
     // Add all dimensions.
     for(size_t i = 0; i <this->m_dimensions.size(); i++)
     {

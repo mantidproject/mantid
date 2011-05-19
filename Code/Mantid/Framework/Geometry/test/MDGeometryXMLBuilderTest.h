@@ -45,6 +45,8 @@ private:
       size_t());
     MOCK_CONST_METHOD0(toXMLString,
       std::string());
+    MOCK_CONST_METHOD0(getIsIntegrated,
+      bool());
     MOCK_CONST_METHOD1(getX,
       double(size_t ind));
   };
@@ -69,7 +71,7 @@ void testCannotAddDimensionTwice()
   MockIMDDimension* pDimensionX = new MockIMDDimension;
   EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
   IMDDimension_const_sptr dimension(pDimensionX);
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   TSM_ASSERT("Addition of dimension to empty set should have succeeded.", builder.addOrdinaryDimension(dimension));
   TSM_ASSERT("Addition of same dimension to set should have failed.", !builder.addOrdinaryDimension(dimension));
 }
@@ -78,7 +80,7 @@ void testAddingNullDimensionReturnsFalse()
 {
   Mantid::Geometry::IMDDimension* pDim = NULL;
   IMDDimension_const_sptr nullDimension(pDim);
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   TSM_ASSERT("Adding null dimension should return false.", !builder.addOrdinaryDimension(nullDimension));
   TSM_ASSERT("Adding null x dimension should return false.", !builder.addXDimension(nullDimension));
   TSM_ASSERT("Adding null y dimension should return false.", !builder.addYDimension(nullDimension));
@@ -86,6 +88,34 @@ void testAddingNullDimensionReturnsFalse()
   TSM_ASSERT("Adding null t dimension should return false.", !builder.addTDimension(nullDimension));
 }
 
+void testStrictPolicy()
+{
+  MockIMDDimension* pDimensionX = new MockIMDDimension;
+  EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+  EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
+  IMDDimension_const_sptr dimension(pDimensionX);
+
+  MDGeometryBuilderXML<StrictDimensionPolicy> builder;
+  TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the x mapping, which is integrated.", builder.addXDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the y mapping, which is integrated.", builder.addYDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the z mapping, which is integrated.", builder.addZDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS("Strict policy should prevent add of a dimension to the t mapping, which is integrated.", builder.addTDimension(dimension), std::invalid_argument);
+}
+
+//Same as test above, but shouldn't throw.
+void testNoPolicy()
+{
+  MockIMDDimension* pDimensionX = new MockIMDDimension;
+  EXPECT_CALL(*pDimensionX, getDimensionId()).WillRepeatedly(Return("a"));
+  EXPECT_CALL(*pDimensionX, getIsIntegrated()).WillRepeatedly(Return(true));
+  IMDDimension_const_sptr dimension(pDimensionX);
+
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the x mapping, which is integrated.", builder.addXDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the y mapping, which is integrated.", builder.addYDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the z mapping, which is integrated.", builder.addZDimension(dimension), std::invalid_argument);
+  TSM_ASSERT_THROWS_NOTHING("Strict policy should prevent add of a dimension to the t mapping, which is integrated.", builder.addTDimension(dimension), std::invalid_argument);
+}
 
 
 void testWithOrinaryDimensionOnly()
@@ -94,7 +124,7 @@ void testWithOrinaryDimensionOnly()
 
   EXPECT_CALL(*pDimensionOrdinary, toXMLString()).Times(1).WillOnce(Return(createDimensionXMLString(1, -1, 1, "O", "o")));
 
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   builder.addOrdinaryDimension(IMDDimension_const_sptr(pDimensionOrdinary));
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
@@ -121,7 +151,7 @@ void testWithXDimensionOnly()
   EXPECT_CALL(*pDimensionX, toXMLString()).WillOnce(Return(createDimensionXMLString(1, -1, 1, "A", "a")));
   EXPECT_CALL(*pDimensionX, getDimensionId()).WillOnce(Return("a"));
 
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
   Poco::XML::DOMParser pParser;
   std::string xmlToParse = builder.create(); //Serialize the geometry.
@@ -151,7 +181,7 @@ void testWithXYDimensionOnly()
   EXPECT_CALL(*pDimensionY, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "B", "b")));
   EXPECT_CALL(*pDimensionY, getDimensionId()).WillRepeatedly(Return("b"));
 
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
   builder.addYDimension(IMDDimension_const_sptr(pDimensionY));
 
@@ -187,7 +217,7 @@ void testWithXYZDimensionOnly()
   EXPECT_CALL(*pDimensionZ, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "C", "c")));
   EXPECT_CALL(*pDimensionZ, getDimensionId()).WillRepeatedly(Return("c"));
 
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
   builder.addYDimension(IMDDimension_const_sptr(pDimensionY));
   builder.addZDimension(IMDDimension_const_sptr(pDimensionZ));
@@ -228,7 +258,7 @@ void testFullCreate()
   EXPECT_CALL(*pDimensionT, toXMLString()).WillRepeatedly(Return(createDimensionXMLString(1, -1, 1, "D", "d")));
   EXPECT_CALL(*pDimensionT, getDimensionId()).WillRepeatedly(Return("d"));
 
-  MDGeometryBuilderXML builder;
+  MDGeometryBuilderXML<NoDimensionPolicy> builder;
   builder.addXDimension(IMDDimension_const_sptr(pDimensionX));
   builder.addYDimension(IMDDimension_const_sptr(pDimensionY));
   builder.addZDimension(IMDDimension_const_sptr(pDimensionZ));
