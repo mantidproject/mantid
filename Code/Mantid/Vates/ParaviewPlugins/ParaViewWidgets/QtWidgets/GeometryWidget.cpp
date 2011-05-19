@@ -1,7 +1,5 @@
 #include "GeometryWidget.h"
 #include "DimensionWidget.h"
-//#include "MantidGeometry/MDGeometry/MDGeometryDescription.h"
-//#include "MantidGeometry/MDGeometry/MDGeometry.h"
 #include "MantidGeometry/MDGeometry/MDGeometryXMLBuilder.h"
 #include <boost/shared_ptr.hpp>
 #include <map>

@@ -3,6 +3,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include <QCheckBox>
 #include <qmessagebox.h>
 #include <stdio.h>
 #include <string>
@@ -42,9 +43,16 @@ void DimensionWidget::constructWidget(const int dimensionIndex, DimensionLimitsO
   boost::shared_ptr<IMDDimension> spDimensionToRender = m_vecNonIntegratedDimensions[dimensionIndex];
   QGridLayout* m_layout = new QGridLayout();
 
-  QLabel* dimensionLabel = new QLabel();
-  dimensionLabel->setText(m_name.c_str());
-  m_layout->addWidget(dimensionLabel, 0, 0, Qt::AlignLeft);
+  QLabel* integratedLabel = new QLabel("Integrated");
+  m_layout->addWidget(integratedLabel, 0, 0, Qt::AlignLeft);
+
+  m_ckIntegrated = new QCheckBox();
+  m_ckIntegrated->setChecked(false); //TODO: should be configured.
+  connect(m_ckIntegrated, SIGNAL(stateChanged(int)), this, SLOT(integratedChanged(int)));
+  m_layout->addWidget(m_ckIntegrated, 0, 1, Qt::AlignLeft);
+
+  m_dimensionLabel = new QLabel(m_name.c_str());
+  m_layout->addWidget(m_dimensionLabel, 1, 0, Qt::AlignLeft);
   m_dimensionCombo = new QComboBox();
 
   //Loop through non-integrated dimensions and add them to the combobox.
@@ -59,30 +67,29 @@ void DimensionWidget::constructWidget(const int dimensionIndex, DimensionLimitsO
   }
 
   connect(m_dimensionCombo,SIGNAL(currentIndexChanged(int)),this ,SLOT(dimensionSelectedListener()));
-  m_layout->addWidget(m_dimensionCombo, 0, 1, Qt::AlignLeft);
+  m_layout->addWidget(m_dimensionCombo, 1, 1, Qt::AlignLeft);
 
-  QLabel* nBinsLabel = new QLabel();
-  nBinsLabel->setText("Number of Bins");
-  m_layout->addWidget(nBinsLabel, 1, 0, Qt::AlignLeft);
+  m_nBinsLabel = new QLabel("Number of Bins");
+  m_layout->addWidget(m_nBinsLabel, 2, 0, Qt::AlignLeft);
   m_nBinsBox = new QLineEdit();
   connect(m_nBinsBox, SIGNAL(editingFinished()), this, SLOT(nBinsListener()));
-  m_layout->addWidget(m_nBinsBox, 1, 1, Qt::AlignLeft);
-
+  m_layout->addWidget(m_nBinsBox, 2, 1, Qt::AlignLeft);
+  
   QLabel* maxLabel = new QLabel("Maximum");
   maxLabel->setText("Maximum");
-  m_layout->addWidget(maxLabel, 2, 0, Qt::AlignLeft);
+  m_layout->addWidget(maxLabel, 3, 0, Qt::AlignLeft);
   m_maxBox = new QLineEdit();
 
   connect(m_maxBox, SIGNAL(editingFinished()), this, SLOT(maxBoxListener()));
-  m_layout->addWidget(m_maxBox, 2, 1, Qt::AlignLeft);
+  m_layout->addWidget(m_maxBox, 3, 1, Qt::AlignLeft);
 
   QLabel* minLabel = new QLabel();
   minLabel->setText("Minimum");
-  m_layout->addWidget(minLabel, 3, 0, Qt::AlignLeft);
+  m_layout->addWidget(minLabel, 4, 0, Qt::AlignLeft);
   m_minBox = new QLineEdit();
   
   connect(m_minBox, SIGNAL(editingFinished()), this, SLOT(minBoxListener()));
-  m_layout->addWidget(m_minBox, 3, 1, Qt::AlignLeft);
+  m_layout->addWidget(m_minBox, 4, 1, Qt::AlignLeft);
 
   if(DisableDimensionLimits == limitsOption)
   {
@@ -102,7 +109,15 @@ void DimensionWidget::populateWidget(const int dimensionIndex)
     boost::shared_ptr<IMDDimension> spDimensionToRender = m_vecNonIntegratedDimensions[dimensionIndex];
 
     m_currentDimensionIndex = dimensionIndex;
-    m_dimensionCombo->setCurrentIndex(dimensionIndex);
+    if(m_ckIntegrated->checkState() == Qt::Unchecked)
+    {
+      m_dimensionCombo->setCurrentIndex(dimensionIndex);
+    }
+    else
+    {
+      m_dimensionLabel->setText(spDimensionToRender->getName().c_str());
+    }
+    
 
     if (m_nBinsBox->text().isEmpty())
     {
@@ -216,6 +231,20 @@ void DimensionWidget::minBoxListener()
 void DimensionWidget::maxBoxListener()
 {
   m_geometryWidget->dimensionWidgetChanged(ApplyBinChanges);
+}
+
+void DimensionWidget::integratedChanged(int checkedState)
+{
+  bool isHidden = false;
+  if(checkedState > 0)
+  {
+    isHidden = true;
+    m_dimensionLabel->setText(m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getName().c_str());
+  }
+  m_nBinsBox->setHidden(isHidden);
+  m_dimensionCombo->setHidden(isHidden);
+  m_nBinsLabel->setHidden(isHidden);
+  m_dimensionLabel->setText(m_name.c_str());
 }
 
 DimensionWidget::~DimensionWidget()

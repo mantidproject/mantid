@@ -13,6 +13,7 @@
 class QLabel;
 class QComboBox;
 class QLineEdit;
+class QCheckBox;
 
 namespace Mantid
 {
@@ -75,7 +76,13 @@ private:
 
   QLineEdit* m_maxBox;
 
+  QCheckBox* m_ckIntegrated;
+
   QComboBox* m_dimensionCombo;
+
+  QLabel* m_nBinsLabel;
+
+  QLabel* m_dimensionLabel;
 
   int m_currentDimensionIndex;
 
@@ -99,6 +106,8 @@ private slots:
   void maxBoxListener();
 
   void minBoxListener();
+
+  void integratedChanged(int checkedState);
 };
 
 #endif
