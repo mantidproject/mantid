@@ -1091,15 +1091,15 @@ public:
   void test_integrate_weighted()
   {
     this->fake_uniform_data_weights();
-    TS_ASSERT_EQUALS( el.integrate(0, MAX_TOF, false),  el.getNumberEvents()*2.0 );
-    TS_ASSERT_EQUALS( el.integrate(10, 1, true),  el.getNumberEvents()*2.0 );
+    TS_ASSERT_EQUALS( el.integrate(0, MAX_TOF, false),  static_cast<double>(el.getNumberEvents())*2.0 );
+    TS_ASSERT_EQUALS( el.integrate(10, 1, true),  static_cast<double>(el.getNumberEvents())*2.0 );
     //Two events per bin
     TS_ASSERT_EQUALS( el.integrate(0, BIN_DELTA, false),  2*2.0 );
     TS_ASSERT_EQUALS( el.integrate(BIN_DELTA*10, BIN_DELTA*20, false),  20*2.0 );
     //Exactly on the first event's TOF?
     TS_ASSERT_EQUALS( el.integrate(100, 100, false),  1*2.0 );
     //Go past the ends?
-    TS_ASSERT_EQUALS( el.integrate(-MAX_TOF, MAX_TOF*2, false), el.getNumberEvents()*2.0  );
+    TS_ASSERT_EQUALS( el.integrate(-MAX_TOF, MAX_TOF*2, false), static_cast<double>(el.getNumberEvents())*2.0  );
     //Give max < min ?
     TS_ASSERT_EQUALS( el.integrate(1000, 100, false),  0 );
   }
@@ -1299,7 +1299,7 @@ public:
 
     TimeSplitterType split;
     //Start only at 100
-    for (size_t i=1; i<10; i++)
+    for (int i=1; i<10; i++)
     {
       //Reject the odd hundreds pulse times (100-199, 300-399, etc).
       if ((i%2) == 0)
@@ -1349,7 +1349,7 @@ public:
 
       TimeSplitterType split;
       //Slices of 100
-      for (size_t i=0; i<10; i++)
+      for (int i=0; i<10; i++)
         split.push_back( SplittingInterval(i*100, (i+1)*100, i) );
 
       if (curType == WEIGHTED_NOTIME)
@@ -1757,14 +1757,14 @@ public:
         // 10 million events, up to 1e5 tof
         el_sorted.clear();
         for (size_t i=0; i < 10e6; i++)
-          el_sorted += TofEvent( i/100.0, rand()%1000);
+          el_sorted += TofEvent( static_cast<double>(i)/100.0, rand()%1000);
         el_sorted.setSortOrder(TOF_SORT);
       }
       PARALLEL_SECTION
       {
         el_sorted_weighted.clear();
         for (size_t i=0; i < 10e6; i++)
-          el_sorted_weighted += WeightedEvent( i/100.0, rand()%1000, 2.34, 4.56);
+          el_sorted_weighted += WeightedEvent( static_cast<double>(i)/100.0, rand()%1000, 2.34, 4.56);
         el_sorted_weighted.setSortOrder(TOF_SORT);
       }
       PARALLEL_SECTION
