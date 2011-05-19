@@ -46,7 +46,7 @@ void SplineBackground::exec()
   API::MatrixWorkspace_sptr inWS = getProperty("InputWorkspace");
   int spec = getProperty("WorkspaceIndex");
 
-  if (spec > inWS->getNumberHistograms())
+  if (spec > static_cast<int>(inWS->getNumberHistograms()))
     throw std::out_of_range("WorkspaceIndex is out of range.");
 
   const MantidVec& X = inWS->readX(spec);
@@ -69,14 +69,14 @@ void SplineBackground::exec()
   gsl_multifit_linear_workspace *mw;
   double chisq;
 
-  int n = Y.size();
+  int n = static_cast<int>(Y.size());
   bool isMasked = inWS->hasMaskedBins(spec);
   std::vector<int> masked(Y.size());
   if (isMasked)
   {
     for(API::MatrixWorkspace::MaskList::const_iterator it=inWS->maskedBins(spec).begin();it!=inWS->maskedBins(spec).end();it++)
       masked[it->first] = 1;
-    n -= inWS->maskedBins(spec).size();
+    n -= static_cast<int>(inWS->maskedBins(spec).size());
   }
 
   if (n < ncoeffs)
