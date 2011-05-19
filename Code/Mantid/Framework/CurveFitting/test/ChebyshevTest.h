@@ -50,7 +50,7 @@ public:
     Mantid::MantidVec& E = ws->dataE(0);
     for(size_t i=0;i<Y.size();i++)
     {
-      double x = -1. + 0.1*i;
+      double x = -1. + 0.1*static_cast<double>(i);
       X[i] = x;
       Y[i] = x*x*x;
       E[i] = 1;

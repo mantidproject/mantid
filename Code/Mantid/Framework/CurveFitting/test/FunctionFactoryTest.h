@@ -10,6 +10,7 @@
 #include "MantidAPI/CompositeFunctionMW.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IConstraint.h"
+#include "MantidKernel/System.h"
 
 #include <sstream>
 
@@ -26,8 +27,18 @@ public:
     declareParameter("a1");
   }
   std::string name()const{return "FunctionFactoryTest_FunctA";}
-  void function(double* out, const double* xValues, const size_t nData)const{}
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData){}
+  void function(double* out, const double* xValues, const size_t nData)const
+  {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+  }
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+  }
   bool hasAttribute(const std::string& attName)const
   {
     if (attName == "attr") return true;
@@ -75,9 +86,15 @@ public:
 
   void function(double* out, const double* xValues, const size_t nData)const
   {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
   }
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
   }
 };
 
@@ -89,8 +106,18 @@ public:
 
   std::string name()const{return "FunctionFactoryTest_CompFunctA";}
 
-  void function(double* out, const double* xValues, const size_t nData)const{}
-  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData){}
+  void function(double* out, const double* xValues, const size_t nData)const
+  {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+  }
+  void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
+  {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
+  }
   bool hasAttribute(const std::string& attName)const
   {
     if (attName == "attr") return true;
@@ -103,6 +130,7 @@ public:
   }
   void setAttribute(const std::string& attName,const Attribute& value)
   {
+    UNUSED_ARG(attName);
     m_attr = value.asString();
   }
 };
@@ -116,9 +144,15 @@ public:
 
   void function(double* out, const double* xValues, const size_t nData)const
   {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
   }
   void functionDeriv(Jacobian* out, const double* xValues, const size_t nData)
   {
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(nData);
   }
 };
 

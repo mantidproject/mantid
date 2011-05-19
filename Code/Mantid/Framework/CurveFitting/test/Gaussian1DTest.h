@@ -13,6 +13,7 @@
 #include "MantidDataHandling/LoadRaw.h"
 #include "MantidDataHandling/LoadRaw3.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/System.h"
 
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
@@ -32,6 +33,12 @@ public:
 protected:
   void functionDeriv(const double* in, Mantid::CurveFitting::Jacobian* out, const double* xValues, const double* yValues, const double* yErrors, const size_t nData)
   {
+    UNUSED_ARG(in);
+    UNUSED_ARG(out);
+    UNUSED_ARG(xValues);
+    UNUSED_ARG(yValues);
+    UNUSED_ARG(yErrors);
+    UNUSED_ARG(nData);
     throw Exception::NotImplementedError("No derivative function provided");
   }
 };

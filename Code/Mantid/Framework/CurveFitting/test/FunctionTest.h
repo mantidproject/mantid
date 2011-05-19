@@ -33,7 +33,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       out[i] = h*exp(-0.5*x*x*w);
@@ -45,7 +45,7 @@ public:
     double c = getParameter("c");
     double h = getParameter("h");
     double w = getParameter("s");
-    for(int i=0;i<nData;i++)
+    for(size_t i=0;i<nData;i++)
     {
       double x = xValues[i] - c;
       double e = h*exp(-0.5*x*x*w);
@@ -145,8 +145,7 @@ public:
     const Mantid::MantidVec& Y00 = ws->readY(0);
     const Mantid::MantidVec& Y0 = outWS->readY(0);
     const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-    for(int i=0;i<Y.size();i++)
+    for(size_t i=0;i<Y.size();i++)
     {
       TS_ASSERT_EQUALS(Y00[i],Y0[i]);
       TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
@@ -257,8 +256,7 @@ public:
     const Mantid::MantidVec& Y00 = ws->readY(0);
     const Mantid::MantidVec& Y0 = outWS->readY(0);
     const Mantid::MantidVec& Y = outWS->readY(1);
-    const Mantid::MantidVec& R = outWS->readY(2);
-    for(int i=0;i<Y.size();i++)
+    for(size_t i=0;i<Y.size();i++)
     {
       TS_ASSERT_EQUALS(Y00[i],Y0[i]);
       TS_ASSERT_DELTA(Y0[i],Y[i],0.001);
@@ -356,11 +354,11 @@ private:
 
   void addNoise(WS_type ws,double noise)
   {
-    for(int iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
+    for(size_t iSpec=0;iSpec<ws->getNumberHistograms();iSpec++)
     {
       Mantid::MantidVec& Y = ws->dataY(iSpec);
       Mantid::MantidVec& E = ws->dataE(iSpec);
-      for(int i=0;i<Y.size();i++)
+      for(size_t i=0;i<Y.size();i++)
       {
         Y[i] += noise*(-.5 + double(rand())/RAND_MAX);
         E[i] += noise;

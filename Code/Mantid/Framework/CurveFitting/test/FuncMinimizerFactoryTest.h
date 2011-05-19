@@ -8,6 +8,7 @@
 #include "MantidCurveFitting/GSLFunctions.h"
 #include "MantidAPI/FrameworkManager.h"
 #include "MantidAPI/IFitFunction.h"
+#include "MantidKernel/System.h"
 
 #include <sstream>
 
@@ -26,10 +27,28 @@ public:
   int iterate() {return 1000;}
   int hasConverged() {return 101;}
   double costFunctionVal() {return 5.0;}
-  void calCovarianceMatrix(double epsrel, gsl_matrix * covar) {}
+  void calCovarianceMatrix(double epsrel, gsl_matrix * covar)
+  {
+    UNUSED_ARG(epsrel);
+    UNUSED_ARG(covar);
+  }
   void initialize(double* X, const double* Y, double *sqrtWeight, const int& nData, const int& nParam, 
-    gsl_vector* startGuess, IFitFunction* function, const std::string& costFunction) {}
-  void initialize(IFitFunction* function, const std::string& costFunction) {}
+    gsl_vector* startGuess, IFitFunction* function, const std::string& costFunction)
+  {
+    UNUSED_ARG(X);
+    UNUSED_ARG(Y);
+    UNUSED_ARG(sqrtWeight);
+    UNUSED_ARG(nData);
+    UNUSED_ARG(nParam);
+    UNUSED_ARG(startGuess);
+    UNUSED_ARG(function);
+    UNUSED_ARG(costFunction);
+  }
+  void initialize(IFitFunction* function, const std::string& costFunction)
+  {
+    UNUSED_ARG(function);
+    UNUSED_ARG(costFunction);
+  }
 };
 
 DECLARE_FUNCMINIMIZER(FuncMinimizerFactoryTest_A, nedtur);
