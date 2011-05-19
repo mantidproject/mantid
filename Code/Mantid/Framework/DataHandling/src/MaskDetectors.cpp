@@ -178,7 +178,7 @@ void MaskDetectors::exec()
     }
 
     //Progress
-    prog+=(double( 1)/indexList.size());
+    prog+= (1.0/static_cast<int>(indexList.size()));
     progress(prog);
   }
 
@@ -207,7 +207,7 @@ void MaskDetectors::fillIndexListFromSpectra(std::vector<size_t>& indexList, con
   //get the spectra axis
   Axis *spectraAxis = WS->getAxis(1);
 
-  for (int i = 0; i < WS->getNumberHistograms(); ++i)
+  for (int i = 0; i < static_cast<int>(WS->getNumberHistograms()); ++i)
   {
     int currentSpec = spectraAxis->spectraNo(i);
     if ( spectraSet.find(currentSpec) != spectraSet.end() )
