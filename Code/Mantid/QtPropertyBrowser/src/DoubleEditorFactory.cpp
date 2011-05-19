@@ -10,15 +10,18 @@
 
 void DoubleEditorFactory::connectPropertyManager(QtDoublePropertyManager *manager)
 {
+    (void) manager;
 }
 
 QWidget* DoubleEditorFactory::createEditor(QtDoublePropertyManager *manager, QtProperty *property,QWidget *parent)
 {
+    (void) manager;
   return new DoubleEditor(property,parent);
 }
 
 void DoubleEditorFactory::disconnectPropertyManager(QtDoublePropertyManager *manager)
 {
+    (void) manager;
 }
 
 DoubleEditor::DoubleEditor(QtProperty *property, QWidget *parent)
@@ -38,7 +41,7 @@ m_property(property)
                   20,
                   this));
   connect(this,SIGNAL(editingFinished()),this,SLOT(updateProperty()));
-  double val = mgr->value(property);
+  //double val = mgr->value(property);
   setValue(mgr->value(property));
 }
 
