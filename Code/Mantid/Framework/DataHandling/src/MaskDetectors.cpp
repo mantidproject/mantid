@@ -61,7 +61,7 @@ void MaskDetectors::exec()
   // Get the input workspace
   const MatrixWorkspace_sptr WS = getProperty("Workspace");
   // Get the size of the vectors
-  const int vectorSize = WS->blocksize();
+  const size_t vectorSize = WS->blocksize();
 
   //Is it an event workspace?
   EventWorkspace_sptr eventWS = boost::dynamic_pointer_cast<EventWorkspace>(WS);

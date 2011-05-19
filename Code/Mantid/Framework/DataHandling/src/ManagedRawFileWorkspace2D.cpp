@@ -291,7 +291,7 @@ namespace Mantid
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
       ManagedWorkspace2D::writeDataBlock(toWrite);
-      int blockIndex = toWrite->minIndex() / m_vectorsPerBlock;
+      int blockIndex = static_cast<int>(toWrite->minIndex() / m_vectorsPerBlock);
       m_changedBlock[blockIndex] = toWrite->hasChanges();
     }
 

@@ -182,9 +182,9 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 
   // Then it's the Y values
   MantidVec& Y = workspace->dataY(index);
-  const int nbins = workspace->blocksize();
+  const size_t nbins = workspace->blocksize();
   int retval;
-  for (int i = 0; i < nbins; ++i)
+  for (size_t i = 0; i < nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&Y[i]);
     //g_log.error() << Y[i] << std::endl;
@@ -210,7 +210,7 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 
   // And then the error values
   MantidVec& E = workspace->dataE(index);
-  for (int i = 0; i < nbins; ++i)
+  for (size_t i = 0; i < nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&E[i]);
     if ( retval != 1 ) 
