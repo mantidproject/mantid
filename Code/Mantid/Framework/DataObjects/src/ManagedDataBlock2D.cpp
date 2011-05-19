@@ -78,7 +78,7 @@ void ManagedDataBlock2D::hasChanges(bool has)
 void ManagedDataBlock2D::setX(const size_t index, const MantidVecPtr::ptr_type& vec)
 {
   if ( ( index < m_minIndex ) 
-      || ( index >= static_cast<int>(m_minIndex + m_data.size()) ) )
+      || ( index >= m_minIndex + m_data.size() ) )
     throw std::range_error("ManagedDataBlock2D::setX, histogram number out of range");
 
   m_data[index-m_minIndex].setX(vec);
