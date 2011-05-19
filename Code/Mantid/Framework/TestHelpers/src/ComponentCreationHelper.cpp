@@ -357,7 +357,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   ws->setYUnit("");
   for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i)
   {
-    ws->getAxis(1)->spectraNo(i) = i;
+    ws->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i);
   }
   
   // Load instrument geometry
@@ -405,10 +405,10 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   void SANSInstrumentCreationHelper::runLoadMappingTable(Workspace2D_sptr workspace, int nxbins, int nybins)
   {
     // Get the number of monitor channels
-    int64_t nMonitors = 0;
+    int nMonitors = 0;
     boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
     std::vector<detid_t> monitors = instrument->getMonitors();
-    nMonitors = monitors.size();
+    nMonitors = static_cast<int>(monitors.size());
 
     // Number of monitors should be consistent with data file format
     if( nMonitors != 2 ) {
