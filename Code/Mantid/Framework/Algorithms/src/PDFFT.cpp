@@ -66,7 +66,7 @@ namespace Algorithms
 	  const double qmax = getProperty("Qmax");
 	  const double qmin = getProperty("Qmin");
 
-	  int sizer = rmax/deltar;
+      int sizer = static_cast<int>(rmax/deltar);
 
 	  // 2. Set up G(r)
 	  Gspace = WorkspaceFactory::Instance().create("Workspace2D", 1, sizer, sizer);

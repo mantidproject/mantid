@@ -108,10 +108,10 @@ namespace Mantid
 
       size_t is = atoi(firstFN.c_str());  // starting run number
       size_t ie = atoi(lastFN.c_str());   // last run number
-      size_t w  = firstFN.size();
+      int w  = static_cast<int>(firstFN.size());
 
       // The number of runs
-      int npoints = ie - is + 1;
+      size_t npoints = ie - is + 1;
 
       // Create the 2D workspace for the output
       int nplots = green != EMPTY_INT() ? 4 : 1;
@@ -390,8 +390,8 @@ namespace Mantid
         integr->execute();
         MatrixWorkspace_sptr out = integr->getProperty("OutputWorkspace");
 
-        Y = out->readY(0)[0] / tmpWS->dataY(0).size();
-        E = out->readE(0)[0] / tmpWS->dataY(0).size();
+        Y = out->readY(0)[0] / static_cast<double>(tmpWS->dataY(0).size());
+        E = out->readE(0)[0] / static_cast<double>(tmpWS->dataY(0).size());
       }
       else
       {   

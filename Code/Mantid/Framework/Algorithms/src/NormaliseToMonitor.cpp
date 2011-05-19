@@ -19,6 +19,7 @@ DECLARE_ALGORITHM(NormaliseToMonitor)
 
 using namespace Kernel;
 using namespace API;
+using std::size_t;
 
 /// Default constructor
 NormaliseToMonitor::NormaliseToMonitor() :
@@ -203,11 +204,11 @@ API::MatrixWorkspace_sptr NormaliseToMonitor::getMonitorWorkspace(API::MatrixWor
  *  @param index :: The index of the spectrum to extract
  *  @returns A workspace containing the single spectrum requested
  */
-API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const int index)
+API::MatrixWorkspace_sptr NormaliseToMonitor::extractMonitorSpectrum(API::MatrixWorkspace_sptr WS, const size_t index)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("ExtractSingleSpectrum");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex", index);
+  childAlg->setProperty<int>("WorkspaceIndex", static_cast<int>(index));
 
   childAlg->executeAsSubAlg();
 

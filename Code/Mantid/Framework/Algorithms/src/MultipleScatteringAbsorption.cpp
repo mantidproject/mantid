@@ -173,12 +173,12 @@ double MultipleScatteringAbsorption::AttFac(const double sigir, const double sig
     {
       if( i+j <= 5 )
       {
-        int J = 1 + i + 6 * j;
+        size_t J = 1 + i + 6 * j; // TODO J defined in terms of j?
         att   = att + Z[J-1] * facts * facti;
-        facts = -facts * sigsr / (j+1);
+        facts = -facts * sigsr / static_cast<double>(j+1);
       }
    }
-  facti = -facti * sigir / (i+1);
+  facti = -facti * sigir / static_cast<double>(i+1);
   }
   return att;
 }

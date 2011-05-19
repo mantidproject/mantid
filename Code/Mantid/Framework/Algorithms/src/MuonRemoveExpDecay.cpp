@@ -16,6 +16,7 @@ namespace Algorithms
 
 using namespace Kernel;
 using API::Progress;
+using std::size_t;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM(MuonRemoveExpDecay)
@@ -51,7 +52,7 @@ void MuonRemoveExpDecay::exec()
   //Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-  int numSpectra = inputWS->size() / inputWS->blocksize();
+  int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
 
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
@@ -94,7 +95,7 @@ void MuonRemoveExpDecay::exec()
     }
 
     //Do the specified spectra only
-    int specLength = Spectra.size();
+    int specLength = static_cast<int>(Spectra.size());
     PARALLEL_FOR2(inputWS,outputWS)
     for (int i = 0; i < specLength; ++i)
     {
