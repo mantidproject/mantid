@@ -90,7 +90,7 @@ namespace NeXus
   /** Append to current_path */
   int SaveToSNSHistogramNexus::add_path(const char* path)
   {
-    int i;
+    size_t i;
     i = strlen(current_path);
     sprintf(current_path + i, "/%s", path);
     return 0;
@@ -231,7 +231,7 @@ namespace NeXus
     // Dimension 1 = the Y pixels
     dataDimensions[1] = det->ypixels();
     // Dimension 2 = time of flight bins
-    dataDimensions[2] = inputWorkspace->blocksize();
+    dataDimensions[2] = static_cast<int>(inputWorkspace->blocksize());
 
     // ---- Determine slab size -----
     // Number of pixels to collect in X before slabbing
@@ -257,7 +257,7 @@ namespace NeXus
       // Add an attribute called "errors" with value = the name of the data_errors field.
       NXname attrName = "errors";
       std::string attrBuffer = errors_field_name;
-      if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), attrBuffer.size(), NX_CHAR) != NX_OK) return NX_ERROR;
+      if (NXputattr (outId, attrName, (void *) attrBuffer.c_str(), static_cast<int>(attrBuffer.size()), NX_CHAR) != NX_OK) return NX_ERROR;
     }
 
     // ---- Errors field -----
@@ -298,14 +298,14 @@ namespace NeXus
       int slabx = x % x_pixel_slab;
 
       Timer tim1;
-      size_t ypixels = det->ypixels();
+      int ypixels = static_cast<int>(det->ypixels());
 
       PARALLEL_FOR1(inputWorkspace)
       for (int y = 0; y < ypixels; y++)
       {
         PARALLEL_START_INTERUPT_REGION
         //Get the workspace index for the detector ID at this spot
-        int wi = 0;
+        size_t wi = 0;
         try
         {
           wi = (*map)[ det->getAtXY(x,y)->getID() ];
@@ -454,7 +454,7 @@ namespace NeXus
       {
         // Compute how large of a slab you can still use.
         int x_slab;
-        x_slab = memory_available/(size_t(det->ypixels())*size_t(inputWorkspace->blocksize())*2*sizeof(float));
+        x_slab = static_cast<int>(memory_available/(det->ypixels()*inputWorkspace->blocksize()*2*sizeof(float)));
         if (x_slab <= 0) x_slab = 1;
         // Look for a slab size that evenly divides the # of pixels.
         while (x_slab > 1)
@@ -560,10 +560,10 @@ namespace NeXus
               // Get the X bins
               const MantidVec & X = inputWorkspace->readX(0);
               // 1 dimension, with that number of bin boundaries
-              dataDimensions[0] = X.size();
+              dataDimensions[0] = static_cast<int>(X.size());
               // The output TOF axis will be whatever size in the workspace.
-              float       *tof_data;                /* pointer to data buffer to write */
-              tof_data = new float[dataDimensions[0]];
+              double       *tof_data;                /* pointer to data buffer to write */
+              tof_data = new double[dataDimensions[0]];
 
               // And fill it with the X data
               for (size_t i=0; i < X.size(); i++)
