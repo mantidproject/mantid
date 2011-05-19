@@ -58,15 +58,14 @@ void SaveNISTDAT::exec()
   if ( inputWS->axes() > 1 && inputWS->getAxis(1)->isNumeric() )
   {
     const Axis& axis = *inputWS->getAxis(1);
-    const int axisLength = axis.length();
-    for (int i = 0; i < axisLength-1; i++)
+    for (size_t i = 0; i < axis.length()-1; i++)
     {
       const double qy = (axis(i)+axis(i+1))/2.0;
       const MantidVec& XIn = inputWS->readX(i);
       const MantidVec& YIn = inputWS->readY(i);
       const MantidVec& EIn = inputWS->readE(i);
 
-      for ( unsigned int j = 0; j < XIn.size()-1; j++)
+      for ( size_t j = 0; j < XIn.size()-1; j++)
       {
         // Exclude NaNs
         if (YIn[j]==YIn[j])
