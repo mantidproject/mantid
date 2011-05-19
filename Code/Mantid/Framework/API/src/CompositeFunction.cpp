@@ -17,6 +17,8 @@ namespace Mantid
 namespace API
 {
 
+using std::size_t;
+
 //DECLARE_FUNCTION(CompositeFunction)
 
 /// Copy contructor
@@ -43,7 +45,7 @@ CompositeFunction& CompositeFunction::operator=(const CompositeFunction& f)
 ///Destructor
 CompositeFunction::~CompositeFunction()
 {
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
     if (m_functions[i]) delete m_functions[i];
 }
 
@@ -69,7 +71,7 @@ void CompositeFunction::init()
 std::string CompositeFunction::asString()const
 {
   std::ostringstream ostr;
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     IFitFunction* fun = getFunction(i);
     bool isComp = dynamic_cast<CompositeFunction*>(fun) != 0;
@@ -137,7 +139,7 @@ void CompositeFunction::setParameterDescription(size_t i, const std::string& des
  */
 double CompositeFunction::getParameter(int i)const
 {
-  int iFun = functionIndex(i);
+  size_t iFun = functionIndex(i);
   return m_functions[ iFun ]->getParameter(i - m_paramOffsets[iFun]);
 }
 
@@ -318,7 +320,7 @@ void CompositeFunction::removeActive(int i)
   m_functions[ iFun ]->removeActive(i - m_paramOffsets[iFun]);
 
   m_nActive--;
-  for(int j=iFun+1;j<nFunctions();j++)
+  for(size_t j=iFun+1;j<nFunctions();j++)
     m_activeOffsets[j] -= 1;
 }
 
@@ -337,7 +339,7 @@ void CompositeFunction::restoreActive(int i)
   m_functions[ iFun ]->restoreActive(i - m_paramOffsets[iFun]);
 
   m_nActive++;
-  for(int j=iFun+1;j<nFunctions();j++)
+  for(size_t j=iFun+1;j<nFunctions();j++)
     m_activeOffsets[j] += 1;
 }
 
@@ -415,7 +417,7 @@ int CompositeFunction::addFunction(IFitFunction* f)
  */
 void CompositeFunction::removeFunction(int i, bool del)
 {
-  if ( i >= nFunctions() )
+  if ( i >= static_cast<int>(nFunctions()) )
     throw std::out_of_range("Function index out of range.");
 
   IFitFunction* fun = getFunction(i);
@@ -473,7 +475,7 @@ void CompositeFunction::removeFunction(int i, bool del)
 
   m_nActive -= dna;
   // Shift the active offsets down by the number of i-th function's active params
-  for(int j=i+1;j<nFunctions();j++)
+  for(size_t j=static_cast<size_t>(i+1);j<nFunctions();j++)
   {
     m_activeOffsets[j] -= dna;
   }
@@ -481,7 +483,7 @@ void CompositeFunction::removeFunction(int i, bool del)
 
   m_nParams -= dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
-  for(int j=i+1;j<nFunctions();j++)
+  for(size_t j=static_cast<size_t>(i+1);j<nFunctions();j++)
   {
     m_paramOffsets[j] -= dnp;
   }
@@ -515,7 +517,7 @@ void CompositeFunction::replaceFunction(const IFitFunction* f_old,IFitFunction* 
  */
 void CompositeFunction::replaceFunction(int i,IFitFunction* f)
 {
-  if ( i >= nFunctions() )
+  if ( i >= static_cast<int>(nFunctions()) )
     throw std::out_of_range("Function index out of range.");
 
   IFitFunction* fun = getFunction(i);
@@ -570,7 +572,7 @@ void CompositeFunction::replaceFunction(int i,IFitFunction* f)
   int dna = na_new - na_old;
   m_nActive += dna;
   // Recalc the active offsets 
-  for(int j=i+1;j<nFunctions();j++)
+  for(size_t j=static_cast<size_t>(i+1);j<nFunctions();j++)
   {
     m_activeOffsets[j] += dna;
   }
@@ -578,7 +580,7 @@ void CompositeFunction::replaceFunction(int i,IFitFunction* f)
   int dnp = np_new - np_old;
   m_nParams += dnp;
   // Shift the parameter offsets down by the total number of i-th function's params
-  for(int j=i+1;j<nFunctions();j++)
+  for(size_t j=static_cast<size_t>(i+1);j<nFunctions();j++)
   {
     m_paramOffsets[j] += dnp;
   }
@@ -591,9 +593,9 @@ void CompositeFunction::replaceFunction(int i,IFitFunction* f)
  * @param i :: The index of the function
  * @return function at the requested index
  */
-IFitFunction* CompositeFunction::getFunction(int i)const
+IFitFunction* CompositeFunction::getFunction(size_t i)const
 {
-  if ( i >= nFunctions()  || i < 0)
+  if ( i >= nFunctions() )
   {
     throw std::out_of_range("Function index out of range.");
   }
@@ -605,9 +607,9 @@ IFitFunction* CompositeFunction::getFunction(int i)const
  * @param i :: The parameter index
  * @return function index of the requested parameter
  */
-int CompositeFunction::functionIndex(int i)const
+size_t CompositeFunction::functionIndex(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (static_cast<int>(i) >= nParams())
   {
     throw std::out_of_range("Function parameter index out of range.");
   }
@@ -619,9 +621,9 @@ int CompositeFunction::functionIndex(int i)const
  * @param i :: The active parameter index
  * @return active function index of the requested parameter
  */
-int CompositeFunction::functionIndexActive(int i)const
+size_t CompositeFunction::functionIndexActive(size_t i)const
 {
-  if (i >= nParams() || i < 0)
+  if (static_cast<int>(i) >= nParams())
     throw std::out_of_range("Function parameter index out of range.");
   return m_IFitFunctionActive[i];
 }
@@ -695,7 +697,7 @@ std::string CompositeFunction::parameterLocalName(int i)const
  */
 void CompositeFunction::applyTies()
 {
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     getFunction(i)->applyTies();
   }
@@ -706,7 +708,7 @@ void CompositeFunction::applyTies()
  */
 void CompositeFunction::clearTies()
 {
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     getFunction(i)->clearTies();
   }
@@ -777,7 +779,7 @@ void CompositeFunction::addConstraint(IConstraint* ic)
 
 void CompositeFunction::setParametersToSatisfyConstraints()
 {
-  for(int i=0;i<nFunctions();i++)
+  for(size_t i=0;i<nFunctions();i++)
   {
     getFunction(i)->setParametersToSatisfyConstraints();
   }
@@ -823,7 +825,7 @@ int CompositeFunction::getParameterIndex(const ParameterReference& ref)const
   {
     return static_cast<int>(ref.getIndex());
   }
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     int iLocalIndex = getFunction(iFun)->getParameterIndex(ref);
     if (iLocalIndex >= 0)
@@ -844,7 +846,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const ParameterReference&
   {
     return ref.getFunction();
   }
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* fun = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(ref));
     if (fun)
@@ -865,7 +867,7 @@ IFitFunction* CompositeFunction::getContainingFunction(const IFitFunction* fun)
   {
     return this;
   }
-  for(int iFun=0;iFun<nFunctions();iFun++)
+  for(size_t iFun=0;iFun<nFunctions();iFun++)
   {
     IFitFunction* f = static_cast<IFitFunction*>(getFunction(iFun)->getContainingFunction(fun));
     if (f)

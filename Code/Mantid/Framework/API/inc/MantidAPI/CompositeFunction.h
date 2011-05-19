@@ -133,9 +133,9 @@ public:
   /// Add a function at the back of the internal function list
   virtual int addFunction(IFitFunction* f);
   /// Returns the pointer to i-th function
-  IFitFunction* getFunction(int i)const;
+  IFitFunction* getFunction(std::size_t i)const;
   /// Number of functions
-  int nFunctions()const{return static_cast<int>(m_functions.size());}
+  std::size_t nFunctions()const{return m_functions.size();}
   /// Remove a function
   void removeFunction(int i, bool del=true);
   /// Replace a function
@@ -143,9 +143,9 @@ public:
   /// Replace a function
   void replaceFunction(const IFitFunction* f_old,IFitFunction* f_new);
   /// Get the function index
-  int functionIndex(int i)const;
+  std::size_t functionIndex(std::size_t i)const;
   /// Get the function index
-  int functionIndexActive(int i)const;
+  std::size_t functionIndexActive(std::size_t i)const;
   /// Returns the index of parameter i as it declared in its function
   int parameterLocalIndex(int i)const;
   /// Returns the name of parameter i as it declared in its function
