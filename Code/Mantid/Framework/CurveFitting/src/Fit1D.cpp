@@ -318,7 +318,7 @@ void Fit1D::exec()
   // number of histogram is equal to the number of spectra
   const size_t numberOfSpectra = localworkspace->getNumberHistograms();
   // Check that the index given is valid
-  if ( histNumber >= numberOfSpectra )
+  if ( histNumber >= static_cast<int>(numberOfSpectra) )
   {
     g_log.warning("Invalid Workspace index given, using first Workspace");
     histNumber = 0;
