@@ -97,7 +97,7 @@ m_width_set(true),m_width(0),m_addingPeak(false),m_resetting(false)
     xMax(fitBrowser()->endX());
     m_changingXMin = false;
     m_changingXMax = false;
-    for(int i=0;i<cf->nFunctions();i++)
+    for(size_t i=0;i<cf->nFunctions();i++)
     {
       Mantid::API::IPeakFunction* pf = dynamic_cast<Mantid::API::IPeakFunction*>(cf->getFunction(i));
       if (pf)

@@ -402,7 +402,7 @@ void SequentialFitDialog::spectraChanged(int row,int col)
     int wi = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row,3)).toInt();
     int spec = ui.tWorkspaces->model()->data(ui.tWorkspaces->model()->index(row,2)).toInt();
     Mantid::API::Axis* y = ws->getAxis(1);
-    if (wi >= 0 && wi < ws->getNumberHistograms())
+    if (wi >= 0 && wi < static_cast<int>(ws->getNumberHistograms()))
     {
       // this prevents infinite loops
       if ( !y->isSpectra() || y->spectraNo(wi) == spec) return;
@@ -428,7 +428,7 @@ void SequentialFitDialog::spectraChanged(int row,int col)
     }
     if (col == 2) // changed spectrum number
     {
-      for(int i = 0;i<y->length(); ++i)
+      for(int i = 0;i<static_cast<int>(y->length()); ++i)
       {
         if ((*y)(i) == spec)
         {

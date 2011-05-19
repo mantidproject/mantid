@@ -205,13 +205,13 @@ void ObjCompAssemblyActor::drawUsingColorID()
     m_tex->swap(); // swap to pick texture
     //Iterate throught the children with the starting reference color mColorStartID and incrementing
     int rgb=mColorStartID;
-    int r,g,b;
+    float r,g,b;
     for(int i = 0;i < getNumberOfDetectors();++i)
     {
-      r=(rgb/65536);
-      g=((rgb%65536)/256);
-      b=((rgb%65536)%256);
-      GLColor c(r/255.0,g/255.0,b/255.0);
+      r=static_cast<float>(rgb/65536);
+      g=static_cast<float>((rgb%65536)/256);
+      b=static_cast<float>((rgb%65536)%256);
+      GLColor c(r/255,g/255,b/255);
       m_tex->setDetectorColor(i,c);
       rgb++;
     }

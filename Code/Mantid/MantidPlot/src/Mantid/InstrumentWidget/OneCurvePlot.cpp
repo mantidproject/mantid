@@ -36,8 +36,8 @@ QwtPlot(parent),m_curve(NULL)
 void OneCurvePlot::setXScale(double from, double to)
 {
   QFontMetrics fm(this->font());
-  int n = from != 0.0 ? abs(log10(fabs(from))) : 0;
-  int n1 = to != 0.0 ? abs(log10(fabs(to))) : 0;
+  int n = from != 0.0 ? abs(static_cast<int>(floor(log10(fabs(from))))) : 0;
+  int n1 = to != 0.0 ? abs(static_cast<int>(floor(log10(fabs(to))))) : 0;
   if (n1 > n) n = n1;
   n += 4;
 

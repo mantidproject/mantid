@@ -69,6 +69,7 @@ void MantidTable::closeTable()
 
 void MantidTable::deleteHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
+  UNUSED_ARG(wsName)
   if (dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) == m_ws.get())
   {
     emit needToClose();
@@ -77,6 +78,7 @@ void MantidTable::deleteHandle(const std::string& wsName,const boost::shared_ptr
 
 void MantidTable::afterReplaceHandle(const std::string& wsName,const boost::shared_ptr<Mantid::API::Workspace> ws)
 {
+  UNUSED_ARG(wsName)
   if (dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) == m_ws.get())
   {
     fillTable();

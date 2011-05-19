@@ -162,6 +162,7 @@ void MantidGLWidget::setLightingModel(int state)
  */
 void MantidGLWidget::paintEvent(QPaintEvent *event)
 {
+  UNUSED_ARG(event)
   //(void) event; //avoid compiler warning
   //makeCurrent();
   //if(iInteractionMode == MantidGLWidget::PickMode)
@@ -201,6 +202,8 @@ void MantidGLWidget::paintEvent(QPaintEvent *event)
  */
 void MantidGLWidget::resizeGL(int width, int height)
 {
+  UNUSED_ARG(width)
+  UNUSED_ARG(height)
 }
 
 /**
@@ -213,6 +216,7 @@ void MantidGLWidget::resizeGL(int width, int height)
  */
 void MantidGLWidget::mousePressEvent(QMouseEvent* event)
 {
+  UNUSED_ARG(event)
 }
 
 /**
@@ -220,7 +224,7 @@ void MantidGLWidget::mousePressEvent(QMouseEvent* event)
  */
 void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
 {
-  (void) event; //avoid compiler warning
+  UNUSED_ARG(event) //avoid compiler warning
   if( m_interactionMode == MantidGLWidget::PickMode )
   {
     //mPickBox->mousePressed(Qt::RightButton, QCursor::pos());
@@ -245,7 +249,7 @@ void MantidGLWidget::contextMenuEvent(QContextMenuEvent * event)
  */
 void MantidGLWidget::mouseMoveEvent(QMouseEvent* event)
 {
-
+  UNUSED_ARG(event)
 }
 
 /**
@@ -254,6 +258,7 @@ void MantidGLWidget::mouseMoveEvent(QMouseEvent* event)
  */
 void MantidGLWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+  UNUSED_ARG(event)
 }
 
 /**
@@ -262,6 +267,7 @@ void MantidGLWidget::mouseReleaseEvent(QMouseEvent* event)
  */
 void MantidGLWidget::wheelEvent(QWheelEvent* event)
 {
+  UNUSED_ARG(event)
   OpenGLError::check("MantidGLWidget::wheelEvent");
 }
 
@@ -271,7 +277,7 @@ void MantidGLWidget::wheelEvent(QWheelEvent* event)
  */
 void MantidGLWidget::keyPressEvent(QKeyEvent *event)
 {
-
+  UNUSED_ARG(event)
 }
 
 /**

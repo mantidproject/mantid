@@ -756,5 +756,6 @@ QFrame * InstrumentWindow::createInstrumentTreeTab(QTabWidget* ControlsTab)
 
   void InstrumentWindow::finishHandle(const Mantid::API::IAlgorithm* alg)
   {
+    UNUSED_ARG(alg)
     mInstrumentDisplay->refreshView();
   }

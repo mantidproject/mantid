@@ -358,6 +358,7 @@ void InstrumentWindowPickTab::setSelectionType()
   */
 void InstrumentWindowPickTab::addPeak(double x,double y)
 {
+  UNUSED_ARG(y)
   if (!m_peak->isChecked() ||  m_currentPos.getDetID() < 0) return;
   std::string peakTableName = "SingleCrystalPeakTable";
   Mantid::API::ITableWorkspace_sptr tw;

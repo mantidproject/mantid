@@ -1066,9 +1066,9 @@ QMultiMap<QString,int> MantidTreeWidget::chooseSpectrumFromSelected() const
 
   // Now need to go around inserting workspace-spectrum pairs into a map
   // and checking whether the requested spectrum is too large for any workspaces
-  for ( int i = 0; i < wsNames.size(); ++i )
+  for ( int i = 0; i < static_cast<int>(wsNames.size()); ++i )
   {
-    if (spec >= wsSizes[i])
+    if (spec >= static_cast<int>(wsSizes[i]))
     {
       logObject.warning() << wsNames[i].toStdString() << " has only "
         << wsSizes[i] << (wsSizes[i]==1 ? " spectrum" : " spectra") << " - not plotted.\n";

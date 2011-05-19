@@ -392,7 +392,7 @@ void MantidMatrix::range(double *min, double *max)
     {
 
       PARALLEL_FOR1(m_workspace)
-      for (int wi=0; wi < m_workspace->getNumberHistograms(); wi++)
+      for (int wi=0; wi < static_cast<int>(m_workspace->getNumberHistograms()); wi++)
       {
         double local_min, local_max;
         const MantidVec & Y = m_workspace->readY(wi);
@@ -1218,8 +1218,8 @@ void MantidMatrix::afterReplaceHandle(const std::string& wsName,const boost::sha
 
 void MantidMatrix::changeWorkspace(Mantid::API::MatrixWorkspace_sptr ws)
 {
-  if (m_cols != ws->blocksize() ||
-      m_workspaceTotalHist != ws->getNumberHistograms())
+  if (m_cols != static_cast<int>(ws->blocksize()) ||
+      m_workspaceTotalHist != static_cast<int>(ws->getNumberHistograms()))
   {
     closeDependants();
   }
