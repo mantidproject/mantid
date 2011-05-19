@@ -1265,7 +1265,7 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
     QString reBunchStr = QString("Rebunch(\"") + wsname.c_str() + "\",\""
         + wsname.c_str() + QString("\",") + m_uiForm.optionStepSizeText->text() + ");";
     runPythonCode( reBunchStr ).trimmed(); 
-  }
+  } 
 
   // Make group to display more organised in Mantidplot workspace list
   if ( !AnalysisDataService::Instance().doesExist(groupName) )
@@ -1283,7 +1283,6 @@ void MuonAnalysis::createPlotWS(const std::string& groupName, const std::string&
       + "',OutputWorkspace='" + groupName.c_str() + "')\n";
     runPythonCode( groupStr ).trimmed();
   }
-
 }
 
 
@@ -1369,7 +1368,6 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       pyS += "l.setAxisScale(Layer.Left," + QString::number(min) + "," + QString::number(max) + ")\n";
     }
 
-
     QString pyString;
     if (plotType.compare("Counts") == 0)
     {
@@ -1377,6 +1375,7 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
     }
     else if (plotType.compare("Asymmetry") == 0)
     {
+      matrix_workspace->setYUnitLabel("Asymmetry");
       // Normalise before removing exponential decay
       const std::vector<double>& x = matrix_workspace->readX(0);
       const std::vector<double>& y = matrix_workspace->readY(0);
@@ -1403,14 +1402,14 @@ void MuonAnalysis::plotGroup(const std::string& plotType)
       runPythonCode( pyStrNormalise ).trimmed();
 
       pyString = "RemoveExpDecay(\"" + cropWS + "\",\"" 
-        + cropWS + "\")\n" + pyS
-        + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
+        + cropWS + "\")\n" + pyS;
+        //+ "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
     }
     else if (plotType.compare("Logorithm") == 0)
     {
+      matrix_workspace->setYUnitLabel("Logorithm");
       pyString += "Logarithm(\"" + cropWS + "\",\"" 
-        + cropWS + "\")\n" + pyS
-        + "l.setAxisTitle(Layer.Left, \"Logorithm\")\n";
+        + cropWS + "\")\n" + pyS;
     }
     else
     {
@@ -1477,10 +1476,10 @@ void MuonAnalysis::plotPair(const std::string& plotType)
       "l.setTitle(\"" + m_title.c_str() + "\")\n"
       "l.setAxisTitle(Layer.Bottom, \"Time / microsecond\")\n";
 
+    Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
+    MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
     if ( !m_uiForm.yAxisAutoscale->isChecked() )
     {
-      Workspace_sptr ws_ptr = AnalysisDataService::Instance().retrieve(cropWS.toStdString());
-      MatrixWorkspace_sptr matrix_workspace = boost::dynamic_pointer_cast<MatrixWorkspace>(ws_ptr);
       const Mantid::MantidVec& dataY = matrix_workspace->readY(pairNum);
       double min = 0.0; double max = 0.0;
 
@@ -1509,6 +1508,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
     QString pyString;
     if (plotType.compare("Asymmetry") == 0)
     {
+      matrix_workspace->setYUnitLabel("Asymmetry");
       QComboBox* qw1 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,1));
       QComboBox* qw2 = static_cast<QComboBox*>(m_uiForm.pairTable->cellWidget(m_pairTableRowInFocus,2));
 
@@ -1523,8 +1523,7 @@ void MuonAnalysis::plotPair(const std::string& plotType)
         + cropWS + "\","
         + QString::number(qw1->currentIndex()) + "," 
         + QString::number(qw2->currentIndex()) + "," 
-        + item->text() + ")\n" + pyS
-        + "l.setAxisTitle(Layer.Left, \"Asymmetry\")\n";
+        + item->text() + ")\n" + pyS;
     }
     else
     {
