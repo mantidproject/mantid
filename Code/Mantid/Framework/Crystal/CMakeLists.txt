@@ -18,7 +18,6 @@ set ( INC_FILES
 set ( TEST_FILES
 	test/LoadPeaksFileTest.h
 	test/MaskPeaksWorkspaceTest.h
-	test/PeakIntegrationTest.h
 	test/PredictPeaksTest.h
 	test/SavePeaksFileTest.h
 )
