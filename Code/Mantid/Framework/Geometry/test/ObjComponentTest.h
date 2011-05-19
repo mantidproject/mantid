@@ -192,34 +192,6 @@ public:
     ObjComponent A("ocyl", createCappedCylinder());
     A.setPos(10,0,0);
     A.setRot(Quat(90.0,V3D(0,0,1)));
-    double xmax,ymax,zmax,xmin,ymin,zmin;
-    xmax=15; ymax=15; zmax=3;
-    xmin=5;  ymin=-5; zmin=-3;
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    TS_ASSERT_DELTA(xmax,10.5,1e-5);
-    TS_ASSERT_DELTA(ymax,1.2,1e-5);
-    TS_ASSERT_DELTA(zmax,0.5, 1e-5);
-    TS_ASSERT_DELTA(xmin,9.5,1e-5);
-    TS_ASSERT_DELTA(ymin,-3.2,1e-5);
-    TS_ASSERT_DELTA(zmin,-0.5,1e-5);
-
-    // Add a parent with a rotation of its own;
-    Component parent("parent",V3D(0,10,0),Quat(90.0,V3D(0,1,0)));
-    A.setParent(&parent);
-    // note that input values are ignored in this case as cached results used.
-    A.getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    // consistent with the solid angle results
-    TS_ASSERT_DELTA(zmax,-9.5,1e-5);
-    TS_ASSERT_DELTA(zmin,-10.5,1e-5);
-  }
-
-  void testBoundingBoxCappedCylinder_with_AlternateImplemetation()
-  {
-    // Check that getBoundingBox transforms input guess to Object coordinates and
-    // result back to ObjComponent
-    ObjComponent A("ocyl", createCappedCylinder());
-    A.setPos(10,0,0);
-    A.setRot(Quat(90.0,V3D(0,0,1)));
 
     BoundingBox boundingBox;
     A.getBoundingBox(boundingBox);
@@ -342,12 +314,10 @@ public:
   {
     ObjComponent * A_base = new ObjComponent("ocyl", createCappedCylinder());
     ObjComponent * A = MakeWithScaleFactor( A_base, 2.0,1.0,1.0);
-    double xmax,ymax,zmax,xmin,ymin,zmin;
-    xmax=100; ymax=100; zmax=100;
-    xmin=-100;  ymin=-100; zmin=-100;
-    A->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-    TS_ASSERT_DELTA(xmax, 2.4,0.00001);
-    TS_ASSERT_DELTA(xmin,-6.4,0.00001);
+    BoundingBox bbox;
+    A->getBoundingBox(bbox);
+    TS_ASSERT_DELTA(bbox.xMax(), 2.4,0.00001);
+    TS_ASSERT_DELTA(bbox.xMin(),-6.4,0.00001);
   }
 
   void testPointInObjectWithScaleFactor()

@@ -496,28 +496,9 @@ int RectangularDetector::getPointInObject(V3D& point) const
 
 //-------------------------------------------------------------------------------------------------
 /**
- * Return the bounding box (as 6 double values)
- * @param xmax :: maximum x of the bounding box
- * @param ymax :: maximum y of the bounding box
- * @param zmax :: maximum z of the bounding box
- * @param xmin :: minimum x of the bounding box
- * @param ymin :: minimum y of the bounding box
- * @param zmin :: minimum z of the bounding box
+ * Get the bounding box and store it in the given object. This is cached after the first call.
+ * @param assemblyBox :: A BoundingBox object that will be overwritten
  */
-void RectangularDetector::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
-{
-  // Use cached box
-  BoundingBox box;
-  this->getBoundingBox(box);
-  xmax = box.xMax();
-  xmin = box.xMin();
-  ymax = box.yMax();
-  ymin = box.yMin();
-  zmax = box.zMax();
-  zmin = box.zMin();
-}
-
-
 void RectangularDetector::getBoundingBox(BoundingBox & assemblyBox) const
 {
   if( !m_cachedBoundingBox )

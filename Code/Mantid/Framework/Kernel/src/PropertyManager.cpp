@@ -348,17 +348,17 @@ namespace Mantid
     /**
     * Return the property manager serialized as a string.
     * The format is propName=value,propName=value,propName=value
-    * @param includeDefaults :: If true then the value of default parameters will be included
-    * @returns A stringized version of the manager
+    * @param withDefaultValues :: If true then the value of default parameters will be included
+    * @returns A serialized version of the manager
     */
-    std::string PropertyManager::toString(bool includeDefaults) const
+    std::string PropertyManager::toString(bool withDefaultValues) const
     {
       std::ostringstream writer;
       const size_t count = propertyCount();
       for( size_t i = 0; i < count; ++i )
       {
         Property *p = getPointerToPropertyOrdinal((int)i);
-        if( includeDefaults || !(p->isDefault()) )
+        if( withDefaultValues || !(p->isDefault()) )
         {
           writer << p->name() << "=" << p->value() << ",";
         }

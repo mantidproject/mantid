@@ -75,7 +75,8 @@ public:
   bool isOnSide(const V3D& point) const;
   int interceptSurface(Track& track) const;
   double solidAngle(const V3D& observer) const;
-  void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
+  ///@todo This should go in favour of just the class related one.
+  void boundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const;
   void getBoundingBox(BoundingBox& absoluteBB) const;
   /// get Height (Y-dimension) value for component
   virtual double getHeight() const;

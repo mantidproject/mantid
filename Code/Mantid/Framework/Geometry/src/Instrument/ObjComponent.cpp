@@ -153,54 +153,6 @@ namespace Mantid
     * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
     * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
     * The returned BB will be the frame of the ObjComponent and may not be optimal.
-    * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
-    * object and returns them back in max and min points. Cached values used after first call.
-    *
-    * @param xmax :: Maximum value for the bounding box in x direction
-    * @param ymax :: Maximum value for the bounding box in y direction
-    * @param zmax :: Maximum value for the bounding box in z direction
-    * @param xmin :: Minimum value for the bounding box in x direction
-    * @param ymin :: Minimum value for the bounding box in y direction
-    * @param zmin :: Minimum value for the bounding box in z direction
-    */
-    void ObjComponent::getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const
-    {
-      if (!shape()) throw Kernel::Exception::NullPointerException("ObjComponent::getBoundingBox","shape");
-
-      Geometry::V3D min(xmin,ymin,zmin),        max(xmax,ymax,zmax);
-
-      min-=this->getPos();
-      max-=this->getPos();
-      // Scale
-      V3D scaleFactor = getScaleFactor();
-      min/=scaleFactor;
-      max/=scaleFactor;
-
-      //Rotation
-      Geometry::Quat inverse(this->getRotation());
-      inverse.inverse();
-      // Find new BB
-      inverse.rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
-
-      // pass bounds to getBoundingBox
-      shape()->getBoundingBox(max[0],max[1],max[2],min[0],min[1],min[2]);
-
-      //Apply scale factor
-      min*=scaleFactor;
-      max*=scaleFactor;
-      // Re-rotate
-      (this->getRotation()).rotateBB(min[0],min[1],min[2],max[0],max[1],max[2]);
-      min+=this->getPos();
-      max+=this->getPos();
-      xmin=min[0];xmax=max[0];
-      ymin=min[1];ymax=max[1];
-      zmin=min[2];zmax=max[2];
-      return;
-    }
-
-    /**
-    * Get the bounding box for this object-component. The underlying shape has a bounding box defined in its own coorindate
-    * system. This needs to be adjusted for the actual position and rotation of this ObjComponent.
     * @param absoluteBB :: [Out] The bounding box for this object component will be stored here.
     */
     void ObjComponent::getBoundingBox(BoundingBox& absoluteBB) const

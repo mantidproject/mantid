@@ -5,6 +5,7 @@
 #include "MantidGeometry/IDetector.h"
 #include "ObjComponentActor.h"
 #include "MantidObject.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 using namespace Mantid;
 using namespace Geometry;
@@ -124,12 +125,10 @@ int ObjComponentActor::setInternalDetectorColors(std::vector<boost::shared_ptr<G
  */
 void ObjComponentActor::getBoundingBox(Mantid::Geometry::V3D& minBound,Mantid::Geometry::V3D& maxBound)
 {
-	double xmin,ymin,zmin,xmax,ymax,zmax;
-	xmin=ymin=zmin=-1000;
-	xmax=ymax=zmax=1000;
-	mObjComp->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-	minBound[0]=xmin;minBound[1]=ymin;minBound[2]=zmin;
-	maxBound[0]=xmax;maxBound[1]=ymax;maxBound[2]=zmax;
+  Mantid::Geometry::BoundingBox boundBox;
+  mObjComp->getBoundingBox(boundBox);
+  minBound = boundBox.minPoint();
+  maxBound = boundBox.maxPoint();
 }
 
 void ObjComponentActor::detectorCallback(DetectorCallback* callback)const

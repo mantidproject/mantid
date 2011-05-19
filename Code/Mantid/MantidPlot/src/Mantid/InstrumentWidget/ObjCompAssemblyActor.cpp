@@ -105,14 +105,11 @@ void ObjCompAssemblyActor::initChilds(bool withDisplayList)
   {
     mObjCompIDs.push_back(objAss->getChild(i)->getComponentID());
   }
-
-  double xmin,ymin,zmin,xmax,ymax,zmax;
-  xmin=ymin=zmin=-1000;
-  xmax=ymax=zmax=1000;
   Mantid::Geometry::IObjComponent_const_sptr objComp = boost::dynamic_pointer_cast<const Mantid::Geometry::IObjComponent>(m_ObjAss);
-  objComp->getBoundingBox(xmax,ymax,zmax,xmin,ymin,zmin);
-  minBoundBox[0]=xmin;minBoundBox[1]=ymin;minBoundBox[2]=zmin;
-  maxBoundBox[0]=xmax;maxBoundBox[1]=ymax;maxBoundBox[2]=zmax;
+  Mantid::Geometry::BoundingBox boundBox;
+  objComp->getBoundingBox(boundBox);
+  minBoundBox[0]=boundBox.xMin(); minBoundBox[1]=boundBox.yMin(); minBoundBox[2]=boundBox.zMin();
+  maxBoundBox[0]=boundBox.xMax(); maxBoundBox[1]=boundBox.yMax(); maxBoundBox[2]=boundBox.zMax();
 }
 
 /**

@@ -47,8 +47,8 @@ public:
  void testResults(){
 	 TSM_ASSERT_EQUALS("Azimutal values should be exactly specified",std::string("0,0,0"),findPar->getPropertyValue("azimuthal"));
 	 TSM_ASSERT_EQUALS("Polar values should be exactly specified",std::string("170.565,169.565,168.565"),findPar->getPropertyValue("polar"));
-	 TSM_ASSERT_EQUALS("Azimutal width values should be exactly specified",std::string("0.396108,0.39495,0.393671"),findPar->getPropertyValue("azimuthal_width"));
-	 TSM_ASSERT_EQUALS("Polar width values should be exactly specified",std::string("2.86241,2.86241,2.86241"),findPar->getPropertyValue("polar_width"));
+	 TSM_ASSERT_EQUALS("Azimutal width values should be exactly specified",std::string("0.396157,0.394998,0.393718"),findPar->getPropertyValue("azimuthal_width"));
+	 TSM_ASSERT_EQUALS("Polar width values should be exactly specified",std::string("2.86236,2.86236,2.86236"),findPar->getPropertyValue("polar_width"));
 	 TSM_ASSERT_EQUALS("Flightpath values should be exactly  specified",std::string("1,1,1"),findPar->getPropertyValue("secondary_flightpath"));
  }
 

@@ -113,16 +113,10 @@ void SavePHX::exec() {
 			//        std::cout << "Height = " << height << std::endl;
 			//        std::cout << "Radius = " << radius << std::endl;
 
-			// Initialise to large values
-			double xmin = -1000.0;
-			double xmax = 1000.0;
-			double ymin = -1000.0;
-			double ymax = 1000.0;
-			double zmin = -1000.0;
-			double zmax = 1000.0;
-
 			// Get the bounding box
-			det->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
+			BoundingBox bbox;
+			det->getBoundingBox(bbox);
+			
 
 			//            g_log.information("X:(" + boost::lexical_cast<std::string>(xmin) + "," + boost::lexical_cast<
 			//                std::string>(xmax) + ")");
@@ -131,9 +125,9 @@ void SavePHX::exec() {
 			//            g_log.information("Z:(" + boost::lexical_cast<std::string>(zmin) + "," + boost::lexical_cast<
 			//                std::string>(zmax) + ")");
 
-			double xsize = xmax - xmin;
-			double ysize = ymax - ymin;
-			double zsize = zmax - zmin;
+			double xsize = bbox.xMax() - bbox.xMin();
+			double ysize = bbox.yMax() - bbox.yMin();
+			double zsize = bbox.zMax() - bbox.zMin();
 
 			g_log.debug() << "L2     : " << distance << std::endl;
 			g_log.debug() << "Width  : " << xsize << std::endl;

@@ -81,21 +81,6 @@ public:
   /// Finds the approximate solid angle covered by the component when viewed from the point given
   virtual double solidAngle(const V3D& observer) const = 0;
 
-  /**
-   * Given an input estimate of the axis aligned (AA) bounding box (BB), return an improved set of values.
-   * The AA BB is determined in the frame of the object and the initial estimate will be transformed there.
-   * The returned BB will be the frame of the ObjComponent and may not be optimal.
-   * Takes input axis aligned bounding box max and min points and calculates the bounding box for the
-   * object and returns them back in max and min points. Cached values used after first call.
-   * @param xmax :: Maximum value for the bounding box in x direction
-   * @param ymax :: Maximum value for the bounding box in y direction
-   * @param zmax :: Maximum value for the bounding box in z direction
-   * @param xmin :: Minimum value for the bounding box in x direction
-   * @param ymin :: Minimum value for the bounding box in y direction
-   * @param zmin :: Minimum value for the bounding box in z direction
-   */
-  virtual void getBoundingBox(double &xmax, double &ymax, double &zmax, double &xmin, double &ymin, double &zmin) const = 0;
-  
   ///Try to find a point that lies within (or on) the object
   virtual int getPointInObject(V3D& point) const = 0;
 

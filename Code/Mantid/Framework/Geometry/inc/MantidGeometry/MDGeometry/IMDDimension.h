@@ -83,18 +83,12 @@ namespace Mantid
       return getNBins() == 1;
     }
 
-
-
-    //===============================================================================================
-    //========== Virtual Methods used in MDDimension  ===============================================
-    //===============================================================================================
-    virtual bool operator==(const IMDDimension &)const{
+    bool operator==(const IMDDimension &)const{
       throw std::runtime_error("Not Implemented.");
     }
-    virtual bool operator!=(const IMDDimension &)const{
+    bool operator!=(const IMDDimension &)const{
       throw std::runtime_error("Not Implemented.");
     }
-
 
     /// it is sometimes convinient to shift image data by some number along specific dimension
     /// @return ???
@@ -126,7 +120,6 @@ namespace Mantid
      (when axis has nBins+1 points with point 0 equal rMin and nBins+1 equal rMax) */
     virtual void getAxisPoints(std::vector<double>  &)const
     { throw std::runtime_error("Not Implemented."); }
-
 
   };
 

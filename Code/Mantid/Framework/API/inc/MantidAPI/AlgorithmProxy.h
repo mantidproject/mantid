@@ -123,7 +123,7 @@ namespace Mantid
       /** @name String serialization */
       //@{
       /// Serialize an object to a string
-      virtual std::string toString() const;
+      virtual std::string toString(bool withDefaultValues) const;
       //@}
       
     private:

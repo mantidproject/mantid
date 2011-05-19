@@ -165,12 +165,12 @@ namespace Mantid
     /**
     * Return the property manager serialized as a string.
     * The format is propName=value,propName=value,propName=value
-    * @param includeDefaults :: If true then the value of default parameters will be included
+    * @param withDefaultValues :: If true then the value of default parameters will be included
     * @returns A stringized version of the manager
     */
-    std::string PropertyManagerOwner::toString(bool includeDefaults) const
+    std::string PropertyManagerOwner::toString(bool withDefaultValues) const
     {
-      return m_properties->toString(includeDefaults);
+      return m_properties->toString(withDefaultValues);
     }
 
     /** 

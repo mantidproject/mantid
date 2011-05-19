@@ -168,9 +168,13 @@ public:
     //Set the properties so that we know what they are
     alg.setPropertyValue("prop1", "value1");
     alg.setProperty("prop2", 5);
-    const std::string expected = "ToyAlgorithm.1(prop1=value1,prop2=5)";
+    std::string expected = "ToyAlgorithm.1(prop1=value1,prop2=5)";
+    TS_ASSERT_EQUALS(alg.toString(false), expected);
 
-    TS_ASSERT_EQUALS(alg.toString(), expected);
+    // Rest the first property back to default and then include it in the toString list
+    alg.setPropertyValue("prop1", "value");
+    expected = "ToyAlgorithm.1(prop1=value,prop2=5)";
+    TS_ASSERT_EQUALS(alg.toString(true), expected);
   }
 
   void test_From_String_With_Invalid_Input_Throws()

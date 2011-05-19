@@ -1,6 +1,7 @@
 #include "MantidDataHandling/FindDetectorsPar.h"
 #include "MantidKernel/ArrayProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidGeometry/Objects/BoundingBox.h"
 
 namespace Mantid
 {
@@ -86,18 +87,12 @@ FindDetectorsPar::exec()
 
               // Now let's work out the detector widths
               // TODO: This is the historically wrong method...update it!
+	      // Get the bounding box
+	      Geometry::BoundingBox bbox;
+	      det->getBoundingBox(bbox);
+	      double xsize = bbox.xMax() - bbox.xMin();
+	      double ysize = bbox.yMax() - bbox.yMin();
 
-              // Initialise to large values
-              double xmin = -1000.0;
-              double xmax = 1000.0;
-              double ymin = -1000.0;
-              double ymax = 1000.0;
-              double zmin = -1000.0;
-              double zmax = 1000.0;
-              // Get the bounding box
-              det->getBoundingBox(xmax, ymax, zmax, xmin, ymin, zmin);
-              double xsize = xmax - xmin;
-              double ysize = ymax - ymin;
               double delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
               double delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
 
