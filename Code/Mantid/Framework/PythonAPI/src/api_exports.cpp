@@ -146,7 +146,7 @@ using namespace boost::python;
       .def("_setWorkspaceProperty", &_setMatrixWorkspaceProperty)
       .def("_getWorkspaceProperty", &_getMatrixWorkspaceProperty)
       // Special methods
-      .def("__str__", &IAlgorithm::toString)
+      .def("__str__", (std::string (IAlgorithm::*)() const)&IAlgorithm::toString)
       ;
     class_< API::Algorithm, bases<API::IAlgorithm>, boost::noncopyable>("IAlgorithm", no_init)
       ;
