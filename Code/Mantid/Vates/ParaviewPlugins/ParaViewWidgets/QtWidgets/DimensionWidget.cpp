@@ -129,8 +129,14 @@ double DimensionWidget::getMaximum() const
   return atof(m_maxBox->text().toStdString().c_str());
 }
 
-int DimensionWidget::getNBins() const
+int DimensionWidget::getNBins()
 {
+  int nbins = static_cast<int>( m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getNBins() );
+  int entry = atoi(m_nBinsBox->text());
+  if(entry == nbins || entry <= 1)
+  {
+    resetBins();
+  }
   return atoi(m_nBinsBox->text().toStdString().c_str());
 }
 
@@ -151,7 +157,7 @@ void DimensionWidget::setMaximum(double maximum)
   m_maxBox->setText(maxValueString.c_str());
 }
 
-boost::shared_ptr<Mantid::Geometry::IMDDimension>  DimensionWidget::getDimension() const
+boost::shared_ptr<Mantid::Geometry::IMDDimension>  DimensionWidget::getDimension()
 {
   boost::shared_ptr<Mantid::Geometry::IMDDimension> originalDimension = m_vecNonIntegratedDimensions[m_currentDimensionIndex];
   //Remake the dimension with a new number of bins. Note: Would be much better to have the clone facility.
@@ -186,7 +192,15 @@ void DimensionWidget::resetBins()
 
 void DimensionWidget::nBinsListener()
 {
-  m_geometryWidget->dimensionWidgetChanged(ApplyBinChanges);
+  int nbins = static_cast<int>( m_vecNonIntegratedDimensions[m_currentDimensionIndex]->getNBins() );
+  int entry = atoi(m_nBinsBox->text());
+  if(entry == nbins || entry <= 1)
+  {
+    resetBins();
+  }
+  {
+    m_geometryWidget->dimensionWidgetChanged(ApplyBinChanges);
+  }
 }
 
 void DimensionWidget::minBoxListener()

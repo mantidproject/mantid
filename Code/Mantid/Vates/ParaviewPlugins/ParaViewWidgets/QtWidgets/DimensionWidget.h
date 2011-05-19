@@ -48,10 +48,10 @@ public:
   void setMaximum(double maximum);
 
   /// Get the number of dimensions.
-  boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension() const;
+  boost::shared_ptr<Mantid::Geometry::IMDDimension>  getDimension();
 
   /// Get the number of bins.
-  int getNBins() const;
+  int getNBins();
 
   /// Get the selected index.
   int getSelectedIndex() const;
