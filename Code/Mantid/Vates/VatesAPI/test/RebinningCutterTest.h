@@ -121,7 +121,7 @@ std::string getComplexXMLInstructions()
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>fe_demo_30.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
@@ -348,7 +348,7 @@ void testFindWorkspaceLocation()
   vtkDataSet* dataset = constructInputDataSet();
 
   std::string location = findExistingWorkspaceLocation(dataset, id.c_str());
-  static const boost::regex match(".*(fe_demo_30.sqw)$");
+  static const boost::regex match(".*(test_horace_reader.sqw)$");
 
   TSM_ASSERT("The workspace location is differrent from the xml value.", regex_match(location, match));
   dataset->Delete();

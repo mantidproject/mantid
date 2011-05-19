@@ -59,7 +59,7 @@ private:
     // this will set loader to work with thest file format rather then with real file on HDD
     // loader.set_test_mode();
     loader.initialize();
-    loader.setPropertyValue("inFilename","fe_demo_bin.sqw");
+    loader.setPropertyValue("inFilename","test_horace_reader.sqw");
     
     std::string targetWorkspaceName = "Input";
     loader.setPropertyValue("MDWorkspace",targetWorkspaceName);
@@ -113,7 +113,7 @@ private:
     return std::string("<?xml version=\"1.0\" encoding=\"utf-8\"?>") +
 "<MDInstruction>" +
   "<MDWorkspaceName>Input</MDWorkspaceName>" +
-  "<MDWorkspaceLocation>fe_demo_bin.sqw</MDWorkspaceLocation>" +
+  "<MDWorkspaceLocation>test_horace_reader.sqw</MDWorkspaceLocation>" +
   "<DimensionSet>" +
     "<Dimension ID=\"en\">" +
       "<Name>Energy</Name>" +
@@ -267,7 +267,7 @@ public:
   void testGetWorkspaceLocation()
   {
     ExposedDynamicRebinFromXML xmlRebinAlg;
-    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "fe_demo_bin.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
+    TSM_ASSERT_EQUALS("The workspace location is not correctly extracted", "test_horace_reader.sqw", xmlRebinAlg.getWorkspaceLocation(MDInstructionXML()));
   }
 
   void testGetImplicitFunction()

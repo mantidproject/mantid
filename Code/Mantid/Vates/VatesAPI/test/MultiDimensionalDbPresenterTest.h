@@ -18,7 +18,7 @@ class MultiDimensionalDbPresenterTest : public CxxTest::TestSuite
 
 private:
 
-  static std::string getTestFileName(){return "fe_demo_30.sqw";}
+  static std::string getTestFileName(){return "test_horace_reader.sqw";}
   
   // Helper type. Facilitates testing without AnalysisDataService.
   class ExposedExecutor : public Mantid::VATES::MultiDimensionalDbPresenter
@@ -83,9 +83,9 @@ void testConstruction()
   vtkDataArray* data = mdPresenter.getScalarDataFromTimeBin(vtkGridFactory);
   RebinningXMLGenerator serializer;
   vtkDataSet* visData = mdPresenter.getMesh(serializer, vtkGridFactory);
-  TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 125000, data->GetSize());
-  TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 132651, visData->GetNumberOfPoints());
-  TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 30, mdPresenter.getNumberOfTimesteps());
+  TSM_ASSERT_EQUALS("Incorrect number of scalar signal points.", 18, data->GetSize());
+  TSM_ASSERT_EQUALS("Incorrect number of visualisation vtkPoints generated", 48, visData->GetNumberOfPoints());
+  TSM_ASSERT_EQUALS("Incorrect number of timesteps returned", 2, mdPresenter.getNumberOfTimesteps());
   data->Delete();
   visData->Delete();
 }

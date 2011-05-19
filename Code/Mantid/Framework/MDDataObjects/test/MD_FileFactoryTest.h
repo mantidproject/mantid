@@ -60,7 +60,7 @@ public:
   //}
   void testHoraceFileFound(){
     std::auto_ptr<IMD_FileFormat> horaceFormat;
-    std::string testFile = API::FileFinder::Instance().getFullPath("fe_demo_bin.sqw");
+    std::string testFile = API::FileFinder::Instance().getFullPath("test_horace_reader.sqw");
 
     TS_ASSERT_THROWS_NOTHING(horaceFormat= MD_FileFormatFactory::getFileReader(testFile.c_str()));
 
