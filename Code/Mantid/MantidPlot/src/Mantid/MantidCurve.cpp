@@ -29,7 +29,7 @@ MantidCurve::MantidCurve(const QString& name,const QString& wsName,Graph* g,cons
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
 
-  if ( !ws || index >= ws->getNumberHistograms() )
+  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
   {
     std::stringstream ss;
     ss << index << " is an invalid spectrum index for workspace " << ws->getName()
@@ -58,7 +58,7 @@ MantidCurve::MantidCurve(const QString& wsName,Graph* g,const QString& type,int 
   MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<MatrixWorkspace>(
               AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
 
-  if ( !ws || index >= ws->getNumberHistograms() )
+  if ( !ws || index >= static_cast<int>(ws->getNumberHistograms()) )
   {
     std::stringstream ss;
     ss << index << " is an invalid spectrum index for workspace " << ws->getName()
@@ -132,7 +132,7 @@ void MantidCurve::init(boost::shared_ptr<const Mantid::API::MatrixWorkspace> wor
       break;
     }
     setStyle(qwtStyle);
-    lineWidth = ml->applicationWindow()->defaultCurveLineWidth;
+    lineWidth = static_cast<int>(floor(ml->applicationWindow()->defaultCurveLineWidth));
   }
   else if (workspace->isHistogramData() && !workspace->isDistribution())
   {
@@ -198,9 +198,9 @@ void MantidCurve::draw(QPainter *p,
     p->setPen(pen());
     const int dx = 3;
     const int dx2 = 2*dx;
-    int x1 = xMap.p1();
-    int x2 = xMap.p2();
-    for (int i = 0; i < d->esize(); i++)
+    int x1 = static_cast<int>(floor(xMap.p1()));
+    int x2 = static_cast<int>(floor(xMap.p2()));
+    for (int i = 0; i < static_cast<int>(d->esize()); i++)
     {
       const int xi = xMap.transform(d->ex(i));
       if (m_drawAllErrorBars || (xi > x1 && xi < x2 && (i == 0 || abs(xi - xi0) > dx2)))
