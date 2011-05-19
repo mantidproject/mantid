@@ -146,7 +146,7 @@ void FunctionCurve::loadData(int points)
       Mantid::API::MatrixWorkspace_const_sptr ws = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(
         Mantid::API::AnalysisDataService::Instance().retrieve(wsName.toStdString()) );
 
-      if (wsIndex >= ws->getNumberHistograms()) return;
+      if (wsIndex >= static_cast<int>(ws->getNumberHistograms())) return;
 
       const Mantid::MantidVec& wsX = ws->readX(wsIndex);
       
@@ -164,7 +164,7 @@ void FunctionCurve::loadData(int points)
 
       if (ws->isHistogramData())
       {
-        for(int i=0;i<ws->blocksize()-1;i++)
+        for(int i=0;i<static_cast<int>(ws->blocksize())-1;i++)
         {
           double x = (wsX[i] + wsX[i+1])/2;
           if (x < d_from) continue;
@@ -174,7 +174,7 @@ void FunctionCurve::loadData(int points)
       }
       else
       {
-        for(int i=0;i<ws->blocksize();i++)
+        for(int i=0;i<static_cast<int>(ws->blocksize());i++)
         {
           double x = wsX[i];
           if (x < d_from) continue;
