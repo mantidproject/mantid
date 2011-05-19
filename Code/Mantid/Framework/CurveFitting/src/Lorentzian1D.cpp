@@ -44,7 +44,7 @@ void Lorentzian1D::function(const double* in, double* out, const double* xValues
     const double& peakCentre = in[3];
     const double& hwhm = in[4];
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff=xValues[i]-peakCentre;
         out[i] = height*( hwhm*hwhm/(diff*diff+hwhm*hwhm) )+bg0+bg1*xValues[i];
     }
@@ -56,7 +56,7 @@ void Lorentzian1D::functionDeriv(const double* in, Jacobian* out, const double* 
     const double& peakCentre = in[3];
     const double& hwhm = in[4];
 
-    for (int i = 0; i < nData; i++) {
+    for (size_t i = 0; i < nData; i++) {
         double diff = xValues[i]-peakCentre;
         double invDenominator =  1/((diff*diff+hwhm*hwhm));
         out->set(i,0, 1);
