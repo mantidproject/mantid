@@ -221,10 +221,10 @@ namespace Mantid
         }
 
         size_t counter = 0;
-        for (size_t i = m_spec_min; i < m_spec_max; ++i)
+        for (int64_t i = m_spec_min; i < m_spec_max; ++i)
         {
           // Shift the histogram to read if we're not in the first period
-          specid_t histToRead = i + period*total_specs;
+          specid_t histToRead = static_cast<specid_t>(i + period*total_specs);
           loadData(timeChannelsVec,counter,histToRead,nxload,lengthIn-1,localWorkspace ); // added -1 for NeXus
           counter++;
           progress.report();
@@ -262,7 +262,7 @@ namespace Mantid
               thereAreZeroes = true;
               continue;
             }
-            m_groupings[i] = ig;
+            m_groupings[i] = static_cast<specid_t>(ig);
             if (groups.find(ig) == groups.end())
               groups[ig] = static_cast<int64_t>(groups.size());
             if (ig > max_group) max_group = ig;
@@ -275,12 +275,12 @@ namespace Mantid
               if (ig == 0)
               {
                 ig = ++max_group;
-                m_groupings[i] = ig;
+                m_groupings[i] = static_cast<specid_t>(ig);
                 groups[ig] = groups.size();
               }
             }
 
-          size_t numHists = localWorkspace->getNumberHistograms();
+          int numHists = static_cast<int>(localWorkspace->getNumberHistograms());
           size_t ngroups = groups.size(); // number of groups
 
           // to output groups in ascending order
@@ -343,9 +343,9 @@ namespace Mantid
           boost::shared_array<detid_t> dets(new detid_t[numHists]);
 
           //Compile the groups
-          for (size_t i = 0; i < numHists; ++i)
+          for (int i = 0; i < numHists; ++i)
           {    
-            specid_t k = groups[ m_groupings[numHists*period + i] ];
+            specid_t k = static_cast<specid_t>(groups[ m_groupings[numHists*period + i] ]);
 
             for (detid_t j = 0; j < static_cast<detid_t>(localWorkspace->blocksize()); ++j)
             {
@@ -556,7 +556,7 @@ namespace Mantid
       NXRoot root(m_filename);
       NXInt number = root.openNXInt("run/instrument/detector/number");
       number.load();
-      detid_t ndet = number[0]/m_numberOfPeriods;
+      detid_t ndet = static_cast<detid_t>(number[0]/m_numberOfPeriods);
       boost::shared_array<detid_t> det(new detid_t[ndet]);
       for(detid_t i=0;i<ndet;i++)
         det[i] = i + 1;
