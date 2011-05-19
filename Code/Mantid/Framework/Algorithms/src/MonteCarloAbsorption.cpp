@@ -108,8 +108,8 @@ namespace Mantid
       correctionFactors->setYUnitLabel("Attenuation factor");
       
       const bool isHistogram = m_inputWS->isHistogramData();
-      const int numHists(m_inputWS->getNumberHistograms());
-      const int numBins = m_inputWS->blocksize();
+      const int numHists = static_cast<int>(m_inputWS->getNumberHistograms());
+      const int numBins = static_cast<int>(m_inputWS->blocksize());
       
       // Compute the step size
       m_xStepSize = numBins/m_numberOfPoints;
@@ -390,9 +390,9 @@ namespace Mantid
       }
 
       m_numberOfPoints = getProperty("NumberOfWavelengthPoints");
-      if( isEmpty(m_numberOfPoints) ||  m_numberOfPoints > m_inputWS->blocksize() )
+      if( isEmpty(m_numberOfPoints) ||  m_numberOfPoints > static_cast<int>(m_inputWS->blocksize()) )
       {
-        m_numberOfPoints = m_inputWS->blocksize();
+        m_numberOfPoints = static_cast<int>(m_inputWS->blocksize());
         if( !isEmpty(m_numberOfPoints) )
         {
           g_log.warning() << "The requested number of wavelength points is larger than the spectra size. "
