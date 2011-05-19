@@ -92,7 +92,7 @@ public:
    size_t num = 20;
    TS_ASSERT_EQUALS(file.getNumElements(), num);
    //Get it
-   std::vector<DasEvent> * data;
+   std::vector<DasEvent> * data = 0;
    TS_ASSERT_THROWS_NOTHING( data = file.loadAll() );
    TS_ASSERT_EQUALS(data->size(), num);
    //Check the first event
