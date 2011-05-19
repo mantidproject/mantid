@@ -70,7 +70,7 @@ void Linear::exec()
   // Get the spectrum to fit
   const int histNumber = getProperty("WorkspaceIndex");
   // Check validity
-  if ( histNumber >= inputWorkspace->getNumberHistograms() )
+  if ( histNumber >= static_cast<int>(inputWorkspace->getNumberHistograms()) )
   {
     g_log.error() << "WorkspaceIndex set to an invalid value of " << histNumber << std::endl;
     throw Exception::IndexError(histNumber,inputWorkspace->getNumberHistograms(),"Linear WorkspaceIndex property");
@@ -184,7 +184,7 @@ void Linear::exec()
   // Copy over the X bins
   outputWorkspace->dataX(0).assign(X.begin(),X.end());
   // Now loop over the spectrum and use gsl function to calculate the Y & E values for the function
-  for (int i = 0; i < YSize; ++i)
+  for (size_t i = 0; i < YSize; ++i)
   {
     const double x = ( isHistogram ? 0.5*(X[i]+X[i+1]) : X[i] );
     const int err = gsl_fit_linear_est(x,*c0,*c1,*cov00,*cov01,*cov11,&(outputWorkspace->dataY(0)[i]),&(outputWorkspace->dataE(0)[i]));
