@@ -14,6 +14,7 @@ namespace Algorithms
 
 using namespace Kernel;
 using API::Progress;
+using std::size_t;
 
 // Register the class into the algorithm factory
 DECLARE_ALGORITHM( MuonAsymmetryCalc)
@@ -83,7 +84,7 @@ void MuonAsymmetryCalc::exec()
   //Calculate asymmetry for each time bin
   //F-aB / F+aB
   Progress prog(this, 0.0, 1.0, tmpWS->blocksize());
-  for (int j = 0; j < tmpWS->blocksize(); ++j)
+  for (size_t j = 0; j < tmpWS->blocksize(); ++j)
   {
     double numerator = tmpWS->dataY(forward)[j] - alpha * tmpWS->dataY(backward)[j];
     double denominator = (tmpWS->dataY(forward)[j] + alpha * tmpWS->dataY(backward)[j]);
