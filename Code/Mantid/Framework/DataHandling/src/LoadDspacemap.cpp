@@ -271,7 +271,7 @@ namespace DataHandling
   struct VulcanCorrectionFactor
   {
     /// ID for pixel
-    detid_t pixelID;
+    double pixelID;
     /// Correction factor for pixel
     double factor;
   };
