@@ -128,7 +128,7 @@ void SaveRKH::writeHeader()
 
   if (!m_2d)
   {
-    const int noDataPoints = m_workspace->size();
+    const size_t noDataPoints = m_workspace->size();
     m_outRKH << std::setw(5) << noDataPoints << "    0    0    0    1" << std::setw(5) << noDataPoints << "    0\n"
              << "         0         0         0         0\n"
              << " 3 (F12.5,2E16.6)\n";
@@ -138,7 +138,7 @@ void SaveRKH::writeHeader()
 ///Writes out the 1D data
 void SaveRKH::write1D()
 {
-  const int noDataPoints = m_workspace->size();
+  const size_t noDataPoints = m_workspace->size();
   const bool horizontal = (m_workspace->getNumberHistograms() == 1) ? true : false;
   if (horizontal)
   {
@@ -175,24 +175,24 @@ void SaveRKH::write2D()
 {
   // First the axis values
   const Axis* const X = m_workspace->getAxis(0);
-  const int Xbins = X->length();
+  const size_t Xbins = X->length();
   m_outRKH << "  " << Xbins << "\n";
-  for (int i = 0; i < Xbins; ++i) 
+  for (size_t i = 0; i < Xbins; ++i) 
   {
     m_outRKH << " " << std::scientific << std::setprecision(6) << (*X)(i);
     if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
   const Axis* const Y = m_workspace->getAxis(1);
-  const int Ybins = Y->length();
+  const size_t Ybins = Y->length();
   m_outRKH << "\n  " << Ybins << std::endl;
-  for (int i = 0; i < Ybins; ++i) 
+  for (size_t i = 0; i < Ybins; ++i) 
   {
     m_outRKH << " " << std::scientific << std::setprecision(6) << (*Y)(i);
     if ((i+1)%LINE_LENGTH == 0) m_outRKH << "\n";
   }
 
   // Now the data
-  const int xSize = m_workspace->blocksize();
+  const size_t xSize = m_workspace->blocksize();
   const size_t ySize = m_workspace->getNumberHistograms();
   m_outRKH << "\n   " << xSize << "   " << ySize << "  " 
            << std::scientific << std::setprecision(12) << 1.0 << "\n";
