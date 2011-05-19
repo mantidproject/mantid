@@ -45,7 +45,12 @@ public:
 
   ~WorkspaceValidatorsTest()
   {
-    delete wavUnitVal, anyUnitVal, histVal, rawVal, nonRawVal, binVal;
+      delete wavUnitVal;
+      delete anyUnitVal;
+      delete histVal;
+      delete rawVal;
+      delete nonRawVal;
+      delete binVal;
   }
 
   void testCast()
