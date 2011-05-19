@@ -50,7 +50,7 @@ void SaveFocusedXYE::exec()
   using namespace Mantid::API;
   //Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  const int nHist=inputWS->getNumberHistograms();
+  const size_t nHist=inputWS->getNumberHistograms();
   const bool isHistogram = inputWS->isHistogramData();
   std::string filename = getProperty("Filename");
   std::string inputWSName = getProperty("InputWorkspace");
@@ -72,7 +72,7 @@ void SaveFocusedXYE::exec()
   ios_base::openmode mode = ( append ? (ios_base::out | ios_base::app) : ios_base::out );
 
   Progress progress(this,0.0,1.0,nHist);
-  for (int i=0;i<nHist;i++)
+  for (size_t i=0;i<nHist;i++)
   {
     const MantidVec& X=inputWS->readX(i);
     const MantidVec& Y=inputWS->readY(i);
