@@ -461,9 +461,9 @@ QString PropertyHandler::functionPrefix()const
   PropertyHandler* ph = parentHandler();
   if (ph)
   {
-    size_t iFun = -1;
+    int iFun = -1;
     Mantid::API::CompositeFunction* cf = ph->cfun();
-    for(size_t i=0;i<cf->nFunctions();i++)
+    for(int i=0;i<static_cast<int>(cf->nFunctions());i++)
     {
       if (cf->getFunction(i) == function())
       {
