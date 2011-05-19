@@ -175,9 +175,9 @@ namespace Mantid
 	    throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 	  }
 	}
-	size_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-	if (endIndex >= m_noVectors) endIndex = m_noVectors;
-	size_t index=startIndex;
+	int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+	if (endIndex >= static_cast<int64_t>(m_noVectors)) endIndex = static_cast<int64_t>(m_noVectors);
+	int64_t index=startIndex;
 	while(index<endIndex)
 	{
 	  if(isMonitor(m_readIndex))
@@ -243,9 +243,9 @@ namespace Mantid
 	    throw std::runtime_error("ManagedRawFileWorkspace2D: Error reading RAW file.");
 	  }
 	}
-	size_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-	if (endIndex >= m_noVectors) endIndex = m_noVectors;
-	for(size_t index = startIndex;index<endIndex;index++,m_readIndex++)
+	int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
+  if (endIndex >= static_cast<int64_t>(m_noVectors)) endIndex = static_cast<int64_t>(m_noVectors);
+	for(int64_t index = startIndex;index<endIndex;index++,m_readIndex++)
 	{
 	  isisRaw->readData(m_fileRaw,m_readIndex+1);
 	  // g_log.error()<<"counter is "<<counter<<std::endl;
