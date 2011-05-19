@@ -370,7 +370,7 @@ public:
     MatrixWorkspace_sptr output;
     TS_ASSERT_THROWS_NOTHING(output = boost::dynamic_pointer_cast<MatrixWorkspace>(AnalysisDataService::Instance().retrieve(outputSpace)));
 
-    Property *prop;
+    Property *prop = 0;
     TimeSeriesProperty<double> *tsp;
     std::vector<double> vals;
     std::vector<DateAndTime> times;
