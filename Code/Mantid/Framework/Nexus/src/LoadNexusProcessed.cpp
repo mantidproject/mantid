@@ -412,7 +412,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
         if(m_interval)
         {
           //specs at the min-max interval
-          int interval_specs=m_spec_max-m_spec_min;
+          int interval_specs=static_cast<int>(m_spec_max-m_spec_min);
           fullblocks=(interval_specs)/blocksize;
           read_stop = (fullblocks * blocksize)+m_spec_min-1;
 
@@ -584,7 +584,7 @@ API::MatrixWorkspace_sptr LoadNexusProcessed::loadEntry(NXRoot & root, const std
     EventWorkspace_sptr ew = boost::dynamic_pointer_cast<EventWorkspace>(local_workspace);
     for (std::size_t wi=0; wi<local_workspace->getNumberHistograms(); wi++)
     {
-      std::vector<detid_t> dets = local_workspace->mutableSpectraMap().getDetectors(wi);
+      std::vector<detid_t> dets = local_workspace->mutableSpectraMap().getDetectors(static_cast<specid_t>(wi));
       EventList & el = ew->getEventList(wi);
       for (size_t i=0; i < dets.size(); i++)
         el.addDetectorID(dets[i]);
@@ -1393,7 +1393,7 @@ size_t LoadNexusProcessed::calculateWorkspacesize(const size_t numberofspectra)
       {
         m_spec_max = numberofspectra;
       }
-      total_specs = (m_spec_max-m_spec_min+1);
+      total_specs = static_cast<int>(m_spec_max-m_spec_min+1);
       m_spec_max += 1;
     }
     else
