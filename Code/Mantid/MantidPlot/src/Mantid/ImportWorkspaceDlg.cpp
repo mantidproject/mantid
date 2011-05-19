@@ -85,7 +85,7 @@ void ImportWorkspaceDlg::okClicked()
 		bool ok;
 		int low = lineLow->text().toInt(&ok, 10); 
 		
-		if (!ok || low < 0 || low > numHists)
+		if (!ok || low < 0 || low > static_cast<int>(numHists))
 		{
 			QMessageBox::warning(this, tr("Mantid"),
                    		tr("Lower limit is not valid - please change it.\n")
@@ -95,7 +95,7 @@ void ImportWorkspaceDlg::okClicked()
 		
 		int high = lineHigh->text().toInt(&ok, 10); 
 		
-		if (!ok || high < 0 || high > numHists)
+		if (!ok || high < 0 || high > static_cast<int>(numHists))
 		{
 			QMessageBox::warning(this, tr("Mantid"),
                    		tr("Upper limit is not valid - please change it.\n")
