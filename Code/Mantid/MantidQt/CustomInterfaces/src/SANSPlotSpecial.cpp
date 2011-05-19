@@ -188,6 +188,8 @@ void SANSPlotSpecial::calculateDerivatives()
 
 void SANSPlotSpecial::tableUpdated(int row, int column)
 {
+    UNUSED_ARG(row);
+
   if ( m_rearrangingTable ) { return; }
   if ( ! ( column == 3 || column == 5 ) ) { return; }
 
