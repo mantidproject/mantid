@@ -178,7 +178,7 @@ void SaveISISNexus::exec()
     saveInt("good_frames",&m_isisRaw->rpb.r_goodfrm);
     
     std::string experiment_identifier = boost::lexical_cast<std::string>(m_isisRaw->rpb.r_prop);
-    saveChar("experiment_identifier",&experiment_identifier[0],experiment_identifier.size());
+    saveChar("experiment_identifier",&experiment_identifier[0],static_cast<int>(experiment_identifier.size()));
     int tmp_int(0);
     saveInt("measurement_first_run",&tmp_int);
     saveString("measurement_id"," ");
@@ -340,13 +340,13 @@ int SaveISISNexus::saveStringVectorOpen(const char* name,const std::vector<std::
   if (buff_size <= 0) buff_size = 1;
   char *buff = new char[buff_size];
   int dim[2];
-  dim[0] = str_vec.size();
+  dim[0] = static_cast<int>(str_vec.size());
   dim[1] = buff_size;
   NXmakedata(handle,name,NX_CHAR,2,dim);
   NXopendata(handle,name);
   for(std::size_t i = 0; i < str_vec.size(); ++i)
   {
-    int start[] = {i,0};
+    int start[] = {static_cast<int>(i),0};
     int sizes[] = {1,buff_size};
     const char* str = str_vec[i].c_str();
     std::fill_n(buff,buff_size,' ');
@@ -367,7 +367,7 @@ void SaveISISNexus::saveString(const char* name,const std::string& str)
 {
   if (str.empty()) return;
   std::string buff(str);
-  saveChar(name,&buff[0],buff.size());
+  saveChar(name,&buff[0],static_cast<int>(buff.size()));
 }
 
 /**
@@ -379,14 +379,14 @@ void SaveISISNexus::saveStringOpen(const char* name,const std::string& str)
 {
   if (str.empty()) return;
   std::string buff(str);
-  saveCharOpen(name,&buff[0],buff.size());
+  saveCharOpen(name,&buff[0],static_cast<int>(buff.size()));
 }
 
 void SaveISISNexus::putAttr(const char* name,const std::string& value)
 {
   boost::scoped_array<char> buff(new char[value.size()]);
   std::copy(value.begin(),value.end(),buff.get());
-  NXputattr(handle,name,buff.get(),value.size(),NX_CHAR);
+  NXputattr(handle,name,buff.get(),static_cast<int>(value.size()),NX_CHAR);
 }
 
 void SaveISISNexus::putAttr(const char* name,char* value,int size)
@@ -838,20 +838,22 @@ void SaveISISNexus::runlog()
   NXmakegroup(handle,"runlog","IXrunlog");
   NXopengroup(handle,"runlog","IXrunlog");
 
-  write_runlog("period",&time_vec[0],&period_vec[0],NX_INT32,time_vec.size(),"none");
-  write_runlog("is_running",&time_vec[0],&is_running_vec[0],NX_INT32,time_vec.size(),"none");
-  write_runlog("is_waiting",&time_vec[0],&is_waiting_vec[0],NX_INT32,time_vec.size(),"none");
-  write_runlog("good_frames",&time_vec[0],&good_frames_vec[0],NX_INT32,time_vec.size(),"frames");
-  write_runlog("raw_frames",&time_vec[0],&raw_frames_vec[0],NX_INT32,time_vec.size(),"frames");
-  write_runlog("monitor_sum_1",&time_vec[0],&monitor_sum_1_vec[0],NX_INT32,time_vec.size(),"counts");
-  write_runlog("total_counts",&time_vec[0],&total_counts_vec[0],NX_INT32,time_vec.size(),"counts");
-  write_runlog("proton_charge",&time_vec[0],&proton_charge_vec[0],NX_FLOAT32,time_vec.size(),"uAh");
-  write_runlog("proton_charge_raw",&time_vec[0],&proton_charge_raw_vec[0],NX_FLOAT32,time_vec.size(),"uAh");
-  write_runlog("dae_beam_current",&time_vec[0],&dae_beam_current_vec[0],NX_FLOAT32,time_vec.size(),"uAh");
-  write_runlog("count_rate",&time_vec[0],&count_rate_vec[0],NX_FLOAT32,time_vec.size(),"counts");
-  write_runlog("np_ratio",&time_vec[0],&np_ratio_vec[0],NX_FLOAT32,time_vec.size(),"nones");
+  int time_vec_size = static_cast<int>(time_vec.size());
 
-  write_runlog("run_status",&time_vec[0],&run_status_vec[0],NX_INT32,time_vec.size(),"none");
+  write_runlog("period",&time_vec[0],&period_vec[0],NX_INT32,time_vec_size,"none");
+  write_runlog("is_running",&time_vec[0],&is_running_vec[0],NX_INT32,time_vec_size,"none");
+  write_runlog("is_waiting",&time_vec[0],&is_waiting_vec[0],NX_INT32,time_vec_size,"none");
+  write_runlog("good_frames",&time_vec[0],&good_frames_vec[0],NX_INT32,time_vec_size,"frames");
+  write_runlog("raw_frames",&time_vec[0],&raw_frames_vec[0],NX_INT32,time_vec_size,"frames");
+  write_runlog("monitor_sum_1",&time_vec[0],&monitor_sum_1_vec[0],NX_INT32,time_vec_size,"counts");
+  write_runlog("total_counts",&time_vec[0],&total_counts_vec[0],NX_INT32,time_vec_size,"counts");
+  write_runlog("proton_charge",&time_vec[0],&proton_charge_vec[0],NX_FLOAT32,time_vec_size,"uAh");
+  write_runlog("proton_charge_raw",&time_vec[0],&proton_charge_raw_vec[0],NX_FLOAT32,time_vec_size,"uAh");
+  write_runlog("dae_beam_current",&time_vec[0],&dae_beam_current_vec[0],NX_FLOAT32,time_vec_size,"uAh");
+  write_runlog("count_rate",&time_vec[0],&count_rate_vec[0],NX_FLOAT32,time_vec_size,"counts");
+  write_runlog("np_ratio",&time_vec[0],&np_ratio_vec[0],NX_FLOAT32,time_vec_size,"nones");
+
+  write_runlog("run_status",&time_vec[0],&run_status_vec[0],NX_INT32,time_vec_size,"none");
 
   // read in ICPevent file and create icp_event log
   std::ifstream icpevent_fil(ICPevent_filename.c_str());
@@ -879,7 +881,7 @@ void SaveISISNexus::runlog()
   NXmakegroup(handle,"icp_event","NXlog");
   NXopengroup(handle,"icp_event","NXlog");
 
-  saveFloatOpen("time",&time_vec[0],time_vec.size());
+  saveFloatOpen("time",&time_vec[0],static_cast<int>(time_vec.size()));
   putAttr("start",start_time_str);
   putAttr("units","seconds");
   close();
@@ -971,7 +973,7 @@ void SaveISISNexus::selog()
   NXopengroup(handle,"selog","IXselog");
 
   // create a log for each of the found log files
-  int nBase = base_name.size() + 1;
+  std::size_t nBase = base_name.size() + 1;
   for(std::size_t i = 0; i < potentialLogFiles.size(); ++i)
   {
     std::string logName = Poco::Path(potentialLogFiles[i]).getFileName();
@@ -1041,14 +1043,14 @@ void SaveISISNexus::selog()
     NXmakegroup(handle,"value_log","NXlog");
     NXopengroup(handle,"value_log","NXlog");
 
-    saveFloatOpen("time",&time_vec[0],time_vec.size());
+    saveFloatOpen("time",&time_vec[0],static_cast<int>(time_vec.size()));
     putAttr("start",start_time_str);
     putAttr("units","seconds");
     close();
 
     if (flt_vec.size() == str_vec.size())
     {
-      saveFloatOpen("value",&flt_vec[0],flt_vec.size());
+      saveFloatOpen("value",&flt_vec[0],static_cast<int>(flt_vec.size()));
     }
     else
     {
