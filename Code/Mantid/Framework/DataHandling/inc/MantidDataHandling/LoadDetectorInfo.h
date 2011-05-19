@@ -83,7 +83,7 @@ private:
   /// will store a pointer to the user selected workspace
   API::MatrixWorkspace_sptr m_workspace;
   /// number of histograms in the workspace
-  std::size_t m_numHists;
+  int m_numHists;
   /// the detector IDs that are monitors, according to the raw file
   std::set<int64_t> m_monitors;
   /// Xbin boundaries for the monitors, normally monitors have a different time delay and hence a different offset
@@ -110,13 +110,13 @@ private:
 
   void setDetectorParams(const detectorInfo &params, detectorInfo &changed);
   void adjDelayTOFs(double lastOffset, bool &differentDelays, const std::vector<detid_t> &detectIDs=std::vector<detid_t>(), const std::vector<float> &delays=std::vector<float>());
-  void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, std::size_t numDetectors);
+  void adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs, const float * const delays, int numDetectors);
   void adjustXs(const std::vector<detid_t> &detIDs, const std::vector<float> &offsets);
   void adjustXs(const double detectorOffset);
   void adjustXsCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
   void adjustXsUnCommon(const std::vector<float> &offsets, const std::vector<specid_t> &spectraList, spec2index_map &specs2index, std::vector<detid_t> missingDetectors);
   void noteMonitorOffset(const float offSet, const detid_t detID);
-  void setUpXArray(MantidVecPtr &theXValuesArray, specid_t specInd, double offset);
+  void setUpXArray(MantidVecPtr &theXValuesArray, size_t specInd, double offset);
   void logErrorsFromRead(const std::vector<detid_t> &missingDetectors);
   void sometimesLogSuccess(const detectorInfo &params, bool &setToFalse);
 

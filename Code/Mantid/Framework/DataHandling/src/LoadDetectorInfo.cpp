@@ -76,7 +76,7 @@ void LoadDetectorInfo::exec()
 {
   // get the infomation that will be need from the user selected workspace, assume it exsists because of the validator in init()
   m_workspace = getProperty("Workspace");
-  m_numHists = m_workspace->getNumberHistograms();
+  m_numHists = static_cast<int>(m_workspace->getNumberHistograms());
   // when we change the X-values will care take to maintain sharing. I have only implemented maintaining sharing where _all_ the arrays are initiall common
   m_commonXs = WorkspaceHelpers::sharedXData(m_workspace);
   // set the other member variables to their defaults
@@ -290,7 +290,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
   g_log.information() << "Writing to the detector parameter map, only the first and last entries will be logged here\n";
 
   // the number of detectors according to the raw file header
-  const int64_t numDets = static_cast<int64_t>(iraw.i_det);
+  const int numDets = iraw.i_det;
   
   // there are different formats for where pressures and wall thinknesses are stored check the number of user tables
   detectDatForm tableForm;
@@ -317,7 +317,7 @@ void LoadDetectorInfo::readRAW(const std::string& fName)
   // there are only used to output to the log the first and last parameters that were stored
   detectorInfo log;
   bool noneSet = true;
-  for (int64_t i = 0; i < numDets; ++i)
+  for (int i = 0; i < numDets; ++i)
   {
     // this code tells us what the numbers in the user table (iraw.ut), which we are about to use, mean
     switch (iraw.code[i])
@@ -459,7 +459,7 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
     const std::vector<float> &delays)
 {
   // a spectra wont be adjusted if their detector wasn't included in the input file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace
-  differentDelays = differentDelays || ( delays.size() < m_numHists );
+  differentDelays = differentDelays || ( static_cast<int>(delays.size()) < m_numHists );
   // if we don't have a list of delays then we have no choice
   differentDelays = (delays.size() > 0 && differentDelays);
   // see if adjusting the TOF Xbin boundaries requires knowledge of individual detectors or if they are all the same
@@ -482,7 +482,7 @@ void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, co
 *  @param delays :: required regardless of if differentDelays is true or false and needs to be in the same order as detectIDs
 *  @param numDetectors :: the size of the arrays pointed to by delays and detectIDs
 */void LoadDetectorInfo::adjDelayTOFs(double lastOffset, bool &differentDelays, const detid_t * const detectIDs,
-    const float * const delays, size_t numDetectors)
+    const float * const delays, int numDetectors)
 {
   // a spectra wont be adjusted if their detector wasn't included in the RAW file. So for differentDelays to false there need to be at least as many detectors in the data file as in the workspace 
   differentDelays = differentDelays || ( numDetectors < m_numHists );
@@ -560,7 +560,7 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
 
   MantidVecPtr newXs;
 
-  for ( size_t specInd = 0; specInd < m_numHists; ++specInd )
+  for ( int specInd = 0; specInd < m_numHists; ++specInd )
   {// check if we dealing with a monitor as these are dealt by a different function
     const specid_t specNum = m_workspace->getAxis(1)->spectraNo(specInd);
     const std::vector<detid_t> dets = m_workspace->spectraMap().getDetectors(specNum);
@@ -612,7 +612,7 @@ void LoadDetectorInfo::adjustXs(const double detectorOffset)
     }
     if ( specInd % INTERVAL == INTERVAL/2 )
     {
-      fracCompl += (2.0*static_cast<double>(INTERVAL)/3.0)/static_cast<double>(m_numHists);
+      fracCompl += (2.0*static_cast<double>(INTERVAL)/3.0)/m_numHists;
       progress( fracCompl );
       interruption_point();
     }
@@ -649,7 +649,7 @@ void LoadDetectorInfo::adjustXsCommon(const std::vector<float> &offsets, const s
       // and then move on to the next detector in the loop
       continue;
     }
-    const int64_t specIndex = specs2index[spectraList[j]];
+    const size_t specIndex = specs2index[spectraList[j]];
     // check if we dealing with a monitor as these are dealt by a different function
     const std::vector<detid_t> dets =
       m_workspace->spectraMap().getDetectors(spectraList[j]);
@@ -704,7 +704,7 @@ void LoadDetectorInfo::adjustXsUnCommon(const std::vector<float> &offsets, const
       // and then move on to the next detector in the loop
       continue;
     }
-    const specid_t specIndex = specs2index[spectraList[j]];
+    const size_t specIndex = specs2index[spectraList[j]];
     // check if we dealing with a monitor as these are dealt by a different function
     const std::vector<detid_t> dets =
       m_workspace->spectraMap().getDetectors(spectraList[j]);
@@ -759,7 +759,7 @@ void LoadDetectorInfo::noteMonitorOffset(const float offSet, const detid_t detID
 * @param specInd :: index number of histogram from with to take the original X-values 
 * @param offset :: _subtract_ this number from all the X-values
 */
-void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, specid_t specInd, double offset)
+void LoadDetectorInfo::setUpXArray(MantidVecPtr &theXValuesArray, size_t specInd, double offset)
 {
   std::vector<double> &AllXbins = theXValuesArray.access();
   AllXbins.resize(m_workspace->dataX(specInd).size());
