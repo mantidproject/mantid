@@ -66,7 +66,7 @@ void LinearBackground::fit(const std::vector<double>& X,const std::vector<double
   double y_mean = 0;
   double x2_mean = 0;
   double xy_mean = 0;
-  for(int i = 0; i < n; i++)
+  for(size_t i = 0; i < n; i++)
   {
     double x = X[i];
     double y = Y[i];
@@ -75,10 +75,10 @@ void LinearBackground::fit(const std::vector<double>& X,const std::vector<double
     x2_mean += x*x;
     xy_mean += x*y;
   }
-  x_mean /= n;
-  y_mean /= n;
-  x2_mean /= n;
-  xy_mean /= n;
+  x_mean /= static_cast<double>(n);
+  y_mean /= static_cast<double>(n);
+  x2_mean /= static_cast<double>(n);
+  xy_mean /= static_cast<double>(n);
 
   double a1 = (xy_mean - x_mean*y_mean)/(x2_mean-x_mean*x_mean);
   double a0 = y_mean - a1*x_mean;
