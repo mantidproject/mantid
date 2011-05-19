@@ -130,7 +130,7 @@ namespace Mantid
 
     // readData(int) should be changed to readNextSpectrum() returning the spectrum index
     // and skipData to skipNextSpectrum()
-    void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock, int startIndex)const
+    void ManagedRawFileWorkspace2D::readDataBlock(DataObjects::ManagedDataBlock2D *newBlock, int64_t startIndex)const
     {
       Poco::ScopedLock<Poco::FastMutex> mutex(m_mutex);
       if (!m_fileRaw)
@@ -138,7 +138,7 @@ namespace Mantid
         g_log.error("Raw file was not open.");
         throw std::runtime_error("Raw file was not open.");
       }
-      int blockIndex = static_cast<int>(startIndex / m_vectorsPerBlock);
+      int64_t blockIndex = static_cast<int64_t>(startIndex / m_vectorsPerBlock);
       // Modified data is stored in ManagedWorkspace2D flat file.
       if (m_changedBlock[blockIndex])
       {
@@ -151,7 +151,7 @@ namespace Mantid
 	{
 	  while(startIndex > m_readIndex-m_nmonitorSkipCounter)
 	  {
-	    isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
+	    isisRaw->skipData(m_fileRaw,static_cast<int>(m_readIndex)+1);// Adding 1 because we dropped the first spectrum.
 	    ++m_readIndex;
 	    if(isMonitor(m_readIndex))
 	      ++m_nmonitorSkipCounter;
@@ -181,14 +181,14 @@ namespace Mantid
 	while(index<endIndex)
 	{
 	  if(isMonitor(m_readIndex))
-	  {	isisRaw->skipData(m_fileRaw,m_readIndex+1);
+	  {	isisRaw->skipData(m_fileRaw,static_cast<int>(m_readIndex+1));
 	    //g_log.error()<<"skipData called for monitor index"<<m_readIndex<<std::endl;
 	    ++m_nmonitorSkipCounter;
 	    ++m_readIndex;
 	  }
 	  else
 	  {
-	    isisRaw->readData(m_fileRaw,m_readIndex+1);
+	    isisRaw->readData(m_fileRaw,static_cast<int>(m_readIndex+1));
 	    //g_log.error()<<"readData called for spectrum index"<<m_readIndex<< " and wsIndex is "<<index<< std::endl;
 	    if( m_readIndex == static_cast<int64_t>(m_noVectors+m_monitorList.size()) )
 	      break;
@@ -223,7 +223,7 @@ namespace Mantid
 	{
 	  while(startIndex > m_readIndex)
 	  {
-	    isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
+	    isisRaw->skipData(m_fileRaw,static_cast<int>(m_readIndex+1));// Adding 1 because we dropped the first spectrum.
 	    ++m_readIndex;
 	  }
 	}
@@ -247,7 +247,7 @@ namespace Mantid
   if (endIndex >= static_cast<int64_t>(m_noVectors)) endIndex = static_cast<int64_t>(m_noVectors);
 	for(int64_t index = startIndex;index<endIndex;index++,m_readIndex++)
 	{
-	  isisRaw->readData(m_fileRaw,m_readIndex+1);
+	  isisRaw->readData(m_fileRaw,static_cast<int>(m_readIndex+1));
 	  // g_log.error()<<"counter is "<<counter<<std::endl;
 	  MantidVec& y = newBlock->dataY(index);
 	  y.assign(isisRaw->dat1 + 1, isisRaw->dat1 + m_numberOfBinBoundaries);   
@@ -276,7 +276,7 @@ namespace Mantid
      * @param readIndex :: a spectrum index
      * @return true if it's a monitor ,otherwise false
      */
-    bool ManagedRawFileWorkspace2D::isMonitor(const specid_t readIndex)const
+    bool ManagedRawFileWorkspace2D::isMonitor(const int64_t readIndex)const
     {
       std::vector<specid_t>::const_iterator itr;
       for(itr=m_monitorList.begin();itr!=m_monitorList.end();++itr)
