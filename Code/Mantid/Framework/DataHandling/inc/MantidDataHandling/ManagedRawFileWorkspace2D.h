@@ -67,7 +67,7 @@ public:
  
 protected:
   /// Reads in a data block.
-  virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock, int64_t startIndex)const;
+  virtual void readDataBlock(DataObjects::ManagedDataBlock2D *newBlock,size_t startIndex)const;
   /// Saves the dropped data block to disk.
   virtual void writeDataBlock(DataObjects::ManagedDataBlock2D *toWrite) const;
 
@@ -84,13 +84,13 @@ private:
   void openTempFile();
   void removeTempFile()const;
   /// returns true if the given spectrum index is a monitor
-  bool isMonitor(const int64_t readIndex) const;
+  bool isMonitor(const detid_t readIndex) const;
 
   boost::shared_ptr<ISISRAW2> isisRaw;        ///< Pointer to an ISISRAW2 object
   const std::string m_filenameRaw;///< RAW file name.
   FILE* m_fileRaw;          ///< RAW file pointer.
   fpos_t m_data_pos;        ///< Position in the file where the data start.
-  mutable int64_t m_readIndex;  ///< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
+  mutable int m_readIndex;  ///< Index of the spectrum which starts at current position in the file (== index_of_last_read + 1)
   std::vector<boost::shared_ptr<MantidVec> > m_timeChannels; ///< Time bins
   std::map<int64_t,int64_t> m_specTimeRegimes;   ///< Stores the time regime for each spectrum
 
