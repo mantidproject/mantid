@@ -90,7 +90,7 @@ namespace DataHandling
           prog = new Progress(this, 0.0, 1.0, nSpec);
         }
         double bc1 = 0;
-        double bc2 = 0;
+        //double bc2 = 0;
         double bc4 = 0;
         if (  currentLine[0] == '\n' || currentLine[0] == '#' )
         {
