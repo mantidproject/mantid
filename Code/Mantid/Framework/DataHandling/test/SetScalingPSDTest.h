@@ -65,8 +65,8 @@ public:
       V3D newPos = det->getPos();
       V3D oldPos = originalPositions[i];
       TS_ASSERT_DELTA(newPos.Y(), expectedYPos[i], 1e-6);
-      TS_ASSERT_DELTA(abs(oldPos.X() - newPos.X()), 0.0, 1e-05);
-      TS_ASSERT_DELTA(abs(oldPos.Z() - newPos.Z()), 0.0, 1e-05);
+      TS_ASSERT_DELTA(fabs(oldPos.X() - newPos.X()), 0.0, 1e-05);
+      TS_ASSERT_DELTA(fabs(oldPos.Z() - newPos.Z()), 0.0, 1e-05);
       
       if( det->isMonitor() )
       {
