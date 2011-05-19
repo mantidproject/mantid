@@ -70,10 +70,9 @@ FindDetectorsPar::exec()
   secondary_flightpath.resize(nHist);
 
    Progress progress(this,0,1,100);
-   const int progStep = static_cast<int>(ceil(nHist/100.0));
       
       // Loop over spectra
-      for (int i = 0; i < nHist; i++) {
+      for (size_t i = 0; i < nHist; i++) {
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())
             {
