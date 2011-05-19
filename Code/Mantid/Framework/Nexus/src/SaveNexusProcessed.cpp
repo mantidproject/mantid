@@ -357,7 +357,7 @@ namespace NeXus
 
     // --- Fill in the combined event arrays ----
     PARALLEL_FOR_NO_WSP_CHECK()
-    for (std::size_t wi=0; wi < m_eventWorkspace->getNumberHistograms(); wi++)
+    for (int wi=0; wi < static_cast<int>(m_eventWorkspace->getNumberHistograms()); wi++)
     {
       PARALLEL_START_INTERUPT_REGION
       const DataObjects::EventList & el = m_eventWorkspace->getEventList(wi);
