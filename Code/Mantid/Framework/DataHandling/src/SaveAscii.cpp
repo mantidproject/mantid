@@ -58,8 +58,8 @@ namespace Mantid
     {
         // Get the workspace
         MatrixWorkspace_const_sptr ws = getProperty("Workspace");
-        size_t nSpectra = ws->getNumberHistograms();
-        int nBins = ws->blocksize();
+        int nSpectra = static_cast<int>(ws->getNumberHistograms());
+        int nBins = static_cast<int>(ws->blocksize());
 
         // Get the properties
         std::vector<int> spec_list = getProperty("SpectrumList");
