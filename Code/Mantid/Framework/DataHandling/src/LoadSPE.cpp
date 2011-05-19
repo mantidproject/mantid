@@ -82,13 +82,13 @@ void LoadSPE::exec()
   }
 
   // The first two numbers are the number of histograms and the number of bins
-  size_t nhist=0, nbins=0;
+  int nhist=0, nbins=0;
   int retval = fscanf(speFile,"%8u%8u\n",&nhist,&nbins);
   if ( retval != 2 ) reportFormatError("Header line");
 
   // Next line should be comment line: "### Phi Grid" or "### Q Grid"
   char comment[100];
-  fgets(comment,100,speFile);
+  char* _tmp = fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Create the axis that will hold the phi values
@@ -104,7 +104,7 @@ void LoadSPE::exec()
   }
 
   // Read in phi grid
-  for (unsigned int i = 0; i <= nhist; ++i)
+  for (int i = 0; i <= nhist; ++i)
   {
     double phi;
     retval = fscanf(speFile,"%10le",&phi);
@@ -117,10 +117,10 @@ void LoadSPE::exec()
     phiAxis->setValue(i,phi);
   }
   // Read to EOL
-  fgets(comment,100,speFile);
+  _tmp = fgets(comment,100,speFile);
 
   // Next line should be comment line: "### Energy Grid"
-  fgets(comment,100,speFile);
+  _tmp = fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Now the X bin boundaries
@@ -128,7 +128,7 @@ void LoadSPE::exec()
   MantidVec& X = XValues.access();
   X.resize(nbins+1);
 
-  for (unsigned int i = 0; i <= nbins; ++i)
+  for (int i = 0; i <= nbins; ++i)
   {
     retval = fscanf(speFile,"%10le",&X[i]);
     if ( retval != 1 ) 
@@ -139,7 +139,7 @@ void LoadSPE::exec()
     }
   }
   // Read to EOL
-  fgets(comment,100,speFile);
+  _tmp = fgets(comment,100,speFile);
 
   // Now create the output workspace
   MatrixWorkspace_sptr workspace = WorkspaceFactory::Instance().create("Workspace2D",nhist,nbins+1,nbins);
@@ -151,7 +151,7 @@ void LoadSPE::exec()
 
   // Now read in the data spectrum-by-spectrum
   Progress progress(this,0,1,nhist);
-  for (unsigned int j = 0; j < nhist; ++j) 
+  for (int j = 0; j < nhist; ++j)
   {
     // Set the common X vector
     workspace->setX(j,XValues);
@@ -177,7 +177,7 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 {
   // First, there should be a comment line
   char comment[100];
-  fgets(comment,100,speFile);
+  char* _tmp = fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // Then it's the Y values
@@ -202,10 +202,10 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
 
   }
   // Read to EOL
-  fgets(comment,100,speFile);
+  _tmp = fgets(comment,100,speFile);
 
   // Another comment line
-  fgets(comment,100,speFile);
+  _tmp = fgets(comment,100,speFile);
   if ( comment[0] != '#' ) reportFormatError(std::string(comment));
 
   // And then the error values
@@ -221,7 +221,7 @@ void LoadSPE::readHistogram(FILE* speFile, API::MatrixWorkspace_sptr workspace, 
     }
   }
   // Read to EOL
-  fgets(comment,100,speFile);
+  _tmp =fgets(comment,100,speFile);
 
   return;
 }
