@@ -343,7 +343,7 @@ namespace Mantid
           boost::shared_array<detid_t> dets(new detid_t[numHists]);
 
           //Compile the groups
-          for (size_t i = 0; i < static_cast<size_t>(numHists); ++i)
+          for (size_t i = 0; i < numHists; ++i)
           {    
             specid_t k = groups[ m_groupings[numHists*period + i] ];
 
@@ -459,7 +459,7 @@ namespace Mantid
       std::transform(Y.begin(), Y.end(), E.begin(), dblSqrt);
       // Populate the workspace. Loop starts from 1, hence i-1
       localWorkspace->setX(hist, tcbs);
-      localWorkspace->getAxis(1)->spectraNo(hist)= hist + 1;
+      localWorkspace->getAxis(1)->spectraNo(hist)= static_cast<int>(hist) + 1;
     }
 
 
