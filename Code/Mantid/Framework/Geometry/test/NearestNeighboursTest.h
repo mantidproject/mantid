@@ -3,6 +3,7 @@
 
 #include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IInstrument.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
@@ -27,7 +28,8 @@ public:
   {
     // Create Instrument and make it Parameterised
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    ParameterMap_sptr pmap(new ParameterMap());
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new ComponentCreationHelper::OneToOneSpectraMap(1, 18));
+    ParameterMap_sptr pmap(new ParameterMap(&(*spectramap)));
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
     detid2det_map m_detectors;
     m_instrument->getDetectors(m_detectors);
@@ -74,11 +76,13 @@ public:
     Instrument_sptr instrument = boost::dynamic_pointer_cast<Instrument>(ComponentCreationHelper::createTestInstrumentRectangular(2, 16) );
 
     // Test fails without a parameter map.
-    ParameterMap_sptr pmap(new ParameterMap());
+    boost::scoped_ptr<ISpectraDetectorMap> spectramap(new ComponentCreationHelper::OneToOneSpectraMap(256, 2*16*16));
+    ParameterMap_sptr pmap(new ParameterMap(&(*spectramap)));
     Instrument_sptr m_instrument(new Instrument(instrument, pmap));
 
     // Correct # of detectors
     TS_ASSERT_EQUALS( m_instrument->getDetectorIDs().size(), 16*16*2);
+
 
     RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);

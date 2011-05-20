@@ -4,6 +4,7 @@
 #include "MantidGeometry/Instrument/NearestNeighbours.h"
 #include "MantidKernel/MultiThreaded.h"
 #include "MantidGeometry/Instrument/Instrument.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 #include <cstring>
 
 namespace Mantid
@@ -19,7 +20,16 @@ namespace Mantid
     /**
      * Default constructor
      */
-    ParameterMap::ParameterMap() : m_map(), m_nearestNeighbours()
+    ParameterMap::ParameterMap()
+      : m_spectraMap(NULL), m_map(), m_nearestNeighbours()
+    {}
+
+    /**
+     * Constructor
+     * @param spectraMap :: A pointer to the spectra map
+     */
+    ParameterMap::ParameterMap(const ISpectraDetectorMap *const spectraMap) 
+      : m_spectraMap(spectraMap), m_map(), m_nearestNeighbours()
     {}
 
     /**
@@ -515,10 +525,7 @@ namespace Mantid
       m_cacheLocMap.clear();
       m_cacheRotMap.clear();
       m_boundingBoxMap.clear();
-      if ( m_nearestNeighbours )
-      {
-        m_nearestNeighbours->clear();
-      }
+      m_nearestNeighbours.reset();
     }
  
     ///Sets a cached location on the location cache
@@ -584,6 +591,16 @@ namespace Mantid
       return m_boundingBoxMap.getCache(comp->getComponentID(),box);
     }
 
+    //--------------------------------------------------------------------------
+    // Nearest Neighbours code. This may be moved after a rethink of where the neigbours map
+    // should live
+    //--------------------------------------------------------------------------
+    void ParameterMap::resetSpectraMap(const ISpectraDetectorMap *const spectramap)
+    {
+      m_spectraMap = spectramap;
+      // The neighbour map needs to be rebuilt
+      m_nearestNeighbours.reset();
+    }
 
     /**
      * Handles the building of the NearestNeighbours object, if it has not already been 
@@ -592,7 +609,13 @@ namespace Mantid
      */
     void ParameterMap::buildNearestNeighbours(const IComponent *comp) const
     {
-      if ( ! m_nearestNeighbours )
+      if( !m_spectraMap )
+      {
+	throw Kernel::Exception::NullPointerException("ParameterMap::buildNearestNeighbours", 
+						      "SpectraDetectorMap");
+      }
+
+      if ( !m_nearestNeighbours )
       {
         // Get pointer to Instrument
         boost::shared_ptr<const IComponent> parent(comp, NoDeleting());
@@ -603,15 +626,14 @@ namespace Mantid
         boost::shared_ptr<const Instrument> inst = boost::dynamic_pointer_cast<const Instrument>(parent);
         if ( inst )
         {
-          m_nearestNeighbours = NearestNeighbours_sptr(new NearestNeighbours(inst));
+          m_nearestNeighbours.reset(new NearestNeighbours(inst, *m_spectraMap));
         }
         else
         {
           throw Mantid::Kernel::Exception::NullPointerException("ParameterMap: buildNearestNeighbours", 
-                                                                  parent->getName());
+								parent->getName());
         }
       }
-      m_nearestNeighbours->build();
     }
     
     /**
@@ -622,7 +644,7 @@ namespace Mantid
      */
     std::map<detid_t, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
     {
-      if ( ! m_nearestNeighbours || ! m_nearestNeighbours->isPopulated() )
+      if ( !m_nearestNeighbours )
       {
         buildNearestNeighbours(comp);
       }

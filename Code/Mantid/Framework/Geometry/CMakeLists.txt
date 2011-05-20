@@ -151,6 +151,7 @@ set ( INC_FILES
 	inc/MantidGeometry/Rendering/OpenGL_Headers.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheReader.h
 	inc/MantidGeometry/Rendering/vtkGeometryCacheWriter.h
+        inc/MantidGeometry/ISpectraDetectorMap.h
 	inc/MantidGeometry/Surfaces/BaseVisit.h
 	inc/MantidGeometry/Tolerance.h
 	inc/MantidGeometry/V3D.h

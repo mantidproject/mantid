@@ -35,9 +35,10 @@ namespace Mantid
 
     /// Default constructor
     MatrixWorkspace::MatrixWorkspace() : 
-    IMDWorkspace(), m_axes(), m_isInitialized(false),
+      IMDWorkspace(), m_axes(), m_isInitialized(false),
       sptr_instrument(new Instrument), m_spectramap(), m_sample(), m_run(),
-      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap), m_masks(), m_indexCalculator()
+      m_YUnit(), m_YUnitLabel(), m_isDistribution(false), m_parmap(new ParameterMap(&(*m_spectramap))), 
+      m_masks(), m_indexCalculator()
     {}
 
     /// Destructor
@@ -157,7 +158,10 @@ namespace Mantid
     */
     SpectraDetectorMap& MatrixWorkspace::mutableSpectraMap()
     {
-      return m_spectramap.access();
+      SpectraDetectorMap& spectramap = m_spectramap.access();
+      // Update the parameter map's copy (which wipes the nearest neighbour tree)
+      m_parmap->resetSpectraMap(&(spectramap));
+      return spectramap;
     }
 
 

@@ -31,7 +31,6 @@ using Mantid::specid_t;
 
 namespace ComponentCreationHelper
 {
-
   //----------------------------------------------------------------------------------------------
   /**
    * Create a capped cylinder object

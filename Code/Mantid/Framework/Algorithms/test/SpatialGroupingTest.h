@@ -14,6 +14,8 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
+#include "MantidDataHandling/LoadRaw3.h"
+
 class SpatialGroupingTest : public CxxTest::TestSuite
 {
 public:
@@ -41,13 +43,16 @@ public:
   void testExec()
   {
     // Test the algorithm
-
+    // Create a workspace
+    const int nhist(18);
+    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(WorkspaceCreationHelper::Create2DWorkspaceBinned(18, 1));
     // Create a parameterised instrument
     Mantid::Geometry::Instrument_sptr instrument = boost::dynamic_pointer_cast<Mantid::Geometry::Instrument>(ComponentCreationHelper::createTestInstrumentCylindrical(2));
-    Mantid::Geometry::ParameterMap_sptr pmap(new Mantid::Geometry::ParameterMap());
-    instrument = boost::shared_ptr<Mantid::Geometry::Instrument>(new Mantid::Geometry::Instrument(instrument, pmap));
-    // need to create a workspace too
-    Mantid::API::MatrixWorkspace_sptr workspace = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(WorkspaceCreationHelper::CreateWorkspaceSingleValue(1.234));
+    for( int i = 1; i < nhist + 1; ++i )
+    {
+      workspace->getAxis(1)->spectraNo(i-1) = i;
+    }
+    workspace->mutableSpectraMap().populateSimple(1, nhist+1);
     workspace->setInstrument(instrument);
 
     alg = new Mantid::Algorithms::SpatialGrouping();

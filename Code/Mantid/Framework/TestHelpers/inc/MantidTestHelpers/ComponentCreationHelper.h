@@ -5,7 +5,7 @@
 #include "MantidGeometry/Objects/Object.h"
 #include "MantidGeometry/V3D.h"
 #include "MantidGeometry/Instrument/Instrument.h"
-
+#include "MantidGeometry/ISpectraDetectorMap.h"
 #include "MantidDataObjects/Workspace2D.h"
 
 // Forward declarations
@@ -106,6 +106,66 @@ namespace ComponentCreationHelper
    * @param verbose: prints out the instrument after creation.
    */
   DLL_TESTHELPERS Mantid::Geometry::IInstrument_sptr createTestInstrumentRectangular(int num_banks, int pixels);
+
+  //A simple 1:1 spectra map implementation
+  class DLL_TESTHELPERS OneToOneSpectraMap : public Mantid::Geometry::ISpectraDetectorMap
+  {
+  public:
+    OneToOneSpectraMap(const Mantid::specid_t start, const Mantid::specid_t nspectra) : 
+      m_start(start), m_nspectra(nspectra), m_itr(1)
+    {}
+    
+    /// Return number of detectors contributing to this spectrum
+    inline std::size_t ndet(const Mantid::specid_t) const
+    {
+      return 1;
+    }
+    /// Get a vector of detectors ids contributing to a spectrum
+    inline std::vector<Mantid::detid_t> getDetectors(const Mantid::specid_t spectrumNumber) const
+    {
+      return std::vector<Mantid::detid_t>(1, spectrumNumber);
+    }
+    /// Gets a list of spectra corresponding to a list of detector numbers
+    inline std::vector<Mantid::specid_t> getSpectra(const std::vector<Mantid::detid_t>& detectorList) const
+    {
+      return detectorList;
+    }
+    /// Return the size of the map
+    inline std::size_t nElements() const
+    {
+      return m_nspectra;
+    }
+    
+    /**@name Iterate over the whole map */
+    //@{
+    /// Setup the map for iteration from the beginning
+    inline void moveIteratorToStart() const
+    {
+      m_itr = m_start;
+    }
+    /// Returns whether a next element exists
+    inline bool hasNext() const
+    {
+      return (m_itr < m_nspectra + 1);
+    }
+    /// Advance the iterator to the next element
+    inline void advanceIterator() const
+    {
+      ++m_itr;
+    }
+    /// Returns the current element of the sequence
+    inline Mantid::specid_t getCurrentSpectrum() const
+    {
+      return m_itr;
+    }
+    
+  private:
+    const Mantid::specid_t m_start;
+    const Mantid::specid_t m_nspectra;
+    mutable Mantid::specid_t m_itr;
+  };
+
+
 
 }
 

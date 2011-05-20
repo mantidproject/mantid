@@ -5,7 +5,6 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/IMDWorkspace.h"
-#include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceHistory.h"
 #include "MantidAPI/MatrixWSIndexCalculator.h"
 #include "MantidAPI/Sample.h"
@@ -17,35 +16,30 @@
 #include "MantidKernel/Exception.h"
 #include "MantidKernel/Unit.h"
 #include "MantidKernel/cow_ptr.h"
-#include <boost/shared_ptr.hpp>
+
 #include <set>
-#include "MantidAPI/SpectraDetectorMap.h"
 
 namespace Mantid
 {
-  //Forward Decs
+  //----------------------------------------------------------------------------
+  // Forward declarations
+  //----------------------------------------------------------------------------
   namespace Geometry
   {
     class MDCell;
     class MDPoint;
     class ParameterMap;
   }
-
   namespace API
   {
-
-//    /** Map from one type of index (e.g. workspace index) to another type (e.g. spectrum # or detector id #).
-//    * Used by MatrixWorkspace to return maps.
-//    */
-//    typedef std::map<int64_t, int64_t> IndexToIndexMap;
-
+    class SpectraDetectorMap;
+    
+    //----------------------------------------------------------------------------
+    // Typedefs
+    //----------------------------------------------------------------------------
     // Map for associating indexes to generated MDPoints.
     typedef std::map<int64_t, Mantid::Geometry::MDPoint> MatrixMDPointMap;
 
-    //----------------------------------------------------------------------
-    // Forward Declaration
-    //----------------------------------------------------------------------
-    class SpectraDetectorMap;
     //----------------------------------------------------------------------
     /** Base MatrixWorkspace Abstract Class.
 
@@ -72,8 +66,7 @@ namespace Mantid
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
     */
-    
-    class DLLExport MatrixWorkspace : public IMDWorkspace //, public Workspace
+    class DLLExport MatrixWorkspace : public IMDWorkspace
     {
     public:
 
@@ -84,40 +77,40 @@ namespace Mantid
       typedef workspace_iterator<LocatedDataRef, MatrixWorkspace> iterator;
       /// Typedef for the const workspace_iterator to use with a Workspace
       typedef workspace_iterator<const LocatedDataRef, const MatrixWorkspace> const_iterator;
-
+      /// Initialize
       void initialize(const std::size_t &NVectors, const std::size_t &XLength, const std::size_t &YLength);
+      /// Delete
       virtual ~MatrixWorkspace();
-
+      
+      /**@name Instrument queries */
+      //@{
       void setInstrument(const Geometry::IInstrument_sptr&);
       Geometry::IInstrument_sptr getInstrument() const;
       boost::shared_ptr<Geometry::Instrument> getBaseInstrument()const;
+      Geometry::IDetector_sptr getDetector(const size_t workspaceIndex) const;
+      Geometry::IDetector_sptr getDetector(const int workspaceIndex) const;
+      Geometry::IDetector_sptr getDetector(const int64_t workspaceIndex) const;
+      double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
+      double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
+      //@}
 
-      // SpectraDetectorMap accessors
+      /// Const access to the spectra-detector map
       const SpectraDetectorMap& spectraMap() const;
+      /// Mutable access to the spectra-detector map
       virtual SpectraDetectorMap& mutableSpectraMap();
-
       // More mapping
       index2spec_map * getWorkspaceIndexToSpectrumMap() const;
       spec2index_map * getSpectrumToWorkspaceIndexMap() const;
       index2detid_map * getWorkspaceIndexToDetectorIDMap() const;
       detid2index_map * getDetectorIDToWorkspaceIndexMap( bool throwIfMultipleDets ) const;
       void getIndicesFromSpectra(const std::vector<specid_t>& spectraList, std::vector<size_t>& indexList) const;
-
       /// Sample accessors
-      const  Sample& sample() const;
+      const Sample& sample() const;
       Sample& mutableSample();
-
       /// Run details object access
       const Run & run() const;
       /// Writable version of the run object
       Run& mutableRun();
-
-      Geometry::IDetector_sptr getDetector(const size_t workspaceIndex) const;
-      Geometry::IDetector_sptr getDetector(const int workspaceIndex) const;
-      Geometry::IDetector_sptr getDetector(const int64_t workspaceIndex) const;
-
-      double detectorTwoTheta(Geometry::IDetector_const_sptr det) const;
-      double gravitationalDrop(Geometry::IDetector_const_sptr det, const double waveLength) const;
 
       /// Get the footprint in memory in bytes.
       virtual size_t getMemorySize() const;
@@ -152,7 +145,6 @@ namespace Mantid
       //----------------------------------------------------------------------
       // Methods for getting read-only access to the data.
       // Just passes through to the virtual dataX/Y/E function (const version)
-
       /// Returns a read-only (i.e. const) reference to the specified X array
       /// @param index :: workspace index to retrieve.
       const MantidVec& readX(std::size_t const index) const { return dataX(index); }
@@ -233,58 +225,40 @@ namespace Mantid
 
       /// Gets the number of points available on the workspace.
       virtual uint64_t getNPoints() const;
-
       /// Get the number of dimensions
       virtual size_t getNumDims() const;
-
       /// Get the x-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getXDimension() const;
-
       /// Get the y-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getYDimension() const;
-
       /// Get the z-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getZDimension() const;
-
       /// Get the t-dimension mapping.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getTDimension() const;
-
       /// Get the dimension with the specified id.
       virtual boost::shared_ptr<const Mantid::Geometry::IMDDimension> getDimension(std::string id) const;
-
       /// Get the dimension ids in their order
       virtual const std::vector<std::string> getDimensionIDs() const;
-
       /// Get the point at the specified index.
       virtual const Mantid::Geometry::SignalAggregate& getPoint(size_t index) const;
-
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment) const;
-
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment) const;
-
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment) const;
-
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(size_t dim1Increment, size_t dim2Increment, size_t dim3Increment, size_t dim4Increment) const;
-
       /// Get the cell at the specified index/increment.
       virtual const Mantid::Geometry::SignalAggregate& getCell(...) const;
-
       /// Provide the location of the underlying file. 
       virtual std::string getWSLocation() const;
-
       /// Provide the underlying xml for 
       virtual std::string getGeometryXML() const;
-
       /// Dimension id for x-dimension.
       static const std::string xDimensionId;
-
       /// Dimensin id for y-dimension.
       static const std::string yDimensionId;
-
       /// Getter for collapsed dimensions.
       Mantid::Geometry::VecIMDDimension_const_sptr getNonIntegratedDimensions() const
       {
@@ -316,16 +290,14 @@ namespace Mantid
       /// Has this workspace been initialised?
       bool m_isInitialized;
 
-      /// The instrument used for this experiment
+      /// The base instrument
       boost::shared_ptr<Geometry::Instrument> sptr_instrument;
 
     protected:
       /// The SpectraDetector table used for this experiment. Inside a copy-on-write pointer.
       Kernel::cow_ptr<SpectraDetectorMap> m_spectramap;
-
       /// The information on the sample environment
       Kernel::cow_ptr<Sample> m_sample;
-
       /// The run information
       Kernel::cow_ptr<Run> m_run;
 
@@ -339,13 +311,10 @@ namespace Mantid
 
       /// Parameters modifying the base instrument
       boost::shared_ptr<Geometry::ParameterMap> m_parmap;
-
       /// The set of masked bins in a map keyed on spectrum index
       std::map< int64_t, MaskList > m_masks;
-
       /// Associates indexes to MDPoints. Dynamic cache.
       mutable MatrixMDPointMap m_mdPointMap;
-
       /// Assists conversions to and from 2D histogram indexing to 1D indexing.
       MatrixWSIndexCalculator m_indexCalculator;
 

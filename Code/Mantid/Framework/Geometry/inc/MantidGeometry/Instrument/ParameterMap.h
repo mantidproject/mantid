@@ -29,6 +29,7 @@ namespace Geometry
   //---------------------------------------------------------------------------
   class BoundingBox;
   class NearestNeighbours;
+  class ISpectraDetectorMap;
 
   /** @class ParameterMap ParameterMap.h
 
@@ -77,8 +78,10 @@ namespace Geometry
     /// Parameter map iterator typedef
     typedef std::tr1::unordered_multimap<const ComponentID,boost::shared_ptr<Parameter> >::const_iterator pmap_cit;
 #endif
-    ///Constructor
+    /// Default constructor
     ParameterMap();
+    /// Constructor taking a pointer to a spectra map
+    ParameterMap(const ISpectraDetectorMap *const);
     /// Returns true if the map is empty, false otherwise
     inline bool empty() const { return m_map.empty(); }
     /// Return the size of the map
@@ -236,10 +239,22 @@ namespace Geometry
     void setCachedBoundingBox(const IComponent *comp, const BoundingBox & box) const;
     ///Attempts to retrieve a bounding box from the cache
     bool getCachedBoundingBox(const IComponent *comp, BoundingBox & box) const;
+    
+    /** @name Nearest neighbours */
+    // MG
+    // This is here for the moment because a detector doesn't have access to anything else.
+    // Should this be on the instrument with a reference passed to the detectors?
+    //@{
+    /// Update the spectra map reference
+    void resetSpectraMap(const ISpectraDetectorMap *const);
     /// Build and populate the NearestNeighbours object
     void buildNearestNeighbours(const IComponent *comp) const;
     /// Query the NearestNeighbours object for a detector
     std::map<detid_t, double> getNeighbours(const IComponent *comp, const double radius = 0.0) const;
+  private:
+    /// Requires a spectra map to give the correct neighbours
+    const ISpectraDetectorMap *m_spectraMap;
+    //@}
 
   private:
     ///Assignment operator

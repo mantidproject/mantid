@@ -204,6 +204,19 @@ namespace Mantid
       return false;
 
     }
+    
+    /**
+     * Return the neighbours within the given radius
+     * @param radius :: A given radius to search for neighbours
+     */
+    std::map<detid_t, double> DetectorGroup::getNeighbours(double radius)
+    {
+      if( m_detectors.empty() )
+      {
+	throw std::runtime_error("DetectorGroup::getNeighbours - Empty group");
+      }
+      return m_detectors[m_id]->getNeighbours(radius);
+    }
 
     /** Indicates whether this is a monitor.
     *  Will return false if even one member of the group is not flagged as a monitor
