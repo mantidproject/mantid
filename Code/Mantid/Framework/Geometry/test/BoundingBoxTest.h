@@ -160,6 +160,12 @@ public:
     TS_ASSERT_DELTA(parentBox.zMax(), 3.0, 1e-08);
   }
 
+  void test_That_The_Width_Returns_The_Correct_Vector_For_The_Box()
+  {
+    BoundingBox box(3.0,4.0,5.0,1.0,1.0,2.5);
+    TS_ASSERT_EQUALS(box.width(), V3D(2.0, 3.0, 2.5));
+  }
+
 private:
 
   void doPointTest(bool insideTest)

@@ -93,7 +93,9 @@ namespace Mantid
       /// Returns the min point of the box
       inline const V3D & maxPoint() const { return m_maxPoint; }
       /// Returns the centre of the bounding box
-      inline V3D centrePoint() const { return Geometry::V3D(0.5*(xMax() + xMin()), 0.5*(yMax() + yMin()), 0.5*(zMax() + zMin())); }
+      inline V3D centrePoint() const { return V3D(0.5*(xMax() + xMin()), 0.5*(yMax() + yMin()), 0.5*(zMax() + zMin())); }
+      /// Returns the width of the box
+      inline V3D width() const { return V3D(m_maxPoint-m_minPoint); }
       //@}
       
       /** @name Querying */

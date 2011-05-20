@@ -10,41 +10,23 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& SpectraDetectorMap::g_log = Kernel::Logger::get("SpectraDetectorMap");
 
-    SpectraDetectorMap::SpectraDetectorMap() : m_s2dmap()
+    /**
+     * Default constrcutor
+     */
+    SpectraDetectorMap::SpectraDetectorMap() : m_s2dmap(), m_citr(m_s2dmap.begin())
     {}
 
-    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy) : m_s2dmap(copy.m_s2dmap)
+    /**
+     * Copy constructor
+     * @param copy :: An object to copy from.  
+     */
+    SpectraDetectorMap::SpectraDetectorMap(const SpectraDetectorMap& copy) 
+      : m_s2dmap(copy.m_s2dmap), m_citr(copy.m_citr)
     {}
 
+    /// Destructor
     SpectraDetectorMap::~SpectraDetectorMap()
     {}
-
-
-//    //------------------------------------------------------------------------------------------------
-//    /** Populate the map with 2 arrays; one detector per spectrum
-//     *
-//     * @param _spectable :: bare vector of the spectrum numbers
-//     * @param _udettable :: bare vector of the detector ids (same length as spectable)
-//     * @param nentries :: number of entries in the vectors
-//     */
-//    void SpectraDetectorMap::populate(const int* _spectable, const int* _udettable, int64_t nentries)
-//    {
-//      m_s2dmap.clear();
-//      if (nentries<=0)
-//      {
-//        g_log.error("Populate : number of entries should be > 0");
-//        throw std::invalid_argument("Populate : number of entries should be > 0");
-//      }
-//      for (int64_t i=0; i<nentries; ++i)
-//      {
-//        // Uncomment the line below to get a print out of the mapping as it's loaded
-//        // g_log.error() << *_spectable << " " << *_udettable << std::endl;
-//        m_s2dmap.insert(std::pair<specid_t,detid_t>(static_cast<int64_t>(*_spectable),static_cast<int64_t>(*_udettable))); // Insert current detector with Spectra number as key
-//        ++_spectable;
-//        ++_udettable;
-//      }
-//      return;
-//    }
 
     /** Populate the map with 2 arrays; one detector per spectrum
      *
@@ -261,6 +243,47 @@ namespace Mantid
     bool SpectraDetectorMap::operator!=(const SpectraDetectorMap& other) const
     {
       return !(*this == other);
+    }
+
+    //------------------------------------------------------------------------------------------------
+    /**
+     * Setup the map for iteration from the beginning
+     */
+    void SpectraDetectorMap::moveIteratorToStart() const
+    {
+      m_citr = m_s2dmap.begin();
+    }
+
+    /**
+     * Returns whether a next element exists
+     * @returns True if there is another element to access, false otherwise
+     */
+    bool SpectraDetectorMap::hasNext() const
+    {
+      return m_citr != m_s2dmap.end();
+    }
+    
+    /**
+     * Advance the iterator to the next element
+     * @throws std::out_range_error If the final position is invalid. The iterator is left in 
+     * a valid state
+     */
+    void SpectraDetectorMap::advanceIterator() const
+    {
+      if( m_citr == m_s2dmap.end() )
+      {
+	throw std::out_of_range("SpectraDetectorMap::advanceIterator - Next element is out of range, have you cheked hasNext()?");
+      }
+      ++m_citr;
+    }
+
+    /**
+     * Returns the current element of the sequence
+     * @returns The element currently being pointed at.
+     */
+    specid_t SpectraDetectorMap::getCurrentSpectrum() const
+    {
+      return m_citr->first;
     }
 
   } // Namespace API 

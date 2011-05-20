@@ -131,6 +131,35 @@ public:
     TS_ASSERT( sdMap != sdMapLocal )
   }
 
+  void test_Move_Iterator_To_Start_Gives_First_Element_When_Asked()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(10, 15);
+    // Ordered so the first element is 10
+    TS_ASSERT_THROWS_NOTHING(sdmapLocal.moveIteratorToStart());
+    TS_ASSERT_EQUALS(sdmapLocal.getCurrentSpectrum(), 10);
+  }
+
+  void test_Iterating_Over_The_Whole_Map_Doesnt_Throw()
+  {
+    SpectraDetectorMap sdmapLocal;
+    sdmapLocal.populateSimple(10, 15);
+    sdmapLocal.moveIteratorToStart();
+    int expected(10);
+    while(sdmapLocal.hasNext())
+    {
+      int value(-1);
+      TS_ASSERT_THROWS_NOTHING(value = sdmapLocal.getCurrentSpectrum());
+      TS_ASSERT_EQUALS(expected, value);
+      sdmapLocal.advanceIterator();
+      ++expected;
+    }
+    //Trying to advance the iterator again
+    TS_ASSERT_THROWS(sdmapLocal.advanceIterator(), std::out_of_range);
+  }
+
+
+
 private:
   void populateSDMap(SpectraDetectorMap& sdMap, int length, const int offset)
   {
