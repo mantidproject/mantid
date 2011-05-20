@@ -18,6 +18,12 @@
 #   define CXXTEST_TEMPLATE_INSTANTIATION template<>
 #endif // _CXXTEST_OLD_TEMPLATE_SYNTAX
 
+// Russell Taylor: Disable an Intel compiler warning just for this
+// third-party file.
+#ifdef __INTEL_COMPILER
+  #pragma warning disable 191
+#endif
+
 namespace CxxTest 
 {
     //
@@ -374,5 +380,10 @@ namespace CxxTest
 
 #define CXXTEST_ENUM_MEMBER( MEMBER ) \
     case MEMBER: return #MEMBER;
+
+// Russell Taylor: Re-enable the warning disable at the top of the file
+#ifdef __INTEL_COMPILER
+  #pragma warning enable 191
+#endif
 
 #endif // __cxxtest__ValueTraits_h__
