@@ -397,6 +397,23 @@ void MuonAnalysis::runLoadCurrent()
     return;
   }
 
+  if ( instname == "EMU" || instname == "HIFI" || instname == "MUSR")
+  {
+    QString psudoDAE = "\\\\" + instname + "\\data\\" + instname + "auto_A.tmp";
+    Poco::File l_path( psudoDAE.toStdString() );
+    if ( !l_path.exists() )
+    {
+      QMessageBox::warning(this,"Mantid - MuonAnalysis", 
+        QString("Can't load ") + "EMU Current data since\n" +
+        psudoDAE + QString("\n") +
+        QString("does not seem to exist"));
+      return;
+    }
+    m_previousFilename = psudoDAE;
+    inputFileChanged(psudoDAE);
+    return;
+  }
+
   QString daename = "NDX" + instname;
 
   // Load dae file
