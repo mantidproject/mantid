@@ -48,7 +48,7 @@ DetectorsRing::calcRingRadius()
 	  rVect       = it->second->getPos()-RingCenter;
 	  RingRadius += rVect.norm2();
 	}
-	RingRadius = sqrt(RingRadius)/m_detectors.size();
+	RingRadius = sqrt(RingRadius)/double(m_detectors.size());
 }
 /// Destructor
 DetectorsRing::~DetectorsRing()
