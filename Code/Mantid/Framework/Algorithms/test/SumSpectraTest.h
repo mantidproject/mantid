@@ -66,7 +66,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(output = AnalysisDataService::Instance().retrieve(outputSpace1));
 
     Workspace2D_const_sptr output2D = boost::dynamic_pointer_cast<const Workspace2D>(output);
-    size_t max;
+    size_t max = 0;
     TS_ASSERT_EQUALS( max = inputSpace->blocksize(), output2D->blocksize());
     TS_ASSERT_EQUALS( output2D->getNumberHistograms(), 1);
 
