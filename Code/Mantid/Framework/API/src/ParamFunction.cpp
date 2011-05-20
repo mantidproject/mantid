@@ -74,7 +74,11 @@ void ParamFunction::setParameter(int i, const double& value, bool explicitlySet)
  */
 void ParamFunction::setParameterDescription(size_t i, const std::string& description)
 {
-  if (static_cast<int>(i) >= nParams())
+  // Casting this to an int could result in it being turned into a -1
+  // so need to check that also. 
+  // @todo: nParams should return size_t and get rid of -1 error returns
+  int iindex = static_cast<int>(i);
+  if( iindex >= nParams() || iindex < 0 )
   {
     throw std::out_of_range("ParamFunction parameter index out of range.");
   }
