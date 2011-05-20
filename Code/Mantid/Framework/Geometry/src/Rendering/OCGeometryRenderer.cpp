@@ -5,6 +5,11 @@
 #include "MantidGeometry/Quat.h"
 #include <climits>
 
+// Squash a warning coming out of an OpenCascade header
+#ifdef __INTEL_COMPILER
+  #pragma warning disable 191
+#endif
+
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Pnt.hxx>
 #include <TopoDS.hxx>
@@ -15,6 +20,10 @@
 #include <Poly_Array1OfTriangle.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <Poly_Triangulation.hxx>
+
+#ifdef __INTEL_COMPILER
+  #pragma warning enable 191
+#endif
 
 namespace Mantid
 {

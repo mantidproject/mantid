@@ -14,6 +14,10 @@
 #include "MantidGeometry/Surfaces/Torus.h"
 #include "MantidGeometry/Objects/Rules.h"
 
+// Squash a warning coming out of an OpenCascade header
+#ifdef __INTEL_COMPILER
+  #pragma warning disable 191
+#endif
 
 #include "MantidGeometry/Rendering/OpenCascadeConfig.h"
 #include <gp_Trsf.hxx>
@@ -40,6 +44,10 @@
 #include <BRepBuilderAPI_Transform.hxx>
 #include <BRep_Tool.hxx>
 #include <Poly_Triangulation.hxx>
+
+#ifdef __INTEL_COMPILER
+  #pragma warning enable 191
+#endif
 
 namespace Mantid
 {
