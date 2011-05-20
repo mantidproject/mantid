@@ -38,18 +38,18 @@ RingRadius(0)
 void
 DetectorsRing::calcRingRadius()
 {
-	RingRadius=0;
+    RingRadius=0;
 
-	DetCollection::const_iterator it;
-	for (it = m_detectors.begin(); it != m_detectors.end(); ++it){
-		  if(it->second->isValid(RingCenter)){
-			  g_log.error()<<" can not build a detectors ring as ring center belongs to one of the detectors\n";
-			  throw(std::invalid_argument("wrong group to build a detectors ring"));
-		   }
-	  V3D rVect       = it->second->getPos()-RingCenter;
-	  RingRadius += rVect.norm2();
-	}
-	RingRadius = sqrt(RingRadius/double(m_detectors.size()));
+    DetCollection::const_iterator it;
+    for (it = m_detectors.begin(); it != m_detectors.end(); ++it){
+          if(it->second->isValid(RingCenter)){
+              g_log.error()<<" can not build a detectors ring as ring center belongs to one of the detectors\n";
+              throw(std::invalid_argument("wrong group to build a detectors ring"));
+           }
+      V3D rVect       = it->second->getPos()-RingCenter;
+      RingRadius += rVect.norm2();
+    }
+    RingRadius = sqrt(RingRadius/double(m_detectors.size()));
 }
 /// Destructor
 DetectorsRing::~DetectorsRing()
