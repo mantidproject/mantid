@@ -147,9 +147,9 @@ namespace Mantid
       }
       if(m_monitorList.size()>0)
       {	
-	if (startIndex > m_readIndex)
+        if ( static_cast<int>(startIndex) > m_readIndex)
 	{
-	  while(startIndex > m_readIndex-m_nmonitorSkipCounter)
+          while(static_cast<int>(startIndex) >  m_readIndex-m_nmonitorSkipCounter)
 	  {
 	    isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
 	    ++m_readIndex;
@@ -160,7 +160,7 @@ namespace Mantid
 	else
 	{
 	  int nwords = 0;
-	  while(startIndex+m_nmonitorSkipCounter+1 < m_readIndex)
+          while(static_cast<int>(startIndex)+ m_nmonitorSkipCounter+1 <  m_readIndex)
 	  {
 	    if(isMonitor(m_readIndex))
 	      --m_nmonitorSkipCounter;
@@ -219,9 +219,9 @@ namespace Mantid
       }
       else
       {	
-	if (startIndex > m_readIndex)
+        if ( static_cast<int>(startIndex) > m_readIndex)
 	{
-	  while(startIndex > m_readIndex)
+          while( static_cast<int>(startIndex) > m_readIndex)
 	  {
 	    isisRaw->skipData(m_fileRaw,m_readIndex+1);// Adding 1 because we dropped the first spectrum.
 	    ++m_readIndex;
@@ -230,7 +230,7 @@ namespace Mantid
 	else
 	{
 	  int nwords = 0;
-	  while(startIndex < m_readIndex)
+          while( static_cast<int>(startIndex) < m_readIndex)
 	  {			 
 	    --m_readIndex;
 	    nwords += 4*isisRaw->ddes[m_readIndex+1].nwords;
@@ -244,7 +244,7 @@ namespace Mantid
 	  }
 	}
 	int64_t endIndex = startIndex+m_vectorsPerBlock < m_noVectors?startIndex+m_vectorsPerBlock:m_noVectors;
-	if (endIndex >= m_noVectors) endIndex = m_noVectors;
+        if (endIndex >=  static_cast<int64_t>(m_noVectors)) endIndex = m_noVectors;
 	for(int64_t index = startIndex;index<endIndex;index++,m_readIndex++)
 	{
 	  isisRaw->readData(m_fileRaw,m_readIndex+1);
