@@ -487,7 +487,8 @@ public:
     FILE* pf = fopen(buf, "r");
     if (pf) {
         int size; //       total program size
-        fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+        int status = fscanf(pf, "%u" /* %u %u %u %u %u"*/, &size/*, &resident, &share, &text, &lib, &data*/);
+        (void) status;
         fclose(pf);
         return size*4; //On my system each number here = 4 kb
     }
