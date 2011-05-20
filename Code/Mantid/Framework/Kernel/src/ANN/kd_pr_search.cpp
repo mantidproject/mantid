@@ -27,7 +27,7 @@
 // MG: gcc doesn't like line 117 about a pointer reference 
 // but this is not our code and it seems to function 
 // so disable the warning.
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 

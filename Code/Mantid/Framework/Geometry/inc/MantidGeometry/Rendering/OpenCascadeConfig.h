@@ -36,7 +36,7 @@
 //Open Cascade maths header
 #include <Standard_math.hxx>
 
-#if __GNUC__
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
   #pragma GCC diagnostic ignored "-Wcast-qual"
 #endif
 

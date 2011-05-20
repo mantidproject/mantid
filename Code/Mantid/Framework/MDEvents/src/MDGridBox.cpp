@@ -14,8 +14,11 @@ using namespace Mantid;
 using namespace Mantid::Kernel;
 using namespace Mantid::API;
 
-#if defined(__GNUC__)
-/// This pragma ignores the warning in the ctor where "d<nd-1" for nd=1. This is okay (though would be better if it were for only that function
+// These pragmas ignores the warning in the ctor where "d<nd-1" for nd=1.
+// This is okay (though would be better if it were for only that function
+#if (defined(__INTEL_COMPILER))
+#pragma warning disable 196
+#elif defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 

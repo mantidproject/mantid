@@ -9,7 +9,7 @@
  there doesn't seem to be a problem when it is used so disable the warning but
  just for this translation unit
  */ 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
 #endif
 

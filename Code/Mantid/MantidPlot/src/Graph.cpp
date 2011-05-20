@@ -101,7 +101,7 @@
 
 // We can safely ignore warnings about assuming signed overflow does not occur from qvector.h
 // (They really should have implemented it with unsigned types!
-#ifdef __GNUC__
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
  #pragma GCC diagnostic ignored "-Wstrict-overflow"
 #endif
 

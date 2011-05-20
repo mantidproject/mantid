@@ -4,7 +4,7 @@
 // it is 3rd party code
 //------------------------------------------------------------------------------
 
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
   #pragma GCC diagnostic ignored "-Wcast-qual"
   #pragma GCC diagnostic ignored "-Wconversion"
   #pragma GCC diagnostic ignored "-Wunused-parameter"

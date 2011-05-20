@@ -61,7 +61,7 @@
 
 // M. Gigg: Added the next two pragmas to supress the warnings regarding
 // unused parameters since this is a third party package
-#if defined(__GNUC__)
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #elif defined _WIN32 
 #pragma warning( disable: 4100 )

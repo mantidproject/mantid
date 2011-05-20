@@ -2,7 +2,7 @@
 // A wrapper for the auto-generated sipqtipart?.cpp files to disable warnings
 // that we can't control
 //------------------------------------------------------------------------------
-#ifdef __GNUC__
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
   #pragma GCC diagnostic ignored "-Wuninitialized"
   #pragma GCC diagnostic ignored "-Wconversion"
   #pragma GCC diagnostic ignored "-Wunused-variable"

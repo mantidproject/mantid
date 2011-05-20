@@ -27,7 +27,8 @@
  *                                                                         *
  ***************************************************************************/
 
-#if defined(__GNUC__)
+// Disable various warnings as this is not our code
+#if defined(__GNUC__) && !(defined(__INTEL_COMPILER))
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wunused-result"
@@ -39,6 +40,10 @@
 
 #ifdef _WIN32
   #pragma warning( disable: 4800 )
+#endif
+
+#ifdef __INTEL_COMPILER
+  #pragma warning disable 181
 #endif
 
 #define  _CRT_SECURE_NO_WARNINGS
