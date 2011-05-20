@@ -99,6 +99,36 @@ public:
     delete d;
   }
 
+  void test_GetDetectors_With_All_Valid_IDs()
+  {
+    const size_t ndets(3);
+    std::vector<detid_t> detIDs(ndets);
+    detIDs[0] = 1;
+    detIDs[1] = 10;
+    detIDs[2] = 11;
+
+    std::vector<IDetector_sptr> dets;
+    TS_ASSERT_THROWS_NOTHING(dets = instrument.getDetectors(detIDs));
+    TS_ASSERT_EQUALS(dets.size(), ndets);
+    for( size_t i = 0; i < ndets; ++i )
+    {
+      TS_ASSERT_EQUALS(dets[i]->getID(), detIDs[i]);
+    }
+    
+  }
+
+  void test_GetDetectors_Throws_With_Invalid_IDs()
+  {
+    const size_t ndets(1);
+    std::vector<detid_t> detIDs(ndets);
+    detIDs[0] = 10000;
+
+    std::vector<IDetector_sptr> dets;
+    TS_ASSERT_THROWS(dets = instrument.getDetectors(detIDs), Kernel::Exception::NotFoundError);
+    
+  }
+
+
   void testCasts()
   {
     Instrument *i = new Instrument;

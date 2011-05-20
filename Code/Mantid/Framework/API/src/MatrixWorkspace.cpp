@@ -469,14 +469,7 @@ namespace Mantid
         return localInstrument->getDetector(dets[0]);
       }
       // Else need to construct a DetectorGroup and return that
-      std::vector<Geometry::IDetector_sptr> dets_ptr;
-      dets_ptr.reserve(ndets);
-      std::vector<detid_t>::const_iterator it;
-      for ( it = dets.begin(); it != dets.end(); ++it )
-      {
-        dets_ptr.push_back( localInstrument->getDetector(*it) );
-      }
-
+      std::vector<Geometry::IDetector_sptr> dets_ptr = localInstrument->getDetectors(dets);
       return Geometry::IDetector_sptr( new Geometry::DetectorGroup(dets_ptr, false) );
     }
 

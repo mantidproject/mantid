@@ -70,10 +70,10 @@ public:
   /// Returns a unit vector pointing in the direction of the beam
   Geometry::V3D getBeamDirection() const;
 
-
-
   /// Returns a pointer to the geometrical object for the detector with the given ID
   virtual Geometry::IDetector_sptr getDetector(const detid_t &detector_id) const = 0;
+  /// Returns a list of Detectors for the given detectors ids
+  virtual std::vector<IDetector_sptr> getDetectors(const std::vector<detid_t> &det_ids) const = 0;
 
   /// Fill a vector with all the detectors contained in a named component
   virtual void getDetectorsInBank(std::vector<Geometry::IDetector_sptr> & dets, const std::string & bankName) = 0;
