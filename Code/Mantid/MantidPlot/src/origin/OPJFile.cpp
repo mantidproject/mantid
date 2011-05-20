@@ -1893,7 +1893,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 	GRAPH.push_back(graph(name));
 	readWindowProperties(GRAPH.back(), f, debug, POS, headersize);
-        char c = 0;
+        //char c = 0;
 
 	unsigned short graph_width;
 	fseek(f,POS + 0x23,SEEK_SET);
