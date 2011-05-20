@@ -693,9 +693,9 @@ class WeightedAzimuthalAverage(ReductionStep):
             ny_pixels = int(mtd[workspace].getInstrument().getNumberParameter("number-of-y-pixels")[0])
             
             # Q min is one pixel from the center, unless we have the beam trap size
-            try:
+            if mtd[workspace].getRun().hasProperty("beam-trap-radius"):
                 mindist = mtd[workspace].getRun().getProperty("beam-trap-radius").value
-            except:
+            else:
                 mindist = min(pixel_size_x, pixel_size_y)
             qmin = 4*math.pi/wavelength_max*math.sin(0.5*math.atan(mindist/sample_detector_distance))
             

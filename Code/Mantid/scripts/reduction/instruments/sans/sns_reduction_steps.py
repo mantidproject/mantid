@@ -106,6 +106,14 @@ class LoadRun(ReductionStep):
         else:
             data_file = self._data_file
         
+        # Configuration files
+        config_file = None
+        config_files = []
+        class _ConfigFile(object):
+            def __init__(self, run, path):
+                self.run = run
+                self.path = path
+        
         # Load data
         def _load_data_file(file_name, wks_name):
             filepath = reducer._full_file_path(file_name)
@@ -135,15 +143,29 @@ class LoadRun(ReductionStep):
                 # Doesn't look like event pre-nexus, try event nexus
                 is_event_nxs = True
             
-            # Mapping file
-            mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
-            directory,_ = os.path.split(event_file)
-            mapping_file = os.path.join(directory, mapping_file)
             
+            # Find available configuration files
+            directory,_ = os.path.split(filepath)
+            files = os.listdir(directory)
+            for file in files:
+                name, ext = os.path.splitext(file)
+                if name.startswith("eqsans_configuration"):
+                    # The extension should be a run number
+                    try:
+                        ext = ext.replace('.','')
+                        config_files.append(_ConfigFile(int(ext),file))
+                    except:
+                        # Bad extension, which means it's not the file we are looking for
+                        pass
+                
             if is_event_nxs:
                 mantid.sendLogMessage("Loading %s as event Nexus" % (filepath))
-                LoadSNSEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
+                LoadEventNexus(Filename=filepath, OutputWorkspace=workspace+'_evt')
             else:
+                # Mapping file
+                mapping_file = reducer.instrument.definition.getStringParameter("TS_mapping_file")[0]
+                mapping_file = os.path.join(directory, mapping_file)
+                
                 mantid.sendLogMessage("Loading %s as event pre-Nexus" % (filepath))
                 nxs_file = event_file.replace("_neutron_event.dat", ".nxs")
                 LoadEventPreNeXus(EventFilename=event_file, OutputWorkspace=workspace+'_evt', PulseidFilename=pulseid_file, MappingFilename=mapping_file, PadEmptyPixels=1)
@@ -187,6 +209,30 @@ class LoadRun(ReductionStep):
         else:
             mantid.sendLogMessage("Beam center isn't defined: skipping beam center alignment for %s" % workspace)
 
+        # Choose and process configuration file
+        if len(config_files)>0:
+            if mtd[workspace+'_evt'].getRun().hasProperty("run_number"):
+                run_prop = mtd[workspace+'_evt'].getRun().getProperty("run_number")
+                try:
+                    run_as_int = int(run_prop.value)
+                    def _compare(item, compare_with):
+                         if item.run < compare_with.run and compare_with.run <= run_as_int:
+                             return compare_with
+                         else:
+                             return item 
+                    config_file = reduce(_compare, config_files).path
+                except:
+                    # Could not read in the run number
+                    pass
+            else:
+                mantid.sendLogMessage("Could not find run number file for %s" % workspace)
+            
+        if config_file is not None:
+            output_str +=  "Using configuration file: %s\n" % config_file
+        else:
+            mantid.sendLogMessage("Could not find configuration file for %s" % workspace)
+            output_str += "Could not find configuration file for %s\n" % workspace
+            
         # Modify TOF
         a = EQSANSTofStructure(InputWorkspace=workspace+'_evt')
         offset = float(a.getPropertyValue("TofOffset"))
@@ -261,8 +307,8 @@ class Transmission(BaseTransmission):
     def execute(self, reducer, workspace):
         # The transmission calculation only works on the original un-normalized counts
         if not reducer.is_clean(workspace):
-            trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
-            if trans_prop is not None:
+            if mtd[workspace].getRun().hasProperty("transmission_ws"):
+                trans_prop = mtd[workspace].getRun().getProperty("transmission_ws")
                 if mtd.workspaceExists(trans_prop.value):
                     self._transmission_ws = trans_prop.value
                 else:

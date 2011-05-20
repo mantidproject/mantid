@@ -71,9 +71,8 @@ class AbsoluteScale(BaseAbsoluteScale):
         if self._sample_thickness is not None:
             thickness = self._sample_thickness
         else:
-            thickness_prop = mtd[workspace].getRun().getProperty("sample-thickness")
-            if thickness_prop is not None:
-                thickness = thickness_prop.value
+            if mtd[workspace].getRun().hasProperty("sample-thickness"):
+                thickness = mtd[workspace].getRun().getProperty("sample-thickness").value
             else:
                 raise RuntimeError, "AbsoluteScale could not get the sample thickness"
                 
@@ -109,18 +108,16 @@ class AbsoluteScale(BaseAbsoluteScale):
             monitor = reducer._normalizer.get_normalization_spectrum()
         monitor = mtd[data_file_ws].dataY(monitor)[0]
         
-        sdd_property = mtd[data_file_ws].getRun().getProperty("sample_detector_distance")
-        if sdd_property is not None:
-            sdd = sdd_property.value
+        if mtd[data_file_ws].getRun().hasProperty("sample_detector_distance"):
+            sdd = mtd[data_file_ws].getRun().getProperty("sample_detector_distance").value
         else:
             raise RuntimeError, "AbsoluteScale could not read the sample-detector-distance"
         
         if self._beamstop_diameter is not None:
             beam_diameter = self._beamstop_diameter
         else:
-            beamstop_property = mtd[data_file_ws].getRun().getProperty("beam-diameter")
-            if beamstop_property is not None:
-                beam_diameter = beamstop_property.value
+            if mtd[data_file_ws].getRun().hasProperty("beam-diameter"):
+                beam_diameter = mtd[data_file_ws].getRun().getProperty("beam-diameter").value
             else:
                 raise RuntimeError, "AbsoluteScale could not read the beam radius and none was provided"        
         
