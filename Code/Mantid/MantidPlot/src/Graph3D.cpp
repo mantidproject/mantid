@@ -2619,7 +2619,7 @@ void Graph3D::changeTransparency(double t)
 
 	alpha = t;
 
-	Qwt3D::StandardColor* color=(StandardColor*) sp->dataColor ();
+        Qwt3D::StandardColor* color=static_cast<StandardColor*>(const_cast<Color*>(sp->dataColor()));
 	color->setAlpha(t);
 
     sp->showColorLegend(legendOn);
@@ -2635,7 +2635,7 @@ void Graph3D::setTransparency(double t)
 
 	alpha = t;
 
-	Qwt3D::StandardColor* color=(StandardColor*) sp->dataColor ();
+        Qwt3D::StandardColor* color=static_cast<StandardColor*>(const_cast<Color*>(sp->dataColor()));
 	color->setAlpha(t);
 }
 
