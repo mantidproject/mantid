@@ -1,6 +1,14 @@
 #ifndef ENDIAN_CONVERT
 #define ENDIAN_CONVERT
 
+// We aren't going to EVER change this code - so let's ignore the warnings.
+#if defined(__GNUC__)
+    #pragma GCC diagnostic ignored "-Wconversion"
+    #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+#elif defined(_WIN32)
+    #pragma warning( disable: 4100)
+#endif
+
 typedef int fort_int;
 
 unsigned short local_to_vax_short(const unsigned short* s);
