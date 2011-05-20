@@ -20,6 +20,13 @@ C
 #define FAILURE 1
 #define SUCCESS 0
 
+// We aren't going to EVER change this code - so let's ignore the warnings.
+#if defined(__GNUC__)
+    #pragma GCC diagnostic ignored "-Wconversion"
+#elif defined(_WIN32)
+    #pragma warning( disable: 4100)
+#endif
+
 int byte_rel_comp(int* data_in, int n_in, char* data_out, int max_out, int& n_out)
 {
 	int i, icurrent, irel;
