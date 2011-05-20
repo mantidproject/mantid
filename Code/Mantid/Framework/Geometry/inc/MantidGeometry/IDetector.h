@@ -101,7 +101,8 @@ public:
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
-
+  /// get the position (some kind of centre, mass or geometrical -- tbd) of a detector
+  virtual V3D getPos() const = 0;
   /// (Empty) Constructor
   IDetector() {}
   /// Virtual destructor

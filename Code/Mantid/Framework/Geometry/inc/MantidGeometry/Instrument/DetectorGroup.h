@@ -116,12 +116,7 @@ namespace Mantid
        */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
 
-    private:
-      /// Private, unimplemented copy constructor
-      DetectorGroup(const DetectorGroup&);
-      /// Private, unimplemented copy assignment operator
-      DetectorGroup& operator=(const DetectorGroup&);
-
+	protected:
       /// The ID of this effective detector
       int m_id;
       /// The type of collection used for the detectors
@@ -131,9 +126,7 @@ namespace Mantid
       /// The collection of grouped detectors
       DetCollection m_detectors;
 
-      /// Static reference to the logger class
-      static Kernel::Logger& g_log;
-  
+   
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
       ComponentID getComponentID(void) const{ return NULL; }
@@ -182,7 +175,15 @@ namespace Mantid
       {
         return boost::shared_ptr<const Material>();
       }
+    private:
+      /// Private, unimplemented copy constructor
+      DetectorGroup(const DetectorGroup&);
+      /// Private, unimplemented copy assignment operator
+      DetectorGroup& operator=(const DetectorGroup&);
 
+   /// Static reference to the logger class
+      static Kernel::Logger& g_log;
+  
     };
 
     /// Typedef for shared pointer

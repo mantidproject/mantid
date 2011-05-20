@@ -185,7 +185,10 @@ namespace Mantid
       DetCollection::const_iterator it;
       for (it = m_detectors.begin(); it != m_detectors.end(); ++it)
       {
-        if ( !(*it).second->isMasked() ) isMasked = false;
+        if ( !(*it).second->isMasked() ){
+			isMasked = false;
+			break;
+		}
       }
       return isMasked;
     }

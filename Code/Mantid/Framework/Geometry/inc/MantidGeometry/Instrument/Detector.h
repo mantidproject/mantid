@@ -62,6 +62,7 @@ public:
   double getDistance(const IComponent& comp) const;
   double getTwoTheta(const V3D& observer, const V3D& axis) const;
   double getPhi() const;
+  V3D    getPos() const{return ObjComponent::getPos();}
   bool isMasked() const;
   bool isMonitor() const;
   std::map<detid_t, double> getNeighbours(double radius = 0.0);
