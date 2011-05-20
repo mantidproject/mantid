@@ -8,11 +8,11 @@
 using namespace Mantid::Geometry;
 using namespace Mantid;
 
-class DetectorGroupTest : public CxxTest::TestSuite
+class DetectorsRingTest : public CxxTest::TestSuite
 {
 public:
- static DetectorGroupTest *createSuite() { return new DetectorGroupTest(); }
- static void destroySuite(DetectorGroupTest *suite) { delete suite; }
+ static DetectorsRingTest *createSuite() { return new DetectorsRingTest(); }
+ static void destroySuite(DetectorsRingTest *suite) { delete suite; }
  //*********************************************
  void testConstructorThrowsInNotRing(){
 	 boost::shared_ptr<Mantid::Geometry::DetectorGroup> psGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
@@ -21,7 +21,7 @@ public:
 
 private:
 	std::auto_ptr<DetectorsRing> pDetRing;
-	DetectorGroupTest(){
+	DetectorsRingTest(){
 		pDetRing = std::auto_ptr<DetectorsRing>(new DetectorsRing(detectorsInRing(),false));
 	}
 	std::vector<boost::shared_ptr<IDetector> > detectorsInRing(){
