@@ -30,6 +30,7 @@
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wunused-result"
 #pragma GCC diagnostic ignored "-Wunused"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wconversion"
