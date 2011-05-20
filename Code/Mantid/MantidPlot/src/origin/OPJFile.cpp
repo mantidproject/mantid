@@ -30,6 +30,7 @@
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wreorder"
 #pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wunused"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #pragma GCC diagnostic ignored "-Wconversion"
 #pragma GCC diagnostic ignored "-Wtype-limits"
@@ -1891,7 +1892,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 	GRAPH.push_back(graph(name));
 	readWindowProperties(GRAPH.back(), f, debug, POS, headersize);
-	//char c = 0;
+        char c = 0;
 
 	unsigned short graph_width;
 	fseek(f,POS + 0x23,SEEK_SET);
