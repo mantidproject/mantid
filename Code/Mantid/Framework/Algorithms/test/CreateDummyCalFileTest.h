@@ -60,7 +60,7 @@ public:
     TS_ASSERT_THROWS_NOTHING(testerCAL.isExecuted());
 
     // has the algorithm written a file to disk?
-    bool fileExists;
+    bool fileExists = false;
     TS_ASSERT( fileExists = Poco::File(outputFile).exists() );
 
     if ( fileExists )
