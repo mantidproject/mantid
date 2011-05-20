@@ -16,6 +16,7 @@ namespace Mantid
     class CompAssembly;
     class ObjComponent;
     class DetectorGroup;
+	class DetectorsRing;
   }
 }
 
@@ -82,6 +83,10 @@ namespace ComponentCreationHelper
    * Create a detector group containing 5 detectors
    */
   DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
+  /**
+   * Create a detector group containing detectors ring
+   */
+  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorsRing> createRingOfCylindricalDetectors();
   /**
    * Create a group of two monitors
    */

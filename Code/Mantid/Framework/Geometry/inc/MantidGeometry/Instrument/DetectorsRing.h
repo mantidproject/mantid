@@ -12,12 +12,6 @@ namespace Geometry
 {
     /** Holds a collection of detectors, arranged in a ring.
 
-	Responds to IDetector methods as though it were a single detector.
-	Currently, detectors in a group are treated as pointlike (or at least)
-	homogenous entities. This means that it's up to the use to make
-	only sensible groupings of similar detectors since no weighting according
-	to solid angle size takes place and the DetectorGroup's position is just
-	a simple average of its constituents.
 	
 	@author Alex Buts ISIS
 	@date 19/05/2011
@@ -44,10 +38,11 @@ namespace Geometry
     */
     class DLLExport DetectorsRing : public DetectorGroup
 	{
+	public:
       DetectorsRing(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked = false);
       virtual ~DetectorsRing();
 
-      void addDetector(IDetector_sptr det, bool& warn);
+   //   void addDetector(IDetector_sptr det, bool& warn);
 
       // IDetector methods; overloaded from DetectorGroup; most other group methods remain the same
 	  V3D getPos() const{return RingCenter;}
@@ -81,7 +76,7 @@ namespace Geometry
 	  V3D RingCenter;
 	  /// the radius of the ring
 	  double RingRadius;
-	  /// helper function to verify if detecotors ring is correct (no detectors intersect the center) and what is its radius
+	  /// helper function to verify if detecotors ring is correct (no detectors intersect the center) and identify its radius
 	  void calcRingRadius();
 	};
 } // endnamespace Geometry

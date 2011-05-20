@@ -166,6 +166,7 @@ set ( TEST_FILES
 	test/ConeTest.h
 	test/CylinderTest.h
 	test/DetectorGroupTest.h
+	test/DetectorsRingTest.h
 	test/DetectorTest.h
 	test/FitParameterTest.h
 	test/GeneralTest.h

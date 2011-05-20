@@ -25,7 +25,7 @@ public:
   }
 
   void testCategory(){
-    TS_ASSERT_EQUALS( findPar->category(), "DataHandling" );
+    TS_ASSERT_EQUALS( findPar->category(), "DataHandling\\Detectors" );
   }
 
   void testInit(){
@@ -36,7 +36,8 @@ public:
     TSM_ASSERT_EQUALS("should be six propeties here",6,(size_t)(findPar->getProperties().size()));
   }
 
- void testExec(){
+ void testSimpleExec(){
+	  inputWS = buildUngroupedWS("FindDetParTestWS");
  
 	  TS_ASSERT_THROWS_NOTHING(findPar->setPropertyValue("InputWorkspace", inputWS->getName()));
 
@@ -44,7 +45,7 @@ public:
       TSM_ASSERT("parameters calculations should complete successfully", findPar->isExecuted() );
   
  }
- void testResults(){
+ void testSimpleResults(){
 	 TSM_ASSERT_EQUALS("Azimutal values should be exactly specified",std::string("0,0,0"),findPar->getPropertyValue("azimuthal"));
 	 TSM_ASSERT_EQUALS("Polar values should be exactly specified",std::string("170.565,169.565,168.565"),findPar->getPropertyValue("polar"));
 	 TSM_ASSERT_EQUALS("Azimutal width values should be exactly specified",std::string("0.396157,0.394998,0.393718"),findPar->getPropertyValue("azimuthal_width"));
@@ -55,31 +56,8 @@ public:
  //*******************************************************
  FindDetectorsParTest()
  {// the functioning of FindDetectorsParTest is affected by a function call in the FrameworkManager's constructor, creating the algorithm in this way ensures that function is executed
-	const size_t NHIST=3;
-	std::string WS_Name("FindDetParTestWS");
+	
     findPar =  FrameworkManager::Instance().createAlgorithm("FindDetectorsPar");
-	inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
-
-    int forSpecDetMap[NHIST];
-    for (size_t j = 0; j < NHIST; ++j)
-    {
-      // Just set the spectrum number to match the index
-      inputWS->getAxis(1)->spectraNo(j) = j+1;
-      forSpecDetMap[j] = j+1;
-    }
-
-    AnalysisDataService::Instance().add(WS_Name,inputWS);
-
-    // Load the instrument data
-    Mantid::DataHandling::LoadInstrument loader;
-    loader.initialize();
-    // Path to test input file assumes Test directory checked out from SVN
-    std::string inputFile = "INES_Definition.xml";
-    loader.setPropertyValue("Filename", inputFile);
-    loader.setPropertyValue("Workspace", WS_Name);
-    loader.execute();
-
-    inputWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, NHIST);
 
  }
  ~FindDetectorsParTest(){
@@ -89,5 +67,36 @@ public:
 private:
 	IAlgorithm* findPar;
     MatrixWorkspace_sptr inputWS;
+
+	//
+	MatrixWorkspace_sptr  buildUngroupedWS(const std::string &WS_Name)
+	{
+		const size_t NHIST=3;
+
+		inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
+
+	    int forSpecDetMap[NHIST];
+		for (size_t j = 0; j < NHIST; ++j)
+		{
+			// Just set the spectrum number to match the index
+			inputWS->getAxis(1)->spectraNo(j) = j+1;
+			forSpecDetMap[j] = j+1;
+		}
+
+		AnalysisDataService::Instance().add(WS_Name,inputWS);
+
+		// Load the instrument data
+		 Mantid::DataHandling::LoadInstrument loader;
+		 loader.initialize();
+	    // Path to test input file assumes Test directory checked out from SVN
+		 std::string inputFile = "INES_Definition.xml";
+		 loader.setPropertyValue("Filename", inputFile);
+		 loader.setPropertyValue("Workspace", WS_Name);
+		 loader.execute();
+
+		 inputWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, NHIST);
+		 return inputWS;
+
+	}
 };
 #endif

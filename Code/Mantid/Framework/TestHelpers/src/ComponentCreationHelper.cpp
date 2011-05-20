@@ -12,6 +12,7 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
+#include "MantidGeometry/Instrument/DetectorsRing.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadInstrumentHelper.h"
@@ -163,6 +164,46 @@ namespace ComponentCreationHelper
     return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
   }
 
+   //----------------------------------------------------------------------------------------------
+  /**
+   * Create a group of detectors arranged in a ring;
+   */
+  boost::shared_ptr<DetectorsRing> createRingOfCylindricalDetectors()
+  {
+
+    std::vector<boost::shared_ptr<IDetector> > groupMembers;
+    // One object
+	double R0=0.5;
+	double h =1.5;
+    Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(R0, h, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
+
+	int NY=10;
+	int NX=30;
+	double y_bl = NY*h;
+	double x_bl = NX*R0;
+
+	double Rmin(2.5), Rmax(3.5);
+	double Rmin2(Rmin*Rmin),Rmax2(Rmax*Rmax);
+
+	int ic(0);
+	for(int j=0;j<NY;j++){
+		double y=-0.5*y_bl+j*h;
+		for(int i=0;i<NX;i++){
+			double x = -0.5*x_bl+i*R0;
+			double Rsq = x*x+y*y;
+			if(Rsq>=Rmin2 && Rsq<Rmax2){
+			      std::ostringstream os;
+		          os << "d" << ic;
+				 boost::shared_ptr<Detector> det(new Detector(os.str(), ic+1, detShape, NULL));
+				 det->setPos(x, y, 2.0);
+	    		 groupMembers.push_back(det);
+			}
+
+          ic++;
+		}
+	}
+    return boost::shared_ptr<DetectorsRing>(new DetectorsRing(groupMembers, false));
+  }
 
   //----------------------------------------------------------------------------------------------
   /**
@@ -357,7 +398,7 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   ws->setYUnit("");
   for (std::size_t i = 0; i < ws->getNumberHistograms(); ++i)
   {
-    ws->getAxis(1)->spectraNo(i) = static_cast<specid_t>(i);
+    ws->getAxis(1)->spectraNo(i) = i;
   }
   
   // Load instrument geometry
@@ -405,10 +446,10 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
   void SANSInstrumentCreationHelper::runLoadMappingTable(Workspace2D_sptr workspace, int nxbins, int nybins)
   {
     // Get the number of monitor channels
-    int nMonitors = 0;
+    size_t nMonitors(0);
     boost::shared_ptr<Instrument> instrument = workspace->getBaseInstrument();
     std::vector<detid_t> monitors = instrument->getMonitors();
-    nMonitors = static_cast<int>(monitors.size());
+    nMonitors = monitors.size();
 
     // Number of monitors should be consistent with data file format
     if( nMonitors != 2 ) {
@@ -418,17 +459,17 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
       throw std::runtime_error(error.str());
     }
 
-    int ndet = nxbins*nybins + nMonitors;
+    size_t ndet = nxbins*nybins + nMonitors;
     boost::shared_array<detid_t> udet(new detid_t[ndet]);
     boost::shared_array<specid_t> spec(new specid_t[ndet]);
 
     // Generate mapping of detector/channel IDs to spectrum ID
 
     // Detector/channel counter
-    int icount = 0;
+    size_t icount = 0;
 
     // Monitor: IDs start at 1 and increment by 1
-    for(int i=0; i<nMonitors; i++)
+    for(size_t i=0; i<nMonitors; i++)
     {
       spec[icount] = icount;
       udet[icount] = icount+1;
@@ -436,9 +477,9 @@ Workspace2D_sptr SANSInstrumentCreationHelper::createSANSInstrumentWorkspace(std
     }
 
     // Detector pixels
-    for(int ix=0; ix<nxbins; ix++)
+    for(size_t ix=0; ix<nxbins; ix++)
     {
-      for(int iy=0; iy<nybins; iy++)
+      for(size_t iy=0; iy<nybins; iy++)
       {
         spec[icount] = icount;
         udet[icount] = 1000000 + iy*1000 + ix;
