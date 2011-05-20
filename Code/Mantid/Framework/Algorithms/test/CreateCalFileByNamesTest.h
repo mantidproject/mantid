@@ -64,7 +64,7 @@ public:
     AnalysisDataService::Instance().remove(wsName);
     
     // has the algorithm written a file to disk?
-    bool fileExists;
+    bool fileExists = false;
     TS_ASSERT( fileExists = Poco::File(outputFile).exists() );
 
     if ( fileExists )
