@@ -61,6 +61,11 @@ private:
 
   /// Compute TOF offset
   double getTofOffset(API::MatrixWorkspace_const_sptr inputWS, bool frame_skipping);
+  double frame_tof0;
+  bool flight_path_correction;
+  double low_tof_cut;
+  double high_tof_cut;
+
 };
 
 } // namespace Algorithms

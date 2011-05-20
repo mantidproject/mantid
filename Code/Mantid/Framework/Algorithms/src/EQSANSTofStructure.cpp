@@ -7,10 +7,13 @@
 #include "MantidDataObjects/Events.h"
 #include "MantidDataObjects/EventList.h"
 #include "MantidDataObjects/EventWorkspace.h"
+#include "MantidGeometry/Instrument/Instrument.h"
+
 #include <vector>
 
 using namespace Mantid::Kernel;
 using namespace Mantid::DataObjects;
+using namespace Mantid::Geometry;
 
 namespace Mantid
 {
@@ -40,6 +43,9 @@ void EQSANSTofStructure::init()
   //wsValidator->add(new EventWorkspaceValidator<>(false));
   declareProperty(new WorkspaceProperty<>("InputWorkspace","",Direction::Input,wsValidator),
       "Workspace to apply the TOF correction to");
+  declareProperty("FlightPathCorrection", false, Kernel::Direction::Input);
+  declareProperty("LowTOFCut", 0.0, Kernel::Direction::Input);
+  declareProperty("HighTOFCut", 0.0, Kernel::Direction::Input);
 
   // Output parameters
   declareProperty("FrameSkipping", false, Kernel::Direction::Output);
@@ -51,6 +57,9 @@ void EQSANSTofStructure::init()
 void EQSANSTofStructure::exec()
 {
   MatrixWorkspace_sptr inputWS = getProperty("InputWorkspace");
+  flight_path_correction = getProperty("FlightPathCorrection");
+  low_tof_cut = getProperty("LowTOFCut");
+  high_tof_cut = getProperty("HighTOFCut");
 
   // Calculate the frame width
   double frequency = dynamic_cast<TimeSeriesProperty<double>*>(inputWS->run().getLogData("frequency"))->getStatistics().mean;
@@ -62,7 +71,7 @@ void EQSANSTofStructure::exec()
   if (std::fabs(chopper_speed-frequency/2.0)<1.0) frame_skipping = true;
 
   // Get TOF offset
-  double frame_tof0 = getTofOffset(inputWS, frame_skipping);
+  frame_tof0 = getTofOffset(inputWS, frame_skipping);
 
   // Calculate the frame width
   double tmp_frame_width = frame_skipping ? tof_frame_width * 2.0 : tof_frame_width;
@@ -184,19 +193,61 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
   PARALLEL_FOR1(inputWS)
   for (int64_t ispec = 0; ispec < int64_t(numHists); ++ispec)
   {
+
+    IDetector_const_sptr det;
+    try {
+      det = inputWS->getDetector(ispec);
+    } catch (Exception::NotFoundError&) {
+      g_log.warning() << "Spectrum index " << ispec << " has no detector assigned to it - discarding" << std::endl;
+      continue;
+    }
+
+    // Get the flight path from the sample to the detector pixel
+    const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
+    const V3D scattered_flight_path = det->getPos() - samplePos;
+
+    // Get the nominal sample-to-detector distance (in mm)
+    Mantid::Kernel::Property* prop = inputWS->run().getProperty("sample_detector_distance");
+    Mantid::Kernel::PropertyWithValue<double>* dp = dynamic_cast<Mantid::Kernel::PropertyWithValue<double>* >(prop);
+    const double SDD = *dp/1000.0;
+
+    // Sample-to-source distance
+    const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
+    const V3D SSD = samplePos - sourcePos;
+    double tof_factor = (SSD.norm() + scattered_flight_path.norm()) / (SSD.norm() + SDD);
+
     PARALLEL_START_INTERUPT_REGION
 
     //Get the pointer to the output event list
     EventList* outEL = inputWS->getEventListPtr(ispec);
     std::vector<TofEvent>& events = outEL->getEvents();
     std::vector<TofEvent>::iterator it;
+    std::vector<TofEvent> clean_events;
+
     for (it=events.begin(); it<events.end(); it++)
     {
     	if( it->m_tof >= tof_frame_width ) continue;
     	if( it->m_tof < threshold )
     		it->m_tof += tmp_frame_width;
     	it->m_tof += frame_offset;
+    	// Correct for the scattered neutron flight path
+      if (flight_path_correction) it->m_tof *= tof_factor;
+
+      // Remove events that don't fall within the accepted time window
+    	double rel_tof = it->m_tof - frame_tof0;
+    	double x = ( static_cast<int>(floor(rel_tof*10)) % static_cast<int>(floor(tof_frame_width*10) ) ) * 0.1;
+      if( x < low_tof_cut || x > tof_frame_width-high_tof_cut)
+      {
+        continue;
+      }
+      clean_events.push_back(*it);
     }
+    events.clear();
+    for (it=clean_events.begin(); it<clean_events.end(); it++)
+    {
+      events.push_back(*it);
+    }
+
 
     progress.report("TOF structure");
     PARALLEL_END_INTERUPT_REGION
@@ -423,7 +474,7 @@ double EQSANSTofStructure::getTofOffset(MatrixWorkspace_const_sptr inputWS, bool
   double detector_z = inputWS->getInstrument()->getComponentByName(det_name)->getPos().Z();
 
   double source_to_detector = (detector_z - source_z)*1000.0;
-  double frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
+  frame_tof0 = frame_srcpulse_wl_1 / 3.9560346 * source_to_detector;
 
   g_log.information() << "TOF offset = " << frame_tof0 << " microseconds" << std::endl;
   g_log.information() << "Band defined by T1-T4 " << frame_wl_1 << " " << frame_wl_2 << std::endl;
