@@ -24,8 +24,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA) :
       m_workspace(&WA),m_CPoint(),m_loopCount(1),m_loopOrientation(0),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsX2Present(false)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),
+      m_blockMin((std::size_t)-1),m_blockMax((std::size_t)-1),m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -40,8 +40,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(0),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsX2Present(false)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin((std::size_t)-1),
+      m_blockMax((std::size_t)-1),m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -59,8 +59,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator(_Container& WA, int loopCount, const unsigned int loopOrientation) :
       m_workspace(&WA),m_CPoint(),m_loopCount(loopCount),m_loopOrientation(loopOrientation),m_index(0),
-      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin(-1),m_blockMax(-1),
-      m_IsX2Present(false)
+      m_wsSize(m_workspace->size()),m_blocksize(m_workspace->blocksize()),m_blockMin((std::size_t)-1),
+      m_blockMax((std::size_t)-1),m_IsX2Present(false)
     {
       
       m_IsX2Present = isWorkspaceHistogram();
@@ -118,7 +118,7 @@ namespace Mantid
             else
             {
               //Horizontal Orientation we want to loop over the same datablock loopcount times.
-	      std::size_t realWsSize = m_wsSize/m_loopCount;
+              std::size_t realWsSize = m_wsSize/m_loopCount;
               m_dataBlockIndex = (m_index % realWsSize)/m_blocksize;
             }
           }

@@ -556,20 +556,16 @@ namespace MantidQt
 
     bool ICatInvestigation::isFileExistsInDownloadedList(const std::string& selectedFile,std::string& loadPath )
     {
-      std::basic_string <char>::size_type npos = -1;
-      std::basic_string <char>::size_type index;
-      std::string filenamePart;
-
       std::vector<std::string>::const_iterator cditr;
       for(cditr=m_downloadedFileList.begin();cditr!=m_downloadedFileList.end();++cditr)
       {
         // the selected file name from UI contains only file names,but the downloaded filelist returned
         // by downlaod algorithm contains filename with full path
         // below code extarcts the file name part and checks file exists in the downloaded list
-        index=(*cditr).find_last_of("/");
-        if(index!=npos)
+        const std::string::size_type index = (*cditr).find_last_of("/");
+        if ( index != std::string::npos )
         {
-          filenamePart=(*cditr).substr(index+1,(*cditr).length()-index);
+          std::string filenamePart=(*cditr).substr(index+1,(*cditr).length()-index);
           QString temp=QString::fromStdString(filenamePart);
           QString temp1=QString::fromStdString(selectedFile);
           if(!temp.compare(temp1,Qt::CaseInsensitive))

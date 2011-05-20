@@ -206,7 +206,7 @@ void MergeRuns::buildAdditionTables()
         else
         {
           //Did not find it!
-          outWI = -1; //Marker to mean its not in the LHS.
+          outWI = (std::size_t)-1; //Marker to mean its not in the LHS. Sets it to a BIG number
         }
         table->push_back( std::pair<int64_t,int64_t>(inWI, outWI) );
         done = true; //Great, we did it.
