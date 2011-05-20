@@ -109,9 +109,10 @@ ISISRAW::ISISRAW() : m_crpt(0), m_ntc1(0), m_nsp1(0), m_nper(0),dat1(0)
 	{
 		dat1[i] = i;
 	}
-
-  // diable warning about strcpy
-  #pragma warning(disable:4996)
+#if defined(_WIN32)
+    // disable warning about strcpy
+    #pragma warning( disable: 4996)
+#endif
 	logsect.nlines = 1;
 	logsect.lines = new LOG_LINE[logsect.nlines];
 	for(i=0; i<logsect.nlines; i++)

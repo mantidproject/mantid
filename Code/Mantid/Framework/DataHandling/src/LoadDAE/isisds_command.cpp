@@ -14,6 +14,19 @@
     GNU General Public License
 */
 
+// We aren't going to EVER change this code - so let's ignore the warnings.
+#if defined(__GNUC__)
+  #pragma GCC diagnostic ignored "-Wcast-qual"
+  #pragma GCC diagnostic ignored "-Wconversion"
+  #pragma GCC diagnostic ignored "-Wunused-parameter"
+  #pragma GCC diagnostic ignored "-Wstrict-aliasing"
+  #pragma GCC diagnostic ignored "-Wformat"
+#elif defined(_WIN32)
+  #pragma warning( disable:4100 )
+  // disable warning about vsprintf and strncpy
+  #pragma warning( disable:4996 )
+#endif
+
 ///@cond nodoc
 
 #include <stdio.h>
@@ -148,8 +161,6 @@ SOCKET isisds_send_open(const char* host, ISISDSAccessMode access_type)
 		return INVALID_SOCKET;
 	}
 
-  // diable warning about vsprintf and strncpy
-  #pragma warning(disable:4996)
   /* socket connected */
 	op.ver_major = ISISDS_MAJOR_VER;
 	op.ver_minor = ISISDS_MINOR_VER;
