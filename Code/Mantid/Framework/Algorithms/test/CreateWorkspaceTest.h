@@ -62,7 +62,7 @@ public:
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->unitID(), "MomentumTransfer");
     TS_ASSERT_EQUALS(ws->getAxis(1)->unit()->caption(), "q");
     
-    double axisVal;
+    double axisVal = 0.0;
     
     TS_ASSERT_THROWS_NOTHING(axisVal = boost::lexical_cast<double>(ws->getAxis(1)->label(0)));
 
