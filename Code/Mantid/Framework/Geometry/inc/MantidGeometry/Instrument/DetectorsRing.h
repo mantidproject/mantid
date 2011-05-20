@@ -65,7 +65,7 @@ namespace Geometry
        ///Try to find a point that lies within (or on) the object ?? meaning is unclear on rings but let's define it as on group
       /// int getPointInObject(V3D& point) const { throw Mantid::Kernel::Exception::NotImplementedError("getNeighbours not implemented for DetectorsRings"); };
       /// Get the bounding box for this component and store it in the given argument
-      virtual void getBoundingBox(BoundingBox& boundingBox) const;
+	  virtual void getBoundingBox(BoundingBox& boundingBox) const{throw(Mantid::Kernel::Exception::NotImplementedError("getNeighbours not implemented for DetectorsRings"));};
 
     
     private:
