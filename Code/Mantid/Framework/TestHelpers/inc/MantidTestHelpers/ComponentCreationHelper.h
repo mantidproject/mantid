@@ -16,7 +16,7 @@ namespace Mantid
     class CompAssembly;
     class ObjComponent;
     class DetectorGroup;
-	class DetectorsRing;
+    class DetectorsRing;
   }
 }
 
@@ -54,7 +54,7 @@ namespace ComponentCreationHelper
    */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr 
   createCappedCylinder(double radius, double height, const Mantid::Geometry::V3D & baseCentre, 
-		       const Mantid::Geometry::V3D & axis, const std::string & id);
+               const Mantid::Geometry::V3D & axis, const std::string & id);
   /**
    * Return the XML for a sphere.
    */
@@ -65,7 +65,7 @@ namespace ComponentCreationHelper
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr createSphere(double radius, const Mantid::Geometry::V3D & centre, const std::string & id);
   /** Create a cuboid shape for your pixels */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr createCuboid(double x_side_length, double y_side_length = -1.0, 
-							     double z_side_length = -1.0);
+                                 double z_side_length = -1.0);
   /**
   * Create a component assembly at the origin made up of 4 cylindrical detectors
   */
@@ -78,7 +78,7 @@ namespace ComponentCreationHelper
    * Create a hollow shell, i.e. the intersection of two spheres or radius r1 and r2
    */
   DLL_TESTHELPERS Mantid::Geometry::Object_sptr createHollowShell(double innerRadius, double outerRadius, 
-						const Mantid::Geometry::V3D & centre = Mantid::Geometry::V3D());
+                        const Mantid::Geometry::V3D & centre = Mantid::Geometry::V3D());
   /**
    * Create a detector group containing 5 detectors
    */
@@ -132,7 +132,7 @@ public:
    * @param workspace :: The workspace to insert the instrument into
    */
   static void runLoadInstrument(const std::string & inst_name,
-				Mantid::DataObjects::Workspace2D_sptr workspace);
+                Mantid::DataObjects::Workspace2D_sptr workspace);
 
   /**
    * Populate spectra mapping to detector IDs
@@ -142,7 +142,7 @@ public:
    * @param nybins: number of bins in Y
    */
   static void runLoadMappingTable(Mantid::DataObjects::Workspace2D_sptr workspace, 
-				  int nxbins, int nybins);
+                  int nxbins, int nybins);
 
 };
 

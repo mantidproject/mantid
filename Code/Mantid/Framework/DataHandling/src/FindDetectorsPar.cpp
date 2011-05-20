@@ -48,9 +48,9 @@ FindDetectorsPar::exec()
 {
 
  // Get the input workspace
-	const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
+    const MatrixWorkspace_sptr inputWS = this->getProperty("InputWorkspace");
   if(inputWS.get()==NULL){
-	  throw(Kernel::Exception::NotFoundError("can not obtain InoputWorkspace for the algorithm to work",""));
+      throw(Kernel::Exception::NotFoundError("can not obtain InoputWorkspace for the algorithm to work",""));
   }
   
 
@@ -81,50 +81,50 @@ FindDetectorsPar::exec()
               azimuthal[i] =  det->getPhi() * rad2deg;
 
               // Get Sample->Detector distance
-			  double distance        = det->getDistance(*sample);
+              double distance        = det->getDistance(*sample);
               secondary_flightpath[i]= distance;
 
               // Now let's work out the detector widths
               // TODO: This is the historically wrong method...update it!
-	      // Get the bounding box
-	      Geometry::BoundingBox bbox;
-	      det->getBoundingBox(bbox);
-	      double xsize = bbox.xMax() - bbox.xMin();
-	      double ysize = bbox.yMax() - bbox.yMin();
+          // Get the bounding box
+          Geometry::BoundingBox bbox;
+          det->getBoundingBox(bbox);
+          double xsize = bbox.xMax() - bbox.xMin();
+          double ysize = bbox.yMax() - bbox.yMin();
 
               double delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
               double delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
 
               // Now store the widths...
               polar_width[i]    = delta_polar;
-			  azimuthal_width[i]= delta_azimuthal;
+              azimuthal_width[i]= delta_azimuthal;
 
-		  }
-	  }
-	  if(!this->isChild()){
-		  Kernel::Property *pPAsim = this->getPointerToProperty("azimuthal");           fill_property(pPAsim,azimuthal);
-		  Kernel::Property *pPPol = this->getPointerToProperty("polar");	            fill_property(pPPol,polar);
-		  Kernel::Property *pPAsWidth = this->getPointerToProperty("azimuthal_width");  fill_property(pPAsWidth,azimuthal_width);
-		  Kernel::Property *pPPolWidth = this->getPointerToProperty("polar_width");     fill_property(pPPolWidth,polar_width);
-		  Kernel::Property *pPFlp = this->getPointerToProperty("secondary_flightpath"); fill_property(pPFlp,secondary_flightpath);
-	  }
+          }
+      }
+      if(!this->isChild()){
+          Kernel::Property *pPAsim = this->getPointerToProperty("azimuthal");           fill_property(pPAsim,azimuthal);
+          Kernel::Property *pPPol = this->getPointerToProperty("polar");	            fill_property(pPPol,polar);
+          Kernel::Property *pPAsWidth = this->getPointerToProperty("azimuthal_width");  fill_property(pPAsWidth,azimuthal_width);
+          Kernel::Property *pPPolWidth = this->getPointerToProperty("polar_width");     fill_property(pPPolWidth,polar_width);
+          Kernel::Property *pPFlp = this->getPointerToProperty("secondary_flightpath"); fill_property(pPFlp,secondary_flightpath);
+      }
 
 }
 void 
 FindDetectorsPar::fill_property(Kernel::Property *const pProperty,std::vector<double> const&data)
 {
     std::stringstream Buf;
-	if(!data.empty()){
-		Buf<<data[0];
-	}else{
-	    pProperty->setValue("");
-		return;
-	}
-	for(size_t i=1;i<data.size();i++){
-		Buf<<","<<data[i];
-	}
-	Buf<<std::endl;
-	pProperty->setValue( Buf.str());
+    if(!data.empty()){
+        Buf<<data[0];
+    }else{
+        pProperty->setValue("");
+        return;
+    }
+    for(size_t i=1;i<data.size();i++){
+        Buf<<","<<data[i];
+    }
+    Buf<<std::endl;
+    pProperty->setValue( Buf.str());
 }
 }
 }
