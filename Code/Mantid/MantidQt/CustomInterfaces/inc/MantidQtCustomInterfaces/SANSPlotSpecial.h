@@ -54,9 +54,9 @@ public:
     TransformType m_type;
     QList<QWidget*> m_xWidgets;
     QList<QWidget*> m_yWidgets;
+    QWidget* m_parent;
     QString m_gDeriv;
     QString m_iDeriv;
-    QWidget* m_parent;
   };
 
 public:
