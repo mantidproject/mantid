@@ -761,7 +761,19 @@ namespace Mantid
         //Default ID row step size
         if (idfillbyfirst_y) idstepbyrow = ypixels;
           else idstepbyrow = xpixels;
-        if ( pCompElem->hasAttribute("idstepbyrow") ) idstepbyrow = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+        if ( pCompElem->hasAttribute("idstepbyrow") ) 
+        {
+          int idstepbyrowRead = atoi((pCompElem->getAttribute("idstepbyrow")).c_str());
+          if ( idstepbyrowRead < idstepbyrow )
+          {
+            g_log.warning() << "idstepbyrow must be bigger than or equal to the number of rows physical present.\n"
+                            << "Reset idstepbyrow to " << idstepbyrow << "\n";
+          }
+          else
+          {
+            idstepbyrow = idstepbyrowRead;
+          }
+        }
         //Default ID row step size
         if ( pCompElem->hasAttribute("idstep") ) idstep = atoi((pCompElem->getAttribute("idstep")).c_str());
 
