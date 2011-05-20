@@ -29,9 +29,10 @@
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wreorder"
-#pragma GCC diagnostic ignored "-Wunused-result"
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wtype-limits"
 #endif
 
 #ifdef _WIN32
@@ -432,7 +433,7 @@ int OPJFile::ParseFormatOld() {
 					stmp=char(i+0x41);
 				else if(i<26*26) {
 					stmp = char(0x40+i/26);
-					stmp[1] = i%26+0x41;
+                                        stmp[1] = i%26+0x41;
 				}
 				else {
 					stmp = char(0x40+i/26/26);
@@ -1890,7 +1891,7 @@ void OPJFile::readGraphInfo(FILE *f, FILE *debug)
 
 	GRAPH.push_back(graph(name));
 	readWindowProperties(GRAPH.back(), f, debug, POS, headersize);
-	char c = 0;
+	//char c = 0;
 
 	unsigned short graph_width;
 	fseek(f,POS + 0x23,SEEK_SET);
