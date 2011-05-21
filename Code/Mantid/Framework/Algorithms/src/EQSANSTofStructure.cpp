@@ -199,8 +199,10 @@ void EQSANSTofStructure::execEvent(Mantid::DataObjects::EventWorkspace_sptr inpu
       det = inputWS->getDetector(ispec);
     } catch (Exception::NotFoundError&) {
       g_log.warning() << "Spectrum index " << ispec << " has no detector assigned to it - discarding" << std::endl;
-      continue;
+      // 'continue' statement moved outside catch block because Mac Intel
+      // compiler has a problem with it being here in an openmp block.
     }
+    if ( !det ) continue;
 
     // Get the flight path from the sample to the detector pixel
     const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
