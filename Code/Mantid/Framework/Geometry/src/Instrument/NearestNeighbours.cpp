@@ -53,12 +53,20 @@ namespace Mantid
       }
       else if( radius > m_cutoff )
       {
-	int neighbours = m_noNeighbours + 2;
+	// We might have to see how efficient this ends up being.
+	int neighbours = m_noNeighbours + 1;
 	while( true )
 	{
-	  const_cast<NearestNeighbours*>(this)->build(neighbours);
+	  try
+	  {
+	    const_cast<NearestNeighbours*>(this)->build(neighbours);
+	  }
+	  catch(std::invalid_argument&)
+	  {
+	    break;
+	  }
 	  if( radius < m_cutoff ) break;
-	  else neighbours += 2;
+	  else neighbours += 1;
 	}
       }
     
@@ -81,7 +89,7 @@ namespace Mantid
     /**
      * Builds a map based on the given number of neighbours
      * @param noNeighbours :: The number of nearest neighbours to use to build 
-     * the graph 
+     * the graph
      */
     void NearestNeighbours::build(const int noNeighbours)
     {
@@ -91,12 +99,17 @@ namespace Mantid
       {
 	throw std::runtime_error("NearestNeighbours::build - Cannot find any spectra");
       }
+      const int nspectra = static_cast<int>(spectraDets.size()); //ANN only deals with integers
+      if( noNeighbours >= nspectra )
+      {
+	throw std::invalid_argument("NearestNeighbours::build - Invalid number of neighbours");
+      }
+
       // Clear current
       m_graph.clear(); 
       m_specToVertex.clear();
       m_noNeighbours = noNeighbours;
 
-      const int nspectra = static_cast<int>(spectraDets.size()); //ANN only deals with integers
       BoundingBox bbox;
       // Base the scaling on the first detector, should be adequate but we can look at this
       IDetector_sptr firstDet = (*spectraDets.begin()).second;
@@ -124,14 +137,15 @@ namespace Mantid
       ANNkd_tree *annTree = new ANNkd_tree(dataPoints, nspectra, 3);
       pointNo = 0;
       // Run the nearest neighbour search on each detector, reusing the arrays
-      ANNidxArray nnIndexList = new ANNidx[noNeighbours];
-      ANNdistArray nnDistList = new ANNdist[noNeighbours];
+      ANNidxArray nnIndexList = new ANNidx[m_noNeighbours];
+      ANNdistArray nnDistList = new ANNdist[m_noNeighbours];
+
       for ( detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt )
       {
 	ANNpoint scaledPos = dataPoints[pointNo]; 
       	annTree->annkSearch(
       	  scaledPos, // Point to search nearest neighbours of
-      	  noNeighbours, // Number of neighbours to find (8)
+      	  m_noNeighbours, // Number of neighbours to find (8)
       	  nnIndexList, // Index list of results
       	  nnDistList, // List of distances to each of these
       	  0.0 // Error bound (?) is this the radius to search in?
@@ -139,7 +153,7 @@ namespace Mantid
 	// The distances that are returned are in our scaled coordinate
 	// system. We store the real space ones.
 	V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2])*(*m_scale);
-      	for ( int i = 0; i < noNeighbours; i++ )
+      	for ( int i = 0; i < m_noNeighbours; i++ )
       	{
 	  ANNidx index = nnIndexList[i];
 	  V3D neighbour = V3D(dataPoints[index][0], dataPoints[index][1], dataPoints[index][2])*(*m_scale);
