@@ -27,15 +27,11 @@ else ( VISIT_FOUND AND USE_VISIT )
 endif ( VISIT_FOUND AND USE_VISIT )
 
 # Paraview dependencies built if Paraview is found
-find_package( ParaView QUIET )
-
+find_package( ParaView )
 if (ParaView_FOUND AND USE_PARAVIEW)
-
   add_subdirectory ( VatesAPI )
   add_subdirectory(ParaviewPlugins)
+  add_subdirectory( VatesSimpleGui )
 else (ParaView_FOUND AND USE_PARAVIEW )
   message( STATUS "Vates-Paraview plugins and widgets will not be built.") 
 endif( ParaView_FOUND AND USE_PARAVIEW )
-
-
-
