@@ -13,8 +13,8 @@ namespace Mantid
     template<typename _Iterator, typename _Container>
     workspace_iterator<_Iterator, _Container>::workspace_iterator() :
       m_workspace(0),m_CPoint(),m_loopCount(1),m_loopOrientation(1),
-      m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin(-1),m_blockMax(-1),
-      m_IsX2Present(false)
+      m_index(0),m_wsSize(0),m_blocksize(0),m_blockMin((std::size_t)-1),
+      m_blockMax((std::size_t)-1),m_IsX2Present(false)
     {}
 
     /**
