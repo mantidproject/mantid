@@ -74,7 +74,7 @@ void Indicator::updatePos(const QPoint &pos)
 void Indicator::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
 	QPointF pos = this->mapToScene(event->pos());
-	this->setPos(this->left_edge, this->fixVerticalPos(pos.y()));
+	this->setPos(this->left_edge, this->fixVerticalPos(static_cast<int>(pos.y())));
 }
 
 void Indicator::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)

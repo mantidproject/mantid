@@ -32,7 +32,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
 	Poco::XML::XMLString label = pNode->innerText();
 
 	pNodes = this->pDoc->getElementsByTagName("Dimension");
-	for (int i = 0; i < pNodes->length(); ++i)
+	for (unsigned long int i = 0; i < pNodes->length(); ++i)
 	{
 		pNode = pNodes->item(i);
 		Poco::XML::NamedNodeMap *aMap = pNode->attributes();
@@ -46,7 +46,7 @@ AxisInformation *GeometryParser::getAxisInfo(const std::string dimension)
 	Poco::XML::NodeList *cNodes = pNode->childNodes();
 	double min, max;
 	std::string title;
-	for (int j = 0; j < cNodes->length(); ++j)
+	for (unsigned long int j = 0; j < cNodes->length(); ++j)
 	{
 		Poco::XML::Node *cNode = cNodes->item(j);
 		Poco::XML::XMLString elem = cNode->nodeName();
