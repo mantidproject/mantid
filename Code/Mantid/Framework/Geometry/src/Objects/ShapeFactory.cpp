@@ -240,23 +240,34 @@ boost::shared_ptr<Object> ShapeFactory::createShape(Poco::XML::Element* pElem)
       found = algebraFromUser.find(iter->first);
 
       if (found==std::string::npos)
-        continue;
+      {
+        defaultAlgebra = true;
+        g_log.warning() << "Algebra shape Warning: " + iter->first + " not found in algebra string: "
+              + algebraFromUser + "\n"
+              + ". Default to equal shape to intersection of those defined.";
+        break;
+      }
       else
       {
         allFound[found] = iter->first;
       }
     }
 
-    // Here do the actually swapping of strings 
-    std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
-    for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
-    {
-      std::string  kuse = iter2->second;
-      algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
+    // Here do the actually swapping of strings
+    // but only if the algebra containes all the shapes
+    if ( allFound.size() == idMatching.size() )
+    { 
+      std::map<size_t,std::string, std::greater<size_t> >::iterator iter2;
+      for( iter2 = allFound.begin(); iter2 != allFound.end(); iter2++ )
+      {
+        std::string  kuse = iter2->second;
+        algebraFromUser.replace(iter2->first, (iter2->second).size(), idMatching[iter2->second]);
+      }
     }
   }
-  else
+  if ( defaultAlgebra )
   {
+    algebraFromUser = ""; // reset in case we are overwriten invalid string
     std::map<std::string,std::string>::iterator iter;
     for( iter = idMatching.begin(); iter != idMatching.end(); iter++ )
     {
