@@ -60,6 +60,7 @@ public:
     ICostFunction* cfA = CostFunctionFactory::Instance().createUnwrapped("nedtur");
     TS_ASSERT(cfA);
     TS_ASSERT(cfA->name().compare("fido") == 0);
+    TS_ASSERT(cfA->shortName().compare("Quality") == 0);
 
     delete cfA;
   }

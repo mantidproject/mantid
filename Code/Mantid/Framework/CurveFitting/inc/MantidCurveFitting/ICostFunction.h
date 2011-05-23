@@ -46,6 +46,9 @@ public:
   /// Get name of minimizer
   virtual std::string name() const = 0;
 
+  /// Get short name of minimizer - useful for say labels in guis
+  virtual std::string shortName() const {return "Quality";};
+
   /// Calculate value of cost function from observed
   /// and calculated values
   virtual double val(const double* yData, const double* inverseError, double* yCal, const size_t& n) = 0;
