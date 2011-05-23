@@ -14,8 +14,6 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
-#include "MantidDataHandling/LoadRaw3.h"
-
 class SpatialGroupingTest : public CxxTest::TestSuite
 {
 public:

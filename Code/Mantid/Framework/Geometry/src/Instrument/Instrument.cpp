@@ -5,6 +5,7 @@
 #include "MantidGeometry/Instrument/ParComponentFactory.h"
 #include "MantidGeometry/Objects/BoundingBox.h"
 #include "MantidGeometry/Instrument/CompAssembly.h"
+#include "MantidGeometry/Instrument/DetectorGroup.h"
 #include <algorithm>
 #include <iostream>
 
@@ -248,6 +249,31 @@ namespace Mantid
         }
 
         return it->second;
+      }
+    }
+
+    /**
+     * Returns a pointer to the geometrical object for the given set of IDs
+     * @param det_ids :: A list of detector ids
+     *  @returns A pointer to the detector object
+     *  @throw   NotFoundError If no detector is found for the detector ID given
+     */
+    IDetector_sptr Instrument::getDetector(const std::vector<detid_t> &det_ids) const
+    {
+      const size_t ndets(det_ids.size());
+      if( ndets == 1)
+      {
+	return this->getDetector(det_ids[0]);
+      }
+      else
+      {
+	boost::shared_ptr<DetectorGroup> det_group(new DetectorGroup());
+	bool warn(false);
+	for( size_t i = 0; i < ndets; ++i )
+	{
+	  det_group->addDetector(this->getDetector(det_ids[i]), warn);
+	}
+	return det_group;
       }
     }
 

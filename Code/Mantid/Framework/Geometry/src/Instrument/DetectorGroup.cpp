@@ -13,6 +13,14 @@ namespace Mantid
     // Get a reference to the logger
     Kernel::Logger& DetectorGroup::g_log = Kernel::Logger::get("DetectorGroup");
 
+    /**
+     * Default constructor
+     */
+    DetectorGroup::DetectorGroup() :
+      IDetector(), m_id(), m_detectors()
+    {
+    }
+
     /** Constructor that takes a list of detectors to add
     *  @param dets :: The vector of IDetector pointers that this virtual detector will hold
     *  @param warnAboutMasked :: If true a log message at warning level will be generated if a one of the detectors in dets is masked. 

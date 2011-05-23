@@ -49,6 +49,7 @@ namespace Mantid
     class DLLExport DetectorGroup : public virtual IDetector
     {
     public:
+      DetectorGroup();
       DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked = false);
       virtual ~DetectorGroup();
 

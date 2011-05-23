@@ -117,6 +117,27 @@ public:
     
   }
 
+  void test_GetDetector_With_A_List_Returns_A_Group()
+  {
+    const size_t ndets(3);
+    std::vector<detid_t> detIDs(ndets);
+    detIDs[0] = 1;
+    detIDs[1] = 10;
+    detIDs[2] = 11;
+
+    IDetector_sptr det;
+    TS_ASSERT_THROWS_NOTHING(det = instrument.getDetector(detIDs));
+    boost::shared_ptr<DetectorGroup> detGroup = boost::dynamic_pointer_cast<DetectorGroup>(det);
+    TS_ASSERT(detGroup);
+    
+    TS_ASSERT_EQUALS(detGroup->nDets(), ndets);
+    std::vector<detid_t> memberIDs = detGroup->getDetectorIDs();
+    for( size_t i = 0; i < ndets; ++i )
+    {
+      TS_ASSERT_EQUALS(memberIDs[i], detIDs[i]);
+    }
+  }
+
   void test_GetDetectors_Throws_With_Invalid_IDs()
   {
     const size_t ndets(1);

@@ -47,8 +47,8 @@ public:
     TS_ASSERT_EQUALS(m_detectors.size(), 18);
 
     // Check distances calculated in NearestNeighbours compare with those using getDistance on component
-    std::map<detid_t, double> distances = m_detectors[5]->getNeighbours();
-    std::map<detid_t, double>::iterator distIt;
+    std::map<specid_t, double> distances = m_detectors[5]->getNeighbours();
+    std::map<specid_t, double>::iterator distIt;
 
     // We should have 8 neighbours when not specifying a range.
     TS_ASSERT_EQUALS(distances.size(), 8);
@@ -60,15 +60,14 @@ public:
       pos -= m_detectors[5]->getPos();
       pos /= scale;
       double gmDist = pos.norm();
-      TS_ASSERT_EQUALS(nnDist, gmDist);
+      TS_ASSERT_DELTA(nnDist, gmDist, 1e-12);
     }
 
     // Check that the 'radius' option works as expected
     distances = m_detectors[14]->getNeighbours(1);
     TS_ASSERT_EQUALS(distances.size(), 2);
   }
-
-
+  
   // Let's try it with a rectangular detector.
   void testNeighbours_RectangularDetector()
   {
@@ -87,7 +86,7 @@ public:
     RectangularDetector_sptr bank1 = boost::dynamic_pointer_cast<RectangularDetector>(m_instrument->getComponentByName("bank1"));
     boost::shared_ptr<Detector> det = bank1->getAtXY(2,3);
     TS_ASSERT( det );
-    std::map<detid_t, double> nb;
+   std::map<specid_t, double> nb;
 
     // Too close!
     nb = det->getNeighbours(0.003);

@@ -71,6 +71,9 @@ namespace Mantid
       IObjComponent_sptr getSource() const;
       IObjComponent_sptr getSample() const;
       IDetector_sptr getDetector(const detid_t &detector_id) const;
+      /// Returns a pointer to the geometrical object for the given set of IDs
+      IDetector_sptr getDetector(const std::vector<detid_t> &det_ids) const;
+
       /// Returns a list of Detectors for the given detectors ids
       std::vector<IDetector_sptr> getDetectors(const std::vector<detid_t> &det_ids) const;
   

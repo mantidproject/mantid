@@ -642,13 +642,20 @@ namespace Mantid
      * @param radius :: distance from detector on which to filter results
      * @return map of DetectorID to distance for the nearest neighbours
      */
-    std::map<detid_t, double> ParameterMap::getNeighbours(const IComponent *comp, const double radius) const
+    std::map<specid_t, double> ParameterMap::getNeighbours(const IDetector *comp, const double radius) const
     {
       if ( !m_nearestNeighbours )
       {
         buildNearestNeighbours(comp);
       }
-      return m_nearestNeighbours->neighbours(comp, radius);
+      // Find the spectrum number
+      std::vector<specid_t> spectra = m_spectraMap->getSpectra(std::vector<detid_t>(1, comp->getID()));
+      if(spectra.empty())
+      {
+	throw Kernel::Exception::NotFoundError("ParameterMap::getNeighbours - Cannot find spectrum number for detector", comp->getID());
+      }
+      std::map<specid_t, double> neighbours = m_nearestNeighbours->neighbours(spectra[0], radius);
+      return neighbours;      
     }
 
     //--------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/ISpectraDetectorMap.h"
 // Boost graphing
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_map.hpp>
@@ -19,7 +20,6 @@ namespace Mantid
     class IInstrument;
     class IComponent;
     class V3D;
-    class ISpectraDetectorMap;
 
     /**
      *  This class is used to find the nearest neighbours of a detector in the instrument
@@ -68,12 +68,9 @@ namespace Mantid
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
-      /// query the graph for the eight nearest neighbours to specified detector
-      std::map<detid_t, double> neighbours(const detid_t detID) const;
-      /// as above, but filter based on the distance given
-      std::map<detid_t, double> neighbours(const detid_t detID, const double radius) const;
-      /// as above, but taking input as an IComponent pointer
-      std::map<detid_t, double> neighbours(const IComponent *component, const double radius=0.0) const;
+    public:
+      // Neighbouring spectra
+      std::map<specid_t, double> neighbours(const specid_t spectrum, const double radius=0.0) const;
 
     private:
       /// typedef for Graph object used to hold the calculated information
@@ -84,22 +81,23 @@ namespace Mantid
       /// Vertex descriptor object for Graph
       typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;
       /// map object of int to Graph Vertex descriptor
-      typedef boost::unordered_map<detid_t,Vertex> MapIV;
+      typedef boost::unordered_map<specid_t,Vertex> MapIV;
 
       /// Construct the graph based on the given instument and spectra-detector mapping
       void build(boost::shared_ptr<const IInstrument> instrument, 
-		 const ISpectraDetectorMap & spectraMap);
+		 const ISpectraDetectorMap & spectraMap, const int noNeighbours);
+      /// Query the graph for the default number of nearest neighbours to specified detector
+      std::map<specid_t, double> defaultNeighbours(const specid_t spectrum) const;
+
       /// Get the spectra associated with all in the instrument
-      void getSpectraDetectors(std::vector<IDetector_sptr>& spectra, 
-			       boost::shared_ptr<const IInstrument> instrument, 
-			       const ISpectraDetectorMap & spectraMap);
+      std::map<specid_t, IDetector_sptr> 
+	getSpectraDetectors(boost::shared_ptr<const IInstrument> instrument, 
+			    const ISpectraDetectorMap & spectraMap);
       
       /// populates the graph with the nodes (detectors with id) and edges (neighbour links with distances)
       void populate();
-      /// number of neighbours to find. always set to 8. Unfortunately ANN requires this be an int.
-      int m_noNeighbours;
       /// map between the DetectorID and the Graph node descriptor
-      MapIV m_detIDtoVertex;
+      MapIV m_specToVertex;
       /// boost::graph object
       Graph m_graph;
       /// property map holding the node's related DetectorID's

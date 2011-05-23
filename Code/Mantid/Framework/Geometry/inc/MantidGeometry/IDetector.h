@@ -6,7 +6,6 @@
 //----------------------------------------------------------------------
 #include "MantidKernel/System.h"
 #include "MantidKernel/Logger.h"
-#include "MantidGeometry/IDetector.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
 #include <boost/shared_ptr.hpp>
@@ -96,7 +95,7 @@ public:
   virtual bool isMonitor() const = 0;
 
   /// Get Nearest Neighbours
-  virtual std::map<detid_t, double> getNeighbours(double radius = 0.0) = 0;
+  virtual std::map<int32_t, double> getNeighbours(double radius = 0.0) = 0;
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();

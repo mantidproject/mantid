@@ -8,7 +8,9 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
+#include "MantidGeometry/ISpectraDetectorMap.h" //For specid_t
 #include "MantidGeometry/Objects/BoundingBox.h"
+
 
 #ifndef HAS_UNORDERED_MAP_H
 #include <map>
@@ -29,7 +31,6 @@ namespace Geometry
   //---------------------------------------------------------------------------
   class BoundingBox;
   class NearestNeighbours;
-  class ISpectraDetectorMap;
 
   /** @class ParameterMap ParameterMap.h
 
@@ -250,7 +251,7 @@ namespace Geometry
     /// Build and populate the NearestNeighbours object
     void buildNearestNeighbours(const IComponent *comp) const;
     /// Query the NearestNeighbours object for a detector
-    std::map<detid_t, double> getNeighbours(const IComponent *comp, const double radius = 0.0) const;
+    std::map<specid_t, double> getNeighbours(const IDetector *comp, const double radius = 0.0) const;
   private:
     /// Requires a spectra map to give the correct neighbours
     const ISpectraDetectorMap *m_spectraMap;
