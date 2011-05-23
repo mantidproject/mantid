@@ -136,8 +136,13 @@ class LoadData(ReductionStep):
             merges.append([])
             merges.append([])
             for file in self._data_files:
-                merges[2*n].append(mtd[file].getNames()[n])
-                merges[2*n+1].append(mtd[file].getNames()[n]+'_mon')
+                try:
+                    merges[2*n].append(mtd[file].getNames()[n])
+                    merges[2*n+1].append(mtd[file].getNames()[n]+'_mon')
+                except AttributeError:
+                    if n == 0:
+                        merges[0].append(file)
+                        merges[1].append(file+'_mon')
         for merge in merges:
             MergeRuns(','.join(merge), merge[0])
             factor = 1.0 / len(merge)
@@ -187,7 +192,10 @@ class BackgroundOperations(ReductionStep):
 
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
 
@@ -335,7 +343,10 @@ class ApplyCalibration(ReductionStep):
         if self._calib_workspace is None: # No calibration workspace set
             return
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
 
@@ -369,7 +380,10 @@ class HandleMonitor(ReductionStep):
         """Does everything we want to with the Monitor.
         """
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
 
@@ -460,7 +474,10 @@ class CorrectByMonitor(ReductionStep):
 
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
 
@@ -483,7 +500,10 @@ class FoldData(ReductionStep):
     def execute(self, reducer, file_ws):
         """Folds data back into a single workspace if it has been "chopped".
         """
-        wsgroup = mtd[file_ws].getNames()        
+        try:
+            wsgroup = mtd[file_ws].getNames()
+        except AttributeError:
+            return # Not a grouped workspace
         ws = file_ws+'_merged'
         MergeRuns(','.join(wsgroup), ws)
         scaling = self._create_scaling_workspace(wsgroup, ws)
@@ -536,7 +556,10 @@ class ConvertToEnergy(ReductionStep):
         
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
             
@@ -626,7 +649,10 @@ class Grouping(ReductionStep):
         
     def execute(self, reducer, file_ws):
         if ( self._multiple_frames ):
-            workspaces = mtd[file_ws].getNames()
+            try:
+                workspaces = mtd[file_ws].getNames()
+            except AttributeError:
+                workspaces = [file_ws]
         else:
             workspaces = [file_ws]
             

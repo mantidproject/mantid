@@ -61,8 +61,9 @@ def resolution(files, iconOpt, rebinParam, bground,
     reducer.set_detector_range(iconOpt['first']-1,iconOpt['last']-1)
     for file in files:
         reducer.append_data_file(file)
-    reducer.set_parameter_file(instrument + '_' + analyser + '_' + reflection
-        + '_Parameters.xml')
+    parfile = mtd.settings["instrumentDefinition.directory"]
+    parfile += instrument +"_"+ analyser +"_"+ reflection +"_Parameters.xml"
+    reducer.set_parameter_file(parfile)
     reducer.set_grouping_policy('All')
     reducer.set_sum(True)
     reducer.reduce()
