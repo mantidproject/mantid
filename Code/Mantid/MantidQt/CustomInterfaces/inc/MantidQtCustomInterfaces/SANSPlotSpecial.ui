@@ -330,6 +330,13 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QPushButton" name="pbClearIDerived" >
+       <property name="text" >
+        <string>Clear I Derived</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>

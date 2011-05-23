@@ -35,12 +35,12 @@ public:
   /**
   * Small utility class to hold information about the different functions.
   */
-  class Transform : QWidget
+  class Transform
   {
   public:
     enum TransformType { GuinierSpheres, GuinierRods, GuinierSheets, Zimm, DebyeBueche,
       Holtzer, Kratky, Porod, LogLog, General };
-    Transform(TransformType type, QWidget* parent=0);
+    Transform(TransformType type);
     ~Transform();
     void init();
     std::vector<double> functionConstants();
@@ -48,6 +48,7 @@ public:
     QList<QWidget*> xWidgets() { return m_xWidgets; }
     QList<QWidget*> yWidgets() { return m_yWidgets; }
     TransformType type() { return m_type; }
+    QStringList interceptDerivatives();
     void tidyGeneral();
     
   private:
@@ -71,6 +72,7 @@ public slots:
   void clearTable();
   void calculateDerivatives();
   void tableUpdated(int row, int column);
+  void clearInterceptDerived();
 
 private:
   void initLayout();
@@ -80,13 +82,22 @@ private:
   void setupTable();
   void createTransforms();
   QwtPlotCurve* plotMiniplot(QwtPlotCurve* curve, 
-    boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace);
+    boost::shared_ptr<Mantid::API::MatrixWorkspace> workspace,
+    size_t workspaceIndex=0);
+
+  void deriveGuinierSpheres();
+  void deriveGuinierRods();
+  void deriveZimm();
+  void deriveKratky();
+  void derivePorod();
+
+  double getValue(QTableWidgetItem*);
+  QPair<QStringList, QMap<QString, double> > getProperties(const QString & transform);
   
 private:
   Ui::SANSPlotSpecial m_uiForm;
   MantidWidgets::RangeSelector* m_rangeSelector;
   QMap<QString, Transform*> m_transforms;
-  QMap<QString, QTableWidgetItem*> m_fitProperties;
   QMap<QString, QTableWidgetItem*> m_derivatives;
   QString m_current;
   QwtPlotCurve* m_dataCurve;

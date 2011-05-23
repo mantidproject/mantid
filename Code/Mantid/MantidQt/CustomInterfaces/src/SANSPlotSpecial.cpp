@@ -1,12 +1,14 @@
 #include "MantidQtCustomInterfaces/SANSPlotSpecial.h"
 
+#include "MantidKernel/PhysicalConstants.h"
 #include "MantidAPI/AlgorithmManager.h"
 #include "MantidAPI/MatrixWorkspace.h"
 
 #include "MantidQtMantidWidgets/RangeSelector.h"
 
 #include <QLineEdit>
-// #include <math>
+#include <QDesktopServices>
+#include <QUrl>
 #include "qwt_plot_curve.h"
 
 namespace MantidQt
@@ -28,29 +30,32 @@ SANSPlotSpecial::~SANSPlotSpecial()
 }
 
 void SANSPlotSpecial::rangeChanged(double low, double high)
-{
-  Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Linear");
+{  
+  Mantid::API::IAlgorithm_sptr fit = Mantid::API::AlgorithmManager::Instance().create("Fit");
   fit->initialize();
   fit->setProperty<Mantid::API::MatrixWorkspace_sptr>("InputWorkspace", m_workspaceIQT);
-  fit->setPropertyValue("OutputWorkspace", "__sans_isis_display_linear");
+  fit->setPropertyValue("Output", "__sans_isis_display_linear");
+  fit->setPropertyValue("Function", "name=UserFunction, Formula=Intercept+Gradient*x");
   fit->setProperty<double>("StartX", low);
   fit->setProperty<double>("EndX", high);
   fit->execute();
 
+  if ( ! fit->isExecuted() ) { return; }
+
   m_workspaceLinear = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>
-    (Mantid::API::AnalysisDataService::Instance().retrieve("__sans_isis_display_linear"));
-  m_linearCurve = plotMiniplot(m_linearCurve, m_workspaceLinear);
+    (Mantid::API::AnalysisDataService::Instance().retrieve("__sans_isis_display_linear_Workspace"));
+  m_linearCurve = plotMiniplot(m_linearCurve, m_workspaceLinear, 1);
 
   QPen fitPen(Qt::red, Qt::SolidLine);
   m_linearCurve->setPen(fitPen);
   m_uiForm.plotWindow->replot();
 
-  double intercept = fit->getProperty("FitIntercept");
-  double gradient = fit->getProperty("FitSlope");
-  double chisqrd = fit->getProperty("Chi2");
+  QStringList parValues = QString::fromStdString(fit->getPropertyValue("Parameters")).split(",", QString::SkipEmptyParts);
 
-  m_derivatives["Intercept"]->setText(QString::number(intercept));
-  m_derivatives["Gradient"]->setText(QString::number(gradient));
+  double chisqrd = fit->getProperty("OutputChi2overDoF");
+
+  m_derivatives["Intercept"]->setText(parValues[0]);
+  m_derivatives["Gradient"]->setText(parValues[1]);
   m_derivatives["Chi Squared"]->setText(QString::number(chisqrd));
 
   calculateDerivatives();
@@ -75,7 +80,7 @@ void SANSPlotSpecial::plot()
 
 void SANSPlotSpecial::help()
 {
-  //
+  QDesktopServices::openUrl(QUrl("http://www.mantidproject.org/ISIS_SANS_Display"));
 }
 
 void SANSPlotSpecial::updateAxisLabels(const QString & value)
@@ -144,12 +149,14 @@ void SANSPlotSpecial::calculateDerivatives()
     temp = - std::sqrt(5 * gradient);
     m_derivatives["R"]->setText(QString::number(temp));
     // Intercept = M.[(c.(deltarho**2) / (NA.d**2)] = M.[(phi.(deltarho**2) / (NA.d)]
+    deriveGuinierSpheres();
     break;
   case Transform::GuinierRods:
     // Gradient = -(Rg,xs**2)/2  (note dividing by 2 this time)
     temp = - std::sqrt(2 * gradient);
     m_derivatives["Rg,xs"]->setText(QString::number(temp));
-    //Intercept (Q**2=0) = Ln[(pi.c.(deltarho**2).ML) / (NA.d**2)] 
+    //Intercept (Q**2=0) = Ln[(pi.c.(deltarho**2).ML) / (NA.d**2)]
+    deriveGuinierRods();
     break;
   case Transform::GuinierSheets:
     temp = - std::sqrt(gradient * 12);
@@ -162,9 +169,11 @@ void SANSPlotSpecial::calculateDerivatives()
     temp = std::sqrt(5 * gradient);
     m_derivatives["R"]->setText(QString::number(temp));
     // Intercept = (1/M).[(NA.d**2) / (c.(deltarho**2)] = (1/M).[(NA.d) / (phi.(deltarho**2)]
+    deriveZimm();
     break;
   case Transform::Kratky:
     // Plateau Intercept = [(2.c.M.(deltarho**2)) / (NA.(d**2).(Rg**2))] = [(2.phi.M.(deltarho**2)) / (NA.d.(Rg**2))]
+    deriveKratky();
     break;
   case Transform::DebyeBueche:
     temp = std::sqrt( gradient / intercept );
@@ -178,6 +187,7 @@ void SANSPlotSpecial::calculateDerivatives()
     break;
   case Transform::Porod:
     // Plateau Intercept = [(2.pi.c.(deltarho**2)) / d].(S / V)
+    derivePorod();
     break;
   default:
     break;
@@ -188,7 +198,7 @@ void SANSPlotSpecial::calculateDerivatives()
 
 void SANSPlotSpecial::tableUpdated(int row, int column)
 {
-    UNUSED_ARG(row);
+  UNUSED_ARG(row);
 
   if ( m_rearrangingTable ) { return; }
   if ( ! ( column == 3 || column == 5 ) ) { return; }
@@ -196,6 +206,20 @@ void SANSPlotSpecial::tableUpdated(int row, int column)
   // Transform::TransformType type = m_transforms[m_uiForm.cbPlotType->currentText()]->type();
 
   calculateDerivatives();
+}
+
+void SANSPlotSpecial::clearInterceptDerived()
+{
+  m_rearrangingTable = true;
+
+  int nrows = m_uiForm.tbDerived->rowCount();
+
+  for ( int i = 0; i < m_uiForm.tbDerived->rowCount(); i++ )
+  {
+    m_uiForm.tbDerived->item(i, 5)->setText("");
+  }
+
+  m_rearrangingTable = false;
 }
 
 void SANSPlotSpecial::initLayout()
@@ -218,7 +242,7 @@ void SANSPlotSpecial::initLayout()
   connect(m_uiForm.cbBackground, SIGNAL(currentIndexChanged(int)), m_uiForm.swBackground, SLOT(setCurrentIndex(int)));
   connect(m_uiForm.cbPlotType, SIGNAL(currentIndexChanged(const QString &)), this, SLOT(updateAxisLabels(const QString &)));
   connect(m_uiForm.tbDerived, SIGNAL(cellChanged(int, int)), this, SLOT(tableUpdated(int, int)));
-
+  connect(m_uiForm.pbClearIDerived, SIGNAL(clicked()), this, SLOT(clearInterceptDerived()));
   updateAxisLabels(m_uiForm.cbPlotType->currentText());
 }
 
@@ -269,6 +293,7 @@ void SANSPlotSpecial::tableDisplay(QStringList properties, QList<QPair<int, int>
     }
     int column = (*pos).second;
     QTableWidgetItem* lblItm = new QTableWidgetItem(*m_emptyCell);
+    lblItm->setToolTip(m_derivatives[(*it)]->toolTip());
     lblItm->setText((*it));
     m_uiForm.tbDerived->setItem(row, column, lblItm);
     m_uiForm.tbDerived->setItem(row, column+1, m_derivatives[(*it)]);
@@ -337,7 +362,7 @@ void SANSPlotSpecial::createTransforms()
 }
 
 void SANSPlotSpecial::setupTable()
-{  // Setup the table
+{
   m_emptyCell = new QTableWidgetItem();
   m_emptyCell->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled );
   m_uiForm.tbDerived->setItemPrototype(m_emptyCell);
@@ -355,26 +380,39 @@ void SANSPlotSpecial::setupTable()
   lbl = new QTableWidgetItem(*m_emptyCell); lbl->setText("Chi Squared");
   m_uiForm.tbDerived->setItem(2,0, lbl);
   m_uiForm.tbDerived->setItem(2,1, m_derivatives["Chi Squared"]);
-
-  // Properties that can not be changed should be cloned from m_emptyCell
-  
-  m_derivatives["Rg"] = new QTableWidgetItem(); // Radius of gyration
-  m_derivatives["Rg,xs"] = new QTableWidgetItem(); // Cross-sectional radius of gyration
-  m_derivatives["R"] = new QTableWidgetItem(); // Equivalent spherical radius
-  m_derivatives["T"] = new QTableWidgetItem(*m_emptyCell); // Thickness
-  m_derivatives["C"] = new QTableWidgetItem(); // Concentration
-  m_derivatives["Phi"] = new QTableWidgetItem(); // Volume fraction
-  m_derivatives["Deltarho"] = new QTableWidgetItem(); // Difference in neutron scattering length densities (solute-solvent)
-  m_derivatives["M"] = new QTableWidgetItem(); // Molecular weight
-  m_derivatives["ML"] = new QTableWidgetItem(); // Mass per unit length
-  m_derivatives["D"] = new QTableWidgetItem(); // Bulk density
-  m_derivatives["N"] = new QTableWidgetItem(*m_emptyCell); // Q-Dependence
-  m_derivatives["V"] = new QTableWidgetItem(*m_emptyCell); // Excluded volume component
-  m_derivatives["Zeta"] = new QTableWidgetItem(*m_emptyCell); // Characteristic length
-  m_derivatives["(S/V)"] = new QTableWidgetItem(); // Survace area-to-volume ratio
+    
+  m_derivatives["Rg"] = new QTableWidgetItem();
+  m_derivatives["Rg"]->setToolTip("Radius of gyration");
+  m_derivatives["Rg,xs"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["Rg,xs"]->setToolTip("Cross-sectional radius of gyration");
+  m_derivatives["R"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["R"]->setToolTip("Equivalent spherical radius");
+  m_derivatives["T"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["T"]->setToolTip("Thickness");
+  m_derivatives["C"] = new QTableWidgetItem();
+  m_derivatives["C"]->setToolTip("Concentration");
+  m_derivatives["Phi"] = new QTableWidgetItem();
+  m_derivatives["Phi"]->setToolTip("Volume fraction");
+  m_derivatives["Deltarho"] = new QTableWidgetItem();
+  m_derivatives["Deltarho"]->setToolTip("Difference in neutron scattering length densities (solute-solvent)");
+  m_derivatives["M"] = new QTableWidgetItem();
+  m_derivatives["M"]->setToolTip("Molecular weight");
+  m_derivatives["ML"] = new QTableWidgetItem();
+  m_derivatives["ML"]->setToolTip("Mass per unit length");
+  m_derivatives["D"] = new QTableWidgetItem();
+  m_derivatives["D"]->setToolTip("Bulk density");
+  m_derivatives["N"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["N"]->setToolTip("Q-Dependence");
+  m_derivatives["V"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["V"]->setToolTip("Excluded volume component");
+  m_derivatives["Zeta"] = new QTableWidgetItem(*m_emptyCell);
+  m_derivatives["Zeta"]->setToolTip("Characteristic length");
+  m_derivatives["(S/V)"] = new QTableWidgetItem();
+  m_derivatives["(S/V)"]->setToolTip("Surface area-to-volume ratio");
 }
 
-QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::MatrixWorkspace_sptr workspace)
+QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::MatrixWorkspace_sptr workspace,
+  size_t workspaceIndex)
 {
   bool data = ( curve == m_dataCurve );
 
@@ -387,8 +425,8 @@ QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::Ma
 
   curve = new QwtPlotCurve();
 
-  const QVector<double> dataX = QVector<double>::fromStdVector(workspace->readX(0));
-  const QVector<double> dataY = QVector<double>::fromStdVector(workspace->readY(0));
+  const QVector<double> dataX = QVector<double>::fromStdVector(workspace->readX(workspaceIndex));
+  const QVector<double> dataY = QVector<double>::fromStdVector(workspace->readY(workspaceIndex));
 
   curve->setData(dataX, dataY);
   curve->attach(m_uiForm.plotWindow);
@@ -405,11 +443,267 @@ QwtPlotCurve* SANSPlotSpecial::plotMiniplot(QwtPlotCurve* curve, Mantid::API::Ma
   return curve;
 }
 
+void SANSPlotSpecial::deriveGuinierSpheres()
+{
+  // Intercept = M.[(c.(deltarho**2) / (NA.d**2)] = M.[(phi.(deltarho**2) / (NA.d)]
+  QPair<QStringList, QMap<QString, double> > props = getProperties("Guinier (spheres)");
+  QStringList unknown = props.first;
+  QMap<QString, double> values = props.second;
+
+  if ( ( ( unknown.size() > 1 ) && ( unknown.indexOf("Phi") == -1 ) ) || ( unknown.size() > 2 ) )
+  {
+    return;
+  }
+
+  double lhs = values["Intercept"] * Mantid::PhysicalConstants::N_A;
+
+  foreach ( QString item, unknown )
+  {
+    double val;
+    if ( item == "M" )
+    {
+      val = ( lhs * std::pow(values["D"], 2.0) ) / ( values["C"] * std::pow(values["Deltarho"], 2.0) );
+    }
+    else if ( item == "C" )
+    {
+      val = ( lhs * std::pow(values["D"], 2.0) ) / ( values["M"] * std::pow(values["Deltarho"], 2.0) );
+    }
+    else if ( item == "Deltarho" )
+    {
+      val = std::sqrt( ( lhs * std::pow(values["D"], 2.0) ) / ( values["M"] * values["C"] ) );
+    }
+    else if ( item == "D" )
+    {
+      val = std::sqrt( lhs / ( values["M"] * values["C"] * std::pow(values["Deltarho"], 2.0) ) );
+    }
+    else if ( item == "Phi" )
+    {
+      val = ( lhs * values["D"] ) / ( values["M"] * std::pow(values["Deltarho"], 2.0) );
+    }
+    else { continue; }
+
+    values[item] = val;
+    m_derivatives[item]->setText(QString::number(val));
+  }
+}
+
+void SANSPlotSpecial::deriveGuinierRods()
+{
+  //Intercept (Q**2=0) = Ln[(pi.c.(deltarho**2).ML) / (NA.d**2)]
+  QPair<QStringList, QMap<QString, double> > props = getProperties("Guinier (rods)");
+  QStringList unknown = props.first;
+  QMap<QString, double> values = props.second;
+
+  if ( unknown.size() != 1 )
+  {
+    return;
+  }
+
+  QString item = unknown.front();
+
+  double val;
+
+  double lhs = ( std::pow(2.71828183, values["Intercept"]) * Mantid::PhysicalConstants::N_A ) / M_PI;
+  
+  if ( item == "C" )
+  {
+    val = lhs * ( std::pow(values["D"], 2) / ( std::pow(values["Deltarho"], 2) * values["ML"] ) );
+  }
+  else if ( item == "Deltarho" )
+  {
+    val = std::sqrt( lhs * ( std::pow(values["D"], 2) / ( values["C"] * values["ML"] ) ) );
+  }
+  else if ( item == "ML" )
+  {
+    val = lhs * ( std::pow(values["D"], 2) / ( std::pow(values["Deltarho"], 2) * values["C"] ) );
+  }
+  else if ( item == "D" )
+  {
+    val = std::sqrt( lhs / ( values["C"] * values["ML"] * std::pow(values["Deltarho"], 2) ) );
+  }
+  else { return; }
+
+  m_derivatives[item]->setText(QString::number(val));
+
+}
+
+void SANSPlotSpecial::deriveZimm()
+{
+  // Intercept = (1/M).[(NA.d**2) / (c.(deltarho**2)] = (1/M).[(NA.d) / (phi.(deltarho**2)]
+  QPair<QStringList, QMap<QString, double> > props = getProperties("Zimm");
+  QStringList unknown = props.first;
+  QMap<QString, double> values = props.second;
+
+  double lhs = values["Intercept"] / Mantid::PhysicalConstants::N_A;
+
+  if ( unknown.size() > 2 || ( unknown.size() > 1 && unknown.indexOf("Phi") == -1 ) )
+  {
+    return;
+  }
+
+  foreach ( QString item, unknown )
+  {
+    double val;
+    if ( item == "D" )
+    {
+      val = std::sqrt( lhs * values["M"] * values["C"] * std::pow(values["Deltarho"], 2) );
+    }
+    else if ( item == "M" )
+    {
+      val = lhs * ( values["C"] * std::pow(values["Deltarho"], 2) ) / std::pow(values["D"], 2);
+    }
+    else if ( item == "C" )
+    {
+      val = lhs * ( values["M"] * std::pow(values["Deltarho"], 2) ) / std::pow(values["D"], 2);
+    }
+    else if ( item == "Deltarho" )
+    {
+      val = std::sqrt( lhs * ( values["M"] * values["C"] ) / std::pow(values["D"], 2) ) ;
+    }
+    else if ( item == "Phi" )
+    {
+      val = lhs * ( values["M"] * std::pow(values["Deltarho"], 2) ) / values["D"];
+    }
+    else { continue; }
+    
+    values[item] = val;
+    m_derivatives[item]->setText(QString::number(val));
+  }
+}
+
+void SANSPlotSpecial::deriveKratky()
+{
+  // Plateau Intercept = [(2.c.M.(deltarho**2)) / (NA.(d**2).(Rg**2))] = [(2.phi.M.(deltarho**2)) / (NA.d.(Rg**2))]
+  QPair<QStringList, QMap<QString, double> > props = getProperties("Kratky");
+  QStringList unknown = props.first;
+  QMap<QString, double> values = props.second;
+
+  double lhs = Mantid::PhysicalConstants::N_A * values["Intercept"] / 2.0;
+
+  if ( unknown.size() > 2 || ( unknown.size() == 2 && unknown.indexOf("Phi") == -1 ) )
+  {
+    return;
+  }
+
+  foreach ( QString item, unknown )
+  {
+    double val;
+
+    if ( item == "C" )
+    {
+      val = lhs * ( std::pow(values["D"], 2) * std::pow(values["Rg"], 2) ) / ( values["M"] * std::pow(values["Deltarho"], 2) );
+    }
+    else if ( item == "M" )
+    {
+      val = lhs * ( std::pow(values["D"], 2) * std::pow(values["Rg"], 2) ) / ( values["C"] * std::pow(values["Deltarho"], 2) );
+    }
+    else if ( item == "Deltarho" )
+    {
+      val = std::sqrt( lhs * ( std::pow(values["D"], 2) * std::pow(values["Rg"], 2) ) / ( values["C"] * values["M"] ) );
+    }
+    else if ( item == "D" )
+    {
+      val = std::sqrt( lhs * std::pow(values["Rg"], 2) / ( values["C"] * values["M"] * std::pow(values["Deltarho"], 2 ) ) );
+    }
+    else if ( item == "Rg" )
+    {
+      val = std::sqrt( lhs * std::pow(values["D"], 2) / ( values["C"] * values["M"] * std::pow(values["Deltarho"], 2 ) ) );
+    }
+    else if ( item == "Phi" )
+    {
+      val = lhs * ( values["D"] * std::pow(values["Rg"], 2) ) / ( values["M"] * std::pow(values["Deltarho"], 2) );
+    }
+    else { continue; }
+
+    values[item] = val;
+    m_derivatives[item]->setText(QString::number(val));
+  }
+}
+
+void SANSPlotSpecial::derivePorod()
+{
+  // Plateau Intercept = [(2.pi.c.(deltarho**2)) / d].(S / V)
+  QPair<QStringList, QMap<QString, double> > props = getProperties("Porod");
+  QStringList unknown = props.first;
+  QMap<QString, double> values = props.second;
+
+  if ( unknown.size() != 1 ) { return; }
+
+  QString item = unknown.front();
+  double val;
+  double lhs = values["Intercept"] / ( 2 * M_PI );
+
+  if ( item == "C" )
+  {
+    val = ( lhs * values["D"] ) / ( std::pow(values["Deltarho"], 2) * values["(S/V)"] );
+  }
+  else if ( item == "Deltarho" )
+  {
+    val = std::sqrt( ( lhs * values["D"] ) / ( values["C"] * values["(S/V)"] ) );
+  }
+  else if ( item == "(S/V)" )
+  {
+    val = ( lhs * values["D"] ) / ( std::pow(values["Deltarho"], 2) * values["C"] );
+  }
+  else if ( item == "D" )
+  {
+    val = lhs / ( values["C"] * std::pow(values["Deltarho"], 2) * values["(S/V)"] );
+  }
+  else { return; }
+
+  m_derivatives[item]->setText(QString::number(val));
+}
+
+double SANSPlotSpecial::getValue(QTableWidgetItem* item)
+{
+  QString text = item->text().trimmed();
+  if ( text == "nan" ) { item->setText(""); }
+
+  if ( text != "" && text != "nan" )
+  {
+    bool ok = false;
+    double result = item->text().trimmed().toDouble(&ok);
+    if ( ok )
+    {
+      return result;
+    }
+  }
+  else
+  {
+    throw std::invalid_argument("Could not convert value given to a double.");
+  }
+}
+
+QPair<QStringList, QMap<QString, double> > SANSPlotSpecial::getProperties(const QString & transform)
+{
+  QStringList items = m_transforms[transform]->interceptDerivatives();
+  items << "Intercept";
+  QMap<QString, double> values;
+  QStringList unknown;
+  foreach ( QString item, items )
+  {
+    try
+    {
+      double val = getValue(m_derivatives[item]);
+      values[item] = val;
+    } catch ( std::invalid_argument & )
+    {
+      unknown << item;
+    }
+  }
+
+  QPair<QStringList, QMap<QString, double> > result;
+  result.first = unknown;
+  result.second = values;
+
+  return result;
+}
+
 //--------------------------------------------------------------------
 //------- Utility "Transform" Class ----------------------------------
 //--------------------------------------------------------------------
-SANSPlotSpecial::Transform::Transform(Transform::TransformType type, QWidget* parent) : m_type(type), 
-  m_xWidgets(QList<QWidget*>()), m_yWidgets(QList<QWidget*>()), m_parent(parent), m_gDeriv(""), m_iDeriv("")
+SANSPlotSpecial::Transform::Transform(Transform::TransformType type) : m_type(type), 
+  m_xWidgets(QList<QWidget*>()), m_yWidgets(QList<QWidget*>()), m_gDeriv(""), m_iDeriv("")
 {
   init();
 }
@@ -424,75 +718,75 @@ void SANSPlotSpecial::Transform::init()
   switch ( m_type )
   {
   case GuinierSpheres:
-    m_xWidgets.append(new QLabel("Q^2", this));
-    m_yWidgets.append(new QLabel("ln (I)", this));
+    m_xWidgets.append(new QLabel("Q^2"));
+    m_yWidgets.append(new QLabel("ln (I)"));
     m_gDeriv = "Rg|R";
     m_iDeriv = "M|C|Deltarho|D|Phi";
     break;
   case GuinierRods:
-    m_xWidgets.append(new QLabel("Q^2", this));
-    m_yWidgets.append(new QLabel("ln (I (Q) )", this));
+    m_xWidgets.append(new QLabel("Q^2"));
+    m_yWidgets.append(new QLabel("ln (I (Q) )"));
     m_gDeriv = "Rg,xs";
     m_iDeriv = "C|Deltarho|ML|D";
     break;
   case GuinierSheets:
-    m_xWidgets.append(new QLabel("Q^2", this));
-    m_yWidgets.append(new QLabel("ln (I (Q ^ 2 ) )", this));
+    m_xWidgets.append(new QLabel("Q^2"));
+    m_yWidgets.append(new QLabel("ln (I (Q ^ 2 ) )"));
     m_gDeriv = "T";
     break;
   case Zimm:
-    m_xWidgets.append(new QLabel("Q^2", this));
-    m_yWidgets.append(new QLabel("1 / I", this));
+    m_xWidgets.append(new QLabel("Q^2"));
+    m_yWidgets.append(new QLabel("1 / I"));
     m_gDeriv = "Rg|R";
     m_iDeriv = "M|D|C|Deltarho|Phi";
     break;
   case DebyeBueche:
-    m_xWidgets.append(new QLabel("Q^2", this));
-    m_yWidgets.append(new QLabel("1 / sqrt (I)", this));
+    m_xWidgets.append(new QLabel("Q^2"));
+    m_yWidgets.append(new QLabel("1 / sqrt (I)"));
     m_gDeriv = "Zeta"; // Weird ? Zeta = sqrt( graident / intercept )
     break;
   case Holtzer:
-    m_xWidgets.append(new QLabel("Q", this));
-    m_yWidgets.append(new QLabel("I * Q", this));
+    m_xWidgets.append(new QLabel("Q"));
+    m_yWidgets.append(new QLabel("I * Q"));
     break;
   case Kratky:
-    m_xWidgets.append(new QLabel("Q", this));
-    m_yWidgets.append(new QLabel("I * Q^2", this));
+    m_xWidgets.append(new QLabel("Q"));
+    m_yWidgets.append(new QLabel("I * Q^2"));
     m_iDeriv = "C|M|Deltarho|D|Rg|Phi";
     break;
   case Porod:
-    m_xWidgets.append(new QLabel("Q", this));
-    m_yWidgets.append(new QLabel("I * Q^4", this));
+    m_xWidgets.append(new QLabel("Q"));
+    m_yWidgets.append(new QLabel("I * Q^4"));
     m_iDeriv = "C|Deltarho|D|S|V";
     break;
   case LogLog:
-    m_xWidgets.append(new QLabel("ln (Q)", this));
-    m_yWidgets.append(new QLabel("ln (I)", this));
+    m_xWidgets.append(new QLabel("ln (Q)"));
+    m_yWidgets.append(new QLabel("ln (I)"));
     m_gDeriv = "N|V";
     break;
   case General:
-    m_xWidgets.append(new QLabel("Q^", this));
-    m_xWidgets.append(new QLineEdit("C6", this));
-    m_xWidgets.append(new QLabel("*I^", this));
-    m_xWidgets.append(new QLineEdit("C7", this));
-    m_xWidgets.append(new QLabel("*ln(Q^", this));
-    m_xWidgets.append(new QLineEdit("C8", this));
-    m_xWidgets.append(new QLabel("*I^", this));
-    m_xWidgets.append(new QLineEdit("C9", this));
-    m_xWidgets.append(new QLabel("*", this));
-    m_xWidgets.append(new QLineEdit("C10", this));
-    m_xWidgets.append(new QLabel(")", this));
-    m_yWidgets.append(new QLabel("Q^", this));
-    m_yWidgets.append(new QLineEdit("C1", this));
-    m_yWidgets.append(new QLabel("*I^", this));
-    m_yWidgets.append(new QLineEdit("C2", this));
-    m_yWidgets.append(new QLabel("*ln(Q^", this));
-    m_yWidgets.append(new QLineEdit("C3", this));
-    m_yWidgets.append(new QLabel("*I^", this));
-    m_yWidgets.append(new QLineEdit("C4", this));
-    m_yWidgets.append(new QLabel("*", this));
-    m_yWidgets.append(new QLineEdit("C5", this));
-    m_yWidgets.append(new QLabel(")", this));
+    m_xWidgets.append(new QLabel("Q^"));
+    m_xWidgets.append(new QLineEdit("C6"));
+    m_xWidgets.append(new QLabel("*I^"));
+    m_xWidgets.append(new QLineEdit("C7"));
+    m_xWidgets.append(new QLabel("*ln(Q^"));
+    m_xWidgets.append(new QLineEdit("C8"));
+    m_xWidgets.append(new QLabel("*I^"));
+    m_xWidgets.append(new QLineEdit("C9"));
+    m_xWidgets.append(new QLabel("*"));
+    m_xWidgets.append(new QLineEdit("C10"));
+    m_xWidgets.append(new QLabel(")"));
+    m_yWidgets.append(new QLabel("Q^"));
+    m_yWidgets.append(new QLineEdit("C1"));
+    m_yWidgets.append(new QLabel("*I^"));
+    m_yWidgets.append(new QLineEdit("C2"));
+    m_yWidgets.append(new QLabel("*ln(Q^"));
+    m_yWidgets.append(new QLineEdit("C3"));
+    m_yWidgets.append(new QLabel("*I^"));
+    m_yWidgets.append(new QLineEdit("C4"));
+    m_yWidgets.append(new QLabel("*"));
+    m_yWidgets.append(new QLineEdit("C5"));
+    m_yWidgets.append(new QLabel(")"));
     tidyGeneral();
     break;
   }
@@ -545,6 +839,12 @@ QPair<QStringList, QList<QPair<int, int> > > SANSPlotSpecial::Transform::derivat
   }
 
   QPair<QStringList, QList<QPair<int, int> > > result = QPair<QStringList, QList<QPair<int, int> > >(items, positions);
+  return result;
+}
+
+QStringList SANSPlotSpecial::Transform::interceptDerivatives()
+{
+  QStringList result = m_iDeriv.split("|", QString::SkipEmptyParts);
   return result;
 }
 
