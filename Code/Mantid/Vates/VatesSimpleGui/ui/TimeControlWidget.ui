@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TimeControlWidget</class>
+ <widget class="QWidget" name="TimeControlWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>465</width>
+    <height>337</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>TimeControlWidget</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">TimeControlWidget { border: 2px groove black; }</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="pqAnimationTimeToolbar" name="animWidget" native="true"/>
+   </item>
+   <item row="1" column="0">
+    <widget class="pqVCRToolbar" name="vcrWidget" native="true">
+     <property name="minimumSize">
+      <size>
+       <width>280</width>
+       <height>0</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>pqVCRToolbar</class>
+   <extends>QWidget</extends>
+   <header>pqVCRToolbar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>pqAnimationTimeToolbar</class>
+   <extends>QWidget</extends>
+   <header>pqAnimationTimeToolbar.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
