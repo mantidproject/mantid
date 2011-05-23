@@ -108,9 +108,9 @@ void GeneralisedSecondDifference::exec()
 	const int nsteps=2*n_av+1;
 
     m_progress=new Progress(this,0.0,1.0,(spec_max-spec_min));
-  	for (int i=spec_min;i<=spec_max;i++)
+  	for (size_t i=spec_min;i<=spec_max;i++)
   	{
-  		int out_index=i-spec_min;
+  		size_t out_index=i-spec_min;
   		out->getAxis(1)->spectraNo(out_index)=inputWS->getAxis(1)->spectraNo(i);
   		const MantidVec& refX=inputWS->readX(i);
   		const MantidVec& refY=inputWS->readY(i);

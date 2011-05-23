@@ -97,7 +97,7 @@ void Q1DWeighted::exec()
   const V3D sourcePos = inputWS->getInstrument()->getSource()->getPos();
   const V3D samplePos = inputWS->getInstrument()->getSample()->getPos();
 
-  const int xLength = static_cast<int>(inputWS->readX(0).size());
+  const size_t xLength = inputWS->readX(0).size();
   const double fmp=4.0*M_PI;
 
   // Count histogram for normalization

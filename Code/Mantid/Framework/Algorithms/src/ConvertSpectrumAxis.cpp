@@ -79,7 +79,7 @@ namespace Algorithms
     // Loop over the original spectrum axis, finding the theta (n.b. not 2theta!) for each spectrum
     // and storing it's corresponding workspace index
     // Map will be sorted on theta, so resulting axis will be ordered as well
-    std::multimap<double,int> indexMap;
+    std::multimap<double,size_t> indexMap;
     const size_t nHist = inputWS->getNumberHistograms();
     const size_t nBins = inputWS->blocksize();
     const bool isHist = inputWS->isHistogramData();
@@ -177,7 +177,7 @@ namespace Algorithms
     {
       newAxis->unit() = UnitFactory::Instance().create(unitTarget);
     }
-    std::multimap<double,int>::const_iterator it;
+    std::multimap<double,size_t>::const_iterator it;
     int currentIndex = 0;
     for (it = indexMap.begin(); it != indexMap.end(); ++it)
     {

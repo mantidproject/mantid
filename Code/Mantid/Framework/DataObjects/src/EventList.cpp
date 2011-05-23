@@ -2003,12 +2003,13 @@ namespace DataObjects
       if (it_first >= it_last)
         throw std::runtime_error("Event filter is all messed up"); // TODO
 
+      size_t tmp = (it_last - it_first);
       //it_last will either be at the end (if not found) or before it.
       //Erase this range from the vector
       events.erase(it_first, it_last);
 
       //Done! Sorting is still valid, no need to redo.
-      return (it_last - it_first);
+      return tmp;//(it_last - it_first); the iterators get invalid after erase (on my machine)
     }
     return 0;
   }

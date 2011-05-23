@@ -41,7 +41,7 @@ void FlatBackground::init()
     "The X value at which to start the background fit");
   declareProperty("EndX", Mantid::EMPTY_DBL(), mustHaveValue->clone(),
     "The X value at which to end the background fit");
-  declareProperty(new ArrayProperty<int>("WorkspaceIndexList"),
+  declareProperty(new ArrayProperty<size_t>("WorkspaceIndexList"),
     "Indices of the spectra that will have their background removed\n"
     "default: modify all spectra");
   std::vector<std::string> modeOptions;
@@ -64,14 +64,14 @@ void FlatBackground::exec()
   // Retrieve the input workspace
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
   // Copy over all the data
-  const int numHists = static_cast<int>(inputWS->getNumberHistograms());
-  const int blocksize = static_cast<int>(inputWS->blocksize());
+  const size_t numHists = inputWS->getNumberHistograms();
+  const size_t blocksize = inputWS->blocksize();
 
   // Get the required X range
   double startX,endX;
   this->checkRange(startX,endX);
 
-  std::vector<int> specInds = getProperty("WorkspaceIndexList");
+  std::vector<size_t> specInds = getProperty("WorkspaceIndexList");
   // check if the user passed an empty list, if so all of spec will be processed
   this->getSpecInds(specInds, numHists);
  
@@ -108,10 +108,10 @@ void FlatBackground::exec()
   const int progStep(static_cast<int>(ceil(toFitsize/80.0)));
 
   // Now loop over the required spectra
-  std::vector<int>::const_iterator specIt;
+  std::vector<size_t>::const_iterator specIt;
   for (specIt = specInds.begin(); specIt != specInds.end(); ++specIt)
   {
-    const int currentSpec = *specIt;
+    const size_t currentSpec = *specIt;
     try
     {
       // Only if Mean() is called will variance be changed
@@ -271,7 +271,7 @@ void FlatBackground::checkRange(double& startX, double& endX)
 *  @param output :: the array to be checked
 *  @param workspaceTotal :: required to be the total number of spectra in the workspace
 */
-void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTotal)
+void FlatBackground::getSpecInds(std::vector<size_t> &output, const size_t workspaceTotal)
 {
   if ( output.size() > 0 )
   {
@@ -279,7 +279,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
   }
 
   output.resize(workspaceTotal);
-  for ( int i = 0; i < workspaceTotal; ++i )
+  for ( size_t i = 0; i < workspaceTotal; ++i )
   {
     output[i] = i;
   }
@@ -295,7 +295,7 @@ void FlatBackground::getSpecInds(std::vector<int> &output, const int workspaceTo
 *  @throw out_of_range if either startX or endX are out of the range of X-values in the specified spectrum
 *  @throw invalid_argument if endX has the value of first X-value one of the spectra
 */
-double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const
+double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const size_t specInd, const double startX, const double endX, double &variance) const
 {
   const MantidVec &XS = WS->readX(specInd), &YS = WS->readY(specInd);
   const MantidVec &ES = WS->readE(specInd);
@@ -330,11 +330,11 @@ double FlatBackground::Mean(const API::MatrixWorkspace_const_sptr WS, const int 
   return background;
 }
 /// Calls Linear as a sub-algorithm to do the fitting
-double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX)
+double FlatBackground::LinearFit(API::MatrixWorkspace_sptr WS, size_t spectrum, double startX, double endX)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("Linear");
   childAlg->setProperty<MatrixWorkspace_sptr>("InputWorkspace", WS);
-  childAlg->setProperty<int>("WorkspaceIndex",spectrum);
+  childAlg->setProperty<int>("WorkspaceIndex",static_cast<int>(spectrum));
   childAlg->setProperty<double>("StartX",startX);
   childAlg->setProperty<double>("EndX",endX);
   childAlg->executeAsSubAlg();

@@ -661,7 +661,7 @@ API::MatrixWorkspace_sptr ConvertUnits::removeUnphysicalBins(const Mantid::API::
     // one.
     // Thus, we first need to loop to find largest 'good' range
     std::vector<MantidVec::difference_type> lastBins(numSpec);
-    int maxBins = 0;
+    MantidVec::difference_type maxBins = 0;
     for (size_t i = 0; i < numSpec; ++i)
     {
       const MantidVec& X = workspace->readX(i);

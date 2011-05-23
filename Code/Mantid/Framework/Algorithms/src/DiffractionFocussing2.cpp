@@ -278,7 +278,7 @@ void DiffractionFocussing2::exec()
     std::transform(Yout.begin(),Yout.end(),wgt.begin(),Yout.begin(),std::divides<double>());
     std::transform(Eout.begin(),Eout.end(),wgt.begin(),Eout.begin(),std::divides<double>());
     // Now multiply by the number of spectra in the group
-    const int groupSize = static_cast<int>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
+    const size_t groupSize = static_cast<size_t>(std::count(groupAtWorkspaceIndex.begin(),groupAtWorkspaceIndex.end(),(*wit).first));
     std::transform(Yout.begin(),Yout.end(),Yout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
     std::transform(Eout.begin(),Eout.end(),Eout.begin(),std::bind2nd(std::multiplies<double>(),groupSize));
 
@@ -332,7 +332,7 @@ void DiffractionFocussing2::execEvent()
       EventList chunkEL;
 
       // Perform in chunks for more efficiency
-      int max = (wiChunk+1)*chunkSize;
+      int64_t max = (wiChunk+1)*chunkSize;
       if (max > nHist) max = nHist;
       for (int wi=wiChunk*chunkSize; wi < max; wi++)
       {

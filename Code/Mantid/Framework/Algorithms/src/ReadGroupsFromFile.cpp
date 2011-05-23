@@ -128,7 +128,7 @@ namespace Algorithms
     }
 
     // Get the instrument.
-    const int64_t nHist=localWorkspace->getNumberHistograms();
+    const size_t nHist=localWorkspace->getNumberHistograms();
     API::Axis* specAxis=localWorkspace->getAxis(1);
     // Get the spectra to detector map
     const API::SpectraDetectorMap& spectramap=localWorkspace->spectraMap();
@@ -138,7 +138,7 @@ namespace Algorithms
     bool showunselected=(!su.compare("True"));
     bool success=false;
 
-    for (int64_t i=0;i<nHist;i++)
+    for (size_t i=0;i<nHist;i++)
     {
       specid_t spec=specAxis->spectraNo(i);
       std::vector<detid_t> dets=spectramap.getDetectors(spec);
@@ -199,7 +199,7 @@ namespace Algorithms
       // Comment, not read
       if (str.empty() || str[0] == '#') continue;
       std::istringstream istr(str);
-      int64_t n,udet,sel,group;
+      int n,udet,sel,group;
       double offset;
       istr >> n >> udet >> offset >> sel >> group;
       calibration[static_cast<int>(udet)]=std::make_pair<int,int>(static_cast<int>(group),static_cast<int>(sel));

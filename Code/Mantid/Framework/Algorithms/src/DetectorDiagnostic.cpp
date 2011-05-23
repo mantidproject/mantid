@@ -46,8 +46,8 @@ namespace Mantid
      */
     MatrixWorkspace_sptr 
     DetectorDiagnostic::integrateSpectra(MatrixWorkspace_sptr inputWS, 
-					 const int indexMin,
-					 const int indexMax,
+					 const size_t indexMin,
+					 const size_t indexMax,
 					 const double lower, 
 					 const double upper,
 					 const bool outputWorkspace2D)
@@ -60,8 +60,8 @@ namespace Mantid
       double t0 = m_fracDone, t1 = advanceProgress(RTGetTotalCounts);
       IAlgorithm_sptr childAlg = createSubAlgorithm("Integration", t0, t1 );
       childAlg->setProperty( "InputWorkspace", inputWS );
-      childAlg->setProperty( "StartWorkspaceIndex", indexMin );
-      childAlg->setProperty( "EndWorkspaceIndex", indexMax );
+      childAlg->setProperty( "StartWorkspaceIndex", static_cast<int>(indexMin) );
+      childAlg->setProperty( "EndWorkspaceIndex", static_cast<int>(indexMax) );
       // pass inputed values straight to this integration trusting the checking done there
       childAlg->setProperty("RangeLower",  lower );
       childAlg->setProperty("RangeUpper", upper);
@@ -96,7 +96,7 @@ namespace Mantid
       // The median should only include "good" spectra, i.e. those not INF, NAN or without
       // a detector
       std::vector<double> goodValues;
-      const int nhists = static_cast<int>(input->getNumberHistograms());
+      const size_t nhists(input->getNumberHistograms());
       // The maximum possible length is that of workspace length
       goodValues.reserve(nhists);
       // Track the indices or the bad detectors so that we don't need to double check later

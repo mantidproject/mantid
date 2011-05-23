@@ -59,8 +59,10 @@ void Integration::exec()
   // Try and retrieve the optional properties
   m_MinRange = getProperty("RangeLower");
   m_MaxRange = getProperty("RangeUpper");
-  m_MinSpec = getProperty("StartWorkspaceIndex");
-  m_MaxSpec = getProperty("EndWorkspaceIndex");
+  int MinSpec = getProperty("StartWorkspaceIndex");
+  int MaxSpec = getProperty("EndWorkspaceIndex");
+  m_MinSpec = MinSpec;
+  m_MaxSpec = MaxSpec;
   const bool incPartBins = getProperty("IncludePartialBins");
 
   // Get the input workspace
@@ -105,10 +107,10 @@ void Integration::exec()
 
   // Loop over spectra
   PARALLEL_FOR2(localworkspace,outputWorkspace)
-  for (int i = m_MinSpec; i <= m_MaxSpec; ++i)
+  for (int i = static_cast<int>(m_MinSpec); i <= static_cast<int>(m_MaxSpec); ++i)
   {
     PARALLEL_START_INTERUPT_REGION
-    const int j = i - m_MinSpec;
+    const int j = static_cast<int>(i - m_MinSpec);
     
     // Copy Axis values from previous workspace
     if ( axisIsText )

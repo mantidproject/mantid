@@ -62,7 +62,7 @@ void Rebunch::initDocs()
 			bool dist = inputW->isDistribution();
 
 			// workspace independent determination of length
-                        int histnumber = static_cast<int>(inputW->size()/inputW->blocksize());
+			size_t histnumber = inputW->size()/inputW->blocksize();
 
 			/*
 			const std::vector<double>& Xold = inputW->readX(0);
@@ -70,14 +70,14 @@ void Rebunch::initDocs()
 			int size_x=Xold.size();
 			int size_y=Yold.size();
 			*/
-                        int size_x = static_cast<int>(inputW->readX(0).size());
-                        int size_y = static_cast<int>(inputW->readY(0).size());
+			size_t size_x = inputW->readX(0).size();
+			size_t size_y = inputW->readY(0).size();
 
 			//signal is the same length for histogram and point data
-			int ny=(size_y/n_bunch);
+			size_t ny=(size_y/n_bunch);
 			if(size_y%n_bunch >0)ny+=1;
 			// default is for hist
-			int nx=ny+1;
+			size_t nx=ny+1;
 			bool point=false;
 			if (size_x==size_y)
 			{
@@ -88,10 +88,10 @@ void Rebunch::initDocs()
 			// make output Workspace the same type is the input, but with new length of signal array
 			API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,nx,ny);
 
-            int progress_step = histnumber / 100;
+            size_t progress_step = histnumber / 100;
             if (progress_step == 0) progress_step = 1;
 			PARALLEL_FOR2(inputW,outputW)
-			for (int hist=0; hist <  histnumber;hist++)
+			for (int hist=0; hist <  static_cast<int>(histnumber);hist++)
 			{
 				PARALLEL_START_INTERUPT_REGION
 				// Ensure that axis information are copied to the output workspace if the axis exists
@@ -265,13 +265,13 @@ void Rebunch::initDocs()
 			std::vector<double>& xnew, std::vector<double>& ynew, std::vector<double>& enew, const int n_bunch)
 		{
 			int i,j;
-                        int size_y=static_cast<int>(yold.size());
+			size_t size_y=yold.size();
 			double xsum,ysum,esum;
-			int wbins=size_y/n_bunch;
-			int rem=size_y%n_bunch;
+			size_t wbins=size_y/n_bunch;
+			size_t rem=size_y%n_bunch;
 
 
-			int i_in=0;
+			size_t i_in=0;
 			j=0;
 			while (j < wbins )
 			{

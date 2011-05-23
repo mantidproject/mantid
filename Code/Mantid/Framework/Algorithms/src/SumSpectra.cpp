@@ -61,8 +61,10 @@ void SumSpectra::init()
 void SumSpectra::exec()
 {
   // Try and retrieve the optional properties
-  m_MinSpec = getProperty("StartWorkspaceIndex");
-  m_MaxSpec = getProperty("EndWorkspaceIndex");
+  int MinSpec = getProperty("StartWorkspaceIndex");
+  int MaxSpec = getProperty("EndWorkspaceIndex");
+  m_MinSpec = MinSpec;
+  m_MaxSpec = MaxSpec;
   const std::vector<int> indices_list = getProperty("ListOfWorkspaceIndices");
 
   keepMonitors = getProperty("IncludeMonitors");
@@ -70,8 +72,8 @@ void SumSpectra::exec()
   // Get the input workspace
   MatrixWorkspace_const_sptr localworkspace = getProperty("InputWorkspace");
 
-  numberOfSpectra = static_cast<int>(localworkspace->getNumberHistograms());
-  const int YLength = static_cast<int>(localworkspace->blocksize());
+  numberOfSpectra = localworkspace->getNumberHistograms();
+  const size_t YLength = localworkspace->blocksize();
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
   if ( m_MinSpec > numberOfSpectra )
@@ -99,8 +101,8 @@ void SumSpectra::exec()
   //And add the range too, if any
   if (!isEmpty(m_MaxSpec))
   {
-    for (int i = m_MinSpec; i <= m_MaxSpec; i++)
-      indices.insert(i);
+    for (size_t i = m_MinSpec; i <= m_MaxSpec; i++)
+      indices.insert(static_cast<detid_t>(i));
   }
   
   EventWorkspace_const_sptr eventW = boost::dynamic_pointer_cast<const EventWorkspace>(localworkspace);

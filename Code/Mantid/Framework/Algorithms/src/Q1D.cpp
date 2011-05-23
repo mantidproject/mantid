@@ -100,7 +100,7 @@ void Q1D::exec()
   const bool doGravity = getProperty("AccountForGravity");
 
 
-  const int xLength = static_cast<int>(inputWS->readX(0).size());
+  const size_t xLength = inputWS->readX(0).size();
   const double fmp=4.0*M_PI;
 
   PARALLEL_FOR3(inputWS,outputWS,errorsWS)

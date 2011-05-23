@@ -74,7 +74,7 @@ private:
 
 
   /// An addition table is a list of pairs: First int = workspace index in the EW being added, Second int = workspace index to which it will be added in the OUTPUT EW. -1 if it should add a new entry at the end.
-  typedef std::vector< std::pair<int, int> >  AdditionTable;
+  typedef std::vector< std::pair<int64_t, int64_t> >  AdditionTable;
 
   // Methods called by exec()
   std::list<API::MatrixWorkspace_sptr> validateInputs(const std::vector<std::string>& inputWorkspaces);

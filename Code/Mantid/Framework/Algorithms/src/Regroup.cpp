@@ -85,7 +85,7 @@ void Regroup::exec()
   // make output Workspace the same type is the input, but with new length of signal array
   API::MatrixWorkspace_sptr outputW = API::WorkspaceFactory::Instance().create(inputW,histnumber,ntcnew,ntcnew-1);
 
-  int progress_step = histnumber / 100;
+  size_t progress_step = histnumber / 100;
   if (progress_step == 0) progress_step = 1;
   for (int hist=0; hist <  histnumber;hist++)
   {
@@ -204,8 +204,8 @@ int Regroup::newAxis(const std::vector<double>& params,
 {
   double xcurr, xs;
   int ibound(2), istep(1), inew(0);
-  int ibounds=static_cast<int>(params.size()); //highest index in params array containing a bin boundary
-  int isteps=ibounds-1; // highest index in params array containing a step
+  size_t ibounds=params.size(); //highest index in params array containing a bin boundary
+  size_t isteps=ibounds-1; // highest index in params array containing a step
 
   xcurr = params[0];
   std::vector<double>::const_iterator iup =

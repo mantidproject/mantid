@@ -70,8 +70,8 @@ void FFT::exec()
   const bool isComplex = iImag != EMPTY_INT();
 
   const MantidVec& X = inWS->readX(iReal);
-  const int ySize = static_cast<int>(inWS->blocksize());
-  const int xSize = static_cast<int>(X.size());
+  const size_t ySize = inWS->blocksize();
+  const size_t xSize = X.size();
 
   if (iReal >= ySize) throw std::invalid_argument("Property Real is out of range");
   if (isComplex && iImag >= ySize) throw std::invalid_argument("Property Imaginary is out of range");
@@ -142,12 +142,12 @@ void FFT::exec()
   tAxis->setLabel(iAbs,"Modulus");
   outWS->replaceAxis(1,tAxis);
 
-  const int dys = ySize % 2;
+  const size_t dys = ySize % 2;
   if (transform == "Forward")
   {
-    for(int i=0;i<ySize;i++)
+    for(size_t i=0;i<ySize;i++)
     {
-      int j = shift? (ySize/2 + i) % ySize : i; 
+      size_t j = shift? (ySize/2 + i) % ySize : i; 
       data[2*i] = inWS->dataY(iReal)[j];
       data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
     }
@@ -155,8 +155,8 @@ void FFT::exec()
     gsl_fft_complex_forward (data.get(), 1, ySize, wavetable, workspace);
     for(int i=0;i<ySize;i++)
     {
-      int j = (ySize/2 + i + dys) % ySize;
-      outWS->dataX(iRe)[i] = df*(-ySize/2 + i);
+      size_t j = (ySize/2 + i + dys) % ySize;
+      outWS->dataX(iRe)[i] = df*( int(i) - int(ySize/2));
       double re = data[2*j]*dx;
       double im = data[2*j+1]*dx;
       outWS->dataY(iRe)[i] = re; // real part
@@ -190,7 +190,7 @@ void FFT::exec()
   {
     for(int i=0;i<ySize;i++)
     {
-      int j = (ySize/2 + i) % ySize;
+      size_t j = (ySize/2 + i) % ySize;
       data[2*i] = inWS->dataY(iReal)[j];
       data[2*i+1] = isComplex? inWS->dataY(iImag)[j] : 0.;
     }
@@ -200,7 +200,7 @@ void FFT::exec()
       double x = df*i;
       if (shift) x -= df*(ySize/2);
       outWS->dataX(0)[i] = x;
-      int j = shift? (ySize/2 + i + dys) % ySize : i; 
+      size_t j = shift? (ySize/2 + i + dys) % ySize : i; 
       double re = data[2*j]/df;
       double im = data[2*j+1]/df;
       outWS->dataY(0)[i] = re;                  // real part

@@ -132,8 +132,8 @@ void FindPeaks::findPeaksGivenStartingPoints(std::vector<double> peakCenters)
   std::vector<double>::iterator it;
 
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? index : 0;
-  const int end = singleSpectrum ? index+1 : static_cast<int>(inputWS->getNumberHistograms());
+  const int start = static_cast<int>(singleSpectrum ? index : 0);
+  const int end = static_cast<int>(singleSpectrum ? index+1 : inputWS->getNumberHistograms());
   m_progress = new Progress(this,0.0,1.0,end-start);
 
   for (int spec = start; spec < end; ++spec)
@@ -186,10 +186,10 @@ void FindPeaks::findPeaksUsingMariscotti()
 //  setProperty("SmoothedData",smoothedData);
 
   // Loop over the spectra searching for peaks
-  const int start = singleSpectrum ? index : 0;
-  const int end = singleSpectrum ? index+1 : static_cast<int>(smoothedData->getNumberHistograms());
+  const int start = static_cast<int>(singleSpectrum ? index : 0);
+  const int end = static_cast<int>(singleSpectrum ? index+1 : smoothedData->getNumberHistograms());
   m_progress = new Progress(this,0.0,1.0,end-start);
-  const int blocksize = static_cast<int>(smoothedData->blocksize());
+  const size_t blocksize = smoothedData->blocksize();
 
   for (int k = start; k < end; ++k)
   {
@@ -495,7 +495,7 @@ void FindPeaks::fitPeak(const API::MatrixWorkspace_sptr &input, const int spectr
   // See Mariscotti eqn. 20. Using l=1 for bg0/bg1 - correspond to p6 & p7 in paper.
   unsigned int i_min = 1;
   if (i0 > static_cast<int>(5*fitWidth)) i_min = i0 - 5*fitWidth;
-  unsigned int i_max = i0 + 5*fitWidth;
+  size_t i_max = i0 + 5*fitWidth;
   // Bounds checks
   if (i_min<1) i_min=1;
   if (i_max>=Y.size()-1) i_max=static_cast<unsigned int>(Y.size()-2); // TODO this is dangerous

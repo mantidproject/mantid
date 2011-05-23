@@ -230,12 +230,12 @@ double GetEi2::calculatePeakPosition(size_t ws_index, double t_min, double t_max
  *  @throw runtime_error if the algorithm just falls over
  *  @throw invalid_argument if the input workspace does not have common binning
  */
-MatrixWorkspace_sptr GetEi2::extractSpectrum(size_t ws_index, const double start, const double end)
+MatrixWorkspace_sptr GetEi2::extractSpectrum(const size_t ws_index, const double start, const double end)
 {
   IAlgorithm_sptr childAlg = createSubAlgorithm("CropWorkspace");
   childAlg->setProperty("InputWorkspace", m_input_ws);
-  childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<int>(ws_index));
-  childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<int>(ws_index));
+  childAlg->setProperty<int>("StartWorkspaceIndex", static_cast<const int>(ws_index));
+  childAlg->setProperty<int>("EndWorkspaceIndex", static_cast<const int>(ws_index));
   childAlg->setProperty("XMin", start);
   childAlg->setProperty("XMax", end);
   childAlg->executeAsSubAlg();

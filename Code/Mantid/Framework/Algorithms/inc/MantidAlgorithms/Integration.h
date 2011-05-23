@@ -79,9 +79,9 @@ private:
   /// The value in X to finish the integration at
   double m_MaxRange;
   /// The spectrum to start the integration from
-  int m_MinSpec;
+  size_t m_MinSpec;
   /// The spectrum to finish the integration at
-  int m_MaxSpec;
+  size_t m_MaxSpec;
 
 };
 

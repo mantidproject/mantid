@@ -85,7 +85,7 @@ void CorrectKiKf::exec()
 
   const size_t size = this->inputWS->blocksize();
   // Calculate the number of spectra in this workspace
-  const int numberOfSpectra = static_cast<int>(this->inputWS->size() / size);
+  const size_t numberOfSpectra = this->inputWS->size() / size;
   Progress prog(this,0.0,1.0,numberOfSpectra);
   const bool histogram = this->inputWS->isHistogramData();
   bool negativeEnergyWarning = false;

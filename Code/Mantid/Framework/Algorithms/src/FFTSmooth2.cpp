@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#pragma warning (disable: 4996)
+#endif
+
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
@@ -5,7 +9,6 @@
 #include "MantidKernel/Exception.h"
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/detail/classification.hpp>
-
 
 #include <iostream>
 
@@ -69,7 +72,7 @@ void FFTSmooth2::exec()
   // First spectrum in input
   int s0 = getProperty("WorkspaceIndex");
   // By default only do one
-  int send = s0+1;
+  size_t send = static_cast<size_t>(s0+1);
   if (getProperty("AllSpectra"))
   { //Except if AllSpectra
     s0 = 0;
@@ -80,7 +83,7 @@ void FFTSmooth2::exec()
     API::WorkspaceFactory::Instance().create(m_inWS,send-s0,m_inWS->readX(0).size(),m_inWS->readY(0).size());
 
   // Symmetrize the input spectrum 
-  int dn = static_cast<int>(m_inWS->readY(0).size());
+  size_t dn = m_inWS->readY(0).size();
   API::MatrixWorkspace_sptr symmWS = 
     API::WorkspaceFactory::Instance().create("Workspace2D",1,m_inWS->readX(0).size()+dn,m_inWS->readY(0).size()+dn);
 
@@ -229,13 +232,13 @@ void FFTSmooth2::exec()
  */
 void FFTSmooth2::truncate(int n)
 {
-  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
-  int ny = my / n;
+  size_t my = m_unfilteredWS->readY(0).size();
+  size_t ny = my / n;
 
   double f = double(ny)/my;
 
   if (ny == 0) ny = 1;
-  int nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
+  size_t nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,nx,ny);
 
   const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
@@ -289,9 +292,9 @@ void FFTSmooth2::truncate(int n)
  */
 void FFTSmooth2::zero(int n)
 {
-  int mx = static_cast<int>(m_unfilteredWS->readX(0).size());
-  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
-  int ny = my / n;
+  size_t mx = m_unfilteredWS->readX(0).size();
+  size_t my = m_unfilteredWS->readY(0).size();
+  size_t ny = my / n;
 
   if (ny == 0) ny = 1;
 
@@ -311,7 +314,7 @@ void FFTSmooth2::zero(int n)
   yr.assign(Yr.size(),0);
   yi.assign(Yr.size(),0);
 
-  for(int i=0;i<ny;i++)
+  for(size_t i=0;i<ny;i++)
   {
     //if (abs(my2-i) < ny2)
     //{
@@ -335,9 +338,9 @@ void FFTSmooth2::zero(int n)
  */
 void FFTSmooth2::Butterworth(int n, int order)
 {
-  int mx = static_cast<int>(m_unfilteredWS->readX(0).size());
-  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
-  int ny = my / n;
+  size_t mx = m_unfilteredWS->readX(0).size();
+  size_t my = m_unfilteredWS->readY(0).size();
+  size_t ny = my / n;
 
   if (ny == 0) ny = 1;
 
@@ -357,9 +360,9 @@ void FFTSmooth2::Butterworth(int n, int order)
   yr.assign(Yr.size(),0);
   yi.assign(Yr.size(),0);
 
-  double cutoff = ny;
+  double cutoff = static_cast<double>(ny);
   double scale;
-  for(int i=0;i<my;i++)
+  for(size_t i=0;i<my;i++)
   {
     scale = 1.0/(1.0 + pow(i/cutoff, 2*order));
     yr[i] = scale * Yr[i];

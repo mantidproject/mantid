@@ -77,7 +77,7 @@ void RealFFT::exec()
     int spec = (transform == "Forward") ? getProperty("WorkspaceIndex") : 0;
 
     const MantidVec& X = inWS->readX(spec);
-    int ySize = static_cast<int>(inWS->blocksize());
+    size_t ySize = inWS->blocksize();
 
     if (spec >= ySize) throw std::invalid_argument("Property WorkspaceIndex is out of range");
 
@@ -96,8 +96,8 @@ void RealFFT::exec()
 
     if (transform == "Forward")
     {
-        int yOutSize = ySize / 2 + 1;
-        int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
+        size_t yOutSize = ySize / 2 + 1;
+        size_t xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
         bool odd = ySize % 2 != 0;
 
         outWS = WorkspaceFactory::Instance().create(inWS,3,xOutSize,yOutSize);
@@ -110,7 +110,7 @@ void RealFFT::exec()
         gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(ySize);
         boost::shared_array<double> data(new double[2*ySize]);
 
-        for(int i=0;i<ySize;i++)
+        for(size_t i=0;i<ySize;i++)
         {
             data[i] = inWS->dataY(spec)[i];
         }
@@ -120,9 +120,9 @@ void RealFFT::exec()
         gsl_fft_real_wavetable_free (wavetable);
         gsl_fft_real_workspace_free (workspace);
 
-        for(int i=0;i<yOutSize;i++)
+        for(size_t i=0;i<yOutSize;i++)
         {
-            int j = i * 2;
+            size_t j = i * 2;
             outWS->dataX(0)[i] = df * i;
             double re = i!=0 ? data[j-1] : data[0];
             double im = (i!=0 && (odd || i!=yOutSize-1)) ? data[j] : 0;
@@ -145,9 +145,9 @@ void RealFFT::exec()
       if (inWS->getNumberHistograms() < 2)
         throw std::runtime_error("The input workspace must have at least 2 spectra.");
 
-      int yOutSize = (ySize - 1)* 2;
+      size_t yOutSize = (ySize - 1)* 2;
       if (inWS->readY(1).back() != 0.0) yOutSize++;
-      int xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
+      size_t xOutSize = inWS->isHistogramData() ? yOutSize + 1 : yOutSize;
       bool odd = yOutSize % 2 != 0;
 
       df = 1.0 / (dx * (yOutSize));
@@ -160,9 +160,9 @@ void RealFFT::exec()
       gsl_fft_real_workspace * workspace = gsl_fft_real_workspace_alloc(yOutSize);
       boost::shared_array<double> data(new double[yOutSize]);
 
-      for(int i=0;i<ySize;i++)
+      for(size_t i=0;i<ySize;i++)
       {
-        int j = i * 2;
+        size_t j = i * 2;
         outWS->dataX(0)[i] = df * i;
         if (i!=0)
         {
@@ -183,7 +183,7 @@ void RealFFT::exec()
       gsl_fft_halfcomplex_wavetable_free (wavetable);
       gsl_fft_real_workspace_free (workspace);
   
-      for(int i=0;i<yOutSize;i++)
+      for(size_t i=0;i<yOutSize;i++)
       {
         double x = df*i;
         outWS->dataX(0)[i] = x;

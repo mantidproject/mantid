@@ -116,7 +116,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
   // there is the potential for having an overlap between the two regions. We exclude
   // the region beyond a single frame by considering only the first 1/60 sec of the
   // TOF histogram. (Bins 1 to 1666, as opposed to 1 to 2000)
-  int tof_bin_range = static_cast<int>(100000.0/frequency);
+  size_t tof_bin_range = static_cast<size_t>(100000.0/frequency);
   //int tof_bin_range = nTOF;
 
   g_log.information() << "Low TOFs: old = [" << (cutoff+1) << ", " << (tof_bin_range-2) << "]  ->  new = [0, " << (tof_bin_range-3-cutoff) << "]" << std::endl;
@@ -159,6 +159,7 @@ void EQSANSTofStructure::execHisto(Mantid::API::MatrixWorkspace_sptr inputWS, do
     XOut[nTOF-1] = XOut[nTOF-2]+10.0;
 
     // Move down the high TOFs
+    for (size_t i=cutoff+1; i<tof_bin_range-1; i++)
     {
       if (tof_bin_range == 0)
           throw std::runtime_error("Encountered case where tof_bin_range is 0");

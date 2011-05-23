@@ -75,7 +75,7 @@ private:
 
   double m_startX;                                   ///< The range start point
   double m_endX;                                     ///< The range end point
-  std::vector<int> spectra_list; ///<the list of Spectra (workspace index) to load
+  std::vector<size_t> spectra_list; ///<the list of Spectra (workspace index) to load
 
 };
 

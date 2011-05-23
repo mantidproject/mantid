@@ -87,7 +87,6 @@ namespace Mantid
       std::vector<detid_t> deadDets;
       int countSpec = 0, countDets = 0;
 
-
       // iterate over the data values setting the live and dead values
       g_log.information() << "Marking dead detectors" << std::endl;
       const int64_t numSpec = integratedWorkspace->getNumberHistograms();

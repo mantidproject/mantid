@@ -53,13 +53,13 @@ void SmoothData::exec()
   }
 
   // Check that the number of points in the smoothing isn't larger than the spectrum length
-  const int vecSize = static_cast<int>(inputWorkspace->blocksize());
+  const size_t vecSize = inputWorkspace->blocksize();
   if ( npts >= vecSize )
   {
     g_log.error("The number of averaging points requested is larger than the spectrum length");
     throw std::out_of_range("The number of averaging points requested is larger than the spectrum length");
   }
-  const int halfWidth = (npts-1)/2;
+  const size_t halfWidth = (npts-1)/2;
 
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace);
@@ -82,16 +82,16 @@ void SmoothData::exec()
     // Use total to help hold our moving average
     double total = 0.0, totalE = 0.0;
     // First push the values ahead of the current point onto total
-    for (int i = 0; i < halfWidth; ++i)
+    for (size_t i = 0; i < halfWidth; ++i)
     {
       if ( Y[i] == Y[i] ) total += Y[i]; // Exclude if NaN
       totalE += E[i]*E[i];
     }
     // Now calculate the smoothed values for the 'end' points, where the number contributing
     // to the smoothing will be less than NPoints
-    for (int j = 0; j <= halfWidth; ++j)
+    for (size_t j = 0; j <= halfWidth; ++j)
     {
-      const int index = j+halfWidth;
+      const size_t index = j+halfWidth;
       if ( Y[index] == Y[index] ) total += Y[index]; // Exclude if NaN
       newY[j] = total/(index+1);
       totalE += E[index]*E[index];
@@ -100,10 +100,10 @@ void SmoothData::exec()
     // This is the main part, where each data point is the average of NPoints points centred on the
     // current point. Note that the statistical error will be reduced by sqrt(npts) because more
     // data is now contributing to each point.
-    for (int k = halfWidth+1; k < vecSize-halfWidth; ++k)
+    for (size_t k = halfWidth+1; k < vecSize-halfWidth; ++k)
     {
-      const int kp = k+halfWidth;
-      const int km = k-halfWidth-1;
+      const size_t kp = k+halfWidth;
+      const size_t km = k-halfWidth-1;
       total += (Y[kp]!=Y[kp] ? 0.0 : Y[kp]) - (Y[km]!=Y[km] ? 0.0 : Y[km]); // Exclude if NaN
       newY[k] = total/npts;
       totalE += E[kp]*E[kp] - E[km]*E[km];
@@ -112,9 +112,9 @@ void SmoothData::exec()
       newE[k] = std::sqrt(std::abs(totalE))/npts;
     }
     // This deals with the 'end' at the tail of each spectrum
-    for (int l = vecSize-halfWidth; l < vecSize; ++l)
+    for (size_t l = vecSize-halfWidth; l < vecSize; ++l)
     {
-      const int index = l-halfWidth;
+      const size_t index = l-halfWidth;
       total -= (Y[index-1]!=Y[index-1] ? 0.0 : Y[index-1]); // Exclude if NaN
       newY[l] = total/(vecSize-index);
       totalE -= E[index-1]*E[index-1];

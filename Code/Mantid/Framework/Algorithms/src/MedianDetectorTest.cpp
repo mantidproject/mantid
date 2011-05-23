@@ -132,13 +132,15 @@ namespace Mantid
       m_inputWS = getProperty("InputWorkspace");
       int maxSpecIndex = static_cast<int>(m_inputWS->getNumberHistograms()) - 1;
 
-      m_minSpec = getProperty("StartWorkspaceIndex");
+      int minSpec = getProperty("StartWorkspaceIndex");
+      m_minSpec = minSpec;
       if ( (m_minSpec < 0) || (m_minSpec > maxSpecIndex) )
       {
 	g_log.warning("StartSpectrum out of range, changed to 0");
 	m_minSpec = 0;
       }
-      m_maxSpec = getProperty("EndWorkspaceIndex");
+      int maxSpec = getProperty("EndWorkspaceIndex");
+      m_maxSpec = maxSpec;
       if (m_maxSpec == EMPTY_INT() ) m_maxSpec = maxSpecIndex;
       if ( (m_maxSpec < 0) || (m_maxSpec > maxSpecIndex ) )
       {
@@ -223,7 +225,7 @@ namespace Mantid
       const double minSigma = getProperty("SignificanceTest");
 
       // prepare to report progress
-      const int numSpec(m_maxSpec - m_minSpec);
+      const size_t numSpec(m_maxSpec - m_minSpec);
       const int progStep = static_cast<int>(ceil(numSpec/30.0));
 
       const double live_value(1.0);
@@ -234,7 +236,7 @@ namespace Mantid
       countWorkspace->setYUnit("");
 
       PARALLEL_FOR1(countWorkspace)
-      for (int i = 0; i <= numSpec; ++i)
+      for (int i = 0; i <= static_cast<int>(numSpec); ++i)
       {
 	PARALLEL_START_INTERUPT_REGION
 	  

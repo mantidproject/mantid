@@ -202,8 +202,8 @@ void CalculateEfficiency::normalizeDetectors(MatrixWorkspace_sptr rebinnedWS,
       EOut[0] = nPixels/std::abs(sum) * std::sqrt(EIn[0]*EIn[0] + err_sum*err_sum);
 
       // Mask this detector if the signal is outside the acceptable band
-      if ( !isEmpty(min_eff) && YOut[0] < min_eff ) dets_to_mask.push_back(i);
-      if ( !isEmpty(max_eff) && YOut[0] > max_eff ) dets_to_mask.push_back(i);
+      if ( !isEmpty(min_eff) && YOut[0] < min_eff ) dets_to_mask.push_back(static_cast<specid_t>(i));
+      if ( !isEmpty(max_eff) && YOut[0] > max_eff ) dets_to_mask.push_back(static_cast<specid_t>(i));
 
     }
 

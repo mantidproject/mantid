@@ -147,8 +147,8 @@ void CrossCorrelate::exec()
 
   // Now start the real stuff
 	// Create a 2DWorkspace that will hold the result
- 	const int nY=static_cast<int>(refY.size());
-	const int npoints=2*nY-3;
+ 	const size_t nY=refY.size();
+	const size_t npoints=2*nY-3;
 	MatrixWorkspace_sptr out= WorkspaceFactory::Instance().create(inputWS,nspecs,npoints,npoints);
 
 	// Calculate the mean value of the reference spectrum and associated error squared
@@ -222,11 +222,11 @@ void CrossCorrelate::exec()
 		MantidVec& outY=out->dataY(i);
 		MantidVec& outE=out->dataE(i);
 
-		for (int k=-nY+2;k<=nY-2;++k)
+		for (int k=static_cast<int>(2-nY);k<=nY-2;++k)
 		{
 			int kp=abs(k);
 			double val=0, err2=0, x, y, xE, yE;
-			for (int j=nY-1-kp;j>=0;--j)
+			for (int j=static_cast<int>(nY-1-kp);j>=0;--j)
 			{
 				if (k>=0)
 				{

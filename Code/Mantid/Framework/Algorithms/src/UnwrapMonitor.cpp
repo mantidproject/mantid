@@ -91,7 +91,7 @@ void UnwrapMonitor::exec()
   tempWS->getAxis(0)->unit() = UnitFactory::Instance().create("Wavelength");
 
   // This will be used later to store the maximum number of bin BOUNDARIES for the rebinning
-  int max_bins = 0;
+  size_t max_bins = 0;
   m_progress=new Progress(this,0.0,1.0,numberOfSpectra);
   // Loop over the histograms (detector spectra)
   for (int i = 0; i < numberOfSpectra; ++i)
@@ -118,7 +118,7 @@ void UnwrapMonitor::exec()
     // Get the maximum number of bins (excluding monitors) for the rebinning below
     if ( !isMonitor )
     {
-      const int XLen = static_cast<int>(tempWS->dataX(i).size());
+      const size_t XLen = tempWS->dataX(i).size();
       if ( XLen > max_bins ) max_bins = XLen;
     }
     m_progress->report();
@@ -174,7 +174,7 @@ double UnwrapMonitor::getPrimaryFlightpath() const
  *  @return The flightpath (Ld) for the detector linked to spectrum
  *  @throw Kernel::Exception::InstrumentDefinitionError if the detector position can't be obtained
  */
-double UnwrapMonitor::calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const
+double UnwrapMonitor::calculateFlightpath(const size_t& spectrum, const double& L1, bool& isMonitor) const
 {
   double Ld = -1.0;
   try
@@ -210,7 +210,7 @@ double UnwrapMonitor::calculateFlightpath(const int& spectrum, const double& L1,
  *  @param Ld ::       The flightpath for the detector related to this spectrum
  *  @return A 3-element vector containing the bins at which the upper and lower ranges start & end
  */
-const std::vector<int> UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld)
+const std::vector<int> UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr& tempWS, const size_t& spectrum, const double& Ld)
 {
   // Create and initalise the vector that will store the bin ranges, and will be returned
   // Elements are: 0 - Lower range start, 1 - Lower range end, 2 - Upper range start
@@ -261,9 +261,9 @@ const std::vector<int> UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr& t
   // Deal with the (rare) case that a detector (e.g. downstream monitor) is at a longer flightpath than m_LRef
   if (Ld > m_LRef)
   {
-    std::pair<int,int> binLimits = this->handleFrameOverlapped(xdata, Ld, tempX_L);
-    binRange[0] = binLimits.first;
-    binRange[1] = binLimits.second;
+    std::pair<size_t,size_t> binLimits = this->handleFrameOverlapped(xdata, Ld, tempX_L);
+    binRange[0] = static_cast<int>(binLimits.first);
+    binRange[1] = static_cast<int>(binLimits.second);
   }
 
   // Record the point at which the unwrapped sections are joined, first time through only
@@ -283,7 +283,7 @@ const std::vector<int> UnwrapMonitor::unwrapX(const API::MatrixWorkspace_sptr& t
 /** Deals with the (rare) case where the flightpath is longer than the reference
  *  Note that in this case both T1 & T2 will be greater than Tmax
  */
-std::pair<int,int> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX)
+std::pair<size_t,size_t> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX)
 {
   // Calculate the interval to exclude
   const double Dt = (m_Tmax - m_Tmin) * (1 - (m_LRef/Ld) );
@@ -298,8 +298,8 @@ std::pair<int,int> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, 
     return std::make_pair(0,xdata.size()-1);
   }
 
-  int min = 0, max = static_cast<int>(xdata.size());
-  for (unsigned int j = 0; j < m_XSize; ++j)
+  size_t min = 0, max = xdata.size();
+  for (size_t j = 0; j < m_XSize; ++j)
   {
     const double T = xdata[j];
     if ( T < minT )
@@ -322,7 +322,7 @@ std::pair<int,int> UnwrapMonitor::handleFrameOverlapped(const MantidVec& xdata, 
  *  @param spectrum ::    The workspace index
  *  @param rangeBounds :: The upper and lower ranges for the unwrapping
  */
-void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds)
+void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const size_t& spectrum, const std::vector<int>& rangeBounds)
 {
   // Copy over the relevant ranges of Y & E data
   MantidVec& Y = tempWS->dataY(spectrum);
@@ -367,7 +367,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
       MatrixWorkspace::MaskList::const_iterator it;
       for (it = inputMasks.begin(); it != inputMasks.end(); ++it)
       {
-        const int maskIndex = static_cast<int>((*it).first);
+        const size_t maskIndex = (*it).first;
         if ( maskIndex >= rangeBounds[0] && maskIndex < rangeBounds[1] )
           tempWS->maskBin(spectrum,maskIndex-rangeBounds[0],(*it).second);
       }
@@ -383,7 +383,7 @@ void UnwrapMonitor::unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const i
  *  @return A pointer to the workspace containing the rebinned data
  *  @throw std::runtime_error If the Rebin child algorithm fails
  */
-API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const int& numBins)
+API::MatrixWorkspace_sptr UnwrapMonitor::rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const size_t& numBins)
 {
   // Calculate the width of a bin
   const double step = (max - min)/numBins;

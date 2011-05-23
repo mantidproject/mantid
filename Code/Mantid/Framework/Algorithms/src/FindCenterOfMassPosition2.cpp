@@ -101,7 +101,8 @@ void FindCenterOfMassPosition2::exec()
   int n_iteration = 0;
 
   // Get the number of monitors. We assume that all monitors are stored in the first spectra
-  const int numSpec = static_cast<int>(inputWS->getNumberHistograms());
+  size_t n_monitors = inputWS->getInstrument()->getMonitors().size();
+  const size_t numSpec = inputWS->getNumberHistograms();
 
   // Find center of mass and iterate until we converge
   // to within a quarter of a pixel

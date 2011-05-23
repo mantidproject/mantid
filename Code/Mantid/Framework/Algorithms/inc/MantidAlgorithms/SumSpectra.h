@@ -73,13 +73,13 @@ private:
   void execEvent(DataObjects::EventWorkspace_const_sptr localworkspace, std::set<int> &indices);
 
   /// The spectrum to start the integration from
-  int m_MinSpec;
+  size_t m_MinSpec;
   /// The spectrum to finish the integration at
-  int m_MaxSpec;
+  size_t m_MaxSpec;
   /// Set true to keep monitors
   bool keepMonitors;
   /// numberOfSpectra in the input
-  int numberOfSpectra;
+  size_t numberOfSpectra;
 };
 
 } // namespace Algorithm

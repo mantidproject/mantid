@@ -64,8 +64,8 @@ private:
   ///Execution code
   void exec();
 
-  int m_startBin; ///< start bin
-  int m_endBin; ///< end bin
+  size_t m_startBin; ///< start bin
+  size_t m_endBin; ///< end bin
   double m_factor; ///<factor
 };
 
