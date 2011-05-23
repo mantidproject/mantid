@@ -59,7 +59,7 @@ void SANSSolidAngleCorrection::exec()
   Progress progress(this,0.0,1.0,numHists);
 
   // Number of X bins
-  const size_t xLength = inputWS->readY(0).size();
+  const int xLength = static_cast<int>(inputWS->readY(0).size());
 
   for (int i = 0; i < numHists; ++i)
   {

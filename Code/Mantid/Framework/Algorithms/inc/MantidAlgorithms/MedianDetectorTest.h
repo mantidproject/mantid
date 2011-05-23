@@ -94,9 +94,9 @@ namespace Mantid
       /// The factor of the median value above which a detector is considered over-reading
       double m_High;
       ///The index of the first spectrum to calculate
-      size_t m_minSpec;
+      int m_minSpec;
       /// The index of the last spectrum to calculate
-      size_t m_maxSpec;
+      int m_maxSpec;
       /// Start point for integration
       double m_rangeLower;
       /// End point for integration

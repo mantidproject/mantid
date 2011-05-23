@@ -115,11 +115,11 @@ void RemoveBins::exec()
   }
 
   // Loop over the spectra
-  size_t start=0,end=0;
-  const size_t blockSize = m_inputWorkspace->readX(0).size();
-  const size_t numHists = m_inputWorkspace->getNumberHistograms();
+  int start=0,end=0;
+  const int blockSize = static_cast<int>(m_inputWorkspace->readX(0).size());
+  const int numHists = static_cast<int>(m_inputWorkspace->getNumberHistograms());
   Progress prog(this,0.0,1.0,numHists);
-  for (size_t i = 0; i < numHists; ++i)
+  for (int i = 0; i < numHists; ++i)
   {
     // Copy over the data
     const MantidVec& X = m_inputWorkspace->readX(i);
@@ -226,7 +226,7 @@ void RemoveBins::crop(const double& start, const double& end)
  *  @param startX :: Returns the start of the range in the workspace's unit
  *  @param endX ::   Returns the end of the range in the workspace's unit
  */
-void RemoveBins::transformRangeUnit(const size_t& index, double& startX, double& endX)
+void RemoveBins::transformRangeUnit(const int& index, double& startX, double& endX)
 {
   const Kernel::Unit_sptr inputUnit = m_inputWorkspace->getAxis(0)->unit();
   // First check for a 'quick' conversion
@@ -267,7 +267,7 @@ void RemoveBins::transformRangeUnit(const size_t& index, double& startX, double&
  *  @param l2 ::       Returns the sample-detector distance
  *  @param twoTheta :: Returns the detector's scattering angle
  */
-void RemoveBins::calculateDetectorPosition(const size_t& index, double& l1, double& l2, double& twoTheta)
+void RemoveBins::calculateDetectorPosition(const int& index, double& l1, double& l2, double& twoTheta)
 {
   // Get a pointer to the instrument contained in the workspace
   IInstrument_const_sptr instrument = m_inputWorkspace->getInstrument();
@@ -303,7 +303,7 @@ void RemoveBins::calculateDetectorPosition(const size_t& index, double& l1, doub
  *  @param vec ::   The vector to search
  *  @return The index (will give vec.size()+1 if the value is past the end of the vector)
  */
-size_t RemoveBins::findIndex(const double& value, const MantidVec& vec)
+int RemoveBins::findIndex(const double& value, const MantidVec& vec)
 {
   MantidVec::const_iterator pos = std::lower_bound(vec.begin(),vec.end(),value);
   return static_cast<int>(pos-vec.begin());
@@ -315,11 +315,12 @@ size_t RemoveBins::findIndex(const double& value, const MantidVec& vec)
  *  @param Y ::     The data vector
  *  @param E ::     The error vector
  */
-void RemoveBins::RemoveFromEnds(size_t start, size_t end, MantidVec& Y, MantidVec& E)
+void RemoveBins::RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E)
 {
   if ( start ) --start;
-  if ( end > static_cast<int>(Y.size()) ) end = static_cast<int>(Y.size());
-  for (size_t j = start; j < end; ++j)
+  int size = static_cast<int>(Y.size());
+  if ( end > size ) end = size;
+  for (int j = start; j < end; ++j)
   {
     Y[j] = 0.0;
     E[j] = 0.0;
@@ -338,7 +339,7 @@ void RemoveBins::RemoveFromEnds(size_t start, size_t end, MantidVec& Y, MantidVe
  *  @param Y ::         The data vector
  *  @param E ::         The error vector
  */
-void RemoveBins::RemoveFromMiddle(const size_t& start, const size_t& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E)
+void RemoveBins::RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E)
 {
   //Remove bins from middle
   double valPrev = 0;
@@ -360,7 +361,7 @@ void RemoveBins::RemoveFromMiddle(const size_t& start, const size_t& end, const 
 
   double aveE = (errPrev + errNext)/2; //Cheat: will do properly later
 
-  for (size_t j = start; j < end; ++j)
+  for (int j = start; j < end; ++j)
   {
     if (!m_interpolate && j==start)
     {

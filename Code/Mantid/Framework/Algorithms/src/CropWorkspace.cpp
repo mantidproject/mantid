@@ -98,7 +98,7 @@ void CropWorkspace::exec()
   }
   Progress prog(this,0.0,1.0,(m_maxSpec-m_minSpec));
   // Loop over the required spectra, copying in the desired bins
-  for (size_t i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
+  for (int i = m_minSpec, j = 0; i <= m_maxSpec; ++i,++j)
   {
     // Preserve/restore sharing if X vectors are the same
     if ( m_commonBoundaries )
@@ -166,11 +166,9 @@ void CropWorkspace::checkProperties()
   if ( !m_commonBoundaries ) m_minX = 0;
   if ( !m_commonBoundaries ) m_maxX = static_cast<int>(m_inputWorkspace->readX(0).size());
 
-  int minSpec = getProperty("StartWorkspaceIndex");
-  m_minSpec = minSpec;
+  m_minSpec = getProperty("StartWorkspaceIndex");
   const int numberOfSpectra = static_cast<int>(m_inputWorkspace->getNumberHistograms());
-  int maxSpec = getProperty("EndWorkspaceIndex");
-  m_maxSpec = maxSpec;
+  m_maxSpec = getProperty("EndWorkspaceIndex");
   if ( isEmpty(m_maxSpec) ) m_maxSpec = numberOfSpectra-1;
 
   // Check 'StartSpectrum' is in range 0-numberOfSpectra
@@ -196,7 +194,7 @@ void CropWorkspace::checkProperties()
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMin value.
  */
-size_t CropWorkspace::getXMin(const size_t wsIndex)
+size_t CropWorkspace::getXMin(const int wsIndex)
 {
   double minX_val = getProperty("XMin");
   size_t xIndex = 0;
@@ -211,7 +209,7 @@ size_t CropWorkspace::getXMin(const size_t wsIndex)
     // Reduce cut-off value slightly to allow for rounding errors
     // when trying to exactly hit a bin boundary.
     minX_val -= std::abs(minX_val*xBoundaryTolerance);
-    xIndex = static_cast<size_t>(std::lower_bound(X.begin(),X.end(),minX_val) - X.begin());
+    xIndex = std::lower_bound(X.begin(),X.end(),minX_val) - X.begin();
   }
   return xIndex;
 }
@@ -221,7 +219,7 @@ size_t CropWorkspace::getXMin(const size_t wsIndex)
  *  @param  wsIndex The workspace index to check (default 0).
  *  @return The X index corresponding to the XMax value.
  */
-size_t CropWorkspace::getXMax(const size_t wsIndex)
+size_t CropWorkspace::getXMax(const int wsIndex)
 {
   const MantidVec& X = m_inputWorkspace->readX(wsIndex);
   size_t xIndex = X.size();
@@ -247,7 +245,7 @@ size_t CropWorkspace::getXMax(const size_t wsIndex)
  *  @param inIndex ::         The workspace index of the spectrum in the input workspace
  *  @param outIndex ::        The workspace index of the spectrum in the output workspace
  */
-void CropWorkspace::cropRagged(API::MatrixWorkspace_sptr outputWorkspace, size_t inIndex, size_t outIndex)
+void CropWorkspace::cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex)
 {
   MantidVec& Y = outputWorkspace->dataY(outIndex);
   MantidVec& E = outputWorkspace->dataE(outIndex);

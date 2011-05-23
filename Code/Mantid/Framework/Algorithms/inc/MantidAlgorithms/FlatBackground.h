@@ -72,9 +72,9 @@ private:
   void convertToDistribution(API::MatrixWorkspace_sptr workspace);
   void restoreDistributionState(API::MatrixWorkspace_sptr workspace);
   void checkRange(double& startX, double& endX);
-  void getSpecInds(std::vector<size_t> &output, const size_t workspaceTotal);
-  double Mean(const API::MatrixWorkspace_const_sptr WS, const size_t specInd, const double startX, const double endX, double &variance) const;
-  double LinearFit(API::MatrixWorkspace_sptr WS, size_t spectrum, double startX, double endX);
+  void getSpecInds(std::vector<int> &output, const int workspaceTotal);
+  double Mean(const API::MatrixWorkspace_const_sptr WS, const int specInd, const double startX, const double endX, double &variance) const;
+  double LinearFit(API::MatrixWorkspace_sptr WS, int spectrum, double startX, double endX);
 
   /// variable bin width raw count data must be converted to distributions first and then converted back, keep track of this
   bool m_convertedFromRawCounts;

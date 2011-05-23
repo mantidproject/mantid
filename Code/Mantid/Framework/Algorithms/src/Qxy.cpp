@@ -135,7 +135,7 @@ void Qxy::exec()
       grav = GravitySANSHelper(inputWorkspace, det);
     }
 
-    for (size_t j = numBins-1; j >= 0; --j)
+    for (int j = static_cast<int>(numBins)-1; j >= 0; --j)
     {
       const double binWidth = X[j+1]-X[j];
       // Calculate the wavelength at the mid-point of this bin

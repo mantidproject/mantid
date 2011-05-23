@@ -55,7 +55,7 @@ namespace Mantid
 
       const int numSpectra = static_cast<int>(inputWS->getNumberHistograms());
       const size_t numYValues = inputWS->blocksize();
-      const size_t numXValues = getNewXSize(inputWS);
+      const int numXValues = getNewXSize(inputWS);
       m_sharedX = API::WorkspaceHelpers::sharedXData(inputWS);
       // Create the new workspace 
       MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS, numSpectra, numXValues, numYValues);

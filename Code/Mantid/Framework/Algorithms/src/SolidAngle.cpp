@@ -80,11 +80,11 @@ namespace Mantid
         g_log.warning("StartWorkspaceIndex out of range! Set to 0.");
         m_MinSpec = 0;
       }
-      if ( isEmpty(m_MaxSpec) ) m_MaxSpec = static_cast<int>(numberOfSpectra-1);
+      if ( isEmpty(m_MaxSpec) ) m_MaxSpec = numberOfSpectra-1;
       if ( m_MaxSpec > numberOfSpectra-1 || m_MaxSpec < m_MinSpec )
       {
         g_log.warning("EndWorkspaceIndex out of range! Set to max detector number");
-        m_MaxSpec = static_cast<int>(numberOfSpectra-1);
+        m_MaxSpec = numberOfSpectra-1;
       }
 
       API::MatrixWorkspace_sptr outputWS = WorkspaceFactory::Instance().create(inputWS,m_MaxSpec-m_MinSpec+1,2,1);

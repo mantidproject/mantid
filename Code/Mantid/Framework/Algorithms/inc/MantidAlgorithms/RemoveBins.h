@@ -73,11 +73,11 @@ private:
   
   void checkProperties();
   void crop(const double& start, const double& end);
-  void transformRangeUnit(const size_t& index, double& startX, double& endX);
-  void calculateDetectorPosition(const size_t& index, double& l1, double& l2, double& twoTheta);
-  size_t findIndex(const double& value, const MantidVec& vec);
-  void RemoveFromEnds(size_t start, size_t end, MantidVec& Y, MantidVec& E);
-  void RemoveFromMiddle(const size_t& start, const size_t& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E);
+  void transformRangeUnit(const int& index, double& startX, double& endX);
+  void calculateDetectorPosition(const int& index, double& l1, double& l2, double& twoTheta);
+  int findIndex(const double& value, const MantidVec& vec);
+  void RemoveFromEnds(int start, int end, MantidVec& Y, MantidVec& E);
+  void RemoveFromMiddle(const int& start, const int& end, const double& startFrac, const double& endFrac, MantidVec& Y, MantidVec& E);
   
   API::MatrixWorkspace_const_sptr m_inputWorkspace;  ///< The input workspace
   double m_startX;                                   ///< The range start point

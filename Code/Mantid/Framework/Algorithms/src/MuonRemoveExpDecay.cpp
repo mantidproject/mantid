@@ -52,7 +52,7 @@ void MuonRemoveExpDecay::exec()
   //Get original workspace
   API::MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
 
-  size_t numSpectra = inputWS->size() / inputWS->blocksize();
+  int numSpectra = static_cast<int>(inputWS->size() / inputWS->blocksize());
 
   //Create output workspace with same dimensions as input
   API::MatrixWorkspace_sptr outputWS = API::WorkspaceFactory::Instance().create(inputWS);
@@ -97,7 +97,7 @@ void MuonRemoveExpDecay::exec()
     //Do the specified spectra only
     int specLength = static_cast<int>(Spectra.size());
     PARALLEL_FOR2(inputWS,outputWS)
-    for (int i = 0; i < static_cast<int>(specLength); ++i)
+    for (int i = 0; i < specLength; ++i)
     {
 			PARALLEL_START_INTERUPT_REGION
       if (Spectra[i] > numSpectra)

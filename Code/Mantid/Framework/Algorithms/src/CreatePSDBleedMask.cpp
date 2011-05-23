@@ -98,7 +98,7 @@ namespace Mantid
       // This algorithm assumes that the instrument geometry is tube based, i.e. the parent CompAssembly 
       // of the lowest detector in the tree is a "tube" and that all pixels in a tube are consectively ordered
       // with respect to spectra number
-      const size_t numSpectra(inputWorkspace->getNumberHistograms());
+      const int numSpectra = static_cast<int>(inputWorkspace->getNumberHistograms());
       // Keep track of a map of tubes to lists of indices
       typedef std::map<Geometry::ComponentID, std::vector<int> > TubeIndex;
       TubeIndex tubeMap;

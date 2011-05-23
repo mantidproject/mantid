@@ -141,8 +141,8 @@ API::MatrixWorkspace_sptr StripPeaks::removePeaks(API::MatrixWorkspace_const_spt
     g_log.debug() << "Subtracting peak from spectrum " << peakslist->getRef<int>("spectrum",i) 
                   << " at x = " << centre << "\n";
     // Loop over the spectrum elements
-    const size_t spectrumLength = Y.size();
-    for (size_t j = 0; j < spectrumLength; ++j)
+    const int spectrumLength = static_cast<int>(Y.size());
+    for (int j = 0; j < spectrumLength; ++j)
     {
       // If this is histogram data, we want to use the bin's central value
       double x = (isHistogramData ? 0.5*(X[j]+X[j+1]) : X[j]);

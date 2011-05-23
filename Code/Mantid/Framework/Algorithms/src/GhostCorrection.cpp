@@ -142,7 +142,7 @@ namespace Mantid
       {
         //Find the input workspace index corresponding to this input Pixel ID
         detid2index_map::iterator it;
-        it = input_detectorIDToWorkspaceIndexMap->find(static_cast<detid_t>(inPixelId));
+        it = input_detectorIDToWorkspaceIndexMap->find(inPixelId);
 
         if (it != input_detectorIDToWorkspaceIndexMap->end())
         {
@@ -167,7 +167,7 @@ namespace Mantid
             if (ghostVal.weight > 0.0)
             {
               //Find the group # for this ghost pixel id
-              ghostGroup = detId_to_group[static_cast<detid_t>(ghostPixelId)];
+              ghostGroup = detId_to_group[ghostPixelId];
               //Check for changing group #
               if (lastGroup == -1)
                 lastGroup = ghostGroup;

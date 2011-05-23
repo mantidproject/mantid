@@ -81,9 +81,9 @@ private:
   void exec();
 
   void checkProperties();
-  std::size_t getXMin(const size_t wsIndex = 0);
-  std::size_t getXMax(const size_t wsIndex = 0);
-  void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, size_t inIndex, size_t outIndex);
+  std::size_t getXMin(const int wsIndex = 0);
+  std::size_t getXMax(const int wsIndex = 0);
+  void cropRagged(API::MatrixWorkspace_sptr outputWorkspace, int inIndex, int outIndex);
 
   /// The input workspace
   API::MatrixWorkspace_const_sptr m_inputWorkspace;

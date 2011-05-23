@@ -204,9 +204,9 @@ API::MatrixWorkspace_sptr SofQW::setUpOutputWorkspace(API::MatrixWorkspace_const
   // Create vector to hold the new X axis values
   MantidVecPtr xAxis;
   xAxis.access() = inputWorkspace->readX(0);
-  const size_t xLength = xAxis->size();
+  const int xLength = static_cast<int>(xAxis->size());
   // Create a vector to temporarily hold the vertical ('y') axis and populate that
-  const size_t yLength = VectorHelper::createAxisFromRebinParams(getProperty("QAxisBinning"),newAxis);
+  const int yLength = static_cast<int>(VectorHelper::createAxisFromRebinParams(getProperty("QAxisBinning"),newAxis));
   
   // Create the output workspace
   MatrixWorkspace_sptr outputWorkspace = WorkspaceFactory::Instance().create(inputWorkspace,yLength-1,xLength,xLength-1);

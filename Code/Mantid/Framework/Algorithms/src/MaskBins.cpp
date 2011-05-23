@@ -45,7 +45,7 @@ void MaskBins::init()
   declareProperty("XMax",std::numeric_limits<double>::max(),required->clone());
 
   // which pixels to load
-  this->declareProperty(new ArrayProperty<size_t>("SpectraList"),
+  this->declareProperty(new ArrayProperty<int>("SpectraList"),
                         "Optional: A list of individual which spectra to mask (specified using the workspace index). If not set, all spectra are masked.");
 
 }
@@ -77,7 +77,7 @@ void MaskBins::exec()
     //--- Validate spectra list ---
     for (size_t i = 0; i < this->spectra_list.size(); ++i)
     {
-      size_t wi = this->spectra_list[i];
+      int wi = this->spectra_list[i];
       if ((wi < 0) || (wi >= numHist))
       {
         std::ostringstream oss;
@@ -125,13 +125,13 @@ void MaskBins::exec()
     bool useSpectraList = (this->spectra_list.size() > 0);
 
     //Alter the for loop ending based on what we are looping on
-    size_t for_end = numHists;
+    int for_end = numHists;
     if (useSpectraList) for_end = static_cast<int>(this->spectra_list.size());
 
-    for (size_t i = 0; i < for_end; ++i)
+    for (int i = 0; i < for_end; ++i)
     {
       // Find the workspace index, either based on the spectra list or all spectra
-      size_t wi;
+      int wi;
       if (useSpectraList)
         wi = this->spectra_list[i];
       else
@@ -147,7 +147,7 @@ void MaskBins::exec()
       if (!commonBins) this->findIndices(X,startBinLoop,endBinLoop);
 
       // Loop over masking each bin in the range
-      for (MantidVec::difference_type j = startBinLoop; j < endBinLoop; ++j)
+      for (int j = static_cast<int>(startBinLoop); j < static_cast<int>(endBinLoop); ++j)
       {
         outputWS->maskBin(wi,j);
       }

@@ -63,11 +63,11 @@ private:
   void exec();
 
   double getPrimaryFlightpath() const;
-  double calculateFlightpath(const size_t& spectrum, const double& L1, bool& isMonitor) const;
-  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr& tempWS, const size_t& spectrum, const double& Ld);
-  std::pair<size_t,size_t> handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX);
-  void unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const size_t& spectrum, const std::vector<int>& rangeBounds);
-  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const size_t& numBins);
+  double calculateFlightpath(const int& spectrum, const double& L1, bool& isMonitor) const;
+  const std::vector<int> unwrapX(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const double& Ld);
+  std::pair<int,int> handleFrameOverlapped(const MantidVec& xdata, const double& Ld, std::vector<double>& tempX);
+  void unwrapYandE(const API::MatrixWorkspace_sptr& tempWS, const int& spectrum, const std::vector<int>& rangeBounds);
+  API::MatrixWorkspace_sptr rebin(const API::MatrixWorkspace_sptr& workspace, const double& min, const double& max, const int& numBins);
 
   double m_conversionConstant; ///< The constant used in the conversion from TOF to wavelength
   API::MatrixWorkspace_const_sptr m_inputWS; ///< Pointer to the input workspace

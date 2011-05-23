@@ -1,6 +1,3 @@
-#ifdef _WIN32
-#pragma warning (disable: 4996)
-#endif
 #include "MantidAlgorithms/CreateGroupingWorkspace.h"
 #include "MantidAPI/MatrixWorkspace.h"
 #include "MantidDataObjects/GroupingWorkspace.h"
@@ -286,7 +283,7 @@ namespace Algorithms
         {
           outWS->setValue(detID, double(group));
         }
-        catch (std::invalid_argument &)
+        catch (std::invalid_argument & e)
         {
           numNotFound++;
         }

@@ -45,14 +45,12 @@ void MultiplyRange::exec()
 {
   // Get the input workspace and other properties
   MatrixWorkspace_const_sptr inputWS = getProperty("InputWorkspace");
-  int startBin = getProperty("StartBin");
-  int endBin = getProperty("EndBin");
-  m_startBin = startBin;
-  m_endBin = endBin;
+  m_startBin = getProperty("StartBin");
+  m_endBin = getProperty("EndBin");
   m_factor = getProperty("Factor");
 
   // A few checks on the input properties
-  const size_t specSize = inputWS->blocksize();
+  const int specSize = static_cast<int>(inputWS->blocksize());
   if ( isEmpty(m_endBin) ) m_endBin = specSize - 1;
 
   if ( m_endBin >= specSize )

@@ -56,7 +56,7 @@ void FFTSmooth::exec()
   m_x0 = m_inWS->readX(spec)[0];
 
   // Symmetrize the input spectrum 
-  size_t dn = m_inWS->readY(0).size();
+  int dn = static_cast<int>(m_inWS->readY(0).size());
 
   API::MatrixWorkspace_sptr symmWS = 
     API::WorkspaceFactory::Instance().create("Workspace2D",1,m_inWS->readX(0).size()+dn,m_inWS->readY(0).size()+dn);
@@ -168,13 +168,13 @@ void FFTSmooth::exec()
  */
 void FFTSmooth::truncate(int n)
 {
-  size_t my = m_unfilteredWS->readY(0).size();
-  size_t ny = my / n;
+  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
+  int ny = my / n;
 
   double f = double(ny)/my;
 
   if (ny == 0) ny = 1;
-  size_t nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
+  int nx = m_unfilteredWS->isHistogramData() ? ny + 1 : ny;
   m_filteredWS = API::WorkspaceFactory::Instance().create(m_unfilteredWS,2,nx,ny);
 
   const Mantid::MantidVec& Yr = m_unfilteredWS->readY(0);
@@ -228,9 +228,9 @@ void FFTSmooth::truncate(int n)
  */
 void FFTSmooth::zero(int n)
 {
-  size_t mx = m_unfilteredWS->readX(0).size();
-  size_t my = m_unfilteredWS->readY(0).size();
-  size_t ny = my / n;
+  int mx = static_cast<int>(m_unfilteredWS->readX(0).size());
+  int my = static_cast<int>(m_unfilteredWS->readY(0).size());
+  int ny = my / n;
 
   if (ny == 0) ny = 1;
 
@@ -250,7 +250,7 @@ void FFTSmooth::zero(int n)
   yr.assign(Yr.size(),0);
   yi.assign(Yr.size(),0);
 
-  for(size_t i=0;i<ny;i++)
+  for(int i=0;i<ny;i++)
   {
     //if (abs(my2-i) < ny2)
     //{

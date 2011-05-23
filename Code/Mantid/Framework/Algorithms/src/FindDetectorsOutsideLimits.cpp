@@ -121,12 +121,12 @@ namespace Mantid
         integratedWorkspace->dataY(i)[0] = liveValue;
       }
 	
-      const size_t totalNumFailed(numLow+numHigh);
+      const int totalNumFailed(numLow+numHigh);
       g_log.information() << "Found a total of " << totalNumFailed << " failing "
 			  << "spectra (" << numLow << " reading low and " << numHigh
 			  << " reading high)" << std::endl;
   
-      setProperty("NumberOfFailures", static_cast<int>(totalNumFailed));
+      setProperty("NumberOfFailures", totalNumFailed);
       // Assign it to the output workspace property
       setProperty("OutputWorkspace", integratedWorkspace);
     }
