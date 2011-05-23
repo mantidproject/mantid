@@ -9,7 +9,7 @@
 #define AXISINTERACTOR_H_
 
 #include <QtGui/QWidget>
-#include "ui_axisinteractor.h"
+#include "ui_AxisInteractor.h"
 
 class QGraphicsScene;
 class QMouseEvent;

@@ -121,7 +121,7 @@
   <customwidget>
    <class>AxisInteractor</class>
    <extends>QWidget</extends>
-   <header>axisinteractor.h</header>
+   <header>AxisInteractor.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

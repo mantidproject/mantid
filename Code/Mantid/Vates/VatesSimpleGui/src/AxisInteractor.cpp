@@ -4,9 +4,9 @@
  *  Created on: Apr 7, 2011
  *      Author: 2zr
  */
-#include "axisinteractor.h"
-#include "indicator.h"
-#include "scalepicker.h"
+#include "AxisInteractor.h"
+#include "Indicator.h"
+#include "ScalePicker.h"
 
 #include <qwt_scale_draw.h>
 #include <qwt_scale_engine.h>

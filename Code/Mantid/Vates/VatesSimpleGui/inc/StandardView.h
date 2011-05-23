@@ -3,8 +3,8 @@
 
 #include <QtGui/QWidget>
 #include <QPointer>
-#include "iview.h"
-#include "ui_standardview.h"
+#include "IView.h"
+#include "ui_StandardView.h"
 
 class pqPipelineRepresentation;
 class pqPipelineSource;

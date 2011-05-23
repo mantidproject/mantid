@@ -1,4 +1,4 @@
-#include "modecontrolwidget.h"
+#include "ModeControlWidget.h"
 
 ModeControlWidget::ModeControlWidget(QWidget *parent)
     : QWidget(parent)

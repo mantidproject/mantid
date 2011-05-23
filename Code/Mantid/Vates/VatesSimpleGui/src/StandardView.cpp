@@ -1,4 +1,4 @@
-#include "standardview.h"
+#include "StandardView.h"
 
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"

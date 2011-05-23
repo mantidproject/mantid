@@ -1,10 +1,10 @@
-#include "mpmainwindow.h"
+#include "MpMainWindow.h"
 
-#include "modecontrolwidget.h"
-#include "multisliceview.h"
-#include "standardview.h"
-#include "threesliceview.h"
-#include "timecontrolwidget.h"
+#include "ModeControlWidget.h"
+#include "MultisliceView.h"
+#include "StandardView.h"
+#include "ThreesliceView.h"
+#include "TimeControlWidget.h"
 
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"

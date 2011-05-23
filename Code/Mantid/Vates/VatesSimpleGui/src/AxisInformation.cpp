@@ -5,7 +5,7 @@
  *      Author: 2zr
  */
 
-#include <axisinformation.h>
+#include <AxisInformation.h>
 
 AxisInformation::AxisInformation()
 {

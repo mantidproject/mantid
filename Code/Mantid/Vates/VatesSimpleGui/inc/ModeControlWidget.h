@@ -2,7 +2,7 @@
 #define MODECONTROLWIDGET_H
 
 #include <QtGui/QWidget>
-#include "ui_modecontrolwidget.h"
+#include "ui_ModeControlWidget.h"
 
 class ModeControlWidget : public QWidget
 {

@@ -5,9 +5,8 @@
  *      Author: 2zr
  */
 
-#include "geometryparser.h"
-
-#include "axisinformation.h"
+#include "GeometryParser.h"
+#include "AxisInformation.h"
 
 #include "Poco/DOM/DOMParser.h"
 #include "Poco/DOM/Element.h"

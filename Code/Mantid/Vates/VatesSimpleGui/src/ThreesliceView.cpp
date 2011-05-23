@@ -1,4 +1,4 @@
-#include "threesliceview.h"
+#include "ThreesliceView.h"
 
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"

@@ -1,8 +1,8 @@
-#include "multisliceview.h"
+#include "MultisliceView.h"
 
-#include "axisinformation.h"
-#include "geometryparser.h"
-#include "scalepicker.h"
+#include "AxisInformation.h"
+#include "GeometryParser.h"
+#include "ScalePicker.h"
 
 #include "pqActiveObjects.h"
 #include "pqApplicationCore.h"
@@ -94,7 +94,9 @@ void MultiSliceView::setupAxisInfo()
 	this->ui.zAxisWidget->setInformation(QString(zinfo->getTitle().c_str()),
 			zinfo->getMinimum(), zinfo->getMaximum());
 
-	delete xinfo, yinfo, zinfo;
+	delete xinfo;
+	delete yinfo;
+	delete zinfo;
 }
 
 void MultiSliceView::render()

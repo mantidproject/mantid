@@ -3,8 +3,8 @@
 
 #include <QtGui/QWidget>
 #include <QPointer>
-#include "iview.h"
-#include "ui_multisliceview.h"
+#include "IView.h"
+#include "ui_MultisliceView.h"
 
 class pqPipelineRepresentation;
 class pqPipelineSource;

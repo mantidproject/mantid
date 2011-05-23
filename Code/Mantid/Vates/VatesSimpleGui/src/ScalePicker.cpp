@@ -5,7 +5,7 @@
  *      Author: 2zr
  */
 
-#include "scalepicker.h"
+#include "ScalePicker.h"
 
 #include <qwt_scale_draw.h>
 #include <qwt_scale_map.h>

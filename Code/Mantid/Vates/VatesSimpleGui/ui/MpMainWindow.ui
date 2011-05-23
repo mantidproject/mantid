@@ -203,13 +203,13 @@
   <customwidget>
    <class>TimeControlWidget</class>
    <extends>QWidget</extends>
-   <header>timecontrolwidget.h</header>
+   <header>TimeControlWidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>
    <class>ModeControlWidget</class>
    <extends>QWidget</extends>
-   <header>modecontrolwidget.h</header>
+   <header>ModeControlWidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

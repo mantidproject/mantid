@@ -5,7 +5,7 @@
  *      Author: 2zr
  */
 
-#include "indicator.h"
+#include "Indicator.h"
 
 #include <QBrush>
 #include <QGraphicsSceneMouseEvent>
