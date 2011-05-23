@@ -1,6 +1,7 @@
 #include "MantidDataHandling/SaveNXSPE.h"
 #include "MantidAPI/FileProperty.h"
 #include "MantidKernel/ConfigService.h"
+#include "MantidKernel/MantidVersion.h"
 #include "MantidAPI/WorkspaceValidators.h"
 #include "MantidGeometry/Instrument/Detector.h"
 #include "MantidGeometry/Instrument/ObjComponent.h"
@@ -22,7 +23,6 @@ namespace Mantid
 
     const double SaveNXSPE::MASK_FLAG = -1e30;
     const double SaveNXSPE::MASK_ERROR = 0.0;
-   // TODO: Get the correct version number
 	// works fine but there were cases that some compilers crush on this (VS2008 in mixed .net environment ?)
     const std::string SaveNXSPE::NXSPE_VER = "1.1";
 
@@ -103,23 +103,20 @@ namespace Mantid
 
       // Create the file.
       ::NeXus::File nxFile(this->filename, NXACC_CREATE5);
-	  // define nxspe version as the file attribute
-       nxFile.putAttr("nxspe_version", NXSPE_VER);
+
       // Make the top level entry (and open it)
       nxFile.makeGroup(inputWS->getName(), "NXentry", true);
 
       // Definition name and version
       nxFile.writeData("definition", "NXSPE");
       nxFile.openData("definition");
-      // Make Version 1.0 as we don't have all the metadata yet!
-   
+      nxFile.putAttr("version", NXSPE_VER);
       nxFile.closeData();
 
       // Program name and version
       nxFile.writeData("program_name", "mantid");
       nxFile.openData("program_name");
-    
-      nxFile.putAttr("version", NXSPE_VER);
+      nxFile.putAttr("version", Mantid::Kernel::MantidVersion::version());
       nxFile.closeData();
 
       // Create NXSPE_info
