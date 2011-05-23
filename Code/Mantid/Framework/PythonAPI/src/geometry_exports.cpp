@@ -205,7 +205,7 @@ namespace Mantid
       .def("getSample", &Geometry::IInstrument::getSample)
       .def("getSource", &Geometry::IInstrument::getSource)
       .def("getComponentByName", &Geometry::IInstrument::getComponentByName)
-      .def("getDetector", &Geometry::IInstrument::getDetector) // mw 091110
+      .def("getDetector", (IDetector_sptr (IInstrument::*)(const detid_t&)const)&Geometry::IInstrument::getDetector)
       ;
 
     /** Concrete implementations so that Python knows about them */
