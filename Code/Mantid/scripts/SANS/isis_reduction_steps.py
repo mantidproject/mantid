@@ -51,7 +51,8 @@ class LoadRun(ReductionStep):
         if int(entry) > 0:
             self._period = int(entry)
         else:
-            self._period = self.UNSET_PERIOD
+            self._period = 1
+        self.periods_in_file = None
 
         self._spec_min = None
         self._spec_max = None
@@ -80,9 +81,7 @@ class LoadRun(ReductionStep):
                 self._data_file = alg.getPropertyValue("Filename")
     
             LoadSampleDetailsFromRaw(workspace, self._data_file)
-            #if the user didn't specify a period use the first period
-            if self._period != self.UNSET_PERIOD:
-                workspace = self._leaveSinglePeriod(workspace)
+            workspace = self._leaveSinglePeriod(workspace)
 
 #the following code needs to be removed because log information is now stored in raw files
 #            log_file = alg.getPropertyValue("Filename")
@@ -101,17 +100,18 @@ class LoadRun(ReductionStep):
             else:
                 #no specific period was requested
                 alg = LoadNexus(self._data_file, workspace,
-                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max)
+                  SpectrumMin=self._spec_min, SpectrumMax=self._spec_max, EntryNumber=1)
 
         SANS2D_log_file = mtd[workspace]
        
         numPeriods  = self._find_workspace_num_periods(workspace)
         #deal with the difficult situation of not reporting the period of single period files
-        if numPeriods > 1 and self._period == 1:
-            #the string "workspace" contains the period number only if it is greater than 1, this always contains the period number
+        if numPeriods > 1:
+            #the string "workspace" contains the period number only if it is greater than 1, "period_definitely_inc" always contains the period number
             period_definitely_inc = self._get_workspace_name(False)
-            RenameWorkspace(workspace, period_definitely_inc)
-            workspace = period_definitely_inc 
+            if period_definitely_inc != workspace:
+                RenameWorkspace(workspace, period_definitely_inc)
+                workspace = period_definitely_inc 
         
         log = None
         if (not inst is None) and inst.name() == 'SANS2D':
@@ -134,9 +134,8 @@ class LoadRun(ReductionStep):
             @param optional_entry_no: include the entry number even if it's 1, default: false
         """  
         run = str(self.shortrun_no)
-        if self._period > self.UNSET_PERIOD:
-            if (int(self._period) != 1) or (not optional_entry_no):
-                run += 'p'+str(self._period)
+        if (int(self._period) != 1) or (not optional_entry_no):
+            run += 'p'+str(self._period)
         
         if self._is_trans:
             return run + '_trans_' + self.ext.lower()
@@ -146,7 +145,7 @@ class LoadRun(ReductionStep):
     # Helper function
     def _assignHelper(self, reducer):
         if self._data_file == '' or self._data_file.startswith('.'):
-            return '', -1
+            return ''
         
         try:
             data_file = self._extract_run_details(
@@ -158,15 +157,15 @@ class LoadRun(ReductionStep):
         workspace = self._get_workspace_name()
         if not self._reload:
             raise NotImplementedError('Raw workspaces must be reloaded, run with reload=True')
-            nPeriods = self._find_workspace_num_periods(workspace)
+            self.periods_in_file = self._find_workspace_num_periods(workspace)
             if mantid.workspaceExists(workspace):
                 self.wksp_name = workspace
-                return '', nPeriods
+                return ''
             #this always contains the period number
             period_definitely_inc = self._get_workspace_name(False)
             if mantid.workspaceExists(period_definitely_inc):
                 self.wksp_name = period_definitely_inc
-                return '', nPeriods
+                return ''
 
         self._data_file = os.path.join(reducer._data_path, data_file)
         # Workaround so that the FileProperty does the correct searching of data paths if this file doesn't exist
@@ -182,19 +181,19 @@ class LoadRun(ReductionStep):
                 else:
                     self._spec_min = None
                     self._spec_max = 8
-                nPeriods, logs = self._load(reducer.instrument)
+                self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, err:
                 mantid.sendLogMessage("::SANS::Warning: "+str(err))
                 return '', -1
         else:
             try:
-                nPeriods, logs = self._load(reducer.instrument)
+                self.periods_in_file, logs = self._load(reducer.instrument)
             except RuntimeError, details:
                 mantid.sendLogMessage("::SANS::Warning: "+str(details))
                 self.wksp_name = ''
                 return '', -1
         
-        return nPeriods, logs
+        return logs
 
     def _leaveSinglePeriod(self, workspace):
         groupW = mantid[workspace]
@@ -291,9 +290,8 @@ class LoadRun(ReductionStep):
             #get the number of periods in a group using the fact that each period has a different name
             numPeriods = len(pWorksp.getNames())
         else :
-            if self._period == self.UNSET_PERIOD:
-                #they didn't specify a period but there is only one period, the original file must contain no more than one period 
-                numPeriods = 1
+            numPeriods = 1
+
         #the logs have the definitive information on the number of periods, if it is in the logs
         try:
             samp = pWorksp.getSampleDetails()
@@ -320,8 +318,8 @@ class LoadTransmissions(ReductionStep):
             @param reload: setting this to false will mean the workspaces aren't reloaded if they already exist (default True i.e. reload)
         """
         super(LoadTransmissions, self).__init__()
-        self.trans_name = None
-        self.direct_name = None
+        self.trans = None
+        self.direct = None
         self._reload = reload
         self._period_t = -1
         self._period_d = -1
@@ -337,27 +335,23 @@ class LoadTransmissions(ReductionStep):
 
     def execute(self, reducer, workspace):
         if self._trans_name not in [None, '']:
-            load = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
-            self.TRANS_SAMPLE_N_PERIODS, dummy = \
-                                        load._assignHelper(reducer)
-            if not load.wksp_name:
+            self.trans = LoadRun(self._trans_name, trans=True, reload=self._reload, entry=self._period_t)
+            self.trans._assignHelper(reducer)
+            if not self.trans.wksp_name:
                 # do nothing if no workspace was specified
                 return '', ''
-            self.trans_name = load.wksp_name
 
         if self._direct_name not in [None, '']:
-            load = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
-            self.DIRECT_SAMPLE_N_PERIODS, dummy = \
-                                        load._assignHelper(reducer)
-            if not load.wksp_name:
+            self.direct = LoadRun(self._direct_name, trans=True, reload=self._reload, entry=self._period_d)
+            self.direct._assignHelper(reducer)
+            if not self.direct.wksp_name:
                 raise RuntimeError('Transmission run set without direct run error')
-            self.direct_name = load.wksp_name
  
         #transmission workspaces sometimes have monitor locations, depending on the instrument, load these locations
-        reducer.instrument.load_transmission_inst(self.trans_name)
-        reducer.instrument.load_transmission_inst(self.direct_name)
+        reducer.instrument.load_transmission_inst(self.trans.wksp_name)
+        reducer.instrument.load_transmission_inst(self.direct.wksp_name)
 
-        return self.trans_name, self.direct_name
+        return self.trans.wksp_name, self.direct.wksp_name
 
 class CanSubtraction(LoadRun):
     """
@@ -388,7 +382,7 @@ class CanSubtraction(LoadRun):
             self.workspace.wksp_name = ''
             return '()'
     
-        self._CAN_N_PERIODS, logs = self._assignHelper(reducer)
+        logs = self._assignHelper(reducer)
         #refactor this so that CanSubtraction doesn't inherit from LoadRun
         self.workspace.wksp_name = self.wksp_name
 
@@ -812,7 +806,6 @@ class LoadSample(LoadRun):
         super(LoadSample, self).__init__(sample, reload=reload, entry=entry)
         self._scatter_sample = None
         self._SAMPLE_RUN = None
-        self._SAMPLE_N_PERIODS = -1
         
         self.maskpt_rmin = None
         
@@ -825,15 +818,13 @@ class LoadSample(LoadRun):
 
         # Code from AssignSample
         self._clearPrevious(self._scatter_sample)
-        self._SAMPLE_N_PERIODS = -1
         
         if self._data_file.startswith('.') or ( not self._data_file ):
             self._SAMPLE_RUN = ''
             self._scatter_sample = None
             raise RuntimeError('Sample needs to be assigned as run_number.file_type')
 
-        self._SAMPLE_N_PERIODS, logs =\
-            self._assignHelper(reducer)
+        logs = self._assignHelper(reducer)
 
         if self.wksp_name == '':
             raise RuntimeError('Unable to load SANS sample run, cannot continue.')
@@ -1212,10 +1203,10 @@ class TransmissionCalc(sans_reduction_steps.BaseTransmission):
             of the transmission
             @return: post_sample pre_sample workspace names
         """  
-        if (not self.loader) or (not self.loader.trans_name):
+        if (not self.loader) or (not self.loader.trans.wksp_name):
             return '', ''
         else:
-            return self.loader.trans_name, self.loader.direct_name
+            return self.loader.trans.wksp_name, self.loader.direct.wksp_name
 
     def calculate(self, reducer):       
         #get the settings required to do the calculation

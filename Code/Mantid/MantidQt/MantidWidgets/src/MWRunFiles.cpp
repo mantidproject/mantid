@@ -35,7 +35,17 @@ MWRunFiles::MWRunFiles(QWidget *parent)
 
   m_uiForm.fileEditor->clear();
   
-  m_multiEntry ? m_uiForm.entryNum->show() : m_uiForm.entryNum->hide();
+  if (m_multiEntry)
+  {
+    m_uiForm.entryNum->show();
+    m_uiForm.numEntries->show();     
+  }
+  else
+  {
+    m_uiForm.entryNum->hide();
+    m_uiForm.numEntries->hide();
+  }
+
   doButtonOpt(m_buttonOpt);
 
   setFocusPolicy(Qt::StrongFocus);
@@ -175,10 +185,12 @@ void MWRunFiles::doMultiEntry(const bool multiEntry)
   if (m_multiEntry)
   {
     m_uiForm.entryNum->show();
+    m_uiForm.numEntries->show();
   }
   else
   {
     m_uiForm.entryNum->hide();
+    m_uiForm.numEntries->hide();
   }
   refreshValidator();
 }
@@ -312,6 +324,14 @@ int MWRunFiles::getEntryNum() const
   return NO_ENTRY_NUM;
 }
 
+/** Set the entry displayed in the box to this value
+* @param num the period number to use
+*/
+void MWRunFiles::setEntryNum(const int num)
+{
+  m_uiForm.entryNum->setText(QString::number(num));
+}
+
 /**
  * Retrieve user input from this widget. NOTE: This knows nothing of periods yet
  * @returns A qvariant
@@ -358,7 +378,17 @@ void MWRunFiles::saveSettings(const QString & group)
 
   settings.endGroup();
 }
-
+/** Writes the total number of periods in a file to the NumEntries
+*  Qlabel
+*  @param number the number to write, if this is < 1 a ? will be displayed in it's place
+*/
+void MWRunFiles::setNumberOfEntries(const int number)
+{
+  const QString total = number > 0 ? QString::number(number) : "?";
+  {
+    m_uiForm.numEntries->setText("/"+total);
+  }
+}
 /** 
 * Set the file text
 * @param text :: The text string to set

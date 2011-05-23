@@ -137,6 +137,7 @@ private:
   void addSpectrumMasksToTable(const QString & mask_string, const QString & det_name);
   /// Add a time mask string to the mask table
   void addTimeMasksToTable(const QString & mask_string, const QString & det_name);
+  void readNumberOfEntries(const QString & RunStep, MantidWidgets::MWRunFiles * const output);
   QString readUserFileGUIChanges(const States type);
   QString readSampleObjectGUIChanges();
   /// Get the component distances
@@ -165,9 +166,9 @@ private:
   /// Run an assign command
   bool runAssign(int key, QString & logs);
   /// Load a scatter sample file or can run via Python objects using the passed Python command
-  bool assignDetBankRun(const MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs);
+  bool assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs);
   /// runs that contain only monitor counts can be direct or transmission runs
-  bool assignMonitorRun(const MantidWidgets::MWRunFiles & runFile, const MantidWidgets::MWRunFiles & canFile, const QString & assignFn);
+  bool assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWidgets::MWRunFiles & direct, const QString & assignFn);
   /// Get the detectors' names
   void fillDetectNames(QComboBox *output);
   QStringList getSaveAlgs();
@@ -210,8 +211,6 @@ private slots:
   void saveWorkspacesDialog();
   ///deals with the save workspaces dialog box closing
   void saveWorkspacesClosed();
-  /// A run number has changed
-  void runChanged();
   /// Receive a load button click
   bool handleLoadButtonClick();
   /// Reduce button clicked
@@ -294,8 +293,6 @@ private:
   ValMap m_validators;
   /// List of all validators searched through before a load operation is possible
   ValMap m_loadValids;
-  /// A map for quickly retrieving the different line edits
-  QHash<int, QLineEdit*> m_run_no_boxes;
   /// A list of the full workspace names
   std::set<QString> m_workspaceNames;
   /// Stores the last output workspace from single run mode, should be emptied when run in batch mode

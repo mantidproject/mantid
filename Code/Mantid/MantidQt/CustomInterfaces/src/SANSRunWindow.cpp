@@ -65,7 +65,7 @@ Logger& SANSRunWindow::g_log = Logger::get("SANSRunWindow");
 SANSRunWindow::SANSRunWindow(QWidget *parent) :
   UserSubWindow(parent), m_addFilesTab(NULL), m_displayTab(NULL), m_diagnosticsTab(NULL),
   m_saveWorkspaces(NULL), m_ins_defdir(""), m_last_dir(""),
-  m_cfg_loaded(true), m_userFname(false), m_sample_file(), m_run_no_boxes(),
+  m_cfg_loaded(true), m_userFname(false), m_sample_file(),
   m_warnings_issued(false), m_force_reload(false),
   m_log_warnings(false), m_newInDir(*this, &SANSRunWindow::handleInputDirChange),
   m_delete_observer(*this, &SANSRunWindow::handleMantidDeleteWorkspace),
@@ -346,11 +346,6 @@ void SANSRunWindow::connectButtonSignals()
 void SANSRunWindow::connectChangeSignals()
 {
   //controls on the first tab page
-  //Connect each box's edited signal to flag if the box's text has changed
-  for( int idx = 1; idx < 9; ++idx )
-  {
-    connect(m_run_no_boxes.value(idx), SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
-  }
 
   connect(m_uiForm.smpl_offset, SIGNAL(textEdited(const QString&)), this, SLOT(runChanged()));
   connect(m_uiForm.outfile_edit, SIGNAL(textEdited(const QString&)),
@@ -1504,7 +1499,7 @@ void SANSRunWindow::selectUserFile()
   {
     return;
   }
-  
+  //possibly redudent code now
   runReduceScriptFunction("i.ReductionSingleton().user_file_path='"+
     QFileInfo(m_uiForm.userfile_edit->text()).path() + "'");
 
@@ -1568,14 +1563,6 @@ void SANSRunWindow::saveFileBrowse()
   }
 }
 /**
- * Mark that a run number has changed
-*/
-void SANSRunWindow::runChanged()
-{
-  m_warnings_issued = false;
-  forceDataReload(true);
-}
-/**
  * Flip the flag to confirm whether data is reloaded
  * @param force :: If true, the data is reloaded when reduce is clicked
  */
@@ -1637,28 +1624,36 @@ bool SANSRunWindow::handleLoadButtonClick()
   }
 
   QString error;
-  //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
-  if ( ( ! m_uiForm.transCan->isEmpty() ) && m_uiForm.dirCan->isEmpty() )
-  {
-    m_uiForm.dirCan->setFileText(m_uiForm.direct->getText());
-  }
 
   QString sample_logs, can_logs;  
   QString sample = m_uiForm.scatterSample->getFirstFilename();
   try
   {//preliminarly error checking is over try to load that data
     is_loaded &= assignDetBankRun(*(m_uiForm.scatterSample), "AssignSample", sample_logs);
+    readNumberOfEntries("data_loader", m_uiForm.scatterSample);
     if ( ! m_uiForm.scatCan->isEmpty() )
     {
       is_loaded &= assignDetBankRun(*(m_uiForm.scatCan), "AssignCan", can_logs);
+      readNumberOfEntries("background_subtracter", m_uiForm.scatCan);
     }
     if ( ( ! m_uiForm.transmis->isEmpty() ) && ( ! m_uiForm.direct->isEmpty() ) )
     {
       is_loaded &= assignMonitorRun(*(m_uiForm.transmis), *(m_uiForm.direct), "TransmissionSample");
+      readNumberOfEntries("samp_trans_load.trans", m_uiForm.transmis);
+      readNumberOfEntries("samp_trans_load.direct", m_uiForm.direct);
+    }
+    
+    //Quick check that there is a can direct run if a trans can is defined. If not use the sample one
+    if ( ( ! m_uiForm.transCan->isEmpty() ) && m_uiForm.dirCan->isEmpty() )
+    {
+      m_uiForm.dirCan->setFileText(m_uiForm.direct->getText());
+      m_uiForm.dirCan->setEntryNum(m_uiForm.direct->getEntryNum());
     }
     if ( ( ! m_uiForm.transCan->isEmpty() ) && ( ! m_uiForm.dirCan->isEmpty() ) )
     {
       is_loaded &= assignMonitorRun(*(m_uiForm.transCan), *(m_uiForm.dirCan), "TransmissionCan");
+      readNumberOfEntries("can_trans_load.trans", m_uiForm.transCan);
+      readNumberOfEntries("can_trans_load.direct", m_uiForm.dirCan);
     }
   }
   catch(std::runtime_error)
@@ -1734,6 +1729,15 @@ bool SANSRunWindow::handleLoadButtonClick()
   setProcessingState(Ready);
   m_uiForm.load_dataBtn->setText("Load Data");
   return true;
+}
+/** Queries the number of periods from the Python object whose name was passed
+*  @param RunStep name of the RunStep Python object
+*  @param output where the number will be displayed
+*/
+void SANSRunWindow::readNumberOfEntries(const QString & RunStep, MantidWidgets::MWRunFiles * const output)
+{
+  QString periods = runReduceScriptFunction("print i.ReductionSingleton()."+RunStep+".periods_in_file");
+  output->setNumberOfEntries(periods.toInt());
 }
 /** Construct the python code to perform the analysis using the 
  * current settings
@@ -2600,15 +2604,31 @@ void SANSRunWindow::resetDefaultOutput(const QString & wsName)
 *  @param direct run widget box with the selected direct (run with no sample present) file
 *  @para assignFn this is different for can or sample
 */
-bool SANSRunWindow::assignMonitorRun(const MantidWidgets::MWRunFiles & trans, const MantidWidgets::MWRunFiles & direct, const QString & assignFn)
+bool SANSRunWindow::assignMonitorRun(MantidWidgets::MWRunFiles & trans, MantidWidgets::MWRunFiles & direct, const QString & assignFn)
 {
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
   const static QString PYTHON_SEP("C++assignMonitorRunC++");
   
   QString assignCom("i."+assignFn+"(r'" + trans.getFirstFilename() + "'");
   assignCom.append(", r'"+direct.getFirstFilename()+"'");
-  assignCom.append(", period_t="+QString::number(trans.getEntryNum()));
-  assignCom.append(", period_d="+QString::number(direct.getEntryNum())+")");
+
+  int period = trans.getEntryNum();
+  //we can only do single period reductions now
+  if (period == MWRunFiles::ALL_ENTRIES)
+  {
+    period = 1;
+    trans.setEntryNum(period);
+  }
+  assignCom.append(", period_t="+QString::number(period));
+
+  period = direct.getEntryNum();
+  //we can only do single period reductions now
+  if (period == MWRunFiles::ALL_ENTRIES)
+  {
+    period = 1;
+    direct.setEntryNum(period);
+  }
+  assignCom.append(", period_d="+QString::number(period)+")");
   
   //assign the workspace name to a Python variable and read back some details
   QString pythonC="t1, t2 = " + assignCom + ";print '"+PYTHON_SEP+"',t1,'"+PYTHON_SEP+"',t2";
@@ -2639,14 +2659,21 @@ bool SANSRunWindow::assignMonitorRun(const MantidWidgets::MWRunFiles & trans, co
  * @param[out] logs information loaded from the file
  * @return true if there were no Python errors, false otherwise
  */
-bool SANSRunWindow::assignDetBankRun(const MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs)
+bool SANSRunWindow::assignDetBankRun(MantidWidgets::MWRunFiles & runFile, const QString & assignFn, QString & logs)
 {
   //need something to place between names printed by Python that won't be intepreted as the names or removed as white space
   const static QString PYTHON_SEP("C++assignDetBankRunC++");
   
   QString assignCom("i."+assignFn+"(r'" + runFile.getFirstFilename() + "'");
   assignCom.append(", reload = True");
-  assignCom.append(", period = " + QString::number(runFile.getEntryNum())+")");
+  int period = runFile.getEntryNum();
+  //we can only do single period reductions now
+  if (period == MWRunFiles::ALL_ENTRIES)
+  {
+    period = 1;
+    runFile.setEntryNum(period);
+  }
+  assignCom.append(", period = " + QString::number(period)+")");
 
   //assign the workspace name to a Python variable and read back some details
   QString run_info = "i.SetCentre('" + m_uiForm.beam_x->text();

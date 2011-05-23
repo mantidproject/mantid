@@ -100,6 +100,7 @@ namespace MantidQt
       QStringList getFilenames() const;
       QString getFirstFilename() const;
       int getEntryNum() const;
+      void setEntryNum(const int num);
       /// Overridden from base class to retrieve user input through a common interface
       QVariant getUserInput() const;      
       /// Sets a value on the widget through a common interface
@@ -110,6 +111,8 @@ namespace MantidQt
       void readSettings(const QString & group);
       /// Save settings in the given group
       void saveSettings(const QString & group);
+      /// Alters the text label that contains the number of entries, normally run when the file is loaded
+      void setNumberOfEntries(const int number);
 
     signals:
       /// Emitted when the file text changes
