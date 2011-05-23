@@ -68,8 +68,7 @@ namespace Mantid
       /// Default (empty) destructor
       virtual ~NearestNeighbours() {};
 
-    public:
-      // Neighbouring spectra
+      // Neighbouring spectra by radius
       std::map<specid_t, double> neighbours(const specid_t spectrum, const double radius=0.0) const;
 
     private:
@@ -83,9 +82,9 @@ namespace Mantid
       /// map object of int to Graph Vertex descriptor
       typedef boost::unordered_map<specid_t,Vertex> MapIV;
 
-      /// Construct the graph based on the given instument and spectra-detector mapping
-      void build(boost::shared_ptr<const IInstrument> instrument, 
-		 const ISpectraDetectorMap & spectraMap, const int noNeighbours);
+      /// Construct the graph based on the given number of neighbours and the 
+      /// current instument and spectra-detector mapping
+      void build(const int noNeighbours);
       /// Query the graph for the default number of nearest neighbours to specified detector
       std::map<specid_t, double> defaultNeighbours(const specid_t spectrum) const;
 
@@ -93,9 +92,15 @@ namespace Mantid
       std::map<specid_t, IDetector_sptr> 
 	getSpectraDetectors(boost::shared_ptr<const IInstrument> instrument, 
 			    const ISpectraDetectorMap & spectraMap);
-      
-      /// populates the graph with the nodes (detectors with id) and edges (neighbour links with distances)
-      void populate();
+
+      /// A pointer the the instrument
+      boost::shared_ptr<const IInstrument> m_instrument;
+      /// A reference to the spectra map
+      const ISpectraDetectorMap & m_spectraMap;
+      /// The current number of nearest neighbours
+      int m_noNeighbours;
+      /// The largest value of the distance to a nearest neighbour
+      double m_cutoff;
       /// map between the DetectorID and the Graph node descriptor
       MapIV m_specToVertex;
       /// boost::graph object

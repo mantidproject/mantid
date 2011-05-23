@@ -56,16 +56,21 @@ public:
     for ( distIt = distances.begin(); distIt != distances.end(); ++distIt )
     {
       double nnDist = distIt->second;
-      V3D pos = m_detectors[distIt->first]->getPos();
-      pos -= m_detectors[5]->getPos();
-      pos /= scale;
-      double gmDist = pos.norm();
+      V3D delta = m_detectors[distIt->first]->getPos() - m_detectors[5]->getPos();
+      double gmDist = delta.norm();
       TS_ASSERT_DELTA(nnDist, gmDist, 1e-12);
     }
 
     // Check that the 'radius' option works as expected
-    distances = m_detectors[14]->getNeighbours(1);
-    TS_ASSERT_EQUALS(distances.size(), 2);
+    // Lower radius
+    distances = m_detectors[14]->getNeighbours(0.008);
+    TS_ASSERT_EQUALS(distances.size(), 4);
+
+    // Higher than currently computed
+    distances = m_detectors[14]->getNeighbours(6);
+    TS_ASSERT_EQUALS(distances.size(), 17);
+
+    
   }
   
   // Let's try it with a rectangular detector.
@@ -93,7 +98,7 @@ public:
     TS_ASSERT_EQUALS( nb.size(), 0 );
 
     // The ones above below and next to it
-    nb = det->getNeighbours(2);
+    nb = det->getNeighbours(0.016);
     TS_ASSERT_EQUALS( nb.size(), 4 );
 
   }

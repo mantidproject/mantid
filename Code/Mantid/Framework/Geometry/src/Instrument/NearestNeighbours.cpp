@@ -7,6 +7,7 @@
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 // Nearest neighbours library
 #include "MantidKernel/ANN/ANN.h"
+#include "MantidKernel/Timer.h"
 
 namespace Mantid
 {
@@ -21,10 +22,9 @@ namespace Mantid
      */
     NearestNeighbours::NearestNeighbours(IInstrument_const_sptr instrument,
 					 const ISpectraDetectorMap & spectraMap) : 
-      m_scale()
+      m_instrument(instrument), m_spectraMap(spectraMap), m_noNeighbours(8), m_cutoff(-DBL_MAX), m_scale()
     {
-      const int noNeighbours = 8;
-      this->build(instrument, spectraMap, noNeighbours);
+      this->build(m_noNeighbours);
     }
    
     /**
@@ -36,18 +36,40 @@ namespace Mantid
      */
     std::map<specid_t, double> NearestNeighbours::neighbours(const specid_t spectrum, const double radius) const
     {
-      std::map<specid_t, double> nearest = defaultNeighbours(spectrum);
-      if ( radius == 0.0 )
+      // If the radius is stupid then don't let it continue as well be stuck forever
+      if( radius < 0.0 || radius > 10.0 )
       {
-	return nearest;
+	throw std::invalid_argument("NearestNeighbours::neighbours - Invalid radius parameter.");
       }
+
       std::map<specid_t, double> result;
-      std::map<specid_t, double>::const_iterator nnIt;
-      for ( nnIt = nearest.begin(); nnIt != nearest.end(); ++nnIt )
+      if( radius == 0.0 ) 
       {
-	if ( nnIt->second <= radius )
+	// Note: Should be able to do this better but time constraints for the moment mean that
+	// it is necessary. 
+	// Cast is necessary as the user should see this as a const member
+	const_cast<NearestNeighbours*>(this)->build(8);
+	result = defaultNeighbours(spectrum);	  
+      }
+      else if( radius > m_cutoff )
+      {
+	int neighbours = m_noNeighbours + 2;
+	while( true )
 	{
-	  result[nnIt->first] = nnIt->second;
+	  const_cast<NearestNeighbours*>(this)->build(neighbours);
+	  if( radius < m_cutoff ) break;
+	  else neighbours += 2;
+	}
+      }
+    
+      std::map<detid_t, double> nearest = defaultNeighbours(spectrum);
+      std::map<specid_t, double>::const_iterator cend;
+      for(std::map<specid_t, double>::const_iterator cit = nearest.begin();
+	  cit != nearest.end(); ++cit )
+      {
+	if ( cit->second <= radius )
+	{
+	  result[cit->first] = cit->second;
 	}
       }
       return result;
@@ -57,22 +79,22 @@ namespace Mantid
     // Private member functions
     //--------------------------------------------------------------------------
     /**
-     * Builds a map based on the given instrument and spectra map
-     * @param instrument :: A pointer to the instrument
-     * @param spectraMap :: A reference to the spectra-detector mapping
+     * Builds a map based on the given number of neighbours
      * @param noNeighbours :: The number of nearest neighbours to use to build 
      * the graph 
      */
-    void NearestNeighbours::build(IInstrument_const_sptr instrument, 
-				  const ISpectraDetectorMap & spectraMap,
-				  const int noNeighbours)
+    void NearestNeighbours::build(const int noNeighbours)
     {
-      std::map<specid_t, IDetector_sptr> spectraDets =
-	getSpectraDetectors(instrument, spectraMap);
+      std::map<specid_t, IDetector_sptr> spectraDets 
+	= getSpectraDetectors(m_instrument, m_spectraMap);
       if( spectraDets.empty() )
       {
 	throw std::runtime_error("NearestNeighbours::build - Cannot find any spectra");
       }
+      // Clear current
+      m_graph.clear(); 
+      m_specToVertex.clear();
+      m_noNeighbours = noNeighbours;
 
       const int nspectra = static_cast<int>(spectraDets.size()); //ANN only deals with integers
       BoundingBox bbox;
@@ -89,7 +111,7 @@ namespace Mantid
       {
       	IDetector_sptr detector = detIt->second;
       	const specid_t spectrum = detIt->first;
-      	V3D pos = detector->getPos() / (*m_scale);
+      	V3D pos = detector->getPos()/(*m_scale);
       	dataPoints[pointNo][0] = pos.X();
       	dataPoints[pointNo][1] = pos.Y();
       	dataPoints[pointNo][2] = pos.Z();
@@ -106,22 +128,32 @@ namespace Mantid
       ANNdistArray nnDistList = new ANNdist[noNeighbours];
       for ( detIt = spectraDets.begin(); detIt != spectraDets.end(); ++detIt )
       {
-
+	ANNpoint scaledPos = dataPoints[pointNo]; 
       	annTree->annkSearch(
-      	  dataPoints[pointNo], // Point to search nearest neighbours of
+      	  scaledPos, // Point to search nearest neighbours of
       	  noNeighbours, // Number of neighbours to find (8)
       	  nnIndexList, // Index list of results
       	  nnDistList, // List of distances to each of these
       	  0.0 // Error bound (?) is this the radius to search in?
       	  );
+	// The distances that are returned are in our scaled coordinate
+	// system. We store the real space ones.
+	V3D realPos = V3D(scaledPos[0], scaledPos[1], scaledPos[2])*(*m_scale);
       	for ( int i = 0; i < noNeighbours; i++ )
       	{
+	  ANNidx index = nnIndexList[i];
+	  V3D neighbour = V3D(dataPoints[index][0], dataPoints[index][1], dataPoints[index][2])*(*m_scale);
+	  double separation = (neighbour-realPos).norm();
       	  boost::add_edge(
       	    m_specToVertex[detIt->first], // from
-      	    pointNoToVertex[nnIndexList[i]], // to
-      	    nnDistList[i], // Distance Squared
+      	    pointNoToVertex[index], // to
+	    separation, 
       	    m_graph
       	    );
+	  if( separation > m_cutoff )
+	  {
+	    m_cutoff = separation;
+	  }
       	}
       	pointNo++;
       }
@@ -157,9 +189,7 @@ namespace Mantid
 	  Vertex nearest = (*adjIt);
 	  specid_t nrSpec = specid_t(m_vertexID[nearest]);
 	  std::pair<Graph::edge_descriptor, bool> nrEd = boost::edge(vertex->second, nearest, m_graph);
-	  double distance = m_edgeLength[nrEd.first];
-	  distance = sqrt(distance);
-	  result[nrSpec] = distance;
+	  result[nrSpec] = m_edgeLength[nrEd.first];
 	}
 	return result;
       }
@@ -201,13 +231,5 @@ namespace Mantid
       return spectra;
     }
 
-    /**
-     * Creates a graph object for the instrument, with the nodes being the detectors and 
-     * edges linking the detectors to their  nearest neighbours. 
-     */
-    void NearestNeighbours::populate()
-    {
-      throw Kernel::Exception::NotImplementedError("NearestNeighbours::populate()");
-    }
   }
 }
