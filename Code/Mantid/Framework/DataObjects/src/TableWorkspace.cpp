@@ -104,7 +104,7 @@ namespace Mantid
     /// Gets the shared pointer to a column.
     API::Column_sptr TableWorkspace::getColumn(size_t index)
     {
-        if (index < 0 || index >= columnCount())
+        if (index >= columnCount())
         {
             std::string str = "Column index is out of range";
             g_log.error()<<str<<": "<<index<<"("<<columnCount()<<")\n";
@@ -132,7 +132,6 @@ namespace Mantid
     size_t TableWorkspace::insertRow(size_t index)
     {
         if (index >= rowCount()) index = rowCount();
-        if (index < 0) index = 0;
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
             insertInColumn(ci->get(),index);
         ++m_rowCount;
@@ -143,7 +142,7 @@ namespace Mantid
     */
     void TableWorkspace::removeRow(size_t index)
     {
-        if (index < 0 || index >= rowCount())
+        if (index >= rowCount())
         {
             g_log.error()<<"Attempt to delete a non-existing row ("<<index<<")\n";
             return;

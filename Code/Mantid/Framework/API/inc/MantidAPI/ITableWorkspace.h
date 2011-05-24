@@ -217,7 +217,7 @@ public:
             g_log.error(ostr.str());
             throw std::runtime_error(ostr.str());
         }
-        if (row < 0 || row >= this->rowCount())
+        if (row >= this->rowCount())
         {
           throw std::range_error("Table does not have row " + boost::lexical_cast<std::string>(row));
         }

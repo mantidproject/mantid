@@ -90,7 +90,7 @@ public:
     template<class T>
     TableRow& operator<<(const T& t)
     {
-        if (m_col < 0 || m_col >= m_columns.size())
+        if (m_col >= m_columns.size())
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
@@ -121,7 +121,7 @@ public:
     template<class T>
     const TableRow& operator>>(T& t)const
     {
-        if (m_col < 0 || m_col >= m_columns.size())
+        if (m_col >= m_columns.size())
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
@@ -142,7 +142,7 @@ public:
     template<class T>
     T& cell(size_t col)
     {
-        if (col < 0 || col >= m_columns.size())
+        if (col >= m_columns.size())
         {
             g_log.error("Column index out of range.");
             throw std::range_error("Column index out of range.");
