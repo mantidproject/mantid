@@ -105,6 +105,23 @@ public:
     runInfo.addProperty(p);
     TS_ASSERT_EQUALS( runInfo.getMemorySize(), sizeof(ConcreteProperty) + sizeof( void *));
   }
+
+  void test_getGoniometer()
+  {
+    Run runInfo;
+    TS_ASSERT_THROWS_NOTHING( runInfo.getGoniometer() );
+    // No axes by default
+    TS_ASSERT_EQUALS( runInfo.getGoniometer().getNumberAxes(), 0 );
+    // Now does copy work?
+    runInfo.getGoniometer().makeUniversalGoniometer();
+    TS_ASSERT_EQUALS( runInfo.getGoniometer().getNumberAxes(), 3 );
+    Run runCopy(runInfo);
+    TS_ASSERT_EQUALS( runCopy.getGoniometer().getNumberAxes(), 3 );
+    runCopy = runInfo;
+    TS_ASSERT_EQUALS( runCopy.getGoniometer().getNumberAxes(), 3 );
+
+  }
+
 };
 
 

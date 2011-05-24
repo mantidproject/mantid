@@ -363,9 +363,7 @@ namespace Crystal
 
     // Build the universal goniometer that will build the rotation matrix.
     Mantid::Geometry::Goniometer uniGonio;
-    uniGonio.pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
-    uniGonio.pushAxis("chi",   1., 0., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
-    uniGonio.pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+    uniGonio.makeUniversalGoniometer();
 
     while( in.good() )
     {

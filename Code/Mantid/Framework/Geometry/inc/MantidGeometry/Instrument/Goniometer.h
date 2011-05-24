@@ -46,14 +46,15 @@ namespace Geometry
     CCW=1};///Counter clockwise rotation
 
   /// Structure containing a rotation axis: name, direction, angle, sense
-  struct Axis
+  struct GoniometerAxis
   {
-    std::string name; /// Axis name
-    V3D rotationaxis; /// Axis direction
+    std::string name; /// GoniometerAxis name
+    V3D rotationaxis; /// GoniometerAxis direction
     double angle; /// Rotation angle
     int sense;  /// Rotation sense (1 for CCW, -1 for CW)
     int angleunit; ///angle units are angDegrees or angRadians (see UnitCell.h)
-    Axis(std::string initname,V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
+    /// Constructor
+    GoniometerAxis(std::string initname,V3D initrotationaxis,double initangle,int initsense,int initangleunit):name(initname),rotationaxis(initrotationaxis),angle(initangle),sense(initsense),angleunit(initangleunit){}
   };
 
   class DLLExport Goniometer
@@ -78,14 +79,19 @@ namespace Geometry
       // Set rotation angle for an axis
       void setRotationAngle( size_t axisnumber, double value);
       // Get axis object
-      Axis getAxis(size_t axisnumber);
+      GoniometerAxis getAxis(size_t axisnumber);
       // Get axis object
-      Axis getAxis(std::string axisname);
+      GoniometerAxis getAxis(std::string axisname);
+      // Return the number of axes
+      size_t getNumberAxes();
+      // Make a default universal goniometer
+      void makeUniversalGoniometer();
+
     private:
       /// Global rotation matrix of the goniometer
       MantidMat R;
-      /// Motors vector contains #Axis objects, the last one is the closest to the sample
-      std::vector<Axis> motors;
+      /// Motors vector contains #GoniometerAxis objects, the last one is the closest to the sample
+      std::vector<GoniometerAxis> motors;
       /// Flag to specify if the goniometer is initialized from a rotation matrix
       bool initFromR;
       /// Private function to recalculate R when setRotationAngle is called

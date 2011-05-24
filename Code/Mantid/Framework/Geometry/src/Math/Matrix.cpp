@@ -1,9 +1,12 @@
-#include "MantidGeometry/Math/Matrix.h"
-#include "MantidKernel/Exception.h"
 #include "MantidGeometry/Math/mathSupport.h"
+#include "MantidGeometry/Math/Matrix.h"
 #include "MantidGeometry/V3D.h"
-#include <iostream>
+#include "MantidKernel/Exception.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <iomanip>
+#include <iostream>
+
+using Mantid::Kernel::TimeSeriesProperty;
 
 
 namespace Mantid
@@ -462,6 +465,7 @@ Always returns 0 if the Matrix have different sizes
 }
 
 
+//---------------------------------------------------------------------------------------
 template<typename T>
 bool Matrix<T>::equals(const Matrix<T>& A, const double Tolerance) const
 /**
@@ -501,6 +505,57 @@ Always returns 0 if the Matrix have different sizes
   return true;
 }
 
+//---------------------------------------------------------------------------------------
+/** Element by element comparison of <
+Always returns false if the Matrix have different sizes
+@param A :: matrix to check.
+@return true if this < A
+*/
+template<typename T>
+bool Matrix<T>::operator<(const Matrix<T>& A) const
+{
+  if (&A == this)       // this < A == always false
+    return false;
+
+  if(A.nx!=nx || A.ny!=ny)
+    return false;
+
+  for(size_t i=0;i<nx;i++)
+    for(size_t j=0;j<ny;j++)
+    {
+      if (V[i][j] >= A.V[i][j])
+        return false;
+    }
+  return true;
+}
+
+
+//---------------------------------------------------------------------------------------
+/** Element by element comparison of >=
+Always returns false if the Matrix have different sizes
+@param A :: matrix to check.
+@return true if this >= A
+*/
+template<typename T>
+bool Matrix<T>::operator>=(const Matrix<T>& A) const
+{
+  if (&A == this)
+    return true;
+
+  if(A.nx!=nx || A.ny!=ny)
+    return false;
+
+  for(size_t i=0;i<nx;i++)
+    for(size_t j=0;j<ny;j++)
+    {
+      if (V[i][j] < A.V[i][j])
+        return false;
+    }
+  return true;
+}
+
+
+//---------------------------------------------------------------------------------------
 template<typename T>
 void
 Matrix<T>::deleteMem()
@@ -1543,7 +1598,6 @@ template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix
 template DLLExport std::ostream& operator<<(std::ostream&,const Geometry::Matrix<int>&);
 
 ///\endcond TEMPLATE
+} // namespace Geometry
+} // namespace
 
-} 
-
-}

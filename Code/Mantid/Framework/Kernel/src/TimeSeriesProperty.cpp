@@ -1,5 +1,5 @@
-#include "MantidKernel/TimeSeriesProperty.h"
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/TimeSeriesProperty.h"
 #include <algorithm>
 #include <cmath>
 #include <functional>

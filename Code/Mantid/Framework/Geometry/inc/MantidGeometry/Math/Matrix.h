@@ -88,6 +88,8 @@ namespace Mantid
       Matrix<T>& operator*=(const T&);                 ///< Multiply by constant
       Matrix<T>& operator/=(const T&);                 ///< Divide by constant
 
+      bool operator<(const Matrix<T>&) const;
+      bool operator>=(const Matrix<T>&) const;
       bool operator!=(const Matrix<T>&) const;
       bool operator==(const Matrix<T>&) const;
       bool equals(const Matrix<T>& A, const double Tolerance=FLT_EPSILON) const;

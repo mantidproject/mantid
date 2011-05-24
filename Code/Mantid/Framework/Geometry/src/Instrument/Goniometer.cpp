@@ -65,7 +65,7 @@ std::string Goniometer::axesInfo()
   else
   {
     std::stringstream info;
-    std::vector<Axis>::iterator it;
+    std::vector<GoniometerAxis>::iterator it;
     std::string strCW("CW"),strCCW("CCW"),sense;
     double angle;
 
@@ -88,7 +88,7 @@ std::string Goniometer::axesInfo()
 }
 
 /**Add an additional axis to the goniometer, closer to the sample
-  @param name :: Axis name
+  @param name :: GoniometerAxis name
   @param axisx, axisy axisz :: the x, y, z components of the rotation axis
   @param angle :: rotation angle, 0 by default
   @param sense :: rotation sense (CW or CCW), CCW by default
@@ -102,26 +102,26 @@ void Goniometer::pushAxis(std::string name, double axisx, double axisy, double a
   }
   else
   {
-    std::vector<Axis>::iterator it;
+    std::vector<GoniometerAxis>::iterator it;
     // check if such axis is already defined
     for(it=motors.begin(); it<motors.end(); it++)
     {
       if(name.compare((*it).name)==0) throw std::invalid_argument("Motor name already defined");
     }
-    Axis a(name,V3D(axisx,axisy,axisz),angle,sense,angUnit);
+    GoniometerAxis a(name,V3D(axisx,axisy,axisz),angle,sense,angUnit);
     motors.push_back(a);
   }
   recalculateR();
 }
 
 /** Set rotation angle for an axis using motor name
-  @param name :: Axis name  
+  @param name :: GoniometerAxis name
   @param value :: value in the units that the axis is set
 */
 void Goniometer::setRotationAngle( std::string name, double value)
 {
   bool changed=false;
-  std::vector<Axis>::iterator it;
+  std::vector<GoniometerAxis>::iterator it;
   for(it=motors.begin(); it<motors.end(); it++)
   {
     if(name.compare((*it).name)==0)
@@ -138,7 +138,7 @@ void Goniometer::setRotationAngle( std::string name, double value)
 }
 
 /**Set rotation angle for an axis using motor name
-  @param axisnumber :: Axis number (from 0)  
+  @param axisnumber :: GoniometerAxis number (from 0)
   @param value :: value in the units that the axis is set
 */
 void Goniometer::setRotationAngle( size_t axisnumber, double value)
@@ -147,19 +147,19 @@ void Goniometer::setRotationAngle( size_t axisnumber, double value)
   recalculateR();
 }
 
-/// Get Axis obfject using motor number
+/// Get GoniometerAxis obfject using motor number
 /// @param axisnumber :: axis number (from 0)
-Axis Goniometer::getAxis( size_t axisnumber)
+GoniometerAxis Goniometer::getAxis( size_t axisnumber)
 {
   return motors.at(axisnumber);//it will throw out of range exception if axisnumber is not in range
 }
 
-/// Get Axis obfject using motor name
+/// Get GoniometerAxis obfject using motor name
 /// @param axisname :: axis name
-Axis Goniometer::getAxis( std::string axisname)
+GoniometerAxis Goniometer::getAxis( std::string axisname)
 {
   bool found=false;
-  std::vector<Axis>::iterator it;
+  std::vector<GoniometerAxis>::iterator it;
   for(it=motors.begin(); it<motors.end(); it++)
   {
     if(axisname.compare((*it).name)==0)
@@ -175,10 +175,28 @@ Axis Goniometer::getAxis( std::string axisname)
   return motors.at(0);
 }
 
+/// @return the number of axes
+size_t Goniometer::getNumberAxes()
+{
+  return motors.size();
+}
+
+/** Make a default universal goniometer with phi,chi,omega angles
+ * according to SNS convention.
+ */
+void Goniometer::makeUniversalGoniometer()
+{
+  motors.clear();
+  this->pushAxis("phi",   0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("chi",   1., 0., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+  this->pushAxis("omega", 0., 1., 0.,   0., Mantid::Geometry::CCW, Mantid::Geometry::angDegrees);
+}
+
+
 /// Private function to recalculate the rotation matrix of the goniometer
 void Goniometer::recalculateR()
 {
-  std::vector<Axis>::iterator it;
+  std::vector<GoniometerAxis>::iterator it;
   std::vector<double> elements;
   Quat QGlobal,QCurrent;
 

@@ -14,7 +14,7 @@ class GoniometerTest : public CxxTest::TestSuite
 public:
   void test_AxisConstructor()
   {
-    Axis a("axis1",V3D(1.,0,0),3.,CW,angRadians);
+    GoniometerAxis a("axis1",V3D(1.,0,0),3.,CW,angRadians);
     TS_ASSERT_EQUALS(a.name,"axis1");
     TS_ASSERT_EQUALS(a.rotationaxis[0],1.);
     TS_ASSERT_EQUALS(a.angle,3.);
@@ -22,7 +22,7 @@ public:
     TS_ASSERT_DIFFERS(a.sense,angDegrees);
   }
 
-  void test_Goniomter()
+  void test_Goniometer()
   {
     Goniometer G;
     MantidMat M(3,3);
@@ -54,6 +54,27 @@ public:
     TS_ASSERT_EQUALS(G1.axesInfo(),std::string("Goniometer was initialized from a rotation matrix. No information about axis is available.\n"));
     TS_ASSERT_THROWS_ANYTHING(G.pushAxis("Axis2", 0., 0., 1.,30));
     TS_ASSERT_EQUALS(M,G2.getR());
+  }
+
+  void test_makeUniversalGoniometer()
+  {
+    Goniometer G;
+    G.makeUniversalGoniometer();
+    TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "omega");
+  }
+
+  void test_copy()
+  {
+    Goniometer G, G1;
+    G1.makeUniversalGoniometer();
+    G = G1;
+    TS_ASSERT_EQUALS(G.getNumberAxes(), 3);
+    TS_ASSERT_EQUALS(G.getAxis(0).name, "phi");
+    TS_ASSERT_EQUALS(G.getAxis(1).name, "chi");
+    TS_ASSERT_EQUALS(G.getAxis(2).name, "omega");
   }
 };
 

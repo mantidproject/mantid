@@ -38,7 +38,7 @@ const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm"
    * Copy constructor
    * @param copy :: The object to initialize the copy from
    */
-  Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName)
+  Run::Run(const Run& copy) : m_manager(copy.m_manager), m_protonChargeName(copy.m_protonChargeName), m_goniometer(copy.m_goniometer)
   {
   }
 
@@ -54,6 +54,7 @@ const std::string Run::ADDABLE[ADDABLES] = {"tot_prtn_chrg", "rawfrm", "goodfrm"
     if( this == &rhs ) return *this;
     m_manager = rhs.m_manager;
     m_protonChargeName = rhs.m_protonChargeName;
+    m_goniometer = rhs.m_goniometer;
     return *this;
   }
 

@@ -1,12 +1,11 @@
 #ifndef MANTID_API_RUN_H_
 #define MANTID_API_RUN_H_
 
-//----------------------------------------------------------------------
-// Includes
-//----------------------------------------------------------------------
+#include "MantidGeometry/Instrument/Goniometer.h"
 #include "MantidKernel/PropertyManager.h"
 #include "MantidKernel/TimeSplitter.h"
 #include <vector>
+
 
 namespace Mantid
 {
@@ -102,6 +101,14 @@ namespace Mantid
 
       double integrateProtonCharge();
 
+      /** @return a reference to the Goniometer object for this run */
+      Mantid::Geometry::Goniometer & getGoniometer()
+      { return m_goniometer; }
+
+      /** @return a reference to the const Goniometer object for this run */
+      const Mantid::Geometry::Goniometer & getGoniometer() const
+      { return m_goniometer; }
+
       /**
        * Add a log entry
        * @param p :: A pointer to the property containing the log entry
@@ -138,6 +145,9 @@ namespace Mantid
       /// The name of the proton charge property
       std::string m_protonChargeName;
       
+      /// Goniometer for this run
+      Mantid::Geometry::Goniometer m_goniometer;
+
       /// Adds all the time series in from one property manager into another
       void mergeMergables(Mantid::Kernel::PropertyManager & sum, const Mantid::Kernel::PropertyManager & toAdd);
     };
