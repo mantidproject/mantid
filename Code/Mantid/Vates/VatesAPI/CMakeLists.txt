@@ -1,11 +1,6 @@
 # This is mainly here so you don't get a complaint when running cmake
 cmake_minimum_required ( VERSION 2.6 )
 
-if(USE_VISIT)
-  include(${VISIT_INCLUDE_DIR}/PluginVsInstall.cmake)
-  include(${VISIT_INCLUDE_DIR}/VisItLibraryDependencies.cmake)
-endif(USE_VISIT)
-
 project ( VatesAPI )
 
 set ( SRC_FILES 
@@ -93,11 +88,6 @@ if( USE_PARAVIEW )
   include(${PARAVIEW_USE_FILE})
   include_directories (${ParaView_DIR}/VTK)
   link_directories ( ${ParaView_DIR}/bin ) # TODO: handle /bin/Debug bin/Release
-else( USE_PARAVIEW )
-  #VisIT specific
-  include_directories (${VTK_INCLUDE_DIRS})
-  include_directories (inc)
-  link_directories ( ${VTK_LIBRARY_DIRS} )
 endif( USE_PARAVIEW )
 include_directories (inc)
 
