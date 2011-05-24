@@ -62,44 +62,44 @@ public:
     /// Virtual destructor.
     virtual ~TablePointerColumn(){}
     /// Number of individual elements in the column.
-    int size()const{return static_cast<int>(m_data.size());}
+    size_t size()const{return m_data.size();}
     /// Reference to the data.
-    Type& data(int i){return *m_data[i];}
+    Type& data(size_t i){return *m_data[i];}
     /// Returns typeid for the data in the column
     const std::type_info& get_type_info()const{return typeid(Type);}
     /// Returns typeid for the pointer type to the data element in the column
     const std::type_info& get_pointer_type_info()const{return typeid(Type*);}
     /// Prints
-    void print(std::ostream& s, int index)const{s << name() << '_' << index;}
+    void print(std::ostream& s, size_t index)const{s << name() << '_' << index;}
     /// Type check
     bool isBool()const{return typeid(Type) == typeid(API::Boolean);}
     /// Memory used by the column
     long int sizeOfData()const{return static_cast<long int>(m_data.size()*sizeof(Type));}
 protected:
     /// Resize.
-    void resize(int count)
+    void resize(size_t count)
     {
-        if (count > int(m_data.size()))
+        if (count > m_data.size())
         {
-            while(count > int(m_data.size()))
+            while(count > m_data.size())
             {
                 m_data.push_back(boost::shared_ptr<Type>(new Type));
             }
         }
-        else if (count < int(m_data.size()))
+        else if (count < m_data.size())
         {
             m_data.erase(m_data.begin()+count,m_data.end());
         }
     }
     /// Inserts default value at position index. 
-    void insert(int index){m_data.insert(m_data.begin()+index,boost::shared_ptr<Type>(new Type));}
+    void insert(size_t index){m_data.insert(m_data.begin()+index,boost::shared_ptr<Type>(new Type));}
     /// Removes an item.
-    void remove(int index){m_data.erase(m_data.begin()+index);}
+    void remove(size_t index){m_data.erase(m_data.begin()+index);}
     /**  Gets the void pointer to a data element
          @param index :: Index of the element
          @return Pointer to the element
       */  
-    void* void_pointer(int index){return &(*m_data[index]);}
+    void* void_pointer(size_t index){return &(*m_data[index]);}
 private:
     std::vector< boost::shared_ptr<Type> > m_data; ///< Vector holding the data
     friend class TableWorkspace;

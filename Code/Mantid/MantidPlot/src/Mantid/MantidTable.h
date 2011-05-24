@@ -13,6 +13,8 @@ public:
     ApplicationWindow* parent, const QString& name = QString(), Qt::WFlags f=0);
 signals:
   void needToClose();
+public slots:
+  void deleteRows(int startRow, int endRow);
 protected slots:
   void closeTable();
 protected:

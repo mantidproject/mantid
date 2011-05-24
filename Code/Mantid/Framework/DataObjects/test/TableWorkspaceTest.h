@@ -118,7 +118,7 @@ public:
     for(int i=0;i<5;i++)
     {
         TableRow row = tw.appendRow();
-        int j = row.row();
+        int j = int(row.row());
         std::ostringstream ostr;
         ostr<<"Number "<<j;
         row << 18*j << 3.14*j << ostr.str() << (j%2 == 0);
@@ -184,7 +184,7 @@ public:
       TableRow row = tw.getFirstRow();
       do
       {
-          int i = row.row();
+          size_t i = row.row();
           row << i << (i % 2 == 0);
       }
       while(row.next());
@@ -240,7 +240,7 @@ public:
 
 	  }
 	  std::string searchstr="Name3";
-	  int row=0;const int col=0;
+	  size_t row=0;const size_t col=0;
 	  tw.find(searchstr,row,col);
 	  TS_ASSERT_EQUALS(row,2);
 

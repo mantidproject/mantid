@@ -79,7 +79,7 @@ public:
     void setName(const std::string& str){m_name = str;}
 
     /// Number of individual elements in the column.
-    virtual int size()const = 0;
+    virtual size_t size()const = 0;
 
     /// Returns typeid for the data in the column
     virtual const std::type_info& get_type_info()const = 0;
@@ -88,7 +88,7 @@ public:
     virtual const std::type_info& get_pointer_type_info()const = 0;
 
     /// Prints
-    virtual void print(std::ostream& s, int index) const = 0;
+    virtual void print(std::ostream& s, size_t index) const = 0;
 
     /// Specialized type check
     virtual bool isBool()const = 0;
@@ -98,14 +98,14 @@ public:
 
     /// Templated method for returning a value. No type checks are done.
     template<class T>
-    T& cell(int index)
+    T& cell(size_t index)
     {
         return *static_cast<T*>(void_pointer(index));
     }
 
     /// Templated method for returning a value (const version). No type checks are done.
     template<class T>
-    const T& cell(int index)const
+    const T& cell(size_t index)const
     {
         return *static_cast<T*>(void_pointer(index));
     }
@@ -119,13 +119,13 @@ public:
 
 protected:
     /// Sets the new column size.
-    virtual void resize(int count) = 0;
+    virtual void resize(size_t count) = 0;
     /// Inserts an item.
-    virtual void insert(int index) = 0;
+    virtual void insert(size_t index) = 0;
     /// Removes an item.
-    virtual void remove(int index) = 0;
+    virtual void remove(size_t index) = 0;
     /// Pointer to a data element
-    virtual void* void_pointer(int index) = 0;
+    virtual void* void_pointer(size_t index) = 0;
 
     std::string m_name;///< name
     std::string m_type;///< type

@@ -2,6 +2,7 @@ set ( SRC_FILES
 	src/CompressEvents.cpp
 	src/CreateSampleShape.cpp
 	src/DefineGaugeVolume.cpp
+	src/DeleteTableRows.cpp
 	src/FindDetectorsInShape.cpp
 	src/GetMaskedDetectors.cpp
 	src/GroupDetectors.cpp
@@ -85,6 +86,7 @@ set ( INC_FILES
 	inc/MantidDataHandling/CompressEvents.h
 	inc/MantidDataHandling/CreateSampleShape.h
 	inc/MantidDataHandling/DefineGaugeVolume.h
+	inc/MantidDataHandling/DeleteTableRows.h
 	inc/MantidDataHandling/FindDetectorsInShape.h
 	inc/MantidDataHandling/GetMaskedDetectors.h
 	inc/MantidDataHandling/GroupDetectors.h
@@ -151,6 +153,7 @@ set ( TEST_FILES
 	test/CompressEventsTest.h
 	test/CreateSampleShapeTest.h
 	test/DefineGaugeVolumeTest.h
+	test/DeleteTableRowsTest.h
 	test/FindDetectorsInShapeTest.h
 	test/GetMaskedDetectorsTest.h
 	test/GroupDetectors2Test.h

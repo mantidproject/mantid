@@ -223,7 +223,7 @@ public slots:
 	//! \name Row Operations
 	//@{
 	void deleteSelectedRows();
-	void deleteRows(int startRow, int endRow);
+	virtual void deleteRows(int startRow, int endRow);
 	void insertRow();
 	void insertRow(int row);//Mantid
 	void addRows(int num);//Mantid

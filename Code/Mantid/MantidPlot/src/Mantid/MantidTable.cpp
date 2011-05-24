@@ -1,7 +1,10 @@
 #include "MantidTable.h"
 #include "../ApplicationWindow.h"
 #include "MantidAPI/Column.h"
+#include "MantidAPI/AlgorithmManager.h"
+#include "MantidAPI/Algorithm.h"
 
+#include <QMessageBox>
 #include <iostream>
 
 MantidTable::MantidTable(ScriptingEnv *env, Mantid::API::ITableWorkspace_sptr ws, const QString &label, 
@@ -30,7 +33,6 @@ m_ws(ws)
       setText(j,i,QString::fromStdString(ostr.str()));
     }
   }
-  std::cerr << "Mantid\n";
 
   connect(this,SIGNAL(needToClose()),this,SLOT(closeTable()));
   observeDelete();
@@ -82,5 +84,22 @@ void MantidTable::afterReplaceHandle(const std::string& wsName,const boost::shar
   if (dynamic_cast<Mantid::API::ITableWorkspace*>(ws.get()) == m_ws.get())
   {
     fillTable();
+  }
+}
+
+void MantidTable::deleteRows(int startRow, int endRow)
+{
+  Mantid::API::IAlgorithm_sptr alg = Mantid::API::AlgorithmManager::Instance().create("DeleteTableRow");
+  alg->setPropertyValue("TableWorkspace",m_ws->getName());
+  QStringList rows;
+  rows << QString::number(startRow - 1) << QString::number(endRow - 1);
+  alg->setPropertyValue("Rows",rows.join("-").toStdString());
+  try
+  {
+    alg->execute();
+  }
+  catch(...)
+  {
+    QMessageBox::critical(this,"MantidPlot - Error", "DeleteTableRow algorithm failed");
   }
 }

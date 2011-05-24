@@ -17,7 +17,7 @@ namespace Mantid
     Kernel::Logger& TableWorkspace::g_log = Kernel::Logger::get("TableWorkspace");
 
     /// Constructor
-    TableWorkspace::TableWorkspace(int nrows) : ITableWorkspace(), m_rowCount(0)
+    TableWorkspace::TableWorkspace(size_t nrows) : ITableWorkspace(), m_rowCount(0)
     {
       setRowCount(nrows);
     }
@@ -80,7 +80,7 @@ namespace Mantid
         Otherwise rows at the end are erased to reach the new size.
         @param count :: New number of rows.
     */
-    void TableWorkspace::setRowCount(int count)
+    void TableWorkspace::setRowCount(size_t count)
     {
         if (count == rowCount()) return;
         for(column_it ci=m_columns.begin();ci!=m_columns.end();ci++)
@@ -102,7 +102,7 @@ namespace Mantid
     }
 
     /// Gets the shared pointer to a column.
-    API::Column_sptr TableWorkspace::getColumn(int index)
+    API::Column_sptr TableWorkspace::getColumn(size_t index)
     {
         if (index < 0 || index >= columnCount())
         {
@@ -129,7 +129,7 @@ namespace Mantid
     /** @param index :: Points where to insert the new row.
         @return Position of the inserted row.
     */
-    int TableWorkspace::insertRow(int index)
+    size_t TableWorkspace::insertRow(size_t index)
     {
         if (index >= rowCount()) index = rowCount();
         if (index < 0) index = 0;
@@ -141,7 +141,7 @@ namespace Mantid
 
     /** @param index :: Row to delete.
     */
-    void TableWorkspace::removeRow(int index)
+    void TableWorkspace::removeRow(size_t index)
     {
         if (index < 0 || index >= rowCount())
         {
