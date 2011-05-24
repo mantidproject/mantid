@@ -744,6 +744,10 @@ class Mask_ISIS(sans_reduction_steps.Mask):
         #reset the instrument to mask the current detector
         instrum.setDetector(original)
 
+        if counts:    
+            Power(counts, 'ones', 0)
+            Plus(wksp, 'ones', wksp)
+
         # Mark up "dead" detectors with error value 
         FindDeadDetectors(wksp, wksp, LiveValue = 0, DeadValue=1)
 
@@ -778,10 +782,10 @@ class Mask_ISIS(sans_reduction_steps.Mask):
 
             CreateWorkspace(wksp, Xs, Ys, Es, len(Ys), UnitX='TOF', VerticalAxisValues=Ys)
             #change the units on the workspace so it is compatible with the workspace containing counts data
-            Power(counts, 'ones', 0)
             Multiply('ones', wksp, 'units')
             #do the super-position and clean up
             Minus(counts, 'units', wksp)
+            Minus(wksp, 'ones', wksp)
             mantid.deleteWorkspace('ones')
             mantid.deleteWorkspace('units')
 
