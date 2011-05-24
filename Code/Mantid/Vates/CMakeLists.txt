@@ -5,7 +5,7 @@ project ( Vates )
 
 include ( CommonVatesSetup )
 
-#Select either building Paraview plugins or VisIT plugins.
+# Select either building Paraview plugins
 set(USE_PARAVIEW ON CACHE BOOL "Create paraview plugins. ")
 
 # Paraview dependencies built if Paraview is found
