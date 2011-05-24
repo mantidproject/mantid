@@ -1169,7 +1169,7 @@ std::pair<double,double> IndirectDataAnalysis::getCurveRange(QwtPlotCurve* curve
   {
     throw std::invalid_argument("Too few points on data curve to determine range.");
   }
-  return std::make_pair(m_elwDataCurve->data().x(0), m_elwDataCurve->data().x(npts-1));
+  return std::make_pair(curve->data().x(0), curve->data().x(npts-1));
 }
 
 
