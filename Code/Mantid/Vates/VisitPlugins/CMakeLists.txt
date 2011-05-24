@@ -1,2 +1,0 @@
-add_subdirectory(RebinningCutterOperator)
-add_subdirectory(CutterOperator)
