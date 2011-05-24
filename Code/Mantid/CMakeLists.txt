@@ -25,20 +25,6 @@ endif ()
 include ( CommonSetup )
 
 ###########################################################################
-# Add linux-specific things
-###########################################################################
-if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
-  include ( LinuxSetup )
-endif ()
-
-###########################################################################
-# Add compiler options if using gcc
-###########################################################################
-if ( CMAKE_COMPILER_IS_GNUCXX )
-  include ( GNUSetup )
-endif ()
-
-###########################################################################
 # Check for Qt
 ###########################################################################
 find_package ( Qt4 COMPONENTS QtCore QtGui QtOpenGL QtXml QtSvg Qt3Support REQUIRED )

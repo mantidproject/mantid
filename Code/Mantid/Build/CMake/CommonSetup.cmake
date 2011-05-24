@@ -89,6 +89,20 @@ mark_as_advanced( MtdVersion_WC_LAST_CHANGED_REV MtdVersion_WC_LAST_CHANGED_DATE
 find_package ( OpenMP )
 
 ###########################################################################
+# Add linux-specific things
+###########################################################################
+if ( ${CMAKE_SYSTEM_NAME} STREQUAL "Linux" )
+  include ( LinuxSetup )
+endif ()
+
+###########################################################################
+# Add compiler options if using gcc
+###########################################################################
+if ( CMAKE_COMPILER_IS_GNUCXX )
+  include ( GNUSetup )
+endif ()
+
+###########################################################################
 # Set up the unit tests target
 ###########################################################################
 

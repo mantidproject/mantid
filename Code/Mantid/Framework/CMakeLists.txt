@@ -26,9 +26,6 @@ endif ()
 # Look for dependencies - bail out if any necessary ones not found
 ###########################################################################
 
-# Might just as well link everything to Boost & Poco (found in CommonSetup)
-set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} )
-
 # gsl is currently needed by Geometry, Algorithms & Curvefitting
 find_package ( GSL REQUIRED )
 
@@ -39,6 +36,37 @@ if ( OPENMP_FOUND )
   set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}" )
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}" )
 endif ()
+
+###########################################################################
+# **EXPERIMENTAL** MPI setup
+###########################################################################
+
+set ( MPI_BUILD OFF CACHE BOOL "Enable MPI options" )
+# Create the variable 
+set ( MPI_LIBRARIES )
+if ( MPI_BUILD )
+  # This find OpenMPI on rhel6 (assuming it's installed, of course)
+  find_package ( MPI REQUIRED )
+  # Set things up to use the OpenMPI 'wrapper' compilers
+  INCLUDE(CMakeForceCompiler)
+  CMAKE_FORCE_C_COMPILER(mpicc "MPI C Compiler")
+  CMAKE_FORCE_CXX_COMPILER(mpicxx "MPI C++ Compiler")
+  include_directories ( SYSTEM ${MPI_INCLUDE_PATH} )
+
+  set ( BOOST_ROOT /usr/lib64/openmpi ) # This is where openmpi winds up on rhel6
+  find_package ( Boost REQUIRED mpi serialization )
+  include_directories( ${Boost_INCLUDE_DIRS} )
+  
+  add_definitions ( -DMPI_BUILD )
+endif ()
+
+###########################################################################
+# Globally-linked libraries variable
+###########################################################################
+
+# Might just as well link everything to Boost & Poco (found in CommonSetup)
+# TCMalloc & MPI variables will be empty if not using
+set ( MANTIDLIBS  ${Boost_LIBRARIES} ${POCO_LIBRARIES} ${TCMALLOC_LIBRARY} ${MPI_LIBRARIES} )
 
 ###########################################################################
 # Now add the packages one-by-one, building up the dependencies as we go
@@ -79,6 +107,11 @@ add_subdirectory (Algorithms)
 add_subdirectory (CurveFitting)
 add_subdirectory (Crystal)
 add_subdirectory (ICat)
+
+# If an MPI-enabled build, add in the MPI-specific algorithms package
+if ( MPI_BUILD )
+  add_subdirectory ( MPIAlgorithms )
+endif ()
 
 # Unit test helper packages 
 if ( CXXTEST_FOUND )

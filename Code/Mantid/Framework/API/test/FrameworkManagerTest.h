@@ -35,16 +35,21 @@ class FrameworkManagerTest : public CxxTest::TestSuite
 {
 public:
 
-  //void testInitialize()
-  //{
-  //  // Not really much to test
-  //  TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().initialize() )
-  //}
+  void testConstructor()
+  {
+    // Not really much to test
+    TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance() );
+
+#ifdef MPI_BUILD
+    // If this is 'MPI Mantid' then test that the mpi environment has been initialized
+    TS_ASSERT( boost::mpi::environment::initialized() );
+#endif
+  }
 
   void testcreateAlgorithm()
   {
     TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2") )
-	TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","",3), std::runtime_error )
+    TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","",3), std::runtime_error )
     TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("aaaaaa"), std::runtime_error )
   }
 
@@ -53,10 +58,10 @@ public:
     IAlgorithm *alg = FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","Prop=Val;P2=V2");
     std::string prop;
     TS_ASSERT_THROWS_NOTHING( prop = alg->getPropertyValue("Prop") )
-	  TS_ASSERT( ! prop.compare("Val") )
-	  TS_ASSERT_THROWS_NOTHING( prop = alg->getPropertyValue("P2") )
-	  TS_ASSERT( ! prop.compare("V2") )
-	  
+    TS_ASSERT( ! prop.compare("Val") )
+    TS_ASSERT_THROWS_NOTHING( prop = alg->getPropertyValue("P2") )
+    TS_ASSERT( ! prop.compare("V2") )
+
     TS_ASSERT_THROWS_NOTHING( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","") )
 //    TS_ASSERT_THROWS_NOTHING( manager->createAlgorithm("ToyAlgorithm2","noValProp") )
     TS_ASSERT_THROWS( FrameworkManager::Instance().createAlgorithm("ToyAlgorithm2","P1=P2=P3"), std::invalid_argument)
@@ -72,7 +77,7 @@ public:
   {
     TS_ASSERT_THROWS( FrameworkManager::Instance().getWorkspace("wrongname"), std::runtime_error )
   }
-	
+
 };
 
 #endif /*FRAMEWORKMANAGERTEST_H_*/

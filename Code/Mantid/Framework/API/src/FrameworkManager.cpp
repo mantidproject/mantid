@@ -29,6 +29,9 @@ namespace API
 {
 /// Default constructor
 FrameworkManagerImpl::FrameworkManagerImpl() : g_log(Kernel::Logger::get("FrameworkManager"))
+#ifdef MPI_BUILD
+      , m_mpi_environment()
+#endif
 {
   // Mantid only understands English...
   setGlobalLocaleToAscii();
