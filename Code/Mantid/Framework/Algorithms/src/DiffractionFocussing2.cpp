@@ -315,48 +315,48 @@ void DiffractionFocussing2::execEvent()
   Progress * prog;
   prog = new Progress(this,0.2,0.35,nHist);
 
-  if (nGroups == 1)
-  {
-    g_log.information() << "Performing focussing on a single group\n";
-    // Special case of a single group - parallelize differently
-    EventList & groupEL = out->getOrAddEventList(0);
-
-    int chunkSize = 200;
-
-    PRAGMA_OMP(parallel for schedule(dynamic, 1) if (eventW->threadSafe()) )
-    for (int wiChunk=0;wiChunk<nHist/chunkSize;wiChunk++)
-    {
-      PARALLEL_START_INTERUPT_REGION
-
-      // Make a blank EventList that will accumulate the chunk.
-      EventList chunkEL;
-
-      // Perform in chunks for more efficiency
-      int max = (wiChunk+1)*chunkSize;
-      if (max > nHist) max = nHist;
-      for (int wi=wiChunk*chunkSize; wi < max; wi++)
-      {
-        const int group = groupAtWorkspaceIndex[wi];
-        if (group == 1)
-        {
-          // Accumulate the chunk
-          chunkEL += eventW->getEventList(wi);
-        }
-      }
-
-      // Rejoin the chunk with the rest.
-      PARALLEL_CRITICAL( DiffractionFocussing2_JoinChunks )
-      {
-        groupEL += chunkEL;
-      }
-
-      PARALLEL_END_INTERUPT_REGION
-    }
-    PARALLEL_CHECK_INTERUPT_REGION
-
-    out->doneAddingEventLists();
-  }
-  else
+//  if (nGroups == 1)
+//  {
+//    g_log.information() << "Performing focussing on a single group\n";
+//    // Special case of a single group - parallelize differently
+//    EventList & groupEL = out->getOrAddEventList(0);
+//
+//    int chunkSize = 200;
+//
+//    PRAGMA_OMP(parallel for schedule(dynamic, 1) if (eventW->threadSafe()) )
+//    for (int wiChunk=0;wiChunk<nHist/chunkSize;wiChunk++)
+//    {
+//      PARALLEL_START_INTERUPT_REGION
+//
+//      // Make a blank EventList that will accumulate the chunk.
+//      EventList chunkEL;
+//
+//      // Perform in chunks for more efficiency
+//      int max = (wiChunk+1)*chunkSize;
+//      if (max > nHist) max = nHist;
+//      for (int wi=wiChunk*chunkSize; wi < max; wi++)
+//      {
+//        const int group = groupAtWorkspaceIndex[wi];
+//        if (group == 1)
+//        {
+//          // Accumulate the chunk
+//          chunkEL += eventW->getEventList(wi);
+//        }
+//      }
+//
+//      // Rejoin the chunk with the rest.
+//      PARALLEL_CRITICAL( DiffractionFocussing2_JoinChunks )
+//      {
+//        groupEL += chunkEL;
+//      }
+//
+//      PARALLEL_END_INTERUPT_REGION
+//    }
+//    PARALLEL_CHECK_INTERUPT_REGION
+//
+//    out->doneAddingEventLists();
+//  }
+//  else
   {
     // ------ PARALLELIZE BY GROUPS -------------------------
     // ------------- Pre-allocate Event Lists ----------------------------
