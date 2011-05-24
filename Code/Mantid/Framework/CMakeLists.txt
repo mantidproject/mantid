@@ -91,6 +91,8 @@ if( MAKE_MULTIDIMENSIONAL )
   add_subdirectory (MDDataObjects)
   # This is not ideal - can MDAlgorithms code to interfaces?
   include_directories(MDDataObjects/inc)
+  set(MANTIDLIBS ${MANTIDLIBS} MDDataObjects)
+  
   add_subdirectory (MDAlgorithms)
 endif ()
 
