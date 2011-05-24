@@ -7,13 +7,13 @@
 #from eqsans_interface import EQSANSInterface
 from hfir_interface_dev import HFIRInterface
 from eqsans_interface_dev import EQSANSInterface
-
+from example_interface import ExampleInterface
 
 INSTRUMENT_DICT = {"HFIR": {"BIOSANS": HFIRInterface, 
-                            "GPSANS": HFIRInterface,
-                            "HFIRDEV": HFIRInterface},
+                            "GPSANS": HFIRInterface},
                    "SNS":  {"EQSANS": EQSANSInterface,
-                            "EQDEV": EQSANSInterface}}               
+                            "Example": ExampleInterface}
+                  }               
 
 def instrument_factory(instrument_name, settings=None):
     for facility in INSTRUMENT_DICT:

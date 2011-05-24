@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'ui/sans/hfir_background.ui'
 #
-# Created: Fri Apr 15 15:10:01 2011
+# Created: Tue May 24 15:28:47 2011
 #      by: PyQt4 UI code generator 4.7.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -23,7 +23,7 @@ class Ui_Frame(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtGui.QWidget(self.scrollArea)
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 941, 701))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 935, 695))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_2 = QtGui.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
@@ -91,6 +91,8 @@ class Ui_Frame(object):
         self.formLayout_3 = QtGui.QFormLayout()
         self.formLayout_3.setSizeConstraint(QtGui.QLayout.SetDefaultConstraint)
         self.formLayout_3.setFieldGrowthPolicy(QtGui.QFormLayout.AllNonFixedFieldsGrow)
+        self.formLayout_3.setLabelAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignVCenter)
+        self.formLayout_3.setFormAlignment(QtCore.Qt.AlignLeading|QtCore.Qt.AlignLeft|QtCore.Qt.AlignTop)
         self.formLayout_3.setHorizontalSpacing(0)
         self.formLayout_3.setObjectName("formLayout_3")
         self.label_4 = QtGui.QLabel(self.geometry_options_groupbox)
@@ -138,6 +140,8 @@ class Ui_Frame(object):
         spacerItem3 = QtGui.QSpacerItem(20, 10, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
         self.verticalLayout_2.addItem(spacerItem3)
         self.transmission_grpbox = QtGui.QGroupBox(self.scrollAreaWidgetContents)
+        self.transmission_grpbox.setFlat(False)
+        self.transmission_grpbox.setCheckable(False)
         self.transmission_grpbox.setObjectName("transmission_grpbox")
         self.verticalLayout_3 = QtGui.QVBoxLayout(self.transmission_grpbox)
         self.verticalLayout_3.setObjectName("verticalLayout_3")
@@ -243,9 +247,9 @@ class Ui_Frame(object):
         self.widget_placeholder = QtGui.QVBoxLayout()
         self.widget_placeholder.setObjectName("widget_placeholder")
         self.verticalLayout_3.addLayout(self.widget_placeholder)
-        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
-        self.verticalLayout_3.addItem(spacerItem10)
         self.verticalLayout_2.addWidget(self.transmission_grpbox)
+        spacerItem10 = QtGui.QSpacerItem(20, 40, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Expanding)
+        self.verticalLayout_2.addItem(spacerItem10)
         self.scrollArea.setWidget(self.scrollAreaWidgetContents)
         self.verticalLayout.addWidget(self.scrollArea)
 

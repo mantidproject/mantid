@@ -25,6 +25,8 @@ try:
     os.system("pyuic4 -o ui/ui_trans_spreader.py ui/trans_spreader.ui")
     os.system("pyuic4 -o ui/ui_instrument_dialog.py ui/instrument_dialog.ui")
     
+    # Example
+    #os.system("pyuic4 -o ui/ui_example.py ui/example.ui")
 except:
     print "Could not compile resource file"
     
