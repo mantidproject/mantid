@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------
 #include "MantidDataHandling/DeleteTableRows.h"
 #include "MantidAPI/IWorkspaceProperty.h"
-#include "MAntidAPI/ITableWorkspace.h"
+#include "MantidAPI/ITableWorkspace.h"
 #include "MantidKernel/ArrayProperty.h"
 
 #include <set>
