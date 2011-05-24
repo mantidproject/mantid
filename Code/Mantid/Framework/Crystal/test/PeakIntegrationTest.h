@@ -189,7 +189,7 @@ public:
     TS_ASSERT(ws);
     if (!ws) return;
     Peak & peak = ws->getPeaks()[0];
-    TS_ASSERT_DELTA( peak.getIntensity(), 1348.49, 10.0);
+    TS_ASSERT_DELTA( peak.getIntensity(), 1382.5647, 10.0);
     TS_ASSERT_DELTA( peak.getSigmaIntensity(), 71.5718, 1.0);
     AnalysisDataService::Instance().remove("TOPAZ");
 

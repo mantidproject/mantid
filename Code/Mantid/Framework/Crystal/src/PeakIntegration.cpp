@@ -51,12 +51,12 @@ namespace Mantid
 
       declareProperty(new WorkspaceProperty<PeaksWorkspace>("InPeaksWorkspace", "", Direction::Input), "Name of the peaks workspace.");
 
-      declareProperty("XMin", -2, "Minimum of X (col) Range to integrate for peak");
-      declareProperty("XMax", 2, "Maximum of X (col) Range to integrate for peak");
-      declareProperty("YMin", -2, "Minimum of Y (row) Range to integrate for peak");
-      declareProperty("YMax", 2, "Maximum of Y (row) Range to integrate for peak");
-      declareProperty("TOFBinMin", -5, "Minimum of TOF Bin Range to integrate for peak");
-      declareProperty("TOFBinMax", 5, "Maximum of TOF Bin Range to integrate for peak");
+      declareProperty("XMin", -7, "Minimum of X (col) Range to integrate for peak");
+      declareProperty("XMax", 7, "Maximum of X (col) Range to integrate for peak");
+      declareProperty("YMin", -7, "Minimum of Y (row) Range to integrate for peak");
+      declareProperty("YMax", 7, "Maximum of Y (row) Range to integrate for peak");
+      declareProperty("TOFBinMin", -4, "Minimum of TOF Bin Range to integrate for peak");
+      declareProperty("TOFBinMax", 6, "Maximum of TOF Bin Range to integrate for peak");
       declareProperty(
         new ArrayProperty<double>("Params", new RebinParamsValidator), 
         "A comma separated list of first bin boundary, width, last bin boundary. Optionally\n"
@@ -72,13 +72,10 @@ namespace Mantid
     void PeakIntegration::exec()
     {
       retrieveProperties();
-      Alpha0 = 1.89157;
-      Alpha1 = 1.69777;
-      Beta0 = 9.38995;
-      Kappa = 4.3558;
-      SigmaSquared = 396.9;
-      Gamma = 0.57103;
-
+      Alpha0 = 1.6;
+      Alpha1 = 1.5;
+      Beta0 = 31.9;
+      Kappa = 46.0;
   
       PeaksWorkspace_sptr peaksW;
       peaksW = boost::dynamic_pointer_cast<PeaksWorkspace>(AnalysisDataService::Instance().retrieve(getProperty("InPeaksWorkspace")));
@@ -144,7 +141,7 @@ namespace Mantid
         outputW = bin_alg->getProperty("OutputWorkspace");
 
         fitSpectra(0, I, sigI);
-        std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
+        //std::cout << peak.getIntensity()<<"  " << I << "  " << peak.getSigmaIntensity() << "  "<< sigI << "\n";
         peak.setIntensity(I);
         peak.setSigmaIntensity(sigI);
       }
@@ -184,11 +181,10 @@ namespace Mantid
       int numbins = static_cast<int>(Y.size());
       if (TOFmin > numbins) TOFmin = numbins;
       if (TOFmax > numbins) TOFmax = numbins;
-      std::cout <<TOFPeakd<<"  "<<TOFPeak<<"  "<<TOFmin<<"  "<<TOFmax<<"  "<<numbins<<"\n";
-      for (int i = TOFmin; i < TOFmax; i++) std::cout << X[i] <<"  ";
+      /*for (int i = TOFmin; i < TOFmax; i++) std::cout << X[i] <<"  ";
       std::cout <<"\n";
       for (int i = TOFmin; i < TOFmax; i++) std::cout << Y[i] <<"  ";
-      std::cout <<"\n";
+      std::cout <<"\n";*/
 
       double bktime = X[TOFmin] + X[TOFmax];
       double bkg0 = Y[TOFmin] + Y[TOFmax];
@@ -197,7 +193,14 @@ namespace Mantid
       double ratio = pktime/bktime;
 
       const double peakLoc = X[TOFPeak];
-      const double peakHeight =  Y[TOFPeak]*(X[TOFPeak]-X[TOFPeak-1]);//Intensity*HWHM
+      int iSig;
+      for (iSig=TOFmin; iSig < TOFmax; iSig++) 
+      {
+        if(((Y[iSig]-Y[TOFPeak]/2.)*(Y[iSig+1]-Y[TOFPeak]/2.))<0.)break;
+      }
+      Gamma = X[TOFPeak]-X[iSig];
+      SigmaSquared = Gamma*Gamma;
+      const double peakHeight =  Y[TOFPeak]*Gamma;//Intensity*HWHM
 
       IAlgorithm_sptr fit_alg;
       try
@@ -216,9 +219,7 @@ namespace Mantid
       fit_alg->setProperty("Output", "fit");
       std::ostringstream fun_str;
       fun_str << "name=IkedaCarpenterPV,I="<<peakHeight<<",Alpha0="<<Alpha0<<",Alpha1="<<Alpha1<<",Beta0="<<Beta0<<",Kappa="<<Kappa<<",SigmaSquared="<<SigmaSquared<<",Gamma="<<Gamma<<",X0="<<peakLoc;
-      /*fun_str << "name = Gaussian, Height = "<<peakHeight<<", PeakCentre = "<<peakLoc<<", Sigma = 1.";*/
       fit_alg->setProperty("Function", fun_str.str());
-      std::ostringstream tie_str;
       fit_alg->executeAsSubAlg();
       MatrixWorkspace_sptr ws = fit_alg->getProperty("OutputWorkspace");
 
@@ -236,7 +237,6 @@ namespace Mantid
         X0 = params[7];
       }
       std::string funct = fit_alg->getPropertyValue("Function");
-      std::cout <<funct<<"\n";
 
       setProperty("OutputWorkspace", ws);
 
@@ -252,8 +252,8 @@ namespace Mantid
       }
       pk->setMatrixWorkspace(outputW, 0, -1, -1);
       pk->function(y,x,n);
-      for (int i = 0; i < 1000; i+=100) std::cout << y[i] <<"  ";
-      std::cout <<"\n";
+      /*for (int i = 0; i < 1000; i+=100) std::cout << y[i] <<"  ";
+      std::cout <<"\n";*/
 
       I = 0.0;
       for (int i = 0; i < n; i++) I+= y[i];
