@@ -72,10 +72,11 @@ FindDetectorsPar::exec()
    Progress progress(this,0,1,100);
       
       // Loop over spectra
-      for (size_t i = 0; i < nHist; i++) {
+      for (size_t i = 0; i < nHist; i++)
+      {
           // Check that we aren't writing a monitor...
           if (!inputWS->getDetector(i)->isMonitor())
-            {
+          {
               Geometry::IDetector_sptr det = inputWS->getDetector(i);
               polar[i]     =  inputWS->detectorTwoTheta(det) * rad2deg;
               azimuthal[i] =  det->getPhi() * rad2deg;
@@ -86,13 +87,13 @@ FindDetectorsPar::exec()
 
               // Now let's work out the detector widths
               // TODO: This is the historically wrong method...update it!
-          // Get the bounding box
-          Geometry::BoundingBox bbox;
-          det->getBoundingBox(bbox);
-          double xsize = bbox.xMax() - bbox.xMin();
-          double ysize = bbox.yMax() - bbox.yMin();
+             // Get the bounding box
+              Geometry::BoundingBox bbox;
+              det->getBoundingBox(bbox);
+              double xsize = bbox.xMax() - bbox.xMin();
+              double ysize = bbox.yMax() - bbox.yMin();
 
-              double delta_polar = atan2((ysize / 2.0), distance) * rad2deg;
+              double delta_polar     = atan2((ysize / 2.0), distance) * rad2deg;
               double delta_azimuthal = atan2((xsize / 2.0), distance) * rad2deg;
 
               // Now store the widths...

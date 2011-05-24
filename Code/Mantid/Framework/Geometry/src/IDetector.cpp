@@ -7,3 +7,4 @@ IComponent* IDetector::getComponent()
 {
   throw std::runtime_error("This detector class does not inherit from IComponent.");
 }
+

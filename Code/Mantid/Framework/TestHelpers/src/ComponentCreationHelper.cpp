@@ -12,7 +12,6 @@
 #include "MantidGeometry/Instrument/ObjComponent.h"
 #include "MantidGeometry/Instrument/DetectorGroup.h"
 #include "MantidGeometry/Instrument/Detector.h"
-#include "MantidGeometry/Instrument/DetectorsRing.h"
 #include "MantidGeometry/Instrument/RectangularDetector.h"
 #include "MantidDataHandling/LoadInstrument.h"
 #include "MantidDataHandling/LoadInstrumentHelper.h"
@@ -167,7 +166,7 @@ namespace ComponentCreationHelper
   /**
    * Create a group of detectors arranged in a ring;
    */
-  boost::shared_ptr<DetectorsRing> createRingOfCylindricalDetectors()
+  boost::shared_ptr<DetectorGroup> createRingOfCylindricalDetectors(const double R_min, const double R_max, const double z0)
   {
 
     std::vector<boost::shared_ptr<IDetector> > groupMembers;
@@ -176,13 +175,13 @@ namespace ComponentCreationHelper
     double h =1.5;
     Object_sptr detShape = ComponentCreationHelper::createCappedCylinder(R0, h, V3D(0.0,0.0,0.0), V3D(0.,1.0,0.), "tube"); 
 
-    int NY=10;
-    int NX=30;
+    int NY=int(ceil(2*R_max/h)+1);
+    int NX=int(ceil(2*R_max/R0)+1);
     double y_bl = NY*h;
     double x_bl = NX*R0;
 
-    double Rmin(2.5), Rmax(3.5);
-    double Rmin2(Rmin*Rmin),Rmax2(Rmax*Rmax);
+  
+    double Rmin2(R_min*R_min),Rmax2(R_max*R_max);
 
     int ic(0);
     for(int j=0;j<NY;j++){
@@ -194,14 +193,14 @@ namespace ComponentCreationHelper
                   std::ostringstream os;
                   os << "d" << ic;
                  boost::shared_ptr<Detector> det(new Detector(os.str(), ic+1, detShape, NULL));
-                 det->setPos(x, y, 2.0);
+                 det->setPos(x, y, z0);
                  groupMembers.push_back(det);
             }
 
           ic++;
         }
     }
-    return boost::shared_ptr<DetectorsRing>(new DetectorsRing(groupMembers, false));
+    return boost::shared_ptr<DetectorGroup>(new DetectorGroup(groupMembers, false));
   }
 
   //----------------------------------------------------------------------------------------------

@@ -49,6 +49,14 @@ namespace Geometry
     File change history is stored at: <https://svn.mantidproject.org/mantid/trunk/Code/Mantid>.
     Code Documentation is available at: <http://doxygen.mantidproject.org>
 */
+/** enum describes the toplogy of a detectors group used to calculate angular position and angular 
+ *  measures for detecors. The topology defines the meaning of angular measurements for a detector
+*/
+enum det_topology{
+    rect,  //< rectangular geometry
+    cyl,   //< cylindrical geometry
+    undef  //< the geometry is yet undefined, if you need to know the geometry, a method to identify it must be deployed
+};
 class DLLExport IDetector : public virtual IObjComponent
 {
 public:
@@ -76,8 +84,7 @@ public:
 
   /// Indicates whether the detector has been masked
   virtual bool isMasked() const = 0;
-
-  /// Indicates whether this is a monitor detector
+   /// Indicates whether this is a monitor detector
   virtual bool isMonitor() const = 0;
 
   /// Get Nearest Neighbours
@@ -85,6 +92,9 @@ public:
 
   /// Must return a pointer to itself if derived from IComponent
   virtual IComponent* getComponent();
+ /// returns the geometry of detectors, meaningful for groups, rectangular for single
+  virtual det_topology getTopology()const = 0;
+
   /// (Empty) Constructor
   IDetector() {}
   /// Virtual destructor

@@ -85,8 +85,12 @@ namespace ComponentCreationHelper
   DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createDetectorGroupWith5CylindricalDetectors();
   /**
    * Create a detector group containing detectors ring
+   * R_min -- min radius of the ring
+   * R_max -- max radius of the ring, center has to be in 0 position,
+   * z     -- axial z-coordinate of the detectors position; 
+    The detectors are the cylinders with 1.5cm height and 0.5 cm radius
    */
-  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorsRing> createRingOfCylindricalDetectors();
+  DLL_TESTHELPERS boost::shared_ptr<Mantid::Geometry::DetectorGroup> createRingOfCylindricalDetectors(const double R_min=2.5, const double R_max=3.5, const double z=2);
   /**
    * Create a group of two monitors
    */

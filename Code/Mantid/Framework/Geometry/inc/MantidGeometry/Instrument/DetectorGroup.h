@@ -115,7 +115,9 @@ namespace Mantid
        * @returns A list of size 0 as this is not a parameterized component
        */
       std::vector<std::string> getStringParameter(const std::string& pname, bool recursive = true) const;
-
+  /** returns the detector's group topology if it has been calculated before or invokes the procedure of 
+      calculating such topology if it was not */
+     det_topology getTopology()const;
 	protected:
       /// The ID of this effective detector
       int m_id;
@@ -125,7 +127,9 @@ namespace Mantid
       typedef std::map<int, IDetector_sptr> DetCollection;
       /// The collection of grouped detectors
       DetCollection m_detectors;
-
+     /** the parameter describes the topology of the detector's group namely if detectors form a box or a ring.  
+      *  the topology is undefined on construction and caclulated on first request   */
+      mutable det_topology group_topology;
    
       // functions inherited from IComponent
       Component* clone() const{ return NULL; }
@@ -183,7 +187,8 @@ namespace Mantid
 
    /// Static reference to the logger class
       static Kernel::Logger& g_log;
-  
+      /// function calculates the detectors arrangement (topology)
+      void calculateGroupTopology()const;
     };
 
     /// Typedef for shared pointer

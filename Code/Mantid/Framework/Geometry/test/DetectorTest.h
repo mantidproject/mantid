@@ -20,6 +20,11 @@ public:
     TS_ASSERT(!det.isMonitor());
     TS_ASSERT(!det.isParametrized());
   }
+  void testDetTopology()
+  {
+      Detector det("det1",0,0);
+      TSM_ASSERT_EQUALS("single detector should have rectangular topology",det_topology::rect,det.getTopology());
+  }
 
   void testNameParentConstructor()
   {

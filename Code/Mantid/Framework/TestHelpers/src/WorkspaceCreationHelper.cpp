@@ -512,6 +512,24 @@ namespace WorkspaceCreationHelper
     return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
   }
 
+  MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist, int numBins, double binDelta)
+  {
+     size_t numHist=RootOfNumHist*RootOfNumHist;
+     Workspace2D_sptr retVal = Create2DWorkspaceBinned(static_cast<int>(numHist), numBins, 0.0, binDelta);
+     retVal->setInstrument( ComponentCreationHelper::createTestInstrumentCylindrical(static_cast<int>(numHist)) );
+
+    // Set the detector IDs
+    for (int g=0; g < static_cast<int>(numHist); g++)
+    {
+      std::vector<int> dets;
+      for (int i=1; i<=9; i++)
+        dets.push_back(g*9+i);
+      retVal->mutableSpectraMap().addSpectrumEntries(g, dets);
+    }
+
+    return boost::dynamic_pointer_cast<MatrixWorkspace>(retVal);
+
+  }
 
 
   //not strictly creating a workspace, but really helpfull to see what one contains

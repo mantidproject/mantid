@@ -17,7 +17,7 @@ namespace Mantid
      * Default constructor
      */
     DetectorGroup::DetectorGroup() :
-      IDetector(), m_id(), m_detectors()
+      IDetector(), m_id(), m_detectors(),group_topology(undef)
     {
     }
 
@@ -27,7 +27,7 @@ namespace Mantid
     *  @throw std::invalid_argument If an empty vector is passed as argument
     */
     DetectorGroup::DetectorGroup(const std::vector<IDetector_sptr>& dets, bool warnAboutMasked) :
-    IDetector(), m_id(), m_detectors()
+    IDetector(), m_id(), m_detectors(),group_topology(undef)
     {
       if ( dets.empty() )
       {
@@ -52,12 +52,15 @@ namespace Mantid
     */
     void DetectorGroup::addDetector(IDetector_sptr det, bool& warn)
     {
+      // the topology of the group become undefined and needs recalculation if new detector has been added to the group
+      group_topology = undef;
       // Warn if adding a masked detector
       if ( warn && det->isMasked() )
       {
         g_log.warning() << "Adding a detector (ID:" << det->getID() << ") that is flagged as masked." << std::endl;
         warn = false;
       }
+      
 
       // For now at least, the ID is the same as the first detector that is added
       if ( m_detectors.empty() ) m_id = det->getID();
@@ -350,7 +353,32 @@ namespace Mantid
     {
       return std::vector<std::string>(0);
     }
-
-
-  } // namespace Geometry
+    /// 
+    det_topology
+    DetectorGroup::getTopology()const
+    {
+        if(group_topology==undef){
+            this->calculateGroupTopology();
+        }
+        return group_topology;
+    }
+    /** the private function calculates the topology of the detector's group, namely if the detectors arranged into 
+     *  a ring or into a rectangle. Uses assumption that a ring has hole inside, so geometrical centre of the shape does
+     *  not belong to a ring but does belong to a rectangle
+     */
+    void 
+    DetectorGroup::calculateGroupTopology()const
+    {
+        if(m_detectors.size()==1){
+            group_topology = rect;
+            return;
+        }
+        V3D center = this->getPos();
+        if (this->isValid(center)){
+             group_topology = rect;
+        }else{
+             group_topology = cyl;
+        }
+    }
+} // namespace Geometry
 } // namespace Mantid

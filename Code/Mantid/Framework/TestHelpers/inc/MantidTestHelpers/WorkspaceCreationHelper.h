@@ -84,7 +84,8 @@ namespace WorkspaceCreationHelper
   DLL_TESTHELPERS Mantid::DataObjects::EventWorkspace_sptr CreateRandomEventWorkspace(size_t numbins, size_t numpixels, double bin_delta=1.0);
 
   DLL_TESTHELPERS Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2D(size_t numHist, int numBins, double binDelta);
-
+  // grouped workpsace with rings in centre and boxes outside
+  DLL_TESTHELPERS Mantid::API::MatrixWorkspace_sptr CreateGroupedWorkspace2DWithRingsAndBoxes(size_t RootOfNumHist=10, int numBins=10, double binDelta=1.0);
   //not strictly creating a workspace, but really helpfull to see what one contains
   DLL_TESTHELPERS void DisplayDataY(const Mantid::API::MatrixWorkspace_sptr ws);
   //not strictly creating a workspace, but really helpfull to see what one contains

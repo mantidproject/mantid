@@ -21,7 +21,6 @@ set ( SRC_FILES
 	src/Instrument/ParameterMap.cpp
 	src/Instrument/RectangularDetector.cpp
 	src/Instrument/XMLlogfile.cpp
-	src/Instrument/DetectorsRing.cpp 	
 	src/InstrumentRayTracer.cpp
 	src/MDGeometry/Coordinate.cpp
 	src/MDGeometry/IMDDimension.cpp
@@ -95,7 +94,6 @@ set ( INC_FILES
 	inc/MantidGeometry/Instrument/Component.h
 	inc/MantidGeometry/Instrument/Detector.h
 	inc/MantidGeometry/Instrument/DetectorGroup.h
-	inc/MantidGeometry/Instrument/DetectorsRing.h
 	inc/MantidGeometry/Instrument/FitParameter.h
 	inc/MantidGeometry/Instrument/Goniometer.h
 	inc/MantidGeometry/Instrument/Instrument.h
@@ -168,8 +166,7 @@ set ( TEST_FILES
 	test/ComponentTest.h
 	test/ConeTest.h
 	test/CylinderTest.h
-	test/DetectorGroupTest.h
-	test/DetectorsRingTest.h
+	test/DetectorGroupTest.h	
 	test/DetectorTest.h
 	test/FitParameterTest.h
 	test/GeneralTest.h

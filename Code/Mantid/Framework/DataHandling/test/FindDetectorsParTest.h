@@ -98,5 +98,34 @@ private:
 		 return inputWS;
 
 	}
+    MatrixWorkspace_sptr  buildGroupedWS(const std::string &WS_Name)
+	{
+		const size_t NHIST=10;
+
+		inputWS  = WorkspaceCreationHelper::Create2DWorkspaceBinned(NHIST,10,1.0);
+
+	    int forSpecDetMap[NHIST];
+		for (size_t j = 0; j < NHIST; ++j)
+		{
+			// Just set the spectrum number to match the index
+			inputWS->getAxis(1)->spectraNo(j) = j+1;
+			forSpecDetMap[j] = j+1;
+		}
+
+		AnalysisDataService::Instance().add(WS_Name,inputWS);
+
+		// Load the instrument data
+		 Mantid::DataHandling::LoadInstrument loader;
+		 loader.initialize();
+	    // Path to test input file assumes Test directory checked out from SVN
+		 std::string inputFile = "INES_Definition.xml";
+		 loader.setPropertyValue("Filename", inputFile);
+		 loader.setPropertyValue("Workspace", WS_Name);
+		 loader.execute();
+
+		 inputWS->mutableSpectraMap().populate(forSpecDetMap, forSpecDetMap, NHIST);
+		 return inputWS;
+
+	}
 };
 #endif

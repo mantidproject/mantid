@@ -54,7 +54,14 @@ public:
     }
   }
 
-
+  void testIdentRectShape(){
+      boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup = ComponentCreationHelper::createDetectorGroupWith5CylindricalDetectors();
+      TSM_ASSERT_EQUALS("should be rectangular shape",det_topology::rect,rectGroup->getTopology());
+  }
+  void testIdentRingShape(){
+      boost::shared_ptr<Mantid::Geometry::DetectorGroup> rectGroup = ComponentCreationHelper::createRingOfCylindricalDetectors();
+      TSM_ASSERT_EQUALS("should be ring shape",det_topology::cyl,rectGroup->getTopology());
+  }
   void testGetID()
   {
     TS_ASSERT_EQUALS( m_detGroup->getID(), 1 );
