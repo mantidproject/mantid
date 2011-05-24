@@ -19,6 +19,10 @@ class ReductionOptions(BaseOptions):
     # Correct for flight path at larger angle
     correct_for_flight_path = True
 
+    # Use the mask defined in the configuration file
+    use_config_mask = True
+
+
     def __init__(self):
         super(ReductionOptions, self).__init__()
         self.reset()
@@ -34,6 +38,8 @@ class ReductionOptions(BaseOptions):
         self.low_TOF_cut = ReductionOptions.low_TOF_cut
         self.high_TOF_cut = ReductionOptions.high_TOF_cut
         self.correct_for_flight_path = ReductionOptions.correct_for_flight_path
+        
+        self.use_config_mask = ReductionOptions.use_config_mask
 
     def to_script(self):
         """
@@ -69,6 +75,9 @@ class ReductionOptions(BaseOptions):
         xml += "  <perform_flight_path_corr>%s</perform_flight_path_corr>\n" % str(self.correct_for_flight_path)
         xml += "</TOFcorr>\n"
         
+        # Mask
+        xml += "<UseConfigMask>%s</UseConfigMask>\n" % self.use_config_mask
+        
         return xml
     
     def from_xml(self, xml_str):
@@ -95,5 +104,8 @@ class ReductionOptions(BaseOptions):
             self.high_TOF_cut = BaseScriptElement.getFloatElement(tof_dom, "high_tof_cut", 
                                                                   default=ReductionOptions.high_TOF_cut)
         
+        # Mask
+        self.use_config_mask = BaseScriptElement.getBoolElement(dom, "UseConfigMask",
+                                                                default = ReductionOptions.use_config_mask)
         
     

@@ -368,8 +368,8 @@ class SANSInstrumentWidget(BaseWidget):
         self._summary.low_tof_edit.setText(QtCore.QString(str(state.low_TOF_cut)))
         self._summary.high_tof_edit.setText(QtCore.QString(str(state.high_TOF_cut)))
         
-        # Flight path correction
-        self._summary
+        # Config Mask
+        self._summary.config_mask_chk.setChecked(state.use_config_mask)
         
         self._summary.listWidget.clear()
         for item in state.shapes:
@@ -447,5 +447,8 @@ class SANSInstrumentWidget(BaseWidget):
         m.use_config_cutoff = self._summary.tof_cut_chk.isChecked()
         m.low_TOF_cut = util._check_and_get_float_line_edit(self._summary.low_tof_edit)
         m.high_TOF_cut = util._check_and_get_float_line_edit(self._summary.high_tof_edit)
+        
+        # Config Mask
+        m.use_config_mask = self._summary.config_mask_chk.isChecked()
         
         return m
