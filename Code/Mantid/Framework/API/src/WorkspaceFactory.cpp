@@ -5,10 +5,7 @@
 #include "MantidAPI/Workspace.h"
 #include "MantidAPI/WorkspaceOpOverloads.h"
 #include "MantidAPI/MemoryManager.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/ConfigService.h"
-//#include "MantidAPI/MDPropertyGeometry.h"
-
 #include "MantidAPI/NumericAxis.h"
 #include "MantidAPI/TextAxis.h"
 

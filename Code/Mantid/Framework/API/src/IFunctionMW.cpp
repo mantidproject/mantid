@@ -5,8 +5,8 @@
 #include "MantidAPI/IFunctionWithLocation.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/MatrixWorkspace.h"
+#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidAPI/CompositeFunction.h"
 #include "MantidAPI/ConstraintFactory.h"
 #include "MantidAPI/AnalysisDataService.h"
@@ -20,7 +20,6 @@
 #include "MantidKernel/UnitFactory.h"
 #include "MantidKernel/Exception.h"
 #include "MantidGeometry/muParser_Silent.h"
-
 #include <boost/lexical_cast.hpp>
 
 #include <sstream>
@@ -603,7 +602,7 @@ boost::shared_ptr<API::MatrixWorkspace> IFunctionMW::createCalculatedWorkspace(b
       tAxis->setLabel(2,"Diff");
       ws->replaceAxis(1,tAxis);
 
-      assert(m_xMaxIndex-m_xMinIndex+1 == nData);
+      assert(m_xMaxIndex-m_xMinIndex+1 == static_cast<int64_t>(nData));
 
       for(size_t i=0;i<3;i++)
       {

@@ -8,7 +8,7 @@
 #include "MantidGeometry/Instrument/ParameterFactory.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/ISpectraDetectorMap.h" //For specid_t
+#include "MantidGeometry/IDTypes.h" //For specid_t
 #include "MantidGeometry/Objects/BoundingBox.h"
 
 
@@ -31,6 +31,7 @@ namespace Geometry
   //---------------------------------------------------------------------------
   class BoundingBox;
   class NearestNeighbours;
+  class ISpectraDetectorMap;
 
   /** @class ParameterMap ParameterMap.h
 

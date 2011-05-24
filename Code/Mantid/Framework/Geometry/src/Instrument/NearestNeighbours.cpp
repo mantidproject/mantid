@@ -224,11 +224,19 @@ namespace Mantid
 					    const ISpectraDetectorMap & spectraMap)
      {
       std::map<specid_t, IDetector_sptr> spectra;
+      if( spectraMap.nElements() == 0 ) return spectra;
       spectraMap.moveIteratorToStart();
       // The map could return identical numbers as we go along, only consider the unique ones
-      specid_t lastSpectrum(INT_MAX);
+      specid_t lastSpectrum = spectraMap.getCurrentSpectrum();
+      std::vector<int> detIDs = spectraMap.getDetectors(lastSpectrum);
+      IDetector_sptr det = instrument->getDetector(detIDs);
+      if( !det->isMonitor() ) 
+      {
+	spectra.insert(std::make_pair(lastSpectrum, det));
+      }
       while(spectraMap.hasNext())
       {
+	spectraMap.advanceIterator();
 	specid_t spectrumNo = spectraMap.getCurrentSpectrum();
 	if( spectrumNo != lastSpectrum )
 	{
@@ -240,7 +248,6 @@ namespace Mantid
 	  }
 	  lastSpectrum = spectrumNo;
 	}
-	spectraMap.advanceIterator();	
       }
       return spectra;
     }

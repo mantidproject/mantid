@@ -11,6 +11,7 @@
 #include "MantidAPI/Run.h"
 #include "MantidAPI/WorkspaceIterator.h"
 #include "MantidAPI/Axis.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidGeometry/Instrument/Instrument.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Exception.h"

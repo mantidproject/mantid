@@ -2,10 +2,10 @@
 // Includes
 //----------------------------------------------------------------------
 #include "MantidKernel/Exception.h"
+#include "MantidKernel/Logger.h"
 #include "MantidAPI/IFitFunction.h"
 #include "MantidAPI/IConstraint.h"
 #include "MantidAPI/ParameterTie.h"
-#include "MantidAPI/SpectraDetectorMap.h"
 
 #include <boost/lexical_cast.hpp>
 

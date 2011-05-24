@@ -14,11 +14,30 @@
 #include <Poco/Path.h>
 #include <Poco/File.h>
 
+#include "MantidDataHandling/LoadRaw3.h"
+
+
 class SpatialGroupingTest : public CxxTest::TestSuite
 {
 public:
   SpatialGroupingTest() {}
   ~SpatialGroupingTest() {}
+
+  void testWISH()
+  {
+    Mantid::DataHandling::LoadRaw3 loader;
+    loader.initialize();
+    loader.setChild(true);
+    loader.setPropertyValue("Filename", "/home/dmn58364/mantidproject/svn/trunk/Test/Data/WISH00016748.raw");
+    loader.setPropertyValue("OutputWorkspace", "wish");
+    loader.execute();
+
+    Mantid::API::Workspace_sptr ws = loader.getProperty("OutputWorkspace");
+    Mantid::API::MatrixWorkspace_sptr outputWS = boost::dynamic_pointer_cast<Mantid::API::MatrixWorkspace>(ws);
+
+    outputWS->getDetector(100)->getNeighbours();
+
+  }
 
   void testMetaInfo()
   {

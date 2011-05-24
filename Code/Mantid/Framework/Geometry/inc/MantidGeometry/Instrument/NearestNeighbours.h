@@ -3,7 +3,7 @@
 
 #include "MantidKernel/System.h"
 #include "MantidGeometry/IDetector.h"
-#include "MantidGeometry/ISpectraDetectorMap.h"
+#include "MantidGeometry/IDTypes.h"
 // Boost graphing
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/unordered_map.hpp>
@@ -20,6 +20,7 @@ namespace Mantid
     class IInstrument;
     class IComponent;
     class V3D;
+    class ISpectraDetectorMap;
 
     /**
      *  This class is used to find the nearest neighbours of a detector in the instrument

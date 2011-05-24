@@ -5,14 +5,11 @@
 // Includes
 //------------------------------------------------------------------------------
 #include "MantidKernel/System.h"
-#include "MantidGeometry/IDetector.h" //For detid_t
+#include "MantidGeometry/IDTypes.h"
 #include <vector>
 
 namespace Mantid
 {
-
-  /// Typedef for a spectrum index (ID)
-  typedef int32_t specid_t;
 
   namespace Geometry
   {

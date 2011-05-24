@@ -1,11 +1,11 @@
-#ifndef MANTID_API_SpectraAxis_H_
-#define MANTID_API_SpectraAxis_H_
+#ifndef MANTID_API_SPECTRAAXIS_H_
+#define MANTID_API_SPECTRAAXIS_H_
 
 //----------------------------------------------------------------------
 // Includes
 //----------------------------------------------------------------------
 #include "MantidAPI/Axis.h"
-#include "MantidAPI/SpectraDetectorMap.h"
+#include "MantidAPI/SpectraDetectorTypes.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
 #include <boost/shared_ptr.hpp>

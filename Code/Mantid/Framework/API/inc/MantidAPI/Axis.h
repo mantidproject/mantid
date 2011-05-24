@@ -1,9 +1,9 @@
 #ifndef MANTID_API_AXIS_H_
 #define MANTID_API_AXIS_H_
 
-#include "MantidAPI/SpectraDetectorMap.h"
 #include "MantidKernel/System.h"
 #include "MantidKernel/Unit.h"
+#include "MantidGeometry/IDTypes.h"
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <vector>

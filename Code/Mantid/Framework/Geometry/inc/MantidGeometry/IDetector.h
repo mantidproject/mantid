@@ -8,27 +8,13 @@
 #include "MantidKernel/Logger.h"
 #include "MantidGeometry/IComponent.h"
 #include "MantidGeometry/IObjComponent.h"
+#include "MantidGeometry/IDTypes.h"
 #include <boost/shared_ptr.hpp>
 #include <stdexcept>
 #include <map>
 
 namespace Mantid
 {
-
-  /// Typedef for the ID of a detector
-  typedef int32_t detid_t;
-
-#ifndef HAS_UNORDERED_MAP_H
-  /// Map with key = spectrum number, value = workspace index
-  typedef std::map<detid_t, size_t> detid2index_map;
-  /// Map with key = workspace index, value = spectrum number
-  typedef std::map<size_t, detid_t> index2detid_map;
-#else
-  /// Map with key = spectrum number, value = workspace index
-  typedef std::tr1::unordered_map<detid_t, size_t> detid2index_map;
-  /// Map with key = workspace index, value = spectrum number
-  typedef std::tr1::unordered_map<size_t, detid_t> index2detid_map;
-#endif
 
 namespace Geometry
 {
